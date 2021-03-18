@@ -11,8 +11,11 @@ jobs:
       - name: Run black
         uses: psf/black@stable
         with:
-          checkName: "black"
           args: ". --check"
+      - name: Run isort
+        uses: jamescurtin/isort-action@master
+        with:
+          requirementsFiles: "requirements.txt requirements-dev.txt"
       - name: Run flake8
         uses: julianwachholz/flake8-action@v1.1.0
         with:
