@@ -1,0 +1,4 @@
+alembic==1.5.7
+Django==3.1.7
+psycopg2==2.8.6
+SQLAlchemy==1.4.1

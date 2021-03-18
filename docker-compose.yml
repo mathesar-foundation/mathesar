@@ -1,0 +1,22 @@
+version: "3.9"
+   
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=mathesar
+      - POSTGRES_USER=mathesar
+      - POSTGRES_PASSWORD=mathesar
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.volumes:/var/lib/postgresql/data
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
