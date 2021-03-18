@@ -11,11 +11,12 @@ jobs:
       - name: Run black
         uses: psf/black@stable
         with:
+          checkName: "black"
           args: ". --check"
       - name: Run flake8
         uses: julianwachholz/flake8-action@v1.1.0
         with:
-          checkName: "Python Flake8"
+          checkName: "flake8"
           path: "."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
