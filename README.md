@@ -23,4 +23,4 @@ docker exec -it mathesar_web_1 bash
 
 ## Contributing
 
-You can join us on Matrix on [`#mathesar:matrix.org`](https://matrix.to/#/#mathesar:matrix.org) and/or [GitHub Discussions](https://github.com/centerofci/mathesar/discussions)
+See [CONTRIBUTING.md](CONTRIBUTING.md).
