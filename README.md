@@ -18,7 +18,7 @@ docker exec -it mathesar_web_1 python manage.py migrate
 ```
 You can also open a shell in the container running Django using:
 ```
-docker exec -t mathesar_web_1 bash
+docker exec -it mathesar_web_1 bash
 ```
 
 ## Contributing
