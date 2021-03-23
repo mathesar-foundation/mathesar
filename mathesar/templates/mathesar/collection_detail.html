@@ -1,0 +1,31 @@
+{% extends 'mathesar/base.html' %}
+
+{% block title %}{{ collection.name }}{% endblock %}
+
+{% block body %}
+  <h2>{{ collection.name }}</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        {% for column in columns %}
+          {% if forloop.counter > 3 %}
+            <th>{{ column.name }}</th>
+          {% endif %}
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for record in records %}
+      <tr>
+         <td>{{ forloop.counter }}</td>
+          {% for item in record %}
+            {% if forloop.counter > 3 %}
+              <td>{{ item }}</td>
+            {% endif %}
+          {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
