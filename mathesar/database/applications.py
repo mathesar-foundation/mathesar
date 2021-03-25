@@ -1,7 +1,7 @@
-from sqlalchemy import Table, select, text
+from sqlalchemy import text
 from sqlalchemy.schema import CreateSchema
 
-from mathesar.database.base import APP_PREFIX, DBObject, engine, inspector, metadata
+from mathesar.database.base import APP_PREFIX, DBObject, engine, inspector
 
 
 class Application(DBObject):
