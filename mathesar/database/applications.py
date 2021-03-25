@@ -1,8 +1,7 @@
 from sqlalchemy import Table, select, text
-from sqlalchemy.orm import Session
 from sqlalchemy.schema import CreateSchema
 
-from mathesar.database.base import DBObject, engine, metadata
+from mathesar.database.base import APP_PREFIX, DBObject, engine, inspector, metadata
 
 
 class Application(DBObject):
@@ -14,20 +13,7 @@ class Application(DBObject):
         return self.db_name
 
     def _schema_exists(self):
-        schemata_table = Table(
-            "schemata",
-            metadata,
-            schema="information_schema",
-            autoload_with=engine,
-        )
-        with Session(engine) as session:
-            schemas = [
-                row[0]
-                for row in session.execute(
-                    select([schemata_table.columns["schema_name"]])
-                )
-            ]
-            return self.schema in schemas
+        return self.schema in self.get_all_schemas()
 
     def create(self):
         """
@@ -40,3 +26,11 @@ class Application(DBObject):
                 connection.execute(
                     text(f"COMMENT ON SCHEMA \"{self.schema}\" IS '{schema_comment}';")
                 )
+
+    @classmethod
+    def get_all_schemas(cls):
+        return [
+            schema
+            for schema in inspector.get_schema_names()
+            if schema.startswith(APP_PREFIX)
+        ]

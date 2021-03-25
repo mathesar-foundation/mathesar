@@ -3,7 +3,7 @@ import time
 import uuid
 
 from django.conf import settings
-from sqlalchemy import MetaData, create_engine
+from sqlalchemy import MetaData, create_engine, inspect
 
 from mathesar.settings import mathesar_settings
 
@@ -24,6 +24,7 @@ engine = create_engine(
     future=True,
 )
 metadata = MetaData(bind=engine)
+inspector = inspect(engine)
 
 
 class DBObject(object):
@@ -46,5 +47,13 @@ class DBObject(object):
                 CREATED: int(time.time()),
                 MODIFIED: int(time.time()),
             } | original_comment
-
         return json.dumps(comment, ensure_ascii=False)
+
+    @classmethod
+    def get_uuid(cls, comment):
+        comment = json.loads(comment)
+        return comment[UUID]
+
+    @classmethod
+    def get_human_readable_name(cls, name):
+        return name.replace(APP_PREFIX, "", 1)

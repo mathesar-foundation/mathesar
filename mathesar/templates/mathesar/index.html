@@ -21,7 +21,9 @@
         <h5>View Existing Collections</h5>
         <ul>
           {% for collection in collections %}
-            <li><a href="{% url 'collection-detail' collection.id %}">{{ collection.name }}</a></li>
+            {% if collection %}
+              <li><a href="{% url 'collection-detail' collection.uuid %}">{{ collection.name }}</a></li>
+            {% endif %}
           {% endfor %}
         </ul>
       </div>

@@ -1,8 +1,17 @@
 from sqlalchemy import TIMESTAMP, Column, Integer, String, Table, func
 from sqlalchemy.exc import NoSuchTableError
+from sqlalchemy.orm import Session
 
 from mathesar.database.applications import Application
-from mathesar.database.base import CREATED, ID, MODIFIED, DBObject, engine, metadata
+from mathesar.database.base import (
+    CREATED,
+    ID,
+    MODIFIED,
+    DBObject,
+    engine,
+    inspector,
+    metadata,
+)
 from mathesar.imports.csv import get_csv_reader
 
 
@@ -16,8 +25,24 @@ class Collection(DBObject):
     def __init__(self, name, application):
         self.name = name
         self.application = application
+
+    @property
+    def data(self):
+        with Session(engine) as session:
+            table = self.get_table()
+            if table is not None:
+                query = session.query(table)
+                return {
+                    "name": self.name,
+                    "uuid": self.find_uuid(table),
+                    "records": query.all(),
+                    "columns": query.column_descriptions,
+                }
+        return {}
+
+    def get_table(self):
         try:
-            self.table = Table(
+            return Table(
                 self.db_name,
                 metadata,
                 schema=self.application.schema,
@@ -25,7 +50,12 @@ class Collection(DBObject):
                 extend_existing=True,
             )
         except NoSuchTableError:
-            self.table = None
+            return None
+
+    def find_uuid(self, table=None):
+        if table is None:
+            table = self.get_table()
+        return self.get_uuid(table.comment)
 
     def create(self, column_names):
         """
@@ -34,19 +64,21 @@ class Collection(DBObject):
         columns = self.DEFAULT_COLUMNS + [
             Column(column_name, String) for column_name in column_names
         ]
-        if self.table is None:
-            self.table = Table(
+        comment = self.get_comment()
+        if self.get_table() is None:
+            table = Table(
                 self.db_name,
                 metadata,
                 *columns,
                 schema=self.application.schema,
-                comment=self.get_comment(),
+                comment=comment,
             )
-        metadata.create_all(engine, tables=[self.table])
+        metadata.create_all(engine, tables=[table])
+        return self
 
     def insert_rows(self, rows):
         with engine.begin() as connection:
-            result = connection.execute(self.table.insert(), rows)
+            result = connection.execute(self.get_table().insert(), rows)
             return result
 
     @classmethod
@@ -61,3 +93,26 @@ class Collection(DBObject):
         collection.create(csv_reader.fieldnames)
         collection.insert_rows([row for row in csv_reader])
         return collection
+
+    @classmethod
+    def all(cls):
+        collections = []
+        schemas = Application.get_all_schemas()
+        for schema in schemas:
+            tables = inspector.get_table_names(schema)
+            for table in tables:
+                collections.append(
+                    cls(
+                        cls.get_human_readable_name(table),
+                        Application(cls.get_human_readable_name(schema)),
+                    )
+                )
+        return collections
+
+    @classmethod
+    def get_from_uuid(cls, uuid):
+        collections = cls.all()
+        for collection in collections:
+            if collection.find_uuid() == uuid:
+                return collection
+        return None
