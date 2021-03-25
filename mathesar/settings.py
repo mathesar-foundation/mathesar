@@ -1,7 +1,7 @@
 from django.conf import settings
 
 DEFAULTS = {
-    "APP_PREFIX": "mathesar",
+    "APP_PREFIX": "mathesar_",
 }
 
 mathesar_settings = DEFAULTS

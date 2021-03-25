@@ -8,10 +8,10 @@ from sqlalchemy import MetaData, create_engine
 from mathesar.settings import mathesar_settings
 
 APP_PREFIX = mathesar_settings["APP_PREFIX"]
-ID = f"{APP_PREFIX}_id"
-CREATED = f"{APP_PREFIX}_created"
-MODIFIED = f"{APP_PREFIX}_last_modified"
-UUID = f"{APP_PREFIX}_uuid"
+ID = f"{APP_PREFIX}id"
+CREATED = f"{APP_PREFIX}created"
+MODIFIED = f"{APP_PREFIX}last_modified"
+UUID = f"{APP_PREFIX}uuid"
 
 
 engine = create_engine(
@@ -31,7 +31,7 @@ class DBObject(object):
     def db_name(self):
         if not self.name:
             raise ValueError("Please set a name for this object.")
-        return f"{APP_PREFIX}_{self.name}"
+        return f"{APP_PREFIX}{self.name}"
 
     def get_comment(self, original_comment={}, overwrite_original=False):
         if overwrite_original:
