@@ -31,7 +31,7 @@ class Collection(DatabaseObject):
             metadata,
             schema=self.schema,
             autoload_with=engine,
-            extend_existing=True
+            extend_existing=True,
         )
 
     @property

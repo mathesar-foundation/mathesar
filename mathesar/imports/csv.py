@@ -1,7 +1,7 @@
 import csv
 from io import TextIOWrapper
 
-from mathesar.database.base import human_readable_name, inspector
+from mathesar.database.base import human_readable_name
 from mathesar.database.collections import DBCollection
 from mathesar.models import Collection
 
@@ -18,7 +18,6 @@ def create_collection_from_csv(csv_file):
     csv_reader = get_csv_reader(csv_file)
     db_collection = DBCollection.create_from_csv(name, csv_reader)
     collection, _ = Collection.objects.get_or_create(
-        name=human_readable_name(db_collection.name),
-        schema=db_collection.schema
+        name=human_readable_name(db_collection.name), schema=db_collection.schema
     )
     return collection

@@ -4,8 +4,8 @@ from django.urls import reverse
 from django.views.generic import DetailView
 
 from mathesar.forms import UploadFileForm
-from mathesar.models import Collection
 from mathesar.imports.csv import create_collection_from_csv
+from mathesar.models import Collection
 
 
 def index(request):
