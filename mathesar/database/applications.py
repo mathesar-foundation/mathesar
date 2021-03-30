@@ -1,16 +1,15 @@
-from sqlalchemy import text
 from sqlalchemy.schema import CreateSchema
 
-from mathesar.database.base import APP_PREFIX, DBObject, engine, inspector
+from mathesar.database.base import APP_PREFIX, engine, inspector, db_name
 
 
-class Application(DBObject):
+class DBApplication(object):
     def __init__(self, name):
         self.name = name
 
     @property
     def schema(self):
-        return self.db_name
+        return db_name(self.name)
 
     def _schema_exists(self):
         return self.schema in self.get_all_schemas()
@@ -19,13 +18,9 @@ class Application(DBObject):
         """
         This method creates a Postgres schema corresponding to the application.
         """
-        schema_comment = self.get_comment()
         if not self._schema_exists():
             with engine.begin() as connection:
                 connection.execute(CreateSchema(f"{self.schema}"))
-                connection.execute(
-                    text(f"COMMENT ON SCHEMA \"{self.schema}\" IS '{schema_comment}';")
-                )
 
     @classmethod
     def get_all_schemas(cls):

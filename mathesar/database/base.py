@@ -1,7 +1,3 @@
-import json
-import time
-import uuid
-
 from django.conf import settings
 from sqlalchemy import MetaData, create_engine, inspect
 
@@ -9,9 +5,6 @@ from mathesar.settings import mathesar_settings
 
 APP_PREFIX = mathesar_settings["APP_PREFIX"]
 ID = f"{APP_PREFIX}id"
-CREATED = f"{APP_PREFIX}created"
-MODIFIED = f"{APP_PREFIX}last_modified"
-UUID = f"{APP_PREFIX}uuid"
 
 
 engine = create_engine(
@@ -27,33 +20,9 @@ metadata = MetaData(bind=engine)
 inspector = inspect(engine)
 
 
-class DBObject(object):
-    @property
-    def db_name(self):
-        if not self.name:
-            raise ValueError("Please set a name for this object.")
-        return f"{APP_PREFIX}{self.name}"
+def db_name(human_readable_name):
+    return f"{APP_PREFIX}{human_readable_name}"
 
-    def get_comment(self, original_comment={}, overwrite_original=False):
-        if overwrite_original:
-            comment = original_comment | {
-                UUID: uuid.uuid4(),
-                CREATED: int(time.time()),
-                MODIFIED: int(time.time()),
-            }
-        else:
-            comment = {
-                UUID: str(uuid.uuid4()),
-                CREATED: int(time.time()),
-                MODIFIED: int(time.time()),
-            } | original_comment
-        return json.dumps(comment, ensure_ascii=False)
 
-    @classmethod
-    def get_uuid(cls, comment):
-        comment = json.loads(comment)
-        return comment[UUID]
-
-    @classmethod
-    def get_human_readable_name(cls, name):
-        return name.replace(APP_PREFIX, "", 1)
+def human_readable_name(db_name):
+    return db_name.replace(APP_PREFIX, "", 1)

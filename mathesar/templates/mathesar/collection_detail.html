@@ -9,7 +9,7 @@
       <tr>
         <th>#</th>
         {% for column in collection.columns %}
-          {% if forloop.counter > 3 %}
+          {% if forloop.counter > 1 %}
             <th>{{ column.name }}</th>
           {% endif %}
         {% endfor %}
@@ -20,7 +20,7 @@
       <tr>
          <td>{{ forloop.counter }}</td>
           {% for item in record %}
-            {% if forloop.counter > 3 %}
+            {% if forloop.counter > 1 %}
               <td>{{ item }}</td>
             {% endif %}
           {% endfor %}

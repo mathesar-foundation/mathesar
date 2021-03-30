@@ -1,32 +1,31 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.views.generic import DetailView
 
-from mathesar.database.collections import Collection
 from mathesar.forms import UploadFileForm
+from mathesar.models import Collection
+from mathesar.imports.csv import create_collection_from_csv
 
 
 def index(request):
-    collections = Collection.all()
+    collections = Collection.objects.all()
     if request.method == "POST":
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            collection = Collection.create_from_csv(request.FILES["file"])
+            collection = create_collection_from_csv(request.FILES["file"])
             return HttpResponseRedirect(
-                reverse("collection-detail", kwargs={"collection": collection})
+                reverse("collection-detail", kwargs={"pk": collection.id})
             )
     else:
         form = UploadFileForm()
     return render(
         request,
         "mathesar/index.html",
-        {"form": form, "collections": [collection.data for collection in collections]},
+        {"form": form, "collections": collections},
     )
 
 
-def collection_detail(request, uuid=None, collection=None):
-    if not collection:
-        collection = Collection.get_from_uuid(str(uuid))
-    return render(
-        request, "mathesar/collection_detail.html", {"collection": collection.data}
-    )
+class CollectionDetail(DetailView):
+    context_object_name = "collection"
+    queryset = Collection.objects.all()

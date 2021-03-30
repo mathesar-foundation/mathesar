@@ -4,5 +4,9 @@ from mathesar import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path("collections/<uuid:uuid>/", views.collection_detail, name="collection-detail"),
+    path(
+        "collections/<int:pk>/",
+        views.CollectionDetail.as_view(),
+        name="collection-detail",
+    ),
 ]
