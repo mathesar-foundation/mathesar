@@ -1,8 +1,8 @@
 from django.db import models
 from sqlalchemy.orm import Session
+from sqlalchemy import Table
 
 from mathesar.database.base import db_name, engine, metadata
-from mathesar.database.collections import DBCollection
 
 
 class DatabaseObject(models.Model):
@@ -25,8 +25,8 @@ class Collection(DatabaseObject):
     schema = models.CharField(max_length=63)
 
     @property
-    def db_collection(self):
-        return DBCollection(
+    def sa_table(self):
+        return Table(
             self.db_name,
             metadata,
             schema=self.schema,
@@ -35,15 +35,15 @@ class Collection(DatabaseObject):
         )
 
     @property
-    def query(self):
+    def sa_query(self):
         with Session(engine) as session:
-            query = session.query(self.db_collection)
+            query = session.query(self.sa_table)
             return query
 
     @property
-    def columns(self):
-        return self.query.column_descriptions
+    def sa_columns(self):
+        return self.sa_query.column_descriptions
 
     @property
-    def records(self):
-        return self.query.all()
+    def sa_records(self):
+        return self.sa_query.all()

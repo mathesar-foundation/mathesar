@@ -8,7 +8,7 @@
     <thead>
       <tr>
         <th>#</th>
-        {% for column in collection.columns %}
+        {% for column in collection.sa_columns %}
           {% if forloop.counter > 1 %}
             <th>{{ column.name }}</th>
           {% endif %}
@@ -16,7 +16,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for record in collection.records %}
+      {% for record in collection.sa_records %}
       <tr>
          <td>{{ forloop.counter }}</td>
           {% for item in record %}
