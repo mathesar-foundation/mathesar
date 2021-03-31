@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Table
 
-from mathesar.database.base import ID, db_name, engine, metadata
+from mathesar.database.base import ID, engine, metadata
 from mathesar.database.schemas import create_schema
 
 DEFAULT_COLUMNS = [
@@ -17,7 +17,7 @@ def create_table(name, schema, column_names):
         Column(column_name, String) for column_name in column_names
     ]
     table = Table(
-        db_name(name),
+        name,
         metadata,
         *columns,
         schema=schema,

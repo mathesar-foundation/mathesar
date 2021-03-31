@@ -2,7 +2,7 @@ from django.db import models
 from sqlalchemy import Table
 from sqlalchemy.orm import Session
 
-from mathesar.database.base import db_name, engine, metadata
+from mathesar.database.base import engine, metadata
 
 
 class DatabaseObject(models.Model):
@@ -12,10 +12,6 @@ class DatabaseObject(models.Model):
 
     class Meta:
         abstract = True
-
-    @property
-    def db_name(self):
-        return db_name(self.name)
 
     def __str__(self):
         return f"{self.__class__.__name__}: {self.name}"
@@ -27,7 +23,7 @@ class Collection(DatabaseObject):
     @property
     def sa_table(self):
         return Table(
-            self.db_name,
+            self.name,
             metadata,
             schema=self.schema,
             autoload_with=engine,

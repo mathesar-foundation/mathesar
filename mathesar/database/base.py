@@ -18,11 +18,3 @@ engine = create_engine(
 )
 metadata = MetaData(bind=engine)
 inspector = inspect(engine)
-
-
-def db_name(human_readable_name):
-    return f"{APP_PREFIX}{human_readable_name}"
-
-
-def human_readable_name(db_name):
-    return db_name.replace(APP_PREFIX, "", 1)

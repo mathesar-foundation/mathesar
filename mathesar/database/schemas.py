@@ -1,13 +1,13 @@
 from sqlalchemy.schema import CreateSchema
 
-from mathesar.database.base import APP_PREFIX, engine, inspector
+from mathesar.database.base import engine, inspector
 
 
 def get_all_schemas():
     return [
         schema
         for schema in inspector.get_schema_names()
-        if schema.startswith(APP_PREFIX)
+        if schema not in ["public", "information_schema"]
     ]
 
 
@@ -21,4 +21,4 @@ def create_schema(schema):
     """
     if not schema_exists(schema):
         with engine.begin() as connection:
-            connection.execute(CreateSchema(f"{schema}"))
+            connection.execute(CreateSchema(schema))
