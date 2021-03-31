@@ -1,6 +1,6 @@
 from sqlalchemy.schema import CreateSchema
 
-from mathesar.database.base import APP_PREFIX, db_name, engine, inspector
+from mathesar.database.base import APP_PREFIX, engine, inspector
 
 
 def get_all_schemas():

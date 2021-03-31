@@ -1,6 +1,6 @@
 from django.db import models
-from sqlalchemy.orm import Session
 from sqlalchemy import Table
+from sqlalchemy.orm import Session
 
 from mathesar.database.base import db_name, engine, metadata
 

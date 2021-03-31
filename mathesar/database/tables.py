@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, Table
 
-from mathesar.database.schemas import create_schema
 from mathesar.database.base import ID, db_name, engine, metadata
-
+from mathesar.database.schemas import create_schema
 
 DEFAULT_COLUMNS = [
     Column(ID, Integer, primary_key=True),
