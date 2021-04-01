@@ -1,0 +1,32 @@
+{% extends 'mathesar/base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block body %}
+  <div>
+    <div>
+      <h2>Welcome to Mathesar!</h3>
+    </div>
+    <div>
+      <h5>Create a Collection</h5>
+      <p>Upload a CSV file to create a collection.</p>
+      <form enctype="multipart/form-data" method="post" action="/">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Submit">
+      </form>
+    </div>
+    {% if collections %}
+      <div>
+        <h5>View Existing Collections</h5>
+        <ul>
+          {% for collection in collections %}
+            {% if collection %}
+              <li><a href="{% url 'collection-detail' collection.id %}">{{ collection.name }}</a></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}
