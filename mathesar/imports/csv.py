@@ -17,9 +17,7 @@ def create_table_from_csv(name, csv_reader):
     return table
 
 
-def create_collection_from_csv(csv_file):
-    # TODO: Accept name as input from frontend.
-    name = csv_file.name.lower()[:-4].title()
+def create_collection_from_csv(name, csv_file):
     csv_reader = get_csv_reader(csv_file)
     table = create_table_from_csv(name, csv_reader)
     collection, _ = Collection.objects.get_or_create(
