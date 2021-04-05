@@ -1,3 +1,3 @@
 import os
 
-TYPE_SCHEMA = "__M_types_test"
+TYPE_SCHEMA = "__M_types"
