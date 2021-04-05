@@ -1,3 +1,3 @@
 import os
 
-TYPE_SCHEMA = "__M_types"
+TYPE_SCHEMA = "mathesar_types"

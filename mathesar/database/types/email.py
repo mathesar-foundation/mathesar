@@ -1,4 +1,5 @@
-from sqlalchemy import text, create_engine
+from sqlalchemy import text, create_engine, func
+from sqlalchemy.sql.functions import Function
 from sqlalchemy.types import UserDefinedType
 from mathesar.database.types import constants as c
 
@@ -14,15 +15,26 @@ QUOTED_INTERNAL_TYPE_NAME = ".".join(
         preparer.quote(EMAIL_SPEC_BASE) + "_internal"
     ]
 )
+EMAIL_LOADS = ".".join(
+    [
+        preparer.quote_schema(c.TYPE_SCHEMA),
+        preparer.quote(EMAIL_SPEC_BASE) + "_loads"
+    ]
+)
+EMAIL_DUMPS = ".".join(
+    [
+        preparer.quote_schema(c.TYPE_SCHEMA),
+        preparer.quote(EMAIL_SPEC_BASE) + "_dumps"
+    ]
+)
 
 FULL_ADDRESS = "full_address"
 USER_NAME = "user_name"
 DOMAIN_NAME = "domain_name"
-TEXT = "text"
 EMAIL_COMPOSITE = {
-    FULL_ADDRESS: TEXT,
-    USER_NAME: TEXT,
-    DOMAIN_NAME: TEXT,
+    FULL_ADDRESS: "text",
+    USER_NAME: "text",
+    DOMAIN_NAME: "text",
 }
 EMAIL_REGEX_STR = (
     "'^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}"
@@ -30,9 +42,18 @@ EMAIL_REGEX_STR = (
 )
 
 class Email(UserDefinedType):
-    # TODO Finish implementation of input/output parsers
     def get_col_spec(self, **kw):
         return QUOTED_TYPE_NAME
+
+    def bind_expression(self, bindvalue):
+        # This is brittle.  We need to figure out how to sync the SQLAlchemy
+        # function with the underlying DB function in a more robust way
+        return func.mathesar_types.email_loads(bindvalue)
+
+    def column_expression(self, col):
+        # This is brittle.  We need to figure out how to sync the SQLAlchemy
+        # function with the underlying DB function in a more robust way
+        return func.mathesar_types.email_dumps(col)
 
 
 def create_email_type(engine):
@@ -56,9 +77,25 @@ def create_email_type(engine):
       AND split_part((value).{FULL_ADDRESS}, '@', 2) = (value).{DOMAIN_NAME}
     );
     """
+    create_email_loads_query = f"""
+    CREATE OR REPLACE FUNCTION {EMAIL_LOADS}(text)
+    RETURNS {QUOTED_TYPE_NAME} AS $$
+      SELECT ($1, split_part($1, '@', 1), split_part($1, '@', 2))
+    $$
+    LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+    """
+    create_email_dumps_query = f"""
+    CREATE OR REPLACE FUNCTION {EMAIL_DUMPS}({QUOTED_TYPE_NAME})
+    RETURNS text AS $$
+      SELECT ($1).{FULL_ADDRESS}
+    $$
+    LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+    """
     with engine.connect() as conn:
         conn.execute(text(drop_domain_query))
         conn.execute(text(drop_type_query))
         conn.execute(text(create_type_query))
         conn.execute(text(create_domain_query))
+        conn.execute(text(create_email_loads_query))
+        conn.execute(text(create_email_dumps_query))
         conn.commit()
