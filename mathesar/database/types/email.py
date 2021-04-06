@@ -1,4 +1,4 @@
-from sqlalchemy import text, create_engine, func
+from sqlalchemy import text, create_engine, func, Text, cast
 from sqlalchemy.sql.functions import Function
 from sqlalchemy.types import UserDefinedType
 from mathesar.database.types import constants as c
@@ -46,14 +46,10 @@ class Email(UserDefinedType):
         return QUOTED_TYPE_NAME
 
     def bind_expression(self, bindvalue):
-        # This is brittle.  We need to figure out how to sync the SQLAlchemy
-        # function with the underlying DB function in a more robust way
-        return func.mathesar_types.email_loads(bindvalue)
+        return cast(bindvalue, Text)
 
     def column_expression(self, col):
-        # This is brittle.  We need to figure out how to sync the SQLAlchemy
-        # function with the underlying DB function in a more robust way
-        return func.mathesar_types.email_dumps(col)
+        return cast(col, Text)
 
 
 def create_email_type(engine):
@@ -85,11 +81,21 @@ def create_email_type(engine):
     LANGUAGE SQL RETURNS NULL ON NULL INPUT;
     """
     create_email_dumps_query = f"""
-    CREATE OR REPLACE FUNCTION {EMAIL_DUMPS}({QUOTED_TYPE_NAME})
+    CREATE OR REPLACE FUNCTION {EMAIL_DUMPS}({QUOTED_INTERNAL_TYPE_NAME})
     RETURNS text AS $$
       SELECT ($1).{FULL_ADDRESS}
     $$
     LANGUAGE SQL RETURNS NULL ON NULL INPUT;
+    """
+    create_cast_text_as_email_query = f"""
+    CREATE CAST (text AS {QUOTED_INTERNAL_TYPE_NAME})
+    WITH FUNCTION {EMAIL_LOADS}
+    AS IMPLICIT;
+    """
+    create_cast_email_as_text_query = f"""
+    CREATE CAST ({QUOTED_INTERNAL_TYPE_NAME} AS text)
+    WITH FUNCTION {EMAIL_DUMPS}
+    AS IMPLICIT;
     """
     with engine.connect() as conn:
         conn.execute(text(drop_domain_query))
@@ -98,4 +104,6 @@ def create_email_type(engine):
         conn.execute(text(create_domain_query))
         conn.execute(text(create_email_loads_query))
         conn.execute(text(create_email_dumps_query))
+        conn.execute(text(create_cast_text_as_email_query))
+        conn.execute(text(create_cast_email_as_text_query))
         conn.commit()
