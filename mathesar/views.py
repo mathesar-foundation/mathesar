@@ -13,8 +13,11 @@ def index(request):
     if request.method == "POST":
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            collection = create_collection_from_csv(form.cleaned_data["name"],
-                                                    request.FILES["file"])
+            collection = create_collection_from_csv(
+                form.cleaned_data["collection_name"],
+                form.cleaned_data["application_name"],
+                request.FILES["file"]
+            )
             return HttpResponseRedirect(
                 reverse("collection-detail", kwargs={"pk": collection.id})
             )

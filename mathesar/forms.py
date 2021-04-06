@@ -8,5 +8,6 @@ def validate_csv(value):
 
 
 class UploadFileForm(forms.Form):
-    name = forms.CharField(min_length=1, label="Collection Name")
+    collection_name = forms.CharField(min_length=1, label="Collection Name")
+    application_name = forms.CharField(min_length=1, label="Application Name")
     file = forms.FileField(validators=[validate_csv], label="CSV File")
