@@ -5,6 +5,11 @@ from mathesar.database.tables import create_table, insert_rows_into_table
 from mathesar.models import Collection
 
 
+def get_application_name(cleaned_data):
+    if cleaned_data["application_name_toggle"]:
+        return cleaned_data["application_name_text"]
+    return cleaned_data["application_name_choice"]
+
 def get_csv_reader(csv_file):
     csv_file = TextIOWrapper(csv_file, encoding="utf-8-sig")
     reader = csv.DictReader(csv_file)

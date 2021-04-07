@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.views.generic import DetailView
 
 from mathesar.forms import UploadFileForm
-from mathesar.imports.csv import create_collection_from_csv
+from mathesar.imports.csv import create_collection_from_csv, get_application_name
 from mathesar.models import Collection
 
 
@@ -15,7 +15,7 @@ def index(request):
         if form.is_valid():
             collection = create_collection_from_csv(
                 form.cleaned_data["collection_name"],
-                form.cleaned_data["application_name"],
+                get_application_name(form.cleaned_data),
                 request.FILES["file"]
             )
             return HttpResponseRedirect(
