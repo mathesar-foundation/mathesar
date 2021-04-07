@@ -26,7 +26,10 @@ def index(request):
     return render(
         request,
         "mathesar/index.html",
-        {"form": form, "collections": collections},
+        {
+            "form": form,
+            "collections": sorted(collections, key=lambda x: x.schema),
+        },
     )
 
 
