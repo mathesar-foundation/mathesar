@@ -177,4 +177,4 @@ Temporary Items
 
 ## REPO-SPECIFIC ##
 .volumes/
-docs/
+docs/_build/
