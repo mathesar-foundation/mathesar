@@ -8,14 +8,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
-      - name: Run black
-        uses: psf/black@stable
-        with:
-          args: ". --check"
-      - name: Run isort
-        uses: jamescurtin/isort-action@master
-        with:
-          requirementsFiles: "requirements.txt requirements-dev.txt"
       - name: Run flake8
         uses: julianwachholz/flake8-action@v1.1.0
         with:
