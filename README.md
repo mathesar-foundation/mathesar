@@ -1,6 +1,8 @@
 # Mathesar
 
-Mathesar is a product to help users of all skill levels store, manipulate, and visualize data. More information coming soon.
+Mathesar is a product to help users of all skill levels store, manipulate, and visualize data.
+
+Please see our [Read the Docs site](https://mathesar.readthedocs.io/) for more information.
 
 ## Local Development
 
