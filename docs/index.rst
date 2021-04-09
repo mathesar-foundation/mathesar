@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Mathesar's documentation
-========================
+Introduction
+============
 
-Mathesar is a new open source project that will allow users of all technical skill levels to store and visualize data and collaborate with others on it.
+Mathesar is a new open source project that aims to allow users of all technical skill levels to store and visualize data and collaborate with others on it.
 
 We are in the early stages of development, working towards a minimum viable product.
 
@@ -14,12 +14,6 @@ We are in the early stages of development, working towards a minimum viable prod
    :maxdepth: 2
    :caption: About:
 
-   product/technology
-   product/concepts
    product/roadmap
-
-
-Indices and tables
-==================
-
-* :ref:`search`
+   product/technology
+   product/future
