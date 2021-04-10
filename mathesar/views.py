@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import DetailView
 
-from mathesar.forms import UploadFileForm
+from mathesar.forms.forms import UploadFileForm
 from mathesar.imports.csv import create_collection_from_csv, get_application_name
 from mathesar.models import Collection
 
