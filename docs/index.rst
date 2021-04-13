@@ -10,10 +10,12 @@ Mathesar is a new open source project that aims to allow users of all technical 
 
 We are in the early stages of development, working towards a minimum viable product.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: About:
+.. warning:: This documentation is expected to change significantly over the next few weeks. This notice will be removed when the documentation is more stable.
 
-   product/roadmap
-   product/technology
-   product/future
+.. toctree::
+   :maxdepth: 1
+   :caption: Development:
+
+   development/roadmap
+   development/technology
+   development/potential-features

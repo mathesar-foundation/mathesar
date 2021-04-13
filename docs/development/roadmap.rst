@@ -5,6 +5,10 @@ This is the Mathesar roadmap for the next few months until we get to a mininum v
 
 We have many more features planned for Mathesar, some of them are quite essential. See :doc:`Future Features <future>`.
 
+.. warning:: We are still finalizing the roadmap and it is expected to change significantly over the next few weeks. This notice will be removed when the roadmap is more stable.
+
+.. contents:: :local:
+
 Installation and Configuration
 ------------------------------
 Users should be able to:
