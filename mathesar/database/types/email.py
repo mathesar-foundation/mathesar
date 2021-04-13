@@ -1,6 +1,8 @@
 from sqlalchemy import text, create_engine, func, Text, cast
-from sqlalchemy.sql.functions import Function
+from sqlalchemy.sql import quoted_name
+from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.types import UserDefinedType
+
 from mathesar.database.types import constants as c
 
 preparer = create_engine("postgresql://").dialect.identifier_preparer
@@ -9,33 +11,19 @@ EMAIL_SPEC_BASE = "email"
 QUOTED_TYPE_NAME = ".".join(
     [preparer.quote_schema(c.TYPE_SCHEMA), preparer.quote(EMAIL_SPEC_BASE)]
 )
-QUOTED_INTERNAL_TYPE_NAME = ".".join(
+EMAIL_DOMAIN_NAME = ".".join(
     [
         preparer.quote_schema(c.TYPE_SCHEMA),
-        preparer.quote(EMAIL_SPEC_BASE) + "_internal"
+        preparer.quote(EMAIL_SPEC_BASE + "_domain_name")
     ]
 )
-EMAIL_LOADS = ".".join(
+EMAIL_LOCAL_PART = ".".join(
     [
         preparer.quote_schema(c.TYPE_SCHEMA),
-        preparer.quote(EMAIL_SPEC_BASE) + "_loads"
-    ]
-)
-EMAIL_DUMPS = ".".join(
-    [
-        preparer.quote_schema(c.TYPE_SCHEMA),
-        preparer.quote(EMAIL_SPEC_BASE) + "_dumps"
+        preparer.quote(EMAIL_SPEC_BASE + "_local_part")
     ]
 )
 
-FULL_ADDRESS = "full_address"
-USER_NAME = "user_name"
-DOMAIN_NAME = "domain_name"
-EMAIL_COMPOSITE = {
-    FULL_ADDRESS: "text",
-    USER_NAME: "text",
-    DOMAIN_NAME: "text",
-}
 EMAIL_REGEX_STR = (
     "'^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}"
     "[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$'"
@@ -45,65 +33,43 @@ class Email(UserDefinedType):
     def get_col_spec(self, **kw):
         return QUOTED_TYPE_NAME
 
-    def bind_expression(self, bindvalue):
-        return cast(bindvalue, Text)
 
-    def column_expression(self, col):
-        return cast(col, Text)
+class email_domain_name(GenericFunction):
+    type = Text
+    name = quoted_name(EMAIL_DOMAIN_NAME, False)
+    identifier = "email_domain_name"
+
+
+class email_local_part(GenericFunction):
+    type = Text
+    name = quoted_name(EMAIL_LOCAL_PART, False)
+    identifier = "email_local_part"
 
 
 def create_email_type(engine):
-    types_list = [f"{k} {v}" for k, v in EMAIL_COMPOSITE.items()]
-    drop_type_query = f"""
-    DROP TYPE IF EXISTS {QUOTED_INTERNAL_TYPE_NAME};
-    """
-    create_type_query = f"""
-    CREATE TYPE {QUOTED_INTERNAL_TYPE_NAME} AS (
-      {", ".join(types_list)}
-    );
-    """
     drop_domain_query = f"""
     DROP DOMAIN IF EXISTS {QUOTED_TYPE_NAME};
     """
     create_domain_query = f"""
-    CREATE DOMAIN {QUOTED_TYPE_NAME} AS {QUOTED_INTERNAL_TYPE_NAME}
-    CHECK (
-      (value).{FULL_ADDRESS} ~ {EMAIL_REGEX_STR}
-      AND split_part((value).{FULL_ADDRESS}, '@', 1) = (value).{USER_NAME}
-      AND split_part((value).{FULL_ADDRESS}, '@', 2) = (value).{DOMAIN_NAME}
-    );
+    CREATE DOMAIN {QUOTED_TYPE_NAME} AS text CHECK (value ~ {EMAIL_REGEX_STR});
     """
-    create_email_loads_query = f"""
-    CREATE OR REPLACE FUNCTION {EMAIL_LOADS}(text)
-    RETURNS {QUOTED_TYPE_NAME} AS $$
-      SELECT ($1, split_part($1, '@', 1), split_part($1, '@', 2))
-    $$
-    LANGUAGE SQL RETURNS NULL ON NULL INPUT;
-    """
-    create_email_dumps_query = f"""
-    CREATE OR REPLACE FUNCTION {EMAIL_DUMPS}({QUOTED_INTERNAL_TYPE_NAME})
+    create_email_domain_name_query = f"""
+    CREATE OR REPLACE FUNCTION {EMAIL_DOMAIN_NAME}({QUOTED_TYPE_NAME})
     RETURNS text AS $$
-      SELECT ($1).{FULL_ADDRESS}
+        SELECT split_part($1, '@', 2);
     $$
     LANGUAGE SQL RETURNS NULL ON NULL INPUT;
     """
-    create_cast_text_as_email_query = f"""
-    CREATE CAST (text AS {QUOTED_INTERNAL_TYPE_NAME})
-    WITH FUNCTION {EMAIL_LOADS}
-    AS IMPLICIT;
-    """
-    create_cast_email_as_text_query = f"""
-    CREATE CAST ({QUOTED_INTERNAL_TYPE_NAME} AS text)
-    WITH FUNCTION {EMAIL_DUMPS}
-    AS IMPLICIT;
+    create_email_local_part_query = f"""
+    CREATE OR REPLACE FUNCTION {EMAIL_LOCAL_PART}({QUOTED_TYPE_NAME})
+    RETURNS text AS $$
+        SELECT split_part($1, '@', 1);
+    $$
+    LANGUAGE SQL RETURNS NULL ON NULL INPUT;
     """
     with engine.connect() as conn:
         conn.execute(text(drop_domain_query))
-        conn.execute(text(drop_type_query))
-        conn.execute(text(create_type_query))
         conn.execute(text(create_domain_query))
-        conn.execute(text(create_email_loads_query))
-        conn.execute(text(create_email_dumps_query))
-        conn.execute(text(create_cast_text_as_email_query))
-        conn.execute(text(create_cast_email_as_text_query))
+        conn.execute(text(create_email_domain_name_query))
+        conn.execute(text(create_email_local_part_query))
         conn.commit()

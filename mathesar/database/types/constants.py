@@ -1,3 +1,5 @@
 import os
+from mathesar.settings import mathesar_settings
 
-TYPE_SCHEMA = "mathesar_types"
+APP_PREFIX = mathesar_settings["APP_PREFIX"]
+TYPE_SCHEMA = f"{APP_PREFIX}types"
