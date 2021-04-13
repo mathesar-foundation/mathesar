@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from mathesar.database.schemas import get_all_schemas
-from mathesar.forms.form_widgets import DataListInput
+from mathesar.forms.widgets import DataListInput
 
 def validate_csv(value):
     if not value.name.lower().endswith(".csv"):
@@ -11,9 +11,9 @@ def validate_csv(value):
 class UploadFileForm(forms.Form):
     collection_name = forms.CharField(min_length=1, label="Collection Name")
 
-    data_list_widget = DataListInput(get_all_schemas)
     application_name = forms.CharField(
-        min_length=1, label="Application Name", widget=data_list_widget
+        min_length=1, label="Application Name",
+        widget=DataListInput(get_all_schemas)
     )
 
     file = forms.FileField(validators=[validate_csv], label="CSV File")
