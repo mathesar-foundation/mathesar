@@ -1,17 +1,13 @@
-## Description
 <!-- If PR doesn't fully resolve the issue, replace 'Fixes' below with 'Related to'. -->
 <!-- If there is no issue being resolved, open one before creating this pull request. -->
 Fixes #[issue number]
 
 <!-- Concisely describe what the pull request does. -->
 
-## Technical details
+**Technical details**
 <!-- Add any other information or technical details about the implementation; or delete the section entirely. -->
 
-## Tests
-<!-- Give steps for the reviewer to verify that this PR fixes the problem; or delete the section entirely. -->
-
-## Screenshots
+**Screenshots**
 <!-- Add screenshots to show the problem and the solution; or delete the section entirely. -->
 
 ## Checklist
