@@ -2,7 +2,6 @@ from django.conf import settings
 import pytest
 from sqlalchemy import text
 from mathesar.database.base import create_engine_with_custom_types
-from mathesar.database.base import engine
 from mathesar.database.types import install
 from mathesar.database.types import email
 
@@ -18,6 +17,7 @@ def engine():
         ),
         future=True,
     )
+
 
 @pytest.fixture
 def type_schema(engine):

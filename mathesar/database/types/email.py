@@ -1,4 +1,4 @@
-from sqlalchemy import text, create_engine, func, Text, cast
+from sqlalchemy import text, create_engine, Text
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.types import UserDefinedType
@@ -24,9 +24,10 @@ QUALIFIED_EMAIL_LOCAL_PART = ".".join(
 # This is directly from the HTML5 email spec, we could change it based on our
 # needs (it's more restrictive than the actual RFC)
 EMAIL_REGEX_STR = (
-    "'^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}"
-    "[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$'"
+    r"'^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}"
+    r"[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$'"
 )
+
 
 class Email(UserDefinedType):
     def get_col_spec(self, **kw):

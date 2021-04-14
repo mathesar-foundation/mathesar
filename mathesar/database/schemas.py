@@ -23,7 +23,6 @@ def create_schema(schema, engine=engine):
     """
     This method creates a Postgres schema corresponding to the application.
     """
-    inspector = inspect(engine)
     if not schema_exists(schema, engine=engine):
         with engine.begin() as connection:
             connection.execute(CreateSchema(schema))

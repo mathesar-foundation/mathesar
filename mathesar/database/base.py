@@ -27,6 +27,7 @@ def create_mathesar_engine():
         future=True,
     )
 
+
 engine = create_mathesar_engine()
 metadata = MetaData(bind=engine)
 inspector = inspect(engine)

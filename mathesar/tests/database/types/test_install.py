@@ -18,6 +18,7 @@ def engine():
         future=True,
     )
 
+
 @pytest.mark.django_db
 def test_create_type_schema(engine):
     install.create_type_schema(engine)
