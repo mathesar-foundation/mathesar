@@ -1,7 +1,6 @@
-on:
-  push:
-    paths:
-      - '*.py'
+name: Flake8
+
+on: [push]
 
 jobs:
   flake8_py3:
