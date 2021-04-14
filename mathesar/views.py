@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import DetailView
 
-from mathesar.forms import UploadFileForm
+from mathesar.forms.forms import UploadFileForm
 from mathesar.imports.csv import create_collection_from_csv
 from mathesar.models import Collection
 
@@ -13,7 +13,11 @@ def index(request):
     if request.method == "POST":
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            collection = create_collection_from_csv(request.FILES["file"])
+            collection = create_collection_from_csv(
+                form.cleaned_data["collection_name"],
+                form.cleaned_data["application_name"],
+                request.FILES["file"]
+            )
             return HttpResponseRedirect(
                 reverse("collection-detail", kwargs={"pk": collection.id})
             )
@@ -22,7 +26,10 @@ def index(request):
     return render(
         request,
         "mathesar/index.html",
-        {"form": form, "collections": collections},
+        {
+            "form": form,
+            "collections": sorted(collections, key=lambda x: x.schema),
+        },
     )
 
 

@@ -19,11 +19,23 @@
     {% if collections %}
       <div>
         <h5>View Existing Collections</h5>
+				{% regroup collections by schema as grouped_collections %}
         <ul>
-          {% for collection in collections %}
-            {% if collection %}
-              <li><a href="{% url 'collection-detail' collection.id %}">{{ collection.name }}</a></li>
-            {% endif %}
+          {% for schema, schema_collections in grouped_collections %}
+						<li>
+							{{ schema }}
+							<ul>
+								{% for collection in schema_collections %}
+									{% if collection and collection.schema == schema %}
+										<li>
+											<a href="{% url 'collection-detail' collection.id %}">
+												{{ collection.name }}
+											</a>
+										</li>
+									{% endif %}
+								{% endfor %}
+							</ul>
+						</li>
           {% endfor %}
         </ul>
       </div>

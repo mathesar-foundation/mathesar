@@ -4,3 +4,4 @@ ipython==7.21.0
 isort==5.7.0
 pytest==6.2.3
 pytest-django==4.2.0
+Sphinx==3.5.3
