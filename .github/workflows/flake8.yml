@@ -1,17 +1,17 @@
-name: flake8 Lint
+name: Lint
 
 on: [push]
 
 jobs:
-  flake8-lint:
+  lint:
     runs-on: ubuntu-latest
-    name: Lint
     steps:
-      - name: Check out source repository
-        uses: actions/checkout@v2
-      - name: Set up Python environment
-        uses: actions/setup-python@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - name: Run flake8
+        uses: julianwachholz/flake8-action@v1.1.0
         with:
-          python-version: "3.9"
-      - name: flake8 Lint
-        uses: py-actions/flake8@v1
+          checkName: "flake8"
+          path: "."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
