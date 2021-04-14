@@ -27,7 +27,6 @@ def type_schema(engine):
 @pytest.mark.django_db
 def test_create_email_type_creates_pg_domain(engine, type_schema):
     email_address = 'alice@example.com'
-
     email.create_email_type(engine)
     with engine.connect() as conn:
         res = conn.execute(

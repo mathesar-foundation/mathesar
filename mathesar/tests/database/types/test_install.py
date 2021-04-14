@@ -24,7 +24,6 @@ def test_create_type_schema(engine):
     with engine.connect() as conn:
         res = conn.execute(text("SELECT * FROM information_schema.schemata"))
     schemata = {row['schema_name'] for row in res.fetchall()}
-    print(schemata)
     assert constants.TYPE_SCHEMA in schemata
 
 
