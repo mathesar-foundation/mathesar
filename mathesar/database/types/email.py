@@ -5,6 +5,8 @@ from sqlalchemy.types import UserDefinedType
 
 from mathesar.database.types import constants as c
 
+# Since we want to have our identifiers quoted appropriately for use in
+# PostgreSQL, we want to use the postgres dialect preparer to set this up.
 preparer = create_engine("postgresql://").dialect.identifier_preparer
 
 EMAIL = "email"
@@ -19,6 +21,8 @@ QUALIFIED_EMAIL_LOCAL_PART = ".".join(
     [preparer.quote_schema(c.TYPE_SCHEMA), EMAIL_LOCAL_PART]
 )
 
+# This is directly from the HTML5 email spec, we could change it based on our
+# needs (it's more restrictive than the actual RFC)
 EMAIL_REGEX_STR = (
     "'^[a-zA-Z0-9.!#$%&''*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}"
     "[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$'"
@@ -29,12 +33,16 @@ class Email(UserDefinedType):
         return QUALIFIED_EMAIL
 
 
+# This will register our custom email_domain_name function with sqlalchemy so
+# it can be used via `func.email_domain_name`
 class email_domain_name(GenericFunction):
     type = Text
     name = quoted_name(QUALIFIED_EMAIL_DOMAIN_NAME, False)
     identifier = EMAIL_DOMAIN_NAME
 
 
+# This will register our custom email_local_part function with sqlalchemy so
+# it can be used via `func.email_local_part`
 class email_local_part(GenericFunction):
     type = Text
     name = quoted_name(QUALIFIED_EMAIL_LOCAL_PART, False)
@@ -42,6 +50,9 @@ class email_local_part(GenericFunction):
 
 
 def create_email_type(engine):
+    # We'll use postgres domains to check that a given string conforms to what
+    # an email should look like.  We also create some DB-level functions to
+    # split out the different parts of an email address for grouping.
     drop_domain_query = f"""
     DROP DOMAIN IF EXISTS {QUALIFIED_EMAIL};
     """
