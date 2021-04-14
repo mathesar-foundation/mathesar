@@ -1,0 +1,14 @@
+name: Move pull requests into Active Sprint
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  automate-project-columns:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: alex-page/github-project-automation-plus@v0.3.0
+        with:
+          project: Active Sprint
+          column: In progress
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
