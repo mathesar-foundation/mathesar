@@ -1,4 +1,4 @@
-name: Move pull requests into Active Sprint
+name: Move pull requests into Active project
 on:
   pull_request:
     types: [opened]
@@ -9,6 +9,6 @@ jobs:
     steps:
       - uses: alex-page/github-project-automation-plus@v0.3.0
         with:
-          project: Active Sprint
+          project: Active
           column: In progress
           repo-token: ${{ secrets.MATHESAR_GITHUB_TOKEN }}
