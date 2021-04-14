@@ -1,4 +1,4 @@
-name: Move pull requests into Active Sprint
+name: Move pull requests into Active project
 on:
   pull_request:
     types: [opened]
