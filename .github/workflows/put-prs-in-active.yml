@@ -11,4 +11,4 @@ jobs:
         with:
           project: Active Sprint
           column: In progress
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.MATHESAR_GITHUB_TOKEN }}
