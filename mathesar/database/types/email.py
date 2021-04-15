@@ -74,7 +74,7 @@ def create_email_type(engine):
     $$
     LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
     """
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         conn.execute(text(drop_domain_query))
         conn.execute(text(create_domain_query))
         conn.execute(text(create_email_domain_name_query))
