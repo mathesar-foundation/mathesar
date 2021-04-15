@@ -1,0 +1,24 @@
+reviewers:
+  # The default reviewers
+  defaults:
+    - engineers
+    - designers
+
+  # Reviewer groups each of which has a list of GitHub usernames
+  groups:
+    engineers:
+      - kgodey # username
+      - mathemancer # username
+    designers:
+      - ghislaineguerin
+
+files:
+  # Keys are glob expressions.
+  # You can assign groups defined above as well as GitHub usernames.
+  '**':
+    - engineers
+    - designers
+
+options:
+  ignore_draft: true
+  enable_group_assignment: false
