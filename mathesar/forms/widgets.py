@@ -38,4 +38,3 @@ class DataListInput(TextInput):
         attrs = {} if attrs is None else attrs
         attrs["list"] = self.data_list_id
         return super().render(name, value, attrs, renderer)
-
