@@ -1,5 +1,6 @@
 from django.forms.widgets import TextInput
 
+
 class DataListInput(TextInput):
     """
     Widget that adds a <data_list> element to the standard text input widget.
