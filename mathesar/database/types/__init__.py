@@ -1,3 +1,5 @@
-from mathesar.database.types import types
+from mathesar.database.types import email
 
-CUSTOM_TYPE_DICT = types.CUSTOM_TYPE_DICT
+CUSTOM_TYPE_DICT = {
+    email.QUALIFIED_EMAIL: email.Email,
+}

@@ -66,7 +66,6 @@ def test_local_part_func_wrapper(engine_email_type):
 @pytest.mark.django_db
 def test_email_type_column_creation(engine_with_app):
     engine, app_schema = engine_with_app
-    engine.echo = True
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={app_schema}"))
         metadata = MetaData(bind=conn)
@@ -81,7 +80,6 @@ def test_email_type_column_creation(engine_with_app):
 @pytest.mark.django_db
 def test_email_type_column_reflection(engine_with_app):
     engine, app_schema = engine_with_app
-    engine.echo = True
     with engine.begin() as conn:
         metadata = MetaData(bind=conn)
         test_table = Table(
