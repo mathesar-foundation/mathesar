@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
       - name: Run flake8
-        uses: julianwachholz/flake8-action@v1.1.0
+        uses: julianwachholz/flake8-action@main
         with:
           checkName: "flake8"
           path: "."

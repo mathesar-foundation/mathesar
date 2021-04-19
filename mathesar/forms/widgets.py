@@ -1,5 +1,6 @@
 from django.forms.widgets import TextInput
 
+
 class DataListInput(TextInput):
     """
     Widget that adds a <data_list> element to the standard text input widget.
@@ -37,4 +38,3 @@ class DataListInput(TextInput):
         attrs = {} if attrs is None else attrs
         attrs["list"] = self.data_list_id
         return super().render(name, value, attrs, renderer)
-
