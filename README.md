@@ -18,6 +18,11 @@ You run database migrations like so:
 ```
 docker exec mathesar_web_1 python manage.py migrate
 ```
+
+You run tests like so:
+```
+docker exec mathesar_web_1 pytest
+```
 You can also open a shell in the container running Django using:
 ```
 docker exec -it mathesar_web_1 bash
