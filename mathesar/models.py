@@ -1,7 +1,9 @@
 from django.db import models
 
-from mathesar.database.base import engine
+from mathesar.database.base import create_mathesar_engine
 from mathesar.database import tables
+
+engine = create_mathesar_engine()
 
 
 class DatabaseObject(models.Model):

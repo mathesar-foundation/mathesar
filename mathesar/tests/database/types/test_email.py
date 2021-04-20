@@ -11,12 +11,10 @@ from mathesar.database.types import email
 @pytest.fixture
 def engine():
     return create_engine_with_custom_types(
-        "postgresql://{username}:{password}@{hostname}/{database}".format(
-            username=settings.DATABASES["default"]["USER"],
-            password=settings.DATABASES["default"]["PASSWORD"],
-            hostname=settings.DATABASES["default"]["HOST"],
-            database=settings.DATABASES["default"]["NAME"],
-        ),
+        username=settings.DATABASES["default"]["USER"],
+        password=settings.DATABASES["default"]["PASSWORD"],
+        hostname=settings.DATABASES["default"]["HOST"],
+        database=settings.DATABASES["default"]["NAME"],
         future=True,
     )
 
