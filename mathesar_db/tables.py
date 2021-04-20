@@ -1,10 +1,9 @@
 from sqlalchemy import Column, Integer, String, Table, MetaData, select
 
-from mathesar.database.base import ID
-from mathesar.database.schemas import create_schema
+from mathesar_db import constants, schemas
 
 DEFAULT_COLUMNS = [
-    Column(ID, Integer, primary_key=True),
+    Column(constants.ID, Integer, primary_key=True),
 ]
 
 
@@ -12,7 +11,7 @@ def create_table(name, schema, column_names, engine):
     """
     This method creates a Postgres table corresponding to a collection.
     """
-    create_schema(schema, engine)
+    schemas.create_schema(schema, engine)
     columns = DEFAULT_COLUMNS + [
         Column(column_name, String) for column_name in column_names
     ]

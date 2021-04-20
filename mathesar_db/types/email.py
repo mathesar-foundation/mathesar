@@ -1,25 +1,17 @@
-from sqlalchemy import text, create_engine, Text
+from sqlalchemy import text, Text
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.types import UserDefinedType
 
-from mathesar.database.types import constants as c
-
-# Since we want to have our identifiers quoted appropriately for use in
-# PostgreSQL, we want to use the postgres dialect preparer to set this up.
-preparer = create_engine("postgresql://").dialect.identifier_preparer
+from mathesar_db.types import base
 
 EMAIL = "email"
 EMAIL_DOMAIN_NAME = EMAIL + "_domain_name"
 EMAIL_LOCAL_PART = EMAIL + "_local_part"
 
-QUALIFIED_EMAIL = ".".join([preparer.quote_schema(c.TYPE_SCHEMA), EMAIL])
-QUALIFIED_EMAIL_DOMAIN_NAME = ".".join(
-    [preparer.quote_schema(c.TYPE_SCHEMA), EMAIL_DOMAIN_NAME]
-)
-QUALIFIED_EMAIL_LOCAL_PART = ".".join(
-    [preparer.quote_schema(c.TYPE_SCHEMA), EMAIL_LOCAL_PART]
-)
+QUALIFIED_EMAIL = base.get_qualified_name((EMAIL))
+QUALIFIED_EMAIL_DOMAIN_NAME = base.get_qualified_name(EMAIL_DOMAIN_NAME)
+QUALIFIED_EMAIL_LOCAL_PART = base.get_qualified_name(EMAIL_LOCAL_PART)
 
 # This is directly from the HTML5 email spec, we could change it based on our
 # needs (it's more restrictive than the actual RFC)
