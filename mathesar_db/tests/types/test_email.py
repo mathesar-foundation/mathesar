@@ -1,8 +1,8 @@
-from django.conf import settings
 from psycopg2.errors import CheckViolation
 import pytest
 from sqlalchemy import text, select, func, Table, Column, MetaData
 from sqlalchemy.exc import IntegrityError
+from mathesar_db.engine import _add_custom_types_to_engine
 from mathesar_db.types import install
 from mathesar_db.types import email
 
@@ -71,10 +71,10 @@ def test_email_type_column_reflection(engine_with_app):
         )
         test_table.create()
 
+    _add_custom_types_to_engine(engine)
     with engine.begin() as conn:
         metadata = MetaData(bind=conn)
         reflect_table = Table("test_table", metadata, autoload_with=conn)
-
     expect_cls = email.Email
     actual_cls = reflect_table.columns["email_addresses"].type.__class__
     assert actual_cls == expect_cls

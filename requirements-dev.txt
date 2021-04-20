@@ -1,5 +1,4 @@
 flake8==3.9.0
 ipython==7.21.0
 pytest==6.2.3
-pytest-django==4.2.0
 Sphinx==3.5.3

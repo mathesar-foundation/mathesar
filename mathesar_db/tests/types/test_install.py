@@ -1,5 +1,3 @@
-from django.conf import settings
-import pytest
 from sqlalchemy import text
 from mathesar_db.types import install
 from mathesar_db.types import base
