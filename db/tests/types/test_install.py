@@ -1,6 +1,6 @@
 from sqlalchemy import text
-from mathesar_db.types import install
-from mathesar_db.types import base
+from db.types import install
+from db.types import base
 
 
 def test_create_type_schema(engine):

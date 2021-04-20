@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.forms.widgets import DataListInput
-from mathesar_db import schemas
+from db import schemas
 
 
 engine = create_mathesar_engine()

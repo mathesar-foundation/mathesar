@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from mathesar_db import constants
+from db import constants
 
 SCHEMA = f"{constants.MATHESAR_PREFIX}types"
 # Since we want to have our identifiers quoted appropriately for use in

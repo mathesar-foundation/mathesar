@@ -2,9 +2,9 @@ from psycopg2.errors import CheckViolation
 import pytest
 from sqlalchemy import text, select, func, Table, Column, MetaData
 from sqlalchemy.exc import IntegrityError
-from mathesar_db.engine import _add_custom_types_to_engine
-from mathesar_db.types import install
-from mathesar_db.types import email
+from db.engine import _add_custom_types_to_engine
+from db.types import install
+from db.types import email
 
 
 @pytest.fixture

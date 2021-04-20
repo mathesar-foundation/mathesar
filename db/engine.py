@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from mathesar_db import types
+from db import types
 
 
 def create_engine_with_custom_types(

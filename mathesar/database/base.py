@@ -1,5 +1,5 @@
 from django.conf import settings
-from mathesar_db import engine
+from db import engine
 
 
 def create_mathesar_engine():

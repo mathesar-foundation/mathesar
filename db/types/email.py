@@ -3,7 +3,7 @@ from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.types import UserDefinedType
 
-from mathesar_db.types import base
+from db.types import base
 
 EMAIL = "email"
 EMAIL_DOMAIN_NAME = EMAIL + "_domain_name"
