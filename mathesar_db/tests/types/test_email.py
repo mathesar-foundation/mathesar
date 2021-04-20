@@ -3,20 +3,8 @@ from psycopg2.errors import CheckViolation
 import pytest
 from sqlalchemy import text, select, func, Table, Column, MetaData
 from sqlalchemy.exc import IntegrityError
-from mathesar.database.base import create_engine_with_custom_types
-from mathesar.database.types import install
-from mathesar.database.types import email
-
-
-@pytest.fixture
-def engine():
-    return create_engine_with_custom_types(
-        username=settings.DATABASES["default"]["USER"],
-        password=settings.DATABASES["default"]["PASSWORD"],
-        hostname=settings.DATABASES["default"]["HOST"],
-        database=settings.DATABASES["default"]["NAME"],
-        future=True,
-    )
+from mathesar_db.types import install
+from mathesar_db.types import email
 
 
 @pytest.fixture
@@ -25,7 +13,7 @@ def engine_type_schema(engine):
     yield engine
     with engine.begin() as conn:
         conn.execute(
-            text(f"DROP SCHEMA IF EXISTS {install.c.TYPE_SCHEMA} CASCADE;")
+            text(f"DROP SCHEMA IF EXISTS {install.base.SCHEMA} CASCADE;")
         )
 
 
@@ -45,7 +33,6 @@ def engine_with_app(engine_email_type):
         conn.execute(text(f"DROP SCHEMA {app_schema} CASCADE;"))
 
 
-@pytest.mark.django_db
 def test_domain_func_wrapper(engine_email_type):
     sel = select(func.email_domain_name(text("'test@example.com'")))
     with engine_email_type.begin() as conn:
@@ -53,7 +40,6 @@ def test_domain_func_wrapper(engine_email_type):
         assert res.fetchone()[0] == "example.com"
 
 
-@pytest.mark.django_db
 def test_local_part_func_wrapper(engine_email_type):
     sel = select(func.email_local_part(text("'test@example.com'")))
     with engine_email_type.begin() as conn:
@@ -61,7 +47,6 @@ def test_local_part_func_wrapper(engine_email_type):
         assert res.fetchone()[0] == "test"
 
 
-@pytest.mark.django_db
 def test_email_type_column_creation(engine_with_app):
     engine, app_schema = engine_with_app
     with engine.begin() as conn:
@@ -75,7 +60,6 @@ def test_email_type_column_creation(engine_with_app):
         test_table.create()
 
 
-@pytest.mark.django_db
 def test_email_type_column_reflection(engine_with_app):
     engine, app_schema = engine_with_app
     with engine.begin() as conn:
@@ -96,7 +80,6 @@ def test_email_type_column_reflection(engine_with_app):
     assert actual_cls == expect_cls
 
 
-@pytest.mark.django_db
 def test_create_email_type_domain_passes_correct_emails(engine_email_type):
     email_addresses_correct = ["alice@example.com", "alice@example"]
     for address in email_addresses_correct:
@@ -107,14 +90,13 @@ def test_create_email_type_domain_passes_correct_emails(engine_email_type):
             assert res.fetchone()[0] == address
 
 
-@pytest.mark.django_db
 def test_create_email_type_domain_checks_broken_emails(engine_email_type):
     address_incorrect = "aliceexample.com"
-    with engine_email_type.begin() as conn:
-        with pytest.raises(IntegrityError) as e:
+    with pytest.raises(IntegrityError) as e:
+        with engine_email_type.begin() as conn:
             conn.execute(
                 text(
                     f"SELECT '{address_incorrect}'::{email.QUALIFIED_EMAIL};"
                 )
             )
-            assert type(e.orig) == CheckViolation
+        assert type(e.orig) == CheckViolation
