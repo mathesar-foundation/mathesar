@@ -1,12 +1,8 @@
 from sqlalchemy.schema import CreateSchema
 from sqlalchemy import inspect
 
-from mathesar.database.base import create_mathesar_engine
 
-engine = create_mathesar_engine()
-
-
-def get_all_schemas(engine=engine):
+def get_all_schemas(engine):
     inspector = inspect(engine)
     return [
         schema
@@ -15,14 +11,14 @@ def get_all_schemas(engine=engine):
     ]
 
 
-def schema_exists(schema, engine=engine):
-    return schema in get_all_schemas(engine=engine)
+def schema_exists(schema, engine):
+    return schema in get_all_schemas(engine)
 
 
-def create_schema(schema, engine=engine):
+def create_schema(schema, engine):
     """
     This method creates a Postgres schema corresponding to the application.
     """
-    if not schema_exists(schema, engine=engine):
+    if not schema_exists(schema, engine):
         with engine.begin() as connection:
             connection.execute(CreateSchema(schema))

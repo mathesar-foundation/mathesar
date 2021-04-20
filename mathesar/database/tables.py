@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Table
 
-from mathesar.database.base import ID, engine, metadata
+from mathesar.database.base import ID, metadata
 from mathesar.database.schemas import create_schema
 
 DEFAULT_COLUMNS = [
@@ -8,11 +8,11 @@ DEFAULT_COLUMNS = [
 ]
 
 
-def create_table(name, schema, column_names):
+def create_table(name, schema, column_names, engine):
     """
     This method creates a Postgres table corresponding to a collection.
     """
-    create_schema(schema)
+    create_schema(schema, engine)
     columns = DEFAULT_COLUMNS + [
         Column(column_name, String) for column_name in column_names
     ]
@@ -26,7 +26,7 @@ def create_table(name, schema, column_names):
     return table
 
 
-def insert_rows_into_table(table, rows):
+def insert_rows_into_table(table, rows, engine):
     with engine.begin() as connection:
         result = connection.execute(table.insert(), rows)
         return result
