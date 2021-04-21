@@ -14,6 +14,10 @@ TEST_DB = "mathesar_db_test_database"
 def test_db():
     superuser_engine = _get_superuser_engine()
     with superuser_engine.connect() as conn:
+        # We need to use raw SQL here, since the goal is to end the transaction
+        # block started by `superuser_engine.connect()`, but `conn.commit()`
+        # doesn't seem to end empty transaction blocks.
+        # TODO Figure out why that is.
         conn.execute(text("COMMIT"))
         conn.execute(text(f"DROP DATABASE IF EXISTS {TEST_DB} WITH (FORCE)"))
         conn.execute(text(f"CREATE DATABASE {TEST_DB}"))
