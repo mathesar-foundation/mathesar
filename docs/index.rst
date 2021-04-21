@@ -3,19 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Introduction
-============
+Welcome
+=======
 
-Mathesar is a new open source project that aims to allow users of all technical skill levels to store and visualize data and collaborate with others on it.
+Mathesar is an open source project that aims to make databases accessible to non-technical users, allowing users to store, manipulate, visualize, and collaborate with others on their data. Please see `the Mathesar wiki <https://wiki.mathesar.org/>`_ for more information.
 
-We are in the early stages of development, working towards a minimum viable product.
-
-.. warning:: This documentation is expected to change significantly over the next few weeks. This notice will be removed when the documentation is more stable.
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Development:
-
-   development/roadmap
-   development/technology
-   development/potential-features
+*Documentation is coming soon.*
