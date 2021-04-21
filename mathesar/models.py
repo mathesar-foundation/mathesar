@@ -18,7 +18,7 @@ class DatabaseObject(models.Model):
         return f"{self.__class__.__name__}: {self.name}"
 
 
-class Collection(DatabaseObject):
+class Table(DatabaseObject):
     schema = models.CharField(max_length=63)
 
     @property

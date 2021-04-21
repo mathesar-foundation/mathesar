@@ -17,7 +17,7 @@ def schema_exists(schema, engine):
 
 def create_schema(schema, engine):
     """
-    This method creates a Postgres schema corresponding to the application.
+    This method creates a Postgres schema.
     """
     if not schema_exists(schema, engine):
         with engine.begin() as connection:
