@@ -4,22 +4,22 @@ from django.urls import reverse
 from django.views.generic import DetailView
 
 from mathesar.forms.forms import UploadFileForm
-from mathesar.imports.csv import create_collection_from_csv
-from mathesar.models import Collection
+from mathesar.imports.csv import create_table_from_csv
+from mathesar.models import Table
 
 
 def index(request):
-    collections = Collection.objects.all()
+    tables = Table.objects.all()
     if request.method == "POST":
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            collection = create_collection_from_csv(
-                form.cleaned_data["collection_name"],
-                form.cleaned_data["application_name"],
+            table = create_table_from_csv(
+                form.cleaned_data["table_name"],
+                form.cleaned_data["schema_name"],
                 request.FILES["file"]
             )
             return HttpResponseRedirect(
-                reverse("collection-detail", kwargs={"pk": collection.id})
+                reverse("table-detail", kwargs={"pk": table.id})
             )
     else:
         form = UploadFileForm()
@@ -28,11 +28,11 @@ def index(request):
         "mathesar/index.html",
         {
             "form": form,
-            "collections": sorted(collections, key=lambda x: x.schema),
+            "tables": sorted(tables, key=lambda x: x.schema),
         },
     )
 
 
-class CollectionDetail(DetailView):
-    context_object_name = "collection"
-    queryset = Collection.objects.all()
+class TableDetail(DetailView):
+    context_object_name = "table"
+    queryset = Table.objects.all()
