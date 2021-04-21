@@ -1,8 +1,9 @@
 from django.db import models
-from sqlalchemy import Table
-from sqlalchemy.orm import Session
 
-from mathesar.database.base import engine, metadata
+from mathesar.database.base import create_mathesar_engine
+from db import tables
+
+engine = create_mathesar_engine()
 
 
 class DatabaseObject(models.Model):
@@ -21,25 +22,9 @@ class Collection(DatabaseObject):
     schema = models.CharField(max_length=63)
 
     @property
-    def sa_table(self):
-        return Table(
-            self.name,
-            metadata,
-            schema=self.schema,
-            autoload_with=engine,
-            extend_existing=True,
-        )
-
-    @property
-    def sa_query(self):
-        with Session(engine) as session:
-            query = session.query(self.sa_table)
-            return query
-
-    @property
     def sa_columns(self):
-        return self.sa_query.column_descriptions
+        return tables.reflect_table_columns(self.name, self.schema, engine)
 
     @property
     def sa_records(self):
-        return self.sa_query.all()
+        return tables.get_all_table_records(self.name, self.schema, engine)
