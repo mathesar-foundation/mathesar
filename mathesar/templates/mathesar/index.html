@@ -28,7 +28,7 @@
 								{% for table in schema_tables %}
 									{% if table and table.schema == schema %}
 										<li>
-											<a href="{% url 'table-detail' table.id %}">
+											<a href="{% url 'frontend-table-detail' table.id %}">
 												{{ table.name }}
 											</a>
 										</li>

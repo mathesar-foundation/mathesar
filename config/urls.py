@@ -19,5 +19,7 @@ from django.urls import include, path
 from mathesar import urls as mathesar_urls
 
 urlpatterns = [
-    path("admin/", admin.site.urls), path("", include(mathesar_urls))
+    path('admin/', admin.site.urls),
+    path('', include(mathesar_urls)),
+    path('api-docs/', include('rest_framework.urls')),
 ]

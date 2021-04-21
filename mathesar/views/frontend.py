@@ -19,7 +19,7 @@ def index(request):
                 request.FILES["file"]
             )
             return HttpResponseRedirect(
-                reverse("table-detail", kwargs={"pk": table.id})
+                reverse("frontend-table-detail", kwargs={"pk": table.id})
             )
     else:
         form = UploadFileForm()
