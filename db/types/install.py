@@ -1,5 +1,10 @@
-from db.types import base
+from db.types import base, email
 from db.schemas import create_schema
+
+
+def install_mathesar_on_database(engine):
+    create_schema(engine)
+    email.create_email_type(engine)
 
 
 def create_type_schema(engine):
