@@ -1,7 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from mathesar.database.base import create_mathesar_engine
 from mathesar.forms.widgets import DataListInput
 from mathesar.models import Schema
 
