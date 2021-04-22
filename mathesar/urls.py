@@ -1,12 +1,18 @@
-from django.urls import path
+from django.urls import include, path
+from rest_framework import routers
 
-from mathesar import views
+from mathesar.views import api, frontend
+
+
+router = routers.DefaultRouter()
+router.register(r'tables', api.TableViewSet)
 
 urlpatterns = [
-    path("", views.index, name="index"),
+    path('', frontend.index, name="index"),
     path(
-        "tables/<int:pk>/",
-        views.TableDetail.as_view(),
-        name="table-detail",
+        'tables/<int:pk>/',
+        frontend.TableDetail.as_view(),
+        name='frontend-table-detail',
     ),
+    path('api/v0/', include(router.urls)),
 ]
