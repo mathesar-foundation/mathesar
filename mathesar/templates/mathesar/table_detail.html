@@ -1,15 +1,15 @@
 {% extends 'mathesar/base.html' %}
 
-{% block title %}{{ collection.name }}{% endblock %}
+{% block title %}{{ table.name }}{% endblock %}
 
 {% block body %}
-  <h2>Collection: {{ collection.name }}</h2>
-  <h3>Application: {{ collection.schema }}</h2>
+  <h2>Table: {{ table.name }}</h2>
+  <h3>Schema: {{ table.schema }}</h2>
   <table>
     <thead>
       <tr>
         <th>#</th>
-        {% for column in collection.sa_columns %}
+        {% for column in table.sa_columns %}
           {% if forloop.counter > 1 %}
             <th>{{ column.name }}</th>
           {% endif %}
@@ -17,7 +17,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for record in collection.sa_records %}
+      {% for record in table.sa_records %}
       <tr>
          <td>{{ forloop.counter }}</td>
           {% for item in record %}

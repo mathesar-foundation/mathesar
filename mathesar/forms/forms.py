@@ -15,10 +15,10 @@ def validate_csv(value):
 
 
 class UploadFileForm(forms.Form):
-    collection_name = forms.CharField(min_length=1, label="Collection Name")
+    table_name = forms.CharField(min_length=1, label="Table Name")
 
-    application_name = forms.CharField(
-        min_length=1, label="Application Name",
+    schema_name = forms.CharField(
+        min_length=1, label="Schema Name",
         widget=DataListInput(schemas.get_all_schemas(engine))
     )
 

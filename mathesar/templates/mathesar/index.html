@@ -8,34 +8,34 @@
       <h2>Welcome to Mathesar!</h3>
     </div>
     <div>
-      <h5>Create a Collection</h5>
-      <p>Upload a CSV file to create a collection.</p>
+      <h5>Create a Table</h5>
+      <p>Upload a CSV file to create a table.</p>
       <form enctype="multipart/form-data" method="post" action="/">
         {% csrf_token %}
         {{ form }}
         <input type="submit" value="Submit">
       </form>
     </div>
-    {% if collections %}
+    {% if tables %}
       <div>
-        <h5>View Existing Collections</h5>
-				{% regroup collections by schema as grouped_collections %}
+        <h5>View Existing Tables</h5>
+        {% regroup tables by schema as grouped_tables %}
         <ul>
-          {% for schema, schema_collections in grouped_collections %}
-						<li>
-							{{ schema }}
-							<ul>
-								{% for collection in schema_collections %}
-									{% if collection and collection.schema == schema %}
-										<li>
-											<a href="{% url 'collection-detail' collection.id %}">
-												{{ collection.name }}
-											</a>
-										</li>
-									{% endif %}
-								{% endfor %}
-							</ul>
-						</li>
+          {% for schema, schema_tables in grouped_tables %}
+            <li>
+              {{ schema }}
+              <ul>
+                {% for table in schema_tables %}
+                  {% if table and table.schema == schema %}
+                    <li>
+                      <a href="{% url 'frontend-table-detail' table.id %}">
+                        {{ table.name }}
+                      </a>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </li>
           {% endfor %}
         </ul>
       </div>
