@@ -6,6 +6,7 @@ from mathesar.views import api, frontend
 
 router = routers.DefaultRouter()
 router.register(r'tables', api.TableViewSet)
+router.register(r'schemas', api.SchemaViewSet)
 
 urlpatterns = [
     path('', frontend.index, name="index"),

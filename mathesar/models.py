@@ -18,13 +18,17 @@ class DatabaseObject(models.Model):
         return f"{self.__class__.__name__}: {self.name}"
 
 
+class Schema(DatabaseObject):
+    database = models.CharField(max_length=63)
+
+
 class Table(DatabaseObject):
-    schema = models.CharField(max_length=63)
+    schema = models.ForeignKey('Schema', on_delete=models.CASCADE, related_name='tables')
 
     @property
     def sa_columns(self):
-        return tables.reflect_table_columns(self.name, self.schema, engine)
+        return tables.reflect_table_columns(self.name, self.schema.name, engine)
 
     @property
     def sa_records(self):
-        return tables.get_all_table_records(self.name, self.schema, engine)
+        return tables.get_all_table_records(self.name, self.schema.name, engine)

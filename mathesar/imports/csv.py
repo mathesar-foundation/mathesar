@@ -2,7 +2,7 @@ import csv
 from io import TextIOWrapper
 
 from mathesar.database.base import create_mathesar_engine
-from mathesar.models import Table
+from mathesar.models import Table, Schema
 from db import tables
 
 engine = create_mathesar_engine()
@@ -22,8 +22,8 @@ def create_db_table_from_csv(name, schema, csv_reader, engine):
 
 def create_table_from_csv(name, schema, csv_file, engine=engine):
     csv_reader = get_csv_reader(csv_file)
-    table = create_db_table_from_csv(name, schema, csv_reader, engine)
-    table, _ = Table.objects.get_or_create(
-        name=table.name, schema=table.schema
-    )
+    db_table = create_db_table_from_csv(name, schema, csv_reader, engine)
+    database = engine.url.database
+    schema, _ = Schema.objects.get_or_create(name=db_table.schema, database=database)
+    table, _ = Table.objects.get_or_create(name=db_table.name, schema=schema)
     return table

@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.forms.widgets import DataListInput
-from db import schemas
+from mathesar.models import Schema
 
 
 def validate_csv(value):
@@ -12,8 +12,7 @@ def validate_csv(value):
 
 
 def get_schemas():
-    engine = create_mathesar_engine()
-    schemas.get_all_schemas(engine)
+    return [schema.name for schema in Schema.objects.all()]
 
 
 class UploadFileForm(forms.Form):
