@@ -78,12 +78,20 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
+        "NAME": "mathesar_django",
+        "USER": "mathesar",
+        "PASSWORD": "mathesar",
+        "HOST": "db",
+        "PORT": 5432,
+    },
+    "mathesar_tables": {
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": "mathesar",
         "USER": "mathesar",
         "PASSWORD": "mathesar",
         "HOST": "db",
         "PORT": 5432,
-    }
+    },
 }
 
 

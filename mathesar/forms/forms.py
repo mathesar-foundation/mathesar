@@ -6,12 +6,14 @@ from mathesar.forms.widgets import DataListInput
 from db import schemas
 
 
-engine = create_mathesar_engine()
-
-
 def validate_csv(value):
     if not value.name.lower().endswith(".csv"):
         raise ValidationError(f"{value.name} is not a CSV file")
+
+
+def get_schemas():
+    engine = create_mathesar_engine()
+    schemas.get_all_schemas(engine)
 
 
 class UploadFileForm(forms.Form):
@@ -19,7 +21,7 @@ class UploadFileForm(forms.Form):
 
     schema_name = forms.CharField(
         min_length=1, label="Schema Name",
-        widget=DataListInput(schemas.get_all_schemas(engine))
+        widget=DataListInput(get_schemas)
     )
 
     file = forms.FileField(validators=[validate_csv], label="CSV File")
