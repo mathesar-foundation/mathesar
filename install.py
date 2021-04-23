@@ -40,11 +40,11 @@ def install_on_db_with_key(mathesar_tables_key):
         if confirmation.lower() in ["y", "yes"]:
             print("Installing...")
             install.install_mathesar_on_preexisting_database(
-                DATABASES[mathesar_tables_key]["USER"],
-                DATABASES[mathesar_tables_key]["PASSWORD"],
-                DATABASES[mathesar_tables_key]["HOST"],
-                DATABASES[mathesar_tables_key]["NAME"],
-                DATABASES[mathesar_tables_key]["PORT"],
+                username,
+                password,
+                host,
+                db_name,
+                port,
             )
         else:
             print("Skipping DB with key {mathesar_tables_key}.")
