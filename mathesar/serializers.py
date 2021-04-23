@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from mathesar.models import Table
+from mathesar.models import Table, Schema
 
 
 class ColumnSerializer(serializers.Serializer):
@@ -8,7 +8,13 @@ class ColumnSerializer(serializers.Serializer):
     type = serializers.CharField()
 
 
-class TableSerializer(serializers.ModelSerializer):
+class SchemaSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Schema
+        fields = ['id', 'name', 'database', 'tables']
+
+
+class TableSerializer(serializers.HyperlinkedModelSerializer):
     columns = ColumnSerializer(many=True, read_only=True, source='sa_columns')
 
     class Meta:

@@ -2,6 +2,10 @@ from sqlalchemy import create_engine
 from db import types
 
 
+def get_connection_string(username, password, hostname, database, port='5432'):
+    return f"postgresql://{username}:{password}@{hostname}:{port}/{database}"
+
+
 def create_future_engine_with_custom_types(
         username, password, hostname, database, port, *args, **kwargs
 ):
@@ -17,7 +21,7 @@ def create_future_engine_with_custom_types(
 def create_future_engine(
         username, password, hostname, database, port, *args, **kwargs
 ):
-    conn_str = f"postgresql://{username}:{password}@{hostname}/{database}"
+    conn_str = get_connection_string(username, password, hostname, database)
     kwargs.update(future=True)
     return create_engine(conn_str, *args, **kwargs)
 
