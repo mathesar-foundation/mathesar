@@ -28,7 +28,7 @@ def index(request):
         "mathesar/index.html",
         {
             "form": form,
-            "tables": sorted(tables, key=lambda x: x.schema),
+            "tables": sorted(tables, key=lambda x: x.schema.name),
         },
     )
 

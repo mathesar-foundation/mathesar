@@ -75,6 +75,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+# TODO: Add to documentation that database keys should not be than 128 characters.
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
