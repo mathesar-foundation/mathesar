@@ -19,6 +19,15 @@ You run database migrations like so:
 docker exec mathesar_web_1 python manage.py migrate
 ```
 
+You install Mathesar types and functions like so:
+```
+docker exec -it mathesar_web_1 python install.py
+```
+
+If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASES.mathesar_tables` entry of the `config/settings.py` file with appropriate connection details before installing the Mathesar types and functions with the previous step.
+
+**NOTE**:  Currently, only one Mathesar DB may be associated with a given Mathesar webapp.
+
 You run tests like so:
 ```
 docker exec mathesar_web_1 pytest

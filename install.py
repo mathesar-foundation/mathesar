@@ -18,7 +18,7 @@ def main():
             DATABASES["default"]["NAME"],
             DATABASES["default"]["PORT"],
         )
-        print(f"Created DB is {DATABASES['mathesar_tables']['name']}")
+        print(f"Created DB is {DATABASES['mathesar_tables']['NAME']}")
     else:
         # if we're installing anywhere else, we require the DB to exist in
         # advance.
