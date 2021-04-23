@@ -7,10 +7,10 @@ def get_connection_string(username, password, hostname, database, port='5432'):
 
 
 def create_future_engine_with_custom_types(
-        username, password, hostname, database, *args, **kwargs
+        username, password, hostname, database, port, *args, **kwargs
 ):
     engine = create_future_engine(
-        username, password, hostname, database, *args, **kwargs
+        username, password, hostname, database, port, *args, **kwargs
     )
     # We need to add our custom types to any engine created for SQLALchemy use
     # so that they can be used for reflection
@@ -19,9 +19,11 @@ def create_future_engine_with_custom_types(
 
 
 def create_future_engine(
-        username, password, hostname, database, *args, **kwargs
+        username, password, hostname, database, port, *args, **kwargs
 ):
-    conn_str = get_connection_string(username, password, hostname, database)
+    conn_str = get_connection_string(
+        username, password, hostname, database, port
+    )
     kwargs.update(future=True)
     return create_engine(conn_str, *args, **kwargs)
 
