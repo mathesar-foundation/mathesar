@@ -12,6 +12,7 @@ def create_mathesar_db(apps, schema_editor):
         settings.DATABASES["default"]["PASSWORD"],
         settings.DATABASES["default"]["HOST"],
         settings.DATABASES["default"]["NAME"],
+        settings.DATABASES["default"]["PORT"],
     )
 
 

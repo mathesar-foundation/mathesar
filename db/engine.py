@@ -3,10 +3,10 @@ from db import types
 
 
 def create_future_engine_with_custom_types(
-        username, password, hostname, database, *args, **kwargs
+        username, password, hostname, database, port, *args, **kwargs
 ):
     engine = create_future_engine(
-        username, password, hostname, database, *args, **kwargs
+        username, password, hostname, database, port, *args, **kwargs
     )
     # We need to add our custom types to any engine created for SQLALchemy use
     # so that they can be used for reflection
@@ -15,7 +15,7 @@ def create_future_engine_with_custom_types(
 
 
 def create_future_engine(
-        username, password, hostname, database, *args, **kwargs
+        username, password, hostname, database, port, *args, **kwargs
 ):
     conn_str = f"postgresql://{username}:{password}@{hostname}/{database}"
     kwargs.update(future=True)
