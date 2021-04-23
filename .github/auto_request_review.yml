@@ -7,8 +7,9 @@ reviewers:
   # Reviewer groups each of which has a list of GitHub usernames
   groups:
     engineers:
-      - kgodey # username
-      - mathemancer # username
+      - kgodey
+      - mathemancer
+      - pavish
     designers:
       - ghislaineguerin
 
