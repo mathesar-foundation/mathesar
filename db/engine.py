@@ -21,7 +21,9 @@ def create_future_engine_with_custom_types(
 def create_future_engine(
         username, password, hostname, database, port, *args, **kwargs
 ):
-    conn_str = get_connection_string(username, password, hostname, database)
+    conn_str = get_connection_string(
+        username, password, hostname, database, port
+    )
     kwargs.update(future=True)
     return create_engine(conn_str, *args, **kwargs)
 
