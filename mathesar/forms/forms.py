@@ -16,10 +16,8 @@ def get_schemas():
 
 class UploadFileForm(forms.Form):
     table_name = forms.CharField(min_length=1, label="Table Name")
-
     schema_name = forms.CharField(
         min_length=1, label="Schema Name",
         widget=DataListInput(get_schemas)
     )
-
     file = forms.FileField(validators=[validate_csv], label="CSV File")

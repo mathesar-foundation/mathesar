@@ -19,7 +19,7 @@ class DatabaseObject(models.Model):
 
 
 class Schema(DatabaseObject):
-    database = models.CharField(max_length=63)
+    database = models.CharField(max_length=128)
 
 
 class Table(DatabaseObject):
