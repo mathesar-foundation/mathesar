@@ -18,7 +18,12 @@ def create_string_column_table(name, schema, column_names, engine):
 
 
 def create_mathesar_table(name, schema, columns, engine):
-    columns = DEFAULT_COLUMNS + columns
+    """
+    This method creates a Postgres table in the specified schema using the
+    given name and column list.  It adds internal mathesar columns to the
+    table.
+    """
+    columns = [_copy_column(c) for c in DEFAULT_COLUMNS + columns]
     schemas.create_schema(schema, engine)
     metadata = MetaData(bind=engine)
     table = Table(
@@ -54,3 +59,12 @@ def get_all_table_records(name, schema, engine):
     sel = select(t)
     with engine.begin() as conn:
         return conn.execute(sel).fetchall()
+
+
+def _copy_column(old_column):
+    new_column = old_column.copy()
+    new_fk_names = {fk.target_fullname for fk in new_column.foreign_keys}
+    for k in old_column.foreign_keys:
+        if k.target_fullname not in new_fk_names:
+            new_column.append_foreign_key(k.copy())
+    return new_column
