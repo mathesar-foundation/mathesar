@@ -30,5 +30,5 @@ class Table(DatabaseObject):
         return tables.reflect_table_columns(self.name, self.schema.name, engine)
 
     @property
-    def sa_records(self):
+    def sa_all_records(self):
         return tables.get_all_table_records(self.name, self.schema.name, engine)

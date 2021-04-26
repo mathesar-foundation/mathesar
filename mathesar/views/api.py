@@ -10,7 +10,7 @@ class RecordViewSet(viewsets.GenericViewSet):
 
     def list(self, request, table_pk=None):
         table = self.queryset.get(id=table_pk)
-        serializer = RecordSerializer(table.sa_records, many=True)
+        serializer = RecordSerializer(table.sa_all_records, many=True)
         return Response(serializer.data)
 
 
