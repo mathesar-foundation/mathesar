@@ -9,7 +9,6 @@ class RecordViewSet(viewsets.GenericViewSet):
     queryset = Table.objects.all().order_by('-created_at')
 
     def list(self, request, table_pk=None):
-        print(self, self.get_view_name())
         table = self.queryset.get(id=table_pk)
         serializer = RecordSerializer(table.sa_records, many=True)
         return Response(serializer.data)
