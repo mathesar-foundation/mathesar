@@ -18,4 +18,9 @@ def test_table_creation_doesnt_reuse_defaults(engine_with_schema):
     engine, schema = engine_with_schema
     t1 = tables.create_mathesar_table("t1", schema, columns, engine)
     t2 = tables.create_mathesar_table("t2", schema, columns, engine)
-    print(t1, t2)
+    assert all(
+        [
+            c1.name == c2.name and c1 != c2
+            for c1, c2 in zip(t1.columns, t2.columns)
+        ]
+    )

@@ -22,7 +22,7 @@ class MathesarColumn(Column):
     @classmethod
     def from_column(cls, column):
         """
-        This alternat init method creates a new column (a copy) of the given
+        This alternate init method creates a new column (a copy) of the given
         column.  It respects only the properties in the __init__ of the
         MathesarColumn.
         """
@@ -32,7 +32,7 @@ class MathesarColumn(Column):
         default_def = DEFAULT_COLUMNS.get(self.name, False)
         return (
             default_def
-            and self.type == default_def[TYPE]
+            and self.type.__class__ == default_def[TYPE]
             and self.primary_key == default_def[PRIMARY_KEY]
         )
 
