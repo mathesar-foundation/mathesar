@@ -23,6 +23,6 @@ def create_schema(schema, engine):
     """
     This method creates a Postgres schema.
     """
-    if not schema in get_all_schemas(engine):
+    if schema not in get_all_schemas(engine):
         with engine.begin() as connection:
             connection.execute(CreateSchema(schema))
