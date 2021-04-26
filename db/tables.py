@@ -7,14 +7,19 @@ DEFAULT_COLUMNS = [
 ]
 
 
-def create_table(name, schema, column_names, engine):
+def create_string_column_table(name, schema, column_names, engine):
     """
-    This method creates a Postgres table.
+    This method creates a Postgres table in the specified schema, with all
+    columns being String type.
     """
+    columns = [Column(column_name, String) for column_name in column_names]
+    table = create_mathesar_table(name, schema, columns, engine)
+    return table
+
+
+def create_mathesar_table(name, schema, columns, engine):
+    columns = DEFAULT_COLUMNS + columns
     schemas.create_schema(schema, engine)
-    columns = DEFAULT_COLUMNS + [
-        Column(column_name, String) for column_name in column_names
-    ]
     metadata = MetaData(bind=engine)
     table = Table(
         name,
