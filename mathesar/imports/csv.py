@@ -16,7 +16,9 @@ def get_csv_reader(csv_file):
 
 
 def create_db_table_from_csv(name, schema, csv_reader, engine):
-    table = tables.create_table(name, schema, csv_reader.fieldnames, engine)
+    table = tables.create_string_column_table(
+        name, schema, csv_reader.fieldnames, engine,
+    )
     tables.insert_rows_into_table(table, [row for row in csv_reader], engine)
     return table
 

@@ -1,20 +1,27 @@
-from sqlalchemy import Column, Integer, String, Table, MetaData, select
+from sqlalchemy import Column, String, Table, MetaData, select
 
-from db import constants, schemas
-
-DEFAULT_COLUMNS = [
-    Column(constants.ID, Integer, primary_key=True),
-]
+from db import schemas
+from db.columns import init_mathesar_table_column_list_with_defaults
 
 
-def create_table(name, schema, column_names, engine):
+def create_string_column_table(name, schema, column_names, engine):
     """
-    This method creates a Postgres table.
+    This method creates a Postgres table in the specified schema, with all
+    columns being String type.
     """
+    columns = [Column(column_name, String) for column_name in column_names]
+    table = create_mathesar_table(name, schema, columns, engine)
+    return table
+
+
+def create_mathesar_table(name, schema, columns, engine):
+    """
+    This method creates a Postgres table in the specified schema using the
+    given name and column list.  It adds internal mathesar columns to the
+    table.
+    """
+    columns = init_mathesar_table_column_list_with_defaults(columns)
     schemas.create_schema(schema, engine)
-    columns = DEFAULT_COLUMNS + [
-        Column(column_name, String) for column_name in column_names
-    ]
     metadata = MetaData(bind=engine)
     table = Table(
         name,
