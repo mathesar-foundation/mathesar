@@ -7,8 +7,6 @@ class DefaultLimitOffsetPagination(LimitOffsetPagination):
 
 
 class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
-    default_limit = 50
-    max_limit = 500
 
     def paginate_queryset(self, queryset, request, table_id):
         self.limit = self.get_limit(request)
