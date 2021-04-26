@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import Column, text
+from sqlalchemy import text
 from db import tables
 
 
