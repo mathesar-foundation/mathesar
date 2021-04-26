@@ -14,7 +14,9 @@ DEFAULT_COLUMNS = {
 class MathesarColumn(Column):
     """
     This class constrains the possible arguments, enabling us to include a copy
-    method (which has been deprecated in upstream SQLAlchemy since 1.4)
+    method (which has been deprecated in upstream SQLAlchemy since 1.4).  The
+    idea is that we can faithfully copy the subset of the column definition
+    that we care about, and this class defines that subset.
     """
     def __init__(self, name, sa_type, primary_key=False):
         super().__init__(name=name, type_=sa_type, primary_key=primary_key)
