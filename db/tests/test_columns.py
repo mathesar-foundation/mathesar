@@ -31,7 +31,7 @@ def test_MC_is_default_when_true():
         c = columns.MathesarColumn(
             default_col, dc_definition["type"], dc_definition["primary_key"]
         )
-        assert c.is_default()
+        assert c.is_default
 
 
 def test_MC_is_default_when_false_for_name():
@@ -42,7 +42,7 @@ def test_MC_is_default_when_false_for_name():
             dc_definition["type"],
             dc_definition["primary_key"]
         )
-        assert not c.is_default()
+        assert not c.is_default
 
 
 def test_MC_is_default_when_false_for_type():
@@ -54,7 +54,7 @@ def test_MC_is_default_when_false_for_type():
             changed_type,
             dc_definition["primary_key"]
         )
-        assert not c.is_default()
+        assert not c.is_default
 
 
 def test_MC_is_default_when_false_for_pk():
@@ -65,7 +65,7 @@ def test_MC_is_default_when_false_for_pk():
             dc_definition["type"],
             not dc_definition["primary_key"]
         )
-        assert not c.is_default()
+        assert not c.is_default
 
 
 def test_MC_from_column():

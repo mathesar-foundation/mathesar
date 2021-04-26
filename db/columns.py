@@ -28,6 +28,7 @@ class MathesarColumn(Column):
         """
         return cls(column.name, column.type)
 
+    @property
     def is_default(self):
         default_def = DEFAULT_COLUMNS.get(self.name, False)
         return (
