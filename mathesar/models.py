@@ -30,10 +30,21 @@ class Table(DatabaseObject):
         return tables.reflect_table(self.name, self.schema.name, engine)
 
     @property
+    def _sa_query(self):
+        query = tables.get_query(self._sa_table, engine)
+        return query
+
+    @property
     def sa_columns(self):
         return self._sa_table.columns
 
     @property
+    def sa_num_records(self):
+        return self._sa_query.count()
+
+    @property
     def sa_all_records(self):
-        query = tables.get_query(self._sa_table, engine)
-        return query.all()
+        return self._sa_query.all()
+
+    def get_records(self, limit=None, offset=None):
+        return self._sa_query.limit(limit).offset(offset).all()
