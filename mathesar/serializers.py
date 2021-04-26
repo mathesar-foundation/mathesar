@@ -8,6 +8,11 @@ class ColumnSerializer(serializers.Serializer):
     type = serializers.CharField()
 
 
+class RecordSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance):
+        return instance._asdict()
+
+
 class SchemaSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Schema
