@@ -4,16 +4,16 @@ services:
   db:
     image: postgres
     environment:
-      - POSTGRES_DB=mathesar_django
-      - POSTGRES_USER=mathesar
-      - POSTGRES_PASSWORD=mathesar
+      - POSTGRES_DB=${POSTGRES_DB-mathesar_django}
+      - POSTGRES_USER=${POSTGRES_USER-mathesar}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD-mathesar}
     ports:
       - "5432:5432"
     volumes:
       - ./.volumes:/var/lib/postgresql/data
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: dockerize -wait tcp://db:5432 -timeout 30s python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
     ports:
