@@ -45,7 +45,12 @@ class MathesarColumn(Column):
         given column.  It respects only the properties in the __init__
         of the MathesarColumn.
         """
-        return cls(column.name, column.type)
+        return cls(
+            column.name,
+            column.type,
+            primary_key=column.primary_key,
+            nullable=column.nullable,
+        )
 
     @property
     def is_default(self):
