@@ -1,5 +1,4 @@
-from sqlalchemy import Column, String, Table, MetaData
-from sqlalchemy.orm import Session
+from sqlalchemy import Column, String, Table, MetaData, func, select
 
 from db import schemas
 from db.columns import init_mathesar_table_column_list_with_defaults
@@ -45,7 +44,13 @@ def reflect_table(name, schema, engine):
     return Table(name, metadata, schema=schema, autoload_with=engine)
 
 
-def get_query(table, engine):
-    with Session(engine) as session:
-        query = session.query(table)
-        return query
+def get_records(table, engine, limit=None, offset=None):
+    query = select(table).limit(limit).offset(offset)
+    with engine.begin() as conn:
+        return conn.execute(query).fetchall()
+
+
+def get_count(table, engine):
+    query = select([func.count()]).select_from(table)
+    with engine.begin() as conn:
+        return conn.execute(query).scalar()
