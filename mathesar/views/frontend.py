@@ -16,6 +16,7 @@ def index(request):
             table = create_table_from_csv(
                 form.cleaned_data["table_name"],
                 form.cleaned_data["schema_name"],
+                form.cleaned_data["database_key"],
                 request.FILES["file"]
             )
             return HttpResponseRedirect(
