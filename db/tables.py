@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Table, MetaData, select
+from sqlalchemy import Column, String, Table, MetaData, func, select
 
 from db import schemas
 from db.columns import init_mathesar_table_column_list_with_defaults
@@ -44,15 +44,13 @@ def reflect_table(name, schema, engine):
     return Table(name, metadata, schema=schema, autoload_with=engine)
 
 
-def reflect_table_columns(name, schema, engine):
-    t = reflect_table(name, schema, engine)
-    return [
-        {"name": c.name, "type": c.type} for c in t.columns
-    ]
-
-
-def get_all_table_records(name, schema, engine):
-    t = reflect_table(name, schema, engine)
-    sel = select(t)
+def get_records(table, engine, limit=None, offset=None):
+    query = select(table).limit(limit).offset(offset)
     with engine.begin() as conn:
-        return conn.execute(sel).fetchall()
+        return conn.execute(query).fetchall()
+
+
+def get_count(table, engine):
+    query = select([func.count()]).select_from(table)
+    with engine.begin() as conn:
+        return conn.execute(query).scalar()
