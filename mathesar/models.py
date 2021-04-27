@@ -26,9 +26,20 @@ class Table(DatabaseObject):
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE, related_name='tables')
 
     @property
-    def sa_columns(self):
-        return tables.reflect_table_columns(self.name, self.schema.name, engine)
+    def _sa_table(self):
+        return tables.reflect_table(self.name, self.schema.name, engine)
 
     @property
-    def sa_records(self):
-        return tables.get_all_table_records(self.name, self.schema.name, engine)
+    def sa_columns(self):
+        return self._sa_table.columns.keys()
+
+    @property
+    def sa_num_records(self):
+        return tables.get_count(self._sa_table, engine)
+
+    @property
+    def sa_all_records(self):
+        return tables.get_records(self._sa_table, engine)
+
+    def get_records(self, limit=None, offset=None):
+        return tables.get_records(self._sa_table, engine, limit, offset)
