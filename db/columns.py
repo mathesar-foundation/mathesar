@@ -2,10 +2,11 @@ from sqlalchemy import Column, Integer
 from db import constants
 
 
-ID_TYPE = Integer
+NULLABLE = "nullable"
 PRIMARY_KEY = "primary_key"
 TYPE = "type"
 
+ID_TYPE = Integer
 DEFAULT_COLUMNS = {
     constants.ID: {TYPE: ID_TYPE, PRIMARY_KEY: True}
 }
@@ -58,7 +59,8 @@ class MathesarColumn(Column):
         return (
             default_def
             and self.type.__class__ == default_def[TYPE]
-            and self.primary_key == default_def[PRIMARY_KEY]
+            and self.primary_key == default_def.get(PRIMARY_KEY, False)
+            and self.nullable == default_def.get(NULLABLE, True)
         )
 
 
