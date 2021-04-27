@@ -31,7 +31,7 @@ class Table(DatabaseObject):
 
     @property
     def sa_columns(self):
-        return self._sa_table.columns
+        return self._sa_table.columns.keys()
 
     @property
     def sa_num_records(self):
