@@ -25,6 +25,16 @@ def test_MC_inits_with_pk_true():
     assert c.primary_key
 
 
+def test_MC_inits_default_nullable():
+    c = columns.MathesarColumn("a_col", String)
+    assert c.nullable
+
+
+def test_MC_inits_with_nullable_false():
+    c = columns.MathesarColumn("a_col", String, nullable=False)
+    assert not c.nullable
+
+
 def test_MC_is_default_when_true():
     for default_col in columns.DEFAULT_COLUMNS:
         dc_definition = columns.DEFAULT_COLUMNS[default_col]

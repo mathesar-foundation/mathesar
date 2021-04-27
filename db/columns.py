@@ -2,11 +2,12 @@ from sqlalchemy import Column, Integer
 from db import constants
 
 
+ID_TYPE = Integer
 PRIMARY_KEY = "primary_key"
 TYPE = "type"
 
 DEFAULT_COLUMNS = {
-    constants.ID: {TYPE: Integer, PRIMARY_KEY: True}
+    constants.ID: {TYPE: ID_TYPE, PRIMARY_KEY: True}
 }
 
 
@@ -19,7 +20,7 @@ class MathesarColumn(Column):
     column definition that we care about, and this class defines that
     subset.
     """
-    def __init__(self, name, sa_type, primary_key=False):
+    def __init__(self, name, sa_type, primary_key=False, nullable=True):
         """
         Construct a new ``MathesarColumn`` object.
 
@@ -30,7 +31,12 @@ class MathesarColumn(Column):
         Optional keyword arguments:
         primary_key -- Boolean giving whether the column is a primary key.
         """
-        super().__init__(name=name, type_=sa_type, primary_key=primary_key)
+        super().__init__(
+            name=name,
+            type_=sa_type,
+            primary_key=primary_key,
+            nullable=nullable,
+        )
 
     @classmethod
     def from_column(cls, column):
