@@ -4,16 +4,11 @@ about: Suggest a new feature for Mathesar
 labels: enhancement
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+**Problem**
+<!-- Please provide a clear and concise description of the problem that this feature request is designed to solve.-->
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
-
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Proposed solution**
+<!-- A clear and concise description of your proposed solution or feature. -->
 
 **Additional context**
-Add any other context or screenshots about the feature request here.
-
-**Have a nice day!**
+<!-- Add any other context or screenshots about the feature request here.-->

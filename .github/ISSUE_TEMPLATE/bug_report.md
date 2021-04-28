@@ -11,7 +11,7 @@ labels: bug
 <!-- A clear and concise description of what you expected to happen. -->
 
 **To Reproduce**
-Please try to provide a [Minimal, Complete, and Verifiable](http://stackoverflow.com/help/mcve) example.
+<!-- How can we recreate this bug? Please try to provide a Minimal, Complete, and Verifiable (http://stackoverflow.com/help/mcve) example if code-related. -->
 
 **Environment**
  - OS: (_eg._ macOS 10.14.6; Fedora 32)
@@ -21,5 +21,3 @@ Please try to provide a [Minimal, Complete, and Verifiable](http://stackoverflow
 
 **Additional context**
 <!-- Add any other context about the problem or screenshots here. -->
-
-**Have a nice day!**
