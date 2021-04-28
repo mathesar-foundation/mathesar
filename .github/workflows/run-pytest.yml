@@ -6,10 +6,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Build the stack
+
       - uses: satackey/action-docker-layer-caching@v0.0.11
-          # Ignore the failure of a step and avoid terminating the job.
-          continue-on-error: true
-      - run: docker-compose up --build -d
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+
+      - name: Build the stack
+        run: docker-compose up --build -d
+
       - name: Run tests with pytest
         run: docker exec mathesar_web_1 pytest
