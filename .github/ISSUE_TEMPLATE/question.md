@@ -4,7 +4,7 @@ about: Question about Mathesar development or usage
 labels: question
 ---
 
-**Describe your question**
+**Question**
 
 **Environment**
  - OS: (_eg._ macOS 10.14.6; Fedora 32)
@@ -14,5 +14,3 @@ labels: question
 
 **Additional context**
 <!-- Add any other context about the problem or screenshots here. -->
-
-**Have a nice day!**
