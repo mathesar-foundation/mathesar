@@ -9,4 +9,4 @@ jobs:
       - name: Build the stack
         run: docker-compose up -d
       - name: Run tests with pytest
-        run: docker-compose exec mathesar_web_1 pytest
+        run: docker exec mathesar_web_1 pytest
