@@ -5,7 +5,7 @@ labels: enhancement
 ---
 
 **Problem**
-<!-- Please provide a clear and consise description of the problem that this feature request is designed to solve.-->
+<!-- Please provide a clear and concise description of the problem that this feature request is designed to solve.-->
 
 **Proposed solution**
 <!-- A clear and concise description of your proposed solution or feature. -->
