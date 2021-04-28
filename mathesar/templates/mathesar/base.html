@@ -1,18 +1,25 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8" />
-  <title>Mathesar - {% block title %}{% endblock %}</title>
-  {% block styles %}
-  {% endblock %}
-</head>
-<body>
-  <div>
-    <a href="/">Mathesar</a>
-  </div>
-  {% block body %}
-  {% endblock %}
-  {% block scripts %}
-  {% endblock %}
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mathesar - {% block title %}{% endblock %}</title>
+    {% block styles %}
+    {% endblock %}
+  </head>
+  <body>
+    <div>
+      <a href="/">Mathesar</a>
+    </div>
+    {% block body %}
+    {% endblock %}
+    {% block scripts %}
+    {% endblock %}
+
+    <!-- For development with hot module replacement -->
+    <!-- TODO: Control mode with an env variable -->
+    <script type="module" src="http://localhost:3000/@vite/client"></script>
+    <script type="module" src="http://localhost:3000/src/main.js"></script>
+
+    <!-- TODO: Production build inclusion based on env variable -->
+  </body>
 </html>
