@@ -63,7 +63,7 @@ def test_schema_detail(engine, csv_filename, client):
     }
     """
     with open(csv_filename, 'rb') as csv_file:
-       create_table_from_csv(
+        create_table_from_csv(
             name='Fairfax County 2',
             schema='Libraries',
             database_key='mathesar_db_test_database',
