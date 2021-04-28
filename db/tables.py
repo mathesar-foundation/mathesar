@@ -16,7 +16,7 @@ def create_string_column_table(name, schema, column_names, engine):
     return table
 
 
-def create_mathesar_table(name, schema, columns, engine):
+def create_mathesar_table(name, schema, columns, engine, metadata=None):
     """
     This method creates a Postgres table in the specified schema using the
     given name and column list.  It adds internal mathesar columns to the
@@ -24,7 +24,11 @@ def create_mathesar_table(name, schema, columns, engine):
     """
     columns = col.init_mathesar_table_column_list_with_defaults(columns)
     schemas.create_schema(schema, engine)
-    metadata = MetaData(bind=engine)
+    if metadata is None:
+        metadata = MetaData(bind=engine, schema=schema)
+    print(metadata.tables)
+    metadata.reflect()
+    print("REFLECTED:  ", metadata.tables)
     table = Table(
         name,
         metadata,
@@ -54,6 +58,7 @@ def extract_columns_from_table(
     extracted_columns, remainder_columns = _split_column_list(
         old_non_default_columns, extracted_column_names,
     )
+    return extracted_columns, remainder_columns
 
 
 def _split_column_list(columns, extracted_column_names):
@@ -74,6 +79,7 @@ def _create_split_tables(
         schema,
         engine,
 ):
+    print("creating extracted_table")
     extracted_table = create_mathesar_table(
         extracted_table_name,
         schema,
@@ -86,11 +92,13 @@ def _create_split_tables(
             ForeignKey(f"{extracted_table.name}.{constants.ID}"),
             nullable=False,
     )
+    print("creating remainder_table")
     remainder_table = create_mathesar_table(
         remainder_table_name,
         schema,
         [remainder_fk_column] + remainder_columns,
         engine,
+        metadata=extracted_table.metadata
     )
     return extracted_table, remainder_table, remainder_fk_column.name
 

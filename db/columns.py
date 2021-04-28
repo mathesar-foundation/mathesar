@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, ForeignKey
 from db import constants
 
 
@@ -21,7 +21,14 @@ class MathesarColumn(Column):
     column definition that we care about, and this class defines that
     subset.
     """
-    def __init__(self, name, sa_type, primary_key=False, nullable=True):
+    def __init__(
+            self,
+            name,
+            sa_type,
+            foreign_keys=[],
+            primary_key=False,
+            nullable=True,
+    ):
         """
         Construct a new ``MathesarColumn`` object.
 
@@ -33,6 +40,7 @@ class MathesarColumn(Column):
         primary_key -- Boolean giving whether the column is a primary key.
         """
         super().__init__(
+            *foreign_keys,
             name=name,
             type_=sa_type,
             primary_key=primary_key,
@@ -46,9 +54,11 @@ class MathesarColumn(Column):
         given column.  It respects only the properties in the __init__
         of the MathesarColumn.
         """
+        fkeys = [ForeignKey(fk.target_fullname) for fk in column.foreign_keys]
         return cls(
             column.name,
             column.type,
+            foreign_keys=fkeys,
             primary_key=column.primary_key,
             nullable=column.nullable,
         )
@@ -69,7 +79,7 @@ def get_default_mathesar_column_list():
         MathesarColumn(
             c,
             DEFAULT_COLUMNS[c][TYPE],
-            DEFAULT_COLUMNS[c][PRIMARY_KEY]
+            primary_key=DEFAULT_COLUMNS[c][PRIMARY_KEY]
         )
         for c in DEFAULT_COLUMNS
     ]
