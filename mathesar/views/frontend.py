@@ -14,9 +14,10 @@ def index(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             table = create_table_from_csv(
-                form.cleaned_data["table_name"],
-                form.cleaned_data["schema_name"],
-                request.FILES["file"]
+                name=form.cleaned_data["table_name"],
+                schema=form.cleaned_data["schema_name"],
+                database_key=form.cleaned_data["database_key"],
+                csv_file=request.FILES["file"]
             )
             return HttpResponseRedirect(
                 reverse("frontend-table-detail", kwargs={"pk": table.id})

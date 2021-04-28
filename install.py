@@ -6,17 +6,17 @@ from db import install
 
 
 def main():
-    for mathesar_tables_key in [key for key in DATABASES if key != "default"]:
-        install_on_db_with_key(mathesar_tables_key)
+    for database_key in [key for key in DATABASES if key != "default"]:
+        install_on_db_with_key(database_key)
 
 
-def install_on_db_with_key(mathesar_tables_key):
-    if DATABASES[mathesar_tables_key]["HOST"] == "db":
+def install_on_db_with_key(database_key):
+    if DATABASES[database_key]["HOST"] == "db":
         # if we're going to install on the docker-created Postgres, we'll
         # create the DB
         print("Creating Mathesar DB on docker-created PostgreSQL instance")
         install.create_mathesar_database(
-            DATABASES[mathesar_tables_key]["NAME"],
+            DATABASES[database_key]["NAME"],
             DATABASES["default"]["USER"],
             DATABASES["default"]["PASSWORD"],
             DATABASES["default"]["HOST"],
@@ -27,11 +27,11 @@ def install_on_db_with_key(mathesar_tables_key):
     else:
         # if we're installing anywhere else, we require the DB to exist in
         # advance.
-        username = DATABASES[mathesar_tables_key]["USER"]
-        password = DATABASES[mathesar_tables_key]["PASSWORD"]
-        host = DATABASES[mathesar_tables_key]["HOST"]
-        db_name = DATABASES[mathesar_tables_key]["NAME"]
-        port = DATABASES[mathesar_tables_key]["PORT"]
+        username = DATABASES[database_key]["USER"]
+        password = DATABASES[database_key]["PASSWORD"]
+        host = DATABASES[database_key]["HOST"]
+        db_name = DATABASES[database_key]["NAME"]
+        port = DATABASES[database_key]["PORT"]
         print("Installing Mathesar DB on preexisting PostgreSQL instance...")
         confirmation = input(
             f"Mathesar will be installed on DB {db_name} at host {host}."
@@ -47,7 +47,7 @@ def install_on_db_with_key(mathesar_tables_key):
                 port,
             )
         else:
-            print("Skipping DB with key {mathesar_tables_key}.")
+            print("Skipping DB with key {database_key}.")
 
 
 if __name__ == "__main__":
