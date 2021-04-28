@@ -29,7 +29,7 @@ def test_schema_list(engine, csv_filename, client):
     """
     with open(csv_filename, 'rb') as csv_file:
         create_table_from_csv(
-            name='Fairfax County 1',
+            name='Fairfax County Schema List',
             schema='Libraries',
             database_key='mathesar_db_test_database',
             csv_file=csv_file
@@ -64,7 +64,7 @@ def test_schema_detail(engine, csv_filename, client):
     """
     with open(csv_filename, 'rb') as csv_file:
         create_table_from_csv(
-            name='Fairfax County 2',
+            name='Fairfax County Schema Detail',
             schema='Libraries',
             database_key='mathesar_db_test_database',
             csv_file=csv_file
