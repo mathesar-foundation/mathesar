@@ -188,15 +188,18 @@ def merge_tables(
     This specifically undoes the `extract_columns_from_table` (up to
     unique rows).  It may not work in other contexts (yet).
     """
-    t1 = reflect_table(table_name_one, schema, engine)
-    t2 = reflect_table(table_name_two, schema, engine, metadata=t1.metadata)
-    j = t1.join(t2)
+    table_one = reflect_table(table_name_one, schema, engine)
+    table_two = reflect_table(
+        table_name_two, schema, engine, metadata=table_one.metadata
+    )
+    merge_join = table_one.join(table_two)
     referencing_columns = [
-        col for col in [j.onclause.left, j.onclause.right] if col.foreign_keys
+        col for col in [merge_join.onclause.left, merge_join.onclause.right]
+        if col.foreign_keys
     ]
     merged_columns_all = [
         columns.MathesarColumn.from_column(col)
-        for col in list(t1.columns) + list(t2.columns)
+        for col in list(table_one.columns) + list(table_two.columns)
         if col not in referencing_columns
     ]
     merged_columns = [col for col in merged_columns_all if not col.is_default]
@@ -206,12 +209,12 @@ def merge_tables(
         )
         insert_stmt = merged_table.insert().from_select(
             [col.name for col in merged_columns],
-            select(merged_columns, distinct=True).select_from(j)
+            select(merged_columns, distinct=True).select_from(merge_join)
         )
         conn.execute(insert_stmt)
         if drop_original_tables:
-            t1.drop()
-            t2.drop()
+            table_one.drop()
+            table_two.drop()
     return merged_table
 
 
