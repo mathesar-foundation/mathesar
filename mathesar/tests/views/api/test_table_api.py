@@ -1,5 +1,4 @@
 from mathesar.models import Table
-from mathesar.imports.csv import create_table_from_csv
 
 
 def check_table_response(response_table, table, table_name):
@@ -17,7 +16,7 @@ def check_table_response(response_table, table, table_name):
     assert response_table['records'].endswith('/records/')
 
 
-def test_table_list(engine, csv_filename, client):
+def test_table_list(create_table, client):
     """
     Desired format:
     {
@@ -46,14 +45,8 @@ def test_table_list(engine, csv_filename, client):
     }
     """
     table_name = 'Fairfax County Table List'
+    create_table(table_name)
 
-    with open(csv_filename, 'rb') as csv_file:
-        create_table_from_csv(
-            name=table_name,
-            schema='Libraries',
-            database_key='mathesar_db_test_database',
-            csv_file=csv_file
-        )
     table = Table.objects.get(name=table_name)
     response = client.get('/api/v0/tables/')
     response_data = response.json()
@@ -68,20 +61,14 @@ def test_table_list(engine, csv_filename, client):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_detail(engine, csv_filename, client):
+def test_table_detail(create_table, client):
     """
     Desired format:
     One item in the results list in the table list view, see above.
     """
     table_name = 'Fairfax County Table Detail'
+    create_table(table_name)
 
-    with open(csv_filename, 'rb') as csv_file:
-        create_table_from_csv(
-            name=table_name,
-            schema='Libraries',
-            database_key='mathesar_db_test_database',
-            csv_file=csv_file
-        )
     table = Table.objects.get(name=table_name)
     response = client.get(f'/api/v0/tables/{table.id}/')
     response_table = response.json()
