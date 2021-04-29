@@ -12,7 +12,6 @@ DEFAULT_COLUMNS = {
 }
 
 
-# TODO replicate ForeignKey wrangling from prototype
 class MathesarColumn(Column):
     """
     This class constrains the possible arguments, enabling us to include
@@ -25,7 +24,7 @@ class MathesarColumn(Column):
             self,
             name,
             sa_type,
-            foreign_keys=[],
+            foreign_keys=set(),
             primary_key=False,
             nullable=True,
     ):
@@ -54,7 +53,7 @@ class MathesarColumn(Column):
         given column.  It respects only the properties in the __init__
         of the MathesarColumn.
         """
-        fkeys = [ForeignKey(fk.target_fullname) for fk in column.foreign_keys]
+        fkeys = {ForeignKey(fk.target_fullname) for fk in column.foreign_keys}
         return cls(
             column.name,
             column.type,

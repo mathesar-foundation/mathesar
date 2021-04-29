@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, String, Table, MetaData, func, select, ForeignKey
+    Column, String, Table, MetaData, func, select, ForeignKey, literal, exists
 )
 
 from db import constants, schemas
@@ -26,9 +26,7 @@ def create_mathesar_table(name, schema, columns, engine, metadata=None):
     schemas.create_schema(schema, engine)
     if metadata is None:
         metadata = MetaData(bind=engine, schema=schema)
-    print(metadata.tables)
     metadata.reflect()
-    print("REFLECTED:  ", metadata.tables)
     table = Table(
         name,
         metadata,
@@ -43,25 +41,47 @@ def extract_columns_from_table(
         old_table_name,
         extracted_column_names,
         extracted_table_name,
+        remainder_table_name,
         schema,
         engine,
-        remainder_table_name=None,
         drop_original_table=False,
 ):
     old_table = reflect_table(old_table_name, schema, engine)
     old_columns = (
         col.MathesarColumn.from_column(c) for c in old_table.columns
     )
-    old_non_default_columns = [
-        c for c in old_columns if not c.is_default
-    ]
+    old_non_default_columns = [c for c in old_columns if not c.is_default]
+    print(old_non_default_columns)
     extracted_columns, remainder_columns = _split_column_list(
         old_non_default_columns, extracted_column_names,
     )
-    return extracted_columns, remainder_columns
+    print(extracted_columns, remainder_columns)
+    with engine.begin() as conn:
+        extracted_table, remainder_table, remainder_fk = _create_split_tables(
+            extracted_table_name,
+            extracted_columns,
+            remainder_table_name,
+            remainder_columns,
+            schema,
+            engine,
+        )
+        split_ins = _create_split_insert_stmt(
+            old_table,
+            extracted_table,
+            extracted_columns,
+            remainder_table,
+            remainder_columns,
+            remainder_fk,
+        )
+        conn.execute(split_ins)
+
+
+    return extracted_table, remainder_table, remainder_fk
 
 
 def _split_column_list(columns, extracted_column_names):
+    print(columns)
+    print(extracted_column_names)
     extracted_columns = [
         c for c in columns if c.name in extracted_column_names
     ]
@@ -79,7 +99,6 @@ def _create_split_tables(
         schema,
         engine,
 ):
-    print("creating extracted_table")
     extracted_table = create_mathesar_table(
         extracted_table_name,
         schema,
@@ -92,7 +111,6 @@ def _create_split_tables(
             ForeignKey(f"{extracted_table.name}.{constants.ID}"),
             nullable=False,
     )
-    print("creating remainder_table")
     remainder_table = create_mathesar_table(
         remainder_table_name,
         schema,
@@ -101,6 +119,58 @@ def _create_split_tables(
         metadata=extracted_table.metadata
     )
     return extracted_table, remainder_table, remainder_fk_column.name
+
+
+def _create_split_insert_stmt(
+        old_table,
+        extracted_table,
+        extracted_columns,
+        remainder_table,
+        remainder_columns,
+        remainder_fk_name,
+):
+    SPLIT_ID = "f{constants.MATHESAR_PREFIX}_split_column_alias"
+    extracted_column_names = [c.name for c in extracted_columns]
+    remainder_column_names = [c.name for c in remainder_columns]
+    split_cte = select(
+        [
+            old_table,
+            func.dense_rank().over(order_by=extracted_columns).label(SPLIT_ID)
+        ]
+    ).cte()
+    cte_extraction_columns = (
+        [split_cte.columns[SPLIT_ID]]
+        + [split_cte.columns[n] for n in extracted_column_names]
+    )
+    cte_remainder_columns = (
+        [split_cte.columns[SPLIT_ID]]
+        + [split_cte.columns[n] for n in remainder_column_names]
+    )
+    extract_sel = select(
+        cte_extraction_columns,
+        distinct=True
+    )
+    extract_ins_cte = (
+        extracted_table
+        .insert()
+        .from_select([constants.ID] + extracted_column_names, extract_sel)
+        .returning(literal(1))
+        .cte()
+    )
+    remainder_sel = select(
+        cte_remainder_columns,
+        distinct=True
+    ).where(exists(extract_ins_cte.select()))
+
+    split_ins = (
+        remainder_table
+        .insert()
+        .from_select(
+            [remainder_fk_name] + remainder_column_names,
+            remainder_sel
+        )
+    )
+    return split_ins
 
 
 def insert_rows_into_table(table, rows, engine):
