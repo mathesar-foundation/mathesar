@@ -52,9 +52,11 @@ def extract_columns_from_table(
 ):
     old_table = reflect_table(old_table_name, schema, engine)
     old_columns = (
-        columns.MathesarColumn.from_column(c) for c in old_table.columns
+        columns.MathesarColumn.from_column(col) for col in old_table.columns
     )
-    old_non_default_columns = [c for c in old_columns if not c.is_default]
+    old_non_default_columns = [
+        col for col in old_columns if not col.is_default
+    ]
     extracted_columns, remainder_columns = _split_column_list(
         old_non_default_columns, extracted_column_names,
     )
@@ -84,10 +86,10 @@ def extract_columns_from_table(
 
 def _split_column_list(columns_, extracted_column_names):
     extracted_columns = [
-        c for c in columns_ if c.name in extracted_column_names
+        col for col in columns_ if col.name in extracted_column_names
     ]
     remainder_columns = [
-        c for c in columns_ if c.name not in extracted_column_names
+        col for col in columns_ if col.name not in extracted_column_names
     ]
     return extracted_columns, remainder_columns
 
@@ -131,8 +133,8 @@ def _create_split_insert_stmt(
         remainder_fk_name,
 ):
     SPLIT_ID = "f{constants.MATHESAR_PREFIX}_split_column_alias"
-    extracted_column_names = [c.name for c in extracted_columns]
-    remainder_column_names = [c.name for c in remainder_columns]
+    extracted_column_names = [col.name for col in extracted_columns]
+    remainder_column_names = [col.name for col in remainder_columns]
     split_cte = select(
         [
             old_table,
@@ -190,20 +192,20 @@ def merge_tables(
     t2 = reflect_table(table_name_two, schema, engine, metadata=t1.metadata)
     j = t1.join(t2)
     referencing_columns = [
-        c for c in [j.onclause.left, j.onclause.right] if c.foreign_keys
+        col for col in [j.onclause.left, j.onclause.right] if col.foreign_keys
     ]
     merged_columns_all = [
-        col.MathesarColumn.from_column(c)
-        for c in list(t1.columns) + list(t2.columns)
-        if c not in referencing_columns
+        columns.MathesarColumn.from_column(col)
+        for col in list(t1.columns) + list(t2.columns)
+        if col not in referencing_columns
     ]
-    merged_columns = [c for c in merged_columns_all if not c.is_default]
+    merged_columns = [col for col in merged_columns_all if not col.is_default]
     with engine.begin() as conn:
         merged_table = create_mathesar_table(
             merged_table_name, schema, merged_columns, engine,
         )
         insert_stmt = merged_table.insert().from_select(
-            [c.name for c in merged_columns],
+            [col.name for col in merged_columns],
             select(merged_columns, distinct=True).select_from(j)
         )
         conn.execute(insert_stmt)
