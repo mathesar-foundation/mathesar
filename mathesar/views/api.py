@@ -5,14 +5,10 @@ from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPa
 from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer
 
 
-class RecordViewSet(viewsets.GenericViewSet):
-    queryset = Table.objects.all().order_by('-created_at')
-
-    def list(self, request, table_pk=None):
-        paginator = TableLimitOffsetPagination()
-        records = paginator.paginate_queryset(self.queryset, request, table_pk)
-        serializer = RecordSerializer(records, many=True)
-        return paginator.get_paginated_response(serializer.data)
+class SchemaViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Schema.objects.all().order_by('-created_at')
+    serializer_class = SchemaSerializer
+    pagination_class = DefaultLimitOffsetPagination
 
 
 class TableViewSet(viewsets.ReadOnlyModelViewSet):
@@ -21,7 +17,11 @@ class TableViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = DefaultLimitOffsetPagination
 
 
-class SchemaViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Schema.objects.all().order_by('-created_at')
-    serializer_class = SchemaSerializer
-    pagination_class = DefaultLimitOffsetPagination
+class RecordViewSet(viewsets.GenericViewSet):
+    queryset = Table.objects.all().order_by('-created_at')
+
+    def list(self, request, table_pk=None):
+        paginator = TableLimitOffsetPagination()
+        records = paginator.paginate_queryset(self.queryset, request, table_pk)
+        serializer = RecordSerializer(records, many=True)
+        return paginator.get_paginated_response(serializer.data)
