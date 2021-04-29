@@ -11,6 +11,15 @@ services:
       - "5432:5432"
     volumes:
       - ./.volumes:/var/lib/postgresql/data
+  ui:
+    build: ./mathesar_ui
+    volumes:
+      - ./mathesar_ui:/ui
+      - /ui/node_modules
+      - /ui/dist
+    ports:
+      - "3000:3000"
+    command: npm run dev
   web:
     build: .
     command: dockerize -wait tcp://db:5432 -timeout 30s python manage.py runserver 0.0.0.0:8000

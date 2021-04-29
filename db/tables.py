@@ -2,8 +2,7 @@ from sqlalchemy import (
     Column, String, Table, MetaData, func, select, ForeignKey, literal, exists
 )
 
-from db import constants, schemas
-from db import columns as col
+from db import columns, constants, schemas
 
 
 def create_string_column_table(name, schema, column_names, engine):
@@ -11,26 +10,31 @@ def create_string_column_table(name, schema, column_names, engine):
     This method creates a Postgres table in the specified schema, with all
     columns being String type.
     """
-    columns = [Column(column_name, String) for column_name in column_names]
-    table = create_mathesar_table(name, schema, columns, engine)
+    columns_ = [Column(column_name, String) for column_name in column_names]
+    table = create_mathesar_table(name, schema, columns_, engine)
     return table
 
 
-def create_mathesar_table(name, schema, columns, engine, metadata=None):
+def create_mathesar_table(name, schema, columns_, engine, metadata=None):
     """
     This method creates a Postgres table in the specified schema using the
     given name and column list.  It adds internal mathesar columns to the
     table.
     """
-    columns = col.init_mathesar_table_column_list_with_defaults(columns)
+    columns_ = columns.init_mathesar_table_column_list_with_defaults(columns_)
     schemas.create_schema(schema, engine)
+    # We need this so that we can create multiple mathesar tables in the
+    # same MetaData, enabling them to reference each other in the
+    # SQLAlchemy context (e.g., for creating a ForeignKey relationship)
     if metadata is None:
         metadata = MetaData(bind=engine, schema=schema)
+    # This reflection step lets us notice any "table already exists"
+    # errors before sending error-generating requests to the DB.
     metadata.reflect()
     table = Table(
         name,
         metadata,
-        *columns,
+        *columns_,
         schema=schema,
     )
     table.create(engine)
@@ -48,7 +52,7 @@ def extract_columns_from_table(
 ):
     old_table = reflect_table(old_table_name, schema, engine)
     old_columns = (
-        col.MathesarColumn.from_column(c) for c in old_table.columns
+        columns.MathesarColumn.from_column(c) for c in old_table.columns
     )
     old_non_default_columns = [c for c in old_columns if not c.is_default]
     extracted_columns, remainder_columns = _split_column_list(
@@ -78,12 +82,12 @@ def extract_columns_from_table(
     return extracted_table, remainder_table, remainder_fk
 
 
-def _split_column_list(columns, extracted_column_names):
+def _split_column_list(columns_, extracted_column_names):
     extracted_columns = [
-        c for c in columns if c.name in extracted_column_names
+        c for c in columns_ if c.name in extracted_column_names
     ]
     remainder_columns = [
-        c for c in columns if c.name not in extracted_column_names
+        c for c in columns_ if c.name not in extracted_column_names
     ]
     return extracted_columns, remainder_columns
 
@@ -104,7 +108,7 @@ def _create_split_tables(
     )
     remainder_fk_column = Column(
         f"{extracted_table.name}_{constants.ID}",
-        col.ID_TYPE,
+        columns.ID_TYPE,
         ForeignKey(f"{extracted_table.name}.{constants.ID}"),
         nullable=False,
     )
