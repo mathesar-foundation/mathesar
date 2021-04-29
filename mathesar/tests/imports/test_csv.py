@@ -1,6 +1,6 @@
 import pytest
 
-from sqlalchemy.exc import ProgrammingError, InvalidRequestError
+from sqlalchemy.exc import InvalidRequestError
 
 from mathesar.imports.csv import create_table_from_csv
 
@@ -63,6 +63,7 @@ def test_csv_upload_with_duplicate_table_name(engine, csv_filename):
                 csv_file
             )
             assert already_defined_str in str(excinfo)
+
 
 def test_csv_upload_with_wrong_parameter(engine, csv_filename):
     with pytest.raises(TypeError) as excinfo:
