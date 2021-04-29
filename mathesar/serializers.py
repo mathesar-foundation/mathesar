@@ -4,20 +4,15 @@ from rest_framework import serializers
 from mathesar.models import Table, Schema
 
 
-class ColumnSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    type = serializers.CharField()
-
-
-class RecordSerializer(serializers.BaseSerializer):
-    def to_representation(self, instance):
-        return instance._asdict()
-
-
 class SchemaSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Schema
         fields = ['id', 'name', 'database', 'tables']
+
+
+class ColumnSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    type = serializers.CharField()
 
 
 class TableSerializer(serializers.HyperlinkedModelSerializer):
@@ -31,3 +26,8 @@ class TableSerializer(serializers.HyperlinkedModelSerializer):
     def get_records(self, obj):
         request = self.context['request']
         return request.build_absolute_uri(reverse('table-records-list', kwargs={'table_pk': obj.pk}))
+
+
+class RecordSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance):
+        return instance._asdict()
