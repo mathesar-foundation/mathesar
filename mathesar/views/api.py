@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.response import Response
 
 from mathesar.models import Table, Schema
 from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
@@ -25,3 +26,9 @@ class RecordViewSet(viewsets.GenericViewSet):
         records = paginator.paginate_queryset(self.queryset, request, table_pk)
         serializer = RecordSerializer(records, many=True)
         return paginator.get_paginated_response(serializer.data)
+
+    def retrieve(self, request, pk=None, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        record = table.get_record(pk)
+        serializer = RecordSerializer(record)
+        return Response(serializer.data)

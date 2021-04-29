@@ -1,6 +1,7 @@
 from sqlalchemy import (
     Column, String, Table, MetaData, func, select, ForeignKey, literal, exists
 )
+from sqlalchemy.inspection import inspect
 
 from db import columns, constants, schemas
 
@@ -183,6 +184,18 @@ def insert_rows_into_table(table, rows, engine):
 def reflect_table(name, schema, engine):
     metadata = MetaData()
     return Table(name, metadata, schema=schema, autoload_with=engine)
+
+
+def get_record(table, engine, value):
+    primary_key_list = list(inspect(table).primary_key)
+    # We do not support getting by composite primary keys
+    assert len(primary_key_list) == 1
+    primary_key_column = primary_key_list[0]
+    query = select(table).where(primary_key_column == value)
+    with engine.begin() as conn:
+        result = conn.execute(query).fetchall()
+        assert len(result) == 1
+        return result[0]
 
 
 def get_records(table, engine, limit=None, offset=None):
