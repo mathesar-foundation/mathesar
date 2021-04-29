@@ -74,7 +74,8 @@ def extract_columns_from_table(
             remainder_fk,
         )
         conn.execute(split_ins)
-
+        if drop_original_table:
+            old_table.drop()
 
     return extracted_table, remainder_table, remainder_fk
 
@@ -106,10 +107,10 @@ def _create_split_tables(
         engine,
     )
     remainder_fk_column = Column(
-            f"{extracted_table.name}_{constants.ID}",
-            col.ID_TYPE,
-            ForeignKey(f"{extracted_table.name}.{constants.ID}"),
-            nullable=False,
+        f"{extracted_table.name}_{constants.ID}",
+        col.ID_TYPE,
+        ForeignKey(f"{extracted_table.name}.{constants.ID}"),
+        nullable=False,
     )
     remainder_table = create_mathesar_table(
         remainder_table_name,
