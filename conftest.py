@@ -23,7 +23,7 @@ def test_db():
         conn.execute(text(f"DROP DATABASE {TEST_DB} WITH (FORCE)"))
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def engine(test_db):
     return create_engine(
         _get_connection_string(
