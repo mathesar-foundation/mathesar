@@ -1,16 +1,17 @@
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, ForeignKey
 from db import constants
 
 
+NULLABLE = "nullable"
 PRIMARY_KEY = "primary_key"
 TYPE = "type"
 
+ID_TYPE = Integer
 DEFAULT_COLUMNS = {
-    constants.ID: {TYPE: Integer, PRIMARY_KEY: True}
+    constants.ID: {TYPE: ID_TYPE, PRIMARY_KEY: True}
 }
 
 
-# TODO replicate ForeignKey wrangling from prototype
 class MathesarColumn(Column):
     """
     This class constrains the possible arguments, enabling us to include
@@ -19,7 +20,14 @@ class MathesarColumn(Column):
     column definition that we care about, and this class defines that
     subset.
     """
-    def __init__(self, name, sa_type, primary_key=False):
+    def __init__(
+            self,
+            name,
+            sa_type,
+            foreign_keys=set(),
+            primary_key=False,
+            nullable=True,
+    ):
         """
         Construct a new ``MathesarColumn`` object.
 
@@ -30,7 +38,13 @@ class MathesarColumn(Column):
         Optional keyword arguments:
         primary_key -- Boolean giving whether the column is a primary key.
         """
-        super().__init__(name=name, type_=sa_type, primary_key=primary_key)
+        super().__init__(
+            *foreign_keys,
+            name=name,
+            type_=sa_type,
+            primary_key=primary_key,
+            nullable=nullable,
+        )
 
     @classmethod
     def from_column(cls, column):
@@ -39,7 +53,14 @@ class MathesarColumn(Column):
         given column.  It respects only the properties in the __init__
         of the MathesarColumn.
         """
-        return cls(column.name, column.type)
+        fkeys = {ForeignKey(fk.target_fullname) for fk in column.foreign_keys}
+        return cls(
+            column.name,
+            column.type,
+            foreign_keys=fkeys,
+            primary_key=column.primary_key,
+            nullable=column.nullable,
+        )
 
     @property
     def is_default(self):
@@ -47,7 +68,8 @@ class MathesarColumn(Column):
         return (
             default_def
             and self.type.__class__ == default_def[TYPE]
-            and self.primary_key == default_def[PRIMARY_KEY]
+            and self.primary_key == default_def.get(PRIMARY_KEY, False)
+            and self.nullable == default_def.get(NULLABLE, True)
         )
 
 
@@ -56,7 +78,7 @@ def get_default_mathesar_column_list():
         MathesarColumn(
             c,
             DEFAULT_COLUMNS[c][TYPE],
-            DEFAULT_COLUMNS[c][PRIMARY_KEY]
+            primary_key=DEFAULT_COLUMNS[c][PRIMARY_KEY]
         )
         for c in DEFAULT_COLUMNS
     ]
