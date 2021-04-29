@@ -8,7 +8,7 @@ TYPE = "type"
 
 ID_TYPE = Integer
 DEFAULT_COLUMNS = {
-    constants.ID: {TYPE: ID_TYPE, PRIMARY_KEY: True}
+    constants.ID: {TYPE: ID_TYPE, PRIMARY_KEY: True, NULLABLE: False}
 }
 
 
@@ -67,7 +67,7 @@ class MathesarColumn(Column):
         default_def = DEFAULT_COLUMNS.get(self.name, False)
         return (
             default_def
-            and self.type.__class__ == default_def[TYPE]
+            and self.type.python_type == default_def[TYPE]().python_type
             and self.primary_key == default_def.get(PRIMARY_KEY, False)
             and self.nullable == default_def.get(NULLABLE, True)
         )

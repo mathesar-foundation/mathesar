@@ -53,9 +53,11 @@ def extract_columns_from_table(
 ):
     old_table = reflect_table(old_table_name, schema, engine)
     old_columns = (
-        columns.MathesarColumn.from_column(c) for c in old_table.columns
+        columns.MathesarColumn.from_column(col) for col in old_table.columns
     )
-    old_non_default_columns = [c for c in old_columns if not c.is_default]
+    old_non_default_columns = [
+        col for col in old_columns if not col.is_default
+    ]
     extracted_columns, remainder_columns = _split_column_list(
         old_non_default_columns, extracted_column_names,
     )
@@ -85,10 +87,10 @@ def extract_columns_from_table(
 
 def _split_column_list(columns_, extracted_column_names):
     extracted_columns = [
-        c for c in columns_ if c.name in extracted_column_names
+        col for col in columns_ if col.name in extracted_column_names
     ]
     remainder_columns = [
-        c for c in columns_ if c.name not in extracted_column_names
+        col for col in columns_ if col.name not in extracted_column_names
     ]
     return extracted_columns, remainder_columns
 
@@ -132,8 +134,8 @@ def _create_split_insert_stmt(
         remainder_fk_name,
 ):
     SPLIT_ID = "f{constants.MATHESAR_PREFIX}_split_column_alias"
-    extracted_column_names = [c.name for c in extracted_columns]
-    remainder_column_names = [c.name for c in remainder_columns]
+    extracted_column_names = [col.name for col in extracted_columns]
+    remainder_column_names = [col.name for col in remainder_columns]
     split_cte = select(
         [
             old_table,
@@ -175,14 +177,57 @@ def _create_split_insert_stmt(
     return split_ins
 
 
+def merge_tables(
+        table_name_one,
+        table_name_two,
+        merged_table_name,
+        schema,
+        engine,
+        drop_original_tables=False,
+):
+    """
+    This specifically undoes the `extract_columns_from_table` (up to
+    unique rows).  It may not work in other contexts (yet).
+    """
+    table_one = reflect_table(table_name_one, schema, engine)
+    table_two = reflect_table(
+        table_name_two, schema, engine, metadata=table_one.metadata
+    )
+    merge_join = table_one.join(table_two)
+    referencing_columns = [
+        col for col in [merge_join.onclause.left, merge_join.onclause.right]
+        if col.foreign_keys
+    ]
+    merged_columns_all = [
+        columns.MathesarColumn.from_column(col)
+        for col in list(table_one.columns) + list(table_two.columns)
+        if col not in referencing_columns
+    ]
+    merged_columns = [col for col in merged_columns_all if not col.is_default]
+    with engine.begin() as conn:
+        merged_table = create_mathesar_table(
+            merged_table_name, schema, merged_columns, engine,
+        )
+        insert_stmt = merged_table.insert().from_select(
+            [col.name for col in merged_columns],
+            select(merged_columns, distinct=True).select_from(merge_join)
+        )
+        conn.execute(insert_stmt)
+        if drop_original_tables:
+            table_one.drop()
+            table_two.drop()
+    return merged_table
+
+
 def insert_rows_into_table(table, rows, engine):
     with engine.begin() as connection:
         result = connection.execute(table.insert(), rows)
         return result
 
 
-def reflect_table(name, schema, engine):
-    metadata = MetaData()
+def reflect_table(name, schema, engine, metadata=None):
+    if metadata is None:
+        metadata = MetaData(bind=engine)
     return Table(name, metadata, schema=schema, autoload_with=engine)
 
 
