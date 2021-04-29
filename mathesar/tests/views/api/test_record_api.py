@@ -100,3 +100,20 @@ def test_record_list_pagination_offset(create_table, client):
     assert record_1_data['Y'] != record_2_data['Y']
     assert record_1_data['OBJECTID'] != record_2_data['OBJECTID']
     assert record_1_data['DESCRIPTION'] != record_2_data['DESCRIPTION']
+
+
+def test_record_detail(create_table, client):
+    table_name = 'Fairfax County Record Detail'
+    create_table(table_name)
+    table = Table.objects.get(name=table_name)
+    record_id = 1
+    record = table.get_record(record_id)
+
+    response = client.get(f'/api/v0/tables/{table.id}/records/{record_id}/')
+    record_data = response.json()
+    record_as_dict = record._asdict()
+
+    assert response.status_code == 200
+    for column_name in table.sa_column_names:
+        assert column_name in record_data
+        assert record_as_dict[column_name] == record_data[column_name]
