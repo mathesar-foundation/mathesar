@@ -1,5 +1,3 @@
-import pytest
-
 from mathesar.models import Table
 from mathesar.imports.csv import create_table_from_csv
 
@@ -48,7 +46,7 @@ def test_table_list(engine, csv_filename, client):
     }
     """
     table_name = 'Fairfax County Table List'
-    
+
     with open(csv_filename, 'rb') as csv_file:
         create_table_from_csv(
             name=table_name,

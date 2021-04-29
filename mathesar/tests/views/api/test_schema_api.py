@@ -1,5 +1,3 @@
-import pytest
-
 from mathesar.models import Schema
 from mathesar.imports.csv import create_table_from_csv
 
@@ -12,7 +10,7 @@ def check_schema_response(response_schema, schema, schema_name):
     response_table = response_schema['tables'][0]
     assert response_table.startswith('http')
     assert '/api/v0/tables/' in response_table
-    
+
 
 def test_schema_list(engine, csv_filename, client):
     """
