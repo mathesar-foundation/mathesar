@@ -117,3 +117,29 @@ def test_record_detail(create_table, client):
     for column_name in table.sa_column_names:
         assert column_name in record_data
         assert record_as_dict[column_name] == record_data[column_name]
+
+
+def test_record_delete(create_table, client):
+    table_name = 'Fairfax County Record Delete'
+    create_table(table_name)
+    table = Table.objects.get(name=table_name)
+    records = table.get_records()
+    original_num_records = len(records)
+    record_id = records[0]['mathesar_id']
+
+    response = client.delete(f'/api/v0/tables/{table.id}/records/{record_id}/')
+    assert response.status_code == 204
+    assert len(table.get_records()) == original_num_records - 1
+
+
+def test_record_404(create_table, client):
+    table_name = 'Fairfax County Record 404'
+    create_table(table_name)
+    table = Table.objects.get(name=table_name)
+    records = table.get_records()
+    record_id = records[0]['mathesar_id']
+
+    client.delete(f'/api/v0/tables/{table.id}/records/{record_id}/')
+    response = client.get(f'/api/v0/tables/{table.id}/records/{record_id}/')
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'

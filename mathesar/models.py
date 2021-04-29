@@ -54,3 +54,6 @@ class Table(DatabaseObject):
 
     def get_records(self, limit=None, offset=None):
         return tables.get_records(self._sa_table, self._sa_engine, limit, offset)
+
+    def delete_record(self, value):
+        return tables.delete_record(self._sa_table, self._sa_engine, value)

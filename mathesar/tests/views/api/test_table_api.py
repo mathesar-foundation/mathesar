@@ -74,3 +74,9 @@ def test_table_detail(create_table, client):
     response_table = response.json()
     assert response.status_code == 200
     check_table_response(response_table, table, table_name)
+
+
+def test_table_404(create_table, client):
+    response = client.get('/api/v0/tables/3000/')
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'

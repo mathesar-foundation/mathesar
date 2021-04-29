@@ -1,4 +1,5 @@
-from rest_framework import viewsets
+from rest_framework import status, viewsets
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from mathesar.models import Table, Schema
@@ -30,5 +31,12 @@ class RecordViewSet(viewsets.GenericViewSet):
     def retrieve(self, request, pk=None, table_pk=None):
         table = Table.objects.get(id=table_pk)
         record = table.get_record(pk)
+        if not record:
+            raise NotFound
         serializer = RecordSerializer(record)
         return Response(serializer.data)
+
+    def destroy(self, request, pk=None, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        table.delete_record(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)

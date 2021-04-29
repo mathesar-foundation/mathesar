@@ -52,3 +52,9 @@ def test_schema_detail(create_table, client):
     response_schema = response.json()
     assert response.status_code == 200
     check_schema_response(response_schema, schema, 'Libraries')
+
+
+def test_schema_404(create_table, client):
+    response = client.get('/api/v0/schemas/3000/')
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'
