@@ -1,5 +1,4 @@
 from mathesar.models import Schema
-from mathesar.imports.csv import create_table_from_csv
 
 
 def check_schema_response(response_schema, schema, schema_name):
@@ -12,7 +11,7 @@ def check_schema_response(response_schema, schema, schema_name):
     assert '/api/v0/tables/' in response_table
 
 
-def test_schema_list(engine, csv_filename, client):
+def test_schema_list(create_table, client):
     """
     Desired format:
     {
@@ -29,13 +28,8 @@ def test_schema_list(engine, csv_filename, client):
         ]
     }
     """
-    with open(csv_filename, 'rb') as csv_file:
-        create_table_from_csv(
-            name='Fairfax County Schema List',
-            schema='Libraries',
-            database_key='mathesar_db_test_database',
-            csv_file=csv_file
-        )
+    create_table('Fairfax County Schema List')
+
     schema = Schema.objects.get()
     response = client.get('/api/v0/schemas/')
     response_data = response.json()
@@ -46,18 +40,13 @@ def test_schema_list(engine, csv_filename, client):
     check_schema_response(response_schema, schema, 'Libraries')
 
 
-def test_schema_detail(engine, csv_filename, client):
+def test_schema_detail(create_table, client):
     """
     Desired format:
     One item in the results list in the schema list view, see above.
     """
-    with open(csv_filename, 'rb') as csv_file:
-        create_table_from_csv(
-            name='Fairfax County Schema Detail',
-            schema='Libraries',
-            database_key='mathesar_db_test_database',
-            csv_file=csv_file
-        )
+    create_table('Fairfax County Schema Detail')
+
     schema = Schema.objects.get()
     response = client.get(f'/api/v0/schemas/{schema.id}/')
     response_schema = response.json()
