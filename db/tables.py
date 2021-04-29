@@ -51,11 +51,9 @@ def extract_columns_from_table(
         col.MathesarColumn.from_column(c) for c in old_table.columns
     )
     old_non_default_columns = [c for c in old_columns if not c.is_default]
-    print(old_non_default_columns)
     extracted_columns, remainder_columns = _split_column_list(
         old_non_default_columns, extracted_column_names,
     )
-    print(extracted_columns, remainder_columns)
     with engine.begin() as conn:
         extracted_table, remainder_table, remainder_fk = _create_split_tables(
             extracted_table_name,
@@ -81,8 +79,6 @@ def extract_columns_from_table(
 
 
 def _split_column_list(columns, extracted_column_names):
-    print(columns)
-    print(extracted_column_names)
     extracted_columns = [
         c for c in columns if c.name in extracted_column_names
     ]

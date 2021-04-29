@@ -39,7 +39,10 @@ def test_MC_is_default_when_true():
     for default_col in columns.DEFAULT_COLUMNS:
         dc_definition = columns.DEFAULT_COLUMNS[default_col]
         c = columns.MathesarColumn(
-            default_col, dc_definition["type"], dc_definition["primary_key"]
+            default_col,
+            dc_definition["type"],
+            primary_key=dc_definition.get("primary_key", False),
+            nullable=dc_definition.get("nullable", True),
         )
         assert c.is_default
 
@@ -50,7 +53,8 @@ def test_MC_is_default_when_false_for_name():
         c = columns.MathesarColumn(
             "definitely_not_a_default",
             dc_definition["type"],
-            dc_definition["primary_key"]
+            primary_key=dc_definition.get("primary_key", False),
+            nullable=dc_definition.get("nullable", True),
         )
         assert not c.is_default
 
@@ -62,7 +66,8 @@ def test_MC_is_default_when_false_for_type():
         c = columns.MathesarColumn(
             default_col,
             changed_type,
-            dc_definition["primary_key"]
+            primary_key=dc_definition.get("primary_key", False),
+            nullable=dc_definition.get("nullable", True),
         )
         assert not c.is_default
 
@@ -70,10 +75,12 @@ def test_MC_is_default_when_false_for_type():
 def test_MC_is_default_when_false_for_pk():
     for default_col in columns.DEFAULT_COLUMNS:
         dc_definition = columns.DEFAULT_COLUMNS[default_col]
+        not_pk = not dc_definition.get("primary_key", False),
         c = columns.MathesarColumn(
             default_col,
             dc_definition["type"],
-            not dc_definition["primary_key"]
+            primary_key=not_pk,
+            nullable=dc_definition.get("nullable", True),
         )
         assert not c.is_default
 
