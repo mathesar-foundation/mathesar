@@ -170,14 +170,54 @@ def _create_split_insert_stmt(
     return split_ins
 
 
+def merge_tables(
+        table_name_one,
+        table_name_two,
+        merged_table_name,
+        schema,
+        engine,
+        drop_original_tables=False,
+):
+    """
+    This specifically undoes the `extract_columns_from_table` (up to
+    unique rows).  It may not work in other contexts (yet).
+    """
+    t1 = reflect_table(table_name_one, schema, engine)
+    t2 = reflect_table(table_name_two, schema, engine, metadata=t1.metadata)
+    j = t1.join(t2)
+    referencing_columns = [
+        c for c in [j.onclause.left, j.onclause.right] if c.foreign_keys
+    ]
+    merged_columns_all = [
+        col.MathesarColumn.from_column(c)
+        for c in list(t1.columns) + list(t2.columns)
+        if c not in referencing_columns
+    ]
+    merged_columns = [c for c in merged_columns_all if not c.is_default]
+    with engine.begin() as conn:
+        merged_table = create_mathesar_table(
+            merged_table_name, schema, merged_columns, engine,
+        )
+        insert_stmt = merged_table.insert().from_select(
+            [c.name for c in merged_columns],
+            select(merged_columns, distinct=True).select_from(j)
+        )
+        conn.execute(insert_stmt)
+        if drop_original_tables:
+            t1.drop()
+            t2.drop()
+    return merged_table
+
+
 def insert_rows_into_table(table, rows, engine):
     with engine.begin() as connection:
         result = connection.execute(table.insert(), rows)
         return result
 
 
-def reflect_table(name, schema, engine):
-    metadata = MetaData()
+def reflect_table(name, schema, engine, metadata=None):
+    if metadata is None:
+        metadata = MetaData(bind=engine)
     return Table(name, metadata, schema=schema, autoload_with=engine)
 
 
