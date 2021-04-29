@@ -9,7 +9,7 @@
     <thead>
       <tr>
         <th>#</th>
-        {% for column in table.sa_columns %}
+        {% for column in table.sa_column_names %}
           {% if forloop.counter > 1 %}
             <th>{{ column.name }}</th>
           {% endif %}
