@@ -2,6 +2,13 @@ from sqlalchemy import delete, select
 from sqlalchemy.inspection import inspect
 
 
+def _get_primary_key_column(table):
+    primary_key_list = list(inspect(table).primary_key)
+    # We do not support getting by composite primary keys
+    assert len(primary_key_list) == 1
+    return primary_key_list[0]
+
+
 def create_records(table, records, engine):
     """
     records can be a dictionary, tuple, or list of dictionaries or tuples.
@@ -9,13 +16,6 @@ def create_records(table, records, engine):
     with engine.begin() as connection:
         result = connection.execute(table.insert(), records)
         return result
-
-
-def _get_primary_key_column(table):
-    primary_key_list = list(inspect(table).primary_key)
-    # We do not support getting by composite primary keys
-    assert len(primary_key_list) == 1
-    return primary_key_list[0]
 
 
 def delete_record(table, engine, id_value):
