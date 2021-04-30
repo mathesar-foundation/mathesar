@@ -9,12 +9,12 @@ def _get_primary_key_column(table):
     return primary_key_list[0]
 
 
-def create_records(table, records, engine):
+def create_records(table, engine, record_data):
     """
     records can be a dictionary, tuple, or list of dictionaries or tuples.
     """
     with engine.begin() as connection:
-        result = connection.execute(table.insert(), records)
+        result = connection.execute(table.insert(), record_data)
         return result
 
 
