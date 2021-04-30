@@ -4,7 +4,7 @@ from io import TextIOWrapper
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.utils import get_database_key
 from mathesar.models import Table, Schema
-from db import tables
+from db import tables, records
 
 
 def get_csv_reader(csv_file):
@@ -17,7 +17,7 @@ def create_db_table_from_csv(name, schema, csv_reader, engine):
     table = tables.create_string_column_table(
         name, schema, csv_reader.fieldnames, engine,
     )
-    tables.insert_rows_into_table(table, [row for row in csv_reader], engine)
+    records.create_records(table, [row for row in csv_reader], engine)
     return table
 
 

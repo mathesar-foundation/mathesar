@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.functional import cached_property
 
 from mathesar.database.base import create_mathesar_engine
-from db import tables
+from db import tables, records
 
 
 class DatabaseObject(models.Model):
@@ -47,13 +47,13 @@ class Table(DatabaseObject):
 
     @property
     def sa_all_records(self):
-        return tables.get_records(self._sa_table, self._sa_engine)
+        return records.get_records(self._sa_table, self._sa_engine)
 
     def get_record(self, value):
-        return tables.get_record(self._sa_table, self._sa_engine, value)
+        return records.get_record(self._sa_table, self._sa_engine, value)
 
     def get_records(self, limit=None, offset=None):
-        return tables.get_records(self._sa_table, self._sa_engine, limit, offset)
+        return records.get_records(self._sa_table, self._sa_engine, limit, offset)
 
     def delete_record(self, value):
-        return tables.delete_record(self._sa_table, self._sa_engine, value)
+        return records.delete_record(self._sa_table, self._sa_engine, value)
