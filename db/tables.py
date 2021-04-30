@@ -79,8 +79,8 @@ def extract_columns_from_table(
             remainder_fk,
         )
         conn.execute(split_ins)
-        if drop_original_table:
-            old_table.drop()
+    if drop_original_table:
+        old_table.drop()
 
     return extracted_table, remainder_table, remainder_fk
 
@@ -213,9 +213,15 @@ def merge_tables(
             select(merged_columns, distinct=True).select_from(merge_join)
         )
         conn.execute(insert_stmt)
+
     if drop_original_tables:
-        table_one.drop()
-        table_two.drop()
+        if table_one.foreign_keys:
+            table_one.drop(bind=engine)
+            table_two.drop(bind=engine)
+        else:
+            table_two.drop(bind=engine)
+            table_one.drop(bind=engine)
+
     return merged_table
 
 
@@ -232,18 +238,18 @@ def move_column_between_related_tables(
         target_table_name, schema, engine, metadata=source_table.metadata
     )
     relationship = _find_table_relationship(source_table, target_table)
-    assert _check_column_move_validity(relationship, source_table, column_names)
+    moving_columns = [source_table.columns[n] for n in column_names]
+    assert _check_columns(relationship, source_table, moving_columns)
     ext_args = _get_column_moving_extraction_args(
         relationship,
         target_table,
         target_table_name,
         source_table,
         source_table_name,
+        moving_columns,
         column_names,
     )
     (extracted_table_name, remainder_table_name, extraction_columns) = ext_args
-
-    engine.begin()
     merge_tables(
         source_table_name,
         target_table_name,
@@ -261,7 +267,6 @@ def move_column_between_related_tables(
         engine,
         drop_original_table=True,
     )
-    engine.commit()
     return extracted_table, remainder_table
 
 
@@ -287,8 +292,7 @@ def _find_table_relationship(table_one, table_two):
     return relationship
 
 
-def _check_column_move_validity(relationship, source_table, column_names):
-    moving_columns = (source_table.columns[n] for n in column_names)
+def _check_columns(relationship, source_table, moving_columns):
     return (
         relationship is not None
         and all([not c.foreign_keys for c in moving_columns])
@@ -301,23 +305,24 @@ def _get_column_moving_extraction_args(
         target_table_name,
         source_table,
         source_table_name,
+        moving_columns,
         column_names,
 ):
     if relationship["referenced"] == target_table:
         extracted_table_name = target_table_name
         remainder_table_name = source_table_name
-        extraction_columns = (
+        extraction_columns = [
             col for col in target_table.columns
             if not columns.MathesarColumn.from_column(col).is_default
-        )
+        ] + moving_columns
     else:
         extracted_table_name = source_table_name
         remainder_table_name = target_table_name
-        extraction_columns = (
+        extraction_columns = [
             col for col in target_table.columns
             if not columns.MathesarColumn.from_column(col).is_default
             and col not in column_names
-        )
+        ]
     return extracted_table_name, remainder_table_name, extraction_columns
 
 
