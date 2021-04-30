@@ -119,6 +119,40 @@ def test_record_detail(create_table, client):
         assert record_as_dict[column_name] == record_data[column_name]
 
 
+def test_record_create(create_table, client):
+    table_name = 'Fairfax County Record Create'
+    create_table(table_name)
+    table = Table.objects.get(name=table_name)
+    records = table.get_records()
+    original_num_records = len(records)
+
+    data = {
+        'X': '11808468.057',
+        'Y': '6996127.139',
+        'OBJECTID': '3',
+        'DESCRIPTION': 'LIBRARY ADMINISTRATION',
+        'JURISDICTION': 'COUNTY OF FAIRFAX',
+        'WEB_ADDRESS': 'https://www.fairfaxcounty.gov/library/branches',
+        'STREET_NUMBER': '12000',
+        'STREET_NAME': 'GOVERNMENT CENTER PKWY  SUITE 324',
+        'CITY': 'FAIRFAX',
+        'ZIP': '22035',
+        'CreationDate': '2021/03/06 06:03:20.044+00',
+        'Creator': 'FairfaxCounty',
+        'EditDate': '2021/03/06 06:03:20.044+00',
+        'Editor': 'FairfaxCounty'
+    }
+    response = client.post(f'/api/v0/tables/{table.id}/records/', data=data)
+    record_data = response.json()
+
+    assert response.status_code == 201
+    assert len(table.get_records()) == original_num_records + 1
+    for column_name in table.sa_column_names:
+        assert column_name in record_data
+        if column_name in data:
+            assert data[column_name] == record_data[column_name]
+
+
 def test_record_delete(create_table, client):
     table_name = 'Fairfax County Record Delete'
     create_table(table_name)
