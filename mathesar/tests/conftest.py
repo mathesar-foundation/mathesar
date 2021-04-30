@@ -12,4 +12,4 @@ def enable_db_access_for_all_tests(db):
 
 @pytest.fixture(scope='session')
 def csv_filename():
-    return 'mathesar/tests/libraries.csv'
+    return 'mathesar/tests/patents.csv'
