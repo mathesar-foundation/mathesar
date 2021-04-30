@@ -49,11 +49,11 @@ class Table(DatabaseObject):
     def sa_all_records(self):
         return records.get_records(self._sa_table, self._sa_engine)
 
-    def get_record(self, value):
-        return records.get_record(self._sa_table, self._sa_engine, value)
+    def get_record(self, id_value):
+        return records.get_record(self._sa_table, self._sa_engine, id_value)
 
     def get_records(self, limit=None, offset=None):
         return records.get_records(self._sa_table, self._sa_engine, limit, offset)
 
-    def delete_record(self, value):
-        return records.delete_record(self._sa_table, self._sa_engine, value)
+    def delete_record(self, id_value):
+        return records.delete_record(self._sa_table, self._sa_engine, id_value)

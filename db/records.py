@@ -18,16 +18,16 @@ def _get_primary_key_column(table):
     return primary_key_list[0]
 
 
-def delete_record(table, engine, value):
+def delete_record(table, engine, id_value):
     primary_key_column = _get_primary_key_column(table)
-    query = delete(table).where(primary_key_column == value)
+    query = delete(table).where(primary_key_column == id_value)
     with engine.begin() as conn:
         return conn.execute(query)
 
 
-def get_record(table, engine, value):
+def get_record(table, engine, id_value):
     primary_key_column = _get_primary_key_column(table)
-    query = select(table).where(primary_key_column == value)
+    query = select(table).where(primary_key_column == id_value)
     with engine.begin() as conn:
         result = conn.execute(query).fetchall()
         assert len(result) <= 1
