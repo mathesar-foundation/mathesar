@@ -1,6 +1,7 @@
 from sqlalchemy import (
-    Column, String, Table, MetaData, func, select, ForeignKey, literal, exists
+    Column, String, Table, MetaData, func, select, ForeignKey, literal, exists, delete
 )
+from sqlalchemy.inspection import inspect
 
 from db import columns, constants, schemas
 
@@ -228,6 +229,29 @@ def reflect_table(name, schema, engine, metadata=None):
     if metadata is None:
         metadata = MetaData(bind=engine)
     return Table(name, metadata, schema=schema, autoload_with=engine)
+
+
+def get_primary_key_column(table):
+    primary_key_list = list(inspect(table).primary_key)
+    # We do not support getting by composite primary keys
+    assert len(primary_key_list) == 1
+    return primary_key_list[0]
+
+
+def delete_record(table, engine, value):
+    primary_key_column = get_primary_key_column(table)
+    query = delete(table).where(primary_key_column == value)
+    with engine.begin() as conn:
+        return conn.execute(query)
+
+
+def get_record(table, engine, value):
+    primary_key_column = get_primary_key_column(table)
+    query = select(table).where(primary_key_column == value)
+    with engine.begin() as conn:
+        result = conn.execute(query).fetchall()
+        assert len(result) <= 1
+        return result[0] if result else None
 
 
 def get_records(table, engine, limit=None, offset=None):
