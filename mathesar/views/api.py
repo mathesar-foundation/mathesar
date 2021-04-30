@@ -19,7 +19,7 @@ class TableViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = DefaultLimitOffsetPagination
 
 
-class RecordViewSet(viewsets.GenericViewSet):
+class RecordViewSet(viewsets.ViewSet):
     queryset = Table.objects.all().order_by('-created_at')
 
     def list(self, request, table_pk=None):
@@ -35,6 +35,14 @@ class RecordViewSet(viewsets.GenericViewSet):
             raise NotFound
         serializer = RecordSerializer(record)
         return Response(serializer.data)
+
+    def create(self, request, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        # We only support adding a single record through the API.
+        assert type(request.data) is dict
+        record = table.create_records(request.data)
+        serializer = RecordSerializer(record)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, pk=None, table_pk=None):
         table = Table.objects.get(id=table_pk)
