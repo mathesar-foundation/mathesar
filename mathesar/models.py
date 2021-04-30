@@ -58,5 +58,8 @@ class Table(DatabaseObject):
     def create_records(self, record_data):
         return records.create_records(self._sa_table, self._sa_engine, record_data)
 
+    def update_record(self, id_value, record_data):
+        return records.update_record(self._sa_table, self._sa_engine, id_value, record_data)
+
     def delete_record(self, id_value):
         return records.delete_record(self._sa_table, self._sa_engine, id_value)

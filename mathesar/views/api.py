@@ -20,6 +20,9 @@ class TableViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecordViewSet(viewsets.ViewSet):
+    # There is no "update" method.
+    # We're not supporting PUT requests because there aren't a lot of use cases
+    # where the entire record needs to be replaced, PATCH suffices for updates.
     queryset = Table.objects.all().order_by('-created_at')
 
     def list(self, request, table_pk=None):
@@ -43,6 +46,12 @@ class RecordViewSet(viewsets.ViewSet):
         record = table.create_records(request.data)
         serializer = RecordSerializer(record)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def partial_update(self, request, pk=None, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        record = table.update_record(pk, request.data)
+        serializer = RecordSerializer(record)
+        return Response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
         table = Table.objects.get(id=table_pk)

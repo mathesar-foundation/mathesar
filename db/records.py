@@ -39,6 +39,15 @@ def create_records(table, engine, record_data):
     return None
 
 
+def update_record(table, engine, id_value, record_data):
+    primary_key_column = _get_primary_key_column(table)
+    with engine.begin() as connection:
+        result = connection.execute(
+            table.update().where(primary_key_column==id_value).values(record_data)
+        )
+    return get_record(table, engine, id_value)
+
+
 def delete_record(table, engine, id_value):
     primary_key_column = _get_primary_key_column(table)
     query = delete(table).where(primary_key_column == id_value)

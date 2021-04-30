@@ -131,6 +131,36 @@ def test_record_create(create_table, client):
             assert data[column_name] == record_data[column_name]
 
 
+def test_record_partial_update(create_table, client):
+    table_name = 'NASA Record Patch'
+    create_table(table_name)
+    table = Table.objects.get(name=table_name)
+    records = table.get_records()
+    record_id = records[0]['mathesar_id']
+
+    original_response = client.get(f'/api/v0/tables/{table.id}/records/{record_id}/')
+    original_data = original_response.json()
+
+    data = {
+        'Center': 'NASA Example Space Center',
+        'Status': 'Example',
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/records/{record_id}/', data=data)
+    record_data = response.json()
+
+    assert response.status_code == 200
+    for column_name in table.sa_column_names:
+        assert column_name in record_data
+        if column_name in data and column_name not in ['Center', 'Status']:
+            assert original_data[column_name] == record_data[column_name]
+        elif column_name == 'Center':
+            assert original_data[column_name] != record_data[column_name]
+            assert record_data[column_name] == 'NASA Example Space Center'
+        elif column_name == 'Status':
+            assert original_data[column_name] != record_data[column_name]
+            assert record_data[column_name] == 'Example'
+
+
 def test_record_delete(create_table, client):
     table_name = 'NASA Record Delete'
     create_table(table_name)
@@ -142,6 +172,22 @@ def test_record_delete(create_table, client):
     response = client.delete(f'/api/v0/tables/{table.id}/records/{record_id}/')
     assert response.status_code == 204
     assert len(table.get_records()) == original_num_records - 1
+
+
+def test_record_update(create_table, client):
+    table_name = 'NASA Record Put'
+    create_table(table_name)
+    table = Table.objects.get(name=table_name)
+    records = table.get_records()
+    record_id = records[0]['mathesar_id']
+
+    data = {
+        'Center': 'NASA Example Space Center',
+        'Status': 'Example',
+    }
+    response = client.put(f'/api/v0/tables/{table.id}/records/{record_id}/', data=data)
+    assert response.status_code == 405
+    assert response.json()['detail'] == 'Method "PUT" not allowed.'
 
 
 def test_record_404(create_table, client):
