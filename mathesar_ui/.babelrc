@@ -1,0 +1,4 @@
+// Babel configuration to be used with jest. For build, refer vite config file.
+{
+  "presets": [["@babel/preset-env", { "targets": { "node": "current" } }]]
+}
