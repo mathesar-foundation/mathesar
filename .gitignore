@@ -181,4 +181,3 @@ docs/_build/
 
 # UI
 node_modules/
-package-lock.json

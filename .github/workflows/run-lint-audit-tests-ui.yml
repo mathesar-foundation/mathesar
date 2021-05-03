@@ -1,0 +1,69 @@
+name: UI - Lint, Audit and Tests
+
+on: [push]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./mathesar_ui
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+      - id: npm-cache-dir
+        run: echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v2
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+      - run: npm install --no-audit --prefer-offline
+      - run: npm run lint
+
+  audit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./mathesar_ui
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+      - id: npm-cache-dir
+        run: echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v2
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+      - run: npm install
+      - run: npm audit
+
+  tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./mathesar_ui
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        node-version: [12, 14]
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - id: npm-cache-dir
+        run: echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v2
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+      - run: npm install --no-audit --prefer-offline
+      - run: npm test
