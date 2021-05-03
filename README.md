@@ -26,13 +26,28 @@ docker exec -it mathesar_web_1 python install.py
 
 If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASES.mathesar_tables` entry of the `config/settings.py` file with appropriate connection details before installing the Mathesar types and functions with the previous step.
 
-You run tests like so:
+#### Running tests
+
+Backend:
 ```
 docker exec mathesar_web_1 pytest
 ```
-You can also open a shell in the container running Django using:
+Frontend:
+```
+docker exec mathesar_ui_1 npm test
+```
+
+#### Opening a shell in the container
+
+Backend:
 ```
 docker exec -it mathesar_web_1 bash
+```
+
+Frontend:
+
+```
+docker exec -it mathesar_ui_1 bash
 ```
 
 ## Contributing
