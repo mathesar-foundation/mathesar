@@ -43,7 +43,7 @@ class RecordViewSet(viewsets.ViewSet):
         table = Table.objects.get(id=table_pk)
         # We only support adding a single record through the API.
         assert isinstance((request.data), dict)
-        record = table.create_records(request.data)
+        record = table.create_record_or_records(request.data)
         serializer = RecordSerializer(record)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

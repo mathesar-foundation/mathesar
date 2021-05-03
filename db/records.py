@@ -24,17 +24,19 @@ def get_records(table, engine, limit=None, offset=None):
         return conn.execute(query).fetchall()
 
 
-def create_records(table, engine, record_data):
+def create_record_or_records(table, engine, record_data):
     """
-    records can be a dictionary, tuple, or list of dictionaries or tuples.
+    record_data can be a dictionary, tuple, or list of dictionaries or tuples.
+    if record_data is a list, it creates multiple records.
     """
     id_value = None
     with engine.begin() as connection:
         result = connection.execute(table.insert(), record_data)
+        # If there was only a single record created, return the record.
         if result.rowcount == 1:
             id_value = result.inserted_primary_key[0]
-    if id_value:
-        return get_record(table, engine, id_value)
+            if id_value is not None:
+                return get_record(table, engine, id_value)
     # Do not return any records if multiple rows were added.
     return None
 

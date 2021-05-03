@@ -55,8 +55,8 @@ class Table(DatabaseObject):
     def get_records(self, limit=None, offset=None):
         return records.get_records(self._sa_table, self._sa_engine, limit, offset)
 
-    def create_records(self, record_data):
-        return records.create_records(self._sa_table, self._sa_engine, record_data)
+    def create_record_or_records(self, record_data):
+        return records.create_record_or_records(self._sa_table, self._sa_engine, record_data)
 
     def update_record(self, id_value, record_data):
         return records.update_record(self._sa_table, self._sa_engine, id_value, record_data)

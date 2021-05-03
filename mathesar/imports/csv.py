@@ -27,5 +27,5 @@ def create_table_from_csv(name, schema, database_key, csv_file):
     database = get_database_key(engine)
     schema, _ = Schema.objects.get_or_create(name=db_table.schema, database=database)
     table, _ = Table.objects.get_or_create(name=db_table.name, schema=schema)
-    table.create_records([row for row in csv_reader])
+    table.create_record_or_records([row for row in csv_reader])
     return table
