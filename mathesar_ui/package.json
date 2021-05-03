@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "vite",
     "lint": "eslint .",
-    "build": "vite build"
+    "build": "vite build",
+    "test": "jest"
   },
   "eslintConfig": {
     "ignorePatterns": [
@@ -18,10 +19,12 @@
     },
     "env": {
       "es6": true,
-      "browser": true
+      "browser": true,
+      "jest/globals": true
     },
     "plugins": [
-      "svelte3"
+      "svelte3",
+      "jest"
     ],
     "overrides": [
       {
@@ -35,7 +38,8 @@
       "airbnb-base",
       "eslint:recommended",
       "plugin:eslint-comments/recommended",
-      "plugin:promise/recommended"
+      "plugin:promise/recommended",
+      "plugin:jest/recommended"
     ],
     "rules": {
       "import/no-extraneous-dependencies": [
@@ -49,17 +53,43 @@
       "import/no-unresolved": "off",
       "import/extensions": "off",
       "import/prefer-default-export": "off"
+    },
+    "settings": {
+      "jest": {
+        "version": 26
+      }
     }
   },
+  "jest": {
+    "transform": {
+      "^.+\\.svelte$": "svelte-jester",
+      "^.+\\.js$": "babel-jest"
+    },
+    "moduleFileExtensions": [
+      "js",
+      "svelte"
+    ],
+    "setupFilesAfterEnv": [
+      "@testing-library/jest-dom/extend-expect"
+    ]
+  },
   "devDependencies": {
+    "@babel/preset-env": "^7.14.0",
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.7",
+    "@testing-library/jest-dom": "^5.12.0",
+    "@testing-library/svelte": "^3.0.3",
     "@vitejs/plugin-legacy": "^1.3.2",
+    "babel-jest": "^26.6.3",
     "eslint": "^7.25.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.3.6",
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-svelte3": "^3.2.0",
+    "jest": "^26.6.3",
     "svelte": "^3.37.0",
+    "svelte-jester": "^1.5.0",
     "vite": "^2.2.3"
   }
 }
