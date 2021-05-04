@@ -19,7 +19,10 @@ class TableViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = DefaultLimitOffsetPagination
 
 
-class RecordViewSet(viewsets.GenericViewSet):
+class RecordViewSet(viewsets.ViewSet):
+    # There is no "update" method.
+    # We're not supporting PUT requests because there aren't a lot of use cases
+    # where the entire record needs to be replaced, PATCH suffices for updates.
     queryset = Table.objects.all().order_by('-created_at')
 
     def list(self, request, table_pk=None):
@@ -33,6 +36,20 @@ class RecordViewSet(viewsets.GenericViewSet):
         record = table.get_record(pk)
         if not record:
             raise NotFound
+        serializer = RecordSerializer(record)
+        return Response(serializer.data)
+
+    def create(self, request, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        # We only support adding a single record through the API.
+        assert isinstance((request.data), dict)
+        record = table.create_record_or_records(request.data)
+        serializer = RecordSerializer(record)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def partial_update(self, request, pk=None, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        record = table.update_record(pk, request.data)
         serializer = RecordSerializer(record)
         return Response(serializer.data)
 

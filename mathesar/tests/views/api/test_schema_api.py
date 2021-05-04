@@ -19,7 +19,7 @@ def test_schema_list(create_table, client):
         "results": [
             {
                 "id": 1,
-                "name": "Libraries",
+                "name": "Patents",
                 "database": "mathesar_tables",
                 "tables": [
                     "http://testserver/api/v0/tables/1/",
@@ -28,7 +28,7 @@ def test_schema_list(create_table, client):
         ]
     }
     """
-    create_table('Fairfax County Schema List')
+    create_table('NASA Schema List')
 
     schema = Schema.objects.get()
     response = client.get('/api/v0/schemas/')
@@ -37,7 +37,7 @@ def test_schema_list(create_table, client):
     assert response.status_code == 200
     assert response_data['count'] == 1
     assert len(response_data['results']) == 1
-    check_schema_response(response_schema, schema, 'Libraries')
+    check_schema_response(response_schema, schema, 'Patents')
 
 
 def test_schema_detail(create_table, client):
@@ -45,13 +45,13 @@ def test_schema_detail(create_table, client):
     Desired format:
     One item in the results list in the schema list view, see above.
     """
-    create_table('Fairfax County Schema Detail')
+    create_table('NASA Schema Detail')
 
     schema = Schema.objects.get()
     response = client.get(f'/api/v0/schemas/{schema.id}/')
     response_schema = response.json()
     assert response.status_code == 200
-    check_schema_response(response_schema, schema, 'Libraries')
+    check_schema_response(response_schema, schema, 'Patents')
 
 
 def test_schema_404(create_table, client):
