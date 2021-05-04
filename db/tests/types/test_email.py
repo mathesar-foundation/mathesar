@@ -63,7 +63,7 @@ def test_email_type_column_creation(engine_with_app):
 def test_email_type_column_reflection(engine_with_app):
     engine, app_schema = engine_with_app
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn)
+        metadata = MetaData(bind=conn, schema=app_schema)
         test_table = Table(
             "test_table",
             metadata,
@@ -73,7 +73,7 @@ def test_email_type_column_reflection(engine_with_app):
 
     _add_custom_types_to_engine(engine)
     with engine.begin() as conn:
-        metadata = MetaData(bind=conn)
+        metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table("test_table", metadata, autoload_with=conn)
     expect_cls = email.Email
     actual_cls = reflect_table.columns["email_addresses"].type.__class__
