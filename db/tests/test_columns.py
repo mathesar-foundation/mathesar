@@ -1,6 +1,6 @@
 import re
 import pytest
-from sqlalchemy import String, Integer, Column
+from sqlalchemy import String, Integer, ForeignKey
 from db import columns
 
 
@@ -58,6 +58,22 @@ def test_MC_inits_default_nullable(column_builder):
 def test_MC_inits_with_nullable_false(column_builder):
     col = column_builder("a_col", String, nullable=False)
     assert not col.nullable
+
+
+@pytest.mark.parametrize("column_builder", column_builder_list)
+def test_MC_inits_with_foreign_keys_empty(column_builder):
+    col = column_builder("some_col", String)
+    assert not col.foreign_keys
+
+
+@pytest.mark.parametrize("column_builder", column_builder_list)
+def test_MC_inits_with_non_empty_foreign_keys(column_builder):
+    fk_target = "some_schema.some_table.a_column"
+    col = column_builder(
+        "anew_col", String, foreign_keys={ForeignKey(fk_target)},
+    )
+    fk_names = [fk.target_fullname for fk in col.foreign_keys]
+    assert len(fk_names) == 1 and fk_names[0] == fk_target
 
 
 def test_MC_is_default_when_true():
@@ -119,12 +135,14 @@ def get_mathesar_column_init_args():
 def test_test_columns_covers_MathesarColumn(mathesar_col_arg):
     """
     This is a meta-test to require at least one test for each __init__
-    arg of the column object.  It is stupid, and only checks function names.
-    To get it to pass, make a test function with "MC_inits" and <param>
-    in the name.
+    arg of the column object. It is stupid, and only checks function
+    names. To get it to pass, make a test function with "test_MC_inits"
+    and <param> in the name. It is the responsibility of the implementer
+    of new arguments to MathesarColumn to ensure the tests they write are
+    valid.
     """
     test_funcs = [var_name for var_name in globals() if var_name[:4] == "test"]
-    pattern = re.compile(f"test_MC_inits\S*{mathesar_col_arg}\S*")
+    pattern = re.compile(r"test_MC_inits\S*{}\S*".format(mathesar_col_arg))
     number_tests = len(
         [func for func in test_funcs if pattern.match(func) is not None]
     )
