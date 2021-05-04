@@ -10,8 +10,8 @@ jobs:
         working-directory: ./mathesar_ui
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
       - id: npm-cache-dir
         run: echo "::set-output name=dir::$(npm config get cache)"
       - uses: actions/cache@v2
@@ -30,8 +30,8 @@ jobs:
         working-directory: ./mathesar_ui
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
       - id: npm-cache-dir
         run: echo "::set-output name=dir::$(npm config get cache)"
       - uses: actions/cache@v2
@@ -53,8 +53,8 @@ jobs:
       matrix:
         node-version: [12, 14]
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
       - id: npm-cache-dir

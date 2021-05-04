@@ -24,7 +24,7 @@ def test_table_list(create_table, client):
         "results": [
             {
                 "id": 1,
-                "name": "Fairfax County Table List",
+                "name": "NASA Table List",
                 "schema": "http://testserver/api/v0/schemas/1/",
                 "created_at": "2021-04-27T18:43:41.201851Z",
                 "updated_at": "2021-04-27T18:43:41.201898Z",
@@ -34,7 +34,7 @@ def test_table_list(create_table, client):
                         "type": "INTEGER"
                     },
                     {
-                        "name": "X",
+                        "name": "Center",
                         "type": "VARCHAR"
                     },
                     # etc.
@@ -44,7 +44,7 @@ def test_table_list(create_table, client):
         ]
     }
     """
-    table_name = 'Fairfax County Table List'
+    table_name = 'NASA Table List'
     create_table(table_name)
 
     table = Table.objects.get(name=table_name)
@@ -66,7 +66,7 @@ def test_table_detail(create_table, client):
     Desired format:
     One item in the results list in the table list view, see above.
     """
-    table_name = 'Fairfax County Table Detail'
+    table_name = 'NASA Table Detail'
     create_table(table_name)
 
     table = Table.objects.get(name=table_name)

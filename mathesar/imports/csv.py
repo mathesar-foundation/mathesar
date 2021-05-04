@@ -17,7 +17,6 @@ def create_db_table_from_csv(name, schema, csv_reader, engine):
     table = tables.create_string_column_table(
         name, schema, csv_reader.fieldnames, engine,
     )
-    tables.insert_rows_into_table(table, [row for row in csv_reader], engine)
     return table
 
 
@@ -28,4 +27,5 @@ def create_table_from_csv(name, schema, database_key, csv_file):
     database = get_database_key(engine)
     schema, _ = Schema.objects.get_or_create(name=db_table.schema, database=database)
     table, _ = Table.objects.get_or_create(name=db_table.name, schema=schema)
+    table.create_record_or_records([row for row in csv_reader])
     return table
