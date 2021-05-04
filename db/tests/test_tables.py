@@ -1,7 +1,7 @@
 import os
 import pytest
 from sqlalchemy import text, MetaData
-from db import tables, constants
+from db import tables, constants, columns
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "resources")
@@ -10,8 +10,8 @@ ROSTER = "Roster"
 TEACHERS = "Teachers"
 ROSTER_NO_TEACHERS = "Roster without Teachers"
 APP_SCHEMA = "test_schema"
-COL1 = "Teacher"
-COL2 = "Teacher Email"
+EXTRACTED_COLS = ["Teacher", "Teacher Email"]
+FKEY_COL = f"{TEACHERS}_{constants.ID}"
 
 
 @pytest.fixture
@@ -33,11 +33,11 @@ def engine_with_roster(engine_with_schema):
 
 
 @pytest.fixture
-def extracted_teachers(engine_with_roster):
+def extracted_remainder_roster(engine_with_roster):
     engine = engine_with_roster
     tables.extract_columns_from_table(
         ROSTER,
-        [COL1, COL2],
+        EXTRACTED_COLS,
         TEACHERS,
         ROSTER_NO_TEACHERS,
         APP_SCHEMA,
@@ -47,7 +47,8 @@ def extracted_teachers(engine_with_roster):
     metadata.reflect()
     teachers = metadata.tables[f"{APP_SCHEMA}.{TEACHERS}"]
     roster_no_teachers = metadata.tables[f"{APP_SCHEMA}.{ROSTER_NO_TEACHERS}"]
-    return teachers, roster_no_teachers
+    roster = metadata.tables[f"{APP_SCHEMA}.{ROSTER}"]
+    return teachers, roster_no_teachers, roster, engine
 
 
 def test_table_creation_doesnt_reuse_defaults(engine_with_schema):
@@ -69,7 +70,7 @@ def test_extract_columns_from_table_creates_tables(engine_with_roster):
     roster_no_teachers = "Roster without Teachers"
     tables.extract_columns_from_table(
         ROSTER,
-        [COL1, COL2],
+        EXTRACTED_COLS,
         teachers,
         roster_no_teachers,
         APP_SCHEMA,
@@ -84,14 +85,18 @@ def test_extract_columns_from_table_creates_tables(engine_with_roster):
     )
 
 
-def test_extract_columns_from_table_sets_up_one_fkey(extracted_teachers):
-    extracted, remainder = extracted_teachers
+def test_extract_columns_from_table_sets_up_one_fkey(
+        extracted_remainder_roster,
+):
+    extracted, remainder, _, _ = extracted_remainder_roster
     fkeys = list(remainder.foreign_keys)
     assert len(fkeys) == 1
 
 
-def test_extract_columns_from_table_sets_correct_reference(extracted_teachers):
-    extracted, remainder = extracted_teachers
+def test_extract_columns_from_table_sets_correct_reference(
+        extracted_remainder_roster,
+):
+    extracted, remainder, _, _ = extracted_remainder_roster
     fkeys = list(remainder.foreign_keys)
     assert fkeys[0].references(extracted)
     expect_referenced_column = extracted.columns[constants.ID]
@@ -99,9 +104,74 @@ def test_extract_columns_from_table_sets_correct_reference(extracted_teachers):
     assert expect_referenced_column == actual_referenced_column
 
 
-def test_extract_columns_from_table_sets_correct_fkey(extracted_teachers):
-    extracted, remainder = extracted_teachers
+def test_extract_columns_from_table_sets_correct_fkey(
+        extracted_remainder_roster
+):
+    extracted, remainder, _, _ = extracted_remainder_roster
     fkeys = list(remainder.foreign_keys)
-    expect_fkey_column = remainder.columns[f"{extracted.name}_{constants.ID}"]
+    expect_fkey_column = remainder.columns[FKEY_COL]
     actual_fkey_column = fkeys[0].parent
     assert expect_fkey_column == actual_fkey_column
+
+
+def test_extract_columns_extracts_correct_columns(extracted_remainder_roster):
+    extracted, remainder, roster, _ = extracted_remainder_roster
+    expect_extracted_names = sorted(EXTRACTED_COLS)
+    actual_extracted_names = sorted(
+        [
+            col.name for col in extracted.columns
+            if col.name not in columns.DEFAULT_COLUMNS
+        ]
+    )
+    assert expect_extracted_names == actual_extracted_names
+
+
+def test_extract_columns_leaves_correct_columns(extracted_remainder_roster):
+    extracted, remainder, roster, _ = extracted_remainder_roster
+    expect_remainder_names = sorted(
+        [
+            col.name for col in roster.columns
+            if col.name not in columns.DEFAULT_COLUMNS
+            and col.name not in EXTRACTED_COLS
+        ]
+        + [FKEY_COL]
+    )
+    actual_remainder_names = sorted(
+        [
+            col.name for col in remainder.columns
+            if col.name not in columns.DEFAULT_COLUMNS
+        ]
+    )
+    assert expect_remainder_names == actual_remainder_names
+
+
+def test_merge_columns_undoes_extract_columns_ddl(extracted_remainder_roster):
+    extracted, remainder, roster, engine = extracted_remainder_roster
+    tables.merge_tables(
+        remainder.name,
+        extracted.name,
+        "Merged Roster",
+        APP_SCHEMA,
+        engine,
+    )
+    metadata = MetaData(bind=engine, schema=APP_SCHEMA)
+    metadata.reflect()
+    merged = metadata.tables[f"{APP_SCHEMA}.Merged Roster"]
+    expect_merged_names = sorted([col.name for col in roster.columns])
+    actual_merged_names = sorted([col.name for col in merged.columns])
+
+    expect_remainder_names = sorted(
+        [
+            col.name for col in roster.columns
+            if col.name not in columns.DEFAULT_COLUMNS
+            and col.name not in EXTRACTED_COLS
+        ]
+        + [FKEY_COL]
+    )
+    actual_remainder_names = sorted(
+        [
+            col.name for col in remainder.columns
+            if col.name not in columns.DEFAULT_COLUMNS
+        ]
+    )
+    assert expect_remainder_names == actual_remainder_names
