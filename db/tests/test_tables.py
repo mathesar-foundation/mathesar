@@ -159,19 +159,4 @@ def test_merge_columns_undoes_extract_columns_ddl(extracted_remainder_roster):
     merged = metadata.tables[f"{APP_SCHEMA}.Merged Roster"]
     expect_merged_names = sorted([col.name for col in roster.columns])
     actual_merged_names = sorted([col.name for col in merged.columns])
-
-    expect_remainder_names = sorted(
-        [
-            col.name for col in roster.columns
-            if col.name not in columns.DEFAULT_COLUMNS
-            and col.name not in EXTRACTED_COLS
-        ]
-        + [FKEY_COL]
-    )
-    actual_remainder_names = sorted(
-        [
-            col.name for col in remainder.columns
-            if col.name not in columns.DEFAULT_COLUMNS
-        ]
-    )
-    assert expect_remainder_names == actual_remainder_names
+    assert expect_merged_names == actual_merged_names
