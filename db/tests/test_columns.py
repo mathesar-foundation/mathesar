@@ -1,3 +1,4 @@
+import re
 import pytest
 from sqlalchemy import String, Integer, Column
 from db import columns
@@ -36,13 +37,13 @@ def test_MC_inits_with_sa_type(column_builder):
 
 
 @pytest.mark.parametrize("column_builder", column_builder_list)
-def test_MC_inits_default_not_pk(column_builder):
+def test_MC_inits_default_not_primary_key(column_builder):
     col = column_builder("anycol", String)
     assert not col.primary_key
 
 
 @pytest.mark.parametrize("column_builder", column_builder_list)
-def test_MC_inits_with_pk_true(column_builder):
+def test_MC_inits_with_primary_key_true(column_builder):
     col = column_builder("anycol", String, primary_key=True)
     assert col.primary_key
 
@@ -109,16 +110,22 @@ def test_MC_is_default_when_false_for_pk():
         assert not col.is_default
 
 
-# def test_MC_from_column():
-#     orig_col = Column("testcol", String)
-#     new_col = columns.MathesarColumn.from_column(orig_col)
-#     assert new_col.name == orig_col.name and new_col.type == orig_col.type
-#
-#
-# def test_self_globals():
-#     print("\n\n\n\n\n ")
-#     global_dict = globals().copy()
-#     for g in global_dict:
-#         if g[:4] == "test":
-#             print(g, global_dict[g])
-#     print("\n\n\n\n\n")
+def get_mathesar_column_init_args():
+    init_code = columns.MathesarColumn.__init__.__code__
+    return init_code.co_varnames[1:init_code.co_argcount]
+
+
+@pytest.mark.parametrize("mathesar_col_arg", get_mathesar_column_init_args())
+def test_test_columns_covers_MathesarColumn(mathesar_col_arg):
+    """
+    This is a meta-test to require at least one test for each __init__
+    arg of the column object.  It is stupid, and only checks function names.
+    To get it to pass, make a test function with "MC_inits" and <param>
+    in the name.
+    """
+    test_funcs = [var_name for var_name in globals() if var_name[:4] == "test"]
+    pattern = re.compile(f"test_MC_inits\S*{mathesar_col_arg}\S*")
+    number_tests = len(
+        [func for func in test_funcs if pattern.match(func) is not None]
+    )
+    assert number_tests > 0
