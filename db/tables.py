@@ -132,7 +132,7 @@ def _create_split_insert_stmt(
         remainder_columns,
         remainder_fk_name,
 ):
-    SPLIT_ID = "f{constants.MATHESAR_PREFIX}_split_column_alias"
+    SPLIT_ID = f"{constants.MATHESAR_PREFIX}_split_column_alias"
     extracted_column_names = [col.name for col in extracted_columns]
     remainder_column_names = [col.name for col in remainder_columns]
     split_cte = select(
