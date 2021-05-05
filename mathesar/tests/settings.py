@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 
+from conftest import TEST_DB
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -84,9 +86,9 @@ DATABASES = {
         "HOST": "db",
         "PORT": 5432,
     },
-    "mathesar_db_test_database": {
+    TEST_DB: {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "mathesar_db_test_database",
+        "NAME": TEST_DB,
         "USER": "mathesar",
         "PASSWORD": "mathesar",
         "HOST": "db",
