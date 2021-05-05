@@ -11,6 +11,8 @@ TEACHERS = "Teachers"
 ROSTER_NO_TEACHERS = "Roster without Teachers"
 APP_SCHEMA = "test_schema"
 EXTRACTED_COLS = ["Teacher", "Teacher Email"]
+REM_MOVE_COL = ["Subject"]
+REM_MOVE_COLS = ["Student Name", "Student Email"]
 FKEY_COL = f"{TEACHERS}_{constants.ID}"
 
 
@@ -297,3 +299,59 @@ def test_merge_columns_returns_original_data_ext_rem(
         expect_tuples = conn.execute(expect_tuple_sel).fetchall()
         actual_tuples = conn.execute(actual_tuple_sel).fetchall()
     assert sorted(expect_tuples) == sorted(actual_tuples)
+
+
+def test_move_columns_moves_column_from_ext_to_rem(extracted_remainder_roster):
+    extracted, remainder, _, engine = extracted_remainder_roster
+    moving_col = EXTRACTED_COLS[0]
+    extracted_cols = [col.name for col in extracted.columns]
+    remainder_cols = [col.name for col in remainder.columns]
+    expect_extracted_cols = [
+        name for name in extracted_cols if name != moving_col
+    ]
+    expect_remainder_cols = remainder_cols + [moving_col]
+    extracted_name = extracted.name
+    remainder_name = remainder.name
+    tables.move_columns_between_related_tables(
+        extracted_name,
+        remainder_name,
+        [moving_col],
+        APP_SCHEMA,
+        engine,
+    )
+    metadata = MetaData(bind=engine, schema=APP_SCHEMA)
+    metadata.reflect()
+    new_extracted = metadata.tables[f"{APP_SCHEMA}.{extracted_name}"]
+    new_remainder = metadata.tables[f"{APP_SCHEMA}.{remainder_name}"]
+    actual_extracted_cols = [col.name for col in new_extracted.columns]
+    actual_remainder_cols = [col.name for col in new_remainder.columns]
+    assert sorted(actual_extracted_cols) == sorted(expect_extracted_cols)
+    assert sorted(actual_remainder_cols) == sorted(expect_remainder_cols)
+
+
+def test_move_columns_moves_column_from_rem_to_ext(extracted_remainder_roster):
+    extracted, remainder, _, engine = extracted_remainder_roster
+    extracted_cols = [col.name for col in extracted.columns]
+    remainder_cols = [col.name for col in remainder.columns]
+    moving_col = "Grade"
+    expect_remainder_cols = [
+        name for name in remainder_cols if name != moving_col
+    ]
+    expect_extracted_cols = extracted_cols + [moving_col]
+    extracted_name = extracted.name
+    remainder_name = remainder.name
+    tables.move_columns_between_related_tables(
+        remainder_name,
+        extracted_name,
+        [moving_col],
+        APP_SCHEMA,
+        engine,
+    )
+    metadata = MetaData(bind=engine, schema=APP_SCHEMA)
+    metadata.reflect()
+    new_extracted = metadata.tables[f"{APP_SCHEMA}.{extracted_name}"]
+    new_remainder = metadata.tables[f"{APP_SCHEMA}.{remainder_name}"]
+    actual_extracted_cols = [col.name for col in new_extracted.columns]
+    actual_remainder_cols = [col.name for col in new_remainder.columns]
+    assert sorted(actual_extracted_cols) == sorted(expect_extracted_cols)
+    assert sorted(actual_remainder_cols) == sorted(expect_remainder_cols)
