@@ -173,8 +173,8 @@ def test_extract_columns_leaves_correct_data(extracted_remainder_roster):
         if col.name not in columns.DEFAULT_COLUMNS
         and col.name not in EXTRACTED_COLS
     ]
-    expect_tuple_sel = (
-        select([roster.columns[name] for name in remainder_column_names])
+    expect_tuple_sel = select(
+        [roster.columns[name] for name in remainder_column_names]
     )
     actual_tuple_sel = select(
         [remainder.columns[name] for name in remainder_column_names]
@@ -185,7 +185,9 @@ def test_extract_columns_leaves_correct_data(extracted_remainder_roster):
     assert sorted(expect_tuples) == sorted(actual_tuples)
 
 
-def test_merge_columns_undoes_extract_columns_ddl(extracted_remainder_roster):
+def test_merge_columns_undoes_extract_columns_ddl_rem_ext(
+        extracted_remainder_roster
+):
     extracted, remainder, roster, engine = extracted_remainder_roster
     tables.merge_tables(
         remainder.name,
@@ -200,3 +202,98 @@ def test_merge_columns_undoes_extract_columns_ddl(extracted_remainder_roster):
     expect_merged_names = sorted([col.name for col in roster.columns])
     actual_merged_names = sorted([col.name for col in merged.columns])
     assert expect_merged_names == actual_merged_names
+
+
+def test_merge_columns_undoes_extract_columns_ddl_ext_rem(
+        extracted_remainder_roster
+):
+    extracted, remainder, roster, engine = extracted_remainder_roster
+    tables.merge_tables(
+        extracted.name,
+        remainder.name,
+        "Merged Roster",
+        APP_SCHEMA,
+        engine,
+    )
+    metadata = MetaData(bind=engine, schema=APP_SCHEMA)
+    metadata.reflect()
+    merged = metadata.tables[f"{APP_SCHEMA}.Merged Roster"]
+    expect_merged_names = sorted([col.name for col in roster.columns])
+    actual_merged_names = sorted([col.name for col in merged.columns])
+    assert expect_merged_names == actual_merged_names
+
+
+def test_merge_columns_returns_original_data_rem_ext(
+        extracted_remainder_roster
+):
+    extracted, remainder, roster, engine = extracted_remainder_roster
+    tables.merge_tables(
+        remainder.name,
+        extracted.name,
+        "Merged Roster",
+        APP_SCHEMA,
+        engine,
+    )
+    metadata = MetaData(bind=engine, schema=APP_SCHEMA)
+    metadata.reflect()
+    roster_columns = sorted(
+        [
+            col.name for col in roster.columns
+            if col.name not in columns.DEFAULT_COLUMNS
+        ]
+    )
+    merged = metadata.tables[f"{APP_SCHEMA}.Merged Roster"]
+    merged_columns = sorted(
+        [
+            col.name for col in merged.columns
+            if col.name not in columns.DEFAULT_COLUMNS
+        ]
+    )
+    expect_tuple_sel = select(
+        [roster.columns[name] for name in roster_columns]
+    )
+    actual_tuple_sel = select(
+        [merged.columns[name] for name in merged_columns]
+    )
+    with engine.begin() as conn:
+        expect_tuples = conn.execute(expect_tuple_sel).fetchall()
+        actual_tuples = conn.execute(actual_tuple_sel).fetchall()
+    assert sorted(expect_tuples) == sorted(actual_tuples)
+
+
+def test_merge_columns_returns_original_data_ext_rem(
+        extracted_remainder_roster
+):
+    extracted, remainder, roster, engine = extracted_remainder_roster
+    tables.merge_tables(
+        extracted.name,
+        remainder.name,
+        "Merged Roster",
+        APP_SCHEMA,
+        engine,
+    )
+    metadata = MetaData(bind=engine, schema=APP_SCHEMA)
+    metadata.reflect()
+    roster_columns = sorted(
+        [
+            col.name for col in roster.columns
+            if col.name not in columns.DEFAULT_COLUMNS
+        ]
+    )
+    merged = metadata.tables[f"{APP_SCHEMA}.Merged Roster"]
+    merged_columns = sorted(
+        [
+            col.name for col in merged.columns
+            if col.name not in columns.DEFAULT_COLUMNS
+        ]
+    )
+    expect_tuple_sel = select(
+        [roster.columns[name] for name in roster_columns]
+    )
+    actual_tuple_sel = select(
+        [merged.columns[name] for name in merged_columns]
+    )
+    with engine.begin() as conn:
+        expect_tuples = conn.execute(expect_tuple_sel).fetchall()
+        actual_tuples = conn.execute(actual_tuple_sel).fetchall()
+    assert sorted(expect_tuples) == sorted(actual_tuples)
