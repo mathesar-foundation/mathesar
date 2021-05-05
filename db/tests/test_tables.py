@@ -1,6 +1,6 @@
 import os
 import pytest
-from sqlalchemy import text, MetaData
+from sqlalchemy import text, MetaData, select
 from db import tables, constants, columns
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -143,6 +143,46 @@ def test_extract_columns_leaves_correct_columns(extracted_remainder_roster):
         ]
     )
     assert expect_remainder_names == actual_remainder_names
+
+
+def test_extract_columns_extracts_correct_data(extracted_remainder_roster):
+    # This test is only valid in combination
+    # with test_extract_columns_extracts_columns, since we assume the
+    # extracted column list is correct
+    extracted, _, roster, engine = extracted_remainder_roster
+    expect_tuple_sel = (
+        select([roster.columns[name] for name in EXTRACTED_COLS])
+        .distinct()
+    )
+    actual_tuple_sel = select(
+        [extracted.columns[name] for name in EXTRACTED_COLS]
+    )
+    with engine.begin() as conn:
+        expect_tuples = conn.execute(expect_tuple_sel).fetchall()
+        actual_tuples = conn.execute(actual_tuple_sel).fetchall()
+    assert sorted(expect_tuples) == sorted(actual_tuples)
+
+
+def test_extract_columns_leaves_correct_data(extracted_remainder_roster):
+    # This test is only valid in combination
+    # with test_extract_columns_leaves_correct_columns, since we assume the
+    # remainder column list is correct
+    extracted, remainder, roster, engine = extracted_remainder_roster
+    remainder_column_names = [
+        col.name for col in roster.columns
+        if col.name not in columns.DEFAULT_COLUMNS
+        and col.name not in EXTRACTED_COLS
+    ]
+    expect_tuple_sel = (
+        select([roster.columns[name] for name in remainder_column_names])
+    )
+    actual_tuple_sel = select(
+        [remainder.columns[name] for name in remainder_column_names]
+    )
+    with engine.begin() as conn:
+        expect_tuples = conn.execute(expect_tuple_sel).fetchall()
+        actual_tuples = conn.execute(actual_tuple_sel).fetchall()
+    assert sorted(expect_tuples) == sorted(actual_tuples)
 
 
 def test_merge_columns_undoes_extract_columns_ddl(extracted_remainder_roster):
