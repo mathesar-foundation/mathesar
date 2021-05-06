@@ -5,37 +5,37 @@ from sqlalchemy.exc import InvalidRequestError
 from mathesar.imports.csv import create_table_from_csv
 
 
-def test_csv_upload_with_all_required_parameters(engine, csv_filename):
+def test_csv_upload_with_all_required_parameters(engine, csv_filename, test_db_name):
     with open(csv_filename, 'rb') as csv_file:
         table = create_table_from_csv(
             name='NASA',
             schema='Patents',
-            database_key='mathesar_db_test_database',
+            database_key=test_db_name,
             csv_file=csv_file
         )
         assert table is not None
         assert table.name == 'NASA'
         assert table.schema.name == 'Patents'
-        assert table.schema.database == 'mathesar_db_test_database'
+        assert table.schema.database == test_db_name
         assert table.sa_num_records == 1393
 
 
-def test_csv_upload_with_parameters_positional(engine, csv_filename):
+def test_csv_upload_with_parameters_positional(engine, csv_filename, test_db_name):
     with open(csv_filename, 'rb') as csv_file:
         table = create_table_from_csv(
             'NASA 2',
             'Patents',
-            'mathesar_db_test_database',
+            test_db_name,
             csv_file
         )
         assert table is not None
         assert table.name == 'NASA 2'
         assert table.schema.name == 'Patents'
-        assert table.schema.database == 'mathesar_db_test_database'
+        assert table.schema.database == test_db_name
         assert table.sa_num_records == 1393
 
 
-def test_csv_upload_with_duplicate_table_name(engine, csv_filename):
+def test_csv_upload_with_duplicate_table_name(engine, csv_filename, test_db_name):
     schema_name = 'Patents'
     table_name = 'NASA 3'
     already_defined_str = (
@@ -46,32 +46,32 @@ def test_csv_upload_with_duplicate_table_name(engine, csv_filename):
         table = create_table_from_csv(
             table_name,
             schema_name,
-            'mathesar_db_test_database',
+            test_db_name,
             csv_file
         )
         assert table is not None
         assert table.name == table_name
         assert table.schema.name == schema_name
-        assert table.schema.database == 'mathesar_db_test_database'
+        assert table.schema.database == test_db_name
         assert table.sa_num_records == 1393
     with open(csv_filename, 'rb') as csv_file:
         with pytest.raises(InvalidRequestError) as excinfo:
             create_table_from_csv(
                 table_name,
                 schema_name,
-                'mathesar_db_test_database',
+                test_db_name,
                 csv_file
             )
             assert already_defined_str in str(excinfo)
 
 
-def test_csv_upload_with_wrong_parameter(engine, csv_filename):
+def test_csv_upload_with_wrong_parameter(engine, csv_filename, test_db_name):
     with pytest.raises(TypeError) as excinfo:
         with open(csv_filename, 'rb') as csv_file:
             create_table_from_csv(
                 name='NASA',
                 schema_name='Patents',
-                database_key='mathesar_db_test_database',
+                database_key=test_db_name,
                 csv_file=csv_file
             )
             assert 'unexpected keyword' in str(excinfo.value)
