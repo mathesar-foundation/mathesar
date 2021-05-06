@@ -11,6 +11,11 @@ TEST_DB = "mathesar_db_test_database"
 
 
 @pytest.fixture(scope="session")
+def test_db_name():
+    return TEST_DB
+
+
+@pytest.fixture(scope="session")
 def test_db():
     superuser_engine = _get_superuser_engine()
     with superuser_engine.connect() as conn:

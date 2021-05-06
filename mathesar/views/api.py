@@ -2,6 +2,7 @@ from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
+from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema
 from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
 from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer
@@ -57,3 +58,8 @@ class RecordViewSet(viewsets.ViewSet):
         table = Table.objects.get(id=table_pk)
         table.delete_record(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class DatabaseKeyViewSet(viewsets.ViewSet):
+    def list(self, request):
+        return Response(get_non_default_database_keys())

@@ -5,7 +5,8 @@ from django.views.generic import DetailView
 
 from mathesar.forms.forms import UploadFileForm
 from mathesar.imports.csv import create_table_from_csv
-from mathesar.models import Table
+from mathesar.models import Table, Schema
+from mathesar.serializers import SchemaSerializer
 
 
 def index(request):
@@ -24,12 +25,14 @@ def index(request):
             )
     else:
         form = UploadFileForm()
+    schema_serializer = SchemaSerializer(Schema.objects.all(), many=True, context={'request': request})
     return render(
         request,
         "mathesar/index.html",
         {
             "form": form,
             "tables": sorted(tables, key=lambda x: x.schema.name),
+            "schema_data": schema_serializer.data
         },
     )
 
