@@ -1,15 +1,32 @@
-<main>
-  Mathesar - Rendered from Svelte
-</main>
+<script>
+  import { onMount } from 'svelte';
+  import { Route, router } from 'tinro';
+  import Index from '@mathesar/pages/index/Index.svelte';
+  import Tables from '@mathesar/pages/tables/Tables.svelte';
 
-<style>
-  main {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-      Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    text-align: center;
-    padding: 1em;
-    margin: 30px auto;
-    border: 1px solid #dfdfdf;
-    font-size: 16px;
-  }
-</style>
+  export let preload = {};
+
+  onMount(() => {
+    let unsubscribe = router.subscribe((params) => {
+      if (params.from) {
+        preload = {};
+        unsubscribe();
+        unsubscribe = null;
+      }
+    });
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  });
+</script>
+
+<Route path="/tables/:id" let:meta>
+  <Tables {...preload} {...meta?.params}/>
+</Route>
+
+<Route path="/">
+  <Index {...preload}/>
+</Route>

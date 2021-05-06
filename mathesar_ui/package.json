@@ -14,7 +14,7 @@
       "index.html"
     ],
     "parserOptions": {
-      "ecmaVersion": 2019,
+      "ecmaVersion": 2021,
       "sourceType": "module"
     },
     "env": {
@@ -65,6 +65,10 @@
       "^.+\\.svelte$": "svelte-jester",
       "^.+\\.js$": "babel-jest"
     },
+    "moduleNameMapper": {
+      "^@mathesar(.*)$": "<rootDir>/src$1",
+      "^@mathesar-components(.*)$": "<rootDir>/src/components/$1"
+    },
     "moduleFileExtensions": [
       "js",
       "svelte"
@@ -88,8 +92,14 @@
     "eslint-plugin-promise": "^5.1.0",
     "eslint-plugin-svelte3": "^3.2.0",
     "jest": "^26.6.3",
+    "node-sass": "^5.0.0",
     "svelte": "^3.37.0",
     "svelte-jester": "^1.5.0",
+    "svelte-preprocess": "^4.7.3",
+    "tinro": "^0.6.1",
     "vite": "^2.2.3"
+  },
+  "dependencies": {
+    "js-cookie": "^2.2.1"
   }
 }
