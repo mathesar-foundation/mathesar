@@ -7,6 +7,7 @@ from mathesar.views import api, frontend
 router = routers.DefaultRouter()
 router.register(r'tables', api.TableViewSet)
 router.register(r'schemas', api.SchemaViewSet)
+router.register(r'database_keys', api.DatabaseKeyViewSet, basename='database_keys')
 
 records_router = routers.NestedSimpleRouter(router, r'tables', lookup='table')
 records_router.register(r'records', api.RecordViewSet, basename='table-records')

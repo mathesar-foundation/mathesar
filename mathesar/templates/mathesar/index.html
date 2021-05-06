@@ -42,3 +42,7 @@
     {% endif %}
   </div>
 {% endblock %}
+
+{% block scripts %}
+   {{ schema_data|json_script:"schema-data" }}
+{% endblock %}

@@ -132,7 +132,7 @@ def _create_split_insert_stmt(
         remainder_columns,
         remainder_fk_name,
 ):
-    SPLIT_ID = "f{constants.MATHESAR_PREFIX}_split_column_alias"
+    SPLIT_ID = f"{constants.MATHESAR_PREFIX}_split_column_alias"
     extracted_column_names = [col.name for col in extracted_columns]
     remainder_column_names = [col.name for col in remainder_columns]
     split_cte = select(
@@ -224,7 +224,7 @@ def merge_tables(
     return merged_table
 
 
-def move_column_between_related_tables(
+def move_columns_between_related_tables(
         source_table_name,
         target_table_name,
         column_names,
@@ -318,9 +318,9 @@ def _get_column_moving_extraction_args(
         extracted_table_name = source_table_name
         remainder_table_name = target_table_name
         extraction_columns = [
-            col for col in target_table.columns
+            col for col in source_table.columns
             if not columns.MathesarColumn.from_column(col).is_default
-            and col not in column_names
+            and col.name not in column_names
         ]
     return extracted_table_name, remainder_table_name, extraction_columns
 
