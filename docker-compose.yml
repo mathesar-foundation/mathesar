@@ -14,8 +14,8 @@ services:
   ui:
     build: ./mathesar_ui
     volumes:
-      - ./mathesar_ui:/ui
-      - /ui/node_modules
+      - ./mathesar_ui:/home/node/ui
+      - /home/node/ui/node_modules
     ports:
       - "3000:3000"
     command: npm run dev

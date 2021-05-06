@@ -54,11 +54,11 @@ docker exec -it mathesar_ui_1 /bin/bash
 
 and then perform any action from within the container. Example:
 ```bash
-root@4f157919354e:/ui# ls
+node@c273da65c52d:/ui$ ls
 Dockerfile  jsconfig.json  package-lock.json  public  vite.config.js
 README.md   node_modules   package.json       src
 
-root@4f157919354e:/ui# npm install <package>
+node@c273da65c52d:/ui$ npm install <package>
 
-root@4f157919354e:/ui# npm uninstall <package>
+node@c273da65c52d:/ui$ npm uninstall <package>
 ```

@@ -1,11 +1,10 @@
 <style lang="scss">
-  @import "./index.scss";
+  @import './index.scss';
 </style>
 
 <script>
   import Cookies from 'js-cookie';
 
-  export let existingSchemas = [];
   export let schemas = [];
   export let databases = [];
 
@@ -55,8 +54,8 @@
 
     <label for="id_database_key">Database:</label>
     <select name="database_key" id="id_database_key">
-      {#each databases as database (database.name)}
-        <option value={database.name}>{database.name}</option>
+      {#each databases as database (database)}
+        <option value={database}>{database}</option>
       {/each}
     </select>
 
@@ -66,11 +65,11 @@
     <button type="submit">Submit</button>
   </form>
 
-  {#if existingSchemas?.length > 0}
+  {#if schemas?.length > 0}
     <div>
       <h5>View Existing Tables</h5>
       <ul>
-        {#each existingSchemas as schema}
+        {#each schemas as schema}
           <li>
             {schema.name}
             {#if schema.tables?.length > 0}

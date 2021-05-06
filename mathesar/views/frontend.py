@@ -7,6 +7,7 @@ from mathesar.forms.forms import UploadFileForm
 from mathesar.imports.csv import create_table_from_csv
 from mathesar.models import Table, Schema
 from mathesar.serializers import SchemaSerializer
+from mathesar.database.utils import get_non_default_database_keys
 
 
 def index(request):
@@ -26,13 +27,17 @@ def index(request):
     else:
         form = UploadFileForm()
     schema_serializer = SchemaSerializer(Schema.objects.all(), many=True, context={'request': request})
+    preloaded_data = {
+        "schemas": schema_serializer.data,
+        "databases": get_non_default_database_keys()
+    }
     return render(
         request,
         "mathesar/index.html",
         {
             "form": form,
             "tables": sorted(tables, key=lambda x: x.schema.name),
-            "schema_data": schema_serializer.data
+            "preloaded_data": preloaded_data
         },
     )
 
