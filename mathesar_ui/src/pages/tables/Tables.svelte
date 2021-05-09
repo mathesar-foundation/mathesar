@@ -16,7 +16,7 @@
 </script>
 
 {#if $tables.state === 'done'}
-  <h2>{$tables.data.name}</h2>
+  <h2>{$tables.data.name || ''}</h2>
 
   <table>
     <thead>
