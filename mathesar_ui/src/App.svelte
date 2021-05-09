@@ -1,32 +1,52 @@
+<style global lang="scss">
+  @import "App.scss";
+</style>
+
 <script>
-  import { onMount } from 'svelte';
-  import { Route, router } from 'tinro';
+  import { Route, active } from 'tinro';
+  import { schemas } from '@mathesar/api/schemas';
   import Index from '@mathesar/pages/index/Index.svelte';
   import Tables from '@mathesar/pages/tables/Tables.svelte';
+  import { preloadCommonData } from '@mathesar/utils/preloadData';
 
-  export let preload = {};
-
-  onMount(() => {
-    let unsubscribe = router.subscribe((params) => {
-      if (params.from) {
-        preload = {};
-        unsubscribe();
-        unsubscribe = null;
-      }
-    });
-
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  });
+  const commonData = preloadCommonData();
 </script>
 
-<Route path="/tables/:id" let:meta>
-  <Tables {...preload} {...meta?.params}/>
-</Route>
+<header>
+  <div class="dropdown">
+    {#if commonData?.databases?.[0]}
+      <div>{commonData?.databases?.[0]}</div>
+    {/if}
+  </div>
+</header>
 
-<Route path="/">
-  <Index {...preload}/>
-</Route>
+<aside>
+  <nav>
+    <ul>
+      {#each $schemas.data as schema (schema.id)}
+        <li>
+          <div>{schema.name}</div>
+          <ul>
+            {#each (schema.tables || []) as table (table.id)}
+              <li>
+                <a href='/tables/{table.id}' use:active>{table.name}</a>
+              </li>
+            {/each}
+          </ul>
+        </li>
+      {/each}
+    </ul>
+
+    <a href='/' use:active exact>Import CSV</a>
+  </nav>
+</aside>
+
+<section>
+  <Route path="/tables/:id">
+    <Tables/>
+  </Route>
+  
+  <Route path="/">
+    <Index database={commonData?.databases?.[0]}/>
+  </Route>  
+</section>
