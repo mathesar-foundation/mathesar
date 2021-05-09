@@ -15,10 +15,10 @@ services:
     build: ./mathesar_ui
     volumes:
       - ./mathesar_ui:/home/node/ui
-      - /home/node/ui/node_modules
+      - ui_node_modules:/home/node/ui/node_modules
     ports:
       - "3000:3000"
-    command: npm run dev
+    command: bash -c "npm install && npm run dev"
   web:
     build: .
     command: dockerize -wait tcp://db:5432 -timeout 30s python manage.py runserver 0.0.0.0:8000
@@ -28,3 +28,6 @@ services:
       - "8000:8000"
     depends_on:
       - db
+
+volumes:
+  ui_node_modules:
