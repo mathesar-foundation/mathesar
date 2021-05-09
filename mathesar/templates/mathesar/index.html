@@ -3,5 +3,10 @@
 {% block title %}Home{% endblock %}
 
 {% block scripts %}
-   {{ preloaded_data|json_script:"preloaded-data" }}
+   {{ common_data|json_script:"common-data" }}
+   {% if route_specific_data %}
+      {% for key, value in route_specific_data.items %}
+         {{ value|json_script:key }}
+      {% endfor %}
+   {% endif %}
 {% endblock %}
