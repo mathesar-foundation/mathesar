@@ -33,7 +33,6 @@ def engine_email_type(test_schema):
         conn.execute(DropSchema(base.SCHEMA, cascade=True, if_exists=True))
 
 
-
 def test_get_alter_column_types_with_standard_engine(engine):
     type_dict = base.get_supported_alter_column_types(engine)
     assert len(type_dict) > 0
@@ -51,25 +50,25 @@ def test_get_alter_column_types_with_custom_engine(engine_with_types):
 
 
 type_test_list = [
-    (String, "float", "1.2", "DOUBLE PRECISION"),
-    (String, "int", "1", "INTEGER"),
-    (String, "integer", "10", "INTEGER"),
-    (String, "json", '{"my": "json", "a": 45}', "JSON"),
-    (String, "jsonb", '{"my": "json", "a": 45}', "JSONB"),
-    (String, "numeric", "12341234.3241234", "NUMERIC"),
-    (String, "character varying", "mystringhere", "VARCHAR"),
-    (String, "text", "abcdefg", "TEXT"),
-    (String, "timestamp", "2020-01-01", "TIMESTAMP WITHOUT TIME ZONE"),
-    (String, "uuid", "79a3387e-eada-4197-a330-54eb6810d3c8", "UUID"),
-    (String, "email", "alice@example.com", "mathesar_types.email")
+    (String, "boolean", "BOOLEAN"),
+    (String, "float", "DOUBLE PRECISION"),
+    (String, "int", "INTEGER"),
+    (String, "integer", "INTEGER"),
+    (String, "money", "MONEY"),
+    (String, "numeric", "NUMERIC"),
+    (String, "string", "VARCHAR"),
+    (String, "text", "TEXT"),
+    (String, "timestamp", "TIMESTAMP WITHOUT TIME ZONE"),
+    (String, "uuid", "UUID"),
+    (String, "email", "mathesar_types.email"),
 ]
 
 
 @pytest.mark.parametrize(
-    "type_,target_type,value,expect_result", type_test_list
+    "type_,target_type,expect_type", type_test_list
 )
-def test_alter_column_type_alters_column(
-        engine_email_type, type_, target_type, value, expect_result
+def test_alter_column_type_alters_column_type(
+        engine_email_type, type_, target_type, expect_type
 ):
     engine, schema = engine_email_type
     TABLE_NAME = "testtable"
@@ -82,7 +81,6 @@ def test_alter_column_type_alters_column(
         schema=schema
     )
     input_table.create()
-    input_table.insert(values=value)
     base.alter_column_type(
         schema, TABLE_NAME, COLUMN_NAME, target_type, engine,
     )
@@ -94,5 +92,5 @@ def test_alter_column_type_alters_column(
         schema=schema,
         autoload_with=engine
     ).columns[COLUMN_NAME]
-    actual_result = actual_column.type.compile(dialect=engine.dialect)
-    assert actual_result == expect_result
+    actual_type = actual_column.type.compile(dialect=engine.dialect)
+    assert actual_type == expect_type

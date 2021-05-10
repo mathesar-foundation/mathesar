@@ -16,19 +16,18 @@ def get_supported_alter_column_types(engine):
     dialect_types = engine.dialect.ischema_names
     type_map = {
         # Default Postgres types
-        'float': dialect_types.get('float'),
-        'int': dialect_types.get('integer'),
-        'integer': dialect_types.get('integer'),
-        'json': dialect_types.get('json'),
-        'jsonb': dialect_types.get('jsonb'),
-        'numeric': dialect_types.get('numeric'),
-        'string': dialect_types.get('name'),
-        'character varying': dialect_types.get('character varying'),
-        'text': dialect_types.get('text'),
-        'timestamp': dialect_types.get('timestamp'),
-        'uuid': dialect_types.get('uuid'),
+        "boolean": dialect_types.get("boolean"),
+        "float": dialect_types.get("float"),
+        "int": dialect_types.get("integer"),
+        "integer": dialect_types.get("integer"),
+        "money": dialect_types.get("money"),
+        "numeric": dialect_types.get("numeric"),
+        "string": dialect_types.get("name"),
+        "text": dialect_types.get("text"),
+        "timestamp": dialect_types.get("timestamp"),
+        "uuid": dialect_types.get("uuid"),
         # Custom Mathesar types
-        'email': dialect_types.get(email.QUALIFIED_EMAIL)
+        "email": dialect_types.get(email.QUALIFIED_EMAIL)
     }
     return {k: v for k, v in type_map.items() if v is not None}
 
