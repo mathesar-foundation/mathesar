@@ -17,10 +17,10 @@ def get_supported_alter_column_types(engine):
     type_map = {
         # Default Postgres types
         "boolean": dialect_types.get("boolean"),
+        "date": dialect_types.get("date"),
         "float": dialect_types.get("float"),
         "int": dialect_types.get("integer"),
         "integer": dialect_types.get("integer"),
-        "money": dialect_types.get("money"),
         "numeric": dialect_types.get("numeric"),
         "string": dialect_types.get("name"),
         "text": dialect_types.get("text"),
