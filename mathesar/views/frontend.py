@@ -1,16 +1,22 @@
-from django.http import HttpResponseRedirect
+from django.http import JsonResponse
 from django.shortcuts import render
-from django.urls import reverse
-from django.views.generic import DetailView
 
 from mathesar.forms.forms import UploadFileForm
 from mathesar.imports.csv import create_table_from_csv
 from mathesar.models import Table, Schema
-from mathesar.serializers import SchemaSerializer
+from mathesar.serializers import SchemaSerializer, TableSerializer, RecordSerializer
+from mathesar.database.utils import get_non_default_database_keys
+
+
+def get_common_data(request):
+    schema_serializer = SchemaSerializer(Schema.objects.all(), many=True, context={'request': request})
+    return {
+        "schemas": schema_serializer.data,
+        "databases": get_non_default_database_keys(),
+    }
 
 
 def index(request):
-    tables = Table.objects.all()
     if request.method == "POST":
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
@@ -20,23 +26,32 @@ def index(request):
                 database_key=form.cleaned_data["database_key"],
                 csv_file=request.FILES["file"]
             )
-            return HttpResponseRedirect(
-                reverse("frontend-table-detail", kwargs={"pk": table.id})
-            )
-    else:
-        form = UploadFileForm()
-    schema_serializer = SchemaSerializer(Schema.objects.all(), many=True, context={'request': request})
+            return JsonResponse({"pk": table.id}, status=200)
     return render(
         request,
         "mathesar/index.html",
         {
-            "form": form,
-            "tables": sorted(tables, key=lambda x: x.schema.name),
-            "schema_data": schema_serializer.data
-        },
+            "common_data": get_common_data(request),
+        }
     )
 
 
-class TableDetail(DetailView):
-    context_object_name = "table"
-    queryset = Table.objects.all()
+def table(request, pk):
+    try:
+        table_data = Table.objects.get(pk=pk)
+        table_serialized = TableSerializer(table_data, context={'request': request}).data
+        records_serialized = RecordSerializer(table_data.get_records(limit=50, offset=0), many=True, context={'request': request}).data
+    except Table.DoesNotExist:
+        table_serialized = {}
+        records_serialized = []
+    return render(
+        request,
+        "mathesar/index.html",
+        {
+            "common_data": get_common_data(request),
+            "route_specific_data": {
+                "table-detail": table_serialized,
+                "table-records": records_serialized
+            }
+        }
+    )

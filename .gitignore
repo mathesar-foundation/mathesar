@@ -180,4 +180,4 @@ Temporary Items
 docs/_build/
 
 # UI
-node_modules/
+node_modules

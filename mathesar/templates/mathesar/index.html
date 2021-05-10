@@ -2,47 +2,11 @@
 
 {% block title %}Home{% endblock %}
 
-{% block body %}
-  <div>
-    <div>
-      <h2>Welcome to Mathesar!</h3>
-    </div>
-    <div>
-      <h5>Create a Table</h5>
-      <p>Upload a CSV file to create a table.</p>
-      <form enctype="multipart/form-data" method="post" action="/">
-        {% csrf_token %}
-        {{ form }}
-        <input type="submit" value="Submit">
-      </form>
-    </div>
-    {% if tables %}
-      <div>
-        <h5>View Existing Tables</h5>
-        {% regroup tables by schema as grouped_tables %}
-        <ul>
-          {% for schema, schema_tables in grouped_tables %}
-            <li>
-              {{ schema.name }}
-              <ul>
-                {% for table in schema_tables %}
-                  {% if table and table.schema.name == schema.name %}
-                    <li>
-                      <a href="{% url 'frontend-table-detail' table.id %}">
-                        {{ table.name }}
-                      </a>
-                    </li>
-                  {% endif %}
-                {% endfor %}
-              </ul>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-    {% endif %}
-  </div>
-{% endblock %}
-
 {% block scripts %}
-   {{ schema_data|json_script:"schema-data" }}
+   {{ common_data|json_script:"common-data" }}
+   {% if route_specific_data %}
+      {% for key, value in route_specific_data.items %}
+         {{ value|json_script:key }}
+      {% endfor %}
+   {% endif %}
 {% endblock %}
