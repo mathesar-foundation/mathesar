@@ -26,7 +26,7 @@ def get_supported_alter_column_types(engine):
         'character varying': dialect_types.get('character varying'),
         'text': dialect_types.get('text'),
         'timestamp': dialect_types.get('timestamp'),
-        'uuid': dialect_types.get('timestamp'),
+        'uuid': dialect_types.get('uuid'),
         # Custom Mathesar types
         'email': dialect_types.get(email.QUALIFIED_EMAIL)
     }
