@@ -1,6 +1,4 @@
-from datetime import datetime, date
 from decimal import Decimal
-from psycopg2.errors import InvalidTextRepresentation
 import pytest
 from sqlalchemy import Table, Column, MetaData
 from sqlalchemy import String, Numeric
