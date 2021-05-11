@@ -1,3 +1,4 @@
+from datetime import timedelta
 from decimal import Decimal
 import pytest
 from sqlalchemy import Table, Column, MetaData
@@ -53,14 +54,9 @@ def test_get_alter_column_types_with_custom_engine(engine_with_types):
 
 type_test_list = [
     (String, "boolean", "BOOLEAN"),
-    (String, "float", "DOUBLE PRECISION"),
-    (String, "int", "INTEGER"),
-    (String, "integer", "INTEGER"),
+    (String, "interval", "INTERVAL"),
     (String, "numeric", "NUMERIC"),
     (String, "string", "VARCHAR"),
-    (String, "text", "TEXT"),
-    (String, "timestamp", "TIMESTAMP WITHOUT TIME ZONE"),
-    (String, "uuid", "UUID"),
     (String, "email", "mathesar_types.email"),
 ]
 
@@ -104,6 +100,10 @@ type_test_data_list = [
     (String, "boolean", "true", True),
     (String, "boolean", "f", False),
     (String, "boolean", "t", True),
+    (String, "interval", "1 day", timedelta(days=1)),
+    (String, "interval", "1 week", timedelta(days=7)),
+    (String, "interval", "3:30", timedelta(hours=3, minutes=30)),
+    (String, "interval", "00:03:30", timedelta(minutes=3, seconds=30)),
     (String, "numeric", "1", 1.0),
     (String, "numeric", "1.2", Decimal('1.2')),
     (Numeric, "numeric", 1, 1.0),
@@ -156,6 +156,7 @@ def test_alter_column_type_casts_column_data(
 
 type_test_bad_data_list = [
     (String, "boolean", "cat"),
+    (String, "interval", "1 potato"),
     (String, "numeric", "abc"),
     (String, "email", "alice-example.com"),
 ]
