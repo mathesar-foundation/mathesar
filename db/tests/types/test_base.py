@@ -1,8 +1,9 @@
 from datetime import datetime, date
 from decimal import Decimal
+from psycopg2.errors import InvalidTextRepresentation
 import pytest
 from sqlalchemy import Table, Column, MetaData
-from sqlalchemy import Float, Integer, String
+from sqlalchemy import String, Numeric
 from sqlalchemy.schema import CreateSchema, DropSchema
 from db import types
 from db.engine import _add_custom_types_to_engine
@@ -105,32 +106,17 @@ type_test_data_list = [
     (String, "boolean", "true", True),
     (String, "boolean", "f", False),
     (String, "boolean", "t", True),
-    (Integer, "boolean", 1, True),
-    (Integer, "boolean", 0, False),
-    (Integer, "boolean", -1, True),
-    (Integer, "boolean", 5.5, True),
-    (String, "date", "2020-01-01", date(2020, 1, 1)),
-    (String, "float", "1", 1.0),
-    (String, "float", "1.2", 1.2),
-    (Integer, "float", 1, 1.0),
-    (String, "integer", "5", 5),
-    (Float, "integer", 5.0, 5),
-    (Float, "integer", 5.1, 5),
-    (Float, "integer", 5.8, 6), # This rounds, doesn't truncate
+    (String, "numeric", "1", 1.0),
+    (String, "numeric", "1.2", Decimal('1.2')),
+    (Numeric, "numeric", 1, 1.0),
+    (String, "numeric", "5", 5),
     (String, "numeric", "500000", 500000),
     (String, "numeric", "500000.134", Decimal("500000.134")),
-    (Integer, "string", 3, "3"),
-    (Float, "string", 3.13241234, "3.13241234"),
-    (String, "text", "abc", "abc"),
-    (String, "timestamp", "2020-01-01", datetime(2020, 1, 1)),
-    (
-        String,
-        "uuid",
-        "9cc1600c-aba4-4809-af94-b6a2cea27b70",
-        "9cc1600c-aba4-4809-af94-b6a2cea27b70",
-    ),
+    (Numeric, "string", 3, "3"),
+    (String, "string", "abc", "abc"),
     (String, "email", "alice@example.com", "alice@example.com"),
 ]
+
 
 @pytest.mark.parametrize(
     "type_,target_type,value,expect_value", type_test_data_list
@@ -168,3 +154,36 @@ def test_alter_column_type_casts_column_data(
         res = conn.execute(sel).fetchall()
     actual_value = res[0][0]
     assert actual_value == expect_value
+
+
+type_test_bad_data_list = [
+    (String, "boolean", "cat"),
+    (String, "numeric", "abc"),
+    (String, "email", "alice-example.com"),
+]
+
+
+@pytest.mark.parametrize(
+    "type_,target_type,value", type_test_bad_data_list
+)
+def test_alter_column_type_raises_on_bad_column_data(
+        engine_email_type, type_, target_type, value,
+):
+    engine, schema = engine_email_type
+    TABLE_NAME = "testtable"
+    COLUMN_NAME = "testcol"
+    metadata = MetaData(bind=engine)
+    input_table = Table(
+        TABLE_NAME,
+        metadata,
+        Column(COLUMN_NAME, type_),
+        schema=schema
+    )
+    input_table.create()
+    ins = input_table.insert(values=(value,))
+    with engine.begin() as conn:
+        conn.execute(ins)
+    with pytest.raises(Exception):
+        base.alter_column_type(
+            schema, TABLE_NAME, COLUMN_NAME, target_type, engine,
+        )

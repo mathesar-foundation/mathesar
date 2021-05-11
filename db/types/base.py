@@ -17,15 +17,9 @@ def get_supported_alter_column_types(engine):
     type_map = {
         # Default Postgres types
         "boolean": dialect_types.get("boolean"),
-        "date": dialect_types.get("date"),
-        "float": dialect_types.get("float"),
-        "int": dialect_types.get("integer"),
-        "integer": dialect_types.get("integer"),
+        "interval": dialect_types.get("interval"),
         "numeric": dialect_types.get("numeric"),
         "string": dialect_types.get("name"),
-        "text": dialect_types.get("text"),
-        "timestamp": dialect_types.get("timestamp"),
-        "uuid": dialect_types.get("uuid"),
         # Custom Mathesar types
         "email": dialect_types.get(email.QUALIFIED_EMAIL)
     }
