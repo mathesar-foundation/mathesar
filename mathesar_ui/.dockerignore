@@ -1,4 +1,6 @@
-node_modules/
-dist/
+node_modules
+dist
 .vscode
-package-lock.json
+npm-debug.log
+Dockerfile
+.dockerignore
