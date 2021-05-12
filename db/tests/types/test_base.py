@@ -18,7 +18,7 @@ def engine_with_types(engine):
 
 
 @pytest.fixture
-def test_schema(engine_with_types):
+def temporary_testing_schema(engine_with_types):
     schema = TEST_SCHEMA
     with engine_with_types.begin() as conn:
         conn.execute(CreateSchema(schema))
@@ -28,8 +28,8 @@ def test_schema(engine_with_types):
 
 
 @pytest.fixture
-def engine_email_type(test_schema):
-    engine, schema = test_schema
+def engine_email_type(temporary_testing_schema):
+    engine, schema = temporary_testing_schema
     install.install_mathesar_on_database(engine)
     yield engine, schema
     with engine.begin() as conn:
