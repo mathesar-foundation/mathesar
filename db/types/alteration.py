@@ -134,9 +134,15 @@ def create_interval_casts(engine):
           RETURN $1;
         END;
         """,
+        # We need to check that a string isn't a valid number before
+        # casting to intervals (since a number is more likely)
         TEXT: f"""
         BEGIN
-          RETURN $1::{INTERVAL};
+          PERFORM $1::{NUMERIC};
+          RAISE EXCEPTION '% is a {NUMERIC}', $1;
+          EXCEPTION
+            WHEN sqlstate '22P02' THEN
+              RETURN $1::{INTERVAL};
         END;
         """,
     }
