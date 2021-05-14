@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, MetaData, Table, DDL
 from db import constants
-from db.types import email
+from db.types import casts, email
 
 SCHEMA = f"{constants.MATHESAR_PREFIX}types"
 # Since we want to have our identifiers quoted appropriately for use in
@@ -41,10 +41,11 @@ def alter_column_type(
         prepared_table_name = _preparer.format_table(table)
         prepared_column_name = _preparer.format_column(column)
         prepared_type_name = target_type().compile(dialect=engine.dialect)
+        cast_function_name = casts.get_cast_function_name(prepared_type_name)
         alter_stmt = f"""
         ALTER TABLE {prepared_table_name}
           ALTER COLUMN {prepared_column_name}
           TYPE {prepared_type_name}
-          USING {prepared_column_name}::{prepared_type_name};
+          USING {cast_function_name}({prepared_column_name});
         """
         conn.execute(DDL(alter_stmt))
