@@ -13,6 +13,11 @@ def install_all_casts(engine):
 def create_boolean_casts(engine):
     not_bool_exception_str = f"RAISE EXCEPTION '% is not a {BOOLEAN}', $1;"
     type_body_map = {
+        BOOLEAN: f"""
+        BEGIN
+          RETURN $1;
+        END;
+        """,
         TEXT: f"""
         DECLARE
         istrue {BOOLEAN};
@@ -31,7 +36,7 @@ def create_boolean_casts(engine):
           END IF;
           RETURN $1<>0;
         END;
-        """
+        """,
     }
     for type_, body in type_body_map.items():
         query = assemble_function_creation_sql(type_, 'boolean', body)
