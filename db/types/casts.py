@@ -8,6 +8,7 @@ NUMERIC = "numeric"
 
 def install_all_casts(engine):
     create_boolean_casts(engine)
+    create_numeric_casts(engine)
 
 
 def create_boolean_casts(engine):
@@ -39,7 +40,34 @@ def create_boolean_casts(engine):
         """,
     }
     for type_, body in type_body_map.items():
-        query = assemble_function_creation_sql(type_, 'boolean', body)
+        query = assemble_function_creation_sql(type_, BOOLEAN, body)
+        with engine.begin() as conn:
+            conn.execute(text(query))
+
+
+def create_numeric_casts(engine):
+    type_body_map = {
+        NUMERIC: f"""
+        BEGIN
+          RETURN $1;
+        END;
+        """,
+        BOOLEAN: f"""
+        BEGIN
+          IF $1 THEN
+            RETURN 1::numeric;
+          END IF;
+          RETURN 0;
+        END;
+        """,
+        TEXT: f"""
+        BEGIN
+          RETURN $1::numeric;
+        END;
+        """
+    }
+    for type_, body in type_body_map.items():
+        query = assemble_function_creation_sql(type_, NUMERIC, body)
         with engine.begin() as conn:
             conn.execute(text(query))
 
