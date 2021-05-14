@@ -3,8 +3,10 @@ from db.types import base, email
 
 BOOLEAN = "boolean"
 EMAIL = email.QUALIFIED_EMAIL
+INTERVAL = "interval"
 NUMERIC = "numeric"
 TEXT = "text"
+VARCHAR = "varchar"
 
 
 def get_supported_alter_column_types(engine):
@@ -48,7 +50,10 @@ def alter_column_type(
 
 def install_all_casts(engine):
     create_boolean_casts(engine)
+    create_email_casts(engine)
+    create_interval_casts(engine)
     create_numeric_casts(engine)
+    create_varchar_casts(engine)
 
 
 def create_boolean_casts(engine):
@@ -120,6 +125,58 @@ def create_email_casts(engine):
         """,
     }
     create_cast_functions(EMAIL, type_body_map, engine)
+
+
+def create_interval_casts(engine):
+    type_body_map = {
+        INTERVAL: f"""
+        BEGIN
+          RETURN $1;
+        END;
+        """,
+        TEXT: f"""
+        BEGIN
+          RETURN $1::{INTERVAL};
+        END;
+        """,
+    }
+    create_cast_functions(INTERVAL, type_body_map, engine)
+
+
+def create_varchar_casts(engine):
+    type_body_map = {
+        VARCHAR: f"""
+        BEGIN
+          RETURN $1;
+        END;
+        """,
+        BOOLEAN: f"""
+        BEGIN
+          RETURN $1::{VARCHAR};
+        END;
+        """,
+        EMAIL: f"""
+        BEGIN
+          RETURN $1::{VARCHAR};
+        END;
+        """,
+        INTERVAL: f"""
+        BEGIN
+          RETURN $1::{VARCHAR};
+        END;
+        """,
+        NUMERIC: f"""
+        BEGIN
+          RETURN $1::{VARCHAR};
+        END;
+        """,
+        TEXT: f"""
+        BEGIN
+          RETURN $1::{VARCHAR};
+        END;
+        """,
+    }
+    create_cast_functions(VARCHAR, type_body_map, engine)
 
 
 def create_cast_functions(target_type, type_body_map, engine):
