@@ -1,9 +1,10 @@
 from sqlalchemy import text
-from db.types import base
+from db.types import base, email
 
-TEXT = "text"
 BOOLEAN = "boolean"
+EMAIL = email.QUALIFIED_EMAIL
 NUMERIC = "numeric"
+TEXT = "text"
 
 
 def install_all_casts(engine):
@@ -39,10 +40,7 @@ def create_boolean_casts(engine):
         END;
         """,
     }
-    for type_, body in type_body_map.items():
-        query = assemble_function_creation_sql(type_, BOOLEAN, body)
-        with engine.begin() as conn:
-            conn.execute(text(query))
+    create_cast_functions(BOOLEAN, type_body_map, engine)
 
 
 def create_numeric_casts(engine):
@@ -55,19 +53,23 @@ def create_numeric_casts(engine):
         BOOLEAN: f"""
         BEGIN
           IF $1 THEN
-            RETURN 1::numeric;
+            RETURN 1::{NUMERIC};
           END IF;
           RETURN 0;
         END;
         """,
         TEXT: f"""
         BEGIN
-          RETURN $1::numeric;
+          RETURN $1::{NUMERIC};
         END;
-        """
+        """,
     }
+    create_cast_functions(NUMERIC, type_body_map, engine)
+
+
+def create_cast_functions(target_type, type_body_map, engine):
     for type_, body in type_body_map.items():
-        query = assemble_function_creation_sql(type_, NUMERIC, body)
+        query = assemble_function_creation_sql(type_, target_type, body)
         with engine.begin() as conn:
             conn.execute(text(query))
 
@@ -84,5 +86,5 @@ def assemble_function_creation_sql(argument_type, target_type, function_body):
 
 def get_cast_function_name(target_type):
     unqualified_type_name = target_type.split('.')[-1].lower()
-    bare_function_name = f"cast_to_{target_type}"
+    bare_function_name = f"cast_to_{unqualified_type_name}"
     return f"{base.get_qualified_name(bare_function_name)}"
