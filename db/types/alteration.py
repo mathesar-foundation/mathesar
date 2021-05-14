@@ -59,7 +59,7 @@ def install_all_casts(engine):
 def create_boolean_casts(engine):
     not_bool_exception_str = f"RAISE EXCEPTION '% is not a {BOOLEAN}', $1;"
     type_body_map = {
-        BOOLEAN: f"""
+        BOOLEAN: """
         BEGIN
           RETURN $1;
         END;
@@ -89,7 +89,7 @@ def create_boolean_casts(engine):
 
 def create_numeric_casts(engine):
     type_body_map = {
-        NUMERIC: f"""
+        NUMERIC: """
         BEGIN
           RETURN $1;
         END;
@@ -113,7 +113,7 @@ def create_numeric_casts(engine):
 
 def create_email_casts(engine):
     type_body_map = {
-        EMAIL: f"""
+        EMAIL: """
         BEGIN
           RETURN $1;
         END;
@@ -129,7 +129,7 @@ def create_email_casts(engine):
 
 def create_interval_casts(engine):
     type_body_map = {
-        INTERVAL: f"""
+        INTERVAL: """
         BEGIN
           RETURN $1;
         END;
@@ -145,7 +145,7 @@ def create_interval_casts(engine):
 
 def create_varchar_casts(engine):
     type_body_map = {
-        VARCHAR: f"""
+        VARCHAR: """
         BEGIN
           RETURN $1;
         END;
@@ -196,46 +196,8 @@ def assemble_function_creation_sql(argument_type, target_type, function_body):
     $$ LANGUAGE plpgsql;
     """
 
+
 def get_cast_function_name(target_type):
     unqualified_type_name = target_type.split('.')[-1].lower()
     bare_function_name = f"cast_to_{unqualified_type_name}"
     return f"{base.get_qualified_name(bare_function_name)}"
-
-
-def get_supported_alter_column_types(engine):
-    dialect_types = engine.dialect.ischema_names
-    type_map = {
-        # Default Postgres types
-        "boolean": dialect_types.get("boolean"),
-        "interval": dialect_types.get("interval"),
-        "numeric": dialect_types.get("numeric"),
-        "string": dialect_types.get("name"),
-        # Custom Mathesar types
-        "email": dialect_types.get(email.QUALIFIED_EMAIL)
-    }
-    return {k: v for k, v in type_map.items() if v is not None}
-
-
-def alter_column_type(
-        schema, table_name, column_name, target_type_str, engine
-):
-    _preparer = engine.dialect.identifier_preparer
-    supported_types = get_supported_alter_column_types(engine)
-    target_type = supported_types.get(target_type_str.lower())
-    with engine.begin() as conn:
-        metadata = MetaData(bind=engine, schema=schema)
-        table = Table(
-            table_name, metadata, schema=schema, autoload_with=engine
-        )
-        column = table.columns[column_name]
-        prepared_table_name = _preparer.format_table(table)
-        prepared_column_name = _preparer.format_column(column)
-        prepared_type_name = target_type().compile(dialect=engine.dialect)
-        cast_function_name = get_cast_function_name(prepared_type_name)
-        alter_stmt = f"""
-        ALTER TABLE {prepared_table_name}
-          ALTER COLUMN {prepared_column_name}
-          TYPE {prepared_type_name}
-          USING {cast_function_name}({prepared_column_name});
-        """
-        conn.execute(DDL(alter_stmt))

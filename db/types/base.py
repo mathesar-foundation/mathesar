@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, MetaData, Table, DDL
+from sqlalchemy import create_engine
 from db import constants
 
 SCHEMA = f"{constants.MATHESAR_PREFIX}types"
@@ -9,4 +9,3 @@ preparer = create_engine("postgresql://").dialect.identifier_preparer
 
 def get_qualified_name(name):
     return ".".join([preparer.quote_schema(SCHEMA), name])
-

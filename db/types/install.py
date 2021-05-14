@@ -8,6 +8,5 @@ def install_mathesar_on_database(engine):
     alteration.install_all_casts(engine)
 
 
-
 def create_type_schema(engine):
     create_schema(base.SCHEMA, engine)
