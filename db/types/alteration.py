@@ -57,6 +57,17 @@ def install_all_casts(engine):
 
 
 def create_boolean_casts(engine):
+    """
+    Using the `create_cast_functions` python function, we create a
+    PL/pgSQL function to cast types corresponding to each of:
+
+    boolean -> boolean:  Identity. No remarks
+    text -> boolean:     We only cast 't', 'f', 'true', or 'false' all
+                         others raise a custom exception.
+    numeric -> boolean:  We only cast 1 -> true, 0 -> false (this is not
+                         default behavior for PostgreSQL). Others raise a
+                         custom exception.
+    """
     not_bool_exception_str = f"RAISE EXCEPTION '% is not a {BOOLEAN}', $1;"
     type_body_map = {
         BOOLEAN: """
@@ -88,6 +99,14 @@ def create_boolean_casts(engine):
 
 
 def create_numeric_casts(engine):
+    """
+    Using the `create_cast_functions` python function, we create a
+    PL/pgSQL function to cast types corresponding to each of:
+
+    numeric -> numeric:  Identity. No remarks
+    boolean -> numeric:  We cast TRUE -> 1, FALSE -> 0
+    text -> numeric:     We use the default PostgreSQL behavior.
+    """
     type_body_map = {
         NUMERIC: """
         BEGIN
@@ -112,6 +131,15 @@ def create_numeric_casts(engine):
 
 
 def create_email_casts(engine):
+    """
+    Using the `create_cast_functions` python function, we create a
+    PL/pgSQL function to cast types corresponding to each of:
+
+    email -> email:  Identity. No remarks
+    text -> email:   We use the default PostgreSQL behavior (this will
+                     just check that the TEXT object satisfies the email
+                     DOMAIN).
+    """
     type_body_map = {
         EMAIL: """
         BEGIN
@@ -128,6 +156,15 @@ def create_email_casts(engine):
 
 
 def create_interval_casts(engine):
+    """
+    Using the `create_cast_functions` python function, we create a
+    PL/pgSQL function to cast types corresponding to each of:
+
+    interval -> interval:  Identity. No remarks
+    text -> interval:      We first check that the text *cannot* be cast
+                           to a numeric, and then try to cast the text to an
+                           interval.
+    """
     type_body_map = {
         INTERVAL: """
         BEGIN
@@ -150,6 +187,17 @@ def create_interval_casts(engine):
 
 
 def create_varchar_casts(engine):
+    """
+    Using the `create_cast_functions` python function, we create a
+    PL/pgSQL function to cast types corresponding to each of:
+
+    varchar -> varchar:   Identity. No remarks
+    boolean -> varchar:   We use the default PostgreSQL cast behavior.
+    email -> varchar:     We use the default PostgreSQL cast behavior.
+    interval -> varchar:  We use the default PostgreSQL cast behavior.
+    numeric -> varchar:   We use the default PostgreSQL cast behavior.
+    text -> varchar:      We use the default PostgreSQL cast behavior.
+    """
     type_body_map = {
         VARCHAR: """
         BEGIN
@@ -186,6 +234,22 @@ def create_varchar_casts(engine):
 
 
 def create_cast_functions(target_type, type_body_map, engine):
+    """
+    This python function writes a number of PL/pgSQL functions that cast
+    between types supported by Mathesar, and installs them on the DB
+    using the given engine.  Each generated PL/pgSQL function has the
+    name `cast_to_<target_type>`.  We utilize the function overloading of
+    PL/pgSQL to use the correct function body corresponding to a given
+    input (source) type.
+
+    Args:
+        target_type:   string corresponding to the target type of the
+                       cast function.
+        type_body_map: dictionary that gives a map between source types
+                       and the body of a PL/pgSQL function to cast a
+                       given source type to the target type.
+        engine:        an SQLAlchemy engine.
+    """
     for type_, body in type_body_map.items():
         query = assemble_function_creation_sql(type_, target_type, body)
         with engine.begin() as conn:
