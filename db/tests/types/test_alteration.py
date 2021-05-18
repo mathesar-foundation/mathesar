@@ -6,7 +6,7 @@ from sqlalchemy import String, Numeric
 from sqlalchemy.schema import CreateSchema, DropSchema
 from db import types
 from db.engine import _add_custom_types_to_engine
-from db.types import base, install
+from db.types import alteration, base, install
 
 TEST_SCHEMA = "test_schema"
 
@@ -37,13 +37,13 @@ def engine_email_type(temporary_testing_schema):
 
 
 def test_get_alter_column_types_with_standard_engine(engine):
-    type_dict = base.get_supported_alter_column_types(engine)
+    type_dict = alteration.get_supported_alter_column_types(engine)
     assert len(type_dict) > 0
     assert all([type_ not in type_dict for type_ in types.CUSTOM_TYPE_DICT])
 
 
 def test_get_alter_column_types_with_custom_engine(engine_with_types):
-    type_dict = base.get_supported_alter_column_types(engine_with_types)
+    type_dict = alteration.get_supported_alter_column_types(engine_with_types)
     assert all(
         [
             type_ in type_dict.values()
@@ -78,7 +78,7 @@ def test_alter_column_type_alters_column_type(
         schema=schema
     )
     input_table.create()
-    base.alter_column_type(
+    alteration.alter_column_type(
         schema, TABLE_NAME, COLUMN_NAME, target_type, engine,
     )
     metadata = MetaData(bind=engine)
@@ -94,8 +94,6 @@ def test_alter_column_type_alters_column_type(
 
 
 type_test_data_list = [
-    (String, "boolean", "0", False),
-    (String, "boolean", "1", True),
     (String, "boolean", "false", False),
     (String, "boolean", "true", True),
     (String, "boolean", "f", False),
@@ -136,7 +134,7 @@ def test_alter_column_type_casts_column_data(
     ins = input_table.insert(values=(value,))
     with engine.begin() as conn:
         conn.execute(ins)
-    base.alter_column_type(
+    alteration.alter_column_type(
         schema, TABLE_NAME, COLUMN_NAME, target_type, engine,
     )
     metadata = MetaData(bind=engine)
@@ -155,8 +153,11 @@ def test_alter_column_type_casts_column_data(
 
 
 type_test_bad_data_list = [
+    (String, "boolean", "0"),
+    (String, "boolean", "1"),
     (String, "boolean", "cat"),
     (String, "interval", "1 potato"),
+    (String, "interval", "3"),
     (String, "numeric", "abc"),
     (String, "email", "alice-example.com"),
 ]
@@ -183,6 +184,6 @@ def test_alter_column_type_raises_on_bad_column_data(
     with engine.begin() as conn:
         conn.execute(ins)
     with pytest.raises(Exception):
-        base.alter_column_type(
+        alteration.alter_column_type(
             schema, TABLE_NAME, COLUMN_NAME, target_type, engine,
         )
