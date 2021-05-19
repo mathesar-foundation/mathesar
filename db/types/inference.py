@@ -15,7 +15,9 @@ TYPE_INFERENCE_DAG = {
     alteration.BOOLEAN: [],
     alteration.EMAIL: [],
     alteration.INTERVAL: [],
-    alteration.NUMERIC: [],
+    alteration.NUMERIC: [
+        alteration.BOOLEAN,
+    ],
     alteration.STRING: [
         alteration.BOOLEAN,
         alteration.NUMERIC,
