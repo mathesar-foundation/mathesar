@@ -80,8 +80,8 @@ def create_boolean_casts(engine):
         DECLARE
         istrue {BOOLEAN};
         BEGIN
-          SELECT lower($1)='t' OR lower($1)='true' INTO istrue;
-          IF istrue OR lower($1)='f' OR lower($1)='false' THEN
+          SELECT lower($1)='t' OR lower($1)='true' OR $1='1' INTO istrue;
+          IF istrue OR lower($1)='f' OR lower($1)='false' OR $1='0' THEN
             RETURN istrue;
           END IF;
           {not_bool_exception_str}

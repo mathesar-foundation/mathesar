@@ -153,8 +153,6 @@ def test_alter_column_type_casts_column_data(
 
 
 type_test_bad_data_list = [
-    (String, "boolean", "0"),
-    (String, "boolean", "1"),
     (String, "boolean", "cat"),
     (String, "interval", "1 potato"),
     (String, "interval", "3"),
