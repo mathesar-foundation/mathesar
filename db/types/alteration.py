@@ -2,9 +2,10 @@ from sqlalchemy import text, DDL, MetaData, Table
 from db.types import base, email
 
 BOOLEAN = "boolean"
-EMAIL = email.QUALIFIED_EMAIL
+EMAIL = "email"
 INTERVAL = "interval"
 NUMERIC = "numeric"
+STRING = "string"
 TEXT = "text"
 VARCHAR = "varchar"
 
@@ -13,12 +14,12 @@ def get_supported_alter_column_types(engine):
     dialect_types = engine.dialect.ischema_names
     type_map = {
         # Default Postgres types
-        "boolean": dialect_types.get("boolean"),
-        "interval": dialect_types.get("interval"),
-        "numeric": dialect_types.get("numeric"),
-        "string": dialect_types.get("name"),
+        BOOLEAN: dialect_types.get("boolean"),
+        INTERVAL: dialect_types.get("interval"),
+        NUMERIC: dialect_types.get("numeric"),
+        STRING: dialect_types.get("name"),
         # Custom Mathesar types
-        "email": dialect_types.get(email.QUALIFIED_EMAIL)
+        EMAIL: dialect_types.get(email.QUALIFIED_EMAIL)
     }
     return {k: v for k, v in type_map.items() if v is not None}
 
@@ -141,18 +142,18 @@ def create_email_casts(engine):
                      DOMAIN).
     """
     type_body_map = {
-        EMAIL: """
+        email.QUALIFIED_EMAIL: """
         BEGIN
           RETURN $1;
         END;
         """,
         TEXT: f"""
         BEGIN
-          RETURN $1::{EMAIL};
+          RETURN $1::{email.QUALIFIED_EMAIL};
         END;
         """,
     }
-    create_cast_functions(EMAIL, type_body_map, engine)
+    create_cast_functions(email.QUALIFIED_EMAIL, type_body_map, engine)
 
 
 def create_interval_casts(engine):
@@ -209,7 +210,7 @@ def create_varchar_casts(engine):
           RETURN $1::{VARCHAR};
         END;
         """,
-        EMAIL: f"""
+        email.QUALIFIED_EMAIL: f"""
         BEGIN
           RETURN $1::{VARCHAR};
         END;
