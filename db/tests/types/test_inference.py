@@ -1,6 +1,6 @@
 import pytest
 from sqlalchemy import Column, MetaData, Table
-from sqlalchemy import BOOLEAN, String, NUMERIC, VARCHAR
+from sqlalchemy import BOOLEAN, Numeric, NUMERIC, String, VARCHAR
 from sqlalchemy.schema import CreateSchema, DropSchema
 from db.engine import _add_custom_types_to_engine
 from db.types import base, inference, install
@@ -34,6 +34,8 @@ def engine_email_type(temporary_testing_schema):
 
 
 type_data_list = [
+    (Numeric, [0, 2, 1, 0], NUMERIC),
+    (Numeric, [0, 1, 1, 0], BOOLEAN),
     (String, ["t", "false", "true", "f", "f"], BOOLEAN),
     (String, ["t", "false", "2", "0"], VARCHAR),
     (String, ["a", "cat", "mat", "bat"], VARCHAR),
