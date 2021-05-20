@@ -3,13 +3,7 @@ from sqlalchemy import MetaData, Table
 from sqlalchemy import VARCHAR, TEXT, Text
 from db.types import alteration
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s:  %(message)s',
-    level=logging.INFO
-)
-
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 TYPE_INFERENCE_DAG = {
     alteration.BOOLEAN: [],

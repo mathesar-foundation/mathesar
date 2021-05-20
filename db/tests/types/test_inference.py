@@ -49,7 +49,6 @@ def test_type_inference(engine_email_type, type_, value_list, expect_type):
     TEST_TABLE = "test_table"
     TEST_COLUMN = "test_column"
     metadata = MetaData(bind=engine)
-    print(value_list)
     input_table = Table(
         TEST_TABLE,
         metadata,
