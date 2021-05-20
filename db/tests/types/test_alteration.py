@@ -3,37 +3,17 @@ from decimal import Decimal
 import pytest
 from sqlalchemy import Table, Column, MetaData
 from sqlalchemy import String, Numeric
-from sqlalchemy.schema import CreateSchema, DropSchema
 from db import types
-from db.engine import _add_custom_types_to_engine
-from db.types import alteration, base, install
-
-TEST_SCHEMA = "test_schema"
+from db.tests.types import fixtures
+from db.types import alteration
 
 
-@pytest.fixture
-def engine_with_types(engine):
-    _add_custom_types_to_engine(engine)
-    return engine
-
-
-@pytest.fixture
-def temporary_testing_schema(engine_with_types):
-    schema = TEST_SCHEMA
-    with engine_with_types.begin() as conn:
-        conn.execute(CreateSchema(schema))
-    yield engine_with_types, schema
-    with engine_with_types.begin() as conn:
-        conn.execute(DropSchema(schema, cascade=True, if_exists=True))
-
-
-@pytest.fixture
-def engine_email_type(temporary_testing_schema):
-    engine, schema = temporary_testing_schema
-    install.install_mathesar_on_database(engine)
-    yield engine, schema
-    with engine.begin() as conn:
-        conn.execute(DropSchema(base.SCHEMA, cascade=True, if_exists=True))
+# We need to set these variables when the file loads, or pytest can't
+# properly detect the fixtures.  Importing them directly results in a
+# flake8 unused import error.
+engine_with_types = fixtures.engine_with_types
+engine_email_type = fixtures.engine_email_type
+temporary_testing_schema = fixtures.temporary_testing_schema
 
 
 def test_get_alter_column_types_with_standard_engine(engine):
