@@ -9,7 +9,7 @@ from db.types import email
 
 # We need to set these variables when the file loads, or pytest can't
 # properly detect the fixtures.  Importing them directly results in a
-# flake8 unused import error.
+# flake8 unused import error, and a bunch of flake8 F811 errors.
 engine_with_types = fixtures.engine_with_types
 engine_email_type = fixtures.engine_email_type
 temporary_testing_schema = fixtures.temporary_testing_schema
