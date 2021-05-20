@@ -1,6 +1,7 @@
 import logging
 from sqlalchemy import MetaData, Table
 from sqlalchemy import VARCHAR, TEXT, Text
+from sqlalchemy.exc import DatabaseError
 from db.types import alteration
 
 logger = logging.getLogger(__name__)
@@ -64,7 +65,9 @@ def infer_column_type(
                 type_inference_dag=type_inference_dag,
             )
             break
-        except Exception:
+        # It's expected we catch this error when the test to see whether
+        # a type is appropriate for a column fails.
+        except DatabaseError:
             logger.info(
                 f"Cannot alter column {column_name} to type {type_str}"
             )
