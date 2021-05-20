@@ -1,14 +1,23 @@
+from django.contrib.auth.models import User
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils.functional import cached_property
 
 from mathesar.database.base import create_mathesar_engine
+from mathesar.utils import models as model_utils
 from db import tables, records
 
 
-class DatabaseObject(models.Model):
-    name = models.CharField(max_length=63)
+class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
+class DatabaseObject(BaseModel):
+    name = models.CharField(max_length=63)
 
     class Meta:
         abstract = True
@@ -63,3 +72,13 @@ class Table(DatabaseObject):
 
     def delete_record(self, id_value):
         return records.delete_record(self._sa_table, self._sa_engine, id_value)
+
+
+class DataFile(BaseModel):
+    file = models.FileField(
+        upload_to=model_utils.user_directory_path,
+        validators=[FileExtensionValidator(allowed_extensions=['csv'])]
+    )
+    associated_table = models.ForeignKey(Table, blank=True, null=True, on_delete=models.SET_NULL)
+    associated_schema = models.ForeignKey(Schema, blank=True, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)

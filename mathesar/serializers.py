@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework import serializers
 
-from mathesar.models import Table, Schema
+from mathesar.models import Table, Schema, DataFile
 
 
 class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
@@ -45,3 +45,10 @@ class TableSerializer(serializers.HyperlinkedModelSerializer):
 class RecordSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         return instance._asdict()
+
+
+class DataFileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = DataFile
+        fields = ['id', 'file', 'associated_table', 'associated_schema', 'user']
