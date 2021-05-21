@@ -60,6 +60,10 @@ class DataFileSerializer(serializers.ModelSerializer):
         read_only_fields = ['table_imported_to']
 
     def save(self, **kwargs):
-        """Include default for read_only `user` field"""
-        kwargs["user"] = self.fields["user"].get_default()
+        """
+        Set user to current user while saving the data file.
+        """
+        current_user = self.fields["user"].get_default()
+        if current_user.is_authenticated:
+            kwargs["user"] = current_user
         return super().save(**kwargs)

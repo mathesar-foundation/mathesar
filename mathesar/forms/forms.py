@@ -1,3 +1,5 @@
+# TODO: Remove this file once frontend switches to using the API
+
 from django import forms
 from django.core.exceptions import ValidationError
 

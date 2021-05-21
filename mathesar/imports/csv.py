@@ -20,7 +20,8 @@ def create_db_table_from_csv(name, schema, csv_reader, engine):
     return table
 
 
-def create_table_from_csv(name, schema, database_key, csv_file):
+# TODO: Remove this function once frontend switches to using the API
+def legacy_create_table_from_csv(name, schema, database_key, csv_file):
     engine = create_mathesar_engine(database_key)
     csv_reader = get_csv_reader(csv_file)
     db_table = create_db_table_from_csv(name, schema, csv_reader, engine)
