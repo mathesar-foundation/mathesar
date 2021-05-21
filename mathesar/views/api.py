@@ -1,11 +1,12 @@
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
 
 from mathesar.database.utils import get_non_default_database_keys
-from mathesar.models import Table, Schema
+from mathesar.models import Table, Schema, DataFile
 from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
-from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer
+from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer
 
 
 class SchemaViewSet(viewsets.ReadOnlyModelViewSet):
@@ -63,3 +64,9 @@ class RecordViewSet(viewsets.ViewSet):
 class DatabaseKeyViewSet(viewsets.ViewSet):
     def list(self, request):
         return Response(get_non_default_database_keys())
+
+
+class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):
+    queryset = DataFile.objects.all().order_by('-created_at')
+    serializer_class = DataFileSerializer
+    pagination_class = DefaultLimitOffsetPagination

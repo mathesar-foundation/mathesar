@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +26,7 @@ SECRET_KEY = "2gr6ud88x=(p855_5nbj_+7^bw-iz&n7ldqv%94mjaecl+b9=4"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -136,3 +137,10 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 CLIENT_DEV_URL = "http://localhost:3000"
+
+
+# Media files (uploaded by the user)
+
+MEDIA_ROOT = os.path.join(BASE_DIR, '.media/')
+
+MEDIA_URL = "/media/"
