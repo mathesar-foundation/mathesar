@@ -51,6 +51,7 @@ class DataFileSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(
         default=serializers.CurrentUserDefault(), read_only=True
     )
+    schema = serializers.PrimaryKeyRelatedField(required=True, queryset=Schema.objects.all())
 
     class Meta:
         model = DataFile

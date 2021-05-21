@@ -83,3 +83,13 @@ class DataFile(BaseModel):
     table_imported_to = models.ForeignKey(Table, blank=True, null=True, on_delete=models.SET_NULL)
     schema = models.ForeignKey(Schema, blank=True, null=True, on_delete=models.SET_NULL)
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        created = False
+        if not self.pk:
+            created = True
+        super().save(*args, **kwargs)
+        if created:
+            # TODO: remove this
+            from mathesar.imports.csv import create_table_from_csv
+            create_table_from_csv(self)

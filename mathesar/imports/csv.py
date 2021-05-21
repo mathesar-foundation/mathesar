@@ -4,7 +4,7 @@ from io import TextIOWrapper
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.utils import get_database_key
 from mathesar.models import Table, Schema
-from db import tables
+from db import tables, records
 
 
 def get_csv_reader(csv_file):
@@ -13,7 +13,8 @@ def get_csv_reader(csv_file):
     return reader
 
 
-def create_db_table_from_csv(name, schema, csv_reader, engine):
+# TODO: Remove this function once frontend switches to using the API
+def legacy_create_db_table_from_csv(name, schema, csv_reader, engine):
     table = tables.create_string_column_table(
         name, schema, csv_reader.fieldnames, engine,
     )
@@ -24,9 +25,33 @@ def create_db_table_from_csv(name, schema, csv_reader, engine):
 def legacy_create_table_from_csv(name, schema, database_key, csv_file):
     engine = create_mathesar_engine(database_key)
     csv_reader = get_csv_reader(csv_file)
-    db_table = create_db_table_from_csv(name, schema, csv_reader, engine)
+    db_table = legacy_create_db_table_from_csv(name, schema, csv_reader, engine)
     database = get_database_key(engine)
     schema, _ = Schema.objects.get_or_create(name=db_table.schema, database=database)
     table, _ = Table.objects.get_or_create(name=db_table.name, schema=schema)
     table.create_record_or_records([row for row in csv_reader])
+    return table
+
+
+def create_db_table_from_data_file(data_file):
+    engine = create_mathesar_engine(data_file.schema.database)
+    csv_filename = data_file.file.path
+    with open(csv_filename, 'rb') as csv_file:
+        csv_reader = get_csv_reader(csv_file)
+        column_names = csv_reader.fieldnames
+        table = tables.create_string_column_table(
+            name=data_file.file.name.split('/')[-1],
+            schema=data_file.schema.name,
+            column_names=column_names,
+            engine=engine
+        )
+    records.create_records_from_csv(table, engine, csv_filename, column_names)
+    return table
+
+
+def create_table_from_csv(data_file):
+    db_table = create_db_table_from_data_file(data_file)
+    table, _ = Table.objects.get_or_create(name=db_table.name, schema=data_file.schema)
+    data_file.table_imported_to = table
+    data_file.save()
     return table
