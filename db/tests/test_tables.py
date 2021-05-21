@@ -362,7 +362,7 @@ def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
     column_list = []
     engine = engine_with_schema
     table_name = "t1"
-    t1 = tables.create_mathesar_table(
+    tables.create_mathesar_table(
         table_name, APP_SCHEMA, column_list, engine
     )
     with patch.object(tables.inference, "infer_column_type") as mock_infer:
@@ -380,7 +380,7 @@ def test_infer_table_column_types_infers_non_default_types(engine_with_schema):
     column_list = [col1, col2]
     engine = engine_with_schema
     table_name = "table_with_columns"
-    t1 = tables.create_mathesar_table(
+    tables.create_mathesar_table(
         table_name, APP_SCHEMA, column_list, engine
     )
     with patch.object(tables.inference, "infer_column_type") as mock_infer:
@@ -410,7 +410,7 @@ def test_infer_table_column_types_skips_pkey_columns(engine_with_schema):
     column_list = [Column("checkcol", String, primary_key=True)]
     engine = engine_with_schema
     table_name = "t1"
-    t1 = tables.create_mathesar_table(
+    tables.create_mathesar_table(
         table_name, APP_SCHEMA, column_list, engine
     )
     with patch.object(tables.inference, "infer_column_type") as mock_infer:
@@ -432,6 +432,4 @@ def test_infer_table_column_types_skips_fkey_columns(
             remainder.name,
             engine
         )
-    assert all([
-        call_[1][2] != FKEY_COL for call_ in mock_infer.mock_calls
-    ])
+    assert all([call_[1][2] != FKEY_COL for call_ in mock_infer.mock_calls])
