@@ -345,11 +345,12 @@ def infer_table_column_types(
 ):
     table = reflect_table(table_name, schema, engine)
     # we only want to infer (modify) the type of non-default columns
-    non_default_column_names = (
+    inferable_column_names = (
         col.name for col in table.columns
         if not columns.MathesarColumn.from_column(col).is_default
+        and not col.primary_key
     )
-    for column_name in non_default_column_names:
+    for column_name in inferable_column_names:
         inference.infer_column_type(
             schema,
             table_name,

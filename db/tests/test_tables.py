@@ -404,3 +404,19 @@ def test_infer_table_column_types_infers_non_default_types(engine_with_schema):
         ),
     ]
     mock_infer.assert_has_calls(expect_calls)
+
+
+def test_infer_table_column_types_skips_pkey_columns(engine_with_schema):
+    column_list = [Column("checkcol", String, primary_key=True)]
+    engine = engine_with_schema
+    table_name = "t1"
+    t1 = tables.create_mathesar_table(
+        table_name, APP_SCHEMA, column_list, engine
+    )
+    with patch.object(tables.inference, "infer_column_type") as mock_infer:
+        tables.infer_table_column_types(
+            APP_SCHEMA,
+            table_name,
+            engine
+        )
+    mock_infer.assert_not_called()
