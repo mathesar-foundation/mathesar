@@ -3,52 +3,36 @@ import pytest
 from sqlalchemy import text, select, func, Table, Column, MetaData
 from sqlalchemy.exc import IntegrityError
 from db.engine import _add_custom_types_to_engine
-from db.types import install
+from db.tests.types import fixtures
 from db.types import email
 
 
-@pytest.fixture
-def engine_type_schema(engine):
-    install.create_type_schema(engine)
-    yield engine
-    with engine.begin() as conn:
-        conn.execute(
-            text(f"DROP SCHEMA IF EXISTS {install.base.SCHEMA} CASCADE;")
-        )
-
-
-@pytest.fixture
-def engine_email_type(engine_type_schema):
-    email.create_email_type(engine_type_schema)
-    return engine_type_schema
-
-
-@pytest.fixture
-def engine_with_app(engine_email_type):
-    app_schema = "test_app"
-    with engine_email_type.begin() as conn:
-        conn.execute(text(f"CREATE SCHEMA {app_schema};"))
-    yield engine_email_type, app_schema
-    with engine_email_type.begin() as conn:
-        conn.execute(text(f"DROP SCHEMA {app_schema} CASCADE;"))
+# We need to set these variables when the file loads, or pytest can't
+# properly detect the fixtures.  Importing them directly results in a
+# flake8 unused import error, and a bunch of flake8 F811 errors.
+engine_with_types = fixtures.engine_with_types
+engine_email_type = fixtures.engine_email_type
+temporary_testing_schema = fixtures.temporary_testing_schema
 
 
 def test_domain_func_wrapper(engine_email_type):
+    engine, _ = engine_email_type
     sel = select(func.email_domain_name(text("'test@example.com'")))
-    with engine_email_type.begin() as conn:
+    with engine.begin() as conn:
         res = conn.execute(sel)
         assert res.fetchone()[0] == "example.com"
 
 
 def test_local_part_func_wrapper(engine_email_type):
+    engine, _ = engine_email_type
     sel = select(func.email_local_part(text("'test@example.com'")))
-    with engine_email_type.begin() as conn:
+    with engine.begin() as conn:
         res = conn.execute(sel)
         assert res.fetchone()[0] == "test"
 
 
-def test_email_type_column_creation(engine_with_app):
-    engine, app_schema = engine_with_app
+def test_email_type_column_creation(engine_email_type):
+    engine, app_schema = engine_email_type
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={app_schema}"))
         metadata = MetaData(bind=conn)
@@ -60,8 +44,8 @@ def test_email_type_column_creation(engine_with_app):
         test_table.create()
 
 
-def test_email_type_column_reflection(engine_with_app):
-    engine, app_schema = engine_with_app
+def test_email_type_column_reflection(engine_email_type):
+    engine, app_schema = engine_email_type
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         test_table = Table(
@@ -81,9 +65,10 @@ def test_email_type_column_reflection(engine_with_app):
 
 
 def test_create_email_type_domain_passes_correct_emails(engine_email_type):
+    engine, _ = engine_email_type
     email_addresses_correct = ["alice@example.com", "alice@example"]
     for address in email_addresses_correct:
-        with engine_email_type.begin() as conn:
+        with engine.begin() as conn:
             res = conn.execute(
                 text(f"SELECT '{address}'::{email.QUALIFIED_EMAIL};")
             )
@@ -91,9 +76,10 @@ def test_create_email_type_domain_passes_correct_emails(engine_email_type):
 
 
 def test_create_email_type_domain_checks_broken_emails(engine_email_type):
+    engine, _ = engine_email_type
     address_incorrect = "aliceexample.com"
     with pytest.raises(IntegrityError) as e:
-        with engine_email_type.begin() as conn:
+        with engine.begin() as conn:
             conn.execute(
                 text(
                     f"SELECT '{address_incorrect}'::{email.QUALIFIED_EMAIL};"
