@@ -349,6 +349,7 @@ def infer_table_column_types(
         col.name for col in table.columns
         if not columns.MathesarColumn.from_column(col).is_default
         and not col.primary_key
+        and not col.foreign_keys
     )
     for column_name in inferable_column_names:
         inference.infer_column_type(

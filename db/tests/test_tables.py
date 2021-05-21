@@ -420,3 +420,18 @@ def test_infer_table_column_types_skips_pkey_columns(engine_with_schema):
             engine
         )
     mock_infer.assert_not_called()
+
+
+def test_infer_table_column_types_skips_fkey_columns(
+        extracted_remainder_roster
+):
+    _, remainder, _, engine = extracted_remainder_roster
+    with patch.object(tables.inference, "infer_column_type") as mock_infer:
+        tables.infer_table_column_types(
+            APP_SCHEMA,
+            remainder.name,
+            engine
+        )
+    assert all([
+        call_[1][2] != FKEY_COL for call_ in mock_infer.mock_calls
+    ])
