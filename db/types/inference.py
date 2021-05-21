@@ -6,6 +6,8 @@ from db.types import alteration
 
 logger = logging.getLogger(__name__)
 
+MAX_INFERENCE_DAG_DEPTH = 100
+
 TYPE_INFERENCE_DAG = {
     alteration.BOOLEAN: [],
     alteration.EMAIL: [],
@@ -34,7 +36,7 @@ def infer_column_type(
         depth=0,
         type_inference_dag=TYPE_INFERENCE_DAG,
 ):
-    if depth > 100:
+    if depth > MAX_INFERENCE_DAG_DEPTH:
         raise DagCycleError("The type_inference_dag likely has a cycle")
     supported_types = alteration.get_supported_alter_column_types(engine)
     reverse_type_map = {

@@ -3,6 +3,7 @@ from sqlalchemy import (
 )
 
 from db import columns, constants, schemas
+from db.types import inference
 
 
 def create_string_column_table(name, schema, column_names, engine):
@@ -335,3 +336,23 @@ def get_count(table, engine):
     query = select([func.count()]).select_from(table)
     with engine.begin() as conn:
         return conn.execute(query).scalar()
+
+
+def infer_table_column_types(
+        schema,
+        table_name,
+        engine,
+):
+    table = reflect_table(table_name, schema, engine)
+    # we only want to infer (modify) the type of non-default columns
+    non_default_column_names = (
+        col.name for col in table.columns
+        if not columns.MathesarColumn.from_column(col).is_default
+    )
+    for column_name in non_default_column_names:
+        inference.infer_column_type(
+            schema,
+            table_name,
+            column_name,
+            engine,
+        )
