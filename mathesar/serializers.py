@@ -48,9 +48,18 @@ class RecordSerializer(serializers.BaseSerializer):
 
 
 class DataFileSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(
+        default=serializers.CurrentUserDefault(), read_only=True
+    )
+
     class Meta:
         model = DataFile
         fields = ['id', 'file', 'table_imported_to', 'schema', 'user']
         # We only currently support importing to a new table, so setting a table via API is invalid.
         # User should be set automatically, not submitted via the API.
-        read_only_fields = ['table_imported_to', 'user']
+        read_only_fields = ['table_imported_to']
+
+    def save(self, **kwargs):
+        """Include default for read_only `user` field"""
+        kwargs["user"] = self.fields["user"].get_default()
+        return super().save(**kwargs)
