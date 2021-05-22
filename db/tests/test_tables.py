@@ -1,6 +1,7 @@
 import os
+from unittest.mock import call, patch
 import pytest
-from sqlalchemy import text, MetaData, select
+from sqlalchemy import text, MetaData, select, Column, String
 from db import tables, constants, columns
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -54,10 +55,10 @@ def extracted_remainder_roster(engine_with_roster):
 
 
 def test_table_creation_doesnt_reuse_defaults(engine_with_schema):
-    columns = []
+    column_list = []
     engine = engine_with_schema
-    t1 = tables.create_mathesar_table("t1", APP_SCHEMA, columns, engine)
-    t2 = tables.create_mathesar_table("t2", APP_SCHEMA, columns, engine)
+    t1 = tables.create_mathesar_table("t1", APP_SCHEMA, column_list, engine)
+    t2 = tables.create_mathesar_table("t2", APP_SCHEMA, column_list, engine)
     assert all(
         [
             c1.name == c2.name and c1 != c2
@@ -355,3 +356,80 @@ def test_move_columns_moves_column_from_rem_to_ext(extracted_remainder_roster):
     actual_remainder_cols = [col.name for col in new_remainder.columns]
     assert sorted(actual_extracted_cols) == sorted(expect_extracted_cols)
     assert sorted(actual_remainder_cols) == sorted(expect_remainder_cols)
+
+
+def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
+    column_list = []
+    engine = engine_with_schema
+    table_name = "t1"
+    tables.create_mathesar_table(
+        table_name, APP_SCHEMA, column_list, engine
+    )
+    with patch.object(tables.inference, "infer_column_type") as mock_infer:
+        tables.infer_table_column_types(
+            APP_SCHEMA,
+            table_name,
+            engine
+        )
+    mock_infer.assert_not_called()
+
+
+def test_infer_table_column_types_infers_non_default_types(engine_with_schema):
+    col1 = Column("col1", String)
+    col2 = Column("col2", String)
+    column_list = [col1, col2]
+    engine = engine_with_schema
+    table_name = "table_with_columns"
+    tables.create_mathesar_table(
+        table_name, APP_SCHEMA, column_list, engine
+    )
+    with patch.object(tables.inference, "infer_column_type") as mock_infer:
+        tables.infer_table_column_types(
+            APP_SCHEMA,
+            table_name,
+            engine
+        )
+    expect_calls = [
+        call(
+            APP_SCHEMA,
+            table_name,
+            col1.name,
+            engine,
+        ),
+        call(
+            APP_SCHEMA,
+            table_name,
+            col2.name,
+            engine,
+        ),
+    ]
+    mock_infer.assert_has_calls(expect_calls)
+
+
+def test_infer_table_column_types_skips_pkey_columns(engine_with_schema):
+    column_list = [Column("checkcol", String, primary_key=True)]
+    engine = engine_with_schema
+    table_name = "t1"
+    tables.create_mathesar_table(
+        table_name, APP_SCHEMA, column_list, engine
+    )
+    with patch.object(tables.inference, "infer_column_type") as mock_infer:
+        tables.infer_table_column_types(
+            APP_SCHEMA,
+            table_name,
+            engine
+        )
+    mock_infer.assert_not_called()
+
+
+def test_infer_table_column_types_skips_fkey_columns(
+        extracted_remainder_roster
+):
+    _, remainder, _, engine = extracted_remainder_roster
+    with patch.object(tables.inference, "infer_column_type") as mock_infer:
+        tables.infer_table_column_types(
+            APP_SCHEMA,
+            remainder.name,
+            engine
+        )
+    assert all([call_[1][2] != FKEY_COL for call_ in mock_infer.mock_calls])
