@@ -1,22 +1,18 @@
-
-<style global lang="scss">
-  @import './Index.scss';
-</style>
-
-<script>
+<script lang="ts">
   import Cookies from 'js-cookie';
   import { schemas, reloadSchemas } from '@mathesar/api/schemas';
 
   export let database = null;
 
-  function submitListener(form) {
-    function onSubmit(e) {
+  function submitListener(form: Node) {
+    function onSubmit(e: Event) {
       e.preventDefault();
       const formData = new FormData(this);
       formData.append('database_key', database);
 
       fetch('/', { method: 'post', body: formData, headers: { 'X-CSRFToken': Cookies.get('csrftoken') } }).then((res) => {
-        reloadSchemas();
+        // eslint-disable-next-line no-void
+        void reloadSchemas();
         return res;
       }).catch((err) => {
         // eslint-disable-next-line no-console
@@ -34,7 +30,7 @@
   }
 </script>
 
-<div class="index-view">
+<div class="import-file-view">
   Upload a CSV file to create a table.
 
   <form enctype="multipart/form-data" use:submitListener>
@@ -55,3 +51,7 @@
     <button type="submit">Submit</button>
   </form>
 </div>
+
+<style global lang="scss">
+  @import 'ImportFile.scss';
+</style>

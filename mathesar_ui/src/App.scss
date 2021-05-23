@@ -1,17 +1,19 @@
+$top-pane-height: 64px;
+$side-bar-width: 255px;
+
 header {
   display: flex;
   padding-right: 12px;
   position: fixed;
   width: 100%;
-  height: 44px;
+  height: $top-pane-height;
   z-index: 4;
   justify-content: space-between;
   top: 0;
-  box-shadow: 0 0 3px 0 #e0e0e0;
 
   .dropdown {
     display: flex;
-    flex-basis: 224px;
+    flex-basis: $side-bar-width;
     flex-shrink: 1;
     border-right: 1px solid #efefef;
     padding: 5px 20px;
@@ -25,54 +27,27 @@ header {
 
 aside {
   position: fixed;
-  top: 44px;
+  top: $top-pane-height;
   left: 0;
   bottom: 0;
-  width: 224px;
+  width: $side-bar-width;
   border-right: 1px solid #efefef;
   transition: left .2s ease-out;
   z-index: 3;
-  display: flex;
   justify-content: space-between;
   flex-direction: column;
 
   nav {
-    a.active {
-      background: #efefef;
-    }
-
-    >a {
-      display: block;
-      padding: 8px 20px;
-      width: 100%;
-    }
-
-    >ul {
-      padding: 10px 20px;
-    }
-
-    ul {
-      margin: 0;
-      list-style: none;
-      list-style-type: none;
-
-      li {
-        >div {
-          padding: 5px 0px;
-        }
-
-        ul {
-          padding-left: 10px;
-        }
-      }
+    .tree {
+      padding: 0px 20px;
     }
   }
 }
 
 section {
   position: absolute;
-  top: 44px;
-  left: 224px;
+  top: $top-pane-height;
+  left: $side-bar-width;
   right: 0;
   bottom: 0;
   overflow: auto;

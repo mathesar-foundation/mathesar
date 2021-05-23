@@ -1,0 +1,73 @@
+.tab-container {
+  display: flex;
+  flex-direction: column;
+
+  >ul.tabs {
+    align-items: center;
+    display: flex;
+    flex: none;
+    position: relative;
+    flex-direction: row;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  
+    >li.tab {
+      align-items: center;
+      background: 0 0;
+      cursor: pointer;
+      display: inline-flex;
+      outline: none;
+      position: relative;
+      border: 1px solid #dfdfdf;
+      width: 200px;
+      max-width: 200px;
+      user-select: none;
+      list-style: none;
+      overflow: hidden;
+      transition: width 0.200s cubic-bezier(0.39, 0.575, 0.565, 1);
+      border-radius: 4px 4px 0px 0px;
+
+      >a {
+        padding: 7px 12px;
+        white-space: nowrap;
+        text-decoration: none;
+        text-overflow: ellipsis;
+        display: block;
+        overflow: hidden;
+        flex-grow: 1;
+        transition: all 0.200s cubic-bezier(0.39, 0.575, 0.565, 1);
+      }
+
+      &+li.tab {
+        margin-left: -1px;
+      }
+
+      &.active {
+        border-bottom: 1px solid #fff;
+      }
+
+      >button.remove {
+        display: none;
+        cursor: pointer;
+        padding: 1px 4px;
+        border: 1px solid #dfdfdf;
+        border-radius: 10px;
+        background: none;
+        margin: 0;
+        margin-right: 6px;
+        color: inherit;
+      }
+
+      &:hover>button.remove {
+        display: inline-block;
+      }
+    }
+  }
+  
+  .tab-content-holder {
+    flex: auto;
+    min-height: 0;
+    min-width: 0;
+  }
+}

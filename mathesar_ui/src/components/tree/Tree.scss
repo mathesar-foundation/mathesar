@@ -1,0 +1,34 @@
+ul.tree {
+  margin: 0;
+  list-style: none;
+  list-style-type: none;
+  padding: 0;
+
+  li {
+    a {
+      display: block;
+      width: 100%;
+
+      &.active {
+        background: #efefef;
+      }
+    } 
+  }
+
+  ul {
+    margin: 0;
+    list-style: none;
+    list-style-type: none;
+    padding: 0px 0px 0px 10px;
+
+    li {
+      >div {
+        padding: 5px 0px;
+      }
+
+      ul {
+        padding-left: 10px;
+      }
+    }
+  }
+}

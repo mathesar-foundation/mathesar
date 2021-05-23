@@ -5,78 +5,9 @@
     "preinstall": "npx npm-force-resolutions",
     "dev": "vite",
     "lint": "eslint .",
+    "typecheck": "svelte-check",
     "build": "vite build",
     "test": "jest"
-  },
-  "eslintConfig": {
-    "ignorePatterns": [
-      "node_modules",
-      "dist",
-      "index.html"
-    ],
-    "parserOptions": {
-      "ecmaVersion": 2021,
-      "sourceType": "module"
-    },
-    "env": {
-      "es6": true,
-      "browser": true,
-      "jest/globals": true
-    },
-    "plugins": [
-      "svelte3",
-      "jest"
-    ],
-    "overrides": [
-      {
-        "files": [
-          "*.svelte"
-        ],
-        "processor": "svelte3/svelte3"
-      }
-    ],
-    "extends": [
-      "airbnb-base",
-      "eslint:recommended",
-      "plugin:eslint-comments/recommended",
-      "plugin:promise/recommended",
-      "plugin:jest/recommended"
-    ],
-    "rules": {
-      "import/no-extraneous-dependencies": [
-        "error",
-        {
-          "devDependencies": true
-        }
-      ],
-      "import/first": "off",
-      "import/no-mutable-exports": "off",
-      "import/no-unresolved": "off",
-      "import/extensions": "off",
-      "import/prefer-default-export": "off"
-    },
-    "settings": {
-      "jest": {
-        "version": 26
-      }
-    }
-  },
-  "jest": {
-    "transform": {
-      "^.+\\.svelte$": "svelte-jester",
-      "^.+\\.js$": "babel-jest"
-    },
-    "moduleNameMapper": {
-      "^@mathesar(.*)$": "<rootDir>/src$1",
-      "^@mathesar-components(.*)$": "<rootDir>/src/components/$1"
-    },
-    "moduleFileExtensions": [
-      "js",
-      "svelte"
-    ],
-    "setupFilesAfterEnv": [
-      "@testing-library/jest-dom/extend-expect"
-    ]
   },
   "resolutions": {
     "hosted-git-info": "3.0.8"
@@ -86,10 +17,16 @@
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.9",
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/svelte": "^3.0.3",
+    "@tsconfig/svelte": "^1.0.10",
+    "@types/jest": "^26.0.23",
+    "@types/js-cookie": "^2.2.6",
+    "@typescript-eslint/eslint-plugin": "^4.24.0",
+    "@typescript-eslint/parser": "^4.24.0",
     "@vitejs/plugin-legacy": "^1.3.2",
     "babel-jest": "^26.6.3",
     "eslint": "^7.25.0",
-    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-airbnb-typescript": "^12.3.1",
+    "eslint-import-resolver-typescript": "^2.4.0",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jest": "^24.3.6",
@@ -98,9 +35,13 @@
     "jest": "^26.6.3",
     "sass": "^1.32.12",
     "svelte": "^3.37.0",
+    "svelte-check": "^1.5.4",
     "svelte-jester": "^1.5.0",
     "svelte-preprocess": "^4.7.3",
     "tinro": "^0.6.1",
+    "ts-jest": "^26.5.6",
+    "tslib": "^2.2.0",
+    "typescript": "^4.2.4",
     "vite": "^2.2.3"
   },
   "dependencies": {

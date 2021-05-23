@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unresolved
 import 'vite/dynamic-import-polyfill';
 import App from '@mathesar/App.svelte';
 
