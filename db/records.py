@@ -18,7 +18,7 @@ def get_record(table, engine, id_value):
         return result[0] if result else None
 
 
-def get_records(table, engine, limit=None, offset=None, order_by=None):
+def get_records(table, engine, limit=None, offset=None, order_by=[]):
     """
     Returns records from a table.
 
