@@ -1,15 +1,11 @@
-import os
+from unittest.mock import call, patch
 import pytest
-from sqlalchemy import text, MetaData, select
+from sqlalchemy import MetaData, select, Column, String
 from db import tables, constants, columns
 
-FILE_DIR = os.path.abspath(os.path.dirname(__file__))
-RESOURCES = os.path.join(FILE_DIR, "resources")
-ROSTER_SQL = os.path.join(RESOURCES, "roster_create.sql")
 ROSTER = "Roster"
 TEACHERS = "Teachers"
 ROSTER_NO_TEACHERS = "Roster without Teachers"
-APP_SCHEMA = "test_schema"
 EXTRACTED_COLS = ["Teacher", "Teacher Email"]
 REM_MOVE_COL = ["Subject"]
 REM_MOVE_COLS = ["Student Name", "Student Email"]
@@ -17,47 +13,29 @@ FKEY_COL = f"{TEACHERS}_{constants.ID}"
 
 
 @pytest.fixture
-def engine_with_schema(engine):
-    with engine.begin() as conn:
-        conn.execute(text(f"CREATE SCHEMA {APP_SCHEMA};"))
-    yield engine
-    with engine.begin() as conn:
-        conn.execute(text(f"DROP SCHEMA {APP_SCHEMA} CASCADE;"))
-
-
-@pytest.fixture
-def engine_with_roster(engine_with_schema):
-    engine = engine_with_schema
-    with engine.begin() as conn, open(ROSTER_SQL) as f:
-        conn.execute(text(f"SET search_path={APP_SCHEMA}"))
-        conn.execute(text(f.read()))
-    return engine
-
-
-@pytest.fixture
 def extracted_remainder_roster(engine_with_roster):
-    engine = engine_with_roster
+    engine, schema = engine_with_roster
     tables.extract_columns_from_table(
         ROSTER,
         EXTRACTED_COLS,
         TEACHERS,
         ROSTER_NO_TEACHERS,
-        APP_SCHEMA,
+        schema,
         engine,
     )
-    metadata = MetaData(bind=engine, schema=APP_SCHEMA)
+    metadata = MetaData(bind=engine, schema=schema)
     metadata.reflect()
-    teachers = metadata.tables[f"{APP_SCHEMA}.{TEACHERS}"]
-    roster_no_teachers = metadata.tables[f"{APP_SCHEMA}.{ROSTER_NO_TEACHERS}"]
-    roster = metadata.tables[f"{APP_SCHEMA}.{ROSTER}"]
-    return teachers, roster_no_teachers, roster, engine
+    teachers = metadata.tables[f"{schema}.{TEACHERS}"]
+    roster_no_teachers = metadata.tables[f"{schema}.{ROSTER_NO_TEACHERS}"]
+    roster = metadata.tables[f"{schema}.{ROSTER}"]
+    return teachers, roster_no_teachers, roster, engine, schema
 
 
 def test_table_creation_doesnt_reuse_defaults(engine_with_schema):
-    columns = []
-    engine = engine_with_schema
-    t1 = tables.create_mathesar_table("t1", APP_SCHEMA, columns, engine)
-    t2 = tables.create_mathesar_table("t2", APP_SCHEMA, columns, engine)
+    column_list = []
+    engine, schema = engine_with_schema
+    t1 = tables.create_mathesar_table("t1", schema, column_list, engine)
+    t2 = tables.create_mathesar_table("t2", schema, column_list, engine)
     assert all(
         [
             c1.name == c2.name and c1 != c2
@@ -67,7 +45,7 @@ def test_table_creation_doesnt_reuse_defaults(engine_with_schema):
 
 
 def test_extract_columns_from_table_creates_tables(engine_with_roster):
-    engine = engine_with_roster
+    engine, schema = engine_with_roster
     teachers = "Teachers"
     roster_no_teachers = "Roster without Teachers"
     tables.extract_columns_from_table(
@@ -75,22 +53,22 @@ def test_extract_columns_from_table_creates_tables(engine_with_roster):
         EXTRACTED_COLS,
         teachers,
         roster_no_teachers,
-        APP_SCHEMA,
+        schema,
         engine,
     )
-    metadata = MetaData(bind=engine, schema=APP_SCHEMA)
+    metadata = MetaData(bind=engine, schema=schema)
     metadata.reflect()
     t_dict = metadata.tables
     assert (
-        f"{APP_SCHEMA}.{TEACHERS}" in t_dict
-        and f"{APP_SCHEMA}.{ROSTER_NO_TEACHERS}" in t_dict
+        f"{schema}.{TEACHERS}" in t_dict
+        and f"{schema}.{ROSTER_NO_TEACHERS}" in t_dict
     )
 
 
 def test_extract_columns_from_table_sets_up_one_fkey(
         extracted_remainder_roster,
 ):
-    extracted, remainder, _, _ = extracted_remainder_roster
+    extracted, remainder, _, _, _ = extracted_remainder_roster
     fkeys = list(remainder.foreign_keys)
     assert len(fkeys) == 1
 
@@ -98,7 +76,7 @@ def test_extract_columns_from_table_sets_up_one_fkey(
 def test_extract_columns_from_table_sets_correct_reference(
         extracted_remainder_roster,
 ):
-    extracted, remainder, _, _ = extracted_remainder_roster
+    extracted, remainder, _, _, _ = extracted_remainder_roster
     fkeys = list(remainder.foreign_keys)
     assert fkeys[0].references(extracted)
     expect_referenced_column = extracted.columns[constants.ID]
@@ -109,7 +87,7 @@ def test_extract_columns_from_table_sets_correct_reference(
 def test_extract_columns_from_table_sets_correct_fkey(
         extracted_remainder_roster
 ):
-    extracted, remainder, _, _ = extracted_remainder_roster
+    extracted, remainder, _, _, _ = extracted_remainder_roster
     fkeys = list(remainder.foreign_keys)
     expect_fkey_column = remainder.columns[FKEY_COL]
     actual_fkey_column = fkeys[0].parent
@@ -117,7 +95,7 @@ def test_extract_columns_from_table_sets_correct_fkey(
 
 
 def test_extract_columns_extracts_correct_columns(extracted_remainder_roster):
-    extracted, remainder, roster, _ = extracted_remainder_roster
+    extracted, remainder, roster, _, _ = extracted_remainder_roster
     expect_extracted_names = sorted(EXTRACTED_COLS)
     actual_extracted_names = sorted(
         [
@@ -129,7 +107,7 @@ def test_extract_columns_extracts_correct_columns(extracted_remainder_roster):
 
 
 def test_extract_columns_leaves_correct_columns(extracted_remainder_roster):
-    extracted, remainder, roster, _ = extracted_remainder_roster
+    extracted, remainder, roster, _, _ = extracted_remainder_roster
     expect_remainder_names = sorted(
         [
             col.name for col in roster.columns
@@ -151,7 +129,7 @@ def test_extract_columns_extracts_correct_data(extracted_remainder_roster):
     # This test is only valid in combination
     # with test_extract_columns_extracts_columns, since we assume the
     # extracted column list is correct
-    extracted, _, roster, engine = extracted_remainder_roster
+    extracted, _, roster, engine, _ = extracted_remainder_roster
     expect_tuple_sel = (
         select([roster.columns[name] for name in EXTRACTED_COLS])
         .distinct()
@@ -169,7 +147,7 @@ def test_extract_columns_leaves_correct_data(extracted_remainder_roster):
     # This test is only valid in combination
     # with test_extract_columns_leaves_correct_columns, since we assume the
     # remainder column list is correct
-    extracted, remainder, roster, engine = extracted_remainder_roster
+    extracted, remainder, roster, engine, _ = extracted_remainder_roster
     remainder_column_names = [
         col.name for col in roster.columns
         if col.name not in columns.DEFAULT_COLUMNS
@@ -190,17 +168,17 @@ def test_extract_columns_leaves_correct_data(extracted_remainder_roster):
 def test_merge_columns_undoes_extract_columns_ddl_rem_ext(
         extracted_remainder_roster
 ):
-    extracted, remainder, roster, engine = extracted_remainder_roster
+    extracted, remainder, roster, engine, schema = extracted_remainder_roster
     tables.merge_tables(
         remainder.name,
         extracted.name,
         "Merged Roster",
-        APP_SCHEMA,
+        schema,
         engine,
     )
-    metadata = MetaData(bind=engine, schema=APP_SCHEMA)
+    metadata = MetaData(bind=engine, schema=schema)
     metadata.reflect()
-    merged = metadata.tables[f"{APP_SCHEMA}.Merged Roster"]
+    merged = metadata.tables[f"{schema}.Merged Roster"]
     expect_merged_names = sorted([col.name for col in roster.columns])
     actual_merged_names = sorted([col.name for col in merged.columns])
     assert expect_merged_names == actual_merged_names
@@ -209,17 +187,17 @@ def test_merge_columns_undoes_extract_columns_ddl_rem_ext(
 def test_merge_columns_undoes_extract_columns_ddl_ext_rem(
         extracted_remainder_roster
 ):
-    extracted, remainder, roster, engine = extracted_remainder_roster
+    extracted, remainder, roster, engine, schema = extracted_remainder_roster
     tables.merge_tables(
         extracted.name,
         remainder.name,
         "Merged Roster",
-        APP_SCHEMA,
+        schema,
         engine,
     )
-    metadata = MetaData(bind=engine, schema=APP_SCHEMA)
+    metadata = MetaData(bind=engine, schema=schema)
     metadata.reflect()
-    merged = metadata.tables[f"{APP_SCHEMA}.Merged Roster"]
+    merged = metadata.tables[f"{schema}.Merged Roster"]
     expect_merged_names = sorted([col.name for col in roster.columns])
     actual_merged_names = sorted([col.name for col in merged.columns])
     assert expect_merged_names == actual_merged_names
@@ -228,15 +206,15 @@ def test_merge_columns_undoes_extract_columns_ddl_ext_rem(
 def test_merge_columns_returns_original_data_rem_ext(
         extracted_remainder_roster
 ):
-    extracted, remainder, roster, engine = extracted_remainder_roster
+    extracted, remainder, roster, engine, schema = extracted_remainder_roster
     tables.merge_tables(
         remainder.name,
         extracted.name,
         "Merged Roster",
-        APP_SCHEMA,
+        schema,
         engine,
     )
-    metadata = MetaData(bind=engine, schema=APP_SCHEMA)
+    metadata = MetaData(bind=engine, schema=schema)
     metadata.reflect()
     roster_columns = sorted(
         [
@@ -244,7 +222,7 @@ def test_merge_columns_returns_original_data_rem_ext(
             if col.name not in columns.DEFAULT_COLUMNS
         ]
     )
-    merged = metadata.tables[f"{APP_SCHEMA}.Merged Roster"]
+    merged = metadata.tables[f"{schema}.Merged Roster"]
     merged_columns = sorted(
         [
             col.name for col in merged.columns
@@ -266,15 +244,15 @@ def test_merge_columns_returns_original_data_rem_ext(
 def test_merge_columns_returns_original_data_ext_rem(
         extracted_remainder_roster
 ):
-    extracted, remainder, roster, engine = extracted_remainder_roster
+    extracted, remainder, roster, engine, schema = extracted_remainder_roster
     tables.merge_tables(
         extracted.name,
         remainder.name,
         "Merged Roster",
-        APP_SCHEMA,
+        schema,
         engine,
     )
-    metadata = MetaData(bind=engine, schema=APP_SCHEMA)
+    metadata = MetaData(bind=engine, schema=schema)
     metadata.reflect()
     roster_columns = sorted(
         [
@@ -282,7 +260,7 @@ def test_merge_columns_returns_original_data_ext_rem(
             if col.name not in columns.DEFAULT_COLUMNS
         ]
     )
-    merged = metadata.tables[f"{APP_SCHEMA}.Merged Roster"]
+    merged = metadata.tables[f"{schema}.Merged Roster"]
     merged_columns = sorted(
         [
             col.name for col in merged.columns
@@ -302,7 +280,7 @@ def test_merge_columns_returns_original_data_ext_rem(
 
 
 def test_move_columns_moves_column_from_ext_to_rem(extracted_remainder_roster):
-    extracted, remainder, _, engine = extracted_remainder_roster
+    extracted, remainder, _, engine, schema = extracted_remainder_roster
     moving_col = EXTRACTED_COLS[0]
     extracted_cols = [col.name for col in extracted.columns]
     remainder_cols = [col.name for col in remainder.columns]
@@ -316,13 +294,13 @@ def test_move_columns_moves_column_from_ext_to_rem(extracted_remainder_roster):
         extracted_name,
         remainder_name,
         [moving_col],
-        APP_SCHEMA,
+        schema,
         engine,
     )
-    metadata = MetaData(bind=engine, schema=APP_SCHEMA)
+    metadata = MetaData(bind=engine, schema=schema)
     metadata.reflect()
-    new_extracted = metadata.tables[f"{APP_SCHEMA}.{extracted_name}"]
-    new_remainder = metadata.tables[f"{APP_SCHEMA}.{remainder_name}"]
+    new_extracted = metadata.tables[f"{schema}.{extracted_name}"]
+    new_remainder = metadata.tables[f"{schema}.{remainder_name}"]
     actual_extracted_cols = [col.name for col in new_extracted.columns]
     actual_remainder_cols = [col.name for col in new_remainder.columns]
     assert sorted(actual_extracted_cols) == sorted(expect_extracted_cols)
@@ -330,7 +308,7 @@ def test_move_columns_moves_column_from_ext_to_rem(extracted_remainder_roster):
 
 
 def test_move_columns_moves_column_from_rem_to_ext(extracted_remainder_roster):
-    extracted, remainder, _, engine = extracted_remainder_roster
+    extracted, remainder, _, engine, schema = extracted_remainder_roster
     extracted_cols = [col.name for col in extracted.columns]
     remainder_cols = [col.name for col in remainder.columns]
     moving_col = "Grade"
@@ -344,14 +322,91 @@ def test_move_columns_moves_column_from_rem_to_ext(extracted_remainder_roster):
         remainder_name,
         extracted_name,
         [moving_col],
-        APP_SCHEMA,
+        schema,
         engine,
     )
-    metadata = MetaData(bind=engine, schema=APP_SCHEMA)
+    metadata = MetaData(bind=engine, schema=schema)
     metadata.reflect()
-    new_extracted = metadata.tables[f"{APP_SCHEMA}.{extracted_name}"]
-    new_remainder = metadata.tables[f"{APP_SCHEMA}.{remainder_name}"]
+    new_extracted = metadata.tables[f"{schema}.{extracted_name}"]
+    new_remainder = metadata.tables[f"{schema}.{remainder_name}"]
     actual_extracted_cols = [col.name for col in new_extracted.columns]
     actual_remainder_cols = [col.name for col in new_remainder.columns]
     assert sorted(actual_extracted_cols) == sorted(expect_extracted_cols)
     assert sorted(actual_remainder_cols) == sorted(expect_remainder_cols)
+
+
+def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
+    column_list = []
+    engine, schema = engine_with_schema
+    table_name = "t1"
+    tables.create_mathesar_table(
+        table_name, schema, column_list, engine
+    )
+    with patch.object(tables.inference, "infer_column_type") as mock_infer:
+        tables.infer_table_column_types(
+            schema,
+            table_name,
+            engine
+        )
+    mock_infer.assert_not_called()
+
+
+def test_infer_table_column_types_infers_non_default_types(engine_with_schema):
+    col1 = Column("col1", String)
+    col2 = Column("col2", String)
+    column_list = [col1, col2]
+    engine, schema = engine_with_schema
+    table_name = "table_with_columns"
+    tables.create_mathesar_table(
+        table_name, schema, column_list, engine
+    )
+    with patch.object(tables.inference, "infer_column_type") as mock_infer:
+        tables.infer_table_column_types(
+            schema,
+            table_name,
+            engine
+        )
+    expect_calls = [
+        call(
+            schema,
+            table_name,
+            col1.name,
+            engine,
+        ),
+        call(
+            schema,
+            table_name,
+            col2.name,
+            engine,
+        ),
+    ]
+    mock_infer.assert_has_calls(expect_calls)
+
+
+def test_infer_table_column_types_skips_pkey_columns(engine_with_schema):
+    column_list = [Column("checkcol", String, primary_key=True)]
+    engine, schema = engine_with_schema
+    table_name = "t1"
+    tables.create_mathesar_table(
+        table_name, schema, column_list, engine
+    )
+    with patch.object(tables.inference, "infer_column_type") as mock_infer:
+        tables.infer_table_column_types(
+            schema,
+            table_name,
+            engine
+        )
+    mock_infer.assert_not_called()
+
+
+def test_infer_table_column_types_skips_fkey_columns(
+        extracted_remainder_roster
+):
+    _, remainder, _, engine, schema = extracted_remainder_roster
+    with patch.object(tables.inference, "infer_column_type") as mock_infer:
+        tables.infer_table_column_types(
+            schema,
+            remainder.name,
+            engine
+        )
+    assert all([call_[1][2] != FKEY_COL for call_ in mock_infer.mock_calls])
