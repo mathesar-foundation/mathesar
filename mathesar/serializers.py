@@ -64,7 +64,7 @@ class DataFileSerializer(serializers.ModelSerializer):
         """
         Set user to current user while saving the data file.
         """
-        current_user = self.fields["user"].get_default()
+        current_user = self.fields['user'].get_default()
         if current_user.is_authenticated:
-            kwargs["user"] = current_user
+            kwargs['user'] = current_user
         return super().save(**kwargs)

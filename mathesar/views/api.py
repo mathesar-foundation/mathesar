@@ -7,12 +7,18 @@ from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile
 from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
 from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer
+from mathesar.utils.schemas import create_schema_and_object
 
 
-class SchemaViewSet(viewsets.ReadOnlyModelViewSet):
+class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     queryset = Schema.objects.all().order_by('-created_at')
     serializer_class = SchemaSerializer
     pagination_class = DefaultLimitOffsetPagination
+
+    def create(self, request):
+        schema = create_schema_and_object(request.data['name'], request.data['database'])
+        serializer = SchemaSerializer(schema)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class TableViewSet(viewsets.ReadOnlyModelViewSet):

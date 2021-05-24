@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils.functional import cached_property
@@ -88,6 +89,12 @@ class DataFile(BaseModel):
         created = False
         if not self.pk:
             created = True
+            if not self.schema:
+                # We are validating that a schema exists when a data file is created
+                # and not setting the schema field to non-nullable because if a schema
+                # is deleted, we may want to associate the data file with a different
+                # schema.
+                raise ValidationError('Data file must be associated with a schema.')
         super().save(*args, **kwargs)
         if created:
             # TODO: remove this
