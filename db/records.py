@@ -18,8 +18,20 @@ def get_record(table, engine, id_value):
         return result[0] if result else None
 
 
-def get_records(table, engine, limit=None, offset=None):
-    query = select(table).limit(limit).offset(offset)
+def get_records(table, engine, limit=None, offset=None, order_by=None):
+    """
+    Returns records from a table.
+
+    Args:
+        table:    SQLAlchemy table object
+        engine:   SQLAlchemy engine object
+        limit:    int, gives number of rows to return
+        offset:   int, gives number of rows to skip
+        order_by: list of SQLAlchemy ColumnElements to order by.  Should
+                  usually be either a list of string column names, or a
+                  list of columns from the given table.
+    """
+    query = select(table).order_by(*order_by).limit(limit).offset(offset)
     with engine.begin() as conn:
         return conn.execute(query).fetchall()
 
