@@ -72,7 +72,8 @@ def test_data_file_detail(client, data_file):
     verify_data_file_data(data_file, data_file_dict)
 
 
-def test_data_file_create(client, csv_filename, schema):
+def test_data_file_create(client, csv_filename):
+    schema = create_schema_and_object('data_file_create', test_db_name)
     num_data_files = DataFile.objects.count()
 
     with open(csv_filename, 'rb') as csv_file:
@@ -100,7 +101,8 @@ def test_data_file_create_with_wrong_extension(client, schema):
         assert response.json()['file'][0] == 'File extension “txt” is not allowed. Allowed extensions are: csv.'
 
 
-def test_data_file_create_with_table_imported_to(client, csv_filename, schema):
+def test_data_file_create_with_table_imported_to(client, csv_filename):
+    schema = create_schema_and_object('data_file_create_with_table', test_db_name)
     num_data_files = DataFile.objects.count()
 
     with open(csv_filename, 'rb') as csv_file:
