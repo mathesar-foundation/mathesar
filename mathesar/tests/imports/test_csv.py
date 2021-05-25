@@ -2,12 +2,12 @@ import pytest
 
 from sqlalchemy.exc import InvalidRequestError
 
-from mathesar.imports.csv import create_table_from_csv
+from mathesar.imports.csv import legacy_create_table_from_csv
 
 
 def test_csv_upload_with_all_required_parameters(engine, csv_filename, test_db_name):
     with open(csv_filename, 'rb') as csv_file:
-        table = create_table_from_csv(
+        table = legacy_create_table_from_csv(
             name='NASA',
             schema='Patents',
             database_key=test_db_name,
@@ -22,7 +22,7 @@ def test_csv_upload_with_all_required_parameters(engine, csv_filename, test_db_n
 
 def test_csv_upload_with_parameters_positional(engine, csv_filename, test_db_name):
     with open(csv_filename, 'rb') as csv_file:
-        table = create_table_from_csv(
+        table = legacy_create_table_from_csv(
             'NASA 2',
             'Patents',
             test_db_name,
@@ -43,7 +43,7 @@ def test_csv_upload_with_duplicate_table_name(engine, csv_filename, test_db_name
     )
 
     with open(csv_filename, 'rb') as csv_file:
-        table = create_table_from_csv(
+        table = legacy_create_table_from_csv(
             table_name,
             schema_name,
             test_db_name,
@@ -56,7 +56,7 @@ def test_csv_upload_with_duplicate_table_name(engine, csv_filename, test_db_name
         assert table.sa_num_records == 1393
     with open(csv_filename, 'rb') as csv_file:
         with pytest.raises(InvalidRequestError) as excinfo:
-            create_table_from_csv(
+            legacy_create_table_from_csv(
                 table_name,
                 schema_name,
                 test_db_name,
@@ -68,7 +68,7 @@ def test_csv_upload_with_duplicate_table_name(engine, csv_filename, test_db_name
 def test_csv_upload_with_wrong_parameter(engine, csv_filename, test_db_name):
     with pytest.raises(TypeError) as excinfo:
         with open(csv_filename, 'rb') as csv_file:
-            create_table_from_csv(
+            legacy_create_table_from_csv(
                 name='NASA',
                 schema_name='Patents',
                 database_key=test_db_name,
@@ -80,5 +80,5 @@ def test_csv_upload_with_wrong_parameter(engine, csv_filename, test_db_name):
 def test_csv_upload_with_missing_database_key(engine, csv_filename):
     with pytest.raises(TypeError) as excinfo:
         with open(csv_filename, 'rb') as csv_file:
-            create_table_from_csv('NASA', 'Patents', csv_file)
+            legacy_create_table_from_csv('NASA', 'Patents', csv_file)
             assert 'csv_file' in str(excinfo.value)
