@@ -1,4 +1,5 @@
 import csv
+import os
 from io import TextIOWrapper
 
 from mathesar.database.base import create_mathesar_engine
@@ -14,6 +15,7 @@ def get_csv_reader(csv_file):
 
 
 # TODO: Remove this function once frontend switches to using the API
+# See https://github.com/centerofci/mathesar/issues/150
 def legacy_create_db_table_from_csv(name, schema, csv_reader, engine):
     table = tables.create_string_column_table(
         name, schema, csv_reader.fieldnames, engine,
@@ -22,6 +24,7 @@ def legacy_create_db_table_from_csv(name, schema, csv_reader, engine):
 
 
 # TODO: Remove this function once frontend switches to using the API
+# See https://github.com/centerofci/mathesar/issues/150
 def legacy_create_table_from_csv(name, schema, database_key, csv_file):
     engine = create_mathesar_engine(database_key)
     csv_reader = get_csv_reader(csv_file)
@@ -40,7 +43,7 @@ def create_db_table_from_data_file(data_file):
         csv_reader = get_csv_reader(csv_file)
         column_names = csv_reader.fieldnames
         table = tables.create_string_column_table(
-            name=data_file.file.name.split('/')[-1],
+            name=os.path.split(data_file.file.name)[-1],
             schema=data_file.schema.name,
             column_names=column_names,
             engine=engine

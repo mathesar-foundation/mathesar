@@ -17,7 +17,8 @@ def get_common_data(request):
 
 
 def index(request):
-    # TODO: Remove this function once frontend switches to using the API
+    # TODO: Remove this path once frontend switches to using the API
+    # See https://github.com/centerofci/mathesar/issues/150
     if request.method == "POST":
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
