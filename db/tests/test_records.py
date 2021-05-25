@@ -80,3 +80,84 @@ def test_get_records_orders_before_limiting(roster_table_obj):
         roster, engine, limit=1, order_by=["Grade", "Student Name"]
     )
     assert record_list[0][7] == 25 and record_list[0][2] == "Amy Gamble"
+
+
+def test_get_records_filters_using_col_str_names(roster_table_obj):
+    roster, engine = roster_table_obj
+    filter_list = [("Student Name", "Amy Gamble"), ("Subject", "Math")]
+    record_list = records.get_records(
+        roster, engine, filters=filter_list
+    )
+    assert all(
+        [
+            len(record_list) == 1,
+            record_list[0][2] == "Amy Gamble",
+            record_list[0][6] == "Math",
+        ]
+    )
+
+
+def test_get_records_filters_using_col_objects(roster_table_obj):
+    roster, engine = roster_table_obj
+    filter_list = [
+        (roster.columns["Student Name"], "Amy Gamble"),
+        (roster.columns["Subject"], "Math"),
+    ]
+    record_list = records.get_records(
+        roster, engine, filters=filter_list
+    )
+    assert all(
+        [
+            len(record_list) == 1,
+            record_list[0][2] == "Amy Gamble",
+            record_list[0][6] == "Math",
+        ]
+    )
+
+
+def test_get_records_filters_using_mixed_col_objects_and_str(roster_table_obj):
+    roster, engine = roster_table_obj
+    filter_list = [
+        (roster.columns["Student Name"], "Amy Gamble"),
+        ("Subject", "Math"),
+    ]
+    record_list = records.get_records(
+        roster, engine, filters=filter_list
+    )
+    assert all(
+        [
+            len(record_list) == 1,
+            record_list[0][2] == "Amy Gamble",
+            record_list[0][6] == "Math",
+        ]
+    )
+
+
+def test_get_records_filters_with_numeric_col(roster_table_obj):
+    roster, engine = roster_table_obj
+    filter_list = [
+        (roster.columns["Student Name"], "Amy Gamble"),
+        (roster.columns["Grade"], 74),
+    ]
+    record_list = records.get_records(
+        roster, engine, filters=filter_list
+    )
+    assert all(
+        [
+            len(record_list) == 1,
+            record_list[0][2] == "Amy Gamble",
+            record_list[0][7] == 74,
+        ]
+    )
+
+
+def test_get_records_filters_with_miss(roster_table_obj):
+    roster, engine = roster_table_obj
+    filter_list = [
+        (roster.columns["Student Name"], "Amy Gamble"),
+        (roster.columns["Grade"], 75),
+    ]
+    record_list = records.get_records(
+        roster, engine, filters=filter_list
+    )
+    assert len(record_list) == 0
