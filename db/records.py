@@ -1,5 +1,8 @@
-from sqlalchemy import delete, select
+import logging
+from sqlalchemy import delete, select, and_, Column
 from sqlalchemy.inspection import inspect
+
+logger = logging.getLogger(__name__)
 
 
 def _get_primary_key_column(table):
@@ -18,7 +21,9 @@ def get_record(table, engine, id_value):
         return result[0] if result else None
 
 
-def get_records(table, engine, limit=None, offset=None, order_by=[]):
+def get_records(
+        table, engine, limit=None, offset=None, order_by=[], filters=[]
+):
     """
     Returns records from a table.
 
@@ -30,10 +35,70 @@ def get_records(table, engine, limit=None, offset=None, order_by=[]):
         order_by: list of SQLAlchemy ColumnElements to order by.  Should
                   usually be either a list of string column names, or a
                   list of columns from the given table.
+        filters:  list of tuples of type (ColumnElement, value), where
+                  ColumnElement is an SQLAlchemy ColumnElement, and value
+                  is a valid value for the associated column (i.e., the
+                  type must be correct)
     """
-    query = select(table).order_by(*order_by).limit(limit).offset(offset)
+    query = (
+        select(table)
+        .order_by(*order_by)
+        .limit(limit)
+        .offset(offset)
+        .where(_build_filter_conjunction(table, filters))
+    )
     with engine.begin() as conn:
         return conn.execute(query).fetchall()
+
+
+def _build_filter_conjunction(table, filters):
+    refined_filters = [
+        (table.columns[col] if type(col) == str else col, value)
+        for col, value in filters
+    ]
+    # We need a default of True (rather than empty), since invoking and_
+    # without arguments is deprecated.
+    return and_(True, *[col == value for col, value in refined_filters])
+
+
+def get_distinct_tuple_values(
+        column_list, engine, table=None, limit=None, offset=None,
+):
+    """
+    Returns distinct tuples from a given list of columns.
+
+    Args:
+        column_list: list of column names or SQLAlchemy column objects
+        engine:   SQLAlchemy engine object
+        table:    SQLAlchemy table object
+        limit:    int, gives number of rows to return
+        offset:   int, gives number of rows to skip
+
+    If no table is given, the column_list must consist entirely of
+    SQLAlchemy column objects associated with a table.
+    """
+    if table is not None:
+        column_objects = [
+            table.columns[col] if type(col) == str else col
+            for col in column_list
+        ]
+    else:
+        column_objects = column_list
+    try:
+        assert all([type(col) == Column for col in column_objects])
+    except AssertionError as e:
+        logger.error("All columns must be str or sqlalchemy.Column type")
+        raise e
+
+    query = (
+        select(*column_objects)
+        .distinct()
+        .limit(limit)
+        .offset(offset)
+    )
+    with engine.begin() as conn:
+        res = conn.execute(query).fetchall()
+    return [tuple(zip(column_objects, row)) for row in res]
 
 
 def create_record_or_records(table, engine, record_data):
