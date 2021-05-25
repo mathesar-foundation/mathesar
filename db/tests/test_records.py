@@ -237,3 +237,24 @@ def test_get_distinct_tuple_values_offset(roster_table_obj):
         column_list, engine, table=roster, limit=10, offset=10
     )
     assert record_list_offset == record_list_base[10:]
+
+
+def test_get_distinct_tuple_values_feeds_get_records(roster_table_obj):
+    roster, engine = roster_table_obj
+    column_list = [
+        "Student Number",
+        "Student Email",
+    ]
+    distinct_tuples = records.get_distinct_tuple_values(
+        column_list, engine, table=roster, limit=2
+    )
+    record_list = records.get_records(
+        roster, engine, filters=distinct_tuples[0]
+    )
+    assert all(
+        [
+            record[1] == distinct_tuples[0][0][1]
+            and record[3] == distinct_tuples[0][1][1]
+            for record in record_list
+        ]
+    )
