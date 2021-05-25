@@ -1,4 +1,4 @@
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, and_
 from sqlalchemy.inspection import inspect
 
 
@@ -18,7 +18,9 @@ def get_record(table, engine, id_value):
         return result[0] if result else None
 
 
-def get_records(table, engine, limit=None, offset=None, order_by=[]):
+def get_records(
+        table, engine, limit=None, offset=None, order_by=[], filters=[]
+):
     """
     Returns records from a table.
 
@@ -30,10 +32,28 @@ def get_records(table, engine, limit=None, offset=None, order_by=[]):
         order_by: list of SQLAlchemy ColumnElements to order by.  Should
                   usually be either a list of string column names, or a
                   list of columns from the given table.
+        filters:  list of tuples of type (ColumnElement, value), where
+                  ColumnElement is an SQLAlchemy ColumnElement, and value
+                  is a valid value for the associated column (i.e., the
+                  type must be correct)
     """
-    query = select(table).order_by(*order_by).limit(limit).offset(offset)
+    query = (
+        select(table)
+        .order_by(*order_by)
+        .limit(limit)
+        .offset(offset)
+        .where(_build_filter_conjunction(table, filters))
+    )
     with engine.begin() as conn:
         return conn.execute(query).fetchall()
+
+
+def _build_filter_conjunction(table, filters):
+    refined_filters = [
+        (table.columns[col] if type(col) == str else col, value)
+        for col, value in filters
+    ]
+    return and_(*[col == value for col, value in refined_filters])
 
 
 def create_record_or_records(table, engine, record_data):
