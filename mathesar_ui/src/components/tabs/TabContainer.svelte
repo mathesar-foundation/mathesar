@@ -8,10 +8,7 @@
 </script>
 
 <script lang="ts">
-  interface Tab {
-    href?: string
-    disabled?: boolean
-  }
+  import type { Tab } from './TabContainer';
 
   export let tabs: Tab[] = [];
   export let idKey = 'id';

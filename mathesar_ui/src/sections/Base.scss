@@ -1,0 +1,30 @@
+/* TODO: Move this variable to a common file */
+$side-bar-width: 255px;
+
+aside {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: $side-bar-width;
+  border-right: 1px solid #efefef;
+  transition: left .2s ease-out;
+  z-index: 3;
+  overflow-y: auto;
+
+  nav {
+    .tree {
+      padding: 0px 20px;
+    }
+  }
+}
+
+section.table-section {
+  position: absolute;
+  top: 0;
+  left: $side-bar-width;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+  padding: 16px;
+}

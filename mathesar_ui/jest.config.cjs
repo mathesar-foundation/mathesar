@@ -10,6 +10,7 @@ module.exports = {
   },
   moduleNameMapper: {
     '^@mathesar-components': '<rootDir>/src/components/index.ts',
+    '^@mathesar-components/types': '<rootDir>/src/components/types.d.ts',
     '^@mathesar(.*)$': '<rootDir>/src$1',
   },
   moduleFileExtensions: ['js', 'ts', 'svelte'],

@@ -1,7 +1,10 @@
-export interface Schema {
+export interface SchemaEntry {
   id: string,
-  name: string,
-  tables: { id: string, name: string }[]
+  name: string
+}
+
+export interface Schema extends SchemaEntry {
+  tables: SchemaEntry[]
 }
 
 interface CommonData {

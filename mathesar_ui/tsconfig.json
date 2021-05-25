@@ -17,7 +17,8 @@
     "baseUrl": "./",
     "paths": {
       "@mathesar/*": ["src/*"],
-      "@mathesar-components": ["src/components/index.ts"]
+      "@mathesar-components": ["src/components/index.ts"],
+      "@mathesar-components/types": ["src/components/types.d.ts"]
     }
   },
   "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.svelte", "**.cjs", "vite.config.js"]

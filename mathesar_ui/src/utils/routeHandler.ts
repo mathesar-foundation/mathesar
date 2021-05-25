@@ -1,45 +1,32 @@
 import { router } from 'tinro';
 
-interface TableQuery {
-  i: string,
-  l?: number,
-  o?: number
-}
-
-interface OpenTables {
-  tables: TableQuery[],
-  activeTable: string
-}
+// Structure of url t=[[id,limit,offset],[i,l,o]], a=id
+// t -> tables, a -> active
 
 export function getTableQuery(id: string) : string {
-  return encodeURIComponent(`t=${JSON.stringify([{ i: id }])}&a=${id}`);
+  const t = encodeURIComponent(`${JSON.stringify([[id]])}`);
+  const a = encodeURIComponent(id);
+  return `?t=${t}&a=${a}`;
 }
 
 export function isInTableContentView(db: string): boolean {
-  return window.location.pathname.indexOf(`${db}/content`) > -1;
+  const dbInURL = window.location.pathname.split('/')[1];
+  return db === dbInURL;
 }
 
-export function openTable(db: string, id: string): void {
+export function setOpenTableQuery(db: string, id: string): void {
   if (isInTableContentView(db)) {
     const tableQuery = router.location.query.get('t') as string;
-    const tables: TableQuery[] = tableQuery ? JSON.parse(decodeURIComponent(tableQuery)) as [] : [];
-    const existingTable = tables.find((table) => table.i === id);
+    const tables: string[][] = tableQuery ? JSON.parse(decodeURIComponent(tableQuery)) as [] : [];
+    const existingTable = tables.find((table) => table[0] === id);
     if (!existingTable) {
-      tables.push({
-        i: id,
-      });
+      tables.push([id]);
       router.location.query.set('t', encodeURIComponent(JSON.stringify(tables)));
     }
     router.location.query.set('a', encodeURIComponent(id));
   }
 }
 
-export function getOpenTables(): OpenTables {
-  const tableQuery = router.location.query.get('t') as string;
-  const tables: TableQuery[] = tableQuery ? JSON.parse(decodeURIComponent(tableQuery)) as [] : [];
-  const activeTable = router.location.query.get('a') as string;
-  return {
-    tables,
-    activeTable,
-  };
+export function getTablesFromQuery(tableQuery: string): string[][] {
+  return tableQuery ? JSON.parse(decodeURIComponent(tableQuery)) as [] : [];
 }
