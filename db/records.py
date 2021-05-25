@@ -1,5 +1,8 @@
-from sqlalchemy import delete, select, and_
+import logging
+from sqlalchemy import delete, select, and_, Column
 from sqlalchemy.inspection import inspect
+
+logger = logging.getLogger(__name__)
 
 
 def _get_primary_key_column(table):
@@ -56,6 +59,46 @@ def _build_filter_conjunction(table, filters):
     # We need a default of True (rather than empty), since invoking and_
     # without arguments is deprecated.
     return and_(True, *[col == value for col, value in refined_filters])
+
+
+def get_distinct_tuple_values(
+        column_list, engine, table=None, limit=None, offset=None,
+):
+    """
+    Returns distinct tuples from a given list of columns.
+
+    Args:
+        column_list: list of column names or SQLAlchemy column objects
+        engine:   SQLAlchemy engine object
+        table:    SQLAlchemy table object
+        limit:    int, gives number of rows to return
+        offset:   int, gives number of rows to skip
+
+    If no table is given, the column_list must consist entirely of
+    SQLAlchemy column objects associated with a table.
+    """
+    if table is not None:
+        column_objects = [
+            table.columns[col] if type(col) == str else col
+            for col in column_list
+        ]
+    else:
+        column_objects = column_list
+    try:
+        assert all([type(col) == Column for col in column_objects])
+    except AssertionError as e:
+        logger.error("All columns must be str or sqlalchemy.Column type")
+        raise e
+
+    query = (
+        select(*column_objects)
+        .distinct()
+        .limit(limit)
+        .offset(offset)
+    )
+    with engine.begin() as conn:
+        res = conn.execute(query).fetchall()
+    return [tuple(zip(column_objects, row)) for row in res]
 
 
 def create_record_or_records(table, engine, record_data):
