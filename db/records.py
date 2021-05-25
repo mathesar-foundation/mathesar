@@ -53,7 +53,9 @@ def _build_filter_conjunction(table, filters):
         (table.columns[col] if type(col) == str else col, value)
         for col, value in filters
     ]
-    return and_(*[col == value for col, value in refined_filters])
+    # We need a default of True (rather than empty), since invoking and_
+    # without arguments is deprecated.
+    return and_(True, *[col == value for col, value in refined_filters])
 
 
 def create_record_or_records(table, engine, record_data):
