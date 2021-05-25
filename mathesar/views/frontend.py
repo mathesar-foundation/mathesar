@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 from mathesar.forms.forms import UploadFileForm
-from mathesar.imports.csv import create_table_from_csv
+from mathesar.imports.csv import legacy_create_table_from_csv
 from mathesar.models import Table, Schema
 from mathesar.serializers import SchemaSerializer, TableSerializer, RecordSerializer
 from mathesar.database.utils import get_non_default_database_keys
@@ -17,10 +17,12 @@ def get_common_data(request):
 
 
 def index(request):
+    # TODO: Remove this path once frontend switches to using the API
+    # See https://github.com/centerofci/mathesar/issues/150
     if request.method == "POST":
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            table = create_table_from_csv(
+            table = legacy_create_table_from_csv(
                 name=form.cleaned_data["table_name"],
                 schema=form.cleaned_data["schema_name"],
                 database_key=form.cleaned_data["database_key"],
