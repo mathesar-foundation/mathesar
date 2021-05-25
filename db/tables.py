@@ -36,7 +36,7 @@ def create_mathesar_table(name, schema, columns_, engine, metadata=None):
         name,
         metadata,
         *columns_,
-        schema=schema,
+        schema=schema
     )
     table.create(engine)
     return table

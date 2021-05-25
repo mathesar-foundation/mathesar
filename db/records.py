@@ -18,8 +18,20 @@ def get_record(table, engine, id_value):
         return result[0] if result else None
 
 
-def get_records(table, engine, limit=None, offset=None):
-    query = select(table).limit(limit).offset(offset)
+def get_records(table, engine, limit=None, offset=None, order_by=[]):
+    """
+    Returns records from a table.
+
+    Args:
+        table:    SQLAlchemy table object
+        engine:   SQLAlchemy engine object
+        limit:    int, gives number of rows to return
+        offset:   int, gives number of rows to skip
+        order_by: list of SQLAlchemy ColumnElements to order by.  Should
+                  usually be either a list of string column names, or a
+                  list of columns from the given table.
+    """
+    query = select(table).order_by(*order_by).limit(limit).offset(offset)
     with engine.begin() as conn:
         return conn.execute(query).fetchall()
 
@@ -41,6 +53,16 @@ def create_record_or_records(table, engine, record_data):
                 return get_record(table, engine, id_value)
     # Do not return any records if multiple rows were added.
     return None
+
+
+def create_records_from_csv(table, engine, csv_filename, column_names):
+    with open(csv_filename, 'rb') as csv_file:
+        with engine.begin() as conn:
+            cursor = conn.connection.cursor()
+            relation = '.'.join('"{}"'.format(part) for part in (table.schema, table.name))
+            formatted_columns = '({})'.format(','.join([f'"{column_name}"' for column_name in column_names]))
+            copy_sql = f'COPY {relation} {formatted_columns} FROM STDIN CSV HEADER'
+            cursor.copy_expert(copy_sql, csv_file)
 
 
 def update_record(table, engine, id_value, record_data):
