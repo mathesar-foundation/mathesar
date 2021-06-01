@@ -25,7 +25,7 @@
 
   function nodeSelected(e: Event) {
     dispatch('nodeSelected', {
-      entry,
+      node: entry,
       level,
       link,
       originalEvent: e,
@@ -52,7 +52,7 @@
 {:else}
   <li role="none" class="nav-item">
     {#if link}
-      <a role="treeitem" tabindex="-1" href={link} on:click={nodeSelected}>
+      <a role="treeitem" tabindex="-1" href={link} on:click={nodeSelected} data-tinro-ignore>
         <slot {entry} {level}/>
       </a>
     {:else}

@@ -15,7 +15,7 @@ records_router.register(r'records', api.RecordViewSet, basename='table-records')
 
 urlpatterns = [
     path('', frontend.index, name="index"),
-    path('tables/<int:pk>', frontend.table, name="table"),
+    path('<dbname>', frontend.index, name="index"),
     path('api/v0/', include(router.urls)),
     path('api/v0/', include(records_router.urls)),
 ]

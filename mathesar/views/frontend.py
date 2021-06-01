@@ -16,7 +16,7 @@ def get_common_data(request):
     }
 
 
-def index(request):
+def index(request, **kwargs):
     # TODO: Remove this path once frontend switches to using the API
     # See https://github.com/centerofci/mathesar/issues/150
     if request.method == "POST":
@@ -34,26 +34,5 @@ def index(request):
         "mathesar/index.html",
         {
             "common_data": get_common_data(request),
-        }
-    )
-
-
-def table(request, pk):
-    try:
-        table_data = Table.objects.get(pk=pk)
-        table_serialized = TableSerializer(table_data, context={'request': request}).data
-        records_serialized = RecordSerializer(table_data.get_records(limit=50, offset=0), many=True, context={'request': request}).data
-    except Table.DoesNotExist:
-        table_serialized = {}
-        records_serialized = []
-    return render(
-        request,
-        "mathesar/index.html",
-        {
-            "common_data": get_common_data(request),
-            "route_specific_data": {
-                "table-detail": table_serialized,
-                "table-records": records_serialized
-            }
         }
     )

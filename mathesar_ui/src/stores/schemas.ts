@@ -1,6 +1,6 @@
 import { writable, derived, Readable } from 'svelte/store';
 import { preloadCommonData, Schema, SchemaEntry } from '@mathesar/utils/preloadData';
-import getAPI, { States } from './getAPI';
+import getAPI, { States } from '@mathesar/utils/getAPI';
 
 export interface SchemaMapEntry extends SchemaEntry {
   children?: string[],

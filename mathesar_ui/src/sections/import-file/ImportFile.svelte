@@ -1,6 +1,6 @@
 <script lang="ts">
   import Cookies from 'js-cookie';
-  import { schemas, reloadSchemas } from '@mathesar/api/schemas';
+  import { schemas, reloadSchemas } from '@mathesar/stores/schemas';
 
   export let database = null;
 

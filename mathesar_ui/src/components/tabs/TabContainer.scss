@@ -11,6 +11,7 @@
     margin: 0;
     padding: 0;
     list-style: none;
+    border-bottom: 1px solid #dfdfdf;
   
     >li.tab {
       align-items: center;
@@ -19,14 +20,15 @@
       display: inline-flex;
       outline: none;
       position: relative;
-      border: 1px solid #dfdfdf;
-      width: 200px;
-      max-width: 200px;
+      border: 1px solid transparent;
+      border-color: #dfdfdf;
+      flex-basis: 200px;
       user-select: none;
       list-style: none;
       overflow: hidden;
       transition: width 0.200s cubic-bezier(0.39, 0.575, 0.565, 1);
       border-radius: 4px 4px 0px 0px;
+      margin-bottom: -1px;
 
       >a {
         padding: 7px 12px;
@@ -36,7 +38,10 @@
         display: block;
         overflow: hidden;
         flex-grow: 1;
-        transition: all 0.200s cubic-bezier(0.39, 0.575, 0.565, 1);
+      }
+
+      >a:focus {
+        outline: none;
       }
 
       &+li.tab {
@@ -44,7 +49,12 @@
       }
 
       &.active {
-        border-bottom: 1px solid #fff;
+        border-color: #dfdfdf #dfdfdf #fff;
+      }
+
+      &.focused {
+        border-color: blue;
+        z-index: 1;
       }
 
       >button.remove {
@@ -64,10 +74,17 @@
       }
     }
   }
+
+  >ul.tabs:before {
+    border-bottom: 1px solid #efefef;
+  }
   
   .tab-content-holder {
     flex: auto;
     min-height: 0;
     min-width: 0;
+    border: 1px solid #dfdfdf;
+    border-top: none;
+    border-radius: 0px 0px 4px 4px;
   }
 }

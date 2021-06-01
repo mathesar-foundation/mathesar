@@ -14,7 +14,7 @@ export function isInTableContentView(db: string): boolean {
   return db === dbInURL;
 }
 
-export function setOpenTableQuery(db: string, id: string): void {
+export function openTableQuery(db: string, id: string): void {
   if (isInTableContentView(db)) {
     const tableQuery = router.location.query.get('t') as string;
     const tables: string[][] = tableQuery ? JSON.parse(decodeURIComponent(tableQuery)) as [] : [];
@@ -24,6 +24,26 @@ export function setOpenTableQuery(db: string, id: string): void {
       router.location.query.set('t', encodeURIComponent(JSON.stringify(tables)));
     }
     router.location.query.set('a', encodeURIComponent(id));
+  }
+}
+
+export function removeTableQuery(db: string, id: string, activeTabId?: string): void {
+  if (isInTableContentView(db)) {
+    const tableQuery = router.location.query.get('t') as string;
+    const tables: string[][] = tableQuery ? JSON.parse(decodeURIComponent(tableQuery)) as [] : [];
+    const newTables = tables.filter((table) => table[0] !== id);
+    if (newTables.length !== tables.length) {
+      if (newTables.length > 0) {
+        router.location.query.set('t', encodeURIComponent(JSON.stringify(newTables)));
+      } else {
+        router.location.query.delete('t');
+      }
+    }
+    if (activeTabId && tables.find((table) => table[0] === activeTabId)) {
+      router.location.query.set('a', encodeURIComponent(activeTabId));
+    } else {
+      router.location.query.delete('a');
+    }
   }
 }
 
