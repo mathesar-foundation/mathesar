@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Report an issue with Mathesar
-labels: bug
+labels: "type: bug"
 ---
 
 **Describe the bug**
