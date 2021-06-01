@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest a new feature for Mathesar
-labels: enhancement
+labels: "type: enhancement"
 ---
 
 **Problem**
