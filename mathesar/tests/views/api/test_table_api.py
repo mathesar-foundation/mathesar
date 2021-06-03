@@ -95,9 +95,9 @@ def test_table_detail(create_table, client):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_create(create_table, client, data_file, test_db_name):
+def test_table_create_from_datafile(client, data_file):
     num_tables = Table.objects.count()
-    response = client.post('/api/v0/tables/', {"file_pk": data_file.id})
+    response = client.post('/api/v0/tables/', {'data_file_pk': data_file.id})
     response_table = response.json()
     table = Table.objects.get(id=response_table['id'])
     table_name = os.path.basename(data_file.file.name)
@@ -107,7 +107,13 @@ def test_table_create(create_table, client, data_file, test_db_name):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_404(create_table, client):
+def test_table_404(client):
     response = client.get('/api/v0/tables/3000/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
+
+
+def test_table_create_from_datafile_404(client):
+    response = client.post('/api/v0/tables/', {'data_file_pk': -999})
+    assert response.status_code == 400
+    assert response.json()['data_file_pk'] == 'Data file not found'

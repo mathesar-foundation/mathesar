@@ -1,5 +1,5 @@
 from rest_framework import status, viewsets
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
 
@@ -22,16 +22,17 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
+class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
+                   CreateModelMixin):
     queryset = Table.objects.all().order_by('-created_at')
     serializer_class = TableSerializer
     pagination_class = DefaultLimitOffsetPagination
 
     def create(self, request):
-        if "file_pk" in request.data:
+        if "data_file_pk" in request.data:
             return create_table_from_datafile(request)
         else:
-            raise ValidationError({"file_pk": "File primary key missing"})
+            super().create(request)
 
 
 class RecordViewSet(viewsets.ViewSet):
