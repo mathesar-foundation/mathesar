@@ -81,7 +81,9 @@ class DataFile(BaseModel):
         upload_to=model_utils.user_directory_path,
         validators=[FileExtensionValidator(allowed_extensions=['csv'])]
     )
-    table_imported_to = models.ForeignKey(Table, blank=True, null=True, on_delete=models.SET_NULL)
+    table_imported_to = models.ForeignKey(Table, related_name='data_file',
+                                          blank=True, null=True,
+                                          on_delete=models.SET_NULL)
     schema = models.ForeignKey(Schema, blank=True, null=True, on_delete=models.SET_NULL)
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
 

@@ -36,7 +36,7 @@ class TableSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Table
         fields = ['id', 'name', 'schema', 'created_at', 'updated_at',
-                  'columns', 'records']
+                  'columns', 'records', 'data_file']
 
     def get_records(self, obj):
         request = self.context['request']
