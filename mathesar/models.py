@@ -96,7 +96,3 @@ class DataFile(BaseModel):
                 # schema.
                 raise ValidationError('Data file must be associated with a schema.')
         super().save(*args, **kwargs)
-        if created:
-            # TODO: remove this
-            from mathesar.imports.csv import create_table_from_csv
-            create_table_from_csv(self)

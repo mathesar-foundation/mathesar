@@ -1,4 +1,23 @@
+import os
+import pytest
+
+from django.core.files import File
+
 from mathesar.models import Table
+from mathesar.models import DataFile
+from mathesar.utils.schemas import create_schema_and_object
+
+
+@pytest.fixture
+def schema(test_db_name):
+    return create_schema_and_object('table_tests', test_db_name)
+
+
+@pytest.fixture
+def data_file(csv_filename, schema):
+    with open(csv_filename, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file), schema=schema)
+    return data_file
 
 
 def check_table_response(response_table, table, table_name):
@@ -73,6 +92,18 @@ def test_table_detail(create_table, client):
     response = client.get(f'/api/v0/tables/{table.id}/')
     response_table = response.json()
     assert response.status_code == 200
+    check_table_response(response_table, table, table_name)
+
+
+def test_table_create(create_table, client, data_file, test_db_name):
+    num_tables = Table.objects.count()
+    response = client.post('/api/v0/tables/', {"file_pk": data_file.id})
+    response_table = response.json()
+    table = Table.objects.get(id=response_table['id'])
+    table_name = os.path.basename(data_file.file.name)
+
+    assert response.status_code == 201
+    assert Table.objects.count() == num_tables + 1
     check_table_response(response_table, table, table_name)
 
 
