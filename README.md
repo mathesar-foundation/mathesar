@@ -12,6 +12,13 @@ From this directory, run:
 ```
 docker-compose up
 ```
+
+If you see an error complaining that the bind path does not exist, create the
+`.volumes/` directory and try again:
+```
+mkdir .volumes/
+```
+
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application.
 
 You run database migrations like so:
