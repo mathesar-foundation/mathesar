@@ -1,5 +1,5 @@
 from rest_framework import status, viewsets
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
 
@@ -7,8 +7,8 @@ from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile
 from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
 from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer
-from mathesar.imports.csv import create_table_from_csv
 from mathesar.utils.schemas import create_schema_and_object
+from mathesar.utils.api import create_table_from_datafile
 
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -28,11 +28,10 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     pagination_class = DefaultLimitOffsetPagination
 
     def create(self, request):
-        file_pk = request.data["file_pk"]
-        data_file = DataFile.objects.get(id=file_pk)
-        table = create_table_from_csv(data_file)
-        serializer = TableSerializer(table, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if "file_pk" in request.data:
+            return create_table_from_datafile(request)
+        else:
+            raise ValidationError({"file_pk": "File primary key missing"})
 
 
 class RecordViewSet(viewsets.ViewSet):
