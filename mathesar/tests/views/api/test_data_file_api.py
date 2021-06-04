@@ -2,7 +2,6 @@ import pytest
 from django.core.files import File
 
 from mathesar.models import DataFile
-from mathesar.utils.schemas import create_schema_and_object
 
 
 def verify_data_file_data(data_file, data_file_dict):

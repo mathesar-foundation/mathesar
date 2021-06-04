@@ -1,5 +1,4 @@
 import csv
-import os
 from io import TextIOWrapper
 
 from mathesar.database.base import create_mathesar_engine
