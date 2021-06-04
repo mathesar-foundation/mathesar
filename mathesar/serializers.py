@@ -29,16 +29,9 @@ class ColumnSerializer(serializers.Serializer):
     type = serializers.CharField()
 
 
-class TableSerializer(serializers.HyperlinkedModelSerializer):
+class TableSerializer(serializers.ModelSerializer):
     columns = ColumnSerializer(many=True, read_only=True, source='sa_columns')
     records = serializers.SerializerMethodField()
-    schema = serializers.PrimaryKeyRelatedField(
-        required=True, queryset=Schema.objects.all()
-    )
-    # Make this non-required if we make other methods of creating tables
-    data_file = serializers.PrimaryKeyRelatedField(
-        required=True, queryset=DataFile.objects.all()
-    )
 
     class Meta:
         model = Table

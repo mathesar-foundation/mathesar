@@ -23,7 +23,7 @@ def data_file(csv_filename):
 def check_table_response(response_table, table, table_name):
     assert response_table['id'] == table.id
     assert response_table['name'] == table_name
-    assert '/api/v0/schemas/' in response_table['schema']
+    assert response_table['schema'] == table.schema.id
     assert 'created_at' in response_table
     assert 'updated_at' in response_table
     assert len(response_table['columns']) == len(table.sa_column_names)
@@ -101,11 +101,10 @@ def test_table_create_from_datafile(client, data_file, schema):
     body = {
         'data_file': data_file.id,
         'name': table_name,
-        'schema': schema.id
+        'schema': schema.id,
     }
     response = client.post('/api/v0/tables/', body)
     response_table = response.json()
-    print(response_table)
     table = Table.objects.get(id=response_table['id'])
 
     assert response.status_code == 201
@@ -120,6 +119,13 @@ def test_table_404(client):
 
 
 def test_table_create_from_datafile_404(client):
-    response = client.post('/api/v0/tables/', {'data_file_pk': -999})
+    body = {
+        'data_file': -999,
+        'name': 'test_table',
+        'schema': -999,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
     assert response.status_code == 400
-    assert response.json()['data_file_pk'] == 'Data file not found'
+    assert 'object does not exist' in response_table['schema'][0]
+    assert 'object does not exist' in response_table['data_file'][0]
