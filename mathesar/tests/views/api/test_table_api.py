@@ -95,12 +95,18 @@ def test_table_detail(create_table, client):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_create_from_datafile(client, data_file):
+def test_table_create_from_datafile(client, data_file, schema):
     num_tables = Table.objects.count()
-    response = client.post('/api/v0/tables/', {'data_file_pk': data_file.id})
+    table_name = 'test_table'
+    body = {
+        'data_file': data_file.id,
+        'name': table_name,
+        'schema': schema.id
+    }
+    response = client.post('/api/v0/tables/', body)
     response_table = response.json()
+    print(response_table)
     table = Table.objects.get(id=response_table['id'])
-    table_name = os.path.basename(data_file.file.name)
 
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1

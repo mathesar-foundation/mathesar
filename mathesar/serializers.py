@@ -32,6 +32,13 @@ class ColumnSerializer(serializers.Serializer):
 class TableSerializer(serializers.HyperlinkedModelSerializer):
     columns = ColumnSerializer(many=True, read_only=True, source='sa_columns')
     records = serializers.SerializerMethodField()
+    schema = serializers.PrimaryKeyRelatedField(
+        required=True, queryset=Schema.objects.all()
+    )
+    # Make this non-required if we make other methods of creating tables
+    data_file = serializers.PrimaryKeyRelatedField(
+        required=True, queryset=DataFile.objects.all()
+    )
 
     class Meta:
         model = Table
@@ -39,8 +46,12 @@ class TableSerializer(serializers.HyperlinkedModelSerializer):
                   'columns', 'records', 'data_file']
 
     def get_records(self, obj):
-        request = self.context['request']
-        return request.build_absolute_uri(reverse('table-records-list', kwargs={'table_pk': obj.pk}))
+        if isinstance(obj, Table):
+            # Only get records if we are serializing an existing table
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('table-records-list', kwargs={'table_pk': obj.pk}))
+        else:
+            return None
 
 
 class RecordSerializer(serializers.BaseSerializer):

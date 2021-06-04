@@ -1,5 +1,5 @@
 from rest_framework import status, viewsets
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
 
@@ -29,10 +29,12 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
     pagination_class = DefaultLimitOffsetPagination
 
     def create(self, request):
-        if "data_file_pk" in request.data:
-            return create_table_from_datafile(request)
+        serializer = TableSerializer(data=request.data,
+                                     context={'request': request})
+        if serializer.is_valid():
+            return create_table_from_datafile(request, serializer.data)
         else:
-            super().create(request)
+            raise ValidationError(serializer.errors)
 
 
 class RecordViewSet(viewsets.ViewSet):
