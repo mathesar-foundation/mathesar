@@ -64,9 +64,8 @@ def test_table_list(create_table, client):
     }
     """
     table_name = 'NASA Table List'
-    create_table(table_name)
+    table = create_table(table_name)
 
-    table = Table.objects.get(name=table_name)
     response = client.get('/api/v0/tables/')
     response_data = response.json()
     response_table = None
@@ -86,9 +85,8 @@ def test_table_detail(create_table, client):
     One item in the results list in the table list view, see above.
     """
     table_name = 'NASA Table Detail'
-    create_table(table_name)
+    table = create_table(table_name)
 
-    table = Table.objects.get(name=table_name)
     response = client.get(f'/api/v0/tables/{table.id}/')
     response_table = response.json()
     assert response.status_code == 200
