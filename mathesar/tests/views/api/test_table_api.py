@@ -128,3 +128,24 @@ def test_table_create_from_datafile_404(client):
     assert response.status_code == 400
     assert 'object does not exist' in response_table['schema'][0]
     assert 'object does not exist' in response_table['data_file'][0]
+
+
+def test_table_update(client, create_table):
+    table = create_table('update_table_test')
+    response = client.put(f'/api/v0/tables/{table.id}/')
+    assert response.status_code == 405
+    assert response.json()['detail'] == 'Method "PUT" not allowed.'
+
+
+def test_data_file_partial_update(client, create_table):
+    table = create_table('partial_update_table_test')
+    response = client.patch(f'/api/v0/tables/{table.id}/')
+    assert response.status_code == 405
+    assert response.json()['detail'] == 'Method "PATCH" not allowed.'
+
+
+def test_data_file_delete(client, create_table):
+    table = create_table('delete_table_test')
+    response = client.delete(f'/api/v0/tables/{table.id}/')
+    assert response.status_code == 405
+    assert response.json()['detail'] == 'Method "DELETE" not allowed.'
