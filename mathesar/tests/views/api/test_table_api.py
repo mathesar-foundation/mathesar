@@ -109,6 +109,7 @@ def test_table_create_from_datafile(client, data_file, schema):
 
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1
+    assert response_table["data_file"] == table.data_file.id
     check_table_response(response_table, table, table_name)
 
 
