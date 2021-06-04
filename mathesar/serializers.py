@@ -63,14 +63,10 @@ class DataFileSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(
         default=serializers.CurrentUserDefault(), read_only=True
     )
-    schema = serializers.PrimaryKeyRelatedField(required=True, queryset=Schema.objects.all())
 
     class Meta:
         model = DataFile
-        fields = ['id', 'file', 'table_imported_to', 'schema', 'user']
-        # We only currently support importing to a new table, so setting a table via API is invalid.
-        # User should be set automatically, not submitted via the API.
-        read_only_fields = ['table_imported_to']
+        fields = ['id', 'file', 'user']
 
     def save(self, **kwargs):
         """

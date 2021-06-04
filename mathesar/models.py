@@ -32,8 +32,12 @@ class Schema(DatabaseObject):
 
 
 class Table(DatabaseObject):
-    schema = models.ForeignKey('Schema', on_delete=models.CASCADE, related_name='tables')
+    schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
+                               related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
+    data_file = models.ForeignKey('DataFile', related_name='tables',
+                                  blank=True, null=True,
+                                  on_delete=models.SET_NULL)
 
     @cached_property
     def _sa_engine(self):
@@ -81,20 +85,4 @@ class DataFile(BaseModel):
         upload_to=model_utils.user_directory_path,
         validators=[FileExtensionValidator(allowed_extensions=['csv'])]
     )
-    table_imported_to = models.ForeignKey(Table, related_name='data_file',
-                                          blank=True, null=True,
-                                          on_delete=models.SET_NULL)
-    schema = models.ForeignKey(Schema, blank=True, null=True, on_delete=models.SET_NULL)
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
-
-    def save(self, *args, **kwargs):
-        created = False
-        if not self.pk:
-            created = True
-            if not self.schema:
-                # We are validating that a schema exists when a data file is created
-                # and not setting the schema field to non-nullable because if a schema
-                # is deleted, we may want to associate the data file with a different
-                # schema.
-                raise ValidationError('Data file must be associated with a schema.')
-        super().save(*args, **kwargs)

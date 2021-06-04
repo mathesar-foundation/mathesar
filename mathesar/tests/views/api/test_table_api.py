@@ -14,9 +14,9 @@ def schema(test_db_name):
 
 
 @pytest.fixture
-def data_file(csv_filename, schema):
+def data_file(csv_filename):
     with open(csv_filename, 'rb') as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file), schema=schema)
+        data_file = DataFile.objects.create(file=File(csv_file))
     return data_file
 
 
