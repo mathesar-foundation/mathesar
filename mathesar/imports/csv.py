@@ -53,6 +53,7 @@ def create_db_table_from_data_file(data_file, name, schema):
 
 def create_table_from_csv(data_file, name, schema):
     db_table = create_db_table_from_data_file(data_file, name, schema)
-    table, _ = Table.objects.get_or_create(name=db_table.name, schema=schema,
-                                           data_file=data_file)
+    table, _ = Table.objects.get_or_create(name=db_table.name, schema=schema)
+    data_file.table_imported_to = table
+    data_file.save()
     return table

@@ -34,9 +34,6 @@ class Table(DatabaseObject):
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
-    data_file = models.ForeignKey('DataFile', related_name='tables',
-                                  blank=True, null=True,
-                                  on_delete=models.SET_NULL)
 
     @cached_property
     def _sa_engine(self):
@@ -85,3 +82,6 @@ class DataFile(BaseModel):
         validators=[FileExtensionValidator(allowed_extensions=['csv'])]
     )
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    table_imported_to = models.ForeignKey(Table, related_name="data_files",
+                                          blank=True, null=True,
+                                          on_delete=models.SET_NULL)

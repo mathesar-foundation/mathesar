@@ -36,7 +36,7 @@ class TableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Table
         fields = ['id', 'name', 'schema', 'created_at', 'updated_at',
-                  'columns', 'records', 'data_file']
+                  'columns', 'records', 'data_files']
 
     def get_records(self, obj):
         if isinstance(obj, Table):
@@ -59,7 +59,10 @@ class DataFileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DataFile
-        fields = ['id', 'file', 'user']
+        fields = ['id', 'file', 'table_imported_to', 'user']
+        # We only currently support importing to a new table, so setting a table via API is invalid.
+        # User should be set automatically, not submitted via the API.
+        read_only_fields = ['table_imported_to']
 
     def save(self, **kwargs):
         """

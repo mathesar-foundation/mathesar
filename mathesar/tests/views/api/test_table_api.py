@@ -96,17 +96,18 @@ def test_table_create_from_datafile(client, data_file, schema):
     num_tables = Table.objects.count()
     table_name = 'test_table'
     body = {
-        'data_file': data_file.id,
+        'data_files': [data_file.id],
         'name': table_name,
         'schema': schema.id,
     }
     response = client.post('/api/v0/tables/', body)
     response_table = response.json()
     table = Table.objects.get(id=response_table['id'])
+    data_file.refresh_from_db()
 
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1
-    assert response_table["data_file"] == table.data_file.id
+    assert data_file.table_imported_to.id == table.id
     check_table_response(response_table, table, table_name)
 
 
@@ -118,7 +119,7 @@ def test_table_404(client):
 
 def test_table_create_from_datafile_404(client):
     body = {
-        'data_file': -999,
+        'data_files': -999,
         'name': 'test_table',
         'schema': -999,
     }
@@ -126,7 +127,7 @@ def test_table_create_from_datafile_404(client):
     response_table = response.json()
     assert response.status_code == 400
     assert 'object does not exist' in response_table['schema'][0]
-    assert 'object does not exist' in response_table['data_file'][0]
+    assert 'object does not exist' in response_table['data_files'][0]
 
 
 def test_table_update(client, create_table):

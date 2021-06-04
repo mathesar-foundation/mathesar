@@ -7,6 +7,10 @@ from mathesar.models import DataFile
 def verify_data_file_data(data_file, data_file_dict):
     assert data_file_dict['id'] == data_file.id
     assert data_file_dict['file'] == f'http://testserver/media/{data_file.file.name}'
+    if data_file.table_imported_to:
+        assert data_file_dict['table_imported_to'] == data_file.table_imported_to.id
+    else:
+        assert data_file_dict['table_imported_to'] is None
     if data_file.user:
         assert data_file_dict['user'] == data_file.user.id
     else:
