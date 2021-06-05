@@ -16,8 +16,9 @@
   import type { SchemaTreeMapEntry } from '@mathesar/stores/schemas';
   import {
     getAllImportDetails,
-    fileImportChanges,
+    getDBStore,
     ImportChangeType,
+    removeImport,
   } from '@mathesar/stores/fileImports';
   import { clearTable } from '@mathesar/stores/tableData';
 
@@ -37,12 +38,12 @@
       };
     },
   );
-  let tabs: Tab[] = (getAllImportDetails() as unknown as Tab[]).concat(tables);
+  let tabs: Tab[] = (getAllImportDetails(database) as unknown as Tab[]).concat(tables);
   let activeTab = tables.find(
     (table) => table.id?.toString() === decodeURIComponent(route.query.a),
   ) || tabs[0];
 
-  const unsubFileImports = fileImportChanges.subscribe((fileImportInfo) => {
+  const unsubFileImports = getDBStore(database).changes.subscribe((fileImportInfo) => {
     if (fileImportInfo) {
       if (fileImportInfo.changeType === ImportChangeType.ADDED) {
         const newImportTab = {
@@ -55,9 +56,6 @@
           newImportTab,
         ];
         activeTab = newImportTab;
-      } else {
-        tabs = tabs.filter((tab) => tab.id !== fileImportInfo.info?.id);
-        [activeTab] = tabs; // TODO: Check and set active tab using a common util
       }
     }
   });
@@ -110,7 +108,9 @@
     if (activeTab?.isNew) {
       removeActiveTableQuery(database);
     }
-    if (!removedTab.isNew) {
+    if (removedTab.isNew) {
+      removeImport(database, removedTab.id as string);
+    } else {
       removeTableQuery(database, removedTab.id as string, tabActive?.id as string);
       clearTable(database, removedTab.id as string);
     }
@@ -138,7 +138,7 @@
 
       {#if activeTab}
         {#if activeTab.isNew}
-          <ImportFile {database}/>
+          <ImportFile {database} id={activeTab.id?.toString()}/>
         {:else}
           <TableView {database} id={activeTab.id?.toString()}/>
         {/if}

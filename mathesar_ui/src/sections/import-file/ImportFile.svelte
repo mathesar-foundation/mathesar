@@ -1,8 +1,14 @@
 <script lang="ts">
   import Cookies from 'js-cookie';
   import { schemas, reloadSchemas } from '@mathesar/stores/schemas';
+  import { getFileStore } from '@mathesar/stores/fileImports';
+  import type { FileImport } from '@mathesar/stores/fileImports';
 
-  export let database = null;
+  export let id: string = null;
+  export let database: string = null;
+
+  let fileImportData: FileImport;
+  $: fileImportData = getFileStore(database, id);
 
   function submitListener(form: Node) {
     function onSubmit(e: Event) {
@@ -35,10 +41,12 @@
 
   <form enctype="multipart/form-data" use:submitListener>
     <label for="id_table_name">Table name:</label>
-    <input type="text" name="table_name" minlength="1" required id="id_table_name">
+    <input type="text" name="table_name" minlength="1" required id="id_table_name"
+           bind:value={$fileImportData.name}>
 
     <label for="id_schema_name">Schema name:</label>
-    <input type="text" name="schema_name" minlength="1" required id="id_schema_name" list="id_schema_name_data_list">
+    <input type="text" name="schema_name" minlength="1" required id="id_schema_name"
+           list="id_schema_name_data_list" bind:value={$fileImportData.schema}>
     <datalist id="id_schema_name_data_list">
       {#each $schemas.data as schema (schema.name)}
         <option value={schema.name}/>

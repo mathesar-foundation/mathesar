@@ -1,4 +1,5 @@
 import {
+  get,
   writable,
   Writable,
 } from 'svelte/store';
@@ -9,7 +10,9 @@ export enum ImportChangeType {
 }
 
 export interface FileImportInfo {
-  id: string
+  id: string,
+  name?: string,
+  schema?: string
 }
 
 export interface FileImportChange {
@@ -19,48 +22,71 @@ export interface FileImportChange {
 }
 
 export type FileImport = Writable<FileImportInfo>;
-
 let fileId = 0;
 
-export const fileImportChanges = writable<FileImportChange>(null);
-const fileImportDetails: FileImportInfo[] = [];
-const fileImportMap: Map<string, FileImport> = new Map();
+// Storage map
+interface FileImportsForDB {
+  changes: Writable<FileImportChange>,
+  imports: Map<string, FileImport>
+}
+const databaseMap: Map<string, FileImportsForDB> = new Map();
 
-export function newImport(): FileImport {
-  const id = `_new_${fileId}`;
-  const fileImportInfo: FileImportInfo = { id };
+export function getAllImportDetails(db: string): FileImportInfo[] {
+  const database = databaseMap.get(db);
+  if (database?.imports) {
+    return Array.from(database.imports.values()).map((entry: FileImport) => get(entry));
+  }
+  return [];
+}
 
-  fileImportDetails.push(fileImportInfo);
-  fileImportChanges.set({
-    changeType: ImportChangeType.ADDED,
-    info: fileImportInfo,
-    all: fileImportDetails,
-  });
+export function getDBStore(db: string): FileImportsForDB {
+  let database = databaseMap.get(db);
+  if (!database) {
+    database = {
+      changes: writable<FileImportChange>(null),
+      imports: new Map(),
+    };
+    databaseMap.set(db, database);
+  }
+  return database;
+}
 
-  const fileImport = writable(fileImportInfo);
-  fileImportMap.set(id, fileImport);
+export function getFileStore(db: string, id: string): FileImport {
+  const database = getDBStore(db);
 
-  fileId += 1;
+  let fileImport = database.imports.get(id);
+  if (!fileImport) {
+    const fileImportInitialInfo: FileImportInfo = { id };
+    fileImport = writable(fileImportInitialInfo);
+    database.imports.set(id, fileImport);
+  }
   return fileImport;
 }
 
-export function getImport(id: string): FileImport {
-  return fileImportMap.get(id);
-}
+export function newImport(db: string): void {
+  const id = `_new_${fileId}`;
+  const database = getDBStore(db);
+  const fileImport = getFileStore(db, id);
 
-export function removeImport(id: string): void {
-  const index = fileImportDetails.findIndex((importInfo) => importInfo.id === id);
-  const removedImport = fileImportDetails.splice(index, 1);
-
-  fileImportChanges.set({
-    changeType: ImportChangeType.REMOVED,
-    info: removedImport[0],
-    all: fileImportDetails,
+  database.changes.set({
+    changeType: ImportChangeType.ADDED,
+    info: get(fileImport),
+    all: getAllImportDetails(db),
   });
 
-  fileImportMap.delete(id);
+  fileId += 1;
 }
 
-export function getAllImportDetails(): FileImportInfo[] {
-  return fileImportDetails;
+export function removeImport(db:string, id: string): void {
+  const database = databaseMap.get(db);
+  if (database?.imports) {
+    const fileImport = database.imports.get(id);
+    database.imports.delete(id);
+
+    database.changes.set({
+      changeType: ImportChangeType.REMOVED,
+      info: get(fileImport),
+      all: getAllImportDetails(db),
+    });
+  }
 }

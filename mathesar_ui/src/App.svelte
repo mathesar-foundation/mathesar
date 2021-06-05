@@ -14,12 +14,14 @@
       <div>{selectedDb}</div>
     {/if}
   </div>
-  <button on:click={() => newImport()}>Import CSV</button>
+  <button on:click={() => newImport(selectedDb)}>Import CSV</button>
 </header>
 
 <section class="content-section">
   <Route path="/:db">
-    <Base database={selectedDb}/>
+    {#key selectedDb}
+      <Base database={selectedDb}/>
+    {/key}
   </Route>
   
   <Route path="/" redirect="/{selectedDb}"/>
