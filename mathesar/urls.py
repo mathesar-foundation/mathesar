@@ -15,7 +15,9 @@ records_router.register(r'records', api.RecordViewSet, basename='table-records')
 
 urlpatterns = [
     path('', frontend.index, name="index"),
-    path('<dbname>', frontend.index, name="index"),
     path('api/v0/', include(router.urls)),
     path('api/v0/', include(records_router.urls)),
+    # TODO: Handle known urls like /favicon.ico etc.,
+    # Currenty, this catches all
+    path('<dbname>', frontend.index, name="index"),
 ]

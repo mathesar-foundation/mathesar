@@ -5,14 +5,14 @@ ul.tree {
   padding: 0;
 
   li {
-    a {
+    a, span {
       display: block;
       width: 100%;
 
       &.active {
         background: #efefef;
       }
-    } 
+    }
   }
 
   ul {

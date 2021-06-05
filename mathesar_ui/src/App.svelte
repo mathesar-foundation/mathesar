@@ -2,6 +2,7 @@
   import { Route } from 'tinro';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import Base from '@mathesar/sections/Base.svelte';
+  import { newImport } from '@mathesar/stores/fileImports';
 
   const commonData = preloadCommonData();
   const selectedDb = commonData?.databases?.[0];
@@ -13,7 +14,7 @@
       <div>{selectedDb}</div>
     {/if}
   </div>
-  <button>Import CSV</button>
+  <button on:click={() => newImport()}>Import CSV</button>
 </header>
 
 <section class="content-section">

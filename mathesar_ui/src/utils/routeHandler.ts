@@ -47,6 +47,12 @@ export function removeTableQuery(db: string, id: string, activeTabId?: string): 
   }
 }
 
+export function removeActiveTableQuery(db: string): void {
+  if (isInTableContentView(db)) {
+    router.location.query.delete('a');
+  }
+}
+
 export function getTablesFromQuery(tableQuery: string): string[][] {
   return tableQuery ? JSON.parse(decodeURIComponent(tableQuery)) as [] : [];
 }

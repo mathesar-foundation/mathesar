@@ -65,7 +65,7 @@
   }
 
   function getTabURL(tab: Tab): string {
-    return getLink ? getLink(tab) : tab[linkKey] as string || '#';
+    return getLink ? getLink(tab) : tab[linkKey] as string || null;
   }
 </script>
 
@@ -75,7 +75,7 @@
       <li role="presentation" class="tab" class:active={activeTab === tab} tabindex="-1" 
           style={activeTab !== tab ? `width: ${Math.floor(100 / tabs.length)}%;` : null}>
 
-        <a role="tab" href={getTabURL(tab)} tabindex="0"
+        <a role="tab" href={getTabURL(tab) || '#'} tabindex="0"
             aria-selected={activeTab === tab} aria-disabled="{!!tab.disabled}"
             id={activeTab === tab ? `mtsr-${componentId}-tab` : null} data-tinro-ignore
             aria-controls={activeTab === tab ? `mtsr-${componentId}-tabpanel` : null}

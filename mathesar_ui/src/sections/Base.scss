@@ -26,5 +26,88 @@ section.table-section {
   right: 0;
   bottom: 0;
   overflow: auto;
-  padding: 16px;
+
+  ul.tabs {
+    li.active {
+      background-color: #f0fbff;
+    }
+  }
+  
+  .tab-container {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    top: 0;
+
+    .tab-content-holder {
+      flex-grow: 1;
+
+      >div {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+
+        >.actions-pane {
+          border-bottom: 1px solid #efefef;
+          background-color: #f0fbff;
+        }
+        >.table-content {
+          flex-grow: 1;
+          overflow: auto;
+
+          table {
+            border-collapse: collapse;
+            min-width: 100%;
+            text-indent: 0;
+            border-color: inherit;
+
+            thead th, tbody td {
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              padding: 7px 15px;
+              text-align: left;
+              border-bottom: 1px solid #efefef;
+              border-right: 1px solid #efefef;
+              max-width: 200px;
+
+              &:last-child, &:first-child {
+                border-right: none;
+              }
+
+              &:first-child {
+                font-size: 12px;
+                color: #959595;
+              }
+            }
+
+            thead {
+              th {
+                font-weight: 400;
+                background: #f9f9f9;
+                position: sticky;
+                top: 0;
+
+                >.drag-grip {
+                  position: absolute;
+                  
+                }
+              }
+            }
+
+            tbody {
+              tr:last-child {
+                td {
+                  border-bottom: none;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
