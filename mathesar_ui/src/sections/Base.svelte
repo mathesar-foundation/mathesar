@@ -2,7 +2,8 @@
   import { onDestroy } from 'svelte';
   import { meta } from 'tinro';
   import { schemas } from '@mathesar/stores/schemas';
-  import { Tree, TabContainer } from '@mathesar-components';
+  import { faTable } from '@fortawesome/free-solid-svg-icons';
+  import { Tree, TabContainer, Icon } from '@mathesar-components';
   import {
     openTableQuery,
     removeTableQuery,
@@ -118,7 +119,11 @@
 
 <aside>
   <nav>
-    <Tree data={$schemas.data || []} idKey="id" labelKey="name" childKey="tables" {getLink} on:nodeSelected={tableSelected}/>
+    <Tree data={$schemas.data || []} idKey="id" labelKey="name" childKey="tables"
+          {getLink} on:nodeSelected={tableSelected} let:entry>
+        <Icon data={faTable} size='14px'/>
+        <span>{entry.name}</span>
+    </Tree>
   </nav>
 </aside>
 
@@ -126,14 +131,17 @@
   {#if tabs?.length > 0}
     <TabContainer bind:tabs bind:activeTab allowRemoval={true} preventDefault={true}
                   {getLink} on:tabSelected={tabSelected} on:tabRemoved={tabRemoved}>
+      <span slot="tab" let:tab>
+        <Icon data={faTable}/>
+        <span>{tab.label}</span>
+      </span>
+
       {#if activeTab}
         {#if activeTab.isNew}
           <ImportFile {database}/>
         {:else}
-          <TableView {database} id={activeTab.id}/>
+          <TableView {database} id={activeTab.id?.toString()}/>
         {/if}
-      {:else}
-        Empty content
       {/if}
     </TabContainer>
 

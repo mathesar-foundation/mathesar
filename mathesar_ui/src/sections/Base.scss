@@ -14,7 +14,15 @@ aside {
 
   nav {
     .tree {
-      padding: 0px 20px;
+      padding: 0px 12px;
+
+      li {
+        a.item {
+          span {
+            margin-left: 6px;
+          }
+        }
+      }
     }
   }
 }

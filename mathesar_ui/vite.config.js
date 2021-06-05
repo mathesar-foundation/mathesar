@@ -7,8 +7,8 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: '@mathesar', replacement: path.resolve(__dirname, 'src') },
-      { find: '@mathesar-components', replacement: path.resolve(__dirname, 'src/components/index.ts') },
       { find: '@mathesar-components/types', replacement: path.resolve(__dirname, 'src/components/types.d.ts') },
+      { find: '@mathesar-components', replacement: path.resolve(__dirname, 'src/components/index.ts') },
     ],
   },
   plugins: [

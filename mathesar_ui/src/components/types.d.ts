@@ -1,3 +1,3 @@
-export type { Tab } from './tabs/TabContainer';
-
-export default {}; // TODO: Remove after we have more than one export
+export type { Tab } from './tabs/TabContainer.d';
+export type { TreeItem } from './tree/Tree.d';
+export * from './icon/Icon.d';

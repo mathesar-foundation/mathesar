@@ -45,6 +45,7 @@
     "vite": "^2.2.3"
   },
   "dependencies": {
+    "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "js-cookie": "^2.2.1"
   }
 }

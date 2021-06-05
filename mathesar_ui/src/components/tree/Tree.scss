@@ -5,13 +5,34 @@ ul.tree {
   padding: 0;
 
   li {
-    a, span {
-      display: block;
+    .item {
+      display: flex;
+      align-items: center;
       width: 100%;
+      cursor: pointer;
+      padding: 6px;
 
-      &.active {
-        background: #efefef;
+      span {
+        display: inline-block;
+        vertical-align: middle;
       }
+
+      svg + span {
+        margin-left: 3px;
+      }
+
+      &:hover {
+        background: #E5F7FF;
+      }
+    }
+
+    >a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    &:hover >a {
+      text-decoration: underline;
     }
   }
 
@@ -19,15 +40,11 @@ ul.tree {
     margin: 0;
     list-style: none;
     list-style-type: none;
-    padding: 0px 0px 0px 10px;
+    padding: 0px 0px 0px 12px;
 
     li {
-      >div {
-        padding: 5px 0px;
-      }
-
       ul {
-        padding-left: 10px;
+        padding-left: 12px;
       }
     }
   }

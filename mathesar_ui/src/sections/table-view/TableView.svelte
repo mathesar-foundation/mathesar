@@ -4,7 +4,7 @@
   import { States } from '@mathesar/utils/getAPI';
 
   export let database: string;
-  export let id;
+  export let id: string;
 
   let columns: TableColumnStore;
   let records: TableRecordStore;

@@ -1,9 +1,11 @@
+import type { TreeItem } from '@mathesar-components/types';
+
 export interface SchemaEntry {
   id: string,
   name: string
 }
 
-export interface Schema extends SchemaEntry {
+export interface Schema extends SchemaEntry, TreeItem {
   tables: SchemaEntry[]
 }
 

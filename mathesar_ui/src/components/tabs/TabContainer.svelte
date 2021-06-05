@@ -81,7 +81,9 @@
             aria-controls={activeTab === tab ? `mtsr-${componentId}-tabpanel` : null}
             on:focus={focusTab} on:blur={blurTab} on:mousedown={(e) => selectActiveTab(e, tab)}
             on:click={checkAndPreventDefault}>
-          {tab[labelKey]}
+              <slot name="tab" {tab}>
+                {tab[labelKey]}
+              </slot>
         </a>
 
         {#if allowRemoval}
@@ -100,7 +102,7 @@
           aria-labelledby="mtsr-{componentId}-tab"
           tabindex="0">
       {#if activeTab}
-        <slot {activeTab}></slot>
+        <slot></slot>
       {/if}
     </div>
   </div>  

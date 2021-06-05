@@ -1,7 +1,8 @@
 <script lang="ts">
-  import TreeItem from './TreeItem.svelte';
+  import TreeItemComponent from './TreeItem.svelte';
+  import type { TreeItem } from './Tree.d';
 
-  export let data = [];
+  export let data: TreeItem[] = [];
   export let idKey = 'id';
   export let labelKey = 'label';
   export let childKey = 'children';
@@ -13,12 +14,12 @@
 
 <ul role="tree" class="tree">
   {#each data as entry (entry[idKey] || entry)}
-    <TreeItem {idKey} {labelKey} {childKey} {linkKey} {entry} {getLink} level={0} on:nodeSelected
+    <TreeItemComponent {idKey} {labelKey} {childKey} {linkKey} {entry} {getLink} level={0} on:nodeSelected
               let:level let:entry={innerEntry} bind:expansionInfo>
       <slot entry={innerEntry} {level}>
         {innerEntry[labelKey]}
       </slot>
-    </TreeItem>
+    </TreeItemComponent>
   {/each}
 </ul>
 
