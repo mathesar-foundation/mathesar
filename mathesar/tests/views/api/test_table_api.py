@@ -18,6 +18,7 @@ def data_file(csv_filename):
         data_file = DataFile.objects.create(file=File(csv_file))
     return data_file
 
+
 @pytest.fixture
 def tsv_data_file(tsv_filename):
     with open(tsv_filename, 'rb') as tsv_file:
@@ -98,7 +99,7 @@ def test_table_detail(create_table, client):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_create_from_datafile(client, data_file, schema):
+def test_table_create_from_csv_datafile(client, data_file, schema):
     num_tables = Table.objects.count()
     table_name = 'test_table'
     body = {
@@ -117,9 +118,9 @@ def test_table_create_from_datafile(client, data_file, schema):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_create_from_datafile(client, tsv_data_file, schema):
+def test_table_create_from_tsv_datafile(client, tsv_data_file, schema):
     num_tables = Table.objects.count()
-    table_name = 'test_table'
+    table_name = 'test_tsv_table'
     body = {
         'data_files': [tsv_data_file.id],
         'name': table_name,
