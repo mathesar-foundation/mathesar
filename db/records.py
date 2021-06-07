@@ -120,13 +120,15 @@ def create_record_or_records(table, engine, record_data):
     return None
 
 
-def create_records_from_csv(table, engine, csv_filename, column_names):
+def create_records_from_csv(table, engine, csv_filename, column_names, delimiter=','):
     with open(csv_filename, 'rb') as csv_file:
         with engine.begin() as conn:
             cursor = conn.connection.cursor()
             relation = '.'.join('"{}"'.format(part) for part in (table.schema, table.name))
             formatted_columns = '({})'.format(','.join([f'"{column_name}"' for column_name in column_names]))
-            copy_sql = f'COPY {relation} {formatted_columns} FROM STDIN CSV HEADER'
+            copy_sql = (f'COPY {relation} {formatted_columns} FROM STDIN CSV HEADER'
+                        f'WITH DELIMITER {delimiter}')
+
             cursor.copy_expert(copy_sql, csv_file)
 
 

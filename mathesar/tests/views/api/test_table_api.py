@@ -18,6 +18,12 @@ def data_file(csv_filename):
         data_file = DataFile.objects.create(file=File(csv_file))
     return data_file
 
+@pytest.fixture
+def tsv_data_file(tsv_filename):
+    with open(tsv_filename, 'rb') as tsv_file:
+        data_file = DataFile.objects.create(file=File(tsv_file))
+    return data_file
+
 
 def check_table_response(response_table, table, table_name):
     assert response_table['id'] == table.id
@@ -108,6 +114,25 @@ def test_table_create_from_datafile(client, data_file, schema):
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1
     assert data_file.table_imported_to.id == table.id
+    check_table_response(response_table, table, table_name)
+
+
+def test_table_create_from_datafile(client, tsv_data_file, schema):
+    num_tables = Table.objects.count()
+    table_name = 'test_table'
+    body = {
+        'data_files': [tsv_data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
+    table = Table.objects.get(id=response_table['id'])
+    tsv_data_file.refresh_from_db()
+
+    assert response.status_code == 201
+    assert Table.objects.count() == num_tables + 1
+    assert tsv_data_file.table_imported_to.id == table.id
     check_table_response(response_table, table, table_name)
 
 

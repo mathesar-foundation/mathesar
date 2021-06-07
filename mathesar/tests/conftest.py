@@ -13,3 +13,8 @@ def enable_db_access_for_all_tests(db):
 @pytest.fixture(scope='session')
 def csv_filename():
     return 'mathesar/tests/patents.csv'
+
+
+@pytest.fixture(scope='session')
+def tsv_filename():
+    return 'mathesar/tests/patents.tsv'

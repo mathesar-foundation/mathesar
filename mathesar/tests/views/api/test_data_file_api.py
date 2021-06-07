@@ -62,7 +62,7 @@ def test_data_file_detail(client, data_file):
     verify_data_file_data(data_file, data_file_dict)
 
 
-def test_data_file_create(client, csv_filename):
+def test_data_file_create_csv(client, csv_filename):
     num_data_files = DataFile.objects.count()
 
     with open(csv_filename, 'rb') as csv_file:
@@ -75,11 +75,24 @@ def test_data_file_create(client, csv_filename):
         verify_data_file_data(data_file, data_file_dict)
 
 
+def test_data_file_create_tsv(client, tsv_filename):
+    num_data_files = DataFile.objects.count()
+
+    with open(tsv_filename, 'rb') as tsv_file:
+        response = client.post('/api/v0/data_files/', data={'file': tsv_file})
+        data_file_dict = response.json()
+        data_file = DataFile.objects.get(id=data_file_dict['id'])
+
+        assert response.status_code == 201
+        assert DataFile.objects.count() == num_data_files + 1
+        verify_data_file_data(data_file, data_file_dict)
+
+
 def test_data_file_create_with_wrong_extension(client):
     with open('mathesar/tests/textfile.txt', 'rb') as text_file:
         response = client.post('/api/v0/data_files/', data={'file': text_file})
         assert response.status_code == 400
-        assert response.json()['file'][0] == 'File extension “txt” is not allowed. Allowed extensions are: csv.'
+        assert response.json()['file'][0] == 'File extension “txt” is not allowed. Allowed extensions are: csv, tsv.'
 
 
 def test_data_file_update(client, data_file):
