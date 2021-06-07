@@ -26,7 +26,7 @@ def legacy_create_db_table_from_csv(name, schema, csv_reader, engine):
 # See https://github.com/centerofci/mathesar/issues/150
 def legacy_create_table_from_csv(name, schema, database_key, csv_file):
     engine = create_mathesar_engine(database_key)
-    csv_reader = get_csv_reader(csv_file)
+    csv_reader = get_sv_reader(csv_file)
     db_table = legacy_create_db_table_from_csv(name, schema, csv_reader, engine)
     database = get_database_key(engine)
     schema, _ = Schema.objects.get_or_create(name=db_table.schema, database=database)

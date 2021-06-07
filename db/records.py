@@ -126,8 +126,8 @@ def create_records_from_csv(table, engine, csv_filename, column_names, delimiter
             cursor = conn.connection.cursor()
             relation = '.'.join('"{}"'.format(part) for part in (table.schema, table.name))
             formatted_columns = '({})'.format(','.join([f'"{column_name}"' for column_name in column_names]))
-            copy_sql = (f'COPY {relation} {formatted_columns} FROM STDIN CSV HEADER'
-                        f'WITH DELIMITER {delimiter}')
+            copy_sql = (f'COPY {relation} {formatted_columns} FROM STDIN '
+                        f"DELIMITER E'{delimiter}' CSV HEADER")
 
             cursor.copy_expert(copy_sql, csv_file)
 
