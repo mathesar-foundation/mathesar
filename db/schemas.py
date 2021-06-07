@@ -24,17 +24,16 @@ def get_mathesar_schemas_with_oids(engine):
             )
         )
     )
-    print(sel)
     with engine.begin() as conn:
         result = conn.execute(sel).fetchall()
     return result
 
 
-
 def get_all_schemas(engine):
     inspector = inspect(engine)
     # We don't need to exclude system schemas (i.e., starting with "pg_")
-    # since Inspector.get_schema_names already excludes them.
+    # since Inspector.get_schema_names already excludes them.  Thus, this
+    # function actually gets all non-pg-reserved schemas.
     return inspector.get_schema_names()
 
 

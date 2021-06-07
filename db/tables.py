@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column, String, Table, MetaData, func, select, ForeignKey, literal, exists,
-    join
+    join, inspect
 )
 
 from db import columns, constants, schemas
@@ -345,6 +345,11 @@ def reflect_table_from_oid(oid, engine):
     with engine.begin() as conn:
         schema, table_name = conn.execute(sel).fetchall()[0]
     return reflect_table(table_name, schema, engine)
+
+
+def get_oid_from_table(name, schema, engine):
+    inspector = inspect(engine)
+    return inspector.get_table_oid(name, schema=schema)
 
 
 def reflect_table(name, schema, engine, metadata=None):
