@@ -1,5 +1,4 @@
 import csv
-import os
 from io import TextIOWrapper
 
 from mathesar.database.base import create_mathesar_engine
@@ -36,15 +35,15 @@ def legacy_create_table_from_csv(name, schema, database_key, csv_file):
     return table
 
 
-def create_db_table_from_data_file(data_file):
-    engine = create_mathesar_engine(data_file.schema.database)
+def create_db_table_from_data_file(data_file, name, schema):
+    engine = create_mathesar_engine(schema.database)
     csv_filename = data_file.file.path
     with open(csv_filename, 'rb') as csv_file:
         csv_reader = get_csv_reader(csv_file)
         column_names = csv_reader.fieldnames
         table = tables.create_string_column_table(
-            name=os.path.split(data_file.file.name)[-1],
-            schema=data_file.schema.name,
+            name=name,
+            schema=schema.name,
             column_names=column_names,
             engine=engine
         )
@@ -52,9 +51,9 @@ def create_db_table_from_data_file(data_file):
     return table
 
 
-def create_table_from_csv(data_file):
-    db_table = create_db_table_from_data_file(data_file)
-    table, _ = Table.objects.get_or_create(name=db_table.name, schema=data_file.schema)
+def create_table_from_csv(data_file, name, schema):
+    db_table = create_db_table_from_data_file(data_file, name, schema)
+    table, _ = Table.objects.get_or_create(name=db_table.name, schema=schema)
     data_file.table_imported_to = table
     data_file.save()
     return table

@@ -1,10 +1,28 @@
+import pytest
+
+from django.core.files import File
+
 from mathesar.models import Table
+from mathesar.models import DataFile
+from mathesar.utils.schemas import create_schema_and_object
+
+
+@pytest.fixture
+def schema(test_db_name):
+    return create_schema_and_object('table_tests', test_db_name)
+
+
+@pytest.fixture
+def data_file(csv_filename):
+    with open(csv_filename, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+    return data_file
 
 
 def check_table_response(response_table, table, table_name):
     assert response_table['id'] == table.id
     assert response_table['name'] == table_name
-    assert '/api/v0/schemas/' in response_table['schema']
+    assert response_table['schema'] == table.schema.id
     assert 'created_at' in response_table
     assert 'updated_at' in response_table
     assert len(response_table['columns']) == len(table.sa_column_names)
@@ -45,9 +63,8 @@ def test_table_list(create_table, client):
     }
     """
     table_name = 'NASA Table List'
-    create_table(table_name)
+    table = create_table(table_name)
 
-    table = Table.objects.get(name=table_name)
     response = client.get('/api/v0/tables/')
     response_data = response.json()
     response_table = None
@@ -67,16 +84,68 @@ def test_table_detail(create_table, client):
     One item in the results list in the table list view, see above.
     """
     table_name = 'NASA Table Detail'
-    create_table(table_name)
+    table = create_table(table_name)
 
-    table = Table.objects.get(name=table_name)
     response = client.get(f'/api/v0/tables/{table.id}/')
     response_table = response.json()
     assert response.status_code == 200
     check_table_response(response_table, table, table_name)
 
 
-def test_table_404(create_table, client):
+def test_table_create_from_datafile(client, data_file, schema):
+    num_tables = Table.objects.count()
+    table_name = 'test_table'
+    body = {
+        'data_files': [data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
+    table = Table.objects.get(id=response_table['id'])
+    data_file.refresh_from_db()
+
+    assert response.status_code == 201
+    assert Table.objects.count() == num_tables + 1
+    assert data_file.table_imported_to.id == table.id
+    check_table_response(response_table, table, table_name)
+
+
+def test_table_404(client):
     response = client.get('/api/v0/tables/3000/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
+
+
+def test_table_create_from_datafile_404(client):
+    body = {
+        'data_files': -999,
+        'name': 'test_table',
+        'schema': -999,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
+    assert response.status_code == 400
+    assert 'object does not exist' in response_table['schema'][0]
+    assert 'object does not exist' in response_table['data_files'][0]
+
+
+def test_table_update(client, create_table):
+    table = create_table('update_table_test')
+    response = client.put(f'/api/v0/tables/{table.id}/')
+    assert response.status_code == 405
+    assert response.json()['detail'] == 'Method "PUT" not allowed.'
+
+
+def test_data_file_partial_update(client, create_table):
+    table = create_table('partial_update_table_test')
+    response = client.patch(f'/api/v0/tables/{table.id}/')
+    assert response.status_code == 405
+    assert response.json()['detail'] == 'Method "PATCH" not allowed.'
+
+
+def test_data_file_delete(client, create_table):
+    table = create_table('delete_table_test')
+    response = client.delete(f'/api/v0/tables/{table.id}/')
+    assert response.status_code == 405
+    assert response.json()['detail'] == 'Method "DELETE" not allowed.'

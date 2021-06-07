@@ -1,5 +1,5 @@
 from rest_framework import status, viewsets
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
 
@@ -8,6 +8,7 @@ from mathesar.models import Table, Schema, DataFile
 from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
 from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer
 from mathesar.utils.schemas import create_schema_and_object
+from mathesar.utils.api import create_table_from_datafile
 
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -21,10 +22,19 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class TableViewSet(viewsets.ReadOnlyModelViewSet):
+class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
+                   CreateModelMixin):
     queryset = Table.objects.all().order_by('-created_at')
     serializer_class = TableSerializer
     pagination_class = DefaultLimitOffsetPagination
+
+    def create(self, request):
+        serializer = TableSerializer(data=request.data,
+                                     context={'request': request})
+        if serializer.is_valid():
+            return create_table_from_datafile(request, serializer.data)
+        else:
+            raise ValidationError(serializer.errors)
 
 
 class RecordViewSet(viewsets.ViewSet):
