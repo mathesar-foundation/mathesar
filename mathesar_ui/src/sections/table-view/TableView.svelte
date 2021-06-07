@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getTable } from '@mathesar/stores/tableData';
   import type { TableColumnStore, TableRecordStore } from '@mathesar/stores/tableData';
-  import { States } from '@mathesar/utils/getAPI';
+  import { States } from '@mathesar/utils/api';
 
   export let database: string;
   export let id: string;
@@ -70,3 +70,7 @@
 <div>
   Pagination
 </div>
+
+<style global lang="scss">
+  @import "TableView.scss";
+</style>

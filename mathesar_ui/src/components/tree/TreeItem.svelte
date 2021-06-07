@@ -43,7 +43,7 @@
 {#if entry[childKey]}
   <li aria-level={level + 1} role="treeitem" tabindex="-1">
     <div class="item parent" on:click={toggle}>
-      <Icon data={faCaretRight} rotate={expansionInfo[id] ? IconRotate.NINETY : null} size='16px'/>
+      <Icon data={faCaretRight} rotate={expansionInfo[id] ? IconRotate.NINETY : null}/>
       <span>{entry[labelKey]}</span>
     </div>
 

@@ -121,7 +121,7 @@
   <nav>
     <Tree data={$schemas.data || []} idKey="id" labelKey="name" childKey="tables"
           {getLink} on:nodeSelected={tableSelected} let:entry>
-        <Icon data={faTable} size='14px'/>
+        <Icon data={faTable}/>
         <span>{entry.name}</span>
     </Tree>
   </nav>

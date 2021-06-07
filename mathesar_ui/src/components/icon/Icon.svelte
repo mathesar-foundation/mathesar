@@ -5,7 +5,7 @@
   export let data: IconDefinition;
   $: [viewBoxWith, viewBoxHeight, , , path] = data.icon;
 
-  export let size = '12px';
+  export let size = '1em';
   export let label = null;
 
   export let spin = false;

@@ -1,6 +1,6 @@
 import { writable, derived, Readable } from 'svelte/store';
 import { preloadCommonData, Schema, SchemaEntry } from '@mathesar/utils/preloadData';
-import getAPI, { States } from '@mathesar/utils/getAPI';
+import { getAPI, States } from '@mathesar/utils/api';
 
 export interface SchemaMapEntry extends SchemaEntry {
   children?: string[],
@@ -53,7 +53,7 @@ export async function reloadSchemas(): Promise<void> {
   }));
 
   try {
-    const response = await getAPI<SchemaResponse>('/api/v0/schemas/');
+    const response = await getAPI<SchemaResponse>('/schemas/');
     const data = response.results || [];
     schemaWriteStore.set({
       state: States.Done,

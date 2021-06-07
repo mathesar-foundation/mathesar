@@ -13,7 +13,7 @@
     border-bottom: 1px solid #dfdfdf;
   
     >li.tab {
-      align-items: center;
+      align-items: stretch;
       background: 0 0;
       cursor: pointer;
       display: inline-flex;
@@ -27,7 +27,7 @@
       list-style: none;
       overflow: hidden;
       transition: width 0.200s cubic-bezier(0.39, 0.575, 0.565, 1);
-      border-radius: 4px 4px 0px 0px;
+      border-radius: 2px 2px 0px 0px;
       margin-bottom: -1px;
 
       >a {
@@ -35,9 +35,12 @@
         white-space: nowrap;
         text-decoration: none;
         text-overflow: ellipsis;
-        display: block;
+        display: flex;
+        align-items: center;
         overflow: hidden;
         flex-grow: 1;
+        text-decoration: none;
+        color: inherit;
       }
 
       >a:focus {
@@ -49,6 +52,7 @@
       }
 
       &.active {
+        background-color: #fff;
         border-color: #dfdfdf #dfdfdf transparent;
       }
 
@@ -60,13 +64,15 @@
       >button.remove {
         display: none;
         cursor: pointer;
-        padding: 1px 4px;
-        border: 1px solid #dfdfdf;
-        border-radius: 10px;
+        padding: 4px 10px;
+        border: none;
         background: none;
         margin: 0;
-        margin-right: 6px;
         color: inherit;
+
+        &:hover {
+          background: #d9f2fb;;
+        }
       }
 
       &:hover>button.remove {
@@ -84,6 +90,6 @@
     min-width: 0;
     border: 1px solid #dfdfdf;
     border-top: none;
-    border-radius: 0px 0px 4px 4px;
+    border-radius: 0px 0px 2px 2px;
   }
 }

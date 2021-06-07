@@ -1,3 +1,22 @@
 .import-file-view {
   padding: 20px;
+
+  .error {
+    color: red;
+
+    code {
+      margin-top: 10px;
+      display: block;
+    }
+  }
+
+  form {
+    margin-top: 15px;
+
+    table {
+      td {
+        padding: 5px 10px;
+      }
+    }
+  }
 }

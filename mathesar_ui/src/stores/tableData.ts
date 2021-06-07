@@ -1,5 +1,5 @@
 import { get, writable, Writable } from 'svelte/store';
-import getAPI, { States } from '@mathesar/utils/getAPI';
+import { getAPI, States } from '@mathesar/utils/api';
 
 interface TableColumn {
   name: string,
@@ -59,7 +59,7 @@ async function fetchTableDetails(db: string, id: string): Promise<void> {
     });
 
     try {
-      const response = await getAPI<TableDetailsResponse>(`/api/v0/tables/${id}/`);
+      const response = await getAPI<TableDetailsResponse>(`/tables/${id}/`);
       const columns = response.columns || [];
       tableColumnStore.set({
         state: States.Done,
@@ -100,7 +100,7 @@ async function fetchTableRecords(
     }
 
     try {
-      const response = await getAPI<TableRecordsResponse>(`/api/v0/tables/${id}/records/?${params.join('&')}`);
+      const response = await getAPI<TableRecordsResponse>(`/tables/${id}/records/?${params.join('&')}`);
       const totalCount = response.count || 0;
       const data = response.results || [];
       tableRecordStore.set({
