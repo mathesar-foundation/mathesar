@@ -18,7 +18,7 @@ export function openTableQuery(db: string, id: string): void {
   if (isInTableContentView(db)) {
     const tableQuery = router.location.query.get('t') as string;
     const tables: string[][] = tableQuery ? JSON.parse(decodeURIComponent(tableQuery)) as [] : [];
-    const existingTable = tables.find((table) => table[0] === id);
+    const existingTable = tables.find((table) => table[0].toString() === id);
     if (!existingTable) {
       tables.push([id]);
       router.location.query.set('t', encodeURIComponent(JSON.stringify(tables)));
@@ -31,7 +31,7 @@ export function removeTableQuery(db: string, id: string, activeTabId?: string): 
   if (isInTableContentView(db)) {
     const tableQuery = router.location.query.get('t') as string;
     const tables: string[][] = tableQuery ? JSON.parse(decodeURIComponent(tableQuery)) as [] : [];
-    const newTables = tables.filter((table) => table[0] !== id);
+    const newTables = tables.filter((table) => table[0].toString() !== id);
     if (newTables.length !== tables.length) {
       if (newTables.length > 0) {
         router.location.query.set('t', encodeURIComponent(JSON.stringify(newTables)));
@@ -39,7 +39,7 @@ export function removeTableQuery(db: string, id: string, activeTabId?: string): 
         router.location.query.delete('t');
       }
     }
-    if (activeTabId && tables.find((table) => table[0] === activeTabId)) {
+    if (activeTabId && tables.find((table) => table[0].toString() === activeTabId)) {
       router.location.query.set('a', encodeURIComponent(activeTabId));
     } else {
       router.location.query.delete('a');

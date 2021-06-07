@@ -19,25 +19,24 @@
 </script>
 
 <div class="actions-pane">
-  <button>Filter</button>
-  <button>Sort</button>
-</div>
+  Actions
 
-<div class="table-content">
   {#if $columns.state === States.Loading}
-    Loading table
+    | Loading table
 
   {:else if $columns.state === States.Error}
-    Error in loading table: {$columns.error}
+    | Error in loading table: {$columns.error}
   {/if}
 
   {#if $records.state === States.Loading}
-    Loading records
+    | Loading records
 
   {:else if $records.state === States.Error}
-    Error in loading records: {$records.error}
+    | Error in loading records: {$records.error}
   {/if}
+</div>
 
+<div class="table-content">
   {#if $columns.data.length > 0}
     <table>
       <thead>
@@ -67,7 +66,7 @@
   {/if}
 </div>
 
-<div>
+<div class="status-pane">
   Pagination
 </div>
 

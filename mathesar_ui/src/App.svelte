@@ -9,12 +9,14 @@
 </script>
 
 <header>
-  <div class="dropdown">
+  <div class="selector">
     {#if selectedDb}
       <div>{selectedDb}</div>
     {/if}
   </div>
-  <button on:click={() => newImport(selectedDb)}>Import CSV</button>
+  <div class="navigator">
+    <button on:click={() => newImport(selectedDb)}>Import CSV</button>
+  </div>
 </header>
 
 <section class="content-section">

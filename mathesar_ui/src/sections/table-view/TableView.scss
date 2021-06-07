@@ -1,6 +1,7 @@
 section.table-section .tab-container {
   .tab-content-holder {
     .actions-pane {
+      padding: 10px;
       border-bottom: 1px solid #efefef;
     }
     .table-content {
@@ -55,6 +56,9 @@ section.table-section .tab-container {
           }
         }
       }
+    }
+    .status-pane {
+      padding: 10px;
     }
   }
 }

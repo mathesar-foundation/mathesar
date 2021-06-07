@@ -24,6 +24,7 @@
 
   import ImportFile from './import-file/ImportFile.svelte';
   import TableView from './table-view/TableView.svelte';
+  import EmptyState from './empty-state/EmptyState.svelte';
 
   const route = meta();
   export let database : string;
@@ -68,7 +69,7 @@
     if (entry.isNew) {
       return null;
     }
-    return `/${database}${getTableQuery(entry.id as string)}`;
+    return `/${database}${getTableQuery(entry.id.toString())}`;
   }
 
   function tableSelected(e: { detail: { node: Schema, originalEvent: Event, link?: string } }) {
@@ -99,7 +100,7 @@
     if (tab.isNew) {
       removeActiveTableQuery(database);
     } else {
-      openTableQuery(database, tab.id as string);
+      openTableQuery(database, tab.id.toString());
     }
   }
 
@@ -109,10 +110,10 @@
       removeActiveTableQuery(database);
     }
     if (removedTab.isNew) {
-      removeImport(database, removedTab.id as string);
+      removeImport(database, removedTab.id.toString());
     } else {
-      removeTableQuery(database, removedTab.id as string, tabActive?.id as string);
-      clearTable(database, removedTab.id as string);
+      removeTableQuery(database, removedTab.id.toString(), tabActive?.id.toString() ?? null);
+      clearTable(database, removedTab.id.toString());
     }
   }
 </script>
@@ -138,15 +139,15 @@
 
       {#if activeTab}
         {#if activeTab.isNew}
-          <ImportFile {database} id={activeTab.id?.toString()}/>
+          <ImportFile {database} id={activeTab.id.toString()}/>
         {:else}
-          <TableView {database} id={activeTab.id?.toString()}/>
+          <TableView {database} id={activeTab.id.toString()}/>
         {/if}
       {/if}
     </TabContainer>
 
   {:else}
-    Empty state
+    <EmptyState/>
   {/if}
 </section>
 

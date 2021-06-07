@@ -12,7 +12,6 @@
   $: fileImportData = getFileStore(database, id);
 
   function completionCallback(completionStatus: UploadCompletionOpts, fileId: string) {
-    console.log(completionStatus);
     setFileStore(database, fileId, {
       progress: completionStatus,
     });
