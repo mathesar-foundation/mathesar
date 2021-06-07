@@ -149,5 +149,5 @@ export function getTable(db: string, id: string): TableData {
 }
 
 export function clearTable(db: string, id: string): void {
-  databaseMap.get(db)?.delete(id);
+  databaseMap.get(db)?.delete(id.toString());
 }

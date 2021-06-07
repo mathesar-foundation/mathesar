@@ -14,7 +14,7 @@ aside {
 
   nav {
     .tree {
-      padding: 0px 12px;
+      padding: 5px 12px;
 
       li {
         a.item {
@@ -63,6 +63,9 @@ section.table-section {
       flex-grow: 1;
 
       >div {
+        position: absolute;
+        left: 0;
+        top: 0;
         width: 100%;
         height: 100%;
         overflow: hidden;

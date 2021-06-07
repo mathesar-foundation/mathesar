@@ -24,7 +24,8 @@ interface SchemaResponse {
 function generateEntryMap(data: Schema[]): SchemaTreeMapEntry {
   const entryMap: SchemaTreeMapEntry = new Map();
   data.forEach((entry) => {
-    entryMap.set(entry.id, {
+    const schemaKey = `_s_${entry.id}`;
+    entryMap.set(schemaKey, {
       id: entry.id,
       name: entry.name,
       parent: 'root',
@@ -33,7 +34,7 @@ function generateEntryMap(data: Schema[]): SchemaTreeMapEntry {
       entryMap.set(tableEntry.id, {
         id: tableEntry.id,
         name: tableEntry.name,
-        parent: entry.id,
+        parent: schemaKey,
       });
     });
   });

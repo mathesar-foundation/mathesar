@@ -69,7 +69,7 @@
     if (entry.isNew) {
       return null;
     }
-    return `/${database}${getTableQuery(entry.id.toString())}`;
+    return `/${database}${getTableQuery(entry.id as string)}`;
   }
 
   function tableSelected(e: { detail: { node: Schema, originalEvent: Event, link?: string } }) {
@@ -100,7 +100,7 @@
     if (tab.isNew) {
       removeActiveTableQuery(database);
     } else {
-      openTableQuery(database, tab.id.toString());
+      openTableQuery(database, tab.id as string);
     }
   }
 
@@ -110,10 +110,10 @@
       removeActiveTableQuery(database);
     }
     if (removedTab.isNew) {
-      removeImport(database, removedTab.id.toString());
+      removeImport(database, removedTab.id as string);
     } else {
-      removeTableQuery(database, removedTab.id.toString(), tabActive?.id.toString() ?? null);
-      clearTable(database, removedTab.id.toString());
+      removeTableQuery(database, removedTab.id as string, tabActive?.id as string);
+      clearTable(database, removedTab.id as string);
     }
   }
 </script>
