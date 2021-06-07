@@ -7,9 +7,9 @@ from mathesar.models import Table, Schema
 from db import tables, records
 
 
-def get_csv_reader(csv_file):
-    csv_file = TextIOWrapper(csv_file, encoding="utf-8-sig")
-    reader = csv.DictReader(csv_file)
+def get_sv_reader(file, delimiter=','):
+    file = TextIOWrapper(file, encoding="utf-8-sig")
+    reader = csv.DictReader(file, delimiter=delimiter)
     return reader
 
 
@@ -35,19 +35,31 @@ def legacy_create_table_from_csv(name, schema, database_key, csv_file):
     return table
 
 
+def get_sv_delimiter(filename):
+    if filename.endswith('.tsv'):
+        return '\t'
+    elif filename.endswith('.csv'):
+        return ','
+    else:
+        # Should never be hit because we only allow csv and tsv extensions
+        raise NotImplementedError("File extension not supported!")
+
+
 def create_db_table_from_data_file(data_file, name, schema):
     engine = create_mathesar_engine(schema.database)
-    csv_filename = data_file.file.path
-    with open(csv_filename, 'rb') as csv_file:
-        csv_reader = get_csv_reader(csv_file)
-        column_names = csv_reader.fieldnames
+    sv_filename = data_file.file.path
+    delimiter = get_sv_delimiter(sv_filename)
+    with open(sv_filename, 'rb') as sv_file:
+        sv_reader = get_sv_reader(sv_file, delimiter=delimiter)
+        column_names = sv_reader.fieldnames
         table = tables.create_string_column_table(
             name=name,
             schema=schema.name,
             column_names=column_names,
             engine=engine
         )
-    records.create_records_from_csv(table, engine, csv_filename, column_names)
+    records.create_records_from_csv(table, engine, sv_filename, column_names,
+                                    delimiter=delimiter)
     return table
 
 
