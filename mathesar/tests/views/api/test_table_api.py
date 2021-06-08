@@ -78,6 +78,22 @@ def test_table_list(create_table, client):
     check_table_response(response_table, table, table_name)
 
 
+def test_table_list_filter(create_table, client):
+    create_table('Filler Table 1')
+    create_table('Filler Table 2')
+    table_name = 'NASA Table List Filter'
+    table = create_table(table_name)
+
+    response = client.get('/api/v0/tables/?name=NASA Table List Filter')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data['count'] == 1
+    assert len(response_data['results']) == 1
+
+    response_table = response_data['results'][0]
+    check_table_response(response_table, table, table_name)
+
+
 def test_table_detail(create_table, client):
     """
     Desired format:
