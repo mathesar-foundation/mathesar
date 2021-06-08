@@ -29,17 +29,22 @@ class ColumnSerializer(serializers.Serializer):
     type = serializers.CharField()
 
 
-class TableSerializer(serializers.HyperlinkedModelSerializer):
+class TableSerializer(serializers.ModelSerializer):
     columns = ColumnSerializer(many=True, read_only=True, source='sa_columns')
     records = serializers.SerializerMethodField()
 
     class Meta:
         model = Table
-        fields = ['id', 'name', 'schema', 'created_at', 'updated_at', 'columns', 'records']
+        fields = ['id', 'name', 'schema', 'created_at', 'updated_at',
+                  'columns', 'records', 'data_files']
 
     def get_records(self, obj):
-        request = self.context['request']
-        return request.build_absolute_uri(reverse('table-records-list', kwargs={'table_pk': obj.pk}))
+        if isinstance(obj, Table):
+            # Only get records if we are serializing an existing table
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('table-records-list', kwargs={'table_pk': obj.pk}))
+        else:
+            return None
 
 
 class RecordSerializer(serializers.BaseSerializer):
@@ -51,11 +56,10 @@ class DataFileSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(
         default=serializers.CurrentUserDefault(), read_only=True
     )
-    schema = serializers.PrimaryKeyRelatedField(required=True, queryset=Schema.objects.all())
 
     class Meta:
         model = DataFile
-        fields = ['id', 'file', 'table_imported_to', 'schema', 'user']
+        fields = ['id', 'file', 'table_imported_to', 'user']
         # We only currently support importing to a new table, so setting a table via API is invalid.
         # User should be set automatically, not submitted via the API.
         read_only_fields = ['table_imported_to']
