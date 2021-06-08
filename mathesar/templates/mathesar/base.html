@@ -12,13 +12,13 @@
         overflow: hidden;
         font-family: -apple-system,system-ui,BlinkMacSystemFont,'Segoe UI',
                       Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',
-                      sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol',
-                      sans-serif;
+                      Helvetica, Arial, sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol';
         font-weight: 400;
         margin: 0;
         padding: 0;
         font-size: 14px;
-        line-height: normal;
+        line-height: 1em;
+        color: #1E1E1E;
       }
       * {
         box-sizing: border-box;
@@ -33,7 +33,7 @@
 
     {% if development_mode %}
       <script type="module" src="{{ ui_dev_url }}/@vite/client"></script>
-      <script type="module" src="{{ ui_dev_url }}/src/main.js"></script>
+      <script type="module" src="{{ ui_dev_url }}/src/main.ts"></script>
     {% else %}
       <!-- TODO: Include production build -->
     {% endif %}
