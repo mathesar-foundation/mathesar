@@ -5,7 +5,7 @@ from django.utils.functional import cached_property
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.utils import models as model_utils
-from db import tables, records
+from db import tables, records, schemas
 
 
 class BaseModel(models.Model):
@@ -17,7 +17,7 @@ class BaseModel(models.Model):
 
 
 class DatabaseObject(BaseModel):
-    name = models.CharField(max_length=63)
+    oid = models.IntegerField()
 
     class Meta:
         abstract = True
@@ -29,20 +29,28 @@ class DatabaseObject(BaseModel):
 class Schema(DatabaseObject):
     database = models.CharField(max_length=128)
 
+    @cached_property
+    def _sa_engine(self):
+        # We're caching this since the engine is used frequently.
+        return create_mathesar_engine(self.database)
+
+    @cached_property
+    def name(self):
+        return schemas.get_schema_name_from_oid(self.oid, self._sa_engine)
+
 
 class Table(DatabaseObject):
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
 
-    @cached_property
-    def _sa_engine(self):
-        # We're caching this since the engine is used frequently.
-        return create_mathesar_engine(self.schema.database)
-
     @property
     def _sa_table(self):
-        return tables.reflect_table(self.name, self.schema.name, self._sa_engine)
+        return tables.reflect_table_from_oid(self.oid, self.schema._sa_engine)
+
+    @cached_property
+    def name(self):
+        return self._sa_table.name
 
     @property
     def sa_columns(self):
@@ -54,26 +62,26 @@ class Table(DatabaseObject):
 
     @property
     def sa_num_records(self):
-        return tables.get_count(self._sa_table, self._sa_engine)
+        return tables.get_count(self._sa_table, self.schema._sa_engine)
 
     @property
     def sa_all_records(self):
-        return records.get_records(self._sa_table, self._sa_engine)
+        return records.get_records(self._sa_table, self.schema._sa_engine)
 
     def get_record(self, id_value):
-        return records.get_record(self._sa_table, self._sa_engine, id_value)
+        return records.get_record(self._sa_table, self.schema._sa_engine, id_value)
 
     def get_records(self, limit=None, offset=None):
-        return records.get_records(self._sa_table, self._sa_engine, limit, offset)
+        return records.get_records(self._sa_table, self.schema._sa_engine, limit, offset)
 
     def create_record_or_records(self, record_data):
-        return records.create_record_or_records(self._sa_table, self._sa_engine, record_data)
+        return records.create_record_or_records(self._sa_table, self.schema._sa_engine, record_data)
 
     def update_record(self, id_value, record_data):
-        return records.update_record(self._sa_table, self._sa_engine, id_value, record_data)
+        return records.update_record(self._sa_table, self.schema._sa_engine, id_value, record_data)
 
     def delete_record(self, id_value):
-        return records.delete_record(self._sa_table, self._sa_engine, id_value)
+        return records.delete_record(self._sa_table, self.schema._sa_engine, id_value)
 
 
 class DataFile(BaseModel):
