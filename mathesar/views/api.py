@@ -10,6 +10,7 @@ from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPa
 from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.utils.api import create_table_from_datafile
+from mathesar.filters import TableFilter
 
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -29,7 +30,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
     serializer_class = TableSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
-    filterset_fields = ('name',)
+    filterset_class = TableFilter
 
     def create(self, request):
         serializer = TableSerializer(data=request.data,
