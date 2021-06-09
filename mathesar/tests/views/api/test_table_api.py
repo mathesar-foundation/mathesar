@@ -162,6 +162,21 @@ def test_table_create_from_datafile_404(client):
     assert 'object does not exist' in response_table['data_files'][0]
 
 
+def test_table_create_from_datafile_invalid_delimiter(client, schema):
+    with open('mathesar/tests/patents_invalid.csv') as invalid_file:
+        data_file = DataFile.objects.create(file=File(invalid_file))
+    table_name = 'test_invalid_datafile_table'
+    body = {
+        'data_files': [data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
+    assert response.status_code == 400
+    assert response_table["data_files"][0] == 'No valid delimiter found in datafile'
+
+
 def test_table_update(client, create_table):
     table = create_table('update_table_test')
     response = client.put(f'/api/v0/tables/{table.id}/')
