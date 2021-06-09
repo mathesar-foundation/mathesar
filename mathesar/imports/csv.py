@@ -4,12 +4,18 @@ from io import TextIOWrapper
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.utils import get_database_key
 from mathesar.models import Table, Schema
+from mathesar.errors import InvalidDelimiterError
 from db import tables, records
+
+ALLOWED_DELIMITERS = ",\t:| "
 
 
 def get_sv_dialect(filename):
     with open(filename, 'r') as f:
-        dialect = csv.Sniffer().sniff(f.read())
+        try:
+            dialect = csv.Sniffer().sniff(f.read(), delimiters=ALLOWED_DELIMITERS)
+        except csv.Error:
+            raise InvalidDelimiterError
     return dialect
 
 

@@ -1,0 +1,2 @@
+class InvalidDelimiterError(Exception):
+    pass
