@@ -7,9 +7,15 @@ from mathesar.models import Table, Schema
 from db import tables, records
 
 
-def get_sv_reader(file, delimiter=','):
+def get_sv_dialect(filename):
+    with open(filename, 'r') as f:
+        dialect = csv.Sniffer().sniff(f.read())
+    return dialect
+
+
+def get_sv_reader(file, dialect=None):
     file = TextIOWrapper(file, encoding="utf-8-sig")
-    reader = csv.DictReader(file, delimiter=delimiter)
+    reader = csv.DictReader(file, dialect=dialect)
     return reader
 
 
@@ -35,22 +41,12 @@ def legacy_create_table_from_csv(name, schema, database_key, csv_file):
     return table
 
 
-def get_sv_delimiter(filename):
-    if filename.endswith('.tsv'):
-        return '\t'
-    elif filename.endswith('.csv'):
-        return ','
-    else:
-        # Should never be hit because we only allow csv and tsv extensions
-        raise NotImplementedError("File extension not supported!")
-
-
 def create_db_table_from_data_file(data_file, name, schema):
     engine = create_mathesar_engine(schema.database)
     sv_filename = data_file.file.path
-    delimiter = get_sv_delimiter(sv_filename)
+    dialect = get_sv_dialect(sv_filename)
     with open(sv_filename, 'rb') as sv_file:
-        sv_reader = get_sv_reader(sv_file, delimiter=delimiter)
+        sv_reader = get_sv_reader(sv_file, dialect=dialect)
         column_names = sv_reader.fieldnames
         table = tables.create_string_column_table(
             name=name,
@@ -59,7 +55,9 @@ def create_db_table_from_data_file(data_file, name, schema):
             engine=engine
         )
     records.create_records_from_csv(table, engine, sv_filename, column_names,
-                                    delimiter=delimiter)
+                                    delimiter=dialect.delimiter,
+                                    escape=dialect.escapechar,
+                                    quote=dialect.quotechar)
     return table
 
 
