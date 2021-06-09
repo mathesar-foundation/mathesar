@@ -79,7 +79,6 @@ class Table(DatabaseObject):
 class DataFile(BaseModel):
     file = models.FileField(
         upload_to=model_utils.user_directory_path,
-        validators=[FileExtensionValidator(allowed_extensions=['csv', 'tsv'])]
     )
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     table_imported_to = models.ForeignKey(Table, related_name="data_files", blank=True,
