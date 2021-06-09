@@ -2,6 +2,7 @@ from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
+from django_filters import rest_framework as filters
 
 from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile
@@ -9,6 +10,7 @@ from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPa
 from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.utils.api import create_table_from_datafile
+from mathesar.filters import TableFilter
 
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -27,6 +29,8 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
     queryset = Table.objects.all().order_by('-created_at')
     serializer_class = TableSerializer
     pagination_class = DefaultLimitOffsetPagination
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = TableFilter
 
     def create(self, request):
         serializer = TableSerializer(data=request.data,
