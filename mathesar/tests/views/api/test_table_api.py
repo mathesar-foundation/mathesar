@@ -20,10 +20,12 @@ def data_file(csv_filename):
 
 
 @pytest.fixture
-def tsv_data_file(tsv_filename):
-    with open(tsv_filename, 'rb') as tsv_file:
-        data_file = DataFile.objects.create(file=File(tsv_file))
-    return data_file
+def create_data_file():
+    def _create_data_file(filename):
+        with open(filename, 'rb') as csv_file:
+            data_file = DataFile.objects.create(file=File(csv_file))
+        return data_file
+    return _create_data_file
 
 
 def check_table_response(response_table, table, table_name):
@@ -99,7 +101,7 @@ def test_table_detail(create_table, client):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_create_from_csv_datafile(client, data_file, schema):
+def test_table_create_from_datafile(client, data_file, schema):
     num_tables = Table.objects.count()
     table_name = 'test_table'
     body = {
@@ -121,7 +123,8 @@ def test_table_create_from_csv_datafile(client, data_file, schema):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_create_from_tsv_datafile(client, tsv_data_file, schema):
+def test_table_create_from_tsv_datafile(client, create_data_file, tsv_filename, schema):
+    tsv_data_file = create_data_file(tsv_filename)
     num_tables = Table.objects.count()
     table_name = 'test_tsv_table'
     body = {
@@ -144,8 +147,7 @@ def test_table_create_from_tsv_datafile(client, tsv_data_file, schema):
 
 
 def test_table_create_from_datafile_mixed_quote(client, data_file, schema):
-    with open('mathesar/tests/data/csv_parsing/mixed_quote.csv') as formatting_file:
-        data_file = DataFile.objects.create(file=File(formatting_file))
+    data_file = create_data_file('mathesar/tests/data/csv_parsing/mixed_quote.csv')
     body = {
         'data_files': [data_file.id],
         'name': 'test_mixed_quote_datafile_table',
@@ -162,8 +164,7 @@ def test_table_create_from_datafile_mixed_quote(client, data_file, schema):
 
 
 def test_table_create_from_datafile_double_quote(client, data_file, schema):
-    with open('mathesar/tests/data/csv_parsing/double_quote.csv') as formatting_file:
-        data_file = DataFile.objects.create(file=File(formatting_file))
+    data_file = create_data_file('mathesar/tests/data/csv_parsing/double_quote.csv')
     body = {
         'data_files': [data_file.id],
         'name': 'test_double_quote_datafile_table',
@@ -180,8 +181,7 @@ def test_table_create_from_datafile_double_quote(client, data_file, schema):
 
 
 def test_table_create_from_datafile_escaped_quote(client, data_file, schema):
-    with open('mathesar/tests/data/csv_parsing/escaped_quote.csv') as formatting_file:
-        data_file = DataFile.objects.create(file=File(formatting_file))
+    data_file = create_data_file('mathesar/tests/data/csv_parsing/escaped_quote.csv')
     body = {
         'data_files': [data_file.id],
         'name': 'test_escaped_quote_datafile_table',
@@ -217,9 +217,8 @@ def test_table_create_from_datafile_404(client):
     assert 'object does not exist' in response_table['data_files'][0]
 
 
-def test_table_create_from_datafile_invalid_delimiter(client, schema):
-    with open('mathesar/tests/data/csv_parsing/patents_invalid.csv') as invalid_file:
-        data_file = DataFile.objects.create(file=File(invalid_file))
+def test_table_create_from_datafile_invalid_delimiter(client, schema, create_data_file):
+    data_file = create_data_file('mathesar/tests/data/csv_parsing/patents_invalid.csv')
     table_name = 'test_invalid_delimiter_datafile_table'
     body = {
         'data_files': [data_file.id],
@@ -232,9 +231,8 @@ def test_table_create_from_datafile_invalid_delimiter(client, schema):
     assert response_table["data_files"] == 'Unable to tabulate datafile'
 
 
-def test_table_create_from_datafile_extra_quote(client, schema):
-    with open('mathesar/tests/data/csv_parsing/extra_quote_invalid.csv') as invalid_file:
-        data_file = DataFile.objects.create(file=File(invalid_file))
+def test_table_create_from_datafile_extra_quote(client, schema, create_data_file):
+    data_file = create_data_file('mathesar/tests/data/csv_parsing/extra_quote_invalid.csv')
     table_name = 'test_extra_quote_datafile_table'
     body = {
         'data_files': [data_file.id],
@@ -247,9 +245,10 @@ def test_table_create_from_datafile_extra_quote(client, schema):
     assert response_table["data_files"] == 'Unable to tabulate datafile'
 
 
-def test_table_create_from_datafile_escaped_quote_invalid(client, schema):
-    with open('mathesar/tests/data/csv_parsing/escaped_quote_invalid.csv') as invalid_file:
-        data_file = DataFile.objects.create(file=File(invalid_file))
+def test_table_create_from_datafile_escaped_quote_invalid(client, schema,
+                                                          create_data_file):
+    data_file = create_data_file(
+        'mathesar/tests/data/csv_parsing/escaped_quote_invalid.csv')
     table_name = 'test_extra_quote_datafile_table'
     body = {
         'data_files': [data_file.id],
