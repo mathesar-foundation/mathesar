@@ -146,7 +146,8 @@ def test_table_create_from_tsv_datafile(client, create_data_file, tsv_filename, 
     check_table_response(response_table, table, table_name)
 
 
-def test_table_create_from_datafile_mixed_quote(client, data_file, schema):
+def test_table_create_from_datafile_mixed_quote(client, data_file, schema,
+                                                create_data_file):
     data_file = create_data_file('mathesar/tests/data/csv_parsing/mixed_quote.csv')
     body = {
         'data_files': [data_file.id],
@@ -163,7 +164,8 @@ def test_table_create_from_datafile_mixed_quote(client, data_file, schema):
     assert table.get_records()[0] == first_row
 
 
-def test_table_create_from_datafile_double_quote(client, data_file, schema):
+def test_table_create_from_datafile_double_quote(client, data_file, schema,
+                                                 create_data_file):
     data_file = create_data_file('mathesar/tests/data/csv_parsing/double_quote.csv')
     body = {
         'data_files': [data_file.id],
@@ -180,7 +182,8 @@ def test_table_create_from_datafile_double_quote(client, data_file, schema):
     assert table.get_records()[0] == first_row
 
 
-def test_table_create_from_datafile_escaped_quote(client, data_file, schema):
+def test_table_create_from_datafile_escaped_quote(client, data_file, schema,
+                                                  create_data_file):
     data_file = create_data_file('mathesar/tests/data/csv_parsing/escaped_quote.csv')
     body = {
         'data_files': [data_file.id],
