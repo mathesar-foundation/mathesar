@@ -1,2 +1,2 @@
-class InvalidDelimiterError(Exception):
+class InvalidTableError(Exception):
     pass

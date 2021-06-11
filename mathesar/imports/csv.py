@@ -5,7 +5,7 @@ import clevercsv as csv
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.utils import get_database_key
 from mathesar.models import Table, Schema
-from mathesar.errors import InvalidDelimiterError
+from mathesar.errors import InvalidTableError
 from db import tables, records
 
 ALLOWED_DELIMITERS = ",\t:| "
@@ -43,6 +43,9 @@ def parse_row(row, delimiter, escapechar, quotechar):
             escaped = False
         i += 1
 
+    if in_quote:
+        return None
+
     splits.append(current_split)
     return splits
 
@@ -59,10 +62,10 @@ def check_dialect(file, dialect):
 
         columns = parse_row(row, dialect.delimiter, dialect.escapechar,
                             dialect.quotechar)
-        num_columns = len(columns)
-        # if num_columns == 1:
-        #     # Consider single column layout an error
-        #     return False
+        if columns is None:
+            return False
+        else:
+            num_columns = len(columns)
 
         if prev_num_columns is None:
             prev_num_columns = num_columns
@@ -78,7 +81,8 @@ def get_sv_dialect(file):
         f.seek(0)
         if check_dialect(f, dialect):
             return dialect
-    raise InvalidDelimiterError
+        else:
+            raise InvalidTableError
 
 
 def get_sv_reader(file, dialect=None):
