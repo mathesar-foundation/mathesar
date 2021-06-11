@@ -8,15 +8,65 @@ from mathesar.errors import InvalidDelimiterError
 from db import tables, records
 
 ALLOWED_DELIMITERS = ",\t:| "
+CHECK_ROWS = 10
 
 
-def get_sv_dialect(filename):
-    with open(filename, 'r') as f:
-        try:
-            dialect = csv.Sniffer().sniff(f.read(), delimiters=ALLOWED_DELIMITERS)
-        except csv.Error:
-            raise InvalidDelimiterError
-    return dialect
+def parse_row(row, delimiter, escapechar, quotechar):
+    in_quote = False
+    escaped = False
+    row_len = len(row)
+    splits = []
+    current_split = []
+    i = 0
+    while i < row_len:
+        current_char = row[i]
+        if current_char == quotechar and not escaped:
+            if i != row_len - 1 and row[i + 1] == quotechar:
+                # Handle double quote escapes
+                current_split.append(current_char)
+                i += 1
+            else:
+                in_quote = not in_quote
+        elif current_char == escapechar and not escaped:
+            escaped = True
+        elif current_char == delimiter and not in_quote and not escaped:
+            if current_split:
+                # Multiple delimiter characters are handled as one
+                splits.append(current_split)
+            current_split = []
+        else:
+            current_split.append(current_char)
+            escaped = False
+        i += 1
+    return splits
+
+
+def check_delimiter(file, delimiter, dialect):
+    prev_num_columns = None
+    for _ in range(CHECK_ROWS):
+        row = file.readline()[:-1]
+        columns = parse_row(row, delimiter, dialect.escapechar, dialect.quotechar)
+        num_columns = len(columns)
+        if num_columns == 0:
+            return False
+
+        if prev_num_columns is None:
+            prev_num_columns = num_columns
+        elif prev_num_columns != num_columns:
+            return False
+    return True
+
+
+def get_sv_dialect(file):
+    with open(file, 'r') as f:
+        dialect = csv.Sniffer().sniff(f.read())
+        for delimiter in ALLOWED_DELIMITERS:
+            f.seek(0)
+            if check_delimiter(f, delimiter, dialect):
+                print(delimiter)
+                dialect.delimiter = delimiter
+                return dialect
+    raise InvalidDelimiterError
 
 
 def get_sv_reader(file, dialect=None):
