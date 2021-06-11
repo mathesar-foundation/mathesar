@@ -1,5 +1,6 @@
-import csv
 from io import TextIOWrapper
+
+import clevercsv as csv
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.utils import get_database_key
@@ -41,11 +42,12 @@ def parse_row(row, delimiter, escapechar, quotechar):
     return splits
 
 
-def check_delimiter(file, delimiter, dialect):
+def check_dialect(file, dialect):
     prev_num_columns = None
     for _ in range(CHECK_ROWS):
         row = file.readline()[:-1]
-        columns = parse_row(row, delimiter, dialect.escapechar, dialect.quotechar)
+        columns = parse_row(row, dialect.delimiter, dialect.escapechar,
+                            dialect.quotechar)
         num_columns = len(columns)
         if num_columns == 0:
             return False
@@ -59,19 +61,19 @@ def check_delimiter(file, delimiter, dialect):
 
 def get_sv_dialect(file):
     with open(file, 'r') as f:
-        dialect = csv.Sniffer().sniff(f.read())
-        for delimiter in ALLOWED_DELIMITERS:
-            f.seek(0)
-            if check_delimiter(f, delimiter, dialect):
-                print(delimiter)
-                dialect.delimiter = delimiter
-                return dialect
+        dialect = csv.Sniffer().sniff(f.read(), delimiters=ALLOWED_DELIMITERS)
+        f.seek(0)
+        if check_dialect(f, dialect):
+            return dialect
     raise InvalidDelimiterError
 
 
 def get_sv_reader(file, dialect=None):
     file = TextIOWrapper(file, encoding="utf-8-sig")
-    reader = csv.DictReader(file, dialect=dialect)
+    if dialect:
+        reader = csv.DictReader(file, dialect=dialect)
+    else:
+        reader = csv.DictReader(file)
     return reader
 
 
