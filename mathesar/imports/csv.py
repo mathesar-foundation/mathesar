@@ -9,6 +9,7 @@ from mathesar.errors import InvalidDelimiterError
 from db import tables, records
 
 ALLOWED_DELIMITERS = ",\t:| "
+SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
 
 
@@ -61,7 +62,8 @@ def check_dialect(file, dialect):
 
 def get_sv_dialect(file):
     with open(file, 'r') as f:
-        dialect = csv.Sniffer().sniff(f.read(), delimiters=ALLOWED_DELIMITERS)
+        dialect = csv.Sniffer().sniff(f.read(SAMPLE_SIZE),
+                                      delimiters=ALLOWED_DELIMITERS)
         f.seek(0)
         if check_dialect(f, dialect):
             return dialect

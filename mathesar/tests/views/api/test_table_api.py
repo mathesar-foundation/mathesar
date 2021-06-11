@@ -174,7 +174,7 @@ def test_table_create_from_datafile_invalid_delimiter(client, schema):
     response = client.post('/api/v0/tables/', body)
     response_table = response.json()
     assert response.status_code == 400
-    assert response_table["data_files"][0] == 'No valid delimiter found in datafile'
+    assert response_table["data_files"] == 'Unable to tabulate datafile'
 
 
 def test_table_update(client, create_table):
