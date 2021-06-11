@@ -163,7 +163,7 @@ def test_table_create_from_datafile_404(client):
 
 
 def test_table_create_from_datafile_invalid_delimiter(client, schema):
-    with open('mathesar/tests/patents_invalid.csv') as invalid_file:
+    with open('mathesar/tests/data/patents_invalid.csv') as invalid_file:
         data_file = DataFile.objects.create(file=File(invalid_file))
     table_name = 'test_invalid_datafile_table'
     body = {
