@@ -4,7 +4,8 @@ from mathesar.models import Schema
 from mathesar.utils.schemas import create_schema_and_object
 
 
-def check_schema_response(response_schema, schema, schema_name, test_db_name, len_tables=1):
+def check_schema_response(response_schema, schema, schema_name, test_db_name,
+                          len_tables=1, check_schema_objects=True):
     assert response_schema['id'] == schema.id
     assert response_schema['name'] == schema_name
     assert response_schema['database'] == test_db_name
@@ -16,7 +17,8 @@ def check_schema_response(response_schema, schema, schema_name, test_db_name, le
         assert 'name' in response_table
         assert response_table['url'].startswith('http')
         assert response_table['url'].endswith(f'/api/v0/tables/{response_table_id}/')
-    assert schema_name in get_mathesar_schemas(create_mathesar_engine(test_db_name))
+    if check_schema_objects:
+        assert schema_name in get_mathesar_schemas(create_mathesar_engine(test_db_name))
 
 
 def test_schema_list(create_table, client, test_db_name):
@@ -51,6 +53,39 @@ def test_schema_list(create_table, client, test_db_name):
     assert response_data['count'] == 1
     assert len(response_data['results']) == 1
     check_schema_response(response_schema, schema, 'Patents', test_db_name)
+
+
+def test_schema_list_filter(client):
+    schema_params = [("schema_1", "database_1"), ("schema_2", "database_2"),
+                     ("schema_3", "database_3"), ("schema_1", "database_3")]
+    schemas = {(name, database): Schema.objects.create(name=name, database=database)
+               for name, database in schema_params}
+
+    names = ["schema_1", "schema_3"]
+    names_query = ",".join(names)
+    databases = ["database_2", "database_3"]
+    database_query = ",".join(databases)
+    query = f"name={names_query}&database={database_query}"
+
+    response = client.get(f'/api/v0/schemas/?{query}')
+    response_data = response.json()
+    response_schemas = response_data['results']
+
+    assert response.status_code == 200
+    assert response_data['count'] == 2
+    assert len(response_data['results']) == 2
+
+    response_schemas = {(schema["name"], schema["database"]): schema
+                        for schema in response_schemas}
+    for name in names:
+        for database in databases:
+            query_tuple = (name, database)
+            if query_tuple not in schemas:
+                continue
+            schema = schemas[query_tuple]
+            response_schema = response_schemas[query_tuple]
+            check_schema_response(response_schema, schema, schema.name, schema.database,
+                                  len_tables=0, check_schema_objects=False)
 
 
 def test_schema_detail(create_table, client, test_db_name):
