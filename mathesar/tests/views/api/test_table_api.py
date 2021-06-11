@@ -143,6 +143,60 @@ def test_table_create_from_tsv_datafile(client, tsv_data_file, schema):
     check_table_response(response_table, table, table_name)
 
 
+def test_table_create_from_datafile_mixed_quote(client, data_file, schema):
+    with open('mathesar/tests/data/mixed_quote.csv') as formatting_file:
+        data_file = DataFile.objects.create(file=File(formatting_file))
+    body = {
+        'data_files': [data_file.id],
+        'name': 'test_mixed_quote_datafile_table',
+        'schema': schema.id,
+    }
+
+    response = client.post('/api/v0/tables/', body)
+    table = Table.objects.get(id=response.json()['id'])
+    first_row = (1, '""NASA Kennedy Space Center""', '""Application""', 'KSC-12871', '0',
+                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+
+    assert response.status_code == 201
+    assert table.get_records()[0] == first_row
+
+
+def test_table_create_from_datafile_double_quote(client, data_file, schema):
+    with open('mathesar/tests/data/double_quote.csv') as formatting_file:
+        data_file = DataFile.objects.create(file=File(formatting_file))
+    body = {
+        'data_files': [data_file.id],
+        'name': 'test_double_quote_datafile_table',
+        'schema': schema.id,
+    }
+
+    response = client.post('/api/v0/tables/', body)
+    table = Table.objects.get(id=response.json()['id'])
+    first_row = (1, 'NASA Kennedy "Space Center"', '"Application', 'KSC-12871', '0',
+                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+
+    assert response.status_code == 201
+    assert table.get_records()[0] == first_row
+
+
+def test_table_create_from_datafile_escaped_quote(client, data_file, schema):
+    with open('mathesar/tests/data/mixed_quote.csv') as formatting_file:
+        data_file = DataFile.objects.create(file=File(formatting_file))
+    body = {
+        'data_files': [data_file.id],
+        'name': 'test_mixed_quote_datafile_table',
+        'schema': schema.id,
+    }
+
+    response = client.post('/api/v0/tables/', body)
+    table = Table.objects.get(id=response.json()['id'])
+    first_row = (1, '"NASA Kennedy "Space Center"', '"Application"', 'KSC-12871', '0',
+                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+
+    assert response.status_code == 201
+    assert table.get_records()[0] == first_row
+
+
 def test_table_404(client):
     response = client.get('/api/v0/tables/3000/')
     assert response.status_code == 404

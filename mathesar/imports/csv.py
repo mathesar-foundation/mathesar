@@ -19,19 +19,20 @@ def parse_row(row, delimiter, escapechar, quotechar):
     row_len = len(row)
     splits = []
     current_split = []
+
     i = 0
     while i < row_len:
         current_char = row[i]
         if current_char == quotechar and not escaped:
-            if i != row_len - 1 and row[i + 1] == quotechar:
-                # Handle double quote escapes
+            if not escapechar and i != row_len - 1 and row[i + 1] == quotechar:
+                # Handle double quote escapes when there is no escape char
                 current_split.append(current_char)
                 i += 1
             else:
                 in_quote = not in_quote
         elif current_char == escapechar and not escaped:
             escaped = True
-        elif current_char == delimiter and not in_quote and not escaped:
+        elif current_char == delimiter and not in_quote:
             if current_split:
                 # Multiple delimiter characters are handled as one
                 splits.append(current_split)
@@ -40,17 +41,26 @@ def parse_row(row, delimiter, escapechar, quotechar):
             current_split.append(current_char)
             escaped = False
         i += 1
+
+    splits.append(current_split)
     return splits
 
 
 def check_dialect(file, dialect):
     prev_num_columns = None
+    lines = iter(file)
     for _ in range(CHECK_ROWS):
-        row = file.readline()[:-1]
+        try:
+            row = next(lines)[:-1]
+        except StopIteration:
+            # If less than CHECK_ROWS rows in file, stop early
+            break
+
         columns = parse_row(row, dialect.delimiter, dialect.escapechar,
                             dialect.quotechar)
         num_columns = len(columns)
-        if num_columns == 0:
+        if num_columns == 1:
+            # Consider single column layout an error
             return False
 
         if prev_num_columns is None:
