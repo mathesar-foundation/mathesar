@@ -128,7 +128,7 @@ def create_records_from_csv(table, engine, csv_filename, column_names, delimiter
             relation = '.'.join('"{}"'.format(part) for part in (table.schema, table.name))
             formatted_columns = '({})'.format(','.join([f'"{column_name}"' for column_name in column_names]))
 
-            copy_sql = f'COPY {relation} {formatted_columns} FROM STDIN'
+            copy_sql = f'COPY {relation} {formatted_columns} FROM STDIN CSV HEADER'
             if delimiter:
                 copy_sql += f" DELIMITER E'{delimiter}'"
             if escape:
@@ -137,8 +137,6 @@ def create_records_from_csv(table, engine, csv_filename, column_names, delimiter
                 if quote == "'":
                     quote = "''"
                 copy_sql += f" QUOTE '{quote}'"
-            copy_sql += ' CSV HEADER'
-            print(copy_sql)
 
             cursor.copy_expert(copy_sql, csv_file)
 
