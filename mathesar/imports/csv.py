@@ -14,6 +14,25 @@ CHECK_ROWS = 10
 
 
 def parse_row(row, delimiter, escapechar, quotechar):
+    """
+    Parses a row of a *sv file given a set of dialetic parameters
+
+    Tries to mimic how PostgreSQL parses CSV files:
+        - Escape characters only escape quotes
+        - Escape characters only work inside quotes
+        - If no escape character is specified, it is the quote character
+
+    Args:
+        row: str, the row of text to parse
+        delimiter: str, a single character that divides the fields of the row
+        escapechar: str, a single character that escapes quotes
+        quotechar: str, a single character that is the type of quote uses
+
+    Returns:
+        splits: None if the row was invalid (due to an unmatched quote), otherwise a
+        list of lists, where the inner list contains every character of the field.
+
+    """
     in_quote = False
     escaped = False
     row_len = len(row)
@@ -51,6 +70,19 @@ def parse_row(row, delimiter, escapechar, quotechar):
 
 
 def check_dialect(file, dialect):
+    """
+    Checks to see if we can parse the given file with the given dialect
+
+    Parses the first CHECK_ROWS rows. Checks to see if any have formatting issues (as
+    indicated by parse_row), or if any have a differing number of columns.
+
+    Args:
+        file: _io.TextIOWrapper object, an already opened file
+        dialect: csv.Dialect object, the dialect we are validating
+
+    Returns:
+        bool: False if any error that would cause SQL errors were found, otherwise True
+    """
     prev_num_columns = None
     lines = iter(file)
     for _ in range(CHECK_ROWS):
@@ -75,6 +107,18 @@ def check_dialect(file, dialect):
 
 
 def get_sv_dialect(file):
+    """
+    Given a *sv file, generate a dialect to parse it.
+
+    Args:
+        file: str, path to the file
+
+    Returns:
+        dialect: csv.Dialect object, the dialect to parse the file
+
+    Raises:
+        InvalidTableError: If the generated dialect was unable to parse the file
+    """
     with open(file, 'r') as f:
         dialect = csv.Sniffer().sniff(f.read(SAMPLE_SIZE),
                                       delimiters=ALLOWED_DELIMITERS)
