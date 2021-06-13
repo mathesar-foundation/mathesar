@@ -29,7 +29,7 @@ def legacy_create_table_from_csv(name, schema, database_key, csv_file):
     csv_reader = get_csv_reader(csv_file)
     db_table = legacy_create_db_table_from_csv(name, schema, csv_reader, engine)
     database = get_database_key(engine)
-    db_schema_oid = schemas.get_schema_oid_from_name(engine, name=None)
+    db_schema_oid = schemas.get_schema_oid_from_name(db_table.schema, engine)
     schema, _ = Schema.objects.get_or_create(oid=db_schema_oid, database=database)
     db_table_oid = tables.get_oid_from_table(db_table.name, db_table.schema, engine)
     table, _ = Table.objects.get_or_create(oid=db_table_oid, schema=schema)
