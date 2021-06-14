@@ -5,7 +5,6 @@ from rest_framework.exceptions import ValidationError
 from mathesar.models import DataFile, Schema
 from mathesar.serializers import TableSerializer
 from mathesar.imports.csv import create_table_from_csv
-from mathesar.errors import InvalidTableError
 
 
 def create_table_from_datafile(request, data):
@@ -16,10 +15,6 @@ def create_table_from_datafile(request, data):
     else:
         raise ValidationError({'data_files': 'Multiple data files are unsupported'})
 
-    try:
-        table = create_table_from_csv(data_file, name, schema)
-    except InvalidTableError:
-        raise ValidationError({'data_files': 'Unable to tabulate datafile'})
-
+    table = create_table_from_csv(data_file, name, schema)
     serializer = TableSerializer(table, context={'request': request})
     return Response(serializer.data, status=status.HTTP_201_CREATED)
