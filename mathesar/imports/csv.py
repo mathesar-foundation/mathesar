@@ -111,7 +111,7 @@ def get_sv_dialect(file):
     Given a *sv file, generate a dialect to parse it.
 
     Args:
-        file: str, path to the file
+        file: _io.TextIOWrapper object, an already opened file
 
     Returns:
         dialect: csv.Dialect object, the dialect to parse the file
@@ -119,14 +119,15 @@ def get_sv_dialect(file):
     Raises:
         InvalidTableError: If the generated dialect was unable to parse the file
     """
-    with open(file, 'r') as f:
-        dialect = csv.Sniffer().sniff(f.read(SAMPLE_SIZE),
-                                      delimiters=ALLOWED_DELIMITERS)
-        f.seek(0)
-        if check_dialect(f, dialect):
-            return dialect
-        else:
-            raise InvalidTableError
+    dialect = csv.Sniffer().sniff(file.read(SAMPLE_SIZE),
+                                  delimiters=ALLOWED_DELIMITERS)
+    file.seek(0)
+    if check_dialect(file, dialect):
+        file.seek(0)
+        return dialect
+    else:
+        file.seek(0)
+        raise InvalidTableError
 
 
 def get_sv_reader(file, dialect=None):
@@ -163,7 +164,8 @@ def legacy_create_table_from_csv(name, schema, database_key, csv_file):
 def create_db_table_from_data_file(data_file, name, schema):
     engine = create_mathesar_engine(schema.database)
     sv_filename = data_file.file.path
-    dialect = get_sv_dialect(sv_filename)
+    dialect = csv.dialect.SimpleDialect(data_file.delimiter, data_file.quotechar,
+                                        data_file.escapechar)
     with open(sv_filename, 'rb') as sv_file:
         sv_reader = get_sv_reader(sv_file, dialect=dialect)
         column_names = sv_reader.fieldnames

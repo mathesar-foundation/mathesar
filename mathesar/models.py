@@ -82,3 +82,6 @@ class DataFile(BaseModel):
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     table_imported_to = models.ForeignKey(Table, related_name="data_files", blank=True,
                                           null=True, on_delete=models.SET_NULL)
+    delimiter = models.CharField(max_length=1, default=',', blank=True)
+    escapechar = models.CharField(max_length=1, blank=True)
+    quotechar = models.CharField(max_length=1, default='"', blank=True)
