@@ -1,6 +1,7 @@
 from db.schemas import get_mathesar_schemas
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Schema
+from mathesar import models
 from mathesar.utils.schemas import create_schema_and_object
 
 
@@ -55,11 +56,22 @@ def test_schema_list(create_table, client, test_db_name):
     check_schema_response(response_schema, schema, 'Patents', test_db_name)
 
 
-def test_schema_list_filter(client):
+def test_schema_list_filter(client, monkeypatch):
     schema_params = [("schema_1", "database_1"), ("schema_2", "database_2"),
                      ("schema_3", "database_3"), ("schema_1", "database_3")]
-    schemas = {(name, database): Schema.objects.create(name=name, database=database)
-               for name, database in schema_params}
+
+    def mock_get_name_from_oid(oid, engine):
+        return schema_params[oid][0]
+
+    monkeypatch.setattr(models.schemas, "get_schema_name_from_oid", mock_get_name_from_oid)
+    monkeypatch.setattr(models, "create_mathesar_engine", lambda x: x)
+
+    schemas = {
+        (schema_params[i][0], schema_params[i][1]): Schema.objects.create(
+            oid=i, database=schema_params[i][1]
+        )
+        for i in range(len(schema_params))
+    }
 
     names = ["schema_1", "schema_3"]
     names_query = ",".join(names)
