@@ -69,15 +69,15 @@ node@c273da65c52d:/ui$ npm uninstall <package>
   - Valid names:
     ```bash
     App.svelte
-    CancellablePromise.js
+    CancellablePromise.ts
     App.scss
     ```
 
-* Javascript file names should be lowerCamelCased.
+* Typescript file names should be lowerCamelCased.
   - Valid names:
     ```bash
-    index.js
-    utilityFunctions.js
+    index.ts
+    utilityFunctions.ts
     ```
 
 * All variables and constants should be lowerCamelCased.

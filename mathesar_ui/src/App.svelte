@@ -1,52 +1,34 @@
-<style global lang="scss">
-  @import "App.scss";
-</style>
-
-<script>
-  import { Route, active } from 'tinro';
-  import { schemas } from '@mathesar/api/schemas';
-  import Index from '@mathesar/pages/index/Index.svelte';
-  import Tables from '@mathesar/pages/tables/Tables.svelte';
+<script lang="ts">
+  import { Route } from 'tinro';
   import { preloadCommonData } from '@mathesar/utils/preloadData';
+  import Base from '@mathesar/sections/Base.svelte';
+  import { newImport } from '@mathesar/stores/fileImports';
 
   const commonData = preloadCommonData();
+  const selectedDb = commonData?.databases?.[0];
 </script>
 
 <header>
-  <div class="dropdown">
-    {#if commonData?.databases?.[0]}
-      <div>{commonData?.databases?.[0]}</div>
+  <div class="selector">
+    {#if selectedDb}
+      <div>{selectedDb}</div>
     {/if}
+  </div>
+  <div class="navigator">
+    <button on:click={() => newImport(selectedDb)}>Import CSV</button>
   </div>
 </header>
 
-<aside>
-  <nav>
-    <ul>
-      {#each $schemas.data as schema (schema.id)}
-        <li>
-          <div>{schema.name}</div>
-          <ul>
-            {#each (schema.tables || []) as table (table.id)}
-              <li>
-                <a href='/tables/{table.id}' use:active>{table.name}</a>
-              </li>
-            {/each}
-          </ul>
-        </li>
-      {/each}
-    </ul>
-
-    <a href='/' use:active exact>Import CSV</a>
-  </nav>
-</aside>
-
-<section>
-  <Route path="/tables/:id">
-    <Tables/>
+<section class="content-section">
+  <Route path="/:db">
+    {#key selectedDb}
+      <Base database={selectedDb}/>
+    {/key}
   </Route>
   
-  <Route path="/">
-    <Index database={commonData?.databases?.[0]}/>
-  </Route>  
+  <Route path="/" redirect="/{selectedDb}"/>
 </section>
+
+<style global lang="scss">
+  @import "App.scss";
+</style>

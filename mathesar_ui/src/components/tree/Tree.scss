@@ -1,0 +1,51 @@
+ul.tree {
+  margin: 0;
+  list-style: none;
+  list-style-type: none;
+  padding: 0;
+
+  li {
+    .item {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      cursor: pointer;
+      padding: 6px;
+
+      span {
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      svg + span {
+        margin-left: 3px;
+      }
+
+      &:hover {
+        background: #E5F7FF;
+      }
+    }
+
+    >a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    &:hover >a {
+      text-decoration: underline;
+    }
+  }
+
+  ul {
+    margin: 0;
+    list-style: none;
+    list-style-type: none;
+    padding: 0px 0px 4px 12px;
+
+    li {
+      ul {
+        padding-left: 12px;
+      }
+    }
+  }
+}
