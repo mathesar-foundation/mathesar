@@ -33,10 +33,9 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
     pagination_class = DefaultLimitOffsetPagination
 
     def create(self, request):
-        serializer = TableSerializer(data=request.data,
-                                     context={'request': request})
+        serializer = TableSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            return create_table_from_datafile(request, serializer.data)
+            return create_table_from_datafile(request, serializer.validated_data)
         else:
             raise ValidationError(serializer.errors)
 
@@ -102,7 +101,7 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
             except InvalidTableError:
                 raise ValidationError({'file': 'Unable to tabulate datafile'})
 
-            inferred_data = {'file': request.data['file'],
+            inferred_data = {'file': serializer.validated_data['file'],
                              'delimiter': dialect.delimiter,
                              'escapechar': dialect.escapechar,
                              'quotechar': dialect.quotechar}
