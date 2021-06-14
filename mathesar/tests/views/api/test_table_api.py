@@ -19,15 +19,6 @@ def data_file(csv_filename):
     return data_file
 
 
-@pytest.fixture
-def create_data_file():
-    def _create_data_file(filename):
-        with open(filename, 'rb') as csv_file:
-            data_file = DataFile.objects.create(file=File(csv_file))
-        return data_file
-    return _create_data_file
-
-
 def check_table_response(response_table, table, table_name):
     assert response_table['id'] == table.id
     assert response_table['name'] == table_name
@@ -123,84 +114,6 @@ def test_table_create_from_datafile(client, data_file, schema):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_create_from_tsv_datafile(client, create_data_file, tsv_filename, schema):
-    tsv_data_file = create_data_file(tsv_filename)
-    num_tables = Table.objects.count()
-    table_name = 'test_tsv_table'
-    body = {
-        'data_files': [tsv_data_file.id],
-        'name': table_name,
-        'schema': schema.id,
-    }
-    response = client.post('/api/v0/tables/', body)
-    response_table = response.json()
-    table = Table.objects.get(id=response_table['id'])
-    tsv_data_file.refresh_from_db()
-    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
-                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
-
-    assert response.status_code == 201
-    assert Table.objects.count() == num_tables + 1
-    assert tsv_data_file.table_imported_to.id == table.id
-    assert table.get_records()[0] == first_row
-    check_table_response(response_table, table, table_name)
-
-
-def test_table_create_from_datafile_mixed_quote(client, data_file, schema,
-                                                create_data_file):
-    data_file = create_data_file('mathesar/tests/data/csv_parsing/mixed_quote.csv')
-    body = {
-        'data_files': [data_file.id],
-        'name': 'test_mixed_quote_datafile_table',
-        'schema': schema.id,
-    }
-
-    response = client.post('/api/v0/tables/', body)
-    table = Table.objects.get(id=response.json()['id'])
-    first_row = (1, '""NASA Kennedy Space Center""', '""Application""', 'KSC-12871', '0',
-                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
-
-    assert response.status_code == 201
-    assert table.get_records()[0] == first_row
-
-
-def test_table_create_from_datafile_double_quote(client, data_file, schema,
-                                                 create_data_file):
-    data_file = create_data_file('mathesar/tests/data/csv_parsing/double_quote.csv')
-    body = {
-        'data_files': [data_file.id],
-        'name': 'test_double_quote_datafile_table',
-        'schema': schema.id,
-    }
-
-    response = client.post('/api/v0/tables/', body)
-    table = Table.objects.get(id=response.json()['id'])
-    first_row = (1, 'NASA Kennedy "Space Center"', '"Application', 'KSC-12871', '0',
-                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
-
-    assert response.status_code == 201
-    assert table.get_records()[0] == first_row
-
-
-def test_table_create_from_datafile_escaped_quote(client, data_file, schema,
-                                                  create_data_file):
-    data_file = create_data_file('mathesar/tests/data/csv_parsing/escaped_quote.csv')
-    body = {
-        'data_files': [data_file.id],
-        'name': 'test_escaped_quote_datafile_table',
-        'schema': schema.id,
-    }
-
-    response = client.post('/api/v0/tables/', body)
-    table = Table.objects.get(id=response.json()['id'])
-    print(table.get_records()[0])
-    first_row = (1, 'NASA Kennedy "Space Center"', 'Application', 'KSC-12871', '0',
-                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
-
-    assert response.status_code == 201
-    assert table.get_records()[0] == first_row
-
-
 def test_table_404(client):
     response = client.get('/api/v0/tables/3000/')
     assert response.status_code == 404
@@ -218,50 +131,6 @@ def test_table_create_from_datafile_404(client):
     assert response.status_code == 400
     assert 'object does not exist' in response_table['schema'][0]
     assert 'object does not exist' in response_table['data_files'][0]
-
-
-def test_table_create_from_datafile_invalid_delimiter(client, schema, create_data_file):
-    data_file = create_data_file('mathesar/tests/data/csv_parsing/patents_invalid.csv')
-    table_name = 'test_invalid_delimiter_datafile_table'
-    body = {
-        'data_files': [data_file.id],
-        'name': table_name,
-        'schema': schema.id,
-    }
-    response = client.post('/api/v0/tables/', body)
-    response_table = response.json()
-    assert response.status_code == 400
-    assert response_table["data_files"] == 'Unable to tabulate datafile'
-
-
-def test_table_create_from_datafile_extra_quote(client, schema, create_data_file):
-    data_file = create_data_file('mathesar/tests/data/csv_parsing/extra_quote_invalid.csv')
-    table_name = 'test_extra_quote_datafile_table'
-    body = {
-        'data_files': [data_file.id],
-        'name': table_name,
-        'schema': schema.id,
-    }
-    response = client.post('/api/v0/tables/', body)
-    response_table = response.json()
-    assert response.status_code == 400
-    assert response_table["data_files"] == 'Unable to tabulate datafile'
-
-
-def test_table_create_from_datafile_escaped_quote_invalid(client, schema,
-                                                          create_data_file):
-    data_file = create_data_file(
-        'mathesar/tests/data/csv_parsing/escaped_quote_invalid.csv')
-    table_name = 'test_extra_quote_datafile_table'
-    body = {
-        'data_files': [data_file.id],
-        'name': table_name,
-        'schema': schema.id,
-    }
-    response = client.post('/api/v0/tables/', body)
-    response_table = response.json()
-    assert response.status_code == 400
-    assert response_table["data_files"] == 'Unable to tabulate datafile'
 
 
 def test_table_update(client, create_table):
