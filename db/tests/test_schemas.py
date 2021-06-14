@@ -1,4 +1,5 @@
 from unittest.mock import patch
+import warnings
 from sqlalchemy import create_engine, select, Table, MetaData
 from db import schemas
 from db import types
@@ -38,7 +39,9 @@ def test_get_mathesar_schemas_with_oids_avoids_types_schema(engine_with_schema):
 def test_get_mathesar_schemas_with_oids_gets_correct_oid(engine_with_schema):
     engine, schema = engine_with_schema
     metadata = MetaData()
-    pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
     sel = select(pg_namespace.c.oid).where(pg_namespace.c.nspname == schema)
     with engine.begin() as conn:
         expect_oid = conn.execute(sel).fetchone()[0]

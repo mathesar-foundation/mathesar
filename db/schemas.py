@@ -1,4 +1,5 @@
 import logging
+import warnings
 from sqlalchemy.schema import CreateSchema
 from sqlalchemy import inspect, MetaData, select, and_, not_, or_, Table
 
@@ -27,7 +28,9 @@ def reflect_schema(engine, name=None, oid=None):
         logger.error("ERROR:  Only one of 'name' or 'oid' can be given!")
         raise e
     metadata = MetaData()
-    pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
     sel = (
         select(pg_namespace.c.oid, pg_namespace.c.nspname.label("name"))
         .where(or_(pg_namespace.c.nspname == name, pg_namespace.c.oid == oid))
@@ -43,7 +46,9 @@ def get_mathesar_schemas(engine):
 
 def get_mathesar_schemas_with_oids(engine):
     metadata = MetaData()
-    pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
     sel = (
         select(pg_namespace.c.nspname.label('schema'), pg_namespace.c.oid)
         .where(

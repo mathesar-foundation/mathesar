@@ -1,3 +1,4 @@
+import warnings
 from sqlalchemy import (
     Column, String, Table, MetaData, func, select, ForeignKey, literal, exists,
     join, inspect
@@ -329,8 +330,11 @@ def _get_column_moving_extraction_args(
 
 def reflect_table_from_oid(oid, engine):
     metadata = MetaData()
-    pg_class = Table("pg_class", metadata, autoload_with=engine)
-    pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_class = Table("pg_class", metadata, autoload_with=engine)
+        pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
     sel = (
         select(pg_namespace.c.nspname, pg_class.c.relname)
         .select_from(
