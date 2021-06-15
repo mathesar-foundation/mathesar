@@ -49,10 +49,13 @@ def test_schema_list(create_table, client, test_db_name):
     schema = Schema.objects.get()
     response = client.get('/api/v0/schemas/')
     response_data = response.json()
-    response_schema = response_data['results'][0]
+    print(response_data)
+    response_schema = [
+        s for s in response_data['results'] if s['name'] != 'public'
+    ][0]
     assert response.status_code == 200
-    assert response_data['count'] == 1
-    assert len(response_data['results']) == 1
+    assert response_data['count'] == 2
+    assert len(response_data['results']) == 2
     check_schema_response(response_schema, schema, 'Patents', test_db_name)
 
 
