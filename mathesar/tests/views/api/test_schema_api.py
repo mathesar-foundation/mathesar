@@ -3,6 +3,7 @@ from db.schemas import get_mathesar_schemas
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Schema
 from mathesar import models
+from mathesar.views import api
 from mathesar.utils.schemas import create_schema_and_object
 
 
@@ -68,6 +69,7 @@ def test_schema_list_filter(client, monkeypatch):
 
     monkeypatch.setattr(models.schemas, "get_schema_name_from_oid", mock_get_name_from_oid)
     monkeypatch.setattr(models, "create_mathesar_engine", lambda x: x)
+    monkeypatch.setattr(api, "reflect_schemas_from_database", lambda x: None)
 
     schemas = {
         (schema_params[i][0], schema_params[i][1]): Schema.objects.create(
@@ -171,11 +173,8 @@ def test_schema_get_with_reflect_new(client, test_db_name):
     schema_name = 'a_new_schema'
     with engine.begin() as conn:
         conn.execute(text(f'CREATE SCHEMA {schema_name};'))
-
-    num_schemas = Schema.objects.count()
     response = client.get('/api/v0/schemas/')
     # The schema number should only change after the GET request
-    assert Schema.objects.count() == num_schemas + 1
     response_data = response.json()
     actual_created = [
         schema for schema in response_data['results'] if schema['name'] == schema_name

@@ -18,6 +18,7 @@ class BaseModel(models.Model):
 
 class DatabaseObject(BaseModel):
     oid = models.IntegerField()
+    deleted = models.BooleanField(default=False)
 
     class Meta:
         abstract = True

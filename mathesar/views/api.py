@@ -4,6 +4,7 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateMode
 from rest_framework.response import Response
 from django_filters import rest_framework as filters
 
+
 from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile
 from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
@@ -17,7 +18,7 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
     def get_queryset(self):
         for database_key in get_non_default_database_keys():
             reflect_schemas_from_database(database_key)
-        return Schema.objects.all().order_by('-created_at')
+        return Schema.objects.all().order_by('-created_at').filter(deleted=False)
     serializer_class = SchemaSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
