@@ -13,62 +13,6 @@ SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
 
 
-def parse_row(row, delimiter, escapechar, quotechar):
-    """
-    Parses a row of a *sv file given a set of dialetic parameters
-
-    Tries to mimic how PostgreSQL parses CSV files:
-        - Escape characters only escape quotes
-        - Escape characters only work inside quotes
-        - If no escape character is specified, it is the quote character
-
-    Args:
-        row: str, the row of text to parse
-        delimiter: str, a single character that divides the fields of the row
-        escapechar: str, a single character that escapes quotes
-        quotechar: str, a single character that is the type of quote uses
-
-    Returns:
-        splits: None if the row was invalid (due to an unmatched quote), otherwise a
-        list of lists, where the inner list contains every character of the field.
-
-    """
-    in_quote = False
-    escaped = False
-    row_len = len(row)
-    splits = []
-    current_split = []
-
-    i = 0
-    while i < row_len:
-        current_char = row[i]
-        if current_char == quotechar and not escaped:
-            if (in_quote and not escapechar
-                    and i != row_len - 1 and row[i + 1] == quotechar):
-                # Handle double quote escapes when there is no escape char
-                # Escapes are only respected within quotes
-                current_split.append(current_char)
-                i += 1
-            else:
-                in_quote = not in_quote
-        elif current_char == escapechar and in_quote and not escaped:
-            # Escapes are only respected within quotes
-            escaped = True
-        elif current_char == delimiter and not in_quote:
-            splits.append(current_split)
-            current_split = []
-        else:
-            current_split.append(current_char)
-            escaped = False
-        i += 1
-
-    if in_quote:
-        return None
-
-    splits.append(current_split)
-    return splits
-
-
 def check_dialect(file, dialect):
     """
     Checks to see if we can parse the given file with the given dialect
@@ -84,21 +28,15 @@ def check_dialect(file, dialect):
         bool: False if any error that would cause SQL errors were found, otherwise True
     """
     prev_num_columns = None
-    lines = iter(file)
+    row_gen = csv.read.reader(file, dialect)
     for _ in range(CHECK_ROWS):
         try:
-            row = next(lines)[:-1]
+            row = next(row_gen)
         except StopIteration:
             # If less than CHECK_ROWS rows in file, stop early
             break
 
-        columns = parse_row(row, dialect.delimiter, dialect.escapechar,
-                            dialect.quotechar)
-        if columns is None:
-            return False
-        else:
-            num_columns = len(columns)
-
+        num_columns = len(row)
         if prev_num_columns is None:
             prev_num_columns = num_columns
         elif prev_num_columns != num_columns:
@@ -119,14 +57,16 @@ def get_sv_dialect(file):
     Raises:
         InvalidTableError: If the generated dialect was unable to parse the file
     """
-    dialect = csv.Sniffer().sniff(file.read(SAMPLE_SIZE),
-                                  delimiters=ALLOWED_DELIMITERS)
+    dialect = csv.detect.Detector().detect(file.read(SAMPLE_SIZE),
+                                           delimiters=ALLOWED_DELIMITERS)
+    if dialect is None:
+        raise InvalidTableError
+
     file.seek(0)
     if check_dialect(file, dialect):
         file.seek(0)
         return dialect
     else:
-        file.seek(0)
         raise InvalidTableError
 
 
