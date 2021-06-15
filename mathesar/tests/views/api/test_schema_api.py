@@ -1,6 +1,8 @@
+from sqlalchemy import text
 from db.schemas import get_mathesar_schemas
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Schema
+from mathesar.views import api
 from mathesar import models
 from mathesar.utils.schemas import create_schema_and_object
 
@@ -49,7 +51,6 @@ def test_schema_list(create_table, client, test_db_name):
     schema = Schema.objects.get()
     response = client.get('/api/v0/schemas/')
     response_data = response.json()
-    print(response_data)
     response_schema = [
         s for s in response_data['results'] if s['name'] != 'public'
     ][0]
@@ -164,3 +165,23 @@ def test_schema_delete(client, test_db_name):
     response = client.delete(f'/api/v0/schemas/{schema.id}/')
     assert response.status_code == 405
     assert response.json()['detail'] == 'Method "DELETE" not allowed.'
+
+
+def test_schema_get_with_reflect_new(client, test_db_name):
+    engine = create_mathesar_engine(test_db_name)
+    schema_name = 'a_new_schema'
+    engine.echo = True
+    with engine.begin() as conn:
+        conn.execute(text(f'CREATE SCHEMA {schema_name};'))
+
+    num_schemas = Schema.objects.count()
+    response = client.get('/api/v0/schemas/')
+    # The schema number should only change after the GET request
+    assert Schema.objects.count() == num_schemas + 1
+    response_data = response.json()
+    actual_created = [
+        schema for schema in response_data['results'] if schema['name'] == schema_name
+    ]
+    assert len(actual_created) == 1
+    with engine.begin() as conn:
+        conn.execute(text(f'DROP SCHEMA {schema_name} CASCADE;'))
