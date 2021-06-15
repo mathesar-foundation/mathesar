@@ -2,7 +2,6 @@ from sqlalchemy import text
 from db.schemas import get_mathesar_schemas
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Schema
-from mathesar.views import api
 from mathesar import models
 from mathesar.utils.schemas import create_schema_and_object
 
