@@ -169,7 +169,6 @@ def test_schema_delete(client, test_db_name):
 def test_schema_get_with_reflect_new(client, test_db_name):
     engine = create_mathesar_engine(test_db_name)
     schema_name = 'a_new_schema'
-    engine.echo = True
     with engine.begin() as conn:
         conn.execute(text(f'CREATE SCHEMA {schema_name};'))
 
@@ -184,3 +183,33 @@ def test_schema_get_with_reflect_new(client, test_db_name):
     assert len(actual_created) == 1
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA {schema_name} CASCADE;'))
+
+
+def test_schema_get_with_reflect_change(client, test_db_name):
+    engine = create_mathesar_engine(test_db_name)
+    schema_name = 'a_new_schema'
+    with engine.begin() as conn:
+        conn.execute(text(f'CREATE SCHEMA {schema_name};'))
+
+    response = client.get('/api/v0/schemas/')
+    response_data = response.json()
+    orig_created = [
+        schema for schema in response_data['results'] if schema['name'] == schema_name
+    ]
+    assert len(orig_created) == 1
+    orig_id = orig_created[0]['id']
+    new_schema_name = 'even_newer_schema'
+    with engine.begin() as conn:
+        conn.execute(text(f'ALTER SCHEMA {schema_name} RENAME TO {new_schema_name};'))
+    response = client.get('/api/v0/schemas/')
+    response_data = response.json()
+    orig_created = [
+        schema for schema in response_data['results'] if schema['name'] == schema_name
+    ]
+    assert len(orig_created) == 0
+    modified = [
+        schema for schema in response_data['results'] if schema['name'] == new_schema_name
+    ]
+    modified_id = modified[0]['id']
+    assert len(modified) == 1
+    assert orig_id == modified_id
