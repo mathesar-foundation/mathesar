@@ -4,3 +4,4 @@ drf-nested-routers==0.93.3
 psycopg2==2.8.6
 SQLAlchemy==1.4.1
 clevercsv==0.6.8
+django-filter==2.4.0

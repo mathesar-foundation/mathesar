@@ -78,6 +78,30 @@ def test_table_list(create_table, client):
     check_table_response(response_table, table, table_name)
 
 
+def test_table_list_filter(create_table, client):
+    tables = {
+        'Nasa Table List Filter': create_table('Nasa Table List Filter'),
+        'Filler Table 1': create_table('Filler Table 1'),
+        'Filler Table 2': create_table('Filler Table 2')
+    }
+
+    filter_tables = ['Nasa Table List Filter', 'Filler Table 1']
+    query_str = ','.join(filter_tables)
+
+    response = client.get(f'/api/v0/tables/?name={query_str}')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data['count'] == 2
+    assert len(response_data['results']) == 2
+
+    response_tables = {res['name']: res for res in response_data['results']}
+    for table_name in filter_tables:
+        assert table_name in response_tables
+        table = tables[table_name]
+        response_table = response_tables[table_name]
+        check_table_response(response_table, table, table_name)
+
+
 def test_table_detail(create_table, client):
     """
     Desired format:
