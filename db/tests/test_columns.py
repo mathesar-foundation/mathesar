@@ -1,7 +1,7 @@
 import re
 import pytest
-from sqlalchemy import String, Integer, ForeignKey
-from db import columns
+from sqlalchemy import String, Integer, ForeignKey, Column, Table, MetaData
+from db import columns, tables
 
 
 def init_column(*args, **kwargs):
@@ -124,6 +124,23 @@ def test_MC_is_default_when_false_for_pk():
             nullable=dc_definition.get("nullable", True),
         )
         assert not col.is_default
+
+
+def test_rename_column(engine_with_schema):
+    old_col_name = "col1"
+    new_col_name = "col2"
+    column_list = [Column(old_col_name, String)]
+    engine, schema = engine_with_schema
+    table_name = "table_with_columns"
+    table = tables.create_mathesar_table(
+        table_name, schema, column_list, engine
+    )
+    columns.rename_column(
+        schema, table_name, old_col_name, new_col_name, engine
+    )
+    table = tables.reflect_table(table_name, schema, engine)
+    assert new_col_name in table.columns
+    assert old_col_name not in table.columns
 
 
 def get_mathesar_column_init_args():
