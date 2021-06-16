@@ -1,21 +1,30 @@
 <script lang="ts">
   import { getTable } from '@mathesar/stores/tableData';
-  import type { TableColumnStore, TableRecordStore } from '@mathesar/stores/tableData';
+  import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
+  import type {
+    TableColumnStore,
+    TableRecordStore,
+    TablePaginationStore,
+  } from '@mathesar/stores/tableData';
   import { States } from '@mathesar/utils/api';
+  import { Pagination } from '@mathesar-components';
 
   export let database: string;
-  export let id: string;
+  export let id: unknown;
 
   let columns: TableColumnStore;
   let records: TableRecordStore;
+  let pagination: TablePaginationStore;
 
-  function setStores(_database: string, _id: string) {
-    const table = getTable(_database, _id);
+  function setStores(_database: string, _id: number) {
+    const options = URLQueryHandler.getTableConfig(_database, _id);
+    const table = getTable(_database, _id, options);
     columns = table.columns;
     records = table.records;
+    pagination = table.pagination;
   }
 
-  $: setStores(database, id);
+  $: setStores(database, id as number);
 </script>
 
 <div class="actions-pane">
@@ -67,7 +76,10 @@
 </div>
 
 <div class="status-pane">
-  Pagination
+  <Pagination
+    total={$records.totalCount}
+    pageSize={$pagination.pageSize}
+    bind:page={$pagination.page}/>
 </div>
 
 <style global lang="scss">

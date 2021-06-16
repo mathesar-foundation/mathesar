@@ -23,12 +23,19 @@ interface TableRecordData {
   totalCount: number
 }
 
+interface TablePaginationData {
+  pageSize: number,
+  page: number
+}
+
 export type TableColumnStore = Writable<TableColumnData>;
 export type TableRecordStore = Writable<TableRecordData>;
+export type TablePaginationStore = Writable<TablePaginationData>;
 
 interface TableData {
   columns?: TableColumnStore,
-  records?: TableRecordStore
+  records?: TableRecordStore,
+  pagination?: TablePaginationStore
 }
 
 interface TableDetailsResponse {
@@ -45,9 +52,14 @@ interface TableRecordsResponse {
   results: TableRecords[]
 }
 
-const databaseMap: Map<string, Map<string, TableData>> = new Map();
+interface GetTableOptions {
+  pageSize?: number,
+  page?: number
+}
 
-async function fetchTableDetails(db: string, id: string): Promise<void> {
+const databaseMap: Map<string, Map<number, TableData>> = new Map();
+
+async function fetchTableDetails(db: string, id: number): Promise<void> {
   const tableColumnStore = databaseMap.get(db)?.get(id)?.columns;
 
   if (tableColumnStore) {
@@ -77,7 +89,7 @@ async function fetchTableDetails(db: string, id: string): Promise<void> {
 
 async function fetchTableRecords(
   db: string,
-  id: string,
+  id: number,
   queryParams: TableRecordsQuery = {},
 ): Promise<void> {
   const tableRecordStore = databaseMap.get(db)?.get(id)?.records;
@@ -119,7 +131,7 @@ async function fetchTableRecords(
   }
 }
 
-export function getTable(db: string, id: string): TableData {
+export function getTable(db: string, id: number, options?: GetTableOptions): TableData {
   let database = databaseMap.get(db);
   if (!database) {
     database = new Map();
@@ -138,6 +150,10 @@ export function getTable(db: string, id: string): TableData {
         data: [],
         totalCount: 0,
       }),
+      pagination: writable({
+        pageSize: options?.pageSize || 20,
+        page: options?.page || 1,
+      }),
     };
     database.set(id, table);
     // eslint-disable-next-line no-void
@@ -148,6 +164,6 @@ export function getTable(db: string, id: string): TableData {
   return table;
 }
 
-export function clearTable(db: string, id: string): void {
-  databaseMap.get(db)?.delete(id.toString());
+export function clearTable(db: string, id: number): void {
+  databaseMap.get(db)?.delete(id);
 }

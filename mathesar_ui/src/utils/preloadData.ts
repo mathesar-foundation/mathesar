@@ -1,7 +1,7 @@
 import type { TreeItem } from '@mathesar-components/types';
 
 export interface SchemaEntry {
-  id: string,
+  id: number,
   name: string
 }
 

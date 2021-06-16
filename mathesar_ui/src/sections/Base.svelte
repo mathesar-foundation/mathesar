@@ -1,19 +1,12 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
-  import { meta } from 'tinro';
   import { schemas } from '@mathesar/stores/schemas';
   import { faTable } from '@fortawesome/free-solid-svg-icons';
   import { Tree, TabContainer, Icon } from '@mathesar-components';
-  import {
-    openTableQuery,
-    removeTableQuery,
-    getTableQuery,
-    getTablesFromQuery,
-    removeActiveTableQuery,
-  } from '@mathesar/utils/routeHandler';
+  import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
   import type { Schema } from '@mathesar/utils/preloadData';
   import type { Tab } from '@mathesar-components/types';
-  import type { SchemaTreeMapEntry } from '@mathesar/stores/schemas';
+  import type { TableMap } from '@mathesar/stores/schemas';
   import {
     getAllImportDetails,
     getDBStore,
@@ -26,22 +19,21 @@
   import TableView from './table-view/TableView.svelte';
   import EmptyState from './empty-state/EmptyState.svelte';
 
-  const route = meta();
   export let database : string;
 
-  const tables: Tab[] = getTablesFromQuery(route.query.t).map(
+  const tableMap = $schemas.tableMap as TableMap;
+  const tables: Tab[] = URLQueryHandler.getTables(database).map(
     (entry) => {
-      const entryMap = $schemas.entryMap as SchemaTreeMapEntry;
-      const schemaTable = entryMap?.get(entry[0]);
+      const schemaTable = tableMap?.get(entry.id);
       return {
-        id: entry[0],
+        id: entry.id,
         label: schemaTable?.name,
       };
     },
   );
   let tabs: Tab[] = (getAllImportDetails(database) as unknown as Tab[]).concat(tables);
   let activeTab = tables.find(
-    (table) => table.id?.toString() === decodeURIComponent(route.query.a),
+    (table) => table.id === URLQueryHandler.getActiveTable(database),
   ) || tabs[0];
 
   const unsubFileImports = getDBStore(database).changes.subscribe((fileImportInfo) => {
@@ -69,14 +61,14 @@
     if (entry.isNew) {
       return null;
     }
-    return `/${database}${getTableQuery(entry.id as string)}`;
+    return `/${database}${URLQueryHandler.constructTableQuery(entry.id as number)}`;
   }
 
   function tableSelected(e: { detail: { node: Schema, originalEvent: Event, link?: string } }) {
     const { node, originalEvent } = e.detail;
     originalEvent.preventDefault();
 
-    openTableQuery(database, node.id);
+    URLQueryHandler.addTable(database, node.id);
     const existingTab = tabs.find((tabEntry) => tabEntry.id === node.id);
     if (existingTab) {
       if (activeTab.id !== existingTab.id) {
@@ -98,22 +90,22 @@
     originalEvent.preventDefault();
 
     if (tab.isNew) {
-      removeActiveTableQuery(database);
+      URLQueryHandler.removeActiveTable(database);
     } else {
-      openTableQuery(database, tab.id as string);
+      URLQueryHandler.addTable(database, tab.id as number);
     }
   }
 
   function tabRemoved(e: { detail: { removedTab: Tab, activeTab?: Tab } }) {
     const { removedTab, activeTab: tabActive } = e.detail;
     if (activeTab?.isNew) {
-      removeActiveTableQuery(database);
+      URLQueryHandler.removeActiveTable(database);
     }
     if (removedTab.isNew) {
       removeImport(database, removedTab.id as string);
     } else {
-      removeTableQuery(database, removedTab.id as string, tabActive?.id as string);
-      clearTable(database, removedTab.id as string);
+      URLQueryHandler.removeTable(database, removedTab.id as number, tabActive?.id as number);
+      clearTable(database, removedTab.id as number);
     }
   }
 </script>
@@ -141,7 +133,7 @@
         {#if activeTab.isNew}
           <ImportFile {database} id={activeTab.id.toString()}/>
         {:else}
-          <TableView {database} id={activeTab.id.toString()}/>
+          <TableView {database} id={activeTab.id}/>
         {/if}
       {/if}
     </TabContainer>

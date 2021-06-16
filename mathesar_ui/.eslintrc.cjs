@@ -53,7 +53,7 @@ module.exports = {
       },
     },
     {
-      files: ['**/*.ts'],
+      files: ['*.ts'],
       rules: {
         'import/extensions': [
           'error',
@@ -63,6 +63,7 @@ module.exports = {
             ts: 'never',
           },
         ],
+        'import/prefer-default-export': 'off',
       },
     },
   ],
