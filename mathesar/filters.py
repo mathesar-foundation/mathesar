@@ -25,6 +25,8 @@ class TableFilter(PropertyFilterSet):
     created = PropertyDateTimeFromToRangeFilter(field_name='created_at')
     updated = PropertyDateTimeFromToRangeFilter(field_name='updated_at')
     import_verified = PropertyBooleanFilter(field_name='import_verified')
+    not_imported = PropertyBooleanFilter(lookup_expr="isnull",
+                                         field_name='import_verified')
 
     class Meta:
         model = Table
