@@ -3,7 +3,7 @@ import pytest
 from django.core.files import File
 
 from mathesar.models import Table
-from mathesar.models import DataFile
+from mathesar.models import DataFile, Schema
 from mathesar.utils.schemas import create_schema_and_object
 
 
@@ -78,14 +78,14 @@ def test_table_list(create_table, client):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_list_filter(create_table, client):
+def test_table_list_filter_name(create_table, client):
     tables = {
-        'Nasa Table List Filter': create_table('Nasa Table List Filter'),
-        'Filler Table 1': create_table('Filler Table 1'),
-        'Filler Table 2': create_table('Filler Table 2')
+        'Filter Name 1': create_table('Filter Name 1'),
+        'Filter Name 2': create_table('Filter Name 2'),
+        'Filter Name 3': create_table('Filter Name 3')
     }
 
-    filter_tables = ['Nasa Table List Filter', 'Filler Table 1']
+    filter_tables = ['Filter Name 1', 'Filter Name 2']
     query_str = ','.join(filter_tables)
 
     response = client.get(f'/api/v0/tables/?name={query_str}')
@@ -100,6 +100,88 @@ def test_table_list_filter(create_table, client):
         table = tables[table_name]
         response_table = response_tables[table_name]
         check_table_response(response_table, table, table_name)
+
+
+def test_table_list_filter_schema(create_table, client):
+    tables = {
+        'Schema 1': create_table('Filter Schema 1', schema='Schema 1'),
+        'Schema 2': create_table('Filter Schema 2', schema='Schema 2'),
+        'Schema 3': create_table('Filter Schema 3', schema='Schema 3')
+    }
+
+    filter_tables = ['Schema 2', 'Schema 3']
+    query_str = ','.join(filter_tables)
+
+    response = client.get(f'/api/v0/tables/?schema={query_str}')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data['count'] == 2
+    assert len(response_data['results']) == 2
+
+    response_tables = {Schema.objects.get(id=res['schema']).name: res
+                       for res in response_data['results']}
+    for schema_name in filter_tables:
+        assert schema_name in response_tables
+        table = tables[schema_name]
+        response_table = response_tables[schema_name]
+        check_table_response(response_table, table, table.name)
+
+
+def test_table_list_filter_created(create_table, client):
+    table_name = 'Fitler Created'
+    table = create_table(table_name)
+    query_str = '2020-01-01 8:00'
+
+    response = client.get(f'/api/v0/tables/?created_before={query_str}')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data['count'] == 0
+    assert len(response_data['results']) == 0
+
+    response = client.get(f'/api/v0/tables/?created_after={query_str}')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data['count'] == 1
+    assert len(response_data['results']) == 1
+    check_table_response(response_data['results'][0], table, table_name)
+
+
+def test_table_list_filter_updated(create_table, client):
+    table_name = 'Filter Updated'
+    table = create_table(table_name)
+    query_str = '2020-01-01 8:00'
+
+    response = client.get(f'/api/v0/tables/?updated_before={query_str}')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data['count'] == 0
+    assert len(response_data['results']) == 0
+
+    response = client.get(f'/api/v0/tables/?updated_after={query_str}')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data['count'] == 1
+    assert len(response_data['results']) == 1
+    check_table_response(response_data['results'][0], table, table_name)
+
+    response = client.get(f'/api/v0/tables/?updated={table.updated_at}')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data['count'] == 1
+    assert len(response_data['results']) == 1
+    check_table_response(response_data['results'][0], table, table_name)
+
+
+def test_table_list_filter_import_verified(create_table, client):
+    table_name = 'Filter Verified'
+    table = create_table(table_name)
+
+    response = client.get('/api/v0/tables/?import_verified=none')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data['count'] == 1
+    assert len(response_data['results']) == 1
+    check_table_response(response_data['results'][0], table, table_name)
 
 
 def test_table_detail(create_table, client):
