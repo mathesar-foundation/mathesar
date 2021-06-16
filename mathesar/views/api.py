@@ -9,7 +9,7 @@ from mathesar.models import Table, Schema, DataFile
 from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
 from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer
 from mathesar.utils.schemas import create_schema_and_object
-from mathesar.utils.api import create_table_from_datafile
+from mathesar.utils.api import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
 
 
@@ -35,10 +35,9 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
     filterset_class = TableFilter
 
     def create(self, request):
-        serializer = TableSerializer(data=request.data,
-                                     context={'request': request})
+        serializer = TableSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            return create_table_from_datafile(request, serializer.data)
+            return create_table_from_datafile(request, serializer.validated_data)
         else:
             raise ValidationError(serializer.errors)
 
@@ -92,3 +91,10 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
     queryset = DataFile.objects.all().order_by('-created_at')
     serializer_class = DataFileSerializer
     pagination_class = DefaultLimitOffsetPagination
+
+    def create(self, request):
+        serializer = DataFileSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            return create_datafile(request, serializer.validated_data['file'])
+        else:
+            raise ValidationError(serializer.errors)
