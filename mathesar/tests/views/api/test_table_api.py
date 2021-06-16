@@ -180,23 +180,47 @@ def test_table_list_filter_updated(create_table, client):
 
 
 def test_table_list_filter_import_verified(create_table, client):
-    table_name = 'Filter Verified'
-    table = create_table(table_name)
-    table.import_verified = True
-    table.save()
+    tables = {
+        True: create_table('Filter Verified 2'),
+        False: create_table('Filter Verified 3'),
+    }
+    for verified, table in tables.items():
+        table.import_verified = verified
+        table.save()
 
-    response = client.get('/api/v0/tables/?import_verified=false')
+    for verified, table in tables.items():
+        query_str = str(verified).lower()
+        response = client.get(f'/api/v0/tables/?import_verified={query_str}')
+        response_data = response.json()
+        assert response.status_code == 200
+        assert response_data['count'] == 1
+        assert len(response_data['results']) == 1
+        check_table_response(response_data['results'][0], table, table.name)
+
+
+def test_table_list_filter_imported(create_table, client):
+    tables = {
+        None: create_table('Filter Imported 1'),
+        False: create_table('Filter Imported 2'),
+        True: create_table('Filter Imported 3'),
+    }
+    for verified, table in tables.items():
+        table.import_verified = verified
+        table.save()
+
+    response = client.get('/api/v0/tables/?not_imported=false')
     response_data = response.json()
     assert response.status_code == 200
-    assert response_data['count'] == 0
-    assert len(response_data['results']) == 0
+    assert response_data['count'] == 2
+    assert len(response_data['results']) == 2
 
-    response = client.get('/api/v0/tables/?import_verified=true')
+    table = tables[None]
+    response = client.get('/api/v0/tables/?not_imported=true')
     response_data = response.json()
     assert response.status_code == 200
     assert response_data['count'] == 1
     assert len(response_data['results']) == 1
-    check_table_response(response_data['results'][0], table, table_name)
+    check_table_response(response_data['results'][0], table, table.name)
 
 
 def test_table_detail(create_table, client):
