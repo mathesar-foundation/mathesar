@@ -24,6 +24,12 @@ class SchemaSerializer(serializers.HyperlinkedModelSerializer):
         model = Schema
         fields = ['id', 'name', 'database', 'tables']
 
+    def validate_name(self, value):
+        existing = [schema for schema in Schema.objects.all() if schema.name == value]
+        if len(existing) == 0:
+            return value
+        raise serializers.ValidationError("Schema name is not unique")
+
 
 class ColumnSerializer(serializers.Serializer):
     name = serializers.CharField()

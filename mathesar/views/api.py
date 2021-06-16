@@ -25,9 +25,13 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
     filterset_class = SchemaFilter
 
     def create(self, request):
-        schema = create_schema_and_object(request.data['name'], request.data['database'])
-        serializer = SchemaSerializer(schema)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        serializer = SchemaSerializer(data=request.data)
+        if serializer.is_valid():
+            schema = create_schema_and_object(request.data['name'], request.data['database'])
+            serializer = SchemaSerializer(schema)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            raise ValidationError(serializer.errors)
 
 
 class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
