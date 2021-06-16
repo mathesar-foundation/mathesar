@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User
-from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils.functional import cached_property
 
@@ -79,9 +78,10 @@ class Table(DatabaseObject):
 class DataFile(BaseModel):
     file = models.FileField(
         upload_to=model_utils.user_directory_path,
-        validators=[FileExtensionValidator(allowed_extensions=['csv'])]
     )
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
-    table_imported_to = models.ForeignKey(Table, related_name="data_files",
-                                          blank=True, null=True,
-                                          on_delete=models.SET_NULL)
+    table_imported_to = models.ForeignKey(Table, related_name="data_files", blank=True,
+                                          null=True, on_delete=models.SET_NULL)
+    delimiter = models.CharField(max_length=1, default=',', blank=True)
+    escapechar = models.CharField(max_length=1, blank=True)
+    quotechar = models.CharField(max_length=1, default='"', blank=True)

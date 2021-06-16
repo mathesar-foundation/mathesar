@@ -1,15 +1,81 @@
-import csv
 from io import TextIOWrapper
+
+import clevercsv as csv
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.utils import get_database_key
 from mathesar.models import Table, Schema
+from mathesar.errors import InvalidTableError
 from db import tables, records
 
+ALLOWED_DELIMITERS = ",\t:| "
+SAMPLE_SIZE = 20000
+CHECK_ROWS = 10
 
-def get_csv_reader(csv_file):
-    csv_file = TextIOWrapper(csv_file, encoding="utf-8-sig")
-    reader = csv.DictReader(csv_file)
+
+def check_dialect(file, dialect):
+    """
+    Checks to see if we can parse the given file with the given dialect
+
+    Parses the first CHECK_ROWS rows. Checks to see if any have formatting issues (as
+    indicated by parse_row), or if any have a differing number of columns.
+
+    Args:
+        file: _io.TextIOWrapper object, an already opened file
+        dialect: csv.Dialect object, the dialect we are validating
+
+    Returns:
+        bool: False if any error that would cause SQL errors were found, otherwise True
+    """
+    prev_num_columns = None
+    row_gen = csv.read.reader(file, dialect)
+    for _ in range(CHECK_ROWS):
+        try:
+            row = next(row_gen)
+        except StopIteration:
+            # If less than CHECK_ROWS rows in file, stop early
+            break
+
+        num_columns = len(row)
+        if prev_num_columns is None:
+            prev_num_columns = num_columns
+        elif prev_num_columns != num_columns:
+            return False
+    return True
+
+
+def get_sv_dialect(file):
+    """
+    Given a *sv file, generate a dialect to parse it.
+
+    Args:
+        file: _io.TextIOWrapper object, an already opened file
+
+    Returns:
+        dialect: csv.Dialect object, the dialect to parse the file
+
+    Raises:
+        InvalidTableError: If the generated dialect was unable to parse the file
+    """
+    dialect = csv.detect.Detector().detect(file.read(SAMPLE_SIZE),
+                                           delimiters=ALLOWED_DELIMITERS)
+    if dialect is None:
+        raise InvalidTableError
+
+    file.seek(0)
+    if check_dialect(file, dialect):
+        file.seek(0)
+        return dialect
+    else:
+        raise InvalidTableError
+
+
+def get_sv_reader(file, dialect=None):
+    file = TextIOWrapper(file, encoding="utf-8-sig")
+    if dialect:
+        reader = csv.DictReader(file, dialect=dialect)
+    else:
+        reader = csv.DictReader(file)
     return reader
 
 
@@ -26,7 +92,7 @@ def legacy_create_db_table_from_csv(name, schema, csv_reader, engine):
 # See https://github.com/centerofci/mathesar/issues/150
 def legacy_create_table_from_csv(name, schema, database_key, csv_file):
     engine = create_mathesar_engine(database_key)
-    csv_reader = get_csv_reader(csv_file)
+    csv_reader = get_sv_reader(csv_file)
     db_table = legacy_create_db_table_from_csv(name, schema, csv_reader, engine)
     database = get_database_key(engine)
     schema, _ = Schema.objects.get_or_create(name=db_table.schema, database=database)
@@ -37,17 +103,22 @@ def legacy_create_table_from_csv(name, schema, database_key, csv_file):
 
 def create_db_table_from_data_file(data_file, name, schema):
     engine = create_mathesar_engine(schema.database)
-    csv_filename = data_file.file.path
-    with open(csv_filename, 'rb') as csv_file:
-        csv_reader = get_csv_reader(csv_file)
-        column_names = csv_reader.fieldnames
+    sv_filename = data_file.file.path
+    dialect = csv.dialect.SimpleDialect(data_file.delimiter, data_file.quotechar,
+                                        data_file.escapechar)
+    with open(sv_filename, 'rb') as sv_file:
+        sv_reader = get_sv_reader(sv_file, dialect=dialect)
+        column_names = sv_reader.fieldnames
         table = tables.create_string_column_table(
             name=name,
             schema=schema.name,
             column_names=column_names,
             engine=engine
         )
-    records.create_records_from_csv(table, engine, csv_filename, column_names)
+    records.create_records_from_csv(table, engine, sv_filename, column_names,
+                                    delimiter=dialect.delimiter,
+                                    escape=dialect.escapechar,
+                                    quote=dialect.quotechar)
     return table
 
 
