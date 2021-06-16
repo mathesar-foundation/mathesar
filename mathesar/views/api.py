@@ -1,5 +1,3 @@
-from io import TextIOWrapper
-
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
@@ -11,9 +9,7 @@ from mathesar.models import Table, Schema, DataFile
 from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
 from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer
 from mathesar.utils.schemas import create_schema_and_object
-from mathesar.utils.api import create_table_from_datafile
-from mathesar.imports.csv import get_sv_dialect
-from mathesar.errors import InvalidTableError
+from mathesar.utils.api import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
 
 
@@ -97,23 +93,8 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
     pagination_class = DefaultLimitOffsetPagination
 
     def create(self, request):
-        serializer = DataFileSerializer(data=request.data,
-                                        context={'request': request})
+        serializer = DataFileSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            file = TextIOWrapper(serializer.validated_data['file'].file,
-                                 encoding="utf-8-sig")
-            try:
-                dialect = get_sv_dialect(file)
-            except InvalidTableError:
-                raise ValidationError({'file': 'Unable to tabulate datafile'})
-
-            inferred_data = {'file': serializer.validated_data['file'],
-                             'delimiter': dialect.delimiter,
-                             'escapechar': dialect.escapechar,
-                             'quotechar': dialect.quotechar}
-            serializer = DataFileSerializer(data=inferred_data,
-                                            context={'request': request})
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-        raise ValidationError(serializer.errors)
+            return create_datafile(request, serializer.validated_data['file'])
+        else:
+            raise ValidationError(serializer.errors)
