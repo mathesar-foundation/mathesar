@@ -145,6 +145,13 @@ def test_table_list_filter_created(create_table, client):
     assert len(response_data['results']) == 1
     check_table_response(response_data['results'][0], table, table_name)
 
+    response = client.get(f'/api/v0/tables/?created={table.created_at}')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data['count'] == 1
+    assert len(response_data['results']) == 1
+    check_table_response(response_data['results'][0], table, table_name)
+
 
 def test_table_list_filter_updated(create_table, client):
     table_name = 'Filter Updated'
