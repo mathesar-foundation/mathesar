@@ -182,8 +182,16 @@ def test_table_list_filter_updated(create_table, client):
 def test_table_list_filter_import_verified(create_table, client):
     table_name = 'Filter Verified'
     table = create_table(table_name)
+    table.import_verified = True
+    table.save()
 
-    response = client.get('/api/v0/tables/?import_verified=none')
+    response = client.get('/api/v0/tables/?import_verified=false')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert response_data['count'] == 0
+    assert len(response_data['results']) == 0
+
+    response = client.get('/api/v0/tables/?import_verified=true')
     response_data = response.json()
     assert response.status_code == 200
     assert response_data['count'] == 1
