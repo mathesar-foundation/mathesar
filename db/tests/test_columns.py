@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy import String, Integer, ForeignKey, Column
 from db import columns, tables, constants
 
-from .test_tables import ROSTER, EXTRACTED_COLS, TEACHERS,  ROSTER_NO_TEACHERS
+from .test_tables import ROSTER, EXTRACTED_COLS, TEACHERS, ROSTER_NO_TEACHERS
 
 
 def init_column(*args, **kwargs):
