@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from django.core.cache import cache
 from sqlalchemy import text
 from db.schemas import get_mathesar_schemas
@@ -240,3 +241,17 @@ def test_schema_get_with_reflect_delete(client, test_db_name):
         schema for schema in response_data['results'] if schema['name'] == schema_name
     ]
     assert len(orig_created) == 0
+
+
+def test_schema_viewset_sets_cache(client):
+    cache.delete(api.SCHEMA_REFLECTION_KEY)
+    assert not cache.get(api.SCHEMA_REFLECTION_KEY)
+    client.get('/api/v0/schemas/')
+    assert cache.get(api.SCHEMA_REFLECTION_KEY)
+
+
+def test_schema_viewset_checks_cache(client):
+    cache.delete(api.SCHEMA_REFLECTION_KEY)
+    with patch.object(api, 'reflect_schemas_from_database') as mock_reflect:
+        client.get('/api/v0/schemas/')
+    mock_reflect.assert_called()

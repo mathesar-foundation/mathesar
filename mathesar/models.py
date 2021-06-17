@@ -49,8 +49,7 @@ class Schema(DatabaseObject):
                     )
                     cache.set(cache_key, schema_name, NAME_CACHE_INTERVAL)
                 return schema_name
-            except TypeError as e:
-                print(e)
+            except TypeError:
                 return 'MISSING'
         else:
             return 'DELETED'
