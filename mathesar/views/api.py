@@ -1,7 +1,9 @@
+import logging
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
+from django.core.cache import cache
 from django_filters import rest_framework as filters
 
 
@@ -13,12 +15,20 @@ from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_fro
 from mathesar.utils.api import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
 
+logger = logging.getLogger(__name__)
+
+SCHEMA_REFLECTION_KEY = 'schema_reflected_recently'
+SCHEMA_REFLECTION_INTERVAL = 60 * 5  # we reflect DB changes every 5 minutes
+
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     def get_queryset(self):
-        for database_key in get_non_default_database_keys():
-            reflect_schemas_from_database(database_key)
+        if not cache.get(SCHEMA_REFLECTION_KEY):
+            for database_key in get_non_default_database_keys():
+                reflect_schemas_from_database(database_key)
+            cache.set(SCHEMA_REFLECTION_KEY, True, SCHEMA_REFLECTION_INTERVAL)
         return Schema.objects.all().order_by('-created_at').filter(deleted=False)
+
     serializer_class = SchemaSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
