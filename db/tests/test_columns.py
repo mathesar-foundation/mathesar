@@ -1,7 +1,9 @@
 import re
 import pytest
-from sqlalchemy import String, Integer, ForeignKey, Column, Table, MetaData
-from db import columns, tables
+from sqlalchemy import String, Integer, ForeignKey, Column
+from db import columns, tables, constants
+
+from .test_tables import ROSTER, EXTRACTED_COLS, TEACHERS,  ROSTER_NO_TEACHERS
 
 
 def init_column(*args, **kwargs):
@@ -141,6 +143,27 @@ def test_rename_column(engine_with_schema):
     table = tables.reflect_table(table_name, schema, engine)
     assert new_col_name in table.columns
     assert old_col_name not in table.columns
+
+
+def test_rename_column_foreign_keys(engine_with_roster):
+    engine, schema = engine_with_roster
+    _, remainder, fk_name = tables.extract_columns_from_table(
+        ROSTER,
+        EXTRACTED_COLS,
+        TEACHERS,
+        ROSTER_NO_TEACHERS,
+        schema,
+        engine,
+    )
+    new_fk_name = "new_" + fk_name
+    columns.rename_column(schema, remainder.name, fk_name, new_fk_name, engine)
+    remainder = tables.reflect_table(remainder.name, schema, engine)
+    assert new_fk_name in remainder.columns
+    assert fk_name not in remainder.columns
+
+    fk = list(remainder.foreign_keys)[0]
+    assert fk.parent.name == new_fk_name
+    assert fk.column.name == constants.ID
 
 
 def get_mathesar_column_init_args():
