@@ -1,10 +1,13 @@
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.db import models
 from django.utils.functional import cached_property
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.utils import models as model_utils
 from db import tables, records, schemas
+
+NAME_CACHE_INTERVAL = 60 * 5
 
 
 class BaseModel(models.Model):
@@ -23,7 +26,7 @@ class DatabaseObject(BaseModel):
         abstract = True
 
     def __str__(self):
-        return f"{self.__class__.__name__}: {self.name}"
+        return f"{self.__class__.__name__}: {self.oid}"
 
 
 class Schema(DatabaseObject):
@@ -36,7 +39,21 @@ class Schema(DatabaseObject):
 
     @cached_property
     def name(self):
-        return schemas.get_schema_name_from_oid(self.oid, self._sa_engine)
+        cache_key = f"{self.database}_schema_name_{self.oid}"
+        if not self.deleted:
+            try:
+                schema_name = cache.get(cache_key)
+                if schema_name is None:
+                    schema_name = schemas.get_schema_name_from_oid(
+                        self.oid, self._sa_engine
+                    )
+                    cache.set(cache_key, schema_name, NAME_CACHE_INTERVAL)
+                return schema_name
+            except TypeError as e:
+                print(e)
+                return 'MISSING'
+        else:
+            return 'DELETED'
 
 
 class Table(DatabaseObject):
