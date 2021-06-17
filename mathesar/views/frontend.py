@@ -9,7 +9,11 @@ from mathesar.database.utils import get_non_default_database_keys
 
 
 def get_schemas(request):
-    schema_serializer = SchemaSerializer(Schema.objects.all(), many=True, context={'request': request})
+    schema_serializer = SchemaSerializer(
+        Schema.objects.all().filter(deleted=False),
+        many=True,
+        context={'request': request}
+    )
     return schema_serializer.data
 
 
