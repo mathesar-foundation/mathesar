@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from sqlalchemy import text
 from db.schemas import get_mathesar_schemas
 from mathesar.database.base import create_mathesar_engine
@@ -173,6 +174,7 @@ def test_schema_get_with_reflect_new(client, test_db_name):
     schema_name = 'a_new_schema'
     with engine.begin() as conn:
         conn.execute(text(f'CREATE SCHEMA {schema_name};'))
+    cache.clear()
     response = client.get('/api/v0/schemas/')
     # The schema number should only change after the GET request
     response_data = response.json()
@@ -190,6 +192,7 @@ def test_schema_get_with_reflect_change(client, test_db_name):
     with engine.begin() as conn:
         conn.execute(text(f'CREATE SCHEMA {schema_name};'))
 
+    cache.clear()
     response = client.get('/api/v0/schemas/')
     response_data = response.json()
     orig_created = [
@@ -200,6 +203,7 @@ def test_schema_get_with_reflect_change(client, test_db_name):
     new_schema_name = 'even_newer_schema'
     with engine.begin() as conn:
         conn.execute(text(f'ALTER SCHEMA {schema_name} RENAME TO {new_schema_name};'))
+    cache.clear()
     response = client.get('/api/v0/schemas/')
     response_data = response.json()
     orig_created = [
@@ -220,16 +224,16 @@ def test_schema_get_with_reflect_delete(client, test_db_name):
     with engine.begin() as conn:
         conn.execute(text(f'CREATE SCHEMA {schema_name};'))
 
+    cache.clear()
     response = client.get('/api/v0/schemas/')
     response_data = response.json()
     orig_created = [
         schema for schema in response_data['results'] if schema['name'] == schema_name
     ]
     assert len(orig_created) == 1
-    orig_id = orig_created[0]['id']
-    new_schema_name = 'even_newer_schema'
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA {schema_name};'))
+    cache.clear()
     response = client.get('/api/v0/schemas/')
     response_data = response.json()
     orig_created = [
