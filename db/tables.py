@@ -1,6 +1,5 @@
 from sqlalchemy import (
-    Column, String, Table, MetaData, func, select, ForeignKey, literal, exists, text,
-    DDL
+    Column, String, Table, MetaData, func, select, ForeignKey, literal, exists, DDL
 )
 
 from db import columns, constants, schemas
