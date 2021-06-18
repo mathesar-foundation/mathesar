@@ -361,7 +361,7 @@ def update_table_column_types(
 
 
 def infer_table_column_types(schema, table_name, engine):
-    metadata = MetaData(schema=schema)
+    metadata = MetaData(bind=engine, schema=schema)
     table = reflect_table(table_name, schema, engine)
 
     temp_name = "temp_table"
@@ -377,4 +377,5 @@ def infer_table_column_types(schema, table_name, engine):
     update_table_column_types(schema, temp_table.name, engine)
     table = reflect_table(temp_name, schema, engine)
     types = [c.type.__class__ for c in table.columns]
+    temp_table.drop()
     return types
