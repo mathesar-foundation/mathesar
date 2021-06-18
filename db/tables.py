@@ -369,8 +369,10 @@ def infer_table_column_types(schema, table_name, engine):
     columns = [c.copy() for c in table.columns]
     temp_table = Table(temp_name, metadata, *columns)
 
-    original_table_query = str(select(table).compile(dialect=engine.dialect))
-    create_table = f"CREATE TABLE {temp_full_name} AS {original_table_query}"
+    create_table = f"""
+    CREATE TABLE {temp_full_name} AS
+    TABLE {table.schema}.{table.name}
+    """
     with engine.begin() as conn:
         conn.execute(DDL(create_table))
 
