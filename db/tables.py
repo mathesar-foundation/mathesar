@@ -1,5 +1,6 @@
 from sqlalchemy import (
-    Column, String, Table, MetaData, func, select, ForeignKey, literal, exists
+    Column, String, Table, MetaData, func, select, ForeignKey, literal, exists, text,
+    DDL
 )
 
 from db import columns, constants, schemas
@@ -338,7 +339,7 @@ def get_count(table, engine):
         return conn.execute(query).scalar()
 
 
-def infer_table_column_types(
+def update_table_column_types(
         schema,
         table_name,
         engine,
@@ -358,3 +359,23 @@ def infer_table_column_types(
             column_name,
             engine,
         )
+
+
+def infer_table_column_types(schema, table_name, engine):
+    metadata = MetaData(schema=schema)
+    table = reflect_table(table_name, schema, engine)
+
+    temp_name = "temp_table"
+    temp_full_name = schema + "." + temp_name
+    columns = [c.copy() for c in table.columns]
+    temp_table = Table(temp_name, metadata, *columns)
+
+    original_table_query = str(select(table).compile(dialect=engine.dialect))
+    create_table = f"CREATE TABLE {temp_full_name} AS {original_table_query}"
+    with engine.begin() as conn:
+        conn.execute(DDL(create_table))
+
+    update_table_column_types(schema, temp_table.name, engine)
+    table = reflect_table(temp_name, schema, engine)
+    types = [c.type.__class__ for c in table.columns]
+    return types
