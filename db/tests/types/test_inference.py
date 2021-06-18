@@ -24,29 +24,38 @@ type_data_list = [
 ]
 
 
+def create_test_table(engine, schema, table_name, column_name, column_type, values):
+    metadata = MetaData(bind=engine)
+    input_table = Table(
+        table_name,
+        metadata,
+        Column(column_name, column_type),
+        schema=schema
+    )
+    input_table.create()
+    for value in values:
+        ins = input_table.insert(values=(value,))
+        with engine.begin() as conn:
+            conn.execute(ins)
+    return input_table
+
+
 @pytest.mark.parametrize("type_,value_list,expect_type", type_data_list)
 def test_type_inference(engine_email_type, type_, value_list, expect_type):
     engine, schema = engine_email_type
     TEST_TABLE = "test_table"
     TEST_COLUMN = "test_column"
-    metadata = MetaData(bind=engine)
-    input_table = Table(
-        TEST_TABLE,
-        metadata,
-        Column(TEST_COLUMN, type_),
-        schema=schema
+    create_test_table(
+        engine, schema, TEST_TABLE, TEST_COLUMN, type_, value_list
     )
-    input_table.create()
-    for value in value_list:
-        ins = input_table.insert(values=(value,))
-        with engine.begin() as conn:
-            conn.execute(ins)
+
     inference.infer_column_type(
         schema,
         TEST_TABLE,
         TEST_COLUMN,
         engine
     )
+
     with engine.begin():
         metadata = MetaData(bind=engine, schema=schema)
         actual_type = Table(
@@ -55,32 +64,14 @@ def test_type_inference(engine_email_type, type_, value_list, expect_type):
     assert actual_type == expect_type
 
 
-def test_table_inference(engine_email_type):
-    TYPES = [Numeric, Numeric, String, String, String, String]
-    VALUES = [
-        [0, 0, "t", "t", "a", "2"],
-        [2, 1, "false", "false", "cat", "1"],
-        [1, 1, "true", "2", "mat", "0"],
-        [0, 0, "f", "0", "bat", "0"],
-    ]
-    EXPECTED_TYPES = [NUMERIC, BOOLEAN, BOOLEAN, VARCHAR, VARCHAR, NUMERIC]
-    TEST_TABLE = "test_table"
-
+@pytest.mark.parametrize("type_,value_list,expect_type", type_data_list)
+def test_table_inference(engine_email_type, type_, value_list, expect_type):
     engine, schema = engine_email_type
-    metadata = MetaData(bind=engine)
-
-    columns = [Column("col_" + str(i), t) for i, t in enumerate(TYPES)]
-    input_table = Table(
-        TEST_TABLE,
-        metadata,
-        *columns,
-        schema=schema
+    TEST_TABLE = "test_table"
+    TEST_COLUMN = "test_column"
+    input_table = create_test_table(
+        engine, schema, TEST_TABLE, TEST_COLUMN, type_, value_list
     )
-    input_table.create()
-    for row in VALUES:
-        ins = input_table.insert(values=row)
-        with engine.begin() as conn:
-            conn.execute(ins)
 
     with engine.begin() as conn:
         results = conn.execute(select(input_table))
@@ -91,7 +82,7 @@ def test_table_inference(engine_email_type):
         TEST_TABLE,
         engine
     )
-    assert inferred_types == EXPECTED_TYPES
+    assert inferred_types == [expect_type]
 
     # Ensure the original table is untouced
     with engine.begin() as conn:
