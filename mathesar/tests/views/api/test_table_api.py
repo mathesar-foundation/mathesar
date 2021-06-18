@@ -34,6 +34,15 @@ def check_table_response(response_table, table, table_name):
     assert response_table['records'].endswith('/records/')
 
 
+def check_table_filter_response(response, status_code=None, count=None):
+    response_data = response.json()
+    if status_code is not None:
+        assert response.status_code == status_code
+    if count is not None:
+        assert response_data['count'] == count
+        assert len(response_data['results']) == count
+
+
 def test_table_list(create_table, client):
     """
     Desired format:
@@ -87,12 +96,9 @@ def test_table_list_filter_name(create_table, client):
 
     filter_tables = ['Filter Name 1', 'Filter Name 2']
     query_str = ','.join(filter_tables)
-
     response = client.get(f'/api/v0/tables/?name={query_str}')
     response_data = response.json()
-    assert response.status_code == 200
-    assert response_data['count'] == 2
-    assert len(response_data['results']) == 2
+    check_table_filter_response(response, status_code=200, count=2)
 
     response_tables = {res['name']: res for res in response_data['results']}
     for table_name in filter_tables:
@@ -111,12 +117,9 @@ def test_table_list_filter_schema(create_table, client):
 
     filter_tables = ['Schema 2', 'Schema 3']
     query_str = ','.join(filter_tables)
-
     response = client.get(f'/api/v0/tables/?schema={query_str}')
     response_data = response.json()
-    assert response.status_code == 200
-    assert response_data['count'] == 2
-    assert len(response_data['results']) == 2
+    check_table_filter_response(response, status_code=200, count=2)
 
     response_tables = {Schema.objects.get(id=res['schema']).name: res
                        for res in response_data['results']}
@@ -127,62 +130,32 @@ def test_table_list_filter_schema(create_table, client):
         check_table_response(response_table, table, table.name)
 
 
-def test_table_list_filter_created(create_table, client):
-    table_name = 'Fitler Created'
+@pytest.mark.parametrize('timestamp_type', ['created', 'updated'])
+def test_table_list_filter_timestamps(create_table, client, timestamp_type):
+    table_name = f'Fitler {timestamp_type}'
     table = create_table(table_name)
     query_str = '2020-01-01 8:00'
 
-    response = client.get(f'/api/v0/tables/?created_before={query_str}')
+    response = client.get(f'/api/v0/tables/?{timestamp_type}_before={query_str}')
     response_data = response.json()
-    assert response.status_code == 200
-    assert response_data['count'] == 0
-    assert len(response_data['results']) == 0
+    check_table_filter_response(response, status_code=200, count=0)
 
-    response = client.get(f'/api/v0/tables/?created_after={query_str}')
+    response = client.get(f'/api/v0/tables/?{timestamp_type}_after={query_str}')
     response_data = response.json()
-    assert response.status_code == 200
-    assert response_data['count'] == 1
-    assert len(response_data['results']) == 1
+    check_table_filter_response(response, status_code=200, count=1)
     check_table_response(response_data['results'][0], table, table_name)
 
-    response = client.get(f'/api/v0/tables/?created={table.created_at}')
+    timestamp = table.created_at if timestamp_type == 'created' else table.updated_at
+    response = client.get(f'/api/v0/tables/?{timestamp_type}={timestamp}')
     response_data = response.json()
-    assert response.status_code == 200
-    assert response_data['count'] == 1
-    assert len(response_data['results']) == 1
-    check_table_response(response_data['results'][0], table, table_name)
-
-
-def test_table_list_filter_updated(create_table, client):
-    table_name = 'Filter Updated'
-    table = create_table(table_name)
-    query_str = '2020-01-01 8:00'
-
-    response = client.get(f'/api/v0/tables/?updated_before={query_str}')
-    response_data = response.json()
-    assert response.status_code == 200
-    assert response_data['count'] == 0
-    assert len(response_data['results']) == 0
-
-    response = client.get(f'/api/v0/tables/?updated_after={query_str}')
-    response_data = response.json()
-    assert response.status_code == 200
-    assert response_data['count'] == 1
-    assert len(response_data['results']) == 1
-    check_table_response(response_data['results'][0], table, table_name)
-
-    response = client.get(f'/api/v0/tables/?updated={table.updated_at}')
-    response_data = response.json()
-    assert response.status_code == 200
-    assert response_data['count'] == 1
-    assert len(response_data['results']) == 1
+    check_table_filter_response(response, status_code=200, count=1)
     check_table_response(response_data['results'][0], table, table_name)
 
 
 def test_table_list_filter_import_verified(create_table, client):
     tables = {
-        True: create_table('Filter Verified 2'),
-        False: create_table('Filter Verified 3'),
+        True: create_table('Filter Verified 1'),
+        False: create_table('Filter Verified 2'),
     }
     for verified, table in tables.items():
         table.import_verified = verified
@@ -192,9 +165,7 @@ def test_table_list_filter_import_verified(create_table, client):
         query_str = str(verified).lower()
         response = client.get(f'/api/v0/tables/?import_verified={query_str}')
         response_data = response.json()
-        assert response.status_code == 200
-        assert response_data['count'] == 1
-        assert len(response_data['results']) == 1
+        check_table_filter_response(response, status_code=200, count=1)
         check_table_response(response_data['results'][0], table, table.name)
 
 
@@ -209,17 +180,12 @@ def test_table_list_filter_imported(create_table, client):
         table.save()
 
     response = client.get('/api/v0/tables/?not_imported=false')
-    response_data = response.json()
-    assert response.status_code == 200
-    assert response_data['count'] == 2
-    assert len(response_data['results']) == 2
+    check_table_filter_response(response, status_code=200, count=2)
 
     table = tables[None]
     response = client.get('/api/v0/tables/?not_imported=true')
     response_data = response.json()
-    assert response.status_code == 200
-    assert response_data['count'] == 1
-    assert len(response_data['results']) == 1
+    check_table_filter_response(response, status_code=200, count=1)
     check_table_response(response_data['results'][0], table, table.name)
 
 
