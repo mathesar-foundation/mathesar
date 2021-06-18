@@ -1,6 +1,6 @@
 import re
 import pytest
-from sqlalchemy import String, Integer, ForeignKey, Column, select
+from sqlalchemy import String, Integer, ForeignKey, Column, select, Table, MetaData
 from db import columns, tables, constants
 
 from .test_tables import ROSTER, EXTRACTED_COLS, TEACHERS, ROSTER_NO_TEACHERS
@@ -186,6 +186,26 @@ def test_rename_column_sequence(engine_with_schema):
         result = conn.execute(slct)
     new_value = result.fetchall()[-1][new_col_name]
     assert new_value == 2
+
+
+def test_rename_column_index(engine_with_schema):
+    old_col_name = constants.ID
+    new_col_name = "new_" + constants.ID
+    engine, schema = engine_with_schema
+    table_name = "table_with_index"
+    metadata = MetaData(bind=engine, schema=schema)
+    table = Table(table_name, metadata, Column(old_col_name, Integer, index=True))
+    table.create()
+
+    columns.rename_column(schema, table_name, old_col_name, new_col_name, engine)
+    table = tables.reflect_table(table_name, schema, engine)
+    assert new_col_name in table.columns
+    assert old_col_name not in table.columns
+    with engine.begin() as conn:
+        index = engine.dialect.get_indexes(conn, table_name, schema)[0]
+        index_columns = index["column_names"]
+    assert old_col_name not in index_columns
+    assert new_col_name in index_columns
 
 
 def get_mathesar_column_init_args():
