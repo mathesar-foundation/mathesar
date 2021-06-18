@@ -134,12 +134,8 @@ def test_rename_column(engine_with_schema):
     column_list = [Column(old_col_name, String)]
     engine, schema = engine_with_schema
     table_name = "table_with_columns"
-    table = tables.create_mathesar_table(
-        table_name, schema, column_list, engine
-    )
-    columns.rename_column(
-        schema, table_name, old_col_name, new_col_name, engine
-    )
+    table = tables.create_mathesar_table(table_name, schema, column_list, engine)
+    columns.rename_column(schema, table_name, old_col_name, new_col_name, engine)
     table = tables.reflect_table(table_name, schema, engine)
     assert new_col_name in table.columns
     assert old_col_name not in table.columns
@@ -169,20 +165,16 @@ def test_rename_column_foreign_keys(engine_with_roster):
 
 
 def test_rename_column_sequence(engine_with_schema):
-    old_col_name = "mathesar_id"
-    new_col_name = "new_mathesar_id"
+    old_col_name = constants.ID
+    new_col_name = "new_" + constants.ID
     engine, schema = engine_with_schema
     table_name = "table_with_columns"
-    table = tables.create_mathesar_table(
-        table_name, schema, [], engine
-    )
+    table = tables.create_mathesar_table(table_name, schema, [], engine)
     with engine.begin() as conn:
         ins = table.insert()
         conn.execute(ins)
 
-    columns.rename_column(
-        schema, table_name, old_col_name, new_col_name, engine
-    )
+    columns.rename_column(schema, table_name, old_col_name, new_col_name, engine)
     table = tables.reflect_table(table_name, schema, engine)
     assert new_col_name in table.columns
     assert old_col_name not in table.columns
@@ -192,7 +184,7 @@ def test_rename_column_sequence(engine_with_schema):
         conn.execute(ins)
         slct = select(table)
         result = conn.execute(slct)
-    new_value = list(result)[-1][new_col_name]
+    new_value = result.fetchall()[-1][new_col_name]
     assert new_value == 2
 
 
