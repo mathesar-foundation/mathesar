@@ -1,7 +1,7 @@
 import warnings
 from sqlalchemy import (
     Column, String, Table, MetaData, func, select, ForeignKey, literal, exists,
-    join, inspect
+    join, inspect, and_
 )
 
 from db import columns, constants, schemas
@@ -351,6 +351,23 @@ def reflect_table_from_oid(oid, engine):
     return reflect_table(table_name, schema, engine)
 
 
+def get_table_oids_from_schema(schema_oid, engine):
+    metadata = MetaData()
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_class = Table("pg_class", metadata, autoload_with=engine)
+    sel = (
+        select(pg_class.c.oid)
+        .where(
+            and_(pg_class.c.relkind == 'r', pg_class.c.relnamespace == schema_oid)
+        )
+    )
+    with engine.begin() as conn:
+        table_oids = conn.execute(sel).fetchall()
+    return table_oids
+
+
 def get_oid_from_table(name, schema, engine):
     inspector = inspect(engine)
     return inspector.get_table_oid(name, schema=schema)
@@ -360,6 +377,10 @@ def reflect_table(name, schema, engine, metadata=None):
     if metadata is None:
         metadata = MetaData(bind=engine)
     return Table(name, metadata, schema=schema, autoload_with=engine)
+
+
+def create_empty_table(name):
+    return Table(name, MetaData())
 
 
 def get_count(table, engine):
