@@ -1,5 +1,8 @@
+from rest_framework.exceptions import ValidationError
+
 from db.schemas import (
-    create_schema, get_schema_oid_from_name, get_mathesar_schemas_with_oids
+    create_schema, get_schema_oid_from_name, get_mathesar_schemas,
+    get_mathesar_schemas_with_oids
 )
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Schema
@@ -7,6 +10,11 @@ from mathesar.models import Schema
 
 def create_schema_and_object(name, database):
     engine = create_mathesar_engine(database)
+
+    all_schemas = get_mathesar_schemas(engine)
+    if name in all_schemas:
+        raise ValidationError({"name": "Schema name is not unique"})
+
     create_schema(name, engine)
     schema_oid = get_schema_oid_from_name(name, engine)
     schema = Schema.objects.create(oid=schema_oid, database=database)

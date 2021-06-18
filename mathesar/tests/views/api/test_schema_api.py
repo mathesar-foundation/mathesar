@@ -216,7 +216,7 @@ def test_schema_get_with_reflect_change(client, test_db_name):
 
 def test_schema_create_duplicate(client, test_db_name):
     data = {
-        'name': 'Test Schema',
+        'name': 'Test Duplication Schema',
         'database': test_db_name
     }
     response = client.post('/api/v0/schemas/', data=data)
