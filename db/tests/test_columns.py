@@ -147,7 +147,7 @@ def test_rename_column(engine_with_schema):
 
 def test_rename_column_foreign_keys(engine_with_roster):
     engine, schema = engine_with_roster
-    _, remainder, fk_name = tables.extract_columns_from_table(
+    extracted, remainder, fk_name = tables.extract_columns_from_table(
         ROSTER,
         EXTRACTED_COLS,
         TEACHERS,
@@ -158,12 +158,14 @@ def test_rename_column_foreign_keys(engine_with_roster):
     new_fk_name = "new_" + fk_name
     columns.rename_column(schema, remainder.name, fk_name, new_fk_name, engine)
     remainder = tables.reflect_table(remainder.name, schema, engine)
+    extracted = tables.reflect_table(extracted.name, schema, engine)
+
     assert new_fk_name in remainder.columns
     assert fk_name not in remainder.columns
 
     fk = list(remainder.foreign_keys)[0]
     assert fk.parent.name == new_fk_name
-    assert fk.column.name == constants.ID
+    assert fk.column.table.name == extracted.name
 
 
 def test_rename_column_sequence(engine_with_schema):
