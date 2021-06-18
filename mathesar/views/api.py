@@ -12,22 +12,29 @@ from mathesar.models import Table, Schema, DataFile
 from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
 from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
+from mathesar.utils.tables import reflect_tables_from_schema
 from mathesar.utils.api import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
 
 logger = logging.getLogger(__name__)
 
-SCHEMA_REFLECTION_KEY = 'schema_reflected_recently'
-SCHEMA_REFLECTION_INTERVAL = 60 * 5  # we reflect DB changes every 5 minutes
+DB_REFLECTION_KEY = 'database_reflected_recently'
+DB_REFLECTION_INTERVAL = 60 * 5  # we reflect DB changes every 5 minutes
+
+
+def reflect_db_objects():
+    if not cache.get(DB_REFLECTION_KEY):
+        for database_key in get_non_default_database_keys():
+            reflect_schemas_from_database(database_key)
+        for schema in Schema.objects.all():
+            reflect_tables_from_schema(schema)
+        cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)
 
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     def get_queryset(self):
-        if not cache.get(SCHEMA_REFLECTION_KEY):
-            for database_key in get_non_default_database_keys():
-                reflect_schemas_from_database(database_key)
-            cache.set(SCHEMA_REFLECTION_KEY, True, SCHEMA_REFLECTION_INTERVAL)
-        return Schema.objects.all().order_by('-created_at').filter(deleted=False)
+        reflect_db_objects()
+        return Schema.objects.all().order_by('-created_at')
 
     serializer_class = SchemaSerializer
     pagination_class = DefaultLimitOffsetPagination
@@ -42,7 +49,10 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
 
 class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
                    CreateModelMixin):
-    queryset = Table.objects.all().order_by('-created_at')
+    def get_queryset(self):
+        reflect_db_objects()
+        return Table.objects.all().order_by('-created_at')
+
     serializer_class = TableSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)

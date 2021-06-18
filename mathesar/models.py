@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
 from django.utils.functional import cached_property
+from sqlalchemy import Table
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.utils import models as model_utils
@@ -20,7 +21,6 @@ class BaseModel(models.Model):
 
 class DatabaseObject(BaseModel):
     oid = models.IntegerField()
-    deleted = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -40,19 +40,16 @@ class Schema(DatabaseObject):
     @cached_property
     def name(self):
         cache_key = f"{self.database}_schema_name_{self.oid}"
-        if not self.deleted:
-            try:
-                schema_name = cache.get(cache_key)
-                if schema_name is None:
-                    schema_name = schemas.get_schema_name_from_oid(
-                        self.oid, self._sa_engine
-                    )
-                    cache.set(cache_key, schema_name, NAME_CACHE_INTERVAL)
-                return schema_name
-            except TypeError:
-                return 'MISSING'
-        else:
-            return 'DELETED'
+        try:
+            schema_name = cache.get(cache_key)
+            if schema_name is None:
+                schema_name = schemas.get_schema_name_from_oid(
+                    self.oid, self._sa_engine
+                )
+                cache.set(cache_key, schema_name, NAME_CACHE_INTERVAL)
+            return schema_name
+        except TypeError:
+            return 'MISSING'
 
 
 class Table(DatabaseObject):
@@ -60,9 +57,15 @@ class Table(DatabaseObject):
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
 
-    @property
+    @cached_property
     def _sa_table(self):
-        return tables.reflect_table_from_oid(self.oid, self.schema._sa_engine)
+        try:
+            table = tables.reflect_table_from_oid(
+                self.oid, self.schema._sa_engine,
+            )
+        except TypeError:
+            table = tables.create_empty_table("MISSING")
+        return table
 
     @cached_property
     def name(self):
