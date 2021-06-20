@@ -30,6 +30,13 @@
   }
 
   $: setStores(database, identifier);
+
+  function pageChanged(e: { detail: { originalEvent: Event } }) {
+    const { originalEvent } = e.detail;
+    originalEvent.preventDefault();
+    void fetchTableRecords(database, identifier);
+    URLQueryHandler.setTableOptions(database, identifier, $pagination);
+  }
 </script>
 
 <div class="actions-pane">
@@ -84,11 +91,12 @@
 
 <div class="status-pane">
   <TablePagination
+    id={identifier} {database}
     total={$records.totalCount}
     pageSize={$pagination.pageSize}
     bind:page={$pagination.page}
     bind:offset={offset}
-    on:pageChanged={() => fetchTableRecords(database, identifier)}/>
+    on:pageChanged={pageChanged}/>
 </div>
 
 <style global lang="scss">

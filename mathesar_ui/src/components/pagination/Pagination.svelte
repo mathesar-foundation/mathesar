@@ -15,7 +15,7 @@
   export let page = 1;
   export let pageSize = 10;
   export let total = 0;
-  export let getLink: (page: unknown) => string = null;
+  export let getLink: (page: number, pageSize: number) => string = null;
 
   export let pageCount = 0;
 
@@ -45,7 +45,7 @@
   {#if pageInfo.start > 1}
     <li tabindex="0" class:active={page === pageInfo.start}>
       {#if getLink}
-        <a class="page" href={getLink(1)} on:click={(e) => setPage(e, 1)}>
+        <a class="page" href={getLink(1, pageSize)} on:click={(e) => setPage(e, 1)} data-tinro-ignore>
           1
         </a>
       {:else}
@@ -67,7 +67,7 @@
   {#each pageInfo.pages as _page (_page)}
     <li tabindex="0" class:active={page === _page}>
       {#if getLink}
-        <a class="page" href={getLink(_page)} on:click={(e) => setPage(e, _page)}>
+        <a class="page" href={getLink(_page, pageSize)} on:click={(e) => setPage(e, _page)} data-tinro-ignore>
           {_page}
         </a>
       {:else}
@@ -89,7 +89,7 @@
     {/if}
     <li tabindex="0" class:active={page === pageInfo.end}>
       {#if getLink}
-        <a class="page" href={getLink(pageCount)} on:click={(e) => setPage(e, pageCount)}>
+        <a class="page" href={getLink(pageCount, pageSize)} on:click={(e) => setPage(e, pageCount)} data-tinro-ignore>
           {pageCount}
         </a>
       {:else}

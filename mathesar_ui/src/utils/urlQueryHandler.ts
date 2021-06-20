@@ -4,10 +4,12 @@ import { router } from 'tinro';
 // t -> tables, a -> active
 // Null value represented for numbers as -1, strings as empty string
 
-interface TableConfig {
-  id: number,
+interface TableOptions {
   pageSize?: number,
   page?: number
+}
+interface TableConfig extends TableOptions {
+  id: number,
 }
 
 function isInDBPath(db: string): boolean {
@@ -64,8 +66,13 @@ function getActiveTable(db: string): number {
   return null;
 }
 
-function constructTableQuery(id: number) : string {
-  const t = encodeURIComponent(`${JSON.stringify([[id]])}`);
+function constructTableQuery(id: number, options?: TableOptions) : string {
+  const table = [id];
+  if (options) {
+    table.push(options.pageSize || -1);
+    table.push(options.page || -1);
+  }
+  const t = encodeURIComponent(`${JSON.stringify([table])}`);
   const a = encodeURIComponent(id);
   return `?t=${t}&a=${a}`;
 }
@@ -73,7 +80,7 @@ function constructTableQuery(id: number) : string {
 function addTable(
   db: string,
   id: number,
-  options?: { pageSize?: number, page?: number },
+  options?: TableOptions,
 ): void {
   if (isInDBPath(db)) {
     const tables = getRawTables(db);
@@ -110,6 +117,16 @@ function removeTable(db: string, id: number, activeTabId?: number): void {
   }
 }
 
+function setTableOptions(db: string, id: number, options: TableOptions): void {
+  const allTables = getRawTables(db);
+  const table = allTables.find((entry) => entry[0] === id);
+  if (table) {
+    table[1] = options.pageSize || -1;
+    table[2] = options.page || -1;
+    router.location.query.set('t', encodeURIComponent(JSON.stringify(allTables)));
+  }
+}
+
 function removeActiveTable(db: string): void {
   if (isInDBPath(db)) {
     router.location.query.delete('a');
@@ -119,6 +136,7 @@ function removeActiveTable(db: string): void {
 export default {
   getTableConfig,
   getAllTableConfigs,
+  setTableOptions,
   getActiveTable,
   constructTableQuery,
   addTable,
