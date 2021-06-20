@@ -1,5 +1,8 @@
 <script lang="ts">
-  import { getTable } from '@mathesar/stores/tableData';
+  import {
+    getTable,
+    fetchTableRecords,
+  } from '@mathesar/stores/tableData';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
   import type {
     TableColumnStore,
@@ -7,14 +10,16 @@
     TablePaginationStore,
   } from '@mathesar/stores/tableData';
   import { States } from '@mathesar/utils/api';
-  import { Pagination } from '@mathesar-components';
+  import TablePagination from './TablePagination.svelte';
 
   export let database: string;
   export let id: unknown;
+  $: identifier = id as number;
 
   let columns: TableColumnStore;
   let records: TableRecordStore;
   let pagination: TablePaginationStore;
+  let offset: number;
 
   function setStores(_database: string, _id: number) {
     const options = URLQueryHandler.getTableConfig(_database, _id);
@@ -24,7 +29,7 @@
     pagination = table.pagination;
   }
 
-  $: setStores(database, id as number);
+  $: setStores(database, identifier);
 </script>
 
 <div class="actions-pane">
@@ -64,7 +69,9 @@
       <tbody>
         {#each $records.data as row, index}
           <tr>
-            <td>{index + 1}</td>
+            <td>
+              {offset + index}
+            </td>
             {#each $columns.data as column (column.name)}
               <td>{row[column.name]}</td>
             {/each}
@@ -76,10 +83,12 @@
 </div>
 
 <div class="status-pane">
-  <Pagination
+  <TablePagination
     total={$records.totalCount}
     pageSize={$pagination.pageSize}
-    bind:page={$pagination.page}/>
+    bind:page={$pagination.page}
+    bind:offset={offset}
+    on:pageChanged={() => fetchTableRecords(database, identifier)}/>
 </div>
 
 <style global lang="scss">

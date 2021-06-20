@@ -37,7 +37,6 @@
           completionCallback(completionStatus, fileId);
         },
       ).then((res) => {
-        // eslint-disable-next-line no-void
         void reloadSchemas();
         setFileStore(database, fileId, {
           status: States.Done,

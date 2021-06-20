@@ -42,11 +42,6 @@ interface TableDetailsResponse {
   columns: TableColumn[]
 }
 
-interface TableRecordsQuery {
-  limit?: number,
-  offset?: number
-}
-
 interface TableRecordsResponse {
   count: number,
   results: TableRecords[]
@@ -87,12 +82,13 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
   }
 }
 
-async function fetchTableRecords(
+export async function fetchTableRecords(
   db: string,
   id: number,
-  queryParams: TableRecordsQuery = {},
 ): Promise<void> {
-  const tableRecordStore = databaseMap.get(db)?.get(id)?.records;
+  const table = databaseMap.get(db)?.get(id);
+  const tableRecordStore = table?.records;
+  const paginationStore = table?.pagination;
 
   if (tableRecordStore) {
     const existingData = get(tableRecordStore);
@@ -104,11 +100,11 @@ async function fetchTableRecords(
     });
 
     const params = [];
-    if (typeof queryParams.limit !== 'undefined') {
-      params.push(`limit=${queryParams.limit}`);
-    }
-    if (typeof queryParams.limit !== 'undefined') {
-      params.push(`offset=${queryParams.offset}`);
+    if (paginationStore) {
+      const paginationData = get(paginationStore);
+      params.push(`limit=${paginationData.pageSize}`);
+      const offset = paginationData.pageSize * (paginationData.page - 1);
+      params.push(`offset=${offset}`);
     }
 
     try {
@@ -156,10 +152,8 @@ export function getTable(db: string, id: number, options?: GetTableOptions): Tab
       }),
     };
     database.set(id, table);
-    // eslint-disable-next-line no-void
     void fetchTableDetails(db, id);
   }
-  // eslint-disable-next-line no-void
   void fetchTableRecords(db, id);
   return table;
 }

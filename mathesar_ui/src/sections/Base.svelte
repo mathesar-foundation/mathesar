@@ -22,7 +22,7 @@
   export let database : string;
 
   const tableMap = $schemas.tableMap as TableMap;
-  const tables: Tab[] = URLQueryHandler.getTables(database).map(
+  const tables: Tab[] = URLQueryHandler.getAllTableConfigs(database).map(
     (entry) => {
       const schemaTable = tableMap?.get(entry.id);
       return {

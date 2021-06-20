@@ -17,7 +17,7 @@ ul.pagination {
       cursor: pointer;
     }
 
-    a {
+    .page {
       border: 1px solid #efefef;
       text-decoration: none;
       color: inherit;
@@ -40,8 +40,11 @@ ul.pagination {
       }
     }
 
-    &.active a {
-      color: #39a0f5;
+    &.active {
+      .page {
+        color: #39a0f5;
+        border-color: #489ee4;
+      }
     }
   }
 }

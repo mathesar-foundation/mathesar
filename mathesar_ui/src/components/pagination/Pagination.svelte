@@ -15,12 +15,15 @@
   export let page = 1;
   export let pageSize = 10;
   export let total = 0;
+  export let getLink: (page: unknown) => string = null;
+
+  export let pageCount = 0;
 
   $: pageCount = Math.ceil(total / pageSize);
   $: pageInfo = calculatePages(page, pageCount);
 
   function setPage(e: Event, _page: number) {
-    if (_page > 0 && _page <= pageCount) {
+    if (_page > 0 && _page <= pageCount && page !== _page) {
       page = _page;
       dispatch('pageChanged', {
         page,
@@ -41,9 +44,15 @@
 
   {#if pageInfo.start > 1}
     <li tabindex="0" class:active={page === pageInfo.start}>
-      <span on:click={(e) => setPage(e, 1)}>
-        1
-      </span>
+      {#if getLink}
+        <a class="page" href={getLink(1)} on:click={(e) => setPage(e, 1)}>
+          1
+        </a>
+      {:else}
+        <span class="page" on:click={(e) => setPage(e, 1)}>
+          1
+        </span>
+      {/if}
     </li>
     {#if pageInfo.start > 2}
       <li tabindex="0">
@@ -57,9 +66,15 @@
 
   {#each pageInfo.pages as _page (_page)}
     <li tabindex="0" class:active={page === _page}>
-      <span on:click={(e) => setPage(e, _page)}>
-        {_page}
-      </span>
+      {#if getLink}
+        <a class="page" href={getLink(_page)} on:click={(e) => setPage(e, _page)}>
+          {_page}
+        </a>
+      {:else}
+        <span class="page" on:click={(e) => setPage(e, _page)}>
+          {_page}
+        </span>
+      {/if}
     </li>
   {/each}
 
@@ -73,9 +88,15 @@
       </li>
     {/if}
     <li tabindex="0" class:active={page === pageInfo.end}>
-      <span on:click={(e) => setPage(e, pageCount)}>
-        {pageCount}
-      </span>
+      {#if getLink}
+        <a class="page" href={getLink(pageCount)} on:click={(e) => setPage(e, pageCount)}>
+          {pageCount}
+        </a>
+      {:else}
+        <span class="page" on:click={(e) => setPage(e, pageCount)}>
+          {pageCount}
+        </span>
+      {/if}
     </li>
   {/if}
 
@@ -87,10 +108,6 @@
     </li>
   {/if}
 </ul>
-
-{#if pageCount > 0}
-  {page} of {pageCount}
-{/if}
 
 <style global lang="scss">
   @import "Pagination.scss";

@@ -24,15 +24,37 @@ function getRawTables(db: string): (string|number|string[])[][] {
 }
 
 function parseTableConfig(config: (string|number|string[])[]): TableConfig {
-  return {
+  const tableConfig: TableConfig = {
     id: parseInt(config[0] as string, 10),
-    pageSize: config[1] ? parseInt(config[1] as string, 10) : null,
-    page: config[2] ? parseInt(config[2] as string, 10) : null,
   };
+
+  if (config[1]) {
+    const pageSize = parseInt(config[1] as string, 10);
+    if (pageSize > -1) {
+      tableConfig.pageSize = pageSize;
+    }
+  }
+
+  if (config[2]) {
+    const page = parseInt(config[2] as string, 10);
+    if (page > -1) {
+      tableConfig.page = page;
+    }
+  }
+
+  return tableConfig;
 }
 
-function getTables(db: string): TableConfig[] {
+function getAllTableConfigs(db: string): TableConfig[] {
   return getRawTables(db).map((table) => parseTableConfig(table));
+}
+
+function getTableConfig(db: string, id: number): TableConfig {
+  const table = getRawTables(db).find((entry) => entry[0] === id);
+  if (table) {
+    return parseTableConfig(table);
+  }
+  return null;
 }
 
 function getActiveTable(db: string): number {
@@ -69,18 +91,6 @@ function addTable(
   }
 }
 
-function getTableConfig(db: string, id: number): { pageSize?: number, page?: number } {
-  if (isInDBPath(db)) {
-    const tables = getRawTables(db);
-    const existingTable = tables.find((table) => table[0] === id);
-    return existingTable ? {
-      pageSize: existingTable[1] as number,
-      page: existingTable[2] as number,
-    } : null;
-  }
-  return null;
-}
-
 function removeTable(db: string, id: number, activeTabId?: number): void {
   if (isInDBPath(db)) {
     const tables = getRawTables(db);
@@ -107,11 +117,11 @@ function removeActiveTable(db: string): void {
 }
 
 export default {
-  getTables,
+  getTableConfig,
+  getAllTableConfigs,
   getActiveTable,
   constructTableQuery,
   addTable,
-  getTableConfig,
   removeTable,
   removeActiveTable,
 };

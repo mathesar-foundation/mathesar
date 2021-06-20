@@ -39,6 +39,7 @@ module.exports = {
         'import/prefer-default-export': 'off',
         'no-multiple-empty-lines': 'off',
         '@typescript-eslint/no-unsafe-member-access': 'off',
+        'no-void': 'off',
       },
     },
     {
@@ -64,6 +65,7 @@ module.exports = {
           },
         ],
         'import/prefer-default-export': 'off',
+        'no-void': 'off',
       },
     },
   ],
