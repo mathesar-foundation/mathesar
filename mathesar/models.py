@@ -47,6 +47,11 @@ class Schema(DatabaseObject):
                 )
                 cache.set(cache_key, schema_name, NAME_CACHE_INTERVAL)
             return schema_name
+        # We catch this error, since it lets us decouple the cadence of
+        # overall DB reflection from the cadence of cache expiration for
+        # schema names.  Also, it makes it obvious when the DB layer has
+        # been altered, as opposed to other reasons for a 404 when
+        # requesting a schema.
         except TypeError:
             return 'MISSING'
 
@@ -62,6 +67,11 @@ class Table(DatabaseObject):
             table = tables.reflect_table_from_oid(
                 self.oid, self.schema._sa_engine,
             )
+        # We catch this error, since it lets us decouple the cadence of
+        # overall DB reflection from the cadence of cache expiration for
+        # table names.  Also, it makes it obvious when the DB layer has
+        # been altered, as opposed to other reasons for a 404 when
+        # requesting a table.
         except TypeError:
             table = tables.create_empty_table("MISSING")
         return table
