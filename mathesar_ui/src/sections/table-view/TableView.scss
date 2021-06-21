@@ -22,15 +22,32 @@ section.table-section .tab-container {
           text-align: left;
           border-bottom: 1px solid #efefef;
           border-right: 1px solid #efefef;
-          max-width: 200px;
+          position: relative;
 
-          &:last-child, &:first-child {
+          &:last-child {
             border-right: none;
           }
 
           &:first-child {
             font-size: 12px;
             color: #959595;
+          }
+
+          &.row-number {
+            min-width: 60px;
+          }
+
+          &:not(.row-number) {
+            max-width: 200px;
+            min-width: 160px;
+          }
+
+          .skeleton {
+            position: absolute;
+            top: 6px;
+            left: 15px;
+            right: 15px;
+            bottom: 6px;
           }
         }
 
@@ -40,10 +57,10 @@ section.table-section .tab-container {
             background: #f9f9f9;
             position: sticky;
             top: 0;
+            z-index: 10;
 
             >.drag-grip {
               position: absolute;
-              
             }
           }
         }
@@ -59,6 +76,14 @@ section.table-section .tab-container {
     }
     .status-pane {
       padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      border-top: 1px solid #efefef;
+
+      .pagination {
+        margin-left: 10px;
+      }
     }
   }
 }

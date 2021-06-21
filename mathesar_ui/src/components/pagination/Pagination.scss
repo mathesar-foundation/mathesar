@@ -1,0 +1,50 @@
+ul.pagination {
+  margin: 0;
+  list-style: none;
+  list-style-type: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+
+  li {
+    margin: 0 2px;
+
+    a, span {
+      padding: 5px 3px;
+      min-width: 26px;
+      display: inline-block;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .page {
+      border: 1px solid #efefef;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    span {
+      .ellipsis {
+        color: #afafaf;
+      }
+
+      &:hover {
+        .ellipsis {
+          display: none;
+        }
+      }
+      &:not(:hover) {
+        .arrow {
+          display: none;
+        }
+      }
+    }
+
+    &.active {
+      .page {
+        color: #39a0f5;
+        border-color: #489ee4;
+      }
+    }
+  }
+}

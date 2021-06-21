@@ -1,0 +1,37 @@
+.fa-icon {
+  display: inline-block;
+  vertical-align: middle;
+  fill: currentColor;
+}
+.fa-flip-horizontal {
+  transform: scale(-1, 1);
+}
+.fa-flip-vertical {
+  transform: scale(1, -1);
+}
+.fa-flip-both {
+  transform: scale(-1);
+}
+.fa-spin {
+  animation: spin 1s 0s infinite linear;
+}
+.fa-pulse {
+  animation: spin 1s infinite steps(8);
+}
+.fa-rotate-90 {
+  transform: rotate(90deg);
+}
+.fa-rotate-180 {
+  transform: rotate(180deg);
+}
+.fa-rotate-270 {
+  transform: rotate(270deg);
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
