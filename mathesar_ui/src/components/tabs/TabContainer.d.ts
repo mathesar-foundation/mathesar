@@ -1,5 +1,5 @@
 export interface Tab {
-  [key: string]: string | boolean | unknown
+  [key: string]: unknown
   href?: string
   disabled?: boolean
 }
