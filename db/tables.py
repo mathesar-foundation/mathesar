@@ -383,8 +383,8 @@ def infer_table_column_types(schema, table_name, engine):
 
     temp_name = "temp_table"
     temp_full_name = schema + "." + temp_name
-    columns = [c.copy() for c in table.columns]
-    temp_table = Table(temp_name, metadata, *columns)
+    temp_columns = [columns.MathesarColumn.from_column(c) for c in table.columns]
+    temp_table = Table(temp_name, metadata, *temp_columns)
 
     select_table = select(table)
     with engine.begin() as conn:
