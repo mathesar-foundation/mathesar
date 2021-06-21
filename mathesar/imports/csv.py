@@ -5,8 +5,8 @@ import clevercsv as csv
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.utils import get_database_key
 from mathesar.models import Table, Schema
+from db import tables, records, schemas
 from mathesar.errors import InvalidTableError
-from db import tables, records
 
 ALLOWED_DELIMITERS = ",\t:| "
 SAMPLE_SIZE = 20000
@@ -95,8 +95,10 @@ def legacy_create_table_from_csv(name, schema, database_key, csv_file):
     csv_reader = get_sv_reader(csv_file)
     db_table = legacy_create_db_table_from_csv(name, schema, csv_reader, engine)
     database = get_database_key(engine)
-    schema, _ = Schema.objects.get_or_create(name=db_table.schema, database=database)
-    table, _ = Table.objects.get_or_create(name=db_table.name, schema=schema)
+    db_schema_oid = schemas.get_schema_oid_from_name(db_table.schema, engine)
+    schema, _ = Schema.objects.get_or_create(oid=db_schema_oid, database=database)
+    db_table_oid = tables.get_oid_from_table(db_table.name, db_table.schema, engine)
+    table, _ = Table.objects.get_or_create(oid=db_table_oid, schema=schema)
     table.create_record_or_records([row for row in csv_reader])
     return table
 
@@ -123,8 +125,10 @@ def create_db_table_from_data_file(data_file, name, schema):
 
 
 def create_table_from_csv(data_file, name, schema):
+    engine = create_mathesar_engine(schema.database)
     db_table = create_db_table_from_data_file(data_file, name, schema)
-    table, _ = Table.objects.get_or_create(name=db_table.name, schema=schema)
+    db_table_oid = tables.get_oid_from_table(db_table.name, db_table.schema, engine)
+    table, _ = Table.objects.get_or_create(oid=db_table_oid, schema=schema)
     data_file.table_imported_to = table
     data_file.save()
     return table

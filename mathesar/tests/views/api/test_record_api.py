@@ -1,6 +1,3 @@
-from mathesar.models import Table
-
-
 def test_record_list(create_table, client):
     """
     Desired format:
@@ -32,8 +29,7 @@ def test_record_list(create_table, client):
     }
     """
     table_name = 'NASA Record List'
-    create_table(table_name)
-    table = Table.objects.get(name=table_name)
+    table = create_table(table_name)
 
     response = client.get(f'/api/v0/tables/{table.id}/records/')
     response_data = response.json()
@@ -48,8 +44,7 @@ def test_record_list(create_table, client):
 
 def test_record_list_pagination_limit(create_table, client):
     table_name = 'NASA Record List Pagination Limit'
-    create_table(table_name)
-    table = Table.objects.get(name=table_name)
+    table = create_table(table_name)
 
     response = client.get(f'/api/v0/tables/{table.id}/records/?limit=5')
     response_data = response.json()
@@ -64,8 +59,7 @@ def test_record_list_pagination_limit(create_table, client):
 
 def test_record_list_pagination_offset(create_table, client):
     table_name = 'NASA Record List Pagination Offset'
-    create_table(table_name)
-    table = Table.objects.get(name=table_name)
+    table = create_table(table_name)
 
     response_1 = client.get(f'/api/v0/tables/{table.id}/records/?limit=5&offset=5')
     response_1_data = response_1.json()
@@ -89,8 +83,7 @@ def test_record_list_pagination_offset(create_table, client):
 
 def test_record_detail(create_table, client):
     table_name = 'NASA Record Detail'
-    create_table(table_name)
-    table = Table.objects.get(name=table_name)
+    table = create_table(table_name)
     record_id = 1
     record = table.get_record(record_id)
 
@@ -106,8 +99,7 @@ def test_record_detail(create_table, client):
 
 def test_record_create(create_table, client):
     table_name = 'NASA Record Create'
-    create_table(table_name)
-    table = Table.objects.get(name=table_name)
+    table = create_table(table_name)
     records = table.get_records()
     original_num_records = len(records)
 
@@ -133,8 +125,7 @@ def test_record_create(create_table, client):
 
 def test_record_partial_update(create_table, client):
     table_name = 'NASA Record Patch'
-    create_table(table_name)
-    table = Table.objects.get(name=table_name)
+    table = create_table(table_name)
     records = table.get_records()
     record_id = records[0]['mathesar_id']
 
@@ -163,8 +154,7 @@ def test_record_partial_update(create_table, client):
 
 def test_record_delete(create_table, client):
     table_name = 'NASA Record Delete'
-    create_table(table_name)
-    table = Table.objects.get(name=table_name)
+    table = create_table(table_name)
     records = table.get_records()
     original_num_records = len(records)
     record_id = records[0]['mathesar_id']
@@ -176,8 +166,7 @@ def test_record_delete(create_table, client):
 
 def test_record_update(create_table, client):
     table_name = 'NASA Record Put'
-    create_table(table_name)
-    table = Table.objects.get(name=table_name)
+    table = create_table(table_name)
     records = table.get_records()
     record_id = records[0]['mathesar_id']
 
@@ -192,8 +181,7 @@ def test_record_update(create_table, client):
 
 def test_record_404(create_table, client):
     table_name = 'NASA Record 404'
-    create_table(table_name)
-    table = Table.objects.get(name=table_name)
+    table = create_table(table_name)
     records = table.get_records()
     record_id = records[0]['mathesar_id']
 

@@ -18,6 +18,7 @@ class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
 
 class SchemaSerializer(serializers.HyperlinkedModelSerializer):
     tables = NestedTableSerializer(many=True, read_only=True)
+    name = serializers.CharField()
 
     class Meta:
         model = Schema
@@ -32,6 +33,7 @@ class ColumnSerializer(serializers.Serializer):
 class TableSerializer(serializers.ModelSerializer):
     columns = ColumnSerializer(many=True, read_only=True, source='sa_columns')
     records = serializers.SerializerMethodField()
+    name = serializers.CharField()
 
     class Meta:
         model = Table

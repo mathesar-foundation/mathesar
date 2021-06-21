@@ -1,34 +1,62 @@
+import logging
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
+from django.core.cache import cache
 from django_filters import rest_framework as filters
+
 
 from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile
 from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
 from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer
-from mathesar.utils.schemas import create_schema_and_object
+from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
+from mathesar.utils.tables import reflect_tables_from_schema
 from mathesar.utils.api import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
 
+logger = logging.getLogger(__name__)
+
+DB_REFLECTION_KEY = 'database_reflected_recently'
+DB_REFLECTION_INTERVAL = 60 * 5  # we reflect DB changes every 5 minutes
+
+
+def reflect_db_objects():
+    if not cache.get(DB_REFLECTION_KEY):
+        for database_key in get_non_default_database_keys():
+            reflect_schemas_from_database(database_key)
+        for schema in Schema.objects.all():
+            reflect_tables_from_schema(schema)
+        cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)
+
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    queryset = Schema.objects.all().order_by('-created_at')
+    def get_queryset(self):
+        reflect_db_objects()
+        return Schema.objects.all().order_by('-created_at')
+
     serializer_class = SchemaSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = SchemaFilter
 
     def create(self, request):
-        schema = create_schema_and_object(request.data['name'], request.data['database'])
-        serializer = SchemaSerializer(schema)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        serializer = SchemaSerializer(data=request.data)
+        if serializer.is_valid():
+            schema = create_schema_and_object(request.data['name'], request.data['database'])
+            serializer = SchemaSerializer(schema)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            raise ValidationError(serializer.errors)
 
 
 class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
                    CreateModelMixin):
-    queryset = Table.objects.all().order_by('-created_at')
+    def get_queryset(self):
+        reflect_db_objects()
+        return Table.objects.all().order_by('-created_at')
+
     serializer_class = TableSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
