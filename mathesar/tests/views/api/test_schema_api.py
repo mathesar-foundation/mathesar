@@ -26,40 +26,20 @@ def check_schema_response(response_schema, schema, schema_name, test_db_name,
         assert schema_name in get_mathesar_schemas(create_mathesar_engine(test_db_name))
 
 
-def test_schema_list(create_table, client, test_db_name):
-    """
-    Desired format:
-    {
-        "count": 1,
-        "results": [
-            {
-                "id": 1,
-                "name": "Patents",
-                "database": "mathesar_tables",
-                "tables": [
-                    {
-                        "id": 1,
-                        "name": "Fairfax County",
-                        "url": "http://testserver/api/v0/tables/1/",
-                    }
-
-                ]
-            }
-        ]
-    }
-    """
-    create_table('NASA Schema List')
-
-    schema = Schema.objects.get()
+def test_schema_list(client, patent_schema, empty_nasa_table):
+    cache.clear()
     response = client.get('/api/v0/schemas/')
     response_data = response.json()
     response_schema = [
         s for s in response_data['results'] if s['name'] != 'public'
     ][0]
+
+    print(response_schema)
+
     assert response.status_code == 200
     assert response_data['count'] == 2
     assert len(response_data['results']) == 2
-    check_schema_response(response_schema, schema, 'Patents', test_db_name)
+    check_schema_response(response_schema, patent_schema, patent_schema.name, patent_schema.database)
 
 
 def test_schema_list_filter(client, monkeypatch):
@@ -244,14 +224,14 @@ def test_schema_get_with_reflect_delete(client, test_db_name):
 
 
 def test_schema_viewset_sets_cache(client):
-    cache.delete(api.SCHEMA_REFLECTION_KEY)
-    assert not cache.get(api.SCHEMA_REFLECTION_KEY)
+    cache.delete(api.DB_REFLECTION_KEY)
+    assert not cache.get(api.DB_REFLECTION_KEY)
     client.get('/api/v0/schemas/')
-    assert cache.get(api.SCHEMA_REFLECTION_KEY)
+    assert cache.get(api.DB_REFLECTION_KEY)
 
 
 def test_schema_viewset_checks_cache(client):
-    cache.delete(api.SCHEMA_REFLECTION_KEY)
+    cache.delete(api.DB_REFLECTION_KEY)
     with patch.object(api, 'reflect_schemas_from_database') as mock_reflect:
         client.get('/api/v0/schemas/')
     mock_reflect.assert_called()
