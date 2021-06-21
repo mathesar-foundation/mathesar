@@ -147,7 +147,7 @@ export function getTable(db: string, id: number, options?: GetTableOptions): Tab
         totalCount: 0,
       }),
       pagination: writable({
-        pageSize: options?.pageSize || 20,
+        pageSize: options?.pageSize || 50,
         page: options?.page || 1,
       }),
     };

@@ -23,11 +23,13 @@
   $: pageInfo = calculatePages(page, pageCount);
 
   function setPage(e: Event, _page: number) {
-    if (_page > 0 && _page <= pageCount && page !== _page) {
+    if (_page > 0 && _page <= pageCount) {
+      const prevPage = page;
       page = _page;
       dispatch('pageChanged', {
         page,
         originalEvent: e,
+        prevPage,
       });
     }
   }
@@ -35,28 +37,29 @@
 
 <ul class="pagination">
   {#if pageCount > 1}
-    <li tabindex="0">
-      <span on:click={(e) => setPage(e, page - 1)}>
+    <li>
+      <span tabindex="0" on:click={(e) => setPage(e, page - 1)}>
         <Icon data={faAngleLeft}/>
       </span>
     </li>
   {/if}
 
   {#if pageInfo.start > 1}
-    <li tabindex="0" class:active={page === pageInfo.start}>
+    <li class:active={page === pageInfo.start}>
       {#if getLink}
-        <a class="page" href={getLink(1, pageSize)} on:click={(e) => setPage(e, 1)} data-tinro-ignore>
+        <a tabindex="0" class="page" href={getLink(1, pageSize)}
+            on:click={(e) => setPage(e, 1)} data-tinro-ignore>
           1
         </a>
       {:else}
-        <span class="page" on:click={(e) => setPage(e, 1)}>
+        <span tabindex="0" class="page" on:click={(e) => setPage(e, 1)}>
           1
         </span>
       {/if}
     </li>
     {#if pageInfo.start > 2}
-      <li tabindex="0">
-        <span on:click={(e) => setPage(e, pageInfo.prevPageWindow)}>
+      <li>
+        <span tabindex="0" on:click={(e) => setPage(e, pageInfo.prevPageWindow)}>
           <Icon class="ellipsis" data={faEllipsisH}/>
           <Icon class="arrow" data={faAngleDoubleLeft}/>
         </span>
@@ -65,13 +68,14 @@
   {/if}
 
   {#each pageInfo.pages as _page (_page)}
-    <li tabindex="0" class:active={page === _page}>
+    <li class:active={page === _page}>
       {#if getLink}
-        <a class="page" href={getLink(_page, pageSize)} on:click={(e) => setPage(e, _page)} data-tinro-ignore>
+        <a tabindex="0" class="page" href={getLink(_page, pageSize)}
+            on:click={(e) => setPage(e, _page)} data-tinro-ignore>
           {_page}
         </a>
       {:else}
-        <span class="page" on:click={(e) => setPage(e, _page)}>
+        <span tabindex="0" class="page" on:click={(e) => setPage(e, _page)}>
           {_page}
         </span>
       {/if}
@@ -80,20 +84,21 @@
 
   {#if pageInfo.end < pageCount}
     {#if pageInfo.end < pageCount - 1}
-      <li tabindex="0">
-        <span on:click={(e) => setPage(e, pageInfo.nextPageWindow)}>
+      <li>
+        <span tabindex="0" on:click={(e) => setPage(e, pageInfo.nextPageWindow)}>
           <Icon class="ellipsis" data={faEllipsisH}/>
           <Icon class="arrow" data={faAngleDoubleRight}/>
         </span>
       </li>
     {/if}
-    <li tabindex="0" class:active={page === pageInfo.end}>
+    <li class:active={page === pageInfo.end}>
       {#if getLink}
-        <a class="page" href={getLink(pageCount, pageSize)} on:click={(e) => setPage(e, pageCount)} data-tinro-ignore>
+        <a tabindex="0" class="page" href={getLink(pageCount, pageSize)}
+            on:click={(e) => setPage(e, pageCount)} data-tinro-ignore>
           {pageCount}
         </a>
       {:else}
-        <span class="page" on:click={(e) => setPage(e, pageCount)}>
+        <span tabindex="0" class="page" on:click={(e) => setPage(e, pageCount)}>
           {pageCount}
         </span>
       {/if}
@@ -101,8 +106,8 @@
   {/if}
 
   {#if pageCount > 1}
-    <li tabindex="0">
-      <span on:click={(e) => setPage(e, page + 1)}>
+    <li>
+      <span tabindex="0" on:click={(e) => setPage(e, page + 1)}>
         <Icon data={faAngleRight}/>
       </span>
     </li>

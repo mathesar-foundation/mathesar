@@ -23,7 +23,7 @@
 </script>
 
 {#if pageCount > 0}
-  Showing {offset} - {max} of {total}
+  <div>Showing {offset} - {max} of {total}</div>
 {/if}
 
 <Pagination total={total} pageSize={pageSize} {getLink}

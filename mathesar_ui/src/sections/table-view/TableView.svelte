@@ -10,6 +10,7 @@
     TablePaginationStore,
   } from '@mathesar/stores/tableData';
   import { States } from '@mathesar/utils/api';
+  import { Skeleton } from '@mathesar-components';
   import TablePagination from './TablePagination.svelte';
 
   export let database: string;
@@ -31,11 +32,13 @@
 
   $: setStores(database, identifier);
 
-  function pageChanged(e: { detail: { originalEvent: Event } }) {
-    const { originalEvent } = e.detail;
+  function pageChanged(e: { detail: { originalEvent: Event, page: number, prevPage: number } }) {
+    const { originalEvent, page, prevPage } = e.detail;
     originalEvent.preventDefault();
-    void fetchTableRecords(database, identifier);
-    URLQueryHandler.setTableOptions(database, identifier, $pagination);
+    if (page !== prevPage) {
+      void fetchTableRecords(database, identifier);
+      URLQueryHandler.setTableOptions(database, identifier, $pagination);
+    }
   }
 </script>
 
@@ -62,7 +65,7 @@
     <table>
       <thead>
         <tr>
-          <th></th>
+          <th class="row-number"></th>
           {#each $columns.data as column, index (column.name)}
             <th>
               {#if index > 0}
@@ -76,11 +79,14 @@
       <tbody>
         {#each $records.data as row, index}
           <tr>
-            <td>
+            <td class="row-number">
               {offset + index}
             </td>
             {#each $columns.data as column (column.name)}
-              <td>{row[column.name]}</td>
+              <td>
+                {row[column.name]}
+                <Skeleton loading={$records.state === States.Loading}/>
+              </td>
             {/each}
           </tr>
         {/each}
