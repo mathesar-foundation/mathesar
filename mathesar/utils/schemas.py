@@ -24,6 +24,5 @@ def reflect_schemas_from_database(database):
     ]
     for schema in Schema.objects.all():
         if schema.oid not in db_schema_oids:
-            schema.deleted = True
-            schema.save()
+            schema.delete()
     return schemas

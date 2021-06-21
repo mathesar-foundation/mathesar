@@ -1,11 +1,13 @@
 from django.contrib.auth.models import User
-from django.core.validators import FileExtensionValidator
+from django.core.cache import cache
 from django.db import models
 from django.utils.functional import cached_property
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.utils import models as model_utils
 from db import tables, records, schemas
+
+NAME_CACHE_INTERVAL = 60 * 5
 
 
 class BaseModel(models.Model):
@@ -18,13 +20,12 @@ class BaseModel(models.Model):
 
 class DatabaseObject(BaseModel):
     oid = models.IntegerField()
-    deleted = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
 
     def __str__(self):
-        return f"{self.__class__.__name__}: {self.name}"
+        return f"{self.__class__.__name__}: {self.oid}"
 
 
 class Schema(DatabaseObject):
@@ -37,7 +38,22 @@ class Schema(DatabaseObject):
 
     @cached_property
     def name(self):
-        return schemas.get_schema_name_from_oid(self.oid, self._sa_engine)
+        cache_key = f"{self.database}_schema_name_{self.oid}"
+        try:
+            schema_name = cache.get(cache_key)
+            if schema_name is None:
+                schema_name = schemas.get_schema_name_from_oid(
+                    self.oid, self._sa_engine
+                )
+                cache.set(cache_key, schema_name, NAME_CACHE_INTERVAL)
+            return schema_name
+        # We catch this error, since it lets us decouple the cadence of
+        # overall DB reflection from the cadence of cache expiration for
+        # schema names.  Also, it makes it obvious when the DB layer has
+        # been altered, as opposed to other reasons for a 404 when
+        # requesting a schema.
+        except TypeError:
+            return 'MISSING'
 
 
 class Table(DatabaseObject):
@@ -45,9 +61,20 @@ class Table(DatabaseObject):
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
 
-    @property
+    @cached_property
     def _sa_table(self):
-        return tables.reflect_table_from_oid(self.oid, self.schema._sa_engine)
+        try:
+            table = tables.reflect_table_from_oid(
+                self.oid, self.schema._sa_engine,
+            )
+        # We catch this error, since it lets us decouple the cadence of
+        # overall DB reflection from the cadence of cache expiration for
+        # table names.  Also, it makes it obvious when the DB layer has
+        # been altered, as opposed to other reasons for a 404 when
+        # requesting a table.
+        except TypeError:
+            table = tables.create_empty_table("MISSING")
+        return table
 
     @cached_property
     def name(self):
@@ -88,9 +115,10 @@ class Table(DatabaseObject):
 class DataFile(BaseModel):
     file = models.FileField(
         upload_to=model_utils.user_directory_path,
-        validators=[FileExtensionValidator(allowed_extensions=['csv'])]
     )
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
-    table_imported_to = models.ForeignKey(Table, related_name="data_files",
-                                          blank=True, null=True,
-                                          on_delete=models.SET_NULL)
+    table_imported_to = models.ForeignKey(Table, related_name="data_files", blank=True,
+                                          null=True, on_delete=models.SET_NULL)
+    delimiter = models.CharField(max_length=1, default=',', blank=True)
+    escapechar = models.CharField(max_length=1, blank=True)
+    quotechar = models.CharField(max_length=1, default='"', blank=True)

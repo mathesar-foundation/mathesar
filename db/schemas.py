@@ -24,7 +24,7 @@ def reflect_schema(engine, name=None, oid=None):
     # If we have both arguments, the behavior is undefined.
     try:
         assert name is None or oid is None
-    except Exception as e:
+    except AssertionError as e:
         logger.error("ERROR:  Only one of 'name' or 'oid' can be given!")
         raise e
     metadata = MetaData()
