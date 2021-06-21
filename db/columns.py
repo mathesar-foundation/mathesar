@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, Integer, ForeignKey, Table, DDL, MetaData
 from db import constants
 
 
@@ -88,3 +88,19 @@ def init_mathesar_table_column_list_with_defaults(column_list):
     default_columns = get_default_mathesar_column_list()
     given_columns = [MathesarColumn.from_column(c) for c in column_list]
     return default_columns + given_columns
+
+
+def rename_column(schema, table_name, column_name, new_column_name, engine):
+    _preparer = engine.dialect.identifier_preparer
+    with engine.begin() as conn:
+        metadata = MetaData(bind=engine, schema=schema)
+        table = Table(table_name, metadata, schema=schema, autoload_with=engine)
+        column = table.columns[column_name]
+        prepared_table_name = _preparer.format_table(table)
+        prepared_column_name = _preparer.format_column(column)
+        prepared_new_column_name = _preparer.quote(new_column_name)
+        alter_stmt = f"""
+        ALTER TABLE {prepared_table_name}
+        RENAME {prepared_column_name} TO {prepared_new_column_name}
+        """
+        conn.execute(DDL(alter_stmt))
