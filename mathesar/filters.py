@@ -1,22 +1,24 @@
-from django_filters import rest_framework as filters
+from django_property_filter import (
+    PropertyFilterSet, PropertyBaseInFilter, PropertyCharFilter,
+)
 
 from mathesar.models import Schema, Table
 
 
-class CharInFilter(filters.BaseInFilter, filters.CharFilter):
+class CharInFilter(PropertyBaseInFilter, PropertyCharFilter):
     pass
 
 
-class SchemaFilter(filters.FilterSet):
-    name = CharInFilter(field_name='name', lookup_expr='in')
+class SchemaFilter(PropertyFilterSet):
     database = CharInFilter(field_name='database', lookup_expr='in')
+    name = CharInFilter(field_name='name', lookup_expr='in')
 
     class Meta:
         model = Schema
-        fields = ['name', 'database']
+        fields = ['database', 'name']
 
 
-class TableFilter(filters.FilterSet):
+class TableFilter(PropertyFilterSet):
     name = CharInFilter(field_name='name', lookup_expr='in')
 
     class Meta:
