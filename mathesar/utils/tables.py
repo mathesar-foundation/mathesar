@@ -11,7 +11,7 @@ def reflect_tables_from_schema(schema):
         Table.objects.get_or_create(oid=oid, schema=schema)
         for oid in db_table_oids
     ]
-    for table in Table.objects.all():
+    for table in Table.objects.all().filter(schema=schema):
         if table.oid not in db_table_oids:
             table.delete()
     return tables
