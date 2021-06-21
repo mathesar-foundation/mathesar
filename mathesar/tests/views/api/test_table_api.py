@@ -1,3 +1,4 @@
+from unittest.mock import patch
 import pytest
 
 from django.core.cache import cache
@@ -7,6 +8,7 @@ from sqlalchemy import text
 from mathesar.models import Table
 from mathesar.models import DataFile
 from mathesar.utils.schemas import create_schema_and_object
+from mathesar.views import api
 
 
 @pytest.fixture
@@ -275,3 +277,17 @@ def test_table_get_with_reflect_delete(client, table_for_reflection):
         table for table in response_data['results'] if table['name'] == table_name
     ]
     assert len(new_created) == 0
+
+
+def test_table_viewset_sets_cache(client):
+    cache.delete(api.DB_REFLECTION_KEY)
+    assert not cache.get(api.DB_REFLECTION_KEY)
+    client.get('/api/v0/schemas/')
+    assert cache.get(api.DB_REFLECTION_KEY)
+
+
+def test_table_viewset_checks_cache(client):
+    cache.delete(api.DB_REFLECTION_KEY)
+    with patch.object(api, 'reflect_tables_from_schema') as mock_reflect:
+        client.get('/api/v0/tables/')
+    mock_reflect.assert_called()
