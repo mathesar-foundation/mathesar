@@ -9,7 +9,7 @@ class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Table
-        fields = ['id', 'oid', 'name', 'url']
+        fields = ['id', 'name', 'url']
 
     def get_url(self, obj):
         request = self.context['request']
