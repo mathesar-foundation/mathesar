@@ -56,3 +56,22 @@ def empty_nasa_table(patent_schema):
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     table = Table.objects.create(oid=db_table_oid, schema=patent_schema)
     return table
+
+
+@pytest.fixture
+def table_for_reflection(test_db_name):
+    engine = create_mathesar_engine(test_db_name)
+    schema_name = 'a_new_schema'
+    table_name = 'a_new_table'
+    with engine.begin() as conn:
+        conn.execute(text(f'CREATE SCHEMA {schema_name};'))
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                f'CREATE TABLE {schema_name}.{table_name}'
+                f' (id INTEGER, name VARCHAR);'
+            )
+        )
+    yield schema_name, table_name, engine
+    with engine.begin() as conn:
+        conn.execute(text(f'DROP SCHEMA {schema_name} CASCADE;'))

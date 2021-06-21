@@ -34,8 +34,6 @@ def test_schema_list(client, patent_schema, empty_nasa_table):
         s for s in response_data['results'] if s['name'] != 'public'
     ][0]
 
-    print(response_schema)
-
     assert response.status_code == 200
     assert response_data['count'] == 2
     assert len(response_data['results']) == 2
