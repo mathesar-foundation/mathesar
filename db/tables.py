@@ -1,6 +1,8 @@
 from sqlalchemy import (
-    Column, String, Table, MetaData, func, select, ForeignKey, literal, exists, DDL
+    Column, String, Table, MetaData, func, select, ForeignKey, literal, exists
 )
+from sqlalchemy.schema import DDLElement
+from sqlalchemy.ext import compiler
 
 from db import columns, constants, schemas
 from db.types import inference
@@ -360,6 +362,21 @@ def update_table_column_types(
         )
 
 
+class CreateTempTableAs(DDLElement):
+    def __init__(self, name, selectable):
+        self.name = name
+        self.selectable = selectable
+
+
+@compiler.compiles(CreateTempTableAs)
+def compile(element, compiler, **_):
+    print(element.name)
+    return "CREATE TABLE %s AS (%s)" % (
+        element.name,
+        compiler.sql_compiler.process(element.selectable, literal_binds=True),
+    )
+
+
 def infer_table_column_types(schema, table_name, engine):
     metadata = MetaData(bind=engine, schema=schema)
     table = reflect_table(table_name, schema, engine)
@@ -369,12 +386,9 @@ def infer_table_column_types(schema, table_name, engine):
     columns = [c.copy() for c in table.columns]
     temp_table = Table(temp_name, metadata, *columns)
 
-    create_table = f"""
-    CREATE TABLE {temp_full_name} AS
-    TABLE {table.schema}.{table.name}
-    """
+    select_table = select(table)
     with engine.begin() as conn:
-        conn.execute(DDL(create_table))
+        conn.execute(CreateTempTableAs(temp_full_name, select_table))
 
     update_table_column_types(schema, temp_table.name, engine)
     table = reflect_table(temp_name, schema, engine)
