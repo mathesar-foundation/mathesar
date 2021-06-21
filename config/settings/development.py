@@ -16,7 +16,7 @@ ALLOWED_HOSTS = ['*']
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 # TODO: Add to documentation that database keys should not be than 128 characters.
-DATABASES = { 
+DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "mathesar_django",
@@ -25,7 +25,7 @@ DATABASES = {
         "HOST": "db",
         "PORT": 5432,
     },
-    "mathesar_tables": { 
+    "mathesar_tables": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "mathesar",
         "USER": "mathesar",
