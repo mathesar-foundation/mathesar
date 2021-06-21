@@ -45,18 +45,3 @@ def test_schema_name_handles_missing(monkeypatch):
     schema = models.Schema(oid=123, database='db')
     name_ = schema.name
     assert name_ == 'MISSING'
-
-
-def test_schema_name_handles_deleted(monkeypatch):
-    monkeypatch.setattr(
-        models.Schema, '_sa_engine', lambda x: None
-    )
-    cache.clear()
-    with patch.object(
-            models.schemas, 'get_schema_name_from_oid', return_value='myname'
-    ) as mock_get_name:
-        schema = models.Schema(oid=123, database='db')
-        schema.deleted = True
-        name_ = schema.name
-    assert name_ == "DELETED"
-    assert mock_get_name.call_count == 0

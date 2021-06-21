@@ -2,7 +2,6 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
 from django.utils.functional import cached_property
-from sqlalchemy import Table
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.utils import models as model_utils
