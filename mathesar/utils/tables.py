@@ -1,6 +1,7 @@
 from db.tables import get_table_oids_from_schema
 from mathesar.models import Table
 
+
 def reflect_tables_from_schema(schema):
     db_table_oids = {
         table["oid"]
