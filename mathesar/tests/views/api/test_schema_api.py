@@ -197,6 +197,17 @@ def test_schema_get_with_reflect_change(client, test_db_name):
     assert orig_id == modified_id
 
 
+def test_schema_create_duplicate(client, test_db_name):
+    data = {
+        'name': 'Test Duplication Schema',
+        'database': test_db_name
+    }
+    response = client.post('/api/v0/schemas/', data=data)
+    assert response.status_code == 201
+    response = client.post('/api/v0/schemas/', data=data)
+    assert response.status_code == 400
+
+
 def test_schema_get_with_reflect_delete(client, test_db_name):
     engine = create_mathesar_engine(test_db_name)
     schema_name = 'a_new_schema'
