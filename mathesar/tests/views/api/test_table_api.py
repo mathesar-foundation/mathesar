@@ -4,7 +4,6 @@ from django.core.cache import cache
 from django.core.files import File
 from sqlalchemy import text
 
-from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Table
 from mathesar.models import DataFile
 from mathesar.utils.schemas import create_schema_and_object
@@ -220,7 +219,59 @@ def test_table_get_with_reflect_column_change(client, table_for_reflection):
         table for table in response_data['results'] if table['name'] == table_name
     ][0]
     new_columns = altered_table['columns']
+    assert altered_table['id'] == orig_id
     assert new_columns == [
         {'name': 'id', 'type': 'INTEGER'},
         {'name': new_column_name, 'type': 'VARCHAR'}
     ]
+
+
+def test_table_get_with_reflect_name_change(client, table_for_reflection):
+    schema_name, table_name, engine = table_for_reflection
+    cache.clear()
+    response = client.get('/api/v0/tables/')
+    response_data = response.json()
+    orig_created = [
+        table for table in response_data['results'] if table['name'] == table_name
+    ]
+    orig_id = orig_created[0]['id']
+    new_table_name = 'super_new_table_name'
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                f'ALTER TABLE {schema_name}.{table_name} RENAME TO {new_table_name};'
+            )
+        )
+    cache.clear()
+    response = client.get('/api/v0/tables/')
+    response_data = response.json()
+    orig_created_2 = [
+        table for table in response_data['results'] if table['name'] == table_name
+    ]
+    assert len(orig_created_2) == 0
+    modified = [
+        table for table in response_data['results'] if table['name'] == new_table_name
+    ]
+    modified_id = modified[0]['id']
+    assert len(modified) == 1
+    assert orig_id == modified_id
+
+
+def test_table_get_with_reflect_delete(client, table_for_reflection):
+    schema_name, table_name, engine = table_for_reflection
+    cache.clear()
+    response = client.get('/api/v0/tables/')
+    response_data = response.json()
+    orig_created = [
+        table for table in response_data['results'] if table['name'] == table_name
+    ]
+    assert len(orig_created) == 1
+    with engine.begin() as conn:
+        conn.execute(text(f'DROP TABLE {schema_name}.{table_name};'))
+    cache.clear()
+    response = client.get('/api/v0/tables/')
+    response_data = response.json()
+    new_created = [
+        table for table in response_data['results'] if table['name'] == table_name
+    ]
+    assert len(new_created) == 0
