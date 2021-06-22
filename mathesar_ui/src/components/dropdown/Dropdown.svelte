@@ -12,10 +12,9 @@
 
   export let triggerClass = '';
   export let contentClass = '';
+  export let isOpen = false;
 
   let trigger: HTMLElement;
-  let isOpen = false;
-
   $: tgClasses = ['dropdown', 'trigger', triggerClass].join(' ');
 
   function toggle() {

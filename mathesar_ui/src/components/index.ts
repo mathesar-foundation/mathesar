@@ -11,3 +11,4 @@ export { default as Icon } from './icon/Icon.svelte';
 export { default as Pagination } from './pagination/Pagination.svelte';
 export { default as Skeleton } from './skeleton/Skeleton.svelte';
 export { default as Dropdown } from './dropdown/Dropdown.svelte';
+export { default as Select } from './select/Select.svelte';
