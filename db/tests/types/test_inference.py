@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 from sqlalchemy import Column, MetaData, Table, select
 from sqlalchemy import BOOLEAN, Numeric, NUMERIC, String, VARCHAR
 from db.tests.types import fixtures
@@ -89,3 +90,19 @@ def test_table_inference(engine_email_type, type_, value_list, expect_type):
         results = conn.execute(select(input_table))
     new_table = results.fetchall()
     assert original_table == new_table
+
+
+def test_table_inference_drop_temp(engine_email_type):
+    engine, schema = engine_email_type
+    TEST_TABLE = "test_table"
+    TEST_COLUMN = "test_column"
+    TYPE = Numeric
+    VALUES = [0, 1, 2, 3, 4]
+    create_test_table(engine, schema, TEST_TABLE, TEST_COLUMN, TYPE, VALUES)
+
+    # Ensure that the temp table is deleted even when the function errors
+    with patch.object(tables.inference, "infer_column_type") as mock_infer:
+        mock_infer.side_effect = Exception()
+        with pytest.raises(Exception):
+            tables.infer_table_column_types(schema, TEST_TABLE, engine)
+    tables.infer_table_column_types(schema, TEST_TABLE, engine)

@@ -3,7 +3,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.schema import DDLElement
 from sqlalchemy.ext import compiler
-from datetime import datetime
 
 from db import columns, constants, schemas
 from db.types import inference
@@ -388,15 +387,21 @@ def infer_table_column_types(schema, table_name, engine):
     metadata = MetaData(bind=engine, schema=None)
     temp_table = Table(temp_name, metadata, *temp_columns)
 
+    print("START")
     select_table = select(table)
     with engine.connect() as conn:
         with conn.begin():
             conn.execute(CreateTempTableAs(temp_name, select_table))
-        update_table_column_types(
-            None, temp_table.name, engine, table=temp_table, conn=conn
-        )
-        with conn.begin():
-            temp_table = reflect_table(temp_name, None, conn)
-            types = [c.type.__class__ for c in temp_table.columns]
+        try:
+            update_table_column_types(
+                None, temp_table.name, engine, table=temp_table, conn=conn
+            )
+            with conn.begin():
+                temp_table = reflect_table(temp_name, None, conn)
+                types = [c.type.__class__ for c in temp_table.columns]
+                temp_table.drop()
+            return types
+        except Exception as e:
+            # Ensure the temp table is deleted
             temp_table.drop()
-    return types
+            raise e
