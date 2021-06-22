@@ -1,5 +1,4 @@
-import { createPopper } from '@popperjs/core/lib/popper-lite';
-import flip from '@popperjs/core/lib/modifiers/flip';
+import { createPopper } from '@popperjs/core/dist/umd/popper.min';
 import type { ModifierArguments, Options, Instance } from '@popperjs/core/lib/types';
 import type { Action } from './types';
 
@@ -15,6 +14,7 @@ export default function popper(
 
   function create(reference: HTMLElement, options?: Options) {
     if (reference) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       popperInstance = createPopper(reference, node, {
         placement: options?.placement || 'bottom-start',
         modifiers: [
@@ -33,7 +33,9 @@ export default function popper(
               obj.state.elements.popper.style.minWidth = `${width}px`;
             },
           },
-          flip,
+          {
+            name: 'flip',
+          },
           {
             name: 'offset',
             options: {
@@ -41,7 +43,7 @@ export default function popper(
             },
           },
         ],
-      });
+      }) as Instance;
     }
   }
 
