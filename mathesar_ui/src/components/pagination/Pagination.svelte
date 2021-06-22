@@ -26,7 +26,7 @@
     if (_page > 0 && _page <= pageCount) {
       const prevPage = page;
       page = _page;
-      dispatch('pageChanged', {
+      dispatch('change', {
         page,
         originalEvent: e,
         prevPage,
