@@ -1,7 +1,7 @@
 import re
 import pytest
-from sqlalchemy import String, Integer, ForeignKey
-from db import columns
+from sqlalchemy import String, Integer, ForeignKey, Column, select, Table, MetaData
+from db import columns, tables, constants
 
 
 def init_column(*args, **kwargs):
@@ -16,6 +16,17 @@ def from_column_column(*args, **kwargs):
     """
     col = columns.MathesarColumn(*args, **kwargs)
     return columns.MathesarColumn.from_column(col)
+
+
+def _rename_column(schema, table_name, old_col_name, new_col_name, engine):
+    """
+    Renames the colum of a table and assert the change went through
+    """
+    columns.rename_column(schema, table_name, old_col_name, new_col_name, engine)
+    table = tables.reflect_table(table_name, schema, engine)
+    assert new_col_name in table.columns
+    assert old_col_name not in table.columns
+    return table
 
 
 column_builder_list = [init_column, from_column_column]
@@ -124,6 +135,71 @@ def test_MC_is_default_when_false_for_pk():
             nullable=dc_definition.get("nullable", True),
         )
         assert not col.is_default
+
+
+def test_rename_column(engine_with_schema):
+    old_col_name = "col1"
+    new_col_name = "col2"
+    table_name = "table_with_columns"
+    engine, schema = engine_with_schema
+    metadata = MetaData(bind=engine, schema=schema)
+    Table(table_name, metadata, Column(old_col_name, String)).create()
+    _rename_column(schema, table_name, old_col_name, new_col_name, engine)
+
+
+def test_rename_column_foreign_keys(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "table_to_split"
+    columns_list = [Column("Filler 1", Integer), Column("Filler 2", Integer)]
+    tables.create_mathesar_table(table_name, schema, columns_list, engine)
+    extracted, remainder, fk_name = tables.extract_columns_from_table(
+        table_name, ["Filler 1"], "Extracted", "Remainder", schema, engine
+    )
+    new_fk_name = "new_" + fk_name
+    remainder = _rename_column(schema, remainder.name, fk_name, new_fk_name, engine)
+
+    fk = list(remainder.foreign_keys)[0]
+    assert fk.parent.name == new_fk_name
+    assert fk.column.table.name == extracted.name
+
+
+def test_rename_column_sequence(engine_with_schema):
+    old_col_name = constants.ID
+    new_col_name = "new_" + constants.ID
+    engine, schema = engine_with_schema
+    table_name = "table_with_columns"
+    table = tables.create_mathesar_table(table_name, schema, [], engine)
+    with engine.begin() as conn:
+        ins = table.insert()
+        conn.execute(ins)
+
+    table = _rename_column(schema, table_name, old_col_name, new_col_name, engine)
+
+    with engine.begin() as conn:
+        ins = table.insert()
+        conn.execute(ins)
+        slct = select(table)
+        result = conn.execute(slct)
+    new_value = result.fetchall()[-1][new_col_name]
+    assert new_value == 2
+
+
+def test_rename_column_index(engine_with_schema):
+    old_col_name = constants.ID
+    new_col_name = "new_" + constants.ID
+    engine, schema = engine_with_schema
+    table_name = "table_with_index"
+    metadata = MetaData(bind=engine, schema=schema)
+    table = Table(table_name, metadata, Column(old_col_name, Integer, index=True))
+    table.create()
+
+    table = _rename_column(schema, table_name, old_col_name, new_col_name, engine)
+
+    with engine.begin() as conn:
+        index = engine.dialect.get_indexes(conn, table_name, schema)[0]
+        index_columns = index["column_names"]
+    assert old_col_name not in index_columns
+    assert new_col_name in index_columns
 
 
 def get_mathesar_column_init_args():

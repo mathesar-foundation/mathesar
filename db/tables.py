@@ -1,5 +1,7 @@
+import warnings
 from sqlalchemy import (
-    Column, String, Table, MetaData, func, select, ForeignKey, literal, exists
+    Column, String, Table, MetaData, func, select, ForeignKey, literal, exists,
+    join, inspect, and_
 )
 from sqlalchemy.schema import DDLElement
 from sqlalchemy.ext import compiler
@@ -328,10 +330,59 @@ def _get_column_moving_extraction_args(
     return extracted_table_name, remainder_table_name, extraction_columns
 
 
+def reflect_table_from_oid(oid, engine):
+    metadata = MetaData()
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_class = Table("pg_class", metadata, autoload_with=engine)
+        pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
+    sel = (
+        select(pg_namespace.c.nspname, pg_class.c.relname)
+        .select_from(
+            join(
+                pg_class,
+                pg_namespace,
+                pg_class.c.relnamespace == pg_namespace.c.oid
+            )
+        )
+        .where(pg_class.c.oid == oid)
+    )
+    with engine.begin() as conn:
+        schema, table_name = conn.execute(sel).fetchall()[0]
+    return reflect_table(table_name, schema, engine)
+
+
+def get_table_oids_from_schema(schema_oid, engine):
+    metadata = MetaData()
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_class = Table("pg_class", metadata, autoload_with=engine)
+    sel = (
+        select(pg_class.c.oid)
+        .where(
+            and_(pg_class.c.relkind == 'r', pg_class.c.relnamespace == schema_oid)
+        )
+    )
+    with engine.begin() as conn:
+        table_oids = conn.execute(sel).fetchall()
+    return table_oids
+
+
+def get_oid_from_table(name, schema, engine):
+    inspector = inspect(engine)
+    return inspector.get_table_oid(name, schema=schema)
+
+
 def reflect_table(name, schema, engine, metadata=None):
     if metadata is None:
         metadata = MetaData(bind=engine)
     return Table(name, metadata, schema=schema, autoload_with=engine)
+
+
+def create_empty_table(name):
+    return Table(name, MetaData())
 
 
 def get_count(table, engine):

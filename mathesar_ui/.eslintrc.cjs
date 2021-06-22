@@ -39,6 +39,7 @@ module.exports = {
         'import/prefer-default-export': 'off',
         'no-multiple-empty-lines': 'off',
         '@typescript-eslint/no-unsafe-member-access': 'off',
+        'no-void': 'off',
       },
     },
     {
@@ -53,7 +54,7 @@ module.exports = {
       },
     },
     {
-      files: ['**/*.ts'],
+      files: ['*.ts'],
       rules: {
         'import/extensions': [
           'error',
@@ -63,6 +64,8 @@ module.exports = {
             ts: 'never',
           },
         ],
+        'import/prefer-default-export': 'off',
+        'no-void': 'off',
       },
     },
   ],

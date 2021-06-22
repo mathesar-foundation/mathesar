@@ -3,6 +3,7 @@
   import { preloadCommonData } from '@mathesar/utils/preloadData';
   import Base from '@mathesar/sections/Base.svelte';
   import { newImport } from '@mathesar/stores/fileImports';
+  import { Button } from '@mathesar-components';
 
   const commonData = preloadCommonData();
   const selectedDb = commonData?.databases?.[0];
@@ -15,7 +16,9 @@
     {/if}
   </div>
   <div class="navigator">
-    <button on:click={() => newImport(selectedDb)}>Import CSV</button>
+    <Button on:click={() => newImport(selectedDb)}>
+      Import CSV
+    </Button>
   </div>
 </header>
 

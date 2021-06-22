@@ -10,7 +10,7 @@ interface TableRecords {
   [key: string]: unknown
 }
 
-interface TableColumnData {
+export interface TableColumnData {
   state: States,
   error?: string,
   data: TableColumn[]
@@ -23,21 +23,23 @@ interface TableRecordData {
   totalCount: number
 }
 
+interface TablePaginationData {
+  pageSize: number,
+  page: number
+}
+
 export type TableColumnStore = Writable<TableColumnData>;
 export type TableRecordStore = Writable<TableRecordData>;
+export type TablePaginationStore = Writable<TablePaginationData>;
 
 interface TableData {
   columns?: TableColumnStore,
-  records?: TableRecordStore
+  records?: TableRecordStore,
+  pagination?: TablePaginationStore
 }
 
 interface TableDetailsResponse {
   columns: TableColumn[]
-}
-
-interface TableRecordsQuery {
-  limit?: number,
-  offset?: number
 }
 
 interface TableRecordsResponse {
@@ -45,9 +47,14 @@ interface TableRecordsResponse {
   results: TableRecords[]
 }
 
-const databaseMap: Map<string, Map<string, TableData>> = new Map();
+interface GetTableOptions {
+  pageSize?: number,
+  page?: number
+}
 
-async function fetchTableDetails(db: string, id: string): Promise<void> {
+const databaseMap: Map<string, Map<number, TableData>> = new Map();
+
+async function fetchTableDetails(db: string, id: number): Promise<void> {
   const tableColumnStore = databaseMap.get(db)?.get(id)?.columns;
 
   if (tableColumnStore) {
@@ -75,12 +82,13 @@ async function fetchTableDetails(db: string, id: string): Promise<void> {
   }
 }
 
-async function fetchTableRecords(
+export async function fetchTableRecords(
   db: string,
-  id: string,
-  queryParams: TableRecordsQuery = {},
+  id: number,
 ): Promise<void> {
-  const tableRecordStore = databaseMap.get(db)?.get(id)?.records;
+  const table = databaseMap.get(db)?.get(id);
+  const tableRecordStore = table?.records;
+  const paginationStore = table?.pagination;
 
   if (tableRecordStore) {
     const existingData = get(tableRecordStore);
@@ -92,11 +100,11 @@ async function fetchTableRecords(
     });
 
     const params = [];
-    if (typeof queryParams.limit !== 'undefined') {
-      params.push(`limit=${queryParams.limit}`);
-    }
-    if (typeof queryParams.limit !== 'undefined') {
-      params.push(`offset=${queryParams.offset}`);
+    if (paginationStore) {
+      const paginationData = get(paginationStore);
+      params.push(`limit=${paginationData.pageSize}`);
+      const offset = paginationData.pageSize * (paginationData.page - 1);
+      params.push(`offset=${offset}`);
     }
 
     try {
@@ -119,7 +127,7 @@ async function fetchTableRecords(
   }
 }
 
-export function getTable(db: string, id: string): TableData {
+export function getTable(db: string, id: number, options?: GetTableOptions): TableData {
   let database = databaseMap.get(db);
   if (!database) {
     database = new Map();
@@ -138,16 +146,18 @@ export function getTable(db: string, id: string): TableData {
         data: [],
         totalCount: 0,
       }),
+      pagination: writable({
+        pageSize: options?.pageSize || 50,
+        page: options?.page || 1,
+      }),
     };
     database.set(id, table);
-    // eslint-disable-next-line no-void
     void fetchTableDetails(db, id);
   }
-  // eslint-disable-next-line no-void
   void fetchTableRecords(db, id);
   return table;
 }
 
-export function clearTable(db: string, id: string): void {
-  databaseMap.get(db)?.delete(id.toString());
+export function clearTable(db: string, id: number): void {
+  databaseMap.get(db)?.delete(id);
 }

@@ -2,18 +2,22 @@ import { writable, derived, Readable } from 'svelte/store';
 import { preloadCommonData, Schema, SchemaEntry } from '@mathesar/utils/preloadData';
 import { getAPI, States } from '@mathesar/utils/api';
 
-export interface SchemaMapEntry extends SchemaEntry {
-  children?: string[],
-  parent?: string
+interface SchemaMapEntry extends SchemaEntry {
+  children?: number[],
 }
 
-export type SchemaTreeMapEntry = Map<string, SchemaMapEntry>;
+interface TableMapEntry extends SchemaEntry {
+  parent?: number
+}
+export type SchemaMap = Map<number, SchemaMapEntry>;
+export type TableMap = Map<number, TableMapEntry>;
 
 interface SchemaStoreData {
   toPreload?: boolean,
   state: States,
   data?: Schema[],
-  entryMap?: SchemaTreeMapEntry,
+  schemaMap?: SchemaMap,
+  tableMap?: TableMap,
   error?: string
 }
 
@@ -21,24 +25,30 @@ interface SchemaResponse {
   results: Schema[]
 }
 
-function generateEntryMap(data: Schema[]): SchemaTreeMapEntry {
-  const entryMap: SchemaTreeMapEntry = new Map();
+function generateEntryMaps(data: Schema[]): { schemaMap: SchemaMap, tableMap: TableMap } {
+  const schemaMap: SchemaMap = new Map();
+  const tableMap: TableMap = new Map();
+
   data.forEach((entry) => {
-    const schemaKey = `_s_${entry.id}`;
-    entryMap.set(schemaKey, {
+    const schemaKey = entry.id;
+    const tableIdList = entry.tables?.map((tableEntry) => tableEntry.id);
+    schemaMap.set(schemaKey, {
       id: entry.id,
       name: entry.name,
-      parent: 'root',
+      children: tableIdList,
     });
     entry.tables?.forEach((tableEntry) => {
-      entryMap.set(tableEntry.id, {
+      tableMap.set(tableEntry.id, {
         id: tableEntry.id,
         name: tableEntry.name,
         parent: schemaKey,
       });
     });
   });
-  return entryMap;
+  return {
+    schemaMap,
+    tableMap,
+  };
 }
 
 const schemaWriteStore = writable<SchemaStoreData>({
@@ -59,7 +69,7 @@ export async function reloadSchemas(): Promise<void> {
     schemaWriteStore.set({
       state: States.Done,
       data,
-      entryMap: generateEntryMap(data),
+      ...generateEntryMaps(data),
     });
   } catch (err) {
     schemaWriteStore.set({
@@ -78,7 +88,7 @@ export const schemas: Readable<SchemaStoreData> = derived(
       set({
         state: States.Done,
         data,
-        entryMap: generateEntryMap(data),
+        ...generateEntryMaps(data),
       });
     } else {
       set($schemaWriteStore);

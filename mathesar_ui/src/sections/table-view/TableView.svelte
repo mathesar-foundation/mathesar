@@ -1,21 +1,41 @@
 <script lang="ts">
-  import { getTable } from '@mathesar/stores/tableData';
-  import type { TableColumnStore, TableRecordStore } from '@mathesar/stores/tableData';
+  import {
+    getTable,
+    fetchTableRecords,
+  } from '@mathesar/stores/tableData';
+  import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
+  import type {
+    TableColumnStore,
+    TableRecordStore,
+    TablePaginationStore,
+  } from '@mathesar/stores/tableData';
   import { States } from '@mathesar/utils/api';
+  import TablePagination from './TablePagination.svelte';
+  import Row from './Row.svelte';
 
   export let database: string;
-  export let id: string;
+  export let id: unknown;
+  $: identifier = id as number;
 
   let columns: TableColumnStore;
   let records: TableRecordStore;
+  let pagination: TablePaginationStore;
+  let offset: number;
 
-  function setStores(_database: string, _id: string) {
-    const table = getTable(_database, _id);
+  function setStores(_database: string, _id: number) {
+    const options = URLQueryHandler.getTableConfig(_database, _id);
+    const table = getTable(_database, _id, options);
     columns = table.columns;
     records = table.records;
+    pagination = table.pagination;
   }
 
-  $: setStores(database, id);
+  $: setStores(database, identifier);
+
+  function refetch() {
+    void fetchTableRecords(database, identifier);
+    URLQueryHandler.setTableOptions(database, identifier, $pagination);
+  }
 </script>
 
 <div class="actions-pane">
@@ -41,7 +61,7 @@
     <table>
       <thead>
         <tr>
-          <th></th>
+          <th class="row-number"></th>
           {#each $columns.data as column, index (column.name)}
             <th>
               {#if index > 0}
@@ -54,12 +74,8 @@
       </thead>
       <tbody>
         {#each $records.data as row, index}
-          <tr>
-            <td>{index + 1}</td>
-            {#each $columns.data as column (column.name)}
-              <td>{row[column.name]}</td>
-            {/each}
-          </tr>
+          <Row columns={$columns} loading={$records.state === States.Loading}
+                {row} {index} {offset}/>
         {/each}
       </tbody>
     </table>
@@ -67,7 +83,13 @@
 </div>
 
 <div class="status-pane">
-  Pagination
+  <TablePagination
+    id={identifier} {database}
+    total={$records.totalCount}
+    bind:pageSize={$pagination.pageSize}
+    bind:page={$pagination.page}
+    bind:offset={offset}
+    on:change={refetch}/>
 </div>
 
 <style global lang="scss">

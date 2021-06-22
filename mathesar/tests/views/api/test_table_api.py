@@ -1,10 +1,14 @@
+from unittest.mock import patch
 import pytest
 
+from django.core.cache import cache
 from django.core.files import File
+from sqlalchemy import text
 
 from mathesar.models import Table
 from mathesar.models import DataFile
 from mathesar.utils.schemas import create_schema_and_object
+from mathesar.views import api
 
 
 @pytest.fixture
@@ -176,3 +180,114 @@ def test_data_file_delete(client, create_table):
     response = client.delete(f'/api/v0/tables/{table.id}/')
     assert response.status_code == 405
     assert response.json()['detail'] == 'Method "DELETE" not allowed.'
+
+
+def test_table_get_with_reflect_new(client, table_for_reflection):
+    _, table_name, _ = table_for_reflection
+    cache.clear()
+    response = client.get('/api/v0/tables/')
+    # The table number should only change after the GET request
+    response_data = response.json()
+    actual_created = [
+        table for table in response_data['results'] if table['name'] == table_name
+    ]
+    assert len(actual_created) == 1
+    created_table = actual_created[0]
+    assert created_table['name'] == table_name
+    created_columns = created_table['columns']
+    assert created_columns == [
+        {'name': 'id', 'type': 'INTEGER'}, {'name': 'name', 'type': 'VARCHAR'}
+    ]
+
+
+def test_table_get_with_reflect_column_change(client, table_for_reflection):
+    schema_name, table_name, engine = table_for_reflection
+    cache.clear()
+    response = client.get('/api/v0/tables/')
+    response_data = response.json()
+    orig_created = [
+        table for table in response_data['results'] if table['name'] == table_name
+    ]
+    orig_id = orig_created[0]['id']
+    new_column_name = 'new_name'
+    with engine.begin() as conn:
+        conn.execute(
+            text(f'ALTER TABLE {schema_name}.{table_name} RENAME COLUMN name TO {new_column_name};')
+        )
+    cache.clear()
+    response = client.get('/api/v0/tables/')
+    response_data = response.json()
+    altered_table = [
+        table for table in response_data['results'] if table['name'] == table_name
+    ][0]
+    new_columns = altered_table['columns']
+    assert altered_table['id'] == orig_id
+    assert new_columns == [
+        {'name': 'id', 'type': 'INTEGER'},
+        {'name': new_column_name, 'type': 'VARCHAR'}
+    ]
+
+
+def test_table_get_with_reflect_name_change(client, table_for_reflection):
+    schema_name, table_name, engine = table_for_reflection
+    cache.clear()
+    response = client.get('/api/v0/tables/')
+    response_data = response.json()
+    orig_created = [
+        table for table in response_data['results'] if table['name'] == table_name
+    ]
+    orig_id = orig_created[0]['id']
+    new_table_name = 'super_new_table_name'
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                f'ALTER TABLE {schema_name}.{table_name} RENAME TO {new_table_name};'
+            )
+        )
+    cache.clear()
+    response = client.get('/api/v0/tables/')
+    response_data = response.json()
+    orig_created_2 = [
+        table for table in response_data['results'] if table['name'] == table_name
+    ]
+    assert len(orig_created_2) == 0
+    modified = [
+        table for table in response_data['results'] if table['name'] == new_table_name
+    ]
+    modified_id = modified[0]['id']
+    assert len(modified) == 1
+    assert orig_id == modified_id
+
+
+def test_table_get_with_reflect_delete(client, table_for_reflection):
+    schema_name, table_name, engine = table_for_reflection
+    cache.clear()
+    response = client.get('/api/v0/tables/')
+    response_data = response.json()
+    orig_created = [
+        table for table in response_data['results'] if table['name'] == table_name
+    ]
+    assert len(orig_created) == 1
+    with engine.begin() as conn:
+        conn.execute(text(f'DROP TABLE {schema_name}.{table_name};'))
+    cache.clear()
+    response = client.get('/api/v0/tables/')
+    response_data = response.json()
+    new_created = [
+        table for table in response_data['results'] if table['name'] == table_name
+    ]
+    assert len(new_created) == 0
+
+
+def test_table_viewset_sets_cache(client):
+    cache.delete(api.DB_REFLECTION_KEY)
+    assert not cache.get(api.DB_REFLECTION_KEY)
+    client.get('/api/v0/schemas/')
+    assert cache.get(api.DB_REFLECTION_KEY)
+
+
+def test_table_viewset_checks_cache(client):
+    cache.delete(api.DB_REFLECTION_KEY)
+    with patch.object(api, 'reflect_tables_from_schema') as mock_reflect:
+        client.get('/api/v0/tables/')
+    mock_reflect.assert_called()
