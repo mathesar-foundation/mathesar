@@ -1,6 +1,8 @@
 from sqlalchemy import text, DDL, MetaData, Table
 from db.types import base, email
 
+from contextlib import ExitStack
+
 BOOLEAN = "boolean"
 EMAIL = "email"
 INTERVAL = "interval"
@@ -25,13 +27,20 @@ def get_supported_alter_column_types(engine):
 
 
 def alter_column_type(
-        schema, table_name, column_name, target_type_str, engine
+        schema, table_name, column_name, target_type_str, engine, metadata=None,
+        conn=None
 ):
     _preparer = engine.dialect.identifier_preparer
     supported_types = get_supported_alter_column_types(engine)
     target_type = supported_types.get(target_type_str.lower())
-    with engine.begin() as conn:
-        metadata = MetaData(bind=engine, schema=schema)
+
+    with ExitStack() as stack:
+        if conn is not None:
+            stack.enter_context(conn.begin())
+        else:
+            conn = stack.enter_context(engine.begin())
+        if metadata is None:
+            metadata = MetaData(bind=engine, schema=schema)
         table = Table(
             table_name, metadata, schema=schema, autoload_with=engine
         )

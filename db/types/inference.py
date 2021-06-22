@@ -3,6 +3,7 @@ from sqlalchemy import MetaData, Table
 from sqlalchemy import VARCHAR, TEXT, Text
 from sqlalchemy.exc import DatabaseError
 from db.types import alteration
+from db import tables
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,8 @@ def infer_column_type(
         engine,
         depth=0,
         type_inference_dag=TYPE_INFERENCE_DAG,
+        metadata=None,
+        conn=None,
 ):
     if depth > MAX_INFERENCE_DAG_DEPTH:
         raise DagCycleError("The type_inference_dag likely has a cycle")
@@ -46,7 +49,8 @@ def infer_column_type(
     }
     reverse_type_map.update({v: k for k, v in supported_types.items()})
     with engine.begin():
-        metadata = MetaData(bind=engine, schema=schema)
+        if metadata is None:
+            metadata = MetaData(bind=engine, schema=schema)
         column_type = Table(
             table_name, metadata, schema=schema, autoload_with=engine,
         ).columns[column_name].type.__class__
@@ -55,7 +59,8 @@ def infer_column_type(
     for type_str in type_inference_dag.get(column_type_str, []):
         try:
             alteration.alter_column_type(
-                schema, table_name, column_name, type_str, engine,
+                schema, table_name, column_name, type_str, engine, metadata=metadata,
+                conn=conn
             )
             logger.info(f"Column {column_name} altered to type {type_str}")
             column_type = infer_column_type(
@@ -65,6 +70,8 @@ def infer_column_type(
                 engine,
                 depth=depth + 1,
                 type_inference_dag=type_inference_dag,
+                metadata=metadata,
+                conn=conn,
             )
             break
         # It's expected we catch this error when the test to see whether

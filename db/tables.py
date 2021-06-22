@@ -3,6 +3,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.schema import DDLElement
 from sqlalchemy.ext import compiler
+from datetime import datetime
 
 from db import columns, constants, schemas
 from db.types import inference
@@ -344,8 +345,10 @@ def update_table_column_types(
         schema,
         table_name,
         engine,
+        metadata=None,
+        conn=None,
 ):
-    table = reflect_table(table_name, schema, engine)
+    table = reflect_table(table_name, schema, engine, metadata=metadata)
     # we only want to infer (modify) the type of non-default columns
     inferable_column_names = (
         col.name for col in table.columns
@@ -359,6 +362,8 @@ def update_table_column_types(
             table_name,
             column_name,
             engine,
+            metadata=metadata,
+            conn=conn,
         )
 
 
@@ -370,28 +375,27 @@ class CreateTempTableAs(DDLElement):
 
 @compiler.compiles(CreateTempTableAs)
 def compile(element, compiler, **_):
-    print(element.name)
-    return "CREATE TABLE %s AS (%s)" % (
+    return "CREATE TEMPORARY TABLE %s AS (%s)" % (
         element.name,
         compiler.sql_compiler.process(element.selectable, literal_binds=True),
     )
 
 
 def infer_table_column_types(schema, table_name, engine):
-    metadata = MetaData(bind=engine, schema=schema)
     table = reflect_table(table_name, schema, engine)
-
     temp_name = "temp_table"
-    temp_full_name = schema + "." + temp_name
     temp_columns = [columns.MathesarColumn.from_column(c) for c in table.columns]
+    metadata = MetaData(bind=engine, schema=None)
     temp_table = Table(temp_name, metadata, *temp_columns)
 
     select_table = select(table)
-    with engine.begin() as conn:
-        conn.execute(CreateTempTableAs(temp_full_name, select_table))
+    with engine.connect() as conn:
+        with conn.begin():
+            conn.execute(CreateTempTableAs(temp_name, select_table))
+        update_table_column_types(
+            None, temp_table.name, engine, metadata=metadata, conn=conn
+        )
 
-    update_table_column_types(schema, temp_table.name, engine)
-    table = reflect_table(temp_name, schema, engine)
-    types = [c.type.__class__ for c in table.columns]
-    temp_table.drop()
+    temp_table = reflect_table(temp_name, None, engine, metadata=metadata)
+    types = [c.type.__class__ for c in temp_table.columns]
     return types
