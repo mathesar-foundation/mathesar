@@ -372,12 +372,14 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
             table_name,
             col1.name,
             engine,
+            conn=None,
         ),
         call(
             schema,
             table_name,
             col2.name,
             engine,
+            conn=None,
         ),
     ]
     mock_infer.assert_has_calls(expect_calls)

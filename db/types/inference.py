@@ -52,7 +52,7 @@ def infer_column_type(
         if conn is not None:
             stack.enter_context(conn.begin())
         else:
-            conn = stack.enter_context(engine.begin())
+            stack.enter_context(engine.begin())
         metadata = MetaData(bind=engine, schema=schema)
         column_type = Table(
             table_name, metadata, schema=schema, autoload_with=conn if conn else engine,
