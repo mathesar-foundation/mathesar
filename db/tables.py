@@ -345,10 +345,11 @@ def update_table_column_types(
         schema,
         table_name,
         engine,
-        metadata=None,
+        table=None,
         conn=None,
 ):
-    table = reflect_table(table_name, schema, engine, metadata=metadata)
+    if table is None:
+        table = reflect_table(table_name, schema, engine)
     # we only want to infer (modify) the type of non-default columns
     inferable_column_names = (
         col.name for col in table.columns
@@ -362,7 +363,6 @@ def update_table_column_types(
             table_name,
             column_name,
             engine,
-            metadata=metadata,
             conn=conn,
         )
 
@@ -393,9 +393,10 @@ def infer_table_column_types(schema, table_name, engine):
         with conn.begin():
             conn.execute(CreateTempTableAs(temp_name, select_table))
         update_table_column_types(
-            None, temp_table.name, engine, metadata=metadata, conn=conn
+            None, temp_table.name, engine, table=temp_table, conn=conn
         )
-
-    temp_table = reflect_table(temp_name, None, engine, metadata=metadata)
-    types = [c.type.__class__ for c in temp_table.columns]
+        with conn.begin():
+            temp_table = reflect_table(temp_name, None, conn)
+            types = [c.type.__class__ for c in temp_table.columns]
+            temp_table.drop()
     return types

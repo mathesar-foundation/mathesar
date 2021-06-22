@@ -27,8 +27,7 @@ def get_supported_alter_column_types(engine):
 
 
 def alter_column_type(
-        schema, table_name, column_name, target_type_str, engine, metadata=None,
-        conn=None
+        schema, table_name, column_name, target_type_str, engine, conn=None
 ):
     _preparer = engine.dialect.identifier_preparer
     supported_types = get_supported_alter_column_types(engine)
@@ -39,10 +38,9 @@ def alter_column_type(
             stack.enter_context(conn.begin())
         else:
             conn = stack.enter_context(engine.begin())
-        if metadata is None:
-            metadata = MetaData(bind=engine, schema=schema)
+        metadata = MetaData(bind=engine, schema=schema)
         table = Table(
-            table_name, metadata, schema=schema, autoload_with=engine
+            table_name, metadata, schema=schema, autoload_with=conn if conn else engine
         )
         column = table.columns[column_name]
         prepared_table_name = _preparer.format_table(table)
@@ -56,6 +54,24 @@ def alter_column_type(
           USING {cast_function_name}({prepared_column_name});
         """
         conn.execute(DDL(alter_stmt))
+    # with conn.begin():
+    #     result = conn.execute(text("SELECT * FROM temp_table"))
+    #     print("=" * 20)
+    #     print(table.columns['test_column'].type)
+    #     for r in result.fetchall():
+    #         print(r)
+    #     print("=" * 20)
+    # with conn.begin():
+    #     result = conn.execute(text(
+    #         """select column_name,data_type
+    #         from information_schema.columns
+    #         where table_name = 'temp_table';
+    #         """))
+    #     print("=" * 20)
+    #     print(table.columns['test_column'].type)
+    #     for r in result.fetchall():
+    #         print(r)
+    #     print("=" * 20)
 
 
 def install_all_casts(engine):
