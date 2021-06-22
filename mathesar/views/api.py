@@ -13,7 +13,7 @@ from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPa
 from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
 from mathesar.utils.tables import reflect_tables_from_schema
-from mathesar.utils.api import create_table_from_datafile, create_datafile
+from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
 
 logger = logging.getLogger(__name__)
