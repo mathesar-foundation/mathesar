@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
+    "@popperjs/core": "^2.9.2",
     "js-cookie": "^2.2.1"
   }
 }
