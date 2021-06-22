@@ -1,6 +1,7 @@
 // Actions
 export { default as portal } from './common/actions/portal';
 export { default as popper } from './common/actions/popper';
+export { default as clickOffBounds } from './common/actions/clickOffBounds';
 
 // Components
 export { default as Button } from './button/Button.svelte';
