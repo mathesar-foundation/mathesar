@@ -387,7 +387,6 @@ def infer_table_column_types(schema, table_name, engine):
     metadata = MetaData(bind=engine, schema=None)
     temp_table = Table(temp_name, metadata, *temp_columns)
 
-    print("START")
     select_table = select(table)
     with engine.connect() as conn:
         with conn.begin():

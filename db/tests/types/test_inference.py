@@ -106,3 +106,20 @@ def test_table_inference_drop_temp(engine_email_type):
         with pytest.raises(Exception):
             tables.infer_table_column_types(schema, TEST_TABLE, engine)
     tables.infer_table_column_types(schema, TEST_TABLE, engine)
+
+
+def test_table_inference_same_name(engine_email_type):
+    engine, schema = engine_email_type
+    TEST_TABLE = "temp_table"
+    TEST_COLUMN = "test_column"
+    TYPE = Numeric
+    VALUES = [0, 1, 2, 3, 4]
+    table = create_test_table(engine, schema, TEST_TABLE, TEST_COLUMN, TYPE, VALUES)
+    with engine.begin() as conn:
+        results = conn.execute(select(table))
+    original_table = results.fetchall()
+    tables.infer_table_column_types(schema, TEST_TABLE, engine)
+    with engine.begin() as conn:
+        results = conn.execute(select(table))
+    new_table = results.fetchall()
+    assert original_table == new_table

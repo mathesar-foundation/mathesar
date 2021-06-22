@@ -54,24 +54,6 @@ def alter_column_type(
           USING {cast_function_name}({prepared_column_name});
         """
         conn.execute(DDL(alter_stmt))
-    # with conn.begin():
-    #     result = conn.execute(text("SELECT * FROM temp_table"))
-    #     print("=" * 20)
-    #     print(table.columns['test_column'].type)
-    #     for r in result.fetchall():
-    #         print(r)
-    #     print("=" * 20)
-    # with conn.begin():
-    #     result = conn.execute(text(
-    #         """select column_name,data_type
-    #         from information_schema.columns
-    #         where table_name = 'temp_table';
-    #         """))
-    #     print("=" * 20)
-    #     print(table.columns['test_column'].type)
-    #     for r in result.fetchall():
-    #         print(r)
-    #     print("=" * 20)
 
 
 def install_all_casts(engine):
