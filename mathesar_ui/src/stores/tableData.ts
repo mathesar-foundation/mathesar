@@ -10,7 +10,7 @@ interface TableRecords {
   [key: string]: unknown
 }
 
-interface TableColumnData {
+export interface TableColumnData {
   state: States,
   error?: string,
   data: TableColumn[]

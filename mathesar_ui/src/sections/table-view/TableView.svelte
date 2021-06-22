@@ -10,8 +10,8 @@
     TablePaginationStore,
   } from '@mathesar/stores/tableData';
   import { States } from '@mathesar/utils/api';
-  import { Skeleton } from '@mathesar-components';
   import TablePagination from './TablePagination.svelte';
+  import Row from './Row.svelte';
 
   export let database: string;
   export let id: unknown;
@@ -32,13 +32,9 @@
 
   $: setStores(database, identifier);
 
-  function pageChanged(e: { detail: { originalEvent: Event, page: number, prevPage: number } }) {
-    const { originalEvent, page, prevPage } = e.detail;
-    originalEvent.preventDefault();
-    if (page !== prevPage) {
-      void fetchTableRecords(database, identifier);
-      URLQueryHandler.setTableOptions(database, identifier, $pagination);
-    }
+  function refetch() {
+    void fetchTableRecords(database, identifier);
+    URLQueryHandler.setTableOptions(database, identifier, $pagination);
   }
 </script>
 
@@ -78,17 +74,8 @@
       </thead>
       <tbody>
         {#each $records.data as row, index}
-          <tr>
-            <td class="row-number">
-              {offset + index}
-            </td>
-            {#each $columns.data as column (column.name)}
-              <td>
-                {row[column.name]}
-                <Skeleton loading={$records.state === States.Loading}/>
-              </td>
-            {/each}
-          </tr>
+          <Row columns={$columns} loading={$records.state === States.Loading}
+                {row} {index} {offset}/>
         {/each}
       </tbody>
     </table>
@@ -99,10 +86,10 @@
   <TablePagination
     id={identifier} {database}
     total={$records.totalCount}
-    pageSize={$pagination.pageSize}
+    bind:pageSize={$pagination.pageSize}
     bind:page={$pagination.page}
     bind:offset={offset}
-    on:pageChanged={pageChanged}/>
+    on:change={refetch}/>
 </div>
 
 <style global lang="scss">

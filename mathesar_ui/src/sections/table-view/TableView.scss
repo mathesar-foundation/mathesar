@@ -3,10 +3,13 @@ section.table-section .tab-container {
     .actions-pane {
       padding: 10px;
       border-bottom: 1px solid #efefef;
+      position: relative;
     }
     .table-content {
       flex-grow: 1;
       overflow: auto;
+      user-select: none;
+      position: relative;
 
       table {
         border-collapse: collapse;
@@ -18,7 +21,7 @@ section.table-section .tab-container {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          padding: 7px 15px;
+          padding: 9px 15px;
           text-align: left;
           border-bottom: 1px solid #efefef;
           border-right: 1px solid #efefef;
@@ -66,23 +69,31 @@ section.table-section .tab-container {
         }
 
         tbody {
-          tr:last-child {
-            td {
-              border-bottom: none;
+          tr {
+            &:hover {
+              background: #f7f7f7;
+            }
+
+            &:last-child {
+              td {
+                border-bottom: none;
+              }
             }
           }
         }
       }
     }
     .status-pane {
-      padding: 10px;
+      padding: 8px 12px;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: space-between;
       border-top: 1px solid #efefef;
+      position: relative;
 
       .pagination {
         margin-left: 10px;
+        position: relative;
       }
     }
   }
