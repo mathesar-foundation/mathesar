@@ -28,6 +28,17 @@ class DagCycleError(Exception):
     pass
 
 
+def get_reverse_type_map(engine):
+    supported_types = alteration.get_supported_alter_column_types(engine)
+    reverse_type_map = {
+        Text: alteration.STRING,
+        TEXT: alteration.STRING,
+        VARCHAR: alteration.STRING,
+    }
+    reverse_type_map.update({v: k for k, v in supported_types.items()})
+    return reverse_type_map
+
+
 def infer_column_type(
         schema,
         table_name,
@@ -38,13 +49,7 @@ def infer_column_type(
 ):
     if depth > MAX_INFERENCE_DAG_DEPTH:
         raise DagCycleError("The type_inference_dag likely has a cycle")
-    supported_types = alteration.get_supported_alter_column_types(engine)
-    reverse_type_map = {
-        Text: alteration.STRING,
-        TEXT: alteration.STRING,
-        VARCHAR: alteration.STRING,
-    }
-    reverse_type_map.update({v: k for k, v in supported_types.items()})
+    reverse_type_map = get_reverse_type_map(engine)
 
     table = tables.reflect_table(table_name, schema, engine)
     column_type = table.columns[column_name].type.__class__
