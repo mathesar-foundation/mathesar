@@ -1,4 +1,5 @@
 // Actions
+export { default as portal } from './common/actions/portal';
 export { default as popper } from './common/actions/popper';
 
 // Components
