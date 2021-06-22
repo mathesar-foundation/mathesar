@@ -9,6 +9,7 @@ from mathesar.models import Table
 from mathesar.models import DataFile
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.views import api
+from mathesar.imports.csv import legacy_create_table_from_csv
 
 
 @pytest.fixture
@@ -118,6 +119,34 @@ def test_table_detail(create_table, client):
     response_table = response.json()
     assert response.status_code == 200
     check_table_response(response_table, table, table_name)
+
+
+def test_table_type_suggestion(client, test_db_name):
+    table_name = 'Type Inference Table'
+    file = 'mathesar/tests/data/type_inference.csv'
+    schema = 'type_inference'
+    EXPECTED_TYPES = {
+        'col_1': 'numeric',
+        'col_2': 'boolean',
+        'col_3': 'boolean',
+        'col_4': 'string',
+        'col_5': 'string',
+        'col_6': 'numeric'
+    }
+
+    with open(file, 'rb') as csv_file:
+        table = legacy_create_table_from_csv(
+            name=table_name,
+            schema=schema,
+            database_key=test_db_name,
+            csv_file=csv_file
+        )
+
+    response = client.get(f'/api/v0/tables/{table.id}/type_suggestions/')
+    response_table = response.json()
+    print(response_table)
+    assert response.status_code == 200
+    assert response_table == EXPECTED_TYPES
 
 
 def test_table_create_from_datafile(client, data_file, schema):

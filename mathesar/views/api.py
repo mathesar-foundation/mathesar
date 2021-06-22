@@ -70,11 +70,10 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
         else:
             raise ValidationError(serializer.errors)
 
-    @action(methods=['get'], detail=True, url_path='type-suggestions')
+    @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):
         table = self.get_object()
-        types = get_table_column_types(table)
-        col_types = {c: t for c, t in zip(table.sa_column_names, types)}
+        col_types = get_table_column_types(table)
         return Response(col_types)
 
 

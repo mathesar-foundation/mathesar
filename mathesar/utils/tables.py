@@ -1,5 +1,6 @@
 from db.tables import get_table_oids_from_schema, infer_table_column_types
 from db.types.inference import get_reverse_type_map
+from db.columns import MathesarColumn
 from mathesar.models import Table
 
 
@@ -20,7 +21,13 @@ def reflect_tables_from_schema(schema):
 
 def get_table_column_types(table):
     schema = table.schema
-    types = infer_table_column_types(schema, table.name, schema._sa_engine)
+    types = infer_table_column_types(schema.name, table.name, schema._sa_engine)
     rev_type_map = get_reverse_type_map(schema._sa_engine)
-    types = [rev_type_map[t] for t in types]
-    return types
+    col_types = {
+        col.name: rev_type_map[t]
+        for col, t in zip(table.sa_columns, types)
+        if not MathesarColumn.from_column(col).is_default
+        and not col.primary_key
+        and not col.foreign_keys
+    }
+    return col_types
