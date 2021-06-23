@@ -10,11 +10,14 @@ from django_filters import rest_framework as filters
 from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile
 from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
-from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer
+from mathesar.serializers import (
+    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer,
+)
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
 from mathesar.utils.tables import reflect_tables_from_schema
 from mathesar.utils.api import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
+from mathesar.forms.forms import RecordListFilterForm
 
 logger = logging.getLogger(__name__)
 
@@ -78,9 +81,14 @@ class RecordViewSet(viewsets.ViewSet):
 
     def list(self, request, table_pk=None):
         paginator = TableLimitOffsetPagination()
-        records = paginator.paginate_queryset(self.queryset, request, table_pk)
-        serializer = RecordSerializer(records, many=True)
-        return paginator.get_paginated_response(serializer.data)
+        filter_form = RecordListFilterForm(request.GET)
+        if filter_form.is_valid():
+            records = paginator.paginate_queryset(self.queryset, request, table_pk,
+                                                  filters=filter_form.cleaned_data['filters'])
+            serializer = RecordSerializer(records, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        else:
+            raise ValidationError(filter_form.errors)
 
     def retrieve(self, request, pk=None, table_pk=None):
         table = Table.objects.get(id=table_pk)

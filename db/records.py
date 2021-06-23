@@ -1,6 +1,7 @@
 import logging
 from sqlalchemy import delete, select, and_, Column
 from sqlalchemy.inspection import inspect
+from sqlalchemy_filters import apply_filters
 
 logger = logging.getLogger(__name__)
 
@@ -45,20 +46,11 @@ def get_records(
         .order_by(*order_by)
         .limit(limit)
         .offset(offset)
-        .where(_build_filter_conjunction(table, filters))
     )
+    if filters:
+        query = apply_filters(query, filters)
     with engine.begin() as conn:
         return conn.execute(query).fetchall()
-
-
-def _build_filter_conjunction(table, filters):
-    refined_filters = [
-        (table.columns[col] if type(col) == str else col, value)
-        for col, value in filters
-    ]
-    # We need a default of True (rather than empty), since invoking and_
-    # without arguments is deprecated.
-    return and_(True, *[col == value for col, value in refined_filters])
 
 
 def get_distinct_tuple_values(
