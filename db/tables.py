@@ -434,14 +434,13 @@ def compile(element, compiler, **_):
 def infer_table_column_types(schema, table_name, engine):
     table = reflect_table(table_name, schema, engine)
     temp_name = "temp_table"
-    temp_columns = [columns.MathesarColumn.from_column(c) for c in table.columns]
-    metadata = MetaData(bind=engine, schema=None)
-    temp_table = Table(temp_name, metadata, *temp_columns)
 
     select_table = select(table)
     with engine.connect() as conn:
         with conn.begin():
             conn.execute(CreateTempTableAs(temp_name, select_table))
+        with conn.begin():
+            temp_table = reflect_table(temp_name, None, conn)
         try:
             update_table_column_types(
                 None, temp_table.name, engine, table=temp_table, conn=conn
