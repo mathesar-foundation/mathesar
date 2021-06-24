@@ -11,6 +11,10 @@ from db import columns, constants, schemas
 from db.types import inference
 
 
+TEMP_SCHEMA = f"{constants.MATHESAR_PREFIX}temp_schema"
+TEMP_TABLE = f"{constants.MATHESAR_PREFIX}temp_table_%s"
+
+
 def create_string_column_table(name, schema, column_names, engine):
     """
     This method creates a Postgres table in the specified schema, with all
@@ -427,30 +431,29 @@ def compile(element, compiler, **_):
 def infer_table_column_types(schema, table_name, engine):
     table = reflect_table(table_name, schema, engine)
 
-    temp_name = f"_temp_table_{int(time())}"
-    temp_schema = "mathesar_temp"
-    schemas.create_schema(temp_schema, engine)
+    temp_name = TEMP_TABLE % (int(time()))
+    schemas.create_schema(TEMP_SCHEMA, engine)
     with engine.begin() as conn:
-        while engine.dialect.has_table(conn, temp_name, schema=temp_schema):
-            temp_name = f"_temp_table_{int(time())}"
+        while engine.dialect.has_table(conn, temp_name, schema=TEMP_SCHEMA):
+            temp_name = TEMP_TABLE.format(int(time()))
 
-    full_temp_name = f"{temp_schema}.{temp_name}"
+    full_temp_name = f"{TEMP_SCHEMA}.{temp_name}"
 
     select_table = select(table)
     with engine.begin() as conn:
         conn.execute(CreateTableAs(full_temp_name, select_table))
-    temp_table = reflect_table(temp_name, temp_schema, engine)
+    temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
 
     try:
         update_table_column_types(
-            temp_schema, temp_table.name, engine,
+            TEMP_SCHEMA, temp_table.name, engine,
         )
     except Exception as e:
         # Ensure the temp table is deleted
         temp_table.drop()
         raise e
 
-    temp_table = reflect_table(temp_name, temp_schema, engine)
+    temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
     types = [c.type.__class__ for c in temp_table.columns]
     with engine.begin():
         temp_table.drop()
