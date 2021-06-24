@@ -4,6 +4,7 @@ export { default as popper } from './common/actions/popper';
 export { default as clickOffBounds } from './common/actions/clickOffBounds';
 
 // Components
+export { default as TextInput } from './text-input/TextInput.svelte';
 export { default as Button } from './button/Button.svelte';
 export { default as TabContainer } from './tabs/TabContainer.svelte';
 export { default as Tree } from './tree/Tree.svelte';
