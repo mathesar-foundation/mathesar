@@ -426,11 +426,15 @@ def compile(element, compiler, **_):
 
 def infer_table_column_types(schema, table_name, engine):
     table = reflect_table(table_name, schema, engine)
-    timestamp = int(time())
-    temp_name = f"_temp_table_{timestamp}"
-    temp_schema = "_temp_schema"
-    full_temp_name = f"{temp_schema}.{temp_name}"
+
+    temp_name = f"_temp_table_{int(time())}"
+    temp_schema = "mathesar_temp"
     schemas.create_schema(temp_schema, engine)
+    with engine.begin() as conn:
+        while engine.dialect.has_table(conn, temp_name, schema=temp_schema):
+            temp_name = f"_temp_table_{int(time())}"
+
+    full_temp_name = f"{temp_schema}.{temp_name}"
 
     select_table = select(table)
     with engine.begin() as conn:
@@ -441,13 +445,13 @@ def infer_table_column_types(schema, table_name, engine):
         update_table_column_types(
             temp_schema, temp_table.name, engine,
         )
-        temp_table = reflect_table(temp_name, temp_schema, engine)
-        types = [c.type.__class__ for c in temp_table.columns]
     except Exception as e:
         # Ensure the temp table is deleted
         temp_table.drop()
         raise e
 
+    temp_table = reflect_table(temp_name, temp_schema, engine)
+    types = [c.type.__class__ for c in temp_table.columns]
     with engine.begin():
         temp_table.drop()
     return types
