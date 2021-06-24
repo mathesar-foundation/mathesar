@@ -34,7 +34,7 @@ def alter_column_type(
     with engine.begin() as conn:
         metadata = MetaData(bind=engine, schema=schema)
         table = Table(
-            table_name, metadata, schema=schema, autoload_with=conn if conn else engine
+            table_name, metadata, schema=schema, autoload_with=engine
         )
         column = table.columns[column_name]
         prepared_table_name = _preparer.format_table(table)
