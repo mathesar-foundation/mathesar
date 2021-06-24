@@ -21,10 +21,12 @@
 
   export let database : string;
 
+  let expandedSchemas = new Set();
   const tableMap = $schemas.tableMap as TableMap;
   const tables: Tab[] = URLQueryHandler.getAllTableConfigs(database).map(
     (entry) => {
       const schemaTable = tableMap?.get(entry.id);
+      expandedSchemas.add(schemaTable?.parent);
       return {
         id: entry.id,
         label: schemaTable?.name,
@@ -35,6 +37,19 @@
   let activeTab = tables.find(
     (table) => table.id === URLQueryHandler.getActiveTable(database),
   ) || tabs[0];
+
+  let activeTable;
+
+  function onActiveTabChange(_activeTab: Tab) {
+    activeTable = new Set([_activeTab?.id]);
+    const schemaTable = tableMap?.get(_activeTab?.id as number);
+    if (schemaTable) {
+      expandedSchemas.add(schemaTable.parent);
+      expandedSchemas = new Set(expandedSchemas);
+    }
+  }
+
+  $: onActiveTabChange(activeTab);
 
   const unsubFileImports = getDBStore(database).changes.subscribe((fileImportInfo) => {
     if (fileImportInfo) {
@@ -113,9 +128,15 @@
 <aside>
   <nav>
     <Tree data={$schemas.data || []} idKey="id" labelKey="name" childKey="tables"
-          {getLink} on:nodeSelected={tableSelected} let:entry>
+          bind:expandedItems={expandedSchemas} search={true} {getLink}
+          bind:selectedItems={activeTable} on:nodeSelected={tableSelected}
+          let:entry>
         <Icon data={faTable}/>
         <span>{entry.name}</span>
+
+        <svelte:fragment slot="empty">
+          No tables found
+        </svelte:fragment>
     </Tree>
   </nav>
 </aside>

@@ -13,9 +13,9 @@ aside {
   overflow-y: auto;
 
   nav {
-    .tree {
-      padding: 5px 12px;
+    margin: 15px 0;
 
+    .tree {
       li {
         a.item {
           span {
@@ -34,7 +34,7 @@ section.table-section {
   right: 0;
   bottom: 0;
   overflow: auto;
-  background: #f9f9f9;
+  background: #f6f7fdaa;
   
   .tab-container {
     position: absolute;

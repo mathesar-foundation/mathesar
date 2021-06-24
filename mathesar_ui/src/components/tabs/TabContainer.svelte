@@ -61,6 +61,8 @@
   function checkAndPreventDefault(e: Event) {
     if (preventDefault) {
       e.preventDefault();
+      const tab = (e.target as HTMLElement).closest('a[role="tab"]');
+      (tab as HTMLElement)?.focus?.();
     }
   }
 
