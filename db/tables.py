@@ -1,4 +1,5 @@
 import warnings
+from time import time
 from sqlalchemy import (
     Column, String, Table, MetaData, func, select, ForeignKey, literal, exists,
     join, inspect, and_
@@ -425,8 +426,9 @@ def compile(element, compiler, **_):
 
 def infer_table_column_types(schema, table_name, engine):
     table = reflect_table(table_name, schema, engine)
-    temp_name = "temp_table"
-    temp_schema = "temp_schema"
+    timestamp = int(time())
+    temp_name = f"_temp_table_{timestamp}"
+    temp_schema = "_temp_schema"
     full_temp_name = f"{temp_schema}.{temp_name}"
     schemas.create_schema(temp_schema, engine)
 

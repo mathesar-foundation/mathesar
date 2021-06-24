@@ -1,5 +1,4 @@
 import logging
-from sqlalchemy import MetaData, Table
 from sqlalchemy import VARCHAR, TEXT, Text
 from sqlalchemy.exc import DatabaseError
 from db.types import alteration
