@@ -452,9 +452,8 @@ def infer_table_column_types(schema, table_name, engine):
         # Ensure the temp table is deleted
         temp_table.drop()
         raise e
-
-    temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
-    types = [c.type.__class__ for c in temp_table.columns]
-    with engine.begin():
+    else:
+        temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
+        types = [c.type.__class__ for c in temp_table.columns]
         temp_table.drop()
-    return types
+        return types
