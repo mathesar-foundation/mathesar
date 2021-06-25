@@ -28,13 +28,19 @@ class DatabaseObject(BaseModel):
         return f"{self.__class__.__name__}: {self.oid}"
 
 
+_engine = None
+
+
 class Schema(DatabaseObject):
     database = models.CharField(max_length=128)
 
-    @cached_property
+    @property
     def _sa_engine(self):
+        global _engine
         # We're caching this since the engine is used frequently.
-        return create_mathesar_engine(self.database)
+        if _engine is None:
+            _engine = create_mathesar_engine(self.database)
+        return _engine
 
     @cached_property
     def name(self):
