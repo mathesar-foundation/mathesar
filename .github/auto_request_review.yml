@@ -13,6 +13,9 @@ reviewers:
       - eito-fis
     designers:
       - ghislaineguerin
+    frontend-reviewers:
+      - dhruvkb
+      - zackkrida
 
 files:
   # Keys are glob expressions.
@@ -20,6 +23,8 @@ files:
   '**':
     - engineers
     - designers
+  'mathesar_ui/**':
+    - frontend-reviewers
 
 options:
   ignore_draft: true

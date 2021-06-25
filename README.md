@@ -8,6 +8,11 @@ Please see our [Read the Docs site](https://mathesar.readthedocs.io/) for more i
 
 First, [ensure that you have Docker installed](https://docs.docker.com/get-docker/).
 
+Then, copy the `.env.example` file to `.env` like so:
+```
+cp .env.example .env
+```
+
 From this directory, run:
 ```
 docker-compose up
