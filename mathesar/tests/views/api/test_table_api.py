@@ -9,7 +9,12 @@ from mathesar.models import Table
 from mathesar.models import DataFile
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.views import api
-from mathesar.imports.csv import legacy_create_table_from_csv
+from db.tests.types import fixtures
+
+
+engine_with_types = fixtures.engine_with_types
+engine_email_type = fixtures.engine_email_type
+temporary_testing_schema = fixtures.temporary_testing_schema
 
 
 @pytest.fixture
@@ -121,7 +126,7 @@ def test_table_detail(create_table, client):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_type_suggestion(client, test_db_name, schema):
+def test_table_type_suggestion(client, schema, engine_email_type):
     table_name = 'Type Inference Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
