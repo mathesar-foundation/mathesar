@@ -73,9 +73,11 @@ DATABASES = {
     decouple_config('DJANGO_DATABASE_KEY'): decouple_config('DJANGO_DATABASE_URL', cast=db_url),
     decouple_config('MATHESAR_DATABASE_KEY'): decouple_config('MATHESAR_DATABASE_URL', cast=db_url)
 }
-DATABASES[decouple_config('MATHESAR_DATABASE_KEY')]['TEST'] = {
-    'NAME': DATABASES[decouple_config('MATHESAR_DATABASE_KEY')]['NAME']
-}
+
+if decouple_config('TEST', default=False, cast=bool):
+    DATABASES[decouple_config('MATHESAR_DATABASE_KEY')]['TEST'] = {
+        'NAME': DATABASES[decouple_config('MATHESAR_DATABASE_KEY')]['NAME']
+    }
 
 
 # Quick-start development settings - unsuitable for production
