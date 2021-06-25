@@ -121,10 +121,20 @@ def test_table_detail(create_table, client):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_type_suggestion(client, test_db_name):
+def test_table_type_suggestion(client, test_db_name, schema):
     table_name = 'Type Inference Table'
     file = 'mathesar/tests/data/type_inference.csv'
-    schema = 'type_inference'
+    with open(file, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    body = {
+        'data_files': [data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response_table = client.post('/api/v0/tables/', body).json()
+    table = Table.objects.get(id=response_table['id'])
+
     EXPECTED_TYPES = {
         'col_1': 'numeric',
         'col_2': 'boolean',
@@ -133,18 +143,8 @@ def test_table_type_suggestion(client, test_db_name):
         'col_5': 'string',
         'col_6': 'numeric'
     }
-
-    with open(file, 'rb') as csv_file:
-        table = legacy_create_table_from_csv(
-            name=table_name,
-            schema=schema,
-            database_key=test_db_name,
-            csv_file=csv_file
-        )
-
     response = client.get(f'/api/v0/tables/{table.id}/type_suggestions/')
     response_table = response.json()
-    print(response_table)
     assert response.status_code == 200
     assert response_table == EXPECTED_TYPES
 
