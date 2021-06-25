@@ -1,5 +1,6 @@
 import { get, writable, Writable } from 'svelte/store';
 import { getAPI, States } from '@mathesar/utils/api';
+import type { CancellablePromise } from '@mathesar/components';
 
 interface TableColumn {
   name: string,
@@ -8,6 +9,20 @@ interface TableColumn {
 
 interface TableRecords {
   [key: string]: unknown
+}
+
+interface TableDetailsResponse {
+  columns: TableColumn[]
+}
+
+interface TableRecordsResponse {
+  count: number,
+  results: TableRecords[]
+}
+
+interface GetTableOptions {
+  pageSize?: number,
+  page?: number
 }
 
 export interface TableColumnData {
@@ -28,6 +43,11 @@ interface TablePaginationData {
   page: number
 }
 
+interface TableConfigData {
+  previousTableRequest?: CancellablePromise<TableDetailsResponse>,
+  previousRecordRequest?: CancellablePromise<TableRecordsResponse>,
+}
+
 export type TableColumnStore = Writable<TableColumnData>;
 export type TableRecordStore = Writable<TableRecordData>;
 export type TablePaginationStore = Writable<TablePaginationData>;
@@ -35,29 +55,16 @@ export type TablePaginationStore = Writable<TablePaginationData>;
 interface TableData {
   columns?: TableColumnStore,
   records?: TableRecordStore,
-  pagination?: TablePaginationStore
-}
-
-interface TableDetailsResponse {
-  columns: TableColumn[]
-}
-
-interface TableRecordsResponse {
-  count: number,
-  results: TableRecords[]
-}
-
-interface GetTableOptions {
-  pageSize?: number,
-  page?: number
+  pagination?: TablePaginationStore,
+  config?: TableConfigData,
 }
 
 const databaseMap: Map<string, Map<number, TableData>> = new Map();
 
 async function fetchTableDetails(db: string, id: number): Promise<void> {
-  const tableColumnStore = databaseMap.get(db)?.get(id)?.columns;
-
-  if (tableColumnStore) {
+  const table = databaseMap.get(db)?.get(id);
+  if (table) {
+    const tableColumnStore = databaseMap.get(db)?.get(id)?.columns;
     const existingData = get(tableColumnStore);
 
     tableColumnStore.set({
@@ -66,7 +73,15 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
     });
 
     try {
-      const response = await getAPI<TableDetailsResponse>(`/tables/${id}/`);
+      table.config.previousTableRequest?.cancel();
+
+      const tableDetailsPromise = getAPI<TableDetailsResponse>(`/tables/${id}/`);
+      table.config = {
+        ...table.config,
+        previousTableRequest: tableDetailsPromise,
+      };
+
+      const response = await tableDetailsPromise;
       const columns = response.columns || [];
       tableColumnStore.set({
         state: States.Done,
@@ -87,11 +102,12 @@ export async function fetchTableRecords(
   id: number,
 ): Promise<void> {
   const table = databaseMap.get(db)?.get(id);
-  const tableRecordStore = table?.records;
-  const paginationStore = table?.pagination;
+  if (table) {
+    const tableRecordStore = table.records;
+    const paginationStore = table.pagination;
 
-  if (tableRecordStore) {
     const existingData = get(tableRecordStore);
+    const paginationData = get(paginationStore);
 
     tableRecordStore.set({
       state: States.Loading,
@@ -100,15 +116,20 @@ export async function fetchTableRecords(
     });
 
     const params = [];
-    if (paginationStore) {
-      const paginationData = get(paginationStore);
-      params.push(`limit=${paginationData.pageSize}`);
-      const offset = paginationData.pageSize * (paginationData.page - 1);
-      params.push(`offset=${offset}`);
-    }
+    params.push(`limit=${paginationData.pageSize}`);
+    const offset = paginationData.pageSize * (paginationData.page - 1);
+    params.push(`offset=${offset}`);
 
     try {
-      const response = await getAPI<TableRecordsResponse>(`/tables/${id}/records/?${params.join('&')}`);
+      table.config.previousRecordRequest?.cancel();
+
+      const tableRecordsPromise = getAPI<TableRecordsResponse>(`/tables/${id}/records/?${params.join('&')}`);
+      table.config = {
+        ...table.config,
+        previousRecordRequest: tableRecordsPromise,
+      };
+
+      const response = await tableRecordsPromise;
       const totalCount = response.count || 0;
       const data = response.results || [];
       tableRecordStore.set({
@@ -150,6 +171,7 @@ export function getTable(db: string, id: number, options?: GetTableOptions): Tab
         pageSize: options?.pageSize || 50,
         page: options?.page || 1,
       }),
+      config: {},
     };
     database.set(id, table);
     void fetchTableDetails(db, id);
