@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import create_engine, text
 from config.settings import DATABASES
 
-TEST_DB = "mathesar_db_test_database"
+TEST_DB = "mathesar_db_test"
 
 
 @pytest.fixture(scope="session")

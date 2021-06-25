@@ -1,4 +1,5 @@
 Django==3.1.7
+dj-database-url==0.5.0
 djangorestframework==3.12.4
 drf-nested-routers==0.93.3
 psycopg2==2.8.6
