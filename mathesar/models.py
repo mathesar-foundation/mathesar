@@ -28,6 +28,8 @@ class DatabaseObject(BaseModel):
         return f"{self.__class__.__name__}: {self.oid}"
 
 
+# TODO: Replace with a proper form of caching
+# See: https://github.com/centerofci/mathesar/issues/280
 _engine = None
 
 
