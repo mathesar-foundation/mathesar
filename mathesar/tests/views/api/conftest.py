@@ -21,11 +21,11 @@ def client():
 
 @pytest.fixture
 def create_table(engine, csv_filename, test_db_name):
-    def _create_table(table_name):
+    def _create_table(table_name, schema='Patents'):
         with open(csv_filename, 'rb') as csv_file:
             table = legacy_create_table_from_csv(
                 name=table_name,
-                schema='Patents',
+                schema=schema,
                 database_key=test_db_name,
                 csv_file=csv_file
             )

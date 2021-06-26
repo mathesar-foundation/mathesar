@@ -74,6 +74,13 @@ DATABASES = {
     decouple_config('MATHESAR_DATABASE_KEY'): decouple_config('MATHESAR_DATABASE_URL', cast=db_url)
 }
 
+# pytest-django will create a new database named 'test_{DATABASES[table_db]['NAME']}'
+# and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
+if decouple_config('TEST', default=False, cast=bool):
+    DATABASES[decouple_config('MATHESAR_DATABASE_KEY')]['TEST'] = {
+        'NAME': DATABASES[decouple_config('MATHESAR_DATABASE_KEY')]['NAME']
+    }
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
