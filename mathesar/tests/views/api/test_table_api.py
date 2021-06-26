@@ -17,9 +17,11 @@ engine_email_type = fixtures.engine_email_type
 temporary_testing_schema = fixtures.temporary_testing_schema
 
 
-@pytest.fixture
-def schema(test_db_name):
-    return create_schema_and_object('table_tests', test_db_name)
+@pytest.fixture(scope='module')
+def schema(django_db_setup, django_db_blocker, test_db_name):
+    # We have to do some additional work to access the DB at module scope
+    with django_db_blocker.unblock():
+        return create_schema_and_object('table_tests', test_db_name)
 
 
 @pytest.fixture
