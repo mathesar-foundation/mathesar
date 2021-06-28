@@ -1,4 +1,7 @@
 import json
+from unittest.mock import patch
+
+from db import records
 
 
 def test_record_list(create_table, client):
@@ -61,16 +64,22 @@ def test_record_list_filter(create_table, client):
             ]}
         ]}
     ]
-    filter_list = json.dumps(filter_list)
-    response = client.get(f'/api/v0/tables/{table.id}/records/?filters={filter_list}')
-    response_data = response.json()
-    record_data = response_data['results'][0]
+    json_filter_list = json.dumps(filter_list)
+
+    with patch.object(
+        records, "get_records", side_effect=records.get_records
+    ) as mock_infer:
+        response = client.get(
+            f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
+        )
+        response_data = response.json()
 
     assert response.status_code == 200
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 2
-    for column_name in table.sa_column_names:
-        assert column_name in record_data
+
+    assert mock_infer.call_args is not None
+    assert mock_infer.call_args[1]['filters'] == filter_list
 
 
 def test_record_list_pagination_limit(create_table, client):
