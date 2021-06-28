@@ -13,21 +13,11 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 
+from decouple import Csv, config as decouple_config
+from dj_database_url import parse as db_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "2gr6ud88x=(p855_5nbj_+7^bw-iz&n7ldqv%94mjaecl+b9=4"
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -75,30 +65,33 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 # TODO: Add to documentation that database keys should not be than 128 characters.
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "mathesar_django",
-        "USER": "mathesar",
-        "PASSWORD": "mathesar",
-        "HOST": "db",
-        "PORT": 5432,
-    },
-    "mathesar_tables": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "mathesar",
-        "USER": "mathesar",
-        "PASSWORD": "mathesar",
-        "HOST": "db",
-        "PORT": 5432,
-    },
+    decouple_config('DJANGO_DATABASE_KEY'): decouple_config('DJANGO_DATABASE_URL', cast=db_url),
+    decouple_config('MATHESAR_DATABASE_KEY'): decouple_config('MATHESAR_DATABASE_URL', cast=db_url)
 }
 
+# pytest-django will create a new database named 'test_{DATABASES[table_db]['NAME']}'
+# and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
+if decouple_config('TEST', default=False, cast=bool):
+    DATABASES[decouple_config('MATHESAR_DATABASE_KEY')]['TEST'] = {
+        'NAME': DATABASES[decouple_config('MATHESAR_DATABASE_KEY')]['NAME']
+    }
+
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = decouple_config('SECRET_KEY')
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = decouple_config('DEBUG', default=False, cast=bool)
+
+ALLOWED_HOSTS = decouple_config('ALLOWED_HOSTS', cast=Csv())
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

@@ -172,6 +172,7 @@ Temporary Items
 
 
 ## REPO-SPECIFIC ##
+.env
 .volumes/
 .media/
 docs/_build/

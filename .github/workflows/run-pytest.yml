@@ -14,6 +14,9 @@ jobs:
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
 
+      - name: Copy env file
+        run: cp .env.example .env
+
       - name: Build the stack
         run: docker-compose up --build -d
 
