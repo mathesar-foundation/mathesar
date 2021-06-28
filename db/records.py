@@ -1,7 +1,7 @@
 import logging
 from sqlalchemy import delete, select, Column
 from sqlalchemy.inspection import inspect
-from sqlalchemy_filters import apply_filters
+from sqlalchemy_filters import apply_filters, apply_sort
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +40,11 @@ def get_records(
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
     """
+    query = select(table)
+    if order_by:
+        query = apply_sort(query, order_by, table)
     query = (
-        select(table)
-        .order_by(*order_by)
+        query
         .limit(limit)
         .offset(offset)
     )
