@@ -4,6 +4,7 @@ from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
 from django.core.cache import cache
+from rest_framework.decorators import action
 from django_filters import rest_framework as filters
 from sqlalchemy_filters.exceptions import BadFilterFormat, FieldNotFound
 
@@ -15,8 +16,8 @@ from mathesar.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer,
 )
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
-from mathesar.utils.tables import reflect_tables_from_schema
-from mathesar.utils.api import create_table_from_datafile, create_datafile
+from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
+from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
 from mathesar.forms.forms import RecordListFilterForm
 
@@ -72,6 +73,12 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
             return create_table_from_datafile(request, serializer.validated_data)
         else:
             raise ValidationError(serializer.errors)
+
+    @action(methods=['get'], detail=True)
+    def type_suggestions(self, request, pk=None):
+        table = self.get_object()
+        col_types = get_table_column_types(table)
+        return Response(col_types)
 
 
 class RecordViewSet(viewsets.ViewSet):

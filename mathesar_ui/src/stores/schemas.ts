@@ -1,6 +1,7 @@
 import { writable, derived, Readable } from 'svelte/store';
 import { preloadCommonData, Schema, SchemaEntry } from '@mathesar/utils/preloadData';
 import { getAPI, States } from '@mathesar/utils/api';
+import type { CancellablePromise } from '@mathesar/components';
 
 interface SchemaMapEntry extends SchemaEntry {
   children?: number[],
@@ -57,6 +58,8 @@ const schemaWriteStore = writable<SchemaStoreData>({
   data: [],
 });
 
+let schemaRequest: CancellablePromise<SchemaResponse>;
+
 export async function reloadSchemas(): Promise<void> {
   schemaWriteStore.update((currentData) => ({
     ...currentData,
@@ -64,7 +67,9 @@ export async function reloadSchemas(): Promise<void> {
   }));
 
   try {
-    const response = await getAPI<SchemaResponse>('/schemas/');
+    schemaRequest?.cancel();
+    schemaRequest = getAPI<SchemaResponse>('/schemas/');
+    const response = await schemaRequest;
     const data = response.results || [];
     schemaWriteStore.set({
       state: States.Done,
