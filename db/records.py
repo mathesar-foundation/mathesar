@@ -1,5 +1,5 @@
 import logging
-from sqlalchemy import delete, select, and_, Column
+from sqlalchemy import delete, select, Column
 from sqlalchemy.inspection import inspect
 from sqlalchemy_filters import apply_filters
 

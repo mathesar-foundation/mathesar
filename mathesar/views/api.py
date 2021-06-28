@@ -5,6 +5,7 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateMode
 from rest_framework.response import Response
 from django.core.cache import cache
 from django_filters import rest_framework as filters
+from sqlalchemy_filters.exceptions import BadFilterFormat, FieldNotFound
 
 
 from mathesar.database.utils import get_non_default_database_keys
@@ -83,8 +84,13 @@ class RecordViewSet(viewsets.ViewSet):
         paginator = TableLimitOffsetPagination()
         filter_form = RecordListFilterForm(request.GET)
         if filter_form.is_valid():
-            records = paginator.paginate_queryset(self.queryset, request, table_pk,
-                                                  filters=filter_form.cleaned_data['filters'])
+            try:
+                records = paginator.paginate_queryset(
+                    self.queryset, request, table_pk,
+                    filters=filter_form.cleaned_data['filters']
+                )
+            except (FieldNotFound, BadFilterFormat) as e:
+                raise ValidationError({'filters': e})
             serializer = RecordSerializer(records, many=True)
             return paginator.get_paginated_response(serializer.data)
         else:
