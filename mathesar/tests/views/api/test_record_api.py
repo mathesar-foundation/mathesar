@@ -220,3 +220,54 @@ def test_record_404(create_table, client):
     response = client.get(f'/api/v0/tables/{table.id}/records/{record_id}/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
+
+
+def _get_filter_error_response(create_table, client, table_name, filter_list):
+    table = create_table(table_name)
+    filter_list = json.dumps(filter_list)
+    response = client.get(f'/api/v0/tables/{table.id}/records/?filters={filter_list}')
+    assert response.status_code == 400
+    return response
+
+
+def test_record_list_filter_invalid_field(create_table, client):
+    table_name = 'NASA Record List Filter Invalid Field'
+    filter_list = [{'field': 'Doesnt Exist', 'op': '==', 'value': 'test'}]
+    response = _get_filter_error_response(create_table, client, table_name, filter_list)
+    assert 'has no column' in response.json()['filters']
+
+
+def test_record_list_filter_invalid_format(create_table, client):
+    table_name = 'NASA Record List Filter Invalid Format'
+    filter_list = [('field', 'Doesnt Exist', 'op', '==', 'value', 'test')]
+    response = _get_filter_error_response(create_table, client, table_name, filter_list)
+    assert 'should be a dictionary' in response.json()['filters']
+
+
+def test_record_list_filter_invalid_op(create_table, client):
+    table_name = 'NASA Record List Filter Invalid Op'
+    op = '<><><>'
+    filter_list = [{'field': 'Center', 'op': op, 'value': 'test'}]
+    response = _get_filter_error_response(create_table, client, table_name, filter_list)
+    assert f'Operator `{op}` not valid.' == response.json()['filters']
+
+
+def test_record_list_filter_invalid_boolean(create_table, client):
+    table_name = 'NASA Record List Filter Invalid Boolean'
+    filter_list = [{'and': []}]
+    response = _get_filter_error_response(create_table, client, table_name, filter_list)
+    assert 'must have one or more arguments' in response.json()['filters']
+
+
+def test_record_list_filter_missing_field(create_table, client):
+    table_name = 'NASA Record List Filter Missing Field'
+    filter_list = [{'op': '==', 'value': 'test'}]
+    response = _get_filter_error_response(create_table, client, table_name, filter_list)
+    assert 'is a mandatory filter attribute' in response.json()['filters']
+
+
+def test_record_list_filter_missing_value(create_table, client):
+    table_name = 'NASA Record List Filter Missing Value'
+    filter_list = [{'field': 'Center'}]
+    response = _get_filter_error_response(create_table, client, table_name, filter_list)
+    assert 'must be provided' in response.json()['filters']
