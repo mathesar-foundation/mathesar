@@ -9,11 +9,19 @@ from mathesar.models import Table
 from mathesar.models import DataFile, Schema
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.views import api
+from db.tests.types import fixtures
 
 
-@pytest.fixture
-def schema(test_db_name):
-    return create_schema_and_object('table_tests', test_db_name)
+engine_with_types = fixtures.engine_with_types
+engine_email_type = fixtures.engine_email_type
+temporary_testing_schema = fixtures.temporary_testing_schema
+
+
+@pytest.fixture(scope='module')
+def schema(django_db_setup, django_db_blocker, test_db_name):
+    # We have to do some additional work to access the DB at module scope
+    with django_db_blocker.unblock():
+        return create_schema_and_object('table_tests', test_db_name)
 
 
 @pytest.fixture
@@ -207,6 +215,34 @@ def test_table_detail(create_table, client):
     check_table_response(response_table, table, table_name)
 
 
+def test_table_type_suggestion(client, schema, engine_email_type):
+    table_name = 'Type Inference Table'
+    file = 'mathesar/tests/data/type_inference.csv'
+    with open(file, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    body = {
+        'data_files': [data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response_table = client.post('/api/v0/tables/', body).json()
+    table = Table.objects.get(id=response_table['id'])
+
+    EXPECTED_TYPES = {
+        'col_1': 'NUMERIC',
+        'col_2': 'BOOLEAN',
+        'col_3': 'BOOLEAN',
+        'col_4': 'VARCHAR',
+        'col_5': 'VARCHAR',
+        'col_6': 'NUMERIC'
+    }
+    response = client.get(f'/api/v0/tables/{table.id}/type_suggestions/')
+    response_table = response.json()
+    assert response.status_code == 200
+    assert response_table == EXPECTED_TYPES
+
+
 def test_table_create_from_datafile(client, data_file, schema):
     num_tables = Table.objects.count()
     table_name = 'test_table'
@@ -231,6 +267,12 @@ def test_table_create_from_datafile(client, data_file, schema):
 
 def test_table_404(client):
     response = client.get('/api/v0/tables/3000/')
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'
+
+
+def test_table_type_suggestion_404(client):
+    response = client.get('/api/v0/tables/3000/type_suggestions/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
 
