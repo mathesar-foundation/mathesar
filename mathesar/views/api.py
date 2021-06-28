@@ -88,6 +88,17 @@ class ColumnViewSet(viewsets.ViewSet):
         serializer = ColumnSerializer(column)
         return Response(serializer.data)
 
+    def create(self, request, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        # We only support adding a single column through the API.
+        serializer = ColumnSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            column = table.add_column(request.data)
+            out_serializer = ColumnSerializer(column)
+            return Response(out_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            raise ValidationError(serializer.errors)
+
 
 class RecordViewSet(viewsets.ViewSet):
     # There is no "update" method.

@@ -5,7 +5,7 @@ from django.utils.functional import cached_property
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.utils import models as model_utils
-from db import tables, records, schemas
+from db import tables, records, schemas, columns
 
 NAME_CACHE_INTERVAL = 60 * 5
 
@@ -95,6 +95,15 @@ class Table(DatabaseObject):
     @property
     def sa_column_names(self):
         return self.sa_columns.keys()
+
+    def add_column(self, column_data):
+        return columns.create_column(
+            self.schema.name,
+            self.name,
+            column_data["name"],
+            column_data["type"],
+            self.schema._sa_engine
+        )
 
     @property
     def sa_num_records(self):

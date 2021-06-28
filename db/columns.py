@@ -1,5 +1,9 @@
+import logging
 from sqlalchemy import Column, Integer, ForeignKey, Table, DDL, MetaData
 from db import constants
+from db.types import alteration
+
+logger = logging.getLogger(__name__)
 
 
 NULLABLE = "nullable"
@@ -101,6 +105,28 @@ def rename_column(schema, table_name, column_name, new_column_name, engine):
         prepared_new_column_name = _preparer.quote(new_column_name)
         alter_stmt = f"""
         ALTER TABLE {prepared_table_name}
-        RENAME {prepared_column_name} TO {prepared_new_column_name}
+        RENAME {prepared_column_name} TO {prepared_new_column_name};
         """
         conn.execute(DDL(alter_stmt))
+
+
+def create_column(schema, table_name, column_name, column_type, engine):
+    _preparer = engine.dialect.identifier_preparer
+    supported_types = alteration.get_supported_alter_column_types(engine)
+    db_type = supported_types.get(column_type.lower())
+    if db_type is None:
+        logger.warning("Requested type not supported. falling back to String")
+        db_type = supported_types[alteration.STRING]
+
+    table = Table(table_name, MetaData(), schema=schema, autoload_with=engine)
+    prepared_table_name = _preparer.format_table(table)
+    prepared_column_name = _preparer.quote(column_name)
+    prepared_type_name = db_type().compile(dialect=engine.dialect)
+    alter_stmt = f"""
+    ALTER TABLE {prepared_table_name}
+      ADD COLUMN {prepared_column_name} {prepared_type_name};
+    """
+    with engine.begin() as conn:
+        conn.execute(DDL(alter_stmt))
+    mod_table = Table(table_name, MetaData(), schema=schema, autoload_with=engine)
+    return mod_table.columns[column_name]
