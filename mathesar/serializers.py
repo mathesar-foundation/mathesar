@@ -44,7 +44,7 @@ class TableSerializer(serializers.ModelSerializer):
         if isinstance(obj, Table):
             # Only get records if we are serializing an existing table
             request = self.context['request']
-            return request.build_absolute_uri(reverse('table-records-list', kwargs={'table_pk': obj.pk}))
+            return request.build_absolute_uri(reverse('table-record-list', kwargs={'table_pk': obj.pk}))
         else:
             return None
 

@@ -10,7 +10,9 @@ from django_filters import rest_framework as filters
 from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile
 from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
-from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer
+from mathesar.serializers import (
+    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
+)
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
 from mathesar.utils.tables import reflect_tables_from_schema
 from mathesar.utils.api import create_table_from_datafile, create_datafile
@@ -68,6 +70,23 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
             return create_table_from_datafile(request, serializer.validated_data)
         else:
             raise ValidationError(serializer.errors)
+
+
+class ColumnViewSet(viewsets.ViewSet):
+    queryset = Table.objects.all().order_by('-created_at')
+
+    def list(self, request, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        columns = table.sa_columns
+        serializer = ColumnSerializer(columns, many=True)
+        # return paginator.get_paginated_response(serializer.data)
+        return Response({'data': serializer.data})
+
+    def retrieve(self, request, pk=None, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        column = table.sa_columns[int(pk)]
+        serializer = ColumnSerializer(column)
+        return Response(serializer.data)
 
 
 class RecordViewSet(viewsets.ViewSet):
