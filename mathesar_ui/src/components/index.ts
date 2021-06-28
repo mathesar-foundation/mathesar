@@ -1,10 +1,13 @@
+// Utility Classes
+export { default as CancellablePromise } from './common/utils/CancellablePromise';
+
+// Utility Functions
+export * from './common/utils/filterUtils';
+
 // Actions
 export { default as portal } from './common/actions/portal';
 export { default as popper } from './common/actions/popper';
 export { default as clickOffBounds } from './common/actions/clickOffBounds';
-
-// Utils
-export * from './common/utils/filterUtils';
 
 // Components
 export { default as TextInput } from './text-input/TextInput.svelte';

@@ -23,16 +23,22 @@
 
   let expandedSchemas = new Set();
   const tableMap = $schemas.tableMap as TableMap;
-  const tables: Tab[] = URLQueryHandler.getAllTableConfigs(database).map(
+  const tables: Tab[] = [];
+  URLQueryHandler.getAllTableConfigs(database).forEach(
     (entry) => {
       const schemaTable = tableMap?.get(entry.id);
-      expandedSchemas.add(schemaTable?.parent);
-      return {
-        id: entry.id,
-        label: schemaTable?.name,
-      };
+      if (schemaTable) {
+        expandedSchemas.add(schemaTable?.parent);
+        tables.push({
+          id: entry.id,
+          label: schemaTable?.name,
+        });
+      } else {
+        URLQueryHandler.removeTable(database, entry.id);
+      }
     },
   );
+
   let tabs: Tab[] = (getAllImportDetails(database) as unknown as Tab[]).concat(tables);
   let activeTab = tables.find(
     (table) => table.id === URLQueryHandler.getActiveTable(database),
