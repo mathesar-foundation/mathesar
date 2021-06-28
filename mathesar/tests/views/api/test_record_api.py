@@ -86,20 +86,29 @@ def test_record_list_filter(create_table, client):
 
 
 def test_record_list_sort(create_table, client):
-    table_name = 'NASA Record List Filter'
+    table_name = 'NASA Record List Order'
     table = create_table(table_name)
 
     order_by = [
         {'field': 'Center', 'direction': 'desc'},
         {'field': 'Case Number', 'direction': 'asc'},
     ]
-    order_by = json.dumps(order_by)
-    response = client.get(f'/api/v0/tables/{table.id}/records/?order_by={order_by}')
-    response_data = response.json()
+    json_order_by = json.dumps(order_by)
+
+    with patch.object(
+        records, "get_records", side_effect=records.get_records
+    ) as mock_infer:
+        response = client.get(
+            f'/api/v0/tables/{table.id}/records/?order_by={json_order_by}'
+        )
+        response_data = response.json()
 
     assert response.status_code == 200
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 50
+
+    assert mock_infer.call_args is not None
+    assert mock_infer.call_args[1]['order_by'] == order_by
 
 
 def test_record_list_pagination_limit(create_table, client):
