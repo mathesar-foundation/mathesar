@@ -7,4 +7,4 @@ SQLAlchemy==1.4.18
 clevercsv==0.6.8
 django-filter==2.4.0
 django-property-filter==1.1.0
-git+git://github.com/centerofci/sqlalchemy-filters#egg=sqlalchemy_filters
+git+git://github.com/centerofci/sqlalchemy-filters@models_to_tables#egg=sqlalchemy_filters

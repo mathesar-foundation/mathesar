@@ -48,7 +48,7 @@ def get_records(
         .offset(offset)
     )
     if filters:
-        query = apply_filters(query, filters)
+        query = apply_filters(query, filters, table)
     with engine.begin() as conn:
         return conn.execute(query).fetchall()
 
@@ -91,6 +91,17 @@ def get_distinct_tuple_values(
     with engine.begin() as conn:
         res = conn.execute(query).fetchall()
     return [tuple(zip(column_objects, row)) for row in res]
+
+
+def distinct_tuple_to_filter(distinct_tuple):
+    filters = []
+    for col, value in distinct_tuple:
+        filters.append({
+            "field": col,
+            "op": "==",
+            "value": value,
+        })
+    return filters
 
 
 def create_record_or_records(table, engine, record_data):

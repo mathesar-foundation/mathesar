@@ -84,7 +84,10 @@ def test_get_records_orders_before_limiting(roster_table_obj):
 
 def test_get_records_filters_using_col_str_names(roster_table_obj):
     roster, engine = roster_table_obj
-    filter_list = [("Student Name", "Amy Gamble"), ("Subject", "Math")]
+    filter_list = [
+        {"field": "Student Name", "op": "==", "value": "Amy Gamble"},
+        {"field": "Subject", "op": "==", "value": "Math"}
+    ]
     record_list = records.get_records(
         roster, engine, filters=filter_list
     )
@@ -100,8 +103,8 @@ def test_get_records_filters_using_col_str_names(roster_table_obj):
 def test_get_records_filters_using_col_objects(roster_table_obj):
     roster, engine = roster_table_obj
     filter_list = [
-        (roster.columns["Student Name"], "Amy Gamble"),
-        (roster.columns["Subject"], "Math"),
+        {"field": roster.columns["Student Name"], "op": "==", "value": "Amy Gamble"},
+        {"field": roster.columns["Subject"], "op": "==", "value": "Math"}
     ]
     record_list = records.get_records(
         roster, engine, filters=filter_list
@@ -118,8 +121,8 @@ def test_get_records_filters_using_col_objects(roster_table_obj):
 def test_get_records_filters_using_mixed_col_objects_and_str(roster_table_obj):
     roster, engine = roster_table_obj
     filter_list = [
-        (roster.columns["Student Name"], "Amy Gamble"),
-        ("Subject", "Math"),
+        {"field": roster.columns["Student Name"], "op": "==", "value": "Amy Gamble"},
+        {"field": "Subject", "op": "==", "value": "Math"}
     ]
     record_list = records.get_records(
         roster, engine, filters=filter_list
@@ -136,8 +139,8 @@ def test_get_records_filters_using_mixed_col_objects_and_str(roster_table_obj):
 def test_get_records_filters_with_numeric_col(roster_table_obj):
     roster, engine = roster_table_obj
     filter_list = [
-        (roster.columns["Student Name"], "Amy Gamble"),
-        (roster.columns["Grade"], 74),
+        {"field": roster.columns["Student Name"], "op": "==", "value": "Amy Gamble"},
+        {"field": roster.columns["Grade"], "op": "==", "value": 74}
     ]
     record_list = records.get_records(
         roster, engine, filters=filter_list
@@ -154,8 +157,8 @@ def test_get_records_filters_with_numeric_col(roster_table_obj):
 def test_get_records_filters_with_miss(roster_table_obj):
     roster, engine = roster_table_obj
     filter_list = [
-        (roster.columns["Student Name"], "Amy Gamble"),
-        (roster.columns["Grade"], 75),
+        {"field": roster.columns["Student Name"], "op": "==", "value": "Amy Gamble"},
+        {"field": roster.columns["Grade"], "op": "==", "value": 75}
     ]
     record_list = records.get_records(
         roster, engine, filters=filter_list
@@ -248,8 +251,9 @@ def test_get_distinct_tuple_values_feeds_get_records(roster_table_obj):
     distinct_tuples = records.get_distinct_tuple_values(
         column_list, engine, table=roster, limit=2
     )
+    filter_list = records.distinct_tuple_to_filter(distinct_tuples[0])
     record_list = records.get_records(
-        roster, engine, filters=distinct_tuples[0]
+        roster, engine, filters=filter_list
     )
     assert all(
         [
