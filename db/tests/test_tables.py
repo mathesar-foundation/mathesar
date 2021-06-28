@@ -343,7 +343,7 @@ def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
         table_name, schema, column_list, engine
     )
     with patch.object(tables.inference, "infer_column_type") as mock_infer:
-        tables.infer_table_column_types(
+        tables.update_table_column_types(
             schema,
             table_name,
             engine
@@ -351,7 +351,7 @@ def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
     mock_infer.assert_not_called()
 
 
-def test_infer_table_column_types_infers_non_default_types(engine_with_schema):
+def test_update_table_column_types_infers_non_default_types(engine_with_schema):
     col1 = Column("col1", String)
     col2 = Column("col2", String)
     column_list = [col1, col2]
@@ -361,7 +361,7 @@ def test_infer_table_column_types_infers_non_default_types(engine_with_schema):
         table_name, schema, column_list, engine
     )
     with patch.object(tables.inference, "infer_column_type") as mock_infer:
-        tables.infer_table_column_types(
+        tables.update_table_column_types(
             schema,
             table_name,
             engine
@@ -383,7 +383,7 @@ def test_infer_table_column_types_infers_non_default_types(engine_with_schema):
     mock_infer.assert_has_calls(expect_calls)
 
 
-def test_infer_table_column_types_skips_pkey_columns(engine_with_schema):
+def test_update_table_column_types_skips_pkey_columns(engine_with_schema):
     column_list = [Column("checkcol", String, primary_key=True)]
     engine, schema = engine_with_schema
     table_name = "t1"
@@ -391,7 +391,7 @@ def test_infer_table_column_types_skips_pkey_columns(engine_with_schema):
         table_name, schema, column_list, engine
     )
     with patch.object(tables.inference, "infer_column_type") as mock_infer:
-        tables.infer_table_column_types(
+        tables.update_table_column_types(
             schema,
             table_name,
             engine
@@ -399,12 +399,12 @@ def test_infer_table_column_types_skips_pkey_columns(engine_with_schema):
     mock_infer.assert_not_called()
 
 
-def test_infer_table_column_types_skips_fkey_columns(
+def test_update_table_column_types_skips_fkey_columns(
         extracted_remainder_roster
 ):
     _, remainder, _, engine, schema = extracted_remainder_roster
     with patch.object(tables.inference, "infer_column_type") as mock_infer:
-        tables.infer_table_column_types(
+        tables.update_table_column_types(
             schema,
             remainder.name,
             engine
