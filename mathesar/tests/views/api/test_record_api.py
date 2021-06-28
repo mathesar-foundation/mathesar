@@ -1,3 +1,6 @@
+import json
+
+
 def test_record_list(create_table, client):
     """
     Desired format:
@@ -38,6 +41,34 @@ def test_record_list(create_table, client):
     assert response.status_code == 200
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 50
+    for column_name in table.sa_column_names:
+        assert column_name in record_data
+
+
+def test_record_list_filter(create_table, client):
+    table_name = 'NASA Record List Filter'
+    table = create_table(table_name)
+
+    filter_list = [
+        {'or': [
+            {'and': [
+                {'field': 'Center', 'op': '==', 'value': 'NASA Ames Research Center'},
+                {'field': 'Case Number', 'op': '==', 'value': 'ARC-14048-1'}
+            ]},
+            {'and': [
+                {'field': 'Center', 'op': '==', 'value': 'NASA Kennedy Space Center'},
+                {'field': 'Case Number', 'op': '==', 'value': 'KSC-12871'}
+            ]}
+        ]}
+    ]
+    filter_list = json.dumps(filter_list)
+    response = client.get(f'/api/v0/tables/{table.id}/records/?filters={filter_list}')
+    response_data = response.json()
+    record_data = response_data['results'][0]
+
+    assert response.status_code == 200
+    assert response_data['count'] == 1393
+    assert len(response_data['results']) == 2
     for column_name in table.sa_column_names:
         assert column_name in record_data
 
