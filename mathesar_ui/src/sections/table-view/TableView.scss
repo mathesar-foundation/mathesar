@@ -91,9 +91,14 @@ section.table-section .tab-container {
       border-top: 1px solid #efefef;
       position: relative;
 
-      .pagination {
-        margin-left: 10px;
-        position: relative;
+      .rt-opts {
+        display: flex;
+        align-items: center;
+
+        .pagination {
+          margin-left: 10px;
+          position: relative;
+        }
       }
     }
   }
