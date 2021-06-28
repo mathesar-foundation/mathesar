@@ -30,7 +30,7 @@ class ColumnLimitOffsetPagination(DefaultLimitOffsetPagination):
 
 class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
 
-    def paginate_queryset(self, queryset, request, table_id, filters=[]):
+    def paginate_queryset(self, queryset, request, table_id, filters=[], order_by=[]):
         self.limit = self.get_limit(request)
         if self.limit is None:
             self.limit = self.default_limit
@@ -39,4 +39,5 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         table = queryset.get(id=table_id)
         self.count = table.sa_num_records
         self.request = request
-        return table.get_records(self.limit, self.offset, filters=filters)
+        return table.get_records(self.limit, self.offset,
+                                 filters=filters, order_by=order_by)
