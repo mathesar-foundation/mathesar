@@ -1,11 +1,18 @@
 import warnings
+from time import time
 from sqlalchemy import (
     Column, String, Table, MetaData, func, select, ForeignKey, literal, exists,
     join, inspect, and_
 )
+from sqlalchemy.schema import DDLElement
+from sqlalchemy.ext import compiler
 
 from db import columns, constants, schemas
 from db.types import inference
+
+
+TEMP_SCHEMA = f"{constants.MATHESAR_PREFIX}temp_schema"
+TEMP_TABLE = f"{constants.MATHESAR_PREFIX}temp_table_%s"
 
 
 def create_string_column_table(name, schema, column_names, engine):
@@ -389,11 +396,7 @@ def get_count(table, engine):
         return conn.execute(query).scalar()
 
 
-def infer_table_column_types(
-        schema,
-        table_name,
-        engine,
-):
+def update_table_column_types(schema, table_name, engine):
     table = reflect_table(table_name, schema, engine)
     # we only want to infer (modify) the type of non-default columns
     inferable_column_names = (
@@ -409,3 +412,48 @@ def infer_table_column_types(
             column_name,
             engine,
         )
+
+
+class CreateTableAs(DDLElement):
+    def __init__(self, name, selectable):
+        self.name = name
+        self.selectable = selectable
+
+
+@compiler.compiles(CreateTableAs)
+def compile(element, compiler, **_):
+    return "CREATE TABLE %s AS (%s)" % (
+        element.name,
+        compiler.sql_compiler.process(element.selectable, literal_binds=True),
+    )
+
+
+def infer_table_column_types(schema, table_name, engine):
+    table = reflect_table(table_name, schema, engine)
+
+    temp_name = TEMP_TABLE % (int(time()))
+    schemas.create_schema(TEMP_SCHEMA, engine)
+    with engine.begin() as conn:
+        while engine.dialect.has_table(conn, temp_name, schema=TEMP_SCHEMA):
+            temp_name = TEMP_TABLE.format(int(time()))
+
+    full_temp_name = f"{TEMP_SCHEMA}.{temp_name}"
+
+    select_table = select(table)
+    with engine.begin() as conn:
+        conn.execute(CreateTableAs(full_temp_name, select_table))
+    temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
+
+    try:
+        update_table_column_types(
+            TEMP_SCHEMA, temp_table.name, engine,
+        )
+    except Exception as e:
+        # Ensure the temp table is deleted
+        temp_table.drop()
+        raise e
+    else:
+        temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
+        types = [c.type.__class__ for c in temp_table.columns]
+        temp_table.drop()
+        return types

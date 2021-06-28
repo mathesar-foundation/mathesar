@@ -30,6 +30,7 @@ def alter_column_type(
     _preparer = engine.dialect.identifier_preparer
     supported_types = get_supported_alter_column_types(engine)
     target_type = supported_types.get(target_type_str.lower())
+
     with engine.begin() as conn:
         metadata = MetaData(bind=engine, schema=schema)
         table = Table(
