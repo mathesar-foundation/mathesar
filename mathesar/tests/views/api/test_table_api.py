@@ -6,14 +6,22 @@ from django.core.files import File
 from sqlalchemy import text
 
 from mathesar.models import Table
-from mathesar.models import DataFile
+from mathesar.models import DataFile, Schema
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.views import api
+from db.tests.types import fixtures
 
 
-@pytest.fixture
-def schema(test_db_name):
-    return create_schema_and_object('table_tests', test_db_name)
+engine_with_types = fixtures.engine_with_types
+engine_email_type = fixtures.engine_email_type
+temporary_testing_schema = fixtures.temporary_testing_schema
+
+
+@pytest.fixture(scope='module')
+def schema(django_db_setup, django_db_blocker, test_db_name):
+    # We have to do some additional work to access the DB at module scope
+    with django_db_blocker.unblock():
+        return create_schema_and_object('table_tests', test_db_name)
 
 
 @pytest.fixture
@@ -36,6 +44,15 @@ def check_table_response(response_table, table, table_name):
     assert response_table['records'].startswith('http')
     assert '/api/v0/tables/' in response_table['records']
     assert response_table['records'].endswith('/records/')
+
+
+def check_table_filter_response(response, status_code=None, count=None):
+    response_data = response.json()
+    if status_code is not None:
+        assert response.status_code == status_code
+    if count is not None:
+        assert response_data['count'] == count
+        assert len(response_data['results']) == count
 
 
 def test_table_list(create_table, client):
@@ -82,21 +99,18 @@ def test_table_list(create_table, client):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_list_filter(create_table, client):
+def test_table_list_filter_name(create_table, client):
     tables = {
-        'Nasa Table List Filter': create_table('Nasa Table List Filter'),
-        'Filler Table 1': create_table('Filler Table 1'),
-        'Filler Table 2': create_table('Filler Table 2')
+        'Filter Name 1': create_table('Filter Name 1'),
+        'Filter Name 2': create_table('Filter Name 2'),
+        'Filter Name 3': create_table('Filter Name 3')
     }
 
-    filter_tables = ['Nasa Table List Filter', 'Filler Table 1']
+    filter_tables = ['Filter Name 1', 'Filter Name 2']
     query_str = ','.join(filter_tables)
-
     response = client.get(f'/api/v0/tables/?name={query_str}')
     response_data = response.json()
-    assert response.status_code == 200
-    assert response_data['count'] == 2
-    assert len(response_data['results']) == 2
+    check_table_filter_response(response, status_code=200, count=2)
 
     response_tables = {res['name']: res for res in response_data['results']}
     for table_name in filter_tables:
@@ -104,6 +118,87 @@ def test_table_list_filter(create_table, client):
         table = tables[table_name]
         response_table = response_tables[table_name]
         check_table_response(response_table, table, table_name)
+
+
+def test_table_list_filter_schema(create_table, client):
+    tables = {
+        'Schema 1': create_table('Filter Schema 1', schema='Schema 1'),
+        'Schema 2': create_table('Filter Schema 2', schema='Schema 2'),
+        'Schema 3': create_table('Filter Schema 3', schema='Schema 3')
+    }
+
+    filter_tables = ['Schema 2', 'Schema 3']
+    query_str = ','.join(filter_tables)
+    response = client.get(f'/api/v0/tables/?schema={query_str}')
+    response_data = response.json()
+    check_table_filter_response(response, status_code=200, count=2)
+
+    response_tables = {Schema.objects.get(id=res['schema']).name: res
+                       for res in response_data['results']}
+    for schema_name in filter_tables:
+        assert schema_name in response_tables
+        table = tables[schema_name]
+        response_table = response_tables[schema_name]
+        check_table_response(response_table, table, table.name)
+
+
+@pytest.mark.parametrize('timestamp_type', ['created', 'updated'])
+def test_table_list_filter_timestamps(create_table, client, timestamp_type):
+    table_name = f'Fitler {timestamp_type}'
+    table = create_table(table_name)
+    query_str = '2020-01-01 8:00'
+
+    response = client.get(f'/api/v0/tables/?{timestamp_type}_before={query_str}')
+    response_data = response.json()
+    check_table_filter_response(response, status_code=200, count=0)
+
+    response = client.get(f'/api/v0/tables/?{timestamp_type}_after={query_str}')
+    response_data = response.json()
+    check_table_filter_response(response, status_code=200, count=1)
+    check_table_response(response_data['results'][0], table, table_name)
+
+    timestamp = table.created_at if timestamp_type == 'created' else table.updated_at
+    response = client.get(f'/api/v0/tables/?{timestamp_type}={timestamp}')
+    response_data = response.json()
+    check_table_filter_response(response, status_code=200, count=1)
+    check_table_response(response_data['results'][0], table, table_name)
+
+
+def test_table_list_filter_import_verified(create_table, client):
+    tables = {
+        True: create_table('Filter Verified 1'),
+        False: create_table('Filter Verified 2'),
+    }
+    for verified, table in tables.items():
+        table.import_verified = verified
+        table.save()
+
+    for verified, table in tables.items():
+        query_str = str(verified).lower()
+        response = client.get(f'/api/v0/tables/?import_verified={query_str}')
+        response_data = response.json()
+        check_table_filter_response(response, status_code=200, count=1)
+        check_table_response(response_data['results'][0], table, table.name)
+
+
+def test_table_list_filter_imported(create_table, client):
+    tables = {
+        None: create_table('Filter Imported 1'),
+        False: create_table('Filter Imported 2'),
+        True: create_table('Filter Imported 3'),
+    }
+    for verified, table in tables.items():
+        table.import_verified = verified
+        table.save()
+
+    response = client.get('/api/v0/tables/?not_imported=false')
+    check_table_filter_response(response, status_code=200, count=2)
+
+    table = tables[None]
+    response = client.get('/api/v0/tables/?not_imported=true')
+    response_data = response.json()
+    check_table_filter_response(response, status_code=200, count=1)
+    check_table_response(response_data['results'][0], table, table.name)
 
 
 def test_table_detail(create_table, client):
@@ -118,6 +213,34 @@ def test_table_detail(create_table, client):
     response_table = response.json()
     assert response.status_code == 200
     check_table_response(response_table, table, table_name)
+
+
+def test_table_type_suggestion(client, schema, engine_email_type):
+    table_name = 'Type Inference Table'
+    file = 'mathesar/tests/data/type_inference.csv'
+    with open(file, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    body = {
+        'data_files': [data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response_table = client.post('/api/v0/tables/', body).json()
+    table = Table.objects.get(id=response_table['id'])
+
+    EXPECTED_TYPES = {
+        'col_1': 'NUMERIC',
+        'col_2': 'BOOLEAN',
+        'col_3': 'BOOLEAN',
+        'col_4': 'VARCHAR',
+        'col_5': 'VARCHAR',
+        'col_6': 'NUMERIC'
+    }
+    response = client.get(f'/api/v0/tables/{table.id}/type_suggestions/')
+    response_table = response.json()
+    assert response.status_code == 200
+    assert response_table == EXPECTED_TYPES
 
 
 def test_table_create_from_datafile(client, data_file, schema):
@@ -144,6 +267,12 @@ def test_table_create_from_datafile(client, data_file, schema):
 
 def test_table_404(client):
     response = client.get('/api/v0/tables/3000/')
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'
+
+
+def test_table_type_suggestion_404(client):
+    response = client.get('/api/v0/tables/3000/type_suggestions/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
 
