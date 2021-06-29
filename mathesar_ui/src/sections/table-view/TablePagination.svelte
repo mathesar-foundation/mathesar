@@ -61,9 +61,11 @@
 
 <Select options={pageSizeOpts} bind:value={selectedPageSize} on:change={setPageSize}/>
 
-{#if pageCount > 0}
-  <div>Showing {offset} - {max} of {total}</div>
-{/if}
+<div class="rt-opts">
+  {#if pageCount > 0}
+    <div>Showing {offset} - {max} of {total}</div>
+  {/if}
 
-<Pagination total={total} pageSize={pageSize} {getLink}
-  bind:page bind:pageCount on:change={pageChanged}/>
+  <Pagination total={total} pageSize={pageSize} {getLink}
+    bind:page bind:pageCount on:change={pageChanged}/>
+</div>

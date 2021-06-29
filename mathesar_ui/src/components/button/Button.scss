@@ -7,6 +7,14 @@ button.btn {
   background: #fff;
   box-shadow: #000 0 0 0 0, #000 0 0 0 0, rgba(0, 0, 0, 0.05) 0 1px 2px 0;
   color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+
+  &.plain {
+    border-color: transparent;
+    border-radius: 0px;
+    box-shadow: none !important;
+  }
 
   &:hover {
     background: #f3f4f5;
@@ -14,5 +22,7 @@ button.btn {
 
   &:active, &:focus {
     border-color: #39a0f5;
+    outline: 0;
+    box-shadow: 0 0 0 2px #2087e633;
   }
 }

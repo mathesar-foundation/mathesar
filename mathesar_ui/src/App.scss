@@ -1,4 +1,4 @@
-$top-pane-height: 64px;
+$top-pane-height: 60px;
 $side-bar-width: 255px;
 
 header {
@@ -15,6 +15,7 @@ header {
     flex-basis: $side-bar-width;
     flex-shrink: 1;
     border-right: 1px solid #efefef;
+    border-bottom: 1px solid #efefef;
     padding: 5px 20px;
 
     >div {
@@ -27,7 +28,7 @@ header {
     display: flex;
     align-items: center;
     padding: 16px;
-    background: #f9f9f9;
+    background: #f6f7fdaa;
   }
 }
 

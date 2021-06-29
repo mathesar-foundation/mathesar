@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie';
+import { CancellablePromise } from '@mathesar-components';
 
 export enum States {
   Idle = 'idle',
@@ -39,20 +40,24 @@ function appendUrlPrefix(url: string | URLObject): string {
   return `${urlPrefix}${url.url}`;
 }
 
-// TODO: Implement cancellable promise for api calls
+export function getAPI<T>(url: string): CancellablePromise<T> {
+  const request = new XMLHttpRequest();
+  request.open('GET', appendUrlPrefix(url));
+  request.setRequestHeader('Content-Type', 'application/json');
+  request.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+  request.send();
 
-export async function getAPI<T>(url: string): Promise<T> {
-  const response = await fetch(appendUrlPrefix(url), {
-    cache: 'no-cache',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': Cookies.get('csrftoken'),
-    },
+  return new CancellablePromise((resolve, reject) => {
+    request.addEventListener('load', () => {
+      if (successStatusCodes.has(request.status)) {
+        resolve(JSON.parse(request.response) as T);
+      } else {
+        reject(new Error('An error has occurred while fetching data'));
+      }
+    });
+  }, () => {
+    request.abort();
   });
-  if (successStatusCodes.has(response.status)) {
-    return await response.json() as T;
-  }
-  throw new Error('An error has occurred while fetching data');
 }
 
 export async function uploadFile<T>(
