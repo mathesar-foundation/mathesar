@@ -47,7 +47,7 @@ def get_records(
         .offset(offset)
     )
     if filters:
-        query = apply_filters(query, filters, table)
+        query = apply_filters(query, filters)
     with engine.begin() as conn:
         return conn.execute(query).fetchall()
 
