@@ -33,9 +33,9 @@ def get_records(
         engine:   SQLAlchemy engine object
         limit:    int, gives number of rows to return
         offset:   int, gives number of rows to skip
-        order_by: list of SQLAlchemy ColumnElements to order by.  Should
-                  usually be either a list of string column names, or a
-                  list of columns from the given table.
+        order_by: list of dictionaries, where each dictionary has a 'field' and
+                  'direction' field.
+                  See https://github.com/centerofci/sqlalchemy-filters for details.
         filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
