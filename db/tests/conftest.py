@@ -8,6 +8,7 @@ APP_SCHEMA = "test_schema"
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "resources")
 ROSTER_SQL = os.path.join(RESOURCES, "roster_create.sql")
+FILTERSORT_SQL = os.path.join(RESOURCES, "filter_sort_create.sql")
 
 
 @pytest.fixture
@@ -24,6 +25,15 @@ def engine_with_schema(engine):
 def engine_with_roster(engine_with_schema):
     engine, schema = engine_with_schema
     with engine.begin() as conn, open(ROSTER_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    return engine, schema
+
+
+@pytest.fixture
+def engine_with_filter_sort(engine_with_schema):
+    engine, schema = engine_with_schema
+    with engine.begin() as conn, open(FILTERSORT_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
     return engine, schema
