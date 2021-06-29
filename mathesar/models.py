@@ -98,11 +98,17 @@ class Table(DatabaseObject):
 
     def add_column(self, column_data):
         return columns.create_column(
-            self.schema.name,
-            self.name,
-            column_data["name"],
-            column_data["type"],
-            self.schema._sa_engine
+            self.schema._sa_engine,
+            self.oid,
+            column_data,
+        )
+
+    def alter_column(self, column_index, column_data):
+        return columns.alter_column(
+            self.schema._sa_engine,
+            self.oid,
+            column_index,
+            column_data,
         )
 
     @property
