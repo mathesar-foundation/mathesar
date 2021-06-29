@@ -32,6 +32,7 @@ class SimpleColumnSerializer(serializers.Serializer):
 
 class ColumnSerializer(SimpleColumnSerializer):
     nullable = serializers.BooleanField(default=True)
+    primary_key = serializers.BooleanField(default=False)
 
 
 class TableSerializer(serializers.ModelSerializer):

@@ -37,7 +37,6 @@ class MathesarColumn(Column):
             foreign_keys=set(),
             primary_key=False,
             nullable=True,
-            unique=False,
     ):
         """
         Construct a new ``MathesarColumn`` object.
@@ -55,7 +54,6 @@ class MathesarColumn(Column):
             type_=sa_type,
             primary_key=primary_key,
             nullable=nullable,
-            unique=unique,
         )
 
     @classmethod
@@ -72,7 +70,6 @@ class MathesarColumn(Column):
             foreign_keys=fkeys,
             primary_key=column.primary_key,
             nullable=column.nullable,
-            unique=column.unique,
         )
 
     @property
@@ -118,15 +115,17 @@ def get_column_index_from_name(table_oid, column_name, engine):
 
 
 def create_column(engine, table_oid, column_data):
-    column_nullable = column_data.get(NULLABLE, True)
     column_type = column_data[TYPE]
+    column_nullable = column_data.get(NULLABLE, True)
     supported_types = alteration.get_supported_alter_column_types(engine)
     sa_type = supported_types.get(column_type.lower())
     if sa_type is None:
         logger.warning("Requested type not supported. falling back to String")
         sa_type = supported_types[alteration.STRING]
     table = tables.reflect_table_from_oid(table_oid, engine)
-    column = MathesarColumn(table.columns[NAME], sa_type, nullable=column_nullable)
+    column = MathesarColumn(
+        table.columns[NAME], sa_type, nullable=column_nullable,
+    )
     with engine.begin() as conn:
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)

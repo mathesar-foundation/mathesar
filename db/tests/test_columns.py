@@ -89,18 +89,6 @@ def test_MC_inits_with_non_empty_foreign_keys(column_builder):
     assert len(fk_names) == 1 and fk_names[0] == fk_target
 
 
-@pytest.mark.parametrize("column_builder", column_builder_list)
-def test_MC_inits_default_non_unique(column_builder):
-    col = column_builder("some_col", String)
-    assert not col.unique
-
-
-@pytest.mark.parametrize("column_builder", column_builder_list)
-def test_MC_inits_unique(column_builder):
-    col = column_builder("some_col", String, unique=True)
-    assert col.unique
-
-
 def test_MC_is_default_when_true():
     for default_col in columns.DEFAULT_COLUMNS:
         dc_definition = columns.DEFAULT_COLUMNS[default_col]
