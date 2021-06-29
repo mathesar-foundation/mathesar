@@ -105,6 +105,11 @@ class ColumnViewSet(viewsets.ViewSet):
         serializer = ColumnSerializer(column)
         return Response(serializer.data)
 
+    def destroy(self, request, pk=None, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        table.drop_column(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class RecordViewSet(viewsets.ViewSet):
     # There is no "update" method.

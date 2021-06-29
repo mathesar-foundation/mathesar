@@ -177,3 +177,20 @@ def retype_column(table_oid, column_index, new_type, engine):
         engine,
     )
     return tables.reflect_table_from_oid(table_oid, engine).columns[column_index]
+
+
+def drop_column(
+        engine,
+        table_oid,
+        column_index,
+):
+    table = tables.reflect_table_from_oid(table_oid, engine)
+    column = table.columns[int(column_index)]
+    _preparer = engine.dialect.identifier_preparer
+    prepared_table_name = _preparer.format_table(table)
+    prepared_column_name = _preparer.format_column(column)
+    alter_stmt = f"""
+    ALTER TABLE {prepared_table_name} DROP COLUMN {prepared_column_name};
+    """
+    with engine.begin() as conn:
+        conn.execute(DDL(alter_stmt))

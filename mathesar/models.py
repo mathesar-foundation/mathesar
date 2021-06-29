@@ -111,6 +111,13 @@ class Table(DatabaseObject):
             column_data,
         )
 
+    def drop_column(self, column_index):
+        columns.drop_column(
+            self.schema._sa_engine,
+            self.oid,
+            column_index,
+        )
+
     @property
     def sa_num_records(self):
         return tables.get_count(self._sa_table, self.schema._sa_engine)
