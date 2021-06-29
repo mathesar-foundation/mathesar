@@ -18,6 +18,7 @@ services:
       - ui_node_modules:/home/node/ui/node_modules
     ports:
       - "3000:3000"
+      - "6006:6006"
     command: bash -c "npm install && npm run dev"
   web:
     build: .

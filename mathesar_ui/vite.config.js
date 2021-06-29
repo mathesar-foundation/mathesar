@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import legacy from '@vitejs/plugin-legacy';
-import svelte from '@sveltejs/vite-plugin-svelte';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 import path from 'path';
 
 export default defineConfig({
@@ -19,6 +19,9 @@ export default defineConfig({
   ],
   optimizeDeps: {
     exclude: ['tinro'],
+  },
+  server: {
+    host: true,
   },
   build: {
     manifest: true,
