@@ -11,6 +11,7 @@ from db.types import alteration
 logger = logging.getLogger(__name__)
 
 
+NAME = "name"
 NULLABLE = "nullable"
 PRIMARY_KEY = "primary_key"
 TYPE = "type"
@@ -114,24 +115,20 @@ def get_column_index_from_name(table_oid, column_name, engine):
 
 
 def create_column(engine, table_oid, column_data):
-    column_name = column_data["name"]
-    column_type = column_data["type"]
+    column_nullable = column_data.get(NULLABLE, True)
+    column_type = column_data[TYPE]
     supported_types = alteration.get_supported_alter_column_types(engine)
     sa_type = supported_types.get(column_type.lower())
     if sa_type is None:
         logger.warning("Requested type not supported. falling back to String")
         sa_type = supported_types[alteration.STRING]
     table = tables.reflect_table_from_oid(table_oid, engine)
-    column = MathesarColumn(column_name, sa_type)
+    column = MathesarColumn(column[NAME], sa_type, nullable=column_nullable)
     with engine.begin() as conn:
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)
-        op.add_column(
-            table.name,
-            column,
-            schema=table.schema
-        )
-    return tables.reflect_table_from_oid(table_oid, engine).columns[column_name]
+        op.add_column(table.name, column, schema=table.schema)
+    return tables.reflect_table_from_oid(table_oid, engine).columns[column[NAME]]
 
 
 def alter_column(
@@ -140,8 +137,6 @@ def alter_column(
         column_index,
         column_definition_dict,
 ):
-    NAME = "name"
-    TYPE = "type"
     assert len(column_definition_dict) == 1
     column_def_key = list(column_definition_dict.keys())[0]
     column_index = int(column_index)
@@ -191,8 +186,4 @@ def drop_column(
     with engine.begin() as conn:
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)
-        op.drop_column(
-            table.name,
-            column.name,
-            schema=table.schema
-        )
+        op.drop_column(table.name, column.name, schema=table.schema)
