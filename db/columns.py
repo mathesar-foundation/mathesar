@@ -37,6 +37,7 @@ class MathesarColumn(Column):
             foreign_keys=set(),
             primary_key=False,
             nullable=True,
+            unique=False,
     ):
         """
         Construct a new ``MathesarColumn`` object.
@@ -54,6 +55,7 @@ class MathesarColumn(Column):
             type_=sa_type,
             primary_key=primary_key,
             nullable=nullable,
+            unique=unique,
         )
 
     @classmethod
@@ -70,6 +72,7 @@ class MathesarColumn(Column):
             foreign_keys=fkeys,
             primary_key=column.primary_key,
             nullable=column.nullable,
+            unique=column.unique,
         )
 
     @property
