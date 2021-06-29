@@ -101,6 +101,7 @@ class ColumnViewSet(viewsets.ViewSet):
 
     def partial_update(self, request, pk=None, table_pk=None):
         table = Table.objects.get(id=table_pk)
+        assert isinstance((request.data), dict)
         column = table.alter_column(pk, request.data)
         serializer = ColumnSerializer(column)
         return Response(serializer.data)

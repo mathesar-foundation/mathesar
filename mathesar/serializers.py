@@ -28,6 +28,7 @@ class SchemaSerializer(serializers.HyperlinkedModelSerializer):
 class ColumnSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.CharField()
+    nullable = serializers.BooleanField(default=True)
 
 
 class TableSerializer(serializers.ModelSerializer):

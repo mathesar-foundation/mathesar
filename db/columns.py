@@ -175,6 +175,21 @@ def retype_column(table_oid, column_index, new_type, engine):
     return tables.reflect_table_from_oid(table_oid, engine).columns[column_index]
 
 
+def change_column_nullable(table_oid, column_index, nullable, engine):
+    table = tables.reflect_table_from_oid(table_oid, engine)
+    column = table.columns[column_index]
+    with engine.begin() as conn:
+        ctx = MigrationContext.configure(conn)
+        op = Operations(ctx)
+        op.alter_column(
+            table.name,
+            column.name,
+            nullable=nullable,
+            schema=table.schema
+        )
+    return tables.reflect_table_from_oid(table_oid, engine).columns[column_index]
+
+
 def drop_column(
         engine,
         table_oid,
