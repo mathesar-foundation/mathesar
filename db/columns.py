@@ -142,12 +142,12 @@ def alter_column(
     NAME = "name"
     TYPE = "type"
     assert len(column_definition_dict) == 1
-    column_def_key = column_definition_dict.keys()[0]
+    column_def_key = list(column_definition_dict.keys())[0]
     attribute_alter_map = {
         NAME: rename_column, TYPE: retype_column
     }
     return attribute_alter_map[column_def_key](
-        table_oid, column_index, column_definition_dict[column_def_key], engine,
+        table_oid, int(column_index), column_definition_dict[column_def_key], engine,
     )
 
 
@@ -170,6 +170,10 @@ def rename_column(table_oid, column_index, new_column_name, engine):
 def retype_column(table_oid, column_index, new_type, engine):
     table = tables.reflect_table_from_oid(table_oid, engine)
     alteration.alter_column_type(
-        table.schema, table.name, table.columns[column_index], new_type, engine,
+        table.schema,
+        table.name,
+        table.columns[column_index].name,
+        new_type,
+        engine,
     )
     return tables.reflect_table_from_oid(table_oid, engine).columns[column_index]

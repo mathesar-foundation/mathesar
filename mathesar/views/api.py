@@ -101,13 +101,9 @@ class ColumnViewSet(viewsets.ViewSet):
 
     def partial_update(self, request, pk=None, table_pk=None):
         table = Table.objects.get(id=table_pk)
-        serializer = ColumnSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            column = table.alter_column(pk, request.data)
-            out_serializer = ColumnSerializer(column)
-            return Response(out_serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            raise ValidationError(serializer.errors)
+        column = table.alter_column(pk, request.data)
+        serializer = ColumnSerializer(column)
+        return Response(serializer.data)
 
 
 class RecordViewSet(viewsets.ViewSet):
