@@ -25,14 +25,17 @@ class SchemaSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['id', 'name', 'database', 'tables']
 
 
-class ColumnSerializer(serializers.Serializer):
+class SimpleColumnSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.CharField()
+
+
+class ColumnSerializer(SimpleColumnSerializer):
     nullable = serializers.BooleanField(default=True)
 
 
 class TableSerializer(serializers.ModelSerializer):
-    columns = ColumnSerializer(many=True, read_only=True, source='sa_columns')
+    columns = SimpleColumnSerializer(many=True, read_only=True, source='sa_columns')
     records = serializers.SerializerMethodField()
     name = serializers.CharField()
 
