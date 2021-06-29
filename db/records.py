@@ -42,7 +42,7 @@ def get_records(
     """
     query = select(table)
     if order_by:
-        query = apply_sort(query, order_by, table)
+        query = apply_sort(query, order_by)
     query = (
         query
         .limit(limit)
