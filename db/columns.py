@@ -1,5 +1,7 @@
 import logging
 import warnings
+from alembic.migration import MigrationContext
+from alembic.operations import Operations
 from sqlalchemy import (
     Column, Integer, ForeignKey, Table, DDL, MetaData, and_, select
 )
@@ -114,22 +116,21 @@ def get_column_index_from_name(table_oid, column_name, engine):
 def create_column(engine, table_oid, column_data):
     column_name = column_data["name"]
     column_type = column_data["type"]
-    _preparer = engine.dialect.identifier_preparer
     supported_types = alteration.get_supported_alter_column_types(engine)
-    db_type = supported_types.get(column_type.lower())
-    if db_type is None:
+    sa_type = supported_types.get(column_type.lower())
+    if sa_type is None:
         logger.warning("Requested type not supported. falling back to String")
-        db_type = supported_types[alteration.STRING]
+        sa_type = supported_types[alteration.STRING]
     table = tables.reflect_table_from_oid(table_oid, engine)
-    prepared_table_name = _preparer.format_table(table)
-    prepared_column_name = _preparer.quote(column_name)
-    prepared_type_name = db_type().compile(dialect=engine.dialect)
-    alter_stmt = f"""
-    ALTER TABLE {prepared_table_name}
-      ADD COLUMN {prepared_column_name} {prepared_type_name};
-    """
+    column = MathesarColumn(column_name, sa_type)
     with engine.begin() as conn:
-        conn.execute(DDL(alter_stmt))
+        ctx = MigrationContext.configure(conn)
+        op = Operations(ctx)
+        op.add_column(
+            table.name,
+            column,
+            schema=table.schema
+        )
     return tables.reflect_table_from_oid(table_oid, engine).columns[column_name]
 
 
@@ -143,27 +144,27 @@ def alter_column(
     TYPE = "type"
     assert len(column_definition_dict) == 1
     column_def_key = list(column_definition_dict.keys())[0]
+    column_index = int(column_index)
     attribute_alter_map = {
         NAME: rename_column, TYPE: retype_column
     }
     return attribute_alter_map[column_def_key](
-        table_oid, int(column_index), column_definition_dict[column_def_key], engine,
+        table_oid, column_index, column_definition_dict[column_def_key], engine,
     )
 
 
 def rename_column(table_oid, column_index, new_column_name, engine):
-    _preparer = engine.dialect.identifier_preparer
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
-    prepared_table_name = _preparer.format_table(table)
-    prepared_column_name = _preparer.format_column(column)
-    prepared_new_column_name = _preparer.quote(new_column_name)
-    alter_stmt = f"""
-    ALTER TABLE {prepared_table_name}
-    RENAME {prepared_column_name} TO {prepared_new_column_name};
-    """
     with engine.begin() as conn:
-        conn.execute(DDL(alter_stmt))
+        ctx = MigrationContext.configure(conn)
+        op = Operations(ctx)
+        op.alter_column(
+            table.name,
+            column.name,
+            new_column_name=new_column_name,
+            schema=table.schema
+        )
     return tables.reflect_table_from_oid(table_oid, engine).columns[column_index]
 
 
@@ -184,13 +185,14 @@ def drop_column(
         table_oid,
         column_index,
 ):
+    column_index = int(column_index)
     table = tables.reflect_table_from_oid(table_oid, engine)
-    column = table.columns[int(column_index)]
-    _preparer = engine.dialect.identifier_preparer
-    prepared_table_name = _preparer.format_table(table)
-    prepared_column_name = _preparer.format_column(column)
-    alter_stmt = f"""
-    ALTER TABLE {prepared_table_name} DROP COLUMN {prepared_column_name};
-    """
+    column = table.columns[column_index]
     with engine.begin() as conn:
-        conn.execute(DDL(alter_stmt))
+        ctx = MigrationContext.configure(conn)
+        op = Operations(ctx)
+        op.drop_column(
+            table.name,
+            column.name,
+            schema=table.schema
+        )
