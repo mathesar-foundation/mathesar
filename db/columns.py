@@ -3,7 +3,7 @@ import warnings
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from sqlalchemy import (
-    Column, Integer, ForeignKey, Table, DDL, MetaData, and_, select
+    Column, Integer, ForeignKey, Table, MetaData, and_, select
 )
 from db import constants, tables
 from db.types import alteration
@@ -123,7 +123,7 @@ def create_column(engine, table_oid, column_data):
         logger.warning("Requested type not supported. falling back to String")
         sa_type = supported_types[alteration.STRING]
     table = tables.reflect_table_from_oid(table_oid, engine)
-    column = MathesarColumn(column[NAME], sa_type, nullable=column_nullable)
+    column = MathesarColumn(table.columns[NAME], sa_type, nullable=column_nullable)
     with engine.begin() as conn:
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)
