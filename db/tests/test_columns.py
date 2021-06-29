@@ -22,7 +22,9 @@ def _rename_column(schema, table_name, old_col_name, new_col_name, engine):
     """
     Renames the colum of a table and assert the change went through
     """
-    columns.rename_column(schema, table_name, old_col_name, new_col_name, engine)
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    column_index = columns.get_column_index_from_name(table_oid, old_col_name, engine)
+    columns.rename_column(table_oid, column_index, new_col_name, engine)
     table = tables.reflect_table(table_name, schema, engine)
     assert new_col_name in table.columns
     assert old_col_name not in table.columns
