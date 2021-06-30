@@ -40,6 +40,7 @@ module.exports = {
         'no-multiple-empty-lines': 'off',
         '@typescript-eslint/no-unsafe-member-access': 'off',
         'no-void': 'off',
+        'no-useless-escape': 'off',
       },
     },
     {
