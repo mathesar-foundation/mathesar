@@ -297,7 +297,6 @@ def test_create_column(engine_with_schema):
     assert created_col.type.compile(engine.dialect) == "BOOLEAN"
 
 
-
 nullable_changes = [(True, True), (False, False), (True, False), (False, True)]
 
 
