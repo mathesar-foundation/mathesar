@@ -63,6 +63,22 @@ node@c273da65c52d:/ui$ npm install <package>
 node@c273da65c52d:/ui$ npm uninstall <package>
 ```
 
+### Components
+
+For guidelines on component development, refer [README of components](https://github.com/centerofci/mathesar/tree/integrate_storybook/mathesar_ui/src/components#readme).
+
+You can start storybook in dev mode by connecting to the container and then running `npm run storybook`:
+
+```bash
+docker exec -it mathesar_ui_1 /bin/bash
+
+node@c273da65c52d:/ui$ npm run storybook
+```
+
+This should start storybook at port 6006.
+
+To build storybook, run `npm run build-storybook`. The static storybook build will be present within __storybook-static__ folder.
+
 ## Naming conventions
 
 * File names for Components, Classes and Stylesheets should be CamelCased.
