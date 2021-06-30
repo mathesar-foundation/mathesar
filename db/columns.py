@@ -124,13 +124,13 @@ def create_column(engine, table_oid, column_data):
         sa_type = supported_types[alteration.STRING]
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = MathesarColumn(
-        table.columns[NAME], sa_type, nullable=column_nullable,
+        column_data[NAME], sa_type, nullable=column_nullable,
     )
     with engine.begin() as conn:
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)
         op.add_column(table.name, column, schema=table.schema)
-    return tables.reflect_table_from_oid(table_oid, engine).columns[column[NAME]]
+    return tables.reflect_table_from_oid(table_oid, engine).columns[column_data[NAME]]
 
 
 def alter_column(

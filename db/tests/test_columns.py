@@ -2,7 +2,9 @@ import re
 from unittest.mock import patch
 from psycopg2.errors import NotNullViolation
 import pytest
-from sqlalchemy import String, Integer, ForeignKey, Column, select, Table, MetaData
+from sqlalchemy import (
+    String, Integer, ForeignKey, Column, select, Table, MetaData, create_engine
+)
 from sqlalchemy.exc import IntegrityError
 from db import columns, tables, constants
 
@@ -142,6 +144,31 @@ def test_MC_is_default_when_false_for_pk():
         assert not col.is_default
 
 
+@pytest.mark.parametrize(
+    "column_dict,func_name",
+    [
+        ({"name": "blah"}, "rename_column"),
+        ({"type": "blah"}, "retype_column"),
+        ({"nullable": True}, "change_column_nullable"),
+    ]
+)
+def test_alter_column_chooses_wisely(column_dict, func_name):
+    engine = create_engine("postgresql://")
+    with patch.object(columns, func_name) as mock_alterer:
+        columns.alter_column(
+            engine,
+            1234,
+            5678,
+            column_dict
+        )
+    mock_alterer.assert_called_with(
+        1234,
+        5678,
+        list(column_dict.values())[0],
+        engine,
+    )
+
+
 def test_rename_column(engine_with_schema):
     old_col_name = "col1"
     new_col_name = "col2"
@@ -207,6 +234,23 @@ def test_rename_column_index(engine_with_schema):
     assert new_col_name in index_columns
 
 
+def test_get_column_index_from_name(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "table_with_columns"
+    zero_name = "colzero"
+    one_name = "colone"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(zero_name, Integer),
+        Column(one_name, String),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    assert columns.get_column_index_from_name(table_oid, zero_name, engine) == 0
+    assert columns.get_column_index_from_name(table_oid, one_name, engine) == 1
+
+
 def test_retype_column_correct_column(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "atableone"
@@ -230,6 +274,28 @@ def test_retype_column_correct_column(engine_with_schema):
         "boolean",
         engine
     )
+
+
+def test_create_column(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atableone"
+    target_type = "boolean"
+    initial_column_name = "original_column"
+    new_column_name = "added_column"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(initial_column_name, Integer),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    column_data = {"name": new_column_name, "type": target_type}
+    created_col = columns.create_column(engine, table_oid, column_data)
+    altered_table = tables.reflect_table_from_oid(table_oid, engine)
+    assert len(altered_table.columns) == 2
+    assert created_col.name == new_column_name
+    assert created_col.type.compile(engine.dialect) == "BOOLEAN"
+
 
 
 nullable_changes = [(True, True), (False, False), (True, False), (False, True)]
