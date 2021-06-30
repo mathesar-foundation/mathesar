@@ -91,20 +91,27 @@ dir_to_python_func = {
 
 
 single_field_test_list = [
-    (field, direction)
+    (field, direction, null)
     for field in ["varchar", "numeric", "date"]
     for direction in ["asc", "desc"]
+    for null in ["nullsfirst", "nullslast"]
 ]
 
 
-@pytest.mark.parametrize("field,direction", single_field_test_list)
+@pytest.mark.parametrize("field,direction,null", single_field_test_list)
 def test_get_records_orders_single_field(
-    filter_sort_table_obj, field, direction
+    filter_sort_table_obj, field, direction, null
 ):
     filter_sort, engine = filter_sort_table_obj
     order_list = [{"field": field, "direction": direction}]
+    order_list[0][null] = True
 
     record_list = records.get_records(filter_sort, engine, order_by=order_list)
+
+    if null == "nullsfirst":
+        assert getattr(record_list[0], field) is None
+    elif null == "nullslast":
+        assert getattr(record_list[-1], field) is None
 
     for i in range(1, len(record_list)):
         prev = getattr(record_list[i - 1], field)
