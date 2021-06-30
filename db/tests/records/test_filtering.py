@@ -1,8 +1,12 @@
-from datetime import datetime
-import pytest
 import re
+import pytest
+from datetime import datetime
+
 from sqlalchemy import MetaData, Table
+from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
+
 from db import records
+
 
 
 ROSTER = "Roster"
@@ -276,3 +280,23 @@ def test_get_records_filters_nested_boolean_ops(filter_sort_table_obj):
     for record in record_list:
         assert ((record.varchar == "string24" or record.numeric == 42)
                 and (record.varchar == "string42" or record.numeric == 24))
+
+
+exceptions_test_list = [
+    (("field", "tuple", "op", "eq", "value", "test"), BadFilterFormat),
+    ([{"field": "varchar", "op": "non_existent", "value": "test"}], BadFilterFormat),
+    ([{"op": "eq", "value": "test"}], BadFilterFormat),
+    ([{"field": "varchar", "op": "eq"}], BadFilterFormat),
+    ([{"and": []}], BadFilterFormat),
+    ([{"or": []}], BadFilterFormat),
+    ([{"not": []}], BadFilterFormat),
+    ([{"not": [{"field": "date", "op": "is_null"} for _ in range(2)]}], BadFilterFormat),
+    ([{"field": "non_existent", "op": "eq", "value": "test"}], FilterFieldNotFound),
+]
+
+
+@pytest.mark.parametrize("filters,exception", exceptions_test_list)
+def test_get_records_filters_exceptions(filter_sort_table_obj, filters, exception):
+    filter_sort, engine = filter_sort_table_obj
+    with pytest.raises(exception):
+        records.get_records(filter_sort, engine, filters=filters)
