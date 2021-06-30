@@ -1,3 +1,4 @@
+from datetime import datetime
 import pytest
 import re
 from sqlalchemy import MetaData, Table
@@ -98,28 +99,84 @@ def _ilike(x, v):
     return re.match(v.replace("%", ".*").lower(), x.lower()) is not None
 
 
+op_to_python_func = {
+    "is_null": lambda x, _: x is None,
+    "is_not_null": lambda x, _: x is not None,
+    "eq": lambda x, v: x == v,
+    "ne": lambda x, v: x != v,
+    "gt": lambda x, v: x > v,
+    "lt": lambda x, v: x < v,
+    "ge": lambda x, v: x >= v,
+    "le": lambda x, v: x <= v,
+    "like": _like,
+    "ilike": _ilike,
+    "not_ilike": lambda x, v: not _ilike(x, v),
+    "in": lambda x, v: x in v,
+    "not_in": lambda x, v: x not in v,
+    "any": lambda x, v: v in x,
+    "not_any": lambda x, v: v not in x,
+}
+
+
 ops_test_list = [
-    ("varchar", "is_null", None, 5, lambda x, _: x is None),
-    ("varchar", "is_not_null", None, 100, lambda x, _: x is not None),
-    ("varchar", "eq", "string42", 1, lambda x, v: x == v),
-    ("varchar", "ne", "string42", 99, lambda x, v: x != v),
-    ("numeric", "gt", 50, 50, lambda x, v: x > v),
-    ("numeric", "lt", 51, 50, lambda x, v: x < v),
-    ("numeric", "ge", 50, 51, lambda x, v: x >= v),
-    ("numeric", "le", 51, 51, lambda x, v: x <= v),
-    ("varchar", "like", "%1", 10, _like),
-    ("varchar", "ilike", "STRING1%", 12, _ilike),
-    ("numeric", "in", [1, 2, 3], 3, lambda x, v: x in v),
-    ("numeric", "not_in", [1, 2, 3], 97, lambda x, v: x not in v),
-    ("numeric", "in", [1, 2, 3], 3, lambda x, v: x in v),
-    ("array", "any", 1, 1, lambda x, v: v in x),
-    ("array", "not_any", 1, 99, lambda x, v: v not in x),
+    # is_null
+    ("varchar", "is_null", None, 5),
+    ("numeric", "is_null", None, 5),
+    ("date", "is_null", None, 5),
+    ("array", "is_null", None, 5),
+    # is_not_null
+    ("varchar", "is_not_null", None, 100),
+    ("numeric", "is_not_null", None, 100),
+    ("date", "is_not_null", None, 100),
+    ("array", "is_not_null", None, 100),
+    # eq
+    ("varchar", "eq", "string42", 1),
+    ("numeric", "eq", 1, 1),
+    ("date", "eq", "2000-01-01", 1),
+    ("array", "eq", "{0,0}", 1),
+    # ne
+    ("varchar", "ne", "string42", 99),
+    ("numeric", "ne", 1, 99),
+    ("date", "ne", "2000-01-01", 99),
+    ("array", "ne", "{0,0}", 99),
+    # gt
+    ("varchar", "gt", "string0", 100),
+    ("numeric", "gt", 50, 50),
+    ("date", "gt", "2000-01-01", 99),
+    # lt
+    ("varchar", "lt", "stringA", 100),
+    ("numeric", "lt", 51, 50),
+    ("date", "lt", "2099-01-01", 99),
+    # ge
+    ("varchar", "ge", "string1", 100),
+    ("numeric", "ge", 50, 51),
+    ("date", "ge", "2000-01-01", 100),
+    # le
+    ("varchar", "le", "string2", 13),
+    ("numeric", "le", 51, 51),
+    ("date", "le", "2099-01-01", 100),
+    # like
+    ("varchar", "like", "%1", 10),
+    # ilike
+    ("varchar", "ilike", "STRING1%", 12),
+    # not_ilike
+    ("varchar", "not_ilike", "STRING1%", 88),
+    # in
+    ("varchar", "in", ["string1", "string2", "string3"], 3),
+    ("numeric", "in", [1, 2, 3], 3),
+    # not_in
+    ("varchar", "not_in", ["string1", "string2", "string3"], 97),
+    ("numeric", "not_in", [1, 2, 3], 97),
+    # any
+    ("array", "any", 1, 1),
+    # not_any
+    ("array", "not_any", 1, 99),
 ]
 
 
-@pytest.mark.parametrize("column,op,value,res_len,val_func", ops_test_list)
+@pytest.mark.parametrize("column,op,value,res_len", ops_test_list)
 def test_get_records_filters_ops(
-    filter_sort_table_obj, column, op, value, res_len, val_func
+    filter_sort_table_obj, column, op, value, res_len
 ):
     filter_sort, engine = filter_sort_table_obj
     filter_list = [{"field": column, "op": op}]
@@ -130,6 +187,12 @@ def test_get_records_filters_ops(
         filter_sort, engine, filters=filter_list
     )
 
+    if column == "date" and value is not None:
+        value = datetime.strptime(value, "%Y-%m-%d").date()
+    elif column == "array" and value is not None and op not in ["any", "not_any"]:
+        value = [int(c) for c in value[1:-1].split(",")]
+
     assert len(record_list) == res_len
     for record in record_list:
+        val_func = op_to_python_func[op]
         assert val_func(getattr(record, column), value)
