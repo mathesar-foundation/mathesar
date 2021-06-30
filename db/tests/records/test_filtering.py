@@ -115,6 +115,9 @@ op_to_python_func = {
     "not_in": lambda x, v: x not in v,
     "any": lambda x, v: v in x,
     "not_any": lambda x, v: v not in x,
+    "and": lambda x: all(x),
+    "or": lambda x: any(x),
+    "not": lambda x: not x
 }
 
 
@@ -196,3 +199,32 @@ def test_get_records_filters_ops(
     for record in record_list:
         val_func = op_to_python_func[op]
         assert val_func(getattr(record, column), value)
+
+
+ops_variant_test_list = [
+    ("eq", "=="),
+    ("ne", "!="),
+    ("gt", ">"),
+    ("lt", "<"),
+    ("ge", ">="),
+    ("le", "<=")
+]
+
+
+@pytest.mark.parametrize("op,variant_op", ops_variant_test_list)
+def test_get_records_filters_variant_ops(filter_sort_table_obj, op, variant_op):
+    filter_sort, engine = filter_sort_table_obj
+
+    filter_list = [{"field": "numeric", "op": op, "value": 50}]
+    record_list = records.get_records(
+        filter_sort, engine, filters=filter_list
+    )
+
+    filter_list = [{"field": "numeric", "op": variant_op, "value": 50}]
+    variant_record_list = records.get_records(
+        filter_sort, engine, filters=filter_list
+    )
+
+    assert len(record_list) == len(variant_record_list)
+    for record, variant_record in zip(record_list, variant_record_list):
+        assert record == variant_record
