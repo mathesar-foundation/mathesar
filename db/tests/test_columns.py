@@ -1,7 +1,9 @@
 import re
 from unittest.mock import patch
+from psycopg2.errors import NotNullViolation
 import pytest
 from sqlalchemy import String, Integer, ForeignKey, Column, select, Table, MetaData
+from sqlalchemy.exc import IntegrityError
 from db import columns, tables, constants
 
 
@@ -233,10 +235,7 @@ def test_retype_column_correct_column(engine_with_schema):
 nullable_changes = [(True, True), (False, False), (True, False), (False, True)]
 
 
-@pytest.mark.parametrize(
-    "nullable_tup",
-    [(True, True), (False, False), (True, False), (False, True)]
-)
+@pytest.mark.parametrize("nullable_tup", nullable_changes)
 def test_change_column_nullable_changes(engine_with_schema, nullable_tup):
     engine, schema = engine_with_schema
     table_name = "atablefornulling"
@@ -258,6 +257,65 @@ def test_change_column_nullable_changes(engine_with_schema, nullable_tup):
     )
     assert changed_column.nullable is nullable_tup[1]
 
+
+@pytest.mark.parametrize("nullable_tup", nullable_changes)
+def test_change_column_nullable_with_data(engine_with_schema, nullable_tup):
+    engine, schema = engine_with_schema
+    table_name = "atablefornulling"
+    target_column_name = "thecolumntochange"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(target_column_name, Integer, nullable=nullable_tup[0]),
+    )
+    table.create()
+    ins = table.insert().values(
+        [
+            {target_column_name: 1},
+            {target_column_name: 2},
+            {target_column_name: 3},
+        ]
+    )
+    with engine.begin() as conn:
+        conn.execute(ins)
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    changed_column = columns.change_column_nullable(
+        table_oid,
+        0,
+        nullable_tup[1],
+        engine
+    )
+    assert changed_column.nullable is nullable_tup[1]
+
+
+def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atablefornulling"
+    target_column_name = "thecolumntochange"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(target_column_name, Integer, nullable=True),
+    )
+    table.create()
+    ins = table.insert().values(
+        [
+            {target_column_name: 1},
+            {target_column_name: 2},
+            {target_column_name: None},
+        ]
+    )
+    with engine.begin() as conn:
+        conn.execute(ins)
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    with pytest.raises(IntegrityError) as e:
+        columns.change_column_nullable(
+            table_oid,
+            0,
+            False,
+            engine
+        )
+        assert type(e.orig) == NotNullViolation
 
 
 def get_mathesar_column_init_args():
