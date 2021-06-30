@@ -1,9 +1,7 @@
-import re
 import pytest
-from datetime import datetime
 
 from sqlalchemy import MetaData, Table
-from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
+from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db import records
 
@@ -156,3 +154,19 @@ def test_get_records_orders_multiple_fields(
             # Only check order when previous field has equal values
             assert not prev_field_equal or comp_func(prev, curr)
             prev_field_equal = prev == curr
+
+
+exceptions_test_list = [
+    (("field", "tuple", "direction", "asc"), BadSortFormat),
+    ([{"field": "varchar", "direction": "sideways"}], BadSortFormat),
+    ([{"direction": "asc"}], BadSortFormat),
+    ([{"field": "varchar"}], BadSortFormat),
+    ([{"field": "non_existent", "direction": "asc"}], SortFieldNotFound),
+]
+
+
+@pytest.mark.parametrize("order_list,exception", exceptions_test_list)
+def test_get_records_orders_exceptions(filter_sort_table_obj, order_list, exception):
+    filter_sort, engine = filter_sort_table_obj
+    with pytest.raises(exception):
+        records.get_records(filter_sort, engine, order_by=order_list)
