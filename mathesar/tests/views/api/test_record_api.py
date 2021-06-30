@@ -238,8 +238,8 @@ def test_record_404(create_table, client):
 def test_record_list_filter_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    filter_list = json.dumps([{"field": "Center", "op": "not_null"}])
-    with patch.object(records, "get_records", side_effect=records.get_records):
+    filter_list = json.dumps([{"field": "Center", "op": "is_null"}])
+    with patch.object(records, "get_records", side_effect=exception):
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?filters={filter_list}'
         )
