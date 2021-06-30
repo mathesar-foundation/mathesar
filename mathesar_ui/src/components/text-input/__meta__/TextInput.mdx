@@ -1,0 +1,34 @@
+import { Story, Canvas, ArgsTable, Source } from '@storybook/addon-docs/blocks';
+import TextInput from '../TextInput.svelte';
+
+# TextInput
+
+TextInput component design specification.
+
+## Usage
+
+<p></p>
+
+### Basic
+<Canvas withSource="none">
+  <Story name="basic" id="components-textinput--basic" />
+</Canvas>
+
+<Source language='html' code={`
+<script>
+  import { TextInput } from '@mathesar-components';
+<\/script>
+
+<TextInput bind:value='Pikachu'/>
+`}/>
+
+### Slotted
+
+Use named slots __prepend__ and __append__ to add elements/components before and after the input.
+
+<Canvas withSource="open">
+  <Story name="basic" id="components-textinput--slotted" />
+</Canvas>
+
+## Arguments
+<ArgsTable of={TextInput} />
