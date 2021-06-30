@@ -38,7 +38,7 @@ def get_records(
                   list of columns from the given table.
         filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
                   field, in addition to an 'value' field if appropriate.
-                  See https://github.com/centerofci/sqlalchemy-filters for details.
+                  See: https://github.com/centerofci/sqlalchemy-filters#filters-format
     """
     query = (
         select(table)
