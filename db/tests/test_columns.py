@@ -1,4 +1,5 @@
 import re
+from unittest.mock import patch
 import pytest
 from sqlalchemy import String, Integer, ForeignKey, Column, select, Table, MetaData
 from db import columns, tables, constants
@@ -202,6 +203,61 @@ def test_rename_column_index(engine_with_schema):
         index_columns = index["column_names"]
     assert old_col_name not in index_columns
     assert new_col_name in index_columns
+
+
+def test_retype_column_correct_column(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atableone"
+    target_type = "boolean"
+    target_column_name = "thecolumntochange"
+    nontarget_column_name = "notthecolumntochange"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(target_column_name, Integer),
+        Column(nontarget_column_name, String),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    with patch.object(columns.alteration, "alter_column_type") as mock_retyper:
+        columns.retype_column(table_oid, 0, target_type, engine)
+    mock_retyper.assert_called_with(
+        schema,
+        table_name,
+        target_column_name,
+        "boolean",
+        engine
+    )
+
+
+nullable_changes = [(True, True), (False, False), (True, False), (False, True)]
+
+
+@pytest.mark.parametrize(
+    "nullable_tup",
+    [(True, True), (False, False), (True, False), (False, True)]
+)
+def test_change_column_nullable_changes(engine_with_schema, nullable_tup):
+    engine, schema = engine_with_schema
+    table_name = "atablefornulling"
+    target_column_name = "thecolumntochange"
+    nontarget_column_name = "notthecolumntochange"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(target_column_name, Integer, nullable=nullable_tup[0]),
+        Column(nontarget_column_name, String),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    changed_column = columns.change_column_nullable(
+        table_oid,
+        0,
+        nullable_tup[1],
+        engine
+    )
+    assert changed_column.nullable is nullable_tup[1]
+
 
 
 def get_mathesar_column_init_args():
