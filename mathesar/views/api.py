@@ -156,6 +156,8 @@ class RecordViewSet(viewsets.ViewSet):
 
     # For filter parameter formatting, see:
     # https://github.com/centerofci/sqlalchemy-filters#filters-format
+    # For sorting parameter formatting, see:
+    # https://github.com/centerofci/sqlalchemy-filters#sort-format
     def list(self, request, table_pk=None):
         paginator = TableLimitOffsetPagination()
 

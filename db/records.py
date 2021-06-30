@@ -35,7 +35,7 @@ def get_records(
         offset:   int, gives number of rows to skip
         order_by: list of dictionaries, where each dictionary has a 'field' and
                   'direction' field.
-                  See https://github.com/centerofci/sqlalchemy-filters for details.
+                  See: https://github.com/centerofci/sqlalchemy-filters#sort-format
         filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
