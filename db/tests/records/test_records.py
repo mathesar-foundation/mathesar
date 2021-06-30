@@ -89,6 +89,8 @@ def test_get_records_orders_before_limiting(roster_table_obj):
         roster, engine, limit=1, order_by=["Grade", "Student Name"]
     )
     assert record_list[0][7] == 25 and record_list[0][2] == "Amy Gamble"
+
+
 def test_get_distinct_tuple_values_length(roster_table_obj):
     roster, engine = roster_table_obj
     column_list = [

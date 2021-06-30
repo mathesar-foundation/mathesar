@@ -8,7 +8,6 @@ from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 from db import records
 
 
-
 ROSTER = "Roster"
 FILTERSORT = "FilterSort"
 
