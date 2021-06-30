@@ -2,14 +2,25 @@ import { defineConfig } from 'vite';
 import legacy from '@vitejs/plugin-legacy';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import path from 'path';
+import * as data from './tsconfig.json';
+
+function getAlias() {
+  const alias = [];
+  const { paths } = data.compilerOptions;
+  Object.keys(paths).forEach((key) => {
+    const find = (__dirname, key.replace('/*', ''));
+    const replacement = path.resolve(paths[key][0].replace('/*', ''));
+    alias.push({
+      find,
+      replacement,
+    });
+  });
+  return alias;
+}
 
 export default defineConfig({
   resolve: {
-    alias: [
-      { find: '@mathesar', replacement: path.resolve(__dirname, 'src') },
-      { find: '@mathesar-components/types', replacement: path.resolve(__dirname, 'src/components/types.d.ts') },
-      { find: '@mathesar-components', replacement: path.resolve(__dirname, 'src/components/index.ts') },
-    ],
+    alias: getAlias(),
   },
   plugins: [
     svelte(),
