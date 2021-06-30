@@ -143,7 +143,9 @@ def alter_column(
     column_def_key = list(column_definition_dict.keys())[0]
     column_index = int(column_index)
     attribute_alter_map = {
-        NAME: rename_column, TYPE: retype_column
+        NAME: rename_column,
+        TYPE: retype_column,
+        NULLABLE: change_column_nullable,
     }
     return attribute_alter_map[column_def_key](
         table_oid, column_index, column_definition_dict[column_def_key], engine,
