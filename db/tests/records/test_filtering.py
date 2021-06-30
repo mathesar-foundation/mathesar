@@ -117,7 +117,7 @@ op_to_python_func = {
     "not_any": lambda x, v: v not in x,
     "and": lambda x: all(x),
     "or": lambda x: any(x),
-    "not": lambda x: not x
+    "not": lambda x: not x[0]
 }
 
 
@@ -177,31 +177,29 @@ ops_test_list = [
 ]
 
 
-@pytest.mark.parametrize("column,op,value,res_len", ops_test_list)
+@pytest.mark.parametrize("field,op,value,res_len", ops_test_list)
 def test_get_records_filters_ops(
-    filter_sort_table_obj, column, op, value, res_len
+    filter_sort_table_obj, field, op, value, res_len
 ):
     filter_sort, engine = filter_sort_table_obj
-    filter_list = [{"field": column, "op": op}]
+    filter_list = [{"field": field, "op": op}]
     if value is not None:
         filter_list[0]["value"] = value
 
-    record_list = records.get_records(
-        filter_sort, engine, filters=filter_list
-    )
+    record_list = records.get_records(filter_sort, engine, filters=filter_list)
 
-    if column == "date" and value is not None:
+    if field == "date" and value is not None:
         value = datetime.strptime(value, "%Y-%m-%d").date()
-    elif column == "array" and value is not None and op not in ["any", "not_any"]:
+    elif field == "array" and value is not None and op not in ["any", "not_any"]:
         value = [int(c) for c in value[1:-1].split(",")]
 
     assert len(record_list) == res_len
     for record in record_list:
         val_func = op_to_python_func[op]
-        assert val_func(getattr(record, column), value)
+        assert val_func(getattr(record, field), value)
 
 
-ops_variant_test_list = [
+variant_ops_test_list = [
     ("eq", "=="),
     ("ne", "!="),
     ("gt", ">"),
@@ -211,20 +209,70 @@ ops_variant_test_list = [
 ]
 
 
-@pytest.mark.parametrize("op,variant_op", ops_variant_test_list)
-def test_get_records_filters_variant_ops(filter_sort_table_obj, op, variant_op):
+@pytest.mark.parametrize("op,variant_op", variant_ops_test_list)
+def test_get_records_filters_variant_ops(
+    filter_sort_table_obj, op, variant_op
+):
     filter_sort, engine = filter_sort_table_obj
 
     filter_list = [{"field": "numeric", "op": op, "value": 50}]
-    record_list = records.get_records(
-        filter_sort, engine, filters=filter_list
-    )
+    record_list = records.get_records(filter_sort, engine, filters=filter_list)
 
     filter_list = [{"field": "numeric", "op": variant_op, "value": 50}]
-    variant_record_list = records.get_records(
-        filter_sort, engine, filters=filter_list
-    )
+    variant_record_list = records.get_records(filter_sort, engine, filters=filter_list)
 
     assert len(record_list) == len(variant_record_list)
     for record, variant_record in zip(record_list, variant_record_list):
         assert record == variant_record
+
+
+boolean_ops_test_list = [
+    ("and", [("numeric", 1)], 1),
+    ("and", [("numeric", 1), ("numeric", 2)], 0),
+    ("and", [("numeric", 1), ("varchar", "string2")], 0),
+    ("or", [("numeric", 1)], 1),
+    ("or", [("numeric", 1), ("numeric", 2)], 2),
+    ("or", [("numeric", 1), ("varchar", "string2")], 2),
+    ("not", [("numeric", 1)], 99),
+    ("not", [("varchar", "string1")], 99),
+]
+
+
+@pytest.mark.parametrize("op,field_val_pairs,res_len", boolean_ops_test_list)
+def test_get_records_filters_boolean_ops(
+    filter_sort_table_obj, op, field_val_pairs, res_len
+):
+    filter_sort, engine = filter_sort_table_obj
+
+    filter_list = [{op: [
+        {"field": field, "op": "eq", "value": value}
+        for field, value in field_val_pairs
+    ]}]
+    record_list = records.get_records(filter_sort, engine, filters=filter_list)
+
+    assert len(record_list) == res_len
+    for record in record_list:
+        val_func = op_to_python_func[op]
+        args = [getattr(record, field) == value for field, value in field_val_pairs]
+        assert val_func(args)
+
+
+def test_get_records_filters_nested_boolean_ops(filter_sort_table_obj):
+    filter_sort, engine = filter_sort_table_obj
+
+    filter_list = [{"and": [
+        {"or": [
+            {"field": "varchar", "op": "eq", "value": "string24"},
+            {"field": "numeric", "op": "eq", "value": 42},
+        ]},
+        {"or": [
+            {"field": "varchar", "op": "eq", "value": "string42"},
+            {"field": "numeric", "op": "eq", "value": 24},
+        ]},
+    ]}]
+    record_list = records.get_records(filter_sort, engine, filters=filter_list)
+
+    assert len(record_list) == 2
+    for record in record_list:
+        assert ((record.varchar == "string24" or record.numeric == 42)
+                and (record.varchar == "string42" or record.numeric == 24))
