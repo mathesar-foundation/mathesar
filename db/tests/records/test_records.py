@@ -41,64 +41,6 @@ def test_get_records_gets_limited_offset_records(roster_table_obj):
     assert len(offset_records) == 10 and offset_records[0] == base_records[5]
 
 
-def test_get_records_gets_ordered_records_str_col_name(roster_table_obj):
-    roster, engine = roster_table_obj
-    order_list = [{"field": "Teacher", "direction": "asc"}]
-    record_list = records.get_records(roster, engine, order_by=order_list)
-    assert record_list[0][4] == "Amber Hudson"
-
-
-def test_get_records_gets_ordered_records_num_col(roster_table_obj):
-    roster, engine = roster_table_obj
-    order_list = [{"field": "Grade", "direction": "asc"}]
-    record_list = records.get_records(roster, engine, order_by=order_list)
-    assert record_list[0][7] == 25
-
-
-def test_get_records_gets_ordered_records_str_col_obj(roster_table_obj):
-    roster, engine = roster_table_obj
-    order_list = [{"field": roster.columns["Teacher"], "direction": "asc"}]
-    record_list = records.get_records(roster, engine, order_by=order_list)
-    assert record_list[0][4] == "Amber Hudson"
-
-
-def test_get_records_gets_ordered_records_num_col_obj(roster_table_obj):
-    roster, engine = roster_table_obj
-    order_list = [{"field": roster.columns["Grade"], "direction": "asc"}]
-    record_list = records.get_records(roster, engine, order_by=order_list)
-    assert record_list[0][7] == 25
-
-
-def test_get_records_ordered_col_set(roster_table_obj):
-    roster, engine = roster_table_obj
-    order_list = [
-        {"field": "Student Name", "direction": "asc"},
-        {"field": "Grade", "direction": "asc"}
-    ]
-    record_list = records.get_records(roster, engine, order_by=order_list)
-    assert record_list[0][2] == "Alejandro Lam" and record_list[0][7] == 40
-
-
-def test_get_records_ordered_col_set_different_col_order(roster_table_obj):
-    roster, engine = roster_table_obj
-    order_list = [
-        {"field": "Grade", "direction": "asc"},
-        {"field": "Student Name", "direction": "asc"}
-    ]
-    record_list = records.get_records(roster, engine, order_by=order_list)
-    assert record_list[0][7] == 25 and record_list[0][2] == "Amy Gamble"
-
-
-def test_get_records_orders_before_limiting(roster_table_obj):
-    roster, engine = roster_table_obj
-    order_list = [
-        {"field": "Grade", "direction": "asc"},
-        {"field": "Student Name", "direction": "asc"}
-    ]
-    record_list = records.get_records(roster, engine, limit=1, order_by=order_list)
-    assert record_list[0][7] == 25 and record_list[0][2] == "Amy Gamble"
-
-
 def test_get_distinct_tuple_values_length(roster_table_obj):
     roster, engine = roster_table_obj
     column_list = [
