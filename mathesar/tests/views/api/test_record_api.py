@@ -1,5 +1,8 @@
 import json
+import pytest
 from unittest.mock import patch
+
+from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
 from db import records
 
@@ -231,52 +234,16 @@ def test_record_404(create_table, client):
     assert response.json()['detail'] == 'Not found.'
 
 
-def _get_filter_error_response(create_table, client, table_name, filter_list):
+@pytest.mark.parametrize("exception", [BadFilterFormat, FilterFieldNotFound])
+def test_record_list_filter_exceptions(create_table, client, exception):
+    table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    filter_list = json.dumps(filter_list)
-    response = client.get(f'/api/v0/tables/{table.id}/records/?filters={filter_list}')
+    filter_list = json.dumps([{"field": "Center", "op": "not_null"}])
+    with patch.object(records, "get_records", side_effect=records.get_records):
+        response = client.get(
+            f'/api/v0/tables/{table.id}/records/?filters={filter_list}'
+        )
+        response_data = response.json()
     assert response.status_code == 400
-    return response
-
-
-def test_record_list_filter_invalid_field(create_table, client):
-    table_name = 'NASA Record List Filter Invalid Field'
-    filter_list = [{'field': 'Doesnt Exist', 'op': '==', 'value': 'test'}]
-    response = _get_filter_error_response(create_table, client, table_name, filter_list)
-    assert 'has no column' in response.json()['filters']
-
-
-def test_record_list_filter_invalid_format(create_table, client):
-    table_name = 'NASA Record List Filter Invalid Format'
-    filter_list = [('field', 'Doesnt Exist', 'op', '==', 'value', 'test')]
-    response = _get_filter_error_response(create_table, client, table_name, filter_list)
-    assert 'should be a dictionary' in response.json()['filters']
-
-
-def test_record_list_filter_invalid_op(create_table, client):
-    table_name = 'NASA Record List Filter Invalid Op'
-    op = '<><><>'
-    filter_list = [{'field': 'Center', 'op': op, 'value': 'test'}]
-    response = _get_filter_error_response(create_table, client, table_name, filter_list)
-    assert f'Operator `{op}` not valid.' == response.json()['filters']
-
-
-def test_record_list_filter_invalid_boolean(create_table, client):
-    table_name = 'NASA Record List Filter Invalid Boolean'
-    filter_list = [{'and': []}]
-    response = _get_filter_error_response(create_table, client, table_name, filter_list)
-    assert 'must have one or more arguments' in response.json()['filters']
-
-
-def test_record_list_filter_missing_field(create_table, client):
-    table_name = 'NASA Record List Filter Missing Field'
-    filter_list = [{'op': '==', 'value': 'test'}]
-    response = _get_filter_error_response(create_table, client, table_name, filter_list)
-    assert 'is a mandatory filter attribute' in response.json()['filters']
-
-
-def test_record_list_filter_missing_value(create_table, client):
-    table_name = 'NASA Record List Filter Missing Value'
-    filter_list = [{'field': 'Center'}]
-    response = _get_filter_error_response(create_table, client, table_name, filter_list)
-    assert 'must be provided' in response.json()['filters']
+    assert len(response_data) == 1
+    assert "filters" in response_data
