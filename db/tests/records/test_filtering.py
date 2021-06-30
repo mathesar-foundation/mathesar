@@ -112,6 +112,8 @@ ops_test_list = [
     ("numeric", "in", [1, 2, 3], 3, lambda x, v: x in v),
     ("numeric", "not_in", [1, 2, 3], 97, lambda x, v: x not in v),
     ("numeric", "in", [1, 2, 3], 3, lambda x, v: x in v),
+    ("array", "any", 1, 1, lambda x, v: v in x),
+    ("array", "not_any", 1, 99, lambda x, v: v not in x),
 ]
 
 
