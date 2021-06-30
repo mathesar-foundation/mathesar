@@ -90,18 +90,19 @@ class RecordViewSet(viewsets.ViewSet):
     def list(self, request, table_pk=None):
         paginator = TableLimitOffsetPagination()
         filter_form = RecordListFilterForm(request.GET)
-        if filter_form.is_valid():
-            try:
-                records = paginator.paginate_queryset(
-                    self.queryset, request, table_pk,
-                    filters=filter_form.cleaned_data['filters']
-                )
-            except (FieldNotFound, BadFilterFormat) as e:
-                raise ValidationError({'filters': e})
-            serializer = RecordSerializer(records, many=True)
-            return paginator.get_paginated_response(serializer.data)
-        else:
+        if not filter_form.is_valid():
             raise ValidationError(filter_form.errors)
+
+        try:
+            records = paginator.paginate_queryset(
+                self.queryset, request, table_pk,
+                filters=filter_form.cleaned_data['filters']
+            )
+        except (FieldNotFound, BadFilterFormat) as e:
+            raise ValidationError({'filters': e})
+
+        serializer = RecordSerializer(records, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):
         table = Table.objects.get(id=table_pk)
