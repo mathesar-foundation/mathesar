@@ -10,7 +10,9 @@ from django_filters import rest_framework as filters
 
 from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile
-from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
+from mathesar.pagination import (
+    ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetPagination
+)
 from mathesar.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
 )
@@ -83,11 +85,10 @@ class ColumnViewSet(viewsets.ViewSet):
     queryset = Table.objects.all().order_by('-created_at')
 
     def list(self, request, table_pk=None):
-        table = Table.objects.get(id=table_pk)
-        columns = table.sa_columns
+        paginator = ColumnLimitOffsetPagination()
+        columns = paginator.paginate_queryset(self.queryset, request, table_pk)
         serializer = ColumnSerializer(columns, many=True)
-        # return paginator.get_paginated_response(serializer.data)
-        return Response({'data': serializer.data})
+        return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):
         table = Table.objects.get(id=table_pk)
