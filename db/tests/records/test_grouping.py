@@ -5,6 +5,7 @@ import pytest
 from sqlalchemy import select
 
 from db import records
+from db.records import GroupFieldNotFound, BadGroupFormat
 
 
 def test_get_group_counts_str_field(filter_sort_table_obj):
@@ -88,3 +89,18 @@ def test_get_group_counts_count_values(roster_table_obj, group_by):
         if type(key) is not tuple:
             key = (key,)
         assert manual_count[key] == value
+
+
+exceptions_test_list = [
+    ("string", BadGroupFormat),
+    ({"dictionary": ""}, BadGroupFormat),
+    ([{"field": "varchar"}], BadGroupFormat),
+    (["non_existent_field"], GroupFieldNotFound),
+]
+
+
+@pytest.mark.parametrize("group_by,exception", exceptions_test_list)
+def test_get_group_counts_exceptions(filter_sort_table_obj, group_by, exception):
+    filter_sort, engine = filter_sort_table_obj
+    with pytest.raises(exception):
+        records.get_group_counts(filter_sort, engine, group_by)
