@@ -27,6 +27,8 @@ from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
 from mathesar.forms.forms import RecordListFilterForm
 
+from db.records import BadGroupFormat, GroupFieldNotFound
+
 logger = logging.getLogger(__name__)
 
 DB_REFLECTION_KEY = 'database_reflected_recently'
@@ -177,6 +179,8 @@ class RecordViewSet(viewsets.ViewSet):
             raise ValidationError({'filters': e})
         except (BadSortFormat, SortFieldNotFound) as e:
             raise ValidationError({'order_by': e})
+        except (BadGroupFormat, GroupFieldNotFound) as e:
+            raise ValidationError({'group_count_by': e})
 
         serializer = RecordSerializer(records, many=True)
         return paginator.get_paginated_response(serializer.data)
