@@ -92,7 +92,8 @@ def get_group_counts(
     for field in group_by:
         if type(field) not in (str, Column):
             raise BadGroupFormat(f"Group field {field} must be a string or Column.")
-        if field not in table.c:
+        field_name = field if type(field) == str else field.name
+        if field_name not in table.c:
             raise GroupFieldNotFound(f"Group field {field} not found in {table}.")
 
     group_by = _create_col_objects(table, group_by)
