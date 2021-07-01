@@ -1,11 +1,13 @@
 import logging
 from rest_framework import status, viewsets
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound, ValidationError, APIException
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
 from django.core.cache import cache
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
+from psycopg2.errors import DuplicateColumn, UndefinedFunction
+from sqlalchemy.exc import ProgrammingError
 
 
 from mathesar.database.utils import get_non_default_database_keys
@@ -104,16 +106,30 @@ class ColumnViewSet(viewsets.ViewSet):
         # We only support adding a single column through the API.
         serializer = ColumnSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            column = table.add_column(request.data)
-            out_serializer = ColumnSerializer(column)
-            return Response(out_serializer.data, status=status.HTTP_201_CREATED)
+            try:
+                column = table.add_column(request.data)
+                out_serializer = ColumnSerializer(column)
+                return Response(out_serializer.data, status=status.HTTP_201_CREATED)
+            except ProgrammingError as e:
+                if type(e.orig) == DuplicateColumn:
+                    raise ValidationError(
+                        f"Column {request.data['name']} already exists"
+                    )
+                else:
+                    raise APIException(e)
         else:
             raise ValidationError(serializer.errors)
 
     def partial_update(self, request, pk=None, table_pk=None):
         table = Table.objects.get(id=table_pk)
         assert isinstance((request.data), dict)
-        column = table.alter_column(pk, request.data)
+        try:
+            column = table.alter_column(pk, request.data)
+        except ProgrammingError as e:
+            if type(e.orig) == UndefinedFunction:
+                raise ValidationError("This type cast is not implemented")
+            else:
+                raise ValidationError
         serializer = ColumnSerializer(column)
         return Response(serializer.data)
 
