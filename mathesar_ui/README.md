@@ -65,7 +65,7 @@ node@c273da65c52d:/ui$ npm uninstall <package>
 
 ### Components
 
-For guidelines on component development, refer [README of components](https://github.com/centerofci/mathesar/tree/integrate_storybook/mathesar_ui/src/components#readme).
+For guidelines on component development, refer [README of components](https://github.com/centerofci/mathesar/tree/master/mathesar_ui/src/components#readme).
 
 You can start storybook in dev mode by connecting to the container and then running `npm run storybook`:
 
