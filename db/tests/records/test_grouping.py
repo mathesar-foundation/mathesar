@@ -76,7 +76,6 @@ count_values_test_list = itertools.chain(*[
 @pytest.mark.parametrize("group_by", count_values_test_list)
 def test_get_group_counts_count_values(roster_table_obj, group_by):
     roster, engine = roster_table_obj
-    print(group_by)
     counts = records.get_group_counts(roster, engine, group_by)
 
     cols = [roster.c[f] for f in group_by]

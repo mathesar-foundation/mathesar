@@ -2,10 +2,20 @@ import logging
 from sqlalchemy import delete, select, Column, func
 from sqlalchemy.inspection import inspect
 from sqlalchemy_filters import apply_filters, apply_sort
+from sqlalchemy_filters.exceptions import FieldNotFound
 
 from db.constants import ID
 
 logger = logging.getLogger(__name__)
+
+
+# Grouping exceptions follow the sqlalchemy_filters exceptions patterns
+class BadGroupFormat(Exception):
+    pass
+
+
+class GroupFieldNotFound(FieldNotFound):
+    pass
 
 
 def _get_primary_key_column(table):
@@ -77,6 +87,14 @@ def get_group_counts(
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
     """
+    if type(group_by) not in (tuple, list):
+        raise BadGroupFormat(f"Group spec {group_by} must be list or tuple.")
+    for field in group_by:
+        if type(field) not in (str, Column):
+            raise BadGroupFormat(f"Group field {field} must be a string or Column.")
+        if field not in table.c:
+            raise GroupFieldNotFound(f"Group field {field} not found in {table}.")
+
     group_by = _create_col_objects(table, group_by)
     query = (
         select(*group_by, func.count(table.c[ID]))
