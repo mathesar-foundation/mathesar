@@ -87,3 +87,63 @@ def test_column_create(column_test_table, client):
     actual_new_col = new_columns_response.json()["results"][-1]
     assert actual_new_col["name"] == name
     assert actual_new_col["type"] == type_
+
+
+def test_column_create_duplicate(column_test_table, client):
+    column = column_test_table.sa_columns[0]
+    name = column.name
+    type_ = "NUMERIC"
+    cache.clear()
+    data = {
+        "name": name, "type": type_
+    }
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/", data=data
+    )
+    assert response.status_code == 400
+
+
+def test_column_update_name(column_test_table, client):
+    cache.clear()
+    name = "updatedname"
+    data = {"name": name}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data
+    )
+    assert response.json()["name"] == name
+
+
+def test_column_update_type(column_test_table, client):
+    cache.clear()
+    type_ = "BOOLEAN"
+    data = {"type": type_}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/3/", data=data
+    )
+    assert response.json()["type"] == type_
+
+
+def test_column_update_type_invalid_cast(column_test_table, client):
+    cache.clear()
+    type_ = "email"
+    data = {"type": type_}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data
+    )
+    assert response.json()["type"] == type_
+
+
+def test_column_destroy(column_test_table, client):
+    cache.clear()
+    num_columns = len(column_test_table.sa_columns)
+    col_one_name = column_test_table.sa_columns[1].name
+    response = client.delete(
+        f"/api/v0/tables/{column_test_table.id}/columns/1/"
+    )
+    assert response.status_code == 204
+    new_columns_response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    new_data = new_columns_response.json()
+    assert col_one_name not in [col["name"] for col in new_data["results"]]
+    assert new_data["count"] == num_columns - 1
