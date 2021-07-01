@@ -16,7 +16,7 @@ from sqlalchemy_filters.exceptions import (
 from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile
 from mathesar.pagination import (
-    ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetPagination
+    ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
@@ -159,7 +159,7 @@ class RecordViewSet(viewsets.ViewSet):
     # For sorting parameter formatting, see:
     # https://github.com/centerofci/sqlalchemy-filters#sort-format
     def list(self, request, table_pk=None):
-        paginator = TableLimitOffsetPagination()
+        paginator = TableLimitOffsetGroupPagination()
 
         # Use a Django Form to automatically parse JSON URL parameters
         filter_form = RecordListFilterForm(request.GET)
