@@ -87,12 +87,12 @@ class RecordViewSet(viewsets.ViewSet):
     # where the entire record needs to be replaced, PATCH suffices for updates.
     queryset = Table.objects.all().order_by('-created_at')
 
-    # For fitlers parameter formatting, see:
+    # For filter parameter formatting, see:
     # https://github.com/centerofci/sqlalchemy-filters#filters-format
     def list(self, request, table_pk=None):
         paginator = TableLimitOffsetPagination()
 
-        # Use a form to parse JSON url parameters
+        # Use a Django Form to automatically parse JSON URL parameters
         filter_form = RecordListFilterForm(request.GET)
         if not filter_form.is_valid():
             raise ValidationError(filter_form.errors)
