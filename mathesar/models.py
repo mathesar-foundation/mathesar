@@ -134,11 +134,11 @@ class Table(DatabaseObject):
                                    offset, filters=filters, order_by=order_by)
 
     def get_group_counts(
-        self, limit=None, offset=None, filters=[], order_by=[], group_count_by=[]
+        self, group_by, limit=None, offset=None, filters=[], order_by=[]
     ):
-        return records.get_records(self._sa_table, self.schema._sa_engine, limit,
-                                   offset, filters=filters, order_by=order_by,
-                                   group_count_by=group_count_by)
+        return records.get_group_counts(self._sa_table, self.schema._sa_engine,
+                                        group_by, limit, offset, filters=filters,
+                                        order_by=order_by)
 
     def create_record_or_records(self, record_data):
         return records.create_record_or_records(self._sa_table, self.schema._sa_engine, record_data)

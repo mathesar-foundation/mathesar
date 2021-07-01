@@ -44,8 +44,8 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
 
         if group_count_by:
             group_count = table.get_group_counts(
-                self.limit, self.offest, self.limit, self.offset,
-                filters=filters, order_by=order_by, group_by=group_count_by
+                group_count_by, self.limit, self.offset,
+                filters=filters, order_by=order_by
             )
             self.group_count = {
                 "group_count_by": group_count_by,

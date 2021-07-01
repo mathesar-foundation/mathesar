@@ -59,7 +59,7 @@ def get_records(
 
 
 def get_group_counts(
-        table, engine, limit=None, offset=None, order_by=[], filters=[], group_by=[],
+        table, engine, group_by, limit=None, offset=None, order_by=[], filters=[],
 ):
     """
     Returns counts by specified groupings
@@ -69,13 +69,13 @@ def get_group_counts(
         engine:   SQLAlchemy engine object
         limit:    int, gives number of rows to return
         offset:   int, gives number of rows to skip
+        group_by: list or tuple of column names or column objects to group by
         order_by: list of dictionaries, where each dictionary has a 'field' and
                   'direction' field.
                   See: https://github.com/centerofci/sqlalchemy-filters#sort-format
         filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
-        group_count_by: list or tuple of column names or column objects to group by
     """
     group_by = _create_col_objects(table, group_by)
     query = (
