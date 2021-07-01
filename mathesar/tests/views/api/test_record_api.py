@@ -8,6 +8,7 @@ from sqlalchemy_filters.exceptions import (
 )
 
 from db import records
+from db.records import BadGroupFormat, GroupFieldNotFound
 
 
 def test_record_list(create_table, client):
@@ -309,12 +310,27 @@ def test_record_list_filter_exceptions(create_table, client, exception):
 def test_record_list_sort_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    filter_list = json.dumps([{"field": "Center", "direction": "desc"}])
+    order_by = json.dumps([{"field": "Center", "direction": "desc"}])
     with patch.object(records, "get_records", side_effect=exception):
         response = client.get(
-            f'/api/v0/tables/{table.id}/records/?order_by={filter_list}'
+            f'/api/v0/tables/{table.id}/records/?order_by={order_by}'
         )
         response_data = response.json()
     assert response.status_code == 400
     assert len(response_data) == 1
     assert "order_by" in response_data
+
+
+@pytest.mark.parametrize("exception", [BadGroupFormat, GroupFieldNotFound])
+def test_record_list_group_exceptions(create_table, client, exception):
+    table_name = f"NASA Record List {exception.__name__}"
+    table = create_table(table_name)
+    group_by = json.dumps(["Center"])
+    with patch.object(records, "get_group_counts", side_effect=exception):
+        response = client.get(
+            f'/api/v0/tables/{table.id}/records/?group_count_by={group_by}'
+        )
+        response_data = response.json()
+    assert response.status_code == 400
+    assert len(response_data) == 1
+    assert "group_count_by" in response_data
