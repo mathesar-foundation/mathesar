@@ -30,7 +30,6 @@ def column_test_table(patent_schema):
     return table
 
 
-
 def test_column_list(column_test_table, client):
     cache.clear()
     response = client.get(f"/api/v0/tables/{column_test_table.id}/columns/")
@@ -43,3 +42,29 @@ def test_column_list(column_test_table, client):
         {'name': 'mycolumn3', 'type': 'VARCHAR', 'nullable': True, 'primary_key': False}
     ]
     assert response_data['results'] == expect_results
+
+
+@pytest.mark.parametrize(
+    "index,expect_data",
+    [
+        (0, {'name': 'mycolumn0', 'type': 'INTEGER', 'nullable': False, 'primary_key': True}),
+        (2, {'name': 'mycolumn2', 'type': 'INTEGER', 'nullable': True, 'primary_key': False}),
+    ]
+)
+def test_column_retrieve(index, expect_data, column_test_table, client):
+    cache.clear()
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/{index}/"
+    )
+    response_data = response.json()
+    assert response_data == expect_data
+
+
+def test_column_retrieve_when_missing(column_test_table, client):
+    cache.clear()
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/15/"
+    )
+    response_data = response.json()
+    assert response_data == {"detail": "Not found."}
+    assert response.status_code == 404
