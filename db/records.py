@@ -62,7 +62,7 @@ def get_group_counts(
         table, engine, limit=None, offset=None, order_by=[], filters=[], group_by=[],
 ):
     """
-    Returns records from a table.
+    Returns counts by specified groupings
 
     Args:
         table:    SQLAlchemy table object
@@ -89,7 +89,11 @@ def get_group_counts(
     if filters is not None:
         query = apply_filters(query, filters)
     with engine.begin() as conn:
-        return conn.execute(query).fetchall()
+        records = conn.execute(query).fetchall()
+
+    # Last field is the count, preceding fields are the group by fields
+    counts = {(*record[:-1],): record[-1] for record in records}
+    return counts
 
 
 def get_distinct_tuple_values(
