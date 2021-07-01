@@ -11,6 +11,7 @@ class DefaultLimitOffsetPagination(LimitOffsetPagination):
     def get_paginated_response(self, data):
         return Response(OrderedDict([
             ('count', self.count),
+            ('group_count', self.group_count),
             ('results', data)
         ]))
 
@@ -30,7 +31,8 @@ class ColumnLimitOffsetPagination(DefaultLimitOffsetPagination):
 
 class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
 
-    def paginate_queryset(self, queryset, request, table_id, filters=[], order_by=[]):
+    def paginate_queryset(self, queryset, request, table_id,
+                          filters=[], order_by=[], group_count_by=[]):
         self.limit = self.get_limit(request)
         if self.limit is None:
             self.limit = self.default_limit
@@ -39,5 +41,22 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         table = queryset.get(id=table_id)
         self.count = table.sa_num_records
         self.request = request
-        return table.get_records(self.limit, self.offset,
-                                 filters=filters, order_by=order_by)
+
+        if group_count_by:
+            group_count = table.get_group_counts(
+                self.limit, self.offest, self.limit, self.offset,
+                filters=filters, order_by=order_by, group_by=group_count_by
+            )
+            self.group_count = {
+                "group_count_by": group_count_by,
+                "results": group_count,
+            }
+        else:
+            self.group_count = {
+                "group_count_by": None,
+                "results": None,
+            }
+
+        return table.get_records(
+            self.limit, self.offset, filters=filters, order_by=order_by,
+        )

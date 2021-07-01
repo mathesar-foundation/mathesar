@@ -170,7 +170,8 @@ class RecordViewSet(viewsets.ViewSet):
             records = paginator.paginate_queryset(
                 self.queryset, request, table_pk,
                 filters=filter_form.cleaned_data['filters'],
-                order_by=filter_form.cleaned_data['order_by']
+                order_by=filter_form.cleaned_data['order_by'],
+                group_count_by=filter_form.cleaned_data['group_count_by'],
             )
         except (BadFilterFormat, FilterFieldNotFound) as e:
             raise ValidationError({'filters': e})
