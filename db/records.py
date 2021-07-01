@@ -1,7 +1,9 @@
 import logging
-from sqlalchemy import delete, select, Column
+from sqlalchemy import delete, select, Column, func
 from sqlalchemy.inspection import inspect
 from sqlalchemy_filters import apply_filters, apply_sort
+
+from db.constants import ID
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +13,13 @@ def _get_primary_key_column(table):
     # We do not support getting by composite primary keys
     assert len(primary_key_list) == 1
     return primary_key_list[0]
+
+
+def _create_col_objects(table, column_list):
+    return [
+        table.columns[col] if type(col) == str else col
+        for col in column_list
+    ]
 
 
 def get_record(table, engine, id_value):
@@ -23,7 +32,7 @@ def get_record(table, engine, id_value):
 
 
 def get_records(
-        table, engine, limit=None, offset=None, order_by=[], filters=[]
+        table, engine, limit=None, offset=None, order_by=[], filters=[],
 ):
     """
     Returns records from a table.
@@ -40,15 +49,44 @@ def get_records(
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
     """
-    query = select(table)
-    if order_by:
+    query = select(table).limit(limit).offset(offset)
+    if order_by is not None:
         query = apply_sort(query, order_by)
+    if filters is not None:
+        query = apply_filters(query, filters)
+    with engine.begin() as conn:
+        return conn.execute(query).fetchall()
+
+
+def get_group_counts(
+        table, engine, limit=None, offset=None, order_by=[], filters=[], group_by=[],
+):
+    """
+    Returns records from a table.
+
+    Args:
+        table:    SQLAlchemy table object
+        engine:   SQLAlchemy engine object
+        limit:    int, gives number of rows to return
+        offset:   int, gives number of rows to skip
+        order_by: list of dictionaries, where each dictionary has a 'field' and
+                  'direction' field.
+                  See: https://github.com/centerofci/sqlalchemy-filters#sort-format
+        filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
+                  field, in addition to an 'value' field if appropriate.
+                  See: https://github.com/centerofci/sqlalchemy-filters#filters-format
+        group_count_by: list or tuple of column names or column objects to group by
+    """
+    group_by = _create_col_objects(table, group_by)
     query = (
-        query
+        select(*group_by, func.count(table.c[ID]))
+        .group_by(*group_by)
         .limit(limit)
         .offset(offset)
     )
-    if filters:
+    if order_by is not None:
+        query = apply_sort(query, order_by)
+    if filters is not None:
         query = apply_filters(query, filters)
     with engine.begin() as conn:
         return conn.execute(query).fetchall()
@@ -71,10 +109,7 @@ def get_distinct_tuple_values(
     SQLAlchemy column objects associated with a table.
     """
     if table is not None:
-        column_objects = [
-            table.columns[col] if type(col) == str else col
-            for col in column_list
-        ]
+        column_objects = _create_col_objects(table, column_list)
     else:
         column_objects = column_list
     try:
