@@ -1,12 +1,10 @@
-from django.conf import settings
 from django.core.cache import cache
 import pytest
 from sqlalchemy import Column, Integer, String, MetaData
 from sqlalchemy import Table as SATable
-from sqlalchemy.schema import CreateSchema, CreateTable
 
-from db.tables import get_oid_from_table, create_mathesar_table
-from mathesar.models import Schema, Table
+from db.tables import get_oid_from_table
+from mathesar.models import Table
 
 
 @pytest.fixture
@@ -68,3 +66,24 @@ def test_column_retrieve_when_missing(column_test_table, client):
     response_data = response.json()
     assert response_data == {"detail": "Not found."}
     assert response.status_code == 404
+
+
+def test_column_create(column_test_table, client):
+    name = "anewcolumn"
+    type_ = "NUMERIC"
+    cache.clear()
+    num_columns = len(column_test_table.sa_columns)
+    data = {
+        "name": name, "type": type_
+    }
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/", data=data
+    )
+    assert response.status_code == 201
+    new_columns_response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    assert new_columns_response.json()["count"] == num_columns + 1
+    actual_new_col = new_columns_response.json()["results"][-1]
+    assert actual_new_col["name"] == name
+    assert actual_new_col["type"] == type_
