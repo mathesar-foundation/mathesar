@@ -114,6 +114,33 @@ def test_record_list_sort(create_table, client):
     assert mock_infer.call_args[1]['order_by'] == order_by
 
 
+def test_record_list_group(create_table, client):
+    table_name = 'NASA Record List Group'
+    table = create_table(table_name)
+
+    group_count_by = ['Center', 'Case Number']
+    json_group_count_by = json.dumps(group_count_by)
+
+    with patch.object(
+        records, "get_group_counts", side_effect=records.get_group_counts
+    ) as mock_infer:
+        response = client.get(
+            f'/api/v0/tables/{table.id}/records/?group_count_by={json_group_count_by}'
+        )
+        response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['count'] == 1393
+    assert len(response_data['results']) == 50
+
+    assert 'group_count' in response_data
+    assert response_data['group_count']['group_count_by'] == group_count_by
+    assert 'results' in response_data['group_count']
+
+    assert mock_infer.call_args is not None
+    assert mock_infer.call_args[0][2] == group_count_by
+
+
 def test_record_list_pagination_limit(create_table, client):
     table_name = 'NASA Record List Pagination Limit'
     table = create_table(table_name)
