@@ -1,3 +1,15 @@
+const data = require('./tsconfig.json');
+
+function getAlias() {
+  const moduleNameMapper = {};
+  const { paths } = data.compilerOptions;
+  Object.keys(paths).forEach((key) => {
+    const location = paths[key][0].replace('*', '$1');
+    moduleNameMapper[`^${key.replace('*', '(.*)$')}`] = `<rootDir>/${location}`;
+  });
+  return moduleNameMapper;
+}
+
 module.exports = {
   transform: {
     '^.+\\.svelte$': [
@@ -8,11 +20,7 @@ module.exports = {
     ],
     '^.+\\.ts$': 'ts-jest',
   },
-  moduleNameMapper: {
-    '^@mathesar-components': '<rootDir>/src/components/index.ts',
-    '^@mathesar-components/types': '<rootDir>/src/components/types.d.ts',
-    '^@mathesar(.*)$': '<rootDir>/src$1',
-  },
+  moduleNameMapper: getAlias(),
   moduleFileExtensions: ['js', 'ts', 'svelte'],
   setupFilesAfterEnv: [
     '@testing-library/jest-dom/extend-expect',

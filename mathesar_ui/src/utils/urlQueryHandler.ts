@@ -17,7 +17,7 @@ function isInDBPath(db: string): boolean {
   return db === dbInURL;
 }
 
-function getRawTables(db: string): (string|number|string[])[][] {
+function getRawTables(db: string): (string | number | string[])[][] {
   if (isInDBPath(db)) {
     const tableQuery = router.location.query.get('t') as string;
     return tableQuery ? JSON.parse(decodeURIComponent(tableQuery)) as [] : [];
@@ -25,7 +25,7 @@ function getRawTables(db: string): (string|number|string[])[][] {
   return [];
 }
 
-function parseTableConfig(config: (string|number|string[])[]): TableConfig {
+function parseTableConfig(config: (string | number | string[])[]): TableConfig {
   const tableConfig: TableConfig = {
     id: parseInt(config[0] as string, 10),
   };
@@ -86,7 +86,7 @@ function addTable(
     const tables = getRawTables(db);
     const existingTable = tables.find((table) => table[0] === id);
     if (!existingTable) {
-      const tableConfig: (string|number|string[])[] = [id];
+      const tableConfig: (string | number | string[])[] = [id];
       if (options) {
         tableConfig.push(options.pageSize || -1);
         tableConfig.push(options.page || -1);
