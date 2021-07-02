@@ -30,7 +30,7 @@ class DatabaseObject(BaseModel):
 
 # TODO: Replace with a proper form of caching
 # See: https://github.com/centerofci/mathesar/issues/280
-_engine = None
+_engines = {}
 
 
 class Schema(DatabaseObject):
@@ -38,11 +38,11 @@ class Schema(DatabaseObject):
 
     @property
     def _sa_engine(self):
-        global _engine
+        global _engines
         # We're caching this since the engine is used frequently.
-        if _engine is None:
-            _engine = create_mathesar_engine(self.database)
-        return _engine
+        if self.database not in _engines:
+            _engines[self.database] = create_mathesar_engine(self.database)
+        return _engines[self.database]
 
     @cached_property
     def name(self):
