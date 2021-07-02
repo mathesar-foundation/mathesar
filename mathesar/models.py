@@ -129,8 +129,9 @@ class Table(DatabaseObject):
     def get_record(self, id_value):
         return records.get_record(self._sa_table, self.schema._sa_engine, id_value)
 
-    def get_records(self, limit=None, offset=None):
-        return records.get_records(self._sa_table, self.schema._sa_engine, limit, offset)
+    def get_records(self, limit=None, offset=None, filters=[]):
+        return records.get_records(self._sa_table, self.schema._sa_engine, limit,
+                                   offset, filters=filters)
 
     def create_record_or_records(self, record_data):
         return records.create_record_or_records(self._sa_table, self.schema._sa_engine, record_data)

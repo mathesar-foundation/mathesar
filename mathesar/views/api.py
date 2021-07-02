@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from django.core.cache import cache
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
+from sqlalchemy_filters.exceptions import BadFilterFormat, FieldNotFound
 from psycopg2.errors import DuplicateColumn, UndefinedFunction
 from sqlalchemy.exc import ProgrammingError
 
@@ -22,6 +23,7 @@ from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_fro
 from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
 from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
+from mathesar.forms.forms import RecordListFilterForm
 
 logger = logging.getLogger(__name__)
 
@@ -150,9 +152,24 @@ class RecordViewSet(viewsets.ViewSet):
     # where the entire record needs to be replaced, PATCH suffices for updates.
     queryset = Table.objects.all().order_by('-created_at')
 
+    # For filter parameter formatting, see:
+    # https://github.com/centerofci/sqlalchemy-filters#filters-format
     def list(self, request, table_pk=None):
         paginator = TableLimitOffsetPagination()
-        records = paginator.paginate_queryset(self.queryset, request, table_pk)
+
+        # Use a Django Form to automatically parse JSON URL parameters
+        filter_form = RecordListFilterForm(request.GET)
+        if not filter_form.is_valid():
+            raise ValidationError(filter_form.errors)
+
+        try:
+            records = paginator.paginate_queryset(
+                self.queryset, request, table_pk,
+                filters=filter_form.cleaned_data['filters']
+            )
+        except (FieldNotFound, BadFilterFormat) as e:
+            raise ValidationError({'filters': e})
+
         serializer = RecordSerializer(records, many=True)
         return paginator.get_paginated_response(serializer.data)
 

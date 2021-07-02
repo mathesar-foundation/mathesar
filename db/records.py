@@ -1,6 +1,7 @@
 import logging
-from sqlalchemy import delete, select, and_, Column
+from sqlalchemy import delete, select, Column
 from sqlalchemy.inspection import inspect
+from sqlalchemy_filters import apply_filters
 
 logger = logging.getLogger(__name__)
 
@@ -35,30 +36,20 @@ def get_records(
         order_by: list of SQLAlchemy ColumnElements to order by.  Should
                   usually be either a list of string column names, or a
                   list of columns from the given table.
-        filters:  list of tuples of type (ColumnElement, value), where
-                  ColumnElement is an SQLAlchemy ColumnElement, and value
-                  is a valid value for the associated column (i.e., the
-                  type must be correct)
+        filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
+                  field, in addition to an 'value' field if appropriate.
+                  See: https://github.com/centerofci/sqlalchemy-filters#filters-format
     """
     query = (
         select(table)
         .order_by(*order_by)
         .limit(limit)
         .offset(offset)
-        .where(_build_filter_conjunction(table, filters))
     )
+    if filters:
+        query = apply_filters(query, filters)
     with engine.begin() as conn:
         return conn.execute(query).fetchall()
-
-
-def _build_filter_conjunction(table, filters):
-    refined_filters = [
-        (table.columns[col] if type(col) == str else col, value)
-        for col, value in filters
-    ]
-    # We need a default of True (rather than empty), since invoking and_
-    # without arguments is deprecated.
-    return and_(True, *[col == value for col, value in refined_filters])
 
 
 def get_distinct_tuple_values(
@@ -99,6 +90,17 @@ def get_distinct_tuple_values(
     with engine.begin() as conn:
         res = conn.execute(query).fetchall()
     return [tuple(zip(column_objects, row)) for row in res]
+
+
+def distinct_tuples_to_filter(distinct_tuples):
+    filters = []
+    for col, value in distinct_tuples:
+        filters.append({
+            "field": col,
+            "op": "==",
+            "value": value,
+        })
+    return filters
 
 
 def create_record_or_records(table, engine, record_data):
