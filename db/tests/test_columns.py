@@ -1,6 +1,11 @@
 import re
+from unittest.mock import patch
+from psycopg2.errors import NotNullViolation
 import pytest
-from sqlalchemy import String, Integer, ForeignKey, Column, select, Table, MetaData
+from sqlalchemy import (
+    String, Integer, ForeignKey, Column, select, Table, MetaData, create_engine
+)
+from sqlalchemy.exc import IntegrityError
 from db import columns, tables, constants
 
 
@@ -22,7 +27,9 @@ def _rename_column(schema, table_name, old_col_name, new_col_name, engine):
     """
     Renames the colum of a table and assert the change went through
     """
-    columns.rename_column(schema, table_name, old_col_name, new_col_name, engine)
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    column_index = columns.get_column_index_from_name(table_oid, old_col_name, engine)
+    columns.rename_column(table_oid, column_index, new_col_name, engine)
     table = tables.reflect_table(table_name, schema, engine)
     assert new_col_name in table.columns
     assert old_col_name not in table.columns
@@ -137,6 +144,31 @@ def test_MC_is_default_when_false_for_pk():
         assert not col.is_default
 
 
+@pytest.mark.parametrize(
+    "column_dict,func_name",
+    [
+        ({"name": "blah"}, "rename_column"),
+        ({"type": "blah"}, "retype_column"),
+        ({"nullable": True}, "change_column_nullable"),
+    ]
+)
+def test_alter_column_chooses_wisely(column_dict, func_name):
+    engine = create_engine("postgresql://")
+    with patch.object(columns, func_name) as mock_alterer:
+        columns.alter_column(
+            engine,
+            1234,
+            5678,
+            column_dict
+        )
+    mock_alterer.assert_called_with(
+        1234,
+        5678,
+        list(column_dict.values())[0],
+        engine,
+    )
+
+
 def test_rename_column(engine_with_schema):
     old_col_name = "col1"
     new_col_name = "col2"
@@ -200,6 +232,175 @@ def test_rename_column_index(engine_with_schema):
         index_columns = index["column_names"]
     assert old_col_name not in index_columns
     assert new_col_name in index_columns
+
+
+def test_get_column_index_from_name(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "table_with_columns"
+    zero_name = "colzero"
+    one_name = "colone"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(zero_name, Integer),
+        Column(one_name, String),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    assert columns.get_column_index_from_name(table_oid, zero_name, engine) == 0
+    assert columns.get_column_index_from_name(table_oid, one_name, engine) == 1
+
+
+def test_retype_column_correct_column(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atableone"
+    target_type = "boolean"
+    target_column_name = "thecolumntochange"
+    nontarget_column_name = "notthecolumntochange"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(target_column_name, Integer),
+        Column(nontarget_column_name, String),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    with patch.object(columns.alteration, "alter_column_type") as mock_retyper:
+        columns.retype_column(table_oid, 0, target_type, engine)
+    mock_retyper.assert_called_with(
+        schema,
+        table_name,
+        target_column_name,
+        "boolean",
+        engine
+    )
+
+
+def test_create_column(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atableone"
+    target_type = "boolean"
+    initial_column_name = "original_column"
+    new_column_name = "added_column"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(initial_column_name, Integer),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    column_data = {"name": new_column_name, "type": target_type}
+    created_col = columns.create_column(engine, table_oid, column_data)
+    altered_table = tables.reflect_table_from_oid(table_oid, engine)
+    assert len(altered_table.columns) == 2
+    assert created_col.name == new_column_name
+    assert created_col.type.compile(engine.dialect) == "BOOLEAN"
+
+
+nullable_changes = [(True, True), (False, False), (True, False), (False, True)]
+
+
+@pytest.mark.parametrize("nullable_tup", nullable_changes)
+def test_change_column_nullable_changes(engine_with_schema, nullable_tup):
+    engine, schema = engine_with_schema
+    table_name = "atablefornulling"
+    target_column_name = "thecolumntochange"
+    nontarget_column_name = "notthecolumntochange"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(target_column_name, Integer, nullable=nullable_tup[0]),
+        Column(nontarget_column_name, String),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    changed_column = columns.change_column_nullable(
+        table_oid,
+        0,
+        nullable_tup[1],
+        engine
+    )
+    assert changed_column.nullable is nullable_tup[1]
+
+
+@pytest.mark.parametrize("nullable_tup", nullable_changes)
+def test_change_column_nullable_with_data(engine_with_schema, nullable_tup):
+    engine, schema = engine_with_schema
+    table_name = "atablefornulling"
+    target_column_name = "thecolumntochange"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(target_column_name, Integer, nullable=nullable_tup[0]),
+    )
+    table.create()
+    ins = table.insert().values(
+        [
+            {target_column_name: 1},
+            {target_column_name: 2},
+            {target_column_name: 3},
+        ]
+    )
+    with engine.begin() as conn:
+        conn.execute(ins)
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    changed_column = columns.change_column_nullable(
+        table_oid,
+        0,
+        nullable_tup[1],
+        engine
+    )
+    assert changed_column.nullable is nullable_tup[1]
+
+
+def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atablefornulling"
+    target_column_name = "thecolumntochange"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(target_column_name, Integer, nullable=True),
+    )
+    table.create()
+    ins = table.insert().values(
+        [
+            {target_column_name: 1},
+            {target_column_name: 2},
+            {target_column_name: None},
+        ]
+    )
+    with engine.begin() as conn:
+        conn.execute(ins)
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    with pytest.raises(IntegrityError) as e:
+        columns.change_column_nullable(
+            table_oid,
+            0,
+            False,
+            engine
+        )
+        assert type(e.orig) == NotNullViolation
+
+
+def test_drop_column_correct_column(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atable"
+    target_column_name = "thecolumntodrop"
+    nontarget_column_name = "notthecolumntodrop"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(target_column_name, Integer),
+        Column(nontarget_column_name, String),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    columns.drop_column(engine, table_oid, 0)
+    altered_table = tables.reflect_table_from_oid(table_oid, engine)
+    assert len(altered_table.columns) == 1
+    assert nontarget_column_name in altered_table.columns
+    assert target_column_name not in altered_table.columns
 
 
 def get_mathesar_column_init_args():

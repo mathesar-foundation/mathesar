@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 from sqlalchemy import Column, String, MetaData, text
 from sqlalchemy import Table as SATable
 
+from db.types import base, install
 from db.schemas import create_schema, get_schema_oid_from_name
 from db.tables import get_oid_from_table
 from mathesar.models import Schema, Table
@@ -37,6 +38,7 @@ def create_table(engine, csv_filename, test_db_name):
 @pytest.fixture
 def patent_schema(test_db_name):
     engine = create_mathesar_engine(test_db_name)
+    install.install_mathesar_on_database(engine)
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA IF EXISTS "{PATENT_SCHEMA}" CASCADE;'))
     create_schema(PATENT_SCHEMA, engine)
@@ -44,6 +46,7 @@ def patent_schema(test_db_name):
     yield Schema.objects.create(oid=schema_oid, database=test_db_name)
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA "{PATENT_SCHEMA}" CASCADE;'))
+        conn.execute(text(f'DROP SCHEMA {base.SCHEMA} CASCADE;'))
 
 
 @pytest.fixture
