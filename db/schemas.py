@@ -1,6 +1,6 @@
 import logging
 import warnings
-from sqlalchemy.schema import CreateSchema
+from sqlalchemy.schema import CreateSchema, DropSchema
 from sqlalchemy import inspect, MetaData, select, and_, not_, or_, Table
 
 from db import types
@@ -78,3 +78,12 @@ def create_schema(schema, engine):
     if schema not in get_all_schemas(engine):
         with engine.begin() as connection:
             connection.execute(CreateSchema(schema))
+
+
+def delete_schema(schema, engine):
+    """
+    This method deletes a Postgres schema.
+    """
+    if schema in get_all_schemas(engine):
+        with engine.begin() as connection:
+            connection.execute(DropSchema(schema))
