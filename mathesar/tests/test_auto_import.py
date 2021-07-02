@@ -65,13 +65,10 @@ def test_auto_import_schema(auto_import_engine, client):
     cache.clear()
     response = client.get('/api/v0/schemas/')
     response_data = response.json()
-    print(response_data)
     response_schemas = [
-        s for s in response_data['results'] if s['name'] != 'public'
-    ][0]
-    print(response_schemas)
+        s['name'] for s in response_data['results'] if s['name'] != 'public'
+    ]
 
     assert response.status_code == 200
-    assert response_data['count'] == 2
-    assert len(response_data['results']) == 4
-    assert response_schemas == test_schemas
+    assert len(response_schemas) == 2
+    assert set(response_schemas) == set(test_schemas)
