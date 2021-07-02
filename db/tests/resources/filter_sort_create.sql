@@ -1,4 +1,4 @@
-CREATE TABLE "FilterSort" (
+CREATE TABLE "filter_sort" (
     mathesar_id integer NOT NULL,
     "varchar" varchar(32),
     "numeric" integer,
@@ -6,7 +6,7 @@ CREATE TABLE "FilterSort" (
     "array"   integer[]
 );
 
-INSERT INTO "FilterSort" VALUES
+INSERT INTO "filter_sort" VALUES
 (1,'string1',1,'2000-01-01','{}'),
 (2,'string2',2,'2001-01-01','{0,0}'),
 (3,'string3',3,'2002-01-01','{1,1}'),
@@ -113,5 +113,5 @@ INSERT INTO "FilterSort" VALUES
 (104,NULL,NULL,NULL,NULL),
 (105,NULL,NULL,NULL,NULL);
 
-ALTER TABLE ONLY "FilterSort"
-    ADD CONSTRAINT "FilterSort_pkey" PRIMARY KEY (mathesar_id);
+ALTER TABLE ONLY "filter_sort"
+    ADD CONSTRAINT "filter_sort_pkey" PRIMARY KEY (mathesar_id);
