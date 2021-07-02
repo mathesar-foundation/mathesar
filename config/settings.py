@@ -16,6 +16,14 @@ from pathlib import Path
 from decouple import Csv, config as decouple_config
 from dj_database_url import parse as db_url
 
+
+def pipe_delim(pipe_string):
+    # Remove opening and closing brackets
+    pipe_string = pipe_string[1:-1]
+    # Split on pipe delim
+    return pipe_string.split("|")
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -71,17 +79,15 @@ WSGI_APPLICATION = "config.wsgi.application"
 # TODO: Add to documentation that database keys should not be than 128 characters.
 
 DATABASES = {
-    db_key: url_string for db_key, url_string in zip(
-        decouple_config('MATHESAR_DATABASE_KEYS', cast=Csv()),
-        decouple_config('MATHESAR_DATABASE_URLS', cast=Csv(db_url)),
-    )
+    db_key: db_url(url_string)
+    for db_key, url_string in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim))
 }
 DATABASES[decouple_config('DJANGO_DATABASE_KEY')] = decouple_config('DJANGO_DATABASE_URL', cast=db_url)
 
 # pytest-django will create a new database named 'test_{DATABASES[table_db]['NAME']}'
 # and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
 if decouple_config('TEST', default=False, cast=bool):
-    for db_key in decouple_config('MATHESAR_DATABASE_KEYS', cast=Csv()):
+    for db_key, _ in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim)):
         DATABASES[db_key]['TEST'] = {'NAME': DATABASES[db_key]['NAME']}
 
 
