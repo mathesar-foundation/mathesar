@@ -7,7 +7,7 @@ from db import records
 
 
 ROSTER = "Roster"
-FILTERSORT = "FilterSort"
+FILTER_SORT = "filter_sort"
 
 
 @pytest.fixture
@@ -22,7 +22,7 @@ def roster_table_obj(engine_with_roster):
 def filter_sort_table_obj(engine_with_filter_sort):
     engine, schema = engine_with_filter_sort
     metadata = MetaData(bind=engine)
-    roster = Table(FILTERSORT, metadata, schema=schema, autoload_with=engine)
+    roster = Table(FILTER_SORT, metadata, schema=schema, autoload_with=engine)
     return roster, engine
 
 
