@@ -1,8 +1,12 @@
 .skeleton {
-  position: relative;
+  position: absolute;
   transition: background 70ms cubic-bezier(0,0,.4,.9);
   background: #fafafa;
   opacity: 0.6;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
 
   &::before {
     position: absolute;

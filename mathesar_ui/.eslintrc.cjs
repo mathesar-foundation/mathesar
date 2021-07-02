@@ -3,7 +3,7 @@ const typescript = require('typescript');
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
-  ignorePatterns: ['node_modules', 'dist', 'index.html'],
+  ignorePatterns: ['node_modules', 'dist', 'index.html', 'storybook-static'],
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],
@@ -40,17 +40,21 @@ module.exports = {
         'no-multiple-empty-lines': 'off',
         '@typescript-eslint/no-unsafe-member-access': 'off',
         'no-void': 'off',
+        'no-useless-escape': 'off',
       },
     },
     {
       files: [
-        '*.cjs',
+        '*.cjs', '*.config.js',
       ],
       rules: {
         '@typescript-eslint/no-var-requires': 'off',
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/no-unsafe-call': 'off',
         '@typescript-eslint/no-unsafe-return': 'off',
+        '@typescript-eslint/no-unsafe-member-access': 'off',
+        '@typescript-eslint/restrict-template-expressions': 'off',
+        '@typescript-eslint/explicit-module-boundary-types': 'off',
       },
     },
     {
