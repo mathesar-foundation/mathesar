@@ -108,8 +108,6 @@ class ColumnViewSet(viewsets.ViewSet):
         if serializer.is_valid():
             try:
                 column = table.add_column(request.data)
-                out_serializer = ColumnSerializer(column)
-                return Response(out_serializer.data, status=status.HTTP_201_CREATED)
             except ProgrammingError as e:
                 if type(e.orig) == DuplicateColumn:
                     raise ValidationError(
@@ -119,6 +117,8 @@ class ColumnViewSet(viewsets.ViewSet):
                     raise APIException(e)
         else:
             raise ValidationError(serializer.errors)
+        out_serializer = ColumnSerializer(column)
+        return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
         table = Table.objects.get(id=table_pk)
@@ -130,12 +130,17 @@ class ColumnViewSet(viewsets.ViewSet):
                 raise ValidationError("This type cast is not implemented")
             else:
                 raise ValidationError
+        except IndexError:
+            raise NotFound
         serializer = ColumnSerializer(column)
         return Response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
         table = Table.objects.get(id=table_pk)
-        table.drop_column(pk)
+        try:
+            table.drop_column(pk)
+        except IndexError:
+            raise NotFound
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

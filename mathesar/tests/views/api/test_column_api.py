@@ -133,6 +133,18 @@ def test_column_update_type_invalid_cast(column_test_table, client):
     assert response.status_code == 400
 
 
+def test_column_update_when_missing(column_test_table, client):
+    cache.clear()
+    name = "updatedname"
+    data = {"name": name}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/15/", data=data
+    )
+    response_data = response.json()
+    assert response_data == {"detail": "Not found."}
+    assert response.status_code == 404
+
+
 def test_column_destroy(column_test_table, client):
     cache.clear()
     num_columns = len(column_test_table.sa_columns)
@@ -147,3 +159,13 @@ def test_column_destroy(column_test_table, client):
     new_data = new_columns_response.json()
     assert col_one_name not in [col["name"] for col in new_data["results"]]
     assert new_data["count"] == num_columns - 1
+
+
+def test_column_destroy_when_missing(column_test_table, client):
+    cache.clear()
+    response = client.delete(
+        f"/api/v0/tables/{column_test_table.id}/columns/15/"
+    )
+    response_data = response.json()
+    assert response_data == {"detail": "Not found."}
+    assert response.status_code == 404
