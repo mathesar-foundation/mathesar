@@ -6,18 +6,6 @@ CREATE TABLE "FilterSort" (
     "array"   integer[]
 );
 
-CREATE SEQUENCE "filter_sort_mathesar_id_seq"
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE "filter_sort_mathesar_id_seq" OWNED BY "FilterSort".mathesar_id;
-
-ALTER TABLE ONLY "FilterSort" ALTER COLUMN mathesar_id SET DEFAULT nextval('"filter_sort_mathesar_id_seq"'::regclass);
-
 INSERT INTO "FilterSort" VALUES
 (1,'string1',1,'2000-01-01','{}'),
 (2,'string2',2,'2001-01-01','{0,0}'),
@@ -124,8 +112,6 @@ INSERT INTO "FilterSort" VALUES
 (103,NULL,NULL,NULL,NULL),
 (104,NULL,NULL,NULL,NULL),
 (105,NULL,NULL,NULL,NULL);
-
-SELECT pg_catalog.setval('"filter_sort_mathesar_id_seq"', 105, true);
 
 ALTER TABLE ONLY "FilterSort"
     ADD CONSTRAINT "FilterSort_pkey" PRIMARY KEY (mathesar_id);
