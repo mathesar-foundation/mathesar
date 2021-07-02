@@ -1,7 +1,7 @@
 import logging
 from sqlalchemy import delete, select, Column
 from sqlalchemy.inspection import inspect
-from sqlalchemy_filters import apply_filters
+from sqlalchemy_filters import apply_filters, apply_sort
 
 logger = logging.getLogger(__name__)
 
@@ -33,16 +33,18 @@ def get_records(
         engine:   SQLAlchemy engine object
         limit:    int, gives number of rows to return
         offset:   int, gives number of rows to skip
-        order_by: list of SQLAlchemy ColumnElements to order by.  Should
-                  usually be either a list of string column names, or a
-                  list of columns from the given table.
+        order_by: list of dictionaries, where each dictionary has a 'field' and
+                  'direction' field.
+                  See: https://github.com/centerofci/sqlalchemy-filters#sort-format
         filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
     """
+    query = select(table)
+    if order_by:
+        query = apply_sort(query, order_by)
     query = (
-        select(table)
-        .order_by(*order_by)
+        query
         .limit(limit)
         .offset(offset)
     )

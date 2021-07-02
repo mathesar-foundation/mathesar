@@ -6,9 +6,11 @@ from rest_framework.response import Response
 from django.core.cache import cache
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
-from sqlalchemy_filters.exceptions import BadFilterFormat, FieldNotFound
 from psycopg2.errors import DuplicateColumn, UndefinedFunction
 from sqlalchemy.exc import ProgrammingError
+from sqlalchemy_filters.exceptions import (
+    BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound,
+)
 
 
 from mathesar.database.utils import get_non_default_database_keys
@@ -154,6 +156,8 @@ class RecordViewSet(viewsets.ViewSet):
 
     # For filter parameter formatting, see:
     # https://github.com/centerofci/sqlalchemy-filters#filters-format
+    # For sorting parameter formatting, see:
+    # https://github.com/centerofci/sqlalchemy-filters#sort-format
     def list(self, request, table_pk=None):
         paginator = TableLimitOffsetPagination()
 
@@ -165,10 +169,13 @@ class RecordViewSet(viewsets.ViewSet):
         try:
             records = paginator.paginate_queryset(
                 self.queryset, request, table_pk,
-                filters=filter_form.cleaned_data['filters']
+                filters=filter_form.cleaned_data['filters'],
+                order_by=filter_form.cleaned_data['order_by']
             )
-        except (FieldNotFound, BadFilterFormat) as e:
+        except (BadFilterFormat, FilterFieldNotFound) as e:
             raise ValidationError({'filters': e})
+        except (BadSortFormat, SortFieldNotFound) as e:
+            raise ValidationError({'order_by': e})
 
         serializer = RecordSerializer(records, many=True)
         return paginator.get_paginated_response(serializer.data)
