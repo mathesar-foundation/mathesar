@@ -48,3 +48,15 @@ def test_get_mathesar_schemas_with_oids_gets_correct_oid(engine_with_schema):
     actual_schemata = schemas.get_mathesar_schemas_with_oids(engine)
     actual_oid = [oid for schm, oid in actual_schemata if schm == schema][0]
     assert actual_oid == expect_oid
+
+
+def test_delete_schema(engine):
+    test_schema = "test_delete_schema"
+
+    schemas.create_schema(test_schema, engine)
+    current_schemas = schemas.get_mathesar_schemas(engine)
+    assert test_schema in current_schemas
+
+    schemas.delete_schema(test_schema, engine)
+    current_schemas = schemas.get_mathesar_schemas(engine)
+    assert test_schema not in current_schemas
