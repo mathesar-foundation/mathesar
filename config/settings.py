@@ -17,6 +17,8 @@ from decouple import Csv, config as decouple_config
 from dj_database_url import parse as db_url
 
 
+# We use a 'tuple' with pipes as delimiters as decople naively splits the global
+# variables on commas when casting to Csv()
 def pipe_delim(pipe_string):
     # Remove opening and closing brackets
     pipe_string = pipe_string[1:-1]
