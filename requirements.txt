@@ -1,10 +1,11 @@
+alembic==1.6.5
+clevercsv==0.6.8
 Django==3.1.7
 dj-database-url==0.5.0
+django-filter==2.4.0
+django-property-filter==1.1.0
 djangorestframework==3.12.4
 drf-nested-routers==0.93.3
 psycopg2==2.8.6
 SQLAlchemy==1.4.18
-clevercsv==0.6.8
-django-filter==2.4.0
-django-property-filter==1.1.0
 git+git://github.com/centerofci/sqlalchemy-filters@models_to_tables#egg=sqlalchemy_filters

@@ -1,19 +1,23 @@
 import logging
 from rest_framework import status, viewsets
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound, ValidationError, APIException
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
 from django.core.cache import cache
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
 from sqlalchemy_filters.exceptions import BadFilterFormat, FieldNotFound
+from psycopg2.errors import DuplicateColumn, UndefinedFunction
+from sqlalchemy.exc import ProgrammingError
 
 
 from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile
-from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
+from mathesar.pagination import (
+    ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetPagination
+)
 from mathesar.serializers import (
-    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer,
+    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
 )
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
 from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
@@ -79,6 +83,67 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
         table = self.get_object()
         col_types = get_table_column_types(table)
         return Response(col_types)
+
+
+class ColumnViewSet(viewsets.ViewSet):
+    queryset = Table.objects.all().order_by('-created_at')
+
+    def list(self, request, table_pk=None):
+        paginator = ColumnLimitOffsetPagination()
+        columns = paginator.paginate_queryset(self.queryset, request, table_pk)
+        serializer = ColumnSerializer(columns, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    def retrieve(self, request, pk=None, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        try:
+            column = table.sa_columns[int(pk)]
+        except IndexError:
+            raise NotFound
+        serializer = ColumnSerializer(column)
+        return Response(serializer.data)
+
+    def create(self, request, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        # We only support adding a single column through the API.
+        serializer = ColumnSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            try:
+                column = table.add_column(request.data)
+            except ProgrammingError as e:
+                if type(e.orig) == DuplicateColumn:
+                    raise ValidationError(
+                        f"Column {request.data['name']} already exists"
+                    )
+                else:
+                    raise APIException(e)
+        else:
+            raise ValidationError(serializer.errors)
+        out_serializer = ColumnSerializer(column)
+        return Response(out_serializer.data, status=status.HTTP_201_CREATED)
+
+    def partial_update(self, request, pk=None, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        assert isinstance((request.data), dict)
+        try:
+            column = table.alter_column(pk, request.data)
+        except ProgrammingError as e:
+            if type(e.orig) == UndefinedFunction:
+                raise ValidationError("This type cast is not implemented")
+            else:
+                raise ValidationError
+        except IndexError:
+            raise NotFound
+        serializer = ColumnSerializer(column)
+        return Response(serializer.data)
+
+    def destroy(self, request, pk=None, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        try:
+            table.drop_column(pk)
+        except IndexError:
+            raise NotFound
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RecordViewSet(viewsets.ViewSet):
