@@ -92,9 +92,9 @@ def get_distinct_tuple_values(
     return [tuple(zip(column_objects, row)) for row in res]
 
 
-def distinct_tuple_to_filter(distinct_tuple):
+def distinct_tuples_to_filter(distinct_tuples):
     filters = []
-    for col, value in distinct_tuple:
+    for col, value in distinct_tuples:
         filters.append({
             "field": col,
             "op": "==",

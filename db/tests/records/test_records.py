@@ -176,7 +176,7 @@ def test_get_distinct_tuple_values_feeds_get_records(roster_table_obj):
     distinct_tuples = records.get_distinct_tuple_values(
         column_list, engine, table=roster, limit=2
     )
-    filter_list = records.distinct_tuple_to_filter(distinct_tuples[0])
+    filter_list = records.distinct_tuples_to_filter(distinct_tuples[0])
     record_list = records.get_records(
         roster, engine, filters=filter_list
     )
