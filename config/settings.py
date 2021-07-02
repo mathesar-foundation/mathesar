@@ -80,6 +80,8 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # TODO: Add to documentation that database keys should not be than 128 characters.
 
+# MATHESAR_DATABASES should be of the form '({db_name}|{db_url}), ({db_name}|{db_url})'
+# See pipe_delim above for why we use pipes as delimiters
 DATABASES = {
     db_key: db_url(url_string)
     for db_key, url_string in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim))
