@@ -15,7 +15,7 @@
   } from '@mathesar/stores/fileImports';
   import { clearTable } from '@mathesar/stores/tableData';
 
-  import ImportFile from './import-file/ImportFile.svelte';
+  import NewTable from './new-table/NewTable.svelte';
   import TableView from './table-view/TableView.svelte';
   import EmptyState from './empty-state/EmptyState.svelte';
 
@@ -158,7 +158,7 @@
 
       {#if activeTab}
         {#if activeTab.isNew}
-          <ImportFile {database} id={activeTab.id.toString()}/>
+          <NewTable {database} id={activeTab.id}/>
         {:else}
           <TableView {database} id={activeTab.id}/>
         {/if}

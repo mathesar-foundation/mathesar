@@ -82,7 +82,12 @@ export async function uploadFile<T>(
   return new Promise((resolve, reject) => {
     request.addEventListener('load', () => {
       if (successStatusCodes.has(request.status)) {
-        resolve(request.response);
+        try {
+          const response = JSON.parse(request.response) as T;
+          resolve(response);
+        } catch (exp) {
+          resolve(request.response);
+        }
       } else {
         reject(new Error('An error has occurred while uploading file'));
       }

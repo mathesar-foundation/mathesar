@@ -17,7 +17,7 @@
       }
 
       >svg {
-        color: #d0d3d6;
+        color: #c4c7ca;
       }
 
       >.file-info {
@@ -42,13 +42,6 @@
           display: flex;
           justify-content: space-between;
         }
-
-        >.actions {
-          margin-top: 14px;
-          padding-top: 14px;
-          text-align: right;
-          border-top: 1px solid #f3f4f4;
-        }
       }
     }
   }
@@ -56,7 +49,7 @@
   .file-upload-trigger {
     display: block;
     background: transparent;
-    border: 2px dashed #dfdfdf;
+    border: 1px dashed #5193F0;
     border-radius: 3px;
     color: inherit;
     font-family: inherit;
@@ -74,17 +67,26 @@
       flex-direction: column;
       text-align: center;
 
+      >svg {
+        color: #5193F0;
+      }
+
       .text {
         margin-top: 25px;
+
+        .title {
+          font-weight: 500;
+          margin-bottom: 10px;
+        }
       }
     }
   
     &:focus, &:hover {
-      background: #f8f9f9;
+      background: #f5f9ff;
     }
   
-    &:active {
-      background: #f2f3f3;
+    &:active, &.in {
+      background: #ebf3ff;
     }
   }
 

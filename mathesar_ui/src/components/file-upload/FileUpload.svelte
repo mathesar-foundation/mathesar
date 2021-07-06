@@ -13,7 +13,7 @@
     faFile,
     faFileUpload,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Icon, Progress, Button } from '@mathesar-components';
+  import { Icon, Progress } from '@mathesar-components';
   import type {
     FileUpload,
     FileUploadProgress,
@@ -76,23 +76,20 @@
   }
 </script>
 
-<div class="file-upload" class:inprogress={fileUploads.length > 0}>
-  {#if fileUploads.length > 0}
+<div class="file-upload" class:inprogress={fileUploads?.length > 0}>
+  {#if fileUploads?.length > 0}
     <div class="files">
       {#each fileUploads as upload (upload.fileId)}
         <div class="file">
           <Icon data={faFile} size="3.5em"/>
           <div class="file-info">
             <div class="name">{upload.file.name}</div>
-            <Progress percentage={Math.round(fileProgress[upload.fileId]?.progress || 0)} />
+            <Progress percentage={Math.round(fileProgress?.[upload.fileId]?.progress || 0)} />
             <div class="upload-info">
               <span>
-                Uploaded {Math.round(fileProgress[upload.fileId]?.progress || 0)}%
+                Uploaded {Math.round(fileProgress?.[upload.fileId]?.progress || 0)}%
               </span>
               <span>{upload.file.size}Kb</span>
-            </div>
-            <div class="actions">
-              <Button>Cancel Upload</Button>
             </div>
           </div>
         </div>
@@ -105,7 +102,7 @@
           style="display: none;"
           on:change={onChange}/>
 
-  {#if multiple || fileUploads.length === 0}
+  {#if multiple || !fileUploads || fileUploads.length === 0}
     <label tabindex="0" for={componentId} class="file-upload-trigger {state}"
       on:keydown={checkAndOpen}
       on:drop|preventDefault|stopPropagation={(e) => processFiles(e, e.dataTransfer.files)} 
@@ -117,8 +114,8 @@
         <div class="message">
           <Icon size="60px" data={faFileUpload}/>
           <div class="text">
-            <div>Drag a file here</div>
-            <div>Or click to browse a file from your computer</div>
+            <div class="title">Drag a file here</div>
+            <div>or click to browse a file from your computer</div>
           </div>
         </div>
       </slot>

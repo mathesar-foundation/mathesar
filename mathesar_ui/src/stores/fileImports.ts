@@ -5,16 +5,21 @@ import {
 } from 'svelte/store';
 import { States } from '@mathesar/utils/api';
 import type { UploadCompletionOpts } from '@mathesar/utils/api';
+import type { FileUpload } from '@mathesar-components/types';
 
 export enum ImportChangeType {
   ADDED = 'added',
   REMOVED = 'removed',
+  MODIFIED = 'modified',
 }
 
 interface FileImportWritableInfo {
+  stage?: number,
+  uploads?: FileUpload[],
+  dataFileId?: number,
   name?: string,
   schema?: string,
-  status?: States,
+  uploadStatus?: States,
   progress?: UploadCompletionOpts,
   error?: string
 }
@@ -25,6 +30,7 @@ export interface FileImportInfo extends FileImportWritableInfo {
 
 export interface FileImportChange {
   changeType: ImportChangeType,
+  old?: FileImportInfo,
   info?: FileImportInfo,
   all: FileImportInfo[],
 }
@@ -64,7 +70,11 @@ export function getFileStore(db: string, id: string): FileImport {
 
   let fileImport = database.imports.get(id);
   if (!fileImport) {
-    const fileImportInitialInfo: FileImportInfo = { id, status: States.Idle };
+    const fileImportInitialInfo: FileImportInfo = {
+      id,
+      uploadStatus: States.Idle,
+      stage: 1,
+    };
     fileImport = writable(fileImportInitialInfo);
     database.imports.set(id, fileImport);
   }
@@ -72,11 +82,19 @@ export function getFileStore(db: string, id: string): FileImport {
 }
 
 export function setFileStore(db: string, id: string, data: FileImportWritableInfo): void {
+  const database = getDBStore(db);
   const store = getFileStore(db, id);
   const existingData = get(store);
   store.set({
     ...existingData,
     ...data,
+  });
+
+  database.changes.set({
+    changeType: ImportChangeType.MODIFIED,
+    old: existingData,
+    info: get(store),
+    all: getAllImportDetails(db),
   });
 }
 

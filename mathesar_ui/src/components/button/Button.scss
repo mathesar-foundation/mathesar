@@ -13,7 +13,6 @@ button.btn {
   }
 
   /* Appearances */
-
   &.btn-default {
     background: #fff;
     border-color: #dfdfdf;
@@ -86,5 +85,11 @@ button.btn {
   &.size-large {
     padding: 8px 14px;
     font-size: 1.2rem;
+  }
+
+  /* State */
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
