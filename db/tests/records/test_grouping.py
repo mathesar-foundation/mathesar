@@ -13,7 +13,7 @@ def test_get_group_counts_str_field(filter_sort_table_obj):
     group_by = ["varchar"]
     counts = records.get_group_counts(filter_sort, engine, group_by)
     assert len(counts) == 101
-    assert "string1" in counts
+    assert ("string1",) in counts
 
 
 def test_get_group_counts_col_field(filter_sort_table_obj):
@@ -21,7 +21,7 @@ def test_get_group_counts_col_field(filter_sort_table_obj):
     group_by = [filter_sort.c.varchar]
     counts = records.get_group_counts(filter_sort, engine, group_by)
     assert len(counts) == 101
-    assert "string1" in counts
+    assert ("string1",) in counts
 
 
 def test_get_group_counts_mixed_str_col_field(filter_sort_table_obj):
@@ -42,9 +42,9 @@ def test_get_group_counts_limit_ordering(filter_sort_table_obj):
     assert len(counts) == 50
     for i in range(1, 100):
         if i > 50:
-            assert i in counts
+            assert (i,) in counts
         else:
-            assert i not in counts
+            assert (i,) not in counts
 
 
 def test_get_group_counts_limit_offset_ordering(filter_sort_table_obj):
@@ -58,9 +58,9 @@ def test_get_group_counts_limit_offset_ordering(filter_sort_table_obj):
     assert len(counts) == 50
     for i in range(1, 100):
         if i > 25 and i <= 75:
-            assert i in counts
+            assert (i,) in counts
         else:
-            assert i not in counts
+            assert (i,) not in counts
 
 
 count_values_test_list = itertools.chain(*[
@@ -85,9 +85,6 @@ def test_get_group_counts_count_values(roster_table_obj, group_by):
     manual_count = Counter(all_records)
 
     for key, value in counts.items():
-        # The counter uses tuples as keys
-        if type(key) is not tuple:
-            key = (key,)
         assert manual_count[key] == value
 
 
