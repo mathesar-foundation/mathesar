@@ -70,7 +70,7 @@ def auto_import_engine(auto_import_test_db, auto_import_test_db_connection_strin
     )
 
 
-def test_auto_import_schema(auto_import_engine, client):
+def test_auto_import_schema(engine, auto_import_engine, client):
     test_schemas = ["test_auto_import_schema_1", "test_auto_import_schema_2"]
     for schema in test_schemas:
         schemas.create_schema(schema, auto_import_engine)
@@ -87,7 +87,7 @@ def test_auto_import_schema(auto_import_engine, client):
     assert set(response_schemas) == set(test_schemas)
 
 
-def test_auto_import_tables(auto_import_engine, client):
+def test_auto_import_tables(engine, auto_import_engine, client):
     schema_name = "test_auto_import_tables_schema"
     test_tables = ["test_table_1", "test_table_2"]
     schemas.create_schema(schema_name, auto_import_engine)
