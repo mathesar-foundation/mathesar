@@ -1,5 +1,3 @@
-from time import sleep
-
 import pytest
 from sqlalchemy import create_engine, text
 from config.settings import DATABASES
@@ -7,7 +5,7 @@ from django.core.cache import cache
 from django.conf import settings
 from dj_database_url import parse as db_url
 
-from db import schemas
+from db import schemas, tables
 
 AUTO_IMPORT_TEST_DB = "mathesar_auto_import_db_test"
 
@@ -28,12 +26,12 @@ def _get_superuser_engine():
     )
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def auto_import_test_db_name():
     return AUTO_IMPORT_TEST_DB
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def auto_import_test_db_connection_string(auto_import_test_db_name):
     return _get_connection_string(
         DATABASES["default"]["USER"],
@@ -43,7 +41,7 @@ def auto_import_test_db_connection_string(auto_import_test_db_name):
     )
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def auto_import_test_db(auto_import_test_db_connection_string):
     superuser_engine = _get_superuser_engine()
     with superuser_engine.connect() as conn:
@@ -64,7 +62,7 @@ def auto_import_test_db(auto_import_test_db_connection_string):
     del settings.DATABASES[AUTO_IMPORT_TEST_DB]
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def auto_import_engine(auto_import_test_db, auto_import_test_db_connection_string):
     return create_engine(
         auto_import_test_db_connection_string,
@@ -73,7 +71,7 @@ def auto_import_engine(auto_import_test_db, auto_import_test_db_connection_strin
 
 
 def test_auto_import_schema(auto_import_engine, client):
-    test_schemas = ["test_schema_1", "test_schema_2"]
+    test_schemas = ["test_auto_import_schema_1", "test_auto_import_schema_2"]
     for schema in test_schemas:
         schemas.create_schema(schema, auto_import_engine)
 
@@ -87,3 +85,19 @@ def test_auto_import_schema(auto_import_engine, client):
     assert response.status_code == 200
     assert len(response_schemas) == 2
     assert set(response_schemas) == set(test_schemas)
+
+
+def test_auto_import_tables(auto_import_engine, client):
+    schema_name = "test_auto_import_tables_schema"
+    test_tables = ["test_table_1", "test_table_2"]
+    schemas.create_schema(schema_name, auto_import_engine)
+    for table_name in test_tables:
+        tables.create_mathesar_table(table_name, schema_name, [], auto_import_engine)
+
+    cache.clear()
+    response = client.get('/api/v0/tables/')
+    response_tables = [s['name'] for s in response.json()['results']]
+
+    assert response.status_code == 200
+    for table_name in test_tables:
+        assert table_name in response_tables
