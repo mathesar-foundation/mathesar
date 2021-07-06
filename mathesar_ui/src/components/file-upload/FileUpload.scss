@@ -1,0 +1,99 @@
+.file-upload {
+  display: flex;
+  width: 100%;
+
+  .files {
+    flex-grow: 1;
+    min-width: calc(50% - 8px);
+
+    .file {
+      padding: 14px 20px 14px 14px;
+      border: 1px solid #efefef;
+      border-radius: 3px;
+      display: flex;
+
+      &+.file {
+        margin-top: 8px;
+      }
+
+      >svg {
+        color: #d0d3d6;
+      }
+
+      >.file-info {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin-left: 14px;
+
+        >.name {
+          font-weight: 500;
+        }
+
+        >.progress {
+          height: 10px;
+          border-radius: 4px;
+          margin-top: 7px;
+          margin-bottom: 5px;
+        }
+
+        >.upload-info {
+          font-size: 0.8em;
+          display: flex;
+          justify-content: space-between;
+        }
+
+        >.actions {
+          margin-top: 14px;
+          padding-top: 14px;
+          text-align: right;
+          border-top: 1px solid #f3f4f4;
+        }
+      }
+    }
+  }
+
+  .file-upload-trigger {
+    display: block;
+    background: transparent;
+    border: 2px dashed #dfdfdf;
+    border-radius: 3px;
+    color: inherit;
+    font-family: inherit;
+    padding: 0px;
+    margin: 0px;
+    min-height: 180px;
+    flex-grow: 1;
+
+    .message {
+      display: flex;
+      height: 100%;
+      width: 100%;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+
+      .text {
+        margin-top: 25px;
+      }
+    }
+  
+    &:focus, &:hover {
+      background: #f8f9f9;
+    }
+  
+    &:active {
+      background: #f2f3f3;
+    }
+  }
+
+  &.inprogress {
+    .files {
+      margin-right: 8px;
+    }
+    .file-upload-trigger {
+      margin-left: 8px;
+    }
+  }
+}
