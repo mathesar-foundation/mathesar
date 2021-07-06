@@ -110,10 +110,9 @@ def get_group_counts(
     with engine.begin() as conn:
         records = conn.execute(query).fetchall()
 
-    # Use a tuple as the key if we are grouping by mutliple fields
     # Last field is the count, preceding fields are the group by fields
     counts = {
-        record[0] if len(group_by) == 1 else (*record[:-1],): record[-1]
+        (*record[:-1],): record[-1]
         for record in records
     }
     return counts
