@@ -1,21 +1,31 @@
 import logging
 from rest_framework import status, viewsets
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound, ValidationError, APIException
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
 from django.core.cache import cache
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
+from psycopg2.errors import DuplicateColumn, UndefinedFunction
+from sqlalchemy.exc import ProgrammingError
+from sqlalchemy_filters.exceptions import (
+    BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound,
+)
 
 
 from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile
-from mathesar.pagination import DefaultLimitOffsetPagination, TableLimitOffsetPagination
-from mathesar.serializers import TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer
+from mathesar.pagination import (
+    ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetPagination
+)
+from mathesar.serializers import (
+    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
+)
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
 from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
 from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
+from mathesar.forms.forms import RecordListFilterForm
 
 logger = logging.getLogger(__name__)
 
@@ -77,15 +87,96 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
         return Response(col_types)
 
 
+class ColumnViewSet(viewsets.ViewSet):
+    queryset = Table.objects.all().order_by('-created_at')
+
+    def list(self, request, table_pk=None):
+        paginator = ColumnLimitOffsetPagination()
+        columns = paginator.paginate_queryset(self.queryset, request, table_pk)
+        serializer = ColumnSerializer(columns, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    def retrieve(self, request, pk=None, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        try:
+            column = table.sa_columns[int(pk)]
+        except IndexError:
+            raise NotFound
+        serializer = ColumnSerializer(column)
+        return Response(serializer.data)
+
+    def create(self, request, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        # We only support adding a single column through the API.
+        serializer = ColumnSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            try:
+                column = table.add_column(request.data)
+            except ProgrammingError as e:
+                if type(e.orig) == DuplicateColumn:
+                    raise ValidationError(
+                        f"Column {request.data['name']} already exists"
+                    )
+                else:
+                    raise APIException(e)
+        else:
+            raise ValidationError(serializer.errors)
+        out_serializer = ColumnSerializer(column)
+        return Response(out_serializer.data, status=status.HTTP_201_CREATED)
+
+    def partial_update(self, request, pk=None, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        assert isinstance((request.data), dict)
+        try:
+            column = table.alter_column(pk, request.data)
+        except ProgrammingError as e:
+            if type(e.orig) == UndefinedFunction:
+                raise ValidationError("This type cast is not implemented")
+            else:
+                raise ValidationError
+        except IndexError:
+            raise NotFound
+        serializer = ColumnSerializer(column)
+        return Response(serializer.data)
+
+    def destroy(self, request, pk=None, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        try:
+            table.drop_column(pk)
+        except IndexError:
+            raise NotFound
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class RecordViewSet(viewsets.ViewSet):
     # There is no "update" method.
     # We're not supporting PUT requests because there aren't a lot of use cases
     # where the entire record needs to be replaced, PATCH suffices for updates.
     queryset = Table.objects.all().order_by('-created_at')
 
+    # For filter parameter formatting, see:
+    # https://github.com/centerofci/sqlalchemy-filters#filters-format
+    # For sorting parameter formatting, see:
+    # https://github.com/centerofci/sqlalchemy-filters#sort-format
     def list(self, request, table_pk=None):
         paginator = TableLimitOffsetPagination()
-        records = paginator.paginate_queryset(self.queryset, request, table_pk)
+
+        # Use a Django Form to automatically parse JSON URL parameters
+        filter_form = RecordListFilterForm(request.GET)
+        if not filter_form.is_valid():
+            raise ValidationError(filter_form.errors)
+
+        try:
+            records = paginator.paginate_queryset(
+                self.queryset, request, table_pk,
+                filters=filter_form.cleaned_data['filters'],
+                order_by=filter_form.cleaned_data['order_by']
+            )
+        except (BadFilterFormat, FilterFieldNotFound) as e:
+            raise ValidationError({'filters': e})
+        except (BadSortFormat, SortFieldNotFound) as e:
+            raise ValidationError({'order_by': e})
+
         serializer = RecordSerializer(records, many=True)
         return paginator.get_paginated_response(serializer.data)
 

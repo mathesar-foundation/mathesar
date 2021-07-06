@@ -29,3 +29,8 @@ class UploadFileForm(forms.Form):
         label='Database'
     )
     file = forms.FileField(validators=[validate_csv], label='CSV File')
+
+
+class RecordListFilterForm(forms.Form):
+    filters = forms.JSONField(required=False, empty_value=[])
+    order_by = forms.JSONField(required=False, empty_value=[])

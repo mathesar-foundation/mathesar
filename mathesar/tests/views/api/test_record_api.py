@@ -1,3 +1,15 @@
+import json
+import pytest
+from unittest.mock import patch
+
+from sqlalchemy_filters.exceptions import (
+    BadFilterFormat, FilterFieldNotFound,
+    BadSortFormat, SortFieldNotFound,
+)
+
+from db import records
+
+
 def test_record_list(create_table, client):
     """
     Desired format:
@@ -40,6 +52,66 @@ def test_record_list(create_table, client):
     assert len(response_data['results']) == 50
     for column_name in table.sa_column_names:
         assert column_name in record_data
+
+
+def test_record_list_filter(create_table, client):
+    table_name = 'NASA Record List Filter'
+    table = create_table(table_name)
+
+    filter_list = [
+        {'or': [
+            {'and': [
+                {'field': 'Center', 'op': '==', 'value': 'NASA Ames Research Center'},
+                {'field': 'Case Number', 'op': '==', 'value': 'ARC-14048-1'}
+            ]},
+            {'and': [
+                {'field': 'Center', 'op': '==', 'value': 'NASA Kennedy Space Center'},
+                {'field': 'Case Number', 'op': '==', 'value': 'KSC-12871'}
+            ]}
+        ]}
+    ]
+    json_filter_list = json.dumps(filter_list)
+
+    with patch.object(
+        records, "get_records", side_effect=records.get_records
+    ) as mock_infer:
+        response = client.get(
+            f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
+        )
+        response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['count'] == 1393
+    assert len(response_data['results']) == 2
+
+    assert mock_infer.call_args is not None
+    assert mock_infer.call_args[1]['filters'] == filter_list
+
+
+def test_record_list_sort(create_table, client):
+    table_name = 'NASA Record List Order'
+    table = create_table(table_name)
+
+    order_by = [
+        {'field': 'Center', 'direction': 'desc'},
+        {'field': 'Case Number', 'direction': 'asc'},
+    ]
+    json_order_by = json.dumps(order_by)
+
+    with patch.object(
+        records, "get_records", side_effect=records.get_records
+    ) as mock_infer:
+        response = client.get(
+            f'/api/v0/tables/{table.id}/records/?order_by={json_order_by}'
+        )
+        response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['count'] == 1393
+    assert len(response_data['results']) == 50
+
+    assert mock_infer.call_args is not None
+    assert mock_infer.call_args[1]['order_by'] == order_by
 
 
 def test_record_list_pagination_limit(create_table, client):
@@ -189,3 +261,33 @@ def test_record_404(create_table, client):
     response = client.get(f'/api/v0/tables/{table.id}/records/{record_id}/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
+
+
+@pytest.mark.parametrize("exception", [BadFilterFormat, FilterFieldNotFound])
+def test_record_list_filter_exceptions(create_table, client, exception):
+    table_name = f"NASA Record List {exception.__name__}"
+    table = create_table(table_name)
+    filter_list = json.dumps([{"field": "Center", "op": "is_null"}])
+    with patch.object(records, "get_records", side_effect=exception):
+        response = client.get(
+            f'/api/v0/tables/{table.id}/records/?filters={filter_list}'
+        )
+        response_data = response.json()
+    assert response.status_code == 400
+    assert len(response_data) == 1
+    assert "filters" in response_data
+
+
+@pytest.mark.parametrize("exception", [BadSortFormat, SortFieldNotFound])
+def test_record_list_sort_exceptions(create_table, client, exception):
+    table_name = f"NASA Record List {exception.__name__}"
+    table = create_table(table_name)
+    filter_list = json.dumps([{"field": "Center", "direction": "desc"}])
+    with patch.object(records, "get_records", side_effect=exception):
+        response = client.get(
+            f'/api/v0/tables/{table.id}/records/?order_by={filter_list}'
+        )
+        response_data = response.json()
+    assert response.status_code == 400
+    assert len(response_data) == 1
+    assert "order_by" in response_data

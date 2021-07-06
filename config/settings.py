@@ -16,6 +16,16 @@ from pathlib import Path
 from decouple import Csv, config as decouple_config
 from dj_database_url import parse as db_url
 
+
+# We use a 'tuple' with pipes as delimiters as decople naively splits the global
+# variables on commas when casting to Csv()
+def pipe_delim(pipe_string):
+    # Remove opening and closing brackets
+    pipe_string = pipe_string[1:-1]
+    # Split on pipe delim
+    return pipe_string.split("|")
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -69,17 +79,20 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 # TODO: Add to documentation that database keys should not be than 128 characters.
+
+# MATHESAR_DATABASES should be of the form '({db_name}|{db_url}), ({db_name}|{db_url})'
+# See pipe_delim above for why we use pipes as delimiters
 DATABASES = {
-    decouple_config('DJANGO_DATABASE_KEY'): decouple_config('DJANGO_DATABASE_URL', cast=db_url),
-    decouple_config('MATHESAR_DATABASE_KEY'): decouple_config('MATHESAR_DATABASE_URL', cast=db_url)
+    db_key: db_url(url_string)
+    for db_key, url_string in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim))
 }
+DATABASES[decouple_config('DJANGO_DATABASE_KEY')] = decouple_config('DJANGO_DATABASE_URL', cast=db_url)
 
 # pytest-django will create a new database named 'test_{DATABASES[table_db]['NAME']}'
 # and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
 if decouple_config('TEST', default=False, cast=bool):
-    DATABASES[decouple_config('MATHESAR_DATABASE_KEY')]['TEST'] = {
-        'NAME': DATABASES[decouple_config('MATHESAR_DATABASE_KEY')]['NAME']
-    }
+    for db_key, _ in decouple_config('MATHESAR_DATABASES', cast=Csv(pipe_delim)):
+        DATABASES[db_key]['TEST'] = {'NAME': DATABASES[db_key]['NAME']}
 
 
 # Quick-start development settings - unsuitable for production

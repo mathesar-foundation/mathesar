@@ -25,13 +25,18 @@ class SchemaSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['id', 'name', 'database', 'tables']
 
 
-class ColumnSerializer(serializers.Serializer):
+class SimpleColumnSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.CharField()
 
 
+class ColumnSerializer(SimpleColumnSerializer):
+    nullable = serializers.BooleanField(default=True)
+    primary_key = serializers.BooleanField(default=False)
+
+
 class TableSerializer(serializers.ModelSerializer):
-    columns = ColumnSerializer(many=True, read_only=True, source='sa_columns')
+    columns = SimpleColumnSerializer(many=True, read_only=True, source='sa_columns')
     records = serializers.SerializerMethodField()
     name = serializers.CharField()
 
@@ -44,7 +49,7 @@ class TableSerializer(serializers.ModelSerializer):
         if isinstance(obj, Table):
             # Only get records if we are serializing an existing table
             request = self.context['request']
-            return request.build_absolute_uri(reverse('table-records-list', kwargs={'table_pk': obj.pk}))
+            return request.build_absolute_uri(reverse('table-record-list', kwargs={'table_pk': obj.pk}))
         else:
             return None
 
