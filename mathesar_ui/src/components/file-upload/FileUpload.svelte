@@ -51,7 +51,7 @@
       });
       fileId += 1;
     }
-    fileUploads = [...fileUploads, ...newUploads];
+    fileUploads = [...(fileUploads || []), ...newUploads];
 
     const fileUploadAddEvent: FileUploadAddDetail = {
       added: newUploads,
