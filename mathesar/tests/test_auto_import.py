@@ -1,44 +1,19 @@
+from time import sleep
+
 import pytest
 from sqlalchemy import create_engine, text
 from config.settings import DATABASES
 from django.core.cache import cache
+from django.conf import settings
+from dj_database_url import parse as db_url
 
 from db import schemas
 
 AUTO_IMPORT_TEST_DB = "mathesar_auto_import_db_test"
 
 
-@pytest.fixture(scope="module")
-def auto_import_test_db_name():
-    return AUTO_IMPORT_TEST_DB
-
-
-@pytest.fixture(scope="module")
-def auto_import_test_db():
-    superuser_engine = _get_superuser_engine()
-    with superuser_engine.connect() as conn:
-        conn.execution_options(isolation_level="AUTOCOMMIT")
-        conn.execute(text(f"DROP DATABASE IF EXISTS {AUTO_IMPORT_TEST_DB} WITH (FORCE)"))
-        conn.execute(text(f"CREATE DATABASE {AUTO_IMPORT_TEST_DB}"))
-
-    yield AUTO_IMPORT_TEST_DB
-
-    with superuser_engine.connect() as conn:
-        conn.execution_options(isolation_level="AUTOCOMMIT")
-        conn.execute(text(f"DROP DATABASE {AUTO_IMPORT_TEST_DB} WITH (FORCE)"))
-
-
-@pytest.fixture(scope="module")
-def auto_import_engine(auto_import_test_db):
-    return create_engine(
-        _get_connection_string(
-            DATABASES["default"]["USER"],
-            DATABASES["default"]["PASSWORD"],
-            DATABASES["default"]["HOST"],
-            auto_import_test_db,
-        ),
-        future=True,
-    )
+def _get_connection_string(username, password, hostname, database, port=5432):
+    return f"postgresql://{username}:{password}@{hostname}:{port}/{database}"
 
 
 def _get_superuser_engine():
@@ -53,8 +28,48 @@ def _get_superuser_engine():
     )
 
 
-def _get_connection_string(username, password, hostname, database):
-    return f"postgresql://{username}:{password}@{hostname}/{database}"
+@pytest.fixture()
+def auto_import_test_db_name():
+    return AUTO_IMPORT_TEST_DB
+
+
+@pytest.fixture()
+def auto_import_test_db_connection_string(auto_import_test_db_name):
+    return _get_connection_string(
+        DATABASES["default"]["USER"],
+        DATABASES["default"]["PASSWORD"],
+        DATABASES["default"]["HOST"],
+        auto_import_test_db_name,
+    )
+
+
+@pytest.fixture()
+def auto_import_test_db(auto_import_test_db_connection_string):
+    superuser_engine = _get_superuser_engine()
+    with superuser_engine.connect() as conn:
+        conn.execution_options(isolation_level="AUTOCOMMIT")
+        conn.execute(text(f"DROP DATABASE IF EXISTS {AUTO_IMPORT_TEST_DB} WITH (FORCE)"))
+        conn.execute(text(f"CREATE DATABASE {AUTO_IMPORT_TEST_DB}"))
+
+    settings.DATABASES[AUTO_IMPORT_TEST_DB] = db_url(
+        auto_import_test_db_connection_string
+    )
+
+    yield AUTO_IMPORT_TEST_DB
+
+    with superuser_engine.connect() as conn:
+        conn.execution_options(isolation_level="AUTOCOMMIT")
+        conn.execute(text(f"DROP DATABASE {AUTO_IMPORT_TEST_DB} WITH (FORCE)"))
+
+    del settings.DATABASES[AUTO_IMPORT_TEST_DB]
+
+
+@pytest.fixture()
+def auto_import_engine(auto_import_test_db, auto_import_test_db_connection_string):
+    return create_engine(
+        auto_import_test_db_connection_string,
+        future=True,
+    )
 
 
 def test_auto_import_schema(auto_import_engine, client):
