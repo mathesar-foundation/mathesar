@@ -31,6 +31,6 @@ def reflect_schemas_from_database(database):
         for oid in db_schema_oids
     ]
     for schema in Schema.objects.all():
-        if schema.oid not in db_schema_oids:
+        if schema.database == database and schema.oid not in db_schema_oids:
             schema.delete()
     return schemas
