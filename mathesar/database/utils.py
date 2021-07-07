@@ -25,7 +25,7 @@ def get_non_default_database_keys():
 
 
 def update_databases():
-    databases = set([db_name for db_name in settings.DATABASES])
+    databases = set(settings.DATABASES)
 
     # Update deleted databases
     for database in Database.objects.all():

@@ -91,11 +91,13 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
 
 
 class ColumnViewSet(viewsets.ViewSet):
-    queryset = Table.objects.all().order_by('-created_at')
+    def get_queryset(self):
+        reflect_db_objects()
+        return Table.objects.all().order_by('-created_at')
 
     def list(self, request, table_pk=None):
         paginator = ColumnLimitOffsetPagination()
-        columns = paginator.paginate_queryset(self.queryset, request, table_pk)
+        columns = paginator.paginate_queryset(self.get_queryset(), request, table_pk)
         serializer = ColumnSerializer(columns, many=True)
         return paginator.get_paginated_response(serializer.data)
 
@@ -155,7 +157,9 @@ class RecordViewSet(viewsets.ViewSet):
     # There is no "update" method.
     # We're not supporting PUT requests because there aren't a lot of use cases
     # where the entire record needs to be replaced, PATCH suffices for updates.
-    queryset = Table.objects.all().order_by('-created_at')
+    def get_queryset(self):
+        reflect_db_objects()
+        return Table.objects.all().order_by('-created_at')
 
     # For filter parameter formatting, see:
     # https://github.com/centerofci/sqlalchemy-filters#filters-format
@@ -171,7 +175,7 @@ class RecordViewSet(viewsets.ViewSet):
 
         try:
             records = paginator.paginate_queryset(
-                self.queryset, request, table_pk,
+                self.get_queryset(), request, table_pk,
                 filters=filter_form.cleaned_data['filters'],
                 order_by=filter_form.cleaned_data['order_by'],
                 group_count_by=filter_form.cleaned_data['group_count_by'],
