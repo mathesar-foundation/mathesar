@@ -71,9 +71,10 @@ def multi_db_engine(multi_db_test_db, multi_db_test_db_connection_string):
 
 
 def test_multi_db_schema(engine, multi_db_engine, client):
-    test_schemas = ["test_multi_db_schema_1", "test_multi_db_schema_2"]
+    test_schemas = ["test_schema_1", "test_schema_2"]
     for schema in test_schemas:
-        schemas.create_schema(schema, multi_db_engine)
+        schemas.create_schema(schema, engine)
+        schemas.create_schema("multi_db_" + schema, multi_db_engine)
 
     cache.clear()
     response = client.get('/api/v0/schemas/')
@@ -83,21 +84,26 @@ def test_multi_db_schema(engine, multi_db_engine, client):
     ]
 
     assert response.status_code == 200
-    assert len(response_schemas) == 2
-    assert set(response_schemas) == set(test_schemas)
+    assert len(response_schemas) == 4
+
+    expected_schemas = test_schemas + ["multi_db_" + s for s in test_schemas]
+    assert set(response_schemas) == set(expected_schemas)
 
 
 def test_multi_db_tables(engine, multi_db_engine, client):
     schema_name = "test_multi_db_tables_schema"
     test_tables = ["test_table_1", "test_table_2"]
-    schemas.create_schema(schema_name, multi_db_engine)
     for table_name in test_tables:
-        tables.create_mathesar_table(table_name, schema_name, [], multi_db_engine)
+        tables.create_mathesar_table(table_name, schema_name, [], engine)
+        tables.create_mathesar_table(
+            "multi_db_" + table_name, schema_name, [], multi_db_engine
+        )
 
     cache.clear()
     response = client.get('/api/v0/tables/')
     response_tables = [s['name'] for s in response.json()['results']]
 
     assert response.status_code == 200
-    for table_name in test_tables:
+    expected_tables = test_tables + ["multi_db_" + s for s in test_tables]
+    for table_name in expected_tables:
         assert table_name in response_tables
