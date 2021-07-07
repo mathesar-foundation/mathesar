@@ -13,7 +13,7 @@ from sqlalchemy_filters.exceptions import (
 )
 
 
-from mathesar.database.utils import get_non_default_database_keys
+from mathesar.database.utils import get_non_default_database_keys, update_databases
 from mathesar.models import Table, Schema, DataFile
 from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
@@ -37,6 +37,7 @@ DB_REFLECTION_INTERVAL = 60 * 5  # we reflect DB changes every 5 minutes
 
 def reflect_db_objects():
     if not cache.get(DB_REFLECTION_KEY):
+        update_databases()
         for database_key in get_non_default_database_keys():
             reflect_schemas_from_database(database_key)
         for schema in Schema.objects.all():
