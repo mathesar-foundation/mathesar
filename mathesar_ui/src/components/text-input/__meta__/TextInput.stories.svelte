@@ -3,7 +3,7 @@
   import TextInput from '../TextInput.svelte';
   import TextInputDocs from './TextInput.mdx';
 
-  let value;
+  let value: string;
 
   const meta = {
     title: 'Components/TextInput',

@@ -31,7 +31,7 @@
   );
 
   const { tabs, activeTab } = getAllTabsForDB(database);
-  let activeTable;
+  let activeTable: Set<unknown>;
 
   function onActiveTabChange(_activeTab: MathesarTab) {
     activeTable = new Set([_activeTab?.id]);

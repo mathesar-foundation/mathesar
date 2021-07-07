@@ -6,6 +6,7 @@ import {
 import { States } from '@mathesar/utils/api';
 import type { UploadCompletionOpts } from '@mathesar/utils/api';
 import type { FileUpload } from '@mathesar-components/types';
+import type { CancellablePromise } from '@mathesar/components';
 
 export enum ImportChangeType {
   ADDED = 'added',
@@ -16,11 +17,14 @@ export enum ImportChangeType {
 interface FileImportWritableInfo {
   stage?: number,
   uploads?: FileUpload[],
+  uploadStatus?: States,
+  uploadPromise?: CancellablePromise<unknown>,
+  uploadProgress?: UploadCompletionOpts,
   dataFileId?: number,
+  importStatus?: States,
+  importPromise?: CancellablePromise<unknown>,
   name?: string,
   schema?: string,
-  uploadStatus?: States,
-  progress?: UploadCompletionOpts,
   error?: string
 }
 
@@ -72,6 +76,7 @@ export function getFileStore(db: string, id: string): FileImport {
   if (!fileImport) {
     const fileImportInitialInfo: FileImportInfo = {
       id,
+      name: 'Untitled',
       uploadStatus: States.Idle,
       stage: 1,
     };
@@ -81,12 +86,21 @@ export function getFileStore(db: string, id: string): FileImport {
   return fileImport;
 }
 
+export function getFileStoreData(db: string, id: string): FileImportInfo {
+  return get(getFileStore(db, id));
+}
+
 export function setFileStore(db: string, id: string, data: FileImportWritableInfo): void {
   const database = getDBStore(db);
   const store = getFileStore(db, id);
   const existingData = get(store);
-  store.set({
+  const existingDataWithoutError = {
     ...existingData,
+    error: null,
+  };
+
+  store.set({
+    ...existingDataWithoutError,
     ...data,
   });
 
