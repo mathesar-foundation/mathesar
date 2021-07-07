@@ -33,16 +33,26 @@ class DatabaseObject(BaseModel):
 _engines = {}
 
 
-class Schema(DatabaseObject):
-    database = models.CharField(max_length=128)
+class Database(BaseModel):
+    name = models.CharField(max_length=128)
+    deleted = models.BooleanField(blank=True, default=True)
 
     @property
     def _sa_engine(self):
         global _engines
         # We're caching this since the engine is used frequently.
         if self.database not in _engines:
-            _engines[self.database] = create_mathesar_engine(self.database)
-        return _engines[self.database]
+            _engines[self.name] = create_mathesar_engine(self.name)
+        return _engines[self.name]
+
+
+class Schema(DatabaseObject):
+    database = models.ForeignKey('Database', on_delete=models.CASCADE,
+                                 related_name='schemas')
+
+    @property
+    def _sa_engine(self):
+        return self.database._sa_engine
 
     @cached_property
     def name(self):
