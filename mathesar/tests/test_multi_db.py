@@ -7,7 +7,7 @@ from dj_database_url import parse as db_url
 
 from db import schemas, tables
 
-AUTO_IMPORT_TEST_DB = "mathesar_auto_import_db_test"
+MULTI_DB_TEST_DB = "mathesar_multi_db_test"
 
 
 def _get_connection_string(username, password, hostname, database, port=5432):
@@ -27,53 +27,53 @@ def _get_superuser_engine():
 
 
 @pytest.fixture(scope="module")
-def auto_import_test_db_name():
-    return AUTO_IMPORT_TEST_DB
+def multi_db_test_db_name():
+    return MULTI_DB_TEST_DB
 
 
 @pytest.fixture(scope="module")
-def auto_import_test_db_connection_string(auto_import_test_db_name):
+def multi_db_test_db_connection_string(multi_db_test_db_name):
     return _get_connection_string(
         DATABASES["default"]["USER"],
         DATABASES["default"]["PASSWORD"],
         DATABASES["default"]["HOST"],
-        auto_import_test_db_name,
+        multi_db_test_db_name,
     )
 
 
 @pytest.fixture(scope="module")
-def auto_import_test_db(auto_import_test_db_connection_string):
+def multi_db_test_db(multi_db_test_db_connection_string):
     superuser_engine = _get_superuser_engine()
     with superuser_engine.connect() as conn:
         conn.execution_options(isolation_level="AUTOCOMMIT")
-        conn.execute(text(f"DROP DATABASE IF EXISTS {AUTO_IMPORT_TEST_DB} WITH (FORCE)"))
-        conn.execute(text(f"CREATE DATABASE {AUTO_IMPORT_TEST_DB}"))
+        conn.execute(text(f"DROP DATABASE IF EXISTS {MULTI_DB_TEST_DB} WITH (FORCE)"))
+        conn.execute(text(f"CREATE DATABASE {MULTI_DB_TEST_DB}"))
 
-    settings.DATABASES[AUTO_IMPORT_TEST_DB] = db_url(
-        auto_import_test_db_connection_string
+    settings.DATABASES[MULTI_DB_TEST_DB] = db_url(
+        multi_db_test_db_connection_string
     )
 
-    yield AUTO_IMPORT_TEST_DB
+    yield MULTI_DB_TEST_DB
 
     with superuser_engine.connect() as conn:
         conn.execution_options(isolation_level="AUTOCOMMIT")
-        conn.execute(text(f"DROP DATABASE {AUTO_IMPORT_TEST_DB} WITH (FORCE)"))
+        conn.execute(text(f"DROP DATABASE {MULTI_DB_TEST_DB} WITH (FORCE)"))
 
-    del settings.DATABASES[AUTO_IMPORT_TEST_DB]
+    del settings.DATABASES[MULTI_DB_TEST_DB]
 
 
 @pytest.fixture(scope="module")
-def auto_import_engine(auto_import_test_db, auto_import_test_db_connection_string):
+def multi_db_engine(multi_db_test_db, multi_db_test_db_connection_string):
     return create_engine(
-        auto_import_test_db_connection_string,
+        multi_db_test_db_connection_string,
         future=True,
     )
 
 
-def test_auto_import_schema(engine, auto_import_engine, client):
-    test_schemas = ["test_auto_import_schema_1", "test_auto_import_schema_2"]
+def test_multi_db_schema(engine, multi_db_engine, client):
+    test_schemas = ["test_multi_db_schema_1", "test_multi_db_schema_2"]
     for schema in test_schemas:
-        schemas.create_schema(schema, auto_import_engine)
+        schemas.create_schema(schema, multi_db_engine)
 
     cache.clear()
     response = client.get('/api/v0/schemas/')
@@ -87,12 +87,12 @@ def test_auto_import_schema(engine, auto_import_engine, client):
     assert set(response_schemas) == set(test_schemas)
 
 
-def test_auto_import_tables(engine, auto_import_engine, client):
-    schema_name = "test_auto_import_tables_schema"
+def test_multi_db_tables(engine, multi_db_engine, client):
+    schema_name = "test_multi_db_tables_schema"
     test_tables = ["test_table_1", "test_table_2"]
-    schemas.create_schema(schema_name, auto_import_engine)
+    schemas.create_schema(schema_name, multi_db_engine)
     for table_name in test_tables:
-        tables.create_mathesar_table(table_name, schema_name, [], auto_import_engine)
+        tables.create_mathesar_table(table_name, schema_name, [], multi_db_engine)
 
     cache.clear()
     response = client.get('/api/v0/tables/')
