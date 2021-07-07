@@ -178,9 +178,9 @@ export function removeTab(
      * If called directly, tab will have to be removed.
      * We have a find check, to avoid unnessary re-renders, incase of component events.
      */
-    if (tabData.find((entry) => entry === removedTab)) {
+    if (tabData.find((entry) => entry.id === removedTab.id)) {
       tabs.set(
-        tabData.filter((tab) => tab !== removedTab),
+        tabData.filter((tab) => tab.id !== removedTab.id),
       );
     }
 

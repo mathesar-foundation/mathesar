@@ -126,6 +126,10 @@ export function removeImport(db:string, id: string): void {
   const database = databaseMap.get(db);
   if (database?.imports) {
     const fileImport = database.imports.get(id);
+    const fileImportData = get(fileImport);
+    fileImportData.importPromise?.cancel();
+    fileImportData.uploadPromise?.cancel();
+
     database.imports.delete(id);
 
     database.changes.set({

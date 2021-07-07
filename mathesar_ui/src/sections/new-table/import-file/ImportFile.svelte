@@ -14,7 +14,6 @@
     uploadNewFile,
     getFileUploadInfo,
     shiftStage,
-    cancelStage,
     clearErrors,
   } from './importFileUtils';
 
@@ -61,7 +60,6 @@
   {/if}
 
   <div class="actions">
-    <Button on:click={() => cancelStage(database, id)}>Cancel</Button>
     <Button appearance="primary"
             disabled={$fileImportData.uploadStatus !== States.Done || $fileImportData.importStatus === States.Loading}
             on:click={() => shiftStage(database, id)}>

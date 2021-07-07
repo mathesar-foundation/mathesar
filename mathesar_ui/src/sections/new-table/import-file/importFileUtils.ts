@@ -148,8 +148,15 @@ export function shiftStage(database: string, importId: string): void {
 export function cancelStage(database: string, importId: string): void {
   const fileImportData = getFileStoreData(database, importId);
 
-  if (fileImportData.stage === Stages.UPLOAD) {
-    fileImportData.uploadPromise?.cancel();
+  switch (fileImportData.stage) {
+    case Stages.UPLOAD:
+      fileImportData.uploadPromise?.cancel();
+      break;
+    case Stages.IMPORT:
+      fileImportData.importPromise?.cancel();
+      break;
+    default:
+      break;
   }
 }
 
