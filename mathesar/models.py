@@ -34,8 +34,8 @@ _engines = {}
 
 
 class Database(BaseModel):
-    name = models.CharField(max_length=128)
-    deleted = models.BooleanField(blank=True, default=False)
+    name = models.CharField(max_length=128, unique=True)
+    deleted = models.BooleanField(blank=True, default=True)
 
     @property
     def _sa_engine(self):
