@@ -1,5 +1,6 @@
 import pytest
 from sqlalchemy import create_engine, text
+from sqlalchemy.schema import DropSchema
 from config.settings import DATABASES
 from django.core.cache import cache
 from django.conf import settings
@@ -89,6 +90,11 @@ def test_multi_db_schema(engine, multi_db_engine, client):
     expected_schemas = test_schemas + ["multi_db_" + s for s in test_schemas]
     assert set(response_schemas) == set(expected_schemas)
 
+    # We have to delete the schemas to not break later tests
+    with engine.begin() as conn:
+        for schema in test_schemas:
+            conn.execute(DropSchema(schema))
+
 
 def test_multi_db_tables(engine, multi_db_engine, client):
     schema_name = "test_multi_db_tables_schema"
@@ -107,3 +113,7 @@ def test_multi_db_tables(engine, multi_db_engine, client):
     expected_tables = test_tables + ["multi_db_" + s for s in test_tables]
     for table_name in expected_tables:
         assert table_name in response_tables
+
+    # We have to delete the schema to not break later tests
+    with engine.begin() as conn:
+        conn.execute(DropSchema(schema_name, cascade=True))
