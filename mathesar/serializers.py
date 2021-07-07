@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework import serializers
 
-from mathesar.models import Table, Schema, DataFile
+from mathesar.models import Table, Schema, DataFile, Database
 
 
 class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
@@ -19,10 +19,11 @@ class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
 class SchemaSerializer(serializers.HyperlinkedModelSerializer):
     tables = NestedTableSerializer(many=True, read_only=True)
     name = serializers.CharField()
+    database = serializers.CharField(max_length=128)
 
     class Meta:
         model = Schema
-        fields = ['id', 'name', 'database', 'tables']
+        fields = ['id', 'name', 'tables']
 
 
 class SimpleColumnSerializer(serializers.Serializer):

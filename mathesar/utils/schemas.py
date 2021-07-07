@@ -5,7 +5,7 @@ from db.schemas import (
     get_mathesar_schemas_with_oids
 )
 from mathesar.database.base import create_mathesar_engine
-from mathesar.models import Schema
+from mathesar.models import Schema, Database
 
 
 def create_schema_and_object(name, database):
@@ -17,6 +17,7 @@ def create_schema_and_object(name, database):
 
     create_schema(name, engine)
     schema_oid = get_schema_oid_from_name(name, engine)
+    database = Database.objects.get(name=database)
     schema = Schema.objects.create(oid=schema_oid, database=database)
     return schema
 
