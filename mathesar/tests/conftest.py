@@ -5,6 +5,9 @@ This inherits the fixtures in the root conftest.py
 import pytest
 
 
+from mathesar.models import Database
+
+
 @pytest.fixture(scope="session")
 def django_db_setup(request, django_db_blocker) -> None:
     """
@@ -15,6 +18,8 @@ def django_db_setup(request, django_db_blocker) -> None:
     Removes most additional options (use migrations, keep / create db, etc.)
     Adds 'aliases' to the call to setup_databases() which restrict Django to only
     building and destroying the default Django db, and not our tables dbs.
+
+    Called by build_test_db_model to setup the django DB before the databse models.
     """
     from django.test.utils import setup_databases, teardown_databases
 
@@ -37,6 +42,12 @@ def django_db_setup(request, django_db_blocker) -> None:
                 )
 
     request.addfinalizer(teardown_database)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def build_test_db_model(test_db_name, django_db_blocker, django_db_setup):
+    with django_db_blocker.unblock():
+        Database.objects.create(name=test_db_name)
 
 
 @pytest.fixture(autouse=True)
