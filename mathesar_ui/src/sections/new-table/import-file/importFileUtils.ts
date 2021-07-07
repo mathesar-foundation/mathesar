@@ -64,6 +64,7 @@ export function uploadNewFile(
     uploadProgress: null,
     uploadStatus: States.Loading,
     uploadPromise,
+    error: null,
   });
 
   uploadPromise.then((res: { id: number }) => {
@@ -71,6 +72,8 @@ export function uploadNewFile(
     return res;
   }).catch((err: Error) => {
     setFileStore(database, importId, {
+      uploads: [],
+      uploadProgress: null,
       uploadStatus: States.Error,
       error: err.stack,
     });
@@ -109,6 +112,7 @@ function createTable(database: string, importId: string) {
     setFileStore(database, importId, {
       importStatus: States.Loading,
       importPromise,
+      error: null,
     });
 
     importPromise.then((res: { id: number, name: string }) => {
@@ -147,4 +151,10 @@ export function cancelStage(database: string, importId: string): void {
   if (fileImportData.stage === Stages.UPLOAD) {
     fileImportData.uploadPromise?.cancel();
   }
+}
+
+export function clearErrors(database: string, importId: string): void {
+  setFileStore(database, importId, {
+    error: null,
+  });
 }

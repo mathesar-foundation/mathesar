@@ -23,9 +23,9 @@
   const dispatch = createEventDispatcher();
   const componentId = `file-import-${getId()}`;
 
-  export let fileProgress: Record<string, FileUploadProgress> = {};
+  export let fileProgress: Record<string, FileUploadProgress> = null;
   export let multiple = false;
-  export let fileUploads: FileUpload[] = [];
+  export let fileUploads: FileUpload[] = null;
 
   let fileId = 0;
   let state = 'idle';
@@ -67,6 +67,7 @@
     if (target.files) {
       processFiles(event, target.files);
     }
+    target.value = '';
   }
 
   function checkAndOpen(event: KeyboardEvent) {

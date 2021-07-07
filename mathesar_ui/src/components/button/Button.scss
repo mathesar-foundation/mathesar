@@ -52,6 +52,13 @@ button.btn {
 
   &.btn-plain {
     background: #fff;
+  }
+
+  &.btn-ghost {
+    background: transparent;
+  }
+
+  &.btn-plain, &.btn-ghost {
     border-color: transparent;
     border-radius: 0px;
     box-shadow: none !important;

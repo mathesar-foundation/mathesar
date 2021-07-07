@@ -25,12 +25,9 @@
     text-align: right;
   }
 
-  .error {
-    color: red;
-
-    code {
-      margin-top: 10px;
-      display: block;
-    }
+  >.notification {
+    position: sticky;
+    top: 0px;
+    margin-bottom: 20px;
   }
 }

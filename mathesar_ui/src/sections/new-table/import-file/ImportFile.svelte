@@ -3,13 +3,19 @@
   import { getFileStore } from '@mathesar/stores/fileImports';
   import type { FileImport } from '@mathesar/stores/fileImports';
   import { States } from '@mathesar/utils/api';
-  import { FileUpload, Button, Icon } from '@mathesar-components';
+  import {
+    FileUpload,
+    Button,
+    Icon,
+    Notification,
+  } from '@mathesar-components';
   import {
     Stages,
     uploadNewFile,
     getFileUploadInfo,
     shiftStage,
     cancelStage,
+    clearErrors,
   } from './importFileUtils';
 
   export let id: string = null;
@@ -20,14 +26,13 @@
 </script>
 
 <div class="import-file-view">
-  {#if $fileImportData.error}
-    <div class="error">
-      <strong>There was an error when trying to import file. Please try again.</strong>
-      <code>
-        {$fileImportData.error}
-      </code>
-    </div>
-  {/if}
+  <Notification type="danger" show={!!$fileImportData.error}
+                on:close={() => clearErrors(database, id)}>
+    There was an error when trying to import file. Please try again.
+    <svelte:fragment slot="description">
+      {$fileImportData.error}
+    </svelte:fragment>
+  </Notification>
 
   {#if $fileImportData.stage === Stages.UPLOAD}
     <div>Add Table (Step 1 of 2)</div>

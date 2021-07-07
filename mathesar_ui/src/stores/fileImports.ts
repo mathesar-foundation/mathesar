@@ -94,13 +94,9 @@ export function setFileStore(db: string, id: string, data: FileImportWritableInf
   const database = getDBStore(db);
   const store = getFileStore(db, id);
   const existingData = get(store);
-  const existingDataWithoutError = {
-    ...existingData,
-    error: null,
-  };
 
   store.set({
-    ...existingDataWithoutError,
+    ...existingData,
     ...data,
   });
 

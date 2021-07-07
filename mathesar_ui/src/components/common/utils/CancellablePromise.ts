@@ -24,14 +24,17 @@ export default class CancellablePromise<T> extends Promise<T> {
       if (this.isCancelled) {
         return null;
       }
-      return onFulfilled?.(value) || null;
+      return onFulfilled?.(value) || value as unknown as TResult1;
     };
 
     const reject = (reason: unknown): TResult2 | Promise<TResult2> => {
       if (this.isCancelled) {
         return null;
       }
-      return onRejected?.(reason) || null;
+      if (!onRejected) {
+        throw reason;
+      }
+      return onRejected(reason);
     };
 
     if (this.isCancelled) {
