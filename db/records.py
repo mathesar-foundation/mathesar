@@ -1,9 +1,21 @@
 import logging
-from sqlalchemy import delete, select, Column
+from sqlalchemy import delete, select, Column, func
 from sqlalchemy.inspection import inspect
 from sqlalchemy_filters import apply_filters, apply_sort
+from sqlalchemy_filters.exceptions import FieldNotFound
+
+from db.constants import ID
 
 logger = logging.getLogger(__name__)
+
+
+# Grouping exceptions follow the sqlalchemy_filters exceptions patterns
+class BadGroupFormat(Exception):
+    pass
+
+
+class GroupFieldNotFound(FieldNotFound):
+    pass
 
 
 def _get_primary_key_column(table):
@@ -11,6 +23,13 @@ def _get_primary_key_column(table):
     # We do not support getting by composite primary keys
     assert len(primary_key_list) == 1
     return primary_key_list[0]
+
+
+def _create_col_objects(table, column_list):
+    return [
+        table.columns[col] if type(col) == str else col
+        for col in column_list
+    ]
 
 
 def get_record(table, engine, id_value):
@@ -23,7 +42,7 @@ def get_record(table, engine, id_value):
 
 
 def get_records(
-        table, engine, limit=None, offset=None, order_by=[], filters=[]
+        table, engine, limit=None, offset=None, order_by=[], filters=[],
 ):
     """
     Returns records from a table.
@@ -40,18 +59,63 @@ def get_records(
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
     """
-    query = select(table)
-    if order_by:
+    query = select(table).limit(limit).offset(offset)
+    if order_by is not None:
         query = apply_sort(query, order_by)
-    query = (
-        query
-        .limit(limit)
-        .offset(offset)
-    )
-    if filters:
+    if filters is not None:
         query = apply_filters(query, filters)
     with engine.begin() as conn:
         return conn.execute(query).fetchall()
+
+
+def get_group_counts(
+        table, engine, group_by, limit=None, offset=None, order_by=[], filters=[],
+):
+    """
+    Returns counts by specified groupings
+
+    Args:
+        table:    SQLAlchemy table object
+        engine:   SQLAlchemy engine object
+        limit:    int, gives number of rows to return
+        offset:   int, gives number of rows to skip
+        group_by: list or tuple of column names or column objects to group by
+        order_by: list of dictionaries, where each dictionary has a 'field' and
+                  'direction' field.
+                  See: https://github.com/centerofci/sqlalchemy-filters#sort-format
+        filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
+                  field, in addition to an 'value' field if appropriate.
+                  See: https://github.com/centerofci/sqlalchemy-filters#filters-format
+    """
+    if type(group_by) not in (tuple, list):
+        raise BadGroupFormat(f"Group spec {group_by} must be list or tuple.")
+    for field in group_by:
+        if type(field) not in (str, Column):
+            raise BadGroupFormat(f"Group field {field} must be a string or Column.")
+        field_name = field if type(field) == str else field.name
+        if field_name not in table.c:
+            raise GroupFieldNotFound(f"Group field {field} not found in {table}.")
+
+    group_by = _create_col_objects(table, group_by)
+    query = (
+        select(*group_by, func.count(table.c[ID]))
+        .group_by(*group_by)
+        .limit(limit)
+        .offset(offset)
+    )
+    if order_by is not None:
+        query = apply_sort(query, order_by)
+    if filters is not None:
+        query = apply_filters(query, filters)
+    with engine.begin() as conn:
+        records = conn.execute(query).fetchall()
+
+    # Last field is the count, preceding fields are the group by fields
+    counts = {
+        (*record[:-1],): record[-1]
+        for record in records
+    }
+    return counts
 
 
 def get_distinct_tuple_values(
@@ -71,10 +135,7 @@ def get_distinct_tuple_values(
     SQLAlchemy column objects associated with a table.
     """
     if table is not None:
-        column_objects = [
-            table.columns[col] if type(col) == str else col
-            for col in column_list
-        ]
+        column_objects = _create_col_objects(table, column_list)
     else:
         column_objects = column_list
     try:
