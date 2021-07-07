@@ -8,6 +8,7 @@ from sqlalchemy_filters.exceptions import (
 )
 
 from db import records
+from db.records import BadGroupFormat, GroupFieldNotFound
 
 
 def test_record_list(create_table, client):
@@ -83,6 +84,7 @@ def test_record_list_filter(create_table, client):
     assert response.status_code == 200
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 2
+    print(response_data['results'])
 
     assert mock_infer.call_args is not None
     assert mock_infer.call_args[1]['filters'] == filter_list
@@ -112,6 +114,55 @@ def test_record_list_sort(create_table, client):
 
     assert mock_infer.call_args is not None
     assert mock_infer.call_args[1]['order_by'] == order_by
+
+
+def _test_record_list_group(table, client, group_count_by, expected_groups):
+    json_group_count_by = json.dumps(group_count_by)
+
+    with patch.object(
+        records, "get_group_counts", side_effect=records.get_group_counts
+    ) as mock_infer:
+        response = client.get(
+            f'/api/v0/tables/{table.id}/records/?group_count_by={json_group_count_by}'
+        )
+        response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data['count'] == 1393
+    assert len(response_data['results']) == 50
+
+    assert 'group_count' in response_data
+    assert response_data['group_count']['group_count_by'] == group_count_by
+    assert 'results' in response_data['group_count']
+
+    results = response_data['group_count']['results']
+    for expected_group in expected_groups:
+        assert expected_group in results
+
+    assert mock_infer.call_args is not None
+    assert mock_infer.call_args[0][2] == group_count_by
+
+
+def test_record_list_group_single_column(create_table, client):
+    table_name = 'NASA Record List Group Single'
+    table = create_table(table_name)
+    group_count_by = ['Center']
+    expected_groups = [
+        'NASA Ames Research Center',
+        'NASA Kennedy Space Center'
+    ]
+    _test_record_list_group(table, client, group_count_by, expected_groups)
+
+
+def test_record_list_group_multi_column(create_table, client):
+    table_name = 'NASA Record List Group Multi'
+    table = create_table(table_name)
+    group_count_by = ['Center', 'Status']
+    expected_groups = [
+        'NASA Ames Research Center,Issued',
+        'NASA Kennedy Space Center,Issued',
+    ]
+    _test_record_list_group(table, client, group_count_by, expected_groups)
 
 
 def test_record_list_pagination_limit(create_table, client):
@@ -282,12 +333,27 @@ def test_record_list_filter_exceptions(create_table, client, exception):
 def test_record_list_sort_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    filter_list = json.dumps([{"field": "Center", "direction": "desc"}])
+    order_by = json.dumps([{"field": "Center", "direction": "desc"}])
     with patch.object(records, "get_records", side_effect=exception):
         response = client.get(
-            f'/api/v0/tables/{table.id}/records/?order_by={filter_list}'
+            f'/api/v0/tables/{table.id}/records/?order_by={order_by}'
         )
         response_data = response.json()
     assert response.status_code == 400
     assert len(response_data) == 1
     assert "order_by" in response_data
+
+
+@pytest.mark.parametrize("exception", [BadGroupFormat, GroupFieldNotFound])
+def test_record_list_group_exceptions(create_table, client, exception):
+    table_name = f"NASA Record List {exception.__name__}"
+    table = create_table(table_name)
+    group_by = json.dumps(["Center"])
+    with patch.object(records, "get_group_counts", side_effect=exception):
+        response = client.get(
+            f'/api/v0/tables/{table.id}/records/?group_count_by={group_by}'
+        )
+        response_data = response.json()
+    assert response.status_code == 400
+    assert len(response_data) == 1
+    assert "group_count_by" in response_data
