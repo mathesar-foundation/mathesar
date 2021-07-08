@@ -14,12 +14,13 @@ from sqlalchemy_filters.exceptions import (
 
 
 from mathesar.database.utils import get_non_default_database_keys, update_databases
-from mathesar.models import Table, Schema, DataFile
+from mathesar.models import Table, Schema, DataFile, Database
 from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
-    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
+    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer,
+    ColumnSerializer, DatabaseSerializer
 )
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
 from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
@@ -222,6 +223,14 @@ class RecordViewSet(viewsets.ViewSet):
 class DatabaseKeyViewSet(viewsets.ViewSet):
     def list(self, request):
         return Response(get_non_default_database_keys())
+
+
+class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
+    def get_queryset(self):
+        reflect_db_objects()
+        return Database.objects.all().order_by('-created_at')
+    serializer_class = DatabaseSerializer
+    pagination_class = DefaultLimitOffsetPagination
 
 
 class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):
