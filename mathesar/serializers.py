@@ -70,6 +70,15 @@ class RecordSerializer(serializers.BaseSerializer):
         return instance._asdict()
 
 
+class DatabaseSerializer(serializers.ModelSerializer):
+    supported_types = serializers.ListField(child=serializers.CharField())
+
+    class Meta:
+        model = Database
+        fields = ['id', 'name', 'deleted', 'supported_types']
+        read_only_fields = ['deleted']
+
+
 class DataFileSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(
         default=serializers.CurrentUserDefault(), read_only=True
