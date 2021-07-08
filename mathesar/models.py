@@ -119,12 +119,11 @@ class Table(DatabaseObject):
         )
 
     @property
-    def sa_num_records(self):
-        return tables.get_count(self._sa_table, self.schema._sa_engine)
-
-    @property
     def sa_all_records(self):
         return records.get_records(self._sa_table, self.schema._sa_engine)
+
+    def sa_num_records(self, filters=[]):
+        return tables.get_count(self._sa_table, self.schema._sa_engine, filters=filters)
 
     def get_record(self, id_value):
         return records.get_record(self._sa_table, self.schema._sa_engine, id_value)
