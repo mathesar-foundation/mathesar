@@ -58,7 +58,8 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
     def create(self, request):
         serializer = SchemaSerializer(data=request.data)
         if serializer.is_valid():
-            schema = create_schema_and_object(request.data['name'], request.data['database'])
+            schema = create_schema_and_object(serializer.validated_data['name'],
+                                              serializer.validated_data['database'].name)
             serializer = SchemaSerializer(schema)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:

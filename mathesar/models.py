@@ -41,7 +41,7 @@ class Database(BaseModel):
     def _sa_engine(self):
         global _engines
         # We're caching this since the engine is used frequently.
-        if self.database not in _engines:
+        if self.name not in _engines:
             _engines[self.name] = create_mathesar_engine(self.name)
         return _engines[self.name]
 
@@ -56,7 +56,7 @@ class Schema(DatabaseObject):
 
     @cached_property
     def name(self):
-        cache_key = f"{self.database}_schema_name_{self.oid}"
+        cache_key = f"{self.database.name}_schema_name_{self.oid}"
         try:
             schema_name = cache.get(cache_key)
             if schema_name is None:
