@@ -5,6 +5,8 @@ import { router } from 'tinro';
 // Null value represented for numbers as -1, strings as empty string
 
 interface TableOptions {
+  position?: number,
+  status?: 'active' | 'inactive',
   pageSize?: number,
   page?: number
 }
@@ -91,10 +93,20 @@ function addTable(
         tableConfig.push(options.pageSize || -1);
         tableConfig.push(options.page || -1);
       }
-      tables.push(tableConfig);
+      if (
+        typeof options?.position === 'number'
+        && options?.position < tables.length
+        && options?.position > -1
+      ) {
+        tables.splice(options.position, 0, tableConfig);
+      } else {
+        tables.push(tableConfig);
+      }
       router.location.query.set('t', encodeURIComponent(JSON.stringify(tables)));
     }
-    router.location.query.set('a', encodeURIComponent(id));
+    if (options?.status !== 'inactive') {
+      router.location.query.set('a', encodeURIComponent(id));
+    }
   }
 }
 

@@ -5,17 +5,26 @@ import {
 } from 'svelte/store';
 import { States } from '@mathesar/utils/api';
 import type { UploadCompletionOpts } from '@mathesar/utils/api';
+import type { FileUpload } from '@mathesar-components/types';
+import type { CancellablePromise } from '@mathesar/components';
 
 export enum ImportChangeType {
   ADDED = 'added',
   REMOVED = 'removed',
+  MODIFIED = 'modified',
 }
 
 interface FileImportWritableInfo {
+  stage?: number,
+  uploads?: FileUpload[],
+  uploadStatus?: States,
+  uploadPromise?: CancellablePromise<unknown>,
+  uploadProgress?: UploadCompletionOpts,
+  dataFileId?: number,
+  importStatus?: States,
+  importPromise?: CancellablePromise<unknown>,
   name?: string,
   schema?: string,
-  status?: States,
-  progress?: UploadCompletionOpts,
   error?: string
 }
 
@@ -25,6 +34,7 @@ export interface FileImportInfo extends FileImportWritableInfo {
 
 export interface FileImportChange {
   changeType: ImportChangeType,
+  old?: FileImportInfo,
   info?: FileImportInfo,
   all: FileImportInfo[],
 }
@@ -64,19 +74,37 @@ export function getFileStore(db: string, id: string): FileImport {
 
   let fileImport = database.imports.get(id);
   if (!fileImport) {
-    const fileImportInitialInfo: FileImportInfo = { id, status: States.Idle };
+    const fileImportInitialInfo: FileImportInfo = {
+      id,
+      name: 'Untitled',
+      uploadStatus: States.Idle,
+      stage: 1,
+    };
     fileImport = writable(fileImportInitialInfo);
     database.imports.set(id, fileImport);
   }
   return fileImport;
 }
 
+export function getFileStoreData(db: string, id: string): FileImportInfo {
+  return get(getFileStore(db, id));
+}
+
 export function setFileStore(db: string, id: string, data: FileImportWritableInfo): void {
+  const database = getDBStore(db);
   const store = getFileStore(db, id);
   const existingData = get(store);
+
   store.set({
     ...existingData,
     ...data,
+  });
+
+  database.changes.set({
+    changeType: ImportChangeType.MODIFIED,
+    old: existingData,
+    info: get(store),
+    all: getAllImportDetails(db),
   });
 }
 
@@ -98,6 +126,10 @@ export function removeImport(db:string, id: string): void {
   const database = databaseMap.get(db);
   if (database?.imports) {
     const fileImport = database.imports.get(id);
+    const fileImportData = get(fileImport);
+    fileImportData.importPromise?.cancel();
+    fileImportData.uploadPromise?.cancel();
+
     database.imports.delete(id);
 
     database.changes.set({
