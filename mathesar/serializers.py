@@ -16,28 +16,10 @@ class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
         return request.build_absolute_uri(reverse('table-detail', kwargs={'pk': obj.pk}))
 
 
-class DatabaseField(serializers.RelatedField):
-    """
-    Takes and returns a db name, but uses a db object internally
-    """
-    queryset = Database.objects.all()
-
-    def to_representation(self, value):
-        return value.name
-
-    def to_internal_value(self, data):
-        if len(data) > 128:
-            raise serializers.ValidationError(
-                f"Database name {data} longer than 128 characters."
-            )
-        database = Database.objects.get(name=data)
-        return database
-
-
 class SchemaSerializer(serializers.HyperlinkedModelSerializer):
     tables = NestedTableSerializer(many=True, read_only=True)
     name = serializers.CharField()
-    database = DatabaseField()
+    database = serializers.CharField(max_length=128)
 
     class Meta:
         model = Schema
