@@ -11,12 +11,12 @@ class CharInFilter(PropertyBaseInFilter, PropertyCharFilter):
 
 
 class SchemaFilter(PropertyFilterSet):
-    database = CharInFilter(field_name='database', lookup_expr='in')
+    database = CharInFilter(field_name='database__name', lookup_expr='in')
     name = CharInFilter(field_name='name', lookup_expr='in')
 
     class Meta:
         model = Schema
-        fields = ['database', 'name']
+        fields = ['name']
 
 
 class TableFilter(PropertyFilterSet):
