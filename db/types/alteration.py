@@ -34,7 +34,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         type_map = {k: v for k, v in friendly_type_map.items() if v is not None}
     else:
         type_map = {
-            val().compile(dialect=engine.dialect)
+            val().compile(dialect=engine.dialect): val
             for val in friendly_type_map.values()
             if val is not None
         }

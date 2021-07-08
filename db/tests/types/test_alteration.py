@@ -32,6 +32,18 @@ def test_get_alter_column_types_with_custom_engine(engine_with_types):
     )
 
 
+def test_get_alter_column_types_with_unfriendly_names(engine_with_types):
+    type_dict = alteration.get_supported_alter_column_types(
+        engine_with_types, friendly_names=False
+    )
+    assert all(
+        [
+            type_dict[type_]().compile(dialect=engine_with_types.dialect) == type_
+            for type_ in type_dict
+        ]
+    )
+
+
 type_test_list = [
     (String, "boolean", "BOOLEAN"),
     (String, "interval", "INTERVAL"),
