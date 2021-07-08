@@ -6,6 +6,7 @@ from django.utils.functional import cached_property
 from mathesar.database.base import create_mathesar_engine
 from mathesar.utils import models as model_utils
 from db import tables, records, schemas, columns
+from db.types.alteration import get_supported_alter_column_types
 
 NAME_CACHE_INTERVAL = 60 * 5
 
@@ -44,6 +45,11 @@ class Database(BaseModel):
         if self.name not in _engines:
             _engines[self.name] = create_mathesar_engine(self.name)
         return _engines[self.name]
+
+    @property
+    def supported_types(self):
+        types = get_supported_alter_column_types(self._sa_engine)
+        return [t for t, _ in types.items()]
 
 
 class Schema(DatabaseObject):
