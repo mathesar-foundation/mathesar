@@ -6,7 +6,7 @@ from sqlalchemy import Table as SATable
 from db.types import base, install
 from db.schemas import create_schema, get_schema_oid_from_name
 from db.tables import get_oid_from_table
-from mathesar.models import Schema, Table, Database
+from mathesar.models import Schema, Table
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import legacy_create_table_from_csv

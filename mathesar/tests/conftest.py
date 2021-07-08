@@ -51,7 +51,6 @@ def test_db_model(test_db_name, django_db_blocker, django_db_setup):
     return database_model
 
 
-
 @pytest.fixture(autouse=True)
 def enable_db_access_for_all_tests(db):
     pass
