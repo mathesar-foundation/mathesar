@@ -40,7 +40,7 @@
     };
   }
 
-  function processFiles(event: Event, files: FileList) {
+  function processFiles(event: Event, files: FileList | File[]) {
     const newUploads: FileUpload[] = [];
 
     // eslint-disable-next-line no-restricted-syntax
@@ -68,6 +68,15 @@
       processFiles(event, target.files);
     }
     target.value = '';
+  }
+
+  function onFileDrop(event: DragEvent) {
+    const fileList = event.dataTransfer.files;
+    if (multiple) {
+      processFiles(event, fileList);
+    } else {
+      processFiles(event, [fileList[0]]);
+    }
   }
 
   function checkAndOpen(event: KeyboardEvent) {
@@ -106,7 +115,7 @@
   {#if multiple || !fileUploads || fileUploads.length === 0}
     <label tabindex="0" for={componentId} class="file-upload-trigger {state}"
       on:keydown={checkAndOpen}
-      on:drop|preventDefault|stopPropagation={(e) => processFiles(e, e.dataTransfer.files)} 
+      on:drop|preventDefault|stopPropagation={onFileDrop} 
       on:dragenter|preventDefault|stopPropagation={() => { state = 'in'; }}
       on:dragover|preventDefault|stopPropagation={() => { state = 'in'; }}
       on:dragleave|preventDefault|stopPropagation={() => { state = 'out'; }}
