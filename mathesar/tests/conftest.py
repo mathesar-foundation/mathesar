@@ -45,9 +45,11 @@ def django_db_setup(request, django_db_blocker) -> None:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def build_test_db_model(test_db_name, django_db_blocker, django_db_setup):
+def test_db_model(test_db_name, django_db_blocker, django_db_setup):
     with django_db_blocker.unblock():
-        Database.objects.create(name=test_db_name)
+        database_model = Database.objects.create(name=test_db_name)
+    return database_model
+
 
 
 @pytest.fixture(autouse=True)

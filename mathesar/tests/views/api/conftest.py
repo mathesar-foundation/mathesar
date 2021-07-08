@@ -6,7 +6,7 @@ from sqlalchemy import Table as SATable
 from db.types import base, install
 from db.schemas import create_schema, get_schema_oid_from_name
 from db.tables import get_oid_from_table
-from mathesar.models import Schema, Table
+from mathesar.models import Schema, Table, Database
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import legacy_create_table_from_csv
@@ -36,14 +36,14 @@ def create_table(engine, csv_filename, test_db_name):
 
 
 @pytest.fixture
-def patent_schema(test_db_name):
-    engine = create_mathesar_engine(test_db_name)
+def patent_schema(test_db_model):
+    engine = create_mathesar_engine(test_db_model.name)
     install.install_mathesar_on_database(engine)
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA IF EXISTS "{PATENT_SCHEMA}" CASCADE;'))
     create_schema(PATENT_SCHEMA, engine)
     schema_oid = get_schema_oid_from_name(PATENT_SCHEMA, engine)
-    yield Schema.objects.create(oid=schema_oid, database=test_db_name)
+    yield Schema.objects.create(oid=schema_oid, database=test_db_model)
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA "{PATENT_SCHEMA}" CASCADE;'))
         conn.execute(text(f'DROP SCHEMA {base.SCHEMA} CASCADE;'))
@@ -51,7 +51,7 @@ def patent_schema(test_db_name):
 
 @pytest.fixture
 def empty_nasa_table(patent_schema):
-    engine = create_mathesar_engine(patent_schema.database)
+    engine = create_mathesar_engine(patent_schema.database.name)
     db_table = SATable(
         NASA_TABLE, MetaData(bind=engine), Column('nasa_col1', String), schema=patent_schema.name
     )
