@@ -38,7 +38,7 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         self.offset = self.get_offset(request)
         # TODO: Cache count value somewhere, since calculating it is expensive.
         table = queryset.get(id=table_id)
-        self.count = table.sa_num_records
+        self.count = table.sa_num_records(filters=filters)
         self.request = request
 
         return table.get_records(
