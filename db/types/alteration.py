@@ -42,11 +42,18 @@ def get_supported_alter_column_types(engine, friendly_names=True):
 
 
 def alter_column_type(
-        schema, table_name, column_name, target_type_str, engine
+        schema,
+        table_name,
+        column_name,
+        target_type_str,
+        engine,
+        friendly_names=True
 ):
     _preparer = engine.dialect.identifier_preparer
-    supported_types = get_supported_alter_column_types(engine)
-    target_type = supported_types.get(target_type_str.lower())
+    supported_types = get_supported_alter_column_types(
+        engine, friendly_names=friendly_names
+    )
+    target_type = supported_types.get(target_type_str)
 
     with engine.begin() as conn:
         metadata = MetaData(bind=engine, schema=schema)

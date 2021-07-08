@@ -125,7 +125,7 @@ def test_column_update_type(column_test_table, client):
 
 def test_column_update_type_invalid_cast(column_test_table, client):
     cache.clear()
-    type_ = "email"
+    type_ = "mathesar_types.email"
     data = {"type": type_}
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data

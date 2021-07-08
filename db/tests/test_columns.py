@@ -272,14 +272,15 @@ def test_retype_column_correct_column(engine_with_schema):
         table_name,
         target_column_name,
         "boolean",
-        engine
+        engine,
+        friendly_names=False,
     )
 
 
 def test_create_column(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "atableone"
-    target_type = "boolean"
+    target_type = "BOOLEAN"
     initial_column_name = "original_column"
     new_column_name = "added_column"
     table = Table(

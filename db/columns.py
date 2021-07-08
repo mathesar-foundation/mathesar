@@ -117,11 +117,13 @@ def get_column_index_from_name(table_oid, column_name, engine):
 def create_column(engine, table_oid, column_data):
     column_type = column_data[TYPE]
     column_nullable = column_data.get(NULLABLE, True)
-    supported_types = alteration.get_supported_alter_column_types(engine)
-    sa_type = supported_types.get(column_type.lower())
+    supported_types = alteration.get_supported_alter_column_types(
+        engine, friendly_names=False,
+    )
+    sa_type = supported_types.get(column_type)
     if sa_type is None:
-        logger.warning("Requested type not supported. falling back to String")
-        sa_type = supported_types[alteration.STRING]
+        logger.warning("Requested type not supported. falling back to VARCHAR")
+        sa_type = supported_types["VARCHAR"]
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = MathesarColumn(
         column_data[NAME], sa_type, nullable=column_nullable,
@@ -175,6 +177,7 @@ def retype_column(table_oid, column_index, new_type, engine):
         table.columns[column_index].name,
         new_type,
         engine,
+        friendly_names=False,
     )
     return tables.reflect_table_from_oid(table_oid, engine).columns[column_index]
 
