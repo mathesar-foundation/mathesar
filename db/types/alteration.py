@@ -4,24 +4,41 @@ from db.types import base, email
 BOOLEAN = "boolean"
 EMAIL = "email"
 INTERVAL = "interval"
+NAME = "name"
 NUMERIC = "numeric"
 STRING = "string"
 TEXT = "text"
 VARCHAR = "varchar"
 
 
-def get_supported_alter_column_types(engine):
+def get_supported_alter_column_types(engine, friendly_names=True):
+    """
+    Returns a list of valid types supported by mathesar for the given engine.
+
+    engine:  This should be an engine connecting to the DB where we want
+    to inspect the installed types.
+    friendly_names: sets whether to use "friendly" service-layer or the
+    actual DB-layer names.
+    """
     dialect_types = engine.dialect.ischema_names
-    type_map = {
+    friendly_type_map = {
         # Default Postgres types
-        BOOLEAN: dialect_types.get("boolean"),
-        INTERVAL: dialect_types.get("interval"),
-        NUMERIC: dialect_types.get("numeric"),
-        STRING: dialect_types.get("name"),
+        BOOLEAN: dialect_types.get(BOOLEAN),
+        INTERVAL: dialect_types.get(INTERVAL),
+        NUMERIC: dialect_types.get(NUMERIC),
+        STRING: dialect_types.get(NAME),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.QUALIFIED_EMAIL)
     }
-    return {k: v for k, v in type_map.items() if v is not None}
+    if friendly_names:
+        type_map = {k: v for k, v in friendly_type_map.items() if v is not None}
+    else:
+        type_map = {
+            val().compile(dialect=engine.dialect)
+            for val in friendly_type_map.values()
+            if val is not None
+        }
+    return type_map
 
 
 def alter_column_type(
