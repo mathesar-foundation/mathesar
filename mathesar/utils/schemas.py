@@ -27,6 +27,8 @@ def reflect_schemas_from_database(database):
     db_schema_oids = {
         schema["oid"] for schema in get_mathesar_schemas_with_oids(engine)
     }
+
+    database = Database.objects.get(name=database)
     schemas = [
         Schema.objects.get_or_create(oid=oid, database=database)
         for oid in db_schema_oids
