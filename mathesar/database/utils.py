@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from mathesar.models import Database
+from mathesar.models import Schema, Database
 from db.engine import get_connection_string
 
 
@@ -33,6 +33,7 @@ def update_databases():
             databases.remove(database.name)
         else:
             database.deleted = True
+            Schema.objects.filter(database=database).delete()
             database.save()
 
     # Create databases that aren't models yet
