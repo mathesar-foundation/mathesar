@@ -16,7 +16,7 @@ def test_csv_upload_with_all_required_parameters(engine, csv_filename, test_db_n
         assert table is not None
         assert table.name == 'NASA'
         assert table.schema.name == 'Patents'
-        assert table.schema.database == test_db_name
+        assert table.schema.database.name == test_db_name
         assert table.sa_num_records == 1393
 
 
@@ -31,7 +31,7 @@ def test_csv_upload_with_parameters_positional(engine, csv_filename, test_db_nam
         assert table is not None
         assert table.name == 'NASA 2'
         assert table.schema.name == 'Patents'
-        assert table.schema.database == test_db_name
+        assert table.schema.database.name == test_db_name
         assert table.sa_num_records == 1393
 
 
@@ -52,7 +52,7 @@ def test_csv_upload_with_duplicate_table_name(engine, csv_filename, test_db_name
         assert table is not None
         assert table.name == table_name
         assert table.schema.name == schema_name
-        assert table.schema.database == test_db_name
+        assert table.schema.database.name == test_db_name
         assert table.sa_num_records == 1393
     with open(csv_filename, 'rb') as csv_file:
         with pytest.raises(InvalidRequestError) as excinfo:
