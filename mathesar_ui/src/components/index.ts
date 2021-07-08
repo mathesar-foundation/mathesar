@@ -3,6 +3,7 @@ export { default as CancellablePromise } from './common/utils/CancellablePromise
 
 // Utility Functions
 export * from './common/utils/filterUtils';
+export * from './common/utils/formatUtils';
 
 // Actions
 export { default as portal } from './common/actions/portal';

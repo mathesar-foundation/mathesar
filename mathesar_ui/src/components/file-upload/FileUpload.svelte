@@ -13,7 +13,7 @@
     faFile,
     faFileUpload,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Icon, Progress } from '@mathesar-components';
+  import { Icon, Progress, formatSize } from '@mathesar-components';
   import type {
     FileUpload,
     FileUploadProgress,
@@ -99,7 +99,7 @@
               <span>
                 Uploaded {Math.round(fileProgress?.[upload.fileId]?.progress || 0)}%
               </span>
-              <span>{upload.file.size}Kb</span>
+              <span>{formatSize(upload.file.size)}</span>
             </div>
           </div>
         </div>
