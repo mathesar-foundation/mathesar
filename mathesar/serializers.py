@@ -16,10 +16,20 @@ class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
         return request.build_absolute_uri(reverse('table-detail', kwargs={'pk': obj.pk}))
 
 
+class ModelNameField(serializers.CharField):
+    """
+    De-serializes the request field as a string, but serializes the response field as
+    `model.name`. Required to support passing and returing a model name from the
+    endpoint, while also storing the model as a related field.
+    """
+    def to_representation(self, value):
+        return value.name
+
+
 class SchemaSerializer(serializers.HyperlinkedModelSerializer):
     tables = NestedTableSerializer(many=True, read_only=True)
     name = serializers.CharField()
-    database = serializers.CharField(max_length=128)
+    database = ModelNameField(max_length=128)
 
     class Meta:
         model = Schema
