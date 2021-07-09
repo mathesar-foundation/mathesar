@@ -25,7 +25,7 @@ from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_fro
 from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
 from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
-from mathesar.forms.forms import RecordListFilterForm
+from mathesar.forms import RecordListFilterForm
 
 from db.records import BadGroupFormat, GroupFieldNotFound
 
