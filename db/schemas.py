@@ -101,12 +101,14 @@ def delete_schema(schema, engine, cascade=False):
     """
     This method deletes a Postgres schema.
     """
+    related_tables = get_related_tables(engine, schema)
     if schema in get_all_schemas(engine):
         with engine.begin() as connection:
             try:
                 connection.execute(DropSchema(schema, cascade=cascade))
             except InternalError as e:
                 if isinstance(e.orig, DependentObjectsStillExist):
-                    return get_related_tables(engine, schema)
+                    return related_tables
                 else:
                     raise e
+    return related_tables
