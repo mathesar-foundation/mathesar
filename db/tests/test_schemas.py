@@ -1,7 +1,7 @@
 from unittest.mock import patch
 import warnings
 from sqlalchemy import create_engine, select, Table, MetaData
-from db import schemas
+from db import schemas, tables
 from db import types
 
 
@@ -58,5 +58,34 @@ def test_delete_schema(engine):
     assert test_schema in current_schemas
 
     schemas.delete_schema(test_schema, engine)
+    current_schemas = schemas.get_mathesar_schemas(engine)
+    assert test_schema not in current_schemas
+
+
+def test_delete_schema_restricted(engine):
+    test_schema = "test_delete_schema_cascade"
+    test_table = "test_delete_schema_cascade_table"
+
+    schemas.create_schema(test_schema, engine)
+    tables.create_mathesar_table(test_table, test_schema, [], engine)
+
+    related_tables = schemas.delete_schema(test_schema, engine)
+    related_tables = [table.name for table in related_tables]
+    assert len(related_tables) == 1
+    assert test_table in related_tables
+
+    current_schemas = schemas.get_mathesar_schemas(engine)
+    assert test_schema in current_schemas
+
+
+def test_delete_schema_cascade(engine):
+    test_schema = "test_delete_schema_cascade"
+    test_table = "test_delete_schema_cascade_table"
+
+    schemas.create_schema(test_schema, engine)
+    tables.create_mathesar_table(test_table, test_schema, [], engine)
+
+    schemas.delete_schema(test_schema, engine, cascade=True)
+
     current_schemas = schemas.get_mathesar_schemas(engine)
     assert test_schema not in current_schemas

@@ -2,8 +2,10 @@ import logging
 import warnings
 from sqlalchemy.schema import CreateSchema, DropSchema
 from sqlalchemy import inspect, MetaData, select, and_, not_, or_, Table
+from sqlalchemy.exc import InternalError
+from psycopg2.errors import DependentObjectsStillExist
 
-from db import types
+from db import types, tables
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +73,21 @@ def get_all_schemas(engine):
     return inspector.get_schema_names()
 
 
+def get_related_tables(engine, schema):
+    metadata = MetaData()
+    pg_tables = Table("pg_tables", metadata, autoload_with=engine)
+    sel = (
+        select(pg_tables.c.schemaname, pg_tables.c.tablename).
+        where(pg_tables.c.schemaname == schema)
+    )
+    with engine.begin() as conn:
+        results = conn.execute(sel).fetchall()
+
+    related_tables = [tables.reflect_table(table, schema, engine)
+                      for schema, table in results]
+    return related_tables
+
+
 def create_schema(schema, engine):
     """
     This method creates a Postgres schema.
@@ -86,4 +103,10 @@ def delete_schema(schema, engine, cascade=False):
     """
     if schema in get_all_schemas(engine):
         with engine.begin() as connection:
-            connection.execute(DropSchema(schema, cascade=cascade))
+            try:
+                connection.execute(DropSchema(schema, cascade=cascade))
+            except InternalError as e:
+                if isinstance(e.orig, DependentObjectsStillExist):
+                    return get_related_tables(engine, schema)
+                else:
+                    raise e
