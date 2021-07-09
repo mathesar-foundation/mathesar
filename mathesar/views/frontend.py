@@ -1,8 +1,5 @@
-from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
-from mathesar.forms.forms import UploadFileForm
-from mathesar.imports.csv import legacy_create_table_from_csv
 from mathesar.models import Schema
 from mathesar.serializers import SchemaSerializer
 from mathesar.database.utils import get_non_default_database_keys
