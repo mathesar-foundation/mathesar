@@ -16,7 +16,7 @@
       },
     },
     appearance: {
-      control: { type: 'select', options: ['default', 'primary', 'secondary', 'plain'] },
+      control: { type: 'select', options: ['default', 'primary', 'secondary', 'plain', 'ghost'] },
     },
   };
 
@@ -69,6 +69,7 @@
   <Button appearance="primary">Primary button</Button>
   <Button appearance="secondary">Secondary button</Button>
   <Button appearance="plain">Plain button</Button>
+  <Button appearance="ghost">Ghost button</Button>
 </Story>
 
 <Story name="Sizes" parameters={disabledAddons}>

@@ -15,7 +15,7 @@ def test_db_name():
     return TEST_DB
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def test_db():
     superuser_engine = _get_superuser_engine()
     with superuser_engine.connect() as conn:

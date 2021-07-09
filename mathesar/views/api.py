@@ -16,7 +16,7 @@ from sqlalchemy_filters.exceptions import (
 from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile
 from mathesar.pagination import (
-    ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetPagination
+    ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
@@ -25,7 +25,9 @@ from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_fro
 from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
 from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
-from mathesar.forms.forms import RecordListFilterForm
+from mathesar.forms import RecordListFilterForm
+
+from db.records import BadGroupFormat, GroupFieldNotFound
 
 logger = logging.getLogger(__name__)
 
@@ -159,7 +161,7 @@ class RecordViewSet(viewsets.ViewSet):
     # For sorting parameter formatting, see:
     # https://github.com/centerofci/sqlalchemy-filters#sort-format
     def list(self, request, table_pk=None):
-        paginator = TableLimitOffsetPagination()
+        paginator = TableLimitOffsetGroupPagination()
 
         # Use a Django Form to automatically parse JSON URL parameters
         filter_form = RecordListFilterForm(request.GET)
@@ -170,12 +172,15 @@ class RecordViewSet(viewsets.ViewSet):
             records = paginator.paginate_queryset(
                 self.queryset, request, table_pk,
                 filters=filter_form.cleaned_data['filters'],
-                order_by=filter_form.cleaned_data['order_by']
+                order_by=filter_form.cleaned_data['order_by'],
+                group_count_by=filter_form.cleaned_data['group_count_by'],
             )
         except (BadFilterFormat, FilterFieldNotFound) as e:
             raise ValidationError({'filters': e})
         except (BadSortFormat, SortFieldNotFound) as e:
             raise ValidationError({'order_by': e})
+        except (BadGroupFormat, GroupFieldNotFound) as e:
+            raise ValidationError({'group_count_by': e})
 
         serializer = RecordSerializer(records, many=True)
         return paginator.get_paginated_response(serializer.data)

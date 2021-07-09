@@ -1,0 +1,14 @@
+.new-table-view {
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+  width: 100%;
+
+  >.title {
+    padding: 10px;
+
+    .text-input {
+      width: 210px;
+    }
+  }
+}

@@ -30,7 +30,7 @@ class DatabaseObject(BaseModel):
 
 # TODO: Replace with a proper form of caching
 # See: https://github.com/centerofci/mathesar/issues/280
-_engine = None
+_engines = {}
 
 
 class Schema(DatabaseObject):
@@ -38,11 +38,11 @@ class Schema(DatabaseObject):
 
     @property
     def _sa_engine(self):
-        global _engine
+        global _engines
         # We're caching this since the engine is used frequently.
-        if _engine is None:
-            _engine = create_mathesar_engine(self.database)
-        return _engine
+        if self.database not in _engines:
+            _engines[self.database] = create_mathesar_engine(self.database)
+        return _engines[self.database]
 
     @cached_property
     def name(self):
@@ -75,12 +75,12 @@ class Table(DatabaseObject):
             table = tables.reflect_table_from_oid(
                 self.oid, self.schema._sa_engine,
             )
-        # We catch this error, since it lets us decouple the cadence of
+        # We catch these errors, since it lets us decouple the cadence of
         # overall DB reflection from the cadence of cache expiration for
         # table names.  Also, it makes it obvious when the DB layer has
         # been altered, as opposed to other reasons for a 404 when
         # requesting a table.
-        except TypeError:
+        except (TypeError, IndexError):
             table = tables.create_empty_table("MISSING")
         return table
 
@@ -119,12 +119,11 @@ class Table(DatabaseObject):
         )
 
     @property
-    def sa_num_records(self):
-        return tables.get_count(self._sa_table, self.schema._sa_engine)
-
-    @property
     def sa_all_records(self):
         return records.get_records(self._sa_table, self.schema._sa_engine)
+
+    def sa_num_records(self, filters=[]):
+        return tables.get_count(self._sa_table, self.schema._sa_engine, filters=filters)
 
     def get_record(self, id_value):
         return records.get_record(self._sa_table, self.schema._sa_engine, id_value)
@@ -132,6 +131,13 @@ class Table(DatabaseObject):
     def get_records(self, limit=None, offset=None, filters=[], order_by=[]):
         return records.get_records(self._sa_table, self.schema._sa_engine, limit,
                                    offset, filters=filters, order_by=order_by)
+
+    def get_group_counts(
+        self, group_by, limit=None, offset=None, filters=[], order_by=[]
+    ):
+        return records.get_group_counts(self._sa_table, self.schema._sa_engine,
+                                        group_by, limit, offset, filters=filters,
+                                        order_by=order_by)
 
     def create_record_or_records(self, record_data):
         return records.create_record_or_records(self._sa_table, self.schema._sa_engine, record_data)

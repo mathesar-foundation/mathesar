@@ -1,5 +1,7 @@
 <script lang="ts">
-  export let component;
+  import type { SvelteComponent } from 'svelte';
+  
+  export let component: SvelteComponent;
 </script>
 
 <svelte:component this={component} {...$$restProps}>
