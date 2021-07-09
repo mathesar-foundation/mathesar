@@ -80,10 +80,10 @@ def create_schema(schema, engine):
             connection.execute(CreateSchema(schema))
 
 
-def delete_schema(schema, engine):
+def delete_schema(schema, engine, cascade=False):
     """
     This method deletes a Postgres schema.
     """
     if schema in get_all_schemas(engine):
         with engine.begin() as connection:
-            connection.execute(DropSchema(schema))
+            connection.execute(DropSchema(schema, cascade=cascade))
