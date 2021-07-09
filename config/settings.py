@@ -88,6 +88,15 @@ DATABASES = {
 }
 DATABASES[decouple_config('DJANGO_DATABASE_KEY')] = decouple_config('DJANGO_DATABASE_URL', cast=db_url)
 
+for db_key, db_dict in DATABASES.items():
+    # Engine can be '.postgresql' or '.postgresql_psycopg2'
+    if not db_dict['ENGINE'].startswith('django.db.backends.postgresql'):
+        raise ValueError(
+            f"{db_key} is not a postgres database. "
+            f"{db_dict['ENGINE']} found for {db_key}'s engine."
+        )
+
+
 # pytest-django will create a new database named 'test_{DATABASES[table_db]['NAME']}'
 # and use it for our API tests if we don't specify DATABASES[table_db]['TEST']['NAME']
 if decouple_config('TEST', default=False, cast=bool):
