@@ -92,7 +92,7 @@ for db_key, db_dict in DATABASES.items():
     # Engine can be '.postgresql' or '.postgresql_psycopg2'
     if not db_dict['ENGINE'].startswith('django.db.backends.postgresql'):
         raise ValueError(
-            f"{db_key} is not a postgres database. "
+            f"{db_key} is not a PostgreSQL database. "
             f"{db_dict['ENGINE']} found for {db_key}'s engine."
         )
 
