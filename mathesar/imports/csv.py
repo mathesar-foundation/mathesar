@@ -3,9 +3,8 @@ from io import TextIOWrapper
 import clevercsv as csv
 
 from mathesar.database.base import create_mathesar_engine
-from mathesar.database.utils import get_database_key
-from mathesar.models import Table, Schema
-from db import tables, records, schemas
+from mathesar.models import Table
+from db import tables, records
 from mathesar.errors import InvalidTableError
 
 ALLOWED_DELIMITERS = ",\t:| "
