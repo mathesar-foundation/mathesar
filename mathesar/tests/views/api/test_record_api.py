@@ -137,10 +137,13 @@ def _test_record_list_group(table, client, group_count_by, expected_groups):
     assert 'group_count' in response_data
     assert response_data['group_count']['group_count_by'] == group_count_by
     assert 'results' in response_data['group_count']
+    assert 'columns' in response_data['group_count']['results'][0]
+    assert 'count' in response_data['group_count']['results'][0]
 
     results = response_data['group_count']['results']
+    returned_groups = {tuple(group["columns"]) for group in results}
     for expected_group in expected_groups:
-        assert expected_group in results
+        assert expected_group in returned_groups
 
     assert mock_infer.call_args is not None
     assert mock_infer.call_args[0][2] == group_count_by
@@ -151,8 +154,8 @@ def test_record_list_group_single_column(create_table, client):
     table = create_table(table_name)
     group_count_by = ['Center']
     expected_groups = [
-        'NASA Marshall Space Flight Center',
-        'NASA Stennis Space Center'
+        ('NASA Marshall Space Flight Center',),
+        ('NASA Stennis Space Center',)
     ]
     _test_record_list_group(table, client, group_count_by, expected_groups)
 
@@ -162,8 +165,8 @@ def test_record_list_group_multi_column(create_table, client):
     table = create_table(table_name)
     group_count_by = ['Center', 'Status']
     expected_groups = [
-        'NASA Marshall Space Flight Center,Issued',
-        'NASA Stennis Space Center,Issued',
+        ('NASA Marshall Space Flight Center', 'Issued'),
+        ('NASA Stennis Space Center', 'Issued'),
     ]
     _test_record_list_group(table, client, group_count_by, expected_groups)
 
