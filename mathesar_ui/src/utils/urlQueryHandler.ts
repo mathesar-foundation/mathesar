@@ -1,15 +1,27 @@
 import { router } from 'tinro';
+import type {
+  TableOptionsData,
+} from '@mathesar/stores/tableData';
 
-// Structure of url t=[[id,limit,page,filters]], a=id
-// t -> tables, a -> active
-// Null value represented for numbers as -1, strings as empty string
+/**
+ * Structure of url t=[
+ *  [
+ *    id,
+ *    limit,
+ *    page,
+ *    [sortcolumn1, sortorder, sortc2, sortorder2],
+ *    [filtercolumn, condition, value, op2, condition2]
+ *  ]
+ * ], a=id
+ * t -> tables, a -> active
+ * Null value for limit and page represented as -1
+ */
 
-interface TableOptions {
+interface TableOptions extends Partial<TableOptionsData> {
   position?: number,
   status?: 'active' | 'inactive',
-  pageSize?: number,
-  page?: number
 }
+
 interface TableConfig extends TableOptions {
   id: number,
 }

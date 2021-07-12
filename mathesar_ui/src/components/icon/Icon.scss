@@ -2,6 +2,7 @@
   display: inline-block;
   vertical-align: middle;
   fill: currentColor;
+  flex-shrink: 0;
 }
 .fa-flip-horizontal {
   transform: scale(-1, 1);

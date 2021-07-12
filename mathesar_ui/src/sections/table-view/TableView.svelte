@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { faFilter } from '@fortawesome/free-solid-svg-icons';
   import {
     getTable,
     fetchTableRecords,
@@ -7,10 +8,13 @@
   import type {
     TableColumnStore,
     TableRecordStore,
-    TablePaginationStore,
+    TableOptionsStore,
   } from '@mathesar/stores/tableData';
   import { States } from '@mathesar/utils/api';
+  import { Button, Icon } from '@mathesar-components';
+  import DisplayOptions from './DisplayOptions.svelte';
   import TablePagination from './TablePagination.svelte';
+  import Header from './Header.svelte';
   import Row from './Row.svelte';
 
   export let database: string;
@@ -19,27 +23,35 @@
 
   let columns: TableColumnStore;
   let records: TableRecordStore;
-  let pagination: TablePaginationStore;
+  let options: TableOptionsStore;
   let offset: number;
+  let showDisplayOptions = false;
 
   function setStores(_database: string, _id: number) {
-    const options = URLQueryHandler.getTableConfig(_database, _id);
-    const table = getTable(_database, _id, options);
+    const opts = URLQueryHandler.getTableConfig(_database, _id);
+    const table = getTable(_database, _id, opts);
     columns = table.columns;
     records = table.records;
-    pagination = table.pagination;
+    options = table.options;
   }
 
   $: setStores(database, identifier);
 
   function refetch() {
     void fetchTableRecords(database, identifier);
-    URLQueryHandler.setTableOptions(database, identifier, $pagination);
+    URLQueryHandler.setTableOptions(database, identifier, $options);
+  }
+
+  function toggleDisplayOptions() {
+    showDisplayOptions = !showDisplayOptions;
   }
 </script>
 
 <div class="actions-pane">
-  Actions
+  <Button appearance="plain" on:click={toggleDisplayOptions}>
+    <Icon data={faFilter}/>
+    Display properties
+  </Button>
 
   {#if $columns.state === States.Loading}
     | Loading table
@@ -56,38 +68,34 @@
   {/if}
 </div>
 
-<div class="table-content">
-  {#if $columns.data.length > 0}
-    <table>
-      <thead>
-        <tr>
-          <th class="row-number"></th>
-          {#each $columns.data as column, index (column.name)}
-            <th>
-              {#if index > 0}
-                <div class="drag-grip"></div>
-              {/if}
-              {column.name}
-            </th>
+<div class="table-data" class:has-display-opts={showDisplayOptions}>
+  <div class="display-options-pane">
+    {#if showDisplayOptions}
+      <DisplayOptions/>
+    {/if}
+  </div>
+
+  <div class="table-content">
+    {#if $columns.data.length > 0}
+      <table>
+        <Header columns={$columns} bind:sort={$options.sort} on:refetch={refetch}/>
+        <tbody>
+          {#each $records.data as row, index}
+            <Row columns={$columns} loading={$records.state === States.Loading}
+                  {row} {index} {offset}/>
           {/each}
-        </tr>
-      </thead>
-      <tbody>
-        {#each $records.data as row, index}
-          <Row columns={$columns} loading={$records.state === States.Loading}
-                {row} {index} {offset}/>
-        {/each}
-      </tbody>
-    </table>
-  {/if}
+        </tbody>
+      </table>
+    {/if}
+  </div>
 </div>
 
 <div class="status-pane">
   <TablePagination
     id={identifier} {database}
     total={$records.totalCount}
-    bind:pageSize={$pagination.pageSize}
-    bind:page={$pagination.page}
+    bind:pageSize={$options.pageSize}
+    bind:page={$options.page}
     bind:offset={offset}
     on:change={refetch}/>
 </div>

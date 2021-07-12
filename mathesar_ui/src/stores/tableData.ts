@@ -2,7 +2,7 @@ import { get, writable, Writable } from 'svelte/store';
 import { getAPI, States } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
 
-interface TableColumn {
+export interface TableColumn {
   name: string,
   type: string
 }
@@ -20,11 +20,6 @@ interface TableRecordsResponse {
   results: TableRecords[]
 }
 
-interface GetTableOptions {
-  pageSize?: number,
-  page?: number
-}
-
 export interface TableColumnData {
   state: States,
   error?: string,
@@ -38,9 +33,11 @@ interface TableRecordData {
   totalCount: number
 }
 
-interface TablePaginationData {
+export type SortOption = Map<string, 'asc' | 'desc'>;
+export interface TableOptionsData {
   pageSize: number,
-  page: number
+  page: number,
+  sort: SortOption
 }
 
 interface TableConfigData {
@@ -50,12 +47,15 @@ interface TableConfigData {
 
 export type TableColumnStore = Writable<TableColumnData>;
 export type TableRecordStore = Writable<TableRecordData>;
-export type TablePaginationStore = Writable<TablePaginationData>;
+export type TableOptionsStore = Writable<TableOptionsData>;
 
 interface TableData {
+  // Store objects: For use in views and controller
   columns?: TableColumnStore,
   records?: TableRecordStore,
-  pagination?: TablePaginationStore,
+  options?: TableOptionsStore,
+
+  // Direct objects: For use only in controller
   config?: TableConfigData,
 }
 
@@ -104,10 +104,10 @@ export async function fetchTableRecords(
   const table = databaseMap.get(db)?.get(id);
   if (table) {
     const tableRecordStore = table.records;
-    const paginationStore = table.pagination;
+    const optionStore = table.options;
 
     const existingData = get(tableRecordStore);
-    const paginationData = get(paginationStore);
+    const optionData = get(optionStore);
 
     tableRecordStore.set({
       state: States.Loading,
@@ -116,9 +116,20 @@ export async function fetchTableRecords(
     });
 
     const params = [];
-    params.push(`limit=${paginationData.pageSize}`);
-    const offset = paginationData.pageSize * (paginationData.page - 1);
+    params.push(`limit=${optionData.pageSize}`);
+    const offset = optionData.pageSize * (optionData.page - 1);
     params.push(`offset=${offset}`);
+
+    const sortOptions = [];
+    optionData.sort?.forEach((value, key) => {
+      sortOptions.push({
+        field: key,
+        direction: value,
+      });
+    });
+    if (sortOptions.length > 0) {
+      params.push(`order_by=${encodeURIComponent(JSON.stringify(sortOptions))}`);
+    }
 
     try {
       table.config.previousRecordRequest?.cancel();
@@ -148,7 +159,7 @@ export async function fetchTableRecords(
   }
 }
 
-export function getTable(db: string, id: number, options?: GetTableOptions): TableData {
+export function getTable(db: string, id: number, options?: Partial<TableOptionsData>): TableData {
   let database = databaseMap.get(db);
   if (!database) {
     database = new Map();
@@ -167,9 +178,10 @@ export function getTable(db: string, id: number, options?: GetTableOptions): Tab
         data: [],
         totalCount: 0,
       }),
-      pagination: writable({
+      options: writable({
         pageSize: options?.pageSize || 50,
         page: options?.page || 1,
+        sort: options?.sort || null,
       }),
       config: {},
     };

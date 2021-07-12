@@ -73,6 +73,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Mathesar - {$activeTab?.label || 'Home'}</title>
+</svelte:head>
+
 <aside>
   <nav>
     <Tree data={$schemas.data || []} idKey="id" labelKey="name" childKey="tables"
