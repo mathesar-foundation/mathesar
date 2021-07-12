@@ -3,6 +3,7 @@ from collections import Counter
 
 import pytest
 from sqlalchemy import select
+from sqlalchemy_filters import apply_sort
 
 from db import records
 from db.records import GroupFieldNotFound, BadGroupFormat
@@ -32,35 +33,38 @@ def test_get_group_counts_mixed_str_col_field(filter_sort_table_obj):
     assert ("string1", 1) in counts
 
 
-def test_get_group_counts_limit_ordering(filter_sort_table_obj):
-    filter_sort, engine = filter_sort_table_obj
-    limit = 50
-    order_by = [{"field": "numeric", "direction": "desc", "nullslast": True}]
-    group_by = [filter_sort.c.numeric]
-    counts = records.get_group_counts(filter_sort, engine, group_by, limit=limit,
-                                      order_by=order_by)
-    assert len(counts) == 50
-    for i in range(1, 100):
-        if i > 50:
-            assert (i,) in counts
-        else:
-            assert (i,) not in counts
+limit_offset_test_list = [
+    (limit, offset)
+    for limit in [None, 0, 25, 50, 100]
+    for offset in [None, 0, 25, 50, 100]
+]
 
 
-def test_get_group_counts_limit_offset_ordering(filter_sort_table_obj):
-    filter_sort, engine = filter_sort_table_obj
-    offset = 25
-    limit = 50
-    order_by = [{"field": "numeric", "direction": "desc", "nullslast": True}]
-    group_by = [filter_sort.c.numeric]
-    counts = records.get_group_counts(filter_sort, engine, group_by, limit=limit,
+@pytest.mark.parametrize("limit,offset", limit_offset_test_list)
+def test_get_group_counts_limit_offset_ordering(roster_table_obj, limit, offset):
+    roster, engine = roster_table_obj
+    order_by = [{"field": "Grade", "direction": "desc", "nullslast": True}]
+    group_by = [roster.c["Grade"]]
+    counts = records.get_group_counts(roster, engine, group_by, limit=limit,
                                       offset=offset, order_by=order_by)
-    assert len(counts) == 50
-    for i in range(1, 100):
-        if i > 25 and i <= 75:
-            assert (i,) in counts
-        else:
-            assert (i,) not in counts
+
+    query = select(group_by[0])
+    query = apply_sort(query, order_by)
+    with engine.begin() as conn:
+        all_records = list(conn.execute(query))
+    if limit is None:
+        end = None
+    elif offset is None:
+        end = limit
+    else:
+        end = limit + offset
+    limit_offset_records = all_records[offset:end]
+    manual_count = Counter(limit_offset_records)
+
+    assert len(counts) == len(manual_count)
+    for value, count in manual_count.items():
+        assert value in counts
+        assert counts[value] == count
 
 
 count_values_test_list = itertools.chain(*[
