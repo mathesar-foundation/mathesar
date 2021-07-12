@@ -3,7 +3,7 @@ from collections import Counter
 
 import pytest
 from sqlalchemy import select
-from sqlalchemy_filters import apply_sort
+from sqlalchemy_filters import apply_sort, apply_filters
 
 from db import records
 from db.records import GroupFieldNotFound, BadGroupFormat
@@ -88,8 +88,38 @@ def test_get_group_counts_count_values(roster_table_obj, group_by):
         all_records = conn.execute(select(*cols)).fetchall()
     manual_count = Counter(all_records)
 
-    for key, value in counts.items():
-        assert manual_count[key] == value
+    for value, count in manual_count.items():
+        assert value in counts
+        assert counts[value] == count
+
+
+filter_values_test_list = itertools.chain(*[
+    itertools.combinations([
+        {"field": "Student Name", "op": "ge", "value": "Test Name"},
+        {"field": "Student Email", "op": "le", "value": "Test Email"},
+        {"field": "Teacher Email", "op": "like", "value": "%gmail.com"},
+        {"field": "Subject", "op": "eq", "value": "Non-Existent Subject"},
+        {"field": "Grade", "op": "ne", "value": 99}
+    ], i) for i in range(1, 3)
+])
+
+
+@pytest.mark.parametrize("filter_by", filter_values_test_list)
+def test_get_group_counts_filter_values(roster_table_obj, filter_by):
+    roster, engine = roster_table_obj
+    group_by = ["Student Name"]
+    counts = records.get_group_counts(roster, engine, group_by, filters=filter_by)
+
+    cols = [roster.c[f] for f in group_by]
+    query = select(*cols)
+    query = apply_filters(query, filter_by)
+    with engine.begin() as conn:
+        all_records = conn.execute(query).fetchall()
+    manual_count = Counter(all_records)
+
+    for value, count in manual_count.items():
+        assert value in counts
+        assert counts[value] == count
 
 
 exceptions_test_list = [
