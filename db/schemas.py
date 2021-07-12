@@ -3,6 +3,8 @@ import warnings
 from sqlalchemy.schema import CreateSchema, DropSchema
 from sqlalchemy import inspect, MetaData, select, and_, not_, or_, Table
 from sqlalchemy.exc import InternalError
+from sqlalchemy.schema import DDLElement
+from sqlalchemy.ext import compiler
 from psycopg2.errors import DependentObjectsStillExist
 
 from db import types, tables
@@ -112,3 +114,26 @@ def delete_schema(schema, engine, cascade=False):
                 else:
                     raise e
     return related_tables
+
+
+class RenameSchema(DDLElement):
+    def __init__(self, schema, rename_to):
+        self.schema = schema
+        self.rename_to = rename_to
+
+
+@compiler.compiles(RenameSchema)
+def compile(element, compiler, **_):
+    return "ALTER SCHEMA %s RENAME TO %s" % (
+        element.schema,
+        element.rename_to
+    )
+
+
+def rename_schema(schema, engine, rename_to):
+    """
+    This method deletes a Postgres schema.
+    """
+    if schema in get_all_schemas(engine):
+        with engine.begin() as connection:
+            connection.execute(RenameSchema(schema, rename_to))

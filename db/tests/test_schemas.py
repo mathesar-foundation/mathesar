@@ -93,3 +93,17 @@ def test_delete_schema_cascade(engine):
 
     current_schemas = schemas.get_mathesar_schemas(engine)
     assert test_schema not in current_schemas
+
+
+def test_rename_schema(engine):
+    test_schema = "test_rename_schema"
+    new_test_schema = "test_rename_schema_new"
+
+    schemas.create_schema(test_schema, engine)
+    current_schemas = schemas.get_mathesar_schemas(engine)
+    assert test_schema in current_schemas
+
+    schemas.rename_schema(test_schema, engine, new_test_schema)
+    current_schemas = schemas.get_mathesar_schemas(engine)
+    assert test_schema not in current_schemas
+    assert new_test_schema in current_schemas
