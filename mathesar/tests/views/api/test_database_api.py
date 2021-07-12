@@ -135,16 +135,17 @@ def test_database_detail(client):
     check_database(expected_database, response_database)
 
 
-def test_database_types_not_installed(client, test_db_name, custom_types):
-    reflect_db_objects()
-    default_database = Database.objects.get(name=test_db_name)
+# TODO: Re-enable when modular type installation has been implemented
+# def test_database_types_not_installed(client, test_db_name, custom_types):
+#     reflect_db_objects()
+#     default_database = Database.objects.get(name=test_db_name)
 
-    response = client.get(f'/api/v0/databases/{default_database.id}/')
-    type_dict = response.json()['supported_types']
+#     response = client.get(f'/api/v0/databases/{default_database.id}/')
+#     type_dict = response.json()['supported_types']
 
-    assert response.status_code == 200
-    assert len(type_dict) > 0
-    assert all([type_ not in type_dict for type_ in custom_types])
+#     assert response.status_code == 200
+#     assert len(type_dict) > 0
+#     assert all([type_ not in type_dict for type_ in custom_types])
 
 
 def test_database_types_installed(client, test_db_name, custom_types,
