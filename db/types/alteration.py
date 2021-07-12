@@ -7,7 +7,6 @@ INTERVAL = "interval"
 NAME = "name"
 NUMERIC = "numeric"
 STRING = "string"
-TEXT = "text"
 VARCHAR = "varchar"
 
 
@@ -39,6 +38,20 @@ def get_supported_alter_column_types(engine, friendly_names=True):
             if val is not None
         }
     return type_map
+
+
+def get_robust_supported_alter_column_type_map(engine):
+    supported_types = get_supported_alter_column_types(engine, friendly_names=True)
+    supported_types.update(get_supported_alter_column_types(engine, friendly_names=False))
+    supported_types.update(
+        {
+            type_.lower(): supported_types[type_] for type_ in supported_types
+        } | {
+
+            type_.upper(): supported_types[type_] for type_ in supported_types
+        }
+    )
+    return supported_types
 
 
 def alter_column_type(
@@ -109,8 +122,16 @@ def create_varchar_casts(engine):
 
 def get_defined_source_type_target_type_cast_map(engine):
     full_cast_map = {}
-    for k, v in get_defined_source_target_cast_tuples():
-        full_cast_map.setdefault(k, []).append(v)
+    supported_types = get_robust_supported_alter_column_type_map(engine)
+    for st in supported_types:
+        print(st)
+    for source, target in get_defined_source_target_cast_tuples():
+        source_python_type = supported_types.get(source)
+        target_python_type = supported_types.get(target)
+        if source_python_type is not None and target_python_type is not None:
+            source_db_type = source_python_type().compile(dialect=engine.dialect)
+            target_db_type = target_python_type().compile(dialect=engine.dialect)
+            full_cast_map.setdefault(source_db_type, []).append(target_db_type)
 
     return full_cast_map
 
@@ -176,7 +197,7 @@ def _get_boolean_type_body_map():
     types to booleans.
 
     boolean -> boolean:  Identity. No remarks
-    text -> boolean:     We only cast 't', 'f', 'true', or 'false' all
+    varchar -> boolean:     We only cast 't', 'f', 'true', or 'false' all
                          others raise a custom exception.
     numeric -> boolean:  We only cast 1 -> true, 0 -> false (this is not
                          default behavior for PostgreSQL). Others raise a
@@ -189,7 +210,7 @@ def _get_boolean_type_body_map():
           RETURN $1;
         END;
         """,
-        TEXT: f"""
+        VARCHAR: f"""
         DECLARE
         istrue {BOOLEAN};
         BEGIN
@@ -216,8 +237,8 @@ def _get_email_type_body_map():
     types to email.
 
     email -> email:  Identity. No remarks
-    text -> email:   We use the default PostgreSQL behavior (this will
-                     just check that the TEXT object satisfies the email
+    varchar -> email:   We use the default PostgreSQL behavior (this will
+                     just check that the VARCHAR object satisfies the email
                      DOMAIN).
     """
     return {
@@ -226,7 +247,7 @@ def _get_email_type_body_map():
           RETURN $1;
         END;
         """,
-        TEXT: f"""
+        VARCHAR: f"""
         BEGIN
           RETURN $1::{email.QUALIFIED_EMAIL};
         END;
@@ -240,9 +261,9 @@ def _get_interval_type_body_map():
     types to interval.
 
     interval -> interval:  Identity. No remarks
-    text -> interval:      We first check that the text *cannot* be cast
-                           to a numeric, and then try to cast the text to an
-                           interval.
+    varchar -> interval:   We first check that the varchar *cannot* be cast
+                           to a numeric, and then try to cast the varchar
+                           to an interval.
     """
     return {
         INTERVAL: """
@@ -252,7 +273,7 @@ def _get_interval_type_body_map():
         """,
         # We need to check that a string isn't a valid number before
         # casting to intervals (since a number is more likely)
-        TEXT: f"""
+        VARCHAR: f"""
         BEGIN
           PERFORM $1::{NUMERIC};
           RAISE EXCEPTION '% is a {NUMERIC}', $1;
@@ -271,7 +292,7 @@ def _get_numeric_type_body_map():
 
     numeric -> numeric:  Identity. No remarks
     boolean -> numeric:  We cast TRUE -> 1, FALSE -> 0
-    text -> numeric:     We use the default PostgreSQL behavior.
+    varchar -> numeric:     We use the default PostgreSQL behavior.
     """
     return {
         NUMERIC: """
@@ -287,7 +308,7 @@ def _get_numeric_type_body_map():
           RETURN 0;
         END;
         """,
-        TEXT: f"""
+        VARCHAR: f"""
         BEGIN
           RETURN $1::{NUMERIC};
         END;
@@ -305,7 +326,6 @@ def _get_varchar_type_body_map():
     email -> varchar:     We use the default PostgreSQL cast behavior.
     interval -> varchar:  We use the default PostgreSQL cast behavior.
     numeric -> varchar:   We use the default PostgreSQL cast behavior.
-    text -> varchar:      We use the default PostgreSQL cast behavior.
     """
     return {
         VARCHAR: """
@@ -329,11 +349,6 @@ def _get_varchar_type_body_map():
         END;
         """,
         NUMERIC: f"""
-        BEGIN
-          RETURN $1::{VARCHAR};
-        END;
-        """,
-        TEXT: f"""
         BEGIN
           RETURN $1::{VARCHAR};
         END;
