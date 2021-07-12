@@ -75,12 +75,12 @@ class Table(DatabaseObject):
             table = tables.reflect_table_from_oid(
                 self.oid, self.schema._sa_engine,
             )
-        # We catch this error, since it lets us decouple the cadence of
+        # We catch these errors, since it lets us decouple the cadence of
         # overall DB reflection from the cadence of cache expiration for
         # table names.  Also, it makes it obvious when the DB layer has
         # been altered, as opposed to other reasons for a 404 when
         # requesting a table.
-        except TypeError:
+        except (TypeError, IndexError):
             table = tables.create_empty_table("MISSING")
         return table
 
