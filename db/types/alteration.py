@@ -123,8 +123,6 @@ def create_varchar_casts(engine):
 def get_defined_source_type_target_type_cast_map(engine):
     full_cast_map = {}
     supported_types = get_robust_supported_alter_column_type_map(engine)
-    for st in supported_types:
-        print(st)
     for source, target in get_defined_source_target_cast_tuples():
         source_python_type = supported_types.get(source)
         target_python_type = supported_types.get(target)

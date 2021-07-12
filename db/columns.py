@@ -82,6 +82,19 @@ class MathesarColumn(Column):
             and self.nullable == default_def.get(NULLABLE, True)
         )
 
+    def get_valid_target_types(self, engine):
+        """
+        Returns a set of valid types to which the type of the column can be
+        altered.
+        """
+        db_type = self.type.compile(dialect=engine.dialect)
+        return list(
+            set(
+                alteration.get_defined_source_type_target_type_cast_map(engine).get(db_type)
+            )
+        )
+
+
 
 def get_default_mathesar_column_list():
     return [
