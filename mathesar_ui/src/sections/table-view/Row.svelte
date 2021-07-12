@@ -8,17 +8,29 @@
   export let index: number;
   export let columns: TableColumnData;
   export let loading = false;
+  export let isGrouped = false;
   export let row: { [key: string]: unknown };
+
+  $: rowNumber = isGrouped
+    ? offset + (row.__index as number)
+    : offset + index;
 </script>
 
 <tr>
-  <td class="row-number">
-    {offset + index}
-  </td>
-  {#each columns.data as column (column.name)}
-    <td>
-      {row[column.name]}
-      <Skeleton {loading}/>
+  {#if row.__isGroupRow}
+    <td colspan={columns.data.length + 1}>
+      {row.key}: {row.count}
     </td>
-  {/each}
+
+  {:else}
+    <td class="row-number">
+      {rowNumber}
+    </td>
+    {#each columns.data as column (column.name)}
+      <td>
+        {row[column.name]}
+        <Skeleton {loading}/>
+      </td>
+    {/each}
+  {/if}
 </tr>

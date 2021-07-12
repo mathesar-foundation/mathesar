@@ -41,6 +41,7 @@ module.exports = {
         '@typescript-eslint/no-unsafe-member-access': 'off',
         'no-void': 'off',
         'no-useless-escape': 'off',
+        'no-underscore-dangle': 'off',
       },
     },
     {

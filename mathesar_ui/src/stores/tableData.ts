@@ -7,7 +7,7 @@ export interface TableColumn {
   type: string
 }
 
-interface TableRecords {
+export interface TableRecords {
   [key: string]: unknown
 }
 
@@ -15,9 +15,14 @@ interface TableDetailsResponse {
   columns: TableColumn[]
 }
 
+interface TableRecordGroupsResponse {
+  group_count_by: string[],
+  results: Record<string, number>,
+}
 interface TableRecordsResponse {
   count: number,
-  results: TableRecords[]
+  results: TableRecords[],
+  group_count: TableRecordGroupsResponse
 }
 
 export interface TableColumnData {
@@ -26,22 +31,31 @@ export interface TableColumnData {
   data: TableColumn[]
 }
 
+export interface TableRecordGroupData {
+  fields: string[],
+  count: Record<string, number>
+}
+
 interface TableRecordData {
   state: States,
   error?: string,
   data: TableRecords[],
+  groupData?: TableRecordGroupData,
   totalCount: number
 }
 
 export type SortOption = Map<string, 'asc' | 'desc'>;
+export type GroupOption = Set<string>;
 export interface TableOptionsData {
   pageSize: number,
   page: number,
-  sort: SortOption
+  sort: SortOption,
+  group: GroupOption
 }
 
 interface TableConfigData {
   previousTableRequest?: CancellablePromise<TableDetailsResponse>,
+  previousRecordGroupRequest?: CancellablePromise<TableRecordsResponse>,
   previousRecordRequest?: CancellablePromise<TableRecordsResponse>,
 }
 
@@ -120,7 +134,11 @@ export async function fetchTableRecords(
     const offset = optionData.pageSize * (optionData.page - 1);
     params.push(`offset=${offset}`);
 
-    const sortOptions = [];
+    const groupOptions = Array.from(optionData.group ?? []);
+    const sortOptions = groupOptions.map((field) => ({
+      field,
+      direction: 'asc',
+    }));
     optionData.sort?.forEach((value, key) => {
       sortOptions.push({
         field: key,
@@ -132,20 +150,42 @@ export async function fetchTableRecords(
     }
 
     try {
+      table.config.previousRecordGroupRequest?.cancel();
       table.config.previousRecordRequest?.cancel();
 
       const tableRecordsPromise = getAPI<TableRecordsResponse>(`/tables/${id}/records/?${params.join('&')}`);
+
+      let tableGroupPromise: CancellablePromise<TableRecordsResponse> = null;
+      if (groupOptions.length > 0) {
+        const groupParams = ['limit=100'];
+        groupParams.push(
+          `group_count_by=${encodeURIComponent(JSON.stringify(groupOptions))}`,
+        );
+        tableGroupPromise = getAPI<TableRecordsResponse>(`/tables/${id}/records/?${groupParams.join('&')}`);
+      }
+
       table.config = {
         ...table.config,
         previousRecordRequest: tableRecordsPromise,
+        previousRecordGroupRequest: tableGroupPromise,
       };
 
       const response = await tableRecordsPromise;
+      const groupResponse = await tableGroupPromise;
+
       const totalCount = response.count || 0;
       const data = response.results || [];
+      let groupData: TableRecordGroupData = null;
+      if (groupResponse?.group_count?.results) {
+        groupData = {
+          fields: groupResponse.group_count?.group_count_by || [],
+          count: groupResponse.group_count.results,
+        };
+      }
       tableRecordStore.set({
         state: States.Done,
         data,
+        groupData,
         totalCount,
       });
     } catch (err) {
@@ -182,6 +222,7 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
         pageSize: options?.pageSize || 50,
         page: options?.page || 1,
         sort: options?.sort || null,
+        group: options?.group || null,
       }),
       config: {},
     };

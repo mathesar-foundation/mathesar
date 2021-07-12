@@ -15,7 +15,7 @@
   import DisplayOptions from './DisplayOptions.svelte';
   import TablePagination from './TablePagination.svelte';
   import Header from './Header.svelte';
-  import Row from './Row.svelte';
+  import Body from './Body.svelte';
 
   export let database: string;
   export let id: unknown;
@@ -78,13 +78,11 @@
   <div class="table-content">
     {#if $columns.data.length > 0}
       <table>
-        <Header columns={$columns} bind:sort={$options.sort} on:refetch={refetch}/>
-        <tbody>
-          {#each $records.data as row, index}
-            <Row columns={$columns} loading={$records.state === States.Loading}
-                  {row} {index} {offset}/>
-          {/each}
-        </tbody>
+        <Header columns={$columns} bind:sort={$options.sort} 
+                bind:group={$options.group} on:refetch={refetch}/>
+        <Body columns={$columns} data={$records.data}
+              groupData={$records.groupData}
+              state={$records.state} {offset}/>
       </table>
     {/if}
   </div>
