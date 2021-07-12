@@ -1,5 +1,6 @@
 import { router } from 'tinro';
 import type {
+  SortOption,
   TableOptionsData,
 } from '@mathesar/stores/tableData';
 
@@ -26,12 +27,14 @@ interface TableConfig extends TableOptions {
   id: number,
 }
 
+type RawTableConfig = (string | number | string[])[];
+
 function isInDBPath(db: string): boolean {
   const dbInURL = window.location.pathname.split('/')[1];
   return db === dbInURL;
 }
 
-function getRawTables(db: string): (string | number | string[])[][] {
+function getRawTables(db: string): RawTableConfig[] {
   if (isInDBPath(db)) {
     const tableQuery = router.location.query.get('t') as string;
     return tableQuery ? JSON.parse(decodeURIComponent(tableQuery)) as [] : [];
@@ -39,7 +42,7 @@ function getRawTables(db: string): (string | number | string[])[][] {
   return [];
 }
 
-function parseTableConfig(config: (string | number | string[])[]): TableConfig {
+function parseTableConfig(config: RawTableConfig): TableConfig {
   const tableConfig: TableConfig = {
     id: parseInt(config[0] as string, 10),
   };
@@ -58,7 +61,35 @@ function parseTableConfig(config: (string | number | string[])[]): TableConfig {
     }
   }
 
+  if (config[3]) {
+    const sortOptionMap: SortOption = new Map();
+    const sortList = config[3] as string[];
+    for (let i = 0; i < sortList.length; i += 2) {
+      const sortOrder = sortList[i + 1] === 'd' ? 'desc' : 'asc';
+      sortOptionMap.set(sortList[i], sortOrder);
+    }
+    if (sortList.length > 0) {
+      tableConfig.sort = sortOptionMap;
+    }
+  }
+
   return tableConfig;
+}
+
+function prepareRawTableConfig(id: number, options?: TableOptions): RawTableConfig {
+  const table: RawTableConfig = [id];
+  if (options) {
+    table.push(options.pageSize || -1);
+    table.push(options.page || -1);
+    const sortOption: string[] = [];
+    options.sort?.forEach((value, key) => {
+      sortOption.push(key);
+      const sortOrder = value === 'desc' ? 'd' : 'a';
+      sortOption.push(sortOrder);
+    });
+    table.push(sortOption);
+  }
+  return table;
 }
 
 function getAllTableConfigs(db: string): TableConfig[] {
@@ -80,13 +111,8 @@ function getActiveTable(db: string): number {
   return null;
 }
 
-function constructTableQuery(id: number, options?: TableOptions) : string {
-  const table = [id];
-  if (options) {
-    table.push(options.pageSize || -1);
-    table.push(options.page || -1);
-  }
-  const t = encodeURIComponent(`${JSON.stringify([table])}`);
+function constructTableLink(id: number, options?: TableOptions) : string {
+  const t = encodeURIComponent(`${JSON.stringify(prepareRawTableConfig(id, options))}`);
   const a = encodeURIComponent(id);
   return `?t=${t}&a=${a}`;
 }
@@ -100,11 +126,7 @@ function addTable(
     const tables = getRawTables(db);
     const existingTable = tables.find((table) => table[0] === id);
     if (!existingTable) {
-      const tableConfig: (string | number | string[])[] = [id];
-      if (options) {
-        tableConfig.push(options.pageSize || -1);
-        tableConfig.push(options.page || -1);
-      }
+      const tableConfig = prepareRawTableConfig(id, options);
       if (
         typeof options?.position === 'number'
         && options?.position < tables.length
@@ -143,10 +165,9 @@ function removeTable(db: string, id: number, activeTabId?: number): void {
 
 function setTableOptions(db: string, id: number, options: TableOptions): void {
   const allTables = getRawTables(db);
-  const table = allTables.find((entry) => entry[0] === id);
-  if (table) {
-    table[1] = options.pageSize || -1;
-    table[2] = options.page || -1;
+  const tableIndex = allTables.findIndex((entry) => entry[0] === id);
+  if (tableIndex > -1) {
+    allTables[tableIndex] = prepareRawTableConfig(id, options);
     router.location.query.set('t', encodeURIComponent(JSON.stringify(allTables)));
   }
 }
@@ -162,7 +183,7 @@ export default {
   getAllTableConfigs,
   setTableOptions,
   getActiveTable,
-  constructTableQuery,
+  constructTableLink,
   addTable,
   removeTable,
   removeActiveTable,

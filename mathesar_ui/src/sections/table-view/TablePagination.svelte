@@ -24,7 +24,7 @@
   $: max = Math.min(total, offset + pageSize - 1);
 
   function getLink(_page: number, _pageSize: number): string {
-    return `/${database}${URLQueryHandler.constructTableQuery(id, {
+    return `/${database}${URLQueryHandler.constructTableLink(id, {
       pageSize: _pageSize,
       page: _page,
     })}`;

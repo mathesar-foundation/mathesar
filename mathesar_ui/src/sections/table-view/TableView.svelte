@@ -49,7 +49,7 @@
 
 <div class="actions-pane">
   <Button appearance="plain" on:click={toggleDisplayOptions}>
-    <Icon data={faFilter}/>
+    <Icon data={faFilter} size="0.8em"/>
     Display properties
   </Button>
 
