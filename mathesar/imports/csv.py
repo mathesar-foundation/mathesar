@@ -3,9 +3,8 @@ from io import TextIOWrapper
 import clevercsv as csv
 
 from mathesar.database.base import create_mathesar_engine
-from mathesar.database.utils import get_database_key
-from mathesar.models import Table, Schema, Database
-from db import tables, records, schemas
+from mathesar.models import Table
+from db import tables, records
 from mathesar.errors import InvalidTableError
 
 ALLOWED_DELIMITERS = ",\t:| "
@@ -77,30 +76,6 @@ def get_sv_reader(file, dialect=None):
     else:
         reader = csv.DictReader(file)
     return reader
-
-
-# TODO: Remove this function once frontend switches to using the API
-# See https://github.com/centerofci/mathesar/issues/150
-def legacy_create_db_table_from_csv(name, schema, csv_reader, engine):
-    table = tables.create_string_column_table(
-        name, schema, csv_reader.fieldnames, engine,
-    )
-    return table
-
-
-# TODO: Remove this function once frontend switches to using the API
-# See https://github.com/centerofci/mathesar/issues/150
-def legacy_create_table_from_csv(name, schema, database_key, csv_file):
-    engine = create_mathesar_engine(database_key)
-    csv_reader = get_sv_reader(csv_file)
-    db_table = legacy_create_db_table_from_csv(name, schema, csv_reader, engine)
-    database = Database.objects.get(name=get_database_key(engine))
-    db_schema_oid = schemas.get_schema_oid_from_name(db_table.schema, engine)
-    schema, _ = Schema.objects.get_or_create(oid=db_schema_oid, database=database)
-    db_table_oid = tables.get_oid_from_table(db_table.name, db_table.schema, engine)
-    table, _ = Table.objects.get_or_create(oid=db_table_oid, schema=schema)
-    table.create_record_or_records([row for row in csv_reader])
-    return table
 
 
 def create_db_table_from_data_file(data_file, name, schema):

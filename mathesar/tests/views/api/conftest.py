@@ -2,15 +2,17 @@ import pytest
 from rest_framework.test import APIClient
 from sqlalchemy import Column, String, MetaData, text
 from sqlalchemy import Table as SATable
+from django.core.files import File
 
 from db.types import base, install
 from db.schemas import create_schema, get_schema_oid_from_name
 from db.tables import get_oid_from_table
-from mathesar.models import Schema, Table
+from mathesar.models import Schema, Table, DataFile
 
 from mathesar.database.base import create_mathesar_engine
-from mathesar.imports.csv import legacy_create_table_from_csv
+from mathesar.imports.csv import create_table_from_csv
 
+TEST_SCHEMA = 'import_csv_schema'
 PATENT_SCHEMA = 'Patents'
 NASA_TABLE = 'NASA Schema List'
 
@@ -20,19 +22,34 @@ def client():
     return APIClient()
 
 
-@pytest.fixture
-def create_table(engine, csv_filename, test_db_name):
-    def _create_table(table_name, schema='Patents'):
-        with open(csv_filename, 'rb') as csv_file:
-            table = legacy_create_table_from_csv(
-                name=table_name,
-                schema=schema,
-                database_key=test_db_name,
-                csv_file=csv_file
-            )
-        return table
+def _create_schema(engine, schema_name, test_db_model):
+    create_schema(schema_name, engine)
+    schema_oid = get_schema_oid_from_name(schema_name, engine)
+    return Schema.objects.create(oid=schema_oid, database=test_db_model)
 
-    return _create_table
+
+@pytest.fixture
+def create_table(engine, csv_filename, test_db_model):
+    """
+    Creates a table factory, making sure to track and clean up new schemas
+    """
+    function_schemas = {}
+    with open(csv_filename, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    def _create_table(table_name, schema='Patents'):
+        if schema in function_schemas:
+            schema_model = function_schemas[schema]
+        else:
+            schema_model = _create_schema(engine, schema, test_db_model)
+            function_schemas[schema] = schema_model
+        return create_table_from_csv(data_file, table_name, schema_model)
+
+    yield _create_table
+
+    for schema in function_schemas:
+        with engine.begin() as conn:
+            conn.execute(text(f'DROP SCHEMA "{schema}" CASCADE;'))
 
 
 @pytest.fixture
@@ -41,9 +58,7 @@ def patent_schema(test_db_model):
     install.install_mathesar_on_database(engine)
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA IF EXISTS "{PATENT_SCHEMA}" CASCADE;'))
-    create_schema(PATENT_SCHEMA, engine)
-    schema_oid = get_schema_oid_from_name(PATENT_SCHEMA, engine)
-    yield Schema.objects.create(oid=schema_oid, database=test_db_model)
+    yield _create_schema(engine, PATENT_SCHEMA, test_db_model)
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA "{PATENT_SCHEMA}" CASCADE;'))
         conn.execute(text(f'DROP SCHEMA {base.SCHEMA} CASCADE;'))

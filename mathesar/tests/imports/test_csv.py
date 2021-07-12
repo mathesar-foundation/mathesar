@@ -1,84 +1,59 @@
 import pytest
 
+from django.core.files import File
 from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy import text
 
-from mathesar.imports.csv import legacy_create_table_from_csv
+from mathesar.imports.csv import create_table_from_csv
+from mathesar.models import DataFile, Schema
+from db.schemas import create_schema, get_schema_oid_from_name
+
+TEST_SCHEMA = 'import_csv_schema'
 
 
-def test_csv_upload_with_all_required_parameters(engine, csv_filename, test_db_name):
+@pytest.fixture
+def data_file(csv_filename):
     with open(csv_filename, 'rb') as csv_file:
-        table = legacy_create_table_from_csv(
-            name='NASA',
-            schema='Patents',
-            database_key=test_db_name,
-            csv_file=csv_file
-        )
-        assert table is not None
-        assert table.name == 'NASA'
-        assert table.schema.name == 'Patents'
-        assert table.schema.database.name == test_db_name
-        assert table.sa_num_records() == 1393
+        data_file = DataFile.objects.create(file=File(csv_file))
+    return data_file
 
 
-def test_csv_upload_with_parameters_positional(engine, csv_filename, test_db_name):
-    with open(csv_filename, 'rb') as csv_file:
-        table = legacy_create_table_from_csv(
-            'NASA 2',
-            'Patents',
-            test_db_name,
-            csv_file
-        )
-        assert table is not None
-        assert table.name == 'NASA 2'
-        assert table.schema.name == 'Patents'
-        assert table.schema.database.name == test_db_name
-        assert table.sa_num_records() == 1393
+@pytest.fixture()
+def schema(engine, test_db_model):
+    create_schema(TEST_SCHEMA, engine)
+    schema_oid = get_schema_oid_from_name(TEST_SCHEMA, engine)
+    yield Schema.objects.create(oid=schema_oid, database=test_db_model)
+    with engine.begin() as conn:
+        conn.execute(text(f'DROP SCHEMA "{TEST_SCHEMA}" CASCADE;'))
 
 
-def test_csv_upload_with_duplicate_table_name(engine, csv_filename, test_db_name):
-    schema_name = 'Patents'
-    table_name = 'NASA 3'
+def test_csv_upload(data_file, schema):
+    table_name = 'NASA 1'
+    table = create_table_from_csv(data_file, table_name, schema)
+    assert table is not None
+    assert table.name == table_name
+    assert table.schema == schema
+    assert table.sa_num_records() == 1393
+
+
+def test_csv_upload_with_duplicate_table_name(data_file, schema):
+    table_name = 'NASA 2'
     already_defined_str = (
-        f"Table '{schema_name}.{table_name}' is already defined"
+        f"Table '{schema.name}.{table_name}' is already defined"
     )
 
-    with open(csv_filename, 'rb') as csv_file:
-        table = legacy_create_table_from_csv(
-            table_name,
-            schema_name,
-            test_db_name,
-            csv_file
-        )
-        assert table is not None
-        assert table.name == table_name
-        assert table.schema.name == schema_name
-        assert table.schema.database.name == test_db_name
-        assert table.sa_num_records() == 1393
-    with open(csv_filename, 'rb') as csv_file:
-        with pytest.raises(InvalidRequestError) as excinfo:
-            legacy_create_table_from_csv(
-                table_name,
-                schema_name,
-                test_db_name,
-                csv_file
-            )
-            assert already_defined_str in str(excinfo)
+    table = create_table_from_csv(data_file, table_name, schema)
+    assert table is not None
+    assert table.name == table_name
+    assert table.schema == schema
+    assert table.sa_num_records() == 1393
+
+    with pytest.raises(InvalidRequestError) as excinfo:
+        create_table_from_csv(data_file, table_name, schema)
+        assert already_defined_str in str(excinfo)
 
 
-def test_csv_upload_with_wrong_parameter(engine, csv_filename, test_db_name):
-    with pytest.raises(TypeError) as excinfo:
-        with open(csv_filename, 'rb') as csv_file:
-            legacy_create_table_from_csv(
-                name='NASA',
-                schema_name='Patents',
-                database_key=test_db_name,
-                csv_file=csv_file
-            )
-            assert 'unexpected keyword' in str(excinfo.value)
-
-
-def test_csv_upload_with_missing_database_key(engine, csv_filename):
-    with pytest.raises(TypeError) as excinfo:
-        with open(csv_filename, 'rb') as csv_file:
-            legacy_create_table_from_csv('NASA', 'Patents', csv_file)
-            assert 'csv_file' in str(excinfo.value)
+def test_csv_upload_table_imported_to(data_file, schema):
+    table = create_table_from_csv(data_file, 'NASA', schema)
+    data_file.refresh_from_db()
+    assert data_file.table_imported_to == table
