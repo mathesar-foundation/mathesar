@@ -129,6 +129,9 @@ class Table(DatabaseObject):
     def update_table(self, update_params):
         return table_utils.update_table(self, update_params)
 
+    def delete_table_sa_table(self):
+        return tables.delete_table(self.name, self.schema, self.schema._sa_engine)
+
     def get_record(self, id_value):
         return records.get_record(self._sa_table, self.schema._sa_engine, id_value)
 

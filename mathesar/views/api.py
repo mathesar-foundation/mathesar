@@ -96,6 +96,12 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         serializer = TableSerializer(table)
         return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
+    def destroy(self, request, pk=None):
+        table = self.get_object()
+        table.delete_sa_table()
+        table.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):
         table = self.get_object()
