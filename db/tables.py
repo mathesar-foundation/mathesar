@@ -7,6 +7,8 @@ from sqlalchemy import (
 from sqlalchemy.schema import DDLElement
 from sqlalchemy.ext import compiler
 from sqlalchemy_filters import apply_filters
+from alembic.migration import MigrationContext
+from alembic.operations import Operations
 
 from db import columns, constants, schemas
 from db.types import inference
@@ -50,6 +52,19 @@ def create_mathesar_table(name, schema, columns_, engine, metadata=None):
     )
     table.create(engine)
     return table
+
+
+def delete_table(name, schema, engine):
+    table = reflect_table(name, schema, engine)
+    table.drop()
+
+
+def rename_table(name, schema, engine, rename_to):
+    table = reflect_table(name, schema, engine)
+    with engine.begin() as conn:
+        ctx = MigrationContext.configure(conn)
+        op = Operations(ctx)
+        op.rename_table(table.name, rename_to, schema=table.schema)
 
 
 def extract_columns_from_table(
