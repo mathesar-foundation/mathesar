@@ -126,10 +126,10 @@ class Table(DatabaseObject):
     def sa_num_records(self, filters=[]):
         return tables.get_count(self._sa_table, self.schema._sa_engine, filters=filters)
 
-    def update_table(self, update_params):
-        return table_utils.update_table(self, update_params)
+    def update_sa_table(self, update_params):
+        return table_utils.update_sa_table(self, update_params)
 
-    def delete_table_sa_table(self):
+    def delete_sa_table(self):
         return tables.delete_table(self.name, self.schema, self.schema._sa_engine)
 
     def get_record(self, id_value):

@@ -91,7 +91,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
             raise ValidationError(serializer.errors)
 
         table = self.get_object()
-        table.update_table(serializer.validated_data)
+        table.update_sa_table(serializer.validated_data)
         table.refresh_from_db()
         serializer = TableSerializer(table)
         return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)

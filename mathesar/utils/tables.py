@@ -31,7 +31,7 @@ def get_table_column_types(table):
     return col_types
 
 
-def update_table(table, validated_data):
+def update_sa_table(table, validated_data):
     if 'name' in validated_data:
         rename_table(table.name, table.schema, table.schema._sa_engine,
                      validated_data['name'])
