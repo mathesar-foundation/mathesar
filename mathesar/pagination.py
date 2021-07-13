@@ -67,7 +67,7 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
                 filters=filters, order_by=order_by
             )
             # Convert the tuple keys into strings so it can be converted to JSON
-            group_count = [{"columns": list(cols), "count": count}
+            group_count = [{"values": list(cols), "count": count}
                            for cols, count in group_count.items()]
             self.group_count = {
                 'group_count_by': group_count_by,

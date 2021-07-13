@@ -137,11 +137,11 @@ def _test_record_list_group(table, client, group_count_by, expected_groups):
     assert 'group_count' in response_data
     assert response_data['group_count']['group_count_by'] == group_count_by
     assert 'results' in response_data['group_count']
-    assert 'columns' in response_data['group_count']['results'][0]
+    assert 'values' in response_data['group_count']['results'][0]
     assert 'count' in response_data['group_count']['results'][0]
 
     results = response_data['group_count']['results']
-    returned_groups = {tuple(group["columns"]) for group in results}
+    returned_groups = {tuple(group['values']) for group in results}
     for expected_group in expected_groups:
         assert expected_group in returned_groups
 
