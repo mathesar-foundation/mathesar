@@ -1,0 +1,13 @@
+.virtual-list {
+  &.outerElement {
+    position: relative;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    will-change: transform;
+  }
+
+  &.resizer {
+    overflow: visible;
+    height:0;
+  }
+}
