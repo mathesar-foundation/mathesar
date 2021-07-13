@@ -1,6 +1,7 @@
 from unittest.mock import call, patch
 import pytest
 from sqlalchemy import MetaData, select, Column, String
+from sqlalchemy.exc import NoSuchTableError
 from db import tables, constants, columns
 
 ROSTER = "Roster"
@@ -42,6 +43,29 @@ def test_table_creation_doesnt_reuse_defaults(engine_with_schema):
             for c1, c2 in zip(t1.columns, t2.columns)
         ]
     )
+
+
+def test_delete_table(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "test_delete_table"
+    tables.create_mathesar_table(table_name, schema, [], engine)
+    tables.delete_table(table_name, schema, engine)
+    with pytest.raises(NoSuchTableError):
+        tables.reflect_table(table_name, schema, engine)
+
+
+def test_rename_table(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "test_rename_table"
+    new_table_name = "test_rename_table_new"
+    tables.create_mathesar_table(table_name, schema, [], engine)
+    tables.rename_table(table_name, schema, engine, new_table_name)
+
+    new_table = tables.reflect_table(new_table_name, schema, engine)
+    assert new_table.name == new_table_name
+
+    with pytest.raises(NoSuchTableError):
+        tables.reflect_table(table_name, schema, engine)
 
 
 def test_extract_columns_from_table_creates_tables(engine_with_roster):
