@@ -1,11 +1,6 @@
-from rest_framework import status
-from rest_framework.response import Response
-
-
 from db.tables import get_table_oids_from_schema, infer_table_column_types, rename_table
 from db.columns import MathesarColumn
-from mathesar.models import Table
-from mathesar.serializers import TableSerializer
+import mathesar.models as models
 
 
 def reflect_tables_from_schema(schema):
@@ -14,10 +9,10 @@ def reflect_tables_from_schema(schema):
         for table in get_table_oids_from_schema(schema.oid, schema._sa_engine)
     }
     tables = [
-        Table.objects.get_or_create(oid=oid, schema=schema)
+        models.Table.objects.get_or_create(oid=oid, schema=schema)
         for oid in db_table_oids
     ]
-    for table in Table.objects.all().filter(schema=schema):
+    for table in models.Table.objects.all().filter(schema=schema):
         if table.oid not in db_table_oids:
             table.delete()
     return tables
