@@ -58,10 +58,14 @@ def test_rename_table(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "test_rename_table"
     new_table_name = "test_rename_table_new"
-    tables.create_mathesar_table(table_name, schema, [], engine)
-    tables.rename_table(table_name, schema, engine, new_table_name)
+    old_table = tables.create_mathesar_table(table_name, schema, [], engine)
+    old_oid = tables.get_oid_from_table(old_table.name, old_table.schema, engine)
 
+    tables.rename_table(table_name, schema, engine, new_table_name)
     new_table = tables.reflect_table(new_table_name, schema, engine)
+    new_oid = tables.get_oid_from_table(new_table.name, new_table.schema, engine)
+
+    assert old_oid == new_oid
     assert new_table.name == new_table_name
 
     with pytest.raises(NoSuchTableError):
