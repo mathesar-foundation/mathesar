@@ -132,7 +132,7 @@ def compile(element, compiler, **_):
 
 def rename_schema(schema, engine, rename_to):
     """
-    This method deletes a Postgres schema.
+    This method renames a Postgres schema.
     """
     if schema in get_all_schemas(engine):
         with engine.begin() as connection:
