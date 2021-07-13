@@ -22,7 +22,9 @@ from mathesar.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
 )
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
-from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
+from mathesar.utils.tables import (
+    reflect_tables_from_schema, get_table_column_types, update_table
+)
 from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
 from mathesar.forms import RecordListFilterForm
@@ -64,8 +66,7 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
             raise ValidationError(serializer.errors)
 
 
-class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
-                   CreateModelMixin):
+class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     def get_queryset(self):
         reflect_db_objects()
         return Table.objects.all().order_by('-created_at')
@@ -81,6 +82,17 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
             return create_table_from_datafile(request, serializer.validated_data)
         else:
             raise ValidationError(serializer.errors)
+
+    def partial_update(self, request, pk=None):
+        serializer = TableSerializer(
+            data=request.data, context={'request': request}, partial=True
+        )
+        if serializer.is_valid():
+            table = self.get_object()
+            return update_table(request, table, serializer.validated_data)
+        else:
+            raise ValidationError(serializer.errors)
+
 
     @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):
