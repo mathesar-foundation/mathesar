@@ -36,13 +36,9 @@ def get_table_column_types(table):
     return col_types
 
 
-def update_table(request, table, validated_data):
+def update_table(table, validated_data):
     if 'name' in validated_data:
         rename_table(table.name, table.schema, table.schema._sa_engine,
                      validated_data['name'])
         # Clear the cached name property
         del table.name
-
-    table.refresh_from_db()
-    serializer = TableSerializer(table)
-    return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)

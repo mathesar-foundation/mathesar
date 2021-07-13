@@ -78,7 +78,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
 
     def create(self, request):
         serializer = TableSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
+        if not serializer.is_valid():
             return create_table_from_datafile(request, serializer.validated_data)
         else:
             raise ValidationError(serializer.errors)
@@ -87,12 +87,14 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         serializer = TableSerializer(
             data=request.data, context={'request': request}, partial=True
         )
-        if serializer.is_valid():
-            table = self.get_object()
-            return update_table(request, table, serializer.validated_data)
-        else:
+        if not serializer.is_valid():
             raise ValidationError(serializer.errors)
 
+        table = self.get_object()
+        table.update_table(serializer.validated_data)
+        table.refresh_from_db()
+        serializer = TableSerializer(table)
+        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):
