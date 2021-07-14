@@ -111,7 +111,7 @@ def delete_schema(schema, engine, cascade=False, if_exists=False):
             connection.execute(DropSchema(schema, cascade=cascade))
         except InternalError as e:
             if isinstance(e.orig, DependentObjectsStillExist):
-                raise DependentObjectsStillExist()
+                raise e.orig
             else:
                 raise e
 
