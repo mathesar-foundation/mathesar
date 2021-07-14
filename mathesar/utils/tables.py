@@ -41,7 +41,8 @@ def update_sa_table(table, validated_data):
         if arg not in SUPPORTED_TABLE_UPDATE_ARGS:
             raise ValidationError({arg: f'Updating {arg} for tables is not supported.'})
     if 'name' in validated_data:
-        rename_table(table.name, table.schema, table.schema._sa_engine,
+        rename_table(table.name, table.schema.name, table.schema._sa_engine,
                      validated_data['name'])
-        # Clear the cached name property
+        # Force the table and nameto reload
+        del table._sa_table
         del table.name

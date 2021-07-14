@@ -23,9 +23,7 @@ from mathesar.serializers import (
     TableDeleteParameterSerializer,
 )
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
-from mathesar.utils.tables import (
-    reflect_tables_from_schema, get_table_column_types, update_table
-)
+from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
 from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
 from mathesar.filters import SchemaFilter, TableFilter
 from mathesar.forms import RecordListFilterForm
@@ -79,7 +77,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
 
     def create(self, request):
         serializer = TableSerializer(data=request.data, context={'request': request})
-        if not serializer.is_valid():
+        if serializer.is_valid():
             return create_table_from_datafile(request, serializer.validated_data)
         else:
             raise ValidationError(serializer.errors)
@@ -93,9 +91,11 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
 
         table = self.get_object()
         table.update_sa_table(serializer.validated_data)
-        table.refresh_from_db()
-        serializer = TableSerializer(table)
-        return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+
+        # Reload the table to avoid cached properties
+        table = self.get_object()
+        serializer = TableSerializer(table, context={'request': request})
+        return Response(serializer.data)
 
     def destroy(self, request, pk=None):
         serializer = TableDeleteParameterSerializer(data=request.GET)
