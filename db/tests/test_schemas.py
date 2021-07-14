@@ -4,7 +4,7 @@ from unittest.mock import patch
 from sqlalchemy import (
     create_engine, select, Table, MetaData, ForeignKey, Column, Integer
 )
-from sqlalchemy.exc import NoSuchTableError
+from sqlalchemy.exc import NoSuchTableError, ProgrammingError
 from psycopg2.errors import DependentObjectsStillExist
 
 from db import schemas, tables, types, constants
@@ -74,16 +74,27 @@ def _create_related_table(schema, related_schema, table, related_table, engine):
     return related_table
 
 
-def test_delete_schema(engine):
+@pytest.mark.parametrize("if_exists", [True, False])
+def test_delete_schema(engine, if_exists):
     test_schema = "test_delete_schema"
 
     schemas.create_schema(test_schema, engine)
     current_schemas = schemas.get_mathesar_schemas(engine)
     assert test_schema in current_schemas
 
-    schemas.delete_schema(test_schema, engine)
+    schemas.delete_schema(test_schema, engine, if_exists=if_exists)
     current_schemas = schemas.get_mathesar_schemas(engine)
     assert test_schema not in current_schemas
+
+
+def test_delete_schema_missing_if_exists_true(engine):
+    # Just ensure there is no error
+    schemas.delete_schema("test_delete_schema_missing", engine, if_exists=True)
+
+
+def test_delete_schema_missing_if_exists_false(engine):
+    with pytest.raises(ProgrammingError):
+        schemas.delete_schema("test_delete_schema_missing", engine, if_exists=False)
 
 
 def test_delete_schema_restricted(engine):
@@ -143,6 +154,11 @@ def test_rename_schema(engine):
     current_schemas = schemas.get_mathesar_schemas(engine)
     assert test_schema not in current_schemas
     assert new_test_schema in current_schemas
+
+
+def test_rename_schema_missing(engine):
+    with pytest.raises(ProgrammingError):
+        schemas.rename_schema("test_rename_schema_missing", engine, "new_name")
 
 
 def test_rename_schema_foreign_key(engine):
