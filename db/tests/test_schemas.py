@@ -1,8 +1,10 @@
+import pytest
 import warnings
 from unittest.mock import patch
 from sqlalchemy import (
     create_engine, select, Table, MetaData, ForeignKey, Column, Integer
 )
+from sqlalchemy.exc import NoSuchTableError
 
 from db import schemas, tables, types, constants
 
@@ -106,7 +108,7 @@ def test_delete_schema_cascade(engine):
     test_table = "test_delete_schema_cascade_table"
 
     schemas.create_schema(test_schema, engine)
-    tables.create_mathesar_table(test_table, test_schema, [], engine)
+    table = tables.create_mathesar_table(test_table, test_schema, [], engine)
 
     related_tables = schemas.delete_schema(test_schema, engine, cascade=True)
     related_tables = [table.name for table in related_tables]
@@ -115,6 +117,24 @@ def test_delete_schema_cascade(engine):
 
     current_schemas = schemas.get_mathesar_schemas(engine)
     assert test_schema not in current_schemas
+    with pytest.raises(NoSuchTableError):
+        tables.reflect_table(table.name, test_schema, engine)
+
+
+def test_delete_schema_cascade_foreign_key(engine):
+    test_schema = "test_delete_schema_cascade_foreign_key"
+    related_schema = "test_delete_schema_cascade_foreign_key_related"
+    test_table = "test_delete_schema_cascade_foreign_key_table"
+    test_related_table = "test_delete_schema_cascade_foreign_key_related_table"
+
+    related_table = _create_related_table(
+        test_schema, related_schema, test_table, test_related_table, engine
+    )
+
+    schemas.delete_schema(test_schema, engine, cascade=True)
+
+    related_table = tables.reflect_table(related_table.name, related_schema, engine)
+    assert len(related_table.foreign_keys) == 0
 
 
 def test_rename_schema(engine):
