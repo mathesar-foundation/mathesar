@@ -60,11 +60,31 @@ export function getAPI<T>(url: string): CancellablePromise<T> {
   });
 }
 
-export async function uploadFile<T>(
+export function postAPI<T>(url: string, data: unknown): CancellablePromise<T> {
+  const request = new XMLHttpRequest();
+  request.open('POST', appendUrlPrefix(url));
+  request.setRequestHeader('Content-Type', 'application/json');
+  request.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+  request.send(JSON.stringify(data));
+
+  return new CancellablePromise((resolve, reject) => {
+    request.addEventListener('load', () => {
+      if (successStatusCodes.has(request.status)) {
+        resolve(JSON.parse(request.response) as T);
+      } else {
+        reject(new Error('An error has occurred while posting data'));
+      }
+    });
+  }, () => {
+    request.abort();
+  });
+}
+
+export function uploadFile<T>(
   url: string | URLObject,
   formData: FormData,
   completionCallback?: (obj: UploadCompletionOpts) => unknown,
-): Promise<T> {
+): CancellablePromise<T> {
   const request = new XMLHttpRequest();
   request.open('POST', appendUrlPrefix(url));
   request.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
@@ -79,13 +99,20 @@ export async function uploadFile<T>(
   };
   request.send(formData);
 
-  return new Promise((resolve, reject) => {
+  return new CancellablePromise((resolve, reject) => {
     request.addEventListener('load', () => {
       if (successStatusCodes.has(request.status)) {
-        resolve(request.response);
+        try {
+          const response = JSON.parse(request.response) as T;
+          resolve(response);
+        } catch (exp) {
+          resolve(request.response);
+        }
       } else {
         reject(new Error('An error has occurred while uploading file'));
       }
     });
+  }, () => {
+    request.abort();
   });
 }

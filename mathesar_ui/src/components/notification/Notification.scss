@@ -1,0 +1,42 @@
+.notification {
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+
+  &.danger {
+    background: #393939;
+    border-left: 6px solid #fa4d56;
+    color: #fff;
+    padding: 15px;
+    border-radius: 3px;
+    line-height: 1.4em;
+
+    .header {
+      color: #fa4d56;
+    }
+  }
+
+  >.header {
+    display: flex;
+    align-items: flex-start;
+
+    .icon, .close {
+      flex-shrink: 0;
+      flex-basis: 1rem;
+    }
+    .icon {
+      margin-right: 10px;
+    }
+    .message {
+      flex-grow: 1;
+    }
+    button.btn.close {
+      margin-left: 10px;
+      padding: 0;
+      color: #fff;
+    }
+  }
+  >.description {
+    margin-top: 10px;
+  }
+}

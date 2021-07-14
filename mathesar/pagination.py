@@ -38,7 +38,7 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         self.offset = self.get_offset(request)
         # TODO: Cache count value somewhere, since calculating it is expensive.
         table = queryset.get(id=table_id)
-        self.count = table.sa_num_records
+        self.count = table.sa_num_records(filters=filters)
         self.request = request
 
         return table.get_records(
@@ -67,7 +67,8 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
                 filters=filters, order_by=order_by
             )
             # Convert the tuple keys into strings so it can be converted to JSON
-            group_count = {','.join(k): v for k, v in group_count.items()}
+            group_count = [{"values": list(cols), "count": count}
+                           for cols, count in group_count.items()]
             self.group_count = {
                 'group_count_by': group_count_by,
                 'results': group_count,

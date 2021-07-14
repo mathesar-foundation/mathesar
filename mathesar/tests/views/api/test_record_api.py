@@ -82,7 +82,7 @@ def test_record_list_filter(create_table, client):
         response_data = response.json()
 
     assert response.status_code == 200
-    assert response_data['count'] == 1393
+    assert response_data['count'] == 2
     assert len(response_data['results']) == 2
     assert mock_infer.call_args is not None
     assert mock_infer.call_args[1]['filters'] == filter_list
@@ -115,14 +115,18 @@ def test_record_list_sort(create_table, client):
 
 
 def _test_record_list_group(table, client, group_count_by, expected_groups):
+    order_by = [
+        {'field': 'Center', 'direction': 'desc'},
+        {'field': 'Case Number', 'direction': 'asc'},
+    ]
+    json_order_by = json.dumps(order_by)
     json_group_count_by = json.dumps(group_count_by)
+    query_str = f'group_count_by={json_group_count_by}&order_by={json_order_by}'
 
     with patch.object(
         records, "get_group_counts", side_effect=records.get_group_counts
     ) as mock_infer:
-        response = client.get(
-            f'/api/v0/tables/{table.id}/records/?group_count_by={json_group_count_by}'
-        )
+        response = client.get(f'/api/v0/tables/{table.id}/records/?{query_str}')
         response_data = response.json()
 
     assert response.status_code == 200
@@ -132,10 +136,13 @@ def _test_record_list_group(table, client, group_count_by, expected_groups):
     assert 'group_count' in response_data
     assert response_data['group_count']['group_count_by'] == group_count_by
     assert 'results' in response_data['group_count']
+    assert 'values' in response_data['group_count']['results'][0]
+    assert 'count' in response_data['group_count']['results'][0]
 
     results = response_data['group_count']['results']
+    returned_groups = {tuple(group['values']) for group in results}
     for expected_group in expected_groups:
-        assert expected_group in results
+        assert expected_group in returned_groups
 
     assert mock_infer.call_args is not None
     assert mock_infer.call_args[0][2] == group_count_by
@@ -146,8 +153,8 @@ def test_record_list_group_single_column(create_table, client):
     table = create_table(table_name)
     group_count_by = ['Center']
     expected_groups = [
-        'NASA Ames Research Center',
-        'NASA Kennedy Space Center'
+        ('NASA Marshall Space Flight Center',),
+        ('NASA Stennis Space Center',)
     ]
     _test_record_list_group(table, client, group_count_by, expected_groups)
 
@@ -157,8 +164,8 @@ def test_record_list_group_multi_column(create_table, client):
     table = create_table(table_name)
     group_count_by = ['Center', 'Status']
     expected_groups = [
-        'NASA Ames Research Center,Issued',
-        'NASA Kennedy Space Center,Issued',
+        ('NASA Marshall Space Flight Center', 'Issued'),
+        ('NASA Stennis Space Center', 'Issued'),
     ]
     _test_record_list_group(table, client, group_count_by, expected_groups)
 

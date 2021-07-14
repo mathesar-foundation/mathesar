@@ -1,9 +1,9 @@
 <script lang="ts">
   /**
-   * Button appearance. One of: 'default', 'primary', 'secondary', 'plain'.
+   * Button appearance. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.
    * @required
    */
-  export let appearance : 'default' | 'primary' | 'secondary' | 'plain' = 'default';
+  export let appearance : 'default' | 'primary' | 'secondary' | 'plain' | 'ghost' = 'default';
 
   /**
    * Button size. One of: 'small', 'medium', 'large'.

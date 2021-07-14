@@ -6,6 +6,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.schema import DDLElement
 from sqlalchemy.ext import compiler
+from sqlalchemy_filters import apply_filters
 
 from db import columns, constants, schemas
 from db.types import inference
@@ -405,8 +406,10 @@ def create_empty_table(name):
     return Table(name, MetaData())
 
 
-def get_count(table, engine):
+def get_count(table, engine, filters=[]):
     query = select([func.count()]).select_from(table)
+    if filters is not None:
+        query = apply_filters(query, filters)
     with engine.begin() as conn:
         return conn.execute(query).scalar()
 

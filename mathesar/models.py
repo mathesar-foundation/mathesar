@@ -75,12 +75,12 @@ class Table(DatabaseObject):
             table = tables.reflect_table_from_oid(
                 self.oid, self.schema._sa_engine,
             )
-        # We catch this error, since it lets us decouple the cadence of
+        # We catch these errors, since it lets us decouple the cadence of
         # overall DB reflection from the cadence of cache expiration for
         # table names.  Also, it makes it obvious when the DB layer has
         # been altered, as opposed to other reasons for a 404 when
         # requesting a table.
-        except TypeError:
+        except (TypeError, IndexError):
             table = tables.create_empty_table("MISSING")
         return table
 
@@ -129,12 +129,11 @@ class Table(DatabaseObject):
         )
 
     @property
-    def sa_num_records(self):
-        return tables.get_count(self._sa_table, self.schema._sa_engine)
-
-    @property
     def sa_all_records(self):
         return records.get_records(self._sa_table, self.schema._sa_engine)
+
+    def sa_num_records(self, filters=[]):
+        return tables.get_count(self._sa_table, self.schema._sa_engine, filters=filters)
 
     def get_record(self, id_value):
         return records.get_record(self._sa_table, self.schema._sa_engine, id_value)
