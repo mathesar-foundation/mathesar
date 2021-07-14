@@ -76,7 +76,7 @@ class DatabaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Database
         fields = ['id', 'name', 'deleted', 'supported_types']
-        read_only_fields = ['deleted']
+        read_only_fields = ['id', 'name', 'deleted', 'supported_types']
 
 
 class DataFileSerializer(serializers.ModelSerializer):
