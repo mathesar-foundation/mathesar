@@ -100,7 +100,7 @@ def test_table_list(create_table, client):
 
 
 def test_table_list_filter_name(create_table, client):
-    tables = {
+    expected_tables = {
         'Filter Name 1': create_table('Filter Name 1'),
         'Filter Name 2': create_table('Filter Name 2'),
         'Filter Name 3': create_table('Filter Name 3')
@@ -115,13 +115,13 @@ def test_table_list_filter_name(create_table, client):
     response_tables = {res['name']: res for res in response_data['results']}
     for table_name in filter_tables:
         assert table_name in response_tables
-        table = tables[table_name]
+        table = expected_tables[table_name]
         response_table = response_tables[table_name]
         check_table_response(response_table, table, table_name)
 
 
 def test_table_list_filter_schema(create_table, client):
-    tables = {
+    expected_tables = {
         'Schema 1': create_table('Filter Schema 1', schema='Schema 1'),
         'Schema 2': create_table('Filter Schema 2', schema='Schema 2'),
         'Schema 3': create_table('Filter Schema 3', schema='Schema 3')
@@ -137,7 +137,7 @@ def test_table_list_filter_schema(create_table, client):
                        for res in response_data['results']}
     for schema_name in filter_tables:
         assert schema_name in response_tables
-        table = tables[schema_name]
+        table = expected_tables[schema_name]
         response_table = response_tables[schema_name]
         check_table_response(response_table, table, table.name)
 
@@ -165,15 +165,15 @@ def test_table_list_filter_timestamps(create_table, client, timestamp_type):
 
 
 def test_table_list_filter_import_verified(create_table, client):
-    tables = {
+    expected_tables = {
         True: create_table('Filter Verified 1'),
         False: create_table('Filter Verified 2'),
     }
-    for verified, table in tables.items():
+    for verified, table in expected_tables.items():
         table.import_verified = verified
         table.save()
 
-    for verified, table in tables.items():
+    for verified, table in expected_tables.items():
         query_str = str(verified).lower()
         response = client.get(f'/api/v0/tables/?import_verified={query_str}')
         response_data = response.json()
@@ -182,19 +182,19 @@ def test_table_list_filter_import_verified(create_table, client):
 
 
 def test_table_list_filter_imported(create_table, client):
-    tables = {
+    expected_tables = {
         None: create_table('Filter Imported 1'),
         False: create_table('Filter Imported 2'),
         True: create_table('Filter Imported 3'),
     }
-    for verified, table in tables.items():
+    for verified, table in expected_tables.items():
         table.import_verified = verified
         table.save()
 
     response = client.get('/api/v0/tables/?not_imported=false')
     check_table_filter_response(response, status_code=200, count=2)
 
-    table = tables[None]
+    table = expected_tables[None]
     response = client.get('/api/v0/tables/?not_imported=true')
     response_data = response.json()
     check_table_filter_response(response, status_code=200, count=1)
