@@ -10,6 +10,7 @@ from mathesar.models import DataFile, Schema
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.views import api
 from db.tests.types import fixtures
+from db import tables
 
 
 engine_with_types = fixtures.engine_with_types
@@ -281,6 +282,32 @@ def test_table_partial_update(create_table, client):
     assert table.name == new_table_name
 
 
+@pytest.mark.parametrize('cascade', [True, False])
+def test_table_delete(create_table, client, cascade):
+    table_name = 'NASA Table Partial Update'
+    table = create_table(table_name)
+    table_count = len(Table.objects.all())
+
+    with patch.object(tables, 'delete_table') as mock_infer:
+        response = client.delete(f'/api/v0/tables/{table.id}/?cascade={cascade}')
+    assert response.status_code == 204
+
+    # Ensure the Django model was deleted
+    new_table_count = len(Table.objects.all())
+    assert table_count - 1 == new_table_count
+
+    # Ensure the backend table would have been deleted
+    assert mock_infer.call_args is not None
+    assert mock_infer.call_args[0] == (
+        table.name,
+        table.schema.name,
+        table.schema._sa_engine,
+    )
+    assert mock_infer.call_args[1] == {
+        'cascade': cascade
+    }
+
+
 def test_table_404(client):
     response = client.get('/api/v0/tables/3000/')
     assert response.status_code == 404
@@ -319,6 +346,12 @@ def test_table_partial_update_invalid_field(create_table, client):
 
 def test_table_partial_update_404(client):
     response = client.patch('/api/v0/tables/3000/', {})
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'
+
+
+def test_table_delete_404(client):
+    response = client.delete('/api/v0/tables/3000/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
 
