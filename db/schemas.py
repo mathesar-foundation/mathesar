@@ -99,19 +99,21 @@ def create_schema(schema, engine):
             connection.execute(CreateSchema(schema))
 
 
-def delete_schema(schema, engine, cascade=False):
+def delete_schema(schema, engine, cascade=False, if_exists=False):
     """
     This method deletes a Postgres schema.
     """
-    if schema in get_all_schemas(engine):
-        with engine.begin() as connection:
-            try:
-                connection.execute(DropSchema(schema, cascade=cascade))
-            except InternalError as e:
-                if isinstance(e.orig, DependentObjectsStillExist):
-                    raise DependentObjectsStillExist()
-                else:
-                    raise e
+    if if_exists and schema not in get_all_schemas(engine):
+        return
+
+    with engine.begin() as connection:
+        try:
+            connection.execute(DropSchema(schema, cascade=cascade))
+        except InternalError as e:
+            if isinstance(e.orig, DependentObjectsStillExist):
+                raise DependentObjectsStillExist()
+            else:
+                raise e
 
 
 class RenameSchema(DDLElement):
@@ -132,6 +134,5 @@ def rename_schema(schema, engine, rename_to):
     """
     This method renames a Postgres schema.
     """
-    if schema in get_all_schemas(engine):
-        with engine.begin() as connection:
-            connection.execute(RenameSchema(schema, rename_to))
+    with engine.begin() as connection:
+        connection.execute(RenameSchema(schema, rename_to))
