@@ -101,7 +101,7 @@ class ColumnViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk=None, table_pk=None):
         table = Table.objects.get(id=table_pk)
         try:
-            column = table.sa_columns[int(pk)]
+            column = table.mathesar_columns[int(pk)]
         except IndexError:
             raise NotFound
         serializer = ColumnSerializer(column)
