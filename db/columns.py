@@ -37,7 +37,6 @@ class MathesarColumn(Column):
             foreign_keys=set(),
             primary_key=False,
             nullable=True,
-            engine=None
     ):
         """
         Construct a new ``MathesarColumn`` object.
@@ -49,8 +48,8 @@ class MathesarColumn(Column):
         Optional keyword arguments:
         primary_key -- Boolean giving whether the column is a primary key.
         nullable -- Boolean giving whether the column is nullable.
-        engine -- An SQLAlchemy engine for use in determining type info.
         """
+        self.engine = None
         super().__init__(
             *foreign_keys,
             name=name,
