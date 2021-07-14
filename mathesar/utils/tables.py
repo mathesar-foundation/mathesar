@@ -1,6 +1,11 @@
+from rest_framework.exceptions import ValidationError
+
 from db.tables import get_table_oids_from_schema, infer_table_column_types, rename_table
 from db.columns import MathesarColumn
 import mathesar.models as models
+
+
+SUPPORTED_TABLE_UPDATE_ARGS = {'name'}
 
 
 def reflect_tables_from_schema(schema):
@@ -32,6 +37,9 @@ def get_table_column_types(table):
 
 
 def update_sa_table(table, validated_data):
+    for arg in validated_data:
+        if arg not in SUPPORTED_TABLE_UPDATE_ARGS:
+            raise ValidationError({arg: f'Updating {arg} for tables is not supported.'})
     if 'name' in validated_data:
         rename_table(table.name, table.schema, table.schema._sa_engine,
                      validated_data['name'])
