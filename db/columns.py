@@ -37,6 +37,7 @@ class MathesarColumn(Column):
             foreign_keys=set(),
             primary_key=False,
             nullable=True,
+            engine=None
     ):
         """
         Construct a new ``MathesarColumn`` object.
@@ -47,6 +48,8 @@ class MathesarColumn(Column):
 
         Optional keyword arguments:
         primary_key -- Boolean giving whether the column is a primary key.
+        nullable -- Boolean giving whether the column is nullable.
+        engine -- An SQLAlchemy engine for use in determining type info.
         """
         super().__init__(
             *foreign_keys,
@@ -82,17 +85,24 @@ class MathesarColumn(Column):
             and self.nullable == default_def.get(NULLABLE, True)
         )
 
-    def get_valid_target_types(self, engine):
+
+    def add_engine(self, engine):
+        self.engine = engine
+
+
+    @property
+    def valid_target_types(self):
         """
         Returns a set of valid types to which the type of the column can be
         altered.
         """
-        db_type = self.type.compile(dialect=engine.dialect)
-        return list(
-            set(
-                alteration.get_defined_source_type_target_type_cast_map(engine).get(db_type)
+        if self.engine is not None and not self.is_default:
+            db_type = self.type.compile(dialect=self.engine.dialect)
+            return list(
+                set(
+                    alteration.get_full_cast_map(self.engine).get(db_type)
+                )
             )
-        )
 
 
 
