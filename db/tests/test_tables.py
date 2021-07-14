@@ -2,7 +2,6 @@ from unittest.mock import call, patch
 import pytest
 from sqlalchemy import MetaData, select, Column, String, Table, ForeignKey, Integer
 from sqlalchemy.exc import NoSuchTableError, InternalError
-from psycopg2.errors import DependentObjectsStillExist
 
 from db import tables, constants, columns
 
@@ -133,6 +132,22 @@ def test_rename_table(engine_with_schema):
 
     with pytest.raises(NoSuchTableError):
         tables.reflect_table(table_name, schema, engine)
+
+
+def test_rename_table_foreign_key(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "test_rename_table_foreign_key"
+    new_table_name = "test_rename_table_foreign_key_new"
+    related_table_name = "test_rename_table_foreign_key_related"
+
+    table = tables.create_mathesar_table(table_name, schema, [], engine)
+    related_table = _create_related_table(related_table_name, table, schema, engine)
+
+    tables.rename_table(table_name, schema, engine, new_table_name)
+
+    related_table = tables.reflect_table(related_table_name, schema, engine)
+    fk = list(related_table.foreign_keys)[0]
+    assert fk.column.table.name == new_table_name
 
 
 def test_extract_columns_from_table_creates_tables(engine_with_roster):
