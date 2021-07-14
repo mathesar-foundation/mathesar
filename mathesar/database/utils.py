@@ -26,6 +26,8 @@ def get_non_default_database_keys():
 
 def update_databases():
     databases = set(settings.DATABASES)
+    # We only want to track non-django dbs
+    databases.remove('default')
 
     # Update deleted databases
     for database in Database.objects.all():

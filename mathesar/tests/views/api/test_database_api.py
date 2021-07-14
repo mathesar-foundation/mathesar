@@ -86,13 +86,13 @@ def check_database(database, response_database):
     assert database.supported_types == response_database['supported_types']
 
 
-def test_database_list(client, test_db_name):
+def test_database_list(client, test_db_name, database_api_db):
     response = client.get('/api/v0/databases/')
     response_data = response.json()
 
     expected_databases = {
-        'default': Database.objects.get(name='default'),
         test_db_name: Database.objects.get(name=test_db_name),
+        database_api_db: Database.objects.get(name=database_api_db),
     }
 
     assert response.status_code == 200
@@ -112,14 +112,13 @@ def test_database_list_deleted(client, test_db_name, database_api_db):
     response_data = response.json()
 
     expected_databases = {
-        'default': Database.objects.get(name='default'),
         test_db_name: Database.objects.get(name=test_db_name),
         database_api_db: Database.objects.get(name=database_api_db),
     }
 
     assert response.status_code == 200
-    assert response_data['count'] == 3
-    assert len(response_data['results']) == 3
+    assert response_data['count'] == 2
+    assert len(response_data['results']) == 2
     for response_database in response_data['results']:
         expected_database = expected_databases[response_database['name']]
         check_database(expected_database, response_database)
