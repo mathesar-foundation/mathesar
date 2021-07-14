@@ -98,12 +98,14 @@ class MathesarColumn(Column):
         """
         if self.engine is not None and not self.is_default:
             db_type = self.type.compile(dialect=self.engine.dialect)
-            return list(
-                set(
-                    alteration.get_full_cast_map(self.engine).get(db_type)
+            valid_target_types = sorted(
+                list(
+                    set(
+                        alteration.get_full_cast_map(self.engine).get(db_type, [])
+                    )
                 )
             )
-
+            return valid_target_types if valid_target_types else None
 
 
 def get_default_mathesar_column_list():
