@@ -124,6 +124,29 @@ def test_database_list_deleted(client, test_db_name, database_api_db):
         check_database(expected_database, response_database)
 
 
+@pytest.mark.parametrize('deleted', [True, False])
+def test_database_list_filter_deleted(client, deleted, test_db_name, database_api_db):
+    reflect_db_objects()
+    del settings.DATABASES[database_api_db]
+
+    cache.clear()
+    response = client.get(f'/api/v0/databases/?deleted={deleted}')
+    response_data = response.json()
+
+    expected_databases = {
+        False: Database.objects.get(name=test_db_name),
+        True: Database.objects.get(name=database_api_db),
+    }
+
+    assert response.status_code == 200
+    assert response_data['count'] == 1
+    assert len(response_data['results']) == 1
+
+    expected_database = expected_databases[deleted]
+    response_database = response_data['results'][0]
+    check_database(expected_database, response_database)
+
+
 def test_database_detail(client):
     expected_database = Database.objects.get()
 
