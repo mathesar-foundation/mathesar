@@ -3,7 +3,7 @@ from django.core.cache import cache
 from sqlalchemy import text
 from db.schemas import get_mathesar_schemas
 from mathesar.database.base import create_mathesar_engine
-from mathesar.models import Schema
+from mathesar.models import Schema, Database
 from mathesar import models
 from mathesar.views import api
 from mathesar.utils.schemas import create_schema_and_object
@@ -37,23 +37,29 @@ def test_schema_list(client, patent_schema, empty_nasa_table):
     assert response.status_code == 200
     assert response_data['count'] == 2
     assert len(response_data['results']) == 2
-    check_schema_response(response_schema, patent_schema, patent_schema.name, patent_schema.database)
+    check_schema_response(response_schema, patent_schema, patent_schema.name,
+                          patent_schema.database.name)
 
 
 def test_schema_list_filter(client, monkeypatch):
     schema_params = [("schema_1", "database_1"), ("schema_2", "database_2"),
                      ("schema_3", "database_3"), ("schema_1", "database_3")]
+    dbs = {
+        "database_1": Database.objects.create(name="database_1"),
+        "database_2": Database.objects.create(name="database_2"),
+        "database_3": Database.objects.create(name="database_3"),
+    }
 
     def mock_get_name_from_oid(oid, engine):
         return schema_params[oid][0]
 
     monkeypatch.setattr(models.schemas, "get_schema_name_from_oid", mock_get_name_from_oid)
     monkeypatch.setattr(models, "create_mathesar_engine", lambda x: x)
-    monkeypatch.setattr(api, "reflect_schemas_from_database", lambda x: None)
+    monkeypatch.setattr(api, "reflect_db_objects", lambda: None)
 
     schemas = {
         (schema_params[i][0], schema_params[i][1]): Schema.objects.create(
-            oid=i, database=schema_params[i][1]
+            oid=i, database=dbs[schema_params[i][1]]
         )
         for i in range(len(schema_params))
     }
@@ -81,8 +87,9 @@ def test_schema_list_filter(client, monkeypatch):
                 continue
             schema = schemas[query_tuple]
             response_schema = response_schemas[query_tuple]
-            check_schema_response(response_schema, schema, schema.name, schema.database,
-                                  len_tables=0, check_schema_objects=False)
+            check_schema_response(response_schema, schema, schema.name,
+                                  schema.database.name, len_tables=0,
+                                  check_schema_objects=False)
 
 
 def test_schema_detail(create_table, client, test_db_name):
