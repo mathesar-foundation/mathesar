@@ -5,6 +5,7 @@ from sqlalchemy import (
     create_engine, select, Table, MetaData, ForeignKey, Column, Integer
 )
 from sqlalchemy.exc import NoSuchTableError
+from psycopg2.errors import DependentObjectsStillExist
 
 from db import schemas, tables, types, constants
 
@@ -80,8 +81,7 @@ def test_delete_schema(engine):
     current_schemas = schemas.get_mathesar_schemas(engine)
     assert test_schema in current_schemas
 
-    related_tables = schemas.delete_schema(test_schema, engine)
-    assert len(related_tables) == 0
+    schemas.delete_schema(test_schema, engine)
     current_schemas = schemas.get_mathesar_schemas(engine)
     assert test_schema not in current_schemas
 
@@ -93,12 +93,9 @@ def test_delete_schema_restricted(engine):
     schemas.create_schema(test_schema, engine)
     tables.create_mathesar_table(test_table, test_schema, [], engine)
 
-    related_tables = schemas.delete_schema(test_schema, engine)
-    related_tables = [table.name for table in related_tables]
-    assert len(related_tables) == 1
-    assert test_table in related_tables
+    with pytest.raises(DependentObjectsStillExist):
+        schemas.delete_schema(test_schema, engine)
 
-    # Ensure schema was not deleted, as it has relations
     current_schemas = schemas.get_mathesar_schemas(engine)
     assert test_schema in current_schemas
 
@@ -110,10 +107,7 @@ def test_delete_schema_cascade(engine):
     schemas.create_schema(test_schema, engine)
     table = tables.create_mathesar_table(test_table, test_schema, [], engine)
 
-    related_tables = schemas.delete_schema(test_schema, engine, cascade=True)
-    related_tables = [table.name for table in related_tables]
-    assert len(related_tables) == 1
-    assert test_table in related_tables
+    schemas.delete_schema(test_schema, engine, cascade=True)
 
     current_schemas = schemas.get_mathesar_schemas(engine)
     assert test_schema not in current_schemas

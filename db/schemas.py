@@ -103,17 +103,15 @@ def delete_schema(schema, engine, cascade=False):
     """
     This method deletes a Postgres schema.
     """
-    related_tables = get_related_tables(engine, schema)
     if schema in get_all_schemas(engine):
         with engine.begin() as connection:
             try:
                 connection.execute(DropSchema(schema, cascade=cascade))
             except InternalError as e:
                 if isinstance(e.orig, DependentObjectsStillExist):
-                    return related_tables
+                    raise DependentObjectsStillExist()
                 else:
                     raise e
-    return related_tables
 
 
 class RenameSchema(DDLElement):
@@ -123,7 +121,7 @@ class RenameSchema(DDLElement):
 
 
 @compiler.compiles(RenameSchema)
-def compile(element, compiler, **_):
+def compile_rename_schema(element, compiler, **_):
     return "ALTER SCHEMA %s RENAME TO %s" % (
         element.schema,
         element.rename_to
