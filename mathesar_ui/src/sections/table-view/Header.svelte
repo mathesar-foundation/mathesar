@@ -3,25 +3,24 @@
   import {
     faSortAmountDown,
     faSortAmountDownAlt,
-    faThList,
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Dropdown } from '@mathesar-components';
   import type {
     TableColumnData,
     TableColumn,
     SortOption,
-    GroupOption,
     TableDisplayData,
+  } from '@mathesar/stores/tableData';
+  import {
+    DEFAULT_COUNT_COL_WIDTH,
   } from '@mathesar/stores/tableData';
 
   const dispatch = createEventDispatcher();
   export let columns: TableColumnData;
   export let sort: SortOption = new Map();
-  export let group: GroupOption = new Set();
+  // export let group: GroupOption = new Set();
   export let columnPosition: TableDisplayData['columnPosition'] = new Map();
   export let horizontalScrollOffset = 0;
-
-  $: lastColumn = columns.data[columns.data.length - 1].name;
 
   function sortByColumn(column: TableColumn, order: 'asc' | 'desc') {
     if (sort?.get(column.name) !== order) {
@@ -32,19 +31,23 @@
     }
   }
 
-  function groupByColumn(column: TableColumn) {
-    const newGroup = new Set(group);
-    if (newGroup?.has(column.name)) {
-      newGroup.delete(column.name);
-    } else {
-      newGroup.add(column.name);
-    }
-    group = newGroup;
-    dispatch('refetch');
-  }
+  // Grouping logic commented until ready to use
+  // function groupByColumn(column: TableColumn) {
+  //   const newGroup = new Set(group);
+  //   if (newGroup?.has(column.name)) {
+  //     newGroup.delete(column.name);
+  //   } else {
+  //     newGroup.add(column.name);
+  //   }
+  //   group = newGroup;
+  //   dispatch('refetch');
+  // }
 </script>
 
-<div class="header" style="width:{columnPosition.get('__row').width + 150}px;margin-left:{-horizontalScrollOffset}px">
+<div class="header" style="width:{columnPosition.get('__row').width + 160}px;margin-left:{-horizontalScrollOffset}px">
+  <div class="cell row-number" style="width:{DEFAULT_COUNT_COL_WIDTH}px">
+  </div>
+
   {#each columns.data as column, index (column.name)}
     <div class="cell" style="
       width:{columnPosition.get(column.name).width}px;
@@ -73,16 +76,16 @@
               <Icon class="opt" data={faSortAmountDown}/>
               <span>Sort Descending</span>
             </li>
-            <li on:click={() => groupByColumn(column)}>
+            <!-- <li on:click={() => groupByColumn(column)}>
               <Icon class="opt" data={faThList}/>
               <span>Group by column</span>
-            </li>
+            </li> -->
           </ul>
         </svelte:fragment>
       </Dropdown>
     </div>
   {/each}
-  <div class="cell" style="width:200px;left:{
+  <div class="cell" style="width:70px;left:{
       columnPosition.get('__row').width
     }px;">
     <div class="add">

@@ -46,15 +46,27 @@ section.table-section .tab-container {
           height: 100%;
           left: 0;
           top: 0;
+
+          &.row-number {
+            font-size: 12px;
+            color: #959595;
+            left: 0;
+            position: sticky;
+            z-index: 10;
+          }
         }
 
         .header {
           height: 32px;
+          min-width: 100%;
           position: relative;
+          background: #f9f9f9;
+          border-bottom: 1px solid #efefef;
 
           .cell {
             padding: 8px 28px 8px 10px;
             display: flex;
+            border-bottom: none;
 
             .type {
               margin-right: 5px;
@@ -83,6 +95,10 @@ section.table-section .tab-container {
             .unsorted {
               color: #d2d2d2;
             }
+
+            &.row-number {
+              background: #f9f9f9;
+            }
           }
         }
         
@@ -93,139 +109,17 @@ section.table-section .tab-container {
           right: 0px;
           bottom: 0px;
           overflow: auto;
+          background: #f7f8f8;
 
           .cell {
             padding: 7px 14px;
-          }
-        }
+            background: #fff;
 
-        table {
-          border-collapse: collapse;
-          min-width: 100%;
-          text-indent: 0;
-          border-color: inherit;
-  
-          thead th, tbody td {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            text-align: left;
-            border-bottom: 1px solid #efefef;
-            border-right: 1px solid #efefef;
-            position: relative;
-  
-            &:last-child {
-              border-right: none;
-            }
-  
-            &.row-number {
-              font-size: 12px;
-              color: #959595;
-              min-width: 60px;
-              left: 0;
-            }
-  
-            &:not(.row-number) {
-              max-width: 200px;
-              min-width: 160px;
-            }
-  
             .skeleton {
               top: 6px;
               left: 15px;
               right: 15px;
               bottom: 6px;
-            }
-          }
-  
-          thead {
-            th {
-              font-weight: 400;
-              background: #f9f9f9;
-              position: sticky;
-              backface-visibility: hidden;
-              -webkit-backface-visibility: hidden;
-              top: 0;
-              z-index: 20;
-
-              &.row-number {
-                z-index: 30;
-              }
-  
-              >.drag-grip {
-                position: absolute;
-              }
-
-              >div.header {
-                display: flex;
-                align-items: center;
-                padding: 8px 28px 8px 10px;
-
-                .type {
-                  margin-right: 5px;
-                  color: #7f7f7f;
-                  font-weight: 500;
-                }
-
-                .name {
-                  display: block;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  white-space: nowrap;
-                }
-
-                .opts {
-                  position: absolute;
-                  right: 8px;
-                  padding: 8px;
-                  color: #8f8f8f;
-
-                  >.arrow {
-                    padding-right: 1px;
-                  }
-                }
-
-                .unsorted {
-                  color: #d2d2d2;
-                }
-              }
-            }
-          }
-  
-          tbody {
-            tr {
-              &:not(.group):hover {
-                td {
-                  background: #f7f7f7;
-                }
-              }
-              &.group {
-                td {
-                  background: #efefef;
-                  position: sticky;
-                  left: 0;
-                  top: 32px;
-                  z-index: 20;
-                }
-              }
-
-              td {
-                padding: 9px 14px;
-                background: #fff;
-
-                &.row-number {
-                  position: sticky;
-                  z-index: 10;
-                  backface-visibility: hidden;
-                  -webkit-backface-visibility: hidden;
-                }
-              }
-  
-              &:last-child {
-                td {
-                  border-bottom: none;
-                }
-              }
             }
           }
         }
@@ -249,7 +143,8 @@ section.table-section .tab-container {
       border-top: 1px solid #efefef;
       position: relative;
       flex-shrink: 0;
-      flex-basis: 44px;
+      flex-basis: 32px;
+      background: #f7f8f8;
 
       .rt-opts {
         display: flex;

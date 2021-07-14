@@ -3,9 +3,11 @@
     TableColumnData,
     TableDisplayData,
   } from '@mathesar/stores/tableData';
+  import {
+    DEFAULT_COUNT_COL_WIDTH,
+  } from '@mathesar/stores/tableData';
   import { Skeleton } from '@mathesar-components';
 
-  export let offset: number;
   export let index: number;
   export let columns: TableColumnData;
   export let loading = false;
@@ -15,8 +17,8 @@
   export let style: { [key: string]: string | number };
 
   $: rowNumber = isGrouped
-    ? offset + (row.__index as number)
-    : offset + index;
+    ? (row.__index as number)
+    : index + 1;
 
   function calculateStyle(
     _style: { [key: string]: string | number },
@@ -41,11 +43,15 @@
     </div>
 
   {:else}
+    <div class="cell row-number" style="width:{DEFAULT_COUNT_COL_WIDTH}px">
+      {rowNumber}
+    </div>
+
     {#each columns.data as column (column.name)}
       <div class="cell" style="
         width:{columnPosition.get(column.name).width}px;
         left:{columnPosition.get(column.name).left}px;">
-        {row[column.name]}
+        {typeof row[column.name] !== 'undefined' ? row[column.name] : ''}
         <Skeleton {loading}/>
       </div>
     {/each}

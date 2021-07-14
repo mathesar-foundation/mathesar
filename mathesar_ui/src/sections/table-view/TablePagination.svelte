@@ -1,4 +1,17 @@
 <script lang="ts">
+  /**
+   * Currently, not being used.
+   * TODO: Come up with a limit for infinite scroll, and use pagination
+   *       when limit exceeds.
+   * Usage:
+   *   <TablePagination id={identifier} {database}
+   *      total={$records.totalCount}
+   *      bind:pageSize={$options.pageSize}
+   *      bind:page={$options.page}
+   *      bind:offset={offset}
+   *      on:change={refetch}/>
+   */
+
   import { createEventDispatcher } from 'svelte';
   import { Pagination, Select } from '@mathesar-components';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';

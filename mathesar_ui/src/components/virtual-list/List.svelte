@@ -11,14 +11,16 @@
    * This fork contains the following changes:
    * 1. Ported to Svelte, TS
    * 2. Stripped down to vertical variable size list essentials
+   * 3. Added perfect scrollbar, utilized it's event instead of native
    */
 
   const IS_SCROLLING_DEBOUNCE_INTERVAL = 150;
-  const DEFAULT_ESTIMATED_ITEM_SIZE = 32;
+  const DEFAULT_ESTIMATED_ITEM_SIZE = 30;
 </script>
 
 <script lang="ts">
   import { onMount, afterUpdate, onDestroy } from 'svelte';
+  import PerfectScrollbar from 'perfect-scrollbar';
   import { cancelTimeout, requestTimeout } from './timer';
   import listUtils from './listUtils';
   import type { Props } from './listUtils';
@@ -48,13 +50,14 @@
   let items = [];
   let estimatedTotalSize: number;
 
-  let outerRef;
+  let outerRef: HTMLElement;
   let innerRef;
 
   let requestResetIsScrolling = false;
   let resetIsScrollingTimeoutId = null;
 
   let requestGetItemStyleCache = false;
+  let psRef: PerfectScrollbar = null;
 
   function recalc(opts: Props) {
     items = listUtils.getItems(opts);
@@ -76,10 +79,61 @@
     estimatedItemSize,
   });
 
+  function onScroll(event: Event): void {
+    const {
+      clientHeight,
+      scrollHeight,
+      scrollTop,
+      scrollLeft,
+    } = event.target as HTMLElement;
+    requestResetIsScrolling = true;
+    horizontalScrollOffset = scrollLeft;
+
+    // Scroll position may have been updated by cDM/cDU,
+    // In which case we don't need to trigger another render,
+    // And we don't want to update state.isScrolling.
+    if (scrollOffset !== scrollTop) {
+      // Prevent Safari's elastic scrolling from causing visual shaking when scrolling past bounds.
+      const newScrollOffset = Math.max(
+        0,
+        Math.min(scrollTop, scrollHeight - clientHeight),
+      );
+      isScrolling = true;
+      scrollDirection = scrollOffset < newScrollOffset ? 'forward' : 'backward';
+      scrollOffset = newScrollOffset;
+    }
+  }
+
+  function onHorizontalScroll(event: Event): void {
+    const {
+      scrollLeft,
+    } = event.target as HTMLElement;
+    horizontalScrollOffset = scrollLeft;
+  }
+
   onMount(() => {
     if (typeof scrollOffset === 'number' && outerRef) {
       outerRef.scrollTop = scrollOffset;
     }
+    psRef = new PerfectScrollbar(outerRef, {
+      minScrollbarLength: 40,
+    });
+
+    const callback = (ev: Event) => {
+      onScroll(ev);
+    };
+    const hCallback = (ev: Event) => {
+      onHorizontalScroll(ev);
+    };
+
+    outerRef.addEventListener('ps-scroll-y', callback);
+    outerRef.addEventListener('ps-scroll-x', hCallback);
+
+    return (() => {
+      outerRef.removeEventListener('ps-scroll-y', callback);
+      outerRef.removeEventListener('ps-scroll-x', hCallback);
+      psRef.destroy();
+    });
   });
 
   const resetIsScrolling = () => {
@@ -108,6 +162,9 @@
       requestGetItemStyleCache = false;
       instanceProps.styleCache = {};
     }
+    if (psRef) {
+      psRef.update();
+    }
   });
 
   onDestroy(() => {
@@ -115,38 +172,12 @@
       cancelTimeout(resetIsScrollingTimeoutId);
     }
   });
-
-  function onScroll(event: Event): void {
-    const {
-      clientHeight,
-      scrollHeight,
-      scrollTop,
-      scrollLeft,
-    } = event.currentTarget as HTMLElement;
-    requestResetIsScrolling = true;
-    horizontalScrollOffset = scrollLeft;
-
-    // Scroll position may have been updated by cDM/cDU,
-    // In which case we don't need to trigger another render,
-    // And we don't want to update state.isScrolling.
-    if (scrollOffset !== scrollTop) {
-      // Prevent Safari's elastic scrolling from causing visual shaking when scrolling past bounds.
-      const newScrollOffset = Math.max(
-        0,
-        Math.min(scrollTop, scrollHeight - clientHeight),
-      );
-      isScrolling = true;
-      scrollDirection = scrollOffset < newScrollOffset ? 'forward' : 'backward';
-      scrollOffset = newScrollOffset;
-    }
-  }
 </script>
 
 <div
   class={outerClass}
   style="height:{height}px;width:100%;direction:ltr;"
-  bind:this={outerRef}
-  on:scroll={onScroll}>
+  bind:this={outerRef}>
   <div
       bind:this={innerRef}
       style="height:{estimatedTotalSize + paddingBottom}px;{isScrolling ? 'pointer-events:none;' : ''}width:100%;">

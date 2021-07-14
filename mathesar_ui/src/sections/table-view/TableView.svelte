@@ -14,7 +14,6 @@
   import { States } from '@mathesar/utils/api';
   import { Button, Icon } from '@mathesar-components';
   import DisplayOptions from './DisplayOptions.svelte';
-  import TablePagination from './TablePagination.svelte';
   import Header from './Header.svelte';
   import Body from './Body.svelte';
 
@@ -26,7 +25,6 @@
   let records: TableRecordStore;
   let options: TableOptionsStore;
   let display: TableDisplayStore;
-  let offset: number;
   let showDisplayOptions = false;
   let horizontalScrollOffset = 0;
 
@@ -82,14 +80,13 @@
   <div class="table-content">
     {#if $columns.data.length > 0}
       <Header columns={$columns}
-              bind:sort={$options.sort} 
-              bind:group={$options.group}
+              bind:sort={$options.sort}
               bind:columnPosition={$display.columnPosition}
               {horizontalScrollOffset}
               on:refetch={refetch}/>
+
       <Body columns={$columns} data={$records.data}
             groupData={$records.groupData}
-            state={$records.state} {offset}
             bind:horizontalScrollOffset
             columnPosition={$display.columnPosition}/>
     {/if}
@@ -97,13 +94,7 @@
 </div>
 
 <div class="status-pane">
-  <TablePagination
-    id={identifier} {database}
-    total={$records.totalCount}
-    bind:pageSize={$options.pageSize}
-    bind:page={$options.page}
-    bind:offset={offset}
-    on:change={refetch}/>
+  
 </div>
 
 <style global lang="scss">

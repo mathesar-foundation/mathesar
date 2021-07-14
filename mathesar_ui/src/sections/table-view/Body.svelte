@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { States } from '@mathesar/utils/api';
   import type {
     TableColumnData,
     TableRecords,
@@ -12,8 +11,6 @@
   export let columns: TableColumnData;
   export let data: TableRecords[];
   export let groupData: TableRecordGroupData;
-  export let state: States;
-  export let offset: number;
   export let columnPosition: TableDisplayData['columnPosition'];
   export let horizontalScrollOffset = 0;
 
@@ -63,10 +60,12 @@
 </script>
 
 <div class="body">
-  <VirtualList itemCount={rowsToDisplay.length} bind:horizontalScrollOffset
+  <VirtualList itemCount={50000}
+                bind:horizontalScrollOffset
                 let:index let:style>
-    <Row {columns} loading={state === States.Loading}
+    <Row {columns}
           isGrouped={!!groupData} {style}
-          row={rowsToDisplay[index]} {index} {offset} {columnPosition}/>
+          row={rowsToDisplay[index] || {}} {index}
+          {columnPosition}/>
   </VirtualList>
 </div>

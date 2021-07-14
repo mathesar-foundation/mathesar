@@ -8,7 +8,7 @@
   export let scrollOffset = 0;
   export let horizontalScrollOffset = 0;
 
-  function getItemSize(index, style) {
+  function getItemSize() {
     return 30;
   }
 </script>

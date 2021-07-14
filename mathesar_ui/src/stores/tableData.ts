@@ -2,6 +2,7 @@ import { get, writable, Writable } from 'svelte/store';
 import { getAPI, States } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
 
+export const DEFAULT_COUNT_COL_WIDTH = 70;
 export const DEFAULT_COLUMN_WIDTH = 160;
 
 export interface TableColumn {
@@ -56,6 +57,7 @@ export interface TableOptionsData {
 }
 
 export interface TableDisplayData {
+  scrollOffset: number,
   columnPosition: Map<string, {
     width: number,
     left: number
@@ -64,7 +66,6 @@ export interface TableDisplayData {
 
 interface TableConfigData {
   previousTableRequest?: CancellablePromise<TableDetailsResponse>,
-  previousRecordGroupRequest?: CancellablePromise<TableRecordsResponse>,
   previousRecordRequest?: CancellablePromise<TableRecordsResponse>,
 }
 
@@ -87,7 +88,7 @@ interface TableData {
 const databaseMap: Map<string, Map<number, TableData>> = new Map();
 
 function calculateColumnPosition(columns: TableColumn[]): TableDisplayData['columnPosition'] {
-  let left = 0;
+  let left = DEFAULT_COUNT_COL_WIDTH;
   const columnPosition: TableDisplayData['columnPosition'] = new Map();
   columns.forEach((column) => {
     columnPosition.set(column.name, {
@@ -131,9 +132,11 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
         data: columns,
       });
 
+      const existingDisplayData = get(tableDisplayStore);
       const columnPosition = calculateColumnPosition(columns);
 
       tableDisplayStore.set({
+        ...existingDisplayData,
         columnPosition,
       });
     } catch (err) {
@@ -183,38 +186,32 @@ export async function fetchTableRecords(
     if (sortOptions.length > 0) {
       params.push(`order_by=${encodeURIComponent(JSON.stringify(sortOptions))}`);
     }
+    // Commented out until group implementation is complete
+    // if (groupOptions.length > 0) {
+    //   params.push(
+    //     `group_count_by=${encodeURIComponent(JSON.stringify(groupOptions))}`,
+    //   );
+    // }
 
     try {
-      table.config.previousRecordGroupRequest?.cancel();
       table.config.previousRecordRequest?.cancel();
 
       const tableRecordsPromise = getAPI<TableRecordsResponse>(`/tables/${id}/records/?${params.join('&')}`);
 
-      let tableGroupPromise: CancellablePromise<TableRecordsResponse> = null;
-      if (groupOptions.length > 0) {
-        const groupParams = ['limit=100'];
-        groupParams.push(
-          `group_count_by=${encodeURIComponent(JSON.stringify(groupOptions))}`,
-        );
-        tableGroupPromise = getAPI<TableRecordsResponse>(`/tables/${id}/records/?${groupParams.join('&')}`);
-      }
-
       table.config = {
         ...table.config,
         previousRecordRequest: tableRecordsPromise,
-        previousRecordGroupRequest: tableGroupPromise,
       };
 
       const response = await tableRecordsPromise;
-      const groupResponse = await tableGroupPromise;
 
       const totalCount = response.count || 0;
       const data = response.results || [];
       let groupData: TableRecordGroupData = null;
-      if (groupResponse?.group_count?.results) {
+      if (response?.group_count?.results) {
         groupData = {
-          fields: groupResponse.group_count?.group_count_by || [],
-          count: groupResponse.group_count.results,
+          fields: response.group_count?.group_count_by || [],
+          count: response.group_count.results,
         };
       }
       tableRecordStore.set({
@@ -254,12 +251,13 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
         totalCount: 0,
       }),
       options: writable({
-        pageSize: options?.pageSize || 50,
+        pageSize: options?.pageSize || 500,
         page: options?.page || 1,
         sort: options?.sort || null,
         group: options?.group || null,
       }),
       display: writable({
+        scrollOffset: 0,
         columnPosition: new Map(),
       }),
       config: {},
