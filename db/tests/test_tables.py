@@ -1,7 +1,9 @@
 from unittest.mock import call, patch
 import pytest
-from sqlalchemy import MetaData, select, Column, String
-from sqlalchemy.exc import NoSuchTableError
+from sqlalchemy import MetaData, select, Column, String, Table, ForeignKey, Integer
+from sqlalchemy.exc import NoSuchTableError, InternalError
+from psycopg2.errors import DependentObjectsStillExist
+
 from db import tables, constants, columns
 
 ROSTER = "Roster"
@@ -52,6 +54,67 @@ def test_delete_table(engine_with_schema):
     tables.delete_table(table_name, schema, engine)
     with pytest.raises(NoSuchTableError):
         tables.reflect_table(table_name, schema, engine)
+
+
+def test_delete_table_if_exists_true(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "test_delete_table"
+    tables.create_mathesar_table(table_name, schema, [], engine)
+    tables.delete_table(table_name, schema, engine, if_exists=True)
+    with pytest.raises(NoSuchTableError):
+        tables.reflect_table(table_name, schema, engine)
+
+
+def test_delete_table_no_table_if_exists_true(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "test_delete_table"
+    # Just confirm we don't thrown an error
+    tables.delete_table(table_name, schema, engine, if_exists=True)
+
+
+def test_delete_table_no_table_if_exists_false(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "test_delete_table"
+    with pytest.raises(NoSuchTableError):
+        tables.delete_table(table_name, schema, engine, if_exists=False)
+
+
+def _create_related_table(name, table, schema, engine):
+    metadata = MetaData(schema=schema, bind=engine)
+    related_table = Table(
+        name, metadata,
+        Column('id', Integer, ForeignKey(table.c[constants.ID]))
+    )
+    related_table.create()
+    fk = list(related_table.foreign_keys)[0]
+    assert fk.column.table.name == table.name
+    return related_table
+
+
+def test_delete_table_restricted_foreign_key(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "test_delete_table_restricted_foreign_key"
+    related_table_name = "test_delete_table_restricted_foreign_key_related"
+
+    table = tables.create_mathesar_table(table_name, schema, [], engine)
+    _create_related_table(related_table_name, table, schema, engine)
+
+    with pytest.raises(InternalError):
+        tables.delete_table(table_name, schema, engine, cascade=False)
+
+
+def test_delete_table_cascade_foreign_key(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "test_delete_table_cascade_foreign_key"
+    related_table_name = "test_delete_table_cascade_foreign_key_related"
+
+    table = tables.create_mathesar_table(table_name, schema, [], engine)
+    related_table = _create_related_table(related_table_name, table, schema, engine)
+
+    tables.delete_table(table_name, schema, engine, cascade=True)
+
+    related_table = tables.reflect_table(related_table.name, schema, engine)
+    assert len(related_table.foreign_keys) == 0
 
 
 def test_rename_table(engine_with_schema):
