@@ -19,10 +19,10 @@ def data_file(csv_filename):
 
 
 @pytest.fixture()
-def schema(engine, test_db_name):
+def schema(engine, test_db_model):
     create_schema(TEST_SCHEMA, engine)
     schema_oid = get_schema_oid_from_name(TEST_SCHEMA, engine)
-    yield Schema.objects.create(oid=schema_oid, database=test_db_name)
+    yield Schema.objects.create(oid=schema_oid, database=test_db_model)
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA "{TEST_SCHEMA}" CASCADE;'))
 

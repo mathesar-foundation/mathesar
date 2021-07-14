@@ -13,18 +13,19 @@ from sqlalchemy_filters.exceptions import (
 )
 
 
-from mathesar.database.utils import get_non_default_database_keys
-from mathesar.models import Table, Schema, DataFile
+from mathesar.database.utils import get_non_default_database_keys, update_databases
+from mathesar.models import Table, Schema, DataFile, Database
 from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
-    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
+    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer,
+    ColumnSerializer, DatabaseSerializer
 )
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
 from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
 from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
-from mathesar.filters import SchemaFilter, TableFilter
+from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
 from mathesar.forms import RecordListFilterForm
 
 from db.records import BadGroupFormat, GroupFieldNotFound
@@ -37,6 +38,7 @@ DB_REFLECTION_INTERVAL = 60 * 5  # we reflect DB changes every 5 minutes
 
 def reflect_db_objects():
     if not cache.get(DB_REFLECTION_KEY):
+        update_databases()
         for database_key in get_non_default_database_keys():
             reflect_schemas_from_database(database_key)
         for schema in Schema.objects.all():
@@ -57,7 +59,8 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
     def create(self, request):
         serializer = SchemaSerializer(data=request.data)
         if serializer.is_valid():
-            schema = create_schema_and_object(request.data['name'], request.data['database'])
+            schema = create_schema_and_object(serializer.validated_data['name'],
+                                              serializer.validated_data['database'])
             serializer = SchemaSerializer(schema)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
@@ -90,11 +93,13 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
 
 
 class ColumnViewSet(viewsets.ViewSet):
-    queryset = Table.objects.all().order_by('-created_at')
+    def get_queryset(self):
+        reflect_db_objects()
+        return Table.objects.all().order_by('-created_at')
 
     def list(self, request, table_pk=None):
         paginator = ColumnLimitOffsetPagination()
-        columns = paginator.paginate_queryset(self.queryset, request, table_pk)
+        columns = paginator.paginate_queryset(self.get_queryset(), request, table_pk)
         serializer = ColumnSerializer(columns, many=True)
         return paginator.get_paginated_response(serializer.data)
 
@@ -154,7 +159,9 @@ class RecordViewSet(viewsets.ViewSet):
     # There is no "update" method.
     # We're not supporting PUT requests because there aren't a lot of use cases
     # where the entire record needs to be replaced, PATCH suffices for updates.
-    queryset = Table.objects.all().order_by('-created_at')
+    def get_queryset(self):
+        reflect_db_objects()
+        return Table.objects.all().order_by('-created_at')
 
     # For filter parameter formatting, see:
     # https://github.com/centerofci/sqlalchemy-filters#filters-format
@@ -170,7 +177,7 @@ class RecordViewSet(viewsets.ViewSet):
 
         try:
             records = paginator.paginate_queryset(
-                self.queryset, request, table_pk,
+                self.get_queryset(), request, table_pk,
                 filters=filter_form.cleaned_data['filters'],
                 order_by=filter_form.cleaned_data['order_by'],
                 group_count_by=filter_form.cleaned_data['group_count_by'],
@@ -216,6 +223,16 @@ class RecordViewSet(viewsets.ViewSet):
 class DatabaseKeyViewSet(viewsets.ViewSet):
     def list(self, request):
         return Response(get_non_default_database_keys())
+
+
+class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
+    def get_queryset(self):
+        reflect_db_objects()
+        return Database.objects.all().order_by('-created_at')
+    serializer_class = DatabaseSerializer
+    pagination_class = DefaultLimitOffsetPagination
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = DatabaseFilter
 
 
 class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):
