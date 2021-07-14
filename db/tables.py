@@ -9,7 +9,8 @@ from sqlalchemy.ext import compiler
 from sqlalchemy_filters import apply_filters
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
-from sqlalchemy.exc import NoSuchTableError
+from sqlalchemy.exc import NoSuchTableError, InternalError
+from psycopg2.errors import DependentObjectsStillExist
 
 from db import columns, constants, schemas
 from db.types import inference
@@ -80,7 +81,13 @@ def delete_table(name, schema, engine, cascade=False, if_exists=False):
         else:
             raise
     with engine.begin() as conn:
-        conn.execute(DropTableCascade(table, cascade=cascade))
+        try:
+            conn.execute(DropTableCascade(table, cascade=cascade))
+        except InternalError as e:
+            if isinstance(e.orig, DependentObjectsStillExist):
+                raise e.orig
+            else:
+                raise e
 
 
 def rename_table(name, schema, engine, rename_to):
