@@ -102,11 +102,9 @@ class Table(DatabaseObject):
     def sa_column_names(self):
         return self.sa_columns.keys()
 
-
     @cached_property
     def mathesar_columns(self):
         return self._enriched_column_sa_table.columns
-
 
     def add_column(self, column_data):
         return columns.create_column(

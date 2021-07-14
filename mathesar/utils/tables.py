@@ -1,5 +1,4 @@
 from db.tables import get_table_oids_from_schema, infer_table_column_types
-from db.columns import MathesarColumn
 from mathesar.models import Table
 
 

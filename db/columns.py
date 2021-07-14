@@ -84,10 +84,8 @@ class MathesarColumn(Column):
             and self.nullable == default_def.get(NULLABLE, True)
         )
 
-
     def add_engine(self, engine):
         self.engine = engine
-
 
     @property
     def valid_target_types(self):
