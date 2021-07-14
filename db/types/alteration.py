@@ -120,7 +120,7 @@ def create_varchar_casts(engine):
     create_cast_functions(VARCHAR, type_body_map, engine)
 
 
-def get_defined_source_type_target_type_cast_map(engine):
+def get_full_cast_map(engine):
     full_cast_map = {}
     supported_types = get_robust_supported_alter_column_type_map(engine)
     for source, target in get_defined_source_target_cast_tuples():
