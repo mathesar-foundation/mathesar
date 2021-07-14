@@ -3,7 +3,7 @@ from django_property_filter import (
     PropertyDateTimeFromToRangeFilter, PropertyBooleanFilter
 )
 
-from mathesar.models import Schema, Table
+from mathesar.models import Schema, Table, Database
 
 
 class CharInFilter(PropertyBaseInFilter, PropertyCharFilter):
@@ -31,3 +31,11 @@ class TableFilter(PropertyFilterSet):
     class Meta:
         model = Table
         fields = ['name', 'schema', 'created_at', 'updated_at', 'import_verified']
+
+
+class DatabaseFilter(PropertyFilterSet):
+    deleted = PropertyBooleanFilter(field_name='deleted')
+
+    class Meta:
+        model = Database
+        fields = ['deleted']

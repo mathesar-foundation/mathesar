@@ -25,7 +25,7 @@ from mathesar.serializers import (
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
 from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
 from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
-from mathesar.filters import SchemaFilter, TableFilter
+from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
 from mathesar.forms import RecordListFilterForm
 
 from db.records import BadGroupFormat, GroupFieldNotFound
@@ -231,6 +231,8 @@ class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
         return Database.objects.all().order_by('-created_at')
     serializer_class = DatabaseSerializer
     pagination_class = DefaultLimitOffsetPagination
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = DatabaseFilter
 
 
 class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):
