@@ -265,6 +265,22 @@ def test_table_create_from_datafile(client, data_file, schema):
     check_table_response(response_table, table, table_name)
 
 
+def test_table_partial_update(create_table, client):
+    table_name = 'NASA Table Partial Update'
+    new_table_name = 'NASA Table Partial Update New'
+    table = create_table(table_name)
+
+    body = {'name': new_table_name}
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+
+    response_table = response.json()
+    assert response.status_code == 200
+    check_table_response(response_table, table, new_table_name)
+
+    table = Table.objects.get(oid=table.oid)
+    assert table.name == new_table_name
+
+
 def test_table_404(client):
     response = client.get('/api/v0/tables/3000/')
     assert response.status_code == 404
@@ -290,25 +306,28 @@ def test_table_create_from_datafile_404(client):
     assert 'object does not exist' in response_table['data_files'][0]
 
 
+def test_table_partial_update_invalid_field(create_table, client):
+    table_name = 'NASA Table Partial Update'
+    table = create_table(table_name)
+
+    body = {'schema': table.schema.id}
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+
+    assert response.status_code == 400
+    assert 'is not supported' in response.json()['schema']
+
+
+def test_table_partial_update_404(client):
+    response = client.patch('/api/v0/tables/3000/', {})
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'
+
+
 def test_table_update(client, create_table):
     table = create_table('update_table_test')
     response = client.put(f'/api/v0/tables/{table.id}/')
     assert response.status_code == 405
     assert response.json()['detail'] == 'Method "PUT" not allowed.'
-
-
-def test_data_file_partial_update(client, create_table):
-    table = create_table('partial_update_table_test')
-    response = client.patch(f'/api/v0/tables/{table.id}/')
-    assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "PATCH" not allowed.'
-
-
-def test_data_file_delete(client, create_table):
-    table = create_table('delete_table_test')
-    response = client.delete(f'/api/v0/tables/{table.id}/')
-    assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "DELETE" not allowed.'
 
 
 def test_table_get_with_reflect_new(client, table_for_reflection):
