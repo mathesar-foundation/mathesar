@@ -31,10 +31,12 @@
   export let height: Props['height'];
   export let scrollOffset: Props['scrollOffset'] = 0;
   export let itemCount: Props['itemCount'];
-  export let overscanCount: Props['overscanCount'] = 2;
+  export let overscanCount: Props['overscanCount'] = 5;
   export let itemSize: Props['itemSize'] = () : number => estimatedItemSize;
-  export let itemKey: Props['itemKey'];
-
+  export let paddingBottom = 0;
+  export let horizontalScrollOffset = 0;
+  
+  let itemKey: Props['itemKey'];
   const instanceProps: Props['instanceProps'] = {
     lastMeasuredIndex: -1,
     itemMetadataMap: {},
@@ -44,7 +46,7 @@
   let scrollDirection : Props['scrollDirection'] = 'forward';
 
   let items = [];
-  let estimatedTotalSize;
+  let estimatedTotalSize: number;
 
   let outerRef;
   let innerRef;
@@ -119,8 +121,10 @@
       clientHeight,
       scrollHeight,
       scrollTop,
+      scrollLeft,
     } = event.currentTarget as HTMLElement;
     requestResetIsScrolling = true;
+    horizontalScrollOffset = scrollLeft;
 
     // Scroll position may have been updated by cDM/cDU,
     // In which case we don't need to trigger another render,
@@ -145,7 +149,7 @@
   on:scroll={onScroll}>
   <div
       bind:this={innerRef}
-      style="height:{estimatedTotalSize}px;{isScrolling ? 'pointer-events:none;' : ''}width:100%;">
+      style="height:{estimatedTotalSize + paddingBottom}px;{isScrolling ? 'pointer-events:none;' : ''}width:100%;">
       <slot {items} />
   </div>
 </div>

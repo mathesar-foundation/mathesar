@@ -2,6 +2,12 @@
   import Resizer from './Resizer.svelte';
   import List from './List.svelte';
 
+  export let itemCount = 100;
+  export let paddingBottom = 100;
+
+  export let scrollOffset = 0;
+  export let horizontalScrollOffset = 0;
+
   function getItemSize(index, style) {
     return 30;
   }
@@ -10,12 +16,17 @@
 <Resizer let:height>
   <List
     {height}
-    itemCount={50000}
+    {itemCount}
+    {paddingBottom}
     itemSize={getItemSize}
+    bind:scrollOffset
+    bind:horizontalScrollOffset
     let:items
     >
-    {#each items as it (it.key)}
-      <div style={it.style}>Row {it.index}</div>
+    {#each items as it (it?.key || it)}
+      {#if it}
+        <slot style={it.style} index={it.index}></slot>
+      {/if}
     {/each}
   </List>
 </Resizer>

@@ -9,6 +9,7 @@
     TableColumnStore,
     TableRecordStore,
     TableOptionsStore,
+    TableDisplayStore,
   } from '@mathesar/stores/tableData';
   import { States } from '@mathesar/utils/api';
   import { Button, Icon } from '@mathesar-components';
@@ -24,8 +25,10 @@
   let columns: TableColumnStore;
   let records: TableRecordStore;
   let options: TableOptionsStore;
+  let display: TableDisplayStore;
   let offset: number;
   let showDisplayOptions = false;
+  let horizontalScrollOffset = 0;
 
   function setStores(_database: string, _id: number) {
     const opts = URLQueryHandler.getTableConfig(_database, _id);
@@ -33,6 +36,7 @@
     columns = table.columns;
     records = table.records;
     options = table.options;
+    display = table.display;
   }
 
   $: setStores(database, identifier);
@@ -77,13 +81,17 @@
 
   <div class="table-content">
     {#if $columns.data.length > 0}
-      <table>
-        <Header columns={$columns} bind:sort={$options.sort} 
-                bind:group={$options.group} on:refetch={refetch}/>
-        <Body columns={$columns} data={$records.data}
-              groupData={$records.groupData}
-              state={$records.state} {offset}/>
-      </table>
+      <Header columns={$columns}
+              bind:sort={$options.sort} 
+              bind:group={$options.group}
+              bind:columnPosition={$display.columnPosition}
+              {horizontalScrollOffset}
+              on:refetch={refetch}/>
+      <Body columns={$columns} data={$records.data}
+            groupData={$records.groupData}
+            state={$records.state} {offset}
+            bind:horizontalScrollOffset
+            columnPosition={$display.columnPosition}/>
     {/if}
   </div>
 </div>

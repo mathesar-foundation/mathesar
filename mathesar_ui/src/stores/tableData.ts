@@ -2,6 +2,8 @@ import { get, writable, Writable } from 'svelte/store';
 import { getAPI, States } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
 
+export const DEFAULT_COLUMN_WIDTH = 160;
+
 export interface TableColumn {
   name: string,
   type: string
@@ -53,6 +55,13 @@ export interface TableOptionsData {
   group: GroupOption
 }
 
+export interface TableDisplayData {
+  columnPosition: Map<string, {
+    width: number,
+    left: number
+  }>
+}
+
 interface TableConfigData {
   previousTableRequest?: CancellablePromise<TableDetailsResponse>,
   previousRecordGroupRequest?: CancellablePromise<TableRecordsResponse>,
@@ -62,12 +71,14 @@ interface TableConfigData {
 export type TableColumnStore = Writable<TableColumnData>;
 export type TableRecordStore = Writable<TableRecordData>;
 export type TableOptionsStore = Writable<TableOptionsData>;
+export type TableDisplayStore = Writable<TableDisplayData>;
 
 interface TableData {
   // Store objects: For use in views and controller
-  columns?: TableColumnStore,
-  records?: TableRecordStore,
-  options?: TableOptionsStore,
+  columns: TableColumnStore,
+  records: TableRecordStore,
+  options: TableOptionsStore,
+  display: TableDisplayStore,
 
   // Direct objects: For use only in controller
   config?: TableConfigData,
@@ -75,10 +86,28 @@ interface TableData {
 
 const databaseMap: Map<string, Map<number, TableData>> = new Map();
 
+function calculateColumnPosition(columns: TableColumn[]): TableDisplayData['columnPosition'] {
+  let left = 0;
+  const columnPosition: TableDisplayData['columnPosition'] = new Map();
+  columns.forEach((column) => {
+    columnPosition.set(column.name, {
+      left,
+      width: DEFAULT_COLUMN_WIDTH,
+    });
+    left += DEFAULT_COLUMN_WIDTH;
+  });
+  columnPosition.set('__row', {
+    width: left,
+    left: 0,
+  });
+  return columnPosition;
+}
+
 async function fetchTableDetails(db: string, id: number): Promise<void> {
   const table = databaseMap.get(db)?.get(id);
   if (table) {
-    const tableColumnStore = databaseMap.get(db)?.get(id)?.columns;
+    const tableColumnStore = table.columns;
+    const tableDisplayStore = table.display;
     const existingData = get(tableColumnStore);
 
     tableColumnStore.set({
@@ -100,6 +129,12 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
       tableColumnStore.set({
         state: States.Done,
         data: columns,
+      });
+
+      const columnPosition = calculateColumnPosition(columns);
+
+      tableDisplayStore.set({
+        columnPosition,
       });
     } catch (err) {
       tableColumnStore.set({
@@ -124,9 +159,9 @@ export async function fetchTableRecords(
     const optionData = get(optionStore);
 
     tableRecordStore.set({
+      ...existingData,
       state: States.Loading,
-      data: existingData.data,
-      totalCount: existingData.totalCount,
+      error: null,
     });
 
     const params = [];
@@ -223,6 +258,9 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
         page: options?.page || 1,
         sort: options?.sort || null,
         group: options?.group || null,
+      }),
+      display: writable({
+        columnPosition: new Map(),
       }),
       config: {},
     };

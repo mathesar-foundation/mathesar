@@ -24,7 +24,7 @@ section.table-section .tab-container {
       }
 
       .table-content {
-        overflow: auto;
+        overflow: hidden;
         position: absolute;
         left: 0;
         right: 0;
@@ -32,6 +32,72 @@ section.table-section .tab-container {
         bottom: 0;
         user-select: none;
         transition: left .25s cubic-bezier(0,0,.2,1);
+
+        .cell {
+          position: absolute;
+          display: block;
+          align-items: center;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          text-align: left;
+          border-bottom: 1px solid #efefef;
+          border-right: 1px solid #efefef;
+          height: 100%;
+          left: 0;
+          top: 0;
+        }
+
+        .header {
+          height: 32px;
+          position: relative;
+
+          .cell {
+            padding: 8px 28px 8px 10px;
+            display: flex;
+
+            .type {
+              margin-right: 5px;
+              color: #7f7f7f;
+              font-weight: 500;
+            }
+
+            .name {
+              display: block;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+
+            .opts {
+              position: absolute;
+              right: 8px;
+              padding: 8px;
+              color: #8f8f8f;
+
+              >.arrow {
+                padding-right: 1px;
+              }
+            }
+
+            .unsorted {
+              color: #d2d2d2;
+            }
+          }
+        }
+        
+        .body {
+          position: absolute;
+          top: 32px;
+          left: 0px;
+          right: 0px;
+          bottom: 0px;
+          overflow: auto;
+
+          .cell {
+            padding: 7px 14px;
+          }
+        }
 
         table {
           border-collapse: collapse;
@@ -52,12 +118,9 @@ section.table-section .tab-container {
               border-right: none;
             }
   
-            &:first-child {
+            &.row-number {
               font-size: 12px;
               color: #959595;
-            }
-  
-            &.row-number {
               min-width: 60px;
               left: 0;
             }
@@ -131,9 +194,18 @@ section.table-section .tab-container {
   
           tbody {
             tr {
-              &:hover {
+              &:not(.group):hover {
                 td {
                   background: #f7f7f7;
+                }
+              }
+              &.group {
+                td {
+                  background: #efefef;
+                  position: sticky;
+                  left: 0;
+                  top: 32px;
+                  z-index: 20;
                 }
               }
 

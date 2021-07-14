@@ -1,6 +1,7 @@
 <script lang="ts">
   import type {
     TableColumnData,
+    TableDisplayData,
   } from '@mathesar/stores/tableData';
   import { Skeleton } from '@mathesar-components';
 
@@ -10,27 +11,43 @@
   export let loading = false;
   export let isGrouped = false;
   export let row: { [key: string]: unknown };
+  export let columnPosition: TableDisplayData['columnPosition'];
+  export let style: { [key: string]: string | number };
 
   $: rowNumber = isGrouped
     ? offset + (row.__index as number)
     : offset + index;
+
+  function calculateStyle(
+    _style: { [key: string]: string | number },
+    _columnPosition: TableDisplayData['columnPosition'],
+  ) {
+    if (!_style) {
+      return '';
+    }
+    const totalWidth = _columnPosition.get('__row').width;
+    return `position:${_style.position};left:${_style.left}px;`
+            + `top:${_style.top}px;height:${_style.height}px;`
+            + `width:${totalWidth + 100}px`;
+  }
+
+  $: styleString = calculateStyle(style, columnPosition);
 </script>
 
-<tr>
+<div class:group={row.__isGroupRow} style={styleString}>
   {#if row.__isGroupRow}
-    <td colspan={columns.data.length + 1}>
+    <div class="cell">
       {row.key}: {row.count}
-    </td>
+    </div>
 
   {:else}
-    <td class="row-number">
-      {rowNumber}
-    </td>
     {#each columns.data as column (column.name)}
-      <td>
+      <div class="cell" style="
+        width:{columnPosition.get(column.name).width}px;
+        left:{columnPosition.get(column.name).left}px;">
         {row[column.name]}
         <Skeleton {loading}/>
-      </td>
+      </div>
     {/each}
   {/if}
-</tr>
+</div>

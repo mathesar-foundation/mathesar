@@ -14,7 +14,7 @@
   import { createDetectElementResize } from './detectElementResize';
   import type { ElementResizeDetector } from './detectElementResize';
 
-  let classes = '';
+  let classes = 'default';
   export { classes as class };
   $: outerClass = ['virtual-list', 'resizer', classes].join(' ');
 

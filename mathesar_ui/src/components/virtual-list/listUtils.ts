@@ -16,7 +16,7 @@ interface Item {
   key: number,
   index: number,
   isScrolling: boolean,
-  style: string,
+  style: { [key: string]: string | number },
 }
 
 interface ItemMetaData {
@@ -29,7 +29,7 @@ export interface Props {
   instanceProps: {
     lastMeasuredIndex: number,
     itemMetadataMap: Record<number, ItemMetaData>,
-    styleCache: Record<number, string>,
+    styleCache: Record<number, Item['style']>,
   },
   isScrolling: boolean,
   scrollDirection: 'forward' | 'backward',
@@ -211,18 +211,25 @@ function getRangeToRender(props: Props): number[] {
 function getItemStyle(
   props: Props,
   index: number,
-): string {
+): Item['style'] {
   const { instanceProps } = props;
   const { styleCache } = instanceProps;
 
-  let style = '';
+  let style: Item['style'];
   if (Object.prototype.hasOwnProperty.call(styleCache, index)) {
     style = styleCache[index];
   } else {
     const { offset } = getItemMetadata(props, index);
     const { size } = instanceProps.itemMetadataMap[index];
 
-    style = `position:absolute;left:0;top:${offset}px;height:${size}px;width:100%`;
+    style = {
+      position: 'absolute',
+      left: 0,
+      top: offset,
+      height: size,
+      width: '100%',
+    };
+
     styleCache[index] = style;
   }
   return style;

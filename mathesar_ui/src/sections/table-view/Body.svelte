@@ -4,7 +4,9 @@
     TableColumnData,
     TableRecords,
     TableRecordGroupData,
+    TableDisplayData,
   } from '@mathesar/stores/tableData';
+  import { VirtualList } from '@mathesar-components';
   import Row from './Row.svelte';
 
   export let columns: TableColumnData;
@@ -12,6 +14,8 @@
   export let groupData: TableRecordGroupData;
   export let state: States;
   export let offset: number;
+  export let columnPosition: TableDisplayData['columnPosition'];
+  export let horizontalScrollOffset = 0;
 
   function computeDisplayRows(
     _rows: TableRecords[],
@@ -58,10 +62,11 @@
   $: rowsToDisplay = computeDisplayRows(data, groupData);
 </script>
 
-<tbody>
-  {#each rowsToDisplay as row, index (row)}
+<div class="body">
+  <VirtualList itemCount={rowsToDisplay.length} bind:horizontalScrollOffset
+                let:index let:style>
     <Row {columns} loading={state === States.Loading}
-          isGrouped={!!groupData}
-          {row} {index} {offset}/>
-  {/each}
-</tbody>
+          isGrouped={!!groupData} {style}
+          row={rowsToDisplay[index]} {index} {offset} {columnPosition}/>
+  </VirtualList>
+</div>
