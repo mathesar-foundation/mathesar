@@ -85,16 +85,28 @@ class Table(DatabaseObject):
         return table
 
     @cached_property
+    def _enriched_column_sa_table(self):
+        return tables.get_enriched_column_table(
+            self._sa_table, engine=self.schema._sa_engine,
+        )
+
+    @cached_property
     def name(self):
         return self._sa_table.name
 
-    @property
+    @cached_property
     def sa_columns(self):
         return self._sa_table.columns
 
     @property
     def sa_column_names(self):
         return self.sa_columns.keys()
+
+
+    @cached_property
+    def mathesar_columns(self):
+        return self._enriched_column_sa_table.columns
+
 
     def add_column(self, column_data):
         return columns.create_column(
