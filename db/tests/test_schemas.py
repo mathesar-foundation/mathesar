@@ -1,8 +1,9 @@
 from unittest.mock import patch
 import warnings
-from sqlalchemy import create_engine, select, Table, MetaData
-from db import schemas, tables
-from db import types
+from sqlalchemy import (
+    create_engine, select, Table, MetaData, ForeignKey, Column, Integer
+)
+from db import schemas, tables, types, constants
 
 
 def test_get_mathesar_schemas():
@@ -107,3 +108,30 @@ def test_rename_schema(engine):
     current_schemas = schemas.get_mathesar_schemas(engine)
     assert test_schema not in current_schemas
     assert new_test_schema in current_schemas
+
+
+def test_rename_schema_foreign_key(engine):
+    test_schema = "test_rename_schema_foreign_key"
+    new_test_schema = "test_rename_schema_foreign_key_new"
+    test_table = "test_rename_schema_foreign_key_table"
+    test_related_table = "test_rename_schema_foreign_key_related_table"
+
+    schemas.create_schema(test_schema, engine)
+    table = tables.create_mathesar_table(test_table, test_schema, [], engine)
+
+    metadata = MetaData(schema=test_schema, bind=engine)
+    related_table = Table(
+        test_related_table, metadata,
+        Column('id', Integer, ForeignKey(table.c[constants.ID]))
+    )
+    related_table.create()
+
+    related_table = tables.reflect_table(related_table.name, test_schema, engine)
+    fk = list(related_table.foreign_keys)[0]
+    assert fk.parent.table.schema == test_schema
+
+    schemas.rename_schema(test_schema, engine, new_test_schema)
+
+    related_table = tables.reflect_table(related_table.name, new_test_schema, engine)
+    fk = list(related_table.foreign_keys)[0]
+    assert fk.parent.table.schema == new_test_schema
