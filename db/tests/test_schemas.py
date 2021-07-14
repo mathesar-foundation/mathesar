@@ -1,8 +1,9 @@
-from unittest.mock import patch
 import warnings
+from unittest.mock import patch
 from sqlalchemy import (
     create_engine, select, Table, MetaData, ForeignKey, Column, Integer
 )
+
 from db import schemas, tables, types, constants
 
 
@@ -51,6 +52,25 @@ def test_get_mathesar_schemas_with_oids_gets_correct_oid(engine_with_schema):
     assert actual_oid == expect_oid
 
 
+def _create_related_table(schema, related_schema, table, related_table, engine):
+    schemas.create_schema(schema, engine)
+    table = tables.create_mathesar_table(table, schema, [], engine)
+
+    schemas.create_schema(related_schema, engine)
+    metadata = MetaData(schema=related_schema, bind=engine)
+    related_table = Table(
+        related_table, metadata,
+        Column('id', Integer, ForeignKey(table.c[constants.ID]))
+    )
+    related_table.create()
+
+    related_table = tables.reflect_table(related_table.name, related_schema, engine)
+    fk = list(related_table.foreign_keys)[0]
+    assert fk.column.table.schema == schema
+
+    return related_table
+
+
 def test_delete_schema(engine):
     test_schema = "test_delete_schema"
 
@@ -76,6 +96,7 @@ def test_delete_schema_restricted(engine):
     assert len(related_tables) == 1
     assert test_table in related_tables
 
+    # Ensure schema was not deleted, as it has relations
     current_schemas = schemas.get_mathesar_schemas(engine)
     assert test_schema in current_schemas
 
@@ -112,26 +133,17 @@ def test_rename_schema(engine):
 
 def test_rename_schema_foreign_key(engine):
     test_schema = "test_rename_schema_foreign_key"
+    related_schema = "test_rename_schema_foreign_key_related"
     new_test_schema = "test_rename_schema_foreign_key_new"
     test_table = "test_rename_schema_foreign_key_table"
     test_related_table = "test_rename_schema_foreign_key_related_table"
 
-    schemas.create_schema(test_schema, engine)
-    table = tables.create_mathesar_table(test_table, test_schema, [], engine)
-
-    metadata = MetaData(schema=test_schema, bind=engine)
-    related_table = Table(
-        test_related_table, metadata,
-        Column('id', Integer, ForeignKey(table.c[constants.ID]))
+    related_table = _create_related_table(
+        test_schema, related_schema, test_table, test_related_table, engine
     )
-    related_table.create()
-
-    related_table = tables.reflect_table(related_table.name, test_schema, engine)
-    fk = list(related_table.foreign_keys)[0]
-    assert fk.parent.table.schema == test_schema
 
     schemas.rename_schema(test_schema, engine, new_test_schema)
 
-    related_table = tables.reflect_table(related_table.name, new_test_schema, engine)
+    related_table = tables.reflect_table(related_table.name, related_schema, engine)
     fk = list(related_table.foreign_keys)[0]
-    assert fk.parent.table.schema == new_test_schema
+    assert fk.column.table.schema == new_test_schema
