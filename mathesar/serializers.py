@@ -54,6 +54,10 @@ class TableSerializer(serializers.ModelSerializer):
             return None
 
 
+class TableDeleteParameterSerializer(serializers.Serializer):
+    cascade = serializers.BooleanField(default=False)
+
+
 class RecordSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         return instance._asdict()

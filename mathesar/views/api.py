@@ -20,6 +20,7 @@ from mathesar.pagination import (
 )
 from mathesar.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
+    TableDeleteParameterSerializer,
 )
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
 from mathesar.utils.tables import (
@@ -97,8 +98,12 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
 
     def destroy(self, request, pk=None):
+        serializer = TableDeleteParameterSerializer(data=request.GET)
+        if not serializer.is_valid():
+            raise ValidationError(serializer.errors)
+
         table = self.get_object()
-        table.delete_sa_table()
+        table.delete_sa_table(cascade=serializer.validated_data['cascade'])
         table.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
