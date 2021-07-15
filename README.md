@@ -27,6 +27,23 @@ docker exec -it mathesar_web_1 python install.py
 
 If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASES.mathesar_tables` entry of the `config/settings.py` file with appropriate connection details before installing the Mathesar types and functions with the previous step.
 
+### Linting
+
+To lint the project, run the `lint.sh` script from the root of the repository. The script requires that the Python virtual environment with `flake8` be activated and that Node modules be installed in `mathesar_ui/`.
+```
+./lint.sh
+```
+
+By default, the script lints both Python and Node.js but this can be changed with the `-p` and `-n` flags respectively.
+```
+./lint.sh -p false
+```
+
+You should symlink the script as your pre-commit hook to ensure that your code is linted along-side development.
+```
+ln -s ../../lint.sh .git/hooks/pre-commit
+```
+
 ### Running tests
 
 If you'd like to run tests before pushing, here's how you do it:
