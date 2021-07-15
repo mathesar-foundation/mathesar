@@ -58,7 +58,6 @@ def create_mathesar_table(name, schema, columns_, engine, metadata=None):
 
 class DropTableCascade(DropTable):
     def __init__(self, table, cascade=False, if_exists=False, **kwargs):
-        print(if_exists)
         super().__init__(table, if_exists=if_exists, **kwargs)
         self.cascade = cascade
 

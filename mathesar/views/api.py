@@ -11,6 +11,7 @@ from sqlalchemy.exc import ProgrammingError
 from sqlalchemy_filters.exceptions import (
     BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound,
 )
+from psycopg2.errors import DependentObjectsStillExist
 
 
 from mathesar.database.utils import get_non_default_database_keys, update_databases
@@ -105,7 +106,10 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
             raise ValidationError(serializer.errors)
 
         table = self.get_object()
-        table.delete_sa_table(cascade=serializer.validated_data['cascade'])
+        try:
+            table.delete_sa_table(cascade=serializer.validated_data['cascade'])
+        except DependentObjectsStillExist:
+            raise ValidationError('Cannot delete, dependent database objects exist.')
         table.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

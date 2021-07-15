@@ -3,14 +3,14 @@ import pytest
 
 from django.core.cache import cache
 from django.core.files import File
-from sqlalchemy import text
+from sqlalchemy import text, MetaData, Column, ForeignKey, Integer, Table as SATable
 
 from mathesar.models import Table
 from mathesar.models import DataFile, Schema
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.views import api
 from db.tests.types import fixtures
-from db import tables
+from db import tables, constants
 
 
 engine_with_types = fixtures.engine_with_types
@@ -284,7 +284,7 @@ def test_table_partial_update(create_table, client):
 
 @pytest.mark.parametrize('cascade', [True, False])
 def test_table_delete(create_table, client, cascade):
-    table_name = 'NASA Table Partial Update'
+    table_name = 'NASA Table Delete'
     table = create_table(table_name)
     table_count = len(Table.objects.all())
 
@@ -348,6 +348,29 @@ def test_table_partial_update_404(client):
     response = client.patch('/api/v0/tables/3000/', {})
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
+
+
+@pytest.mark.parametrize('cascade', [True, False])
+def test_table_delete_dependent_object(create_table, client, cascade, engine):
+    table_name = 'NASA Table Delete Dependent Object'
+    related_table_name = 'NASA Table Delete Dependent Object Related'
+    table = create_table(table_name)
+
+    metadata = MetaData(schema=table.schema.name, bind=engine)
+    related_table = SATable(
+        related_table_name, metadata,
+        Column('id', Integer, ForeignKey(table._sa_table.c[constants.ID]))
+    )
+    related_table.create()
+
+    response = client.delete(f'/api/v0/tables/{table.id}/?cascade={cascade}')
+    if cascade:
+        assert response.status_code == 204
+    else:
+        assert response.status_code == 400
+        assert response.json()[0] == (
+            'Cannot delete, dependent database objects exist.'
+        )
 
 
 def test_table_delete_404(client):
