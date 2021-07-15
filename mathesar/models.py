@@ -79,6 +79,12 @@ class Schema(DatabaseObject):
         except TypeError:
             return 'MISSING'
 
+    def update_sa_schema(self, update_params):
+        return model_utils.update_sa_schema(self, update_params)
+
+    def delete_sa_schema(self):
+        return schemas.delete_schema(self.name, self._sa_engine, cascade=True)
+
 
 class Table(DatabaseObject):
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
