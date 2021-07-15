@@ -19,11 +19,18 @@
 </script>
 
 <script lang="ts">
-  import { onMount, afterUpdate, onDestroy } from 'svelte';
+  import {
+    createEventDispatcher,
+    onMount,
+    afterUpdate,
+    onDestroy,
+  } from 'svelte';
   import PerfectScrollbar from 'perfect-scrollbar';
   import { cancelTimeout, requestTimeout } from './timer';
   import listUtils from './listUtils';
-  import type { Props } from './listUtils';
+  import type { Props, ItemInfo } from './listUtils';
+
+  const dispatch = createEventDispatcher();
 
   let classes = 'default';
   export { classes as class };
@@ -47,7 +54,7 @@
   let isScrolling: Props['isScrolling'] = false;
   let scrollDirection : Props['scrollDirection'] = 'forward';
 
-  let items = [];
+  let items: ItemInfo['items'] = [];
   let estimatedTotalSize: number;
 
   let outerRef: HTMLElement;
@@ -59,10 +66,11 @@
   let requestGetItemStyleCache = false;
   let psRef: PerfectScrollbar = null;
 
+  let itemInfo: ItemInfo;
+
   function recalc(opts: Props) {
-    items = listUtils.getItems(opts);
-    // Read this value AFTER items have been created,
-    // So their actual sizes (if variable) are taken into consideration.
+    itemInfo = listUtils.getItemsInfo(opts);
+    items = itemInfo.items;
     estimatedTotalSize = listUtils.getEstimatedTotalSize(opts);
   }
 
@@ -126,6 +134,8 @@
       onHorizontalScroll(ev);
     };
 
+    dispatch('refetch', itemInfo);
+
     outerRef.addEventListener('ps-scroll-y', callback);
     outerRef.addEventListener('ps-scroll-x', hCallback);
 
@@ -136,10 +146,11 @@
     });
   });
 
-  const resetIsScrolling = () => {
+  const scrollStopped = () => {
     resetIsScrollingTimeoutId = null;
     isScrolling = false;
     requestGetItemStyleCache = true;
+    dispatch('refetch', itemInfo);
   };
 
   function resetIsScrollingDebounced() {
@@ -147,7 +158,7 @@
       cancelTimeout(resetIsScrollingTimeoutId);
     }
     resetIsScrollingTimeoutId = requestTimeout(
-      resetIsScrolling,
+      scrollStopped,
       IS_SCROLLING_DEBOUNCE_INTERVAL,
     );
   }
@@ -180,7 +191,12 @@
   bind:this={outerRef}>
   <div
       bind:this={innerRef}
-      style="height:{estimatedTotalSize + paddingBottom}px;{isScrolling ? 'pointer-events:none;' : ''}width:100%;">
+      style="height:{estimatedTotalSize + paddingBottom}px;
+            {isScrolling ? 'pointer-events:none;' : ''}width:100%;">
       <slot {items} />
   </div>
 </div>
+
+<style global lang="scss">
+  @import "VirtualList.scss";
+</style>

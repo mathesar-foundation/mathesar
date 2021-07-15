@@ -9,13 +9,13 @@ import type {
  *  [
  *    id,
  *    limit,
- *    page,
+ *    offset,
  *    [sortcolumn1, sortorder, sortc2, sortorder2],
  *    [filtercolumn, condition, value, op2, condition2]
  *  ]
  * ], a=id
  * t -> tables, a -> active
- * Null value for limit and page represented as -1
+ * Null value for limit and offset represented as -1
  */
 
 interface TableOptions extends Partial<TableOptionsData> {
@@ -48,16 +48,16 @@ function parseTableConfig(config: RawTableConfig): TableConfig {
   };
 
   if (config[1]) {
-    const pageSize = parseInt(config[1] as string, 10);
-    if (pageSize > -1) {
-      tableConfig.pageSize = pageSize;
+    const limit = parseInt(config[1] as string, 10);
+    if (limit > -1) {
+      tableConfig.limit = limit;
     }
   }
 
   if (config[2]) {
-    const page = parseInt(config[2] as string, 10);
-    if (page > -1) {
-      tableConfig.page = page;
+    const offset = parseInt(config[2] as string, 10);
+    if (offset > -1) {
+      tableConfig.offset = offset;
     }
   }
 
@@ -79,8 +79,8 @@ function parseTableConfig(config: RawTableConfig): TableConfig {
 function prepareRawTableConfig(id: number, options?: TableOptions): RawTableConfig {
   const table: RawTableConfig = [id];
   if (options) {
-    table.push(options.pageSize || -1);
-    table.push(options.page || -1);
+    table.push(options.limit || -1);
+    table.push(options.offset || -1);
     const sortOption: string[] = [];
     options.sort?.forEach((value, key) => {
       sortOption.push(key);

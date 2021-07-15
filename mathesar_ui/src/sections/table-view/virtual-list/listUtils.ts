@@ -1,5 +1,5 @@
 /**
- * Forked from "react-window@1.8.6"
+ * Forked and ported from "react-window@1.8.6"
  * https://github.com/bvaughn/react-window
  * Copyright (c) 2018 Brian Vaughn
  *
@@ -39,6 +39,12 @@ export interface Props {
   height: number,
   itemKey: (index: number) => number,
   estimatedItemSize: number
+}
+
+export interface ItemInfo {
+  items: Item[],
+  startIndex: number,
+  stopIndex: number
 }
 
 const defaultItemKey: Props['itemKey'] = (index: number) => index;
@@ -235,7 +241,7 @@ function getItemStyle(
   return style;
 }
 
-function getItems(props: Props): Item[] {
+function getItemsInfo(props: Props): ItemInfo {
   const {
     itemKey,
     itemCount,
@@ -258,7 +264,11 @@ function getItems(props: Props): Item[] {
       i += 1;
     }
   }
-  return items;
+  return {
+    items,
+    startIndex,
+    stopIndex,
+  };
 }
 
 function getEstimatedTotalSize(props: Props): number {
@@ -286,6 +296,6 @@ function getEstimatedTotalSize(props: Props): number {
 }
 
 export default {
-  getItems,
+  getItemsInfo,
   getEstimatedTotalSize,
 };

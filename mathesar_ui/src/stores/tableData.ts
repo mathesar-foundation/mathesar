@@ -50,8 +50,8 @@ interface TableRecordData {
 export type SortOption = Map<string, 'asc' | 'desc'>;
 export type GroupOption = Set<string>;
 export interface TableOptionsData {
-  pageSize: number,
-  page: number,
+  limit: number,
+  offset: number,
   sort: SortOption,
   group: GroupOption
 }
@@ -65,8 +65,7 @@ export interface TableDisplayData {
 }
 
 interface TableConfigData {
-  previousTableRequest?: CancellablePromise<TableDetailsResponse>,
-  previousRecordRequest?: CancellablePromise<TableRecordsResponse>,
+  previousTableRequest?: CancellablePromise<TableDetailsResponse>
 }
 
 export type TableColumnStore = Writable<TableColumnData>;
@@ -161,6 +160,50 @@ export async function fetchTableRecords(
     const existingData = get(tableRecordStore);
     const optionData = get(optionStore);
 
+    // const requestedOffset = optionData.pageSize * (optionData.page - 1);
+    const requestedOffset = optionData.offset;
+    let offset: number = null;
+    let limit: number = null;
+
+    // Set offset as the first empty item index in range
+    // If range is empty, this will break on 1 loop
+    for (let i = requestedOffset; i < requestedOffset + optionData.limit; i += 1) {
+      if (!existingData.data[i]) {
+        offset = i;
+        break;
+      }
+    }
+
+    // Return if range is already loaded
+    if (offset === null) {
+      return;
+    }
+
+    // Set limit based on last empty item index in range
+    // If range is empty, this will break on 1 loop
+    for (let i = requestedOffset + optionData.limit - 1; i >= requestedOffset; i -= 1) {
+      if (!existingData.data[i]) {
+        limit = i - offset + 1;
+        break;
+      }
+    }
+
+    // Limit should have already been set here.
+
+    // Set all elements in new range to state: loading
+    // Using the same object to not trigger an immediate re-render
+    for (let i = offset; i < offset + limit; i += 1) {
+      /**
+       * There may be a case where a smaller range is already loaded
+       * within the specified range.
+       *
+       * So, updating only empty elements
+       */
+      if (!existingData.data[i]) {
+        existingData.data[i] = { __state: 'loading' };
+      }
+    }
+
     tableRecordStore.set({
       ...existingData,
       state: States.Loading,
@@ -168,8 +211,7 @@ export async function fetchTableRecords(
     });
 
     const params = [];
-    params.push(`limit=${optionData.pageSize}`);
-    const offset = optionData.pageSize * (optionData.page - 1);
+    params.push(`limit=${limit}`);
     params.push(`offset=${offset}`);
 
     const groupOptions = Array.from(optionData.group ?? []);
@@ -194,19 +236,23 @@ export async function fetchTableRecords(
     // }
 
     try {
-      table.config.previousRecordRequest?.cancel();
-
       const tableRecordsPromise = getAPI<TableRecordsResponse>(`/tables/${id}/records/?${params.join('&')}`);
-
-      table.config = {
-        ...table.config,
-        previousRecordRequest: tableRecordsPromise,
-      };
-
       const response = await tableRecordsPromise;
-
       const totalCount = response.count || 0;
       const data = response.results || [];
+
+      // Getting from store again, since state may have changed
+      const records = [...get(tableRecordStore).data];
+      records.length = totalCount;
+
+      for (
+        let i = offset, j = 0;
+        i < offset + limit && j < data.length;
+        i += 1, j += 1
+      ) {
+        records[i] = data[j];
+      }
+
       let groupData: TableRecordGroupData = null;
       if (response?.group_count?.results) {
         groupData = {
@@ -216,7 +262,7 @@ export async function fetchTableRecords(
       }
       tableRecordStore.set({
         state: States.Done,
-        data,
+        data: records,
         groupData,
         totalCount,
       });
@@ -225,7 +271,7 @@ export async function fetchTableRecords(
         state: States.Error,
         error: err instanceof Error ? err.message : null,
         data: [],
-        totalCount: 0,
+        totalCount: null,
       });
     }
   }
@@ -248,11 +294,11 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
       records: writable({
         state: States.Loading,
         data: [],
-        totalCount: 0,
+        totalCount: null,
       }),
       options: writable({
-        pageSize: options?.pageSize || 500,
-        page: options?.page || 1,
+        limit: options?.limit || 40,
+        offset: options?.offset || 0,
         sort: options?.sort || null,
         group: options?.group || null,
       }),

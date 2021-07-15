@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
   import { faFilter } from '@fortawesome/free-solid-svg-icons';
   import {
     getTable,
@@ -16,6 +17,7 @@
   import DisplayOptions from './DisplayOptions.svelte';
   import Header from './Header.svelte';
   import Body from './Body.svelte';
+  import type { ItemInfo } from './virtual-list/listUtils';
 
   export let database: string;
   export let id: unknown;
@@ -39,9 +41,25 @@
 
   $: setStores(database, identifier);
 
-  function refetch() {
+  function refetch(event: { detail: ItemInfo }) {
+    const itemInfo = event.detail;
+    const optInfo = get(options);
+    const recordInfo = get(records);
+
+    const offset = Math.max(itemInfo.startIndex - 20, 0);
+    let limit = itemInfo.stopIndex - itemInfo.startIndex + 26;
+    if (recordInfo.totalCount !== null
+        && offset + limit > recordInfo.totalCount) {
+      limit = recordInfo.totalCount - offset;
+    }
+    options.set({
+      ...optInfo,
+      limit,
+      offset,
+    });
+
     void fetchTableRecords(database, identifier);
-    URLQueryHandler.setTableOptions(database, identifier, $options);
+    // URLQueryHandler.setTableOptions(database, identifier, $options);
   }
 
   function toggleDisplayOptions() {
@@ -80,15 +98,14 @@
   <div class="table-content">
     {#if $columns.data.length > 0}
       <Header columns={$columns}
-              bind:sort={$options.sort}
               bind:columnPosition={$display.columnPosition}
-              {horizontalScrollOffset}
-              on:refetch={refetch}/>
+              {horizontalScrollOffset}/>
 
       <Body columns={$columns} data={$records.data}
             groupData={$records.groupData}
             bind:horizontalScrollOffset
-            columnPosition={$display.columnPosition}/>
+            columnPosition={$display.columnPosition}
+            on:refetch={refetch}/>
     {/if}
   </div>
 </div>

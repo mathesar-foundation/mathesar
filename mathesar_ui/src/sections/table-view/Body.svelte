@@ -5,8 +5,9 @@
     TableRecordGroupData,
     TableDisplayData,
   } from '@mathesar/stores/tableData';
-  import { VirtualList } from '@mathesar-components';
   import Row from './Row.svelte';
+  import Resizer from './virtual-list/Resizer.svelte';
+  import VirtualList from './virtual-list/VirtualList.svelte';
 
   export let columns: TableColumnData;
   export let data: TableRecords[];
@@ -57,15 +58,32 @@
   }
 
   $: rowsToDisplay = computeDisplayRows(data, groupData);
+
+  function getItemSize() {
+    return 30;
+  }
 </script>
 
 <div class="body">
-  <VirtualList itemCount={50000}
-                bind:horizontalScrollOffset
-                let:index let:style>
-    <Row {columns}
-          isGrouped={!!groupData} {style}
-          row={rowsToDisplay[index] || {}} {index}
-          {columnPosition}/>
-  </VirtualList>
+  <Resizer let:height>
+    <VirtualList
+      {height}
+      itemCount={data.length}
+      paddingBottom={100}
+      itemSize={getItemSize}
+      bind:horizontalScrollOffset
+      on:refetch
+      let:items
+      >
+      {#each items as it (it?.key || it)}
+        {#if it}
+          <Row {columns}
+                isGrouped={!!groupData} style={it.style}
+                row={rowsToDisplay[it.index] || {}}
+                index={it.index}
+                {columnPosition}/>
+        {/if}
+      {/each}
+    </VirtualList>
+  </Resizer>
 </div>
