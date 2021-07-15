@@ -22,7 +22,7 @@ def get_table_column_types(table):
     types = infer_table_column_types(schema.name, table.name, schema._sa_engine)
     col_types = {
         col.name: t().compile(dialect=schema._sa_engine.dialect)
-        for col, t in zip(table.mathesar_columns, types)
+        for col, t in zip(table.sa_columns, types)
         if not col.is_default
         and not col.primary_key
         and not col.foreign_keys

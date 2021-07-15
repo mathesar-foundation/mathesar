@@ -23,9 +23,9 @@ class ColumnLimitOffsetPagination(DefaultLimitOffsetPagination):
             self.limit = self.default_limit
         self.offset = self.get_offset(request)
         table = queryset.get(id=table_id)
-        self.count = len(table.mathesar_columns)
+        self.count = len(table.sa_columns)
         self.request = request
-        return list(table.mathesar_columns)[self.offset:self.offset + self.limit]
+        return list(table.sa_columns)[self.offset:self.offset + self.limit]
 
 
 class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
