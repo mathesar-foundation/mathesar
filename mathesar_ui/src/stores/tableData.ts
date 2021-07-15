@@ -58,6 +58,7 @@ export interface TableOptionsData {
 
 export interface TableDisplayData {
   scrollOffset: number,
+  horizontalScrollOffset: number,
   columnPosition: Map<string, {
     width: number,
     left: number
@@ -303,6 +304,7 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
         group: options?.group || null,
       }),
       display: writable({
+        horizontalScrollOffset: 0,
         scrollOffset: 0,
         columnPosition: new Map(),
       }),

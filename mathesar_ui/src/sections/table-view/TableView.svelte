@@ -28,7 +28,7 @@
   let options: TableOptionsStore;
   let display: TableDisplayStore;
   let showDisplayOptions = false;
-  let horizontalScrollOffset = 0;
+  let tableBodyRef: Body;
 
   function setStores(_database: string, _id: number) {
     const opts = URLQueryHandler.getTableConfig(_database, _id);
@@ -37,6 +37,15 @@
     records = table.records;
     options = table.options;
     display = table.display;
+
+    if (tableBodyRef) {
+      const displayInfo = get(display);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      tableBodyRef.scrollToPosition(
+        displayInfo.scrollOffset,
+        displayInfo.horizontalScrollOffset,
+      );
+    }
   }
 
   $: setStores(database, identifier);
@@ -99,12 +108,13 @@
     {#if $columns.data.length > 0}
       <Header columns={$columns}
               bind:columnPosition={$display.columnPosition}
-              {horizontalScrollOffset}/>
+              horizontalScrollOffset={$display.horizontalScrollOffset}/>
 
-      <Body columns={$columns} data={$records.data}
+      <Body bind:this={tableBodyRef} columns={$columns} data={$records.data}
             groupData={$records.groupData}
-            bind:horizontalScrollOffset
             columnPosition={$display.columnPosition}
+            bind:scrollOffset={$display.scrollOffset}
+            bind:horizontalScrollOffset={$display.horizontalScrollOffset}
             on:refetch={refetch}/>
     {/if}
   </div>

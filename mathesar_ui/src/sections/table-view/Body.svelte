@@ -13,7 +13,12 @@
   export let data: TableRecords[];
   export let groupData: TableRecordGroupData;
   export let columnPosition: TableDisplayData['columnPosition'];
+  export let scrollOffset = 0;
   export let horizontalScrollOffset = 0;
+
+  // Be careful while accessing this ref.
+  // Resizer may not have created it yet/destroyed it
+  let virtualListRef: VirtualList;
 
   function computeDisplayRows(
     _rows: TableRecords[],
@@ -62,16 +67,25 @@
   function getItemSize() {
     return 30;
   }
+
+  export function scrollToPosition(_vScroll: number, _hScroll: number): void {
+    if (virtualListRef) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      virtualListRef.scrollToPosition(_vScroll, _hScroll);
+    }
+  }
 </script>
 
 <div class="body">
   <Resizer let:height>
     <VirtualList
+      bind:this={virtualListRef}
+      bind:scrollOffset
+      bind:horizontalScrollOffset
       {height}
       itemCount={data.length}
       paddingBottom={100}
       itemSize={getItemSize}
-      bind:horizontalScrollOffset
       on:refetch
       let:items
       >

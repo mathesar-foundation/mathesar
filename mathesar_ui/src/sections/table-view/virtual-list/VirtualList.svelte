@@ -183,6 +183,29 @@
       cancelTimeout(resetIsScrollingTimeoutId);
     }
   });
+
+  export function scrollToPosition(
+    _scrollOffset: number,
+    _horizontalScrollOffset: number,
+  ): void {
+    if (outerRef && psRef) {
+      const newOffset = Math.max(_scrollOffset, 0);
+      const newHOffset = Math.max(_horizontalScrollOffset, 0);
+
+      let isUpdateRequired = false;
+      if (scrollOffset !== newOffset) {
+        outerRef.scrollTop = newOffset;
+        isUpdateRequired = true;
+      }
+      if (horizontalScrollOffset !== newHOffset) {
+        outerRef.scrollLeft = newHOffset;
+        isUpdateRequired = true;
+      }
+      if (isUpdateRequired) {
+        psRef.update();
+      }
+    }
+  }
 </script>
 
 <div
