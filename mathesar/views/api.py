@@ -89,8 +89,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         serializer = TableSerializer(
             data=request.data, context={'request': request}, partial=True
         )
-        if not serializer.is_valid():
-            raise ValidationError(serializer.errors)
+        serializer.is_valid(raise_exception=True)
 
         table = self.get_object()
         table.update_sa_table(serializer.validated_data)
@@ -102,8 +101,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
 
     def destroy(self, request, pk=None):
         serializer = TableDeleteParameterSerializer(data=request.GET)
-        if not serializer.is_valid():
-            raise ValidationError(serializer.errors)
+        serializer.is_valid(raise_exception=True)
 
         table = self.get_object()
         try:
