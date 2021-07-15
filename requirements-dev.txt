@@ -3,5 +3,4 @@ ipython==7.21.0
 pytest==6.2.3
 pytest-django==4.2.0
 pytest-env==0.6.2
-python-decouple==3.4
 Sphinx==3.5.3

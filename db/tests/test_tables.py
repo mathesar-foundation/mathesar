@@ -1,6 +1,9 @@
 from unittest.mock import call, patch
 import pytest
-from sqlalchemy import MetaData, select, Column, String
+from sqlalchemy import MetaData, select, Column, String, Table, ForeignKey, Integer
+from sqlalchemy.exc import NoSuchTableError
+from psycopg2.errors import DependentObjectsStillExist
+
 from db import tables, constants, columns
 
 ROSTER = "Roster"
@@ -42,6 +45,100 @@ def test_table_creation_doesnt_reuse_defaults(engine_with_schema):
             for c1, c2 in zip(t1.columns, t2.columns)
         ]
     )
+
+
+@pytest.mark.parametrize("if_exists", [True, False])
+def test_delete_table(engine_with_schema, if_exists):
+    engine, schema = engine_with_schema
+    table_name = "test_delete_table"
+    tables.create_mathesar_table(table_name, schema, [], engine)
+    tables.delete_table(table_name, schema, engine, if_exists=if_exists)
+    with pytest.raises(NoSuchTableError):
+        tables.reflect_table(table_name, schema, engine)
+
+
+def test_delete_table_no_table_if_exists_true(engine_with_schema):
+    engine, schema = engine_with_schema
+    # Just confirm we don't thrown an error
+    tables.delete_table("test_delete_table", schema, engine, if_exists=True)
+
+
+def test_delete_table_no_table_if_exists_false(engine_with_schema):
+    engine, schema = engine_with_schema
+    with pytest.raises(NoSuchTableError):
+        tables.delete_table("test_delete_table", schema, engine, if_exists=False)
+
+
+def _create_related_table(name, table, schema, engine):
+    metadata = MetaData(schema=schema, bind=engine)
+    related_table = Table(
+        name, metadata,
+        Column('id', Integer, ForeignKey(table.c[constants.ID]))
+    )
+    related_table.create()
+    fk = list(related_table.foreign_keys)[0]
+    assert fk.column.table.name == table.name
+    return related_table
+
+
+def test_delete_table_restricted_foreign_key(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "test_delete_table_restricted_foreign_key"
+    related_table_name = "test_delete_table_restricted_foreign_key_related"
+
+    table = tables.create_mathesar_table(table_name, schema, [], engine)
+    _create_related_table(related_table_name, table, schema, engine)
+
+    with pytest.raises(DependentObjectsStillExist):
+        tables.delete_table(table_name, schema, engine, cascade=False)
+
+
+def test_delete_table_cascade_foreign_key(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "test_delete_table_cascade_foreign_key"
+    related_table_name = "test_delete_table_cascade_foreign_key_related"
+
+    table = tables.create_mathesar_table(table_name, schema, [], engine)
+    related_table = _create_related_table(related_table_name, table, schema, engine)
+
+    tables.delete_table(table_name, schema, engine, cascade=True)
+
+    related_table = tables.reflect_table(related_table.name, schema, engine)
+    assert len(related_table.foreign_keys) == 0
+
+
+def test_rename_table(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "test_rename_table"
+    new_table_name = "test_rename_table_new"
+    old_table = tables.create_mathesar_table(table_name, schema, [], engine)
+    old_oid = tables.get_oid_from_table(old_table.name, old_table.schema, engine)
+
+    tables.rename_table(table_name, schema, engine, new_table_name)
+    new_table = tables.reflect_table(new_table_name, schema, engine)
+    new_oid = tables.get_oid_from_table(new_table.name, new_table.schema, engine)
+
+    assert old_oid == new_oid
+    assert new_table.name == new_table_name
+
+    with pytest.raises(NoSuchTableError):
+        tables.reflect_table(table_name, schema, engine)
+
+
+def test_rename_table_foreign_key(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "test_rename_table_foreign_key"
+    new_table_name = "test_rename_table_foreign_key_new"
+    related_table_name = "test_rename_table_foreign_key_related"
+
+    table = tables.create_mathesar_table(table_name, schema, [], engine)
+    related_table = _create_related_table(related_table_name, table, schema, engine)
+
+    tables.rename_table(table_name, schema, engine, new_table_name)
+
+    related_table = tables.reflect_table(related_table_name, schema, engine)
+    fk = list(related_table.foreign_keys)[0]
+    assert fk.column.table.name == new_table_name
 
 
 def test_extract_columns_from_table_creates_tables(engine_with_roster):
