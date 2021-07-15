@@ -282,14 +282,13 @@ def test_table_partial_update(create_table, client):
     assert table.name == new_table_name
 
 
-@pytest.mark.parametrize('cascade', [True, False])
-def test_table_delete(create_table, client, cascade):
+def test_table_delete(create_table, client):
     table_name = 'NASA Table Delete'
     table = create_table(table_name)
     table_count = len(Table.objects.all())
 
     with patch.object(tables, 'delete_table') as mock_infer:
-        response = client.delete(f'/api/v0/tables/{table.id}/?cascade={cascade}')
+        response = client.delete(f'/api/v0/tables/{table.id}/')
     assert response.status_code == 204
 
     # Ensure the Django model was deleted
@@ -304,7 +303,7 @@ def test_table_delete(create_table, client, cascade):
         table.schema._sa_engine,
     )
     assert mock_infer.call_args[1] == {
-        'cascade': cascade
+        'cascade': True
     }
 
 
@@ -348,29 +347,6 @@ def test_table_partial_update_404(client):
     response = client.patch('/api/v0/tables/3000/', {})
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
-
-
-@pytest.mark.parametrize('cascade', [True, False])
-def test_table_delete_dependent_object(create_table, client, cascade, engine):
-    table_name = 'NASA Table Delete Dependent Object'
-    related_table_name = 'NASA Table Delete Dependent Object Related'
-    table = create_table(table_name)
-
-    metadata = MetaData(schema=table.schema.name, bind=engine)
-    related_table = SATable(
-        related_table_name, metadata,
-        Column('id', Integer, ForeignKey(table._sa_table.c[constants.ID]))
-    )
-    related_table.create()
-
-    response = client.delete(f'/api/v0/tables/{table.id}/?cascade={cascade}')
-    if cascade:
-        assert response.status_code == 204
-    else:
-        assert response.status_code == 400
-        assert response.json()[0] == (
-            'Cannot delete, dependent database objects exist.'
-        )
 
 
 def test_table_delete_404(client):

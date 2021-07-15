@@ -144,9 +144,9 @@ class Table(DatabaseObject):
     def update_sa_table(self, update_params):
         return model_utils.update_sa_table(self, update_params)
 
-    def delete_sa_table(self, cascade=False):
+    def delete_sa_table(self):
         return tables.delete_table(self.name, self.schema.name, self.schema._sa_engine,
-                                   cascade=cascade)
+                                   cascade=True)
 
     def get_record(self, id_value):
         return records.get_record(self._sa_table, self.schema._sa_engine, id_value)

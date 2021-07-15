@@ -100,14 +100,8 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         return Response(serializer.data)
 
     def destroy(self, request, pk=None):
-        serializer = TableDeleteParameterSerializer(data=request.GET)
-        serializer.is_valid(raise_exception=True)
-
         table = self.get_object()
-        try:
-            table.delete_sa_table(cascade=serializer.validated_data['cascade'])
-        except DependentObjectsStillExist:
-            raise ValidationError('Cannot delete, dependent database objects exist.')
+        table.delete_sa_table()
         table.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
