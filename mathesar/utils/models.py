@@ -11,7 +11,10 @@ def user_directory_path(instance, filename):
 
 
 def update_sa_table(table, validated_data):
-    for arg in validated_data:
-        if arg not in SUPPORTED_TABLE_UPDATE_ARGS:
-            raise ValidationError({arg: f'Updating {arg} for tables is not supported.'})
+    errors = {
+        arg: f'Updating {arg} for tables is not supported.'
+        for arg in set(validated_data) - SUPPORTED_TABLE_UPDATE_ARGS
+    }
+    if errors:
+        raise ValidationError(errors)
     update_table(table.name, table.schema.name, table.schema._sa_engine, validated_data)
