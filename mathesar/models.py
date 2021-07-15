@@ -5,7 +5,6 @@ from django.utils.functional import cached_property
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.utils import models as model_utils
-from mathesar.utils import tables as table_utils
 from db import tables, records, schemas, columns
 from db.types.alteration import get_supported_alter_column_types
 
@@ -143,7 +142,7 @@ class Table(DatabaseObject):
         return tables.get_count(self._sa_table, self.schema._sa_engine, filters=filters)
 
     def update_sa_table(self, update_params):
-        return table_utils.update_sa_table(self, update_params)
+        return model_utils.update_sa_table(self, update_params)
 
     def delete_sa_table(self, cascade=False):
         return tables.delete_table(self.name, self.schema.name, self.schema._sa_engine,
