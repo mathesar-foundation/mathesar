@@ -3,14 +3,14 @@ import pytest
 
 from django.core.cache import cache
 from django.core.files import File
-from sqlalchemy import text, MetaData, Column, ForeignKey, Integer, Table as SATable
+from sqlalchemy import text
 
 from mathesar.models import Table
 from mathesar.models import DataFile, Schema
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.views import api
 from db.tests.types import fixtures
-from db import tables, constants
+from db import tables
 
 
 engine_with_types = fixtures.engine_with_types

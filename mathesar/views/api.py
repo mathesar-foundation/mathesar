@@ -11,7 +11,6 @@ from sqlalchemy.exc import ProgrammingError
 from sqlalchemy_filters.exceptions import (
     BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound,
 )
-from psycopg2.errors import DependentObjectsStillExist
 
 
 from mathesar.database.utils import get_non_default_database_keys, update_databases
