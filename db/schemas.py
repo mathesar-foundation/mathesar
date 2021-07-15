@@ -1,7 +1,11 @@
 import logging
 import warnings
-from sqlalchemy.schema import CreateSchema
+from sqlalchemy.schema import CreateSchema, DropSchema
 from sqlalchemy import inspect, MetaData, select, and_, not_, or_, Table
+from sqlalchemy.exc import InternalError
+from sqlalchemy.schema import DDLElement
+from sqlalchemy.ext import compiler
+from psycopg2.errors import DependentObjectsStillExist
 
 from db import types
 
@@ -78,3 +82,42 @@ def create_schema(schema, engine):
     if schema not in get_all_schemas(engine):
         with engine.begin() as connection:
             connection.execute(CreateSchema(schema))
+
+
+def delete_schema(schema, engine, cascade=False, if_exists=False):
+    """
+    This method deletes a Postgres schema.
+    """
+    if if_exists and schema not in get_all_schemas(engine):
+        return
+
+    with engine.begin() as connection:
+        try:
+            connection.execute(DropSchema(schema, cascade=cascade))
+        except InternalError as e:
+            if isinstance(e.orig, DependentObjectsStillExist):
+                raise e.orig
+            else:
+                raise e
+
+
+class RenameSchema(DDLElement):
+    def __init__(self, schema, rename_to):
+        self.schema = schema
+        self.rename_to = rename_to
+
+
+@compiler.compiles(RenameSchema)
+def compile_rename_schema(element, compiler, **_):
+    return "ALTER SCHEMA %s RENAME TO %s" % (
+        element.schema,
+        element.rename_to
+    )
+
+
+def rename_schema(schema, engine, rename_to):
+    """
+    This method renames a Postgres schema.
+    """
+    with engine.begin() as connection:
+        connection.execute(RenameSchema(schema, rename_to))
