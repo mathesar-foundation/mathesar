@@ -54,7 +54,7 @@ class TableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Table
         fields = ['id', 'name', 'schema', 'created_at', 'updated_at',
-                  'columns', 'records', 'data_files']
+                  'columns', 'records', 'data_files', 'has_dependencies']
 
     def get_records(self, obj):
         if isinstance(obj, Table):
@@ -63,10 +63,6 @@ class TableSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(reverse('table-record-list', kwargs={'table_pk': obj.pk}))
         else:
             return None
-
-
-class TableDeleteParameterSerializer(serializers.Serializer):
-    cascade = serializers.BooleanField(default=False)
 
 
 class RecordSerializer(serializers.BaseSerializer):

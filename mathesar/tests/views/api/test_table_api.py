@@ -38,6 +38,7 @@ def check_table_response(response_table, table, table_name):
     assert response_table['schema'] == table.schema.id
     assert 'created_at' in response_table
     assert 'updated_at' in response_table
+    assert 'has_dependencies' in response_table
     assert len(response_table['columns']) == len(table.sa_column_names)
     for column in response_table['columns']:
         assert column['name'] in table.sa_column_names
@@ -305,6 +306,16 @@ def test_table_delete(create_table, client):
     assert mock_infer.call_args[1] == {
         'cascade': True
     }
+
+
+def test_table_dependencies(client, create_table):
+    table_name = 'NASA Table Dependencies'
+    table = create_table(table_name)
+
+    response = client.get(f'/api/v0/tables/{table.id}/')
+    response_table = response.json()
+    assert response.status_code == 200
+    assert response_table['has_dependencies'] is True
 
 
 def test_table_404(client):

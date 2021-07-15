@@ -112,6 +112,10 @@ class Table(DatabaseObject):
     def sa_column_names(self):
         return self.sa_columns.keys()
 
+    @property
+    def has_dependencies(self):
+        return True
+
     def add_column(self, column_data):
         return columns.create_column(
             self.schema._sa_engine,
