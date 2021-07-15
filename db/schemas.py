@@ -7,7 +7,7 @@ from sqlalchemy.schema import DDLElement
 from sqlalchemy.ext import compiler
 from psycopg2.errors import DependentObjectsStillExist
 
-from db import types, tables
+from db import types
 
 logger = logging.getLogger(__name__)
 
@@ -73,21 +73,6 @@ def get_all_schemas(engine):
     # since Inspector.get_schema_names already excludes them.  Thus, this
     # function actually gets all non-pg-reserved schemas.
     return inspector.get_schema_names()
-
-
-def get_related_tables(engine, schema):
-    metadata = MetaData()
-    pg_tables = Table("pg_tables", metadata, autoload_with=engine)
-    sel = (
-        select(pg_tables.c.schemaname, pg_tables.c.tablename).
-        where(pg_tables.c.schemaname == schema)
-    )
-    with engine.begin() as conn:
-        results = conn.execute(sel).fetchall()
-
-    related_tables = [tables.reflect_table(table, schema, engine)
-                      for schema, table in results]
-    return related_tables
 
 
 def create_schema(schema, engine):
