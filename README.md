@@ -29,7 +29,7 @@ If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASE
 
 ### Linting
 
-To lint the project, run the `lint.sh` script from the root of the repository. The script requires that the Python virtual environment with `flake8` be activated and that Node modules be installed in `mathesar_ui/`.
+To lint the project, run the `lint.sh` script from the root of the repository. The script requires that the Python virtual environment with `flake8` be activated and that Node modules be installed in `mathesar_ui/`. Alternatively, ESLint and Flake8 should be installed globally on the system.
 ```
 ./lint.sh
 ```
