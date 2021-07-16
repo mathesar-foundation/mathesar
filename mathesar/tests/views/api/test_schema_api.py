@@ -109,12 +109,6 @@ def test_schema_detail(create_table, client, test_db_name):
     check_schema_response(response_schema, schema, 'Patents', test_db_name)
 
 
-def test_schema_404(create_table, client):
-    response = client.get('/api/v0/schemas/3000/')
-    assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
-
-
 def test_schema_create(client, test_db_name):
     num_schemas = Schema.objects.count()
 
@@ -179,6 +173,24 @@ def test_schema_delete(create_schema, client):
     assert mock_infer.call_args[1] == {
         'cascade': True
     }
+
+
+def test_schema_detail_404(client):
+    response = client.get('/api/v0/schemas/3000/')
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'
+
+
+def test_schema_partial_update_404(client):
+    response = client.patch('/api/v0/schemas/3000/', {})
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'
+
+
+def test_schema_delete_404(client):
+    response = client.delete('/api/v0/schemas/3000/')
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'
 
 
 def test_schema_get_with_reflect_new(client, test_db_name):
