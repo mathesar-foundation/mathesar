@@ -68,7 +68,21 @@
     });
 
     void fetchTableRecords(database, identifier);
-    // URLQueryHandler.setTableOptions(database, identifier, $options);
+  }
+
+  function reload() {
+    const optInfo = get(options);
+    options.set({
+      ...optInfo,
+      limit: 50,
+      offset: 0,
+    });
+    void fetchTableRecords(database, identifier, true);
+    URLQueryHandler.setTableOptions(database, identifier, $options);
+    if (tableBodyRef) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      tableBodyRef.scrollToPosition(0, 0);
+    }
   }
 
   function toggleDisplayOptions() {
@@ -107,8 +121,10 @@
   <div class="table-content">
     {#if $columns.data.length > 0}
       <Header columns={$columns}
+              bind:sort={$options.sort}
               bind:columnPosition={$display.columnPosition}
-              horizontalScrollOffset={$display.horizontalScrollOffset}/>
+              horizontalScrollOffset={$display.horizontalScrollOffset}
+              on:reload={reload}/>
 
       <Body bind:this={tableBodyRef} columns={$columns} data={$records.data}
             groupData={$records.groupData}

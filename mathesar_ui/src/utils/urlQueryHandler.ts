@@ -8,14 +8,11 @@ import type {
  * Structure of url t=[
  *  [
  *    id,
- *    limit,
- *    offset,
  *    [sortcolumn1, sortorder, sortc2, sortorder2],
  *    [filtercolumn, condition, value, op2, condition2]
  *  ]
  * ], a=id
  * t -> tables, a -> active
- * Null value for limit and offset represented as -1
  */
 
 interface TableOptions extends Partial<TableOptionsData> {
@@ -48,22 +45,8 @@ function parseTableConfig(config: RawTableConfig): TableConfig {
   };
 
   if (config[1]) {
-    const limit = parseInt(config[1] as string, 10);
-    if (limit > -1) {
-      tableConfig.limit = limit;
-    }
-  }
-
-  if (config[2]) {
-    const offset = parseInt(config[2] as string, 10);
-    if (offset > -1) {
-      tableConfig.offset = offset;
-    }
-  }
-
-  if (config[3]) {
     const sortOptionMap: SortOption = new Map();
-    const sortList = config[3] as string[];
+    const sortList = config[1] as string[];
     for (let i = 0; i < sortList.length; i += 2) {
       const sortOrder = sortList[i + 1] === 'd' ? 'desc' : 'asc';
       sortOptionMap.set(sortList[i], sortOrder);
@@ -79,8 +62,6 @@ function parseTableConfig(config: RawTableConfig): TableConfig {
 function prepareRawTableConfig(id: number, options?: TableOptions): RawTableConfig {
   const table: RawTableConfig = [id];
   if (options) {
-    table.push(options.limit || -1);
-    table.push(options.offset || -1);
     const sortOption: string[] = [];
     options.sort?.forEach((value, key) => {
       sortOption.push(key);

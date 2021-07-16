@@ -152,6 +152,7 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
 export async function fetchTableRecords(
   db: string,
   id: number,
+  reload = false,
 ): Promise<void> {
   const table = databaseMap.get(db)?.get(id);
   if (table) {
@@ -166,30 +167,41 @@ export async function fetchTableRecords(
     let offset: number = null;
     let limit: number = null;
 
-    // Set offset as the first empty item index in range
-    // If range is empty, this will break on 1 loop
-    for (let i = requestedOffset; i < requestedOffset + optionData.limit; i += 1) {
-      if (!existingData.data[i]) {
-        offset = i;
-        break;
+    if (reload) {
+      offset = requestedOffset;
+      limit = optionData.limit;
+    } else {
+      // Set offset as the first empty item index in range
+      // If range is empty, this will break on 1 loop
+      for (let i = requestedOffset; i < requestedOffset + optionData.limit; i += 1) {
+        if (!existingData.data[i]) {
+          offset = i;
+          break;
+        }
       }
-    }
 
-    // Return if range is already loaded
-    if (offset === null) {
-      return;
-    }
-
-    // Set limit based on last empty item index in range
-    // If range is empty, this will break on 1 loop
-    for (let i = requestedOffset + optionData.limit - 1; i >= requestedOffset; i -= 1) {
-      if (!existingData.data[i]) {
-        limit = i - offset + 1;
-        break;
+      // Return if range is already loaded
+      if (offset === null) {
+        return;
       }
+
+      // Set limit based on last empty item index in range
+      // If range is empty, this will break on 1 loop
+      for (let i = requestedOffset + optionData.limit - 1; i >= requestedOffset; i -= 1) {
+        if (!existingData.data[i]) {
+          limit = i - offset + 1;
+          break;
+        }
+      }
+
+      // Limit should have already been set here.
     }
 
-    // Limit should have already been set here.
+    // If reloaded, set all other elements to null
+    if (reload) {
+      existingData.data.length = offset + limit;
+      existingData.data.fill(null);
+    }
 
     // Set all elements in new range to state: loading
     // Using the same object to not trigger an immediate re-render
@@ -298,7 +310,7 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
         totalCount: null,
       }),
       options: writable({
-        limit: options?.limit || 40,
+        limit: options?.limit || 50,
         offset: options?.offset || 0,
         sort: options?.sort || null,
         group: options?.group || null,
