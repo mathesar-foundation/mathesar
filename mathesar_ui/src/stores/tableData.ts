@@ -66,7 +66,8 @@ export interface TableDisplayData {
 }
 
 interface TableConfigData {
-  previousTableRequest?: CancellablePromise<TableDetailsResponse>
+  previousTableRequest?: CancellablePromise<TableDetailsResponse>,
+  previousRecordRequestSet?: Set<CancellablePromise<TableRecordsResponse>>,
 }
 
 export type TableColumnStore = Writable<TableColumnData>;
@@ -170,6 +171,11 @@ export async function fetchTableRecords(
     if (reload) {
       offset = requestedOffset;
       limit = optionData.limit;
+
+      table.config.previousRecordRequestSet?.forEach((promise) => {
+        promise.cancel();
+      });
+      table.config.previousRecordRequestSet = null;
     } else {
       // Set offset as the first empty item index in range
       // If range is empty, this will break on 1 loop
@@ -247,9 +253,14 @@ export async function fetchTableRecords(
     //     `group_count_by=${encodeURIComponent(JSON.stringify(groupOptions))}`,
     //   );
     // }
+    const tableRecordsPromise = getAPI<TableRecordsResponse>(`/tables/${id}/records/?${params.join('&')}`);
+
+    if (!table.config.previousRecordRequestSet) {
+      table.config.previousRecordRequestSet = new Set();
+    }
+    table.config.previousRecordRequestSet.add(tableRecordsPromise);
 
     try {
-      const tableRecordsPromise = getAPI<TableRecordsResponse>(`/tables/${id}/records/?${params.join('&')}`);
       const response = await tableRecordsPromise;
       const totalCount = response.count || 0;
       const data = response.results || [];
@@ -286,6 +297,9 @@ export async function fetchTableRecords(
         data: [],
         totalCount: null,
       });
+    } finally {
+      // Delete from promise set, if the promise execution is complete
+      table.config.previousRecordRequestSet?.delete(tableRecordsPromise);
     }
   }
 }
