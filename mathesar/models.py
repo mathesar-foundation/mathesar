@@ -112,6 +112,7 @@ class Table(DatabaseObject):
     def sa_column_names(self):
         return self.sa_columns.keys()
 
+    # TODO: This should check for dependencies once the depdency endpoint is implemeted
     @property
     def has_dependencies(self):
         return True
