@@ -13,7 +13,7 @@
  */
 
 interface Item {
-  key: number,
+  key: number | string,
   index: number,
   isScrolling: boolean,
   style: { [key: string]: string | number },
@@ -37,7 +37,7 @@ export interface Props {
   overscanCount: number,
   scrollOffset: number,
   height: number,
-  itemKey: (index: number) => number,
+  itemKey: (index: number) => number | string,
   estimatedItemSize: number
 }
 
@@ -250,13 +250,12 @@ function getItemsInfo(props: Props): ItemInfo {
   const [startIndex, stopIndex] = getRangeToRender(props);
   const items: Item[] = [];
   items.length = stopIndex - startIndex + 1;
-  const getItemKey = itemKey || defaultItemKey;
 
   if (itemCount > 0) {
     let i = 0;
     for (let index = startIndex; index <= stopIndex; index += 1) {
       items[i] = {
-        key: getItemKey(index),
+        key: itemKey(index),
         index,
         isScrolling,
         style: getItemStyle(props, index),
@@ -296,6 +295,7 @@ function getEstimatedTotalSize(props: Props): number {
 }
 
 export default {
+  defaultItemKey,
   getItemsInfo,
   getEstimatedTotalSize,
 };

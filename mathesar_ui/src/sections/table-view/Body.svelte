@@ -64,8 +64,17 @@
 
   $: rowsToDisplay = computeDisplayRows(data, groupData);
 
-  function getItemSize() {
+  function getItemSize(index: number) {
+    if (data[index]?.__isGroupRow) {
+      return 60;
+    }
     return 30;
+  }
+
+  function getItemKey(index: number): number | string {
+    // Check and return primary key
+    // Return index by default
+    return `__index_${index}`;
   }
 
   export function scrollToPosition(_vScroll: number, _hScroll: number): void {
@@ -86,6 +95,7 @@
       itemCount={data.length}
       paddingBottom={100}
       itemSize={getItemSize}
+      itemKey={getItemKey}
       on:refetch
       let:items
       >
@@ -93,7 +103,7 @@
         {#if it}
           <Row {columns}
                 isGrouped={!!groupData} style={it.style}
-                row={rowsToDisplay[it.index] || {}}
+                row={data[it.index] || {}}
                 index={it.index}
                 {columnPosition}/>
         {/if}

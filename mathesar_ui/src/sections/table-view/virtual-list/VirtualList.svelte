@@ -44,8 +44,8 @@
   export let itemSize: Props['itemSize'] = () : number => estimatedItemSize;
   export let paddingBottom = 0;
   export let horizontalScrollOffset = 0;
+  export let itemKey: Props['itemKey'] = listUtils.defaultItemKey;
   
-  let itemKey: Props['itemKey'];
   const instanceProps: Props['instanceProps'] = {
     lastMeasuredIndex: -1,
     itemMetadataMap: {},
