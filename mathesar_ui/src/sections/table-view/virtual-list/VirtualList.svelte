@@ -1,6 +1,6 @@
 <script lang="ts" context="module">
   /**
-   * Forked from "react-window@1.8.6"
+   * Ported from "react-window@1.8.6"
    * https://github.com/bvaughn/react-window
    * Copyright (c) 2018 Brian Vaughn
    *

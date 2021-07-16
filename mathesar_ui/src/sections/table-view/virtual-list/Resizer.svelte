@@ -1,6 +1,6 @@
 <script lang="ts">
   /**
-   * Forked from "react-virtualized-auto-sizer@1.0.5"
+   * Ported from "react-virtualized-auto-sizer@1.0.5"
    * https://github.com/bvaughn/react-virtualized-auto-sizer
    * MIT © bvaughn
    *

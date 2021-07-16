@@ -14,7 +14,7 @@
  * Version: 0.5.3
  * Sebastian Decima
  *
- * Forked from the fork of Detect Element Resize in react-virtualized-auto-resizer
+ * Ported from the fork of Detect Element Resize in react-virtualized-auto-resizer@1.0.5
  * https://github.com/bvaughn/react-virtualized-auto-sizer/blob/master/src/vendor/detectElementResize.js
  * MIT @ bvaughn
  *
