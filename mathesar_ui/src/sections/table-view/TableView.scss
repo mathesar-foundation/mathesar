@@ -30,8 +30,8 @@ section.table-section .tab-container {
         right: 0;
         top: 0;
         bottom: 0;
-        user-select: none;
         transition: left .25s cubic-bezier(0,0,.2,1);
+        background: #f7f8f8;
 
         .cell {
           position: absolute;
@@ -62,6 +62,7 @@ section.table-section .tab-container {
           position: relative;
           background: #f9f9f9;
           border-bottom: 1px solid #efefef;
+          user-select: none;
 
           .cell {
             padding: 8px 28px 8px 10px;
@@ -109,9 +110,30 @@ section.table-section .tab-container {
           right: 0px;
           bottom: 0px;
           overflow: auto;
-          background: #f7f8f8;
+
+          .group {
+            border-bottom: 1px solid #efefef;
+
+            .values {
+              position: absolute;
+              bottom: 0;
+              left: 0px;
+              padding: 10px 20px;
+              background: #e6f1ff;
+              border-radius: 0px 8px 0px 0px;
+              border-top: 1px solid #81b9ff;
+              border-right: 1px solid #81b9ff;
+
+              .tag {
+                & + .tag {
+                 margin-left: 30px;
+                }
+               }
+            }
+          }
 
           .cell {
+            user-select: none;
             padding: 7px 14px;
             background: #fff;
 

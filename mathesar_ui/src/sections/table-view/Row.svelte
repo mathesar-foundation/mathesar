@@ -1,59 +1,72 @@
 <script lang="ts">
   import type {
     TableColumnData,
-    TableDisplayData,
+    ColumnPosition,
+    TableRecord,
   } from '@mathesar/stores/tableData';
   import {
     DEFAULT_COUNT_COL_WIDTH,
+    GROUP_ROW_HEIGHT,
   } from '@mathesar/stores/tableData';
   import { Skeleton } from '@mathesar-components';
 
   export let index: number;
   export let columns: TableColumnData;
   export let loading = false;
-  export let isGrouped = false;
-  export let row: { [key: string]: unknown };
-  export let columnPosition: TableDisplayData['columnPosition'];
+  export let row: TableRecord;
+  export let columnPosition: ColumnPosition;
   export let style: { [key: string]: string | number };
-
-  $: rowNumber = isGrouped
-    ? (row.__index as number)
-    : index + 1;
 
   function calculateStyle(
     _style: { [key: string]: string | number },
-    _columnPosition: TableDisplayData['columnPosition'],
+    _columnPosition: ColumnPosition,
+    isGroupRow = false,
   ) {
     if (!_style) {
-      return '';
+      return {};
     }
     const totalWidth = _columnPosition.get('__row').width;
-    return `position:${_style.position};left:${_style.left}px;`
-            + `top:${_style.top}px;height:${_style.height}px;`
+    const styleStr = `position:${_style.position};left:${_style.left}px;`
             + `width:${totalWidth + 100}px`;
+
+    if (isGroupRow) {
+      const top = _style.top as number;
+      const height = _style.height as number;
+      return {
+        group: `${styleStr};top:${top}px;height:${GROUP_ROW_HEIGHT}px;`,
+        default: `${styleStr};top:${top + GROUP_ROW_HEIGHT}px;height:${height - GROUP_ROW_HEIGHT}px;`,
+      };
+    }
+
+    return {
+      default: `${styleStr};top:${_style.top}px;height:${_style.height}px;`,
+    };
   }
 
-  $: styleString = calculateStyle(style, columnPosition);
+  $: styleString = calculateStyle(style, columnPosition, !!row.__groupInfo);
 </script>
 
-<div class:group={row.__isGroupRow} style={styleString}>
-  {#if row.__isGroupRow}
-    <div class="cell">
-      {row.key}: {row.count}
+{#if row.__groupInfo}
+  <div class="group" style={styleString.group}>
+    <div class="values">
+      {#each row.__groupInfo.columns as column (column)}
+        <span class="tag">{column}: {row[column]}</span>
+      {/each}
     </div>
+  </div>
+{/if}
 
-  {:else}
-    <div class="cell row-number" style="width:{DEFAULT_COUNT_COL_WIDTH}px">
-      {rowNumber}
+<div class="row" style={styleString.default}>
+  <div class="cell row-number" style="width:{DEFAULT_COUNT_COL_WIDTH}px">
+    {index + 1}
+  </div>
+
+  {#each columns.data as column (column.name)}
+    <div class="cell" style="
+      width:{columnPosition.get(column.name).width}px;
+      left:{columnPosition.get(column.name).left}px;">
+      {typeof row[column.name] !== 'undefined' ? row[column.name] : ''}
+      <Skeleton {loading}/>
     </div>
-
-    {#each columns.data as column (column.name)}
-      <div class="cell" style="
-        width:{columnPosition.get(column.name).width}px;
-        left:{columnPosition.get(column.name).left}px;">
-        {typeof row[column.name] !== 'undefined' ? row[column.name] : ''}
-        <Skeleton {loading}/>
-      </div>
-    {/each}
-  {/if}
+  {/each}
 </div>

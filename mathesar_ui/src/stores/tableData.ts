@@ -4,14 +4,19 @@ import type { CancellablePromise } from '@mathesar/components';
 
 export const DEFAULT_COUNT_COL_WIDTH = 70;
 export const DEFAULT_COLUMN_WIDTH = 160;
+export const GROUP_MARGIN_LEFT = 30;
+export const GROUP_ROW_HEIGHT = 70;
 
 export interface TableColumn {
   name: string,
   type: string
 }
 
-export interface TableRecords {
+export interface TableRecord {
   [key: string]: unknown
+  __groupInfo?: {
+    columns: string[]
+  }
 }
 
 interface TableDetailsResponse {
@@ -20,11 +25,11 @@ interface TableDetailsResponse {
 
 interface TableRecordGroupsResponse {
   group_count_by: string[],
-  results: Record<string, number>,
+  results: { count: number, values: string[] }[],
 }
 interface TableRecordsResponse {
   count: number,
-  results: TableRecords[],
+  results: TableRecord[],
   group_count: TableRecordGroupsResponse
 }
 
@@ -34,16 +39,10 @@ export interface TableColumnData {
   data: TableColumn[]
 }
 
-export interface TableRecordGroupData {
-  fields: string[],
-  count: Record<string, number>
-}
-
 interface TableRecordData {
   state: States,
   error?: string,
-  data: TableRecords[],
-  groupData?: TableRecordGroupData,
+  data: TableRecord[],
   totalCount: number
 }
 
@@ -56,13 +55,21 @@ export interface TableOptionsData {
   group: GroupOption
 }
 
-export interface TableDisplayData {
-  scrollOffset: number,
-  horizontalScrollOffset: number,
-  columnPosition: Map<string, {
-    width: number,
-    left: number
-  }>
+export type ColumnPosition = Map<string, {
+  width: number,
+  left: number
+}>;
+
+export type GroupIndex = {
+  latest: number,
+  previous: number
+};
+
+export interface TableDisplayStores {
+  scrollOffset: Writable<number>,
+  horizontalScrollOffset: Writable<number>,
+  columnPosition: Writable<ColumnPosition>,
+  groupIndex: Writable<GroupIndex>
 }
 
 interface TableConfigData {
@@ -73,14 +80,16 @@ interface TableConfigData {
 export type TableColumnStore = Writable<TableColumnData>;
 export type TableRecordStore = Writable<TableRecordData>;
 export type TableOptionsStore = Writable<TableOptionsData>;
-export type TableDisplayStore = Writable<TableDisplayData>;
+export type TableDisplayStoreList = TableDisplayStores;
 
 interface TableData {
   // Store objects: For use in views and controller
   columns: TableColumnStore,
   records: TableRecordStore,
   options: TableOptionsStore,
-  display: TableDisplayStore,
+
+  // Objects that contain stores; For use in views and controller
+  display: TableDisplayStoreList,
 
   // Direct objects: For use only in controller
   config?: TableConfigData,
@@ -88,9 +97,9 @@ interface TableData {
 
 const databaseMap: Map<string, Map<number, TableData>> = new Map();
 
-function calculateColumnPosition(columns: TableColumn[]): TableDisplayData['columnPosition'] {
+function calculateColumnPosition(columns: TableColumn[]): ColumnPosition {
   let left = DEFAULT_COUNT_COL_WIDTH;
-  const columnPosition: TableDisplayData['columnPosition'] = new Map();
+  const columnPosition: ColumnPosition = new Map();
   columns.forEach((column) => {
     columnPosition.set(column.name, {
       left,
@@ -105,11 +114,42 @@ function calculateColumnPosition(columns: TableColumn[]): TableDisplayData['colu
   return columnPosition;
 }
 
+function checkAndSetGroupHeaderRow(
+  groupColumns: TableRecordGroupsResponse['group_count_by'],
+  groupResults: TableRecordGroupsResponse['results'],
+  index: number,
+  records: TableRecord[],
+): boolean {
+  let isGroup = false;
+
+  if (index === 0) {
+    isGroup = true;
+  } else if (records[index - 1]?.__state === 'done') {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const column of groupColumns) {
+      if (records[index - 1][column] !== records[index][column]) {
+        isGroup = true;
+        break;
+      }
+    }
+  }
+
+  if (isGroup) {
+    // eslint-disable-next-line no-param-reassign
+    records[index] = {
+      ...records[index],
+      __groupInfo: {
+        columns: groupColumns,
+      },
+    };
+  }
+  return isGroup;
+}
+
 async function fetchTableDetails(db: string, id: number): Promise<void> {
   const table = databaseMap.get(db)?.get(id);
   if (table) {
     const tableColumnStore = table.columns;
-    const tableDisplayStore = table.display;
     const existingData = get(tableColumnStore);
 
     tableColumnStore.set({
@@ -133,13 +173,8 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
         data: columns,
       });
 
-      const existingDisplayData = get(tableDisplayStore);
       const columnPosition = calculateColumnPosition(columns);
-
-      tableDisplayStore.set({
-        ...existingDisplayData,
-        columnPosition,
-      });
+      table.display.columnPosition.set(columnPosition);
     } catch (err) {
       tableColumnStore.set({
         state: States.Error,
@@ -247,12 +282,11 @@ export async function fetchTableRecords(
     if (sortOptions.length > 0) {
       params.push(`order_by=${encodeURIComponent(JSON.stringify(sortOptions))}`);
     }
-    // Commented out until group implementation is complete
-    // if (groupOptions.length > 0) {
-    //   params.push(
-    //     `group_count_by=${encodeURIComponent(JSON.stringify(groupOptions))}`,
-    //   );
-    // }
+    if (groupOptions.length > 0) {
+      params.push(
+        `group_count_by=${encodeURIComponent(JSON.stringify(groupOptions))}`,
+      );
+    }
     const tableRecordsPromise = getAPI<TableRecordsResponse>(`/tables/${id}/records/?${params.join('&')}`);
 
     if (!table.config.previousRecordRequestSet) {
@@ -269,26 +303,46 @@ export async function fetchTableRecords(
       const records = [...get(tableRecordStore).data];
       records.length = totalCount;
 
+      const groupColumns = response?.group_count?.group_count_by;
+      const isResultGrouped = groupColumns?.length > 0;
+
+      const groupIndexData = get(table.display.groupIndex);
+
+      let groupedIndex = isResultGrouped
+        ? groupIndexData.latest
+        : null;
+      let isGroupedIndexSet = false;
       for (
         let i = offset, j = 0;
         i < offset + limit && j < data.length;
         i += 1, j += 1
       ) {
-        records[i] = data[j];
+        records[i] = {
+          ...data[j],
+          __state: 'done',
+        };
+        if (isResultGrouped) {
+          const isRowGrouped = checkAndSetGroupHeaderRow(
+            groupColumns,
+            response.group_count.results,
+            i,
+            records,
+          );
+          if (isRowGrouped && !isGroupedIndexSet) {
+            groupedIndex = i;
+            isGroupedIndexSet = true;
+          }
+        }
       }
 
-      let groupData: TableRecordGroupData = null;
-      if (response?.group_count?.results) {
-        groupData = {
-          fields: response.group_count?.group_count_by || [],
-          count: response.group_count.results,
-        };
-      }
       tableRecordStore.set({
         state: States.Done,
         data: records,
-        groupData,
         totalCount,
+      });
+      table.display.groupIndex.set({
+        ...groupIndexData,
+        latest: groupedIndex,
       });
     } catch (err) {
       tableRecordStore.set({
@@ -329,11 +383,15 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
         sort: options?.sort || null,
         group: options?.group || null,
       }),
-      display: writable({
-        horizontalScrollOffset: 0,
-        scrollOffset: 0,
-        columnPosition: new Map(),
-      }),
+      display: {
+        horizontalScrollOffset: writable(0),
+        scrollOffset: writable(0),
+        columnPosition: writable(new Map() as ColumnPosition),
+        groupIndex: writable({
+          latest: null,
+          previous: null,
+        }),
+      },
       config: {},
     };
     database.set(id, table);

@@ -3,13 +3,15 @@
   import {
     faSortAmountDown,
     faSortAmountDownAlt,
+    faThList,
   } from '@fortawesome/free-solid-svg-icons';
   import { Dropdown, Icon } from '@mathesar-components';
   import type {
     TableColumnData,
-    TableDisplayData,
+    ColumnPosition,
     TableColumn,
     SortOption,
+    GroupOption,
   } from '@mathesar/stores/tableData';
   import {
     DEFAULT_COUNT_COL_WIDTH,
@@ -18,8 +20,8 @@
   const dispatch = createEventDispatcher();
   export let columns: TableColumnData;
   export let sort: SortOption = new Map();
-  // export let group: GroupOption = new Set();
-  export let columnPosition: TableDisplayData['columnPosition'] = new Map();
+  export let group: GroupOption = new Set();
+  export let columnPosition: ColumnPosition = new Map();
   export let horizontalScrollOffset = 0;
 
   function sortByColumn(column: TableColumn, order: 'asc' | 'desc') {
@@ -33,24 +35,23 @@
     }
   }
 
-  // Grouping logic commented until ready to use
-  // function groupByColumn(column: TableColumn) {
-  //   const newGroup = new Set(group);
-  //   if (newGroup?.has(column.name)) {
-  //     newGroup.delete(column.name);
-  //   } else {
-  //     newGroup.add(column.name);
-  //   }
-  //   group = newGroup;
-  //   dispatch('refetch');
-  // }
+  function groupByColumn(column: TableColumn) {
+    const newGroup = new Set(group);
+    if (newGroup?.has(column.name)) {
+      newGroup.delete(column.name);
+    } else {
+      newGroup.add(column.name);
+    }
+    group = newGroup;
+    dispatch('reload');
+  }
 </script>
 
 <div class="header" style="width:{columnPosition.get('__row').width + 160}px;margin-left:{-horizontalScrollOffset}px">
   <div class="cell row-number" style="width:{DEFAULT_COUNT_COL_WIDTH}px">
   </div>
 
-  {#each columns.data as column, index (column.name)}
+  {#each columns.data as column (column.name)}
     <div class="cell" style="
       width:{columnPosition.get(column.name).width}px;
       left:{columnPosition.get(column.name).left}px;">
@@ -78,10 +79,10 @@
               <Icon class="opt" data={faSortAmountDown}/>
               <span>Sort Descending</span>
             </li>
-            <!-- <li on:click={() => groupByColumn(column)}>
+            <li on:click={() => groupByColumn(column)}>
               <Icon class="opt" data={faThList}/>
               <span>Group by column</span>
-            </li> -->
+            </li>
           </ul>
         </svelte:fragment>
       </Dropdown>

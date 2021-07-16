@@ -220,7 +220,6 @@ function getItemStyle(
 ): Item['style'] {
   const { instanceProps } = props;
   const { styleCache } = instanceProps;
-
   let style: Item['style'];
   if (Object.prototype.hasOwnProperty.call(styleCache, index)) {
     style = styleCache[index];

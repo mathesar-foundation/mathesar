@@ -71,6 +71,7 @@ module.exports = {
         ],
         'import/prefer-default-export': 'off',
         'no-void': 'off',
+        'no-underscore-dangle': 'off',
       },
     },
   ],

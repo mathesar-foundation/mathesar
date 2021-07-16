@@ -10,7 +10,7 @@
     TableColumnStore,
     TableRecordStore,
     TableOptionsStore,
-    TableDisplayStore,
+    TableDisplayStores,
   } from '@mathesar/stores/tableData';
   import { States } from '@mathesar/utils/api';
   import { Button, Icon } from '@mathesar-components';
@@ -26,9 +26,13 @@
   let columns: TableColumnStore;
   let records: TableRecordStore;
   let options: TableOptionsStore;
-  let display: TableDisplayStore;
   let showDisplayOptions = false;
   let tableBodyRef: Body;
+
+  let columnPosition: TableDisplayStores['columnPosition'];
+  let horizontalScrollOffset: TableDisplayStores['horizontalScrollOffset'];
+  let scrollOffset: TableDisplayStores['scrollOffset'];
+  let groupIndex: TableDisplayStores['groupIndex'];
 
   function setStores(_database: string, _id: number) {
     const opts = URLQueryHandler.getTableConfig(_database, _id);
@@ -36,14 +40,17 @@
     columns = table.columns;
     records = table.records;
     options = table.options;
-    display = table.display;
+
+    columnPosition = table.display.columnPosition;
+    horizontalScrollOffset = table.display.horizontalScrollOffset;
+    scrollOffset = table.display.scrollOffset;
+    groupIndex = table.display.groupIndex;
 
     if (tableBodyRef) {
-      const displayInfo = get(display);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       tableBodyRef.scrollToPosition(
-        displayInfo.scrollOffset,
-        displayInfo.horizontalScrollOffset,
+        get(table.display.scrollOffset),
+        get(table.display.horizontalScrollOffset),
       );
     }
   }
@@ -122,15 +129,16 @@
     {#if $columns.data.length > 0}
       <Header columns={$columns}
               bind:sort={$options.sort}
-              bind:columnPosition={$display.columnPosition}
-              horizontalScrollOffset={$display.horizontalScrollOffset}
+              bind:group={$options.group}
+              bind:columnPosition={$columnPosition}
+              horizontalScrollOffset={$horizontalScrollOffset}
               on:reload={reload}/>
 
       <Body bind:this={tableBodyRef} columns={$columns} data={$records.data}
-            groupData={$records.groupData}
-            columnPosition={$display.columnPosition}
-            bind:scrollOffset={$display.scrollOffset}
-            bind:horizontalScrollOffset={$display.horizontalScrollOffset}
+            groupIndex={$groupIndex}
+            columnPosition={$columnPosition}
+            bind:scrollOffset={$scrollOffset}
+            bind:horizontalScrollOffset={$horizontalScrollOffset}
             on:refetch={refetch}/>
     {/if}
   </div>

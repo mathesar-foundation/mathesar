@@ -46,7 +46,7 @@
   export let horizontalScrollOffset = 0;
   export let itemKey: Props['itemKey'] = listUtils.defaultItemKey;
   
-  const instanceProps: Props['instanceProps'] = {
+  let instanceProps: Props['instanceProps'] = {
     lastMeasuredIndex: -1,
     itemMetadataMap: {},
     styleCache: {},
@@ -189,6 +189,17 @@
       cancelTimeout(resetIsScrollingTimeoutId);
     }
   });
+
+  export function resetAfterIndex(index: number): void {
+    instanceProps = {
+      ...instanceProps,
+      lastMeasuredIndex: Math.min(
+        instanceProps.lastMeasuredIndex,
+        index - 1,
+      ),
+      styleCache: {},
+    };
+  }
 
   export function scrollToPosition(
     _scrollOffset: number,
