@@ -79,6 +79,7 @@ class Schema(DatabaseObject):
         except TypeError:
             return 'MISSING'
 
+    # TODO: This should check for dependencies once the depdency endpoint is implemeted
     @property
     def has_dependencies(self):
         return True
