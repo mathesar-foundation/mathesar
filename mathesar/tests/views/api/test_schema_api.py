@@ -14,6 +14,7 @@ def check_schema_response(response_schema, schema, schema_name, test_db_name,
     assert response_schema['id'] == schema.id
     assert response_schema['name'] == schema_name
     assert response_schema['database'] == test_db_name
+    assert 'has_dependencies' in response_schema
     assert len(response_schema['tables']) == len_tables
     if len_tables > 0:
         response_table = response_schema['tables'][0]
@@ -104,7 +105,6 @@ def test_schema_detail(create_table, client, test_db_name):
     schema = Schema.objects.get()
     response = client.get(f'/api/v0/schemas/{schema.id}/')
     response_schema = response.json()
-    print(response_schema)
     assert response.status_code == 200
     check_schema_response(response_schema, schema, 'Patents', test_db_name)
 
@@ -173,6 +173,16 @@ def test_schema_delete(create_schema, client):
     assert mock_infer.call_args[1] == {
         'cascade': True
     }
+
+
+def test_schema_dependencies(client, create_schema):
+    schema_name = 'NASA Schema Dependencies'
+    schema = create_schema(schema_name)
+
+    response = client.get(f'/api/v0/schemas/{schema.id}/')
+    response_schema = response.json()
+    assert response.status_code == 200
+    assert response_schema['has_dependencies'] is True
 
 
 def test_schema_detail_404(client):
