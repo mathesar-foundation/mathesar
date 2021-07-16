@@ -77,6 +77,7 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
 
         # Reload the schema to avoid cached properties
         schema = self.get_object()
+        schema.clear_name_cache()
         serializer = SchemaSerializer(schema, context={'request': request})
         return Response(serializer.data)
 
