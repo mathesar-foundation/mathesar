@@ -53,6 +53,7 @@
   };
   let isScrolling: Props['isScrolling'] = false;
   let scrollDirection : Props['scrollDirection'] = 'forward';
+  let lastHeight: Props['height'] = height;
 
   let items: ItemInfo['items'] = [];
   let estimatedTotalSize: number;
@@ -72,6 +73,11 @@
     itemInfo = listUtils.getItemsInfo(opts);
     items = itemInfo.items;
     estimatedTotalSize = listUtils.getEstimatedTotalSize(opts);
+
+    if (lastHeight !== height) {
+      lastHeight = height;
+      dispatch('refetch', itemInfo);
+    }
   }
 
   $: recalc({
