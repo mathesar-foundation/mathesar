@@ -1,7 +1,7 @@
 from unittest.mock import patch
 from django.core.cache import cache
 from sqlalchemy import text
-from db.schemas import get_mathesar_schemas
+from db import schemas
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Schema, Database
 from mathesar import models
@@ -23,7 +23,9 @@ def check_schema_response(response_schema, schema, schema_name, test_db_name,
         assert response_table['url'].startswith('http')
         assert response_table['url'].endswith(f'/api/v0/tables/{response_table_id}/')
     if check_schema_objects:
-        assert schema_name in get_mathesar_schemas(create_mathesar_engine(test_db_name))
+        assert schema_name in schemas.get_mathesar_schemas(
+            create_mathesar_engine(test_db_name)
+        )
 
 
 def test_schema_list(client, patent_schema, empty_nasa_table):
@@ -102,6 +104,7 @@ def test_schema_detail(create_table, client, test_db_name):
     schema = Schema.objects.get()
     response = client.get(f'/api/v0/schemas/{schema.id}/')
     response_schema = response.json()
+    print(response_schema)
     assert response.status_code == 200
     check_schema_response(response_schema, schema, 'Patents', test_db_name)
 
@@ -138,21 +141,44 @@ def test_schema_update(client, test_db_name):
     assert response.json()['detail'] == 'Method "PUT" not allowed.'
 
 
-def test_schema_partial_update(client, test_db_name):
-    schema = create_schema_and_object('bar', test_db_name)
-    data = {
-        'name': 'blah'
+def test_schema_partial_update(create_schema, client, test_db_name):
+    schema_name = 'NASA Schema Partial Update'
+    new_schema_name = 'NASA Schema Partial Update New'
+    schema = create_schema(schema_name)
+
+    body = {'name': new_schema_name}
+    response = client.patch(f'/api/v0/schemas/{schema.id}/', body)
+
+    response_schema = response.json()
+    assert response.status_code == 200
+    check_schema_response(response_schema, schema, new_schema_name, test_db_name,
+                          len_tables=0)
+
+    schema = Schema.objects.get(oid=schema.oid)
+    assert schema.name == new_schema_name
+
+
+def test_schema_delete(create_schema, client):
+    schema_name = 'NASA Schema Delete'
+    schema = create_schema(schema_name)
+
+    with patch.object(schemas, 'delete_schema') as mock_infer:
+        response = client.delete(f'/api/v0/schemas/{schema.id}/')
+    assert response.status_code == 204
+
+    # Ensure the Django model was deleted
+    existing_oids = {schema.oid for schema in Schema.objects.all()}
+    assert schema.oid not in existing_oids
+
+    # Ensure the backend schema would have been deleted
+    assert mock_infer.call_args is not None
+    assert mock_infer.call_args[0] == (
+        schema.name,
+        schema._sa_engine,
+    )
+    assert mock_infer.call_args[1] == {
+        'cascade': True
     }
-    response = client.patch(f'/api/v0/schemas/{schema.id}/', data=data)
-    assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "PATCH" not allowed.'
-
-
-def test_schema_delete(client, test_db_name):
-    schema = create_schema_and_object('baz', test_db_name)
-    response = client.delete(f'/api/v0/schemas/{schema.id}/')
-    assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "DELETE" not allowed.'
 
 
 def test_schema_get_with_reflect_new(client, test_db_name):
