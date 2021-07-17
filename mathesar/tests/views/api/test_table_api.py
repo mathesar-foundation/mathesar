@@ -1,5 +1,4 @@
 from unittest.mock import patch
-import json
 import pytest
 
 from django.core.cache import cache
@@ -246,7 +245,7 @@ def test_table_type_suggestion(client, schema, engine_email_type):
 
 def test_table_create_from_datafile(client, data_file, schema):
     num_tables = Table.objects.count()
-    table_name = 'test_table'
+    table_name = 'Test Table Datafile'
     body = {
         'data_files': [data_file.id],
         'name': table_name,
@@ -268,7 +267,7 @@ def test_table_create_from_datafile(client, data_file, schema):
 
 def test_table_create_from_paste(client, schema):
     num_tables = Table.objects.count()
-    table_name = 'test_table'
+    table_name = 'Test Table Paste'
     with open('mathesar/tests/data/patents.txt', 'r') as paste_file:
         paste_data = paste_file.read()
     body = {
