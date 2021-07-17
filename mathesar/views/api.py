@@ -23,8 +23,10 @@ from mathesar.serializers import (
     ColumnSerializer, DatabaseSerializer
 )
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
-from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
-from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
+from mathesar.utils.tables import (
+    reflect_tables_from_schema, get_table_column_types, create_table_from_data
+)
+from mathesar.utils.datafiles import create_datafile
 from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
 from mathesar.forms import RecordListFilterForm
 
@@ -81,7 +83,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
     def create(self, request):
         serializer = TableSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            return create_table_from_datafile(request, serializer.validated_data)
+            return create_table_from_data(request, serializer.validated_data)
         else:
             raise ValidationError(serializer.errors)
 
