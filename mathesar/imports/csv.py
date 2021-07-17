@@ -1,11 +1,13 @@
+import re
 from io import TextIOWrapper
 
 import clevercsv as csv
+from rest_framework.exceptions import ValidationError
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Table
 from db import tables, records
-from mathesar.errors import InvalidTableError
+from mathesar.errors import InvalidTableError, InvalidPasteError
 
 ALLOWED_DELIMITERS = ",\t:| "
 SAMPLE_SIZE = 20000
@@ -106,4 +108,45 @@ def create_table_from_csv(data_file, name, schema):
     table, _ = Table.objects.get_or_create(oid=db_table_oid, schema=schema)
     data_file.table_imported_to = table
     data_file.save()
+    return table
+
+
+def validate_paste(raw_paste):
+    lines = raw_paste.split('\n')
+    if len(lines) == 0:
+        raise InvalidPasteError()
+
+    # Assumes columns will be delimited by 2 or more whitespace characters
+    # Tested with Google Sheets and Libre Office
+    column_names = re.split(r'\s{2,}', lines[0])
+    num_columns = len(column_names)
+
+    parsed_lines = []
+    for line in lines:
+        parsed_line = re.split(r'\s{2,}', line)
+        if len(parsed_line) != num_columns:
+            raise InvalidPasteError
+        parsed_lines.append(parsed_line)
+
+    return column_names, parsed_lines
+
+
+def create_db_table_from_paste(raw_paste, name, schema):
+    engine = create_mathesar_engine(schema.database.name)
+    column_names, lines = validate_paste(raw_paste)
+    table = tables.create_string_column_table(
+        name=name,
+        schema=schema.name,
+        column_names=column_names,
+        engine=engine
+    )
+    records.create_records_from_paste(table, engine, lines, column_names)
+    return table
+
+
+def create_table_from_paste(raw_paste, name, schema):
+    engine = create_mathesar_engine(schema.database.name)
+    db_table = create_db_table_from_paste(raw_paste, name, schema)
+    db_table_oid = tables.get_oid_from_table(db_table.name, db_table.schema, engine)
+    table, _ = Table.objects.get_or_create(oid=db_table_oid, schema=schema)
     return table

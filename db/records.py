@@ -211,6 +211,13 @@ def create_records_from_csv(table, engine, csv_filename, column_names, delimiter
             cursor.copy_expert(copy_sql, csv_file)
 
 
+def create_records_from_paste(table, engine, lines, column_names):
+    ins = table.insert()
+    arguments = [{col: val for col, val in zip(column_names, line)} for line in lines]
+    with engine.begin() as conn:
+        conn.execute(ins, arguments)
+
+
 def update_record(table, engine, id_value, record_data):
     primary_key_column = _get_primary_key_column(table)
     with engine.begin() as connection:
