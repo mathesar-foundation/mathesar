@@ -118,11 +118,11 @@ def validate_paste(raw_paste):
 
     # Assumes columns will be delimited by 2 or more whitespace characters
     # Tested with Google Sheets and Libre Office
-    column_names = re.split(r'\s{2,}', lines[0])
+    column_names = re.split(r'\s{2,}|\t', lines[0])
     num_columns = len(column_names)
 
     parsed_lines = []
-    for line in lines:
+    for line in lines[1:]:
         parsed_line = re.split(r'\s{2,}|\t', line)
         if len(parsed_line) != num_columns:
             raise InvalidPasteError

@@ -50,12 +50,12 @@ class TableSerializer(serializers.ModelSerializer):
     columns = SimpleColumnSerializer(many=True, read_only=True, source='sa_columns')
     records = serializers.SerializerMethodField()
     name = serializers.CharField()
-    paste = serializers.CharField(read_only=True, required=False)
+    paste = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Table
         fields = ['id', 'name', 'schema', 'created_at', 'updated_at',
-                  'columns', 'records', 'data_files']
+                  'columns', 'records', 'data_files', 'paste']
 
     def get_records(self, obj):
         if isinstance(obj, Table):
