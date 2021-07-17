@@ -6,7 +6,8 @@ from db.tables import get_table_oids_from_schema, infer_table_column_types
 from db.columns import MathesarColumn
 from mathesar.models import Table
 from mathesar.serializers import TableSerializer
-from mathesar.imports.csv import create_table_from_csv, create_table_from_paste
+from mathesar.imports.csv import create_table_from_csv
+from mathesar.imports.paste import create_table_from_paste
 from mathesar.errors import InvalidPasteError
 
 
