@@ -4,8 +4,17 @@ Mathesar is a project to make databases easier to use for non-technical users. O
 
 We are currently in early development and hope to release an alpha version by late 2021. Please see the [Mathesar wiki](https://wiki.mathesar.org/) for more information about the project.
 
-<!-- START doctoc -->
-<!-- END doctoc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Contributing](#contributing)
+- [Local Development](#local-development)
+  - [Linting](#linting)
+  - [Running tests](#running-tests)
+  - [Opening a shell in the container](#opening-a-shell-in-the-container)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Contributing
 
