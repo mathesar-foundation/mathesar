@@ -123,7 +123,7 @@ def validate_paste(raw_paste):
 
     parsed_lines = []
     for line in lines:
-        parsed_line = re.split(r'\s{2,}', line)
+        parsed_line = re.split(r'\s{2,}|\t', line)
         if len(parsed_line) != num_columns:
             raise InvalidPasteError
         parsed_lines.append(parsed_line)
