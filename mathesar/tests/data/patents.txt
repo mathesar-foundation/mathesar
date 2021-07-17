@@ -1,0 +1,1394 @@
+Center	Status  Case Number
+NASA Kennedy Space Center	Application	KSC-12871
+NASA Ames Research Center	Issued	ARC-14048-1
+NASA Ames Research Center	Issued	ARC-14231-1
+NASA Ames Research Center	Issued	ARC-14231-2DIV
+NASA Ames Research Center	Issued	ARC-14231-3
+NASA Ames Research Center	Issued	ARC-14275-1
+NASA Ames Research Center	Issued	ARC-14281-1
+NASA Ames Research Center	Issued	ARC-14281-3
+NASA Ames Research Center	Issued	ARC-14359-1
+NASA Ames Research Center	Issued	ARC-14494-1
+NASA Ames Research Center	Issued	ARC-14512-1
+NASA Ames Research Center	Issued	ARC-14513-1
+NASA Ames Research Center	Issued	ARC-14514-1
+NASA Ames Research Center	Issued	ARC-14515-1
+NASA Ames Research Center	Issued	ARC-14556-1
+NASA Ames Research Center	Issued	ARC-14569-1
+NASA Ames Research Center	Issued	ARC-14569-2
+NASA Ames Research Center	Issued	ARC-14586-1DIV
+NASA Ames Research Center	Issued	ARC-14613-1
+NASA Ames Research Center	Issued	ARC-14652-1
+NASA Ames Research Center	Issued	ARC-14653-1
+NASA Ames Research Center	Issued	ARC-14653-2
+NASA Ames Research Center	Issued	ARC-14661-1
+NASA Ames Research Center	Issued	ARC-14661-2
+NASA Ames Research Center	Issued	ARC-14661-3
+NASA Ames Research Center	Issued	ARC-14662-1
+NASA Ames Research Center	Issued	ARC-14682-2
+NASA Ames Research Center	Issued	ARC-14710-1
+NASA Ames Research Center	Issued	ARC-14733-1
+NASA Ames Research Center	Issued	ARC-14743-1
+NASA Armstrong Flight Research Center	Issued	DRC-008-014
+NASA Ames Research Center	Issued	ARC-14744-1US
+NASA Ames Research Center	Issued	ARC-14744-2
+NASA Ames Research Center	Issued	ARC-14940-1
+NASA Ames Research Center	Issued	ARC-14941-1
+NASA Ames Research Center	Issued	ARC-14950-1
+NASA Ames Research Center	Issued	ARC-14950-2
+NASA Ames Research Center	Issued	ARC-14970-1
+NASA Ames Research Center	Issued	ARC-15040-1
+NASA Ames Research Center	Issued	ARC-15041-2
+NASA Ames Research Center	Issued	ARC-15042-2
+NASA Ames Research Center	Issued	ARC-15058-1
+NASA Ames Research Center	Issued	ARC-15073-1
+NASA Ames Research Center	Issued	ARC-15088-1
+NASA Ames Research Center	Issued	ARC-15101-1
+NASA Ames Research Center	Issued	ARC-15157-1
+NASA Ames Research Center	Issued	ARC-15171-1
+NASA Ames Research Center	Issued	ARC-15173-1
+NASA Ames Research Center	Issued	ARC-15173-2
+NASA Ames Research Center	Issued	ARC-15201-1
+NASA Ames Research Center	Issued	ARC-15201-2
+NASA Ames Research Center	Issued	ARC-15204-1
+NASA Ames Research Center	Issued	ARC-15204-1DIV
+NASA Ames Research Center	Issued	ARC-15205-1
+NASA Ames Research Center	Issued	ARC-15312-1
+NASA Ames Research Center	Issued	ARC-15314-1
+NASA Ames Research Center	Issued	ARC-15314-2
+NASA Ames Research Center	Issued	ARC-15315-1
+NASA Ames Research Center	Issued	ARC-15356-2
+NASA Ames Research Center	Issued	ARC-15356-3
+NASA Ames Research Center	Issued	ARC-15370-1
+NASA Ames Research Center	Issued	ARC-15392-1
+NASA Ames Research Center	Issued	ARC-15404-1
+NASA Ames Research Center	Issued	ARC-15437-1
+NASA Ames Research Center	Issued	ARC-15443-1
+NASA Ames Research Center	Issued	ARC-15460-1
+NASA Ames Research Center	Issued	ARC-15462-1
+NASA Ames Research Center	Issued	ARC-15487-1
+NASA Ames Research Center	Issued	ARC-15506-1
+NASA Ames Research Center	Issued	ARC-15519-1
+NASA Ames Research Center	Issued	ARC-15566-1
+NASA Ames Research Center	Issued	ARC-15566-2
+NASA Ames Research Center	Issued	ARC-15566-3
+NASA Ames Research Center	Issued	ARC-15566-5
+NASA Ames Research Center	Issued	ARC-15575-1
+NASA Ames Research Center	Issued	ARC-15578-2
+NASA Ames Research Center	Issued	ARC-15606-1
+NASA Ames Research Center	Issued	ARC-15684-1
+NASA Ames Research Center	Issued	ARC-15714-1
+NASA Ames Research Center	Issued	ARC-15782-1
+NASA Ames Research Center	Issued	ARC-15796-1
+NASA Ames Research Center	Issued	ARC-15870-1
+NASA Ames Research Center	Issued	ARC-15890-1
+NASA Ames Research Center	Issued	ARC-15900-1
+NASA Ames Research Center	Issued	ARC-15903-1DIV
+NASA Ames Research Center	Issued	ARC-15967-1
+NASA Ames Research Center	Application	ARC-15977-1
+NASA Ames Research Center	Application	ARC-15981-4
+NASA Ames Research Center	Issued	ARC-15983-1
+NASA Ames ResearchCenter	Application	ARC-16478-1
+NASA Ames Research Center	Issued	ARC-15995-1
+NASA Ames Research Center	Issued	ARC-16013-1
+NASA Ames Research Center	Issued	ARC-16018-1
+NASA Ames Research Center	Application	ARC-16132-1
+NASA Ames Research Center	Issued	ARC-16133-1
+NASA Ames Research Center	Application	ARC-16211-1
+NASA Ames Research Center	Issued	ARC-16235-1
+NASA Ames Research Center	Application	ARC-16273-1
+NASA Ames Research Center	Issued	ARC-16280-1
+NASA Ames Research Center	Issued	ARC-16298-1
+NASA Ames Research Center	Issued	ARC-16320-1
+NASA Ames Research Center	Issued	ARC-16331-1
+NASA Ames Research Center	Issued	ARC-16334-1
+NASA Ames Research Center	Application	ARC-16337-1
+NASA Ames Research Center	Application	ARC-16340-1
+NASA Ames Research Center	Issued	ARC-16342-1
+NASA Ames Research Center	Application	ARC-16348-1
+NASA Ames Research Center	Issued	ARC-16351-1
+NASA Ames Research Center	Issued	ARC-16370-1
+NASA Ames Research Center	Application	ARC-16372-1
+NASA Ames Research Center	Issued	ARC-16373-1
+NASA Ames Research Center	Application	ARC-16405-1
+NASA Ames Research Center	Issued	ARC-16407-1
+NASA Ames Research Center	Application	ARC-16419-1
+NASA Ames Research Center	Application	ARC-16450-1CIP
+NASA Ames Research Center	Application	ARC-16456-1
+NASA Ames Research Center	Application	ARC-16461-1
+NASA Ames Research Center	Application	ARC-16466-1
+NASA Ames Research Center	Application	ARC-16467-1
+NASA Ames Research Center	Application	ARC-16607-1
+NASA Ames Research Center	Application	ARC-16621-1
+NASA Ames Research Center	Application	ARC-16644-1
+NASA Ames Research Center	Application	ARC-16646-1
+NASA Ames Research Center	Application	ARC-16661-1
+NASA Ames Research Center	Application	ARC-16697-1
+NASA Ames Research Center	Application	ARC-16707-1
+NASA Ames Research Center	Application	ARC-16707-1CIP
+NASA Ames Research Center	Application	ARC-16732-1
+NASA Ames Research Center	Application	ARC-16733-1
+NASA Ames Research Center	Application	ARC-16752-1
+NASA Ames Research Center	Application	ARC-16811-1
+NASA Ames Research Center	Application	ARC-16812-1
+NASA Ames Research Center	Application	ARC-16833-1
+NASA Ames Research Center	Application	ARC-16844-1
+NASA Ames Research Center	Application	ARC-16846-1
+NASA Ames Research Center	Application	ARC-16892-1A
+NASA Ames Research Center	Application	ARC-16902-1
+NASA Ames Research Center	Application	ARC-16916-1
+NASA Ames Research Center	Application	ARC-16924-1
+NASA Ames Research Center	Application	ARC-16942-2
+NASA Armstrong Flight Research Center	Issued	DRC-001-049
+NASA Armstrong Flight Research Center	Issued	DRC-005-031
+NASA Armstrong Flight Research Center	Issued	DRC-006-001
+NASA Armstrong Flight Research Center	Application	DRC-006-002
+NASA Armstrong Flight Research Center	Issued	DRC-006-005
+NASA Armstrong Flight Research Center	Issued	DRC-006-024
+NASA Armstrong Flight Research Center	Application	DRC-006-045
+NASA Armstrong Flight Research Center	Issued	DRC-008-001
+NASA Armstrong Flight Research Center	Issued	DRC-008-023
+NASA Armstrong Flight Research Center	Application	DRC-009-008
+NASA Armstrong Flight Research Center	Issued	DRC-009-026
+NASA Armstrong Flight Research Center	Application	DRC-010-042
+NASA Armstrong Flight Research Center	Application	DRC-011-002
+NASA Armstrong Flight Research Center	Application	DRC-011-015
+NASA Armstrong Flight Research Center	Application	DRC-012-005
+NASA Armstrong Flight Research Center	Application	DRC-012-006
+NASA Armstrong Flight Research Center	Application	DRC-012-011
+NASA Armstrong Flight Research Center	Issued	DRC-096-055
+NASA Armstrong Flight Research Center	Issued	DRC-097-021
+NASA Armstrong Flight Research Center	Issued	DRC-098-001
+NASA Goddard Space Flight Center	Application	GSC-13378-1
+NASA Goddard Space Flight Center	Issued	GSC-13802-1
+NASA Goddard Space Flight Center	Issued	GSC-13817-1
+NASA Goddard Space Flight Center	Issued	GSC-13817-2
+NASA Goddard Space Flight Center	Issued	GSC-13817-3
+NASA Goddard Space Flight Center	Issued	GSC-13817-4
+NASA Goddard Space Flight Center	Issued	GSC-13817-5
+NASA Goddard Space Flight Center	Issued	GSC-13905-1
+NASA Goddard Space Flight Center	Issued	GSC-13909-1
+NASA Goddard Space Flight Center	Issued	GSC-13985-1
+NASA Goddard Space Flight Center	Issued	GSC-14064-1
+NASA Goddard Space Flight Center	Issued	GSC-14207-1
+NASA Goddard Space Flight Center	Issued	GSC-14209-1
+NASA Goddard Space Flight Center	Issued	GSC-14213-1
+NASA Goddard Space Flight Center	Issued	GSC-14236-1
+NASA Goddard Space Flight Center	Issued	GSC-14302-1
+NASA Goddard Space Flight Center	Issued	GSC-14305-1
+NASA Goddard Space Flight Center	Issued	GSC-14389-1
+NASA Goddard Space Flight Center	Issued	GSC-14393-1
+NASA Goddard Space Flight Center	Issued	GSC-14413-1
+NASA Goddard Space Flight Center	Issued	GSC-14435-1
+NASA Goddard Space Flight Center	Issued	GSC-14480-2
+NASA Goddard Space Flight Center	Issued	GSC-14561-1
+NASA Goddard Space Flight Center	Issued	GSC-14562-1
+NASA Goddard Space Flight Center	Issued	GSC-14601-1
+NASA Goddard Space Flight Center	Issued	GSC-14603-1
+NASA Goddard Space Flight Center	Issued	GSC-14608-1
+NASA Goddard Space Flight Center	Issued	GSC-14616-1
+NASA Goddard Space Flight Center	Issued	GSC-14657-1
+NASA Goddard Space Flight Center	Issued	GSC-14666-1
+NASA Goddard Space Flight Center	Issued	GSC-14673-1
+NASA Goddard Space Flight Center	Issued	GSC-14683-1
+NASA Goddard Space Flight Center	Issued	GSC-14762-1
+NASA Goddard Space Flight Center	Issued	GSC-14777-1
+NASA Goddard Space Flight Center	Issued	GSC-14793-1
+NASA Goddard Space Flight Center	Issued	GSC-14807-1
+NASA Goddard Space Flight Center	Issued	GSC-14833-1
+NASA Goddard Space Flight Center	Issued	GSC-14845-1
+NASA Goddard Space Flight Center	Issued	GSC-14871-1
+NASA Goddard Space Flight Center	Issued	GSC-14873-1
+NASA Goddard Space Flight Center	Issued	GSC-14879-1
+NASA Goddard Space Flight Center	Issued	GSC-14941-1
+NASA Goddard Space Flight Center	Issued	GSC-14942-1
+NASA Goddard Space Flight Center	Issued	GSC-14952-1
+NASA Goddard Space Flight Center	Issued	GSC-14960-1
+NASA Goddard Space Flight Center	Application	GSC-16700-1
+NASA Goddard Space Flight Center	Issued	GSC-14968-1
+NASA Goddard Space Flight Center	Issued	GSC-14968-2
+NASA Goddard Space Flight Center	Issued	GSC-14979-1
+NASA Goddard Space Flight Center	Issued	GSC-14994-1
+NASA Goddard Space Flight Center	Issued	GSC-15001-1
+NASA Goddard Space Flight Center	Issued	GSC-15002-1
+NASA Goddard Space Flight Center	Issued	GSC-15002-2
+NASA Goddard Space Flight Center	Issued	GSC-15002-3
+NASA Goddard Space Flight Center	Issued	GSC-15002-4
+NASA Goddard Space Flight Center	Issued	GSC-15002-5
+NASA Goddard Space Flight Center	Issued	GSC-15027-1
+NASA Goddard Space Flight Center	Issued	GSC-15027-2
+NASA Goddard Space Flight Center	Issued	GSC-15027-3
+NASA Goddard Space Flight Center	Issued	GSC-15030-1
+NASA Goddard Space Flight Center	Issued	GSC-15038-1
+NASA Goddard Space Flight Center	Issued	GSC-15039-1
+NASA Goddard Space Flight Center	Issued	GSC-15042-1
+NASA Goddard Space Flight Center	Issued	GSC-15055-1
+NASA Goddard Space Flight Center	Issued	GSC-15077-1
+NASA Goddard Space Flight Center	Issued	GSC-15079-1
+NASA Goddard Space Flight Center	Issued	GSC-15080-1
+NASA Goddard Space Flight Center	Issued	GSC-15115-1
+NASA Goddard Space Flight Center	Issued	GSC-15136-1
+NASA Goddard Space Flight Center	Issued	GSC-15148-1
+NASA Goddard Space Flight Center	Issued	GSC-15162-1
+NASA Goddard Space Flight Center	Application	GSC-15163-2
+NASA Goddard Space Flight Center	Issued	GSC-15176-1
+NASA Goddard Space Flight Center	Issued	GSC-15177-1
+NASA Goddard Space Flight Center	Application	GSC-15177-2
+NASA Goddard Space Flight Center	Issued	GSC-15178-1
+NASA Goddard Space Flight Center	Issued	GSC-15179-1
+NASA Goddard Space Flight Center	Issued	GSC-15184-1
+NASA Goddard Space Flight Center	Issued	GSC-15206-1
+NASA Goddard Space Flight Center	Issued	GSC-15206-2
+NASA Goddard Space Flight Center	Issued	GSC-15206-3
+NASA Goddard Space Flight Center	Issued	GSC-15206-4
+NASA Goddard Space Flight Center	Issued	GSC-15206-5
+NASA Goddard Space Flight Center	Issued	GSC-15206-6
+NASA Goddard Space Flight Center	Issued	GSC-15217-1
+NASA Goddard Space Flight Center	Issued	GSC-15301-1
+NASA Goddard Space Flight Center	Issued	GSC-15302-1
+NASA Goddard Space Flight Center	Issued	GSC-15328-1
+NASA Goddard Space Flight Center	Application	GSC-15333-1
+NASA Goddard Space Flight Center	Issued	GSC-15341-1
+NASA Goddard Space Flight Center	Issued	GSC-15341-3
+NASA Goddard Space Flight Center	Issued	GSC-15349-1
+NASA Goddard Space Flight Center	Issued	GSC-15353-1
+NASA Goddard Space Flight Center	Issued	GSC-15357-1
+NASA Goddard Space Flight Center	Issued	GSC-15364-1
+NASA Goddard Space Flight Center	Issued	GSC-15377-1
+NASA Goddard Space Flight Center	Issued	GSC-15416-1
+NASA Goddard Space Flight Center	Issued	GSC-15417-1
+NASA Goddard Space Flight Center	Issued	GSC-15419-1
+NASA Goddard Space Flight Center	Issued	GSC-15421-1
+NASA Goddard Space Flight Center	Issued	GSC-15431-1
+NASA Goddard Space Flight Center	Issued	GSC-15445-1
+NASA Goddard Space Flight Center	Issued	GSC-15458-1
+NASA Goddard Space Flight Center	Issued	GSC-15483-1
+NASA Goddard Space Flight Center	Issued	GSC-15520-1
+NASA Goddard Space Flight Center	Issued	GSC-15527-1
+NASA Goddard Space Flight Center	Issued	GSC-15538-1
+NASA Goddard Space Flight Center	Issued	GSC-15550-1
+NASA Goddard Space Flight Center	Issued	GSC-15552-1
+NASA Goddard Space Flight Center	Issued	GSC-15557-1
+NASA Goddard Space Flight Center	Issued	GSC-15583-1
+NASA Goddard Space Flight Center	Issued	GSC-15584-1
+NASA Goddard Space Flight Center	Issued	GSC-15655-1
+NASA Goddard Space Flight Center	Application	GSC-15660-1
+NASA Goddard Space Flight Center	Issued	GSC-15662-1
+NASA Goddard Space Flight Center	Application	GSC-15672-1
+NASA Goddard Space Flight Center	Issued	GSC-15678-1
+NASA Goddard Space Flight Center	Issued	GSC-15684-1
+NASA Goddard Space Flight Center	Issued	GSC-15685-1
+NASA Goddard Space Flight Center	Issued	GSC-15692-1
+NASA Goddard Space Flight Center	Application	GSC-15693-1
+NASA Goddard Space Flight Center	Issued	GSC-15699-1
+NASA Goddard Space Flight Center	Issued	GSC-15724-1
+NASA Goddard Space Flight Center	Application	GSC-15727-1
+NASA Goddard Space Flight Center	Issued	GSC-15729-1
+NASA Goddard Space Flight Center	Issued	GSC-15729-2
+NASA Goddard Space Flight Center	Issued	GSC-15730-1
+NASA Goddard Space Flight Center	Issued	GSC-15732-1
+NASA Goddard Space Flight Center	Issued	GSC-15758-1
+NASA Goddard Space Flight Center	Issued	GSC-15771-1
+NASA Goddard Space Flight Center	Application	GSC-15774-1
+NASA Goddard Space Flight Center	Application	GSC-15782-1
+NASA Goddard Space Flight Center	Issued	GSC-15792-1
+NASA Goddard Space Flight Center	Application	GSC-15815-1
+NASA Goddard Space Flight Center	Issued	GSC-15826-1
+NASA Goddard Space Flight Center	Application	GSC-15829-1
+NASA Goddard Space Flight Center	Application	GSC-15839-1
+NASA Goddard Space Flight Center	Issued	GSC-15856-1
+NASA Goddard Space Flight Center	Application	GSC-15886-1
+NASA Goddard Space Flight Center	Application	GSC-15911-1
+NASA Goddard Space Flight Center	Application	GSC-15934-1
+NASA Goddard Space Flight Center	Application	GSC-15935-1
+NASA Goddard Space Flight Center	Application	GSC-15936-1
+NASA Goddard Space Flight Center	Issued	GSC-15947-1
+NASA Goddard Space Flight Center	Application	GSC-15948-1
+NASA Goddard Space Flight Center	Application	GSC-15949-1
+NASA Goddard Space Flight Center	Application	GSC-15951-1
+NASA Goddard Space Flight Center	Issued	GSC-15953-1
+NASA Goddard Space Flight Center	Application	GSC-15953-2
+NASA Goddard Space Flight Center	Application	GSC-15957-1
+NASA Goddard Space Flight Center	Issued	GSC-15964-1
+NASA Goddard Space Flight Center	Application	GSC-15970-1
+NASA Goddard Space Flight Center	Application	GSC-15976-1
+NASA Goddard Space Flight Center	Issued	GSC-15977-1
+NASA Goddard Space Flight Center	Application	GSC-15979-1
+NASA Goddard Space Flight Center	Application	GSC-15994-1
+NASA Goddard Space Flight Center	Application	GSC-16006-1
+NASA Goddard Space Flight Center	Application	GSC-16008-1
+NASA Goddard Space Flight Center	Application	GSC-16016-1
+NASA Goddard Space Flight Center	Issued	GSC-16024-1
+NASA Goddard Space Flight Center	Application	GSC-16789-1
+NASA Goddard Space Flight Center	Application	GSC-16029-1
+NASA Goddard Space Flight Center	Application	GSC-16096-1
+NASA Goddard Space Flight Center	Application	GSC-16100-1
+NASA Goddard Space Flight Center	Application	GSC-16105-1
+NASA Goddard Space Flight Center	Application	GSC-16109-1
+NASA Goddard Space Flight Center	Application	GSC-16122-1
+NASA Goddard Space Flight Center	Application	GSC-16135-1
+NASA Goddard Space Flight Center	Application	GSC-16146-1
+NASA Goddard Space Flight Center	Application	GSC-16182-1
+NASA Goddard Space Flight Center	Application	GSC-16193-1
+NASA Goddard Space Flight Center	Application	GSC-16223-1
+NASA Goddard Space Flight Center	Application	GSC-16247-1
+NASA Goddard Space Flight Center	Application	GSC-16250-1
+NASA Goddard Space Flight Center	Application	GSC-16259-1
+NASA Goddard Space Flight Center	Application	GSC-16299-1
+NASA Goddard Space Flight Center	Application	GSC-16301-1
+NASA Goddard Space Flight Center	Application	GSC-16327-1
+NASA Goddard Space Flight Center	Application	GSC-16328-1
+NASA Goddard Space Flight Center	Application	GSC-16438-1
+NASA Goddard Space Flight Center	Application	GSC-16460-1
+NASA Goddard Space Flight Center	Application	GSC-16461-1
+NASA Goddard Space Flight Center	Application	GSC-16485-1
+NASA Goddard Space Flight Center	Application	GSC-16516-1
+NASA Kennedy Space Center	Application	KSC-12866
+NASA Goddard Space Flight Center	Application	GSC-16545-1
+NASA Goddard Space Flight Center	Application	GSC-16555-1
+NASA Goddard Space Flight Center	Application	GSC-16569-1
+NASA Goddard Space Flight Center	Application	GSC-16674-1
+NASA Goddard Space Flight Center	Application	GSC-16795-1
+NASA Goddard Space Flight Center	Application	GSC-16805-1
+NASA Goddard Space Flight Center	Application	GSC-16808-1
+NASA Goddard Space Flight Center	Application	GSC-16859-1
+NASA Goddard Space Flight Center	Application	GSC-16887-1
+NASA Headquarters	Issued	HQN-11248-1
+NASA Kennedy Space Center	Issued	KSC-11641
+NASA Kennedy Space Center	Issued	KSC-11751
+NASA Kennedy Space Center	Issued	KSC-11804
+NASA Kennedy Space Center	Issued	KSC-11866-1
+NASA Kennedy Space Center	Issued	KSC-11884
+NASA Kennedy Space Center	Issued	KSC-11884-2
+NASA Kennedy Space Center	Issued	KSC-11937-2
+NASA Kennedy Space Center	Issued	KSC-12035-1
+NASA Kennedy Space Center	Issued	KSC-12049
+NASA Kennedy Space Center	Issued	KSC-12056
+NASA Kennedy Space Center	Issued	KSC-12092-2
+NASA Kennedy Space Center	Issued	KSC-12107
+NASA Kennedy Space Center	Issued	KSC-12108
+NASA Kennedy Space Center	Issued	KSC-12168
+NASA Kennedy Space Center	Issued	KSC-12190
+NASA Kennedy Space Center	Issued	KSC-12191-2
+NASA Kennedy Space Center	Issued	KSC-12205
+NASA Kennedy Space Center	Issued	KSC-12220
+NASA Kennedy Space Center	Issued	KSC-12221
+NASA Kennedy Space Center	Issued	KSC-12235
+NASA Kennedy Space Center	Issued	KSC-12235-2
+NASA Kennedy Space Center	Issued	KSC-12235-3
+NASA Kennedy Space Center	Issued	KSC-12236
+NASA Kennedy Space Center	Application	KSC-12236-2-PCT
+NASA Kennedy Space Center	Application	KSC-12236-CIP
+NASA Kennedy Space Center	Issued	KSC-12246
+NASA Kennedy Space Center	Issued	KSC-12246-2
+NASA Kennedy Space Center	Issued	KSC-12278
+NASA Kennedy Space Center	Issued	KSC-12386
+NASA Kennedy Space Center	Issued	KSC-12390
+NASA Kennedy Space Center	Issued	KSC-12394
+NASA Kennedy Space Center	Issued	KSC-12458
+NASA Kennedy Space Center	Issued	KSC-12490
+NASA Kennedy Space Center	Issued	KSC-12518
+NASA Kennedy Space Center	Issued	KSC-12539
+NASA Kennedy Space Center	Issued	KSC-12539-2
+NASA Kennedy Space Center	Application	KSC-12539-3
+NASA Kennedy Space Center	Issued	KSC-12540
+NASA Kennedy Space Center	Issued	KSC-12630
+NASA Kennedy Space Center	Issued	KSC-12631
+NASA Kennedy Space Center	Issued	KSC-12637
+NASA Kennedy Space Center	Issued	KSC-12664
+NASA Kennedy Space Center	Issued	KSC-12664-3-CIP
+NASA Kennedy Space Center	Issued	KSC-12666
+NASA Kennedy Space Center	Issued	KSC-12669
+NASA Kennedy Space Center	Issued	KSC-12697
+NASA Kennedy Space Center	Issued	KSC-12697-3
+NASA Kennedy Space Center	Issued	KSC-12703
+NASA Kennedy Space Center	Issued	KSC-12723
+NASA Kennedy Space Center	Application	KSC-12723-DIV
+NASA Kennedy Space Center	Issued	KSC-12848
+NASA Kennedy Space Center	Issued	KSC-12848-DIV
+NASA Kennedy Space Center	Application	KSC-12871-CIP
+NASA Kennedy Space Center	Application	KSC-12871-DIV1
+NASA Kennedy Space Center	Application	KSC-12871-DIV2
+NASA Kennedy Space Center	Issued	KSC-12875
+NASA Kennedy Space Center	Issued	KSC-12878-2-CIP
+NASA Kennedy Space Center	Issued	KSC-12890
+NASA Kennedy Space Center	Application	KSC-12890-2-DIV
+NASA Kennedy Space Center	Issued	KSC-12899
+NASA Kennedy Space Center	Issued	KSC-12978
+NASA Kennedy Space Center	Issued	KSC-12978-DIV
+NASA Kennedy Space Center	Issued	KSC-12983
+NASA Kennedy Space Center	Application	KSC-13047
+NASA Kennedy Space Center	Application	KSC-13047-DIV
+NASA Kennedy Space Center	Issued	KSC-13088
+NASA Kennedy Space Center	Application	KSC-13088-CON
+NASA Kennedy Space Center	Application	KSC-13088-DIV
+NASA Kennedy Space Center	Application	KSC-13161
+NASA Kennedy Space Center	Application	KSC-13167
+NASA Kennedy Space Center	Application	KSC-13265-CIP2
+NASA Kennedy Space Center	Application	KSC-13278
+NASA Kennedy Space Center	Issued	KSC-13285
+NASA Kennedy Space Center	Issued	KSC-13331
+NASA Kennedy Space Center	Application	KSC-13336
+NASA Kennedy Space Center	Application	KSC-13343
+NASA Kennedy Space Center	Application	KSC-13366
+NASA Kennedy Space Center	Application	KSC-13579
+NASA Kennedy Space Center	Application	KSC-13588
+NASA Kennedy Space Center	Application	KSC-13592
+NASA Kennedy Space Center	Application	KSC-13595
+NASA Kennedy Space Center	Application	KSC-13636
+NASA Kennedy Space Center	Application	KSC-13638
+NASA Kennedy Space Center	Application	KSC-13664
+NASA Kennedy Space Center	Application	KSC-13689
+NASA Langley Research Center	Issued	LAR-14673-1
+NASA Langley Research Center	Issued	LAR-14840-1
+NASA Langley Research Center	Issued	LAR-15205-1
+NASA Langley Research Center	Issued	LAR-15282-1
+NASA Langley Research Center	Issued	LAR-15318-1
+NASA Langley Research Center	Issued	LAR-15348-1
+NASA Langley Research Center	Issued	LAR-15348-2
+NASA Langley Research Center	Issued	LAR-15351-1-CU
+NASA Langley Research Center	Issued	LAR-15370-1-SB
+NASA Langley Research Center	Issued	LAR-15376-1
+NASA Langley Research Center	Issued	LAR-15406-1
+NASA Langley Research Center	Issued	LAR-15412-1
+NASA Langley Research Center	Issued	LAR-15412-2
+NASA Langley Research Center	Issued	LAR-15449-1
+NASA Langley Research Center	Issued	LAR-15449-2
+NASA Langley Research Center	Issued	LAR-15507-1
+NASA Langley Research Center	Issued	LAR-15508-1
+NASA Langley Research Center	Issued	LAR-15514-1-SB
+NASA Langley Research Center	Issued	LAR-15524-1
+NASA Langley Research Center	Issued	LAR-15525-1-CU
+NASA Langley Research Center	Issued	LAR-15637-1
+NASA Langley Research Center	Issued	LAR-15637-2
+NASA Langley Research Center	Issued	LAR-15652-1-CU
+NASA Langley Research Center	Application	LAR-15665-1-CU
+NASA Langley Research Center	Issued	LAR-15745-1
+NASA Langley Research Center	Issued	LAR-15747-1-CU
+NASA Langley Research Center	Issued	LAR-15767-1
+NASA Langley Research Center	Issued	LAR-15816-1
+NASA Langley Research Center	Issued	LAR-15816-2
+NASA Langley Research Center	Issued	LAR-15817-1
+NASA Langley Research Center	Issued	LAR-15818-3
+NASA Langley Research Center	Issued	LAR-15831-1
+NASA Langley Research Center	Issued	LAR-15831-2
+NASA Langley Research Center	Issued	LAR-15831-3
+NASA Langley Research Center	Issued	LAR-15834-1
+NASA Langley Research Center	Issued	LAR-15851-1-CU
+NASA Langley Research Center	Issued	LAR-15854-1
+NASA Langley Research Center	Issued	LAR-15927-1
+NASA Langley Research Center	Issued	LAR-15934-1
+NASA Langley Research Center	Issued	LAR-15943-1
+NASA Langley Research Center	Issued	LAR-15954-1
+NASA Langley Research Center	Issued	LAR-15959-1
+NASA Langley Research Center	Issued	LAR-15977-1
+NASA Langley Research Center	Issued	LAR-15990-1
+NASA Langley Research Center	Issued	LAR-16001-1
+NASA Langley Research Center	Issued	LAR-16005-1
+NASA Langley Research Center	Issued	LAR-16012-1-CU
+NASA Langley Research Center	Issued	LAR-16020-1
+NASA Langley Research Center	Issued	LAR-16079-1
+NASA Langley Research Center	Issued	LAR-16083-1
+NASA Langley Research Center	Issued	LAR-16116-1
+NASA Langley Research Center	Issued	LAR-16176-2
+NASA Langley Research Center	Issued	LAR-16220-1
+NASA Langley Research Center	Issued	LAR-16231-1-CU
+NASA Langley Research Center	Issued	LAR-16256-1
+NASA Langley Research Center	Application	LAR-16256-1-CON
+NASA Langley Research Center	Issued	LAR-16299-1
+NASA Langley Research Center	Issued	LAR-16307-1-SB
+NASA Langley Research Center	Issued	LAR-16307-2
+NASA Langley Research Center	Application	LAR-16308-2
+NASA Langley Research Center	Issued	LAR-16311-1
+NASA Langley Research Center	Issued	LAR-16323-1
+NASA Langley Research Center	Issued	LAR-16324-1
+NASA Langley Research Center	Issued	LAR-16324-2
+NASA Langley Research Center	Issued	LAR-16326-1
+NASA Langley Research Center	Issued	LAR-16332-1-CU
+NASA Langley Research Center	Issued	LAR-16363-1
+NASA Langley Research Center	Issued	LAR-16383-1-NP
+NASA Langley Research Center	Issued	LAR-16383-2
+NASA Langley Research Center	Issued	LAR-16390-1-SB
+NASA Langley Research Center	Issued	LAR-16393-1
+NASA Langley Research Center	Issued	LAR-16406-1-CU
+NASA Langley Research Center	Issued	LAR-16409-1
+NASA Langley Research Center	Issued	LAR-16432-1
+NASA Langley Research Center	Issued	LAR-16437-1-NP
+NASA Langley Research Center	Issued	LAR-16440-1
+NASA Langley Research Center	Issued	LAR-16475-1
+NASA Langley Research Center	Issued	LAR-16496-1
+NASA Langley Research Center	Issued	LAR-16499-1
+NASA Langley Research Center	Issued	LAR-16510-1
+NASA Langley Research Center	Issued	LAR-16516-1
+NASA Langley Research Center	Issued	LAR-16517-1
+NASA Langley Research Center	Issued	LAR-16532-1
+NASA Langley Research Center	Issued	LAR-16538-1
+NASA Langley Research Center	Issued	LAR-16549-1
+NASA Langley Research Center	Application	LAR-16565-1
+NASA Langley Research Center	Issued	LAR-16566-1
+NASA Langley Research Center	Issued	LAR-16571-1
+NASA Langley Research Center	Issued	LAR-16571-2
+NASA Langley Research Center	Issued	LAR-16571-3
+NASA Langley Research Center	Issued	LAR-16573-1
+NASA Langley Research Center	Issued	LAR-16575-1
+NASA Langley Research Center	Issued	LAR-16605-1
+NASA Langley Research Center	Issued	LAR-16615-1
+NASA Langley Research Center	Issued	LAR-16615-2
+NASA Langley Research Center	Issued	LAR-16616-1
+NASA Langley Research Center	Issued	LAR-16640-1
+NASA Langley Research Center	Issued	LAR-16696-1
+NASA Langley Research Center	Issued	LAR-16698-1
+NASA Langley Research Center	Issued	LAR-16736-1
+NASA Langley Research Center	Issued	LAR-16845-1
+NASA Langley Research Center	Issued	LAR-16854-1
+NASA Langley Research Center	Issued	LAR-16858-1
+NASA Langley Research Center	Issued	LAR-16867-1
+NASA Langley Research Center	Issued	LAR-17548-1
+NASA Langley Research Center	Issued	LAR-16867-2
+NASA Langley Research Center	Issued	LAR-16868-1
+NASA Langley Research Center	Issued	LAR-16871-1
+NASA Langley Research Center	Issued	LAR-16872-1
+NASA Langley Research Center	Issued	LAR-16874-1
+NASA Langley Research Center	Issued	LAR-16877-1
+NASA Langley Research Center	Issued	LAR-16885-1
+NASA Langley Research Center	Issued	LAR-16886-1
+NASA Langley Research Center	Issued	LAR-16900-1
+NASA Langley Research Center	Issued	LAR-16906-1
+NASA Langley Research Center	Issued	LAR-16907-1
+NASA Langley Research Center	Issued	LAR-16908-1
+NASA Langley Research Center	Issued	LAR-16946-1
+NASA Langley Research Center	Issued	LAR-16950-1
+NASA Langley Research Center	Issued	LAR-16958-1
+NASA Langley Research Center	Issued	LAR-16970-1
+NASA Langley Research Center	Issued	LAR-16974-1
+NASA Langley Research Center	Issued	LAR-17003-1
+NASA Langley Research Center	Issued	LAR-17013-1
+NASA Langley Research Center	Issued	LAR-17017-1
+NASA Langley Research Center	Issued	LAR-17032-1
+NASA Langley Research Center	Issued	LAR-17044-1
+NASA Langley Research Center	Issued	LAR-17073-1
+NASA Langley Research Center	Application	LAR-17088-1
+NASA Langley Research Center	Issued	LAR-17112-1
+NASA Langley Research Center	Issued	LAR-17116-1
+NASA Langley Research Center	Issued	LAR-17126-1
+NASA Langley Research Center	Issued	LAR-17128-1
+NASA Langley Research Center	Issued	LAR-17135-1
+NASA Langley Research Center	Issued	LAR-17149-2
+NASA Langley Research Center	Issued	LAR-17154-1
+NASA Langley Research Center	Issued	LAR-17154-2
+NASA Langley Research Center	Issued	LAR-17155-1
+NASA Langley Research Center	Issued	LAR-17157-1
+NASA Langley Research Center	Issued	LAR-17163-1
+NASA Langley Research Center	Issued	LAR-17165-1
+NASA Langley Research Center	Issued	LAR-17168-1
+NASA Langley Research Center	Issued	LAR-17169-1
+NASA Langley Research Center	Application	LAR-17211-1
+NASA Langley Research Center	Issued	LAR-17213-1
+NASA Langley Research Center	Issued	LAR-17224-1
+NASA Langley Research Center	Issued	LAR-17229-1
+NASA Langley Research Center	Issued	LAR-17235-1
+NASA Langley Research Center	Issued	LAR-17237-1
+NASA Langley Research Center	Issued	LAR-17240-1
+NASA Langley Research Center	Issued	LAR-17241-1
+NASA Langley Research Center	Issued	LAR-17242-1
+NASA Langley Research Center	Issued	LAR-17243-1
+NASA Langley Research Center	Issued	LAR-17245-1
+NASA Langley Research Center	Issued	LAR-17257-1
+NASA Langley Research Center	Issued	LAR-17267-1
+NASA Langley Research Center	Issued	LAR-17268-1
+NASA Langley Research Center	Issued	LAR-17280-1
+NASA Langley Research Center	Issued	LAR-17286-1
+NASA Langley Research Center	Issued	LAR-17290-1
+NASA Langley Research Center	Issued	LAR-17293-1
+NASA Langley Research Center	Issued	LAR-17294-1
+NASA Langley Research Center	Issued	LAR-17295-1
+NASA Langley Research Center	Issued	LAR-17300-1
+NASA Langley Research Center	Application	LAR-17307-1
+NASA Langley Research Center	Issued	LAR-17317-1
+NASA Langley Research Center	Application	LAR-17317-2
+NASA Langley Research Center	Application	LAR-17318-1
+NASA Langley Research Center	Issued	LAR-17321-1
+NASA Langley Research Center	Application	LAR-17323-1
+NASA Langley Research Center	Issued	LAR-17325-1
+NASA Langley Research Center	Issued	LAR-17327-1
+NASA Langley Research Center	Application	LAR-17330-1
+NASA Langley Research Center	Issued	LAR-17332-1
+NASA Langley Research Center	Application	LAR-17332-2
+NASA Langley Research Center	Issued	LAR-17335-1
+NASA Langley Research Center	Issued	LAR-17346-1
+NASA Langley Research Center	Issued	LAR-17355-1
+NASA Langley Research Center	Application	LAR-17361-1
+NASA Langley Research Center	Issued	LAR-17365-1
+NASA Langley Research Center	Issued	LAR-17381-1
+NASA Langley Research Center	Issued	LAR-17382-1
+NASA Langley Research Center	Issued	LAR-17384-1
+NASA Langley Research Center	Issued	LAR-17385-1
+NASA Langley Research Center	Application	LAR-17386-1
+NASA Langley Research Center	Issued	LAR-17387-1
+NASA Langley Research Center	Issued	LAR-17390-1
+NASA Langley Research Center	Issued	LAR-17391-1
+NASA Langley Research Center	Issued	LAR-17402-1
+NASA Langley Research Center	Issued	LAR-17405-1
+NASA Langley Research Center	Application	LAR-17413-2
+NASA Langley Research Center	Issued	LAR-17425-1
+NASA Langley Research Center	Application	LAR-17427-1
+NASA Langley Research Center	Issued	LAR-17432-1
+NASA Langley Research Center	Issued	LAR-17433-1
+NASA Langley Research Center	Issued	LAR-17440-1
+NASA Langley Research Center	Issued	LAR-17444-1
+NASA Langley Research Center	Issued	LAR-17447-1
+NASA Langley Research Center	Application	LAR-17455-3
+NASA Langley Research Center	Issued	LAR-17469-1
+NASA Langley Research Center	Issued	LAR-17477-1
+NASA Langley Research Center	Issued	LAR-17478-1
+NASA Langley Research Center	Issued	LAR-17480-1
+NASA Langley Research Center	Issued	LAR-17485-1
+NASA Langley Research Center	Issued	LAR-17485-2
+NASA Langley Research Center	Issued	LAR-17487-1
+NASA Langley Research Center	Issued	LAR-17488-1
+NASA Langley Research Center	Issued	LAR-17493-1
+NASA Langley Research Center	Issued	LAR-17502-1
+NASA Langley Research Center	Application	LAR-17502-1-CON
+NASA Langley Research Center	Issued	LAR-17514-1
+NASA Langley Research Center	Issued	LAR-17526-1
+NASA Langley Research Center	Issued	LAR-17528-1
+NASA Langley Research Center	Issued	LAR-17535-1
+NASA Langley Research Center	Issued	LAR-17539-1
+NASA Langley Research Center	Issued	LAR-17547-1
+NASA Langley Research Center	Issued	LAR-17553-1
+NASA Langley Research Center	Issued	LAR-17554-1
+NASA Langley Research Center	Application	LAR-17555-1
+NASA Langley Research Center	Issued	LAR-17573-1
+NASA Langley Research Center	Issued	LAR-17576-1
+NASA Langley Research Center	Issued	LAR-17579-1
+NASA Langley Research Center	Issued	LAR-17593-1
+NASA Langley Research Center	Issued	LAR-17608-1
+NASA Langley Research Center	Issued	LAR-17609-1
+NASA Langley Research Center	Issued	LAR-17629-1
+NASA Langley Research Center	Issued	LAR-17634-1
+NASA Langley Research Center	Application	LAR-17636-1
+NASA Langley Research Center	Issued	LAR-17638-1
+NASA Langley Research Center	Issued	LAR-17651-1
+NASA Langley Research Center	Issued	LAR-17655-1
+NASA Langley Research Center	Issued	LAR-17656-1
+NASA Langley Research Center	Application	LAR-17668-1
+NASA Langley Research Center	Issued	LAR-17681-1
+NASA Langley Research Center	Application	LAR-17681-2
+NASA Langley Research Center	Issued	LAR-17681-3
+NASA Langley Research Center	Application	LAR-17689-1
+NASA Langley Research Center	Application	LAR-17694-1
+NASA Langley Research Center	Issued	LAR-17695-1
+NASA Langley Research Center	Application	LAR-17696-1
+NASA Langley Research Center	Issued	LAR-17705-1
+NASA Langley Research Center	Issued	LAR-17709-1
+NASA Langley Research Center	Issued	LAR-17711-1
+NASA Langley Research Center	Application	LAR-17723-1
+NASA Langley Research Center	Issued	LAR-17724-1
+NASA Langley Research Center	Issued	LAR-17735-1
+NASA Langley Research Center	Issued	LAR-17736-1
+NASA Langley Research Center	Application	LAR-17738-1
+NASA Langley Research Center	Issued	LAR-17743-1
+NASA Langley Research Center	Issued	LAR-17745-1
+NASA Langley Research Center	Application	LAR-17877-1
+NASA Langley Research Center	Application	LAR-17747-1
+NASA Langley Research Center	Application	LAR-18090-1
+NASA Langley Research Center	Application	LAR-17747-1-CON
+NASA Langley Research Center	Issued	LAR-17748-1
+NASA Langley Research Center	Issued	LAR-17759-1
+NASA Langley Research Center	Issued	LAR-17766-1
+NASA Langley Research Center	Application	LAR-17769-1
+NASA Langley Research Center	Application	LAR-17777-1
+NASA Langley Research Center	Application	LAR-17780-1
+NASA Langley Research Center	Application	LAR-17786-1
+NASA Langley Research Center	Application	LAR-17789-1
+NASA Langley Research Center	Application	LAR-17791-1
+NASA Langley Research Center	Issued	LAR-17799-1
+NASA Langley Research Center	Application	LAR-17800-1
+NASA Langley Research Center	Application	LAR-17801-1
+NASA Langley Research Center	Application	LAR-17813-1
+NASA Langley Research Center	Application	LAR-17813-1-CON
+NASA Langley Research Center	Application	LAR-17830-1
+NASA Langley Research Center	Issued	LAR-17831-1
+NASA Langley Research Center	Application	LAR-17832-1
+NASA Langley Research Center	Application	LAR-17833-1
+NASA Langley Research Center	Issued	LAR-17836-1
+NASA Langley Research Center	Application	LAR-17841-1
+NASA Langley Research Center	Application	LAR-17848-1
+NASA Langley Research Center	Issued	LAR-17856-1
+NASA Langley Research Center	Application	LAR-17857-1
+NASA Langley Research Center	Application	LAR-17869-1
+NASA Langley Research Center	Application	LAR-17886-1
+NASA Langley Research Center	Application	LAR-17887-1
+NASA Langley Research Center	Issued	LAR-17888-1
+NASA Langley Research Center	Issued	LAR-17894-1
+NASA Langley Research Center	Application	LAR-17895-1
+NASA Langley Research Center	Application	LAR-17902-1
+NASA Langley Research Center	Application	LAR-17906-1
+NASA Langley Research Center	Issued	LAR-17908-1
+NASA Langley Research Center	Application	LAR-17918-1
+NASA Langley Research Center	Issued	LAR-17919-1
+NASA Langley Research Center	Application	LAR-17919-2
+NASA Langley Research Center	Application	LAR-18097-1
+NASA Langley Research Center	Application	LAR-17923-1
+NASA Langley Research Center	Application	LAR-17947-1
+NASA Langley Research Center	Application	LAR-17952-1
+NASA Langley Research Center	Application	LAR-17958-1
+NASA Langley Research Center	Issued	LAR-17959-1
+NASA Langley Research Center	Application	LAR-17966-1
+NASA Langley Research Center	Application	LAR-17967-1
+NASA Langley Research Center	Application	LAR-17972-1
+NASA Langley Research Center	Application	LAR-17973-1
+NASA Langley Research Center	Application	LAR-17977-1
+NASA Langley Research Center	Application	LAR-17980-1
+NASA Langley Research Center	Application	LAR-17984-1
+NASA Langley Research Center	Application	LAR-17985-1
+NASA Langley Research Center	Application	LAR-17987-1
+NASA Langley Research Center	Application	LAR-17991-1
+NASA Langley Research Center	Issued	LAR-17993-1
+NASA Langley Research Center	Application	LAR-17993-2
+NASA Langley Research Center	Application	LAR-17994-1
+NASA Langley Research Center	Application	LAR-17996-1
+NASA Langley Research Center	Issued	LAR-18006-1
+NASA Langley Research Center	Application	LAR-18006-2
+NASA Langley Research Center	Issued	LAR-18016-1
+NASA Langley Research Center	Application	LAR-18021-1
+NASA Langley Research Center	Application	LAR-18023-1
+NASA Langley Research Center	Application	LAR-18024-1
+NASA Langley Research Center	Application	LAR-18026-1
+NASA Langley Research Center	Application	LAR-18257-1
+NASA Langley Research Center	Issued	LAR-18032-1
+NASA Langley Research Center	Application	LAR-18034-1
+NASA Langley Research Center	Application	LAR-18037-1
+NASA Langley Research Center	Application	LAR-18040-1
+NASA Langley Research Center	Application	LAR-18065-1
+NASA Langley Research Center	Application	LAR-18070-1
+NASA Langley Research Center	Application	LAR-18071-1
+NASA Langley Research Center	Application	LAR-18073-1
+NASA Langley Research Center	Application	LAR-18077-1
+NASA Langley Research Center	Application	LAR-18089-1
+NASA Langley Research Center	Application	LAR-18127-1
+NASA Langley Research Center	Application	LAR-18131-1
+NASA Langley Research Center	Application	LAR-18132-1
+NASA Langley Research Center	Application	LAR-18143-1
+NASA Langley Research Center	Application	LAR-18144-1
+NASA Langley Research Center	Application	LAR-18160-1
+NASA Langley Research Center	Application	LAR-18166-1
+NASA Langley Research Center	Application	LAR-18179-1
+NASA Langley Research Center	Application	LAR-18183-1
+NASA Langley Research Center	Application	LAR-18184-1
+NASA Langley Research Center	Application	LAR-18186-1
+NASA Langley Research Center	Application	LAR-18202-1
+NASA Langley Research Center	Application	LAR-18204-1
+NASA Langley Research Center	Application	LAR-18211-1
+NASA Langley Research Center	Application	LAR-18217-1
+NASA Langley Research Center	Application	LAR-18246-1
+NASA Langley Research Center	Application	LAR-18266-1
+NASA Langley Research Center	Application	LAR-18267-1
+NASA Langley Research Center	Application	LAR-18270-1
+NASA Langley Research Center	Application	LAR-18301-1
+NASA Langley Research Center	Application	LAR-18318-1
+NASA Langley Research Center	Application	LAR-18374-1
+NASA Glenn Research Center	Issued	LEW-16183-1
+NASA Glenn Research Center	Issued	LEW-16519-2
+NASA Glenn Research Center	Issued	LEW-16901-1
+NASA Glenn Research Center	Issued	LEW-17153-1
+NASA Glenn Research Center	Issued	LEW-17157-1
+NASA Glenn Research Center	Issued	LEW-17166-1
+NASA Glenn Research Center	Issued	LEW-17167-1
+NASA Glenn Research Center	Issued	LEW-17170-1
+NASA Glenn Research Center	Issued	LEW-17182-1
+NASA Glenn Research Center	Issued	LEW-17240-1
+NASA Glenn Research Center	Issued	LEW-17256-1
+NASA Glenn Research Center	Issued	LEW-17256-2
+NASA Glenn Research Center	Issued	LEW-17269-2
+NASA Glenn Research Center	Application	LEW-17269-3
+NASA Glenn Research Center	Issued	LEW-17291-1
+NASA Glenn Research Center	Issued	LEW-17293-1
+NASA Glenn Research Center	Issued	LEW-17293-2
+NASA Glenn Research Center	Issued	LEW-17299-1
+NASA Glenn Research Center	Issued	LEW-17317-1
+NASA Glenn Research Center	Application	LEW-17317-2
+NASA Glenn Research Center	Issued	LEW-17345-2
+NASA Glenn Research Center	Issued	LEW-17383-1
+NASA Glenn Research Center	Application	LEW-17458-2
+NASA Glenn Research Center	Issued	LEW-17483-1
+NASA Glenn Research Center	Issued	LEW-17484-5
+NASA Glenn Research Center	Issued	LEW-17494-1
+NASA Glenn Research Center	Issued	LEW-17498-1
+NASA Glenn Research Center	Issued	LEW-17510-1
+NASA Glenn Research Center	Issued	LEW-17517-1
+NASA Glenn Research Center	Issued	LEW-17520-1
+NASA Glenn Research Center	Issued	LEW-17551-1
+NASA Glenn Research Center	Issued	LEW-17561-1
+NASA Glenn Research Center	Issued	LEW-17589-1
+NASA Glenn Research Center	Issued	LEW-17592-1
+NASA Glenn Research Center	Application	LEW-17595-1
+NASA Glenn Research Center	Issued	LEW-17605-1
+NASA Glenn Research Center	Issued	LEW-17618-1
+NASA Glenn Research Center	Issued	LEW-17618-1-REIS
+NASA Glenn Research Center	Application	LEW-17618-3
+NASA Glenn Research Center	Issued	LEW-17630-1
+NASA Glenn Research Center	Application	LEW-17634-1
+NASA Glenn Research Center	Application	LEW-17634-2
+NASA Glenn Research Center	Issued	LEW-17642-2
+NASA Glenn Research Center	Issued	LEW-17642-4
+NASA Glenn Research Center	Issued	LEW-17661-1 with LEW-17765-1
+NASA Glenn Research Center	Issued	LEW-17664-1
+NASA Glenn Research Center	Issued	LEW-17671-1
+NASA Glenn Research Center	Issued	LEW-17672-1
+NASA Glenn Research Center	Issued	LEW-17678-1
+NASA Glenn Research Center	Issued	LEW-17694-1
+NASA Glenn Research Center	Issued	LEW-17704-1
+NASA Glenn Research Center	Issued	LEW-17765-1 with LEW-17661-1
+NASA Glenn Research Center	Issued	LEW-17786-1
+NASA Glenn Research Center	Issued	LEW-17814-1
+NASA Glenn Research Center	Issued	LEW-17820-1
+NASA Glenn Research Center	Issued	LEW-17820-2
+NASA Glenn Research Center	Issued	LEW-17825-1
+NASA Glenn Research Center	Issued	LEW-17826-1
+NASA Glenn Research Center	Issued	LEW-17859-1
+NASA Glenn Research Center	Issued	LEW-17859-2
+NASA Glenn Research Center	Issued	LEW-17877-1
+NASA Glenn Research Center	Application	LEW-17877-2
+NASA Glenn Research Center	Issued	LEW-17904-1
+NASA Glenn Research Center	Issued	LEW-17904-2
+NASA Glenn Research Center	Application	LEW-17915-1
+NASA Glenn Research Center	Issued	LEW-17916-1
+NASA Glenn Research Center	Application	LEW-17916-2
+NASA Glenn Research Center	Application	LEW-17945-1
+NASA Glenn Research Center	Issued	LEW-17951-1
+NASA Glenn Research Center	Issued	LEW-17954-1
+NASA Glenn Research Center	Application	LEW-17963-1
+NASA Glenn Research Center	Issued	LEW-17975-1
+NASA Glenn Research Center	Issued	LEW-17991-1
+NASA Glenn Research Center	Issued	LEW-18003-1
+NASA Glenn Research Center	Issued	LEW-18042-1
+NASA Glenn Research Center	Application	LEW-18042-2
+NASA Glenn Research Center	Application	LEW-18043-1
+NASA Glenn Research Center	Application	LEW-18048-1
+NASA Glenn Research Center	Issued	LEW-18049-1
+NASA Glenn Research Center	Issued	LEW-18054-1
+NASA Glenn Research Center	Issued	LEW-18059-1
+NASA Glenn Research Center	Issued	LEW-18076-1
+NASA Glenn Research Center	Application	LEW-18076-2
+NASA Glenn Research Center	Issued	LEW-18089-1
+NASA Glenn Research Center	Issued	LEW-18138-1
+NASA Glenn Research Center	Application	LEW-18205-1
+NASA Glenn Research Center	Application	LEW-18207-1
+NASA Glenn Research Center	Issued	LEW-18221-1
+NASA Glenn Research Center	Application	LEW-18221-2
+NASA Glenn Research Center	Issued	LEW-18236-1
+NASA Glenn Research Center	Application	LEW-18236-2
+NASA Glenn Research Center	Issued	LEW-18248-1
+NASA Glenn Research Center	Issued	LEW-18248-2
+NASA Glenn Research Center	Issued	LEW-18253-1
+NASA Glenn Research Center	Issued	LEW-18254-1
+NASA Glenn Research Center	Issued	LEW-18255-1
+NASA Glenn Research Center	Issued	LEW-18256-1
+NASA Glenn Research Center	Issued	LEW-18261-1
+NASA Glenn Research Center	Application	LEW-18291-1
+NASA Glenn Research Center	Application	LEW-18296-1
+NASA Glenn Research Center	Issued	LEW-18313-1
+NASA Glenn Research Center	Issued	LEW-18313-2
+NASA Glenn Research Center	Application	LEW-18324-1
+NASA Glenn Research Center	Issued	LEW-18325-1
+NASA Glenn Research Center	Application	LEW-18325-2
+NASA Glenn Research Center	Issued	LEW-18338-1
+NASA Glenn Research Center	Issued	LEW-18340-1
+NASA Glenn Research Center	Issued	LEW-18340-2
+NASA Glenn Research Center	Issued	LEW-18356-1
+NASA Glenn Research Center	Issued	LEW-18356-2
+NASA Glenn Research Center	Issued	LEW-18362-1
+NASA Glenn Research Center	Issued	LEW-18362-2
+NASA Glenn Research Center	Issued	LEW-18373-1
+NASA Glenn Research Center	Issued	LEW-18426-1
+NASA Glenn Research Center	Application	LEW-18426-2
+NASA Glenn Research Center	Issued	LEW-18432-1
+NASA Glenn Research Center	Application	LEW-18432-2
+NASA Glenn Research Center	Issued	LEW-18458-1
+NASA Glenn Research Center	Issued	LEW-18461-1
+NASA Glenn Research Center	Application	LEW-18461-2
+NASA Glenn Research Center	Application	LEW-18466-1
+NASA Glenn Research Center	Application	LEW-18473-1
+NASA Glenn Research Center	Issued	LEW-18474-1
+NASA Glenn Research Center	Issued	LEW-18476-1
+NASA Glenn Research Center	Application	LEW-18476-2
+NASA Glenn Research Center	Application	LEW-18477-1
+NASA Glenn Research Center	Issued	LEW-18483-1
+NASA Glenn Research Center	Application	LEW-18486-2
+NASA Glenn Research Center	Issued	LEW-18491-1
+NASA Glenn Research Center	Application	LEW-18492-1
+NASA Glenn Research Center	Issued	LEW-18496-1
+NASA Glenn Research Center	Application	LEW-18500-1
+NASA Glenn Research Center	Application	LEW-18516-1
+NASA Glenn Research Center	Issued	LEW-18538-1
+NASA Glenn Research Center	Application	LEW-18542-1
+NASA Glenn Research Center	Application	LEW-18554-1
+NASA Glenn Research Center	Application	LEW-18561-1
+NASA Glenn Research Center	Application	LEW-18565-1
+NASA Glenn Research Center	Application	LEW-18566-1
+NASA Glenn Research Center	Application	LEW-18586-1
+NASA Glenn Research Center	Issued	LEW-18593-1
+NASA Glenn Research Center	Issued	LEW-18594-1
+NASA Glenn Research Center	Application	LEW-18594-2
+NASA Glenn Research Center	Issued	LEW-18601-1
+NASA Glenn Research Center	Application	LEW-18604-1
+NASA Glenn Research Center	Issued	LEW-18605-1
+NASA Glenn Research Center	Application	LEW-18605-2
+NASA Glenn Research Center	Application	LEW-18605-3
+NASA Glenn Research Center	Application	LEW-18608-1
+NASA Glenn Research Center	Application	LEW-18614-1
+NASA Glenn Research Center	Application	LEW-18615-1
+NASA Glenn Research Center	Application	LEW-18629-1
+NASA Glenn Research Center	Application	LEW-18631-1
+NASA Glenn Research Center	Application	LEW-18632-1
+NASA Glenn Research Center	Application	LEW-18634-1
+NASA Glenn Research Center	Issued	LEW-18636-1
+NASA Glenn Research Center	Application	LEW-18639-1
+NASA Glenn Research Center	Application	LEW-18649-1
+NASA Glenn Research Center	Application	LEW-18652-1
+NASA Glenn Research Center	Application	LEW-18658-1
+NASA Glenn Research Center	Application	LEW-18674-1
+NASA Johnson Space Center	Application	MSC-25349-1
+NASA Glenn Research Center	Issued	LEW-18691-1
+NASA Glenn Research Center	Issued	LEW-18692-1
+NASA Glenn Research Center	Application	LEW-18693-1
+NASA Glenn Research Center	Application	LEW-18694-1
+NASA Glenn Research Center	Application	LEW-18704-1
+NASA Glenn Research Center	Application	LEW-18714-1
+NASA Glenn Research Center	Issued	LEW-18717-1
+NASA Glenn Research Center	Application	LEW-18717-2
+NASA Glenn Research Center	Application	LEW-18724-1
+NASA Glenn Research Center	Application	LEW-18732-1
+NASA Glenn Research Center	Application	LEW-18736-1
+NASA Glenn Research Center	Application	LEW-18738-1
+NASA Glenn Research Center	Application	LEW-18752-1
+NASA Glenn Research Center	Application	LEW-18754-1
+NASA Glenn Research Center	Application	LEW-18761-1
+NASA Glenn Research Center	Application	LEW-18762-1
+NASA Glenn Research Center	Application	LEW-18768-1
+NASA Glenn Research Center	Application	LEW-18769-1
+NASA Glenn Research Center	Application	LEW-18771-1
+NASA Glenn Research Center	Application	LEW-18785-1
+NASA Glenn Research Center	Application	LEW-18789-1
+NASA Glenn Research Center	Application	LEW-18797-1
+NASA Glenn Research Center	Application	LEW-18802-1
+NASA Glenn Research Center	Application	LEW-18809-1
+NASA Glenn Research Center	Application	LEW-18816-1
+NASA Glenn Research Center	Application	LEW-18821-1
+NASA Glenn Research Center	Application	LEW-18822-1
+NASA Glenn Research Center	Application	LEW-18825-1
+NASA Glenn Research Center	Application	LEW-18837-1
+NASA Glenn Research Center	Application	LEW-18844-1
+NASA Glenn Research Center	Application	LEW-18849-1
+NASA Glenn Research Center	Application	LEW-18858-1
+NASA Glenn Research Center	Application	LEW-18862-1
+NASA Glenn Research Center	Application	LEW-18864-1
+NASA Glenn Research Center	Application	LEW-18873-1
+NASA Glenn Research Center	Application	LEW-18887-1
+NASA Glenn Research Center	Application	LEW-18889-1
+NASA Glenn Research Center	Application	LEW-18890-1
+NASA Glenn Research Center	Application	LEW-18891-1 with LEW-18611-1 and LEW-18895-1
+NASA Glenn Research Center	Application	LEW-18893-1
+NASA Glenn Research Center	Application	LEW-18900-1
+NASA Glenn Research Center	Application	LEW-18902-1
+NASA Glenn Research Center	Application	LEW-18903-1
+NASA Glenn Research Center	Application	LEW-18919-1
+NASA Glenn Research Center	Application	LEW-18923-1
+NASA Glenn Research Center	Application	LEW-18928-1
+NASA Glenn Research Center	Application	LEW-18934-1
+NASA Glenn Research Center	Application	LEW-18939-1
+NASA Glenn Research Center	Application	LEW-18942-1
+NASA Glenn Research Center	Application	LEW-18949-1
+NASA Glenn Research Center	Application	LEW-18952-1
+NASA Glenn Research Center	Application	LEW-18957-1
+NASA Glenn Research Center	Application	LEW-18960-1
+NASA Glenn Research Center	Application	LEW-18963-1
+NASA Glenn Research Center	Application	LEW-18964-1
+NASA Glenn Research Center	Application	LEW-18970-1
+NASA Glenn Research Center	Application	LEW-18986-1
+NASA Glenn Research Center	Application	LEW-19013-1
+NASA Glenn Research Center	Application	LEW-19029-1
+NASA Glenn Research Center	Application	LEW-19040-1
+NASA Glenn Research Center	Application	LEW-19045-1
+NASA Glenn Research Center	Application	LEW-19053-1
+NASA Glenn Research Center	Application	LEW-19067-1
+NASA Glenn Research Center	Application	LEW-19077-1
+NASA Glenn Research Center	Application	LEW-19080-1
+NASA Glenn Research Center	Application	LEW-19098-1
+NASA Glenn Research Center	Application	LEW-19171-1
+NASA Marshall Space Flight Center	Issued	MFS-28402-2
+NASA Marshall Space Flight Center	Issued	MFS-28985-1
+NASA Marshall Space Flight Center	Issued	MFS-31175-2-CIP
+NASA Marshall Space Flight Center	Issued	MFS-31243-1
+NASA Marshall Space Flight Center	Issued	MFS-31243-2-CON
+NASA Marshall Space Flight Center	Issued	MFS-31258-1
+NASA Marshall Space Flight Center	Issued	MFS-31294-2-CIP2
+NASA Marshall Space Flight Center	Issued	MFS-31294-5-CIP
+NASA Marshall Space Flight Center	Issued	MFS-31294-6-CIP
+NASA Marshall Space Flight Center	Issued	MFS-31294-7-CIP
+NASA Marshall Space Flight Center	Issued	MFS-31303-1
+NASA Marshall Space Flight Center	Issued	MFS-31387-1
+NASA Marshall Space Flight Center	Issued	MFS-31399-1
+NASA Marshall Space Flight Center	Issued	MFS-31413-1
+NASA Marshall Space Flight Center	Issued	MFS-31475-1
+NASA Marshall Space Flight Center	Issued	MFS-31475-2-DIV
+NASA Marshall Space Flight Center	Issued	MFS-31488-1
+NASA Marshall Space Flight Center	Issued	MFS-31490-1
+NASA Marshall Space Flight Center	Issued	MFS-31529-1
+NASA Marshall Space Flight Center	Issued	MFS-31559-1-CON
+NASA Marshall Space Flight Center	Issued	MFS-31559-1-DIV
+NASA Marshall Space Flight Center	Issued	MFS-31559-2-DIV
+NASA Marshall Space Flight Center	Issued	MFS-31565-1
+NASA Marshall Space Flight Center	Issued	MFS-31584-1
+NASA Marshall Space Flight Center	Issued	MFS-31584-1-CIP
+NASA Marshall Space Flight Center	Issued	MFS-31593-1
+NASA Marshall Space Flight Center	Issued	MFS-31596-1
+NASA Marshall Space Flight Center	Issued	MFS-31616-1
+NASA Marshall Space Flight Center	Issued	MFS-31646-1
+NASA Marshall Space Flight Center	Issued	MFS-31649-1
+NASA Marshall Space Flight Center	Issued	MFS-31698-1
+NASA Marshall Space Flight Center	Issued	MFS-31706-1
+NASA Marshall Space Flight Center	Issued	MFS-31727-1
+NASA Marshall Space Flight Center	Issued	MFS-31761-1
+NASA Marshall Space Flight Center	Issued	MFS-31768-1
+NASA Marshall Space Flight Center	Issued	MFS-31776-1
+NASA Marshall Space Flight Center	Issued	MFS-31785-1
+NASA Marshall Space Flight Center	Issued	MFS-31789-1
+NASA Marshall Space Flight Center	Issued	MFS-31807-1
+NASA Marshall Space Flight Center	Issued	MFS-31813-1
+NASA Marshall Space Flight Center	Issued	MFS-31815-1
+NASA Marshall Space Flight Center	Issued	MFS-31817-1
+NASA Marshall Space Flight Center	Issued	MFS-31823-1-DIV
+NASA Marshall Space Flight Center	Issued	MFS-31828-1
+NASA Marshall Space Flight Center	Issued	MFS-31838-1
+NASA Marshall Space Flight Center	Issued	MFS-31842-1
+NASA Marshall Space Flight Center	Issued	MFS-31843-1
+NASA Marshall Space Flight Center	Issued	MFS-31852-1
+NASA Marshall Space Flight Center	Issued	MFS-31865-1
+NASA Marshall Space Flight Center	Issued	MFS-31886-1
+NASA Marshall Space Flight Center	Issued	MFS-31891-1
+NASA Marshall Space Flight Center	Issued	MFS-31918-1
+NASA Marshall Space Flight Center	Issued	MFS-31944-1
+NASA Marshall Space Flight Center	Issued	MFS-32024-1
+NASA Marshall Space Flight Center	Issued	MFS-32031-1
+NASA Marshall Space Flight Center	Issued	MFS-32099-1-CON
+NASA Marshall Space Flight Center	Issued	MFS-32102-1
+NASA Marshall Space Flight Center	Issued	MFS-32105-1-DIV
+NASA Marshall Space Flight Center	Issued	MFS-32115-1
+NASA Marshall Space Flight Center	Issued	MFS-32136-1
+NASA Marshall Space Flight Center	Issued	MFS-32137-1
+NASA Marshall Space Flight Center	Issued	MFS-32175-1
+NASA Marshall Space Flight Center	Issued	MFS-32192-1
+NASA Marshall Space Flight Center	Issued	MFS-32208-1
+NASA Marshall Space Flight Center	Issued	MFS-32214-1
+NASA Marshall Space Flight Center	Issued	MFS-32228-1
+NASA Marshall Space Flight Center	Issued	MFS-32253-1
+NASA Marshall Space Flight Center	Issued	MFS-32307-1
+NASA Marshall Space Flight Center	Issued	MFS-32311-1
+NASA Marshall Space Flight Center	Issued	MFS-32318-1
+NASA Marshall Space Flight Center	Issued	MFS-32323-1
+NASA Marshall Space Flight Center	Issued	MFS-32324-1
+NASA Marshall Space Flight Center	Issued	MFS-32341-1
+NASA Marshall Space Flight Center	Issued	MFS-32364-1
+NASA Marshall Space Flight Center	Issued	MFS-32390-1
+NASA Marshall Space Flight Center	Issued	MFS-32400-1
+NASA Marshall Space Flight Center	Issued	MFS-32402-1
+NASA Marshall Space Flight Center	Issued	MFS-32429-1
+NASA Marshall Space Flight Center	Issued	MFS-32438-1
+NASA Marshall Space Flight Center	Issued	MFS-32439-1
+NASA Marshall Space Flight Center	Issued	MFS-32497-1
+NASA Marshall Space Flight Center	Application	MFS-32518-1-CIP
+NASA Marshall Space Flight Center	Issued	MFS-32521-1
+NASA Marshall Space Flight Center	Issued	MFS-32548-1
+NASA Marshall Space Flight Center	Issued	MFS-32558-1
+NASA Marshall Space Flight Center	Issued	MFS-32584-1
+NASA Marshall Space Flight Center	Issued	MFS-32588-1
+NASA Marshall Space Flight Center	Issued	MFS-32605-1
+NASA Marshall Space Flight Center	Application	MFS-32605-1-CIP
+NASA Marshall Space Flight Center	Issued	MFS-32605-1-DIV
+NASA Marshall Space Flight Center	Application	MFS-32612-1-CIP
+NASA Marshall Space Flight Center	Issued	MFS-32614-1
+NASA Marshall Space Flight Center	Issued	MFS-32615-1
+NASA Marshall Space Flight Center	Issued	MFS-32638-1
+NASA Marshall Space Flight Center	Application	MFS-32642-1
+NASA Marshall Space Flight Center	Issued	MFS-32651-1
+NASA Marshall Space Flight Center	Application	MFS-32655-1
+NASA Marshall Space Flight Center	Issued	MFS-32667-1
+NASA Marshall Space Flight Center	Issued	MFS-32697-1
+NASA Marshall Space Flight Center	Issued	MFS-32697-1-CIP
+NASA Marshall Space Flight Center	Issued	MFS-32715-1
+NASA Marshall Space Flight Center	Issued	MFS-32719-1
+NASA Marshall Space Flight Center	Issued	MFS-32733-1
+NASA Marshall Space Flight Center	Issued	MFS-32737-1
+NASA Marshall Space Flight Center	Application	MFS-32737-1-CIP
+NASA Marshall Space Flight Center	Issued	MFS-32748-1
+NASA Marshall Space Flight Center	Application	MFS-32757-1
+NASA Marshall Space Flight Center	Application	MFS-32761-1-CIP
+NASA Marshall Space Flight Center	Application	MFS-32761-1-CON
+NASA Marshall Space Flight Center	Issued	MFS-32777-1
+NASA Marshall Space Flight Center	Issued	MFS-32797-1
+NASA Marshall Space Flight Center	Issued	MFS-32803-1
+NASA Marshall Space Flight Center	Application	MFS-32809-1
+NASA Marshall Space Flight Center	Issued	MFS-32817-1
+NASA Marshall Space Flight Center	Issued	MFS-32826-1
+NASA Marshall Space Flight Center	Application	MFS-33054-1
+NASA Marshall Space Flight Center	Issued	MFS-32830-1
+NASA Marshall Space Flight Center	Application	MFS-32830-1-CIP
+NASA Marshall Space Flight Center	Issued	MFS-32840-1
+NASA Marshall Space Flight Center	Application	MFS-32841-1
+NASA Marshall Space Flight Center	Application	MFS-32853-1
+NASA Marshall Space Flight Center	Issued	MFS-32857-1
+NASA Marshall Space Flight Center	Issued	MFS-32859-1
+NASA Marshall Space Flight Center	Issued	MFS-32859-1-DIV
+NASA Marshall Space Flight Center	Application	MFS-32865-1
+NASA Marshall Space Flight Center	Issued	MFS-32865-2
+NASA Marshall Space Flight Center	Application	MFS-32865-3
+NASA Marshall Space Flight Center	Application	MFS-32865-4
+NASA Marshall Space Flight Center	Issued	MFS-32871-1
+NASA Marshall Space Flight Center	Application	MFS-32873-1
+NASA Marshall Space Flight Center	Application	MFS-32889-1
+NASA Marshall Space Flight Center	Application	MFS-32895-1
+NASA Marshall Space Flight Center	Application	MFS-32912-1
+NASA Marshall Space Flight Center	Application	MFS-32916-1
+NASA Marshall Space Flight Center	Application	MFS-32924-1
+NASA Marshall Space Flight Center	Application	MFS-32934-1
+NASA Marshall Space Flight Center	Issued	MFS-32940-1
+NASA Marshall Space Flight Center	Application	MFS-32944-1
+NASA Marshall Space Flight Center	Application	MFS-32945-1
+NASA Marshall Space Flight Center	Application	MFS-32986-1
+NASA Marshall Space Flight Center	Application	MFS-33007-1
+NASA Marshall Space Flight Center	Application	MFS-33022-1
+NASA Marshall Space Flight Center	Application	MFS-33031-1
+NASA Marshall Space Flight Center	Application	MFS-33060-1
+NASA Johnson Space Center	Issued	MSC-21715-2
+NASA Johnson Space Center	Issued	MSC-21947-1
+NASA Johnson Space Center	Issued	MSC-22119-1
+NASA Johnson Space Center	Issued	MSC-22122-1
+NASA Johnson Space Center	Issued	MSC-22489-1
+NASA Johnson Space Center	Issued	MSC-22616-2
+NASA Johnson Space Center	Issued	MSC-22616-3
+NASA Johnson Space Center	Issued	MSC-22633-1
+NASA Johnson Space Center	Issued	MSC-22633-2
+NASA Johnson Space Center	Issued	MSC-22695-1
+NASA Johnson Space Center	Issued	MSC-22721-2
+NASA Johnson Space Center	Issued	MSC-22724-1
+NASA Johnson Space Center	Issued	MSC-22724-2
+NASA Johnson Space Center	Issued	MSC-22724-3
+NASA Johnson Space Center	Issued	MSC-22724-5
+NASA Johnson Space Center	Issued	MSC-22757-1
+NASA Johnson Space Center	Issued	MSC-22797-1
+NASA Johnson Space Center	Issued	MSC-22839-1
+NASA Johnson Space Center	Issued	MSC-22859-1
+NASA Johnson Space Center	Issued	MSC-22859-2
+NASA Johnson Space Center	Issued	MSC-22859-3
+NASA Johnson Space Center	Issued	MSC-22859-5
+NASA Johnson Space Center	Issued	MSC-22863-1
+NASA Johnson Space Center	Issued	MSC-22866-1
+NASA Johnson Space Center	Issued	MSC-22900-1
+NASA Johnson Space Center	Issued	MSC-23563-2
+NASA Johnson Space Center	Issued	MSC-22931-1
+NASA Johnson Space Center	Issued	MSC-22936-1
+NASA Johnson Space Center	Issued	MSC-22936-2
+NASA Johnson Space Center	Issued	MSC-22936-3
+NASA Johnson Space Center	Issued	MSC-22936-4
+NASA Johnson Space Center	Issued	MSC-22937-1
+NASA Johnson Space Center	Issued	MSC-22938-1
+NASA Johnson Space Center	Issued	MSC-22939-4
+NASA Johnson Space Center	Issued	MSC-22970-1
+NASA Johnson Space Center	Issued	MSC-22970-2
+NASA Johnson Space Center	Issued	MSC-22970-3
+NASA Johnson Space Center	Issued	MSC-23029-1
+NASA Johnson Space Center	Issued	MSC-23037-1
+NASA Johnson Space Center	Issued	MSC-23041-1
+NASA Johnson Space Center	Issued	MSC-23049-3
+NASA Johnson Space Center	Issued	MSC-23049-4
+NASA Johnson Space Center	Issued	MSC-23076-1
+NASA Johnson Space Center	Issued	MSC-23092-1
+NASA Johnson Space Center	Issued	MSC-23153-1
+NASA Johnson Space Center	Issued	MSC-23154-1
+NASA Johnson Space Center	Issued	MSC-23154-2
+NASA Johnson Space Center	Issued	MSC-23178-1
+NASA Johnson Space Center	Issued	MSC-23193-1
+NASA Johnson Space Center	Issued	MSC-23277-1
+NASA Johnson Space Center	Issued	MSC-23303-1
+NASA Johnson Space Center	Issued	MSC-23307-1
+NASA Johnson Space Center	Issued	MSC-23309-1
+NASA Johnson Space Center	Issued	MSC-23311-1
+NASA Johnson Space Center	Issued	MSC-23314-1
+NASA Johnson Space Center	Issued	MSC-23349-1
+NASA Johnson Space Center	Application	MSC-23349-2-SB
+NASA Johnson Space Center	Issued	MSC-23424-1
+NASA Johnson Space Center	Issued	MSC-23427-1
+NASA Johnson Space Center	Issued	MSC-23436-1
+NASA Johnson Space Center	Issued	MSC-23443-1
+NASA Johnson Space Center	Issued	MSC-23444-1
+NASA Johnson Space Center	Issued	MSC-23449-1
+NASA Johnson Space Center	Issued	MSC-23510-1
+NASA Johnson Space Center	Issued	MSC-23518-1
+NASA Johnson Space Center	Issued	MSC-23538-1
+NASA Johnson Space Center	Issued	MSC-23539-1
+NASA Johnson Space Center	Issued	MSC-23563-1
+NASA Johnson Space Center	Issued	MSC-23594-1
+NASA Johnson Space Center	Issued	MSC-23623-1
+NASA Johnson Space Center	Issued	MSC-23659-1
+NASA Johnson Space Center	Issued	MSC-23659-2
+NASA Johnson Space Center	Issued	MSC-23668-1
+NASA Johnson Space Center	Issued	MSC-23695-1
+NASA Johnson Space Center	Issued	MSC-23781-1
+NASA Johnson Space Center	Issued	MSC-23805-1
+NASA Johnson Space Center	Issued	MSC-23881-1
+NASA Johnson Space Center	Application	MSC-23882-1
+NASA Johnson Space Center	Issued	MSC-23906-1
+NASA Johnson Space Center	Issued	MSC-23933-1
+NASA Johnson Space Center	Issued	MSC-23954-1
+NASA Johnson Space Center	Issued	MSC-23988-1
+NASA Johnson Space Center	Issued	MSC-23988-2
+NASA Johnson Space Center	Issued	MSC-23997-2
+NASA Johnson Space Center	Issued	MSC-24000-1
+NASA Johnson Space Center	Issued	MSC-24042-1
+NASA Johnson Space Center	Issued	MSC-24106-1
+NASA Johnson Space Center	Issued	MSC-24115-1
+NASA Johnson Space Center	Issued	MSC-24149-1
+NASA Johnson Space Center	Issued	MSC-24149-2
+NASA Johnson Space Center	Issued	MSC-24164-1
+NASA Johnson Space Center	Issued	MSC-24169-1
+NASA Johnson Space Center	Issued	MSC-24180-1
+NASA Johnson Space Center	Issued	MSC-24184-1
+NASA Johnson Space Center	Issued	MSC-24201-1
+NASA Johnson Space Center	Issued	MSC-24207-1
+NASA Johnson Space Center	Issued	MSC-24215-1
+NASA Johnson Space Center	Issued	MSC-24216-1
+NASA Johnson Space Center	Issued	MSC-24228-1
+NASA Johnson Space Center	Issued	MSC-24238-1
+NASA Johnson Space Center	Issued	MSC-24263-1
+NASA Johnson Space Center	Issued	MSC-24273-1
+NASA Johnson Space Center	Application	MSC-24314-1
+NASA Johnson Space Center	Issued	MSC-24346-1
+NASA Johnson Space Center	Issued	MSC-24387-1
+NASA Johnson Space Center	Issued	MSC-24441-1
+NASA Johnson Space Center	Issued	MSC-24444-1
+NASA Johnson Space Center	Application	MSC-24451-1
+NASA Johnson Space Center	Issued	MSC-24464-1
+NASA Johnson Space Center	Issued	MSC-24466-1
+NASA Johnson Space Center	Application	MSC-24490-1
+NASA Johnson Space Center	Application	MSC-24506-1
+NASA Johnson Space Center	Issued	MSC-24508-1
+NASA Johnson Space Center	Issued	MSC-24509-1
+NASA Johnson Space Center	Issued	MSC-24525-1
+NASA Johnson Space Center	Application	MSC-24541-1
+NASA Johnson Space Center	Issued	MSC-24569-1
+NASA Johnson Space Center	Issued	MSC-24570-1
+NASA Johnson Space Center	Issued	MSC-24571-1
+NASA Johnson Space Center	Application	MSC-24685-1
+NASA Johnson Space Center	Application	MSC-24686-1
+NASA Johnson Space Center	Issued	MSC-24687-1
+NASA Johnson Space Center	Issued	MSC-24688-1
+NASA Johnson Space Center	Issued	MSC-24689-1
+NASA Johnson Space Center	Issued	MSC-24732-1
+NASA Johnson Space Center	Application	MSC-24733-1
+NASA Johnson Space Center	Application	MSC-24734-1
+NASA Johnson Space Center	Application	MSC-24735-1
+NASA Johnson Space Center	Issued	MSC-24736-1
+NASA Johnson Space Center	Issued	MSC-24737-1
+NASA Johnson Space Center	Application	MSC-24738-1
+NASA Johnson Space Center	Application	MSC-24739-1
+NASA Johnson Space Center	Application	MSC-24740-1
+NASA Johnson Space Center	Issued	MSC-24741-1
+NASA Johnson Space Center	Application	MSC-24742-1
+NASA Johnson Space Center	Application	MSC-24743-1
+NASA Johnson Space Center	Application	MSC-24744-1
+NASA Johnson Space Center	GM	MSC-24745-1
+NASA Johnson Space Center	Application	MSC-24746-1
+NASA Johnson Space Center	Issued	MSC-24747-1
+NASA Johnson Space Center	Issued	MSC-24750-1
+NASA Johnson Space Center	Issued	MSC-24751-1
+NASA Johnson Space Center	Issued	MSC-24752-1
+NASA Johnson Space Center	Application	MSC-24753-1
+NASA Johnson Space Center	Application	MSC-24755-1
+NASA Johnson Space Center	Application	MSC-24758-1
+NASA Johnson Space Center	Application	MSC-24798-1
+NASA Johnson Space Center	Application	MSC-24811-1
+NASA Johnson Space Center	Application	MSC-24813-1
+NASA Johnson Space Center	Application	MSC-24817-1
+NASA Johnson Space Center	Application	MSC-24837-1
+NASA Johnson Space Center	Application	MSC-24919-1
+NASA Johnson Space Center	Issued	MSC-24926-1
+NASA Johnson Space Center	Issued	MSC-24930-1
+NASA Johnson Space Center	Application	MSC-25026-1
+NASA Johnson Space Center	Issued	MSC-25053-1
+NASA Johnson Space Center	Application	MSC-25056-1
+NASA Johnson Space Center	Issued	MSC-25084-1
+NASA Johnson Space Center	Application	MSC-25084-DE
+NASA Johnson Space Center	Application	MSC-25084-JP
+NASA Johnson Space Center	Application	MSC-25091-1
+NASA Johnson Space Center	Issued	MSC-25121-1
+NASA Johnson Space Center	Application	MSC-25149-1
+NASA Johnson Space Center	Application	MSC-25216-1
+NASA Johnson Space Center	Application	MSC-25217-1
+NASA Johnson Space Center	Application	MSC-25219
+NASA Johnson Space Center	Application	MSC-25265-1
+NASA Johnson Space Center	Application	MSC-25286-1
+NASA Johnson Space Center	Application	MSC-25313-1
+NASA Johnson Space Center	Application	MSC-25318
+NASA Johnson Space Center	Application	MSC-25319
+NASA Johnson Space Center	Application	MSC-25320
+NASA Johnson Space Center	Application	MSC-25327-1
+NASA Johnson Space Center	Application	MSC-25386-1
+NASA Johnson Space Center	Application	MSC-25590-1
+NASA Johnson Space Center	Application	MSC-25604-1
+NASA Johnson Space Center	Application	MSC-25605-1
+NASA Johnson Space Center	Application	MSC-25626-1
+NASA Johnson Space Center	Application	MSC-25632-1
+NASA Johnson Space Center	Application	MSC-25758-1
+NASA Johnson Space Center	Application	MSC-25759-1
+NASA Johnson Space Center	Application	MSC-25760-1
+NASA Jet Propulsion Laboratory	Application	NPO-17734-1
+NASA Jet Propulsion Laboratory	Issued	NPO-19289-1
+NASA Jet Propulsion Laboratory	Application	NPO-19769-1
+NASA Jet Propulsion Laboratory	Issued	NPO-19855-1
+NASA Jet Propulsion Laboratory	Issued	NPO-20031-1
+NASA Jet Propulsion Laboratory	Issued	NPO-20837-1
+NASA Jet Propulsion Laboratory	Application	NPO-21136-1
+NASA Jet Propulsion Laboratory	Issued	NPO-30703-1
+NASA Jet Propulsion Laboratory	Issued	NPO-40040-1
+NASA Jet Propulsion Laboratory	Issued	NPO-40407-1
+NASA Jet Propulsion Laboratory	Issued	NPO-40827-1
+NASA Jet Propulsion Laboratory	Issued	NPO-41446-1
+NASA Jet Propulsion Laboratory	Issued	NPO-41506-2
+NASA Jet Propulsion Laboratory	Issued	NPO-41511-1
+NASA Jet Propulsion Laboratory	Issued	NPO-41982-1
+NASA Jet Propulsion Laboratory	Issued	NPO-42131-1
+NASA Jet Propulsion Laboratory	Issued	NPO-42312-1
+NASA Jet Propulsion Laboratory	Issued	NPO-42466-1
+NASA Jet Propulsion Laboratory	Issued	NPO-42563-1
+NASA Jet Propulsion Laboratory	Issued	NPO-42672-1
+NASA Jet Propulsion Laboratory	Issued	NPO-43213-1
+NASA Jet Propulsion Laboratory	Issued	NPO-43348-1
+NASA Jet Propulsion Laboratory	Issued	NPO-43361-1
+NASA Jet Propulsion Laboratory	Issued	NPO-43524-1
+NASA Jet Propulsion Laboratory	Issued	NPO-44079-1
+NASA Jet Propulsion Laboratory	Issued	NPO-44765-1
+NASA Jet Propulsion Laboratory	Issued	NPO-44914-1
+NASA Jet Propulsion Laboratory	Issued	NPO-45053-1
+NASA Jet Propulsion Laboratory	Issued	NPO-45911-1
+NASA Jet Propulsion Laboratory	Issued	NPO-45948-1
+NASA Jet Propulsion Laboratory	Application	NPO-46253-1
+NASA Jet Propulsion Laboratory	Issued	NPO-46843-1
+NASA Jet Propulsion Laboratory	Issued	NPO-46938-1
+NASA Jet Propulsion Laboratory	Application	NPO-47300-1
+NASA Jet Propulsion Laboratory	Application	NPO-47300-2
+NASA Jet Propulsion Laboratory	Issued	NPO-47310-1
+NASA Jet Propulsion Laboratory	Issued	NPO-47604-1
+NASA Jet Propulsion Laboratory	Application	NPO-47717-1
+NASA Jet Propulsion Laboratory	Issued	NPO-47869-1
+NASA Jet Propulsion Laboratory	Application	NPO-47881-1
+NASA Jet Propulsion Laboratory	Application	NPO-48140-1
+NASA Jet Propulsion Laboratory	Application	NPO-48413-1
+NASA Jet Propulsion Laboratory	Application	NPO-48539-1
+NASA Jet Propulsion Laboratory	Application	NPO-49086-1
+NASA Stennis Space Center	Issued	SSC-00040
+NASA Stennis Space Center	Issued	SSC-00050
+NASA Stennis Space Center	Issued	SSC-00247
+NASA Stennis Space Center	Issued	SSC-00264
+NASA Stennis Space Center	Issued	SSC-00327

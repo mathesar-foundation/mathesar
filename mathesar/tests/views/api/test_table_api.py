@@ -1,4 +1,5 @@
 from unittest.mock import patch
+import json
 import pytest
 
 from django.core.cache import cache
@@ -262,6 +263,30 @@ def test_table_create_from_datafile(client, data_file, schema):
     assert Table.objects.count() == num_tables + 1
     assert data_file.table_imported_to.id == table.id
     assert table.get_records()[0] == first_row
+    check_table_response(response_table, table, table_name)
+
+
+def test_table_create_from_paste(client, schema):
+    num_tables = Table.objects.count()
+    table_name = 'test_table'
+    with open('mathesar/tests/data/patents.txt', 'r') as paste_file:
+        paste_data = paste_file.read()
+    body = {
+        'paste': paste_data,
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
+
+    table = Table.objects.get(id=response_table['id'])
+    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871')
+    column_names = ['Center', 'Status', 'Case Number']
+
+    assert response.status_code == 201
+    assert Table.objects.count() == num_tables + 1
+    assert table.get_records()[0] == first_row
+    assert all([col in table.sa_column_names for col in column_names])
     check_table_response(response_table, table, table_name)
 
 
