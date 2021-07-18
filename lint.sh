@@ -15,13 +15,23 @@ normal=$(tput sgr0)
 
 red="\e[31m"
 green="\e[32m"
+yellow="\e[33m"
 endcol="\e[0m"
 
 indent() { sed 's/^/│  /'; } # Indents piped output with a indent guide lines
 
-# Global variables
-RUN_PYTHON="true"
-RUN_NODE="true"
+# Run switches
+RUN_PYTHON="false"
+CHANGED_NON_NODE_FILES=$(git diff --name-only --staged -- . :^mathesar_ui)
+if [[ $CHANGED_NON_NODE_FILES != "" ]]; then
+	RUN_PYTHON="true"
+fi
+
+RUN_NODE="false"
+CHANGED_NODE_FILES=$(git diff --name-only --staged mathesar_ui/)
+if [[ $CHANGED_NODE_FILES == *"mathesar_ui/"* ]]; then
+	RUN_NODE="true"
+fi
 
 # Argument parsing
 while getopts "p:n:" opt; do
@@ -78,23 +88,29 @@ else
 	NODE_EXIT=0 # Assume checks passed if skipped
 fi
 
-# Collate exit statuses
+# Show lint report
 printf "\n${bold}Report:${normal}\n"
 printf " Python: "
 if [[ $PYTHON_EXIT -ne 0 ]]; then
 	printf "${red}failed"
-else
-	printf "${green}passed"
-fi
-printf "${endcol}\n"
-printf "Node.js: "
-if [[ $NODE_EXIT -ne 0 ]]; then
-	printf "${red}failed"
+elif [[ $RUN_PYTHON == "false" ]]; then
+	printf "${yellow}skipped"
 else
 	printf "${green}passed"
 fi
 printf "${endcol}\n"
 
+printf "Node.js: "
+if [[ $NODE_EXIT -ne 0 ]]; then
+	printf "${red}failed"
+elif [[ $RUN_NODE == "false" ]]; then
+	printf "${yellow}skipped"
+else
+	printf "${green}passed"
+fi
+printf "${endcol}\n"
+
+# Collate exit statuses
 printf "\n"
 if [[ $PYTHON_EXIT -eq 0 && $NODE_EXIT -eq 0 ]]; then
 	printf "${green}:) No lint problems!${endcol}\n"
