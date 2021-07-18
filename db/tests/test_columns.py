@@ -7,6 +7,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.exc import IntegrityError
 from db import columns, tables, constants
+from db.tests.types import fixtures
+
+engine_with_types = fixtures.engine_with_types
 
 
 def init_column(*args, **kwargs):
@@ -142,6 +145,23 @@ def test_MC_is_default_when_false_for_pk():
             nullable=dc_definition.get("nullable", True),
         )
         assert not col.is_default
+
+
+def test_MC_valid_target_types_no_engine():
+    mc = columns.MathesarColumn('testable_col', String)
+    assert mc.valid_target_types is None
+
+
+def test_MC_valid_target_types_default_engine(engine):
+    mc = columns.MathesarColumn('testable_col', String)
+    mc.add_engine(engine)
+    assert "VARCHAR" in mc.valid_target_types
+
+
+def test_MC_valid_target_types_custom_engine(engine_with_types):
+    mc = columns.MathesarColumn('testable_col', String)
+    mc.add_engine(engine_with_types)
+    assert "mathesar_types.email" in mc.valid_target_types
 
 
 @pytest.mark.parametrize(

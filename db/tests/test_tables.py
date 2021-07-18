@@ -1,6 +1,6 @@
 from unittest.mock import call, patch
 import pytest
-from sqlalchemy import MetaData, select, Column, String
+from sqlalchemy import MetaData, select, Column, String, Table
 from db import tables, constants, columns
 
 ROSTER = "Roster"
@@ -333,6 +333,20 @@ def test_move_columns_moves_column_from_rem_to_ext(extracted_remainder_roster):
     actual_remainder_cols = [col.name for col in new_remainder.columns]
     assert sorted(actual_extracted_cols) == sorted(expect_extracted_cols)
     assert sorted(actual_remainder_cols) == sorted(expect_remainder_cols)
+
+
+def test_get_enriched_column_table(engine):
+    abc = "abc"
+    table = Table("testtable", MetaData(), Column(abc, String), Column('def', String))
+    enriched_table = tables.get_enriched_column_table(table, engine=engine)
+    assert enriched_table.columns[abc].engine == engine
+
+
+def test_get_enriched_column_table_no_engine():
+    abc = "abc"
+    table = Table("testtable", MetaData(), Column(abc, String), Column('def', String))
+    enriched_table = tables.get_enriched_column_table(table)
+    assert enriched_table.columns[abc].engine is None
 
 
 def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
