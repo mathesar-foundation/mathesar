@@ -4,12 +4,12 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
-from mathesar.serializers import TableSerializer, DataFileSerializer
+from mathesar.serializers import DataFileSerializer
 from mathesar.imports.csv import create_table_from_csv, get_sv_dialect
 from mathesar.errors import InvalidTableError
 
 
-def create_table_from_datafile(request, data):
+def create_table_from_datafile(data):
     name = data['name']
     schema = data['schema']
     if len(data['data_files']) == 1:
@@ -18,8 +18,7 @@ def create_table_from_datafile(request, data):
         raise ValidationError({'data_files': 'Multiple data files are unsupported'})
 
     table = create_table_from_csv(data_file, name, schema)
-    serializer = TableSerializer(table, context={'request': request})
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return table
 
 
 def create_datafile(request, original_file):
