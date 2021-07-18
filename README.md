@@ -50,7 +50,7 @@ To lint the project, run the `lint.sh` script from the root of the repository. T
 ./lint.sh
 ```
 
-By default, the script lints both Python and Node.js but this can be changed with the `-p` and `-n` flags respectively.
+By default, the script lints both Python and Node.js (if changes are staged), but this can be overridden with the `-p` and `-n` flags respectively.
 ```
 ./lint.sh -p false
 ```
