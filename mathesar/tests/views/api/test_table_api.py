@@ -303,7 +303,7 @@ def test_table_create_with_empty_datafile(client, schema):
     assert len(table.get_records()) == 0
     check_table_response(response_table, table, table_name)
 
-    
+
 def test_table_partial_update(create_table, client):
     table_name = 'NASA Table Partial Update'
     new_table_name = 'NASA Table Partial Update New'
