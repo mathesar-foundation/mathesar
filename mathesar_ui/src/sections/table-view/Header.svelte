@@ -25,6 +25,7 @@
   export let group: GroupOption = new Set();
   export let columnPosition: ColumnPosition = new Map();
   export let horizontalScrollOffset = 0;
+  export let isResultGrouped: boolean;
 
   let headerRef: HTMLElement;
 
@@ -37,7 +38,7 @@
   $: onHScrollOffsetChange(horizontalScrollOffset);
 
   let paddingLeft: number;
-  $: paddingLeft = group?.size > 0 ? GROUP_MARGIN_LEFT : 0;
+  $: paddingLeft = isResultGrouped ? GROUP_MARGIN_LEFT : 0;
 
   function onHeaderScroll(scrollLeft: number) {
     if (horizontalScrollOffset !== scrollLeft) {

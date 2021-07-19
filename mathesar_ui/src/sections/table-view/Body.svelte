@@ -4,7 +4,7 @@
     TableRecord,
     ColumnPosition,
     GroupIndex,
-    GroupOption,
+    GroupData,
   } from '@mathesar/stores/tableData';
   import {
     GROUP_ROW_HEIGHT,
@@ -18,7 +18,7 @@
   export let id: number;
   export let columns: TableColumnData;
   export let data: TableRecord[];
-  export let group: GroupOption;
+  export let groupData: GroupData;
   export let columnPosition: ColumnPosition;
   export let scrollOffset = 0;
   export let horizontalScrollOffset = 0;
@@ -91,12 +91,13 @@
             <Row {columns} style={it.style}
                   row={data[it.index] || {}}
                   index={it.index}
-                  isGrouped={group?.size > 0}
+                  {groupData}
+                  isGrouped={!!groupData}
                   {columnPosition}/>
           {/if}
         {/each}
 
-        {#if group?.size > 0}
+        {#if groupData}
           <div class="group-padding"></div>
         {/if}
       </VirtualList>

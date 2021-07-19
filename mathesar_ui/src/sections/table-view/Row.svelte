@@ -3,6 +3,7 @@
     TableColumnData,
     ColumnPosition,
     TableRecord,
+    GroupData,
   } from '@mathesar/stores/tableData';
   import {
     DEFAULT_COUNT_COL_WIDTH,
@@ -11,6 +12,7 @@
     DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/tableData';
   import { Skeleton } from '@mathesar-components';
+  import GroupHeader from './GroupHeader.svelte';
 
   export let index: number;
   export let columns: TableColumnData;
@@ -19,6 +21,7 @@
   export let isGrouped = false;
   export let columnPosition: ColumnPosition;
   export let style: { [key: string]: string | number };
+  export let groupData: GroupData;
 
   function calculateStyle(
     _style: { [key: string]: string | number },
@@ -38,7 +41,7 @@
       const top = _style.top as number;
       const height = _style.height as number;
       return {
-        group: `${styleStr};top:${top + 20}px;height:${GROUP_ROW_HEIGHT - 20}px;`
+        group: `${styleStr};top:${top + 25}px;height:${GROUP_ROW_HEIGHT - 25}px;`
                 + `width:${totalWidth}px`,
         default: `${styleStr};top:${top + GROUP_ROW_HEIGHT}px;`
                   + `height:${height - GROUP_ROW_HEIGHT}px;`
@@ -61,18 +64,7 @@
 </script>
 
 {#if row.__groupInfo}
-  <div class="row group" style={styleString.group}>
-    <div class="cell row-number" style="width:{DEFAULT_COUNT_COL_WIDTH}px;
-                      left:{isGrouped ? GROUP_MARGIN_LEFT : 0}px">
-      <div class="border"></div>
-      <div class="content"></div>
-    </div>
-    <div class="cell values" style="left:{DEFAULT_COUNT_COL_WIDTH}px">
-      {#each row.__groupInfo.columns as column (column)}
-        <span class="tag">{column}: {row[column]}</span>
-      {/each}
-    </div>
-  </div>
+  <GroupHeader style={styleString.group} {row} {groupData}/>
 {/if}
 
 <div class="row" class:in-group={isGrouped} style={styleString.default}>

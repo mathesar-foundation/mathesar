@@ -40,11 +40,16 @@ export interface TableColumnData {
   data: TableColumn[]
 }
 
+export interface GroupData {
+  [key: string]: GroupData | number
+}
+
 interface TableRecordData {
   state: States,
   error?: string,
   data: TableRecord[],
-  totalCount: number
+  totalCount: number,
+  groupData: GroupData
 }
 
 export type SortOption = Map<string, 'asc' | 'desc'>;
@@ -114,6 +119,28 @@ function calculateColumnPosition(columns: TableColumn[]): ColumnPosition {
     left: 0,
   });
   return columnPosition;
+}
+
+function combineGroups(
+  groupData: GroupData,
+  groupResults: TableRecordGroupsResponse['results'],
+): GroupData {
+  if (!groupResults) {
+    return groupData;
+  }
+  const groupMap: GroupData = groupData || {};
+  groupResults?.forEach((result) => {
+    let group = groupMap;
+    for (let i = 0; i < result.values.length - 1; i += 1) {
+      const value = result.values[i];
+      if (!group[value]) {
+        group[value] = {};
+      }
+      group = group[value] as GroupData;
+    }
+    group[result.values[result.values.length - 1]] = result.count;
+  });
+  return groupMap;
 }
 
 function checkAndSetGroupHeaderRow(
@@ -227,6 +254,9 @@ export async function fetchTableRecords(
         previous: -1,
         bailOutOnReset: true,
       });
+
+      // Set to empty object if query is grouped
+      existingData.groupData = optionData.group?.size > 0 ? {} : null;
     } else {
       // Set offset as the first empty item index in range
       // If range is empty, this will break on 1 loop
@@ -316,11 +346,17 @@ export async function fetchTableRecords(
       const data = response.results || [];
 
       // Getting from store again, since state may have changed
-      const records = [...get(tableRecordStore).data];
+      const recordInfo = get(tableRecordStore);
+      const records = [...recordInfo.data];
       records.length = totalCount;
 
       const groupColumns = response?.group_count?.group_count_by;
       const isResultGrouped = groupColumns?.length > 0;
+
+      const groupData = combineGroups(
+        recordInfo.groupData,
+        response?.group_count?.results,
+      );
 
       const groupIndexData = get(table.display.groupIndex);
 
@@ -355,6 +391,7 @@ export async function fetchTableRecords(
         state: States.Done,
         data: records,
         totalCount,
+        groupData,
       });
       table.display.groupIndex.set({
         ...groupIndexData,
@@ -366,6 +403,7 @@ export async function fetchTableRecords(
         state: States.Error,
         error: err instanceof Error ? err.message : null,
         data: [],
+        groupData: null,
         totalCount: null,
       });
     } finally {
@@ -392,6 +430,7 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
       records: writable({
         state: States.Loading,
         data: [],
+        groupData: null,
         totalCount: null,
       }),
       options: writable({

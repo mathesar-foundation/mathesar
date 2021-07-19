@@ -134,13 +134,14 @@
       <Header columns={$columns}
               bind:sort={$options.sort}
               bind:group={$options.group}
+              isResultGrouped={!!$records.groupData}
               bind:columnPosition={$columnPosition}
               bind:horizontalScrollOffset={$horizontalScrollOffset}
               on:reload={reload}/>
 
       <Body bind:this={tableBodyRef} id={idKey}
             columns={$columns} data={$records.data}
-            group={$options.group}
+            groupData={$records.groupData}
             groupIndex={$groupIndex}
             columnPosition={$columnPosition}
             bind:scrollOffset={$scrollOffset}
