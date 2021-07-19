@@ -50,6 +50,7 @@ class TableSerializer(serializers.ModelSerializer):
     columns = SimpleColumnSerializer(many=True, read_only=True, source='sa_columns')
     records = serializers.SerializerMethodField()
     name = serializers.CharField()
+    data_files = serializers.PrimaryKeyRelatedField(required=False, many=True, queryset=DataFile.objects.all())
 
     class Meta:
         model = Table
