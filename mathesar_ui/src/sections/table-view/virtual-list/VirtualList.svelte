@@ -74,6 +74,7 @@
     items = itemInfo.items;
     estimatedTotalSize = listUtils.getEstimatedTotalSize(opts);
 
+    // Refetch when container resizes
     if (lastHeight !== height) {
       lastHeight = height;
       dispatch('refetch', itemInfo);
@@ -126,8 +127,11 @@
   }
 
   onMount(() => {
-    if (typeof scrollOffset === 'number' && outerRef) {
+    if (typeof scrollOffset === 'number') {
       outerRef.scrollTop = scrollOffset;
+    }
+    if (typeof horizontalScrollOffset === 'number') {
+      outerRef.scrollLeft = horizontalScrollOffset;
     }
     psRef = new PerfectScrollbar(outerRef, {
       minScrollbarLength: 40,

@@ -23,6 +23,16 @@
   export let id: unknown;
   $: identifier = id as number;
 
+  /**
+   * idKey is only modified after table display properties
+   * are set.
+   *
+   * It is used for recreating the virtual list instance, so
+   * it should only be set in the same tick as the required
+   * props for virtual list.
+   */
+  let idKey = id as number;
+
   let columns: TableColumnStore;
   let records: TableRecordStore;
   let options: TableOptionsStore;
@@ -46,13 +56,7 @@
     scrollOffset = table.display.scrollOffset;
     groupIndex = table.display.groupIndex;
 
-    if (tableBodyRef) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      tableBodyRef.scrollToPosition(
-        get(table.display.scrollOffset),
-        get(table.display.horizontalScrollOffset),
-      );
-    }
+    idKey = _id;
   }
 
   $: setStores(database, identifier);
@@ -134,7 +138,8 @@
               horizontalScrollOffset={$horizontalScrollOffset}
               on:reload={reload}/>
 
-      <Body bind:this={tableBodyRef} columns={$columns} data={$records.data}
+      <Body bind:this={tableBodyRef} id={idKey}
+            columns={$columns} data={$records.data}
             groupIndex={$groupIndex}
             columnPosition={$columnPosition}
             bind:scrollOffset={$scrollOffset}

@@ -12,6 +12,7 @@
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
 
+  export let id: number;
   export let columns: TableColumnData;
   export let data: TableRecord[];
   export let columnPosition: ColumnPosition;
@@ -61,26 +62,28 @@
 
 <div class="body">
   <Resizer let:height>
-    <VirtualList
-      bind:this={virtualListRef}
-      bind:scrollOffset
-      bind:horizontalScrollOffset
-      {height}
-      itemCount={data.length}
-      paddingBottom={100}
-      itemSize={getItemSize}
-      itemKey={getItemKey}
-      on:refetch
-      let:items
-      >
-      {#each items as it (it?.key || it)}
-        {#if it}
-          <Row {columns} style={it.style}
-                row={data[it.index] || {}}
-                index={it.index}
-                {columnPosition}/>
-        {/if}
-      {/each}
-    </VirtualList>
+    {#key id}
+      <VirtualList
+        bind:this={virtualListRef}
+        bind:scrollOffset
+        bind:horizontalScrollOffset
+        {height}
+        itemCount={data.length}
+        paddingBottom={100}
+        itemSize={getItemSize}
+        itemKey={getItemKey}
+        on:refetch
+        let:items
+        >
+        {#each items as it (it?.key || it)}
+          {#if it}
+            <Row {columns} style={it.style}
+                  row={data[it.index] || {}}
+                  index={it.index}
+                  {columnPosition}/>
+          {/if}
+        {/each}
+      </VirtualList>
+    {/key}
   </Resizer>
 </div>
