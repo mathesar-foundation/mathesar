@@ -33,7 +33,7 @@ class SchemaSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Schema
-        fields = ['id', 'name', 'tables', 'database']
+        fields = ['id', 'name', 'tables', 'database', 'has_dependencies']
 
 
 class SimpleColumnSerializer(serializers.Serializer):

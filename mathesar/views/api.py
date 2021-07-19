@@ -67,6 +67,27 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
         else:
             raise ValidationError(serializer.errors)
 
+    def partial_update(self, request, pk=None):
+        serializer = SchemaSerializer(
+            data=request.data, context={'request': request}, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+
+        schema = self.get_object()
+        schema.update_sa_schema(serializer.validated_data)
+
+        # Reload the schema to avoid cached properties
+        schema = self.get_object()
+        schema.clear_name_cache()
+        serializer = SchemaSerializer(schema, context={'request': request})
+        return Response(serializer.data)
+
+    def destroy(self, request, pk=None):
+        schema = self.get_object()
+        schema.delete_sa_schema()
+        schema.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     def get_queryset(self):

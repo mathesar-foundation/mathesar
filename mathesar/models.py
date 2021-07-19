@@ -79,6 +79,21 @@ class Schema(DatabaseObject):
         except TypeError:
             return 'MISSING'
 
+    # TODO: This should check for dependencies once the depdency endpoint is implemeted
+    @property
+    def has_dependencies(self):
+        return True
+
+    def update_sa_schema(self, update_params):
+        return model_utils.update_sa_schema(self, update_params)
+
+    def delete_sa_schema(self):
+        return schemas.delete_schema(self.name, self._sa_engine, cascade=True)
+
+    def clear_name_cache(self):
+        cache_key = f"{self.database.name}_schema_name_{self.oid}"
+        cache.delete(cache_key)
+
 
 class Table(DatabaseObject):
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
