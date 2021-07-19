@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { onMount, createEventDispatcher } from 'svelte';
   import {
     faSortAmountDown,
     faSortAmountDownAlt,
@@ -16,6 +16,7 @@
   import {
     DEFAULT_COUNT_COL_WIDTH,
     GROUP_MARGIN_LEFT,
+    DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/tableData';
 
   const dispatch = createEventDispatcher();
@@ -25,8 +26,39 @@
   export let columnPosition: ColumnPosition = new Map();
   export let horizontalScrollOffset = 0;
 
+  let headerRef: HTMLElement;
+
+  function onHScrollOffsetChange(_hscrollOffset: number) {
+    if (headerRef) {
+      headerRef.scrollLeft = _hscrollOffset;
+    }
+  }
+
+  $: onHScrollOffsetChange(horizontalScrollOffset);
+
   let paddingLeft: number;
   $: paddingLeft = group?.size > 0 ? GROUP_MARGIN_LEFT : 0;
+
+  function onHeaderScroll(scrollLeft: number) {
+    if (horizontalScrollOffset !== scrollLeft) {
+      horizontalScrollOffset = scrollLeft;
+    }
+  }
+
+  onMount(() => {
+    onHScrollOffsetChange(horizontalScrollOffset);
+
+    const scrollListener = (event: Event) => {
+      const { scrollLeft } = event.target as HTMLElement;
+      onHeaderScroll(scrollLeft);
+    };
+
+    headerRef.addEventListener('scroll', scrollListener);
+
+    return () => {
+      headerRef.removeEventListener('scroll', scrollListener);
+    };
+  });
 
   function sortByColumn(column: TableColumn, order: 'asc' | 'desc') {
     // Sorting is currently done as a single column sort
@@ -51,8 +83,7 @@
   }
 </script>
 
-<div class="header" style="width:{columnPosition.get('__row').width + 160}px;
-                            margin-left:{-horizontalScrollOffset}px">
+<div bind:this={headerRef} class="header">
   <div class="cell row-number" style="width:{DEFAULT_COUNT_COL_WIDTH + paddingLeft}px;">
   </div>
 
@@ -93,7 +124,7 @@
       </Dropdown>
     </div>
   {/each}
-  <div class="cell" style="width:70px;left:{
+  <div class="cell" style="width:{70 + DEFAULT_ROW_RIGHT_PADDING}px;left:{
       columnPosition.get('__row').width + paddingLeft
     }px;">
     <div class="add">

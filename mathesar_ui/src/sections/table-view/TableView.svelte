@@ -135,7 +135,7 @@
               bind:sort={$options.sort}
               bind:group={$options.group}
               bind:columnPosition={$columnPosition}
-              horizontalScrollOffset={$horizontalScrollOffset}
+              bind:horizontalScrollOffset={$horizontalScrollOffset}
               on:reload={reload}/>
 
       <Body bind:this={tableBodyRef} id={idKey}

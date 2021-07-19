@@ -63,6 +63,7 @@ section.table-section .tab-container {
           background: #f9f9f9;
           border-bottom: 1px solid #efefef;
           user-select: none;
+          overflow: hidden;
 
           .cell {
             padding: 8px 28px 8px 10px;

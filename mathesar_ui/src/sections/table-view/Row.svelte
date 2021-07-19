@@ -8,6 +8,7 @@
     DEFAULT_COUNT_COL_WIDTH,
     GROUP_ROW_HEIGHT,
     GROUP_MARGIN_LEFT,
+    DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/tableData';
   import { Skeleton } from '@mathesar-components';
 
@@ -18,8 +19,6 @@
   export let isGrouped = false;
   export let columnPosition: ColumnPosition;
   export let style: { [key: string]: string | number };
-
-  const RIGHT_PADDING = 100;
 
   function calculateStyle(
     _style: { [key: string]: string | number },
@@ -39,15 +38,17 @@
       const top = _style.top as number;
       const height = _style.height as number;
       return {
-        group: `${styleStr};top:${top + 20}px;height:${GROUP_ROW_HEIGHT - 20}px;width:${totalWidth}px`,
+        group: `${styleStr};top:${top + 20}px;height:${GROUP_ROW_HEIGHT - 20}px;`
+                + `width:${totalWidth}px`,
         default: `${styleStr};top:${top + GROUP_ROW_HEIGHT}px;`
-                  + `height:${height - GROUP_ROW_HEIGHT}px;width:${totalWidth + RIGHT_PADDING}px`,
+                  + `height:${height - GROUP_ROW_HEIGHT}px;`
+                  + `width:${totalWidth + DEFAULT_ROW_RIGHT_PADDING}px`,
       };
     }
 
     return {
       default: `${styleStr};top:${_style.top}px;height:${_style.height}px;`
-                + `width:${totalWidth + RIGHT_PADDING}px`,
+                + `width:${totalWidth + DEFAULT_ROW_RIGHT_PADDING}px`,
     };
   }
 

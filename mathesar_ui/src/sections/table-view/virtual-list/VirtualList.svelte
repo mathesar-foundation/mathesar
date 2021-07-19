@@ -45,6 +45,7 @@
   export let paddingBottom = 0;
   export let horizontalScrollOffset = 0;
   export let itemKey: Props['itemKey'] = listUtils.defaultItemKey;
+  export let width: number = null;
   
   let instanceProps: Props['instanceProps'] = {
     lastMeasuredIndex: -1,
@@ -94,6 +95,21 @@
     estimatedItemSize,
   });
 
+  $: innerStyle = `height:${estimatedTotalSize + paddingBottom}px;`
+              + `width:${width ? `${width}px` : '100%'};`
+              + `${isScrolling ? 'pointer-events:none;' : ''}`;
+
+  function onHscrollChange(_hscrollOffset: number) {
+    if (outerRef
+          && typeof _hscrollOffset === 'number'
+          && outerRef.scrollLeft !== _hscrollOffset) {
+      outerRef.scrollLeft = _hscrollOffset;
+    }
+  }
+
+  // For direct updates on horizontalScrollOffset
+  $: onHscrollChange(horizontalScrollOffset);
+  
   function onScroll(event: Event): void {
     const {
       clientHeight,
@@ -130,9 +146,8 @@
     if (typeof scrollOffset === 'number') {
       outerRef.scrollTop = scrollOffset;
     }
-    if (typeof horizontalScrollOffset === 'number') {
-      outerRef.scrollLeft = horizontalScrollOffset;
-    }
+    onHscrollChange(horizontalScrollOffset);
+
     psRef = new PerfectScrollbar(outerRef, {
       minScrollbarLength: 40,
       wheelPropagation: false,
@@ -200,7 +215,7 @@
       ...instanceProps,
       lastMeasuredIndex: Math.min(
         instanceProps.lastMeasuredIndex,
-        index - 1,
+        (index || 0) - 1,
       ),
       styleCache: {},
     };
@@ -234,10 +249,7 @@
   class={outerClass}
   style="height:{height}px;width:100%;direction:ltr;"
   bind:this={outerRef}>
-  <div
-      bind:this={innerRef}
-      style="height:{estimatedTotalSize + paddingBottom}px;
-            {isScrolling ? 'pointer-events:none;' : ''}width:100%;">
+  <div bind:this={innerRef} style={innerStyle}>
       <slot {items} />
   </div>
 </div>
