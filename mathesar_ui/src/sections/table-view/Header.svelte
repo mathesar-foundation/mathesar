@@ -15,6 +15,7 @@
   } from '@mathesar/stores/tableData';
   import {
     DEFAULT_COUNT_COL_WIDTH,
+    GROUP_MARGIN_LEFT,
   } from '@mathesar/stores/tableData';
 
   const dispatch = createEventDispatcher();
@@ -23,6 +24,9 @@
   export let group: GroupOption = new Set();
   export let columnPosition: ColumnPosition = new Map();
   export let horizontalScrollOffset = 0;
+
+  let paddingLeft: number;
+  $: paddingLeft = group?.size > 0 ? GROUP_MARGIN_LEFT : 0;
 
   function sortByColumn(column: TableColumn, order: 'asc' | 'desc') {
     // Sorting is currently done as a single column sort
@@ -47,14 +51,15 @@
   }
 </script>
 
-<div class="header" style="width:{columnPosition.get('__row').width + 160}px;margin-left:{-horizontalScrollOffset}px">
-  <div class="cell row-number" style="width:{DEFAULT_COUNT_COL_WIDTH}px">
+<div class="header" style="width:{columnPosition.get('__row').width + 160}px;
+                            margin-left:{-horizontalScrollOffset}px">
+  <div class="cell row-number" style="width:{DEFAULT_COUNT_COL_WIDTH + paddingLeft}px;">
   </div>
 
   {#each columns.data as column (column.name)}
     <div class="cell" style="
       width:{columnPosition.get(column.name).width}px;
-      left:{columnPosition.get(column.name).left}px;">
+      left:{columnPosition.get(column.name).left + paddingLeft}px;">
       <span class="type">
         {#if column.type === 'INTEGER'}
           #
@@ -89,7 +94,7 @@
     </div>
   {/each}
   <div class="cell" style="width:70px;left:{
-      columnPosition.get('__row').width
+      columnPosition.get('__row').width + paddingLeft
     }px;">
     <div class="add">
       +

@@ -140,6 +140,7 @@
 
       <Body bind:this={tableBodyRef} id={idKey}
             columns={$columns} data={$records.data}
+            group={$options.group}
             groupIndex={$groupIndex}
             columnPosition={$columnPosition}
             bind:scrollOffset={$scrollOffset}

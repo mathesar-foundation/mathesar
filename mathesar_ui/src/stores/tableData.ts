@@ -211,11 +211,6 @@ export async function fetchTableRecords(
         promise.cancel();
       });
       table.config.previousRecordRequestSet = null;
-      table.display.groupIndex.set({
-        ...get(table.display.groupIndex),
-        previous: null,
-        latest: null,
-      });
     } else {
       // Set offset as the first empty item index in range
       // If range is empty, this will break on 1 loop
