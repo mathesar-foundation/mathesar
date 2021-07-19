@@ -37,7 +37,7 @@
 
     const styleStr = `position:${_style.position};left:${left}px`;
 
-    if (isGroupHeaderRow) {
+    if (isGrouped && isGroupHeaderRow) {
       const top = _style.top as number;
       const height = _style.height as number;
       return {
@@ -63,7 +63,7 @@
   );
 </script>
 
-{#if row.__groupInfo}
+{#if groupData && row.__groupInfo}
   <GroupHeader style={styleString.group} {row} {groupData}/>
 {/if}
 

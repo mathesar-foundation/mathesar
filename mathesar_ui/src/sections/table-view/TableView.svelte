@@ -92,7 +92,7 @@
     URLQueryHandler.setTableOptions(database, identifier, $options);
     if (tableBodyRef) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      tableBodyRef.scrollToPosition(0, 0);
+      tableBodyRef.reloadPositions();
     }
   }
 

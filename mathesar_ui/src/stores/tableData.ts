@@ -145,7 +145,6 @@ function combineGroups(
 
 function checkAndSetGroupHeaderRow(
   groupColumns: TableRecordGroupsResponse['group_count_by'],
-  groupResults: TableRecordGroupsResponse['results'],
   index: number,
   records: TableRecord[],
 ): boolean {
@@ -256,7 +255,11 @@ export async function fetchTableRecords(
       });
 
       // Set to empty object if query is grouped
-      existingData.groupData = optionData.group?.size > 0 ? {} : null;
+      if (existingData.groupData && optionData.group?.size > 0) {
+        existingData.groupData = {};
+      } else {
+        existingData.groupData = null;
+      }
     } else {
       // Set offset as the first empty item index in range
       // If range is empty, this will break on 1 loop
@@ -376,7 +379,6 @@ export async function fetchTableRecords(
         if (isResultGrouped) {
           const isRowGrouped = checkAndSetGroupHeaderRow(
             groupColumns,
-            response.group_count.results,
             i,
             records,
           );

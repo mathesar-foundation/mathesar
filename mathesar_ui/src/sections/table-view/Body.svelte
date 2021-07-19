@@ -62,10 +62,12 @@
     return `__index_${index}`;
   }
 
-  export function scrollToPosition(_vScroll: number, _hScroll: number): void {
+  export function reloadPositions(): void {
     if (virtualListRef) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      virtualListRef.scrollToPosition(_vScroll, _hScroll);
+      virtualListRef.scrollToPosition(0, 0);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      virtualListRef.resetAfterIndex(0);
     }
   }
 </script>

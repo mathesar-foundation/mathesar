@@ -43,6 +43,8 @@
     {#each row.__groupInfo.columns as column (column)}
       <span class="tag">{column}: {row[column]}</span>
     {/each}
-    <span class="tag">COUNT: {count}</span>
+    {#if count}
+      <span class="tag">COUNT: {count}</span>
+    {/if}
   </div>
 </div>
