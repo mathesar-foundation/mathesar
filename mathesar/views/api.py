@@ -19,8 +19,8 @@ from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
-    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer,
-    ColumnSerializer, DatabaseSerializer
+    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
+    DatabaseSerializer
 )
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
 from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
@@ -68,8 +68,7 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
             raise ValidationError(serializer.errors)
 
 
-class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
-                   CreateModelMixin):
+class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     def get_queryset(self):
         reflect_db_objects()
         return Table.objects.all().order_by('-created_at')
@@ -92,6 +91,26 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             raise ValidationError(serializer.errors)
+
+    def partial_update(self, request, pk=None):
+        serializer = TableSerializer(
+            data=request.data, context={'request': request}, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+
+        table = self.get_object()
+        table.update_sa_table(serializer.validated_data)
+
+        # Reload the table to avoid cached properties
+        table = self.get_object()
+        serializer = TableSerializer(table, context={'request': request})
+        return Response(serializer.data)
+
+    def destroy(self, request, pk=None):
+        table = self.get_object()
+        table.delete_sa_table()
+        table.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):
