@@ -81,7 +81,8 @@
     void fetchTableRecords(database, identifier);
   }
 
-  function reload() {
+  function reload(event: { detail: { resetPositions?: boolean } }) {
+    const resetPositions = event.detail?.resetPositions || false;
     const optInfo = get(options);
     options.set({
       ...optInfo,
@@ -92,7 +93,7 @@
     URLQueryHandler.setTableOptions(database, identifier, $options);
     if (tableBodyRef) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      tableBodyRef.reloadPositions();
+      tableBodyRef.reloadPositions(resetPositions);
     }
   }
 

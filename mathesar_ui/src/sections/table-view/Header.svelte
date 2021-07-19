@@ -73,6 +73,7 @@
   }
 
   function groupByColumn(column: TableColumn) {
+    const oldSize = group?.size || 0;
     const newGroup = new Set(group);
     if (newGroup?.has(column.name)) {
       newGroup.delete(column.name);
@@ -80,7 +81,12 @@
       newGroup.add(column.name);
     }
     group = newGroup;
-    dispatch('reload');
+    /**
+     * Only reset item positions when group layout is created or destroyed
+    */
+    dispatch('reload', {
+      resetPositions: oldSize === 0 || group.size === 0,
+    });
   }
 </script>
 
