@@ -103,7 +103,7 @@
     requestResetIsScrolling = true;
     horizontalScrollOffset = scrollLeft;
 
-    // Scroll position may have been updated by cDM/cDU,
+    // Scroll position may have been updated directly
     // In which case we don't need to trigger another render,
     // And we don't want to update state.isScrolling.
     if (scrollOffset !== scrollTop) {

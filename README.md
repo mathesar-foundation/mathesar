@@ -4,7 +4,6 @@ Mathesar is a project to make databases easier to use for non-technical users. O
 
 We are currently in early development and hope to release an alpha version by late 2021. Please see the [Mathesar wiki](https://wiki.mathesar.org/) for more information about the project.
 
-Mathesar is open source under the GPLv3 license - see [LICENSE](LICENSE). It also contains derivatives of third-party open source modules. See the list and respective licenses in [THIRDPARTY](THIRDPARTY).
 ## Local Development
 
 First, [ensure that you have Docker installed](https://docs.docker.com/get-docker/).
@@ -76,3 +75,7 @@ docker exec -it mathesar_ui_1 bash
 ## Contributing
 
 We actively encourage contribution! [Join our community](https://wiki.mathesar.org/community) and read through [our contributing guidelines](https://wiki.mathesar.org/community/contributing).
+
+## License
+
+Mathesar is open source under the GPLv3 license - see [LICENSE](LICENSE). It also contains derivatives of third-party open source modules licensed under the MIT license. See the list and respective licenses in [THIRDPARTY](THIRDPARTY).
