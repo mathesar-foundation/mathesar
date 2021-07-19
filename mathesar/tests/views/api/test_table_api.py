@@ -265,6 +265,43 @@ def test_table_create_from_datafile(client, data_file, schema):
     check_table_response(response_table, table, table_name)
 
 
+def test_table_create_without_datafile(client, schema):
+    num_tables = Table.objects.count()
+    table_name = 'test_table_no_file'
+    body = {  # No `data_files` field
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
+    table = Table.objects.get(id=response_table['id'])
+
+    assert response.status_code == 201
+    assert Table.objects.count() == num_tables + 1
+    assert len(table.sa_columns) == 1  # only the internal `mathesar_id` column
+    assert len(table.get_records()) == 0
+    check_table_response(response_table, table, table_name)
+
+
+def test_table_create_with_empty_datafile(client, schema):
+    num_tables = Table.objects.count()
+    table_name = 'test_table_empty_files'
+    body = {
+        'data_files': [],  # Empty `data_files` field
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
+    table = Table.objects.get(id=response_table['id'])
+
+    assert response.status_code == 201
+    assert Table.objects.count() == num_tables + 1
+    assert len(table.sa_columns) == 1  # only the internal `mathesar_id` column
+    assert len(table.get_records()) == 0
+    check_table_response(response_table, table, table_name)
+
+
 def test_table_404(client):
     response = client.get('/api/v0/tables/3000/')
     assert response.status_code == 404
