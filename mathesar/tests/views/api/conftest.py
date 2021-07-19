@@ -5,7 +5,10 @@ from sqlalchemy import Table as SATable
 from django.core.files import File
 
 from db.types import base, install
-from db.schemas import create_schema, get_schema_oid_from_name
+from db.schemas import (
+    create_schema as create_sa_schema,
+    get_schema_oid_from_name, get_schema_name_from_oid
+)
 from db.tables import get_oid_from_table
 from mathesar.models import Schema, Table, DataFile
 
@@ -22,45 +25,50 @@ def client():
     return APIClient()
 
 
-def _create_schema(engine, schema_name, test_db_model):
-    create_schema(schema_name, engine)
-    schema_oid = get_schema_oid_from_name(schema_name, engine)
-    return Schema.objects.create(oid=schema_oid, database=test_db_model)
+@pytest.fixture
+def create_schema(engine, test_db_model):
+    """
+    Creates a schema factory, making sure to track and clean up new instances
+    """
+    function_schemas = {}
+
+    def _create_schema(schema_name):
+        if schema_name in function_schemas:
+            schema_oid = function_schemas[schema_name]
+        else:
+            create_sa_schema(schema_name, engine)
+            schema_oid = get_schema_oid_from_name(schema_name, engine)
+            function_schemas[schema_name] = schema_oid
+        schema_model, _ = Schema.objects.get_or_create(oid=schema_oid, database=test_db_model)
+        return schema_model
+    yield _create_schema
+
+    for oid in function_schemas.values():
+        # Handle schemas being renamed during test
+        schema = get_schema_name_from_oid(oid, engine)
+        with engine.begin() as conn:
+            conn.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE;'))
 
 
 @pytest.fixture
-def create_table(engine, csv_filename, test_db_model):
-    """
-    Creates a table factory, making sure to track and clean up new schemas
-    """
-    function_schemas = {}
+def create_table(csv_filename, create_schema):
     with open(csv_filename, 'rb') as csv_file:
         data_file = DataFile.objects.create(file=File(csv_file))
 
     def _create_table(table_name, schema='Patents'):
-        if schema in function_schemas:
-            schema_model = function_schemas[schema]
-        else:
-            schema_model = _create_schema(engine, schema, test_db_model)
-            function_schemas[schema] = schema_model
+        schema_model = create_schema(schema)
         return create_table_from_csv(data_file, table_name, schema_model)
-
-    yield _create_table
-
-    for schema in function_schemas:
-        with engine.begin() as conn:
-            conn.execute(text(f'DROP SCHEMA "{schema}" CASCADE;'))
+    return _create_table
 
 
 @pytest.fixture
-def patent_schema(test_db_model):
+def patent_schema(test_db_model, create_schema):
     engine = create_mathesar_engine(test_db_model.name)
     install.install_mathesar_on_database(engine)
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA IF EXISTS "{PATENT_SCHEMA}" CASCADE;'))
-    yield _create_schema(engine, PATENT_SCHEMA, test_db_model)
+    yield create_schema(PATENT_SCHEMA)
     with engine.begin() as conn:
-        conn.execute(text(f'DROP SCHEMA "{PATENT_SCHEMA}" CASCADE;'))
         conn.execute(text(f'DROP SCHEMA {base.SCHEMA} CASCADE;'))
 
 
