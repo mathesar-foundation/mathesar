@@ -135,6 +135,7 @@
     }
     psRef = new PerfectScrollbar(outerRef, {
       minScrollbarLength: 40,
+      wheelPropagation: false,
     });
 
     const callback = (ev: Event) => {
