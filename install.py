@@ -3,14 +3,21 @@ This script installs functions and types for Mathesar onto the configured DB.
 """
 from config.settings import DATABASES
 from db import install
+import sys
+import getopt
 
 
 def main():
+    skip_confirm = False
+    (opts, _) = getopt.getopt(sys.argv[1:], ":s", ["skip-confirm"])
+    for (opt, value) in opts:
+        if (opt == "-s") or (opt == "--skip-confirm"):
+            skip_confirm = True
     for database_key in [key for key in DATABASES if key != "default"]:
-        install_on_db_with_key(database_key)
+        install_on_db_with_key(database_key, skip_confirm)
 
 
-def install_on_db_with_key(database_key):
+def install_on_db_with_key(database_key, skip_confirm):
     if DATABASES[database_key]["HOST"] == "db":
         # if we're going to install on the docker-created Postgres, we'll
         # create the DB
@@ -33,21 +40,22 @@ def install_on_db_with_key(database_key):
         db_name = DATABASES[database_key]["NAME"]
         port = DATABASES[database_key]["PORT"]
         print("Installing Mathesar DB on preexisting PostgreSQL instance...")
-        confirmation = input(
-            f"Mathesar will be installed on DB {db_name} at host {host}."
-            "Confirm? (y/n) >  "
-        )
-        if confirmation.lower() in ["y", "yes"]:
-            print("Installing...")
-            install.install_mathesar_on_preexisting_database(
-                username,
-                password,
-                host,
-                db_name,
-                port,
+        if skip_confirm is False:
+            confirmation = input(
+                f"Mathesar will be installed on DB {db_name} at host {host}."
+                "Confirm? (y/n) >  "
             )
-        else:
-            print("Skipping DB with key {database_key}.")
+            if (confirmation.lower() in ["y", "yes"]) or (skip_confirm is True):
+                print("Installing...")
+                install.install_mathesar_on_preexisting_database(
+                    username,
+                    password,
+                    host,
+                    db_name,
+                    port,
+                )
+            else:
+                print("Skipping DB with key {database_key}.")
 
 
 if __name__ == "__main__":

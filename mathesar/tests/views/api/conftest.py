@@ -22,14 +22,14 @@ def client():
     return APIClient()
 
 
-def _create_schema(engine, schema_name, test_db_name):
+def _create_schema(engine, schema_name, test_db_model):
     create_schema(schema_name, engine)
     schema_oid = get_schema_oid_from_name(schema_name, engine)
-    return Schema.objects.create(oid=schema_oid, database=test_db_name)
+    return Schema.objects.create(oid=schema_oid, database=test_db_model)
 
 
 @pytest.fixture
-def create_table(engine, csv_filename, test_db_name):
+def create_table(engine, csv_filename, test_db_model):
     """
     Creates a table factory, making sure to track and clean up new schemas
     """
@@ -41,7 +41,7 @@ def create_table(engine, csv_filename, test_db_name):
         if schema in function_schemas:
             schema_model = function_schemas[schema]
         else:
-            schema_model = _create_schema(engine, schema, test_db_name)
+            schema_model = _create_schema(engine, schema, test_db_model)
             function_schemas[schema] = schema_model
         return create_table_from_csv(data_file, table_name, schema_model)
 
@@ -53,12 +53,12 @@ def create_table(engine, csv_filename, test_db_name):
 
 
 @pytest.fixture
-def patent_schema(test_db_name):
-    engine = create_mathesar_engine(test_db_name)
+def patent_schema(test_db_model):
+    engine = create_mathesar_engine(test_db_model.name)
     install.install_mathesar_on_database(engine)
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA IF EXISTS "{PATENT_SCHEMA}" CASCADE;'))
-    yield _create_schema(engine, PATENT_SCHEMA, test_db_name)
+    yield _create_schema(engine, PATENT_SCHEMA, test_db_model)
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA "{PATENT_SCHEMA}" CASCADE;'))
         conn.execute(text(f'DROP SCHEMA {base.SCHEMA} CASCADE;'))
@@ -66,7 +66,7 @@ def patent_schema(test_db_name):
 
 @pytest.fixture
 def empty_nasa_table(patent_schema):
-    engine = create_mathesar_engine(patent_schema.database)
+    engine = create_mathesar_engine(patent_schema.database.name)
     db_table = SATable(
         NASA_TABLE, MetaData(bind=engine), Column('nasa_col1', String), schema=patent_schema.name
     )

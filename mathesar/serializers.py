@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework import serializers
 
-from mathesar.models import Table, Schema, DataFile
+from mathesar.models import Table, Schema, DataFile, Database
 
 
 class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
@@ -16,13 +16,24 @@ class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
         return request.build_absolute_uri(reverse('table-detail', kwargs={'pk': obj.pk}))
 
 
+class ModelNameField(serializers.CharField):
+    """
+    De-serializes the request field as a string, but serializes the response field as
+    `model.name`. Required to support passing and returing a model name from the
+    endpoint, while also storing the model as a related field.
+    """
+    def to_representation(self, value):
+        return value.name
+
+
 class SchemaSerializer(serializers.HyperlinkedModelSerializer):
     tables = NestedTableSerializer(many=True, read_only=True)
     name = serializers.CharField()
+    database = ModelNameField(max_length=128)
 
     class Meta:
         model = Schema
-        fields = ['id', 'name', 'database', 'tables']
+        fields = ['id', 'name', 'tables', 'database']
 
 
 class SimpleColumnSerializer(serializers.Serializer):
@@ -58,6 +69,15 @@ class TableSerializer(serializers.ModelSerializer):
 class RecordSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         return instance._asdict()
+
+
+class DatabaseSerializer(serializers.ModelSerializer):
+    supported_types = serializers.ListField(child=serializers.CharField())
+
+    class Meta:
+        model = Database
+        fields = ['id', 'name', 'deleted', 'supported_types']
+        read_only_fields = ['id', 'name', 'deleted', 'supported_types']
 
 
 class DataFileSerializer(serializers.ModelSerializer):

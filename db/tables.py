@@ -4,9 +4,13 @@ from sqlalchemy import (
     Column, String, Table, MetaData, func, select, ForeignKey, literal, exists,
     join, inspect, and_
 )
-from sqlalchemy.schema import DDLElement
+from sqlalchemy.schema import DDLElement, DropTable
 from sqlalchemy.ext import compiler
 from sqlalchemy_filters import apply_filters
+from alembic.migration import MigrationContext
+from alembic.operations import Operations
+from sqlalchemy.exc import NoSuchTableError, InternalError
+from psycopg2.errors import DependentObjectsStillExist
 
 from db import columns, constants, schemas
 from db.types import inference
@@ -50,6 +54,48 @@ def create_mathesar_table(name, schema, columns_, engine, metadata=None):
     )
     table.create(engine)
     return table
+
+
+class DropTableCascade(DropTable):
+    def __init__(self, table, cascade=False, if_exists=False, **kwargs):
+        print(if_exists)
+        super().__init__(table, if_exists=if_exists, **kwargs)
+        self.cascade = cascade
+
+
+@compiler.compiles(DropTableCascade, "postgresql")
+def compile_drop_table(element, compiler, **_):
+    expression = compiler.visit_drop_table(element)
+    if element.cascade:
+        return expression + " CASCADE"
+    else:
+        return expression
+
+
+def delete_table(name, schema, engine, cascade=False, if_exists=False):
+    try:
+        table = reflect_table(name, schema, engine)
+    except NoSuchTableError:
+        if if_exists:
+            return
+        else:
+            raise
+    with engine.begin() as conn:
+        try:
+            conn.execute(DropTableCascade(table, cascade=cascade))
+        except InternalError as e:
+            if isinstance(e.orig, DependentObjectsStillExist):
+                raise e.orig
+            else:
+                raise e
+
+
+def rename_table(name, schema, engine, rename_to):
+    table = reflect_table(name, schema, engine)
+    with engine.begin() as conn:
+        ctx = MigrationContext.configure(conn)
+        op = Operations(ctx)
+        op.rename_table(table.name, rename_to, schema=table.schema)
 
 
 def extract_columns_from_table(
@@ -439,7 +485,7 @@ class CreateTableAs(DDLElement):
 
 
 @compiler.compiles(CreateTableAs)
-def compile(element, compiler, **_):
+def compile_create_table_as(element, compiler, **_):
     return "CREATE TABLE %s AS (%s)" % (
         element.name,
         compiler.sql_compiler.process(element.selectable, literal_binds=True),

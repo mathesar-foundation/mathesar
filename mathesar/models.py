@@ -6,6 +6,7 @@ from django.utils.functional import cached_property
 from mathesar.database.base import create_mathesar_engine
 from mathesar.utils import models as model_utils
 from db import tables, records, schemas, columns
+from db.types.alteration import get_supported_alter_column_types
 
 NAME_CACHE_INTERVAL = 60 * 5
 
@@ -33,20 +34,35 @@ class DatabaseObject(BaseModel):
 _engines = {}
 
 
-class Schema(DatabaseObject):
-    database = models.CharField(max_length=128)
+class Database(BaseModel):
+    name = models.CharField(max_length=128, unique=True)
+    deleted = models.BooleanField(blank=True, default=False)
 
     @property
     def _sa_engine(self):
         global _engines
         # We're caching this since the engine is used frequently.
-        if self.database not in _engines:
-            _engines[self.database] = create_mathesar_engine(self.database)
-        return _engines[self.database]
+        if self.name not in _engines:
+            _engines[self.name] = create_mathesar_engine(self.name)
+        return _engines[self.name]
+
+    @property
+    def supported_types(self):
+        types = get_supported_alter_column_types(self._sa_engine)
+        return [t for t, _ in types.items()]
+
+
+class Schema(DatabaseObject):
+    database = models.ForeignKey('Database', on_delete=models.CASCADE,
+                                 related_name='schemas')
+
+    @property
+    def _sa_engine(self):
+        return self.database._sa_engine
 
     @cached_property
     def name(self):
-        cache_key = f"{self.database}_schema_name_{self.oid}"
+        cache_key = f"{self.database.name}_schema_name_{self.oid}"
         try:
             schema_name = cache.get(cache_key)
             if schema_name is None:
