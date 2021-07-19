@@ -112,6 +112,11 @@ class Table(DatabaseObject):
     def sa_column_names(self):
         return self.sa_columns.keys()
 
+    # TODO: This should check for dependencies once the depdency endpoint is implemeted
+    @property
+    def has_dependencies(self):
+        return True
+
     def add_column(self, column_data):
         return columns.create_column(
             self.schema._sa_engine,
@@ -140,6 +145,13 @@ class Table(DatabaseObject):
 
     def sa_num_records(self, filters=[]):
         return tables.get_count(self._sa_table, self.schema._sa_engine, filters=filters)
+
+    def update_sa_table(self, update_params):
+        return model_utils.update_sa_table(self, update_params)
+
+    def delete_sa_table(self):
+        return tables.delete_table(self.name, self.schema.name, self.schema._sa_engine,
+                                   cascade=True)
 
     def get_record(self, id_value):
         return records.get_record(self._sa_table, self.schema._sa_engine, id_value)
