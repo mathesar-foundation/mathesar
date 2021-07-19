@@ -161,3 +161,11 @@ CLIENT_DEV_URL = "http://localhost:3000"
 MEDIA_ROOT = os.path.join(BASE_DIR, '.media/')
 
 MEDIA_URL = "/media/"
+
+# Update Authentication classes, removed BasicAuthentication
+# Defaults: https://www.django-rest-framework.org/api-guide/settings/
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication'
+    ]
+}
