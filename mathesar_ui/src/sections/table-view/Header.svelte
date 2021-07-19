@@ -62,14 +62,14 @@
   });
 
   function sortByColumn(column: TableColumn, order: 'asc' | 'desc') {
-    // Sorting is currently done as a single column sort
-    // TODO: Implement multi column sort
-    if (sort?.get(column.name) !== order) {
-      const newSort: SortOption = new Map();
+    const newSort: SortOption = new Map(sort);
+    if (sort?.get(column.name) === order) {
+      newSort.delete(column.name);
+    } else {
       newSort.set(column.name, order);
-      sort = newSort;
-      dispatch('reload');
     }
+    sort = newSort;
+    dispatch('reload');
   }
 
   function groupByColumn(column: TableColumn) {
