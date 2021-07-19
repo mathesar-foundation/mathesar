@@ -6,6 +6,7 @@ export const DEFAULT_COUNT_COL_WIDTH = 70;
 export const DEFAULT_COLUMN_WIDTH = 160;
 export const GROUP_MARGIN_LEFT = 30;
 export const GROUP_ROW_HEIGHT = 70;
+export const DEFAULT_ROW_RIGHT_PADDING = 100;
 
 export interface TableColumn {
   name: string,
@@ -62,7 +63,8 @@ export type ColumnPosition = Map<string, {
 
 export type GroupIndex = {
   latest: number,
-  previous: number
+  previous: number,
+  bailOutOnReset: boolean
 };
 
 export interface TableDisplayStores {
@@ -211,6 +213,20 @@ export async function fetchTableRecords(
         promise.cancel();
       });
       table.config.previousRecordRequestSet = null;
+
+      /**
+       * To reset group index when grouped by multiple columns,
+       * setting latest to null, and previous to -1.
+       *
+       * bailOutOnReset:true makes sure that it does not re-render
+       * right away,
+       */
+      table.display.groupIndex.set({
+        ...get(table.display.groupIndex),
+        latest: null,
+        previous: -1,
+        bailOutOnReset: true,
+      });
     } else {
       // Set offset as the first empty item index in range
       // If range is empty, this will break on 1 loop
@@ -343,6 +359,7 @@ export async function fetchTableRecords(
       table.display.groupIndex.set({
         ...groupIndexData,
         latest: groupedIndex,
+        bailOutOnReset: false,
       });
     } catch (err) {
       tableRecordStore.set({
@@ -390,6 +407,7 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
         groupIndex: writable({
           latest: null,
           previous: null,
+          bailOutOnReset: false,
         }),
       },
       config: {},

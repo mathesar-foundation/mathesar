@@ -8,6 +8,8 @@
   } from '@mathesar/stores/tableData';
   import {
     GROUP_ROW_HEIGHT,
+    DEFAULT_ROW_RIGHT_PADDING,
+    GROUP_MARGIN_LEFT,
   } from '@mathesar/stores/tableData';
   import Row from './Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
@@ -22,12 +24,18 @@
   export let horizontalScrollOffset = 0;
   export let groupIndex: GroupIndex;
 
+  let rowWidth: number;
+  let widthWithPadding: number;
+  $: rowWidth = columnPosition?.get('__row')?.width || null;
+  $: widthWithPadding = rowWidth ? rowWidth + DEFAULT_ROW_RIGHT_PADDING : null;
+  $: totalWidth = widthWithPadding ? widthWithPadding + GROUP_MARGIN_LEFT : null;
+
   // Be careful while accessing this ref.
   // Resizer may not have created it yet/destroyed it
   let virtualListRef: VirtualList;
 
   function onGroupIndexChange(_groupIndex: GroupIndex) {
-    if (_groupIndex.latest !== _groupIndex.previous) {
+    if (!_groupIndex.bailOutOnReset && _groupIndex.latest !== _groupIndex.previous) {
       // eslint-disable-next-line no-param-reassign
       _groupIndex.previous = _groupIndex.latest;
 
@@ -70,6 +78,7 @@
         bind:scrollOffset
         bind:horizontalScrollOffset
         {height}
+        width={totalWidth || null}
         itemCount={data.length}
         paddingBottom={100}
         itemSize={getItemSize}
