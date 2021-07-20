@@ -321,13 +321,15 @@ export async function fetchTableRecords(
     const groupOptions = Array.from(optionData.group ?? []);
     const sortOptions = groupOptions.map((field) => ({
       field,
-      direction: 'asc',
+      direction: optionData.sort?.get(field) ?? 'asc',
     }));
     optionData.sort?.forEach((value, key) => {
-      sortOptions.push({
-        field: key,
-        direction: value,
-      });
+      if (!optionData.group?.has(key)) {
+        sortOptions.push({
+          field: key,
+          direction: value,
+        });
+      }
     });
     if (sortOptions.length > 0) {
       params.push(`order_by=${encodeURIComponent(JSON.stringify(sortOptions))}`);
