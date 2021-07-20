@@ -3,9 +3,11 @@ button.dropdown.trigger {
   position: relative;
 
   >.label {
-    display: flex;
-    align-items: center;
+    display: inline-block;
     position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   >.arrow {
@@ -27,6 +29,8 @@ button.dropdown.trigger {
   border-radius: 2px;
   background: #fff;
   z-index: 100;
+  max-height: 210px;
+  overflow: auto;
 
   &[data-popper-placement="top-start"] {
     box-shadow: rgba(0, 0, 0, 0.1) 0px -10px 15px -3px,

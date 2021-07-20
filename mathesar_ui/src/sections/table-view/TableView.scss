@@ -1,4 +1,4 @@
-$display-opts-pane-width: 300px;
+$display-opts-pane-width: 310px;
 
 section.table-section .tab-container {
   .tab-content-holder {
@@ -17,10 +17,63 @@ section.table-section .tab-container {
         width: $display-opts-pane-width;
         top: 0;
         bottom: 0;
-        border-right: 1px solid #efefef;
-        transition: left .25s cubic-bezier(0,0,.2,1);
+        border-right: 1px solid #e2e2e2;
         overflow-y: auto;
         overflow-x: hidden;
+        background: #F4F4F6;
+
+        .display-opts {
+          padding: 10px 12px;
+
+          .header {
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+          }
+
+          >section {
+            margin-top: 10px;
+            padding: 10px 0px;
+
+            .content {
+              margin-top: 10px;
+
+              table {
+                width: 100%;
+
+                td.column {
+                  width: 104px;
+                  >button {
+                    width: 100px;
+                  }
+                }
+                td.dir {
+                  width: 78px;
+                  >button {
+                    width: 74px;
+                  }
+                }
+                td.groupcolumn {
+                  width: 182px;
+                  >button {
+                    width: 182px;
+                  }
+                }
+
+                tr.add-option td {
+                  padding-top: 10px;
+                }
+              }
+
+              .empty-msg {
+                color: #606066;
+              }
+            }
+          }
+          >section + section {
+            border-top: 1px solid #e2e2e2;
+          }
+        }
       }
 
       .table-content {
@@ -30,7 +83,6 @@ section.table-section .tab-container {
         right: 0;
         top: 0;
         bottom: 0;
-        transition: left .25s cubic-bezier(0,0,.2,1);
         background: #f7f8f8;
 
         .cell {
@@ -197,6 +249,11 @@ section.table-section .tab-container {
 
         .table-content {
           left: $display-opts-pane-width;
+        }
+      }
+      &.animate-opts {
+        .display-options-pane, .table-content {
+          transition: left .25s cubic-bezier(0,0,.2,1);
         }
       }
     }

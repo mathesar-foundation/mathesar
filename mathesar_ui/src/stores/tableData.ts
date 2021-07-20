@@ -76,7 +76,8 @@ export interface TableDisplayStores {
   scrollOffset: Writable<number>,
   horizontalScrollOffset: Writable<number>,
   columnPosition: Writable<ColumnPosition>,
-  groupIndex: Writable<GroupIndex>
+  groupIndex: Writable<GroupIndex>,
+  showDisplayOptions: Writable<boolean>,
 }
 
 interface TableConfigData {
@@ -450,6 +451,7 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
           previous: null,
           bailOutOnReset: false,
         }),
+        showDisplayOptions: writable(false),
       },
       config: {},
     };
