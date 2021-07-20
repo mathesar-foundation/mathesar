@@ -15,6 +15,8 @@ TYPES_SCHEMA = types.base.SCHEMA
 
 EXCLUDED_SCHEMATA = [TYPES_SCHEMA, "information_schema"]
 
+SUPPORTED_SCHEMA_UPDATE_ARGS = {'name'}
+
 
 def get_schema_name_from_oid(oid, engine):
     return reflect_schema(engine, oid=oid)["name"]
@@ -109,7 +111,7 @@ class RenameSchema(DDLElement):
 
 @compiler.compiles(RenameSchema)
 def compile_rename_schema(element, compiler, **_):
-    return "ALTER SCHEMA %s RENAME TO %s" % (
+    return 'ALTER SCHEMA "%s" RENAME TO "%s"' % (
         element.schema,
         element.rename_to
     )
@@ -121,3 +123,8 @@ def rename_schema(schema, engine, rename_to):
     """
     with engine.begin() as connection:
         connection.execute(RenameSchema(schema, rename_to))
+
+
+def update_schema(name, engine, update_data):
+    if "name" in update_data:
+        rename_schema(name, engine, update_data["name"])

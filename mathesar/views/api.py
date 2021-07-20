@@ -19,12 +19,13 @@ from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
-    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer,
-    ColumnSerializer, DatabaseSerializer
+    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
+    DatabaseSerializer
 )
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
 from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
 from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
+from mathesar.utils.tables import create_empty_table
 from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
 from mathesar.forms import RecordListFilterForm
 
@@ -66,9 +67,29 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
         else:
             raise ValidationError(serializer.errors)
 
+    def partial_update(self, request, pk=None):
+        serializer = SchemaSerializer(
+            data=request.data, context={'request': request}, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
 
-class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
-                   CreateModelMixin):
+        schema = self.get_object()
+        schema.update_sa_schema(serializer.validated_data)
+
+        # Reload the schema to avoid cached properties
+        schema = self.get_object()
+        schema.clear_name_cache()
+        serializer = SchemaSerializer(schema, context={'request': request})
+        return Response(serializer.data)
+
+    def destroy(self, request, pk=None):
+        schema = self.get_object()
+        schema.delete_sa_schema()
+        schema.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     def get_queryset(self):
         reflect_db_objects()
         return Table.objects.all().order_by('-created_at')
@@ -81,9 +102,36 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin,
     def create(self, request):
         serializer = TableSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            return create_table_from_datafile(request, serializer.validated_data)
+            valid_data = serializer.validated_data
+            if 'data_files' in valid_data and valid_data['data_files']:
+                table = create_table_from_datafile(valid_data)
+            else:
+                table = create_empty_table(valid_data)
+
+            serializer = TableSerializer(table, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             raise ValidationError(serializer.errors)
+
+    def partial_update(self, request, pk=None):
+        serializer = TableSerializer(
+            data=request.data, context={'request': request}, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+
+        table = self.get_object()
+        table.update_sa_table(serializer.validated_data)
+
+        # Reload the table to avoid cached properties
+        table = self.get_object()
+        serializer = TableSerializer(table, context={'request': request})
+        return Response(serializer.data)
+
+    def destroy(self, request, pk=None):
+        table = self.get_object()
+        table.delete_sa_table()
+        table.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):
