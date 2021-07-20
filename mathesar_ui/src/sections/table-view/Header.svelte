@@ -116,15 +116,33 @@
           <ul>
             <li on:click={() => sortByColumn(column, 'asc')}>
               <Icon class="opt" data={faSortAmountDownAlt}/>
-              <span>Sort Ascending</span>
+              <span>
+                {#if sort?.get(column.name) === 'asc'}
+                  Remove asc sort
+                {:else}
+                  Sort Ascending
+                {/if}
+              </span>
             </li>
             <li on:click={() => sortByColumn(column, 'desc')}>
               <Icon class="opt" data={faSortAmountDown}/>
-              <span>Sort Descending</span>
+              <span>
+                {#if sort?.get(column.name) === 'desc'}
+                  Remove desc sort
+                {:else}
+                  Sort Descending
+                {/if}
+              </span>
             </li>
             <li on:click={() => groupByColumn(column)}>
               <Icon class="opt" data={faThList}/>
-              <span>Group by column</span>
+              <span>
+                {#if group?.has(column.name)}
+                  Remove grouping
+                {:else}
+                  Group by column
+                {/if}
+              </span>
             </li>
           </ul>
         </svelte:fragment>
