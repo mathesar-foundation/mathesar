@@ -221,10 +221,18 @@ section.table-section .tab-container {
           }
 
           .row {
-            transition: all .25s cubic-bezier(0,0,.2,1);
+            transition: all .20s cubic-bezier(0,0,.2,1);
 
             &.in-group {
               .row-number {
+                /**
+                 * Fix for an obsure bug in firefox.
+                 * If position of sticky elements and their parents are updated, and if
+                 * the parents have an associated transition, the sticky elements consider
+                 * the old position of their parents until the next browser animation frame.
+                 * Work around is to add the same animation to the sticky elements.
+                 */
+                transition: left .20s cubic-bezier(0,0,.2,1);
                 border-left: 1px solid #efefef;
               }
             }
