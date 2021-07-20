@@ -37,7 +37,7 @@ def test_column_list(column_test_table, client):
         {
             'name': 'mycolumn0',
             'type': 'INTEGER',
-            'column_index': 0,
+            'index': 0,
             'nullable': False,
             'primary_key': True,
             'valid_target_types': None,
@@ -45,7 +45,7 @@ def test_column_list(column_test_table, client):
         {
             'name': 'mycolumn1',
             'type': 'INTEGER',
-            'column_index': 1,
+            'index': 1,
             'nullable': False,
             'primary_key': False,
             'valid_target_types': None,
@@ -53,7 +53,7 @@ def test_column_list(column_test_table, client):
         {
             'name': 'mycolumn2',
             'type': 'INTEGER',
-            'column_index': 2,
+            'index': 2,
             'nullable': True,
             'primary_key': False,
             'valid_target_types': None,
@@ -61,7 +61,7 @@ def test_column_list(column_test_table, client):
         {
             'name': 'mycolumn3',
             'type': 'VARCHAR',
-            'column_index': 3,
+            'index': 3,
             'nullable': True,
             'primary_key': False,
             'valid_target_types': [
@@ -84,7 +84,7 @@ def test_column_list(column_test_table, client):
             {
                 'name': 'mycolumn0',
                 'type': 'INTEGER',
-                'column_index': 0,
+                'index': 0,
                 'nullable': False,
                 'primary_key': True,
                 'valid_target_types': None
@@ -95,7 +95,7 @@ def test_column_list(column_test_table, client):
             {
                 'name': 'mycolumn2',
                 'type': 'INTEGER',
-                'column_index': 2,
+                'index': 2,
                 'nullable': True,
                 'primary_key': False,
                 'valid_target_types': None
