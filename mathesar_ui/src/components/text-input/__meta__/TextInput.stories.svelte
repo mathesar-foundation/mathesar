@@ -3,7 +3,7 @@
   import TextInput from '../TextInput.svelte';
   import TextInputDocs from './TextInput.mdx';
 
-  let value: string;
+  let value = '';
 
   const meta = {
     title: 'Components/TextInput',
@@ -24,7 +24,6 @@
         disabled: true,
       },
       docs: {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         page: TextInputDocs,
         source: {
           type: 'code',

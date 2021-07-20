@@ -13,6 +13,7 @@ We are currently in early development and hope to release an alpha version by la
   - [Linting](#linting)
   - [Running tests](#running-tests)
   - [Opening a shell in the container](#opening-a-shell-in-the-container)
+- [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -87,3 +88,7 @@ Frontend:
 ```
 docker exec -it mathesar_ui_1 bash
 ```
+
+## License
+
+Mathesar is open source under the GPLv3 license - see [LICENSE](LICENSE). It also contains derivatives of third-party open source modules licensed under the MIT license. See the list and respective licenses in [THIRDPARTY](THIRDPARTY).

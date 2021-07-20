@@ -7,7 +7,7 @@ aside {
   left: 0;
   bottom: 0;
   width: $side-bar-width;
-  border-right: 1px solid #efefef;
+  border-right: 1px solid #dfdfdf;
   transition: left .2s ease-out;
   z-index: 3;
   overflow-y: auto;
@@ -38,9 +38,9 @@ section.table-section {
   
   .tab-container {
     position: absolute;
-    left: 16px;
-    right: 16px;
-    bottom: 16px;
+    left: 5px;
+    right: 0px;
+    bottom: 0px;
     top: 0;
 
     .tabs {
@@ -49,11 +49,15 @@ section.table-section {
           >span {
             display: flex;
             align-items: center;
+            overflow: hidden;
 
             >span {
               margin-left: 6px;
-              display: inline-block;
-              vertical-align: middle;
+              display: block;
+              flex-grow: 1;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
             }
           }
         }
