@@ -48,7 +48,7 @@
     if (entry.isNew) {
       return null;
     }
-    return `/${database}${URLQueryHandler.constructTableQuery(entry.id as number)}`;
+    return `/${database}${URLQueryHandler.constructTableLink(entry.id as number)}`;
   }
 
   function tableSelected(e: { detail: { node: Schema, originalEvent: Event, link?: string } }) {
@@ -72,6 +72,10 @@
     removeTab(database, e.detail.removedTab, e.detail.activeTab);
   }
 </script>
+
+<svelte:head>
+  <title>Mathesar - {$activeTab?.label || 'Home'}</title>
+</svelte:head>
 
 <aside>
   <nav>
