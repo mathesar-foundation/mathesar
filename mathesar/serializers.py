@@ -42,8 +42,10 @@ class SimpleColumnSerializer(serializers.Serializer):
 
 
 class ColumnSerializer(SimpleColumnSerializer):
+    index = serializers.IntegerField(source='column_index', read_only=True)
     nullable = serializers.BooleanField(default=True)
     primary_key = serializers.BooleanField(default=False)
+    valid_target_types = serializers.ListField(read_only=True)
 
 
 class TableSerializer(serializers.ModelSerializer):

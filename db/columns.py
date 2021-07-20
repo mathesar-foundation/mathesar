@@ -3,7 +3,7 @@ import warnings
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from sqlalchemy import (
-    Column, Integer, ForeignKey, Table, MetaData, and_, select
+    Column, Integer, ForeignKey, Table, MetaData, and_, select, inspect
 )
 from db import constants, tables
 from db.types import alteration
@@ -47,7 +47,9 @@ class MathesarColumn(Column):
 
         Optional keyword arguments:
         primary_key -- Boolean giving whether the column is a primary key.
+        nullable -- Boolean giving whether the column is nullable.
         """
+        self.engine = None
         super().__init__(
             *foreign_keys,
             name=name,
@@ -81,6 +83,46 @@ class MathesarColumn(Column):
             and self.primary_key == default_def.get(PRIMARY_KEY, False)
             and self.nullable == default_def.get(NULLABLE, True)
         )
+
+    def add_engine(self, engine):
+        self.engine = engine
+
+    @property
+    def valid_target_types(self):
+        """
+        Returns a set of valid types to which the type of the column can be
+        altered.
+        """
+        if self.engine is not None and not self.is_default:
+            db_type = self.type.compile(dialect=self.engine.dialect)
+            valid_target_types = sorted(
+                list(
+                    set(
+                        alteration.get_full_cast_map(self.engine).get(db_type, [])
+                    )
+                )
+            )
+            return valid_target_types if valid_target_types else None
+
+    @property
+    def column_index(self):
+        """
+        Get the ordinal index of this column in its table, if it is
+        attached to a table that is associated with the column's engine.
+        """
+        if (
+                self.engine is not None
+                and self.table is not None
+                and inspect(self.engine).has_table(self.table.name, schema=self.table.schema)
+        ):
+            table_oid = tables.get_oid_from_table(
+                self.table.name, self.table.schema, self.engine
+            )
+            return get_column_index_from_name(
+                table_oid,
+                self.name,
+                self.engine
+            )
 
 
 def get_default_mathesar_column_list():
@@ -117,11 +159,13 @@ def get_column_index_from_name(table_oid, column_name, engine):
 def create_column(engine, table_oid, column_data):
     column_type = column_data[TYPE]
     column_nullable = column_data.get(NULLABLE, True)
-    supported_types = alteration.get_supported_alter_column_types(engine)
-    sa_type = supported_types.get(column_type.lower())
+    supported_types = alteration.get_supported_alter_column_types(
+        engine, friendly_names=False,
+    )
+    sa_type = supported_types.get(column_type)
     if sa_type is None:
-        logger.warning("Requested type not supported. falling back to String")
-        sa_type = supported_types[alteration.STRING]
+        logger.warning("Requested type not supported. falling back to VARCHAR")
+        sa_type = supported_types["VARCHAR"]
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = MathesarColumn(
         column_data[NAME], sa_type, nullable=column_nullable,
@@ -175,6 +219,7 @@ def retype_column(table_oid, column_index, new_type, engine):
         table.columns[column_index].name,
         new_type,
         engine,
+        friendly_names=False,
     )
     return tables.reflect_table_from_oid(table_oid, engine).columns[column_index]
 
