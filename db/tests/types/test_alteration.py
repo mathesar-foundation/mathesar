@@ -32,6 +32,18 @@ def test_get_alter_column_types_with_custom_engine(engine_with_types):
     )
 
 
+def test_get_alter_column_types_with_unfriendly_names(engine_with_types):
+    type_dict = alteration.get_supported_alter_column_types(
+        engine_with_types, friendly_names=False
+    )
+    assert all(
+        [
+            type_dict[type_]().compile(dialect=engine_with_types.dialect) == type_
+            for type_ in type_dict
+        ]
+    )
+
+
 type_test_list = [
     (String, "boolean", "BOOLEAN"),
     (String, "interval", "INTERVAL"),
@@ -165,3 +177,26 @@ def test_alter_column_type_raises_on_bad_column_data(
         alteration.alter_column_type(
             schema, TABLE_NAME, COLUMN_NAME, target_type, engine,
         )
+
+
+def test_get_full_cast_map(engine_with_types):
+    """
+    This test specifies the full map of what types can be cast to what
+    target types in Mathesar.  When the map is modified, this test
+    should be updated accordingly.
+    """
+    expect_cast_map = {
+        'NUMERIC': ['BOOLEAN', 'NUMERIC', 'VARCHAR'],
+        'VARCHAR': ['NUMERIC', 'VARCHAR', 'INTERVAL', 'mathesar_types.email', 'BOOLEAN'],
+        'mathesar_types.email': ['mathesar_types.email', 'VARCHAR'],
+        'INTERVAL': ['INTERVAL', 'VARCHAR'],
+        'BOOLEAN': ['NUMERIC', 'BOOLEAN', 'VARCHAR']
+    }
+    actual_cast_map = alteration.get_full_cast_map(engine_with_types)
+    assert len(actual_cast_map) == len(expect_cast_map)
+    assert all(
+        [
+            sorted(actual_cast_map[type_]) == sorted(expect_target_list)
+            for type_, expect_target_list in expect_cast_map.items()
+        ]
+    )

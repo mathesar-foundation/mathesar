@@ -1,4 +1,3 @@
-from db.columns import MathesarColumn
 from db.tables import get_table_oids_from_schema, infer_table_column_types, create_mathesar_table, get_oid_from_table
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Table
@@ -23,9 +22,9 @@ def get_table_column_types(table):
     schema = table.schema
     types = infer_table_column_types(schema.name, table.name, schema._sa_engine)
     col_types = {
-        col.name: t.__name__
+        col.name: t().compile(dialect=schema._sa_engine.dialect)
         for col, t in zip(table.sa_columns, types)
-        if not MathesarColumn.from_column(col).is_default
+        if not col.is_default
         and not col.primary_key
         and not col.foreign_keys
     }

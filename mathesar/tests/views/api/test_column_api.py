@@ -34,10 +34,44 @@ def test_column_list(column_test_table, client):
     response_data = response.json()
     assert response_data['count'] == len(column_test_table.sa_columns)
     expect_results = [
-        {'name': 'mycolumn0', 'type': 'INTEGER', 'nullable': False, 'primary_key': True},
-        {'name': 'mycolumn1', 'type': 'INTEGER', 'nullable': False, 'primary_key': False},
-        {'name': 'mycolumn2', 'type': 'INTEGER', 'nullable': True, 'primary_key': False},
-        {'name': 'mycolumn3', 'type': 'VARCHAR', 'nullable': True, 'primary_key': False}
+        {
+            'name': 'mycolumn0',
+            'type': 'INTEGER',
+            'index': 0,
+            'nullable': False,
+            'primary_key': True,
+            'valid_target_types': None,
+        },
+        {
+            'name': 'mycolumn1',
+            'type': 'INTEGER',
+            'index': 1,
+            'nullable': False,
+            'primary_key': False,
+            'valid_target_types': None,
+        },
+        {
+            'name': 'mycolumn2',
+            'type': 'INTEGER',
+            'index': 2,
+            'nullable': True,
+            'primary_key': False,
+            'valid_target_types': None,
+        },
+        {
+            'name': 'mycolumn3',
+            'type': 'VARCHAR',
+            'index': 3,
+            'nullable': True,
+            'primary_key': False,
+            'valid_target_types': [
+                'BOOLEAN',
+                'INTERVAL',
+                'NUMERIC',
+                'VARCHAR',
+                'mathesar_types.email',
+            ],
+        }
     ]
     assert response_data['results'] == expect_results
 
@@ -45,8 +79,28 @@ def test_column_list(column_test_table, client):
 @pytest.mark.parametrize(
     "index,expect_data",
     [
-        (0, {'name': 'mycolumn0', 'type': 'INTEGER', 'nullable': False, 'primary_key': True}),
-        (2, {'name': 'mycolumn2', 'type': 'INTEGER', 'nullable': True, 'primary_key': False}),
+        (
+            0,
+            {
+                'name': 'mycolumn0',
+                'type': 'INTEGER',
+                'index': 0,
+                'nullable': False,
+                'primary_key': True,
+                'valid_target_types': None
+            },
+        ),
+        (
+            2,
+            {
+                'name': 'mycolumn2',
+                'type': 'INTEGER',
+                'index': 2,
+                'nullable': True,
+                'primary_key': False,
+                'valid_target_types': None
+            },
+        ),
     ]
 )
 def test_column_retrieve(index, expect_data, column_test_table, client):
@@ -125,7 +179,7 @@ def test_column_update_type(column_test_table, client):
 
 def test_column_update_type_invalid_cast(column_test_table, client):
     cache.clear()
-    type_ = "email"
+    type_ = "mathesar_types.email"
     data = {"type": type_}
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data

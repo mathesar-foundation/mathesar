@@ -84,7 +84,6 @@ def test_record_list_filter(create_table, client):
     assert response.status_code == 200
     assert response_data['count'] == 2
     assert len(response_data['results']) == 2
-
     assert mock_infer.call_args is not None
     assert mock_infer.call_args[1]['filters'] == filter_list
 

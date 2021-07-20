@@ -411,6 +411,21 @@ def reflect_table_from_oid(oid, engine):
     return reflect_table(table_name, schema, engine)
 
 
+def get_enriched_column_table(raw_sa_table, engine=None):
+    table_columns = [
+        columns.MathesarColumn.from_column(c) for c in raw_sa_table.columns
+    ]
+    if engine is not None:
+        for col in table_columns:
+            col.add_engine(engine)
+    return Table(
+        raw_sa_table.name,
+        MetaData(),
+        *table_columns,
+        schema=raw_sa_table.schema
+    )
+
+
 def get_table_oids_from_schema(schema_oid, engine):
     metadata = MetaData()
 
