@@ -104,6 +104,26 @@ class MathesarColumn(Column):
             )
             return valid_target_types if valid_target_types else None
 
+    @property
+    def column_index(self):
+        """
+        Get the ordinal index of this column in its table, if it is
+        attached to a table that is associated with the column's engine.
+        """
+        if (
+                self.engine is not None
+                and self.table is not None
+                and self.table.exists(bind=self.engine)
+        ):
+            table_oid = tables.get_oid_from_table(
+                self.table.name, self.table.schema, self.engine
+            )
+            return get_column_index_from_name(
+                table_oid,
+                self.name,
+                self.engine
+            )
+
 
 def get_default_mathesar_column_list():
     return [
