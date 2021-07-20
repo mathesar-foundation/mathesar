@@ -33,7 +33,7 @@ class SchemaSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Schema
-        fields = ['id', 'name', 'tables', 'database']
+        fields = ['id', 'name', 'tables', 'database', 'has_dependencies']
 
 
 class SimpleColumnSerializer(serializers.Serializer):
@@ -52,11 +52,12 @@ class TableSerializer(serializers.ModelSerializer):
     columns = SimpleColumnSerializer(many=True, read_only=True, source='sa_columns')
     records = serializers.SerializerMethodField()
     name = serializers.CharField()
+    data_files = serializers.PrimaryKeyRelatedField(required=False, many=True, queryset=DataFile.objects.all())
 
     class Meta:
         model = Table
         fields = ['id', 'name', 'schema', 'created_at', 'updated_at',
-                  'columns', 'records', 'data_files']
+                  'columns', 'records', 'data_files', 'has_dependencies']
 
     def get_records(self, obj):
         if isinstance(obj, Table):

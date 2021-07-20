@@ -3,7 +3,7 @@ import warnings
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from sqlalchemy import (
-    Column, Integer, ForeignKey, Table, MetaData, and_, select
+    Column, Integer, ForeignKey, Table, MetaData, and_, select, inspect
 )
 from db import constants, tables
 from db.types import alteration
@@ -113,7 +113,7 @@ class MathesarColumn(Column):
         if (
                 self.engine is not None
                 and self.table is not None
-                and self.table.exists(bind=self.engine)
+                and inspect(self.engine).has_table(self.table.name, schema=self.table.schema)
         ):
             table_oid = tables.get_oid_from_table(
                 self.table.name, self.table.schema, self.engine
