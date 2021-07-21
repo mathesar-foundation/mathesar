@@ -1,0 +1,30 @@
+name: 'Ansible'
+description: 'Runs an Ansible playbook'
+inputs:
+  playbook:
+    description: 'Playbook file to run'
+    required: true
+    default: 'staging'
+  inventory:
+    description: 'Host list to run playbook against'
+    required: true
+    default: 'hosts/staging'
+  vault_password:
+    description: 'Password used to get secrets out of the ansible vault'
+    required: true
+  deploy_user:
+    description: 'SSH username for connections to use'
+    required: true
+    default: 'deployer'
+  deploy_key:
+    description: 'SSH key for connections to use'
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.playbook }}
+    - ${{ inputs.inventory }}
+    - ${{ inputs.vault_password }}
+    - ${{ inputs.deploy_user }}
+    - ${{ inputs.deploy_key }}
