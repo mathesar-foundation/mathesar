@@ -1,19 +1,22 @@
 reviewers:
   # The default reviewers
   defaults:
-    - engineers
-    - designers
+    - maintainers
 
   # Reviewer groups each of which has a list of GitHub usernames
   groups:
-    engineers:
+    maintainers:
       - kgodey
       - mathemancer
       - pavish
-      - eito-fis
     designers:
       - ghislaineguerin
+    backend-reviewers:
+      - kgodey
+      - mathemancer
+      - eito-fis
     frontend-reviewers:
+      - pavish
       - dhruvkb
       - zackkrida
 
@@ -21,9 +24,13 @@ files:
   # Keys are glob expressions.
   # You can assign groups defined above as well as GitHub usernames.
   '**':
-    - engineers
-    - designers
+    - maintainers
+  'mathesar/**':
+    - backend-reviewers
+  'db/**':
+    - backend-reviewers
   'mathesar_ui/**':
+    - designers
     - frontend-reviewers
 
 options:
