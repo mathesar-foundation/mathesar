@@ -69,13 +69,13 @@ def get_sv_dialect(file):
         raise InvalidTableError
 
 
-def get_sv_reader(file, dialect=None, header=True):
+def get_sv_reader(file, header, dialect=None):
     file = TextIOWrapper(file, encoding="utf-8-sig")
     if dialect:
         reader = csv.DictReader(file, dialect=dialect)
     else:
         reader = csv.DictReader(file)
-    if header is False:
+    if not header:
         reader.fieldnames = [
             f"column_{i}" for i in range(len(reader.fieldnames))
         ]
@@ -90,7 +90,7 @@ def create_db_table_from_data_file(data_file, name, schema):
     dialect = csv.dialect.SimpleDialect(data_file.delimiter, data_file.quotechar,
                                         data_file.escapechar)
     with open(sv_filename, 'rb') as sv_file:
-        sv_reader = get_sv_reader(sv_file, dialect=dialect, header=header)
+        sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
         column_names = sv_reader.fieldnames
         table = tables.create_string_column_table(
             name=name,
@@ -103,10 +103,10 @@ def create_db_table_from_data_file(data_file, name, schema):
         engine,
         sv_filename,
         column_names,
+        header,
         delimiter=dialect.delimiter,
         escape=dialect.escapechar,
         quote=dialect.quotechar,
-        header=header,
     )
     return table
 
