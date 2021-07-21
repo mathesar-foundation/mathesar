@@ -1,5 +1,7 @@
 name: Move pull requests into Active project
 on:
+  pull_request:
+    types: [opened, reopened]
   pull_request_target:
     types: [opened, reopened]
 
