@@ -22,6 +22,8 @@ def data_file(csv_filename):
 def headerless_data_file(headerless_csv_filename):
     with open(headerless_csv_filename, 'rb') as csv_file:
         data_file = DataFile.objects.create(file=File(csv_file))
+    data_file.header = False
+    data_file.save()
     return data_file
 
 
@@ -46,7 +48,7 @@ def test_csv_upload(data_file, schema):
 def test_headerless_csv_upload(headerless_data_file, schema):
     table_name = 'NASA no headers'
     table = create_table_from_csv(
-        headerless_data_file, table_name, schema, header=False
+        headerless_data_file, table_name, schema
     )
     assert table is not None
     assert table.name == table_name

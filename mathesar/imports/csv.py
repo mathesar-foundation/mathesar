@@ -83,9 +83,10 @@ def get_sv_reader(file, dialect=None, header=True):
     return reader
 
 
-def create_db_table_from_data_file(data_file, name, schema, header=True):
+def create_db_table_from_data_file(data_file, name, schema):
     engine = create_mathesar_engine(schema.database.name)
     sv_filename = data_file.file.path
+    header = data_file.header
     dialect = csv.dialect.SimpleDialect(data_file.delimiter, data_file.quotechar,
                                         data_file.escapechar)
     with open(sv_filename, 'rb') as sv_file:
@@ -110,10 +111,10 @@ def create_db_table_from_data_file(data_file, name, schema, header=True):
     return table
 
 
-def create_table_from_csv(data_file, name, schema, header=True):
+def create_table_from_csv(data_file, name, schema):
     engine = create_mathesar_engine(schema.database.name)
     db_table = create_db_table_from_data_file(
-        data_file, name, schema, header=header
+        data_file, name, schema
     )
     db_table_oid = tables.get_oid_from_table(db_table.name, db_table.schema, engine)
     table, _ = Table.objects.get_or_create(oid=db_table_oid, schema=schema)
