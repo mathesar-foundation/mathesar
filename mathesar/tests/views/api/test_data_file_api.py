@@ -146,7 +146,7 @@ def test_data_file_update(client, data_file):
 def test_data_file_partial_update(client, data_file):
     response = client.patch(f'/api/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "PATCH" not allowed.'
+    assert response.json()['detail'] == 'Method "PATCH" allowed only for header.'
 
 
 def test_data_file_delete(client, data_file):

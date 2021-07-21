@@ -288,6 +288,24 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
     serializer_class = DataFileSerializer
     pagination_class = DefaultLimitOffsetPagination
 
+    def partial_update(self, request, pk=None):
+        serializer = DataFileSerializer(
+            data=request.data, context={'request': request}, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+
+        data_file = self.get_object()
+        if serializer.validated_data.get('header') is not None:
+            data_file.header = serializer.validated_data['header']
+            data_file.save()
+            serializer = DataFileSerializer(data_file, context={'request': request})
+            return Response(serializer.data)
+        else:
+            return Response(
+                {'detail': 'Method "PATCH" allowed only for header.'},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+
     def create(self, request):
         serializer = DataFileSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
