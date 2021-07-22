@@ -101,16 +101,18 @@ def get_group_counts(
         if field_name not in table.c:
             raise GroupFieldNotFound(f"Group field {field} not found in {table}.")
 
-    query = _get_query(table, limit, offset, order_by, filters)
-    subquery = query.subquery()
+    # Get the list of groups that we should count.
+    # We're considering limit and offset here so that we only count relevant groups
+    relevant_groups_query = _get_query(table, limit, offset, order_by, filters)
+    subquery = relevant_groups_query.subquery()
 
-    group_by = [
+    columns = [
         subquery.columns[col] if type(col) == str else subquery.columns[col.name]
         for col in group_by
     ]
-    query = select(*group_by, func.count(subquery.c[ID])).group_by(*group_by)
+    count_query = select(*columns, func.count(subquery.c[ID])).group_by(*columns)
     with engine.begin() as conn:
-        records = conn.execute(query).fetchall()
+        records = conn.execute(count_query).fetchall()
 
     # Last field is the count, preceding fields are the group by fields
     counts = {
