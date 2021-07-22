@@ -37,8 +37,10 @@
   function onValueChange(_inputValue: string) {
     clearTimeout(timer);
     timer = setTimeout(() => {
-      value = _inputValue;
-      dispatch('reload');
+      if (value !== _inputValue) {
+        value = _inputValue;
+        dispatch('reload');
+      }
     }, 500);
   }
   

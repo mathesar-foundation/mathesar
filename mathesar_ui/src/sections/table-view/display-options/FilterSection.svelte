@@ -28,8 +28,8 @@
   let addNew = false;
 
   const combinations = [
-    { id: 'and', label: 'AND' },
-    { id: 'or', label: 'OR' },
+    { id: 'and', label: 'and' },
+    { id: 'or', label: 'or' },
   ];
 
   const conditions = [
