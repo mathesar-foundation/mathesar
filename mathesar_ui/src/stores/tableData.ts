@@ -6,6 +6,7 @@ export const DEFAULT_COUNT_COL_WIDTH = 70;
 export const DEFAULT_COLUMN_WIDTH = 160;
 export const GROUP_MARGIN_LEFT = 30;
 export const GROUP_ROW_HEIGHT = 70;
+export const DEFAULT_ROW_RIGHT_PADDING = 100;
 
 export interface TableColumn {
   name: string,
@@ -39,11 +40,16 @@ export interface TableColumnData {
   data: TableColumn[]
 }
 
+export interface GroupData {
+  [key: string]: GroupData | number
+}
+
 interface TableRecordData {
   state: States,
   error?: string,
   data: TableRecord[],
-  totalCount: number
+  totalCount: number,
+  groupData: GroupData
 }
 
 export type SortOption = Map<string, 'asc' | 'desc'>;
@@ -62,14 +68,16 @@ export type ColumnPosition = Map<string, {
 
 export type GroupIndex = {
   latest: number,
-  previous: number
+  previous: number,
+  bailOutOnReset: boolean
 };
 
 export interface TableDisplayStores {
   scrollOffset: Writable<number>,
   horizontalScrollOffset: Writable<number>,
   columnPosition: Writable<ColumnPosition>,
-  groupIndex: Writable<GroupIndex>
+  groupIndex: Writable<GroupIndex>,
+  showDisplayOptions: Writable<boolean>,
 }
 
 interface TableConfigData {
@@ -114,9 +122,30 @@ function calculateColumnPosition(columns: TableColumn[]): ColumnPosition {
   return columnPosition;
 }
 
+function combineGroups(
+  groupData: GroupData,
+  groupResults: TableRecordGroupsResponse['results'],
+): GroupData {
+  if (!groupResults) {
+    return groupData;
+  }
+  const groupMap: GroupData = groupData || {};
+  groupResults?.forEach((result) => {
+    let group = groupMap;
+    for (let i = 0; i < result.values.length - 1; i += 1) {
+      const value = result.values[i];
+      if (!group[value]) {
+        group[value] = {};
+      }
+      group = group[value] as GroupData;
+    }
+    group[result.values[result.values.length - 1]] = result.count;
+  });
+  return groupMap;
+}
+
 function checkAndSetGroupHeaderRow(
   groupColumns: TableRecordGroupsResponse['group_count_by'],
-  groupResults: TableRecordGroupsResponse['results'],
   index: number,
   records: TableRecord[],
 ): boolean {
@@ -211,11 +240,27 @@ export async function fetchTableRecords(
         promise.cancel();
       });
       table.config.previousRecordRequestSet = null;
+
+      /**
+       * To reset group index when grouped by multiple columns,
+       * setting latest to null, and previous to -1.
+       *
+       * bailOutOnReset:true makes sure that it does not re-render
+       * right away,
+       */
       table.display.groupIndex.set({
         ...get(table.display.groupIndex),
-        previous: null,
         latest: null,
+        previous: -1,
+        bailOutOnReset: true,
       });
+
+      // Set to empty object if query is grouped
+      if (existingData.groupData && optionData.group?.size > 0) {
+        existingData.groupData = {};
+      } else {
+        existingData.groupData = null;
+      }
     } else {
       // Set offset as the first empty item index in range
       // If range is empty, this will break on 1 loop
@@ -276,13 +321,15 @@ export async function fetchTableRecords(
     const groupOptions = Array.from(optionData.group ?? []);
     const sortOptions = groupOptions.map((field) => ({
       field,
-      direction: 'asc',
+      direction: optionData.sort?.get(field) ?? 'asc',
     }));
     optionData.sort?.forEach((value, key) => {
-      sortOptions.push({
-        field: key,
-        direction: value,
-      });
+      if (!optionData.group?.has(key)) {
+        sortOptions.push({
+          field: key,
+          direction: value,
+        });
+      }
     });
     if (sortOptions.length > 0) {
       params.push(`order_by=${encodeURIComponent(JSON.stringify(sortOptions))}`);
@@ -305,11 +352,17 @@ export async function fetchTableRecords(
       const data = response.results || [];
 
       // Getting from store again, since state may have changed
-      const records = [...get(tableRecordStore).data];
+      const recordInfo = get(tableRecordStore);
+      const records = [...recordInfo.data];
       records.length = totalCount;
 
       const groupColumns = response?.group_count?.group_count_by;
       const isResultGrouped = groupColumns?.length > 0;
+
+      const groupData = combineGroups(
+        recordInfo.groupData,
+        response?.group_count?.results,
+      );
 
       const groupIndexData = get(table.display.groupIndex);
 
@@ -329,7 +382,6 @@ export async function fetchTableRecords(
         if (isResultGrouped) {
           const isRowGrouped = checkAndSetGroupHeaderRow(
             groupColumns,
-            response.group_count.results,
             i,
             records,
           );
@@ -344,16 +396,19 @@ export async function fetchTableRecords(
         state: States.Done,
         data: records,
         totalCount,
+        groupData,
       });
       table.display.groupIndex.set({
         ...groupIndexData,
         latest: groupedIndex,
+        bailOutOnReset: false,
       });
     } catch (err) {
       tableRecordStore.set({
         state: States.Error,
         error: err instanceof Error ? err.message : null,
         data: [],
+        groupData: null,
         totalCount: null,
       });
     } finally {
@@ -380,6 +435,7 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
       records: writable({
         state: States.Loading,
         data: [],
+        groupData: null,
         totalCount: null,
       }),
       options: writable({
@@ -395,7 +451,9 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
         groupIndex: writable({
           latest: null,
           previous: null,
+          bailOutOnReset: false,
         }),
+        showDisplayOptions: writable(false),
       },
       config: {},
     };

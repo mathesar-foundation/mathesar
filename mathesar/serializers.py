@@ -89,8 +89,9 @@ class DataFileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DataFile
-        fields = ['id', 'file', 'table_imported_to', 'user', 'delimiter', 'escapechar',
-                  'quotechar']
+        fields = [
+            'id', 'file', 'table_imported_to', 'user', 'header', 'delimiter', 'escapechar', 'quotechar'
+        ]
         extra_kwargs = {'delimiter': {'trim_whitespace': False},
                         'escapechar': {'trim_whitespace': False},
                         'quotechar': {'trim_whitespace': False}}

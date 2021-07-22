@@ -21,7 +21,7 @@ def create_table_from_datafile(data):
     return table
 
 
-def create_datafile(request, original_file):
+def create_datafile(request, original_file, header):
     text_file = TextIOWrapper(original_file.file, encoding="utf-8-sig")
     try:
         dialect = get_sv_dialect(text_file)
@@ -29,6 +29,7 @@ def create_datafile(request, original_file):
         raise ValidationError({'file': 'Unable to tabulate datafile'})
 
     inferred_data = {'file': original_file,
+                     'header': header,
                      'delimiter': dialect.delimiter,
                      'escapechar': dialect.escapechar,
                      'quotechar': dialect.quotechar}

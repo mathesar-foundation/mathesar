@@ -1,0 +1,27 @@
+name: Deploy to staging
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  staging-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout ansible repo
+      uses: actions/checkout@v2
+      with:
+        repository: 'centerofci/mathesar-ansible'
+        token: ${{ secrets.GH_PAT_ANSIBLE_REPO }} # Repo is private, so an access token is used
+    # This checkout is used for getting the 'action' from the current repo
+    - name: Checkout mathesar repo
+      uses: actions/checkout@v2
+      with:
+        path: mathesar
+    - name: Run ansible
+      uses: ./mathesar/.github/actions/ansible
+      with:
+        playbook: staging
+        inventory: hosts/staging
+        vault_password: ${{ secrets.ANSIBLE_VAULT_PASS }}
+        deploy_key: ${{ secrets.STAGING_DEPLOY_KEY }}

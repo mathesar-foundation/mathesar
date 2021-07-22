@@ -9,6 +9,8 @@
   export let labelKey = 'label';
   export let options: SelectOption[] = [];
   export let value: SelectOption = null;
+  export let contentClass = '';
+  export let triggerClass = '';
 
   let isOpen = false;
 
@@ -29,7 +31,7 @@
   $: setOptions(options);
 </script>
 
-<Dropdown bind:isOpen contentClass="select">
+<Dropdown bind:isOpen contentClass="select {contentClass}" {triggerClass}>
   <svelte:fragment slot="trigger">
     {value?.[labelKey]}
   </svelte:fragment>

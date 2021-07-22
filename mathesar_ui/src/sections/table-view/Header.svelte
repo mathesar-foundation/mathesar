@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { onMount, createEventDispatcher } from 'svelte';
   import {
     faSortAmountDown,
     faSortAmountDownAlt,
@@ -15,6 +15,8 @@
   } from '@mathesar/stores/tableData';
   import {
     DEFAULT_COUNT_COL_WIDTH,
+    GROUP_MARGIN_LEFT,
+    DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/tableData';
 
   const dispatch = createEventDispatcher();
@@ -23,19 +25,55 @@
   export let group: GroupOption = new Set();
   export let columnPosition: ColumnPosition = new Map();
   export let horizontalScrollOffset = 0;
+  export let isResultGrouped: boolean;
 
-  function sortByColumn(column: TableColumn, order: 'asc' | 'desc') {
-    // Sorting is currently done as a single column sort
-    // TODO: Implement multi column sort
-    if (sort?.get(column.name) !== order) {
-      const newSort: SortOption = new Map();
-      newSort.set(column.name, order);
-      sort = newSort;
-      dispatch('reload');
+  let headerRef: HTMLElement;
+
+  function onHScrollOffsetChange(_hscrollOffset: number) {
+    if (headerRef) {
+      headerRef.scrollLeft = _hscrollOffset;
     }
   }
 
+  $: onHScrollOffsetChange(horizontalScrollOffset);
+
+  let paddingLeft: number;
+  $: paddingLeft = isResultGrouped ? GROUP_MARGIN_LEFT : 0;
+
+  function onHeaderScroll(scrollLeft: number) {
+    if (horizontalScrollOffset !== scrollLeft) {
+      horizontalScrollOffset = scrollLeft;
+    }
+  }
+
+  onMount(() => {
+    onHScrollOffsetChange(horizontalScrollOffset);
+
+    const scrollListener = (event: Event) => {
+      const { scrollLeft } = event.target as HTMLElement;
+      onHeaderScroll(scrollLeft);
+    };
+
+    headerRef.addEventListener('scroll', scrollListener);
+
+    return () => {
+      headerRef.removeEventListener('scroll', scrollListener);
+    };
+  });
+
+  function sortByColumn(column: TableColumn, order: 'asc' | 'desc') {
+    const newSort: SortOption = new Map(sort);
+    if (sort?.get(column.name) === order) {
+      newSort.delete(column.name);
+    } else {
+      newSort.set(column.name, order);
+    }
+    sort = newSort;
+    dispatch('reload');
+  }
+
   function groupByColumn(column: TableColumn) {
+    const oldSize = group?.size || 0;
     const newGroup = new Set(group);
     if (newGroup?.has(column.name)) {
       newGroup.delete(column.name);
@@ -43,18 +81,23 @@
       newGroup.add(column.name);
     }
     group = newGroup;
-    dispatch('reload');
+    /**
+     * Only reset item positions when group layout is created or destroyed
+    */
+    dispatch('reload', {
+      resetPositions: oldSize === 0 || group.size === 0,
+    });
   }
 </script>
 
-<div class="header" style="width:{columnPosition.get('__row').width + 160}px;margin-left:{-horizontalScrollOffset}px">
-  <div class="cell row-number" style="width:{DEFAULT_COUNT_COL_WIDTH}px">
+<div bind:this={headerRef} class="header">
+  <div class="cell row-number" style="width:{DEFAULT_COUNT_COL_WIDTH + paddingLeft}px;">
   </div>
 
   {#each columns.data as column (column.name)}
     <div class="cell" style="
       width:{columnPosition.get(column.name).width}px;
-      left:{columnPosition.get(column.name).left}px;">
+      left:{columnPosition.get(column.name).left + paddingLeft}px;">
       <span class="type">
         {#if column.type === 'INTEGER'}
           #
@@ -73,23 +116,41 @@
           <ul>
             <li on:click={() => sortByColumn(column, 'asc')}>
               <Icon class="opt" data={faSortAmountDownAlt}/>
-              <span>Sort Ascending</span>
+              <span>
+                {#if sort?.get(column.name) === 'asc'}
+                  Remove asc sort
+                {:else}
+                  Sort Ascending
+                {/if}
+              </span>
             </li>
             <li on:click={() => sortByColumn(column, 'desc')}>
               <Icon class="opt" data={faSortAmountDown}/>
-              <span>Sort Descending</span>
+              <span>
+                {#if sort?.get(column.name) === 'desc'}
+                  Remove desc sort
+                {:else}
+                  Sort Descending
+                {/if}
+              </span>
             </li>
             <li on:click={() => groupByColumn(column)}>
               <Icon class="opt" data={faThList}/>
-              <span>Group by column</span>
+              <span>
+                {#if group?.has(column.name)}
+                  Remove grouping
+                {:else}
+                  Group by column
+                {/if}
+              </span>
             </li>
           </ul>
         </svelte:fragment>
       </Dropdown>
     </div>
   {/each}
-  <div class="cell" style="width:70px;left:{
-      columnPosition.get('__row').width
+  <div class="cell" style="width:{70 + DEFAULT_ROW_RIGHT_PADDING}px;left:{
+      columnPosition.get('__row').width + paddingLeft
     }px;">
     <div class="add">
       +
