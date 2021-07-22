@@ -8,9 +8,11 @@
   import type {
     SortOption,
     GroupOption,
+    FilterOption,
     TableColumnData,
   } from '@mathesar/stores/tableData';
   import type { SelectOption } from '@mathesar-components/types';
+  import FilterSection from './FilterSection.svelte';
   import SortSection from './SortSection.svelte';
   import GroupSection from './GroupSection.svelte';
 
@@ -19,6 +21,7 @@
   export let columns: TableColumnData;
   export let sort: SortOption;
   export let group: GroupOption;
+  export let filter: FilterOption;
 
   function getColumnOptions(
     _columns: TableColumnData,
@@ -41,13 +44,7 @@
     </Button>
   </div>
 
+  <FilterSection options={columnOptions} bind:filter on:reload/>
   <SortSection options={columnOptions} bind:sort on:reload/>
   <GroupSection options={columnOptions} bind:group on:reload/>
-
-  <section>
-    <div class="header">Filter</div>
-    <div class="content">
-      TODO
-    </div>
-  </section>
 </div>
