@@ -40,13 +40,18 @@ def _get_query(table, limit, offset, order_by, filters):
     return query
 
 
+def _execute_query(query, engine):
+    with engine.begin() as conn:
+        records = conn.execute(query).fetchall()
+        return records
+
+
 def get_record(table, engine, id_value):
     primary_key_column = _get_primary_key_column(table)
     query = select(table).where(primary_key_column == id_value)
-    with engine.begin() as conn:
-        result = conn.execute(query).fetchall()
-        assert len(result) <= 1
-        return result[0] if result else None
+    result = _execute_query(query, engine)
+    assert len(result) <= 1
+    return result[0] if result else None
 
 
 def get_records(
@@ -68,8 +73,7 @@ def get_records(
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
     """
     query = _get_query(table, limit, offset, order_by, filters)
-    with engine.begin() as conn:
-        return conn.execute(query).fetchall()
+    return _execute_query(query, engine)
 
 
 def get_group_counts(
@@ -110,8 +114,7 @@ def get_group_counts(
         for col in group_by
     ]
     count_query = select(*columns, func.count(columns[0])).group_by(*columns)
-    with engine.begin() as conn:
-        records = conn.execute(count_query).fetchall()
+    records = _execute_query(count_query, engine)
 
     # Last field is the count, preceding fields are the group by fields
     counts = {
@@ -153,9 +156,8 @@ def get_distinct_tuple_values(
         .limit(limit)
         .offset(offset)
     )
-    with engine.begin() as conn:
-        res = conn.execute(query).fetchall()
-    return [tuple(zip(column_objects, row)) for row in res]
+    result = _execute_query(query, engine)
+    return [tuple(zip(column_objects, row)) for row in result]
 
 
 def distinct_tuples_to_filter(distinct_tuples):
