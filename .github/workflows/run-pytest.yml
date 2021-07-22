@@ -21,4 +21,4 @@ jobs:
         run: docker-compose up --build -d
 
       - name: Run tests with pytest
-        run: docker exec mathesar_web_1 pytest
+        run: docker exec --user mathesar mathesar_service_1 pytest

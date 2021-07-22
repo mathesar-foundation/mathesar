@@ -38,8 +38,8 @@ You should now have a web server and database server running. Opening `http://lo
 
 If it's your first time running the application, you'll also need to run database migrations and install Mathesar types and functions:
 ```
-docker exec mathesar_web_1 python manage.py migrate
-docker exec -it mathesar_web_1 python install.py
+docker exec --user mathesar mathesar_service_1 python manage.py migrate
+docker exec --user mathesar -it mathesar_service_1 python install.py
 ```
 
 If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASES.mathesar_tables` entry of the `config/settings.py` file with appropriate connection details before installing the Mathesar types and functions with the previous step.
@@ -67,26 +67,19 @@ If you'd like to run tests before pushing, here's how you do it:
 
 Backend tests:
 ```
-docker exec mathesar_web_1 pytest
+docker exec --user mathesar mathesar_service_1 pytest
 ```
 
 Frontend tests:
 ```
-docker exec mathesar_ui_1 npm test
+docker exec --user mathesar mathesar_service_1 bash -c "cd mathesar_ui && npm test"
 ```
 
 ### Opening a shell in the container
 
 If you need to do some work on the container that's running the code, here's how you access it:
-
-Backend:
 ```
-docker exec -it mathesar_web_1 bash
-```
-
-Frontend:
-```
-docker exec -it mathesar_ui_1 bash
+docker exec --user mathesar -it mathesar_service_1 bash
 ```
 
 ## License

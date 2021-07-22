@@ -110,6 +110,8 @@ if decouple_config('TEST', default=False, cast=bool):
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = decouple_config('SECRET_KEY')
 
+MODE = decouple_config('MODE', default='PRODUCTION')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = decouple_config('DEBUG', default=False, cast=bool)
 
@@ -150,8 +152,22 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
+# https://docs.djangoproject.com/en/3.1/ref/contrib/staticfiles/
 
 STATIC_URL = "/static/"
+
+# When running with DEBUG=False, the webserver needs to serve files from this location
+# python manage.py collectstatic has to be run to collect all static files into this location
+# The files need to served in brotli or gzip compressed format
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
+# Location of client build
+CLIENT_BUILD_LOCATION = os.path.join(BASE_DIR, 'client_build/')
+
+# For development, served by Django's default webserver
+STATICFILES_DIRS = [
+    CLIENT_BUILD_LOCATION
+]
 
 CLIENT_DEV_URL = "http://localhost:3000"
 
