@@ -190,6 +190,9 @@ export function removeTab(
       URLQueryHandler.removeTable(db, removedTab.id as number, newActiveTab?.id as number);
       clearTable(db, removedTab.id as number);
     }
+  } else {
+    // eslint-disable-next-line no-console
+    console.error('Tab removal failed. RemovedTab information is missing');
   }
 }
 

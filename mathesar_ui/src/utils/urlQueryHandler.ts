@@ -1,5 +1,6 @@
 import { router } from 'tinro';
 import type {
+  GroupOption,
   SortOption,
   TableOptionsData,
 } from '@mathesar/stores/tableData';
@@ -9,6 +10,7 @@ import type {
  *  [
  *    id,
  *    [sortcolumn1, sortorder, sortc2, sortorder2],
+ *    [groupcolumn1, groupcolumn2],
  *    [filtercolumn, condition, value, op2, condition2]
  *  ]
  * ], a=id
@@ -56,6 +58,13 @@ function parseTableConfig(config: RawTableConfig): TableConfig {
     }
   }
 
+  if (config[2]) {
+    const groupOptionSet: GroupOption = new Set(config[2] as string[]);
+    if (groupOptionSet.size > 0) {
+      tableConfig.group = groupOptionSet;
+    }
+  }
+
   return tableConfig;
 }
 
@@ -69,6 +78,9 @@ function prepareRawTableConfig(id: number, options?: TableOptions): RawTableConf
       sortOption.push(sortOrder);
     });
     table.push(sortOption);
+
+    const groupOption: string[] = [...(options.group ?? [])];
+    table.push(groupOption);
   }
   return table;
 }
