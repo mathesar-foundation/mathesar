@@ -69,22 +69,28 @@ def get_sv_dialect(file):
         raise InvalidTableError
 
 
-def get_sv_reader(file, dialect=None):
+def get_sv_reader(file, header, dialect=None):
     file = TextIOWrapper(file, encoding="utf-8-sig")
     if dialect:
         reader = csv.DictReader(file, dialect=dialect)
     else:
         reader = csv.DictReader(file)
+    if not header:
+        reader.fieldnames = [
+            f"column_{i}" for i in range(len(reader.fieldnames))
+        ]
+        file.seek(0)
     return reader
 
 
 def create_db_table_from_data_file(data_file, name, schema):
     engine = create_mathesar_engine(schema.database.name)
     sv_filename = data_file.file.path
+    header = data_file.header
     dialect = csv.dialect.SimpleDialect(data_file.delimiter, data_file.quotechar,
                                         data_file.escapechar)
     with open(sv_filename, 'rb') as sv_file:
-        sv_reader = get_sv_reader(sv_file, dialect=dialect)
+        sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
         column_names = sv_reader.fieldnames
         table = tables.create_string_column_table(
             name=name,
@@ -92,16 +98,24 @@ def create_db_table_from_data_file(data_file, name, schema):
             column_names=column_names,
             engine=engine
         )
-    records.create_records_from_csv(table, engine, sv_filename, column_names,
-                                    delimiter=dialect.delimiter,
-                                    escape=dialect.escapechar,
-                                    quote=dialect.quotechar)
+    records.create_records_from_csv(
+        table,
+        engine,
+        sv_filename,
+        column_names,
+        header,
+        delimiter=dialect.delimiter,
+        escape=dialect.escapechar,
+        quote=dialect.quotechar,
+    )
     return table
 
 
 def create_table_from_csv(data_file, name, schema):
     engine = create_mathesar_engine(schema.database.name)
-    db_table = create_db_table_from_data_file(data_file, name, schema)
+    db_table = create_db_table_from_data_file(
+        data_file, name, schema
+    )
     db_table_oid = tables.get_oid_from_table(db_table.name, db_table.schema, engine)
     table, _ = Table.objects.get_or_create(oid=db_table_oid, schema=schema)
     data_file.table_imported_to = table
