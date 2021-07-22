@@ -4,7 +4,6 @@ from sqlalchemy.inspection import inspect
 from sqlalchemy_filters import apply_filters, apply_sort
 from sqlalchemy_filters.exceptions import FieldNotFound
 
-from db.constants import ID
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +109,7 @@ def get_group_counts(
         subquery.columns[col] if type(col) == str else subquery.columns[col.name]
         for col in group_by
     ]
-    count_query = select(*columns, func.count(subquery.c[ID])).group_by(*columns)
+    count_query = select(*columns, func.count(columns[0])).group_by(*columns)
     with engine.begin() as conn:
         records = conn.execute(count_query).fetchall()
 
