@@ -1,9 +1,19 @@
+<script lang="typescript" context="module">
+  let id = 0;
+
+  export function getSelectId(): number {
+    id += 1;
+    return id;
+}
+</script>
+
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { Dropdown } from '@mathesar-components';
   import type { SelectOption } from './Select.d';
 
   const dispatch = createEventDispatcher();
+  const selectId: number = getSelectId() as number;
 
   export let idKey = 'id';
   export let labelKey = 'label';
@@ -37,9 +47,9 @@
   </svelte:fragment>
   
   <svelte:fragment slot="content">
-    <ul>
+    <ul id="select-value-{selectId}" tabindex="0" role="listbox" aria-labelledby="totalRows" aria-expanded="true">
       {#each options as option (option[idKey])}
-        <li class:selected={option === value} on:click={() => setValue(option)}>
+        <li role='option' class:selected={option === value} on:click={() => setValue(option)}>
           <span>{option[labelKey]}</span>
         </li>
       {/each}

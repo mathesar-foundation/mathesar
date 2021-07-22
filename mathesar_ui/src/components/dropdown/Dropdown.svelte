@@ -34,7 +34,8 @@
   }
 </script>
 
-<Button bind:element={trigger} appearance={triggerAppearance} class={tgClasses} on:click={toggle}>
+<Button bind:element={trigger} appearance={triggerAppearance} class={tgClasses} on:click={toggle} 
+aria-controls="listbox-options" aria-haspopup="listbox" aria-label="Total Rows" >
   <span class="label">
     <slot name="trigger"></slot>
   </span>
