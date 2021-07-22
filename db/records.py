@@ -32,6 +32,15 @@ def _create_col_objects(table, column_list):
     ]
 
 
+def _get_query(table, limit, offset, order_by, filters):
+    query = select(table).limit(limit).offset(offset)
+    if order_by is not None:
+        query = apply_sort(query, order_by)
+    if filters is not None:
+        query = apply_filters(query, filters)
+    return query
+
+
 def get_record(table, engine, id_value):
     primary_key_column = _get_primary_key_column(table)
     query = select(table).where(primary_key_column == id_value)
@@ -59,11 +68,7 @@ def get_records(
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
     """
-    query = select(table).limit(limit).offset(offset)
-    if order_by is not None:
-        query = apply_sort(query, order_by)
-    if filters is not None:
-        query = apply_filters(query, filters)
+    query = _get_query(table, limit, offset, order_by, filters)
     with engine.begin() as conn:
         return conn.execute(query).fetchall()
 
@@ -96,15 +101,7 @@ def get_group_counts(
         if field_name not in table.c:
             raise GroupFieldNotFound(f"Group field {field} not found in {table}.")
 
-    query = (
-        select(table)
-        .limit(limit)
-        .offset(offset)
-    )
-    if order_by is not None:
-        query = apply_sort(query, order_by)
-    if filters is not None:
-        query = apply_filters(query, filters)
+    query = _get_query(table, limit, offset, order_by, filters)
     subquery = query.subquery()
 
     group_by = [
