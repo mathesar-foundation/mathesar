@@ -1,6 +1,6 @@
 name: Lint Python code
 
-on: [push]
+on: [push, pull_request_target]
 
 jobs:
   lint:
