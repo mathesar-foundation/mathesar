@@ -119,7 +119,12 @@
 <div class="actions-pane">
   <Button appearance="plain" on:click={openDisplayOptions}>
     <Icon data={faFilter} size="0.8em"/>
-    <span>Filters</span>
+    <span>
+      Filters
+      {#if $options.filter?.filters?.length > 0}
+        ({$options.filter?.filters?.length})
+      {/if}
+    </span>
   </Button>
 
   <Button appearance="plain" on:click={openDisplayOptions}>
@@ -165,6 +170,7 @@
         columns={$columns}
         bind:sort={$options.sort}
         bind:group={$options.group}
+        bind:filter={$options.filter}
         on:reload={reload}
         on:close={closeDisplayOptions}/>
     {/if}
