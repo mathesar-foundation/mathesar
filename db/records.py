@@ -26,7 +26,7 @@ def _get_primary_key_column(table):
 
 def _create_col_objects(table, column_list):
     return [
-        table.columns[col] if type(col) == str else col
+        table.columns[col] if type(col) == str else table.columns[col.name]
         for col in column_list
     ]
 
@@ -104,17 +104,11 @@ def get_group_counts(
         if field_name not in table.c:
             raise GroupFieldNotFound(f"Group field {field} not found in {table}.")
 
-    # Get the list of groups that we should count.
-    # We're considering limit and offset here so that we only count relevant groups
-    table_columns = [
-        table.columns[col]
-        if type(col) == str else table.columns[col.name]
-        for col in group_by
-    ]
-    count_query = select(
-        *table_columns,
-        func.count(table_columns[0])
-    ).group_by(*table_columns)
+    table_columns = _create_col_objects(table, group_by)
+    count_query = (
+        select(*table_columns, func.count(table_columns[0]))
+        .group_by(*table_columns)
+    )
     if filters is not None:
         count_query = apply_filters(count_query, filters)
     filtered_count_query = _get_filtered_group_by_count_query(
@@ -123,10 +117,7 @@ def get_group_counts(
     if filtered_count_query is not None:
         records = _execute_query(filtered_count_query, engine)
         # Last field is the count, preceding fields are the group by fields
-        counts = {
-            (*record[:-1],): record[-1]
-            for record in records
-        }
+        counts = {(*record[:-1],): record[-1] for record in records}
     else:
         counts = {}
     return counts
@@ -135,13 +126,11 @@ def get_group_counts(
 def _get_filtered_group_by_count_query(
         table, engine, group_by, limit, offset, order_by, filters, count_query
 ):
+    # Get the list of groups that we should count.
+    # We're considering limit and offset here so that we only count relevant groups
     relevant_subtable_query = _get_query(table, limit, offset, order_by, filters)
     relevant_subtable_cte = relevant_subtable_query.cte()
-    cte_columns = [
-        relevant_subtable_cte.columns[col]
-        if type(col) == str else relevant_subtable_cte.columns[col.name]
-        for col in group_by
-    ]
+    cte_columns = _create_col_objects(relevant_subtable_cte, group_by)
     distinct_tuples = get_distinct_tuple_values(cte_columns, engine, output_table=table)
     if distinct_tuples:
         limited_filters = [
