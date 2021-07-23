@@ -1,6 +1,7 @@
 import { get, writable, Writable } from 'svelte/store';
 import { getAPI, States } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
+import type { SelectOption } from '@mathesar-components/types';
 
 export const DEFAULT_COUNT_COL_WIDTH = 70;
 export const DEFAULT_COLUMN_WIDTH = 160;
@@ -54,11 +55,24 @@ interface TableRecordData {
 
 export type SortOption = Map<string, 'asc' | 'desc'>;
 export type GroupOption = Set<string>;
+
+export type StringCondition = 'eq' | 'ne' | 'ilike' | 'not_ilike';
+export interface FilterEntry {
+  column: SelectOption,
+  condition: SelectOption,
+  value: string
+}
+export interface FilterOption {
+  combination: SelectOption,
+  filters: FilterEntry[]
+}
+
 export interface TableOptionsData {
   limit: number,
   offset: number,
   sort: SortOption,
-  group: GroupOption
+  group: GroupOption,
+  filter: FilterOption
 }
 
 export type ColumnPosition = Map<string, {
@@ -339,6 +353,19 @@ export async function fetchTableRecords(
         `group_count_by=${encodeURIComponent(JSON.stringify(groupOptions))}`,
       );
     }
+    if (optionData.filter?.filters?.length > 0) {
+      const filter = {};
+      const terms = optionData.filter?.filters.map((term) => ({
+        field: term.column.id,
+        op: term.condition.id,
+        value: term.value,
+      }));
+      filter[optionData.filter.combination.id as string] = terms;
+      params.push(
+        `filters=${encodeURIComponent(JSON.stringify(filter))}`,
+      );
+    }
+
     const tableRecordsPromise = getAPI<TableRecordsResponse>(`/tables/${id}/records/?${params.join('&')}`);
 
     if (!table.config.previousRecordRequestSet) {
@@ -443,6 +470,7 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
         offset: options?.offset || 0,
         sort: options?.sort || null,
         group: options?.group || null,
+        filter: options?.filter || null,
       }),
       display: {
         horizontalScrollOffset: writable(0),

@@ -1,4 +1,4 @@
-$display-opts-pane-width: 310px;
+$display-opts-pane-width: 360px;
 
 section.table-section .tab-container {
   .tab-content-holder {
@@ -57,6 +57,14 @@ section.table-section .tab-container {
                   width: 182px;
                   >button {
                     width: 178px;
+                  }
+                }
+                td.filter-action {
+                  text-align: right;
+                }
+                td.value {
+                  .text-input {
+                    background: #fff;
                   }
                 }
 

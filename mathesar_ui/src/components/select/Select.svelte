@@ -39,7 +39,8 @@
   <svelte:fragment slot="content">
     <ul>
       {#each options as option (option[idKey])}
-        <li class:selected={option === value} on:click={() => setValue(option)}>
+        <li class:selected={option[idKey] === value[idKey]}
+            on:click={() => setValue(option)}>
           <span>{option[labelKey]}</span>
         </li>
       {/each}
