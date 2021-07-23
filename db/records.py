@@ -147,7 +147,6 @@ def _get_filtered_group_by_count_query(
     return filtered_count_query
 
 
-
 def get_distinct_tuple_values(
         column_list, engine, table=None, limit=None, offset=None, output_table=None
 ):
