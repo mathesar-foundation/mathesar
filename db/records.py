@@ -106,26 +106,61 @@ def get_group_counts(
 
     # Get the list of groups that we should count.
     # We're considering limit and offset here so that we only count relevant groups
-    relevant_groups_query = _get_query(table, limit, offset, order_by, filters)
-    subquery = relevant_groups_query.subquery()
-
-    columns = [
-        subquery.columns[col] if type(col) == str else subquery.columns[col.name]
+    table_columns = [
+        table.columns[col]
+        if type(col) == str else table.columns[col.name]
         for col in group_by
     ]
-    count_query = select(*columns, func.count(columns[0])).group_by(*columns)
-    records = _execute_query(count_query, engine)
-
-    # Last field is the count, preceding fields are the group by fields
-    counts = {
-        (*record[:-1],): record[-1]
-        for record in records
-    }
+    count_query = select(
+        *table_columns,
+        func.count(table_columns[0])
+    ).group_by(*table_columns)
+    if filters is not None:
+        count_query = apply_filters(count_query, filters)
+    filtered_count_query = _get_filtered_group_by_count_query(
+        table, engine, group_by, limit, offset, order_by, filters, count_query
+    )
+    if filtered_count_query is not None:
+        records = _execute_query(filtered_count_query, engine)
+        # Last field is the count, preceding fields are the group by fields
+        counts = {
+            (*record[:-1],): record[-1]
+            for record in records
+        }
+    else:
+        counts = {}
     return counts
 
 
+def _get_filtered_group_by_count_query(
+        table, engine, group_by, limit, offset, order_by, filters, count_query
+):
+    relevant_subtable_query = _get_query(table, limit, offset, order_by, filters)
+    relevant_subtable_cte = relevant_subtable_query.cte()
+    cte_columns = [
+        relevant_subtable_cte.columns[col]
+        if type(col) == str else relevant_subtable_cte.columns[col.name]
+        for col in group_by
+    ]
+    distinct_tuples = get_distinct_tuple_values(cte_columns, engine, output_table=table)
+    if distinct_tuples:
+        limited_filters = [
+            {
+                "or": [
+                    distinct_tuples_to_filter(distinct_tuple_spec)
+                    for distinct_tuple_spec in distinct_tuples
+                ]
+            }
+        ]
+        filtered_count_query = apply_filters(count_query, limited_filters)
+    else:
+        filtered_count_query = None
+    return filtered_count_query
+
+
+
 def get_distinct_tuple_values(
-        column_list, engine, table=None, limit=None, offset=None,
+        column_list, engine, table=None, limit=None, offset=None, output_table=None
 ):
     """
     Returns distinct tuples from a given list of columns.
@@ -157,6 +192,8 @@ def get_distinct_tuple_values(
         .offset(offset)
     )
     result = _execute_query(query, engine)
+    if output_table is not None:
+        column_objects = [output_table.columns[col.name] for col in column_objects]
     return [tuple(zip(column_objects, row)) for row in result]
 
 
