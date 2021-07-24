@@ -49,7 +49,8 @@
   <svelte:fragment slot="content">
     <ul id="select-value-{selectId}" tabindex="0" role="listbox" aria-expanded="true">
       {#each options as option (option[idKey])}
-        <li role='option' class:selected={option === value} on:click={() => setValue(option)}>
+        <li class:selected={option[idKey] === value[idKey]}
+            on:click={() => setValue(option)}>
           <span>{option[labelKey]}</span>
         </li>
       {/each}

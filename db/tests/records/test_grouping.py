@@ -47,11 +47,10 @@ def test_get_group_counts_limit_offset_ordering(roster_table_obj, limit, offset)
     group_by = [roster.c["Grade"]]
     counts = records.get_group_counts(roster, engine, group_by, limit=limit,
                                       offset=offset, order_by=order_by)
-
     query = select(group_by[0])
     query = apply_sort(query, order_by)
     with engine.begin() as conn:
-        all_records = list(conn.execute(query))
+        all_records = conn.execute(query).fetchall()
     if limit is None:
         end = None
     elif offset is None:
@@ -59,7 +58,12 @@ def test_get_group_counts_limit_offset_ordering(roster_table_obj, limit, offset)
     else:
         end = limit + offset
     limit_offset_records = all_records[offset:end]
-    manual_count = Counter(limit_offset_records)
+    values_to_count = set([record["Grade"] for record in limit_offset_records])
+
+    manual_all_count = Counter(all_records).items()
+    manual_count = {
+        k: v for k, v in manual_all_count if int(k[0]) in values_to_count
+    }
 
     assert len(counts) == len(manual_count)
     for value, count in manual_count.items():

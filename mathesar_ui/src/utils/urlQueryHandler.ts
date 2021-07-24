@@ -3,6 +3,7 @@ import type {
   GroupOption,
   SortOption,
   TableOptionsData,
+  FilterEntry,
 } from '@mathesar/stores/tableData';
 
 /**
@@ -11,7 +12,7 @@ import type {
  *    id,
  *    [sortcolumn1, sortorder, sortc2, sortorder2],
  *    [groupcolumn1, groupcolumn2],
- *    [filtercolumn, condition, value, op2, condition2]
+ *    [combination, filtercolumn, condition, value, filterc2, condition2]
  *  ]
  * ], a=id
  * t -> tables, a -> active
@@ -65,6 +66,41 @@ function parseTableConfig(config: RawTableConfig): TableConfig {
     }
   }
 
+  if ((config[3] as string[])?.length > 0) {
+    const filterList = config[3] as string[];
+    const combination = filterList[0];
+    const filters: FilterEntry[] = [];
+    for (let i = 1; i < filterList.length;) {
+      const column = filterList[i];
+      const condition = filterList[i + 1];
+
+      if (column && condition) {
+        const value = filterList[i + 2] || '';
+        filters.push({
+          column: {
+            id: column,
+            label: column,
+          },
+          condition: {
+            id: condition,
+            label: condition,
+          },
+          value,
+        });
+      }
+      i += 3;
+    }
+    if (filters.length > 0) {
+      tableConfig.filter = {
+        combination: {
+          id: combination,
+          label: combination,
+        },
+        filters,
+      };
+    }
+  }
+
   return tableConfig;
 }
 
@@ -81,6 +117,17 @@ function prepareRawTableConfig(id: number, options?: TableOptions): RawTableConf
 
     const groupOption: string[] = [...(options.group ?? [])];
     table.push(groupOption);
+
+    const filterOptions: string[] = [];
+    if (options.filter?.filters?.length > 0) {
+      filterOptions.push(options.filter.combination.id as string || 'and');
+      options.filter.filters.forEach((filter) => {
+        filterOptions.push(filter.column.id as string);
+        filterOptions.push(filter.condition.id as string);
+        filterOptions.push(filter.value);
+      });
+      table.push(filterOptions);
+    }
   }
   return table;
 }
