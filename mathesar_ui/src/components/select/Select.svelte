@@ -21,6 +21,7 @@
   export let value: SelectOption = null;
   export let contentClass = '';
   export let triggerClass = '';
+  export let ariaLabel;
 
   let isOpen = false;
 
@@ -41,7 +42,7 @@
   $: setOptions(options);
 </script>
 
-<Dropdown bind:isOpen contentClass="select {contentClass}" {triggerClass}>
+<Dropdown ariaControls="select-value-{selectId}" {ariaLabel} bind:isOpen contentClass="select {contentClass}" {triggerClass}>
   <svelte:fragment slot="trigger">
     {value?.[labelKey]}
   </svelte:fragment>
