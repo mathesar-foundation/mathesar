@@ -17,6 +17,11 @@ jobs:
       - name: Copy env file
         run: cp .env.example .env
 
+      # The code is checked out under uid 1001 - reset this to 1000 for the
+      # container to run tests successfully
+      - name: Fix permissions
+        run: sudo chown -R 1000:1000 .
+
       - name: Build the stack
         run: docker-compose up --build -d
 

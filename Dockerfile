@@ -3,8 +3,8 @@ FROM python:3-buster
 RUN apt update
 RUN apt install -y sudo
 
-# Add mathesar user with uid 1001 to support running via Github Actions
-RUN sudo useradd -m mathesar --uid 1001
+# Add mathesar user
+RUN sudo useradd -m mathesar
 
 ENV PYTHONUNBUFFERED=1
 ENV DOCKERIZE_VERSION v0.6.1
