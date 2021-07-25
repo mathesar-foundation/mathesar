@@ -13,7 +13,7 @@
   import type { SelectOption } from './Select.d';
 
   const dispatch = createEventDispatcher();
-  const selectId: number = getSelectId() as number;
+  const selectId: number = getSelectId();
 
   export let idKey = 'id';
   export let labelKey = 'label';

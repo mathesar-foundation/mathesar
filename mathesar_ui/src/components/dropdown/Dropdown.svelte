@@ -15,7 +15,7 @@
   export let contentClass = '';
   export let isOpen = false;
   export let closeOnInnerClick = false;
-  export let ariaLabel:string = null; 
+  export let ariaLabel:string = null;
   export let ariaControls;
 
   let trigger: HTMLElement;
