@@ -28,6 +28,9 @@ class DatabaseObjectManager(models.Manager):
 
 class DatabaseObject(BaseModel):
     oid = models.IntegerField()
+    # The default manager does not reflect databse objects.
+    # This saves us from having to deal with Django trying to automatically reflect db
+    # objects in the background when we might not expect it.
     current_objects = models.Manager()
     objects = DatabaseObjectManager()
 

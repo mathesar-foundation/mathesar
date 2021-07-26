@@ -12,6 +12,11 @@ DB_REFLECTION_KEY = 'database_reflected_recently'
 DB_REFLECTION_INTERVAL = 60 * 5  # we reflect DB changes every 5 minutes
 
 
+# NOTE: All querysets used for reflection should use the .current_objects manager
+# instead of the .objects manger. The .objects manager calls reflect_db_objects when a
+# queryset is created, and will recurse if used in these functions.
+
+
 def reflect_databases():
     databases = set(settings.DATABASES)
     # We only want to track non-django dbs
