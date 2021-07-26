@@ -34,7 +34,8 @@ logger = logging.getLogger(__name__)
 
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    queryset = Schema.objects.all().order_by('-created_at')
+    def get_queryset(self):
+        return Schema.objects.all().order_by('-created_at')
     serializer_class = SchemaSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
@@ -73,7 +74,9 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
 
 
 class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    queryset = Table.objects.all().order_by('-created_at')
+    def get_queryset(self):
+        return Table.objects.all().order_by('-created_at')
+
     serializer_class = TableSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
@@ -121,11 +124,12 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
 
 
 class ColumnViewSet(viewsets.ViewSet):
-    queryset = Table.objects.all().order_by('-created_at')
+    def get_queryset(self):
+        return Table.objects.all().order_by('-created_at')
 
     def list(self, request, table_pk=None):
         paginator = ColumnLimitOffsetPagination()
-        columns = paginator.paginate_queryset(self.get_queryset(), request, table_pk)
+        columns = paginator.paginate_queryset(self.get_queryset(self), request, table_pk)
         serializer = ColumnSerializer(columns, many=True)
         return paginator.get_paginated_response(serializer.data)
 
@@ -185,7 +189,8 @@ class RecordViewSet(viewsets.ViewSet):
     # There is no "update" method.
     # We're not supporting PUT requests because there aren't a lot of use cases
     # where the entire record needs to be replaced, PATCH suffices for updates.
-    queryset = Table.objects.all().order_by('-created_at')
+    def get_queryset(self):
+        return Table.objects.all().order_by('-created_at')
 
     # For filter parameter formatting, see:
     # https://github.com/centerofci/sqlalchemy-filters#filters-format
@@ -201,7 +206,7 @@ class RecordViewSet(viewsets.ViewSet):
 
         try:
             records = paginator.paginate_queryset(
-                self.get_queryset(), request, table_pk,
+                self.get_queryset(self), request, table_pk,
                 filters=filter_form.cleaned_data['filters'],
                 order_by=filter_form.cleaned_data['order_by'],
                 group_count_by=filter_form.cleaned_data['group_count_by'],
@@ -250,7 +255,8 @@ class DatabaseKeyViewSet(viewsets.ViewSet):
 
 
 class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    queryset = Database.objects.all().order_by('-created_at')
+    def get_queryset(self):
+        return Database.objects.all().order_by('-created_at')
     serializer_class = DatabaseSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)

@@ -28,6 +28,7 @@ class DatabaseObjectManager(models.Manager):
 
 class DatabaseObject(BaseModel):
     oid = models.IntegerField()
+    current_objects = models.Manager()
     objects = DatabaseObjectManager()
 
     class Meta:
@@ -43,6 +44,8 @@ _engines = {}
 
 
 class Database(BaseModel):
+    current_objects = models.Manager()
+    objects = DatabaseObjectManager()
     name = models.CharField(max_length=128, unique=True)
     deleted = models.BooleanField(blank=True, default=False)
 
