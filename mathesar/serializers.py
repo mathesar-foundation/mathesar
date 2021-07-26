@@ -1,6 +1,8 @@
 from django.urls import reverse
 from rest_framework import serializers
+from sqlalchemy import CheckConstraint, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint
 
+from db.constraints import ConstraintType
 from mathesar.models import Table, Schema, DataFile, Database
 
 
@@ -107,3 +109,19 @@ class DataFileSerializer(serializers.ModelSerializer):
         if current_user.is_authenticated:
             kwargs['user'] = current_user
         return super().save(**kwargs)
+
+
+class ConstraintSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    type = serializers.SerializerMethodField()
+    columns = SimpleColumnSerializer(many=True)
+
+    def get_type(self, obj):
+        if type(obj) == CheckConstraint:
+            return ConstraintType.CHECK.value
+        elif type(obj) == ForeignKeyConstraint:
+            return ConstraintType.FOREIGN_KEY.value
+        elif type(obj) == PrimaryKeyConstraint:
+            return ConstraintType.PRIMARY_KEY.value
+        elif type(obj) == UniqueConstraint:
+            return ConstraintType.UNIQUE.value

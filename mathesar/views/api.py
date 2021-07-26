@@ -16,11 +16,12 @@ from sqlalchemy_filters.exceptions import (
 from mathesar.database.utils import get_non_default_database_keys, update_databases
 from mathesar.models import Table, Schema, DataFile, Database
 from mathesar.pagination import (
-    ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
+    ColumnLimitOffsetPagination, ConstraintLimitOffsetPagination,
+    DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
-    DatabaseSerializer
+    DatabaseSerializer, ConstraintSerializer
 )
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
 from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
@@ -316,3 +317,15 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
             )
         else:
             raise ValidationError(serializer.errors)
+
+
+class ConstraintViewSet(viewsets.ViewSet):
+    def get_queryset(self):
+        reflect_db_objects()
+        return Table.objects.all().order_by('-created_at')
+
+    def list(self, request, table_pk=None):
+        paginator = ConstraintLimitOffsetPagination()
+        constraints = paginator.paginate_queryset(self.get_queryset(), request, table_pk)
+        serializer = ConstraintSerializer(constraints, many=True)
+        return paginator.get_paginated_response(serializer.data)
