@@ -129,7 +129,7 @@ class ColumnViewSet(viewsets.ViewSet):
 
     def list(self, request, table_pk=None):
         paginator = ColumnLimitOffsetPagination()
-        columns = paginator.paginate_queryset(self.get_queryset(self), request, table_pk)
+        columns = paginator.paginate_queryset(self.get_queryset(), request, table_pk)
         serializer = ColumnSerializer(columns, many=True)
         return paginator.get_paginated_response(serializer.data)
 
@@ -206,7 +206,7 @@ class RecordViewSet(viewsets.ViewSet):
 
         try:
             records = paginator.paginate_queryset(
-                self.get_queryset(self), request, table_pk,
+                self.get_queryset(), request, table_pk,
                 filters=filter_form.cleaned_data['filters'],
                 order_by=filter_form.cleaned_data['order_by'],
                 group_count_by=filter_form.cleaned_data['group_count_by'],
