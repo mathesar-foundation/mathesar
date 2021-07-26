@@ -11,7 +11,7 @@
     DEFAULT_ROW_RIGHT_PADDING,
     GROUP_MARGIN_LEFT,
   } from '@mathesar/stores/tableData';
-  import Row from './Row.svelte';
+  import Row from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
 
@@ -23,6 +23,7 @@
   export let scrollOffset = 0;
   export let horizontalScrollOffset = 0;
   export let groupIndex: GroupIndex;
+  export let selected: Record<string | number, boolean>;
 
   let rowWidth: number;
   let widthWithPadding: number;
@@ -97,7 +98,8 @@
                   index={it.index}
                   {groupData}
                   isGrouped={!!groupData}
-                  {columnPosition}/>
+                  {columnPosition}
+                  bind:selected/>
           {/if}
         {/each}
 

@@ -47,6 +47,7 @@
   let scrollOffset: TableDisplayStores['scrollOffset'];
   let groupIndex: TableDisplayStores['groupIndex'];
   let showDisplayOptions: TableDisplayStores['showDisplayOptions'];
+  let selected: TableDisplayStores['selected'];
 
   let animateOpts = false;
 
@@ -62,6 +63,7 @@
     scrollOffset = table.display.scrollOffset;
     groupIndex = table.display.groupIndex;
     showDisplayOptions = table.display.showDisplayOptions;
+    selected = table.display.selected;
 
     animateOpts = false;
     idKey = _id;
@@ -191,6 +193,7 @@
             groupData={$records.groupData}
             groupIndex={$groupIndex}
             columnPosition={$columnPosition}
+            bind:selected={$selected}
             bind:scrollOffset={$scrollOffset}
             bind:horizontalScrollOffset={$horizontalScrollOffset}
             on:refetch={refetch}/>

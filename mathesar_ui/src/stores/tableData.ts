@@ -11,9 +11,12 @@ export const DEFAULT_ROW_RIGHT_PADDING = 100;
 
 export interface TableColumn {
   name: string,
-  type: string
+  type: string,
+  index: number,
+  nullable: boolean,
+  primaryKey: boolean,
+  validTargetTypes: string[]
 }
-
 export interface TableRecord {
   [key: string]: unknown
   __groupInfo?: {
@@ -21,8 +24,14 @@ export interface TableRecord {
   }
 }
 
-interface TableDetailsResponse {
-  columns: TableColumn[]
+interface TableColumnResponse extends TableColumn {
+  primary_key: TableColumn['primaryKey'],
+  valid_target_types: TableColumn['validTargetTypes']
+}
+
+interface TableColumnsResponse {
+  count: number,
+  results: TableColumnResponse[]
 }
 
 interface TableRecordGroupsResponse {
@@ -38,7 +47,8 @@ interface TableRecordsResponse {
 export interface TableColumnData {
   state: States,
   error?: string,
-  data: TableColumn[]
+  data: TableColumn[],
+  primaryKey: string,
 }
 
 export interface GroupData {
@@ -92,10 +102,11 @@ export interface TableDisplayStores {
   columnPosition: Writable<ColumnPosition>,
   groupIndex: Writable<GroupIndex>,
   showDisplayOptions: Writable<boolean>,
+  selected: Writable<Record<string | number, boolean>>
 }
 
 interface TableConfigData {
-  previousTableRequest?: CancellablePromise<TableDetailsResponse>,
+  previousTableRequest?: CancellablePromise<TableColumnsResponse>,
   previousRecordRequestSet?: Set<CancellablePromise<TableRecordsResponse>>,
 }
 
@@ -196,24 +207,37 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
     const existingData = get(tableColumnStore);
 
     tableColumnStore.set({
+      ...existingData,
       state: States.Loading,
-      data: existingData.data,
     });
 
     try {
       table.config.previousTableRequest?.cancel();
 
-      const tableDetailsPromise = getAPI<TableDetailsResponse>(`/tables/${id}/`);
+      const tableColumnsPromise = getAPI<TableColumnsResponse>(`/tables/${id}/columns/?limit=500`);
       table.config = {
         ...table.config,
-        previousTableRequest: tableDetailsPromise,
+        previousTableRequest: tableColumnsPromise,
       };
 
-      const response = await tableDetailsPromise;
-      const columns = response.columns || [];
+      const response = await tableColumnsPromise;
+      const columnResponse = response.results || [];
+      const columns: TableColumn[] = columnResponse.map((column) => {
+        const converted = {
+          ...column,
+          primaryKey: column.primary_key,
+          validTargetTypes: column.valid_target_types,
+        };
+        delete converted.primary_key;
+        delete converted.valid_target_types;
+        return converted;
+      });
+      const pkColumn = columns.find((column) => column.primaryKey);
+
       tableColumnStore.set({
         state: States.Done,
         data: columns,
+        primaryKey: pkColumn?.name || null,
       });
 
       const columnPosition = calculateColumnPosition(columns);
@@ -223,6 +247,7 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
         state: States.Error,
         error: err instanceof Error ? err.message : null,
         data: [],
+        primaryKey: null,
       });
     }
   }
@@ -458,6 +483,7 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
       columns: writable({
         state: States.Loading,
         data: [],
+        primaryKey: null,
       }),
       records: writable({
         state: States.Loading,
@@ -482,6 +508,7 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
           bailOutOnReset: false,
         }),
         showDisplayOptions: writable(false),
+        selected: writable({}),
       },
       config: {},
     };

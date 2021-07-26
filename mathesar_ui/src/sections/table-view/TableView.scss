@@ -107,12 +107,18 @@ section.table-section .tab-container {
           left: 0;
           top: 0;
 
-          &.row-number {
+          &.row-control {
             font-size: 12px;
             color: #959595;
             left: 0;
             position: sticky;
             z-index: 10;
+            display: inline-flex;
+            align-items: center;
+
+            .checkbox {
+              display: none;
+            }
           }
         }
 
@@ -158,7 +164,7 @@ section.table-section .tab-container {
               color: #d2d2d2;
             }
 
-            &.row-number {
+            &.row-control {
               background: #f9f9f9;
             }
           }
@@ -175,12 +181,12 @@ section.table-section .tab-container {
           .group {
             overflow: visible;
 
-            .values, .cell.row-number > div.border {
+            .values, .cell.row-control > div.border {
               border: 1px solid #81b9ff;
               background: #e6f1ff;
             }
 
-            .cell.row-number {
+            .cell.row-control {
               border: none;
               background: #f7f8f8;
 
@@ -231,8 +237,31 @@ section.table-section .tab-container {
           .row {
             transition: all .20s cubic-bezier(0,0,.2,1);
 
+            &:hover {
+              .cell {
+                background: #f6f7f7;
+              }
+            }
+
+            &:hover, &.selected {
+              .cell.row-control {
+                .checkbox {
+                  display: inline-flex;
+                }
+                .number {
+                  display: none;
+                }
+              }
+            }
+
+            &.selected {
+              .cell {
+                background: #e4f2ff;
+              }
+            }
+
             &.in-group {
-              .row-number {
+              .row-control {
                 /**
                  * Fix for an obsure bug in firefox.
                  * If position of sticky elements and their parents are updated, and if
