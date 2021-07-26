@@ -1,10 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import ValidationError
 
-from db.schemas import (
-    create_schema, get_schema_oid_from_name, get_mathesar_schemas,
-    get_mathesar_schemas_with_oids
-)
+from db.schemas import create_schema, get_schema_oid_from_name, get_mathesar_schemas
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Schema, Database
 
@@ -26,20 +23,3 @@ def create_schema_and_object(name, database):
 
     schema = Schema.objects.create(oid=schema_oid, database=database_model)
     return schema
-
-
-def reflect_schemas_from_database(database):
-    engine = create_mathesar_engine(database)
-    db_schema_oids = {
-        schema["oid"] for schema in get_mathesar_schemas_with_oids(engine)
-    }
-
-    database = Database.objects.get(name=database)
-    schemas = [
-        Schema.objects.get_or_create(oid=oid, database=database)
-        for oid in db_schema_oids
-    ]
-    for schema in Schema.objects.all():
-        if schema.database.name == database and schema.oid not in db_schema_oids:
-            schema.delete()
-    return schemas

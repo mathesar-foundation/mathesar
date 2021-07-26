@@ -3,8 +3,9 @@ from django.core.cache import cache
 from django.db import models
 from django.utils.functional import cached_property
 
-from mathesar.database.base import create_mathesar_engine
+from mathesar import reflection
 from mathesar.utils import models as model_utils
+from mathesar.database.base import create_mathesar_engine
 from db import tables, records, schemas, columns
 from db.types.alteration import get_supported_alter_column_types
 
@@ -19,8 +20,15 @@ class BaseModel(models.Model):
         abstract = True
 
 
+class DatabaseObjectManager(models.Manager):
+    def get_queryset(self):
+        reflection.reflect_db_objects()
+        return super().get_queryset()
+
+
 class DatabaseObject(BaseModel):
     oid = models.IntegerField()
+    objects = DatabaseObjectManager()
 
     class Meta:
         abstract = True

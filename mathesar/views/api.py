@@ -3,7 +3,6 @@ from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError, APIException
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
-from django.core.cache import cache
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
 from psycopg2.errors import DuplicateColumn, UndefinedFunction
@@ -13,7 +12,7 @@ from sqlalchemy_filters.exceptions import (
 )
 
 
-from mathesar.database.utils import get_non_default_database_keys, update_databases
+from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile, Database
 from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
@@ -22,8 +21,8 @@ from mathesar.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
     DatabaseSerializer
 )
-from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
-from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
+from mathesar.utils.schemas import create_schema_and_object
+from mathesar.utils.tables import get_table_column_types
 from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
 from mathesar.utils.tables import create_empty_table
 from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
@@ -33,25 +32,9 @@ from db.records import BadGroupFormat, GroupFieldNotFound
 
 logger = logging.getLogger(__name__)
 
-DB_REFLECTION_KEY = 'database_reflected_recently'
-DB_REFLECTION_INTERVAL = 60 * 5  # we reflect DB changes every 5 minutes
-
-
-def reflect_db_objects():
-    if not cache.get(DB_REFLECTION_KEY):
-        update_databases()
-        for database_key in get_non_default_database_keys():
-            reflect_schemas_from_database(database_key)
-        for schema in Schema.objects.all():
-            reflect_tables_from_schema(schema)
-        cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)
-
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    def get_queryset(self):
-        reflect_db_objects()
-        return Schema.objects.all().order_by('-created_at')
-
+    queryset = Schema.objects.all().order_by('-created_at')
     serializer_class = SchemaSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
@@ -90,10 +73,7 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
 
 
 class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    def get_queryset(self):
-        reflect_db_objects()
-        return Table.objects.all().order_by('-created_at')
-
+    queryset = Table.objects.all().order_by('-created_at')
     serializer_class = TableSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
@@ -141,9 +121,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
 
 
 class ColumnViewSet(viewsets.ViewSet):
-    def get_queryset(self):
-        reflect_db_objects()
-        return Table.objects.all().order_by('-created_at')
+    queryset = Table.objects.all().order_by('-created_at')
 
     def list(self, request, table_pk=None):
         paginator = ColumnLimitOffsetPagination()
@@ -207,9 +185,7 @@ class RecordViewSet(viewsets.ViewSet):
     # There is no "update" method.
     # We're not supporting PUT requests because there aren't a lot of use cases
     # where the entire record needs to be replaced, PATCH suffices for updates.
-    def get_queryset(self):
-        reflect_db_objects()
-        return Table.objects.all().order_by('-created_at')
+    queryset = Table.objects.all().order_by('-created_at')
 
     # For filter parameter formatting, see:
     # https://github.com/centerofci/sqlalchemy-filters#filters-format
@@ -274,9 +250,7 @@ class DatabaseKeyViewSet(viewsets.ViewSet):
 
 
 class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    def get_queryset(self):
-        reflect_db_objects()
-        return Database.objects.all().order_by('-created_at')
+    queryset = Database.objects.all().order_by('-created_at')
     serializer_class = DatabaseSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
