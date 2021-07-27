@@ -2,7 +2,8 @@ from enum import Enum
 
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, CheckConstraint, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy.dialects.postgresql import ExcludeConstraint
 
 
 class ConstraintType(Enum):
@@ -11,6 +12,20 @@ class ConstraintType(Enum):
     UNIQUE = 'unique'
     CHECK = 'check'
     EXCLUDE = 'exclude'
+
+
+def get_constraint_type(constraint):
+    if type(constraint) == CheckConstraint:
+        return ConstraintType.CHECK.value
+    elif type(constraint) == ForeignKeyConstraint:
+        return ConstraintType.FOREIGN_KEY.value
+    elif type(constraint) == PrimaryKeyConstraint:
+        return ConstraintType.PRIMARY_KEY.value
+    elif type(constraint) == UniqueConstraint:
+        return ConstraintType.UNIQUE.value
+    elif type(constraint) == ExcludeConstraint:
+        return ConstraintType.EXCLUDE.value
+    return None
 
 
 # Naming conventions for constraints follow standard Postgres conventions

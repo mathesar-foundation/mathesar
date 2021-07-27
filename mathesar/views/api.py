@@ -5,7 +5,7 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateMode
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
-from psycopg2.errors import DuplicateColumn, UndefinedFunction
+from psycopg2.errors import DuplicateColumn, DuplicateTable, UndefinedFunction
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy_filters.exceptions import (
     BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound,
@@ -150,8 +150,9 @@ class ColumnViewSet(viewsets.ViewSet):
             column = table.add_column(request.data)
         except ProgrammingError as e:
             if type(e.orig) == DuplicateColumn:
+                name = request.data['name']
                 raise ValidationError(
-                    f"Column {request.data['name']} already exists"
+                    f'Column {name} already exists'
                 )
             else:
                 raise APIException(e)
@@ -166,7 +167,7 @@ class ColumnViewSet(viewsets.ViewSet):
             column = table.alter_column(pk, request.data)
         except ProgrammingError as e:
             if type(e.orig) == UndefinedFunction:
-                raise ValidationError("This type cast is not implemented")
+                raise ValidationError('This type cast is not implemented')
             else:
                 raise ValidationError
         except IndexError:
@@ -184,7 +185,7 @@ class ColumnViewSet(viewsets.ViewSet):
 
 
 class RecordViewSet(viewsets.ViewSet):
-    # There is no "update" method.
+    # There is no 'update' method.
     # We're not supporting PUT requests because there aren't a lot of use cases
     # where the entire record needs to be replaced, PATCH suffices for updates.
     def get_queryset(self):
@@ -302,3 +303,40 @@ class ConstraintViewSet(viewsets.ViewSet):
         constraints = paginator.paginate_queryset(self.get_queryset(), request, table_pk)
         serializer = ConstraintSerializer(constraints, many=True)
         return paginator.get_paginated_response(serializer.data)
+
+    def retrieve(self, request, pk=None, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        constraint = table.get_constraint_by_name(pk)
+        if not constraint:
+            raise NotFound
+        serializer = ConstraintSerializer(constraint)
+        return Response(serializer.data)
+
+    def create(self, request, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        serializer = ConstraintSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        try:
+            table.add_constraint(request.data)
+        except ProgrammingError as e:
+            if type(e.orig) == DuplicateTable:
+                name = request.data['name']
+                raise ValidationError(
+                    f'Constraint with name {name} already exists'
+                )
+            else:
+                raise APIException(e)
+
+        try:
+            # Clearing cache so that new constraint shows up.
+            del table._sa_table
+        except AttributeError:
+            pass
+        constraint = table.get_constraint_by_type_and_columns(request.data['type'], request.data['columns'])
+        out_serializer = ConstraintSerializer(constraint)
+        return Response(out_serializer.data, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, pk=None, table_pk=None):
+        table = Table.objects.get(id=table_pk)
+        table.drop_constraint(pk)
+        return Response(status=status.HTTP_204_NO_CONTENT)

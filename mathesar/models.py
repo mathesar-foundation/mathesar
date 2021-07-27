@@ -6,7 +6,7 @@ from django.utils.functional import cached_property
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
-from db import tables, records, schemas, columns
+from db import tables, records, schemas, columns, constraints
 from db.types.alteration import get_supported_alter_column_types
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -144,6 +144,10 @@ class Table(DatabaseObject):
         return self._enriched_column_sa_table.columns
 
     @property
+    def sa_constraints(self):
+        return self._sa_table.constraints
+
+    @property
     def sa_column_names(self):
         return self.sa_columns.keys()
 
@@ -210,6 +214,38 @@ class Table(DatabaseObject):
 
     def delete_record(self, id_value):
         return records.delete_record(self._sa_table, self.schema._sa_engine, id_value)
+
+    def get_constraint_by_name(self, name):
+        for constraint in self.sa_constraints:
+            if constraint.name == name:
+                return constraint
+        return None
+
+    def get_constraint_by_type_and_columns(self, constraint_type, columns):
+        for constraint in self.sa_constraints:
+            current_constraint_type = constraints.get_constraint_type(constraint)
+            if current_constraint_type == constraint_type and set(columns) == set([column.name for column in constraint.columns]):
+                return constraint
+        return None
+
+    def add_constraint(self, constraint_data):
+        if 'type' not in constraint_data or constraint_data['type'] != constraints.ConstraintType.UNIQUE.value:
+            raise ValueError('Only creating unique constraints is currently supported.')
+        constraints.create_unique_constraint(
+            self._sa_table.name,
+            self._sa_table.schema,
+            self.schema._sa_engine,
+            constraint_data['columns'],
+            constraint_data['name'] if 'name' in constraint_data else None
+        )
+
+    def drop_constraint(self, name):
+        constraints.drop_constraint(
+            self._sa_table.name,
+            self._sa_table.schema,
+            self.schema._sa_engine,
+            name
+        )
 
 
 class DataFile(BaseModel):
