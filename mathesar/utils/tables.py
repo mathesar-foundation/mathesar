@@ -70,6 +70,6 @@ def create_table_from_paste_data(paste, name, schema):
     try:
         table = create_table_from_paste(paste, name, schema)
     except InvalidPasteError:
-        raise ValidationError({'paste': 'Unable to parse pasted value.'})
+        raise ValidationError({'paste': 'Unable to tabulate paste'})
 
     return table

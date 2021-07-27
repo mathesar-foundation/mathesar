@@ -5,10 +5,11 @@ from django.core.cache import cache
 from django.core.files import File
 from sqlalchemy import text
 
-from mathesar.models import Table
-from mathesar.models import DataFile, Schema
-from mathesar.utils.schemas import create_schema_and_object
 from mathesar.views import api
+from mathesar.imports import paste
+from mathesar.errors import InvalidPasteError
+from mathesar.models import Table, DataFile, Schema
+from mathesar.utils.schemas import create_schema_and_object
 from db.tests.types import fixtures
 
 
@@ -314,6 +315,23 @@ def test_table_create_from_datafile_404(client):
     assert response.status_code == 400
     assert 'object does not exist' in response_table['schema'][0]
     assert 'object does not exist' in response_table['data_files'][0]
+
+
+def test_table_create_from_paste_exception(client, schema):
+    table_name = 'Test Table Paste Exception'
+    with open('mathesar/tests/data/patents.txt', 'r') as paste_file:
+        paste_data = paste_file.read()
+    body = {
+        'paste': paste_data,
+        'name': table_name,
+        'schema': schema.id,
+    }
+    with patch.object(paste, "validate_paste") as mock_infer:
+        mock_infer.side_effect = InvalidPasteError
+        response = client.post('/api/v0/tables/', body)
+        response_dict = response.json()
+    assert response.status_code == 400
+    assert response_dict["paste"] == 'Unable to tabulate paste'
 
 
 def test_table_update(client, create_table):

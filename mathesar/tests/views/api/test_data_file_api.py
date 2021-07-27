@@ -118,6 +118,6 @@ def test_datafile_create_invalid_csv(client):
         mock_infer.side_effect = InvalidTableError
         with open(file, 'r') as f:
             response = client.post('/api/v0/data_files/', data={'file': f})
-            data_file_dict = response.json()
+            response_dict = response.json()
     assert response.status_code == 400
-    assert data_file_dict["file"] == 'Unable to tabulate datafile'
+    assert response_dict["file"] == 'Unable to tabulate datafile'
