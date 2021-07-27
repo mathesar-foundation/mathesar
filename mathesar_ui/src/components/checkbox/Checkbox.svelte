@@ -13,7 +13,6 @@
   const dispatch = createEventDispatcher();
 
   export let checked = false;
-  export let group = [];
   export let value = null;
   export let indeterminate = false;
   export let disabled = false;
@@ -22,6 +21,7 @@
   const componentId = getId();
 
   function onChange(e: Event) {
+    checked = !checked;
     dispatch('change', {
       checked,
       originalEvent: e,
@@ -33,7 +33,7 @@
         class:checked class:indeterminate class:disabled>
   <span class="wrapper">
     <input type="checkbox" id="checkbox-{componentId}"
-            bind:checked bind:group
+            checked={checked}
             {indeterminate} {disabled} {value}
             on:change={onChange}/>
     <span class="alias"></span>

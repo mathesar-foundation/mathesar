@@ -1,5 +1,5 @@
 import { get, writable, Writable } from 'svelte/store';
-import { getAPI, States } from '@mathesar/utils/api';
+import { deleteAPI, getAPI, States } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
 import type { SelectOption } from '@mathesar-components/types';
 
@@ -517,6 +517,95 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
   }
   void fetchTableRecords(db, id);
   return table;
+}
+
+export async function deleteRecords(db: string, id: number, pks: string[]): Promise<void> {
+  const table = databaseMap.get(db)?.get(id);
+  if (table && pks.length > 0) {
+    const tableRecordStore = table.records;
+    const tableColumnStore = table.columns;
+
+    const columnData = get(tableColumnStore);
+    const existingData = get(tableRecordStore);
+
+    const pkSet = new Set(pks);
+
+    // TODO: Retain map with pk uuid hash for record operations
+    const data = existingData.data.map((entry) => {
+      if (entry && pkSet.has(entry[columnData.primaryKey]?.toString())) {
+        return {
+          ...entry,
+          __state: 'deleting',
+        };
+      }
+      return entry;
+    });
+
+    tableRecordStore.set({
+      ...existingData,
+      data,
+    });
+
+    try {
+      const success = new Set();
+      const failed = new Set();
+      // TODO: Convert this to single request
+      const promises = pks.map((pk) => deleteAPI<unknown>(`/tables/${id}/records/${pk}/`)
+        .then(() => {
+          success.add(pk);
+          return success;
+        })
+        .catch(() => {
+          failed.add(pk);
+          return failed;
+        }));
+      await Promise.all(promises);
+
+      // Getting again, since data may have changed
+      const recordData = get(tableRecordStore);
+      const newData: TableRecord[] = [];
+      recordData.data.forEach((entry) => {
+        if (!entry) {
+          newData.push(entry);
+        } else {
+          const entryPK = entry[columnData.primaryKey]?.toString();
+          if (!success.has(entryPK)) {
+            if (failed.has(entryPK)) {
+              newData.push({
+                ...entry,
+                __state: 'deletionFailed',
+              });
+            } else {
+              newData.push(entry);
+            }
+          }
+        }
+      });
+
+      tableRecordStore.set({
+        ...recordData,
+        data: newData,
+      });
+    } catch (err) {
+      const recordData = get(tableRecordStore);
+      const newData = existingData.data.map((entry) => {
+        if (entry && pkSet.has(entry[columnData.primaryKey]?.toString())) {
+          return {
+            ...entry,
+            __state: 'deletionError',
+          };
+        }
+        return entry;
+      });
+
+      tableRecordStore.set({
+        ...recordData,
+        data: newData,
+      });
+    } finally {
+      table.display.selected.set({});
+    }
+  }
 }
 
 export function clearTable(db: string, id: number): void {

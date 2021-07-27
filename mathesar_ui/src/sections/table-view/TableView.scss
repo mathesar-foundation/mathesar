@@ -5,6 +5,11 @@ section.table-section .tab-container {
     .actions-pane {
       border-bottom: 1px solid #efefef;
       position: relative;
+
+      .loading-info {
+        float: right;
+        padding: 8px 12px;
+      }
     }
     .table-data {
       flex-grow: 1;
@@ -101,7 +106,7 @@ section.table-section .tab-container {
           text-overflow: ellipsis;
           white-space: nowrap;
           text-align: left;
-          border-bottom: 1px solid #efefef;
+          border-bottom: 1px solid #e7e7e7;
           border-right: 1px solid #efefef;
           height: 100%;
           left: 0;
@@ -127,7 +132,7 @@ section.table-section .tab-container {
           min-width: 100%;
           position: relative;
           background: #f9f9f9;
-          border-bottom: 1px solid #efefef;
+          border-bottom: 1px solid #e5e5e5;
           user-select: none;
           overflow: hidden;
 
@@ -237,26 +242,28 @@ section.table-section .tab-container {
           .row {
             transition: all .20s cubic-bezier(0,0,.2,1);
 
-            &:hover {
-              .cell {
-                background: #f6f7f7;
-              }
-            }
-
-            &:hover, &.selected {
-              .cell.row-control {
-                .checkbox {
-                  display: inline-flex;
-                }
-                .number {
-                  display: none;
+            &:not(.group) {
+              &:hover {
+                .cell {
+                  background: #f6f7f7;
                 }
               }
-            }
-
-            &.selected {
-              .cell {
-                background: #e4f2ff;
+  
+              &:hover, &.selected {
+                .cell.row-control {
+                  .checkbox {
+                    display: inline-flex;
+                  }
+                  .number {
+                    display: none;
+                  }
+                }
+              }
+  
+              &.selected {
+                .cell {
+                  background: #e4f2ff;
+                }
               }
             }
 
@@ -313,14 +320,8 @@ section.table-section .tab-container {
       flex-basis: 32px;
       background: #f7f8f8;
 
-      .rt-opts {
-        display: flex;
-        align-items: center;
-
-        .pagination {
-          margin-left: 10px;
-          position: relative;
-        }
+      .record-count {
+        font-size: 12px;
       }
     }
   }

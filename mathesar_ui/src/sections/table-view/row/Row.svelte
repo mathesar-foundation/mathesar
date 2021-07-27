@@ -70,7 +70,7 @@
   <GroupHeader style={styleString.group} {row} {groupData}/>
 {/if}
 
-<div class="row" class:in-group={isGrouped} class:selected={isSelected}
+<div class="row {row.__state || ''}" class:in-group={isGrouped} class:selected={isSelected}
       style={styleString.default}>
   <RowControl {index} {isGrouped} primaryKey={columns.primaryKey}
               {row} bind:selected/>
