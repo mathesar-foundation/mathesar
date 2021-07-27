@@ -8,7 +8,7 @@ from sqlalchemy import text
 from mathesar.models import Table
 from mathesar.models import DataFile, Schema
 from mathesar.utils.schemas import create_schema_and_object
-from mathesar.views import api
+from mathesar import reflection
 from db.tests.types import fixtures
 from db import tables
 
@@ -508,14 +508,14 @@ def test_table_get_with_reflect_delete(client, table_for_reflection):
 
 
 def test_table_viewset_sets_cache(client):
-    cache.delete(api.DB_REFLECTION_KEY)
-    assert not cache.get(api.DB_REFLECTION_KEY)
+    cache.delete(reflection.DB_REFLECTION_KEY)
+    assert not cache.get(reflection.DB_REFLECTION_KEY)
     client.get('/api/v0/schemas/')
-    assert cache.get(api.DB_REFLECTION_KEY)
+    assert cache.get(reflection.DB_REFLECTION_KEY)
 
 
 def test_table_viewset_checks_cache(client):
-    cache.delete(api.DB_REFLECTION_KEY)
-    with patch.object(api, 'reflect_tables_from_schema') as mock_reflect:
+    cache.delete(reflection.DB_REFLECTION_KEY)
+    with patch.object(reflection, 'reflect_tables_from_schema') as mock_reflect:
         client.get('/api/v0/tables/')
     mock_reflect.assert_called()
