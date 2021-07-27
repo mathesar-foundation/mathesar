@@ -1,5 +1,3 @@
-import re
-
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Table
 from db import tables, records
@@ -11,15 +9,20 @@ def validate_paste(raw_paste):
     if len(lines) == 0:
         raise InvalidPasteError()
 
-    # Assumes columns will be delimited by 2 or more whitespace characters
+    # Assumes columns will be delimited by tabs and that the first line is the header
     # Tested with Google Sheets and Libre Office
-    column_names = re.split(r'\s{2,}|\t', lines[0])
+    column_names = lines[0].split('\t')
     num_columns = len(column_names)
 
     parsed_lines = []
     for line in lines[1:]:
-        parsed_line = re.split(r'\s{2,}|\t', line)
-        if len(parsed_line) != num_columns:
+        parsed_line = line.split('\t')
+        parsed_line_len = len(parsed_line)
+
+        if parsed_line_len == num_columns - 1:
+            # Assume that a single missing column means the final column was empty
+            parsed_line.append('')
+        elif parsed_line_len != num_columns:
             raise InvalidPasteError
         parsed_lines.append(parsed_line)
 
