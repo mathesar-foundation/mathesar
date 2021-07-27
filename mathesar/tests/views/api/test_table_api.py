@@ -279,8 +279,10 @@ def test_table_create_from_paste(client, schema):
     response_table = response.json()
 
     table = Table.objects.get(id=response_table['id'])
-    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871')
-    column_names = ['Center', 'Status', 'Case Number']
+    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                 '13/033,085', 'Polyimide Wire Insulation Repair System', '')
+    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
+                    'Application SN', 'Title', 'Patent Expiration Date']
 
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1
