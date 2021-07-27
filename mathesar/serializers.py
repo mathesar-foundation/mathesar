@@ -1,6 +1,7 @@
 from django.urls import reverse
 from rest_framework import serializers
 from sqlalchemy import CheckConstraint, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy.dialects.postgresql import ExcludeConstraint
 
 from db.constraints import ConstraintType
 from mathesar.models import Table, Schema, DataFile, Database
@@ -131,3 +132,6 @@ class ConstraintSerializer(serializers.Serializer):
             return ConstraintType.PRIMARY_KEY.value
         elif type(obj) == UniqueConstraint:
             return ConstraintType.UNIQUE.value
+        elif type(obj) == ExcludeConstraint:
+            return ConstraintType.EXCLUDE.value
+        return None

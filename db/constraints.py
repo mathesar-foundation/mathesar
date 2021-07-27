@@ -10,6 +10,7 @@ class ConstraintType(Enum):
     PRIMARY_KEY = 'primary'
     UNIQUE = 'unique'
     CHECK = 'check'
+    EXCLUDE = 'exclude'
 
 
 # Naming conventions for constraints follow standard Postgres conventions
