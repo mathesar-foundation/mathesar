@@ -59,3 +59,8 @@ def enable_db_access_for_all_tests(db):
 @pytest.fixture(scope='session')
 def csv_filename():
     return 'mathesar/tests/data/patents.csv'
+
+
+@pytest.fixture(scope='session')
+def paste_filename():
+    return 'mathesar/tests/data/patents.txt'

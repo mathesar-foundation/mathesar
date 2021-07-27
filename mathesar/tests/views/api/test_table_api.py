@@ -25,6 +25,13 @@ def schema(django_db_setup, django_db_blocker, test_db_name):
         return create_schema_and_object('table_tests', test_db_name)
 
 
+@pytest.fixture(scope='module')
+def paste_text(paste_filename):
+    with open(paste_filename, 'r') as paste_file:
+        paste_data = paste_file.read()
+    return paste_data
+
+
 @pytest.fixture
 def data_file(csv_filename):
     with open(csv_filename, 'rb') as csv_file:
@@ -269,13 +276,11 @@ def test_table_create_from_datafile(client, data_file, schema):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_create_from_paste(client, schema):
+def test_table_create_from_paste(client, schema, paste_text):
     num_tables = Table.objects.count()
     table_name = 'Test Table Paste'
-    with open('mathesar/tests/data/patents.txt', 'r') as paste_file:
-        paste_data = paste_file.read()
     body = {
-        'paste': paste_data,
+        'paste': paste_text,
         'name': table_name,
         'schema': schema.id,
     }
@@ -320,12 +325,10 @@ def test_table_create_from_datafile_404(client):
     assert 'object does not exist' in response_table['data_files'][0]
 
 
-def test_table_create_from_paste_exception(client, schema):
+def test_table_create_from_paste_exception(client, schema, paste_text):
     table_name = 'Test Table Paste Exception'
-    with open('mathesar/tests/data/patents.txt', 'r') as paste_file:
-        paste_data = paste_file.read()
     body = {
-        'paste': paste_data,
+        'paste': paste_text,
         'name': table_name,
         'schema': schema.id,
     }
