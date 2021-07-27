@@ -21,8 +21,6 @@ def create_datafile(request, original_file):
                      'escapechar': dialect.escapechar,
                      'quotechar': dialect.quotechar}
     serializer = DataFileSerializer(data=inferred_data, context={'request': request})
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    else:
-        raise ValidationError(serializer.errors)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
