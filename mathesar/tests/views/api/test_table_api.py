@@ -258,11 +258,14 @@ def test_table_create_from_datafile(client, data_file, schema):
     data_file.refresh_from_db()
     first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
                  '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
+                    'Application SN', 'Title', 'Patent Expiration Date']
 
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1
-    assert data_file.table_imported_to.id == table.id
     assert table.get_records()[0] == first_row
+    assert all([col in table.sa_column_names for col in column_names])
+    assert data_file.table_imported_to.id == table.id
     check_table_response(response_table, table, table_name)
 
 
