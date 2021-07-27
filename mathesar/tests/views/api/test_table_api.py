@@ -46,7 +46,9 @@ def check_table_response(response_table, table, table_name):
     assert response_table['records_url'].startswith('http')
     assert response_table['columns_url'].startswith('http')
     assert response_table['constraints_url'].startswith('http')
-    assert '/api/v0/tables/' in response_table['records']
+    assert '/api/v0/tables/' in response_table['records_url']
+    assert '/api/v0/tables/' in response_table['columns_url']
+    assert '/api/v0/tables/' in response_table['constraints_url']
     assert response_table['records_url'].endswith('/records/')
     assert response_table['columns_url'].endswith('/columns/')
     assert response_table['constraints_url'].endswith('/constraints/')
