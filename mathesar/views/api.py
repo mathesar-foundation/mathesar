@@ -19,15 +19,14 @@ from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
-    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
-    DatabaseSerializer
+    TableSerializer, SchemaSerializer, RecordSerializer, RecordListParameterSerializer,
+    DataFileSerializer, ColumnSerializer, DatabaseSerializer
 )
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
 from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
 from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
 from mathesar.utils.tables import create_empty_table
 from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
-from mathesar.forms import RecordListFilterForm
 
 from db.records import BadGroupFormat, GroupFieldNotFound
 
@@ -59,13 +58,12 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
 
     def create(self, request):
         serializer = SchemaSerializer(data=request.data)
-        if serializer.is_valid():
-            schema = create_schema_and_object(serializer.validated_data['name'],
-                                              serializer.validated_data['database'])
-            serializer = SchemaSerializer(schema)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            raise ValidationError(serializer.errors)
+        serializer.is_valid(raise_exception=True)
+
+        schema = create_schema_and_object(serializer.validated_data['name'],
+                                          serializer.validated_data['database'])
+        serializer = SchemaSerializer(schema)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):
         serializer = SchemaSerializer(
@@ -101,17 +99,16 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
 
     def create(self, request):
         serializer = TableSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            valid_data = serializer.validated_data
-            if 'data_files' in valid_data and valid_data['data_files']:
-                table = create_table_from_datafile(valid_data)
-            else:
-                table = create_empty_table(valid_data)
+        serializer.is_valid(raise_exception=True)
 
-            serializer = TableSerializer(table, context={'request': request})
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        valid_data = serializer.validated_data
+        if 'data_files' in valid_data and valid_data['data_files']:
+            table = create_table_from_datafile(valid_data)
         else:
-            raise ValidationError(serializer.errors)
+            table = create_empty_table(valid_data)
+
+        serializer = TableSerializer(table, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):
         serializer = TableSerializer(
@@ -164,18 +161,18 @@ class ColumnViewSet(viewsets.ViewSet):
         table = Table.objects.get(id=table_pk)
         # We only support adding a single column through the API.
         serializer = ColumnSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            try:
-                column = table.add_column(request.data)
-            except ProgrammingError as e:
-                if type(e.orig) == DuplicateColumn:
-                    raise ValidationError(
-                        f"Column {request.data['name']} already exists"
-                    )
-                else:
-                    raise APIException(e)
-        else:
-            raise ValidationError(serializer.errors)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            column = table.add_column(request.data)
+        except ProgrammingError as e:
+            if type(e.orig) == DuplicateColumn:
+                raise ValidationError(
+                    f"Column {request.data['name']} already exists"
+                )
+            else:
+                raise APIException(e)
+
         out_serializer = ColumnSerializer(column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
@@ -218,17 +215,15 @@ class RecordViewSet(viewsets.ViewSet):
     def list(self, request, table_pk=None):
         paginator = TableLimitOffsetGroupPagination()
 
-        # Use a Django Form to automatically parse JSON URL parameters
-        filter_form = RecordListFilterForm(request.GET)
-        if not filter_form.is_valid():
-            raise ValidationError(filter_form.errors)
+        serializer = RecordListParameterSerializer(data=request.GET)
+        serializer.is_valid(raise_exception=True)
 
         try:
             records = paginator.paginate_queryset(
                 self.get_queryset(), request, table_pk,
-                filters=filter_form.cleaned_data['filters'],
-                order_by=filter_form.cleaned_data['order_by'],
-                group_count_by=filter_form.cleaned_data['group_count_by'],
+                filters=serializer.validated_data['filters'],
+                order_by=serializer.validated_data['order_by'],
+                group_count_by=serializer.validated_data['group_count_by'],
             )
         except (BadFilterFormat, FilterFieldNotFound) as e:
             raise ValidationError({'filters': e})
@@ -308,11 +303,10 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
 
     def create(self, request):
         serializer = DataFileSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            return create_datafile(
-                request,
-                serializer.validated_data['file'],
-                serializer.validated_data.get('header', True),
-            )
-        else:
-            raise ValidationError(serializer.errors)
+        serializer.is_valid(raise_exception=True)
+
+        return create_datafile(
+            request,
+            serializer.validated_data['file'],
+            serializer.validated_data.get('header', True),
+        )
