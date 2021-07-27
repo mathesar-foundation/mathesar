@@ -560,26 +560,22 @@ export async function deleteRecords(db: string, id: number, pks: string[]): Prom
           return failed;
         }));
       await Promise.all(promises);
+      await fetchTableRecords(db, id, true);
 
       // Getting again, since data may have changed
       const recordData = get(tableRecordStore);
       const newData: TableRecord[] = [];
       recordData.data.forEach((entry) => {
-        if (!entry) {
-          newData.push(entry);
-        } else {
+        if (entry) {
           const entryPK = entry[columnData.primaryKey]?.toString();
-          if (!success.has(entryPK)) {
-            if (failed.has(entryPK)) {
-              newData.push({
-                ...entry,
-                __state: 'deletionFailed',
-              });
-            } else {
-              newData.push(entry);
-            }
+          if (failed.has(entryPK)) {
+            newData.push({
+              ...entry,
+              __state: 'deletionFailed',
+            });
           }
         }
+        newData.push(entry);
       });
 
       tableRecordStore.set({

@@ -242,6 +242,10 @@ section.table-section .tab-container {
           .row {
             transition: all .20s cubic-bezier(0,0,.2,1);
 
+            &:not(.done) {
+              pointer-events: none;
+            }
+
             &:not(.group) {
               &:hover {
                 .cell {
@@ -263,6 +267,13 @@ section.table-section .tab-container {
               &.selected {
                 .cell {
                   background: #e4f2ff;
+                }
+              }
+
+              &.deleting {
+                .cell {
+                  transition: all .20s cubic-bezier(0,0,.2,1);
+                  background: #f1bfbf;
                 }
               }
             }
