@@ -253,7 +253,7 @@ def test_table_type_suggestion(client, schema, engine_email_type):
 
 def test_table_create_from_datafile(client, data_file, schema):
     num_tables = Table.objects.count()
-    table_name = 'Test Table Datafile'
+    table_name = 'Test Table Create From Datafile'
     body = {
         'data_files': [data_file.id],
         'name': table_name,
@@ -278,7 +278,7 @@ def test_table_create_from_datafile(client, data_file, schema):
 
 def test_table_create_from_paste(client, schema, paste_text):
     num_tables = Table.objects.count()
-    table_name = 'Test Table Paste'
+    table_name = 'Test Table Create From Paste'
     body = {
         'paste': paste_text,
         'name': table_name,
@@ -325,8 +325,8 @@ def test_table_create_from_datafile_404(client):
     assert 'object does not exist' in response_table['data_files'][0]
 
 
-def test_table_create_from_paste_exception(client, schema, paste_text):
-    table_name = 'Test Table Paste Exception'
+def test_table_create_from_invalid_paste(client, schema, paste_text):
+    table_name = 'Test Table Create From Invalid Paste'
     body = {
         'paste': paste_text,
         'name': table_name,
@@ -338,6 +338,32 @@ def test_table_create_from_paste_exception(client, schema, paste_text):
         response_dict = response.json()
     assert response.status_code == 400
     assert response_dict["paste"] == 'Unable to tabulate paste'
+
+
+def test_table_create_from_datafile_and_paste(client, schema, paste_text, data_file):
+    table_name = 'Test Table Create From Datafile And Paste'
+    body = {
+        'data_files': [data_file.id],
+        'paste': paste_text,
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_dict = response.json()
+    assert response.status_code == 400
+    assert response_dict[0] == 'Both data file and raw paste value supplied.'
+
+
+def test_table_create_from_empty(client, schema):
+    table_name = 'Test Table Create From Empty'
+    body = {
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_dict = response.json()
+    assert response.status_code == 400
+    assert response_dict[0] == 'No data files or paste value supplied.'
 
 
 def test_table_update(client, create_table):
