@@ -48,7 +48,7 @@ def test_create_single_column_unique_constraint(engine_with_schema):
 
 def test_create_multiple_column_unique_constraint(engine_with_schema):
     engine, schema = engine_with_schema
-    table_name = "orders_1"
+    table_name = "orders_2"
     unique_column_names = ['product_name', 'customer_name']
     table = Table(
         table_name,
@@ -70,3 +70,26 @@ def test_create_multiple_column_unique_constraint(engine_with_schema):
     assert unique_constraint.name == f'{table_name}_{unique_column_name_1}_key'
     assert len(list(unique_constraint.columns)) == 2
     assert set([column.name for column in unique_constraint.columns]) == set(unique_column_names)
+
+
+def test_drop_unique_constraint(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "orders_3"
+    unique_column_name = 'product_name'
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column('order_id', Integer, primary_key=True),
+        Column(unique_column_name, String),
+    )
+    table.create()
+
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    constraints.create_unique_constraint(table.name, schema, engine, [unique_column_name])
+    altered_table = tables.reflect_table_from_oid(table_oid, engine)
+    _assert_primary_key_and_unique_present(altered_table)
+    unique_constraint = _get_first_unique_constraint(altered_table)
+
+    constraints.drop_constraint(table_name, schema, engine, unique_constraint.name)
+    new_altered_table = tables.reflect_table_from_oid(table_oid, engine)
+    _assert_only_primary_key_present(new_altered_table)
