@@ -27,7 +27,9 @@ def validate_paste(raw_paste):
         if parsed_line_len != num_columns:
             raise InvalidPasteError
         else:
-            parsed_lines.append(parsed_line)
+            parsed_lines.append({
+                col: val for col, val in zip(column_names, parsed_line)
+            })
 
     return column_names, parsed_lines
 
@@ -41,7 +43,7 @@ def create_db_table_from_paste(raw_paste, name, schema):
         column_names=column_names,
         engine=engine
     )
-    records.create_records_from_paste(table, engine, lines, column_names)
+    records.create_record_or_records(table, engine, lines)
     return table
 
 

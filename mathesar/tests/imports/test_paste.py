@@ -57,27 +57,47 @@ def test_paste_upload_with_duplicate_table_name(paste_text, schema):
 validate_paste_test_list = [
     (
         ['Center', 'Status', 'Case Number'],
-        [['NASA Ames Research Center', 'Issued', 'ARC-14048-1']],
+        [{
+            'Center': 'NASA Ames Research Center',
+            'Status': 'Issued',
+            'Case Number': 'ARC-14048-1'
+        }],
         'mathesar/tests/data/paste_parsing/base.txt',
     ),
     (
         ['Center', 'Status', 'Case Number'],
-        [['', 'Issued', 'ARC-14048-1']],
+        [{
+            'Center': '',
+            'Status': 'Issued',
+            'Case Number': 'ARC-14048-1'
+        }],
         'mathesar/tests/data/paste_parsing/missing_start_col.txt',
     ),
     (
         ['Center', 'Status', 'Case Number'],
-        [['NASA Ames Research Center', '', 'ARC-14048-1']],
+        [{
+            'Center': 'NASA Ames Research Center',
+            'Status': '',
+            'Case Number': 'ARC-14048-1'
+        }],
         'mathesar/tests/data/paste_parsing/missing_middle_col.txt',
     ),
     (
         ['Center', 'Status', 'Case Number'],
-        [['NASA Ames Research Center', 'Issued', '']],
+        [{
+            'Center': 'NASA Ames Research Center',
+            'Status': 'Issued',
+            'Case Number': ''
+        }],
         'mathesar/tests/data/paste_parsing/missing_end_col.txt',
     ),
     (
         ['Center', 'Status', 'Case Number'],
-        [['NASA Ames Research Center', '', '']],
+        [{
+            'Center': 'NASA Ames Research Center',
+            'Status': '',
+            'Case Number': ''
+        }],
         'mathesar/tests/data/paste_parsing/missing_multiple_col.txt',
     ),
 ]
