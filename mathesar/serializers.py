@@ -135,6 +135,7 @@ class DataFileSerializer(serializers.ModelSerializer):
 
 
 class ConstraintSerializer(serializers.Serializer):
+    # We're duplicating the "name" field as "id" to make clear what the constraint detail URL uses.
     id = serializers.CharField(required=False, source='name')
     name = serializers.CharField(required=False)
     type = serializers.SerializerMethodField()
