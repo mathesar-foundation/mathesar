@@ -300,6 +300,22 @@ def test_table_create_from_paste(client, schema, paste_text):
     check_table_response(response_table, table, table_name)
 
 
+def test_table_create_from_paste_no_trim(client, schema):
+    paste_file = 'mathesar/tests/data/paste_parsing/missing_multiple_col.txt'
+    with open(paste_file, 'r') as paste_file:
+        paste_text = paste_file.read()
+
+    table_name = 'Test Table Create From Paste No Trim'
+    body = {
+        'paste': paste_text,
+        'name': table_name,
+        'schema': schema.id,
+    }
+    # This file will break if whitespace is trimmed from the end
+    response = client.post('/api/v0/tables/', body)
+    assert response.status_code == 201
+
+
 def test_table_404(client):
     response = client.get('/api/v0/tables/3000/')
     assert response.status_code == 404

@@ -50,7 +50,9 @@ class TableSerializer(serializers.ModelSerializer):
     columns = SimpleColumnSerializer(many=True, read_only=True, source='sa_columns')
     records = serializers.SerializerMethodField()
     name = serializers.CharField()
-    paste = serializers.CharField(write_only=True, required=False, default='')
+    paste = serializers.CharField(
+        write_only=True, required=False, default='', trim_whitespace=False
+    )
 
     class Meta:
         model = Table
