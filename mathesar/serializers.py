@@ -75,6 +75,12 @@ class RecordSerializer(serializers.BaseSerializer):
         return instance._asdict()
 
 
+class RecordListParameterSerializer(serializers.Serializer):
+    filters = serializers.JSONField(required=False, default=[])
+    order_by = serializers.JSONField(required=False, default=[])
+    group_count_by = serializers.JSONField(required=False, default=[])
+
+
 class DatabaseSerializer(serializers.ModelSerializer):
     supported_types = serializers.ListField(child=serializers.CharField())
 

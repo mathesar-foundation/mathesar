@@ -5,7 +5,7 @@ from db import schemas
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Schema, Database
 from mathesar import models
-from mathesar.views import api
+from mathesar import reflection
 from mathesar.utils.schemas import create_schema_and_object
 
 
@@ -58,7 +58,7 @@ def test_schema_list_filter(client, monkeypatch):
 
     monkeypatch.setattr(models.schemas, "get_schema_name_from_oid", mock_get_name_from_oid)
     monkeypatch.setattr(models, "create_mathesar_engine", lambda x: x)
-    monkeypatch.setattr(api, "reflect_db_objects", lambda: None)
+    monkeypatch.setattr(reflection, "reflect_db_objects", lambda: None)
 
     schemas = {
         (schema_params[i][0], schema_params[i][1]): Schema.objects.create(
@@ -288,14 +288,14 @@ def test_schema_get_with_reflect_delete(client, test_db_name):
 
 
 def test_schema_viewset_sets_cache(client):
-    cache.delete(api.DB_REFLECTION_KEY)
-    assert not cache.get(api.DB_REFLECTION_KEY)
+    cache.delete(reflection.DB_REFLECTION_KEY)
+    assert not cache.get(reflection.DB_REFLECTION_KEY)
     client.get('/api/v0/schemas/')
-    assert cache.get(api.DB_REFLECTION_KEY)
+    assert cache.get(reflection.DB_REFLECTION_KEY)
 
 
 def test_schema_viewset_checks_cache(client):
-    cache.delete(api.DB_REFLECTION_KEY)
-    with patch.object(api, 'reflect_schemas_from_database') as mock_reflect:
+    cache.delete(reflection.DB_REFLECTION_KEY)
+    with patch.object(reflection, 'reflect_schemas_from_database') as mock_reflect:
         client.get('/api/v0/schemas/')
     mock_reflect.assert_called()
