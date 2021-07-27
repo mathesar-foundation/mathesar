@@ -19,15 +19,14 @@ from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
-    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
-    DatabaseSerializer
+    TableSerializer, SchemaSerializer, RecordSerializer, RecordListParameterSerializer,
+    DataFileSerializer, ColumnSerializer, DatabaseSerializer
 )
 from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
 from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
 from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
 from mathesar.utils.tables import create_empty_table
 from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
-from mathesar.forms import RecordListFilterForm
 
 from db.records import BadGroupFormat, GroupFieldNotFound
 
@@ -216,17 +215,15 @@ class RecordViewSet(viewsets.ViewSet):
     def list(self, request, table_pk=None):
         paginator = TableLimitOffsetGroupPagination()
 
-        # Use a Django Form to automatically parse JSON URL parameters
-        filter_form = RecordListFilterForm(request.GET)
-        if not filter_form.is_valid():
-            raise ValidationError(filter_form.errors)
+        serializer = RecordListParameterSerializer(data=request.GET)
+        serializer.is_valid(raise_exception=True)
 
         try:
             records = paginator.paginate_queryset(
                 self.get_queryset(), request, table_pk,
-                filters=filter_form.cleaned_data['filters'],
-                order_by=filter_form.cleaned_data['order_by'],
-                group_count_by=filter_form.cleaned_data['group_count_by'],
+                filters=serializer.validated_data['filters'],
+                order_by=serializer.validated_data['order_by'],
+                group_count_by=serializer.validated_data['group_count_by'],
             )
         except (BadFilterFormat, FilterFieldNotFound) as e:
             raise ValidationError({'filters': e})
