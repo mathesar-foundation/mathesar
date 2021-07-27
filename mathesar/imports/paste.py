@@ -5,9 +5,14 @@ from mathesar.errors import InvalidPasteError
 
 
 def validate_paste(raw_paste):
-    lines = raw_paste.split('\n')
-    if len(lines) == 0:
+    # Empty tables should be made through a dedicated function
+    if not raw_paste:
         raise InvalidPasteError()
+
+    # Ending newline creates an extra empty line
+    if raw_paste[-1] == '\n':
+        raw_paste = raw_paste[:-1]
+    lines = raw_paste.split('\n')
 
     # Assumes columns will be delimited by tabs and that the first line is the header
     # Tested with Google Sheets and Libre Office
@@ -19,12 +24,10 @@ def validate_paste(raw_paste):
         parsed_line = line.split('\t')
         parsed_line_len = len(parsed_line)
 
-        if parsed_line_len == num_columns - 1:
-            # Assume that a single missing column means the final column was empty
-            parsed_line.append('')
-        elif parsed_line_len != num_columns:
+        if parsed_line_len != num_columns:
             raise InvalidPasteError
-        parsed_lines.append(parsed_line)
+        else:
+            parsed_lines.append(parsed_line)
 
     return column_names, parsed_lines
 
