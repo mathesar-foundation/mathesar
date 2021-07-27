@@ -301,7 +301,7 @@ class ConstraintViewSet(viewsets.ViewSet):
     def list(self, request, table_pk=None):
         paginator = ConstraintLimitOffsetPagination()
         constraints = paginator.paginate_queryset(self.get_queryset(), request, table_pk)
-        serializer = ConstraintSerializer(constraints, many=True)
+        serializer = ConstraintSerializer(constraints, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):
@@ -309,7 +309,7 @@ class ConstraintViewSet(viewsets.ViewSet):
         constraint = table.get_constraint_by_name(pk)
         if not constraint:
             raise NotFound
-        serializer = ConstraintSerializer(constraint)
+        serializer = ConstraintSerializer(constraint, context={'request': request})
         return Response(serializer.data)
 
     def create(self, request, table_pk=None):
@@ -333,7 +333,7 @@ class ConstraintViewSet(viewsets.ViewSet):
         except AttributeError:
             pass
         constraint = table.get_constraint_by_type_and_columns(request.data['type'], request.data['columns'])
-        out_serializer = ConstraintSerializer(constraint)
+        out_serializer = ConstraintSerializer(constraint, context={'request': request})
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, pk=None, table_pk=None):
