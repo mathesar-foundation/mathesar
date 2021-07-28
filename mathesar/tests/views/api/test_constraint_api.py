@@ -171,3 +171,18 @@ def test_create_unique_constraint_for_non_unique_column(create_table, client):
     response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
     assert response.status_code == 400
     assert response.json() == ['This column has non-unique values so a unique constraint cannot be set']
+
+
+def test_drop_nonexistent_constraint(create_table, client):
+    table_name = 'NASA Constraint List 10'
+    table = create_table(table_name)
+
+    response = client.delete(f'/api/v0/tables/{table.id}/constraints/nonsense_constraint/')
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'
+
+
+def test_drop_nonexistent_table(create_table, client):
+    response = client.delete('/api/v0/tables/9387489/constraints/nonsense_constraint/')
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'

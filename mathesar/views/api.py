@@ -5,7 +5,7 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateMode
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
-from psycopg2.errors import DuplicateColumn, DuplicateTable, UndefinedFunction, UniqueViolation
+from psycopg2.errors import DuplicateColumn, DuplicateTable, UndefinedFunction, UniqueViolation, UndefinedObject
 from sqlalchemy.exc import ProgrammingError, IntegrityError
 from sqlalchemy_filters.exceptions import (
     BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound,
@@ -31,6 +31,14 @@ from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
 from db.records import BadGroupFormat, GroupFieldNotFound
 
 logger = logging.getLogger(__name__)
+
+
+def get_table_or_404(pk):
+    try:
+        table = Table.objects.get(id=pk)
+    except Table.DoesNotExist:
+        raise NotFound
+    return table
 
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -132,7 +140,7 @@ class ColumnViewSet(viewsets.ViewSet):
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         try:
             column = table.sa_columns[int(pk)]
         except IndexError:
@@ -141,7 +149,7 @@ class ColumnViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         # We only support adding a single column through the API.
         serializer = ColumnSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
@@ -161,7 +169,7 @@ class ColumnViewSet(viewsets.ViewSet):
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         assert isinstance((request.data), dict)
         try:
             column = table.alter_column(pk, request.data)
@@ -176,7 +184,7 @@ class ColumnViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         try:
             table.drop_column(pk)
         except IndexError:
@@ -219,7 +227,7 @@ class RecordViewSet(viewsets.ViewSet):
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         record = table.get_record(pk)
         if not record:
             raise NotFound
@@ -227,7 +235,7 @@ class RecordViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         # We only support adding a single record through the API.
         assert isinstance((request.data), dict)
         record = table.create_record_or_records(request.data)
@@ -235,13 +243,13 @@ class RecordViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         record = table.update_record(pk, request.data)
         serializer = RecordSerializer(record)
         return Response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         table.delete_record(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -305,7 +313,7 @@ class ConstraintViewSet(viewsets.ViewSet):
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         constraint = table.get_constraint_by_name(pk)
         if not constraint:
             raise NotFound
@@ -313,7 +321,7 @@ class ConstraintViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         serializer = ConstraintSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         # If we don't do this, the request.data QueryDict will only return the last column's name
@@ -347,6 +355,12 @@ class ConstraintViewSet(viewsets.ViewSet):
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, pk=None, table_pk=None):
-        table = Table.objects.get(id=table_pk)
-        table.drop_constraint(pk)
+        table = get_table_or_404(table_pk)
+        try:
+            table.drop_constraint(pk)
+        except ProgrammingError as e:
+            if type(e.orig) == UndefinedObject:
+                raise NotFound
+            else:
+                raise APIException(e)
         return Response(status=status.HTTP_204_NO_CONTENT)
