@@ -89,12 +89,13 @@ def alter_column_type(
         conn.execute(DDL(alter_stmt))
 
 
-def get_column_cast_expression(column, target_type, engine):
+def get_column_cast_expression(column, target_type_str, engine):
     """
     Given an SQLAlchemy Column, we get the correct SQL selectable for
     selecting the results of a Mathesar cast_to_<type> function on that
-    column.
+    column, where <type> is derived from the target_type_str.
     """
+    target_type = get_robust_supported_alter_column_type_map(engine)[target_type_str]
     prepared_type_name = target_type().compile(dialect=engine.dialect)
     qualified_function_name = get_cast_function_name(prepared_type_name)
     return Function(
