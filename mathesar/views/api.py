@@ -316,13 +316,16 @@ class ConstraintViewSet(viewsets.ViewSet):
         table = Table.objects.get(id=table_pk)
         serializer = ConstraintSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
+        # If we don't do this, the request.data QueryDict will only return the last column's name
+        # if there are multiple columns.
+        data = request.data.dict()
+        data['columns'] = request.data.getlist('columns')
         try:
-            table.add_constraint(request.data)
+            table.add_constraint(data)
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
-                name = request.data['name']
                 raise ValidationError(
-                    f'Constraint with name {name} already exists'
+                    f'Constraint with the same name already exists'
                 )
             else:
                 raise APIException(e)
@@ -332,7 +335,8 @@ class ConstraintViewSet(viewsets.ViewSet):
             del table._sa_table
         except AttributeError:
             pass
-        constraint = table.get_constraint_by_type_and_columns(request.data['type'], request.data['columns'])
+
+        constraint = table.get_constraint_by_type_and_columns(data['type'], data['columns'])
         out_serializer = ConstraintSerializer(constraint, context={'request': request})
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
