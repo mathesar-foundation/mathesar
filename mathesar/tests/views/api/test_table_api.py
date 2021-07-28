@@ -257,9 +257,11 @@ def test_table_type_suggestion(client, schema, engine_email_type):
     assert response_table == EXPECTED_TYPES
 
 
-def test_table_create_from_datafile(client, data_file, schema):
+# Workaround for not being able to parametrize with fixtures
+
+
+def check_create_table_response(client, table_name, data_file, schema):
     num_tables = Table.objects.count()
-    table_name = 'Test Table Create From Datafile'
     body = {
         'data_files': [data_file.id],
         'name': table_name,
@@ -282,29 +284,14 @@ def test_table_create_from_datafile(client, data_file, schema):
     check_table_response(response_table, table, table_name)
 
 
+def test_table_create_from_datafile(client, data_file, schema):
+    table_name = 'Test Table Create From Datafile'
+    check_create_table_response(client, table_name, data_file, schema)
+
+
 def test_table_create_from_paste(client, schema, paste_data_file):
-    num_tables = Table.objects.count()
     table_name = 'Test Table Create From Paste'
-    body = {
-        'data_files': [paste_data_file.id],
-        'name': table_name,
-        'schema': schema.id,
-    }
-    response = client.post('/api/v0/tables/', body)
-    response_table = response.json()
-
-    table = Table.objects.get(id=response_table['id'])
-    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
-                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
-    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
-                    'Application SN', 'Title', 'Patent Expiration Date']
-
-    assert response.status_code == 201
-    assert Table.objects.count() == num_tables + 1
-    print(table.get_records())
-    assert table.get_records()[0] == first_row
-    assert all([col in table.sa_column_names for col in column_names])
-    check_table_response(response_table, table, table_name)
+    check_create_table_response(client, table_name, paste_data_file, schema)
 
 
 def test_table_create_without_datafile(client, schema):
