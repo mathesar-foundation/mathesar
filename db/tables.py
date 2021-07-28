@@ -13,7 +13,7 @@ from sqlalchemy.exc import NoSuchTableError, InternalError
 from psycopg2.errors import DependentObjectsStillExist
 
 from db import columns, constants, schemas
-from db.types import inference
+from db.types import alteration, inference
 
 
 TEMP_SCHEMA = f"{constants.MATHESAR_PREFIX}temp_schema"
@@ -527,3 +527,16 @@ def infer_table_column_types(schema, table_name, engine):
         types = [c.type.__class__ for c in temp_table.columns]
         temp_table.drop()
         return types
+
+
+def get_column_cast_records(engine, table_oid, column_target_types, num_records=20):
+    table = reflect_table_from_oid(table_oid, engine)
+    assert len(column_target_types) == len(table.columns)
+    cast_expression_list = [
+        alteration.get_column_cast_expression(column, target_type, engine)
+        for column, target_type in zip(table.columns, column_target_types)
+    ]
+    sel = select(cast_expression_list).limit(num_records)
+    with engine.begin() as conn:
+        result = conn.execute(sel)
+    return result.fetchall()
