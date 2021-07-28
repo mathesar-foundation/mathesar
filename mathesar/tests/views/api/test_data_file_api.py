@@ -10,6 +10,7 @@ from mathesar.errors import InvalidTableError
 def verify_data_file_data(data_file, data_file_dict):
     assert data_file_dict['id'] == data_file.id
     assert data_file_dict['file'] == f'http://testserver/media/{data_file.file.name}'
+    assert data_file_dict['created_from'] == data_file.created_from
     if data_file.table_imported_to:
         assert data_file_dict['table_imported_to'] == data_file.table_imported_to.id
     else:
@@ -83,6 +84,7 @@ def test_data_file_create_csv(client, csv_filename, header):
 
     assert response.status_code == 201
     assert DataFile.objects.count() == num_data_files + 1
+    assert data_file.created_from == 'file'
     assert data_file.delimiter == correct_dialect.delimiter
     assert data_file.quotechar == correct_dialect.quotechar
     assert data_file.escapechar == correct_dialect.escapechar
@@ -103,6 +105,7 @@ def test_data_file_create_paste(client, paste_filename, header):
 
     assert response.status_code == 201
     assert DataFile.objects.count() == num_data_files + 1
+    assert data_file.created_from == 'paste'
     assert data_file.delimiter == '\t'
     assert data_file.quotechar == ''
     assert data_file.escapechar == ''
