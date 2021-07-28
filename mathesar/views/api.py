@@ -22,7 +22,9 @@ from mathesar.serializers import (
     DataFileSerializer, ColumnSerializer, DatabaseSerializer
 )
 from mathesar.utils.schemas import create_schema_and_object
-from mathesar.utils.tables import get_table_column_types, create_table_from_data
+from mathesar.utils.tables import (
+    get_table_column_types, create_table_from_datafile, create_empty_table
+)
 from mathesar.utils.datafiles import create_datafile
 from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
 
@@ -82,7 +84,21 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     def create(self, request):
         serializer = TableSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        return create_table_from_data(request, serializer.validated_data)
+
+        if serializer.validated_data['data_files']:
+            table = create_table_from_datafile(
+                serializer.validated_data['data_files'],
+                serializer.validated_data['name'],
+                serializer.validated_data['schema'],
+            )
+        else:
+            table = create_empty_table(
+                serializer.validated_data['name'],
+                serializer.validated_data['schema'],
+            )
+
+        serializer = TableSerializer(table, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):
         serializer = TableSerializer(

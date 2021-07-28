@@ -70,6 +70,11 @@ class TableSerializer(serializers.ModelSerializer):
         else:
             return None
 
+    def validate(self, data):
+        if len(data.get('data_files', [])) > 1:
+            raise ValidationError({'data_files': 'Multiple data files are unsupported.'})
+        return data
+
 
 class RecordSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):

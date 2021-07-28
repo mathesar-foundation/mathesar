@@ -1,9 +1,4 @@
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
-
 from mathesar.models import Table
-from mathesar.serializers import TableSerializer
 from mathesar.imports.csv import create_table_from_csv
 from mathesar.database.base import create_mathesar_engine
 from db.tables import infer_table_column_types, create_mathesar_table, get_oid_from_table
@@ -22,25 +17,9 @@ def get_table_column_types(table):
     return col_types
 
 
-def create_table_from_data(request, data):
-    name = data['name']
-    schema = data['schema']
-
-    if data['data_files']:
-        table = create_table_from_datafile(data['data_files'], name, schema)
-    else:
-        table = create_empty_table(name, schema)
-
-    serializer = TableSerializer(table, context={'request': request})
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
 def create_table_from_datafile(data_files, name, schema):
-    if len(data_files) == 1:
-        data_file = data_files[0]
-        table = create_table_from_csv(data_file, name, schema)
-    elif len(data_files) > 1:
-        raise ValidationError({'data_files': 'Multiple data files are unsupported.'})
+    data_file = data_files[0]
+    table = create_table_from_csv(data_file, name, schema)
     return table
 
 

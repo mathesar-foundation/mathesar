@@ -256,7 +256,6 @@ def test_table_type_suggestion(client, schema, engine_email_type):
     assert response.status_code == 200
     assert response_table == EXPECTED_TYPES
 
-
 # Workaround for not being able to parametrize with fixtures
 
 
@@ -396,7 +395,7 @@ def test_table_type_suggestion_404(client):
 
 def test_table_create_from_datafile_404(client):
     body = {
-        'data_files': -999,
+        'data_files': [-999],
         'name': 'test_table',
         'schema': -999,
     }
@@ -405,6 +404,18 @@ def test_table_create_from_datafile_404(client):
     assert response.status_code == 400
     assert 'object does not exist' in response_table['schema'][0]
     assert 'object does not exist' in response_table['data_files'][0]
+
+
+def test_table_create_from_multiple_datafile(client, data_file, schema):
+    body = {
+        'data_files': [data_file.id, data_file.id],
+        'name': 'test_table',
+        'schema': schema.id,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
+    assert response.status_code == 400
+    assert response_table['data_files'][0] == 'Multiple data files are unsupported.'
 
 
 def test_table_partial_update_invalid_field(create_table, client):
