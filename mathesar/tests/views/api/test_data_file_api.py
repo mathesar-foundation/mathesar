@@ -18,7 +18,7 @@ def verify_data_file_data(data_file, data_file_dict):
     assert data_file_dict['delimiter'] == data_file.delimiter
     assert data_file_dict['quotechar'] == data_file.quotechar
     assert data_file_dict['escapechar'] == data_file.escapechar
-    assert data_file_dict['header'] == data_file.header
+    assert data_file_dict.get('header', True) == data_file.header
 
 
 @pytest.fixture

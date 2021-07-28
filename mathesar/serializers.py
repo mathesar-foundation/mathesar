@@ -100,7 +100,8 @@ class DataFileSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {'delimiter': {'trim_whitespace': False},
                         'escapechar': {'trim_whitespace': False},
-                        'quotechar': {'trim_whitespace': False}}
+                        'quotechar': {'trim_whitespace': False},
+                        'header': {'required': True}}
         # We only currently support importing to a new table, so setting a table via API is invalid.
         # User should be set automatically, not submitted via the API.
         read_only_fields = ['table_imported_to']
