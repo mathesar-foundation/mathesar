@@ -91,7 +91,7 @@
 </script>
 
 <div bind:this={headerRef} class="header">
-  <div class="cell row-number" style="width:{DEFAULT_COUNT_COL_WIDTH + paddingLeft}px;">
+  <div class="cell row-control" style="width:{DEFAULT_COUNT_COL_WIDTH + paddingLeft}px;">
   </div>
 
   {#each columns.data as column (column.name)}
