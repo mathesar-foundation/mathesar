@@ -204,5 +204,5 @@ def test_data_file_create_csv_headerless(client, csv_filename):
     assert data_file.delimiter == ','
     assert data_file.quotechar == '"'
     assert data_file.escapechar == ''
-    assert data_file.header is True
+    assert data_file.header is False
     verify_data_file_data(data_file, data_file_dict)
