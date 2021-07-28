@@ -85,6 +85,7 @@ def get_sv_reader(file, header, dialect=None):
 
 def create_db_table_from_data_file(data_file, name, schema):
     engine = create_mathesar_engine(schema.database.name)
+    print(data_file.file)
     sv_filename = data_file.file.path
     header = data_file.header
     dialect = csv.dialect.SimpleDialect(data_file.delimiter, data_file.quotechar,

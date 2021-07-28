@@ -2,7 +2,7 @@ from unittest.mock import patch
 import pytest
 
 from django.core.cache import cache
-from django.core.files import File
+from django.core.files.base import File, ContentFile
 from sqlalchemy import text
 
 from mathesar import reflection
@@ -28,6 +28,19 @@ def schema(django_db_setup, django_db_blocker, test_db_name):
 def data_file(csv_filename):
     with open(csv_filename, 'rb') as csv_file:
         data_file = DataFile.objects.create(file=File(csv_file))
+    return data_file
+
+
+@pytest.fixture
+def paste_data_file(paste_filename):
+    with open(paste_filename, 'r') as paste_file:
+        paste_text = paste_file.read()
+    data_file = DataFile.objects.create(
+        file=ContentFile(paste_text, name='paste_file.txt'),
+        delimiter='\t',
+        quotechar='',
+        escapechar='',
+    )
     return data_file
 
 
@@ -266,6 +279,31 @@ def test_table_create_from_datafile(client, data_file, schema):
     assert table.get_records()[0] == first_row
     assert all([col in table.sa_column_names for col in column_names])
     assert data_file.table_imported_to.id == table.id
+    check_table_response(response_table, table, table_name)
+
+
+def test_table_create_from_paste(client, schema, paste_data_file):
+    num_tables = Table.objects.count()
+    table_name = 'Test Table Create From Paste'
+    body = {
+        'data_files': [paste_data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
+
+    table = Table.objects.get(id=response_table['id'])
+    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
+                    'Application SN', 'Title', 'Patent Expiration Date']
+
+    assert response.status_code == 201
+    assert Table.objects.count() == num_tables + 1
+    print(table.get_records())
+    assert table.get_records()[0] == first_row
+    assert all([col in table.sa_column_names for col in column_names])
     check_table_response(response_table, table, table_name)
 
 
