@@ -275,9 +275,4 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
     def create(self, request):
         serializer = DataFileSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-
-        return create_datafile(
-            request,
-            serializer.validated_data['file'],
-            serializer.validated_data.get('header', True),
-        )
+        return create_datafile(request, serializer.validated_data)
