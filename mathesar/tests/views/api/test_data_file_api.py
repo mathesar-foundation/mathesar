@@ -1,12 +1,16 @@
 import pytest
+from unittest.mock import patch
 from django.core.files import File
 
+from mathesar.imports import csv
 from mathesar.models import DataFile
+from mathesar.errors import InvalidTableError
 
 
 def verify_data_file_data(data_file, data_file_dict):
     assert data_file_dict['id'] == data_file.id
     assert data_file_dict['file'] == f'http://testserver/media/{data_file.file.name}'
+    assert data_file_dict['created_from'] == data_file.created_from
     if data_file.table_imported_to:
         assert data_file_dict['table_imported_to'] == data_file.table_imported_to.id
     else:
@@ -66,74 +70,46 @@ def test_data_file_detail(client, data_file):
     verify_data_file_data(data_file, data_file_dict)
 
 
-def test_data_file_create_csv(client, csv_filename):
+@pytest.mark.parametrize('header', [True, False])
+def test_data_file_create_csv(client, csv_filename, header):
     num_data_files = DataFile.objects.count()
 
     with open(csv_filename, 'rb') as csv_file:
-        response = client.post('/api/v0/data_files/', data={'file': csv_file})
+        data = {'file': csv_file, 'header': header}
+        response = client.post('/api/v0/data_files/', data)
         data_file_dict = response.json()
         data_file = DataFile.objects.get(id=data_file_dict['id'])
+    with open(csv_filename, 'r') as csv_file:
+        correct_dialect = csv.get_sv_dialect(csv_file)
 
     assert response.status_code == 201
     assert DataFile.objects.count() == num_data_files + 1
-    assert data_file.delimiter == ','
-    assert data_file.quotechar == '"'
-    assert data_file.escapechar == ''
+    assert data_file.created_from == 'file'
+    assert data_file.delimiter == correct_dialect.delimiter
+    assert data_file.quotechar == correct_dialect.quotechar
+    assert data_file.escapechar == correct_dialect.escapechar
+    assert data_file.header == header
     verify_data_file_data(data_file, data_file_dict)
 
 
-def test_data_file_create_tsv(client, tsv_filename):
+@pytest.mark.parametrize('header', [True, False])
+def test_data_file_create_paste(client, paste_filename, header):
     num_data_files = DataFile.objects.count()
+    with open(paste_filename, 'r') as paste_file:
+        paste_text = paste_file.read()
 
-    with open(tsv_filename, 'rb') as tsv_file:
-        response = client.post('/api/v0/data_files/', data={'file': tsv_file})
-        data_file_dict = response.json()
-        data_file = DataFile.objects.get(id=data_file_dict['id'])
+    data = {'paste': paste_text, 'header': header}
+    response = client.post('/api/v0/data_files/', data)
+    data_file_dict = response.json()
+    data_file = DataFile.objects.get(id=data_file_dict['id'])
 
     assert response.status_code == 201
     assert DataFile.objects.count() == num_data_files + 1
+    assert data_file.created_from == 'paste'
     assert data_file.delimiter == '\t'
-    assert data_file.quotechar == '"'
+    assert data_file.quotechar == ''
     assert data_file.escapechar == ''
-    verify_data_file_data(data_file, data_file_dict)
-
-
-def test_datafile_create_mixed_quotes(client):
-    file = 'mathesar/tests/data/csv_parsing/mixed_quote.csv'
-    with open(file, 'r') as f:
-        response = client.post('/api/v0/data_files/', data={'file': f})
-        data_file_dict = response.json()
-        data_file = DataFile.objects.get(id=data_file_dict['id'])
-    assert response.status_code == 201
-    assert data_file.delimiter == ','
-    assert data_file.quotechar == "'"
-    assert data_file.escapechar == ''
-    verify_data_file_data(data_file, data_file_dict)
-
-
-def test_datafile_create_double_quote(client):
-    file = 'mathesar/tests/data/csv_parsing/double_quote.csv'
-    with open(file, 'r') as f:
-        response = client.post('/api/v0/data_files/', data={'file': f})
-        data_file_dict = response.json()
-        data_file = DataFile.objects.get(id=data_file_dict['id'])
-    assert response.status_code == 201
-    assert data_file.delimiter == ','
-    assert data_file.quotechar == '"'
-    assert data_file.escapechar == ''
-    verify_data_file_data(data_file, data_file_dict)
-
-
-def test_datafile_create_escaped_quote(client):
-    file = 'mathesar/tests/data/csv_parsing/escaped_quote.csv'
-    with open(file, 'r') as f:
-        response = client.post('/api/v0/data_files/', data={'file': f})
-        data_file_dict = response.json()
-        data_file = DataFile.objects.get(id=data_file_dict['id'])
-    assert response.status_code == 201
-    assert data_file.delimiter == ','
-    assert data_file.quotechar == '"'
-    assert data_file.escapechar == '\\'
+    assert data_file.header == header
     verify_data_file_data(data_file, data_file_dict)
 
 
@@ -163,46 +139,32 @@ def test_data_file_404(client, data_file):
     assert response.json()['detail'] == 'Not found.'
 
 
-def test_datafile_create_invalid_delimiter(client):
+def test_datafile_create_invalid_file(client):
     file = 'mathesar/tests/data/csv_parsing/patents_invalid.csv'
-    with open(file, 'r') as f:
-        response = client.post('/api/v0/data_files/', data={'file': f})
-        data_file_dict = response.json()
+    with patch.object(csv, "get_sv_dialect") as mock_infer:
+        mock_infer.side_effect = InvalidTableError
+        with open(file, 'r') as f:
+            response = client.post('/api/v0/data_files/', data={'file': f})
+            response_dict = response.json()
     assert response.status_code == 400
-    assert data_file_dict["file"] == 'Unable to tabulate datafile'
+    assert response_dict[0] == 'Unable to tabulate data'
 
 
-def test_datafile_create_extra_quote(client):
-    file = 'mathesar/tests/data/csv_parsing/extra_quote_invalid.csv'
-    with open(file, 'r') as f:
-        response = client.post('/api/v0/data_files/', data={'file': f})
-        data_file_dict = response.json()
-    assert response.status_code == 400
-    assert data_file_dict["file"] == 'Unable to tabulate datafile'
-
-
-def test_datafile_create_escaped_quote_invalid(client):
-    file = 'mathesar/tests/data/csv_parsing/escaped_quote_invalid.csv'
-    with open(file, 'r') as f:
-        response = client.post('/api/v0/data_files/', data={'file': f})
-        data_file_dict = response.json()
-    assert response.status_code == 400
-    assert data_file_dict["file"] == 'Unable to tabulate datafile'
-
-
-def test_data_file_create_csv_headerless(client, csv_filename):
-    num_data_files = DataFile.objects.count()
-
+def test_datafile_create_file_and_paste(client, csv_filename, paste_filename):
+    with open(paste_filename, 'r') as paste_file:
+        paste_text = paste_file.read()
     with open(csv_filename, 'rb') as csv_file:
-        data = {'file': csv_file, 'header': False}
-        response = client.post('/api/v0/data_files/', data=data)
-        data_file_dict = response.json()
-        data_file = DataFile.objects.get(id=data_file_dict['id'])
+        data = {'file': csv_file, 'paste': paste_text}
+        response = client.post('/api/v0/data_files/', data)
+        response_dict = response.json()
+    assert response.status_code == 400
+    error = response_dict['non_field_errors'][0]
+    assert error == 'Paste field and file field were both specified'
 
-    assert response.status_code == 201
-    assert DataFile.objects.count() == num_data_files + 1
-    assert data_file.delimiter == ','
-    assert data_file.quotechar == '"'
-    assert data_file.escapechar == ''
-    assert data_file.header is False
-    verify_data_file_data(data_file, data_file_dict)
+
+def test_datafile_create_no_file_and_no_paste(client):
+    response = client.post('/api/v0/data_files/', {})
+    response_dict = response.json()
+    assert response.status_code == 400
+    error = response_dict['non_field_errors'][0]
+    assert error == 'Paste field or file field must be specified'

@@ -4,8 +4,9 @@ from django.core.files import File
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy import text
 
-from mathesar.imports.csv import create_table_from_csv
 from mathesar.models import DataFile, Schema
+from mathesar.errors import InvalidTableError
+from mathesar.imports.csv import create_table_from_csv, get_sv_dialect
 from db.schemas import create_schema, get_schema_oid_from_name
 
 TEST_SCHEMA = 'import_csv_schema'
@@ -21,9 +22,7 @@ def data_file(csv_filename):
 @pytest.fixture
 def headerless_data_file(headerless_csv_filename):
     with open(headerless_csv_filename, 'rb') as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file))
-    data_file.header = False
-    data_file.save()
+        data_file = DataFile.objects.create(file=File(csv_file), header=False)
     return data_file
 
 
@@ -36,13 +35,27 @@ def schema(engine, test_db_model):
         conn.execute(text(f'DROP SCHEMA "{TEST_SCHEMA}" CASCADE;'))
 
 
-def test_csv_upload(data_file, schema):
-    table_name = 'NASA 1'
-    table = create_table_from_csv(data_file, table_name, schema)
+def check_csv_upload(table, table_name, schema, num_records, row, cols):
     assert table is not None
     assert table.name == table_name
     assert table.schema == schema
-    assert table.sa_num_records() == 1393
+    assert table.sa_num_records() == num_records
+    assert table.get_records()[0] == row
+    assert all([col in table.sa_column_names for col in cols])
+
+
+def test_csv_upload(data_file, schema):
+    table_name = 'NASA 1'
+    table = create_table_from_csv(data_file, table_name, schema)
+
+    num_records = 1393
+    expected_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                    '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    expected_cols = ['Center', 'Status', 'Case Number', 'Patent Number',
+                     'Application SN', 'Title', 'Patent Expiration Date']
+    check_csv_upload(
+        table, table_name, schema, num_records, expected_row, expected_cols
+    )
 
 
 def test_headerless_csv_upload(headerless_data_file, schema):
@@ -50,10 +63,15 @@ def test_headerless_csv_upload(headerless_data_file, schema):
     table = create_table_from_csv(
         headerless_data_file, table_name, schema
     )
-    assert table is not None
-    assert table.name == table_name
-    assert table.schema == schema
-    assert table.sa_num_records() == 1393
+
+    num_records = 1393
+    expected_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                    '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    expected_cols = ['column_' + str(i) for i in range(7)]
+
+    check_csv_upload(
+        table, table_name, schema, num_records, expected_row, expected_cols
+    )
 
 
 def test_csv_upload_with_duplicate_table_name(data_file, schema):
@@ -77,3 +95,35 @@ def test_csv_upload_table_imported_to(data_file, schema):
     table = create_table_from_csv(data_file, 'NASA', schema)
     data_file.refresh_from_db()
     assert data_file.table_imported_to == table
+
+
+get_dialect_test_list = [
+    (',', '"', '', 'mathesar/tests/data/patents.csv'),
+    ('\t', '"', '', 'mathesar/tests/data/patents.tsv'),
+    (',', "'", '', 'mathesar/tests/data/csv_parsing/mixed_quote.csv'),
+    (',', '"', '', 'mathesar/tests/data/csv_parsing/double_quote.csv'),
+    (',', '"', '\\', 'mathesar/tests/data/csv_parsing/escaped_quote.csv'),
+]
+
+
+@pytest.mark.parametrize("exp_delim,exp_quote,exp_escape,file", get_dialect_test_list)
+def test_sv_get_dialect(exp_delim, exp_quote, exp_escape, file):
+    with open(file, 'r') as sv_file:
+        dialect = get_sv_dialect(sv_file)
+    assert dialect.delimiter == exp_delim
+    assert dialect.quotechar == exp_quote
+    assert dialect.escapechar == exp_escape
+
+
+get_dialect_exceptions_test_list = [
+    ('mathesar/tests/data/csv_parsing/patents_invalid.csv'),
+    ('mathesar/tests/data/csv_parsing/extra_quote_invalid.csv'),
+    ('mathesar/tests/data/csv_parsing/escaped_quote_invalid.csv'),
+]
+
+
+@pytest.mark.parametrize("file", get_dialect_exceptions_test_list)
+def test_sv_get_dialect_exceptions(file):
+    with pytest.raises(InvalidTableError):
+        with open(file, 'r') as sv_file:
+            get_sv_dialect(sv_file)

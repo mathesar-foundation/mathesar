@@ -213,10 +213,13 @@ class Table(DatabaseObject):
 
 
 class DataFile(BaseModel):
+    created_from_choices = models.TextChoices("created_from", "FILE PASTE")
+
     file = models.FileField(
         upload_to=model_utils.user_directory_path,
     )
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
+    created_from = models.CharField(max_length=128, choices=created_from_choices.choices)
     table_imported_to = models.ForeignKey(Table, related_name="data_files", blank=True,
                                           null=True, on_delete=models.SET_NULL)
     header = models.BooleanField(default=True)

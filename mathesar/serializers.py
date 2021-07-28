@@ -1,5 +1,6 @@
 from django.urls import reverse
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from mathesar.models import Table, Schema, DataFile, Database
 
@@ -52,7 +53,9 @@ class TableSerializer(serializers.ModelSerializer):
     columns = SimpleColumnSerializer(many=True, read_only=True, source='sa_columns')
     records = serializers.SerializerMethodField()
     name = serializers.CharField()
-    data_files = serializers.PrimaryKeyRelatedField(required=False, many=True, queryset=DataFile.objects.all())
+    data_files = serializers.PrimaryKeyRelatedField(
+        required=False, many=True, queryset=DataFile.objects.all()
+    )
 
     class Meta:
         model = Table
@@ -66,6 +69,11 @@ class TableSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(reverse('table-record-list', kwargs={'table_pk': obj.pk}))
         else:
             return None
+
+    def validate_data_files(self, data_files):
+        if data_files and len(data_files) > 1:
+            raise ValidationError('Multiple data files are unsupported.')
+        return data_files
 
 
 class RecordSerializer(serializers.BaseSerializer):
@@ -93,19 +101,23 @@ class DataFileSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault(), read_only=True
     )
     header = serializers.BooleanField(default=True)
+    paste = serializers.CharField(required=False, trim_whitespace=False)
 
     class Meta:
         model = DataFile
         fields = [
-            'id', 'file', 'table_imported_to', 'user', 'header', 'delimiter', 'escapechar', 'quotechar'
+            'id', 'file', 'table_imported_to', 'user', 'header', 'delimiter',
+            'escapechar', 'quotechar', 'paste', 'created_from'
         ]
-        extra_kwargs = {'delimiter': {'trim_whitespace': False},
-                        'escapechar': {'trim_whitespace': False},
-                        'quotechar': {'trim_whitespace': False}
-                        }
+        extra_kwargs = {
+            'file': {'required': False},
+            'delimiter': {'trim_whitespace': False},
+            'escapechar': {'trim_whitespace': False},
+            'quotechar': {'trim_whitespace': False}
+        }
         # We only currently support importing to a new table, so setting a table via API is invalid.
         # User should be set automatically, not submitted via the API.
-        read_only_fields = ['table_imported_to']
+        read_only_fields = ['user', 'table_imported_to', 'created_from']
 
     def save(self, **kwargs):
         """
@@ -115,3 +127,12 @@ class DataFileSerializer(serializers.ModelSerializer):
         if current_user.is_authenticated:
             kwargs['user'] = current_user
         return super().save(**kwargs)
+
+    def validate(self, data):
+        if not self.partial:
+            # Only perform validation on source files when we're not partial
+            if 'paste' in data and 'file' in data:
+                raise ValidationError('Paste field and file field were both specified')
+            elif 'paste' not in data and 'file' not in data:
+                raise ValidationError('Paste field or file field must be specified')
+        return data
