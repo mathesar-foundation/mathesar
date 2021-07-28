@@ -19,6 +19,8 @@ from db.types import inference
 TEMP_SCHEMA = f"{constants.MATHESAR_PREFIX}temp_schema"
 TEMP_TABLE = f"{constants.MATHESAR_PREFIX}temp_table_%s"
 
+SUPPORTED_TABLE_UPDATE_ARGS = {'name'}
+
 
 def create_string_column_table(name, schema, column_names, engine):
     """
@@ -58,7 +60,6 @@ def create_mathesar_table(name, schema, columns_, engine, metadata=None):
 
 class DropTableCascade(DropTable):
     def __init__(self, table, cascade=False, if_exists=False, **kwargs):
-        print(if_exists)
         super().__init__(table, if_exists=if_exists, **kwargs)
         self.cascade = cascade
 
@@ -96,6 +97,11 @@ def rename_table(name, schema, engine, rename_to):
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)
         op.rename_table(table.name, rename_to, schema=table.schema)
+
+
+def update_table(name, schema, engine, update_data):
+    if 'name' in update_data:
+        rename_table(name, schema, engine, update_data['name'])
 
 
 def extract_columns_from_table(
@@ -403,6 +409,21 @@ def reflect_table_from_oid(oid, engine):
     with engine.begin() as conn:
         schema, table_name = conn.execute(sel).fetchall()[0]
     return reflect_table(table_name, schema, engine)
+
+
+def get_enriched_column_table(raw_sa_table, engine=None):
+    table_columns = [
+        columns.MathesarColumn.from_column(c) for c in raw_sa_table.columns
+    ]
+    if engine is not None:
+        for col in table_columns:
+            col.add_engine(engine)
+    return Table(
+        raw_sa_table.name,
+        MetaData(),
+        *table_columns,
+        schema=raw_sa_table.schema
+    )
 
 
 def get_table_oids_from_schema(schema_oid, engine):

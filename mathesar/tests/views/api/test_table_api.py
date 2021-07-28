@@ -5,12 +5,13 @@ from django.core.cache import cache
 from django.core.files import File
 from sqlalchemy import text
 
-from mathesar.views import api
+from mathesar import reflection
 from mathesar.imports import paste
 from mathesar.errors import InvalidPasteError
 from mathesar.models import Table, DataFile, Schema
 from mathesar.utils.schemas import create_schema_and_object
 from db.tests.types import fixtures
+from db import tables
 
 
 engine_with_types = fixtures.engine_with_types
@@ -45,6 +46,7 @@ def check_table_response(response_table, table, table_name):
     assert response_table['schema'] == table.schema.id
     assert 'created_at' in response_table
     assert 'updated_at' in response_table
+    assert 'has_dependencies' in response_table
     assert len(response_table['columns']) == len(table.sa_column_names)
     for column in response_table['columns']:
         assert column['name'] in table.sa_column_names
@@ -108,7 +110,7 @@ def test_table_list(create_table, client):
 
 
 def test_table_list_filter_name(create_table, client):
-    tables = {
+    expected_tables = {
         'Filter Name 1': create_table('Filter Name 1'),
         'Filter Name 2': create_table('Filter Name 2'),
         'Filter Name 3': create_table('Filter Name 3')
@@ -123,13 +125,13 @@ def test_table_list_filter_name(create_table, client):
     response_tables = {res['name']: res for res in response_data['results']}
     for table_name in filter_tables:
         assert table_name in response_tables
-        table = tables[table_name]
+        table = expected_tables[table_name]
         response_table = response_tables[table_name]
         check_table_response(response_table, table, table_name)
 
 
 def test_table_list_filter_schema(create_table, client):
-    tables = {
+    expected_tables = {
         'Schema 1': create_table('Filter Schema 1', schema='Schema 1'),
         'Schema 2': create_table('Filter Schema 2', schema='Schema 2'),
         'Schema 3': create_table('Filter Schema 3', schema='Schema 3')
@@ -145,7 +147,7 @@ def test_table_list_filter_schema(create_table, client):
                        for res in response_data['results']}
     for schema_name in filter_tables:
         assert schema_name in response_tables
-        table = tables[schema_name]
+        table = expected_tables[schema_name]
         response_table = response_tables[schema_name]
         check_table_response(response_table, table, table.name)
 
@@ -173,15 +175,15 @@ def test_table_list_filter_timestamps(create_table, client, timestamp_type):
 
 
 def test_table_list_filter_import_verified(create_table, client):
-    tables = {
+    expected_tables = {
         True: create_table('Filter Verified 1'),
         False: create_table('Filter Verified 2'),
     }
-    for verified, table in tables.items():
+    for verified, table in expected_tables.items():
         table.import_verified = verified
         table.save()
 
-    for verified, table in tables.items():
+    for verified, table in expected_tables.items():
         query_str = str(verified).lower()
         response = client.get(f'/api/v0/tables/?import_verified={query_str}')
         response_data = response.json()
@@ -190,19 +192,19 @@ def test_table_list_filter_import_verified(create_table, client):
 
 
 def test_table_list_filter_imported(create_table, client):
-    tables = {
+    expected_tables = {
         None: create_table('Filter Imported 1'),
         False: create_table('Filter Imported 2'),
         True: create_table('Filter Imported 3'),
     }
-    for verified, table in tables.items():
+    for verified, table in expected_tables.items():
         table.import_verified = verified
         table.save()
 
     response = client.get('/api/v0/tables/?not_imported=false')
     check_table_filter_response(response, status_code=200, count=2)
 
-    table = tables[None]
+    table = expected_tables[None]
     response = client.get('/api/v0/tables/?not_imported=true')
     response_data = response.json()
     check_table_filter_response(response, status_code=200, count=1)
@@ -316,6 +318,94 @@ def test_table_create_from_paste_no_trim(client, schema):
     assert response.status_code == 201
 
 
+def test_table_create_without_datafile(client, schema):
+    num_tables = Table.objects.count()
+    table_name = 'test_table_no_file'
+    body = {  # No `data_files` field
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
+    table = Table.objects.get(id=response_table['id'])
+
+    assert response.status_code == 201
+    assert Table.objects.count() == num_tables + 1
+    assert len(table.sa_columns) == 1  # only the internal `mathesar_id` column
+    assert len(table.get_records()) == 0
+    check_table_response(response_table, table, table_name)
+
+
+def test_table_create_with_empty_datafile(client, schema):
+    num_tables = Table.objects.count()
+    table_name = 'test_table_empty_files'
+    body = {
+        'data_files': [],  # Empty `data_files` field
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
+    table = Table.objects.get(id=response_table['id'])
+
+    assert response.status_code == 201
+    assert Table.objects.count() == num_tables + 1
+    assert len(table.sa_columns) == 1  # only the internal `mathesar_id` column
+    assert len(table.get_records()) == 0
+    check_table_response(response_table, table, table_name)
+
+
+def test_table_partial_update(create_table, client):
+    table_name = 'NASA Table Partial Update'
+    new_table_name = 'NASA Table Partial Update New'
+    table = create_table(table_name)
+
+    body = {'name': new_table_name}
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+
+    response_table = response.json()
+    assert response.status_code == 200
+    check_table_response(response_table, table, new_table_name)
+
+    table = Table.objects.get(oid=table.oid)
+    assert table.name == new_table_name
+
+
+def test_table_delete(create_table, client):
+    table_name = 'NASA Table Delete'
+    table = create_table(table_name)
+    table_count = len(Table.objects.all())
+
+    with patch.object(tables, 'delete_table') as mock_infer:
+        response = client.delete(f'/api/v0/tables/{table.id}/')
+    assert response.status_code == 204
+
+    # Ensure the Django model was deleted
+    new_table_count = len(Table.objects.all())
+    assert table_count - 1 == new_table_count
+
+    # Ensure the backend table would have been deleted
+    assert mock_infer.call_args is not None
+    assert mock_infer.call_args[0] == (
+        table.name,
+        table.schema.name,
+        table.schema._sa_engine,
+    )
+    assert mock_infer.call_args[1] == {
+        'cascade': True
+    }
+
+
+def test_table_dependencies(client, create_table):
+    table_name = 'NASA Table Dependencies'
+    table = create_table(table_name)
+
+    response = client.get(f'/api/v0/tables/{table.id}/')
+    response_table = response.json()
+    assert response.status_code == 200
+    assert response_table['has_dependencies'] is True
+
+
 def test_table_404(client):
     response = client.get('/api/v0/tables/3000/')
     assert response.status_code == 404
@@ -370,16 +460,27 @@ def test_table_create_from_datafile_and_paste(client, schema, paste_text, data_f
     assert response_dict[0] == 'Both data file and raw paste value supplied.'
 
 
-def test_table_create_from_empty(client, schema):
-    table_name = 'Test Table Create From Empty'
-    body = {
-        'name': table_name,
-        'schema': schema.id,
-    }
-    response = client.post('/api/v0/tables/', body)
-    response_dict = response.json()
+def test_table_partial_update_invalid_field(create_table, client):
+    table_name = 'NASA Table Partial Update'
+    table = create_table(table_name)
+
+    body = {'schema': table.schema.id}
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+
     assert response.status_code == 400
-    assert response_dict[0] == 'No data files or paste value supplied.'
+    assert 'is not supported' in response.json()['schema']
+
+
+def test_table_partial_update_404(client):
+    response = client.patch('/api/v0/tables/3000/', {})
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'
+
+
+def test_table_delete_404(client):
+    response = client.delete('/api/v0/tables/3000/')
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'
 
 
 def test_table_update(client, create_table):
@@ -387,20 +488,6 @@ def test_table_update(client, create_table):
     response = client.put(f'/api/v0/tables/{table.id}/')
     assert response.status_code == 405
     assert response.json()['detail'] == 'Method "PUT" not allowed.'
-
-
-def test_data_file_partial_update(client, create_table):
-    table = create_table('partial_update_table_test')
-    response = client.patch(f'/api/v0/tables/{table.id}/')
-    assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "PATCH" not allowed.'
-
-
-def test_data_file_delete(client, create_table):
-    table = create_table('delete_table_test')
-    response = client.delete(f'/api/v0/tables/{table.id}/')
-    assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "DELETE" not allowed.'
 
 
 def test_table_get_with_reflect_new(client, table_for_reflection):
@@ -501,14 +588,14 @@ def test_table_get_with_reflect_delete(client, table_for_reflection):
 
 
 def test_table_viewset_sets_cache(client):
-    cache.delete(api.DB_REFLECTION_KEY)
-    assert not cache.get(api.DB_REFLECTION_KEY)
+    cache.delete(reflection.DB_REFLECTION_KEY)
+    assert not cache.get(reflection.DB_REFLECTION_KEY)
     client.get('/api/v0/schemas/')
-    assert cache.get(api.DB_REFLECTION_KEY)
+    assert cache.get(reflection.DB_REFLECTION_KEY)
 
 
 def test_table_viewset_checks_cache(client):
-    cache.delete(api.DB_REFLECTION_KEY)
-    with patch.object(api, 'reflect_tables_from_schema') as mock_reflect:
+    cache.delete(reflection.DB_REFLECTION_KEY)
+    with patch.object(reflection, 'reflect_tables_from_schema') as mock_reflect:
         client.get('/api/v0/tables/')
     mock_reflect.assert_called()

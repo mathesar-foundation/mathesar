@@ -1,6 +1,6 @@
 name: UI - Lint, Audit and Tests
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   lint:

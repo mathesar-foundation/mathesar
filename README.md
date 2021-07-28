@@ -4,6 +4,23 @@ Mathesar is a project to make databases easier to use for non-technical users. O
 
 We are currently in early development and hope to release an alpha version by late 2021. Please see the [Mathesar wiki](https://wiki.mathesar.org/) for more information about the project.
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**
+
+- [Contributing](#contributing)
+- [Local Development](#local-development)
+  - [Linting](#linting)
+  - [Running tests](#running-tests)
+  - [Opening a shell in the container](#opening-a-shell-in-the-container)
+- [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Contributing
+
+We actively encourage contribution! [Join our community](https://wiki.mathesar.org/community) and read through [our contributing guidelines](https://wiki.mathesar.org/community/contributing).
+
 ## Local Development
 
 First, [ensure that you have Docker installed](https://docs.docker.com/get-docker/).
@@ -34,7 +51,7 @@ To lint the project, run the `lint.sh` script from the root of the repository. T
 ./lint.sh
 ```
 
-By default, the script lints both Python and Node.js but this can be changed with the `-p` and `-n` flags respectively.
+By default, the script lints both Python and Node.js (if changes are staged), but this can be overridden with the `-p` and `-n` flags respectively.
 ```
 ./lint.sh -p false
 ```
@@ -72,6 +89,6 @@ Frontend:
 docker exec -it mathesar_ui_1 bash
 ```
 
-## Contributing
+## License
 
-We actively encourage contribution! [Join our community](https://wiki.mathesar.org/community) and read through [our contributing guidelines](https://wiki.mathesar.org/community/contributing).
+Mathesar is open source under the GPLv3 license - see [LICENSE](LICENSE). It also contains derivatives of third-party open source modules licensed under the MIT license. See the list and respective licenses in [THIRDPARTY](THIRDPARTY).

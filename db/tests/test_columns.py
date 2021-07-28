@@ -7,6 +7,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.exc import IntegrityError
 from db import columns, tables, constants
+from db.tests.types import fixtures
+
+engine_with_types = fixtures.engine_with_types
 
 
 def init_column(*args, **kwargs):
@@ -144,6 +147,62 @@ def test_MC_is_default_when_false_for_pk():
         assert not col.is_default
 
 
+def test_MC_valid_target_types_no_engine():
+    mc = columns.MathesarColumn('testable_col', String)
+    assert mc.valid_target_types is None
+
+
+def test_MC_valid_target_types_default_engine(engine):
+    mc = columns.MathesarColumn('testable_col', String)
+    mc.add_engine(engine)
+    assert "VARCHAR" in mc.valid_target_types
+
+
+def test_MC_valid_target_types_custom_engine(engine_with_types):
+    mc = columns.MathesarColumn('testable_col', String)
+    mc.add_engine(engine_with_types)
+    assert "mathesar_types.email" in mc.valid_target_types
+
+
+def test_MC_column_index_when_no_engine():
+    mc = columns.MathesarColumn('testable_col', String)
+    assert mc.column_index is None
+
+
+def test_MC_column_index_when_no_table(engine):
+    mc = columns.MathesarColumn('testable_col', String)
+    mc.add_engine(engine)
+    assert mc.column_index is None
+
+
+def test_MC_column_index_when_no_db_table(engine):
+    mc = columns.MathesarColumn('testable_col', String)
+    mc.add_engine(engine)
+    table = Table('atable', MetaData(), mc)
+    assert mc.table == table and mc.column_index is None
+
+
+def test_MC_column_index_single(engine_with_schema):
+    engine, schema = engine_with_schema
+    mc = columns.MathesarColumn('testable_col', String)
+    mc.add_engine(engine)
+    metadata = MetaData(bind=engine, schema=schema)
+    Table('asupertable', metadata, mc).create()
+    assert mc.column_index == 0
+
+
+def test_MC_column_index_multiple(engine_with_schema):
+    engine, schema = engine_with_schema
+    mc_1 = columns.MathesarColumn('testable_col', String)
+    mc_2 = columns.MathesarColumn('testable_col2', String)
+    mc_1.add_engine(engine)
+    mc_2.add_engine(engine)
+    metadata = MetaData(bind=engine, schema=schema)
+    Table('asupertable', metadata, mc_1, mc_2).create()
+    assert mc_1.column_index == 0
+    assert mc_2.column_index == 1
+
+
 @pytest.mark.parametrize(
     "column_dict,func_name",
     [
@@ -272,14 +331,15 @@ def test_retype_column_correct_column(engine_with_schema):
         table_name,
         target_column_name,
         "boolean",
-        engine
+        engine,
+        friendly_names=False,
     )
 
 
 def test_create_column(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "atableone"
-    target_type = "boolean"
+    target_type = "BOOLEAN"
     initial_column_name = "original_column"
     new_column_name = "added_column"
     table = Table(

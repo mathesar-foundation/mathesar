@@ -1,11 +1,11 @@
 from unittest.mock import patch
 from django.core.cache import cache
 from sqlalchemy import text
-from db.schemas import get_mathesar_schemas
+from db import schemas
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Schema, Database
 from mathesar import models
-from mathesar.views import api
+from mathesar import reflection
 from mathesar.utils.schemas import create_schema_and_object
 
 
@@ -14,6 +14,7 @@ def check_schema_response(response_schema, schema, schema_name, test_db_name,
     assert response_schema['id'] == schema.id
     assert response_schema['name'] == schema_name
     assert response_schema['database'] == test_db_name
+    assert 'has_dependencies' in response_schema
     assert len(response_schema['tables']) == len_tables
     if len_tables > 0:
         response_table = response_schema['tables'][0]
@@ -23,7 +24,9 @@ def check_schema_response(response_schema, schema, schema_name, test_db_name,
         assert response_table['url'].startswith('http')
         assert response_table['url'].endswith(f'/api/v0/tables/{response_table_id}/')
     if check_schema_objects:
-        assert schema_name in get_mathesar_schemas(create_mathesar_engine(test_db_name))
+        assert schema_name in schemas.get_mathesar_schemas(
+            create_mathesar_engine(test_db_name)
+        )
 
 
 def test_schema_list(client, patent_schema, empty_nasa_table):
@@ -55,7 +58,7 @@ def test_schema_list_filter(client, monkeypatch):
 
     monkeypatch.setattr(models.schemas, "get_schema_name_from_oid", mock_get_name_from_oid)
     monkeypatch.setattr(models, "create_mathesar_engine", lambda x: x)
-    monkeypatch.setattr(api, "reflect_db_objects", lambda: None)
+    monkeypatch.setattr(reflection, "reflect_db_objects", lambda: None)
 
     schemas = {
         (schema_params[i][0], schema_params[i][1]): Schema.objects.create(
@@ -106,12 +109,6 @@ def test_schema_detail(create_table, client, test_db_name):
     check_schema_response(response_schema, schema, 'Patents', test_db_name)
 
 
-def test_schema_404(create_table, client):
-    response = client.get('/api/v0/schemas/3000/')
-    assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
-
-
 def test_schema_create(client, test_db_name):
     num_schemas = Schema.objects.count()
 
@@ -138,21 +135,72 @@ def test_schema_update(client, test_db_name):
     assert response.json()['detail'] == 'Method "PUT" not allowed.'
 
 
-def test_schema_partial_update(client, test_db_name):
-    schema = create_schema_and_object('bar', test_db_name)
-    data = {
-        'name': 'blah'
+def test_schema_partial_update(create_schema, client, test_db_name):
+    schema_name = 'NASA Schema Partial Update'
+    new_schema_name = 'NASA Schema Partial Update New'
+    schema = create_schema(schema_name)
+
+    body = {'name': new_schema_name}
+    response = client.patch(f'/api/v0/schemas/{schema.id}/', body)
+
+    response_schema = response.json()
+    assert response.status_code == 200
+    check_schema_response(response_schema, schema, new_schema_name, test_db_name,
+                          len_tables=0)
+
+    schema = Schema.objects.get(oid=schema.oid)
+    assert schema.name == new_schema_name
+
+
+def test_schema_delete(create_schema, client):
+    schema_name = 'NASA Schema Delete'
+    schema = create_schema(schema_name)
+
+    with patch.object(schemas, 'delete_schema') as mock_infer:
+        response = client.delete(f'/api/v0/schemas/{schema.id}/')
+    assert response.status_code == 204
+
+    # Ensure the Django model was deleted
+    existing_oids = {schema.oid for schema in Schema.objects.all()}
+    assert schema.oid not in existing_oids
+
+    # Ensure the backend schema would have been deleted
+    assert mock_infer.call_args is not None
+    assert mock_infer.call_args[0] == (
+        schema.name,
+        schema._sa_engine,
+    )
+    assert mock_infer.call_args[1] == {
+        'cascade': True
     }
-    response = client.patch(f'/api/v0/schemas/{schema.id}/', data=data)
-    assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "PATCH" not allowed.'
 
 
-def test_schema_delete(client, test_db_name):
-    schema = create_schema_and_object('baz', test_db_name)
-    response = client.delete(f'/api/v0/schemas/{schema.id}/')
-    assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "DELETE" not allowed.'
+def test_schema_dependencies(client, create_schema):
+    schema_name = 'NASA Schema Dependencies'
+    schema = create_schema(schema_name)
+
+    response = client.get(f'/api/v0/schemas/{schema.id}/')
+    response_schema = response.json()
+    assert response.status_code == 200
+    assert response_schema['has_dependencies'] is True
+
+
+def test_schema_detail_404(client):
+    response = client.get('/api/v0/schemas/3000/')
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'
+
+
+def test_schema_partial_update_404(client):
+    response = client.patch('/api/v0/schemas/3000/', {})
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'
+
+
+def test_schema_delete_404(client):
+    response = client.delete('/api/v0/schemas/3000/')
+    assert response.status_code == 404
+    assert response.json()['detail'] == 'Not found.'
 
 
 def test_schema_get_with_reflect_new(client, test_db_name):
@@ -240,14 +288,14 @@ def test_schema_get_with_reflect_delete(client, test_db_name):
 
 
 def test_schema_viewset_sets_cache(client):
-    cache.delete(api.DB_REFLECTION_KEY)
-    assert not cache.get(api.DB_REFLECTION_KEY)
+    cache.delete(reflection.DB_REFLECTION_KEY)
+    assert not cache.get(reflection.DB_REFLECTION_KEY)
     client.get('/api/v0/schemas/')
-    assert cache.get(api.DB_REFLECTION_KEY)
+    assert cache.get(reflection.DB_REFLECTION_KEY)
 
 
 def test_schema_viewset_checks_cache(client):
-    cache.delete(api.DB_REFLECTION_KEY)
-    with patch.object(api, 'reflect_schemas_from_database') as mock_reflect:
+    cache.delete(reflection.DB_REFLECTION_KEY)
+    with patch.object(reflection, 'reflect_schemas_from_database') as mock_reflect:
         client.get('/api/v0/schemas/')
     mock_reflect.assert_called()

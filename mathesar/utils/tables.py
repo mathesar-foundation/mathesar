@@ -2,37 +2,22 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
-from db.tables import get_table_oids_from_schema, infer_table_column_types
-from db.columns import MathesarColumn
 from mathesar.models import Table
+from mathesar.errors import InvalidPasteError
 from mathesar.serializers import TableSerializer
 from mathesar.imports.csv import create_table_from_csv
+from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.paste import create_table_from_paste
-from mathesar.errors import InvalidPasteError
-
-
-def reflect_tables_from_schema(schema):
-    db_table_oids = {
-        table["oid"]
-        for table in get_table_oids_from_schema(schema.oid, schema._sa_engine)
-    }
-    tables = [
-        Table.objects.get_or_create(oid=oid, schema=schema)
-        for oid in db_table_oids
-    ]
-    for table in Table.objects.all().filter(schema=schema):
-        if table.oid not in db_table_oids:
-            table.delete()
-    return tables
+from db.tables import infer_table_column_types, create_mathesar_table, get_oid_from_table
 
 
 def get_table_column_types(table):
     schema = table.schema
     types = infer_table_column_types(schema.name, table.name, schema._sa_engine)
     col_types = {
-        col.name: t.__name__
+        col.name: t().compile(dialect=schema._sa_engine.dialect)
         for col, t in zip(table.sa_columns, types)
-        if not MathesarColumn.from_column(col).is_default
+        if not col.is_default
         and not col.primary_key
         and not col.foreign_keys
     }
@@ -50,7 +35,7 @@ def create_table_from_data(request, data):
     elif data['paste']:
         table = create_table_from_paste_data(data['paste'], name, schema)
     else:
-        raise ValidationError('No data files or paste value supplied.')
+        table = create_empty_table(name, schema)
 
     serializer = TableSerializer(table, context={'request': request})
     return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -62,7 +47,6 @@ def create_table_from_datafile(data_files, name, schema):
         table = create_table_from_csv(data_file, name, schema)
     elif len(data_files) > 1:
         raise ValidationError({'data_files': 'Multiple data files are unsupported.'})
-
     return table
 
 
@@ -71,5 +55,20 @@ def create_table_from_paste_data(paste, name, schema):
         table = create_table_from_paste(paste, name, schema)
     except InvalidPasteError:
         raise ValidationError({'paste': 'Unable to tabulate paste'})
+    return table
 
+
+def create_empty_table(name, schema):
+    """
+    Create an empty table, with only Mathesar's internal columns.
+
+    :param name: the parsed and validated table name
+    :param schema: the parsed and validated schema model
+    :return: the newly created blank table
+    """
+
+    engine = create_mathesar_engine(schema.database.name)
+    db_table = create_mathesar_table(name, schema.name, [], engine)
+    db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
+    table, _ = Table.objects.get_or_create(oid=db_table_oid, schema=schema)
     return table

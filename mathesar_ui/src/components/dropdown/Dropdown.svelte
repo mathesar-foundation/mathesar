@@ -11,8 +11,12 @@
   } from '@mathesar-components';
 
   export let triggerClass = '';
+  export let triggerAppearance : 'default' | 'plain' = 'default';
   export let contentClass = '';
   export let isOpen = false;
+  export let closeOnInnerClick = false;
+  export let ariaLabel:string = null;
+  export let ariaControls;
 
   let trigger: HTMLElement;
   $: tgClasses = ['dropdown', 'trigger', triggerClass].join(' ');
@@ -24,9 +28,16 @@
   function close() {
     isOpen = false;
   }
+
+  function checkAndCloseOnInnerClick() {
+    if (closeOnInnerClick) {
+      close();
+    }
+  }
 </script>
 
-<Button bind:element={trigger} class={tgClasses} on:click={toggle}>
+<Button bind:element={trigger} appearance={triggerAppearance} class={tgClasses} on:click={toggle} 
+aria-controls={ariaControls} aria-haspopup="listbox" aria-label={ariaLabel}>
   <span class="label">
     <slot name="trigger"></slot>
   </span>
@@ -43,7 +54,8 @@
           references: [
             trigger,
           ],
-        }}>
+        }}
+        on:click={checkAndCloseOnInnerClick}>
     <slot name="content"></slot>
   </div>
 {/if}

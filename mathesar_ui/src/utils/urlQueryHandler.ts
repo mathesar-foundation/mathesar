@@ -1,25 +1,40 @@
 import { router } from 'tinro';
+import type {
+  GroupOption,
+  SortOption,
+  TableOptionsData,
+  FilterEntry,
+} from '@mathesar/stores/tableData';
 
-// Structure of url t=[[id,limit,page,filters]], a=id
-// t -> tables, a -> active
-// Null value represented for numbers as -1, strings as empty string
+/**
+ * Structure of url t=[
+ *  [
+ *    id,
+ *    [sortcolumn1, sortorder, sortc2, sortorder2],
+ *    [groupcolumn1, groupcolumn2],
+ *    [combination, filtercolumn, condition, value, filterc2, condition2]
+ *  ]
+ * ], a=id
+ * t -> tables, a -> active
+ */
 
-interface TableOptions {
+interface TableOptions extends Partial<TableOptionsData> {
   position?: number,
   status?: 'active' | 'inactive',
-  pageSize?: number,
-  page?: number
 }
+
 interface TableConfig extends TableOptions {
   id: number,
 }
+
+type RawTableConfig = (string | number | string[])[];
 
 function isInDBPath(db: string): boolean {
   const dbInURL = window.location.pathname.split('/')[1];
   return db === dbInURL;
 }
 
-function getRawTables(db: string): (string | number | string[])[][] {
+function getRawTables(db: string): RawTableConfig[] {
   if (isInDBPath(db)) {
     const tableQuery = router.location.query.get('t') as string;
     return tableQuery ? JSON.parse(decodeURIComponent(tableQuery)) as [] : [];
@@ -27,26 +42,94 @@ function getRawTables(db: string): (string | number | string[])[][] {
   return [];
 }
 
-function parseTableConfig(config: (string | number | string[])[]): TableConfig {
+function parseTableConfig(config: RawTableConfig): TableConfig {
   const tableConfig: TableConfig = {
     id: parseInt(config[0] as string, 10),
   };
 
   if (config[1]) {
-    const pageSize = parseInt(config[1] as string, 10);
-    if (pageSize > -1) {
-      tableConfig.pageSize = pageSize;
+    const sortOptionMap: SortOption = new Map();
+    const sortList = config[1] as string[];
+    for (let i = 0; i < sortList.length; i += 2) {
+      const sortOrder = sortList[i + 1] === 'd' ? 'desc' : 'asc';
+      sortOptionMap.set(sortList[i], sortOrder);
+    }
+    if (sortList.length > 0) {
+      tableConfig.sort = sortOptionMap;
     }
   }
 
   if (config[2]) {
-    const page = parseInt(config[2] as string, 10);
-    if (page > -1) {
-      tableConfig.page = page;
+    const groupOptionSet: GroupOption = new Set(config[2] as string[]);
+    if (groupOptionSet.size > 0) {
+      tableConfig.group = groupOptionSet;
+    }
+  }
+
+  if ((config[3] as string[])?.length > 0) {
+    const filterList = config[3] as string[];
+    const combination = filterList[0];
+    const filters: FilterEntry[] = [];
+    for (let i = 1; i < filterList.length;) {
+      const column = filterList[i];
+      const condition = filterList[i + 1];
+
+      if (column && condition) {
+        const value = filterList[i + 2] || '';
+        filters.push({
+          column: {
+            id: column,
+            label: column,
+          },
+          condition: {
+            id: condition,
+            label: condition,
+          },
+          value,
+        });
+      }
+      i += 3;
+    }
+    if (filters.length > 0) {
+      tableConfig.filter = {
+        combination: {
+          id: combination,
+          label: combination,
+        },
+        filters,
+      };
     }
   }
 
   return tableConfig;
+}
+
+function prepareRawTableConfig(id: number, options?: TableOptions): RawTableConfig {
+  const table: RawTableConfig = [id];
+  if (options) {
+    const sortOption: string[] = [];
+    options.sort?.forEach((value, key) => {
+      sortOption.push(key);
+      const sortOrder = value === 'desc' ? 'd' : 'a';
+      sortOption.push(sortOrder);
+    });
+    table.push(sortOption);
+
+    const groupOption: string[] = [...(options.group ?? [])];
+    table.push(groupOption);
+
+    const filterOptions: string[] = [];
+    if (options.filter?.filters?.length > 0) {
+      filterOptions.push(options.filter.combination.id as string || 'and');
+      options.filter.filters.forEach((filter) => {
+        filterOptions.push(filter.column.id as string);
+        filterOptions.push(filter.condition.id as string);
+        filterOptions.push(filter.value);
+      });
+      table.push(filterOptions);
+    }
+  }
+  return table;
 }
 
 function getAllTableConfigs(db: string): TableConfig[] {
@@ -68,13 +151,8 @@ function getActiveTable(db: string): number {
   return null;
 }
 
-function constructTableQuery(id: number, options?: TableOptions) : string {
-  const table = [id];
-  if (options) {
-    table.push(options.pageSize || -1);
-    table.push(options.page || -1);
-  }
-  const t = encodeURIComponent(`${JSON.stringify([table])}`);
+function constructTableLink(id: number, options?: TableOptions) : string {
+  const t = encodeURIComponent(`${JSON.stringify(prepareRawTableConfig(id, options))}`);
   const a = encodeURIComponent(id);
   return `?t=${t}&a=${a}`;
 }
@@ -88,11 +166,7 @@ function addTable(
     const tables = getRawTables(db);
     const existingTable = tables.find((table) => table[0] === id);
     if (!existingTable) {
-      const tableConfig: (string | number | string[])[] = [id];
-      if (options) {
-        tableConfig.push(options.pageSize || -1);
-        tableConfig.push(options.page || -1);
-      }
+      const tableConfig = prepareRawTableConfig(id, options);
       if (
         typeof options?.position === 'number'
         && options?.position < tables.length
@@ -131,10 +205,9 @@ function removeTable(db: string, id: number, activeTabId?: number): void {
 
 function setTableOptions(db: string, id: number, options: TableOptions): void {
   const allTables = getRawTables(db);
-  const table = allTables.find((entry) => entry[0] === id);
-  if (table) {
-    table[1] = options.pageSize || -1;
-    table[2] = options.page || -1;
+  const tableIndex = allTables.findIndex((entry) => entry[0] === id);
+  if (tableIndex > -1) {
+    allTables[tableIndex] = prepareRawTableConfig(id, options);
     router.location.query.set('t', encodeURIComponent(JSON.stringify(allTables)));
   }
 }
@@ -150,7 +223,7 @@ export default {
   getAllTableConfigs,
   setTableOptions,
   getActiveTable,
-  constructTableQuery,
+  constructTableLink,
   addTable,
   removeTable,
   removeActiveTable,

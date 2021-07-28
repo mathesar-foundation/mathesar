@@ -33,7 +33,7 @@ class SchemaSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Schema
-        fields = ['id', 'name', 'tables', 'database']
+        fields = ['id', 'name', 'tables', 'database', 'has_dependencies']
 
 
 class SimpleColumnSerializer(serializers.Serializer):
@@ -42,8 +42,10 @@ class SimpleColumnSerializer(serializers.Serializer):
 
 
 class ColumnSerializer(SimpleColumnSerializer):
+    index = serializers.IntegerField(source='column_index', read_only=True)
     nullable = serializers.BooleanField(default=True)
     primary_key = serializers.BooleanField(default=False)
+    valid_target_types = serializers.ListField(read_only=True)
 
 
 class TableSerializer(serializers.ModelSerializer):
@@ -53,11 +55,14 @@ class TableSerializer(serializers.ModelSerializer):
     paste = serializers.CharField(
         write_only=True, required=False, default='', trim_whitespace=False
     )
+    data_files = serializers.PrimaryKeyRelatedField(
+        required=False, many=True, queryset=DataFile.objects.all()
+    )
 
     class Meta:
         model = Table
         fields = ['id', 'name', 'schema', 'created_at', 'updated_at',
-                  'columns', 'records', 'data_files', 'paste']
+                  'columns', 'records', 'data_files', 'paste', 'has_dependencies']
 
     def get_records(self, obj):
         if isinstance(obj, Table):
@@ -71,6 +76,12 @@ class TableSerializer(serializers.ModelSerializer):
 class RecordSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         return instance._asdict()
+
+
+class RecordListParameterSerializer(serializers.Serializer):
+    filters = serializers.JSONField(required=False, default=[])
+    order_by = serializers.JSONField(required=False, default=[])
+    group_count_by = serializers.JSONField(required=False, default=[])
 
 
 class DatabaseSerializer(serializers.ModelSerializer):
@@ -89,8 +100,9 @@ class DataFileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DataFile
-        fields = ['id', 'file', 'table_imported_to', 'user', 'delimiter', 'escapechar',
-                  'quotechar']
+        fields = [
+            'id', 'file', 'table_imported_to', 'user', 'header', 'delimiter', 'escapechar', 'quotechar'
+        ]
         extra_kwargs = {'delimiter': {'trim_whitespace': False},
                         'escapechar': {'trim_whitespace': False},
                         'quotechar': {'trim_whitespace': False}}

@@ -3,3 +3,8 @@ export interface SelectOption {
 }
 
 export type SelectOptions = SelectOption[] | Promise<SelectOption>;
+export interface SelectChangeEvent extends Event {
+  detail: {
+    value: SelectOption
+  }
+}

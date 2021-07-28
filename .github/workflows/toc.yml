@@ -1,0 +1,8 @@
+on: push
+name: README ToC Generator
+jobs:
+  generateTOC:
+    name: ToC Generator
+    runs-on: ubuntu-latest
+    steps:
+      - uses: technote-space/toc-generator@v4
