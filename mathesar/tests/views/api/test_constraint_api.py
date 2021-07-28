@@ -83,7 +83,7 @@ def test_create_single_column_unique_constraint(create_table, client):
     _verify_unique_constraint(response.json(), ['Case Number'], 'NASA Constraint List 5_Case Number_key')
 
 
-def test_create_single_column_unique_constraint_with_name(create_table, client):
+def test_create_unique_constraint_with_name_specified(create_table, client):
     table_name = 'NASA Constraint List 6'
     table = create_table(table_name)
 
@@ -118,3 +118,21 @@ def test_drop_constraint(create_table, client):
     assert response.status_code == 204
     new_list_response = client.get(f'/api/v0/tables/{table.id}/constraints/')
     assert new_list_response.json()['count'] == 1
+
+
+def test_create_unique_constraint_with_duplicate_name(create_table, client):
+    table_name = 'NASA Constraint List 8'
+    table = create_table(table_name)
+
+    data_1 = {
+        'type': 'unique',
+        'columns': ['Case Number']
+    }
+    table.add_constraint(data_1)
+    data_2 = {
+        'type': 'unique',
+        'columns': ['Case Number', 'Center']
+    }
+    response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data_2)
+    assert response.status_code == 400
+    assert response.json() == ['Constraint with the same name already exists']
