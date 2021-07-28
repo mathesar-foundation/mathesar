@@ -12,6 +12,7 @@ def _verify_unique_constraint(constraint_data, columns, name):
     assert constraint_data['name'] == name
     assert constraint_data['type'] == 'unique'
 
+
 def test_default_constraint_list(create_table, client):
     table_name = 'NASA Constraint List'
     table = create_table(table_name)

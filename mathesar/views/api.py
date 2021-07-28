@@ -325,7 +325,7 @@ class ConstraintViewSet(viewsets.ViewSet):
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
                 raise ValidationError(
-                    f'Constraint with the same name already exists'
+                    'Constraint with the same name already exists'
                 )
             else:
                 raise APIException(e)
