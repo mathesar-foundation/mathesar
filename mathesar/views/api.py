@@ -5,8 +5,8 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateMode
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
-from psycopg2.errors import DuplicateColumn, DuplicateTable, UndefinedFunction
-from sqlalchemy.exc import ProgrammingError
+from psycopg2.errors import DuplicateColumn, DuplicateTable, UndefinedFunction, UniqueViolation
+from sqlalchemy.exc import ProgrammingError, IntegrityError
 from sqlalchemy_filters.exceptions import (
     BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound,
 )
@@ -329,7 +329,13 @@ class ConstraintViewSet(viewsets.ViewSet):
                 )
             else:
                 raise APIException(e)
-
+        except IntegrityError as e:
+            if type(e.orig) == UniqueViolation:
+                raise ValidationError(
+                    'This column has non-unique values so a unique constraint cannot be set'
+                )
+            else:
+                raise APIException(e)
         try:
             # Clearing cache so that new constraint shows up.
             del table._sa_table

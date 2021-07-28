@@ -158,3 +158,16 @@ def test_create_unique_constraint_with_duplicate_name(create_table, client):
     response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data_2)
     assert response.status_code == 400
     assert response.json() == ['Constraint with the same name already exists']
+
+
+def test_create_unique_constraint_for_non_unique_column(create_table, client):
+    table_name = 'NASA Constraint List 9'
+    table = create_table(table_name)
+
+    data = {
+        'type': 'unique',
+        'columns': ['Center']
+    }
+    response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
+    assert response.status_code == 400
+    assert response.json() == ['This column has non-unique values so a unique constraint cannot be set']
