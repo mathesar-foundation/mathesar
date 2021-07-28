@@ -1,6 +1,5 @@
 import logging
 from rest_framework import status, viewsets
-from rest_framework.decorators import api_view
 from rest_framework.exceptions import NotFound, ValidationError, APIException
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
