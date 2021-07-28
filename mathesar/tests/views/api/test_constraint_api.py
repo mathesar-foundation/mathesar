@@ -81,3 +81,26 @@ def test_create_single_column_unique_constraint(create_table, client):
     response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), ['Case Number'], 'NASA Constraint List 5_Case Number_key')
+
+
+def test_drop_constraint(create_table, client):
+    table_name = 'NASA Constraint List 6'
+    table = create_table(table_name)
+
+    data = {
+        'type': 'unique',
+        'columns': ['Case Number']
+    }
+    table.add_constraint(data)
+    list_response = client.get(f'/api/v0/tables/{table.id}/constraints/')
+    list_response_data = list_response.json()
+    assert list_response_data['count'] == 2
+    for constraint_data in list_response_data['results']:
+        if constraint_data['type'] == 'unique':
+            constraint_id = constraint_data['id']
+            break
+
+    response = client.delete(f'/api/v0/tables/{table.id}/constraints/{constraint_id}/')
+    assert response.status_code == 204
+    new_list_response = client.get(f'/api/v0/tables/{table.id}/constraints/')
+    assert new_list_response.json()['count'] == 1
