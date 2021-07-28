@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
 from psycopg2.errors import DuplicateColumn, UndefinedFunction
-from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.exc import ProgrammingError, InvalidRequestError
 from sqlalchemy_filters.exceptions import (
     BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound,
 )
@@ -96,7 +96,6 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
                 serializer.validated_data['name'],
                 serializer.validated_data['schema'],
             )
-
         serializer = TableSerializer(table, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
