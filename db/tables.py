@@ -529,12 +529,14 @@ def infer_table_column_types(schema, table_name, engine):
         return types
 
 
-def get_column_cast_records(engine, table_oid, column_target_types, num_records=20):
-    table = reflect_table_from_oid(table_oid, engine)
-    assert len(column_target_types) == len(table.columns)
+def get_column_cast_records(engine, table, column_definitions, num_records=20):
+    assert len(column_definitions) == len(table.columns)
     cast_expression_list = [
-        alteration.get_column_cast_expression(column, target_type, engine)
-        for column, target_type in zip(table.columns, column_target_types)
+        (
+            alteration.get_column_cast_expression(column, col_def["type"], engine)
+            .label(col_def["name"])
+        )
+        for column, col_def in zip(table.columns, column_definitions)
     ]
     sel = select(cast_expression_list).limit(num_records)
     with engine.begin() as conn:
