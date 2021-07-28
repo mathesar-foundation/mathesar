@@ -158,11 +158,13 @@ def test_datafile_create_file_and_paste(client, csv_filename, paste_filename):
         response = client.post('/api/v0/data_files/', data)
         response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict[0] == 'Paste field and file field were both specified'
+    error = response_dict['non_field_errors'][0]
+    assert error == 'Paste field and file field were both specified'
 
 
 def test_datafile_create_no_file_and_no_paste(client):
     response = client.post('/api/v0/data_files/', {})
     response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict[0] == 'Paste field or file field must be specified'
+    error = response_dict['non_field_errors'][0]
+    assert error == 'Paste field or file field must be specified'

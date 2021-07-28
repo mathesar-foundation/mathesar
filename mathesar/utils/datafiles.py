@@ -15,8 +15,6 @@ from mathesar.models import DataFile
 def create_datafile(request, data):
     header = data.get('header', True)
 
-    if 'paste' in data and 'file' in data:
-        raise ValidationError('Paste field and file field were both specified')
     if 'paste' in data:
         name = str(int(time())) + '.tsv'
         file = ContentFile(str.encode(data['paste']), name=name)
@@ -24,8 +22,6 @@ def create_datafile(request, data):
     elif 'file' in data:
         file = data['file']
         created_from = 'file'
-    else:
-        raise ValidationError('Paste field or file field must be specified')
 
     text_file = TextIOWrapper(file.file, encoding='utf-8-sig')
     try:

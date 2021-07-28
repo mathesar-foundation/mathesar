@@ -1,5 +1,6 @@
 from django.urls import reverse
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from mathesar.models import Table, Schema, DataFile, Database
 
@@ -121,3 +122,12 @@ class DataFileSerializer(serializers.ModelSerializer):
         if current_user.is_authenticated:
             kwargs['user'] = current_user
         return super().save(**kwargs)
+
+    def validate(self, data):
+        if not self.partial:
+            # Only perform validation on source files when we're not partial
+            if 'paste' in data and 'file' in data:
+                raise ValidationError('Paste field and file field were both specified')
+            elif 'paste' not in data and 'file' not in data:
+                raise ValidationError('Paste field or file field must be specified')
+        return data
