@@ -14,7 +14,7 @@ def _verify_unique_constraint(constraint_data, columns, name):
 
 
 def test_default_constraint_list(create_table, client):
-    table_name = 'NASA Constraint List'
+    table_name = 'NASA Constraint List 0'
     table = create_table(table_name)
 
     response = client.get(f'/api/v0/tables/{table.id}/constraints/')
@@ -24,13 +24,13 @@ def test_default_constraint_list(create_table, client):
     assert response.status_code == 200
     assert response_data['count'] == 1
     assert constraint_data['columns'] == ['mathesar_id']
-    assert constraint_data['id'] == 'NASA Constraint List_pkey'
-    assert constraint_data['name'] == 'NASA Constraint List_pkey'
+    assert constraint_data['id'] == 'NASA Constraint List 0_pkey'
+    assert constraint_data['name'] == 'NASA Constraint List 0_pkey'
     assert constraint_data['type'] == 'primary'
 
 
 def test_multiple_constraint_list(create_table, client):
-    table_name = 'NASA Constraint List 2'
+    table_name = 'NASA Constraint List 1'
     table = create_table(table_name)
     table.add_constraint({'type': 'unique', 'columns': ['Case Number']})
 
@@ -40,11 +40,11 @@ def test_multiple_constraint_list(create_table, client):
     _verify_primary_and_unique_constraints(response)
     for constraint_data in response_data['results']:
         if constraint_data['type'] == 'unique':
-            _verify_unique_constraint(constraint_data, ['Case Number'], 'NASA Constraint List 2_Case Number_key')
+            _verify_unique_constraint(constraint_data, ['Case Number'], 'NASA Constraint List 1_Case Number_key')
 
 
 def test_multiple_column_constraint_list(create_table, client):
-    table_name = 'NASA Constraint List 3'
+    table_name = 'NASA Constraint List 2'
     table = create_table(table_name)
     table.add_constraint({'type': 'unique', 'columns': ['Center', 'Case Number']})
 
@@ -54,7 +54,29 @@ def test_multiple_column_constraint_list(create_table, client):
     _verify_primary_and_unique_constraints(response)
     for constraint_data in response_data['results']:
         if constraint_data['type'] == 'unique':
-            _verify_unique_constraint(constraint_data, ['Center', 'Case Number'], 'NASA Constraint List 3_Center_key')
+            _verify_unique_constraint(constraint_data, ['Center', 'Case Number'], 'NASA Constraint List 2_Center_key')
+
+
+def test_retrieve_constraint(create_table, client):
+    table_name = 'NASA Constraint List 3'
+    table = create_table(table_name)
+
+    data = {
+        'type': 'unique',
+        'columns': ['Case Number']
+    }
+    table.add_constraint(data)
+    list_response = client.get(f'/api/v0/tables/{table.id}/constraints/')
+    list_response_data = list_response.json()
+    assert list_response_data['count'] == 2
+    for constraint_data in list_response_data['results']:
+        if constraint_data['type'] == 'unique':
+            constraint_id = constraint_data['id']
+            break
+
+    response = client.get(f'/api/v0/tables/{table.id}/constraints/{constraint_id}/')
+    assert response.status_code == 200
+    _verify_unique_constraint(response.json(), ['Case Number'], constraint_id)
 
 
 def test_create_multiple_column_unique_constraint(create_table, client):
