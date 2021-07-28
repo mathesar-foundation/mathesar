@@ -22,9 +22,7 @@ def data_file(csv_filename):
 @pytest.fixture
 def headerless_data_file(headerless_csv_filename):
     with open(headerless_csv_filename, 'rb') as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file))
-    data_file.header = False
-    data_file.save()
+        data_file = DataFile.objects.create(file=File(csv_file), header=False)
     return data_file
 
 
@@ -37,13 +35,27 @@ def schema(engine, test_db_model):
         conn.execute(text(f'DROP SCHEMA "{TEST_SCHEMA}" CASCADE;'))
 
 
-def test_csv_upload(data_file, schema):
-    table_name = 'NASA 1'
-    table = create_table_from_csv(data_file, table_name, schema)
+def check_csv_upload(table, table_name, schema, num_records, row, cols):
     assert table is not None
     assert table.name == table_name
     assert table.schema == schema
-    assert table.sa_num_records() == 1393
+    assert table.sa_num_records() == num_records
+    assert table.get_records()[0] == row
+    assert all([col in table.sa_column_names for col in cols])
+
+
+def test_csv_upload(data_file, schema):
+    table_name = 'NASA 1'
+    table = create_table_from_csv(data_file, table_name, schema)
+
+    num_records = 1393
+    expected_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                    '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    expected_cols = ['Center', 'Status', 'Case Number', 'Patent Number',
+                     'Application SN', 'Title', 'Patent Expiration Date']
+    check_csv_upload(
+        table, table_name, schema, num_records, expected_row, expected_cols
+    )
 
 
 def test_headerless_csv_upload(headerless_data_file, schema):
@@ -51,10 +63,15 @@ def test_headerless_csv_upload(headerless_data_file, schema):
     table = create_table_from_csv(
         headerless_data_file, table_name, schema
     )
-    assert table is not None
-    assert table.name == table_name
-    assert table.schema == schema
-    assert table.sa_num_records() == 1393
+
+    num_records = 1393
+    expected_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                    '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    expected_cols = ['column_' + str(i) for i in range(7)]
+
+    check_csv_upload(
+        table, table_name, schema, num_records, expected_row, expected_cols
+    )
 
 
 def test_csv_upload_with_duplicate_table_name(data_file, schema):

@@ -69,11 +69,13 @@ def test_data_file_detail(client, data_file):
     verify_data_file_data(data_file, data_file_dict)
 
 
-def test_data_file_create_csv(client, csv_filename):
+@pytest.mark.parametrize('header', [True, False])
+def test_data_file_create_csv(client, csv_filename, header):
     num_data_files = DataFile.objects.count()
 
     with open(csv_filename, 'rb') as csv_file:
-        response = client.post('/api/v0/data_files/', data={'file': csv_file})
+        data = {'file': csv_file, 'header': header}
+        response = client.post('/api/v0/data_files/', data)
         data_file_dict = response.json()
         data_file = DataFile.objects.get(id=data_file_dict['id'])
     with open(csv_filename, 'r') as csv_file:
@@ -84,6 +86,7 @@ def test_data_file_create_csv(client, csv_filename):
     assert data_file.delimiter == correct_dialect.delimiter
     assert data_file.quotechar == correct_dialect.quotechar
     assert data_file.escapechar == correct_dialect.escapechar
+    assert data_file.header == header
     verify_data_file_data(data_file, data_file_dict)
 
 
@@ -122,21 +125,3 @@ def test_datafile_create_invalid_csv(client):
             response_dict = response.json()
     assert response.status_code == 400
     assert response_dict["file"] == 'Unable to tabulate datafile'
-
-
-def test_data_file_create_csv_headerless(client, csv_filename):
-    num_data_files = DataFile.objects.count()
-
-    with open(csv_filename, 'rb') as csv_file:
-        data = {'file': csv_file, 'header': False}
-        response = client.post('/api/v0/data_files/', data=data)
-        data_file_dict = response.json()
-        data_file = DataFile.objects.get(id=data_file_dict['id'])
-
-    assert response.status_code == 201
-    assert DataFile.objects.count() == num_data_files + 1
-    assert data_file.delimiter == ','
-    assert data_file.quotechar == '"'
-    assert data_file.escapechar == ''
-    assert data_file.header is False
-    verify_data_file_data(data_file, data_file_dict)
