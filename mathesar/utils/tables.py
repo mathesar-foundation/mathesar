@@ -3,11 +3,9 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 
 from mathesar.models import Table
-from mathesar.errors import InvalidPasteError
 from mathesar.serializers import TableSerializer
 from mathesar.imports.csv import create_table_from_csv
 from mathesar.database.base import create_mathesar_engine
-from mathesar.imports.paste import create_table_from_paste
 from db.tables import infer_table_column_types, create_mathesar_table, get_oid_from_table
 
 
@@ -28,12 +26,8 @@ def create_table_from_data(request, data):
     name = data['name']
     schema = data['schema']
 
-    if data['data_files'] and data['paste']:
-        raise ValidationError('Both data file and raw paste value supplied.')
-    elif data['data_files']:
+    if data['data_files']:
         table = create_table_from_datafile(data['data_files'], name, schema)
-    elif data['paste']:
-        table = create_table_from_paste_data(data['paste'], name, schema)
     else:
         table = create_empty_table(name, schema)
 
@@ -47,14 +41,6 @@ def create_table_from_datafile(data_files, name, schema):
         table = create_table_from_csv(data_file, name, schema)
     elif len(data_files) > 1:
         raise ValidationError({'data_files': 'Multiple data files are unsupported.'})
-    return table
-
-
-def create_table_from_paste_data(paste, name, schema):
-    try:
-        table = create_table_from_paste(paste, name, schema)
-    except InvalidPasteError:
-        raise ValidationError({'paste': 'Unable to tabulate paste'})
     return table
 
 

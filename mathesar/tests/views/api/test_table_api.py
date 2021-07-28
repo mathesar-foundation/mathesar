@@ -6,8 +6,6 @@ from django.core.files import File
 from sqlalchemy import text
 
 from mathesar import reflection
-from mathesar.imports import paste
-from mathesar.errors import InvalidPasteError
 from mathesar.models import Table, DataFile, Schema
 from mathesar.utils.schemas import create_schema_and_object
 from db.tests.types import fixtures
@@ -24,13 +22,6 @@ def schema(django_db_setup, django_db_blocker, test_db_name):
     # We have to do some additional work to access the DB at module scope
     with django_db_blocker.unblock():
         return create_schema_and_object('table_tests', test_db_name)
-
-
-@pytest.fixture(scope='module')
-def paste_text(paste_filename):
-    with open(paste_filename, 'r') as paste_file:
-        paste_data = paste_file.read()
-    return paste_data
 
 
 @pytest.fixture
@@ -278,46 +269,6 @@ def test_table_create_from_datafile(client, data_file, schema):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_create_from_paste(client, schema, paste_text):
-    num_tables = Table.objects.count()
-    table_name = 'Test Table Create From Paste'
-    body = {
-        'paste': paste_text,
-        'name': table_name,
-        'schema': schema.id,
-    }
-    response = client.post('/api/v0/tables/', body)
-    response_table = response.json()
-
-    table = Table.objects.get(id=response_table['id'])
-    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
-                 '13/033,085', 'Polyimide Wire Insulation Repair System', '')
-    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
-                    'Application SN', 'Title', 'Patent Expiration Date']
-
-    assert response.status_code == 201
-    assert Table.objects.count() == num_tables + 1
-    assert table.get_records()[0] == first_row
-    assert all([col in table.sa_column_names for col in column_names])
-    check_table_response(response_table, table, table_name)
-
-
-def test_table_create_from_paste_no_trim(client, schema):
-    paste_file = 'mathesar/tests/data/paste_parsing/missing_multiple_col.txt'
-    with open(paste_file, 'r') as paste_file:
-        paste_text = paste_file.read()
-
-    table_name = 'Test Table Create From Paste No Trim'
-    body = {
-        'paste': paste_text,
-        'name': table_name,
-        'schema': schema.id,
-    }
-    # This file will break if whitespace is trimmed from the end
-    response = client.post('/api/v0/tables/', body)
-    assert response.status_code == 201
-
-
 def test_table_create_without_datafile(client, schema):
     num_tables = Table.objects.count()
     table_name = 'test_table_no_file'
@@ -429,35 +380,6 @@ def test_table_create_from_datafile_404(client):
     assert response.status_code == 400
     assert 'object does not exist' in response_table['schema'][0]
     assert 'object does not exist' in response_table['data_files'][0]
-
-
-def test_table_create_from_invalid_paste(client, schema, paste_text):
-    table_name = 'Test Table Create From Invalid Paste'
-    body = {
-        'paste': paste_text,
-        'name': table_name,
-        'schema': schema.id,
-    }
-    with patch.object(paste, "validate_paste") as mock_infer:
-        mock_infer.side_effect = InvalidPasteError
-        response = client.post('/api/v0/tables/', body)
-        response_dict = response.json()
-    assert response.status_code == 400
-    assert response_dict["paste"] == 'Unable to tabulate paste'
-
-
-def test_table_create_from_datafile_and_paste(client, schema, paste_text, data_file):
-    table_name = 'Test Table Create From Datafile And Paste'
-    body = {
-        'data_files': [data_file.id],
-        'paste': paste_text,
-        'name': table_name,
-        'schema': schema.id,
-    }
-    response = client.post('/api/v0/tables/', body)
-    response_dict = response.json()
-    assert response.status_code == 400
-    assert response_dict[0] == 'Both data file and raw paste value supplied.'
 
 
 def test_table_partial_update_invalid_field(create_table, client):
