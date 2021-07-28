@@ -70,10 +70,10 @@ class TableSerializer(serializers.ModelSerializer):
         else:
             return None
 
-    def validate(self, data):
-        if len(data.get('data_files', [])) > 1:
-            raise ValidationError({'data_files': 'Multiple data files are unsupported.'})
-        return data
+    def validate_data_files(self, data_files):
+        if data_files and len(data_files) > 1:
+            raise ValidationError('Multiple data files are unsupported.')
+        return data_files
 
 
 class RecordSerializer(serializers.BaseSerializer):
