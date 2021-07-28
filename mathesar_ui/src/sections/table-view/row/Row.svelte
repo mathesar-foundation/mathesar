@@ -6,13 +6,13 @@
     GroupData,
   } from '@mathesar/stores/tableData';
   import {
-    DEFAULT_COUNT_COL_WIDTH,
     GROUP_ROW_HEIGHT,
     GROUP_MARGIN_LEFT,
     DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/tableData';
   import { Skeleton } from '@mathesar-components';
   import GroupHeader from './GroupHeader.svelte';
+  import RowControl from './RowControl.svelte';
 
   export let index: number;
   export let columns: TableColumnData;
@@ -22,6 +22,7 @@
   export let columnPosition: ColumnPosition;
   export let style: { [key: string]: string | number };
   export let groupData: GroupData;
+  export let selected: Record<string | number, boolean>;
 
   function calculateStyle(
     _style: { [key: string]: string | number },
@@ -61,17 +62,18 @@
     isGrouped,
     !!row.__groupInfo,
   );
+
+  $: isSelected = selected[row?.[columns?.primaryKey] as string] || false;
 </script>
 
 {#if groupData && row.__groupInfo}
   <GroupHeader style={styleString.group} {row} {groupData}/>
 {/if}
 
-<div class="row" class:in-group={isGrouped} style={styleString.default}>
-  <div class="cell row-number" style="width:{DEFAULT_COUNT_COL_WIDTH}px;
-                    left:{isGrouped ? GROUP_MARGIN_LEFT : 0}px">
-    {index + 1}
-  </div>
+<div class="row {row.__state || ''}" class:in-group={isGrouped} class:selected={isSelected}
+      style={styleString.default}>
+  <RowControl {index} {isGrouped} primaryKey={columns.primaryKey}
+              {row} bind:selected/>
 
   {#each columns.data as column (column.name)}
     <div class="cell" style="
