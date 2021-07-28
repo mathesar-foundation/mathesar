@@ -101,7 +101,7 @@ class DataFileSerializer(serializers.ModelSerializer):
         model = DataFile
         fields = [
             'id', 'file', 'table_imported_to', 'user', 'header', 'delimiter',
-            'escapechar', 'quotechar', 'paste'
+            'escapechar', 'quotechar', 'paste', 'created_from'
         ]
         extra_kwargs = {
             'file': {'required': False},
@@ -111,7 +111,7 @@ class DataFileSerializer(serializers.ModelSerializer):
         }
         # We only currently support importing to a new table, so setting a table via API is invalid.
         # User should be set automatically, not submitted via the API.
-        read_only_fields = ['table_imported_to']
+        read_only_fields = ['user', 'table_imported_to', 'created_from']
 
     def save(self, **kwargs):
         """
