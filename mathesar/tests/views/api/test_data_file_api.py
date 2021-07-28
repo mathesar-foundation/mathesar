@@ -90,6 +90,26 @@ def test_data_file_create_csv(client, csv_filename, header):
     verify_data_file_data(data_file, data_file_dict)
 
 
+@pytest.mark.parametrize('header', [True, False])
+def test_data_file_create_paste(client, paste_filename, header):
+    num_data_files = DataFile.objects.count()
+    with open(paste_filename, 'r') as paste_file:
+        paste_text = paste_file.read()
+
+    data = {'paste': paste_text, 'header': header}
+    response = client.post('/api/v0/data_files/', data)
+    data_file_dict = response.json()
+    data_file = DataFile.objects.get(id=data_file_dict['id'])
+
+    assert response.status_code == 201
+    assert DataFile.objects.count() == num_data_files + 1
+    assert data_file.delimiter == '\t'
+    assert data_file.quotechar == ''
+    assert data_file.escapechar == ''
+    assert data_file.header == header
+    verify_data_file_data(data_file, data_file_dict)
+
+
 def test_data_file_update(client, data_file):
     response = client.put(f'/api/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
@@ -116,7 +136,7 @@ def test_data_file_404(client, data_file):
     assert response.json()['detail'] == 'Not found.'
 
 
-def test_datafile_create_invalid_csv(client):
+def test_datafile_create_invalid_file(client):
     file = 'mathesar/tests/data/csv_parsing/patents_invalid.csv'
     with patch.object(csv, "get_sv_dialect") as mock_infer:
         mock_infer.side_effect = InvalidTableError
@@ -124,4 +144,22 @@ def test_datafile_create_invalid_csv(client):
             response = client.post('/api/v0/data_files/', data={'file': f})
             response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict["file"] == 'Unable to tabulate datafile'
+    assert response_dict[0] == 'Unable to tabulate data'
+
+
+def test_datafile_create_file_and_paste(client, csv_filename, paste_filename):
+    with open(paste_filename, 'r') as paste_file:
+        paste_text = paste_file.read()
+    with open(csv_filename, 'rb') as csv_file:
+        data = {'file': csv_file, 'paste': paste_text}
+        response = client.post('/api/v0/data_files/', data)
+        response_dict = response.json()
+    assert response.status_code == 400
+    assert response_dict[0] == 'Paste field and file field were both specified'
+
+
+def test_datafile_create_no_file_and_no_paste(client):
+    response = client.post('/api/v0/data_files/', {})
+    response_dict = response.json()
+    assert response.status_code == 400
+    assert response_dict[0] == 'Paste field or file field must be specified'
