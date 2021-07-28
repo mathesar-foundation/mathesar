@@ -1,5 +1,6 @@
 import logging
 from rest_framework import status, viewsets
+from rest_framework.decorators import api_view
 from rest_framework.exceptions import NotFound, ValidationError, APIException
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
@@ -19,7 +20,7 @@ from mathesar.pagination import (
 )
 from mathesar.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, RecordListParameterSerializer,
-    DataFileSerializer, ColumnSerializer, DatabaseSerializer
+    DataFileSerializer, ColumnSerializer, DatabaseSerializer, TablePreviewSerializer,
 )
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.utils.tables import get_table_column_types
@@ -118,6 +119,32 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         table = self.get_object()
         col_types = get_table_column_types(table)
         return Response(col_types)
+
+    @action(methods=['post'], detail=True)
+    def preview(self, request, pk=None):
+        table = self.get_object()
+        serializer = TablePreviewSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors)
+        else:
+            columns = serializer.validated_data["columns"]
+
+        if not len(columns) == len(set([col["name"] for col in columns])):
+            raise ValidationError("Column names must be distinct")
+        if not len(table.sa_columns) == len(serializer.validated_data["columns"]):
+            raise ValidationError("Incorrect number of columns in request.")
+
+        table_data = TableSerializer(table, context={"request": request}).data
+        preview_records = table.get_preview(columns)
+        table_data.update(
+            {
+                "name": serializer.validated_data["name"],
+                "columns": columns,
+                "records": preview_records
+            }
+        )
+
+        return Response(table_data)
 
 
 class ColumnViewSet(viewsets.ViewSet):

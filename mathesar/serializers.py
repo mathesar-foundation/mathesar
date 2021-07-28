@@ -73,6 +73,11 @@ class RecordSerializer(serializers.BaseSerializer):
         return instance._asdict()
 
 
+class TablePreviewSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    columns = ColumnSerializer(many=True)
+
+
 class RecordListParameterSerializer(serializers.Serializer):
     filters = serializers.JSONField(required=False, default=[])
     order_by = serializers.JSONField(required=False, default=[])
