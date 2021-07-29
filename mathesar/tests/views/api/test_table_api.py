@@ -31,7 +31,8 @@ def data_file(csv_filename):
     with open(csv_filename, 'rb') as csv_file:
         data_file = DataFile.objects.create(
             file=File(csv_file),
-            created_from='file'
+            created_from='file',
+            base_name='patents'
         )
     return data_file
 
@@ -73,6 +74,52 @@ def check_table_filter_response(response, status_code=None, count=None):
     if count is not None:
         assert response_data['count'] == count
         assert len(response_data['results']) == count
+
+
+def _create_table(client, data_files, table_name, schema):
+    body = {
+        'name': table_name,
+        'schema': schema.id,
+    }
+    if data_files is not None:
+        body['data_files'] = [df.id for df in data_files]
+
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
+    table = Table.objects.get(id=response_table['id'])
+
+    if data_files is not None:
+        for df in data_files:
+            df.refresh_from_db()
+
+    return response, response_table, table
+
+
+def _get_expected_name(table_name, data_file=None):
+    if not table_name and data_file:
+        return data_file.base_name
+    elif not table_name and data_file is None:
+        return f'Table {Table.objects.count()}'
+    else:
+        return table_name
+
+
+def check_create_table_response(client, name, expt_name, data_file, schema):
+    num_tables = Table.objects.count()
+
+    response, response_table, table = _create_table(client, [data_file], name, schema)
+
+    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
+                    'Application SN', 'Title', 'Patent Expiration Date']
+
+    assert response.status_code == 201
+    assert Table.objects.count() == num_tables + 1
+    assert table.get_records()[0] == first_row
+    assert all([col in table.sa_column_names for col in column_names])
+    assert data_file.table_imported_to.id == table.id
+    check_table_response(response_table, table, expt_name)
 
 
 def test_table_list(create_table, client):
@@ -263,52 +310,9 @@ def test_table_type_suggestion(client, schema, engine_email_type):
     assert response_table == EXPECTED_TYPES
 
 
-def _create_table(client, data_files, table_name, schema):
-    body = {
-        'name': table_name,
-        'schema': schema.id,
-    }
-    if data_files is not None:
-        body['data_files'] = [df.id for df in data_files]
-
-    response = client.post('/api/v0/tables/', body)
-    response_table = response.json()
-    table = Table.objects.get(id=response_table['id'])
-
-    if data_files is not None:
-        for df in data_files:
-            df.refresh_from_db()
-
-    return response, response_table, table
-
-
-def _get_expected_name(table_name):
-    if not table_name:
-        return f'Table {Table.objects.count()}'
-    else:
-        return table_name
-
-
-def check_create_table_response(client, name, expt_name, data_file, schema):
-    num_tables = Table.objects.count()
-    response, response_table, table = _create_table(client, [data_file], name, schema)
-
-    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
-                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
-    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
-                    'Application SN', 'Title', 'Patent Expiration Date']
-
-    assert response.status_code == 201
-    assert Table.objects.count() == num_tables + 1
-    assert table.get_records()[0] == first_row
-    assert all([col in table.sa_column_names for col in column_names])
-    assert data_file.table_imported_to.id == table.id
-    check_table_response(response_table, table, expt_name)
-
-
 @pytest.mark.parametrize('table_name', ['Test Table Create From Datafile', ''])
 def test_table_create_from_datafile(client, data_file, schema, table_name):
-    expt_name = _get_expected_name(table_name)
+    expt_name = _get_expected_name(table_name, data_file=data_file)
     check_create_table_response(client, table_name, expt_name, data_file, schema)
 
 
@@ -335,10 +339,17 @@ def test_table_create_without_datafile(client, schema, data_files, table_name):
     check_table_response(response_table, table, expt_name)
 
 
-def test_table_create_name_taken(client, data_file, schema, create_table, schema_name):
+def test_table_create_name_taken(client, paste_data_file, schema, create_table, schema_name):
     create_table('Table 2', schema=schema_name)
     create_table('Table 3', schema=schema_name)
     expt_name = 'Table 4'
+    check_create_table_response(client, '', expt_name, paste_data_file, schema)
+
+
+def test_table_create_base_name_taken(client, data_file, schema, create_table, schema_name):
+    create_table('patents', schema=schema_name)
+    create_table('patents 1', schema=schema_name)
+    expt_name = 'patents 2'
     check_create_table_response(client, '', expt_name, data_file, schema)
 
 

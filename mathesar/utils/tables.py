@@ -24,7 +24,7 @@ def get_table_column_types(table):
     return col_types
 
 
-def _gen_table_name(schema):
+def _gen_default_table_name(schema):
     table_num = Table.objects.count()
     name = TABLE_NAME_TEMPLATE % table_num
     metadata = MetaData(bind=schema._sa_engine, schema=schema.name)
@@ -35,11 +35,25 @@ def _gen_table_name(schema):
     return name
 
 
+def _gen_base_table_name(schema, base_name):
+    name = base_name
+    metadata = MetaData(bind=schema._sa_engine, schema=schema.name)
+    metadata.reflect()
+    table_num = 1
+    while '.'.join((schema.name, name)) in metadata.tables:
+        name = base_name + f' {table_num}'
+        table_num += 1
+    return name
+
+
 def create_table_from_datafile(data_files, name, schema):
     data_file = data_files[0]
 
     if not name:
-        name = _gen_table_name(schema)
+        if data_file.base_name:
+            name = _gen_base_table_name(schema, data_file.base_name)
+        else:
+            name = _gen_default_table_name(schema)
 
     table = create_table_from_csv(data_file, name, schema)
     return table
@@ -54,7 +68,7 @@ def create_empty_table(name, schema):
     :return: the newly created blank table
     """
     if not name:
-        name = _gen_table_name(schema)
+        name = _gen_default_table_name(schema)
 
     engine = create_mathesar_engine(schema.database.name)
     db_table = create_mathesar_table(name, schema.name, [], engine)
