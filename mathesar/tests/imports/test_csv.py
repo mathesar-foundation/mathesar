@@ -1,7 +1,7 @@
 import pytest
 
 from django.core.files import File
-from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import text
 
 from mathesar.models import DataFile, Schema
@@ -77,7 +77,7 @@ def test_headerless_csv_upload(headerless_data_file, schema):
 def test_csv_upload_with_duplicate_table_name(data_file, schema):
     table_name = 'NASA 2'
     already_defined_str = (
-        f"Table '{schema.name}.{table_name}' is already defined"
+        f'relation "NASA 2" already exists'
     )
 
     table = create_table_from_csv(data_file, table_name, schema)
@@ -86,9 +86,9 @@ def test_csv_upload_with_duplicate_table_name(data_file, schema):
     assert table.schema == schema
     assert table.sa_num_records() == 1393
 
-    with pytest.raises(InvalidRequestError) as excinfo:
+    with pytest.raises(ProgrammingError) as excinfo:
         create_table_from_csv(data_file, table_name, schema)
-        assert already_defined_str in str(excinfo)
+    assert already_defined_str in str(excinfo.value)
 
 
 def test_csv_upload_table_imported_to(data_file, schema):
