@@ -26,7 +26,6 @@ def create_datafile(request, data):
         created_from = 'file'
         base_name, _ = os.path.splitext(os.path.basename(file.name))
 
-
     text_file = TextIOWrapper(file.file, encoding='utf-8-sig')
     try:
         dialect = get_sv_dialect(text_file)

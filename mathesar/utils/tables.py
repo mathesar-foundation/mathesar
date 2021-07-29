@@ -1,5 +1,3 @@
-import os
-
 from sqlalchemy import MetaData
 
 from mathesar.models import Table
@@ -50,7 +48,7 @@ def create_table_from_datafile(data_files, name, schema):
     data_file = data_files[0]
 
     if not name:
-        if data_file.base_name:
+        if data_file.base_name and len(data_file.base_name) < 100:
             name = _gen_base_table_name(schema, data_file.base_name)
         else:
             name = _gen_default_table_name(schema)
