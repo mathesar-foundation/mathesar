@@ -128,9 +128,10 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         else:
             columns = serializer.validated_data["columns"]
 
-        if not len(columns) == len(set([col["name"] for col in columns])):
+        column_names = [col["name"] for col in columns]
+        if not len(column_names) == len(set(column_names)):
             raise ValidationError("Column names must be distinct")
-        if not len(table.sa_columns) == len(serializer.validated_data["columns"]):
+        if not len(columns) == len(table.sa_columns):
             raise ValidationError("Incorrect number of columns in request.")
 
         table_data = TableSerializer(table, context={"request": request}).data
