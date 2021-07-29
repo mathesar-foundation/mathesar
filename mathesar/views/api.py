@@ -5,8 +5,8 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateMode
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
-from psycopg2.errors import DuplicateColumn, UndefinedFunction
-from sqlalchemy.exc import ProgrammingError, InvalidRequestError
+from psycopg2.errors import DuplicateColumn, DuplicateTable, UndefinedFunction
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy_filters.exceptions import (
     BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound,
 )
@@ -85,17 +85,25 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         serializer = TableSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
-        if serializer.validated_data['data_files']:
-            table = create_table_from_datafile(
-                serializer.validated_data['data_files'],
-                serializer.validated_data['name'],
-                serializer.validated_data['schema'],
-            )
-        else:
-            table = create_empty_table(
-                serializer.validated_data['name'],
-                serializer.validated_data['schema'],
-            )
+        try:
+            if serializer.validated_data['data_files']:
+                table = create_table_from_datafile(
+                    serializer.validated_data['data_files'],
+                    serializer.validated_data['name'],
+                    serializer.validated_data['schema'],
+                )
+            else:
+                table = create_empty_table(
+                    serializer.validated_data['name'],
+                    serializer.validated_data['schema'],
+                )
+        except ProgrammingError as e:
+            if type(e.orig) == DuplicateTable:
+                raise ValidationError(
+                    f"Table {request.data['name']} already exists"
+                )
+            else:
+                raise APIException(e)
         serializer = TableSerializer(table, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

@@ -340,7 +340,7 @@ def test_table_create_with_same_name(client, schema):
     response = client.post('/api/v0/tables/', body)
     response_error = response.json()
     assert response.status_code == 400
-    assert response_error[0] == f"Table {table_name} already exists."
+    assert response_error[0] == f"Table {table_name} already exists"
 
 
 def test_table_partial_update(create_table, client):
