@@ -85,6 +85,7 @@ def test_data_file_create_csv(client, csv_filename, header):
     assert response.status_code == 201
     assert DataFile.objects.count() == num_data_files + 1
     assert data_file.created_from == 'file'
+    assert data_file.base_name == 'patents'
     assert data_file.delimiter == correct_dialect.delimiter
     assert data_file.quotechar == correct_dialect.quotechar
     assert data_file.escapechar == correct_dialect.escapechar
@@ -106,6 +107,7 @@ def test_data_file_create_paste(client, paste_filename, header):
     assert response.status_code == 201
     assert DataFile.objects.count() == num_data_files + 1
     assert data_file.created_from == 'paste'
+    assert data_file.base_name == ''
     assert data_file.delimiter == '\t'
     assert data_file.quotechar == ''
     assert data_file.escapechar == ''

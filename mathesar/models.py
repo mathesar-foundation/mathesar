@@ -222,6 +222,7 @@ class DataFile(BaseModel):
     created_from = models.CharField(max_length=128, choices=created_from_choices.choices)
     table_imported_to = models.ForeignKey(Table, related_name="data_files", blank=True,
                                           null=True, on_delete=models.SET_NULL)
+    base_name = models.CharField(max_length=128)
     header = models.BooleanField(default=True)
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)
