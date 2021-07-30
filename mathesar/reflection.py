@@ -68,12 +68,10 @@ def reflect_constraints_from_database(database):
     db_constraints = get_constraints_with_oids(engine)
     for db_constraint in db_constraints:
         try:
-            models.Constraint.current_objects.get_or_create(
-                oid=db_constraint['oid'],
-                table=models.Table.current_objects.get(oid=db_constraint['conrelid'])
-            )
+            table = models.Table.current_objects.get(oid=db_constraint['conrelid'])
         except models.Table.DoesNotExist:
-            pass
+            continue
+        models.Constraint.current_objects.get_or_create(oid=db_constraint['oid'], table=table)
     for constraint in models.Constraint.current_objects.all():
         if constraint.oid not in [db_constraint['oid'] for db_constraint in db_constraints]:
             constraint.delete()
