@@ -44,14 +44,11 @@ def reflect_schemas_from_database(database):
     }
 
     database = models.Database.current_objects.get(name=database)
-    schemas = [
+    for oid in db_schema_oids:
         models.Schema.current_objects.get_or_create(oid=oid, database=database)
-        for oid in db_schema_oids
-    ]
     for schema in models.Schema.current_objects.all():
         if schema.database.name == database and schema.oid not in db_schema_oids:
             schema.delete()
-    return schemas
 
 
 def reflect_tables_from_schema(schema):
@@ -59,30 +56,27 @@ def reflect_tables_from_schema(schema):
         table['oid']
         for table in get_table_oids_from_schema(schema.oid, schema._sa_engine)
     }
-    tables = [
+    for oid in db_table_oids:
         models.Table.current_objects.get_or_create(oid=oid, schema=schema)
-        for oid in db_table_oids
-    ]
     for table in models.Table.current_objects.filter(schema=schema):
         if table.oid not in db_table_oids:
             table.delete()
-    return tables
 
 
 def reflect_constraints_from_database(database):
     engine = create_mathesar_engine(database)
     db_constraints = get_constraints_with_oids(engine)
-    constraints = [
-        models.Constraint.current_objects.get_or_create(
-            oid=db_constraint['oid'],
-            table=models.Table.current_objects.get(oid=db_constraint['conrelid'])
-        )
-        for db_constraint in db_constraints
-    ]
+    for db_constraint in db_constraints:
+        try:
+            models.Constraint.current_objects.get_or_create(
+                oid=db_constraint['oid'],
+                table=models.Table.current_objects.get(oid=db_constraint['conrelid'])
+            )
+        except models.Table.DoesNotExist:
+            pass
     for constraint in models.Constraint.current_objects.all():
         if constraint.oid not in [db_constraint['oid'] for db_constraint in db_constraints]:
             constraint.delete()
-    return constraints
 
 
 def reflect_new_table_constraints(table):
