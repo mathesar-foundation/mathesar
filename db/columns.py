@@ -134,6 +134,7 @@ def get_default_mathesar_column_list():
         for col_name in DEFAULT_COLUMNS
     ]
 
+
 def init_mathesar_table_column_list_with_defaults(column_list):
     default_columns = get_default_mathesar_column_list()
     given_columns = [MathesarColumn.from_column(c) for c in column_list]

@@ -494,7 +494,6 @@ def test_get_column_cast_records(engine_email_type):
         {"name": COL2_MOD, "type": "NUMERIC"},
     ]
     records = tables.get_column_cast_records(engine, table, column_definitions)
-    print(records)
     for record in records:
         assert (
             type(record[COL1 + "_mod"]) == str
