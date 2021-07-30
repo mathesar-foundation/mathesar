@@ -535,7 +535,7 @@ def get_column_cast_records(engine, table, column_definitions, num_records=20):
         (
             alteration.get_column_cast_expression(column, col_def["type"], engine)
             .label(col_def["name"])
-        )
+        ) if not columns.MathesarColumn.from_column(column).is_default else column
         for column, col_def in zip(table.columns, column_definitions)
     ]
     sel = select(cast_expression_list).limit(num_records)
