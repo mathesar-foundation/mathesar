@@ -120,7 +120,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         return Response(col_types)
 
     @action(methods=['post'], detail=True)
-    def preview(self, request, pk=None):
+    def previews(self, request, pk=None):
         table = self.get_object()
         serializer = TablePreviewSerializer(data=request.data)
         if not serializer.is_valid():
