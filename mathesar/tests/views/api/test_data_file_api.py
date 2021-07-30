@@ -104,6 +104,7 @@ def test_data_file_create_csv_long_name(client, csv_filename):
     assert response.status_code == 400
     assert 'Ensure this filename has at most 100' in data_file_dict['file'][0]
 
+
 @pytest.mark.parametrize('header', [True, False])
 def test_data_file_create_paste(client, paste_filename, header):
     num_data_files = DataFile.objects.count()
