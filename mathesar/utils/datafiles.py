@@ -24,7 +24,10 @@ def create_datafile(request, data):
     elif 'file' in data:
         file = data['file']
         created_from = 'file'
+
+        max_length = DataFile._meta.get_field('base_name').max_length
         base_name, _ = os.path.splitext(os.path.basename(file.name))
+        base_name = base_name[:max_length]
 
     text_file = TextIOWrapper(file.file, encoding='utf-8-sig')
     try:
