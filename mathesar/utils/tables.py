@@ -8,6 +8,8 @@ from db.tables import infer_table_column_types, create_mathesar_table, get_oid_f
 
 TABLE_NAME_TEMPLATE = 'Table %s'
 
+POSTGRES_NAME_LEN_CAP = 63
+
 
 def get_table_column_types(table):
     schema = table.schema
@@ -30,6 +32,8 @@ def _gen_default_table_name(schema):
     while '.'.join((schema.name, name)) in metadata.tables:
         table_num += 1
         name = TABLE_NAME_TEMPLATE % table_num
+        if len(name) > POSTGRES_NAME_LEN_CAP:
+            name = str(table_num)
     return name
 
 
@@ -40,6 +44,9 @@ def _gen_base_table_name(schema, base_name):
     table_num = 1
     while '.'.join((schema.name, name)) in metadata.tables:
         name = base_name + f' {table_num}'
+        if len(name) > POSTGRES_NAME_LEN_CAP:
+            base_name = base_name[:-1]
+            name = base_name + f' {table_num}'
         table_num += 1
     return name
 
@@ -48,7 +55,8 @@ def create_table_from_datafile(data_files, name, schema):
     data_file = data_files[0]
 
     if not name:
-        if data_file.base_name and len(data_file.base_name) < 100:
+        if data_file.base_name and len(data_file.base_name) < POSTGRES_NAME_LEN_CAP - 8:
+            # Ensures we have at least 7 digits to work with
             name = _gen_base_table_name(schema, data_file.base_name)
         else:
             name = _gen_default_table_name(schema)

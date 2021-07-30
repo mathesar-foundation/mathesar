@@ -353,6 +353,13 @@ def test_table_create_base_name_taken(client, data_file, schema, create_table, s
     check_create_table_response(client, '', expt_name, data_file, schema)
 
 
+def test_table_create_base_name_too_long(client, data_file, schema):
+    data_file.base_name = '0' * 100
+    data_file.save()
+    expt_name = 'Table 0'
+    check_create_table_response(client, '', expt_name, data_file, schema)
+
+
 def test_table_partial_update(create_table, client):
     table_name = 'NASA Table Partial Update'
     new_table_name = 'NASA Table Partial Update New'
