@@ -266,6 +266,15 @@ class Constraint(DatabaseObject):
     def columns(self):
         return [column.name for column in self._sa_constraint.columns]
 
+    def drop(self):
+        constraints.drop_constraint(
+            self.table._sa_table.name,
+            self.table._sa_table.schema,
+            self.table.schema._sa_engine,
+            self.name
+        )
+        self.delete()
+
 
 class DataFile(BaseModel):
     created_from_choices = models.TextChoices("created_from", "FILE PASTE")

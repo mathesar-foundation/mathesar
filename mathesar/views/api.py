@@ -341,7 +341,7 @@ class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
     def destroy(self, request, pk=None, table_pk=None):
         constraint = self.get_object()
         try:
-            constraint.delete()
+            constraint.drop()
         except ProgrammingError as e:
             if type(e.orig) == UndefinedObject:
                 raise NotFound
