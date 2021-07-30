@@ -1,7 +1,7 @@
 import logging
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError, APIException
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin, DestroyModelMixin
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
@@ -13,10 +13,9 @@ from sqlalchemy_filters.exceptions import (
 
 
 from mathesar.database.utils import get_non_default_database_keys
-from mathesar.models import Table, Schema, DataFile, Database
+from mathesar.models import Table, Schema, DataFile, Database, Constraint
 from mathesar.pagination import (
-    ColumnLimitOffsetPagination, ConstraintLimitOffsetPagination,
-    DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
+    ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
@@ -304,23 +303,12 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
         return create_datafile(request, serializer.validated_data)
 
 
-class ConstraintViewSet(viewsets.ViewSet):
+class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin, DestroyModelMixin):
+    serializer_class = ConstraintSerializer
+    pagination_class = DefaultLimitOffsetPagination
+
     def get_queryset(self):
-        return Table.objects.all().order_by('-created_at')
-
-    def list(self, request, table_pk=None):
-        paginator = ConstraintLimitOffsetPagination()
-        constraints = paginator.paginate_queryset(self.get_queryset(), request, table_pk)
-        serializer = ConstraintSerializer(constraints, many=True, context={'request': request})
-        return paginator.get_paginated_response(serializer.data)
-
-    def retrieve(self, request, pk=None, table_pk=None):
-        table = get_table_or_404(table_pk)
-        constraint = table.get_constraint_by_name(pk)
-        if not constraint:
-            raise NotFound
-        serializer = ConstraintSerializer(constraint, context={'request': request})
-        return Response(serializer.data)
+        return Constraint.objects.filter(table__id=self.kwargs['table_pk']).order_by('-created_at')
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
@@ -331,7 +319,7 @@ class ConstraintViewSet(viewsets.ViewSet):
         data = request.data.dict()
         data['columns'] = request.data.getlist('columns')
         try:
-            table.add_constraint(data)
+            constraint = table.add_constraint(data)
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
                 raise ValidationError(
@@ -346,20 +334,14 @@ class ConstraintViewSet(viewsets.ViewSet):
                 )
             else:
                 raise APIException(e)
-        try:
-            # Clearing cache so that new constraint shows up.
-            del table._sa_table
-        except AttributeError:
-            pass
 
-        constraint = table.get_constraint_by_type_and_columns(data['type'], data['columns'])
         out_serializer = ConstraintSerializer(constraint, context={'request': request})
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, pk=None, table_pk=None):
-        table = get_table_or_404(table_pk)
+        constraint = self.get_object()
         try:
-            table.drop_constraint(pk)
+            constraint.delete()
         except ProgrammingError as e:
             if type(e.orig) == UndefinedObject:
                 raise NotFound

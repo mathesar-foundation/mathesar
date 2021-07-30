@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.cache import cache
 
-from db.constraints import get_mathesar_constraints_with_oids
+from db.constraints import get_constraints_with_oids
 from db.schemas import get_mathesar_schemas_with_oids
 from db.tables import get_table_oids_from_schema
 # We import the entire models module to avoid a circular import error
@@ -71,7 +71,7 @@ def reflect_tables_from_schema(schema):
 
 def reflect_constraints_from_database(database):
     engine = create_mathesar_engine(database)
-    db_constraints = get_mathesar_constraints_with_oids(engine)
+    db_constraints = get_constraints_with_oids(engine)
     constraints = [
         models.Constraint.current_objects.get_or_create(
             oid=db_constraint['oid'],
@@ -82,6 +82,19 @@ def reflect_constraints_from_database(database):
     for constraint in models.Constraint.current_objects.all():
         if constraint.oid not in [db_constraint['oid'] for db_constraint in db_constraints]:
             constraint.delete()
+    return constraints
+
+
+def reflect_new_table_constraints(table):
+    engine = create_mathesar_engine(table.schema.database.name)
+    db_constraints = get_constraints_with_oids(engine, table_oid=table.oid)
+    constraints = [
+        models.Constraint.current_objects.get_or_create(
+            oid=db_constraint['oid'],
+            table=table
+        )
+        for db_constraint in db_constraints
+    ]
     return constraints
 
 

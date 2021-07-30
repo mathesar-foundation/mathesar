@@ -3,8 +3,10 @@ from enum import Enum
 
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
-from sqlalchemy import MetaData, CheckConstraint, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint, Table, select
+from sqlalchemy import MetaData, CheckConstraint, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint, Table, select, and_
 from sqlalchemy.dialects.postgresql import ExcludeConstraint
+
+from db.tables import reflect_table_from_oid
 
 
 class ConstraintType(Enum):
@@ -15,7 +17,7 @@ class ConstraintType(Enum):
     EXCLUDE = 'exclude'
 
 
-def get_constraint_type(constraint):
+def get_constraint_type_from_class(constraint):
     if type(constraint) == CheckConstraint:
         return ConstraintType.CHECK.value
     elif type(constraint) == ForeignKeyConstraint:
@@ -27,6 +29,54 @@ def get_constraint_type(constraint):
     elif type(constraint) == ExcludeConstraint:
         return ConstraintType.EXCLUDE.value
     return None
+
+
+def get_constraints_with_oids(engine, table_oid=None):
+    metadata = MetaData()
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_constraint = Table("pg_constraint", metadata, autoload_with=engine)
+        # We only want to select constraints attached to a table.
+        # conrelid is the table's OID.
+        if table_oid:
+            where_clause = pg_constraint.c.conrelid == table_oid
+        else:
+            where_clause = pg_constraint.c.conrelid != 0
+        query = select(pg_constraint).where(where_clause)
+
+    with engine.begin() as conn:
+        result = conn.execute(query).fetchall()
+    return result
+
+
+def get_constraint_from_oid(oid, engine):
+    metadata = MetaData()
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_constraint = Table("pg_constraint", metadata, autoload_with=engine)
+        # We only want to select constraints attached to a table.
+        # conrelid is the table's OID.
+        query = select(pg_constraint).where(pg_constraint.c.oid == oid)
+    with engine.begin() as conn:
+        constraint_record = conn.execute(query).fetchall()[0]
+    table = reflect_table_from_oid(constraint_record['conrelid'], engine)
+    for constraint in table.constraints:
+        if constraint.name == constraint_record['conname']:
+            return constraint
+    return None
+
+
+def get_constraint_oid_by_name_and_table_oid(name, table_oid, engine):
+    metadata = MetaData()
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_constraint = Table("pg_constraint", metadata, autoload_with=engine)
+        # We only want to select constraints attached to a table.
+        # conrelid is the table's OID.
+        query = select(pg_constraint).where(and_(pg_constraint.c.conrelid == table_oid, pg_constraint.c.conname == name))
+    with engine.begin() as conn:
+        result = conn.execute(query).fetchall()
+    return result[0]['oid']
 
 
 # Naming conventions for constraints follow standard Postgres conventions
@@ -56,17 +106,3 @@ def drop_constraint(table_name, schema, engine, constraint_name):
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)
         op.drop_constraint(constraint_name, table_name, schema=schema)
-
-
-def get_mathesar_constraints_with_oids(engine):
-    metadata = MetaData()
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_constraint = Table("pg_constraint", metadata, autoload_with=engine)
-        # We only want to select constraints attached to a table.
-        # conrelid is the table's OID.
-        query = select(pg_constraint).where(pg_constraint.c.conrelid != 0)
-
-    with engine.begin() as conn:
-        result = conn.execute(query).fetchall()
-    return result

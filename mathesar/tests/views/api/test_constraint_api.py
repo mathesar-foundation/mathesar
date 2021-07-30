@@ -8,9 +8,9 @@ def _verify_primary_and_unique_constraints(response):
 
 def _verify_unique_constraint(constraint_data, columns, name):
     assert constraint_data['columns'] == columns
-    assert constraint_data['id'] == name
     assert constraint_data['name'] == name
     assert constraint_data['type'] == 'unique'
+    assert 'id' in constraint_data and type(constraint_data['id']) == int
 
 
 def test_default_constraint_list(create_table, client):
@@ -24,7 +24,7 @@ def test_default_constraint_list(create_table, client):
     assert response.status_code == 200
     assert response_data['count'] == 1
     assert constraint_data['columns'] == ['mathesar_id']
-    assert constraint_data['id'] == 'NASA Constraint List 0_pkey'
+    assert 'id' in constraint_data and type(constraint_data['id']) == int
     assert constraint_data['name'] == 'NASA Constraint List 0_pkey'
     assert constraint_data['type'] == 'primary'
 
@@ -76,7 +76,7 @@ def test_retrieve_constraint(create_table, client):
 
     response = client.get(f'/api/v0/tables/{table.id}/constraints/{constraint_id}/')
     assert response.status_code == 200
-    _verify_unique_constraint(response.json(), ['Case Number'], constraint_id)
+    _verify_unique_constraint(response.json(), ['Case Number'], 'NASA Constraint List 3_Case Number_key')
 
 
 def test_create_multiple_column_unique_constraint(create_table, client):
@@ -177,12 +177,12 @@ def test_drop_nonexistent_constraint(create_table, client):
     table_name = 'NASA Constraint List 10'
     table = create_table(table_name)
 
-    response = client.delete(f'/api/v0/tables/{table.id}/constraints/nonsense_constraint/')
+    response = client.delete(f'/api/v0/tables/{table.id}/constraints/345/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
 
 
 def test_drop_nonexistent_table(create_table, client):
-    response = client.delete('/api/v0/tables/9387489/constraints/nonsense_constraint/')
+    response = client.delete('/api/v0/tables/9387489/constraints/4234/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'

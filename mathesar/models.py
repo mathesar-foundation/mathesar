@@ -215,15 +215,9 @@ class Table(DatabaseObject):
     def delete_record(self, id_value):
         return records.delete_record(self._sa_table, self.schema._sa_engine, id_value)
 
-    def get_constraint_by_name(self, name):
-        for constraint in self.sa_constraints:
-            if constraint.name == name:
-                return constraint
-        return None
-
     def get_constraint_by_type_and_columns(self, constraint_type, columns):
         for constraint in self.sa_constraints:
-            current_constraint_type = constraints.get_constraint_type(constraint)
+            current_constraint_type = constraints.get_constraint_type_from_class(constraint)
             if current_constraint_type == constraint_type and set(columns) == set([column.name for column in constraint.columns]):
                 return constraint
         return None
@@ -238,18 +232,39 @@ class Table(DatabaseObject):
             constraint_data['columns'],
             constraint_data['name'] if 'name' in constraint_data else None
         )
-
-    def drop_constraint(self, name):
-        constraints.drop_constraint(
-            self._sa_table.name,
-            self._sa_table.schema,
-            self.schema._sa_engine,
-            name
+        try:
+            # Clearing cache so that new constraint shows up.
+            del self._sa_table
+        except AttributeError:
+            pass
+        sa_constraint = self.get_constraint_by_type_and_columns(
+            constraint_data['type'],
+            constraint_data['columns']
         )
+        engine = self.schema.database._sa_engine
+        constraint_oid = constraints.get_constraint_oid_by_name_and_table_oid(sa_constraint.name, self.oid, engine)
+        return Constraint.objects.create(oid=constraint_oid, table=self)
 
 
 class Constraint(DatabaseObject):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='constraints')
+
+    @property
+    def _sa_constraint(self):
+        engine = self.table.schema.database._sa_engine
+        return constraints.get_constraint_from_oid(self.oid, engine)
+
+    @property
+    def name(self):
+        return self._sa_constraint.name
+
+    @property
+    def type(self):
+        return constraints.get_constraint_type_from_class(self._sa_constraint)
+
+    @cached_property
+    def columns(self):
+        return [column.name for column in self._sa_constraint.columns]
 
 
 class DataFile(BaseModel):

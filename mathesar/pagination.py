@@ -28,20 +28,6 @@ class ColumnLimitOffsetPagination(DefaultLimitOffsetPagination):
         return list(table.sa_columns)[self.offset:self.offset + self.limit]
 
 
-class ConstraintLimitOffsetPagination(DefaultLimitOffsetPagination):
-
-    def paginate_queryset(self, queryset, request, table_id):
-        self.limit = self.get_limit(request)
-        if self.limit is None:
-            self.limit = self.default_limit
-        self.offset = self.get_offset(request)
-        table = queryset.get(id=table_id)
-        constraints = list(table._sa_table.constraints)
-        self.count = len(constraints)
-        self.request = request
-        return constraints[self.offset:self.offset + self.limit]
-
-
 class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
 
     def paginate_queryset(self, queryset, request, table_id,

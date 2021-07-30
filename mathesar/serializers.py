@@ -2,8 +2,7 @@ from django.urls import reverse
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from db.constraints import get_constraint_type
-from mathesar.models import Table, Schema, DataFile, Database
+from mathesar.models import Table, Schema, DataFile, Database, Constraint
 
 
 class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
@@ -157,15 +156,11 @@ class DataFileSerializer(serializers.ModelSerializer):
         return data
 
 
-class ConstraintSerializer(serializers.Serializer):
-    # We're duplicating the "name" field as "id" to make clear what the constraint detail URL uses.
-    id = serializers.CharField(read_only=True, source='name')
+class ConstraintSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False)
-    type = serializers.SerializerMethodField()
-    columns = serializers.SerializerMethodField()
+    type = serializers.CharField()
+    columns = serializers.ListField()
 
-    def get_type(self, obj):
-        return get_constraint_type(obj)
-
-    def get_columns(self, obj):
-        return [column.name for column in obj.columns]
+    class Meta:
+        model = Constraint
+        fields = ['id', 'name', 'type', 'columns']
