@@ -146,6 +146,9 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         table_data.update(
             {
                 "name": serializer.validated_data["name"],
+                # There's no way to reflect actual column data without
+                # creating a view, so we just use the submission, assuming
+                # no errors means we changed to the desired names and types
                 "columns": columns,
                 "records": preview_records
             }

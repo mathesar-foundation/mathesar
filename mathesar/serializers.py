@@ -83,7 +83,7 @@ class RecordSerializer(serializers.BaseSerializer):
 
 class TablePreviewSerializer(serializers.Serializer):
     name = serializers.CharField()
-    columns = ColumnSerializer(many=True)
+    columns = SimpleColumnSerializer(many=True)
 
 
 class RecordListParameterSerializer(serializers.Serializer):

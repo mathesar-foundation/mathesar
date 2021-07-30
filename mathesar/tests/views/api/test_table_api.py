@@ -1,3 +1,4 @@
+import json
 from unittest.mock import patch
 import pytest
 
@@ -256,7 +257,59 @@ def test_table_type_suggestion(client, schema, engine_email_type):
     assert response.status_code == 200
     assert response_table == EXPECTED_TYPES
 
-# Workaround for not being able to parametrize with fixtures
+
+def test_table_previews(client, schema, engine_email_type):
+    table_name = 'Type Modification Table'
+    file = 'mathesar/tests/data/type_inference.csv'
+    with open(file, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    body = {
+        'data_files': [data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response_table = client.post('/api/v0/tables/', body).json()
+    table = Table.objects.get(id=response_table['id'])
+
+    post_body = {
+        'name': 'Modified Type Modification Table',
+        'columns': [
+            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "col_1", "type": "NUMERIC"},
+            {"name": "col_2", "type": "BOOLEAN"},
+            {"name": "col_3", "type": "BOOLEAN"},
+            {"name": "col_4", "type": "VARCHAR"},
+            {"name": "col_5", "type": "VARCHAR"},
+            {"name": "col_6", "type": "NUMERIC"}
+        ]
+    }
+    response = client.post(
+        f'/api/v0/tables/{table.id}/previews/',
+        data=json.dumps(post_body),
+        content_type='application/json'
+    )
+    assert response.status_code == 200
+    expect_dict = {
+        'name': 'Modified Type Modification Table',
+        'columns': [
+            {'name': 'mathesar_id', 'type': 'INTEGER'},
+            {'name': 'col_1', 'type': 'NUMERIC'},
+            {'name': 'col_2', 'type': 'BOOLEAN'},
+            {'name': 'col_3', 'type': 'BOOLEAN'},
+            {'name': 'col_4', 'type': 'VARCHAR'},
+            {'name': 'col_5', 'type': 'VARCHAR'},
+            {'name': 'col_6', 'type': 'NUMERIC'}
+        ],
+        'records': [
+            {'mathesar_id': 1, 'col_1': 0.0, 'col_2': False, 'col_3': True, 'col_4': 't', 'col_5': 'a', 'col_6': 2.0},
+            {'mathesar_id': 2, 'col_1': 2.0, 'col_2': True, 'col_3': False, 'col_4': 'false', 'col_5': 'cat', 'col_6': 1.0},
+            {'mathesar_id': 3, 'col_1': 1.0, 'col_2': True, 'col_3': True, 'col_4': '2', 'col_5': 'mat', 'col_6': 0.0},
+            {'mathesar_id': 4, 'col_1': 0.0, 'col_2': False, 'col_3': False, 'col_4': '0', 'col_5': 'bat', 'col_6': 0.0}
+        ],
+    }
+    actual_dict = response.json()
+    assert all([expect_dict[key] == actual_dict[key] for key in expect_dict])
 
 
 def check_create_table_response(client, table_name, data_file, schema):
