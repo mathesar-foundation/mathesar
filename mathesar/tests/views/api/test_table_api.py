@@ -2,13 +2,12 @@ from unittest.mock import patch
 import pytest
 
 from django.core.cache import cache
-from django.core.files import File
+from django.core.files.base import File, ContentFile
 from sqlalchemy import text
 
-from mathesar.models import Table
-from mathesar.models import DataFile, Schema
-from mathesar.utils.schemas import create_schema_and_object
 from mathesar import reflection
+from mathesar.models import Table, DataFile, Schema
+from mathesar.utils.schemas import create_schema_and_object
 from db.tests.types import fixtures
 from db import tables
 
@@ -29,6 +28,19 @@ def schema(django_db_setup, django_db_blocker, test_db_name):
 def data_file(csv_filename):
     with open(csv_filename, 'rb') as csv_file:
         data_file = DataFile.objects.create(file=File(csv_file))
+    return data_file
+
+
+@pytest.fixture
+def paste_data_file(paste_filename):
+    with open(paste_filename, 'r') as paste_file:
+        paste_text = paste_file.read()
+    data_file = DataFile.objects.create(
+        file=ContentFile(paste_text, name='paste_file.txt'),
+        delimiter='\t',
+        quotechar='',
+        escapechar='',
+    )
     return data_file
 
 
@@ -250,10 +262,11 @@ def test_table_type_suggestion(client, schema, engine_email_type):
     assert response.status_code == 200
     assert response_table == EXPECTED_TYPES
 
+# Workaround for not being able to parametrize with fixtures
 
-def test_table_create_from_datafile(client, data_file, schema):
+
+def check_create_table_response(client, table_name, data_file, schema):
     num_tables = Table.objects.count()
-    table_name = 'test_table'
     body = {
         'data_files': [data_file.id],
         'name': table_name,
@@ -265,12 +278,25 @@ def test_table_create_from_datafile(client, data_file, schema):
     data_file.refresh_from_db()
     first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
                  '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
+                    'Application SN', 'Title', 'Patent Expiration Date']
 
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1
-    assert data_file.table_imported_to.id == table.id
     assert table.get_records()[0] == first_row
+    assert all([col in table.sa_column_names for col in column_names])
+    assert data_file.table_imported_to.id == table.id
     check_table_response(response_table, table, table_name)
+
+
+def test_table_create_from_datafile(client, data_file, schema):
+    table_name = 'Test Table Create From Datafile'
+    check_create_table_response(client, table_name, data_file, schema)
+
+
+def test_table_create_from_paste(client, schema, paste_data_file):
+    table_name = 'Test Table Create From Paste'
+    check_create_table_response(client, table_name, paste_data_file, schema)
 
 
 def test_table_create_without_datafile(client, schema):
@@ -375,7 +401,7 @@ def test_table_type_suggestion_404(client):
 
 def test_table_create_from_datafile_404(client):
     body = {
-        'data_files': -999,
+        'data_files': [-999],
         'name': 'test_table',
         'schema': -999,
     }
@@ -384,6 +410,18 @@ def test_table_create_from_datafile_404(client):
     assert response.status_code == 400
     assert 'object does not exist' in response_table['schema'][0]
     assert 'object does not exist' in response_table['data_files'][0]
+
+
+def test_table_create_from_multiple_datafile(client, data_file, schema):
+    body = {
+        'data_files': [data_file.id, data_file.id],
+        'name': 'test_table',
+        'schema': schema.id,
+    }
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
+    assert response.status_code == 400
+    assert response_table['data_files'][0] == 'Multiple data files are unsupported.'
 
 
 def test_table_partial_update_invalid_field(create_table, client):
