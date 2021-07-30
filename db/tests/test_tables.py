@@ -1,3 +1,4 @@
+import decimal
 from unittest.mock import call, patch
 import pytest
 from sqlalchemy import MetaData, select, Column, String, Table, ForeignKey, Integer
@@ -470,26 +471,35 @@ def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
 
 
 def test_get_column_cast_records(engine_email_type):
-    col1 = Column("col1", String)
-    col2 = Column("col2", String)
+    COL1 = "col1"
+    COL2 = "col2"
+    col1 = Column(COL1, String)
+    col2 = Column(COL2, String)
     column_list = [col1, col2]
     engine, schema = engine_email_type
     table_name = "table_with_columns"
     table = tables.create_mathesar_table(
         table_name, schema, column_list, engine
     )
-    ins = table.insert(
-        ['one', 1],
-        ['two', 2],
+    ins = table.insert().values(
+        [{COL1: 'one', COL2: 1}, {COL1: 'two', COL2: 2}]
     )
+    with engine.begin() as conn:
+        conn.execute(ins)
+    COL1_MOD = COL1 + "_mod"
+    COL2_MOD = COL2 + "_mod"
     column_definitions = [
         {"name": "mathesar_id", "type": "INTEGER"},
-        {"name": col1.name, "type": "VARCHAR"},
-        {"name": col2.name, "type": "NUMERIC"},
+        {"name": COL1_MOD, "type": "VARCHAR"},
+        {"name": COL2_MOD, "type": "NUMERIC"},
     ]
     records = tables.get_column_cast_records(engine, table, column_definitions)
+    print(records)
     for record in records:
-        assert type(record[0]) == str and type(record[1]) == int
+        assert (
+            type(record[COL1 + "_mod"]) == str
+            and type(record[COL2 + "_mod"]) == decimal.Decimal
+        )
 
 
 def test_update_table_column_types_infers_non_default_types(engine_with_schema):
