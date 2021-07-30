@@ -248,6 +248,10 @@ class Table(DatabaseObject):
         )
 
 
+class Constraint(DatabaseObject):
+    table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='constraints')
+
+
 class DataFile(BaseModel):
     created_from_choices = models.TextChoices("created_from", "FILE PASTE")
 

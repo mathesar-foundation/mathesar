@@ -1,8 +1,9 @@
+import warnings
 from enum import Enum
 
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
-from sqlalchemy import MetaData, CheckConstraint, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint
+from sqlalchemy import MetaData, CheckConstraint, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint, Table, select
 from sqlalchemy.dialects.postgresql import ExcludeConstraint
 
 
@@ -55,3 +56,17 @@ def drop_constraint(table_name, schema, engine, constraint_name):
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)
         op.drop_constraint(constraint_name, table_name, schema=schema)
+
+
+def get_mathesar_constraints_with_oids(engine):
+    metadata = MetaData()
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_constraint = Table("pg_constraint", metadata, autoload_with=engine)
+        # We only want to select constraints attached to a table.
+        # conrelid is the table's OID.
+        query = select(pg_constraint).where(pg_constraint.c.conrelid != 0)
+
+    with engine.begin() as conn:
+        result = conn.execute(query).fetchall()
+    return result
