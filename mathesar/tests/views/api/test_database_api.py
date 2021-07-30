@@ -2,7 +2,7 @@ import pytest
 from django.conf import settings
 from django.core.cache import cache
 
-from mathesar.views.api import reflect_db_objects
+from mathesar.reflection import reflect_db_objects
 from mathesar.models import Table, Schema, Database
 from db.types import CUSTOM_TYPE_DICT
 from db.tests.types import fixtures

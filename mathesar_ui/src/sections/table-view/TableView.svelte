@@ -1,13 +1,9 @@
 <script lang="ts">
   import { get } from 'svelte/store';
   import {
-    faFilter,
-    faSort,
-    faListAlt,
-  } from '@fortawesome/free-solid-svg-icons';
-  import {
     getTable,
     fetchTableRecords,
+    deleteRecords,
   } from '@mathesar/stores/tableData';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
   import type {
@@ -16,11 +12,11 @@
     TableOptionsStore,
     TableDisplayStores,
   } from '@mathesar/stores/tableData';
-  import { States } from '@mathesar/utils/api';
-  import { Button, Icon } from '@mathesar-components';
+  import ActionsPane from './actions-pane/ActionsPane.svelte';
   import DisplayOptions from './display-options/DisplayOptions.svelte';
   import Header from './Header.svelte';
   import Body from './Body.svelte';
+  import StatusPane from './status-pane/StatusPane.svelte';
   import type { ItemInfo } from './virtual-list/listUtils';
 
   export let database: string;
@@ -47,8 +43,11 @@
   let scrollOffset: TableDisplayStores['scrollOffset'];
   let groupIndex: TableDisplayStores['groupIndex'];
   let showDisplayOptions: TableDisplayStores['showDisplayOptions'];
+  let selected: TableDisplayStores['selected'];
 
   let animateOpts = false;
+
+  $: selectedEntries = Object.keys($selected || []).filter((key) => $selected?.[key]);
 
   function setStores(_database: string, _id: number) {
     const opts = URLQueryHandler.getTableConfig(_database, _id);
@@ -62,6 +61,7 @@
     scrollOffset = table.display.scrollOffset;
     groupIndex = table.display.groupIndex;
     showDisplayOptions = table.display.showDisplayOptions;
+    selected = table.display.selected;
 
     animateOpts = false;
     idKey = _id;
@@ -114,48 +114,17 @@
     animateOpts = true;
     showDisplayOptions.set(false);
   }
+
+  function recordDelete() {
+    if (selectedEntries.length > 0) {
+      void deleteRecords(database, identifier, selectedEntries);
+    }
+  }
 </script>
 
-<div class="actions-pane">
-  <Button appearance="plain" on:click={openDisplayOptions}>
-    <Icon data={faFilter} size="0.8em"/>
-    <span>Filters</span>
-  </Button>
-
-  <Button appearance="plain" on:click={openDisplayOptions}>
-    <Icon data={faSort}/>
-    <span>
-      Sort
-      {#if $options.sort?.size > 0}
-        ({$options.sort?.size})
-      {/if}
-    </span>
-  </Button>
-
-  <Button appearance="plain" on:click={openDisplayOptions}>
-    <Icon data={faListAlt}/>
-    <span>
-      Group
-      {#if $options.group?.size > 0}
-        ({$options.group?.size})
-      {/if}
-    </span>
-  </Button>
-
-  {#if $columns.state === States.Loading}
-    | Loading table
-
-  {:else if $columns.state === States.Error}
-    | Error in loading table: {$columns.error}
-  {/if}
-
-  {#if $records.state === States.Loading}
-    | Loading records
-
-  {:else if $records.state === States.Error}
-    | Error in loading records: {$records.error}
-  {/if}
-</div>
+<ActionsPane {columns} {records} {options} {selectedEntries}
+              on:openDisplayOptions={openDisplayOptions}
+              on:deleteRecords={recordDelete}/>
 
 <div class="table-data" class:animate-opts={animateOpts}
       class:has-display-opts={$showDisplayOptions}>
@@ -165,6 +134,7 @@
         columns={$columns}
         bind:sort={$options.sort}
         bind:group={$options.group}
+        bind:filter={$options.filter}
         on:reload={reload}
         on:close={closeDisplayOptions}/>
     {/if}
@@ -185,6 +155,7 @@
             groupData={$records.groupData}
             groupIndex={$groupIndex}
             columnPosition={$columnPosition}
+            bind:selected={$selected}
             bind:scrollOffset={$scrollOffset}
             bind:horizontalScrollOffset={$horizontalScrollOffset}
             on:refetch={refetch}/>
@@ -192,9 +163,7 @@
   </div>
 </div>
 
-<div class="status-pane">
-  
-</div>
+<StatusPane totalCount={$records.totalCount} {selectedEntries}/>
 
 <style global lang="scss">
   @import "TableView.scss";

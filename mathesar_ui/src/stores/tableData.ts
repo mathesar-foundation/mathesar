@@ -1,6 +1,7 @@
 import { get, writable, Writable } from 'svelte/store';
-import { getAPI, States } from '@mathesar/utils/api';
+import { deleteAPI, getAPI, States } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
+import type { SelectOption } from '@mathesar-components/types';
 
 export const DEFAULT_COUNT_COL_WIDTH = 70;
 export const DEFAULT_COLUMN_WIDTH = 160;
@@ -10,9 +11,12 @@ export const DEFAULT_ROW_RIGHT_PADDING = 100;
 
 export interface TableColumn {
   name: string,
-  type: string
+  type: string,
+  index: number,
+  nullable: boolean,
+  primaryKey: boolean,
+  validTargetTypes: string[]
 }
-
 export interface TableRecord {
   [key: string]: unknown
   __groupInfo?: {
@@ -20,8 +24,14 @@ export interface TableRecord {
   }
 }
 
-interface TableDetailsResponse {
-  columns: TableColumn[]
+interface TableColumnResponse extends TableColumn {
+  primary_key: TableColumn['primaryKey'],
+  valid_target_types: TableColumn['validTargetTypes']
+}
+
+interface TableColumnsResponse {
+  count: number,
+  results: TableColumnResponse[]
 }
 
 interface TableRecordGroupsResponse {
@@ -37,7 +47,8 @@ interface TableRecordsResponse {
 export interface TableColumnData {
   state: States,
   error?: string,
-  data: TableColumn[]
+  data: TableColumn[],
+  primaryKey: string,
 }
 
 export interface GroupData {
@@ -54,11 +65,24 @@ interface TableRecordData {
 
 export type SortOption = Map<string, 'asc' | 'desc'>;
 export type GroupOption = Set<string>;
+
+export type StringCondition = 'eq' | 'ne' | 'ilike' | 'not_ilike';
+export interface FilterEntry {
+  column: SelectOption,
+  condition: SelectOption,
+  value: string
+}
+export interface FilterOption {
+  combination: SelectOption,
+  filters: FilterEntry[]
+}
+
 export interface TableOptionsData {
   limit: number,
   offset: number,
   sort: SortOption,
-  group: GroupOption
+  group: GroupOption,
+  filter: FilterOption
 }
 
 export type ColumnPosition = Map<string, {
@@ -78,10 +102,11 @@ export interface TableDisplayStores {
   columnPosition: Writable<ColumnPosition>,
   groupIndex: Writable<GroupIndex>,
   showDisplayOptions: Writable<boolean>,
+  selected: Writable<Record<string | number, boolean>>
 }
 
 interface TableConfigData {
-  previousTableRequest?: CancellablePromise<TableDetailsResponse>,
+  previousTableRequest?: CancellablePromise<TableColumnsResponse>,
   previousRecordRequestSet?: Set<CancellablePromise<TableRecordsResponse>>,
 }
 
@@ -182,24 +207,37 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
     const existingData = get(tableColumnStore);
 
     tableColumnStore.set({
+      ...existingData,
       state: States.Loading,
-      data: existingData.data,
     });
 
     try {
       table.config.previousTableRequest?.cancel();
 
-      const tableDetailsPromise = getAPI<TableDetailsResponse>(`/tables/${id}/`);
+      const tableColumnsPromise = getAPI<TableColumnsResponse>(`/tables/${id}/columns/?limit=500`);
       table.config = {
         ...table.config,
-        previousTableRequest: tableDetailsPromise,
+        previousTableRequest: tableColumnsPromise,
       };
 
-      const response = await tableDetailsPromise;
-      const columns = response.columns || [];
+      const response = await tableColumnsPromise;
+      const columnResponse = response.results || [];
+      const columns: TableColumn[] = columnResponse.map((column) => {
+        const converted = {
+          ...column,
+          primaryKey: column.primary_key,
+          validTargetTypes: column.valid_target_types,
+        };
+        delete converted.primary_key;
+        delete converted.valid_target_types;
+        return converted;
+      });
+      const pkColumn = columns.find((column) => column.primaryKey);
+
       tableColumnStore.set({
         state: States.Done,
         data: columns,
+        primaryKey: pkColumn?.name || null,
       });
 
       const columnPosition = calculateColumnPosition(columns);
@@ -209,6 +247,7 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
         state: States.Error,
         error: err instanceof Error ? err.message : null,
         data: [],
+        primaryKey: null,
       });
     }
   }
@@ -339,6 +378,19 @@ export async function fetchTableRecords(
         `group_count_by=${encodeURIComponent(JSON.stringify(groupOptions))}`,
       );
     }
+    if (optionData.filter?.filters?.length > 0) {
+      const filter = {};
+      const terms = optionData.filter?.filters.map((term) => ({
+        field: term.column.id,
+        op: term.condition.id,
+        value: term.value,
+      }));
+      filter[optionData.filter.combination.id as string] = terms;
+      params.push(
+        `filters=${encodeURIComponent(JSON.stringify(filter))}`,
+      );
+    }
+
     const tableRecordsPromise = getAPI<TableRecordsResponse>(`/tables/${id}/records/?${params.join('&')}`);
 
     if (!table.config.previousRecordRequestSet) {
@@ -431,6 +483,7 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
       columns: writable({
         state: States.Loading,
         data: [],
+        primaryKey: null,
       }),
       records: writable({
         state: States.Loading,
@@ -443,6 +496,7 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
         offset: options?.offset || 0,
         sort: options?.sort || null,
         group: options?.group || null,
+        filter: options?.filter || null,
       }),
       display: {
         horizontalScrollOffset: writable(0),
@@ -454,6 +508,7 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
           bailOutOnReset: false,
         }),
         showDisplayOptions: writable(false),
+        selected: writable({}),
       },
       config: {},
     };
@@ -462,6 +517,91 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
   }
   void fetchTableRecords(db, id);
   return table;
+}
+
+export async function deleteRecords(db: string, id: number, pks: string[]): Promise<void> {
+  const table = databaseMap.get(db)?.get(id);
+  if (table && pks.length > 0) {
+    const tableRecordStore = table.records;
+    const tableColumnStore = table.columns;
+
+    const columnData = get(tableColumnStore);
+    const existingData = get(tableRecordStore);
+
+    const pkSet = new Set(pks);
+
+    // TODO: Retain map with pk uuid hash for record operations
+    const data = existingData.data.map((entry) => {
+      if (entry && pkSet.has(entry[columnData.primaryKey]?.toString())) {
+        return {
+          ...entry,
+          __state: 'deleting',
+        };
+      }
+      return entry;
+    });
+
+    tableRecordStore.set({
+      ...existingData,
+      data,
+    });
+
+    try {
+      const success = new Set();
+      const failed = new Set();
+      // TODO: Convert this to single request
+      const promises = pks.map((pk) => deleteAPI<unknown>(`/tables/${id}/records/${pk}/`)
+        .then(() => {
+          success.add(pk);
+          return success;
+        })
+        .catch(() => {
+          failed.add(pk);
+          return failed;
+        }));
+      await Promise.all(promises);
+      await fetchTableRecords(db, id, true);
+
+      // Getting again, since data may have changed
+      const recordData = get(tableRecordStore);
+      const newData: TableRecord[] = [];
+      recordData.data.forEach((entry) => {
+        if (entry) {
+          const entryPK = entry[columnData.primaryKey]?.toString();
+          if (failed.has(entryPK)) {
+            newData.push({
+              ...entry,
+              __state: 'deletionFailed',
+            });
+          }
+        }
+        newData.push(entry);
+      });
+
+      tableRecordStore.set({
+        ...recordData,
+        data: newData,
+      });
+    } catch (err) {
+      const recordData = get(tableRecordStore);
+      const newData = existingData.data.map((entry) => {
+        if (entry && pkSet.has(entry[columnData.primaryKey]?.toString())) {
+          return {
+            ...entry,
+            __state: 'deletionError',
+          };
+        }
+        return entry;
+      });
+
+      tableRecordStore.set({
+        ...recordData,
+        data: newData,
+      });
+    } finally {
+      table.display.selected.set({});
+    }
+  }
 }
 
 export function clearTable(db: string, id: number): void {

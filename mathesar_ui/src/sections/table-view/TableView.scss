@@ -1,10 +1,15 @@
-$display-opts-pane-width: 310px;
+$display-opts-pane-width: 360px;
 
 section.table-section .tab-container {
   .tab-content-holder {
     .actions-pane {
       border-bottom: 1px solid #efefef;
       position: relative;
+
+      .loading-info {
+        float: right;
+        padding: 8px 12px;
+      }
     }
     .table-data {
       flex-grow: 1;
@@ -59,6 +64,14 @@ section.table-section .tab-container {
                     width: 178px;
                   }
                 }
+                td.filter-action {
+                  text-align: right;
+                }
+                td.value {
+                  .text-input {
+                    background: #fff;
+                  }
+                }
 
                 tr.add-option td {
                   padding-top: 10px;
@@ -93,18 +106,24 @@ section.table-section .tab-container {
           text-overflow: ellipsis;
           white-space: nowrap;
           text-align: left;
-          border-bottom: 1px solid #efefef;
+          border-bottom: 1px solid #e7e7e7;
           border-right: 1px solid #efefef;
           height: 100%;
           left: 0;
           top: 0;
 
-          &.row-number {
+          &.row-control {
             font-size: 12px;
             color: #959595;
             left: 0;
             position: sticky;
             z-index: 10;
+            display: inline-flex;
+            align-items: center;
+
+            .checkbox {
+              display: none;
+            }
           }
         }
 
@@ -113,7 +132,7 @@ section.table-section .tab-container {
           min-width: 100%;
           position: relative;
           background: #f9f9f9;
-          border-bottom: 1px solid #efefef;
+          border-bottom: 1px solid #e5e5e5;
           user-select: none;
           overflow: hidden;
 
@@ -150,7 +169,7 @@ section.table-section .tab-container {
               color: #d2d2d2;
             }
 
-            &.row-number {
+            &.row-control {
               background: #f9f9f9;
             }
           }
@@ -167,12 +186,12 @@ section.table-section .tab-container {
           .group {
             overflow: visible;
 
-            .values, .cell.row-number > div.border {
+            .values, .cell.row-control > div.border {
               border: 1px solid #81b9ff;
               background: #e6f1ff;
             }
 
-            .cell.row-number {
+            .cell.row-control {
               border: none;
               background: #f7f8f8;
 
@@ -223,8 +242,44 @@ section.table-section .tab-container {
           .row {
             transition: all .20s cubic-bezier(0,0,.2,1);
 
+            &:not(.done) {
+              pointer-events: none;
+            }
+
+            &:not(.group) {
+              &:hover {
+                .cell {
+                  background: #f6f7f7;
+                }
+              }
+  
+              &:hover, &.selected {
+                .cell.row-control {
+                  .checkbox {
+                    display: inline-flex;
+                  }
+                  .number {
+                    display: none;
+                  }
+                }
+              }
+  
+              &.selected {
+                .cell {
+                  background: #e4f2ff;
+                }
+              }
+
+              &.deleting {
+                .cell {
+                  transition: all .20s cubic-bezier(0,0,.2,1);
+                  background: #f1bfbf;
+                }
+              }
+            }
+
             &.in-group {
-              .row-number {
+              .row-control {
                 /**
                  * Fix for an obsure bug in firefox.
                  * If position of sticky elements and their parents are updated, and if
@@ -276,14 +331,8 @@ section.table-section .tab-container {
       flex-basis: 32px;
       background: #f7f8f8;
 
-      .rt-opts {
-        display: flex;
-        align-items: center;
-
-        .pagination {
-          margin-left: 10px;
-          position: relative;
-        }
+      .record-count {
+        font-size: 12px;
       }
     }
   }

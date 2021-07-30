@@ -15,6 +15,8 @@
   export let contentClass = '';
   export let isOpen = false;
   export let closeOnInnerClick = false;
+  export let ariaLabel:string = null;
+  export let ariaControls: string = null;
 
   let trigger: HTMLElement;
   $: tgClasses = ['dropdown', 'trigger', triggerClass].join(' ');
@@ -34,7 +36,8 @@
   }
 </script>
 
-<Button bind:element={trigger} appearance={triggerAppearance} class={tgClasses} on:click={toggle}>
+<Button bind:element={trigger} appearance={triggerAppearance} class={tgClasses} on:click={toggle}
+        aria-controls={ariaControls} aria-haspopup="listbox" aria-label={ariaLabel}>
   <span class="label">
     <slot name="trigger"></slot>
   </span>
