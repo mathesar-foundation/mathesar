@@ -12,6 +12,10 @@ STRING = "string"
 VARCHAR = "varchar"
 
 
+class UnsupportedTypeException(Exception):
+    pass
+
+
 def get_supported_alter_column_types(engine, friendly_names=True):
     """
     Returns a list of valid types supported by mathesar for the given engine.
@@ -95,9 +99,13 @@ def get_column_cast_expression(column, target_type_str, engine):
     selecting the results of a Mathesar cast_to_<type> function on that
     column, where <type> is derived from the target_type_str.
     """
-    target_type = get_robust_supported_alter_column_type_map(engine)[target_type_str]
-    prepared_type_name = target_type().compile(dialect=engine.dialect)
-    qualified_function_name = get_cast_function_name(prepared_type_name)
+    target_type = get_robust_supported_alter_column_type_map(engine).get(target_type_str)
+    if target_type is None:
+        raise UnsupportedTypeException(
+            f'Target Type "{target_type_str}" is not supported.'
+        )
+    prepared_target_type_name = target_type().compile(dialect=engine.dialect)
+    qualified_function_name = get_cast_function_name(prepared_target_type_name)
     return Function(
         quoted_name(qualified_function_name, False),
         column

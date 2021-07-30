@@ -179,6 +179,15 @@ def test_alter_column_type_raises_on_bad_column_data(
         )
 
 
+def test_get_column_cast_expression_unsupported(engine_with_types):
+    target_type = "this_type_does_not_exist"
+    column = Column("colname", Numeric)
+    with pytest.raises(alteration.UnsupportedTypeException):
+        alteration.get_column_cast_expression(
+            column, target_type, engine_with_types
+        )
+
+
 def test_get_full_cast_map(engine_with_types):
     """
     This test specifies the full map of what types can be cast to what
