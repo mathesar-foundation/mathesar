@@ -1,6 +1,7 @@
-from db.tables import infer_table_column_types, create_mathesar_table, get_oid_from_table
-from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Table
+from mathesar.imports.csv import create_table_from_csv
+from mathesar.database.base import create_mathesar_engine
+from db.tables import infer_table_column_types, create_mathesar_table, get_oid_from_table
 
 
 def get_table_column_types(table):
@@ -16,16 +17,20 @@ def get_table_column_types(table):
     return col_types
 
 
-def create_empty_table(data):
+def create_table_from_datafile(data_files, name, schema):
+    data_file = data_files[0]
+    table = create_table_from_csv(data_file, name, schema)
+    return table
+
+
+def create_empty_table(name, schema):
     """
     Create an empty table, with only Mathesar's internal columns.
 
-    :param data: the parsed and validated data from the incoming request
+    :param name: the parsed and validated table name
+    :param schema: the parsed and validated schema model
     :return: the newly created blank table
     """
-
-    name = data['name']
-    schema = data['schema']
 
     engine = create_mathesar_engine(schema.database.name)
     db_table = create_mathesar_table(name, schema.name, [], engine)

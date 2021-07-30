@@ -62,10 +62,10 @@ def csv_filename():
 
 
 @pytest.fixture(scope='session')
-def headerless_csv_filename():
-    return 'mathesar/tests/data/headerless_patents.csv'
+def paste_filename():
+    return 'mathesar/tests/data/patents.txt'
 
 
 @pytest.fixture(scope='session')
-def tsv_filename():
-    return 'mathesar/tests/data/patents.tsv'
+def headerless_csv_filename():
+    return 'mathesar/tests/data/headerless_patents.csv'

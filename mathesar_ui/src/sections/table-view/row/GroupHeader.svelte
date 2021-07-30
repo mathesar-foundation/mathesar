@@ -34,7 +34,7 @@
 </script>
 
 <div class="row group" style={style}>
-  <div class="cell row-number" style="width:{DEFAULT_COUNT_COL_WIDTH}px;
+  <div class="cell row-control" style="width:{DEFAULT_COUNT_COL_WIDTH}px;
                     left:{GROUP_MARGIN_LEFT}px">
     <div class="border"></div>
     <div class="content"></div>
