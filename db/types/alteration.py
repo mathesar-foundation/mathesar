@@ -104,12 +104,18 @@ def get_column_cast_expression(column, target_type_str, engine):
         raise UnsupportedTypeException(
             f'Target Type "{target_type_str}" is not supported.'
         )
-    prepared_target_type_name = target_type().compile(dialect=engine.dialect)
-    qualified_function_name = get_cast_function_name(prepared_target_type_name)
-    return Function(
-        quoted_name(qualified_function_name, False),
-        column
-    )
+    else:
+        prepared_target_type_name = target_type().compile(dialect=engine.dialect)
+
+    if prepared_target_type_name == column.type.__class__().compile(dialect=engine.dialect):
+        cast_expr = column
+    else:
+        qualified_function_name = get_cast_function_name(prepared_target_type_name)
+        cast_expr = Function(
+            quoted_name(qualified_function_name, False),
+            column
+        )
+    return cast_expr
 
 
 def install_all_casts(engine):

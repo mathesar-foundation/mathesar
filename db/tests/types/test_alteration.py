@@ -179,6 +179,36 @@ def test_alter_column_type_raises_on_bad_column_data(
         )
 
 
+def test_get_column_cast_expression_unchanged(engine_with_types):
+    target_type = "numeric"
+    col_name = "my_column"
+    column = Column(col_name, Numeric)
+    cast_expr = alteration.get_column_cast_expression(
+        column, target_type, engine_with_types
+    )
+    assert cast_expr == column
+
+
+def test_get_column_cast_expression_change(engine_with_types):
+    target_type = "boolean"
+    col_name = "my_column"
+    column = Column(col_name, Numeric)
+    cast_expr = alteration.get_column_cast_expression(
+        column, target_type, engine_with_types
+    )
+    assert str(cast_expr) == f"mathesar_types.cast_to_boolean({col_name})"
+
+
+def test_get_column_cast_expression_change_quotes(engine_with_types):
+    target_type = "boolean"
+    col_name = "A Column Needing Quotes"
+    column = Column(col_name, Numeric)
+    cast_expr = alteration.get_column_cast_expression(
+        column, target_type, engine_with_types
+    )
+    assert str(cast_expr) == f'mathesar_types.cast_to_boolean("{col_name}")'
+
+
 def test_get_column_cast_expression_unsupported(engine_with_types):
     target_type = "this_type_does_not_exist"
     column = Column("colname", Numeric)
