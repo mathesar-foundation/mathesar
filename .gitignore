@@ -182,4 +182,4 @@ node_modules/
 storybook-static/
 
 # Client Build files
-client_build/
+/client_build/

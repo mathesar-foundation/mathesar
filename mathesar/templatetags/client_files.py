@@ -17,8 +17,18 @@ MANIFEST = os.path.join(CLIENT_BUILD_LOCATION, "manifest.json")
 STATIC_URL = getattr(settings, "STATIC_URL")
 CLIENT_DEV_URL = getattr(settings, "CLIENT_DEV_URL")
 
+# The template tag get_assets is used to generate the script links based on
+# the mode. Development mode loads the script from vite dev server, which
+# needs to be running. Production mode loads it from the built client assets.
+
+# Client build produces a manifest.json file, which contains the urls of
+# the built files. Refer: https://vitejs.dev/guide/backend-integration.html
+
 
 class ClientAssetHandler:
+    # This Singleton class loads the manifest.json file, and produces the scripts
+    # that need to be imported in the base html template.
+    # The scripts get generated once, on the initial call of get_assets class method.
     _instance = None
     _inclusion_scripts = None
 
@@ -51,7 +61,7 @@ class ClientAssetHandler:
             self._inclusion_scripts = "\n".join(includes)
             logger.info("Client build manifest file loaded")
         except Exception as e:
-            raise RuntimeError(e)
+            raise RuntimeError('Unable to load client build manifest file') from e
 
     @staticmethod
     def get_module_includes(manifest_data):
