@@ -4,7 +4,7 @@
   export function getSelectId(): number {
     id += 1;
     return id;
-}
+  }
 </script>
 
 <script lang="ts">
@@ -24,6 +24,25 @@
   export let ariaLabel;
 
   let isOpen = false;
+  function alerta({keyCode}){
+    if(keyCode !== 38 && keyCode !== 40) return
+
+    const current = document.activeElement;
+    const items =  [...document.querySelectorAll('[role="option"]')];
+    const currentIndex= items.indexOf(current);
+    let newIndex;
+    if(currentIndex === -1){
+      newIndex = 0
+    }else{
+      if(keyCode === 38){
+        newIndex = (currentIndex + items.length - 1) % items.length
+      }else{
+        newIndex = (currentIndex + 1) % items.length
+      }
+    }
+    current.blur();
+    items[newIndex].focus()
+    }
 
   function setValue(opt: SelectOption) {
     value = opt;
@@ -32,7 +51,7 @@
     });
     isOpen = false;
   }
-
+  
   function setOptions(opts: SelectOption[]) {
     if (!value && opts.length > 0) {
       setValue(opts[0]);
@@ -41,7 +60,7 @@
 
   $: setOptions(options);
 </script>
-
+<svelte:window on:keydown={alerta}/>
 <Dropdown ariaControls="select-value-{selectId}" {ariaLabel} bind:isOpen contentClass="select {contentClass}" {triggerClass}>
   <svelte:fragment slot="trigger">
     {value?.[labelKey]}
