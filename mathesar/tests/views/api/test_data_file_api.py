@@ -164,7 +164,7 @@ def test_datafile_create_invalid_file(client):
     assert response_dict[0] == 'Unable to tabulate data'
 
 
-def test_datafile_create_file_and_paste(client, csv_filename, paste_filename):
+def test_datafile_create_multiple_source_fields(client, csv_filename, paste_filename):
     with open(paste_filename, 'r') as paste_file:
         paste_text = paste_file.read()
     with open(csv_filename, 'rb') as csv_file:
@@ -172,13 +172,11 @@ def test_datafile_create_file_and_paste(client, csv_filename, paste_filename):
         response = client.post('/api/v0/data_files/', data)
         response_dict = response.json()
     assert response.status_code == 400
-    error = response_dict['non_field_errors'][0]
-    assert error == 'Paste field and file field were both specified'
+    assert 'Multiple source fields passed:' in response_dict['non_field_errors'][0]
 
 
-def test_datafile_create_no_file_and_no_paste(client):
+def test_datafile_createno_source_fields(client):
     response = client.post('/api/v0/data_files/', {})
     response_dict = response.json()
     assert response.status_code == 400
-    error = response_dict['non_field_errors'][0]
-    assert error == 'Paste field or file field must be specified'
+    assert 'should be specified.' in response_dict['non_field_errors'][0]

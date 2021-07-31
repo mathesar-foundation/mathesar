@@ -1,7 +1,12 @@
+<<<<<<< HEAD
 import os
+=======
+import tempfile
+>>>>>>> Add urls as a source option for data files
 from time import time
 from io import TextIOWrapper
 
+import requests
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
@@ -13,14 +18,29 @@ from mathesar.errors import InvalidTableError
 from mathesar.models import DataFile
 
 
+def _download_datafile(url):
+    temp_file = tempfile.TemporaryFile()
+    with requests.get(url, allow_redirects=True, stream=True) as r:
+        if not r.ok:
+            raise ValidationError({'url': 'Unable to download datafile'})
+        for chunk in r.iter_content(chunk_size=8192):
+            temp_file.write(chunk)
+    temp_file.seek(0)
+    return temp_file
+
+
 def create_datafile(request, data):
     header = data.get('header', True)
 
+    # Validation guarentees only one arg will be present
     if 'paste' in data:
         name = str(int(time())) + '.tsv'
         file = ContentFile(str.encode(data['paste']), name=name)
         created_from = 'paste'
         base_name = ''
+    elif 'url' in data:
+        file = _download_datafile(data['url'])
+        created_from = 'url'
     elif 'file' in data:
         file = data['file']
         created_from = 'file'
@@ -45,6 +65,7 @@ def create_datafile(request, data):
         quotechar=dialect.quotechar,
     )
     datafile.save()
+    file.close()
 
     serializer = DataFileSerializer(datafile, context={'request': request})
     return Response(serializer.data, status=status.HTTP_201_CREATED)

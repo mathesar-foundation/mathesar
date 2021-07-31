@@ -213,7 +213,7 @@ class Table(DatabaseObject):
 
 
 class DataFile(BaseModel):
-    created_from_choices = models.TextChoices("created_from", "FILE PASTE")
+    created_from_choices = models.TextChoices("created_from", "FILE PASTE URL")
 
     file = models.FileField(upload_to=model_utils.user_directory_path)
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
