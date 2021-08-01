@@ -5,27 +5,37 @@ $color-muted: #606066;
 $font-size-info: 0.875rem;
 
 .schema-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
   color: $color-dark;
   padding: 1em;
 
-  .title {
-    display: flex;
-    flex-direction: row;
-    gap: 0.5em;
+  .details {
+    .title {
+      display: flex;
+      flex-direction: row;
+      gap: 0.5em;
 
-    margin-bottom: 0.5em;
-  }
-
-  .fa-icon {
-    color: $color-muted;
-  }
-
-  .info {
-    color: $color-muted;
-    font-size: $font-size-info;
-
-    strong {
-      font-weight: 600;
+      margin-bottom: 0.5em;
     }
+
+    .fa-icon {
+      color: $color-muted;
+    }
+
+    .info {
+      color: $color-muted;
+      font-size: $font-size-info;
+
+      strong {
+        font-weight: 600;
+      }
+    }
+  }
+
+  .controls {
+    margin-left: auto;
   }
 }

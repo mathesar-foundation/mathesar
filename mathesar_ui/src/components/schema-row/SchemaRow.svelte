@@ -20,19 +20,24 @@
 </script>
 
 <div class={['schema-row', classes].join(' ')} {style}>
-  <div class="title">
-    <Icon data={faProjectDiagram}/>
-    {schemaName}
-    {#if isLocked}
-      <Icon class="lock" data={faLock}/>
-    {/if}
+  <div class="details">
+    <div class="title">
+      <Icon data={faProjectDiagram}/>
+      {schemaName}
+      {#if isLocked}
+        <Icon class="lock" data={faLock}/>
+      {/if}
+    </div>
+    <div class="info">
+      {#if isDefault}
+        <strong>Default</strong>
+        &middot;
+      {/if}
+      {tableCount} Tables
+    </div>
   </div>
-  <div class="info">
-    {#if isDefault}
-      <strong>Default</strong>
-      &middot;
-    {/if}
-    {tableCount} Tables
+  <div class="controls">
+    <slot/>
   </div>
 </div>
 
