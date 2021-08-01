@@ -50,14 +50,16 @@
           <SchemaRow
             schemaName={schema.name}
             tableCount={schema.children.length}
-            isDefault={false}
-            isLocked={false}>
-            <Button class="edit">
-              <Icon data={faPencilAlt}/>
-            </Button>
-            <Button class="delete">
-              <Icon data={faTrash}/>
-            </Button>
+            isDefault={schema.name === 'public'}
+            isLocked={schema.name === 'public'}>
+            {#if schema.name !== 'public'}
+              <Button class="edit">
+                <Icon data={faPencilAlt}/>
+              </Button>
+              <Button class="delete">
+                <Icon data={faTrash}/>
+              </Button>
+            {/if}
           </SchemaRow>
         </li>
       {/each}
