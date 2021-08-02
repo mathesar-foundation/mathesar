@@ -10,7 +10,8 @@ import requests
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-from django.core.files.base import ContentFile
+from django.core.files.base import ContentFile, File
+from django.core.files.uploadedfile import TemporaryUploadedFile
 
 from mathesar.serializers import DataFileSerializer
 from mathesar.imports.csv import get_sv_dialect
@@ -19,14 +20,22 @@ from mathesar.models import DataFile
 
 
 def _download_datafile(url):
-    temp_file = tempfile.TemporaryFile()
+    name = 'file_from_url'
+    if '/' in url:
+        name = url.split('/')[-1]
+
+    headers = requests.head(url, allow_redirects=True).headers
+    temp_file = TemporaryUploadedFile(
+        name, headers.get('content-type'), headers.get('content-length'), None,
+    )
+
     with requests.get(url, allow_redirects=True, stream=True) as r:
         if not r.ok:
             raise ValidationError({'url': 'Unable to download datafile'})
         for chunk in r.iter_content(chunk_size=8192):
             temp_file.write(chunk)
     temp_file.seek(0)
-    return temp_file
+    return File(temp_file)
 
 
 def create_datafile(request, data):

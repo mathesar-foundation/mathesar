@@ -127,6 +127,26 @@ def test_data_file_create_paste(client, paste_filename, header):
     verify_data_file_data(data_file, data_file_dict)
 
 
+@pytest.mark.parametrize('header', [True, False])
+def test_data_file_create_url(client, header):
+    num_data_files = DataFile.objects.count()
+    url = 'https://data.nasa.gov/resource/gquh-watm.csv'
+
+    data = {'url': url, 'header': header}
+    response = client.post('/api/v0/data_files/', data)
+    data_file_dict = response.json()
+    data_file = DataFile.objects.get(id=data_file_dict['id'])
+
+    assert response.status_code == 201
+    assert DataFile.objects.count() == num_data_files + 1
+    assert data_file.created_from == 'url'
+    assert data_file.delimiter == ','
+    assert data_file.quotechar == '"'
+    assert data_file.escapechar == ''
+    assert data_file.header == header
+    verify_data_file_data(data_file, data_file_dict)
+
+
 def test_data_file_update(client, data_file):
     response = client.put(f'/api/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
@@ -153,7 +173,7 @@ def test_data_file_404(client, data_file):
     assert response.json()['detail'] == 'Not found.'
 
 
-def test_datafile_create_invalid_file(client):
+def test_data_file_create_invalid_file(client):
     file = 'mathesar/tests/data/csv_parsing/patents_invalid.csv'
     with patch.object(csv, "get_sv_dialect") as mock_infer:
         mock_infer.side_effect = InvalidTableError
@@ -164,7 +184,7 @@ def test_datafile_create_invalid_file(client):
     assert response_dict[0] == 'Unable to tabulate data'
 
 
-def test_datafile_create_url_invalid_format(client):
+def test_data_file_create_url_invalid_format(client):
     url = 'invalid_url'
     response = client.post('/api/v0/data_files/', data={'url': url})
     response_dict = response.json()
@@ -172,7 +192,7 @@ def test_datafile_create_url_invalid_format(client):
     assert response_dict['url'][0] == 'Enter a valid URL.'
 
 
-def test_datafile_create_url_invalid_address(client):
+def test_data_file_create_url_invalid_address(client):
     url = 'https://www.test.invalid'
     response = client.post('/api/v0/data_files/', data={'url': url})
     response_dict = response.json()
@@ -180,7 +200,7 @@ def test_datafile_create_url_invalid_address(client):
     assert response_dict['url'][0] == 'URL cannot be reached.'
 
 
-def test_datafile_create_url_invalid_content_type(client):
+def test_data_file_create_url_invalid_content_type(client):
     url = 'https://www.google.com'
     response = client.post('/api/v0/data_files/', data={'url': url})
     response_dict = response.json()
@@ -188,7 +208,7 @@ def test_datafile_create_url_invalid_content_type(client):
     assert response_dict['url'][0] == 'URL resource not a valid type.'
 
 
-def test_datafile_create_multiple_source_fields(client, csv_filename, paste_filename):
+def test_data_file_create_multiple_source_fields(client, csv_filename, paste_filename):
     with open(paste_filename, 'r') as paste_file:
         paste_text = paste_file.read()
     with open(csv_filename, 'rb') as csv_file:
@@ -199,7 +219,7 @@ def test_datafile_create_multiple_source_fields(client, csv_filename, paste_file
     assert 'Multiple source fields passed:' in response_dict['non_field_errors'][0]
 
 
-def test_datafile_createno_source_fields(client):
+def test_data_file_create_no_source_fields(client):
     response = client.post('/api/v0/data_files/', {})
     response_dict = response.json()
     assert response.status_code == 400
