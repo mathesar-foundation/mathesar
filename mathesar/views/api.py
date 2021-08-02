@@ -5,8 +5,8 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateMode
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
-from psycopg2.errors import DuplicateColumn, UndefinedFunction
-from sqlalchemy.exc import ProgrammingError
+from psycopg2.errors import DuplicateColumn, UndefinedFunction, InvalidTextRepresentation
+from sqlalchemy.exc import ProgrammingError, DataError
 from sqlalchemy_filters.exceptions import (
     BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound,
 )
@@ -130,7 +130,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     def previews(self, request, pk=None):
         table = self.get_object()
         serializer = TablePreviewSerializer(data=request.data)
-        if not serializer.is_valid():
+        if not serializer.is_valid(raise_exception=True):
             return Response(serializer.errors)
         else:
             columns = serializer.validated_data["columns"]
@@ -142,10 +142,18 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
             raise ValidationError("Incorrect number of columns in request.")
 
         table_data = TableSerializer(table, context={"request": request}).data
-        preview_records = table.get_preview(columns)
+        try:
+            preview_records = table.get_preview(columns)
+        except DataError as e:
+            if type(e.orig) == InvalidTextRepresentation:
+                raise ValidationError(f"Invalid type cast requested.")
+            else:
+                raise APIException
+        table_name = serializer.validated_data.get("name")
+        table_name = table_name if table_name is not None else table_data["name"]
         table_data.update(
             {
-                "name": serializer.validated_data["name"],
+                "name": table_name,
                 # There's no way to reflect actual column data without
                 # creating a view, so we just use the submission, assuming
                 # no errors means we changed to the desired names and types
