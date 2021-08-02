@@ -146,7 +146,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
             preview_records = table.get_preview(columns)
         except DataError as e:
             if type(e.orig) == InvalidTextRepresentation:
-                raise ValidationError(f"Invalid type cast requested.")
+                raise ValidationError("Invalid type cast requested.")
             else:
                 raise APIException
         table_name = serializer.validated_data.get("name")
