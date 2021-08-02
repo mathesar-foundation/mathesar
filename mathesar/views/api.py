@@ -149,11 +149,8 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
                 raise ValidationError("Invalid type cast requested.")
             else:
                 raise APIException
-        table_name = serializer.validated_data.get("name")
-        table_name = table_name if table_name is not None else table_data["name"]
         table_data.update(
             {
-                "name": table_name,
                 # There's no way to reflect actual column data without
                 # creating a view, so we just use the submission, assuming
                 # no errors means we changed to the desired names and types
