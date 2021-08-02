@@ -34,6 +34,22 @@ def data_file(csv_filename):
     return data_file
 
 
+def check_create_data_file_response(response, num_files, created_from, base_name,
+                                    delimiter, quotechar, escapechar, header):
+    data_file_dict = response.json()
+    data_file = DataFile.objects.get(id=data_file_dict['id'])
+
+    assert response.status_code == 201
+    assert DataFile.objects.count() == num_files + 1
+    assert data_file.created_from == created_from
+    assert data_file.base_name == base_name
+    assert data_file.delimiter == delimiter
+    assert data_file.quotechar == quotechar
+    assert data_file.escapechar == escapechar
+    assert data_file.header == header
+    verify_data_file_data(data_file, data_file_dict)
+
+
 def test_data_file_list(client, data_file):
     """
     Desired format:
@@ -79,20 +95,13 @@ def test_data_file_create_csv(client, csv_filename, header):
     with open(csv_filename, 'rb') as csv_file:
         data = {'file': csv_file, 'header': header}
         response = client.post('/api/v0/data_files/', data)
-        data_file_dict = response.json()
-        data_file = DataFile.objects.get(id=data_file_dict['id'])
     with open(csv_filename, 'r') as csv_file:
         correct_dialect = csv.get_sv_dialect(csv_file)
 
-    assert response.status_code == 201
-    assert DataFile.objects.count() == num_data_files + 1
-    assert data_file.created_from == 'file'
-    assert data_file.base_name == 'patents'
-    assert data_file.delimiter == correct_dialect.delimiter
-    assert data_file.quotechar == correct_dialect.quotechar
-    assert data_file.escapechar == correct_dialect.escapechar
-    assert data_file.header == header
-    verify_data_file_data(data_file, data_file_dict)
+    check_create_data_file_response(
+        response, num_data_files, 'file', 'patents', correct_dialect.delimiter,
+        correct_dialect.quotechar, correct_dialect.escapechar, header
+    )
 
 
 def test_data_file_create_csv_long_name(client, csv_filename):
@@ -113,18 +122,10 @@ def test_data_file_create_paste(client, paste_filename, header):
 
     data = {'paste': paste_text, 'header': header}
     response = client.post('/api/v0/data_files/', data)
-    data_file_dict = response.json()
-    data_file = DataFile.objects.get(id=data_file_dict['id'])
 
-    assert response.status_code == 201
-    assert DataFile.objects.count() == num_data_files + 1
-    assert data_file.created_from == 'paste'
-    assert data_file.base_name == ''
-    assert data_file.delimiter == '\t'
-    assert data_file.quotechar == ''
-    assert data_file.escapechar == ''
-    assert data_file.header == header
-    verify_data_file_data(data_file, data_file_dict)
+    check_create_data_file_response(
+        response, num_data_files, 'paste', '', '\t', '', '', header
+    )
 
 
 @pytest.mark.parametrize('header', [True, False])
@@ -132,17 +133,11 @@ def test_data_file_create_url(client, header, patents_url):
     num_data_files = DataFile.objects.count()
     data = {'url': patents_url, 'header': header}
     response = client.post('/api/v0/data_files/', data)
-    data_file_dict = response.json()
-    data_file = DataFile.objects.get(id=data_file_dict['id'])
 
-    assert response.status_code == 201
-    assert DataFile.objects.count() == num_data_files + 1
-    assert data_file.created_from == 'url'
-    assert data_file.delimiter == ','
-    assert data_file.quotechar == '"'
-    assert data_file.escapechar == ''
-    assert data_file.header == header
-    verify_data_file_data(data_file, data_file_dict)
+    base_name = patents_url.split('/')[-1].split('.')[0]
+    check_create_data_file_response(
+        response, num_data_files, 'url', base_name, ',', '"', '', header
+    )
 
 
 def test_data_file_update(client, data_file):

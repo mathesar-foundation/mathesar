@@ -46,11 +46,13 @@ def create_datafile(request, data):
     elif 'url' in data:
         file = _download_datafile(data['url'])
         created_from = 'url'
-        base_name = os.path.basename(file.name)
+        base_name = file.name
     elif 'file' in data:
         file = data['file']
         created_from = 'file'
+        base_name = file.name
 
+    if base_name:
         max_length = DataFile._meta.get_field('base_name').max_length
         base_name, _ = os.path.splitext(os.path.basename(file.name))
         base_name = base_name[:max_length]
