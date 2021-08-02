@@ -100,7 +100,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
                 raise ValidationError(
-                    f"Table {request.data['name']} already exists"
+                    f"Relation {request.data['name']} already exists in schema {request.data['schema']}"
                 )
             else:
                 raise APIException(e)

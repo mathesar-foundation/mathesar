@@ -76,9 +76,7 @@ def test_headerless_csv_upload(headerless_data_file, schema):
 
 def test_csv_upload_with_duplicate_table_name(data_file, schema):
     table_name = 'NASA 2'
-    already_defined_str = (
-        f'relation "NASA 2" already exists'
-    )
+    already_defined_str = ('relation "NASA 2" already exists')
 
     table = create_table_from_csv(data_file, table_name, schema)
     assert table is not None
