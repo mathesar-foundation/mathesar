@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import os
-=======
-import tempfile
->>>>>>> Add urls as a source option for data files
 from time import time
 from io import TextIOWrapper
 
@@ -10,7 +6,7 @@ import requests
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-from django.core.files.base import ContentFile, File
+from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
 
 from mathesar.serializers import DataFileSerializer
@@ -35,7 +31,7 @@ def _download_datafile(url):
         for chunk in r.iter_content(chunk_size=8192):
             temp_file.write(chunk)
     temp_file.seek(0)
-    return File(temp_file)
+    return temp_file
 
 
 def create_datafile(request, data):
@@ -50,6 +46,7 @@ def create_datafile(request, data):
     elif 'url' in data:
         file = _download_datafile(data['url'])
         created_from = 'url'
+        base_name = os.path.basename(file.name)
     elif 'file' in data:
         file = data['file']
         created_from = 'file'
