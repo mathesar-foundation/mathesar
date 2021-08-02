@@ -24,7 +24,17 @@ def get_table_column_types(table):
     return col_types
 
 
-def _gen_table_name(schema, base_name=None):
+def gen_table_name(schema, data_files=None):
+    if data_files:
+        data_file = data_files[0]
+        base_name = data_file.base_name
+    else:
+        base_name = None
+
+    if base_name and len(base_name) >= POSTGRES_NAME_LEN_CAP - 8:
+        # Ensures we have at least 7 digits to work with
+        base_name = None
+
     if not base_name:
         base_name = TABLE_NAME_TEMPLATE
         table_num = Table.objects.count()
@@ -46,13 +56,6 @@ def _gen_table_name(schema, base_name=None):
 
 def create_table_from_datafile(data_files, name, schema):
     data_file = data_files[0]
-
-    if not name:
-        base_name = None
-        if data_file.base_name and len(data_file.base_name) < POSTGRES_NAME_LEN_CAP - 8:
-            # Ensures we have at least 7 digits to work with
-            base_name = data_file.base_name
-        name = _gen_table_name(schema, base_name)
     table = create_table_from_csv(data_file, name, schema)
     return table
 
@@ -65,9 +68,6 @@ def create_empty_table(name, schema):
     :param schema: the parsed and validated schema model
     :return: the newly created blank table
     """
-    if not name:
-        name = _gen_table_name(schema)
-
     engine = create_mathesar_engine(schema.database.name)
     db_table = create_mathesar_table(name, schema.name, [], engine)
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
