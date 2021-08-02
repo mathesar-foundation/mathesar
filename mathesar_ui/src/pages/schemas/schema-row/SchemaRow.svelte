@@ -2,14 +2,17 @@
   import {
     faLock,
     faProjectDiagram,
+    faTrash,
+    faPencilAlt,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Icon } from '@mathesar-components';
+  import { Icon, Button } from '@mathesar-components';
+  import type { Schema } from '@mathesar/utils/preloadData';
 
   // Props
-  export let schemaName = '';
-  export let tableCount = 0;
-  export let isDefault = true;
-  export let isLocked = true;
+  export let schema: Schema;
+
+  $: isDefault = schema.name === 'public';
+  $: isLocked = schema.name === 'public';
 
   // Additional classes
   let classes = '';
@@ -23,7 +26,7 @@
   <div class="details">
     <div class="title">
       <Icon data={faProjectDiagram}/>
-      {schemaName}
+      {schema.name}
       {#if isLocked}
         <Icon class="lock" data={faLock}/>
       {/if}
@@ -33,14 +36,22 @@
         <strong>Default</strong>
         &middot;
       {/if}
-      {tableCount} Tables
+      {schema.tables.length} Tables
     </div>
   </div>
-  <div class="controls">
-    <slot/>
-  </div>
+  {#if !isLocked }
+    <div class="controls">
+      <Button class="edit">
+        <Icon data={faPencilAlt}/>
+      </Button>
+      <Button class="delete">
+        <Icon data={faTrash}/>
+      </Button>
+      <slot/>
+    </div>
+  {/if}
 </div>
 
 <style global lang="scss">
-  @import "SchemaRow";
+  @import "SchemaRow.scss";
 </style>

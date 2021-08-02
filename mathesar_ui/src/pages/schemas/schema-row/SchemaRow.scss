@@ -1,6 +1,7 @@
 // TODO: Extract design tokens
 $color-dark: #1e1e1e;
 $color-muted: #606066;
+$color-danger: #f47171;
 
 $font-size-info: 0.875rem;
 
@@ -37,5 +38,10 @@ $font-size-info: 0.875rem;
 
   .controls {
     margin-left: auto;
+
+    .delete {
+      color: $color-danger;
+      border-color: $color-danger;
+    }
   }
 }

@@ -1,9 +1,5 @@
 <script lang="ts">
-  import {
-    faPlus,
-    faTrash,
-    faPencilAlt,
-  } from '@fortawesome/free-solid-svg-icons';
+  import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
   import { schemas } from '@mathesar/stores/schemas';
   import type { Schema } from '@mathesar/utils/preloadData';
@@ -47,22 +43,7 @@
         bind:value={filterQuery}/>
     <ul class="schema-list">
       {#each displayList as schema, i}
-        <li>
-          <SchemaRow
-            schemaName={schema.name}
-            tableCount={schema.tables.length}
-            isDefault={schema.name === 'public'}
-            isLocked={schema.name === 'public'}>
-            {#if schema.name !== 'public'}
-              <Button class="edit">
-                <Icon data={faPencilAlt}/>
-              </Button>
-              <Button class="delete">
-                <Icon data={faTrash}/>
-              </Button>
-            {/if}
-          </SchemaRow>
-        </li>
+        <li><SchemaRow {schema}/></li>
       {/each}
     </ul>
   </div>

@@ -2,7 +2,6 @@
 
 $color-gray-50: #f6f7f8;
 $color-gray-200: #e2e2e4;
-$color-danger: #f47171;
 
 .schemas {
   @include container.container;
@@ -37,11 +36,6 @@ $color-danger: #f47171;
     padding-left: 0;
 
     li {
-      .delete {
-        color: $color-danger;
-        border-color: $color-danger;
-      }
-
       &:not(:last-of-type) {
         border-bottom: 1px solid $color-gray-200;
       }
