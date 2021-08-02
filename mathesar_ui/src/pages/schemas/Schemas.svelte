@@ -10,9 +10,10 @@
   import {
     Icon,
     Button,
-    SchemaRow,
     TextInput,
   } from '@mathesar-components';
+
+  import SchemaRow from './schema-row/SchemaRow.svelte';
 
   // Prop
   export let database: string;

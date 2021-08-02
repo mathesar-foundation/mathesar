@@ -42,5 +42,5 @@
 </div>
 
 <style global lang="scss">
-  @import "SchemaRow.scss";
+  @import "SchemaRow";
 </style>

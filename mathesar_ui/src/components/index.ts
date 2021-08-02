@@ -26,4 +26,3 @@ export { default as Pagination } from './pagination/Pagination.svelte';
 export { default as Dropdown } from './dropdown/Dropdown.svelte';
 export { default as Select } from './select/Select.svelte';
 export { default as FileUpload } from './file-upload/FileUpload.svelte';
-export { default as SchemaRow } from './schema-row/SchemaRow.svelte';
