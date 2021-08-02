@@ -128,11 +128,9 @@ def test_data_file_create_paste(client, paste_filename, header):
 
 
 @pytest.mark.parametrize('header', [True, False])
-def test_data_file_create_url(client, header):
+def test_data_file_create_url(client, header, patents_url):
     num_data_files = DataFile.objects.count()
-    url = 'https://data.nasa.gov/resource/gquh-watm.csv'
-
-    data = {'url': url, 'header': header}
+    data = {'url': patents_url, 'header': header}
     response = client.post('/api/v0/data_files/', data)
     data_file_dict = response.json()
     data_file = DataFile.objects.get(id=data_file_dict['id'])

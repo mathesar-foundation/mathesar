@@ -1,5 +1,6 @@
-from unittest.mock import patch
+import os
 import pytest
+from unittest.mock import patch
 
 from django.core.cache import cache
 from django.core.files.base import File, ContentFile
@@ -7,6 +8,7 @@ from sqlalchemy import text
 
 from mathesar import reflection
 from mathesar.models import Table, DataFile, Schema
+from mathesar.utils.datafiles import _download_datafile
 from db.tests.types import fixtures
 from db import tables
 
@@ -47,6 +49,18 @@ def paste_data_file(paste_filename):
         delimiter='\t',
         quotechar='',
         escapechar='',
+    )
+    return data_file
+
+
+@pytest.fixture
+def url_data_file(patents_url):
+    file = _download_datafile(patents_url)
+    base_name = patents_url.split('/')[-1].split('.')[0]
+    data_file = DataFile.objects.create(
+        file=File(file),
+        created_from='url',
+        base_name=base_name
     )
     return data_file
 
@@ -104,15 +118,12 @@ def _get_expected_name(table_name, data_file=None):
         return table_name
 
 
-def check_create_table_response(client, name, expt_name, data_file, schema):
+def check_create_table_response(
+    client, name, expt_name, data_file, schema, first_row, column_names
+):
     num_tables = Table.objects.count()
 
     response, response_table, table = _create_table(client, [data_file], name, schema)
-
-    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
-                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
-    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
-                    'Application SN', 'Title', 'Patent Expiration Date']
 
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1
@@ -313,13 +324,40 @@ def test_table_type_suggestion(client, schema, engine_email_type):
 @pytest.mark.parametrize('table_name', ['Test Table Create From Datafile', ''])
 def test_table_create_from_datafile(client, data_file, schema, table_name):
     expt_name = _get_expected_name(table_name, data_file=data_file)
-    check_create_table_response(client, table_name, expt_name, data_file, schema)
+    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
+                    'Application SN', 'Title', 'Patent Expiration Date']
+
+    check_create_table_response(
+        client, table_name, expt_name, data_file, schema, first_row, column_names
+    )
 
 
 @pytest.mark.parametrize('table_name', ['Test Table Create From Paste', ''])
 def test_table_create_from_paste(client, schema, paste_data_file, table_name):
     expt_name = _get_expected_name(table_name)
-    check_create_table_response(client, table_name, expt_name, paste_data_file, schema)
+    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
+                    'Application SN', 'Title', 'Patent Expiration Date']
+
+    check_create_table_response(
+        client, table_name, expt_name, paste_data_file, schema, first_row, column_names
+    )
+
+
+@pytest.mark.parametrize('table_name', ['Test Table Create From URL', ''])
+def test_table_create_from_url(client, schema, url_data_file, table_name):
+    expt_name = _get_expected_name(table_name, data_file=url_data_file)
+    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    column_names = ['center', 'status', 'case_number', 'patent_number',
+                    'application_sn', 'title', 'patent_expiration_date']
+
+    check_create_table_response(
+        client, table_name, expt_name, url_data_file, schema, first_row, column_names
+    )
 
 
 @pytest.mark.parametrize('data_files', [None, []])
@@ -343,21 +381,45 @@ def test_table_create_name_taken(client, paste_data_file, schema, create_table, 
     create_table('Table 2', schema=schema_name)
     create_table('Table 3', schema=schema_name)
     expt_name = 'Table 4'
-    check_create_table_response(client, '', expt_name, paste_data_file, schema)
+
+    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
+                    'Application SN', 'Title', 'Patent Expiration Date']
+
+    check_create_table_response(
+        client, '', expt_name, paste_data_file, schema, first_row, column_names
+    )
 
 
 def test_table_create_base_name_taken(client, data_file, schema, create_table, schema_name):
     create_table('patents', schema=schema_name)
     create_table('patents 1', schema=schema_name)
     expt_name = 'patents 2'
-    check_create_table_response(client, '', expt_name, data_file, schema)
+
+    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
+                    'Application SN', 'Title', 'Patent Expiration Date']
+
+    check_create_table_response(
+        client, '', expt_name, data_file, schema, first_row, column_names
+    )
 
 
 def test_table_create_base_name_too_long(client, data_file, schema):
     data_file.base_name = '0' * 100
     data_file.save()
     expt_name = 'Table 0'
-    check_create_table_response(client, '', expt_name, data_file, schema)
+
+    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
+                    'Application SN', 'Title', 'Patent Expiration Date']
+
+    check_create_table_response(
+        client, '', expt_name, data_file, schema, first_row, column_names
+    )
 
 
 def test_table_partial_update(create_table, client):

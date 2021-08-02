@@ -69,3 +69,8 @@ def paste_filename():
 @pytest.fixture(scope='session')
 def headerless_csv_filename():
     return 'mathesar/tests/data/headerless_patents.csv'
+
+
+@pytest.fixture(scope='session')
+def patents_url():
+    return 'https://data.nasa.gov/resource/gquh-watm.csv'
