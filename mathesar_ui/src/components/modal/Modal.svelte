@@ -1,7 +1,5 @@
 <script lang="ts">
-  import Portal from 'svelte-portal/src/Portal.svelte';
-
-  export let overlayTarget = 'body';
+  import { portal } from '@mathesar-components';
 
   // Additional classes
   let classes = '';
@@ -17,9 +15,7 @@
   </div>
 </div>
 
-<Portal target={overlayTarget}>
-  <div class="overlay"></div>
-</Portal>
+<div class="overlay" use:portal></div>
 
 <style global lang="scss">
   @import "Modal.scss";
