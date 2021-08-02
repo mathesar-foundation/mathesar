@@ -152,7 +152,11 @@ class DataFileSerializer(serializers.ModelSerializer):
         return data
 
     def validate_url(self, url):
-        response = requests.head(url, allow_redirects=True)
+        try:
+            response = requests.head(url, allow_redirects=True)
+        except requests.exceptions.ConnectionError:
+            raise ValidationError('URL cannot be reached.')
+
         content_type = response.headers.get('content-type')
         if content_type not in SUPPORTED_URL_CONTENT_TYPES:
             raise ValidationError('URL resource not a valid type.')

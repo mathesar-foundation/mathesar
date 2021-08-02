@@ -164,6 +164,30 @@ def test_datafile_create_invalid_file(client):
     assert response_dict[0] == 'Unable to tabulate data'
 
 
+def test_datafile_create_url_invalid_format(client):
+    url = 'invalid_url'
+    response = client.post('/api/v0/data_files/', data={'url': url})
+    response_dict = response.json()
+    assert response.status_code == 400
+    assert response_dict['url'][0] == 'Enter a valid URL.'
+
+
+def test_datafile_create_url_invalid_address(client):
+    url = 'https://www.test.invalid'
+    response = client.post('/api/v0/data_files/', data={'url': url})
+    response_dict = response.json()
+    assert response.status_code == 400
+    assert response_dict['url'][0] == 'URL cannot be reached.'
+
+
+def test_datafile_create_url_invalid_content_type(client):
+    url = 'https://www.google.com'
+    response = client.post('/api/v0/data_files/', data={'url': url})
+    response_dict = response.json()
+    assert response.status_code == 400
+    assert response_dict['url'][0] == 'URL resource not a valid type.'
+
+
 def test_datafile_create_multiple_source_fields(client, csv_filename, paste_filename):
     with open(paste_filename, 'r') as paste_file:
         paste_text = paste_file.read()
