@@ -6,7 +6,7 @@
   } from '@fortawesome/free-solid-svg-icons';
 
   import { schemas } from '@mathesar/stores/schemas';
-  import type { SchemaMap } from '@mathesar/stores/schemas';
+  import type { Schema } from '@mathesar/utils/preloadData';
   import {
     Icon,
     Button,
@@ -19,7 +19,7 @@
   export let database: string;
 
   let filterQuery = '';
-  const schemaList = [...($schemas.schemaMap as SchemaMap).values()];
+  const schemaList = $schemas.data as Schema[];
   $: displayList = filterQuery
     ? schemaList.filter((schema) => schema.name.includes(filterQuery))
     : schemaList;
@@ -50,7 +50,7 @@
         <li>
           <SchemaRow
             schemaName={schema.name}
-            tableCount={schema.children.length}
+            tableCount={schema.tables.length}
             isDefault={schema.name === 'public'}
             isLocked={schema.name === 'public'}>
             {#if schema.name !== 'public'}
