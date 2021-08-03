@@ -20,12 +20,10 @@ def _download_datafile(url):
     if '/' in url:
         name = url.split('/')[-1]
 
-    headers = requests.head(url, allow_redirects=True).headers
-    temp_file = TemporaryUploadedFile(
-        name, headers.get('content-type'), headers.get('content-length'), None,
-    )
-
     with requests.get(url, allow_redirects=True, stream=True) as r:
+        temp_file = TemporaryUploadedFile(
+            name, r.headers.get('content-type'), r.headers.get('content-length'), None,
+        )
         if not r.ok:
             raise ValidationError({'url': 'Unable to download datafile'})
         for chunk in r.iter_content(chunk_size=8192):

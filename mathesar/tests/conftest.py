@@ -1,9 +1,9 @@
 """
 This inherits the fixtures in the root conftest.py
 """
+from unittest.mock import patch
 
 import pytest
-
 
 from mathesar.models import Database
 
@@ -74,3 +74,32 @@ def headerless_csv_filename():
 @pytest.fixture(scope='session')
 def patents_url():
     return 'https://data.nasa.gov/resource/gquh-watm.csv'
+
+
+@pytest.fixture(scope='session')
+def patents_url_file():
+    return 'mathesar/tests/data/api_patents.csv'
+
+
+@pytest.fixture(scope='session')
+def patents_url_data(patents_url_file):
+    with open(patents_url_file, 'r') as f:
+        return f.read()
+
+
+@pytest.fixture
+def mock_patents_url(patents_url_data):
+    mock_get_patcher = patch('requests.get')
+    mock_get = mock_get_patcher.start()
+
+    data = bytes(patents_url_data, 'utf-8')
+    mock_get.return_value.__enter__.return_value.iter_content.return_value = [data]
+    mock_get.return_value.__enter__.return_value.ok = True
+    mock_get.return_value.__enter__.return_value.headers = {
+        'content-type': 'text/csv',
+        'content-length': None
+    }
+
+    yield mock_get
+
+    mock_get.stop()

@@ -129,7 +129,7 @@ def test_data_file_create_paste(client, paste_filename, header):
 
 
 @pytest.mark.parametrize('header', [True, False])
-def test_data_file_create_url(client, header, patents_url):
+def test_data_file_create_url(client, header, patents_url, mock_patents_url):
     num_data_files = DataFile.objects.count()
     data = {'url': patents_url, 'header': header}
     response = client.post('/api/v0/data_files/', data)
