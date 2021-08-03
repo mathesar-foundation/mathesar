@@ -13,7 +13,7 @@ from sqlalchemy.exc import NoSuchTableError, InternalError
 from psycopg2.errors import DependentObjectsStillExist
 
 from db import columns, constants, schemas
-from db.types import inference
+from db.types import alteration, inference
 
 
 TEMP_SCHEMA = f"{constants.MATHESAR_PREFIX}temp_schema"
@@ -45,9 +45,6 @@ def create_mathesar_table(name, schema, columns_, engine, metadata=None):
     # SQLAlchemy context (e.g., for creating a ForeignKey relationship)
     if metadata is None:
         metadata = MetaData(bind=engine, schema=schema)
-    # This reflection step lets us notice any "table already exists"
-    # errors before sending error-generating requests to the DB.
-    metadata.reflect()
     table = Table(
         name,
         metadata,
@@ -527,3 +524,18 @@ def infer_table_column_types(schema, table_name, engine):
         types = [c.type.__class__ for c in temp_table.columns]
         temp_table.drop()
         return types
+
+
+def get_column_cast_records(engine, table, column_definitions, num_records=20):
+    assert len(column_definitions) == len(table.columns)
+    cast_expression_list = [
+        (
+            alteration.get_column_cast_expression(column, col_def["type"], engine)
+            .label(col_def["name"])
+        ) if not columns.MathesarColumn.from_column(column).is_default else column
+        for column, col_def in zip(table.columns, column_definitions)
+    ]
+    sel = select(cast_expression_list).limit(num_records)
+    with engine.begin() as conn:
+        result = conn.execute(sel)
+    return result.fetchall()

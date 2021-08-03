@@ -1,3 +1,4 @@
+import json
 from unittest.mock import patch
 import pytest
 
@@ -256,7 +257,209 @@ def test_table_type_suggestion(client, schema, engine_email_type):
     assert response.status_code == 200
     assert response_table == EXPECTED_TYPES
 
-# Workaround for not being able to parametrize with fixtures
+
+def test_table_previews(client, schema, engine_email_type):
+    table_name = 'Type Modification Table'
+    file = 'mathesar/tests/data/type_inference.csv'
+    with open(file, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    body = {
+        'data_files': [data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response_table = client.post('/api/v0/tables/', body).json()
+    table = Table.objects.get(id=response_table['id'])
+
+    post_body = {
+        'columns': [
+            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "col_1", "type": "NUMERIC"},
+            {"name": "col_2", "type": "BOOLEAN"},
+            {"name": "col_3", "type": "BOOLEAN"},
+            {"name": "col_4", "type": "VARCHAR"},
+            {"name": "col_5", "type": "VARCHAR"},
+            {"name": "col_6", "type": "NUMERIC"}
+        ]
+    }
+    response = client.post(
+        f'/api/v0/tables/{table.id}/previews/',
+        data=json.dumps(post_body),
+        content_type='application/json'
+    )
+    assert response.status_code == 200
+    expect_dict = {
+        'name': 'Type Modification Table',
+        'columns': post_body['columns'],
+        'records': [
+            {'mathesar_id': 1, 'col_1': 0.0, 'col_2': False, 'col_3': True, 'col_4': 't', 'col_5': 'a', 'col_6': 2.0},
+            {'mathesar_id': 2, 'col_1': 2.0, 'col_2': True, 'col_3': False, 'col_4': 'false', 'col_5': 'cat', 'col_6': 1.0},
+            {'mathesar_id': 3, 'col_1': 1.0, 'col_2': True, 'col_3': True, 'col_4': '2', 'col_5': 'mat', 'col_6': 0.0},
+            {'mathesar_id': 4, 'col_1': 0.0, 'col_2': False, 'col_3': False, 'col_4': '0', 'col_5': 'bat', 'col_6': 0.0}
+        ],
+    }
+    actual_dict = response.json()
+    assert all([expect_dict[key] == actual_dict[key] for key in expect_dict])
+
+
+def test_table_previews_wrong_column_number(client, schema, engine_email_type):
+    table_name = 'Wrong Column Number Table'
+    file = 'mathesar/tests/data/type_inference.csv'
+    with open(file, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    body = {
+        'data_files': [data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response_table = client.post('/api/v0/tables/', body).json()
+    table = Table.objects.get(id=response_table['id'])
+
+    post_body = {
+        'columns': [
+            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "col_2", "type": "BOOLEAN"},
+            {"name": "col_3", "type": "BOOLEAN"},
+            {"name": "col_4", "type": "VARCHAR"},
+            {"name": "col_5", "type": "VARCHAR"},
+            {"name": "col_6", "type": "NUMERIC"}
+        ]
+    }
+    response = client.post(
+        f'/api/v0/tables/{table.id}/previews/',
+        data=json.dumps(post_body),
+        content_type='application/json'
+    )
+    assert response.status_code == 400
+    assert "number" in response.json()[0]
+
+
+def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
+    table_name = 'Wrong Type Preview Table'
+    file = 'mathesar/tests/data/type_inference.csv'
+    with open(file, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    body = {
+        'data_files': [data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response_table = client.post('/api/v0/tables/', body).json()
+    table = Table.objects.get(id=response_table['id'])
+
+    post_body = {
+        'columns': [
+            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "col_1", "type": "NUMERIC"},
+            {"name": "col_2", "type": "BOOLEAN"},
+            {"name": "col_3", "type": "BOOLEAN"},
+            {"name": "col_4", "type": "NUMERIC"},
+            {"name": "col_5", "type": "VARCHAR"},
+            {"name": "col_6", "type": "NUMERIC"}
+        ]
+    }
+    response = client.post(
+        f'/api/v0/tables/{table.id}/previews/',
+        data=json.dumps(post_body),
+        content_type='application/json'
+    )
+    assert response.status_code == 400
+    assert "Invalid type" in response.json()[0]
+
+
+def test_table_previews_invalid_type_cast_check(client, schema, engine_email_type):
+    table_name = 'Type Check Preview Table'
+    file = 'mathesar/tests/data/type_inference.csv'
+    with open(file, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    body = {
+        'data_files': [data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response_table = client.post('/api/v0/tables/', body).json()
+    table = Table.objects.get(id=response_table['id'])
+
+    post_body = {
+        'columns': [
+            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "col_1", "type": "NUMERIC"},
+            {"name": "col_2", "type": "BOOLEAN"},
+            {"name": "col_3", "type": "BOOLEAN"},
+            {"name": "col_4", "type": "NUMERIC"},
+            {"name": "col_5", "type": "mathesar_types.email"},
+            {"name": "col_6", "type": "NUMERIC"}
+        ]
+    }
+    response = client.post(
+        f'/api/v0/tables/{table.id}/previews/',
+        data=json.dumps(post_body),
+        content_type='application/json'
+    )
+    assert response.status_code == 400
+    assert "Invalid type" in response.json()[0]
+
+
+def test_table_previews_unsupported_type(client, schema, engine_email_type):
+    table_name = 'Unsupported Type Preview Table'
+    file = 'mathesar/tests/data/type_inference.csv'
+    with open(file, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    body = {
+        'data_files': [data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response_table = client.post('/api/v0/tables/', body).json()
+    table = Table.objects.get(id=response_table['id'])
+
+    post_body = {
+        'columns': [
+            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "col_1", "type": "INTEGER"},
+            {"name": "col_2", "type": "BOOLEAN"},
+            {"name": "col_3", "type": "BOOLEAN"},
+            {"name": "col_4", "type": "NUMERIC"},
+            {"name": "col_5", "type": "VARCHAR"},
+            {"name": "col_6", "type": "NUMERIC"}
+        ]
+    }
+    response = client.post(
+        f'/api/v0/tables/{table.id}/previews/',
+        data=json.dumps(post_body),
+        content_type='application/json'
+    )
+    assert response.status_code == 400
+    assert "not supported" in response.json()[0]
+
+
+def test_table_previews_missing_columns(client, schema, engine_email_type):
+    table_name = 'Missing Columns Preview Table'
+    file = 'mathesar/tests/data/type_inference.csv'
+    with open(file, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    body = {
+        'data_files': [data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response_table = client.post('/api/v0/tables/', body).json()
+    table = Table.objects.get(id=response_table['id'])
+
+    post_body = {}
+    response = client.post(
+        f'/api/v0/tables/{table.id}/previews/',
+        data=json.dumps(post_body),
+        content_type='application/json'
+    )
+    assert response.status_code == 400
+    assert "columns" in response.json()
 
 
 def check_create_table_response(client, table_name, data_file, schema):
@@ -328,6 +531,19 @@ def test_table_create_with_empty_datafile(client, schema):
     assert len(table.sa_columns) == 1  # only the internal `mathesar_id` column
     assert len(table.get_records()) == 0
     check_table_response(response_table, table, table_name)
+
+
+def test_table_create_with_same_name(client, schema):
+    table_name = 'test_table_duplicate'
+    body = {
+        'name': table_name,
+        'schema': schema.id,
+    }
+    client.post('/api/v0/tables/', body)
+    response = client.post('/api/v0/tables/', body)
+    response_error = response.json()
+    assert response.status_code == 400
+    assert response_error[0] == f"Relation {table_name} already exists in schema {schema.id}"
 
 
 def test_table_partial_update(create_table, client):
