@@ -1,4 +1,4 @@
-from django.urls import include, path
+from django.urls import include, path, re_path
 from rest_framework_nested import routers
 
 from mathesar.views import api, frontend
@@ -20,6 +20,6 @@ urlpatterns = [
     path('api/v0/', include(router.urls)),
     path('api/v0/', include(table_router.urls)),
     # TODO: Handle known urls like /favicon.ico etc.,
-    # Currenty, this catches all
-    path('<dbname>', frontend.index, name="index"),
+    # Currently, this catches all
+    re_path(r'(?P<dbname>\w+)/.*$', frontend.index, name="index"),
 ]
