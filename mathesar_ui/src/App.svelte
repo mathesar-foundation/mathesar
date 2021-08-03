@@ -29,7 +29,7 @@
 <section class="content-section">
   <Route path="/:db/*">
     <Route path="/schemas">
-      {#key `${selectedDb}__schemas`}
+      {#key selectedDb}
         <Schemas database={selectedDb}/>
       {/key}
     </Route>
