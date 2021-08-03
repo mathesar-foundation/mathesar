@@ -7,7 +7,6 @@ from sqlalchemy import text
 
 from mathesar import reflection
 from mathesar.models import Table, DataFile, Schema
-from mathesar.utils.datafiles import _download_datafile
 from db.tests.types import fixtures
 from db import tables
 

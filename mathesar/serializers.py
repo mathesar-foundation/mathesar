@@ -159,5 +159,5 @@ class DataFileSerializer(serializers.ModelSerializer):
 
         content_type = response.headers.get('content-type')
         if content_type not in SUPPORTED_URL_CONTENT_TYPES:
-            raise ValidationError('URL resource not a valid type.')
+            raise ValidationError(f"URL resource '{content_type}' not a valid type.")
         return url

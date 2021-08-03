@@ -1,6 +1,7 @@
 import os
 
 import pytest
+import requests
 from unittest.mock import patch
 from django.core.files import File
 
@@ -187,18 +188,21 @@ def test_data_file_create_url_invalid_format(client):
 
 def test_data_file_create_url_invalid_address(client):
     url = 'https://www.test.invalid'
-    response = client.post('/api/v0/data_files/', data={'url': url})
-    response_dict = response.json()
+    with patch('requests.head', side_effect=requests.exceptions.ConnectionError):
+        response = client.post('/api/v0/data_files/', data={'url': url})
+        response_dict = response.json()
     assert response.status_code == 400
     assert response_dict['url'][0] == 'URL cannot be reached.'
 
 
 def test_data_file_create_url_invalid_content_type(client):
     url = 'https://www.google.com'
-    response = client.post('/api/v0/data_files/', data={'url': url})
-    response_dict = response.json()
+    with patch('requests.head') as mock:
+        mock.return_value.headers = {'content-type': 'text/html'}
+        response = client.post('/api/v0/data_files/', data={'url': url})
+        response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict['url'][0] == 'URL resource not a valid type.'
+    assert response_dict['url'][0] == "URL resource 'text/html' not a valid type."
 
 
 def test_data_file_create_multiple_source_fields(client, csv_filename, paste_filename):
