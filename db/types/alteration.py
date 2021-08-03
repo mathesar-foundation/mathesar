@@ -1,4 +1,6 @@
 from sqlalchemy import text, DDL, MetaData, Table
+from sqlalchemy.sql import quoted_name
+from sqlalchemy.sql.functions import Function
 from db.types import base, email
 
 BOOLEAN = "boolean"
@@ -8,6 +10,10 @@ NAME = "name"
 NUMERIC = "numeric"
 STRING = "string"
 VARCHAR = "varchar"
+
+
+class UnsupportedTypeException(Exception):
+    pass
 
 
 def get_supported_alter_column_types(engine, friendly_names=True):
@@ -85,6 +91,31 @@ def alter_column_type(
           USING {cast_function_name}({prepared_column_name});
         """
         conn.execute(DDL(alter_stmt))
+
+
+def get_column_cast_expression(column, target_type_str, engine):
+    """
+    Given a Column, we get the correct SQL selectable for selecting the
+    results of a Mathesar cast_to_<type> function on that column, where
+    <type> is derived from the target_type_str.
+    """
+    target_type = get_robust_supported_alter_column_type_map(engine).get(target_type_str)
+    if target_type is None:
+        raise UnsupportedTypeException(
+            f"Target Type '{target_type_str}' is not supported."
+        )
+    else:
+        prepared_target_type_name = target_type().compile(dialect=engine.dialect)
+
+    if prepared_target_type_name == column.type.__class__().compile(dialect=engine.dialect):
+        cast_expr = column
+    else:
+        qualified_function_name = get_cast_function_name(prepared_target_type_name)
+        cast_expr = Function(
+            quoted_name(qualified_function_name, False),
+            column
+        )
+    return cast_expr
 
 
 def install_all_casts(engine):

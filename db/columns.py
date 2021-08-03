@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 NAME = "name"
 NULLABLE = "nullable"
 PRIMARY_KEY = "primary_key"
-TYPE = "type"
+TYPE = "sa_type"
 
 ID_TYPE = Integer
 DEFAULT_COLUMNS = {
@@ -128,10 +128,10 @@ class MathesarColumn(Column):
 def get_default_mathesar_column_list():
     return [
         MathesarColumn(
-            c,
-            DEFAULT_COLUMNS[c][TYPE], primary_key=DEFAULT_COLUMNS[c][PRIMARY_KEY]
+            col_name,
+            **DEFAULT_COLUMNS[col_name]
         )
-        for c in DEFAULT_COLUMNS
+        for col_name in DEFAULT_COLUMNS
     ]
 
 
@@ -157,7 +157,7 @@ def get_column_index_from_name(table_oid, column_name, engine):
 
 
 def create_column(engine, table_oid, column_data):
-    column_type = column_data[TYPE]
+    column_type = column_data.get(TYPE, column_data["type"])
     column_nullable = column_data.get(NULLABLE, True)
     supported_types = alteration.get_supported_alter_column_types(
         engine, friendly_names=False,
@@ -189,6 +189,7 @@ def alter_column(
     attribute_alter_map = {
         NAME: rename_column,
         TYPE: retype_column,
+        "type": retype_column,
         NULLABLE: change_column_nullable,
     }
     return attribute_alter_map[column_def_key](

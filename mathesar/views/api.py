@@ -5,12 +5,16 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateMode
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
-from psycopg2.errors import DuplicateColumn, DuplicateTable, UndefinedFunction
-from sqlalchemy.exc import ProgrammingError
+from psycopg2.errors import (
+    DuplicateColumn, DuplicateTable, UndefinedFunction,
+    InvalidTextRepresentation, CheckViolation
+)
+from sqlalchemy.exc import ProgrammingError, DataError, IntegrityError
 from sqlalchemy_filters.exceptions import (
     BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound,
 )
 
+from db.types.alteration import UnsupportedTypeException
 
 from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile, Database
@@ -19,7 +23,7 @@ from mathesar.pagination import (
 )
 from mathesar.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, RecordListParameterSerializer,
-    DataFileSerializer, ColumnSerializer, DatabaseSerializer
+    DataFileSerializer, ColumnSerializer, DatabaseSerializer, TablePreviewSerializer,
 )
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.utils.tables import (
@@ -132,6 +136,43 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         table = self.get_object()
         col_types = get_table_column_types(table)
         return Response(col_types)
+
+    @action(methods=['post'], detail=True)
+    def previews(self, request, pk=None):
+        table = self.get_object()
+        serializer = TablePreviewSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        columns = serializer.validated_data["columns"]
+
+        column_names = [col["name"] for col in columns]
+        if not len(column_names) == len(set(column_names)):
+            raise ValidationError("Column names must be distinct")
+        if not len(columns) == len(table.sa_columns):
+            raise ValidationError("Incorrect number of columns in request.")
+
+        table_data = TableSerializer(table, context={"request": request}).data
+        try:
+            preview_records = table.get_preview(columns)
+        except (DataError, IntegrityError) as e:
+            if type(e.orig) == InvalidTextRepresentation or type(e.orig) == CheckViolation:
+                raise ValidationError("Invalid type cast requested.")
+            else:
+                raise APIException
+        except UnsupportedTypeException as e:
+            raise ValidationError(e)
+        except Exception:
+            raise APIException
+        table_data.update(
+            {
+                # There's no way to reflect actual column data without
+                # creating a view, so we just use the submission, assuming
+                # no errors means we changed to the desired names and types
+                "columns": columns,
+                "records": preview_records
+            }
+        )
+
+        return Response(table_data)
 
 
 class ColumnViewSet(viewsets.ViewSet):

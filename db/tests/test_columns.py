@@ -98,15 +98,8 @@ def test_MC_inits_with_non_empty_foreign_keys(column_builder):
 
 
 def test_MC_is_default_when_true():
-    for default_col in columns.DEFAULT_COLUMNS:
-        dc_definition = columns.DEFAULT_COLUMNS[default_col]
-        col = columns.MathesarColumn(
-            default_col,
-            dc_definition["type"],
-            primary_key=dc_definition.get("primary_key", False),
-            nullable=dc_definition.get("nullable", True),
-        )
-        assert col.is_default
+    for default_col in columns.get_default_mathesar_column_list():
+        assert default_col.is_default
 
 
 def test_MC_is_default_when_false_for_name():
@@ -114,7 +107,7 @@ def test_MC_is_default_when_false_for_name():
         dc_definition = columns.DEFAULT_COLUMNS[default_col]
         col = columns.MathesarColumn(
             "definitely_not_a_default",
-            dc_definition["type"],
+            dc_definition["sa_type"],
             primary_key=dc_definition.get("primary_key", False),
             nullable=dc_definition.get("nullable", True),
         )
@@ -124,7 +117,7 @@ def test_MC_is_default_when_false_for_name():
 def test_MC_is_default_when_false_for_type():
     for default_col in columns.DEFAULT_COLUMNS:
         dc_definition = columns.DEFAULT_COLUMNS[default_col]
-        changed_type = Integer if dc_definition["type"] == String else String
+        changed_type = Integer if dc_definition["sa_type"] == String else String
         col = columns.MathesarColumn(
             default_col,
             changed_type,
@@ -140,7 +133,7 @@ def test_MC_is_default_when_false_for_pk():
         not_pk = not dc_definition.get("primary_key", False),
         col = columns.MathesarColumn(
             default_col,
-            dc_definition["type"],
+            dc_definition["sa_type"],
             primary_key=not_pk,
             nullable=dc_definition.get("nullable", True),
         )
@@ -207,7 +200,7 @@ def test_MC_column_index_multiple(engine_with_schema):
     "column_dict,func_name",
     [
         ({"name": "blah"}, "rename_column"),
-        ({"type": "blah"}, "retype_column"),
+        ({"sa_type": "blah"}, "retype_column"),
         ({"nullable": True}, "change_column_nullable"),
     ]
 )
