@@ -77,13 +77,13 @@ def patents_url():
 
 
 @pytest.fixture(scope='session')
-def patents_url_file():
+def patents_url_filename():
     return 'mathesar/tests/data/api_patents.csv'
 
 
 @pytest.fixture(scope='session')
-def patents_url_data(patents_url_file):
-    with open(patents_url_file, 'r') as f:
+def patents_url_data(patents_url_filename):
+    with open(patents_url_filename, 'r') as f:
         return f.read()
 
 

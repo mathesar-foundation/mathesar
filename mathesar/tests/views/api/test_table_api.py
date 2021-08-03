@@ -53,14 +53,14 @@ def paste_data_file(paste_filename):
 
 
 @pytest.fixture
-def url_data_file(patents_url):
-    file = _download_datafile(patents_url)
+def url_data_file(patents_url, patents_url_filename):
     base_name = patents_url.split('/')[-1].split('.')[0]
-    data_file = DataFile.objects.create(
-        file=File(file),
-        created_from='url',
-        base_name=base_name
-    )
+    with open(patents_url_filename, 'rb') as file:
+        data_file = DataFile.objects.create(
+            file=File(file),
+            created_from='url',
+            base_name=base_name
+        )
     return data_file
 
 
