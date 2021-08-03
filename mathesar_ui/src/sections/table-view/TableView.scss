@@ -231,11 +231,13 @@ section.table-section .tab-container {
             padding: 7px 14px;
             background: #fff;
 
-            .skeleton {
+            .loader {
               top: 6px;
               left: 15px;
               right: 15px;
               bottom: 6px;
+              position: absolute;
+              background: #efefef;
             }
           }
 
