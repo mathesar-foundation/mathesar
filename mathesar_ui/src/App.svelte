@@ -20,7 +20,7 @@
     <Button on:click={() => newImport(selectedDb)}>
       Import CSV
     </Button>
-    <a href="schemas/">
+    <a href="/{selectedDb}/schemas/">
       Manage schemas
     </a>
   </div>
