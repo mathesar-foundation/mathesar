@@ -27,7 +27,8 @@ from mathesar.serializers import (
 )
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.utils.tables import (
-    get_table_column_types, create_table_from_datafile, create_empty_table
+    get_table_column_types, create_table_from_datafile, create_empty_table,
+    gen_table_name
 )
 from mathesar.utils.datafiles import create_datafile
 from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
@@ -89,17 +90,25 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         serializer = TableSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
+        if not serializer.validated_data['name']:
+            name = gen_table_name(
+                serializer.validated_data['schema'],
+                serializer.validated_data['data_files'],
+            )
+        else:
+            name = serializer.validated_data['name']
+
         try:
             if serializer.validated_data['data_files']:
                 table = create_table_from_datafile(
                     serializer.validated_data['data_files'],
-                    serializer.validated_data['name'],
+                    name,
                     serializer.validated_data['schema'],
                 )
             else:
                 table = create_empty_table(
-                    serializer.validated_data['name'],
-                    serializer.validated_data['schema'],
+                    name,
+                    serializer.validated_data['schema']
                 )
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
@@ -108,6 +117,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
                 )
             else:
                 raise APIException(e)
+
         serializer = TableSerializer(table, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
