@@ -178,6 +178,11 @@ class Table(DatabaseObject):
             column_index,
         )
 
+    def get_preview(self, column_definitions):
+        return tables.get_column_cast_records(
+            self.schema._sa_engine, self._sa_table, column_definitions
+        )
+
     @property
     def sa_all_records(self):
         return records.get_records(self._sa_table, self.schema._sa_engine)
