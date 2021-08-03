@@ -32,7 +32,7 @@ def test_default_constraint_list(create_table, client):
 def test_multiple_constraint_list(create_table, client):
     table_name = 'NASA Constraint List 1'
     table = create_table(table_name)
-    table.add_constraint({'type': 'unique', 'columns': ['Case Number']})
+    table.add_constraint('unique', ['Case Number'])
 
     response = client.get(f'/api/v0/tables/{table.id}/constraints/')
     response_data = response.json()
@@ -46,7 +46,7 @@ def test_multiple_constraint_list(create_table, client):
 def test_multiple_column_constraint_list(create_table, client):
     table_name = 'NASA Constraint List 2'
     table = create_table(table_name)
-    table.add_constraint({'type': 'unique', 'columns': ['Center', 'Case Number']})
+    table.add_constraint('unique', ['Center', 'Case Number'])
 
     response = client.get(f'/api/v0/tables/{table.id}/constraints/')
     response_data = response.json()
@@ -61,11 +61,7 @@ def test_retrieve_constraint(create_table, client):
     table_name = 'NASA Constraint List 3'
     table = create_table(table_name)
 
-    data = {
-        'type': 'unique',
-        'columns': ['Case Number']
-    }
-    table.add_constraint(data)
+    table.add_constraint('unique', ['Case Number'])
     list_response = client.get(f'/api/v0/tables/{table.id}/constraints/')
     list_response_data = list_response.json()
     assert list_response_data['count'] == 2
@@ -123,11 +119,7 @@ def test_drop_constraint(create_table, client):
     table_name = 'NASA Constraint List 7'
     table = create_table(table_name)
 
-    data = {
-        'type': 'unique',
-        'columns': ['Case Number']
-    }
-    table.add_constraint(data)
+    table.add_constraint('unique', ['Case Number'])
     list_response = client.get(f'/api/v0/tables/{table.id}/constraints/')
     list_response_data = list_response.json()
     assert list_response_data['count'] == 2
@@ -146,16 +138,12 @@ def test_create_unique_constraint_with_duplicate_name(create_table, client):
     table_name = 'NASA Constraint List 8'
     table = create_table(table_name)
 
-    data_1 = {
-        'type': 'unique',
-        'columns': ['Case Number']
-    }
-    table.add_constraint(data_1)
-    data_2 = {
+    table.add_constraint('unique', ['Case Number'])
+    data = {
         'type': 'unique',
         'columns': ['Case Number', 'Center']
     }
-    response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data_2)
+    response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
     assert response.status_code == 400
     assert response.json() == ['Constraint with the same name already exists']
 

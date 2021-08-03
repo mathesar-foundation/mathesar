@@ -227,15 +227,15 @@ class Table(DatabaseObject):
                 return constraint
         return None
 
-    def add_constraint(self, constraint_data):
-        if 'type' not in constraint_data or constraint_data['type'] != constraints.ConstraintType.UNIQUE.value:
+    def add_constraint(self, constraint_type, columns, name=None):
+        if constraint_type != constraints.ConstraintType.UNIQUE.value:
             raise ValueError('Only creating unique constraints is currently supported.')
         constraints.create_unique_constraint(
             self._sa_table.name,
             self._sa_table.schema,
             self.schema._sa_engine,
-            constraint_data['columns'],
-            constraint_data['name'] if 'name' in constraint_data else None
+            columns,
+            name
         )
         try:
             # Clearing cache so that new constraint shows up.
@@ -243,8 +243,8 @@ class Table(DatabaseObject):
         except AttributeError:
             pass
         sa_constraint = self.get_constraint_by_type_and_columns(
-            constraint_data['type'],
-            constraint_data['columns']
+            constraint_type,
+            columns
         )
         engine = self.schema.database._sa_engine
         constraint_oid = constraints.get_constraint_oid_by_name_and_table_oid(sa_constraint.name, self.oid, engine)

@@ -1,7 +1,7 @@
 import logging
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError, APIException
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin, DestroyModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
@@ -351,7 +351,7 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
         return create_datafile(request, serializer.validated_data)
 
 
-class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin, DestroyModelMixin):
+class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     serializer_class = ConstraintSerializer
     pagination_class = DefaultLimitOffsetPagination
 
@@ -364,14 +364,16 @@ class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
         serializer.is_valid(raise_exception=True)
         # If we don't do this, the request.data QueryDict will only return the last column's name
         # if there are multiple columns.
-        data = request.data.dict()
-        data['columns'] = request.data.getlist('columns')
+        if type(request.data) != dict:
+            data = request.data.dict()
+            data['columns'] = request.data.getlist('columns')
         try:
-            constraint = table.add_constraint(data)
+            name = data['name'] if 'name' in data else None
+            constraint = table.add_constraint(data['type'], data['columns'], name)
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
                 raise ValidationError(
-                    'Constraint with the same name already exists'
+                    'Relation with the same name already exists'
                 )
             else:
                 raise APIException(e)
