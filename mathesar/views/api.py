@@ -99,17 +99,17 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
             name = serializer.validated_data['name']
 
         try:
-          if serializer.validated_data['data_files']:
-              table = create_table_from_datafile(
-                  serializer.validated_data['data_files'],
-                  name,
-                  serializer.validated_data['schema'],
-              )
-          else:
-              table = create_empty_table(
-                  name,
-                  serializer.validated_data['schema']
-              )
+            if serializer.validated_data['data_files']:
+                table = create_table_from_datafile(
+                    serializer.validated_data['data_files'],
+                    name,
+                    serializer.validated_data['schema'],
+                )
+            else:
+                table = create_empty_table(
+                    name,
+                    serializer.validated_data['schema']
+                )
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
                 raise ValidationError(

@@ -310,7 +310,7 @@ def test_table_type_suggestion(client, schema, engine_email_type):
     assert response.status_code == 200
     assert response_table == EXPECTED_TYPES
 
- 
+
 def test_table_previews(client, schema, engine_email_type):
     table_name = 'Type Modification Table'
     file = 'mathesar/tests/data/type_inference.csv'
