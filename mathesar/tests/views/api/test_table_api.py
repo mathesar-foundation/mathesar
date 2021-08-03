@@ -8,7 +8,6 @@ from sqlalchemy import text
 
 from mathesar import reflection
 from mathesar.models import Table, DataFile, Schema
-from mathesar.utils.schemas import create_schema_and_object
 from db.tests.types import fixtures
 from db import tables
 
@@ -18,17 +17,24 @@ engine_email_type = fixtures.engine_email_type
 temporary_testing_schema = fixtures.temporary_testing_schema
 
 
-@pytest.fixture(scope='module')
-def schema(django_db_setup, django_db_blocker, test_db_name):
-    # We have to do some additional work to access the DB at module scope
-    with django_db_blocker.unblock():
-        return create_schema_and_object('table_tests', test_db_name)
+@pytest.fixture
+def schema_name():
+    return 'table_tests'
+
+
+@pytest.fixture
+def schema(create_schema, schema_name):
+    return create_schema(schema_name)
 
 
 @pytest.fixture
 def data_file(csv_filename):
     with open(csv_filename, 'rb') as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file))
+        data_file = DataFile.objects.create(
+            file=File(csv_file),
+            created_from='file',
+            base_name='patents'
+        )
     return data_file
 
 
@@ -38,6 +44,7 @@ def paste_data_file(paste_filename):
         paste_text = paste_file.read()
     data_file = DataFile.objects.create(
         file=ContentFile(paste_text, name='paste_file.txt'),
+        created_from='paste',
         delimiter='\t',
         quotechar='',
         escapechar='',
@@ -74,6 +81,52 @@ def check_table_filter_response(response, status_code=None, count=None):
     if count is not None:
         assert response_data['count'] == count
         assert len(response_data['results']) == count
+
+
+def _create_table(client, data_files, table_name, schema):
+    body = {
+        'name': table_name,
+        'schema': schema.id,
+    }
+    if data_files is not None:
+        body['data_files'] = [df.id for df in data_files]
+
+    response = client.post('/api/v0/tables/', body)
+    response_table = response.json()
+    table = Table.objects.get(id=response_table['id'])
+
+    if data_files is not None:
+        for df in data_files:
+            df.refresh_from_db()
+
+    return response, response_table, table
+
+
+def _get_expected_name(table_name, data_file=None):
+    if not table_name and data_file:
+        return data_file.base_name
+    elif not table_name and data_file is None:
+        return f'Table {Table.objects.count()}'
+    else:
+        return table_name
+
+
+def check_create_table_response(client, name, expt_name, data_file, schema):
+    num_tables = Table.objects.count()
+
+    response, response_table, table = _create_table(client, [data_file], name, schema)
+
+    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
+                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
+    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
+                    'Application SN', 'Title', 'Patent Expiration Date']
+
+    assert response.status_code == 201
+    assert Table.objects.count() == num_tables + 1
+    assert table.get_records()[0] == first_row
+    assert all([col in table.sa_column_names for col in column_names])
+    assert data_file.table_imported_to.id == table.id
+    check_table_response(response_table, table, expt_name)
 
 
 def test_table_list(create_table, client):
@@ -468,75 +521,54 @@ def test_table_previews_missing_columns(client, schema, engine_email_type):
     assert "columns" in response.json()
 
 
-def check_create_table_response(client, table_name, data_file, schema):
+@pytest.mark.parametrize('table_name', ['Test Table Create From Datafile', ''])
+def test_table_create_from_datafile(client, data_file, schema, table_name):
+    expt_name = _get_expected_name(table_name, data_file=data_file)
+    check_create_table_response(client, table_name, expt_name, data_file, schema)
+
+
+@pytest.mark.parametrize('table_name', ['Test Table Create From Paste', ''])
+def test_table_create_from_paste(client, schema, paste_data_file, table_name):
+    expt_name = _get_expected_name(table_name)
+    check_create_table_response(client, table_name, expt_name, paste_data_file, schema)
+
+
+@pytest.mark.parametrize('data_files', [None, []])
+@pytest.mark.parametrize('table_name', ['test_table_no_file', ''])
+def test_table_create_without_datafile(client, schema, data_files, table_name):
     num_tables = Table.objects.count()
-    body = {
-        'data_files': [data_file.id],
-        'name': table_name,
-        'schema': schema.id,
-    }
-    response = client.post('/api/v0/tables/', body)
-    response_table = response.json()
-    table = Table.objects.get(id=response_table['id'])
-    data_file.refresh_from_db()
-    first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
-                 '13/033,085', 'Polyimide Wire Insulation Repair System', None)
-    column_names = ['Center', 'Status', 'Case Number', 'Patent Number',
-                    'Application SN', 'Title', 'Patent Expiration Date']
+    expt_name = _get_expected_name(table_name)
 
-    assert response.status_code == 201
-    assert Table.objects.count() == num_tables + 1
-    assert table.get_records()[0] == first_row
-    assert all([col in table.sa_column_names for col in column_names])
-    assert data_file.table_imported_to.id == table.id
-    check_table_response(response_table, table, table_name)
-
-
-def test_table_create_from_datafile(client, data_file, schema):
-    table_name = 'Test Table Create From Datafile'
-    check_create_table_response(client, table_name, data_file, schema)
-
-
-def test_table_create_from_paste(client, schema, paste_data_file):
-    table_name = 'Test Table Create From Paste'
-    check_create_table_response(client, table_name, paste_data_file, schema)
-
-
-def test_table_create_without_datafile(client, schema):
-    num_tables = Table.objects.count()
-    table_name = 'test_table_no_file'
-    body = {  # No `data_files` field
-        'name': table_name,
-        'schema': schema.id,
-    }
-    response = client.post('/api/v0/tables/', body)
-    response_table = response.json()
-    table = Table.objects.get(id=response_table['id'])
+    response, response_table, table = _create_table(
+        client, data_files, table_name, schema
+    )
 
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1
     assert len(table.sa_columns) == 1  # only the internal `mathesar_id` column
     assert len(table.get_records()) == 0
-    check_table_response(response_table, table, table_name)
+    check_table_response(response_table, table, expt_name)
 
 
-def test_table_create_with_empty_datafile(client, schema):
-    num_tables = Table.objects.count()
-    table_name = 'test_table_empty_files'
-    body = {
-        'data_files': [],  # Empty `data_files` field
-        'name': table_name,
-        'schema': schema.id,
-    }
-    response = client.post('/api/v0/tables/', body)
-    response_table = response.json()
-    table = Table.objects.get(id=response_table['id'])
+def test_table_create_name_taken(client, paste_data_file, schema, create_table, schema_name):
+    create_table('Table 2', schema=schema_name)
+    create_table('Table 3', schema=schema_name)
+    expt_name = 'Table 4'
+    check_create_table_response(client, '', expt_name, paste_data_file, schema)
 
-    assert response.status_code == 201
-    assert Table.objects.count() == num_tables + 1
-    assert len(table.sa_columns) == 1  # only the internal `mathesar_id` column
-    assert len(table.get_records()) == 0
-    check_table_response(response_table, table, table_name)
+
+def test_table_create_base_name_taken(client, data_file, schema, create_table, schema_name):
+    create_table('patents', schema=schema_name)
+    create_table('patents 1', schema=schema_name)
+    expt_name = 'patents 2'
+    check_create_table_response(client, '', expt_name, data_file, schema)
+
+
+def test_table_create_base_name_too_long(client, data_file, schema):
+    data_file.base_name = '0' * 100
+    data_file.save()
+    expt_name = 'Table 0'
+    check_create_table_response(client, '', expt_name, data_file, schema)
 
 
 def test_table_create_with_same_name(client, schema):

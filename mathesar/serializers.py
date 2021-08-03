@@ -54,7 +54,7 @@ class TableSerializer(serializers.ModelSerializer):
     records_url = serializers.SerializerMethodField()
     constraints_url = serializers.SerializerMethodField()
     columns_url = serializers.SerializerMethodField()
-    name = serializers.CharField()
+    name = serializers.CharField(required=False, allow_blank=True, default='')
     data_files = serializers.PrimaryKeyRelatedField(
         required=False, many=True, queryset=DataFile.objects.all()
     )

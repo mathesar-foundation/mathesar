@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from unittest.mock import patch
 from django.core.files import File
@@ -85,11 +87,22 @@ def test_data_file_create_csv(client, csv_filename, header):
     assert response.status_code == 201
     assert DataFile.objects.count() == num_data_files + 1
     assert data_file.created_from == 'file'
+    assert data_file.base_name == 'patents'
     assert data_file.delimiter == correct_dialect.delimiter
     assert data_file.quotechar == correct_dialect.quotechar
     assert data_file.escapechar == correct_dialect.escapechar
     assert data_file.header == header
     verify_data_file_data(data_file, data_file_dict)
+
+
+def test_data_file_create_csv_long_name(client, csv_filename):
+    with open(csv_filename, 'rb') as csv_file:
+        with patch.object(os.path, 'basename', lambda _: '0' * 101):
+            data = {'file': csv_file}
+            response = client.post('/api/v0/data_files/', data)
+            data_file_dict = response.json()
+    assert response.status_code == 400
+    assert 'Ensure this filename has at most 100' in data_file_dict['file'][0]
 
 
 @pytest.mark.parametrize('header', [True, False])
@@ -106,6 +119,7 @@ def test_data_file_create_paste(client, paste_filename, header):
     assert response.status_code == 201
     assert DataFile.objects.count() == num_data_files + 1
     assert data_file.created_from == 'paste'
+    assert data_file.base_name == ''
     assert data_file.delimiter == '\t'
     assert data_file.quotechar == ''
     assert data_file.escapechar == ''

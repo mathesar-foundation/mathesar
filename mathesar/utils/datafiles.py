@@ -1,3 +1,4 @@
+import os
 from time import time
 from io import TextIOWrapper
 
@@ -19,9 +20,14 @@ def create_datafile(request, data):
         name = str(int(time())) + '.tsv'
         file = ContentFile(str.encode(data['paste']), name=name)
         created_from = 'paste'
+        base_name = ''
     elif 'file' in data:
         file = data['file']
         created_from = 'file'
+
+        max_length = DataFile._meta.get_field('base_name').max_length
+        base_name, _ = os.path.splitext(os.path.basename(file.name))
+        base_name = base_name[:max_length]
 
     text_file = TextIOWrapper(file.file, encoding='utf-8-sig')
     try:
@@ -31,6 +37,7 @@ def create_datafile(request, data):
 
     datafile = DataFile(
         file=file,
+        base_name=base_name,
         created_from=created_from,
         header=header,
         delimiter=dialect.delimiter,
