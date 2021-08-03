@@ -220,18 +220,11 @@ class Table(DatabaseObject):
     def delete_record(self, id_value):
         return records.delete_record(self._sa_table, self.schema._sa_engine, id_value)
 
-    def get_constraint_by_type_and_columns(self, constraint_type, columns):
-        for constraint in self.sa_constraints:
-            current_constraint_type = constraints.get_constraint_type_from_class(constraint)
-            if current_constraint_type == constraint_type and set(columns) == set([column.name for column in constraint.columns]):
-                return constraint
-        return None
-
     def add_constraint(self, constraint_type, columns, name=None):
         if constraint_type != constraints.ConstraintType.UNIQUE.value:
             raise ValueError('Only creating unique constraints is currently supported.')
         constraints.create_unique_constraint(
-            self._sa_table.name,
+            self.name,
             self._sa_table.schema,
             self.schema._sa_engine,
             columns,
@@ -242,12 +235,10 @@ class Table(DatabaseObject):
             del self._sa_table
         except AttributeError:
             pass
-        sa_constraint = self.get_constraint_by_type_and_columns(
-            constraint_type,
-            columns
-        )
         engine = self.schema.database._sa_engine
-        constraint_oid = constraints.get_constraint_oid_by_name_and_table_oid(sa_constraint.name, self.oid, engine)
+        if not name:
+            name = constraints.get_constraint_name(constraint_type, self.name, columns[0])
+        constraint_oid = constraints.get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         return Constraint.objects.create(oid=constraint_oid, table=self)
 
 

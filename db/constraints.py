@@ -89,6 +89,22 @@ convention = {
 }
 
 
+def get_constraint_name(constraint_type, table_name, column_0_name):
+    data = {
+        'table_name': table_name,
+        'column_0_name': column_0_name
+    }
+    if constraint_type == ConstraintType.UNIQUE.value:
+        return convention['uq'] % data
+    if constraint_type == ConstraintType.FOREIGN_KEY.value:
+        return convention['fk'] % data
+    if constraint_type == ConstraintType.PRIMARY_KEY.value:
+        return convention['pk'] % data
+    if constraint_type == ConstraintType.CHECK.value:
+        return convention['ck'] % data
+    return None
+
+
 def create_unique_constraint(table_name, schema, engine, columns, constraint_name=None):
     with engine.begin() as conn:
         metadata = MetaData(bind=engine, schema=schema, naming_convention=convention)

@@ -145,7 +145,7 @@ def test_create_unique_constraint_with_duplicate_name(create_table, client):
     }
     response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
     assert response.status_code == 400
-    assert response.json() == ['Constraint with the same name already exists']
+    assert response.json() == ['Relation with the same name already exists']
 
 
 def test_create_unique_constraint_for_non_unique_column(create_table, client):
