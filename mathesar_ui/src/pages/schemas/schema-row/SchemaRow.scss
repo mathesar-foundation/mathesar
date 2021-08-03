@@ -1,0 +1,47 @@
+// TODO: Extract design tokens
+$color-dark: #1e1e1e;
+$color-muted: #606066;
+$color-danger: #f47171;
+
+$font-size-info: 0.875rem;
+
+.schema-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  color: $color-dark;
+  padding: 1em;
+
+  .details {
+    .title {
+      display: flex;
+      flex-direction: row;
+      gap: 0.5em;
+
+      margin-bottom: 0.5em;
+    }
+
+    .fa-icon {
+      color: $color-muted;
+    }
+
+    .info {
+      color: $color-muted;
+      font-size: $font-size-info;
+
+      strong {
+        font-weight: 600;
+      }
+    }
+  }
+
+  .controls {
+    margin-left: auto;
+
+    .delete {
+      color: $color-danger;
+      border-color: $color-danger;
+    }
+  }
+}

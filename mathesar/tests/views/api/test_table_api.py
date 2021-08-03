@@ -533,6 +533,19 @@ def test_table_create_with_empty_datafile(client, schema):
     check_table_response(response_table, table, table_name)
 
 
+def test_table_create_with_same_name(client, schema):
+    table_name = 'test_table_duplicate'
+    body = {
+        'name': table_name,
+        'schema': schema.id,
+    }
+    client.post('/api/v0/tables/', body)
+    response = client.post('/api/v0/tables/', body)
+    response_error = response.json()
+    assert response.status_code == 400
+    assert response_error[0] == f"Relation {table_name} already exists in schema {schema.id}"
+
+
 def test_table_partial_update(create_table, client):
     table_name = 'NASA Table Partial Update'
     new_table_name = 'NASA Table Partial Update New'

@@ -45,9 +45,6 @@ def create_mathesar_table(name, schema, columns_, engine, metadata=None):
     # SQLAlchemy context (e.g., for creating a ForeignKey relationship)
     if metadata is None:
         metadata = MetaData(bind=engine, schema=schema)
-    # This reflection step lets us notice any "table already exists"
-    # errors before sending error-generating requests to the DB.
-    metadata.reflect()
     table = Table(
         name,
         metadata,
