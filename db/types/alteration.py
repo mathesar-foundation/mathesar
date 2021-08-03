@@ -95,14 +95,14 @@ def alter_column_type(
 
 def get_column_cast_expression(column, target_type_str, engine):
     """
-    Given an SQLAlchemy Column, we get the correct SQL selectable for
-    selecting the results of a Mathesar cast_to_<type> function on that
-    column, where <type> is derived from the target_type_str.
+    Given a Column, we get the correct SQL selectable for selecting the
+    results of a Mathesar cast_to_<type> function on that column, where
+    <type> is derived from the target_type_str.
     """
     target_type = get_robust_supported_alter_column_type_map(engine).get(target_type_str)
     if target_type is None:
         raise UnsupportedTypeException(
-            f'Target Type "{target_type_str}" is not supported.'
+            f"Target Type '{target_type_str}' is not supported."
         )
     else:
         prepared_target_type_name = target_type().compile(dialect=engine.dialect)

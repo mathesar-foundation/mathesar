@@ -370,6 +370,74 @@ def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
     assert "Invalid type" in response.json()[0]
 
 
+def test_table_previews_invalid_type_cast_check(client, schema, engine_email_type):
+    table_name = 'Type Check Preview Table'
+    file = 'mathesar/tests/data/type_inference.csv'
+    with open(file, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    body = {
+        'data_files': [data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response_table = client.post('/api/v0/tables/', body).json()
+    table = Table.objects.get(id=response_table['id'])
+
+    post_body = {
+        'columns': [
+            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "col_1", "type": "NUMERIC"},
+            {"name": "col_2", "type": "BOOLEAN"},
+            {"name": "col_3", "type": "BOOLEAN"},
+            {"name": "col_4", "type": "NUMERIC"},
+            {"name": "col_5", "type": "mathesar_types.email"},
+            {"name": "col_6", "type": "NUMERIC"}
+        ]
+    }
+    response = client.post(
+        f'/api/v0/tables/{table.id}/previews/',
+        data=json.dumps(post_body),
+        content_type='application/json'
+    )
+    assert response.status_code == 400
+    assert "Invalid type" in response.json()[0]
+
+
+def test_table_previews_unsupported_type(client, schema, engine_email_type):
+    table_name = 'Unsupported Type Preview Table'
+    file = 'mathesar/tests/data/type_inference.csv'
+    with open(file, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    body = {
+        'data_files': [data_file.id],
+        'name': table_name,
+        'schema': schema.id,
+    }
+    response_table = client.post('/api/v0/tables/', body).json()
+    table = Table.objects.get(id=response_table['id'])
+
+    post_body = {
+        'columns': [
+            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "col_1", "type": "INTEGER"},
+            {"name": "col_2", "type": "BOOLEAN"},
+            {"name": "col_3", "type": "BOOLEAN"},
+            {"name": "col_4", "type": "NUMERIC"},
+            {"name": "col_5", "type": "VARCHAR"},
+            {"name": "col_6", "type": "NUMERIC"}
+        ]
+    }
+    response = client.post(
+        f'/api/v0/tables/{table.id}/previews/',
+        data=json.dumps(post_body),
+        content_type='application/json'
+    )
+    assert response.status_code == 400
+    assert "not supported" in response.json()[0]
+
+
 def test_table_previews_missing_columns(client, schema, engine_email_type):
     table_name = 'Missing Columns Preview Table'
     file = 'mathesar/tests/data/type_inference.csv'
