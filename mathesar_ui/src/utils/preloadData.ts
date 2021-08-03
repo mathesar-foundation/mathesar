@@ -1,16 +1,7 @@
-import type { TreeItem } from '@mathesar-components/types';
-
-export interface SchemaEntry {
-  id: number,
-  name: string
-}
-
-export interface Schema extends SchemaEntry, TreeItem {
-  tables: SchemaEntry[]
-}
+import type { Database, Schema } from '@mathesar/App.d';
 
 interface CommonData {
-  databases: string[],
+  databases: Database[],
   schemas: Schema[]
 }
 
