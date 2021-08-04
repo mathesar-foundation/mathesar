@@ -174,6 +174,11 @@ class Table(DatabaseObject):
             column_index,
         )
 
+    def get_preview(self, column_definitions):
+        return tables.get_column_cast_records(
+            self.schema._sa_engine, self._sa_table, column_definitions
+        )
+
     @property
     def sa_all_records(self):
         return records.get_records(self._sa_table, self.schema._sa_engine)
@@ -215,13 +220,13 @@ class Table(DatabaseObject):
 class DataFile(BaseModel):
     created_from_choices = models.TextChoices("created_from", "FILE PASTE")
 
-    file = models.FileField(
-        upload_to=model_utils.user_directory_path,
-    )
+    file = models.FileField(upload_to=model_utils.user_directory_path)
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     created_from = models.CharField(max_length=128, choices=created_from_choices.choices)
     table_imported_to = models.ForeignKey(Table, related_name="data_files", blank=True,
                                           null=True, on_delete=models.SET_NULL)
+
+    base_name = models.CharField(max_length=100)
     header = models.BooleanField(default=True)
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)

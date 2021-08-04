@@ -1,7 +1,14 @@
+from sqlalchemy import MetaData
+
 from mathesar.models import Table
 from mathesar.imports.csv import create_table_from_csv
 from mathesar.database.base import create_mathesar_engine
 from db.tables import infer_table_column_types, create_mathesar_table, get_oid_from_table
+
+
+TABLE_NAME_TEMPLATE = 'Table'
+
+POSTGRES_NAME_LEN_CAP = 63
 
 
 def get_table_column_types(table):
@@ -15,6 +22,36 @@ def get_table_column_types(table):
         and not col.foreign_keys
     }
     return col_types
+
+
+def gen_table_name(schema, data_files=None):
+    if data_files:
+        data_file = data_files[0]
+        base_name = data_file.base_name
+    else:
+        base_name = None
+
+    if base_name and len(base_name) >= POSTGRES_NAME_LEN_CAP - 8:
+        # Ensures we have at least 7 digits to work with
+        base_name = None
+
+    if not base_name:
+        base_name = TABLE_NAME_TEMPLATE
+        table_num = Table.objects.count()
+        name = f'{TABLE_NAME_TEMPLATE} {table_num}'
+    else:
+        table_num = 0
+        name = base_name
+
+    metadata = MetaData(bind=schema._sa_engine, schema=schema.name)
+    metadata.reflect()
+    while '.'.join((schema.name, name)) in metadata.tables:
+        table_num += 1
+        name = f'{base_name} {table_num}'
+        if len(name) > POSTGRES_NAME_LEN_CAP:
+            base_name = base_name[:-1]
+            name = base_name + f' {table_num}'
+    return name
 
 
 def create_table_from_datafile(data_files, name, schema):
@@ -31,7 +68,6 @@ def create_empty_table(name, schema):
     :param schema: the parsed and validated schema model
     :return: the newly created blank table
     """
-
     engine = create_mathesar_engine(schema.database.name)
     db_table = create_mathesar_table(name, schema.name, [], engine)
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
