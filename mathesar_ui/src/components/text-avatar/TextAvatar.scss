@@ -1,0 +1,13 @@
+.text-avatar {
+  display: inline-flex;
+  text-align: center;
+  align-items: center;
+  height: 31px;
+  width: 32px;
+  border-radius: 3px;
+  color: #fff;
+
+  >div {
+    width: 32px;
+  }
+}
