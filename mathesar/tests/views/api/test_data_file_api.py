@@ -35,6 +35,30 @@ def data_file(csv_filename):
     return data_file
 
 
+@pytest.fixture(scope='session')
+def patents_url_data(patents_url_filename):
+    with open(patents_url_filename, 'r') as f:
+        return f.read()
+
+
+@pytest.fixture
+def mock_patents_url(patents_url_data):
+    mock_get_patcher = patch('requests.get')
+    mock_get = mock_get_patcher.start()
+
+    data = bytes(patents_url_data, 'utf-8')
+    mock_get.return_value.__enter__.return_value.iter_content.return_value = [data]
+    mock_get.return_value.__enter__.return_value.ok = True
+    mock_get.return_value.__enter__.return_value.headers = {
+        'content-type': 'text/csv',
+        'content-length': None
+    }
+
+    yield mock_get
+
+    mock_get.stop()
+
+
 def check_create_data_file_response(response, num_files, created_from, base_name,
                                     delimiter, quotechar, escapechar, header):
     data_file_dict = response.json()
