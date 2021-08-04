@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { schemas } from '@mathesar/stores/schemas';
   import { faTable } from '@fortawesome/free-solid-svg-icons';
   import { Tree, TabContainer, Icon } from '@mathesar-components';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
-  import type { Schema } from '@mathesar/utils/preloadData';
-  import type { TableMap } from '@mathesar/stores/schemas';
+  import { schemas } from '@mathesar/stores/schemas';
+  import type { Schema } from '@mathesar/App.d';
   import {
     getAllTabsForDB,
     addTab,
@@ -19,27 +18,11 @@
 
   export let database : string;
 
-  let expandedSchemas = new Set();
-  const tableMap = $schemas.tableMap as TableMap;
-  URLQueryHandler.getAllTableConfigs(database).forEach(
-    (entry) => {
-      const schemaTable = tableMap?.get(entry.id);
-      if (schemaTable) {
-        expandedSchemas.add(schemaTable?.parent);
-      }
-    },
-  );
-
   const { tabs, activeTab } = getAllTabsForDB(database);
   let activeTable: Set<unknown>;
 
   function onActiveTabChange(_activeTab: MathesarTab) {
     activeTable = new Set([_activeTab?.id]);
-    const schemaTable = tableMap?.get(_activeTab?.id as number);
-    if (schemaTable) {
-      expandedSchemas.add(schemaTable.parent);
-      expandedSchemas = new Set(expandedSchemas);
-    }
   }
 
   $: onActiveTabChange($activeTab);
@@ -80,7 +63,7 @@
 <aside>
   <nav>
     <Tree data={$schemas.data || []} idKey="id" labelKey="name" childKey="tables"
-          bind:expandedItems={expandedSchemas} search={true} {getLink}
+          search={true} {getLink}
           bind:selectedItems={activeTable} on:nodeSelected={tableSelected}
           let:entry>
         <Icon data={faTable}/>

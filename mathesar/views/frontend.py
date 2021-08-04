@@ -94,6 +94,8 @@ def schemas(request, **kwargs):
     if render_info.get('is_db_updated'):
         return redirect('schemas', dbname=selected_db)
 
+    common_data['selected_schema'] = None
+
     return render(
         request,
         "mathesar/index.html",

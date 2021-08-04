@@ -1,19 +1,15 @@
 <script lang="ts">
   import { faPlus } from '@fortawesome/free-solid-svg-icons';
-  
+  import { selectedDB } from '@mathesar/stores/databases';
   import { schemas } from '@mathesar/stores/schemas';
   import {
     Icon,
     Button,
     TextInput,
   } from '@mathesar-components';
-
   import type { Schema } from '@mathesar/App.d';
-
   import SchemaRow from './schema-row/SchemaRow.svelte';
 
-  // Prop
-  export let database: string;
   let filterQuery = '';
 
   let schemaList: Schema[];
@@ -31,7 +27,7 @@
 <main class="schemas">
   <section class="hero">
     <div class="container">
-      <h1>{database}</h1>
+      <h1>{$selectedDB.name}</h1>
       <Button class="add">
         <Icon data={faPlus}/>
         New Schema
