@@ -17,12 +17,9 @@ class GroupFieldNotFound(FieldNotFound):
     pass
 
 
-def _get_primary_key_column(table):
-    primary_key_list = list(inspect(table).primary_key)
-    # We do not support getting by composite primary keys
-    assert len(primary_key_list) == 1
-    return primary_key_list[0]
-
+def _get_primary_key_columns(table):
+    return list(inspect(table).primary_key)
+    
 
 def _create_col_objects(table, column_list):
     return [
@@ -47,8 +44,10 @@ def _execute_query(query, engine):
 
 
 def get_record(table, engine, id_value):
-    primary_key_column = _get_primary_key_column(table)
-    query = select(table).where(primary_key_column == id_value)
+    primary_key_columns = _get_primary_key_columns(table)
+    if len(primary_key_columns) != 1:
+        return None
+    query = select(table).where(primary_key_columns[0] == id_value)
     result = _execute_query(query, engine)
     assert len(result) <= 1
     return result[0] if result else None
@@ -247,16 +246,20 @@ def create_records_from_csv(
 
 
 def update_record(table, engine, id_value, record_data):
-    primary_key_column = _get_primary_key_column(table)
+    primary_key_columns = _get_primary_key_columns(table)
+    if len(primary_key_columns) != 1:
+        return None
     with engine.begin() as connection:
         connection.execute(
-            table.update().where(primary_key_column == id_value).values(record_data)
+            table.update().where(primary_key_columns[0] == id_value).values(record_data)
         )
     return get_record(table, engine, id_value)
 
 
 def delete_record(table, engine, id_value):
-    primary_key_column = _get_primary_key_column(table)
-    query = delete(table).where(primary_key_column == id_value)
+    primary_key_columns = _get_primary_key_columns(table)
+    if len(primary_key_columns) != 1:
+        return None
+    query = delete(table).where(primary_key_columns[0] == id_value)
     with engine.begin() as conn:
         return conn.execute(query)
