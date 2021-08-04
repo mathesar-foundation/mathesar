@@ -14,6 +14,7 @@ router.register(r'data_files', api.DataFileViewSet, basename='data-file')
 table_router = routers.NestedSimpleRouter(router, r'tables', lookup='table')
 table_router.register(r'records', api.RecordViewSet, basename='table-record')
 table_router.register(r'columns', api.ColumnViewSet, basename='table-column')
+table_router.register(r'constraints', api.ConstraintViewSet, basename='table-constraint')
 
 urlpatterns = [
     path('api/v0/', include(router.urls)),
