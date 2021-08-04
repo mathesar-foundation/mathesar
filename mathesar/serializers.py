@@ -60,7 +60,7 @@ class TableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Table
         fields = ['id', 'name', 'schema', 'created_at', 'updated_at',
-                  'columns', 'records', 'data_files', 'has_dependencies']
+                  'columns', 'records', 'data_files', 'has_dependencies', 'pk_type']
 
     def get_records(self, obj):
         if isinstance(obj, Table):
