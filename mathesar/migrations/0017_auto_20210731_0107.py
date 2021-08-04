@@ -2,6 +2,8 @@
 
 from django.db import migrations, models
 
+from mathesar.models import DataFile
+
 
 class Migration(migrations.Migration):
 
@@ -13,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='datafile',
             name='created_from',
-            field=models.CharField(choices=[('FILE', 'File'), ('PASTE', 'Paste'), ('URL', 'Url')], max_length=128),
+            field=models.CharField(choices=DataFile.created_from_choices.choices,
+                                   max_length=128)
         ),
     ]
