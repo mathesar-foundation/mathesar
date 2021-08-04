@@ -377,6 +377,8 @@ class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
         if type(request.data) != dict:
             data = request.data.dict()
             data['columns'] = request.data.getlist('columns')
+        else:
+            data = request.data
         try:
             name = data['name'] if 'name' in data else None
             constraint = table.add_constraint(data['type'], data['columns'], name)
