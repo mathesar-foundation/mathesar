@@ -42,7 +42,7 @@ def patents_url_data(patents_url_filename):
 
 
 @pytest.fixture
-def mock_patents_url(patents_url_data):
+def mock_get_patents_url(patents_url_data):
     mock_get_patcher = patch('requests.get')
     mock_get = mock_get_patcher.start()
 
@@ -154,7 +154,7 @@ def test_data_file_create_paste(client, paste_filename, header):
 
 
 @pytest.mark.parametrize('header', [True, False])
-def test_data_file_create_url(client, header, patents_url, mock_patents_url):
+def test_data_file_create_url(client, header, patents_url, mock_get_patents_url):
     num_data_files = DataFile.objects.count()
     data = {'url': patents_url, 'header': header}
     response = client.post('/api/v0/data_files/', data)
@@ -217,6 +217,16 @@ def test_data_file_create_url_invalid_address(client):
         response_dict = response.json()
     assert response.status_code == 400
     assert response_dict['url'][0] == 'URL cannot be reached.'
+
+
+def test_data_file_create_url_invalid_download(
+    client, patents_url, mock_get_patents_url
+):
+    mock_get_patents_url.return_value.__enter__.return_value.ok = False
+    response = client.post('/api/v0/data_files/', data={'url': patents_url})
+    response_dict = response.json()
+    assert response.status_code == 400
+    assert response_dict['url'][0] == 'URL cannot be downloaded.'
 
 
 def test_data_file_create_url_invalid_content_type(client):

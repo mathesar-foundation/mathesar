@@ -25,7 +25,7 @@ def _download_datafile(url):
             name, r.headers.get('content-type'), r.headers.get('content-length'), None,
         )
         if not r.ok:
-            raise ValidationError({'url': 'Unable to download datafile'})
+            raise ValidationError({'url': ['URL cannot be downloaded.']})
         for chunk in r.iter_content(chunk_size=8192):
             temp_file.write(chunk)
     temp_file.seek(0)
