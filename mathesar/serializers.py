@@ -4,7 +4,7 @@ from django.urls import reverse
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from mathesar.models import Table, Schema, DataFile, Database
+from mathesar.models import Table, Schema, DataFile, Database, Constraint
 
 
 SUPPORTED_URL_CONTENT_TYPES = {'text/csv', 'text/plain'}
@@ -56,7 +56,9 @@ class ColumnSerializer(SimpleColumnSerializer):
 
 class TableSerializer(serializers.ModelSerializer):
     columns = SimpleColumnSerializer(many=True, read_only=True, source='sa_columns')
-    records = serializers.SerializerMethodField()
+    records_url = serializers.SerializerMethodField()
+    constraints_url = serializers.SerializerMethodField()
+    columns_url = serializers.SerializerMethodField()
     name = serializers.CharField(required=False, allow_blank=True, default='')
     data_files = serializers.PrimaryKeyRelatedField(
         required=False, many=True, queryset=DataFile.objects.all()
@@ -65,13 +67,29 @@ class TableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Table
         fields = ['id', 'name', 'schema', 'created_at', 'updated_at',
-                  'columns', 'records', 'data_files', 'has_dependencies']
+                  'columns', 'records_url', 'constraints_url', 'columns_url', 'data_files', 'has_dependencies']
 
-    def get_records(self, obj):
+    def get_records_url(self, obj):
         if isinstance(obj, Table):
             # Only get records if we are serializing an existing table
             request = self.context['request']
             return request.build_absolute_uri(reverse('table-record-list', kwargs={'table_pk': obj.pk}))
+        else:
+            return None
+
+    def get_constraints_url(self, obj):
+        if isinstance(obj, Table):
+            # Only get constraints if we are serializing an existing table
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('table-constraint-list', kwargs={'table_pk': obj.pk}))
+        else:
+            return None
+
+    def get_columns_url(self, obj):
+        if isinstance(obj, Table):
+            # Only get columns if we are serializing an existing table
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('table-column-list', kwargs={'table_pk': obj.pk}))
         else:
             return None
 
@@ -166,3 +184,13 @@ class DataFileSerializer(serializers.ModelSerializer):
         if content_type not in SUPPORTED_URL_CONTENT_TYPES:
             raise ValidationError(f"URL resource '{content_type}' not a valid type.")
         return url
+
+
+class ConstraintSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(required=False)
+    type = serializers.CharField()
+    columns = serializers.ListField()
+
+    class Meta:
+        model = Constraint
+        fields = ['id', 'name', 'type', 'columns']

@@ -1,8 +1,8 @@
 from sqlalchemy import MetaData
 
-from mathesar.models import Table
-from mathesar.imports.csv import create_table_from_csv
 from mathesar.database.base import create_mathesar_engine
+from mathesar.imports.csv import create_table_from_csv
+from mathesar.models import Table
 from db.tables import infer_table_column_types, create_mathesar_table, get_oid_from_table
 
 
