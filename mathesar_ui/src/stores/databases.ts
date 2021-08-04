@@ -11,8 +11,10 @@ import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
 
 const commonData = preloadCommonData();
-
-export const selectedDB: Writable<Database> = writable(commonData.databases?.[0] || null);
+const selected: Database = commonData.databases?.find(
+  (entry) => entry.name === commonData.selected_db,
+) || null;
+export const selectedDB: Writable<Database> = writable(selected);
 
 export interface DatabaseStoreData {
   preload?: boolean,

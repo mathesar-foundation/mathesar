@@ -2,7 +2,9 @@ import type { Database, Schema } from '@mathesar/App.d';
 
 interface CommonData {
   databases: Database[],
-  schemas: Schema[]
+  schemas: Schema[],
+  selected_db: string,
+  selected_schema: number,
 }
 
 function getData<T>(selector: string, retainData = false): T {

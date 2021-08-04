@@ -27,20 +27,20 @@
 </header>
 
 <section class="content-section">
-  <Route path="/:db/*">
-    <Route path="/schemas">
-      {#key $selectedDB}
-        <Schemas database={$selectedDB.name}/>
-      {/key}
-    </Route>
-    <Route path="/">
-      {#key $selectedDB}
-        <Base database={$selectedDB.name}/>
-      {/key}
-    </Route>
-  </Route>
-
   {#if $selectedDB}
+    <Route path="/:db/*">
+      <Route path="/schemas">
+        {#key $selectedDB}
+          <Schemas database={$selectedDB.name}/>
+        {/key}
+      </Route>
+      <Route path="/">
+        {#key $selectedDB}
+          <Base database={$selectedDB.name}/>
+        {/key}
+      </Route>
+    </Route>
+
     <Route path="/" redirect="/{$selectedDB.name}"/>
   {/if}
 </section>

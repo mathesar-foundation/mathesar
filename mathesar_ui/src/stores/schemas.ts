@@ -1,9 +1,10 @@
 import {
   writable,
-  derived,
   Writable,
+  derived,
   Readable,
   get,
+  Unsubscriber,
 } from 'svelte/store';
 
 import { preloadCommonData } from '@mathesar/utils/preloadData';
@@ -14,10 +15,12 @@ import type { CancellablePromise } from '@mathesar/components';
 
 import { selectedDB } from './databases';
 
-// TODO:
-// Find schema from table, if open
-// Get first schema of DB by default
-export const selectedSchema: Writable<Schema> = writable(null as Schema);
+const commonData = preloadCommonData();
+
+const selected: Schema = commonData.schemas?.find(
+  (entry) => entry.id === commonData.selected_schema,
+) || null;
+export const selectedSchema: Writable<Schema> = writable(selected);
 
 interface SchemaMapEntry extends SchemaEntry {
   children?: number[],
@@ -109,17 +112,16 @@ export async function fetchSchemas(
 
 let preload = true;
 
-function getSchema(database: string): Writable<SchemaStoreData> {
+export function getSchemaStore(database: string): Writable<SchemaStoreData> {
   let store = dbSchemaStoreMap.get(database);
   if (!store) {
     // TODO: Set and check selectedDB in preloaded data
     if (preload) {
       preload = false;
-      const preloadedSchemas = preloadCommonData().schemas;
       store = writable({
         state: States.Done,
-        data: preloadedSchemas,
-        ...generateEntryMaps(preloadedSchemas),
+        data: commonData.schemas,
+        ...generateEntryMaps(commonData.schemas),
       });
     } else {
       store = writable({
@@ -127,19 +129,32 @@ function getSchema(database: string): Writable<SchemaStoreData> {
       });
       void fetchSchemas(database);
     }
+    dbSchemaStoreMap.set(database, store);
   } else if (get(store).error) {
     void fetchSchemas(database);
   }
   return store;
 }
 
-export const schemas: Readable<Writable<SchemaStoreData>> = derived(
+export const schemas: Readable<SchemaStoreData> = derived(
   selectedDB,
   ($selectedDB, set) => {
-    if ($selectedDB) {
-      set(getSchema($selectedDB.name));
+    let unsubscribe: Unsubscriber;
+
+    if (!$selectedDB) {
+      set({
+        state: States.Done,
+        data: [],
+      });
     } else {
-      set(null);
+      const store = getSchemaStore($selectedDB.name);
+      unsubscribe = store.subscribe((schemaData) => {
+        set(schemaData);
+      });
     }
+
+    return () => {
+      unsubscribe?.();
+    };
   },
 );
