@@ -72,6 +72,17 @@ def get_records(
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
     """
+    if not order_by:
+        # Set default ordering if none was requested
+        if len(table.primary_key.columns) > 0:
+            # If there are primary keys, order by all primary keys
+            order_by = [{'field': col, 'direction': 'asc'}
+                        for col in table.primary_key.columns]
+        else:
+            # If there aren't primary keys, order by all columns
+            order_by = [{'field': col, 'direction': 'asc'}
+                        for col in table.columns]
+
     query = _get_query(table, limit, offset, order_by, filters)
     return _execute_query(query, engine)
 
