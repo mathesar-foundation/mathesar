@@ -12,14 +12,25 @@
     TextAvatar,
     Dropdown,
     Icon,
+    TextInput,
   } from '@mathesar-components';
 
-  import type { Database, Schema } from '@mathesar/App';
+  import type { Database, Schema } from '@mathesar/App.d';
 
   let interalSelectedDB: Database = get(selectedDB);
   $: schemas = getSchemaStore(interalSelectedDB.name);
 
   let isOpen;
+  let schemaFilter = '';
+
+  function getFilteredSchemas(schemaData: Schema[], filter: string): Schema[] {
+    return schemaData.filter(
+      (schema) => schema.name.toLowerCase().indexOf(filter.toLowerCase()) > -1,
+    );
+  }
+
+  let displayedSchemas: Schema[];
+  $: displayedSchemas = getFilteredSchemas($schemas.data, schemaFilter);
 
   function selectDB(db: Database) {
     interalSelectedDB = db;
@@ -46,9 +57,12 @@
   <svelte:fragment slot="content">
     <div class="schema-selector">
       <div class="databases">
+        <div class="section-header">
+          Databases ({$databases.data.length})
+        </div>
         <ul>
           {#each $databases.data as database (database.name)}
-            <li>
+            <li class="item" class:active={interalSelectedDB?.name === database.name}>
               <button type="button"
                 on:click={() => selectDB(database)}
                 on:mouseover={() => selectDB(database)}>
@@ -61,25 +75,31 @@
       </div>
     
       <div class="schemas">
+        <TextInput placeholder="Search schemas" bind:value={schemaFilter}/>
+        <div class="section-header">
+          Schemas ({displayedSchemas.length})
+        </div>
         <ul>
-          {#each $schemas.data as schema (schema.id)}
-            <li>
+          {#each displayedSchemas as schema (schema.id)}
+            <li class="item">
               <a href="/{interalSelectedDB.name}/{schema.id}/"
                   on:click={() => selectSchema(schema)}>
                 <Icon class="schema" data={faProjectDiagram} />
                 {schema.name}
               </a>
             </li>
+
+          {:else}
+            <div class="empty">No schema found</div>
           {/each}
-    
-          <li>
-            <a href="/{interalSelectedDB.name}/schemas/"
-                on:click={() => selectSchema(null)}>
-              <Icon class="manage" data={faCogs}/>
-              Manage schemas
-            </a>
-          </li>
         </ul>
+        <div class="item">
+          <a href="/{interalSelectedDB.name}/schemas/"
+              on:click={() => selectSchema(null)}>
+            <Icon class="manage" data={faCogs}/>
+            Manage schemas
+          </a>
+        </div>
       </div>
     </div>
   </svelte:fragment>
