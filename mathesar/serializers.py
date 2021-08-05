@@ -10,6 +10,26 @@ from mathesar.models import Table, Schema, DataFile, Database, Constraint
 SUPPORTED_URL_CONTENT_TYPES = {'text/csv', 'text/plain'}
 
 
+class ModelNameField(serializers.CharField):
+    """
+    De-serializes the request field as a string, but serializes the response field as
+    `model.name`. Required to support passing and returing a model name from the
+    endpoint, while also storing the model as a related field.
+    """
+    def to_representation(self, value):
+        return value.name
+
+
+class ArbitraryReturnCharField(serializers.CharField):
+    """
+    De-serializes the field as a string, but doesn't serialize the response field at
+    all, and just returns what it is passed. Requires the property-to-be-serialized to
+    always return a primitive data type.
+    """
+    def to_representation(self, value):
+        return value
+
+
 class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
     url = serializers.SerializerMethodField()
 
@@ -20,16 +40,6 @@ class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
     def get_url(self, obj):
         request = self.context['request']
         return request.build_absolute_uri(reverse('table-detail', kwargs={'pk': obj.pk}))
-
-
-class ModelNameField(serializers.CharField):
-    """
-    De-serializes the request field as a string, but serializes the response field as
-    `model.name`. Required to support passing and returing a model name from the
-    endpoint, while also storing the model as a related field.
-    """
-    def to_representation(self, value):
-        return value.name
 
 
 class SchemaSerializer(serializers.HyperlinkedModelSerializer):
@@ -52,6 +62,9 @@ class ColumnSerializer(SimpleColumnSerializer):
     nullable = serializers.BooleanField(default=True)
     primary_key = serializers.BooleanField(default=False)
     valid_target_types = serializers.ListField(read_only=True)
+    default = ArbitraryReturnCharField(
+        source='default_value', read_only=False, default=''
+    )
 
 
 class TableSerializer(serializers.ModelSerializer):

@@ -1,6 +1,6 @@
 from django.core.cache import cache
 import pytest
-from sqlalchemy import Column, Integer, String, MetaData
+from sqlalchemy import Column, Integer, String, MetaData, DefaultClause
 from sqlalchemy import Table as SATable
 
 from db.tables import get_oid_from_table
@@ -13,7 +13,7 @@ def column_test_table(patent_schema):
     column_list_in = [
         Column("mycolumn0", Integer, primary_key=True),
         Column("mycolumn1", Integer, nullable=False),
-        Column("mycolumn2", Integer),
+        Column("mycolumn2", Integer, server_default=DefaultClause("5")),
         Column("mycolumn3", String),
     ]
     db_table = SATable(
@@ -41,6 +41,7 @@ def test_column_list(column_test_table, client):
             'nullable': False,
             'primary_key': True,
             'valid_target_types': None,
+            'default': 1,
         },
         {
             'name': 'mycolumn1',
@@ -49,6 +50,7 @@ def test_column_list(column_test_table, client):
             'nullable': False,
             'primary_key': False,
             'valid_target_types': None,
+            'default': None,
         },
         {
             'name': 'mycolumn2',
@@ -57,6 +59,7 @@ def test_column_list(column_test_table, client):
             'nullable': True,
             'primary_key': False,
             'valid_target_types': None,
+            'default': 5,
         },
         {
             'name': 'mycolumn3',
@@ -71,6 +74,7 @@ def test_column_list(column_test_table, client):
                 'VARCHAR',
                 'mathesar_types.email',
             ],
+            'default': None,
         }
     ]
     assert response_data['results'] == expect_results
@@ -87,7 +91,8 @@ def test_column_list(column_test_table, client):
                 'index': 0,
                 'nullable': False,
                 'primary_key': True,
-                'valid_target_types': None
+                'valid_target_types': None,
+                'default': 1
             },
         ),
         (
@@ -98,7 +103,8 @@ def test_column_list(column_test_table, client):
                 'index': 2,
                 'nullable': True,
                 'primary_key': False,
-                'valid_target_types': None
+                'valid_target_types': None,
+                'default': 5
             },
         ),
     ]
