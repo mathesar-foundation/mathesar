@@ -4,7 +4,6 @@ from django.db import models
 from django.utils.functional import cached_property
 
 from mathesar import reflection
-from mathesar.fields import ColumnField
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
 from db import tables, records, schemas, columns
@@ -16,7 +15,6 @@ NAME_CACHE_INTERVAL = 60 * 5
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    pk_type = ColumnField()
 
     class Meta:
         abstract = True

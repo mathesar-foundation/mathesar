@@ -56,7 +56,7 @@ class TableSerializer(serializers.ModelSerializer):
     data_files = serializers.PrimaryKeyRelatedField(
         required=False, many=True, queryset=DataFile.objects.all()
     )
-
+    pk_type = serializers.CharField()
     class Meta:
         model = Table
         fields = ['id', 'name', 'schema', 'created_at', 'updated_at',
