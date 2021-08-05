@@ -42,9 +42,15 @@ class SchemaSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['id', 'name', 'tables', 'database', 'has_dependencies']
 
 
+class TypeOptionSerializer(serializers.Serializer):
+    precision = serializers.IntegerField(required=False)
+    scale = serializers.IntegerField(required=False)
+
+
 class SimpleColumnSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.CharField()
+    type_options = TypeOptionSerializer(required=False)
 
 
 class ColumnSerializer(SimpleColumnSerializer):
