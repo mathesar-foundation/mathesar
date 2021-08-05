@@ -1,8 +1,12 @@
 <script lang="ts">
   import { faTable } from '@fortawesome/free-solid-svg-icons';
-  import { Tree, TabContainer, Icon } from '@mathesar-components';
+  import {
+    Tree,
+    TabContainer,
+    Icon,
+  } from '@mathesar-components';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
-  import { schemas } from '@mathesar/stores/schemas';
+  import { selectedSchema } from '@mathesar/stores/schemas';
   import type { Schema } from '@mathesar/App.d';
   import {
     getAllTabsForDB,
@@ -60,21 +64,23 @@
   <title>Mathesar - {$activeTab?.label || 'Home'}</title>
 </svelte:head>
 
-<aside>
-  <nav>
-    <Tree data={$schemas.data || []} idKey="id" labelKey="name" childKey="tables"
-          search={true} {getLink}
-          bind:selectedItems={activeTable} on:nodeSelected={tableSelected}
-          let:entry>
-        <Icon data={faTable}/>
-        <span>{entry.name}</span>
+{#if $selectedSchema}
+  <aside>
+    <nav>
+      <Tree data={[$selectedSchema]} idKey="id" labelKey="name" childKey="tables"
+            search={true} {getLink} expandedItems={new Set([$selectedSchema.id])}
+            bind:selectedItems={activeTable} on:nodeSelected={tableSelected}
+            let:entry>
+          <Icon data={faTable}/>
+          <span>{entry.name}</span>
 
-        <svelte:fragment slot="empty">
-          No tables found
-        </svelte:fragment>
-    </Tree>
-  </nav>
-</aside>
+          <svelte:fragment slot="empty">
+            No tables found
+          </svelte:fragment>
+      </Tree>
+    </nav>
+  </aside>
+{/if}
 
 <section class="table-section">
   {#if $tabs?.length > 0}

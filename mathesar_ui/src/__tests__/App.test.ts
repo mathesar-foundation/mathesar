@@ -5,9 +5,11 @@ function addCommonDataScript() {
   const commonDataScript = document.createElement('script');
   commonDataScript.id = 'common-data';
   commonDataScript.type = 'application/json';
+  const selectedDB = { id: 1, name: 'mathesar_tables' };
   commonDataScript.textContent = JSON.stringify({
     schemas: [],
-    databases: [{ id: 1, name: 'mathesar_tables' }],
+    databases: [selectedDB],
+    selected_db: selectedDB.name,
   });
   document.body.append(commonDataScript);
 }
