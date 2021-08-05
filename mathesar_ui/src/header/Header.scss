@@ -1,4 +1,4 @@
-$top-pane-height: 50px;
+$top-pane-height: 46px;
 
 header {
   display: flex;
@@ -18,33 +18,13 @@ header {
 
   .image-wrapper {
     text-align: center;
-    width: 32px;
-    padding: 8px;
+    width: 30px;
+    height: 30px;
+    padding: 7px;
     background: #d1d3d6;
     border-radius: 3px;
     margin-left: auto;
     margin-right: auto;
-  }
-
-  button.dropdown.trigger.selector {
-    display: flex;
-    flex-shrink: 0;
-    padding: 0px 28px 0px 0px;
-    margin-left: 15px;
-    border-radius: 3px;
-
-    .text-avatar {
-      margin-right: 6px;
-    }
-
-    .separator {
-      padding: 0px 4px;
-      font-weight: 600;
-    }
-    svg.schema {
-      margin-right: 3px;
-      color: #647dde;
-    }
   }
 
   .right-options {
@@ -58,8 +38,4 @@ header {
       margin-right: 15px;
     }
   }
-}
-
-.dropdown.content.selector-content {
-
 }

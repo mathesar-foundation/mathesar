@@ -1,7 +1,6 @@
 <script lang="ts">
   import {
     faDragon,
-    faProjectDiagram,
     faUser,
   } from '@fortawesome/free-solid-svg-icons';
 
@@ -10,11 +9,11 @@
   import { newImport } from '@mathesar/stores/fileImports';
 
   import {
-    TextAvatar,
-    Dropdown,
     Icon,
     Button,
   } from '@mathesar-components';
+
+  import SchemaSelector from './schema-selector/SchemaSelector.svelte';
 </script>
 
 <header>
@@ -25,22 +24,7 @@
   </div>
 
   {#if $selectedDB}
-    <Dropdown triggerAppearance="plain" triggerClass="selector"
-              contentClass="selector-content">
-      <svelte:fragment slot="trigger">
-        <TextAvatar text={$selectedDB.name}/>
-        {$selectedDB.name}
-        <span class="separator">/</span>
-        {#if $selectedSchema}
-          <Icon class="schema" data={faProjectDiagram} />
-          {$selectedSchema?.name || ''}
-        {/if}
-      </svelte:fragment>
-
-      <svelte:fragment slot="content">
-        Dropdown
-      </svelte:fragment>
-    </Dropdown>
+    <SchemaSelector/>
   {/if}
 
   <div class="right-options">

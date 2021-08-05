@@ -1,0 +1,109 @@
+button.dropdown.trigger.selector {
+  display: flex;
+  flex-shrink: 0;
+  padding: 0px 28px 0px 0px;
+  margin-left: 15px;
+  border-radius: 3px;
+
+  .text-avatar {
+    margin-right: 6px;
+  }
+
+  .separator {
+    padding: 0px 4px;
+    font-weight: 600;
+    color: #a0a0a0;
+  }
+
+  svg.schema, svg.manage {
+    margin-right: 3px;
+    color: #647dde;
+  }
+}
+
+.dropdown.content.selector-content {
+  max-height: 270px;
+  height: 270px;
+
+  .schema-selector {
+    display: flex;
+    min-width: 500px;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+
+    .databases, .schemas {
+      flex-shrink: 0;
+      flex-grow: 0;
+      flex-basis: 250px;
+      padding: 10px 0px;
+
+      > ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+
+        >li {
+          >button, a {
+            display: flex;
+            align-items: center;
+            border: none;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+            cursor: pointer;
+            border-radius: 0px;
+            width: 100%;
+            text-align: left;
+            text-decoration: none;
+
+            &:hover {
+              background: #f3f4f4;
+            }
+          }
+        }
+      }
+    }
+
+    svg.schema, svg.manage {
+      margin-right: 8px;
+    }
+    svg.schema {
+      color: #647dde;
+    }
+    svg.manage {
+      color: #5b5b5d;
+    }
+
+    .databases {
+      .text-avatar {
+        height: 24px;
+        font-size: 0.7em;
+        margin-right: 6px;
+
+        > div {
+          width: 24px;
+        }
+      }
+
+      >ul li {
+        >button {
+          padding: 4px 12px;
+        }
+      }
+    }
+
+    .schemas {
+      border-left: 1px solid #efefef;
+
+      >ul li {
+        >a {
+          padding: 9px 12px;
+        }
+      }
+    }
+  }  
+}
