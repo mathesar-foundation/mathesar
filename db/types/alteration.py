@@ -66,7 +66,8 @@ def alter_column_type(
         column_name,
         target_type_str,
         engine,
-        friendly_names=True
+        friendly_names=True,
+        type_options={},
 ):
     _preparer = engine.dialect.identifier_preparer
     supported_types = get_supported_alter_column_types(
@@ -82,7 +83,7 @@ def alter_column_type(
         column = table.columns[column_name]
         prepared_table_name = _preparer.format_table(table)
         prepared_column_name = _preparer.format_column(column)
-        prepared_type_name = target_type().compile(dialect=engine.dialect)
+        prepared_type_name = target_type(**type_options).compile(dialect=engine.dialect)
         cast_function_name = get_cast_function_name(prepared_type_name)
         alter_stmt = f"""
         ALTER TABLE {prepared_table_name}
@@ -216,7 +217,8 @@ def assemble_function_creation_sql(argument_type, target_type, function_body):
 
 def get_cast_function_name(target_type):
     unqualified_type_name = target_type.split('.')[-1].lower()
-    bare_function_name = f"cast_to_{unqualified_type_name}"
+    bare_type_name = unqualified_type_name.split('(')[0]
+    bare_function_name = f"cast_to_{bare_type_name}"
     return f"{base.get_qualified_name(bare_function_name)}"
 
 
