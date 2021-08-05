@@ -124,6 +124,23 @@ class MathesarColumn(Column):
                 self.engine
             )
 
+    @property
+    def plain_type(self):
+        """
+        Get the type name without arguments
+        """
+        return self.type.__class__().compile(self.engine.dialect)
+
+    @property
+    def type_options(self):
+        full_type_options = {
+            "precision": getattr(self.type, "precision", None),
+            "scale": getattr(self.type, "scale", None),
+        }
+        _type_options = {k: v for k, v in full_type_options.items() if v is not None}
+        return _type_options if _type_options else None
+
+
 
 def get_default_mathesar_column_list():
     return [

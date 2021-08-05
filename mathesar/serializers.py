@@ -49,7 +49,7 @@ class TypeOptionSerializer(serializers.Serializer):
 
 class SimpleColumnSerializer(serializers.Serializer):
     name = serializers.CharField()
-    type = serializers.CharField()
+    type = serializers.CharField(source='plain_type')
     type_options = TypeOptionSerializer(required=False)
 
 
