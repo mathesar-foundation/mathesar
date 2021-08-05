@@ -6,7 +6,7 @@ from django.utils.functional import cached_property
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
-from db import tables, records, schemas, columns
+from db import tables, records, schemas, columns, constraints
 from db.types.alteration import get_supported_alter_column_types
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -144,6 +144,10 @@ class Table(DatabaseObject):
         return self._enriched_column_sa_table.columns
 
     @property
+    def sa_constraints(self):
+        return self._sa_table.constraints
+
+    @property
     def sa_column_names(self):
         return self.sa_columns.keys()
 
@@ -177,6 +181,11 @@ class Table(DatabaseObject):
             self.schema._sa_engine,
             self.oid,
             column_index,
+        )
+
+    def get_preview(self, column_definitions):
+        return tables.get_column_cast_records(
+            self.schema._sa_engine, self._sa_table, column_definitions
         )
 
     @property
@@ -216,17 +225,68 @@ class Table(DatabaseObject):
     def delete_record(self, id_value):
         return records.delete_record(self._sa_table, self.schema._sa_engine, id_value)
 
+    def add_constraint(self, constraint_type, columns, name=None):
+        if constraint_type != constraints.ConstraintType.UNIQUE.value:
+            raise ValueError('Only creating unique constraints is currently supported.')
+        constraints.create_unique_constraint(
+            self.name,
+            self._sa_table.schema,
+            self.schema._sa_engine,
+            columns,
+            name
+        )
+        try:
+            # Clearing cache so that new constraint shows up.
+            del self._sa_table
+        except AttributeError:
+            pass
+        engine = self.schema.database._sa_engine
+        if not name:
+            name = constraints.get_constraint_name(constraint_type, self.name, columns[0])
+        constraint_oid = constraints.get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
+        return Constraint.objects.create(oid=constraint_oid, table=self)
+
+
+class Constraint(DatabaseObject):
+    table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='constraints')
+
+    @property
+    def _sa_constraint(self):
+        engine = self.table.schema.database._sa_engine
+        return constraints.get_constraint_from_oid(self.oid, engine)
+
+    @property
+    def name(self):
+        return self._sa_constraint.name
+
+    @property
+    def type(self):
+        return constraints.get_constraint_type_from_class(self._sa_constraint)
+
+    @cached_property
+    def columns(self):
+        return [column.name for column in self._sa_constraint.columns]
+
+    def drop(self):
+        constraints.drop_constraint(
+            self.table._sa_table.name,
+            self.table._sa_table.schema,
+            self.table.schema._sa_engine,
+            self.name
+        )
+        self.delete()
+
 
 class DataFile(BaseModel):
-    created_from_choices = models.TextChoices("created_from", "FILE PASTE")
+    created_from_choices = models.TextChoices("created_from", "FILE PASTE URL")
 
-    file = models.FileField(
-        upload_to=model_utils.user_directory_path,
-    )
+    file = models.FileField(upload_to=model_utils.user_directory_path)
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     created_from = models.CharField(max_length=128, choices=created_from_choices.choices)
     table_imported_to = models.ForeignKey(Table, related_name="data_files", blank=True,
                                           null=True, on_delete=models.SET_NULL)
+
+    base_name = models.CharField(max_length=100)
     header = models.BooleanField(default=True)
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)
