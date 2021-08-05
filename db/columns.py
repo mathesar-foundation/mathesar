@@ -253,35 +253,8 @@ def drop_column(table_oid, column_index, engine):
 
 def get_column_default(table_oid, column_index, engine):
     table = tables.reflect_table_from_oid(table_oid, engine)
-    column_name = table.columns[column_index].name
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
-        pg_attrdef = Table("pg_attrdef", MetaData(), autoload_with=engine)
-
-    sel = (
-        select(
-            text("pg_get_expr(:adbin, :adrelid, true)")
-            .bindparams(
-                adbin=str(pg_attrdef.c.adbin),
-                adrelid=str(pg_attrdef.c.adrelid)
-            )
-        )
-        .select_from(pg_attribute.join(
-            pg_attrdef,
-            pg_attribute.c.attrelid == pg_attrdef.c.adrelid,  # Match table OID
-            pg_attribute.c.attnum == pg_attrdef.c.adnum,  # Match column number
-        ))
-        .where(and_(
-            not_(pg_attribute.c.attisdropped),
-            pg_attribute.c.attnum > 0,
-            pg_attribute.c.attrelid == table_oid,
-            pg_attribute.c.attname == column_name
-        ))
-    )
-    with engine.begin() as conn:
-        result = conn.execute(sel).fetchall()
-    return result
+    column = table.columns[column_index]
+    return column.server_default.arg.text
 
 
 def create_column_default(table_oid, column_index, default, engine):
