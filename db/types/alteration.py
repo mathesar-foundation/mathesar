@@ -94,7 +94,7 @@ def alter_column_type(
         conn.execute(DDL(alter_stmt))
 
 
-def get_column_cast_expression(column, target_type_str, engine):
+def get_column_cast_expression(column, target_type_str, engine, type_options={}):
     """
     Given a Column, we get the correct SQL selectable for selecting the
     results of a Mathesar cast_to_<type> function on that column, where
@@ -116,6 +116,8 @@ def get_column_cast_expression(column, target_type_str, engine):
             quoted_name(qualified_function_name, False),
             column
         )
+    if type_options:
+        cast_expr = cast_expr.cast(target_type(**type_options))
     return cast_expr
 
 
