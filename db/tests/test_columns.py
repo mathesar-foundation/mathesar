@@ -456,6 +456,22 @@ def test_drop_column_correct_column(engine_with_schema):
     assert target_column_name not in altered_table.columns
 
 
+def test_get_column_default(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "get_column_default_table"
+    column_name = "get_column_default_column"
+    expt_default = "5"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(column_name, Integer, server_default=expt_default),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    default = columns.get_column_default(table_oid, 0, engine)
+    assert expt_default == default
+
+
 def get_mathesar_column_init_args():
     init_code = columns.MathesarColumn.__init__.__code__
     return init_code.co_varnames[1:init_code.co_argcount]
