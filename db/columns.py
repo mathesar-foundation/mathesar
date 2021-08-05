@@ -4,7 +4,7 @@ from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from sqlalchemy import (
     Column, Integer, ForeignKey, Table, MetaData, and_, select, inspect, text,
-    DefaultClause
+    DefaultClause, func
 )
 from db import constants, tables
 from db.types import alteration
@@ -165,7 +165,18 @@ def get_column_index_from_name(table_oid, column_name, engine):
     )
     with engine.begin() as conn:
         result = conn.execute(sel).fetchone()[0]
-    return result - 1
+
+    sel = (
+        select(func.count())
+        .where(and_(
+            pg_attribute.c.attisdropped == True,
+            pg_attribute.c.attnum < result,
+        ))
+    )
+    with engine.begin() as conn:
+        dropped_count = conn.execute(sel).fetchone()[0]
+
+    return result - 1 - dropped_count
 
 
 def create_column(engine, table_oid, column_data):
