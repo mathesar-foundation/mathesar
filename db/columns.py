@@ -131,10 +131,7 @@ class MathesarColumn(Column):
 
     @property
     def default_value(self):
-        table_oid = tables.get_oid_from_table(
-            self.table.name, self.table.schema, self.engine
-        )
-        return get_column_default(table_oid, self.column_index, self.engine)
+        return _decode_server_default(self.server_default, self.engine)
 
 
 def get_default_mathesar_column_list():
@@ -284,8 +281,12 @@ def drop_column(table_oid, column_index, engine):
 def get_column_default(table_oid, column_index, engine):
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
-    if column.server_default is not None:
-        cast_sql_text = column.server_default.arg.text
+    return _decode_server_default(column.server_default, engine)
+
+
+def _decode_server_default(server_default, engine):
+    if server_default is not None:
+        cast_sql_text = server_default.arg.text
         with engine.begin() as conn:
             # Defaults are returned as text with SQL casts appended
             # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
@@ -314,3 +315,5 @@ def update_column_default(table_oid, column_index, default, engine):
         op.alter_column(
             table.name, column.name, schema=table.schema, server_default=default_clause
         )
+    return column
+    return tables.reflect_table_from_oid(table_oid, engine).columns[column_index]
