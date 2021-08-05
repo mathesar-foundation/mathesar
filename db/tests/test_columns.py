@@ -469,7 +469,59 @@ def test_get_column_default(engine_with_schema):
     table.create()
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     default = columns.get_column_default(table_oid, 0, engine)
-    assert expt_default == default
+    assert default == expt_default
+
+
+def test_create_column_default(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "create_column_default_table"
+    column_name = "create_column_default_column"
+    expt_default = "5"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(column_name, Integer)
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    columns.create_column_default(table_oid, 0, expt_default, engine)
+    default = columns.get_column_default(table_oid, 0, engine)
+    assert default == expt_default
+
+
+def test_update_column_default(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "update_column_default_table"
+    column_name = "update_column_default_column"
+    starting_default = "4"
+    expt_default = "5"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(column_name, Integer, server_default=starting_default)
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    columns.update_column_default(table_oid, 0, expt_default, engine)
+    default = columns.get_column_default(table_oid, 0, engine)
+    assert default != starting_default
+    assert default == expt_default
+
+
+def test_delete_column_default(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "delete_column_default_table"
+    column_name = "delete_column_default_column"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(column_name, Integer, server_default="5")
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    columns.delete_column_default(table_oid, 0, engine)
+    default = columns.get_column_default(table_oid, 0, engine)
+    assert default is None
 
 
 def get_mathesar_column_init_args():

@@ -254,7 +254,10 @@ def drop_column(table_oid, column_index, engine):
 def get_column_default(table_oid, column_index, engine):
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
-    return column.server_default.arg.text
+    if column.server_default is not None:
+        return column.server_default.arg.text
+    else:
+        return None
 
 
 def create_column_default(table_oid, column_index, default, engine):
@@ -269,7 +272,7 @@ def delete_column_default(table_oid, column_index, engine):
 def update_column_default(table_oid, column_index, default, engine):
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
-    default_clause = DefaultClause(default)
+    default_clause = DefaultClause(default) if default is not None else default
     with engine.begin() as conn:
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)
