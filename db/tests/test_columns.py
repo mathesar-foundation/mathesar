@@ -99,6 +99,12 @@ def test_MC_inits_with_non_empty_foreign_keys(column_builder):
     assert len(fk_names) == 1 and fk_names[0] == fk_target
 
 
+@pytest.mark.parametrize("column_builder", column_builder_list)
+def test_MC_inits_with_server_default_none(column_builder):
+    col = column_builder("some_col", String)
+    assert col.server_default is None
+
+
 def test_MC_is_default_when_true():
     for default_col in columns.get_default_mathesar_column_list():
         assert default_col.is_default

@@ -16,6 +16,7 @@ NAME = "name"
 NULLABLE = "nullable"
 PRIMARY_KEY = "primary_key"
 TYPE = "sa_type"
+DEFAULT = "default"
 
 ID_TYPE = Integer
 DEFAULT_COLUMNS = {
@@ -38,6 +39,7 @@ class MathesarColumn(Column):
             foreign_keys=set(),
             primary_key=False,
             nullable=True,
+            server_default=None,
     ):
         """
         Construct a new ``MathesarColumn`` object.
@@ -57,6 +59,7 @@ class MathesarColumn(Column):
             type_=sa_type,
             primary_key=primary_key,
             nullable=nullable,
+            server_default=server_default
         )
 
     @classmethod
@@ -73,6 +76,7 @@ class MathesarColumn(Column):
             foreign_keys=fkeys,
             primary_key=column.primary_key,
             nullable=column.nullable,
+            server_default=column.server_default
         )
 
     @property
@@ -125,6 +129,13 @@ class MathesarColumn(Column):
                 self.engine
             )
 
+    @property
+    def default_value(self):
+        table_oid = tables.get_oid_from_table(
+            self.table.name, self.table.schema, self.engine
+        )
+        return get_column_default(table_oid, self.column_index, self.engine)
+
 
 def get_default_mathesar_column_list():
     return [
@@ -158,8 +169,9 @@ def get_column_index_from_name(table_oid, column_name, engine):
 
 
 def create_column(engine, table_oid, column_data):
-    column_type = column_data.get(TYPE, column_data["type"])
     column_nullable = column_data.get(NULLABLE, True)
+
+    column_type = column_data.get(TYPE, column_data["type"])
     supported_types = alteration.get_supported_alter_column_types(
         engine, friendly_names=False,
     )
@@ -167,10 +179,16 @@ def create_column(engine, table_oid, column_data):
     if sa_type is None:
         logger.warning("Requested type not supported. falling back to VARCHAR")
         sa_type = supported_types["VARCHAR"]
-    table = tables.reflect_table_from_oid(table_oid, engine)
+
+    default = column_data.get(DEFAULT, None)
+    default_clause = DefaultClause(default) if default is not None else default
+
     column = MathesarColumn(
         column_data[NAME], sa_type, nullable=column_nullable,
+        server_default=default_clause
     )
+
+    table = tables.reflect_table_from_oid(table_oid, engine)
     with engine.begin() as conn:
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)
