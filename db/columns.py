@@ -258,9 +258,9 @@ def get_column_default(table_oid, column_index, engine):
         cast_sql_text = column.server_default.arg.text
         with engine.begin() as conn:
             # Defaults are returned as text with SQL casts appended
-            # Ex: 'test default string'::character varying or '2020-01-01'::date
+            # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
             # Here, we execute the cast to get the proper python value
-            return conn.execute(text(f"SELECT {cast_sql_text}")).first()[0]
+            return conn.execute(select(text(cast_sql_text))).first()[0]
     else:
         return None
 

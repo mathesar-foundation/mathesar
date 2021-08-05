@@ -458,6 +458,12 @@ def test_drop_column_correct_column(engine_with_schema):
     assert target_column_name not in altered_table.columns
 
 
+def _get_default(engine, table):
+    with engine.begin() as conn:
+        conn.execute(table.insert())
+        return conn.execute(select(table)).fetchall()[0][0]
+
+
 column_test_dict = {
     Integer: {"start": "0", "set": "5", "expt": 5},
     String: {"start": "default", "set": "test", "expt": "test"},
@@ -480,7 +486,10 @@ def test_get_column_default(engine_with_schema, col_type):
     table.create()
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     default = columns.get_column_default(table_oid, 0, engine)
+    created_default = _get_default(engine, table)
+
     assert default == expt_default
+    assert default == created_default
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
@@ -498,11 +507,9 @@ def test_create_column_default(engine_with_schema, col_type):
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     columns.create_column_default(table_oid, 0, set_default, engine)
     default = columns.get_column_default(table_oid, 0, engine)
-    assert default == expt_default
+    created_default = _get_default(engine, table)
 
-    with engine.begin() as conn:
-        conn.execute(table.insert())
-        created_default = conn.execute(select(table)).fetchall()[0][0]
+    assert default == expt_default
     assert created_default == expt_default
 
 
@@ -521,12 +528,10 @@ def test_update_column_default(engine_with_schema, col_type):
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     columns.update_column_default(table_oid, 0, set_default, engine)
     default = columns.get_column_default(table_oid, 0, engine)
+    created_default = _get_default(engine, table)
+
     assert default != start_default
     assert default == expt_default
-
-    with engine.begin() as conn:
-        conn.execute(table.insert())
-        created_default = conn.execute(select(table)).fetchall()[0][0]
     assert created_default == expt_default
 
 
@@ -545,7 +550,10 @@ def test_delete_column_default(engine_with_schema, col_type):
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     columns.delete_column_default(table_oid, 0, engine)
     default = columns.get_column_default(table_oid, 0, engine)
+    created_default = _get_default(engine, table)
+
     assert default is None
+    assert created_default is None
 
 
 def get_mathesar_column_init_args():
