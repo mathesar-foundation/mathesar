@@ -451,7 +451,7 @@ def test_drop_column_correct_column(engine_with_schema):
     )
     table.create()
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    columns.drop_column(engine, table_oid, 0)
+    columns.drop_column(table_oid, 0, engine)
     altered_table = tables.reflect_table_from_oid(table_oid, engine)
     assert len(altered_table.columns) == 1
     assert nontarget_column_name in altered_table.columns
@@ -459,30 +459,10 @@ def test_drop_column_correct_column(engine_with_schema):
 
 
 column_test_dict = {
-    Integer: {
-        "start": "0",
-        "set": "5",
-        "expt": "5",
-        "actual": 5
-    },
-    String: {
-        "start": "default",
-        "set": "test",
-        "expt": "'test'::character varying",
-        "actual": "test"
-    },
-    Boolean: {
-        "start": "false",
-        "set": "true",
-        "expt": "true",
-        "actual": True
-    },
-    Date: {
-        "start": "2019-01-01",
-        "set": "2020-01-01",
-        "expt": "'2020-01-01'::date",
-        "actual": date(2020, 1, 1)
-    }
+    Integer: {"start": "0", "set": "5", "expt": 5},
+    String: {"start": "default", "set": "test", "expt": "test"},
+    Boolean: {"start": "false", "set": "true", "expt": True},
+    Date: {"start": "2019-01-01", "set": "2020-01-01", "expt": date(2020, 1, 1)}
 }
 
 
@@ -491,7 +471,7 @@ def test_get_column_default(engine_with_schema, col_type):
     engine, schema = engine_with_schema
     table_name = "get_column_default_table"
     column_name = "get_column_default_column"
-    _, set_default, expt_default, _ = column_test_dict[col_type].values()
+    _, set_default, expt_default = column_test_dict[col_type].values()
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -508,7 +488,7 @@ def test_create_column_default(engine_with_schema, col_type):
     engine, schema = engine_with_schema
     table_name = "create_column_default_table"
     column_name = "create_column_default_column"
-    _, set_default, expt_default, actual_default = column_test_dict[col_type].values()
+    _, set_default, expt_default = column_test_dict[col_type].values()
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -523,7 +503,7 @@ def test_create_column_default(engine_with_schema, col_type):
     with engine.begin() as conn:
         conn.execute(table.insert())
         created_default = conn.execute(select(table)).fetchall()[0][0]
-    assert created_default == actual_default
+    assert created_default == expt_default
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
@@ -531,8 +511,7 @@ def test_update_column_default(engine_with_schema, col_type):
     engine, schema = engine_with_schema
     table_name = "update_column_default_table"
     column_name = "update_column_default_column"
-    start_default, set_default, expt_default, actual_default = \
-        column_test_dict[col_type].values()
+    start_default, set_default, expt_default = column_test_dict[col_type].values()
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -548,7 +527,7 @@ def test_update_column_default(engine_with_schema, col_type):
     with engine.begin() as conn:
         conn.execute(table.insert())
         created_default = conn.execute(select(table)).fetchall()[0][0]
-    assert created_default == actual_default
+    assert created_default == expt_default
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
@@ -556,7 +535,7 @@ def test_delete_column_default(engine_with_schema, col_type):
     engine, schema = engine_with_schema
     table_name = "delete_column_default_table"
     column_name = "delete_column_default_column"
-    _, set_default, _, _ = column_test_dict[col_type].values()
+    _, set_default, _ = column_test_dict[col_type].values()
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),

@@ -3,8 +3,8 @@ import warnings
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from sqlalchemy import (
-    Column, Integer, ForeignKey, Table, MetaData, and_, not_, select, inspect,
-    DefaultClause, text
+    Column, Integer, ForeignKey, Table, MetaData, and_, select, inspect, text,
+    DefaultClause
 )
 from db import constants, tables
 from db.types import alteration
@@ -255,7 +255,12 @@ def get_column_default(table_oid, column_index, engine):
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
     if column.server_default is not None:
-        return column.server_default.arg.text
+        cast_sql_text = column.server_default.arg.text
+        with engine.begin() as conn:
+            # Defaults are returned as text with SQL casts appended
+            # Ex: 'test default string'::character varying or '2020-01-01'::date
+            # Here, we execute the cast to get the proper python value
+            return conn.execute(text(f"SELECT {cast_sql_text}")).first()[0]
     else:
         return None
 
