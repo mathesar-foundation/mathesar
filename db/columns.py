@@ -221,6 +221,7 @@ def alter_column(
         TYPE: retype_column,
         "type": retype_column,
         NULLABLE: change_column_nullable,
+        DEFAULT: update_column_default
     }
     return attribute_alter_map[column_def_key](
         table_oid, column_index, column_definition_dict[column_def_key], engine,

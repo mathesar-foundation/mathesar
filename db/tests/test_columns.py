@@ -210,6 +210,7 @@ def test_MC_column_index_multiple(engine_with_schema):
         ({"name": "blah"}, "rename_column"),
         ({"sa_type": "blah"}, "retype_column"),
         ({"nullable": True}, "change_column_nullable"),
+        ({"default": 1}, "update_column_default"),
     ]
 )
 def test_alter_column_chooses_wisely(column_dict, func_name):
