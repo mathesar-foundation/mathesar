@@ -1,9 +1,11 @@
 import re
+from datetime import date
 from unittest.mock import patch
 from psycopg2.errors import NotNullViolation
 import pytest
 from sqlalchemy import (
-    String, Integer, ForeignKey, Column, select, Table, MetaData, create_engine
+    String, Integer, Boolean, Date, ForeignKey, Column, select, Table, MetaData,
+    create_engine
 )
 from sqlalchemy.exc import IntegrityError
 from db import columns, tables, constants
@@ -456,15 +458,44 @@ def test_drop_column_correct_column(engine_with_schema):
     assert target_column_name not in altered_table.columns
 
 
-def test_get_column_default(engine_with_schema):
+column_test_dict = {
+    Integer: {
+        "start": "0",
+        "set": "5",
+        "expt": "5",
+        "actual": 5
+    },
+    String: {
+        "start": "default",
+        "set": "test",
+        "expt": "'test'::character varying",
+        "actual": "test"
+    },
+    Boolean: {
+        "start": "false",
+        "set": "true",
+        "expt": "true",
+        "actual": True
+    },
+    Date: {
+        "start": "2019-01-01",
+        "set": "2020-01-01",
+        "expt": "'2020-01-01'::date",
+        "actual": date(2020, 1, 1)
+    }
+}
+
+
+@pytest.mark.parametrize("col_type", column_test_dict.keys())
+def test_get_column_default(engine_with_schema, col_type):
     engine, schema = engine_with_schema
     table_name = "get_column_default_table"
     column_name = "get_column_default_column"
-    expt_default = "5"
+    _, set_default, expt_default, _ = column_test_dict[col_type].values()
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(column_name, Integer, server_default=expt_default),
+        Column(column_name, col_type, server_default=set_default),
     )
     table.create()
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
@@ -472,50 +503,64 @@ def test_get_column_default(engine_with_schema):
     assert default == expt_default
 
 
-def test_create_column_default(engine_with_schema):
+@pytest.mark.parametrize("col_type", column_test_dict.keys())
+def test_create_column_default(engine_with_schema, col_type):
     engine, schema = engine_with_schema
     table_name = "create_column_default_table"
     column_name = "create_column_default_column"
-    expt_default = "5"
+    _, set_default, expt_default, actual_default = column_test_dict[col_type].values()
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(column_name, Integer)
+        Column(column_name, col_type)
     )
     table.create()
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    columns.create_column_default(table_oid, 0, expt_default, engine)
+    columns.create_column_default(table_oid, 0, set_default, engine)
     default = columns.get_column_default(table_oid, 0, engine)
     assert default == expt_default
 
+    with engine.begin() as conn:
+        conn.execute(table.insert())
+        created_default = conn.execute(select(table)).fetchall()[0][0]
+    assert created_default == actual_default
 
-def test_update_column_default(engine_with_schema):
+
+@pytest.mark.parametrize("col_type", column_test_dict.keys())
+def test_update_column_default(engine_with_schema, col_type):
     engine, schema = engine_with_schema
     table_name = "update_column_default_table"
     column_name = "update_column_default_column"
-    starting_default = "4"
-    expt_default = "5"
+    start_default, set_default, expt_default, actual_default = \
+        column_test_dict[col_type].values()
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(column_name, Integer, server_default=starting_default)
+        Column(column_name, col_type, server_default=start_default)
     )
     table.create()
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    columns.update_column_default(table_oid, 0, expt_default, engine)
+    columns.update_column_default(table_oid, 0, set_default, engine)
     default = columns.get_column_default(table_oid, 0, engine)
-    assert default != starting_default
+    assert default != start_default
     assert default == expt_default
 
+    with engine.begin() as conn:
+        conn.execute(table.insert())
+        created_default = conn.execute(select(table)).fetchall()[0][0]
+    assert created_default == actual_default
 
-def test_delete_column_default(engine_with_schema):
+
+@pytest.mark.parametrize("col_type", column_test_dict.keys())
+def test_delete_column_default(engine_with_schema, col_type):
     engine, schema = engine_with_schema
     table_name = "delete_column_default_table"
     column_name = "delete_column_default_column"
+    _, set_default, _, _ = column_test_dict[col_type].values()
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(column_name, Integer, server_default="5")
+        Column(column_name, col_type, server_default=set_default)
     )
     table.create()
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
