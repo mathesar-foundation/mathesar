@@ -1,3 +1,4 @@
+import json
 from datetime import date
 
 import pytest
@@ -211,6 +212,17 @@ def test_column_update_default(column_test_table, client):
     data = {"default": expt_default}
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data,
+    )
+    assert response.json()["default"] == expt_default
+
+
+def test_column_update_delete_default(column_test_table, client):
+    cache.clear()
+    expt_default = None
+    data = json.dumps({"default": None})
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/2/", data=data,
+        content_type="application/json"
     )
     assert response.json()["default"] == expt_default
 

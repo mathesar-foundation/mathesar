@@ -68,7 +68,9 @@ class ColumnSerializer(SimpleColumnSerializer):
     nullable = serializers.BooleanField(default=True)
     primary_key = serializers.BooleanField(default=False)
     valid_target_types = serializers.ListField(read_only=True)
-    default = TextualSQLField(source='default_value', read_only=False, default='')
+    default = TextualSQLField(
+        source='default_value', read_only=False, default='', allow_null=True
+    )
 
 
 class TableSerializer(serializers.ModelSerializer):
