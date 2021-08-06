@@ -174,6 +174,7 @@ def get_column_index_from_name(table_oid, column_name, engine):
 
 def create_column(engine, table_oid, column_data):
     column_type = column_data.get(TYPE, column_data["type"])
+    column_type_options = column_data.get("type_options", {})
     column_nullable = column_data.get(NULLABLE, True)
     supported_types = alteration.get_supported_alter_column_types(
         engine, friendly_names=False,
@@ -182,9 +183,10 @@ def create_column(engine, table_oid, column_data):
     if sa_type is None:
         logger.warning("Requested type not supported. falling back to VARCHAR")
         sa_type = supported_types["VARCHAR"]
+        column_type_options = {}
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = MathesarColumn(
-        column_data[NAME], sa_type, nullable=column_nullable,
+        column_data[NAME], sa_type(**column_type_options), nullable=column_nullable,
     )
     with engine.begin() as conn:
         ctx = MigrationContext.configure(conn)
