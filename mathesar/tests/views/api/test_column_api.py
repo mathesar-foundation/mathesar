@@ -1,5 +1,3 @@
-import json
-
 import pytest
 from django.core.cache import cache
 from sqlalchemy import Column, Integer, String, MetaData, DefaultClause
