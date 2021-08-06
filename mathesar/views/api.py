@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from django_filters import rest_framework as filters
 from psycopg2.errors import (
     DuplicateColumn, DuplicateTable, UndefinedFunction, UniqueViolation, UndefinedObject,
-    InvalidTextRepresentation, CheckViolation
+    InvalidTextRepresentation, CheckViolation, InvalidParameterValue
 )
 from sqlalchemy.exc import ProgrammingError, DataError, IntegrityError
 from sqlalchemy_filters.exceptions import (
@@ -229,6 +229,19 @@ class ColumnViewSet(viewsets.ViewSet):
                 )
             else:
                 raise APIException(e)
+        except TypeError:
+            raise ValidationError("Unknown type_option passed")
+        except DataError as e:
+            if (
+                    type(e.orig) == InvalidParameterValue
+                    or type(e.orig) == InvalidTextRepresentation
+            ):
+                raise ValidationError(
+                    f'parameter dict {request.data["type_options"]} is'
+                    f' invalid for type {request.data["type"]}'
+                )
+            else:
+                raise APIException(e)
 
         out_serializer = ColumnSerializer(column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
@@ -245,6 +258,21 @@ class ColumnViewSet(viewsets.ViewSet):
                 raise ValidationError
         except IndexError:
             raise NotFound
+        except TypeError:
+            raise ValidationError("Unknown type_option passed")
+        except DataError as e:
+            if (
+                    type(e.orig) == InvalidParameterValue
+                    or type(e.orig) == InvalidTextRepresentation
+            ):
+                raise ValidationError(
+                    f'parameter dict {request.data["type_options"]} is'
+                    f' invalid for type {request.data["type"]}'
+                )
+            else:
+                raise APIException(e)
+        except Exception as e:
+            raise APIException(e)
         serializer = ColumnSerializer(column)
         return Response(serializer.data)
 

@@ -477,7 +477,7 @@ def test_create_column_bad_options(engine_with_schema):
         "type_options": {"precision": 5, "scale": 3},
     }
     with pytest.raises(TypeError):
-        created_col = columns.create_column(engine, table_oid, column_data)
+        columns.create_column(engine, table_oid, column_data)
 
 
 nullable_changes = [(True, True), (False, False), (True, False), (False, True)]
