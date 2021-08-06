@@ -307,6 +307,7 @@ def delete_column_default(table_oid, column_index, engine):
 
 
 def update_column_default(table_oid, column_index, default, engine):
+    # Note: default should be textual SQL that produces the desired default
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
     default_clause = DefaultClause(default) if default is not None else default

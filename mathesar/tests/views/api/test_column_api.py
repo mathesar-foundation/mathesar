@@ -1,6 +1,8 @@
+from datetime import date
+
 import pytest
 from django.core.cache import cache
-from sqlalchemy import Column, Integer, String, MetaData, DefaultClause
+from sqlalchemy import Column, Integer, String, MetaData, DefaultClause, select
 from sqlalchemy import Table as SATable
 
 from db.tables import get_oid_from_table
@@ -148,6 +150,35 @@ def test_column_create(column_test_table, client):
     assert actual_new_col["name"] == name
     assert actual_new_col["type"] == type_
     assert actual_new_col["default"] is None
+
+
+def test_column_create_default(column_test_table, client, engine):
+    name = "anewcolumn"
+    type_ = "DATE"
+    default = date(2020, 1, 1)
+    expt_default = "2020-01-01"
+    cache.clear()
+    data = {
+        "name": name, "type": type_, "default": default,
+    }
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/", data=data
+    )
+    assert response.status_code == 201
+
+    # Ensure the correct serialized date is returned by the API
+    new_columns_response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    actual_new_col = new_columns_response.json()["results"][-1]
+    assert actual_new_col["default"] == expt_default
+
+    # Ensure the correct date value is generated when inserting a new record
+    sa_table = column_test_table._sa_table
+    with engine.begin() as conn:
+        conn.execute(sa_table.insert((1, 1, 1, 'str')))
+        created_default = conn.execute(select(sa_table)).fetchall()[0][-1]
+    assert created_default == default
 
 
 def test_column_create_duplicate(column_test_table, client):

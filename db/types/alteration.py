@@ -10,6 +10,7 @@ NAME = "name"
 NUMERIC = "numeric"
 STRING = "string"
 VARCHAR = "varchar"
+DATE = "date"
 
 
 class UnsupportedTypeException(Exception):
@@ -32,6 +33,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         INTERVAL: dialect_types.get(INTERVAL),
         NUMERIC: dialect_types.get(NUMERIC),
         STRING: dialect_types.get(NAME),
+        DATE: dialect_types.get(DATE),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.QUALIFIED_EMAIL)
     }
