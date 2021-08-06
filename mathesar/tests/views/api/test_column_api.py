@@ -1,5 +1,5 @@
 import json
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 from django.core.cache import cache
@@ -153,18 +153,24 @@ def test_column_create(column_test_table, client):
     assert actual_new_col["default"] is None
 
 
-def test_column_create_default(column_test_table, client, engine):
-    name = "anewcolumn"
-    type_ = "DATE"
-    default = date(2020, 1, 1)
-    expt_default = "2020-01-01"
+create_default_test_list = [
+    ("BOOLEAN", True, True),
+    ("INTERVAL", timedelta(minutes=42), "2520.0"),
+    ("NUMERIC", 42, 42.0),
+    ("STRING", "test_string", "test_string"),
+    ("DATE", date(2020, 1, 1), "2020-01-01"),
+    ("EMAIL", "test@test.com", "test@test.com"),
+]
+
+
+@pytest.mark.parametrize("type_,default,expt_default", create_default_test_list)
+def test_column_create_default(
+    column_test_table, type_, default, expt_default, client, engine
+):
     cache.clear()
-    data = {
-        "name": name, "type": type_, "default": default,
-    }
-    response = client.post(
-        f"/api/v0/tables/{column_test_table.id}/columns/", data=data
-    )
+    name = "anewcolumn"
+    data = {"name": name, "type": type_, "default": default}
+    response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", data)
     assert response.status_code == 201
 
     # Ensure the correct serialized date is returned by the API
