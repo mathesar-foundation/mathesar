@@ -432,6 +432,54 @@ def test_create_column(engine_with_schema):
     assert created_col.type.compile(engine.dialect) == "BOOLEAN"
 
 
+def test_create_column_options(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atableone"
+    target_type = "NUMERIC"
+    initial_column_name = "original_column"
+    new_column_name = "added_column"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(initial_column_name, Integer),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    column_data = {
+        "name": new_column_name,
+        "type": target_type,
+        "type_options": {"precision": 5, "scale": 3},
+    }
+    created_col = columns.create_column(engine, table_oid, column_data)
+    altered_table = tables.reflect_table_from_oid(table_oid, engine)
+    assert len(altered_table.columns) == 2
+    assert created_col.name == new_column_name
+    assert created_col.plain_type == "NUMERIC"
+    assert created_col.type_options == {"precision": 5, "scale": 3}
+
+
+def test_create_column_bad_options(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atableone"
+    target_type = "BOOLEAN"
+    initial_column_name = "original_column"
+    new_column_name = "added_column"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(initial_column_name, Integer),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    column_data = {
+        "name": new_column_name,
+        "type": target_type,
+        "type_options": {"precision": 5, "scale": 3},
+    }
+    with pytest.raises(TypeError):
+        created_col = columns.create_column(engine, table_oid, column_data)
+
+
 nullable_changes = [(True, True), (False, False), (True, False), (False, True)]
 
 
