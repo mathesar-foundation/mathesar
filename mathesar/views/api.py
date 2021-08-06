@@ -178,8 +178,8 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
                 raise APIException
         except UnsupportedTypeException as e:
             raise ValidationError(e)
-        except Exception:
-            raise APIException
+        except Exception as e:
+            raise APIException(e)
 
         table_data.update(
             {

@@ -10,6 +10,7 @@ NAME = "name"
 NUMERIC = "numeric"
 STRING = "string"
 VARCHAR = "varchar"
+FULL_VARCHAR = "character varying"
 
 
 class UnsupportedTypeException(Exception):
@@ -32,6 +33,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         INTERVAL: dialect_types.get(INTERVAL),
         NUMERIC: dialect_types.get(NUMERIC),
         STRING: dialect_types.get(NAME),
+        VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.QUALIFIED_EMAIL)
     }
