@@ -218,6 +218,7 @@ def test_alter_column_chooses_wisely(column_dict, func_name):
         5678,
         list(column_dict.values())[0],
         engine,
+        type_options={},
     )
 
 
@@ -326,6 +327,7 @@ def test_retype_column_correct_column(engine_with_schema):
         "boolean",
         engine,
         friendly_names=False,
+        type_options={},
     )
 
 

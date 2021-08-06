@@ -160,7 +160,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         table = self.get_object()
         serializer = TablePreviewSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        columns = serializer.validated_data["columns"]
+        columns = serializer.data["columns"]
 
         column_names = [col["name"] for col in columns]
         if not len(column_names) == len(set(column_names)):
@@ -180,6 +180,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
             raise ValidationError(e)
         except Exception:
             raise APIException
+
         table_data.update(
             {
                 # There's no way to reflect actual column data without
