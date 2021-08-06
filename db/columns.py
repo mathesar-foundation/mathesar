@@ -163,10 +163,11 @@ def get_column_index_from_name(table_oid, column_name, engine):
     with engine.begin() as conn:
         result = conn.execute(sel).fetchone()[0]
 
+    # Account for dropped columns that don't appear in the SQLAlchemy tables
     sel = (
         select(func.count())
         .where(and_(
-            pg_attribute.c.attisdropped == True,
+            pg_attribute.c.attisdropped.is_(True),
             pg_attribute.c.attnum < result,
         ))
     )
@@ -315,5 +316,4 @@ def update_column_default(table_oid, column_index, default, engine):
         op.alter_column(
             table.name, column.name, schema=table.schema, server_default=default_clause
         )
-    return column
     return tables.reflect_table_from_oid(table_oid, engine).columns[column_index]

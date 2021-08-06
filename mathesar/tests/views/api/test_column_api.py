@@ -1,5 +1,7 @@
-from django.core.cache import cache
+import json
+
 import pytest
+from django.core.cache import cache
 from sqlalchemy import Column, Integer, String, MetaData, DefaultClause
 from sqlalchemy import Table as SATable
 
@@ -147,6 +149,7 @@ def test_column_create(column_test_table, client):
     actual_new_col = new_columns_response.json()["results"][-1]
     assert actual_new_col["name"] == name
     assert actual_new_col["type"] == type_
+    assert actual_new_col["default"] is None
 
 
 def test_column_create_duplicate(column_test_table, client):
@@ -171,6 +174,16 @@ def test_column_update_name(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data
     )
     assert response.json()["name"] == name
+
+
+def test_column_update_default(column_test_table, client):
+    cache.clear()
+    expt_default = 5
+    data = {"default": expt_default}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data,
+    )
+    assert response.json()["default"] == expt_default
 
 
 def test_column_update_type(column_test_table, client):

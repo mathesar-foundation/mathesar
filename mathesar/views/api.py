@@ -15,6 +15,8 @@ from sqlalchemy_filters.exceptions import (
 )
 
 from db.types.alteration import UnsupportedTypeException
+from db.columns import MathesarColumn
+from db.records import BadGroupFormat, GroupFieldNotFound
 
 from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile, Database, Constraint
@@ -32,8 +34,6 @@ from mathesar.utils.tables import (
 )
 from mathesar.utils.datafiles import create_datafile
 from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
-
-from db.records import BadGroupFormat, GroupFieldNotFound
 
 logger = logging.getLogger(__name__)
 
@@ -229,7 +229,9 @@ class ColumnViewSet(viewsets.ViewSet):
             else:
                 raise APIException(e)
 
-        out_serializer = ColumnSerializer(column)
+        mathesar_column = MathesarColumn.from_column(column)
+        mathesar_column.add_engine(table.schema._sa_engine)
+        out_serializer = ColumnSerializer(mathesar_column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
@@ -244,7 +246,9 @@ class ColumnViewSet(viewsets.ViewSet):
                 raise ValidationError
         except IndexError:
             raise NotFound
-        serializer = ColumnSerializer(column)
+        mathesar_column = MathesarColumn.from_column(column)
+        mathesar_column.add_engine(table.schema._sa_engine)
+        serializer = ColumnSerializer(mathesar_column)
         return Response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
