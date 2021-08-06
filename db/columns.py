@@ -94,7 +94,7 @@ class MathesarColumn(Column):
         altered.
         """
         if self.engine is not None and not self.is_default:
-            db_type = self.type.compile(dialect=self.engine.dialect)
+            db_type = self.plain_type
             valid_target_types = sorted(
                 list(
                     set(
@@ -210,7 +210,10 @@ def alter_column(
         NULLABLE: change_column_nullable,
     }
     return attribute_alter_map[column_def_key](
-        table_oid, column_index, column_definition_dict[column_def_key], engine,
+        table_oid,
+        column_index,
+        column_definition_dict[column_def_key],
+        engine,
     )
 
 
@@ -231,6 +234,10 @@ def rename_column(table_oid, column_index, new_column_name, engine):
 
 def retype_column(table_oid, column_index, new_type, engine):
     table = tables.reflect_table_from_oid(table_oid, engine)
+    if type(new_type) == dict:
+        new_type, type_options = new_type["base"], new_type.get("type_options", {})
+    else:
+        type_options = {}
     alteration.alter_column_type(
         table.schema,
         table.name,
@@ -238,8 +245,13 @@ def retype_column(table_oid, column_index, new_type, engine):
         new_type,
         engine,
         friendly_names=False,
+        type_options=type_options
     )
-    return tables.reflect_table_from_oid(table_oid, engine).columns[column_index]
+    new_column = MathesarColumn.from_column(
+        tables.reflect_table_from_oid(table_oid, engine).columns[column_index]
+    )
+    new_column.add_engine(engine)
+    return(new_column)
 
 
 def change_column_nullable(table_oid, column_index, nullable, engine):
