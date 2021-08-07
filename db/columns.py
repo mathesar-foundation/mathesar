@@ -192,12 +192,9 @@ def create_column(engine, table_oid, column_data):
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)
         op.add_column(table.name, column, schema=table.schema)
-
-    new_column = MathesarColumn.from_column(
+    return get_mathesar_column_with_engine(
         tables.reflect_table_from_oid(table_oid, engine).columns[column_data[NAME]]
     )
-    new_column.add_engine(engine)
-    return(new_column)
 
 
 def alter_column(
