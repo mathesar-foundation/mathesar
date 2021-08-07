@@ -19,7 +19,7 @@ class GroupFieldNotFound(FieldNotFound):
 
 def _get_primary_key_columns(table):
     return list(inspect(table).primary_key)
-    
+
 
 def _create_col_objects(table, column_list):
     return [

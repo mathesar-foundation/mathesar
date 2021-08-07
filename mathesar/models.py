@@ -160,7 +160,6 @@ class Table(DatabaseObject):
     def pk_type(self):
         return self.pk_type
 
-
     def add_column(self, column_data):
         return columns.create_column(
             self.schema._sa_engine,
