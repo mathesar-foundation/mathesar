@@ -156,10 +156,6 @@ class Table(DatabaseObject):
     def has_dependencies(self):
         return True
 
-    @property
-    def pk_type(self):
-        return self.pk_type
-
     def add_column(self, column_data):
         return columns.create_column(
             self.schema._sa_engine,
