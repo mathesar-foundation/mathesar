@@ -1,9 +1,7 @@
 """
 This inherits the fixtures in the root conftest.py
 """
-
 import pytest
-
 
 from mathesar.models import Database
 
@@ -69,3 +67,13 @@ def paste_filename():
 @pytest.fixture(scope='session')
 def headerless_csv_filename():
     return 'mathesar/tests/data/headerless_patents.csv'
+
+
+@pytest.fixture(scope='session')
+def patents_url():
+    return 'https://data.nasa.gov/resource/gquh-watm.csv'
+
+
+@pytest.fixture(scope='session')
+def patents_url_filename():
+    return 'mathesar/tests/data/api_patents.csv'

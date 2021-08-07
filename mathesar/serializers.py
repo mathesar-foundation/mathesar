@@ -1,8 +1,13 @@
+import requests
+
 from django.urls import reverse
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from mathesar.models import Table, Schema, DataFile, Database
+from mathesar.models import Table, Schema, DataFile, Database, Constraint
+
+
+SUPPORTED_URL_CONTENT_TYPES = {'text/csv', 'text/plain'}
 
 
 class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
@@ -51,8 +56,10 @@ class ColumnSerializer(SimpleColumnSerializer):
 
 class TableSerializer(serializers.ModelSerializer):
     columns = SimpleColumnSerializer(many=True, read_only=True, source='sa_columns')
-    records = serializers.SerializerMethodField()
-    name = serializers.CharField()
+    records_url = serializers.SerializerMethodField()
+    constraints_url = serializers.SerializerMethodField()
+    columns_url = serializers.SerializerMethodField()
+    name = serializers.CharField(required=False, allow_blank=True, default='')
     data_files = serializers.PrimaryKeyRelatedField(
         required=False, many=True, queryset=DataFile.objects.all()
     )
@@ -62,11 +69,27 @@ class TableSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'schema', 'created_at', 'updated_at',
                   'columns', 'records', 'data_files', 'has_dependencies', 'pk_type']
 
-    def get_records(self, obj):
+    def get_records_url(self, obj):
         if isinstance(obj, Table):
             # Only get records if we are serializing an existing table
             request = self.context['request']
             return request.build_absolute_uri(reverse('table-record-list', kwargs={'table_pk': obj.pk}))
+        else:
+            return None
+
+    def get_constraints_url(self, obj):
+        if isinstance(obj, Table):
+            # Only get constraints if we are serializing an existing table
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('table-constraint-list', kwargs={'table_pk': obj.pk}))
+        else:
+            return None
+
+    def get_columns_url(self, obj):
+        if isinstance(obj, Table):
+            # Only get columns if we are serializing an existing table
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('table-column-list', kwargs={'table_pk': obj.pk}))
         else:
             return None
 
@@ -79,6 +102,11 @@ class TableSerializer(serializers.ModelSerializer):
 class RecordSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         return instance._asdict()
+
+
+class TablePreviewSerializer(serializers.Serializer):
+    name = serializers.CharField(required=False)
+    columns = SimpleColumnSerializer(many=True)
 
 
 class RecordListParameterSerializer(serializers.Serializer):
@@ -102,12 +130,13 @@ class DataFileSerializer(serializers.ModelSerializer):
     )
     header = serializers.BooleanField(default=True)
     paste = serializers.CharField(required=False, trim_whitespace=False)
+    url = serializers.URLField(required=False)
 
     class Meta:
         model = DataFile
         fields = [
             'id', 'file', 'table_imported_to', 'user', 'header', 'delimiter',
-            'escapechar', 'quotechar', 'paste', 'created_from'
+            'escapechar', 'quotechar', 'paste', 'url', 'created_from'
         ]
         extra_kwargs = {
             'file': {'required': False},
@@ -118,6 +147,7 @@ class DataFileSerializer(serializers.ModelSerializer):
         # We only currently support importing to a new table, so setting a table via API is invalid.
         # User should be set automatically, not submitted via the API.
         read_only_fields = ['user', 'table_imported_to', 'created_from']
+        write_only_fields = ['paste', 'url']
 
     def save(self, **kwargs):
         """
@@ -131,8 +161,36 @@ class DataFileSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if not self.partial:
             # Only perform validation on source files when we're not partial
-            if 'paste' in data and 'file' in data:
-                raise ValidationError('Paste field and file field were both specified')
-            elif 'paste' not in data and 'file' not in data:
-                raise ValidationError('Paste field or file field must be specified')
+            source_fields = ['file', 'paste', 'url']
+            present_fields = [field for field in source_fields if field in data]
+            if len(present_fields) > 1:
+                raise ValidationError(
+                    f'Multiple source fields passed: {present_fields}.'
+                    f' Only one of {source_fields} should be specified.'
+                )
+            elif len(present_fields) == 0:
+                raise ValidationError(
+                    f'One of {source_fields} should be specified.'
+                )
         return data
+
+    def validate_url(self, url):
+        try:
+            response = requests.head(url, allow_redirects=True)
+        except requests.exceptions.ConnectionError:
+            raise ValidationError('URL cannot be reached.')
+
+        content_type = response.headers.get('content-type')
+        if content_type not in SUPPORTED_URL_CONTENT_TYPES:
+            raise ValidationError(f"URL resource '{content_type}' not a valid type.")
+        return url
+
+
+class ConstraintSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(required=False)
+    type = serializers.CharField()
+    columns = serializers.ListField()
+
+    class Meta:
+        model = Constraint
+        fields = ['id', 'name', 'type', 'columns']
