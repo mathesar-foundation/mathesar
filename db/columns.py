@@ -193,7 +193,8 @@ def create_column(engine, table_oid, column_data):
         op = Operations(ctx)
         op.add_column(table.name, column, schema=table.schema)
     return get_mathesar_column_with_engine(
-        tables.reflect_table_from_oid(table_oid, engine).columns[column_data[NAME]]
+        tables.reflect_table_from_oid(table_oid, engine).columns[column_data[NAME]],
+        engine
     )
 
 
@@ -236,7 +237,8 @@ def rename_column(table_oid, column_index, new_column_name, engine, **kwargs):
             schema=table.schema
         )
     return get_mathesar_column_with_engine(
-        tables.reflect_table_from_oid(table_oid, engine).columns[column_index], engine
+        tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
+        engine
     )
 
 
@@ -253,7 +255,8 @@ def retype_column(table_oid, column_index, new_type, engine, **kwargs):
         type_options=type_options
     )
     return get_mathesar_column_with_engine(
-        tables.reflect_table_from_oid(table_oid, engine).columns[column_index], engine
+        tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
+        engine
     )
 
 
@@ -270,7 +273,8 @@ def change_column_nullable(table_oid, column_index, nullable, engine, **kwargs):
             schema=table.schema
         )
     return get_mathesar_column_with_engine(
-        tables.reflect_table_from_oid(table_oid, engine).columns[column_index], engine
+        tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
+        engine
     )
 
 
