@@ -23,6 +23,6 @@ urlpatterns = [
     # Specifying each route individually to facilitate redirection and data pre-rendering based on route
     path('', frontend.home, name="home"),
     path('<db_name>/', frontend.db_home, name="db_home"),
-    path('<db_name>/schemas/', frontend.db_home, name="schemas"),
+    path('<db_name>/schemas/', frontend.schemas, name="schemas"),
     path('<db_name>/<int:schema_id>/', frontend.schema_home, name="schema_home"),
 ]

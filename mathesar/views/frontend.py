@@ -82,3 +82,11 @@ def schema_home(request, db_name, schema_id):
     return render(request, 'mathesar/index.html', {
         'common_data': get_common_data(request, database, schema)
     })
+
+
+def schemas(request, db_name):
+    database = get_current_database(request, db_name)
+    schema = get_current_schema(request, None, database)
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request, database, schema)
+    })
