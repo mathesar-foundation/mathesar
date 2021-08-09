@@ -156,6 +156,16 @@ class Table(DatabaseObject):
     def has_dependencies(self):
         return True
 
+    @property
+    def pk_type(self):
+        primary_key_columns = records._get_primary_key_columns(self._sa_table)
+        if len(primary_key_columns) == 0:
+            return "Zero"
+        elif len(primary_key_columns) == 1:
+            return "Single"
+        else:
+            return "Multiple"
+
     def add_column(self, column_data):
         return columns.create_column(
             self.schema._sa_engine,
