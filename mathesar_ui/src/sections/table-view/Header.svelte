@@ -28,7 +28,7 @@
   export let isResultGrouped: boolean;
 
   let headerRef: HTMLElement;
-  let new_column_name:string = "";
+  let newColumnName:string = "";
 
   function onHScrollOffsetChange(_hscrollOffset: number) {
     if (headerRef) {
@@ -93,7 +93,7 @@
   function addColumn() {
     let column:TableColumn = columns.data[0]
     let new_column:TableColumn = {
-        name: new_column_name,
+        name: newColumnName,
         type: "varchar",
         index: columns.data.length,
         nullable:true,
@@ -178,11 +178,11 @@
 
       <svelte:fragment slot="content">
 
-        <TextInput bind:value={new_column_name}>
+        <TextInput bind:value={newColumnName}>
           <svelte:fragment slot="prepend">Column Name</svelte:fragment>
         </TextInput>
         <!-- on:click={addNewColumn} -->
-        <Button disabled={(new_column_name.length === 0) ? true : false } on:click={addColumn}>
+        <Button disabled={(newColumnName.length === 0) ? true : false } on:click={addColumn}>
           Add new column
         </Button>
       </svelte:fragment>
