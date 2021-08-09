@@ -10,6 +10,7 @@ FLOAT = "float"
 INTERVAL = "interval"
 NAME = "name"
 NUMERIC = "numeric"
+REAL = "real"
 STRING = "string"
 VARCHAR = "varchar"
 FULL_VARCHAR = "character varying"
@@ -36,6 +37,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         FLOAT: dialect_types.get(FLOAT),
         INTERVAL: dialect_types.get(INTERVAL),
         NUMERIC: dialect_types.get(NUMERIC),
+        REAL: dialect_types.get(REAL),
         STRING: dialect_types.get(NAME),
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
@@ -156,7 +158,7 @@ def create_email_casts(engine):
 
 
 def create_floating_point_casts(engine):
-    floating_point_types = [FLOAT, DOUBLE_PRECISION]
+    floating_point_types = [DOUBLE_PRECISION, FLOAT, REAL]
     for type_str in floating_point_types:
         type_body_map = _get_float_type_body_map(target_type_str=type_str)
         create_cast_functions(type_str, type_body_map, engine)
@@ -201,6 +203,7 @@ def get_defined_source_target_cast_tuples(engine):
         FLOAT: _get_float_type_body_map(target_type_str=FLOAT),
         INTERVAL: _get_interval_type_body_map(),
         NUMERIC: _get_numeric_type_body_map(),
+        REAL: _get_float_type_body_map(target_type_str=REAL),
         VARCHAR: _get_varchar_type_body_map(engine),
     }
     return {
@@ -260,12 +263,12 @@ def _get_boolean_type_body_map():
     boolean -> boolean:      Identity. No remarks
     varchar -> boolean:      We only cast 't', 'f', 'true', or 'false'
                              all others raise a custom exception.
-    number_type -> boolean:  We only cast numbers 1 -> true, 0 -> false
+    number type -> boolean:  We only cast numbers 1 -> true, 0 -> false
                              (this is not default behavior for
                              PostgreSQL).  Others raise a custom
                              exception.
     """
-    source_number_types = [DOUBLE_PRECISION, FLOAT, NUMERIC]
+    source_number_types = [DOUBLE_PRECISION, FLOAT, NUMERIC, REAL]
     default_behavior_source_types = [BOOLEAN]
 
     not_bool_exception_str = f"RAISE EXCEPTION '% is not a {BOOLEAN}', $1;"
@@ -280,7 +283,7 @@ def _get_boolean_type_body_map():
         """
 
     type_body_map = {
-        type_name: _get_default_behavior_cast_str(FLOAT)
+        type_name: _get_default_behavior_cast_str(BOOLEAN)
         for type_name in default_behavior_source_types
     }
 
@@ -373,7 +376,9 @@ def _get_numeric_type_body_map():
     varchar -> numeric:  We use the default PostgreSQL behavior.
     """
 
-    default_behavior_source_types = [DOUBLE_PRECISION, FLOAT, NUMERIC, VARCHAR]
+    default_behavior_source_types = [
+        DOUBLE_PRECISION, FLOAT, NUMERIC, REAL, VARCHAR
+    ]
     type_body_map = {
         type_name: _get_default_behavior_cast_str(NUMERIC)
         for type_name in default_behavior_source_types
@@ -391,7 +396,9 @@ def _get_float_type_body_map(target_type_str=FLOAT):
     boolean -> float:  We cast TRUE -> 1, FALSE -> 0
     varchar -> float:  We use the default PostgreSQL behavior.
     """
-    default_behavior_source_types = [DOUBLE_PRECISION, FLOAT, NUMERIC, VARCHAR]
+    default_behavior_source_types = [
+        DOUBLE_PRECISION, FLOAT, NUMERIC, REAL, VARCHAR,
+    ]
     type_body_map = {
         type_name: _get_default_behavior_cast_str(target_type_str)
         for type_name in default_behavior_source_types

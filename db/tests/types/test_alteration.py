@@ -277,29 +277,61 @@ def test_get_column_cast_expression_numeric_options(
     assert str(cast_expr) == expect_cast_expr
 
 
-def test_get_full_cast_map(engine_with_types):
-    """
-    This test specifies the full map of what types can be cast to what
-    target types in Mathesar.  When the map is modified, this test
-    should be updated accordingly.
-    """
-    expect_cast_map = {
-        'FLOAT': ['BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC', 'VARCHAR'],
-        'DOUBLE PRECISION': ['BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC', 'VARCHAR'],
-        'NUMERIC': ['BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC', 'VARCHAR'],
-        'VARCHAR': [
-            'NUMERIC', 'DOUBLE PRECISION', 'FLOAT', 'VARCHAR', 'INTERVAL',
-            'mathesar_types.email', 'BOOLEAN'
-        ],
-        'mathesar_types.email': ['mathesar_types.email', 'VARCHAR'],
-        'INTERVAL': ['INTERVAL', 'VARCHAR'],
-        'BOOLEAN': ['NUMERIC', 'DOUBLE PRECISION', 'FLOAT', 'BOOLEAN', 'VARCHAR']
-    }
-    actual_cast_map = alteration.get_full_cast_map(engine_with_types)
-    assert len(actual_cast_map) == len(expect_cast_map)
-    assert all(
+expect_cast_tuples = [
+    # This list specifies the full map of what types can be cast to what
+    # target types in Mathesar.  When the map is modified, this test
+    # should be updated accordingly.
+    (
+        'BOOLEAN',
         [
-            sorted(actual_cast_map[type_]) == sorted(expect_target_list)
-            for type_, expect_target_list in expect_cast_map.items()
+            'NUMERIC', 'DOUBLE PRECISION', 'FLOAT', 'BOOLEAN', 'REAL',
+            'VARCHAR',
         ]
-    )
+    ),
+    (
+        'DOUBLE PRECISION',
+        [
+            'BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC', 'REAL',
+            'VARCHAR',
+        ]
+    ),
+    (
+        'FLOAT',
+        [
+            'BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC', 'REAL',
+            'VARCHAR',
+        ]
+    ),
+    (
+        'INTERVAL',
+        ['INTERVAL', 'VARCHAR']
+    ),
+    (
+        'mathesar_types.email',
+        ['mathesar_types.email', 'VARCHAR']
+    ),
+    (
+        'NUMERIC',
+        ['BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC', 'REAL', 'VARCHAR']
+    ),
+    (
+        'REAL',
+        ['BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC', 'REAL', 'VARCHAR']
+    ),
+    (
+        'VARCHAR',
+        [
+            'BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'INTERVAL',
+            'mathesar_types.email', 'NUMERIC', 'REAL', 'VARCHAR',
+        ]
+    ),
+
+]
+
+
+@pytest.mark.parametrize("source_type,expect_target_types", expect_cast_tuples)
+def test_get_full_cast_map(engine_with_types, source_type, expect_target_types):
+    actual_cast_map = alteration.get_full_cast_map(engine_with_types)
+    actual_target_types = actual_cast_map[source_type]
+    assert len(actual_target_types) == len(expect_target_types)
+    assert sorted(actual_target_types) == sorted(expect_target_types)
