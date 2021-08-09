@@ -10,6 +10,7 @@ NAME = "name"
 NUMERIC = "numeric"
 STRING = "string"
 VARCHAR = "varchar"
+FULL_VARCHAR = "character varying"
 
 
 class UnsupportedTypeException(Exception):
@@ -32,6 +33,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         INTERVAL: dialect_types.get(INTERVAL),
         NUMERIC: dialect_types.get(NUMERIC),
         STRING: dialect_types.get(NAME),
+        VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.QUALIFIED_EMAIL)
     }
@@ -66,7 +68,8 @@ def alter_column_type(
         column_name,
         target_type_str,
         engine,
-        friendly_names=True
+        friendly_names=True,
+        type_options={},
 ):
     _preparer = engine.dialect.identifier_preparer
     supported_types = get_supported_alter_column_types(
@@ -82,7 +85,7 @@ def alter_column_type(
         column = table.columns[column_name]
         prepared_table_name = _preparer.format_table(table)
         prepared_column_name = _preparer.format_column(column)
-        prepared_type_name = target_type().compile(dialect=engine.dialect)
+        prepared_type_name = target_type(**type_options).compile(dialect=engine.dialect)
         cast_function_name = get_cast_function_name(prepared_type_name)
         alter_stmt = f"""
         ALTER TABLE {prepared_table_name}
@@ -93,7 +96,7 @@ def alter_column_type(
         conn.execute(DDL(alter_stmt))
 
 
-def get_column_cast_expression(column, target_type_str, engine):
+def get_column_cast_expression(column, target_type_str, engine, type_options={}):
     """
     Given a Column, we get the correct SQL selectable for selecting the
     results of a Mathesar cast_to_<type> function on that column, where
@@ -115,6 +118,8 @@ def get_column_cast_expression(column, target_type_str, engine):
             quoted_name(qualified_function_name, False),
             column
         )
+    if type_options:
+        cast_expr = cast_expr.cast(target_type(**type_options))
     return cast_expr
 
 
@@ -216,7 +221,8 @@ def assemble_function_creation_sql(argument_type, target_type, function_body):
 
 def get_cast_function_name(target_type):
     unqualified_type_name = target_type.split('.')[-1].lower()
-    bare_function_name = f"cast_to_{unqualified_type_name}"
+    bare_type_name = unqualified_type_name.split('(')[0]
+    bare_function_name = f"cast_to_{bare_type_name}"
     return f"{base.get_qualified_name(bare_function_name)}"
 
 
