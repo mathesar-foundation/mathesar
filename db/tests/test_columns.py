@@ -3,10 +3,12 @@ from unittest.mock import patch
 from psycopg2.errors import NotNullViolation
 import pytest
 from sqlalchemy import (
-    String, Integer, ForeignKey, Column, select, Table, MetaData, create_engine
+    String, Integer, ForeignKey, Column, select, Table, MetaData, create_engine,
+    Numeric
 )
 from sqlalchemy.exc import IntegrityError
 from db import columns, tables, constants
+from db.types import email
 from db.tests.types import fixtures
 
 engine_with_types = fixtures.engine_with_types
@@ -196,11 +198,42 @@ def test_MC_column_index_multiple(engine_with_schema):
     assert mc_2.column_index == 1
 
 
+def test_MC_plain_type_no_opts(engine):
+    mc = columns.MathesarColumn('acolumn', String)
+    mc.add_engine(engine)
+    assert mc.plain_type == "VARCHAR"
+
+
+def test_MC_plain_type_no_opts_custom_type(engine_with_types):
+    mc = columns.MathesarColumn('testable_col', email.Email)
+    mc.add_engine(engine_with_types)
+    assert mc.plain_type == "mathesar_types.email"
+
+
+def test_MC_plain_type_numeric_opts(engine):
+    mc = columns.MathesarColumn('testable_col', Numeric(5, 2))
+    mc.add_engine(engine)
+    assert mc.plain_type == "NUMERIC"
+
+
+def test_MC_type_options_no_opts(engine):
+    mc = columns.MathesarColumn('testable_col', Numeric)
+    mc.add_engine(engine)
+    assert mc.type_options is None
+
+
+def test_MC_type_options(engine):
+    mc = columns.MathesarColumn('testable_col', Numeric(5, 2))
+    mc.add_engine(engine)
+    assert mc.type_options == {'precision': 5, 'scale': 2}
+
+
 @pytest.mark.parametrize(
     "column_dict,func_name",
     [
         ({"name": "blah"}, "rename_column"),
         ({"sa_type": "blah"}, "retype_column"),
+        ({"type": "blah"}, "retype_column"),
         ({"nullable": True}, "change_column_nullable"),
     ]
 )
@@ -218,6 +251,26 @@ def test_alter_column_chooses_wisely(column_dict, func_name):
         5678,
         list(column_dict.values())[0],
         engine,
+        type_options={},
+    )
+
+
+def test_alter_column_adds_type_options():
+    engine = create_engine("postgresql://")
+    column_dict = {"type": "numeric", "type_options": {"precision": 3}}
+    with patch.object(columns, "retype_column") as mock_retyper:
+        columns.alter_column(
+            engine,
+            1234,
+            5678,
+            column_dict
+        )
+    mock_retyper.assert_called_with(
+        1234,
+        5678,
+        column_dict["type"],
+        engine,
+        type_options=column_dict["type_options"],
     )
 
 
@@ -326,6 +379,35 @@ def test_retype_column_correct_column(engine_with_schema):
         "boolean",
         engine,
         friendly_names=False,
+        type_options={},
+    )
+
+
+def test_retype_column_adds_options(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atableone"
+    target_type = "numeric"
+    target_column_name = "thecolumntochange"
+    nontarget_column_name = "notthecolumntochange"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(target_column_name, Integer),
+        Column(nontarget_column_name, String),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    type_options = {"precision": 5}
+    with patch.object(columns.alteration, "alter_column_type") as mock_retyper:
+        columns.retype_column(table_oid, 0, target_type, engine, type_options=type_options)
+    mock_retyper.assert_called_with(
+        schema,
+        table_name,
+        target_column_name,
+        "numeric",
+        engine,
+        friendly_names=False,
+        type_options=type_options,
     )
 
 
@@ -348,6 +430,54 @@ def test_create_column(engine_with_schema):
     assert len(altered_table.columns) == 2
     assert created_col.name == new_column_name
     assert created_col.type.compile(engine.dialect) == "BOOLEAN"
+
+
+def test_create_column_options(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atableone"
+    target_type = "NUMERIC"
+    initial_column_name = "original_column"
+    new_column_name = "added_column"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(initial_column_name, Integer),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    column_data = {
+        "name": new_column_name,
+        "type": target_type,
+        "type_options": {"precision": 5, "scale": 3},
+    }
+    created_col = columns.create_column(engine, table_oid, column_data)
+    altered_table = tables.reflect_table_from_oid(table_oid, engine)
+    assert len(altered_table.columns) == 2
+    assert created_col.name == new_column_name
+    assert created_col.plain_type == "NUMERIC"
+    assert created_col.type_options == {"precision": 5, "scale": 3}
+
+
+def test_create_column_bad_options(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atableone"
+    target_type = "BOOLEAN"
+    initial_column_name = "original_column"
+    new_column_name = "added_column"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(initial_column_name, Integer),
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    column_data = {
+        "name": new_column_name,
+        "type": target_type,
+        "type_options": {"precision": 5, "scale": 3},
+    }
+    with pytest.raises(TypeError):
+        columns.create_column(engine, table_oid, column_data)
 
 
 nullable_changes = [(True, True), (False, False), (True, False), (False, True)]

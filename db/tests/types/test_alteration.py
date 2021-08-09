@@ -1,8 +1,10 @@
 from datetime import timedelta
 from decimal import Decimal
+from psycopg2.errors import InvalidParameterValue
 import pytest
 from sqlalchemy import Table, Column, MetaData
 from sqlalchemy import String, Numeric
+from sqlalchemy.exc import DataError
 from db import types
 from db.tests.types import fixtures
 from db.types import alteration
@@ -45,19 +47,21 @@ def test_get_alter_column_types_with_unfriendly_names(engine_with_types):
 
 
 type_test_list = [
-    (String, "boolean", "BOOLEAN"),
-    (String, "interval", "INTERVAL"),
-    (String, "numeric", "NUMERIC"),
-    (String, "string", "VARCHAR"),
-    (String, "email", "mathesar_types.email"),
+    (String, "boolean", {}, "BOOLEAN"),
+    (String, "interval", {}, "INTERVAL"),
+    (String, "numeric", {}, "NUMERIC"),
+    (String, "numeric", {"precision": 5}, "NUMERIC(5, 0)"),
+    (String, "numeric", {"precision": 5, "scale": 3}, "NUMERIC(5, 3)"),
+    (String, "string", {}, "VARCHAR"),
+    (String, "email", {}, "mathesar_types.email"),
 ]
 
 
 @pytest.mark.parametrize(
-    "type_,target_type,expect_type", type_test_list
+    "type_,target_type,options,expect_type", type_test_list
 )
 def test_alter_column_type_alters_column_type(
-        engine_email_type, type_, target_type, expect_type
+        engine_email_type, type_, target_type, options, expect_type
 ):
     engine, schema = engine_email_type
     TABLE_NAME = "testtable"
@@ -71,7 +75,7 @@ def test_alter_column_type_alters_column_type(
     )
     input_table.create()
     alteration.alter_column_type(
-        schema, TABLE_NAME, COLUMN_NAME, target_type, engine,
+        schema, TABLE_NAME, COLUMN_NAME, target_type, engine, type_options=options
     )
     metadata = MetaData(bind=engine)
     metadata.reflect()
@@ -86,31 +90,37 @@ def test_alter_column_type_alters_column_type(
 
 
 type_test_data_list = [
-    (String, "boolean", "false", False),
-    (String, "boolean", "true", True),
-    (String, "boolean", "f", False),
-    (String, "boolean", "t", True),
-    (String, "interval", "1 day", timedelta(days=1)),
-    (String, "interval", "1 week", timedelta(days=7)),
-    (String, "interval", "3:30", timedelta(hours=3, minutes=30)),
-    (String, "interval", "00:03:30", timedelta(minutes=3, seconds=30)),
-    (String, "numeric", "1", 1.0),
-    (String, "numeric", "1.2", Decimal('1.2')),
-    (Numeric, "numeric", 1, 1.0),
-    (String, "numeric", "5", 5),
-    (String, "numeric", "500000", 500000),
-    (String, "numeric", "500000.134", Decimal("500000.134")),
-    (Numeric, "string", 3, "3"),
-    (String, "string", "abc", "abc"),
-    (String, "email", "alice@example.com", "alice@example.com"),
+    (String, "boolean", {}, "false", False),
+    (String, "boolean", {}, "true", True),
+    (String, "boolean", {}, "f", False),
+    (String, "boolean", {}, "t", True),
+    (String, "interval", {}, "1 day", timedelta(days=1)),
+    (String, "interval", {}, "1 week", timedelta(days=7)),
+    (String, "interval", {}, "3:30", timedelta(hours=3, minutes=30)),
+    (String, "interval", {}, "00:03:30", timedelta(minutes=3, seconds=30)),
+    (String, "numeric", {}, "1", 1.0),
+    (String, "numeric", {}, "1.2", Decimal('1.2')),
+    (Numeric, "numeric", {}, 1, 1.0),
+    (String, "numeric", {}, "5", 5),
+    (String, "numeric", {}, "500000", 500000),
+    (String, "numeric", {}, "500000.134", Decimal("500000.134")),
+    (Numeric, "string", {}, 3, "3"),
+    (String, "string", {}, "abc", "abc"),
+    (String, "email", {}, "alice@example.com", "alice@example.com"),
+    (Numeric(precision=5), "numeric", {}, 1, 1.0),
+    (Numeric(precision=5, scale=2), "numeric", {}, 1, 1.0),
+    (Numeric, "numeric", {"precision": 5, "scale": 2}, 1.234, Decimal("1.23")),
+    # test that rounding is as intended
+    (Numeric, "numeric", {"precision": 5, "scale": 2}, 1.235, Decimal("1.24")),
+    (String, "numeric", {"precision": 5, "scale": 2}, "500.134", Decimal("500.13")),
 ]
 
 
 @pytest.mark.parametrize(
-    "type_,target_type,value,expect_value", type_test_data_list
+    "type_,target_type,options,value,expect_value", type_test_data_list
 )
 def test_alter_column_type_casts_column_data(
-        engine_email_type, type_, target_type, value, expect_value,
+        engine_email_type, type_, target_type, options, value, expect_value,
 ):
     engine, schema = engine_email_type
     TABLE_NAME = "testtable"
@@ -127,7 +137,7 @@ def test_alter_column_type_casts_column_data(
     with engine.begin() as conn:
         conn.execute(ins)
     alteration.alter_column_type(
-        schema, TABLE_NAME, COLUMN_NAME, target_type, engine,
+        schema, TABLE_NAME, COLUMN_NAME, target_type, engine, type_options=options
     )
     metadata = MetaData(bind=engine)
     metadata.reflect()
@@ -179,6 +189,31 @@ def test_alter_column_type_raises_on_bad_column_data(
         )
 
 
+def test_alter_column_type_raises_on_bad_parameters(
+        engine_email_type,
+):
+    engine, schema = engine_email_type
+    TABLE_NAME = "testtable"
+    COLUMN_NAME = "testcol"
+    metadata = MetaData(bind=engine)
+    input_table = Table(
+        TABLE_NAME,
+        metadata,
+        Column(COLUMN_NAME, Numeric),
+        schema=schema
+    )
+    input_table.create()
+    ins = input_table.insert(values=(5.3,))
+    with engine.begin() as conn:
+        conn.execute(ins)
+    bad_options = {"precision": 3, "scale": 4}  # scale must be smaller than precision
+    with pytest.raises(DataError) as e:
+        alteration.alter_column_type(
+            schema, TABLE_NAME, COLUMN_NAME, "numeric", engine, type_options=bad_options
+        )
+        assert e.orig == InvalidParameterValue
+
+
 def test_get_column_cast_expression_unchanged(engine_with_types):
     target_type = "numeric"
     col_name = "my_column"
@@ -216,6 +251,30 @@ def test_get_column_cast_expression_unsupported(engine_with_types):
         alteration.get_column_cast_expression(
             column, target_type, engine_with_types
         )
+
+
+cast_expr_numeric_option_list = [
+    (Numeric, {"precision": 3}, 'CAST(colname AS NUMERIC(3))'),
+    (Numeric, {"precision": 3, "scale": 2}, 'CAST(colname AS NUMERIC(3, 2))'),
+    (Numeric, {"precision": 3, "scale": 2}, 'CAST(colname AS NUMERIC(3, 2))'),
+    (
+        String,
+        {"precision": 3, "scale": 2},
+        'CAST(mathesar_types.cast_to_numeric(colname) AS NUMERIC(3, 2))'
+    )
+]
+
+
+@pytest.mark.parametrize("type_,options,expect_cast_expr", cast_expr_numeric_option_list)
+def test_get_column_cast_expression_numeric_options(
+        engine_with_types, type_, options, expect_cast_expr
+):
+    target_type = "numeric"
+    column = Column("colname", type_)
+    cast_expr = alteration.get_column_cast_expression(
+        column, target_type, engine_with_types, type_options=options,
+    )
+    assert str(cast_expr) == expect_cast_expr
 
 
 def test_get_full_cast_map(engine_with_types):
