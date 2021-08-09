@@ -288,6 +288,10 @@ def get_column_default(table_oid, column_index, engine):
 def _decode_server_default(server_default, engine):
     if server_default is not None:
         cast_sql_text = server_default.arg.text
+        # Ensure that we never evaluate something that increments a query
+        # This is safe as strings will always start with a single quote
+        if cast_sql_text.startswith("nextval(") and cast_sql_text.endswith(")"):
+            return None
         with engine.begin() as conn:
             # Defaults are returned as text with SQL casts appended
             # Ex: "'test default string'::character varying" or "'2020-01-01'::date"

@@ -44,7 +44,7 @@ def test_column_list(column_test_table, client):
             'nullable': False,
             'primary_key': True,
             'valid_target_types': None,
-            'default': 1,
+            'default': None,
         },
         {
             'name': 'mycolumn1',
@@ -95,7 +95,7 @@ def test_column_list(column_test_table, client):
                 'nullable': False,
                 'primary_key': True,
                 'valid_target_types': None,
-                'default': 1
+                'default': None
             },
         ),
         (
