@@ -5,6 +5,7 @@ from db.types import base, email
 
 BOOLEAN = "boolean"
 EMAIL = "email"
+FLOAT = "float"
 INTERVAL = "interval"
 NAME = "name"
 NUMERIC = "numeric"
@@ -152,14 +153,14 @@ def create_numeric_casts(engine):
 
 
 def create_varchar_casts(engine):
-    type_body_map = _get_varchar_type_body_map()
+    type_body_map = _get_varchar_type_body_map(engine)
     create_cast_functions(VARCHAR, type_body_map, engine)
 
 
 def get_full_cast_map(engine):
     full_cast_map = {}
     supported_types = get_robust_supported_alter_column_type_map(engine)
-    for source, target in get_defined_source_target_cast_tuples():
+    for source, target in get_defined_source_target_cast_tuples(engine):
         source_python_type = supported_types.get(source)
         target_python_type = supported_types.get(target)
         if source_python_type is not None and target_python_type is not None:
@@ -167,21 +168,23 @@ def get_full_cast_map(engine):
             target_db_type = target_python_type().compile(dialect=engine.dialect)
             full_cast_map.setdefault(source_db_type, []).append(target_db_type)
 
-    return full_cast_map
+    return {
+        key: list(set(val)) for key, val in full_cast_map.items()
+    }
 
 
-def get_defined_source_target_cast_tuples():
+def get_defined_source_target_cast_tuples(engine):
     type_body_map_map = {
-        BOOLEAN: _get_boolean_type_body_map,
-        EMAIL: _get_email_type_body_map,
-        INTERVAL: _get_interval_type_body_map,
-        NUMERIC: _get_numeric_type_body_map,
-        VARCHAR: _get_varchar_type_body_map,
+        BOOLEAN: _get_boolean_type_body_map(),
+        EMAIL: _get_email_type_body_map(),
+        INTERVAL: _get_interval_type_body_map(),
+        NUMERIC: _get_numeric_type_body_map(),
+        VARCHAR: _get_varchar_type_body_map(engine),
     }
     return {
         (source_type, target_type)
         for target_type in type_body_map_map
-        for source_type in type_body_map_map[target_type]()
+        for source_type in type_body_map_map[target_type]
     }
 
 
@@ -327,7 +330,7 @@ def _get_numeric_type_body_map():
 
     numeric -> numeric:  Identity. No remarks
     boolean -> numeric:  We cast TRUE -> 1, FALSE -> 0
-    varchar -> numeric:     We use the default PostgreSQL behavior.
+    varchar -> numeric:  We use the default PostgreSQL behavior.
     """
     return {
         NUMERIC: """
@@ -351,41 +354,25 @@ def _get_numeric_type_body_map():
     }
 
 
-def _get_varchar_type_body_map():
+def _get_varchar_type_body_map(engine):
     """
     Get SQL strings that create various functions for casting different
     types to varchar.
 
-    varchar -> varchar:   Identity. No remarks
-    boolean -> varchar:   We use the default PostgreSQL cast behavior.
-    email -> varchar:     We use the default PostgreSQL cast behavior.
-    interval -> varchar:  We use the default PostgreSQL cast behavior.
-    numeric -> varchar:   We use the default PostgreSQL cast behavior.
+    All casts to varchar use default PostgreSQL behavior.
+    All types in get_supported_alter_column_types are supported.
     """
-    return {
-        VARCHAR: """
-        BEGIN
-          RETURN $1;
-        END;
-        """,
-        BOOLEAN: f"""
-        BEGIN
-          RETURN $1::{VARCHAR};
-        END;
-        """,
-        email.QUALIFIED_EMAIL: f"""
-        BEGIN
-          RETURN $1::{VARCHAR};
-        END;
-        """,
-        INTERVAL: f"""
-        BEGIN
-          RETURN $1::{VARCHAR};
-        END;
-        """,
-        NUMERIC: f"""
-        BEGIN
-          RETURN $1::{VARCHAR};
-        END;
-        """,
+    supported_types = get_supported_alter_column_types(engine, friendly_names=True)
+    type_body_map = {
+        type_name: _get_default_behavior_cast_str(VARCHAR)
+        for type_name in supported_types
     }
+    return type_body_map
+
+
+def _get_default_behavior_cast_str(target_type_str):
+    return f"""
+        BEGIN
+          RETURN $1::{target_type_str};
+        END;
+    """
