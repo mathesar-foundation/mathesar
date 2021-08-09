@@ -284,12 +284,16 @@ def test_get_full_cast_map(engine_with_types):
     should be updated accordingly.
     """
     expect_cast_map = {
-        'FLOAT': ['BOOLEAN', 'FLOAT', 'NUMERIC', 'VARCHAR'],
-        'NUMERIC': ['BOOLEAN', 'FLOAT', 'NUMERIC', 'VARCHAR'],
-        'VARCHAR': ['NUMERIC', 'FLOAT', 'VARCHAR', 'INTERVAL', 'mathesar_types.email', 'BOOLEAN'],
+        'FLOAT': ['BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC', 'VARCHAR'],
+        'DOUBLE PRECISION': ['BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC', 'VARCHAR'],
+        'NUMERIC': ['BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC', 'VARCHAR'],
+        'VARCHAR': [
+            'NUMERIC', 'DOUBLE PRECISION', 'FLOAT', 'VARCHAR', 'INTERVAL',
+            'mathesar_types.email', 'BOOLEAN'
+        ],
         'mathesar_types.email': ['mathesar_types.email', 'VARCHAR'],
         'INTERVAL': ['INTERVAL', 'VARCHAR'],
-        'BOOLEAN': ['NUMERIC', 'FLOAT', 'BOOLEAN', 'VARCHAR']
+        'BOOLEAN': ['NUMERIC', 'DOUBLE PRECISION', 'FLOAT', 'BOOLEAN', 'VARCHAR']
     }
     actual_cast_map = alteration.get_full_cast_map(engine_with_types)
     assert len(actual_cast_map) == len(expect_cast_map)

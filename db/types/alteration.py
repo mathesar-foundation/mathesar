@@ -5,6 +5,7 @@ from db.types import base, email
 
 BOOLEAN = "boolean"
 EMAIL = "email"
+DOUBLE_PRECISION = "double precision"
 FLOAT = "float"
 INTERVAL = "interval"
 NAME = "name"
@@ -31,6 +32,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
     friendly_type_map = {
         # Default Postgres types
         BOOLEAN: dialect_types.get(BOOLEAN),
+        DOUBLE_PRECISION: dialect_types.get(DOUBLE_PRECISION),
         FLOAT: dialect_types.get(FLOAT),
         INTERVAL: dialect_types.get(INTERVAL),
         NUMERIC: dialect_types.get(NUMERIC),
@@ -137,7 +139,7 @@ def get_column_cast_expression(column, target_type_str, engine, type_options={})
 def install_all_casts(engine):
     create_boolean_casts(engine)
     create_email_casts(engine)
-    create_float_casts(engine)
+    create_floating_point_casts(engine)
     create_interval_casts(engine)
     create_numeric_casts(engine)
     create_varchar_casts(engine)
@@ -153,9 +155,11 @@ def create_email_casts(engine):
     create_cast_functions(email.QUALIFIED_EMAIL, type_body_map, engine)
 
 
-def create_float_casts(engine):
-    type_body_map = _get_float_type_body_map()
-    create_cast_functions(FLOAT, type_body_map, engine)
+def create_floating_point_casts(engine):
+    floating_point_types = [FLOAT, DOUBLE_PRECISION]
+    for type_str in floating_point_types:
+        type_body_map = _get_float_type_body_map(target_type_str=type_str)
+        create_cast_functions(type_str, type_body_map, engine)
 
 
 def create_interval_casts(engine):
@@ -193,7 +197,8 @@ def get_defined_source_target_cast_tuples(engine):
     type_body_map_map = {
         BOOLEAN: _get_boolean_type_body_map(),
         EMAIL: _get_email_type_body_map(),
-        FLOAT: _get_float_type_body_map(),
+        DOUBLE_PRECISION: _get_float_type_body_map(target_type_str=DOUBLE_PRECISION),
+        FLOAT: _get_float_type_body_map(target_type_str=FLOAT),
         INTERVAL: _get_interval_type_body_map(),
         NUMERIC: _get_numeric_type_body_map(),
         VARCHAR: _get_varchar_type_body_map(engine),
@@ -242,7 +247,8 @@ def assemble_function_creation_sql(argument_type, target_type, function_body):
 def get_cast_function_name(target_type):
     unqualified_type_name = target_type.split('.')[-1].lower()
     bare_type_name = unqualified_type_name.split('(')[0]
-    bare_function_name = f"cast_to_{bare_type_name}"
+    function_type_name = '_'.join(bare_type_name.split())
+    bare_function_name = f"cast_to_{function_type_name}"
     return f"{base.get_qualified_name(bare_function_name)}"
 
 
@@ -259,7 +265,7 @@ def _get_boolean_type_body_map():
                              PostgreSQL).  Others raise a custom
                              exception.
     """
-    source_number_types = [FLOAT, NUMERIC]
+    source_number_types = [DOUBLE_PRECISION, FLOAT, NUMERIC]
     default_behavior_source_types = [BOOLEAN]
 
     not_bool_exception_str = f"RAISE EXCEPTION '% is not a {BOOLEAN}', $1;"
@@ -367,7 +373,7 @@ def _get_numeric_type_body_map():
     varchar -> numeric:  We use the default PostgreSQL behavior.
     """
 
-    default_behavior_source_types = [FLOAT, NUMERIC, VARCHAR]
+    default_behavior_source_types = [DOUBLE_PRECISION, FLOAT, NUMERIC, VARCHAR]
     type_body_map = {
         type_name: _get_default_behavior_cast_str(NUMERIC)
         for type_name in default_behavior_source_types
@@ -376,7 +382,7 @@ def _get_numeric_type_body_map():
     return type_body_map
 
 
-def _get_float_type_body_map():
+def _get_float_type_body_map(target_type_str=FLOAT):
     """
     Get SQL strings that create various functions for casting different
     types to floats.
@@ -385,12 +391,12 @@ def _get_float_type_body_map():
     boolean -> float:  We cast TRUE -> 1, FALSE -> 0
     varchar -> float:  We use the default PostgreSQL behavior.
     """
-    default_behavior_source_types = [FLOAT, NUMERIC, VARCHAR]
+    default_behavior_source_types = [DOUBLE_PRECISION, FLOAT, NUMERIC, VARCHAR]
     type_body_map = {
-        type_name: _get_default_behavior_cast_str(FLOAT)
+        type_name: _get_default_behavior_cast_str(target_type_str)
         for type_name in default_behavior_source_types
     }
-    type_body_map.update({BOOLEAN: _get_boolean_to_number_cast(FLOAT)})
+    type_body_map.update({BOOLEAN: _get_boolean_to_number_cast(target_type_str)})
     return type_body_map
 
 
