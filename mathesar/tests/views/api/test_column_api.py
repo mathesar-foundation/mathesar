@@ -71,6 +71,7 @@ def test_column_list(column_test_table, client):
             'primary_key': False,
             'valid_target_types': [
                 'BOOLEAN',
+                'FLOAT',
                 'INTERVAL',
                 'NUMERIC',
                 'VARCHAR',

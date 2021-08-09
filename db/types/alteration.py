@@ -31,6 +31,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
     friendly_type_map = {
         # Default Postgres types
         BOOLEAN: dialect_types.get(BOOLEAN),
+        FLOAT: dialect_types.get(FLOAT),
         INTERVAL: dialect_types.get(INTERVAL),
         NUMERIC: dialect_types.get(NUMERIC),
         STRING: dialect_types.get(NAME),
@@ -136,6 +137,7 @@ def get_column_cast_expression(column, target_type_str, engine, type_options={})
 def install_all_casts(engine):
     create_boolean_casts(engine)
     create_email_casts(engine)
+    create_float_casts(engine)
     create_interval_casts(engine)
     create_numeric_casts(engine)
     create_varchar_casts(engine)
@@ -149,6 +151,11 @@ def create_boolean_casts(engine):
 def create_email_casts(engine):
     type_body_map = _get_email_type_body_map()
     create_cast_functions(email.QUALIFIED_EMAIL, type_body_map, engine)
+
+
+def create_float_casts(engine):
+    type_body_map = _get_float_type_body_map()
+    create_cast_functions(FLOAT, type_body_map, engine)
 
 
 def create_interval_casts(engine):
@@ -186,6 +193,7 @@ def get_defined_source_target_cast_tuples(engine):
     type_body_map_map = {
         BOOLEAN: _get_boolean_type_body_map(),
         EMAIL: _get_email_type_body_map(),
+        FLOAT: _get_float_type_body_map(),
         INTERVAL: _get_interval_type_body_map(),
         NUMERIC: _get_numeric_type_body_map(),
         VARCHAR: _get_varchar_type_body_map(engine),
@@ -243,39 +251,56 @@ def _get_boolean_type_body_map():
     Get SQL strings that create various functions for casting different
     types to booleans.
 
-    boolean -> boolean:  Identity. No remarks
-    varchar -> boolean:     We only cast 't', 'f', 'true', or 'false' all
-                         others raise a custom exception.
-    numeric -> boolean:  We only cast 1 -> true, 0 -> false (this is not
-                         default behavior for PostgreSQL). Others raise a
-                         custom exception.
+    boolean -> boolean:      Identity. No remarks
+    varchar -> boolean:      We only cast 't', 'f', 'true', or 'false'
+                             all others raise a custom exception.
+    number_type -> boolean:  We only cast numbers 1 -> true, 0 -> false
+                             (this is not default behavior for
+                             PostgreSQL).  Others raise a custom
+                             exception.
     """
+    source_number_types = [FLOAT, NUMERIC]
+    default_behavior_source_types = [BOOLEAN]
+
     not_bool_exception_str = f"RAISE EXCEPTION '% is not a {BOOLEAN}', $1;"
-    return {
-        BOOLEAN: """
-        BEGIN
-          RETURN $1;
-        END;
-        """,
-        VARCHAR: f"""
-        DECLARE
-        istrue {BOOLEAN};
-        BEGIN
-          SELECT lower($1)='t' OR lower($1)='true' OR $1='1' INTO istrue;
-          IF istrue OR lower($1)='f' OR lower($1)='false' OR $1='0' THEN
-            RETURN istrue;
-          END IF;
-          {not_bool_exception_str}
-        END;
-        """,
-        NUMERIC: f"""
+
+    def _get_number_to_boolean_cast_str():
+        return f"""
         BEGIN
           IF $1<>0 AND $1<>1 THEN
             {not_bool_exception_str} END IF;
           RETURN $1<>0;
         END;
-        """,
+        """
+
+    type_body_map = {
+        type_name: _get_default_behavior_cast_str(FLOAT)
+        for type_name in default_behavior_source_types
     }
+
+    type_body_map.update(
+        {
+            number_type: _get_number_to_boolean_cast_str()
+            for number_type in source_number_types
+        }
+    )
+    type_body_map.update(
+        {
+            VARCHAR: f"""
+            DECLARE
+            istrue {BOOLEAN};
+            BEGIN
+              SELECT lower($1)='t' OR lower($1)='true' OR $1='1' INTO istrue;
+              IF istrue OR lower($1)='f' OR lower($1)='false' OR $1='0' THEN
+                RETURN istrue;
+              END IF;
+              {not_bool_exception_str}
+            END;
+            """,
+        }
+
+    )
+    return type_body_map
 
 
 def _get_email_type_body_map():
