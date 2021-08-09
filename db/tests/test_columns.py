@@ -210,7 +210,7 @@ def test_MC_column_index_multiple(engine_with_schema):
         ({"name": "blah"}, "rename_column"),
         ({"sa_type": "blah"}, "retype_column"),
         ({"nullable": True}, "change_column_nullable"),
-        ({"default": 1}, "update_column_default"),
+        ({"default": 1}, "set_column_default"),
     ]
 )
 def test_alter_column_chooses_wisely(column_dict, func_name):
@@ -512,7 +512,7 @@ def test_create_column_default(engine_with_schema, col_type):
     )
     table.create()
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    columns.create_column_default(table_oid, 0, set_default, engine)
+    columns.set_column_default(table_oid, 0, set_default, engine)
     default = columns.get_column_default(table_oid, 0, engine)
     created_default = _get_default(engine, table)
 
@@ -533,7 +533,7 @@ def test_update_column_default(engine_with_schema, col_type):
     )
     table.create()
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    columns.update_column_default(table_oid, 0, set_default, engine)
+    columns.set_column_default(table_oid, 0, set_default, engine)
     default = columns.get_column_default(table_oid, 0, engine)
     created_default = _get_default(engine, table)
 
@@ -555,7 +555,7 @@ def test_delete_column_default(engine_with_schema, col_type):
     )
     table.create()
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    columns.delete_column_default(table_oid, 0, engine)
+    columns.set_column_default(table_oid, 0, None, engine)
     default = columns.get_column_default(table_oid, 0, engine)
     created_default = _get_default(engine, table)
 

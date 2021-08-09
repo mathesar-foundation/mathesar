@@ -219,7 +219,7 @@ def alter_column(
         TYPE: retype_column,
         "type": retype_column,
         NULLABLE: change_column_nullable,
-        DEFAULT: update_column_default
+        DEFAULT: set_column_default
     }
     return attribute_alter_map[column_def_key](
         table_oid, column_index, column_definition_dict[column_def_key], engine,
@@ -297,16 +297,7 @@ def _decode_server_default(server_default, engine):
         return None
 
 
-def create_column_default(table_oid, column_index, default, engine):
-    # Just an alias for update
-    update_column_default(table_oid, column_index, default, engine)
-
-
-def delete_column_default(table_oid, column_index, engine):
-    update_column_default(table_oid, column_index, None, engine)
-
-
-def update_column_default(table_oid, column_index, default, engine):
+def set_column_default(table_oid, column_index, default, engine):
     # Note: default should be textual SQL that produces the desired default
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
