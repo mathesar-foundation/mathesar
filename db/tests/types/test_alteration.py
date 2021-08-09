@@ -18,12 +18,6 @@ engine_email_type = fixtures.engine_email_type
 temporary_testing_schema = fixtures.temporary_testing_schema
 
 
-def test_get_alter_column_types_with_standard_engine(engine):
-    type_dict = alteration.get_supported_alter_column_types(engine)
-    assert len(type_dict) > 0
-    assert all([type_ not in type_dict for type_ in types.CUSTOM_TYPE_DICT])
-
-
 def test_get_alter_column_types_with_custom_engine(engine_with_types):
     type_dict = alteration.get_supported_alter_column_types(engine_with_types)
     assert all(
@@ -284,22 +278,29 @@ expect_cast_tuples = [
     (
         'BOOLEAN',
         [
-            'NUMERIC', 'DOUBLE PRECISION', 'FLOAT', 'BOOLEAN', 'REAL',
-            'VARCHAR',
+            'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC',
+            'REAL', 'VARCHAR',
+        ]
+    ),
+    (
+        'DECIMAL',
+        [
+            'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC',
+            'REAL', 'VARCHAR'
         ]
     ),
     (
         'DOUBLE PRECISION',
         [
-            'BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC', 'REAL',
-            'VARCHAR',
+            'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC',
+            'REAL', 'VARCHAR',
         ]
     ),
     (
         'FLOAT',
         [
-            'BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC', 'REAL',
-            'VARCHAR',
+            'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC',
+            'REAL', 'VARCHAR',
         ]
     ),
     (
@@ -312,16 +313,22 @@ expect_cast_tuples = [
     ),
     (
         'NUMERIC',
-        ['BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC', 'REAL', 'VARCHAR']
+        [
+            'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC',
+            'REAL', 'VARCHAR',
+        ]
     ),
     (
         'REAL',
-        ['BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC', 'REAL', 'VARCHAR']
+        [
+            'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT', 'NUMERIC',
+            'REAL', 'VARCHAR'
+        ]
     ),
     (
         'VARCHAR',
         [
-            'BOOLEAN', 'DOUBLE PRECISION', 'FLOAT', 'INTERVAL',
+            'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT', 'INTERVAL',
             'mathesar_types.email', 'NUMERIC', 'REAL', 'VARCHAR',
         ]
     ),
