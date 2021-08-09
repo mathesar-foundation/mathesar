@@ -133,7 +133,6 @@ class MathesarColumn(Column):
     def default_value(self):
         return _decode_server_default(self.server_default, self.engine)
 
-
     @property
     def plain_type(self):
         """
@@ -342,7 +341,7 @@ def _decode_server_default(server_default, engine):
         return None
 
 
-def set_column_default(table_oid, column_index, default, engine):
+def set_column_default(table_oid, column_index, default, engine, **kwargs):
     # Note: default should be textual SQL that produces the desired default
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
@@ -353,4 +352,7 @@ def set_column_default(table_oid, column_index, default, engine):
         op.alter_column(
             table.name, column.name, schema=table.schema, server_default=default_clause
         )
-    return tables.reflect_table_from_oid(table_oid, engine).columns[column_index]
+    return get_mathesar_column_with_engine(
+        tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
+        engine
+    )

@@ -15,7 +15,6 @@ from sqlalchemy_filters.exceptions import (
 )
 
 from db.types.alteration import UnsupportedTypeException
-from db.columns import MathesarColumn
 from db.records import BadGroupFormat, GroupFieldNotFound
 
 from mathesar.database.utils import get_non_default_database_keys
@@ -242,7 +241,7 @@ class ColumnViewSet(viewsets.ViewSet):
                 )
             else:
                 raise APIException(e)
-        out_serializer = ColumnSerializer(mathesar_column)
+        out_serializer = ColumnSerializer(column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):

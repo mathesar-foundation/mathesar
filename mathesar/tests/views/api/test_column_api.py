@@ -164,6 +164,7 @@ create_default_test_list = [
     ("INTERVAL", timedelta(minutes=42), "2520.0"),
     ("NUMERIC", 42, 42.0),
     ("STRING", "test_string", "test_string"),
+    ("VARCHAR", "test_string", "test_string"),
     ("DATE", date(2020, 1, 1), "2020-01-01"),
     ("EMAIL", "test@test.com", "test@test.com"),
 ]
