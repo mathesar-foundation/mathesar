@@ -6,6 +6,9 @@ $color-gray-200: #e2e2e4;
 .schemas {
   @include container.container;
 
+  overflow: auto;
+  height: 100%;
+
   .hero {
     background-color: $color-gray-50;
     padding-top: 2em;

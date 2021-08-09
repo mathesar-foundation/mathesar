@@ -42,6 +42,7 @@ module.exports = {
         'no-void': 'off',
         'no-useless-escape': 'off',
         'no-underscore-dangle': 'off',
+        'no-bitwise': 'off',
       },
     },
     {
