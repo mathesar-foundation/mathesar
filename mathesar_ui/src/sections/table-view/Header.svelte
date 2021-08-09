@@ -5,7 +5,7 @@
     faSortAmountDownAlt,
     faThList,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Dropdown, Icon } from '@mathesar-components';
+  import { Button, Dropdown, Icon, TextInput } from '@mathesar-components';
   import type {
     TableColumnData,
     ColumnPosition,
@@ -28,6 +28,7 @@
   export let isResultGrouped: boolean;
 
   let headerRef: HTMLElement;
+  let new_column_name:string = "";
 
   function onHScrollOffsetChange(_hscrollOffset: number) {
     if (headerRef) {
@@ -87,6 +88,19 @@
     dispatch('reload', {
       resetPositions: oldSize === 0 || group.size === 0,
     });
+  }
+
+  function addColumn() {
+    let column:TableColumn = columns.data[0]
+    let new_column:TableColumn = {
+        name: new_column_name,
+        type: "varchar",
+        index: columns.data.length,
+        nullable:true,
+        primaryKey:false,
+        validTargetTypes: column.validTargetTypes
+    }
+    dispatch('addColumn', new_column)
   }
 </script>
 
@@ -150,10 +164,29 @@
     </div>
   {/each}
   <div class="cell" style="width:{70 + DEFAULT_ROW_RIGHT_PADDING}px;left:{
-      columnPosition.get('__row').width + paddingLeft
-    }px;">
-    <div class="add">
-      +
-    </div>
-  </div>
+    columnPosition.get('__row').width + paddingLeft
+  }px;">
+    <Dropdown closeOnInnerClick={false}
+              contentClass="table-opts-content"
+              isOpen={true}
+              triggerClass=""
+              triggerAppearance="plain">
+
+      <svelte:fragment slot="trigger">
+        <span class="name">Add New Column</span>
+      </svelte:fragment>
+
+      <svelte:fragment slot="content">
+
+        <TextInput bind:value={new_column_name}>
+          <svelte:fragment slot="prepend">Column Name</svelte:fragment>
+        </TextInput>
+        <!-- on:click={addNewColumn} -->
+        <Button disabled={(new_column_name.length === 0) ? true : false } on:click={addColumn}>
+          Add new column
+        </Button>
+      </svelte:fragment>
+
+    </Dropdown>
+</div>
 </div>
