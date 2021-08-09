@@ -1,4 +1,4 @@
-import { schemas, reloadSchemas } from '@mathesar/stores/schemas';
+import { currentSchema } from '@mathesar/stores/schemas';
 import { getFileStoreData, setFileStore } from '@mathesar/stores/fileImports';
 import { replaceTab } from '@mathesar/stores/tabs';
 import { uploadFile, States, postAPI } from '@mathesar/utils/api';
@@ -96,16 +96,16 @@ export function getFileUploadInfo(
 
 function createTable(database: string, importId: string) {
   const fileImportData = getFileStoreData(database, importId);
-  const schemaList = get(schemas).data;
+  const schemaId = get(currentSchema)?.id;
 
   if (
     fileImportData.uploadStatus === States.Done
-    && schemaList[0]?.id
+    && typeof schemaId === 'number'
     && fileImportData.dataFileId
   ) {
     const importPromise = postAPI('/tables/', {
       name: fileImportData.name,
-      schema: schemaList[0].id,
+      schema: schemaId,
       data_files: [fileImportData.dataFileId],
     });
 
@@ -116,7 +116,6 @@ function createTable(database: string, importId: string) {
     });
 
     importPromise.then((res: { id: number, name: string }) => {
-      void reloadSchemas();
       setFileStore(database, importId, {
         importStatus: States.Done,
       });
