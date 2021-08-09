@@ -49,6 +49,15 @@ def get_supported_alter_column_types(engine, friendly_names=True):
     return type_map
 
 
+def get_supported_alter_column_db_types(engine):
+    return set(
+        [
+            type_().compile(dialect=engine.dialect)
+            for type_ in get_supported_alter_column_types(engine).values()
+        ]
+    )
+
+
 def get_robust_supported_alter_column_type_map(engine):
     supported_types = get_supported_alter_column_types(engine, friendly_names=True)
     supported_types.update(get_supported_alter_column_types(engine, friendly_names=False))
@@ -332,26 +341,14 @@ def _get_numeric_type_body_map():
     boolean -> numeric:  We cast TRUE -> 1, FALSE -> 0
     varchar -> numeric:  We use the default PostgreSQL behavior.
     """
-    return {
-        NUMERIC: """
-        BEGIN
-          RETURN $1;
-        END;
-        """,
-        BOOLEAN: f"""
-        BEGIN
-          IF $1 THEN
-            RETURN 1::{NUMERIC};
-          END IF;
-          RETURN 0;
-        END;
-        """,
-        VARCHAR: f"""
-        BEGIN
-          RETURN $1::{NUMERIC};
-        END;
-        """,
+
+    default_behavior_source_types = [FLOAT, NUMERIC, VARCHAR]
+    type_body_map = {
+        type_name: _get_default_behavior_cast_str(NUMERIC)
+        for type_name in default_behavior_source_types
     }
+    type_body_map.update({BOOLEAN: _get_boolean_to_number_cast(NUMERIC)})
+    return type_body_map
 
 
 def _get_float_type_body_map():
@@ -359,30 +356,28 @@ def _get_float_type_body_map():
     Get SQL strings that create various functions for casting different
     types to floats.
 
-    numeric -> float:  Identity. No remarks
+    float -> float:    Identity. No remarks
     boolean -> float:  We cast TRUE -> 1, FALSE -> 0
     varchar -> float:  We use the default PostgreSQL behavior.
     """
-    return {
-        FLOAT: """
-        BEGIN
-          RETURN $1;
-        END;
-        """,
-        BOOLEAN: f"""
-        BEGIN
-          IF $1 THEN
-            RETURN 1::{FLOAT};
-          END IF;
-          RETURN 0::{FLOAT};
-        END;
-        """,
-        VARCHAR: f"""
-        BEGIN
-          RETURN $1::{FLOAT};
-        END;
-        """,
+    default_behavior_source_types = [FLOAT, NUMERIC, VARCHAR]
+    type_body_map = {
+        type_name: _get_default_behavior_cast_str(FLOAT)
+        for type_name in default_behavior_source_types
     }
+    type_body_map.update({BOOLEAN: _get_boolean_to_number_cast(FLOAT)})
+    return type_body_map
+
+
+def _get_boolean_to_number_cast(target_type):
+    return f"""
+    BEGIN
+      IF $1 THEN
+        RETURN 1::{target_type};
+      END IF;
+      RETURN 0::{target_type};
+    END;
+    """
 
 
 def _get_varchar_type_body_map(engine):
@@ -393,7 +388,7 @@ def _get_varchar_type_body_map(engine):
     All casts to varchar use default PostgreSQL behavior.
     All types in get_supported_alter_column_types are supported.
     """
-    supported_types = get_supported_alter_column_types(engine, friendly_names=True)
+    supported_types = get_supported_alter_column_db_types(engine)
     type_body_map = {
         type_name: _get_default_behavior_cast_str(VARCHAR)
         for type_name in supported_types
