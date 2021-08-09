@@ -5,8 +5,8 @@
   } from '@fortawesome/free-solid-svg-icons';
 
   import { get } from 'svelte/store';
-  import { databases, selectedDB } from '@mathesar/stores/databases';
-  import { selectedSchema, getSchemaStore } from '@mathesar/stores/schemas';
+  import { databases, currentDB } from '@mathesar/stores/databases';
+  import { currentSchema, getSchemaStore } from '@mathesar/stores/schemas';
 
   import {
     TextAvatar,
@@ -17,7 +17,7 @@
 
   import type { Database, Schema } from '@mathesar/App.d';
 
-  let interalSelectedDB: Database = get(selectedDB);
+  let interalSelectedDB: Database = get(currentDB);
   $: schemas = getSchemaStore(interalSelectedDB.name);
 
   let isOpen;
@@ -37,7 +37,7 @@
   }
 
   function selectSchema(schema: Schema) {
-    selectedSchema.set(schema);
+    currentSchema.set(schema);
     isOpen = false;
   }
 </script>
@@ -45,12 +45,12 @@
 <Dropdown bind:isOpen triggerAppearance="plain"
           triggerClass="selector" contentClass="selector-content">
   <svelte:fragment slot="trigger">
-    <TextAvatar text={$selectedDB.name} />
-    {$selectedDB.name}
+    <TextAvatar text={$currentDB.name} />
+    {$currentDB.name}
     <span class="separator">/</span>
-    {#if $selectedSchema}
+    {#if $currentSchema}
       <Icon class="schema" data={faProjectDiagram} />
-      {$selectedSchema?.name || ''}
+      {$currentSchema?.name || ''}
     {/if}
   </svelte:fragment>
 

@@ -13,14 +13,14 @@ import { getAPI, PaginatedResponse, States } from '@mathesar/utils/api';
 import type { Database, Schema, SchemaEntry } from '@mathesar/App.d';
 import type { CancellablePromise } from '@mathesar/components';
 
-import { selectedDB } from './databases';
+import { currentDB } from './databases';
 
 const commonData = preloadCommonData();
 
 const selected: Schema = commonData.schemas?.find(
-  (entry) => entry.id === commonData.selected_schema,
+  (entry) => entry.id === commonData.current_schema,
 ) || null;
-export const selectedSchema: Writable<Schema> = writable(selected);
+export const currentSchema: Writable<Schema> = writable(selected);
 
 interface SchemaMapEntry extends SchemaEntry {
   children?: number[],
@@ -96,8 +96,8 @@ export async function fetchSchemas(
       ...generateEntryMaps(data),
     });
 
-    if (!get(selectedSchema) && data.length > 0) {
-      selectedSchema.set(data[0]);
+    if (!get(currentSchema) && data.length > 0) {
+      currentSchema.set(data[0]);
     }
 
     return data;
@@ -115,7 +115,7 @@ let preload = true;
 export function getSchemaStore(database: string): Writable<SchemaStoreData> {
   let store = dbSchemaStoreMap.get(database);
   if (!store) {
-    // TODO: Set and check selectedDB in preloaded data
+    // TODO: Set and check currentDB in preloaded data
     if (preload) {
       preload = false;
       store = writable({
@@ -137,17 +137,17 @@ export function getSchemaStore(database: string): Writable<SchemaStoreData> {
 }
 
 export const schemas: Readable<SchemaStoreData> = derived(
-  selectedDB,
-  ($selectedDB, set) => {
+  currentDB,
+  ($currentDB, set) => {
     let unsubscribe: Unsubscriber;
 
-    if (!$selectedDB) {
+    if (!$currentDB) {
       set({
         state: States.Done,
         data: [],
       });
     } else {
-      const store = getSchemaStore($selectedDB.name);
+      const store = getSchemaStore($currentDB.name);
       unsubscribe = store.subscribe((schemaData) => {
         set(schemaData);
       });

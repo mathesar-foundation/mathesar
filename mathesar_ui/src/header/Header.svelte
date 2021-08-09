@@ -4,8 +4,8 @@
     faUser,
   } from '@fortawesome/free-solid-svg-icons';
 
-  import { selectedDB } from '@mathesar/stores/databases';
-  import { selectedSchema } from '@mathesar/stores/schemas';
+  import { currentDB } from '@mathesar/stores/databases';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import { newImport } from '@mathesar/stores/fileImports';
 
   import {
@@ -23,14 +23,14 @@
     </div>
   </div>
 
-  {#if $selectedDB}
+  {#if $currentDB}
     <SchemaSelector/>
   {/if}
 
   <div class="right-options">
-    {#if $selectedSchema}
+    {#if $currentSchema}
       <div class="quick-links">
-        <Button on:click={() => newImport($selectedDB.name)}>
+        <Button on:click={() => newImport($currentDB.name)}>
           New table
         </Button>
       </div>

@@ -12,9 +12,9 @@ import type { CancellablePromise } from '@mathesar/components';
 
 const commonData = preloadCommonData();
 const selected: Database = commonData.databases?.find(
-  (entry) => entry.name === commonData.selected_db,
+  (entry) => entry.name === commonData.current_db,
 ) || null;
-export const selectedDB: Writable<Database> = writable(selected);
+export const currentDB: Writable<Database> = writable(selected);
 
 export interface DatabaseStoreData {
   preload?: boolean,

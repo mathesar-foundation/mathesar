@@ -1,4 +1,4 @@
-import { selectedSchema } from '@mathesar/stores/schemas';
+import { currentSchema } from '@mathesar/stores/schemas';
 import { getFileStoreData, setFileStore } from '@mathesar/stores/fileImports';
 import { replaceTab } from '@mathesar/stores/tabs';
 import { uploadFile, States, postAPI } from '@mathesar/utils/api';
@@ -96,7 +96,7 @@ export function getFileUploadInfo(
 
 function createTable(database: string, importId: string) {
   const fileImportData = getFileStoreData(database, importId);
-  const schemaId = get(selectedSchema)?.id;
+  const schemaId = get(currentSchema)?.id;
 
   if (
     fileImportData.uploadStatus === States.Done

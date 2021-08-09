@@ -24,8 +24,8 @@ def get_database_list(request):
 
 def get_common_data(request, database, schema=None):
     return {
-        'selected_db': database.name if database else None,
-        'selected_schema': schema.id if schema else None,
+        'current_db': database.name if database else None,
+        'current_schema': schema.id if schema else None,
         'schemas': get_schema_list(request, database),
         'databases': get_database_list(request)
     }

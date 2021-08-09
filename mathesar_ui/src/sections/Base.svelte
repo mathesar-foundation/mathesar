@@ -6,7 +6,7 @@
     Icon,
   } from '@mathesar-components';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
-  import { selectedSchema } from '@mathesar/stores/schemas';
+  import { currentSchema } from '@mathesar/stores/schemas';
   import type { Schema } from '@mathesar/App.d';
   import {
     getAllTabsForDB,
@@ -64,11 +64,11 @@
   <title>Mathesar - {$activeTab?.label || 'Home'}</title>
 </svelte:head>
 
-{#if $selectedSchema}
+{#if $currentSchema}
   <aside>
     <nav>
-      <Tree data={[$selectedSchema]} idKey="id" labelKey="name" childKey="tables"
-            search={true} {getLink} expandedItems={new Set([$selectedSchema.id])}
+      <Tree data={[$currentSchema]} idKey="id" labelKey="name" childKey="tables"
+            search={true} {getLink} expandedItems={new Set([$currentSchema.id])}
             bind:selectedItems={activeTable} on:nodeSelected={tableSelected}
             let:entry>
           <Icon data={faTable}/>
