@@ -4,9 +4,11 @@
     getTable,
     fetchTableRecords,
     deleteRecords,
+    addColumn
   } from '@mathesar/stores/tableData';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
   import type {
+    TableColumn,
     TableColumnStore,
     TableRecordStore,
     TableOptionsStore,
@@ -120,6 +122,11 @@
       void deleteRecords(database, identifier, selectedEntries);
     }
   }
+
+  function columnAdd(event) {
+    let new_column:TableColumn = event.detail
+    void addColumn(database, identifier, new_column);
+  }
 </script>
 
 <ActionsPane {columns} {records} {options} {selectedEntries}
@@ -148,7 +155,8 @@
               isResultGrouped={!!$records.groupData}
               bind:columnPosition={$columnPosition}
               bind:horizontalScrollOffset={$horizontalScrollOffset}
-              on:reload={reload}/>
+              on:reload={reload}
+              on:addColumn={columnAdd}/>
 
       <Body bind:this={tableBodyRef} id={idKey}
             columns={$columns} data={$records.data}
