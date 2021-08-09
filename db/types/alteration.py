@@ -354,6 +354,37 @@ def _get_numeric_type_body_map():
     }
 
 
+def _get_float_type_body_map():
+    """
+    Get SQL strings that create various functions for casting different
+    types to floats.
+
+    numeric -> float:  Identity. No remarks
+    boolean -> float:  We cast TRUE -> 1, FALSE -> 0
+    varchar -> float:  We use the default PostgreSQL behavior.
+    """
+    return {
+        FLOAT: """
+        BEGIN
+          RETURN $1;
+        END;
+        """,
+        BOOLEAN: f"""
+        BEGIN
+          IF $1 THEN
+            RETURN 1::{FLOAT};
+          END IF;
+          RETURN 0::{FLOAT};
+        END;
+        """,
+        VARCHAR: f"""
+        BEGIN
+          RETURN $1::{FLOAT};
+        END;
+        """,
+    }
+
+
 def _get_varchar_type_body_map(engine):
     """
     Get SQL strings that create various functions for casting different
