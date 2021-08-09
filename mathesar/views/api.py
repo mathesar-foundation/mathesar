@@ -352,8 +352,7 @@ class RecordViewSet(viewsets.ViewSet):
     def destroy(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
         try:
-            record = table.destroy(request.data)
-            serializer = RecordSerializer(record)
+            table.destroy(request.data)
         except NotUniquePrimaryKey as e:
             logger.error(e.message)
             raise e
