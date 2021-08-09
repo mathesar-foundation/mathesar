@@ -2,6 +2,7 @@ import { get, writable, Writable } from 'svelte/store';
 import { deleteAPI, getAPI, postAPI, States } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
 import type { SelectOption } from '@mathesar-components/types';
+import { createEventDispatcher } from 'svelte';
 
 export const DEFAULT_COUNT_COL_WIDTH = 70;
 export const DEFAULT_COLUMN_WIDTH = 160;
@@ -201,6 +202,7 @@ function checkAndSetGroupHeaderRow(
 }
 
 async function fetchTableDetails(db: string, id: number): Promise<void> {
+  console.log("FETCHTABLEDETAILS")
   const table = databaseMap.get(db)?.get(id);
   if (table) {
     const tableColumnStore = table.columns;
@@ -258,6 +260,7 @@ export async function fetchTableRecords(
   id: number,
   reload = false,
 ): Promise<void> {
+  console.log("FETCHTABLERECORDS")
   const table = databaseMap.get(db)?.get(id);
   if (table) {
     const tableRecordStore = table.records;
@@ -522,27 +525,17 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
 export async function addColumn(db:string, id:number, new_column:TableColumn): Promise<void> {
   const table = databaseMap.get(db)?.get(id);
   if (table) {
-    const tableColumnStore = table.columns;
-    const columnData:TableColumnData = get(tableColumnStore)
-
     try {
-      const success = new Set();
-      const failed = new Set();
       const promise = postAPI<unknown>(`/tables/${id}/columns/`, new_column)
           .then(() => {
-            success.add(new_column);
-            return success;
+            void fetchTableDetails(db, id);
+            void fetchTableRecords(db, id, true);
           })
           .catch((err) => {
-            failed.add(new_column);
-            return failed;
+            console.error(err)
           });
-
-      await promise;
-      columnData.data.push(new_column)
-      tableColumnStore.set(columnData)
     } catch (err) {
-
+      console.error(err)
     }
   }
 }
