@@ -1,46 +1,28 @@
 <script lang="ts">
   import { Route } from 'tinro';
-  import { preloadCommonData } from '@mathesar/utils/preloadData';
+  import { currentDB } from '@mathesar/stores/databases';
   import Base from '@mathesar/sections/Base.svelte';
   import Schemas from '@mathesar/pages/schemas/Schemas.svelte';
-  import { newImport } from '@mathesar/stores/fileImports';
-  import { Button } from '@mathesar-components';
-
-  const commonData = preloadCommonData();
-  const selectedDb = commonData?.databases?.[0];
+  import Header from './header/Header.svelte';
 </script>
 
-<header>
-  <div class="selector">
-    {#if selectedDb}
-      <div>{selectedDb}</div>
-    {/if}
-  </div>
-  <div class="navigator">
-    <Button on:click={() => newImport(selectedDb)}>
-      Import CSV
-    </Button>
-    <a href="/{selectedDb}/schemas/">
-      Manage schemas
-    </a>
-  </div>
-</header>
+<Header/>
 
 <section class="content-section">
-  <Route path="/:db/*">
-    <Route path="/schemas">
-      {#key selectedDb}
-        <Schemas database={selectedDb}/>
-      {/key}
+  {#if $currentDB}
+    <Route path="/:db/*" firstmatch>
+      <Route path="/schemas">
+        <Schemas/>
+      </Route>
+      <Route path="/:schema">
+        {#key $currentDB}
+          <Base database={$currentDB.name}/>
+        {/key}
+      </Route>
     </Route>
-    <Route path="/">
-      {#key selectedDb}
-        <Base database={selectedDb}/>
-      {/key}
-    </Route>
-  </Route>
 
-  <Route path="/" redirect="/{selectedDb}"/>
+    <Route path="/" redirect="/{$currentDB.name}"/>
+  {/if}
 </section>
 
 <style global lang="scss">

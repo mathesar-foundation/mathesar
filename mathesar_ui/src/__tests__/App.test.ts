@@ -1,14 +1,15 @@
 import '@testing-library/jest-dom/extend-expect';
 import { render } from '@testing-library/svelte';
-import App from '../App.svelte';
 
 function addCommonDataScript() {
   const commonDataScript = document.createElement('script');
   commonDataScript.id = 'common-data';
   commonDataScript.type = 'application/json';
+  const currentDB = { id: 1, name: 'mathesar_tables' };
   commonDataScript.textContent = JSON.stringify({
     schemas: [],
-    databases: ['mathesar_tables'],
+    databases: [currentDB],
+    current_db: currentDB.name,
   });
   document.body.append(commonDataScript);
 }
@@ -20,9 +21,10 @@ function removeCommonDataScript() {
   }
 }
 
-test('shows mathesar default text when rendered', () => {
+test('shows mathesar default text when rendered', async () => {
   addCommonDataScript();
-  const { getByText } = render(App, {});
+  const App = await import('../App.svelte');
+  const { getByText } = render(App.default, {});
   expect(getByText('mathesar_tables')).toBeInTheDocument();
   removeCommonDataScript();
 });

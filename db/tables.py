@@ -530,7 +530,11 @@ def get_column_cast_records(engine, table, column_definitions, num_records=20):
     assert len(column_definitions) == len(table.columns)
     cast_expression_list = [
         (
-            alteration.get_column_cast_expression(column, col_def["type"], engine)
+            alteration.get_column_cast_expression(
+                column, col_def["type"],
+                engine,
+                type_options=col_def.get("type_options", {})
+            )
             .label(col_def["name"])
         ) if not columns.MathesarColumn.from_column(column).is_default else column
         for column, col_def in zip(table.columns, column_definitions)

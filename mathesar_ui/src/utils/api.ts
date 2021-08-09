@@ -19,6 +19,11 @@ export interface URLObject {
   avoidPrefix?: boolean
 }
 
+export interface PaginatedResponse<T> {
+  count: number,
+  results: T[]
+}
+
 const urlPrefix = '/api/v0';
 const NO_CONTENT = 204;
 const successStatusCodes = new Set([200, 201, NO_CONTENT]);

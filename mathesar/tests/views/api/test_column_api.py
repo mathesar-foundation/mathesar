@@ -40,6 +40,7 @@ def test_column_list(column_test_table, client):
         {
             'name': 'mycolumn0',
             'type': 'INTEGER',
+            'type_options': None,
             'index': 0,
             'nullable': False,
             'primary_key': True,
@@ -49,6 +50,7 @@ def test_column_list(column_test_table, client):
         {
             'name': 'mycolumn1',
             'type': 'INTEGER',
+            'type_options': None,
             'index': 1,
             'nullable': False,
             'primary_key': False,
@@ -58,6 +60,7 @@ def test_column_list(column_test_table, client):
         {
             'name': 'mycolumn2',
             'type': 'INTEGER',
+            'type_options': None,
             'index': 2,
             'nullable': True,
             'primary_key': False,
@@ -67,6 +70,7 @@ def test_column_list(column_test_table, client):
         {
             'name': 'mycolumn3',
             'type': 'VARCHAR',
+            'type_options': None,
             'index': 3,
             'nullable': True,
             'primary_key': False,
@@ -91,6 +95,7 @@ def test_column_list(column_test_table, client):
             {
                 'name': 'mycolumn0',
                 'type': 'INTEGER',
+                'type_options': None,
                 'index': 0,
                 'nullable': False,
                 'primary_key': True,
@@ -103,6 +108,7 @@ def test_column_list(column_test_table, client):
             {
                 'name': 'mycolumn2',
                 'type': 'INTEGER',
+                'type_options': None,
                 'index': 2,
                 'nullable': True,
                 'primary_key': False,
@@ -188,6 +194,54 @@ def test_column_create_default(
     assert created_default == default
 
 
+def test_column_create_retrieve_options(column_test_table, client):
+    name = "anewcolumn"
+    type_ = "NUMERIC"
+    type_options = {"precision": 5, "scale": 3}
+    cache.clear()
+    num_columns = len(column_test_table.sa_columns)
+    data = {
+        "name": name, "type": type_, "type_options": type_options,
+    }
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/",
+        data=json.dumps(data),
+        content_type='application/json'
+    )
+    assert response.status_code == 201
+    new_columns_response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    assert new_columns_response.json()["count"] == num_columns + 1
+    actual_new_col = new_columns_response.json()["results"][-1]
+    assert actual_new_col["name"] == name
+    assert actual_new_col["type"] == type_
+    assert actual_new_col["type_options"] == type_options
+
+
+invalid_type_options = [
+    {"precision": 5, "scale": 8},
+    {"precision": "asd"},
+    {"nonoption": 34},
+]
+
+
+@pytest.mark.parametrize("type_options", invalid_type_options)
+def test_column_create_bad_options(column_test_table, client, type_options):
+    name = "anewcolumn"
+    type_ = "NUMERIC"
+    cache.clear()
+    data = {
+        "name": name, "type": type_, "type_options": type_options,
+    }
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/",
+        data=json.dumps(data),
+        content_type='application/json'
+    )
+    assert response.status_code == 400
+
+
 def test_column_create_duplicate(column_test_table, client):
     column = column_test_table.sa_columns[0]
     name = column.name
@@ -241,6 +295,33 @@ def test_column_update_type(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/3/", data=data
     )
     assert response.json()["type"] == type_
+
+
+def test_column_update_type_options(column_test_table, client):
+    cache.clear()
+    type_ = "NUMERIC"
+    type_options = {"precision": 3, "scale": 1}
+    data = {"type": type_, "type_options": type_options}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/3/",
+        data=json.dumps(data),
+        content_type='application/json'
+    )
+    assert response.json()["type"] == type_
+    assert response.json()["type_options"] == type_options
+
+
+@pytest.mark.parametrize("type_options", invalid_type_options)
+def test_column_update_type_invalid_options(column_test_table, client, type_options):
+    cache.clear()
+    type_ = "NUMERIC"
+    data = {"type": type_, "type_options": type_options}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/3/",
+        data=json.dumps(data),
+        content_type='application/json'
+    )
+    assert response.status_code == 400
 
 
 def test_column_update_type_invalid_cast(column_test_table, client):

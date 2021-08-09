@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from django_filters import rest_framework as filters
 from psycopg2.errors import (
     DuplicateColumn, DuplicateTable, UndefinedFunction, UniqueViolation, UndefinedObject,
-    InvalidTextRepresentation, CheckViolation
+    InvalidTextRepresentation, CheckViolation, InvalidParameterValue
 )
 from sqlalchemy.exc import ProgrammingError, DataError, IntegrityError
 from sqlalchemy_filters.exceptions import (
@@ -160,7 +160,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         table = self.get_object()
         serializer = TablePreviewSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        columns = serializer.validated_data["columns"]
+        columns = serializer.data["columns"]
 
         column_names = [col["name"] for col in columns]
         if not len(column_names) == len(set(column_names)):
@@ -178,8 +178,9 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
                 raise APIException
         except UnsupportedTypeException as e:
             raise ValidationError(e)
-        except Exception:
-            raise APIException
+        except Exception as e:
+            raise APIException(e)
+
         table_data.update(
             {
                 # There's no way to reflect actual column data without
@@ -228,9 +229,19 @@ class ColumnViewSet(viewsets.ViewSet):
                 )
             else:
                 raise APIException(e)
-
-        mathesar_column = MathesarColumn.from_column(column)
-        mathesar_column.add_engine(table.schema._sa_engine)
+        except TypeError:
+            raise ValidationError("Unknown type_option passed")
+        except DataError as e:
+            if (
+                    type(e.orig) == InvalidParameterValue
+                    or type(e.orig) == InvalidTextRepresentation
+            ):
+                raise ValidationError(
+                    f'parameter dict {request.data["type_options"]} is'
+                    f' invalid for type {request.data["type"]}'
+                )
+            else:
+                raise APIException(e)
         out_serializer = ColumnSerializer(mathesar_column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
@@ -246,9 +257,22 @@ class ColumnViewSet(viewsets.ViewSet):
                 raise ValidationError
         except IndexError:
             raise NotFound
-        mathesar_column = MathesarColumn.from_column(column)
-        mathesar_column.add_engine(table.schema._sa_engine)
-        serializer = ColumnSerializer(mathesar_column)
+        except TypeError:
+            raise ValidationError("Unknown type_option passed")
+        except DataError as e:
+            if (
+                    type(e.orig) == InvalidParameterValue
+                    or type(e.orig) == InvalidTextRepresentation
+            ):
+                raise ValidationError(
+                    f'parameter dict {request.data["type_options"]} is'
+                    f' invalid for type {request.data["type"]}'
+                )
+            else:
+                raise APIException(e)
+        except Exception as e:
+            raise APIException(e)
+        serializer = ColumnSerializer(column)
         return Response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
