@@ -33,7 +33,7 @@ from mathesar.utils.tables import (
 from mathesar.utils.datafiles import create_datafile
 from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
 
-from db.records import BadGroupFormat, GroupFieldNotFound
+from db.records import BadGroupFormat, GroupFieldNotFound, NotUniquePrimaryKey
 
 logger = logging.getLogger(__name__)
 
@@ -331,19 +331,32 @@ class RecordViewSet(viewsets.ViewSet):
         table = get_table_or_404(table_pk)
         # We only support adding a single record through the API.
         assert isinstance((request.data), dict)
-        record = table.create_record_or_records(request.data)
-        serializer = RecordSerializer(record)
+        try:
+            record = table.create_record_or_records(request.data)
+            serializer = RecordSerializer(record)
+        except NotUniquePrimaryKey as e:
+            logger.error(e.message)
+            raise e
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
-        record = table.update_record(pk, request.data)
-        serializer = RecordSerializer(record)
+        try:
+            record = table.partial_update(request.data)
+            serializer = RecordSerializer(record)
+        except NotUniquePrimaryKey as e:
+            logger.error(e.message)
+            raise e
         return Response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
-        table.delete_record(pk)
+        try:
+            record = table.destroy(request.data)
+            serializer = RecordSerializer(record)
+        except NotUniquePrimaryKey as e:
+            logger.error(e.message)
+            raise e
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
