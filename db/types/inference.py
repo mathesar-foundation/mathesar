@@ -30,12 +30,14 @@ class DagCycleError(Exception):
 
 def get_reverse_type_map(engine):
     supported_types = alteration.get_supported_alter_column_types(engine)
-    reverse_type_map = {
-        Text: alteration.STRING,
-        TEXT: alteration.STRING,
-        VARCHAR: alteration.STRING,
-    }
-    reverse_type_map.update({v: k for k, v in supported_types.items()})
+    reverse_type_map = {v: k for k, v in supported_types.items()}
+    reverse_type_map.update(
+        {
+            Text: alteration.STRING,
+            TEXT: alteration.STRING,
+            VARCHAR: alteration.STRING,
+        }
+    )
     return reverse_type_map
 
 
