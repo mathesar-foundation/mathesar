@@ -1,19 +1,19 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from mathesar.models import Database, Schema
 from mathesar.serializers import DatabaseSerializer, SchemaSerializer
 
 
-def get_schemas(request, database):
+def get_schema_list(request, database):
     schema_serializer = SchemaSerializer(
-        Schema.objects.filter(database__name=database),
+        Schema.objects.filter(database=database),
         many=True,
         context={'request': request}
     )
     return schema_serializer.data
 
 
-def get_databases(request):
+def get_database_list(request):
     database_serializer = DatabaseSerializer(
         Database.objects.all(),
         many=True,
@@ -22,84 +22,63 @@ def get_databases(request):
     return database_serializer.data
 
 
-def get_render_info(request, **kwargs):
-    requested_db = kwargs.get('dbname')
-    requested_schema = kwargs.get('schema')
-    is_db_updated = False
-    is_schema_updated = False
-
-    database_list = get_databases(request)
-
-    # This block check if db is none or invalid, and if true, redirects to the first db.
-    # If db is invalid, and no dbs are configured, sets requested_db to None
-    #   - Mathesar wont start in this case, but if we plan to show a specific error page, or
-    #     allow initial start of Mathesar without a db in the future, this will be essential.
-    if (requested_db is None or next((x for x in database_list if x.get('name') == requested_db), None) is None):
-        if len(database_list) > 0:
-            requested_db = database_list[0].get('name')
-            is_db_updated = True
-        elif requested_db is not None:
-            requested_db = None
-            is_db_updated = True
-
-    schema_list = get_schemas(request, requested_db)
-
-    # Performs the same checks as above, but for schemas
-    if (requested_schema is None or next((x for x in schema_list if x.get('id') == requested_schema), None) is None):
-        if len(schema_list) > 0:
-            requested_schema = schema_list[0].get('id')
-            is_schema_updated = True
-        elif requested_schema is not None:
-            requested_schema = None
-            is_schema_updated = True
-
+def get_common_data(request, database, schema=None):
     return {
-        'is_db_updated': is_db_updated,
-        'is_schema_updated': is_schema_updated,
-        'common_data': {
-            'selected_db': requested_db,
-            'selected_schema': requested_schema,
-            'schemas': schema_list,
-            'databases': database_list
-        }
+        'selected_db': database.name if database else None,
+        'selected_schema': schema.id if schema else None,
+        'schemas': get_schema_list(request, database),
+        'databases': get_database_list(request)
     }
 
 
-def index(request, **kwargs):
-    render_info = get_render_info(request, **kwargs)
-    common_data = render_info.get('common_data')
-    selected_db = common_data.get('selected_db')
-    selected_schema = common_data.get('selected_schema')
-
-    if render_info.get('is_db_updated') or render_info.get('is_schema_updated'):
-        return redirect('index', dbname=selected_db, schema=selected_schema)
-
-    if selected_db is not None and selected_schema is None:
-        return redirect('schemas', dbname=selected_db)
-
-    return render(
-        request,
-        "mathesar/index.html",
-        {
-            "common_data": common_data
-        }
-    )
+def get_current_database(request, db_name):
+    # if there's a DB name passed in, try to retrieve the database, or return a 404 error.
+    if db_name is not None:
+        return get_object_or_404(Database, name=db_name)
+    else:
+        try:
+            # Try to get the first database available
+            return Database.objects.order_by('id').first()
+        except Database.DoesNotExist:
+            return None
 
 
-def schemas(request, **kwargs):
-    render_info = get_render_info(request, **kwargs)
-    common_data = render_info.get('common_data')
-    selected_db = common_data.get('selected_db')
+def get_current_schema(request, schema_id, database):
+    # if there's a schema ID passed in, try to retrieve the schema, or return a 404 error.
+    if schema_id is not None:
+        return get_object_or_404(Schema, id=schema_id)
+    else:
+        try:
+            # Try to get the first schema in the DB
+            return Schema.objects.filter(database=database).order_by('id').first()
+        except Schema.DoesNotExist:
+            return None
 
-    if render_info.get('is_db_updated'):
-        return redirect('schemas', dbname=selected_db)
 
-    common_data['selected_schema'] = None
+def render_schema(request, database, schema):
+    # if there's no schema available, redirect to the schemas page.
+    if not schema:
+        return redirect('schemas', db_name=database.name)
+    else:
+        # We are redirecting so that the correct URL is passed to the frontend.
+        return redirect('schema_home', db_name=database.name, schema_id=schema.id)
 
-    return render(
-        request,
-        "mathesar/index.html",
-        {
-            "common_data": common_data
-        }
-    )
+
+def home(request):
+    database = get_current_database(request, None)
+    schema = get_current_schema(request, None, database)
+    return render_schema(request, database, schema)
+
+
+def db_home(request, db_name):
+    database = get_current_database(request, db_name)
+    schema = get_current_schema(request, None, database)
+    return render_schema(request, database, schema)
+
+
+def schema_home(request, db_name, schema_id):
+    database = get_current_database(request, db_name)
+    schema = get_current_schema(request, schema_id, database)
+    return render(request, 'mathesar/index.html', {
+        'common_data': get_common_data(request, database, schema)
+    })
