@@ -1,5 +1,5 @@
 import { get, writable, Writable } from 'svelte/store';
-import { deleteAPI, getAPI, States } from '@mathesar/utils/api';
+import { deleteAPI, getAPI, postAPI, States } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
 import type { SelectOption } from '@mathesar-components/types';
 
@@ -517,6 +517,34 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
   }
   void fetchTableRecords(db, id);
   return table;
+}
+
+export async function addColumn(db:string, id:number, new_column:TableColumn): Promise<void> {
+  const table = databaseMap.get(db)?.get(id);
+  if (table) {
+    const tableColumnStore = table.columns;
+    const columnData:TableColumnData = get(tableColumnStore)
+
+    try {
+      const success = new Set();
+      const failed = new Set();
+      const promise = postAPI<unknown>(`/tables/${id}/columns/`, new_column)
+          .then(() => {
+            success.add(new_column);
+            return success;
+          })
+          .catch((err) => {
+            failed.add(new_column);
+            return failed;
+          });
+
+      await promise;
+      columnData.data.push(new_column)
+      tableColumnStore.set(columnData)
+    } catch (err) {
+
+    }
+  }
 }
 
 export async function deleteRecords(db: string, id: number, pks: string[]): Promise<void> {
