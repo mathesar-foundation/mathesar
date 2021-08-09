@@ -75,6 +75,7 @@ def test_column_list(column_test_table, client):
                 'FLOAT',
                 'INTERVAL',
                 'NUMERIC',
+                'REAL',
                 'VARCHAR',
                 'mathesar_types.email',
             ],
