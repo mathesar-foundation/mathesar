@@ -34,8 +34,8 @@
       close();
     }
   }
-
 </script>
+
 <Button bind:element={trigger} appearance={triggerAppearance} class={tgClasses} on:click={toggle} 
 aria-controls={ariaControls} aria-haspopup="listbox" aria-label={ariaLabel} on:keydown>
   <span class="label">
@@ -45,6 +45,7 @@ aria-controls={ariaControls} aria-haspopup="listbox" aria-label={ariaLabel} on:k
     <Icon data={faAngleDown}/>
   </span>
 </Button>
+
 {#if isOpen}
   <div  class={['dropdown content', contentClass].join(' ')}
         use:portal use:popper={{ reference: trigger }}

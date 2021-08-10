@@ -8,7 +8,7 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
   import { Dropdown } from '@mathesar-components';
   import type { SelectOption } from './Select.d';
 
@@ -22,7 +22,6 @@
   export let contentClass = '';
   export let triggerClass = '';
   export let ariaLabel: string = null;
-
 
   let isOpen = false;
   let currentIndex = 0;
@@ -84,8 +83,9 @@
           if (options.length == 0) break;
           setValue(options[currentIndex]);
           break;
+      }
     }
-    }
+    
   $: setOptions(options); 
 </script>
 <Dropdown ariaControls="select-value-{selectId}" {ariaLabel} bind:isOpen contentClass="select {contentClass}" {triggerClass} on:keydown={keyAccessibility}>

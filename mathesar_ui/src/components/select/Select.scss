@@ -1,5 +1,6 @@
 .select.dropdown.content {
   padding: 0px;
+
   ul {
     list-style: none;
     padding: 0;
@@ -12,10 +13,10 @@
       &:hover {
         background: #f3f4f5;
       }
+
       &.hovered {
         background: #f3f4f5;
       }
     }
-  
   }
 }
