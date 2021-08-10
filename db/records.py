@@ -274,7 +274,7 @@ def update_record(table, engine, id_value, record_data):
         raise NotUniquePrimaryKey("This table does not have a unique primary key.")
 
     with engine.begin() as connection:
-        first_primary_key_column = _get_primary_key_columns(table, 0)
+        first_primary_key_column = _get_primary_key_column(table, 0)
         connection.execute(
             table.update().where(first_primary_key_column == id_value).values(record_data)
         )
@@ -287,7 +287,7 @@ def delete_record(table, engine, id_value):
     if len(primary_key_columns) != 1:
         raise NotUniquePrimaryKey("This table does not have a unique primary key.")
 
-    first_primary_key_column = _get_primary_key_columns(table, 0)
+    first_primary_key_column = _get_primary_key_column(table, 0)
     query = delete(table).where(first_primary_key_column == id_value)
     with engine.begin() as conn:
         return conn.execute(query)

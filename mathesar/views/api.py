@@ -342,7 +342,7 @@ class RecordViewSet(viewsets.ViewSet):
     def partial_update(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
         try:
-            record = table.partial_update(request.data)
+            record = table.update_record(pk, request.data)
             serializer = RecordSerializer(record)
         except NotUniquePrimaryKey as e:
             logger.error(e.message)
@@ -352,7 +352,7 @@ class RecordViewSet(viewsets.ViewSet):
     def destroy(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
         try:
-            table.destroy(request.data)
+            table.delete_record(pk)
         except NotUniquePrimaryKey as e:
             logger.error(e.message)
             raise e
