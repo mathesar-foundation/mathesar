@@ -1,4 +1,4 @@
-FROM quay.io/ansible/ansible-runner:latest
+FROM quay.io/ansible/ansible-runner:stable-2.11-latest
 
 # Required addons that don't come by default
 RUN ansible-galaxy collection install ansible.posix -p /usr/share/ansible/collections \
