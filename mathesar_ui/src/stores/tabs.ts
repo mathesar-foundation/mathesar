@@ -12,7 +12,7 @@ import {
   removeImport,
 } from '@mathesar/stores/fileImports';
 import { clearTable } from '@mathesar/stores/tableData';
-import { schemas } from '@mathesar/stores/schemas';
+import { getSchemaStore } from '@mathesar/stores/schemas';
 import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
 
 export interface MathesarTab extends Tab {
@@ -31,7 +31,7 @@ function getTabsForDB(db: string): TabList {
   let dbInfo = databaseMap.get(db);
   if (!dbInfo) {
     const tables = [] as MathesarTab[];
-    const { tableMap } = get(schemas);
+    const { tableMap } = get(getSchemaStore(db));
 
     URLQueryHandler.getAllTableConfigs(db).forEach(
       (entry) => {
