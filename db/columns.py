@@ -388,3 +388,7 @@ def duplicate_column(
             new_column_index,
             engine
         )
+
+    table = tables.reflect_table_from_oid(table_oid, engine)
+    column_index = get_column_index_from_name(table_oid, new_column_name, engine)
+    return get_mathesar_column_with_engine(table.c[column_index], engine)

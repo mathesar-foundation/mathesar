@@ -1,4 +1,3 @@
-import re
 from unittest.mock import patch
 from psycopg2.errors import NotNullViolation
 import pytest
@@ -7,7 +6,7 @@ from sqlalchemy import (
     UniqueConstraint, Numeric
 )
 from sqlalchemy.exc import IntegrityError
-from db import columns, tables, constants
+from db import columns, tables, constants, constraints
 from db.types import email
 from db.tests.types import fixtures
 
@@ -586,23 +585,107 @@ def test_drop_column_correct_column(engine_with_schema):
     assert target_column_name not in altered_table.columns
 
 
-def test_duplicate_column(engine_with_schema):
+duplicate_column_options = [
+    (True, True),
+    (True, False),
+    (False, True),
+]
+
+
+def _check_duplicate_results(
+    table_oid, col_index, con_idxs, engine, copy_data, copy_constraints
+):
+    table = tables.reflect_table_from_oid(table_oid, engine)
+
+    with engine.begin() as conn:
+        rows = conn.execute(table.select()).fetchall()
+    if copy_data:
+        assert all([row[0] == row[-1] for row in rows])
+    else:
+        assert all([row[-1] is None for row in rows])
+
+    constraints_ = constraints.get_column_constraints(col_index, table_oid, engine)
+    if copy_constraints:
+        assert len(constraints_) == 1
+        constraint = constraints_[0]
+        assert constraint.contype == "u"
+        assert set([con - 1 for con in constraint.conkey]) == set(con_idxs)
+    else:
+        assert len(constraints_) == 0
+
+
+def test_duplicate_column_name(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atable"
+    new_col_name = "duplicated_column"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column("Filler", Numeric)
+    )
+    table.create()
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    columns.duplicate_column(table_oid, 0, engine, new_col_name)
+    table = tables.reflect_table_from_oid(table_oid, engine)
+    assert new_col_name in table.c
+
+
+@pytest.mark.parametrize('copy_data,copy_constraints', duplicate_column_options)
+def test_duplicate_column_single_unique(engine_with_schema, copy_data, copy_constraints):
     engine, schema = engine_with_schema
     table_name = "atable"
     target_column_name = "columtoduplicate"
+    new_col_name = "duplicated_column"
+    insert_data = [(1,), (2,), (3,)]
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
         Column(target_column_name, Numeric, unique=True),
-        Column("Filler1", Numeric, unique=True),
     )
     table.create()
     with engine.begin() as conn:
-        conn.execute(table.insert().values((1, 1)))
-        conn.execute(table.insert().values((2, 2)))
+        for data in insert_data:
+            conn.execute(table.insert().values(data))
 
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    columns.duplicate_column(table_oid, 0, engine)
+    columns.duplicate_column(
+        table_oid, 0, engine, new_col_name, copy_data, copy_constraints
+    )
+
+    col_index = columns.get_column_index_from_name(table_oid, new_col_name, engine)
+    _check_duplicate_results(
+        table_oid, col_index, [col_index], engine, copy_data, copy_constraints
+    )
+
+
+@pytest.mark.parametrize('copy_data,copy_constraints', duplicate_column_options)
+def test_duplicate_column_multi_unique(engine_with_schema, copy_data, copy_constraints):
+    engine, schema = engine_with_schema
+    table_name = "atable"
+    target_column_name = "columtoduplicate"
+    new_col_name = "duplicated_column"
+    insert_data = [(1, 2), (2, 3), (3, 4)]
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(target_column_name, Numeric),
+        Column("Filler", Numeric),
+        UniqueConstraint(target_column_name, "Filler")
+    )
+    table.create()
+    with engine.begin() as conn:
+        for data in insert_data:
+            conn.execute(table.insert().values(data))
+
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    columns.duplicate_column(
+        table_oid, 0, engine, new_col_name, copy_data, copy_constraints
+    )
+
+    col_index = columns.get_column_index_from_name(table_oid, new_col_name, engine)
+    _check_duplicate_results(
+        table_oid, col_index, [1, col_index], engine, copy_data, copy_constraints
+    )
 
 
 def get_mathesar_column_init_args():
