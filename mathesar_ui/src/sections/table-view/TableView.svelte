@@ -4,7 +4,7 @@
     getTable,
     fetchTableRecords,
     deleteRecords,
-    addColumn
+    addColumn,
   } from '@mathesar/stores/tableData';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
   import type {
@@ -124,8 +124,10 @@
   }
 
   function columnAdd(event) {
-    let new_column:TableColumn = event.detail
-    void addColumn(database, identifier, new_column);
+    const newColumn:TableColumn = (event.detail) ? <TableColumn>event.detail : null;
+    if (newColumn) {
+      void addColumn(database, identifier, newColumn);
+    }
   }
 </script>
 
