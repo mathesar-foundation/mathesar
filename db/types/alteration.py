@@ -3,6 +3,7 @@ from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 from db.types import base, email
 
+BIGINT = "bigint"
 BOOLEAN = "boolean"
 EMAIL = "email"
 DECIMAL = "decimal"
@@ -34,6 +35,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
     dialect_types = engine.dialect.ischema_names
     friendly_type_map = {
         # Default Postgres types
+        BIGINT: dialect_types.get(BIGINT),
         BOOLEAN: dialect_types.get(BOOLEAN),
         DECIMAL: dialect_types.get(DECIMAL),
         DOUBLE_PRECISION: dialect_types.get(DOUBLE_PRECISION),
@@ -162,8 +164,10 @@ def create_email_casts(engine):
 
 
 def create_integer_casts(engine):
-    type_body_map = _get_integer_type_body_map()
-    create_cast_functions(INTEGER, type_body_map, engine)
+    integer_types = [BIGINT, INTEGER]
+    for type_str in integer_types:
+        type_body_map = _get_integer_type_body_map(target_type_str=type_str)
+        create_cast_functions(type_str, type_body_map, engine)
 
 
 def create_interval_casts(engine):
@@ -201,6 +205,7 @@ def get_full_cast_map(engine):
 
 def get_defined_source_target_cast_tuples(engine):
     type_body_map_map = {
+        BIGINT: _get_integer_type_body_map(target_type_str=BIGINT),
         BOOLEAN: _get_boolean_type_body_map(),
         EMAIL: _get_email_type_body_map(),
         DECIMAL: _get_decimal_number_type_body_map(target_type_str=DECIMAL),
@@ -275,7 +280,7 @@ def _get_boolean_type_body_map():
                              exception.
     """
     source_number_types = [
-        DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
+        BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
     ]
     default_behavior_source_types = [BOOLEAN]
 
@@ -369,7 +374,7 @@ def _get_integer_type_body_map(target_type_str=INTEGER):
     We specifically disallow rounding or truncating when casting from numerics,
     etc.
     """
-    default_behavior_source_types = [INTEGER, VARCHAR]
+    default_behavior_source_types = [BIGINT, INTEGER, VARCHAR]
     no_rounding_source_types = [
         DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL
     ]
@@ -412,7 +417,8 @@ def _get_decimal_number_type_body_map(target_type_str=NUMERIC):
     """
 
     default_behavior_source_types = [
-        DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL, VARCHAR
+        BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
+        VARCHAR,
     ]
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, target_type_str,

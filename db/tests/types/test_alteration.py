@@ -18,6 +18,7 @@ engine_email_type = fixtures.engine_email_type
 temporary_testing_schema = fixtures.temporary_testing_schema
 
 
+BIGINT = "BIGINT"
 BOOLEAN = "BOOLEAN"
 DECIMAL = "DECIMAL"
 DOUBLE = "DOUBLE PRECISION"
@@ -27,6 +28,7 @@ INTEGER = "INTEGER"
 INTERVAL = "INTERVAL"
 NUMERIC = "NUMERIC"
 REAL = "REAL"
+SMALLINT = "SMALLINT"
 VARCHAR = "VARCHAR"
 
 
@@ -61,10 +63,26 @@ MASTER_DB_TYPE_MAP_SPEC = {
     # of valid and invalid casting values.  VALID value list is a list of
     # tuples representing the input and expected output, whereas INVALID
     # value list only needs input (since it should break, giving no output)
+    BIGINT: {
+        ISCHEMA_NAME: "bigint",
+        REFLECTED_NAME: BIGINT,
+        TARGET_DICT: {
+            BIGINT: {VALID: [(500, 500), (500000000000, 500000000000)]},
+            BOOLEAN: {VALID: [(1, True), (0, False)], INVALID: [3]},
+            DECIMAL: {VALID: [(1, Decimal('1.0'))]},
+            DOUBLE: {VALID: [(3.0, 3)]},
+            FLOAT: {VALID: [(4.0, 4)]},
+            INTEGER: {VALID: [(500, 500)]},
+            NUMERIC: {VALID: [(1, Decimal('1.0'))]},
+            REAL: {VALID: [(5, 5.0)]},
+            VARCHAR: {VALID: [(3, "3")]},
+        }
+    },
     BOOLEAN: {
         ISCHEMA_NAME: "boolean",
         REFLECTED_NAME: BOOLEAN,
         TARGET_DICT: {
+            BIGINT: {VALID: [(True, 1), (False, 0)]},
             BOOLEAN: {VALID: [(True, True), (False, False)]},
             DECIMAL: {VALID: [(True, Decimal('1.0')), (False, Decimal('0'))]},
             DOUBLE: {VALID: [(True, 1.0), (False, 0.0)]},
@@ -79,6 +97,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: "decimal",
         REFLECTED_NAME: NUMERIC,
         TARGET_DICT: {
+            BIGINT: {VALID: [(500, 500), (1234123412341234, 1234123412341234)]},
             BOOLEAN: {
                 VALID: [(1, True), (0, False), (1.0, True), (0.0, False)],
                 INVALID: [Decimal('1.3')]
@@ -99,6 +118,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: "double precision",
         REFLECTED_NAME: DOUBLE,
         TARGET_DICT: {
+            BIGINT: {VALID: [(500, 500)]},
             BOOLEAN: {VALID: [(1.0, True), (0.0, False)]},
             DECIMAL: {VALID: [(1, 1.0)]},
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
@@ -113,6 +133,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: "float",
         REFLECTED_NAME: DOUBLE,
         TARGET_DICT: {
+            BIGINT: {VALID: [(500, 500)]},
             BOOLEAN: {VALID: [(1.0, True), (0.0, False)], INVALID: [1.234]},
             DECIMAL: {VALID: [(1, 1.0)]},
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
@@ -127,6 +148,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: "integer",
         REFLECTED_NAME: INTEGER,
         TARGET_DICT: {
+            BIGINT: {VALID: [(500, 500)]},
             BOOLEAN: {VALID: [(1, True), (0, False)], INVALID: [3]},
             DECIMAL: {VALID: [(1, Decimal('1.0'))]},
             DOUBLE: {VALID: [(3.0, 3)]},
@@ -172,6 +194,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: "numeric",
         REFLECTED_NAME: NUMERIC,
         TARGET_DICT: {
+            BIGINT: {VALID: [(500, 500)]},
             BOOLEAN: {
                 VALID: [(1, True), (0, False), (1.0, True), (0.0, False)],
                 INVALID: [42, -1]
@@ -192,6 +215,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: "real",
         REFLECTED_NAME: REAL,
         TARGET_DICT: {
+            BIGINT: {VALID: [(500, 500)]},
             BOOLEAN: {
                 VALID: [(1.0, True), (0.0, False)],
                 INVALID: [42, -1]
@@ -213,6 +237,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
         SUPPORTED_MAP_NAME: "varchar",
         REFLECTED_NAME: VARCHAR,
         TARGET_DICT: {
+            BIGINT: {
+                VALID: [("432", 432), ("1234123412341234", 1234123412341234)],
+                INVALID: ["1.2234"]
+            },
             BOOLEAN: {
                 VALID: [
                     ("true", True), ("false", False), ("t", True), ("f", False)

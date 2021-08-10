@@ -43,8 +43,8 @@ def test_column_list(column_test_table, client):
             'nullable': False,
             'primary_key': True,
             'valid_target_types': [
-                'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT', 'INTEGER',
-                'NUMERIC', 'REAL', 'VARCHAR',
+                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                'INTEGER', 'NUMERIC', 'REAL', 'VARCHAR',
             ],
         },
         {
@@ -55,8 +55,8 @@ def test_column_list(column_test_table, client):
             'nullable': False,
             'primary_key': False,
             'valid_target_types': [
-                'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT', 'INTEGER',
-                'NUMERIC', 'REAL', 'VARCHAR',
+                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                'INTEGER', 'NUMERIC', 'REAL', 'VARCHAR',
             ],
         },
         {
@@ -67,8 +67,8 @@ def test_column_list(column_test_table, client):
             'nullable': True,
             'primary_key': False,
             'valid_target_types': [
-                'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT', 'INTEGER',
-                'NUMERIC', 'REAL', 'VARCHAR',
+                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                'INTEGER', 'NUMERIC', 'REAL', 'VARCHAR',
             ],
         },
         {
@@ -79,8 +79,8 @@ def test_column_list(column_test_table, client):
             'nullable': True,
             'primary_key': False,
             'valid_target_types': [
-                'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT', 'INTEGER',
-                'INTERVAL', 'NUMERIC', 'REAL', 'VARCHAR',
+                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                'INTEGER', 'INTERVAL', 'NUMERIC', 'REAL', 'VARCHAR',
                 'mathesar_types.email',
             ],
         }
@@ -101,7 +101,7 @@ def test_column_list(column_test_table, client):
                 'nullable': False,
                 'primary_key': True,
                 'valid_target_types': [
-                    'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                    'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
                     'INTEGER', 'NUMERIC', 'REAL', 'VARCHAR',
                 ],
             },
@@ -116,7 +116,7 @@ def test_column_list(column_test_table, client):
                 'nullable': True,
                 'primary_key': False,
                 'valid_target_types': [
-                    'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                    'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
                     'INTEGER', 'NUMERIC', 'REAL', 'VARCHAR',
                 ],
             },
