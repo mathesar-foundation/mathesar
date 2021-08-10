@@ -156,5 +156,15 @@ def drop_constraint(table_name, schema, engine, constraint_name):
         op.drop_constraint(constraint_name, table_name, schema=schema)
 
 
-def copy_constraint(table_name, schema, engine, constraint, from_column, to_column):
+def copy_constraint(table_oid, engine, constraint, from_column, to_column):
     constraint_type = get_constraint_type_from_char(constraint.contype)
+    if constraint_type == ConstraintType.UNIQUE.value:
+        table = reflect_table_from_oid(table_oid, engine)
+        column_idxs = [con - 1 for con in constraint.conkey]
+        columns = [
+            table.c[to_column if idx == from_column else idx].name
+            for idx in column_idxs
+        ]
+        create_unique_constraint(table.name, table.schema, engine, columns)
+    else:
+        raise NotImplementedError

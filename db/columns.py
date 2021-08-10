@@ -313,34 +313,36 @@ def _gen_col_name(table, column_name):
 
 
 class CopyColumn(DDLElement):
-    def __init__(self, table, from_column, to_column):
+    def __init__(self, schema, table, to_column, from_column):
+        self.schema = schema
         self.table = table
-        self.from_column = from_column
         self.to_column = to_column
+        self.from_column = from_column
 
 
 @compiler.compiles(CopyColumn, "postgresql")
 def compile_create_table_as(element, compiler, **_):
-    return 'UPDATE %s SET %s = %s' % (
+    return 'UPDATE "%s"."%s" SET "%s" = "%s"' % (
+        element.schema,
         element.table,
-        element.from_column,
-        element.to_column
+        element.to_column,
+        element.from_column
     )
 
 
 def duplicate_column_data(table_oid, from_column, to_column, engine):
     table = tables.reflect_table_from_oid(table_oid, engine)
     copy = CopyColumn(
-        f"{table.schema}.{table.name}",
-        table.c[from_column].name,
-        table.c[to_column].name
+        table.schema,
+        table.name,
+        table.c[to_column].name,
+        table.c[from_column].name
     )
     with engine.begin() as conn:
         conn.execute(copy)
 
 
 def duplicate_column_constraints(table_oid, from_column, to_column, engine):
-    table = tables.reflect_table_from_oid(table_oid, engine)
     constraints_ = constraints.get_column_constraints(from_column, table_oid, engine)
     for constraint in constraints_:
         constraint_type = constraints.get_constraint_type_from_char(constraint.contype)
@@ -348,7 +350,7 @@ def duplicate_column_constraints(table_oid, from_column, to_column, engine):
             # Don't allow duplciation of primary keys
             continue
         constraints.copy_constraint(
-            table.name, table.schema, engine, constraint, from_column, to_column
+            table_oid, engine, constraint, from_column, to_column
         )
 
 

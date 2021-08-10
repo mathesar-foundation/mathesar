@@ -595,9 +595,12 @@ def test_duplicate_column(engine_with_schema):
         MetaData(bind=engine, schema=schema),
         Column(target_column_name, Numeric, unique=True),
         Column("Filler1", Numeric, unique=True),
-        UniqueConstraint(target_column_name, "Filler1"),
     )
     table.create()
+    with engine.begin() as conn:
+        conn.execute(table.insert().values((1, 1)))
+        conn.execute(table.insert().values((2, 2)))
+
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     columns.duplicate_column(table_oid, 0, engine)
 
