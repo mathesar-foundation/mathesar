@@ -11,9 +11,11 @@ MONEY = 'money'
 NUMBER = 'number'
 TEXT = 'text'
 URI = 'uri'
+
+# These are default Postgres types that we don't have specific behavior for yet in the UI.
 OTHER = 'other'
 
-# Any types not mapped to the above list are mapped to this.
+# These are types that we don't know anything about.
 CUSTOM = 'custom'
 
 
@@ -81,7 +83,8 @@ MATHESAR_TYPES = [{
         'MACADDR',
         'MACADDR8',
         'NUMRANGE',
-        'PATH ,POLYGON',
+        'PATH',
+        'POLYGON',
         'PG_LSN',
         'PG_SNAPSHOT',
         'POINT',
