@@ -383,8 +383,15 @@ def _get_interval_type_body_map():
 
 
 def _get_integer_type_body_map(target_type_str=INTEGER):
+    """
+    We use default behavior for identity and casts from TEXT types.
+    We specifically disallow rounding or truncating when casting from numerics,
+    etc.
+    """
     default_behavior_source_types = [INTEGER, VARCHAR]
-    no_rounding_source_types = [DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL]
+    no_rounding_source_types = [
+        DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL
+    ]
     cast_loss_exception_str = (
         f"RAISE EXCEPTION '% cannot be cast to {target_type_str} without loss', $1;"
     )
@@ -420,9 +427,8 @@ def _get_numeric_type_body_map(target_type_str=NUMERIC):
     Get SQL strings that create various functions for casting different
     types to numerics.
 
-    numeric -> numeric:  Identity. No remarks
-    boolean -> numeric:  We cast TRUE -> 1, FALSE -> 0
-    varchar -> numeric:  We use the default PostgreSQL behavior.
+    Notable casts:
+        boolean -> numeric:  We cast TRUE -> 1, FALSE -> 0
     """
 
     default_behavior_source_types = [
