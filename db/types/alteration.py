@@ -392,7 +392,7 @@ def _get_varchar_type_body_map(engine):
     All types in get_supported_alter_column_types are supported.
     """
     supported_types = get_supported_alter_column_db_types(engine)
-    return _get_default_type_body_map( supported_types, VARCHAR, )
+    return _get_default_type_body_map(supported_types, VARCHAR)
 
 
 def _get_default_type_body_map(source_types, target_type_str):
