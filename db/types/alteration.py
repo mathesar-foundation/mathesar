@@ -143,9 +143,8 @@ def get_column_cast_expression(column, target_type_str, engine, type_options={})
 def install_all_casts(engine):
     create_boolean_casts(engine)
     create_email_casts(engine)
-    create_floating_point_casts(engine)
+    create_decimal_number_casts(engine)
     create_interval_casts(engine)
-    create_decimal_numeric_casts(engine)
     create_varchar_casts(engine)
 
 
@@ -159,22 +158,15 @@ def create_email_casts(engine):
     create_cast_functions(email.QUALIFIED_EMAIL, type_body_map, engine)
 
 
-def create_floating_point_casts(engine):
-    floating_point_types = [DOUBLE_PRECISION, FLOAT, REAL]
-    for type_str in floating_point_types:
-        type_body_map = _get_float_type_body_map(target_type_str=type_str)
-        create_cast_functions(type_str, type_body_map, engine)
-
-
 def create_interval_casts(engine):
     type_body_map = _get_interval_type_body_map()
     create_cast_functions(INTERVAL, type_body_map, engine)
 
 
-def create_decimal_numeric_casts(engine):
-    decimal_types = [DECIMAL, NUMERIC]
-    for type_str in decimal_types:
-        type_body_map = _get_numeric_type_body_map(target_type_str=type_str)
+def create_decimal_number_casts(engine):
+    decimal_number_types = [DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL]
+    for type_str in decimal_number_types:
+        type_body_map = _get_decimal_number_type_body_map(target_type_str=type_str)
         create_cast_functions(type_str, type_body_map, engine)
 
 
@@ -203,12 +195,12 @@ def get_defined_source_target_cast_tuples(engine):
     type_body_map_map = {
         BOOLEAN: _get_boolean_type_body_map(),
         EMAIL: _get_email_type_body_map(),
-        DECIMAL: _get_numeric_type_body_map(target_type_str=DECIMAL),
-        DOUBLE_PRECISION: _get_float_type_body_map(target_type_str=DOUBLE_PRECISION),
-        FLOAT: _get_float_type_body_map(target_type_str=FLOAT),
+        DECIMAL: _get_decimal_number_type_body_map(target_type_str=DECIMAL),
+        DOUBLE_PRECISION: _get_decimal_number_type_body_map(target_type_str=DOUBLE_PRECISION),
+        FLOAT: _get_decimal_number_type_body_map(target_type_str=FLOAT),
         INTERVAL: _get_interval_type_body_map(),
-        NUMERIC: _get_numeric_type_body_map(target_type_str=NUMERIC),
-        REAL: _get_float_type_body_map(target_type_str=REAL),
+        NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
+        REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
         VARCHAR: _get_varchar_type_body_map(engine),
     }
     return {
@@ -286,12 +278,9 @@ def _get_boolean_type_body_map():
           RETURN $1<>0;
         END;
         """
-
-    type_body_map = {
-        type_name: _get_default_behavior_cast_str(BOOLEAN)
-        for type_name in default_behavior_source_types
-    }
-
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, BOOLEAN,
+    )
     type_body_map.update(
         {
             number_type: _get_number_to_boolean_cast_str()
@@ -327,18 +316,10 @@ def _get_email_type_body_map():
                      just check that the VARCHAR object satisfies the email
                      DOMAIN).
     """
-    return {
-        email.QUALIFIED_EMAIL: """
-        BEGIN
-          RETURN $1;
-        END;
-        """,
-        VARCHAR: f"""
-        BEGIN
-          RETURN $1::{email.QUALIFIED_EMAIL};
-        END;
-        """,
-    }
+    default_behavior_source_types = [email.QUALIFIED_EMAIL, VARCHAR]
+    return _get_default_type_body_map(
+        default_behavior_source_types, email.QUALIFIED_EMAIL,
+    )
 
 
 def _get_interval_type_body_map():
@@ -371,43 +352,22 @@ def _get_interval_type_body_map():
     }
 
 
-def _get_numeric_type_body_map(target_type_str=NUMERIC):
+def _get_decimal_number_type_body_map(target_type_str=NUMERIC):
     """
     Get SQL strings that create various functions for casting different
-    types to numerics.
+    types to number types including DECIMAL, DOUBLE PRECISION, FLOAT,
+    NUMERIC, and REAL.
 
-    numeric -> numeric:  Identity. No remarks
-    boolean -> numeric:  We cast TRUE -> 1, FALSE -> 0
-    varchar -> numeric:  We use the default PostgreSQL behavior.
+    The only notable non-default cast is from boolean:
+        boolean -> number:  We cast TRUE -> 1, FALSE -> 0
     """
 
     default_behavior_source_types = [
         DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL, VARCHAR
     ]
-    type_body_map = {
-        type_name: _get_default_behavior_cast_str(target_type_str)
-        for type_name in default_behavior_source_types
-    }
-    type_body_map.update({BOOLEAN: _get_boolean_to_number_cast(target_type_str)})
-    return type_body_map
-
-
-def _get_float_type_body_map(target_type_str=FLOAT):
-    """
-    Get SQL strings that create various functions for casting different
-    types to floats.
-
-    float -> float:    Identity. No remarks
-    boolean -> float:  We cast TRUE -> 1, FALSE -> 0
-    varchar -> float:  We use the default PostgreSQL behavior.
-    """
-    default_behavior_source_types = [
-        DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL, VARCHAR,
-    ]
-    type_body_map = {
-        type_name: _get_default_behavior_cast_str(target_type_str)
-        for type_name in default_behavior_source_types
-    }
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, target_type_str,
+    )
     type_body_map.update({BOOLEAN: _get_boolean_to_number_cast(target_type_str)})
     return type_body_map
 
@@ -432,16 +392,13 @@ def _get_varchar_type_body_map(engine):
     All types in get_supported_alter_column_types are supported.
     """
     supported_types = get_supported_alter_column_db_types(engine)
-    type_body_map = {
-        type_name: _get_default_behavior_cast_str(VARCHAR)
-        for type_name in supported_types
-    }
-    return type_body_map
+    return _get_default_type_body_map( supported_types, VARCHAR, )
 
 
-def _get_default_behavior_cast_str(target_type_str):
-    return f"""
+def _get_default_type_body_map(source_types, target_type_str):
+    default_cast_str = f"""
         BEGIN
           RETURN $1::{target_type_str};
         END;
     """
+    return {type_name: default_cast_str for type_name in source_types}
