@@ -28,7 +28,6 @@
   export let isResultGrouped: boolean;
 
   let headerRef: HTMLElement;
-  let newColumnName:string = "";
 
   function onHScrollOffsetChange(_hscrollOffset: number) {
     if (headerRef) {
@@ -90,17 +89,19 @@
     });
   }
 
-  function addColumn() {
-    let column:TableColumn = columns.data[0]
-    let new_column:TableColumn = {
-        name: newColumnName,
-        type: "varchar",
-        index: columns.data.length,
-        nullable:true,
-        primaryKey:false,
-        validTargetTypes: column.validTargetTypes
-    }
-    dispatch('addColumn', new_column)
+  let newColumnDropdownIsOpen:boolean = false;
+  let newColumnName:string = ""
+  function addColumn(newColumnName:string) {
+    let newColumn:TableColumn = {
+      name: newColumnName,
+      type: "varchar",
+      index: columns.data.length,
+      nullable:true,
+      primaryKey:false,
+      validTargetTypes: null
+    };
+    dispatch('addColumn', newColumn);
+    newColumnDropdownIsOpen = false;
   }
 </script>
 
@@ -163,30 +164,30 @@
       </Dropdown>
     </div>
   {/each}
+
   <div class="cell" style="width:{70 + DEFAULT_ROW_RIGHT_PADDING}px;left:{
     columnPosition.get('__row').width + paddingLeft
   }px;">
     <Dropdown closeOnInnerClick={false}
               contentClass="table-opts-content"
-              isOpen={true}
-              triggerClass=""
+              bind:isOpen={newColumnDropdownIsOpen}
               triggerAppearance="plain">
 
       <svelte:fragment slot="trigger">
-        <span class="name">Add New Column</span>
+        <span class="name">Add Column</span>
       </svelte:fragment>
 
       <svelte:fragment slot="content">
 
         <TextInput bind:value={newColumnName}>
-          <svelte:fragment slot="prepend">Column Name</svelte:fragment>
+          <svelte:fragment slot="prepend">Name:</svelte:fragment>
         </TextInput>
-        <!-- on:click={addNewColumn} -->
-        <Button disabled={(newColumnName.length === 0) ? true : false } on:click={addColumn}>
-          Add new column
-        </Button>
-      </svelte:fragment>
 
+        <Button appearance="primary" disabled={(newColumnName.length === 0) ? true : false } on:click={() => addColumn(newColumnName)}>
+          Add Column
+        </Button>
+
+      </svelte:fragment>
     </Dropdown>
-</div>
+  </div>
 </div>
