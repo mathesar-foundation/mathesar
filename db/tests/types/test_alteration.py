@@ -18,10 +18,85 @@ engine_email_type = fixtures.engine_email_type
 temporary_testing_schema = fixtures.temporary_testing_schema
 
 
-def test_get_alter_column_types_with_standard_engine(engine):
-    type_dict = alteration.get_supported_alter_column_types(engine)
-    assert len(type_dict) > 0
-    assert all([type_ not in type_dict for type_ in types.CUSTOM_TYPE_DICT])
+BOOLEAN = "BOOLEAN"
+DECIMAL = "DECIMAL"
+DOUBLE = "DOUBLE PRECISION"
+EMAIL = "mathesar_types.email"
+FLOAT = "FLOAT"
+INTERVAL = "INTERVAL"
+NUMERIC = "NUMERIC"
+REAL = "REAL"
+VARCHAR = "VARCHAR"
+
+
+ISCHEMA_NAME = "ischema_name"
+TARGET_LIST = "target_list"
+REFLECTED_NAME = "reflected_name"
+SUPPORTED_MAP_NAME = "supported_map_name"
+
+MASTER_DB_TYPE_MAP_SPEC = {
+    # This dict specifies the full map of what types can be cast to what
+    # target types in Mathesar.  Format of each key, val pair is:
+    # <db_set_type_name>: {
+    #     ISCHEMA_NAME: <name for looking up in engine.dialect.ischema_names>,
+    #     REFLECTED_NAME: <name for reflection of db type>,
+    #     SUPPORTED_MAP_NAME: <optional; key in supported type map dictionaries>
+    #     TARGET_LIST: <list of target db types for alteration>,
+    # }
+    # The tuples in TARGET_LIST should be (set, reflect), where 'set' is
+    # a valid DB type for setting a column type, and 'reflect' is the
+    # type actually reflected afterwards
+    BOOLEAN: {
+        ISCHEMA_NAME: "boolean",
+        REFLECTED_NAME: BOOLEAN,
+        TARGET_LIST: [BOOLEAN, DECIMAL, DOUBLE, FLOAT, NUMERIC, REAL, VARCHAR]
+    },
+    DECIMAL: {
+        ISCHEMA_NAME: "decimal",
+        REFLECTED_NAME: NUMERIC,
+        TARGET_LIST: [BOOLEAN, DECIMAL, DOUBLE, FLOAT, NUMERIC, REAL, VARCHAR]
+    },
+    DOUBLE: {
+        ISCHEMA_NAME: "double precision",
+        REFLECTED_NAME: DOUBLE,
+        TARGET_LIST: [BOOLEAN, DECIMAL, DOUBLE, FLOAT, NUMERIC, REAL, VARCHAR]
+    },
+    FLOAT: {
+        ISCHEMA_NAME: "float",
+        REFLECTED_NAME: DOUBLE,
+        TARGET_LIST: [BOOLEAN, DECIMAL, DOUBLE, FLOAT, NUMERIC, REAL, VARCHAR]
+    },
+    INTERVAL: {
+        ISCHEMA_NAME: "interval",
+        REFLECTED_NAME: INTERVAL,
+        TARGET_LIST: [INTERVAL, VARCHAR]
+    },
+    EMAIL: {
+        ISCHEMA_NAME: "mathesar_types.email",
+        SUPPORTED_MAP_NAME: "email",
+        REFLECTED_NAME: EMAIL,
+        TARGET_LIST: [EMAIL, VARCHAR]
+    },
+    NUMERIC: {
+        ISCHEMA_NAME: "numeric",
+        REFLECTED_NAME: NUMERIC,
+        TARGET_LIST: [BOOLEAN, DECIMAL, DOUBLE, FLOAT, NUMERIC, REAL, VARCHAR]
+    },
+    REAL: {
+        ISCHEMA_NAME: "real",
+        REFLECTED_NAME: REAL,
+        TARGET_LIST: [BOOLEAN, DECIMAL, DOUBLE, FLOAT, NUMERIC, REAL, VARCHAR]
+    },
+    VARCHAR: {
+        ISCHEMA_NAME: "character varying",
+        SUPPORTED_MAP_NAME: "varchar",
+        REFLECTED_NAME: VARCHAR,
+        TARGET_LIST: [
+            BOOLEAN, DECIMAL, DOUBLE, EMAIL, FLOAT, INTERVAL, NUMERIC, REAL,
+            VARCHAR,
+        ]
+    }
+}
 
 
 def test_get_alter_column_types_with_custom_engine(engine_with_types):
@@ -47,13 +122,28 @@ def test_get_alter_column_types_with_unfriendly_names(engine_with_types):
 
 
 type_test_list = [
-    (String, "boolean", {}, "BOOLEAN"),
-    (String, "interval", {}, "INTERVAL"),
-    (String, "numeric", {}, "NUMERIC"),
-    (String, "numeric", {"precision": 5}, "NUMERIC(5, 0)"),
-    (String, "numeric", {"precision": 5, "scale": 3}, "NUMERIC(5, 3)"),
-    (String, "string", {}, "VARCHAR"),
-    (String, "email", {}, "mathesar_types.email"),
+    (
+        val[ISCHEMA_NAME],
+        MASTER_DB_TYPE_MAP_SPEC[target].get(
+            SUPPORTED_MAP_NAME, MASTER_DB_TYPE_MAP_SPEC[target][ISCHEMA_NAME]
+        ),
+        {},
+        MASTER_DB_TYPE_MAP_SPEC[target][REFLECTED_NAME]
+    )
+    for val in MASTER_DB_TYPE_MAP_SPEC.values()
+    for target in val[TARGET_LIST]
+] + [
+    (val[ISCHEMA_NAME], "numeric", {"precision": 5}, "NUMERIC(5, 0)")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if NUMERIC in val[TARGET_LIST]
+] + [
+    (val[ISCHEMA_NAME], "numeric", {"precision": 5, "scale": 3}, "NUMERIC(5, 3)")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if NUMERIC in val[TARGET_LIST]
+] + [
+    (val[ISCHEMA_NAME], "decimal", {"precision": 5}, "NUMERIC(5, 0)")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if DECIMAL in val[TARGET_LIST]
+] + [
+    (val[ISCHEMA_NAME], "decimal", {"precision": 5, "scale": 3}, "NUMERIC(5, 3)")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if DECIMAL in val[TARGET_LIST]
 ]
 
 
@@ -63,6 +153,11 @@ type_test_list = [
 def test_alter_column_type_alters_column_type(
         engine_email_type, type_, target_type, options, expect_type
 ):
+    """
+    The massive number of cases make sure all type casting functions at
+    least pass a smoke test for each type mapping defined in
+    MASTER_DB_TYPE_MAP_SPEC above.
+    """
     engine, schema = engine_email_type
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
@@ -70,7 +165,7 @@ def test_alter_column_type_alters_column_type(
     input_table = Table(
         TABLE_NAME,
         metadata,
-        Column(COLUMN_NAME, type_),
+        Column(COLUMN_NAME, engine.dialect.ischema_names[type_]),
         schema=schema
     )
     input_table.create()
@@ -277,24 +372,15 @@ def test_get_column_cast_expression_numeric_options(
     assert str(cast_expr) == expect_cast_expr
 
 
-def test_get_full_cast_map(engine_with_types):
-    """
-    This test specifies the full map of what types can be cast to what
-    target types in Mathesar.  When the map is modified, this test
-    should be updated accordingly.
-    """
-    expect_cast_map = {
-        'NUMERIC': ['BOOLEAN', 'NUMERIC', 'VARCHAR'],
-        'VARCHAR': ['NUMERIC', 'VARCHAR', 'INTERVAL', 'mathesar_types.email', 'BOOLEAN'],
-        'mathesar_types.email': ['mathesar_types.email', 'VARCHAR'],
-        'INTERVAL': ['INTERVAL', 'VARCHAR'],
-        'BOOLEAN': ['NUMERIC', 'BOOLEAN', 'VARCHAR']
-    }
+expect_cast_tuples = [
+    (key, [target for target in val[TARGET_LIST]])
+    for key, val in MASTER_DB_TYPE_MAP_SPEC.items()
+]
+
+
+@pytest.mark.parametrize("source_type,expect_target_types", expect_cast_tuples)
+def test_get_full_cast_map(engine_with_types, source_type, expect_target_types):
     actual_cast_map = alteration.get_full_cast_map(engine_with_types)
-    assert len(actual_cast_map) == len(expect_cast_map)
-    assert all(
-        [
-            sorted(actual_cast_map[type_]) == sorted(expect_target_list)
-            for type_, expect_target_list in expect_cast_map.items()
-        ]
-    )
+    actual_target_types = actual_cast_map[source_type]
+    assert len(actual_target_types) == len(expect_target_types)
+    assert sorted(actual_target_types) == sorted(expect_target_types)

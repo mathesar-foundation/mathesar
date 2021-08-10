@@ -76,8 +76,12 @@ def test_column_list(column_test_table, client):
             'primary_key': False,
             'valid_target_types': [
                 'BOOLEAN',
+                'DECIMAL',
+                'DOUBLE PRECISION',
+                'FLOAT',
                 'INTERVAL',
                 'NUMERIC',
+                'REAL',
                 'VARCHAR',
                 'mathesar_types.email',
             ],
