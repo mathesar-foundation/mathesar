@@ -418,6 +418,7 @@ type_set = {
     'DECIMAL',
     'DOUBLE PRECISION',
     'FLOAT',
+    'INTEGER',
     'INTERVAL',
     'NUMERIC',
     'REAL',
