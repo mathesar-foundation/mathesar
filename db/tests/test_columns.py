@@ -1,3 +1,5 @@
+import re
+
 from unittest.mock import patch
 from psycopg2.errors import NotNullViolation
 import pytest
@@ -592,9 +594,7 @@ duplicate_column_options = [
 ]
 
 
-def _check_duplicate_results(
-    table_oid, col_index, con_idxs, engine, copy_data, copy_constraints
-):
+def _check_duplicate_data(table_oid, engine, copy_data):
     table = tables.reflect_table_from_oid(table_oid, engine)
 
     with engine.begin() as conn:
@@ -604,6 +604,10 @@ def _check_duplicate_results(
     else:
         assert all([row[-1] is None for row in rows])
 
+
+def _check_duplicate_unique_constraint(
+    table_oid, col_index, con_idxs, engine, copy_constraints
+):
     constraints_ = constraints.get_column_constraints(col_index, table_oid, engine)
     if copy_constraints:
         assert len(constraints_) == 1
@@ -653,8 +657,9 @@ def test_duplicate_column_single_unique(engine_with_schema, copy_data, copy_cons
     )
 
     col_index = columns.get_column_index_from_name(table_oid, new_col_name, engine)
-    _check_duplicate_results(
-        table_oid, col_index, [col_index], engine, copy_data, copy_constraints
+    _check_duplicate_data(table_oid, engine, copy_data)
+    _check_duplicate_unique_constraint(
+        table_oid, col_index, [col_index], engine, copy_constraints
     )
 
 
@@ -683,9 +688,44 @@ def test_duplicate_column_multi_unique(engine_with_schema, copy_data, copy_const
     )
 
     col_index = columns.get_column_index_from_name(table_oid, new_col_name, engine)
-    _check_duplicate_results(
-        table_oid, col_index, [1, col_index], engine, copy_data, copy_constraints
+    _check_duplicate_data(table_oid, engine, copy_data)
+    _check_duplicate_unique_constraint(
+        table_oid, col_index, [1, col_index], engine, copy_constraints
     )
+
+
+@pytest.mark.parametrize('copy_data,copy_constraints', duplicate_column_options)
+@pytest.mark.parametrize('nullable', [True, False])
+def test_duplicate_column_nullable(
+    engine_with_schema, nullable, copy_data, copy_constraints
+):
+    engine, schema = engine_with_schema
+    table_name = "atable"
+    target_column_name = "columtoduplicate"
+    new_col_name = "duplicated_column"
+    insert_data = [(1,), (2,), (3,)]
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(target_column_name, Numeric, nullable=nullable),
+    )
+    table.create()
+    with engine.begin() as conn:
+        for data in insert_data:
+            conn.execute(table.insert().values(data))
+
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    col = columns.duplicate_column(
+        table_oid, 0, engine, new_col_name, copy_data, copy_constraints
+    )
+
+    _check_duplicate_data(table_oid, engine, copy_data)
+    # Nullability constriant is only copied when data is
+    # Otherwise, it defaults to True
+    if copy_constraints and copy_data:
+        assert col.nullable == nullable
+    else:
+        assert col.nullable is True
 
 
 def get_mathesar_column_init_args():

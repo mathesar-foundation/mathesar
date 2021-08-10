@@ -11,7 +11,6 @@ from sqlalchemy.ext import compiler
 
 from db import constants, tables, constraints
 from db.types import alteration
-from db.types.inference import get_reverse_type_map
 
 logger = logging.getLogger(__name__)
 
@@ -342,12 +341,19 @@ def duplicate_column_data(table_oid, from_column, to_column, engine):
         conn.execute(copy)
 
 
-def duplicate_column_constraints(table_oid, from_column, to_column, engine):
+def duplicate_column_constraints(table_oid, from_column, to_column, engine,
+                                 copy_nullable=True):
+    if copy_nullable:
+        table = tables.reflect_table_from_oid(table_oid, engine)
+        change_column_nullable(
+            table_oid, to_column, table.c[from_column].nullable, engine
+        )
+
     constraints_ = constraints.get_column_constraints(from_column, table_oid, engine)
     for constraint in constraints_:
         constraint_type = constraints.get_constraint_type_from_char(constraint.contype)
         if constraint_type == constraints.ConstraintType.UNIQUE:
-            # Don't allow duplciation of primary keys
+            # Don't allow duplication of primary keys
             continue
         constraints.copy_constraint(
             table_oid, engine, constraint, from_column, to_column
@@ -378,15 +384,14 @@ def duplicate_column(
             new_column_index,
             engine
         )
-        if not from_column.nullable:
-            change_column_nullable(table_oid, copy_from_index, False, engine)
 
     if copy_constraints:
         duplicate_column_constraints(
             table_oid,
             copy_from_index,
             new_column_index,
-            engine
+            engine,
+            copy_nullable=copy_data
         )
 
     table = tables.reflect_table_from_oid(table_oid, engine)
