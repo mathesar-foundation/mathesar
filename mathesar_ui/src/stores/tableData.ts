@@ -1,5 +1,7 @@
 import { get, writable, Writable } from 'svelte/store';
-import { deleteAPI, getAPI, postAPI, States } from '@mathesar/utils/api';
+import {
+  deleteAPI, getAPI, postAPI, States,
+} from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
 import type { SelectOption } from '@mathesar-components/types';
 
@@ -522,18 +524,21 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
 export async function addColumn(db:string, id:number, new_column:TableColumn): Promise<void> {
   const table = databaseMap.get(db)?.get(id);
   if (table) {
-    try {
-      const promise = postAPI<unknown>(`/tables/${id}/columns/`, new_column)
-          .then(() => {
-            void fetchTableDetails(db, id);
-            void fetchTableRecords(db, id, true);
-          })
-          .catch((err) => {
-            console.error(err)
-          });
-    } catch (err) {
-      console.error(err)
-    }
+    await postAPI<unknown>(`/tables/${id}/columns/`, new_column)
+      .then((column:TableColumn) => {
+        void fetchTableDetails(db, id);
+        void fetchTableRecords(db, id, true);
+        return column;
+      })
+      .catch((err) => {
+        const tableColumnStore = table.columns;
+        tableColumnStore.set({
+          state: States.Error,
+          error: err instanceof Error ? err.message : null,
+          data: [],
+          primaryKey: null,
+        });
+      });
   }
 }
 
