@@ -24,7 +24,8 @@
 <button bind:this={element} type="button"
         class={allClasses}
         {...$$restProps}
-        on:click>
+        on:click
+        on:keydown>
   <slot></slot>
 </button>
 

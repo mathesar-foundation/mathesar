@@ -8,7 +8,7 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   import { Dropdown } from '@mathesar-components';
   import type { SelectOption } from './Select.d';
 
@@ -23,26 +23,11 @@
   export let triggerClass = '';
   export let ariaLabel;
 
-  let isOpen = false;
-  function alerta({keyCode}){
-    if(keyCode !== 38 && keyCode !== 40) return
 
-    const current = document.activeElement;
-    const items =  [...document.querySelectorAll('[role="option"]')];
-    const currentIndex= items.indexOf(current);
-    let newIndex;
-    if(currentIndex === -1){
-      newIndex = 0
-    }else{
-      if(keyCode === 38){
-        newIndex = (currentIndex + items.length - 1) % items.length
-      }else{
-        newIndex = (currentIndex + 1) % items.length
-      }
-    }
-    current.blur();
-    items[newIndex].focus()
-    }
+  let isOpen = false;
+  let currentIndex = 0;
+  let erasedIndex = 0;
+  let t = 0;
 
   function setValue(opt: SelectOption) {
     value = opt;
@@ -50,6 +35,8 @@
       value,
     });
     isOpen = false;
+    erasedIndex = 0;
+    currentIndex = 0;
   }
   
   function setOptions(opts: SelectOption[]) {
@@ -57,11 +44,51 @@
       setValue(opts[0]);
     }
   }
+  
+  function hoveredItem(index){
+      let items= [...document.getElementById('select-value-'+selectId).getElementsByTagName('li')];
+      if(currentIndex == items.length - 1 && index > 0){
+        currentIndex = 0;
+        index = 0;
+      }else if(currentIndex == 0 && index < 0){
+        currentIndex = items.length;
+      }else if(currentIndex == 0 && index > 0){
+        if(t <1){
+          currentIndex = -1;
+        }else if (t > 1){
+          currentIndex = 0;
+        }
+        t += 1; 
+      }
+      if(erasedIndex >= 1){
+        let hoveredElement= document.querySelector(".hovered");
+        hoveredElement.classList.remove("hovered");
+      }
+      currentIndex = currentIndex + index; 
+      items[currentIndex].classList.add("hovered");
+      erasedIndex = 1; 
+    }
 
-  $: setOptions(options);
+  function keyAccessibility(e){
+      switch (e.key){
+        case "ArrowDown":
+          hoveredItem(1);
+          break;
+        case "ArrowUp":
+          hoveredItem(-1);
+          break;
+        case "Escape":
+          isOpen = false;
+          break;
+        case "Enter":
+          if (options.length == 0) break;
+          setValue(options[currentIndex]);
+          break;
+    }
+    }
+  $: setOptions(options); 
 </script>
-<svelte:window on:keydown={alerta}/>
-<Dropdown ariaControls="select-value-{selectId}" {ariaLabel} bind:isOpen contentClass="select {contentClass}" {triggerClass}>
+<Dropdown ariaControls="select-value-{selectId}" {ariaLabel} bind:isOpen contentClass="select {contentClass}" {triggerClass} on:keydown={keyAccessibility}>
   <svelte:fragment slot="trigger">
     {value?.[labelKey]}
   </svelte:fragment>
