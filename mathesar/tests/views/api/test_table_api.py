@@ -776,7 +776,8 @@ def test_table_get_with_reflect_new(client, table_for_reflection):
     assert created_table['name'] == table_name
     created_columns = created_table['columns']
     assert created_columns == [
-        {'name': 'id', 'type': 'INTEGER'}, {'name': 'name', 'type': 'VARCHAR'}
+        {'name': 'id', 'type': 'INTEGER', 'type_options': None},
+        {'name': 'name', 'type': 'VARCHAR', 'type_options': None}
     ]
 
 
@@ -803,8 +804,8 @@ def test_table_get_with_reflect_column_change(client, table_for_reflection):
     new_columns = altered_table['columns']
     assert altered_table['id'] == orig_id
     assert new_columns == [
-        {'name': 'id', 'type': 'INTEGER'},
-        {'name': new_column_name, 'type': 'VARCHAR'}
+        {'name': 'id', 'type': 'INTEGER', 'type_options': None},
+        {'name': new_column_name, 'type': 'VARCHAR', 'type_options': None}
     ]
 
 

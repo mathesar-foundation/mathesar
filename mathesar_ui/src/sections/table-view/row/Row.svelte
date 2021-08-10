@@ -10,13 +10,11 @@
     GROUP_MARGIN_LEFT,
     DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/tableData';
-  import { Skeleton } from '@mathesar-components';
   import GroupHeader from './GroupHeader.svelte';
   import RowControl from './RowControl.svelte';
 
   export let index: number;
   export let columns: TableColumnData;
-  export let loading = false;
   export let row: TableRecord;
   export let isGrouped = false;
   export let columnPosition: ColumnPosition;
@@ -80,7 +78,10 @@
       width:{columnPosition.get(column.name).width}px;
       left:{columnPosition.get(column.name).left}px;">
       {typeof row[column.name] !== 'undefined' ? row[column.name] : ''}
-      <Skeleton {loading}/>
+
+      {#if !row.__state || row.__state === 'loading'}
+        <div class="loader"></div>
+      {/if}
     </div>
   {/each}
 </div>

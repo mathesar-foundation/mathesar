@@ -9,6 +9,7 @@
 
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import TabComponent from './Tab.svelte';
   import type { Tab } from './TabContainer';
 
   const dispatch = createEventDispatcher();
@@ -31,9 +32,9 @@
     });
   }
 
-  function removeTab(e: Event, index: number) {
+  function removeTab(e: { detail: Event }, index: number) {
     const removedTab = tabs.splice(index, 1);
-    if (activeTab === removedTab[0]) {
+    if (activeTab[idKey] === removedTab[0]?.[idKey]) {
       if (tabs[index]) {
         activeTab = tabs[index];
       } else if (tabs[index - 1]) {
@@ -46,7 +47,7 @@
     dispatch('tabRemoved', {
       removedTab: removedTab[0],
       activeTab,
-      originalEvent: e,
+      originalEvent: e.detail,
     });
   }
 
@@ -74,27 +75,15 @@
 <div class="tab-container" role="navigation">
   <ul role="tablist" class="tabs">
     {#each tabs as tab, index (tab[idKey] || tab)}
-      <li role="presentation" class="tab" class:active={activeTab === tab} tabindex="-1" 
-          style={activeTab !== tab ? `width: ${Math.floor(100 / tabs.length)}%;` : null}>
-
-        <a role="tab" href={getTabURL(tab) || '#'} tabindex="0"
-            aria-selected={activeTab === tab} aria-disabled="{!!tab.disabled}"
-            id={activeTab === tab ? `mtsr-${componentId}-tab` : null} data-tinro-ignore
-            aria-controls={activeTab === tab ? `mtsr-${componentId}-tabpanel` : null}
-            on:focus={focusTab} on:blur={blurTab} on:mousedown={(e) => selectActiveTab(e, tab)}
-            on:click={checkAndPreventDefault}>
-              <slot name="tab" {tab}>
-                {tab[labelKey]}
-              </slot>
-        </a>
-
-        {#if allowRemoval}
-          <button type="button" aria-label="remove" class="remove"
-            on:click={(e) => removeTab(e, index)}>
-            &times;
-          </button>
-        {/if}
-      </li>
+      <TabComponent {componentId} {tab} {allowRemoval} totalTabs={tabs.length}
+        {getTabURL} isActive={tab[idKey] === activeTab[idKey]}
+        on:focus={focusTab} on:blur={blurTab}
+        on:click={checkAndPreventDefault} on:mousedown={(e) => selectActiveTab(e, tab)}
+        on:remove={(e) => removeTab(e, index)}>
+        <slot name="tab" {tab}>
+          {tab[labelKey]}
+        </slot>
+      </TabComponent>
     {/each}
   </ul>
 
