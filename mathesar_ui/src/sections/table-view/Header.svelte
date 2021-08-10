@@ -90,6 +90,8 @@
   }
 
   let newColumnDropdownIsOpen:boolean = false;
+
+  const existingColumnNames:string[] = Object(columns.data).map(column => column.name)
   let newColumnName:string = ""
   function addColumn(newColumnName:string) {
     let newColumn:TableColumn = {
@@ -169,8 +171,9 @@
     columnPosition.get('__row').width + paddingLeft
   }px;">
     <Dropdown closeOnInnerClick={false}
-              contentClass="table-opts-content"
+              contentClass="content"
               bind:isOpen={newColumnDropdownIsOpen}
+              data-popper-placement="bottom-end"
               triggerAppearance="plain">
 
       <svelte:fragment slot="trigger">
@@ -178,16 +181,29 @@
       </svelte:fragment>
 
       <svelte:fragment slot="content">
+        <div class="add-column" style="width:{(70 + DEFAULT_ROW_RIGHT_PADDING) * 1.5}px">
+          <div class="grid">
 
-        <TextInput bind:value={newColumnName}>
-          <svelte:fragment slot="prepend">Name:</svelte:fragment>
-        </TextInput>
+            <TextInput bind:value={newColumnName}>
+              <svelte:fragment slot="prepend">Name:</svelte:fragment>
+            </TextInput>
+            <Button appearance="primary" disabled={newColumnName.length === 0 || existingColumnNames.indexOf(newColumnName) >= 0} on:click={() => addColumn(newColumnName)}>
+              Add
+            </Button>
 
-        <Button appearance="primary" disabled={(newColumnName.length === 0) ? true : false } on:click={() => addColumn(newColumnName)}>
-          Add Column
-        </Button>
+          </div>
 
+          {#if existingColumnNames.indexOf(newColumnName) >= 0}
+            <p class="messages">
+              <strong>Warning!</strong> The column name must be unique.
+            </p>
+          {/if}
+        </div>
       </svelte:fragment>
     </Dropdown>
   </div>
 </div>
+
+<style global lang="scss">
+  @import "Header.scss";
+</style>
