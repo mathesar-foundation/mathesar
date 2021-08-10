@@ -8,6 +8,7 @@ EMAIL = "email"
 DECIMAL = "decimal"
 DOUBLE_PRECISION = "double precision"
 FLOAT = "float"
+INTEGER = "integer"
 INTERVAL = "interval"
 NAME = "name"
 NUMERIC = "numeric"
@@ -37,6 +38,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         DECIMAL: dialect_types.get(DECIMAL),
         DOUBLE_PRECISION: dialect_types.get(DOUBLE_PRECISION),
         FLOAT: dialect_types.get(FLOAT),
+        INTEGER: dialect_types.get(INTEGER),
         INTERVAL: dialect_types.get(INTERVAL),
         NUMERIC: dialect_types.get(NUMERIC),
         REAL: dialect_types.get(REAL),
@@ -144,6 +146,7 @@ def install_all_casts(engine):
     create_boolean_casts(engine)
     create_email_casts(engine)
     create_floating_point_casts(engine)
+    create_integer_casts(engine)
     create_interval_casts(engine)
     create_decimal_numeric_casts(engine)
     create_varchar_casts(engine)
@@ -164,6 +167,11 @@ def create_floating_point_casts(engine):
     for type_str in floating_point_types:
         type_body_map = _get_float_type_body_map(target_type_str=type_str)
         create_cast_functions(type_str, type_body_map, engine)
+
+
+def create_integer_casts(engine):
+    type_body_map = _get_integer_type_body_map()
+    create_cast_functions(INTEGER, type_body_map, engine)
 
 
 def create_interval_casts(engine):
@@ -206,6 +214,7 @@ def get_defined_source_target_cast_tuples(engine):
         DECIMAL: _get_numeric_type_body_map(target_type_str=DECIMAL),
         DOUBLE_PRECISION: _get_float_type_body_map(target_type_str=DOUBLE_PRECISION),
         FLOAT: _get_float_type_body_map(target_type_str=FLOAT),
+        INTEGER: _get_integer_type_body_map(target_type_str=INTEGER),
         INTERVAL: _get_interval_type_body_map(),
         NUMERIC: _get_numeric_type_body_map(target_type_str=NUMERIC),
         REAL: _get_float_type_body_map(target_type_str=REAL),
@@ -273,7 +282,9 @@ def _get_boolean_type_body_map():
                              PostgreSQL).  Others raise a custom
                              exception.
     """
-    source_number_types = [DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL]
+    source_number_types = [
+        DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
+    ]
     default_behavior_source_types = [BOOLEAN]
 
     not_bool_exception_str = f"RAISE EXCEPTION '% is not a {BOOLEAN}', $1;"
@@ -371,6 +382,18 @@ def _get_interval_type_body_map():
     }
 
 
+def _get_integer_type_body_map(target_type_str=INTEGER):
+    default_behavior_source_types = [
+        DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL, VARCHAR
+    ]
+    type_body_map = {
+        type_name: _get_default_behavior_cast_str(target_type_str)
+        for type_name in default_behavior_source_types
+    }
+    type_body_map.update({BOOLEAN: _get_boolean_to_number_cast(target_type_str)})
+    return type_body_map
+
+
 def _get_numeric_type_body_map(target_type_str=NUMERIC):
     """
     Get SQL strings that create various functions for casting different
@@ -382,7 +405,7 @@ def _get_numeric_type_body_map(target_type_str=NUMERIC):
     """
 
     default_behavior_source_types = [
-        DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL, VARCHAR
+        DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL, VARCHAR
     ]
     type_body_map = {
         type_name: _get_default_behavior_cast_str(target_type_str)
@@ -402,7 +425,7 @@ def _get_float_type_body_map(target_type_str=FLOAT):
     varchar -> float:  We use the default PostgreSQL behavior.
     """
     default_behavior_source_types = [
-        DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL, VARCHAR,
+        DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL, VARCHAR,
     ]
     type_body_map = {
         type_name: _get_default_behavior_cast_str(target_type_str)
