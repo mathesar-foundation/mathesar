@@ -3,7 +3,7 @@ from datetime import date, timedelta
 
 import pytest
 from django.core.cache import cache
-from sqlalchemy import Column, Integer, String, MetaData, DefaultClause, select
+from sqlalchemy import Column, Integer, String, MetaData, select
 from sqlalchemy import Table as SATable
 
 from db.tables import get_oid_from_table
@@ -16,7 +16,7 @@ def column_test_table(patent_schema):
     column_list_in = [
         Column("mycolumn0", Integer, primary_key=True),
         Column("mycolumn1", Integer, nullable=False),
-        Column("mycolumn2", Integer, server_default=DefaultClause("5")),
+        Column("mycolumn2", Integer, server_default="5"),
         Column("mycolumn3", String),
     ]
     db_table = SATable(

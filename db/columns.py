@@ -51,6 +51,7 @@ class MathesarColumn(Column):
         Optional keyword arguments:
         primary_key -- Boolean giving whether the column is a primary key.
         nullable -- Boolean giving whether the column is nullable.
+        server_default -- String or DefaultClause giving the default value
         """
         self.engine = None
         super().__init__(
@@ -70,14 +71,24 @@ class MathesarColumn(Column):
         of the MathesarColumn.
         """
         fkeys = {ForeignKey(fk.target_fullname) for fk in column.foreign_keys}
-        return cls(
+        new_column = cls(
             column.name,
             column.type,
             foreign_keys=fkeys,
             primary_key=column.primary_key,
             nullable=column.nullable,
-            server_default=column.server_default
+            server_default=column.server_default,
         )
+        new_column._table = column.table
+        return new_column
+
+    @property
+    def table_(self):
+        if hasattr(self, "table") and self.table is not None:
+            return self.table
+        elif hasattr(self, "_table") and self._table is not None:
+            return self._table
+        return None
 
     @property
     def is_default(self):
@@ -117,11 +128,11 @@ class MathesarColumn(Column):
         """
         if (
                 self.engine is not None
-                and self.table is not None
-                and inspect(self.engine).has_table(self.table.name, schema=self.table.schema)
+                and self.table_ is not None
+                and inspect(self.engine).has_table(self.table_.name, schema=self.table_.schema)
         ):
             table_oid = tables.get_oid_from_table(
-                self.table.name, self.table.schema, self.engine
+                self.table_.name, self.table_.schema, self.engine
             )
             return get_column_index_from_name(
                 table_oid,
@@ -131,7 +142,11 @@ class MathesarColumn(Column):
 
     @property
     def default_value(self):
-        return _decode_server_default(self.server_default, self.engine)
+        if self.table_ is not None:
+            table_oid = tables.get_oid_from_table(
+                self.table_.name, self.table_.schema, self.engine
+            )
+            return get_column_default(table_oid, self.column_index, self.engine)
 
     @property
     def plain_type(self):
@@ -322,23 +337,47 @@ def drop_column(table_oid, column_index, engine):
 def get_column_default(table_oid, column_index, engine):
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
-    return _decode_server_default(column.server_default, engine)
-
-
-def _decode_server_default(server_default, engine):
-    if server_default is not None:
-        cast_sql_text = server_default.arg.text
-        # Ensure that we never evaluate something that increments a query
-        # This is safe as strings will always start with a single quote
-        if cast_sql_text.startswith("nextval(") and cast_sql_text.endswith(")"):
-            return None
-        with engine.begin() as conn:
-            # Defaults are returned as text with SQL casts appended
-            # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
-            # Here, we execute the cast to get the proper python value
-            return conn.execute(select(text(cast_sql_text))).first()[0]
-    else:
+    if column.server_default is None:
         return None
+
+    metadata = MetaData()
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_attribute = Table("pg_attribute", metadata, autoload_with=engine)
+        pg_attrdef = Table("pg_attrdef", metadata, autoload_with=engine)
+
+    query = (
+        select(pg_attrdef.c.adbin)
+        .select_from(
+            pg_attrdef
+            .join(
+                pg_attribute,
+                pg_attribute.c.attnum == pg_attrdef.c.adnum,
+            )
+        )
+        .where(and_(
+            pg_attribute.c.attrelid == table_oid,
+            pg_attribute.c.attname == column.name,
+            pg_attribute.c.attnum >= 1,
+        ))
+    )
+
+    with engine.begin() as conn:
+        result = conn.execute(query).first()[0]
+
+
+    # Here, we get the 'adbin' value for the current column, stored in the attrdef
+    # system table. The prefix of this value tells us whether the default is static
+    # ('{CONSTANT') or generated ('{FUNCEXPR'). We do not return generated defaults.
+    if result.startswith("{FUNCEXPR"):
+        return None
+
+    cast_sql_text = column.server_default.arg.text
+    with engine.begin() as conn:
+        # Defaults are returned as text with SQL casts appended
+        # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
+        # Here, we execute the cast to get the proper python value
+        return conn.execute(select(text(cast_sql_text))).first()[0]
 
 
 def set_column_default(table_oid, column_index, default, engine, **kwargs):

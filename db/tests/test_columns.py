@@ -5,7 +5,7 @@ from psycopg2.errors import NotNullViolation
 import pytest
 from sqlalchemy import (
     String, Integer, Boolean, Date, ForeignKey, Column, select, Table, MetaData,
-    create_engine, Sequence, Numeric
+    create_engine, Sequence, Numeric, DateTime, func
 )
 from sqlalchemy.exc import IntegrityError
 from db import columns, tables, constants
@@ -608,29 +608,38 @@ column_test_dict = {
 }
 
 
+@pytest.mark.parametrize("filler", [True, False])
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_get_column_default(engine_with_schema, col_type):
+def test_get_column_default(engine_with_schema, filler, col_type):
     engine, schema = engine_with_schema
     table_name = "get_column_default_table"
     column_name = "get_column_default_column"
     _, set_default, expt_default = column_test_dict[col_type].values()
+
+    # Ensure we test one and multiple defaults in a table
+    # There _was_ a bug associated with multiple defaults
+    cols = [Column(column_name, col_type, server_default=set_default)]
+    if filler:
+        cols.append(Column("Filler", Integer, server_default="0"))
+
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(column_name, col_type, server_default=set_default),
+        *cols
     )
     table.create()
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
+
     default = columns.get_column_default(table_oid, 0, engine)
     created_default = _get_default(engine, table)
-
     assert default == expt_default
     assert default == created_default
 
 
 get_column_generated_default_test_list = [
     Column("generated_default_col", Integer, primary_key=True),
-    Column("generated_default_col", Integer, Sequence("test_id"))
+    Column("generated_default_col", Integer, Sequence("test_id")),
+    Column("generated_default_col", DateTime, server_default=func.now())
 ]
 
 
