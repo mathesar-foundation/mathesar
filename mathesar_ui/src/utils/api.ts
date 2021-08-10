@@ -19,8 +19,14 @@ export interface URLObject {
   avoidPrefix?: boolean
 }
 
+export interface PaginatedResponse<T> {
+  count: number,
+  results: T[]
+}
+
 const urlPrefix = '/api/v0';
-const successStatusCodes = new Set([200, 201]);
+const NO_CONTENT = 204;
+const successStatusCodes = new Set([200, 201, NO_CONTENT]);
 
 /*
  * We might need to use multiple versions of apis
@@ -40,19 +46,26 @@ function appendUrlPrefix(url: string | URLObject): string {
   return `${urlPrefix}${url.url}`;
 }
 
-export function getAPI<T>(url: string): CancellablePromise<T> {
+function sendXHRRequest<T>(method: string, url: string, data?: unknown): CancellablePromise<T> {
   const request = new XMLHttpRequest();
-  request.open('GET', appendUrlPrefix(url));
+  request.open(method, appendUrlPrefix(url));
   request.setRequestHeader('Content-Type', 'application/json');
   request.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-  request.send();
+  if (data) {
+    request.send(JSON.stringify(data));
+  } else {
+    request.send();
+  }
 
   return new CancellablePromise((resolve, reject) => {
     request.addEventListener('load', () => {
       if (successStatusCodes.has(request.status)) {
-        resolve(JSON.parse(request.response) as T);
+        const result = request.status === NO_CONTENT
+          ? null
+          : JSON.parse(request.response) as T;
+        resolve(result);
       } else {
-        reject(new Error('An error has occurred while fetching data'));
+        reject(new Error('An unexpected error has occurred'));
       }
     });
   }, () => {
@@ -60,24 +73,16 @@ export function getAPI<T>(url: string): CancellablePromise<T> {
   });
 }
 
-export function postAPI<T>(url: string, data: unknown): CancellablePromise<T> {
-  const request = new XMLHttpRequest();
-  request.open('POST', appendUrlPrefix(url));
-  request.setRequestHeader('Content-Type', 'application/json');
-  request.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-  request.send(JSON.stringify(data));
+export function getAPI<T>(url: string): CancellablePromise<T> {
+  return sendXHRRequest('GET', url);
+}
 
-  return new CancellablePromise((resolve, reject) => {
-    request.addEventListener('load', () => {
-      if (successStatusCodes.has(request.status)) {
-        resolve(JSON.parse(request.response) as T);
-      } else {
-        reject(new Error('An error has occurred while posting data'));
-      }
-    });
-  }, () => {
-    request.abort();
-  });
+export function postAPI<T>(url: string, data: unknown): CancellablePromise<T> {
+  return sendXHRRequest('POST', url, data);
+}
+
+export function deleteAPI<T>(url: string): CancellablePromise<T> {
+  return sendXHRRequest('DELETE', url);
 }
 
 export function uploadFile<T>(

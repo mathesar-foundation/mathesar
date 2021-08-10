@@ -3,55 +3,52 @@ from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError, APIException
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
-from django.core.cache import cache
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
-from psycopg2.errors import DuplicateColumn, UndefinedFunction
-from sqlalchemy.exc import ProgrammingError
+from psycopg2.errors import (
+    DuplicateColumn, DuplicateTable, UndefinedFunction, UniqueViolation, UndefinedObject,
+    InvalidTextRepresentation, CheckViolation, InvalidParameterValue
+)
+from sqlalchemy.exc import ProgrammingError, DataError, IntegrityError
 from sqlalchemy_filters.exceptions import (
     BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound,
 )
 
+from db.types.alteration import UnsupportedTypeException
 
-from mathesar.database.utils import get_non_default_database_keys, update_databases
-from mathesar.models import Table, Schema, DataFile, Database
+from mathesar.database.utils import get_non_default_database_keys
+from mathesar.models import Table, Schema, DataFile, Database, Constraint
 from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
-    DatabaseSerializer
+    DatabaseSerializer, ConstraintSerializer, RecordListParameterSerializer, TablePreviewSerializer
 )
-from mathesar.utils.schemas import create_schema_and_object, reflect_schemas_from_database
-from mathesar.utils.tables import reflect_tables_from_schema, get_table_column_types
-from mathesar.utils.datafiles import create_table_from_datafile, create_datafile
-from mathesar.utils.tables import create_empty_table
+from mathesar.utils.schemas import create_schema_and_object
+from mathesar.utils.tables import (
+    get_table_column_types, create_table_from_datafile, create_empty_table,
+    gen_table_name
+)
+from mathesar.utils.datafiles import create_datafile
 from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
-from mathesar.forms import RecordListFilterForm
 
 from db.records import BadGroupFormat, GroupFieldNotFound
 
 logger = logging.getLogger(__name__)
 
-DB_REFLECTION_KEY = 'database_reflected_recently'
-DB_REFLECTION_INTERVAL = 60 * 5  # we reflect DB changes every 5 minutes
 
-
-def reflect_db_objects():
-    if not cache.get(DB_REFLECTION_KEY):
-        update_databases()
-        for database_key in get_non_default_database_keys():
-            reflect_schemas_from_database(database_key)
-        for schema in Schema.objects.all():
-            reflect_tables_from_schema(schema)
-        cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)
+def get_table_or_404(pk):
+    try:
+        table = Table.objects.get(id=pk)
+    except Table.DoesNotExist:
+        raise NotFound
+    return table
 
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     def get_queryset(self):
-        reflect_db_objects()
         return Schema.objects.all().order_by('-created_at')
-
     serializer_class = SchemaSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
@@ -59,13 +56,12 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
 
     def create(self, request):
         serializer = SchemaSerializer(data=request.data)
-        if serializer.is_valid():
-            schema = create_schema_and_object(serializer.validated_data['name'],
-                                              serializer.validated_data['database'])
-            serializer = SchemaSerializer(schema)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            raise ValidationError(serializer.errors)
+        serializer.is_valid(raise_exception=True)
+
+        schema = create_schema_and_object(serializer.validated_data['name'],
+                                          serializer.validated_data['database'])
+        serializer = SchemaSerializer(schema)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):
         serializer = SchemaSerializer(
@@ -91,7 +87,6 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
 
 class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     def get_queryset(self):
-        reflect_db_objects()
         return Table.objects.all().order_by('-created_at')
 
     serializer_class = TableSerializer
@@ -101,17 +96,38 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
 
     def create(self, request):
         serializer = TableSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            valid_data = serializer.validated_data
-            if 'data_files' in valid_data and valid_data['data_files']:
-                table = create_table_from_datafile(valid_data)
-            else:
-                table = create_empty_table(valid_data)
+        serializer.is_valid(raise_exception=True)
 
-            serializer = TableSerializer(table, context={'request': request})
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if not serializer.validated_data['name']:
+            name = gen_table_name(
+                serializer.validated_data['schema'],
+                serializer.validated_data['data_files'],
+            )
         else:
-            raise ValidationError(serializer.errors)
+            name = serializer.validated_data['name']
+
+        try:
+            if serializer.validated_data['data_files']:
+                table = create_table_from_datafile(
+                    serializer.validated_data['data_files'],
+                    name,
+                    serializer.validated_data['schema'],
+                )
+            else:
+                table = create_empty_table(
+                    name,
+                    serializer.validated_data['schema']
+                )
+        except ProgrammingError as e:
+            if type(e.orig) == DuplicateTable:
+                raise ValidationError(
+                    f"Relation {request.data['name']} already exists in schema {request.data['schema']}"
+                )
+            else:
+                raise APIException(e)
+
+        serializer = TableSerializer(table, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):
         serializer = TableSerializer(
@@ -139,10 +155,47 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         col_types = get_table_column_types(table)
         return Response(col_types)
 
+    @action(methods=['post'], detail=True)
+    def previews(self, request, pk=None):
+        table = self.get_object()
+        serializer = TablePreviewSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        columns = serializer.data["columns"]
+
+        column_names = [col["name"] for col in columns]
+        if not len(column_names) == len(set(column_names)):
+            raise ValidationError("Column names must be distinct")
+        if not len(columns) == len(table.sa_columns):
+            raise ValidationError("Incorrect number of columns in request.")
+
+        table_data = TableSerializer(table, context={"request": request}).data
+        try:
+            preview_records = table.get_preview(columns)
+        except (DataError, IntegrityError) as e:
+            if type(e.orig) == InvalidTextRepresentation or type(e.orig) == CheckViolation:
+                raise ValidationError("Invalid type cast requested.")
+            else:
+                raise APIException
+        except UnsupportedTypeException as e:
+            raise ValidationError(e)
+        except Exception as e:
+            raise APIException(e)
+
+        table_data.update(
+            {
+                # There's no way to reflect actual column data without
+                # creating a view, so we just use the submission, assuming
+                # no errors means we changed to the desired names and types
+                "columns": columns,
+                "records": preview_records
+            }
+        )
+
+        return Response(table_data)
+
 
 class ColumnViewSet(viewsets.ViewSet):
     def get_queryset(self):
-        reflect_db_objects()
         return Table.objects.all().order_by('-created_at')
 
     def list(self, request, table_pk=None):
@@ -152,7 +205,7 @@ class ColumnViewSet(viewsets.ViewSet):
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         try:
             column = table.sa_columns[int(pk)]
         except IndexError:
@@ -161,41 +214,70 @@ class ColumnViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         # We only support adding a single column through the API.
         serializer = ColumnSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            try:
-                column = table.add_column(request.data)
-            except ProgrammingError as e:
-                if type(e.orig) == DuplicateColumn:
-                    raise ValidationError(
-                        f"Column {request.data['name']} already exists"
-                    )
-                else:
-                    raise APIException(e)
-        else:
-            raise ValidationError(serializer.errors)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            column = table.add_column(request.data)
+        except ProgrammingError as e:
+            if type(e.orig) == DuplicateColumn:
+                name = request.data['name']
+                raise ValidationError(
+                    f'Column {name} already exists'
+                )
+            else:
+                raise APIException(e)
+        except TypeError:
+            raise ValidationError("Unknown type_option passed")
+        except DataError as e:
+            if (
+                    type(e.orig) == InvalidParameterValue
+                    or type(e.orig) == InvalidTextRepresentation
+            ):
+                raise ValidationError(
+                    f'parameter dict {request.data["type_options"]} is'
+                    f' invalid for type {request.data["type"]}'
+                )
+            else:
+                raise APIException(e)
+
         out_serializer = ColumnSerializer(column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         assert isinstance((request.data), dict)
         try:
             column = table.alter_column(pk, request.data)
         except ProgrammingError as e:
             if type(e.orig) == UndefinedFunction:
-                raise ValidationError("This type cast is not implemented")
+                raise ValidationError('This type cast is not implemented')
             else:
                 raise ValidationError
         except IndexError:
             raise NotFound
+        except TypeError:
+            raise ValidationError("Unknown type_option passed")
+        except DataError as e:
+            if (
+                    type(e.orig) == InvalidParameterValue
+                    or type(e.orig) == InvalidTextRepresentation
+            ):
+                raise ValidationError(
+                    f'parameter dict {request.data["type_options"]} is'
+                    f' invalid for type {request.data["type"]}'
+                )
+            else:
+                raise APIException(e)
+        except Exception as e:
+            raise APIException(e)
         serializer = ColumnSerializer(column)
         return Response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         try:
             table.drop_column(pk)
         except IndexError:
@@ -204,11 +286,10 @@ class ColumnViewSet(viewsets.ViewSet):
 
 
 class RecordViewSet(viewsets.ViewSet):
-    # There is no "update" method.
+    # There is no 'update' method.
     # We're not supporting PUT requests because there aren't a lot of use cases
     # where the entire record needs to be replaced, PATCH suffices for updates.
     def get_queryset(self):
-        reflect_db_objects()
         return Table.objects.all().order_by('-created_at')
 
     # For filter parameter formatting, see:
@@ -218,17 +299,15 @@ class RecordViewSet(viewsets.ViewSet):
     def list(self, request, table_pk=None):
         paginator = TableLimitOffsetGroupPagination()
 
-        # Use a Django Form to automatically parse JSON URL parameters
-        filter_form = RecordListFilterForm(request.GET)
-        if not filter_form.is_valid():
-            raise ValidationError(filter_form.errors)
+        serializer = RecordListParameterSerializer(data=request.GET)
+        serializer.is_valid(raise_exception=True)
 
         try:
             records = paginator.paginate_queryset(
                 self.get_queryset(), request, table_pk,
-                filters=filter_form.cleaned_data['filters'],
-                order_by=filter_form.cleaned_data['order_by'],
-                group_count_by=filter_form.cleaned_data['group_count_by'],
+                filters=serializer.validated_data['filters'],
+                order_by=serializer.validated_data['order_by'],
+                group_count_by=serializer.validated_data['group_count_by'],
             )
         except (BadFilterFormat, FilterFieldNotFound) as e:
             raise ValidationError({'filters': e})
@@ -241,7 +320,7 @@ class RecordViewSet(viewsets.ViewSet):
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         record = table.get_record(pk)
         if not record:
             raise NotFound
@@ -249,7 +328,7 @@ class RecordViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         # We only support adding a single record through the API.
         assert isinstance((request.data), dict)
         record = table.create_record_or_records(request.data)
@@ -257,13 +336,13 @@ class RecordViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         record = table.update_record(pk, request.data)
         serializer = RecordSerializer(record)
         return Response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
-        table = Table.objects.get(id=table_pk)
+        table = get_table_or_404(table_pk)
         table.delete_record(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -275,7 +354,6 @@ class DatabaseKeyViewSet(viewsets.ViewSet):
 
 class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     def get_queryset(self):
-        reflect_db_objects()
         return Database.objects.all().order_by('-created_at')
     serializer_class = DatabaseSerializer
     pagination_class = DefaultLimitOffsetPagination
@@ -308,11 +386,56 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
 
     def create(self, request):
         serializer = DataFileSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            return create_datafile(
-                request,
-                serializer.validated_data['file'],
-                serializer.validated_data.get('header', True),
-            )
+        serializer.is_valid(raise_exception=True)
+        return create_datafile(request, serializer.validated_data)
+
+
+class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
+    serializer_class = ConstraintSerializer
+    pagination_class = DefaultLimitOffsetPagination
+
+    def get_queryset(self):
+        return Constraint.objects.filter(table__id=self.kwargs['table_pk']).order_by('-created_at')
+
+    def create(self, request, table_pk=None):
+        table = get_table_or_404(table_pk)
+        serializer = ConstraintSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        # If we don't do this, the request.data QueryDict will only return the last column's name
+        # if there are multiple columns.
+        if type(request.data) != dict:
+            data = request.data.dict()
+            data['columns'] = request.data.getlist('columns')
         else:
-            raise ValidationError(serializer.errors)
+            data = request.data
+        try:
+            name = data['name'] if 'name' in data else None
+            constraint = table.add_constraint(data['type'], data['columns'], name)
+        except ProgrammingError as e:
+            if type(e.orig) == DuplicateTable:
+                raise ValidationError(
+                    'Relation with the same name already exists'
+                )
+            else:
+                raise APIException(e)
+        except IntegrityError as e:
+            if type(e.orig) == UniqueViolation:
+                raise ValidationError(
+                    'This column has non-unique values so a unique constraint cannot be set'
+                )
+            else:
+                raise APIException(e)
+
+        out_serializer = ConstraintSerializer(constraint, context={'request': request})
+        return Response(out_serializer.data, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, pk=None, table_pk=None):
+        constraint = self.get_object()
+        try:
+            constraint.drop()
+        except ProgrammingError as e:
+            if type(e.orig) == UndefinedObject:
+                raise NotFound
+            else:
+                raise APIException(e)
+        return Response(status=status.HTTP_204_NO_CONTENT)

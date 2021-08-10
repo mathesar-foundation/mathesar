@@ -1,0 +1,51 @@
+@use '../../styles/container.scss';
+
+$color-gray-50: #f6f7f8;
+$color-gray-200: #e2e2e4;
+
+.schemas {
+  @include container.container;
+
+  overflow: auto;
+  height: 100%;
+
+  .hero {
+    background-color: $color-gray-50;
+    padding-top: 2em;
+    padding-bottom: 2em;
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+
+      .add {
+        .fa-icon {
+          margin-right: 0.5em;
+        }
+      }
+    }
+  }
+
+  h2 {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .schema-list {
+    width: 100%;
+    list-style: none;
+    padding-left: 0;
+
+    li {
+      &:not(:last-of-type) {
+        border-bottom: 1px solid $color-gray-200;
+      }
+
+      &:hover {
+        background-color: $color-gray-50;
+      }
+    }
+  }
+}

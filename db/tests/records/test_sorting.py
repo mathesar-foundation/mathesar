@@ -1,5 +1,7 @@
 import pytest
 
+from sqlalchemy import MetaData, Table
+from sqlalchemy.schema import DropConstraint
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db import records
@@ -63,6 +65,66 @@ def test_get_records_orders_before_limiting(roster_table_obj):
     assert record_list[0][7] == 25 and record_list[0][2] == "Amy Gamble"
 
 
+def check_single_field_ordered(record_list, field, direction):
+    for i in range(1, len(record_list)):
+        prev = getattr(record_list[i - 1], field)
+        curr = getattr(record_list[i], field)
+        if prev is None or curr is None:
+            continue
+        comp_func = dir_to_python_func[direction]
+        assert comp_func(prev, curr)
+
+
+def check_multi_field_ordered(record_list, field_dir_pairs):
+    for i in range(1, len(record_list)):
+        for field, direction in field_dir_pairs:
+            prev = getattr(record_list[i - 1], field)
+            curr = getattr(record_list[i], field)
+            if prev is None or curr is None:
+                continue
+
+            comp_func = dir_to_python_func[direction]
+            # If fields are equal, check the next field
+            # If fields differ, ensure the comparison is correct
+            if prev != curr:
+                assert comp_func(prev, curr)
+                break
+
+
+def test_get_records_default_order_single_primary_key(roster_table_obj):
+    roster, engine = roster_table_obj
+    primary_column = roster.primary_key.columns[0].name
+    record_list = records.get_records(roster, engine)
+    check_single_field_ordered(record_list, primary_column, 'asc')
+
+
+def test_get_records_default_order_composite_primary_key(filter_sort_table_obj):
+    filter_sort, engine = filter_sort_table_obj
+    primary_columns = [col.name for col in filter_sort.primary_key.columns]
+    record_list = records.get_records(filter_sort, engine)
+    field_dir_pairs = [(col, 'asc') for col in primary_columns]
+    check_multi_field_ordered(record_list, field_dir_pairs)
+
+
+def test_get_records_default_order_no_primary_key(filter_sort_table_obj):
+    filter_sort, engine = filter_sort_table_obj
+
+    constraint = filter_sort.primary_key
+    with engine.begin() as conn:
+        conn.execute(DropConstraint(constraint))
+    metadata = MetaData(bind=engine)
+    filter_sort = Table(
+        filter_sort.name, metadata, schema=filter_sort.schema, autoload_with=engine
+    )
+    assert len(filter_sort.primary_key.columns) == 0
+
+    record_list = records.get_records(filter_sort, engine)
+
+    columns = [col.name for col in filter_sort.columns]
+    field_dir_pairs = [(col, 'asc') for col in columns]
+    check_multi_field_ordered(record_list, field_dir_pairs)
+
+
 dir_to_python_func = {
     "asc": lambda x, y: x <= y,
     "desc": lambda x, y: x >= y,
@@ -92,13 +154,7 @@ def test_get_records_orders_single_field(
     elif null == "nullslast":
         assert getattr(record_list[-1], field) is None
 
-    for i in range(1, len(record_list)):
-        prev = getattr(record_list[i - 1], field)
-        curr = getattr(record_list[i], field)
-        if prev is None or curr is None:
-            continue
-        comp_func = dir_to_python_func[direction]
-        assert comp_func(prev, curr)
+    check_single_field_ordered(record_list, field, direction)
 
 
 multi_field_test_list = [
@@ -128,18 +184,7 @@ def test_get_records_orders_multiple_fields(
 
     record_list = records.get_records(roster_sort, engine, order_by=order_list)
 
-    for i in range(1, len(record_list)):
-        prev_field_equal = True
-        for field, direction in field_dir_pairs:
-            prev = getattr(record_list[i - 1], field)
-            curr = getattr(record_list[i], field)
-            if prev is None or curr is None:
-                continue
-            comp_func = dir_to_python_func[direction]
-
-            # Only check order when previous field has equal values
-            assert not prev_field_equal or comp_func(prev, curr)
-            prev_field_equal = prev == curr
+    check_multi_field_ordered(record_list, field_dir_pairs)
 
 
 exceptions_test_list = [

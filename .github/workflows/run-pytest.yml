@@ -1,9 +1,12 @@
 name: Run Python tests
-on: [push, pull_request_target]
+on: [push, pull_request]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # We only want to run on external PRs, since internal PRs are covered by "push"
+    # This prevents this from running twice on internal PRs
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     steps:
       - uses: actions/checkout@v2
 
@@ -13,6 +16,10 @@ jobs:
       - uses: satackey/action-docker-layer-caching@v0.0.11
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
+        with:
+          key: mathesar-docker-cache-{hash}
+          restore-keys: |
+            mathesar-docker-cache-
 
       - name: Copy env file
         run: cp .env.example .env

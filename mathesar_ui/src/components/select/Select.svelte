@@ -21,7 +21,7 @@
   export let value: SelectOption = null;
   export let contentClass = '';
   export let triggerClass = '';
-  export let ariaLabel;
+  export let ariaLabel: string = null;
 
 
   let isOpen = false;

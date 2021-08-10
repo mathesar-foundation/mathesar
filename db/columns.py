@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 NAME = "name"
 NULLABLE = "nullable"
 PRIMARY_KEY = "primary_key"
-TYPE = "type"
+TYPE = "sa_type"
 
 ID_TYPE = Integer
 DEFAULT_COLUMNS = {
@@ -94,7 +94,7 @@ class MathesarColumn(Column):
         altered.
         """
         if self.engine is not None and not self.is_default:
-            db_type = self.type.compile(dialect=self.engine.dialect)
+            db_type = self.plain_type
             valid_target_types = sorted(
                 list(
                     set(
@@ -124,14 +124,30 @@ class MathesarColumn(Column):
                 self.engine
             )
 
+    @property
+    def plain_type(self):
+        """
+        Get the type name without arguments
+        """
+        return self.type.__class__().compile(self.engine.dialect)
+
+    @property
+    def type_options(self):
+        full_type_options = {
+            "precision": getattr(self.type, "precision", None),
+            "scale": getattr(self.type, "scale", None),
+        }
+        _type_options = {k: v for k, v in full_type_options.items() if v is not None}
+        return _type_options if _type_options else None
+
 
 def get_default_mathesar_column_list():
     return [
         MathesarColumn(
-            c,
-            DEFAULT_COLUMNS[c][TYPE], primary_key=DEFAULT_COLUMNS[c][PRIMARY_KEY]
+            col_name,
+            **DEFAULT_COLUMNS[col_name]
         )
-        for c in DEFAULT_COLUMNS
+        for col_name in DEFAULT_COLUMNS
     ]
 
 
@@ -157,7 +173,8 @@ def get_column_index_from_name(table_oid, column_name, engine):
 
 
 def create_column(engine, table_oid, column_data):
-    column_type = column_data[TYPE]
+    column_type = column_data.get(TYPE, column_data["type"])
+    column_type_options = column_data.get("type_options", {})
     column_nullable = column_data.get(NULLABLE, True)
     supported_types = alteration.get_supported_alter_column_types(
         engine, friendly_names=False,
@@ -166,15 +183,19 @@ def create_column(engine, table_oid, column_data):
     if sa_type is None:
         logger.warning("Requested type not supported. falling back to VARCHAR")
         sa_type = supported_types["VARCHAR"]
+        column_type_options = {}
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = MathesarColumn(
-        column_data[NAME], sa_type, nullable=column_nullable,
+        column_data[NAME], sa_type(**column_type_options), nullable=column_nullable,
     )
     with engine.begin() as conn:
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)
         op.add_column(table.name, column, schema=table.schema)
-    return tables.reflect_table_from_oid(table_oid, engine).columns[column_data[NAME]]
+    return get_mathesar_column_with_engine(
+        tables.reflect_table_from_oid(table_oid, engine).columns[column_data[NAME]],
+        engine
+    )
 
 
 def alter_column(
@@ -183,20 +204,27 @@ def alter_column(
         column_index,
         column_definition_dict,
 ):
-    assert len(column_definition_dict) == 1
-    column_def_key = list(column_definition_dict.keys())[0]
-    column_index = int(column_index)
     attribute_alter_map = {
         NAME: rename_column,
         TYPE: retype_column,
+        "type": retype_column,
         NULLABLE: change_column_nullable,
     }
+    assert len(
+        [key for key in column_definition_dict if key in attribute_alter_map]
+    ) == 1
+    column_def_key = list(column_definition_dict.keys())[0]
+    column_index = int(column_index)
     return attribute_alter_map[column_def_key](
-        table_oid, column_index, column_definition_dict[column_def_key], engine,
+        table_oid,
+        column_index,
+        column_definition_dict[column_def_key],
+        engine,
+        type_options=column_definition_dict.get("type_options", {})
     )
 
 
-def rename_column(table_oid, column_index, new_column_name, engine):
+def rename_column(table_oid, column_index, new_column_name, engine, **kwargs):
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
     with engine.begin() as conn:
@@ -208,11 +236,15 @@ def rename_column(table_oid, column_index, new_column_name, engine):
             new_column_name=new_column_name,
             schema=table.schema
         )
-    return tables.reflect_table_from_oid(table_oid, engine).columns[column_index]
+    return get_mathesar_column_with_engine(
+        tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
+        engine
+    )
 
 
-def retype_column(table_oid, column_index, new_type, engine):
+def retype_column(table_oid, column_index, new_type, engine, **kwargs):
     table = tables.reflect_table_from_oid(table_oid, engine)
+    type_options = kwargs.get("type_options", {})
     alteration.alter_column_type(
         table.schema,
         table.name,
@@ -220,11 +252,15 @@ def retype_column(table_oid, column_index, new_type, engine):
         new_type,
         engine,
         friendly_names=False,
+        type_options=type_options
     )
-    return tables.reflect_table_from_oid(table_oid, engine).columns[column_index]
+    return get_mathesar_column_with_engine(
+        tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
+        engine
+    )
 
 
-def change_column_nullable(table_oid, column_index, nullable, engine):
+def change_column_nullable(table_oid, column_index, nullable, engine, **kwargs):
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
     with engine.begin() as conn:
@@ -236,7 +272,16 @@ def change_column_nullable(table_oid, column_index, nullable, engine):
             nullable=nullable,
             schema=table.schema
         )
-    return tables.reflect_table_from_oid(table_oid, engine).columns[column_index]
+    return get_mathesar_column_with_engine(
+        tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
+        engine
+    )
+
+
+def get_mathesar_column_with_engine(col, engine):
+    new_column = MathesarColumn.from_column(col)
+    new_column.add_engine(engine)
+    return new_column
 
 
 def drop_column(

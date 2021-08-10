@@ -1,20 +1,38 @@
-import { writable, derived, Readable } from 'svelte/store';
-import { preloadCommonData, Schema, SchemaEntry } from '@mathesar/utils/preloadData';
-import { getAPI, States } from '@mathesar/utils/api';
+import {
+  writable,
+  Writable,
+  derived,
+  Readable,
+  get,
+  Unsubscriber,
+} from 'svelte/store';
+
+import { preloadCommonData } from '@mathesar/utils/preloadData';
+import { getAPI, PaginatedResponse, States } from '@mathesar/utils/api';
+
+import type { Database, Schema, SchemaEntry } from '@mathesar/App.d';
 import type { CancellablePromise } from '@mathesar/components';
+
+import { currentDB } from './databases';
+
+const commonData = preloadCommonData();
+
+const selected: Schema = commonData.schemas?.find(
+  (entry) => entry.id === commonData.current_schema,
+) || null;
+export const currentSchema: Writable<Schema> = writable(selected);
 
 interface SchemaMapEntry extends SchemaEntry {
   children?: number[],
 }
-
 interface TableMapEntry extends SchemaEntry {
   parent?: number
 }
 export type SchemaMap = Map<number, SchemaMapEntry>;
 export type TableMap = Map<number, TableMapEntry>;
 
-interface SchemaStoreData {
-  toPreload?: boolean,
+export interface SchemaStoreData {
+  preload?: boolean,
   state: States,
   data?: Schema[],
   schemaMap?: SchemaMap,
@@ -22,9 +40,8 @@ interface SchemaStoreData {
   error?: string
 }
 
-interface SchemaResponse {
-  results: Schema[]
-}
+const dbSchemaStoreMap: Map<Database['name'], Writable<SchemaStoreData>> = new Map();
+const dbSchemaRequestMap: Map<Database['name'], CancellablePromise<PaginatedResponse<Schema>>> = new Map();
 
 function generateEntryMaps(data: Schema[]): { schemaMap: SchemaMap, tableMap: TableMap } {
   const schemaMap: SchemaMap = new Map();
@@ -52,51 +69,92 @@ function generateEntryMaps(data: Schema[]): { schemaMap: SchemaMap, tableMap: Ta
   };
 }
 
-const schemaWriteStore = writable<SchemaStoreData>({
-  toPreload: true,
-  state: States.Loading,
-  data: [],
-});
-
-let schemaRequest: CancellablePromise<SchemaResponse>;
-
-export async function reloadSchemas(): Promise<void> {
-  schemaWriteStore.update((currentData) => ({
-    ...currentData,
-    state: States.Loading,
-  }));
+export async function fetchSchemas(
+  database: string,
+): Promise<Schema[]> {
+  const store = dbSchemaStoreMap.get(database);
+  if (!store) {
+    return [];
+  }
 
   try {
-    schemaRequest?.cancel();
-    schemaRequest = getAPI<SchemaResponse>('/schemas/');
+    store.update((currentData) => ({
+      ...currentData,
+      state: States.Loading,
+    }));
+
+    dbSchemaRequestMap.get(database)?.cancel();
+
+    const schemaRequest = getAPI<PaginatedResponse<Schema>>(`/schemas/?database=${database}`);
+    dbSchemaRequestMap.set(database, schemaRequest);
     const response = await schemaRequest;
     const data = response.results || [];
-    schemaWriteStore.set({
+
+    store.set({
       state: States.Done,
       data,
       ...generateEntryMaps(data),
     });
+
+    if (!get(currentSchema) && data.length > 0) {
+      currentSchema.set(data[0]);
+    }
+
+    return data;
   } catch (err) {
-    schemaWriteStore.set({
+    store.set({
       state: States.Error,
-      error: err instanceof Error ? err.message : null,
+      error: err instanceof Error ? err.message : 'Error in fetching schemas',
     });
+    return [];
   }
 }
 
-export const schemas: Readable<SchemaStoreData> = derived(
-  schemaWriteStore,
-  ($schemaWriteStore, set) => {
-    if ($schemaWriteStore.toPreload) {
-      const preloadedData = preloadCommonData();
-      const data = preloadedData?.schemas || [];
-      set({
+let preload = true;
+
+export function getSchemaStore(database: string): Writable<SchemaStoreData> {
+  let store = dbSchemaStoreMap.get(database);
+  if (!store) {
+    // TODO: Set and check currentDB in preloaded data
+    if (preload) {
+      preload = false;
+      store = writable({
         state: States.Done,
-        data,
-        ...generateEntryMaps(data),
+        data: commonData.schemas,
+        ...generateEntryMaps(commonData.schemas),
       });
     } else {
-      set($schemaWriteStore);
+      store = writable({
+        state: States.Loading,
+      });
+      void fetchSchemas(database);
     }
+    dbSchemaStoreMap.set(database, store);
+  } else if (get(store).error) {
+    void fetchSchemas(database);
+  }
+  return store;
+}
+
+export const schemas: Readable<SchemaStoreData> = derived(
+  currentDB,
+  ($currentDB, set) => {
+    let unsubscribe: Unsubscriber;
+
+    if (!$currentDB) {
+      set({
+        state: States.Done,
+        data: [],
+      });
+    } else {
+      const store = getSchemaStore($currentDB.name);
+      unsubscribe = store.subscribe((schemaData) => {
+        set(schemaData);
+      });
+    }
+
+    return () => {
+      unsubscribe?.();
+    };
   },
 );

@@ -1,9 +1,7 @@
 """
 This inherits the fixtures in the root conftest.py
 """
-
 import pytest
-
 
 from mathesar.models import Database
 
@@ -47,7 +45,7 @@ def django_db_setup(request, django_db_blocker) -> None:
 @pytest.fixture(scope="session", autouse=True)
 def test_db_model(test_db_name, django_db_blocker, django_db_setup):
     with django_db_blocker.unblock():
-        database_model = Database.objects.create(name=test_db_name)
+        database_model = Database.current_objects.create(name=test_db_name)
     return database_model
 
 
@@ -62,10 +60,20 @@ def csv_filename():
 
 
 @pytest.fixture(scope='session')
+def paste_filename():
+    return 'mathesar/tests/data/patents.txt'
+
+
+@pytest.fixture(scope='session')
 def headerless_csv_filename():
     return 'mathesar/tests/data/headerless_patents.csv'
 
 
 @pytest.fixture(scope='session')
-def tsv_filename():
-    return 'mathesar/tests/data/patents.tsv'
+def patents_url():
+    return 'https://data.nasa.gov/resource/gquh-watm.csv'
+
+
+@pytest.fixture(scope='session')
+def patents_url_filename():
+    return 'mathesar/tests/data/api_patents.csv'
