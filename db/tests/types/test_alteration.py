@@ -275,6 +275,7 @@ type_test_bad_data_list = [
     (String, "interval", "3"),
     (String, "numeric", "abc"),
     (String, "email", "alice-example.com"),
+    (Numeric, "integer", 1.2),
 ]
 
 

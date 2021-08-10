@@ -383,13 +383,34 @@ def _get_interval_type_body_map():
 
 
 def _get_integer_type_body_map(target_type_str=INTEGER):
-    default_behavior_source_types = [
-        DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL, VARCHAR
-    ]
+    default_behavior_source_types = [INTEGER, VARCHAR]
+    no_rounding_source_types = [DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL]
+    cast_loss_exception_str = (
+        f"RAISE EXCEPTION '% cannot be cast to {target_type_str} without loss', $1;"
+    )
+
+    def _get_no_rounding_cast_to_integer():
+        return f"""
+        DECLARE integer_res {target_type_str};
+        BEGIN
+          SELECT $1::{target_type_str} INTO integer_res;
+          IF integer_res = $1 THEN
+            RETURN integer_res;
+          END IF;
+          {cast_loss_exception_str}
+        END;
+        """
+
     type_body_map = {
         type_name: _get_default_behavior_cast_str(target_type_str)
         for type_name in default_behavior_source_types
     }
+    type_body_map.update(
+        {
+            type_name: _get_no_rounding_cast_to_integer()
+            for type_name in no_rounding_source_types
+        }
+    )
     type_body_map.update({BOOLEAN: _get_boolean_to_number_cast(target_type_str)})
     return type_body_map
 
