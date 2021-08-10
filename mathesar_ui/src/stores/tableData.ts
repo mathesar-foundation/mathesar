@@ -2,7 +2,6 @@ import { get, writable, Writable } from 'svelte/store';
 import { deleteAPI, getAPI, postAPI, States } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
 import type { SelectOption } from '@mathesar-components/types';
-import { createEventDispatcher } from 'svelte';
 
 export const DEFAULT_COUNT_COL_WIDTH = 70;
 export const DEFAULT_COLUMN_WIDTH = 160;
