@@ -423,6 +423,7 @@ type_set = {
     'INTERVAL',
     'NUMERIC',
     'REAL',
+    'SMALLINT',
     'VARCHAR',
     'mathesar_types.email',
 }

@@ -44,7 +44,7 @@ def test_column_list(column_test_table, client):
             'primary_key': True,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'NUMERIC', 'REAL', 'VARCHAR',
+                'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
             ],
         },
         {
@@ -56,7 +56,7 @@ def test_column_list(column_test_table, client):
             'primary_key': False,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'NUMERIC', 'REAL', 'VARCHAR',
+                'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
             ],
         },
         {
@@ -68,7 +68,7 @@ def test_column_list(column_test_table, client):
             'primary_key': False,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'NUMERIC', 'REAL', 'VARCHAR',
+                'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
             ],
         },
         {
@@ -80,7 +80,7 @@ def test_column_list(column_test_table, client):
             'primary_key': False,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'INTERVAL', 'NUMERIC', 'REAL', 'VARCHAR',
+                'INTEGER', 'INTERVAL', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
                 'mathesar_types.email',
             ],
         }
@@ -102,7 +102,7 @@ def test_column_list(column_test_table, client):
                 'primary_key': True,
                 'valid_target_types': [
                     'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                    'INTEGER', 'NUMERIC', 'REAL', 'VARCHAR',
+                    'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
                 ],
             },
         ),
@@ -117,7 +117,7 @@ def test_column_list(column_test_table, client):
                 'primary_key': False,
                 'valid_target_types': [
                     'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                    'INTEGER', 'NUMERIC', 'REAL', 'VARCHAR',
+                    'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
                 ],
             },
         ),

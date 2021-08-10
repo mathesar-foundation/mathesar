@@ -75,6 +75,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             INTEGER: {VALID: [(500, 500)]},
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
+            SMALLINT: {VALID: [(500, 500)]},
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
@@ -90,6 +91,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             INTEGER: {VALID: [(True, 1), (False, 0)]},
             NUMERIC: {VALID: [(True, Decimal('1.0')), (False, Decimal('0'))]},
             REAL: {VALID: [(True, 1.0), (False, 0.0)]},
+            SMALLINT: {VALID: [(True, 1), (False, 0)]},
             VARCHAR: {VALID: [(True, 'true'), (False, 'false')]},
         }
     },
@@ -111,6 +113,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
+            SMALLINT: {
+                VALID: [(500, 500)],
+                INVALID: [12341234]
+            },
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
@@ -126,7 +132,17 @@ MASTER_DB_TYPE_MAP_SPEC = {
             INTEGER: {VALID: [(500, 500)]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
+            SMALLINT: {VALID: [(500, 500)]},
             VARCHAR: {VALID: [(3, "3")]},
+        }
+    },
+    EMAIL: {
+        ISCHEMA_NAME: "mathesar_types.email",
+        SUPPORTED_MAP_NAME: "email",
+        REFLECTED_NAME: EMAIL,
+        TARGET_DICT: {
+            EMAIL: {VALID: [("alice@example.com", "alice@example.com")]},
+            VARCHAR: {VALID: [("bob@example.com", "bob@example.com")]},
         }
     },
     FLOAT: {
@@ -141,6 +157,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             INTEGER: {VALID: [(500, 500), (-5, -5)], INVALID: [-3.234, 234.34]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
+            SMALLINT: {VALID: [(500, 500), (-5, -5)], INVALID: [-3.234, 234.34]},
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
@@ -156,6 +173,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             INTEGER: {VALID: [(500, 500)]},
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
+            SMALLINT: {VALID: [(500, 500)]},
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
@@ -181,15 +199,6 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
         }
     },
-    EMAIL: {
-        ISCHEMA_NAME: "mathesar_types.email",
-        SUPPORTED_MAP_NAME: "email",
-        REFLECTED_NAME: EMAIL,
-        TARGET_DICT: {
-            EMAIL: {VALID: [("alice@example.com", "alice@example.com")]},
-            VARCHAR: {VALID: [("bob@example.com", "bob@example.com")]},
-        }
-    },
     NUMERIC: {
         ISCHEMA_NAME: "numeric",
         REFLECTED_NAME: NUMERIC,
@@ -208,6 +217,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
+            SMALLINT: {
+                VALID: [(500, 500)],
+                INVALID: [1.234, 12341234]
+            },
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
@@ -229,6 +242,26 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
+            SMALLINT: {
+                VALID: [(500, 500)],
+                INVALID: [3.345]
+            },
+            VARCHAR: {VALID: [(3, "3")]},
+        }
+    },
+    SMALLINT: {
+        ISCHEMA_NAME: "smallint",
+        REFLECTED_NAME: SMALLINT,
+        TARGET_DICT: {
+            BIGINT: {VALID: [(500, 500)]},
+            BOOLEAN: {VALID: [(1, True), (0, False)], INVALID: [3]},
+            DECIMAL: {VALID: [(1, Decimal('1.0'))]},
+            DOUBLE: {VALID: [(3.0, 3)]},
+            FLOAT: {VALID: [(4.0, 4)]},
+            INTEGER: {VALID: [(500, 500)]},
+            NUMERIC: {VALID: [(1, Decimal('1.0'))]},
+            REAL: {VALID: [(5, 5.0)]},
+            SMALLINT: {VALID: [(500, 500)]},
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
@@ -286,6 +319,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             REAL: {
                 VALID: [("1.234", 1.234)],
                 INVALID: ["real"]
+            },
+            SMALLINT: {
+                VALID: [("432", 432)],
+                INVALID: ["1.2234"]
             },
             VARCHAR: {VALID: [("a string", "a string")]},
         }

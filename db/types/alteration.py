@@ -14,6 +14,7 @@ INTERVAL = "interval"
 NAME = "name"
 NUMERIC = "numeric"
 REAL = "real"
+SMALLINT = "smallint"
 STRING = "string"
 VARCHAR = "varchar"
 FULL_VARCHAR = "character varying"
@@ -44,6 +45,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         INTERVAL: dialect_types.get(INTERVAL),
         NUMERIC: dialect_types.get(NUMERIC),
         REAL: dialect_types.get(REAL),
+        SMALLINT: dialect_types.get(SMALLINT),
         STRING: dialect_types.get(NAME),
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
@@ -164,7 +166,7 @@ def create_email_casts(engine):
 
 
 def create_integer_casts(engine):
-    integer_types = [BIGINT, INTEGER]
+    integer_types = [BIGINT, INTEGER, SMALLINT]
     for type_str in integer_types:
         type_body_map = _get_integer_type_body_map(target_type_str=type_str)
         create_cast_functions(type_str, type_body_map, engine)
@@ -215,6 +217,7 @@ def get_defined_source_target_cast_tuples(engine):
         INTERVAL: _get_interval_type_body_map(),
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
+        SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
         VARCHAR: _get_varchar_type_body_map(engine),
     }
     return {
@@ -281,6 +284,7 @@ def _get_boolean_type_body_map():
     """
     source_number_types = [
         BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
+        SMALLINT,
     ]
     default_behavior_source_types = [BOOLEAN]
 
@@ -374,7 +378,7 @@ def _get_integer_type_body_map(target_type_str=INTEGER):
     We specifically disallow rounding or truncating when casting from numerics,
     etc.
     """
-    default_behavior_source_types = [BIGINT, INTEGER, VARCHAR]
+    default_behavior_source_types = [BIGINT, INTEGER, SMALLINT, VARCHAR]
     no_rounding_source_types = [
         DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL
     ]
@@ -418,7 +422,7 @@ def _get_decimal_number_type_body_map(target_type_str=NUMERIC):
 
     default_behavior_source_types = [
         BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
-        VARCHAR,
+        SMALLINT, VARCHAR,
     ]
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, target_type_str,
