@@ -5,7 +5,12 @@
     faSortAmountDownAlt,
     faThList,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Button, Dropdown, Icon, TextInput } from '@mathesar-components';
+  import {
+    Button,
+    Dropdown,
+    Icon,
+    TextInput,
+  } from '@mathesar-components';
   import type {
     TableColumnData,
     ColumnPosition,
@@ -89,21 +94,30 @@
     });
   }
 
-  let newColumnDropdownIsOpen:boolean = false;
+  const getColumnNames = () => {
+    const columnNames:string[] = [];
+    const columnData = (columns.data) ? columns.data : null;
+    if (columnData) {
+      columnData.forEach((col:TableColumn) => columnNames.push(col.name));
+    }
+    return columnNames;
+  };
 
-  const existingColumnNames:string[] = Object(columns.data).map(column => column.name)
-  let newColumnName:string = ""
-  function addColumn(newColumnName:string) {
-    let newColumn:TableColumn = {
+  let newColumnDropdownIsOpen = false;
+  let newColumnName = '';
+
+  function addColumn() {
+    const newColumn:TableColumn = {
       name: newColumnName,
-      type: "varchar",
+      type: 'varchar',
       index: columns.data.length,
-      nullable:true,
-      primaryKey:false,
-      validTargetTypes: null
+      nullable: true,
+      primaryKey: false,
+      validTargetTypes: null,
     };
     dispatch('addColumn', newColumn);
     newColumnDropdownIsOpen = false;
+    newColumnName = '';
   }
 </script>
 
@@ -173,7 +187,6 @@
     <Dropdown closeOnInnerClick={false}
               contentClass="content"
               bind:isOpen={newColumnDropdownIsOpen}
-              data-popper-placement="bottom-end"
               triggerAppearance="plain">
 
       <svelte:fragment slot="trigger">
@@ -187,13 +200,13 @@
             <TextInput bind:value={newColumnName}>
               <svelte:fragment slot="prepend">Name:</svelte:fragment>
             </TextInput>
-            <Button appearance="primary" disabled={newColumnName.length === 0 || existingColumnNames.indexOf(newColumnName) >= 0} on:click={() => addColumn(newColumnName)}>
+            <Button appearance="primary" disabled={newColumnName.length === 0 || getColumnNames().indexOf(newColumnName) >= 0} on:click={() => addColumn()}>
               Add
             </Button>
 
           </div>
 
-          {#if existingColumnNames.indexOf(newColumnName) >= 0}
+          {#if getColumnNames().indexOf(newColumnName) >= 0}
             <p class="messages">
               <strong>Warning!</strong> The column name must be unique.
             </p>
