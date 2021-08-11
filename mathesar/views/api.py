@@ -321,22 +321,22 @@ class RecordViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
-        record = table.get_record(pk)
-        if not record:
-            raise NotFound
-        serializer = RecordSerializer(record)
+        try:
+            record = table.get_record(pk)
+            if not record:
+                raise NotFound
+            serializer = RecordSerializer(record)
+        except NotUniquePrimaryKey as e:
+            logger.error(e.message)
+            raise e
         return Response(serializer.data)
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
         # We only support adding a single record through the API.
         assert isinstance((request.data), dict)
-        try:
-            record = table.create_record_or_records(request.data)
-            serializer = RecordSerializer(record)
-        except NotUniquePrimaryKey as e:
-            logger.error(e.message)
-            raise e
+        record = table.create_record_or_records(request.data)
+        serializer = RecordSerializer(record)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
