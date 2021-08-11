@@ -79,15 +79,19 @@ class MathesarColumn(Column):
             nullable=column.nullable,
             server_default=column.server_default,
         )
-        new_column._table = column.table
+        new_column.original_table = column.table
         return new_column
 
     @property
     def table_(self):
-        if hasattr(self, "table") and self.table is not None:
+        """
+        Returns the current table the column is associated with if it exists, otherwise
+        returns the table the column was originally created from.
+        """
+        if hasattr(self, "table"):
             return self.table
-        elif hasattr(self, "_table") and self._table is not None:
-            return self._table
+        elif hasattr(self, "original_table"):
+            return self.original_table
         return None
 
     @property
@@ -365,18 +369,17 @@ def get_column_default(table_oid, column_index, engine):
     with engine.begin() as conn:
         result = conn.execute(query).first()[0]
 
-
     # Here, we get the 'adbin' value for the current column, stored in the attrdef
     # system table. The prefix of this value tells us whether the default is static
     # ('{CONSTANT') or generated ('{FUNCEXPR'). We do not return generated defaults.
     if result.startswith("{FUNCEXPR"):
         return None
 
+    # Defaults are stored as text with SQL casts appended
+    # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
+    # Here, we execute the cast to get the proper python value
     cast_sql_text = column.server_default.arg.text
     with engine.begin() as conn:
-        # Defaults are returned as text with SQL casts appended
-        # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
-        # Here, we execute the cast to get the proper python value
         return conn.execute(select(text(cast_sql_text))).first()[0]
 
 

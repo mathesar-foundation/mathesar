@@ -430,6 +430,7 @@ type_set = {
     'NUMERIC',
     'REAL',
     'VARCHAR',
+    'DATE',
     'mathesar_types.email',
 }
 
