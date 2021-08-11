@@ -9,10 +9,12 @@ from sqlalchemy import (
 )
 from sqlalchemy.exc import IntegrityError
 from db import columns, tables, constants, constraints
-from db.types import email
+from db.types import email, alteration
 from db.tests.types import fixtures
 
 engine_with_types = fixtures.engine_with_types
+temporary_testing_schema = fixtures.temporary_testing_schema
+engine_email_type = fixtures.engine_email_type
 
 
 def init_column(*args, **kwargs):
@@ -384,10 +386,10 @@ def test_retype_column_correct_column(engine_with_schema):
     )
 
 
-def test_retype_column_adds_options(engine_with_schema):
+@pytest.mark.parametrize('target_type', ['numeric', 'decimal'])
+def test_retype_column_adds_options(engine_with_schema, target_type):
     engine, schema = engine_with_schema
     table_name = "atableone"
-    target_type = "numeric"
     target_column_name = "thecolumntochange"
     nontarget_column_name = "notthecolumntochange"
     table = Table(
@@ -405,19 +407,47 @@ def test_retype_column_adds_options(engine_with_schema):
         schema,
         table_name,
         target_column_name,
-        "numeric",
+        target_type,
         engine,
         friendly_names=False,
         type_options=type_options,
     )
 
 
-def test_create_column(engine_with_schema):
-    engine, schema = engine_with_schema
+type_set = {
+    'BOOLEAN',
+    'DECIMAL',
+    'DOUBLE PRECISION',
+    'FLOAT',
+    'INTERVAL',
+    'NUMERIC',
+    'REAL',
+    'VARCHAR',
+    'mathesar_types.email',
+}
+
+
+def test_type_list_completeness(engine_with_types):
+    """
+    This metatest ensures that tests parameterized on the type_set
+    use the entire set supported.
+    """
+    actual_supported_db_types = alteration.get_supported_alter_column_db_types(
+        engine_with_types
+    )
+    assert type_set == actual_supported_db_types
+
+
+@pytest.mark.parametrize("target_type", type_set)
+def test_create_column(engine_email_type, target_type):
+    engine, schema = engine_email_type
     table_name = "atableone"
-    target_type = "BOOLEAN"
     initial_column_name = "original_column"
     new_column_name = "added_column"
+    input_output_type_map = {type_: type_ for type_ in type_set}
+    # update the map with types that reflect differently than they're
+    # set when creating a column
+    input_output_type_map.update({'FLOAT': 'DOUBLE PRECISION', 'DECIMAL': 'NUMERIC'})
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -430,13 +460,13 @@ def test_create_column(engine_with_schema):
     altered_table = tables.reflect_table_from_oid(table_oid, engine)
     assert len(altered_table.columns) == 2
     assert created_col.name == new_column_name
-    assert created_col.type.compile(engine.dialect) == "BOOLEAN"
+    assert created_col.type.compile(engine.dialect) == input_output_type_map[target_type]
 
 
-def test_create_column_options(engine_with_schema):
-    engine, schema = engine_with_schema
+@pytest.mark.parametrize("target_type", ["NUMERIC", "DECIMAL"])
+def test_create_column_options(engine_email_type, target_type):
+    engine, schema = engine_email_type
     table_name = "atableone"
-    target_type = "NUMERIC"
     initial_column_name = "original_column"
     new_column_name = "added_column"
     table = Table(
