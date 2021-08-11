@@ -69,7 +69,7 @@ class TableSerializer(serializers.ModelSerializer):
     data_files = serializers.PrimaryKeyRelatedField(
         required=False, many=True, queryset=DataFile.objects.all()
     )
-    pk_type = serializers.CharField()
+    num_primary_keys = serializers.IntegerField(required=True)
 
     class Meta:
         model = Table
