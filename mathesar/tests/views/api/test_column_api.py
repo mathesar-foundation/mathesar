@@ -1,10 +1,13 @@
 import json
-from django.core.cache import cache
+
 import pytest
+from unittest.mock import patch
+from django.core.cache import cache
 from sqlalchemy import Column, Integer, String, MetaData
 from sqlalchemy import Table as SATable
 
 from db.tables import get_oid_from_table
+from db import columns
 from mathesar.models import Table
 
 
@@ -301,6 +304,45 @@ def test_column_destroy_when_missing(column_test_table, client):
     cache.clear()
     response = client.delete(
         f"/api/v0/tables/{column_test_table.id}/columns/15/"
+    )
+    response_data = response.json()
+    assert response_data == {"detail": "Not found."}
+    assert response.status_code == 404
+
+
+def test_column_duplicate(column_test_table, client):
+    cache.clear()
+    target_col_idx = 2
+    target_col = column_test_table.sa_columns[target_col_idx]
+    data = {
+        "name": "new_col_name",
+        "copy_data": False,
+        "copy_constraints": False,
+    }
+    with patch.object(columns, "duplicate_column") as mock_infer:
+        mock_infer.return_value = target_col
+        response = client.post(
+            f"/api/v0/tables/{column_test_table.id}/columns/{target_col_idx}/duplicate/",
+            data=data
+        )
+
+    assert response.status_code == 201
+
+    assert mock_infer.call_args[0] == (
+        column_test_table.oid,
+        target_col_idx,
+        column_test_table.schema._sa_engine,
+    )
+    assert mock_infer.call_args[1] == {
+        "new_column_name": data["name"],
+        "copy_data": data["copy_data"],
+        "copy_constraints": data["copy_constraints"]
+    }
+
+
+def test_column_duplicate_when_missing(column_test_table, client):
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/3000/duplicate/",
     )
     response_data = response.json()
     assert response_data == {"detail": "Not found."}
