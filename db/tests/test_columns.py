@@ -728,6 +728,29 @@ def test_duplicate_column_nullable(
         assert col.nullable is True
 
 
+def test_duplicate_non_unique_constraint(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atable"
+    target_column_name = "columtoduplicate"
+    new_col_name = "duplicated_column"
+    insert_data = [(1,), (2,), (3,)]
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(target_column_name, Numeric, primary_key=True),
+    )
+    table.create()
+    with engine.begin() as conn:
+        for data in insert_data:
+            conn.execute(table.insert().values(data))
+
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    col = columns.duplicate_column(table_oid, 0, engine, new_col_name)
+
+    _check_duplicate_data(table_oid, engine, True)
+    assert col.primary_key is False
+
+
 def get_mathesar_column_init_args():
     init_code = columns.MathesarColumn.__init__.__code__
     return init_code.co_varnames[1:init_code.co_argcount]

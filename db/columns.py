@@ -352,7 +352,7 @@ def duplicate_column_constraints(table_oid, from_column, to_column, engine,
     constraints_ = constraints.get_column_constraints(from_column, table_oid, engine)
     for constraint in constraints_:
         constraint_type = constraints.get_constraint_type_from_char(constraint.contype)
-        if constraint_type == constraints.ConstraintType.UNIQUE:
+        if constraint_type != constraints.ConstraintType.UNIQUE.value:
             # Don't allow duplication of primary keys
             continue
         constraints.copy_constraint(
