@@ -618,6 +618,19 @@ def _check_duplicate_unique_constraint(
         assert len(constraints_) == 0
 
 
+def _create_table_to_duplicate(table_name, cols, insert_data, schema, engine):
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        *cols
+    )
+    table.create()
+    with engine.begin() as conn:
+        for data in insert_data:
+            conn.execute(table.insert().values(data))
+    return table
+
+
 def test_duplicate_column_name(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "atable"
@@ -640,16 +653,9 @@ def test_duplicate_column_single_unique(engine_with_schema, copy_data, copy_cons
     table_name = "atable"
     target_column_name = "columtoduplicate"
     new_col_name = "duplicated_column"
+    cols = [Column(target_column_name, Numeric, unique=True)]
     insert_data = [(1,), (2,), (3,)]
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column(target_column_name, Numeric, unique=True),
-    )
-    table.create()
-    with engine.begin() as conn:
-        for data in insert_data:
-            conn.execute(table.insert().values(data))
+    _create_table_to_duplicate(table_name, cols, insert_data, schema, engine)
 
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     columns.duplicate_column(
@@ -669,18 +675,13 @@ def test_duplicate_column_multi_unique(engine_with_schema, copy_data, copy_const
     table_name = "atable"
     target_column_name = "columtoduplicate"
     new_col_name = "duplicated_column"
-    insert_data = [(1, 2), (2, 3), (3, 4)]
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
+    cols = [
         Column(target_column_name, Numeric),
         Column("Filler", Numeric),
         UniqueConstraint(target_column_name, "Filler")
-    )
-    table.create()
-    with engine.begin() as conn:
-        for data in insert_data:
-            conn.execute(table.insert().values(data))
+    ]
+    insert_data = [(1, 2), (2, 3), (3, 4)]
+    _create_table_to_duplicate(table_name, cols, insert_data, schema, engine)
 
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     columns.duplicate_column(
@@ -703,16 +704,9 @@ def test_duplicate_column_nullable(
     table_name = "atable"
     target_column_name = "columtoduplicate"
     new_col_name = "duplicated_column"
+    cols = [Column(target_column_name, Numeric, nullable=nullable)]
     insert_data = [(1,), (2,), (3,)]
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column(target_column_name, Numeric, nullable=nullable),
-    )
-    table.create()
-    with engine.begin() as conn:
-        for data in insert_data:
-            conn.execute(table.insert().values(data))
+    _create_table_to_duplicate(table_name, cols, insert_data, schema, engine)
 
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     col = columns.duplicate_column(
