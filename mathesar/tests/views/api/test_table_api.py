@@ -99,7 +99,7 @@ def _create_table(client, data_files, table_name, schema):
     body = {
         'name': table_name,
         'schema': schema.id,
-        'pk_type': 'Single'
+        'num_primary_keys': 1
     }
     if data_files is not None:
         body['data_files'] = [df.id for df in data_files]
@@ -309,7 +309,7 @@ def test_table_type_suggestion(client, schema, engine_email_type):
         'data_files': [data_file.id],
         'name': table_name,
         'schema': schema.id,
-        'pk_type': 'Single'
+        'num_primary_keys': 1
     }
     response_table = client.post('/api/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
@@ -338,7 +338,7 @@ def test_table_previews(client, schema, engine_email_type):
         'data_files': [data_file.id],
         'name': table_name,
         'schema': schema.id,
-        'pk_type': 'Single'
+        'num_primary_keys': 1
     }
     response_table = client.post('/api/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
@@ -384,7 +384,7 @@ def test_table_previews_wrong_column_number(client, schema, engine_email_type):
         'data_files': [data_file.id],
         'name': table_name,
         'schema': schema.id,
-        'pk_type': 'Single'
+        'num_primary_keys': 1
     }
     response_table = client.post('/api/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
@@ -418,7 +418,7 @@ def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
         'data_files': [data_file.id],
         'name': table_name,
         'schema': schema.id,
-        'pk_type': 'Single'
+        'num_primary_keys': 1
     }
     response_table = client.post('/api/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
@@ -453,7 +453,7 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_email_typ
         'data_files': [data_file.id],
         'name': table_name,
         'schema': schema.id,
-        'pk_type': 'Single'
+        'num_primary_keys': 1
     }
     response_table = client.post('/api/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
@@ -488,7 +488,7 @@ def test_table_previews_unsupported_type(client, schema, engine_email_type):
         'data_files': [data_file.id],
         'name': table_name,
         'schema': schema.id,
-        'pk_type': 'Single'
+        'num_primary_keys': 1
     }
     response_table = client.post('/api/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
@@ -523,7 +523,7 @@ def test_table_previews_missing_columns(client, schema, engine_email_type):
         'data_files': [data_file.id],
         'name': table_name,
         'schema': schema.id,
-        'pk_type': 'Single'
+        'num_primary_keys': 1
     }
     response_table = client.post('/api/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
@@ -644,7 +644,7 @@ def test_table_create_with_same_name(client, schema):
     body = {
         'name': table_name,
         'schema': schema.id,
-        'pk_type': 'Single'
+        'num_primary_keys': 1
     }
     client.post('/api/v0/tables/', body)
     response = client.post('/api/v0/tables/', body)
@@ -721,7 +721,7 @@ def test_table_create_from_datafile_404(client):
         'data_files': [-999],
         'name': 'test_table',
         'schema': -999,
-        'pk_type': 'Single'
+        'num_primary_keys': 1
     }
     response = client.post('/api/v0/tables/', body)
     response_table = response.json()
@@ -735,7 +735,7 @@ def test_table_create_from_multiple_datafile(client, data_file, schema):
         'data_files': [data_file.id, data_file.id],
         'name': 'test_table',
         'schema': schema.id,
-        'pk_type': 'Single'
+        'num_primary_keys': 1
     }
     response = client.post('/api/v0/tables/', body)
     response_table = response.json()
@@ -747,7 +747,7 @@ def test_table_partial_update_invalid_field(create_table, client):
     table_name = 'NASA Table Partial Update'
     table = create_table(table_name)
 
-    body = {'schema': table.schema.id, 'pk_type': 'Single'}
+    body = {'schema': table.schema.id, 'num_primary_keys': 1}
     response = client.patch(f'/api/v0/tables/{table.id}/', body)
 
     assert response.status_code == 400
