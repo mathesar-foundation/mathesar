@@ -49,7 +49,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         STRING: dialect_types.get(NAME),
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
-        EMAIL: dialect_types.get(email.QUALIFIED_EMAIL)
+        EMAIL: dialect_types.get(email.DB_TYPE)
     }
     if friendly_names:
         type_map = {k: v for k, v in friendly_type_map.items() if v is not None}
@@ -162,7 +162,7 @@ def create_boolean_casts(engine):
 
 def create_email_casts(engine):
     type_body_map = _get_email_type_body_map()
-    create_cast_functions(email.QUALIFIED_EMAIL, type_body_map, engine)
+    create_cast_functions(email.DB_TYPE, type_body_map, engine)
 
 
 def create_integer_casts(engine):
@@ -336,9 +336,9 @@ def _get_email_type_body_map():
                      just check that the VARCHAR object satisfies the email
                      DOMAIN).
     """
-    default_behavior_source_types = [email.QUALIFIED_EMAIL, VARCHAR]
+    default_behavior_source_types = [email.DB_TYPE, VARCHAR]
     return _get_default_type_body_map(
-        default_behavior_source_types, email.QUALIFIED_EMAIL,
+        default_behavior_source_types, email.DB_TYPE,
     )
 
 
