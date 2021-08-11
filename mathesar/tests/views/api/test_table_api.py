@@ -650,7 +650,6 @@ def test_table_create_with_same_name(client, schema):
     response = client.post('/api/v0/tables/', body)
     response_error = response.json()
     assert response.status_code == 400
-    print(response.json())
     assert response_error[0] == f"Relation {table_name} already exists in schema {schema.id}"
 
 
