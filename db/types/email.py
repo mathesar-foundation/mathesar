@@ -23,7 +23,9 @@ EMAIL_REGEX_STR = (
 
 class Email(UserDefinedType):
     def get_col_spec(self, **kw):
-        return QUALIFIED_EMAIL
+        # This results in the type name being upper case when viewed.
+        # Actual usage in the DB is case-insensitive.
+        return QUALIFIED_EMAIL.upper()
 
 
 # This will register our custom email_domain_name function with sqlalchemy so
