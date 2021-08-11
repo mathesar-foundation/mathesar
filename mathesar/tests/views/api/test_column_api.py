@@ -320,17 +320,20 @@ def test_column_duplicate(column_test_table, client):
     target_col = column_test_table.sa_columns[target_col_idx]
     data = {
         "name": "new_col_name",
+        "duplicate_column": target_col_idx,
         "copy_data": False,
         "copy_constraints": False,
     }
     with patch.object(columns, "duplicate_column") as mock_infer:
         mock_infer.return_value = target_col
         response = client.post(
-            f"/api/v0/tables/{column_test_table.id}/columns/{target_col_idx}/duplicate/",
+            f"/api/v0/tables/{column_test_table.id}/columns/",
             data=data
         )
-
     assert response.status_code == 201
+    response_col = response.json()
+    assert response_col["name"] == target_col.name
+    assert response_col["type"] == target_col.plain_type
 
     assert mock_infer.call_args[0] == (
         column_test_table.oid,
@@ -345,9 +348,35 @@ def test_column_duplicate(column_test_table, client):
 
 
 def test_column_duplicate_when_missing(column_test_table, client):
+    data = {
+        "duplicate_column": 3000,
+    }
     response = client.post(
-        f"/api/v0/tables/{column_test_table.id}/columns/3000/duplicate/",
+        f"/api/v0/tables/{column_test_table.id}/columns/", data=data
     )
     response_data = response.json()
-    assert response_data == {"detail": "Not found."}
-    assert response.status_code == 404
+    assert response.status_code == 400
+    assert "not found" in response_data["duplicate_column"][0]
+
+
+def test_column_duplicate_mixed_parameters(column_test_table, client):
+    data = {
+        "duplicate_column": 3000,
+        "type": "Numeric",
+    }
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/", data=data
+    )
+    response_data = response.json()
+    assert response.status_code == 400
+    assert "column only fields" in response_data["non_field_errors"][0]
+
+
+def test_column_duplicate_no_parameters(column_test_table, client):
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/", data={}
+    )
+    response_data = response.json()
+    assert response.status_code == 400
+    assert response_data["non_field_errors"][0] == \
+        "Required fields for neither new column nor duplicate column found."
