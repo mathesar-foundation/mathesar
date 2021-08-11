@@ -356,7 +356,10 @@ def get_column_default(table_oid, column_index, engine):
             pg_attrdef
             .join(
                 pg_attribute,
-                pg_attribute.c.attnum == pg_attrdef.c.adnum,
+                and_(
+                    pg_attribute.c.attnum == pg_attrdef.c.adnum,
+                    pg_attribute.c.attrelid == pg_attrdef.c.adrelid
+                )
             )
         )
         .where(and_(
