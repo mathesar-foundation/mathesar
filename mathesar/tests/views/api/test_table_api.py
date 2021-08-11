@@ -490,7 +490,7 @@ def test_table_previews_unsupported_type(client, schema, engine_email_type):
     post_body = {
         'columns': [
             {"name": "mathesar_id", "type": "INTEGER"},
-            {"name": "col_1", "type": "INTEGER"},
+            {"name": "col_1", "type": "notatype"},
             {"name": "col_2", "type": "BOOLEAN"},
             {"name": "col_3", "type": "BOOLEAN"},
             {"name": "col_4", "type": "NUMERIC"},

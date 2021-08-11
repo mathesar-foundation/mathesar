@@ -3,15 +3,18 @@ from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 from db.types import base, email
 
+BIGINT = "bigint"
 BOOLEAN = "boolean"
 EMAIL = "email"
 DECIMAL = "decimal"
 DOUBLE_PRECISION = "double precision"
 FLOAT = "float"
+INTEGER = "integer"
 INTERVAL = "interval"
 NAME = "name"
 NUMERIC = "numeric"
 REAL = "real"
+SMALLINT = "smallint"
 STRING = "string"
 VARCHAR = "varchar"
 FULL_VARCHAR = "character varying"
@@ -33,13 +36,16 @@ def get_supported_alter_column_types(engine, friendly_names=True):
     dialect_types = engine.dialect.ischema_names
     friendly_type_map = {
         # Default Postgres types
+        BIGINT: dialect_types.get(BIGINT),
         BOOLEAN: dialect_types.get(BOOLEAN),
         DECIMAL: dialect_types.get(DECIMAL),
         DOUBLE_PRECISION: dialect_types.get(DOUBLE_PRECISION),
         FLOAT: dialect_types.get(FLOAT),
+        INTEGER: dialect_types.get(INTEGER),
         INTERVAL: dialect_types.get(INTERVAL),
         NUMERIC: dialect_types.get(NUMERIC),
         REAL: dialect_types.get(REAL),
+        SMALLINT: dialect_types.get(SMALLINT),
         STRING: dialect_types.get(NAME),
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
@@ -143,6 +149,7 @@ def get_column_cast_expression(column, target_type_str, engine, type_options={})
 def install_all_casts(engine):
     create_boolean_casts(engine)
     create_email_casts(engine)
+    create_integer_casts(engine)
     create_decimal_number_casts(engine)
     create_interval_casts(engine)
     create_varchar_casts(engine)
@@ -156,6 +163,13 @@ def create_boolean_casts(engine):
 def create_email_casts(engine):
     type_body_map = _get_email_type_body_map()
     create_cast_functions(email.QUALIFIED_EMAIL, type_body_map, engine)
+
+
+def create_integer_casts(engine):
+    integer_types = [BIGINT, INTEGER, SMALLINT]
+    for type_str in integer_types:
+        type_body_map = _get_integer_type_body_map(target_type_str=type_str)
+        create_cast_functions(type_str, type_body_map, engine)
 
 
 def create_interval_casts(engine):
@@ -193,14 +207,17 @@ def get_full_cast_map(engine):
 
 def get_defined_source_target_cast_tuples(engine):
     type_body_map_map = {
+        BIGINT: _get_integer_type_body_map(target_type_str=BIGINT),
         BOOLEAN: _get_boolean_type_body_map(),
         EMAIL: _get_email_type_body_map(),
         DECIMAL: _get_decimal_number_type_body_map(target_type_str=DECIMAL),
         DOUBLE_PRECISION: _get_decimal_number_type_body_map(target_type_str=DOUBLE_PRECISION),
         FLOAT: _get_decimal_number_type_body_map(target_type_str=FLOAT),
+        INTEGER: _get_integer_type_body_map(target_type_str=INTEGER),
         INTERVAL: _get_interval_type_body_map(),
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
+        SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
         VARCHAR: _get_varchar_type_body_map(engine),
     }
     return {
@@ -265,7 +282,10 @@ def _get_boolean_type_body_map():
                              PostgreSQL).  Others raise a custom
                              exception.
     """
-    source_number_types = [DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL]
+    source_number_types = [
+        BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
+        SMALLINT,
+    ]
     default_behavior_source_types = [BOOLEAN]
 
     not_bool_exception_str = f"RAISE EXCEPTION '% is not a {BOOLEAN}', $1;"
@@ -352,6 +372,44 @@ def _get_interval_type_body_map():
     }
 
 
+def _get_integer_type_body_map(target_type_str=INTEGER):
+    """
+    We use default behavior for identity and casts from TEXT types.
+    We specifically disallow rounding or truncating when casting from numerics,
+    etc.
+    """
+    default_behavior_source_types = [BIGINT, INTEGER, SMALLINT, VARCHAR]
+    no_rounding_source_types = [
+        DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL
+    ]
+    cast_loss_exception_str = (
+        f"RAISE EXCEPTION '% cannot be cast to {target_type_str} without loss', $1;"
+    )
+
+    def _get_no_rounding_cast_to_integer():
+        return f"""
+        DECLARE integer_res {target_type_str};
+        BEGIN
+          SELECT $1::{target_type_str} INTO integer_res;
+          IF integer_res = $1 THEN
+            RETURN integer_res;
+          END IF;
+          {cast_loss_exception_str}
+        END;
+        """
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, target_type_str,
+    )
+    type_body_map.update(
+        {
+            type_name: _get_no_rounding_cast_to_integer()
+            for type_name in no_rounding_source_types
+        }
+    )
+    type_body_map.update({BOOLEAN: _get_boolean_to_number_cast(target_type_str)})
+    return type_body_map
+
+
 def _get_decimal_number_type_body_map(target_type_str=NUMERIC):
     """
     Get SQL strings that create various functions for casting different
@@ -363,7 +421,8 @@ def _get_decimal_number_type_body_map(target_type_str=NUMERIC):
     """
 
     default_behavior_source_types = [
-        DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL, VARCHAR
+        BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
+        SMALLINT, VARCHAR,
     ]
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, target_type_str,
