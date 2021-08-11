@@ -325,6 +325,17 @@ def test_column_update_type_options(column_test_table, client):
     assert response.json()["type_options"] == type_options
 
 
+def test_column_update_returns_table_dependent_fields(column_test_table, client):
+    cache.clear()
+    expt_default = 5
+    data = {"default": expt_default}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data,
+    )
+    assert response.json()["default"] is not None
+    assert response.json()["index"] is not None
+
+
 @pytest.mark.parametrize("type_options", invalid_type_options)
 def test_column_update_type_invalid_options(column_test_table, client, type_options):
     cache.clear()
