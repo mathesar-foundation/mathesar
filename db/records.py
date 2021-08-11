@@ -27,6 +27,8 @@ def _get_primary_key_columns(table):
 
 def _get_primary_key_column(table, idx):
     primary_key_columns = _get_primary_key_columns(table)
+    if len(primary_key_columns) != 1:
+        raise NotUniquePrimaryKey("This table does not have a unique primary key.")
     return primary_key_columns[idx]
 
 
@@ -53,12 +55,7 @@ def _execute_query(query, engine):
 
 
 def get_record(table, engine, id_value):
-    primary_key_columns = _get_primary_key_columns(table)
-
-    if len(primary_key_columns) != 1:
-        raise NotUniquePrimaryKey("This table does not have a unique primary key.")
-
-    query = select(table).where(primary_key_columns[0] == id_value)
+    query = select(table).where(_get_primary_key_column(table, 0) == id_value)
     result = _execute_query(query, engine)
     assert len(result) <= 1
     return result[0] if result else None
@@ -268,11 +265,6 @@ def create_records_from_csv(
 
 
 def update_record(table, engine, id_value, record_data):
-    primary_key_columns = _get_primary_key_columns(table)
-
-    if len(primary_key_columns) != 1:
-        raise NotUniquePrimaryKey("This table does not have a unique primary key.")
-
     with engine.begin() as connection:
         first_primary_key_column = _get_primary_key_column(table, 0)
         connection.execute(
@@ -282,11 +274,6 @@ def update_record(table, engine, id_value, record_data):
 
 
 def delete_record(table, engine, id_value):
-    primary_key_columns = _get_primary_key_columns(table)
-
-    if len(primary_key_columns) != 1:
-        raise NotUniquePrimaryKey("This table does not have a unique primary key.")
-
     first_primary_key_column = _get_primary_key_column(table, 0)
     query = delete(table).where(first_primary_key_column == id_value)
     with engine.begin() as conn:
