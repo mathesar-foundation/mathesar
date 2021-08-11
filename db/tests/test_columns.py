@@ -422,13 +422,16 @@ def test_retype_column_adds_options(engine_with_schema, target_type):
 
 
 type_set = {
+    'BIGINT',
     'BOOLEAN',
     'DECIMAL',
     'DOUBLE PRECISION',
     'FLOAT',
+    'INTEGER',
     'INTERVAL',
     'NUMERIC',
     'REAL',
+    'SMALLINT',
     'VARCHAR',
     'DATE',
     'mathesar_types.email',
