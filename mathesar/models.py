@@ -178,6 +178,19 @@ class Table(DatabaseObject):
             column_index,
         )
 
+    def duplicate_column(
+        self, column_index,
+        name=None, copy_data=None, copy_constraints=None
+    ):
+        return columns.duplicate_column(
+            self.oid,
+            column_index,
+            self.schema._sa_engine,
+            new_column_name=name,
+            copy_data=copy_data,
+            copy_constraints=copy_constraints,
+        )
+
     def get_preview(self, column_definitions):
         return tables.get_column_cast_records(
             self.schema._sa_engine, self._sa_table, column_definitions

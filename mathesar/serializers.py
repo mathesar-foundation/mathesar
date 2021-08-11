@@ -60,6 +60,12 @@ class ColumnSerializer(SimpleColumnSerializer):
     valid_target_types = serializers.ListField(read_only=True)
 
 
+class DuplicateColumnSerializer(serializers.Serializer):
+    name = serializers.CharField(required=False, default=None, allow_null=True)
+    copy_data = serializers.BooleanField(default=True)
+    copy_constraints = serializers.BooleanField(default=True)
+
+
 class TableSerializer(serializers.ModelSerializer):
     columns = SimpleColumnSerializer(many=True, read_only=True, source='sa_columns')
     records_url = serializers.SerializerMethodField()

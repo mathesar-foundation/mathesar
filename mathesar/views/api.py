@@ -22,8 +22,9 @@ from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
-    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
-    DatabaseSerializer, ConstraintSerializer, RecordListParameterSerializer, TablePreviewSerializer
+    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer,
+    ColumnSerializer, DuplicateColumnSerializer, DatabaseSerializer,
+    ConstraintSerializer, RecordListParameterSerializer, TablePreviewSerializer,
 )
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.utils.tables import (
@@ -283,6 +284,23 @@ class ColumnViewSet(viewsets.ViewSet):
         except IndexError:
             raise NotFound
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['post'], detail=True)
+    def duplicate(self, request, pk=None, table_pk=None):
+        table = get_table_or_404(table_pk)
+        serializer = DuplicateColumnSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            column = table.duplicate_column(
+                int(pk),
+                serializer.validated_data['name'],
+                serializer.validated_data['copy_data'],
+                serializer.validated_data['copy_constraints']
+            )
+        except IndexError:
+            raise NotFound
+        serializer = ColumnSerializer(column)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class RecordViewSet(viewsets.ViewSet):
