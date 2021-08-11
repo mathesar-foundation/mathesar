@@ -88,9 +88,9 @@ class MathesarColumn(Column):
         Returns the current table the column is associated with if it exists, otherwise
         returns the table the column was originally created from.
         """
-        if hasattr(self, "table"):
+        if hasattr(self, "table") and self.table is not None:
             return self.table
-        elif hasattr(self, "original_table"):
+        elif hasattr(self, "original_table") and self.original_table is not None:
             return self.original_table
         return None
 
@@ -146,6 +146,8 @@ class MathesarColumn(Column):
 
     @property
     def default_value(self):
+        print(self.table_)
+        print(self.original_table)
         if self.table_ is not None:
             table_oid = tables.get_oid_from_table(
                 self.table_.name, self.table_.schema, self.engine
