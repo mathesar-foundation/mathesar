@@ -99,7 +99,16 @@ class ColumnSerializer(SimpleColumnSerializer):
                     f'{from_dupe_specific_in} has also been passed in.'
                 )
             elif not from_dupe_required_all and not from_scratch_required_all:
-                raise ValidationError('Required fields not found.')
+                # We default to from scratch required fields if no fields are passed
+                if len(from_dupe_specific_in) and not len(from_scratch_specific_in):
+                    required_fields = from_dupe_required_fields
+                else:
+                    required_fields = from_scratch_required_fields
+                raise ValidationError({
+                    f: ['This field is required.']
+                    for f in required_fields
+                    if f not in self.initial_data
+                })
         return data
 
 

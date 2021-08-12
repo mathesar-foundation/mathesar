@@ -219,6 +219,18 @@ def test_column_create_duplicate(column_test_table, client):
     assert response.status_code == 400
 
 
+def test_column_create_some_parameters(column_test_table, client):
+    data = {
+        "name": "only name",
+    }
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/", data=data
+    )
+    response_data = response.json()
+    assert response.status_code == 400
+    assert response_data["type"][0] == "This field is required."
+
+
 def test_column_update_name(column_test_table, client):
     cache.clear()
     name = "updatedname"
@@ -359,17 +371,16 @@ def test_column_duplicate_when_missing(column_test_table, client):
     assert "not found" in response_data[0]
 
 
-def test_column_duplicate_mixed_parameters(column_test_table, client):
+def test_column_duplicate_some_parameters(column_test_table, client):
     data = {
-        "source_column": 3000,
-        "type": "Numeric",
+        "copy_source_constraints": True,
     }
     response = client.post(
         f"/api/v0/tables/{column_test_table.id}/columns/", data=data
     )
     response_data = response.json()
     assert response.status_code == 400
-    assert "cannot be passed in if" in response_data["non_field_errors"][0]
+    assert response_data["source_column"][0] == "This field is required."
 
 
 def test_column_duplicate_no_parameters(column_test_table, client):
@@ -378,4 +389,5 @@ def test_column_duplicate_no_parameters(column_test_table, client):
     )
     response_data = response.json()
     assert response.status_code == 400
-    assert response_data["non_field_errors"][0] == "Required fields not found."
+    assert response_data["name"][0] == "This field is required."
+    assert response_data["type"][0] == "This field is required."
