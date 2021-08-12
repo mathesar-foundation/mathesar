@@ -4,9 +4,15 @@ import {
   Writable,
 } from 'svelte/store';
 import { States } from '@mathesar/utils/api';
-import type { UploadCompletionOpts } from '@mathesar/utils/api';
+import type { UploadCompletionOpts, PaginatedResponse } from '@mathesar/utils/api';
 import type { FileUpload } from '@mathesar-components/types';
 import type { CancellablePromise } from '@mathesar/components';
+
+export const Stages = {
+  UPLOAD: 1,
+  PREVIEW: 2,
+  IMPORT: 3,
+};
 
 export enum ImportChangeType {
   ADDED = 'added',
@@ -14,13 +20,41 @@ export enum ImportChangeType {
   MODIFIED = 'modified',
 }
 
+export interface PreviewColumn {
+  name: string,
+  displayName: string,
+  type: string,
+  isSelected?: boolean,
+  isEditable?: boolean,
+  primary_key?: boolean,
+  valid_target_types: string[],
+}
+
+export type PreviewRow = Record<string, string>;
+
 interface FileImportWritableInfo {
   stage?: number,
+  // Upload stage
   uploads?: FileUpload[],
   uploadStatus?: States,
   uploadPromise?: CancellablePromise<unknown>,
   uploadProgress?: UploadCompletionOpts,
   dataFileId?: number,
+  firstRowHeader?: boolean,
+
+  // Preview table create stage
+  previewTableCreationStatus?: States,
+  previewCreatePromise?: CancellablePromise<unknown>,
+
+  // Preview stage
+  previewStatus?: States,
+  previewColumnPromise?: CancellablePromise<PaginatedResponse<PreviewColumn>>,
+  previewId?: number,
+  previewName?: string,
+  previewColumns?: PreviewColumn[],
+  previewRows?: PreviewRow[],
+
+  // Import stage
   importStatus?: States,
   importPromise?: CancellablePromise<unknown>,
   name?: string,
@@ -78,7 +112,7 @@ export function getFileStore(db: string, id: string): FileImport {
       id,
       name: 'Untitled',
       uploadStatus: States.Idle,
-      stage: 1,
+      stage: Stages.UPLOAD,
     };
     fileImport = writable(fileImportInitialInfo);
     database.imports.set(id, fileImport);
@@ -90,7 +124,7 @@ export function getFileStoreData(db: string, id: string): FileImportInfo {
   return get(getFileStore(db, id));
 }
 
-export function setFileStore(db: string, id: string, data: FileImportWritableInfo): void {
+export function setFileStore(db: string, id: string, data: FileImportWritableInfo): FileImportInfo {
   const database = getDBStore(db);
   const store = getFileStore(db, id);
   const existingData = get(store);
@@ -106,6 +140,8 @@ export function setFileStore(db: string, id: string, data: FileImportWritableInf
     info: get(store),
     all: getAllImportDetails(db),
   });
+
+  return get(store);
 }
 
 export function newImport(db: string): void {

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { faSpinner } from '@fortawesome/free-solid-svg-icons';
-  import { getFileStore } from '@mathesar/stores/fileImports';
+  import { currentSchema } from '@mathesar/stores/schemas';
+  import { getFileStore, Stages } from '@mathesar/stores/fileImports';
   import type { FileImport } from '@mathesar/stores/fileImports';
   import { States } from '@mathesar/utils/api';
   import {
@@ -9,8 +10,9 @@
     Icon,
     Notification,
   } from '@mathesar-components';
+
+  import Preview from './preview/Preview.svelte';
   import {
-    Stages,
     uploadNewFile,
     getFileUploadInfo,
     shiftStage,
@@ -49,21 +51,23 @@
       You can import tabular (CSV, TSV) data.
     </div>
 
-  {:else if $fileImportData.stage === Stages.IMPORT}
-    <h1>TODO</h1>
-    <div>Add Table (Step 2 of 2)</div>
-    <h2>Confirm your data</h2>
-    <div class="help-content">
-      You have 'n' rows of data. To finish, review suggestions for the field types and column names.
-      To ensure your import is correct we have included a preview of your first few rows.
-    </div>
+  {:else if $fileImportData.stage === Stages.PREVIEW}
+    <Preview {fileImportData}/>
   {/if}
 
   <div class="actions">
     <Button appearance="primary"
-            disabled={$fileImportData.uploadStatus !== States.Done || $fileImportData.importStatus === States.Loading}
-            on:click={() => shiftStage(database, id)}>
-      {$fileImportData.stage === Stages.IMPORT ? 'Finish Import' : 'Next'}
+            disabled={
+              $fileImportData.uploadStatus !== States.Done
+              || $fileImportData.importStatus === States.Loading
+              || $fileImportData.importStatus === States.Error
+              || $fileImportData.previewStatus === States.Loading
+              || $fileImportData.previewStatus === States.Error
+              || $fileImportData.previewTableCreationStatus === States.Loading
+              || $fileImportData.previewTableCreationStatus === States.Error
+            }
+            on:click={() => shiftStage(database, $currentSchema?.id, id)}>
+      {$fileImportData.stage === Stages.PREVIEW ? 'Finish Import' : 'Next'}
 
       {#if $fileImportData.importStatus === States.Loading}
         <Icon data={faSpinner} spin={true}/>

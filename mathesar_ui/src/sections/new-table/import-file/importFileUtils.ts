@@ -1,19 +1,17 @@
-import { currentSchema } from '@mathesar/stores/schemas';
-import { getFileStoreData, setFileStore } from '@mathesar/stores/fileImports';
+import { getFileStoreData, setFileStore, Stages } from '@mathesar/stores/fileImports';
 import { replaceTab } from '@mathesar/stores/tabs';
-import { uploadFile, States, postAPI } from '@mathesar/utils/api';
-import type { FileImportInfo } from '@mathesar/stores/fileImports';
-import type { UploadCompletionOpts } from '@mathesar/utils/api';
+import {
+  uploadFile,
+  States,
+  postAPI,
+  getAPI,
+} from '@mathesar/utils/api';
+import type { FileImportInfo, PreviewColumn } from '@mathesar/stores/fileImports';
+import type { UploadCompletionOpts, PaginatedResponse } from '@mathesar/utils/api';
 import type {
   FileUploadAddDetail,
   FileUploadProgress,
 } from '@mathesar-components/types';
-import { get } from 'svelte/store';
-
-export const Stages = {
-  UPLOAD: 1,
-  IMPORT: 2,
-};
 
 function completionCallback(
   database: string,
@@ -94,9 +92,8 @@ export function getFileUploadInfo(
   return {};
 }
 
-function createTable(database: string, importId: string) {
+function createTable(database: string, schemaId: number, importId: string) {
   const fileImportData = getFileStoreData(database, importId);
-  const schemaId = get(currentSchema)?.id;
 
   if (
     fileImportData.uploadStatus === States.Done
@@ -133,14 +130,133 @@ function createTable(database: string, importId: string) {
   }
 }
 
-export function shiftStage(database: string, importId: string): void {
+async function createPreviewTable(
+  database: string,
+  schemaId: number,
+  importId: string,
+): Promise<{ id: number, name: string }> {
   const fileImportData = getFileStoreData(database, importId);
-  if (fileImportData.stage === Stages.IMPORT) {
-    createTable(database, importId);
-  } else {
-    setFileStore(database, importId, {
-      stage: 2,
+
+  fileImportData.previewCreatePromise?.cancel();
+
+  if (fileImportData.previewTableCreationStatus === States.Done) {
+    return {
+      id: fileImportData.previewId,
+      name: fileImportData.previewName,
+    };
+  }
+
+  if (
+    fileImportData.uploadStatus === States.Done
+    && typeof schemaId === 'number'
+    && fileImportData.dataFileId
+  ) {
+    const previewCreatePromise = postAPI('/tables/', {
+      schema: schemaId,
+      data_files: [fileImportData.dataFileId],
     });
+
+    setFileStore(database, importId, {
+      previewTableCreationStatus: States.Loading,
+      previewCreatePromise,
+      firstRowHeader: true,
+      error: null,
+    });
+
+    try {
+      const res = await previewCreatePromise as { id: number, name: string };
+
+      setFileStore(database, importId, {
+        previewTableCreationStatus: States.Done,
+        previewId: res.id,
+        previewName: res.name,
+      });
+
+      return res;
+    } catch (err: unknown) {
+      setFileStore(database, importId, {
+        previewTableCreationStatus: States.Error,
+        error: (err as Error).stack,
+      });
+    }
+  }
+  return null;
+}
+
+async function fetchPreviewTableInfo(
+  database: string,
+  importId: string,
+  tableId: number,
+): Promise<unknown> {
+  const fileImportData = getFileStoreData(database, importId);
+  fileImportData.previewColumnPromise?.cancel();
+
+  try {
+    const previewColumnPromise = getAPI<PaginatedResponse<PreviewColumn>>(
+      `/tables/${tableId}/columns/?limit=500`,
+    );
+
+    setFileStore(database, importId, {
+      previewStatus: States.Loading,
+      previewColumnPromise,
+      error: null,
+    });
+
+    const previewColumnResponse = await previewColumnPromise;
+
+    const previewColumns = previewColumnResponse.results.map((column) => ({
+      ...column,
+      displayName: column.name,
+      isEditable: !column.primary_key,
+      isSelected: true,
+    }));
+
+    setFileStore(database, importId, {
+      previewStatus: States.Done,
+      previewColumnPromise,
+      previewColumns,
+      error: null,
+    });
+
+    return previewColumns;
+  } catch (err) {
+    setFileStore(database, importId, {
+      previewStatus: States.Error,
+      error: (err as Error).stack,
+    });
+  }
+  return null;
+}
+
+async function loadPreviewTable(
+  database: string,
+  schemaId: number,
+  importId: string,
+): Promise<unknown> {
+  const tableCreationResult = await createPreviewTable(database, schemaId, importId);
+  if (tableCreationResult) {
+    const columnInfo = await fetchPreviewTableInfo(database, importId, tableCreationResult.id);
+    return columnInfo;
+  }
+  return null;
+}
+
+export function shiftStage(database: string, schemaId: number, importId: string): void {
+  const fileImportData = getFileStoreData(database, importId);
+  switch (fileImportData.stage) {
+    case Stages.UPLOAD: {
+      setFileStore(database, importId, {
+        stage: Stages.PREVIEW,
+      });
+      void loadPreviewTable(database, schemaId, importId);
+      break;
+    }
+    case Stages.PREVIEW: {
+      createTable(database, schemaId, importId);
+      break;
+    }
+    default:
+      break;
   }
 }
 
@@ -151,7 +267,8 @@ export function cancelStage(database: string, importId: string): void {
     case Stages.UPLOAD:
       fileImportData.uploadPromise?.cancel();
       break;
-    case Stages.IMPORT:
+    case Stages.PREVIEW:
+      fileImportData.previewCreatePromise?.cancel();
       fileImportData.importPromise?.cancel();
       break;
     default:

@@ -9,9 +9,12 @@
     Icon,
     clickOffBounds,
   } from '@mathesar-components';
+  import type {
+    Appearance,
+  } from '@mathesar-components/types';
 
   export let triggerClass = '';
-  export let triggerAppearance : 'default' | 'plain' = 'default';
+  export let triggerAppearance : Appearance = 'default';
   export let contentClass = '';
   export let isOpen = false;
   export let closeOnInnerClick = false;
