@@ -531,10 +531,6 @@ export function updateColumnPosition(columns:TableColumn[]):ColumnPosition {
   return columnPosition;
 }
 
-// export function saveColumnPosition(columns:TableColumn[]) {
-//   console.log("SAVE COLUMN RESIZE");
-// }
-
 export async function addColumn(db:string, id:number, newColumn:TableColumn): Promise<void> {
   const table = databaseMap.get(db)?.get(id);
   if (table) {
