@@ -101,7 +101,10 @@ def get_column_constraints(column_index, table_oid, engine):
     query = (
         select(pg_constraint)
         .where(and_(
+            # 'conrelid' contains the table oid
             pg_constraint.c.conrelid == table_oid,
+            # 'conkey' contains a list of the constrained column's indices
+            # Here, we check if the column index appears in the conkey list
             pg_constraint.c.conkey.bool_op("&&")(f"{{{column_index + 1}}}")
         ))
     )
