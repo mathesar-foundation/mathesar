@@ -6,6 +6,9 @@ from sqlalchemy import (
     Column, Integer, ForeignKey, Table, MetaData, and_, select, inspect, text,
     DefaultClause, func
 )
+from sqlalchemy.exc import DataError
+from psycopg2.errors import InvalidTextRepresentation, InvalidParameterValue
+
 from db import constants, tables
 from db.types import alteration
 
@@ -22,6 +25,14 @@ ID_TYPE = Integer
 DEFAULT_COLUMNS = {
     constants.ID: {TYPE: ID_TYPE, PRIMARY_KEY: True, NULLABLE: False}
 }
+
+
+class InvalidDefaultError(Exception):
+    pass
+
+
+class InvalidTypeOptionError(Exception):
+    pass
 
 
 class MathesarColumn(Column):
@@ -227,16 +238,32 @@ def create_column(engine, table_oid, column_data):
         sa_type = supported_types["VARCHAR"]
         column_type_options = {}
     table = tables.reflect_table_from_oid(table_oid, engine)
-    column = MathesarColumn(
-        column_data[NAME], sa_type(**column_type_options), nullable=column_nullable,
-        server_default=column_data.get(DEFAULT, None)
-    )
+
+    try:
+        column = MathesarColumn(
+            column_data[NAME], sa_type(**column_type_options), nullable=column_nullable,
+            server_default=column_data.get(DEFAULT, None)
+        )
+    except DataError as e:
+        if (type(e.orig) == InvalidTextRepresentation):
+            raise InvalidTypeOptionError
+        else:
+            raise e
 
     table = tables.reflect_table_from_oid(table_oid, engine)
-    with engine.begin() as conn:
-        ctx = MigrationContext.configure(conn)
-        op = Operations(ctx)
-        op.add_column(table.name, column, schema=table.schema)
+    try:
+        with engine.begin() as conn:
+            ctx = MigrationContext.configure(conn)
+            op = Operations(ctx)
+            op.add_column(table.name, column, schema=table.schema)
+    except DataError as e:
+        if (type(e.orig) == InvalidTextRepresentation):
+            raise InvalidDefaultError
+        if (type(e.orig) == InvalidParameterValue):
+            raise InvalidTypeOptionError
+        else:
+            raise e
+
     return get_mathesar_column_with_engine(
         tables.reflect_table_from_oid(table_oid, engine).columns[column_data[NAME]],
         engine
@@ -300,6 +327,11 @@ def retype_column(table_oid, column_index, new_type, engine, **kwargs):
         friendly_names=False,
         type_options=type_options
     )
+
+    default = get_column_default(table_oid, column_index, engine)
+    if default is not None:
+        pass
+
     return get_mathesar_column_with_engine(
         tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
         engine

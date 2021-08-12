@@ -208,6 +208,15 @@ def test_column_create_default(
     assert created_default == default
 
 
+def test_column_create_invalid_default(column_test_table, client):
+    cache.clear()
+    name = "anewcolumn"
+    data = {"name": name, "type": "BOOLEAN", "default": "Not a boolean"}
+    response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", data)
+    assert response.status_code == 400
+    assert f'default "{data["default"]}" is invalid for type' in response.json()[0]
+
+
 def test_column_create_retrieve_options(column_test_table, client):
     name = "anewcolumn"
     type_ = "NUMERIC"

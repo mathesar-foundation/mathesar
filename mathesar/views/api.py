@@ -16,6 +16,7 @@ from sqlalchemy_filters.exceptions import (
 
 from db.types.alteration import UnsupportedTypeException
 from db.records import BadGroupFormat, GroupFieldNotFound
+from db.columns import InvalidDefaultError, InvalidTypeOptionError
 
 from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile, Database, Constraint
@@ -230,17 +231,17 @@ class ColumnViewSet(viewsets.ViewSet):
                 raise APIException(e)
         except TypeError:
             raise ValidationError("Unknown type_option passed")
-        except DataError as e:
-            if (
-                    type(e.orig) == InvalidParameterValue
-                    or type(e.orig) == InvalidTextRepresentation
-            ):
-                raise ValidationError(
-                    f'parameter dict {request.data["type_options"]} is'
-                    f' invalid for type {request.data["type"]}'
-                )
-            else:
-                raise APIException(e)
+        except InvalidDefaultError:
+            raise ValidationError(
+                f'default "{request.data["default"]}" is'
+                f' invalid for type {request.data["type"]}'
+            )
+        except InvalidTypeOptionError:
+            raise ValidationError(
+                f'parameter dict {request.data["type_options"]} is'
+                f' invalid for type {request.data["type"]}'
+            )
+
         out_serializer = ColumnSerializer(column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
