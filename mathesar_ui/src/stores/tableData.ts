@@ -138,7 +138,7 @@ function calculateColumnPosition(columns: TableColumn[]): ColumnPosition {
   const columnPosition: ColumnPosition = new Map();
   columns.forEach((column) => {
     if (!column.width) {
-      column.width = DEFAULT_COLUMN_WIDTH
+      column.width = DEFAULT_COLUMN_WIDTH;
     }
     columnPosition.set(column.name, {
       left,
@@ -150,7 +150,6 @@ function calculateColumnPosition(columns: TableColumn[]): ColumnPosition {
     width: left,
     left: 0,
   });
-  console.groupEnd();
   return columnPosition;
 }
 

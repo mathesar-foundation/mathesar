@@ -5,7 +5,7 @@
     fetchTableRecords,
     deleteRecords,
     addColumn,
-updateColumnPosition,
+    updateColumnPosition,
   } from '@mathesar/stores/tableData';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
   import type {
@@ -133,7 +133,9 @@ updateColumnPosition,
 
   function columnResize(event) {
     const cols:TableColumn[] = (event.detail) ? <TableColumn[]>event.detail : null;
-    void updateColumnPosition(cols)
+    if (cols) {
+      void updateColumnPosition(cols);
+    }
   }
 </script>
 

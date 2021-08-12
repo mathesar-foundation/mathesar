@@ -35,11 +35,10 @@
   export let isResultGrouped: boolean;
 
   let resizer:Resizeable;
-  $:{ resizer; console.log(resizer); };
 
   let headerRef: HTMLElement;
   let resizerRef:HTMLElement;
-  let resizerRefs: HTMLElement[] = [];
+  const resizerRefs: HTMLElement[] = [];
 
 
   function onHScrollOffsetChange(_hscrollOffset: number) {
@@ -53,32 +52,32 @@
   let paddingLeft: number;
   $: paddingLeft = isResultGrouped ? GROUP_MARGIN_LEFT : 0;
 
-  let columnToResize:TableColumn;
-  $:{ columnToResize;  if (columnToResize) resizeColumn(columnToResize); };
-
   export let columnPosition: ColumnPosition = new Map();
-  $: columnPosition;
-
-  function showColumnSizer(event:MouseEvent, column:TableColumn) {
-    resizer.$set({
-      target: <HTMLElement>event.target,
-      onResize: ({ detail: { width }}) => {
-        column.width = width;
-      },
-      onResizeEnd: () => {
-        columnToResize = column;
-      }
-    })
-  }
 
   function resizeColumn(column:TableColumn) {
     if (column) {
-      let position = columnPosition.get(column.name)
+      const position = columnPosition.get(column.name);
       if (position) {
         position.width = column.width;
         columnPosition = updateColumnPosition(columns.data);
       }
     }
+  }
+
+  let columnToResize:TableColumn;
+  $: resizeColumn(columnToResize);
+
+  function showColumnSizer(event:MouseEvent, column:TableColumn) {
+    resizer.$set({
+      target: <HTMLElement>event.target,
+      onResize: (resizeEvent) => {
+        const newWidth = (resizeEvent.detail.width) ? <number>resizeEvent.detail.width : column.width;
+        column.width = newWidth;
+      },
+      onResizeEnd: () => {
+        columnToResize = column;
+      },
+    });
   }
 
   function onHeaderScroll(scrollLeft: number) {
@@ -88,7 +87,6 @@
   }
 
   onMount(() => {
-    defaultColumnWidth = DEFAULT_COUNT_COL_WIDTH + paddingLeft;
     onHScrollOffsetChange(horizontalScrollOffset);
 
     const scrollListener = (event: Event) => {
@@ -140,7 +138,6 @@
     return columnNames;
   };
 
-  let defaultColumnWidth: number;
   let newColumnDropdownIsOpen = false;
   let newColumnName = '';
   function addColumn() {
