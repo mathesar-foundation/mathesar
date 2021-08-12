@@ -220,19 +220,17 @@ class ColumnViewSet(viewsets.ViewSet):
         serializer = ColumnSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
-        if 'duplicate_column' in serializer.validated_data:
+        if 'source_column' in serializer.validated_data:
             try:
                 column = table.duplicate_column(
-                    serializer.validated_data['duplicate_column'],
-                    serializer.validated_data['copy_data'],
-                    serializer.validated_data['copy_constraints'],
+                    serializer.validated_data['source_column'],
+                    serializer.validated_data['copy_source_data'],
+                    serializer.validated_data['copy_source_constraints'],
                     serializer.validated_data.get('name'),
                 )
             except IndexError:
-                _col_idx = serializer.validated_data['duplicate_column']
-                raise ValidationError(
-                    {'duplicate_column': [f'column index "{_col_idx}" not found']}
-                )
+                _col_idx = serializer.validated_data['source_column']
+                raise ValidationError(f'column index "{_col_idx}" not found')
         else:
             try:
                 column = table.add_column(request.data)

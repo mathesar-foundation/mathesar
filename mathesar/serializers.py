@@ -56,15 +56,15 @@ class SimpleColumnSerializer(serializers.Serializer):
 class ColumnSerializer(SimpleColumnSerializer):
     name = serializers.CharField(required=False)
 
-    # Creation fields
+    # From scratch fields
     type = serializers.CharField(source='plain_type', required=False)
     nullable = serializers.BooleanField(default=True)
     primary_key = serializers.BooleanField(default=False)
 
-    # Duplication fields
-    duplicate_column = serializers.IntegerField(required=False, write_only=True)
-    copy_data = serializers.BooleanField(default=True, write_only=True)
-    copy_constraints = serializers.BooleanField(default=True, write_only=True)
+    # From duplication fields
+    source_column = serializers.IntegerField(required=False, write_only=True)
+    copy_source_data = serializers.BooleanField(default=True, write_only=True)
+    copy_source_constraints = serializers.BooleanField(default=True, write_only=True)
 
     # Read only fields
     index = serializers.IntegerField(source='column_index', read_only=True)
@@ -72,27 +72,34 @@ class ColumnSerializer(SimpleColumnSerializer):
 
     def validate(self, data):
         if not self.partial:
-            # Note that we run validation on self.initlal_data, as `data` has defaults
+            from_scratch_required_fields = ['name', 'type']
+            from_scratch_specific_fields = ['type', 'nullable', 'primary_key']
+            from_dupe_required_fields = ['source_column']
+            from_dupe_specific_fields = ['source_column', 'copy_source_data',
+                                         'copy_source_constraints']
+
+            # Note that we run validation on self.initial_data, as `data` has defaults
             # filled in for fields that weren't specified by the request
-            new_req_fields = ['name', 'type']
-            new_only_fields = ['type', 'nullable', 'primary_key']
-            new_req_all = all([f in self.initial_data for f in new_req_fields])
-            new_only_in = [f for f in new_only_fields if f in self.initial_data]
+            from_scratch_required_all = all([
+                f in self.initial_data for f in from_scratch_required_fields
+            ])
+            from_scratch_specific_in = [
+                f for f in from_scratch_specific_fields if f in self.initial_data
+            ]
+            from_dupe_required_all = all([
+                f in self.initial_data for f in from_dupe_required_fields
+            ])
+            from_dupe_specific_in = [
+                f for f in from_dupe_specific_fields if f in self.initial_data
+            ]
 
-            dupe_req_fields = ['duplicate_column']
-            dupe_only_fields = ['duplicate_column', 'copy_data', 'copy_constraints']
-            dupe_req_all = all([f in self.initial_data for f in dupe_req_fields])
-            dupe_only_in = [f for f in dupe_only_fields if f in self.initial_data]
-
-            if len(dupe_only_in) and len(new_only_in):
+            if len(from_dupe_specific_in) and len(from_scratch_specific_in):
                 raise ValidationError(
-                    f'New column only fields {new_only_in} included alongside'
-                    f' duplicate column only fields {dupe_only_in}.'
+                    f'{from_scratch_specific_in} cannot be passed in if '
+                    f'{from_dupe_specific_in} has also been passed in.'
                 )
-            elif not dupe_req_all and not new_req_all:
-                raise ValidationError(
-                    'Required fields for neither new column nor duplicate column found.'
-                )
+            elif not from_dupe_required_all and not from_scratch_required_all:
+                raise ValidationError('Required fields not found.')
         return data
 
 
