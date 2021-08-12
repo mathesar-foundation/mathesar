@@ -184,7 +184,7 @@
           i
         {/if}
       </span>
-      <span class="name">{column.name} {columnPosition.get(column.name).width + paddingLeft}</span>
+      <span class="name">{column.name}</span>
 
       <Dropdown closeOnInnerClick={true}
                 triggerClass="opts" triggerAppearance="plain"
