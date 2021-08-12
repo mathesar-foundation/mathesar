@@ -178,10 +178,7 @@ class Table(DatabaseObject):
             column_index,
         )
 
-    def duplicate_column(
-        self, column_index,
-        name=None, copy_data=None, copy_constraints=None
-    ):
+    def duplicate_column(self, column_index, copy_data, copy_constraints, name=None):
         return columns.duplicate_column(
             self.oid,
             column_index,

@@ -224,9 +224,9 @@ class ColumnViewSet(viewsets.ViewSet):
             try:
                 column = table.duplicate_column(
                     serializer.validated_data['duplicate_column'],
-                    serializer.validated_data.get('name'),
                     serializer.validated_data['copy_data'],
-                    serializer.validated_data['copy_constraints']
+                    serializer.validated_data['copy_constraints'],
+                    serializer.validated_data.get('name'),
                 )
             except IndexError:
                 _col_idx = serializer.validated_data['duplicate_column']
