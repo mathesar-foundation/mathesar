@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy import Table, Column, MetaData
 from sqlalchemy import String, Numeric
 from sqlalchemy.exc import DataError
-from db import types
+from db import types, columns, tables
 from db.tests.types import fixtures
 from db.types import alteration
 
@@ -70,8 +70,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             BIGINT: {VALID: [(500, 500), (500000000000, 500000000000)]},
             BOOLEAN: {VALID: [(1, True), (0, False)], INVALID: [3]},
             DECIMAL: {VALID: [(1, Decimal('1.0'))]},
-            DOUBLE: {VALID: [(3.0, 3)]},
-            FLOAT: {VALID: [(4.0, 4)]},
+            DOUBLE: {VALID: [(3, 3.0)]},
+            FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
@@ -168,8 +168,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             BIGINT: {VALID: [(500, 500)]},
             BOOLEAN: {VALID: [(1, True), (0, False)], INVALID: [3]},
             DECIMAL: {VALID: [(1, Decimal('1.0'))]},
-            DOUBLE: {VALID: [(3.0, 3)]},
-            FLOAT: {VALID: [(4.0, 4)]},
+            DOUBLE: {VALID: [(3, 3.0)]},
+            FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
@@ -256,8 +256,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             BIGINT: {VALID: [(500, 500)]},
             BOOLEAN: {VALID: [(1, True), (0, False)], INVALID: [3]},
             DECIMAL: {VALID: [(1, Decimal('1.0'))]},
-            DOUBLE: {VALID: [(3.0, 3)]},
-            FLOAT: {VALID: [(4.0, 4)]},
+            DOUBLE: {VALID: [(3, 3.0)]},
+            FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
@@ -491,7 +491,8 @@ def test_alter_column_casts_data_gen(
     input_table = Table(
         TABLE,
         metadata,
-        Column(COLUMN, engine.dialect.ischema_names[source_type]),
+        Column(COLUMN, engine.dialect.ischema_names[source_type],
+               server_default=str(in_val)),
         schema=schema
     )
     input_table.create()
@@ -507,6 +508,9 @@ def test_alter_column_casts_data_gen(
         res = conn.execute(sel).fetchall()
     actual_value = res[0][0]
     assert actual_value == out_val
+    table_oid = tables.get_oid_from_table(TABLE, schema, engine)
+    actual_default = columns.get_column_default(table_oid, 0, engine)
+    assert actual_default == out_val
 
 
 type_test_bad_data_gen_list = [

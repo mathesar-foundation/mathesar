@@ -245,7 +245,7 @@ def create_column(engine, table_oid, column_data):
             server_default=column_data.get(DEFAULT, None)
         )
     except DataError as e:
-        if (type(e.orig) == InvalidTextRepresentation):
+        if type(e.orig) == InvalidTextRepresentation:
             raise InvalidTypeOptionError
         else:
             raise e
@@ -257,9 +257,9 @@ def create_column(engine, table_oid, column_data):
             op = Operations(ctx)
             op.add_column(table.name, column, schema=table.schema)
     except DataError as e:
-        if (type(e.orig) == InvalidTextRepresentation):
+        if type(e.orig) == InvalidTextRepresentation:
             raise InvalidDefaultError
-        if (type(e.orig) == InvalidParameterValue):
+        elif type(e.orig) == InvalidParameterValue:
             raise InvalidTypeOptionError
         else:
             raise e
@@ -327,10 +327,6 @@ def retype_column(table_oid, column_index, new_type, engine, **kwargs):
         friendly_names=False,
         type_options=type_options
     )
-
-    default = get_column_default(table_oid, column_index, engine)
-    if default is not None:
-        pass
 
     return get_mathesar_column_with_engine(
         tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
