@@ -433,6 +433,7 @@ type_set = {
     'REAL',
     'SMALLINT',
     'VARCHAR',
+    'TEXT',
     'DATE',
     'mathesar_types.email',
 }
