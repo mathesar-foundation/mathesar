@@ -5,6 +5,7 @@
     fetchTableRecords,
     deleteRecords,
     addColumn,
+updateColumnPosition,
   } from '@mathesar/stores/tableData';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
   import type {
@@ -129,6 +130,11 @@
       void addColumn(database, identifier, newColumn);
     }
   }
+
+  function columnResize(event) {
+    const cols:TableColumn[] = (event.detail) ? <TableColumn[]>event.detail : null;
+    void updateColumnPosition(cols)
+  }
 </script>
 
 <ActionsPane {columns} {records} {options} {selectedEntries}
@@ -158,7 +164,8 @@
               bind:columnPosition={$columnPosition}
               bind:horizontalScrollOffset={$horizontalScrollOffset}
               on:reload={reload}
-              on:addColumn={columnAdd}/>
+              on:addColumn={columnAdd}
+              on:resizeColumn={columnResize}/>
 
       <Body bind:this={tableBodyRef} id={idKey}
             columns={$columns} data={$records.data}

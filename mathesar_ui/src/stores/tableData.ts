@@ -17,7 +17,8 @@ export interface TableColumn {
   index: number,
   nullable: boolean,
   primaryKey: boolean,
-  validTargetTypes: string[]
+  validTargetTypes: string[],
+  width: number,
 }
 export interface TableRecord {
   [key: string]: unknown
@@ -136,16 +137,20 @@ function calculateColumnPosition(columns: TableColumn[]): ColumnPosition {
   let left = DEFAULT_COUNT_COL_WIDTH;
   const columnPosition: ColumnPosition = new Map();
   columns.forEach((column) => {
+    if (!column.width) {
+      column.width = DEFAULT_COLUMN_WIDTH
+    }
     columnPosition.set(column.name, {
       left,
-      width: DEFAULT_COLUMN_WIDTH,
+      width: column.width,
     });
-    left += DEFAULT_COLUMN_WIDTH;
+    left += column.width;
   });
   columnPosition.set('__row', {
     width: left,
     left: 0,
   });
+  console.groupEnd();
   return columnPosition;
 }
 
@@ -521,10 +526,19 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
   return table;
 }
 
-export async function addColumn(db:string, id:number, new_column:TableColumn): Promise<void> {
+export function updateColumnPosition(columns:TableColumn[]):ColumnPosition {
+  const columnPosition:ColumnPosition = calculateColumnPosition(columns);
+  return columnPosition;
+}
+
+// export function saveColumnPosition(columns:TableColumn[]) {
+//   console.log("SAVE COLUMN RESIZE");
+// }
+
+export async function addColumn(db:string, id:number, newColumn:TableColumn): Promise<void> {
   const table = databaseMap.get(db)?.get(id);
   if (table) {
-    await postAPI<unknown>(`/tables/${id}/columns/`, new_column)
+    await postAPI<unknown>(`/tables/${id}/columns/`, newColumn)
       .then((column:TableColumn) => {
         void fetchTableDetails(db, id);
         void fetchTableRecords(db, id, true);

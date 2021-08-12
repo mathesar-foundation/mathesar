@@ -9,6 +9,7 @@
     Button,
     Dropdown,
     Icon,
+    Resizeable,
     TextInput,
   } from '@mathesar-components';
   import type {
@@ -19,20 +20,27 @@
     GroupOption,
   } from '@mathesar/stores/tableData';
   import {
+    DEFAULT_COLUMN_WIDTH,
     DEFAULT_COUNT_COL_WIDTH,
     GROUP_MARGIN_LEFT,
     DEFAULT_ROW_RIGHT_PADDING,
+    updateColumnPosition,
   } from '@mathesar/stores/tableData';
 
   const dispatch = createEventDispatcher();
   export let columns: TableColumnData;
   export let sort: SortOption = new Map();
   export let group: GroupOption = new Set();
-  export let columnPosition: ColumnPosition = new Map();
   export let horizontalScrollOffset = 0;
   export let isResultGrouped: boolean;
 
+  let resizer:Resizeable;
+  $:{ resizer; console.log(resizer); };
+
   let headerRef: HTMLElement;
+  let resizerRef:HTMLElement;
+  let resizerRefs: HTMLElement[] = [];
+
 
   function onHScrollOffsetChange(_hscrollOffset: number) {
     if (headerRef) {
@@ -45,6 +53,34 @@
   let paddingLeft: number;
   $: paddingLeft = isResultGrouped ? GROUP_MARGIN_LEFT : 0;
 
+  let columnToResize:TableColumn;
+  $:{ columnToResize;  if (columnToResize) resizeColumn(columnToResize); };
+
+  export let columnPosition: ColumnPosition = new Map();
+  $: columnPosition;
+
+  function showColumnSizer(event:MouseEvent, column:TableColumn) {
+    resizer.$set({
+      target: <HTMLElement>event.target,
+      onResize: ({ detail: { width }}) => {
+        column.width = width;
+      },
+      onResizeEnd: () => {
+        columnToResize = column;
+      }
+    })
+  }
+
+  function resizeColumn(column:TableColumn) {
+    if (column) {
+      let position = columnPosition.get(column.name)
+      if (position) {
+        position.width = column.width;
+        columnPosition = updateColumnPosition(columns.data);
+      }
+    }
+  }
+
   function onHeaderScroll(scrollLeft: number) {
     if (horizontalScrollOffset !== scrollLeft) {
       horizontalScrollOffset = scrollLeft;
@@ -52,6 +88,7 @@
   }
 
   onMount(() => {
+    defaultColumnWidth = DEFAULT_COUNT_COL_WIDTH + paddingLeft;
     onHScrollOffsetChange(horizontalScrollOffset);
 
     const scrollListener = (event: Event) => {
@@ -103,9 +140,9 @@
     return columnNames;
   };
 
+  let defaultColumnWidth: number;
   let newColumnDropdownIsOpen = false;
   let newColumnName = '';
-
   function addColumn() {
     const newColumn:TableColumn = {
       name: newColumnName,
@@ -114,6 +151,7 @@
       nullable: true,
       primaryKey: false,
       validTargetTypes: null,
+      width: DEFAULT_COLUMN_WIDTH,
     };
     dispatch('addColumn', newColumn);
     newColumnDropdownIsOpen = false;
@@ -121,14 +159,22 @@
   }
 </script>
 
-<div bind:this={headerRef} class="header">
+<Resizeable
+  bind:this={resizer}
+  target={resizerRef}
+  directions={['e']}
+/>
+<div id="columns-header" bind:this={headerRef} class="header">
   <div class="cell row-control" style="width:{DEFAULT_COUNT_COL_WIDTH + paddingLeft}px;">
   </div>
 
-  {#each columns.data as column (column.name)}
-    <div class="cell" style="
-      width:{columnPosition.get(column.name).width}px;
-      left:{columnPosition.get(column.name).left + paddingLeft}px;">
+  {#each columns.data as column, i (column.name)}
+    <div
+      bind:this={resizerRefs[i]}
+      on:mouseenter={(e) => showColumnSizer(e, column)}
+      class="cell" style="
+        width:{column.width}px;
+        left:{columnPosition.get(column.name).left + paddingLeft}px;">
       <span class="type">
         {#if column.type === 'INTEGER'}
           #
@@ -138,7 +184,7 @@
           i
         {/if}
       </span>
-      <span class="name">{column.name}</span>
+      <span class="name">{column.name} {columnPosition.get(column.name).width + paddingLeft}</span>
 
       <Dropdown closeOnInnerClick={true}
                 triggerClass="opts" triggerAppearance="plain"
@@ -216,7 +262,6 @@
     </Dropdown>
   </div>
 </div>
-
 <style global lang="scss">
   @import "Header.scss";
 </style>
