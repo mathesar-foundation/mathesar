@@ -6,8 +6,9 @@ from django.utils.functional import cached_property
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
+from mathesar.database.types.mapping import get_types
 from db import tables, records, schemas, columns, constraints
-from db.types.alteration import get_supported_alter_column_types
+
 
 NAME_CACHE_INTERVAL = 60 * 5
 
@@ -62,8 +63,12 @@ class Database(BaseModel):
 
     @property
     def supported_types(self):
-        types = get_supported_alter_column_types(self._sa_engine)
-        return [t for t, _ in types.items()]
+        supported_types = get_types(self._sa_engine)
+        # Remove SQLAlchemy implementation info.
+        for supported_type in supported_types:
+            db_types = supported_type['db_types']
+            supported_type['db_types'] = [key for key in db_types.keys()]
+        return supported_types
 
 
 class Schema(DatabaseObject):

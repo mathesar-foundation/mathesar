@@ -121,8 +121,14 @@ class RecordListParameterSerializer(serializers.Serializer):
     group_count_by = serializers.JSONField(required=False, default=[])
 
 
+class SupportedTypeSerializer(serializers.Serializer):
+    identifier = serializers.CharField()
+    name = serializers.CharField()
+    db_types = serializers.ListField(child=serializers.CharField())
+
+
 class DatabaseSerializer(serializers.ModelSerializer):
-    supported_types = serializers.ListField(child=serializers.CharField())
+    supported_types = serializers.ListField(child=SupportedTypeSerializer())
 
     class Meta:
         model = Database
