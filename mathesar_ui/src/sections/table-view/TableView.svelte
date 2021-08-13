@@ -124,7 +124,7 @@
   }
 
   function columnAdd(event) {
-    const newColumn:TableColumn = (event.detail) ? <TableColumn>event.detail : null;
+    const newColumn:TableColumn = (event.detail) ? event.detail as TableColumn : null;
     if (newColumn) {
       void addColumn(database, identifier, newColumn);
     }

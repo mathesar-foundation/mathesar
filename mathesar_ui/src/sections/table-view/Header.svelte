@@ -66,7 +66,7 @@ faPlus,
       target: <HTMLElement>event.target,
       onResize: (resizeEvent) => {
         const currentWidth = columnPosition.get(column.name).width;
-        const newWidth = (resizeEvent.detail.width) ? <number>resizeEvent.detail.width : currentWidth;
+        const newWidth = (resizeEvent.detail.width) ? resizeEvent.detail.width as number : currentWidth;
         if (currentWidth !== newWidth) {
           columnPosition.get(column.name).width = newWidth;
         }
