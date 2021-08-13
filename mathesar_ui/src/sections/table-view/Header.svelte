@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte';
   import {
-faPlus,
+    faPlus,
     faSortAmountDown,
     faSortAmountDownAlt,
     faThList,
@@ -65,9 +65,9 @@ faPlus,
     resizer.$set({
       target: <HTMLElement>event.target,
       onResize: (resizeEvent) => {
-        const currentWidth = columnPosition.get(column.name).width;
-        const newWidth = (resizeEvent.detail.width) ? resizeEvent.detail.width as number : currentWidth;
-        if (currentWidth !== newWidth) {
+        const currWidth = columnPosition.get(column.name).width;
+        const newWidth = (resizeEvent.detail.width) ? resizeEvent.detail.width as number : currWidth;
+        if (currWidth !== newWidth) {
           columnPosition.get(column.name).width = newWidth;
         }
       },
