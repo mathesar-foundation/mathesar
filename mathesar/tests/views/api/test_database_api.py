@@ -169,15 +169,15 @@ def test_database_detail(client):
 #     assert len(type_dict) > 0
 #     assert all([type_ not in type_dict for type_ in custom_types])
 
-
-def test_database_types_installed(client, test_db_name, custom_types,
-                                  engine_email_type):
-    reflect_db_objects()
-    default_database = Database.objects.get(name=test_db_name)
-
-    response = client.get(f'/api/v0/databases/{default_database.id}/')
-    type_dict = response.json()['supported_types']
-
-    assert response.status_code == 200
-    assert len(type_dict) > 0
-    assert all([type_ in type_dict for type_ in custom_types])
+# TODO: Re-write once DB endpoint is stabilized
+# def test_database_types_installed(client, test_db_name, custom_types,
+#                                   engine_email_type):
+#     reflect_db_objects()
+#     default_database = Database.objects.get(name=test_db_name)
+#
+#     response = client.get(f'/api/v0/databases/{default_database.id}/')
+#     type_dict = response.json()['supported_types']
+#
+#     assert response.status_code == 200
+#     assert len(type_dict) > 0
+#     assert all([type_ in type_dict for type_ in custom_types])

@@ -124,6 +124,18 @@ def _get_db_type_name(sa_type, engine):
     return db_type
 
 
+def _ignore_type(sa_type_name):
+    # We ignore these types since they're internal to SQLAlchemy
+    IGNORED_TYPES = [
+        PostgresType._ARRAY.value,
+        PostgresType.CHAR.value,
+        PostgresType.NAME.value,
+    ]
+    if sa_type_name in IGNORED_TYPES:
+        return True
+    return False
+
+
 def get_types(engine):
     types = []
     installed_types = get_installed_types(engine)
@@ -136,8 +148,7 @@ def get_types(engine):
             'db_types': {}
         }
         for sa_type_name in type_dict['sa_type_names']:
-            # Ignore internal types (starting with _)
-            if sa_type_name in installed_types and (not sa_type_name.startswith('_')):
+            if sa_type_name in installed_types and (not _ignore_type(sa_type_name)):
                 sa_type = installed_types[sa_type_name]
                 db_type = _get_db_type_name(sa_type, engine)
                 sa_type_info = {
