@@ -126,11 +126,6 @@
     });
   }
 
-  function isColumnPresent(name:string) {
-    return columns.data?.some(col => col.name.toLowerCase() === name?.toLowerCase());
-  }
-  $: isDuplicateColumn = isColumnPresent(newColumnName);
-
   let newColumnDropdownIsOpen = false;
   let newColumnName = '';
   function addColumn() {
@@ -146,6 +141,11 @@
     newColumnDropdownIsOpen = false;
     newColumnName = '';
   }
+
+  function isColumnPresent(name:string) {
+    return columns.data?.some((col) => col.name.toLowerCase() === name?.toLowerCase());
+  }
+  $: isDuplicateColumn = isColumnPresent(newColumnName);
 </script>
 
 <Resizeable
