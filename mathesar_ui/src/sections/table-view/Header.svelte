@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte';
   import {
+faPlus,
     faSortAmountDown,
     faSortAmountDownAlt,
     faThList,
@@ -223,7 +224,10 @@
               triggerAppearance="plain">
 
       <svelte:fragment slot="trigger">
-        <span class="name">Add Column</span>
+        <span class="name">
+          <!-- @TODO: Look into whether is a screen-reader only class implemented -->
+          <Icon class="opt" data={faPlus}/>
+        </span>
       </svelte:fragment>
 
       <svelte:fragment slot="content">
