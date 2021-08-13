@@ -126,14 +126,10 @@
     });
   }
 
-  const getColumnNames = () => {
-    const columnNames:string[] = [];
-    const columnData = (columns.data) ? columns.data : null;
-    if (columnData) {
-      columnData.forEach((col:TableColumn) => columnNames.push(col.name));
-    }
-    return columnNames;
-  };
+  function isColumnPresent(name:string) {
+    return columns.data?.some(col => col.name.toLowerCase() === name?.toLowerCase());
+  }
+  $: isDuplicateColumn = isColumnPresent(newColumnName);
 
   let newColumnDropdownIsOpen = false;
   let newColumnName = '';
@@ -239,16 +235,13 @@
             <TextInput bind:value={newColumnName}>
               <svelte:fragment slot="prepend">Name:</svelte:fragment>
             </TextInput>
-            <Button appearance="primary" disabled={newColumnName.length === 0 || getColumnNames().indexOf(newColumnName) >= 0} on:click={() => addColumn()}>
+
+            <Button appearance="primary" disabled={!newColumnName?.trim() || isDuplicateColumn} on:click={() => addColumn()}>
               Add
             </Button>
-
           </div>
-
-          {#if getColumnNames().indexOf(newColumnName) >= 0}
-            <p class="messages">
-              <strong>Warning!</strong> The column name must be unique.
-            </p>
+          {#if isDuplicateColumn}
+            <p class="warning">The column name must be unique.</p>
           {/if}
         </div>
       </svelte:fragment>
