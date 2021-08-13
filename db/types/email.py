@@ -22,7 +22,6 @@ EMAIL_REGEX_STR = (
 
 
 class Email(UserDefinedType):
-    __visit_name__ = DB_TYPE.upper()
 
     def get_col_spec(self, **kw):
         # This results in the type name being upper case when viewed.
