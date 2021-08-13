@@ -70,7 +70,18 @@ def test_create_email_type_domain_passes_correct_emails(engine_email_type):
     for address in email_addresses_correct:
         with engine.begin() as conn:
             res = conn.execute(
-                text(f"SELECT '{address}'::{email.QUALIFIED_EMAIL};")
+                text(f"SELECT '{address}'::{email.DB_TYPE};")
+            )
+            assert res.fetchone()[0] == address
+
+
+def test_create_email_type_domain_accepts_uppercase(engine_email_type):
+    engine, _ = engine_email_type
+    email_addresses_correct = ["alice@example.com", "alice@example"]
+    for address in email_addresses_correct:
+        with engine.begin() as conn:
+            res = conn.execute(
+                text(f"SELECT '{address}'::{email.DB_TYPE.upper()};")
             )
             assert res.fetchone()[0] == address
 
@@ -82,7 +93,7 @@ def test_create_email_type_domain_checks_broken_emails(engine_email_type):
         with engine.begin() as conn:
             conn.execute(
                 text(
-                    f"SELECT '{address_incorrect}'::{email.QUALIFIED_EMAIL};"
+                    f"SELECT '{address_incorrect}'::{email.DB_TYPE};"
                 )
             )
         assert type(e.orig) == CheckViolation
