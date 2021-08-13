@@ -5,19 +5,19 @@ from db.types import base, email
 
 BIGINT = base.PostgresType.BIGINT.value
 BOOLEAN = base.PostgresType.BOOLEAN.value
-EMAIL = 'email'
+EMAIL = base.MathesarCustomType.EMAIL.value
 DECIMAL = base.PostgresType.DECIMAL.value
 DOUBLE_PRECISION = base.PostgresType.DOUBLE_PRECISION.value
 FLOAT = base.PostgresType.FLOAT.value
 INTEGER = base.PostgresType.INTEGER.value
 INTERVAL = base.PostgresType.INTERVAL.value
-NAME = 'name'
+NAME = base.PostgresType.NAME.value
 NUMERIC = base.PostgresType.NUMERIC.value
 REAL = base.PostgresType.REAL.value
 SMALLINT = base.PostgresType.SMALLINT.value
+FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
 STRING = 'string'
 VARCHAR = 'varchar'
-FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
 
 
 class UnsupportedTypeException(Exception):

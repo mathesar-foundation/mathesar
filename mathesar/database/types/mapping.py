@@ -3,7 +3,7 @@ This file maps "friendly" Mathesar data types to Postgres database types.
 Mathesar data types are shown in the UI.
 """
 
-from db.types.base import PostgresType
+from db.types.base import PostgresType, MathesarCustomType, get_installed_types
 
 
 MATHESAR_BOOLEAN = 'boolean'
@@ -22,57 +22,120 @@ MATHESAR_OTHER = 'other'
 MATHESAR_CUSTOM = 'custom'
 
 
-MATHESAR_TYPES = [{
-    'identifier': MATHESAR_BOOLEAN,
-    'name': 'Boolean',
-    'pg_types': [PostgresType.BOOLEAN.value]
-}, {
-    'identifier': MATHESAR_DATETIME,
-    'name': 'Date & Time',
-    'pg_types': [
-        PostgresType.DATE.value,
-        PostgresType.TIME_WITH_TIME_ZONE.value,
-        PostgresType.TIME_WITHOUT_TIME_ZONE.value,
-        PostgresType.TIMESTAMP.value,
-        PostgresType.TIMESTAMP_WITH_TIMESTAMP_ZONE.value,
-        PostgresType.TIMESTAMP_WITHOUT_TIMESTAMP_ZONE.value
-    ]
-}, {
-    'identifier': MATHESAR_DURATION,
-    'name': 'Duration',
-    'pg_types': [PostgresType.INTERVAL.value]
-}, {
-    'identifier': MATHESAR_EMAIL,
-    'name': 'Email',
-    'pg_types': ['mathesar_types.email']
-}, {
-    'identifier': MATHESAR_MONEY,
-    'name': 'Money',
-    'pg_types': [PostgresType.MONEY.value, 'mathesar_types.money']
-}, {
-    'identifier': MATHESAR_NUMBER,
-    'name': 'Number',
-    'pg_types': [
-        PostgresType.BIGINT.value,
-        PostgresType.DECIMAL.value,
-        PostgresType.DOUBLE_PRECISION.value,
-        PostgresType.FLOAT.value,
-        PostgresType.INTEGER.value,
-        PostgresType.NUMERIC.value,
-        PostgresType.REAL.value,
-        PostgresType.SMALLINT.value,
-        'mathesar_types.percentage'
-    ]
-}, {
-    'identifier': MATHESAR_TEXT,
-    'name': 'Text',
-    'pg_types': [
-        PostgresType.CHARACTER.value,
-        PostgresType.CHARACTER_VARYING.value,
-        PostgresType.TEXT.value,
-    ]
-}, {
-    'identifier': MATHESAR_URI,
-    'name': 'URL',
-    'pg_types': ['mathesar_types.uri']
-}]
+def _get_mathesar_custom_type_name(name):
+    return f'mathesar_types.{name}'
+
+
+def _get_mapped_types(type_map):
+    mapped_types = []
+    for type_dict in type_map:
+        for sa_type in type_dict['sa_type_names']:
+            mapped_types.append(sa_type)
+    return mapped_types
+
+
+def _get_other_types(type_map):
+    mapped_types = _get_mapped_types(type_map)
+    return {
+        'identifier': MATHESAR_OTHER,
+        'name': 'Other',
+        'sa_type_names': [pg_type.value for pg_type in PostgresType if pg_type.value not in mapped_types]
+    }
+
+
+def _get_type_map():
+    type_map = [{
+        'identifier': MATHESAR_BOOLEAN,
+        'name': 'Boolean',
+        'sa_type_names': [PostgresType.BOOLEAN.value]
+    }, {
+        'identifier': MATHESAR_DATETIME,
+        'name': 'Date & Time',
+        'sa_type_names': [
+            PostgresType.DATE.value,
+            PostgresType.TIME_WITH_TIME_ZONE.value,
+            PostgresType.TIME_WITHOUT_TIME_ZONE.value,
+            PostgresType.TIMESTAMP.value,
+            PostgresType.TIMESTAMP_WITH_TIMESTAMP_ZONE.value,
+            PostgresType.TIMESTAMP_WITHOUT_TIMESTAMP_ZONE.value
+        ]
+    }, {
+        'identifier': MATHESAR_DURATION,
+        'name': 'Duration',
+        'sa_type_names': [PostgresType.INTERVAL.value]
+    }, {
+        'identifier': MATHESAR_EMAIL,
+        'name': 'Email',
+        'sa_type_names': [_get_mathesar_custom_type_name(MathesarCustomType.EMAIL.value)]
+    }, {
+        'identifier': MATHESAR_MONEY,
+        'name': 'Money',
+        'sa_type_names': [
+            PostgresType.MONEY.value,
+            _get_mathesar_custom_type_name(MathesarCustomType.MONEY.value)
+        ]
+    }, {
+        'identifier': MATHESAR_NUMBER,
+        'name': 'Number',
+        'sa_type_names': [
+            PostgresType.BIGINT.value,
+            PostgresType.DECIMAL.value,
+            PostgresType.DOUBLE_PRECISION.value,
+            PostgresType.FLOAT.value,
+            PostgresType.INTEGER.value,
+            PostgresType.NUMERIC.value,
+            PostgresType.REAL.value,
+            PostgresType.SMALLINT.value
+        ]
+    }, {
+        'identifier': MATHESAR_TEXT,
+        'name': 'Text',
+        'sa_type_names': [
+            PostgresType.CHARACTER.value,
+            PostgresType.CHARACTER_VARYING.value,
+            PostgresType.TEXT.value,
+        ]
+    }, {
+        'identifier': MATHESAR_URI,
+        'name': 'URL',
+        'sa_type_names': [_get_mathesar_custom_type_name(MathesarCustomType.URI.value)]
+    }]
+    type_map.append(_get_other_types(type_map))
+    return type_map
+
+
+def _get_custom_types(type_map, installed_types):
+    mapped_types = _get_mapped_types(type_map)
+    return {
+        'identifier': MATHESAR_CUSTOM,
+        'name': 'Custom',
+        'sa_type_names': [db_type for db_type in installed_types.keys() if db_type not in mapped_types]
+    }
+
+
+def get_types(engine):
+    types = []
+    installed_types = get_installed_types(engine)
+    type_map = _get_type_map()
+    type_map.append(_get_custom_types(type_map, installed_types))
+    for type_dict in type_map:
+        type_info = {
+            'identifier': type_dict['identifier'],
+            'name': type_dict['name'],
+            'db_types': {}
+        }
+        for sa_type_name in type_dict['sa_type_names']:
+            # Ignore internal types (starting with _)
+            if sa_type_name in installed_types and (not sa_type_name.startswith('_')):
+                sa_type = installed_types[sa_type_name]
+                db_type = sa_type().compile(engine.dialect)
+                sa_type_info = {
+                    'sa_type_name': sa_type_name,
+                    'sa_type': sa_type,
+                }
+                if db_type in type_info['db_types']:
+                    type_info['db_types'][db_type].append(sa_type_info)
+                else:
+                    type_info['db_types'][db_type] = [sa_type_info]
+        types.append(type_info)
+    return types
