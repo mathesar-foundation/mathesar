@@ -22,6 +22,8 @@ EMAIL_REGEX_STR = (
 
 
 class Email(UserDefinedType):
+    __visit_name__ = QUALIFIED_EMAIL
+
     def get_col_spec(self, **kw):
         return QUALIFIED_EMAIL
 

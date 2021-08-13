@@ -53,6 +53,7 @@ def _get_type_map():
         'name': 'Date & Time',
         'sa_type_names': [
             PostgresType.DATE.value,
+            PostgresType.TIME.value,
             PostgresType.TIME_WITH_TIME_ZONE.value,
             PostgresType.TIME_WITHOUT_TIME_ZONE.value,
             PostgresType.TIMESTAMP.value,
@@ -91,8 +92,10 @@ def _get_type_map():
         'identifier': MATHESAR_TEXT,
         'name': 'Text',
         'sa_type_names': [
+            PostgresType.CHAR.value,
             PostgresType.CHARACTER.value,
             PostgresType.CHARACTER_VARYING.value,
+            PostgresType.NAME.value,
             PostgresType.TEXT.value,
         ]
     }, {
@@ -113,6 +116,14 @@ def _get_custom_types(type_map, installed_types):
     }
 
 
+def _get_db_type_name(sa_type, engine):
+    USER_DEFINED_STR = 'user_defined'
+    db_type = sa_type.__visit_name__
+    if db_type == USER_DEFINED_STR:
+        db_type = sa_type().compile(engine.dialect)
+    return db_type
+
+
 def get_types(engine):
     types = []
     installed_types = get_installed_types(engine)
@@ -128,7 +139,7 @@ def get_types(engine):
             # Ignore internal types (starting with _)
             if sa_type_name in installed_types and (not sa_type_name.startswith('_')):
                 sa_type = installed_types[sa_type_name]
-                db_type = sa_type().compile(engine.dialect)
+                db_type = _get_db_type_name(sa_type, engine)
                 sa_type_info = {
                     'sa_type_name': sa_type_name,
                     'sa_type': sa_type,
