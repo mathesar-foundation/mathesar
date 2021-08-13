@@ -33,7 +33,6 @@ class PostgresType(Enum):
     JSONB = 'jsonb'
     MACADDR = 'macaddr'
     MONEY = 'money'
-    NAME = 'name'
     NUMERIC = 'numeric'
     NUMRANGE = 'numrange'
     OID = 'oid'

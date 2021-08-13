@@ -3,21 +3,21 @@ from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 from db.types import base, email
 
-BIGINT = "bigint"
-BOOLEAN = "boolean"
-EMAIL = "email"
-DECIMAL = "decimal"
-DOUBLE_PRECISION = "double precision"
-FLOAT = "float"
-INTEGER = "integer"
-INTERVAL = "interval"
-NAME = "name"
-NUMERIC = "numeric"
-REAL = "real"
-SMALLINT = "smallint"
-STRING = "string"
-VARCHAR = "varchar"
-FULL_VARCHAR = "character varying"
+BIGINT = base.PostgresType.BIGINT.value
+BOOLEAN = base.PostgresType.BOOLEAN.value
+EMAIL = 'email'
+DECIMAL = base.PostgresType.DECIMAL.value
+DOUBLE_PRECISION = base.PostgresType.DOUBLE_PRECISION.value
+FLOAT = base.PostgresType.FLOAT.value
+INTEGER = base.PostgresType.INTEGER.value
+INTERVAL = base.PostgresType.INTERVAL.value
+NAME = 'name'
+NUMERIC = base.PostgresType.NUMERIC.value
+REAL = base.PostgresType.REAL.value
+SMALLINT = base.PostgresType.SMALLINT.value
+STRING = 'string'
+VARCHAR = 'varchar'
+FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
 
 
 class UnsupportedTypeException(Exception):

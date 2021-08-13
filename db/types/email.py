@@ -22,9 +22,6 @@ EMAIL_REGEX_STR = (
 
 
 class Email(UserDefinedType):
-    # This is the name of the type in SQLALchemy
-    __visit_name__ = 'MATHESAR_TYPES.EMAIL'
-
     def get_col_spec(self, **kw):
         return QUALIFIED_EMAIL
 
