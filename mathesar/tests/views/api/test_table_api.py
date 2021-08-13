@@ -71,6 +71,7 @@ def check_table_response(response_table, table, table_name):
     assert 'created_at' in response_table
     assert 'updated_at' in response_table
     assert 'has_dependencies' in response_table
+    assert 'import_verified' in response_table
     assert len(response_table['columns']) == len(table.sa_column_names)
     for column in response_table['columns']:
         assert column['name'] in table.sa_column_names
