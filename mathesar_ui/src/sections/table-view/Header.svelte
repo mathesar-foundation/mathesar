@@ -219,9 +219,7 @@
   <div class="cell" style="width:{70 + DEFAULT_ROW_RIGHT_PADDING}px;left:{
     columnPosition.get('__row').width + paddingLeft
   }px;">
-    <Dropdown closeOnInnerClick={false}
-              contentClass="content"
-              bind:isOpen={newColumnDropdownIsOpen}
+    <Dropdown bind:isOpen={newColumnDropdownIsOpen}
               triggerAppearance="plain">
 
       <svelte:fragment slot="trigger">
