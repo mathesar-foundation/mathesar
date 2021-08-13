@@ -42,7 +42,10 @@ def test_column_list(column_test_table, client):
             'index': 0,
             'nullable': False,
             'primary_key': True,
-            'valid_target_types': None,
+            'valid_target_types': [
+                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
+            ],
         },
         {
             'name': 'mycolumn1',
@@ -51,7 +54,10 @@ def test_column_list(column_test_table, client):
             'index': 1,
             'nullable': False,
             'primary_key': False,
-            'valid_target_types': None,
+            'valid_target_types': [
+                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
+            ],
         },
         {
             'name': 'mycolumn2',
@@ -60,7 +66,10 @@ def test_column_list(column_test_table, client):
             'index': 2,
             'nullable': True,
             'primary_key': False,
-            'valid_target_types': None,
+            'valid_target_types': [
+                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
+            ],
         },
         {
             'name': 'mycolumn3',
@@ -70,15 +79,9 @@ def test_column_list(column_test_table, client):
             'nullable': True,
             'primary_key': False,
             'valid_target_types': [
-                'BOOLEAN',
-                'DECIMAL',
-                'DOUBLE PRECISION',
-                'FLOAT',
-                'INTERVAL',
-                'NUMERIC',
-                'REAL',
-                'VARCHAR',
-                'mathesar_types.email',
+                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                'INTEGER', 'INTERVAL', 'MATHESAR_TYPES.EMAIL', 'NUMERIC',
+                'REAL', 'SMALLINT', 'VARCHAR',
             ],
         }
     ]
@@ -97,7 +100,10 @@ def test_column_list(column_test_table, client):
                 'index': 0,
                 'nullable': False,
                 'primary_key': True,
-                'valid_target_types': None
+                'valid_target_types': [
+                    'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                    'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
+                ],
             },
         ),
         (
@@ -109,7 +115,10 @@ def test_column_list(column_test_table, client):
                 'index': 2,
                 'nullable': True,
                 'primary_key': False,
-                'valid_target_types': None
+                'valid_target_types': [
+                    'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                    'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
+                ],
             },
         ),
     ]
@@ -265,7 +274,7 @@ def test_column_update_type_invalid_options(column_test_table, client, type_opti
 
 def test_column_update_type_invalid_cast(column_test_table, client):
     cache.clear()
-    type_ = "mathesar_types.email"
+    type_ = "MATHESAR_TYPES.EMAIL"
     data = {"type": type_}
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data
