@@ -5,7 +5,6 @@
     fetchTableRecords,
     deleteRecords,
     addColumn,
-    updateColumnPosition,
   } from '@mathesar/stores/tableData';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
   import type {

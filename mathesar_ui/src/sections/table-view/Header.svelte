@@ -20,7 +20,6 @@
     GroupOption,
   } from '@mathesar/stores/tableData';
   import {
-    DEFAULT_COLUMN_WIDTH,
     DEFAULT_COUNT_COL_WIDTH,
     GROUP_MARGIN_LEFT,
     DEFAULT_ROW_RIGHT_PADDING,
@@ -56,11 +55,7 @@
 
   function resizeColumn(column:TableColumn) {
     if (column) {
-      const position = columnPosition.get(column.name);
-      if (position) {
-        position.width = column.width;
-        columnPosition = updateColumnPosition(columns.data);
-      }
+      columnPosition = updateColumnPosition(columns.data, columnPosition);
     }
   }
 
@@ -71,8 +66,11 @@
     resizer.$set({
       target: <HTMLElement>event.target,
       onResize: (resizeEvent) => {
-        const newWidth = (resizeEvent.detail.width) ? <number>resizeEvent.detail.width : column.width;
-        column.width = newWidth;
+        const currentWidth = columnPosition.get(column.name).width;
+        const newWidth = (resizeEvent.detail.width) ? <number>resizeEvent.detail.width : currentWidth;
+        if (currentWidth !== newWidth) {
+          columnPosition.get(column.name).width = newWidth;
+        }
       },
       onResizeEnd: () => {
         columnToResize = column;
@@ -148,7 +146,6 @@
       nullable: true,
       primaryKey: false,
       validTargetTypes: null,
-      width: DEFAULT_COLUMN_WIDTH,
     };
     dispatch('addColumn', newColumn);
     newColumnDropdownIsOpen = false;
@@ -170,7 +167,7 @@
       bind:this={resizerRefs[i]}
       on:mouseenter={(e) => showColumnSizer(e, column)}
       class="cell" style="
-        width:{column.width}px;
+        width:{columnPosition.get(column.name).width + paddingLeft}px;
         left:{columnPosition.get(column.name).left + paddingLeft}px;">
       <span class="type">
         {#if column.type === 'INTEGER'}
