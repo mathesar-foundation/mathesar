@@ -18,7 +18,6 @@ export interface TableColumn {
   nullable: boolean,
   primaryKey: boolean,
   validTargetTypes: string[],
-  width: number,
 }
 export interface TableRecord {
   [key: string]: unknown
@@ -133,18 +132,20 @@ interface TableData {
 
 const databaseMap: Map<string, Map<number, TableData>> = new Map();
 
-function calculateColumnPosition(columns: TableColumn[]): ColumnPosition {
+function calculateColumnPosition(cols: TableColumn[], position:ColumnPosition): ColumnPosition {
   let left = DEFAULT_COUNT_COL_WIDTH;
-  const columnPosition: ColumnPosition = new Map();
-  columns.forEach((column) => {
-    if (!column.width) {
-      column.width = DEFAULT_COLUMN_WIDTH;
+  const columnPosition:ColumnPosition = new Map();
+  cols.forEach((column) => {
+    const pos = position?.get(column.name);
+    let width = DEFAULT_COLUMN_WIDTH;
+    if (pos && pos.width) {
+      width = pos.width;
     }
     columnPosition.set(column.name, {
       left,
-      width: column.width,
+      width: width,
     });
-    left += column.width;
+    left += width;
   });
   columnPosition.set('__row', {
     width: left,
@@ -246,7 +247,7 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
         primaryKey: pkColumn?.name || null,
       });
 
-      const columnPosition = calculateColumnPosition(columns);
+      const columnPosition = calculateColumnPosition(columns, null);
       table.display.columnPosition.set(columnPosition);
     } catch (err) {
       tableColumnStore.set({
@@ -525,9 +526,8 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
   return table;
 }
 
-export function updateColumnPosition(columns:TableColumn[]):ColumnPosition {
-  const columnPosition:ColumnPosition = calculateColumnPosition(columns);
-  return columnPosition;
+export function updateColumnPosition(cols:TableColumn[], position:ColumnPosition):ColumnPosition {
+  return calculateColumnPosition(cols, position);
 }
 
 export async function addColumn(db:string, id:number, newColumn:TableColumn): Promise<void> {
