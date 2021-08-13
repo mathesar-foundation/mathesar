@@ -533,21 +533,19 @@ export function updateColumnPosition(cols:TableColumn[], position:ColumnPosition
 export async function addColumn(db:string, id:number, newColumn:TableColumn): Promise<void> {
   const table = databaseMap.get(db)?.get(id);
   if (table) {
-    await postAPI<unknown>(`/tables/${id}/columns/`, newColumn)
-      .then((column:TableColumn) => {
-        void fetchTableDetails(db, id);
-        void fetchTableRecords(db, id, true);
-        return column;
-      })
-      .catch((err) => {
-        const tableColumnStore = table.columns;
-        tableColumnStore.set({
-          state: States.Error,
-          error: err instanceof Error ? err.message : null,
-          data: [],
-          primaryKey: null,
-        });
+    try {
+      await postAPI<TableColumn>(`/tables/${id}/columns/`, newColumn);
+      void fetchTableDetails(db, id);
+      void fetchTableRecords(db, id, true);
+    } catch (err) {
+      const tableColumnStore = table.columns;
+      tableColumnStore.set({
+        state: States.Error,
+        error: err instanceof Error ? err.message : null,
+        data: [],
+        primaryKey: null,
       });
+    }
   }
 }
 
