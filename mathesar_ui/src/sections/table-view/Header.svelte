@@ -33,12 +33,10 @@
   export let horizontalScrollOffset = 0;
   export let isResultGrouped: boolean;
 
-  let resizer:Resizeable;
-
   let headerRef: HTMLElement;
+  let resizer:Resizeable;
   let resizerRef:HTMLElement;
   const resizerRefs: HTMLElement[] = [];
-
 
   function onHScrollOffsetChange(_hscrollOffset: number) {
     if (headerRef) {
@@ -62,7 +60,7 @@
   let columnToResize:TableColumn;
   $: resizeColumn(columnToResize);
 
-  function showColumnSizer(event:MouseEvent, column:TableColumn) {
+  function showResizerForColumn(event:MouseEvent, column:TableColumn) {
     resizer.$set({
       target: <HTMLElement>event.target,
       onResize: (resizeEvent) => {
@@ -73,6 +71,7 @@
         }
       },
       onResizeEnd: () => {
+        columnToResize = null;
         columnToResize = column;
       },
     });
@@ -165,7 +164,7 @@
   {#each columns.data as column, i (column.name)}
     <div
       bind:this={resizerRefs[i]}
-      on:mouseenter={(e) => showColumnSizer(e, column)}
+      on:mouseenter={(e) => showResizerForColumn(e, column)}
       class="cell" style="
         width:{columnPosition.get(column.name).width + paddingLeft}px;
         left:{columnPosition.get(column.name).left + paddingLeft}px;">
