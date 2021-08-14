@@ -3,7 +3,7 @@ This file maps "friendly" Mathesar data types to Postgres database types.
 Mathesar data types are shown in the UI.
 """
 
-from db.types.base import PostgresType, MathesarCustomType, get_installed_types
+from db.types.base import PostgresType, MathesarCustomType, get_installed_types, get_full_mathesar_type_name
 
 
 MATHESAR_BOOLEAN = 'boolean'
@@ -20,10 +20,6 @@ MATHESAR_OTHER = 'other'
 
 # These are types that we don't know anything about.
 MATHESAR_CUSTOM = 'custom'
-
-
-def _get_mathesar_custom_type_name(name):
-    return f'mathesar_types.{name}'
 
 
 def _get_mapped_types(type_map):
@@ -67,13 +63,13 @@ def _get_type_map():
     }, {
         'identifier': MATHESAR_EMAIL,
         'name': 'Email',
-        'sa_type_names': [_get_mathesar_custom_type_name(MathesarCustomType.EMAIL.value)]
+        'sa_type_names': [get_full_mathesar_type_name(MathesarCustomType.EMAIL.value)]
     }, {
         'identifier': MATHESAR_MONEY,
         'name': 'Money',
         'sa_type_names': [
             PostgresType.MONEY.value,
-            _get_mathesar_custom_type_name(MathesarCustomType.MONEY.value)
+            get_full_mathesar_type_name(MathesarCustomType.MONEY.value)
         ]
     }, {
         'identifier': MATHESAR_NUMBER,
@@ -101,7 +97,7 @@ def _get_type_map():
     }, {
         'identifier': MATHESAR_URI,
         'name': 'URL',
-        'sa_type_names': [_get_mathesar_custom_type_name(MathesarCustomType.URI.value)]
+        'sa_type_names': [get_full_mathesar_type_name(MathesarCustomType.URI.value)]
     }]
     type_map.append(_get_other_types(type_map))
     return type_map
