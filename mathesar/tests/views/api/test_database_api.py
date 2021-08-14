@@ -83,7 +83,9 @@ def check_database(database, response_database):
     assert database.id == response_database['id']
     assert database.name == response_database['name']
     assert database.deleted == response_database['deleted']
-    assert database.supported_types == response_database['supported_types']
+    assert 'supported_types_url' in response_database
+    assert '/api/v0/databases/' in response_database['supported_types_url']
+    assert response_database['supported_types_url'].endswith('/types/')
 
 
 def test_database_list(client, test_db_name, database_api_db):

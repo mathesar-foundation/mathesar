@@ -121,19 +121,27 @@ class RecordListParameterSerializer(serializers.Serializer):
     group_count_by = serializers.JSONField(required=False, default=[])
 
 
-class SupportedTypeSerializer(serializers.Serializer):
+class TypeSerializer(serializers.Serializer):
     identifier = serializers.CharField()
     name = serializers.CharField()
     db_types = serializers.ListField(child=serializers.CharField())
 
 
 class DatabaseSerializer(serializers.ModelSerializer):
-    supported_types = serializers.ListField(child=SupportedTypeSerializer())
+    supported_types_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Database
-        fields = ['id', 'name', 'deleted', 'supported_types']
-        read_only_fields = ['id', 'name', 'deleted', 'supported_types']
+        fields = ['id', 'name', 'deleted', 'supported_types_url']
+        read_only_fields = ['id', 'name', 'deleted', 'supported_types_url']
+
+    def get_supported_types_url(self, obj):
+        if isinstance(obj, Database):
+            # Only get records if we are serializing an existing table
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('database-types', kwargs={'pk': obj.pk}))
+        else:
+            return None
 
 
 class DataFileSerializer(serializers.ModelSerializer):

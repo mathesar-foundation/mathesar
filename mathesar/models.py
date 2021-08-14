@@ -63,11 +63,15 @@ class Database(BaseModel):
 
     @property
     def supported_types(self):
-        supported_types = get_types(self._sa_engine)
-        # Remove SQLAlchemy implementation info.
-        for supported_type in supported_types:
-            db_types = supported_type['db_types']
-            supported_type['db_types'] = [key for key in db_types.keys()]
+        supported_types = []
+        available_types = get_types(self._sa_engine)
+        for index, available_type in enumerate(available_types):
+            db_types = available_type['db_types']
+            db_type_list = [key for key in db_types.keys()]
+            if db_type_list:
+                # Remove SQLAlchemy implementation info.
+                available_type['db_types'] = db_type_list
+                supported_types.append(available_type)
         return supported_types
 
 
