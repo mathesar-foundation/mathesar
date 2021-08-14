@@ -158,7 +158,7 @@ def test_MC_valid_target_types_default_engine(engine):
 def test_MC_valid_target_types_custom_engine(engine_with_types):
     mc = columns.MathesarColumn('testable_col', String)
     mc.add_engine(engine_with_types)
-    assert "mathesar_types.email" in mc.valid_target_types
+    assert "MATHESAR_TYPES.EMAIL" in mc.valid_target_types
 
 
 def test_MC_column_index_when_no_engine():
@@ -209,7 +209,7 @@ def test_MC_plain_type_no_opts(engine):
 def test_MC_plain_type_no_opts_custom_type(engine_with_types):
     mc = columns.MathesarColumn('testable_col', email.Email)
     mc.add_engine(engine_with_types)
-    assert mc.plain_type == "mathesar_types.email"
+    assert mc.plain_type == "MATHESAR_TYPES.EMAIL"
 
 
 def test_MC_plain_type_numeric_opts(engine):
@@ -421,11 +421,11 @@ type_set = {
     'FLOAT',
     'INTEGER',
     'INTERVAL',
+    'MATHESAR_TYPES.EMAIL',
     'NUMERIC',
     'REAL',
     'SMALLINT',
     'VARCHAR',
-    'mathesar_types.email',
 }
 
 
