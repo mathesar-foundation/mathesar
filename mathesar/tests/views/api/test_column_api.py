@@ -80,8 +80,8 @@ def test_column_list(column_test_table, client):
             'primary_key': False,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'INTERVAL', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
-                'mathesar_types.email',
+                'INTEGER', 'INTERVAL', 'MATHESAR_TYPES.EMAIL', 'NUMERIC',
+                'REAL', 'SMALLINT', 'VARCHAR',
             ],
         }
     ]
@@ -274,7 +274,7 @@ def test_column_update_type_invalid_options(column_test_table, client, type_opti
 
 def test_column_update_type_invalid_cast(column_test_table, client):
     cache.clear()
-    type_ = "mathesar_types.email"
+    type_ = "MATHESAR_TYPES.EMAIL"
     data = {"type": type_}
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data
