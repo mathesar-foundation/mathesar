@@ -4,8 +4,8 @@
     faUser,
   } from '@fortawesome/free-solid-svg-icons';
 
-  import { currentDB } from '@mathesar/stores/databases';
-  import { currentSchema } from '@mathesar/stores/schemas';
+  import { currentDBName } from '@mathesar/stores/databases';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
   import { newImport } from '@mathesar/stores/fileImports';
 
   import {
@@ -14,6 +14,10 @@
   } from '@mathesar-components';
 
   import SchemaSelector from './schema-selector/SchemaSelector.svelte';
+
+  function createNewTable() {
+    //
+  }
 </script>
 
 <header>
@@ -23,14 +27,14 @@
     </div>
   </div>
 
-  {#if $currentDB}
+  {#if $currentDBName}
     <SchemaSelector/>
   {/if}
 
   <div class="right-options">
-    {#if $currentSchema}
+    {#if $currentSchemaId}
       <div class="quick-links">
-        <Button on:click={() => newImport($currentDB.name)}>
+        <Button on:click={createNewTable}>
           New table
         </Button>
       </div>

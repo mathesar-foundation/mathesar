@@ -1,28 +1,49 @@
 <script lang="ts">
   import { faTable } from '@fortawesome/free-solid-svg-icons';
   import {
-    Tree,
     TabContainer,
     Icon,
   } from '@mathesar-components';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
-  import { currentSchema } from '@mathesar/stores/schemas';
-  import type { Schema } from '@mathesar/App.d';
+  import { currentDBName } from '@mathesar/stores/databases';
+  import { currentSchemaId, currentSchema } from '@mathesar/stores/schemas';
   import {
-    getAllTabsForDB,
-    addTab,
+    getTabsForSchema,
     removeTab,
     selectTab,
   } from '@mathesar/stores/tabs';
   import type { MathesarTab } from '@mathesar/stores/tabs';
+  import type { Writable } from 'svelte/store';
 
   import NewTable from './new-table/NewTable.svelte';
   import TableView from './table-view/TableView.svelte';
   import EmptyState from './empty-state/EmptyState.svelte';
+  import LeftPane from './left-pane/LeftPane.svelte';
 
   export let database : string;
+  export let schemaId: number;
 
-  const { tabs, activeTab } = getAllTabsForDB(database);
+  let tabs: Writable<MathesarTab[]>;
+  let activeTab: Writable<MathesarTab>;
+
+  function changeCurrentSchema(_database: string, _schemaId: number) {
+    let isChanged = false;
+    if ($currentDBName !== _database) {
+      $currentDBName = _database;
+      isChanged = true;
+    }
+    if ($currentSchemaId !== _schemaId) {
+      $currentSchemaId = _schemaId;
+      isChanged = true;
+    }
+
+    if (isChanged) {
+      ({ tabs, activeTab } = getTabsForSchema($currentDBName, $currentSchemaId));
+    }
+  }
+
+  $: changeCurrentSchema(database, schemaId);
+
   let activeTable: Set<unknown>;
 
   function onActiveTabChange(_activeTab: MathesarTab) {
@@ -35,17 +56,7 @@
     if (entry.isNew) {
       return null;
     }
-    return `/${database}${URLQueryHandler.constructTableLink(entry.id as number)}`;
-  }
-
-  function tableSelected(e: { detail: { node: Schema, originalEvent: Event, link?: string } }) {
-    const { node, originalEvent } = e.detail;
-    originalEvent.preventDefault();
-
-    addTab(database, {
-      id: node.id,
-      label: node.name,
-    });
+    return `/${database}/${schemaId}/${URLQueryHandler.constructTableLink(entry.id as number)}`;
   }
 
   function tabSelected(e: { detail: { tab: MathesarTab, originalEvent: Event } }) {
@@ -56,7 +67,7 @@
   }
 
   function tabRemoved(e: { detail: { removedTab: MathesarTab, activeTab?: MathesarTab } }) {
-    removeTab(database, e.detail.removedTab, e.detail.activeTab);
+    removeTab(database, schemaId, e.detail.removedTab, e.detail.activeTab);
   }
 </script>
 
@@ -65,21 +76,7 @@
 </svelte:head>
 
 {#if $currentSchema}
-  <aside>
-    <nav>
-      <Tree data={[$currentSchema]} idKey="id" labelKey="name" childKey="tables"
-            search={true} {getLink} expandedItems={new Set([$currentSchema.id])}
-            bind:selectedItems={activeTable} on:nodeSelected={tableSelected}
-            let:entry>
-          <Icon data={faTable}/>
-          <span>{entry.name}</span>
-
-          <svelte:fragment slot="empty">
-            No tables found
-          </svelte:fragment>
-      </Tree>
-    </nav>
-  </aside>
+  <LeftPane {getLink} {database} schema={$currentSchema}/>
 {/if}
 
 <section class="table-section">
@@ -94,7 +91,7 @@
 
       {#if $activeTab}
         {#if $activeTab.isNew}
-          <NewTable {database} id={$activeTab.id}/>
+          <NewTable schemaId={$currentSchemaId} id={$activeTab.id}/>
         {:else}
           <TableView {database} id={$activeTab.id}/>
         {/if}
