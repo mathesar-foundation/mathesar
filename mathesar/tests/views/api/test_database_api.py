@@ -4,7 +4,6 @@ from django.core.cache import cache
 
 from mathesar.reflection import reflect_db_objects
 from mathesar.models import Table, Schema, Database
-from db.types import CUSTOM_TYPE_DICT
 from db.tests.types import fixtures
 
 
@@ -27,11 +26,6 @@ def database_api_db(test_db_name):
 @pytest.fixture(autouse=True)
 def clear_cache():
     cache.clear()
-
-
-@pytest.fixture(scope='module')
-def custom_types():
-    return [t.split('.')[-1] for t in CUSTOM_TYPE_DICT]
 
 
 def test_database_reflection_new(database_api_db):
@@ -159,27 +153,24 @@ def test_database_detail(client):
     check_database(expected_database, response_database)
 
 
-# TODO: Re-enable when modular type installation has been implemented
-# def test_database_types_not_installed(client, test_db_name, custom_types):
-#     reflect_db_objects()
-#     default_database = Database.objects.get(name=test_db_name)
+def test_type_list(client, test_db_name):
+    database = Database.objects.get(name=test_db_name)
 
-#     response = client.get(f'/api/v0/databases/{default_database.id}/')
-#     type_dict = response.json()['supported_types']
+    response = client.get(f'/api/v0/databases/{database.id}/types/')
+    response_data = response.json()
+    assert response.status_code == 200
+    assert len(response_data) == len(database.supported_types)
+    for supported_type in response_data:
+        assert all([key in supported_type for key in ['identifier', 'name', 'db_types']])
 
-#     assert response.status_code == 200
-#     assert len(type_dict) > 0
-#     assert all([type_ not in type_dict for type_ in custom_types])
 
-# TODO: Re-write once DB endpoint is stabilized
-# def test_database_types_installed(client, test_db_name, custom_types,
-#                                   engine_email_type):
-#     reflect_db_objects()
-#     default_database = Database.objects.get(name=test_db_name)
-#
-#     response = client.get(f'/api/v0/databases/{default_database.id}/')
-#     type_dict = response.json()['supported_types']
-#
-#     assert response.status_code == 200
-#     assert len(type_dict) > 0
-#     assert all([type_ in type_dict for type_ in custom_types])
+def test_database_types_installed(client, test_db_name, engine_email_type):
+    reflect_db_objects()
+    default_database = Database.objects.get(name=test_db_name)
+
+    response = client.get(f'/api/v0/databases/{default_database.id}/types/').json()
+    email_data = next((type_dict for type_dict in response if type_dict['identifier'] == 'email'), None)
+    assert email_data is not None
+    assert email_data['name'] == 'Email'
+    assert len(email_data['db_types']) == 1
+    assert 'MATHESAR_TYPES.EMAIL' in email_data['db_types']
