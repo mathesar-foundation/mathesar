@@ -94,6 +94,10 @@ export function postAPI<T>(url: string, data: unknown): CancellablePromise<T> {
   return sendXHRRequest('POST', url, data);
 }
 
+export function patchAPI<T>(url: string, data: unknown): CancellablePromise<T> {
+  return sendXHRRequest('PATCH', url, data);
+}
+
 export function deleteAPI<T>(url: string): CancellablePromise<T> {
   return sendXHRRequest('DELETE', url);
 }

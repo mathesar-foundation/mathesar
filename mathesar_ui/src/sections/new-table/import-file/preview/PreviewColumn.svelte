@@ -25,7 +25,7 @@
 
 <th class:disabled={!column.isEditable}>
   <div class="name">
-    <Checkbox disabled={!column.isEditable} checked={column.isSelected}/>
+    <Checkbox disabled={!column.isEditable} bind:checked={column.isSelected}/>
     <TextInput disabled={!column.isEditable} bind:value={column.displayName}/>
   </div>
   <div class="type">

@@ -6,34 +6,40 @@
 
   import PreviewColumn from './PreviewColumn.svelte';
   import PreviewRows from './PreviewRows.svelte';
+  
+  import {
+    updateDataFileHeader,
+  } from '../importFileUtils';
 
-  export let fileImportData: FileImport;
+  export let fileImportStore: FileImport;
 
   function typeChanged(e: CustomEvent) {
-    const { previewColumns } = get(fileImportData);
+    const { previewColumns } = get(fileImportStore);
     const changedColumn = previewColumns.find((column) => column.name === e.detail.name);
     if (changedColumn) {
       changedColumn.type = e.detail.type as string;
 
-      fileImportData.update((data) => ({
+      fileImportStore.update((data) => ({
         ...data,
         previewColumns: [...previewColumns],
       }));
     }
+  }
+
+  function headerChanged(e: CustomEvent) {
+    void updateDataFileHeader(fileImportStore, e.detail.checked as boolean);
   }
 </script>
 
 <div>Add Table (Step 2 of 2)</div>
 <h2>Confirm your data</h2>
 
-<Checkbox bind:checked={$fileImportData.firstRowHeader} label="Use first row as header"/>
-
 <div class="help-content">
-  {#if $fileImportData.previewStatus === States.Loading}
+  {#if $fileImportStore.previewStatus === States.Loading}
     Please wait until we prepare a preview
 
-  {:else if $fileImportData.previewStatus === States.Error}
-    {$fileImportData.error ?? ''}
+  {:else if $fileImportStore.previewStatus === States.Error}
+    {$fileImportStore.error ?? ''}
 
   {:else}
     To finish, review suggestions for the field types and column names.
@@ -41,21 +47,25 @@
   {/if}
 </div>
 
-{#if $fileImportData.previewColumns?.length > 0}
+<Checkbox bind:checked={$fileImportStore.firstRowHeader}
+          label="Use first row as header"
+          on:change={headerChanged}/>
+
+{#if $fileImportStore.previewColumns?.length > 0}
   <div class="preview-table">
     <table>
       <thead>
         <tr>
-          {#each $fileImportData.previewColumns as column (column.name)}
+          {#each $fileImportStore.previewColumns as column (column.name)}
             <PreviewColumn {column} on:typechange={typeChanged}/>
           {/each}
         </tr>
       </thead>
       <tbody>
-        {#key $fileImportData.previewColumns}
-          <PreviewRows tableId={$fileImportData.previewId}
-            columns={$fileImportData.previewColumns}
-            bind:rows={$fileImportData.previewRows}/>
+        {#key $fileImportStore.previewColumns}
+          <PreviewRows tableId={$fileImportStore.previewId}
+            columns={$fileImportStore.previewColumns}
+            bind:rows={$fileImportStore.previewRows}/>
         {/key}
       </tbody>
     </table>

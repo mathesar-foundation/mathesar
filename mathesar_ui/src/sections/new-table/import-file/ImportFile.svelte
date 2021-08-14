@@ -1,6 +1,5 @@
 <script lang="ts">
   import { faSpinner } from '@fortawesome/free-solid-svg-icons';
-  import { currentSchema } from '@mathesar/stores/schemas';
   import { getFileStore, Stages } from '@mathesar/stores/fileImports';
   import type { FileImport } from '@mathesar/stores/fileImports';
   import { States } from '@mathesar/utils/api';
@@ -10,6 +9,7 @@
     Icon,
     Notification,
   } from '@mathesar-components';
+  import type { Schema } from '@mathesar/App.d';
 
   import Preview from './preview/Preview.svelte';
   import {
@@ -20,22 +20,22 @@
   } from './importFileUtils';
 
   export let id: string = null;
-  export let database: string = null;
+  export let schemaId: Schema['id'] = null;
 
-  let fileImportData: FileImport;
-  $: fileImportData = getFileStore(database, id);
+  let fileImportStore: FileImport;
+  $: fileImportStore = getFileStore(schemaId, id);
 </script>
 
 <div class="import-file-view">
-  <Notification type="danger" show={!!$fileImportData.error}
-                on:close={() => clearErrors(database, id)}>
+  <Notification type="danger" show={!!$fileImportStore.error}
+                on:close={() => clearErrors(fileImportStore)}>
     There was an error when trying to import file. Please try again.
     <svelte:fragment slot="description">
-      {$fileImportData.error}
+      {$fileImportStore.error}
     </svelte:fragment>
   </Notification>
 
-  {#if $fileImportData.stage === Stages.UPLOAD}
+  {#if $fileImportStore.stage === Stages.UPLOAD}
     <div>Add Table (Step 1 of 2)</div>
     <h2>Import your data</h2>
     <div class="help-content">
@@ -43,33 +43,33 @@
       Please do not close this tab, you may still open and view other tables in the meanwhile.
     </div>
 
-    <FileUpload bind:fileUploads={$fileImportData.uploads}
-                fileProgress={getFileUploadInfo($fileImportData)}
-                on:add={(e) => uploadNewFile(database, id, e.detail)}/>
+    <FileUpload bind:fileUploads={$fileImportStore.uploads}
+                fileProgress={getFileUploadInfo($fileImportStore)}
+                on:add={(e) => uploadNewFile(fileImportStore, e.detail)}/>
 
     <div class="help-content">
       You can import tabular (CSV, TSV) data.
     </div>
 
-  {:else if $fileImportData.stage === Stages.PREVIEW}
-    <Preview {fileImportData}/>
+  {:else if $fileImportStore.stage === Stages.PREVIEW}
+    <Preview {fileImportStore}/>
   {/if}
 
   <div class="actions">
     <Button appearance="primary"
             disabled={
-              $fileImportData.uploadStatus !== States.Done
-              || $fileImportData.importStatus === States.Loading
-              || $fileImportData.importStatus === States.Error
-              || $fileImportData.previewStatus === States.Loading
-              || $fileImportData.previewStatus === States.Error
-              || $fileImportData.previewTableCreationStatus === States.Loading
-              || $fileImportData.previewTableCreationStatus === States.Error
+              $fileImportStore.uploadStatus !== States.Done
+              || $fileImportStore.importStatus === States.Loading
+              || $fileImportStore.importStatus === States.Error
+              || $fileImportStore.previewStatus === States.Loading
+              || $fileImportStore.previewStatus === States.Error
+              || $fileImportStore.previewTableCreationStatus === States.Loading
+              || $fileImportStore.previewTableCreationStatus === States.Error
             }
-            on:click={() => shiftStage(database, $currentSchema?.id, id)}>
-      {$fileImportData.stage === Stages.PREVIEW ? 'Finish Import' : 'Next'}
+            on:click={() => shiftStage(fileImportStore)}>
+      {$fileImportStore.stage === Stages.PREVIEW ? 'Finish Import' : 'Next'}
 
-      {#if $fileImportData.importStatus === States.Loading}
+      {#if $fileImportStore.importStatus === States.Loading}
         <Icon data={faSpinner} spin={true}/>
       {/if}
     </Button>
