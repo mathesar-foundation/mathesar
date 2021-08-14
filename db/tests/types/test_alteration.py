@@ -1,7 +1,8 @@
 from datetime import timedelta
 from decimal import Decimal
-from psycopg2.errors import InvalidParameterValue
+
 import pytest
+from psycopg2.errors import InvalidParameterValue
 from sqlalchemy import Table, Column, MetaData
 from sqlalchemy import String, Numeric
 from sqlalchemy.exc import DataError

@@ -48,12 +48,13 @@ def get_table_or_404(pk):
 
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    def get_queryset(self):
-        return Schema.objects.all().order_by('-created_at')
     serializer_class = SchemaSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = SchemaFilter
+
+    def get_queryset(self):
+        return Schema.objects.all().order_by('-created_at')
 
     def create(self, request):
         serializer = SchemaSerializer(data=request.data)
@@ -87,13 +88,13 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
 
 
 class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    def get_queryset(self):
-        return Table.objects.all().order_by('-created_at')
-
     serializer_class = TableSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = TableFilter
+
+    def get_queryset(self):
+        return Table.objects.all().order_by('-created_at')
 
     def create(self, request):
         serializer = TableSerializer(data=request.data, context={'request': request})
