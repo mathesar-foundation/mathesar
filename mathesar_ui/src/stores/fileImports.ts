@@ -7,6 +7,7 @@ import { States } from '@mathesar/utils/api';
 import type { UploadCompletionOpts, PaginatedResponse } from '@mathesar/utils/api';
 import type { FileUpload } from '@mathesar-components/types';
 import type { CancellablePromise } from '@mathesar/components';
+import type { Schema } from '@mathesar/App.d';
 
 export const Stages = {
   UPLOAD: 1,
@@ -14,16 +15,12 @@ export const Stages = {
   IMPORT: 3,
 };
 
-export enum ImportChangeType {
-  ADDED = 'added',
-  REMOVED = 'removed',
-  MODIFIED = 'modified',
-}
-
 export interface PreviewColumn {
   name: string,
   displayName: string,
+  index: number,
   type: string,
+  originalType: string,
   isSelected?: boolean,
   isEditable?: boolean,
   primary_key?: boolean,
@@ -45,6 +42,7 @@ interface FileImportWritableInfo {
   // Preview table create stage
   previewTableCreationStatus?: States,
   previewCreatePromise?: CancellablePromise<unknown>,
+  previewDeletePromise?: CancellablePromise<unknown>,
 
   // Preview stage
   previewStatus?: States,
@@ -58,120 +56,96 @@ interface FileImportWritableInfo {
   importStatus?: States,
   importPromise?: CancellablePromise<unknown>,
   name?: string,
-  schema?: string,
   error?: string
 }
 
 export interface FileImportInfo extends FileImportWritableInfo {
-  id: string
-}
-
-export interface FileImportChange {
-  changeType: ImportChangeType,
-  old?: FileImportInfo,
-  info?: FileImportInfo,
-  all: FileImportInfo[],
+  id: string,
+  schemaId: number,
 }
 
 export type FileImport = Writable<FileImportInfo>;
 let fileId = 0;
 
 // Storage map
-interface FileImportsForDB {
-  changes: Writable<FileImportChange>,
-  imports: Map<string, FileImport>
-}
-const databaseMap: Map<string, FileImportsForDB> = new Map();
+type FileImportsForDB = Map<string, FileImport>;
+const schemaImportMap: Map<number, FileImportsForDB> = new Map();
 
-export function getAllImportDetails(db: string): FileImportInfo[] {
-  const database = databaseMap.get(db);
-  if (database?.imports) {
-    return Array.from(database.imports.values()).map((entry: FileImport) => get(entry));
+export function getAllImportDetails(schemaId: Schema['id']): FileImportInfo[] {
+  const imports = schemaImportMap.get(schemaId);
+  if (imports) {
+    return Array.from(imports.values()).map((entry: FileImport) => get(entry));
   }
   return [];
 }
 
-export function getDBStore(db: string): FileImportsForDB {
-  let database = databaseMap.get(db);
-  if (!database) {
-    database = {
-      changes: writable<FileImportChange>(null),
-      imports: new Map(),
-    };
-    databaseMap.set(db, database);
+export function getSchemaImportStore(schemaId: Schema['id']): FileImportsForDB {
+  let imports = schemaImportMap.get(schemaId);
+  if (!imports) {
+    imports = new Map();
+    schemaImportMap.set(schemaId, imports);
   }
-  return database;
+  return imports;
 }
 
-export function getFileStore(db: string, id: string): FileImport {
-  const database = getDBStore(db);
+export function getFileStore(schemaId: Schema['id'], id: string): FileImport {
+  const imports = getSchemaImportStore(schemaId);
 
-  let fileImport = database.imports.get(id);
+  let fileImport = imports.get(id);
   if (!fileImport) {
     const fileImportInitialInfo: FileImportInfo = {
       id,
+      schemaId,
       name: 'Untitled',
       uploadStatus: States.Idle,
       stage: Stages.UPLOAD,
+      firstRowHeader: true,
     };
     fileImport = writable(fileImportInitialInfo);
-    database.imports.set(id, fileImport);
+    imports.set(id, fileImport);
   }
   return fileImport;
 }
 
-export function getFileStoreData(db: string, id: string): FileImportInfo {
-  return get(getFileStore(db, id));
+export function getFileStoreData(schemaId: Schema['id'], id: string): FileImportInfo {
+  return get(getFileStore(schemaId, id));
 }
 
-export function setFileStore(db: string, id: string, data: FileImportWritableInfo): FileImportInfo {
-  const database = getDBStore(db);
-  const store = getFileStore(db, id);
-  const existingData = get(store);
-
-  store.set({
+export function setFileStore(schemaId: Schema['id'], id: string, data: FileImportWritableInfo): FileImportInfo {
+  const store = getFileStore(schemaId, id);
+  store.update((existingData) => ({
     ...existingData,
     ...data,
-  });
-
-  database.changes.set({
-    changeType: ImportChangeType.MODIFIED,
-    old: existingData,
-    info: get(store),
-    all: getAllImportDetails(db),
-  });
-
+  }));
   return get(store);
 }
 
-export function newImport(db: string): void {
-  const id = `_new_${fileId}`;
-  const database = getDBStore(db);
-  const fileImport = getFileStore(db, id);
-
-  database.changes.set({
-    changeType: ImportChangeType.ADDED,
-    info: get(fileImport),
-    all: getAllImportDetails(db),
-  });
-
-  fileId += 1;
+export function setInFileStore(
+  fileImportStore: FileImport,
+  data: FileImportWritableInfo,
+): FileImportInfo {
+  fileImportStore.update((oldData) => ({
+    ...oldData,
+    ...data,
+  }));
+  return get(fileImportStore);
 }
 
-export function removeImport(db:string, id: string): void {
-  const database = databaseMap.get(db);
-  if (database?.imports) {
-    const fileImport = database.imports.get(id);
+export function newImport(schemaId: Schema['id']): FileImport {
+  const id = `_new_${fileId}`;
+  const fileImport = getFileStore(schemaId, id);
+  fileId += 1;
+  return fileImport;
+}
+
+export function removeImport(schemaId: Schema['id'], id: string): void {
+  const imports = schemaImportMap.get(schemaId);
+  if (imports) {
+    const fileImport = imports.get(id);
     const fileImportData = get(fileImport);
     fileImportData.importPromise?.cancel();
     fileImportData.uploadPromise?.cancel();
 
-    database.imports.delete(id);
-
-    database.changes.set({
-      changeType: ImportChangeType.REMOVED,
-      info: get(fileImport),
-      all: getAllImportDetails(db),
-    });
+    imports.delete(id);
   }
 }

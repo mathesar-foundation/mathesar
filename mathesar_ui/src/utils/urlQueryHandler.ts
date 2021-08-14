@@ -132,7 +132,7 @@ function prepareRawTableConfig(id: number, options?: TableOptions): RawTableConf
   return table;
 }
 
-function getAllTableConfigs(db: string): TableConfig[] {
+function getAllTableConfigs(db: string, schemaId: number): TableConfig[] {
   return getRawTables(db).map((table) => parseTableConfig(table));
 }
 
