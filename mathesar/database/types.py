@@ -2,24 +2,24 @@
 This file maps "friendly" Mathesar data types to Postgres database types.
 Mathesar data types are shown in the UI.
 """
+from enum import Enum
 
 from db.types.base import PostgresType, MathesarCustomType, get_installed_types, get_full_mathesar_type_name
 
 
-MATHESAR_BOOLEAN = 'boolean'
-MATHESAR_DATETIME = 'datetime'
-MATHESAR_DURATION = 'duration'
-MATHESAR_EMAIL = 'email'
-MATHESAR_MONEY = 'money'
-MATHESAR_NUMBER = 'number'
-MATHESAR_TEXT = 'text'
-MATHESAR_URI = 'uri'
-
-# These are default Postgres types that we don't have specific behavior for yet in the UI.
-MATHESAR_OTHER = 'other'
-
-# These are types that we don't know anything about.
-MATHESAR_CUSTOM = 'custom'
+class MathesarTypeIdentifier(Enum):
+    BOOLEAN = 'boolean'
+    DATETIME = 'datetime'
+    DURATION = 'duration'
+    EMAIL = 'email'
+    MONEY = 'money'
+    NUMBER = 'number'
+    TEXT = 'text'
+    URI = 'uri'
+    # These are default Postgres types that we don't have specific behavior for yet in the UI.
+    OTHER = 'other'
+    # These are types that we don't know anything about.
+    CUSTOM = 'custom'
 
 
 def _get_mapped_types(type_map):
@@ -33,7 +33,7 @@ def _get_mapped_types(type_map):
 def _get_other_types(type_map):
     mapped_types = _get_mapped_types(type_map)
     return {
-        'identifier': MATHESAR_OTHER,
+        'identifier': MathesarTypeIdentifier.OTHER.value,
         'name': 'Other',
         'sa_type_names': [pg_type.value for pg_type in PostgresType if pg_type.value not in mapped_types]
     }
@@ -41,11 +41,11 @@ def _get_other_types(type_map):
 
 def _get_type_map():
     type_map = [{
-        'identifier': MATHESAR_BOOLEAN,
+        'identifier': MathesarTypeIdentifier.BOOLEAN.value,
         'name': 'Boolean',
         'sa_type_names': [PostgresType.BOOLEAN.value]
     }, {
-        'identifier': MATHESAR_DATETIME,
+        'identifier': MathesarTypeIdentifier.DATETIME.value,
         'name': 'Date & Time',
         'sa_type_names': [
             PostgresType.DATE.value,
@@ -57,22 +57,22 @@ def _get_type_map():
             PostgresType.TIMESTAMP_WITHOUT_TIMESTAMP_ZONE.value
         ]
     }, {
-        'identifier': MATHESAR_DURATION,
+        'identifier': MathesarTypeIdentifier.DURATION.value,
         'name': 'Duration',
         'sa_type_names': [PostgresType.INTERVAL.value]
     }, {
-        'identifier': MATHESAR_EMAIL,
+        'identifier': MathesarTypeIdentifier.EMAIL.value,
         'name': 'Email',
         'sa_type_names': [get_full_mathesar_type_name(MathesarCustomType.EMAIL.value)]
     }, {
-        'identifier': MATHESAR_MONEY,
+        'identifier': MathesarTypeIdentifier.MONEY.value,
         'name': 'Money',
         'sa_type_names': [
             PostgresType.MONEY.value,
             get_full_mathesar_type_name(MathesarCustomType.MONEY.value)
         ]
     }, {
-        'identifier': MATHESAR_NUMBER,
+        'identifier': MathesarTypeIdentifier.NUMBER.value,
         'name': 'Number',
         'sa_type_names': [
             PostgresType.BIGINT.value,
@@ -85,7 +85,7 @@ def _get_type_map():
             PostgresType.SMALLINT.value
         ]
     }, {
-        'identifier': MATHESAR_TEXT,
+        'identifier': MathesarTypeIdentifier.TEXT.value,
         'name': 'Text',
         'sa_type_names': [
             PostgresType.CHAR.value,
@@ -95,7 +95,7 @@ def _get_type_map():
             PostgresType.TEXT.value,
         ]
     }, {
-        'identifier': MATHESAR_URI,
+        'identifier': MathesarTypeIdentifier.URI.value,
         'name': 'URL',
         'sa_type_names': [get_full_mathesar_type_name(MathesarCustomType.URI.value)]
     }]
@@ -106,7 +106,7 @@ def _get_type_map():
 def _get_custom_types(type_map, installed_types):
     mapped_types = _get_mapped_types(type_map)
     return {
-        'identifier': MATHESAR_CUSTOM,
+        'identifier': MathesarTypeIdentifier.CUSTOM.value,
         'name': 'Custom',
         'sa_type_names': [db_type for db_type in installed_types.keys() if db_type not in mapped_types]
     }
