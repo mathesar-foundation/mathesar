@@ -46,7 +46,7 @@ function getTableMap(tables: SchemaResponse['tables']): Schema['tables'] {
 }
 
 function setDBSchemaStore(
-  database: string,
+  database: Database['name'],
   schemas: SchemaResponse[],
 ): Writable<DBSchemaStoreData> {
   const schemaMap: DBSchemaStoreData['data'] = new Map();
@@ -72,8 +72,24 @@ function setDBSchemaStore(
   return store;
 }
 
+function updateSchemaInDBSchemaStore(
+  database: Database['name'],
+  schema: SchemaResponse,
+) {
+  const store = dbSchemaStoreMap.get(database);
+  if (store) {
+    store.update((value) => {
+      value.data?.set(schema.id, {
+        ...schema,
+        tables: getTableMap(schema.tables),
+      });
+      return value;
+    });
+  }
+}
+
 export async function refetchSchemasForDB(
-  database: string,
+  database: Database['name'],
 ): Promise<DBSchemaStoreData> {
   const store = dbSchemaStoreMap.get(database);
   if (!store) {
@@ -107,9 +123,29 @@ export async function refetchSchemasForDB(
   }
 }
 
+export async function refetchSchema(
+  database: Database['name'],
+  schemaId: Schema['id'],
+): Promise<SchemaResponse> {
+  const store = dbSchemaStoreMap.get(database);
+  if (!store) {
+    console.error(`DB Schemas store for db: ${database} not found.`);
+    return null;
+  }
+
+  try {
+    const schemaRequest = getAPI<SchemaResponse>(`/schemas/${schemaId}/`);
+    const response = await schemaRequest;
+    updateSchemaInDBSchemaStore(database, response);
+    return response;
+  } catch (err) {
+    return null;
+  }
+}
+
 let preload = true;
 
-export function getSchemasStoreForDB(database: string): Writable<DBSchemaStoreData> {
+export function getSchemasStoreForDB(database: Database['name']): Writable<DBSchemaStoreData> {
   let store = dbSchemaStoreMap.get(database);
   if (!store) {
     store = writable({

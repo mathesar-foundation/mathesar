@@ -5,6 +5,7 @@ import {
   FileImport,
 } from '@mathesar/stores/fileImports';
 import { replaceTab } from '@mathesar/stores/tabs';
+import { refetchSchema } from '@mathesar/stores/schemas';
 import {
   uploadFile,
   States,
@@ -303,6 +304,8 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
         });
         await importPromise;
       }
+
+      void refetchSchema(fileImportData.databaseName, fileImportData.schemaId);
 
       setInFileStore(fileImportStore, {
         importStatus: States.Done,
