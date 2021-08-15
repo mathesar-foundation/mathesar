@@ -549,7 +549,7 @@ def test_table_create_from_datafile(client, data_file, schema, table_name):
                     'Application SN', 'Title', 'Patent Expiration Date']
 
     check_create_table_response(
-        client, table_name, expt_name, data_file, schema, first_row, column_names
+        client, table_name, expt_name, data_file, schema, first_row, column_names, 1
     )
 
 
@@ -562,7 +562,7 @@ def test_table_create_from_paste(client, schema, paste_data_file, table_name):
                     'Application SN', 'Title', 'Patent Expiration Date']
 
     check_create_table_response(
-        client, table_name, expt_name, paste_data_file, schema, first_row, column_names
+        client, table_name, expt_name, paste_data_file, schema, first_row, column_names, 1
     )
 
 
@@ -575,18 +575,18 @@ def test_table_create_from_url(client, schema, url_data_file, table_name):
                     'application_sn', 'title', 'patent_expiration_date']
 
     check_create_table_response(
-        client, table_name, expt_name, url_data_file, schema, first_row, column_names
+        client, table_name, expt_name, url_data_file, schema, first_row, column_names, 1
     )
 
 
 @pytest.mark.parametrize('data_files', [None, []])
 @pytest.mark.parametrize('table_name', ['test_table_no_file', ''])
-def test_table_create_without_datafile(client, schema, data_files, table_name):
+def test_table_create_without_datafile(client, schema, data_files, table_name, num_primary_keys):
     num_tables = Table.objects.count()
     expt_name = _get_expected_name(table_name)
 
     response, response_table, table = _create_table(
-        client, data_files, table_name, schema
+        client, data_files, table_name, schema, num_primary_keys
     )
 
     assert response.status_code == 201
@@ -607,7 +607,7 @@ def test_table_create_name_taken(client, paste_data_file, schema, create_table, 
                     'Application SN', 'Title', 'Patent Expiration Date']
 
     check_create_table_response(
-        client, '', expt_name, paste_data_file, schema, first_row, column_names
+        client, '', expt_name, paste_data_file, schema, first_row, column_names, 1
     )
 
 
@@ -622,7 +622,7 @@ def test_table_create_base_name_taken(client, data_file, schema, create_table, s
                     'Application SN', 'Title', 'Patent Expiration Date']
 
     check_create_table_response(
-        client, '', expt_name, data_file, schema, first_row, column_names
+        client, '', expt_name, data_file, schema, first_row, column_names, 1
     )
 
 
@@ -637,7 +637,7 @@ def test_table_create_base_name_too_long(client, data_file, schema):
                     'Application SN', 'Title', 'Patent Expiration Date']
 
     check_create_table_response(
-        client, '', expt_name, data_file, schema, first_row, column_names
+        client, '', expt_name, data_file, schema, first_row, column_names, 1
     )
 
 
