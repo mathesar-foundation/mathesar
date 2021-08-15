@@ -37,20 +37,13 @@
       isChanged = true;
     }
 
-    if (isChanged) {
+    if (isChanged || !tabs) {
       ({ tabs, activeTab } = getTabsForSchema($currentDBName, $currentSchemaId));
+      // Sync tabs to url here!
     }
   }
 
   $: changeCurrentSchema(database, schemaId);
-
-  let activeTable: Set<unknown>;
-
-  function onActiveTabChange(_activeTab: MathesarTab) {
-    activeTable = new Set([_activeTab?.id]);
-  }
-
-  $: onActiveTabChange($activeTab);
 
   function getLink(entry: MathesarTab) {
     if (entry.isNew) {
@@ -76,7 +69,7 @@
 </svelte:head>
 
 {#if $currentSchema}
-  <LeftPane {getLink} {database} schema={$currentSchema}/>
+  <LeftPane {getLink} {database} schema={$currentSchema} activeTab={$activeTab}/>
 {/if}
 
 <section class="table-section">

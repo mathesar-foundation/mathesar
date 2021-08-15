@@ -2,45 +2,73 @@
   import { faTable } from '@fortawesome/free-solid-svg-icons';
   import {
     Icon,
+    Tree,
   } from '@mathesar-components';
   import {
     addTab,
   } from '@mathesar/stores/tabs';
   import type { MathesarTab } from '@mathesar/stores/tabs';
-  import type { Schema, SchemaEntry } from '@mathesar/App.d';
+  import type { Schema } from '@mathesar/App.d';
+  import type {
+    TreeItem,
+  } from '@mathesar-components/types';
 
   export let database: string;
   export let schema: Schema;
+  export let activeTab;
   export let getLink: (entry: MathesarTab) => string;
+  
+  let tree: TreeItem[] = [];
+  let activeTable: Set<unknown>;
+  const expandedItems = new Set(['table_header']);
 
-  function tableSelected(e: Event, table: SchemaEntry) {
-    e.preventDefault();
+  function generateTree(_schema: Schema) {
+    const tableHeader = {
+      id: 'table_header',
+      name: 'Tables',
+      tables: [],
+    };
+    _schema.tables?.forEach((value) => {
+      tableHeader.tables.push(value);
+    });
+    return [tableHeader];
+  }
+
+  $: tree = generateTree(schema);
+
+  function onActiveTabChange(_activeTab: MathesarTab) {
+    activeTable = new Set([_activeTab?.id]);
+  }
+
+  $: onActiveTabChange(activeTab);
+
+  function tableSelected(e: { detail: { node: Schema, originalEvent: Event, link?: string } }) {
+    const { node, originalEvent } = e.detail;
+    originalEvent.preventDefault();
 
     addTab(database, schema.id, {
-      id: table.id,
-      label: table.name,
+      id: node.id,
+      label: node.name,
     });
   }
 </script>
 
 <aside>
   <nav>
-    {#each [...schema.tables] as [id, table] (id)}
-      <li>
-        <a href={getLink(table)} on:click={(e) => tableSelected(e, table)}>
-          <Icon data={faTable}/>
-          <span>{table.name}</span>
-        </a>
-      </li>
-
-    {:else}
-      No tables found
-    {/each}
-<!-- 
-    <Tree data={[$currentSchema]} idKey="id" labelKey="name"
-          search={true} {getLink} expandedItems={new Set([$currentSchema.id])}
+    <Tree data={tree} idKey="id" labelKey="name" childKey="tables"
+          search={true} {getLink} {expandedItems}
           bind:selectedItems={activeTable} on:nodeSelected={tableSelected}
           let:entry>
-    </Tree> -->
+    <Icon data={faTable}/>
+    <span>{entry.name}</span>
+
+    <svelte:fragment slot="empty">
+      No tables found
+    </svelte:fragment>
+  </Tree>
   </nav>
 </aside>
+
+<style global lang="scss">
+  @import "LeftPane.scss";
+</style>
