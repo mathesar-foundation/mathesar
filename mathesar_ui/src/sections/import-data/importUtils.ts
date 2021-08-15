@@ -13,7 +13,7 @@ import {
   patchAPI,
   deleteAPI,
 } from '@mathesar/utils/api';
-import type { FileImportInfo, PreviewColumn } from '@mathesar/stores/fileImports';
+import type { FileImportInfo, PreviewColumn, FileImportWritableInfo } from '@mathesar/stores/fileImports';
 import type { UploadCompletionOpts, PaginatedResponse } from '@mathesar/utils/api';
 import type {
   FileUploadAddDetail,
@@ -97,68 +97,6 @@ export function getFileUploadInfo(
   return {};
 }
 
-async function finishImport(fileImportStore: FileImport): Promise<void> {
-  const fileImportData = get(fileImportStore);
-
-  if (fileImportData.previewId) {
-    const deletedColumns: PreviewColumn[] = [];
-    const columns: PreviewColumn[] = [];
-    fileImportData.previewColumns.forEach((column) => {
-      if (column.isSelected) {
-        if (column.type !== column.originalType
-            || column.name !== column.displayName) {
-          columns.push(column);
-        }
-      } else {
-        deletedColumns.push(column);
-      }
-    });
-
-    const deletePromises = deletedColumns.map((column) => deleteAPI(
-      `/tables/${fileImportData.previewId}/columns/${column.index}/`,
-    ));
-
-    await Promise.all(deletePromises);
-
-    const updatePromises = columns.map((column) => patchAPI(
-      `/tables/${fileImportData.previewId}/columns/${column.index}/`,
-      {
-        name: column.displayName,
-        type: column.type,
-      },
-    ));
-
-    await Promise.all(updatePromises);
-
-    const importPromise = patchAPI(`/tables/${fileImportData.previewId}/`, {
-      name: fileImportData.name,
-      id: fileImportData.previewId,
-    });
-    setInFileStore(fileImportStore, {
-      importStatus: States.Loading,
-      importPromise,
-      error: null,
-    });
-
-    try {
-      await importPromise;
-      setInFileStore(fileImportStore, {
-        importStatus: States.Done,
-      });
-      // TODO: Replace tab on success!
-      // replaceTab(fileImportData.database, fileImportData.id, {
-      //   id: fileImportData.previewId,
-      //   label: fileImportData.name,
-      // });
-    } catch (err: unknown) {
-      setInFileStore(fileImportStore, {
-        importStatus: States.Error,
-        error: (err as Error).stack,
-      });
-    }
-  }
-}
-
 async function deletePreviewTable(fileImportStore: FileImport): Promise<void> {
   const fileImportData = get(fileImportStore);
 
@@ -171,11 +109,7 @@ async function deletePreviewTable(fileImportStore: FileImport): Promise<void> {
       previewId: null,
     });
 
-    try {
-      await previewDeletePromise;
-    } catch (err: unknown) {
-      // Handle error!
-    }
+    await previewDeletePromise;
   }
 }
 
@@ -186,11 +120,7 @@ async function createPreviewTable(
 
   fileImportData.previewCreatePromise?.cancel();
 
-  if (
-    fileImportData.uploadStatus === States.Done
-    && typeof fileImportData.schemaId === 'number'
-    && fileImportData.dataFileId
-  ) {
+  if (fileImportData.dataFileId) {
     const previewCreatePromise = postAPI('/tables/', {
       name: fileImportData.previewName,
       schema: fileImportData.schemaId,
@@ -206,11 +136,16 @@ async function createPreviewTable(
     try {
       const res = await previewCreatePromise as { id: number, name: string };
 
-      setInFileStore(fileImportStore, {
+      const toUpdate: FileImportWritableInfo = {
         previewTableCreationStatus: States.Done,
         previewId: res.id,
         previewName: res.name,
-      });
+      };
+      if (!fileImportData.name?.trim()) {
+        toUpdate.name = res.name;
+      }
+
+      setInFileStore(fileImportStore, toUpdate);
 
       return res;
     } catch (err: unknown) {
@@ -218,12 +153,14 @@ async function createPreviewTable(
         previewTableCreationStatus: States.Error,
         error: (err as Error).stack,
       });
+      throw err;
     }
+  } else {
+    throw new Error('Unexpected error: Data file not found');
   }
-  return null;
 }
 
-async function fetchPreviewTableInfo(
+export async function fetchPreviewTableInfo(
   fileImportStore: FileImport,
 ): Promise<unknown> {
   const fileImportData = get(fileImportStore);
@@ -267,58 +204,17 @@ async function fetchPreviewTableInfo(
   return null;
 }
 
-async function loadPreviewTable(
-  fileImportStore: FileImport,
-): Promise<unknown> {
-  const fileImportData = get(fileImportStore);
-  let tableCreationResult;
-
-  if (fileImportData.previewTableCreationStatus === States.Done) {
-    tableCreationResult = {
-      id: fileImportData.previewId,
-      name: fileImportData.previewName,
-    };
-  } else {
-    tableCreationResult = await createPreviewTable(fileImportStore);
-  }
-
-  if (tableCreationResult) {
-    const columnInfo = await fetchPreviewTableInfo(fileImportStore);
-    return columnInfo;
-  }
-  return null;
-}
-
-export function shiftStage(fileImportStore: FileImport): void {
-  const fileImportData = get(fileImportStore);
-
-  switch (fileImportData.stage) {
-    case Stages.UPLOAD: {
-      setInFileStore(fileImportStore, {
-        stage: Stages.PREVIEW,
-      });
-      void loadPreviewTable(fileImportStore);
-      break;
-    }
-    case Stages.PREVIEW: {
-      void finishImport(fileImportStore);
-      break;
-    }
-    default:
-      break;
-  }
-}
-
 export async function updateDataFileHeader(
   fileImportStore: FileImport,
   headerValue: boolean,
 ): Promise<void> {
-  // Update header file
-  // Delete and recreate old table
-  // (It would be better if we had an option to drop and re-create with same table id)
-
   const fileImportData = get(fileImportStore);
   try {
+    setInFileStore(fileImportStore, {
+      previewStatus: States.Loading,
+      error: null,
+    });
+
     await patchAPI(`/data_files/${fileImportData.dataFileId}/`, {
       header: headerValue,
     });
@@ -327,10 +223,105 @@ export async function updateDataFileHeader(
     await createPreviewTable(fileImportStore);
     await fetchPreviewTableInfo(fileImportStore);
   } catch (err) {
-    //
+    setInFileStore(fileImportStore, {
+      previewStatus: States.Error,
+      error: (err as Error).stack,
+    });
   }
 }
 
+// When next is clicked after upload
+export async function loadPreview(
+  fileImportStore: FileImport,
+): Promise<{ id: number, name: string }> {
+  const fileImportData = get(fileImportStore);
+  let tableCreationResult: { id: number, name: string } = null;
+
+  if (fileImportData.previewTableCreationStatus === States.Done) {
+    tableCreationResult = {
+      id: fileImportData.previewId,
+      name: fileImportData.name,
+    };
+  } else {
+    tableCreationResult = await createPreviewTable(fileImportStore);
+  }
+
+  setInFileStore(fileImportStore, {
+    stage: Stages.PREVIEW,
+  });
+
+  return tableCreationResult;
+}
+
+// When finish is clicked after preview
+export async function finishImport(fileImportStore: FileImport): Promise<void> {
+  const fileImportData = get(fileImportStore);
+
+  if (fileImportData.previewId) {
+    const deletedColumns: PreviewColumn[] = [];
+    const columns: PreviewColumn[] = [];
+    fileImportData.previewColumns.forEach((column) => {
+      if (column.isSelected) {
+        if (column.type !== column.originalType
+            || column.name !== column.displayName) {
+          columns.push(column);
+        }
+      } else {
+        deletedColumns.push(column);
+      }
+    });
+
+    setInFileStore(fileImportStore, {
+      importStatus: States.Loading,
+      error: null,
+    });
+
+    try {
+      const deletePromises = deletedColumns.map((column) => deleteAPI(
+        `/tables/${fileImportData.previewId}/columns/${column.index}/`,
+      ));
+
+      await Promise.all(deletePromises);
+
+      const updatePromises = columns.map((column) => patchAPI(
+        `/tables/${fileImportData.previewId}/columns/${column.index}/`,
+        {
+          name: column.displayName,
+          type: column.type,
+        },
+      ));
+
+      await Promise.all(updatePromises);
+
+      if (fileImportData.name !== fileImportData.previewName) {
+        const importPromise = patchAPI(`/tables/${fileImportData.previewId}/`, {
+          name: fileImportData.name,
+        });
+        setInFileStore(fileImportStore, {
+          importPromise,
+          previewName: fileImportData.name,
+        });
+        await importPromise;
+      }
+
+      setInFileStore(fileImportStore, {
+        importStatus: States.Done,
+      });
+
+      replaceTab(fileImportData.databaseName, fileImportData.schemaId, fileImportData.id, {
+        id: fileImportData.previewId,
+        label: fileImportData.name,
+      });
+    } catch (err: unknown) {
+      setInFileStore(fileImportStore, {
+        importStatus: States.Error,
+        error: (err as Error).stack,
+      });
+    }
+  }
+}
+
+// When errors are manually closed
 export function clearErrors(fileImportStore: FileImport): void {
   setInFileStore(fileImportStore, {
     error: null,

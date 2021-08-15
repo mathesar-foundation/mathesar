@@ -1,6 +1,12 @@
 <script lang="ts">
   import { get } from 'svelte/store';
-  import { Checkbox } from '@mathesar-components';
+  import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+  import {
+    TextInput,
+    Checkbox,
+    Button,
+    Icon,
+  } from '@mathesar-components';
   import type { FileImport } from '@mathesar/stores/fileImports';
   import { States } from '@mathesar/utils/api';
 
@@ -9,9 +15,12 @@
   
   import {
     updateDataFileHeader,
-  } from '../importFileUtils';
+    finishImport,
+    fetchPreviewTableInfo,
+  } from '../importUtils';
 
   export let fileImportStore: FileImport;
+  void fetchPreviewTableInfo(fileImportStore);
 
   function typeChanged(e: CustomEvent) {
     const { previewColumns } = get(fileImportStore);
@@ -47,9 +56,15 @@
   {/if}
 </div>
 
-<Checkbox bind:checked={$fileImportStore.firstRowHeader}
-          label="Use first row as header"
-          on:change={headerChanged}/>
+<div class="table-config-options">
+  <div class="name">
+    Table name: <TextInput bind:value={$fileImportStore.name}/>
+  </div>
+  
+  <Checkbox bind:checked={$fileImportStore.firstRowHeader}
+            label="Use first row as header"
+            on:change={headerChanged}/>
+</div>
 
 {#if $fileImportStore.previewColumns?.length > 0}
   <div class="preview-table">
@@ -71,6 +86,21 @@
     </table>
   </div>
 {/if}
+
+<div class="actions">
+  <Button appearance="primary"
+          disabled={
+            $fileImportStore.previewStatus !== States.Done
+            || $fileImportStore.importStatus === States.Loading
+          }
+          on:click={() => finishImport(fileImportStore)}>
+      Finish import
+
+    {#if $fileImportStore.importStatus === States.Loading}
+      <Icon data={faSpinner} spin={true}/>
+    {/if}
+  </Button>
+</div>
 
 <style global lang="scss">
   @import "Preview.scss";

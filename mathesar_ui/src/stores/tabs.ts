@@ -5,7 +5,7 @@ import {
 } from 'svelte/store';
 import type { Tab } from '@mathesar-components/types';
 import {
-  getAllImportDetails,
+  getAllImportDetailsForSchema,
   removeImport,
 } from '@mathesar/stores/fileImports';
 import { clearTable } from '@mathesar/stores/tableData';
@@ -31,7 +31,6 @@ export function getTabsForSchema(db: string, schemaId: number): TabList {
     const tables = [] as MathesarTab[];
     const schemas = get(getSchemasStoreForDB(db));
 
-    // Only first time?
     URLQueryHandler.getAllTableConfigs(db, schemaId).forEach(
       (entry) => {
         const schemaTable = schemas?.data.get(schemaId)?.tables.get(entry.id);
@@ -46,7 +45,7 @@ export function getTabsForSchema(db: string, schemaId: number): TabList {
       },
     );
 
-    const imports = getAllImportDetails(schemaId) as unknown as MathesarTab[];
+    const imports = getAllImportDetailsForSchema(schemaId) as unknown as MathesarTab[];
 
     const tabs = [...imports, ...tables];
     const activeTab = tables.find(

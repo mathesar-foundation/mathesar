@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
   import {
     faDragon,
     faUser,
@@ -7,6 +8,9 @@
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { newImport } from '@mathesar/stores/fileImports';
+  import {
+    addTab,
+  } from '@mathesar/stores/tabs';
 
   import {
     Icon,
@@ -16,7 +20,14 @@
   import SchemaSelector from './schema-selector/SchemaSelector.svelte';
 
   function createNewTable() {
-    //
+    if ($currentDBName && $currentSchemaId) {
+      const fileData = get(newImport($currentDBName, $currentSchemaId));
+      addTab($currentDBName, $currentSchemaId, {
+        id: fileData.id,
+        label: fileData.name || 'New table',
+        isNew: true,
+      });
+    }
   }
 </script>
 

@@ -15,7 +15,7 @@
   import type { MathesarTab } from '@mathesar/stores/tabs';
   import type { Writable } from 'svelte/store';
 
-  import NewTable from './new-table/NewTable.svelte';
+  import ImportData from './import-data/ImportData.svelte';
   import TableView from './table-view/TableView.svelte';
   import EmptyState from './empty-state/EmptyState.svelte';
   import LeftPane from './left-pane/LeftPane.svelte';
@@ -84,7 +84,7 @@
 
       {#if $activeTab}
         {#if $activeTab.isNew}
-          <NewTable schemaId={$currentSchemaId} id={$activeTab.id}/>
+          <ImportData {database} schemaId={$currentSchemaId} id={$activeTab.id}/>
         {:else}
           <TableView {database} id={$activeTab.id}/>
         {/if}

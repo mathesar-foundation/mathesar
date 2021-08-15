@@ -7,12 +7,11 @@ import { States } from '@mathesar/utils/api';
 import type { UploadCompletionOpts, PaginatedResponse } from '@mathesar/utils/api';
 import type { FileUpload } from '@mathesar-components/types';
 import type { CancellablePromise } from '@mathesar/components';
-import type { Schema } from '@mathesar/App.d';
+import type { Database, Schema } from '@mathesar/App.d';
 
 export const Stages = {
   UPLOAD: 1,
   PREVIEW: 2,
-  IMPORT: 3,
 };
 
 export interface PreviewColumn {
@@ -29,14 +28,16 @@ export interface PreviewColumn {
 
 export type PreviewRow = Record<string, string>;
 
-interface FileImportWritableInfo {
+export interface FileImportWritableInfo {
   stage?: number,
+
   // Upload stage
   uploads?: FileUpload[],
   uploadStatus?: States,
   uploadPromise?: CancellablePromise<unknown>,
   uploadProgress?: UploadCompletionOpts,
   dataFileId?: number,
+  dataFileName?: string,
   firstRowHeader?: boolean,
 
   // Preview table create stage
@@ -61,17 +62,34 @@ interface FileImportWritableInfo {
 
 export interface FileImportInfo extends FileImportWritableInfo {
   id: string,
-  schemaId: number,
+  schemaId: Schema['id'],
+  databaseName: Database['name']
+}
+
+export interface FileImportStatusInfo {
+  id: FileImportInfo['id'],
+  databaseName: string,
+  schemaId: Schema['id'],
+  name: FileImportInfo['name'],
+  status: States
 }
 
 export type FileImport = Writable<FileImportInfo>;
+
+type FileImportsForSchema = Map<string, FileImport>;
+type FileImportStatusMap = Map<FileImportStatusInfo['id'], FileImportStatusInfo>;
+
 let fileId = 0;
 
 // Storage map
-type FileImportsForDB = Map<string, FileImport>;
-const schemaImportMap: Map<number, FileImportsForDB> = new Map();
+const schemaImportMap: Map<number, FileImportsForSchema> = new Map();
 
-export function getAllImportDetails(schemaId: Schema['id']): FileImportInfo[] {
+// Import status store - for top indicator
+export const importStatuses: Writable<FileImportStatusMap> = writable(
+  new Map() as FileImportStatusMap,
+);
+
+export function getAllImportDetailsForSchema(schemaId: Schema['id']): FileImportInfo[] {
   const imports = schemaImportMap.get(schemaId);
   if (imports) {
     return Array.from(imports.values()).map((entry: FileImport) => get(entry));
@@ -79,7 +97,7 @@ export function getAllImportDetails(schemaId: Schema['id']): FileImportInfo[] {
   return [];
 }
 
-export function getSchemaImportStore(schemaId: Schema['id']): FileImportsForDB {
+export function getSchemaImportStore(schemaId: Schema['id']): FileImportsForSchema {
   let imports = schemaImportMap.get(schemaId);
   if (!imports) {
     imports = new Map();
@@ -88,7 +106,7 @@ export function getSchemaImportStore(schemaId: Schema['id']): FileImportsForDB {
   return imports;
 }
 
-export function getFileStore(schemaId: Schema['id'], id: string): FileImport {
+export function getFileStore(databaseName: Database['name'], schemaId: Schema['id'], id: string): FileImport {
   const imports = getSchemaImportStore(schemaId);
 
   let fileImport = imports.get(id);
@@ -96,7 +114,7 @@ export function getFileStore(schemaId: Schema['id'], id: string): FileImport {
     const fileImportInitialInfo: FileImportInfo = {
       id,
       schemaId,
-      name: 'Untitled',
+      databaseName,
       uploadStatus: States.Idle,
       stage: Stages.UPLOAD,
       firstRowHeader: true,
@@ -105,19 +123,6 @@ export function getFileStore(schemaId: Schema['id'], id: string): FileImport {
     imports.set(id, fileImport);
   }
   return fileImport;
-}
-
-export function getFileStoreData(schemaId: Schema['id'], id: string): FileImportInfo {
-  return get(getFileStore(schemaId, id));
-}
-
-export function setFileStore(schemaId: Schema['id'], id: string, data: FileImportWritableInfo): FileImportInfo {
-  const store = getFileStore(schemaId, id);
-  store.update((existingData) => ({
-    ...existingData,
-    ...data,
-  }));
-  return get(store);
 }
 
 export function setInFileStore(
@@ -131,9 +136,20 @@ export function setInFileStore(
   return get(fileImportStore);
 }
 
-export function newImport(schemaId: Schema['id']): FileImport {
+export function newImport(databaseName: Database['name'], schemaId: Schema['id']): FileImport {
   const id = `_new_${fileId}`;
-  const fileImport = getFileStore(schemaId, id);
+  const fileImport = getFileStore(databaseName, schemaId, id);
+  const fileImportData = get(fileImport);
+  importStatuses.update((existingMap) => {
+    existingMap.set(id, {
+      id,
+      schemaId,
+      name: fileImportData.name,
+      status: States.Loading,
+      databaseName,
+    });
+    return existingMap;
+  });
   fileId += 1;
   return fileImport;
 }
