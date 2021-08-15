@@ -166,6 +166,14 @@ export function getSchemasStoreForDB(database: Database['name']): Writable<DBSch
   return store;
 }
 
+export function getSchemaInfo(database: Database['name'], schemaId: Schema['id']): Schema {
+  const store = dbSchemaStoreMap.get(database);
+  if (!store) {
+    return null;
+  }
+  return get(store).data.get(schemaId);
+}
+
 export const schemas: Readable<DBSchemaStoreData> = derived(
   currentDBName,
   ($currentDBName, set) => {

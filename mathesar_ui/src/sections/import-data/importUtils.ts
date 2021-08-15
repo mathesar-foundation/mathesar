@@ -1,8 +1,10 @@
 import { get } from 'svelte/store';
 import {
   setInFileStore,
+  setImportStatus,
   Stages,
   FileImport,
+  removeImportFromView,
 } from '@mathesar/stores/fileImports';
 import { replaceTab } from '@mathesar/stores/tabs';
 import { refetchSchema } from '@mathesar/stores/schemas';
@@ -69,6 +71,11 @@ export function uploadNewFile(
     uploadStatus: States.Loading,
     uploadPromise,
     error: null,
+  });
+
+  setImportStatus(get(fileImportStore).id, {
+    status: States.Loading,
+    dataFileName: file.name,
   });
 
   uploadPromise.then((res: { id: number }) => {
@@ -310,6 +317,10 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
       setInFileStore(fileImportStore, {
         importStatus: States.Done,
       });
+      setImportStatus(fileImportData.id, {
+        status: States.Done,
+      });
+      removeImportFromView(fileImportData.schemaId, fileImportData.id);
 
       replaceTab(fileImportData.databaseName, fileImportData.schemaId, fileImportData.id, {
         id: fileImportData.previewId,

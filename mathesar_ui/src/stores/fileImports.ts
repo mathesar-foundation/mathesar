@@ -37,7 +37,6 @@ export interface FileImportWritableInfo {
   uploadPromise?: CancellablePromise<unknown>,
   uploadProgress?: UploadCompletionOpts,
   dataFileId?: number,
-  dataFileName?: string,
   firstRowHeader?: boolean,
 
   // Preview table create stage
@@ -67,18 +66,23 @@ export interface FileImportInfo extends FileImportWritableInfo {
   databaseName: Database['name']
 }
 
-export interface FileImportStatusInfo {
+export interface FileImportStatusWritableInfo {
+  name?: FileImportInfo['name'],
+  stage?: number,
+  dataFileName?: string,
+  status?: States
+}
+
+export interface FileImportStatusInfo extends FileImportStatusWritableInfo {
   id: FileImportInfo['id'],
   databaseName: string,
   schemaId: Schema['id'],
-  name: FileImportInfo['name'],
-  status: States
 }
 
 export type FileImport = Writable<FileImportInfo>;
+export type FileImportStatusMap = Map<FileImportStatusInfo['id'], FileImportStatusInfo>;
 
 type FileImportsForSchema = Map<string, FileImport>;
-type FileImportStatusMap = Map<FileImportStatusInfo['id'], FileImportStatusInfo>;
 
 let fileId = 0;
 
@@ -146,23 +150,46 @@ export function newImport(databaseName: Database['name'], schemaId: Schema['id']
       id,
       schemaId,
       name: fileImportData.name,
-      status: States.Loading,
+      status: States.Idle,
       databaseName,
     });
-    return existingMap;
+    return new Map(existingMap);
   });
   fileId += 1;
   return fileImport;
 }
 
-export function removeImport(schemaId: Schema['id'], id: string): void {
+export function removeImportFromView(schemaId: Schema['id'], id: string): void {
   const imports = schemaImportMap.get(schemaId);
-  if (imports) {
-    const fileImport = imports.get(id);
+  const fileImport = imports?.get(id);
+  if (fileImport) {
     const fileImportData = get(fileImport);
-    fileImportData.importPromise?.cancel();
-    fileImportData.uploadPromise?.cancel();
+    let isRemovable = fileImportData.stage === Stages.UPLOAD
+      && fileImportData.uploadStatus !== States.Done;
+    isRemovable = isRemovable || (fileImportData.stage === Stages.PREVIEW
+      && fileImportData.importStatus === States.Done);
 
-    imports.delete(id);
+    if (isRemovable) {
+      fileImportData.importPromise?.cancel();
+      fileImportData.uploadPromise?.cancel();
+      imports.delete(id);
+      importStatuses.update((existingMap) => {
+        existingMap.delete(id);
+        return new Map(existingMap);
+      });
+    }
+  }
+}
+
+export function setImportStatus(id: string, data: FileImportStatusWritableInfo): void {
+  const importmap = get(importStatuses);
+  if (importmap.get(id)) {
+    importStatuses.update((existingMap) => {
+      existingMap.set(id, {
+        ...existingMap.get(id),
+        ...data,
+      });
+      return new Map(existingMap);
+    });
   }
 }

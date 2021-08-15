@@ -6,7 +6,7 @@ import {
 import type { Tab } from '@mathesar-components/types';
 import {
   getAllImportDetailsForSchema,
-  removeImport,
+  removeImportFromView,
 } from '@mathesar/stores/fileImports';
 import { clearTable } from '@mathesar/stores/tableData';
 import { getSchemasStoreForDB } from '@mathesar/stores/schemas';
@@ -31,7 +31,7 @@ export function getTabsForSchema(db: string, schemaId: number): TabList {
     const tables = [] as MathesarTab[];
     const schemas = get(getSchemasStoreForDB(db));
 
-    URLQueryHandler.getAllTableConfigs(db, schemaId).forEach(
+    URLQueryHandler.getAllTableConfigs(db).forEach(
       (entry) => {
         const schemaTable = schemas?.data.get(schemaId)?.tables.get(entry.id);
         if (schemaTable) {
@@ -127,7 +127,7 @@ export function removeTab(
     }
 
     if (removedTab.isNew) {
-      removeImport(schemaId, removedTab.id as string);
+      removeImportFromView(schemaId, removedTab.id as string);
     } else {
       URLQueryHandler.removeTable(db, removedTab.id as number, newActiveTab?.id as number);
       clearTable(db, removedTab.id as number);

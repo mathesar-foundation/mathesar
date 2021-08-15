@@ -7,7 +7,7 @@
 
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId } from '@mathesar/stores/schemas';
-  import { newImport } from '@mathesar/stores/fileImports';
+  import { newImport, importStatuses } from '@mathesar/stores/fileImports';
   import {
     addTab,
   } from '@mathesar/stores/tabs';
@@ -18,6 +18,7 @@
   } from '@mathesar-components';
 
   import SchemaSelector from './schema-selector/SchemaSelector.svelte';
+  import ImportIndicator from './import-indicator/ImportIndicator.svelte';
 
   function createNewTable() {
     if ($currentDBName && $currentSchemaId) {
@@ -43,6 +44,8 @@
   {/if}
 
   <div class="right-options">
+    <ImportIndicator importStatusMap={$importStatuses}/>
+
     {#if $currentSchemaId}
       <div class="quick-links">
         <Button on:click={createNewTable}>
