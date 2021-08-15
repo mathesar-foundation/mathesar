@@ -47,6 +47,7 @@ export interface FileImportWritableInfo {
 
   // Preview stage
   previewStatus?: States,
+  previewRowsLoadStatus?: States,
   previewColumnPromise?: CancellablePromise<PaginatedResponse<PreviewColumn>>,
   previewId?: number,
   previewName?: string,

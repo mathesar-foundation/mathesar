@@ -7,6 +7,7 @@
     Button,
     Icon,
   } from '@mathesar-components';
+  import { setInFileStore } from '@mathesar/stores/fileImports';
   import type { FileImport } from '@mathesar/stores/fileImports';
   import { States } from '@mathesar/utils/api';
 
@@ -28,10 +29,9 @@
     if (changedColumn) {
       changedColumn.type = e.detail.type as string;
 
-      fileImportStore.update((data) => ({
-        ...data,
+      setInFileStore(fileImportStore, {
         previewColumns: [...previewColumns],
-      }));
+      });
     }
   }
 
@@ -66,8 +66,17 @@
             on:change={headerChanged}/>
 </div>
 
+<div class="preview-table-header">
+  Preview
+
+  {#if $fileImportStore.previewStatus === States.Loading
+      || $fileImportStore.previewRowsLoadStatus === States.Loading}
+    <Icon data={faSpinner} spin={true}/>
+  {/if}
+</div>
+
 {#if $fileImportStore.previewColumns?.length > 0}
-  <div class="preview-table">
+  <div class="preview-table" class:disabled={$fileImportStore.previewStatus === States.Loading}>
     <table>
       <thead>
         <tr>
@@ -78,9 +87,7 @@
       </thead>
       <tbody>
         {#key $fileImportStore.previewColumns}
-          <PreviewRows tableId={$fileImportStore.previewId}
-            columns={$fileImportStore.previewColumns}
-            bind:rows={$fileImportStore.previewRows}/>
+          <PreviewRows {fileImportStore} />
         {/key}
       </tbody>
     </table>
@@ -92,6 +99,8 @@
           disabled={
             $fileImportStore.previewStatus !== States.Done
             || $fileImportStore.importStatus === States.Loading
+            || $fileImportStore.previewRowsLoadStatus === States.Loading
+            || $fileImportStore.previewRowsLoadStatus === States.Error
           }
           on:click={() => finishImport(fileImportStore)}>
       Finish import

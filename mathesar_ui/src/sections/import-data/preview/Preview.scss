@@ -11,13 +11,31 @@
   }
 }
 
+.preview-table-header {
+  font-weight: 500;
+  margin-top: 20px;
+  font-size: 1.2rem;
+  height: 20px;
+  display: flex;
+  align-items: center;
+
+  svg {
+    margin-left: 6px;
+  }
+}
+
 .preview-table {
   overflow: auto;
   height: 400px;
   position: relative;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
-  margin: 20px 0px;
+  margin: 10px 0px 20px;
+
+  &.disabled {
+    background: #efefef;
+    pointer-events: none;
+  }
 
   table {
     border-collapse: collapse;

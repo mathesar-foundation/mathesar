@@ -1,39 +1,48 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
   import { onMount } from 'svelte';
   import { postAPI, States } from '@mathesar/utils/api';
-  import type { PreviewColumn, PreviewRow } from '@mathesar/stores/fileImports';
+  import {
+    setInFileStore,
+  } from '@mathesar/stores/fileImports';
+  import type {
+    FileImport,
+    PreviewRow,
+  } from '@mathesar/stores/fileImports';
   import type { CancellablePromise } from '@mathesar/components';
 
   interface Response {
     records: PreviewRow[]
   }
 
-  export let tableId: number;
-  export let columns: PreviewColumn[];
-  export let rows: PreviewRow[] = [];
-
-  let state = States.Idle;
-  let error;
+  export let fileImportStore: FileImport;
   let previewPromise: CancellablePromise<Response>;
 
   async function getRows() {
     previewPromise?.cancel();
     try {
-      state = States.Loading;
-      const columnInfo = columns.map((column) => ({
+      const fileImportData = get(fileImportStore);
+      const columnInfo = fileImportData.previewColumns.map((column) => ({
         name: column.name,
         type: column.type,
       }));
-      previewPromise = postAPI<Response>(`/tables/${tableId}/previews/`, {
+      setInFileStore(fileImportStore, {
+        previewRowsLoadStatus: States.Loading,
+      });
+      previewPromise = postAPI<Response>(`/tables/${fileImportData.previewId}/previews/`, {
         columns: columnInfo,
       });
       const result = await previewPromise;
-      rows = result.records || [];
-      state = States.Done;
+      setInFileStore(fileImportStore, {
+        previewRowsLoadStatus: States.Done,
+        previewRows: result.records || [],
+      });
     } catch (err) {
-      state = States.Error;
-      error = (err as Error).message;
-      rows = [];
+      setInFileStore(fileImportStore, {
+        previewRowsLoadStatus: States.Error,
+        error: (err as Error).message,
+        previewRows: [],
+      });
     }
   }
 
@@ -46,17 +55,9 @@
   });
 </script>
 
-{#if state === States.Loading}
-  Fetching rows
-{/if}
-
-{#if state === States.Error}
-  {error}
-{/if}
-
-{#each rows as row (row)}
+{#each ($fileImportStore.previewRows || []) as row (row)}
   <tr>
-    {#each columns as column (column.name)}
+    {#each ($fileImportStore.previewColumns || []) as column (column.name)}
       <td>
         {row[column.name]}
       </td>
