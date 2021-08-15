@@ -1,3 +1,4 @@
+from db.records import NotUniquePrimaryKey
 import json
 import pytest
 from unittest.mock import patch
@@ -96,11 +97,11 @@ def check_table_filter_response(response, status_code=None, count=None):
         assert len(response_data['results']) == count
 
 
-def _create_table(client, data_files, table_name, schema):
+def _create_table(client, data_files, table_name, schema, num_primary_keys):
     body = {
         'name': table_name,
         'schema': schema.id,
-        'num_primary_keys': 1
+        'num_primary_keys': num_primary_keys
     }
     if data_files is not None:
         body['data_files'] = [df.id for df in data_files]
@@ -126,11 +127,11 @@ def _get_expected_name(table_name, data_file=None):
 
 
 def check_create_table_response(
-    client, name, expt_name, data_file, schema, first_row, column_names
+    client, name, expt_name, data_file, schema, first_row, column_names, num_primary_keys
 ):
     num_tables = Table.objects.count()
 
-    response, response_table, table = _create_table(client, [data_file], name, schema)
+    response, response_table, table = _create_table(client, [data_file], name, schema, num_primary_keys)
 
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1
@@ -884,3 +885,75 @@ def test_table_viewset_checks_cache(client):
     with patch.object(reflection, 'reflect_tables_from_schema') as mock_reflect:
         client.get('/api/v0/tables/')
     mock_reflect.assert_called()
+
+
+def test_table_retrieve_no_primary_key(create_table, client):
+    table_name = 'NASA Table Retrieve'
+    new_table_name = 'NASA Table Retrieve New'
+    table = create_table(table_name)
+
+    body = {'name': new_table_name, 'num_primary_keys': 0}
+    try:
+        client.get(f'/api/v0/tables/{table.id}/', body)
+    except NotUniquePrimaryKey as e:
+        assert e
+
+
+def test_table_delete_no_primary_key(create_table, client):
+    table_name = 'NASA Table Delete'
+    new_table_name = 'NASA Table Delete New'
+    table = create_table(table_name)
+
+    body = {'name': new_table_name, 'num_primary_keys': 0}
+    try:
+        client.delete(f'/api/v0/tables/{table.id}/', body)
+    except NotUniquePrimaryKey as e:
+        assert e
+
+
+def test_table_partial_update_no_primary_key(create_table, client):
+    table_name = 'NASA Table Partial Update'
+    new_table_name = 'NASA Table Partial Update New'
+    table = create_table(table_name)
+
+    body = {'name': new_table_name, 'num_primary_keys': 0}
+    try:
+        client.patch(f'/api/v0/tables/{table.id}/', body)
+    except NotUniquePrimaryKey as e:
+        assert e
+
+
+def test_table_retrieve_multiple_primary_keys(create_table, client):
+    table_name = 'NASA Table Retrieve'
+    new_table_name = 'NASA Table Retrieve New'
+    table = create_table(table_name)
+
+    body = {'name': new_table_name, 'num_primary_keys': 2}
+    try:
+        client.get(f'/api/v0/tables/{table.id}/', body)
+    except NotUniquePrimaryKey as e:
+        assert e
+
+
+def test_table_delete_multiple_primary_keys(create_table, client):
+    table_name = 'NASA Table Delete'
+    new_table_name = 'NASA Table Delete New'
+    table = create_table(table_name)
+
+    body = {'name': new_table_name, 'num_primary_keys': 2}
+    try:
+        client.delete(f'/api/v0/tables/{table.id}/', body)
+    except NotUniquePrimaryKey as e:
+        assert e
+
+
+def test_table_partial_update_multiple_primary_keys(create_table, client):
+    table_name = 'NASA Table Partial Update'
+    new_table_name = 'NASA Table Partial Update New'
+    table = create_table(table_name)
+
+    body = {'name': new_table_name, 'num_primary_keys': 2}
+    try:
+        client.patch(f'/api/v0/tables/{table.id}/', body)
+    except NotUniquePrimaryKey as e:
+        assert e
