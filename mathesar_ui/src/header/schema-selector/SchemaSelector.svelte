@@ -7,7 +7,6 @@
   import { get } from 'svelte/store';
   import { databases, currentDBName } from '@mathesar/stores/databases';
   import {
-    currentSchemaId,
     currentSchema,
     getSchemasStoreForDB,
   } from '@mathesar/stores/schemas';
@@ -47,8 +46,7 @@
     interalSelectedDB = db.name;
   }
 
-  function selectSchema(schema: Schema) {
-    currentSchemaId.set(schema.id);
+  function closeDropdown() {
     isOpen = false;
   }
 </script>
@@ -94,7 +92,7 @@
           {#each displayedSchemas as schema (schema.id)}
             <li class="item">
               <a href="/{interalSelectedDB}/{schema.id}/"
-                  on:click={() => selectSchema(schema)}>
+                  on:click={closeDropdown}>
                 <Icon class="schema" data={faProjectDiagram} />
                 {schema.name}
               </a>
@@ -106,7 +104,7 @@
         </ul>
         <div class="item">
           <a href="/{interalSelectedDB}/schemas/"
-              on:click={() => selectSchema(null)}>
+              on:click={closeDropdown}>
             <Icon class="manage" data={faCogs}/>
             Manage schemas
           </a>
