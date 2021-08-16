@@ -667,6 +667,30 @@ def test_table_partial_update(create_table, client):
     assert table.name == new_table_name
 
 
+def test_table_partial_update_import_verified(create_table, client):
+    table_name = 'NASA Table Import Verify'
+    table = create_table(table_name)
+
+    body = {'import_verified': True}
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+
+    response_table = response.json()
+    assert response.status_code == 200
+    assert response_table['import_verified'] is True
+
+
+def test_table_partial_update_schema(create_table, client):
+    table_name = 'NASA Table Schema PATCH'
+    table = create_table(table_name)
+
+    body = {'schema': table.schema.id}
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+
+    response_error = response.json()
+    assert response.status_code == 400
+    assert response_error['schema'] == 'Updating schema for tables is not supported.'
+
+
 def test_table_delete(create_table, client):
     table_name = 'NASA Table Delete'
     table = create_table(table_name)
