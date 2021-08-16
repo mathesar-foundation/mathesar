@@ -4,7 +4,7 @@ Mathesar data types are shown in the UI.
 """
 from enum import Enum
 
-from db.types.base import PostgresType, MathesarCustomType, get_installed_types, get_full_mathesar_type_name
+from db.types.base import PostgresType, MathesarCustomType, get_installed_types, get_qualified_name
 
 
 class MathesarTypeIdentifier(Enum):
@@ -63,13 +63,13 @@ def _get_type_map():
     }, {
         'identifier': MathesarTypeIdentifier.EMAIL.value,
         'name': 'Email',
-        'sa_type_names': [get_full_mathesar_type_name(MathesarCustomType.EMAIL.value)]
+        'sa_type_names': [get_qualified_name(MathesarCustomType.EMAIL.value)]
     }, {
         'identifier': MathesarTypeIdentifier.MONEY.value,
         'name': 'Money',
         'sa_type_names': [
             PostgresType.MONEY.value,
-            get_full_mathesar_type_name(MathesarCustomType.MONEY.value)
+            get_qualified_name(MathesarCustomType.MONEY.value)
         ]
     }, {
         'identifier': MathesarTypeIdentifier.NUMBER.value,
@@ -97,7 +97,7 @@ def _get_type_map():
     }, {
         'identifier': MathesarTypeIdentifier.URI.value,
         'name': 'URL',
-        'sa_type_names': [get_full_mathesar_type_name(MathesarCustomType.URI.value)]
+        'sa_type_names': [get_qualified_name(MathesarCustomType.URI.value)]
     }]
     type_map.append(_get_other_types(type_map))
     return type_map

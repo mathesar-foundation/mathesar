@@ -9,7 +9,7 @@ from sqlalchemy.exc import DataError
 from db import types
 from db.tests.types import fixtures
 from db.types import alteration
-from db.types.base import PostgresType, MathesarCustomType, get_full_mathesar_type_name
+from db.types.base import PostgresType, MathesarCustomType, get_qualified_name
 
 
 # We need to set these variables when the file loads, or pytest can't
@@ -24,7 +24,7 @@ BIGINT = PostgresType.BIGINT.value.upper()
 BOOLEAN = PostgresType.BOOLEAN.value.upper()
 DECIMAL = PostgresType.DECIMAL.value.upper()
 DOUBLE = PostgresType.DOUBLE_PRECISION.value.upper()
-EMAIL = get_full_mathesar_type_name(MathesarCustomType.EMAIL.value).upper()
+EMAIL = get_qualified_name(MathesarCustomType.EMAIL.value).upper()
 FLOAT = PostgresType.FLOAT.value.upper()
 INTEGER = PostgresType.INTEGER.value.upper()
 INTERVAL = PostgresType.INTERVAL.value.upper()
@@ -140,7 +140,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         }
     },
     EMAIL: {
-        ISCHEMA_NAME: get_full_mathesar_type_name(MathesarCustomType.EMAIL.value),
+        ISCHEMA_NAME: get_qualified_name(MathesarCustomType.EMAIL.value),
         SUPPORTED_MAP_NAME: MathesarCustomType.EMAIL.value,
         REFLECTED_NAME: EMAIL,
         TARGET_DICT: {

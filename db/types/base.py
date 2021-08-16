@@ -79,7 +79,3 @@ def get_qualified_name(name):
 
 def get_installed_types(engine):
     return engine.dialect.ischema_names
-
-
-def get_full_mathesar_type_name(name):
-    return f'mathesar_types.{name}'
