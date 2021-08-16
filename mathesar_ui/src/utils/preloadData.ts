@@ -1,8 +1,8 @@
-import type { Database, Schema } from '@mathesar/App.d';
+import type { Database, SchemaResponse } from '@mathesar/App.d';
 
 interface CommonData {
   databases: Database[],
-  schemas: Schema[],
+  schemas: SchemaResponse[],
   current_db: string,
   current_schema: number,
 }

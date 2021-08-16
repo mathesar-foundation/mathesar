@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Route } from 'tinro';
-  import { currentDB } from '@mathesar/stores/databases';
   import Base from '@mathesar/sections/Base.svelte';
   import Schemas from '@mathesar/pages/schemas/Schemas.svelte';
   import Header from './header/Header.svelte';
@@ -9,20 +8,15 @@
 <Header/>
 
 <section class="content-section">
-  {#if $currentDB}
-    <Route path="/:db/*" firstmatch>
-      <Route path="/schemas">
-        <Schemas/>
-      </Route>
-      <Route path="/:schema">
-        {#key $currentDB}
-          <Base database={$currentDB.name}/>
-        {/key}
-      </Route>
+  <Route path="/*" firstmatch>
+    <Route path="/:db/schemas" let:meta>
+      <Schemas database={meta.params.db}/>
     </Route>
-
-    <Route path="/" redirect="/{$currentDB.name}"/>
-  {/if}
+    <Route path="/:db/:schema" let:meta>
+      <Base database={meta.params.db} schemaId={parseInt(meta.params.schema, 10)}/>
+    </Route>
+    <Route path="/:db" redirect="/:db/schemas"/>
+  </Route>
 </section>
 
 <style global lang="scss">
