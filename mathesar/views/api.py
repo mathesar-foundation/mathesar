@@ -23,7 +23,8 @@ from mathesar.pagination import (
 )
 from mathesar.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
-    DatabaseSerializer, ConstraintSerializer, RecordListParameterSerializer, TablePreviewSerializer
+    DatabaseSerializer, ConstraintSerializer, RecordListParameterSerializer, TablePreviewSerializer,
+    TypeSerializer
 )
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.utils.tables import (
@@ -47,12 +48,13 @@ def get_table_or_404(pk):
 
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    def get_queryset(self):
-        return Schema.objects.all().order_by('-created_at')
     serializer_class = SchemaSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = SchemaFilter
+
+    def get_queryset(self):
+        return Schema.objects.all().order_by('-created_at')
 
     def create(self, request):
         serializer = SchemaSerializer(data=request.data)
@@ -86,13 +88,13 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
 
 
 class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    def get_queryset(self):
-        return Table.objects.all().order_by('-created_at')
-
     serializer_class = TableSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = TableFilter
+
+    def get_queryset(self):
+        return Table.objects.all().order_by('-created_at')
 
     def create(self, request):
         serializer = TableSerializer(data=request.data, context={'request': request})
@@ -364,12 +366,19 @@ class DatabaseKeyViewSet(viewsets.ViewSet):
 
 
 class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    def get_queryset(self):
-        return Database.objects.all().order_by('-created_at')
     serializer_class = DatabaseSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = DatabaseFilter
+
+    def get_queryset(self):
+        return Database.objects.all().order_by('-created_at')
+
+    @action(methods=['get'], detail=True)
+    def types(self, request, pk=None):
+        database = self.get_object()
+        serializer = TypeSerializer(database.supported_types, many=True)
+        return Response(serializer.data)
 
 
 class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):
