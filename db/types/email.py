@@ -5,7 +5,7 @@ from sqlalchemy.types import UserDefinedType
 
 from db.types import base
 
-EMAIL = "email"
+EMAIL = base.MathesarCustomType.EMAIL.value
 EMAIL_DOMAIN_NAME = EMAIL + "_domain_name"
 EMAIL_LOCAL_PART = EMAIL + "_local_part"
 
