@@ -9,7 +9,7 @@ from sqlalchemy.exc import DataError
 from db import types
 from db.tests.types import fixtures
 from db.types import alteration
-from db.types.base import PostgresType, MathesarCustomType, get_qualified_name
+from db.types.base import PostgresType, MathesarCustomType, get_qualified_name, get_available_types
 
 
 # We need to set these variables when the file loads, or pytest can't
@@ -46,7 +46,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
     # This dict specifies the full map of what types can be cast to what
     # target types in Mathesar.  Format of each top-level key, val pair is:
     # <db_set_type_name>: {
-    #     ISCHEMA_NAME: <name for looking up in engine.dialect.ischema_names>,
+    #     ISCHEMA_NAME: <name for looking up in result of get_available_types>,
     #     REFLECTED_NAME: <name for reflection of db type>,
     #     SUPPORTED_MAP_NAME: <optional; key in supported type map dictionaries>
     #     TARGET_DICT: {
@@ -393,13 +393,14 @@ def test_alter_column_type_alters_column_type(
     MASTER_DB_TYPE_MAP_SPEC above.
     """
     engine, schema = engine_email_type
+    available_types = get_available_types(engine)
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
     input_table = Table(
         TABLE_NAME,
         metadata,
-        Column(COLUMN_NAME, engine.dialect.ischema_names[type_]),
+        Column(COLUMN_NAME, available_types[type_]),
         schema=schema
     )
     input_table.create()
@@ -488,13 +489,14 @@ def test_alter_column_casts_data_gen(
         engine_email_type, source_type, target_type, in_val, out_val
 ):
     engine, schema = engine_email_type
+    available_types = get_available_types(engine)
     TABLE = "testtable"
     COLUMN = "testcol"
     metadata = MetaData(bind=engine)
     input_table = Table(
         TABLE,
         metadata,
-        Column(COLUMN, engine.dialect.ischema_names[source_type]),
+        Column(COLUMN, available_types[source_type]),
         schema=schema
     )
     input_table.create()
@@ -533,13 +535,14 @@ def test_alter_column_type_raises_on_bad_column_data(
         engine_email_type, type_, target_type, value,
 ):
     engine, schema = engine_email_type
+    available_types = get_available_types(engine)
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
     input_table = Table(
         TABLE_NAME,
         metadata,
-        Column(COLUMN_NAME, engine.dialect.ischema_names[type_]),
+        Column(COLUMN_NAME, available_types[type_]),
         schema=schema
     )
     input_table.create()

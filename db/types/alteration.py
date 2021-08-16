@@ -33,7 +33,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
     friendly_names: sets whether to use "friendly" service-layer or the
     actual DB-layer names.
     """
-    dialect_types = engine.dialect.ischema_names
+    dialect_types = base.get_available_types(engine)
     friendly_type_map = {
         # Default Postgres types
         BIGINT: dialect_types.get(BIGINT),
