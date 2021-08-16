@@ -1,11 +1,13 @@
 import logging
-from sqlalchemy import delete, select, Column, func
+from sqlalchemy import delete, select, Column, func, true, and_
 from sqlalchemy.inspection import inspect
 from sqlalchemy_filters import apply_filters, apply_sort
 from sqlalchemy_filters.exceptions import FieldNotFound
 
 
 logger = logging.getLogger(__name__)
+
+IS_DUPE = "_is_dupe"
 
 
 # Grouping exceptions follow the sqlalchemy_filters exceptions patterns
@@ -32,7 +34,13 @@ def _create_col_objects(table, column_list):
 
 
 def _get_query(table, limit, offset, order_by, filters):
-    query = select(table).limit(limit).offset(offset)
+    dupe_columns, filters = _get_dupe_columns(filters)
+    if dupe_columns:
+        query = _create_query_with_dupe(table, dupe_columns)
+    else:
+        query = select(table)
+
+    query = query.limit(limit).offset(offset)
     if order_by is not None:
         query = apply_sort(query, order_by)
     if filters is not None:
@@ -44,6 +52,36 @@ def _execute_query(query, engine):
     with engine.begin() as conn:
         records = conn.execute(query).fetchall()
         return records
+
+
+def _get_dupe_columns(filters):
+    for i, f in enumerate(filters):
+        if type(f) is dict and f.get("op") == "get_duplicates":
+            filters.pop(i)
+            return f["value"], filters
+    return None, filters
+
+
+def _create_query_with_dupe(table, dupe_columns):
+    subq_table = table.alias()
+    table_dupe_columns = [c for c in table.c if c.name in dupe_columns]
+    subq_dupe_columns = [c for c in subq_table.c if c.name in dupe_columns]
+    subq = (
+        select(true().label(IS_DUPE))
+        .select_from(subq_table)
+        .group_by(*subq_dupe_columns)
+        .having(and_(
+            func.count() > 1,
+            *[c == subq_c for c, subq_c in zip(table_dupe_columns, subq_dupe_columns)]
+        ))
+        .lateral("lateral_subq")
+    )
+    query = (
+        select(*table.c)
+        .select_from(table.join(subq, true()))
+        .where(subq.c[IS_DUPE])
+    )
+    return query
 
 
 def get_record(table, engine, id_value):
