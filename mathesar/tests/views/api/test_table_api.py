@@ -581,12 +581,12 @@ def test_table_create_from_url(client, schema, url_data_file, table_name):
 
 @pytest.mark.parametrize('data_files', [None, []])
 @pytest.mark.parametrize('table_name', ['test_table_no_file', ''])
-def test_table_create_without_datafile(client, schema, data_files, table_name, num_primary_keys):
+def test_table_create_without_datafile(client, schema, data_files, table_name):
     num_tables = Table.objects.count()
     expt_name = _get_expected_name(table_name)
 
     response, response_table, table = _create_table(
-        client, data_files, table_name, schema, num_primary_keys
+        client, data_files, table_name, schema, 1
     )
 
     assert response.status_code == 201
