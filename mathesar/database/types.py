@@ -4,7 +4,7 @@ Mathesar data types are shown in the UI.
 """
 from enum import Enum
 
-from db.types.base import PostgresType, MathesarCustomType, get_installed_types, get_qualified_name
+from db.types.base import PostgresType, MathesarCustomType, get_available_types, get_qualified_name
 
 
 class MathesarTypeIdentifier(Enum):
@@ -134,7 +134,7 @@ def _ignore_type(sa_type_name):
 
 def get_types(engine):
     types = []
-    installed_types = get_installed_types(engine)
+    installed_types = get_available_types(engine)
     type_map = _get_type_map()
     type_map.append(_get_custom_types(type_map, installed_types))
     for type_dict in type_map:

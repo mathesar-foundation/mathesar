@@ -10,7 +10,7 @@ class PostgresType(Enum):
     This only includes built-in Postgres types that SQLAlchemy supports.
     SQLAlchemy doesn't support XML. See zzzeek's comment on:
     https://stackoverflow.com/questions/16153512/using-postgresql-xml-data-type-with-sqlalchemy
-    The values are keys returned by get_installed_types.
+    The values are keys returned by get_available_types.
     """
     _ARRAY = '_array'
     BIGINT = 'bigint'
@@ -60,7 +60,7 @@ class PostgresType(Enum):
 class MathesarCustomType(Enum):
     """
     This is a list of custom Mathesar DB types.
-    Keys returned by get_installed_types are of the format 'mathesar_types.VALUE'
+    Keys returned by get_available_types are of the format 'mathesar_types.VALUE'
     """
     EMAIL = 'email'
     URI = 'uri'
@@ -77,5 +77,5 @@ def get_qualified_name(name):
     return ".".join([preparer.quote_schema(SCHEMA), name])
 
 
-def get_installed_types(engine):
+def get_available_types(engine):
     return engine.dialect.ischema_names
