@@ -9,7 +9,7 @@ EMAIL = "email"
 EMAIL_DOMAIN_NAME = EMAIL + "_domain_name"
 EMAIL_LOCAL_PART = EMAIL + "_local_part"
 
-QUALIFIED_EMAIL = base.get_qualified_name((EMAIL))
+DB_TYPE = base.get_qualified_name(EMAIL)
 QUALIFIED_EMAIL_DOMAIN_NAME = base.get_qualified_name(EMAIL_DOMAIN_NAME)
 QUALIFIED_EMAIL_LOCAL_PART = base.get_qualified_name(EMAIL_LOCAL_PART)
 
@@ -23,7 +23,9 @@ EMAIL_REGEX_STR = (
 
 class Email(UserDefinedType):
     def get_col_spec(self, **kw):
-        return QUALIFIED_EMAIL
+        # This results in the type name being upper case when viewed.
+        # Actual usage in the DB is case-insensitive.
+        return DB_TYPE.upper()
 
 
 # This will register our custom email_domain_name function with sqlalchemy so
@@ -42,25 +44,25 @@ class email_local_part(GenericFunction):
     identifier = EMAIL_LOCAL_PART
 
 
-def create_email_type(engine):
+def install(engine):
     # We'll use postgres domains to check that a given string conforms to what
     # an email should look like.  We also create some DB-level functions to
     # split out the different parts of an email address for grouping.
     drop_domain_query = f"""
-    DROP DOMAIN IF EXISTS {QUALIFIED_EMAIL};
+    DROP DOMAIN IF EXISTS {DB_TYPE};
     """
     create_domain_query = f"""
-    CREATE DOMAIN {QUALIFIED_EMAIL} AS text CHECK (value ~ {EMAIL_REGEX_STR});
+    CREATE DOMAIN {DB_TYPE} AS text CHECK (value ~ {EMAIL_REGEX_STR});
     """
     create_email_domain_name_query = f"""
-    CREATE OR REPLACE FUNCTION {QUALIFIED_EMAIL_DOMAIN_NAME}({QUALIFIED_EMAIL})
+    CREATE OR REPLACE FUNCTION {QUALIFIED_EMAIL_DOMAIN_NAME}({DB_TYPE})
     RETURNS text AS $$
         SELECT split_part($1, '@', 2);
     $$
     LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
     """
     create_email_local_part_query = f"""
-    CREATE OR REPLACE FUNCTION {QUALIFIED_EMAIL_LOCAL_PART}({QUALIFIED_EMAIL})
+    CREATE OR REPLACE FUNCTION {QUALIFIED_EMAIL_LOCAL_PART}({DB_TYPE})
     RETURNS text AS $$
         SELECT split_part($1, '@', 1);
     $$
