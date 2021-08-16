@@ -3,21 +3,21 @@ from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 from db.types import base, email
 
-BIGINT = "bigint"
-BOOLEAN = "boolean"
-EMAIL = "email"
-DECIMAL = "decimal"
-DOUBLE_PRECISION = "double precision"
-FLOAT = "float"
-INTEGER = "integer"
-INTERVAL = "interval"
-NAME = "name"
-NUMERIC = "numeric"
-REAL = "real"
-SMALLINT = "smallint"
-STRING = "string"
-VARCHAR = "varchar"
-FULL_VARCHAR = "character varying"
+BIGINT = base.PostgresType.BIGINT.value
+BOOLEAN = base.PostgresType.BOOLEAN.value
+EMAIL = base.MathesarCustomType.EMAIL.value
+DECIMAL = base.PostgresType.DECIMAL.value
+DOUBLE_PRECISION = base.PostgresType.DOUBLE_PRECISION.value
+FLOAT = base.PostgresType.FLOAT.value
+INTEGER = base.PostgresType.INTEGER.value
+INTERVAL = base.PostgresType.INTERVAL.value
+NAME = base.PostgresType.NAME.value
+NUMERIC = base.PostgresType.NUMERIC.value
+REAL = base.PostgresType.REAL.value
+SMALLINT = base.PostgresType.SMALLINT.value
+FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
+STRING = 'string'
+VARCHAR = 'varchar'
 
 
 class UnsupportedTypeException(Exception):
@@ -33,7 +33,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
     friendly_names: sets whether to use "friendly" service-layer or the
     actual DB-layer names.
     """
-    dialect_types = engine.dialect.ischema_names
+    dialect_types = base.get_available_types(engine)
     friendly_type_map = {
         # Default Postgres types
         BIGINT: dialect_types.get(BIGINT),
