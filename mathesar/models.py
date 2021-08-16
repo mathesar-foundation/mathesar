@@ -110,6 +110,9 @@ class Schema(DatabaseObject):
 
 
 class Table(DatabaseObject):
+    # These are fields whose source of truth is in the model
+    MODEL_FIELDS = ['import_verified']
+
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
