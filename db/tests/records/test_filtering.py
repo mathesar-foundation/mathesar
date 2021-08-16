@@ -288,6 +288,13 @@ exceptions_test_list = [
     ([{"or": []}], BadFilterFormat),
     ([{"not": []}], BadFilterFormat),
     ([{"not": [{"field": "date", "op": "is_null"} for _ in range(2)]}], BadFilterFormat),
+    ([
+        {"field": "date", "op": "get_duplicates", "value": "test"},
+        {"field": "date", "op": "get_duplicates", "value": "test"}
+    ], BadFilterFormat),
+    ([
+        {"not": [{"field": "date", "op": "get_duplicates", "value": "test"}]}
+    ], BadFilterFormat),
     ([{"field": "non_existent", "op": "eq", "value": "test"}], FilterFieldNotFound),
 ]
 
