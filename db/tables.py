@@ -12,7 +12,7 @@ from alembic.operations import Operations
 from sqlalchemy.exc import NoSuchTableError, InternalError
 from psycopg2.errors import DependentObjectsStillExist
 
-from db import columns, constants, schemas
+from db import columns, constants, schemas, records
 from db.types import alteration, inference
 
 
@@ -456,11 +456,9 @@ def create_empty_table(name):
 
 
 def get_count(table, engine, filters=[]):
-    query = select([func.count()]).select_from(table)
-    if filters is not None:
-        query = apply_filters(query, filters)
-    with engine.begin() as conn:
-        return conn.execute(query).scalar()
+    cols = [func.count()]
+    query = records._get_query(table, None, None, None, filters, cols)
+    return records._execute_query(query, engine)
 
 
 def update_table_column_types(schema, table_name, engine):
