@@ -765,6 +765,7 @@ duplicate_column_options = [
     (True, True),
     (True, False),
     (False, True),
+    (False, False),
 ]
 
 
@@ -917,6 +918,29 @@ def test_duplicate_non_unique_constraint(engine_with_schema):
 
     _check_duplicate_data(table_oid, engine, True)
     assert col.primary_key is False
+
+
+@pytest.mark.parametrize('copy_data,copy_constraints', duplicate_column_options)
+def test_duplicate_column_default(engine_with_schema, copy_data, copy_constraints):
+    engine, schema = engine_with_schema
+    table_name = "atable"
+    target_column_name = "columtoduplicate"
+    new_col_name = "duplicated_column"
+    expt_default = 1
+    cols = [Column(target_column_name, Numeric, server_default=str(expt_default))]
+    _create_table_to_duplicate(table_name, cols, [], schema, engine)
+
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    columns.duplicate_column(
+        table_oid, 0, engine, new_col_name, copy_data, copy_constraints
+    )
+
+    col_index = columns.get_column_index_from_name(table_oid, new_col_name, engine)
+    default = columns.get_column_default(table_oid, col_index, engine)
+    if copy_data:
+        assert default == expt_default
+    else:
+        assert default is None
 
 
 def get_mathesar_column_init_args():

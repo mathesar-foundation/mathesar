@@ -489,6 +489,10 @@ def duplicate_column_data(table_oid, from_column, to_column, engine):
     with engine.begin() as conn:
         conn.execute(copy)
 
+    from_default = get_column_default(table_oid, from_column, engine)
+    if from_default is not None:
+        set_column_default(table_oid, to_column, from_default, engine)
+
 
 def duplicate_column_constraints(table_oid, from_column, to_column, engine,
                                  copy_nullable=True):
