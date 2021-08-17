@@ -51,14 +51,17 @@ $color-gray-200: #e2e2e4;
 }
 
 .schema-modal {
-  .header {
+  .header, .sub-header {
     font-weight: 500;
-    margin-top: 10px;
     margin-bottom: 10px;
+  }
+  .header {
+    font-size: 1.1rem;
+    margin-top: 5px;
   }
   .help-text {
     color: #606066;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     line-height: 1.4rem;
   }
   .sub-text {

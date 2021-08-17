@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import {
     faLock,
     faProjectDiagram,
@@ -7,6 +8,8 @@
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-components';
   import type { Schema } from '@mathesar/App.d';
+
+  const dispatch = createEventDispatcher();
 
   // Props
   export let schema: Schema;
@@ -34,7 +37,7 @@
   </div>
   {#if !isLocked}
     <div class="controls">
-      <Button class="edit">
+      <Button class="edit" on:click={() => dispatch('edit', schema)}>
         <Icon data={faPencilAlt}/>
       </Button>
       <Button class="delete">

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import { faPlus } from '@fortawesome/free-solid-svg-icons';
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
@@ -10,7 +11,7 @@
   import type { Schema } from '@mathesar/App.d';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import SchemaRow from './schema-row/SchemaRow.svelte';
-  import AddSchema from './add-schema/AddSchema.svelte';
+  import AddEditSchema from './add-edit-schema/AddEditSchema.svelte';
 
   export let database: string;
   let isAddModalOpen = false;
@@ -25,6 +26,7 @@
   $: changeCurrentDB(database);
 
   let filterQuery = '';
+  let activeSchema: Schema = null;
 
   function filterSchemas(schemaData: DBSchemaStoreData['data'], filter: string): Schema[] {
     const filtered: Schema[] = [];
@@ -37,6 +39,16 @@
   }
 
   $: displayList = filterSchemas($schemas.data, filterQuery);
+
+  function addSchema() {
+    activeSchema = null;
+    isAddModalOpen = true;
+  }
+
+  function editSchema(schema: Schema) {
+    activeSchema = schema;
+    isAddModalOpen = true;
+  }
 </script>
 
 <svelte:head>
@@ -47,7 +59,7 @@
   <section class="hero">
     <div class="container">
       <h1>{$currentDBName}</h1>
-      <Button class="add" on:click={() => { isAddModalOpen = true; }}>
+      <Button class="add" on:click={addSchema}>
         <Icon data={faPlus}/>
         New Schema
       </Button>
@@ -60,14 +72,19 @@
         placeholder="Find a schema..."
         bind:value={filterQuery}/>
     <ul class="schema-list">
-      {#each displayList as schema, i}
-        <li><SchemaRow {schema}/></li>
+      {#each displayList as schema (schema.id)}
+        <li>
+          <SchemaRow {schema} on:edit={() => editSchema(schema)}/>
+        </li>
       {/each}
     </ul>
   </div>
 </main>
 
-<AddSchema bind:isOpen={isAddModalOpen}/>
+{#if isAddModalOpen}
+  <AddEditSchema isEditMode={activeSchema !== null}
+    schema={activeSchema} bind:isOpen={isAddModalOpen}/>
+{/if}
 
 <style global lang="scss">
   @import "Schemas.scss";

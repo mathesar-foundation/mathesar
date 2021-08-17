@@ -10,6 +10,7 @@ import {
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import {
   getAPI,
+  patchAPI,
   postAPI,
   States,
 } from '@mathesar/utils/api';
@@ -188,6 +189,17 @@ export async function createSchema(
   const response = await postAPI<SchemaResponse>('/schemas/', {
     name: schemaName,
     database,
+  });
+  updateSchemaInDBSchemaStore(database, response);
+  return response;
+}
+
+export async function updateSchema(
+  database: Database['name'],
+  schema: Schema,
+): Promise<SchemaResponse> {
+  const response = await patchAPI<SchemaResponse>(`/schemas/${schema.id}/`, {
+    name: schema.name,
   });
   updateSchemaInDBSchemaStore(database, response);
   return response;
