@@ -8,6 +8,7 @@ export * from './common/utils/formatUtils';
 // Actions
 export { default as portal } from './common/actions/portal';
 export { default as popper } from './common/actions/popper';
+export { default as moveable } from './common/actions/moveable';
 export { default as clickOffBounds } from './common/actions/clickOffBounds';
 
 // Simple Components
@@ -16,7 +17,6 @@ export { default as TextInput } from './text-input/TextInput.svelte';
 export { default as Checkbox } from './checkbox/Checkbox.svelte';
 export { default as Button } from './button/Button.svelte';
 export { default as Icon } from './icon/Icon.svelte';
-export { default as Resizeable } from './moveable/Resizeable.svelte';
 export { default as Progress } from './progress/Progress.svelte';
 export { default as Skeleton } from './skeleton/Skeleton.svelte';
 
