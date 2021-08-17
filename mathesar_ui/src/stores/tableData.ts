@@ -132,7 +132,7 @@ interface TableData {
 
 const databaseMap: Map<string, Map<number, TableData>> = new Map();
 
-function calculateColumnPosition(cols: TableColumn[], position:ColumnPosition): ColumnPosition {
+export function updateColumnPosition(cols: TableColumn[], position:ColumnPosition): ColumnPosition {
   let left = DEFAULT_COUNT_COL_WIDTH;
   const columnPosition:ColumnPosition = new Map();
   cols.forEach((column) => {
@@ -247,7 +247,7 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
         primaryKey: pkColumn?.name || null,
       });
 
-      const columnPosition = calculateColumnPosition(columns, null);
+      const columnPosition = updateColumnPosition(columns, null);
       table.display.columnPosition.set(columnPosition);
     } catch (err) {
       tableColumnStore.set({
@@ -524,10 +524,6 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
   }
   void fetchTableRecords(db, id);
   return table;
-}
-
-export function updateColumnPosition(cols:TableColumn[], position:ColumnPosition):ColumnPosition {
-  return calculateColumnPosition(cols, position);
 }
 
 export async function addColumn(db:string, id:number, newColumn:TableColumn): Promise<void> {
