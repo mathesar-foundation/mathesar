@@ -63,7 +63,7 @@
   }
 </script>
 
-<Modal class="schema-modal" bind:isOpen closeOnEsc={!isInputDisabled}>
+<Modal class="schema-modal" bind:isOpen closeOnEsc={state !== States.Loading}>
   <div class="header">
     {isEditMode ? 'Update schema' : 'Create a schema'}
   </div>
@@ -100,7 +100,7 @@
   {/if}
 
   <svelte:fragment slot="footer">
-    <Button on:click={() => { isOpen = false; }}>Close</Button>
+    <Button disabled={state === States.Loading} on:click={() => { isOpen = false; }}>Close</Button>
     {#if state !== States.Done}
       <Button disabled={isCreationDisabled} appearance="primary" on:click={saveSchema}>
         {isEditMode ? 'Save' : 'Create'} schema
