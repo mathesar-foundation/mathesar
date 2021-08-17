@@ -229,7 +229,7 @@ def get_column_index_from_name(table_oid, column_name, engine):
 
 
 def create_column(engine, table_oid, column_data):
-    column_type = column_data.get(TYPE, column_data["type"])
+    column_type = column_data.get(TYPE, column_data.get("type"))
     column_type_options = column_data.get("type_options", {})
     column_nullable = column_data.get(NULLABLE, True)
     supported_types = alteration.get_supported_alter_column_types(
@@ -423,7 +423,7 @@ def set_column_default(table_oid, column_index, default, engine, **kwargs):
     # Note: default should be textual SQL that produces the desired default
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
-    default_clause = DefaultClause(default) if default is not None else default
+    default_clause = DefaultClause(str(default)) if default is not None else default
     with engine.begin() as conn:
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)

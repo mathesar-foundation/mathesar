@@ -20,17 +20,13 @@ class ModelNameField(serializers.CharField):
         return value.name
 
 
-class TextualSQLField(serializers.CharField):
+class InputValueField(serializers.CharField):
     """
-    De-serializes the field by calling str() on the data, but doesn't serialize the
-    response field at all, and just returns what it is passed. Requires the
-    property-to-be-serialized to always return a primitive data type.
-
-    Currently used for column defaults, where users should be able to specify data of
-    any type, with the data being converted to text to use in a sqlalchemy DefaultClause
+    Takes in an arbitrary value. Use to emulate our column and record creation and
+    update endpoints, which handle arbitrary data pulled from request.data
     """
     def to_internal_value(self, data):
-        return str(data)
+        return data
 
     def to_representation(self, value):
         return value
@@ -85,7 +81,7 @@ class ColumnSerializer(SimpleColumnSerializer):
     # Read only fields
     index = serializers.IntegerField(source='column_index', read_only=True)
     valid_target_types = serializers.ListField(read_only=True)
-    default = TextualSQLField(
+    default = InputValueField(
         source='default_value', read_only=False, default=None, allow_null=True
     )
 

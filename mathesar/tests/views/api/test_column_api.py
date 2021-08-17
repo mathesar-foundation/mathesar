@@ -306,9 +306,10 @@ def test_column_update_name(column_test_table, client):
 def test_column_update_default(column_test_table, client):
     cache.clear()
     expt_default = 5
-    data = {"default": expt_default}
+    data = f'{{"default": {expt_default}}}'  # Ensure we pass a int and not a str
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data,
+        content_type="application/json"
     )
     assert response.json()["default"] == expt_default
 
