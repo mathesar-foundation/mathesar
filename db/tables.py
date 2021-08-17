@@ -6,7 +6,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.schema import DDLElement, DropTable
 from sqlalchemy.ext import compiler
-from sqlalchemy_filters import apply_filters
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from sqlalchemy.exc import NoSuchTableError, InternalError
