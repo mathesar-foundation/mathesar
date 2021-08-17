@@ -6,7 +6,7 @@
     faPencilAlt,
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-components';
-  import type { Schema } from '@mathesar/utils/preloadData';
+  import type { Schema } from '@mathesar/App.d';
 
   // Props
   export let schema: Schema;
@@ -36,7 +36,7 @@
         <strong>Default</strong>
         &middot;
       {/if}
-      {schema.tables.length} Tables
+      {schema.tables.size} Tables
     </div>
   </div>
   {#if !isLocked }

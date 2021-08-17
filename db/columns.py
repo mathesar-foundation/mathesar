@@ -1,11 +1,15 @@
 import logging
 import warnings
+
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from sqlalchemy import (
     Column, Integer, ForeignKey, Table, MetaData, and_, select, inspect
 )
-from db import constants, tables
+from sqlalchemy.schema import DDLElement
+from sqlalchemy.ext import compiler
+
+from db import constants, tables, constraints
 from db.types import alteration
 
 logger = logging.getLogger(__name__)
@@ -296,3 +300,100 @@ def drop_column(
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)
         op.drop_column(table.name, column.name, schema=table.schema)
+
+
+def _gen_col_name(table, column_name):
+    num = 1
+    new_column_name = f"{column_name}_{num}"
+    while new_column_name in table.c:
+        num += 1
+        new_column_name = f"{column_name}_{num}"
+    return new_column_name
+
+
+class CopyColumn(DDLElement):
+    def __init__(self, schema, table, to_column, from_column):
+        self.schema = schema
+        self.table = table
+        self.to_column = to_column
+        self.from_column = from_column
+
+
+@compiler.compiles(CopyColumn, "postgresql")
+def compile_create_table_as(element, compiler, **_):
+    return 'UPDATE "%s"."%s" SET "%s" = "%s"' % (
+        element.schema,
+        element.table,
+        element.to_column,
+        element.from_column
+    )
+
+
+def duplicate_column_data(table_oid, from_column, to_column, engine):
+    table = tables.reflect_table_from_oid(table_oid, engine)
+    copy = CopyColumn(
+        table.schema,
+        table.name,
+        table.c[to_column].name,
+        table.c[from_column].name
+    )
+    with engine.begin() as conn:
+        conn.execute(copy)
+
+
+def duplicate_column_constraints(table_oid, from_column, to_column, engine,
+                                 copy_nullable=True):
+    if copy_nullable:
+        table = tables.reflect_table_from_oid(table_oid, engine)
+        change_column_nullable(
+            table_oid, to_column, table.c[from_column].nullable, engine
+        )
+
+    constraints_ = constraints.get_column_constraints(from_column, table_oid, engine)
+    for constraint in constraints_:
+        constraint_type = constraints.get_constraint_type_from_char(constraint.contype)
+        if constraint_type != constraints.ConstraintType.UNIQUE.value:
+            # Don't allow duplication of primary keys
+            continue
+        constraints.copy_constraint(
+            table_oid, engine, constraint, from_column, to_column
+        )
+
+
+def duplicate_column(
+    table_oid, copy_from_index, engine,
+    new_column_name=None, copy_data=True, copy_constraints=True
+):
+    table = tables.reflect_table_from_oid(table_oid, engine)
+    from_column = table.c[copy_from_index]
+    if new_column_name is None:
+        new_column_name = _gen_col_name(table, from_column.name)
+
+    column_data = {
+        NAME: new_column_name,
+        "type": from_column.type.compile(dialect=engine.dialect),
+        NULLABLE: True,
+    }
+    new_column = create_column(engine, table_oid, column_data)
+    new_column_index = get_column_index_from_name(table_oid, new_column.name, engine)
+
+    if copy_data:
+        duplicate_column_data(
+            table_oid,
+            copy_from_index,
+            new_column_index,
+            engine
+        )
+
+    if copy_constraints:
+        duplicate_column_constraints(
+            table_oid,
+            copy_from_index,
+            new_column_index,
+            engine,
+            copy_nullable=copy_data
+        )
+
+    table = tables.reflect_table_from_oid(table_oid, engine)
+    column_index = get_column_index_from_name(table_oid, new_column_name, engine)
+    return get_mathesar_column_with_engine(table.c[column_index], engine)
