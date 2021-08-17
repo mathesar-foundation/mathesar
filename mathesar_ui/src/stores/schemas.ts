@@ -9,6 +9,7 @@ import {
 
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import {
+  deleteAPI,
   getAPI,
   patchAPI,
   postAPI,
@@ -89,6 +90,21 @@ function updateSchemaInDBSchemaStore(
         ...schema,
         tables: getTableMap(schema.tables),
       });
+      return {
+        ...value,
+      };
+    });
+  }
+}
+
+function removeSchemaInDBSchemaStore(
+  database: Database['name'],
+  schemaId: Schema['id'],
+) {
+  const store = dbSchemaStoreMap.get(database);
+  if (store) {
+    store.update((value) => {
+      value.data?.delete(schemaId);
       return {
         ...value,
       };
@@ -203,6 +219,14 @@ export async function updateSchema(
   });
   updateSchemaInDBSchemaStore(database, response);
   return response;
+}
+
+export async function deleteSchema(
+  database: Database['name'],
+  schemaId: Schema['id'],
+): Promise<void> {
+  await deleteAPI(`/schemas/${schemaId}/`);
+  removeSchemaInDBSchemaStore(database, schemaId);
 }
 
 export const schemas: Readable<DBSchemaStoreData> = derived(

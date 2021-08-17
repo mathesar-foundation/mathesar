@@ -59,10 +59,36 @@ $color-gray-200: #e2e2e4;
     font-size: 1.1rem;
     margin-top: 5px;
   }
+  .sub-header {
+    margin-top: 10px;
+  }
   .help-text {
     color: #606066;
-    margin-bottom: 10px;
     line-height: 1.4rem;
+  }
+  .schema-table-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    margin-top: 10px;
+    border: 1px solid #dfdfdf;
+    max-height: 120px;
+    min-height: 80px;
+    border-radius: 3px;
+    overflow: auto;
+
+    li {
+      margin: 0;
+      padding: 10px;
+      border-top: 1px solid #efefef;
+
+      &:first-child {
+        border-top: none;
+      }
+      &:last-child {
+        border-bottom: 1px solid #efefef;
+      }
+    }
   }
   .sub-text {
     margin-top: 10px;

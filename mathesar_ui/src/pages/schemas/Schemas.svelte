@@ -11,9 +11,11 @@
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import SchemaRow from './schema-row/SchemaRow.svelte';
   import AddEditSchema from './AddEditSchema.svelte';
+  import DeleteSchema from './DeleteSchema.svelte';
 
   export let database: string;
   let isAddModalOpen = false;
+  let isDeleteModalOpen = false;
 
   function changeCurrentDB(_db: string) {
     if ($currentDBName !== _db) {
@@ -48,6 +50,11 @@
     activeSchema = schema;
     isAddModalOpen = true;
   }
+
+  function deleteSchema(schema: Schema) {
+    activeSchema = schema;
+    isDeleteModalOpen = true;
+  }
 </script>
 
 <svelte:head>
@@ -73,7 +80,8 @@
     <ul class="schema-list">
       {#each displayList as schema (schema.id)}
         <li>
-          <SchemaRow {schema} on:edit={() => editSchema(schema)}/>
+          <SchemaRow {schema} on:edit={() => editSchema(schema)}
+            on:delete={() => deleteSchema(schema)}/>
         </li>
       {/each}
     </ul>
@@ -81,8 +89,12 @@
 </main>
 
 {#if isAddModalOpen}
-  <AddEditSchema isEditMode={activeSchema !== null}
-    schema={activeSchema} bind:isOpen={isAddModalOpen}/>
+  <AddEditSchema bind:isOpen={isAddModalOpen}
+    isEditMode={activeSchema !== null} schema={activeSchema}/>
+{/if}
+
+{#if isDeleteModalOpen}
+  <DeleteSchema bind:isOpen={isDeleteModalOpen} schema={activeSchema}/>
 {/if}
 
 <style global lang="scss">

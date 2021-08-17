@@ -40,7 +40,7 @@
       <Button class="edit" on:click={() => dispatch('edit', schema)}>
         <Icon data={faPencilAlt}/>
       </Button>
-      <Button class="delete">
+      <Button class="delete" on:click={() => dispatch('delete', schema)}>
         <Icon data={faTrash}/>
       </Button>
       <slot/>
