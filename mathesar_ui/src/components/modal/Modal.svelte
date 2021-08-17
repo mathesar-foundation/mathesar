@@ -27,13 +27,15 @@
     }
   }
 
-  function dispatchEventOnClose(_isOpen: boolean) {
-    if (!_isOpen) {
+  function dispatchOpenEvent(_isOpen: boolean) {
+    if (_isOpen) {
+      dispatch('open');
+    } else {
       dispatch('close');
     }
   }
 
-  $: dispatchEventOnClose(isOpen);
+  $: dispatchOpenEvent(isOpen);
 </script>
 
 <svelte:window on:keydown={handleKeydown}/>
