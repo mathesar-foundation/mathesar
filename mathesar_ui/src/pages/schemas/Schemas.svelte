@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { tick } from 'svelte';
   import { faPlus } from '@fortawesome/free-solid-svg-icons';
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
@@ -11,7 +10,7 @@
   import type { Schema } from '@mathesar/App.d';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import SchemaRow from './schema-row/SchemaRow.svelte';
-  import AddEditSchema from './add-edit-schema/AddEditSchema.svelte';
+  import AddEditSchema from './AddEditSchema.svelte';
 
   export let database: string;
   let isAddModalOpen = false;
