@@ -5,7 +5,7 @@ from sqlalchemy.types import UserDefinedType
 
 from db.types import base
 
-EMAIL = "email"
+EMAIL = base.MathesarCustomType.EMAIL.value
 EMAIL_DOMAIN_NAME = EMAIL + "_domain_name"
 EMAIL_LOCAL_PART = EMAIL + "_local_part"
 
@@ -22,6 +22,7 @@ EMAIL_REGEX_STR = (
 
 
 class Email(UserDefinedType):
+
     def get_col_spec(self, **kw):
         # This results in the type name being upper case when viewed.
         # Actual usage in the DB is case-insensitive.

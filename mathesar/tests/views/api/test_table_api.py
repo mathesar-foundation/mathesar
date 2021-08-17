@@ -80,12 +80,18 @@ def check_table_response(response_table, table, table_name):
     assert response_table['records_url'].startswith('http')
     assert response_table['columns_url'].startswith('http')
     assert response_table['constraints_url'].startswith('http')
+    assert response_table['type_suggestions_url'].startswith('http')
+    assert response_table['previews_url'].startswith('http')
     assert '/api/v0/tables/' in response_table['records_url']
     assert '/api/v0/tables/' in response_table['columns_url']
     assert '/api/v0/tables/' in response_table['constraints_url']
+    assert '/api/v0/tables/' in response_table['type_suggestions_url']
+    assert '/api/v0/tables/' in response_table['previews_url']
     assert response_table['records_url'].endswith('/records/')
     assert response_table['columns_url'].endswith('/columns/')
     assert response_table['constraints_url'].endswith('/constraints/')
+    assert response_table['type_suggestions_url'].endswith('/type_suggestions/')
+    assert response_table['previews_url'].endswith('/previews/')
 
 
 def check_table_filter_response(response, status_code=None, count=None):
@@ -669,6 +675,30 @@ def test_table_partial_update(create_table, client):
 
     table = Table.objects.get(oid=table.oid)
     assert table.name == new_table_name
+
+
+def test_table_partial_update_import_verified(create_table, client):
+    table_name = 'NASA Table Import Verify'
+    table = create_table(table_name)
+
+    body = {'import_verified': True}
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+
+    response_table = response.json()
+    assert response.status_code == 200
+    assert response_table['import_verified'] is True
+
+
+def test_table_partial_update_schema(create_table, client):
+    table_name = 'NASA Table Schema PATCH'
+    table = create_table(table_name)
+
+    body = {'schema': table.schema.id}
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+
+    response_error = response.json()
+    assert response.status_code == 400
+    assert response_error['schema'] == 'Updating schema for tables is not supported.'
 
 
 def test_table_delete(create_table, client):

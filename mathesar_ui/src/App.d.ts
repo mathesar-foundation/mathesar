@@ -13,5 +13,9 @@ export interface SchemaEntry {
 }
 
 export interface Schema extends SchemaEntry, TreeItem {
-  tables: SchemaEntry[]
+  tables: Map<SchemaEntry['id'], SchemaEntry>
+}
+
+export interface SchemaResponse extends SchemaEntry, TreeItem {
+  tables: SchemaEntry[],
 }
