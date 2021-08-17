@@ -60,7 +60,7 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@popperjs/core": "^2.9.2",
     "js-cookie": "^2.2.1",
-    "perfect-scrollbar": "^1.5.1",
-    "svelte-moveable": "^0.18.0"
+    "moveable": "^0.26.0",
+    "perfect-scrollbar": "^1.5.1"
   }
 }
