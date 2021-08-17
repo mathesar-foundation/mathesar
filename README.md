@@ -44,6 +44,8 @@ docker exec -it mathesar_web_1 python install.py
 
 If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASES.mathesar_tables` entry of the `config/settings.py` file with appropriate connection details before installing the Mathesar types and functions with the previous step.
 
+For sample table data, you can use the `patents.csv` file found in `/mathesar/tests/data`. 
+
 ### Linting
 
 To lint the project, run the `lint.sh` script from the root of the repository. The script requires that the Python virtual environment with `flake8` be activated and that Node modules be installed in `mathesar_ui/`. Alternatively, ESLint and Flake8 should be installed globally on the system.
