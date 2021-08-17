@@ -22,9 +22,9 @@ from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
-    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
-    DatabaseSerializer, ConstraintSerializer, RecordListParameterSerializer, TablePreviewSerializer,
-    TypeSerializer
+    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer,
+    ColumnSerializer, DatabaseSerializer, ConstraintSerializer,
+    RecordListParameterSerializer, TablePreviewSerializer, TypeSerializer
 )
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.utils.tables import (
@@ -232,29 +232,41 @@ class ColumnViewSet(viewsets.ViewSet):
         serializer = ColumnSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
-        try:
-            column = table.add_column(request.data)
-        except ProgrammingError as e:
-            if type(e.orig) == DuplicateColumn:
-                name = request.data['name']
-                raise ValidationError(
-                    f'Column {name} already exists'
+        if 'source_column' in serializer.validated_data:
+            try:
+                column = table.duplicate_column(
+                    serializer.validated_data['source_column'],
+                    serializer.validated_data['copy_source_data'],
+                    serializer.validated_data['copy_source_constraints'],
+                    serializer.validated_data.get('name'),
                 )
-            else:
-                raise APIException(e)
-        except TypeError:
-            raise ValidationError("Unknown type_option passed")
-        except DataError as e:
-            if (
-                    type(e.orig) == InvalidParameterValue
-                    or type(e.orig) == InvalidTextRepresentation
-            ):
-                raise ValidationError(
-                    f'parameter dict {request.data["type_options"]} is'
-                    f' invalid for type {request.data["type"]}'
-                )
-            else:
-                raise APIException(e)
+            except IndexError:
+                _col_idx = serializer.validated_data['source_column']
+                raise ValidationError(f'column index "{_col_idx}" not found')
+        else:
+            try:
+                column = table.add_column(request.data)
+            except ProgrammingError as e:
+                if type(e.orig) == DuplicateColumn:
+                    name = request.data['name']
+                    raise ValidationError(
+                        f'Column {name} already exists'
+                    )
+                else:
+                    raise APIException(e)
+            except TypeError:
+                raise ValidationError("Unknown type_option passed")
+            except DataError as e:
+                if (
+                        type(e.orig) == InvalidParameterValue
+                        or type(e.orig) == InvalidTextRepresentation
+                ):
+                    raise ValidationError(
+                        f'parameter dict {request.data["type_options"]} is'
+                        f' invalid for type {request.data["type"]}'
+                    )
+                else:
+                    raise APIException(e)
 
         out_serializer = ColumnSerializer(column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
