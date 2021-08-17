@@ -2,12 +2,15 @@ import logging
 from sqlalchemy import delete, select, Column, func, true, and_
 from sqlalchemy.inspection import inspect
 from sqlalchemy_filters import apply_filters, apply_sort
-from sqlalchemy_filters.exceptions import FieldNotFound, BadFilterFormat
+from sqlalchemy_filters.exceptions import (
+    FieldNotFound, BadFilterFormat, FilterFieldNotFound
+)
 
 
 logger = logging.getLogger(__name__)
 
 IS_DUPE = "_is_dupe"
+CONJUNCTIONS = ("and", "or", "not")
 
 
 # Grouping exceptions follow the sqlalchemy_filters exceptions patterns
@@ -34,7 +37,7 @@ def _create_col_objects(table, column_list):
 
 
 def _get_query(table, limit, offset, order_by, filters, cols=None):
-    dupe_columns, filters = _get_dupe_columns(filters)
+    dupe_columns, filters = _get_dupe_columns(table, filters)
     if dupe_columns:
         query = _create_query_with_dupe(table, dupe_columns, cols)
     else:
@@ -54,19 +57,34 @@ def _execute_query(query, engine):
         return records
 
 
-def _get_dupe_columns(filters):
+def _get_dupe_columns(table, filters):
     try:
         get_dupe_ops = [f for f in filters if f.get("op") == "get_duplicates"]
         non_get_dupe_ops = [f for f in filters if f.get("op") != "get_duplicates"]
     except AttributeError:
         # Ignore formatting errors - they will be handled by sqlalchemy_filters
         return None, filters
+
+    _validate_nested_ops(non_get_dupe_ops)
     if len(get_dupe_ops) > 1:
         raise BadFilterFormat("get_duplicates can only be specified a single time")
     elif len(get_dupe_ops) == 1:
+        dupe_cols = get_dupe_ops[0]['value']
+        for col in dupe_cols:
+            if col not in table.c:
+                raise FilterFieldNotFound(f"Table {table.name} has no column `{col}`.")
         return get_dupe_ops[0]['value'], non_get_dupe_ops
     else:
         return None, filters
+
+
+def _validate_nested_ops(filters):
+    for op in filters:
+        if op.get("op") == "get_duplicates":
+            raise BadFilterFormat("get_duplicates can not be nested")
+        for field in CONJUNCTIONS:
+            if field in op:
+                _validate_nested_ops(op[field])
 
 
 def _create_query_with_dupe(table, dupe_columns, cols=None):
