@@ -12,6 +12,9 @@
   // Inline styles
   export let style = '';
 
+  // Disable input
+  export let disabled = false;
+
   // Underlying DOM element for direct access
   export let element: HTMLElement = null;
 
@@ -24,13 +27,14 @@
   }
 </script>
 
-<div class={['text-input', classes].join(' ')} class:focus {style} on:click={focusInput}>
+<div class={['text-input', classes].join(' ')} class:focus class:disabled {style} on:click={focusInput}>
   {#if $$slots.prepend}
     <span class="prepend">
       <slot name="prepend"></slot>
     </span>
   {/if}
   <input bind:this={element} {...$$restProps} type='text' bind:value
+          {disabled}
           on:focus={() => { focus = true; }}
           on:blur={() => { focus = false; }}/>
   {#if $$slots.append}

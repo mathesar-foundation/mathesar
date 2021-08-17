@@ -1,13 +1,15 @@
 from datetime import timedelta
 from decimal import Decimal
-from psycopg2.errors import InvalidParameterValue
+
 import pytest
+from psycopg2.errors import InvalidParameterValue
 from sqlalchemy import Table, Column, MetaData
 from sqlalchemy import String, Numeric
 from sqlalchemy.exc import DataError
 from db import types, columns, tables
 from db.tests.types import fixtures
 from db.types import alteration
+from db.types.base import PostgresType, MathesarCustomType, get_qualified_name, get_available_types
 
 
 # We need to set these variables when the file loads, or pytest can't
@@ -18,17 +20,17 @@ engine_email_type = fixtures.engine_email_type
 temporary_testing_schema = fixtures.temporary_testing_schema
 
 
-BIGINT = "BIGINT"
-BOOLEAN = "BOOLEAN"
-DECIMAL = "DECIMAL"
-DOUBLE = "DOUBLE PRECISION"
-EMAIL = "mathesar_types.email"
-FLOAT = "FLOAT"
-INTEGER = "INTEGER"
-INTERVAL = "INTERVAL"
-NUMERIC = "NUMERIC"
-REAL = "REAL"
-SMALLINT = "SMALLINT"
+BIGINT = PostgresType.BIGINT.value.upper()
+BOOLEAN = PostgresType.BOOLEAN.value.upper()
+DECIMAL = PostgresType.DECIMAL.value.upper()
+DOUBLE = PostgresType.DOUBLE_PRECISION.value.upper()
+EMAIL = get_qualified_name(MathesarCustomType.EMAIL.value).upper()
+FLOAT = PostgresType.FLOAT.value.upper()
+INTEGER = PostgresType.INTEGER.value.upper()
+INTERVAL = PostgresType.INTERVAL.value.upper()
+NUMERIC = PostgresType.NUMERIC.value.upper()
+REAL = PostgresType.REAL.value.upper()
+SMALLINT = PostgresType.SMALLINT.value.upper()
 VARCHAR = "VARCHAR"
 
 
@@ -39,11 +41,12 @@ SUPPORTED_MAP_NAME = "supported_map_name"
 VALID = "valid"
 INVALID = "invalid"
 
+
 MASTER_DB_TYPE_MAP_SPEC = {
     # This dict specifies the full map of what types can be cast to what
     # target types in Mathesar.  Format of each top-level key, val pair is:
     # <db_set_type_name>: {
-    #     ISCHEMA_NAME: <name for looking up in engine.dialect.ischema_names>,
+    #     ISCHEMA_NAME: <name for looking up in result of get_available_types>,
     #     REFLECTED_NAME: <name for reflection of db type>,
     #     SUPPORTED_MAP_NAME: <optional; key in supported type map dictionaries>
     #     TARGET_DICT: {
@@ -64,7 +67,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
     # tuples representing the input and expected output, whereas INVALID
     # value list only needs input (since it should break, giving no output)
     BIGINT: {
-        ISCHEMA_NAME: "bigint",
+        ISCHEMA_NAME: PostgresType.BIGINT.value,
         REFLECTED_NAME: BIGINT,
         TARGET_DICT: {
             BIGINT: {VALID: [(500, 500), (500000000000, 500000000000)]},
@@ -80,7 +83,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         }
     },
     BOOLEAN: {
-        ISCHEMA_NAME: "boolean",
+        ISCHEMA_NAME: PostgresType.BOOLEAN.value,
         REFLECTED_NAME: BOOLEAN,
         TARGET_DICT: {
             BIGINT: {VALID: [(True, 1), (False, 0)]},
@@ -96,7 +99,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         }
     },
     DECIMAL: {
-        ISCHEMA_NAME: "decimal",
+        ISCHEMA_NAME: PostgresType.DECIMAL.value,
         REFLECTED_NAME: NUMERIC,
         TARGET_DICT: {
             BIGINT: {VALID: [(500, 500), (1234123412341234, 1234123412341234)]},
@@ -121,7 +124,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         }
     },
     DOUBLE: {
-        ISCHEMA_NAME: "double precision",
+        ISCHEMA_NAME: PostgresType.DOUBLE_PRECISION.value,
         REFLECTED_NAME: DOUBLE,
         TARGET_DICT: {
             BIGINT: {VALID: [(500, 500)]},
@@ -137,8 +140,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
         }
     },
     EMAIL: {
-        ISCHEMA_NAME: "mathesar_types.email",
-        SUPPORTED_MAP_NAME: "email",
+        ISCHEMA_NAME: get_qualified_name(MathesarCustomType.EMAIL.value),
+        SUPPORTED_MAP_NAME: MathesarCustomType.EMAIL.value,
         REFLECTED_NAME: EMAIL,
         TARGET_DICT: {
             EMAIL: {VALID: [("alice@example.com", "alice@example.com")]},
@@ -146,7 +149,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         }
     },
     FLOAT: {
-        ISCHEMA_NAME: "float",
+        ISCHEMA_NAME: PostgresType.FLOAT.value,
         REFLECTED_NAME: DOUBLE,
         TARGET_DICT: {
             BIGINT: {VALID: [(500, 500)]},
@@ -162,7 +165,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         }
     },
     INTEGER: {
-        ISCHEMA_NAME: "integer",
+        ISCHEMA_NAME: PostgresType.INTEGER.value,
         REFLECTED_NAME: INTEGER,
         TARGET_DICT: {
             BIGINT: {VALID: [(500, 500)]},
@@ -178,7 +181,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         }
     },
     INTERVAL: {
-        ISCHEMA_NAME: "interval",
+        ISCHEMA_NAME: PostgresType.INTERVAL.value,
         REFLECTED_NAME: INTERVAL,
         TARGET_DICT: {
             INTERVAL: {
@@ -200,7 +203,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         }
     },
     NUMERIC: {
-        ISCHEMA_NAME: "numeric",
+        ISCHEMA_NAME: PostgresType.NUMERIC.value,
         REFLECTED_NAME: NUMERIC,
         TARGET_DICT: {
             BIGINT: {VALID: [(500, 500)]},
@@ -225,7 +228,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         }
     },
     REAL: {
-        ISCHEMA_NAME: "real",
+        ISCHEMA_NAME: PostgresType.REAL.value,
         REFLECTED_NAME: REAL,
         TARGET_DICT: {
             BIGINT: {VALID: [(500, 500)]},
@@ -250,7 +253,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         }
     },
     SMALLINT: {
-        ISCHEMA_NAME: "smallint",
+        ISCHEMA_NAME: PostgresType.SMALLINT.value,
         REFLECTED_NAME: SMALLINT,
         TARGET_DICT: {
             BIGINT: {VALID: [(500, 500)]},
@@ -266,7 +269,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         }
     },
     VARCHAR: {
-        ISCHEMA_NAME: "character varying",
+        ISCHEMA_NAME: PostgresType.CHARACTER_VARYING.value,
         SUPPORTED_MAP_NAME: "varchar",
         REFLECTED_NAME: VARCHAR,
         TARGET_DICT: {
@@ -390,13 +393,14 @@ def test_alter_column_type_alters_column_type(
     MASTER_DB_TYPE_MAP_SPEC above.
     """
     engine, schema = engine_email_type
+    available_types = get_available_types(engine)
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
     input_table = Table(
         TABLE_NAME,
         metadata,
-        Column(COLUMN_NAME, engine.dialect.ischema_names[type_]),
+        Column(COLUMN_NAME, available_types[type_]),
         schema=schema
     )
     input_table.create()
@@ -485,14 +489,14 @@ def test_alter_column_casts_data_gen(
         engine_email_type, source_type, target_type, in_val, out_val
 ):
     engine, schema = engine_email_type
+    available_types = get_available_types(engine)
     TABLE = "testtable"
     COLUMN = "testcol"
     metadata = MetaData(bind=engine)
     input_table = Table(
         TABLE,
         metadata,
-        Column(COLUMN, engine.dialect.ischema_names[source_type],
-               server_default=str(in_val)),
+        Column(COLUMN, available_types[source_type], server_default=str(in_val)),
         schema=schema
     )
     input_table.create()
@@ -534,13 +538,14 @@ def test_alter_column_type_raises_on_bad_column_data(
         engine_email_type, type_, target_type, value,
 ):
     engine, schema = engine_email_type
+    available_types = get_available_types(engine)
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
     input_table = Table(
         TABLE_NAME,
         metadata,
-        Column(COLUMN_NAME, engine.dialect.ischema_names[type_]),
+        Column(COLUMN_NAME, available_types[type_]),
         schema=schema
     )
     input_table.create()

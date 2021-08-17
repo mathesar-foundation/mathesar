@@ -4,6 +4,7 @@
   display: flex;
   align-items: center;
   border-radius: 4px;
+  background: #fff;
 
   .prepend {
     margin-left: 8px;
@@ -27,5 +28,9 @@
     border-color: #489ee4;
     outline: 0;
     box-shadow: 0 0 0 2px #2087e633;
+  }
+
+  &.disabled {
+    background: #efefef;
   }
 }

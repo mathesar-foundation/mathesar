@@ -4,23 +4,23 @@ from sqlalchemy.sql.functions import Function
 from db import columns, tables
 from db.types import base, email
 
-BIGINT = "bigint"
-BOOLEAN = "boolean"
-EMAIL = "email"
-DECIMAL = "decimal"
-DOUBLE_PRECISION = "double precision"
-FLOAT = "float"
-INTEGER = "integer"
-INTERVAL = "interval"
-NAME = "name"
-NUMERIC = "numeric"
-REAL = "real"
-SMALLINT = "smallint"
-STRING = "string"
-VARCHAR = "varchar"
-TEXT = "text"
-DATE = "date"
-FULL_VARCHAR = "character varying"
+BIGINT = base.PostgresType.BIGINT.value
+BOOLEAN = base.PostgresType.BOOLEAN.value
+EMAIL = base.MathesarCustomType.EMAIL.value
+DECIMAL = base.PostgresType.DECIMAL.value
+DOUBLE_PRECISION = base.PostgresType.DOUBLE_PRECISION.value
+FLOAT = base.PostgresType.FLOAT.value
+INTEGER = base.PostgresType.INTEGER.value
+INTERVAL = base.PostgresType.INTERVAL.value
+NAME = base.PostgresType.NAME.value
+NUMERIC = base.PostgresType.NUMERIC.value
+REAL = base.PostgresType.REAL.value
+SMALLINT = base.PostgresType.SMALLINT.value
+FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
+TEXT = base.PostgresType.TEXT.value
+DATE = base.PostgresType.DATE.value
+STRING = 'string'
+VARCHAR = 'varchar'
 
 
 class UnsupportedTypeException(Exception):
@@ -36,7 +36,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
     friendly_names: sets whether to use "friendly" service-layer or the
     actual DB-layer names.
     """
-    dialect_types = engine.dialect.ischema_names
+    dialect_types = base.get_available_types(engine)
     friendly_type_map = {
         # Default Postgres types
         BIGINT: dialect_types.get(BIGINT),
@@ -54,7 +54,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         DATE: dialect_types.get(DATE),
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
-        EMAIL: dialect_types.get(email.QUALIFIED_EMAIL)
+        EMAIL: dialect_types.get(email.DB_TYPE)
     }
     if friendly_names:
         type_map = {k: v for k, v in friendly_type_map.items() if v is not None}
@@ -180,7 +180,7 @@ def create_boolean_casts(engine):
 
 def create_email_casts(engine):
     type_body_map = _get_email_type_body_map()
-    create_cast_functions(email.QUALIFIED_EMAIL, type_body_map, engine)
+    create_cast_functions(email.DB_TYPE, type_body_map, engine)
 
 
 def create_integer_casts(engine):
@@ -354,9 +354,9 @@ def _get_email_type_body_map():
                      just check that the VARCHAR object satisfies the email
                      DOMAIN).
     """
-    default_behavior_source_types = [email.QUALIFIED_EMAIL, VARCHAR, TEXT]
+    default_behavior_source_types = [email.DB_TYPE, VARCHAR, TEXT]
     return _get_default_type_body_map(
-        default_behavior_source_types, email.QUALIFIED_EMAIL,
+        default_behavior_source_types, email.DB_TYPE,
     )
 
 

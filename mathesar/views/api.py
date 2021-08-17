@@ -24,8 +24,9 @@ from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
-    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
-    DatabaseSerializer, ConstraintSerializer, RecordListParameterSerializer, TablePreviewSerializer
+    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer,
+    ColumnSerializer, DatabaseSerializer, ConstraintSerializer,
+    RecordListParameterSerializer, TablePreviewSerializer, TypeSerializer
 )
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.utils.tables import (
@@ -47,12 +48,13 @@ def get_table_or_404(pk):
 
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    def get_queryset(self):
-        return Schema.objects.all().order_by('-created_at')
     serializer_class = SchemaSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = SchemaFilter
+
+    def get_queryset(self):
+        return Schema.objects.all().order_by('-created_at')
 
     def create(self, request):
         serializer = SchemaSerializer(data=request.data)
@@ -86,13 +88,13 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
 
 
 class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    def get_queryset(self):
-        return Table.objects.all().order_by('-created_at')
-
     serializer_class = TableSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = TableFilter
+
+    def get_queryset(self):
+        return Table.objects.all().order_by('-created_at')
 
     def create(self, request):
         serializer = TableSerializer(data=request.data, context={'request': request})
@@ -134,8 +136,19 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
             data=request.data, context={'request': request}, partial=True
         )
         serializer.is_valid(raise_exception=True)
-
         table = self.get_object()
+
+        # Save the fields that are stored in the model.
+        present_model_fields = []
+        for model_field in table.MODEL_FIELDS:
+            if model_field in serializer.validated_data:
+                setattr(table, model_field, serializer.validated_data[model_field])
+                present_model_fields.append(model_field)
+        table.save()
+        for key in present_model_fields:
+            del serializer.validated_data[key]
+
+        # Save the fields that are stored in the underlying DB.
         table.update_sa_table(serializer.validated_data)
 
         # Reload the table to avoid cached properties
@@ -219,28 +232,40 @@ class ColumnViewSet(viewsets.ViewSet):
         serializer = ColumnSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
-        try:
-            column = table.add_column(request.data)
-        except ProgrammingError as e:
-            if type(e.orig) == DuplicateColumn:
-                name = request.data['name']
-                raise ValidationError(
-                    f'Column {name} already exists'
+        if 'source_column' in serializer.validated_data:
+            try:
+                column = table.duplicate_column(
+                    serializer.validated_data['source_column'],
+                    serializer.validated_data['copy_source_data'],
+                    serializer.validated_data['copy_source_constraints'],
+                    serializer.validated_data.get('name'),
                 )
-            else:
-                raise APIException(e)
-        except TypeError:
-            raise ValidationError("Unknown type_option passed")
-        except InvalidDefaultError:
-            raise ValidationError(
-                f'default "{request.data["default"]}" is'
-                f' invalid for type {request.data["type"]}'
-            )
-        except InvalidTypeOptionError:
-            raise ValidationError(
-                f'parameter dict {request.data["type_options"]} is'
-                f' invalid for type {request.data["type"]}'
-            )
+            except IndexError:
+                _col_idx = serializer.validated_data['source_column']
+                raise ValidationError(f'column index "{_col_idx}" not found')
+        else:
+            try:
+                column = table.add_column(request.data)
+            except ProgrammingError as e:
+                if type(e.orig) == DuplicateColumn:
+                    name = request.data['name']
+                    raise ValidationError(
+                        f'Column {name} already exists'
+                    )
+                else:
+                    raise APIException(e)
+            except TypeError:
+                raise ValidationError("Unknown type_option passed")
+            except InvalidDefaultError:
+                raise ValidationError(
+                    f'default "{request.data["default"]}" is'
+                    f' invalid for type {request.data["type"]}'
+                )
+            except InvalidTypeOptionError:
+                raise ValidationError(
+                    f'parameter dict {request.data["type_options"]} is'
+                    f' invalid for type {request.data["type"]}'
+                )
 
         out_serializer = ColumnSerializer(column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
@@ -352,12 +377,19 @@ class DatabaseKeyViewSet(viewsets.ViewSet):
 
 
 class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    def get_queryset(self):
-        return Database.objects.all().order_by('-created_at')
     serializer_class = DatabaseSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = DatabaseFilter
+
+    def get_queryset(self):
+        return Database.objects.all().order_by('-created_at')
+
+    @action(methods=['get'], detail=True)
+    def types(self, request, pk=None):
+        database = self.get_object()
+        serializer = TypeSerializer(database.supported_types, many=True)
+        return Response(serializer.data)
 
 
 class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):

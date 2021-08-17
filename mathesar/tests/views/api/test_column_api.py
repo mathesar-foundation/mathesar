@@ -2,10 +2,12 @@ import json
 from datetime import date, timedelta
 
 import pytest
+from unittest.mock import patch
 from django.core.cache import cache
 from sqlalchemy import Column, Integer, String, MetaData, select
 from sqlalchemy import Table as SATable
 
+from db import columns
 from db.tables import get_oid_from_table
 from mathesar.models import Table
 
@@ -85,8 +87,8 @@ def test_column_list(column_test_table, client):
             'primary_key': False,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'INTERVAL', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
-                'mathesar_types.email',
+                'INTEGER', 'INTERVAL', 'MATHESAR_TYPES.EMAIL', 'NUMERIC',
+                'REAL', 'SMALLINT', 'VARCHAR',
             ],
             'default': None,
         }
@@ -279,6 +281,18 @@ def test_column_create_duplicate(column_test_table, client):
     assert response.status_code == 400
 
 
+def test_column_create_some_parameters(column_test_table, client):
+    data = {
+        "name": "only name",
+    }
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/", data=data
+    )
+    response_data = response.json()
+    assert response.status_code == 400
+    assert response_data["type"][0] == "This field is required."
+
+
 def test_column_update_name(column_test_table, client):
     cache.clear()
     name = "updatedname"
@@ -360,7 +374,7 @@ def test_column_update_type_invalid_options(column_test_table, client, type_opti
 
 def test_column_update_type_invalid_cast(column_test_table, client):
     cache.clear()
-    type_ = "mathesar_types.email"
+    type_ = "MATHESAR_TYPES.EMAIL"
     data = {"type": type_}
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data
@@ -404,3 +418,70 @@ def test_column_destroy_when_missing(column_test_table, client):
     response_data = response.json()
     assert response_data == {"detail": "Not found."}
     assert response.status_code == 404
+
+
+def test_column_duplicate(column_test_table, client):
+    cache.clear()
+    target_col_idx = 2
+    target_col = column_test_table.sa_columns[target_col_idx]
+    data = {
+        "name": "new_col_name",
+        "source_column": target_col_idx,
+        "copy_source_data": False,
+        "copy_source_constraints": False,
+    }
+    with patch.object(columns, "duplicate_column") as mock_infer:
+        mock_infer.return_value = target_col
+        response = client.post(
+            f"/api/v0/tables/{column_test_table.id}/columns/",
+            data=data
+        )
+    assert response.status_code == 201
+    response_col = response.json()
+    assert response_col["name"] == target_col.name
+    assert response_col["type"] == target_col.plain_type
+
+    assert mock_infer.call_args[0] == (
+        column_test_table.oid,
+        target_col_idx,
+        column_test_table.schema._sa_engine,
+    )
+    assert mock_infer.call_args[1] == {
+        "new_column_name": data["name"],
+        "copy_data": data["copy_source_data"],
+        "copy_constraints": data["copy_source_constraints"]
+    }
+
+
+def test_column_duplicate_when_missing(column_test_table, client):
+    data = {
+        "source_column": 3000,
+    }
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/", data=data
+    )
+    response_data = response.json()
+    assert response.status_code == 400
+    assert "not found" in response_data[0]
+
+
+def test_column_duplicate_some_parameters(column_test_table, client):
+    data = {
+        "copy_source_constraints": True,
+    }
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/", data=data
+    )
+    response_data = response.json()
+    assert response.status_code == 400
+    assert response_data["source_column"][0] == "This field is required."
+
+
+def test_column_duplicate_no_parameters(column_test_table, client):
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/", data={}
+    )
+    response_data = response.json()
+    assert response.status_code == 400
+    assert response_data["name"][0] == "This field is required."
+    assert response_data["type"][0] == "This field is required."
