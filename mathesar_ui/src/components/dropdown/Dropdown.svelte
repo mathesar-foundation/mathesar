@@ -9,14 +9,19 @@
     Icon,
     clickOffBounds,
   } from '@mathesar-components';
+  import type {
+    Appearance,
+  } from '@mathesar-components/types';
+  import type { Placement } from '@popperjs/core/lib/enums';
 
   export let triggerClass = '';
-  export let triggerAppearance : 'default' | 'plain' = 'default';
+  export let triggerAppearance : Appearance = 'default';
   export let contentClass = '';
   export let isOpen = false;
   export let closeOnInnerClick = false;
   export let ariaLabel:string = null;
   export let ariaControls: string = null;
+  export let placement: Placement = 'bottom-start';
 
   let trigger: HTMLElement;
   $: tgClasses = ['dropdown', 'trigger', triggerClass].join(' ');
@@ -48,7 +53,7 @@
 
 {#if isOpen}
   <div class={['dropdown content', contentClass].join(' ')}
-        use:portal use:popper={{ reference: trigger }}
+        use:portal use:popper={{ reference: trigger, options: { placement } }}
         use:clickOffBounds={{
           callback: close,
           references: [

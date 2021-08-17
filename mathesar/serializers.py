@@ -65,6 +65,8 @@ class TableSerializer(serializers.ModelSerializer):
     records_url = serializers.SerializerMethodField()
     constraints_url = serializers.SerializerMethodField()
     columns_url = serializers.SerializerMethodField()
+    type_suggestions_url = serializers.SerializerMethodField()
+    previews_url = serializers.SerializerMethodField()
     name = serializers.CharField(required=False, allow_blank=True, default='')
     data_files = serializers.PrimaryKeyRelatedField(
         required=False, many=True, queryset=DataFile.objects.all()
@@ -101,6 +103,22 @@ class TableSerializer(serializers.ModelSerializer):
         else:
             return None
 
+    def get_type_suggestions_url(self, obj):
+        if isinstance(obj, Table):
+            # Only get type suggestions if we are serializing an existing table
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('table-type-suggestions', kwargs={'pk': obj.pk}))
+        else:
+            return None
+
+    def get_previews_url(self, obj):
+        if isinstance(obj, Table):
+            # Only get previews if we are serializing an existing table
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('table-previews', kwargs={'pk': obj.pk}))
+        else:
+            return None
+
     def validate_data_files(self, data_files):
         if data_files and len(data_files) > 1:
             raise ValidationError('Multiple data files are unsupported.')
@@ -123,13 +141,27 @@ class RecordListParameterSerializer(serializers.Serializer):
     group_count_by = serializers.JSONField(required=False, default=[])
 
 
+class TypeSerializer(serializers.Serializer):
+    identifier = serializers.CharField()
+    name = serializers.CharField()
+    db_types = serializers.ListField(child=serializers.CharField())
+
+
 class DatabaseSerializer(serializers.ModelSerializer):
-    supported_types = serializers.ListField(child=serializers.CharField())
+    supported_types_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Database
-        fields = ['id', 'name', 'deleted', 'supported_types']
-        read_only_fields = ['id', 'name', 'deleted', 'supported_types']
+        fields = ['id', 'name', 'deleted', 'supported_types_url']
+        read_only_fields = ['id', 'name', 'deleted', 'supported_types_url']
+
+    def get_supported_types_url(self, obj):
+        if isinstance(obj, Database):
+            # Only get records if we are serializing an existing table
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('database-types', kwargs={'pk': obj.pk}))
+        else:
+            return None
 
 
 class DataFileSerializer(serializers.ModelSerializer):
