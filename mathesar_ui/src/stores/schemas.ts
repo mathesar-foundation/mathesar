@@ -8,7 +8,12 @@ import {
 } from 'svelte/store';
 
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import { getAPI, PaginatedResponse, States } from '@mathesar/utils/api';
+import {
+  getAPI,
+  postAPI,
+  States,
+} from '@mathesar/utils/api';
+import type { PaginatedResponse } from '@mathesar/utils/api';
 
 import type {
   Database,
@@ -83,7 +88,9 @@ function updateSchemaInDBSchemaStore(
         ...schema,
         tables: getTableMap(schema.tables),
       });
-      return value;
+      return {
+        ...value,
+      };
     });
   }
 }
@@ -172,6 +179,18 @@ export function getSchemaInfo(database: Database['name'], schemaId: Schema['id']
     return null;
   }
   return get(store).data.get(schemaId);
+}
+
+export async function createSchema(
+  database: Database['name'],
+  schemaName: Schema['name'],
+): Promise<SchemaResponse> {
+  const response = await postAPI<SchemaResponse>('/schemas/', {
+    name: schemaName,
+    database,
+  });
+  updateSchemaInDBSchemaStore(database, response);
+  return response;
 }
 
 export const schemas: Readable<DBSchemaStoreData> = derived(

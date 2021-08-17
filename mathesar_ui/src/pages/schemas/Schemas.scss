@@ -49,3 +49,32 @@ $color-gray-200: #e2e2e4;
     }
   }
 }
+
+.schema-modal {
+  .header {
+    font-weight: 500;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  .help-text {
+    color: #606066;
+    margin-bottom: 20px;
+    line-height: 1.4rem;
+  }
+  .sub-text {
+    margin-top: 10px;
+
+    &.error {
+      color: #f47171;
+    }
+    &.success {
+      color: #1bc47d;
+    }
+  }
+  .footer {
+    text-align: right;
+    button + button {
+      margin-left: 6px;
+    }
+  }
+}

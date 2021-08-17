@@ -13,16 +13,9 @@
 
   $: isDefault = schema.name === 'public';
   $: isLocked = schema.name === 'public';
-
-  // Additional classes
-  let classes = '';
-  export { classes as class };
-
-  // Inline styles
-  export let style = '';
 </script>
 
-<div class={['schema-row', classes].join(' ')} {style}>
+<div class="schema-row">
   <div class="details">
     <div class="title">
       <Icon data={faProjectDiagram}/>
@@ -39,7 +32,7 @@
       {schema.tables.size} Tables
     </div>
   </div>
-  {#if !isLocked }
+  {#if !isLocked}
     <div class="controls">
       <Button class="edit">
         <Icon data={faPencilAlt}/>

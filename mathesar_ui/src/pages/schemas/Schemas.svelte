@@ -10,8 +10,10 @@
   import type { Schema } from '@mathesar/App.d';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import SchemaRow from './schema-row/SchemaRow.svelte';
+  import AddSchema from './add-schema/AddSchema.svelte';
 
   export let database: string;
+  let isAddModalOpen = false;
 
   function changeCurrentDB(_db: string) {
     if ($currentDBName !== _db) {
@@ -45,7 +47,7 @@
   <section class="hero">
     <div class="container">
       <h1>{$currentDBName}</h1>
-      <Button class="add">
+      <Button class="add" on:click={() => { isAddModalOpen = true; }}>
         <Icon data={faPlus}/>
         New Schema
       </Button>
@@ -64,6 +66,8 @@
     </ul>
   </div>
 </main>
+
+<AddSchema bind:isOpen={isAddModalOpen}/>
 
 <style global lang="scss">
   @import "Schemas.scss";
