@@ -2,7 +2,7 @@ import logging
 from sqlalchemy import delete, select, Column, func, true, and_
 from sqlalchemy.inspection import inspect
 from sqlalchemy_filters import apply_filters, apply_sort
-from sqlalchemy_filters.exceptions import FieldNotFound
+from sqlalchemy_filters.exceptions import FieldNotFound, BadFilterFormat
 
 
 logger = logging.getLogger(__name__)
@@ -55,11 +55,18 @@ def _execute_query(query, engine):
 
 
 def _get_dupe_columns(filters):
-    for i, f in enumerate(filters):
-        if type(f) is dict and f.get("op") == "get_duplicates":
-            filters.pop(i)
-            return f["value"], filters
-    return None, filters
+    try:
+        get_dupe_ops = [f for f in filters if f.get("op") == "get_duplicates"]
+        non_get_dupe_ops = [f for f in filters if f.get("op") != "get_duplicates"]
+    except AttributeError:
+        # Ignore formatting errors - they will be handled by sqlalchemy_filters
+        return None, filters
+    if len(get_dupe_ops) > 1:
+        raise BadFilterFormat("get_duplicates can only be specified a single time")
+    elif len(get_dupe_ops) == 1:
+        return get_dupe_ops[0]['value'], non_get_dupe_ops
+    else:
+        return None, filters
 
 
 def _create_query_with_dupe(table, dupe_columns):
