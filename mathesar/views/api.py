@@ -327,8 +327,7 @@ class RecordViewSet(viewsets.ViewSet):
                 raise NotFound
             serializer = RecordSerializer(record)
         except NotUniquePrimaryKey as e:
-            logger.error(e.message)
-            raise e
+            raise APIException(e)
         return Response(serializer.data)
 
     def create(self, request, table_pk=None):
