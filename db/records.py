@@ -33,12 +33,12 @@ def _create_col_objects(table, column_list):
     ]
 
 
-def _get_query(table, limit, offset, order_by, filters):
+def _get_query(table, limit, offset, order_by, filters, cols=None):
     dupe_columns, filters = _get_dupe_columns(filters)
     if dupe_columns:
-        query = _create_query_with_dupe(table, dupe_columns)
+        query = _create_query_with_dupe(table, dupe_columns, cols)
     else:
-        query = select(table)
+        query = select(*(cols or table.c)).select_from(table)
 
     query = query.limit(limit).offset(offset)
     if order_by is not None:
@@ -69,7 +69,7 @@ def _get_dupe_columns(filters):
         return None, filters
 
 
-def _create_query_with_dupe(table, dupe_columns):
+def _create_query_with_dupe(table, dupe_columns, cols=None):
     subq_table = table.alias()
     table_dupe_columns = [c for c in table.c if c.name in dupe_columns]
     subq_dupe_columns = [c for c in subq_table.c if c.name in dupe_columns]
@@ -84,7 +84,7 @@ def _create_query_with_dupe(table, dupe_columns):
         .lateral("lateral_subq")
     )
     query = (
-        select(*table.c)
+        select(*(cols or table.c))
         .select_from(table.join(subq, true()))
         .where(subq.c[IS_DUPE])
     )
