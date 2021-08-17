@@ -1,6 +1,7 @@
 import re
 import pytest
 from datetime import datetime
+from collections import Counter
 
 from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
@@ -71,6 +72,24 @@ def test_get_records_filters_with_miss(roster_table_obj):
         roster, engine, filters=filter_list
     )
     assert len(record_list) == 0
+
+
+def test_get_records_filters_duplicates(roster_table_obj):
+    roster, engine = roster_table_obj
+    dupe_cols = ["Grade", "Subject"]
+    filter_list = [{"field": "", "op": "get_duplicates", "value": dupe_cols}]
+
+    full_record_list = records.get_records(roster, engine)
+    dupe_record_list = records.get_records(roster, engine, filters=filter_list)
+
+    # Ensures that:
+    #   - All duplicate values in the table appeared in our query
+    #   - All values in our query are duplicate values
+    #   - All duplicate values appear the correct number of times
+    all_counter = Counter(tuple(r[c] for c in dupe_cols) for r in full_record_list)
+    all_counter = {k: v for k, v in all_counter.items() if v > 1}
+    got_counter = Counter(tuple(r[c] for c in dupe_cols) for r in dupe_record_list)
+    assert all_counter == got_counter
 
 
 def _like(x, v):
@@ -270,6 +289,16 @@ exceptions_test_list = [
     ([{"not": []}], BadFilterFormat),
     ([{"not": [{"field": "date", "op": "is_null"} for _ in range(2)]}], BadFilterFormat),
     ([{"field": "non_existent", "op": "eq", "value": "test"}], FilterFieldNotFound),
+    ([
+        {"field": "date", "op": "get_duplicates", "value": ["non_existent"]},
+    ], FilterFieldNotFound),
+    ([
+        {"field": "", "op": "get_duplicates", "value": ["date"]},
+        {"field": "", "op": "get_duplicates", "value": ["date"]}
+    ], BadFilterFormat),
+    ([
+        {"not": [{"field": "", "op": "get_duplicates", "value": "date"}]}
+    ], BadFilterFormat),
 ]
 
 
