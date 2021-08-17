@@ -455,9 +455,10 @@ def create_empty_table(name):
 
 
 def get_count(table, engine, filters=[]):
-    cols = [func.count()]
+    col_name = "_count"
+    cols = [func.count().label(col_name)]
     query = records._get_query(table, None, None, None, filters, cols)
-    return records._execute_query(query, engine)
+    return records._execute_query(query, engine)[0][col_name]
 
 
 def update_table_column_types(schema, table_name, engine):
