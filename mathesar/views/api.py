@@ -24,7 +24,7 @@ from mathesar.pagination import (
 from mathesar.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer,
     ColumnSerializer, DatabaseSerializer, ConstraintSerializer,
-    RecordListParameterSerializer, TablePreviewSerializer,
+    RecordListParameterSerializer, TablePreviewSerializer, TypeSerializer
 )
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.utils.tables import (
@@ -48,12 +48,13 @@ def get_table_or_404(pk):
 
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    def get_queryset(self):
-        return Schema.objects.all().order_by('-created_at')
     serializer_class = SchemaSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = SchemaFilter
+
+    def get_queryset(self):
+        return Schema.objects.all().order_by('-created_at')
 
     def create(self, request):
         serializer = SchemaSerializer(data=request.data)
@@ -87,13 +88,13 @@ class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin)
 
 
 class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    def get_queryset(self):
-        return Table.objects.all().order_by('-created_at')
-
     serializer_class = TableSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = TableFilter
+
+    def get_queryset(self):
+        return Table.objects.all().order_by('-created_at')
 
     def create(self, request):
         serializer = TableSerializer(data=request.data, context={'request': request})
@@ -135,8 +136,19 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
             data=request.data, context={'request': request}, partial=True
         )
         serializer.is_valid(raise_exception=True)
-
         table = self.get_object()
+
+        # Save the fields that are stored in the model.
+        present_model_fields = []
+        for model_field in table.MODEL_FIELDS:
+            if model_field in serializer.validated_data:
+                setattr(table, model_field, serializer.validated_data[model_field])
+                present_model_fields.append(model_field)
+        table.save()
+        for key in present_model_fields:
+            del serializer.validated_data[key]
+
+        # Save the fields that are stored in the underlying DB.
         table.update_sa_table(serializer.validated_data)
 
         # Reload the table to avoid cached properties
@@ -366,12 +378,19 @@ class DatabaseKeyViewSet(viewsets.ViewSet):
 
 
 class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    def get_queryset(self):
-        return Database.objects.all().order_by('-created_at')
     serializer_class = DatabaseSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
     filterset_class = DatabaseFilter
+
+    def get_queryset(self):
+        return Database.objects.all().order_by('-created_at')
+
+    @action(methods=['get'], detail=True)
+    def types(self, request, pk=None):
+        database = self.get_object()
+        serializer = TypeSerializer(database.supported_types, many=True)
+        return Response(serializer.data)
 
 
 class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):
