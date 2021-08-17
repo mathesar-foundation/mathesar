@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from django_filters import rest_framework as filters
 from psycopg2.errors import (
     DuplicateColumn, DuplicateTable, UndefinedFunction, UniqueViolation, UndefinedObject,
-    InvalidTextRepresentation, CheckViolation, InvalidParameterValue
+    InvalidTextRepresentation, CheckViolation
 )
 from sqlalchemy.exc import ProgrammingError, DataError, IntegrityError
 from sqlalchemy_filters.exceptions import (
@@ -284,17 +284,16 @@ class ColumnViewSet(viewsets.ViewSet):
             raise NotFound
         except TypeError:
             raise ValidationError("Unknown type_option passed")
-        except DataError as e:
-            if (
-                    type(e.orig) == InvalidParameterValue
-                    or type(e.orig) == InvalidTextRepresentation
-            ):
-                raise ValidationError(
-                    f'parameter dict {request.data["type_options"]} is'
-                    f' invalid for type {request.data["type"]}'
-                )
-            else:
-                raise APIException(e)
+        except InvalidDefaultError:
+            raise ValidationError(
+                f'default "{request.data["default"]}" is'
+                f' invalid for this column'
+            )
+        except InvalidTypeOptionError:
+            raise ValidationError(
+                f'parameter dict {request.data["type_options"]} is'
+                f' invalid for type {request.data["type"]}'
+            )
         except Exception as e:
             raise APIException(e)
         serializer = ColumnSerializer(column)

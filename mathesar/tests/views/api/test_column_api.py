@@ -325,6 +325,15 @@ def test_column_update_delete_default(column_test_table, client):
     assert response.json()["default"] == expt_default
 
 
+def test_column_update_default_invalid_cast(column_test_table, client):
+    cache.clear()
+    data = {"default": "not an integer"}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data,
+    )
+    assert response.status_code == 400
+
+
 def test_column_update_type(column_test_table, client):
     cache.clear()
     type_ = "BOOLEAN"

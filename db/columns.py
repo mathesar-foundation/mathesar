@@ -321,15 +321,24 @@ def rename_column(table_oid, column_index, new_column_name, engine, **kwargs):
 def retype_column(table_oid, column_index, new_type, engine, **kwargs):
     table = tables.reflect_table_from_oid(table_oid, engine)
     type_options = kwargs.get("type_options", {})
-    alteration.alter_column_type(
-        table.schema,
-        table.name,
-        table.columns[column_index].name,
-        new_type,
-        engine,
-        friendly_names=False,
-        type_options=type_options
-    )
+    try:
+        alteration.alter_column_type(
+            table.schema,
+            table.name,
+            table.columns[column_index].name,
+            new_type,
+            engine,
+            friendly_names=False,
+            type_options=type_options
+        )
+    except DataError as e:
+        if (
+            type(e.orig) == InvalidParameterValue
+            or type(e.orig) == InvalidTextRepresentation
+        ):
+            raise InvalidTypeOptionError
+        else:
+            raise e
 
     return get_mathesar_column_with_engine(
         tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
@@ -424,12 +433,18 @@ def set_column_default(table_oid, column_index, default, engine, **kwargs):
     table = tables.reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
     default_clause = DefaultClause(str(default)) if default is not None else default
-    with engine.begin() as conn:
-        ctx = MigrationContext.configure(conn)
-        op = Operations(ctx)
-        op.alter_column(
-            table.name, column.name, schema=table.schema, server_default=default_clause
-        )
+    try:
+        with engine.begin() as conn:
+            ctx = MigrationContext.configure(conn)
+            op = Operations(ctx)
+            op.alter_column(
+                table.name, column.name, schema=table.schema, server_default=default_clause
+            )
+    except DataError as e:
+        if (type(e.orig) == InvalidTextRepresentation):
+            raise InvalidDefaultError
+        else:
+            raise e
     return get_mathesar_column_with_engine(
         tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
         engine
