@@ -7,15 +7,29 @@
 
   // Inline styles
   export let style = '';
+
+  // Boolean to open/close modal
+  export let isOpen = true;
+
+  // Close when esc key is pressed
+  export let closeOnEsc = true;
+
+  function handleKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape' && isOpen && closeOnEsc) {
+      isOpen = false;
+    }
+  }
 </script>
 
-<div class="modal-wrapper">
-  <div class={['modal', classes].join(' ')} {style}>
-    <slot/>
-  </div>
-</div>
+<svelte:window on:keydown={handleKeydown}/>
 
-<div class="overlay" use:portal></div>
+{#if isOpen}
+  <div class="modal-wrapper" use:portal>
+    <div class={['modal', classes].join(' ')} {style}>
+      <slot/>
+    </div>
+  </div>
+{/if}
 
 <style global lang="scss">
   @import "Modal.scss";
