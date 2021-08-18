@@ -465,7 +465,7 @@ def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
         table_name, schema, column_list, engine
     )
     with patch.object(inference, "infer_column_type") as mock_infer:
-        tables.update_table_column_types(
+        inference.update_table_column_types(
             schema,
             table_name,
             engine
@@ -483,7 +483,7 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
         table_name, schema, column_list, engine
     )
     with patch.object(inference, "infer_column_type") as mock_infer:
-        tables.update_table_column_types(
+        inference.update_table_column_types(
             schema,
             table_name,
             engine
@@ -513,7 +513,7 @@ def test_update_table_column_types_skips_pkey_columns(engine_with_schema):
         table_name, schema, column_list, engine
     )
     with patch.object(inference, "infer_column_type") as mock_infer:
-        tables.update_table_column_types(
+        inference.update_table_column_types(
             schema,
             table_name,
             engine
@@ -526,7 +526,7 @@ def test_update_table_column_types_skips_fkey_columns(
 ):
     _, remainder, _, engine, schema = extracted_remainder_roster
     with patch.object(inference, "infer_column_type") as mock_infer:
-        tables.update_table_column_types(
+        inference.update_table_column_types(
             schema,
             remainder.name,
             engine
