@@ -10,8 +10,12 @@
   import type { Schema } from '@mathesar/App.d';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import SchemaRow from './schema-row/SchemaRow.svelte';
+  import AddEditSchema from './AddEditSchema.svelte';
+  import DeleteSchema from './DeleteSchema.svelte';
 
   export let database: string;
+  let isAddModalOpen = false;
+  let isDeleteModalOpen = false;
 
   function changeCurrentDB(_db: string) {
     if ($currentDBName !== _db) {
@@ -23,6 +27,7 @@
   $: changeCurrentDB(database);
 
   let filterQuery = '';
+  let activeSchema: Schema = null;
 
   function filterSchemas(schemaData: DBSchemaStoreData['data'], filter: string): Schema[] {
     const filtered: Schema[] = [];
@@ -35,6 +40,21 @@
   }
 
   $: displayList = filterSchemas($schemas.data, filterQuery);
+
+  function addSchema() {
+    activeSchema = null;
+    isAddModalOpen = true;
+  }
+
+  function editSchema(schema: Schema) {
+    activeSchema = schema;
+    isAddModalOpen = true;
+  }
+
+  function deleteSchema(schema: Schema) {
+    activeSchema = schema;
+    isDeleteModalOpen = true;
+  }
 </script>
 
 <svelte:head>
@@ -45,7 +65,7 @@
   <section class="hero">
     <div class="container">
       <h1>{$currentDBName}</h1>
-      <Button class="add">
+      <Button class="add" on:click={addSchema}>
         <Icon data={faPlus}/>
         New Schema
       </Button>
@@ -58,12 +78,24 @@
         placeholder="Find a schema..."
         bind:value={filterQuery}/>
     <ul class="schema-list">
-      {#each displayList as schema, i}
-        <li><SchemaRow {schema}/></li>
+      {#each displayList as schema (schema.id)}
+        <li>
+          <SchemaRow {schema} on:edit={() => editSchema(schema)}
+            on:delete={() => deleteSchema(schema)}/>
+        </li>
       {/each}
     </ul>
   </div>
 </main>
+
+{#if isAddModalOpen}
+  <AddEditSchema bind:isOpen={isAddModalOpen}
+    isEditMode={activeSchema !== null} schema={activeSchema}/>
+{/if}
+
+{#if isDeleteModalOpen}
+  <DeleteSchema bind:isOpen={isDeleteModalOpen} schema={activeSchema}/>
+{/if}
 
 <style global lang="scss">
   @import "Schemas.scss";
