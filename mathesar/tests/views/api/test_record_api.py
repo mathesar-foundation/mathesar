@@ -75,7 +75,7 @@ def test_record_list_filter(create_table, client):
 
     with patch.object(
         records, "get_records", side_effect=records.get_records
-    ) as mock_infer:
+    ) as mock_get:
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
         )
@@ -84,8 +84,23 @@ def test_record_list_filter(create_table, client):
     assert response.status_code == 200
     assert response_data['count'] == 2
     assert len(response_data['results']) == 2
-    assert mock_infer.call_args is not None
-    assert mock_infer.call_args[1]['filters'] == filter_list
+    assert mock_get.call_args is not None
+    assert mock_get.call_args[1]['filters'] == filter_list
+
+
+def test_record_list_filter_duplicates(create_table, client):
+    table_name = 'NASA Record List Filter Duplicates'
+    table = create_table(table_name)
+
+    filter_list = [
+        {'field': '', 'op': 'get_duplicates', 'value': ['Patent Expiration Date']}
+    ]
+    json_filter_list = json.dumps(filter_list)
+
+    with patch.object(records, "get_records") as mock_get:
+        client.get(f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}')
+    assert mock_get.call_args is not None
+    assert mock_get.call_args[1]['filters'] == filter_list
 
 
 def test_record_list_sort(create_table, client):
@@ -100,7 +115,7 @@ def test_record_list_sort(create_table, client):
 
     with patch.object(
         records, "get_records", side_effect=records.get_records
-    ) as mock_infer:
+    ) as mock_get:
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?order_by={json_order_by}'
         )
@@ -110,8 +125,8 @@ def test_record_list_sort(create_table, client):
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 50
 
-    assert mock_infer.call_args is not None
-    assert mock_infer.call_args[1]['order_by'] == order_by
+    assert mock_get.call_args is not None
+    assert mock_get.call_args[1]['order_by'] == order_by
 
 
 def _test_record_list_group(table, client, group_count_by, expected_groups):
@@ -125,7 +140,7 @@ def _test_record_list_group(table, client, group_count_by, expected_groups):
 
     with patch.object(
         records, "get_group_counts", side_effect=records.get_group_counts
-    ) as mock_infer:
+    ) as mock_get:
         response = client.get(f'/api/v0/tables/{table.id}/records/?{query_str}')
         response_data = response.json()
 
@@ -144,8 +159,8 @@ def _test_record_list_group(table, client, group_count_by, expected_groups):
     for expected_group in expected_groups:
         assert expected_group in returned_groups
 
-    assert mock_infer.call_args is not None
-    assert mock_infer.call_args[0][2] == group_count_by
+    assert mock_get.call_args is not None
+    assert mock_get.call_args[0][2] == group_count_by
 
 
 def test_record_list_group_single_column(create_table, client):

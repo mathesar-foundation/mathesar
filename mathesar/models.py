@@ -190,9 +190,19 @@ class Table(DatabaseObject):
 
     def drop_column(self, column_index):
         columns.drop_column(
-            self.schema._sa_engine,
             self.oid,
             column_index,
+            self.schema._sa_engine,
+        )
+
+    def duplicate_column(self, column_index, copy_data, copy_constraints, name=None):
+        return columns.duplicate_column(
+            self.oid,
+            column_index,
+            self.schema._sa_engine,
+            new_column_name=name,
+            copy_data=copy_data,
+            copy_constraints=copy_constraints,
         )
 
     def get_preview(self, column_definitions):
