@@ -16,7 +16,6 @@ from sqlalchemy_filters.exceptions import (
 
 from db.types.alteration import UnsupportedTypeException
 
-from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile, Database, Constraint
 from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
@@ -370,11 +369,6 @@ class RecordViewSet(viewsets.ViewSet):
         table = get_table_or_404(table_pk)
         table.delete_record(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class DatabaseKeyViewSet(viewsets.ViewSet):
-    def list(self, request):
-        return Response(get_non_default_database_keys())
 
 
 class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):

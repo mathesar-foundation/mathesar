@@ -17,7 +17,3 @@ def get_database_key(engine):
         if settings_conn_str == str(engine.url):
             return database
     return None
-
-
-def get_non_default_database_keys():
-    return [key for key in settings.DATABASES if key != 'default']
