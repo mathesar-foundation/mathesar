@@ -3,11 +3,12 @@ from django.core.cache import cache
 from django.db import models
 from django.utils.functional import cached_property
 
+from db import tables, records, schemas, columns, constraints
+from db.types import alteration
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import get_types
-from db import tables, records, schemas, columns, constraints
 
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -201,7 +202,7 @@ class Table(DatabaseObject):
         )
 
     def get_preview(self, column_definitions):
-        return tables.get_column_cast_records(
+        return alteration.get_column_cast_records(
             self.schema._sa_engine, self._sa_table, column_definitions
         )
 
@@ -270,7 +271,7 @@ class Constraint(DatabaseObject):
     @property
     def _sa_constraint(self):
         engine = self.table.schema.database._sa_engine
-        return constraints.get_constraint_from_oid(self.oid, engine)
+        return constraints.get_constraint_from_oid(self.oid, engine, self.table._sa_table)
 
     @property
     def name(self):

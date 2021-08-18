@@ -658,3 +658,65 @@ def test_get_full_cast_map(engine_with_types, source_type, expect_target_types):
     actual_target_types = actual_cast_map[source_type]
     assert len(actual_target_types) == len(expect_target_types)
     assert sorted(actual_target_types) == sorted(expect_target_types)
+
+
+def test_get_column_cast_records(engine_email_type):
+    COL1 = "col1"
+    COL2 = "col2"
+    col1 = Column(COL1, String)
+    col2 = Column(COL2, String)
+    column_list = [col1, col2]
+    engine, schema = engine_email_type
+    table_name = "table_with_columns"
+    table = tables.create_mathesar_table(
+        table_name, schema, column_list, engine
+    )
+    ins = table.insert().values(
+        [{COL1: 'one', COL2: 1}, {COL1: 'two', COL2: 2}]
+    )
+    with engine.begin() as conn:
+        conn.execute(ins)
+    COL1_MOD = COL1 + "_mod"
+    COL2_MOD = COL2 + "_mod"
+    column_definitions = [
+        {"name": "mathesar_id", "type": "INTEGER"},
+        {"name": COL1_MOD, "type": "VARCHAR"},
+        {"name": COL2_MOD, "type": "NUMERIC"},
+    ]
+    records = alteration.get_column_cast_records(engine, table, column_definitions)
+    for record in records:
+        assert (
+            type(record[COL1 + "_mod"]) == str
+            and type(record[COL2 + "_mod"]) == Decimal
+        )
+
+
+def test_get_column_cast_records_options(engine_email_type):
+    COL1 = "col1"
+    COL2 = "col2"
+    col1 = Column(COL1, String)
+    col2 = Column(COL2, String)
+    column_list = [col1, col2]
+    engine, schema = engine_email_type
+    table_name = "table_with_columns"
+    table = tables.create_mathesar_table(
+        table_name, schema, column_list, engine
+    )
+    ins = table.insert().values(
+        [{COL1: 'one', COL2: 1}, {COL1: 'two', COL2: 2}]
+    )
+    with engine.begin() as conn:
+        conn.execute(ins)
+    COL1_MOD = COL1 + "_mod"
+    COL2_MOD = COL2 + "_mod"
+    column_definitions = [
+        {"name": "mathesar_id", "type": "INTEGER"},
+        {"name": COL1_MOD, "type": "VARCHAR"},
+        {"name": COL2_MOD, "type": "NUMERIC", "type_options": {"precision": 5, "scale": 2}},
+    ]
+    records = alteration.get_column_cast_records(engine, table, column_definitions)
+    for record in records:
+        assert (
+            type(record[COL1 + "_mod"]) == str
+            and type(record[COL2 + "_mod"]) == Decimal
+        )
