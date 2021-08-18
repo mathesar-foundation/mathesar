@@ -85,6 +85,7 @@
       newSort.set(column.name, order);
     }
     sort = newSort;
+    closeDropdown(column.name)
     dispatch('reload');
   }
 
@@ -100,6 +101,7 @@
     /**
      * Only reset item positions when group layout is created or destroyed
     */
+    closeDropdown(column.name)
     dispatch('reload', {
       resetPositions: oldSize === 0 || group.size === 0,
     });
