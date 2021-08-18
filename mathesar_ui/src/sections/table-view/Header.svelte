@@ -99,6 +99,17 @@
         return 'i';
     }
   }
+
+  function determineDataTitle(type: string) {
+    switch (type) {
+      case 'INTEGER':
+        return 'Number';
+      case 'VARCHAR': 
+        return 'Text'   
+      default:
+        return 'Else'
+    }
+  }
 </script>
 
 <div bind:this={headerRef} class="header">
