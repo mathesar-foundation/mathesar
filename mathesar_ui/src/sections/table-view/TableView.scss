@@ -344,13 +344,22 @@ section.table-section .tab-container {
   ul {
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 0px;
+    padding-top: 10px;
 
-    li {
-      padding: 8px 12px 8px 8px;
+    .list-button {
+      width: 100%;
       display: flex;
       align-items: center;
+      padding: 8px 12px 8px 8px;
+      background-color: white;
+      border: 0px;
       cursor: pointer;
+
+      .right-icon {
+        font-size: 12px;
+        color: #606066;
+      }
 
       >.opt {
         margin-right: 8px;
@@ -359,6 +368,26 @@ section.table-section .tab-container {
       &:hover {
         background: #f6f7f7;
       }
+
+      .data-icon {
+        margin-right: 4px;
+      }
+    }
+
+    .with-right-icon {
+      justify-content: space-between;
+    }
+
+    .category {
+      display: block;
+      padding: 8px 12px 8px 8px;
+      font-size: 12px;
+    }
+
+    .data-icon {
+      padding: 2px 6px;
+      color: #606066;
+      background-color: #f6f7f7;
     }
   }
 }

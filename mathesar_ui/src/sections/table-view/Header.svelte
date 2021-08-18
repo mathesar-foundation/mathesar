@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount, createEventDispatcher } from 'svelte';
   import {
+    faChevronRight,
+    faCog,
     faSortAmountDown,
     faSortAmountDownAlt,
     faThList,
@@ -125,41 +127,61 @@
       </span>
       <span class="name">{column.name}</span>
 
-      <Dropdown closeOnInnerClick={true}
-                triggerClass="opts" triggerAppearance="plain"
+      <Dropdown triggerClass="opts" triggerAppearance="plain"
                 contentClass="table-opts-content">
         <svelte:fragment slot="content">
           <ul>
-            <li on:click={() => sortByColumn(column, 'asc')}>
-              <Icon class="opt" data={faSortAmountDownAlt}/>
-              <span>
-                {#if sort?.get(column.name) === 'asc'}
-                  Remove asc sort
-                {:else}
-                  Sort Ascending
-                {/if}
-              </span>
+            <li>
+              <span class="category">Data Type</span>
+              <button class="list-button with-right-icon">
+                <div>
+                  <span class="data-icon">{determineTypeIcon(column.type)}</span>
+                  <span>
+                    {determineDataTitle(column.type)}
+                  </span>
+                </div>
+                <div>
+                  <Icon class="right-icon" data={faCog} />
+                  <Icon class="right-icon" data={faChevronRight} />
+                </div>
+              </button>
             </li>
-            <li on:click={() => sortByColumn(column, 'desc')}>
-              <Icon class="opt" data={faSortAmountDown}/>
-              <span>
-                {#if sort?.get(column.name) === 'desc'}
-                  Remove desc sort
-                {:else}
-                  Sort Descending
-                {/if}
-              </span>
+            <li>
+              <button class="list-button" on:click={() => sortByColumn(column, 'asc')}>
+                <Icon class="opt" data={faSortAmountDownAlt}/>
+                <span>
+                  {#if sort?.get(column.name) === 'asc'}
+                    Remove asc sort
+                  {:else}
+                    Sort Ascending
+                  {/if}
+                </span>
+              </button>
             </li>
-            <li on:click={() => groupByColumn(column)}>
-              <Icon class="opt" data={faThList}/>
-              <span>
-                {#if group?.has(column.name)}
-                  Remove grouping
-                {:else}
-                  Group by column
-                {/if}
-              </span>
+            <li>
+              <button class="list-button" on:click={() => sortByColumn(column, 'desc')}>
+                <Icon class="opt" data={faSortAmountDown}/>
+                <span>
+                  {#if sort?.get(column.name) === 'desc'}
+                    Remove desc sort
+                  {:else}
+                    Sort Descending
+                  {/if}
+                </span>
+              </button>
             </li>
+            <li>
+              <button class="list-button" on:click={() => groupByColumn(column)}>
+                <Icon class="opt" data={faThList}/>
+                <span>
+                  {#if group?.has(column.name)}
+                    Remove grouping
+                  {:else}
+                    Group by column
+                  {/if}
+                </span>
+              </button>
+            </li>            
           </ul>
         </svelte:fragment>
       </Dropdown>
