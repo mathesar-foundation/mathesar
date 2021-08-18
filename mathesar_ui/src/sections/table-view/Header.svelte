@@ -10,7 +10,7 @@
     Button,
     Dropdown,
     Icon,
-    Resizeable,
+    moveable,
     TextInput,
   } from '@mathesar-components';
   import type {
@@ -26,6 +26,7 @@
     DEFAULT_ROW_RIGHT_PADDING,
     updateColumnPosition,
   } from '@mathesar/stores/tableData';
+  import type { MoveableEvents } from 'moveable';
 
   const dispatch = createEventDispatcher();
   export let columns: TableColumnData;
@@ -35,9 +36,6 @@
   export let isResultGrouped: boolean;
 
   let headerRef: HTMLElement;
-  let resizer:Resizeable;
-  let resizerRef:HTMLElement;
-  const resizerRefs: HTMLElement[] = [];
 
   function onHScrollOffsetChange(_hscrollOffset: number) {
     if (headerRef) {
@@ -51,31 +49,11 @@
   $: paddingLeft = isResultGrouped ? GROUP_MARGIN_LEFT : 0;
 
   export let columnPosition: ColumnPosition = new Map();
-
-  function resizeColumn(column:TableColumn) {
+  function resizeColumn(event:MoveableEvents['resize'], column:TableColumn) {
     if (column) {
+      columnPosition.get(column.name).width = event.width;
       columnPosition = updateColumnPosition(columns.data, columnPosition);
     }
-  }
-
-  let columnToResize:TableColumn;
-  $: resizeColumn(columnToResize);
-
-  function showResizerForColumn(event:MouseEvent, column:TableColumn) {
-    resizer.$set({
-      target: <HTMLElement>event.target,
-      onResize: (resizeEvent) => {
-        const currWidth = columnPosition.get(column.name).width;
-        const newWidth = (resizeEvent.detail.width) ? resizeEvent.detail.width as number : currWidth;
-        if (currWidth !== newWidth) {
-          columnPosition.get(column.name).width = newWidth;
-        }
-      },
-      onResizeEnd: () => {
-        columnToResize = null;
-        columnToResize = column;
-      },
-    });
   }
 
   function onHeaderScroll(scrollLeft: number) {
@@ -148,23 +126,22 @@
   }
   $: isDuplicateColumn = isColumnPresent(newColumnName);
 </script>
-
-<Resizeable
-  bind:this={resizer}
-  target={resizerRef}
-  directions={['e']}
-/>
 <div id="columns-header" bind:this={headerRef} class="header">
   <div class="cell row-control" style="width:{DEFAULT_COUNT_COL_WIDTH + paddingLeft}px;">
   </div>
-
   {#each columns.data as column, i (column.name)}
     <div
-      bind:this={resizerRefs[i]}
-      on:mouseenter={(e) => showResizerForColumn(e, column)}
+      use:moveable={{
+        onResize: (e) => { resizeColumn(e, column); },
+        moveableOptions: {
+          resizable: true,
+          renderDirections: ['e'],
+        },
+      }}
       class="cell" style="
-        width:{columnPosition.get(column.name).width + paddingLeft}px;
-        left:{columnPosition.get(column.name).left + paddingLeft}px;">
+      width:{columnPosition.get(column.name).width + paddingLeft}px;
+      left:{columnPosition.get(column.name).left + paddingLeft}px;">
+
       <span class="type">
         {#if column.type === 'INTEGER'}
           #
