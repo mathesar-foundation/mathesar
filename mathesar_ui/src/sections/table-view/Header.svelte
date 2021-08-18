@@ -88,6 +88,17 @@
       resetPositions: oldSize === 0 || group.size === 0,
     });
   }
+
+  function determineTypeIcon(type: string) {
+    switch (type) {
+      case 'INTEGER':
+        return '#';
+      case 'VARCHAR':
+        return 'T';
+      default:
+        return 'i';
+    }
+  }
 </script>
 
 <div bind:this={headerRef} class="header">
@@ -99,13 +110,7 @@
       width:{columnPosition.get(column.name).width}px;
       left:{columnPosition.get(column.name).left + paddingLeft}px;">
       <span class="type">
-        {#if column.type === 'INTEGER'}
-          #
-        {:else if column.type === 'VARCHAR'}
-          T
-        {:else}
-          i
-        {/if}
+        {determineTypeIcon(column.type)}
       </span>
       <span class="name">{column.name}</span>
 
