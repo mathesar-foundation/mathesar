@@ -4,6 +4,7 @@ from sqlalchemy.sql.functions import Function
 from db import columns, tables
 from db.types import base, email
 
+
 BIGINT = base.PostgresType.BIGINT.value
 BOOLEAN = base.PostgresType.BOOLEAN.value
 EMAIL = base.MathesarCustomType.EMAIL.value
@@ -19,8 +20,8 @@ SMALLINT = base.PostgresType.SMALLINT.value
 FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
 TEXT = base.PostgresType.TEXT.value
 DATE = base.PostgresType.DATE.value
-STRING = 'string'
-VARCHAR = 'varchar'
+STRING = base.STRING
+VARCHAR = base.VARCHAR
 
 
 class UnsupportedTypeException(Exception):
@@ -479,3 +480,22 @@ def _get_default_type_body_map(source_types, target_type_str):
         END;
     """
     return {type_name: default_cast_str for type_name in source_types}
+
+
+def get_column_cast_records(engine, table, column_definitions, num_records=20):
+    assert len(column_definitions) == len(table.columns)
+    cast_expression_list = [
+        (
+            get_column_cast_expression(
+                column, col_def["type"],
+                engine,
+                type_options=col_def.get("type_options", {})
+            )
+            .label(col_def["name"])
+        ) if not columns.MathesarColumn.from_column(column).is_default else column
+        for column, col_def in zip(table.columns, column_definitions)
+    ]
+    sel = select(cast_expression_list).limit(num_records)
+    with engine.begin() as conn:
+        result = conn.execute(sel)
+    return result.fetchall()

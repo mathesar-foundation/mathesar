@@ -6,8 +6,6 @@ from alembic.operations import Operations
 from sqlalchemy import MetaData, CheckConstraint, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint, Table, select, and_
 from sqlalchemy.dialects.postgresql import ExcludeConstraint
 
-from db.tables import reflect_table_from_oid
-
 
 class ConstraintType(Enum):
     FOREIGN_KEY = 'foreignkey'
@@ -63,7 +61,7 @@ def get_constraints_with_oids(engine, table_oid=None):
     return result
 
 
-def get_constraint_from_oid(oid, engine):
+def get_constraint_from_oid(oid, engine, table):
     metadata = MetaData()
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
@@ -72,7 +70,6 @@ def get_constraint_from_oid(oid, engine):
         query = select(pg_constraint).where(pg_constraint.c.oid == oid)
     with engine.begin() as conn:
         constraint_record = conn.execute(query).first()
-    table = reflect_table_from_oid(constraint_record['conrelid'], engine)
     for constraint in table.constraints:
         if constraint.name == constraint_record['conname']:
             return constraint
@@ -159,10 +156,9 @@ def drop_constraint(table_name, schema, engine, constraint_name):
         op.drop_constraint(constraint_name, table_name, schema=schema)
 
 
-def copy_constraint(table_oid, engine, constraint, from_column, to_column):
+def copy_constraint(table, engine, constraint, from_column, to_column):
     constraint_type = get_constraint_type_from_char(constraint.contype)
     if constraint_type == ConstraintType.UNIQUE.value:
-        table = reflect_table_from_oid(table_oid, engine)
         column_idxs = [con - 1 for con in constraint.conkey]
         columns = [
             table.c[to_column if idx == from_column else idx].name
