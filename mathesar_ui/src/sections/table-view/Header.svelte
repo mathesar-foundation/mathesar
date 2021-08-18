@@ -30,6 +30,20 @@
   export let isResultGrouped: boolean;
 
   let headerRef: HTMLElement;
+  let isAdvancedOptionsOpen = false;
+  $: dropdownStates = columns.data.reduce((acc, el) => {
+    acc[el.name] = false;
+    return acc;
+  }, {});
+
+  function toggleAdvancedOptions() {
+    isAdvancedOptionsOpen = !isAdvancedOptionsOpen;
+  }
+
+  function closeDropdown(name: string) {
+    isAdvancedOptionsOpen = false;
+    dropdownStates = { ...dropdownStates, [name]: false };
+  }
 
   function onHScrollOffsetChange(_hscrollOffset: number) {
     if (headerRef) {
@@ -127,7 +141,7 @@
       </span>
       <span class="name">{column.name}</span>
 
-      <Dropdown triggerClass="opts" triggerAppearance="plain"
+      <Dropdown isOpen={dropdownStates[column.name]} triggerClass="opts" triggerAppearance="plain"
                 contentClass="table-opts-content">
         <svelte:fragment slot="content">
           <ul>
