@@ -21,7 +21,7 @@ import type {
   Database,
   Schema,
   SchemaResponse,
-  SchemaEntry,
+  DBObjectEntry,
 } from '@mathesar/App.d';
 import type { CancellablePromise } from '@mathesar/components';
 
@@ -33,7 +33,7 @@ export const currentSchemaId: Writable<Schema['id']> = writable(
   commonData.current_schema || null,
 );
 
-export type TableMap = Map<number, SchemaEntry>;
+export type TableMap = Map<number, DBObjectEntry>;
 
 export interface DBSchemaStoreData {
   state: States,

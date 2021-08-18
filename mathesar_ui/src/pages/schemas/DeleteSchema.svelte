@@ -36,15 +36,10 @@
     Delete schema '{schema?.name}'
   </div>
 
-  {#if schema?.tables.size > 0}
+  {#if schema?.has_dependencies}
     <div class="help-text">
-      All objects ({schema?.tables.size}) in the schema will be deleted permanently
+      All objects in this schema will be deleted permanently, including tables and views.
     </div>
-    <ul class="schema-table-list">
-      {#each [...schema?.tables] as [tableId, table] (tableId)}
-        <li>{table.name}</li>
-      {/each}
-    </ul>
   {/if}
 
   {#if state === States.Idle}
