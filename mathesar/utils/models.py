@@ -2,7 +2,10 @@ import os
 from rest_framework.exceptions import ValidationError
 
 from db.tables import update_table, SUPPORTED_TABLE_UPDATE_ARGS
+from db.types.alteration import UnsupportedTypeException
 from db.schemas import update_schema, SUPPORTED_SCHEMA_UPDATE_ARGS
+
+from sqlalchemy.exc import DataError, InternalError
 
 
 def user_directory_path(instance, filename):
@@ -18,7 +21,15 @@ def update_sa_table(table, validated_data):
     }
     if errors:
         raise ValidationError(errors)
-    update_table(table.name, table.schema.name, table.schema._sa_engine, validated_data)
+
+    try:
+        update_table(table.name, table.schema.name, table.schema._sa_engine, validated_data)
+    except InternalError as error:
+        raise ValidationError(error)
+    except DataError as error:
+        raise ValidationError(error)
+    except UnsupportedTypeException as error:
+        raise ValidationError(error)
 
 
 def update_sa_schema(schema, validated_data):

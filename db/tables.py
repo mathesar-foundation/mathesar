@@ -12,12 +12,13 @@ from sqlalchemy.exc import NoSuchTableError, InternalError
 from psycopg2.errors import DependentObjectsStillExist
 
 from db import columns, constants, schemas, records
+from db.types import alteration
 
 
 TEMP_SCHEMA = f"{constants.MATHESAR_PREFIX}temp_schema"
 TEMP_TABLE = f"{constants.MATHESAR_PREFIX}temp_table_%s"
 
-SUPPORTED_TABLE_UPDATE_ARGS = {'name'}
+SUPPORTED_TABLE_UPDATE_ARGS = {'name', 'sa_columns'}
 
 
 def create_string_column_table(name, schema, column_names, engine):
@@ -94,9 +95,22 @@ def rename_table(name, schema, engine, rename_to):
         op.rename_table(table.name, rename_to, schema=table.schema)
 
 
+def update_columns(table_name, schema, engine, columns_to_change):
+    for column in columns_to_change:
+        alteration.alter_column_type(
+            schema=schema,
+            table_name=table_name,
+            column_name=column['name'],
+            target_type_str=column['plain_type'].lower(),
+            engine=engine
+        )
+
+
 def update_table(name, schema, engine, update_data):
     if 'name' in update_data:
         rename_table(name, schema, engine, update_data['name'])
+    if 'sa_columns' in update_data:
+        update_columns(name, schema, engine, update_data['sa_columns'])
 
 
 def extract_columns_from_table(
