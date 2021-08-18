@@ -146,10 +146,25 @@
       <Dropdown isOpen={dropdownStates[column.name]} triggerClass="opts" triggerAppearance="plain"
                 contentClass="table-opts-content">
         <svelte:fragment slot="content">
-          <ul>
-            <li>
-              <span class="category">Data Type</span>
-              <button class="list-button with-right-icon">
+          <div>
+            {#if isAdvancedOptionsOpen}
+                <h6 class="category">Advanced Options</h6>
+                <h5 class="title">Set '{column.name}' type</h5>
+                <ul class="type-list">
+                  <li>
+                    <button on:click={() => closeDropdown(column.name)}>
+                      <span class="data-icon">T</span> Text
+                    </button>
+                  </li>
+                  <li>
+                    <button>
+                      <span class="data-icon">#</span> Number
+                    </button>
+                  </li>
+                </ul>
+            {:else} 
+              <h6 class="category">Data Type</h6>
+              <button class="list-button with-right-icon" on:click={() => toggleAdvancedOptions()}>
                 <div>
                   <span class="data-icon">{determineDataIcon(column.type)}</span>
                   <span>
@@ -161,44 +176,46 @@
                   <Icon class="right-icon" data={faChevronRight} />
                 </div>
               </button>
-            </li>
-            <li>
-              <button class="list-button" on:click={() => sortByColumn(column, 'asc')}>
-                <Icon class="opt" data={faSortAmountDownAlt}/>
-                <span>
-                  {#if sort?.get(column.name) === 'asc'}
-                    Remove asc sort
-                  {:else}
-                    Sort Ascending
-                  {/if}
-                </span>
-              </button>
-            </li>
-            <li>
-              <button class="list-button" on:click={() => sortByColumn(column, 'desc')}>
-                <Icon class="opt" data={faSortAmountDown}/>
-                <span>
-                  {#if sort?.get(column.name) === 'desc'}
-                    Remove desc sort
-                  {:else}
-                    Sort Descending
-                  {/if}
-                </span>
-              </button>
-            </li>
-            <li>
-              <button class="list-button" on:click={() => groupByColumn(column)}>
-                <Icon class="opt" data={faThList}/>
-                <span>
-                  {#if group?.has(column.name)}
-                    Remove grouping
-                  {:else}
-                    Group by column
-                  {/if}
-                </span>
-              </button>
-            </li>            
-          </ul>
+              <ul>
+                <li>
+                  <button class="list-button" on:click={() => sortByColumn(column, 'asc')}>
+                    <Icon class="opt" data={faSortAmountDownAlt}/>
+                    <span>
+                      {#if sort?.get(column.name) === 'asc'}
+                        Remove asc sort
+                      {:else}
+                        Sort Ascending
+                      {/if}
+                    </span>
+                  </button>
+                </li>
+                <li>
+                  <button class="list-button" on:click={() => sortByColumn(column, 'desc')}>
+                    <Icon class="opt" data={faSortAmountDown}/>
+                    <span>
+                      {#if sort?.get(column.name) === 'desc'}
+                        Remove desc sort
+                      {:else}
+                        Sort Descending
+                      {/if}
+                    </span>
+                  </button>
+                </li>
+                <li>
+                  <button class="list-button" on:click={() => groupByColumn(column)}>
+                    <Icon class="opt" data={faThList}/>
+                    <span>
+                      {#if group?.has(column.name)}
+                        Remove grouping
+                      {:else}
+                        Group by column
+                      {/if}
+                    </span>
+                  </button>
+                </li>            
+              </ul> 
+            {/if}
+          </div>
         </svelte:fragment>
       </Dropdown>
     </div>
