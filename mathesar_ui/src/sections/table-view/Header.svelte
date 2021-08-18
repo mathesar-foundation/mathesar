@@ -107,7 +107,7 @@
     });
   }
 
-  function determineTypeIcon(type: string) {
+  function determineDataIcon(type: string) {
     switch (type) {
       case 'INTEGER':
         return '#';
@@ -139,7 +139,7 @@
       width:{columnPosition.get(column.name).width}px;
       left:{columnPosition.get(column.name).left + paddingLeft}px;">
       <span class="type">
-        {determineTypeIcon(column.type)}
+        {determineDataIcon(column.type)}
       </span>
       <span class="name">{column.name}</span>
 
@@ -151,7 +151,7 @@
               <span class="category">Data Type</span>
               <button class="list-button with-right-icon">
                 <div>
-                  <span class="data-icon">{determineTypeIcon(column.type)}</span>
+                  <span class="data-icon">{determineDataIcon(column.type)}</span>
                   <span>
                     {determineDataTitle(column.type)}
                   </span>
