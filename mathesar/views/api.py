@@ -357,8 +357,7 @@ class RecordViewSet(viewsets.ViewSet):
             record = table.update_record(pk, request.data)
             serializer = RecordSerializer(record)
         except NotUniquePrimaryKey as e:
-            logger.error(e.message)
-            raise e
+            raise APIException(e)
         return Response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
@@ -366,8 +365,7 @@ class RecordViewSet(viewsets.ViewSet):
         try:
             table.delete_record(pk)
         except NotUniquePrimaryKey as e:
-            logger.error(e.message)
-            raise e
+            raise APIException(e)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
