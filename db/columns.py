@@ -160,8 +160,6 @@ class MathesarColumn(Column):
 
     @property
     def default_value(self):
-        print(self.table_)
-        print(self.original_table)
         if self.table_ is not None:
             table_oid = tables.get_oid_from_table(
                 self.table_.name, self.table_.schema, self.engine
@@ -318,9 +316,8 @@ def rename_column(table_oid, column_index, new_column_name, engine, **kwargs):
     )
 
 
-def retype_column(table_oid, column_index, new_type, engine, **kwargs):
+def retype_column(table_oid, column_index, new_type, engine, type_options={}):
     table = tables.reflect_table_from_oid(table_oid, engine)
-    type_options = kwargs.get("type_options", {})
     try:
         alteration.alter_column_type(
             table.schema,
@@ -368,6 +365,39 @@ def get_mathesar_column_with_engine(col, engine):
     new_column = MathesarColumn.from_column(col)
     new_column.add_engine(engine)
     return new_column
+
+
+def _validate_columns_for_batch_update(table, column_data):
+    ALLOWED_KEYS = ['name', 'plain_type', 'type_options']
+    if len(column_data) != len(table.columns):
+        raise ValueError('Number of columns passed in must equal number of columns in table')
+    for single_column_data in column_data:
+        for key in single_column_data.keys():
+            if key not in ALLOWED_KEYS:
+                allowed_key_list = ', '.join(ALLOWED_KEYS)
+                raise ValueError(f'Key "{key}" found in columns. Keys allowed are: {allowed_key_list}')
+
+
+def batch_update_columns(table_oid, engine, column_data_list):
+    table = tables.reflect_table_from_oid(table_oid, engine)
+    _validate_columns_for_batch_update(table, column_data_list)
+    with engine.begin() as conn:
+        ctx = MigrationContext.configure(conn)
+        op = Operations(ctx)
+        with op.batch_alter_table(table.name, schema=table.schema) as batch_op:
+            for index, column_data in enumerate(column_data_list):
+                column = table.columns[index]
+                if 'name' in column_data and column.name != column_data['name']:
+                    batch_op.alter_column(
+                        column.name,
+                        new_column_name=column_data['name']
+                    )
+                if 'plain_type' in column_data:
+                    new_type = column_data['plain_type']
+                    type_options = column_data.get('type_options', {})
+                    if type_options is None:
+                        type_options = {}
+                    retype_column(table_oid, index, new_type, engine, type_options)
 
 
 def drop_column(table_oid, column_index, engine):
