@@ -921,10 +921,11 @@ def test_table_retrieve_no_primary_key(create_table, client):
     table_name = 'NASA Table Retrieve'
     new_table_name = 'NASA Table Retrieve New'
     table = create_table(table_name)
+    record_id = 233
 
     body = {'name': new_table_name, 'num_primary_keys': 0}
     try:
-        client.get(f'/api/v0/tables/{table.id}/', body)
+        client.get(f'/api/v0/tables/{table.id}/record/{record_id}', body)
     except NotUniquePrimaryKey as e:
         assert e
 
@@ -933,10 +934,11 @@ def test_table_delete_no_primary_key(create_table, client):
     table_name = 'NASA Table Delete'
     new_table_name = 'NASA Table Delete New'
     table = create_table(table_name)
+    record_id = 233
 
     body = {'name': new_table_name, 'num_primary_keys': 0}
     try:
-        client.delete(f'/api/v0/tables/{table.id}/', body)
+        client.delete(f'/api/v0/tables/{table.id}/record/{record_id}', body)
     except NotUniquePrimaryKey as e:
         assert e
 
@@ -945,10 +947,11 @@ def test_table_partial_update_no_primary_key(create_table, client):
     table_name = 'NASA Table Partial Update'
     new_table_name = 'NASA Table Partial Update New'
     table = create_table(table_name)
+    record_id = 233
 
     body = {'name': new_table_name, 'num_primary_keys': 0}
     try:
-        client.patch(f'/api/v0/tables/{table.id}/', body)
+        client.patch(f'/api/v0/tables/{table.id}/record/{record_id}', body)
     except NotUniquePrimaryKey as e:
         assert e
 
@@ -957,10 +960,11 @@ def test_table_retrieve_multiple_primary_keys(create_table, client):
     table_name = 'NASA Table Retrieve'
     new_table_name = 'NASA Table Retrieve New'
     table = create_table(table_name)
+    record_id = 233
 
     body = {'name': new_table_name, 'num_primary_keys': 2}
     try:
-        client.get(f'/api/v0/tables/{table.id}/', body)
+        client.get(f'/api/v0/tables/{table.id}/record/{record_id}', body)
     except NotUniquePrimaryKey as e:
         assert e
 
@@ -969,10 +973,11 @@ def test_table_delete_multiple_primary_keys(create_table, client):
     table_name = 'NASA Table Delete'
     new_table_name = 'NASA Table Delete New'
     table = create_table(table_name)
+    record_id = 233
 
     body = {'name': new_table_name, 'num_primary_keys': 2}
     try:
-        client.delete(f'/api/v0/tables/{table.id}/', body)
+        client.delete(f'/api/v0/tables/{table.id}/record/{record_id}', body)
     except NotUniquePrimaryKey as e:
         assert e
 
@@ -981,9 +986,10 @@ def test_table_partial_update_multiple_primary_keys(create_table, client):
     table_name = 'NASA Table Partial Update'
     new_table_name = 'NASA Table Partial Update New'
     table = create_table(table_name)
+    record_id = 233
 
     body = {'name': new_table_name, 'num_primary_keys': 2}
     try:
-        client.patch(f'/api/v0/tables/{table.id}/', body)
+        client.patch(f'/api/v0/tables/{table.id}/record/{record_id}', body)
     except NotUniquePrimaryKey as e:
         assert e
