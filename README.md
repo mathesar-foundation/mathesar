@@ -52,6 +52,9 @@ If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASE
 
 **Please don't do this unless you have full confidence in what you're doing since Mathesar is not stable yet and may make unexpected changes to the database that you connect to it.**
 
+### Frontend
+For more detailed information on Mathesar's frontend development, please refer the [readme file within mathesar_ui directory](https://github.com/centerofci/mathesar/blob/master/mathesar_ui/README.md).
+
 ### Linting
 
 To lint the project, run the `lint.sh` script from the root of the repository. The script requires that the Python virtual environment with `flake8` be activated and that Node modules be installed in `mathesar_ui/`. Alternatively, ESLint and Flake8 should be installed globally on the system.
