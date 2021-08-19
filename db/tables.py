@@ -1,5 +1,5 @@
 import warnings
-from time import time
+
 from sqlalchemy import (
     Column, String, Table, MetaData, func, select, ForeignKey, literal, exists,
     join, inspect, and_
@@ -12,7 +12,6 @@ from sqlalchemy.exc import NoSuchTableError, InternalError
 from psycopg2.errors import DependentObjectsStillExist
 
 from db import columns, constants, schemas, records
-from db.types import alteration, inference
 
 
 TEMP_SCHEMA = f"{constants.MATHESAR_PREFIX}temp_schema"
@@ -463,24 +462,6 @@ def get_count(table, engine, filters=[]):
     return records._execute_query(query, engine)[0][col_name]
 
 
-def update_table_column_types(schema, table_name, engine):
-    table = reflect_table(table_name, schema, engine)
-    # we only want to infer (modify) the type of non-default columns
-    inferable_column_names = (
-        col.name for col in table.columns
-        if not columns.MathesarColumn.from_column(col).is_default
-        and not col.primary_key
-        and not col.foreign_keys
-    )
-    for column_name in inferable_column_names:
-        inference.infer_column_type(
-            schema,
-            table_name,
-            column_name,
-            engine,
-        )
-
-
 class CreateTableAs(DDLElement):
     def __init__(self, name, selectable):
         self.name = name
@@ -493,53 +474,3 @@ def compile_create_table_as(element, compiler, **_):
         element.name,
         compiler.sql_compiler.process(element.selectable, literal_binds=True),
     )
-
-
-def infer_table_column_types(schema, table_name, engine):
-    table = reflect_table(table_name, schema, engine)
-
-    temp_name = TEMP_TABLE % (int(time()))
-    schemas.create_schema(TEMP_SCHEMA, engine)
-    with engine.begin() as conn:
-        while engine.dialect.has_table(conn, temp_name, schema=TEMP_SCHEMA):
-            temp_name = TEMP_TABLE.format(int(time()))
-
-    full_temp_name = f"{TEMP_SCHEMA}.{temp_name}"
-
-    select_table = select(table)
-    with engine.begin() as conn:
-        conn.execute(CreateTableAs(full_temp_name, select_table))
-    temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
-
-    try:
-        update_table_column_types(
-            TEMP_SCHEMA, temp_table.name, engine,
-        )
-    except Exception as e:
-        # Ensure the temp table is deleted
-        temp_table.drop()
-        raise e
-    else:
-        temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
-        types = [c.type.__class__ for c in temp_table.columns]
-        temp_table.drop()
-        return types
-
-
-def get_column_cast_records(engine, table, column_definitions, num_records=20):
-    assert len(column_definitions) == len(table.columns)
-    cast_expression_list = [
-        (
-            alteration.get_column_cast_expression(
-                column, col_def["type"],
-                engine,
-                type_options=col_def.get("type_options", {})
-            )
-            .label(col_def["name"])
-        ) if not columns.MathesarColumn.from_column(column).is_default else column
-        for column, col_def in zip(table.columns, column_definitions)
-    ]
-    sel = select(cast_expression_list).limit(num_records)
-    with engine.begin() as conn:
-        result = conn.execute(sel)
-    return result.fetchall()

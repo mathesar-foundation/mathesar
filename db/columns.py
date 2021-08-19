@@ -526,8 +526,8 @@ def duplicate_column_data(table_oid, from_column, to_column, engine):
 
 def duplicate_column_constraints(table_oid, from_column, to_column, engine,
                                  copy_nullable=True):
+    table = tables.reflect_table_from_oid(table_oid, engine)
     if copy_nullable:
-        table = tables.reflect_table_from_oid(table_oid, engine)
         change_column_nullable(
             table_oid, to_column, table.c[from_column].nullable, engine
         )
@@ -539,7 +539,7 @@ def duplicate_column_constraints(table_oid, from_column, to_column, engine,
             # Don't allow duplication of primary keys
             continue
         constraints.copy_constraint(
-            table_oid, engine, constraint, from_column, to_column
+            table, engine, constraint, from_column, to_column
         )
 
 
