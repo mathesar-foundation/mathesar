@@ -408,7 +408,7 @@ def _batch_update_column_types(table, column_data_list, connection, engine):
             retype_column_in_connection(table, connection, engine, index, new_type, type_options)
 
 
-def _batch_update_column_names_and_drop_columns(table, column_data_list, connection):
+def _batch_alter_table_columns(table, column_data_list, connection):
     ctx = MigrationContext.configure(connection)
     op = Operations(ctx)
     with op.batch_alter_table(table.name, schema=table.schema) as batch_op:
@@ -428,7 +428,7 @@ def batch_update_columns(table_oid, engine, column_data_list):
     _validate_columns_for_batch_update(table, column_data_list)
     with engine.begin() as conn:
         _batch_update_column_types(table, column_data_list, conn, engine)
-        _batch_update_column_names_and_drop_columns(table, column_data_list, conn)
+        _batch_alter_table_columns(table, column_data_list, conn)
 
 
 def drop_column(table_oid, column_index, engine):
