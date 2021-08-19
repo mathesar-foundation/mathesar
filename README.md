@@ -10,6 +10,7 @@ We are currently in early development and hope to release an alpha version by la
 
 - [Contributing](#contributing)
 - [Local Development](#local-development)
+  - [Configuration Options](#configuration-options)
   - [Linting](#linting)
   - [Running tests](#running-tests)
   - [Opening a shell in the container](#opening-a-shell-in-the-container)
