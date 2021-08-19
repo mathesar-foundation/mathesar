@@ -10,6 +10,7 @@ We are currently in early development and hope to release an alpha version by la
 
 - [Contributing](#contributing)
 - [Local Development](#local-development)
+  - [Configuration Options](#configuration-options)
   - [Linting](#linting)
   - [Running tests](#running-tests)
   - [Opening a shell in the container](#opening-a-shell-in-the-container)
@@ -25,7 +26,7 @@ We actively encourage contribution! [Join our community](https://wiki.mathesar.o
 
 First, [ensure that you have Docker installed](https://docs.docker.com/get-docker/).
 
-Then, copy the `.env.example` file to `.env` like so:
+Clone the repository and then copy the `.env.example` file to `.env` like so:
 ```
 cp .env.example .env
 ```
@@ -34,7 +35,6 @@ From the repository's root directory, run:
 ```
 docker-compose up
 ```
-You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application.
 
 If it's your first time running the application, you'll also need to run database migrations and install Mathesar types and functions:
 ```
@@ -42,9 +42,15 @@ docker exec mathesar_web_1 python manage.py migrate
 docker exec -it mathesar_web_1 python install.py
 ```
 
-If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASES.mathesar_tables` entry of the `config/settings.py` file with appropriate connection details before installing the Mathesar types and functions with the previous step.
+You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application. For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`. 
 
-For sample table data, you can use the `patents.csv` file found in `/mathesar/tests/data`. 
+It is recommended that you keep the Docker containers running while you make changes to the code. Any change to the code made locally will sync to the container and the version deployed at `http://localhost:8000` will always be the latest local version of the code.
+
+### Configuration Options
+
+If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASES.mathesar_tables` entry of the `config/settings.py` file with appropriate connection details before installing the Mathesar types and functions by running `install.py` as described in the previous step. 
+
+**Please don't do this unless you have full confidence in what you're doing since Mathesar is not production-ready yet and may cause unexpected issues.**
 
 ### Linting
 
