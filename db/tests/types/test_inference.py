@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
 from sqlalchemy import Column, MetaData, Table, select
-from sqlalchemy import BOOLEAN, Numeric, NUMERIC, String, VARCHAR
+from sqlalchemy import BOOLEAN, Numeric, NUMERIC, String, VARCHAR, DATE
 from db.tests.types import fixtures
 from db.types import inference
 
@@ -21,6 +21,7 @@ type_data_list = [
     (String, ["t", "false", "2", "0"], VARCHAR),
     (String, ["a", "cat", "mat", "bat"], VARCHAR),
     (String, ["2", "1", "0", "0"], NUMERIC),
+    (String, ["2000-01-12", "6/23/2004", "May-2007-29", "20200909"], DATE),
 ]
 
 
