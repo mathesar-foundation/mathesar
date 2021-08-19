@@ -156,7 +156,7 @@ get_header_test_list = [
 @pytest.mark.parametrize("file", get_header_test_list)
 def test_sv_get_header(file):
     with open(file, "rb") as sv_file:
-        table = get_sv_reader(file=sv_file,header=True)
+        table = get_sv_reader(file=sv_file, header=True)
         assert table.fieldnames == [
             "Center",
             "Status",
