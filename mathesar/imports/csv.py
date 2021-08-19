@@ -80,6 +80,8 @@ def get_sv_reader(file, header, dialect=None):
             f"column_{i}" for i in range(len(reader.fieldnames))
         ]
         file.seek(0)
+    else:
+        reader.fieldnames = list(map(lambda col: col.replace('"', ''), reader.fieldnames))
     return reader
 
 

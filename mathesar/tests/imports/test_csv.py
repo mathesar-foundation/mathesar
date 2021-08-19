@@ -6,22 +6,22 @@ from sqlalchemy import text
 
 from mathesar.models import DataFile, Schema
 from mathesar.errors import InvalidTableError
-from mathesar.imports.csv import create_table_from_csv, get_sv_dialect
+from mathesar.imports.csv import create_table_from_csv, get_sv_dialect, get_sv_reader
 from db.schemas import create_schema, get_schema_oid_from_name
 
-TEST_SCHEMA = 'import_csv_schema'
+TEST_SCHEMA = "import_csv_schema"
 
 
 @pytest.fixture
 def data_file(csv_filename):
-    with open(csv_filename, 'rb') as csv_file:
+    with open(csv_filename, "rb") as csv_file:
         data_file = DataFile.objects.create(file=File(csv_file))
     return data_file
 
 
 @pytest.fixture
 def headerless_data_file(headerless_csv_filename):
-    with open(headerless_csv_filename, 'rb') as csv_file:
+    with open(headerless_csv_filename, "rb") as csv_file:
         data_file = DataFile.objects.create(file=File(csv_file), header=False)
     return data_file
 
@@ -45,29 +45,50 @@ def check_csv_upload(table, table_name, schema, num_records, row, cols):
 
 
 def test_csv_upload(data_file, schema):
-    table_name = 'NASA 1'
+    table_name = "NASA 1"
     table = create_table_from_csv(data_file, table_name, schema)
 
     num_records = 1393
-    expected_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
-                    '13/033,085', 'Polyimide Wire Insulation Repair System', None)
-    expected_cols = ['Center', 'Status', 'Case Number', 'Patent Number',
-                     'Application SN', 'Title', 'Patent Expiration Date']
+    expected_row = (
+        1,
+        "NASA Kennedy Space Center",
+        "Application",
+        "KSC-12871",
+        "0",
+        "13/033,085",
+        "Polyimide Wire Insulation Repair System",
+        None,
+    )
+    expected_cols = [
+        "Center",
+        "Status",
+        "Case Number",
+        "Patent Number",
+        "Application SN",
+        "Title",
+        "Patent Expiration Date",
+    ]
     check_csv_upload(
         table, table_name, schema, num_records, expected_row, expected_cols
     )
 
 
 def test_headerless_csv_upload(headerless_data_file, schema):
-    table_name = 'NASA no headers'
-    table = create_table_from_csv(
-        headerless_data_file, table_name, schema
-    )
+    table_name = "NASA no headers"
+    table = create_table_from_csv(headerless_data_file, table_name, schema)
 
     num_records = 1393
-    expected_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
-                    '13/033,085', 'Polyimide Wire Insulation Repair System', None)
-    expected_cols = ['column_' + str(i) for i in range(7)]
+    expected_row = (
+        1,
+        "NASA Kennedy Space Center",
+        "Application",
+        "KSC-12871",
+        "0",
+        "13/033,085",
+        "Polyimide Wire Insulation Repair System",
+        None,
+    )
+    expected_cols = ["column_" + str(i) for i in range(7)]
 
     check_csv_upload(
         table, table_name, schema, num_records, expected_row, expected_cols
@@ -75,8 +96,8 @@ def test_headerless_csv_upload(headerless_data_file, schema):
 
 
 def test_csv_upload_with_duplicate_table_name(data_file, schema):
-    table_name = 'NASA 2'
-    already_defined_str = ('relation "NASA 2" already exists')
+    table_name = "NASA 2"
+    already_defined_str = 'relation "NASA 2" already exists'
 
     table = create_table_from_csv(data_file, table_name, schema)
     assert table is not None
@@ -90,23 +111,23 @@ def test_csv_upload_with_duplicate_table_name(data_file, schema):
 
 
 def test_csv_upload_table_imported_to(data_file, schema):
-    table = create_table_from_csv(data_file, 'NASA', schema)
+    table = create_table_from_csv(data_file, "NASA", schema)
     data_file.refresh_from_db()
     assert data_file.table_imported_to == table
 
 
 get_dialect_test_list = [
-    (',', '"', '', 'mathesar/tests/data/patents.csv'),
-    ('\t', '"', '', 'mathesar/tests/data/patents.tsv'),
-    (',', "'", '', 'mathesar/tests/data/csv_parsing/mixed_quote.csv'),
-    (',', '"', '', 'mathesar/tests/data/csv_parsing/double_quote.csv'),
-    (',', '"', '\\', 'mathesar/tests/data/csv_parsing/escaped_quote.csv'),
+    (",", '"', "", "mathesar/tests/data/patents.csv"),
+    ("\t", '"', "", "mathesar/tests/data/patents.tsv"),
+    (",", "'", "", "mathesar/tests/data/csv_parsing/mixed_quote.csv"),
+    (",", '"', "", "mathesar/tests/data/csv_parsing/double_quote.csv"),
+    (",", '"', "\\", "mathesar/tests/data/csv_parsing/escaped_quote.csv"),
 ]
 
 
 @pytest.mark.parametrize("exp_delim,exp_quote,exp_escape,file", get_dialect_test_list)
 def test_sv_get_dialect(exp_delim, exp_quote, exp_escape, file):
-    with open(file, 'r') as sv_file:
+    with open(file, "r") as sv_file:
         dialect = get_sv_dialect(sv_file)
     assert dialect.delimiter == exp_delim
     assert dialect.quotechar == exp_quote
@@ -114,14 +135,33 @@ def test_sv_get_dialect(exp_delim, exp_quote, exp_escape, file):
 
 
 get_dialect_exceptions_test_list = [
-    ('mathesar/tests/data/csv_parsing/patents_invalid.csv'),
-    ('mathesar/tests/data/csv_parsing/extra_quote_invalid.csv'),
-    ('mathesar/tests/data/csv_parsing/escaped_quote_invalid.csv'),
+    "mathesar/tests/data/csv_parsing/patents_invalid.csv",
+    "mathesar/tests/data/csv_parsing/extra_quote_invalid.csv",
+    "mathesar/tests/data/csv_parsing/escaped_quote_invalid.csv",
 ]
 
 
 @pytest.mark.parametrize("file", get_dialect_exceptions_test_list)
 def test_sv_get_dialect_exceptions(file):
     with pytest.raises(InvalidTableError):
-        with open(file, 'r') as sv_file:
+        with open(file, "r") as sv_file:
             get_sv_dialect(sv_file)
+
+
+get_header_test_list = [
+    "mathesar/tests/data/csv_parsing/double_quote_in_header.csv",
+]
+
+
+@pytest.mark.parametrize("file", get_header_test_list)
+def test_sv_get_header(file):
+    with open(file, "rb") as sv_file:
+        table = get_sv_reader(file=sv_file,header=True)
+        assert table.fieldnames == [
+            "Center",
+            "Status",
+            "Case Number",
+            "Patent Number",
+            "Application SN",
+            "Title,Patent Expiration Date",
+        ]
