@@ -14,6 +14,7 @@ from psycopg2.errors import InvalidTextRepresentation, InvalidParameterValue
 
 from db import constants, tables, constraints
 from db.types import alteration
+from db.utils import execute_statement
 
 logger = logging.getLogger(__name__)
 
@@ -199,7 +200,7 @@ def init_mathesar_table_column_list_with_defaults(column_list):
     return default_columns + given_columns
 
 
-def get_column_index_from_name(table_oid, column_name, engine):
+def get_column_index_from_name(table_oid, column_name, engine, connection_to_use=None):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
         pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
@@ -209,8 +210,7 @@ def get_column_index_from_name(table_oid, column_name, engine):
             pg_attribute.c.attname == column_name
         )
     )
-    with engine.begin() as conn:
-        result = conn.execute(sel).fetchone()[0]
+    result = execute_statement(engine, sel, connection_to_use).fetchone()[0]
 
     # Account for dropped columns that don't appear in the SQLAlchemy tables
     sel = (
@@ -220,8 +220,7 @@ def get_column_index_from_name(table_oid, column_name, engine):
             pg_attribute.c.attnum < result,
         ))
     )
-    with engine.begin() as conn:
-        dropped_count = conn.execute(sel).fetchone()[0]
+    dropped_count = execute_statement(engine, sel, connection_to_use).fetchone()[0]
 
     return result - 1 - dropped_count
 
@@ -316,6 +315,16 @@ def rename_column(table_oid, column_index, new_column_name, engine, **kwargs):
     )
 
 
+def _handle_retype_data_errors(e):
+    if (
+        type(e.orig) == InvalidParameterValue
+        or type(e.orig) == InvalidTextRepresentation
+    ):
+        raise InvalidTypeOptionError
+    else:
+        raise e
+
+
 def retype_column(table_oid, column_index, new_type, engine, type_options={}):
     table = tables.reflect_table_from_oid(table_oid, engine)
     try:
@@ -329,18 +338,29 @@ def retype_column(table_oid, column_index, new_type, engine, type_options={}):
             type_options=type_options
         )
     except DataError as e:
-        if (
-            type(e.orig) == InvalidParameterValue
-            or type(e.orig) == InvalidTextRepresentation
-        ):
-            raise InvalidTypeOptionError
-        else:
-            raise e
+        _handle_retype_data_errors(e)
 
     return get_mathesar_column_with_engine(
         tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
         engine
     )
+
+
+def retype_column_in_connection(table, connection, engine, column_index, new_type, type_options={}):
+    try:
+        alteration.alter_column_type(
+            table.schema,
+            table.name,
+            table.columns[column_index].name,
+            new_type,
+            engine,
+            friendly_names=False,
+            type_options=type_options,
+            connection_to_use=connection,
+            table_to_use=table
+        )
+    except DataError as e:
+        _handle_retype_data_errors(e)
 
 
 def change_column_nullable(table_oid, column_index, nullable, engine, **kwargs):
@@ -378,26 +398,35 @@ def _validate_columns_for_batch_update(table, column_data):
                 raise ValueError(f'Key "{key}" found in columns. Keys allowed are: {allowed_key_list}')
 
 
+def _batch_update_column_types(table, column_data_list, connection, engine):
+    for index, column_data in enumerate(column_data_list):
+        if 'plain_type' in column_data:
+            new_type = column_data['plain_type']
+            type_options = column_data.get('type_options', {})
+            if type_options is None:
+                type_options = {}
+            retype_column_in_connection(table, connection, engine, index, new_type, type_options)
+
+
+def _batch_update_column_names(table, column_data_list, connection):
+    ctx = MigrationContext.configure(connection)
+    op = Operations(ctx)
+    with op.batch_alter_table(table.name, schema=table.schema) as batch_op:
+        for index, column_data in enumerate(column_data_list):
+            column = table.columns[index]
+            if 'name' in column_data and column.name != column_data['name']:
+                batch_op.alter_column(
+                    column.name,
+                    new_column_name=column_data['name']
+                )
+
+
 def batch_update_columns(table_oid, engine, column_data_list):
     table = tables.reflect_table_from_oid(table_oid, engine)
     _validate_columns_for_batch_update(table, column_data_list)
     with engine.begin() as conn:
-        ctx = MigrationContext.configure(conn)
-        op = Operations(ctx)
-        with op.batch_alter_table(table.name, schema=table.schema) as batch_op:
-            for index, column_data in enumerate(column_data_list):
-                column = table.columns[index]
-                if 'name' in column_data and column.name != column_data['name']:
-                    batch_op.alter_column(
-                        column.name,
-                        new_column_name=column_data['name']
-                    )
-                if 'plain_type' in column_data:
-                    new_type = column_data['plain_type']
-                    type_options = column_data.get('type_options', {})
-                    if type_options is None:
-                        type_options = {}
-                    retype_column(table_oid, index, new_type, engine, type_options)
+        _batch_update_column_names(table, column_data_list, conn)
+        _batch_update_column_types(table, column_data_list, conn, engine)
 
 
 def drop_column(table_oid, column_index, engine):
@@ -410,8 +439,11 @@ def drop_column(table_oid, column_index, engine):
         op.drop_column(table.name, column.name, schema=table.schema)
 
 
-def get_column_default(table_oid, column_index, engine):
-    table = tables.reflect_table_from_oid(table_oid, engine)
+def get_column_default(table_oid, column_index, engine, connection_to_use=None, table_to_use=None):
+    if table_to_use is None:
+        table = tables.reflect_table_from_oid(table_oid, engine)
+    else:
+        table = table_to_use
     column = table.columns[column_index]
     if column.server_default is None:
         return None
@@ -441,8 +473,7 @@ def get_column_default(table_oid, column_index, engine):
         ))
     )
 
-    with engine.begin() as conn:
-        result = conn.execute(query).first()[0]
+    result = execute_statement(engine, query, connection_to_use).first()[0]
 
     # Here, we get the 'adbin' value for the current column, stored in the attrdef
     # system table. The prefix of this value tells us whether the default is static
@@ -454,31 +485,35 @@ def get_column_default(table_oid, column_index, engine):
     # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
     # Here, we execute the cast to get the proper python value
     cast_sql_text = column.server_default.arg.text
-    with engine.begin() as conn:
-        return conn.execute(select(text(cast_sql_text))).first()[0]
+    return execute_statement(engine, select(text(cast_sql_text)), connection_to_use).first()[0]
 
 
-def set_column_default(table_oid, column_index, default, engine, **kwargs):
+def _alter_column_default(ctx, table_name, column_name, schema, default_clause):
+    op = Operations(ctx)
+    op.alter_column(table_name, column_name, schema=schema, server_default=default_clause)
+
+
+def set_column_default(table_oid, column_index, default, engine, connection_to_use=None, table_to_use=None):
     # Note: default should be textual SQL that produces the desired default
-    table = tables.reflect_table_from_oid(table_oid, engine)
+    if table_to_use is None:
+        table = tables.reflect_table_from_oid(table_oid, engine)
+    else:
+        table = table_to_use
     column = table.columns[column_index]
     default_clause = DefaultClause(str(default)) if default is not None else default
     try:
-        with engine.begin() as conn:
-            ctx = MigrationContext.configure(conn)
-            op = Operations(ctx)
-            op.alter_column(
-                table.name, column.name, schema=table.schema, server_default=default_clause
-            )
+        if connection_to_use is None:
+            with engine.begin() as conn:
+                ctx = MigrationContext.configure(conn)
+                _alter_column_default(ctx, table.name, column.name, table.schema, default_clause)
+        else:
+            ctx = MigrationContext.configure(connection_to_use)
+            _alter_column_default(ctx, table.name, column.name, table.schema, default_clause)
     except DataError as e:
         if (type(e.orig) == InvalidTextRepresentation):
             raise InvalidDefaultError
         else:
             raise e
-    return get_mathesar_column_with_engine(
-        tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
-        engine
-    )
 
 
 def _gen_col_name(table, column_name):
