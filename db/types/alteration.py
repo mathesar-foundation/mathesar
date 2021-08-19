@@ -139,8 +139,8 @@ def alter_column_type(
 
     if default is not None:
         cast_stmt = f"{cast_function_name}({default_text})"
-        default_stmt = select(text(cast_stmt)).first()[0]
-        new_default = str(execute_statement(engine, default_stmt, connection_to_use))
+        default_stmt = select(text(cast_stmt))
+        new_default = str(execute_statement(engine, default_stmt, connection_to_use).first()[0])
         columns.set_column_default(table_oid, column_index, new_default, engine, connection_to_use)
 
 
