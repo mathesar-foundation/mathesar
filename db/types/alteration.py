@@ -481,6 +481,8 @@ def _get_varchar_type_body_map(engine):
 
 
 def _get_date_type_body_map():
+    # Note that default postgres conversion for dates depends on the `DateStyle` option
+    # set on the server, which can be one of DMY, MDY, or YMD. Defaults to MDY.
     default_behavior_source_types = [DATE, VARCHAR]
     return _get_default_type_body_map(
         default_behavior_source_types, DATE,
