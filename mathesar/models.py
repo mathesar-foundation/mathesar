@@ -30,7 +30,7 @@ class DatabaseObjectManager(models.Manager):
 
 class DatabaseObject(BaseModel):
     oid = models.IntegerField()
-    # The default manager, current_objects, does not reflect databse objects.
+    # The default manager, current_objects, does not reflect database objects.
     # This saves us from having to deal with Django trying to automatically reflect db
     # objects in the background when we might not expect it.
     current_objects = models.Manager()
@@ -80,6 +80,11 @@ class Schema(DatabaseObject):
     database = models.ForeignKey('Database', on_delete=models.CASCADE,
                                  related_name='schemas')
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["oid", "database"], name="unique_schema")
+        ]
+
     @property
     def _sa_engine(self):
         return self.database._sa_engine
@@ -126,6 +131,11 @@ class Table(DatabaseObject):
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["oid", "schema"], name="unique_table")
+        ]
 
     @cached_property
     def _sa_table(self):
