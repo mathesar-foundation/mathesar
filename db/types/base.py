@@ -5,6 +5,10 @@ from sqlalchemy import create_engine
 from db import constants
 
 
+STRING = 'string'
+VARCHAR = 'varchar'
+
+
 class PostgresType(Enum):
     """
     This only includes built-in Postgres types that SQLAlchemy supports.

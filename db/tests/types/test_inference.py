@@ -4,7 +4,6 @@ from sqlalchemy import Column, MetaData, Table, select
 from sqlalchemy import BOOLEAN, Numeric, NUMERIC, String, VARCHAR
 from db.tests.types import fixtures
 from db.types import inference
-from db import tables
 
 
 # We need to set these variables when the file loads, or pytest can't
@@ -78,7 +77,7 @@ def test_table_inference(engine_email_type, type_, value_list, expect_type):
         results = conn.execute(select(input_table))
     original_table = results.fetchall()
 
-    inferred_types = tables.infer_table_column_types(
+    inferred_types = inference.infer_table_column_types(
         schema,
         TEST_TABLE,
         engine
@@ -101,11 +100,11 @@ def test_table_inference_drop_temp(engine_email_type):
     create_test_table(engine, schema, TEST_TABLE, TEST_COLUMN, TYPE, VALUES)
 
     # Ensure that the temp table is deleted even when the function errors
-    with patch.object(tables.inference, "infer_column_type") as mock_infer:
+    with patch.object(inference, "infer_column_type") as mock_infer:
         mock_infer.side_effect = Exception()
         with pytest.raises(Exception):
-            tables.infer_table_column_types(schema, TEST_TABLE, engine)
-    tables.infer_table_column_types(schema, TEST_TABLE, engine)
+            inference.infer_table_column_types(schema, TEST_TABLE, engine)
+    inference.infer_table_column_types(schema, TEST_TABLE, engine)
 
 
 def test_table_inference_same_name(engine_email_type):
@@ -118,7 +117,7 @@ def test_table_inference_same_name(engine_email_type):
     with engine.begin() as conn:
         results = conn.execute(select(table))
     original_table = results.fetchall()
-    tables.infer_table_column_types(schema, TEST_TABLE, engine)
+    inference.infer_table_column_types(schema, TEST_TABLE, engine)
     with engine.begin() as conn:
         results = conn.execute(select(table))
     new_table = results.fetchall()

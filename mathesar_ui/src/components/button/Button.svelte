@@ -1,15 +1,17 @@
 <script lang="ts">
+  import type { Appearance, Size } from '@mathesar-components/types';
+
   /**
    * Button appearance. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.
    * @required
    */
-  export let appearance : 'default' | 'primary' | 'secondary' | 'plain' | 'ghost' = 'default';
+  export let appearance : Appearance = 'default';
 
   /**
    * Button size. One of: 'small', 'medium', 'large'.
    * @required
    */
-  export let size : 'small' | 'medium' | 'large' = 'medium';
+  export let size : Size = 'medium';
 
   // Additional classes
   let classes = '';

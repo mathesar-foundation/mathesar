@@ -10,6 +10,9 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { Dropdown } from '@mathesar-components';
+  import type {
+    Appearance,
+  } from '@mathesar-components/types';
   import type { SelectOption } from './Select.d';
 
   const dispatch = createEventDispatcher();
@@ -21,6 +24,7 @@
   export let value: SelectOption = null;
   export let contentClass = '';
   export let triggerClass = '';
+  export let triggerAppearance: Appearance = 'plain';
   export let ariaLabel: string = null;
 
   let isOpen = false;
@@ -42,7 +46,8 @@
   $: setOptions(options);
 </script>
 
-<Dropdown ariaControls="select-value-{selectId}" {ariaLabel} bind:isOpen contentClass="select {contentClass}" {triggerClass}>
+<Dropdown ariaControls="select-value-{selectId}" {ariaLabel} bind:isOpen
+          contentClass="select {contentClass}" {triggerAppearance} {triggerClass}>
   <svelte:fragment slot="trigger">
     {value?.[labelKey]}
   </svelte:fragment>
