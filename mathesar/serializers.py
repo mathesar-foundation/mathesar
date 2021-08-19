@@ -128,7 +128,7 @@ class ColumnSerializer(SimpleColumnSerializer):
 
 
 class TableSerializer(serializers.ModelSerializer):
-    columns = SimpleColumnSerializer(many=True, source='sa_columns')
+    columns = SimpleColumnSerializer(many=True, source='sa_columns', required=False)
     records_url = serializers.SerializerMethodField()
     constraints_url = serializers.SerializerMethodField()
     columns_url = serializers.SerializerMethodField()
