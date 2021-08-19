@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
 from django.utils.functional import cached_property
+from django.core.exceptions import ValidationError
 
 from db import tables, records, schemas, columns, constraints
 from db.types import alteration
@@ -132,10 +133,17 @@ class Table(DatabaseObject):
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["oid", "schema"], name="unique_table")
-        ]
+    def validate_unique(self, exclude=None):
+        # Ensure oid is unique on db level
+        if Table.objects.filter(
+            oid=self.oid, schema__database=self.schema.database
+        ).exists():
+            raise ValidationError("Table OID is not unique")
+        super().validate_unique(exclude=exclude)
+
+    def save(self, *args, **kwargs):
+        self.validate_unique()
+        super().save(*args, **kwargs)
 
     @cached_property
     def _sa_table(self):
