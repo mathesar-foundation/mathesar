@@ -135,14 +135,15 @@ class Table(DatabaseObject):
 
     def validate_unique(self, exclude=None):
         # Ensure oid is unique on db level
-        if Table.objects.filter(
+        if Table.current_objects.filter(
             oid=self.oid, schema__database=self.schema.database
         ).exists():
             raise ValidationError("Table OID is not unique")
         super().validate_unique(exclude=exclude)
 
     def save(self, *args, **kwargs):
-        self.validate_unique()
+        if self._state.adding:
+            self.validate_unique()
         super().save(*args, **kwargs)
 
     @cached_property
