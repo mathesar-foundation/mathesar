@@ -15,7 +15,7 @@ from sqlalchemy_filters.exceptions import (
 )
 
 from db.types.alteration import UnsupportedTypeException
-from db.records import BadGroupFormat, GroupFieldNotFound
+from db.records import BadGroupFormat, GroupFieldNotFound, NotUniquePrimaryKey
 from db.columns import InvalidDefaultError, InvalidTypeOptionError
 
 from mathesar.database.utils import get_non_default_database_keys
@@ -35,8 +35,6 @@ from mathesar.utils.tables import (
 )
 from mathesar.utils.datafiles import create_datafile
 from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
-
-from db.records import BadGroupFormat, GroupFieldNotFound, NotUniquePrimaryKey
 
 logger = logging.getLogger(__name__)
 
