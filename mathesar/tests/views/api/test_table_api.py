@@ -946,3 +946,36 @@ def test_table_patch_columns_no_changes(create_table, client, engine_email_type)
 
     assert response.status_code == 200
     _check_columns(response_json['columns'], column_data)
+
+
+def test_table_patch_columns_one_name_change(create_table, client, engine_email_type):
+    table_name = 'Patents PATCH column name change 1'
+    table = create_table(table_name)
+    column_data = _get_patents_column_data()
+    column_data[1]['name'] == 'NASA Center'
+
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response_json = response.json()
+
+    assert response.status_code == 200
+    _check_columns(response_json['columns'], column_data)
+
+
+def test_table_patch_columns_two_name_changes(create_table, client, engine_email_type):
+    table_name = 'Patents PATCH column name change 2'
+    table = create_table(table_name)
+    column_data = _get_patents_column_data()
+    column_data[1]['name'] == 'NASA Center'
+    column_data[2]['name'] == 'Patent Status'
+
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response_json = response.json()
+
+    assert response.status_code == 200
+    _check_columns(response_json['columns'], column_data)
