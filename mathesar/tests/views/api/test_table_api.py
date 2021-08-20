@@ -952,7 +952,7 @@ def test_table_patch_columns_one_name_change(create_table, client, engine_email_
     table_name = 'PATCH columns 3'
     table = create_table(table_name)
     column_data = _get_patents_column_data()
-    column_data[1]['name'] == 'NASA Center'
+    column_data[1]['name'] = 'NASA Center'
 
     body = {
         'columns': column_data
@@ -968,8 +968,8 @@ def test_table_patch_columns_two_name_changes(create_table, client, engine_email
     table_name = 'PATCH columns 4'
     table = create_table(table_name)
     column_data = _get_patents_column_data()
-    column_data[1]['name'] == 'NASA Center'
-    column_data[2]['name'] == 'Patent Status'
+    column_data[1]['name'] = 'NASA Center'
+    column_data[2]['name'] = 'Patent Status'
 
     body = {
         'columns': column_data
@@ -985,7 +985,7 @@ def test_table_patch_columns_one_type_change(create_table, client, engine_email_
     table_name = 'PATCH columns 5'
     table = create_table(table_name)
     column_data = _get_patents_column_data()
-    column_data[7]['type'] == 'DATE'
+    column_data[7]['type'] = 'DATE'
 
     body = {
         'columns': column_data
@@ -1020,9 +1020,9 @@ def test_table_patch_columns_multiple_type_change(create_data_types_table, clien
     table_name = 'PATCH columns 6'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
-    column_data[1]['type'] == 'INTEGER'
-    column_data[2]['type'] == 'BOOLEAN'
-    column_data[4]['type'] == 'DECIMAL'
+    column_data[1]['type'] = 'INTEGER'
+    column_data[2]['type'] = 'BOOLEAN'
+    column_data[4]['type'] = 'NUMERIC'
 
     body = {
         'columns': column_data
@@ -1078,8 +1078,8 @@ def test_table_patch_columns_diff_name_type_change(create_data_types_table, clie
     table_name = 'PATCH columns 9'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
-    column_data[1]['type'] == 'INTEGER'
-    column_data[2]['name'] == 'Checkbox'
+    column_data[1]['type'] = 'INTEGER'
+    column_data[2]['name'] = 'Checkbox'
 
     body = {
         'columns': column_data
@@ -1095,8 +1095,8 @@ def test_table_patch_columns_same_name_type_change(create_data_types_table, clie
     table_name = 'PATCH columns 10'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
-    column_data[2]['type'] == 'BOOLEAN'
-    column_data[2]['name'] == 'Checkbox'
+    column_data[2]['type'] = 'BOOLEAN'
+    column_data[2]['name'] = 'Checkbox'
 
     body = {
         'columns': column_data
@@ -1112,10 +1112,10 @@ def test_table_patch_columns_multiple_name_type_change(create_data_types_table, 
     table_name = 'PATCH columns 11'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
-    column_data[1]['type'] == 'INTEGER'
-    column_data[1]['name'] == 'Int.'
-    column_data[2]['type'] == 'BOOLEAN'
-    column_data[2]['name'] == 'Checkbox'
+    column_data[1]['type'] = 'INTEGER'
+    column_data[1]['name'] = 'Int.'
+    column_data[2]['type'] = 'BOOLEAN'
+    column_data[2]['name'] = 'Checkbox'
 
     body = {
         'columns': column_data
@@ -1131,8 +1131,8 @@ def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client
     table_name = 'PATCH columns 12'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
-    column_data[1]['type'] == 'INTEGER'
-    column_data[2]['name'] == 'Checkbox'
+    column_data[1]['type'] = 'INTEGER'
+    column_data[2]['name'] = 'Checkbox'
     column_data[3] = {}
 
     body = {
@@ -1150,8 +1150,8 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
     column_data[1] = {}
-    column_data[2]['type'] == 'BOOLEAN'
-    column_data[2]['name'] == 'Checkbox'
+    column_data[2]['type'] = 'BOOLEAN'
+    column_data[2]['name'] = 'Checkbox'
     column_data[3] = {}
 
     body = {
@@ -1162,3 +1162,105 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
 
     assert response.status_code == 200
     _check_columns_with_dropped(response_json['columns'], column_data, [1, 3])
+
+
+def test_table_patch_columns_invalid_type(create_data_types_table, client, engine_email_type):
+    table_name = 'PATCH columns 14'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data()
+    column_data[3]['type'] = 'BOOLEAN'
+
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response_json = response.json()
+
+    assert response.status_code == 400
+    assert 'Pizza is not a boolean' in response_json[0]
+
+
+def test_table_patch_columns_invalid_type_with_name(create_data_types_table, client, engine_email_type):
+    table_name = 'PATCH columns 15'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data()
+    column_data[1]['name'] = 'hello'
+    column_data[3]['type'] = 'BOOLEAN'
+
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response_json = response.json()
+    assert response.status_code == 400
+    assert 'Pizza is not a boolean' in response_json[0]
+
+    current_table_response = client.get(f'/api/v0/tables/{table.id}/')
+    # The table should not have changed
+    original_column_data = _get_data_types_column_data()
+    _check_columns(current_table_response.json()['columns'], original_column_data)
+
+
+def test_table_patch_columns_invalid_type_with_type(create_data_types_table, client, engine_email_type):
+    table_name = 'PATCH columns 16'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data()
+    column_data[1]['type'] = 'INTEGER'
+    column_data[3]['type'] = 'BOOLEAN'
+
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response_json = response.json()
+    assert response.status_code == 400
+    assert 'Pizza is not a boolean' in response_json[0]
+
+    current_table_response = client.get(f'/api/v0/tables/{table.id}/')
+    # The table should not have changed
+    original_column_data = _get_data_types_column_data()
+    _check_columns(current_table_response.json()['columns'], original_column_data)
+
+
+def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, client, engine_email_type):
+    table_name = 'PATCH columns 17'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data()
+    column_data[1] = {}
+    column_data[3]['type'] = 'BOOLEAN'
+
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response_json = response.json()
+    assert response.status_code == 400
+    assert 'Pizza is not a boolean' in response_json[0]
+
+    current_table_response = client.get(f'/api/v0/tables/{table.id}/')
+    # The table should not have changed
+    original_column_data = _get_data_types_column_data()
+    _check_columns(current_table_response.json()['columns'], original_column_data)
+
+
+def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_types_table, client, engine_email_type):
+    table_name = 'PATCH columns 18'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data()
+    column_data[1] = {}
+    column_data[2]['name'] = 'Checkbox'
+    column_data[2]['type'] = 'BOOLEAN'
+    column_data[3]['type'] = 'BOOLEAN'
+
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response_json = response.json()
+    assert response.status_code == 400
+    assert 'Pizza is not a boolean' in response_json[0]
+
+    current_table_response = client.get(f'/api/v0/tables/{table.id}/')
+    # The table should not have changed
+    original_column_data = _get_data_types_column_data()
+    _check_columns(current_table_response.json()['columns'], original_column_data)

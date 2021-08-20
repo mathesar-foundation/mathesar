@@ -8,7 +8,7 @@ from sqlalchemy import (
     DefaultClause, func
 )
 from sqlalchemy.ext import compiler
-from sqlalchemy.exc import DataError
+from sqlalchemy.exc import DataError, InternalError
 from sqlalchemy.schema import DDLElement
 from psycopg2.errors import InvalidTextRepresentation, InvalidParameterValue
 
@@ -361,6 +361,8 @@ def retype_column_in_connection(table, connection, engine, column_index, new_typ
         )
     except DataError as e:
         _handle_retype_data_errors(e)
+    except InternalError as e:
+        raise e.orig
 
 
 def change_column_nullable(table_oid, column_index, nullable, engine, **kwargs):

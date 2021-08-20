@@ -18,7 +18,11 @@ def update_sa_table(table, validated_data):
     }
     if errors:
         raise ValidationError(errors)
-    update_table(table.name, table.oid, table.schema.name, table.schema._sa_engine, validated_data)
+    try:
+        update_table(table.name, table.oid, table.schema.name, table.schema._sa_engine, validated_data)
+    # TODO: Catch more specific exceptions
+    except Exception as e:
+        raise ValidationError(e)
 
 
 def update_sa_schema(schema, validated_data):
