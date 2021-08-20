@@ -924,13 +924,18 @@ def test_table_retrieve_no_primary_key(create_schema, client):
     table_name = 'NASA Table Retrieve'
     schema = create_schema('Patents')
     engine = create_mathesar_engine(schema.database.name)
-    meta = MetaData()
-    table = Table(
-        table_name, meta,
+    metadata = MetaData(bind=engine, schema=schema)
+    columns = [
         Column('id', Integer),
         Column('name', String)
+    ]
+    table = Table(
+        table_name,
+        metadata,
+        columns,
+        schema=schema
     )
-    meta.create_all(engine)
+    assert table.num_primary_keys == 0
 
     try:
         record_id = 233
@@ -944,14 +949,18 @@ def test_table_delete_no_primary_key(create_schema, client):
     table_name = 'NASA Table Delete'
     schema = create_schema('Patents')
     engine = create_mathesar_engine(schema.database.name)
-    meta = MetaData()
-    table = Table(
-        table_name, meta,
+    metadata = MetaData(bind=engine, schema=schema)
+    columns = [
         Column('id', Integer),
         Column('name', String)
+    ]
+    table = Table(
+        table_name,
+        metadata,
+        columns,
+        schema=schema
     )
-    meta.create_all(engine)
-    assert len(table.primary_key.columns) == 0
+    assert table.num_primary_keys == 0
 
     new_table_name = 'NASA Table Delete New'
     body = {'name': new_table_name}
@@ -967,14 +976,18 @@ def test_table_partial_update_no_primary_key(create_schema, client):
     table_name = 'NASA Table Partial Update'
     schema = create_schema('Patents')
     engine = create_mathesar_engine(schema.database.name)
-    meta = MetaData()
-    table = Table(
-        table_name, meta,
+    metadata = MetaData(bind=engine, schema=schema)
+    columns = [
         Column('id', Integer),
         Column('name', String)
+    ]
+    table = Table(
+        table_name,
+        metadata,
+        columns,
+        schema=schema
     )
-    meta.create_all(engine)
-    assert len(table.primary_key.columns) == 0
+    assert table.num_primary_keys == 0
 
     new_table_name = 'NASA Table Partial Update New'
     body = {'name': new_table_name}
@@ -990,14 +1003,18 @@ def test_table_retrieve_multiple_primary_keys(create_schema, client):
     table_name = 'NASA Table Retrieve'
     schema = create_schema('Patents')
     engine = create_mathesar_engine(schema.database.name)
-    meta = MetaData()
-    table = Table(
-        table_name, meta,
+    metadata = MetaData(bind=engine, schema=schema)
+    columns = [
         Column('id', Integer, primary_key=True),
         Column('name', String, primary_key=True)
+    ]
+    table = Table(
+        table_name,
+        metadata,
+        columns,
+        schema=schema
     )
-    meta.create_all(engine)
-    assert len(table.primary_key.columns) == 2
+    assert table.num_primary_keys == 2
 
     try:
         record_id = 233
@@ -1011,14 +1028,18 @@ def test_table_delete_multiple_primary_keys(create_schema, client):
     table_name = 'NASA Table Delete'
     schema = create_schema('Patents')
     engine = create_mathesar_engine(schema.database.name)
-    meta = MetaData()
-    table = Table(
-        table_name, meta,
+    metadata = MetaData(bind=engine, schema=schema)
+    columns = [
         Column('id', Integer, primary_key=True),
         Column('name', String, primary_key=True)
+    ]
+    table = Table(
+        table_name,
+        metadata,
+        columns,
+        schema=schema
     )
-    meta.create_all(engine)
-    assert len(table.primary_key.columns) == 2
+    assert table.num_primary_keys == 2
 
     new_table_name = 'NASA Table Delete New'
     body = {'name': new_table_name}
@@ -1034,14 +1055,18 @@ def test_table_partial_update_multiple_primary_keys(create_schema, client):
     table_name = 'NASA Table Partial Update'
     schema = create_schema('Patents')
     engine = create_mathesar_engine(schema.database.name)
-    meta = MetaData()
-    table = Table(
-        table_name, meta,
+    metadata = MetaData(bind=engine, schema=schema)
+    columns = [
         Column('id', Integer, primary_key=True),
         Column('name', String, primary_key=True)
+    ]
+    table = Table(
+        table_name,
+        metadata,
+        columns,
+        schema=schema
     )
-    meta.create_all(engine)
-    assert len(table.primary_key.columns) == 2
+    assert table.num_primary_keys == 2
 
     new_table_name = 'NASA Table Partial Update New'
     body = {'name': new_table_name}
