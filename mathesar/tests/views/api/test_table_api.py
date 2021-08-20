@@ -979,3 +979,56 @@ def test_table_patch_columns_two_name_changes(create_table, client, engine_email
 
     assert response.status_code == 200
     _check_columns(response_json['columns'], column_data)
+
+
+def test_table_patch_columns_one_type_change(create_table, client, engine_email_type):
+    table_name = 'Patents PATCH column type change 1'
+    table = create_table(table_name)
+    column_data = _get_patents_column_data()
+    column_data[7]['type'] == 'DATE'
+
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response_json = response.json()
+
+    assert response.status_code == 200
+    _check_columns(response_json['columns'], column_data)
+
+
+def _get_data_types_column_data():
+    return [{
+        'name': 'mathesar_id',
+        'type': 'INTEGER'
+    }, {
+        'name': 'Integer',
+        'type': 'VARCHAR'
+    }, {
+        'name': 'Boolean',
+        'type': 'VARCHAR'
+    }, {
+        'name': 'Text',
+        'type': 'VARCHAR'
+    }, {
+        'name': 'Decimal',
+        'type': 'VARCHAR'
+    }]
+
+
+def test_table_patch_columns_multiple_type_change(create_data_types_table, client, engine_email_type):
+    table_name = 'Data Types PATCH column type change 2'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data()
+    column_data[1]['type'] == 'INTEGER'
+    column_data[2]['type'] == 'BOOLEAN'
+    column_data[4]['type'] == 'DECIMAL'
+
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response_json = response.json()
+
+    assert response.status_code == 200
+    _check_columns(response_json['columns'], column_data)

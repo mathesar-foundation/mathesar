@@ -77,3 +77,8 @@ def patents_url():
 @pytest.fixture(scope='session')
 def patents_url_filename():
     return 'mathesar/tests/data/api_patents.csv'
+
+
+@pytest.fixture(scope='session')
+def data_types_csv_filename():
+    return 'mathesar/tests/data/data_types.csv'
