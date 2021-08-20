@@ -332,6 +332,13 @@ def test_table_type_suggestion(client, schema, engine_email_type):
     assert response_table == EXPECTED_TYPES
 
 
+def _check_columns(actual_column_list, expected_column_list):
+    # Columns will return an extra type_options key in actual_dict
+    # so we need to check equality only for the keys in expect_dict
+    for index, column_dict in enumerate(expected_column_list):
+        assert all([actual_column_list[index][key] == column_dict[key] for key in column_dict])
+
+
 def test_table_previews(client, schema, engine_email_type):
     table_name = 'Type Modification Table'
     file = 'mathesar/tests/data/type_inference.csv'
@@ -371,10 +378,7 @@ def test_table_previews(client, schema, engine_email_type):
     }
     actual_dict = response.json()
     assert all([expect_dict[key] == actual_dict[key] for key in expect_dict if key in ['name', 'records']])
-    # Columns will return an extra type_options key in actual_dict
-    # so we need to check equality only for the keys in expect_dict
-    for index, column_dict in enumerate(expect_dict['columns']):
-        assert all([actual_dict['columns'][index][key] == column_dict[key] for key in column_dict])
+    _check_columns(actual_dict['columns'], expect_dict['columns'])
 
 
 def test_table_previews_wrong_column_number(client, schema, engine_email_type):
@@ -889,7 +893,7 @@ def _get_patents_column_data():
         'name': 'mathesar_id',
         'type': 'INTEGER',
     }, {
-        'name': 'Center!',
+        'name': 'Center',
         'type': 'VARCHAR',
     }, {
         'name': 'Status',
@@ -927,3 +931,18 @@ def test_table_patch_name_and_columns(create_table, client):
     response_error = response.json()
     assert response.status_code == 400
     assert response_error == ['Only name or columns can be passed in, not both.']
+
+
+def test_table_patch_columns_no_changes(create_table, client, engine_email_type):
+    table_name = 'Patents PATCH column no change'
+    table = create_table(table_name)
+    column_data = _get_patents_column_data()
+
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response_json = response.json()
+
+    assert response.status_code == 200
+    _check_columns(response_json['columns'], column_data)

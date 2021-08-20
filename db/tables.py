@@ -95,7 +95,7 @@ def rename_table(name, schema, engine, rename_to):
 
 
 def update_table(table_name, table_oid, schema, engine, update_data):
-    if 'name' and 'sa_columns' in update_data:
+    if 'name' in update_data and 'sa_columns' in update_data:
         raise ValueError('Only name or columns can be passed in, not both.')
     if 'name' in update_data:
         rename_table(table_name, schema, engine, update_data['name'])
