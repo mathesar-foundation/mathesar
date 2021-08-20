@@ -5,10 +5,13 @@ from unittest.mock import patch
 
 from django.core.cache import cache
 from django.core.files.base import File, ContentFile
-from sqlalchemy import text
+from sqlalchemy import (
+    text, Column, Integer, String, MetaData
+)
 
 from mathesar import reflection
 from mathesar.models import Table, DataFile, Schema
+from mathesar.database.base import create_mathesar_engine
 from db.tests.types import fixtures
 from db import tables
 
@@ -917,43 +920,69 @@ def test_table_viewset_checks_cache(client):
     mock_reflect.assert_called()
 
 
-def test_table_retrieve_no_primary_key(create_table, client):
+def test_table_retrieve_no_primary_key(create_schema, client):
     table_name = 'NASA Table Retrieve'
-    new_table_name = 'NASA Table Retrieve New'
-    table = create_table(table_name)
-    record_id = 233
+    schema = create_schema('Patents')
+    engine = create_mathesar_engine(schema.database.name)
+    meta = MetaData()
+    table = Table(
+        table_name, meta,
+        Column('id', Integer),
+        Column('name', String)
+    )
+    meta.create_all(engine)
 
+    new_table_name = 'NASA Table Retrieve New'
     body = {'name': new_table_name, 'num_primary_keys': 0}
     try:
+        record_id = 233
         client.get(f'/api/v0/tables/{table.id}/record/{record_id}', body)
     except NotUniquePrimaryKey as e:
         assert e.status_code == 400
         assert e.message == "This table does not have a unique primary key."
 
 
-def test_table_delete_no_primary_key(create_table, client):
+def test_table_delete_no_primary_key(create_schema, client):
     table_name = 'NASA Table Delete'
-    new_table_name = 'NASA Table Delete New'
-    table = create_table(table_name)
-    record_id = 233
+    schema = create_schema('Patents')
+    engine = create_mathesar_engine(schema.database.name)
+    meta = MetaData()
+    table = Table(
+        table_name, meta,
+        Column('id', Integer),
+        Column('name', String)
+    )
+    meta.create_all(engine)
+    assert len(table.primary_key.columns) == 0
 
-    body = {'name': new_table_name, 'num_primary_keys': 0}
+    new_table_name = 'NASA Table Delete New'
+    body = {'name': new_table_name}
     try:
-        client.delete(f'/api/v0/tables/{table.id}/record/{record_id}', body)
+        record_id = 233
+        client.get(f'/api/v0/tables/{table.id}/record/{record_id}', body)
     except NotUniquePrimaryKey as e:
         assert e.status_code == 400
         assert e.message == "This table does not have a unique primary key."
 
 
-def test_table_partial_update_no_primary_key(create_table, client):
+def test_table_partial_update_no_primary_key(create_schema, client):
     table_name = 'NASA Table Partial Update'
-    new_table_name = 'NASA Table Partial Update New'
-    table = create_table(table_name)
-    record_id = 233
+    schema = create_schema('Patents')
+    engine = create_mathesar_engine(schema.database.name)
+    meta = MetaData()
+    table = Table(
+        table_name, meta,
+        Column('id', Integer),
+        Column('name', String)
+    )
+    meta.create_all(engine)
+    assert len(table.primary_key.columns) == 0
 
-    body = {'name': new_table_name, 'num_primary_keys': 0}
+    new_table_name = 'NASA Table Partial Update New'
+    body = {'name': new_table_name}
     try:
-        client.patch(f'/api/v0/tables/{table.id}/record/{record_id}', body)
+        record_id = 233
+        client.get(f'/api/v0/tables/{table.id}/record/{record_id}', body)
     except NotUniquePrimaryKey as e:
         assert e.status_code == 400
         assert e.message == "This table does not have a unique primary key."
