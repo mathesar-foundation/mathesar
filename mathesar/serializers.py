@@ -10,6 +10,28 @@ from mathesar.models import Table, Schema, DataFile, Database, Constraint
 SUPPORTED_URL_CONTENT_TYPES = {'text/csv', 'text/plain'}
 
 
+class ModelNameField(serializers.CharField):
+    """
+    De-serializes the request field as a string, but serializes the response field as
+    `model.name`. Required to support passing and returing a model name from the
+    endpoint, while also storing the model as a related field.
+    """
+    def to_representation(self, value):
+        return value.name
+
+
+class InputValueField(serializers.CharField):
+    """
+    Takes in an arbitrary value. Use to emulate our column and record creation and
+    update endpoints, which handle arbitrary data pulled from request.data
+    """
+    def to_internal_value(self, data):
+        return data
+
+    def to_representation(self, value):
+        return value
+
+
 class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
     url = serializers.SerializerMethodField()
 
@@ -20,16 +42,6 @@ class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
     def get_url(self, obj):
         request = self.context['request']
         return request.build_absolute_uri(reverse('table-detail', kwargs={'pk': obj.pk}))
-
-
-class ModelNameField(serializers.CharField):
-    """
-    De-serializes the request field as a string, but serializes the response field as
-    `model.name`. Required to support passing and returing a model name from the
-    endpoint, while also storing the model as a related field.
-    """
-    def to_representation(self, value):
-        return value.name
 
 
 class SchemaSerializer(serializers.HyperlinkedModelSerializer):
@@ -69,6 +81,9 @@ class ColumnSerializer(SimpleColumnSerializer):
     # Read only fields
     index = serializers.IntegerField(source='column_index', read_only=True)
     valid_target_types = serializers.ListField(read_only=True)
+    default = InputValueField(
+        source='default_value', read_only=False, default=None, allow_null=True
+    )
 
     def validate(self, data):
         if not self.partial:
@@ -127,8 +142,9 @@ class TableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Table
         fields = ['id', 'name', 'schema', 'created_at', 'updated_at', 'import_verified',
-                  'columns', 'records_url', 'constraints_url', 'columns_url', 'type_suggestions_url',
-                  'previews_url', 'data_files', 'has_dependencies']
+                  'columns', 'records_url', 'constraints_url', 'columns_url',
+                  'type_suggestions_url', 'previews_url', 'data_files',
+                  'has_dependencies']
 
     def get_records_url(self, obj):
         if isinstance(obj, Table):
