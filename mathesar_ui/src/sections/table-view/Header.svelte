@@ -1,27 +1,18 @@
 <script lang="ts">
-  import { onMount, createEventDispatcher } from 'svelte';
-  import {
-    faChevronRight,
-    faCog,
-    faSortAmountDown,
-    faSortAmountDownAlt,
-    faThList,
-  } from '@fortawesome/free-solid-svg-icons';
-  import { Dropdown, Icon } from '@mathesar-components';
+  import { onMount } from "svelte";
   import type {
     TableColumnData,
     ColumnPosition,
-    TableColumn,
     SortOption,
     GroupOption,
-  } from '@mathesar/stores/tableData';
+  } from "@mathesar/stores/tableData";
   import {
     DEFAULT_COUNT_COL_WIDTH,
     GROUP_MARGIN_LEFT,
     DEFAULT_ROW_RIGHT_PADDING,
-  } from '@mathesar/stores/tableData';
+  } from "@mathesar/stores/tableData";
+  import CellHeader from "./CellHeader.svelte";
 
-  const dispatch = createEventDispatcher();
   export let columns: TableColumnData;
   export let sort: SortOption = new Map();
   export let group: GroupOption = new Set();
@@ -30,20 +21,6 @@
   export let isResultGrouped: boolean;
 
   let headerRef: HTMLElement;
-  let isAdvancedOptionsOpen = false;
-  $: dropdownStates = columns.data.reduce((acc, el) => {
-    acc[el.name] = false;
-    return acc;
-  }, {});
-
-  function toggleAdvancedOptions() {
-    isAdvancedOptionsOpen = !isAdvancedOptionsOpen;
-  }
-
-  function closeDropdown(name: string) {
-    isAdvancedOptionsOpen = false;
-    dropdownStates = { ...dropdownStates, [name]: false };
-  }
 
   function onHScrollOffsetChange(_hscrollOffset: number) {
     if (headerRef) {
@@ -70,161 +47,36 @@
       onHeaderScroll(scrollLeft);
     };
 
-    headerRef.addEventListener('scroll', scrollListener);
+    headerRef.addEventListener("scroll", scrollListener);
 
     return () => {
-      headerRef.removeEventListener('scroll', scrollListener);
+      headerRef.removeEventListener("scroll", scrollListener);
     };
   });
-
-  function sortByColumn(column: TableColumn, order: 'asc' | 'desc') {
-    const newSort: SortOption = new Map(sort);
-    if (sort?.get(column.name) === order) {
-      newSort.delete(column.name);
-    } else {
-      newSort.set(column.name, order);
-    }
-    sort = newSort;
-    closeDropdown(column.name)
-    dispatch('reload');
-  }
-
-  function groupByColumn(column: TableColumn) {
-    const oldSize = group?.size || 0;
-    const newGroup = new Set(group);
-    if (newGroup?.has(column.name)) {
-      newGroup.delete(column.name);
-    } else {
-      newGroup.add(column.name);
-    }
-    group = newGroup;
-    /**
-     * Only reset item positions when group layout is created or destroyed
-    */
-    closeDropdown(column.name)
-    dispatch('reload', {
-      resetPositions: oldSize === 0 || group.size === 0,
-    });
-  }
-
-  function determineDataIcon(type: string) {
-    switch (type) {
-      case 'INTEGER':
-        return '#';
-      case 'VARCHAR':
-        return 'T';
-      default:
-        return 'i';
-    }
-  }
-
-  function determineDataTitle(type: string) {
-    switch (type) {
-      case 'INTEGER':
-        return 'Number';
-      case 'VARCHAR': 
-        return 'Text'   
-      default:
-        return 'Else'
-    }
-  }
 </script>
 
 <div bind:this={headerRef} class="header">
-  <div class="cell row-control" style="width:{DEFAULT_COUNT_COL_WIDTH + paddingLeft}px;">
-  </div>
+  <div
+    class="cell row-control"
+    style="width:{DEFAULT_COUNT_COL_WIDTH + paddingLeft}px;"
+  />
 
   {#each columns.data as column (column.name)}
-    <div class="cell" style="
-      width:{columnPosition.get(column.name).width}px;
-      left:{columnPosition.get(column.name).left + paddingLeft}px;">
-      <span class="type">
-        {determineDataIcon(column.type)}
-      </span>
-      <span class="name">{column.name}</span>
-
-      <Dropdown isOpen={dropdownStates[column.name]} triggerClass="opts" triggerAppearance="plain"
-                contentClass="table-opts-content">
-        <svelte:fragment slot="content">
-          <div>
-            {#if isAdvancedOptionsOpen}
-                <h6 class="category">Advanced Options</h6>
-                <h5 class="title">Set '{column.name}' type</h5>
-                <ul class="type-list">
-                  <li>
-                    <button on:click={() => closeDropdown(column.name)}>
-                      <span class="data-icon">T</span> Text
-                    </button>
-                  </li>
-                  <li>
-                    <button>
-                      <span class="data-icon">#</span> Number
-                    </button>
-                  </li>
-                </ul>
-            {:else} 
-              <h6 class="category">Data Type</h6>
-              <button class="list-button with-right-icon" on:click={() => toggleAdvancedOptions()}>
-                <div>
-                  <span class="data-icon">{determineDataIcon(column.type)}</span>
-                  <span>
-                    {determineDataTitle(column.type)}
-                  </span>
-                </div>
-                <div>
-                  <Icon class="right-icon" data={faCog} />
-                  <Icon class="right-icon" data={faChevronRight} />
-                </div>
-              </button>
-              <ul>
-                <li>
-                  <button class="list-button" on:click={() => sortByColumn(column, 'asc')}>
-                    <Icon class="opt" data={faSortAmountDownAlt}/>
-                    <span>
-                      {#if sort?.get(column.name) === 'asc'}
-                        Remove asc sort
-                      {:else}
-                        Sort Ascending
-                      {/if}
-                    </span>
-                  </button>
-                </li>
-                <li>
-                  <button class="list-button" on:click={() => sortByColumn(column, 'desc')}>
-                    <Icon class="opt" data={faSortAmountDown}/>
-                    <span>
-                      {#if sort?.get(column.name) === 'desc'}
-                        Remove desc sort
-                      {:else}
-                        Sort Descending
-                      {/if}
-                    </span>
-                  </button>
-                </li>
-                <li>
-                  <button class="list-button" on:click={() => groupByColumn(column)}>
-                    <Icon class="opt" data={faThList}/>
-                    <span>
-                      {#if group?.has(column.name)}
-                        Remove grouping
-                      {:else}
-                        Group by column
-                      {/if}
-                    </span>
-                  </button>
-                </li>            
-              </ul> 
-            {/if}
-          </div>
-        </svelte:fragment>
-      </Dropdown>
-    </div>
+    <CellHeader
+      bind:sort
+      bind:group
+      bind:column
+      bind:columnPosition
+      bind:paddingLeft
+      on:reload
+    />
   {/each}
-  <div class="cell" style="width:{70 + DEFAULT_ROW_RIGHT_PADDING}px;left:{
-      columnPosition.get('__row').width + paddingLeft
-    }px;">
-    <div class="add">
-      +
-    </div>
+  <div
+    class="cell"
+    style="width:{70 + DEFAULT_ROW_RIGHT_PADDING}px;left:{columnPosition.get(
+      '__row'
+    ).width + paddingLeft}px;"
+  >
+    <div class="add">+</div>
   </div>
 </div>
