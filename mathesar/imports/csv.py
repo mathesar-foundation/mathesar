@@ -81,7 +81,7 @@ def get_sv_reader(file, header, dialect=None):
         ]
         file.seek(0)
     else:
-        reader.fieldnames = list(map(lambda col: col.replace('"', ''), reader.fieldnames))
+        reader.fieldnames = list(map(lambda col: col.strip('"').replace('"', "'"), reader.fieldnames))
     return reader
 
 
