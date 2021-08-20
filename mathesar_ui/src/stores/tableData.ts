@@ -34,6 +34,12 @@ export interface TableColumnsResponse {
   results: TableColumnResponse[]
 }
 
+export interface TableTypesResponse {
+  db_types: string[]
+  indentifier: string;
+  name: string;
+}
+
 interface TableRecordGroupsResponse {
   group_count_by: string[],
   results: { count: number, values: string[] }[],
