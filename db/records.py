@@ -319,7 +319,7 @@ def create_records_from_csv(
                 delimiter=sql.SQL(f"DELIMITER E'{delimiter}'" if delimiter else ""),
                 escape=sql.SQL(f"ESCAPE '{escape}'" if escape else ""),
                 quote=sql.SQL(
-                    ("QUOTE " "" "" if quote == "'" else f"QUOTE '{quote}'")
+                    ("QUOTE ''''" if quote == "'" else f"QUOTE '{quote}'")
                     if quote
                     else ""
                 ),
