@@ -11,7 +11,6 @@ from sqlalchemy import (
 
 from mathesar import reflection
 from mathesar.models import Table, DataFile, Schema
-from mathesar.database.base import create_mathesar_engine
 from db.tests.types import fixtures
 from db import tables
 
