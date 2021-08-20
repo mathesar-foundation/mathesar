@@ -8,13 +8,20 @@ import {
 } from 'svelte/store';
 
 import { preloadCommonData } from '@mathesar/utils/preloadData';
-import { getAPI, PaginatedResponse, States } from '@mathesar/utils/api';
+import {
+  deleteAPI,
+  getAPI,
+  patchAPI,
+  postAPI,
+  States,
+} from '@mathesar/utils/api';
+import type { PaginatedResponse } from '@mathesar/utils/api';
 
 import type {
   Database,
   Schema,
   SchemaResponse,
-  SchemaEntry,
+  DBObjectEntry,
 } from '@mathesar/App.d';
 import type { CancellablePromise } from '@mathesar/components';
 
@@ -26,7 +33,7 @@ export const currentSchemaId: Writable<Schema['id']> = writable(
   commonData.current_schema || null,
 );
 
-export type TableMap = Map<number, SchemaEntry>;
+export type TableMap = Map<number, DBObjectEntry>;
 
 export interface DBSchemaStoreData {
   state: States,
@@ -83,7 +90,24 @@ function updateSchemaInDBSchemaStore(
         ...schema,
         tables: getTableMap(schema.tables),
       });
-      return value;
+      return {
+        ...value,
+      };
+    });
+  }
+}
+
+function removeSchemaInDBSchemaStore(
+  database: Database['name'],
+  schemaId: Schema['id'],
+) {
+  const store = dbSchemaStoreMap.get(database);
+  if (store) {
+    store.update((value) => {
+      value.data?.delete(schemaId);
+      return {
+        ...value,
+      };
     });
   }
 }
@@ -172,6 +196,37 @@ export function getSchemaInfo(database: Database['name'], schemaId: Schema['id']
     return null;
   }
   return get(store).data.get(schemaId);
+}
+
+export async function createSchema(
+  database: Database['name'],
+  schemaName: Schema['name'],
+): Promise<SchemaResponse> {
+  const response = await postAPI<SchemaResponse>('/schemas/', {
+    name: schemaName,
+    database,
+  });
+  updateSchemaInDBSchemaStore(database, response);
+  return response;
+}
+
+export async function updateSchema(
+  database: Database['name'],
+  schema: Schema,
+): Promise<SchemaResponse> {
+  const response = await patchAPI<SchemaResponse>(`/schemas/${schema.id}/`, {
+    name: schema.name,
+  });
+  updateSchemaInDBSchemaStore(database, response);
+  return response;
+}
+
+export async function deleteSchema(
+  database: Database['name'],
+  schemaId: Schema['id'],
+): Promise<void> {
+  await deleteAPI(`/schemas/${schemaId}/`);
+  removeSchemaInDBSchemaStore(database, schemaId);
 }
 
 export const schemas: Readable<DBSchemaStoreData> = derived(

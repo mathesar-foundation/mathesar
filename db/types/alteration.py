@@ -4,6 +4,7 @@ from sqlalchemy.sql.functions import Function
 from db import columns, tables
 from db.types import base, email
 
+
 BIGINT = base.PostgresType.BIGINT.value
 BOOLEAN = base.PostgresType.BOOLEAN.value
 EMAIL = base.MathesarCustomType.EMAIL.value
@@ -19,8 +20,8 @@ SMALLINT = base.PostgresType.SMALLINT.value
 FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
 TEXT = base.PostgresType.TEXT.value
 DATE = base.PostgresType.DATE.value
-STRING = 'string'
-VARCHAR = 'varchar'
+STRING = base.STRING
+VARCHAR = base.VARCHAR
 
 
 class UnsupportedTypeException(Exception):
@@ -170,6 +171,7 @@ def install_all_casts(engine):
     create_integer_casts(engine)
     create_decimal_number_casts(engine)
     create_interval_casts(engine)
+    create_date_casts(engine)
     create_varchar_casts(engine)
 
 
@@ -200,6 +202,11 @@ def create_decimal_number_casts(engine):
     for type_str in decimal_number_types:
         type_body_map = _get_decimal_number_type_body_map(target_type_str=type_str)
         create_cast_functions(type_str, type_body_map, engine)
+
+
+def create_date_casts(engine):
+    type_body_map = _get_date_type_body_map()
+    create_cast_functions(DATE, type_body_map, engine)
 
 
 def create_varchar_casts(engine):
@@ -236,6 +243,7 @@ def get_defined_source_target_cast_tuples(engine):
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
+        DATE: _get_date_type_body_map(),
         VARCHAR: _get_varchar_type_body_map(engine),
     }
     return {
@@ -472,6 +480,15 @@ def _get_varchar_type_body_map(engine):
     return _get_default_type_body_map(supported_types, VARCHAR)
 
 
+def _get_date_type_body_map():
+    # Note that default postgres conversion for dates depends on the `DateStyle` option
+    # set on the server, which can be one of DMY, MDY, or YMD. Defaults to MDY.
+    default_behavior_source_types = [DATE, VARCHAR]
+    return _get_default_type_body_map(
+        default_behavior_source_types, DATE,
+    )
+
+
 def _get_default_type_body_map(source_types, target_type_str):
     default_cast_str = f"""
         BEGIN
@@ -479,3 +496,22 @@ def _get_default_type_body_map(source_types, target_type_str):
         END;
     """
     return {type_name: default_cast_str for type_name in source_types}
+
+
+def get_column_cast_records(engine, table, column_definitions, num_records=20):
+    assert len(column_definitions) == len(table.columns)
+    cast_expression_list = [
+        (
+            get_column_cast_expression(
+                column, col_def["type"],
+                engine,
+                type_options=col_def.get("type_options", {})
+            )
+            .label(col_def["name"])
+        ) if not columns.MathesarColumn.from_column(column).is_default else column
+        for column, col_def in zip(table.columns, column_definitions)
+    ]
+    sel = select(cast_expression_list).limit(num_records)
+    with engine.begin() as conn:
+        result = conn.execute(sel)
+    return result.fetchall()
