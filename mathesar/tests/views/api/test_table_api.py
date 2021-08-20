@@ -932,11 +932,9 @@ def test_table_retrieve_no_primary_key(create_schema, client):
     )
     meta.create_all(engine)
 
-    new_table_name = 'NASA Table Retrieve New'
-    body = {'name': new_table_name, 'num_primary_keys': 0}
     try:
         record_id = 233
-        client.get(f'/api/v0/tables/{table.id}/record/{record_id}', body)
+        client.get(f'/api/v0/tables/{table.id}/record/{record_id}')
     except NotUniquePrimaryKey as e:
         assert e.status_code == 400
         assert e.message == "This table does not have a unique primary key."
