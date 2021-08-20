@@ -1069,3 +1069,37 @@ def test_table_patch_columns_multiple_drop(create_data_types_table, client, engi
     assert len(response_json['columns']) == len(column_data) - len(INDICES_TO_DROP)
     expected_column_data = [data for index, data in enumerate(column_data) if index not in INDICES_TO_DROP]
     _check_columns(response_json['columns'], expected_column_data)
+
+
+def test_table_patch_columns_diff_name_type_change(create_data_types_table, client, engine_email_type):
+    table_name = 'Data Types PATCH column diff name type'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data()
+    column_data[1]['type'] == 'INTEGER'
+    column_data[2]['name'] == 'Checkbox'
+
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response_json = response.json()
+
+    assert response.status_code == 200
+    _check_columns(response_json['columns'], column_data)
+
+
+def test_table_patch_columns_same_name_type_change(create_data_types_table, client, engine_email_type):
+    table_name = 'Data Types PATCH column same name type'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data()
+    column_data[2]['type'] == 'BOOLEAN'
+    column_data[2]['name'] == 'Checkbox'
+
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response_json = response.json()
+
+    assert response.status_code == 200
+    _check_columns(response_json['columns'], column_data)
