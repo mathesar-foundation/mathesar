@@ -1032,3 +1032,40 @@ def test_table_patch_columns_multiple_type_change(create_data_types_table, clien
 
     assert response.status_code == 200
     _check_columns(response_json['columns'], column_data)
+
+
+def test_table_patch_columns_one_drop(create_data_types_table, client, engine_email_type):
+    table_name = 'Data Types PATCH column drop 1'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data()
+    column_data[1] = {}
+
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response_json = response.json()
+
+    assert response.status_code == 200
+    assert len(response_json['columns']) == len(column_data) - 1
+    _check_columns(response_json['columns'], column_data.pop(1))
+
+
+def test_table_patch_columns_multiple_drop(create_data_types_table, client, engine_email_type):
+    INDICES_TO_DROP = [1, 2]
+    table_name = 'Data Types PATCH column drop 2'
+    table = create_data_types_table(table_name)
+    column_data = _get_data_types_column_data()
+    for index in INDICES_TO_DROP:
+        column_data[index] = {}
+
+    body = {
+        'columns': column_data
+    }
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response_json = response.json()
+
+    assert response.status_code == 200
+    assert len(response_json['columns']) == len(column_data) - len(INDICES_TO_DROP)
+    expected_column_data = [data for index, data in enumerate(column_data) if index not in INDICES_TO_DROP]
+    _check_columns(response_json['columns'], expected_column_data)
