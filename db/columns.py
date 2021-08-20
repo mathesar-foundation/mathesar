@@ -160,8 +160,6 @@ class MathesarColumn(Column):
 
     @property
     def default_value(self):
-        print(self.table_)
-        print(self.original_table)
         if self.table_ is not None:
             table_oid = tables.get_oid_from_table(
                 self.table_.name, self.table_.schema, self.engine

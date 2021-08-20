@@ -171,6 +171,7 @@ def install_all_casts(engine):
     create_integer_casts(engine)
     create_decimal_number_casts(engine)
     create_interval_casts(engine)
+    create_date_casts(engine)
     create_varchar_casts(engine)
 
 
@@ -201,6 +202,11 @@ def create_decimal_number_casts(engine):
     for type_str in decimal_number_types:
         type_body_map = _get_decimal_number_type_body_map(target_type_str=type_str)
         create_cast_functions(type_str, type_body_map, engine)
+
+
+def create_date_casts(engine):
+    type_body_map = _get_date_type_body_map()
+    create_cast_functions(DATE, type_body_map, engine)
 
 
 def create_varchar_casts(engine):
@@ -237,6 +243,7 @@ def get_defined_source_target_cast_tuples(engine):
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
+        DATE: _get_date_type_body_map(),
         VARCHAR: _get_varchar_type_body_map(engine),
     }
     return {
@@ -471,6 +478,15 @@ def _get_varchar_type_body_map(engine):
     """
     supported_types = get_supported_alter_column_db_types(engine)
     return _get_default_type_body_map(supported_types, VARCHAR)
+
+
+def _get_date_type_body_map():
+    # Note that default postgres conversion for dates depends on the `DateStyle` option
+    # set on the server, which can be one of DMY, MDY, or YMD. Defaults to MDY.
+    default_behavior_source_types = [DATE, VARCHAR]
+    return _get_default_type_body_map(
+        default_behavior_source_types, DATE,
+    )
 
 
 def _get_default_type_body_map(source_types, target_type_str):
