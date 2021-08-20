@@ -72,16 +72,16 @@ def get_sv_dialect(file):
 def get_sv_reader(file, header, dialect=None):
     file = TextIOWrapper(file, encoding="utf-8-sig")
     if dialect:
-        reader = csv.DictReader(file, dialect=dialect)
+        reader = csv.DictReader(file, dialect=dialect, quoting=csv.QUOTE_ALL, quotechar='"', delimiter=',')
     else:
-        reader = csv.DictReader(file)
+        reader = csv.DictReader(file, quoting=csv.QUOTE_ALL, quotechar='"', delimiter=',')
     if not header:
         reader.fieldnames = [
             f"column_{i}" for i in range(len(reader.fieldnames))
         ]
         file.seek(0)
     else:
-        reader.fieldnames = list(map(lambda col: col.strip('"').replace('"', "'"), reader.fieldnames))
+        reader.fieldnames = list(map(lambda col: col.strip('"'), reader.fieldnames))
     return reader
 
 

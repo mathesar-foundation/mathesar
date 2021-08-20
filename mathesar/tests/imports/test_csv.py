@@ -158,7 +158,7 @@ def test_sv_get_header(file):
     with open(file, "rb") as sv_file:
         table = get_sv_reader(file=sv_file, header=True)
         assert table.fieldnames == [
-            "Center 'NASA' USA",
+            "Center \"NASA\" USA",
             "Status",
             "Case Number",
             "Patent Number",
