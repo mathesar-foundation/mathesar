@@ -143,7 +143,7 @@ class TableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Table
         fields = ['id', 'name', 'schema', 'created_at', 'updated_at', 'import_verified',
-                  'columns', 'records_url', 'constraints_url', 'columns_url', 'data_files', 'has_dependencies',
+                  'columns', 'records_url', 'previews_url', 'constraints_url', 'columns_url', 'data_files', 'has_dependencies',
                   'num_primary_keys']
 
     def get_records_url(self, obj):
