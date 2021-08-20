@@ -15,7 +15,7 @@
   export let contentClass = "";
   export let isOpen = false;
   export let closeOnInnerClick = false;
-  export let functionBeforeClose = null;
+  export let functionBeforeClose: () => void = null;
   export let ariaLabel: string = null;
   export let ariaControls: string = null;
   export let placement: Placement = "bottom-start";
