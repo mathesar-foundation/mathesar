@@ -988,42 +988,67 @@ def test_table_partial_update_no_primary_key(create_schema, client):
         assert e.message == "This table does not have a unique primary key."
 
 
-def test_table_retrieve_multiple_primary_keys(create_table, client):
+def test_table_retrieve_multiple_primary_keys(create_schema, client):
     table_name = 'NASA Table Retrieve'
-    new_table_name = 'NASA Table Retrieve New'
-    table = create_table(table_name)
-    record_id = 233
+    schema = create_schema('Patents')
+    engine = create_mathesar_engine(schema.database.name)
+    meta = MetaData()
+    table = Table(
+        table_name, meta,
+        Column('id', Integer, primary_key=True),
+        Column('name', String, primary_key=True)
+    )
+    meta.create_all(engine)
+    assert len(table.primary_key.columns) == 2
 
-    body = {'name': new_table_name, 'num_primary_keys': 2}
     try:
-        client.get(f'/api/v0/tables/{table.id}/record/{record_id}', body)
+        record_id = 233
+        client.get(f'/api/v0/tables/{table.id}/record/{record_id}')
     except NotUniquePrimaryKey as e:
         assert e.status_code == 400
         assert e.message == "This table does not have a unique primary key."
 
 
-def test_table_delete_multiple_primary_keys(create_table, client):
+def test_table_delete_multiple_primary_keys(create_schema, client):
     table_name = 'NASA Table Delete'
-    new_table_name = 'NASA Table Delete New'
-    table = create_table(table_name)
-    record_id = 233
+    schema = create_schema('Patents')
+    engine = create_mathesar_engine(schema.database.name)
+    meta = MetaData()
+    table = Table(
+        table_name, meta,
+        Column('id', Integer, primary_key=True),
+        Column('name', String, primary_key=True)
+    )
+    meta.create_all(engine)
+    assert len(table.primary_key.columns) == 2
 
+    new_table_name = 'NASA Table Delete New'
     body = {'name': new_table_name}
     try:
+        record_id = 233
         client.delete(f'/api/v0/tables/{table.id}/record/{record_id}', body)
     except NotUniquePrimaryKey as e:
         assert e.status_code == 400
         assert e.message == "This table does not have a unique primary key."
 
 
-def test_table_partial_update_multiple_primary_keys(create_table, client):
+def test_table_partial_update_multiple_primary_keys(create_schema, client):
     table_name = 'NASA Table Partial Update'
-    new_table_name = 'NASA Table Partial Update New'
-    table = create_table(table_name)
-    record_id = 233
+    schema = create_schema('Patents')
+    engine = create_mathesar_engine(schema.database.name)
+    meta = MetaData()
+    table = Table(
+        table_name, meta,
+        Column('id', Integer, primary_key=True),
+        Column('name', String, primary_key=True)
+    )
+    meta.create_all(engine)
+    assert len(table.primary_key.columns) == 2
 
-    body = {'name': new_table_name, 'num_primary_keys': 2}
+    new_table_name = 'NASA Table Partial Update New'
+    body = {'name': new_table_name}
     try:
+        record_id = 233
         client.patch(f'/api/v0/tables/{table.id}/record/{record_id}', body)
     except NotUniquePrimaryKey as e:
         assert e.status_code == 400
