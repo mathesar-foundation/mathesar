@@ -92,6 +92,8 @@ def reflect_new_table_constraints(table):
 def reflect_db_objects():
     if not cache.get(DB_REFLECTION_KEY):
         reflect_databases()
+        for database_key in models.Database:
+            reflect_schemas_from_database(database_key)
         for schema in models.Schema.current_objects.all():
             reflect_tables_from_schema(schema)
         cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)
