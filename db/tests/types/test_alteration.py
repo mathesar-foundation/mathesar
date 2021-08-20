@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, date
 from decimal import Decimal
 
 import pytest
@@ -31,6 +31,7 @@ INTERVAL = PostgresType.INTERVAL.value.upper()
 NUMERIC = PostgresType.NUMERIC.value.upper()
 REAL = PostgresType.REAL.value.upper()
 SMALLINT = PostgresType.SMALLINT.value.upper()
+DATE = PostgresType.DATE.value.upper()
 VARCHAR = "VARCHAR"
 
 
@@ -268,6 +269,14 @@ MASTER_DB_TYPE_MAP_SPEC = {
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
+    DATE: {
+        ISCHEMA_NAME: PostgresType.DATE.value,
+        REFLECTED_NAME: DATE,
+        TARGET_DICT: {
+            DATE: {VALID: [(date(1999, 1, 18), date(1999, 1, 18))]},
+            VARCHAR: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
+        },
+    },
     VARCHAR: {
         ISCHEMA_NAME: PostgresType.CHARACTER_VARYING.value,
         SUPPORTED_MAP_NAME: "varchar",
@@ -326,6 +335,19 @@ MASTER_DB_TYPE_MAP_SPEC = {
             SMALLINT: {
                 VALID: [("432", 432)],
                 INVALID: ["1.2234"]
+            },
+            DATE: {
+                VALID: [
+                    ("1999-01-18", date(1999, 1, 18)),
+                    ("1/18/1999", date(1999, 1, 18)),
+                    ("jan-1999-18", date(1999, 1, 18)),
+                    ("19990118", date(1999, 1, 18)),
+                ],
+                INVALID: [
+                    "18/1/1999",
+                    "not a date",
+                    "1234",
+                ]
             },
             VARCHAR: {VALID: [("a string", "a string")]},
         }
