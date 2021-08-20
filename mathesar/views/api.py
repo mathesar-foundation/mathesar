@@ -144,7 +144,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
             if model_field in serializer.validated_data:
                 setattr(table, model_field, serializer.validated_data[model_field])
                 present_model_fields.append(model_field)
-        table.save()
+        table.save(update_fields=present_model_fields)
         for key in present_model_fields:
             del serializer.validated_data[key]
 
