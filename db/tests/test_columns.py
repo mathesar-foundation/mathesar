@@ -437,6 +437,7 @@ type_set = {
     'VARCHAR',
     'TEXT',
     'DATE',
+    'TIME',
 }
 
 
