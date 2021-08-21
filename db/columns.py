@@ -14,6 +14,7 @@ from psycopg2.errors import InvalidTextRepresentation, InvalidParameterValue
 
 from db import constants, tables, constraints
 from db.types import alteration
+from db.types.base import get_db_type_name
 from db.utils import execute_statement
 
 logger = logging.getLogger(__name__)
@@ -346,12 +347,27 @@ def retype_column(table_oid, column_index, new_type, engine, type_options={}):
     )
 
 
+def _check_type_option_equivalence(type_options_1, type_options_2):
+    NULL_OPTIONS = [None, {}]
+    if type_options_1 in NULL_OPTIONS and type_options_2 in NULL_OPTIONS:
+        return True
+    elif type_options_1 == type_options_2:
+        return True
+    return False
+
+
 def retype_column_in_connection(table, connection, engine, column_index, new_type, type_options={}):
+    column = table.columns[column_index]
+    column_db_type = get_db_type_name(column.type, engine)
+    column_type_options = MathesarColumn.from_column(column).type_options
+    # Don't try to retype the column if it's already the correct type.
+    if (new_type == column_db_type) and _check_type_option_equivalence(type_options, column_type_options):
+        return
     try:
         alteration.alter_column_type(
             table.schema,
             table.name,
-            table.columns[column_index].name,
+            column.name,
             new_type,
             engine,
             friendly_names=False,
