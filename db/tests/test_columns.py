@@ -1002,9 +1002,29 @@ def test_batch_update_columns_no_changes(engine_email_type):
     engine, schema = engine_email_type
     table = _create_pizza_table(engine, schema)
     table_oid = tables.get_oid_from_table(table.name, schema, engine)
+
     columns.batch_update_columns(table_oid, engine, _get_pizza_column_data())
     updated_table = tables.reflect_table(table.name, schema, engine)
+
     assert len(table.columns) == len(updated_table.columns)
     for index, column in enumerate(table.columns):
         assert updated_table.columns[index].type.__visit_name__ == 'VARCHAR'
         assert updated_table.columns[index].name == table.columns[index].name
+
+
+def test_batch_update_column_names(engine_email_type):
+    engine, schema = engine_email_type
+    table = _create_pizza_table(engine, schema)
+    table_oid = tables.get_oid_from_table(table.name, schema, engine)
+
+    column_data = _get_pizza_column_data()
+    column_data[1]['name'] == 'Pizza Style'
+    column_data[2]['name'] == 'Eaten Recently?'
+
+    columns.batch_update_columns(table_oid, engine, column_data)
+    updated_table = tables.reflect_table(table.name, schema, engine)
+
+    assert len(table.columns) == len(updated_table.columns)
+    for index, column in enumerate(table.columns):
+        assert updated_table.columns[index].type.__visit_name__ == 'VARCHAR'
+        assert updated_table.columns[index].name == column_data[index]['name']
