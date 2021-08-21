@@ -4,6 +4,7 @@ from sqlalchemy import Column, MetaData, Table, select
 from sqlalchemy import BOOLEAN, Numeric, NUMERIC, String, VARCHAR, DATE
 from db.tests.types import fixtures
 from db.types import inference
+from db.types import datetime
 
 
 # We need to set these variables when the file loads, or pytest can't
@@ -22,6 +23,7 @@ type_data_list = [
     (String, ["a", "cat", "mat", "bat"], VARCHAR),
     (String, ["2", "1", "0", "0"], NUMERIC),
     (String, ["2000-01-12", "6/23/2004", "May-2007-29", "20200909"], DATE),
+    (String, ["9:24", "23:12", "03:04:05", "3:4:5"], datetime.TIME)
 ]
 
 
