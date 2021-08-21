@@ -58,7 +58,7 @@
     }
   }
 
-  function keyAccessibility(e) {
+  function keyAccessibility(e: KeyboardEvent): void {
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
@@ -80,6 +80,8 @@
           value,
         });
         isOpen = !isOpen;
+        break;
+      default:
         break;
     }
   }
