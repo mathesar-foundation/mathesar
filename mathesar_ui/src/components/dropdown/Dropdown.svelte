@@ -14,7 +14,7 @@
   } from '@mathesar-components/types';
   import type { Placement } from '@popperjs/core/lib/enums';
   import {
-    createEventDispatcher
+    createEventDispatcher,
   } from 'svelte';
 
   const dispatch = createEventDispatcher();
@@ -45,8 +45,8 @@
     }
   }
 
-  function setCurrentAndSelected(_isOpen){
-    if(_isOpen){
+  function setCurrentAndSelected(_isOpen) {
+    if (_isOpen) {
       dispatch('openDropdown');
     }
   }

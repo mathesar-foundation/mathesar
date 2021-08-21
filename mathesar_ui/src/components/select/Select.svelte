@@ -44,47 +44,47 @@
     }
   }
 
-  function setSelectedItem(){
+  function setSelectedItem() {
     currentIndex = options.indexOf(value);
   }
 
-  function hoveredItem(index){ 
-    if(currentIndex == options.length - 1 && index > 0){
+  function hoveredItem(index) {
+    if (currentIndex === options.length - 1 && index > 0) {
       currentIndex = 0;
-    }else if(currentIndex == 0 && index < 0){
+    } else if (currentIndex === 0 && index < 0) {
       currentIndex = options.length - 1;
-    }else{
-      currentIndex = currentIndex + index;
+    } else {
+      currentIndex += index;
     }
   }
 
-  function keyAccessibility(e){
-      switch (e.key){
-        case "ArrowDown":
-          e.preventDefault();
-          hoveredItem(1);
-          break;
-        case "ArrowUp":
-          e.preventDefault();
-          hoveredItem(-1);
-          break;
-        case "Escape":
-          e.preventDefault();
-          isOpen = false;
-          break;
-        case "Enter":
-          e.preventDefault();
-          if (options.length == 0) break;
-          value = options[currentIndex];
-          dispatch('change', {
-            value,
-          });
-          isOpen = !isOpen;
-          break;
-      }
+  function keyAccessibility(e) {
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        hoveredItem(1);
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        hoveredItem(-1);
+        break;
+      case 'Escape':
+        e.preventDefault();
+        isOpen = false;
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (options.length === 0) break;
+        value = options[currentIndex];
+        dispatch('change', {
+          value,
+        });
+        isOpen = !isOpen;
+        break;
     }
+  }
 
-  $: setOptions(options); 
+  $: setOptions(options);
 </script>
 <Dropdown ariaControls="select-value-{selectId}" {ariaLabel} bind:isOpen 
           contentClass="select {contentClass}" {triggerAppearance} {triggerClass} 
