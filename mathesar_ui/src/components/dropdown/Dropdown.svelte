@@ -9,6 +9,11 @@
     Icon,
     clickOffBounds,
   } from '@mathesar-components';
+  import {
+    createEventDispatcher
+  } from 'svelte';
+
+  const dispatch = createEventDispatcher();
 
   export let triggerClass = '';
   export let triggerAppearance : 'default' | 'plain' = 'default';
@@ -34,6 +39,14 @@
       close();
     }
   }
+
+  function setCurrentAndSelected(_isOpen){
+    if(_isOpen){
+      dispatch('openDropdown');
+    }
+  }
+
+  $: setCurrentAndSelected(isOpen);
 </script>
 
 <Button bind:element={trigger} appearance={triggerAppearance} class={tgClasses} on:click={toggle} 

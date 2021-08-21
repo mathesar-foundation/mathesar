@@ -25,8 +25,6 @@
 
   let isOpen = false;
   let currentIndex = 0;
-  let erasedIndex = 0;
-  let t = 0;
 
   function setValue(opt: SelectOption) {
     value = opt;
@@ -34,8 +32,6 @@
       value,
     });
     isOpen = false;
-    erasedIndex = 0;
-    currentIndex = 0;
   }
   
   function setOptions(opts: SelectOption[]) {
@@ -43,52 +39,50 @@
       setValue(opts[0]);
     }
   }
-  
-  function hoveredItem(index){
-      let items= [...document.getElementById('select-value-'+selectId).getElementsByTagName('li')];
-      if(currentIndex == items.length - 1 && index > 0){
-        currentIndex = 0;
-        index = 0;
-      }else if(currentIndex == 0 && index < 0){
-        currentIndex = items.length;
-      }else if(currentIndex == 0 && index > 0){
-        if(t <1){
-          currentIndex = -1;
-        }else if (t > 1){
-          currentIndex = 0;
-        }
-        t += 1; 
-      }
-      if(erasedIndex >= 1){
-        let hoveredElement= document.querySelector(".hovered");
-        hoveredElement.classList.remove("hovered");
-      }
-      currentIndex = currentIndex + index; 
-      items[currentIndex].classList.add("hovered");
-      erasedIndex = 1; 
+
+  function setSelectedItem(){
+    currentIndex = options?.indexOf(value);
+  }
+
+  function hoveredItem(index){ 
+    if(currentIndex == options.length - 1 && index > 0){
+      currentIndex = 0;
+    }else if(currentIndex == 0 && index < 0){
+      currentIndex = options.length - 1;
+    }else{
+      currentIndex = currentIndex + index;
     }
+  }
 
   function keyAccessibility(e){
       switch (e.key){
         case "ArrowDown":
+          e.preventDefault();
           hoveredItem(1);
           break;
         case "ArrowUp":
+          e.preventDefault();
           hoveredItem(-1);
           break;
         case "Escape":
+          e.preventDefault();
           isOpen = false;
           break;
         case "Enter":
+          e.preventDefault();
           if (options.length == 0) break;
-          setValue(options[currentIndex]);
+          value = options[currentIndex];
+          dispatch('change', {
+            value,
+          });
+          isOpen = !isOpen;
           break;
       }
     }
-    
+
   $: setOptions(options); 
 </script>
-<Dropdown ariaControls="select-value-{selectId}" {ariaLabel} bind:isOpen contentClass="select {contentClass}" {triggerClass} on:keydown={keyAccessibility}>
+<Dropdown ariaControls="select-value-{selectId}" {ariaLabel} bind:isOpen contentClass="select {contentClass}" {triggerClass} on:keydown={keyAccessibility} on:openDropdown={setSelectedItem}>
   <svelte:fragment slot="trigger">
     {value?.[labelKey]}
   </svelte:fragment>
@@ -96,7 +90,7 @@
   <svelte:fragment slot="content">
     <ul id="select-value-{selectId}" tabindex="0" role="listbox" aria-expanded="true">
       {#each options as option (option[idKey])}
-        <li role='option' class:selected={option[idKey] === value[idKey]} on:click={() => setValue(option)}>
+        <li role='option' class:selected={option[idKey] === value[idKey]} class:hovered={option[idKey] === options[currentIndex]?.[idKey]} on:click={() => setValue(option)}>
           <span>{option[labelKey]}</span>
         </li>
       {/each}
