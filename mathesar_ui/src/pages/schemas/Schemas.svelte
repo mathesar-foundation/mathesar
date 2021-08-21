@@ -1,23 +1,60 @@
 <script lang="ts">
   import { faPlus } from '@fortawesome/free-solid-svg-icons';
-  import { currentDB } from '@mathesar/stores/databases';
-  import { schemas } from '@mathesar/stores/schemas';
+  import { currentDBName } from '@mathesar/stores/databases';
+  import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
   import {
     Icon,
     Button,
     TextInput,
   } from '@mathesar-components';
   import type { Schema } from '@mathesar/App.d';
+  import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import SchemaRow from './schema-row/SchemaRow.svelte';
+  import AddEditSchema from './AddEditSchema.svelte';
+  import DeleteSchema from './DeleteSchema.svelte';
+
+  export let database: string;
+  let isAddModalOpen = false;
+  let isDeleteModalOpen = false;
+
+  function changeCurrentDB(_db: string) {
+    if ($currentDBName !== _db) {
+      $currentDBName = _db;
+    }
+    $currentSchemaId = null;
+  }
+
+  $: changeCurrentDB(database);
 
   let filterQuery = '';
+  let activeSchema: Schema = null;
 
-  let schemaList: Schema[];
-  $: schemaList = $schemas.data as Schema[] || [] as Schema[];
+  function filterSchemas(schemaData: DBSchemaStoreData['data'], filter: string): Schema[] {
+    const filtered: Schema[] = [];
+    schemaData.forEach((schema) => {
+      if (schema.name?.toLowerCase().includes(filter.toLowerCase())) {
+        filtered.push(schema);
+      }
+    });
+    return filtered;
+  }
 
-  $: displayList = filterQuery
-    ? schemaList.filter((schema) => schema.name.includes(filterQuery))
-    : schemaList;
+  $: displayList = filterSchemas($schemas.data, filterQuery);
+
+  function addSchema() {
+    activeSchema = null;
+    isAddModalOpen = true;
+  }
+
+  function editSchema(schema: Schema) {
+    activeSchema = schema;
+    isAddModalOpen = true;
+  }
+
+  function deleteSchema(schema: Schema) {
+    activeSchema = schema;
+    isDeleteModalOpen = true;
+  }
 </script>
 
 <svelte:head>
@@ -27,8 +64,8 @@
 <main class="schemas">
   <section class="hero">
     <div class="container">
-      <h1>{$currentDB.name}</h1>
-      <Button class="add">
+      <h1>{$currentDBName}</h1>
+      <Button class="add" on:click={addSchema}>
         <Icon data={faPlus}/>
         New Schema
       </Button>
@@ -36,17 +73,29 @@
   </section>
 
   <div class="container">
-    <h2>Schemas ({schemaList.length})</h2>
+    <h2>Schemas ({$schemas.data.size})</h2>
     <TextInput
         placeholder="Find a schema..."
         bind:value={filterQuery}/>
     <ul class="schema-list">
-      {#each displayList as schema, i}
-        <li><SchemaRow {schema}/></li>
+      {#each displayList as schema (schema.id)}
+        <li>
+          <SchemaRow {schema} on:edit={() => editSchema(schema)}
+            on:delete={() => deleteSchema(schema)}/>
+        </li>
       {/each}
     </ul>
   </div>
 </main>
+
+{#if isAddModalOpen}
+  <AddEditSchema bind:isOpen={isAddModalOpen}
+    isEditMode={activeSchema !== null} schema={activeSchema}/>
+{/if}
+
+{#if isDeleteModalOpen}
+  <DeleteSchema bind:isOpen={isDeleteModalOpen} schema={activeSchema}/>
+{/if}
 
 <style global lang="scss">
   @import "Schemas.scss";

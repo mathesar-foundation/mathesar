@@ -10,6 +10,28 @@ from mathesar.models import Table, Schema, DataFile, Database, Constraint
 SUPPORTED_URL_CONTENT_TYPES = {'text/csv', 'text/plain'}
 
 
+class ModelNameField(serializers.CharField):
+    """
+    De-serializes the request field as a string, but serializes the response field as
+    `model.name`. Required to support passing and returing a model name from the
+    endpoint, while also storing the model as a related field.
+    """
+    def to_representation(self, value):
+        return value.name
+
+
+class InputValueField(serializers.CharField):
+    """
+    Takes in an arbitrary value. Use to emulate our column and record creation and
+    update endpoints, which handle arbitrary data pulled from request.data
+    """
+    def to_internal_value(self, data):
+        return data
+
+    def to_representation(self, value):
+        return value
+
+
 class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
     url = serializers.SerializerMethodField()
 
@@ -20,16 +42,6 @@ class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
     def get_url(self, obj):
         request = self.context['request']
         return request.build_absolute_uri(reverse('table-detail', kwargs={'pk': obj.pk}))
-
-
-class ModelNameField(serializers.CharField):
-    """
-    De-serializes the request field as a string, but serializes the response field as
-    `model.name`. Required to support passing and returing a model name from the
-    endpoint, while also storing the model as a related field.
-    """
-    def to_representation(self, value):
-        return value.name
 
 
 class SchemaSerializer(serializers.HyperlinkedModelSerializer):
@@ -54,10 +66,65 @@ class SimpleColumnSerializer(serializers.Serializer):
 
 
 class ColumnSerializer(SimpleColumnSerializer):
-    index = serializers.IntegerField(source='column_index', read_only=True)
+    name = serializers.CharField(required=False)
+
+    # From scratch fields
+    type = serializers.CharField(source='plain_type', required=False)
     nullable = serializers.BooleanField(default=True)
     primary_key = serializers.BooleanField(default=False)
+
+    # From duplication fields
+    source_column = serializers.IntegerField(required=False, write_only=True)
+    copy_source_data = serializers.BooleanField(default=True, write_only=True)
+    copy_source_constraints = serializers.BooleanField(default=True, write_only=True)
+
+    # Read only fields
+    index = serializers.IntegerField(source='column_index', read_only=True)
     valid_target_types = serializers.ListField(read_only=True)
+    default = InputValueField(
+        source='default_value', read_only=False, default=None, allow_null=True
+    )
+
+    def validate(self, data):
+        if not self.partial:
+            from_scratch_required_fields = ['name', 'type']
+            from_scratch_specific_fields = ['type', 'nullable', 'primary_key']
+            from_dupe_required_fields = ['source_column']
+            from_dupe_specific_fields = ['source_column', 'copy_source_data',
+                                         'copy_source_constraints']
+
+            # Note that we run validation on self.initial_data, as `data` has defaults
+            # filled in for fields that weren't specified by the request
+            from_scratch_required_all = all([
+                f in self.initial_data for f in from_scratch_required_fields
+            ])
+            from_scratch_specific_in = [
+                f for f in from_scratch_specific_fields if f in self.initial_data
+            ]
+            from_dupe_required_all = all([
+                f in self.initial_data for f in from_dupe_required_fields
+            ])
+            from_dupe_specific_in = [
+                f for f in from_dupe_specific_fields if f in self.initial_data
+            ]
+
+            if len(from_dupe_specific_in) and len(from_scratch_specific_in):
+                raise ValidationError(
+                    f'{from_scratch_specific_in} cannot be passed in if '
+                    f'{from_dupe_specific_in} has also been passed in.'
+                )
+            elif not from_dupe_required_all and not from_scratch_required_all:
+                # We default to from scratch required fields if no fields are passed
+                if len(from_dupe_specific_in) and not len(from_scratch_specific_in):
+                    required_fields = from_dupe_required_fields
+                else:
+                    required_fields = from_scratch_required_fields
+                raise ValidationError({
+                    f: ['This field is required.']
+                    for f in required_fields
+                    if f not in self.initial_data
+                })
+        return data
 
 
 class TableSerializer(serializers.ModelSerializer):
@@ -65,6 +132,8 @@ class TableSerializer(serializers.ModelSerializer):
     records_url = serializers.SerializerMethodField()
     constraints_url = serializers.SerializerMethodField()
     columns_url = serializers.SerializerMethodField()
+    type_suggestions_url = serializers.SerializerMethodField()
+    previews_url = serializers.SerializerMethodField()
     name = serializers.CharField(required=False, allow_blank=True, default='')
     data_files = serializers.PrimaryKeyRelatedField(
         required=False, many=True, queryset=DataFile.objects.all()
@@ -72,8 +141,10 @@ class TableSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Table
-        fields = ['id', 'name', 'schema', 'created_at', 'updated_at',
-                  'columns', 'records_url', 'constraints_url', 'columns_url', 'data_files', 'has_dependencies']
+        fields = ['id', 'name', 'schema', 'created_at', 'updated_at', 'import_verified',
+                  'columns', 'records_url', 'constraints_url', 'columns_url',
+                  'type_suggestions_url', 'previews_url', 'data_files',
+                  'has_dependencies']
 
     def get_records_url(self, obj):
         if isinstance(obj, Table):
@@ -99,6 +170,22 @@ class TableSerializer(serializers.ModelSerializer):
         else:
             return None
 
+    def get_type_suggestions_url(self, obj):
+        if isinstance(obj, Table):
+            # Only get type suggestions if we are serializing an existing table
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('table-type-suggestions', kwargs={'pk': obj.pk}))
+        else:
+            return None
+
+    def get_previews_url(self, obj):
+        if isinstance(obj, Table):
+            # Only get previews if we are serializing an existing table
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('table-previews', kwargs={'pk': obj.pk}))
+        else:
+            return None
+
     def validate_data_files(self, data_files):
         if data_files and len(data_files) > 1:
             raise ValidationError('Multiple data files are unsupported.')
@@ -121,13 +208,27 @@ class RecordListParameterSerializer(serializers.Serializer):
     group_count_by = serializers.JSONField(required=False, default=[])
 
 
+class TypeSerializer(serializers.Serializer):
+    identifier = serializers.CharField()
+    name = serializers.CharField()
+    db_types = serializers.ListField(child=serializers.CharField())
+
+
 class DatabaseSerializer(serializers.ModelSerializer):
-    supported_types = serializers.ListField(child=serializers.CharField())
+    supported_types_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Database
-        fields = ['id', 'name', 'deleted', 'supported_types']
-        read_only_fields = ['id', 'name', 'deleted', 'supported_types']
+        fields = ['id', 'name', 'deleted', 'supported_types_url']
+        read_only_fields = ['id', 'name', 'deleted', 'supported_types_url']
+
+    def get_supported_types_url(self, obj):
+        if isinstance(obj, Database):
+            # Only get records if we are serializing an existing table
+            request = self.context['request']
+            return request.build_absolute_uri(reverse('database-types', kwargs={'pk': obj.pk}))
+        else:
+            return None
 
 
 class DataFileSerializer(serializers.ModelSerializer):
