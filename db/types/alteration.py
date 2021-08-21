@@ -1,8 +1,10 @@
 from sqlalchemy import text, DDL, MetaData, Table, select
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
+
 from db import columns, tables
 from db.types import base, email, datetime
+
 
 
 BIGINT = base.PostgresType.BIGINT.value
@@ -54,9 +56,8 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         STRING: dialect_types.get(NAME),
         TEXT: dialect_types.get(TEXT),
         DATE: dialect_types.get(DATE),
-        VARCHAR: dialect_types.get(FULL_VARCHAR),
-        # Extended SQLAlchemy types
         TIME: datetime.TIME,
+        VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),
     }
@@ -208,10 +209,10 @@ def create_decimal_number_casts(engine):
 
 
 def create_datetime_casts(engine):
-    date_or_time = [DATE, TIME]
-    for type_str in date_or_time:
-        type_body_map = _get_date_or_time_type_body_map(type_str)
-        create_cast_functions(type_str, type_body_map, engine)
+    type_body_map = _get_time_type_body_map()
+    create_cast_functions(TIME, type_body_map, engine)
+    type_body_map = _get_date_type_body_map()
+    create_cast_functions(DATE, type_body_map, engine)
 
 
 def create_varchar_casts(engine):
@@ -248,8 +249,8 @@ def get_defined_source_target_cast_tuples(engine):
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
-        DATE: _get_date_or_time_type_body_map(target_type=DATE),
-        TIME: _get_date_or_time_type_body_map(target_type=TIME),
+        DATE: _get_date_type_body_map(),
+        TIME: _get_time_type_body_map(),
         VARCHAR: _get_varchar_type_body_map(engine),
     }
     return {
@@ -474,6 +475,22 @@ def _get_boolean_to_number_cast(target_type):
     """
 
 
+def _get_date_type_body_map():
+    # Note that default postgres conversion for dates depends on the `DateStyle` option
+    # set on the server, which can be one of DMY, MDY, or YMD. Defaults to MDY.
+    default_behavior_source_types = [DATE, VARCHAR]
+    return _get_default_type_body_map(default_behavior_source_types, DATE)
+
+
+def _get_time_type_body_map():
+    default_behavior_source_types = [
+        VARCHAR, TIME
+    ]
+    return _get_default_type_body_map(
+        default_behavior_source_types, TIME,
+    )
+
+
 def _get_varchar_type_body_map(engine):
     """
     Get SQL strings that create various functions for casting different
@@ -484,15 +501,6 @@ def _get_varchar_type_body_map(engine):
     """
     supported_types = get_supported_alter_column_db_types(engine)
     return _get_default_type_body_map(supported_types, VARCHAR)
-
-
-def _get_date_or_time_type_body_map(target_type):
-    # Note that default postgres conversion for dates depends on the `DateStyle` option
-    # set on the server, which can be one of DMY, MDY, or YMD. Defaults to MDY.
-    default_behavior_source_types = [target_type, VARCHAR]
-    return _get_default_type_body_map(
-        default_behavior_source_types, target_type,
-    )
 
 
 def _get_default_type_body_map(source_types, target_type_str):

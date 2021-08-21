@@ -1,11 +1,13 @@
-from datetime import timedelta, date, time, tzinfo
+from datetime import timedelta, date, time
 from decimal import Decimal
 
 import pytest
 from psycopg2.errors import InvalidParameterValue
+from psycopg2.tz import FixedOffsetTimezone
 from sqlalchemy import Table, Column, MetaData
 from sqlalchemy import String, Numeric
 from sqlalchemy.exc import DataError
+
 from db import types, columns, tables
 from db.tests.types import fixtures
 from db.types import alteration
@@ -282,7 +284,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: PostgresType.TIME.value,
         REFLECTED_NAME: TIME,
         TARGET_DICT: {
-            DATE: {VALID: [(time(12, 30, 45), time(12, 30, 45))]},
+            TIME: {VALID: [(time(12, 30, 45), time(12, 30, 45))]},
             VARCHAR: {VALID: [(time(12, 30, 45), "12:30:45")]},
         },
     },
@@ -362,10 +364,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [
                     ("04:05:06", time(4, 5, 6)),
                     ("04:05", time(4, 5)),
-                    ("04:05:06 PST", time(4, 5, 6, tzinfo=tzinfo("PST"))),
                 ],
                 INVALID: [
-                    "12:05 PM",
                     "not a time",
                 ]
             },
