@@ -513,7 +513,8 @@ def _alter_column_default(ctx, table_name, column_name, schema, default_clause):
     op.alter_column(table_name, column_name, schema=schema, server_default=default_clause)
 
 
-def set_column_default(table_oid, column_index, default, engine, connection_to_use=None, table_to_use=None):
+def set_column_default(table_oid, column_index, default, engine, connection_to_use=None,
+                       table_to_use=None, **_):
     # Note: default should be textual SQL that produces the desired default
     if table_to_use is None:
         table = tables.reflect_table_from_oid(table_oid, engine)
@@ -534,6 +535,11 @@ def set_column_default(table_oid, column_index, default, engine, connection_to_u
             raise InvalidDefaultError
         else:
             raise e
+    if connection_to_use is None:
+        return get_mathesar_column_with_engine(
+            tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
+            engine
+        )
 
 
 def _gen_col_name(table, column_name):
