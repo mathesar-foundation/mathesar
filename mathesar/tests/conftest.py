@@ -71,7 +71,7 @@ def headerless_csv_filename():
 
 @pytest.fixture(scope='session')
 def patents_url():
-    return 'https://data.nasa.gov/resource/gquh-watm.csv'
+    return 'https://thisisafakeurl.com'
 
 
 @pytest.fixture(scope='session')
