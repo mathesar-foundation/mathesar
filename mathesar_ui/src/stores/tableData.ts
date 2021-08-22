@@ -218,10 +218,18 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
   const table = databaseMap.get(db)?.get(id);
   if (table) {
     const tableColumnStore = table.columns;
-    const existingData = get(tableColumnStore);
+    const existingColumnData = get(tableColumnStore);
+
+    const tableTypesStore = table.types;
+    const existingTypesData = get(tableTypesStore);
 
     tableColumnStore.set({
-      ...existingData,
+      ...existingColumnData,
+      state: States.Loading,
+    });
+
+    tableTypesStore.set({
+      ...existingTypesData,
       state: States.Loading,
     });
 
@@ -234,8 +242,8 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
         previousTableRequest: tableColumnsPromise,
       };
 
-      const response = await tableColumnsPromise;
-      const columnResponse = response.results || [];
+      const tableResponse = await tableColumnsPromise;
+      const columnResponse = tableResponse.results || [];
       const columns: TableColumn[] = columnResponse.map((column) => {
         const converted = {
           ...column,
@@ -248,10 +256,20 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
       });
       const pkColumn = columns.find((column) => column.primaryKey);
 
+      const typesPromise = getAPI<TableTypesResponse[]>(`/api/v0/databases/${id}/types/`);
+      const typesResponse = await typesPromise;
+      const tableTypes = typesResponse || [];
+      const types = tableTypes.map((type) => type.name);
+
       tableColumnStore.set({
         state: States.Done,
         data: columns,
         primaryKey: pkColumn?.name || null,
+      });
+
+      tableTypesStore.set({
+        state: States.Done,
+        data: types,
       });
 
       const columnPosition = calculateColumnPosition(columns);
@@ -262,6 +280,12 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
         error: err instanceof Error ? err.message : null,
         data: [],
         primaryKey: null,
+      });
+
+      tableTypesStore.set({
+        state: States.Error,
+        error: err instanceof Error ? err.message : null,
+        data: [],
       });
     }
   }
@@ -498,6 +522,10 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
         state: States.Loading,
         data: [],
         primaryKey: null,
+      }),
+      types: writable({
+        state: States.Loading,
+        data: [],
       }),
       records: writable({
         state: States.Loading,
