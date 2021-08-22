@@ -19,6 +19,7 @@
   export let sort: SortOption;
   export let group: GroupOption;
   export let column: TableColumn;
+  export let types: string[];
   export let columnPosition: ColumnPosition;
   export let paddingLeft: number;
 
@@ -104,16 +105,13 @@
           <h6 class="category">Advanced Options</h6>
           <h5 class="title">Set '{column.name}' type</h5>
           <ul class="type-list">
-            <li>
-              <button>
-                <span class="data-icon">T</span> Text
-              </button>
-            </li>
-            <li>
-              <button>
-                <span class="data-icon">#</span> Number
-              </button>
-            </li>
+            {#each types as type}
+              <li>
+                <button>
+                  {type}
+                </button>
+              </li>
+            {/each}
           </ul>
         {:else}
           <h6 class="category">Data Type</h6>

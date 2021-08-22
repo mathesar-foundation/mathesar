@@ -14,6 +14,7 @@
   import CellHeader from "./CellHeader.svelte";
 
   export let columns: TableColumnData;
+  export let types: string[];
   export let sort: SortOption = new Map();
   export let group: GroupOption = new Set();
   export let columnPosition: ColumnPosition = new Map();
@@ -66,6 +67,7 @@
       bind:sort
       bind:group
       bind:column
+      bind:types
       bind:columnPosition
       bind:paddingLeft
       on:reload
@@ -80,3 +82,7 @@
     <div class="add">+</div>
   </div>
 </div>
+
+<style global lang="scss">
+  @import "Header.scss";
+</style>
