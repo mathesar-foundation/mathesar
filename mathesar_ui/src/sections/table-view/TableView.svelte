@@ -1,23 +1,24 @@
 <script lang="ts">
-  import { get } from 'svelte/store';
+  import { get } from "svelte/store";
   import {
     getTable,
     fetchTableRecords,
     deleteRecords,
-  } from '@mathesar/stores/tableData';
-  import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
+  } from "@mathesar/stores/tableData";
+  import URLQueryHandler from "@mathesar/utils/urlQueryHandler";
   import type {
     TableColumnStore,
     TableRecordStore,
     TableOptionsStore,
     TableDisplayStores,
-  } from '@mathesar/stores/tableData';
-  import ActionsPane from './actions-pane/ActionsPane.svelte';
-  import DisplayOptions from './display-options/DisplayOptions.svelte';
-  import Header from './Header.svelte';
-  import Body from './Body.svelte';
-  import StatusPane from './status-pane/StatusPane.svelte';
-  import type { ItemInfo } from './virtual-list/listUtils';
+    TableTypesStore,
+  } from "@mathesar/stores/tableData";
+  import ActionsPane from "./actions-pane/ActionsPane.svelte";
+  import DisplayOptions from "./display-options/DisplayOptions.svelte";
+  import Header from "./header/Header.svelte";
+  import Body from "./Body.svelte";
+  import StatusPane from "./status-pane/StatusPane.svelte";
+  import type { ItemInfo } from "./virtual-list/listUtils";
 
   export let database: string;
   export let id: unknown;
@@ -34,25 +35,29 @@
   let idKey = id as number;
 
   let columns: TableColumnStore;
+  let types: TableTypesStore;
   let records: TableRecordStore;
   let options: TableOptionsStore;
   let tableBodyRef: Body;
 
-  let columnPosition: TableDisplayStores['columnPosition'];
-  let horizontalScrollOffset: TableDisplayStores['horizontalScrollOffset'];
-  let scrollOffset: TableDisplayStores['scrollOffset'];
-  let groupIndex: TableDisplayStores['groupIndex'];
-  let showDisplayOptions: TableDisplayStores['showDisplayOptions'];
-  let selected: TableDisplayStores['selected'];
+  let columnPosition: TableDisplayStores["columnPosition"];
+  let horizontalScrollOffset: TableDisplayStores["horizontalScrollOffset"];
+  let scrollOffset: TableDisplayStores["scrollOffset"];
+  let groupIndex: TableDisplayStores["groupIndex"];
+  let showDisplayOptions: TableDisplayStores["showDisplayOptions"];
+  let selected: TableDisplayStores["selected"];
 
   let animateOpts = false;
 
-  $: selectedEntries = Object.keys($selected || []).filter((key) => $selected?.[key]);
+  $: selectedEntries = Object.keys($selected || []).filter(
+    (key) => $selected?.[key]
+  );
 
   function setStores(_database: string, _id: number) {
     const opts = URLQueryHandler.getTableConfig(_database, _id);
     const table = getTable(_database, _id, opts);
     columns = table.columns;
+    types = table.types;
     records = table.records;
     options = table.options;
 
@@ -76,8 +81,10 @@
 
     const offset = Math.max(itemInfo.startIndex - 20, 0);
     let limit = itemInfo.stopIndex - itemInfo.startIndex + 26;
-    if (recordInfo.totalCount !== null
-        && offset + limit > recordInfo.totalCount) {
+    if (
+      recordInfo.totalCount !== null &&
+      offset + limit > recordInfo.totalCount
+    ) {
       limit = recordInfo.totalCount - offset;
     }
     options.set({
@@ -122,12 +129,20 @@
   }
 </script>
 
-<ActionsPane {columns} {records} {options} {selectedEntries}
-              on:openDisplayOptions={openDisplayOptions}
-              on:deleteRecords={recordDelete}/>
+<ActionsPane
+  {columns}
+  {records}
+  {options}
+  {selectedEntries}
+  on:openDisplayOptions={openDisplayOptions}
+  on:deleteRecords={recordDelete}
+/>
 
-<div class="table-data" class:animate-opts={animateOpts}
-      class:has-display-opts={$showDisplayOptions}>
+<div
+  class="table-data"
+  class:animate-opts={animateOpts}
+  class:has-display-opts={$showDisplayOptions}
+>
   <div class="display-options-pane">
     {#if $showDisplayOptions}
       <DisplayOptions
@@ -136,34 +151,42 @@
         bind:group={$options.group}
         bind:filter={$options.filter}
         on:reload={reload}
-        on:close={closeDisplayOptions}/>
+        on:close={closeDisplayOptions}
+      />
     {/if}
   </div>
 
   <div class="table-content">
     {#if $columns.data.length > 0}
-      <Header columns={$columns}
-              bind:sort={$options.sort}
-              bind:group={$options.group}
-              isResultGrouped={!!$records.groupData}
-              bind:columnPosition={$columnPosition}
-              bind:horizontalScrollOffset={$horizontalScrollOffset}
-              on:reload={reload}/>
+      <Header
+        columns={$columns}
+        types={$types.data}
+        bind:sort={$options.sort}
+        bind:group={$options.group}
+        isResultGrouped={!!$records.groupData}
+        bind:columnPosition={$columnPosition}
+        bind:horizontalScrollOffset={$horizontalScrollOffset}
+        on:reload={reload}
+      />
 
-      <Body bind:this={tableBodyRef} id={idKey}
-            columns={$columns} data={$records.data}
-            groupData={$records.groupData}
-            groupIndex={$groupIndex}
-            columnPosition={$columnPosition}
-            bind:selected={$selected}
-            bind:scrollOffset={$scrollOffset}
-            bind:horizontalScrollOffset={$horizontalScrollOffset}
-            on:refetch={refetch}/>
+      <Body
+        bind:this={tableBodyRef}
+        id={idKey}
+        columns={$columns}
+        data={$records.data}
+        groupData={$records.groupData}
+        groupIndex={$groupIndex}
+        columnPosition={$columnPosition}
+        bind:selected={$selected}
+        bind:scrollOffset={$scrollOffset}
+        bind:horizontalScrollOffset={$horizontalScrollOffset}
+        on:refetch={refetch}
+      />
     {/if}
   </div>
 </div>
 
-<StatusPane totalCount={$records.totalCount} {selectedEntries}/>
+<StatusPane totalCount={$records.totalCount} {selectedEntries} />
 
 <style global lang="scss">
   @import "TableView.scss";
