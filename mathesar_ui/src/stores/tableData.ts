@@ -57,6 +57,12 @@ export interface TableColumnData {
   primaryKey: string,
 }
 
+export interface TableTypesData {
+  state: States,
+  error?: string,
+  data: string[],
+}
+
 export interface GroupData {
   [key: string]: GroupData | number
 }
@@ -117,6 +123,7 @@ interface TableConfigData {
 }
 
 export type TableColumnStore = Writable<TableColumnData>;
+export type TableTypesStore = Writable<TableTypesData>;
 export type TableRecordStore = Writable<TableRecordData>;
 export type TableOptionsStore = Writable<TableOptionsData>;
 export type TableDisplayStoreList = TableDisplayStores;
@@ -124,6 +131,7 @@ export type TableDisplayStoreList = TableDisplayStores;
 interface TableData {
   // Store objects: For use in views and controller
   columns: TableColumnStore,
+  types: TableTypesStore,
   records: TableRecordStore,
   options: TableOptionsStore,
 
