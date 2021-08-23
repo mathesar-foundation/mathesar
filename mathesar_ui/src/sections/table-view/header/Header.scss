@@ -1,4 +1,7 @@
 .dropdown.content.table-opts-content {
+  max-height: none;
+  min-width: 150px !important;
+
   ul {
     list-style: none;
     margin: 0;
@@ -61,7 +64,6 @@
   .type-list {
     height: 150px;
     margin: 0 8px 8px 8px;
-    padding-bottom: 5px;
     border: 1px solid #d2d2d2;
     border-radius: 5px;
     overflow: auto;
@@ -81,6 +83,19 @@
           background: #f6f7f7;
         }
       }
+    }
+  }
+
+  .save-changes {
+    padding: 8px;
+    
+    button {
+      width: 100%;
+      padding: 5px 0;
+      background-color: transparent;
+      border: 1px solid black;
+      border-radius: 3px;
+      cursor: pointer;
     }
   }
 }
