@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
 from django.utils.functional import cached_property
+from django.core.exceptions import ValidationError
 
 from db import tables, records, schemas, columns, constraints
 from db.types import alteration
@@ -30,7 +31,7 @@ class DatabaseObjectManager(models.Manager):
 
 class DatabaseObject(BaseModel):
     oid = models.IntegerField()
-    # The default manager, current_objects, does not reflect databse objects.
+    # The default manager, current_objects, does not reflect database objects.
     # This saves us from having to deal with Django trying to automatically reflect db
     # objects in the background when we might not expect it.
     current_objects = models.Manager()
@@ -80,6 +81,11 @@ class Schema(DatabaseObject):
     database = models.ForeignKey('Database', on_delete=models.CASCADE,
                                  related_name='schemas')
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["oid", "database"], name="unique_schema")
+        ]
+
     @property
     def _sa_engine(self):
         return self.database._sa_engine
@@ -126,6 +132,19 @@ class Table(DatabaseObject):
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
+
+    def validate_unique(self, exclude=None):
+        # Ensure oid is unique on db level
+        if Table.current_objects.filter(
+            oid=self.oid, schema__database=self.schema.database
+        ).exists():
+            raise ValidationError("Table OID is not unique")
+        super().validate_unique(exclude=exclude)
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            self.validate_unique()
+        super().save(*args, **kwargs)
 
     @cached_property
     def _sa_table(self):
