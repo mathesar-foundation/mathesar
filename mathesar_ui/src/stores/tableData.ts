@@ -24,6 +24,11 @@ export interface TableRecord {
   }
 }
 
+export interface TableTypes {
+  name: string;
+  targetType: string;
+}
+
 export interface TableColumnResponse extends TableColumn {
   primary_key: TableColumn['primaryKey'],
   valid_target_types: TableColumn['validTargetTypes']
@@ -60,7 +65,7 @@ export interface TableColumnData {
 export interface TableTypesData {
   state: States,
   error?: string,
-  data: string[],
+  data: TableTypes[],
 }
 
 export interface GroupData {
