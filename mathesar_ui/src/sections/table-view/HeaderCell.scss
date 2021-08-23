@@ -1,0 +1,7 @@
+.header-cell-resize {
+  opacity:0;
+  transition-property: all;
+  transition-duration:0.42s;
+
+  &:hover { opacity:1; }
+}

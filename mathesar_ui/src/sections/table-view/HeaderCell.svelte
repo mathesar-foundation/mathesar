@@ -19,7 +19,7 @@
   import {
     GROUP_MARGIN_LEFT,
   } from '@mathesar/stores/tableData';
-  import type { MoveableEvents, ResizableOptions } from 'moveable';
+  import type { MoveableEvents } from 'moveable';
 
 
   const dispatch = createEventDispatcher();
@@ -65,20 +65,19 @@
   export let isResizable:boolean;
   let paddingLeft: number;
   $: paddingLeft = isResultGrouped ? GROUP_MARGIN_LEFT : 0;
-
-  const resizableOptions: ResizableOptions = {
-    resizable: isResizable,
-    renderDirections: ['e'],
-  };
-  let tableCellRef: HTMLElement;
+  let headerCellRef: HTMLElement;
 </script>
 
 <div
-  bind:this={tableCellRef}
+  bind:this={headerCellRef}
   use:moveable={{
     onResize: resizeColumn,
-    moveableOptions: resizableOptions,
-    reference: tableCellRef,
+    moveableOptions: {
+      className: 'header-cell-resize',
+      resizable: isResizable,
+      renderDirections: ['e'],
+    },
+    reference: headerCellRef,
   }}
   class="cell" style="
   width:{columnPosition.get(column.name).width + paddingLeft}px;
@@ -141,3 +140,6 @@
     </Dropdown>
   {/if}
 </div>
+<style global lang="scss">
+ @import "HeaderCell.scss";
+</style>
