@@ -86,9 +86,11 @@
         </tr>
       </thead>
       <tbody>
-        {#key $fileImportStore.previewColumns}
-          <PreviewRows {fileImportStore} />
-        {/key}
+        {#if $fileImportStore.previewColumns}
+          {#key $fileImportStore.previewColumns}
+            <PreviewRows {fileImportStore} />
+          {/key}
+        {/if}
       </tbody>
     </table>
   </div>

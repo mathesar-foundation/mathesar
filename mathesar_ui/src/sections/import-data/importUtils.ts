@@ -16,6 +16,7 @@ import {
   patchAPI,
   deleteAPI,
 } from '@mathesar/utils/api';
+import { CancellablePromise } from '@mathesar-components';
 import type { FileImportInfo, PreviewColumn, FileImportWritableInfo } from '@mathesar/stores/fileImports';
 import type { UploadCompletionOpts, PaginatedResponse } from '@mathesar/utils/api';
 import type {
@@ -86,7 +87,7 @@ export function uploadNewFile(
       uploads: [],
       uploadProgress: null,
       uploadStatus: States.Error,
-      error: err.stack,
+      error: err.message,
     });
   });
 }
@@ -159,7 +160,7 @@ async function createPreviewTable(
     } catch (err: unknown) {
       setInFileStore(fileImportStore, {
         previewTableCreationStatus: States.Error,
-        error: (err as Error).stack,
+        error: (err as Error).message,
       });
       throw err;
     }
@@ -178,6 +179,9 @@ export async function fetchPreviewTableInfo(
     const previewColumnPromise = getAPI<PaginatedResponse<PreviewColumn>>(
       `/tables/${fileImportData.previewId}/columns/?limit=500`,
     );
+    const suggestedTypesPromise = getAPI<Record<string, string>>(
+      `/tables/${fileImportData.previewId}/type_suggestions/`,
+    );
 
     setInFileStore(fileImportStore, {
       previewStatus: States.Loading,
@@ -186,11 +190,13 @@ export async function fetchPreviewTableInfo(
     });
 
     const previewColumnResponse = await previewColumnPromise;
+    const typesResponse = await suggestedTypesPromise;
 
     const previewColumns = previewColumnResponse.results.map((column) => ({
       ...column,
       displayName: column.name,
       originalType: column.type,
+      type: typesResponse[column.name] ?? column.type,
       isEditable: !column.primary_key,
       isSelected: true,
     }));
@@ -206,7 +212,7 @@ export async function fetchPreviewTableInfo(
   } catch (err) {
     setInFileStore(fileImportStore, {
       previewStatus: States.Error,
-      error: (err as Error).stack,
+      error: (err as Error).message,
     });
   }
   return null;
@@ -233,7 +239,7 @@ export async function updateDataFileHeader(
   } catch (err) {
     setInFileStore(fileImportStore, {
       previewStatus: States.Error,
-      error: (err as Error).stack,
+      error: (err as Error).message,
     });
   }
 }
@@ -266,51 +272,54 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
   const fileImportData = get(fileImportStore);
 
   if (fileImportData.previewId) {
-    const deletedColumns: PreviewColumn[] = [];
-    const columns: PreviewColumn[] = [];
+    const columns: {
+      name?: PreviewColumn['name'],
+      type?: PreviewColumn['type']
+    }[] = [];
     fileImportData.previewColumns.forEach((column) => {
       if (column.isSelected) {
-        if (column.type !== column.originalType
-            || column.name !== column.displayName) {
-          columns.push(column);
-        }
-      } else {
-        deletedColumns.push(column);
-      }
-    });
-
-    setInFileStore(fileImportStore, {
-      importStatus: States.Loading,
-      error: null,
-    });
-
-    try {
-      const deletePromises = deletedColumns.map((column) => deleteAPI(
-        `/tables/${fileImportData.previewId}/columns/${column.index}/`,
-      ));
-
-      await Promise.all(deletePromises);
-
-      const updatePromises = columns.map((column) => patchAPI(
-        `/tables/${fileImportData.previewId}/columns/${column.index}/`,
-        {
+        columns.push({
           name: column.displayName,
           type: column.type,
-        },
-      ));
-
-      await Promise.all(updatePromises);
-
-      if (fileImportData.name !== fileImportData.previewName) {
-        const importPromise = patchAPI(`/tables/${fileImportData.previewId}/`, {
-          name: fileImportData.name,
         });
-        setInFileStore(fileImportStore, {
-          importPromise,
-          previewName: fileImportData.name,
-        });
-        await importPromise;
+      } else {
+        columns.push({});
       }
+    });
+
+    fileImportData.importPromise?.cancel();
+
+    try {
+      let columnChangePromise: CancellablePromise<unknown> = null;
+      let verificationPromise: CancellablePromise<unknown> = null;
+
+      const saveTable = async () => {
+        columnChangePromise = patchAPI(`/tables/${fileImportData.previewId}/`, {
+          columns,
+        });
+        await columnChangePromise;
+        const verificationRequest: Record<string, unknown> = {
+          import_verified: true,
+        };
+        if (fileImportData.name !== fileImportData.previewName) {
+          verificationRequest.name = fileImportData.name;
+        }
+        verificationPromise = patchAPI(`/tables/${fileImportData.previewId}/`, verificationRequest);
+        await verificationPromise;
+      };
+
+      const importPromise = new CancellablePromise((resolve, reject) => {
+        void saveTable().then(() => resolve(), (err) => reject(err));
+      }, () => {
+        columnChangePromise?.cancel();
+        verificationPromise?.cancel();
+      });
+      setInFileStore(fileImportStore, {
+        importStatus: States.Loading,
+        importPromise,
+        error: null,
+      });
+      await importPromise;
 
       void refetchSchema(fileImportData.databaseName, fileImportData.schemaId);
 
@@ -329,7 +338,7 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
     } catch (err: unknown) {
       setInFileStore(fileImportStore, {
         importStatus: States.Error,
-        error: (err as Error).stack,
+        error: (err as Error)?.message,
       });
     }
   }
