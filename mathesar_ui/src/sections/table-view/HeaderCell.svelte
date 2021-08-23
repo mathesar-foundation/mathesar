@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, createEventDispatcher } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
   import {
     faSortAmountDown,
     faSortAmountDownAlt,
@@ -19,18 +19,16 @@
   import {
     GROUP_MARGIN_LEFT,
   } from '@mathesar/stores/tableData';
-  import type { MoveableEvents, MoveableOptions } from 'moveable';
+  import type { MoveableEvents, ResizableOptions } from 'moveable';
+
 
   const dispatch = createEventDispatcher();
-  const showDropdown =  ()  => { return (sortable || groupable) };
-
   export let column: TableColumn;
   export let columnPosition: ColumnPosition;
-
-  export let sortable:boolean = false;
+  export let sortable = false;
   export let sort: SortOption = new Map();
 
-  function sortByColumn(column: TableColumn, order: 'asc' | 'desc') {
+  function sortByColumn(order: 'asc' | 'desc') {
     const newSort: SortOption = new Map(sort);
     if (sort?.get(column.name) === order) {
       newSort.delete(column.name);
@@ -41,13 +39,13 @@
     dispatch('sortUpdated', sort);
   }
 
-  export let groupable:boolean = false;
+  export let groupable = false;
   export let group: GroupOption = new Set();
   let isResultGrouped: boolean;
 
-  function groupByColumn(column: TableColumn) {
+  function groupByColumn() {
     const oldSize = group?.size || 0;
-    const newGroup = new Set(group);
+    const newGroup:GroupOption = new Set(group);
     if (newGroup?.has(column.name)) {
       newGroup.delete(column.name);
     } else {
@@ -55,29 +53,35 @@
     }
     group = newGroup;
     dispatch('groupUpdated', {
-        group: group,
-        resetPositions: oldSize === 0 || group.size === 0,
-    })
+      group: newGroup,
+      resetPositions: oldSize === 0 || group.size === 0,
+    });
   }
 
   function resizeColumn(event:MoveableEvents['resize']) {
     columnPosition.get(column.name).width = event.width;
-    dispatch('columnResized', columnPosition)
+    dispatch('columnResized', columnPosition);
   }
-
-  export let resizable:boolean = false;
+  export let isResizable:boolean;
+  const showDropdown = () => (sortable || groupable);
   let paddingLeft: number;
   $: paddingLeft = isResultGrouped ? GROUP_MARGIN_LEFT : 0;
+
+  const resizableOptions: ResizableOptions = {
+    resizable: isResizable,
+    renderDirections: ['e'],
+  };
+  let tableCellRef: HTMLElement;
 </script>
 
 <div
+  bind:this={tableCellRef}
   use:moveable={{
     onResize: resizeColumn,
-    moveableOptions: {
-      resizable: resizable,
-      renderDirections: ['e'],
-    },
+    moveableOptions: resizableOptions,
+    reference: tableCellRef,
   }}
+
   class="cell" style="
   width:{columnPosition.get(column.name).width + paddingLeft}px;
   left:{columnPosition.get(column.name).left + paddingLeft}px;">
@@ -100,7 +104,7 @@
         <svelte:fragment slot="content">
         <ul>
             {#if sortable}
-                <li on:click={() => sortByColumn(column, 'asc')}>
+                <li on:click={() => sortByColumn('asc')}>
                     <Icon class="opt" data={faSortAmountDownAlt}/>
                     <span>
                     {#if sort?.get(column.name) === 'asc'}
@@ -110,7 +114,7 @@
                     {/if}
                     </span>
                 </li>
-                <li on:click={() => sortByColumn(column, 'desc')}>
+                <li on:click={() => sortByColumn('desc')}>
                     <Icon class="opt" data={faSortAmountDown}/>
                     <span>
                       {#if sort?.get(column.name) === 'desc'}
@@ -122,7 +126,7 @@
                   </li>
             {/if}
             {#if groupable}
-                <li on:click={() => groupByColumn(column)}>
+                <li on:click={() => groupByColumn()}>
                     <Icon class="opt" data={faThList}/>
                     <span>
                     {#if group?.has(column.name)}

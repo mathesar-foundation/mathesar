@@ -2,15 +2,11 @@
   import { onMount, createEventDispatcher } from 'svelte';
   import {
     faPlus,
-    faSortAmountDown,
-    faSortAmountDownAlt,
-    faThList,
   } from '@fortawesome/free-solid-svg-icons';
   import {
     Button,
     Dropdown,
     Icon,
-    moveable,
     TextInput,
   } from '@mathesar-components';
   import type {
@@ -26,8 +22,7 @@
     DEFAULT_ROW_RIGHT_PADDING,
     updateColumnPosition,
   } from '@mathesar/stores/tableData';
-  import TableCell from './TableCell.svelte'
-  import type { MoveableEvents } from 'moveable';
+  import TableCell from './HeaderCell.svelte';
 
   const dispatch = createEventDispatcher();
   export let columns: TableColumnData;
@@ -37,6 +32,7 @@
   export let isResultGrouped: boolean;
 
   let headerRef: HTMLElement;
+  const headerCellRefs: TableCell[] = [];
 
   function onHScrollOffsetChange(_hscrollOffset: number) {
     if (headerRef) {
@@ -50,6 +46,7 @@
   $: paddingLeft = isResultGrouped ? GROUP_MARGIN_LEFT : 0;
 
   export let columnPosition: ColumnPosition = new Map();
+
   function updateColumnPositions(event:CustomEvent) {
     columnPosition = updateColumnPosition(columns.data, event.detail);
   }
@@ -60,16 +57,18 @@
     }
   }
 
-  function updateSort(e:CustomEvent) {
-    sort = e.detail;
+  function updateSort(event:CustomEvent) {
+    sort = event.detail as SortOption;
     dispatch('reload');
   }
 
-  function updateGroup(e:CustomEvent) {
-    if (e.detail['group']) {
-      group = e.detail['group']
+  function updateGroup(event) {
+    if (event.detail?.group) {
+      group = event.detail.group as GroupOption;
+    }
+    if (event.detail?.resetPositions) {
       dispatch('reload', {
-        resetPositions: e.detail['resetPositions']
+        resetPositions: event.detail?.resetPositions as boolean,
       });
     }
   }
@@ -116,6 +115,7 @@
 
   {#each columns.data as column, i (column.name)}
     <TableCell
+      bind:this={headerCellRefs[i]}
       column={column}
       sortable={true}
       sort={sort}
@@ -123,7 +123,7 @@
       groupable={true}
       group={group}
       on:groupUpdated={updateGroup}
-      resizable={true}
+      isResizable={true}
       columnPosition={columnPosition}
       on:columnResized={updateColumnPositions}
     />
