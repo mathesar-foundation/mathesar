@@ -12,14 +12,17 @@
     GroupOption,
     SortOption,
     TableColumn,
+    TableTypes,
   } from "@mathesar/stores/tableData";
+  import { changeColumnType } from "@mathesar/stores/tableData";
   import { createEventDispatcher } from "svelte";
 
   const dispatch = createEventDispatcher();
   export let sort: SortOption;
   export let group: GroupOption;
   export let column: TableColumn;
-  export let types: string[];
+  export let types: TableTypes[];
+  export let id: number;
   export let columnPosition: ColumnPosition;
   export let paddingLeft: number;
 
@@ -61,6 +64,7 @@
   function determineDataIcon(type: string) {
     switch (type) {
       case "INTEGER":
+      case "NUMERIC":
         return "#";
       case "VARCHAR":
         return "T";
@@ -72,12 +76,20 @@
   function determineDataTitle(type: string) {
     switch (type) {
       case "INTEGER":
+      case "NUMERIC":
         return "Number";
       case "VARCHAR":
         return "Text";
       default:
         return "Else";
     }
+  }
+
+  async function retypeColumn(type: string, index: number) {
+    isOpen = false;
+    isAdvancedOptionsOpen = false;
+
+    void changeColumnType(id, type, index);
   }
 </script>
 
@@ -106,11 +118,15 @@
           <h5 class="title">Set '{column.name}' type</h5>
           <ul class="type-list">
             {#each types as type}
-              <li>
-                <button>
-                  {type}
-                </button>
-              </li>
+              {#if column.validTargetTypes.includes(type.targetType)}
+                <li>
+                  <button
+                    on:click={() => retypeColumn(type.targetType, column.index)}
+                  >
+                    {type.name}
+                  </button>
+                </li>
+              {/if}
             {/each}
           </ul>
         {:else}

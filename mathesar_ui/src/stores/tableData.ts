@@ -1,5 +1,7 @@
 import { get, writable, Writable } from 'svelte/store';
-import { deleteAPI, getAPI, States } from '@mathesar/utils/api';
+import {
+  deleteAPI, getAPI, patchAPI, States,
+} from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
 import type { SelectOption } from '@mathesar-components/types';
 
@@ -264,7 +266,23 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
       const typesPromise = getAPI<TableTypesResponse[]>(`/api/v0/databases/${id}/types/`);
       const typesResponse = await typesPromise;
       const tableTypes = typesResponse || [];
-      const types = tableTypes.map((type) => type.name);
+      const types = tableTypes.reduce((acc, type) => {
+        const validTypes = ['VARCHAR', 'NUMERIC'];
+
+        if (type.db_types.length === 1) {
+          const typeObject = { name: type.name, targetType: type.db_types[0] };
+          acc.push(typeObject);
+        } else {
+          const [validType] = type.db_types.filter((i) => validTypes.includes(i));
+
+          if (validType) {
+            const typeObject = { name: type.name, targetType: validType };
+            acc.push(typeObject);
+          }
+        }
+
+        return acc;
+      }, [] as TableTypes[]);
 
       tableColumnStore.set({
         state: States.Done,
@@ -653,4 +671,10 @@ export async function deleteRecords(db: string, id: number, pks: string[]): Prom
 
 export function clearTable(db: string, id: number): void {
   databaseMap.get(db)?.delete(id);
+}
+
+export async function changeColumnType(id:number, type: string, index: number): Promise<void> {
+  await patchAPI<unknown>(`/api/v0/tables/${id}/columns/${index}/`, {
+    type,
+  });
 }
