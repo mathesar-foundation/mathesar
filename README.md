@@ -11,6 +11,7 @@ We are currently in early development and hope to release an alpha version by la
 - [Contributing](#contributing)
 - [Local Development](#local-development)
   - [Configuration Options](#configuration-options)
+  - [Frontend](#frontend)
   - [Linting](#linting)
   - [Running tests](#running-tests)
   - [Opening a shell in the container](#opening-a-shell-in-the-container)
@@ -50,7 +51,10 @@ It is recommended that you keep the Docker containers running while you make cha
 
 If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASES.mathesar_tables` entry of the `config/settings.py` file with appropriate connection details before installing the Mathesar types and functions by running `install.py` as described in the previous step. 
 
-**Please don't do this unless you have full confidence in what you're doing since Mathesar is not production-ready yet and may cause unexpected issues.**
+**Please don't do this unless you have full confidence in what you're doing since Mathesar is not stable yet and may make unexpected changes to the database that you connect to it.**
+
+### Frontend
+For more detailed information on Mathesar's frontend development, please refer the [readme file within mathesar_ui directory](https://github.com/centerofci/mathesar/blob/master/mathesar_ui/README.md).
 
 ### Linting
 

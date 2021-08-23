@@ -62,6 +62,17 @@ def create_table(csv_filename, create_schema):
 
 
 @pytest.fixture
+def create_data_types_table(data_types_csv_filename, create_schema):
+    with open(data_types_csv_filename, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    def _create_table(table_name, schema='Data Types'):
+        schema_model = create_schema(schema)
+        return create_table_from_csv(data_file, table_name, schema_model)
+    return _create_table
+
+
+@pytest.fixture
 def patent_schema(test_db_model, create_schema):
     engine = create_mathesar_engine(test_db_model.name)
     install.install_mathesar_on_database(engine)

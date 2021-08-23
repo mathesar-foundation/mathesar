@@ -86,7 +86,7 @@ def test_column_list(column_test_table, client):
             'nullable': True,
             'primary_key': False,
             'valid_target_types': [
-                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                'BIGINT', 'BOOLEAN', 'DATE', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
                 'INTEGER', 'INTERVAL', 'MATHESAR_TYPES.EMAIL', 'NUMERIC',
                 'REAL', 'SMALLINT', 'VARCHAR',
             ],
