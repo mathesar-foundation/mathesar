@@ -1,8 +1,10 @@
 from sqlalchemy import text, DDL, MetaData, Table, select
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
+
 from db import columns, tables
 from db.types import base, email
+from db.utils import execute_statement
 
 
 BIGINT = base.PostgresType.BIGINT.value
@@ -99,6 +101,8 @@ def alter_column_type(
         engine,
         friendly_names=True,
         type_options={},
+        connection_to_use=None,
+        table_to_use=None
 ):
     _preparer = engine.dialect.identifier_preparer
     supported_types = get_supported_alter_column_types(
@@ -107,15 +111,18 @@ def alter_column_type(
     target_type = supported_types.get(target_type_str)
 
     metadata = MetaData(bind=engine, schema=schema)
-    table = Table(table_name, metadata, schema=schema, autoload_with=engine)
+    if table_to_use is None:
+        table = Table(table_name, metadata, schema=schema, autoload_with=engine)
+    else:
+        table = table_to_use
     column = table.columns[column_name]
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    column_index = columns.get_column_index_from_name(table_oid, column_name, engine)
+    column_index = columns.get_column_index_from_name(table_oid, column_name, engine, connection_to_use)
 
-    default = columns.get_column_default(table_oid, column_index, engine)
+    default = columns.get_column_default(table_oid, column_index, engine, connection_to_use, table_to_use)
     if default is not None:
         default_text = column.server_default.arg.text
-        columns.set_column_default(table_oid, column_index, None, engine)
+        columns.set_column_default(table_oid, column_index, None, engine, connection_to_use, table_to_use)
 
     prepared_table_name = _preparer.format_table(table)
     prepared_column_name = _preparer.format_column(column)
@@ -128,14 +135,13 @@ def alter_column_type(
       USING {cast_function_name}({prepared_column_name});
     """
 
-    with engine.begin() as conn:
-        conn.execute(DDL(alter_stmt))
+    execute_statement(engine, DDL(alter_stmt), connection_to_use)
 
     if default is not None:
         cast_stmt = f"{cast_function_name}({default_text})"
-        with engine.begin() as conn:
-            new_default = str(conn.execute(select(text(cast_stmt))).first()[0])
-        columns.set_column_default(table_oid, column_index, new_default, engine)
+        default_stmt = select(text(cast_stmt))
+        new_default = str(execute_statement(engine, default_stmt, connection_to_use).first()[0])
+        columns.set_column_default(table_oid, column_index, new_default, engine, connection_to_use)
 
 
 def get_column_cast_expression(column, target_type_str, engine, type_options={}):
