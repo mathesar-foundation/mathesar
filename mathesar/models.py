@@ -2,12 +2,14 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
 from django.utils.functional import cached_property
+from django.core.exceptions import ValidationError
 
+from db import tables, records, schemas, columns, constraints
+from db.types import alteration
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import get_types
-from db import tables, records, schemas, columns, constraints
 
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -29,7 +31,7 @@ class DatabaseObjectManager(models.Manager):
 
 class DatabaseObject(BaseModel):
     oid = models.IntegerField()
-    # The default manager, current_objects, does not reflect databse objects.
+    # The default manager, current_objects, does not reflect database objects.
     # This saves us from having to deal with Django trying to automatically reflect db
     # objects in the background when we might not expect it.
     current_objects = models.Manager()
@@ -79,6 +81,11 @@ class Schema(DatabaseObject):
     database = models.ForeignKey('Database', on_delete=models.CASCADE,
                                  related_name='schemas')
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["oid", "database"], name="unique_schema")
+        ]
+
     @property
     def _sa_engine(self):
         return self.database._sa_engine
@@ -125,6 +132,19 @@ class Table(DatabaseObject):
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
+
+    def validate_unique(self, exclude=None):
+        # Ensure oid is unique on db level
+        if Table.current_objects.filter(
+            oid=self.oid, schema__database=self.schema.database
+        ).exists():
+            raise ValidationError("Table OID is not unique")
+        super().validate_unique(exclude=exclude)
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            self.validate_unique()
+        super().save(*args, **kwargs)
 
     @cached_property
     def _sa_table(self):
@@ -185,13 +205,23 @@ class Table(DatabaseObject):
 
     def drop_column(self, column_index):
         columns.drop_column(
-            self.schema._sa_engine,
             self.oid,
             column_index,
+            self.schema._sa_engine,
+        )
+
+    def duplicate_column(self, column_index, copy_data, copy_constraints, name=None):
+        return columns.duplicate_column(
+            self.oid,
+            column_index,
+            self.schema._sa_engine,
+            new_column_name=name,
+            copy_data=copy_data,
+            copy_constraints=copy_constraints,
         )
 
     def get_preview(self, column_definitions):
-        return tables.get_column_cast_records(
+        return alteration.get_column_cast_records(
             self.schema._sa_engine, self._sa_table, column_definitions
         )
 
@@ -260,7 +290,7 @@ class Constraint(DatabaseObject):
     @property
     def _sa_constraint(self):
         engine = self.table.schema.database._sa_engine
-        return constraints.get_constraint_from_oid(self.oid, engine)
+        return constraints.get_constraint_from_oid(self.oid, engine, self.table._sa_table)
 
     @property
     def name(self):

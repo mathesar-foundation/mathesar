@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, date
 from decimal import Decimal
 
 import pytest
@@ -6,7 +6,7 @@ from psycopg2.errors import InvalidParameterValue
 from sqlalchemy import Table, Column, MetaData
 from sqlalchemy import String, Numeric
 from sqlalchemy.exc import DataError
-from db import types
+from db import types, columns, tables
 from db.tests.types import fixtures
 from db.types import alteration
 from db.types.base import PostgresType, MathesarCustomType, get_qualified_name, get_available_types
@@ -31,6 +31,7 @@ INTERVAL = PostgresType.INTERVAL.value.upper()
 NUMERIC = PostgresType.NUMERIC.value.upper()
 REAL = PostgresType.REAL.value.upper()
 SMALLINT = PostgresType.SMALLINT.value.upper()
+DATE = PostgresType.DATE.value.upper()
 VARCHAR = "VARCHAR"
 
 
@@ -73,8 +74,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             BIGINT: {VALID: [(500, 500), (500000000000, 500000000000)]},
             BOOLEAN: {VALID: [(1, True), (0, False)], INVALID: [3]},
             DECIMAL: {VALID: [(1, Decimal('1.0'))]},
-            DOUBLE: {VALID: [(3.0, 3)]},
-            FLOAT: {VALID: [(4.0, 4)]},
+            DOUBLE: {VALID: [(3, 3.0)]},
+            FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
@@ -171,8 +172,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             BIGINT: {VALID: [(500, 500)]},
             BOOLEAN: {VALID: [(1, True), (0, False)], INVALID: [3]},
             DECIMAL: {VALID: [(1, Decimal('1.0'))]},
-            DOUBLE: {VALID: [(3.0, 3)]},
-            FLOAT: {VALID: [(4.0, 4)]},
+            DOUBLE: {VALID: [(3, 3.0)]},
+            FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
@@ -259,14 +260,22 @@ MASTER_DB_TYPE_MAP_SPEC = {
             BIGINT: {VALID: [(500, 500)]},
             BOOLEAN: {VALID: [(1, True), (0, False)], INVALID: [3]},
             DECIMAL: {VALID: [(1, Decimal('1.0'))]},
-            DOUBLE: {VALID: [(3.0, 3)]},
-            FLOAT: {VALID: [(4.0, 4)]},
+            DOUBLE: {VALID: [(3, 3.0)]},
+            FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
             SMALLINT: {VALID: [(500, 500)]},
             VARCHAR: {VALID: [(3, "3")]},
         }
+    },
+    DATE: {
+        ISCHEMA_NAME: PostgresType.DATE.value,
+        REFLECTED_NAME: DATE,
+        TARGET_DICT: {
+            DATE: {VALID: [(date(1999, 1, 18), date(1999, 1, 18))]},
+            VARCHAR: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
+        },
     },
     VARCHAR: {
         ISCHEMA_NAME: PostgresType.CHARACTER_VARYING.value,
@@ -326,6 +335,19 @@ MASTER_DB_TYPE_MAP_SPEC = {
             SMALLINT: {
                 VALID: [("432", 432)],
                 INVALID: ["1.2234"]
+            },
+            DATE: {
+                VALID: [
+                    ("1999-01-18", date(1999, 1, 18)),
+                    ("1/18/1999", date(1999, 1, 18)),
+                    ("jan-1999-18", date(1999, 1, 18)),
+                    ("19990118", date(1999, 1, 18)),
+                ],
+                INVALID: [
+                    "18/1/1999",
+                    "not a date",
+                    "1234",
+                ]
             },
             VARCHAR: {VALID: [("a string", "a string")]},
         }
@@ -496,7 +518,7 @@ def test_alter_column_casts_data_gen(
     input_table = Table(
         TABLE,
         metadata,
-        Column(COLUMN, available_types[source_type]),
+        Column(COLUMN, available_types[source_type], server_default=str(in_val)),
         schema=schema
     )
     input_table.create()
@@ -512,6 +534,9 @@ def test_alter_column_casts_data_gen(
         res = conn.execute(sel).fetchall()
     actual_value = res[0][0]
     assert actual_value == out_val
+    table_oid = tables.get_oid_from_table(TABLE, schema, engine)
+    actual_default = columns.get_column_default(table_oid, 0, engine)
+    assert actual_default == out_val
 
 
 type_test_bad_data_gen_list = [
@@ -655,3 +680,65 @@ def test_get_full_cast_map(engine_with_types, source_type, expect_target_types):
     actual_target_types = actual_cast_map[source_type]
     assert len(actual_target_types) == len(expect_target_types)
     assert sorted(actual_target_types) == sorted(expect_target_types)
+
+
+def test_get_column_cast_records(engine_email_type):
+    COL1 = "col1"
+    COL2 = "col2"
+    col1 = Column(COL1, String)
+    col2 = Column(COL2, String)
+    column_list = [col1, col2]
+    engine, schema = engine_email_type
+    table_name = "table_with_columns"
+    table = tables.create_mathesar_table(
+        table_name, schema, column_list, engine
+    )
+    ins = table.insert().values(
+        [{COL1: 'one', COL2: 1}, {COL1: 'two', COL2: 2}]
+    )
+    with engine.begin() as conn:
+        conn.execute(ins)
+    COL1_MOD = COL1 + "_mod"
+    COL2_MOD = COL2 + "_mod"
+    column_definitions = [
+        {"name": "mathesar_id", "type": "INTEGER"},
+        {"name": COL1_MOD, "type": "VARCHAR"},
+        {"name": COL2_MOD, "type": "NUMERIC"},
+    ]
+    records = alteration.get_column_cast_records(engine, table, column_definitions)
+    for record in records:
+        assert (
+            type(record[COL1 + "_mod"]) == str
+            and type(record[COL2 + "_mod"]) == Decimal
+        )
+
+
+def test_get_column_cast_records_options(engine_email_type):
+    COL1 = "col1"
+    COL2 = "col2"
+    col1 = Column(COL1, String)
+    col2 = Column(COL2, String)
+    column_list = [col1, col2]
+    engine, schema = engine_email_type
+    table_name = "table_with_columns"
+    table = tables.create_mathesar_table(
+        table_name, schema, column_list, engine
+    )
+    ins = table.insert().values(
+        [{COL1: 'one', COL2: 1}, {COL1: 'two', COL2: 2}]
+    )
+    with engine.begin() as conn:
+        conn.execute(ins)
+    COL1_MOD = COL1 + "_mod"
+    COL2_MOD = COL2 + "_mod"
+    column_definitions = [
+        {"name": "mathesar_id", "type": "INTEGER"},
+        {"name": COL1_MOD, "type": "VARCHAR"},
+        {"name": COL2_MOD, "type": "NUMERIC", "type_options": {"precision": 5, "scale": 2}},
+    ]
+    records = alteration.get_column_cast_records(engine, table, column_definitions)
+    for record in records:
+        assert (
+            type(record[COL1 + "_mod"]) == str
+            and type(record[COL2 + "_mod"]) == Decimal
+        )

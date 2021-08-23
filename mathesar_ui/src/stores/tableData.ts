@@ -26,12 +26,12 @@ export interface TableRecord {
   }
 }
 
-interface TableColumnResponse extends TableColumn {
+export interface TableColumnResponse extends TableColumn {
   primary_key: TableColumn['primaryKey'],
   valid_target_types: TableColumn['validTargetTypes']
 }
 
-interface TableColumnsResponse {
+export interface TableColumnsResponse {
   count: number,
   results: TableColumnResponse[]
 }

@@ -6,13 +6,13 @@ export default function popper(
   node: HTMLElement,
   actionOpts: {
     reference: HTMLElement,
-    popperOpts?: Options
+    options?: Partial<Options>
   },
 ) : Action {
   let popperInstance: Instance;
   let prevReference: HTMLElement = null;
 
-  function create(reference: HTMLElement, options?: Options) {
+  function create(reference: HTMLElement, options?: Partial<Options>) {
     if (reference) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       popperInstance = createPopper(reference, node, {
@@ -71,7 +71,7 @@ export default function popper(
     }
   }
 
-  create(actionOpts.reference, actionOpts.popperOpts);
+  create(actionOpts.reference, actionOpts.options);
 
   return {
     update,

@@ -7,11 +7,19 @@ export interface Database {
   supported_types: string[]
 }
 
-export interface SchemaEntry {
+export interface DBObjectEntry {
   id: number,
   name: string
 }
 
+export interface SchemaEntry extends DBObjectEntry {
+  has_dependencies: boolean
+}
+
 export interface Schema extends SchemaEntry, TreeItem {
-  tables: SchemaEntry[]
+  tables: Map<DBObjectEntry['id'], DBObjectEntry>
+}
+
+export interface SchemaResponse extends SchemaEntry, TreeItem {
+  tables: DBObjectEntry[],
 }

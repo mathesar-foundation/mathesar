@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from django_filters import rest_framework as filters
 from psycopg2.errors import (
     DuplicateColumn, DuplicateTable, UndefinedFunction, UniqueViolation, UndefinedObject,
-    InvalidTextRepresentation, CheckViolation, InvalidParameterValue
+    InvalidTextRepresentation, CheckViolation
 )
 from sqlalchemy.exc import ProgrammingError, DataError, IntegrityError
 from sqlalchemy_filters.exceptions import (
@@ -15,6 +15,8 @@ from sqlalchemy_filters.exceptions import (
 )
 
 from db.types.alteration import UnsupportedTypeException
+from db.records import BadGroupFormat, GroupFieldNotFound
+from db.columns import InvalidDefaultError, InvalidTypeOptionError
 
 from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile, Database, Constraint
@@ -22,9 +24,9 @@ from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.serializers import (
-    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer, ColumnSerializer,
-    DatabaseSerializer, ConstraintSerializer, RecordListParameterSerializer, TablePreviewSerializer,
-    TypeSerializer
+    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer,
+    ColumnSerializer, DatabaseSerializer, ConstraintSerializer,
+    RecordListParameterSerializer, TablePreviewSerializer, TypeSerializer
 )
 from mathesar.utils.schemas import create_schema_and_object
 from mathesar.utils.tables import (
@@ -33,8 +35,6 @@ from mathesar.utils.tables import (
 )
 from mathesar.utils.datafiles import create_datafile
 from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
-
-from db.records import BadGroupFormat, GroupFieldNotFound
 
 logger = logging.getLogger(__name__)
 
@@ -144,12 +144,15 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
             if model_field in serializer.validated_data:
                 setattr(table, model_field, serializer.validated_data[model_field])
                 present_model_fields.append(model_field)
-        table.save()
+        table.save(update_fields=present_model_fields)
         for key in present_model_fields:
             del serializer.validated_data[key]
 
         # Save the fields that are stored in the underlying DB.
-        table.update_sa_table(serializer.validated_data)
+        try:
+            table.update_sa_table(serializer.validated_data)
+        except ValueError as e:
+            raise ValidationError(e)
 
         # Reload the table to avoid cached properties
         table = self.get_object()
@@ -232,29 +235,40 @@ class ColumnViewSet(viewsets.ViewSet):
         serializer = ColumnSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
-        try:
-            column = table.add_column(request.data)
-        except ProgrammingError as e:
-            if type(e.orig) == DuplicateColumn:
-                name = request.data['name']
-                raise ValidationError(
-                    f'Column {name} already exists'
+        if 'source_column' in serializer.validated_data:
+            try:
+                column = table.duplicate_column(
+                    serializer.validated_data['source_column'],
+                    serializer.validated_data['copy_source_data'],
+                    serializer.validated_data['copy_source_constraints'],
+                    serializer.validated_data.get('name'),
                 )
-            else:
-                raise APIException(e)
-        except TypeError:
-            raise ValidationError("Unknown type_option passed")
-        except DataError as e:
-            if (
-                    type(e.orig) == InvalidParameterValue
-                    or type(e.orig) == InvalidTextRepresentation
-            ):
+            except IndexError:
+                _col_idx = serializer.validated_data['source_column']
+                raise ValidationError(f'column index "{_col_idx}" not found')
+        else:
+            try:
+                column = table.add_column(request.data)
+            except ProgrammingError as e:
+                if type(e.orig) == DuplicateColumn:
+                    name = request.data['name']
+                    raise ValidationError(
+                        f'Column {name} already exists'
+                    )
+                else:
+                    raise APIException(e)
+            except TypeError:
+                raise ValidationError("Unknown type_option passed")
+            except InvalidDefaultError:
+                raise ValidationError(
+                    f'default "{request.data["default"]}" is'
+                    f' invalid for type {request.data["type"]}'
+                )
+            except InvalidTypeOptionError:
                 raise ValidationError(
                     f'parameter dict {request.data["type_options"]} is'
                     f' invalid for type {request.data["type"]}'
                 )
-            else:
-                raise APIException(e)
 
         out_serializer = ColumnSerializer(column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
@@ -273,17 +287,16 @@ class ColumnViewSet(viewsets.ViewSet):
             raise NotFound
         except TypeError:
             raise ValidationError("Unknown type_option passed")
-        except DataError as e:
-            if (
-                    type(e.orig) == InvalidParameterValue
-                    or type(e.orig) == InvalidTextRepresentation
-            ):
-                raise ValidationError(
-                    f'parameter dict {request.data["type_options"]} is'
-                    f' invalid for type {request.data["type"]}'
-                )
-            else:
-                raise APIException(e)
+        except InvalidDefaultError:
+            raise ValidationError(
+                f'default "{request.data["default"]}" is'
+                f' invalid for this column'
+            )
+        except InvalidTypeOptionError:
+            raise ValidationError(
+                f'parameter dict {request.data["type_options"]} is'
+                f' invalid for type {request.data["type"]}'
+            )
         except Exception as e:
             raise APIException(e)
         serializer = ColumnSerializer(column)
