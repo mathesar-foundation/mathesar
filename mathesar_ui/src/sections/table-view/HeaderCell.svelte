@@ -74,6 +74,7 @@
     onResize: resizeColumn,
     moveableOptions: {
       className: 'header-cell-resize',
+      origin: false,
       resizable: isResizable,
       renderDirections: ['e'],
     },
