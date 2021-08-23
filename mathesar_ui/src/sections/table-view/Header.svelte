@@ -26,6 +26,7 @@
     DEFAULT_ROW_RIGHT_PADDING,
     updateColumnPosition,
   } from '@mathesar/stores/tableData';
+  import TableCell from './TableCell.svelte'
   import type { MoveableEvents } from 'moveable';
 
   const dispatch = createEventDispatcher();
@@ -49,16 +50,27 @@
   $: paddingLeft = isResultGrouped ? GROUP_MARGIN_LEFT : 0;
 
   export let columnPosition: ColumnPosition = new Map();
-  function resizeColumn(event:MoveableEvents['resize'], column:TableColumn) {
-    if (column) {
-      columnPosition.get(column.name).width = event.width;
-      columnPosition = updateColumnPosition(columns.data, columnPosition);
-    }
+  function updateColumnPositions(event:CustomEvent) {
+    columnPosition = updateColumnPosition(columns.data, event.detail);
   }
 
   function onHeaderScroll(scrollLeft: number) {
     if (horizontalScrollOffset !== scrollLeft) {
       horizontalScrollOffset = scrollLeft;
+    }
+  }
+
+  function updateSort(e:CustomEvent) {
+    sort = e.detail;
+    dispatch('reload');
+  }
+
+  function updateGroup(e:CustomEvent) {
+    if (e.detail['group']) {
+      group = e.detail['group']
+      dispatch('reload', {
+        resetPositions: e.detail['resetPositions']
+      });
     }
   }
 
@@ -76,34 +88,6 @@
       headerRef.removeEventListener('scroll', scrollListener);
     };
   });
-
-  function sortByColumn(column: TableColumn, order: 'asc' | 'desc') {
-    const newSort: SortOption = new Map(sort);
-    if (sort?.get(column.name) === order) {
-      newSort.delete(column.name);
-    } else {
-      newSort.set(column.name, order);
-    }
-    sort = newSort;
-    dispatch('reload');
-  }
-
-  function groupByColumn(column: TableColumn) {
-    const oldSize = group?.size || 0;
-    const newGroup = new Set(group);
-    if (newGroup?.has(column.name)) {
-      newGroup.delete(column.name);
-    } else {
-      newGroup.add(column.name);
-    }
-    group = newGroup;
-    /**
-     * Only reset item positions when group layout is created or destroyed
-    */
-    dispatch('reload', {
-      resetPositions: oldSize === 0 || group.size === 0,
-    });
-  }
 
   let newColumnDropdownIsOpen = false;
   let newColumnName = '';
@@ -129,71 +113,21 @@
 <div id="columns-header" bind:this={headerRef} class="header">
   <div class="cell row-control" style="width:{DEFAULT_COUNT_COL_WIDTH + paddingLeft}px;">
   </div>
+
   {#each columns.data as column, i (column.name)}
-    <div
-      use:moveable={{
-        onResize: (e) => { resizeColumn(e, column); },
-        moveableOptions: {
-          resizable: true,
-          renderDirections: ['e'],
-        },
-      }}
-      class="cell" style="
-      width:{columnPosition.get(column.name).width + paddingLeft}px;
-      left:{columnPosition.get(column.name).left + paddingLeft}px;">
-
-      <span class="type">
-        {#if column.type === 'INTEGER'}
-          #
-        {:else if column.type === 'VARCHAR'}
-          T
-        {:else}
-          i
-        {/if}
-      </span>
-      <span class="name">{column.name}</span>
-
-      <Dropdown closeOnInnerClick={true}
-                triggerClass="opts" triggerAppearance="plain"
-                contentClass="table-opts-content">
-        <svelte:fragment slot="content">
-          <ul>
-            <li on:click={() => sortByColumn(column, 'asc')}>
-              <Icon class="opt" data={faSortAmountDownAlt}/>
-              <span>
-                {#if sort?.get(column.name) === 'asc'}
-                  Remove asc sort
-                {:else}
-                  Sort Ascending
-                {/if}
-              </span>
-            </li>
-            <li on:click={() => sortByColumn(column, 'desc')}>
-              <Icon class="opt" data={faSortAmountDown}/>
-              <span>
-                {#if sort?.get(column.name) === 'desc'}
-                  Remove desc sort
-                {:else}
-                  Sort Descending
-                {/if}
-              </span>
-            </li>
-            <li on:click={() => groupByColumn(column)}>
-              <Icon class="opt" data={faThList}/>
-              <span>
-                {#if group?.has(column.name)}
-                  Remove grouping
-                {:else}
-                  Group by column
-                {/if}
-              </span>
-            </li>
-          </ul>
-        </svelte:fragment>
-      </Dropdown>
-    </div>
+    <TableCell
+      column={column}
+      sortable={true}
+      sort={sort}
+      on:sortUpdated={updateSort}
+      groupable={true}
+      group={group}
+      on:groupUpdated={updateGroup}
+      resizable={true}
+      columnPosition={columnPosition}
+      on:columnResized={updateColumnPositions}
+    />
   {/each}
-
   <div class="cell" style="width:{70 + DEFAULT_ROW_RIGHT_PADDING}px;left:{
     columnPosition.get('__row').width + paddingLeft
   }px;">
