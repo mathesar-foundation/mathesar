@@ -11,6 +11,7 @@ from sqlalchemy import (
 from sqlalchemy.exc import IntegrityError
 from db import columns, tables, constants, constraints
 from db.types import email, alteration
+from db.types.base import get_db_type_name
 from db.tests.types import fixtures
 
 engine_with_types = fixtures.engine_with_types
@@ -793,7 +794,7 @@ def _check_duplicate_unique_constraint(
         assert len(constraints_) == 0
 
 
-def _create_table_to_duplicate(table_name, cols, insert_data, schema, engine):
+def _create_table(table_name, cols, insert_data, schema, engine):
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -830,7 +831,7 @@ def test_duplicate_column_single_unique(engine_with_schema, copy_data, copy_cons
     new_col_name = "duplicated_column"
     cols = [Column(target_column_name, Numeric, unique=True)]
     insert_data = [(1,), (2,), (3,)]
-    _create_table_to_duplicate(table_name, cols, insert_data, schema, engine)
+    _create_table(table_name, cols, insert_data, schema, engine)
 
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     columns.duplicate_column(
@@ -856,7 +857,7 @@ def test_duplicate_column_multi_unique(engine_with_schema, copy_data, copy_const
         UniqueConstraint(target_column_name, "Filler")
     ]
     insert_data = [(1, 2), (2, 3), (3, 4)]
-    _create_table_to_duplicate(table_name, cols, insert_data, schema, engine)
+    _create_table(table_name, cols, insert_data, schema, engine)
 
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     columns.duplicate_column(
@@ -881,7 +882,7 @@ def test_duplicate_column_nullable(
     new_col_name = "duplicated_column"
     cols = [Column(target_column_name, Numeric, nullable=nullable)]
     insert_data = [(1,), (2,), (3,)]
-    _create_table_to_duplicate(table_name, cols, insert_data, schema, engine)
+    _create_table(table_name, cols, insert_data, schema, engine)
 
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     col = columns.duplicate_column(
@@ -928,7 +929,7 @@ def test_duplicate_column_default(engine_with_schema, copy_data, copy_constraint
     new_col_name = "duplicated_column"
     expt_default = 1
     cols = [Column(target_column_name, Numeric, server_default=str(expt_default))]
-    _create_table_to_duplicate(table_name, cols, [], schema, engine)
+    _create_table(table_name, cols, [], schema, engine)
 
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     columns.duplicate_column(
@@ -964,3 +965,150 @@ def test_test_columns_covers_MathesarColumn(mathesar_col_arg):
         [func for func in test_funcs if pattern.match(func) is not None]
     )
     assert number_tests > 0
+
+
+def _create_pizza_table(engine, schema):
+    table_name = 'Pizzas'
+    cols = [
+        Column('ID', String),
+        Column('Pizza', String),
+        Column('Checkbox', String),
+        Column('Rating', String)
+    ]
+    insert_data = [
+        ('1', 'Pepperoni', 'true', '4.0'),
+        ('2', 'Supreme', 'false', '5.0'),
+        ('3', 'Hawaiian', 'true', '3.5')
+    ]
+    return _create_table(table_name, cols, insert_data, schema, engine)
+
+
+def _get_pizza_column_data():
+    return [{
+        'name': 'ID',
+        'plain_type': 'VARCHAR'
+    }, {
+        'name': 'Pizza',
+        'plain_type': 'VARCHAR'
+    }, {
+        'name': 'Checkbox',
+        'plain_type': 'VARCHAR'
+    }, {
+        'name': 'Rating',
+        'plain_type': 'VARCHAR'
+    }]
+
+
+def test_batch_update_columns_no_changes(engine_email_type):
+    engine, schema = engine_email_type
+    table = _create_pizza_table(engine, schema)
+    table_oid = tables.get_oid_from_table(table.name, schema, engine)
+
+    columns.batch_update_columns(table_oid, engine, _get_pizza_column_data())
+    updated_table = tables.reflect_table(table.name, schema, engine)
+
+    assert len(table.columns) == len(updated_table.columns)
+    for index, column in enumerate(table.columns):
+        new_column_type = get_db_type_name(updated_table.columns[index].type, engine_email_type)
+        assert new_column_type == 'VARCHAR'
+        assert updated_table.columns[index].name == table.columns[index].name
+
+
+def test_batch_update_column_names(engine_email_type):
+    engine, schema = engine_email_type
+    table = _create_pizza_table(engine, schema)
+    table_oid = tables.get_oid_from_table(table.name, schema, engine)
+
+    column_data = _get_pizza_column_data()
+    column_data[1]['name'] == 'Pizza Style'
+    column_data[2]['name'] == 'Eaten Recently?'
+
+    columns.batch_update_columns(table_oid, engine, column_data)
+    updated_table = tables.reflect_table(table.name, schema, engine)
+
+    assert len(table.columns) == len(updated_table.columns)
+    for index, column in enumerate(table.columns):
+        new_column_type = get_db_type_name(updated_table.columns[index].type, engine_email_type)
+        assert new_column_type == column_data[index]['plain_type']
+        assert updated_table.columns[index].name == column_data[index]['name']
+
+
+def test_batch_update_column_types(engine_email_type):
+    engine, schema = engine_email_type
+    table = _create_pizza_table(engine, schema)
+    table_oid = tables.get_oid_from_table(table.name, schema, engine)
+
+    column_data = _get_pizza_column_data()
+    column_data[0]['plain_type'] == 'INTEGER'
+    column_data[2]['plain_type'] == 'BOOLEAN'
+
+    columns.batch_update_columns(table_oid, engine, column_data)
+    updated_table = tables.reflect_table(table.name, schema, engine)
+
+    assert len(table.columns) == len(updated_table.columns)
+    for index, column in enumerate(table.columns):
+        new_column_type = get_db_type_name(updated_table.columns[index].type, engine_email_type)
+        assert new_column_type == column_data[index]['plain_type']
+        assert updated_table.columns[index].name == column_data[index]['name']
+
+
+def test_batch_update_column_names_and_types(engine_email_type):
+    engine, schema = engine_email_type
+    table = _create_pizza_table(engine, schema)
+    table_oid = tables.get_oid_from_table(table.name, schema, engine)
+
+    column_data = _get_pizza_column_data()
+    column_data[0]['name'] == 'Pizza ID'
+    column_data[0]['plain_type'] == 'INTEGER'
+    column_data[1]['name'] == 'Pizza Style'
+    column_data[2]['plain_type'] == 'BOOLEAN'
+
+    columns.batch_update_columns(table_oid, engine, column_data)
+    updated_table = tables.reflect_table(table.name, schema, engine)
+
+    assert len(table.columns) == len(updated_table.columns)
+    for index, column in enumerate(table.columns):
+        new_column_type = get_db_type_name(updated_table.columns[index].type, engine_email_type)
+        assert new_column_type == column_data[index]['plain_type']
+        assert updated_table.columns[index].name == column_data[index]['name']
+
+
+def test_batch_update_column_drop_columns(engine_email_type):
+    engine, schema = engine_email_type
+    table = _create_pizza_table(engine, schema)
+    table_oid = tables.get_oid_from_table(table.name, schema, engine)
+
+    column_data = _get_pizza_column_data()
+    column_data[0] = {}
+    column_data[1] = {}
+
+    columns.batch_update_columns(table_oid, engine, column_data)
+    updated_table = tables.reflect_table(table.name, schema, engine)
+
+    assert len(updated_table.columns) == len(table.columns) - 2
+    for index, column in enumerate(updated_table.columns):
+        new_column_type = get_db_type_name(updated_table.columns[index].type, engine_email_type)
+        assert new_column_type == column_data[index - 2]['plain_type']
+        assert updated_table.columns[index].name == column_data[index - 2]['name']
+
+
+def test_batch_update_column_all_operations(engine_email_type):
+    engine, schema = engine_email_type
+    table = _create_pizza_table(engine, schema)
+    table_oid = tables.get_oid_from_table(table.name, schema, engine)
+
+    column_data = _get_pizza_column_data()
+    column_data[0]['name'] = 'Pizza ID'
+    column_data[0]['plain_type'] = 'INTEGER'
+    column_data[1]['name'] = 'Pizza Style'
+    column_data[2]['plain_type'] = 'BOOLEAN'
+    column_data[3] = {}
+
+    columns.batch_update_columns(table_oid, engine, column_data)
+    updated_table = tables.reflect_table(table.name, schema, engine)
+
+    assert len(updated_table.columns) == len(table.columns) - 1
+    for index, column in enumerate(updated_table.columns):
+        new_column_type = get_db_type_name(updated_table.columns[index].type, engine_email_type)
+        assert new_column_type == column_data[index]['plain_type']
+        assert updated_table.columns[index].name == column_data[index]['name']
