@@ -63,7 +63,6 @@
     dispatch('columnResized', columnPosition);
   }
   export let isResizable:boolean;
-  const showDropdown = () => (sortable || groupable);
   let paddingLeft: number;
   $: paddingLeft = isResultGrouped ? GROUP_MARGIN_LEFT : 0;
 
@@ -81,7 +80,6 @@
     moveableOptions: resizableOptions,
     reference: tableCellRef,
   }}
-
   class="cell" style="
   width:{columnPosition.get(column.name).width + paddingLeft}px;
   left:{columnPosition.get(column.name).left + paddingLeft}px;">
@@ -97,7 +95,8 @@
   </span>
 
   <span class="name">{column.name}</span>
-  {#if showDropdown()}
+
+  {#if (sortable || groupable)}
     <Dropdown closeOnInnerClick={true}
         triggerClass="opts" triggerAppearance="plain"
         contentClass="table-opts-content">
