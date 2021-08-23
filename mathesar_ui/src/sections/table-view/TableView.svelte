@@ -161,6 +161,7 @@
       <Header
         columns={$columns}
         types={$types.data}
+        id={idKey}
         bind:sort={$options.sort}
         bind:group={$options.group}
         isResultGrouped={!!$records.groupData}

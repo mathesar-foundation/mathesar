@@ -5,6 +5,7 @@
     ColumnPosition,
     SortOption,
     GroupOption,
+    TableTypes,
   } from "@mathesar/stores/tableData";
   import {
     DEFAULT_COUNT_COL_WIDTH,
@@ -14,7 +15,8 @@
   import CellHeader from "./CellHeader.svelte";
 
   export let columns: TableColumnData;
-  export let types: string[];
+  export let types: TableTypes[];
+  export let id: number;
   export let sort: SortOption = new Map();
   export let group: GroupOption = new Set();
   export let columnPosition: ColumnPosition = new Map();
@@ -68,6 +70,7 @@
       bind:group
       bind:column
       bind:types
+      bind:id
       bind:columnPosition
       bind:paddingLeft
       on:reload
