@@ -103,8 +103,7 @@ export function addTab(
 export function removeTab(
   db: string,
   schemaId: Schema['id'],
-  removedTab?: MathesarTab,
-  newActiveTab?: MathesarTab,
+  removedTab: MathesarTab,
 ): void {
   const { tabs, activeTab } = getTabsForSchema(db, schemaId);
   const tabData = get(tabs);
@@ -115,12 +114,28 @@ export function removeTab(
   }
 
   if (removedTab) {
+    const removedTabIndexInTabsArray = tabData.findIndex((entry) => entry.id === removedTab.id);
+
+    /**
+     * If directly called, without changing the active tab to a tab other than the removed one,
+     * active tab has to be manually changed.
+     */
+    if (activeTabData?.id === removedTab.id) {
+      if (tabData[removedTabIndexInTabsArray + 1]) {
+        activeTab.set(tabData[removedTabIndexInTabsArray + 1]);
+      } else if (tabData[removedTabIndexInTabsArray - 1]) {
+        activeTab.set(tabData[removedTabIndexInTabsArray - 1]);
+      } else {
+        activeTab.set(null);
+      }
+    }
+
     /**
      * If called from component event, the tab would already have been removed in previous tick.
      * If called directly, tab will have to be removed.
      * We have a find check, to avoid unnessary re-renders, incase of component events.
      */
-    if (tabData.find((entry) => entry.id === removedTab.id)) {
+    if (removedTabIndexInTabsArray > -1) {
       tabs.set(
         tabData.filter((tab) => tab.id !== removedTab.id),
       );
@@ -129,7 +144,7 @@ export function removeTab(
     if (removedTab.isNew) {
       removeImportFromView(schemaId, removedTab.id as string);
     } else {
-      URLQueryHandler.removeTable(db, removedTab.id as number, newActiveTab?.id as number);
+      URLQueryHandler.removeTable(db, removedTab.id as number, get(activeTab)?.id as number);
       clearTable(db, removedTab.id as number);
     }
   } else {
@@ -149,7 +164,7 @@ export function replaceTab(db: string, schemaId: Schema['id'], oldTabId: unknown
     position: existingTabIndex,
     status: activeTabData?.id === existingTab.id ? 'active' : 'inactive',
   });
-  removeTab(db, schemaId, existingTab, tab);
+  removeTab(db, schemaId, existingTab);
 }
 
 export function selectTab(db: string, tab: MathesarTab): void {

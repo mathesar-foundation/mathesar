@@ -5,8 +5,9 @@ import {
   Stages,
   FileImport,
   removeImportFromView,
+  deleteImport,
 } from '@mathesar/stores/fileImports';
-import { replaceTab } from '@mathesar/stores/tabs';
+import { replaceTab, removeTab } from '@mathesar/stores/tabs';
 import { refetchSchema } from '@mathesar/stores/schemas';
 import {
   uploadFile,
@@ -341,6 +342,18 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
         error: (err as Error)?.message,
       });
     }
+  }
+}
+
+export function cancelImport(fileImportStore: FileImport): void {
+  const fileImportData = get(fileImportStore);
+  if (fileImportData) {
+    deleteImport(fileImportData.schemaId, fileImportData.id);
+    removeTab(fileImportData.databaseName, fileImportData.schemaId, {
+      id: fileImportData.id,
+      label: fileImportData.name,
+      isNew: true,
+    });
   }
 }
 

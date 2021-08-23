@@ -159,6 +159,21 @@ export function newImport(databaseName: Database['name'], schemaId: Schema['id']
   return fileImport;
 }
 
+export function deleteImport(schemaId: Schema['id'], id: string): void {
+  const imports = schemaImportMap.get(schemaId);
+  const fileImport = imports?.get(id);
+  if (fileImport) {
+    const fileImportData = get(fileImport);
+    fileImportData.importPromise?.cancel();
+    fileImportData.uploadPromise?.cancel();
+    imports.delete(id);
+  }
+  importStatuses.update((existingMap) => {
+    existingMap.delete(id);
+    return new Map(existingMap);
+  });
+}
+
 export function removeImportFromView(schemaId: Schema['id'], id: string): void {
   const imports = schemaImportMap.get(schemaId);
   const fileImport = imports?.get(id);
@@ -170,13 +185,7 @@ export function removeImportFromView(schemaId: Schema['id'], id: string): void {
       && fileImportData.importStatus === States.Done);
 
     if (isRemovable) {
-      fileImportData.importPromise?.cancel();
-      fileImportData.uploadPromise?.cancel();
-      imports.delete(id);
-      importStatuses.update((existingMap) => {
-        existingMap.delete(id);
-        return new Map(existingMap);
-      });
+      deleteImport(schemaId, id);
     }
   }
 }

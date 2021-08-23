@@ -18,6 +18,7 @@
     updateDataFileHeader,
     finishImport,
     fetchPreviewTableInfo,
+    cancelImport,
   } from '../importUtils';
 
   export let fileImportStore: FileImport;
@@ -97,6 +98,10 @@
 {/if}
 
 <div class="actions">
+  <Button on:click={() => cancelImport(fileImportStore)}>
+    Cancel
+  </Button>
+
   <Button appearance="primary"
           disabled={
             $fileImportStore.previewStatus !== States.Done
