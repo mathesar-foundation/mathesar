@@ -7,13 +7,14 @@ export default function moveable(
   options: {
     moveableOptions: MoveableOptions,
     onResize?: CallableFunction,
-    onResizeEnd?: CallableFunction,
+    reference: HTMLElement,
   },
 ) : Action {
-  let moveableComponent: Moveable;
-  let isResizing = false;
+  let moveableInstance: Moveable;
+  let prevReference: HTMLElement = null;
+  const bubbledEventName = 'moveableMove';
 
-  function resize(event:MoveableEvents['resize']) {
+  function onResize(event:MoveableEvents['resize']) {
     // eslint-disable-next-line no-param-reassign
     event.target.style.width = `${event.width}px`;
     // eslint-disable-next-line no-param-reassign
@@ -23,53 +24,52 @@ export default function moveable(
     }
   }
 
+  function bubbleEvent() {
+    moveableInstance.container.dispatchEvent(new CustomEvent(bubbledEventName));
+  }
+
+  function onBubbledEvent() {
+    moveableInstance.updateTarget();
+  }
+
   function destroy() {
-    moveableComponent?.destroy();
-    moveableComponent = null;
+    moveableInstance?.destroy();
+    prevReference = null;
   }
 
-  function create() {
-    const target:HTMLElement = node;
-    if (moveableComponent) {
-      destroy();
+  function create(reference: HTMLElement, moveableOptions?: MoveableOptions) {
+    if (reference) {
+      moveableInstance = new Moveable(document.body, moveableOptions);
+      moveableInstance.target = node as MoveableRefType<HTMLElement>;
+      moveableInstance.on('resize', onResize);
+      moveableInstance.on('resize', bubbleEvent);
+      moveableInstance.on('resizeEnd', bubbleEvent);
+      moveableInstance.container.addEventListener(bubbledEventName, onBubbledEvent);
     }
-    moveableComponent = new Moveable(document.body, options.moveableOptions);
-    moveableComponent.target = target as MoveableRefType<HTMLElement>;
-    moveableComponent.on('resize', resize);
-    moveableComponent.on('resizeStart', () => { isResizing = true; });
-    moveableComponent.on('resizeEnd', () => { isResizing = false; });
   }
 
-  let mouseEnterTimer;
-  let mouseLeaveTimer;
-  node.addEventListener('mouseenter', () => {
-    if (isResizing) return;
-    mouseEnterTimer = setTimeout(() => {
-      if (mouseLeaveTimer) {
-        clearTimeout(mouseEnterTimer);
-        mouseEnterTimer = null;
-        return;
-      }
-      if (!isResizing) {
-        create();
-      }
-      mouseEnterTimer = null;
-    }, 100);
-  });
-  node.addEventListener('mouseleave', () => {
-    if (isResizing) return;
-    mouseLeaveTimer = setTimeout(() => {
-      if (mouseEnterTimer) {
-        clearTimeout(mouseLeaveTimer);
-        mouseLeaveTimer = null;
-      }
-      if (!isResizing) {
+  function update(componentOptions: {
+    moveableOptions: MoveableOptions,
+    onResize?: CallableFunction,
+    reference: HTMLElement,
+  }) {
+    const { reference, moveableOptions } = componentOptions;
+    if (moveableInstance) {
+      if (prevReference !== reference) {
         destroy();
+        create(reference, moveableOptions);
+        prevReference = reference;
+      } else if (componentOptions) {
+        // @TODO: Determine the best method to update option values.
       }
-      mouseLeaveTimer = null;
-    }, 500);
-  });
+    } else {
+      create(reference, moveableOptions);
+    }
+  }
+
+  create(options.reference, options.moveableOptions);
   return {
+    update,
     destroy,
   };
 }
