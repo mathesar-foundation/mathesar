@@ -62,7 +62,7 @@ class TypeOptionSerializer(serializers.Serializer):
 class SimpleColumnSerializer(serializers.Serializer):
     name = serializers.CharField()
     type = serializers.CharField(source='plain_type')
-    type_options = TypeOptionSerializer(required=False)
+    type_options = TypeOptionSerializer(required=False, allow_null=True)
 
 
 class ColumnSerializer(SimpleColumnSerializer):
@@ -128,7 +128,7 @@ class ColumnSerializer(SimpleColumnSerializer):
 
 
 class TableSerializer(serializers.ModelSerializer):
-    columns = SimpleColumnSerializer(many=True, read_only=True, source='sa_columns')
+    columns = SimpleColumnSerializer(many=True, source='sa_columns', required=False)
     records_url = serializers.SerializerMethodField()
     constraints_url = serializers.SerializerMethodField()
     columns_url = serializers.SerializerMethodField()
