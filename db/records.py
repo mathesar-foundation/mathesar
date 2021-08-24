@@ -316,7 +316,7 @@ def create_records_from_csv(
                 relation=relation,
                 formatted_columns=formatted_columns,
                 header=sql.SQL("HEADER" if header else ""),
-                delimiter=sql.SQL(f"DELIMITER E'{delimiter}'" if delimiter else ""),
+                delimiter=sql.SQL(f"DELIMITER '{delimiter}'" if delimiter else ""),
                 escape=sql.SQL(f"ESCAPE '{escape}'" if escape else ""),
                 quote=sql.SQL(
                     ("QUOTE ''''" if quote == "'" else f"QUOTE '{quote}'")

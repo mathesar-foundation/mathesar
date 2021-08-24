@@ -7,7 +7,7 @@ from mathesar.models import Table
 from db import tables, records
 from mathesar.errors import InvalidTableError
 
-ALLOWED_DELIMITERS = ",\t:| "
+ALLOWED_DELIMITERS = ",\t:|"
 SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
 
@@ -72,16 +72,15 @@ def get_sv_dialect(file):
 def get_sv_reader(file, header, dialect=None):
     file = TextIOWrapper(file, encoding="utf-8-sig")
     if dialect:
-        reader = csv.DictReader(file, dialect=dialect, quoting=csv.QUOTE_ALL, quotechar='"', delimiter=',')
+        reader = csv.DictReader(file, dialect=dialect)
     else:
-        reader = csv.DictReader(file, quoting=csv.QUOTE_ALL, quotechar='"', delimiter=',')
+        reader = csv.DictReader(file)
     if not header:
         reader.fieldnames = [
             f"column_{i}" for i in range(len(reader.fieldnames))
         ]
         file.seek(0)
-    else:
-        reader.fieldnames = list(map(lambda col: col.strip('"'), reader.fieldnames))
+
     return reader
 
 
