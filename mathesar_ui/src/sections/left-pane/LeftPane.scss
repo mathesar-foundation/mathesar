@@ -5,7 +5,8 @@ aside {
   bottom: 0;
   border-right: 1px solid #dfdfdf;
   transition: left .2s ease-out;
-  z-index: 3;
+  z-index: 101;
+  background-color: white;
   overflow-y: auto;
 
   nav {
