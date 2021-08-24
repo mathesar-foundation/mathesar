@@ -5,6 +5,10 @@ from sqlalchemy import create_engine
 from db import constants
 
 
+STRING = 'string'
+VARCHAR = 'varchar'
+
+
 class PostgresType(Enum):
     """
     This only includes built-in Postgres types that SQLAlchemy supports.
@@ -79,3 +83,11 @@ def get_qualified_name(name):
 
 def get_available_types(engine):
     return engine.dialect.ischema_names
+
+
+def get_db_type_name(sa_type, engine):
+    USER_DEFINED_STR = 'user_defined'
+    db_type = sa_type.__visit_name__
+    if db_type == USER_DEFINED_STR:
+        db_type = sa_type().compile(engine.dialect)
+    return db_type
