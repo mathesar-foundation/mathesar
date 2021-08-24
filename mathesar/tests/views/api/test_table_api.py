@@ -916,6 +916,19 @@ def _get_patents_column_data():
     }]
 
 
+def test_table_patch_same_table_name(create_table, client):
+    table_name = 'PATCH same name'
+    table = create_table(table_name)
+
+    body = {'name': table_name}
+    # Need to specify format here because otherwise the body gets sent
+    # as a multi-part form, which can't handle nested keys.
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+
+    assert response.status_code == 200
+    assert response.json()['name'] == table_name
+
+
 def test_table_patch_columns_and_table_name(create_table, client):
     table_name = 'PATCH columns 1'
     table = create_table(table_name)
