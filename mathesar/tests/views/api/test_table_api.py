@@ -335,8 +335,8 @@ def test_table_type_suggestion(client, schema, engine_email_type):
 def _check_columns(actual_column_list, expected_column_list):
     # Columns will return an extra type_options key in actual_dict
     # so we need to check equality only for the keys in expect_dict
-    for index, column_dict in enumerate(expected_column_list):
-        assert all([actual_column_list[index][key] == column_dict[key] for key in column_dict])
+    for actual_column, expected_column in zip(actual_column_list, expected_column_list):
+        assert all([actual_column[key] == expected_column[key] for key in expected_column])
 
 
 def test_table_previews(client, schema, engine_email_type):
