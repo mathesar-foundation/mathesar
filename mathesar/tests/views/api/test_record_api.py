@@ -115,8 +115,8 @@ def test_record_list_filter_for_boolean(engine, create_table, client):
         ]
     )
 
-    def assert_results_equal_for_op(op, expected):
-        filter_list = [{'field': 'Published', 'op': op, 'value': False}]
+    def assert_results_equal_for_op(op, value, expected):
+        filter_list = [{'field': 'Published', 'op': op, 'value': value}]
         json_filter_list = json.dumps(filter_list)
 
         with patch.object(
@@ -136,14 +136,14 @@ def test_record_list_filter_for_boolean(engine, create_table, client):
         assert mock_get.call_args is not None
         assert mock_get.call_args[1]['filters'] == filter_list
 
-    ops_and_expected = [
-        ('ne', 2),
-        ('eq', 1),
-        ('is_null', 1393),
-        ('is_not_null', 3)
+    op_value_and_expected = [
+        ('ne', False, 2),
+        ('eq', False, 1),
+        ('is_null', None, 1393),
+        ('is_not_null', None, 3)
     ]
 
-    for test_conditions in ops_and_expected:
+    for test_conditions in op_value_and_expected:
         assert_results_equal_for_op(*test_conditions)
 
 
