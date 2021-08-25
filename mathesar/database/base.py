@@ -1,9 +1,7 @@
 from django.conf import settings
 
 from db import engine
-import logging
 
-logger = logging.getLogger(__name__)
 
 def create_mathesar_engine(database):
     return engine.create_future_engine_with_custom_types(
