@@ -321,7 +321,7 @@ def create_records_from_csv(
                 # If HEADER is not None, we'll pass its value to our entire SQL query
                 header=sql.SQL("HEADER" if header else ""),
                 # If DELIMITER is not None, we'll pass its value to our entire SQL query
-                delimiter=sql.SQL(f"DELIMITER '{delimiter}'" if delimiter else ""),
+                delimiter=sql.SQL(f"DELIMITER E'{delimiter}'" if delimiter else ""),
                 # If ESCAPE is not None, we'll pass its value to our entire SQL query
                 escape=sql.SQL(f"ESCAPE '{escape}'" if escape else ""),
                 quote=sql.SQL(
