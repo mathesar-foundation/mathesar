@@ -1,4 +1,5 @@
 import logging
+from psycopg2 import sql
 from sqlalchemy import delete, select, Column, func, true, and_
 from sqlalchemy.inspection import inspect
 from sqlalchemy_filters import apply_filters, apply_sort
@@ -299,23 +300,36 @@ def create_records_from_csv(
         escape=None,
         quote=None,
 ):
-    with open(csv_filename, 'rb') as csv_file:
+    with open(csv_filename, "rb") as csv_file:
         with engine.begin() as conn:
             cursor = conn.connection.cursor()
-            relation = '.'.join('"{}"'.format(part) for part in (table.schema, table.name))
-            formatted_columns = '({})'.format(','.join([f'"{column_name}"' for column_name in column_names]))
+            # We should convert our entire query to sql.SQL class in order to keep its original header's name
+            # When we call sql.Indentifier which will return a Identifier class (based on sql.Composable)
+            # instead of a String. So we have to convert our punctuations to sql.Composable using sql.SQL
+            relation = sql.SQL(".").join(
+                sql.Identifier(part) for part in (table.schema, table.name)
+            )
+            formatted_columns = sql.SQL(",").join(
+                sql.Identifier(column_name) for column_name in column_names
+            )
 
-            copy_sql = f'COPY {relation} {formatted_columns} FROM STDIN CSV'
-            if header:
-                copy_sql += " HEADER"
-            if delimiter:
-                copy_sql += f" DELIMITER E'{delimiter}'"
-            if escape:
-                copy_sql += f" ESCAPE '{escape}'"
-            if quote:
-                if quote == "'":
-                    quote = "''"
-                copy_sql += f" QUOTE '{quote}'"
+            copy_sql = sql.SQL(
+                "COPY {relation} ({formatted_columns}) FROM STDIN CSV {header} {delimiter} {escape} {quote}"
+            ).format(
+                relation=relation,
+                formatted_columns=formatted_columns,
+                # If HEADER is not None, we'll pass its value to our entire SQL query
+                header=sql.SQL("HEADER" if header else ""),
+                # If DELIMITER is not None, we'll pass its value to our entire SQL query
+                delimiter=sql.SQL(f"DELIMITER E'{delimiter}'" if delimiter else ""),
+                # If ESCAPE is not None, we'll pass its value to our entire SQL query
+                escape=sql.SQL(f"ESCAPE '{escape}'" if escape else ""),
+                quote=sql.SQL(
+                    ("QUOTE ''''" if quote == "'" else f"QUOTE '{quote}'")
+                    if quote
+                    else ""
+                ),
+            )
 
             cursor.copy_expert(copy_sql, csv_file)
 

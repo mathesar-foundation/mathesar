@@ -7,7 +7,7 @@ from mathesar.models import Table
 from db import tables, records
 from mathesar.errors import InvalidTableError
 
-ALLOWED_DELIMITERS = ",\t:| "
+ALLOWED_DELIMITERS = ",\t:|"
 SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
 
@@ -80,6 +80,7 @@ def get_sv_reader(file, header, dialect=None):
             f"column_{i}" for i in range(len(reader.fieldnames))
         ]
         file.seek(0)
+
     return reader
 
 
