@@ -392,6 +392,8 @@ def test_retype_column_correct_column(engine_with_schema):
         engine,
         friendly_names=False,
         type_options={},
+        connection_to_use=None,
+        table_to_use=None
     )
 
 
@@ -420,6 +422,8 @@ def test_retype_column_adds_options(engine_with_schema, target_type):
         engine,
         friendly_names=False,
         type_options=type_options,
+        connection_to_use=None,
+        table_to_use=None
     )
 
 

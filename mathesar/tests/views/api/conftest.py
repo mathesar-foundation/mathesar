@@ -39,7 +39,7 @@ def create_schema(engine, test_db_model):
             create_sa_schema(schema_name, engine)
             schema_oid = get_schema_oid_from_name(schema_name, engine)
             function_schemas[schema_name] = schema_oid
-        schema_model, _ = Schema.objects.get_or_create(oid=schema_oid, database=test_db_model)
+        schema_model, _ = Schema.current_objects.get_or_create(oid=schema_oid, database=test_db_model)
         return schema_model
     yield _create_schema
 
