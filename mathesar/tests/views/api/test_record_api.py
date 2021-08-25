@@ -3,7 +3,6 @@ from unittest.mock import patch
 
 import pytest
 from db import records
-from db.columns import retype_column
 from db.records import BadGroupFormat, GroupFieldNotFound
 from sqlalchemy_filters.exceptions import (BadFilterFormat, BadSortFormat,
                                            FilterFieldNotFound,
