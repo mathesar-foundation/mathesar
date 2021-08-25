@@ -72,5 +72,7 @@ def create_empty_table(name, schema):
     engine = create_mathesar_engine(schema.database.name)
     db_table = create_mathesar_table(name, schema.name, [], engine)
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    table, _ = Table.objects.get_or_create(oid=db_table_oid, schema=schema)
+    # Using current_objects to create the table instead of objects. objects
+    # triggers re-reflection, which will cause a race condition to create the table
+    table, _ = Table.current_objects.get_or_create(oid=db_table_oid, schema=schema)
     return table

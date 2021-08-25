@@ -1,8 +1,10 @@
 from sqlalchemy import text, DDL, MetaData, Table, select
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
+
 from db import columns, tables
 from db.types import base, email
+from db.utils import execute_statement
 
 
 BIGINT = base.PostgresType.BIGINT.value
@@ -99,6 +101,8 @@ def alter_column_type(
         engine,
         friendly_names=True,
         type_options={},
+        connection_to_use=None,
+        table_to_use=None
 ):
     _preparer = engine.dialect.identifier_preparer
     supported_types = get_supported_alter_column_types(
@@ -107,15 +111,17 @@ def alter_column_type(
     target_type = supported_types.get(target_type_str)
 
     metadata = MetaData(bind=engine, schema=schema)
-    table = Table(table_name, metadata, schema=schema, autoload_with=engine)
+    table = table_to_use
+    if table is None:
+        table = Table(table_name, metadata, schema=schema, autoload_with=engine)
     column = table.columns[column_name]
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    column_index = columns.get_column_index_from_name(table_oid, column_name, engine)
+    column_index = columns.get_column_index_from_name(table_oid, column_name, engine, connection_to_use)
 
-    default = columns.get_column_default(table_oid, column_index, engine)
+    default = columns.get_column_default(table_oid, column_index, engine, connection_to_use, table_to_use)
     if default is not None:
         default_text = column.server_default.arg.text
-        columns.set_column_default(table_oid, column_index, None, engine)
+        columns.set_column_default(table_oid, column_index, None, engine, connection_to_use, table_to_use)
 
     prepared_table_name = _preparer.format_table(table)
     prepared_column_name = _preparer.format_column(column)
@@ -128,14 +134,13 @@ def alter_column_type(
       USING {cast_function_name}({prepared_column_name});
     """
 
-    with engine.begin() as conn:
-        conn.execute(DDL(alter_stmt))
+    execute_statement(engine, DDL(alter_stmt), connection_to_use)
 
     if default is not None:
         cast_stmt = f"{cast_function_name}({default_text})"
-        with engine.begin() as conn:
-            new_default = str(conn.execute(select(text(cast_stmt))).first()[0])
-        columns.set_column_default(table_oid, column_index, new_default, engine)
+        default_stmt = select(text(cast_stmt))
+        new_default = str(execute_statement(engine, default_stmt, connection_to_use).first()[0])
+        columns.set_column_default(table_oid, column_index, new_default, engine, connection_to_use, table_to_use)
 
 
 def get_column_cast_expression(column, target_type_str, engine, type_options={}):
@@ -171,6 +176,7 @@ def install_all_casts(engine):
     create_integer_casts(engine)
     create_decimal_number_casts(engine)
     create_interval_casts(engine)
+    create_date_casts(engine)
     create_varchar_casts(engine)
 
 
@@ -201,6 +207,11 @@ def create_decimal_number_casts(engine):
     for type_str in decimal_number_types:
         type_body_map = _get_decimal_number_type_body_map(target_type_str=type_str)
         create_cast_functions(type_str, type_body_map, engine)
+
+
+def create_date_casts(engine):
+    type_body_map = _get_date_type_body_map()
+    create_cast_functions(DATE, type_body_map, engine)
 
 
 def create_varchar_casts(engine):
@@ -237,6 +248,7 @@ def get_defined_source_target_cast_tuples(engine):
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
+        DATE: _get_date_type_body_map(),
         VARCHAR: _get_varchar_type_body_map(engine),
     }
     return {
@@ -471,6 +483,15 @@ def _get_varchar_type_body_map(engine):
     """
     supported_types = get_supported_alter_column_db_types(engine)
     return _get_default_type_body_map(supported_types, VARCHAR)
+
+
+def _get_date_type_body_map():
+    # Note that default postgres conversion for dates depends on the `DateStyle` option
+    # set on the server, which can be one of DMY, MDY, or YMD. Defaults to MDY.
+    default_behavior_source_types = [DATE, VARCHAR]
+    return _get_default_type_body_map(
+        default_behavior_source_types, DATE,
+    )
 
 
 def _get_default_type_body_map(source_types, target_type_str):

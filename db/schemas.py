@@ -121,6 +121,8 @@ def rename_schema(schema, engine, rename_to):
     """
     This method renames a Postgres schema.
     """
+    if rename_to == schema:
+        return
     with engine.begin() as connection:
         connection.execute(RenameSchema(schema, rename_to))
 
