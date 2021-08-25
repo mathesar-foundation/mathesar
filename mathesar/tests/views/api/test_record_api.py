@@ -2,12 +2,9 @@ import json
 from unittest.mock import patch
 
 import pytest
-from db import columns, records, tables
+from db import records
 from db.columns import retype_column
 from db.records import BadGroupFormat, GroupFieldNotFound
-from db.types import base
-from mathesar.database.types import MathesarTypeIdentifier
-from sqlalchemy import text
 from sqlalchemy_filters.exceptions import (BadFilterFormat, BadSortFormat,
                                            FilterFieldNotFound,
                                            SortFieldNotFound)
@@ -141,7 +138,6 @@ def test_record_list_filter_for_boolean(engine, create_table, client):
 
     for test_conditions in ops_and_expected:
         assert_results_equal_for_op(*test_conditions)
-
 
 
 def test_record_list_sort(create_table, client):
