@@ -105,8 +105,16 @@ def test_record_list_filter_duplicates(create_table, client):
 def test_record_list_filter_for_boolean(engine, create_table, client):
     table_name = 'NASA Record List Filter'
     table = create_table(table_name)
+    bool_column_name = 'Published'
 
-    retype_column(table.oid, 8, 'BOOLEAN', engine)
+    table.add_column({'name': bool_column_name, 'type': 'BOOLEAN'})
+    table.create_record_or_records(
+        [
+            {bool_column_name: True},
+            {bool_column_name: True},
+            {bool_column_name: False},
+        ]
+    )
 
     def assert_results_equal_for_op(op, expected):
         filter_list = [{'field': 'Published', 'op': op, 'value': False}]
@@ -132,8 +140,8 @@ def test_record_list_filter_for_boolean(engine, create_table, client):
     ops_and_expected = [
         ('ne', 2),
         ('eq', 1),
-        ('is_null', 1390),
-        ('is_not_null', 2)
+        ('is_null', 1393),
+        ('is_not_null', 3)
     ]
 
     for test_conditions in ops_and_expected:
