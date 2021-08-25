@@ -336,10 +336,9 @@ def _check_type_option_equivalence(type_options_1, type_options_2):
 
 
 def retype_column(table_oid, column_index, new_type, engine, type_options={}, connection_to_use=None, table_to_use=None):
-    if table_to_use is None:
+    table = table_to_use
+    if table is None:
         table = tables.reflect_table_from_oid(table_oid, engine)
-    else:
-        table = table_to_use
     column = table.columns[column_index]
     column_db_type = get_db_type_name(column.type, engine)
     column_type_options = MathesarColumn.from_column(column).type_options
@@ -449,10 +448,9 @@ def drop_column(table_oid, column_index, engine):
 
 
 def get_column_default(table_oid, column_index, engine, connection_to_use=None, table_to_use=None):
-    if table_to_use is None:
+    table = table_to_use
+    if table is None:
         table = tables.reflect_table_from_oid(table_oid, engine)
-    else:
-        table = table_to_use
     column = table.columns[column_index]
     if column.server_default is None:
         return None

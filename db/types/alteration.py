@@ -111,10 +111,9 @@ def alter_column_type(
     target_type = supported_types.get(target_type_str)
 
     metadata = MetaData(bind=engine, schema=schema)
-    if table_to_use is None:
+    table = table_to_use
+    if table is None:
         table = Table(table_name, metadata, schema=schema, autoload_with=engine)
-    else:
-        table = table_to_use
     column = table.columns[column_name]
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     column_index = columns.get_column_index_from_name(table_oid, column_name, engine, connection_to_use)
