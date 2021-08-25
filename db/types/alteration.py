@@ -111,10 +111,9 @@ def alter_column_type(
     target_type = supported_types.get(target_type_str)
 
     metadata = MetaData(bind=engine, schema=schema)
-    if table_to_use is None:
+    table = table_to_use
+    if table is None:
         table = Table(table_name, metadata, schema=schema, autoload_with=engine)
-    else:
-        table = table_to_use
     column = table.columns[column_name]
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
     column_index = columns.get_column_index_from_name(table_oid, column_name, engine, connection_to_use)
@@ -141,7 +140,7 @@ def alter_column_type(
         cast_stmt = f"{cast_function_name}({default_text})"
         default_stmt = select(text(cast_stmt))
         new_default = str(execute_statement(engine, default_stmt, connection_to_use).first()[0])
-        columns.set_column_default(table_oid, column_index, new_default, engine, connection_to_use)
+        columns.set_column_default(table_oid, column_index, new_default, engine, connection_to_use, table_to_use)
 
 
 def get_column_cast_expression(column, target_type_str, engine, type_options={}):
