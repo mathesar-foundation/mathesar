@@ -7,7 +7,6 @@ from mathesar.views import api, frontend
 router = routers.DefaultRouter()
 router.register(r'tables', api.TableViewSet, basename='table')
 router.register(r'schemas', api.SchemaViewSet, basename='schema')
-router.register(r'database_keys', api.DatabaseKeyViewSet, basename='database-key')
 router.register(r'databases', api.DatabaseViewSet, basename='database')
 router.register(r'data_files', api.DataFileViewSet, basename='data-file')
 
