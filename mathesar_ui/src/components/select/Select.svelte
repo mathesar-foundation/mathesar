@@ -96,7 +96,7 @@
         default:
           break;
       }
-    } 
+    }
   }
 
   $: setOptions(options);
