@@ -61,29 +61,29 @@
   function keyAccessibility(e: KeyboardEvent): void {
     if (isOpen) {
       switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        hoveredItem(1);
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        hoveredItem(-1);
-        break;
-      case 'Escape':
-        e.preventDefault();
-        isOpen = false;
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (options.length === 0) break;
-        value = options[currentIndex];
-        dispatch('change', {
-          value,
-        });
-        isOpen = !isOpen;
-        break;
-      default:
-        break;
+        case 'ArrowDown':
+          e.preventDefault();
+          hoveredItem(1);
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          hoveredItem(-1);
+          break;
+        case 'Escape':
+          e.preventDefault();
+          isOpen = false;
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (options.length === 0) break;
+          value = options[currentIndex];
+          dispatch('change', {
+            value,
+          });
+          isOpen = !isOpen;
+          break;
+        default:
+          break;
       }
     } else {
       switch (e.key) {
