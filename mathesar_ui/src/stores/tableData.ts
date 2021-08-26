@@ -364,7 +364,7 @@ export async function fetchTableRecords(
     }));
     optionData.sort?.forEach((value, key) => {
       if (!optionData.group?.has(key)) {
-        sortOptions.push({
+        sortOptions.unshift({
           field: key,
           direction: value,
         });
