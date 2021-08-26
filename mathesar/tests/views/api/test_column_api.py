@@ -350,6 +350,18 @@ def test_column_update_type(column_test_table, client):
     assert response.json()["type"] == type_
 
 
+def test_column_update_name_and_type(column_test_table, client):
+    cache.clear()
+    type_ = "BOOLEAN"
+    new_name = 'new name'
+    data = {"type": type_, "name": new_name}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/3/", data=data
+    )
+    assert response.json()["type"] == type_
+    assert response.json()["name"] == new_name
+
+
 def test_column_update_type_options(column_test_table, client):
     cache.clear()
     type_ = "NUMERIC"
@@ -357,8 +369,8 @@ def test_column_update_type_options(column_test_table, client):
     data = {"type": type_, "type_options": type_options}
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/3/",
-        data=json.dumps(data),
-        content_type='application/json'
+        data,
+        format='json'
     )
     assert response.json()["type"] == type_
     assert response.json()["type_options"] == type_options

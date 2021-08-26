@@ -282,42 +282,80 @@ def alter_column(
         column_definition_dict,
 ):
     attribute_alter_map = {
-        NAME: rename_column,
         TYPE: retype_column,
         "plain_type": retype_column,
         NULLABLE: change_column_nullable,
-        "default_value": set_column_default
+        "default_value": set_column_default,
+        NAME: rename_column
     }
-    assert len(
-        [key for key in column_definition_dict if key in attribute_alter_map]
-    ) == 1
-    column_def_key = list(column_definition_dict.keys())[0]
-    column_index = int(column_index)
-    return attribute_alter_map[column_def_key](
-        table_oid,
-        column_index,
-        column_definition_dict[column_def_key],
-        engine,
-        type_options=column_definition_dict.get("type_options", {})
-    )
-
-
-def rename_column(table_oid, column_index, new_column_name, engine, **kwargs):
     table = tables.reflect_table_from_oid(table_oid, engine)
-    column = table.columns[column_index]
+    column_index = int(column_index)
     with engine.begin() as conn:
-        ctx = MigrationContext.configure(conn)
-        op = Operations(ctx)
-        op.alter_column(
-            table.name,
-            column.name,
-            new_column_name=new_column_name,
-            schema=table.schema
-        )
+        for column_def_key in attribute_alter_map.keys():
+            if column_def_key in column_definition_dict:
+                attribute_alter_map[column_def_key](
+                    table_oid,
+                    column_index,
+                    column_definition_dict[column_def_key],
+                    engine,
+                    connection_to_use=conn,
+                    table_to_use=table,
+                    type_options=column_definition_dict.get("type_options", {})
+                )
     return get_mathesar_column_with_engine(
         tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
         engine
     )
+
+
+def _alter_column_nullable(ctx, table_name, column_name, nullable, schema):
+    op = Operations(ctx)
+    op.alter_column(table_name, column_name, nullable=nullable, schema=schema)
+
+
+def change_column_nullable(table_oid, column_index, nullable, engine, connection_to_use=None, table_to_use=None, **kwargs):
+    table = table_to_use
+    if table is None:
+        table = tables.reflect_table_from_oid(table_oid, engine)
+    column = table.columns[column_index]
+    if connection_to_use is None:
+        with engine.begin() as conn:
+            ctx = MigrationContext.configure(conn)
+            _alter_column_nullable(ctx, table.name, column.name, nullable, table.schema)
+    else:
+        ctx = MigrationContext.configure(connection_to_use)
+        _alter_column_nullable(ctx, table.name, column.name, nullable, table.schema)
+
+    if not connection_to_use:
+        return get_mathesar_column_with_engine(
+            tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
+            engine
+        )
+
+
+def _alter_column_name(ctx, table_name, column_name, new_column_name, schema):
+    op = Operations(ctx)
+    op.alter_column(table_name, column_name, new_column_name=new_column_name, schema=schema)
+
+
+def rename_column(table_oid, column_index, new_column_name, engine, connection_to_use=None, table_to_use=None, **kwargs):
+    table = table_to_use
+    if table is None:
+        table = tables.reflect_table_from_oid(table_oid, engine)
+    column = table.columns[column_index]
+    if connection_to_use is None:
+        with engine.begin() as conn:
+            ctx = MigrationContext.configure(conn)
+            _alter_column_name(ctx, table.name, column.name, new_column_name, table.schema)
+    else:
+        ctx = MigrationContext.configure(connection_to_use)
+        _alter_column_name(ctx, table.name, column.name, new_column_name, table.schema)
+
+    if not connection_to_use:
+        return get_mathesar_column_with_engine(
+            tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
+            engine
+        )
 
 
 def _handle_retype_data_errors(e):
@@ -369,24 +407,6 @@ def retype_column(table_oid, column_index, new_type, engine, type_options={}, co
             tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
             engine
         )
-
-
-def change_column_nullable(table_oid, column_index, nullable, engine, **kwargs):
-    table = tables.reflect_table_from_oid(table_oid, engine)
-    column = table.columns[column_index]
-    with engine.begin() as conn:
-        ctx = MigrationContext.configure(conn)
-        op = Operations(ctx)
-        op.alter_column(
-            table.name,
-            column.name,
-            nullable=nullable,
-            schema=table.schema
-        )
-    return get_mathesar_column_with_engine(
-        tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
-        engine
-    )
 
 
 def get_mathesar_column_with_engine(col, engine):
