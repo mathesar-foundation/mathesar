@@ -18,7 +18,6 @@ from db.types.alteration import UnsupportedTypeException
 from db.records import BadGroupFormat, GroupFieldNotFound
 from db.columns import InvalidDefaultError, InvalidTypeOptionError
 
-from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile, Database, Constraint
 from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
@@ -149,7 +148,10 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
             del serializer.validated_data[key]
 
         # Save the fields that are stored in the underlying DB.
-        table.update_sa_table(serializer.validated_data)
+        try:
+            table.update_sa_table(serializer.validated_data)
+        except ValueError as e:
+            raise ValidationError(e)
 
         # Reload the table to avoid cached properties
         table = self.get_object()
@@ -368,11 +370,6 @@ class RecordViewSet(viewsets.ViewSet):
         table = get_table_or_404(table_pk)
         table.delete_record(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class DatabaseKeyViewSet(viewsets.ViewSet):
-    def list(self, request):
-        return Response(get_non_default_database_keys())
 
 
 class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
