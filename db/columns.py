@@ -40,6 +40,10 @@ class InvalidTypeOptionError(Exception):
     pass
 
 
+class InvalidTypeError(Exception):
+    pass
+
+
 class MathesarColumn(Column):
     """
     This class constrains the possible arguments, enabling us to include
@@ -247,7 +251,7 @@ def create_column(engine, table_oid, column_data):
         )
     except DataError as e:
         if type(e.orig) == InvalidTextRepresentation:
-            raise InvalidTypeOptionError
+            raise InvalidTypeError
         else:
             raise e
 
@@ -280,9 +284,9 @@ def alter_column(
     attribute_alter_map = {
         NAME: rename_column,
         TYPE: retype_column,
-        "type": retype_column,
+        "plain_type": retype_column,
         NULLABLE: change_column_nullable,
-        DEFAULT: set_column_default
+        "default_value": set_column_default
     }
     assert len(
         [key for key in column_definition_dict if key in attribute_alter_map]
@@ -317,11 +321,10 @@ def rename_column(table_oid, column_index, new_column_name, engine, **kwargs):
 
 
 def _handle_retype_data_errors(e):
-    if (
-        type(e.orig) == InvalidParameterValue
-        or type(e.orig) == InvalidTextRepresentation
-    ):
+    if type(e.orig) == InvalidParameterValue:
         raise InvalidTypeOptionError
+    if type(e.orig) == InvalidTextRepresentation:
+        raise InvalidTypeError
     else:
         raise e
 
