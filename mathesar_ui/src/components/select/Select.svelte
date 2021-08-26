@@ -59,7 +59,8 @@
   }
 
   function keyAccessibility(e: KeyboardEvent): void {
-    switch (e.key) {
+    if (isOpen) {
+      switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
         hoveredItem(1);
@@ -83,14 +84,26 @@
         break;
       default:
         break;
-    }
+      }
+    } else {
+      switch (e.key) {
+        case 'Enter':
+        case 'ArrowDown':
+        case 'ArrowUp':
+          e.preventDefault();
+          isOpen = true;
+          break;
+        default:
+          break;
+      }
+    } 
   }
 
   $: setOptions(options);
 </script>
 <Dropdown ariaControls="select-value-{selectId}" {ariaLabel} bind:isOpen 
           contentClass="select {contentClass}" {triggerAppearance} {triggerClass} 
-          on:keydown={keyAccessibility} on:openDropdown={setSelectedItem}>
+          on:keydown={keyAccessibility} on:open={setSelectedItem}>
   <svelte:fragment slot="trigger">
     {value?.[labelKey]}
   </svelte:fragment>

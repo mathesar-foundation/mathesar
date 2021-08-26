@@ -45,13 +45,13 @@
     }
   }
 
-  function setCurrentAndSelected(_isOpen) {
+  function dispatchOnOpen(_isOpen) {
     if (_isOpen) {
-      dispatch('openDropdown');
+      dispatch('open');
     }
   }
 
-  $: setCurrentAndSelected(isOpen);
+  $: dispatchOnOpen(isOpen);
 </script>
 
 <Button bind:element={trigger} appearance={triggerAppearance} class={tgClasses} on:click={toggle} 
