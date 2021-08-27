@@ -358,10 +358,12 @@ export async function fetchTableRecords(
     params.push(`offset=${offset}`);
 
     const groupOptions = Array.from(optionData.group ?? []);
-    const sortOptions = groupOptions.map((field) => ({
+    const groupSortOptions = groupOptions.map((field) => ({
       field,
       direction: optionData.sort?.get(field) ?? 'asc',
     }));
+
+    let sortOptions = []
     optionData.sort?.forEach((value, key) => {
       if (!optionData.group?.has(key)) {
         sortOptions.unshift({
@@ -370,6 +372,9 @@ export async function fetchTableRecords(
         });
       }
     });
+
+    sortOptions = [...groupSortOptions, ...sortOptions];
+  
     if (sortOptions.length > 0) {
       params.push(`order_by=${encodeURIComponent(JSON.stringify(sortOptions))}`);
     }
