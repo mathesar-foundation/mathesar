@@ -363,7 +363,7 @@ export async function fetchTableRecords(
       direction: optionData.sort?.get(field) ?? 'asc',
     }));
 
-    let sortOptions = []
+    let sortOptions: { 'field': string, 'direction': string }[] = [];
     optionData.sort?.forEach((value, key) => {
       if (!optionData.group?.has(key)) {
         sortOptions.unshift({
@@ -374,7 +374,7 @@ export async function fetchTableRecords(
     });
 
     sortOptions = [...groupSortOptions, ...sortOptions];
-  
+
     if (sortOptions.length > 0) {
       params.push(`order_by=${encodeURIComponent(JSON.stringify(sortOptions))}`);
     }
