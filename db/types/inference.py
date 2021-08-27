@@ -68,26 +68,25 @@ def infer_column_type(
 
     logger.debug(f"column_type_str: {column_type_str}")
     for type_str in type_inference_dag.get(column_type_str, []):
-        try:
-            alter_column_type(
-                schema, table_name, column_name, type_str, engine
-            )
-            logger.info(f"Column {column_name} altered to type {type_str}")
-            column_type = infer_column_type(
-                schema,
-                table_name,
-                column_name,
-                engine,
-                depth=depth + 1,
-                type_inference_dag=type_inference_dag,
-            )
-            break
-        # It's expected we catch this error when the test to see whether
-        # a type is appropriate for a column fails.
-        except DatabaseError:
-            logger.info(
-                f"Cannot alter column {column_name} to type {type_str}"
-            )
+        with engine.begin() as conn:
+            try:
+                alter_column_type(table, column_name, engine, conn, type_str)
+                logger.info(f"Column {column_name} altered to type {type_str}")
+                column_type = infer_column_type(
+                    schema,
+                    table_name,
+                    column_name,
+                    engine,
+                    depth=depth + 1,
+                    type_inference_dag=type_inference_dag,
+                )
+                break
+            # It's expected we catch this error when the test to see whether
+            # a type is appropriate for a column fails.
+            except DatabaseError:
+                logger.info(
+                    f"Cannot alter column {column_name} to type {type_str}"
+                )
     return column_type
 
 

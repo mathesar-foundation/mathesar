@@ -426,9 +426,15 @@ def test_alter_column_type_alters_column_type(
         schema=schema
     )
     input_table.create()
-    alteration.alter_column_type(
-        schema, TABLE_NAME, COLUMN_NAME, target_type, engine, type_options=options
-    )
+    with engine.begin() as conn:
+        alteration.alter_column_type(
+            input_table,
+            COLUMN_NAME,
+            engine,
+            conn,
+            target_type,
+            options
+        )
     metadata = MetaData(bind=engine)
     metadata.reflect()
     actual_column = Table(
@@ -471,9 +477,14 @@ def test_alter_column_type_casts_column_data_args(
     ins = input_table.insert(values=(value,))
     with engine.begin() as conn:
         conn.execute(ins)
-    alteration.alter_column_type(
-        schema, TABLE_NAME, COLUMN_NAME, target_type, engine, type_options=options
-    )
+        alteration.alter_column_type(
+            input_table,
+            COLUMN_NAME,
+            engine,
+            conn,
+            target_type,
+            options
+        )
     metadata = MetaData(bind=engine)
     metadata.reflect()
     actual_table = Table(
@@ -512,29 +523,35 @@ def test_alter_column_casts_data_gen(
 ):
     engine, schema = engine_email_type
     available_types = get_available_types(engine)
-    TABLE = "testtable"
-    COLUMN = "testcol"
+    TABLE_NAME = "testtable"
+    COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
     input_table = Table(
-        TABLE,
+        TABLE_NAME,
         metadata,
-        Column(COLUMN, available_types[source_type], server_default=str(in_val)),
+        Column(COLUMN_NAME, available_types[source_type], server_default=str(in_val)),
         schema=schema
     )
     input_table.create()
     ins = input_table.insert(values=(in_val,))
     with engine.begin() as conn:
         conn.execute(ins)
-    alteration.alter_column_type(schema, TABLE, COLUMN, target_type, engine)
+        alteration.alter_column_type(
+            input_table,
+            COLUMN_NAME,
+            engine,
+            conn,
+            target_type
+        )
     metadata = MetaData(bind=engine)
     metadata.reflect()
-    actual_table = Table(TABLE, metadata, schema=schema, autoload_with=engine)
+    actual_table = Table(TABLE_NAME, metadata, schema=schema, autoload_with=engine)
     sel = actual_table.select()
     with engine.connect() as conn:
         res = conn.execute(sel).fetchall()
     actual_value = res[0][0]
     assert actual_value == out_val
-    table_oid = tables.get_oid_from_table(TABLE, schema, engine)
+    table_oid = tables.get_oid_from_table(TABLE_NAME, schema, engine)
     actual_default = columns.get_column_default(table_oid, 0, engine)
     assert actual_default == out_val
 
@@ -574,10 +591,14 @@ def test_alter_column_type_raises_on_bad_column_data(
     ins = input_table.insert(values=(value,))
     with engine.begin() as conn:
         conn.execute(ins)
-    with pytest.raises(Exception):
-        alteration.alter_column_type(
-            schema, TABLE_NAME, COLUMN_NAME, target_type, engine,
-        )
+        with pytest.raises(Exception):
+            alteration.alter_column_type(
+                input_table,
+                COLUMN_NAME,
+                engine,
+                conn,
+                target_type
+            )
 
 
 def test_alter_column_type_raises_on_bad_parameters(
@@ -595,14 +616,19 @@ def test_alter_column_type_raises_on_bad_parameters(
     )
     input_table.create()
     ins = input_table.insert(values=(5.3,))
+    bad_options = {"precision": 3, "scale": 4}  # scale must be smaller than precision
     with engine.begin() as conn:
         conn.execute(ins)
-    bad_options = {"precision": 3, "scale": 4}  # scale must be smaller than precision
-    with pytest.raises(DataError) as e:
-        alteration.alter_column_type(
-            schema, TABLE_NAME, COLUMN_NAME, "numeric", engine, type_options=bad_options
-        )
-        assert e.orig == InvalidParameterValue
+        with pytest.raises(DataError) as e:
+            alteration.alter_column_type(
+                input_table,
+                COLUMN_NAME,
+                engine,
+                conn,
+                "numeric",
+                bad_options
+            )
+            assert e.orig == InvalidParameterValue
 
 
 def test_get_column_cast_expression_unchanged(engine_with_types):
