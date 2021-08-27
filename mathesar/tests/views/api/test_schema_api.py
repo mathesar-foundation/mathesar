@@ -152,6 +152,26 @@ def test_schema_partial_update(create_schema, client, test_db_name):
     assert schema.name == new_schema_name
 
 
+def test_schema_patch_same_name(create_schema, client, test_db_name):
+    schema_name = 'Patents Schema Same Name'
+    schema = create_schema(schema_name)
+
+    body = {'name': schema_name}
+    response = client.patch(f'/api/v0/schemas/{schema.id}/', body)
+
+    response_schema = response.json()
+    assert response.status_code == 200
+    check_schema_response(
+        response_schema,
+        schema,
+        schema_name,
+        test_db_name,
+        len_tables=0
+    )
+    schema = Schema.objects.get(oid=schema.oid)
+    assert schema.name == schema_name
+
+
 def test_schema_delete(create_schema, client):
     schema_name = 'NASA Schema Delete'
     schema = create_schema(schema_name)
