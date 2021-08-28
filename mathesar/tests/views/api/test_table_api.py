@@ -1291,7 +1291,7 @@ def test_table_delete_no_primary_key(create_schema, client):
     body = {'name': new_table_name}
     try:
         record_id = 233
-        client.get(f'/api/v0/tables/{table.id}/record/{record_id}', body)
+        client.get(f'/api/v0/tables/{table.id}/record/{record_id}/', body)
     except NotUniquePrimaryKey as e:
         assert e.status_code == 400
         assert e.message == "This table does not have a unique primary key."
@@ -1318,7 +1318,7 @@ def test_table_partial_update_no_primary_key(create_schema, client):
     body = {'name': new_table_name}
     try:
         record_id = 233
-        client.get(f'/api/v0/tables/{table.id}/record/{record_id}', body)
+        client.get(f'/api/v0/tables/{table.id}/record/{record_id}/', body)
     except NotUniquePrimaryKey as e:
         assert e.status_code == 400
         assert e.message == "This table does not have a unique primary key."
@@ -1343,7 +1343,7 @@ def test_table_retrieve_multiple_primary_keys(create_schema, client):
 
     try:
         record_id = 233
-        client.get(f'/api/v0/tables/{table.id}/record/{record_id}')
+        client.get(f'/api/v0/tables/{table.id}/record/{record_id}/')
     except NotUniquePrimaryKey as e:
         assert e.status_code == 400
         assert e.message == "This table does not have a unique primary key."
@@ -1370,7 +1370,7 @@ def test_table_delete_multiple_primary_keys(create_schema, client):
     body = {'name': new_table_name}
     try:
         record_id = 233
-        client.delete(f'/api/v0/tables/{table.id}/record/{record_id}', body)
+        client.delete(f'/api/v0/tables/{table.id}/record/{record_id}/', body)
     except NotUniquePrimaryKey as e:
         assert e.status_code == 400
         assert e.message == "This table does not have a unique primary key."
@@ -1397,7 +1397,7 @@ def test_table_partial_update_multiple_primary_keys(create_schema, client):
     body = {'name': new_table_name}
     try:
         record_id = 233
-        client.patch(f'/api/v0/tables/{table.id}/record/{record_id}', body)
+        client.patch(f'/api/v0/tables/{table.id}/record/{record_id}/', body)
     except NotUniquePrimaryKey as e:
         assert e.status_code == 400
         assert e.message == "This table does not have a unique primary key."
