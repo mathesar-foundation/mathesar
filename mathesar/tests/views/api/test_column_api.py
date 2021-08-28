@@ -362,6 +362,33 @@ def test_column_update_name_and_type(column_test_table, client):
     assert response.json()["name"] == new_name
 
 
+def test_column_update_name_type_nullable(column_test_table, client):
+    cache.clear()
+    type_ = "BOOLEAN"
+    new_name = 'new name'
+    data = {"type": type_, "name": new_name, "nullable": True}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/3/", data=data
+    )
+    assert response.json()["type"] == type_
+    assert response.json()["name"] == new_name
+    assert response.json()["nullable"] is True
+
+
+def test_column_update_name_type_nullable_default(column_test_table, client):
+    cache.clear()
+    type_ = "BOOLEAN"
+    new_name = 'new name'
+    data = {"type": type_, "name": new_name, "nullable": True, "default": True}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/3/", data=data
+    )
+    assert response.json()["type"] == type_
+    assert response.json()["name"] == new_name
+    assert response.json()["nullable"] is True
+    assert response.json()["default"] is True
+
+
 def test_column_update_type_options(column_test_table, client):
     cache.clear()
     type_ = "NUMERIC"
