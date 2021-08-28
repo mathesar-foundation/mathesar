@@ -25,5 +25,5 @@ jobs:
         days-before-issue-close: 1000
         days-before-pr-close: 30
         exempt-issue-labels: 'status: future'
-        labels-to-remove-when-unstale: 'status: triage','status: stale'
+        labels-to-remove-when-unstale: 'status: triage,status: stale'
         delete-branch: true
