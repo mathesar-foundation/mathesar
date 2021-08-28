@@ -135,7 +135,7 @@ def alter_column_type(
         cast_stmt = f"{cast_function_name}({default_text})"
         default_stmt = select(text(cast_stmt))
         new_default = str(execute_statement(engine, default_stmt, connection).first()[0])
-        columns.set_column_default(table, column_index, new_default, engine, connection, new_default)
+        columns.set_column_default(table, column_index, engine, connection, new_default)
 
 
 def get_column_cast_expression(column, target_type_str, engine, type_options={}):

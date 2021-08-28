@@ -482,11 +482,11 @@ def get_column_default(table_oid, column_index, engine, connection_to_use=None, 
     if result.startswith("{FUNCEXPR"):
         return None
 
-    cast_sql_text = get_default_textual_sql(column.server_default)
+    default_textual_sql = get_default_textual_sql(column.server_default)
     # Defaults are stored as text with SQL casts appended
     # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
     # Here, we execute the cast to get the proper python value
-    return execute_statement(engine, select(text(cast_sql_text)), connection_to_use).first()[0]
+    return execute_statement(engine, select(text(default_textual_sql)), connection_to_use).first()[0]
 
 
 def _gen_col_name(table, column_name):
