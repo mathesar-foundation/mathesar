@@ -45,7 +45,9 @@
   }
 
   function setSelectedItem() {
-    currentIndex = options.indexOf(value);
+    if (options.some(e => e.label === value[labelKey])){
+      currentIndex = options.indexOf(value);
+    }
   }
 
   function hoveredItem(index) {
@@ -56,6 +58,7 @@
     } else {
       currentIndex += index;
     }
+    console.log(currentIndex);
   }
 
   function keyAccessibility(e: KeyboardEvent): void {
