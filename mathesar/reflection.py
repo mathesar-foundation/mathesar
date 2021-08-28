@@ -7,7 +7,6 @@ from db.tables import get_table_oids_from_schema
 # We import the entire models module to avoid a circular import error
 from mathesar import models
 from mathesar.database.base import create_mathesar_engine
-from mathesar.database.utils import get_non_default_database_keys
 
 DB_REFLECTION_KEY = 'database_reflected_recently'
 DB_REFLECTION_INTERVAL = 60 * 5  # we reflect DB changes every 5 minutes
@@ -93,9 +92,9 @@ def reflect_new_table_constraints(table):
 def reflect_db_objects():
     if not cache.get(DB_REFLECTION_KEY):
         reflect_databases()
-        for database_key in get_non_default_database_keys():
-            reflect_schemas_from_database(database_key)
+        for database in models.Database.current_objects.filter(deleted=False):
+            reflect_schemas_from_database(database.name)
         for schema in models.Schema.current_objects.all():
             reflect_tables_from_schema(schema)
-        reflect_constraints_from_database(database_key)
+        reflect_constraints_from_database(database.name)
         cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)

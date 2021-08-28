@@ -326,27 +326,6 @@ def _handle_retype_data_errors(e):
         raise e
 
 
-def retype_column(table_oid, column_index, new_type, engine, type_options={}):
-    table = tables.reflect_table_from_oid(table_oid, engine)
-    try:
-        alteration.alter_column_type(
-            table.schema,
-            table.name,
-            table.columns[column_index].name,
-            new_type,
-            engine,
-            friendly_names=False,
-            type_options=type_options
-        )
-    except DataError as e:
-        _handle_retype_data_errors(e)
-
-    return get_mathesar_column_with_engine(
-        tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
-        engine
-    )
-
-
 def _check_type_option_equivalence(type_options_1, type_options_2):
     NULL_OPTIONS = [None, {}]
     if type_options_1 in NULL_OPTIONS and type_options_2 in NULL_OPTIONS:
@@ -356,29 +335,37 @@ def _check_type_option_equivalence(type_options_1, type_options_2):
     return False
 
 
-def retype_column_in_connection(table, connection, engine, column_index, new_type, type_options={}):
+def retype_column(table_oid, column_index, new_type, engine, type_options={}, connection_to_use=None, table_to_use=None):
+    table = table_to_use
+    if table is None:
+        table = tables.reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
     column_db_type = get_db_type_name(column.type, engine)
     column_type_options = MathesarColumn.from_column(column).type_options
-    # Don't try to retype the column if it's already the correct type.
     if (new_type == column_db_type) and _check_type_option_equivalence(type_options, column_type_options):
         return
     try:
         alteration.alter_column_type(
             table.schema,
             table.name,
-            column.name,
+            table.columns[column_index].name,
             new_type,
             engine,
             friendly_names=False,
             type_options=type_options,
-            connection_to_use=connection,
-            table_to_use=table
+            connection_to_use=connection_to_use,
+            table_to_use=table_to_use
         )
     except DataError as e:
         _handle_retype_data_errors(e)
     except InternalError as e:
         raise e.orig
+
+    if connection_to_use is None:
+        return get_mathesar_column_with_engine(
+            tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
+            engine
+        )
 
 
 def change_column_nullable(table_oid, column_index, nullable, engine, **kwargs):
@@ -417,13 +404,14 @@ def _validate_columns_for_batch_update(table, column_data):
 
 
 def _batch_update_column_types(table, column_data_list, connection, engine):
+    table_oid = tables.get_oid_from_table(table.name, table.schema, engine)
     for index, column_data in enumerate(column_data_list):
         if 'plain_type' in column_data:
             new_type = column_data['plain_type']
             type_options = column_data.get('type_options', {})
             if type_options is None:
                 type_options = {}
-            retype_column_in_connection(table, connection, engine, index, new_type, type_options)
+            retype_column(table_oid, index, new_type, engine, type_options, connection_to_use=connection, table_to_use=table)
 
 
 def _batch_alter_table_columns(table, column_data_list, connection):
@@ -460,10 +448,9 @@ def drop_column(table_oid, column_index, engine):
 
 
 def get_column_default(table_oid, column_index, engine, connection_to_use=None, table_to_use=None):
-    if table_to_use is None:
+    table = table_to_use
+    if table is None:
         table = tables.reflect_table_from_oid(table_oid, engine)
-    else:
-        table = table_to_use
     column = table.columns[column_index]
     if column.server_default is None:
         return None

@@ -352,8 +352,8 @@ def test_table_type_suggestion(client, schema, engine_email_type):
 def _check_columns(actual_column_list, expected_column_list):
     # Columns will return an extra type_options key in actual_dict
     # so we need to check equality only for the keys in expect_dict
-    for index, column_dict in enumerate(expected_column_list):
-        assert all([actual_column_list[index][key] == column_dict[key] for key in column_dict])
+    for actual_column, expected_column in zip(actual_column_list, expected_column_list):
+        assert all([actual_column[key] == expected_column[key] for key in expected_column])
 
 
 def test_table_previews(client, schema, engine_email_type):
@@ -931,6 +931,19 @@ def _get_patents_column_data():
         'name': 'Patent Expiration Date',
         'type': 'VARCHAR',
     }]
+
+
+def test_table_patch_same_table_name(create_table, client):
+    table_name = 'PATCH same name'
+    table = create_table(table_name)
+
+    body = {'name': table_name}
+    # Need to specify format here because otherwise the body gets sent
+    # as a multi-part form, which can't handle nested keys.
+    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+
+    assert response.status_code == 200
+    assert response.json()['name'] == table_name
 
 
 def test_table_patch_columns_and_table_name(create_table, client):

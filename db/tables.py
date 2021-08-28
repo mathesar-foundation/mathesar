@@ -88,6 +88,8 @@ def delete_table(name, schema, engine, cascade=False, if_exists=False):
 
 def rename_table(name, schema, engine, rename_to):
     table = reflect_table(name, schema, engine)
+    if rename_to == table.name:
+        return
     with engine.begin() as conn:
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)

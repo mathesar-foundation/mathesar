@@ -18,7 +18,6 @@ from db.types.alteration import UnsupportedTypeException
 from db.records import BadGroupFormat, GroupFieldNotFound, NotUniquePrimaryKey
 from db.columns import InvalidDefaultError, InvalidTypeOptionError
 
-from mathesar.database.utils import get_non_default_database_keys
 from mathesar.models import Table, Schema, DataFile, Database, Constraint
 from mathesar.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
@@ -380,11 +379,6 @@ class RecordViewSet(viewsets.ViewSet):
         except NotUniquePrimaryKey as e:
             raise APIException(e)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class DatabaseKeyViewSet(viewsets.ViewSet):
-    def list(self, request):
-        return Response(get_non_default_database_keys())
 
 
 class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
