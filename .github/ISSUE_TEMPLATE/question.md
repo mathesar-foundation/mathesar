@@ -1,7 +1,7 @@
 ---
 name: Question
 about: Question about Mathesar development or usage
-labels: question
+labels: "question, status: triage"
 ---
 
 ## Question
