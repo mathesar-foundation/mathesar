@@ -115,8 +115,8 @@ def alter_column_type(
 
     default = columns.get_column_default(table_oid, column_index, engine, connection, table)
     if default is not None:
-        default_text = column.server_default.arg.text
-        columns.set_column_default(table_oid, column_index, None, engine, connection, table)
+        default_text = columns.get_default_textual_sql(column.server_default)
+        columns.set_column_default(table, column_index, engine, connection, None)
 
     prepared_table_name = _preparer.format_table(table)
     prepared_column_name = _preparer.format_column(column)
@@ -135,7 +135,7 @@ def alter_column_type(
         cast_stmt = f"{cast_function_name}({default_text})"
         default_stmt = select(text(cast_stmt))
         new_default = str(execute_statement(engine, default_stmt, connection).first()[0])
-        columns.set_column_default(table_oid, column_index, new_default, engine, connection, table)
+        columns.set_column_default(table, column_index, new_default, engine, connection, new_default)
 
 
 def get_column_cast_expression(column, target_type_str, engine, type_options={}):
