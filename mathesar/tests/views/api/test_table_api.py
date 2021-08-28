@@ -5,12 +5,13 @@ from unittest.mock import patch
 from django.core.cache import cache
 from django.core.files.base import File, ContentFile
 from sqlalchemy import (
-    text, Column, Integer, String, MetaData
+    text, Column, Integer, String, MetaData, Table as SATable
 )
 
 from mathesar import reflection
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Table, DataFile, Schema
+from mathesar.reflection import reflect_db_objects
 from db.tests.types import fixtures
 from db import tables
 
@@ -122,6 +123,18 @@ def _create_table(client, data_files, table_name, schema):
             df.refresh_from_db()
 
     return response, response_table, table
+
+
+def _create_sa_table(table_name, metadata, columns, schema):
+    sa_table = SATable(
+        table_name,
+        metadata,
+        columns,
+        schema=schema
+    )
+    sa_table.create()
+    reflect_db_objects()
+    return Table.objects.get(name=table_name)
 
 
 def _get_expected_name(table_name, data_file=None):
@@ -1279,12 +1292,7 @@ def test_table_delete_no_primary_key(create_schema, client):
         Column('id', Integer),
         Column('name', String)
     ]
-    table = Table(
-        table_name,
-        metadata,
-        columns,
-        schema=schema
-    )
+    table = _create_sa_table(table_name, metadata, columns, schema)
     assert table.num_primary_keys == 0
 
     new_table_name = 'NASA Table Delete No Key New'
@@ -1333,12 +1341,7 @@ def test_table_retrieve_multiple_primary_keys(create_schema, client):
         Column('id', Integer, primary_key=True),
         Column('name', String, primary_key=True)
     ]
-    table = Table(
-        table_name,
-        metadata,
-        columns,
-        schema=schema
-    )
+    table = _create_sa_table(table_name, metadata, columns, schema)
     assert table.num_primary_keys == 2
 
     try:
@@ -1358,12 +1361,7 @@ def test_table_delete_multiple_primary_keys(create_schema, client):
         Column('id', Integer, primary_key=True),
         Column('name', String, primary_key=True)
     ]
-    table = Table(
-        table_name,
-        metadata,
-        columns,
-        schema=schema
-    )
+    table = _create_sa_table(table_name, metadata, columns, schema)
     assert table.num_primary_keys == 2
 
     new_table_name = 'NASA Table Delete Multiple Keys New'
@@ -1385,12 +1383,7 @@ def test_table_partial_update_multiple_primary_keys(create_schema, client):
         Column('id', Integer, primary_key=True),
         Column('name', String, primary_key=True)
     ]
-    table = Table(
-        table_name,
-        metadata,
-        columns,
-        schema=schema
-    )
+    table = _create_sa_table(table_name, metadata, columns, schema)
     assert table.num_primary_keys == 2
 
     new_table_name = 'NASA Table Partial Update Multiple Keys New'
