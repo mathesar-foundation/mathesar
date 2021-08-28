@@ -12,6 +12,7 @@ from sqlalchemy.exc import NoSuchTableError, InternalError
 from psycopg2.errors import DependentObjectsStillExist
 
 from db import columns, constants, schemas, records
+from db.utils import execute_statement
 
 
 TEMP_SCHEMA = f"{constants.MATHESAR_PREFIX}temp_schema"
@@ -389,7 +390,7 @@ def _get_column_moving_extraction_args(
     return extracted_table_name, remainder_table_name, extraction_columns
 
 
-def reflect_table_from_oid(oid, engine):
+def reflect_table_from_oid(oid, engine, connection_to_use=None):
     metadata = MetaData()
 
     with warnings.catch_warnings():
@@ -407,8 +408,8 @@ def reflect_table_from_oid(oid, engine):
         )
         .where(pg_class.c.oid == oid)
     )
-    with engine.begin() as conn:
-        schema, table_name = conn.execute(sel).fetchall()[0]
+    result = execute_statement(engine, sel, connection_to_use)
+    schema, table_name = result.fetchall()[0]
     return reflect_table(table_name, schema, engine)
 
 

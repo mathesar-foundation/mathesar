@@ -109,13 +109,16 @@ def alter_column_type(
     target_type = supported_types.get(target_type_str)
     schema = table.schema
 
-    column = table.columns[column_name]
     table_oid = tables.get_oid_from_table(table.name, schema, engine)
+    # Re-reflect table so that column is accurate
+    table = tables.reflect_table_from_oid(table_oid, engine, connection)
+    column = table.columns[column_name]
+
     column_index = columns.get_column_index_from_name(table_oid, column_name, engine, connection)
 
-    default = columns.get_column_default(table_oid, column_index, engine, connection, table)
+    default = columns.get_column_default(table_oid, column_index, engine, connection)
     if default is not None:
-        default_text = columns.get_default_textual_sql(column.server_default)
+        default_text = column.server_default.arg.text
         columns.set_column_default(table, column_index, engine, connection, None)
 
     prepared_table_name = _preparer.format_table(table)

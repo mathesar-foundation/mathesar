@@ -432,19 +432,8 @@ def drop_column(table_oid, column_index, engine):
         op.drop_column(table.name, column.name, schema=table.schema)
 
 
-def get_default_textual_sql(server_default):
-    # server_default.arg can be a string or `DefaultClause` depending on how a table
-    # default was initialized and whether or not it was reflected.
-    if type(server_default.arg) is str:
-        return server_default.arg
-    else:
-        return server_default.arg.text
-
-
-def get_column_default(table_oid, column_index, engine, connection_to_use=None, table_to_use=None):
-    table = table_to_use
-    if table is None:
-        table = tables.reflect_table_from_oid(table_oid, engine)
+def get_column_default(table_oid, column_index, engine, connection_to_use=None):
+    table = tables.reflect_table_from_oid(table_oid, engine, connection_to_use)
     column = table.columns[column_index]
     if column.server_default is None:
         return None
@@ -482,7 +471,7 @@ def get_column_default(table_oid, column_index, engine, connection_to_use=None, 
     if result.startswith("{FUNCEXPR"):
         return None
 
-    default_textual_sql = get_default_textual_sql(column.server_default)
+    default_textual_sql = column.server_default.arg.text
     # Defaults are stored as text with SQL casts appended
     # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
     # Here, we execute the cast to get the proper python value
