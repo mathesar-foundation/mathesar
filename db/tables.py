@@ -410,7 +410,7 @@ def reflect_table_from_oid(oid, engine, connection_to_use=None):
     )
     result = execute_statement(engine, sel, connection_to_use)
     schema, table_name = result.fetchall()[0]
-    return reflect_table(table_name, schema, engine)
+    return reflect_table(table_name, schema, engine, connection_to_use=connection_to_use)
 
 
 def get_enriched_column_table(raw_sa_table, engine=None):
@@ -450,10 +450,11 @@ def get_oid_from_table(name, schema, engine):
     return inspector.get_table_oid(name, schema=schema)
 
 
-def reflect_table(name, schema, engine, metadata=None):
+def reflect_table(name, schema, engine, metadata=None, connection_to_use=None):
     if metadata is None:
         metadata = MetaData(bind=engine)
-    return Table(name, metadata, schema=schema, autoload_with=engine)
+    autoload_with = engine if connection_to_use is None else connection_to_use
+    return Table(name, metadata, schema=schema, autoload_with=autoload_with, extend_existing=True)
 
 
 def create_empty_table(name):

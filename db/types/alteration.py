@@ -113,7 +113,6 @@ def alter_column_type(
     # Re-reflect table so that column is accurate
     table = tables.reflect_table_from_oid(table_oid, engine, connection)
     column = table.columns[column_name]
-
     column_index = columns.get_column_index_from_name(table_oid, column_name, engine, connection)
 
     default = columns.get_column_default(table_oid, column_index, engine, connection)
