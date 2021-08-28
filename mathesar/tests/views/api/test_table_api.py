@@ -1271,7 +1271,7 @@ def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_type
 
 
 def test_table_delete_no_primary_key(create_schema, client):
-    table_name = 'NASA Table Delete'
+    table_name = 'NASA Table Delete No Key'
     schema = create_schema('Patents')
     engine = create_mathesar_engine(schema.database.name)
     metadata = MetaData(bind=engine, schema=schema)
@@ -1287,7 +1287,7 @@ def test_table_delete_no_primary_key(create_schema, client):
     )
     assert table.num_primary_keys == 0
 
-    new_table_name = 'NASA Table Delete New'
+    new_table_name = 'NASA Table Delete No Key New'
     body = {'name': new_table_name}
     try:
         record_id = 233
@@ -1298,7 +1298,7 @@ def test_table_delete_no_primary_key(create_schema, client):
 
 
 def test_table_partial_update_no_primary_key(create_schema, client):
-    table_name = 'NASA Table Partial Update'
+    table_name = 'NASA Table Partial Update No Key'
     schema = create_schema('Patents')
     engine = create_mathesar_engine(schema.database.name)
     metadata = MetaData(bind=engine, schema=schema)
@@ -1314,7 +1314,7 @@ def test_table_partial_update_no_primary_key(create_schema, client):
     )
     assert table.num_primary_keys == 0
 
-    new_table_name = 'NASA Table Partial Update New'
+    new_table_name = 'NASA Table Partial Update No Key New'
     body = {'name': new_table_name}
     try:
         record_id = 233
@@ -1325,7 +1325,7 @@ def test_table_partial_update_no_primary_key(create_schema, client):
 
 
 def test_table_retrieve_multiple_primary_keys(create_schema, client):
-    table_name = 'NASA Table Retrieve'
+    table_name = 'NASA Table Retrieve Multiple Keys'
     schema = create_schema('Patents')
     engine = create_mathesar_engine(schema.database.name)
     metadata = MetaData(bind=engine, schema=schema)
@@ -1350,7 +1350,7 @@ def test_table_retrieve_multiple_primary_keys(create_schema, client):
 
 
 def test_table_delete_multiple_primary_keys(create_schema, client):
-    table_name = 'NASA Table Delete'
+    table_name = 'NASA Table Delete Multiple Keys'
     schema = create_schema('Patents')
     engine = create_mathesar_engine(schema.database.name)
     metadata = MetaData(bind=engine, schema=schema)
@@ -1366,7 +1366,7 @@ def test_table_delete_multiple_primary_keys(create_schema, client):
     )
     assert table.num_primary_keys == 2
 
-    new_table_name = 'NASA Table Delete New'
+    new_table_name = 'NASA Table Delete Multiple Keys New'
     body = {'name': new_table_name}
     try:
         record_id = 233
@@ -1377,7 +1377,7 @@ def test_table_delete_multiple_primary_keys(create_schema, client):
 
 
 def test_table_partial_update_multiple_primary_keys(create_schema, client):
-    table_name = 'NASA Table Partial Update'
+    table_name = 'NASA Table Partial Update Multiple Keys'
     schema = create_schema('Patents')
     engine = create_mathesar_engine(schema.database.name)
     metadata = MetaData(bind=engine, schema=schema)
@@ -1393,7 +1393,7 @@ def test_table_partial_update_multiple_primary_keys(create_schema, client):
     )
     assert table.num_primary_keys == 2
 
-    new_table_name = 'NASA Table Partial Update New'
+    new_table_name = 'NASA Table Partial Update Multiple Keys New'
     body = {'name': new_table_name}
     try:
         record_id = 233
