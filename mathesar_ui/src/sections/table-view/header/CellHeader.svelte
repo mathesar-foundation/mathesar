@@ -85,7 +85,7 @@
     }
   }
 
-  async function retypeColumn(type: string, index: number) {
+  function retypeColumn(type: string, index: number) {
     isOpen = false;
     isAdvancedOptionsOpen = false;
 
@@ -133,7 +133,7 @@
           <h6 class="category">Data Type</h6>
           <button
             class="list-button with-right-icon"
-            on:click={() => (isAdvancedOptionsOpen = true)}
+            on:click={() => { isAdvancedOptionsOpen = true; }}
           >
             <div>
               <span class="data-icon">{determineDataIcon(column.type)}</span>
