@@ -1,27 +1,27 @@
 <script lang="ts">
-  import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
+  import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
   import {
     portal,
     popper,
     Button,
     Icon,
     clickOffBounds,
-  } from "@mathesar-components";
-  import type { Appearance } from "@mathesar-components/types";
-  import type { Placement } from "@popperjs/core/lib/enums";
+  } from '@mathesar-components';
+  import type { Appearance } from '@mathesar-components/types';
+  import type { Placement } from '@popperjs/core/lib/enums';
 
-  export let triggerClass = "";
-  export let triggerAppearance: Appearance = "default";
-  export let contentClass = "";
+  export let triggerClass = '';
+  export let triggerAppearance: Appearance = 'default';
+  export let contentClass = '';
   export let isOpen = false;
   export let closeOnInnerClick = false;
-  export let functionBeforeClose: () => void = null;
   export let ariaLabel: string = null;
+  export let functionBeforeClose: () => void = null;
   export let ariaControls: string = null;
-  export let placement: Placement = "bottom-start";
+  export let placement: Placement = 'bottom-start';
 
   let trigger: HTMLElement;
-  $: tgClasses = ["dropdown", "trigger", triggerClass].join(" ");
+  $: tgClasses = ['dropdown', 'trigger', triggerClass].join(' ');
 
   function checkAndRunFunctionBeforeClose() {
     if (functionBeforeClose) {
@@ -64,7 +64,7 @@
 
 {#if isOpen}
   <div
-    class={["dropdown content", contentClass].join(" ")}
+    class={['dropdown content', contentClass].join(' ')}
     use:portal
     use:popper={{ reference: trigger, options: { placement } }}
     use:clickOffBounds={{

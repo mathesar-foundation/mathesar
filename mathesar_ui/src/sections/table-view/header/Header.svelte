@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount } from 'svelte';
   import type {
     TableColumnData,
     ColumnPosition,
     SortOption,
     GroupOption,
     TableTypes,
-  } from "@mathesar/stores/tableData";
+  } from '@mathesar/stores/tableData';
   import {
     DEFAULT_COUNT_COL_WIDTH,
     GROUP_MARGIN_LEFT,
     DEFAULT_ROW_RIGHT_PADDING,
-  } from "@mathesar/stores/tableData";
-  import CellHeader from "./CellHeader.svelte";
+  } from '@mathesar/stores/tableData';
+  import CellHeader from './CellHeader.svelte';
 
   export let columns: TableColumnData;
   export let types: TableTypes[];
@@ -50,10 +50,10 @@
       onHeaderScroll(scrollLeft);
     };
 
-    headerRef.addEventListener("scroll", scrollListener);
+    headerRef.addEventListener('scroll', scrollListener);
 
     return () => {
-      headerRef.removeEventListener("scroll", scrollListener);
+      headerRef.removeEventListener('scroll', scrollListener);
     };
   });
 </script>
@@ -79,7 +79,7 @@
   <div
     class="cell"
     style="width:{70 + DEFAULT_ROW_RIGHT_PADDING}px;left:{columnPosition.get(
-      '__row'
+      '__row',
     ).width + paddingLeft}px;"
   >
     <div class="add">+</div>

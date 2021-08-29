@@ -1,24 +1,24 @@
 <script lang="ts">
-  import { get } from "svelte/store";
+  import { get } from 'svelte/store';
   import {
     getTable,
     fetchTableRecords,
     deleteRecords,
-  } from "@mathesar/stores/tableData";
-  import URLQueryHandler from "@mathesar/utils/urlQueryHandler";
+  } from '@mathesar/stores/tableData';
+  import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
   import type {
     TableColumnStore,
     TableRecordStore,
     TableOptionsStore,
     TableDisplayStores,
     TableTypesStore,
-  } from "@mathesar/stores/tableData";
-  import ActionsPane from "./actions-pane/ActionsPane.svelte";
-  import DisplayOptions from "./display-options/DisplayOptions.svelte";
-  import Header from "./header/Header.svelte";
-  import Body from "./Body.svelte";
-  import StatusPane from "./status-pane/StatusPane.svelte";
-  import type { ItemInfo } from "./virtual-list/listUtils";
+  } from '@mathesar/stores/tableData';
+  import ActionsPane from './actions-pane/ActionsPane.svelte';
+  import DisplayOptions from './display-options/DisplayOptions.svelte';
+  import Header from './header/Header.svelte';
+  import Body from './Body.svelte';
+  import StatusPane from './status-pane/StatusPane.svelte';
+  import type { ItemInfo } from './virtual-list/listUtils';
 
   export let database: string;
   export let id: unknown;
@@ -40,17 +40,17 @@
   let options: TableOptionsStore;
   let tableBodyRef: Body;
 
-  let columnPosition: TableDisplayStores["columnPosition"];
-  let horizontalScrollOffset: TableDisplayStores["horizontalScrollOffset"];
-  let scrollOffset: TableDisplayStores["scrollOffset"];
-  let groupIndex: TableDisplayStores["groupIndex"];
-  let showDisplayOptions: TableDisplayStores["showDisplayOptions"];
-  let selected: TableDisplayStores["selected"];
+  let columnPosition: TableDisplayStores['columnPosition'];
+  let horizontalScrollOffset: TableDisplayStores['horizontalScrollOffset'];
+  let scrollOffset: TableDisplayStores['scrollOffset'];
+  let groupIndex: TableDisplayStores['groupIndex'];
+  let showDisplayOptions: TableDisplayStores['showDisplayOptions'];
+  let selected: TableDisplayStores['selected'];
 
   let animateOpts = false;
 
   $: selectedEntries = Object.keys($selected || []).filter(
-    (key) => $selected?.[key]
+    (key) => $selected?.[key],
   );
 
   function setStores(_database: string, _id: number) {
@@ -82,8 +82,8 @@
     const offset = Math.max(itemInfo.startIndex - 20, 0);
     let limit = itemInfo.stopIndex - itemInfo.startIndex + 26;
     if (
-      recordInfo.totalCount !== null &&
-      offset + limit > recordInfo.totalCount
+      recordInfo.totalCount !== null
+    && offset + limit > recordInfo.totalCount
     ) {
       limit = recordInfo.totalCount - offset;
     }

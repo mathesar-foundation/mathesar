@@ -5,17 +5,17 @@
     faSortAmountDown,
     faSortAmountDownAlt,
     faThList,
-  } from "@fortawesome/free-solid-svg-icons";
-  import { Dropdown, Icon } from "@mathesar-components";
+  } from '@fortawesome/free-solid-svg-icons';
+  import { Dropdown, Icon } from '@mathesar-components';
   import type {
     ColumnPosition,
     GroupOption,
     SortOption,
     TableColumn,
     TableTypes,
-  } from "@mathesar/stores/tableData";
-  import { changeColumnType } from "@mathesar/stores/tableData";
-  import { createEventDispatcher } from "svelte";
+  } from '@mathesar/stores/tableData';
+  import { changeColumnType } from '@mathesar/stores/tableData';
+  import { createEventDispatcher } from 'svelte';
 
   const dispatch = createEventDispatcher();
   export let sort: SortOption;
@@ -33,7 +33,7 @@
     isAdvancedOptionsOpen = false;
   }
 
-  function sortByColumn(column: TableColumn, order: "asc" | "desc") {
+  function sortByColumn(column: TableColumn, order: 'asc' | 'desc') {
     const newSort: SortOption = new Map(sort);
     if (sort?.get(column.name) === order) {
       newSort.delete(column.name);
@@ -41,7 +41,7 @@
       newSort.set(column.name, order);
     }
     sort = newSort;
-    dispatch("reload");
+    dispatch('reload');
   }
 
   function groupByColumn(column: TableColumn) {
@@ -56,32 +56,32 @@
     /**
      * Only reset item positions when group layout is created or destroyed
      */
-    dispatch("reload", {
+    dispatch('reload', {
       resetPositions: oldSize === 0 || group.size === 0,
     });
   }
 
   function determineDataIcon(type: string) {
     switch (type) {
-      case "INTEGER":
-      case "NUMERIC":
-        return "#";
-      case "VARCHAR":
-        return "T";
+      case 'INTEGER':
+      case 'NUMERIC':
+        return '#';
+      case 'VARCHAR':
+        return 'T';
       default:
-        return "i";
+        return 'i';
     }
   }
 
   function determineDataTitle(type: string) {
     switch (type) {
-      case "INTEGER":
-      case "NUMERIC":
-        return "Number";
-      case "VARCHAR":
-        return "Text";
+      case 'INTEGER':
+      case 'NUMERIC':
+        return 'Number';
+      case 'VARCHAR':
+        return 'Text';
       default:
-        return "Else";
+        return 'Else';
     }
   }
 
@@ -150,11 +150,11 @@
             <li>
               <button
                 class="list-button"
-                on:click={() => sortByColumn(column, "asc")}
+                on:click={() => sortByColumn(column, 'asc')}
               >
                 <Icon class="opt" data={faSortAmountDownAlt} />
                 <span>
-                  {#if sort?.get(column.name) === "asc"}
+                  {#if sort?.get(column.name) === 'asc'}
                     Remove asc sort
                   {:else}
                     Sort Ascending
@@ -165,11 +165,11 @@
             <li>
               <button
                 class="list-button"
-                on:click={() => sortByColumn(column, "desc")}
+                on:click={() => sortByColumn(column, 'desc')}
               >
                 <Icon class="opt" data={faSortAmountDown} />
                 <span>
-                  {#if sort?.get(column.name) === "desc"}
+                  {#if sort?.get(column.name) === 'desc'}
                     Remove desc sort
                   {:else}
                     Sort Descending
