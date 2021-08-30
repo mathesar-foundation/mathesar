@@ -9,7 +9,13 @@ from sqlalchemy import Table as SATable
 
 from db import columns
 from db.tables import get_oid_from_table
+from db.tests.types import fixtures
 from mathesar.models import Table
+
+
+engine_with_types = fixtures.engine_with_types
+engine_email_type = fixtures.engine_email_type
+temporary_testing_schema = fixtures.temporary_testing_schema
 
 
 @pytest.fixture
@@ -29,7 +35,7 @@ def column_test_table(patent_schema):
     )
     db_table.create()
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    table = Table.objects.create(oid=db_table_oid, schema=patent_schema)
+    table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     return table
 
 
@@ -344,6 +350,45 @@ def test_column_update_type(column_test_table, client):
     assert response.json()["type"] == type_
 
 
+def test_column_update_name_and_type(column_test_table, client):
+    cache.clear()
+    type_ = "BOOLEAN"
+    new_name = 'new name'
+    data = {"type": type_, "name": new_name}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/3/", data=data
+    )
+    assert response.json()["type"] == type_
+    assert response.json()["name"] == new_name
+
+
+def test_column_update_name_type_nullable(column_test_table, client):
+    cache.clear()
+    type_ = "BOOLEAN"
+    new_name = 'new name'
+    data = {"type": type_, "name": new_name, "nullable": True}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/3/", data=data
+    )
+    assert response.json()["type"] == type_
+    assert response.json()["name"] == new_name
+    assert response.json()["nullable"] is True
+
+
+def test_column_update_name_type_nullable_default(column_test_table, client):
+    cache.clear()
+    type_ = "BOOLEAN"
+    new_name = 'new name'
+    data = {"type": type_, "name": new_name, "nullable": True, "default": True}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/3/", data=data
+    )
+    assert response.json()["type"] == type_
+    assert response.json()["name"] == new_name
+    assert response.json()["nullable"] is True
+    assert response.json()["default"] is True
+
+
 def test_column_update_type_options(column_test_table, client):
     cache.clear()
     type_ = "NUMERIC"
@@ -351,11 +396,22 @@ def test_column_update_type_options(column_test_table, client):
     data = {"type": type_, "type_options": type_options}
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/3/",
-        data=json.dumps(data),
-        content_type='application/json'
+        data,
+        format='json'
     )
     assert response.json()["type"] == type_
     assert response.json()["type_options"] == type_options
+
+
+def test_column_update_invalid_type(create_table, client, engine_email_type):
+    table = create_table('Column Invalid Type')
+    body = {"type": "BIGINT"}
+    response = client.patch(
+        f"/api/v0/tables/{table.id}/columns/3/",
+        body
+    )
+    assert response.status_code == 400
+    assert response.json() == ["This type casting is invalid."]
 
 
 def test_column_update_returns_table_dependent_fields(column_test_table, client):
