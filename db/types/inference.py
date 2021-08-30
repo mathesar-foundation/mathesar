@@ -69,9 +69,8 @@ def infer_column_type(
     logger.debug(f"column_type_str: {column_type_str}")
     for type_str in type_inference_dag.get(column_type_str, []):
         try:
-            alter_column_type(
-                schema, table_name, column_name, type_str, engine
-            )
+            with engine.begin() as conn:
+                alter_column_type(table, column_name, engine, conn, type_str)
             logger.info(f"Column {column_name} altered to type {type_str}")
             column_type = infer_column_type(
                 schema,

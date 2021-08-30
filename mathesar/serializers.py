@@ -3,6 +3,8 @@ import requests
 from django.urls import reverse
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework.fields import empty
+from rest_framework.settings import api_settings
 
 from mathesar.models import Table, Schema, DataFile, Database, Constraint
 
@@ -57,6 +59,18 @@ class SchemaSerializer(serializers.HyperlinkedModelSerializer):
 class TypeOptionSerializer(serializers.Serializer):
     precision = serializers.IntegerField(required=False)
     scale = serializers.IntegerField(required=False)
+
+    def run_validation(self, data=empty):
+        # Ensure that there are no unknown type options passed in.
+        if data is not empty:
+            unknown = set(data) - set(self.fields)
+            if unknown:
+                errors = ['Unknown field: {}'.format(field) for field in unknown]
+                raise serializers.ValidationError({
+                    api_settings.NON_FIELD_ERRORS_KEY: errors,
+                })
+
+        return super(TypeOptionSerializer, self).run_validation(data)
 
 
 class SimpleColumnSerializer(serializers.Serializer):
