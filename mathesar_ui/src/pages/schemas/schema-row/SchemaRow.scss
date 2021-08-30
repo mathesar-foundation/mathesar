@@ -18,8 +18,6 @@ $font-size-info: 0.875rem;
       display: flex;
       flex-direction: row;
       gap: 0.5em;
-
-      margin-bottom: 0.5em;
     }
 
     .fa-icon {
@@ -27,6 +25,7 @@ $font-size-info: 0.875rem;
     }
 
     .info {
+      margin-top: 0.5em;
       color: $color-muted;
       font-size: $font-size-info;
 

@@ -4,7 +4,7 @@ export default class CancellablePromise<T> extends Promise<T> {
   onCancel: () => void;
 
   constructor(executor: (
-    resolve: (value: T | Promise<T>) => void,
+    resolve: (value?: T | Promise<T>) => void,
     reject: (reason?: unknown) => void,
   ) => void, onCancel?: () => void) {
     super(executor);

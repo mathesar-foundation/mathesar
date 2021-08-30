@@ -41,7 +41,7 @@
       importInfo.schemaId,
       {
         id: importInfo.id,
-        label: importInfo.name,
+        label: importInfo.name || 'New table',
         isNew: true,
       },
     );

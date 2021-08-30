@@ -7,14 +7,14 @@
     Modal,
     Icon,
   } from '@mathesar-components';
-  import type { Schema } from '@mathesar/App.d';
+  import type { SchemaEntry } from '@mathesar/App.d';
   import { currentDBName } from '@mathesar/stores/databases';
   import { schemas, createSchema, updateSchema } from '@mathesar/stores/schemas';
   import { States } from '@mathesar/utils/api';
 
   export let isOpen = false;
   export let isEditMode = false;
-  export let schema: Schema = null;
+  export let schema: SchemaEntry = null;
 
   let name = '';
   let state: States = States.Idle;

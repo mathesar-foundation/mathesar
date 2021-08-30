@@ -7,7 +7,7 @@ import { States } from '@mathesar/utils/api';
 import type { UploadCompletionOpts, PaginatedResponse } from '@mathesar/utils/api';
 import type { FileUpload } from '@mathesar-components/types';
 import type { CancellablePromise } from '@mathesar/components';
-import type { Database, Schema } from '@mathesar/App.d';
+import type { Database, SchemaEntry, TableEntry } from '@mathesar/App.d';
 
 export const Stages = {
   UPLOAD: 1,
@@ -37,6 +37,7 @@ export interface FileImportWritableInfo {
   uploadPromise?: CancellablePromise<unknown>,
   uploadProgress?: UploadCompletionOpts,
   dataFileId?: number,
+  isDataFileInfoPresent?: boolean,
   firstRowHeader?: boolean,
 
   // Preview table create stage
@@ -62,7 +63,7 @@ export interface FileImportWritableInfo {
 
 export interface FileImportInfo extends FileImportWritableInfo {
   id: string,
-  schemaId: Schema['id'],
+  schemaId: SchemaEntry['id'],
   databaseName: Database['name']
 }
 
@@ -76,7 +77,7 @@ export interface FileImportStatusWritableInfo {
 export interface FileImportStatusInfo extends FileImportStatusWritableInfo {
   id: FileImportInfo['id'],
   databaseName: string,
-  schemaId: Schema['id'],
+  schemaId: SchemaEntry['id'],
 }
 
 export type FileImport = Writable<FileImportInfo>;
@@ -94,7 +95,7 @@ export const importStatuses: Writable<FileImportStatusMap> = writable(
   new Map() as FileImportStatusMap,
 );
 
-export function getAllImportDetailsForSchema(schemaId: Schema['id']): FileImportInfo[] {
+export function getAllImportDetailsForSchema(schemaId: SchemaEntry['id']): FileImportInfo[] {
   const imports = schemaImportMap.get(schemaId);
   if (imports) {
     return Array.from(imports.values()).map((entry: FileImport) => get(entry));
@@ -102,7 +103,7 @@ export function getAllImportDetailsForSchema(schemaId: Schema['id']): FileImport
   return [];
 }
 
-export function getSchemaImportStore(schemaId: Schema['id']): FileImportsForSchema {
+export function getSchemaImportStore(schemaId: SchemaEntry['id']): FileImportsForSchema {
   let imports = schemaImportMap.get(schemaId);
   if (!imports) {
     imports = new Map();
@@ -111,7 +112,7 @@ export function getSchemaImportStore(schemaId: Schema['id']): FileImportsForSche
   return imports;
 }
 
-export function getFileStore(databaseName: Database['name'], schemaId: Schema['id'], id: string): FileImport {
+export function getFileStore(databaseName: Database['name'], schemaId: SchemaEntry['id'], id: string): FileImport {
   const imports = getSchemaImportStore(schemaId);
 
   let fileImport = imports.get(id);
@@ -141,7 +142,7 @@ export function setInFileStore(
   return get(fileImportStore);
 }
 
-export function newImport(databaseName: Database['name'], schemaId: Schema['id']): FileImport {
+export function newImport(databaseName: Database['name'], schemaId: SchemaEntry['id']): FileImport {
   const id = `_new_${fileId}`;
   const fileImport = getFileStore(databaseName, schemaId, id);
   const fileImportData = get(fileImport);
@@ -159,7 +160,48 @@ export function newImport(databaseName: Database['name'], schemaId: Schema['id']
   return fileImport;
 }
 
-export function removeImportFromView(schemaId: Schema['id'], id: string): void {
+export function loadIncompleteImport(
+  databaseName: Database['name'],
+  schemaId: SchemaEntry['id'],
+  tableInfo: TableEntry,
+): FileImport {
+  const id = `_existing_${tableInfo.id}`;
+  const fileImport = getFileStore(databaseName, schemaId, id);
+  if (get(fileImport).stage === Stages.UPLOAD) {
+    const dataFileId = tableInfo.data_files?.[0];
+    if (dataFileId) {
+      setInFileStore(fileImport, {
+        uploadStatus: States.Done,
+        stage: Stages.PREVIEW,
+        previewTableCreationStatus: States.Done,
+        previewId: tableInfo.id,
+        previewName: tableInfo.name,
+        name: tableInfo.name,
+        dataFileId,
+        firstRowHeader: true,
+        isDataFileInfoPresent: false,
+      });
+    }
+  }
+  return fileImport;
+}
+
+export function deleteImport(schemaId: SchemaEntry['id'], id: string): void {
+  const imports = schemaImportMap.get(schemaId);
+  const fileImport = imports?.get(id);
+  if (fileImport) {
+    const fileImportData = get(fileImport);
+    fileImportData.importPromise?.cancel();
+    fileImportData.uploadPromise?.cancel();
+    imports.delete(id);
+  }
+  importStatuses.update((existingMap) => {
+    existingMap.delete(id);
+    return new Map(existingMap);
+  });
+}
+
+export function removeImportFromView(schemaId: SchemaEntry['id'], id: string): void {
   const imports = schemaImportMap.get(schemaId);
   const fileImport = imports?.get(id);
   if (fileImport) {
@@ -170,13 +212,7 @@ export function removeImportFromView(schemaId: Schema['id'], id: string): void {
       && fileImportData.importStatus === States.Done);
 
     if (isRemovable) {
-      fileImportData.importPromise?.cancel();
-      fileImportData.uploadPromise?.cancel();
-      imports.delete(id);
-      importStatuses.update((existingMap) => {
-        existingMap.delete(id);
-        return new Map(existingMap);
-      });
+      deleteImport(schemaId, id);
     }
   }
 }

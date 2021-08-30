@@ -60,6 +60,25 @@
     }
   }
 
+  &.disabled {
+    pointer-events: none;
+
+    .wrapper {
+      >span.alias {
+        background: #f2f2f2;
+      }
+    }
+
+    &.checked {
+      .wrapper {
+        >span.alias {
+          border-color: #7f7f7f;
+          background: #8f8f8f;
+        }
+      }
+    }
+  }
+
   .label {
     margin-left: 4px;
   }
