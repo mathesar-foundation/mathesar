@@ -47,13 +47,12 @@ class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class SchemaSerializer(serializers.HyperlinkedModelSerializer):
-    tables = NestedTableSerializer(many=True, read_only=True)
     name = serializers.CharField()
     database = ModelNameField(max_length=128)
 
     class Meta:
         model = Schema
-        fields = ['id', 'name', 'tables', 'database', 'has_dependencies']
+        fields = ['id', 'name', 'database', 'has_dependencies']
 
 
 class TypeOptionSerializer(serializers.Serializer):

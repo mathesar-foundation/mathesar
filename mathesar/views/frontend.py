@@ -22,7 +22,7 @@ def get_database_list(request):
     return database_serializer.data
 
 
-def get_tables_list(request, schema):
+def get_table_list(request, schema):
     if schema is None:
         return []
     tables_serializer = TableSerializer(
@@ -39,7 +39,7 @@ def get_common_data(request, database, schema=None):
         'current_schema': schema.id if schema else None,
         'schemas': get_schema_list(request, database),
         'databases': get_database_list(request),
-        'tables': get_tables_list(request, schema)
+        'tables': get_table_list(request, schema)
     }
 
 
