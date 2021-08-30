@@ -19,6 +19,7 @@ export interface SchemaEntry extends DBObjectEntry {
 export interface TableEntry extends DBObjectEntry {
   schema: SchemaEntry['id'],
   import_verified: boolean,
+  data_files?: number[],
   // TODO: Verify if order is stored in table model or column model
   columns: { name: string }[],
 }

@@ -7,7 +7,7 @@ import { States } from '@mathesar/utils/api';
 import type { UploadCompletionOpts, PaginatedResponse } from '@mathesar/utils/api';
 import type { FileUpload } from '@mathesar-components/types';
 import type { CancellablePromise } from '@mathesar/components';
-import type { Database, SchemaEntry } from '@mathesar/App.d';
+import type { Database, SchemaEntry, TableEntry } from '@mathesar/App.d';
 
 export const Stages = {
   UPLOAD: 1,
@@ -37,6 +37,7 @@ export interface FileImportWritableInfo {
   uploadPromise?: CancellablePromise<unknown>,
   uploadProgress?: UploadCompletionOpts,
   dataFileId?: number,
+  isDataFileInfoPresent?: boolean,
   firstRowHeader?: boolean,
 
   // Preview table create stage
@@ -156,6 +157,32 @@ export function newImport(databaseName: Database['name'], schemaId: SchemaEntry[
     return new Map(existingMap);
   });
   fileId += 1;
+  return fileImport;
+}
+
+export function loadIncompleteImport(
+  databaseName: Database['name'],
+  schemaId: SchemaEntry['id'],
+  tableInfo: TableEntry,
+): FileImport {
+  const id = `_existing_${tableInfo.id}`;
+  const fileImport = getFileStore(databaseName, schemaId, id);
+  if (get(fileImport).stage === Stages.UPLOAD) {
+    const dataFileId = tableInfo.data_files?.[0];
+    if (dataFileId) {
+      setInFileStore(fileImport, {
+        uploadStatus: States.Done,
+        stage: Stages.PREVIEW,
+        previewTableCreationStatus: States.Done,
+        previewId: tableInfo.id,
+        previewName: tableInfo.name,
+        name: tableInfo.name,
+        dataFileId,
+        firstRowHeader: true,
+        isDataFileInfoPresent: false,
+      });
+    }
+  }
   return fileImport;
 }
 

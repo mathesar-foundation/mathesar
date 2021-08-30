@@ -8,7 +8,7 @@ import {
   deleteImport,
 } from '@mathesar/stores/fileImports';
 import { replaceTab, removeTab } from '@mathesar/stores/tabs';
-import { refetchSchema } from '@mathesar/stores/schemas';
+import { refetchTablesForSchema } from '@mathesar/stores/tables';
 import {
   uploadFile,
   States,
@@ -38,6 +38,8 @@ function completionCallback(
         percentCompleted: 100,
       },
       dataFileId,
+      firstRowHeader: true,
+      isDataFileInfoPresent: true,
       uploadStatus: States.Done,
     });
   } else {
@@ -184,6 +186,12 @@ export async function fetchPreviewTableInfo(
       `/tables/${fileImportData.previewId}/type_suggestions/`,
     );
 
+    type DataFileResponse = Record<'header', boolean>;
+    let dataFilePromise: CancellablePromise<DataFileResponse> = null;
+    if (!fileImportData.isDataFileInfoPresent) {
+      dataFilePromise = getAPI<DataFileResponse>(`/data_files/${fileImportData.dataFileId}/`);
+    }
+
     setInFileStore(fileImportStore, {
       previewStatus: States.Loading,
       previewColumnPromise,
@@ -192,6 +200,7 @@ export async function fetchPreviewTableInfo(
 
     const previewColumnResponse = await previewColumnPromise;
     const typesResponse = await suggestedTypesPromise;
+    const dataFileReponse = await dataFilePromise;
 
     const previewColumns = previewColumnResponse.results.map((column) => ({
       ...column,
@@ -202,12 +211,19 @@ export async function fetchPreviewTableInfo(
       isSelected: true,
     }));
 
-    setInFileStore(fileImportStore, {
+    const dataToSet: FileImportWritableInfo = {
       previewStatus: States.Done,
       previewColumnPromise,
       previewColumns,
+      isDataFileInfoPresent: true,
       error: null,
-    });
+    };
+
+    if (dataFileReponse !== null) {
+      dataToSet.firstRowHeader = dataFileReponse.header;
+    }
+
+    setInFileStore(fileImportStore, dataToSet);
 
     return previewColumns;
   } catch (err) {
@@ -322,7 +338,7 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
       });
       await importPromise;
 
-      void refetchSchema(fileImportData.databaseName, fileImportData.schemaId);
+      void refetchTablesForSchema(fileImportData.schemaId);
 
       setInFileStore(fileImportStore, {
         importStatus: States.Done,

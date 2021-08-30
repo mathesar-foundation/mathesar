@@ -112,7 +112,7 @@ export async function refetchSchemasForDB(
 
     dbSchemasRequestMap.get(database)?.cancel();
 
-    const schemaRequest = getAPI<PaginatedResponse<SchemaResponse>>(`/schemas/?database=${database}`);
+    const schemaRequest = getAPI<PaginatedResponse<SchemaResponse>>(`/schemas/?database=${database}&limit=500`);
     dbSchemasRequestMap.set(database, schemaRequest);
     const response = await schemaRequest;
     const schemas = response.results || [];

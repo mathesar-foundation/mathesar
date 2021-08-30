@@ -80,7 +80,7 @@ export async function refetchTablesForSchema(
 
     schemaTablesRequestMap.get(schemaId)?.cancel();
 
-    const tablesRequest = getAPI<PaginatedResponse<TableEntry>>(`/tables/?schema=${schemaId}`);
+    const tablesRequest = getAPI<PaginatedResponse<TableEntry>>(`/tables/?schema=${schemaId}&limit=500`);
     schemaTablesRequestMap.set(schemaId, tablesRequest);
     const response = await tablesRequest;
     const tableEntries = response.results || [];

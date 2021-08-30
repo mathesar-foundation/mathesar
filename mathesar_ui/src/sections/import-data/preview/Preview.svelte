@@ -63,6 +63,7 @@
   </div>
   
   <Checkbox bind:checked={$fileImportStore.firstRowHeader}
+            disabled={$fileImportStore.previewStatus === States.Loading}
             label="Use first row as header"
             on:change={headerChanged}/>
 </div>
