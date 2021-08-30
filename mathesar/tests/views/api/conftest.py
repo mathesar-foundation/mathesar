@@ -39,7 +39,7 @@ def create_schema(engine, test_db_model):
             create_sa_schema(schema_name, engine)
             schema_oid = get_schema_oid_from_name(schema_name, engine)
             function_schemas[schema_name] = schema_oid
-        schema_model, _ = Schema.objects.get_or_create(oid=schema_oid, database=test_db_model)
+        schema_model, _ = Schema.current_objects.get_or_create(oid=schema_oid, database=test_db_model)
         return schema_model
     yield _create_schema
 
@@ -56,6 +56,17 @@ def create_table(csv_filename, create_schema):
         data_file = DataFile.objects.create(file=File(csv_file))
 
     def _create_table(table_name, schema='Patents'):
+        schema_model = create_schema(schema)
+        return create_table_from_csv(data_file, table_name, schema_model)
+    return _create_table
+
+
+@pytest.fixture
+def create_data_types_table(data_types_csv_filename, create_schema):
+    with open(data_types_csv_filename, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    def _create_table(table_name, schema='Data Types'):
         schema_model = create_schema(schema)
         return create_table_from_csv(data_file, table_name, schema_model)
     return _create_table

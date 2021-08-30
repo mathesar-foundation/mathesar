@@ -2,12 +2,15 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
 from django.utils.functional import cached_property
+from django.core.exceptions import ValidationError
 
+from db import tables, records, schemas, columns, constraints
+from db.types import alteration
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
-from db import tables, records, schemas, columns
-from db.types.alteration import get_supported_alter_column_types
+from mathesar.database.types import get_types
+
 
 NAME_CACHE_INTERVAL = 60 * 5
 
@@ -28,7 +31,7 @@ class DatabaseObjectManager(models.Manager):
 
 class DatabaseObject(BaseModel):
     oid = models.IntegerField()
-    # The default manager, current_objects, does not reflect databse objects.
+    # The default manager, current_objects, does not reflect database objects.
     # This saves us from having to deal with Django trying to automatically reflect db
     # objects in the background when we might not expect it.
     current_objects = models.Manager()
@@ -62,13 +65,26 @@ class Database(BaseModel):
 
     @property
     def supported_types(self):
-        types = get_supported_alter_column_types(self._sa_engine)
-        return [t for t, _ in types.items()]
+        supported_types = []
+        available_types = get_types(self._sa_engine)
+        for index, available_type in enumerate(available_types):
+            db_types = available_type['db_types']
+            db_type_list = [key for key in db_types.keys()]
+            if db_type_list:
+                # Remove SQLAlchemy implementation info.
+                available_type['db_types'] = db_type_list
+                supported_types.append(available_type)
+        return supported_types
 
 
 class Schema(DatabaseObject):
     database = models.ForeignKey('Database', on_delete=models.CASCADE,
                                  related_name='schemas')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["oid", "database"], name="unique_schema")
+        ]
 
     @property
     def _sa_engine(self):
@@ -110,9 +126,25 @@ class Schema(DatabaseObject):
 
 
 class Table(DatabaseObject):
+    # These are fields whose source of truth is in the model
+    MODEL_FIELDS = ['import_verified']
+
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
+
+    def validate_unique(self, exclude=None):
+        # Ensure oid is unique on db level
+        if Table.current_objects.filter(
+            oid=self.oid, schema__database=self.schema.database
+        ).exists():
+            raise ValidationError("Table OID is not unique")
+        super().validate_unique(exclude=exclude)
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            self.validate_unique()
+        super().save(*args, **kwargs)
 
     @cached_property
     def _sa_table(self):
@@ -144,6 +176,10 @@ class Table(DatabaseObject):
         return self._enriched_column_sa_table.columns
 
     @property
+    def sa_constraints(self):
+        return self._sa_table.constraints
+
+    @property
     def sa_column_names(self):
         return self.sa_columns.keys()
 
@@ -169,9 +205,24 @@ class Table(DatabaseObject):
 
     def drop_column(self, column_index):
         columns.drop_column(
-            self.schema._sa_engine,
             self.oid,
             column_index,
+            self.schema._sa_engine,
+        )
+
+    def duplicate_column(self, column_index, copy_data, copy_constraints, name=None):
+        return columns.duplicate_column(
+            self.oid,
+            column_index,
+            self.schema._sa_engine,
+            new_column_name=name,
+            copy_data=copy_data,
+            copy_constraints=copy_constraints,
+        )
+
+    def get_preview(self, column_definitions):
+        return alteration.get_column_cast_records(
+            self.schema._sa_engine, self._sa_table, column_definitions
         )
 
     @property
@@ -211,17 +262,68 @@ class Table(DatabaseObject):
     def delete_record(self, id_value):
         return records.delete_record(self._sa_table, self.schema._sa_engine, id_value)
 
+    def add_constraint(self, constraint_type, columns, name=None):
+        if constraint_type != constraints.ConstraintType.UNIQUE.value:
+            raise ValueError('Only creating unique constraints is currently supported.')
+        constraints.create_unique_constraint(
+            self.name,
+            self._sa_table.schema,
+            self.schema._sa_engine,
+            columns,
+            name
+        )
+        try:
+            # Clearing cache so that new constraint shows up.
+            del self._sa_table
+        except AttributeError:
+            pass
+        engine = self.schema.database._sa_engine
+        if not name:
+            name = constraints.get_constraint_name(constraint_type, self.name, columns[0])
+        constraint_oid = constraints.get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
+        return Constraint.objects.create(oid=constraint_oid, table=self)
+
+
+class Constraint(DatabaseObject):
+    table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='constraints')
+
+    @property
+    def _sa_constraint(self):
+        engine = self.table.schema.database._sa_engine
+        return constraints.get_constraint_from_oid(self.oid, engine, self.table._sa_table)
+
+    @property
+    def name(self):
+        return self._sa_constraint.name
+
+    @property
+    def type(self):
+        return constraints.get_constraint_type_from_class(self._sa_constraint)
+
+    @cached_property
+    def columns(self):
+        return [column.name for column in self._sa_constraint.columns]
+
+    def drop(self):
+        constraints.drop_constraint(
+            self.table._sa_table.name,
+            self.table._sa_table.schema,
+            self.table.schema._sa_engine,
+            self.name
+        )
+        self.delete()
+
 
 class DataFile(BaseModel):
-    created_from_choices = models.TextChoices("created_from", "FILE PASTE")
+    created_from_choices = models.TextChoices("created_from", "FILE PASTE URL")
 
-    file = models.FileField(
-        upload_to=model_utils.user_directory_path,
-    )
+    file = models.FileField(upload_to=model_utils.user_directory_path)
     user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     created_from = models.CharField(max_length=128, choices=created_from_choices.choices)
     table_imported_to = models.ForeignKey(Table, related_name="data_files", blank=True,
                                           null=True, on_delete=models.SET_NULL)
+
+    base_name = models.CharField(max_length=100)
     header = models.BooleanField(default=True)
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)

@@ -1,102 +1,264 @@
-import { writable, derived, Readable } from 'svelte/store';
-import { preloadCommonData, Schema, SchemaEntry } from '@mathesar/utils/preloadData';
-import { getAPI, States } from '@mathesar/utils/api';
+import {
+  writable,
+  Writable,
+  derived,
+  Readable,
+  get,
+  Unsubscriber,
+} from 'svelte/store';
+
+import { preloadCommonData } from '@mathesar/utils/preloadData';
+import {
+  deleteAPI,
+  getAPI,
+  patchAPI,
+  postAPI,
+  States,
+} from '@mathesar/utils/api';
+import type { PaginatedResponse } from '@mathesar/utils/api';
+
+import type {
+  Database,
+  Schema,
+  SchemaResponse,
+  DBObjectEntry,
+} from '@mathesar/App.d';
 import type { CancellablePromise } from '@mathesar/components';
 
-interface SchemaMapEntry extends SchemaEntry {
-  children?: number[],
-}
+import { currentDBName } from './databases';
 
-interface TableMapEntry extends SchemaEntry {
-  parent?: number
-}
-export type SchemaMap = Map<number, SchemaMapEntry>;
-export type TableMap = Map<number, TableMapEntry>;
+const commonData = preloadCommonData();
 
-interface SchemaStoreData {
-  toPreload?: boolean,
+export const currentSchemaId: Writable<Schema['id']> = writable(
+  commonData.current_schema || null,
+);
+
+export type TableMap = Map<number, DBObjectEntry>;
+
+export interface DBSchemaStoreData {
   state: States,
-  data?: Schema[],
-  schemaMap?: SchemaMap,
-  tableMap?: TableMap,
+  data: Map<Schema['id'], Schema>,
   error?: string
 }
 
-interface SchemaResponse {
-  results: Schema[]
+const dbSchemaStoreMap: Map<Database['name'], Writable<DBSchemaStoreData>> = new Map();
+const dbSchemasRequestMap: Map<Database['name'], CancellablePromise<PaginatedResponse<SchemaResponse>>> = new Map();
+
+function getTableMap(tables: SchemaResponse['tables']): Schema['tables'] {
+  const tableMap: Schema['tables'] = new Map();
+  tables.forEach((table) => {
+    tableMap.set(table.id, table);
+  });
+  return tableMap;
 }
 
-function generateEntryMaps(data: Schema[]): { schemaMap: SchemaMap, tableMap: TableMap } {
-  const schemaMap: SchemaMap = new Map();
-  const tableMap: TableMap = new Map();
-
-  data.forEach((entry) => {
-    const schemaKey = entry.id;
-    const tableIdList = entry.tables?.map((tableEntry) => tableEntry.id);
-    schemaMap.set(schemaKey, {
-      id: entry.id,
-      name: entry.name,
-      children: tableIdList,
-    });
-    entry.tables?.forEach((tableEntry) => {
-      tableMap.set(tableEntry.id, {
-        id: tableEntry.id,
-        name: tableEntry.name,
-        parent: schemaKey,
-      });
+function setDBSchemaStore(
+  database: Database['name'],
+  schemas: SchemaResponse[],
+): Writable<DBSchemaStoreData> {
+  const schemaMap: DBSchemaStoreData['data'] = new Map();
+  schemas.forEach((schema) => {
+    schemaMap.set(schema.id, {
+      ...schema,
+      tables: getTableMap(schema.tables),
     });
   });
-  return {
-    schemaMap,
-    tableMap,
+  const storeValue = {
+    state: States.Done,
+    data: schemaMap,
+    error: null,
   };
+
+  let store = dbSchemaStoreMap.get(database);
+  if (!store) {
+    store = writable(storeValue);
+    dbSchemaStoreMap.set(database, store);
+  } else {
+    store.set(storeValue);
+  }
+  return store;
 }
 
-const schemaWriteStore = writable<SchemaStoreData>({
-  toPreload: true,
-  state: States.Loading,
-  data: [],
-});
-
-let schemaRequest: CancellablePromise<SchemaResponse>;
-
-export async function reloadSchemas(): Promise<void> {
-  schemaWriteStore.update((currentData) => ({
-    ...currentData,
-    state: States.Loading,
-  }));
-
-  try {
-    schemaRequest?.cancel();
-    schemaRequest = getAPI<SchemaResponse>('/schemas/');
-    const response = await schemaRequest;
-    const data = response.results || [];
-    schemaWriteStore.set({
-      state: States.Done,
-      data,
-      ...generateEntryMaps(data),
-    });
-  } catch (err) {
-    schemaWriteStore.set({
-      state: States.Error,
-      error: err instanceof Error ? err.message : null,
+function updateSchemaInDBSchemaStore(
+  database: Database['name'],
+  schema: SchemaResponse,
+) {
+  const store = dbSchemaStoreMap.get(database);
+  if (store) {
+    store.update((value) => {
+      value.data?.set(schema.id, {
+        ...schema,
+        tables: getTableMap(schema.tables),
+      });
+      return {
+        ...value,
+      };
     });
   }
 }
 
-export const schemas: Readable<SchemaStoreData> = derived(
-  schemaWriteStore,
-  ($schemaWriteStore, set) => {
-    if ($schemaWriteStore.toPreload) {
-      const preloadedData = preloadCommonData();
-      const data = preloadedData?.schemas || [];
+function removeSchemaInDBSchemaStore(
+  database: Database['name'],
+  schemaId: Schema['id'],
+) {
+  const store = dbSchemaStoreMap.get(database);
+  if (store) {
+    store.update((value) => {
+      value.data?.delete(schemaId);
+      return {
+        ...value,
+      };
+    });
+  }
+}
+
+export async function refetchSchemasForDB(
+  database: Database['name'],
+): Promise<DBSchemaStoreData> {
+  const store = dbSchemaStoreMap.get(database);
+  if (!store) {
+    console.error(`DB Schemas store for db: ${database} not found.`);
+    return null;
+  }
+
+  try {
+    store.update((currentData) => ({
+      ...currentData,
+      state: States.Loading,
+    }));
+
+    dbSchemasRequestMap.get(database)?.cancel();
+
+    const schemaRequest = getAPI<PaginatedResponse<SchemaResponse>>(`/schemas/?database=${database}`);
+    dbSchemasRequestMap.set(database, schemaRequest);
+    const response = await schemaRequest;
+    const schemas = response.results || [];
+
+    const dbSchemasStore = setDBSchemaStore(database, schemas);
+
+    return get(dbSchemasStore);
+  } catch (err) {
+    store.update((currentData) => ({
+      ...currentData,
+      state: States.Error,
+      error: err instanceof Error ? err.message : 'Error in fetching schemas',
+    }));
+    return null;
+  }
+}
+
+export async function refetchSchema(
+  database: Database['name'],
+  schemaId: Schema['id'],
+): Promise<SchemaResponse> {
+  const store = dbSchemaStoreMap.get(database);
+  if (!store) {
+    console.error(`DB Schemas store for db: ${database} not found.`);
+    return null;
+  }
+
+  try {
+    const schemaRequest = getAPI<SchemaResponse>(`/schemas/${schemaId}/`);
+    const response = await schemaRequest;
+    updateSchemaInDBSchemaStore(database, response);
+    return response;
+  } catch (err) {
+    return null;
+  }
+}
+
+let preload = true;
+
+export function getSchemasStoreForDB(database: Database['name']): Writable<DBSchemaStoreData> {
+  let store = dbSchemaStoreMap.get(database);
+  if (!store) {
+    store = writable({
+      state: States.Loading,
+      data: new Map(),
+    });
+    dbSchemaStoreMap.set(database, store);
+
+    if (preload) {
+      preload = false;
+      store = setDBSchemaStore(database, commonData.schemas);
+    } else {
+      void refetchSchemasForDB(database);
+    }
+  } else if (get(store).error) {
+    void refetchSchemasForDB(database);
+  }
+  return store;
+}
+
+export function getSchemaInfo(database: Database['name'], schemaId: Schema['id']): Schema {
+  const store = dbSchemaStoreMap.get(database);
+  if (!store) {
+    return null;
+  }
+  return get(store).data.get(schemaId);
+}
+
+export async function createSchema(
+  database: Database['name'],
+  schemaName: Schema['name'],
+): Promise<SchemaResponse> {
+  const response = await postAPI<SchemaResponse>('/schemas/', {
+    name: schemaName,
+    database,
+  });
+  updateSchemaInDBSchemaStore(database, response);
+  return response;
+}
+
+export async function updateSchema(
+  database: Database['name'],
+  schema: Schema,
+): Promise<SchemaResponse> {
+  const response = await patchAPI<SchemaResponse>(`/schemas/${schema.id}/`, {
+    name: schema.name,
+  });
+  updateSchemaInDBSchemaStore(database, response);
+  return response;
+}
+
+export async function deleteSchema(
+  database: Database['name'],
+  schemaId: Schema['id'],
+): Promise<void> {
+  await deleteAPI(`/schemas/${schemaId}/`);
+  removeSchemaInDBSchemaStore(database, schemaId);
+}
+
+export const schemas: Readable<DBSchemaStoreData> = derived(
+  currentDBName,
+  ($currentDBName, set) => {
+    let unsubscribe: Unsubscriber;
+
+    if (!$currentDBName) {
       set({
         state: States.Done,
-        data,
-        ...generateEntryMaps(data),
+        data: new Map(),
       });
     } else {
-      set($schemaWriteStore);
+      const store = getSchemasStoreForDB($currentDBName);
+      unsubscribe = store.subscribe((dbSchemasData) => {
+        set(dbSchemasData);
+      });
+    }
+
+    return () => {
+      unsubscribe?.();
+    };
+  },
+);
+
+export const currentSchema: Readable<Schema> = derived(
+  [currentSchemaId, schemas],
+  ([$currentSchemaId, $schemas], set) => {
+    if (!currentSchemaId) {
+      set(null);
+    } else {
+      set($schemas.data.get($currentSchemaId));
     }
   },
 );

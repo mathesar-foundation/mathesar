@@ -7,7 +7,7 @@ from mathesar.models import Table
 from db import tables, records
 from mathesar.errors import InvalidTableError
 
-ALLOWED_DELIMITERS = ",\t:| "
+ALLOWED_DELIMITERS = ",\t:|"
 SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
 
@@ -80,6 +80,7 @@ def get_sv_reader(file, header, dialect=None):
             f"column_{i}" for i in range(len(reader.fieldnames))
         ]
         file.seek(0)
+
     return reader
 
 
@@ -117,7 +118,13 @@ def create_table_from_csv(data_file, name, schema):
         data_file, name, schema
     )
     db_table_oid = tables.get_oid_from_table(db_table.name, db_table.schema, engine)
-    table, _ = Table.objects.get_or_create(oid=db_table_oid, schema=schema)
+    # Using current_objects to create the table instead of objects. objects
+    # triggers re-reflection, which will cause a race condition to create the table
+    table, _ = Table.current_objects.get_or_create(
+        oid=db_table_oid,
+        schema=schema,
+        import_verified=False
+    )
     data_file.table_imported_to = table
     data_file.save()
     return table

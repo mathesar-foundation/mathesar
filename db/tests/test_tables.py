@@ -3,7 +3,11 @@ import pytest
 from sqlalchemy import MetaData, select, Column, String, Table, ForeignKey, Integer
 from sqlalchemy.exc import NoSuchTableError
 from psycopg2.errors import DependentObjectsStillExist
+
 from db import tables, constants, columns
+from db.types import inference
+from db.tests.types import fixtures
+
 
 ROSTER = "Roster"
 TEACHERS = "Teachers"
@@ -12,6 +16,14 @@ EXTRACTED_COLS = ["Teacher", "Teacher Email"]
 REM_MOVE_COL = ["Subject"]
 REM_MOVE_COLS = ["Student Name", "Student Email"]
 FKEY_COL = f"{TEACHERS}_{constants.ID}"
+
+
+# We need to set these variables when the file loads, or pytest can't
+# properly detect the fixtures.  Importing them directly results in a
+# flake8 unused import error, and a bunch of flake8 F811 errors.
+engine_with_types = fixtures.engine_with_types
+engine_email_type = fixtures.engine_email_type
+temporary_testing_schema = fixtures.temporary_testing_schema
 
 
 @pytest.fixture
@@ -452,8 +464,8 @@ def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
     tables.create_mathesar_table(
         table_name, schema, column_list, engine
     )
-    with patch.object(tables.inference, "infer_column_type") as mock_infer:
-        tables.update_table_column_types(
+    with patch.object(inference, "infer_column_type") as mock_infer:
+        inference.update_table_column_types(
             schema,
             table_name,
             engine
@@ -470,8 +482,8 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
     tables.create_mathesar_table(
         table_name, schema, column_list, engine
     )
-    with patch.object(tables.inference, "infer_column_type") as mock_infer:
-        tables.update_table_column_types(
+    with patch.object(inference, "infer_column_type") as mock_infer:
+        inference.update_table_column_types(
             schema,
             table_name,
             engine
@@ -500,8 +512,8 @@ def test_update_table_column_types_skips_pkey_columns(engine_with_schema):
     tables.create_mathesar_table(
         table_name, schema, column_list, engine
     )
-    with patch.object(tables.inference, "infer_column_type") as mock_infer:
-        tables.update_table_column_types(
+    with patch.object(inference, "infer_column_type") as mock_infer:
+        inference.update_table_column_types(
             schema,
             table_name,
             engine
@@ -513,8 +525,8 @@ def test_update_table_column_types_skips_fkey_columns(
         extracted_remainder_roster
 ):
     _, remainder, _, engine, schema = extracted_remainder_roster
-    with patch.object(tables.inference, "infer_column_type") as mock_infer:
-        tables.update_table_column_types(
+    with patch.object(inference, "infer_column_type") as mock_infer:
+        inference.update_table_column_types(
             schema,
             remainder.name,
             engine

@@ -1,25 +1,23 @@
 import warnings
-from time import time
+
 from sqlalchemy import (
     Column, String, Table, MetaData, func, select, ForeignKey, literal, exists,
     join, inspect, and_
 )
 from sqlalchemy.schema import DDLElement, DropTable
 from sqlalchemy.ext import compiler
-from sqlalchemy_filters import apply_filters
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
 from sqlalchemy.exc import NoSuchTableError, InternalError
 from psycopg2.errors import DependentObjectsStillExist
 
-from db import columns, constants, schemas
-from db.types import inference
+from db import columns, constants, schemas, records
 
 
 TEMP_SCHEMA = f"{constants.MATHESAR_PREFIX}temp_schema"
 TEMP_TABLE = f"{constants.MATHESAR_PREFIX}temp_table_%s"
 
-SUPPORTED_TABLE_UPDATE_ARGS = {'name'}
+SUPPORTED_TABLE_UPDATE_ARGS = {'name', 'sa_columns'}
 
 
 def create_string_column_table(name, schema, column_names, engine):
@@ -45,9 +43,6 @@ def create_mathesar_table(name, schema, columns_, engine, metadata=None):
     # SQLAlchemy context (e.g., for creating a ForeignKey relationship)
     if metadata is None:
         metadata = MetaData(bind=engine, schema=schema)
-    # This reflection step lets us notice any "table already exists"
-    # errors before sending error-generating requests to the DB.
-    metadata.reflect()
     table = Table(
         name,
         metadata,
@@ -93,15 +88,21 @@ def delete_table(name, schema, engine, cascade=False, if_exists=False):
 
 def rename_table(name, schema, engine, rename_to):
     table = reflect_table(name, schema, engine)
+    if rename_to == table.name:
+        return
     with engine.begin() as conn:
         ctx = MigrationContext.configure(conn)
         op = Operations(ctx)
         op.rename_table(table.name, rename_to, schema=table.schema)
 
 
-def update_table(name, schema, engine, update_data):
+def update_table(table_name, table_oid, schema, engine, update_data):
+    if 'name' in update_data and 'sa_columns' in update_data:
+        raise ValueError('Only name or columns can be passed in, not both.')
     if 'name' in update_data:
-        rename_table(name, schema, engine, update_data['name'])
+        rename_table(table_name, schema, engine, update_data['name'])
+    if 'sa_columns' in update_data:
+        columns.batch_update_columns(table_oid, engine, update_data['sa_columns'])
 
 
 def extract_columns_from_table(
@@ -459,29 +460,10 @@ def create_empty_table(name):
 
 
 def get_count(table, engine, filters=[]):
-    query = select([func.count()]).select_from(table)
-    if filters is not None:
-        query = apply_filters(query, filters)
-    with engine.begin() as conn:
-        return conn.execute(query).scalar()
-
-
-def update_table_column_types(schema, table_name, engine):
-    table = reflect_table(table_name, schema, engine)
-    # we only want to infer (modify) the type of non-default columns
-    inferable_column_names = (
-        col.name for col in table.columns
-        if not columns.MathesarColumn.from_column(col).is_default
-        and not col.primary_key
-        and not col.foreign_keys
-    )
-    for column_name in inferable_column_names:
-        inference.infer_column_type(
-            schema,
-            table_name,
-            column_name,
-            engine,
-        )
+    col_name = "_count"
+    cols = [func.count().label(col_name)]
+    query = records._get_query(table, None, None, None, filters, cols)
+    return records._execute_query(query, engine)[0][col_name]
 
 
 class CreateTableAs(DDLElement):
@@ -496,34 +478,3 @@ def compile_create_table_as(element, compiler, **_):
         element.name,
         compiler.sql_compiler.process(element.selectable, literal_binds=True),
     )
-
-
-def infer_table_column_types(schema, table_name, engine):
-    table = reflect_table(table_name, schema, engine)
-
-    temp_name = TEMP_TABLE % (int(time()))
-    schemas.create_schema(TEMP_SCHEMA, engine)
-    with engine.begin() as conn:
-        while engine.dialect.has_table(conn, temp_name, schema=TEMP_SCHEMA):
-            temp_name = TEMP_TABLE.format(int(time()))
-
-    full_temp_name = f"{TEMP_SCHEMA}.{temp_name}"
-
-    select_table = select(table)
-    with engine.begin() as conn:
-        conn.execute(CreateTableAs(full_temp_name, select_table))
-    temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
-
-    try:
-        update_table_column_types(
-            TEMP_SCHEMA, temp_table.name, engine,
-        )
-    except Exception as e:
-        # Ensure the temp table is deleted
-        temp_table.drop()
-        raise e
-    else:
-        temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
-        types = [c.type.__class__ for c in temp_table.columns]
-        temp_table.drop()
-        return types

@@ -2,29 +2,7 @@
 $side-bar-width: 255px;
 
 aside {
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
   width: $side-bar-width;
-  border-right: 1px solid #dfdfdf;
-  transition: left .2s ease-out;
-  z-index: 3;
-  overflow-y: auto;
-
-  nav {
-    margin: 15px 0;
-
-    .tree {
-      li {
-        a.item {
-          span {
-            margin-left: 6px;
-          }
-        }
-      }
-    }
-  }
 }
 
 section.table-section {
@@ -39,9 +17,9 @@ section.table-section {
   .tab-container {
     position: absolute;
     left: 5px;
-    right: 0px;
-    bottom: 0px;
-    top: 0;
+    right: 5px;
+    bottom: 5px;
+    top: 5px;
 
     .tabs {
       .tab {

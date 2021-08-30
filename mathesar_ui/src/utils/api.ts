@@ -19,6 +19,11 @@ export interface URLObject {
   avoidPrefix?: boolean
 }
 
+export interface PaginatedResponse<T> {
+  count: number,
+  results: T[]
+}
+
 const urlPrefix = '/api/v0';
 const NO_CONTENT = 204;
 const successStatusCodes = new Set([200, 201, NO_CONTENT]);
@@ -60,7 +65,20 @@ function sendXHRRequest<T>(method: string, url: string, data?: unknown): Cancell
           : JSON.parse(request.response) as T;
         resolve(result);
       } else {
-        reject(new Error('An unexpected error has occurred'));
+        let errorMessage = 'An unexpected error has occurred';
+        try {
+          // TODO: Follow a proper error message structure
+          const message = JSON.parse(request.response) as string | string[];
+          if (Array.isArray(message)) {
+            errorMessage = message.join(', ');
+          } else if (typeof message === 'string') {
+            errorMessage = message;
+          } else if (message) {
+            errorMessage = JSON.stringify(message);
+          }
+        } finally {
+          reject(new Error(errorMessage));
+        }
       }
     });
   }, () => {
@@ -74,6 +92,10 @@ export function getAPI<T>(url: string): CancellablePromise<T> {
 
 export function postAPI<T>(url: string, data: unknown): CancellablePromise<T> {
   return sendXHRRequest('POST', url, data);
+}
+
+export function patchAPI<T>(url: string, data: unknown): CancellablePromise<T> {
+  return sendXHRRequest('PATCH', url, data);
 }
 
 export function deleteAPI<T>(url: string): CancellablePromise<T> {

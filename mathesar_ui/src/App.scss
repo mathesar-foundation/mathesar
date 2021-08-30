@@ -1,36 +1,4 @@
-$top-pane-height: 60px;
-$side-bar-width: 255px;
-
-header {
-  display: flex;
-  position: fixed;
-  width: 100%;
-  height: $top-pane-height;
-  z-index: 4;
-  justify-content: space-between;
-  top: 0;
-
-  .selector {
-    display: flex;
-    flex-basis: $side-bar-width;
-    flex-shrink: 1;
-    border-right: 1px solid #dfdfdf;
-    border-bottom: 1px solid #efefef;
-    padding: 5px 20px;
-
-    >div {
-      align-items: center;
-      display: flex;
-    }
-  }
-  .navigator {
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    padding: 16px;
-    background: #f6f7fdaa;
-  }
-}
+$top-pane-height: 46px;
 
 section.content-section {
   position: absolute;

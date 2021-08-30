@@ -24,6 +24,10 @@ module.exports = {
   ],
   rules: {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
+    'no-console': [
+      'warn',
+      { allow: ['error'] },
+    ],
   },
   overrides: [
     {
@@ -42,6 +46,7 @@ module.exports = {
         'no-void': 'off',
         'no-useless-escape': 'off',
         'no-underscore-dangle': 'off',
+        'no-bitwise': 'off',
       },
     },
     {

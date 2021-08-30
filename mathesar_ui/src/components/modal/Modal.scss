@@ -1,0 +1,33 @@
+.modal-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  background-color: white;
+  border-radius: 0.4em;
+  max-height: calc(100vh - 10em);
+  min-height: 110px;
+  overflow-y: auto;
+
+  >.body, >.footer {
+    padding: 1em;
+  }
+
+  >.footer {
+    border-top: 1px solid #f5f5f5;
+    background: #f9fafb;
+  }
+
+  &.modal-size-medium {
+    width: 500px;
+  }
+}
