@@ -1,4 +1,4 @@
-{% load client_files %}
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -31,6 +31,11 @@
         outline: 0;
       }
     </style>
+    {% if not development_mode %}
+      {% for css_file in manifest_data.module_css %}
+        <link rel="stylesheet" href="{% static css_file %}">
+      {% endfor %}
+    {% endif %}
     {% block styles %}
     {% endblock %}
   </head>
@@ -38,7 +43,10 @@
     {% block scripts %}
     {% endblock %}
 
-    {% if not development_mode %}
+    {% if development_mode %}
+      <script type="module" src="{{ client_dev_url }}/@vite/client"></script>
+      <script type="module" src="{{ client_dev_url }}/src/main.ts"></script>
+    {% else %}
       <!-- For legacy browsers that do not support modules -->
       <script nomodule>
         !function(){
@@ -52,8 +60,18 @@
           }
         }();
       </script>
-    {% endif %}
 
-    {% get_assets %}
+      {% for js_file in manifest_data.module_vendor_js %}
+        <link rel="modulepreload" href="{% static js_file %}">
+      {% endfor %}
+      <script type="module" src="{% static manifest_data.module_js %}"></script>
+      <script nomodule src="{% static manifest_data.legacy_polyfill_js %}"></script>
+      {% for js_file in manifest_data.legacy_vendor_js %}
+        <script nomodule src="{% static js_file %}"></script>
+      {% endfor %}
+      <script nomodule id="vite-legacy-entry" data-src="{{ manifest_data.legacy_js }}">
+        System.import(document.getElementById("vite-legacy-entry").getAttribute("data-src"))
+      </script>
+    {% endif %}
   </body>
 </html>

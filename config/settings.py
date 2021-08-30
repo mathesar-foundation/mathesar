@@ -63,7 +63,7 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
-                "config.context_processors.get_settings",
+                "config.context_processors.frontend_settings",
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
@@ -109,8 +109,6 @@ if decouple_config('TEST', default=False, cast=bool):
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = decouple_config('SECRET_KEY')
-
-MODE = decouple_config('MODE', default='PRODUCTION')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = decouple_config('DEBUG', default=False, cast=bool)
@@ -161,17 +159,6 @@ STATIC_URL = "/static/"
 # The files need to served in brotli or gzip compressed format
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
-# Location of client build
-CLIENT_BUILD_LOCATION = os.path.join(BASE_DIR, 'client_build/')
-
-# For development, served by Django's default webserver
-STATICFILES_DIRS = [
-    CLIENT_BUILD_LOCATION
-]
-
-CLIENT_DEV_URL = "http://localhost:3000"
-
-
 # Media files (uploaded by the user)
 
 MEDIA_ROOT = os.path.join(BASE_DIR, '.media/')
@@ -185,3 +172,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication'
     ]
 }
+
+# Mathesar settings
+MATHESAR_MODE = decouple_config('MODE', default='PRODUCTION')
+MATHESAR_UI_BUILD_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/mathesar/')
+MATHESAR_MANIFEST_LOCATION = os.path.join(MATHESAR_UI_BUILD_LOCATION, 'manifest.json')
+MATHESAR_CLIENT_DEV_URL = 'http://localhost:3000'
+
+
+STATICFILES_DIRS = [MATHESAR_UI_BUILD_LOCATION]

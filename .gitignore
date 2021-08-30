@@ -182,4 +182,5 @@ node_modules/
 storybook-static/
 
 # Client Build files
-/client_build/
+mathesar/static/
+static/
