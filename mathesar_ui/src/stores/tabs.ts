@@ -3,15 +3,16 @@ import {
   writable,
   Writable,
 } from 'svelte/store';
-import type { Tab } from '@mathesar-components/types';
 import {
   getAllImportDetailsForSchema,
   removeImportFromView,
 } from '@mathesar/stores/fileImports';
 import { clearTable } from '@mathesar/stores/tableData';
-import { getSchemasStoreForDB } from '@mathesar/stores/schemas';
+import { getTablesStoreForSchema } from '@mathesar/stores/tables';
 import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
-import type { Schema } from '@mathesar/App';
+
+import type { Tab } from '@mathesar-components/types';
+import type { SchemaEntry } from '@mathesar/App';
 
 export interface MathesarTab extends Tab {
   id: unknown,
@@ -28,16 +29,16 @@ const schemaMap: Map<number, TabList> = new Map();
 export function getTabsForSchema(db: string, schemaId: number): TabList {
   let schemaTabs = schemaMap.get(schemaId);
   if (!schemaTabs) {
-    const tables = [] as MathesarTab[];
-    const schemas = get(getSchemasStoreForDB(db));
+    const tabTables = [] as MathesarTab[];
+    const tableStoreData = get(getTablesStoreForSchema(schemaId));
 
     URLQueryHandler.getAllTableConfigs(db).forEach(
       (entry) => {
-        const schemaTable = schemas?.data.get(schemaId)?.tables.get(entry.id);
-        if (schemaTable) {
-          tables.push({
+        const table = tableStoreData.data.get(entry.id);
+        if (table) {
+          tabTables.push({
             id: entry.id,
-            label: schemaTable.name,
+            label: table.name,
           });
         } else {
           URLQueryHandler.removeTable(db, entry.id);
@@ -47,8 +48,8 @@ export function getTabsForSchema(db: string, schemaId: number): TabList {
 
     const imports = getAllImportDetailsForSchema(schemaId) as unknown as MathesarTab[];
 
-    const tabs = [...imports, ...tables];
-    const activeTab = tables.find(
+    const tabs = [...imports, ...tabTables];
+    const activeTab = tabTables.find(
       (table) => table.id === URLQueryHandler.getActiveTable(db),
     ) || tabs[0];
 
@@ -63,7 +64,7 @@ export function getTabsForSchema(db: string, schemaId: number): TabList {
 
 export function addTab(
   db: string,
-  schemaId: Schema['id'],
+  schemaId: SchemaEntry['id'],
   tab: MathesarTab,
   options?: { position?: number, status?: 'active' | 'inactive' },
 ): void {
@@ -102,7 +103,7 @@ export function addTab(
 
 export function removeTab(
   db: string,
-  schemaId: Schema['id'],
+  schemaId: SchemaEntry['id'],
   removedTab: MathesarTab,
 ): void {
   const { tabs, activeTab } = getTabsForSchema(db, schemaId);
@@ -153,7 +154,7 @@ export function removeTab(
   }
 }
 
-export function replaceTab(db: string, schemaId: Schema['id'], oldTabId: unknown, tab: MathesarTab): void {
+export function replaceTab(db: string, schemaId: SchemaEntry['id'], oldTabId: unknown, tab: MathesarTab): void {
   const { tabs, activeTab } = getTabsForSchema(db, schemaId);
   const tabData = get(tabs);
   const activeTabData = get(activeTab);

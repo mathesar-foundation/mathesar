@@ -21,7 +21,7 @@
     TextInput,
   } from '@mathesar-components';
 
-  import type { Database, Schema } from '@mathesar/App.d';
+  import type { Database, SchemaEntry } from '@mathesar/App.d';
 
   let interalSelectedDB: Database['name'] = get(currentDBName);
   $: schemas = getSchemasStoreForDB(interalSelectedDB);
@@ -29,8 +29,8 @@
   let isOpen;
   let schemaFilter = '';
 
-  function getFilteredSchemas(schemaData: DBSchemaStoreData['data'], filter: string): Schema[] {
-    const filteredSchemas: Schema[] = [];
+  function getFilteredSchemas(schemaData: DBSchemaStoreData['data'], filter: string): SchemaEntry[] {
+    const filteredSchemas: SchemaEntry[] = [];
     schemaData.forEach((schema) => {
       if (schema.name.toLowerCase().indexOf(filter.toLowerCase()) > -1) {
         filteredSchemas.push(schema);
@@ -39,7 +39,7 @@
     return filteredSchemas;
   }
 
-  let displayedSchemas: Schema[];
+  let displayedSchemas: SchemaEntry[];
   $: displayedSchemas = getFilteredSchemas($schemas.data, schemaFilter);
 
   function selectDB(db: Database) {

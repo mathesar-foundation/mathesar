@@ -7,14 +7,21 @@
   import {
     addTab,
   } from '@mathesar/stores/tabs';
+  import {
+    tables,
+  } from '@mathesar/stores/tables';
+
+  import type {
+    DBTablesStoreData,
+  } from '@mathesar/stores/tables';
   import type { MathesarTab } from '@mathesar/stores/tabs';
-  import type { Schema } from '@mathesar/App.d';
+  import type { SchemaEntry } from '@mathesar/App.d';
   import type {
     TreeItem,
   } from '@mathesar-components/types';
 
   export let database: string;
-  export let schema: Schema;
+  export let schemaId: SchemaEntry['id'];
   export let activeTab;
   export let getLink: (entry: MathesarTab) => string;
   
@@ -22,19 +29,20 @@
   let activeTable: Set<unknown>;
   const expandedItems = new Set(['table_header']);
 
-  function generateTree(_schema: Schema) {
+  function generateTree(_tables: DBTablesStoreData) {
     const tableHeader = {
       id: 'table_header',
       name: 'Tables',
       tables: [],
     };
-    _schema.tables?.forEach((value) => {
+
+    _tables?.data?.forEach((value) => {
       tableHeader.tables.push(value);
     });
     return [tableHeader];
   }
 
-  $: tree = generateTree(schema);
+  $: tree = generateTree($tables);
 
   function onActiveTabChange(_activeTab: MathesarTab) {
     activeTable = new Set([_activeTab?.id]);
@@ -42,11 +50,11 @@
 
   $: onActiveTabChange(activeTab);
 
-  function tableSelected(e: { detail: { node: Schema, originalEvent: Event, link?: string } }) {
+  function tableSelected(e: { detail: { node: SchemaEntry, originalEvent: Event, link?: string } }) {
     const { node, originalEvent } = e.detail;
     originalEvent.preventDefault();
 
-    addTab(database, schema.id, {
+    addTab(database, schemaId, {
       id: node.id,
       label: node.name,
     });

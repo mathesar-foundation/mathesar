@@ -16,8 +16,11 @@ export interface SchemaEntry extends DBObjectEntry {
   has_dependencies: boolean
 }
 
-export interface Schema extends SchemaEntry, TreeItem {
-  tables: Map<DBObjectEntry['id'], DBObjectEntry>
+export interface TableEntry extends DBObjectEntry {
+  schema: SchemaEntry['id'],
+  import_verified: boolean,
+  // TODO: Verify if order is stored in table model or column model
+  columns: { name: string }[],
 }
 
 export interface SchemaResponse extends SchemaEntry, TreeItem {
