@@ -1,6 +1,7 @@
 from django_property_filter import (
     PropertyFilterSet, PropertyBaseInFilter, PropertyCharFilter,
-    PropertyDateTimeFromToRangeFilter, PropertyBooleanFilter
+    PropertyDateTimeFromToRangeFilter, PropertyBooleanFilter,
+    PropertyNumberFilter
 )
 
 from mathesar.models import Schema, Table, Database
@@ -21,7 +22,7 @@ class SchemaFilter(PropertyFilterSet):
 
 class TableFilter(PropertyFilterSet):
     name = CharInFilter(field_name='name', lookup_expr='in')
-    schema = CharInFilter(field_name='schema__name', lookup_expr='in')
+    schema = PropertyNumberFilter(field_name='schema__id')
     created = PropertyDateTimeFromToRangeFilter(field_name='created_at')
     updated = PropertyDateTimeFromToRangeFilter(field_name='updated_at')
     import_verified = PropertyBooleanFilter(field_name='import_verified')
