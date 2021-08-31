@@ -7,7 +7,7 @@
     Button,
     TextInput,
   } from '@mathesar-components';
-  import type { Schema } from '@mathesar/App.d';
+  import type { SchemaEntry } from '@mathesar/App.d';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import SchemaRow from './schema-row/SchemaRow.svelte';
   import AddEditSchema from './AddEditSchema.svelte';
@@ -27,10 +27,10 @@
   $: changeCurrentDB(database);
 
   let filterQuery = '';
-  let activeSchema: Schema = null;
+  let activeSchema: SchemaEntry = null;
 
-  function filterSchemas(schemaData: DBSchemaStoreData['data'], filter: string): Schema[] {
-    const filtered: Schema[] = [];
+  function filterSchemas(schemaData: DBSchemaStoreData['data'], filter: string): SchemaEntry[] {
+    const filtered: SchemaEntry[] = [];
     schemaData.forEach((schema) => {
       if (schema.name?.toLowerCase().includes(filter.toLowerCase())) {
         filtered.push(schema);
@@ -46,12 +46,12 @@
     isAddModalOpen = true;
   }
 
-  function editSchema(schema: Schema) {
+  function editSchema(schema: SchemaEntry) {
     activeSchema = schema;
     isAddModalOpen = true;
   }
 
-  function deleteSchema(schema: Schema) {
+  function deleteSchema(schema: SchemaEntry) {
     activeSchema = schema;
     isDeleteModalOpen = true;
   }

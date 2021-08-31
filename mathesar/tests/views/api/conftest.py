@@ -91,7 +91,7 @@ def empty_nasa_table(patent_schema):
     )
     db_table.create()
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    table = Table.objects.create(oid=db_table_oid, schema=patent_schema)
+    table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     return table
 
 

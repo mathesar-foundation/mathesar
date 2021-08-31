@@ -6,7 +6,7 @@
   } from '@mathesar-components';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
   import { currentDBName } from '@mathesar/stores/databases';
-  import { currentSchemaId, currentSchema } from '@mathesar/stores/schemas';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
     getTabsForSchema,
     removeTab,
@@ -59,8 +59,8 @@
     selectTab(database, tab);
   }
 
-  function tabRemoved(e: { detail: { removedTab: MathesarTab, activeTab?: MathesarTab } }) {
-    removeTab(database, schemaId, e.detail.removedTab, e.detail.activeTab);
+  function tabRemoved(e: { detail: { removedTab: MathesarTab } }) {
+    removeTab(database, schemaId, e.detail.removedTab);
   }
 </script>
 
@@ -68,9 +68,7 @@
   <title>Mathesar - {$activeTab?.label || 'Home'}</title>
 </svelte:head>
 
-{#if $currentSchema}
-  <LeftPane {getLink} {database} schema={$currentSchema} activeTab={$activeTab}/>
-{/if}
+<LeftPane {getLink} {database} schemaId={$currentSchemaId} activeTab={$activeTab}/>
 
 <section class="table-section">
   {#if $tabs?.length > 0}

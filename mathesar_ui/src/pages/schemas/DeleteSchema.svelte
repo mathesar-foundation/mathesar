@@ -5,13 +5,14 @@
     Modal,
     Icon,
   } from '@mathesar-components';
-  import type { Schema } from '@mathesar/App.d';
+  import type { SchemaEntry } from '@mathesar/App.d';
   import { States } from '@mathesar/utils/api';
   import { deleteSchema } from '@mathesar/stores/schemas';
+  import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
   import { currentDBName } from '@mathesar/stores/databases';
 
   export let isOpen = false;
-  export let schema: Schema;
+  export let schema: SchemaEntry;
 
   let state: States = States.Idle;
   let error;
@@ -22,6 +23,8 @@
         state = States.Loading;
         error = null;
         await deleteSchema($currentDBName, schema.id);
+        // TODO: Create common util to handle data clearing & sync between stores
+        removeTablesInSchemaTablesStore(schema.id);
         state = States.Done;
       } catch (err) {
         state = States.Error;
