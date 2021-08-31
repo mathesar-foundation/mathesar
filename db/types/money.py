@@ -1,5 +1,5 @@
-from psycopg2.extras import register_composite
-from sqlalchemy import text
+from psycopg2.extras import Json
+from sqlalchemy import cast, text, func
 from sqlalchemy.types import UserDefinedType
 
 from db.types import base
@@ -13,6 +13,15 @@ class Money(UserDefinedType):
 
     def get_col_spec(self, **kw):
         return DB_TYPE.upper()
+
+    def bind_processor(self, dialect):
+        return lambda x: Json(x)
+
+    def bind_expression(self, bindvalue):
+        return func.json_populate_record(cast(None, self.__class__), bindvalue)
+
+    def column_expression(self, col):
+        return func.to_json(col)
 
 
 def install(engine):
@@ -29,9 +38,3 @@ def install(engine):
         conn.execute(text(drop_type_query))
         conn.execute(text(create_type_query))
         conn.commit()
-
-
-def register(engine):
-    with engine.begin() as conn:
-        dbapi_curs = conn.connection.cursor()
-        register_composite(DB_TYPE, dbapi_curs, globally=True)
