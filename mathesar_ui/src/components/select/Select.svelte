@@ -45,8 +45,9 @@
   }
 
   function setSelectedItem() {
-    if (options.some((e) => e[idKey] === value?.[idKey])) {
-      currentIndex = options.indexOf(value);
+    const index = options.findIndex((e) => e[idKey] === value?.[idKey]);
+    if (index > -1) {
+      currentIndex = index;
     }
   }
 
