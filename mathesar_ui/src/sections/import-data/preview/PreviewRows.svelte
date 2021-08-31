@@ -28,6 +28,7 @@
       }));
       setInFileStore(fileImportStore, {
         previewRowsLoadStatus: States.Loading,
+        error: null,
       });
       previewPromise = postAPI<Response>(`/tables/${fileImportData.previewId}/previews/`, {
         columns: columnInfo,

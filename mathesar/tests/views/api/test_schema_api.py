@@ -9,20 +9,11 @@ from mathesar import reflection
 from mathesar.utils.schemas import create_schema_and_object
 
 
-def check_schema_response(response_schema, schema, schema_name, test_db_name,
-                          len_tables=1, check_schema_objects=True):
+def check_schema_response(response_schema, schema, schema_name, test_db_name, check_schema_objects=True):
     assert response_schema['id'] == schema.id
     assert response_schema['name'] == schema_name
     assert response_schema['database'] == test_db_name
     assert 'has_dependencies' in response_schema
-    assert len(response_schema['tables']) == len_tables
-    if len_tables > 0:
-        response_table = response_schema['tables'][0]
-        assert 'id' in response_table
-        response_table_id = response_table['id']
-        assert 'name' in response_table
-        assert response_table['url'].startswith('http')
-        assert response_table['url'].endswith(f'/api/v0/tables/{response_table_id}/')
     if check_schema_objects:
         assert schema_name in schemas.get_mathesar_schemas(
             create_mathesar_engine(test_db_name)
@@ -91,8 +82,7 @@ def test_schema_list_filter(client, monkeypatch):
             schema = schemas[query_tuple]
             response_schema = response_schemas[query_tuple]
             check_schema_response(response_schema, schema, schema.name,
-                                  schema.database.name, len_tables=0,
-                                  check_schema_objects=False)
+                                  schema.database.name, check_schema_objects=False)
 
 
 def test_schema_detail(create_table, client, test_db_name):
@@ -145,8 +135,7 @@ def test_schema_partial_update(create_schema, client, test_db_name):
 
     response_schema = response.json()
     assert response.status_code == 200
-    check_schema_response(response_schema, schema, new_schema_name, test_db_name,
-                          len_tables=0)
+    check_schema_response(response_schema, schema, new_schema_name, test_db_name,)
 
     schema = Schema.objects.get(oid=schema.oid)
     assert schema.name == new_schema_name
@@ -165,8 +154,7 @@ def test_schema_patch_same_name(create_schema, client, test_db_name):
         response_schema,
         schema,
         schema_name,
-        test_db_name,
-        len_tables=0
+        test_db_name
     )
     schema = Schema.objects.get(oid=schema.oid)
     assert schema.name == schema_name

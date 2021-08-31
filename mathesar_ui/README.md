@@ -46,21 +46,22 @@ When running manually, the `package-lock.json` file may change depending on your
 
 If you want to add or remove packages, or bascially run any npm action, **always do it from within the container**. Never do it from your local node setup, since it may modify the `package-lock.json` in ways we would not want it to.
 
-You can connect to the container by running:
+You can connect to the container and open the ui folder by running:
 
 ```bash
-docker exec -it mathesar_ui_1 /bin/bash
+docker exec --user mathesar -it mathesar_service_1 /bin/bash
+cd mathesar_ui
 ```
 
-and then perform any action from within the container. Example:
+and then perform any action from within it. Example:
 ```bash
-node@c273da65c52d:/ui$ ls
+node@c273da65c52d:/code/mathesar_ui$ ls
 Dockerfile  jsconfig.json  package-lock.json  public  vite.config.js
 README.md   node_modules   package.json       src
 
-node@c273da65c52d:/ui$ npm install <package>
+node@c273da65c52d:/code/mathesar_ui$ npm install <package>
 
-node@c273da65c52d:/ui$ npm uninstall <package>
+node@c273da65c52d:/code/mathesar_ui$ npm uninstall <package>
 ```
 
 ### Components
@@ -70,9 +71,9 @@ For guidelines on component development, refer [README of components](https://gi
 You can start storybook in dev mode by connecting to the container and then running `npm run storybook`:
 
 ```bash
-docker exec -it mathesar_ui_1 /bin/bash
+docker exec --user mathesar -it mathesar_service_1 /bin/bash
 
-node@c273da65c52d:/ui$ npm run storybook
+node@c273da65c52d:/code/mathesar_ui$ cd mathesar_ui && npm run storybook
 ```
 
 This should start storybook at port 6006.

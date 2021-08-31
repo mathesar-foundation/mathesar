@@ -6,13 +6,14 @@ from psycopg2.errors import NotNullViolation
 import pytest
 from sqlalchemy import (
     String, Integer, Boolean, Date, ForeignKey, Column, select, Table, MetaData,
-    create_engine, Sequence, Numeric, DateTime, func, UniqueConstraint,
+    Sequence, Numeric, DateTime, func, UniqueConstraint,
 )
 from sqlalchemy.exc import IntegrityError
 from db import columns, tables, constants, constraints
 from db.types import email, alteration
 from db.types.base import get_db_type_name
 from db.tests.types import fixtures
+
 
 engine_with_types = fixtures.engine_with_types
 temporary_testing_schema = fixtures.temporary_testing_schema
@@ -33,14 +34,15 @@ def from_column_column(*args, **kwargs):
     return columns.MathesarColumn.from_column(col)
 
 
-def _rename_column(schema, table_name, old_col_name, new_col_name, engine):
+def _rename_column(table, old_col_name, new_col_name, engine):
     """
     Renames the colum of a table and assert the change went through
     """
-    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    table_oid = tables.get_oid_from_table(table.name, table.schema, engine)
     column_index = columns.get_column_index_from_name(table_oid, old_col_name, engine)
-    columns.rename_column(table_oid, column_index, new_col_name, engine)
-    table = tables.reflect_table(table_name, schema, engine)
+    with engine.begin() as conn:
+        columns.rename_column(table, column_index, engine, conn, new_col_name)
+    table = tables.reflect_table(table.name, table.schema, engine)
     assert new_col_name in table.columns
     assert old_col_name not in table.columns
     return table
@@ -243,47 +245,27 @@ def test_MC_type_options(engine):
     "column_dict,func_name",
     [
         ({"name": "blah"}, "rename_column"),
-        ({"sa_type": "blah"}, "retype_column"),
-        ({"type": "blah"}, "retype_column"),
+        ({"plain_type": "blah"}, "retype_column"),
         ({"nullable": True}, "change_column_nullable"),
-        ({"default": 1}, "set_column_default"),
+        ({"default_value": 1}, "set_column_default"),
     ]
 )
-def test_alter_column_chooses_wisely(column_dict, func_name):
-    engine = create_engine("postgresql://")
+def test_alter_column_chooses_wisely(column_dict, func_name, engine_with_schema):
+    table_name = "table_with_columns"
+    engine, schema = engine_with_schema
+    metadata = MetaData(bind=engine, schema=schema)
+    table = Table(table_name, metadata, Column('col', String))
+    table.create()
+    table_oid = tables.get_oid_from_table(table.name, table.schema, engine)
+
     with patch.object(columns, func_name) as mock_alterer:
         columns.alter_column(
             engine,
-            1234,
-            5678,
+            table_oid,
+            0,
             column_dict
         )
-    mock_alterer.assert_called_with(
-        1234,
-        5678,
-        list(column_dict.values())[0],
-        engine,
-        type_options={},
-    )
-
-
-def test_alter_column_adds_type_options():
-    engine = create_engine("postgresql://")
-    column_dict = {"type": "numeric", "type_options": {"precision": 3}}
-    with patch.object(columns, "retype_column") as mock_retyper:
-        columns.alter_column(
-            engine,
-            1234,
-            5678,
-            column_dict
-        )
-    mock_retyper.assert_called_with(
-        1234,
-        5678,
-        column_dict["type"],
-        engine,
-        type_options=column_dict["type_options"],
-    )
+        mock_alterer.assert_called_once()
 
 
 def test_rename_column(engine_with_schema):
@@ -292,8 +274,9 @@ def test_rename_column(engine_with_schema):
     table_name = "table_with_columns"
     engine, schema = engine_with_schema
     metadata = MetaData(bind=engine, schema=schema)
-    Table(table_name, metadata, Column(old_col_name, String)).create()
-    _rename_column(schema, table_name, old_col_name, new_col_name, engine)
+    table = Table(table_name, metadata, Column(old_col_name, String))
+    table.create()
+    _rename_column(table, old_col_name, new_col_name, engine)
 
 
 def test_rename_column_foreign_keys(engine_with_schema):
@@ -305,7 +288,7 @@ def test_rename_column_foreign_keys(engine_with_schema):
         table_name, ["Filler 1"], "Extracted", "Remainder", schema, engine
     )
     new_fk_name = "new_" + fk_name
-    remainder = _rename_column(schema, remainder.name, fk_name, new_fk_name, engine)
+    remainder = _rename_column(remainder, fk_name, new_fk_name, engine)
 
     fk = list(remainder.foreign_keys)[0]
     assert fk.parent.name == new_fk_name
@@ -322,7 +305,7 @@ def test_rename_column_sequence(engine_with_schema):
         ins = table.insert()
         conn.execute(ins)
 
-    table = _rename_column(schema, table_name, old_col_name, new_col_name, engine)
+    table = _rename_column(table, old_col_name, new_col_name, engine)
 
     with engine.begin() as conn:
         ins = table.insert()
@@ -342,7 +325,7 @@ def test_rename_column_index(engine_with_schema):
     table = Table(table_name, metadata, Column(old_col_name, Integer, index=True))
     table.create()
 
-    table = _rename_column(schema, table_name, old_col_name, new_col_name, engine)
+    table = _rename_column(table, old_col_name, new_col_name, engine)
 
     with engine.begin() as conn:
         index = engine.dialect.get_indexes(conn, table_name, schema)[0]
@@ -381,20 +364,18 @@ def test_retype_column_correct_column(engine_with_schema):
         Column(nontarget_column_name, String),
     )
     table.create()
-    table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    with patch.object(columns.alteration, "alter_column_type") as mock_retyper:
-        columns.retype_column(table_oid, 0, target_type, engine)
-    mock_retyper.assert_called_with(
-        schema,
-        table_name,
-        target_column_name,
-        "boolean",
-        engine,
-        friendly_names=False,
-        type_options={},
-        connection_to_use=None,
-        table_to_use=None
-    )
+    with engine.begin() as conn:
+        with patch.object(columns.alteration, "alter_column_type") as mock_retyper:
+            columns.retype_column(table, 0, engine, conn, target_type)
+        mock_retyper.assert_called_with(
+            table,
+            target_column_name,
+            engine,
+            conn,
+            "boolean",
+            {},
+            friendly_names=False
+        )
 
 
 @pytest.mark.parametrize('target_type', ['numeric', 'decimal'])
@@ -410,21 +391,19 @@ def test_retype_column_adds_options(engine_with_schema, target_type):
         Column(nontarget_column_name, String),
     )
     table.create()
-    table_oid = tables.get_oid_from_table(table_name, schema, engine)
     type_options = {"precision": 5}
-    with patch.object(columns.alteration, "alter_column_type") as mock_retyper:
-        columns.retype_column(table_oid, 0, target_type, engine, type_options=type_options)
-    mock_retyper.assert_called_with(
-        schema,
-        table_name,
-        target_column_name,
-        target_type,
-        engine,
-        friendly_names=False,
-        type_options=type_options,
-        connection_to_use=None,
-        table_to_use=None
-    )
+    with engine.begin() as conn:
+        with patch.object(columns.alteration, "alter_column_type") as mock_retyper:
+            columns.retype_column(table, 0, engine, conn, target_type, type_options)
+        mock_retyper.assert_called_with(
+            table,
+            target_column_name,
+            engine,
+            conn,
+            target_type,
+            type_options,
+            friendly_names=False
+        )
 
 
 type_set = {
@@ -545,11 +524,17 @@ def test_change_column_nullable_changes(engine_with_schema, nullable_tup):
         Column(nontarget_column_name, String),
     )
     table.create()
-    table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    changed_column = columns.change_column_nullable(
-        table_oid,
-        0,
-        nullable_tup[1],
+    with engine.begin() as conn:
+        columns.change_column_nullable(
+            table,
+            0,
+            engine,
+            conn,
+            nullable_tup[1],
+        )
+    changed_table = tables.reflect_table(table_name, schema, engine)
+    changed_column = columns.get_mathesar_column_with_engine(
+        changed_table.columns[0],
         engine
     )
     assert changed_column.nullable is nullable_tup[1]
@@ -575,11 +560,17 @@ def test_change_column_nullable_with_data(engine_with_schema, nullable_tup):
     )
     with engine.begin() as conn:
         conn.execute(ins)
-    table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    changed_column = columns.change_column_nullable(
-        table_oid,
-        0,
-        nullable_tup[1],
+    with engine.begin() as conn:
+        columns.change_column_nullable(
+            table,
+            0,
+            engine,
+            conn,
+            nullable_tup[1],
+        )
+    changed_table = tables.reflect_table(table_name, schema, engine)
+    changed_column = columns.get_mathesar_column_with_engine(
+        changed_table.columns[0],
         engine
     )
     assert changed_column.nullable is nullable_tup[1]
@@ -604,15 +595,16 @@ def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema
     )
     with engine.begin() as conn:
         conn.execute(ins)
-    table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    with pytest.raises(IntegrityError) as e:
-        columns.change_column_nullable(
-            table_oid,
-            0,
-            False,
-            engine
-        )
-        assert type(e.orig) == NotNullViolation
+    with engine.begin() as conn:
+        with pytest.raises(IntegrityError) as e:
+            columns.change_column_nullable(
+                table,
+                0,
+                engine,
+                conn,
+                False,
+            )
+            assert type(e.orig) == NotNullViolation
 
 
 def test_drop_column_correct_column(engine_with_schema):
@@ -703,7 +695,7 @@ def test_get_column_generated_default(engine_with_schema, col):
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_create_column_default(engine_with_schema, col_type):
+def test_column_default_create(engine_with_schema, col_type):
     engine, schema = engine_with_schema
     table_name = "create_column_default_table"
     column_name = "create_column_default_column"
@@ -714,8 +706,10 @@ def test_create_column_default(engine_with_schema, col_type):
         Column(column_name, col_type)
     )
     table.create()
+
+    with engine.begin() as conn:
+        columns.set_column_default(table, 0, engine, conn, set_default)
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    columns.set_column_default(table_oid, 0, set_default, engine)
     default = columns.get_column_default(table_oid, 0, engine)
     created_default = _get_default(engine, table)
 
@@ -724,7 +718,7 @@ def test_create_column_default(engine_with_schema, col_type):
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_update_column_default(engine_with_schema, col_type):
+def test_column_default_update(engine_with_schema, col_type):
     engine, schema = engine_with_schema
     table_name = "update_column_default_table"
     column_name = "update_column_default_column"
@@ -735,8 +729,10 @@ def test_update_column_default(engine_with_schema, col_type):
         Column(column_name, col_type, server_default=start_default)
     )
     table.create()
+
+    with engine.begin() as conn:
+        columns.set_column_default(table, 0, engine, conn, set_default)
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    columns.set_column_default(table_oid, 0, set_default, engine)
     default = columns.get_column_default(table_oid, 0, engine)
     created_default = _get_default(engine, table)
 
@@ -746,7 +742,7 @@ def test_update_column_default(engine_with_schema, col_type):
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_delete_column_default(engine_with_schema, col_type):
+def test_column_default_delete(engine_with_schema, col_type):
     engine, schema = engine_with_schema
     table_name = "delete_column_default_table"
     column_name = "delete_column_default_column"
@@ -757,8 +753,10 @@ def test_delete_column_default(engine_with_schema, col_type):
         Column(column_name, col_type, server_default=set_default)
     )
     table.create()
+
+    with engine.begin() as conn:
+        columns.set_column_default(table, 0, engine, conn, None)
     table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    columns.set_column_default(table_oid, 0, None, engine)
     default = columns.get_column_default(table_oid, 0, engine)
     created_default = _get_default(engine, table)
 

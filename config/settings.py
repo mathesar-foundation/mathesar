@@ -63,7 +63,7 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
-                "config.context_processors.get_settings",
+                "config.context_processors.frontend_settings",
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
@@ -150,11 +150,14 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
+# https://docs.djangoproject.com/en/3.1/ref/contrib/staticfiles/
 
 STATIC_URL = "/static/"
 
-CLIENT_DEV_URL = "http://localhost:3000"
-
+# When running with DEBUG=False, the webserver needs to serve files from this location
+# python manage.py collectstatic has to be run to collect all static files into this location
+# The files need to served in brotli or gzip compressed format
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Media files (uploaded by the user)
 
@@ -169,3 +172,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication'
     ]
 }
+
+# Mathesar settings
+MATHESAR_MODE = decouple_config('MODE', default='PRODUCTION')
+MATHESAR_UI_BUILD_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/mathesar/')
+MATHESAR_MANIFEST_LOCATION = os.path.join(MATHESAR_UI_BUILD_LOCATION, 'manifest.json')
+MATHESAR_CLIENT_DEV_URL = 'http://localhost:3000'
+
+
+STATICFILES_DIRS = [MATHESAR_UI_BUILD_LOCATION]
