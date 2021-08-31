@@ -101,50 +101,67 @@ def test_record_list_filter_duplicates(create_table, client):
     assert mock_get.call_args[1]['filters'] == filter_list
 
 
-def test_record_list_filter_for_boolean(engine, create_table, client):
+def _test_filter_with_added_columns(table, client, columns_to_add, operators_and_expected_values):
+
+    for new_column in columns_to_add:
+        new_column_name = new_column.get("name")
+        new_column_type = new_column.get("type")
+        table.add_column({"name": new_column_name, "type": new_column_type})
+        row_values_list = []
+
+        response_data = client.get(f'/api/v0/tables/{table.id}/records/').json()
+        existing_records = response_data['results']
+
+        for row_number, row in enumerate(existing_records, 1):
+            row_value = new_column.get("row_values").get(row_number, new_column.get("default_value"))
+            row_values_list.append({new_column_name: row_value})
+
+
+        table.create_record_or_records(row_values_list)
+
+        for op, value, expected in operators_and_expected_values:
+            filter_list = [{'field': new_column_name, 'op': op, 'value': value}]
+            json_filter_list = json.dumps(filter_list)
+
+            with patch.object(
+                records, "get_records", side_effect=records.get_records
+            ) as mock_get:
+                response = client.get(
+                    f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
+                )
+                response_data = response.json()
+
+            num_results = expected
+            if expected > 50:
+                num_results = 50
+            assert response.status_code == 200
+            assert response_data['count'] == expected
+            assert len(response_data['results']) == num_results
+            assert mock_get.call_args is not None
+            assert mock_get.call_args[1]['filters'] == filter_list
+
+
+def test_record_list_filter_for_boolean_type(create_table, client):
     table_name = 'NASA Record List Filter'
     table = create_table(table_name)
-    bool_column_name = 'Published'
 
-    table.add_column({'name': bool_column_name, 'type': 'BOOLEAN'})
-    table.create_record_or_records(
-        [
-            {bool_column_name: True},
-            {bool_column_name: True},
-            {bool_column_name: False},
-        ]
-    )
-
-    def assert_results_equal_for_op(op, value, expected):
-        filter_list = [{'field': 'Published', 'op': op, 'value': value}]
-        json_filter_list = json.dumps(filter_list)
-
-        with patch.object(
-            records, "get_records", side_effect=records.get_records
-        ) as mock_get:
-            response = client.get(
-                f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
-            )
-            response_data = response.json()
-
-        results = expected
-        if expected > 50:
-            results = 50
-        assert response.status_code == 200
-        assert response_data['count'] == expected
-        assert len(response_data['results']) == results
-        assert mock_get.call_args is not None
-        assert mock_get.call_args[1]['filters'] == filter_list
-
-    op_value_and_expected = [
-        ('ne', False, 2),
-        ('eq', False, 1),
-        ('is_null', None, 1393),
-        ('is_not_null', None, 3)
+    columns_to_add = [
+        {
+            'name':'Published',
+            'type':'BOOLEAN',
+            'default_value' : True,
+            'row_values' : {1: False, 2: None, 3: False}
+        }
     ]
 
-    for test_conditions in op_value_and_expected:
-        assert_results_equal_for_op(*test_conditions)
+    op_value_and_expected = [
+        ('ne', True, 1),
+        ('eq', False, 1),
+        ('is_null', None, 1394),
+        ('is_not_null', None, 49)
+    ]
+
+    _test_filter_with_added_columns(table, client, columns_to_add, op_value_and_expected)
 
 
 def test_record_list_sort(create_table, client):
