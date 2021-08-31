@@ -69,7 +69,7 @@
       {% for js_file in manifest_data.legacy_vendor_js %}
         <script nomodule src="{% static js_file %}"></script>
       {% endfor %}
-      <script nomodule id="vite-legacy-entry" data-src="{{ manifest_data.legacy_js }}">
+      <script nomodule id="vite-legacy-entry" data-src="{% static manifest_data.legacy_js %}">
         System.import(document.getElementById("vite-legacy-entry").getAttribute("data-src"))
       </script>
     {% endif %}
