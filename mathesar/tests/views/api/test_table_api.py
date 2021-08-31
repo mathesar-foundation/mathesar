@@ -715,6 +715,10 @@ def test_table_404(client):
     assert response.json()['detail'] == 'Not found.'
 
 
+def test_table_not_exist():
+    assert not Table.objects.filter(id=3000).exists()
+
+
 def test_table_type_suggestion_404(client):
     response = client.get('/api/v0/tables/3000/type_suggestions/')
     assert response.status_code == 404

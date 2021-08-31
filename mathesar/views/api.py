@@ -39,11 +39,10 @@ logger = logging.getLogger(__name__)
 
 
 def get_table_or_404(pk):
-    try:
-        table = Table.objects.get(id=pk)
-    except Table.DoesNotExist:
-        raise NotFound
-    return table
+    if Table.objects.filter(id=pk).exists():
+        return Table.objects.get(id=pk)
+
+    raise NotFound
 
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
