@@ -1,9 +1,18 @@
 import json
 
 from django.conf import settings
+from django.core.cache import cache
 
 
 def get_manifest_data():
+    # We don't need the manifest data for local development.
+    if settings.MATHESAR_MODE == 'DEVELOPMENT':
+        return {}
+
+    manifest_data = cache.get('manifest_data')
+    if manifest_data is not None:
+        return manifest_data
+
     manifest_data = {}
 
     with open(settings.MATHESAR_MANIFEST_LOCATION, 'r') as manifest_file:
@@ -23,4 +32,6 @@ def get_manifest_data():
     ]
     manifest_data['legacy_js'] = legacy_data['file']
 
+    # Cache data for 1 hour
+    cache.set('manifest_data', manifest_data, 60 * 60)
     return manifest_data
