@@ -29,6 +29,8 @@
 
   let isOpen = false;
   let currentIndex = 0;
+  let scrollParentRef;
+  let selected; 
 
   function setValue(opt: SelectOption) {
     value = opt;
@@ -41,6 +43,39 @@
   function setOptions(opts: SelectOption[]) {
     if (!value && opts.length > 0) {
       setValue(opts[0]);
+    }
+  }
+
+  // function offsetTop(elem, parentRef){
+  //   let pElement = elem.parentElement;
+  //   let offset = elem.offsetTop;
+  //   while (pElement && pElement !== parentRef){
+  //     offset += pElement.offsetTop;
+  //     pElement = pElement.parentElement;
+  //   }
+  //   return offset;
+  // }
+
+  function scrollBehavior(){
+    var hoveredElem = scrollParentRef.querySelector('.hovered');
+    var parent = scrollParentRef.parentElement;
+    // const elemOffsetTop = offsetTop(hoveredElem, parent);
+    // console.log(elemOffsetTop);
+    var elemOffsetTop = hoveredElem.offsetTop;
+    console.log(elemOffsetTop);
+    console.log(hoveredElem.clientHeight);
+    var sum = elemOffsetTop + hoveredElem.clientHeight;
+    console.log('Equals' +  sum);
+    console.log('===============');
+    console.log(parent.scrollTop);
+    console.log(parent.clientHeight);
+    var sum2 =  parent.scrollTop + parent.clientHeight;
+    console.log('Equals', sum2);
+
+    if(elemOffsetTop + hoveredElem.clientHeight > (parent.scrollTop + parent.clientHeight)){
+      parent.scrollTop = elemOffsetTop + hoveredElem.clientHeight;
+    }else if (elemOffsetTop < parent.scrollTop) {
+      parent.scrollTop = elemOffsetTop;
     }
   }
 
@@ -64,10 +99,12 @@
         case 'ArrowDown':
           e.preventDefault();
           hoveredItem(1);
+          scrollBehavior();
           break;
         case 'ArrowUp':
           e.preventDefault();
           hoveredItem(-1);
+          scrollBehavior();
           break;
         case 'Escape':
           e.preventDefault();
@@ -109,7 +146,7 @@
   </svelte:fragment>
   
   <svelte:fragment slot="content">
-    <ul id="select-value-{selectId}" tabindex="0" role="listbox" aria-expanded="true">
+    <ul bind:this={scrollParentRef} id="select-value-{selectId}" tabindex="0" role="listbox" aria-expanded="true">
       {#each options as option (option[idKey])}
         <li role='option' class:selected={option[idKey] === value[idKey]} class:hovered={option[idKey] === options[currentIndex]?.[idKey]} on:click={() => setValue(option)}>
           <span>{option[labelKey]}</span>

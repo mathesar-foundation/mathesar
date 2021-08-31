@@ -39,6 +39,16 @@
   const sortDirections = [
     { id: 'asc', label: 'asc' },
     { id: 'desc', label: 'desc' },
+    { id: 'desc1', label: 'desc1' },
+    { id: 'desc22', label: 'desc2' },
+    { id: 'desc2', label: 'desc3' },
+    { id: 'desc3', label: 'desc4' },
+    { id: 'desc4', label: 'desc5' },
+    { id: 'desc5', label: 'desc6' },
+    { id: 'desc6', label: 'desc7' },
+    { id: 'desc7', label: 'desc81' },
+    { id: 'desc8', label: 'desc8' },
+    { id: 'desc9', label: 'desc9'},
   ];
 
   function getSelectedDirection(
