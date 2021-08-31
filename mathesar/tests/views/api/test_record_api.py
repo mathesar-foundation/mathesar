@@ -150,13 +150,17 @@ def test_record_list_filter_for_boolean_type(create_table, client):
             'name':'Published',
             'type':'BOOLEAN',
             'default_value' : True,
-            'row_values' : {1: False, 2: None, 3: False}
+            'row_values' : {
+                1: False,
+                2: False,
+                3: None,
+            }
         }
     ]
 
     op_value_and_expected = [
-        ('ne', True, 1),
-        ('eq', False, 1),
+        ('ne', True, 2),
+        ('eq', False, 2),
         ('is_null', None, 1394),
         ('is_not_null', None, 49)
     ]
