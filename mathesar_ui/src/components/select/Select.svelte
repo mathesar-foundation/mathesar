@@ -45,7 +45,7 @@
   }
 
   function setSelectedItem() {
-    if (options.some((e) => e.label === value[labelKey])) {
+    if (options.some((e) => e[idKey] === value?.[idKey])) {
       currentIndex = options.indexOf(value);
     }
   }
