@@ -115,7 +115,7 @@
       <div>
         {#if isAdvancedOptionsOpen}
           <h6 class="category">Advanced Options</h6>
-          <h5 class="title">Set '{column.name}' type</h5>
+          <span class="title">Set '{column.name}' type</span>
           <ul class="type-list">
             {#each types as type}
               {#if column.validTargetTypes.includes(type.targetType)}
