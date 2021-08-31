@@ -116,7 +116,6 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
             row_value = new_column.get("row_values").get(row_number, new_column.get("default_value"))
             row_values_list.append({new_column_name: row_value})
 
-
         table.create_record_or_records(row_values_list)
 
         for op, value, expected in operators_and_expected_values:
@@ -147,14 +146,10 @@ def test_record_list_filter_for_boolean_type(create_table, client):
 
     columns_to_add = [
         {
-            'name':'Published',
-            'type':'BOOLEAN',
-            'default_value' : True,
-            'row_values' : {
-                1: False,
-                2: False,
-                3: None,
-            }
+            'name': 'Published',
+            'type': 'BOOLEAN',
+            'default_value': True,
+            'row_values': {1: False, 2: False, 3: None}
         }
     ]
 
