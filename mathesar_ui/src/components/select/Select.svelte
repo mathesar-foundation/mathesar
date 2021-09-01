@@ -8,7 +8,11 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { 
+    onMount,
+    createEventDispatcher,
+    tick, 
+  } from 'svelte';
   import { Dropdown } from '@mathesar-components';
   import type {
     Appearance,
@@ -29,8 +33,11 @@
 
   let isOpen = false;
   let currentIndex = 0;
-  let scrollParentRef;
-  let selected; 
+  let parentHoverElem;
+
+  onMount(() => {
+    scrollBehavior();
+  });
 
   function setValue(opt: SelectOption) {
     value = opt;
@@ -46,36 +53,15 @@
     }
   }
 
-  // function offsetTop(elem, parentRef){
-  //   let pElement = elem.parentElement;
-  //   let offset = elem.offsetTop;
-  //   while (pElement && pElement !== parentRef){
-  //     offset += pElement.offsetTop;
-  //     pElement = pElement.parentElement;
-  //   }
-  //   return offset;
-  // }
-
-  function scrollBehavior(){
-    var hoveredElem = scrollParentRef.querySelector('.hovered');
-    var parent = scrollParentRef.parentElement;
-    // const elemOffsetTop = offsetTop(hoveredElem, parent);
-    // console.log(elemOffsetTop);
-    var elemOffsetTop = hoveredElem.offsetTop;
-    console.log(elemOffsetTop);
-    console.log(hoveredElem.clientHeight);
-    var sum = elemOffsetTop + hoveredElem.clientHeight;
-    console.log('Equals' +  sum);
-    console.log('===============');
-    console.log(parent.scrollTop);
-    console.log(parent.clientHeight);
-    var sum2 =  parent.scrollTop + parent.clientHeight;
-    console.log('Equals', sum2);
-
-    if(elemOffsetTop + hoveredElem.clientHeight > (parent.scrollTop + parent.clientHeight)){
-      parent.scrollTop = elemOffsetTop + hoveredElem.clientHeight;
-    }else if (elemOffsetTop < parent.scrollTop) {
-      parent.scrollTop = elemOffsetTop;
+  function scrollBehavior() {
+    if (parentHoverElem) {
+      const hoveredElem = parentHoverElem.querySelector('.hovered');
+      const container = parentHoverElem.parentElement;
+      if (hoveredElem && container) {
+        let offsetValue;
+        offsetValue = container.getBoundingClientRect().bottom - hoveredElem.getBoundingClientRect().bottom;
+        container.scrollTop -= offsetValue;
+      }
     }
   }
 
@@ -83,7 +69,7 @@
     currentIndex = options.indexOf(value);
   }
 
-  function hoveredItem(index) {
+  async function hoveredItem(index) {
     if (currentIndex === options.length - 1 && index > 0) {
       currentIndex = 0;
     } else if (currentIndex === 0 && index < 0) {
@@ -91,6 +77,8 @@
     } else {
       currentIndex += index;
     }
+    await tick();
+    scrollBehavior();
   }
 
   function keyAccessibility(e: KeyboardEvent): void {
@@ -99,12 +87,10 @@
         case 'ArrowDown':
           e.preventDefault();
           hoveredItem(1);
-          scrollBehavior();
           break;
         case 'ArrowUp':
           e.preventDefault();
           hoveredItem(-1);
-          scrollBehavior();
           break;
         case 'Escape':
           e.preventDefault();
@@ -146,7 +132,7 @@
   </svelte:fragment>
   
   <svelte:fragment slot="content">
-    <ul bind:this={scrollParentRef} id="select-value-{selectId}" tabindex="0" role="listbox" aria-expanded="true">
+    <ul bind:this={parentHoverElem} id="select-value-{selectId}" tabindex="0" role="listbox" aria-expanded="true">
       {#each options as option (option[idKey])}
         <li role='option' class:selected={option[idKey] === value[idKey]} class:hovered={option[idKey] === options[currentIndex]?.[idKey]} on:click={() => setValue(option)}>
           <span>{option[labelKey]}</span>
