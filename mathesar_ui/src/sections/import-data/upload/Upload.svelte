@@ -12,6 +12,7 @@
     uploadNewFile,
     getFileUploadInfo,
     loadPreview,
+    cancelImport,
   } from '../importUtils';
 
   export let fileImportStore: FileImport;
@@ -33,6 +34,10 @@
 </div>
 
 <div class="actions">
+  <Button on:click={() => cancelImport(fileImportStore)}>
+    Cancel
+  </Button>
+
   <Button appearance="primary"
           disabled={
             $fileImportStore.uploadStatus !== States.Done

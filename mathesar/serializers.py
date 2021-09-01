@@ -3,7 +3,10 @@ import requests
 from django.urls import reverse
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework.fields import empty
+from rest_framework.settings import api_settings
 
+from mathesar.filters import FILTER_OPTIONS_BY_TYPE_IDENTIFIER
 from mathesar.models import Table, Schema, DataFile, Database, Constraint
 
 
@@ -45,18 +48,29 @@ class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class SchemaSerializer(serializers.HyperlinkedModelSerializer):
-    tables = NestedTableSerializer(many=True, read_only=True)
     name = serializers.CharField()
     database = ModelNameField(max_length=128)
 
     class Meta:
         model = Schema
-        fields = ['id', 'name', 'tables', 'database', 'has_dependencies']
+        fields = ['id', 'name', 'database', 'has_dependencies']
 
 
 class TypeOptionSerializer(serializers.Serializer):
     precision = serializers.IntegerField(required=False)
     scale = serializers.IntegerField(required=False)
+
+    def run_validation(self, data=empty):
+        # Ensure that there are no unknown type options passed in.
+        if data is not empty:
+            unknown = set(data) - set(self.fields)
+            if unknown:
+                errors = ['Unknown field: {}'.format(field) for field in unknown]
+                raise serializers.ValidationError({
+                    api_settings.NON_FIELD_ERRORS_KEY: errors,
+                })
+
+        return super(TypeOptionSerializer, self).run_validation(data)
 
 
 class SimpleColumnSerializer(serializers.Serializer):
@@ -212,6 +226,10 @@ class TypeSerializer(serializers.Serializer):
     identifier = serializers.CharField()
     name = serializers.CharField()
     db_types = serializers.ListField(child=serializers.CharField())
+    filters = serializers.SerializerMethodField()
+
+    def get_filters(self, obj):
+        return FILTER_OPTIONS_BY_TYPE_IDENTIFIER.get(obj.get('identifier'))
 
 
 class DatabaseSerializer(serializers.ModelSerializer):

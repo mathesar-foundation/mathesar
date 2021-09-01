@@ -16,7 +16,7 @@ from sqlalchemy_filters.exceptions import (
 
 from db.types.alteration import UnsupportedTypeException
 from db.records import BadGroupFormat, GroupFieldNotFound
-from db.columns import InvalidDefaultError, InvalidTypeOptionError
+from db.columns import InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
 
 from mathesar.models import Table, Schema, DataFile, Database, Constraint
 from mathesar.pagination import (
@@ -264,19 +264,23 @@ class ColumnViewSet(viewsets.ViewSet):
                     f' invalid for type {request.data["type"]}'
                 )
             except InvalidTypeOptionError:
+                type_options = request.data.get('type_options', '')
                 raise ValidationError(
-                    f'parameter dict {request.data["type_options"]} is'
+                    f'parameter dict {type_options} is'
                     f' invalid for type {request.data["type"]}'
                 )
+            except InvalidTypeError:
+                raise ValidationError('This type casting is invalid.')
 
         out_serializer = ColumnSerializer(column)
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
-        assert isinstance((request.data), dict)
+        serializer = ColumnSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
         try:
-            column = table.alter_column(pk, request.data)
+            column = table.alter_column(pk, serializer.validated_data)
         except ProgrammingError as e:
             if type(e.orig) == UndefinedFunction:
                 raise ValidationError('This type cast is not implemented')
@@ -292,14 +296,17 @@ class ColumnViewSet(viewsets.ViewSet):
                 f' invalid for this column'
             )
         except InvalidTypeOptionError:
+            type_options = request.data.get('type_options', '')
             raise ValidationError(
-                f'parameter dict {request.data["type_options"]} is'
+                f'parameter dict {type_options} is'
                 f' invalid for type {request.data["type"]}'
             )
+        except InvalidTypeError:
+            raise ValidationError('This type casting is invalid.')
         except Exception as e:
             raise APIException(e)
-        serializer = ColumnSerializer(column)
-        return Response(serializer.data)
+        out_serializer = ColumnSerializer(column)
+        return Response(out_serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)

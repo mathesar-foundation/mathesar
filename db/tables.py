@@ -12,6 +12,7 @@ from sqlalchemy.exc import NoSuchTableError, InternalError
 from psycopg2.errors import DependentObjectsStillExist
 
 from db import columns, constants, schemas, records
+from db.utils import execute_statement
 
 
 TEMP_SCHEMA = f"{constants.MATHESAR_PREFIX}temp_schema"
@@ -389,7 +390,7 @@ def _get_column_moving_extraction_args(
     return extracted_table_name, remainder_table_name, extraction_columns
 
 
-def reflect_table_from_oid(oid, engine):
+def reflect_table_from_oid(oid, engine, connection_to_use=None):
     metadata = MetaData()
 
     with warnings.catch_warnings():
@@ -407,9 +408,9 @@ def reflect_table_from_oid(oid, engine):
         )
         .where(pg_class.c.oid == oid)
     )
-    with engine.begin() as conn:
-        schema, table_name = conn.execute(sel).fetchall()[0]
-    return reflect_table(table_name, schema, engine)
+    result = execute_statement(engine, sel, connection_to_use)
+    schema, table_name = result.fetchall()[0]
+    return reflect_table(table_name, schema, engine, connection_to_use=connection_to_use)
 
 
 def get_enriched_column_table(raw_sa_table, engine=None):
@@ -449,10 +450,11 @@ def get_oid_from_table(name, schema, engine):
     return inspector.get_table_oid(name, schema=schema)
 
 
-def reflect_table(name, schema, engine, metadata=None):
+def reflect_table(name, schema, engine, metadata=None, connection_to_use=None):
     if metadata is None:
         metadata = MetaData(bind=engine)
-    return Table(name, metadata, schema=schema, autoload_with=engine)
+    autoload_with = engine if connection_to_use is None else connection_to_use
+    return Table(name, metadata, schema=schema, autoload_with=autoload_with, extend_existing=True)
 
 
 def create_empty_table(name):
