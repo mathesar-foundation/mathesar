@@ -31,26 +31,15 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         serializer = TableSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
-        if not serializer.validated_data['name']:
-            name = gen_table_name(
-                serializer.validated_data['schema'],
-                serializer.validated_data['data_files'],
-            )
-        else:
-            name = serializer.validated_data['name']
+        schema = serializer.validated_data['schema']
+        data_files = serializer.validated_data.get('data_files')
+        name = serializer.validated_data.get('name') or gen_table_name(schema, data_files)
 
         try:
-            if serializer.validated_data['data_files']:
-                table = create_table_from_datafile(
-                    serializer.validated_data['data_files'],
-                    name,
-                    serializer.validated_data['schema'],
-                )
+            if data_files:
+                table = create_table_from_datafile(data_files, name, schema)
             else:
-                table = create_empty_table(
-                    name,
-                    serializer.validated_data['schema']
-                )
+                table = create_empty_table(name, schema)
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
                 raise ValidationError(
