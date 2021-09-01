@@ -6,6 +6,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 from rest_framework.settings import api_settings
 
+from mathesar.filters import FILTER_OPTIONS_BY_TYPE_IDENTIFIER
 from mathesar.models import Table, Schema, DataFile, Database, Constraint
 
 
@@ -225,6 +226,10 @@ class TypeSerializer(serializers.Serializer):
     identifier = serializers.CharField()
     name = serializers.CharField()
     db_types = serializers.ListField(child=serializers.CharField())
+    filters = serializers.SerializerMethodField()
+
+    def get_filters(self, obj):
+        return FILTER_OPTIONS_BY_TYPE_IDENTIFIER.get(obj.get('identifier'))
 
 
 class DatabaseSerializer(serializers.ModelSerializer):
