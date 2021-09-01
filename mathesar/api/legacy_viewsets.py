@@ -3,8 +3,6 @@ from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError, APIException
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
-from rest_framework.decorators import action
-from django_filters import rest_framework as filters
 from psycopg2.errors import (
     DuplicateColumn, DuplicateTable, UndefinedFunction, UniqueViolation, UndefinedObject
 )
@@ -16,16 +14,15 @@ from sqlalchemy_filters.exceptions import (
 from db.records import BadGroupFormat, GroupFieldNotFound
 from db.columns import InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
 
-from mathesar.models import Table, Database, Constraint
+from mathesar.models import Table, Constraint
 from mathesar.api.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.api.serializers import (
-    RecordSerializer, ColumnSerializer, DatabaseSerializer, ConstraintSerializer,
-    RecordListParameterSerializer, TypeSerializer
+    RecordSerializer, ColumnSerializer, ConstraintSerializer,
+    RecordListParameterSerializer
 )
 from mathesar.api.utils import get_table_or_404
-from mathesar.api.filters import DatabaseFilter
 
 logger = logging.getLogger(__name__)
 
@@ -198,22 +195,6 @@ class RecordViewSet(viewsets.ViewSet):
         table = get_table_or_404(table_pk)
         table.delete_record(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    serializer_class = DatabaseSerializer
-    pagination_class = DefaultLimitOffsetPagination
-    filter_backends = (filters.DjangoFilterBackend,)
-    filterset_class = DatabaseFilter
-
-    def get_queryset(self):
-        return Database.objects.all().order_by('-created_at')
-
-    @action(methods=['get'], detail=True)
-    def types(self, request, pk=None):
-        database = self.get_object()
-        serializer = TypeSerializer(database.supported_types, many=True)
-        return Response(serializer.data)
 
 
 class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
