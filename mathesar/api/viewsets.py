@@ -18,6 +18,7 @@ from db.types.alteration import UnsupportedTypeException
 from db.records import BadGroupFormat, GroupFieldNotFound
 from db.columns import InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
 
+from mathesar.errors import InvalidTableError
 from mathesar.models import Table, Schema, DataFile, Database, Constraint
 from mathesar.api.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
@@ -421,7 +422,12 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
     def create(self, request):
         serializer = DataFileSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        return create_datafile(request, serializer.validated_data)
+        try:
+            datafile = create_datafile(serializer.validated_data)
+        except InvalidTableError:
+            raise ValidationError('Unable to tabulate data')
+        serializer = DataFileSerializer(datafile, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
