@@ -2,19 +2,20 @@ from django.urls import include, path
 from rest_framework_nested import routers
 
 from mathesar import views
-from mathesar.api import viewsets
+from mathesar.api import legacy_viewsets
+from mathesar.api.viewsets.schemas import SchemaViewSet
 
 
 router = routers.DefaultRouter()
-router.register(r'tables', viewsets.TableViewSet, basename='table')
-router.register(r'schemas', viewsets.SchemaViewSet, basename='schema')
-router.register(r'databases', viewsets.DatabaseViewSet, basename='database')
-router.register(r'data_files', viewsets.DataFileViewSet, basename='data-file')
+router.register(r'tables', legacy_viewsets.TableViewSet, basename='table')
+router.register(r'schemas', SchemaViewSet, basename='schema')
+router.register(r'databases', legacy_viewsets.DatabaseViewSet, basename='database')
+router.register(r'data_files', legacy_viewsets.DataFileViewSet, basename='data-file')
 
 table_router = routers.NestedSimpleRouter(router, r'tables', lookup='table')
-table_router.register(r'records', viewsets.RecordViewSet, basename='table-record')
-table_router.register(r'columns', viewsets.ColumnViewSet, basename='table-column')
-table_router.register(r'constraints', viewsets.ConstraintViewSet, basename='table-constraint')
+table_router.register(r'records', legacy_viewsets.RecordViewSet, basename='table-record')
+table_router.register(r'columns', legacy_viewsets.ColumnViewSet, basename='table-column')
+table_router.register(r'constraints', legacy_viewsets.ConstraintViewSet, basename='table-constraint')
 
 urlpatterns = [
     path('api/v0/', include(router.urls)),

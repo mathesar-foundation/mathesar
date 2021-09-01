@@ -19,22 +19,21 @@ from db.records import BadGroupFormat, GroupFieldNotFound
 from db.columns import InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
 
 from mathesar.errors import InvalidTableError
-from mathesar.models import Table, Schema, DataFile, Database, Constraint
+from mathesar.models import Table, DataFile, Database, Constraint
 from mathesar.api.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.api.serializers import (
-    TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer,
+    TableSerializer, RecordSerializer, DataFileSerializer,
     ColumnSerializer, DatabaseSerializer, ConstraintSerializer,
     RecordListParameterSerializer, TablePreviewSerializer, TypeSerializer
 )
-from mathesar.utils.schemas import create_schema_and_object
 from mathesar.utils.tables import (
     get_table_column_types, create_table_from_datafile, create_empty_table,
     gen_table_name
 )
 from mathesar.utils.datafiles import create_datafile
-from mathesar.api.filters import SchemaFilter, TableFilter, DatabaseFilter
+from mathesar.api.filters import TableFilter, DatabaseFilter
 
 logger = logging.getLogger(__name__)
 
@@ -45,46 +44,6 @@ def get_table_or_404(pk):
     except Table.DoesNotExist:
         raise NotFound
     return table
-
-
-class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    serializer_class = SchemaSerializer
-    pagination_class = DefaultLimitOffsetPagination
-    filter_backends = (filters.DjangoFilterBackend,)
-    filterset_class = SchemaFilter
-
-    def get_queryset(self):
-        return Schema.objects.all().order_by('-created_at')
-
-    def create(self, request):
-        serializer = SchemaSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        schema = create_schema_and_object(serializer.validated_data['name'],
-                                          serializer.validated_data['database'])
-        serializer = SchemaSerializer(schema)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def partial_update(self, request, pk=None):
-        serializer = SchemaSerializer(
-            data=request.data, context={'request': request}, partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-
-        schema = self.get_object()
-        schema.update_sa_schema(serializer.validated_data)
-
-        # Reload the schema to avoid cached properties
-        schema = self.get_object()
-        schema.clear_name_cache()
-        serializer = SchemaSerializer(schema, context={'request': request})
-        return Response(serializer.data)
-
-    def destroy(self, request, pk=None):
-        schema = self.get_object()
-        schema.delete_sa_schema()
-        schema.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
