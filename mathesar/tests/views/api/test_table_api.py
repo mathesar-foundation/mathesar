@@ -1276,4 +1276,3 @@ def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_type
     current_table_response = client.get(f'/api/v0/tables/{table.id}/')
     # The table should not have changed
     original_column_data = _get_data_types_column_data()
-    _check_columns(current_table_response.json()['columns'], original_column_data)
