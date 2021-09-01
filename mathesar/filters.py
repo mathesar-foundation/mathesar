@@ -1,16 +1,23 @@
 from django_filters import BooleanFilter, DateTimeFromToRangeFilter
 from django_property_filter import PropertyFilterSet, PropertyBaseInFilter, PropertyCharFilter
 
+from mathesar.database.types import MathesarTypeIdentifier
 from mathesar.models import Schema, Table, Database
 
-FILTER_OPTIONS_BY_TYPE_NAME = {
-    'Boolean':
-        {
-            'eq': '<boolean>',
-            'ne': '<boolean>',
-            'is_null': None,
-            'is_not_null': None
-        },
+FILTER_OPTIONS_BY_TYPE_IDENTIFIER = {
+    MathesarTypeIdentifier.BOOLEAN.value:
+    {
+        "db_type": "BOOLEAN",
+        "options": [{
+            "op": "eq",
+            "value": {
+                "allowed_types": ["BOOLEAN"],
+            }
+        }, {
+            "op": "is_null",
+            "value": "null",
+        }]
+    }
 }
 
 
