@@ -1,7 +1,7 @@
 import logging
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError, APIException
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django_filters import rest_framework as filters
@@ -16,18 +16,15 @@ from sqlalchemy_filters.exceptions import (
 from db.records import BadGroupFormat, GroupFieldNotFound
 from db.columns import InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
 
-from mathesar.errors import InvalidTableError
-from mathesar.models import Table, DataFile, Database, Constraint
+from mathesar.models import Table, Database, Constraint
 from mathesar.api.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
 from mathesar.api.serializers import (
-    RecordSerializer, DataFileSerializer,
-    ColumnSerializer, DatabaseSerializer, ConstraintSerializer,
+    RecordSerializer, ColumnSerializer, DatabaseSerializer, ConstraintSerializer,
     RecordListParameterSerializer, TypeSerializer
 )
 from mathesar.api.utils import get_table_or_404
-from mathesar.utils.datafiles import create_datafile
 from mathesar.api.filters import DatabaseFilter
 
 logger = logging.getLogger(__name__)
@@ -217,40 +214,6 @@ class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
         database = self.get_object()
         serializer = TypeSerializer(database.supported_types, many=True)
         return Response(serializer.data)
-
-
-class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):
-    queryset = DataFile.objects.all().order_by('-created_at')
-    serializer_class = DataFileSerializer
-    pagination_class = DefaultLimitOffsetPagination
-
-    def partial_update(self, request, pk=None):
-        serializer = DataFileSerializer(
-            data=request.data, context={'request': request}, partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-
-        data_file = self.get_object()
-        if serializer.validated_data.get('header') is not None:
-            data_file.header = serializer.validated_data['header']
-            data_file.save()
-            serializer = DataFileSerializer(data_file, context={'request': request})
-            return Response(serializer.data)
-        else:
-            return Response(
-                {'detail': 'Method "PATCH" allowed only for header.'},
-                status=status.HTTP_405_METHOD_NOT_ALLOWED
-            )
-
-    def create(self, request):
-        serializer = DataFileSerializer(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        try:
-            datafile = create_datafile(serializer.validated_data)
-        except InvalidTableError:
-            raise ValidationError('Unable to tabulate data')
-        serializer = DataFileSerializer(datafile, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
