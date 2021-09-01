@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 from rest_framework.settings import api_settings
 
-from mathesar.filters import FILTER_OPTIONS_BY_TYPE_IDENTIFIER
+from mathesar.api.filters import FILTER_OPTIONS_BY_TYPE_IDENTIFIER
 from mathesar.models import Table, Schema, DataFile, Database, Constraint
 
 

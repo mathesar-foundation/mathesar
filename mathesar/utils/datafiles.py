@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
 
-from mathesar.serializers import DataFileSerializer
+from mathesar.api.serializers import DataFileSerializer
 from mathesar.imports.csv import get_sv_dialect
 from mathesar.errors import InvalidTableError
 from mathesar.models import DataFile

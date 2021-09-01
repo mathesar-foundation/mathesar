@@ -19,10 +19,10 @@ from db.records import BadGroupFormat, GroupFieldNotFound
 from db.columns import InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
 
 from mathesar.models import Table, Schema, DataFile, Database, Constraint
-from mathesar.pagination import (
+from mathesar.api.pagination import (
     ColumnLimitOffsetPagination, DefaultLimitOffsetPagination, TableLimitOffsetGroupPagination
 )
-from mathesar.serializers import (
+from mathesar.api.serializers import (
     TableSerializer, SchemaSerializer, RecordSerializer, DataFileSerializer,
     ColumnSerializer, DatabaseSerializer, ConstraintSerializer,
     RecordListParameterSerializer, TablePreviewSerializer, TypeSerializer
@@ -33,7 +33,7 @@ from mathesar.utils.tables import (
     gen_table_name
 )
 from mathesar.utils.datafiles import create_datafile
-from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
+from mathesar.api.filters import SchemaFilter, TableFilter, DatabaseFilter
 
 logger = logging.getLogger(__name__)
 
