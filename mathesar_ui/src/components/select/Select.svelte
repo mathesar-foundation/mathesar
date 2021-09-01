@@ -8,10 +8,9 @@
 </script>
 
 <script lang="ts">
-  import { 
-    onMount,
+  import {
     createEventDispatcher,
-    tick, 
+    tick,
   } from 'svelte';
   import { Dropdown } from '@mathesar-components';
   import type {
@@ -33,11 +32,7 @@
 
   let isOpen = false;
   let currentIndex = 0;
-  let parentHoverElem;
-
-  onMount(() => {
-    scrollBehavior();
-  });
+  let parentHoverElem: HTMLElement;
 
   function setValue(opt: SelectOption) {
     value = opt;
@@ -53,13 +48,13 @@
     }
   }
 
-  function scrollBehavior() {
+  function scrollBehavior(): void {
     if (parentHoverElem) {
-      const hoveredElem = parentHoverElem.querySelector('.hovered');
-      const container = parentHoverElem.parentElement;
+      const hoveredElem: HTMLElement = parentHoverElem.querySelector('.hovered');
+      const container: HTMLDivElement = parentHoverElem.parentElement;
       if (hoveredElem && container) {
-        let offsetValue;
-        offsetValue = container.getBoundingClientRect().bottom - hoveredElem.getBoundingClientRect().bottom;
+        const offsetValue: number = container.getBoundingClientRect().bottom
+        - hoveredElem.getBoundingClientRect().bottom;
         container.scrollTop -= offsetValue;
       }
     }
@@ -69,7 +64,7 @@
     currentIndex = options.indexOf(value);
   }
 
-  async function hoveredItem(index) {
+  async function hoveredItem(index): void {
     if (currentIndex === options.length - 1 && index > 0) {
       currentIndex = 0;
     } else if (currentIndex === 0 && index < 0) {
