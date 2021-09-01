@@ -3,6 +3,16 @@ from django_property_filter import PropertyFilterSet, PropertyBaseInFilter, Prop
 
 from mathesar.models import Schema, Table, Database
 
+FILTER_OPTIONS_BY_TYPE_NAME = {
+    'Boolean':
+        {
+            'eq': '<boolean>',
+            'ne': '<boolean>',
+            'is_null': None,
+            'is_not_null': None
+        },
+}
+
 
 class CharInFilter(PropertyBaseInFilter, PropertyCharFilter):
     pass
