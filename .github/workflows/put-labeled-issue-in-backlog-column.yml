@@ -8,7 +8,7 @@ jobs:
   Move_Labeled_Issue_On_Project_Board:
     runs-on: ubuntu-latest
     steps:
-    - name: Move meta issue ticket to the Meta column
+    - name: Move meta issue ticket to the Meta issues column
       uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
       with:
         project-url: "https://github.com/centerofci/mathesar/projects/2"
@@ -26,7 +26,7 @@ jobs:
         columns-to-ignore: "Meta issues, Ready"
         action-token: "${{ secrets.MATHESAR_GITHUB_TOKEN }}"
 
-    - name: Move detail ticket to the Detail needed column
+    - name: Move detail needed ticket to the Detail needed column
       uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
       with:
         project-url: "https://github.com/centerofci/mathesar/projects/2"
@@ -35,7 +35,7 @@ jobs:
         columns-to-ignore: "Meta issues, Detail needed"
         action-token: "${{ secrets.MATHESAR_GITHUB_TOKEN }}"
 
-    - name: Move detail ticket to the Detail needed column
+    - name: Move blocked ticket to the Blocked column
       uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
       with:
         project-url: "https://github.com/centerofci/mathesar/projects/2"
@@ -44,7 +44,7 @@ jobs:
         columns-to-ignore: "Meta issues, Blocked"
         action-token: "${{ secrets.MATHESAR_GITHUB_TOKEN }}"
 
-    - name: Remove future ticket from Blacklog
+    - name: Remove future ticket from Backlog project
       uses: justgiveacar/move-labeled-or-milestoned-issue@v3.0
       with:
         project-url: "https://github.com/centerofci/mathesar/projects/1"
@@ -52,7 +52,7 @@ jobs:
         delete-card: "true"
         action-token: "${{ secrets.MATHESAR_GITHUB_TOKEN }}"
 
-    - name: Move future ticket to Future
+    - name: Move future ticket to Future project
       uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
       with:
         project-url: "https://github.com/centerofci/mathesar/projects/2"
