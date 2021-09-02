@@ -35,18 +35,6 @@ class InputValueField(serializers.CharField):
         return value
 
 
-class NestedTableSerializer(serializers.HyperlinkedModelSerializer):
-    url = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Table
-        fields = ['id', 'name', 'url']
-
-    def get_url(self, obj):
-        request = self.context['request']
-        return request.build_absolute_uri(reverse('table-detail', kwargs={'pk': obj.pk}))
-
-
 class SchemaSerializer(serializers.HyperlinkedModelSerializer):
     name = serializers.CharField()
     database = ModelNameField(max_length=128)
