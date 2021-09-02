@@ -7,6 +7,8 @@ from db.types import base
 MONEY = base.MathesarCustomType.MONEY.value
 
 DB_TYPE = base.get_qualified_name(MONEY)
+VALUE = 'value'
+CURRENCY = 'currency'
 
 
 class Money(UserDefinedType):
@@ -31,7 +33,7 @@ def install(engine):
     """
 
     create_type_query = f"""
-    CREATE TYPE {DB_TYPE} AS (value NUMERIC, currency CHAR(3));
+    CREATE TYPE {DB_TYPE} AS ({VALUE} NUMERIC, {CURRENCY} CHAR(3));
     """
 
     with engine.begin() as conn:
