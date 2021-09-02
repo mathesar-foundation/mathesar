@@ -6,7 +6,7 @@ from sqlalchemy.exc import ProgrammingError
 
 from db.columns import InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
 from mathesar.api.pagination import ColumnLimitOffsetPagination
-from mathesar.api.serializers import ColumnSerializer
+from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.models import Table
 

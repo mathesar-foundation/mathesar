@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from sqlalchemy.exc import ProgrammingError, IntegrityError
 
 from mathesar.api.pagination import DefaultLimitOffsetPagination
-from mathesar.api.serializers import ConstraintSerializer
+from mathesar.api.serializers.constraints import ConstraintSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.models import Constraint
 
