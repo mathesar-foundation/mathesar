@@ -1,0 +1,61 @@
+name: labeled issue auto move
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  Move_Labeled_Issue_On_Project_Board:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move meta issue ticket to the Meta column
+        uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
+        with:
+          project-url: "https://github.com/centerofci/mathesar/projects/2"
+          label-name: "type: meta"
+          column-name: "Meta issues"
+          columns-to-ignore: "Meta issues"
+          action-token: "${{ secrets.MATHESAR_GITHUB_TOKEN }}"
+
+      - name: Move meta ready ticket to the Ready column
+      uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
+      with:
+        project-url: "https://github.com/centerofci/mathesar/projects/2"
+        label-name: "status: ready"
+        column-name: "Ready"
+        columns-to-ignore: "Meta issues"
+        action-token: "${{ secrets.MATHESAR_GITHUB_TOKEN }}"
+
+    - name: Move meta detail ticket to the Detail needed column
+      uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
+      with:
+        project-url: "https://github.com/centerofci/mathesar/projects/2"
+        label-name: "status: detail needed"
+        column-name: "Detail needed"
+        columns-to-ignore: "Detail needed"
+        action-token: "${{ secrets.MATHESAR_GITHUB_TOKEN }}"
+
+    - name: Move meta detail ticket to the Detail needed column
+      uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
+      with:
+        project-url: "https://github.com/centerofci/mathesar/projects/2"
+        label-name: "status: blocked"
+        column-name: "Blocked"
+        columns-to-ignore: "Blocked"
+        action-token: "${{ secrets.MATHESAR_GITHUB_TOKEN }}"
+
+    - name: Remove future ticket from Blacklog
+      uses: justgiveacar/move-labeled-or-milestoned-issue@v3.0
+      with:
+        project-url: "https://github.com/centerofci/mathesar/projects/1"
+        label-name: "status: future"
+        delete-card: "true"
+        action-token: "${{ secrets.MATHESAR_GITHUB_TOKEN }}"
+
+    - name: Move future ticket to Future
+      uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
+      with:
+        project-url: "https://github.com/centerofci/mathesar/projects/2"
+        label-name: "status: future"
+        column-name: "Triage"
+        action-token: "${{ secrets.MATHESAR_GITHUB_TOKEN }}"
