@@ -3,6 +3,7 @@ from rest_framework_nested import routers
 
 from mathesar import views
 from mathesar.api import legacy_viewsets
+from mathesar.api.viewsets.columns import ColumnViewSet
 from mathesar.api.viewsets.data_files import DataFileViewSet
 from mathesar.api.viewsets.databases import DatabaseViewSet
 from mathesar.api.viewsets.schemas import SchemaViewSet
@@ -17,7 +18,7 @@ router.register(r'data_files', DataFileViewSet, basename='data-file')
 
 table_router = routers.NestedSimpleRouter(router, r'tables', lookup='table')
 table_router.register(r'records', legacy_viewsets.RecordViewSet, basename='table-record')
-table_router.register(r'columns', legacy_viewsets.ColumnViewSet, basename='table-column')
+table_router.register(r'columns', ColumnViewSet, basename='table-column')
 table_router.register(r'constraints', legacy_viewsets.ConstraintViewSet, basename='table-constraint')
 
 urlpatterns = [
