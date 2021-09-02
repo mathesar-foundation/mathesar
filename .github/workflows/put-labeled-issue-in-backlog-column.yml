@@ -8,16 +8,16 @@ jobs:
   Move_Labeled_Issue_On_Project_Board:
     runs-on: ubuntu-latest
     steps:
-      - name: Move meta issue ticket to the Meta column
-        uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
-        with:
-          project-url: "https://github.com/centerofci/mathesar/projects/2"
-          label-name: "type: meta"
-          column-name: "Meta issues"
-          columns-to-ignore: "Meta issues"
-          action-token: "${{ secrets.MATHESAR_GITHUB_TOKEN }}"
+    - name: Move meta issue ticket to the Meta column
+      uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
+      with:
+        project-url: "https://github.com/centerofci/mathesar/projects/2"
+        label-name: "type: meta"
+        column-name: "Meta issues"
+        columns-to-ignore: "Meta issues"
+        action-token: "${{ secrets.MATHESAR_GITHUB_TOKEN }}"
 
-      - name: Move ready ticket to the Ready column
+    - name: Move ready ticket to the Ready column
       uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
       with:
         project-url: "https://github.com/centerofci/mathesar/projects/2"
