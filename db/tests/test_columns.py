@@ -415,6 +415,7 @@ type_set = {
     'INTEGER',
     'INTERVAL',
     'MATHESAR_TYPES.EMAIL',
+    'MATHESAR_TYPES.MONEY',
     'NUMERIC',
     'REAL',
     'SMALLINT',
