@@ -10,7 +10,7 @@ from sqlalchemy.exc import ProgrammingError, DataError, IntegrityError
 from db.types.alteration import UnsupportedTypeException
 from mathesar.api.filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
-from mathesar.api.serializers.serializers import TableSerializer, TablePreviewSerializer
+from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer
 from mathesar.models import Table
 from mathesar.utils.tables import (
     get_table_column_types, create_table_from_datafile, create_empty_table,

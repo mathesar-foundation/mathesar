@@ -5,7 +5,7 @@ from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, Filter
 
 from db.records import BadGroupFormat, GroupFieldNotFound
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
-from mathesar.api.serializers.serializers import RecordListParameterSerializer, RecordSerializer
+from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.models import Table
 

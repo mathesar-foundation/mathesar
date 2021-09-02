@@ -3,26 +3,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from mathesar.api.serializers.columns import SimpleColumnSerializer
-from mathesar.models import Table, Schema, DataFile
-
-
-class ModelNameField(serializers.CharField):
-    """
-    De-serializes the request field as a string, but serializes the response field as
-    `model.name`. Required to support passing and returing a model name from the
-    endpoint, while also storing the model as a related field.
-    """
-    def to_representation(self, value):
-        return value.name
-
-
-class SchemaSerializer(serializers.HyperlinkedModelSerializer):
-    name = serializers.CharField()
-    database = ModelNameField(max_length=128)
-
-    class Meta:
-        model = Schema
-        fields = ['id', 'name', 'database', 'has_dependencies']
+from mathesar.models import Table, DataFile
 
 
 class TableSerializer(serializers.ModelSerializer):
@@ -90,17 +71,6 @@ class TableSerializer(serializers.ModelSerializer):
         return data_files
 
 
-class RecordSerializer(serializers.BaseSerializer):
-    def to_representation(self, instance):
-        return instance._asdict()
-
-
 class TablePreviewSerializer(serializers.Serializer):
     name = serializers.CharField(required=False)
     columns = SimpleColumnSerializer(many=True)
-
-
-class RecordListParameterSerializer(serializers.Serializer):
-    filters = serializers.JSONField(required=False, default=[])
-    order_by = serializers.JSONField(required=False, default=[])
-    group_count_by = serializers.JSONField(required=False, default=[])
