@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 
 from mathesar.models import Database, Schema, Table
-from mathesar.api.serializers.serializers import DatabaseSerializer, SchemaSerializer, TableSerializer
+from mathesar.api.serializers.databases import DatabaseSerializer
+from mathesar.api.serializers.serializers import SchemaSerializer, TableSerializer
 
 
 def get_schema_list(request, database):

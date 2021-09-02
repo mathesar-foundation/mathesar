@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from mathesar.errors import InvalidTableError
 from mathesar.models import DataFile
 from mathesar.api.pagination import DefaultLimitOffsetPagination
-from mathesar.api.serializers.serializers import DataFileSerializer
+from mathesar.api.serializers.data_files import DataFileSerializer
 from mathesar.utils.datafiles import create_datafile
 
 

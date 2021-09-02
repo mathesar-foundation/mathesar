@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from mathesar.models import Database
 from mathesar.api.filters import DatabaseFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
-from mathesar.api.serializers.serializers import DatabaseSerializer, TypeSerializer
+from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
 
 
 class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
