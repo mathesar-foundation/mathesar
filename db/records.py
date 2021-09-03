@@ -348,3 +348,10 @@ def delete_record(table, engine, id_value):
     query = delete(table).where(primary_key_column == id_value)
     with engine.begin() as conn:
         return conn.execute(query)
+
+
+def get_count(table, engine, filters=[]):
+    col_name = "_count"
+    cols = [func.count().label(col_name)]
+    query = _get_query(table, None, None, None, filters, cols)
+    return _execute_query(query, engine)[0][col_name]

@@ -8,7 +8,7 @@ from sqlalchemy import text
 from mathesar import reflection
 from mathesar.models import Table, DataFile
 from db.tests.types import fixtures
-from db import tables
+from db.tables import operations as table_operations
 
 
 engine_with_types = fixtures.engine_with_types
@@ -679,7 +679,7 @@ def test_table_delete(create_table, client):
     table = create_table(table_name)
     table_count = len(Table.objects.all())
 
-    with patch.object(tables, 'delete_table') as mock_infer:
+    with patch.object(table_operations, 'delete_table') as mock_infer:
         response = client.delete(f'/api/v0/tables/{table.id}/')
     assert response.status_code == 204
 

@@ -1,7 +1,7 @@
 import os
 from rest_framework.exceptions import ValidationError
 
-from db.tables import update_table, SUPPORTED_TABLE_UPDATE_ARGS
+from db.tables.operations import update_table, SUPPORTED_TABLE_UPDATE_ARGS
 from db.schemas import update_schema, SUPPORTED_SCHEMA_UPDATE_ARGS
 
 

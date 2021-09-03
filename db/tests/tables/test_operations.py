@@ -1,10 +1,12 @@
-from unittest.mock import call, patch
+from psycopg2.errors import DependentObjectsStillExist
 import pytest
 from sqlalchemy import MetaData, select, Column, String, Table, ForeignKey, Integer
 from sqlalchemy.exc import NoSuchTableError
-from psycopg2.errors import DependentObjectsStillExist
+from unittest.mock import call, patch
 
-from db import tables, constants, columns
+from db import constants, columns
+from db.tables import operations as table_operations
+from db.tables import utils as table_utils
 from db.types import inference
 from db.tests.types import fixtures
 
@@ -29,7 +31,7 @@ temporary_testing_schema = fixtures.temporary_testing_schema
 @pytest.fixture
 def extracted_remainder_roster(engine_with_roster):
     engine, schema = engine_with_roster
-    tables.extract_columns_from_table(
+    table_operations.extract_columns_from_table(
         ROSTER,
         EXTRACTED_COLS,
         TEACHERS,
@@ -48,8 +50,8 @@ def extracted_remainder_roster(engine_with_roster):
 def test_table_creation_doesnt_reuse_defaults(engine_with_schema):
     column_list = []
     engine, schema = engine_with_schema
-    t1 = tables.create_mathesar_table("t1", schema, column_list, engine)
-    t2 = tables.create_mathesar_table("t2", schema, column_list, engine)
+    t1 = table_operations.create_mathesar_table("t1", schema, column_list, engine)
+    t2 = table_operations.create_mathesar_table("t2", schema, column_list, engine)
     assert all(
         [
             c1.name == c2.name and c1 != c2
@@ -62,22 +64,22 @@ def test_table_creation_doesnt_reuse_defaults(engine_with_schema):
 def test_delete_table(engine_with_schema, if_exists):
     engine, schema = engine_with_schema
     table_name = "test_delete_table"
-    tables.create_mathesar_table(table_name, schema, [], engine)
-    tables.delete_table(table_name, schema, engine, if_exists=if_exists)
+    table_operations.create_mathesar_table(table_name, schema, [], engine)
+    table_operations.delete_table(table_name, schema, engine, if_exists=if_exists)
     with pytest.raises(NoSuchTableError):
-        tables.reflect_table(table_name, schema, engine)
+        table_utils.reflect_table(table_name, schema, engine)
 
 
 def test_delete_table_no_table_if_exists_true(engine_with_schema):
     engine, schema = engine_with_schema
     # Just confirm we don't thrown an error
-    tables.delete_table("test_delete_table", schema, engine, if_exists=True)
+    table_operations.delete_table("test_delete_table", schema, engine, if_exists=True)
 
 
 def test_delete_table_no_table_if_exists_false(engine_with_schema):
     engine, schema = engine_with_schema
     with pytest.raises(NoSuchTableError):
-        tables.delete_table("test_delete_table", schema, engine, if_exists=False)
+        table_operations.delete_table("test_delete_table", schema, engine, if_exists=False)
 
 
 def _create_related_table(name, table, schema, engine):
@@ -97,11 +99,11 @@ def test_delete_table_restricted_foreign_key(engine_with_schema):
     table_name = "test_delete_table_restricted_foreign_key"
     related_table_name = "test_delete_table_restricted_foreign_key_related"
 
-    table = tables.create_mathesar_table(table_name, schema, [], engine)
+    table = table_operations.create_mathesar_table(table_name, schema, [], engine)
     _create_related_table(related_table_name, table, schema, engine)
 
     with pytest.raises(DependentObjectsStillExist):
-        tables.delete_table(table_name, schema, engine, cascade=False)
+        table_operations.delete_table(table_name, schema, engine, cascade=False)
 
 
 def test_delete_table_cascade_foreign_key(engine_with_schema):
@@ -109,12 +111,12 @@ def test_delete_table_cascade_foreign_key(engine_with_schema):
     table_name = "test_delete_table_cascade_foreign_key"
     related_table_name = "test_delete_table_cascade_foreign_key_related"
 
-    table = tables.create_mathesar_table(table_name, schema, [], engine)
+    table = table_operations.create_mathesar_table(table_name, schema, [], engine)
     related_table = _create_related_table(related_table_name, table, schema, engine)
 
-    tables.delete_table(table_name, schema, engine, cascade=True)
+    table_operations.delete_table(table_name, schema, engine, cascade=True)
 
-    related_table = tables.reflect_table(related_table.name, schema, engine)
+    related_table = table_utils.reflect_table(related_table.name, schema, engine)
     assert len(related_table.foreign_keys) == 0
 
 
@@ -122,18 +124,18 @@ def test_rename_table(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "test_rename_table"
     new_table_name = "test_rename_table_new"
-    old_table = tables.create_mathesar_table(table_name, schema, [], engine)
-    old_oid = tables.get_oid_from_table(old_table.name, old_table.schema, engine)
+    old_table = table_operations.create_mathesar_table(table_name, schema, [], engine)
+    old_oid = table_utils.get_oid_from_table(old_table.name, old_table.schema, engine)
 
-    tables.rename_table(table_name, schema, engine, new_table_name)
-    new_table = tables.reflect_table(new_table_name, schema, engine)
-    new_oid = tables.get_oid_from_table(new_table.name, new_table.schema, engine)
+    table_operations.rename_table(table_name, schema, engine, new_table_name)
+    new_table = table_utils.reflect_table(new_table_name, schema, engine)
+    new_oid = table_utils.get_oid_from_table(new_table.name, new_table.schema, engine)
 
     assert old_oid == new_oid
     assert new_table.name == new_table_name
 
     with pytest.raises(NoSuchTableError):
-        tables.reflect_table(table_name, schema, engine)
+        table_utils.reflect_table(table_name, schema, engine)
 
 
 def test_rename_table_foreign_key(engine_with_schema):
@@ -142,12 +144,12 @@ def test_rename_table_foreign_key(engine_with_schema):
     new_table_name = "test_rename_table_foreign_key_new"
     related_table_name = "test_rename_table_foreign_key_related"
 
-    table = tables.create_mathesar_table(table_name, schema, [], engine)
+    table = table_operations.create_mathesar_table(table_name, schema, [], engine)
     related_table = _create_related_table(related_table_name, table, schema, engine)
 
-    tables.rename_table(table_name, schema, engine, new_table_name)
+    table_operations.rename_table(table_name, schema, engine, new_table_name)
 
-    related_table = tables.reflect_table(related_table_name, schema, engine)
+    related_table = table_utils.reflect_table(related_table_name, schema, engine)
     fk = list(related_table.foreign_keys)[0]
     assert fk.column.table.name == new_table_name
 
@@ -156,7 +158,7 @@ def test_extract_columns_from_table_creates_tables(engine_with_roster):
     engine, schema = engine_with_roster
     teachers = "Teachers"
     roster_no_teachers = "Roster without Teachers"
-    tables.extract_columns_from_table(
+    table_operations.extract_columns_from_table(
         ROSTER,
         EXTRACTED_COLS,
         teachers,
@@ -277,7 +279,7 @@ def test_merge_columns_undoes_extract_columns_ddl_rem_ext(
         extracted_remainder_roster
 ):
     extracted, remainder, roster, engine, schema = extracted_remainder_roster
-    tables.merge_tables(
+    table_operations.merge_tables(
         remainder.name,
         extracted.name,
         "Merged Roster",
@@ -296,7 +298,7 @@ def test_merge_columns_undoes_extract_columns_ddl_ext_rem(
         extracted_remainder_roster
 ):
     extracted, remainder, roster, engine, schema = extracted_remainder_roster
-    tables.merge_tables(
+    table_operations.merge_tables(
         extracted.name,
         remainder.name,
         "Merged Roster",
@@ -315,7 +317,7 @@ def test_merge_columns_returns_original_data_rem_ext(
         extracted_remainder_roster
 ):
     extracted, remainder, roster, engine, schema = extracted_remainder_roster
-    tables.merge_tables(
+    table_operations.merge_tables(
         remainder.name,
         extracted.name,
         "Merged Roster",
@@ -353,7 +355,7 @@ def test_merge_columns_returns_original_data_ext_rem(
         extracted_remainder_roster
 ):
     extracted, remainder, roster, engine, schema = extracted_remainder_roster
-    tables.merge_tables(
+    table_operations.merge_tables(
         extracted.name,
         remainder.name,
         "Merged Roster",
@@ -398,7 +400,7 @@ def test_move_columns_moves_column_from_ext_to_rem(extracted_remainder_roster):
     expect_remainder_cols = remainder_cols + [moving_col]
     extracted_name = extracted.name
     remainder_name = remainder.name
-    tables.move_columns_between_related_tables(
+    table_operations.move_columns_between_related_tables(
         extracted_name,
         remainder_name,
         [moving_col],
@@ -426,7 +428,7 @@ def test_move_columns_moves_column_from_rem_to_ext(extracted_remainder_roster):
     expect_extracted_cols = extracted_cols + [moving_col]
     extracted_name = extracted.name
     remainder_name = remainder.name
-    tables.move_columns_between_related_tables(
+    table_operations.move_columns_between_related_tables(
         remainder_name,
         extracted_name,
         [moving_col],
@@ -443,25 +445,11 @@ def test_move_columns_moves_column_from_rem_to_ext(extracted_remainder_roster):
     assert sorted(actual_remainder_cols) == sorted(expect_remainder_cols)
 
 
-def test_get_enriched_column_table(engine):
-    abc = "abc"
-    table = Table("testtable", MetaData(), Column(abc, String), Column('def', String))
-    enriched_table = tables.get_enriched_column_table(table, engine=engine)
-    assert enriched_table.columns[abc].engine == engine
-
-
-def test_get_enriched_column_table_no_engine():
-    abc = "abc"
-    table = Table("testtable", MetaData(), Column(abc, String), Column('def', String))
-    enriched_table = tables.get_enriched_column_table(table)
-    assert enriched_table.columns[abc].engine is None
-
-
 def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
     column_list = []
     engine, schema = engine_with_schema
     table_name = "t1"
-    tables.create_mathesar_table(
+    table_operations.create_mathesar_table(
         table_name, schema, column_list, engine
     )
     with patch.object(inference, "infer_column_type") as mock_infer:
@@ -479,7 +467,7 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
     column_list = [col1, col2]
     engine, schema = engine_with_schema
     table_name = "table_with_columns"
-    tables.create_mathesar_table(
+    table_operations.create_mathesar_table(
         table_name, schema, column_list, engine
     )
     with patch.object(inference, "infer_column_type") as mock_infer:
@@ -509,7 +497,7 @@ def test_update_table_column_types_skips_pkey_columns(engine_with_schema):
     column_list = [Column("checkcol", String, primary_key=True)]
     engine, schema = engine_with_schema
     table_name = "t1"
-    tables.create_mathesar_table(
+    table_operations.create_mathesar_table(
         table_name, schema, column_list, engine
     )
     with patch.object(inference, "infer_column_type") as mock_infer:

@@ -1,9 +1,8 @@
-import warnings
+"""
+This file contains functions that involve altering tables at the database level.
+"""
 
-from sqlalchemy import (
-    Column, String, Table, MetaData, func, select, ForeignKey, literal, exists,
-    join, inspect, and_
-)
+from sqlalchemy import Column, String, Table, MetaData, func, select, ForeignKey, literal, exists
 from sqlalchemy.schema import DDLElement, DropTable
 from sqlalchemy.ext import compiler
 from alembic.migration import MigrationContext
@@ -11,24 +10,11 @@ from alembic.operations import Operations
 from sqlalchemy.exc import NoSuchTableError, InternalError
 from psycopg2.errors import DependentObjectsStillExist
 
-from db import columns, constants, schemas, records
-from db.utils import execute_statement
+from db import columns, constants, schemas
+from db.tables.utils import reflect_table
 
-
-TEMP_SCHEMA = f"{constants.MATHESAR_PREFIX}temp_schema"
-TEMP_TABLE = f"{constants.MATHESAR_PREFIX}temp_table_%s"
 
 SUPPORTED_TABLE_UPDATE_ARGS = {'name', 'sa_columns'}
-
-
-def create_string_column_table(name, schema, column_names, engine):
-    """
-    This method creates a Postgres table in the specified schema, with all
-    columns being String type.
-    """
-    columns_ = [Column(column_name, String) for column_name in column_names]
-    table = create_mathesar_table(name, schema, columns_, engine)
-    return table
 
 
 def create_mathesar_table(name, schema, columns_, engine, metadata=None):
@@ -51,6 +37,16 @@ def create_mathesar_table(name, schema, columns_, engine, metadata=None):
         schema=schema
     )
     table.create(engine)
+    return table
+
+
+def create_string_column_table(name, schema, column_names, engine):
+    """
+    This method creates a Postgres table in the specified schema, with all
+    columns being String type.
+    """
+    columns_ = [Column(column_name, String) for column_name in column_names]
+    table = create_mathesar_table(name, schema, columns_, engine)
     return table
 
 
@@ -104,49 +100,6 @@ def update_table(table_name, table_oid, schema, engine, update_data):
         rename_table(table_name, schema, engine, update_data['name'])
     if 'sa_columns' in update_data:
         columns.batch_update_columns(table_oid, engine, update_data['sa_columns'])
-
-
-def extract_columns_from_table(
-        old_table_name,
-        extracted_column_names,
-        extracted_table_name,
-        remainder_table_name,
-        schema,
-        engine,
-        drop_original_table=False,
-):
-    old_table = reflect_table(old_table_name, schema, engine)
-    old_columns = (
-        columns.MathesarColumn.from_column(col) for col in old_table.columns
-    )
-    old_non_default_columns = [
-        col for col in old_columns if not col.is_default
-    ]
-    extracted_columns, remainder_columns = _split_column_list(
-        old_non_default_columns, extracted_column_names,
-    )
-    with engine.begin() as conn:
-        extracted_table, remainder_table, remainder_fk = _create_split_tables(
-            extracted_table_name,
-            extracted_columns,
-            remainder_table_name,
-            remainder_columns,
-            schema,
-            engine,
-        )
-        split_ins = _create_split_insert_stmt(
-            old_table,
-            extracted_table,
-            extracted_columns,
-            remainder_table,
-            remainder_columns,
-            remainder_fk,
-        )
-        conn.execute(split_ins)
-    if drop_original_table:
-        old_table.drop()
-
-    return extracted_table, remainder_table, remainder_fk
 
 
 def _split_column_list(columns_, extracted_column_names):
@@ -241,6 +194,49 @@ def _create_split_insert_stmt(
     return split_ins
 
 
+def extract_columns_from_table(
+        old_table_name,
+        extracted_column_names,
+        extracted_table_name,
+        remainder_table_name,
+        schema,
+        engine,
+        drop_original_table=False,
+):
+    old_table = reflect_table(old_table_name, schema, engine)
+    old_columns = (
+        columns.MathesarColumn.from_column(col) for col in old_table.columns
+    )
+    old_non_default_columns = [
+        col for col in old_columns if not col.is_default
+    ]
+    extracted_columns, remainder_columns = _split_column_list(
+        old_non_default_columns, extracted_column_names,
+    )
+    with engine.begin() as conn:
+        extracted_table, remainder_table, remainder_fk = _create_split_tables(
+            extracted_table_name,
+            extracted_columns,
+            remainder_table_name,
+            remainder_columns,
+            schema,
+            engine,
+        )
+        split_ins = _create_split_insert_stmt(
+            old_table,
+            extracted_table,
+            extracted_columns,
+            remainder_table,
+            remainder_columns,
+            remainder_fk,
+        )
+        conn.execute(split_ins)
+    if drop_original_table:
+        old_table.drop()
+
+    return extracted_table, remainder_table, remainder_fk
+
+
 def merge_tables(
         table_name_one,
         table_name_two,
@@ -287,51 +283,6 @@ def merge_tables(
             table_one.drop(bind=engine)
 
     return merged_table
-
-
-def move_columns_between_related_tables(
-        source_table_name,
-        target_table_name,
-        column_names,
-        schema,
-        engine,
-):
-    TEMP_MERGED_TABLE_NAME = f"{constants.MATHESAR_PREFIX}_temp_merge_table"
-    source_table = reflect_table(source_table_name, schema, engine)
-    target_table = reflect_table(
-        target_table_name, schema, engine, metadata=source_table.metadata
-    )
-    relationship = _find_table_relationship(source_table, target_table)
-    moving_columns = [source_table.columns[n] for n in column_names]
-    assert _check_columns(relationship, source_table, moving_columns)
-    ext_args = _get_column_moving_extraction_args(
-        relationship,
-        target_table,
-        target_table_name,
-        source_table,
-        source_table_name,
-        moving_columns,
-        column_names,
-    )
-    (extracted_table_name, remainder_table_name, extraction_columns) = ext_args
-    merge_tables(
-        source_table_name,
-        target_table_name,
-        TEMP_MERGED_TABLE_NAME,
-        schema,
-        engine,
-        drop_original_tables=True,
-    )
-    extracted_table, remainder_table, _ = extract_columns_from_table(
-        TEMP_MERGED_TABLE_NAME,
-        [c.name for c in extraction_columns],
-        extracted_table_name,
-        remainder_table_name,
-        schema,
-        engine,
-        drop_original_table=True,
-    )
-    return extracted_table, remainder_table
 
 
 def _find_table_relationship(table_one, table_two):
@@ -390,82 +341,49 @@ def _get_column_moving_extraction_args(
     return extracted_table_name, remainder_table_name, extraction_columns
 
 
-def reflect_table_from_oid(oid, engine, connection_to_use=None):
-    metadata = MetaData()
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_class = Table("pg_class", metadata, autoload_with=engine)
-        pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
-    sel = (
-        select(pg_namespace.c.nspname, pg_class.c.relname)
-        .select_from(
-            join(
-                pg_class,
-                pg_namespace,
-                pg_class.c.relnamespace == pg_namespace.c.oid
-            )
-        )
-        .where(pg_class.c.oid == oid)
+def move_columns_between_related_tables(
+        source_table_name,
+        target_table_name,
+        column_names,
+        schema,
+        engine,
+):
+    TEMP_MERGED_TABLE_NAME = f"{constants.MATHESAR_PREFIX}_temp_merge_table"
+    source_table = reflect_table(source_table_name, schema, engine)
+    target_table = reflect_table(
+        target_table_name, schema, engine, metadata=source_table.metadata
     )
-    result = execute_statement(engine, sel, connection_to_use)
-    schema, table_name = result.fetchall()[0]
-    return reflect_table(table_name, schema, engine, connection_to_use=connection_to_use)
-
-
-def get_enriched_column_table(raw_sa_table, engine=None):
-    table_columns = [
-        columns.MathesarColumn.from_column(c) for c in raw_sa_table.columns
-    ]
-    if engine is not None:
-        for col in table_columns:
-            col.add_engine(engine)
-    return Table(
-        raw_sa_table.name,
-        MetaData(),
-        *table_columns,
-        schema=raw_sa_table.schema
+    relationship = _find_table_relationship(source_table, target_table)
+    moving_columns = [source_table.columns[n] for n in column_names]
+    assert _check_columns(relationship, source_table, moving_columns)
+    ext_args = _get_column_moving_extraction_args(
+        relationship,
+        target_table,
+        target_table_name,
+        source_table,
+        source_table_name,
+        moving_columns,
+        column_names,
     )
-
-
-def get_table_oids_from_schema(schema_oid, engine):
-    metadata = MetaData()
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_class = Table("pg_class", metadata, autoload_with=engine)
-    sel = (
-        select(pg_class.c.oid)
-        .where(
-            and_(pg_class.c.relkind == 'r', pg_class.c.relnamespace == schema_oid)
-        )
+    (extracted_table_name, remainder_table_name, extraction_columns) = ext_args
+    merge_tables(
+        source_table_name,
+        target_table_name,
+        TEMP_MERGED_TABLE_NAME,
+        schema,
+        engine,
+        drop_original_tables=True,
     )
-    with engine.begin() as conn:
-        table_oids = conn.execute(sel).fetchall()
-    return table_oids
-
-
-def get_oid_from_table(name, schema, engine):
-    inspector = inspect(engine)
-    return inspector.get_table_oid(name, schema=schema)
-
-
-def reflect_table(name, schema, engine, metadata=None, connection_to_use=None):
-    if metadata is None:
-        metadata = MetaData(bind=engine)
-    autoload_with = engine if connection_to_use is None else connection_to_use
-    return Table(name, metadata, schema=schema, autoload_with=autoload_with, extend_existing=True)
-
-
-def create_empty_table(name):
-    return Table(name, MetaData())
-
-
-def get_count(table, engine, filters=[]):
-    col_name = "_count"
-    cols = [func.count().label(col_name)]
-    query = records._get_query(table, None, None, None, filters, cols)
-    return records._execute_query(query, engine)[0][col_name]
+    extracted_table, remainder_table, _ = extract_columns_from_table(
+        TEMP_MERGED_TABLE_NAME,
+        [c.name for c in extraction_columns],
+        extracted_table_name,
+        remainder_table_name,
+        schema,
+        engine,
+        drop_original_table=True,
+    )
+    return extracted_table, remainder_table
 
 
 class CreateTableAs(DDLElement):

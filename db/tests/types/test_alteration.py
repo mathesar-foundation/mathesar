@@ -6,7 +6,10 @@ from psycopg2.errors import InvalidParameterValue
 from sqlalchemy import Table, Column, MetaData
 from sqlalchemy import String, Numeric
 from sqlalchemy.exc import DataError
-from db import types, columns, tables
+
+from db import types, columns
+from db.tables.operations import create_mathesar_table
+from db.tables import utils as table_utils
 from db.tests.types import fixtures
 from db.types import alteration
 from db.types.base import PostgresType, MathesarCustomType, get_qualified_name, get_available_types
@@ -551,7 +554,7 @@ def test_alter_column_casts_data_gen(
         res = conn.execute(sel).fetchall()
     actual_value = res[0][0]
     assert actual_value == out_val
-    table_oid = tables.get_oid_from_table(TABLE_NAME, schema, engine)
+    table_oid = table_utils.get_oid_from_table(TABLE_NAME, schema, engine)
     actual_default = columns.get_column_default(table_oid, 0, engine)
     assert actual_default == out_val
 
@@ -716,7 +719,7 @@ def test_get_column_cast_records(engine_email_type):
     column_list = [col1, col2]
     engine, schema = engine_email_type
     table_name = "table_with_columns"
-    table = tables.create_mathesar_table(
+    table = create_mathesar_table(
         table_name, schema, column_list, engine
     )
     ins = table.insert().values(
@@ -747,7 +750,7 @@ def test_get_column_cast_records_options(engine_email_type):
     column_list = [col1, col2]
     engine, schema = engine_email_type
     table_name = "table_with_columns"
-    table = tables.create_mathesar_table(
+    table = create_mathesar_table(
         table_name, schema, column_list, engine
     )
     ins = table.insert().values(

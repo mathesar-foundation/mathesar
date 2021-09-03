@@ -2,7 +2,8 @@ from sqlalchemy import text, DDL, select
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 
-from db import columns, tables
+from db import columns
+from db.tables import utils as table_utils
 from db.types import base, email
 from db.utils import execute_statement
 
@@ -109,9 +110,9 @@ def alter_column_type(
     target_type = supported_types.get(target_type_str)
     schema = table.schema
 
-    table_oid = tables.get_oid_from_table(table.name, schema, engine)
+    table_oid = table_utils.get_oid_from_table(table.name, schema, engine)
     # Re-reflect table so that column is accurate
-    table = tables.reflect_table_from_oid(table_oid, engine, connection)
+    table = table_utils.reflect_table_from_oid(table_oid, engine, connection)
     column = table.columns[column_name]
     column_index = columns.get_column_index_from_name(table_oid, column_name, engine, connection)
 
