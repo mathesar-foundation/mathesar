@@ -63,7 +63,9 @@ def test_money_type_insert_from_dict(engine_email_type):
         Column("sales_amounts", money.Money),
     )
     test_table.create()
-    ins = test_table.insert().values(sales_amounts={'value': 1234.12, 'currency': 'EUR'})
+    ins = test_table.insert().values(
+        sales_amounts={money.VALUE: 1234.12, money.CURRENCY: 'EUR'}
+    )
     with engine.begin() as conn:
         conn.execute(ins)
 
@@ -94,5 +96,5 @@ def test_money_type_select_to_dict(engine_email_type):
     with engine.begin() as conn:
         res = conn.execute(sel)
         actual_val = res.fetchone()[0]
-        expect_val = {'value': 11.11, 'currency': 'HKD'}
+        expect_val = {money.VALUE: 11.11, money.CURRENCY: 'HKD'}
         assert actual_val == expect_val
