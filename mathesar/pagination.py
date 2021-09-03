@@ -3,16 +3,7 @@ from collections import OrderedDict
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
-from mathesar.models import Table
-from rest_framework.exceptions import NotFound
-
-
-def get_table_or_404(queryset, pk):
-    try:
-        table = queryset.get(id=pk)
-    except Table.DoesNotExist:
-        raise NotFound
-    return table
+from mathesar.utils.api import get_table_or_404
 
 
 class DefaultLimitOffsetPagination(LimitOffsetPagination):

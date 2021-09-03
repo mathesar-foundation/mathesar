@@ -34,16 +34,9 @@ from mathesar.utils.tables import (
 )
 from mathesar.utils.datafiles import create_datafile
 from mathesar.filters import SchemaFilter, TableFilter, DatabaseFilter
+from mathesar.utils.api import get_table_or_404
 
 logger = logging.getLogger(__name__)
-
-
-def get_table_or_404(pk):
-    try:
-        table = Table.objects.get(id=pk)
-    except Table.DoesNotExist:
-        raise NotFound
-    return table
 
 
 class SchemaViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -220,7 +213,7 @@ class ColumnViewSet(viewsets.ViewSet):
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):
-        table = get_table_or_404(table_pk)
+        table = get_table_or_404(Table.objects, table_pk)
         try:
             column = table.sa_columns[int(pk)]
         except IndexError:
@@ -229,7 +222,7 @@ class ColumnViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request, table_pk=None):
-        table = get_table_or_404(table_pk)
+        table = get_table_or_404(Table.objects, table_pk)
         # We only support adding a single column through the API.
         serializer = ColumnSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
@@ -276,7 +269,7 @@ class ColumnViewSet(viewsets.ViewSet):
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
-        table = get_table_or_404(table_pk)
+        table = get_table_or_404(Table.objects, table_pk)
         serializer = ColumnSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         try:
@@ -309,7 +302,7 @@ class ColumnViewSet(viewsets.ViewSet):
         return Response(out_serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
-        table = get_table_or_404(table_pk)
+        table = get_table_or_404(Table.objects, table_pk)
         try:
             table.drop_column(pk)
         except IndexError:
@@ -352,7 +345,7 @@ class RecordViewSet(viewsets.ViewSet):
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):
-        table = get_table_or_404(table_pk)
+        table = get_table_or_404(Table.objects, table_pk)
         record = table.get_record(pk)
         if not record:
             raise NotFound
@@ -360,7 +353,7 @@ class RecordViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create(self, request, table_pk=None):
-        table = get_table_or_404(table_pk)
+        table = get_table_or_404(Table.objects, table_pk)
         # We only support adding a single record through the API.
         assert isinstance((request.data), dict)
         record = table.create_record_or_records(request.data)
@@ -368,13 +361,13 @@ class RecordViewSet(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
-        table = get_table_or_404(table_pk)
+        table = get_table_or_404(Table.objects, table_pk)
         record = table.update_record(pk, request.data)
         serializer = RecordSerializer(record)
         return Response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
-        table = get_table_or_404(table_pk)
+        table = get_table_or_404(Table.objects, table_pk)
         table.delete_record(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -432,7 +425,7 @@ class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
         return Constraint.objects.filter(table__id=self.kwargs['table_pk']).order_by('-created_at')
 
     def create(self, request, table_pk=None):
-        table = get_table_or_404(table_pk)
+        table = get_table_or_404(Table.objects, table_pk)
         serializer = ConstraintSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         # If we don't do this, the request.data QueryDict will only return the last column's name
