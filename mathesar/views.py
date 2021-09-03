@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 
 from mathesar.models import Database, Schema, Table
-from mathesar.serializers import DatabaseSerializer, SchemaSerializer, TableSerializer
+from mathesar.api.serializers.databases import DatabaseSerializer
+from mathesar.api.serializers.schemas import SchemaSerializer
+from mathesar.api.serializers.tables import TableSerializer
 
 
 def get_schema_list(request, database):
@@ -25,12 +27,12 @@ def get_database_list(request):
 def get_table_list(request, schema):
     if schema is None:
         return []
-    tables_serializer = TableSerializer(
+    table_serializer = TableSerializer(
         Table.objects.filter(schema=schema),
         many=True,
         context={'request': request}
     )
-    return tables_serializer.data
+    return table_serializer.data
 
 
 def get_common_data(request, database, schema=None):
