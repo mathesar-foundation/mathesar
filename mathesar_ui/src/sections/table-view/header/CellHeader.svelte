@@ -185,9 +185,13 @@
       mathesarType,
     );
 
-  $: mathesarType = determineMathesarType(mathesarTypes, column.type);
+  let mathesarType: MathesarType;
+  $: {
+    if (mathesarTypes) {
+      mathesarType = determineMathesarType(mathesarTypes, column.type);
+      mathesarTypeIcon = getIcon(mathesarType);
+    };
 
-  $: mathesarTypeIcon = getIcon(mathesarType);
 
 </script>
 
