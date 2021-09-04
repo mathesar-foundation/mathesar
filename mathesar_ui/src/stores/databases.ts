@@ -98,7 +98,7 @@ export const databasesToMathesarTypesStore: Readable<DatabasesToMathesarTypes> =
     databases,
     ($databaseStoreData, set) => {
       const knownDatabases = $databaseStoreData.data;
-      if (knownDatabases) {
+      if (knownDatabases && notEmpty(knownDatabases)) {
         void getDatabasesToMathesarTypes(knownDatabases).then(set);
       }
     },
@@ -111,7 +111,7 @@ export const currentDBMathesarTypes: Readable<MathesarType[]> =
     [databasesToMathesarTypesStore, currentDBId],
     ([databasesToMathesarTypes, databaseId]) => {
       const mathesarTypes = databasesToMathesarTypes && databaseId
-        ? databasesToMathesarTypes[databaseId] as MathesarType[]
+        ? databasesToMathesarTypes.get(databaseId)
         : undefined;
       return mathesarTypes;
     },

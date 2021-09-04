@@ -99,7 +99,7 @@
   ) {
     // eslint-disable-next-line operator-linebreak
     const validDbTypeTargets =
-      validDbTypeTargetsPerMathesarType[mathesarType.identifier];
+      validDbTypeTargetsPerMathesarType.get(mathesarType.identifier);
     const atLeastOne = notEmpty(validDbTypeTargets);
     return atLeastOne;
   }
