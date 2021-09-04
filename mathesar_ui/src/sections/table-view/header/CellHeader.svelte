@@ -163,7 +163,7 @@
     }
   }
 
-  let validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType;
+  let validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType | undefined;
   $: {
     if (mathesarTypes) {
       // eslint-disable-next-line operator-linebreak
@@ -172,7 +172,7 @@
     }
   }
 
-  let validMathesarTypeTargets: MathesarType[];
+  let validMathesarTypeTargets: MathesarType[] | undefined;
   $: {
     if (mathesarTypes && validDbTypeTargetsPerMathesarType) {
       // eslint-disable-next-line operator-linebreak
@@ -197,12 +197,13 @@
           validDbTypeTargetsPerMathesarType,
           mathesarType,
         );
+    } else {
+      // This branch won't be reached.
     }
   }
 
-  // TODO expand type definition to union with undefined
-  let mathesarType: MathesarType;
-  let mathesarTypeIcon: string;
+  let mathesarType: MathesarType | undefined;
+  let mathesarTypeIcon: string | undefined;
   $: {
     if (mathesarTypes) {
       mathesarType = determineMathesarType(mathesarTypes, column.type);
