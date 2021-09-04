@@ -610,7 +610,6 @@ export function clearTable(db: string, id: number): void {
   databaseMap.get(db)?.delete(id);
 }
 
-// TODO finish implementing and consider moving
 export async function patchColumnType(
   tableId: number,
   columnId: number,

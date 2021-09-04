@@ -36,6 +36,7 @@
     isAdvancedOptionsOpen = false;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   function sortByColumn(column: TableColumn, order: 'asc' | 'desc') {
     const newSort: SortOption = new Map(sort);
     if (sort?.get(column.name) === order) {
@@ -47,6 +48,7 @@
     dispatch('reload');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   function groupByColumn(column: TableColumn) {
     const oldSize = group?.size || 0;
     const newGroup = new Set(group);
@@ -64,35 +66,33 @@
     });
   }
 
-  function determineDataIcon(type: string) {
-    switch (type) {
-      case 'INTEGER':
-      case 'NUMERIC':
-        return '#';
-      case 'VARCHAR':
-        return 'T';
-      default:
-        return 'i';
-    }
+  function determineMathesarType(
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    mathesarTypes: MathesarType[],
+    dbType: DbType,
+  ) {
+    const mathesarTypeHasItAsTarget = (mt: MathesarType) => mt.db_types.includes(dbType);
+    return mathesarTypes.find(mathesarTypeHasItAsTarget);
   }
 
-  // TODO use mathesarTypes instead of manual construction
-  function determineDataTitle(type: string) {
-    switch (type) {
-      case 'INTEGER':
-      case 'NUMERIC':
-        return 'Number';
-      case 'VARCHAR':
-        return 'Text';
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  function getIcon(mathesarType: MathesarType): string {
+    switch (mathesarType.name) {
+      case 'Number':
+        return '#';
+      case 'Text':
+        return 'T';
       default:
-        return 'Else';
+        return '?';
     }
   }
 
   type DbType = string;
 
   function mathesarTypeHasAtLeastOneValidDbTypeTarget(
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType,
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     mathesarType: MathesarType,
   ) {
     // eslint-disable-next-line operator-linebreak
@@ -102,7 +102,8 @@
     return atLeastOne;
   }
 
-  function choosePreferredDbType(
+  function choosePreferredDbTypeTarget(
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     mathesarType: MathesarType,
     validDbTypeTargets: DbType[],
   ): DbType {
@@ -112,12 +113,16 @@
 
   type DbTypeTargetsPerMathesarType = Map<MathesarType['identifier'], DbType[]>;
 
-  function getValidDbTypeTargetsPerColumnAndMathesarType(
+  function getValidDbTypeTargetsPerMathesarType(
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     column: TableColumn,
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     mathesarTypes: MathesarType[],
   ): DbTypeTargetsPerMathesarType {
     function getValidDbTypeTargetsForColumnAndMathesarType(
+      // eslint-disable-next-line @typescript-eslint/no-shadow
       column: TableColumn,
+      // eslint-disable-next-line @typescript-eslint/no-shadow
       mathesarType: MathesarType,
     ): DbType[] {
       return intersection(
@@ -126,6 +131,7 @@
       );
     }
     const pairs = mathesarTypes.map(
+      // eslint-disable-next-line @typescript-eslint/no-shadow
       (mathesarType) => pair(
         mathesarType.identifier,
         getValidDbTypeTargetsForColumnAndMathesarType(column, mathesarType),
@@ -135,9 +141,13 @@
   }
 
   function patchColumnToMathesarType(
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     tableId: number,
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     columnId: number,
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType,
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     mathesarType: MathesarType,
   ): void {
     if (validDbTypeTargetsPerMathesarType) {
@@ -147,14 +157,14 @@
       // eslint-disable-next-line operator-linebreak
       const validDbTypeTargets =
         validDbTypeTargetsPerMathesarType[mathesarType.identifier] as DbType[];
-      const newDbType = choosePreferredDbType(mathesarType, validDbTypeTargets);
+      const newDbType = choosePreferredDbTypeTarget(mathesarType, validDbTypeTargets);
 
       void patchColumnType(tableId, columnId, newDbType);
     }
   }
 
   $: validDbTypeTargetsPerMathesarType = mathesarTypes
-    ? getValidDbTypeTargetsPerColumnAndMathesarType(column, mathesarTypes)
+    ? getValidDbTypeTargetsPerMathesarType(column, mathesarTypes)
     : undefined;
 
   $: validMathesarTypeTargets = mathesarTypes && validDbTypeTargetsPerMathesarType
@@ -165,7 +175,8 @@
     )
     : undefined;
 
-  $: patchType = (mathesarType: MathesarType) =>
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  $: patchType = (mathesarType: MathesarType): void =>
     // eslint-disable-next-line implicit-arrow-linebreak
     patchColumnToMathesarType(
       tableId,
@@ -173,6 +184,10 @@
       validDbTypeTargetsPerMathesarType,
       mathesarType,
     );
+
+  $: mathesarType = determineMathesarType(mathesarTypes, column.type);
+
+  $: mathesarTypeIcon = getIcon(mathesarType);
 
 </script>
 
@@ -183,7 +198,7 @@
       left:{columnPosition.get(column.name).left + paddingLeft}px;"
 >
   <span class="type">
-    {determineDataIcon(column.type)}
+    {mathesarTypeIcon}
   </span>
   <span class="name">{column.name}</span>
 
@@ -220,10 +235,8 @@
             on:click={() => { isAdvancedOptionsOpen = true; }}
           >
             <div>
-              <span class="data-icon">{determineDataIcon(column.type)}</span>
-              <span>
-                {determineDataTitle(column.type)}
-              </span>
+              <span class="data-icon">{mathesarTypeIcon}</span>
+              <span>{mathesarType.name}</span>
             </div>
             <div>
               <Icon class="right-icon" data={faCog} />
