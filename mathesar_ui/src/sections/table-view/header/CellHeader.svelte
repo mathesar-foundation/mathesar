@@ -163,34 +163,52 @@
     }
   }
 
-  $: validDbTypeTargetsPerMathesarType = mathesarTypes
-    ? getValidDbTypeTargetsPerMathesarType(column, mathesarTypes)
-    : undefined;
+  let validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType;
+  $: {
+    if (mathesarTypes) {
+      // eslint-disable-next-line operator-linebreak
+      validDbTypeTargetsPerMathesarType =
+        getValidDbTypeTargetsPerMathesarType(column, mathesarTypes);
+    }
+  }
 
-  $: validMathesarTypeTargets = mathesarTypes && validDbTypeTargetsPerMathesarType
-    ? mathesarTypes.filter(
-      (mt: MathesarType) =>
-        // eslint-disable-next-line implicit-arrow-linebreak
-        mathesarTypeHasAtLeastOneValidDbTypeTarget(validDbTypeTargetsPerMathesarType, mt),
-    )
-    : undefined;
+  let validMathesarTypeTargets: MathesarType[];
+  $: {
+    if (mathesarTypes && validDbTypeTargetsPerMathesarType) {
+      // eslint-disable-next-line operator-linebreak
+      validMathesarTypeTargets =
+        mathesarTypes.filter(
+          (mt: MathesarType) =>
+            // eslint-disable-next-line implicit-arrow-linebreak
+            mathesarTypeHasAtLeastOneValidDbTypeTarget(validDbTypeTargetsPerMathesarType, mt),
+        );
+    }
+  }
 
+  let patchToType: (mathesarType: MathesarType) => void;
   // eslint-disable-next-line @typescript-eslint/no-shadow
-  $: patchType = (mathesarType: MathesarType): void =>
-    // eslint-disable-next-line implicit-arrow-linebreak
-    patchColumnToMathesarType(
-      tableId,
-      columnId,
-      validDbTypeTargetsPerMathesarType,
-      mathesarType,
-    );
+  $: {
+    if (validDbTypeTargetsPerMathesarType) {
+      patchToType = (mathesarType) =>
+        // eslint-disable-next-line implicit-arrow-linebreak
+        patchColumnToMathesarType(
+          tableId,
+          columnId,
+          validDbTypeTargetsPerMathesarType,
+          mathesarType,
+        );
+    }
+  }
 
+  // TODO expand type definition to union with undefined
   let mathesarType: MathesarType;
+  let mathesarTypeIcon: string;
   $: {
     if (mathesarTypes) {
       mathesarType = determineMathesarType(mathesarTypes, column.type);
       mathesarTypeIcon = getIcon(mathesarType);
-    };
+    }
+  }
 
 
 </script>
@@ -222,7 +240,7 @@
             {#each validMathesarTypeTargets as mathesarType}
               <li>
                 <button
-                  on:click={ () => patchType(mathesarType) }
+                  on:click={ () => patchToType(mathesarType) }
                 >
                   {mathesarType.name}
                 </button>
