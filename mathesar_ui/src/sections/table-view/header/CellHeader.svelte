@@ -77,11 +77,10 @@
 
   // eslint-disable-next-line @typescript-eslint/no-shadow
   function getIcon(mathesarType: MathesarType): string {
-    // TODO switch to using mathesarType.identifier
-    switch (mathesarType.name) {
-      case 'Number':
+    switch (mathesarType.identifier) {
+      case 'number':
         return '#';
-      case 'Text':
+      case 'text':
         return 'T';
       default:
         return '?';
