@@ -89,6 +89,8 @@
 
   type DbType = string;
 
+  type DbTypeTargetsPerMathesarType = Map<MathesarType['identifier'], DbType[]>;
+
   function mathesarTypeHasAtLeastOneValidDbTypeTarget(
     // eslint-disable-next-line @typescript-eslint/no-shadow
     validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType,
@@ -97,7 +99,7 @@
   ) {
     // eslint-disable-next-line operator-linebreak
     const validDbTypeTargets =
-      validDbTypeTargetsPerMathesarType[mathesarType.identifier] as DbType[];
+      validDbTypeTargetsPerMathesarType[mathesarType.identifier];
     const atLeastOne = notEmpty(validDbTypeTargets);
     return atLeastOne;
   }
@@ -110,8 +112,6 @@
     // TODO implement
     return '';
   }
-
-  type DbTypeTargetsPerMathesarType = Map<MathesarType['identifier'], DbType[]>;
 
   function getValidDbTypeTargetsPerMathesarType(
     // eslint-disable-next-line @typescript-eslint/no-shadow
