@@ -77,6 +77,7 @@
 
   // eslint-disable-next-line @typescript-eslint/no-shadow
   function getIcon(mathesarType: MathesarType): string {
+    // TODO switch to using mathesarType.identifier
     switch (mathesarType.name) {
       case 'Number':
         return '#';
@@ -107,10 +108,15 @@
   function choosePreferredDbTypeTarget(
     // eslint-disable-next-line @typescript-eslint/no-shadow
     mathesarType: MathesarType,
-    validDbTypeTargets: DbType[],
   ): DbType {
-    // TODO implement
-    return '';
+    switch (mathesarType.identifier) {
+      case 'number':
+        return 'NUMERIC';
+      case 'text':
+        return 'VARCHAR';
+      default:
+        throw new Error(`Database type target undefined for Mathesar type ${mathesarType.name}`);
+    }
   }
 
   function getValidDbTypeTargetsPerMathesarType(
@@ -153,12 +159,7 @@
     if (validDbTypeTargetsPerMathesarType) {
       isOpen = false;
       isAdvancedOptionsOpen = false;
-
-      // eslint-disable-next-line operator-linebreak
-      const validDbTypeTargets =
-        validDbTypeTargetsPerMathesarType[mathesarType.identifier] as DbType[];
-      const newDbType = choosePreferredDbTypeTarget(mathesarType, validDbTypeTargets);
-
+      const newDbType = choosePreferredDbTypeTarget(mathesarType);
       void patchColumnType(tableId, columnId, newDbType);
     }
   }
@@ -172,16 +173,25 @@
     }
   }
 
+  const implementedMathesarTypes: MathesarType['identifier'][] = ['number', 'text'];
+  // eslint-disable-next-line operator-linebreak
+  const isMathesarTypeImplemented =
+    (mathesarType: MathesarType): boolean =>
+      // eslint-disable-next-line implicit-arrow-linebreak
+      implementedMathesarTypes.includes(mathesarType.identifier);
+
   let validMathesarTypeTargets: MathesarType[] | undefined;
   $: {
     if (mathesarTypes && validDbTypeTargetsPerMathesarType) {
       // eslint-disable-next-line operator-linebreak
       validMathesarTypeTargets =
-        mathesarTypes.filter(
-          (mt: MathesarType) =>
-            // eslint-disable-next-line implicit-arrow-linebreak
-            mathesarTypeHasAtLeastOneValidDbTypeTarget(validDbTypeTargetsPerMathesarType, mt),
-        );
+        mathesarTypes
+          .filter(isMathesarTypeImplemented)
+          .filter(
+            (mt: MathesarType) =>
+              // eslint-disable-next-line implicit-arrow-linebreak
+              mathesarTypeHasAtLeastOneValidDbTypeTarget(validDbTypeTargetsPerMathesarType, mt),
+          );
     }
   }
 
