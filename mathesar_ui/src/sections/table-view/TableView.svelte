@@ -11,7 +11,6 @@
     TableRecordStore,
     TableOptionsStore,
     TableDisplayStores,
-    TableTypesStore,
   } from '@mathesar/stores/tableData';
   import ActionsPane from './actions-pane/ActionsPane.svelte';
   import DisplayOptions from './display-options/DisplayOptions.svelte';
@@ -35,7 +34,6 @@
   let idKey = id as number;
 
   let columns: TableColumnStore;
-  let types: TableTypesStore;
   let records: TableRecordStore;
   let options: TableOptionsStore;
   let tableBodyRef: Body;
@@ -57,7 +55,6 @@
     const opts = URLQueryHandler.getTableConfig(_database, _id);
     const table = getTable(_database, _id, opts);
     columns = table.columns;
-    types = table.types;
     records = table.records;
     options = table.options;
 
@@ -159,9 +156,8 @@
   <div class="table-content">
     {#if $columns.data.length > 0}
       <Header
+        tableId={idKey}
         columns={$columns}
-        types={$types.data}
-        id={idKey}
         bind:sort={$options.sort}
         bind:group={$options.group}
         isResultGrouped={!!$records.groupData}

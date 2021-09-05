@@ -12,19 +12,22 @@
     GroupOption,
     SortOption,
     TableColumn,
-    TableTypes,
   } from '@mathesar/stores/tableData';
-  import { changeColumnType } from '@mathesar/stores/tableData';
+  import { patchColumnType } from '@mathesar/stores/tableData';
+  import type { MathesarType } from '@mathesar/stores/databases';
   import { createEventDispatcher } from 'svelte';
+  import { intersection, pair, notEmpty } from '@mathesar/utils/language';
 
   const dispatch = createEventDispatcher();
+  export let mathesarTypes: MathesarType[];
+  export let tableId: number;
   export let sort: SortOption;
   export let group: GroupOption;
   export let column: TableColumn;
-  export let types: TableTypes[];
-  export let id: number;
   export let columnPosition: ColumnPosition;
   export let paddingLeft: number;
+
+  $: columnId = column.index;
 
   let isAdvancedOptionsOpen = false;
   let isOpen = false;
@@ -73,6 +76,7 @@
     }
   }
 
+  // TODO use mathesarTypes instead of manual construction
   function determineDataTitle(type: string) {
     switch (type) {
       case 'INTEGER':
@@ -85,12 +89,91 @@
     }
   }
 
-  function retypeColumn(type: string, index: number) {
-    isOpen = false;
-    isAdvancedOptionsOpen = false;
+  type DbType = string;
 
-    void changeColumnType(id, type, index);
+  function mathesarTypeHasAtLeastOneValidDbTypeTarget(
+    validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType,
+    mathesarType: MathesarType,
+  ) {
+    // eslint-disable-next-line operator-linebreak
+    const validDbTypeTargets =
+      validDbTypeTargetsPerMathesarType[mathesarType.identifier] as DbType[];
+    const atLeastOne = notEmpty(validDbTypeTargets);
+    return atLeastOne;
   }
+
+  function choosePreferredDbType(
+    mathesarType: MathesarType,
+    validDbTypeTargets: DbType[],
+  ): DbType {
+    // TODO implement
+    return '';
+  }
+
+  type DbTypeTargetsPerMathesarType = Map<MathesarType['identifier'], DbType[]>;
+
+  function getValidDbTypeTargetsPerColumnAndMathesarType(
+    column: TableColumn,
+    mathesarTypes: MathesarType[],
+  ): DbTypeTargetsPerMathesarType {
+    function getValidDbTypeTargetsForColumnAndMathesarType(
+      column: TableColumn,
+      mathesarType: MathesarType,
+    ): DbType[] {
+      return intersection(
+        new Set(column.validTargetTypes),
+        new Set(mathesarType.db_types),
+      );
+    }
+    const pairs = mathesarTypes.map(
+      (mathesarType) => pair(
+        mathesarType.identifier,
+        getValidDbTypeTargetsForColumnAndMathesarType(column, mathesarType),
+      ),
+    );
+    return new Map(pairs);
+  }
+
+  function patchColumnToMathesarType(
+    tableId: number,
+    columnId: number,
+    validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType,
+    mathesarType: MathesarType,
+  ): void {
+    if (validDbTypeTargetsPerMathesarType) {
+      isOpen = false;
+      isAdvancedOptionsOpen = false;
+
+      // eslint-disable-next-line operator-linebreak
+      const validDbTypeTargets =
+        validDbTypeTargetsPerMathesarType[mathesarType.identifier] as DbType[];
+      const newDbType = choosePreferredDbType(mathesarType, validDbTypeTargets);
+
+      void patchColumnType(tableId, columnId, newDbType);
+    }
+  }
+
+  $: validDbTypeTargetsPerMathesarType = mathesarTypes
+    ? getValidDbTypeTargetsPerColumnAndMathesarType(column, mathesarTypes)
+    : undefined;
+
+  $: validMathesarTypeTargets = mathesarTypes && validDbTypeTargetsPerMathesarType
+    ? mathesarTypes.filter(
+      (mt: MathesarType) =>
+        // eslint-disable-next-line implicit-arrow-linebreak
+        mathesarTypeHasAtLeastOneValidDbTypeTarget(validDbTypeTargetsPerMathesarType, mt),
+    )
+    : undefined;
+
+  $: patchType = (mathesarType: MathesarType) =>
+    // eslint-disable-next-line implicit-arrow-linebreak
+    patchColumnToMathesarType(
+      tableId,
+      columnId,
+      validDbTypeTargetsPerMathesarType,
+      mathesarType,
+    );
+
 </script>
 
 <div
@@ -117,16 +200,17 @@
           <h6 class="category">Advanced Options</h6>
           <span class="title">Set '{column.name}' type</span>
           <ul class="type-list">
-            {#each types as type}
-              {#if column.validTargetTypes.includes(type.targetType)}
-                <li>
-                  <button
-                    on:click={() => retypeColumn(type.targetType, column.index)}
-                  >
-                    {type.name}
-                  </button>
-                </li>
-              {/if}
+            {#each validMathesarTypeTargets as mathesarType}
+              <li>
+                <button
+                  on:click={ () => patchType(mathesarType) }
+                >
+                  {mathesarType.name}
+                </button>
+              </li>
+            {:else}
+              <li>
+              </li>
             {/each}
           </ul>
         {:else}

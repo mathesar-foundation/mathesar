@@ -1,16 +1,16 @@
-import {
-  writable,
-  Writable,
-} from 'svelte/store';
+import { writable, derived } from 'svelte/store';
+import type { Writable, Readable } from 'svelte/store';
 
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { getAPI, States } from '@mathesar/utils/api';
 
 import type { Database } from '@mathesar/App.d';
 import type { PaginatedResponse } from '@mathesar/utils/api';
+import { pair, notEmpty } from '@mathesar/utils/language';
 import type { CancellablePromise } from '@mathesar/components';
 
 const commonData = preloadCommonData();
+
 export const currentDBName: Writable<Database['name']> = writable(
   commonData.current_db || null,
 );
@@ -25,8 +25,21 @@ export interface DatabaseStoreData {
 export const databases = writable<DatabaseStoreData>({
   preload: true,
   state: States.Loading,
+  // TODO an empty list is ambiguous, undefined would be preferable
   data: commonData.databases || [],
 });
+
+export const currentDBId: Readable<Database['id']> = derived(
+  [currentDBName, databases],
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  ([currentDBName, databasesStore]) => {
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    const databases = databasesStore.data;
+    return notEmpty(databases)
+      ? databases.find((database) => database.name === currentDBName).id
+      : undefined;
+  },
+);
 
 let databaseRequest: CancellablePromise<PaginatedResponse<Database>>;
 
@@ -54,3 +67,53 @@ export async function reloadDatabases(): Promise<PaginatedResponse<Database>> {
     return null;
   }
 }
+
+export interface MathesarType {
+  name: string,
+  identifier: string,
+  db_types: string[]
+}
+
+export type DatabasesToMathesarTypes = Map<Database['id'], MathesarType[]>;
+
+async function getDatabasesToMathesarTypes(
+  knownDatabases: Database[],
+):Promise<DatabasesToMathesarTypes> {
+  function getMathesarTypesForDatabase(db: Database) {
+    return getAPI<MathesarType[]>(`/databases/${db.id}/types`);
+  }
+
+  const promisesOfPairs = knownDatabases.map(
+    async (db) => pair(db.id, await getMathesarTypesForDatabase(db)),
+  );
+
+  const toMap = <A, B>(pairs: [A, B][]) => new Map<A, B>(pairs);
+
+  return Promise.all(promisesOfPairs).then(toMap);
+}
+
+// eslint-disable-next-line operator-linebreak
+export const databasesToMathesarTypesStore: Readable<DatabasesToMathesarTypes> =
+  derived<Readable<DatabaseStoreData>, DatabasesToMathesarTypes>(
+    databases,
+    ($databaseStoreData, set) => {
+      const knownDatabases = $databaseStoreData.data;
+      if (knownDatabases) {
+        void getDatabasesToMathesarTypes(knownDatabases).then(set);
+      }
+    },
+    undefined,
+  );
+
+// eslint-disable-next-line operator-linebreak
+export const currentDBMathesarTypes: Readable<MathesarType[]> =
+  derived(
+    [databasesToMathesarTypesStore, currentDBId],
+    ([databasesToMathesarTypes, databaseId]) => {
+      const mathesarTypes = databasesToMathesarTypes && databaseId
+        ? databasesToMathesarTypes[databaseId] as MathesarType[]
+        : undefined;
+      return mathesarTypes;
+    },
+    undefined,
+  );

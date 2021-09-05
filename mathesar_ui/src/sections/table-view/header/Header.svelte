@@ -5,18 +5,17 @@
     ColumnPosition,
     SortOption,
     GroupOption,
-    TableTypes,
   } from '@mathesar/stores/tableData';
   import {
     DEFAULT_COUNT_COL_WIDTH,
     GROUP_MARGIN_LEFT,
     DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/tableData';
+  import { currentDBMathesarTypes } from '@mathesar/stores/databases';
   import CellHeader from './CellHeader.svelte';
 
+  export let tableId: number;
   export let columns: TableColumnData;
-  export let types: TableTypes[];
-  export let id: number;
   export let sort: SortOption = new Map();
   export let group: GroupOption = new Set();
   export let columnPosition: ColumnPosition = new Map();
@@ -56,6 +55,9 @@
       headerRef.removeEventListener('scroll', scrollListener);
     };
   });
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  $: mathesarTypes = $currentDBMathesarTypes;
 </script>
 
 <div bind:this={headerRef} class="header">
@@ -66,11 +68,11 @@
 
   {#each columns.data as column (column.name)}
     <CellHeader
+      tableId={tableId}
+      mathesarTypes={mathesarTypes}
       bind:sort
       bind:group
       bind:column
-      bind:types
-      bind:id
       bind:columnPosition
       bind:paddingLeft
       on:reload

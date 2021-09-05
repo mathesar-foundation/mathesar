@@ -26,11 +26,6 @@ export interface TableRecord {
   }
 }
 
-export interface TableTypes {
-  name: string;
-  targetType: string;
-}
-
 export interface TableColumnResponse extends TableColumn {
   primary_key: TableColumn['primaryKey'],
   valid_target_types: TableColumn['validTargetTypes']
@@ -39,12 +34,6 @@ export interface TableColumnResponse extends TableColumn {
 export interface TableColumnsResponse {
   count: number,
   results: TableColumnResponse[]
-}
-
-export interface TableTypesResponse {
-  db_types: string[]
-  indentifier: string;
-  name: string;
 }
 
 interface TableRecordGroupsResponse {
@@ -62,12 +51,6 @@ export interface TableColumnData {
   error?: string,
   data: TableColumn[],
   primaryKey: string,
-}
-
-export interface TableTypesData {
-  state: States,
-  error?: string,
-  data: TableTypes[],
 }
 
 export interface GroupData {
@@ -130,7 +113,6 @@ interface TableConfigData {
 }
 
 export type TableColumnStore = Writable<TableColumnData>;
-export type TableTypesStore = Writable<TableTypesData>;
 export type TableRecordStore = Writable<TableRecordData>;
 export type TableOptionsStore = Writable<TableOptionsData>;
 export type TableDisplayStoreList = TableDisplayStores;
@@ -138,7 +120,6 @@ export type TableDisplayStoreList = TableDisplayStores;
 interface TableData {
   // Store objects: For use in views and controller
   columns: TableColumnStore,
-  types: TableTypesStore,
   records: TableRecordStore,
   options: TableOptionsStore,
 
@@ -227,16 +208,8 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
     const tableColumnStore = table.columns;
     const existingColumnData = get(tableColumnStore);
 
-    const tableTypesStore = table.types;
-    const existingTypesData = get(tableTypesStore);
-
     tableColumnStore.set({
       ...existingColumnData,
-      state: States.Loading,
-    });
-
-    tableTypesStore.set({
-      ...existingTypesData,
       state: States.Loading,
     });
 
@@ -263,36 +236,10 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
       });
       const pkColumn = columns.find((column) => column.primaryKey);
 
-      const typesPromise = getAPI<TableTypesResponse[]>(`/api/v0/databases/${id}/types/`);
-      const typesResponse = await typesPromise;
-      const tableTypes = typesResponse || [];
-      const types = tableTypes.reduce((acc, type) => {
-        const validTypes = ['VARCHAR', 'NUMERIC'];
-
-        if (type.db_types.length === 1) {
-          const typeObject = { name: type.name, targetType: type.db_types[0] };
-          acc.push(typeObject);
-        } else {
-          const [validType] = type.db_types.filter((i) => validTypes.includes(i));
-
-          if (validType) {
-            const typeObject = { name: type.name, targetType: validType };
-            acc.push(typeObject);
-          }
-        }
-
-        return acc;
-      }, [] as TableTypes[]);
-
       tableColumnStore.set({
         state: States.Done,
         data: columns,
         primaryKey: pkColumn?.name || null,
-      });
-
-      tableTypesStore.set({
-        state: States.Done,
-        data: types,
       });
 
       const columnPosition = calculateColumnPosition(columns);
@@ -303,12 +250,6 @@ async function fetchTableDetails(db: string, id: number): Promise<void> {
         error: err instanceof Error ? err.message : null,
         data: [],
         primaryKey: null,
-      });
-
-      tableTypesStore.set({
-        state: States.Error,
-        error: err instanceof Error ? err.message : null,
-        data: [],
       });
     }
   }
@@ -546,10 +487,6 @@ export function getTable(db: string, id: number, options?: Partial<TableOptionsD
         data: [],
         primaryKey: null,
       }),
-      types: writable({
-        state: States.Loading,
-        data: [],
-      }),
       records: writable({
         state: States.Loading,
         data: [],
@@ -673,8 +610,14 @@ export function clearTable(db: string, id: number): void {
   databaseMap.get(db)?.delete(id);
 }
 
-export async function changeColumnType(id:number, type: string, index: number): Promise<void> {
-  await patchAPI<unknown>(`/api/v0/tables/${id}/columns/${index}/`, {
-    type,
-  });
+// TODO finish implementing and consider moving
+export async function patchColumnType(
+  tableId: number,
+  columnId: number,
+  dbType: string,
+): Promise<void> {
+  await patchAPI<unknown>(
+    `/tables/${tableId}/columns/${columnId}/`,
+    { type: dbType },
+  );
 }
