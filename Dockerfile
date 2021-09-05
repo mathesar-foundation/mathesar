@@ -4,8 +4,6 @@ RUN apt update
 RUN apt install -y sudo
 
 # Add mathesar user
-RUN sudo useradd -m mathesar
-
 ENV PYTHONUNBUFFERED=1
 ENV DOCKERIZE_VERSION v0.6.1
 
@@ -19,16 +17,14 @@ RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt install -y nodejs
 
 # Change work directory
-WORKDIR /home/mathesar/code/
-RUN chown -R mathesar:mathesar /home/mathesar/code/
-ENV PATH="/home/mathesar/.local/bin:${PATH}"
+WORKDIR /code/
 
-COPY --chown=mathesar:mathesar requirements.txt .
-COPY --chown=mathesar:mathesar requirements-dev.txt .
+COPY requirements.txt .
+COPY requirements-dev.txt .
 
-USER mathesar
 RUN pip install -r requirements.txt --force-reinstall sqlalchemy-filters
 RUN pip install -r requirements-dev.txt
-COPY --chown=mathesar:mathesar . .
+COPY . .
 
-RUN cd mathesar_ui && npm install && npm run build
+RUN sudo npm install -g npm-force-resolutions
+RUN cd mathesar_ui && npm install --unsafe-perm && npm run build
