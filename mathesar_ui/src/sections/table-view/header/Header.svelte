@@ -12,7 +12,7 @@
     DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/tableData';
   import { currentDBMathesarTypes } from '@mathesar/stores/databases';
-  import CellHeader from './CellHeader.svelte';
+  import HeaderCell from './HeaderCell.svelte';
 
   export let tableId: number;
   export let columns: TableColumnData;
@@ -67,7 +67,7 @@
   />
 
   {#each columns.data as column (column.name)}
-    <CellHeader
+    <HeaderCell
       tableId={tableId}
       mathesarTypes={mathesarTypes}
       bind:sort
