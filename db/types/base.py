@@ -1,9 +1,8 @@
 from enum import Enum
 
-from sqlalchemy import create_engine, Table, TIME, event
+from sqlalchemy import create_engine
 
 from db import constants
-from db.types import datetime
 
 
 STRING = 'string'

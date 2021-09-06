@@ -1,11 +1,9 @@
-from db.tests.test_columns import test_MC_inits_with_name
 from sqlalchemy import text, DDL, MetaData, Table, select
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 
 from db import columns, tables
 from db.types import base, email, datetime
-
 
 
 BIGINT = base.PostgresType.BIGINT.value
