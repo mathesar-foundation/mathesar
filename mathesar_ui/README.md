@@ -87,7 +87,7 @@ The simplest way to get this to work, and the advised option, is to move the pro
 
 If you have to work in the windows filesystem for any other purpose, you could configure vite to poll files to identify changes, as mentioned in [this issue](https://github.com/vitejs/vite/issues/1153#issuecomment-785467271) and in the [vite documentation](https://vitejs.dev/config/#server-watch). However, this is a resource intensive process and not advised.
 
-This issue: https://github.com/centerofci/mathesar/issues/570 in our repository keeps track of problems encountered during windows development.
+[This issue](https://github.com/centerofci/mathesar/issues/570) keeps track of problems encountered by Mathesar developers using Windows for local development.
 
 ## Naming conventions
 

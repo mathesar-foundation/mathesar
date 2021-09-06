@@ -16,7 +16,7 @@ We are currently in early development and hope to release an alpha version by la
   - [Linting](#linting)
   - [Running tests](#running-tests)
   - [Opening a shell in the container](#opening-a-shell-in-the-container)
-  - [Common issues](#common-issues)
+  - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -100,8 +100,8 @@ If you need to do some work on the container that's running the code, here's how
 docker exec -it mathesar_service_1 bash
 ```
 
-### Common issues
-Please refer our [common issues wiki page](https://wiki.mathesar.org/engineering/common-issues) for common issues and steps to resolve them, while setting up and running Mathesar.
+### Troubleshooting
+Please refer to our [Common Issues wiki page](https://wiki.mathesar.org/engineering/common-issues) for instruction on troubleshooting common issues while setting up and running Mathesar.
 
 ## License
 
