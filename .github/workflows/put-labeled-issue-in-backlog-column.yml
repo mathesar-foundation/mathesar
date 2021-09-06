@@ -30,7 +30,7 @@ jobs:
       uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
       with:
         project-url: "https://github.com/centerofci/mathesar/projects/2"
-        label-name: "status: draft
+        label-name: "status: draft"
         column-name: "Draft"
         columns-to-ignore: "Meta issues, Draft"
         action-token: "${{ secrets.MATHESAR_GITHUB_TOKEN }}"
