@@ -16,7 +16,7 @@ We are currently in early development and hope to release an alpha version by la
   - [Linting](#linting)
   - [Running tests](#running-tests)
   - [Opening a shell in the container](#opening-a-shell-in-the-container)
-  - [Common issues](#common-issues)
+  - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
