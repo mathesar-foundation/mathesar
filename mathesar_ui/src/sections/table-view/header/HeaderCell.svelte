@@ -83,20 +83,20 @@
         {#if isDataTypeOptionsOpen}
           <HeaderCellDropdownTypeOptions
             on:reload
-            bind:mathesarTypes
-            bind:tableId
-            bind:column
+            mathesarTypes={mathesarTypes}
+            tableId={tableId}
+            column={column}
             bind:isOpen
             bind:isDataTypeOptionsOpen
           />
         {:else}
           <HeaderCellDropdownGeneral
             on:reload
-            bind:mathesarType
-            bind:mathesarTypeIcon
+            mathesarType={mathesarType}
+            mathesarTypeIcon={mathesarTypeIcon}
             bind:sort
             bind:group
-            bind:column
+            column={column}
             bind:isDataTypeOptionsOpen
           />
         {/if}

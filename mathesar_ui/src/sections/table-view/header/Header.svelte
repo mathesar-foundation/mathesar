@@ -72,9 +72,9 @@
       mathesarTypes={mathesarTypes}
       bind:sort
       bind:group
-      bind:column
-      bind:columnPosition
-      bind:paddingLeft
+      column={column}
+      columnPosition={columnPosition}
+      paddingLeft={paddingLeft}
       on:reload
     />
   {/each}
