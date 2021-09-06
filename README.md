@@ -51,7 +51,7 @@ It is recommended that you keep the Docker containers running while you make cha
 
 ### Developing in Windows
 
-Windows users, who want to run Mathesar docker development environment in WSL, are adviced to clone the repository in a linux filesystem. WSL does not work well with HMR, required for frontend development, when the project resides in a windows filesystem. Please refer to our [common issues page](https://wiki.mathesar.org/engineering/common-issues), and the [frontend development readme file](https://github.com/centerofci/mathesar/blob/master/mathesar_ui/README.md#developing-in-windows) for more details. 
+Windows users who want to run the Mathesar Docker development environment in WSL are advised to clone the repository in a Linux filesystem. When the project resides in a Windows filesystem, WSL does not work well with hot module replacement (HMR), which is required for frontend development. Please refer to our [Common Issues wiki page](https://wiki.mathesar.org/engineering/common-issues), and the [frontend development README file](https://github.com/centerofci/mathesar/blob/master/mathesar_ui/README.md#developing-in-windows) for more details.
 
 ### Configuration Options
 
