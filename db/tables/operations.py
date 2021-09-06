@@ -3,12 +3,10 @@ This file contains functions that involve altering tables at the database level.
 """
 
 from sqlalchemy import Column, func, select, ForeignKey, literal, exists
-from sqlalchemy.schema import DDLElement, DropTable
+from sqlalchemy.schema import DDLElement
 from sqlalchemy.ext import compiler
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
-from sqlalchemy.exc import NoSuchTableError, InternalError
-from psycopg2.errors import DependentObjectsStillExist
 
 from db import columns, constants
 from db.tables.ddl.create import create_mathesar_table
@@ -16,39 +14,6 @@ from db.tables.utils import reflect_table
 
 
 SUPPORTED_TABLE_UPDATE_ARGS = {'name', 'sa_columns'}
-
-
-class DropTableCascade(DropTable):
-    def __init__(self, table, cascade=False, if_exists=False, **kwargs):
-        super().__init__(table, if_exists=if_exists, **kwargs)
-        self.cascade = cascade
-
-
-@compiler.compiles(DropTableCascade, "postgresql")
-def compile_drop_table(element, compiler, **_):
-    expression = compiler.visit_drop_table(element)
-    if element.cascade:
-        return expression + " CASCADE"
-    else:
-        return expression
-
-
-def delete_table(name, schema, engine, cascade=False, if_exists=False):
-    try:
-        table = reflect_table(name, schema, engine)
-    except NoSuchTableError:
-        if if_exists:
-            return
-        else:
-            raise
-    with engine.begin() as conn:
-        try:
-            conn.execute(DropTableCascade(table, cascade=cascade))
-        except InternalError as e:
-            if isinstance(e.orig, DependentObjectsStillExist):
-                raise e.orig
-            else:
-                raise e
 
 
 def rename_table(name, schema, engine, rename_to):

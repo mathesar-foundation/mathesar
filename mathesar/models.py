@@ -5,8 +5,8 @@ from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 
 from db import records, schemas, columns, constraints
-from db.tables import operations as table_operations
 from db.tables import utils as table_utils
+from db.tables.ddl.drop import drop_table
 from db.types import alteration
 from mathesar import reflection
 from mathesar.utils import models as model_utils
@@ -238,7 +238,7 @@ class Table(DatabaseObject):
         return model_utils.update_sa_table(self, update_params)
 
     def delete_sa_table(self):
-        return table_operations.delete_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
+        return drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
 
     def get_record(self, id_value):
         return records.get_record(self._sa_table, self.schema._sa_engine, id_value)
