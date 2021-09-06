@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { patchColumnType } from '@mathesar/stores/tableData';
-  import type { MathesarType } from '@mathesar/stores/databases';
+  import type { DbType, MathesarType } from '@mathesar/stores/databases';
   import { intersection, pair, notEmpty } from '@mathesar/utils/language';
   import type { TableColumn } from '@mathesar/stores/tableData';
 
@@ -12,9 +12,6 @@
   export let isDataTypeOptionsOpen: boolean;
 
   $: columnId = column.index;
-
-  // TODO move to stores/database.ts
-  type DbType = string;
 
   type DbTypeTargetsPerMathesarType = Map<MathesarType['identifier'], DbType[]>;
 

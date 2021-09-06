@@ -6,7 +6,7 @@
     SortOption,
     TableColumn,
   } from '@mathesar/stores/tableData';
-  import type { MathesarType } from '@mathesar/stores/databases';
+  import type { DbType, MathesarType } from '@mathesar/stores/databases';
   import HeaderCellDropdownGeneral from './HeaderCellDropdownGeneral.svelte';
   import HeaderCellDropdownTypeOptions from './HeaderCellDropdownTypeOptions.svelte';
 
@@ -24,9 +24,6 @@
   function closeDataTypeOptions() {
     isDataTypeOptionsOpen = false;
   }
-
-  // TODO move to stores/database.ts
-  type DbType = string;
 
   function determineMathesarType(
     // eslint-disable-next-line @typescript-eslint/no-shadow

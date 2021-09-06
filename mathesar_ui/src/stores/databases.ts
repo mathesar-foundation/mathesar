@@ -68,10 +68,12 @@ export async function reloadDatabases(): Promise<PaginatedResponse<Database>> {
   }
 }
 
+export type DbType = string;
+
 export interface MathesarType {
   name: string,
   identifier: string,
-  db_types: string[]
+  db_types: DbType[]
 }
 
 export type DatabasesToMathesarTypes = Map<Database['id'], MathesarType[]>;
