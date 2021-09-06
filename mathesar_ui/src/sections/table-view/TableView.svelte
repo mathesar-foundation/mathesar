@@ -3,6 +3,7 @@
   import {
     getTable,
     fetchTableRecords,
+    fetchTableDetails,
     deleteRecords,
   } from '@mathesar/stores/tableData';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
@@ -101,6 +102,7 @@
       limit: 50,
       offset: 0,
     });
+    void fetchTableDetails(database, identifier);
     void fetchTableRecords(database, identifier, true);
     URLQueryHandler.setTableOptions(database, identifier, $options);
     if (tableBodyRef) {

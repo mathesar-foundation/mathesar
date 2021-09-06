@@ -202,7 +202,7 @@ function checkAndSetGroupHeaderRow(
   return isGroup;
 }
 
-async function fetchTableDetails(db: string, id: number): Promise<void> {
+export async function fetchTableDetails(db: string, id: number): Promise<void> {
   const table = databaseMap.get(db)?.get(id);
   if (table) {
     const tableColumnStore = table.columns;
