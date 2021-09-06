@@ -8,7 +8,7 @@ from sqlalchemy.exc import NoSuchTableError, ProgrammingError
 from psycopg2.errors import DependentObjectsStillExist
 
 from db import schemas, types, constants
-from db.tables.operations import create_mathesar_table
+from db.tables.ddl.create import create_mathesar_table
 from db.tables.utils import reflect_table
 
 

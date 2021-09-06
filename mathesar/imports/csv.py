@@ -5,7 +5,7 @@ import clevercsv as csv
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Table
 from db import records
-from db.tables.operations import create_string_column_table
+from db.tables.ddl.create import create_string_column_table
 from db.tables.utils import get_oid_from_table
 from mathesar.errors import InvalidTableError
 

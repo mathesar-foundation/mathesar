@@ -5,6 +5,7 @@ from sqlalchemy.exc import NoSuchTableError
 from unittest.mock import call, patch
 
 from db import constants, columns
+from db.tables import ddl as table_ddl
 from db.tables import operations as table_operations
 from db.tables import utils as table_utils
 from db.types import inference
@@ -50,8 +51,8 @@ def extracted_remainder_roster(engine_with_roster):
 def test_table_creation_doesnt_reuse_defaults(engine_with_schema):
     column_list = []
     engine, schema = engine_with_schema
-    t1 = table_operations.create_mathesar_table("t1", schema, column_list, engine)
-    t2 = table_operations.create_mathesar_table("t2", schema, column_list, engine)
+    t1 = table_ddl.create_mathesar_table("t1", schema, column_list, engine)
+    t2 = table_ddl.create_mathesar_table("t2", schema, column_list, engine)
     assert all(
         [
             c1.name == c2.name and c1 != c2
@@ -64,7 +65,7 @@ def test_table_creation_doesnt_reuse_defaults(engine_with_schema):
 def test_delete_table(engine_with_schema, if_exists):
     engine, schema = engine_with_schema
     table_name = "test_delete_table"
-    table_operations.create_mathesar_table(table_name, schema, [], engine)
+    table_ddl.create_mathesar_table(table_name, schema, [], engine)
     table_operations.delete_table(table_name, schema, engine, if_exists=if_exists)
     with pytest.raises(NoSuchTableError):
         table_utils.reflect_table(table_name, schema, engine)
@@ -99,7 +100,7 @@ def test_delete_table_restricted_foreign_key(engine_with_schema):
     table_name = "test_delete_table_restricted_foreign_key"
     related_table_name = "test_delete_table_restricted_foreign_key_related"
 
-    table = table_operations.create_mathesar_table(table_name, schema, [], engine)
+    table = table_ddl.create_mathesar_table(table_name, schema, [], engine)
     _create_related_table(related_table_name, table, schema, engine)
 
     with pytest.raises(DependentObjectsStillExist):
@@ -111,7 +112,7 @@ def test_delete_table_cascade_foreign_key(engine_with_schema):
     table_name = "test_delete_table_cascade_foreign_key"
     related_table_name = "test_delete_table_cascade_foreign_key_related"
 
-    table = table_operations.create_mathesar_table(table_name, schema, [], engine)
+    table = table_ddl.create_mathesar_table(table_name, schema, [], engine)
     related_table = _create_related_table(related_table_name, table, schema, engine)
 
     table_operations.delete_table(table_name, schema, engine, cascade=True)
@@ -124,7 +125,7 @@ def test_rename_table(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "test_rename_table"
     new_table_name = "test_rename_table_new"
-    old_table = table_operations.create_mathesar_table(table_name, schema, [], engine)
+    old_table = table_ddl.create_mathesar_table(table_name, schema, [], engine)
     old_oid = table_utils.get_oid_from_table(old_table.name, old_table.schema, engine)
 
     table_operations.rename_table(table_name, schema, engine, new_table_name)
@@ -144,7 +145,7 @@ def test_rename_table_foreign_key(engine_with_schema):
     new_table_name = "test_rename_table_foreign_key_new"
     related_table_name = "test_rename_table_foreign_key_related"
 
-    table = table_operations.create_mathesar_table(table_name, schema, [], engine)
+    table = table_ddl.create_mathesar_table(table_name, schema, [], engine)
     related_table = _create_related_table(related_table_name, table, schema, engine)
 
     table_operations.rename_table(table_name, schema, engine, new_table_name)
@@ -449,7 +450,7 @@ def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
     column_list = []
     engine, schema = engine_with_schema
     table_name = "t1"
-    table_operations.create_mathesar_table(
+    table_ddl.create_mathesar_table(
         table_name, schema, column_list, engine
     )
     with patch.object(inference, "infer_column_type") as mock_infer:
@@ -467,7 +468,7 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
     column_list = [col1, col2]
     engine, schema = engine_with_schema
     table_name = "table_with_columns"
-    table_operations.create_mathesar_table(
+    table_ddl.create_mathesar_table(
         table_name, schema, column_list, engine
     )
     with patch.object(inference, "infer_column_type") as mock_infer:
@@ -497,7 +498,7 @@ def test_update_table_column_types_skips_pkey_columns(engine_with_schema):
     column_list = [Column("checkcol", String, primary_key=True)]
     engine, schema = engine_with_schema
     table_name = "t1"
-    table_operations.create_mathesar_table(
+    table_ddl.create_mathesar_table(
         table_name, schema, column_list, engine
     )
     with patch.object(inference, "infer_column_type") as mock_infer:

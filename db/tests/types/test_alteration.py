@@ -8,7 +8,7 @@ from sqlalchemy import String, Numeric
 from sqlalchemy.exc import DataError
 
 from db import types, columns
-from db.tables.operations import create_mathesar_table
+from db.tables.ddl.create import create_mathesar_table
 from db.tables import utils as table_utils
 from db.tests.types import fixtures
 from db.types import alteration
