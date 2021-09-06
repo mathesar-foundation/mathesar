@@ -1,4 +1,6 @@
 from sqlalchemy import Column, String, Table, MetaData
+from sqlalchemy.ext import compiler
+from sqlalchemy.schema import DDLElement
 
 from db import columns, schemas
 
@@ -34,3 +36,17 @@ def create_string_column_table(name, schema, column_names, engine):
     columns_ = [Column(column_name, String) for column_name in column_names]
     table = create_mathesar_table(name, schema, columns_, engine)
     return table
+
+
+class CreateTableAs(DDLElement):
+    def __init__(self, name, selectable):
+        self.name = name
+        self.selectable = selectable
+
+
+@compiler.compiles(CreateTableAs)
+def compile_create_table_as(element, compiler, **_):
+    return "CREATE TABLE %s AS (%s)" % (
+        element.name,
+        compiler.sql_compiler.process(element.selectable, literal_binds=True),
+    )
