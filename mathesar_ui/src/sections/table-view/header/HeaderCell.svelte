@@ -159,7 +159,9 @@
       isOpen = false;
       isAdvancedOptionsOpen = false;
       const newDbType = choosePreferredDbTypeTarget(mathesarType);
-      void patchColumnType(tableId, columnId, newDbType);
+      const reloadTable = () => dispatch('reload');
+      void patchColumnType(tableId, columnId, newDbType)
+        .then(reloadTable);
     }
   }
 
