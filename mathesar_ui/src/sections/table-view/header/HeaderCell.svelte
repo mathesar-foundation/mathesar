@@ -29,11 +29,11 @@
 
   $: columnId = column.index;
 
-  let isAdvancedOptionsOpen = false;
+  let isDataTypeOptionsOpen = false;
   let isOpen = false;
 
-  function closeAdvancedOptions() {
-    isAdvancedOptionsOpen = false;
+  function closeDataTypeOptions() {
+    isDataTypeOptionsOpen = false;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -157,7 +157,7 @@
   ): void {
     if (validDbTypeTargetsPerMathesarType) {
       isOpen = false;
-      isAdvancedOptionsOpen = false;
+      isDataTypeOptionsOpen = false;
       const newDbType = choosePreferredDbTypeTarget(mathesarType);
       const reloadTable = () => dispatch('reload');
       void patchColumnType(tableId, columnId, newDbType)
@@ -241,12 +241,12 @@
     triggerClass="opts"
     triggerAppearance="plain"
     contentClass="table-opts-content"
-    functionBeforeClose={closeAdvancedOptions}
+    functionBeforeClose={closeDataTypeOptions}
   >
     <svelte:fragment slot="content">
       <div>
-        {#if isAdvancedOptionsOpen}
-          <h6 class="category">Advanced Options</h6>
+        {#if isDataTypeOptionsOpen}
+          <h6 class="category">Data Type Options</h6>
           <span class="title">Set '{column.name}' type</span>
           <ul class="type-list">
             {#each validMathesarTypeTargets as mathesarType}
@@ -266,7 +266,7 @@
           <h6 class="category">Data Type</h6>
           <button
             class="list-button with-right-icon"
-            on:click={() => { isAdvancedOptionsOpen = true; }}
+            on:click={() => { isDataTypeOptionsOpen = true; }}
           >
             <div>
               <span class="data-icon">{mathesarTypeIcon}</span>
