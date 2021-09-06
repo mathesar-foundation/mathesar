@@ -76,28 +76,26 @@
     functionBeforeClose={closeDataTypeOptions}
   >
     <svelte:fragment slot="content">
-      <div>
-        {#if isDataTypeOptionsOpen}
-          <HeaderCellDropdownTypeOptions
-            on:reload
-            mathesarTypes={mathesarTypes}
-            tableId={tableId}
-            column={column}
-            bind:isOpen
-            bind:isDataTypeOptionsOpen
-          />
-        {:else}
-          <HeaderCellDropdownGeneral
-            on:reload
-            mathesarType={mathesarType}
-            mathesarTypeIcon={mathesarTypeIcon}
-            bind:sort
-            bind:group
-            column={column}
-            bind:isDataTypeOptionsOpen
-          />
-        {/if}
-      </div>
+      {#if isDataTypeOptionsOpen}
+        <HeaderCellDropdownTypeOptions
+          on:reload
+          mathesarTypes={mathesarTypes}
+          tableId={tableId}
+          column={column}
+          bind:isOpen
+          bind:isDataTypeOptionsOpen
+        />
+      {:else}
+        <HeaderCellDropdownGeneral
+          on:reload
+          mathesarType={mathesarType}
+          mathesarTypeIcon={mathesarTypeIcon}
+          bind:sort
+          bind:group
+          column={column}
+          bind:isDataTypeOptionsOpen
+        />
+      {/if}
     </svelte:fragment>
   </Dropdown>
 </div>

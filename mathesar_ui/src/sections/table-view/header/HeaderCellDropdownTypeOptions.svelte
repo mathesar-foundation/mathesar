@@ -4,6 +4,7 @@
   import type { DbType, MathesarType } from '@mathesar/stores/databases';
   import { intersection, pair, notEmpty } from '@mathesar/utils/language';
   import type { TableColumn } from '@mathesar/stores/tableData';
+  import { Button } from '@mathesar-components';
 
   export let mathesarTypes: MathesarType[];
   export let tableId: number;
@@ -140,19 +141,39 @@
   }
 </script>
 
-<h6 class="category">Data Type Options</h6>
-<span class="title">Set Column Type</span>
-<ul class="type-list">
-  {#each validMathesarTypeTargets as mathesarType}
-    <li>
-      <button
-        on:click={ () => patchToType(mathesarType) }
-      >
-        {mathesarType.name}
-      </button>
-    </li>
-  {:else}
-    <li>
-    </li>
-  {/each}
-</ul>
+<style lang="scss">
+  .buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+  }
+</style>
+
+<div>
+  <h6 class="category">Data Type Options</h6>
+  <span class="title">Set Column Type</span>
+  <ul class="type-list">
+    {#each validMathesarTypeTargets as mathesarType}
+      <li>
+        <!-- TODO is button the right semantic element? -->
+        <button
+          on:click={ () => patchToType(mathesarType) }
+        >
+          {mathesarType.name}
+        </button>
+      </li>
+    {:else}
+      <li>
+      </li>
+    {/each}
+  </ul>
+  <div class="divider"></div>
+  <div class="buttons">
+    <Button appearance="secondary">
+      Cancel
+    </Button>
+    <Button appearance="primary">
+      Save
+    </Button>
+  </div>
+</div>
