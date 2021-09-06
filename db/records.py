@@ -1,11 +1,17 @@
 import logging
-from sqlalchemy import delete, select, Column, func
+from psycopg2 import sql
+from sqlalchemy import delete, select, Column, func, true, and_
 from sqlalchemy.inspection import inspect
 from sqlalchemy_filters import apply_filters, apply_sort
-from sqlalchemy_filters.exceptions import FieldNotFound
+from sqlalchemy_filters.exceptions import (
+    FieldNotFound, BadFilterFormat, FilterFieldNotFound
+)
 
 
 logger = logging.getLogger(__name__)
+
+IS_DUPE = "_is_dupe"
+CONJUNCTIONS = ("and", "or", "not")
 
 
 # Grouping exceptions follow the sqlalchemy_filters exceptions patterns
@@ -31,8 +37,14 @@ def _create_col_objects(table, column_list):
     ]
 
 
-def _get_query(table, limit, offset, order_by, filters):
-    query = select(table).limit(limit).offset(offset)
+def _get_query(table, limit, offset, order_by, filters, cols=None):
+    dupe_columns, filters = _get_dupe_columns(table, filters)
+    if dupe_columns:
+        query = _create_query_with_dupe(table, dupe_columns, cols)
+    else:
+        query = select(*(cols or table.c)).select_from(table)
+
+    query = query.limit(limit).offset(offset)
     if order_by is not None:
         query = apply_sort(query, order_by)
     if filters is not None:
@@ -44,6 +56,58 @@ def _execute_query(query, engine):
     with engine.begin() as conn:
         records = conn.execute(query).fetchall()
         return records
+
+
+def _get_dupe_columns(table, filters):
+    try:
+        get_dupe_ops = [f for f in filters if f.get("op") == "get_duplicates"]
+        non_get_dupe_ops = [f for f in filters if f.get("op") != "get_duplicates"]
+    except AttributeError:
+        # Ignore formatting errors - they will be handled by sqlalchemy_filters
+        return None, filters
+
+    _validate_nested_ops(non_get_dupe_ops)
+    if len(get_dupe_ops) > 1:
+        raise BadFilterFormat("get_duplicates can only be specified a single time")
+    elif len(get_dupe_ops) == 1:
+        dupe_cols = get_dupe_ops[0]['value']
+        for col in dupe_cols:
+            if col not in table.c:
+                raise FilterFieldNotFound(f"Table {table.name} has no column `{col}`.")
+        return get_dupe_ops[0]['value'], non_get_dupe_ops
+    else:
+        return None, filters
+
+
+def _validate_nested_ops(filters):
+    for op in filters:
+        if op.get("op") == "get_duplicates":
+            raise BadFilterFormat("get_duplicates can not be nested")
+        for field in CONJUNCTIONS:
+            if field in op:
+                _validate_nested_ops(op[field])
+
+
+def _create_query_with_dupe(table, dupe_columns, cols=None):
+    subq_table = table.alias()
+    table_dupe_columns = [c for c in table.c if c.name in dupe_columns]
+    subq_dupe_columns = [c for c in subq_table.c if c.name in dupe_columns]
+    subq = (
+        select(true().label(IS_DUPE))
+        .select_from(subq_table)
+        .group_by(*subq_dupe_columns)
+        .having(and_(
+            func.count() > 1,
+            *[c == subq_c for c, subq_c in zip(table_dupe_columns, subq_dupe_columns)]
+        ))
+        .lateral("lateral_subq")
+    )
+    query = (
+        select(*(cols or table.c))
+        .select_from(table.join(subq, true()))
+        .where(subq.c[IS_DUPE])
+    )
+    return query
 
 
 def get_record(table, engine, id_value):
@@ -236,23 +300,36 @@ def create_records_from_csv(
         escape=None,
         quote=None,
 ):
-    with open(csv_filename, 'rb') as csv_file:
+    with open(csv_filename, "rb") as csv_file:
         with engine.begin() as conn:
             cursor = conn.connection.cursor()
-            relation = '.'.join('"{}"'.format(part) for part in (table.schema, table.name))
-            formatted_columns = '({})'.format(','.join([f'"{column_name}"' for column_name in column_names]))
+            # We should convert our entire query to sql.SQL class in order to keep its original header's name
+            # When we call sql.Indentifier which will return a Identifier class (based on sql.Composable)
+            # instead of a String. So we have to convert our punctuations to sql.Composable using sql.SQL
+            relation = sql.SQL(".").join(
+                sql.Identifier(part) for part in (table.schema, table.name)
+            )
+            formatted_columns = sql.SQL(",").join(
+                sql.Identifier(column_name) for column_name in column_names
+            )
 
-            copy_sql = f'COPY {relation} {formatted_columns} FROM STDIN CSV'
-            if header:
-                copy_sql += " HEADER"
-            if delimiter:
-                copy_sql += f" DELIMITER E'{delimiter}'"
-            if escape:
-                copy_sql += f" ESCAPE '{escape}'"
-            if quote:
-                if quote == "'":
-                    quote = "''"
-                copy_sql += f" QUOTE '{quote}'"
+            copy_sql = sql.SQL(
+                "COPY {relation} ({formatted_columns}) FROM STDIN CSV {header} {delimiter} {escape} {quote}"
+            ).format(
+                relation=relation,
+                formatted_columns=formatted_columns,
+                # If HEADER is not None, we'll pass its value to our entire SQL query
+                header=sql.SQL("HEADER" if header else ""),
+                # If DELIMITER is not None, we'll pass its value to our entire SQL query
+                delimiter=sql.SQL(f"DELIMITER E'{delimiter}'" if delimiter else ""),
+                # If ESCAPE is not None, we'll pass its value to our entire SQL query
+                escape=sql.SQL(f"ESCAPE '{escape}'" if escape else ""),
+                quote=sql.SQL(
+                    ("QUOTE ''''" if quote == "'" else f"QUOTE '{quote}'")
+                    if quote
+                    else ""
+                ),
+            )
 
             cursor.copy_expert(copy_sql, csv_file)
 

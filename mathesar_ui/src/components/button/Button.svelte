@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Appearance, Size } from './Button.d';
+  import type { Appearance, Size } from '@mathesar-components/types';
 
   /**
    * Button appearance. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.
@@ -26,7 +26,8 @@
 <button bind:this={element} type="button"
         class={allClasses}
         {...$$restProps}
-        on:click>
+        on:click
+        on:keydown>
   <slot></slot>
 </button>
 

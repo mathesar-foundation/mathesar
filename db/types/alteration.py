@@ -1,7 +1,11 @@
-from sqlalchemy import text, DDL, MetaData, Table
+from sqlalchemy import text, DDL, MetaData, Table, select
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
+
+from db import columns, tables
 from db.types import base, email
+from db.utils import execute_statement
+
 
 BIGINT = base.PostgresType.BIGINT.value
 BOOLEAN = base.PostgresType.BOOLEAN.value
@@ -16,8 +20,10 @@ NUMERIC = base.PostgresType.NUMERIC.value
 REAL = base.PostgresType.REAL.value
 SMALLINT = base.PostgresType.SMALLINT.value
 FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
-STRING = 'string'
-VARCHAR = 'varchar'
+TEXT = base.PostgresType.TEXT.value
+DATE = base.PostgresType.DATE.value
+STRING = base.STRING
+VARCHAR = base.VARCHAR
 
 
 class UnsupportedTypeException(Exception):
@@ -47,6 +53,8 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         REAL: dialect_types.get(REAL),
         SMALLINT: dialect_types.get(SMALLINT),
         STRING: dialect_types.get(NAME),
+        TEXT: dialect_types.get(TEXT),
+        DATE: dialect_types.get(DATE),
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE)
@@ -93,6 +101,8 @@ def alter_column_type(
         engine,
         friendly_names=True,
         type_options={},
+        connection_to_use=None,
+        table_to_use=None
 ):
     _preparer = engine.dialect.identifier_preparer
     supported_types = get_supported_alter_column_types(
@@ -100,23 +110,37 @@ def alter_column_type(
     )
     target_type = supported_types.get(target_type_str)
 
-    with engine.begin() as conn:
-        metadata = MetaData(bind=engine, schema=schema)
-        table = Table(
-            table_name, metadata, schema=schema, autoload_with=engine
-        )
-        column = table.columns[column_name]
-        prepared_table_name = _preparer.format_table(table)
-        prepared_column_name = _preparer.format_column(column)
-        prepared_type_name = target_type(**type_options).compile(dialect=engine.dialect)
-        cast_function_name = get_cast_function_name(prepared_type_name)
-        alter_stmt = f"""
-        ALTER TABLE {prepared_table_name}
-          ALTER COLUMN {prepared_column_name}
-          TYPE {prepared_type_name}
-          USING {cast_function_name}({prepared_column_name});
-        """
-        conn.execute(DDL(alter_stmt))
+    metadata = MetaData(bind=engine, schema=schema)
+    table = table_to_use
+    if table is None:
+        table = Table(table_name, metadata, schema=schema, autoload_with=engine)
+    column = table.columns[column_name]
+    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    column_index = columns.get_column_index_from_name(table_oid, column_name, engine, connection_to_use)
+
+    default = columns.get_column_default(table_oid, column_index, engine, connection_to_use, table_to_use)
+    if default is not None:
+        default_text = column.server_default.arg.text
+        columns.set_column_default(table_oid, column_index, None, engine, connection_to_use, table_to_use)
+
+    prepared_table_name = _preparer.format_table(table)
+    prepared_column_name = _preparer.format_column(column)
+    prepared_type_name = target_type(**type_options).compile(dialect=engine.dialect)
+    cast_function_name = get_cast_function_name(prepared_type_name)
+    alter_stmt = f"""
+    ALTER TABLE {prepared_table_name}
+      ALTER COLUMN {prepared_column_name}
+      TYPE {prepared_type_name}
+      USING {cast_function_name}({prepared_column_name});
+    """
+
+    execute_statement(engine, DDL(alter_stmt), connection_to_use)
+
+    if default is not None:
+        cast_stmt = f"{cast_function_name}({default_text})"
+        default_stmt = select(text(cast_stmt))
+        new_default = str(execute_statement(engine, default_stmt, connection_to_use).first()[0])
+        columns.set_column_default(table_oid, column_index, new_default, engine, connection_to_use, table_to_use)
 
 
 def get_column_cast_expression(column, target_type_str, engine, type_options={}):
@@ -152,6 +176,7 @@ def install_all_casts(engine):
     create_integer_casts(engine)
     create_decimal_number_casts(engine)
     create_interval_casts(engine)
+    create_date_casts(engine)
     create_varchar_casts(engine)
 
 
@@ -182,6 +207,11 @@ def create_decimal_number_casts(engine):
     for type_str in decimal_number_types:
         type_body_map = _get_decimal_number_type_body_map(target_type_str=type_str)
         create_cast_functions(type_str, type_body_map, engine)
+
+
+def create_date_casts(engine):
+    type_body_map = _get_date_type_body_map()
+    create_cast_functions(DATE, type_body_map, engine)
 
 
 def create_varchar_casts(engine):
@@ -218,6 +248,7 @@ def get_defined_source_target_cast_tuples(engine):
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
+        DATE: _get_date_type_body_map(),
         VARCHAR: _get_varchar_type_body_map(engine),
     }
     return {
@@ -336,7 +367,7 @@ def _get_email_type_body_map():
                      just check that the VARCHAR object satisfies the email
                      DOMAIN).
     """
-    default_behavior_source_types = [email.DB_TYPE, VARCHAR]
+    default_behavior_source_types = [email.DB_TYPE, VARCHAR, TEXT]
     return _get_default_type_body_map(
         default_behavior_source_types, email.DB_TYPE,
     )
@@ -454,6 +485,15 @@ def _get_varchar_type_body_map(engine):
     return _get_default_type_body_map(supported_types, VARCHAR)
 
 
+def _get_date_type_body_map():
+    # Note that default postgres conversion for dates depends on the `DateStyle` option
+    # set on the server, which can be one of DMY, MDY, or YMD. Defaults to MDY.
+    default_behavior_source_types = [DATE, VARCHAR]
+    return _get_default_type_body_map(
+        default_behavior_source_types, DATE,
+    )
+
+
 def _get_default_type_body_map(source_types, target_type_str):
     default_cast_str = f"""
         BEGIN
@@ -461,3 +501,22 @@ def _get_default_type_body_map(source_types, target_type_str):
         END;
     """
     return {type_name: default_cast_str for type_name in source_types}
+
+
+def get_column_cast_records(engine, table, column_definitions, num_records=20):
+    assert len(column_definitions) == len(table.columns)
+    cast_expression_list = [
+        (
+            get_column_cast_expression(
+                column, col_def["type"],
+                engine,
+                type_options=col_def.get("type_options", {})
+            )
+            .label(col_def["name"])
+        ) if not columns.MathesarColumn.from_column(column).is_default else column
+        for column, col_def in zip(table.columns, column_definitions)
+    ]
+    sel = select(cast_expression_list).limit(num_records)
+    with engine.begin() as conn:
+        result = conn.execute(sel)
+    return result.fetchall()

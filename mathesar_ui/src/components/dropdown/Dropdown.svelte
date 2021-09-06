@@ -9,6 +9,11 @@
   } from '@mathesar-components';
   import type { Appearance } from '@mathesar-components/types';
   import type { Placement } from '@popperjs/core/lib/enums';
+  import {
+    createEventDispatcher,
+  } from 'svelte';
+
+  const dispatch = createEventDispatcher();
 
   export let triggerClass = '';
   export let triggerAppearance: Appearance = 'default';
@@ -43,16 +48,25 @@
       close();
     }
   }
+
+  function dispatchOnOpen(_isOpen) {
+    if (_isOpen) {
+      dispatch('open');
+    }
+  }
+
+  $: dispatchOnOpen(isOpen);
 </script>
 
 <Button
   bind:element={trigger}
   appearance={triggerAppearance}
   class={tgClasses}
-  on:click={toggle}
+  on:click={toggle} 
   aria-controls={ariaControls}
   aria-haspopup="listbox"
   aria-label={ariaLabel}
+  on:keydown
 >
   <span class="label">
     <slot name="trigger" />

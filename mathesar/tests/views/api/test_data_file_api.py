@@ -54,9 +54,17 @@ def mock_get_patents_url(patents_url_data):
         'content-length': None
     }
 
+    mock_head_patcher = patch('requests.head')
+    mock_head = mock_head_patcher.start()
+    mock_head.return_value.headers = {
+        'content-type': 'text/csv',
+        'content-length': None
+    }
+
     yield mock_get
 
     mock_get.stop()
+    mock_head.stop()
 
 
 def check_create_data_file_response(response, num_files, created_from, base_name,

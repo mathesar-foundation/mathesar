@@ -1,9 +1,10 @@
 from sqlalchemy import MetaData
 
+from db.tables import create_mathesar_table, get_oid_from_table
+from db.types.inference import infer_table_column_types
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import create_table_from_csv
 from mathesar.models import Table
-from db.tables import infer_table_column_types, create_mathesar_table, get_oid_from_table
 
 
 TABLE_NAME_TEMPLATE = 'Table'
@@ -71,5 +72,7 @@ def create_empty_table(name, schema):
     engine = create_mathesar_engine(schema.database.name)
     db_table = create_mathesar_table(name, schema.name, [], engine)
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    table, _ = Table.objects.get_or_create(oid=db_table_oid, schema=schema)
+    # Using current_objects to create the table instead of objects. objects
+    # triggers re-reflection, which will cause a race condition to create the table
+    table, _ = Table.current_objects.get_or_create(oid=db_table_oid, schema=schema)
     return table
