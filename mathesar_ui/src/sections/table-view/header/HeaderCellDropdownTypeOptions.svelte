@@ -83,8 +83,6 @@
     mathesarType: MathesarType,
   ): void {
     if (validDbTypeTargetsPerMathesarType) {
-      isOpen = false;
-      isDataTypeOptionsOpen = false;
       const newDbType = choosePreferredDbTypeTarget(mathesarType);
       const reloadTable = () => dispatch('reload');
       void patchColumnType(tableId, columnId, newDbType)
@@ -139,6 +137,46 @@
       // This branch won't be reached.
     }
   }
+
+  const isDefined = <T>(x: T): boolean => typeof x !== 'undefined';
+
+  let selectedMathesarType: MathesarType;
+
+  function selectMathesarType(mathesarType: MathesarType) {
+    selectedMathesarType = mathesarType;
+  }
+
+  function resetSelection() {
+    selectedMathesarType = undefined;
+  }
+
+  function closeDropdown() {
+    resetSelection();
+    isOpen = false;
+    isDataTypeOptionsOpen = false;
+  }
+
+  function onCancel() {
+    closeDropdown();
+  }
+
+  function onSave() {
+    patchColumnToMathesarType(
+      tableId,
+      columnId,
+      validDbTypeTargetsPerMathesarType,
+      selectedMathesarType,
+    );
+    closeDropdown();
+  }
+
+  let isMathesarTypeSelected: boolean;
+  let shouldSavingBeDisabled: boolean;
+  $: {
+    isMathesarTypeSelected = isDefined(selectedMathesarType);
+    shouldSavingBeDisabled = !isMathesarTypeSelected;
+  }
+
 </script>
 
 <style lang="scss">
@@ -165,7 +203,8 @@
       <li>
         <!-- TODO is button the right semantic element? -->
         <button
-          on:click={ () => patchToType(mathesarType) }
+          on:click={ () => selectMathesarType(mathesarType) }
+          selected={ selectedMathesarType === mathesarType }
         >
           {mathesarType.name}
         </button>
@@ -178,10 +217,10 @@
   <span><i>Placeholder for type options</i></span>
   <div class="divider"></div>
   <div class="buttons">
-    <Button appearance="secondary">
+    <Button appearance="secondary" on:click={onCancel}>
       Cancel
     </Button>
-    <Button appearance="primary">
+    <Button appearance="primary" disabled={shouldSavingBeDisabled} on:click={onSave}>
       Save
     </Button>
   </div>

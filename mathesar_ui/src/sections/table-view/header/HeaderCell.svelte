@@ -98,7 +98,6 @@
       <div class="container">
         {#if isDataTypeOptionsOpen}
           <HeaderCellDropdownTypeOptions
-            class="container"
             on:reload
             mathesarTypes={mathesarTypes}
             tableId={tableId}
@@ -108,7 +107,6 @@
           />
         {:else}
           <HeaderCellDropdownGeneral
-            class="container"
             on:reload
             mathesarType={mathesarType}
             mathesarTypeIcon={mathesarTypeIcon}

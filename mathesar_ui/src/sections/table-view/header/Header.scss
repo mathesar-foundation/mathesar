@@ -71,7 +71,7 @@
         text-align: left;
         cursor: pointer;
 
-        &:hover {
+        &:hover, &[selected="true"] {
           background: #f6f7f7;
         }
       }
