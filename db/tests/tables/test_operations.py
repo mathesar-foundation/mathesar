@@ -1,14 +1,11 @@
 import pytest
 from sqlalchemy import MetaData, select, Column, String
-from sqlalchemy.exc import NoSuchTableError
 from unittest.mock import call, patch
 
 from db import constants, columns
 from db.tables import ddl as table_ddl
 from db.tables import operations as table_operations
-from db.tables import utils as table_utils
 from db.types import inference
-from db.tests.tables import utils as test_utils
 from db.tests.types import fixtures
 
 
@@ -59,40 +56,6 @@ def test_table_creation_doesnt_reuse_defaults(engine_with_schema):
             for c1, c2 in zip(t1.columns, t2.columns)
         ]
     )
-
-
-def test_rename_table(engine_with_schema):
-    engine, schema = engine_with_schema
-    table_name = "test_rename_table"
-    new_table_name = "test_rename_table_new"
-    old_table = table_ddl.create_mathesar_table(table_name, schema, [], engine)
-    old_oid = table_utils.get_oid_from_table(old_table.name, old_table.schema, engine)
-
-    table_operations.rename_table(table_name, schema, engine, new_table_name)
-    new_table = table_utils.reflect_table(new_table_name, schema, engine)
-    new_oid = table_utils.get_oid_from_table(new_table.name, new_table.schema, engine)
-
-    assert old_oid == new_oid
-    assert new_table.name == new_table_name
-
-    with pytest.raises(NoSuchTableError):
-        table_utils.reflect_table(table_name, schema, engine)
-
-
-def test_rename_table_foreign_key(engine_with_schema):
-    engine, schema = engine_with_schema
-    table_name = "test_rename_table_foreign_key"
-    new_table_name = "test_rename_table_foreign_key_new"
-    related_table_name = "test_rename_table_foreign_key_related"
-
-    table = table_ddl.create_mathesar_table(table_name, schema, [], engine)
-    related_table = test_utils.create_related_table(related_table_name, table, schema, engine)
-
-    table_operations.rename_table(table_name, schema, engine, new_table_name)
-
-    related_table = table_utils.reflect_table(related_table_name, schema, engine)
-    fk = list(related_table.foreign_keys)[0]
-    assert fk.column.table.name == new_table_name
 
 
 def test_extract_columns_from_table_creates_tables(engine_with_roster):
