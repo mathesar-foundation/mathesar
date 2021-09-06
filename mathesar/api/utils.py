@@ -5,9 +5,8 @@ from mathesar.models import Table
 
 def get_table_or_404(pk):
     """
-    Get table if exist, otherwise to throw an error of NotFound
+    Get table if it exists, otherwise throws a DRF NotFound error.
     Args:
-        queryset: QuerySet
         pk: id of table
     Returns:
         table: return the table based on a specific id
