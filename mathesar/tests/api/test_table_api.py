@@ -6,7 +6,7 @@ from django.core.files.base import File, ContentFile
 from sqlalchemy import text
 
 from mathesar import reflection
-from mathesar.models import Table, DataFile, Schema
+from mathesar.models import Table, DataFile
 from db.tests.types import fixtures
 from db import tables
 
@@ -216,19 +216,19 @@ def test_table_list_filter_schema(create_table, client):
         'Schema 3': create_table('Filter Schema 3', schema='Schema 3')
     }
 
-    filter_tables = ['Schema 2', 'Schema 3']
-    query_str = ','.join(filter_tables)
-    response = client.get(f'/api/v0/tables/?schema={query_str}')
+    schema_name = 'Schema 1'
+    schema_id = expected_tables[schema_name].schema.id
+    response = client.get(f'/api/v0/tables/?schema={schema_id}')
     response_data = response.json()
-    check_table_filter_response(response, status_code=200, count=2)
+    check_table_filter_response(response, status_code=200, count=1)
 
-    response_tables = {Schema.objects.get(id=res['schema']).name: res
+    response_tables = {res['schema']: res
                        for res in response_data['results']}
-    for schema_name in filter_tables:
-        assert schema_name in response_tables
-        table = expected_tables[schema_name]
-        response_table = response_tables[schema_name]
-        check_table_response(response_table, table, table.name)
+
+    assert schema_id in response_tables
+    table = expected_tables[schema_name]
+    response_table = response_tables[schema_id]
+    check_table_response(response_table, table, table.name)
 
 
 @pytest.mark.parametrize('timestamp_type', ['created', 'updated'])

@@ -7,12 +7,12 @@
     faPencilAlt,
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-components';
-  import type { Schema } from '@mathesar/App.d';
+  import type { SchemaEntry } from '@mathesar/App.d';
 
   const dispatch = createEventDispatcher();
 
   // Props
-  export let schema: Schema;
+  export let schema: SchemaEntry;
 
   $: isDefault = schema.name === 'public';
   $: isLocked = schema.name === 'public';
@@ -27,13 +27,11 @@
         <Icon class="lock" data={faLock}/>
       {/if}
     </div>
+    {#if isDefault}
     <div class="info">
-      {#if isDefault}
-        <strong>Default</strong>
-        &middot;
-      {/if}
-      {schema.tables.size} Tables
+      <strong>Default</strong>
     </div>
+    {/if}
   </div>
   {#if !isLocked}
     <div class="controls">

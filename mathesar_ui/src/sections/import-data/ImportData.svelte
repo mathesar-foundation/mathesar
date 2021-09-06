@@ -4,7 +4,7 @@
   import {
     Notification,
   } from '@mathesar-components';
-  import type { Database, Schema } from '@mathesar/App.d';
+  import type { Database, SchemaEntry } from '@mathesar/App.d';
 
   import Preview from './preview/Preview.svelte';
   import Upload from './upload/Upload.svelte';
@@ -14,7 +14,7 @@
 
   export let id: unknown = null;
   export let database: Database['name'];
-  export let schemaId: Schema['id'];
+  export let schemaId: SchemaEntry['id'];
   $: identifier = id as string;
 
   let fileImportStore: FileImport;

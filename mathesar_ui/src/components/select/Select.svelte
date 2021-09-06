@@ -45,7 +45,10 @@
   }
 
   function setSelectedItem() {
-    currentIndex = options.indexOf(value);
+    const index = options.findIndex((e) => e[idKey] === value?.[idKey]);
+    if (index > -1) {
+      currentIndex = index;
+    }
   }
 
   function hoveredItem(index) {
