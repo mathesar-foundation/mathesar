@@ -81,11 +81,11 @@ This should start storybook at port 6006.
 To build storybook, run `npm run build-storybook`. The static storybook build will be present within __storybook-static__ folder.
 
 ### Developing in Windows
-Hot module replacement does not work well with WSL, as mentioned here as mentioned in [this issue](https://github.com/microsoft/WSL/issues/4739), when the project is present within a windows filesystem.
+Hot module replacement does not work well with WSL, as mentioned in [this issue](https://github.com/microsoft/WSL/issues/4739), when the project is present within a windows filesystem.
 
-The simplest way to get this work, and the adviced option, is to move the project to a linux filesystem. You can clone the repo within the WSL shell in a linux filesystem, which should resolve this.
+The simplest way to get this to work, and the advised option, is to move the project to a linux filesystem. You can clone the repo within the WSL shell in a linux filesystem, which should resolve this.
 
-If you have to work in the windows filesystem for any other purpose, you could configure vite to poll files to identify changes, as mentioned in [this issue](https://github.com/vitejs/vite/issues/1153#issuecomment-785467271) and in the [vite documentation](https://vitejs.dev/config/#server-watch). However, this is a resource intensive process and not adviced.
+If you have to work in the windows filesystem for any other purpose, you could configure vite to poll files to identify changes, as mentioned in [this issue](https://github.com/vitejs/vite/issues/1153#issuecomment-785467271) and in the [vite documentation](https://vitejs.dev/config/#server-watch). However, this is a resource intensive process and not advised.
 
 This issue: https://github.com/centerofci/mathesar/issues/570 in our repository keeps track of problems encountered during windows development.
 
