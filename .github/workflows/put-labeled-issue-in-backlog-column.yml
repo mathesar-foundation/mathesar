@@ -30,9 +30,9 @@ jobs:
       uses: konradpabjan/move-labeled-or-milestoned-issue@v2.0
       with:
         project-url: "https://github.com/centerofci/mathesar/projects/2"
-        label-name: "status: detail needed"
-        column-name: "Detail needed"
-        columns-to-ignore: "Meta issues, Detail needed"
+        label-name: "status: draft"
+        column-name: "Draft"
+        columns-to-ignore: "Meta issues, Draft"
         action-token: "${{ secrets.MATHESAR_GITHUB_TOKEN }}"
 
     - name: Move blocked ticket to the Blocked column
