@@ -1,24 +1,15 @@
 <script lang="ts">
-  import {
-    faChevronRight,
-    faCog,
-    faSortAmountDown,
-    faSortAmountDownAlt,
-    faThList,
-  } from '@fortawesome/free-solid-svg-icons';
-  import { Dropdown, Icon } from '@mathesar-components';
+  import { Dropdown } from '@mathesar-components';
   import type {
     ColumnPosition,
     GroupOption,
     SortOption,
     TableColumn,
   } from '@mathesar/stores/tableData';
-  import { patchColumnType } from '@mathesar/stores/tableData';
   import type { MathesarType } from '@mathesar/stores/databases';
-  import { createEventDispatcher } from 'svelte';
-  import { intersection, pair, notEmpty } from '@mathesar/utils/language';
+  import HeaderCellDropdownGeneral from './HeaderCellDropdownGeneral.svelte';
+  import HeaderCellDropdownTypeOptions from './HeaderCellDropdownTypeOptions.svelte';
 
-  const dispatch = createEventDispatcher();
   export let mathesarTypes: MathesarType[];
   export let tableId: number;
   export let sort: SortOption;
@@ -27,8 +18,6 @@
   export let columnPosition: ColumnPosition;
   export let paddingLeft: number;
 
-  $: columnId = column.index;
-
   let isDataTypeOptionsOpen = false;
   let isOpen = false;
 
@@ -36,35 +25,8 @@
     isDataTypeOptionsOpen = false;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  function sortByColumn(column: TableColumn, order: 'asc' | 'desc') {
-    const newSort: SortOption = new Map(sort);
-    if (sort?.get(column.name) === order) {
-      newSort.delete(column.name);
-    } else {
-      newSort.set(column.name, order);
-    }
-    sort = newSort;
-    dispatch('reload');
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  function groupByColumn(column: TableColumn) {
-    const oldSize = group?.size || 0;
-    const newGroup = new Set(group);
-    if (newGroup?.has(column.name)) {
-      newGroup.delete(column.name);
-    } else {
-      newGroup.add(column.name);
-    }
-    group = newGroup;
-    /**
-     * Only reset item positions when group layout is created or destroyed
-     */
-    dispatch('reload', {
-      resetPositions: oldSize === 0 || group.size === 0,
-    });
-  }
+  // TODO move to stores/database.ts
+  type DbType = string;
 
   function determineMathesarType(
     // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -87,132 +49,6 @@
     }
   }
 
-  type DbType = string;
-
-  type DbTypeTargetsPerMathesarType = Map<MathesarType['identifier'], DbType[]>;
-
-  function mathesarTypeHasAtLeastOneValidDbTypeTarget(
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType,
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    mathesarType: MathesarType,
-  ) {
-    // eslint-disable-next-line operator-linebreak
-    const validDbTypeTargets =
-      validDbTypeTargetsPerMathesarType.get(mathesarType.identifier);
-    const atLeastOne = notEmpty(validDbTypeTargets);
-    return atLeastOne;
-  }
-
-  function choosePreferredDbTypeTarget(
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    mathesarType: MathesarType,
-  ): DbType {
-    switch (mathesarType.identifier) {
-      case 'number':
-        return 'NUMERIC';
-      case 'text':
-        return 'VARCHAR';
-      default:
-        throw new Error(`Database type target undefined for Mathesar type ${mathesarType.name}`);
-    }
-  }
-
-  function getValidDbTypeTargetsPerMathesarType(
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    column: TableColumn,
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    mathesarTypes: MathesarType[],
-  ): DbTypeTargetsPerMathesarType {
-    function getValidDbTypeTargetsForColumnAndMathesarType(
-      // eslint-disable-next-line @typescript-eslint/no-shadow
-      column: TableColumn,
-      // eslint-disable-next-line @typescript-eslint/no-shadow
-      mathesarType: MathesarType,
-    ): DbType[] {
-      return intersection(
-        new Set(column.validTargetTypes),
-        new Set(mathesarType.db_types),
-      );
-    }
-    const pairs = mathesarTypes.map(
-      // eslint-disable-next-line @typescript-eslint/no-shadow
-      (mathesarType) => pair(
-        mathesarType.identifier,
-        getValidDbTypeTargetsForColumnAndMathesarType(column, mathesarType),
-      ),
-    );
-    return new Map(pairs);
-  }
-
-  function patchColumnToMathesarType(
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    tableId: number,
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    columnId: number,
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType,
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    mathesarType: MathesarType,
-  ): void {
-    if (validDbTypeTargetsPerMathesarType) {
-      isOpen = false;
-      isDataTypeOptionsOpen = false;
-      const newDbType = choosePreferredDbTypeTarget(mathesarType);
-      const reloadTable = () => dispatch('reload');
-      void patchColumnType(tableId, columnId, newDbType)
-        .then(reloadTable);
-    }
-  }
-
-  let validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType | undefined;
-  $: {
-    if (mathesarTypes) {
-      // eslint-disable-next-line operator-linebreak
-      validDbTypeTargetsPerMathesarType =
-        getValidDbTypeTargetsPerMathesarType(column, mathesarTypes);
-    }
-  }
-
-  const implementedMathesarTypes: MathesarType['identifier'][] = ['number', 'text'];
-  // eslint-disable-next-line operator-linebreak
-  const isMathesarTypeImplemented =
-    (mathesarType: MathesarType): boolean =>
-      // eslint-disable-next-line implicit-arrow-linebreak
-      implementedMathesarTypes.includes(mathesarType.identifier);
-
-  let validMathesarTypeTargets: MathesarType[] | undefined;
-  $: {
-    if (mathesarTypes && validDbTypeTargetsPerMathesarType) {
-      // eslint-disable-next-line operator-linebreak
-      validMathesarTypeTargets =
-        mathesarTypes
-          .filter(isMathesarTypeImplemented)
-          .filter(
-            (mt: MathesarType) =>
-              // eslint-disable-next-line implicit-arrow-linebreak
-              mathesarTypeHasAtLeastOneValidDbTypeTarget(validDbTypeTargetsPerMathesarType, mt),
-          );
-    }
-  }
-
-  let patchToType: (mathesarType: MathesarType) => void;
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  $: {
-    if (validDbTypeTargetsPerMathesarType) {
-      patchToType = (mathesarType) =>
-        // eslint-disable-next-line implicit-arrow-linebreak
-        patchColumnToMathesarType(
-          tableId,
-          columnId,
-          validDbTypeTargetsPerMathesarType,
-          mathesarType,
-        );
-    } else {
-      // This branch won't be reached.
-    }
-  }
-
   let mathesarType: MathesarType | undefined;
   let mathesarTypeIcon: string | undefined;
   $: {
@@ -221,7 +57,6 @@
       mathesarTypeIcon = getIcon(mathesarType);
     }
   }
-
 
 </script>
 
@@ -246,84 +81,24 @@
     <svelte:fragment slot="content">
       <div>
         {#if isDataTypeOptionsOpen}
-          <h6 class="category">Data Type Options</h6>
-          <span class="title">Set Column Type</span>
-          <ul class="type-list">
-            {#each validMathesarTypeTargets as mathesarType}
-              <li>
-                <button
-                  on:click={ () => patchToType(mathesarType) }
-                >
-                  {mathesarType.name}
-                </button>
-              </li>
-            {:else}
-              <li>
-              </li>
-            {/each}
-          </ul>
+          <HeaderCellDropdownTypeOptions
+            on:reload
+            bind:mathesarTypes
+            bind:tableId
+            bind:column
+            bind:isOpen
+            bind:isDataTypeOptionsOpen
+          />
         {:else}
-          <h6 class="category">Data Type</h6>
-          <button
-            class="list-button with-right-icon"
-            on:click={() => { isDataTypeOptionsOpen = true; }}
-          >
-            <div>
-              <span class="data-icon">{mathesarTypeIcon}</span>
-              <span>{mathesarType.name}</span>
-            </div>
-            <div>
-              <Icon class="right-icon" data={faCog} />
-              <Icon class="right-icon" data={faChevronRight} />
-            </div>
-          </button>
-          <ul>
-            <li>
-              <button
-                class="list-button"
-                on:click={() => sortByColumn(column, 'asc')}
-              >
-                <Icon class="opt" data={faSortAmountDownAlt} />
-                <span>
-                  {#if sort?.get(column.name) === 'asc'}
-                    Remove asc sort
-                  {:else}
-                    Sort Ascending
-                  {/if}
-                </span>
-              </button>
-            </li>
-            <li>
-              <button
-                class="list-button"
-                on:click={() => sortByColumn(column, 'desc')}
-              >
-                <Icon class="opt" data={faSortAmountDown} />
-                <span>
-                  {#if sort?.get(column.name) === 'desc'}
-                    Remove desc sort
-                  {:else}
-                    Sort Descending
-                  {/if}
-                </span>
-              </button>
-            </li>
-            <li>
-              <button
-                class="list-button"
-                on:click={() => groupByColumn(column)}
-              >
-                <Icon class="opt" data={faThList} />
-                <span>
-                  {#if group?.has(column.name)}
-                    Remove grouping
-                  {:else}
-                    Group by column
-                  {/if}
-                </span>
-              </button>
-            </li>
-          </ul>
+          <HeaderCellDropdownGeneral
+            on:reload
+            bind:mathesarType
+            bind:mathesarTypeIcon
+            bind:sort
+            bind:group
+            bind:column
+            bind:isDataTypeOptionsOpen
+          />
         {/if}
       </div>
     </svelte:fragment>
