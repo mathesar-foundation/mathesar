@@ -57,6 +57,25 @@
 
 </script>
 
+<style lang="scss">
+  /* style .container elements in children components */
+  .container > :global(.container) {
+    display: flex;
+    flex-direction: column;
+    margin: 0.75rem;
+
+    & > :global(*) {
+      margin: 0.5rem 0;
+    }
+
+    & > :global(button) {
+      margin: 0;
+      /* use padding since these top-level buttons use it for background effects */
+      padding: 1rem 0.75rem 1rem 0.5rem;
+    }
+  }
+</style>
+
 <div
   class="cell"
   style="
@@ -76,26 +95,30 @@
     functionBeforeClose={closeDataTypeOptions}
   >
     <svelte:fragment slot="content">
-      {#if isDataTypeOptionsOpen}
-        <HeaderCellDropdownTypeOptions
-          on:reload
-          mathesarTypes={mathesarTypes}
-          tableId={tableId}
-          column={column}
-          bind:isOpen
-          bind:isDataTypeOptionsOpen
-        />
-      {:else}
-        <HeaderCellDropdownGeneral
-          on:reload
-          mathesarType={mathesarType}
-          mathesarTypeIcon={mathesarTypeIcon}
-          bind:sort
-          bind:group
-          column={column}
-          bind:isDataTypeOptionsOpen
-        />
-      {/if}
+      <div class="container">
+        {#if isDataTypeOptionsOpen}
+          <HeaderCellDropdownTypeOptions
+            class="container"
+            on:reload
+            mathesarTypes={mathesarTypes}
+            tableId={tableId}
+            column={column}
+            bind:isOpen
+            bind:isDataTypeOptionsOpen
+          />
+        {:else}
+          <HeaderCellDropdownGeneral
+            class="container"
+            on:reload
+            mathesarType={mathesarType}
+            mathesarTypeIcon={mathesarTypeIcon}
+            bind:sort
+            bind:group
+            column={column}
+            bind:isDataTypeOptionsOpen
+          />
+        {/if}
+      </div>
     </svelte:fragment>
   </Dropdown>
 </div>

@@ -4,12 +4,10 @@
 
   ul {
     list-style: none;
-    margin: 0;
     padding: 0px;
   }
 
   .list-button {
-    width: 100%;
     display: flex;
     align-items: center;
     padding: 8px 12px 8px 8px;
@@ -46,24 +44,18 @@
   }
 
   .category {
-    margin: 0px;
     font-weight: normal;
-    padding: 8px 12px 8px 8px;
     font-size: 12px;
   }
 
   .title {
-    margin: 0px;
     font-weight: normal;
-    padding: 8px;
-    padding-top: 0px;
     font-size: 14px;
     display: block;
   }
 
   .type-list {
     height: 150px;
-    margin: 0 8px 8px 8px;
     border: 1px solid #d2d2d2;
     border-radius: 5px;
     overflow: auto;

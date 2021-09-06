@@ -142,6 +142,14 @@
 </script>
 
 <style lang="scss">
+  h6 {
+    color: gray;
+  }
+
+  .divider {
+    border-top: 1px lightgray solid;
+  }
+
   .buttons {
     display: flex;
     flex-direction: row;
@@ -149,7 +157,7 @@
   }
 </style>
 
-<div>
+<div class="container">
   <h6 class="category">Data Type Options</h6>
   <span class="title">Set Column Type</span>
   <ul class="type-list">
@@ -167,6 +175,7 @@
       </li>
     {/each}
   </ul>
+  <span><i>Placeholder for type options</i></span>
   <div class="divider"></div>
   <div class="buttons">
     <Button appearance="secondary">

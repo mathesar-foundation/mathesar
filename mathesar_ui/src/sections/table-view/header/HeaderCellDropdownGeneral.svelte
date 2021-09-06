@@ -56,7 +56,13 @@
 
 </script>
 
-<div>
+<style lang="scss">
+  h6 {
+    color: gray;
+  }
+</style>
+
+<div class="container">
   <h6 class="category">Data Type</h6>
   <button
     class="list-button with-right-icon"
@@ -71,51 +77,43 @@
       <Icon class="right-icon" data={faChevronRight} />
     </div>
   </button>
-  <ul>
-    <li>
-      <button
-        class="list-button"
-        on:click={() => sortByColumn(column, 'asc')}
-      >
-        <Icon class="opt" data={faSortAmountDownAlt} />
-        <span>
-          {#if sort?.get(column.name) === 'asc'}
-            Remove asc sort
-          {:else}
-            Sort Ascending
-          {/if}
-        </span>
-      </button>
-    </li>
-    <li>
-      <button
-        class="list-button"
-        on:click={() => sortByColumn(column, 'desc')}
-      >
-        <Icon class="opt" data={faSortAmountDown} />
-        <span>
-          {#if sort?.get(column.name) === 'desc'}
-            Remove desc sort
-          {:else}
-            Sort Descending
-          {/if}
-        </span>
-      </button>
-    </li>
-    <li>
-      <button
-        class="list-button"
-        on:click={() => groupByColumn(column)}
-      >
-        <Icon class="opt" data={faThList} />
-        <span>
-          {#if group?.has(column.name)}
-            Remove grouping
-          {:else}
-            Group by column
-          {/if}
-        </span>
-      </button>
-    </li>
-  </ul>
+  <button
+    class="list-button"
+    on:click={() => sortByColumn(column, 'asc')}
+  >
+    <Icon class="opt" data={faSortAmountDownAlt} />
+    <span>
+      {#if sort?.get(column.name) === 'asc'}
+        Remove asc sort
+      {:else}
+        Sort Ascending
+      {/if}
+    </span>
+  </button>
+  <button
+    class="list-button"
+    on:click={() => sortByColumn(column, 'desc')}
+  >
+    <Icon class="opt" data={faSortAmountDown} />
+    <span>
+      {#if sort?.get(column.name) === 'desc'}
+        Remove desc sort
+      {:else}
+        Sort Descending
+      {/if}
+    </span>
+  </button>
+  <button
+    class="list-button"
+    on:click={() => groupByColumn(column)}
+  >
+    <Icon class="opt" data={faThList} />
+    <span>
+      {#if group?.has(column.name)}
+        Remove grouping
+      {:else}
+        Group by column
+      {/if}
+    </span>
+  </button>
 </div>
