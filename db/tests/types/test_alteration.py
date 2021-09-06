@@ -10,7 +10,7 @@ from sqlalchemy.exc import DataError
 
 from db import types, columns, tables
 from db.tests.types import fixtures
-from db.types import alteration
+from db.types import alteration, datetime
 from db.types.base import PostgresType, MathesarCustomType, get_qualified_name, get_available_types
 
 
@@ -420,6 +420,15 @@ type_test_list = [
 ] + [
     (val[ISCHEMA_NAME], "decimal", {"precision": 5, "scale": 3}, "NUMERIC(5, 3)")
     for val in MASTER_DB_TYPE_MAP_SPEC.values() if DECIMAL in val[TARGET_DICT]
+] + [
+    (val[ISCHEMA_NAME], "time", {"precision": 5}, "TIME(5)")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIME in val[TARGET_DICT]
+] + [
+    (val[ISCHEMA_NAME], "time", {"timezone": True}, "TIME WITH TIME ZONE")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIME in val[TARGET_DICT]
+] + [
+    (val[ISCHEMA_NAME], "time", {"precision": 5, "timezone": True}, "TIME(5) WITH TIME ZONE")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIME in val[TARGET_DICT]
 ]
 
 
@@ -468,6 +477,12 @@ type_test_data_args_list = [
     # test that rounding is as intended
     (Numeric, "numeric", {"precision": 5, "scale": 2}, 1.235, Decimal("1.24")),
     (String, "numeric", {"precision": 5, "scale": 2}, "500.134", Decimal("500.13")),
+
+    (datetime.TIME, "time", {"precision": 0}, time(0, 0, 0, 9), time(0, 0, 0)),
+    (datetime.TIME, "time", {"timezone": True}, time(0, 0, 0),
+     time(0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0))),
+    (datetime.TIME(timezone=True), "time", {"timezone": False},
+     time(0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0)), time(0, 0, 0))
 ]
 
 

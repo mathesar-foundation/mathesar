@@ -23,6 +23,7 @@ FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
 TEXT = base.PostgresType.TEXT.value
 DATE = base.PostgresType.DATE.value
 TIME = base.PostgresType.TIME.value
+TIME_WITH_TIME_ZONE = base.PostgresType.TIME_WITH_TIME_ZONE.value
 STRING = base.STRING
 VARCHAR = base.VARCHAR
 
@@ -295,6 +296,7 @@ def assemble_function_creation_sql(argument_type, target_type, function_body):
 
 
 def get_cast_function_name(target_type):
+    target_type = target_type.split(' ')[0]  # Catch TIME WITH TIME ZONE edge case
     unqualified_type_name = target_type.split('.')[-1].lower()
     bare_type_name = unqualified_type_name.split('(')[0]
     function_type_name = '_'.join(bare_type_name.split())
@@ -484,7 +486,7 @@ def _get_date_type_body_map():
 
 def _get_time_type_body_map():
     default_behavior_source_types = [
-        VARCHAR, TIME
+        VARCHAR, TIME, TIME_WITH_TIME_ZONE
     ]
     return _get_default_type_body_map(
         default_behavior_source_types, TIME,
