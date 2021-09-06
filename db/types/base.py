@@ -84,13 +84,3 @@ def get_qualified_name(name):
 
 def get_available_types(engine):
     return engine.dialect.ischema_names
-
-
-@event.listens_for(Table, "column_reflect")
-def _setup_extended_types(inspector, table, column_info):
-    if isinstance(column_info["type"], TIME):
-        previous_type = column_info["type"]
-        column_info["type"] = datetime.TIME(
-            timezone=previous_type.timezone,
-            precision=previous_type.precision
-        )
