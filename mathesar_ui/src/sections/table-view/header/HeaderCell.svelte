@@ -247,7 +247,7 @@
       <div>
         {#if isDataTypeOptionsOpen}
           <h6 class="category">Data Type Options</h6>
-          <span class="title">Set '{column.name}' type</span>
+          <span class="title">Set Column Type</span>
           <ul class="type-list">
             {#each validMathesarTypeTargets as mathesarType}
               <li>
