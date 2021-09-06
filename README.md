@@ -10,11 +10,13 @@ We are currently in early development and hope to release an alpha version by la
 
 - [Contributing](#contributing)
 - [Local Development](#local-development)
+  - [Developing in Windows](#developing-in-windows)
   - [Configuration Options](#configuration-options)
   - [Frontend](#frontend)
   - [Linting](#linting)
   - [Running tests](#running-tests)
   - [Opening a shell in the container](#opening-a-shell-in-the-container)
+  - [Common issues](#common-issues)
 - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
