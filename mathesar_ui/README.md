@@ -49,19 +49,19 @@ If you want to add or remove packages, or bascially run any npm action, **always
 You can connect to the container and open the ui folder by running:
 
 ```bash
-docker exec --user mathesar -it mathesar_service_1 /bin/bash
+docker exec -it mathesar_service_1 /bin/bash
 cd mathesar_ui
 ```
 
 and then perform any action from within it. Example:
 ```bash
-node@c273da65c52d:/code/mathesar_ui$ ls
+root@c273da65c52d:/code/mathesar_ui$ ls
 Dockerfile  jsconfig.json  package-lock.json  public  vite.config.js
 README.md   node_modules   package.json       src
 
-node@c273da65c52d:/code/mathesar_ui$ npm install <package>
+root@c273da65c52d:/code/mathesar_ui$ npm install <package>
 
-node@c273da65c52d:/code/mathesar_ui$ npm uninstall <package>
+root@c273da65c52d:/code/mathesar_ui$ npm uninstall <package>
 ```
 
 ### Components
@@ -71,14 +71,23 @@ For guidelines on component development, refer [README of components](https://gi
 You can start storybook in dev mode by connecting to the container and then running `npm run storybook`:
 
 ```bash
-docker exec --user mathesar -it mathesar_service_1 /bin/bash
+docker exec -it mathesar_service_1 /bin/bash
 
-node@c273da65c52d:/code/mathesar_ui$ cd mathesar_ui && npm run storybook
+root@c273da65c52d:/code/mathesar_ui$ cd mathesar_ui && npm run storybook
 ```
 
 This should start storybook at port 6006.
 
 To build storybook, run `npm run build-storybook`. The static storybook build will be present within __storybook-static__ folder.
+
+### Developing in Windows
+Hot module replacement does not work well with WSL, as mentioned here as mentioned in [this issue](https://github.com/microsoft/WSL/issues/4739), when the project is present within a windows filesystem.
+
+The simplest way to get this work, and the adviced option, is to move the project to a linux filesystem. You can clone the repo within the WSL shell in a linux filesystem, which should resolve this.
+
+If you have to work in the windows filesystem for any other purpose, you could configure vite to poll files to identify changes, as mentioned in [this issue](https://github.com/vitejs/vite/issues/1153#issuecomment-785467271) and in the [vite documentation](https://vitejs.dev/config/#server-watch). However, this is a resource intensive process and not adviced.
+
+This issue: https://github.com/centerofci/mathesar/issues/570 in our repository keeps track of problems encountered during windows development.
 
 ## Naming conventions
 

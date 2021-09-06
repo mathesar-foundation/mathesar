@@ -39,13 +39,17 @@ docker-compose up
 
 If it's your first time running the application, you'll also need to run database migrations and install Mathesar types and functions:
 ```
-docker exec --user mathesar mathesar_service_1 python manage.py migrate
-docker exec --user mathesar -it mathesar_service_1 python install.py
+docker exec mathesar_service_1 python manage.py migrate
+docker exec -it mathesar_service_1 python install.py
 ```
 
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application. For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`. 
 
 It is recommended that you keep the Docker containers running while you make changes to the code. Any change to the code made locally will sync to the container and the version deployed at `http://localhost:8000` will always be the latest local version of the code.
+
+### Developing in Windows
+
+Windows users, who want to run Mathesar docker development environment in WSL, are adviced to clone the repository in a linux filesystem. WSL does not work well with HMR, required for frontend development, when the project resides in a windows filesystem. Please refer our [common issues page](https://wiki.mathesar.org/engineering/common-issues), and the [frontend development readme file](https://github.com/centerofci/mathesar/blob/master/mathesar_ui/README.md#developing-in-windows) for more details. 
 
 ### Configuration Options
 
@@ -79,20 +83,23 @@ If you'd like to run tests before pushing, here's how you do it:
 
 Backend tests:
 ```
-docker exec --user mathesar mathesar_service_1 pytest
+docker exec mathesar_service_1 pytest
 ```
 
 Frontend tests:
 ```
-docker exec --user mathesar mathesar_service_1 bash -c "cd mathesar_ui && npm test"
+docker exec mathesar_service_1 bash -c "cd mathesar_ui && npm test"
 ```
 
 ### Opening a shell in the container
 
 If you need to do some work on the container that's running the code, here's how you access it:
 ```
-docker exec --user mathesar -it mathesar_service_1 bash
+docker exec -it mathesar_service_1 bash
 ```
+
+### Common issues
+Please refer our [common issues wiki page](https://wiki.mathesar.org/engineering/common-issues) for common issues and steps to resolve them, while setting up and running Mathesar.
 
 ## License
 
