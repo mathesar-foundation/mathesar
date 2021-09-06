@@ -1,8 +1,3 @@
-"""
-This file contains functions that make it easier to work with tables
-in the codebase but don't involve altering them at the database level.
-"""
-
 import warnings
 
 from sqlalchemy import Table, MetaData, select, join, inspect, and_
