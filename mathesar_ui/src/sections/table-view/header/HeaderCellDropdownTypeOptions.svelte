@@ -1,7 +1,13 @@
+<script context="module">
+  // TODO move static functions to the module context to make them explicitly static
+  // see https://svelte.dev/docs#script_context_module
+</script>
+
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { patchColumnType } from '@mathesar/stores/tableData';
   import type { DbType, MathesarType } from '@mathesar/stores/databases';
+  import { getMathesarTypeIcon } from '@mathesar/stores/databases';
   import { intersection, pair, notEmpty } from '@mathesar/utils/language';
   import type { TableColumn } from '@mathesar/stores/tableData';
   import { Button } from '@mathesar-components';
@@ -206,7 +212,10 @@
           on:click={ () => selectMathesarType(mathesarType) }
           selected={ selectedMathesarType === mathesarType }
         >
-          {mathesarType.name}
+          <div>
+            <span class="data-icon">{getMathesarTypeIcon(mathesarType)}</span>
+            <span>{mathesarType.name}</span>
+          </div>
         </button>
       </li>
     {:else}

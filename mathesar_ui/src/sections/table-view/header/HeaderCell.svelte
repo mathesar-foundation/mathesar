@@ -6,7 +6,8 @@
     SortOption,
     TableColumn,
   } from '@mathesar/stores/tableData';
-  import type { DbType, MathesarType } from '@mathesar/stores/databases';
+  import type { MathesarType } from '@mathesar/stores/databases';
+  import { determineMathesarType, getMathesarTypeIcon } from '@mathesar/stores/databases';
   import HeaderCellDropdownGeneral from './HeaderCellDropdownGeneral.svelte';
   import HeaderCellDropdownTypeOptions from './HeaderCellDropdownTypeOptions.svelte';
 
@@ -25,33 +26,12 @@
     isDataTypeOptionsOpen = false;
   }
 
-  function determineMathesarType(
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    mathesarTypes: MathesarType[],
-    dbType: DbType,
-  ) {
-    const mathesarTypeHasItAsTarget = (mt: MathesarType) => mt.db_types.includes(dbType);
-    return mathesarTypes.find(mathesarTypeHasItAsTarget);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  function getIcon(mathesarType: MathesarType): string {
-    switch (mathesarType.identifier) {
-      case 'number':
-        return '#';
-      case 'text':
-        return 'T';
-      default:
-        return '?';
-    }
-  }
-
   let mathesarType: MathesarType | undefined;
   let mathesarTypeIcon: string | undefined;
   $: {
     if (mathesarTypes) {
       mathesarType = determineMathesarType(mathesarTypes, column.type);
-      mathesarTypeIcon = getIcon(mathesarType);
+      mathesarTypeIcon = getMathesarTypeIcon(mathesarType);
     }
   }
 

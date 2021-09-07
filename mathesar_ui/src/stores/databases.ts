@@ -76,6 +76,27 @@ export interface MathesarType {
   db_types: DbType[]
 }
 
+export function determineMathesarType(
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  mathesarTypes: MathesarType[],
+  dbType: DbType,
+): MathesarType {
+  const mathesarTypeHasItAsTarget = (mt: MathesarType) => mt.db_types.includes(dbType);
+  return mathesarTypes.find(mathesarTypeHasItAsTarget);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-shadow
+export function getMathesarTypeIcon(mathesarType: MathesarType): string {
+  switch (mathesarType.identifier) {
+    case 'number':
+      return '#';
+    case 'text':
+      return 'T';
+    default:
+      return '?';
+  }
+}
+
 export type DatabasesToMathesarTypes = Map<Database['id'], MathesarType[]>;
 
 async function getDatabasesToMathesarTypes(
