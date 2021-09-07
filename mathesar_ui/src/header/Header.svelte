@@ -7,9 +7,9 @@
     faUpload,
     faTable,
   } from '@fortawesome/free-solid-svg-icons';
-  import { postAPI } from '@mathesar/utils/api';
+  import { createTable, refetchTablesForSchema } from '@mathesar/stores/tables';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
-  import { currentSchemaId, refetchSchema } from '@mathesar/stores/schemas';
   import { newImport, importStatuses } from '@mathesar/stores/fileImports';
   import {
     addTab,
@@ -24,15 +24,12 @@
   import SchemaSelector from './schema-selector/SchemaSelector.svelte';
   import ImportIndicator from './import-indicator/ImportIndicator.svelte';
 
-  async function createEmptyTable() {
-    const response = await postAPI<{ id: number, name: string }>('/tables/', {
-      schema: $currentSchemaId as number,
-    });
-    const { id, name } = response;
-    await refetchSchema($currentDBName, $currentSchemaId);
-    addTab($currentDBName, $currentSchemaId, { id, label: name });
+  async function handleCreateEmptyTable() {
+    const table = await createTable($currentSchemaId);
+    await refetchTablesForSchema($currentSchemaId);
+    addTab($currentDBName, $currentSchemaId, { id: table.id, label: table.name });
   }
-
+  
   function beginDataImport() {
     if ($currentDBName && $currentSchemaId) {
       const fileData = get(newImport($currentDBName, $currentSchemaId));
@@ -71,7 +68,7 @@
           </svelte:fragment>
           <svelte:fragment slot="content">
             <div class="new-table-options">
-              <Button on:click={createEmptyTable} appearance="plain">
+              <Button on:click={handleCreateEmptyTable} appearance="plain">
                 <Icon data={faTable} size="0.8em"/>
                 <span>Empty table</span>
               </Button>
