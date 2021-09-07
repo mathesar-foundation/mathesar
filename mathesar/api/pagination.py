@@ -3,6 +3,8 @@ from collections import OrderedDict
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
+from mathesar.api.utils import get_table_or_404
+
 
 class DefaultLimitOffsetPagination(LimitOffsetPagination):
     default_limit = 50
@@ -22,7 +24,7 @@ class ColumnLimitOffsetPagination(DefaultLimitOffsetPagination):
         if self.limit is None:
             self.limit = self.default_limit
         self.offset = self.get_offset(request)
-        table = queryset.get(id=table_id)
+        table = get_table_or_404(pk=table_id)
         self.count = len(table.sa_columns)
         self.request = request
         return list(table.sa_columns)[self.offset:self.offset + self.limit]
@@ -37,7 +39,7 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
             self.limit = self.default_limit
         self.offset = self.get_offset(request)
         # TODO: Cache count value somewhere, since calculating it is expensive.
-        table = queryset.get(id=table_id)
+        table = get_table_or_404(pk=table_id)
         self.count = table.sa_num_records(filters=filters)
         self.request = request
 
@@ -60,7 +62,7 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
             queryset, request, table_id, filters=filters, order_by=order_by
         )
 
-        table = queryset.get(id=table_id)
+        table = get_table_or_404(pk=table_id)
         if group_count_by:
             group_count = table.get_group_counts(
                 group_count_by, self.limit, self.offset,
