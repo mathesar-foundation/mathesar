@@ -19,8 +19,13 @@
   export let columnPosition: ColumnPosition;
   export let paddingLeft: number;
 
-  let isDataTypeOptionsOpen = false;
   let isOpen = false;
+
+  /**
+   * If more than one sub-view should be introduced,
+   * a better state mechanism than boolean flags would be desired.
+   */
+  let isDataTypeOptionsOpen = false;
 
   function closeDataTypeOptions() {
     isDataTypeOptionsOpen = false;

@@ -76,6 +76,9 @@ export interface MathesarType {
   db_types: DbType[]
 }
 
+/**
+ * Considers a DbType to belong to the first MathesarType that has it in its `db_types` set.
+ */
 export function determineMathesarType(
   // eslint-disable-next-line @typescript-eslint/no-shadow
   mathesarTypes: MathesarType[],
@@ -113,6 +116,10 @@ export function getMathesarTypeIcon(mathesarType: MathesarType): string {
 
 export type DatabasesToMathesarTypes = Map<Database['id'], MathesarType[]>;
 
+/**
+ * Given a set of Database objects, queries the API for Mathesar types allowed on those databases
+ * in parallel, and constructs a mapping between database ids and sets of those Mathesar types.
+ */
 async function getDatabasesToMathesarTypes(
   knownDatabases: Database[],
 ):Promise<DatabasesToMathesarTypes> {
@@ -129,6 +136,10 @@ async function getDatabasesToMathesarTypes(
   return Promise.all(promisesOfPairs).then(toMap);
 }
 
+/**
+ * A Readable containing the output of calling getDatabasesToMathesarTypes on the database set
+ * stored in the `databases` store.
+ */
 // eslint-disable-next-line operator-linebreak
 export const databasesToMathesarTypesStore: Readable<DatabasesToMathesarTypes> =
   derived<Readable<DatabaseStoreData>, DatabasesToMathesarTypes>(
@@ -142,6 +153,10 @@ export const databasesToMathesarTypesStore: Readable<DatabasesToMathesarTypes> =
     undefined,
   );
 
+/**
+ * A Readable containing the Mathesar types allowed on the database whose id is stored on
+ * currentDBId.
+ */
 // eslint-disable-next-line operator-linebreak
 export const currentDBMathesarTypes: Readable<MathesarType[]> =
   derived(

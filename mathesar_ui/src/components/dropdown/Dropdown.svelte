@@ -30,6 +30,7 @@
 
   function checkAndRunFunctionBeforeClose() {
     if (functionBeforeClose) {
+      // TODO find out why this isn't being called when using the open/close button to close
       functionBeforeClose();
     }
   }

@@ -6,6 +6,11 @@
 
   type DbTypeTargetsPerMathesarType = Map<MathesarType['identifier'], DbType[]>;
 
+  /**
+   * Valid DbType target set for a given column and a given MathesarType is the intersection
+   * between DbType targets defined on the MathesarType (as returned by the database REST API)
+   * and DbType targets on the column (as returned by the column API).
+   */
   function getValidDbTypeTargetsPerMathesarType(
     // eslint-disable-next-line @typescript-eslint/no-shadow
     column: TableColumn,
@@ -104,6 +109,7 @@ take effect.
   }
 
   const implementedMathesarTypes: MathesarType['identifier'][] = ['number', 'text'];
+
   // eslint-disable-next-line operator-linebreak
   const isMathesarTypeImplemented =
     (mathesarType: MathesarType): boolean =>
@@ -125,6 +131,7 @@ take effect.
     }
   }
 
+  // TODO move to language.ts
   // eslint-disable-next-line @typescript-eslint/comma-dangle
   const isDefined = <T,>(x: T): boolean => typeof x !== 'undefined';
 
