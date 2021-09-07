@@ -1,93 +1,71 @@
 <script lang="ts">
-    import {
-      Button,
-      Modal,
-      Icon,
-    } from '@mathesar-components';
-    import {
-      tables,
-    } from '@mathesar/stores/tables';
-    import { faTable } from '@fortawesome/free-solid-svg-icons';
-    import {
+  import { get } from 'svelte/store';
+  import { faTable } from '@fortawesome/free-solid-svg-icons';
+  import {
+    Button,
+    Modal,
+    Icon,
+  } from '@mathesar-components';
+  import {
+    tables,
+  } from '@mathesar/stores/tables';
+  import {
     refetchTablesForSchema,
     deleteTable
   } from '@mathesar/stores/tables';
-
+  import {
+    removeTab,
+    getTabsForSchema,
+  } from '@mathesar/stores/tabs';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { currentDBName } from '@mathesar/stores/databases';
   
-    export let isOpen = false; 
-    let arr = [];
-    export let placement = 'bottom-start';
-
+  export let isOpen = false; 
+  
+  let nameTables = [];
    
-   function casa(){
-     $tables?.data?.forEach((value) => {
-        arr.push(value.name);
-      })
-     
-    }
-    if(isOpen == true){
-      casa();
-    }
-    $: arr2 = arr
-    function close(){
-        isOpen = false;
-    }
-    function confirmDelete(){
+  function getNameTables(_tables){
+    _tables?.data?.forEach((value) => {
+      nameTables.push(value.name);
+     })
+  }
 
-    }
+  $: getNameTables($tables);
+
+ function getActiveTab(_currentDBName, _currentSchemaId){
+  const { activeTab }  = getTabsForSchema(_currentDBName,_currentSchemaId);
+  const activeTabObj = get(activeTab);
+  return activeTabObj;
+ }
+
+  function confirmDelete() {
+    const _activeTab = getActiveTab($currentDBName, $currentSchemaId);
+    deleteTable('/tables/'+ _activeTab.id);
+    removeTab($currentDBName,$currentSchemaId,_activeTab);
+    refetchTablesForSchema($currentSchemaId);
+  }
+
+  $: nameActiveTab = getActiveTab($currentDBName, $currentSchemaId);
+  
   </script>
-  <style>
-     .dropdown.content {
-        max-height: 150px;
-        padding-left:0;
-        overflow:auto;
-    }
-    li:hover {
-        background-color:#e2e2e4;
-    }
-    li {
-        padding: 10px;
-    }
-    ul{
-        list-style-type: none;
-    }
-    span {
-        margin-left: 6px;
-    }
-    .header {
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-    .footer {
-      text-align: right;
-   }
-  </style>
-  <Modal  bind:isOpen>
-    <div>
+
+  <Modal class="delete-modal">
       <div class="header">
-        Deleting 'Release' could break existing tables and views.
+        Deleting '{nameActiveTab.label}' could break existing tables and views.
       </div >
       <div class="help-text">
         All Objects related to this table will be afected. 
       </div>
-      <ul class='dropdown content'>
-        <li><Icon data={faTable}/> Hola Amigo</li>
-        <li><Icon data={faTable}/> Hola Amigo</li>
-        <li><Icon data={faTable}/> Hola Amigo</li>
-        <li><Icon data={faTable}/> Hola Amigo</li>
-        <li><Icon data={faTable}/> Hola Amigo</li>
-        <li><Icon data={faTable}/> Hola Amigo</li>
-        <li><Icon data={faTable}/> Hola Amigo</li>
-        <li><Icon data={faTable}/> Hola Amigo</li>
+      <ul class="dropdown content">
+        {#each nameTables as table}
+          <li><Icon data={faTable}/> {table} </li>
+        {/each}
      </ul>
-    </div>
     
     <svelte:fragment slot="footer">
-        <!-- <div class="footer"> -->
         <Button on:click={() => { isOpen = false; }}>Cancel</Button>
-        <Button appearance="primary" on:click{confirmDelete} >
-        Delete Table
+        <Button appearance="primary" on:click={confirmDelete}>
+          Delete Table
         </Button>
-        <!-- </div> -->
     </svelte:fragment>
   </Modal>

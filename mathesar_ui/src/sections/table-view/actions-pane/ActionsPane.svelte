@@ -52,17 +52,17 @@
     var ggg = getTable($currentDBName,$currentSchemaId);
     var ttt = ggg.records
     console.log(get(ttt));
-    dispatch('deleteTable');
   }
   
-  async function deleteSecondTable(){
-    const { activeTab }  = getTabsForSchema($currentDBName,$currentSchemaId);
-    var g = get(activeTab);
-    const response = deleteTable('/tables/'+ g.id);
-    removeTab($currentDBName,$currentSchemaId,g);
-    refetchTablesForSchema($currentSchemaId);
-    // const t = getTablesStoreForSchema($currentSchemaId);
-   
+  async function tableDelete(){
+    //if table is not empty
+    dispatch('deleteTable');
+    //else
+    // const { activeTab }  = getTabsForSchema($currentDBName,$currentSchemaId);
+    // const activeTabObj = get(activeTab);
+    // deleteTable('/tables/'+ activeTabObj.id);
+    // removeTab($currentDBName,$currentSchemaId,activeTabObj);
+    // refetchTablesForSchema($currentSchemaId);
   }
 </script>
 
@@ -74,8 +74,8 @@
     </svelte:fragment>
     <svelte:fragment slot="content">
       <ul>
-        <li class= "item" on:click={openConfirmation}>Delete Table</li>
-        <li class= "item">Duplicate Table</li>
+        <li class= "item" on:click={tableDelete}>Delete Table</li>
+        <li class= "item" on:click={openConfirmation}>Duplicate Table</li>
       </ul>
     </svelte:fragment>
   </Dropdown>
