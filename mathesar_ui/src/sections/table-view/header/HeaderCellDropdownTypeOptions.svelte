@@ -90,6 +90,7 @@ take effect.
   import { getMathesarTypeIcon } from '@mathesar/stores/databases';
   import type { TableColumn } from '@mathesar/stores/tableData';
   import { Button } from '@mathesar-components';
+  import { isDefined } from '@mathesar/utils/language';
 
   export let mathesarTypes: MathesarType[];
   export let tableId: number;
@@ -130,10 +131,6 @@ take effect.
           );
     }
   }
-
-  // TODO move to language.ts
-  // eslint-disable-next-line @typescript-eslint/comma-dangle
-  const isDefined = <T,>(x: T): boolean => typeof x !== 'undefined';
 
   let selectedMathesarType: MathesarType;
 
