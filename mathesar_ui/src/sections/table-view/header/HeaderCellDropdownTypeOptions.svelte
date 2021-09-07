@@ -67,6 +67,19 @@
   }
 </script>
 
+<!--
+  Svelte linter cannot differentiate between static/pure and stateful functions
+so it warns when using module context functions in reactive blocks.
+
+  The ability to disable this specific warning will be available when svelte is
+updated to version 3.39.0 or above. The svelte-ignore directive below will then
+take effect.
+
+  https://github.com/sveltejs/svelte/issues/5954
+  https://github.com/sveltejs/svelte/pull/6504
+  -->
+
+<!-- svelte-ignore module-script-reactive-declaration -->
 <script lang="ts">
   import type { DbType, MathesarType } from '@mathesar/stores/databases';
   import { getMathesarTypeIcon } from '@mathesar/stores/databases';
