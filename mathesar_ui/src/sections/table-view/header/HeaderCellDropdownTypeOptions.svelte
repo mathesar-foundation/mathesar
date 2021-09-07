@@ -7,7 +7,7 @@
   import { createEventDispatcher } from 'svelte';
   import { patchColumnType } from '@mathesar/stores/tableData';
   import type { DbType, MathesarType } from '@mathesar/stores/databases';
-  import { getMathesarTypeIcon } from '@mathesar/stores/databases';
+  import { getMathesarTypeIcon, choosePreferredDbTypeTarget } from '@mathesar/stores/databases';
   import { intersection, pair, notEmpty } from '@mathesar/utils/language';
   import type { TableColumn } from '@mathesar/stores/tableData';
   import { Button } from '@mathesar-components';
@@ -33,20 +33,6 @@
       validDbTypeTargetsPerMathesarType.get(mathesarType.identifier);
     const atLeastOne = notEmpty(validDbTypeTargets);
     return atLeastOne;
-  }
-
-  function choosePreferredDbTypeTarget(
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    mathesarType: MathesarType,
-  ): DbType {
-    switch (mathesarType.identifier) {
-      case 'number':
-        return 'NUMERIC';
-      case 'text':
-        return 'VARCHAR';
-      default:
-        throw new Error(`Database type target undefined for Mathesar type ${mathesarType.name}`);
-    }
   }
 
   function getValidDbTypeTargetsPerMathesarType(

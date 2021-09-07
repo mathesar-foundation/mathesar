@@ -85,6 +85,20 @@ export function determineMathesarType(
   return mathesarTypes.find(mathesarTypeHasItAsTarget);
 }
 
+export function choosePreferredDbTypeTarget(
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  mathesarType: MathesarType,
+): DbType {
+  switch (mathesarType.identifier) {
+    case 'number':
+      return 'NUMERIC';
+    case 'text':
+      return 'VARCHAR';
+    default:
+      throw new Error(`Database type target undefined for Mathesar type ${mathesarType.name}`);
+  }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-shadow
 export function getMathesarTypeIcon(mathesarType: MathesarType): string {
   switch (mathesarType.identifier) {
