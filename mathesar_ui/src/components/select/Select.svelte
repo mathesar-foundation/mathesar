@@ -53,9 +53,14 @@
       const hoveredElem: HTMLElement = parentHoverElem.querySelector('.hovered');
       const container: HTMLDivElement = parentHoverElem.parentElement;
       if (hoveredElem && container) {
-        const offsetValue: number = container.getBoundingClientRect().bottom
-        - hoveredElem.getBoundingClientRect().bottom;
-        container.scrollTop -= offsetValue;
+        if (hoveredElem.offsetTop + hoveredElem.clientHeight
+         > (container.scrollTop + container.clientHeight)) {
+          const offsetValue: number = container.getBoundingClientRect().bottom
+            - hoveredElem.getBoundingClientRect().bottom;
+          container.scrollTop -= offsetValue;
+        } else if (hoveredElem.offsetTop < container.scrollTop) {
+          container.scrollTop = hoveredElem.offsetTop;
+        }
       }
     }
   }
