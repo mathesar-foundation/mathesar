@@ -30,13 +30,13 @@
 
   function checkAndRunFunctionBeforeClose() {
     if (functionBeforeClose) {
-      // TODO find out why this isn't being called when using the open/close button to close
       functionBeforeClose();
     }
   }
 
-  function toggle() {
-    isOpen = !isOpen;
+  function open() {
+    isOpen = true;
+    dispatch('open');
   }
 
   function close() {
@@ -44,19 +44,19 @@
     isOpen = false;
   }
 
+  function toggle() {
+    if (isOpen) {
+      close();
+    } else {
+      open();
+    }
+  }
+
   function checkAndCloseOnInnerClick() {
     if (closeOnInnerClick) {
       close();
     }
   }
-
-  function dispatchOnOpen(_isOpen) {
-    if (_isOpen) {
-      dispatch('open');
-    }
-  }
-
-  $: dispatchOnOpen(isOpen);
 </script>
 
 <Button
