@@ -36,6 +36,27 @@ header {
 
     .quick-links {
       margin-right: 15px;
+
+      .new-table {
+        display: flex;
+        align-items: center;
+
+        .label {
+          margin-left: 4px;
+        }
+      }
     }
+  }
+}
+
+.new-table-options {
+  list-style-type: none;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  button {
+    display: flex;
+    width: 100%;
   }
 }
