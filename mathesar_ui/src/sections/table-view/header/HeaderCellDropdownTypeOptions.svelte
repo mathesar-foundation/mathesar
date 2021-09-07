@@ -113,23 +113,6 @@
     }
   }
 
-  let patchToType: (mathesarType: MathesarType) => void;
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  $: {
-    if (validDbTypeTargetsPerMathesarType) {
-      patchToType = (mathesarType) =>
-        // eslint-disable-next-line implicit-arrow-linebreak
-        patchColumnToMathesarType(
-          tableId,
-          columnId,
-          validDbTypeTargetsPerMathesarType,
-          mathesarType,
-        );
-    } else {
-      // This branch won't be reached.
-    }
-  }
-
   // eslint-disable-next-line @typescript-eslint/comma-dangle
   const isDefined = <T,>(x: T): boolean => typeof x !== 'undefined';
 
