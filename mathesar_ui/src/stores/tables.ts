@@ -8,6 +8,7 @@ import {
 } from 'svelte/store';
 import {
   getAPI,
+  postAPI,
   States,
 } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
@@ -118,6 +119,13 @@ export function getTablesStoreForSchema(schemaId: SchemaEntry['id']): Writable<D
     void refetchTablesForSchema(schemaId);
   }
   return store;
+}
+
+export function createTable(
+  schema: SchemaEntry['id'],
+  name: string | undefined = undefined,
+): CancellablePromise<TableEntry> {
+  return postAPI<TableEntry>('/tables/', { schema, name });
 }
 
 export const tables: Readable<DBTablesStoreData> = derived(
