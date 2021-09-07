@@ -11,22 +11,18 @@ services:
       - "5432:5432"
     volumes:
       - ./.volumes:/var/lib/postgresql/data
-  ui:
-    build: ./mathesar_ui
-    volumes:
-      - ./mathesar_ui:/home/node/ui
-      - ui_node_modules:/home/node/ui/node_modules
-    ports:
-      - "3000:3000"
-      - "6006:6006"
-    command: bash -c "npm install && npm run dev"
-  web:
+  service:
     build: .
-    command: dockerize -wait tcp://db:5432 -timeout 30s python manage.py runserver 0.0.0.0:8000
+    environment:
+      - MODE=${MODE-PRODUCTION}
+    command: dockerize -wait tcp://db:5432 -timeout 30s ./run.sh
     volumes:
-      - .:/code
+      - .:/code/
+      - ui_node_modules:/code/mathesar_ui/node_modules/
     ports:
       - "8000:8000"
+      - "3000:3000"
+      - "6006:6006"
     depends_on:
       - db
 

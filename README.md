@@ -10,10 +10,13 @@ We are currently in early development and hope to release an alpha version by la
 
 - [Contributing](#contributing)
 - [Local Development](#local-development)
+  - [Developing in Windows](#developing-in-windows)
   - [Configuration Options](#configuration-options)
+  - [Frontend](#frontend)
   - [Linting](#linting)
   - [Running tests](#running-tests)
   - [Opening a shell in the container](#opening-a-shell-in-the-container)
+  - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -38,19 +41,26 @@ docker-compose up
 
 If it's your first time running the application, you'll also need to run database migrations and install Mathesar types and functions:
 ```
-docker exec mathesar_web_1 python manage.py migrate
-docker exec -it mathesar_web_1 python install.py
+docker exec mathesar_service_1 python manage.py migrate
+docker exec -it mathesar_service_1 python install.py
 ```
 
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application. For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`. 
 
 It is recommended that you keep the Docker containers running while you make changes to the code. Any change to the code made locally will sync to the container and the version deployed at `http://localhost:8000` will always be the latest local version of the code.
 
+### Developing in Windows
+
+Windows users who want to run the Mathesar Docker development environment in WSL are advised to clone the repository in a Linux filesystem. When the project resides in a Windows filesystem, WSL does not work well with hot module replacement (HMR), which is required for frontend development. Please refer to our [Common Issues wiki page](https://wiki.mathesar.org/engineering/common-issues), and the [frontend development README file](https://github.com/centerofci/mathesar/blob/master/mathesar_ui/README.md#developing-in-windows) for more details.
+
 ### Configuration Options
 
 If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASES.mathesar_tables` entry of the `config/settings.py` file with appropriate connection details before installing the Mathesar types and functions by running `install.py` as described in the previous step. 
 
 **Please don't do this unless you have full confidence in what you're doing since Mathesar is not stable yet and may make unexpected changes to the database that you connect to it.**
+
+### Frontend
+For more detailed information on Mathesar's frontend development, please refer the [readme file within mathesar_ui directory](https://github.com/centerofci/mathesar/blob/master/mathesar_ui/README.md).
 
 ### Linting
 
@@ -75,27 +85,23 @@ If you'd like to run tests before pushing, here's how you do it:
 
 Backend tests:
 ```
-docker exec mathesar_web_1 pytest
+docker exec mathesar_service_1 pytest
 ```
 
 Frontend tests:
 ```
-docker exec mathesar_ui_1 npm test
+docker exec mathesar_service_1 bash -c "cd mathesar_ui && npm test"
 ```
 
 ### Opening a shell in the container
 
 If you need to do some work on the container that's running the code, here's how you access it:
-
-Backend:
 ```
-docker exec -it mathesar_web_1 bash
+docker exec -it mathesar_service_1 bash
 ```
 
-Frontend:
-```
-docker exec -it mathesar_ui_1 bash
-```
+### Troubleshooting
+Please refer to our [Common Issues wiki page](https://wiki.mathesar.org/engineering/common-issues) for instruction on troubleshooting common issues while setting up and running Mathesar.
 
 ## License
 

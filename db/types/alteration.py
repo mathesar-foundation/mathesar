@@ -1,9 +1,11 @@
-from sqlalchemy import text, DDL, MetaData, Table, select
+from sqlalchemy import text, DDL, select
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 
-from db import columns, tables
-from db.types import base, email, datetime
+from db import columns
+from db.tables import utils as table_utils
+from db.types import base, email
+from db.utils import execute_statement
 
 
 BIGINT = base.PostgresType.BIGINT.value
@@ -96,30 +98,31 @@ def get_robust_supported_alter_column_type_map(engine):
 
 
 def alter_column_type(
-        schema,
-        table_name,
+        table,
         column_name,
-        target_type_str,
         engine,
-        friendly_names=True,
+        connection,
+        target_type_str,
         type_options={},
+        friendly_names=True,
 ):
     _preparer = engine.dialect.identifier_preparer
     supported_types = get_supported_alter_column_types(
         engine, friendly_names=friendly_names
     )
     target_type = supported_types.get(target_type_str)
+    schema = table.schema
 
-    metadata = MetaData(bind=engine, schema=schema)
-    table = Table(table_name, metadata, schema=schema, autoload_with=engine)
+    table_oid = table_utils.get_oid_from_table(table.name, schema, engine)
+    # Re-reflect table so that column is accurate
+    table = table_utils.reflect_table_from_oid(table_oid, engine, connection)
     column = table.columns[column_name]
-    table_oid = tables.get_oid_from_table(table_name, schema, engine)
-    column_index = columns.get_column_index_from_name(table_oid, column_name, engine)
+    column_index = columns.get_column_index_from_name(table_oid, column_name, engine, connection)
 
-    default = columns.get_column_default(table_oid, column_index, engine)
+    default = columns.get_column_default(table_oid, column_index, engine, connection)
     if default is not None:
         default_text = column.server_default.arg.text
-        columns.set_column_default(table_oid, column_index, None, engine)
+        columns.set_column_default(table, column_index, engine, connection, None)
 
     prepared_table_name = _preparer.format_table(table)
     prepared_column_name = _preparer.format_column(column)
@@ -132,14 +135,13 @@ def alter_column_type(
       USING {cast_function_name}({prepared_column_name});
     """
 
-    with engine.begin() as conn:
-        conn.execute(DDL(alter_stmt))
+    execute_statement(engine, DDL(alter_stmt), connection)
 
     if default is not None:
         cast_stmt = f"{cast_function_name}({default_text})"
-        with engine.begin() as conn:
-            new_default = str(conn.execute(select(text(cast_stmt))).first()[0])
-        columns.set_column_default(table_oid, column_index, new_default, engine)
+        default_stmt = select(text(cast_stmt))
+        new_default = str(execute_statement(engine, default_stmt, connection).first()[0])
+        columns.set_column_default(table, column_index, engine, connection, new_default)
 
 
 def get_column_cast_expression(column, target_type_str, engine, type_options={}):

@@ -5,8 +5,12 @@ from config.settings import DATABASES
 from django.core.cache import cache
 from django.conf import settings
 from dj_database_url import parse as db_url
+from django.core.exceptions import ValidationError
 
-from db import schemas, tables
+from mathesar.models import Table, Schema, Database
+from mathesar.reflection import reflect_db_objects
+from db import schemas
+from db.tables.ddl.create import create_mathesar_table
 
 MULTI_DB_TEST_DB = "mathesar_multi_db_test"
 
@@ -100,8 +104,8 @@ def test_multi_db_tables(engine, multi_db_engine, client):
     schema_name = "test_multi_db_tables_schema"
     test_tables = ["test_table_1", "test_table_2"]
     for table_name in test_tables:
-        tables.create_mathesar_table(table_name, schema_name, [], engine)
-        tables.create_mathesar_table(
+        create_mathesar_table(table_name, schema_name, [], engine)
+        create_mathesar_table(
             "multi_db_" + table_name, schema_name, [], multi_db_engine
         )
 
@@ -117,3 +121,24 @@ def test_multi_db_tables(engine, multi_db_engine, client):
     # We have to delete the schema to not break later tests
     with engine.begin() as conn:
         conn.execute(DropSchema(schema_name, cascade=True))
+
+
+def test_multi_db_oid_unique(multi_db_engine):
+    # Ensure the same OID is allowed for different dbs
+    reflect_db_objects()
+    schema_oid = 5000
+    table_oid = 5001
+    for db in Database.objects.all():
+        schema = Schema.objects.create(oid=schema_oid, database=db)
+        Table.objects.create(oid=table_oid, schema=schema)
+
+
+def test_single_db_oid_unique_exception():
+    reflect_db_objects()
+    table_oid = 5001
+    db = Database.objects.all()[0]
+    schema_1 = Schema.objects.create(oid=4000, database=db)
+    schema_2 = Schema.objects.create(oid=5000, database=db)
+    with pytest.raises(ValidationError):
+        Table.objects.create(oid=table_oid, schema=schema_1)
+        Table.objects.create(oid=table_oid, schema=schema_2)

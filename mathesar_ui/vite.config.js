@@ -39,5 +39,7 @@ export default defineConfig({
     rollupOptions: {
       input: './src/main.ts',
     },
+    outDir: '../mathesar/static/mathesar/',
+    emptyOutDir: true,
   },
 });
