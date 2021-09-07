@@ -14,6 +14,7 @@
   } from '@mathesar/stores/tableData';
   import ActionsPane from './actions-pane/ActionsPane.svelte';
   import DisplayOptions from './display-options/DisplayOptions.svelte';
+  import DeleteTable from './DeleteTable.svelte';
   import Header from './Header.svelte';
   import Body from './Body.svelte';
   import StatusPane from './status-pane/StatusPane.svelte';
@@ -46,6 +47,7 @@
   let selected: TableDisplayStores['selected'];
 
   let animateOpts = false;
+  let isModalOpen = false; 
 
   $: selectedEntries = Object.keys($selected || []).filter((key) => $selected?.[key]);
 
@@ -120,11 +122,14 @@
       void deleteRecords(database, identifier, selectedEntries);
     }
   }
+  function tableDelete() {
+    isModalOpen = true; 
+  }
 </script>
 
 <ActionsPane {columns} {records} {options} {selectedEntries}
               on:openDisplayOptions={openDisplayOptions}
-              on:deleteRecords={recordDelete}/>
+              on:deleteRecords={recordDelete} on:deleteTable={tableDelete}/>
 
 <div class="table-data" class:animate-opts={animateOpts}
       class:has-display-opts={$showDisplayOptions}>
@@ -159,6 +164,9 @@
             bind:scrollOffset={$scrollOffset}
             bind:horizontalScrollOffset={$horizontalScrollOffset}
             on:refetch={refetch}/>
+      {#if isModalOpen}
+        <DeleteTable bind:isOpen={isModalOpen}/>
+      {/if}  
     {/if}
   </div>
 </div>

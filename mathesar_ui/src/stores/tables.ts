@@ -9,6 +9,7 @@ import {
 import {
   getAPI,
   States,
+  deleteAPI
 } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
@@ -120,6 +121,9 @@ export function getTablesStoreForSchema(schemaId: SchemaEntry['id']): Writable<D
   return store;
 }
 
+export function deleteTable(url: string){
+  return deleteAPI(url);
+}
 export const tables: Readable<DBTablesStoreData> = derived(
   currentSchemaId,
   ($currentSchemaId, set) => {

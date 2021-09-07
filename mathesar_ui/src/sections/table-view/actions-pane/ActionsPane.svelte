@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { get } from 'svelte/store';
   import type {
     TableColumnStore,
     TableRecordStore,
@@ -11,8 +12,23 @@
     faListAlt,
     faTrashAlt,
   } from '@fortawesome/free-solid-svg-icons';
-  import { States } from '@mathesar/utils/api';
-  import { Button, Icon } from '@mathesar-components';
+  import { States, } from '@mathesar/utils/api';
+  import { Button, Icon, Dropdown } from '@mathesar-components';
+  import { currentSchemaId, } from '@mathesar/stores/schemas';
+  import { currentDBName } from '@mathesar/stores/databases';
+  import {
+    removeTab,
+    getTabsForSchema,
+  } from '@mathesar/stores/tabs';
+  import {
+    refetchTablesForSchema,
+    deleteTable,
+    tables,
+    getTablesStoreForSchema
+  } from '@mathesar/stores/tables';
+  import {
+   getTable,
+  } from '@mathesar/stores/tableData';
 
   const dispatch = createEventDispatcher();
 
@@ -25,9 +41,45 @@
   function openDisplayOptions() {
     dispatch('openDisplayOptions');
   }
+
+  function openConfirmation(){
+    //if table.not empty call store to delete table else show confirmation
+    // console.log($tables);
+    // var tt = getTablesStoreForSchema($currentSchemaId);
+    // console.log(get(tt));
+    console.log($currentDBName);
+    console.log($currentSchemaId);
+    var ggg = getTable($currentDBName,$currentSchemaId);
+    var ttt = ggg.records
+    console.log(get(ttt));
+    dispatch('deleteTable');
+  }
+  
+  async function deleteSecondTable(){
+    const { activeTab }  = getTabsForSchema($currentDBName,$currentSchemaId);
+    var g = get(activeTab);
+    const response = deleteTable('/tables/'+ g.id);
+    removeTab($currentDBName,$currentSchemaId,g);
+    refetchTablesForSchema($currentSchemaId);
+    // const t = getTablesStoreForSchema($currentSchemaId);
+   
+  }
 </script>
 
 <div class="actions-pane">
+  <Dropdown closeOnInnerClick={true} triggerClass="opts" 
+  triggerAppearance="plain" contentClass="table-opts-content"> 
+    <svelte:fragment slot="trigger">
+      <span>Table</span>
+    </svelte:fragment>
+    <svelte:fragment slot="content">
+      <ul>
+        <li class= "item" on:click={openConfirmation}>Delete Table</li>
+        <li class= "item">Duplicate Table</li>
+      </ul>
+    </svelte:fragment>
+  </Dropdown>
+
   <Button appearance="plain" on:click={openDisplayOptions}>
     <Icon data={faFilter} size="0.8em"/>
     <span>
