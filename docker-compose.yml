@@ -17,8 +17,8 @@ services:
       - MODE=${MODE-PRODUCTION}
     command: dockerize -wait tcp://db:5432 -timeout 30s ./run.sh
     volumes:
-      - .:/home/mathesar/code/
-      - node_modules:/home/mathesar/code/mathesar_ui/node_modules/
+      - .:/code/
+      - ui_node_modules:/code/mathesar_ui/node_modules/
     ports:
       - "8000:8000"
       - "3000:3000"
@@ -27,4 +27,4 @@ services:
       - db
 
 volumes:
-  node_modules:
+  ui_node_modules:
