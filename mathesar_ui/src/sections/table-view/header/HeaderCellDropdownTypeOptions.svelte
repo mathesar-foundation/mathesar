@@ -130,7 +130,8 @@
     }
   }
 
-  const isDefined = <T>(x: T): boolean => typeof x !== 'undefined';
+  // eslint-disable-next-line @typescript-eslint/comma-dangle
+  const isDefined = <T,>(x: T): boolean => typeof x !== 'undefined';
 
   let selectedMathesarType: MathesarType;
 
