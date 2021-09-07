@@ -4,7 +4,9 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 
-from db import tables, records, schemas, columns, constraints
+from db import records, schemas, columns, constraints
+from db.tables import utils as table_utils
+from db.tables import ddl as table_ddl
 from db.types import alteration
 from mathesar import reflection
 from mathesar.utils import models as model_utils
@@ -149,7 +151,7 @@ class Table(DatabaseObject):
     @cached_property
     def _sa_table(self):
         try:
-            table = tables.reflect_table_from_oid(
+            table = table_utils.reflect_table_from_oid(
                 self.oid, self.schema._sa_engine,
             )
         # We catch these errors, since it lets us decouple the cadence of
@@ -158,12 +160,12 @@ class Table(DatabaseObject):
         # been altered, as opposed to other reasons for a 404 when
         # requesting a table.
         except (TypeError, IndexError):
-            table = tables.create_empty_table("MISSING")
+            table = table_utils.get_empty_table("MISSING")
         return table
 
     @cached_property
     def _enriched_column_sa_table(self):
-        return tables.get_enriched_column_table(
+        return table_utils.get_enriched_column_table(
             self._sa_table, engine=self.schema._sa_engine,
         )
 
@@ -230,14 +232,13 @@ class Table(DatabaseObject):
         return records.get_records(self._sa_table, self.schema._sa_engine)
 
     def sa_num_records(self, filters=[]):
-        return tables.get_count(self._sa_table, self.schema._sa_engine, filters=filters)
+        return records.get_count(self._sa_table, self.schema._sa_engine, filters=filters)
 
     def update_sa_table(self, update_params):
         return model_utils.update_sa_table(self, update_params)
 
     def delete_sa_table(self):
-        return tables.delete_table(self.name, self.schema.name, self.schema._sa_engine,
-                                   cascade=True)
+        return table_ddl.drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
 
     def get_record(self, id_value):
         return records.get_record(self._sa_table, self.schema._sa_engine, id_value)
