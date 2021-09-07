@@ -1,6 +1,22 @@
 .dropdown.content.table-opts-content {
   max-height: none;
-  min-width: 150px !important;
+  min-width: 15rem !important;
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    margin: 0.75rem;
+
+    & > * {
+      margin: 0.5rem 0;
+    }
+
+    & > button {
+      margin: 0;
+      /* use padding since these top-level buttons use it for background effects */
+      padding: 1rem 0.75rem 1rem 0.5rem;
+    }
+  }
 
   ul {
     list-style: none;
