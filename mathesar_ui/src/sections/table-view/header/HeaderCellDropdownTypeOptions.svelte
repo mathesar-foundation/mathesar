@@ -1,39 +1,10 @@
-<script context="module">
-  // TODO move static functions to the module context to make them explicitly static
-  // see https://svelte.dev/docs#script_context_module
-</script>
-
-<script lang="ts">
+<script context="module" lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { patchColumnType } from '@mathesar/stores/tableData';
-  import type { DbType, MathesarType } from '@mathesar/stores/databases';
-  import { getMathesarTypeIcon, choosePreferredDbTypeTarget } from '@mathesar/stores/databases';
   import { intersection, pair, notEmpty } from '@mathesar/utils/language';
-  import type { TableColumn } from '@mathesar/stores/tableData';
-  import { Button } from '@mathesar-components';
-
-  export let mathesarTypes: MathesarType[];
-  export let tableId: number;
-  export let column: TableColumn;
-  export let isOpen: boolean;
-  export let isDataTypeOptionsOpen: boolean;
-
-  $: columnId = column.index;
+  import { choosePreferredDbTypeTarget } from '@mathesar/stores/databases';
+  import { patchColumnType } from '@mathesar/stores/tableData';
 
   type DbTypeTargetsPerMathesarType = Map<MathesarType['identifier'], DbType[]>;
-
-  function mathesarTypeHasAtLeastOneValidDbTypeTarget(
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType,
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    mathesarType: MathesarType,
-  ) {
-    // eslint-disable-next-line operator-linebreak
-    const validDbTypeTargets =
-      validDbTypeTargetsPerMathesarType.get(mathesarType.identifier);
-    const atLeastOne = notEmpty(validDbTypeTargets);
-    return atLeastOne;
-  }
 
   function getValidDbTypeTargetsPerMathesarType(
     // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -62,9 +33,22 @@
     return new Map(pairs);
   }
 
-  const dispatch = createEventDispatcher();
+  function mathesarTypeHasAtLeastOneValidDbTypeTarget(
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType,
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    mathesarType: MathesarType,
+  ) {
+    // eslint-disable-next-line operator-linebreak
+    const validDbTypeTargets =
+      validDbTypeTargetsPerMathesarType.get(mathesarType.identifier);
+    const atLeastOne = notEmpty(validDbTypeTargets);
+    return atLeastOne;
+  }
 
   function patchColumnToMathesarType(
+    // as returned by createEventDispatcher()
+    dispatch: (x: unknown) => void,
     // eslint-disable-next-line @typescript-eslint/no-shadow
     tableId: number,
     // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -81,6 +65,21 @@
         .then(reloadTable);
     }
   }
+</script>
+
+<script lang="ts">
+  import type { DbType, MathesarType } from '@mathesar/stores/databases';
+  import { getMathesarTypeIcon } from '@mathesar/stores/databases';
+  import type { TableColumn } from '@mathesar/stores/tableData';
+  import { Button } from '@mathesar-components';
+
+  export let mathesarTypes: MathesarType[];
+  export let tableId: number;
+  export let column: TableColumn;
+  export let isOpen: boolean;
+  export let isDataTypeOptionsOpen: boolean;
+
+  $: columnId = column.index;
 
   let validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType | undefined;
   $: {
@@ -136,8 +135,11 @@
     closeDropdown();
   }
 
+  const dispatch = createEventDispatcher();
+
   function onSave() {
     patchColumnToMathesarType(
+      dispatch,
       tableId,
       columnId,
       validDbTypeTargetsPerMathesarType,
