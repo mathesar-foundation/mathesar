@@ -4,7 +4,10 @@ from time import time
 from sqlalchemy import VARCHAR, TEXT, Text, select
 from sqlalchemy.exc import DatabaseError
 
-from db import constants, columns, tables, schemas
+from db import constants, columns
+from db.schemas.operations.create import create_schema
+from db.tables.operations.create import CreateTableAs
+from db.tables.utils import reflect_table
 from db.types.alteration import get_supported_alter_column_types, alter_column_type
 from db.types import base
 
@@ -62,16 +65,15 @@ def infer_column_type(
         raise DagCycleError("The type_inference_dag likely has a cycle")
     reverse_type_map = get_reverse_type_map(engine)
 
-    table = tables.reflect_table(table_name, schema, engine)
+    table = reflect_table(table_name, schema, engine)
     column_type = table.columns[column_name].type.__class__
     column_type_str = reverse_type_map.get(column_type)
 
     logger.debug(f"column_type_str: {column_type_str}")
     for type_str in type_inference_dag.get(column_type_str, []):
         try:
-            alter_column_type(
-                schema, table_name, column_name, type_str, engine
-            )
+            with engine.begin() as conn:
+                alter_column_type(table, column_name, engine, conn, type_str)
             logger.info(f"Column {column_name} altered to type {type_str}")
             column_type = infer_column_type(
                 schema,
@@ -92,7 +94,7 @@ def infer_column_type(
 
 
 def update_table_column_types(schema, table_name, engine):
-    table = tables.reflect_table(table_name, schema, engine)
+    table = reflect_table(table_name, schema, engine)
     # we only want to infer (modify) the type of non-default columns
     inferable_column_names = (
         col.name for col in table.columns
@@ -110,10 +112,10 @@ def update_table_column_types(schema, table_name, engine):
 
 
 def infer_table_column_types(schema, table_name, engine):
-    table = tables.reflect_table(table_name, schema, engine)
+    table = reflect_table(table_name, schema, engine)
 
     temp_name = TEMP_TABLE % (int(time()))
-    schemas.create_schema(TEMP_SCHEMA, engine)
+    create_schema(TEMP_SCHEMA, engine)
     with engine.begin() as conn:
         while engine.dialect.has_table(conn, temp_name, schema=TEMP_SCHEMA):
             temp_name = TEMP_TABLE.format(int(time()))
@@ -122,8 +124,8 @@ def infer_table_column_types(schema, table_name, engine):
 
     select_table = select(table)
     with engine.begin() as conn:
-        conn.execute(tables.CreateTableAs(full_temp_name, select_table))
-    temp_table = tables.reflect_table(temp_name, TEMP_SCHEMA, engine)
+        conn.execute(CreateTableAs(full_temp_name, select_table))
+    temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
 
     try:
         update_table_column_types(
@@ -134,7 +136,7 @@ def infer_table_column_types(schema, table_name, engine):
         temp_table.drop()
         raise e
     else:
-        temp_table = tables.reflect_table(temp_name, TEMP_SCHEMA, engine)
+        temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
         types = [c.type.__class__ for c in temp_table.columns]
         temp_table.drop()
         return types

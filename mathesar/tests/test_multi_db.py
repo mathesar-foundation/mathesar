@@ -9,7 +9,8 @@ from django.core.exceptions import ValidationError
 
 from mathesar.models import Table, Schema, Database
 from mathesar.reflection import reflect_db_objects
-from db import schemas, tables
+from db.schemas.operations.create import create_schema
+from db.tables.operations.create import create_mathesar_table
 
 MULTI_DB_TEST_DB = "mathesar_multi_db_test"
 
@@ -77,8 +78,8 @@ def multi_db_engine(multi_db_test_db, multi_db_test_db_connection_string):
 def test_multi_db_schema(engine, multi_db_engine, client):
     test_schemas = ["test_schema_1", "test_schema_2"]
     for schema in test_schemas:
-        schemas.create_schema(schema, engine)
-        schemas.create_schema("multi_db_" + schema, multi_db_engine)
+        create_schema(schema, engine)
+        create_schema("multi_db_" + schema, multi_db_engine)
 
     cache.clear()
     response = client.get('/api/v0/schemas/')
@@ -103,8 +104,8 @@ def test_multi_db_tables(engine, multi_db_engine, client):
     schema_name = "test_multi_db_tables_schema"
     test_tables = ["test_table_1", "test_table_2"]
     for table_name in test_tables:
-        tables.create_mathesar_table(table_name, schema_name, [], engine)
-        tables.create_mathesar_table(
+        create_mathesar_table(table_name, schema_name, [], engine)
+        create_mathesar_table(
             "multi_db_" + table_name, schema_name, [], multi_db_engine
         )
 

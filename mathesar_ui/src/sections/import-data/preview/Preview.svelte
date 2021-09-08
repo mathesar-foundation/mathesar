@@ -18,6 +18,7 @@
     updateDataFileHeader,
     finishImport,
     fetchPreviewTableInfo,
+    cancelImport,
   } from '../importUtils';
 
   export let fileImportStore: FileImport;
@@ -62,6 +63,7 @@
   </div>
   
   <Checkbox bind:checked={$fileImportStore.firstRowHeader}
+            disabled={$fileImportStore.previewStatus === States.Loading}
             label="Use first row as header"
             on:change={headerChanged}/>
 </div>
@@ -86,15 +88,21 @@
         </tr>
       </thead>
       <tbody>
-        {#key $fileImportStore.previewColumns}
-          <PreviewRows {fileImportStore} />
-        {/key}
+        {#if $fileImportStore.previewColumns}
+          {#key $fileImportStore.previewColumns}
+            <PreviewRows {fileImportStore} />
+          {/key}
+        {/if}
       </tbody>
     </table>
   </div>
 {/if}
 
 <div class="actions">
+  <Button on:click={() => cancelImport(fileImportStore)}>
+    Cancel
+  </Button>
+
   <Button appearance="primary"
           disabled={
             $fileImportStore.previewStatus !== States.Done

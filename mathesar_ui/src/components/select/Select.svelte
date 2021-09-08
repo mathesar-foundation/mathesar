@@ -8,7 +8,10 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import {
+    createEventDispatcher,
+    tick,
+  } from 'svelte';
   import { Dropdown } from '@mathesar-components';
   import type {
     Appearance,
@@ -28,6 +31,8 @@
   export let ariaLabel: string = null;
 
   let isOpen = false;
+  let currentIndex = 0;
+  let parentHoverElem: HTMLElement;
 
   function setValue(opt: SelectOption) {
     value = opt;
@@ -36,26 +41,98 @@
     });
     isOpen = false;
   }
-
+  
   function setOptions(opts: SelectOption[]) {
     if (!value && opts.length > 0) {
       setValue(opts[0]);
     }
   }
 
+  function scrollBehavior(): void {
+    if (parentHoverElem) {
+      const hoveredElem: HTMLElement = parentHoverElem.querySelector('.hovered');
+      const container: HTMLDivElement = parentHoverElem.parentElement;
+      if (hoveredElem && container) {
+        const offsetValue: number = container.getBoundingClientRect().bottom
+        - hoveredElem.getBoundingClientRect().bottom;
+        container.scrollTop -= offsetValue;
+      }
+    }
+  }
+
+  function setSelectedItem() {
+    const index = options.findIndex((e) => e[idKey] === value?.[idKey]);
+    if (index > -1) {
+      currentIndex = index;
+    }
+  }
+
+  async function hoveredItem(index): void {
+    if (currentIndex === options.length - 1 && index > 0) {
+      currentIndex = 0;
+    } else if (currentIndex === 0 && index < 0) {
+      currentIndex = options.length - 1;
+    } else {
+      currentIndex += index;
+    }
+    await tick();
+    scrollBehavior();
+  }
+
+  function keyAccessibility(e: KeyboardEvent): void {
+    if (isOpen) {
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          hoveredItem(1);
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          hoveredItem(-1);
+          break;
+        case 'Escape':
+          e.preventDefault();
+          isOpen = false;
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (options.length === 0) break;
+          value = options[currentIndex];
+          dispatch('change', {
+            value,
+          });
+          isOpen = !isOpen;
+          break;
+        default:
+          break;
+      }
+    } else {
+      switch (e.key) {
+        case 'Enter':
+        case 'ArrowDown':
+        case 'ArrowUp':
+          e.preventDefault();
+          isOpen = true;
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
   $: setOptions(options);
 </script>
-
-<Dropdown ariaControls="select-value-{selectId}" {ariaLabel} bind:isOpen
-          contentClass="select {contentClass}" {triggerAppearance} {triggerClass}>
+<Dropdown ariaControls="select-value-{selectId}" {ariaLabel} bind:isOpen 
+          contentClass="select {contentClass}" {triggerAppearance} {triggerClass} 
+          on:keydown={keyAccessibility} on:open={setSelectedItem}>
   <svelte:fragment slot="trigger">
     {value?.[labelKey]}
   </svelte:fragment>
   
   <svelte:fragment slot="content">
-    <ul id="select-value-{selectId}" tabindex="0" role="listbox" aria-expanded="true">
+    <ul bind:this={parentHoverElem} id="select-value-{selectId}" tabindex="0" role="listbox" aria-expanded="true">
       {#each options as option (option[idKey])}
-        <li role='option' class:selected={option[idKey] === value[idKey]} on:click={() => setValue(option)}>
+        <li role='option' class:selected={option[idKey] === value[idKey]} class:hovered={option[idKey] === options[currentIndex]?.[idKey]} on:click={() => setValue(option)}>
           <span>{option[labelKey]}</span>
         </li>
       {/each}

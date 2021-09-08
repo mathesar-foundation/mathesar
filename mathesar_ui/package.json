@@ -14,7 +14,8 @@
   "resolutions": {
     "trim": "1.0.1",
     "browserslist": "4.16.7",
-    "glob-parent": "6.0.1"
+    "glob-parent": "6.0.1",
+    "tar": "6.1.11"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",

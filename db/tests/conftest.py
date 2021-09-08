@@ -1,7 +1,11 @@
 import os
 
 import pytest
-from sqlalchemy import text
+from sqlalchemy import MetaData, text
+
+from db import constants
+from db.tables import operations as table_operations
+
 
 APP_SCHEMA = "test_schema"
 
@@ -37,3 +41,47 @@ def engine_with_filter_sort(engine_with_schema):
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
     return engine, schema
+
+
+@pytest.fixture(scope='session')
+def roster_table_name():
+    return "Roster"
+
+
+@pytest.fixture(scope='session')
+def teachers_table_name():
+    return "Teachers"
+
+
+@pytest.fixture(scope='session')
+def roster_no_teachers_table_name():
+    return "Roster without Teachers"
+
+
+@pytest.fixture(scope='session')
+def roster_extracted_cols():
+    return ["Teacher", "Teacher Email"]
+
+
+@pytest.fixture(scope='session')
+def roster_fkey_col(teachers_table_name):
+    return f"{teachers_table_name}_{constants.ID}"
+
+
+@pytest.fixture
+def extracted_remainder_roster(engine_with_roster, roster_table_name, roster_extracted_cols, teachers_table_name, roster_no_teachers_table_name):
+    engine, schema = engine_with_roster
+    table_operations.extract_columns_from_table(
+        roster_table_name,
+        roster_extracted_cols,
+        teachers_table_name,
+        roster_no_teachers_table_name,
+        schema,
+        engine,
+    )
+    metadata = MetaData(bind=engine, schema=schema)
+    metadata.reflect()
+    teachers = metadata.tables[f"{schema}.{teachers_table_name}"]
+    roster_no_teachers = metadata.tables[f"{schema}.{roster_no_teachers_table_name}"]
+    roster = metadata.tables[f"{schema}.{roster_table_name}"]
+    return teachers, roster_no_teachers, roster, engine, schema

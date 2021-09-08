@@ -1,7 +1,8 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import ValidationError
 
-from db.schemas import create_schema, get_schema_oid_from_name, get_mathesar_schemas
+from db.schemas.operations.create import create_schema
+from db.schemas.utils import get_schema_oid_from_name, get_mathesar_schemas
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Schema, Database
 
