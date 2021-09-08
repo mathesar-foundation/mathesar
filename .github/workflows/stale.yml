@@ -18,12 +18,11 @@ jobs:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'This issue has not been updated in 90 days and is being marked as stale.'
         stale-pr-message: 'This pull request has not been updated in 45 days and is being marked as stale. It will automatically be closed in 30 days if not updated by then.'
-        stale-issue-label: 'status: triage'
+        stale-issue-label: 'stale'
         stale-pr-label: 'stale'
         days-before-issue-stale: 90
         days-before-pr-stale: 45
         days-before-issue-close: 1000
         days-before-pr-close: 30
         exempt-issue-labels: 'status: future'
-        labels-to-remove-when-unstale: 'status: triage,stale'
         delete-branch: true

@@ -3,15 +3,11 @@ from time import time
 from io import TextIOWrapper
 
 import requests
-from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
 
-from mathesar.serializers import DataFileSerializer
 from mathesar.imports.csv import get_sv_dialect
-from mathesar.errors import InvalidTableError
 from mathesar.models import DataFile
 
 
@@ -32,37 +28,34 @@ def _download_datafile(url):
     return temp_file
 
 
-def create_datafile(request, data):
+def create_datafile(data):
     header = data.get('header', True)
 
     # Validation guarentees only one arg will be present
     if 'paste' in data:
         name = str(int(time())) + '.tsv'
-        file = ContentFile(str.encode(data['paste']), name=name)
+        raw_file = ContentFile(str.encode(data['paste']), name=name)
         created_from = 'paste'
         base_name = ''
     elif 'url' in data:
-        file = _download_datafile(data['url'])
+        raw_file = _download_datafile(data['url'])
         created_from = 'url'
-        base_name = file.name
+        base_name = raw_file.name
     elif 'file' in data:
-        file = data['file']
+        raw_file = data['file']
         created_from = 'file'
-        base_name = file.name
+        base_name = raw_file.name
 
     if base_name:
         max_length = DataFile._meta.get_field('base_name').max_length
-        base_name, _ = os.path.splitext(os.path.basename(file.name))
+        base_name, _ = os.path.splitext(os.path.basename(raw_file.name))
         base_name = base_name[:max_length]
 
-    text_file = TextIOWrapper(file.file, encoding='utf-8-sig')
-    try:
-        dialect = get_sv_dialect(text_file)
-    except InvalidTableError:
-        raise ValidationError('Unable to tabulate data')
+    text_file = TextIOWrapper(raw_file.file, encoding='utf-8-sig')
+    dialect = get_sv_dialect(text_file)
 
     datafile = DataFile(
-        file=file,
+        file=raw_file,
         base_name=base_name,
         created_from=created_from,
         header=header,
@@ -71,7 +64,6 @@ def create_datafile(request, data):
         quotechar=dialect.quotechar,
     )
     datafile.save()
-    file.close()
+    raw_file.close()
 
-    serializer = DataFileSerializer(datafile, context={'request': request})
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return datafile

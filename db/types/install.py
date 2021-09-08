@@ -1,5 +1,5 @@
 from db.types import base, alteration, email, money
-from db.schemas import create_schema
+from db.schemas.operations.create import create_schema
 
 
 def install_mathesar_on_database(engine):

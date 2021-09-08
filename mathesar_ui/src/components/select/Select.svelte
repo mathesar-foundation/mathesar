@@ -8,7 +8,10 @@
 </script>
 
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import {
+    createEventDispatcher,
+    tick,
+  } from 'svelte';
   import { Dropdown } from '@mathesar-components';
   import type {
     Appearance,
@@ -29,6 +32,7 @@
 
   let isOpen = false;
   let currentIndex = 0;
+  let parentHoverElem: HTMLElement;
 
   function setValue(opt: SelectOption) {
     value = opt;
@@ -44,11 +48,26 @@
     }
   }
 
-  function setSelectedItem() {
-    currentIndex = options.indexOf(value);
+  function scrollBehavior(): void {
+    if (parentHoverElem) {
+      const hoveredElem: HTMLElement = parentHoverElem.querySelector('.hovered');
+      const container: HTMLDivElement = parentHoverElem.parentElement;
+      if (hoveredElem && container) {
+        const offsetValue: number = container.getBoundingClientRect().bottom
+        - hoveredElem.getBoundingClientRect().bottom;
+        container.scrollTop -= offsetValue;
+      }
+    }
   }
 
-  function hoveredItem(index) {
+  function setSelectedItem() {
+    const index = options.findIndex((e) => e[idKey] === value?.[idKey]);
+    if (index > -1) {
+      currentIndex = index;
+    }
+  }
+
+  async function hoveredItem(index): void {
     if (currentIndex === options.length - 1 && index > 0) {
       currentIndex = 0;
     } else if (currentIndex === 0 && index < 0) {
@@ -56,6 +75,8 @@
     } else {
       currentIndex += index;
     }
+    await tick();
+    scrollBehavior();
   }
 
   function keyAccessibility(e: KeyboardEvent): void {
@@ -109,7 +130,7 @@
   </svelte:fragment>
   
   <svelte:fragment slot="content">
-    <ul id="select-value-{selectId}" tabindex="0" role="listbox" aria-expanded="true">
+    <ul bind:this={parentHoverElem} id="select-value-{selectId}" tabindex="0" role="listbox" aria-expanded="true">
       {#each options as option (option[idKey])}
         <li role='option' class:selected={option[idKey] === value[idKey]} class:hovered={option[idKey] === options[currentIndex]?.[idKey]} on:click={() => setValue(option)}>
           <span>{option[labelKey]}</span>

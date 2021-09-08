@@ -3,10 +3,13 @@
   import {
     faDragon,
     faUser,
+    faPlus,
+    faUpload,
+    faTable,
   } from '@fortawesome/free-solid-svg-icons';
-
-  import { currentDBName } from '@mathesar/stores/databases';
+  import { createTable, refetchTablesForSchema } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { currentDBName } from '@mathesar/stores/databases';
   import { newImport, importStatuses } from '@mathesar/stores/fileImports';
   import {
     addTab,
@@ -15,17 +18,24 @@
   import {
     Icon,
     Button,
+    Dropdown,
   } from '@mathesar-components';
 
   import SchemaSelector from './schema-selector/SchemaSelector.svelte';
   import ImportIndicator from './import-indicator/ImportIndicator.svelte';
 
-  function createNewTable() {
+  async function handleCreateEmptyTable() {
+    const table = await createTable($currentSchemaId);
+    await refetchTablesForSchema($currentSchemaId);
+    addTab($currentDBName, $currentSchemaId, { id: table.id, label: table.name });
+  }
+  
+  function beginDataImport() {
     if ($currentDBName && $currentSchemaId) {
       const fileData = get(newImport($currentDBName, $currentSchemaId));
       addTab($currentDBName, $currentSchemaId, {
         id: fileData.id,
-        label: fileData.name || 'New table',
+        label: fileData.name || 'Import data',
         isNew: true,
       });
     }
@@ -48,9 +58,27 @@
 
     {#if $currentSchemaId}
       <div class="quick-links">
-        <Button on:click={createNewTable}>
-          New table
-        </Button>
+        
+        <Dropdown closeOnInnerClick={true} ariaLabel="New table">
+          <svelte:fragment slot="trigger">
+            <div class="new-table">
+              <Icon data={faPlus}/>
+              <span class="label">New table</span>
+            </div>
+          </svelte:fragment>
+          <svelte:fragment slot="content">
+            <div class="new-table-options">
+              <Button on:click={handleCreateEmptyTable} appearance="plain">
+                <Icon data={faTable} size="0.8em"/>
+                <span>Empty table</span>
+              </Button>
+              <Button on:click={beginDataImport} appearance="plain">
+                <Icon data={faUpload} size="0.8em"/>
+                <span>Import data</span>
+              </Button>
+            </div>
+          </svelte:fragment>
+        </Dropdown>
       </div>
     {/if}
 

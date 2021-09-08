@@ -12,7 +12,10 @@ from sqlalchemy.exc import DataError, InternalError
 from sqlalchemy.schema import DDLElement
 from psycopg2.errors import InvalidTextRepresentation, InvalidParameterValue
 
-from db import constants, tables, constraints
+from db import constants
+from db.constraints import operations as constraint_operations
+from db.constraints import utils as constraint_utils
+from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.types import alteration
 from db.types.base import get_db_type_name
 from db.utils import execute_statement
@@ -155,7 +158,7 @@ class MathesarColumn(Column):
                 and self.table_ is not None
                 and inspect(self.engine).has_table(self.table_.name, schema=self.table_.schema)
         ):
-            table_oid = tables.get_oid_from_table(
+            table_oid = get_oid_from_table(
                 self.table_.name, self.table_.schema, self.engine
             )
             return get_column_index_from_name(
@@ -167,7 +170,7 @@ class MathesarColumn(Column):
     @property
     def default_value(self):
         if self.table_ is not None:
-            table_oid = tables.get_oid_from_table(
+            table_oid = get_oid_from_table(
                 self.table_.name, self.table_.schema, self.engine
             )
             return get_column_default(table_oid, self.column_index, self.engine)
@@ -242,7 +245,7 @@ def create_column(engine, table_oid, column_data):
         logger.warning("Requested type not supported. falling back to VARCHAR")
         sa_type = supported_types["VARCHAR"]
         column_type_options = {}
-    table = tables.reflect_table_from_oid(table_oid, engine)
+    table = reflect_table_from_oid(table_oid, engine)
 
     try:
         column = MathesarColumn(
@@ -255,7 +258,7 @@ def create_column(engine, table_oid, column_data):
         else:
             raise e
 
-    table = tables.reflect_table_from_oid(table_oid, engine)
+    table = reflect_table_from_oid(table_oid, engine)
     try:
         with engine.begin() as conn:
             ctx = MigrationContext.configure(conn)
@@ -270,7 +273,7 @@ def create_column(engine, table_oid, column_data):
             raise e
 
     return get_mathesar_column_with_engine(
-        tables.reflect_table_from_oid(table_oid, engine).columns[column_data[NAME]],
+        reflect_table_from_oid(table_oid, engine).columns[column_data[NAME]],
         engine
     )
 
@@ -282,7 +285,7 @@ def alter_column(engine, table_oid, column_index, column_data):
     DEFAULT_KEY = 'default_value'
     NAME_KEY = NAME
 
-    table = tables.reflect_table_from_oid(table_oid, engine)
+    table = reflect_table_from_oid(table_oid, engine)
     column_index = int(column_index)
 
     with engine.begin() as conn:
@@ -303,7 +306,7 @@ def alter_column(engine, table_oid, column_index, column_data):
             rename_column(table, column_index, engine, conn, name)
 
     return get_mathesar_column_with_engine(
-        tables.reflect_table_from_oid(table_oid, engine).columns[column_index],
+        reflect_table_from_oid(table_oid, engine).columns[column_index],
         engine
     )
 
@@ -415,7 +418,7 @@ def _batch_alter_table_columns(table, column_data_list, connection):
 
 
 def batch_update_columns(table_oid, engine, column_data_list):
-    table = tables.reflect_table_from_oid(table_oid, engine)
+    table = reflect_table_from_oid(table_oid, engine)
     _validate_columns_for_batch_update(table, column_data_list)
     with engine.begin() as conn:
         _batch_update_column_types(table, column_data_list, conn, engine)
@@ -424,7 +427,7 @@ def batch_update_columns(table_oid, engine, column_data_list):
 
 def drop_column(table_oid, column_index, engine):
     column_index = int(column_index)
-    table = tables.reflect_table_from_oid(table_oid, engine)
+    table = reflect_table_from_oid(table_oid, engine)
     column = table.columns[column_index]
     with engine.begin() as conn:
         ctx = MigrationContext.configure(conn)
@@ -433,7 +436,7 @@ def drop_column(table_oid, column_index, engine):
 
 
 def get_column_default(table_oid, column_index, engine, connection_to_use=None):
-    table = tables.reflect_table_from_oid(table_oid, engine, connection_to_use)
+    table = reflect_table_from_oid(table_oid, engine, connection_to_use)
     column = table.columns[column_index]
     if column.server_default is None:
         return None
@@ -496,7 +499,7 @@ class CopyColumn(DDLElement):
 
 
 @compiler.compiles(CopyColumn, "postgresql")
-def compile_create_table_as(element, compiler, **_):
+def compile_copy_column(element, compiler, **_):
     return 'UPDATE "%s"."%s" SET "%s" = "%s"' % (
         element.schema,
         element.table,
@@ -506,7 +509,7 @@ def compile_create_table_as(element, compiler, **_):
 
 
 def duplicate_column_data(table_oid, from_column, to_column, engine):
-    table = tables.reflect_table_from_oid(table_oid, engine)
+    table = reflect_table_from_oid(table_oid, engine)
     copy = CopyColumn(
         table.schema,
         table.name,
@@ -524,18 +527,18 @@ def duplicate_column_data(table_oid, from_column, to_column, engine):
 
 def duplicate_column_constraints(table_oid, from_column, to_column, engine,
                                  copy_nullable=True):
-    table = tables.reflect_table_from_oid(table_oid, engine)
+    table = reflect_table_from_oid(table_oid, engine)
     if copy_nullable:
         with engine.begin() as conn:
             change_column_nullable(table, to_column, engine, conn, table.c[from_column].nullable)
 
-    constraints_ = constraints.get_column_constraints(from_column, table_oid, engine)
-    for constraint in constraints_:
-        constraint_type = constraints.get_constraint_type_from_char(constraint.contype)
-        if constraint_type != constraints.ConstraintType.UNIQUE.value:
+    constraints = constraint_operations.get_column_constraints(from_column, table_oid, engine)
+    for constraint in constraints:
+        constraint_type = constraint_utils.get_constraint_type_from_char(constraint.contype)
+        if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
             # Don't allow duplication of primary keys
             continue
-        constraints.copy_constraint(
+        constraint_operations.copy_constraint(
             table, engine, constraint, from_column, to_column
         )
 
@@ -544,7 +547,7 @@ def duplicate_column(
     table_oid, copy_from_index, engine,
     new_column_name=None, copy_data=True, copy_constraints=True
 ):
-    table = tables.reflect_table_from_oid(table_oid, engine)
+    table = reflect_table_from_oid(table_oid, engine)
     from_column = table.c[copy_from_index]
     if new_column_name is None:
         new_column_name = _gen_col_name(table, from_column.name)
@@ -574,6 +577,6 @@ def duplicate_column(
             copy_nullable=copy_data
         )
 
-    table = tables.reflect_table_from_oid(table_oid, engine)
+    table = reflect_table_from_oid(table_oid, engine)
     column_index = get_column_index_from_name(table_oid, new_column_name, engine)
     return get_mathesar_column_with_engine(table.c[column_index], engine)
