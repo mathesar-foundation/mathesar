@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 from mathesar.models import Table, Schema, Database
 from mathesar.reflection import reflect_db_objects
 from db import schemas
-from db.tables.ddl.create import create_mathesar_table
+from db.tables.operations.create import create_mathesar_table
 
 MULTI_DB_TEST_DB = "mathesar_multi_db_test"
 

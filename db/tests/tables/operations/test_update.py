@@ -1,8 +1,8 @@
 import pytest
 from sqlalchemy.exc import NoSuchTableError
 
-from db.tables.ddl.create import create_mathesar_table
-from db.tables.ddl.update import rename_table
+from db.tables.operations.create import create_mathesar_table
+from db.tables.operations.update import rename_table
 from db.tables import utils as table_utils
 from db.tests.tables import utils as test_utils
 

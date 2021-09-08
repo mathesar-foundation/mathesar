@@ -1,7 +1,7 @@
 from sqlalchemy import select
 
 from db import columns
-from db.tables.ddl.create import create_mathesar_table
+from db.tables.operations.create import create_mathesar_table
 from db.tables.utils import reflect_table
 
 

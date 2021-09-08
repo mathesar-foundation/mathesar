@@ -1,6 +1,6 @@
 from sqlalchemy import MetaData
 
-from db.tables.ddl.move_columns import move_columns_between_related_tables
+from db.tables.operations.move_columns import move_columns_between_related_tables
 
 
 def test_move_columns_moves_column_from_ext_to_rem(extracted_remainder_roster, roster_extracted_cols):

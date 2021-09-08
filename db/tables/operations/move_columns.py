@@ -1,6 +1,6 @@
 from db import columns, constants
-from db.tables.ddl.split import extract_columns_from_table
-from db.tables.ddl.merge import merge_tables
+from db.tables.operations.split import extract_columns_from_table
+from db.tables.operations.merge import merge_tables
 from db.tables.utils import reflect_table
 
 

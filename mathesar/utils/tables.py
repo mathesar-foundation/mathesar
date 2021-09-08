@@ -1,6 +1,6 @@
 from sqlalchemy import MetaData
 
-from db.tables.ddl.create import create_mathesar_table
+from db.tables.operations.create import create_mathesar_table
 from db.tables.utils import get_oid_from_table
 from db.types.inference import infer_table_column_types
 from mathesar.database.base import create_mathesar_engine

@@ -1,6 +1,6 @@
 from sqlalchemy import String, Integer, Column, Table, MetaData
 
-from db.constraints.ddl import create_unique_constraint, drop_constraint
+from db.constraints.operations import create_unique_constraint, drop_constraint
 from db.tables import utils as table_utils
 from db.tests.constraints import utils as test_utils
 

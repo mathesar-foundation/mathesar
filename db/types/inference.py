@@ -5,7 +5,7 @@ from sqlalchemy import VARCHAR, TEXT, Text, select
 from sqlalchemy.exc import DatabaseError
 
 from db import constants, columns, schemas
-from db.tables.ddl.create import CreateTableAs
+from db.tables.operations.create import CreateTableAs
 from db.tables.utils import reflect_table
 from db.types.alteration import get_supported_alter_column_types, alter_column_type
 from db.types import base

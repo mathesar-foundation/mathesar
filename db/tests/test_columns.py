@@ -10,8 +10,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.exc import IntegrityError
 from db import columns, constants
-from db.tables import ddl as table_ddl
-from db.constraints import ddl as constraint_ddl
+from db.tables import operations as table_operations
+from db.constraints import operations as constraint_operations
 from db.tables import utils as table_utils
 from db.types import email, alteration
 from db.types.base import get_db_type_name
@@ -286,8 +286,8 @@ def test_rename_column_foreign_keys(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "table_to_split"
     columns_list = [Column("Filler 1", Integer), Column("Filler 2", Integer)]
-    table_ddl.create_mathesar_table(table_name, schema, columns_list, engine)
-    extracted, remainder, fk_name = table_ddl.extract_columns_from_table(
+    table_operations.create_mathesar_table(table_name, schema, columns_list, engine)
+    extracted, remainder, fk_name = table_operations.extract_columns_from_table(
         table_name, ["Filler 1"], "Extracted", "Remainder", schema, engine
     )
     new_fk_name = "new_" + fk_name
@@ -303,7 +303,7 @@ def test_rename_column_sequence(engine_with_schema):
     new_col_name = "new_" + constants.ID
     engine, schema = engine_with_schema
     table_name = "table_with_columns"
-    table = table_ddl.create_mathesar_table(table_name, schema, [], engine)
+    table = table_operations.create_mathesar_table(table_name, schema, [], engine)
     with engine.begin() as conn:
         ins = table.insert()
         conn.execute(ins)
@@ -789,7 +789,7 @@ def _check_duplicate_data(table_oid, engine, copy_data):
 def _check_duplicate_unique_constraint(
     table_oid, col_index, con_idxs, engine, copy_constraints
 ):
-    constraints_ = constraint_ddl.get_column_constraints(col_index, table_oid, engine)
+    constraints_ = constraint_operations.get_column_constraints(col_index, table_oid, engine)
     if copy_constraints:
         assert len(constraints_) == 1
         constraint = constraints_[0]

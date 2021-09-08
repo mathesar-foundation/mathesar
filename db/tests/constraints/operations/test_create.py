@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import String, Integer, Column, Table, MetaData
 from sqlalchemy.exc import ProgrammingError
 
-from db.constraints.ddl.create import create_unique_constraint
+from db.constraints.operations.create import create_unique_constraint
 from db.tables import utils as table_utils
 from db.tests.constraints import utils as test_utils
 
