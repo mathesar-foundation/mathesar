@@ -3,7 +3,6 @@ import {
   setInFileStore,
   setImportStatus,
   Stages,
-  FileImport,
   removeImportFromView,
   deleteImport,
 } from '@mathesar/stores/fileImports';
@@ -18,7 +17,12 @@ import {
   deleteAPI,
 } from '@mathesar/utils/api';
 import { CancellablePromise } from '@mathesar-components';
-import type { FileImportInfo, PreviewColumn, FileImportWritableInfo } from '@mathesar/stores/fileImports';
+import type {
+  FileImportInfo,
+  PreviewColumn,
+  FileImportWritableInfo,
+  FileImport,
+} from '@mathesar/stores/fileImports';
 import type { UploadCompletionOpts, PaginatedResponse } from '@mathesar/utils/api';
 import type {
   FileUploadAddDetail,
