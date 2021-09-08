@@ -322,21 +322,6 @@ section.table-section .tab-container {
         }
       }
     }
-    .status-pane {
-      padding: 6px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-top: 1px solid #efefef;
-      position: relative;
-      flex-shrink: 0;
-      flex-basis: 32px;
-      background: #f7f8f8;
-
-      .record-count {
-        font-size: 12px;
-      }
-    }
   }
 }
 
