@@ -8,6 +8,7 @@ import {
 } from 'svelte/store';
 import {
   getAPI,
+  postAPI,
   States,
   deleteAPI
 } from '@mathesar/utils/api';
@@ -124,6 +125,14 @@ export function getTablesStoreForSchema(schemaId: SchemaEntry['id']): Writable<D
 export function deleteTable(url: string){
   return deleteAPI(url);
 }
+
+export function createTable(
+  schema: SchemaEntry['id'],
+  name?: string,
+): CancellablePromise<TableEntry> {
+  return postAPI<TableEntry>('/tables/', { schema, name });
+}
+
 export const tables: Readable<DBTablesStoreData> = derived(
   currentSchemaId,
   ($currentSchemaId, set) => {

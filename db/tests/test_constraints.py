@@ -2,7 +2,8 @@ import pytest
 from sqlalchemy import String, Integer, Column, Table, MetaData, PrimaryKeyConstraint, UniqueConstraint
 from sqlalchemy.exc import ProgrammingError
 
-from db import constraints, tables
+from db import constraints
+from db.tables import utils as table_utils
 
 
 def _get_first_unique_constraint(table):
@@ -36,10 +37,10 @@ def test_create_single_column_unique_constraint(engine_with_schema):
     )
     table.create()
     _assert_only_primary_key_present(table)
-    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    table_oid = table_utils.get_oid_from_table(table_name, schema, engine)
 
     constraints.create_unique_constraint(table.name, schema, engine, [unique_column_name])
-    altered_table = tables.reflect_table_from_oid(table_oid, engine)
+    altered_table = table_utils.reflect_table_from_oid(table_oid, engine)
     _assert_primary_key_and_unique_present(altered_table)
 
     unique_constraint = _get_first_unique_constraint(altered_table)
@@ -61,10 +62,10 @@ def test_create_multiple_column_unique_constraint(engine_with_schema):
     )
     table.create()
     _assert_only_primary_key_present(table)
-    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    table_oid = table_utils.get_oid_from_table(table_name, schema, engine)
 
     constraints.create_unique_constraint(table.name, schema, engine, unique_column_names)
-    altered_table = tables.reflect_table_from_oid(table_oid, engine)
+    altered_table = table_utils.reflect_table_from_oid(table_oid, engine)
     _assert_primary_key_and_unique_present(altered_table)
 
     unique_constraint = _get_first_unique_constraint(altered_table)
@@ -86,14 +87,14 @@ def test_drop_unique_constraint(engine_with_schema):
     )
     table.create()
 
-    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    table_oid = table_utils.get_oid_from_table(table_name, schema, engine)
     constraints.create_unique_constraint(table.name, schema, engine, [unique_column_name])
-    altered_table = tables.reflect_table_from_oid(table_oid, engine)
+    altered_table = table_utils.reflect_table_from_oid(table_oid, engine)
     _assert_primary_key_and_unique_present(altered_table)
     unique_constraint = _get_first_unique_constraint(altered_table)
 
     constraints.drop_constraint(table_name, schema, engine, unique_constraint.name)
-    new_altered_table = tables.reflect_table_from_oid(table_oid, engine)
+    new_altered_table = table_utils.reflect_table_from_oid(table_oid, engine)
     _assert_only_primary_key_present(new_altered_table)
 
 
@@ -109,10 +110,10 @@ def test_create_unique_constraint_with_custom_name(engine_with_schema):
         Column(unique_column_name, String),
     )
     table.create()
-    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    table_oid = table_utils.get_oid_from_table(table_name, schema, engine)
     constraints.create_unique_constraint(table.name, schema, engine, [unique_column_name], constraint_name)
 
-    altered_table = tables.reflect_table_from_oid(table_oid, engine)
+    altered_table = table_utils.reflect_table_from_oid(table_oid, engine)
     _assert_primary_key_and_unique_present(altered_table)
 
     unique_constraint = _get_first_unique_constraint(altered_table)
@@ -134,10 +135,10 @@ def test_create_unique_constraint_with_duplicate_name(engine_with_schema):
         Column(unique_column_names[1], String),
     )
     table.create()
-    table_oid = tables.get_oid_from_table(table_name, schema, engine)
+    table_oid = table_utils.get_oid_from_table(table_name, schema, engine)
     constraints.create_unique_constraint(table.name, schema, engine, [unique_column_names[0]], constraint_name)
 
-    altered_table = tables.reflect_table_from_oid(table_oid, engine)
+    altered_table = table_utils.reflect_table_from_oid(table_oid, engine)
     _assert_primary_key_and_unique_present(altered_table)
     with pytest.raises(ProgrammingError):
         constraints.create_unique_constraint(table.name, schema, engine, [unique_column_names[1]], constraint_name)

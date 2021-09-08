@@ -6,7 +6,7 @@ from rest_framework.settings import api_settings
 
 class InputValueField(serializers.CharField):
     """
-    Takes in an arbitrary value. Use to emulate our column and record creation and
+    Takes in an arbitrary value. Use to emulate our column creation and
     update endpoints, which handle arbitrary data pulled from request.data
     """
     def to_internal_value(self, data):
