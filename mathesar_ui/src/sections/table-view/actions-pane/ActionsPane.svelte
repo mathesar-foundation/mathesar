@@ -12,22 +12,25 @@
     faListAlt,
     faTrashAlt,
   } from '@fortawesome/free-solid-svg-icons';
-  import { States, } from '@mathesar/utils/api';
+  import { States } from '@mathesar/utils/api';
   import { Button, Icon, Dropdown } from '@mathesar-components';
-  import { currentSchemaId, } from '@mathesar/stores/schemas';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
   import {
     removeTab,
     getTabsForSchema,
+  } from '@mathesar/stores/tabs';
+  import type {
+    ActiveTab,
   } from '@mathesar/stores/tabs';
   import {
     refetchTablesForSchema,
     deleteTable,
   } from '@mathesar/stores/tables';
   import {
-   getTable,
+    getTable,
   } from '@mathesar/stores/tableData';
-
+  
   const dispatch = createEventDispatcher();
 
   export let columns: TableColumnStore;
@@ -40,18 +43,17 @@
     dispatch('openDisplayOptions');
   }
   
-  async function tableDelete(){
-    const { activeTab }  = getTabsForSchema($currentDBName,$currentSchemaId);
-    const activeTabObj = get(activeTab);
-    var table = getTable($currentDBName,activeTabObj.id);
-    var { totalCount } = get(table.records);
-    //if table is not empty dispatch confimation modal
+  async function tableDelete() {
+    const { activeTab } = getTabsForSchema($currentDBName, $currentSchemaId);
+    const activeTabObj: ActiveTab = get(activeTab);
+    const table = getTable($currentDBName, activeTabObj.id);
+    const { totalCount } = get(table.records);
     if (totalCount >= 1) {
       dispatch('deleteTable');
     } else {
-      removeTab($currentDBName,$currentSchemaId,activeTabObj);
-      await deleteTable('/tables/'+ activeTabObj.id);
-      refetchTablesForSchema($currentSchemaId);
+      removeTab($currentDBName, $currentSchemaId, activeTabObj);
+      await deleteTable(`/tables/${activeTabObj.id}`);
+      await refetchTablesForSchema($currentSchemaId);
     }
   }
 </script>

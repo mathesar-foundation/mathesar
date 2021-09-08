@@ -47,7 +47,7 @@
   let selected: TableDisplayStores['selected'];
 
   let animateOpts = false;
-  let isModalOpen = false; 
+  let isModalOpen = false;
 
   $: selectedEntries = Object.keys($selected || []).filter((key) => $selected?.[key]);
 
@@ -123,7 +123,7 @@
     }
   }
   function tableDelete() {
-    isModalOpen = true; 
+    isModalOpen = true;
   }
 </script>
 

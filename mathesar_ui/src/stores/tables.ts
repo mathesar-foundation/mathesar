@@ -10,7 +10,7 @@ import {
   getAPI,
   postAPI,
   States,
-  deleteAPI
+  deleteAPI,
 } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
@@ -122,7 +122,7 @@ export function getTablesStoreForSchema(schemaId: SchemaEntry['id']): Writable<D
   return store;
 }
 
-export function deleteTable(url: string){
+export function deleteTable(url: string): Promise<T> {
   return deleteAPI(url);
 }
 
