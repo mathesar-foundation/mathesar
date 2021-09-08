@@ -9,8 +9,9 @@ from sqlalchemy import (
     Sequence, Numeric, DateTime, func, UniqueConstraint,
 )
 from sqlalchemy.exc import IntegrityError
-from db import columns, constants, constraints
+from db import columns, constants
 from db.tables import ddl as table_ddl
+from db.constraints import ddl as constraint_ddl
 from db.tables import utils as table_utils
 from db.types import email, alteration
 from db.types.base import get_db_type_name
@@ -788,7 +789,7 @@ def _check_duplicate_data(table_oid, engine, copy_data):
 def _check_duplicate_unique_constraint(
     table_oid, col_index, con_idxs, engine, copy_constraints
 ):
-    constraints_ = constraints.get_column_constraints(col_index, table_oid, engine)
+    constraints_ = constraint_ddl.get_column_constraints(col_index, table_oid, engine)
     if copy_constraints:
         assert len(constraints_) == 1
         constraint = constraints_[0]

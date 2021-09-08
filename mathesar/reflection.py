@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.cache import cache
 
-from db.constraints import get_constraints_with_oids
+from db.constraints.ddl.select import get_constraints_with_oids
 from db.schemas import get_mathesar_schemas_with_oids
 from db.tables.utils import get_table_oids_from_schema
 # We import the entire models module to avoid a circular import error

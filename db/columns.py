@@ -12,7 +12,9 @@ from sqlalchemy.exc import DataError, InternalError
 from sqlalchemy.schema import DDLElement
 from psycopg2.errors import InvalidTextRepresentation, InvalidParameterValue
 
-from db import constants, constraints
+from db import constants
+from db.constraints import ddl as constraint_ddl
+from db.constraints import utils as constraint_utils
 from db.tables import utils as table_utils
 from db.types import alteration
 from db.types.base import get_db_type_name
@@ -530,13 +532,13 @@ def duplicate_column_constraints(table_oid, from_column, to_column, engine,
         with engine.begin() as conn:
             change_column_nullable(table, to_column, engine, conn, table.c[from_column].nullable)
 
-    constraints_ = constraints.get_column_constraints(from_column, table_oid, engine)
-    for constraint in constraints_:
-        constraint_type = constraints.get_constraint_type_from_char(constraint.contype)
-        if constraint_type != constraints.ConstraintType.UNIQUE.value:
+    constraints = constraint_ddl.get_column_constraints(from_column, table_oid, engine)
+    for constraint in constraints:
+        constraint_type = constraint_utils.get_constraint_type_from_char(constraint.contype)
+        if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
             # Don't allow duplication of primary keys
             continue
-        constraints.copy_constraint(
+        constraint_ddl.copy_constraint(
             table, engine, constraint, from_column, to_column
         )
 
