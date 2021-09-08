@@ -78,6 +78,14 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
+            MONEY: {
+                VALID: [
+                    (
+                        1234123412341234,
+                        {money.VALUE: 1234123412341234, money.CURRENCY: "USD"}
+                    )
+                ],
+            },
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
             SMALLINT: {VALID: [(500, 500)]},
@@ -116,6 +124,15 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [1234123412341234]
             },
+            MONEY: {
+                VALID: [
+                    (12.12, {money.VALUE: 12.12, money.CURRENCY: "USD"}),
+                    (
+                        1234567890123456.12,
+                        {money.VALUE: 1234567890123456.12, money.CURRENCY: "USD"}
+                    )
+                ],
+            },
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {
@@ -135,6 +152,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
             INTEGER: {VALID: [(500, 500)]},
+            MONEY: {VALID: [(12.12, {money.VALUE: 12.12, money.CURRENCY: "USD"})]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {VALID: [(500, 500)]},
@@ -160,6 +178,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
             INTEGER: {VALID: [(500, 500), (-5, -5)], INVALID: [-3.234, 234.34]},
+            MONEY: {VALID: [(12.12, {money.VALUE: 12.12, money.CURRENCY: "USD"})]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {VALID: [(500, 500), (-5, -5)], INVALID: [-3.234, 234.34]},
@@ -176,6 +195,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
+            MONEY: {VALID: [(12, {money.VALUE: 12, money.CURRENCY: "USD"})]},
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
             SMALLINT: {VALID: [(500, 500)]},
@@ -243,6 +263,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [1.234, 1234123412341234]
             },
+            MONEY: {VALID: [(1, {money.VALUE: 1, money.CURRENCY: "USD"})]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {
@@ -268,6 +289,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [3.345]
             },
+            MONEY: {VALID: [(1.2, {money.VALUE: 1.2, money.CURRENCY: "USD"})]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {
@@ -287,6 +309,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
+            MONEY: {VALID: [(1, {money.VALUE: 1, money.CURRENCY: "USD"})]},
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
             SMALLINT: {VALID: [(500, 500)]},
@@ -344,6 +367,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     ("00:03:30", timedelta(minutes=3, seconds=30)),
                 ],
                 INVALID: ["1 potato", "3"],
+            },
+            MONEY: {
+                VALID: [("1234", {money.VALUE: 1234, money.CURRENCY: "USD"})],
+                INVALID: ["nanumb"],
             },
             NUMERIC: {
                 VALID: [
@@ -586,7 +613,12 @@ def test_alter_column_casts_data_gen(
     table_oid = tables.get_oid_from_table(TABLE_NAME, schema, engine)
     actual_default = columns.get_column_default(table_oid, 0, engine)
     # TODO This needs to be sorted out by fixing how server_default is set.
-    if not source_type == get_qualified_name(MathesarCustomType.MONEY.value):
+    if all(
+            [
+                source_type != get_qualified_name(MathesarCustomType.MONEY.value),
+                target_type != MathesarCustomType.MONEY.value
+            ]
+    ):
         assert actual_default == out_val
 
 
