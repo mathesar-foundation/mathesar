@@ -44,14 +44,9 @@
 
   function openConfirmation(){
     //if table.not empty call store to delete table else show confirmation
-    // console.log($tables);
-    // var tt = getTablesStoreForSchema($currentSchemaId);
-    // console.log(get(tt));
-    console.log($currentDBName);
-    console.log($currentSchemaId);
     var ggg = getTable($currentDBName,$currentSchemaId);
-    var ttt = ggg.records
-    console.log(get(ttt));
+    var records = ggg.records;
+    console.log(get(records));
   }
   
   async function tableDelete(){
