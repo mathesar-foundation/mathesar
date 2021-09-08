@@ -1,14 +1,14 @@
 <script lang="ts">
   import { Checkbox } from '@mathesar-components';
   import {
-    DEFAULT_COUNT_COL_WIDTH,
+    ROW_CONTROL_COLUMN_WIDTH,
     GROUP_MARGIN_LEFT,
-  } from '@mathesar/stores/tableData';
+  } from '@mathesar/stores/table-data/meta';
   import type {
     TableRecord,
-  } from '@mathesar/stores/tableData';
+  } from '@mathesar/stores/table-data/records';
 
-  export let index: number;
+  export let rowNumber: number;
   export let isGrouped = false;
   export let primaryKey: string = null;
   export let selected: Record<string | number, boolean>;
@@ -29,9 +29,9 @@
   }
 </script>
 
-<div class="cell row-control" style="width:{DEFAULT_COUNT_COL_WIDTH}px;
+<div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;
             left:{isGrouped ? GROUP_MARGIN_LEFT : 0}px">
-  <span class="number">{index + 1}</span>
+  <span class="number">{rowNumber}</span>
 
   {#if primaryKeyValue}
     <Checkbox bind:checked={selected[primaryKeyValue]}
