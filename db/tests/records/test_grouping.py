@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy_filters import apply_sort, apply_filters
 
 from db import records
-from db.records import GroupFieldNotFound, BadGroupFormat
+from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 
 
 def test_get_group_counts_str_field(filter_sort_table_obj):

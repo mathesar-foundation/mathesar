@@ -3,10 +3,8 @@ from unittest.mock import patch
 
 import pytest
 from db import records
-from db.records import BadGroupFormat, GroupFieldNotFound
-from sqlalchemy_filters.exceptions import (BadFilterFormat, BadSortFormat,
-                                           FilterFieldNotFound,
-                                           SortFieldNotFound)
+from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
+from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
 
 
 def test_record_list(create_table, client):

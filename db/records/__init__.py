@@ -2,22 +2,13 @@ from psycopg2 import sql
 from sqlalchemy import delete, select, Column, func, true, and_
 from sqlalchemy.inspection import inspect
 from sqlalchemy_filters import apply_filters, apply_sort
-from sqlalchemy_filters.exceptions import (
-    FieldNotFound, BadFilterFormat, FilterFieldNotFound
-)
+from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
+
+from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 
 
 IS_DUPE = "_is_dupe"
 CONJUNCTIONS = ("and", "or", "not")
-
-
-# Grouping exceptions follow the sqlalchemy_filters exceptions patterns
-class BadGroupFormat(Exception):
-    pass
-
-
-class GroupFieldNotFound(FieldNotFound):
-    pass
 
 
 def _get_primary_key_column(table):
