@@ -3,7 +3,7 @@ from django.core.cache import cache
 
 from db.constraints.operations.select import get_constraints_with_oids
 from db.schemas import get_mathesar_schemas_with_oids
-from db.tables.utils import get_table_oids_from_schema
+from db.tables.operations.select import get_table_oids_from_schema
 # We import the entire models module to avoid a circular import error
 from mathesar import models
 from mathesar.database.base import create_mathesar_engine

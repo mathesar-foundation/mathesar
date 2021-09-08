@@ -9,7 +9,7 @@ from db.schemas import (
     create_schema as create_sa_schema,
     get_schema_oid_from_name, get_schema_name_from_oid
 )
-from db.tables.utils import get_oid_from_table
+from db.tables.operations.select import get_oid_from_table
 from mathesar.models import Schema, Table, DataFile
 
 from mathesar.database.base import create_mathesar_engine

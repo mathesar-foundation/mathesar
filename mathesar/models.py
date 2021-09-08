@@ -153,7 +153,7 @@ class Table(DatabaseObject):
     @cached_property
     def _sa_table(self):
         try:
-            table = table_utils.reflect_table_from_oid(
+            table = table_operations.reflect_table_from_oid(
                 self.oid, self.schema._sa_engine,
             )
         # We catch these errors, since it lets us decouple the cadence of

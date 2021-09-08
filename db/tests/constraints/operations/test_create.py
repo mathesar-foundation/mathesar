@@ -3,7 +3,7 @@ from sqlalchemy import String, Integer, Column, Table, MetaData
 from sqlalchemy.exc import ProgrammingError
 
 from db.constraints.operations.create import create_unique_constraint
-from db.tables import utils as table_utils
+from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.tests.constraints import utils as test_utils
 
 
@@ -19,10 +19,10 @@ def test_create_single_column_unique_constraint(engine_with_schema):
     )
     table.create()
     test_utils.assert_only_primary_key_present(table)
-    table_oid = table_utils.get_oid_from_table(table_name, schema, engine)
+    table_oid = get_oid_from_table(table_name, schema, engine)
 
     create_unique_constraint(table.name, schema, engine, [unique_column_name])
-    altered_table = table_utils.reflect_table_from_oid(table_oid, engine)
+    altered_table = reflect_table_from_oid(table_oid, engine)
     test_utils.assert_primary_key_and_unique_present(altered_table)
 
     unique_constraint = test_utils.get_first_unique_constraint(altered_table)
@@ -44,10 +44,10 @@ def test_create_multiple_column_unique_constraint(engine_with_schema):
     )
     table.create()
     test_utils.assert_only_primary_key_present(table)
-    table_oid = table_utils.get_oid_from_table(table_name, schema, engine)
+    table_oid = get_oid_from_table(table_name, schema, engine)
 
     create_unique_constraint(table.name, schema, engine, unique_column_names)
-    altered_table = table_utils.reflect_table_from_oid(table_oid, engine)
+    altered_table = reflect_table_from_oid(table_oid, engine)
     test_utils.assert_primary_key_and_unique_present(altered_table)
 
     unique_constraint = test_utils.get_first_unique_constraint(altered_table)
@@ -69,10 +69,10 @@ def test_create_unique_constraint_with_custom_name(engine_with_schema):
         Column(unique_column_name, String),
     )
     table.create()
-    table_oid = table_utils.get_oid_from_table(table_name, schema, engine)
+    table_oid = get_oid_from_table(table_name, schema, engine)
     create_unique_constraint(table.name, schema, engine, [unique_column_name], constraint_name)
 
-    altered_table = table_utils.reflect_table_from_oid(table_oid, engine)
+    altered_table = reflect_table_from_oid(table_oid, engine)
     test_utils.assert_primary_key_and_unique_present(altered_table)
 
     unique_constraint = test_utils.get_first_unique_constraint(altered_table)
@@ -94,10 +94,10 @@ def test_create_unique_constraint_with_duplicate_name(engine_with_schema):
         Column(unique_column_names[1], String),
     )
     table.create()
-    table_oid = table_utils.get_oid_from_table(table_name, schema, engine)
+    table_oid = get_oid_from_table(table_name, schema, engine)
     create_unique_constraint(table.name, schema, engine, [unique_column_names[0]], constraint_name)
 
-    altered_table = table_utils.reflect_table_from_oid(table_oid, engine)
+    altered_table = reflect_table_from_oid(table_oid, engine)
     test_utils.assert_primary_key_and_unique_present(altered_table)
     with pytest.raises(ProgrammingError):
         create_unique_constraint(table.name, schema, engine, [unique_column_names[1]], constraint_name)

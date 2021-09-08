@@ -6,7 +6,7 @@ from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Table
 from db import records
 from db.tables.operations.create import create_string_column_table
-from db.tables.utils import get_oid_from_table
+from db.tables.operations.select import get_oid_from_table
 from mathesar.errors import InvalidTableError
 
 ALLOWED_DELIMITERS = ",\t:|"
