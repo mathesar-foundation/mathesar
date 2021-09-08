@@ -165,12 +165,25 @@ def test_type_list(client, test_db_name):
 
 
 def test_database_types_installed(client, test_db_name, engine_email_type):
+    expected_custom_types = [
+        {
+            "identifier": "email",
+            "name": "Email",
+            "db_types": [
+                "MATHESAR_TYPES.EMAIL"
+            ]
+        },
+        {
+            "identifier": "money",
+            "name": "Money",
+            "db_types": [
+                "MONEY",
+                "MATHESAR_TYPES.MONEY"
+            ]
+        },
+    ]
     reflect_db_objects()
     default_database = Database.objects.get(name=test_db_name)
 
     response = client.get(f'/api/v0/databases/{default_database.id}/types/').json()
-    email_data = next((type_dict for type_dict in response if type_dict['identifier'] == 'email'), None)
-    assert email_data is not None
-    assert email_data['name'] == 'Email'
-    assert len(email_data['db_types']) == 1
-    assert 'MATHESAR_TYPES.EMAIL' in email_data['db_types']
+    assert all([type_data in response for type_data in expected_custom_types])
