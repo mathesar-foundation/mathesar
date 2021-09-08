@@ -8,7 +8,7 @@ from sqlalchemy import text
 from mathesar import reflection
 from mathesar.models import Table, DataFile
 from db.tests.types import fixtures
-from db import tables
+from db.tables import ddl as table_ddl
 
 
 engine_with_types = fixtures.engine_with_types
@@ -679,22 +679,23 @@ def test_table_delete(create_table, client):
     table = create_table(table_name)
     table_count = len(Table.objects.all())
 
-    with patch.object(tables, 'delete_table') as mock_infer:
+    with patch.object(table_ddl, 'drop_table') as mock_delete:
         response = client.delete(f'/api/v0/tables/{table.id}/')
     assert response.status_code == 204
 
     # Ensure the Django model was deleted
     new_table_count = len(Table.objects.all())
     assert table_count - 1 == new_table_count
+    assert Table.objects.filter(id=table.id).exists() is False
 
     # Ensure the backend table would have been deleted
-    assert mock_infer.call_args is not None
-    assert mock_infer.call_args[0] == (
+    assert mock_delete.call_args is not None
+    assert mock_delete.call_args[0] == (
         table.name,
         table.schema.name,
         table.schema._sa_engine,
     )
-    assert mock_infer.call_args[1] == {
+    assert mock_delete.call_args[1] == {
         'cascade': True
     }
 

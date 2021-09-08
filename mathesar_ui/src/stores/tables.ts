@@ -122,7 +122,7 @@ export function getTablesStoreForSchema(schemaId: SchemaEntry['id']): Writable<D
 
 export function createTable(
   schema: SchemaEntry['id'],
-  name: string | undefined = undefined,
+  name?: string,
 ): CancellablePromise<TableEntry> {
   return postAPI<TableEntry>('/tables/', { schema, name });
 }

@@ -4,7 +4,9 @@ import clevercsv as csv
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Table
-from db import tables, records
+from db import records
+from db.tables.ddl.create import create_string_column_table
+from db.tables.utils import get_oid_from_table
 from mathesar.errors import InvalidTableError
 
 ALLOWED_DELIMITERS = ",\t:|"
@@ -93,7 +95,7 @@ def create_db_table_from_data_file(data_file, name, schema):
     with open(sv_filename, 'rb') as sv_file:
         sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
         column_names = sv_reader.fieldnames
-        table = tables.create_string_column_table(
+        table = create_string_column_table(
             name=name,
             schema=schema.name,
             column_names=column_names,
@@ -117,7 +119,7 @@ def create_table_from_csv(data_file, name, schema):
     db_table = create_db_table_from_data_file(
         data_file, name, schema
     )
-    db_table_oid = tables.get_oid_from_table(db_table.name, db_table.schema, engine)
+    db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     # Using current_objects to create the table instead of objects. objects
     # triggers re-reflection, which will cause a race condition to create the table
     table, _ = Table.current_objects.get_or_create(

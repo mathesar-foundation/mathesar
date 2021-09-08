@@ -7,7 +7,9 @@ from sqlalchemy import (
 from sqlalchemy.exc import NoSuchTableError, ProgrammingError
 from psycopg2.errors import DependentObjectsStillExist
 
-from db import schemas, tables, types, constants
+from db import schemas, types, constants
+from db.tables.ddl.create import create_mathesar_table
+from db.tables.utils import reflect_table
 
 
 def test_get_mathesar_schemas():
@@ -57,7 +59,7 @@ def test_get_mathesar_schemas_with_oids_gets_correct_oid(engine_with_schema):
 
 def _create_related_table(schema, related_schema, table, related_table, engine):
     schemas.create_schema(schema, engine)
-    table = tables.create_mathesar_table(table, schema, [], engine)
+    table = create_mathesar_table(table, schema, [], engine)
 
     schemas.create_schema(related_schema, engine)
     metadata = MetaData(schema=related_schema, bind=engine)
@@ -67,7 +69,7 @@ def _create_related_table(schema, related_schema, table, related_table, engine):
     )
     related_table.create()
 
-    related_table = tables.reflect_table(related_table.name, related_schema, engine)
+    related_table = reflect_table(related_table.name, related_schema, engine)
     fk = list(related_table.foreign_keys)[0]
     assert fk.column.table.schema == schema
 
@@ -102,7 +104,7 @@ def test_delete_schema_restricted(engine):
     test_table = "test_delete_schema_restricted_table"
 
     schemas.create_schema(test_schema, engine)
-    tables.create_mathesar_table(test_table, test_schema, [], engine)
+    create_mathesar_table(test_table, test_schema, [], engine)
 
     with pytest.raises(DependentObjectsStillExist):
         schemas.delete_schema(test_schema, engine)
@@ -116,14 +118,14 @@ def test_delete_schema_cascade(engine):
     test_table = "test_delete_schema_cascade_table"
 
     schemas.create_schema(test_schema, engine)
-    table = tables.create_mathesar_table(test_table, test_schema, [], engine)
+    table = create_mathesar_table(test_table, test_schema, [], engine)
 
     schemas.delete_schema(test_schema, engine, cascade=True)
 
     current_schemas = schemas.get_mathesar_schemas(engine)
     assert test_schema not in current_schemas
     with pytest.raises(NoSuchTableError):
-        tables.reflect_table(table.name, test_schema, engine)
+        reflect_table(table.name, test_schema, engine)
 
 
 def test_delete_schema_cascade_foreign_key(engine):
@@ -138,7 +140,7 @@ def test_delete_schema_cascade_foreign_key(engine):
 
     schemas.delete_schema(test_schema, engine, cascade=True)
 
-    related_table = tables.reflect_table(related_table.name, related_schema, engine)
+    related_table = reflect_table(related_table.name, related_schema, engine)
     assert len(related_table.foreign_keys) == 0
 
 
@@ -174,6 +176,6 @@ def test_rename_schema_foreign_key(engine):
 
     schemas.rename_schema(test_schema, engine, new_test_schema)
 
-    related_table = tables.reflect_table(related_table.name, related_schema, engine)
+    related_table = reflect_table(related_table.name, related_schema, engine)
     fk = list(related_table.foreign_keys)[0]
     assert fk.column.table.schema == new_test_schema

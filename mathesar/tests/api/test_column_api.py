@@ -8,7 +8,7 @@ from sqlalchemy import Column, Integer, String, MetaData, select
 from sqlalchemy import Table as SATable
 
 from db import columns
-from db.tables import get_oid_from_table
+from db.tables.utils import get_oid_from_table
 from db.tests.types import fixtures
 from mathesar.models import Table
 
