@@ -1,38 +1,32 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, getContext } from 'svelte';
   import { fade } from 'svelte/transition';
   import {
     faTimes,
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-components';
-  import type {
-    SortOption,
-    GroupOption,
-    FilterOption,
-    TableColumnData,
-  } from '@mathesar/stores/tableData';
+  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/store';
+  import type { TableColumnData } from '@mathesar/stores/table-data/columns';
   import type { SelectOption } from '@mathesar-components/types';
   import FilterSection from './FilterSection.svelte';
   import SortSection from './SortSection.svelte';
   import GroupSection from './GroupSection.svelte';
 
   const dispatch = createEventDispatcher();
-
-  export let columns: TableColumnData;
-  export let sort: SortOption;
-  export let group: GroupOption;
-  export let filter: FilterOption;
+  
+  const tabularData = getContext<TabularDataStore>('tabularData');
+  $: ({ columns, meta } = $tabularData as TabularData);
 
   function getColumnOptions(
     _columns: TableColumnData,
-  ): SelectOption[] {
+  ): SelectOption<string>[] {
     return _columns?.data?.map((column) => ({
       id: column.name,
       label: column.name,
     })) || [];
   }
 
-  $: columnOptions = getColumnOptions(columns);
+  $: columnOptions = getColumnOptions($columns);
 </script>
 
 <div class="display-opts" transition:fade|local={{ duration: 250 }}>
@@ -44,7 +38,7 @@
     </Button>
   </div>
 
-  <FilterSection options={columnOptions} bind:filter on:reload/>
-  <SortSection options={columnOptions} bind:sort on:reload/>
-  <GroupSection options={columnOptions} bind:group on:reload/>
+  <FilterSection options={columnOptions} {meta}/>
+  <SortSection options={columnOptions} {meta}/>
+  <GroupSection options={columnOptions} {meta}/>
 </div>

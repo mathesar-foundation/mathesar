@@ -1,40 +1,37 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import {
     faTimes,
     faPlus,
   } from '@fortawesome/free-solid-svg-icons';
-  import type {
-    SortOption,
-  } from '@mathesar/stores/tableData';
+  import type { Meta, SortOption } from '@mathesar/stores/table-data/meta';
   import { Icon, Button, Select } from '@mathesar-components';
   import type { SelectOption, SelectChangeEvent } from '@mathesar-components/types';
 
-  const dispatch = createEventDispatcher();
+  export let meta: Meta;
+  export let options: SelectOption<string>[];
 
-  export let options: SelectOption[];
-  export let sort: SortOption;
+  $: ({ sort } = meta);
 
-  let sortColumns: SelectOption[];
-  let sortColumnValue: SelectOption;
-  let sortDirectionValue: SelectOption;
+  let sortColumns: SelectOption<string>[];
+  let sortColumnValue: SelectOption<string>;
+  let sortDirectionValue: SelectOption<'asc' | 'desc'>;
   let addNew = false;
 
   function calcNewSortColumns(
-    _columns: SelectOption[],
+    _columns: SelectOption<string>[],
     _sort: SortOption,
   ) {
     let sortOptions = _columns;
     if (_sort) {
       sortOptions = sortOptions.filter(
-        (option) => !_sort.get(option.id as string),
+        (option) => !_sort.get(option.id),
       );
     }
     sortColumns = sortOptions;
     [sortColumnValue] = sortColumns;
   }
 
-  $: calcNewSortColumns(options, sort);
+  $: calcNewSortColumns(options, $sort);
 
   const sortDirections = [
     { id: 'asc', label: 'asc' },
@@ -48,37 +45,19 @@
   }
 
   function directionChanged(
-    event: SelectChangeEvent,
+    event: SelectChangeEvent<'asc' | 'desc'>,
     option: [string, 'asc' | 'desc'],
   ) {
-    const newDirection = event.detail.value.id as 'asc' | 'desc';
-    if (newDirection && sort?.get(option[0]) !== newDirection) {
-      const newSort = new Map(sort);
-      newSort.set(option[0], newDirection);
-      sort = newSort;
-      dispatch('reload');
-    }
+    const newDirection = event.detail.value.id ?? 'asc';
+    meta.changeSortDirection(option[0], newDirection);
   }
 
   function addSortColumn() {
     if (sortColumnValue?.id) {
-      const column = sortColumnValue.id as string;
-      if (!sort?.get(column)) {
-        const direction = sortDirectionValue?.id as 'asc' | 'desc' || 'asc';
-        const newSort: SortOption = new Map(sort);
-        newSort.set(column, direction);
-        sort = newSort;
-        dispatch('reload');
-        addNew = false;
-      }
+      const column = sortColumnValue.id;
+      meta.addUpdateSort(column, sortDirectionValue?.id);
+      addNew = false;
     }
-  }
-
-  function removeSortColumn(option: [string, 'asc' | 'desc']) {
-    const newSort = new Map(sort);
-    newSort.delete(option[0]);
-    sort = newSort;
-    dispatch('reload');
   }
 </script>
 
@@ -86,14 +65,14 @@
   <div class="header">
     <span>
       Sort
-      {#if sort?.size > 0}
-        ({sort.size})
+      {#if $sort?.size > 0}
+        ({$sort.size})
       {/if}
     </span>
   </div>
   <div class="content">
     <table>
-      {#each [...(sort ?? [])] as option (option[0])}
+      {#each Array.from($sort ?? []) as option (option[0])}
         <tr>
           <td class="column">{option[0]}</td>
           <td class="dir">
@@ -104,7 +83,7 @@
               }/>
           </td>
           <td class="action">
-            <Button on:click={() => removeSortColumn(option)}>
+            <Button on:click={() => meta.removeSort(option[0])}>
               Clear
             </Button>
           </td>

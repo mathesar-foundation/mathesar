@@ -9,9 +9,7 @@
     Select,
     TextInput,
   } from '@mathesar-components';
-  import type {
-    FilterEntry,
-  } from '@mathesar/stores/tableData';
+  import type { FilterEntry } from '@mathesar/stores/table-data/meta';
   import type { SelectOption } from '@mathesar-components/types';
 
   const dispatch = createEventDispatcher();

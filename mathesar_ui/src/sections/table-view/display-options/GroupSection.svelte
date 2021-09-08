@@ -1,59 +1,42 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import {
     faTimes,
     faPlus,
   } from '@fortawesome/free-solid-svg-icons';
-  import type {
-    GroupOption,
-  } from '@mathesar/stores/tableData';
+  import type { Meta, GroupOption } from '@mathesar/stores/table-data/meta';
   import { Button, Select, Icon } from '@mathesar-components';
   import type { SelectOption } from '@mathesar-components/types';
 
-  const dispatch = createEventDispatcher();
+  export let meta: Meta;
+  export let options: SelectOption<string>[];
 
-  export let options: SelectOption[];
-  export let group: GroupOption;
+  $: ({ group } = meta);
 
-  let groupColumns: SelectOption[];
-  let groupColumnValue: SelectOption;
+  let groupColumns: SelectOption<string>[];
+  let groupColumnValue: SelectOption<string>;
   let addNew = false;
 
   function calcNewGroupColumns(
-    _columns: SelectOption[],
+    _columns: SelectOption<string>[],
     _group: GroupOption,
   ) {
     let groupOptions = _columns;
     if (_group) {
       groupOptions = groupOptions.filter(
-        (option) => !_group.has(option.id as string),
+        (option) => !_group.has(option.id),
       );
     }
     groupColumns = groupOptions;
   }
 
-  $: calcNewGroupColumns(options, group);
+  $: calcNewGroupColumns(options, $group);
 
   function addGroupColumn() {
     if (groupColumnValue?.id) {
-      const column = groupColumnValue.id as string;
-      if (!group?.has(column)) {
-        const newGroup = new Set(group);
-        const resetPositions = newGroup.size === 0;
-        newGroup.add(column);
-        group = newGroup;
-        dispatch('reload', { resetPositions });
-        addNew = false;
-      }
+      const column = groupColumnValue.id;
+      meta.addGroup(column);
+      addNew = false;
     }
-  }
-
-  function removeGroupColumn(column: string) {
-    const newGroup = new Set(group);
-    newGroup.delete(column);
-    group = newGroup;
-    const resetPositions = group.size === 0;
-    dispatch('reload', { resetPositions });
   }
 </script>
 
@@ -61,18 +44,18 @@
   <div class="header">
     <span>
       Group
-      {#if group?.size > 0}
-        ({group.size})
+      {#if $group?.size > 0}
+        ({$group.size})
       {/if}
     </span>
   </div>
   <div class="content">
     <table>
-      {#each [...(group ?? [])] as option (option)}
+      {#each Array.from($group ?? []) as option (option)}
         <tr>
           <td class="groupcolumn">{option}</td>
           <td class="action">
-            <Button on:click={() => removeGroupColumn(option)}>
+            <Button on:click={() => meta.removeGroup(option)}>
               Clear
             </Button>
           </td>
