@@ -23,8 +23,6 @@
   import {
     refetchTablesForSchema,
     deleteTable,
-    tables,
-    getTablesStoreForSchema
   } from '@mathesar/stores/tables';
   import {
    getTable,
@@ -41,28 +39,20 @@
   function openDisplayOptions() {
     dispatch('openDisplayOptions');
   }
-
-  function openConfirmation(){
-    //if table.not empty call store to delete table else show confirmation
-    var table = getTable($currentDBName,$currentSchemaId);
-    var records = table.records;
-    var { totalCount } = get(records);
-    console.log(get(records));
-    console.log(totalCount);
-    // const { activeTab }  = getTabsForSchema($currentDBName,$currentSchemaId);
-    // const activeTabObj = get(activeTab)
-    // console.log(activeTabObj.id);
-  }
   
   async function tableDelete(){
-    //if table is not empty
-    dispatch('deleteTable');
-    //else
-    // const { activeTab }  = getTabsForSchema($currentDBName,$currentSchemaId);
-    // const activeTabObj = get(activeTab);
-    // deleteTable('/tables/'+ activeTabObj.id);
-    // removeTab($currentDBName,$currentSchemaId,activeTabObj);
-    // refetchTablesForSchema($currentSchemaId);
+    const { activeTab }  = getTabsForSchema($currentDBName,$currentSchemaId);
+    const activeTabObj = get(activeTab);
+    var table = getTable($currentDBName,activeTabObj.id);
+    var { totalCount } = get(table.records);
+    //if table is not empty dispatch confimation modal
+    if (totalCount >= 1) {
+      dispatch('deleteTable');
+    } else {
+      removeTab($currentDBName,$currentSchemaId,activeTabObj);
+      await deleteTable('/tables/'+ activeTabObj.id);
+      refetchTablesForSchema($currentSchemaId);
+    }
   }
 </script>
 
@@ -70,12 +60,12 @@
   <Dropdown closeOnInnerClick={true} triggerClass="opts" 
   triggerAppearance="plain" contentClass="table-opts-content"> 
     <svelte:fragment slot="trigger">
-      <span>Table</span>
+        Table
     </svelte:fragment>
     <svelte:fragment slot="content">
       <ul>
         <li class= "item" on:click={tableDelete}>Delete Table</li>
-        <li class= "item" on:click={openConfirmation}>Duplicate Table</li>
+        <li class= "item">Duplicate Table</li>
       </ul>
     </svelte:fragment>
   </Dropdown>

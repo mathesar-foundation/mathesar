@@ -32,22 +32,23 @@
 
   $: getNameTables($tables);
 
- function getActiveTab(_currentDBName, _currentSchemaId){
-  const { activeTab }  = getTabsForSchema(_currentDBName,_currentSchemaId);
-  const activeTabObj = get(activeTab);
-  return activeTabObj;
- }
+  function getActiveTab(_currentDBName, _currentSchemaId){
+    const { activeTab }  = getTabsForSchema(_currentDBName,_currentSchemaId);
+    const activeTabObj = get(activeTab);
+    return activeTabObj;
+  }
 
-  function confirmDelete() {
+  async function confirmDelete() {
     const _activeTab = getActiveTab($currentDBName, $currentSchemaId);
-    deleteTable('/tables/'+ _activeTab.id);
     removeTab($currentDBName,$currentSchemaId,_activeTab);
+    await deleteTable('/tables/'+ _activeTab.id);
     refetchTablesForSchema($currentSchemaId);
+    isOpen = false;
   }
 
   $: nameActiveTab = getActiveTab($currentDBName, $currentSchemaId);
   
-  </script>
+</script>
 
   <Modal class="delete-modal">
       <div class="header">
