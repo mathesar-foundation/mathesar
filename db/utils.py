@@ -4,3 +4,7 @@ def execute_statement(engine, statement, connection_to_use=None):
     else:
         with engine.begin() as conn:
             return conn.execute(statement)
+
+
+def execute_query(engine, query, connection_to_use=None):
+    return execute_statement(engine, query, connection_to_use=None).fetchall()
