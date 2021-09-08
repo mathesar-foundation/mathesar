@@ -4,9 +4,11 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 
-from db import records, schemas, columns, constraints
+from db import records, schemas, columns
+from db.constraints import operations as constraint_operations
+from db.constraints import utils as constraint_utils
 from db.tables import utils as table_utils
-from db.tables import ddl as table_ddl
+from db.tables import operations as table_operations
 from db.types import alteration
 from mathesar import reflection
 from mathesar.utils import models as model_utils
@@ -151,7 +153,7 @@ class Table(DatabaseObject):
     @cached_property
     def _sa_table(self):
         try:
-            table = table_utils.reflect_table_from_oid(
+            table = table_operations.reflect_table_from_oid(
                 self.oid, self.schema._sa_engine,
             )
         # We catch these errors, since it lets us decouple the cadence of
@@ -238,7 +240,7 @@ class Table(DatabaseObject):
         return model_utils.update_sa_table(self, update_params)
 
     def delete_sa_table(self):
-        return table_ddl.drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
+        return table_operations.drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
 
     def get_record(self, id_value):
         return records.get_record(self._sa_table, self.schema._sa_engine, id_value)
@@ -264,9 +266,9 @@ class Table(DatabaseObject):
         return records.delete_record(self._sa_table, self.schema._sa_engine, id_value)
 
     def add_constraint(self, constraint_type, columns, name=None):
-        if constraint_type != constraints.ConstraintType.UNIQUE.value:
+        if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
             raise ValueError('Only creating unique constraints is currently supported.')
-        constraints.create_unique_constraint(
+        constraint_operations.create_unique_constraint(
             self.name,
             self._sa_table.schema,
             self.schema._sa_engine,
@@ -280,8 +282,8 @@ class Table(DatabaseObject):
             pass
         engine = self.schema.database._sa_engine
         if not name:
-            name = constraints.get_constraint_name(constraint_type, self.name, columns[0])
-        constraint_oid = constraints.get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
+            name = constraint_utils.get_constraint_name(constraint_type, self.name, columns[0])
+        constraint_oid = constraint_operations.get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         return Constraint.objects.create(oid=constraint_oid, table=self)
 
 
@@ -291,7 +293,7 @@ class Constraint(DatabaseObject):
     @property
     def _sa_constraint(self):
         engine = self.table.schema.database._sa_engine
-        return constraints.get_constraint_from_oid(self.oid, engine, self.table._sa_table)
+        return constraint_operations.get_constraint_from_oid(self.oid, engine, self.table._sa_table)
 
     @property
     def name(self):
@@ -299,14 +301,14 @@ class Constraint(DatabaseObject):
 
     @property
     def type(self):
-        return constraints.get_constraint_type_from_class(self._sa_constraint)
+        return constraint_utils.get_constraint_type_from_class(self._sa_constraint)
 
     @cached_property
     def columns(self):
         return [column.name for column in self._sa_constraint.columns]
 
     def drop(self):
-        constraints.drop_constraint(
+        constraint_operations.drop_constraint(
             self.table._sa_table.name,
             self.table._sa_table.schema,
             self.table.schema._sa_engine,

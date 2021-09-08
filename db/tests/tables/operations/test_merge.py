@@ -1,7 +1,7 @@
 from sqlalchemy import MetaData, select
 
 from db import columns
-from db.tables.ddl.merge import merge_tables
+from db.tables.operations.merge import merge_tables
 
 
 def test_merge_columns_undoes_extract_columns_ddl_rem_ext(extracted_remainder_roster):

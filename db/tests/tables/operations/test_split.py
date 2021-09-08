@@ -1,7 +1,7 @@
 from sqlalchemy import MetaData, select
 
 from db import constants, columns
-from db.tables.ddl.split import extract_columns_from_table
+from db.tables.operations.split import extract_columns_from_table
 
 
 def test_extract_columns_from_table_creates_tables(engine_with_roster, roster_table_name, teachers_table_name, roster_no_teachers_table_name, roster_extracted_cols):
