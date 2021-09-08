@@ -4,34 +4,34 @@ from sqlalchemy import MetaData, Table
 from sqlalchemy.schema import DropConstraint
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
-from db import records
+from db.records.operations.select import get_records
 
 
 def test_get_records_gets_ordered_records_str_col_name(roster_table_obj):
     roster, engine = roster_table_obj
     order_list = [{"field": "Teacher", "direction": "asc"}]
-    record_list = records.get_records(roster, engine, order_by=order_list)
+    record_list = get_records(roster, engine, order_by=order_list)
     assert record_list[0][4] == "Amber Hudson"
 
 
 def test_get_records_gets_ordered_records_num_col(roster_table_obj):
     roster, engine = roster_table_obj
     order_list = [{"field": "Grade", "direction": "asc"}]
-    record_list = records.get_records(roster, engine, order_by=order_list)
+    record_list = get_records(roster, engine, order_by=order_list)
     assert record_list[0][7] == 25
 
 
 def test_get_records_gets_ordered_records_str_col_obj(roster_table_obj):
     roster, engine = roster_table_obj
     order_list = [{"field": roster.columns["Teacher"], "direction": "asc"}]
-    record_list = records.get_records(roster, engine, order_by=order_list)
+    record_list = get_records(roster, engine, order_by=order_list)
     assert record_list[0][4] == "Amber Hudson"
 
 
 def test_get_records_gets_ordered_records_num_col_obj(roster_table_obj):
     roster, engine = roster_table_obj
     order_list = [{"field": roster.columns["Grade"], "direction": "asc"}]
-    record_list = records.get_records(roster, engine, order_by=order_list)
+    record_list = get_records(roster, engine, order_by=order_list)
     assert record_list[0][7] == 25
 
 
@@ -41,7 +41,7 @@ def test_get_records_ordered_col_set(roster_table_obj):
         {"field": "Student Name", "direction": "asc"},
         {"field": "Grade", "direction": "asc"}
     ]
-    record_list = records.get_records(roster, engine, order_by=order_list)
+    record_list = get_records(roster, engine, order_by=order_list)
     assert record_list[0][2] == "Alejandro Lam" and record_list[0][7] == 40
 
 
@@ -51,7 +51,7 @@ def test_get_records_ordered_col_set_different_col_order(roster_table_obj):
         {"field": "Grade", "direction": "asc"},
         {"field": "Student Name", "direction": "asc"}
     ]
-    record_list = records.get_records(roster, engine, order_by=order_list)
+    record_list = get_records(roster, engine, order_by=order_list)
     assert record_list[0][7] == 25 and record_list[0][2] == "Amy Gamble"
 
 
@@ -61,7 +61,7 @@ def test_get_records_orders_before_limiting(roster_table_obj):
         {"field": "Grade", "direction": "asc"},
         {"field": "Student Name", "direction": "asc"}
     ]
-    record_list = records.get_records(roster, engine, limit=1, order_by=order_list)
+    record_list = get_records(roster, engine, limit=1, order_by=order_list)
     assert record_list[0][7] == 25 and record_list[0][2] == "Amy Gamble"
 
 
@@ -94,14 +94,14 @@ def check_multi_field_ordered(record_list, field_dir_pairs):
 def test_get_records_default_order_single_primary_key(roster_table_obj):
     roster, engine = roster_table_obj
     primary_column = roster.primary_key.columns[0].name
-    record_list = records.get_records(roster, engine)
+    record_list = get_records(roster, engine)
     check_single_field_ordered(record_list, primary_column, 'asc')
 
 
 def test_get_records_default_order_composite_primary_key(filter_sort_table_obj):
     filter_sort, engine = filter_sort_table_obj
     primary_columns = [col.name for col in filter_sort.primary_key.columns]
-    record_list = records.get_records(filter_sort, engine)
+    record_list = get_records(filter_sort, engine)
     field_dir_pairs = [(col, 'asc') for col in primary_columns]
     check_multi_field_ordered(record_list, field_dir_pairs)
 
@@ -118,7 +118,7 @@ def test_get_records_default_order_no_primary_key(filter_sort_table_obj):
     )
     assert len(filter_sort.primary_key.columns) == 0
 
-    record_list = records.get_records(filter_sort, engine)
+    record_list = get_records(filter_sort, engine)
 
     columns = [col.name for col in filter_sort.columns]
     field_dir_pairs = [(col, 'asc') for col in columns]
@@ -147,7 +147,7 @@ def test_get_records_orders_single_field(
     order_list = [{"field": field, "direction": direction}]
     order_list[0][null] = True
 
-    record_list = records.get_records(filter_sort, engine, order_by=order_list)
+    record_list = get_records(filter_sort, engine, order_by=order_list)
 
     if null == "nullsfirst":
         assert getattr(record_list[0], field) is None
@@ -182,7 +182,7 @@ def test_get_records_orders_multiple_fields(
         for field, direction in field_dir_pairs
     ]
 
-    record_list = records.get_records(roster_sort, engine, order_by=order_list)
+    record_list = get_records(roster_sort, engine, order_by=order_list)
 
     check_multi_field_ordered(record_list, field_dir_pairs)
 
@@ -200,4 +200,4 @@ exceptions_test_list = [
 def test_get_records_orders_exceptions(filter_sort_table_obj, order_list, exception):
     filter_sort, engine = filter_sort_table_obj
     with pytest.raises(exception):
-        records.get_records(filter_sort, engine, order_by=order_list)
+        get_records(filter_sort, engine, order_by=order_list)

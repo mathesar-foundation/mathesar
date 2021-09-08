@@ -4,7 +4,7 @@ import clevercsv as csv
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Table
-from db import records
+from db.records.operations.insert import insert_records_from_csv
 from db.tables.operations.create import create_string_column_table
 from db.tables.operations.select import get_oid_from_table
 from mathesar.errors import InvalidTableError
@@ -101,7 +101,7 @@ def create_db_table_from_data_file(data_file, name, schema):
             column_names=column_names,
             engine=engine
         )
-    records.create_records_from_csv(
+    insert_records_from_csv(
         table,
         engine,
         sv_filename,

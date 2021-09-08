@@ -4,7 +4,8 @@ from time import time
 from sqlalchemy import VARCHAR, TEXT, Text, select
 from sqlalchemy.exc import DatabaseError
 
-from db import constants, columns, schemas
+from db import constants, columns
+from db.schemas.operations.create import create_schema
 from db.tables.operations.create import CreateTableAs
 from db.tables.utils import reflect_table
 from db.types.alteration import get_supported_alter_column_types, alter_column_type
@@ -114,7 +115,7 @@ def infer_table_column_types(schema, table_name, engine):
     table = reflect_table(table_name, schema, engine)
 
     temp_name = TEMP_TABLE % (int(time()))
-    schemas.create_schema(TEMP_SCHEMA, engine)
+    create_schema(TEMP_SCHEMA, engine)
     with engine.begin() as conn:
         while engine.dialect.has_table(conn, temp_name, schema=TEMP_SCHEMA):
             temp_name = TEMP_TABLE.format(int(time()))

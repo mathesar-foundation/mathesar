@@ -4,9 +4,12 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 
-from db import records, schemas, columns
+from db import columns
 from db.constraints import operations as constraint_operations
 from db.constraints import utils as constraint_utils
+from db.records import operations as record_operations
+from db.schemas import operations as schema_operations
+from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables import operations as table_operations
 from db.types import alteration
@@ -100,7 +103,7 @@ class Schema(DatabaseObject):
         try:
             schema_name = cache.get(cache_key)
             if schema_name is None:
-                schema_name = schemas.get_schema_name_from_oid(
+                schema_name = schema_utils.get_schema_name_from_oid(
                     self.oid, self._sa_engine
                 )
                 cache.set(cache_key, schema_name, NAME_CACHE_INTERVAL)
@@ -122,7 +125,7 @@ class Schema(DatabaseObject):
         return model_utils.update_sa_schema(self, update_params)
 
     def delete_sa_schema(self):
-        return schemas.delete_schema(self.name, self._sa_engine, cascade=True)
+        return schema_operations.drop_schema(self.name, self._sa_engine, cascade=True)
 
     def clear_name_cache(self):
         cache_key = f"{self.database.name}_schema_name_{self.oid}"
@@ -231,10 +234,10 @@ class Table(DatabaseObject):
 
     @property
     def sa_all_records(self):
-        return records.get_records(self._sa_table, self.schema._sa_engine)
+        return record_operations.get_records(self._sa_table, self.schema._sa_engine)
 
     def sa_num_records(self, filters=[]):
-        return records.get_count(self._sa_table, self.schema._sa_engine, filters=filters)
+        return record_operations.get_count(self._sa_table, self.schema._sa_engine, filters=filters)
 
     def update_sa_table(self, update_params):
         return model_utils.update_sa_table(self, update_params)
@@ -243,27 +246,37 @@ class Table(DatabaseObject):
         return table_operations.drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
 
     def get_record(self, id_value):
-        return records.get_record(self._sa_table, self.schema._sa_engine, id_value)
+        return record_operations.get_record(self._sa_table, self.schema._sa_engine, id_value)
 
     def get_records(self, limit=None, offset=None, filters=[], order_by=[]):
-        return records.get_records(self._sa_table, self.schema._sa_engine, limit,
-                                   offset, filters=filters, order_by=order_by)
+        return record_operations.get_records(
+            self._sa_table,
+            self.schema._sa_engine,
+            limit,
+            offset,
+            filters=filters,
+            order_by=order_by
+        )
 
-    def get_group_counts(
-        self, group_by, limit=None, offset=None, filters=[], order_by=[]
-    ):
-        return records.get_group_counts(self._sa_table, self.schema._sa_engine,
-                                        group_by, limit, offset, filters=filters,
-                                        order_by=order_by)
+    def get_group_counts(self, group_by, limit=None, offset=None, filters=[], order_by=[]):
+        return record_operations.get_group_counts(
+            self._sa_table,
+            self.schema._sa_engine,
+            group_by,
+            limit,
+            offset,
+            filters=filters,
+            order_by=order_by
+        )
 
     def create_record_or_records(self, record_data):
-        return records.create_record_or_records(self._sa_table, self.schema._sa_engine, record_data)
+        return record_operations.insert_record_or_records(self._sa_table, self.schema._sa_engine, record_data)
 
     def update_record(self, id_value, record_data):
-        return records.update_record(self._sa_table, self.schema._sa_engine, id_value, record_data)
+        return record_operations.update_record(self._sa_table, self.schema._sa_engine, id_value, record_data)
 
     def delete_record(self, id_value):
-        return records.delete_record(self._sa_table, self.schema._sa_engine, id_value)
+        return record_operations.delete_record(self._sa_table, self.schema._sa_engine, id_value)
 
     def add_constraint(self, constraint_type, columns, name=None):
         if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:

@@ -5,7 +5,7 @@ from collections import Counter
 
 from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
-from db import records
+from db.records.operations.select import get_records
 
 
 def test_get_records_filters_using_col_str_names(roster_table_obj):
@@ -14,7 +14,7 @@ def test_get_records_filters_using_col_str_names(roster_table_obj):
         {"field": "Student Name", "op": "==", "value": "Amy Gamble"},
         {"field": "Subject", "op": "==", "value": "Math"}
     ]
-    record_list = records.get_records(
+    record_list = get_records(
         roster, engine, filters=filter_list
     )
     assert all(
@@ -32,7 +32,7 @@ def test_get_records_filters_using_col_objects(roster_table_obj):
         {"field": roster.columns["Student Name"], "op": "==", "value": "Amy Gamble"},
         {"field": roster.columns["Subject"], "op": "==", "value": "Math"}
     ]
-    record_list = records.get_records(
+    record_list = get_records(
         roster, engine, filters=filter_list
     )
     assert all(
@@ -50,7 +50,7 @@ def test_get_records_filters_using_mixed_col_objects_and_str(roster_table_obj):
         {"field": roster.columns["Student Name"], "op": "==", "value": "Amy Gamble"},
         {"field": "Subject", "op": "==", "value": "Math"}
     ]
-    record_list = records.get_records(
+    record_list = get_records(
         roster, engine, filters=filter_list
     )
     assert all(
@@ -68,7 +68,7 @@ def test_get_records_filters_with_miss(roster_table_obj):
         {"field": roster.columns["Student Name"], "op": "==", "value": "Amy Gamble"},
         {"field": roster.columns["Grade"], "op": "==", "value": 75}
     ]
-    record_list = records.get_records(
+    record_list = get_records(
         roster, engine, filters=filter_list
     )
     assert len(record_list) == 0
@@ -79,8 +79,8 @@ def test_get_records_filters_duplicates(roster_table_obj):
     dupe_cols = ["Grade", "Subject"]
     filter_list = [{"field": "", "op": "get_duplicates", "value": dupe_cols}]
 
-    full_record_list = records.get_records(roster, engine)
-    dupe_record_list = records.get_records(roster, engine, filters=filter_list)
+    full_record_list = get_records(roster, engine)
+    dupe_record_list = get_records(roster, engine, filters=filter_list)
 
     # Ensures that:
     #   - All duplicate values in the table appeared in our query
@@ -187,7 +187,7 @@ def test_get_records_filters_ops(
     if value is not None:
         filter_list[0]["value"] = value
 
-    record_list = records.get_records(filter_sort, engine, filters=filter_list)
+    record_list = get_records(filter_sort, engine, filters=filter_list)
 
     if field == "date" and value is not None:
         value = datetime.strptime(value, "%Y-%m-%d").date()
@@ -217,10 +217,10 @@ def test_get_records_filters_variant_ops(
     filter_sort, engine = filter_sort_table_obj
 
     filter_list = [{"field": "numeric", "op": op, "value": 50}]
-    record_list = records.get_records(filter_sort, engine, filters=filter_list)
+    record_list = get_records(filter_sort, engine, filters=filter_list)
 
     filter_list = [{"field": "numeric", "op": variant_op, "value": 50}]
-    variant_record_list = records.get_records(filter_sort, engine, filters=filter_list)
+    variant_record_list = get_records(filter_sort, engine, filters=filter_list)
 
     assert len(record_list) == len(variant_record_list)
     for record, variant_record in zip(record_list, variant_record_list):
@@ -249,7 +249,7 @@ def test_get_records_filters_boolean_ops(
         {"field": field, "op": "eq", "value": value}
         for field, value in field_val_pairs
     ]}]
-    record_list = records.get_records(filter_sort, engine, filters=filter_list)
+    record_list = get_records(filter_sort, engine, filters=filter_list)
 
     assert len(record_list) == res_len
     for record in record_list:
@@ -271,7 +271,7 @@ def test_get_records_filters_nested_boolean_ops(filter_sort_table_obj):
             {"field": "numeric", "op": "eq", "value": 24},
         ]},
     ]}]
-    record_list = records.get_records(filter_sort, engine, filters=filter_list)
+    record_list = get_records(filter_sort, engine, filters=filter_list)
 
     assert len(record_list) == 2
     for record in record_list:
@@ -306,4 +306,4 @@ exceptions_test_list = [
 def test_get_records_filters_exceptions(filter_sort_table_obj, filters, exception):
     filter_sort, engine = filter_sort_table_obj
     with pytest.raises(exception):
-        records.get_records(filter_sort, engine, filters=filters)
+        get_records(filter_sort, engine, filters=filters)
