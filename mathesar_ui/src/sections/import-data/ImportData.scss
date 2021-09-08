@@ -1,0 +1,31 @@
+.import-file-view {
+  overflow: auto;
+  padding: 20px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0px;
+
+  h2 {
+    font-size: 1.5em;
+    font-weight: 400;
+    margin: 20px 0px;
+  }
+
+  >.help-content {
+    margin: 20px 0px;
+    line-height: 1.4em;
+    color: #606066;
+  }
+
+  >.actions {
+    text-align: right;
+  }
+
+  >.notification {
+    position: sticky;
+    top: 0px;
+    margin-bottom: 20px;
+  }
+}

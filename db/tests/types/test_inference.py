@@ -1,10 +1,11 @@
 import pytest
-from unittest.mock import patch
+from unittest.mock import call, patch
 from sqlalchemy import Column, MetaData, Table, select
-from sqlalchemy import BOOLEAN, Numeric, NUMERIC, String, VARCHAR
+from sqlalchemy import BOOLEAN, Numeric, NUMERIC, String, VARCHAR, DATE
+
+from db.tables import operations as table_operations
 from db.tests.types import fixtures
 from db.types import inference
-from db import tables
 
 
 # We need to set these variables when the file loads, or pytest can't
@@ -22,6 +23,7 @@ type_data_list = [
     (String, ["t", "false", "2", "0"], VARCHAR),
     (String, ["a", "cat", "mat", "bat"], VARCHAR),
     (String, ["2", "1", "0", "0"], NUMERIC),
+    (String, ["2000-01-12", "6/23/2004", "May-2007-29", "20200909"], DATE),
 ]
 
 
@@ -78,7 +80,7 @@ def test_table_inference(engine_email_type, type_, value_list, expect_type):
         results = conn.execute(select(input_table))
     original_table = results.fetchall()
 
-    inferred_types = tables.infer_table_column_types(
+    inferred_types = inference.infer_table_column_types(
         schema,
         TEST_TABLE,
         engine
@@ -101,11 +103,11 @@ def test_table_inference_drop_temp(engine_email_type):
     create_test_table(engine, schema, TEST_TABLE, TEST_COLUMN, TYPE, VALUES)
 
     # Ensure that the temp table is deleted even when the function errors
-    with patch.object(tables.inference, "infer_column_type") as mock_infer:
+    with patch.object(inference, "infer_column_type") as mock_infer:
         mock_infer.side_effect = Exception()
         with pytest.raises(Exception):
-            tables.infer_table_column_types(schema, TEST_TABLE, engine)
-    tables.infer_table_column_types(schema, TEST_TABLE, engine)
+            inference.infer_table_column_types(schema, TEST_TABLE, engine)
+    inference.infer_table_column_types(schema, TEST_TABLE, engine)
 
 
 def test_table_inference_same_name(engine_email_type):
@@ -118,8 +120,83 @@ def test_table_inference_same_name(engine_email_type):
     with engine.begin() as conn:
         results = conn.execute(select(table))
     original_table = results.fetchall()
-    tables.infer_table_column_types(schema, TEST_TABLE, engine)
+    inference.infer_table_column_types(schema, TEST_TABLE, engine)
     with engine.begin() as conn:
         results = conn.execute(select(table))
     new_table = results.fetchall()
     assert original_table == new_table
+
+
+def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
+    column_list = []
+    engine, schema = engine_with_schema
+    table_name = "t1"
+    table_operations.create_mathesar_table(
+        table_name, schema, column_list, engine
+    )
+    with patch.object(inference, "infer_column_type") as mock_infer:
+        inference.update_table_column_types(
+            schema,
+            table_name,
+            engine
+        )
+    mock_infer.assert_not_called()
+
+
+def test_update_table_column_types_infers_non_default_types(engine_with_schema):
+    col1 = Column("col1", String)
+    col2 = Column("col2", String)
+    column_list = [col1, col2]
+    engine, schema = engine_with_schema
+    table_name = "table_with_columns"
+    table_operations.create_mathesar_table(
+        table_name, schema, column_list, engine
+    )
+    with patch.object(inference, "infer_column_type") as mock_infer:
+        inference.update_table_column_types(
+            schema,
+            table_name,
+            engine
+        )
+    expect_calls = [
+        call(
+            schema,
+            table_name,
+            col1.name,
+            engine,
+        ),
+        call(
+            schema,
+            table_name,
+            col2.name,
+            engine,
+        ),
+    ]
+    mock_infer.assert_has_calls(expect_calls)
+
+
+def test_update_table_column_types_skips_pkey_columns(engine_with_schema):
+    column_list = [Column("checkcol", String, primary_key=True)]
+    engine, schema = engine_with_schema
+    table_name = "t1"
+    table_operations.create_mathesar_table(
+        table_name, schema, column_list, engine
+    )
+    with patch.object(inference, "infer_column_type") as mock_infer:
+        inference.update_table_column_types(
+            schema,
+            table_name,
+            engine
+        )
+    mock_infer.assert_not_called()
+
+
+def test_update_table_column_types_skips_fkey_columns(extracted_remainder_roster, roster_fkey_col):
+    _, remainder, _, engine, schema = extracted_remainder_roster
+    with patch.object(inference, "infer_column_type") as mock_infer:
+        inference.update_table_column_types(
+            schema,
+            remainder.name,
+            engine
+        )
+    assert all([call_[1][2] != roster_fkey_col for call_ in mock_infer.mock_calls])

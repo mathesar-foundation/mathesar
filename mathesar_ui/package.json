@@ -14,7 +14,8 @@
   "resolutions": {
     "trim": "1.0.1",
     "browserslist": "4.16.7",
-    "glob-parent": "6.0.1"
+    "glob-parent": "6.0.1",
+    "tar": "6.1.11"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",
@@ -23,6 +24,8 @@
     "@storybook/addon-essentials": "^6.3.6",
     "@storybook/addon-links": "^6.3.6",
     "@storybook/addon-svelte-csf": "^1.1.0",
+    "@storybook/builder-webpack5": "^6.3.7",
+    "@storybook/manager-webpack5": "^6.3.7",
     "@storybook/svelte": "^6.3.6",
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.11",
     "@testing-library/jest-dom": "^5.14.1",

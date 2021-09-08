@@ -4,10 +4,12 @@ import clevercsv as csv
 
 from mathesar.database.base import create_mathesar_engine
 from mathesar.models import Table
-from db import tables, records
+from db.records.operations.insert import insert_records_from_csv
+from db.tables.operations.create import create_string_column_table
+from db.tables.operations.select import get_oid_from_table
 from mathesar.errors import InvalidTableError
 
-ALLOWED_DELIMITERS = ",\t:| "
+ALLOWED_DELIMITERS = ",\t:|"
 SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
 
@@ -80,6 +82,7 @@ def get_sv_reader(file, header, dialect=None):
             f"column_{i}" for i in range(len(reader.fieldnames))
         ]
         file.seek(0)
+
     return reader
 
 
@@ -92,13 +95,13 @@ def create_db_table_from_data_file(data_file, name, schema):
     with open(sv_filename, 'rb') as sv_file:
         sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
         column_names = sv_reader.fieldnames
-        table = tables.create_string_column_table(
+        table = create_string_column_table(
             name=name,
             schema=schema.name,
             column_names=column_names,
             engine=engine
         )
-    records.create_records_from_csv(
+    insert_records_from_csv(
         table,
         engine,
         sv_filename,
@@ -116,8 +119,14 @@ def create_table_from_csv(data_file, name, schema):
     db_table = create_db_table_from_data_file(
         data_file, name, schema
     )
-    db_table_oid = tables.get_oid_from_table(db_table.name, db_table.schema, engine)
-    table, _ = Table.objects.get_or_create(oid=db_table_oid, schema=schema)
+    db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
+    # Using current_objects to create the table instead of objects. objects
+    # triggers re-reflection, which will cause a race condition to create the table
+    table, _ = Table.current_objects.get_or_create(
+        oid=db_table_oid,
+        schema=schema,
+        import_verified=False
+    )
     data_file.table_imported_to = table
     data_file.save()
     return table

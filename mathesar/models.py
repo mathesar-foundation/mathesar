@@ -2,12 +2,22 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
 from django.utils.functional import cached_property
+from django.core.exceptions import ValidationError
 
+from db import columns
+from db.constraints import operations as constraint_operations
+from db.constraints import utils as constraint_utils
+from db.records import operations as record_operations
+from db.schemas import operations as schema_operations
+from db.schemas import utils as schema_utils
+from db.tables import utils as table_utils
+from db.tables import operations as table_operations
+from db.types import alteration
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
-from db import tables, records, schemas, columns, constraints
-from db.types.alteration import get_supported_alter_column_types
+from mathesar.database.types import get_types
+
 
 NAME_CACHE_INTERVAL = 60 * 5
 
@@ -28,7 +38,7 @@ class DatabaseObjectManager(models.Manager):
 
 class DatabaseObject(BaseModel):
     oid = models.IntegerField()
-    # The default manager, current_objects, does not reflect databse objects.
+    # The default manager, current_objects, does not reflect database objects.
     # This saves us from having to deal with Django trying to automatically reflect db
     # objects in the background when we might not expect it.
     current_objects = models.Manager()
@@ -62,13 +72,26 @@ class Database(BaseModel):
 
     @property
     def supported_types(self):
-        types = get_supported_alter_column_types(self._sa_engine)
-        return [t for t, _ in types.items()]
+        supported_types = []
+        available_types = get_types(self._sa_engine)
+        for index, available_type in enumerate(available_types):
+            db_types = available_type['db_types']
+            db_type_list = [key for key in db_types.keys()]
+            if db_type_list:
+                # Remove SQLAlchemy implementation info.
+                available_type['db_types'] = db_type_list
+                supported_types.append(available_type)
+        return supported_types
 
 
 class Schema(DatabaseObject):
     database = models.ForeignKey('Database', on_delete=models.CASCADE,
                                  related_name='schemas')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["oid", "database"], name="unique_schema")
+        ]
 
     @property
     def _sa_engine(self):
@@ -80,7 +103,7 @@ class Schema(DatabaseObject):
         try:
             schema_name = cache.get(cache_key)
             if schema_name is None:
-                schema_name = schemas.get_schema_name_from_oid(
+                schema_name = schema_utils.get_schema_name_from_oid(
                     self.oid, self._sa_engine
                 )
                 cache.set(cache_key, schema_name, NAME_CACHE_INTERVAL)
@@ -102,7 +125,7 @@ class Schema(DatabaseObject):
         return model_utils.update_sa_schema(self, update_params)
 
     def delete_sa_schema(self):
-        return schemas.delete_schema(self.name, self._sa_engine, cascade=True)
+        return schema_operations.drop_schema(self.name, self._sa_engine, cascade=True)
 
     def clear_name_cache(self):
         cache_key = f"{self.database.name}_schema_name_{self.oid}"
@@ -110,14 +133,30 @@ class Schema(DatabaseObject):
 
 
 class Table(DatabaseObject):
+    # These are fields whose source of truth is in the model
+    MODEL_FIELDS = ['import_verified']
+
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
 
+    def validate_unique(self, exclude=None):
+        # Ensure oid is unique on db level
+        if Table.current_objects.filter(
+            oid=self.oid, schema__database=self.schema.database
+        ).exists():
+            raise ValidationError("Table OID is not unique")
+        super().validate_unique(exclude=exclude)
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            self.validate_unique()
+        super().save(*args, **kwargs)
+
     @cached_property
     def _sa_table(self):
         try:
-            table = tables.reflect_table_from_oid(
+            table = table_operations.reflect_table_from_oid(
                 self.oid, self.schema._sa_engine,
             )
         # We catch these errors, since it lets us decouple the cadence of
@@ -126,12 +165,12 @@ class Table(DatabaseObject):
         # been altered, as opposed to other reasons for a 404 when
         # requesting a table.
         except (TypeError, IndexError):
-            table = tables.create_empty_table("MISSING")
+            table = table_utils.get_empty_table("MISSING")
         return table
 
     @cached_property
     def _enriched_column_sa_table(self):
-        return tables.get_enriched_column_table(
+        return table_utils.get_enriched_column_table(
             self._sa_table, engine=self.schema._sa_engine,
         )
 
@@ -173,57 +212,76 @@ class Table(DatabaseObject):
 
     def drop_column(self, column_index):
         columns.drop_column(
-            self.schema._sa_engine,
             self.oid,
             column_index,
+            self.schema._sa_engine,
+        )
+
+    def duplicate_column(self, column_index, copy_data, copy_constraints, name=None):
+        return columns.duplicate_column(
+            self.oid,
+            column_index,
+            self.schema._sa_engine,
+            new_column_name=name,
+            copy_data=copy_data,
+            copy_constraints=copy_constraints,
         )
 
     def get_preview(self, column_definitions):
-        return tables.get_column_cast_records(
+        return alteration.get_column_cast_records(
             self.schema._sa_engine, self._sa_table, column_definitions
         )
 
     @property
     def sa_all_records(self):
-        return records.get_records(self._sa_table, self.schema._sa_engine)
+        return record_operations.get_records(self._sa_table, self.schema._sa_engine)
 
     def sa_num_records(self, filters=[]):
-        return tables.get_count(self._sa_table, self.schema._sa_engine, filters=filters)
+        return record_operations.get_count(self._sa_table, self.schema._sa_engine, filters=filters)
 
     def update_sa_table(self, update_params):
         return model_utils.update_sa_table(self, update_params)
 
     def delete_sa_table(self):
-        return tables.delete_table(self.name, self.schema.name, self.schema._sa_engine,
-                                   cascade=True)
+        return table_operations.drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
 
     def get_record(self, id_value):
-        return records.get_record(self._sa_table, self.schema._sa_engine, id_value)
+        return record_operations.get_record(self._sa_table, self.schema._sa_engine, id_value)
 
     def get_records(self, limit=None, offset=None, filters=[], order_by=[]):
-        return records.get_records(self._sa_table, self.schema._sa_engine, limit,
-                                   offset, filters=filters, order_by=order_by)
+        return record_operations.get_records(
+            self._sa_table,
+            self.schema._sa_engine,
+            limit,
+            offset,
+            filters=filters,
+            order_by=order_by
+        )
 
-    def get_group_counts(
-        self, group_by, limit=None, offset=None, filters=[], order_by=[]
-    ):
-        return records.get_group_counts(self._sa_table, self.schema._sa_engine,
-                                        group_by, limit, offset, filters=filters,
-                                        order_by=order_by)
+    def get_group_counts(self, group_by, limit=None, offset=None, filters=[], order_by=[]):
+        return record_operations.get_group_counts(
+            self._sa_table,
+            self.schema._sa_engine,
+            group_by,
+            limit,
+            offset,
+            filters=filters,
+            order_by=order_by
+        )
 
     def create_record_or_records(self, record_data):
-        return records.create_record_or_records(self._sa_table, self.schema._sa_engine, record_data)
+        return record_operations.insert_record_or_records(self._sa_table, self.schema._sa_engine, record_data)
 
     def update_record(self, id_value, record_data):
-        return records.update_record(self._sa_table, self.schema._sa_engine, id_value, record_data)
+        return record_operations.update_record(self._sa_table, self.schema._sa_engine, id_value, record_data)
 
     def delete_record(self, id_value):
-        return records.delete_record(self._sa_table, self.schema._sa_engine, id_value)
+        return record_operations.delete_record(self._sa_table, self.schema._sa_engine, id_value)
 
     def add_constraint(self, constraint_type, columns, name=None):
-        if constraint_type != constraints.ConstraintType.UNIQUE.value:
+        if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
             raise ValueError('Only creating unique constraints is currently supported.')
-        constraints.create_unique_constraint(
+        constraint_operations.create_unique_constraint(
             self.name,
             self._sa_table.schema,
             self.schema._sa_engine,
@@ -237,8 +295,8 @@ class Table(DatabaseObject):
             pass
         engine = self.schema.database._sa_engine
         if not name:
-            name = constraints.get_constraint_name(constraint_type, self.name, columns[0])
-        constraint_oid = constraints.get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
+            name = constraint_utils.get_constraint_name(constraint_type, self.name, columns[0])
+        constraint_oid = constraint_operations.get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         return Constraint.objects.create(oid=constraint_oid, table=self)
 
 
@@ -248,7 +306,7 @@ class Constraint(DatabaseObject):
     @property
     def _sa_constraint(self):
         engine = self.table.schema.database._sa_engine
-        return constraints.get_constraint_from_oid(self.oid, engine)
+        return constraint_operations.get_constraint_from_oid(self.oid, engine, self.table._sa_table)
 
     @property
     def name(self):
@@ -256,14 +314,14 @@ class Constraint(DatabaseObject):
 
     @property
     def type(self):
-        return constraints.get_constraint_type_from_class(self._sa_constraint)
+        return constraint_utils.get_constraint_type_from_class(self._sa_constraint)
 
     @cached_property
     def columns(self):
         return [column.name for column in self._sa_constraint.columns]
 
     def drop(self):
-        constraints.drop_constraint(
+        constraint_operations.drop_constraint(
             self.table._sa_table.name,
             self.table._sa_table.schema,
             self.table.schema._sa_engine,

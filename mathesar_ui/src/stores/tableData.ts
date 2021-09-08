@@ -26,12 +26,12 @@ export interface TableRecord {
   }
 }
 
-interface TableColumnResponse extends TableColumn {
+export interface TableColumnResponse extends TableColumn {
   primary_key: TableColumn['primaryKey'],
   valid_target_types: TableColumn['validTargetTypes']
 }
 
-interface TableColumnsResponse {
+export interface TableColumnsResponse {
   count: number,
   results: TableColumnResponse[]
 }
@@ -360,18 +360,23 @@ export async function fetchTableRecords(
     params.push(`offset=${offset}`);
 
     const groupOptions = Array.from(optionData.group ?? []);
-    const sortOptions = groupOptions.map((field) => ({
+    const groupSortOptions = groupOptions.map((field) => ({
       field,
       direction: optionData.sort?.get(field) ?? 'asc',
     }));
+
+    let sortOptions: { 'field': string, 'direction': string }[] = [];
     optionData.sort?.forEach((value, key) => {
       if (!optionData.group?.has(key)) {
-        sortOptions.push({
+        sortOptions.unshift({
           field: key,
           direction: value,
         });
       }
     });
+
+    sortOptions = [...groupSortOptions, ...sortOptions];
+
     if (sortOptions.length > 0) {
       params.push(`order_by=${encodeURIComponent(JSON.stringify(sortOptions))}`);
     }

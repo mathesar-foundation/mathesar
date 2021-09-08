@@ -5,8 +5,14 @@
   } from '@fortawesome/free-solid-svg-icons';
 
   import { get } from 'svelte/store';
-  import { databases, currentDB } from '@mathesar/stores/databases';
-  import { currentSchema, getSchemaStore } from '@mathesar/stores/schemas';
+  import { databases, currentDBName } from '@mathesar/stores/databases';
+  import {
+    currentSchema,
+    getSchemasStoreForDB,
+  } from '@mathesar/stores/schemas';
+  import type {
+    DBSchemaStoreData,
+  } from '@mathesar/stores/schemas';
 
   import {
     TextAvatar,
@@ -15,29 +21,32 @@
     TextInput,
   } from '@mathesar-components';
 
-  import type { Database, Schema } from '@mathesar/App.d';
+  import type { Database, SchemaEntry } from '@mathesar/App.d';
 
-  let interalSelectedDB: Database = get(currentDB);
-  $: schemas = getSchemaStore(interalSelectedDB.name);
+  let interalSelectedDB: Database['name'] = get(currentDBName);
+  $: schemas = getSchemasStoreForDB(interalSelectedDB);
 
   let isOpen;
   let schemaFilter = '';
 
-  function getFilteredSchemas(schemaData: Schema[], filter: string): Schema[] {
-    return schemaData.filter(
-      (schema) => schema.name.toLowerCase().indexOf(filter.toLowerCase()) > -1,
-    );
+  function getFilteredSchemas(schemaData: DBSchemaStoreData['data'], filter: string): SchemaEntry[] {
+    const filteredSchemas: SchemaEntry[] = [];
+    schemaData.forEach((schema) => {
+      if (schema.name.toLowerCase().indexOf(filter.toLowerCase()) > -1) {
+        filteredSchemas.push(schema);
+      }
+    });
+    return filteredSchemas;
   }
 
-  let displayedSchemas: Schema[];
+  let displayedSchemas: SchemaEntry[];
   $: displayedSchemas = getFilteredSchemas($schemas.data, schemaFilter);
 
   function selectDB(db: Database) {
-    interalSelectedDB = db;
+    interalSelectedDB = db.name;
   }
 
-  function selectSchema(schema: Schema) {
-    currentSchema.set(schema);
+  function closeDropdown() {
     isOpen = false;
   }
 </script>
@@ -45,12 +54,12 @@
 <Dropdown bind:isOpen triggerAppearance="plain"
           triggerClass="selector" contentClass="selector-content">
   <svelte:fragment slot="trigger">
-    <TextAvatar text={$currentDB.name} />
-    {$currentDB.name}
+    <TextAvatar text={$currentDBName} />
+    {$currentDBName}
     <span class="separator">/</span>
     {#if $currentSchema}
       <Icon class="schema" data={faProjectDiagram} />
-      {$currentSchema?.name || ''}
+      {$currentSchema.name}
     {/if}
   </svelte:fragment>
 
@@ -62,7 +71,7 @@
         </div>
         <ul>
           {#each $databases.data as database (database.name)}
-            <li class="item" class:active={interalSelectedDB?.name === database.name}>
+            <li class="item" class:active={interalSelectedDB === database.name}>
               <button type="button"
                 on:click={() => selectDB(database)}
                 on:mouseover={() => selectDB(database)}>
@@ -82,8 +91,8 @@
         <ul>
           {#each displayedSchemas as schema (schema.id)}
             <li class="item">
-              <a href="/{interalSelectedDB.name}/{schema.id}/"
-                  on:click={() => selectSchema(schema)}>
+              <a href="/{interalSelectedDB}/{schema.id}/"
+                  on:click={closeDropdown}>
                 <Icon class="schema" data={faProjectDiagram} />
                 {schema.name}
               </a>
@@ -94,8 +103,8 @@
           {/each}
         </ul>
         <div class="item">
-          <a href="/{interalSelectedDB.name}/schemas/"
-              on:click={() => selectSchema(null)}>
+          <a href="/{interalSelectedDB}/schemas/"
+              on:click={closeDropdown}>
             <Icon class="manage" data={faCogs}/>
             Manage schemas
           </a>

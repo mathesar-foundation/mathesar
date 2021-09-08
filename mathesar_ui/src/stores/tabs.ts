@@ -2,18 +2,17 @@ import {
   get,
   writable,
   Writable,
-  Unsubscriber,
 } from 'svelte/store';
-import type { Tab } from '@mathesar-components/types';
 import {
-  getDBStore,
-  getAllImportDetails,
-  ImportChangeType,
-  removeImport,
+  getAllImportDetailsForSchema,
+  removeImportFromView,
 } from '@mathesar/stores/fileImports';
 import { clearTable } from '@mathesar/stores/tableData';
-import { getSchemaStore } from '@mathesar/stores/schemas';
+import { getTablesStoreForSchema } from '@mathesar/stores/tables';
 import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
+
+import type { Tab } from '@mathesar-components/types';
+import type { SchemaEntry } from '@mathesar/App';
 
 export interface MathesarTab extends Tab {
   id: unknown,
@@ -25,21 +24,21 @@ export interface TabList {
   tabs: Writable<MathesarTab[]>,
 }
 
-const databaseMap: Map<string, TabList> = new Map();
+const schemaMap: Map<number, TabList> = new Map();
 
-function getTabsForDB(db: string): TabList {
-  let dbInfo = databaseMap.get(db);
-  if (!dbInfo) {
-    const tables = [] as MathesarTab[];
-    const { tableMap } = get(getSchemaStore(db));
+export function getTabsForSchema(db: string, schemaId: number): TabList {
+  let schemaTabs = schemaMap.get(schemaId);
+  if (!schemaTabs) {
+    const tabTables = [] as MathesarTab[];
+    const tableStoreData = get(getTablesStoreForSchema(schemaId));
 
     URLQueryHandler.getAllTableConfigs(db).forEach(
       (entry) => {
-        const schemaTable = tableMap?.get(entry.id);
-        if (schemaTable) {
-          tables.push({
+        const table = tableStoreData.data.get(entry.id);
+        if (table) {
+          tabTables.push({
             id: entry.id,
-            label: schemaTable?.name,
+            label: table.name,
           });
         } else {
           URLQueryHandler.removeTable(db, entry.id);
@@ -47,86 +46,29 @@ function getTabsForDB(db: string): TabList {
       },
     );
 
-    const imports = getAllImportDetails(db) as unknown as MathesarTab[];
+    const imports = getAllImportDetailsForSchema(schemaId) as unknown as MathesarTab[];
 
-    const tabs = [...imports, ...tables];
-    const activeTab = tables.find(
+    const tabs = [...imports, ...tabTables];
+    const activeTab = tabTables.find(
       (table) => table.id === URLQueryHandler.getActiveTable(db),
     ) || tabs[0];
 
-    dbInfo = {
+    schemaTabs = {
       tabs: writable(tabs),
       activeTab: writable(activeTab),
     };
-    databaseMap.set(db, dbInfo);
+    schemaMap.set(schemaId, schemaTabs);
   }
-  return dbInfo;
-}
-
-let unsubFileImports: Unsubscriber = null;
-
-export function getAllTabsForDB(db: string): TabList {
-  if (unsubFileImports) {
-    unsubFileImports();
-  }
-
-  const dbInfo = getTabsForDB(db);
-  unsubFileImports = getDBStore(db).changes.subscribe((fileImportInfo) => {
-    if (fileImportInfo) {
-      switch (fileImportInfo.changeType) {
-        case ImportChangeType.ADDED: {
-          const newImportTab = {
-            ...fileImportInfo.info,
-            label: fileImportInfo.info.name,
-            isNew: true,
-          };
-          dbInfo.tabs.set([
-            ...get(dbInfo.tabs),
-            newImportTab,
-          ]);
-          dbInfo.activeTab.set(newImportTab);
-          break;
-        }
-        case ImportChangeType.MODIFIED: {
-          if (fileImportInfo.old.name !== fileImportInfo.info.name) {
-            const tabList = get(dbInfo.tabs);
-            const activeTabInfo = get(dbInfo.activeTab);
-
-            let newlyCreatedTab: MathesarTab;
-            dbInfo.tabs.set(
-              tabList.map((entry) => {
-                if (entry.id === fileImportInfo.info.id) {
-                  newlyCreatedTab = {
-                    ...entry,
-                    label: fileImportInfo.info.name,
-                  };
-                  return newlyCreatedTab;
-                }
-                return entry;
-              }),
-            );
-
-            if (activeTabInfo.id === newlyCreatedTab?.id) {
-              dbInfo.activeTab.set(newlyCreatedTab);
-            }
-          }
-          break;
-        }
-        default:
-          break;
-      }
-    }
-  });
-
-  return dbInfo;
+  return schemaTabs;
 }
 
 export function addTab(
   db: string,
+  schemaId: SchemaEntry['id'],
   tab: MathesarTab,
   options?: { position?: number, status?: 'active' | 'inactive' },
 ): void {
-  const { tabs, activeTab } = getTabsForDB(db);
+  const { tabs, activeTab } = getTabsForSchema(db, schemaId);
   const tabData = get(tabs);
   const activeTabData = get(activeTab);
 
@@ -161,10 +103,10 @@ export function addTab(
 
 export function removeTab(
   db: string,
-  removedTab?: MathesarTab,
-  newActiveTab?: MathesarTab,
+  schemaId: SchemaEntry['id'],
+  removedTab: MathesarTab,
 ): void {
-  const { tabs, activeTab } = getTabsForDB(db);
+  const { tabs, activeTab } = getTabsForSchema(db, schemaId);
   const tabData = get(tabs);
   const activeTabData = get(activeTab);
 
@@ -173,21 +115,37 @@ export function removeTab(
   }
 
   if (removedTab) {
+    const removedTabIndexInTabsArray = tabData.findIndex((entry) => entry.id === removedTab.id);
+
+    /**
+     * If directly called, without changing the active tab to a tab other than the removed one,
+     * active tab has to be manually changed.
+     */
+    if (activeTabData?.id === removedTab.id) {
+      if (tabData[removedTabIndexInTabsArray + 1]) {
+        activeTab.set(tabData[removedTabIndexInTabsArray + 1]);
+      } else if (tabData[removedTabIndexInTabsArray - 1]) {
+        activeTab.set(tabData[removedTabIndexInTabsArray - 1]);
+      } else {
+        activeTab.set(null);
+      }
+    }
+
     /**
      * If called from component event, the tab would already have been removed in previous tick.
      * If called directly, tab will have to be removed.
      * We have a find check, to avoid unnessary re-renders, incase of component events.
      */
-    if (tabData.find((entry) => entry.id === removedTab.id)) {
+    if (removedTabIndexInTabsArray > -1) {
       tabs.set(
         tabData.filter((tab) => tab.id !== removedTab.id),
       );
     }
 
     if (removedTab.isNew) {
-      removeImport(db, removedTab.id as string);
+      removeImportFromView(schemaId, removedTab.id as string);
     } else {
-      URLQueryHandler.removeTable(db, removedTab.id as number, newActiveTab?.id as number);
+      URLQueryHandler.removeTable(db, removedTab.id as number, get(activeTab)?.id as number);
       clearTable(db, removedTab.id as number);
     }
   } else {
@@ -196,18 +154,18 @@ export function removeTab(
   }
 }
 
-export function replaceTab(db: string, oldTabId: unknown, tab: MathesarTab): void {
-  const { tabs, activeTab } = getTabsForDB(db);
+export function replaceTab(db: string, schemaId: SchemaEntry['id'], oldTabId: unknown, tab: MathesarTab): void {
+  const { tabs, activeTab } = getTabsForSchema(db, schemaId);
   const tabData = get(tabs);
   const activeTabData = get(activeTab);
 
   const existingTabIndex = tabData.findIndex((tabEntry) => tabEntry.id === oldTabId);
   const existingTab = tabData[existingTabIndex];
-  addTab(db, tab, {
+  addTab(db, schemaId, tab, {
     position: existingTabIndex,
     status: activeTabData?.id === existingTab.id ? 'active' : 'inactive',
   });
-  removeTab(db, existingTab, tab);
+  removeTab(db, schemaId, existingTab);
 }
 
 export function selectTab(db: string, tab: MathesarTab): void {
