@@ -44,12 +44,14 @@
 
   function openConfirmation(){
     //if table.not empty call store to delete table else show confirmation
-    // var table = getTable($currentDBName,$currentSchemaId);
-    // var records = table.records;
-    // console.log(get(records));
-    const { activeTab }  = getTabsForSchema($currentDBName,$currentSchemaId);
-    const activeTabObj = get(activeTab)
-    console.log(activeTabObj.id);
+    var table = getTable($currentDBName,$currentSchemaId);
+    var records = table.records;
+    var { totalCount } = get(records);
+    console.log(get(records));
+    console.log(totalCount);
+    // const { activeTab }  = getTabsForSchema($currentDBName,$currentSchemaId);
+    // const activeTabObj = get(activeTab)
+    // console.log(activeTabObj.id);
   }
   
   async function tableDelete(){

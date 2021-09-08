@@ -122,13 +122,10 @@ export function getTablesStoreForSchema(schemaId: SchemaEntry['id']): Writable<D
   return store;
 }
 
-<<<<<<< HEAD
 export function deleteTable(url: string){
   return deleteAPI(url);
 }
 
-=======
->>>>>>> master
 export function createTable(
   schema: SchemaEntry['id'],
   name?: string,
