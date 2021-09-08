@@ -1,19 +1,17 @@
+from django.core.files import File
 import pytest
 from rest_framework.test import APIClient
 from sqlalchemy import Column, String, MetaData, text
 from sqlalchemy import Table as SATable
-from django.core.files import File
 
 from db.types import base, install
-from db.schemas import (
-    create_schema as create_sa_schema,
-    get_schema_oid_from_name, get_schema_name_from_oid
-)
+from db.schemas.operations.create import create_schema as create_sa_schema
+from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
 from db.tables.operations.select import get_oid_from_table
-from mathesar.models import Schema, Table, DataFile
-
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import create_table_from_csv
+from mathesar.models import Schema, Table, DataFile
+
 
 TEST_SCHEMA = 'import_csv_schema'
 PATENT_SCHEMA = 'Patents'

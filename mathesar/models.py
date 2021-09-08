@@ -4,9 +4,11 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 
-from db import records, schemas, columns
+from db import records, columns
 from db.constraints import operations as constraint_operations
 from db.constraints import utils as constraint_utils
+from db.schemas import operations as schema_operations
+from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables import operations as table_operations
 from db.types import alteration
@@ -100,7 +102,7 @@ class Schema(DatabaseObject):
         try:
             schema_name = cache.get(cache_key)
             if schema_name is None:
-                schema_name = schemas.get_schema_name_from_oid(
+                schema_name = schema_utils.get_schema_name_from_oid(
                     self.oid, self._sa_engine
                 )
                 cache.set(cache_key, schema_name, NAME_CACHE_INTERVAL)
@@ -122,7 +124,7 @@ class Schema(DatabaseObject):
         return model_utils.update_sa_schema(self, update_params)
 
     def delete_sa_schema(self):
-        return schemas.delete_schema(self.name, self._sa_engine, cascade=True)
+        return schema_operations.drop_schema(self.name, self._sa_engine, cascade=True)
 
     def clear_name_cache(self):
         cache_key = f"{self.database.name}_schema_name_{self.oid}"
