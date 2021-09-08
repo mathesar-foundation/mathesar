@@ -1,4 +1,3 @@
-import logging
 from psycopg2 import sql
 from sqlalchemy import delete, select, Column, func, true, and_
 from sqlalchemy.inspection import inspect
@@ -7,8 +6,6 @@ from sqlalchemy_filters.exceptions import (
     FieldNotFound, BadFilterFormat, FilterFieldNotFound
 )
 
-
-logger = logging.getLogger(__name__)
 
 IS_DUPE = "_is_dupe"
 CONJUNCTIONS = ("and", "or", "not")
@@ -245,7 +242,6 @@ def get_distinct_tuple_values(
     try:
         assert all([type(col) == Column for col in column_objects])
     except AssertionError as e:
-        logger.error("All columns must be str or sqlalchemy.Column type")
         raise e
 
     query = (
