@@ -496,21 +496,18 @@ def _get_money_type_body_map():
         SMALLINT,
     ]
     textual_types = [TEXT, VARCHAR]
-    return _get_default_type_body_map(
-        default_behavior_source_types, money.DB_TYPE,
-    )
 
     def _get_number_cast_to_money():
         return f"""
         BEGIN
-          RETURN $1::ROW($1, 'USD')::{money.DB_TYPE};
+          RETURN ROW($1, 'USD')::{money.DB_TYPE};
         END;
         """
 
     def _get_base_textual_cast_to_money():
         return f"""
         BEGIN
-          RETURN $1::ROW($1::numeric, 'USD')::{money.DB_TYPE};
+          RETURN ROW($1::numeric, 'USD')::{money.DB_TYPE};
         END;
         """
     type_body_map = _get_default_type_body_map(
