@@ -1,18 +1,12 @@
 <script lang="ts">
   import { get } from 'svelte/store';
-  import { faTable } from '@fortawesome/free-solid-svg-icons';
   import {
     Button,
     Modal,
-    Icon,
   } from '@mathesar-components';
   import {
-    tables,
     refetchTablesForSchema,
     deleteTable,
-  } from '@mathesar/stores/tables';
-  import type {
-    DBTablesStoreData,
   } from '@mathesar/stores/tables';
   import {
     removeTab,
@@ -26,16 +20,6 @@
   
   export let isOpen = false;
   
-  const nameTables = [];
-
-  function getNameTables(_tables: DBTablesStoreData) {
-    _tables?.data?.forEach((value) => {
-      nameTables.push(value.name);
-    });
-  }
-
-  $: getNameTables($tables);
-
   function getActiveTab(_currentDBName, _currentSchemaId) {
     const { activeTab } = getTabsForSchema(_currentDBName, _currentSchemaId);
     const activeTabObj: ActiveTab = get(activeTab);
@@ -61,11 +45,8 @@
     <div class="help-text">
       All Objects related to this table will be afected. 
     </div>
-    <ul class="dropdown content">
-      {#each nameTables as table}
-        <li><Icon data={faTable}/> {table} </li>
-      {/each}
-    </ul>
+    <!-- <ul class="dropdown content">
+    </ul> -->
   
   <svelte:fragment slot="footer">
       <Button on:click={() => { isOpen = false; }}>Cancel</Button>

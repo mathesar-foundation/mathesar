@@ -19,7 +19,7 @@ export interface MathesarTab extends Tab {
   label: string,
 }
 
-export interface ActiveTab {
+export interface ActiveTab extends Tab {
   id: number,
   label: string
 }

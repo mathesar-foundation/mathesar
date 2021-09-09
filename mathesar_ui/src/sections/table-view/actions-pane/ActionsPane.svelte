@@ -14,7 +14,7 @@
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
   import { Button, Icon, Dropdown } from '@mathesar-components';
-  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { currentSchemaId, getSchemaInfo } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
   import {
     removeTab,
@@ -27,9 +27,6 @@
     refetchTablesForSchema,
     deleteTable,
   } from '@mathesar/stores/tables';
-  import {
-    getTable,
-  } from '@mathesar/stores/tableData';
   
   const dispatch = createEventDispatcher();
 
@@ -44,13 +41,12 @@
   }
   
   async function tableDelete() {
-    const { activeTab } = getTabsForSchema($currentDBName, $currentSchemaId);
-    const activeTabObj: ActiveTab = get(activeTab);
-    const table = getTable($currentDBName, activeTabObj.id);
-    const { totalCount } = get(table.records);
-    if (totalCount >= 1) {
+    const { has_dependencies: hasDependencies } = getSchemaInfo($currentDBName, $currentSchemaId);
+    if (hasDependencies) {
       dispatch('deleteTable');
     } else {
+      const { activeTab } = getTabsForSchema($currentDBName, $currentSchemaId);
+      const activeTabObj: ActiveTab = get(activeTab);
       removeTab($currentDBName, $currentSchemaId, activeTabObj);
       await deleteTable(`/tables/${activeTabObj.id}`);
       await refetchTablesForSchema($currentSchemaId);
