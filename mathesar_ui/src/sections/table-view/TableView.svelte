@@ -125,6 +125,7 @@
   function tableDelete() {
     isModalOpen = true;
   }
+  
 </script>
 
 <ActionsPane {columns} {records} {options} {selectedEntries}

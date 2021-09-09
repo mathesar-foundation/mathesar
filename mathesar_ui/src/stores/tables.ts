@@ -122,7 +122,7 @@ export function getTablesStoreForSchema(schemaId: SchemaEntry['id']): Writable<D
   return store;
 }
 
-export function deleteTable(url: string): Promise<T> {
+export function deleteTable(url: string): CancellablePromise<TableEntry> {
   return deleteAPI(url);
 }
 
