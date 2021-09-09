@@ -5,7 +5,7 @@ from psycopg2.errors import DependentObjectsStillExist
 from db.schemas import operations as schema_operations
 from db.schemas.utils import get_mathesar_schemas
 from db.tables.operations.create import create_mathesar_table
-from db.tables.utils import reflect_table
+from db.tables.operations.select import reflect_table
 from db.tests.schemas.utils import create_related_table
 
 

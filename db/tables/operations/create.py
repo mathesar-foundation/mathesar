@@ -2,17 +2,17 @@ from sqlalchemy import Column, String, Table, MetaData
 from sqlalchemy.ext import compiler
 from sqlalchemy.schema import DDLElement
 
-from db import columns
+from db.columns.utils import init_mathesar_table_column_list_with_defaults
 from db.schemas import operations as schema_operations
 
 
-def create_mathesar_table(name, schema, columns_, engine, metadata=None):
+def create_mathesar_table(name, schema, columns, engine, metadata=None):
     """
     This method creates a Postgres table in the specified schema using the
     given name and column list.  It adds internal mathesar columns to the
     table.
     """
-    columns_ = columns.init_mathesar_table_column_list_with_defaults(columns_)
+    columns = init_mathesar_table_column_list_with_defaults(columns)
     schema_operations.create_schema(schema, engine)
     # We need this so that we can create multiple mathesar tables in the
     # same MetaData, enabling them to reference each other in the
@@ -22,7 +22,7 @@ def create_mathesar_table(name, schema, columns_, engine, metadata=None):
     table = Table(
         name,
         metadata,
-        *columns_,
+        *columns,
         schema=schema
     )
     table.create(engine)

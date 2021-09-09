@@ -4,11 +4,13 @@ from time import time
 from sqlalchemy import VARCHAR, TEXT, Text, select
 from sqlalchemy.exc import DatabaseError
 
-from db import constants, columns
+from db import constants
+from db.columns.base import MathesarColumn
+from db.columns.operations.alter import alter_column_type
 from db.schemas.operations.create import create_schema
 from db.tables.operations.create import CreateTableAs
-from db.tables.utils import reflect_table
-from db.types.alteration import get_supported_alter_column_types, alter_column_type
+from db.tables.operations.select import reflect_table
+from db.types.alteration import get_supported_alter_column_types
 from db.types import base
 
 
@@ -53,14 +55,7 @@ def get_reverse_type_map(engine):
     return reverse_type_map
 
 
-def infer_column_type(
-        schema,
-        table_name,
-        column_name,
-        engine,
-        depth=0,
-        type_inference_dag=TYPE_INFERENCE_DAG,
-):
+def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inference_dag=TYPE_INFERENCE_DAG):
     if depth > MAX_INFERENCE_DAG_DEPTH:
         raise DagCycleError("The type_inference_dag likely has a cycle")
     reverse_type_map = get_reverse_type_map(engine)
@@ -98,7 +93,7 @@ def update_table_column_types(schema, table_name, engine):
     # we only want to infer (modify) the type of non-default columns
     inferable_column_names = (
         col.name for col in table.columns
-        if not columns.MathesarColumn.from_column(col).is_default
+        if not MathesarColumn.from_column(col).is_default
         and not col.primary_key
         and not col.foreign_keys
     )

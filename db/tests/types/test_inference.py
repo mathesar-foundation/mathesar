@@ -3,7 +3,7 @@ from unittest.mock import call, patch
 from sqlalchemy import Column, MetaData, Table, select
 from sqlalchemy import BOOLEAN, Numeric, NUMERIC, String, VARCHAR, DATE
 
-from db.tables import operations as table_operations
+from db.tables.operations.create import create_mathesar_table
 from db.tests.types import fixtures
 from db.types import inference
 
@@ -131,7 +131,7 @@ def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
     column_list = []
     engine, schema = engine_with_schema
     table_name = "t1"
-    table_operations.create_mathesar_table(
+    create_mathesar_table(
         table_name, schema, column_list, engine
     )
     with patch.object(inference, "infer_column_type") as mock_infer:
@@ -149,7 +149,7 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema):
     column_list = [col1, col2]
     engine, schema = engine_with_schema
     table_name = "table_with_columns"
-    table_operations.create_mathesar_table(
+    create_mathesar_table(
         table_name, schema, column_list, engine
     )
     with patch.object(inference, "infer_column_type") as mock_infer:
@@ -179,7 +179,7 @@ def test_update_table_column_types_skips_pkey_columns(engine_with_schema):
     column_list = [Column("checkcol", String, primary_key=True)]
     engine, schema = engine_with_schema
     table_name = "t1"
-    table_operations.create_mathesar_table(
+    create_mathesar_table(
         table_name, schema, column_list, engine
     )
     with patch.object(inference, "infer_column_type") as mock_infer:

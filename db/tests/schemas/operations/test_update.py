@@ -3,7 +3,7 @@ from sqlalchemy.exc import ProgrammingError
 
 from db.schemas import operations as schema_operations
 from db.schemas import utils as schema_utils
-from db.tables.utils import reflect_table
+from db.tables.operations.select import reflect_table
 from db.tests.schemas.utils import create_related_table
 
 

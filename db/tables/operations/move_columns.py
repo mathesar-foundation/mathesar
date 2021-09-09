@@ -1,7 +1,8 @@
-from db import columns, constants
+from db.columns.base import MathesarColumn
+from db import constants
 from db.tables.operations.split import extract_columns_from_table
 from db.tables.operations.merge import merge_tables
-from db.tables.utils import reflect_table
+from db.tables.operations.select import reflect_table
 
 
 def _find_table_relationship(table_one, table_two):
@@ -39,14 +40,14 @@ def _get_column_moving_extraction_args(relationship, target_table, target_table_
         remainder_table_name = source_table_name
         extraction_columns = [
             col for col in target_table.columns
-            if not columns.MathesarColumn.from_column(col).is_default
+            if not MathesarColumn.from_column(col).is_default
         ] + moving_columns
     else:
         extracted_table_name = source_table_name
         remainder_table_name = target_table_name
         extraction_columns = [
             col for col in source_table.columns
-            if not columns.MathesarColumn.from_column(col).is_default
+            if not MathesarColumn.from_column(col).is_default
             and col.name not in column_names
         ]
     return extracted_table_name, remainder_table_name, extraction_columns
