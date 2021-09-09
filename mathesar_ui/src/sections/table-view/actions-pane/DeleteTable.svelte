@@ -73,5 +73,4 @@
         Delete Table
       </Button>
   </svelte:fragment>
- </Modal>
- 
+</Modal>
