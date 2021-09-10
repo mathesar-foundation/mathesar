@@ -109,21 +109,12 @@ take effect.
     }
   }
 
-  const implementedMathesarTypes: MathesarType['identifier'][] = ['number', 'text'];
-
-  // eslint-disable-next-line operator-linebreak
-  const isMathesarTypeImplemented =
-    (mathesarType: MathesarType): boolean =>
-      // eslint-disable-next-line implicit-arrow-linebreak
-      implementedMathesarTypes.includes(mathesarType.identifier);
-
   let validMathesarTypeTargets: MathesarType[] | undefined;
   $: {
     if (mathesarTypes && validDbTypeTargetsPerMathesarType) {
       // eslint-disable-next-line operator-linebreak
       validMathesarTypeTargets =
         mathesarTypes
-          .filter(isMathesarTypeImplemented)
           .filter(
             (mt: MathesarType) =>
               // eslint-disable-next-line implicit-arrow-linebreak
