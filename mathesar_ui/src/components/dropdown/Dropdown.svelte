@@ -21,18 +21,11 @@
   export let isOpen = false;
   export let closeOnInnerClick = false;
   export let ariaLabel: string = null;
-  export let functionBeforeClose: () => void = null;
   export let ariaControls: string = null;
   export let placement: Placement = 'bottom-start';
 
   let trigger: HTMLElement;
   $: tgClasses = ['dropdown', 'trigger', triggerClass].join(' ');
-
-  function checkAndRunFunctionBeforeClose() {
-    if (functionBeforeClose) {
-      functionBeforeClose();
-    }
-  }
 
   function open() {
     isOpen = true;
@@ -40,8 +33,8 @@
   }
 
   function close() {
-    checkAndRunFunctionBeforeClose();
     isOpen = false;
+    dispatch('close');
   }
 
   function toggle() {

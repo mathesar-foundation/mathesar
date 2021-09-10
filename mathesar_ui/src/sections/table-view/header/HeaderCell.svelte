@@ -58,7 +58,7 @@
     triggerClass="opts"
     triggerAppearance="plain"
     contentClass="table-opts-content"
-    functionBeforeClose={closeDataTypeOptions}
+    on:close={closeDataTypeOptions}
   >
     <svelte:fragment slot="content">
       {#if isDataTypeOptionsOpen}
