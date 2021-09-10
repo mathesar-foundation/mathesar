@@ -8,6 +8,7 @@
     getValidDbTypeTargetsPerMathesarType,
     mathesarTypeHasAtLeastOneValidDbTypeTarget,
     patchColumnToMathesarType,
+    determineMathesarType,
   } from '@mathesar/stores/mathesarTypes';
   import type { TableColumn } from '@mathesar/stores/tableData';
   import { Button } from '@mathesar-components';
@@ -21,6 +22,14 @@
   export let isDataTypeOptionsOpen: boolean;
 
   $: columnId = column.index;
+
+  let columnMathesarType: MathesarType;
+  $: {
+    if (mathesarTypes && column) {
+      columnMathesarType = determineMathesarType(mathesarTypes, column.type);
+    }
+  }
+
 
   let validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType | undefined;
   $: {
@@ -85,28 +94,34 @@
     shouldSavingBeDisabled = !isMathesarTypeSelected;
   }
 
-</script>
+  function isNotAnIdentityConversion(
+    a: MathesarType,
+    b: MathesarType,
+  ): boolean {
+    return a !== b;
+  }
 
-<style lang="scss">
-</style>
+</script>
 
 <div class="container">
   <h6 class="category">Data Type Options</h6>
   <span class="title">Set Column Type</span>
   <ul class="type-list">
     {#each validMathesarTypeTargets as mathesarType (mathesarType.identifier)}
-      <li>
-        <!-- TODO is button the right semantic element? -->
-        <button
-          on:click={ () => selectMathesarType(mathesarType) }
-          selected={ selectedMathesarType === mathesarType }
-        >
-          <div>
-            <span class="data-icon">{getMathesarTypeIcon(mathesarType)}</span>
-            <span>{mathesarType.name}</span>
-          </div>
-        </button>
-      </li>
+      {#if isNotAnIdentityConversion(mathesarType, columnMathesarType)}
+        <li>
+          <!-- TODO is button the right semantic element? -->
+          <button
+            on:click={ () => selectMathesarType(mathesarType) }
+            selected={ selectedMathesarType === mathesarType }
+          >
+            <div>
+              <span class="data-icon">{getMathesarTypeIcon(mathesarType)}</span>
+              <span>{mathesarType.name}</span>
+            </div>
+          </button>
+        </li>
+      {/if}
     {:else}
       <li>
       </li>
