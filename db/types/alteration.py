@@ -26,7 +26,6 @@ VARCHAR = base.VARCHAR
 
 # custom types
 EMAIL = base.MathesarCustomType.EMAIL.value
-MONEY = base.MathesarCustomType.MONEY.value
 
 
 class UnsupportedTypeException(Exception):
@@ -61,7 +60,6 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),
-        MONEY: dialect_types.get(money.DB_TYPE),
     }
     if friendly_names:
         type_map = {k: v for k, v in friendly_type_map.items() if v is not None}
@@ -252,7 +250,6 @@ def get_defined_source_target_cast_tuples(engine):
         FLOAT: _get_decimal_number_type_body_map(target_type_str=FLOAT),
         INTEGER: _get_integer_type_body_map(target_type_str=INTEGER),
         INTERVAL: _get_interval_type_body_map(),
-        MONEY: _get_money_type_body_map(),
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
