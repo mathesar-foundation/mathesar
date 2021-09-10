@@ -54,12 +54,6 @@
 
 </script>
 
-<style lang="scss">
-  h6 {
-    color: gray;
-  }
-</style>
-
 <div class="container">
   <h6 class="category">Data Type</h6>
   <button

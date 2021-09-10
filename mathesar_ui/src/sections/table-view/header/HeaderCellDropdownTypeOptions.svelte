@@ -88,19 +88,6 @@
 </script>
 
 <style lang="scss">
-  h6 {
-    color: gray;
-  }
-
-  .divider {
-    border-top: 1px lightgray solid;
-  }
-
-  .buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-  }
 </style>
 
 <div class="container">
@@ -127,7 +114,7 @@
   </ul>
   <span><i>Placeholder for type options</i></span>
   <div class="divider"></div>
-  <div class="buttons">
+  <div class="button-row">
     <Button appearance="secondary" on:click={onCancel}>
       Cancel
     </Button>
