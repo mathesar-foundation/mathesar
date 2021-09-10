@@ -107,7 +107,7 @@
   <h6 class="category">Data Type Options</h6>
   <span class="title">Set Column Type</span>
   <ul class="type-list">
-    {#each validMathesarTypeTargets as mathesarType}
+    {#each validMathesarTypeTargets as mathesarType (mathesarType.identifier)}
       <li>
         <!-- TODO is button the right semantic element? -->
         <button
