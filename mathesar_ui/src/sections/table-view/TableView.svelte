@@ -13,6 +13,7 @@
     TableOptionsStore,
     TableDisplayStores,
   } from '@mathesar/stores/tableData';
+  import { currentDBMathesarTypes } from '@mathesar/stores/mathesarTypes';
   import ActionsPane from './actions-pane/ActionsPane.svelte';
   import DisplayOptions from './display-options/DisplayOptions.svelte';
   import Header from './header/Header.svelte';
@@ -126,6 +127,11 @@
       void deleteRecords(database, identifier, selectedEntries);
     }
   }
+
+  // For explanation why this store is dereferenced here, and not in Header, check:
+  // https://github.com/centerofci/mathesar/pull/627#issuecomment-917023226
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  $: mathesarTypes = $currentDBMathesarTypes;
 </script>
 
 <ActionsPane
@@ -158,6 +164,7 @@
   <div class="table-content">
     {#if $columns.data.length > 0}
       <Header
+        mathesarTypes={mathesarTypes}
         tableId={idKey}
         columns={$columns}
         bind:sort={$options.sort}
