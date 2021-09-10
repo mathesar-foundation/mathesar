@@ -1,8 +1,8 @@
 import os
 from rest_framework.exceptions import ValidationError
 
-from db.tables.ddl.update import update_table, SUPPORTED_TABLE_UPDATE_ARGS
-from db.schemas import update_schema, SUPPORTED_SCHEMA_UPDATE_ARGS
+from db.tables.operations.update import update_table, SUPPORTED_TABLE_UPDATE_ARGS
+from db.schemas.operations.update import update_schema, SUPPORTED_SCHEMA_UPDATE_ARGS
 
 
 def user_directory_path(instance, filename):

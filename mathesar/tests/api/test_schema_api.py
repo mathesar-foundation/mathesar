@@ -1,11 +1,12 @@
-from unittest.mock import patch
 from django.core.cache import cache
 from sqlalchemy import text
-from db import schemas
-from mathesar.database.base import create_mathesar_engine
-from mathesar.models import Schema, Database
+from unittest.mock import patch
+
+from db.schemas import operations as schema_operations
+from db.schemas.utils import get_mathesar_schemas
 from mathesar import models
 from mathesar import reflection
+from mathesar.database.base import create_mathesar_engine
 from mathesar.utils.schemas import create_schema_and_object
 
 
@@ -15,7 +16,7 @@ def check_schema_response(response_schema, schema, schema_name, test_db_name, ch
     assert response_schema['database'] == test_db_name
     assert 'has_dependencies' in response_schema
     if check_schema_objects:
-        assert schema_name in schemas.get_mathesar_schemas(
+        assert schema_name in get_mathesar_schemas(
             create_mathesar_engine(test_db_name)
         )
 
@@ -39,20 +40,20 @@ def test_schema_list_filter(client, monkeypatch):
     schema_params = [("schema_1", "database_1"), ("schema_2", "database_2"),
                      ("schema_3", "database_3"), ("schema_1", "database_3")]
     dbs = {
-        "database_1": Database.objects.create(name="database_1"),
-        "database_2": Database.objects.create(name="database_2"),
-        "database_3": Database.objects.create(name="database_3"),
+        "database_1": models.Database.objects.create(name="database_1"),
+        "database_2": models.Database.objects.create(name="database_2"),
+        "database_3": models.Database.objects.create(name="database_3"),
     }
 
     def mock_get_name_from_oid(oid, engine):
         return schema_params[oid][0]
 
-    monkeypatch.setattr(models.schemas, "get_schema_name_from_oid", mock_get_name_from_oid)
+    monkeypatch.setattr(models.schema_utils, "get_schema_name_from_oid", mock_get_name_from_oid)
     monkeypatch.setattr(models, "create_mathesar_engine", lambda x: x)
     monkeypatch.setattr(reflection, "reflect_db_objects", lambda: None)
 
     schemas = {
-        (schema_params[i][0], schema_params[i][1]): Schema.objects.create(
+        (schema_params[i][0], schema_params[i][1]): models.Schema.objects.create(
             oid=i, database=dbs[schema_params[i][1]]
         )
         for i in range(len(schema_params))
@@ -92,7 +93,7 @@ def test_schema_detail(create_table, client, test_db_name):
     """
     create_table('NASA Schema Detail')
 
-    schema = Schema.objects.get()
+    schema = models.Schema.objects.get()
     response = client.get(f'/api/v0/schemas/{schema.id}/')
     response_schema = response.json()
     assert response.status_code == 200
@@ -100,7 +101,7 @@ def test_schema_detail(create_table, client, test_db_name):
 
 
 def test_schema_create(client, test_db_name):
-    num_schemas = Schema.objects.count()
+    num_schemas = models.Schema.objects.count()
 
     data = {
         'name': 'Test Schema',
@@ -108,10 +109,10 @@ def test_schema_create(client, test_db_name):
     }
     response = client.post('/api/v0/schemas/', data=data)
     response_schema = response.json()
-    schema = Schema.objects.get(id=response_schema['id'])
+    schema = models.Schema.objects.get(id=response_schema['id'])
 
     assert response.status_code == 201
-    assert Schema.objects.count() == num_schemas + 1
+    assert models.Schema.objects.count() == num_schemas + 1
     check_schema_response(response_schema, schema, 'Test Schema', test_db_name, 0)
 
 
@@ -137,7 +138,7 @@ def test_schema_partial_update(create_schema, client, test_db_name):
     assert response.status_code == 200
     check_schema_response(response_schema, schema, new_schema_name, test_db_name,)
 
-    schema = Schema.objects.get(oid=schema.oid)
+    schema = models.Schema.objects.get(oid=schema.oid)
     assert schema.name == new_schema_name
 
 
@@ -156,7 +157,7 @@ def test_schema_patch_same_name(create_schema, client, test_db_name):
         schema_name,
         test_db_name
     )
-    schema = Schema.objects.get(oid=schema.oid)
+    schema = models.Schema.objects.get(oid=schema.oid)
     assert schema.name == schema_name
 
 
@@ -164,12 +165,12 @@ def test_schema_delete(create_schema, client):
     schema_name = 'NASA Schema Delete'
     schema = create_schema(schema_name)
 
-    with patch.object(schemas, 'delete_schema') as mock_infer:
+    with patch.object(schema_operations, 'drop_schema') as mock_infer:
         response = client.delete(f'/api/v0/schemas/{schema.id}/')
     assert response.status_code == 204
 
     # Ensure the Django model was deleted
-    existing_oids = {schema.oid for schema in Schema.objects.all()}
+    existing_oids = {schema.oid for schema in models.Schema.objects.all()}
     assert schema.oid not in existing_oids
 
     # Ensure the backend schema would have been deleted
