@@ -1,96 +1,18 @@
-<script context="module" lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  import { intersection, pair, notEmpty } from '@mathesar/utils/language';
-  import { choosePreferredDbTypeTarget } from '@mathesar/stores/databases';
-  import { patchColumnType } from '@mathesar/stores/tableData';
-
-  type DbTypeTargetsPerMathesarType = Map<MathesarType['identifier'], DbType[]>;
-
-  /**
-   * Valid DbType target set for a given column and a given MathesarType is the intersection
-   * between DbType targets defined on the MathesarType (as returned by the database REST API)
-   * and DbType targets on the column (as returned by the column API).
-   */
-  function getValidDbTypeTargetsPerMathesarType(
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    column: TableColumn,
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    mathesarTypes: MathesarType[],
-  ): DbTypeTargetsPerMathesarType {
-    function getValidDbTypeTargetsForColumnAndMathesarType(
-      // eslint-disable-next-line @typescript-eslint/no-shadow
-      column: TableColumn,
-      // eslint-disable-next-line @typescript-eslint/no-shadow
-      mathesarType: MathesarType,
-    ): DbType[] {
-      return intersection(
-        new Set(column.validTargetTypes),
-        new Set(mathesarType.db_types),
-      );
-    }
-    const pairs = mathesarTypes.map(
-      // eslint-disable-next-line @typescript-eslint/no-shadow
-      (mathesarType) => pair(
-        mathesarType.identifier,
-        getValidDbTypeTargetsForColumnAndMathesarType(column, mathesarType),
-      ),
-    );
-    return new Map(pairs);
-  }
-
-  function mathesarTypeHasAtLeastOneValidDbTypeTarget(
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType,
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    mathesarType: MathesarType,
-  ) {
-    // eslint-disable-next-line operator-linebreak
-    const validDbTypeTargets =
-      validDbTypeTargetsPerMathesarType.get(mathesarType.identifier);
-    const atLeastOne = notEmpty(validDbTypeTargets);
-    return atLeastOne;
-  }
-
-  function patchColumnToMathesarType(
-    // as returned by createEventDispatcher()
-    dispatch: (x: unknown) => void,
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    tableId: number,
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    columnId: number,
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType,
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    mathesarType: MathesarType,
-  ): void {
-    if (validDbTypeTargetsPerMathesarType) {
-      const newDbType = choosePreferredDbTypeTarget(mathesarType);
-      const reloadTable = () => dispatch('reload');
-      void patchColumnType(tableId, columnId, newDbType)
-        .then(reloadTable);
-    }
-  }
-</script>
-
-<!--
-  Svelte linter cannot differentiate between static/pure and stateful functions
-so it warns when using module context functions in reactive blocks.
-
-  The ability to disable this specific warning will be available when svelte is
-updated to version 3.39.0 or above. The svelte-ignore directive below will then
-take effect.
-
-  https://github.com/sveltejs/svelte/issues/5954
-  https://github.com/sveltejs/svelte/pull/6504
-  -->
-
-<!-- svelte-ignore module-script-reactive-declaration -->
 <script lang="ts">
-  import type { DbType, MathesarType } from '@mathesar/stores/databases';
-  import { getMathesarTypeIcon } from '@mathesar/stores/databases';
+  import type {
+    MathesarType,
+    DbTypeTargetsPerMathesarType,
+  } from '@mathesar/stores/mathesarTypes';
+  import {
+    getMathesarTypeIcon,
+    getValidDbTypeTargetsPerMathesarType,
+    mathesarTypeHasAtLeastOneValidDbTypeTarget,
+    patchColumnToMathesarType,
+  } from '@mathesar/stores/mathesarTypes';
   import type { TableColumn } from '@mathesar/stores/tableData';
   import { Button } from '@mathesar-components';
   import { isDefined } from '@mathesar/utils/language';
+  import { createEventDispatcher } from 'svelte';
 
   export let mathesarTypes: MathesarType[];
   export let tableId: number;

@@ -11,7 +11,7 @@
     GROUP_MARGIN_LEFT,
     DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/tableData';
-  import { currentDBMathesarTypes } from '@mathesar/stores/databases';
+  import { currentDBMathesarTypes } from '@mathesar/stores/mathesarTypes';
   import HeaderCell from './HeaderCell.svelte';
 
   export let tableId: number;

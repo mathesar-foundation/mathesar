@@ -6,8 +6,8 @@
     SortOption,
     TableColumn,
   } from '@mathesar/stores/tableData';
-  import type { MathesarType } from '@mathesar/stores/databases';
-  import { determineMathesarType, getMathesarTypeIcon } from '@mathesar/stores/databases';
+  import type { MathesarType } from '@mathesar/stores/mathesarTypes';
+  import { determineMathesarType, getMathesarTypeIcon } from '@mathesar/stores/mathesarTypes';
   import HeaderCellDropdownGeneral from './HeaderCellDropdownGeneral.svelte';
   import HeaderCellDropdownTypeOptions from './HeaderCellDropdownTypeOptions.svelte';
 

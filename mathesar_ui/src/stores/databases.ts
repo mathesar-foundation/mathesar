@@ -6,7 +6,7 @@ import { getAPI, States } from '@mathesar/utils/api';
 
 import type { Database } from '@mathesar/App.d';
 import type { PaginatedResponse } from '@mathesar/utils/api';
-import { pair, notEmpty } from '@mathesar/utils/language';
+import { notEmpty } from '@mathesar/utils/language';
 import type { CancellablePromise } from '@mathesar/components';
 
 const commonData = preloadCommonData();
@@ -67,105 +67,3 @@ export async function reloadDatabases(): Promise<PaginatedResponse<Database>> {
     return null;
   }
 }
-
-export type DbType = string;
-
-export interface MathesarType {
-  name: string,
-  identifier: string,
-  db_types: DbType[]
-}
-
-/**
- * Considers a DbType to belong to the first MathesarType that has it in its `db_types` set.
- */
-export function determineMathesarType(
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  mathesarTypes: MathesarType[],
-  dbType: DbType,
-): MathesarType {
-  const mathesarTypeHasItAsTarget = (mt: MathesarType) => mt.db_types.includes(dbType);
-  return mathesarTypes.find(mathesarTypeHasItAsTarget);
-}
-
-export function choosePreferredDbTypeTarget(
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  mathesarType: MathesarType,
-): DbType {
-  switch (mathesarType.identifier) {
-    case 'number':
-      return 'NUMERIC';
-    case 'text':
-      return 'VARCHAR';
-    default:
-      throw new Error(`Database type target undefined for Mathesar type ${mathesarType.name}`);
-  }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-shadow
-export function getMathesarTypeIcon(mathesarType: MathesarType): string {
-  switch (mathesarType.identifier) {
-    case 'number':
-      return '#';
-    case 'text':
-      return 'T';
-    default:
-      return '?';
-  }
-}
-
-export type DatabasesToMathesarTypes = Map<Database['id'], MathesarType[]>;
-
-/**
- * Given a set of Database objects, queries the API for Mathesar types allowed on those databases
- * in parallel, and constructs a mapping between database ids and sets of those Mathesar types.
- */
-async function getDatabasesToMathesarTypes(
-  knownDatabases: Database[],
-):Promise<DatabasesToMathesarTypes> {
-  function getMathesarTypesForDatabase(db: Database) {
-    return getAPI<MathesarType[]>(`/databases/${db.id}/types`);
-  }
-
-  const promisesOfPairs = knownDatabases.map(
-    async (db) => pair(db.id, await getMathesarTypesForDatabase(db)),
-  );
-
-  const toMap = <A, B>(pairs: [A, B][]) => new Map<A, B>(pairs);
-
-  return Promise.all(promisesOfPairs).then(toMap);
-}
-
-/**
- * A Readable containing the output of calling getDatabasesToMathesarTypes on the database set
- * stored in the `databases` store.
- */
-// eslint-disable-next-line operator-linebreak
-export const databasesToMathesarTypesStore: Readable<DatabasesToMathesarTypes> =
-  derived<Readable<DatabaseStoreData>, DatabasesToMathesarTypes>(
-    databases,
-    ($databaseStoreData, set) => {
-      const knownDatabases = $databaseStoreData.data;
-      if (knownDatabases && notEmpty(knownDatabases)) {
-        void getDatabasesToMathesarTypes(knownDatabases).then(set);
-      }
-    },
-    undefined,
-  );
-
-/**
- * A Readable containing the Mathesar types allowed on the database whose id is stored on
- * currentDBId.
- */
-// eslint-disable-next-line operator-linebreak
-export const currentDBMathesarTypes: Readable<MathesarType[]> =
-  derived(
-    [databasesToMathesarTypesStore, currentDBId],
-    ([databasesToMathesarTypes, databaseId]) => {
-      const mathesarTypes = databasesToMathesarTypes && databaseId
-        ? databasesToMathesarTypes.get(databaseId)
-        : undefined;
-      return mathesarTypes;
-    },
-    undefined,
-  );

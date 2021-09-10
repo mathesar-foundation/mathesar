@@ -13,7 +13,7 @@
     SortOption,
     TableColumn,
   } from '@mathesar/stores/tableData';
-  import type { MathesarType } from '@mathesar/stores/databases';
+  import type { MathesarType } from '@mathesar/stores/mathesarTypes';
 
   export let mathesarType: MathesarType;
   export let mathesarTypeIcon: string;
