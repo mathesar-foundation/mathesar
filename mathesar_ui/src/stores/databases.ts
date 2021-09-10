@@ -31,12 +31,11 @@ export const databases = writable<DatabaseStoreData>({
 
 export const currentDBId: Readable<Database['id']> = derived(
   [currentDBName, databases],
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  ([currentDBName, databasesStore]) => {
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    const databases = databasesStore.data;
-    return notEmpty(databases)
-      ? databases.find((database) => database.name === currentDBName).id
+  ([_currentDBName, databasesStore]) => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const _databases = databasesStore.data;
+    return notEmpty(_databases)
+      ? _databases.find((database) => database.name === _currentDBName).id
       : undefined;
   },
 );

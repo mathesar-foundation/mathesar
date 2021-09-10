@@ -24,26 +24,24 @@
 
   const dispatch = createEventDispatcher();
 
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  function sortByColumn(column: TableColumn, order: 'asc' | 'desc') {
+  function sortByColumn(_column: TableColumn, order: 'asc' | 'desc') {
     const newSort: SortOption = new Map(sort);
-    if (sort?.get(column.name) === order) {
-      newSort.delete(column.name);
+    if (sort?.get(_column.name) === order) {
+      newSort.delete(_column.name);
     } else {
-      newSort.set(column.name, order);
+      newSort.set(_column.name, order);
     }
     sort = newSort;
     dispatch('reload');
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  function groupByColumn(column: TableColumn) {
+  function groupByColumn(_column: TableColumn) {
     const oldSize = group?.size || 0;
     const newGroup = new Set(group);
-    if (newGroup?.has(column.name)) {
-      newGroup.delete(column.name);
+    if (newGroup?.has(_column.name)) {
+      newGroup.delete(_column.name);
     } else {
-      newGroup.add(column.name);
+      newGroup.add(_column.name);
     }
     group = newGroup;
     /**

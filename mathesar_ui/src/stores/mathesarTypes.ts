@@ -110,6 +110,16 @@ export const currentDBMathesarTypes: Readable<MathesarType[]> =
 
 export type DbTypeTargetsPerMathesarType = Map<MathesarType['identifier'], DbType[]>;
 
+function getValidDbTypeTargetsForColumnAndMathesarType(
+  column: TableColumn,
+  mathesarType: MathesarType,
+): DbType[] {
+  return intersection(
+    new Set(column.validTargetTypes),
+    new Set(mathesarType.db_types),
+  );
+}
+
 /**
  * Valid DbType target set for a given column and a given MathesarType is the intersection
  * between DbType targets defined on the MathesarType (as returned by the database REST API)
@@ -119,15 +129,6 @@ export function getValidDbTypeTargetsPerMathesarType(
   column: TableColumn,
   mathesarTypes: MathesarType[],
 ): DbTypeTargetsPerMathesarType {
-  function getValidDbTypeTargetsForColumnAndMathesarType(
-    column: TableColumn,
-    mathesarType: MathesarType,
-  ): DbType[] {
-    return intersection(
-      new Set(column.validTargetTypes),
-      new Set(mathesarType.db_types),
-    );
-  }
   const pairs = mathesarTypes.map(
     (mathesarType) => pair(
       mathesarType.identifier,
