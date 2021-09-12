@@ -7,7 +7,7 @@ from db.tables.operations.select import get_oid_from_table, reflect_table_from_o
 from db.constraints.operations.select import get_column_constraints
 from db.tests.columns.utils import create_test_table
 from db.tests.types import fixtures
-from db.types import alteration
+from db.types.operations.cast import get_supported_alter_column_db_types
 
 
 engine_with_types = fixtures.engine_with_types
@@ -70,7 +70,7 @@ def test_type_list_completeness(engine_with_types):
     This metatest ensures that tests parameterized on the type_set
     use the entire set supported.
     """
-    actual_supported_db_types = alteration.get_supported_alter_column_db_types(
+    actual_supported_db_types = get_supported_alter_column_db_types(
         engine_with_types
     )
     assert type_set == actual_supported_db_types

@@ -15,7 +15,7 @@ from db.constraints.operations.create import copy_constraint
 from db.constraints.operations.select import get_column_constraints
 from db.constraints import utils as constraint_utils
 from db.tables.operations.select import reflect_table_from_oid
-from db.types.alteration import get_supported_alter_column_types
+from db.types.operations.cast import get_supported_alter_column_types
 
 
 def create_column(engine, table_oid, column_data):

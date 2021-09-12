@@ -10,7 +10,7 @@ from db.columns.operations.select import get_column_default, get_column_index_fr
 from db.columns.utils import get_mathesar_column_with_engine, get_type_options
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.types.base import get_db_type_name
-from db.types.alteration import get_supported_alter_column_types, get_cast_function_name
+from db.types.operations.cast import get_supported_alter_column_types, get_cast_function_name
 from db.utils import execute_statement
 
 

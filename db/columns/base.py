@@ -3,7 +3,7 @@ from sqlalchemy import Column, ForeignKey, inspect
 from db.columns.defaults import TYPE, PRIMARY_KEY, NULLABLE, DEFAULT_COLUMNS
 from db.columns.operations.select import get_column_default, get_column_index_from_name
 from db.tables.operations.select import get_oid_from_table
-from db.types import alteration
+from db.types.operations.cast import get_full_cast_map
 
 
 class MathesarColumn(Column):
@@ -100,7 +100,7 @@ class MathesarColumn(Column):
             valid_target_types = sorted(
                 list(
                     set(
-                        alteration.get_full_cast_map(self.engine).get(db_type, [])
+                        get_full_cast_map(self.engine).get(db_type, [])
                     )
                 )
             )

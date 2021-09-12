@@ -4,7 +4,7 @@ from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
 from db.columns.base import MathesarColumn
 from db.tables.utils import get_primary_key_column
-from db.types.alteration import get_column_cast_expression
+from db.types.operations.cast import get_column_cast_expression
 from db.utils import execute_query
 
 

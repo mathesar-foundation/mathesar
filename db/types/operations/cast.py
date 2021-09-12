@@ -3,6 +3,7 @@ from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 
 from db.types import base, email
+from db.types.exceptions import UnsupportedTypeException
 
 
 BIGINT = base.PostgresType.BIGINT.value
@@ -22,10 +23,6 @@ TEXT = base.PostgresType.TEXT.value
 DATE = base.PostgresType.DATE.value
 STRING = base.STRING
 VARCHAR = base.VARCHAR
-
-
-class UnsupportedTypeException(Exception):
-    pass
 
 
 def get_supported_alter_column_types(engine, friendly_names=True):

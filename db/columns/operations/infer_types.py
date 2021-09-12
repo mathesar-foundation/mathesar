@@ -6,7 +6,7 @@ from sqlalchemy.exc import DatabaseError
 from db.columns.exceptions import DagCycleError
 from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import reflect_table
-from db.types.alteration import get_supported_alter_column_types
+from db.types.operations.cast import get_supported_alter_column_types
 from db.types import base
 
 
