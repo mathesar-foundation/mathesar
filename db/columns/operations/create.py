@@ -11,7 +11,8 @@ from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, Invalid
 from db.columns.operations.alter import set_column_default, change_column_nullable
 from db.columns.operations.select import get_column_default, get_column_index_from_name
 from db.columns.utils import get_mathesar_column_with_engine
-from db.constraints import operations as constraint_operations
+from db.constraints.operations.create import copy_constraint
+from db.constraints.operations.select import get_column_constraints
 from db.constraints import utils as constraint_utils
 from db.tables.operations.select import reflect_table_from_oid
 from db.types.alteration import get_supported_alter_column_types
@@ -112,13 +113,13 @@ def _duplicate_column_constraints(table_oid, from_column, to_column, engine, cop
         with engine.begin() as conn:
             change_column_nullable(table, to_column, engine, conn, table.c[from_column].nullable)
 
-    constraints = constraint_operations.get_column_constraints(from_column, table_oid, engine)
+    constraints = get_column_constraints(from_column, table_oid, engine)
     for constraint in constraints:
         constraint_type = constraint_utils.get_constraint_type_from_char(constraint.contype)
         if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
             # Don't allow duplication of primary keys
             continue
-        constraint_operations.copy_constraint(
+        copy_constraint(
             table, engine, constraint, from_column, to_column
         )
 

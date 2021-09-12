@@ -8,7 +8,9 @@ from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
-from db.constraints import operations as constraint_operations
+from db.constraints.operations.create import create_unique_constraint
+from db.constraints.operations.drop import drop_constraint
+from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
 from db.constraints import utils as constraint_utils
 from db.records import operations as record_operations
 from db.schemas import operations as schema_operations
@@ -284,7 +286,7 @@ class Table(DatabaseObject):
     def add_constraint(self, constraint_type, columns, name=None):
         if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
             raise ValueError('Only creating unique constraints is currently supported.')
-        constraint_operations.create_unique_constraint(
+        create_unique_constraint(
             self.name,
             self._sa_table.schema,
             self.schema._sa_engine,
@@ -299,7 +301,7 @@ class Table(DatabaseObject):
         engine = self.schema.database._sa_engine
         if not name:
             name = constraint_utils.get_constraint_name(constraint_type, self.name, columns[0])
-        constraint_oid = constraint_operations.get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
+        constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         return Constraint.objects.create(oid=constraint_oid, table=self)
 
 
@@ -309,7 +311,7 @@ class Constraint(DatabaseObject):
     @property
     def _sa_constraint(self):
         engine = self.table.schema.database._sa_engine
-        return constraint_operations.get_constraint_from_oid(self.oid, engine, self.table._sa_table)
+        return get_constraint_from_oid(self.oid, engine, self.table._sa_table)
 
     @property
     def name(self):
@@ -324,7 +326,7 @@ class Constraint(DatabaseObject):
         return [column.name for column in self._sa_constraint.columns]
 
     def drop(self):
-        constraint_operations.drop_constraint(
+        drop_constraint(
             self.table._sa_table.name,
             self.table._sa_table.schema,
             self.table.schema._sa_engine,

@@ -4,7 +4,7 @@ from sqlalchemy import Integer, Column, Table, MetaData, Numeric, UniqueConstrai
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.select import get_column_default, get_column_index_from_name
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
-from db.constraints import operations as constraint_operations
+from db.constraints.operations.select import get_column_constraints
 from db.tests.columns.utils import create_test_table
 from db.tests.types import fixtures
 from db.types import alteration
@@ -37,7 +37,7 @@ def _check_duplicate_data(table_oid, engine, copy_data):
 def _check_duplicate_unique_constraint(
     table_oid, col_index, con_idxs, engine, copy_constraints
 ):
-    constraints_ = constraint_operations.get_column_constraints(col_index, table_oid, engine)
+    constraints_ = get_column_constraints(col_index, table_oid, engine)
     if copy_constraints:
         assert len(constraints_) == 1
         constraint = constraints_[0]
