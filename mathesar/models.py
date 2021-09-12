@@ -12,7 +12,11 @@ from db.constraints.operations.create import create_unique_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
 from db.constraints import utils as constraint_utils
-from db.records import operations as record_operations
+from db.records.operations.delete import delete_record
+from db.records.operations.group import get_group_counts
+from db.records.operations.insert import insert_record_or_records
+from db.records.operations.select import get_column_cast_records, get_count, get_record, get_records
+from db.records.operations.update import update_record
 from db.schemas import operations as schema_operations
 from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
@@ -233,16 +237,16 @@ class Table(DatabaseObject):
         )
 
     def get_preview(self, column_definitions):
-        return record_operations.get_column_cast_records(
+        return get_column_cast_records(
             self.schema._sa_engine, self._sa_table, column_definitions
         )
 
     @property
     def sa_all_records(self):
-        return record_operations.get_records(self._sa_table, self.schema._sa_engine)
+        return get_records(self._sa_table, self.schema._sa_engine)
 
     def sa_num_records(self, filters=[]):
-        return record_operations.get_count(self._sa_table, self.schema._sa_engine, filters=filters)
+        return get_count(self._sa_table, self.schema._sa_engine, filters=filters)
 
     def update_sa_table(self, update_params):
         return model_utils.update_sa_table(self, update_params)
@@ -251,10 +255,10 @@ class Table(DatabaseObject):
         return drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
 
     def get_record(self, id_value):
-        return record_operations.get_record(self._sa_table, self.schema._sa_engine, id_value)
+        return get_record(self._sa_table, self.schema._sa_engine, id_value)
 
     def get_records(self, limit=None, offset=None, filters=[], order_by=[]):
-        return record_operations.get_records(
+        return get_records(
             self._sa_table,
             self.schema._sa_engine,
             limit,
@@ -264,7 +268,7 @@ class Table(DatabaseObject):
         )
 
     def get_group_counts(self, group_by, limit=None, offset=None, filters=[], order_by=[]):
-        return record_operations.get_group_counts(
+        return get_group_counts(
             self._sa_table,
             self.schema._sa_engine,
             group_by,
@@ -275,13 +279,13 @@ class Table(DatabaseObject):
         )
 
     def create_record_or_records(self, record_data):
-        return record_operations.insert_record_or_records(self._sa_table, self.schema._sa_engine, record_data)
+        return insert_record_or_records(self._sa_table, self.schema._sa_engine, record_data)
 
     def update_record(self, id_value, record_data):
-        return record_operations.update_record(self._sa_table, self.schema._sa_engine, id_value, record_data)
+        return update_record(self._sa_table, self.schema._sa_engine, id_value, record_data)
 
     def delete_record(self, id_value):
-        return record_operations.delete_record(self._sa_table, self.schema._sa_engine, id_value)
+        return delete_record(self._sa_table, self.schema._sa_engine, id_value)
 
     def add_constraint(self, constraint_type, columns, name=None):
         if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
