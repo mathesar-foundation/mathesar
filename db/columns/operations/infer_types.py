@@ -1,14 +1,10 @@
 import logging
-from time import time
 
-from sqlalchemy import VARCHAR, TEXT, Text, select
+from sqlalchemy import VARCHAR, TEXT, Text
 from sqlalchemy.exc import DatabaseError
 
-from db import constants
-from db.columns.base import MathesarColumn
+from db.columns.exceptions import DagCycleError
 from db.columns.operations.alter import alter_column_type
-from db.schemas.operations.create import create_schema
-from db.tables.operations.create import CreateTableAs
 from db.tables.operations.select import reflect_table
 from db.types.alteration import get_supported_alter_column_types
 from db.types import base
@@ -34,15 +30,8 @@ TYPE_INFERENCE_DAG = {
     ],
 }
 
-TEMP_SCHEMA = f"{constants.MATHESAR_PREFIX}temp_schema"
-TEMP_TABLE = f"{constants.MATHESAR_PREFIX}temp_table_%s"
 
-
-class DagCycleError(Exception):
-    pass
-
-
-def get_reverse_type_map(engine):
+def _get_reverse_type_map(engine):
     supported_types = get_supported_alter_column_types(engine)
     reverse_type_map = {v: k for k, v in supported_types.items()}
     reverse_type_map.update(
@@ -58,7 +47,7 @@ def get_reverse_type_map(engine):
 def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inference_dag=TYPE_INFERENCE_DAG):
     if depth > MAX_INFERENCE_DAG_DEPTH:
         raise DagCycleError("The type_inference_dag likely has a cycle")
-    reverse_type_map = get_reverse_type_map(engine)
+    reverse_type_map = _get_reverse_type_map(engine)
 
     table = reflect_table(table_name, schema, engine)
     column_type = table.columns[column_name].type.__class__
@@ -86,52 +75,3 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
                 f"Cannot alter column {column_name} to type {type_str}"
             )
     return column_type
-
-
-def update_table_column_types(schema, table_name, engine):
-    table = reflect_table(table_name, schema, engine)
-    # we only want to infer (modify) the type of non-default columns
-    inferable_column_names = (
-        col.name for col in table.columns
-        if not MathesarColumn.from_column(col).is_default
-        and not col.primary_key
-        and not col.foreign_keys
-    )
-    for column_name in inferable_column_names:
-        infer_column_type(
-            schema,
-            table_name,
-            column_name,
-            engine,
-        )
-
-
-def infer_table_column_types(schema, table_name, engine):
-    table = reflect_table(table_name, schema, engine)
-
-    temp_name = TEMP_TABLE % (int(time()))
-    create_schema(TEMP_SCHEMA, engine)
-    with engine.begin() as conn:
-        while engine.dialect.has_table(conn, temp_name, schema=TEMP_SCHEMA):
-            temp_name = TEMP_TABLE.format(int(time()))
-
-    full_temp_name = f"{TEMP_SCHEMA}.{temp_name}"
-
-    select_table = select(table)
-    with engine.begin() as conn:
-        conn.execute(CreateTableAs(full_temp_name, select_table))
-    temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
-
-    try:
-        update_table_column_types(
-            TEMP_SCHEMA, temp_table.name, engine,
-        )
-    except Exception as e:
-        # Ensure the temp table is deleted
-        temp_table.drop()
-        raise e
-    else:
-        temp_table = reflect_table(temp_name, TEMP_SCHEMA, engine)
-        types = [c.type.__class__ for c in temp_table.columns]
-        temp_table.drop()
-        return types

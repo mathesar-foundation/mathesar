@@ -8,3 +8,7 @@ class InvalidTypeError(Exception):
 
 class InvalidTypeOptionError(Exception):
     pass
+
+
+class DagCycleError(Exception):
+    pass
