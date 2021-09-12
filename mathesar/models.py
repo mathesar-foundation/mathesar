@@ -17,7 +17,7 @@ from db.records.operations.group import get_group_counts
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record, get_records
 from db.records.operations.update import update_record
-from db.schemas import operations as schema_operations
+from db.schemas.operations.drop import drop_schema
 from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
@@ -134,7 +134,7 @@ class Schema(DatabaseObject):
         return model_utils.update_sa_schema(self, update_params)
 
     def delete_sa_schema(self):
-        return schema_operations.drop_schema(self.name, self._sa_engine, cascade=True)
+        return drop_schema(self.name, self._sa_engine, cascade=True)
 
     def clear_name_cache(self):
         cache_key = f"{self.database.name}_schema_name_{self.oid}"

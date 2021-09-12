@@ -3,7 +3,7 @@ from sqlalchemy.ext import compiler
 from sqlalchemy.schema import DDLElement
 
 from db.columns.utils import init_mathesar_table_column_list_with_defaults
-from db.schemas import operations as schema_operations
+from db.schemas.operations.create import create_schema
 
 
 def create_mathesar_table(name, schema, columns, engine, metadata=None):
@@ -13,7 +13,7 @@ def create_mathesar_table(name, schema, columns, engine, metadata=None):
     table.
     """
     columns = init_mathesar_table_column_list_with_defaults(columns)
-    schema_operations.create_schema(schema, engine)
+    create_schema(schema, engine)
     # We need this so that we can create multiple mathesar tables in the
     # same MetaData, enabling them to reference each other in the
     # SQLAlchemy context (e.g., for creating a ForeignKey relationship)
