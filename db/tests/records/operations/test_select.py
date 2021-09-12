@@ -3,9 +3,14 @@ from decimal import Decimal
 from sqlalchemy import Column
 from sqlalchemy import String
 
-from db.records.operations.select import get_records
+from db.records.operations.select import get_records, get_column_cast_records
 from db.tables.operations.create import create_mathesar_table
-from db.types import alteration
+from db.tests.types import fixtures
+
+
+engine_with_types = fixtures.engine_with_types
+temporary_testing_schema = fixtures.temporary_testing_schema
+engine_email_type = fixtures.engine_email_type
 
 
 def test_get_records_gets_all_records(roster_table_obj):
@@ -50,7 +55,7 @@ def test_get_column_cast_records(engine_email_type):
         {"name": COL1_MOD, "type": "VARCHAR"},
         {"name": COL2_MOD, "type": "NUMERIC"},
     ]
-    records = alteration.get_column_cast_records(engine, table, column_definitions)
+    records = get_column_cast_records(engine, table, column_definitions)
     for record in records:
         assert (
             type(record[COL1 + "_mod"]) == str
@@ -81,7 +86,7 @@ def test_get_column_cast_records_options(engine_email_type):
         {"name": COL1_MOD, "type": "VARCHAR"},
         {"name": COL2_MOD, "type": "NUMERIC", "type_options": {"precision": 5, "scale": 2}},
     ]
-    records = alteration.get_column_cast_records(engine, table, column_definitions)
+    records = get_column_cast_records(engine, table, column_definitions)
     for record in records:
         assert (
             type(record[COL1 + "_mod"]) == str

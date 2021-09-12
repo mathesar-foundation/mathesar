@@ -16,7 +16,6 @@ from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
 from db.tables.operations.select import reflect_table_from_oid
-from db.types import alteration
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
@@ -232,7 +231,7 @@ class Table(DatabaseObject):
         )
 
     def get_preview(self, column_definitions):
-        return alteration.get_column_cast_records(
+        return record_operations.get_column_cast_records(
             self.schema._sa_engine, self._sa_table, column_definitions
         )
 
