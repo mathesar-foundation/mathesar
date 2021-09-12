@@ -2,13 +2,12 @@ from sqlalchemy import text
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 
-from db.types import base, email
+from db.types import base, email, money
 from db.types.exceptions import UnsupportedTypeException
 
 
 BIGINT = base.PostgresType.BIGINT.value
 BOOLEAN = base.PostgresType.BOOLEAN.value
-EMAIL = base.MathesarCustomType.EMAIL.value
 DECIMAL = base.PostgresType.DECIMAL.value
 DOUBLE_PRECISION = base.PostgresType.DOUBLE_PRECISION.value
 FLOAT = base.PostgresType.FLOAT.value
@@ -23,6 +22,10 @@ TEXT = base.PostgresType.TEXT.value
 DATE = base.PostgresType.DATE.value
 STRING = base.STRING
 VARCHAR = base.VARCHAR
+
+# custom types
+EMAIL = base.MathesarCustomType.EMAIL.value
+MONEY = base.MathesarCustomType.MONEY.value
 
 
 def get_supported_alter_column_types(engine, friendly_names=True):
@@ -52,7 +55,8 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         DATE: dialect_types.get(DATE),
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
-        EMAIL: dialect_types.get(email.DB_TYPE)
+        EMAIL: dialect_types.get(email.DB_TYPE),
+        MONEY: dialect_types.get(money.DB_TYPE),
     }
     if friendly_names:
         type_map = {k: v for k, v in friendly_type_map.items() if v is not None}
@@ -117,17 +121,30 @@ def get_column_cast_expression(column, target_type_str, engine, type_options={})
 
 def install_all_casts(engine):
     create_boolean_casts(engine)
+    create_date_casts(engine)
+    create_decimal_number_casts(engine)
     create_email_casts(engine)
     create_integer_casts(engine)
-    create_decimal_number_casts(engine)
     create_interval_casts(engine)
-    create_date_casts(engine)
+    create_money_casts(engine)
     create_varchar_casts(engine)
 
 
 def create_boolean_casts(engine):
     type_body_map = _get_boolean_type_body_map()
     create_cast_functions(BOOLEAN, type_body_map, engine)
+
+
+def create_date_casts(engine):
+    type_body_map = _get_date_type_body_map()
+    create_cast_functions(DATE, type_body_map, engine)
+
+
+def create_decimal_number_casts(engine):
+    decimal_number_types = [DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL]
+    for type_str in decimal_number_types:
+        type_body_map = _get_decimal_number_type_body_map(target_type_str=type_str)
+        create_cast_functions(type_str, type_body_map, engine)
 
 
 def create_email_casts(engine):
@@ -147,16 +164,9 @@ def create_interval_casts(engine):
     create_cast_functions(INTERVAL, type_body_map, engine)
 
 
-def create_decimal_number_casts(engine):
-    decimal_number_types = [DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL]
-    for type_str in decimal_number_types:
-        type_body_map = _get_decimal_number_type_body_map(target_type_str=type_str)
-        create_cast_functions(type_str, type_body_map, engine)
-
-
-def create_date_casts(engine):
-    type_body_map = _get_date_type_body_map()
-    create_cast_functions(DATE, type_body_map, engine)
+def create_money_casts(engine):
+    type_body_map = _get_money_type_body_map()
+    create_cast_functions(money.DB_TYPE, type_body_map, engine)
 
 
 def create_varchar_casts(engine):
@@ -184,16 +194,17 @@ def get_defined_source_target_cast_tuples(engine):
     type_body_map_map = {
         BIGINT: _get_integer_type_body_map(target_type_str=BIGINT),
         BOOLEAN: _get_boolean_type_body_map(),
-        EMAIL: _get_email_type_body_map(),
+        DATE: _get_date_type_body_map(),
         DECIMAL: _get_decimal_number_type_body_map(target_type_str=DECIMAL),
         DOUBLE_PRECISION: _get_decimal_number_type_body_map(target_type_str=DOUBLE_PRECISION),
+        EMAIL: _get_email_type_body_map(),
         FLOAT: _get_decimal_number_type_body_map(target_type_str=FLOAT),
         INTEGER: _get_integer_type_body_map(target_type_str=INTEGER),
+        MONEY: _get_money_type_body_map(),
         INTERVAL: _get_interval_type_body_map(),
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
-        DATE: _get_date_type_body_map(),
         VARCHAR: _get_varchar_type_body_map(engine),
     }
     return {
@@ -416,6 +427,52 @@ def _get_boolean_to_number_cast(target_type):
       RETURN 0::{target_type};
     END;
     """
+
+
+def _get_money_type_body_map():
+    """
+    Get SQL strings that create various functions for casting different
+    types to money.
+    We allow casting any number type to money, assuming currency is USD.
+    We allow casting any textual type to money, assuming currency is USD
+    and that the type can be cast through a numeric.
+    """
+    default_behavior_source_types = [money.DB_TYPE]
+    number_types = [
+        BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
+        SMALLINT,
+    ]
+    textual_types = [TEXT, VARCHAR]
+
+    def _get_number_cast_to_money():
+        return f"""
+        BEGIN
+          RETURN ROW($1, 'USD')::{money.DB_TYPE};
+        END;
+        """
+
+    def _get_base_textual_cast_to_money():
+        return f"""
+        BEGIN
+          RETURN ROW($1::numeric, 'USD')::{money.DB_TYPE};
+        END;
+        """
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, money.DB_TYPE,
+    )
+    type_body_map.update(
+        {
+            type_name: _get_number_cast_to_money()
+            for type_name in number_types
+        }
+    )
+    type_body_map.update(
+        {
+            type_name: _get_base_textual_cast_to_money()
+            for type_name in textual_types
+        }
+    )
+    return type_body_map
 
 
 def _get_varchar_type_body_map(engine):

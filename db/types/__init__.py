@@ -1,5 +1,5 @@
 from sqlalchemy import DECIMAL as sa_decimal
-from db.types import email
+from db.types import email, money
 from db.types.base import PostgresType
 
 
@@ -8,4 +8,5 @@ CUSTOM_TYPE_DICT = {
     # ischema_names supported by a PostgreSQL engine
     PostgresType.DECIMAL.value: sa_decimal,
     email.DB_TYPE: email.Email,
+    money.DB_TYPE: money.Money,
 }
