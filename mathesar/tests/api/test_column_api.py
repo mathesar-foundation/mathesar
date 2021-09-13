@@ -8,7 +8,7 @@ from sqlalchemy import Column, Integer, String, MetaData, select
 from sqlalchemy import Table as SATable
 
 from db import columns
-from db.tables.utils import get_oid_from_table
+from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
 from mathesar.models import Table
 
@@ -55,7 +55,8 @@ def test_column_list(column_test_table, client):
             'default': None,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
+                'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
+                'SMALLINT', 'VARCHAR',
             ],
         },
         {
@@ -68,7 +69,8 @@ def test_column_list(column_test_table, client):
             'default': None,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
+                'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
+                'SMALLINT', 'VARCHAR',
             ],
         },
         {
@@ -81,7 +83,8 @@ def test_column_list(column_test_table, client):
             'default': 5,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
+                'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
+                'SMALLINT', 'VARCHAR',
             ],
         },
         {
@@ -92,9 +95,10 @@ def test_column_list(column_test_table, client):
             'nullable': True,
             'primary_key': False,
             'valid_target_types': [
-                'BIGINT', 'BOOLEAN', 'DATE', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'INTERVAL', 'MATHESAR_TYPES.EMAIL', 'NUMERIC',
-                'REAL', 'SMALLINT', 'VARCHAR',
+                'BIGINT', 'BOOLEAN', 'DATE', 'DECIMAL', 'DOUBLE PRECISION',
+                'FLOAT', 'INTEGER', 'INTERVAL', 'MATHESAR_TYPES.EMAIL',
+                'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL', 'SMALLINT',
+                'VARCHAR',
             ],
             'default': None,
         }
@@ -117,7 +121,8 @@ def test_column_list(column_test_table, client):
                 'default': None,
                 'valid_target_types': [
                     'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                    'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
+                    'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
+                    'SMALLINT', 'VARCHAR',
                 ],
             },
         ),
@@ -133,7 +138,8 @@ def test_column_list(column_test_table, client):
                 'default': 5,
                 'valid_target_types': [
                     'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                    'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
+                    'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
+                    'SMALLINT', 'VARCHAR',
                 ],
             },
         ),
