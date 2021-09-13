@@ -7,10 +7,9 @@ from django.core.cache import cache
 from sqlalchemy import Column, Integer, String, MetaData, select
 from sqlalchemy import Table as SATable
 
-from db import columns
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
-from mathesar.models import Table
+from mathesar import models
 
 
 engine_with_types = fixtures.engine_with_types
@@ -35,7 +34,7 @@ def column_test_table(patent_schema):
     )
     db_table.create()
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+    table = models.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     return table
 
 
@@ -496,7 +495,7 @@ def test_column_duplicate(column_test_table, client):
         "copy_source_data": False,
         "copy_source_constraints": False,
     }
-    with patch.object(columns, "duplicate_column") as mock_infer:
+    with patch.object(models, "duplicate_column") as mock_infer:
         mock_infer.return_value = target_col
         response = client.post(
             f"/api/v0/tables/{column_test_table.id}/columns/",

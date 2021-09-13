@@ -1,10 +1,9 @@
-from sqlalchemy import text, DDL, select
+from sqlalchemy import text
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
-from db import columns
-from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
+
 from db.types import base, email, money
-from db.utils import execute_statement
+from db.types.exceptions import UnsupportedTypeException
 
 
 BIGINT = base.PostgresType.BIGINT.value
@@ -26,10 +25,6 @@ VARCHAR = base.VARCHAR
 
 # custom types
 EMAIL = base.MathesarCustomType.EMAIL.value
-
-
-class UnsupportedTypeException(Exception):
-    pass
 
 
 def get_supported_alter_column_types(engine, friendly_names=True):
@@ -95,53 +90,6 @@ def get_robust_supported_alter_column_type_map(engine):
     return supported_types
 
 
-def alter_column_type(
-        table,
-        column_name,
-        engine,
-        connection,
-        target_type_str,
-        type_options={},
-        friendly_names=True,
-):
-    _preparer = engine.dialect.identifier_preparer
-    supported_types = get_supported_alter_column_types(
-        engine, friendly_names=friendly_names
-    )
-    target_type = supported_types.get(target_type_str)
-    schema = table.schema
-
-    table_oid = get_oid_from_table(table.name, schema, engine)
-    # Re-reflect table so that column is accurate
-    table = reflect_table_from_oid(table_oid, engine, connection)
-    column = table.columns[column_name]
-    column_index = columns.get_column_index_from_name(table_oid, column_name, engine, connection)
-
-    default = columns.get_column_default(table_oid, column_index, engine, connection)
-    if default is not None:
-        default_text = column.server_default.arg.text
-        columns.set_column_default(table, column_index, engine, connection, None)
-
-    prepared_table_name = _preparer.format_table(table)
-    prepared_column_name = _preparer.format_column(column)
-    prepared_type_name = target_type(**type_options).compile(dialect=engine.dialect)
-    cast_function_name = get_cast_function_name(prepared_type_name)
-    alter_stmt = f"""
-    ALTER TABLE {prepared_table_name}
-      ALTER COLUMN {prepared_column_name}
-      TYPE {prepared_type_name}
-      USING {cast_function_name}({prepared_column_name});
-    """
-
-    execute_statement(engine, DDL(alter_stmt), connection)
-
-    if default is not None:
-        cast_stmt = f"{cast_function_name}({default_text})"
-        default_stmt = select(text(cast_stmt))
-        new_default = str(execute_statement(engine, default_stmt, connection).first()[0])
-        columns.set_column_default(table, column_index, engine, connection, new_default)
-
-
 def get_column_cast_expression(column, target_type_str, engine, type_options={}):
     """
     Given a Column, we get the correct SQL selectable for selecting the
@@ -185,6 +133,18 @@ def create_boolean_casts(engine):
     create_cast_functions(BOOLEAN, type_body_map, engine)
 
 
+def create_date_casts(engine):
+    type_body_map = _get_date_type_body_map()
+    create_cast_functions(DATE, type_body_map, engine)
+
+
+def create_decimal_number_casts(engine):
+    decimal_number_types = [DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL]
+    for type_str in decimal_number_types:
+        type_body_map = _get_decimal_number_type_body_map(target_type_str=type_str)
+        create_cast_functions(type_str, type_body_map, engine)
+
+
 def create_email_casts(engine):
     type_body_map = _get_email_type_body_map()
     create_cast_functions(email.DB_TYPE, type_body_map, engine)
@@ -202,21 +162,9 @@ def create_interval_casts(engine):
     create_cast_functions(INTERVAL, type_body_map, engine)
 
 
-def create_decimal_number_casts(engine):
-    decimal_number_types = [DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL]
-    for type_str in decimal_number_types:
-        type_body_map = _get_decimal_number_type_body_map(target_type_str=type_str)
-        create_cast_functions(type_str, type_body_map, engine)
-
-
 def create_money_casts(engine):
     type_body_map = _get_money_type_body_map()
     create_cast_functions(money.DB_TYPE, type_body_map, engine)
-
-
-def create_date_casts(engine):
-    type_body_map = _get_date_type_body_map()
-    create_cast_functions(DATE, type_body_map, engine)
 
 
 def create_varchar_casts(engine):
@@ -244,16 +192,16 @@ def get_defined_source_target_cast_tuples(engine):
     type_body_map_map = {
         BIGINT: _get_integer_type_body_map(target_type_str=BIGINT),
         BOOLEAN: _get_boolean_type_body_map(),
-        EMAIL: _get_email_type_body_map(),
+        DATE: _get_date_type_body_map(),
         DECIMAL: _get_decimal_number_type_body_map(target_type_str=DECIMAL),
         DOUBLE_PRECISION: _get_decimal_number_type_body_map(target_type_str=DOUBLE_PRECISION),
+        EMAIL: _get_email_type_body_map(),
         FLOAT: _get_decimal_number_type_body_map(target_type_str=FLOAT),
         INTEGER: _get_integer_type_body_map(target_type_str=INTEGER),
         INTERVAL: _get_interval_type_body_map(),
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
-        DATE: _get_date_type_body_map(),
         VARCHAR: _get_varchar_type_body_map(engine),
     }
     return {
@@ -482,7 +430,6 @@ def _get_money_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to money.
-
     We allow casting any number type to money, assuming currency is USD.
     We allow casting any textual type to money, assuming currency is USD
     and that the type can be cast through a numeric.
@@ -553,22 +500,3 @@ def _get_default_type_body_map(source_types, target_type_str):
         END;
     """
     return {type_name: default_cast_str for type_name in source_types}
-
-
-def get_column_cast_records(engine, table, column_definitions, num_records=20):
-    assert len(column_definitions) == len(table.columns)
-    cast_expression_list = [
-        (
-            get_column_cast_expression(
-                column, col_def["type"],
-                engine,
-                type_options=col_def.get("type_options", {})
-            )
-            .label(col_def["name"])
-        ) if not columns.MathesarColumn.from_column(column).is_default else column
-        for column, col_def in zip(table.columns, column_definitions)
-    ]
-    sel = select(cast_expression_list).limit(num_records)
-    with engine.begin() as conn:
-        result = conn.execute(sel)
-    return result.fetchall()

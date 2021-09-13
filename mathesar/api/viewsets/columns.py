@@ -4,7 +4,7 @@ from rest_framework.exceptions import NotFound, ValidationError, APIException
 from rest_framework.response import Response
 from sqlalchemy.exc import ProgrammingError
 
-from db.columns import InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
+from db.columns.exceptions import InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
 from mathesar.api.pagination import ColumnLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404

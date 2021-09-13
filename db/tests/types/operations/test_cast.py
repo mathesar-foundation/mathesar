@@ -7,12 +7,14 @@ from sqlalchemy import Table, Column, MetaData, select, cast
 from sqlalchemy import String, Numeric
 from sqlalchemy.exc import DataError
 
-from db import types, columns
-from db.tables.operations.create import create_mathesar_table
+from db import types
+from db.columns.operations.select import get_column_default
+from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
-from db.types import alteration, email
+from db.types import email
 from db.types.base import PostgresType, MathesarCustomType, get_qualified_name, get_available_types
+from db.types.operations import cast as cast_operations
 
 
 # We need to set these variables when the file loads, or pytest can't
@@ -27,7 +29,6 @@ BIGINT = PostgresType.BIGINT.value.upper()
 BOOLEAN = PostgresType.BOOLEAN.value.upper()
 DECIMAL = PostgresType.DECIMAL.value.upper()
 DOUBLE = PostgresType.DOUBLE_PRECISION.value.upper()
-EMAIL = get_qualified_name(MathesarCustomType.EMAIL.value).upper()
 FLOAT = PostgresType.FLOAT.value.upper()
 INTEGER = PostgresType.INTEGER.value.upper()
 INTERVAL = PostgresType.INTERVAL.value.upper()
@@ -36,6 +37,9 @@ REAL = PostgresType.REAL.value.upper()
 SMALLINT = PostgresType.SMALLINT.value.upper()
 DATE = PostgresType.DATE.value.upper()
 VARCHAR = "VARCHAR"
+# Custom types
+EMAIL = get_qualified_name(MathesarCustomType.EMAIL.value).upper()
+MONEY = get_qualified_name(MathesarCustomType.MONEY.value).upper()
 
 
 ISCHEMA_NAME = "ischema_name"
@@ -359,12 +363,12 @@ MASTER_DB_TYPE_MAP_SPEC = {
 
 
 def test_get_alter_column_types_with_custom_engine(engine_with_types):
-    type_dict = alteration.get_supported_alter_column_types(engine_with_types)
+    type_dict = cast_operations.get_supported_alter_column_types(engine_with_types)
     assert types.CUSTOM_TYPE_DICT[email.DB_TYPE] in type_dict.values()
 
 
 def test_get_alter_column_types_with_unfriendly_names(engine_with_types):
-    type_dict = alteration.get_supported_alter_column_types(
+    type_dict = cast_operations.get_supported_alter_column_types(
         engine_with_types, friendly_names=False
     )
     assert all(
@@ -425,7 +429,7 @@ def test_alter_column_type_alters_column_type(
     )
     input_table.create()
     with engine.begin() as conn:
-        alteration.alter_column_type(
+        alter_column_type(
             input_table,
             COLUMN_NAME,
             engine,
@@ -475,7 +479,7 @@ def test_alter_column_type_casts_column_data_args(
     ins = input_table.insert(values=(value,))
     with engine.begin() as conn:
         conn.execute(ins)
-        alteration.alter_column_type(
+        alter_column_type(
             input_table,
             COLUMN_NAME,
             engine,
@@ -542,7 +546,7 @@ def test_alter_column_casts_data_gen(
     ins = input_table.insert().values(testcol=in_val)
     with engine.begin() as conn:
         conn.execute(ins)
-        alteration.alter_column_type(
+        alter_column_type(
             input_table,
             COLUMN_NAME,
             engine,
@@ -558,7 +562,7 @@ def test_alter_column_casts_data_gen(
     actual_value = res[0][0]
     assert actual_value == out_val
     table_oid = get_oid_from_table(TABLE_NAME, schema, engine)
-    actual_default = columns.get_column_default(table_oid, 0, engine)
+    actual_default = get_column_default(table_oid, 0, engine)
     assert actual_default == out_val
 
 
@@ -598,7 +602,7 @@ def test_alter_column_type_raises_on_bad_column_data(
     with engine.begin() as conn:
         conn.execute(ins)
         with pytest.raises(Exception):
-            alteration.alter_column_type(
+            alter_column_type(
                 input_table,
                 COLUMN_NAME,
                 engine,
@@ -626,7 +630,7 @@ def test_alter_column_type_raises_on_bad_parameters(
     with engine.begin() as conn:
         conn.execute(ins)
         with pytest.raises(DataError) as e:
-            alteration.alter_column_type(
+            alter_column_type(
                 input_table,
                 COLUMN_NAME,
                 engine,
@@ -641,7 +645,7 @@ def test_get_column_cast_expression_unchanged(engine_with_types):
     target_type = "numeric"
     col_name = "my_column"
     column = Column(col_name, Numeric)
-    cast_expr = alteration.get_column_cast_expression(
+    cast_expr = cast_operations.get_column_cast_expression(
         column, target_type, engine_with_types
     )
     assert cast_expr == column
@@ -651,7 +655,7 @@ def test_get_column_cast_expression_change(engine_with_types):
     target_type = "boolean"
     col_name = "my_column"
     column = Column(col_name, Numeric)
-    cast_expr = alteration.get_column_cast_expression(
+    cast_expr = cast_operations.get_column_cast_expression(
         column, target_type, engine_with_types
     )
     assert str(cast_expr) == f"mathesar_types.cast_to_boolean({col_name})"
@@ -661,7 +665,7 @@ def test_get_column_cast_expression_change_quotes(engine_with_types):
     target_type = "boolean"
     col_name = "A Column Needing Quotes"
     column = Column(col_name, Numeric)
-    cast_expr = alteration.get_column_cast_expression(
+    cast_expr = cast_operations.get_column_cast_expression(
         column, target_type, engine_with_types
     )
     assert str(cast_expr) == f'mathesar_types.cast_to_boolean("{col_name}")'
@@ -670,8 +674,8 @@ def test_get_column_cast_expression_change_quotes(engine_with_types):
 def test_get_column_cast_expression_unsupported(engine_with_types):
     target_type = "this_type_does_not_exist"
     column = Column("colname", Numeric)
-    with pytest.raises(alteration.UnsupportedTypeException):
-        alteration.get_column_cast_expression(
+    with pytest.raises(cast_operations.UnsupportedTypeException):
+        cast_operations.get_column_cast_expression(
             column, target_type, engine_with_types
         )
 
@@ -694,7 +698,7 @@ def test_get_column_cast_expression_numeric_options(
 ):
     target_type = "numeric"
     column = Column("colname", type_)
-    cast_expr = alteration.get_column_cast_expression(
+    cast_expr = cast_operations.get_column_cast_expression(
         column, target_type, engine_with_types, type_options=options,
     )
     assert str(cast_expr) == expect_cast_expr
@@ -708,69 +712,7 @@ expect_cast_tuples = [
 
 @pytest.mark.parametrize("source_type,expect_target_types", expect_cast_tuples)
 def test_get_full_cast_map(engine_with_types, source_type, expect_target_types):
-    actual_cast_map = alteration.get_full_cast_map(engine_with_types)
+    actual_cast_map = cast_operations.get_full_cast_map(engine_with_types)
     actual_target_types = actual_cast_map[source_type]
     assert len(actual_target_types) == len(expect_target_types)
     assert sorted(actual_target_types) == sorted(expect_target_types)
-
-
-def test_get_column_cast_records(engine_email_type):
-    COL1 = "col1"
-    COL2 = "col2"
-    col1 = Column(COL1, String)
-    col2 = Column(COL2, String)
-    column_list = [col1, col2]
-    engine, schema = engine_email_type
-    table_name = "table_with_columns"
-    table = create_mathesar_table(
-        table_name, schema, column_list, engine
-    )
-    ins = table.insert().values(
-        [{COL1: 'one', COL2: 1}, {COL1: 'two', COL2: 2}]
-    )
-    with engine.begin() as conn:
-        conn.execute(ins)
-    COL1_MOD = COL1 + "_mod"
-    COL2_MOD = COL2 + "_mod"
-    column_definitions = [
-        {"name": "mathesar_id", "type": "INTEGER"},
-        {"name": COL1_MOD, "type": "VARCHAR"},
-        {"name": COL2_MOD, "type": "NUMERIC"},
-    ]
-    records = alteration.get_column_cast_records(engine, table, column_definitions)
-    for record in records:
-        assert (
-            type(record[COL1 + "_mod"]) == str
-            and type(record[COL2 + "_mod"]) == Decimal
-        )
-
-
-def test_get_column_cast_records_options(engine_email_type):
-    COL1 = "col1"
-    COL2 = "col2"
-    col1 = Column(COL1, String)
-    col2 = Column(COL2, String)
-    column_list = [col1, col2]
-    engine, schema = engine_email_type
-    table_name = "table_with_columns"
-    table = create_mathesar_table(
-        table_name, schema, column_list, engine
-    )
-    ins = table.insert().values(
-        [{COL1: 'one', COL2: 1}, {COL1: 'two', COL2: 2}]
-    )
-    with engine.begin() as conn:
-        conn.execute(ins)
-    COL1_MOD = COL1 + "_mod"
-    COL2_MOD = COL2 + "_mod"
-    column_definitions = [
-        {"name": "mathesar_id", "type": "INTEGER"},
-        {"name": COL1_MOD, "type": "VARCHAR"},
-        {"name": COL2_MOD, "type": "NUMERIC", "type_options": {"precision": 5, "scale": 2}},
-    ]
-    records = alteration.get_column_cast_records(engine, table, column_definitions)
-    for record in records:
-        assert (
-            type(record[COL1 + "_mod"]) == str
-            and type(record[COL2 + "_mod"]) == Decimal
-        )
