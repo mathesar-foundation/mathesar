@@ -3,7 +3,7 @@ from sqlalchemy.ext import compiler
 from sqlalchemy.exc import NoSuchTableError, InternalError
 from psycopg2.errors import DependentObjectsStillExist
 
-from db.tables.utils import reflect_table
+from db.tables.operations.select import reflect_table
 
 
 class DropTableCascade(DropTable):
