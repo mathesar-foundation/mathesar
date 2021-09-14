@@ -63,7 +63,7 @@
         {height}
         width={totalWidth || null}
         itemCount={$records.data.length}
-        paddingBottom={100}
+        paddingBottom={20}
         itemSize={getItemSize}
         itemKey={getItemKey}
         let:items
