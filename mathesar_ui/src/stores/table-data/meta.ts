@@ -4,12 +4,8 @@ import type { TabularType, DBObjectEntry } from '@mathesar/App.d';
 import type { SelectOption } from '@mathesar-components/types';
 
 export const DEFAULT_PAGE_SIZE = 500;
-export const GROUP_MARGIN_LEFT = 30;
-export const ROW_CONTROL_COLUMN_WIDTH = 70;
-export const DEFAULT_ROW_RIGHT_PADDING = 100;
 
 export type SortOption = Map<string, 'asc' | 'desc'>;
-
 export type GroupOption = Set<string>;
 
 export interface FilterEntry {
@@ -73,7 +69,10 @@ export class Meta {
     this.page = writable(1);
     this.sort = writable(new Map() as SortOption);
     this.group = writable(new Set() as GroupOption);
-    this.filter = writable(null as FilterOption);
+    this.filter = writable({
+      combination: filterCombinations[0],
+      filters: [],
+    });
     this.selected = writable({});
 
     this.offset = derived([this.pageSize, this.page], ([$pageSize, $page], set) => {

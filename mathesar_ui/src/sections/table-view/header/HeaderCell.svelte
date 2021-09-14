@@ -42,8 +42,8 @@
   }
 </script>
 
-<div class="cell" style="width:{position.width}px;
-      left:{position.left + paddingLeft}px;">
+<div class="cell" style="width:{position?.width || 0}px;
+      left:{(position?.left || 0) + paddingLeft}px;">
   <span class="type">
     {#if column.type === 'INTEGER'}
       #

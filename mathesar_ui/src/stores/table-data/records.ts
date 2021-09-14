@@ -96,7 +96,7 @@ export class Records implements Writable<TableRecordData> {
 
     try {
       const params = getStoreValue(this._meta.recordRequestParams);
-      this._promise = getAPI<PaginatedResponse<TableRecord>>(`${this._url}?${params}`);
+      this._promise = getAPI<PaginatedResponse<TableRecord>>(`${this._url}?${params ?? ''}`);
 
       const response = await this._promise;
       const totalCount = response.count || 0;
