@@ -174,53 +174,9 @@ section.table-section .tab-container {
           bottom: 0px;
           overflow: hidden;
 
-          .group {
-            overflow: visible;
-
-            .values, .cell.row-control > div.border {
-              border: 1px solid #81b9ff;
-              background: #e6f1ff;
-            }
-
-            .cell.row-control {
-              border: none;
-              background: #f7f8f8;
-
-              >div.border {
-                position: absolute;
-                left: 0;
-                top: 0;
-                right: 0;
-                bottom: 0;
-                border-radius: 6px 0px 0px 0px;
-              }
-              .content {
-                position: relative;
-              }
-            }
-
-            .values {
-              position: absolute;
-              top: 0px;
-              left: 0px;
-              right: 0px;
-              height: 100%;
-              padding: 10px 20px;
-              border-radius: 0px 6px 0px 0px;
-              border-left: none;
-
-              .tag {
-                & + .tag {
-                 margin-left: 30px;
-                }
-               }
-            }
-          }
-
           .cell {
             user-select: none;
             padding: 7px 14px;
-            background: #fff;
 
             .loader {
               top: 6px;
@@ -230,6 +186,19 @@ section.table-section .tab-container {
               position: absolute;
               background: #efefef;
             }
+          }
+
+          .cell:not(.groupheader) {
+            background: #fff;
+          }
+          .cell.groupheader {
+            border-bottom: none;
+
+            .tag {
+              & + .tag {
+               margin-left: 30px;
+              }
+             }
           }
 
           .row {
@@ -268,20 +237,6 @@ section.table-section .tab-container {
                   transition: all .20s cubic-bezier(0,0,.2,1);
                   background: #f1bfbf;
                 }
-              }
-            }
-
-            &.in-group {
-              .row-control {
-                /**
-                 * Fix for an obsure bug in firefox.
-                 * If position of sticky elements and their parents are updated, and if
-                 * the parents have an associated transition, the sticky elements consider
-                 * the old position of their parents until the next browser animation frame.
-                 * Work around is to add the same animation to the sticky elements.
-                 */
-                transition: left .20s cubic-bezier(0,0,.2,1);
-                border-left: 1px solid #efefef;
               }
             }
           }

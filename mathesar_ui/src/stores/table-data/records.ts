@@ -11,12 +11,16 @@ import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
 import type { DBObjectEntry } from '@mathesar/App.d';
 import type { Meta } from './meta';
-import type { Columns } from './columns';
+import type { Columns, TableColumn } from './columns';
 
 export interface TableRecord {
-  [key: string]: unknown
+  [key: string]: unknown,
+  __isGroupHeader?: boolean,
+  __rowNumber?: number,
+  __state: string,
   __groupInfo?: {
-    columns: string[]
+    columns: string[],
+    values: Record<string, unknown>,
   }
 }
 
@@ -32,6 +36,78 @@ interface TableRecordData {
   groupData?: GroupData
 }
 
+interface TableRecordResponse extends PaginatedResponse<TableRecord> {
+  group_count?: {
+    group_count_by?: TableColumn['name'][],
+    results?: {
+      count: number,
+      values: string[]
+    }[]
+  }
+}
+
+function mapGroupCounts(groupInfo: TableRecordResponse['group_count']): GroupData {
+  const groupResults = groupInfo.results;
+  const groupMap: GroupData = {};
+  groupResults?.forEach((result) => {
+    let group = groupMap;
+    for (let i = 0; i < result.values.length - 1; i += 1) {
+      const value = result.values[i];
+      if (!group[value]) {
+        group[value] = {};
+      }
+      group = group[value] as GroupData;
+    }
+    group[result.values[result.values.length - 1]] = result.count;
+  });
+  return groupMap;
+}
+
+function preprocessRecords(offset: number, response: TableRecordResponse): TableRecord[] {
+  const groupColumns = response?.group_count?.group_count_by;
+  const isResultGrouped = groupColumns?.length > 0;
+
+  const records = response.results || [];
+  const combinedRecords: TableRecord[] = [];
+  let index = 0;
+
+  records.forEach((record) => {
+    if (isResultGrouped) {
+      let isGroup = false;
+      if (index === 0) {
+        isGroup = true;
+      } else {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const column of groupColumns) {
+          if (records[index - 1][column] !== records[index][column]) {
+            isGroup = true;
+            break;
+          }
+        }
+      }
+
+      if (isGroup) {
+        combinedRecords.push({
+          __isGroupHeader: true,
+          __groupInfo: {
+            columns: groupColumns,
+            values: record,
+          },
+          __state: 'done',
+        });
+      }
+    }
+
+    combinedRecords.push({
+      ...record,
+      __rowNumber: offset + index + 1,
+      __state: 'done',
+    });
+    index += 1;
+  });
+  return combinedRecords;
+}
+
 export class Records implements Writable<TableRecordData> {
   _type: TabularType;
 
@@ -39,7 +115,7 @@ export class Records implements Writable<TableRecordData> {
 
   _store: Writable<TableRecordData>;
 
-  _promise: CancellablePromise<PaginatedResponse<TableRecord>>;
+  _promise: CancellablePromise<TableRecordResponse>;
 
   _url: string;
 
@@ -105,17 +181,24 @@ export class Records implements Writable<TableRecordData> {
 
     try {
       const params = getStoreValue(this._meta.recordRequestParams);
-      this._promise = getAPI<PaginatedResponse<TableRecord>>(`${this._url}?${params ?? ''}`);
+      this._promise = getAPI<TableRecordResponse>(`${this._url}?${params ?? ''}`);
 
       const response = await this._promise;
       const totalCount = response.count || 0;
-      const data = response.results || [];
 
-      const records = data.map((entry) => ({ ...entry, __state: 'done' }));
+      const groupColumns = response?.group_count?.group_count_by;
+      const isResultGrouped = groupColumns?.length > 0;
+      let groupData: GroupData = null;
+      if (isResultGrouped) {
+        groupData = mapGroupCounts(response.group_count);
+      }
+
+      const records = preprocessRecords(getStoreValue(this._meta.offset), response);
 
       const storeData: TableRecordData = {
         state: States.Done,
         data: records,
+        groupData,
         totalCount,
       };
       this._store.set(storeData);

@@ -44,8 +44,7 @@
         {#each items as it (it?.key || it)}
           {#if it}
             <Row style={it.style}
-                  row={$records.data[it.index] || {}}
-                  index={it.index}/>
+                  row={$records.data[it.index] || { __state: 'loading' }}/>
           {/if}
         {/each}
       </VirtualList>

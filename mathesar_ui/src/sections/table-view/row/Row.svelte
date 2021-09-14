@@ -12,17 +12,17 @@
   } from '@mathesar/stores/table-data/types';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
+  import GroupHeader from './GroupHeader.svelte';
 
-  export let index: number;
   export let row: TableRecord;
   export let style: { [key: string]: string | number };
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  $: ({ columns, meta, display } = $tabularData as TabularData);
+  $: ({
+    records, columns, meta, display,
+  } = $tabularData as TabularData);
   $: ({ columnPositionMap } = display as TabularData['display']);
-  $: ({ offset, selected } = meta as TabularData['meta']);
-
-  $: rowNumber = $offset as number + index + 1;
+  $: ({ selected } = meta as TabularData['meta']);
 
   function calculateStyle(
     _style: { [key: string]: string | number },
@@ -64,13 +64,17 @@
   $: isSelected = calcIsSelected($selected, row, $columns);
 </script>
 
-<div class="row {row.__state || ''}" class:selected={isSelected}
-      style={styleString}>
-  <RowControl {rowNumber} primaryKey={$columns.primaryKey}
+<div class="row {row.__state}" class:selected={isSelected}
+      class:is-group-header={row.__isGroupHeader} style={styleString}>
+  <RowControl primaryKey={$columns.primaryKey}
               {row} bind:selected={$selected}/>
 
-  {#each $columns.data as column (column.name)}
-    <RowCell columnPosition={getColumnPosition($columnPositionMap, column.name)} {row} {column}/>
-  {/each}
+  {#if row.__isGroupHeader}
+    <GroupHeader {row} groupData={$records.groupData}/>
+  {:else}
+    {#each $columns.data as column (column.name)}
+      <RowCell columnPosition={getColumnPosition($columnPositionMap, column.name)} {row} {column}/>
+    {/each}
+  {/if}
 </div>
  

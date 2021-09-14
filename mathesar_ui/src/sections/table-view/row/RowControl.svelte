@@ -8,7 +8,6 @@
     TableRecord,
   } from '@mathesar/stores/table-data/types';
 
-  export let rowNumber: number;
   export let isGrouped = false;
   export let primaryKey: string = null;
   export let selected: Record<string | number, boolean>;
@@ -31,10 +30,15 @@
 
 <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;
             left:{isGrouped ? GROUP_MARGIN_LEFT : 0}px">
-  <span class="number">{rowNumber}</span>
+  
+  {#if !row.__isGroupHeader}
+    {#if row.__rowNumber}
+      <span class="number">{row.__rowNumber}</span>
+    {/if}
 
-  {#if primaryKeyValue}
-    <Checkbox bind:checked={selected[primaryKeyValue]}
-      on:change={selectionChanged}/>
+    {#if primaryKeyValue}
+      <Checkbox bind:checked={selected[primaryKeyValue]}
+        on:change={selectionChanged}/>
+    {/if}
   {/if}
 </div>
