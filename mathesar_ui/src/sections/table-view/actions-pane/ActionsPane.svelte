@@ -24,6 +24,10 @@
   function openDisplayOptions() {
     dispatch('openDisplayOptions');
   }
+
+  function deleteRecords() {
+    void (records as TabularData['records']).deleteSelected();
+  }
 </script>
 
 <div class="actions-pane">
@@ -58,7 +62,7 @@
   </Button>
 
   {#if $selectedRecords.length > 0}
-    <Button appearance="plain" on:click={() => dispatch('deleteRecords')}>
+    <Button appearance="plain" on:click={deleteRecords}>
       <Icon data={faTrashAlt}/>
       <span>
         Delete {$selectedRecords.length} records

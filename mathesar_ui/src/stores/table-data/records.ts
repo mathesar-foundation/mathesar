@@ -78,13 +78,22 @@ export class Records implements Writable<TableRecordData> {
     });
   }
 
-  async fetch(): Promise<TableRecordData> {
+  async fetch(hideLoadingOnExistingRows = false): Promise<TableRecordData> {
     this._promise?.cancel();
     this._store.update((existingData) => {
-      const { data } = existingData;
+      let { data } = existingData;
 
       data.length = getStoreValue(this._meta.pageSize);
-      data.fill({ __state: 'loading' });
+      if (hideLoadingOnExistingRows) {
+        data = data.map((entry) => {
+          if (!entry) {
+            return { __state: 'loading' };
+          }
+          return entry;
+        });
+      } else {
+        data.fill({ __state: 'loading' });
+      }
 
       return {
         ...existingData,
@@ -197,6 +206,8 @@ export class Records implements Writable<TableRecordData> {
             data,
           };
         });
+
+        void this.fetch(true);
       } catch (err) {
         this._store.update((existingData) => {
           // TODO: Retain map with pk uuid hash for record operations
