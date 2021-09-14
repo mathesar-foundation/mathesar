@@ -3,16 +3,23 @@
   import {
     GROUP_MARGIN_LEFT,
     ROW_CONTROL_COLUMN_WIDTH,
+    DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/table-data';
 
-  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
+  import type {
+    TabularDataStore,
+    TabularData,
+    TableColumn,
+    ColumnPosition,
+    ColumnPositionMap,
+  } from '@mathesar/stores/table-data/types';
   import HeaderCell from './HeaderCell.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
   $: ({
     columns, records, meta, display,
   } = $tabularData as TabularData);
-  $: ({ horizontalScrollOffset } = display as TabularData['display']);
+  $: ({ horizontalScrollOffset, rowWidth, columnPositionMap } = display as TabularData['display']);
 
   $: paddingLeft = $records.groupData ? GROUP_MARGIN_LEFT : 0;
 
@@ -30,6 +37,13 @@
     if ($horizontalScrollOffset !== scrollLeft) {
       $horizontalScrollOffset = scrollLeft;
     }
+  }
+
+  function getColumnPosition(
+    _columnPositionMap: ColumnPositionMap,
+    _name: TableColumn['name'],
+  ): ColumnPosition {
+    return _columnPositionMap.get(_name);
   }
 
   onMount(() => {
@@ -53,6 +67,12 @@
   </div>
 
   {#each $columns.data as column (column.name)}
-    <HeaderCell {column} {meta} {display} {paddingLeft}/>
+    <HeaderCell {column} {meta} {paddingLeft}
+      columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
   {/each}
+
+  <div class="cell" style="
+    width:{DEFAULT_ROW_RIGHT_PADDING + paddingLeft}px;
+    left:{$rowWidth + DEFAULT_ROW_RIGHT_PADDING + paddingLeft}px">
+  </div>
 </div>

@@ -26,7 +26,7 @@
   let interalSelectedDB: Database['name'] = get(currentDBName);
   $: schemas = getSchemasStoreForDB(interalSelectedDB);
 
-  let isOpen;
+  let isOpen: boolean;
   let schemaFilter = '';
 
   function getFilteredSchemas(schemaData: DBSchemaStoreData['data'], filter: string): SchemaEntry[] {

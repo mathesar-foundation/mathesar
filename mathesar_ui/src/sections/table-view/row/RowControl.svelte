@@ -14,7 +14,7 @@
   export let selected: Record<string | number, boolean>;
   export let row: TableRecord;
 
-  function calculatePKValue(_row, _pkey) {
+  function calculatePKValue(_row: TableRecord, _pkey: string): string {
     if (_pkey && _row?.[_pkey]) {
       return _row[_pkey] as string;
     }

@@ -7,21 +7,18 @@
   import { Dropdown, Icon } from '@mathesar-components';
   import type {
     Meta,
-    Display,
     TableColumn,
-    ColumnPositionMap,
     SortOption,
     GroupOption,
+    ColumnPosition,
   } from '@mathesar/stores/table-data/types';
 
+  export let columnPosition: ColumnPosition;
   export let column: TableColumn;
   export let meta: Meta;
-  export let display: Display;
   export let paddingLeft: number;
 
   $: ({ sort, group } = meta);
-  $: ({ columnPositionMap } = display);
-  $: position = ($columnPositionMap as ColumnPositionMap).get(column.name);
   $: sortDirection = ($sort as SortOption)?.get(column.name);
   $: hasGrouping = ($group as GroupOption)?.has(column.name);
 
@@ -42,8 +39,8 @@
   }
 </script>
 
-<div class="cell" style="width:{position?.width || 0}px;
-      left:{(position?.left || 0) + paddingLeft}px;">
+<div class="cell" style="width:{columnPosition?.width || 0}px;
+      left:{(columnPosition?.left || 0) + paddingLeft}px;">
   <span class="type">
     {#if column.type === 'INTEGER'}
       #

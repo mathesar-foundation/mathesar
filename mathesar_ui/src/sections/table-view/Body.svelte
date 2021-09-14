@@ -28,7 +28,7 @@
   // Resizer may not have created it yet/destroyed it
   let virtualListRef: VirtualList;
 
-  function getItemSize(index: number) {
+  function getItemSize() {
     const defaultRowHeight = 30;
     // if (data[index]?.__groupInfo) {
     //   return GROUP_ROW_HEIGHT + defaultRowHeight;

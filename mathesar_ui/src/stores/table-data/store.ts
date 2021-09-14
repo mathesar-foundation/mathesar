@@ -21,7 +21,7 @@ export interface TabularDataEntry extends TabularData {
 const tableMap: Map<TableEntry['id'], TabularDataEntry> = new Map();
 const viewMap: Map<ViewEntry['id'], TabularDataEntry> = new Map();
 
-function get(type: TabularType, id: DBObjectEntry['id'], metaInfo?: Meta): TabularData {
+function get(type: TabularType, id: DBObjectEntry['id']): TabularData {
   const tabularMap = type === TabularType.View ? viewMap : tableMap;
   let entry = tabularMap.get(id);
   if (!entry) {
