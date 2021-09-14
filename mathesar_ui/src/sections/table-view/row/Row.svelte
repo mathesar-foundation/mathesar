@@ -8,6 +8,7 @@
     TableRecord,
   } from '@mathesar/stores/table-data/types';
   import RowControl from './RowControl.svelte';
+  import RowCell from './RowCell.svelte';
 
   export let index: number;
   export let row: TableRecord;
@@ -27,8 +28,8 @@
     if (!_style) {
       return '';
     }
-    const totalWidth = _columnPositionMap.get('__row').width;
-    return `position:${_style.position};left:${_style.left}px`
+    const totalWidth = _columnPositionMap.get('__row')?.width || 0;
+    return `position:${_style.position};left:${_style.left}px;`
       + `top:${_style.top}px;height:${_style.height}px;`
       + `width:${totalWidth + DEFAULT_ROW_RIGHT_PADDING}px`;
   }
@@ -47,14 +48,7 @@
               {row} bind:selected={$selected}/>
 
   {#each $columns.data as column (column.name)}
-    <div class="cell" style="
-      width:{$columnPositionMap.get(column.name).width}px;
-      left:{$columnPositionMap.get(column.name).left}px;">
-      {typeof row[column.name] !== 'undefined' ? row[column.name] : ''}
-
-      {#if !row.__state || row.__state === 'loading'}
-        <div class="loader"></div>
-      {/if}
-    </div>
+    <RowCell columnPosition={$columnPositionMap.get(column.name)} {row} {column}/>
   {/each}
 </div>
+ 
