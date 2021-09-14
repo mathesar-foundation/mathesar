@@ -1,10 +1,8 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import { DEFAULT_ROW_RIGHT_PADDING, GROUP_MARGIN_LEFT } from '@mathesar/stores/table-data';
   import type {
     TabularDataStore,
     TabularData,
-    ColumnPositionMap,
   } from '@mathesar/stores/table-data/types';
 
   import Row from './row/Row.svelte';
@@ -14,54 +12,29 @@
   const tabularData = getContext<TabularDataStore>('tabularData');
   $: ({ id, records, display } = $tabularData as TabularData);
   $: ({
-    columnPositionMap, horizontalScrollOffset,
+    rowWidth, horizontalScrollOffset,
   } = display as TabularData['display']);
-
-  // TODO: Compute the following in meta store
-  let rowWidth: number;
-  let widthWithPadding: number | null;
-  $: rowWidth = ($columnPositionMap as ColumnPositionMap)?.get('__row')?.width || 0;
-  $: widthWithPadding = rowWidth ? rowWidth + DEFAULT_ROW_RIGHT_PADDING : 0;
-  $: totalWidth = widthWithPadding ? widthWithPadding + GROUP_MARGIN_LEFT : null;
-
-  // Be careful while accessing this ref.
-  // Resizer may not have created it yet/destroyed it
-  let virtualListRef: VirtualList;
 
   function getItemSize() {
     const defaultRowHeight = 30;
-    // if (data[index]?.__groupInfo) {
-    //   return GROUP_ROW_HEIGHT + defaultRowHeight;
-    // }
+    // TODO: Check and set extra height for group. Needs UX rethought.
     return defaultRowHeight;
   }
 
   function getItemKey(index: number): number | string {
-    // Check and return primary key
+    // TODO: Check and return primary key
     // Return index by default
     return `__index_${index}`;
   }
-
-  // export function reloadPositions(resetPositions: boolean): void {
-  //   if (virtualListRef) {
-  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  //     virtualListRef.scrollToPosition(0, 0);
-  //     if (resetPositions) {
-  //       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  //       virtualListRef.resetAfterIndex(0);
-  //     }
-  //   }
-  // }
 </script>
 
 <div class="body">
   <Resizer let:height>
     {#key id}
       <VirtualList
-        bind:this={virtualListRef}
         bind:horizontalScrollOffset={$horizontalScrollOffset}
         {height}
-        width={totalWidth || null}
+        width={$rowWidth || null}
         itemCount={$records.data.length}
         paddingBottom={20}
         itemSize={getItemSize}

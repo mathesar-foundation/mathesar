@@ -73,6 +73,6 @@
 
   <div class="cell" style="
     width:{DEFAULT_ROW_RIGHT_PADDING + paddingLeft}px;
-    left:{$rowWidth + DEFAULT_ROW_RIGHT_PADDING + paddingLeft}px">
+    left:{$rowWidth + paddingLeft}px">
   </div>
 </div>

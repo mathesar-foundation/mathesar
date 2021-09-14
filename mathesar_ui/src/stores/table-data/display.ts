@@ -76,7 +76,9 @@ export class Display {
       this.columnPositionMap.update(
         (map) => recalculateColumnPositions(map, columnData.data),
       );
-      this.rowWidth.set(get(this.columnPositionMap).get('__row')?.width || 0);
+      const width = get(this.columnPositionMap).get('__row')?.width;
+      const widthWithPadding = width ? width + DEFAULT_ROW_RIGHT_PADDING : 0;
+      this.rowWidth.set(widthWithPadding);
     });
   }
 
