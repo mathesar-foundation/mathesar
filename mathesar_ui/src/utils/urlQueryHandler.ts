@@ -2,9 +2,12 @@ import { router } from 'tinro';
 import type {
   GroupOption,
   SortOption,
-  TableOptionsData,
+  FilterOption,
   FilterEntry,
-} from '@mathesar/stores/tableData';
+  FilterCombination,
+} from '@mathesar/stores/table-data/types';
+
+// TODO: Refactor file based on latest store structure
 
 /**
  * Structure of url t=[
@@ -17,6 +20,14 @@ import type {
  * ], a=id
  * t -> tables, a -> active
  */
+
+interface TableOptionsData {
+  limit: number,
+  offset: number,
+  sort: SortOption,
+  group: GroupOption,
+  filter: FilterOption
+}
 
 interface TableOptions extends Partial<TableOptionsData> {
   position?: number,
@@ -68,7 +79,7 @@ function parseTableConfig(config: RawTableConfig): TableConfig {
 
   if ((config[3] as string[])?.length > 0) {
     const filterList = config[3] as string[];
-    const combination = filterList[0];
+    const combination = filterList[0] as FilterCombination['id'];
     const filters: FilterEntry[] = [];
     for (let i = 1; i < filterList.length;) {
       const column = filterList[i];

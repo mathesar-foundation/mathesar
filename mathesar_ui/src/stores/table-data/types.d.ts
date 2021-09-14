@@ -8,5 +8,6 @@ export type {
   FilterCombination,
   GroupOption,
   SortOption,
+  FilterOption,
 } from './meta';
 export type { Display } from './display';
