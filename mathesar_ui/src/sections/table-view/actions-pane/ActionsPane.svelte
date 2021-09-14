@@ -86,3 +86,7 @@
     {/if}
   </div>
 </div>
+
+<style global lang="scss">
+  @import "ActionsPane.scss";
+</style>

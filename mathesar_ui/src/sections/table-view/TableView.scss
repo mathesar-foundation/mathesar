@@ -2,15 +2,6 @@ $display-opts-pane-width: 360px;
 
 section.table-section .tab-container {
   .tab-content-holder {
-    .actions-pane {
-      border-bottom: 1px solid #efefef;
-      position: relative;
-
-      .loading-info {
-        float: right;
-        padding: 8px 12px;
-      }
-    }
     .table-data {
       flex-grow: 1;
       overflow: hidden;

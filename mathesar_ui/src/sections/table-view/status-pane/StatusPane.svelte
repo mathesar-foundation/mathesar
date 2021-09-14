@@ -31,18 +31,20 @@
 <div class="status-pane">
   <div class="record-count">
     {#if $selectedRecords?.length > 0}
-      {$selectedRecords.length} record{$selectedRecords.length > 1 ? 's' : ''} selected
+      {$selectedRecords.length} record{$selectedRecords.length > 1 ? 's' : ''} selected of {$records.totalCount}
+
+    {:else if pageCount > 0 && $records.totalCount}
+      Showing {$offset + 1} - {max} of {$records.totalCount} records
+    
+    {:else}
+      No records found
     {/if}
   </div>
 
-  <div class="pagination">
-    {#if pageCount > 0}
-      <div>Showing {$offset + 1} - {max} of {$records.totalCount} records</div>
-    {/if}
-
+  <div class="pagination-group">
     {#if $records.totalCount}
-      <Select options={pageSizeOpts} value={selectedPageSize} on:change={setPageSize}/>
       <Pagination total={$records.totalCount} pageSize={$pageSize} bind:page={$page} bind:pageCount/>
+      <Select options={pageSizeOpts} value={selectedPageSize} on:change={setPageSize}/>
     {/if}
   </div>
 </div>
