@@ -1,6 +1,6 @@
 from sqlalchemy import MetaData, select
 
-from db import columns
+from db.columns.defaults import DEFAULT_COLUMNS
 from db.tables.operations.merge import merge_tables
 
 
@@ -52,14 +52,14 @@ def test_merge_columns_returns_original_data_rem_ext(extracted_remainder_roster)
     roster_columns = sorted(
         [
             col.name for col in roster.columns
-            if col.name not in columns.DEFAULT_COLUMNS
+            if col.name not in DEFAULT_COLUMNS
         ]
     )
     merged = metadata.tables[f"{schema}.Merged Roster"]
     merged_columns = sorted(
         [
             col.name for col in merged.columns
-            if col.name not in columns.DEFAULT_COLUMNS
+            if col.name not in DEFAULT_COLUMNS
         ]
     )
     expect_tuple_sel = select(
@@ -88,14 +88,14 @@ def test_merge_columns_returns_original_data_ext_rem(extracted_remainder_roster)
     roster_columns = sorted(
         [
             col.name for col in roster.columns
-            if col.name not in columns.DEFAULT_COLUMNS
+            if col.name not in DEFAULT_COLUMNS
         ]
     )
     merged = metadata.tables[f"{schema}.Merged Roster"]
     merged_columns = sorted(
         [
             col.name for col in merged.columns
-            if col.name not in columns.DEFAULT_COLUMNS
+            if col.name not in DEFAULT_COLUMNS
         ]
     )
     expect_tuple_sel = select(

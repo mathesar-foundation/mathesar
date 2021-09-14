@@ -4,15 +4,24 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 
-from db import columns
-from db.constraints import operations as constraint_operations
+from db.columns import utils as column_utils
+from db.columns.operations.create import create_column, duplicate_column
+from db.columns.operations.alter import alter_column
+from db.columns.operations.drop import drop_column
+from db.constraints.operations.create import create_unique_constraint
+from db.constraints.operations.drop import drop_constraint
+from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
 from db.constraints import utils as constraint_utils
-from db.records import operations as record_operations
-from db.schemas import operations as schema_operations
+from db.records.operations.delete import delete_record
+from db.records.operations.group import get_group_counts
+from db.records.operations.insert import insert_record_or_records
+from db.records.operations.select import get_column_cast_records, get_count, get_record, get_records
+from db.records.operations.update import update_record
+from db.schemas.operations.drop import drop_schema
 from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
-from db.tables import operations as table_operations
-from db.types import alteration
+from db.tables.operations.drop import drop_table
+from db.tables.operations.select import reflect_table_from_oid
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
@@ -125,7 +134,7 @@ class Schema(DatabaseObject):
         return model_utils.update_sa_schema(self, update_params)
 
     def delete_sa_schema(self):
-        return schema_operations.drop_schema(self.name, self._sa_engine, cascade=True)
+        return drop_schema(self.name, self._sa_engine, cascade=True)
 
     def clear_name_cache(self):
         cache_key = f"{self.database.name}_schema_name_{self.oid}"
@@ -156,7 +165,7 @@ class Table(DatabaseObject):
     @cached_property
     def _sa_table(self):
         try:
-            table = table_operations.reflect_table_from_oid(
+            table = reflect_table_from_oid(
                 self.oid, self.schema._sa_engine,
             )
         # We catch these errors, since it lets us decouple the cadence of
@@ -170,7 +179,7 @@ class Table(DatabaseObject):
 
     @cached_property
     def _enriched_column_sa_table(self):
-        return table_utils.get_enriched_column_table(
+        return column_utils.get_enriched_column_table(
             self._sa_table, engine=self.schema._sa_engine,
         )
 
@@ -196,14 +205,14 @@ class Table(DatabaseObject):
         return True
 
     def add_column(self, column_data):
-        return columns.create_column(
+        return create_column(
             self.schema._sa_engine,
             self.oid,
             column_data,
         )
 
     def alter_column(self, column_index, column_data):
-        return columns.alter_column(
+        return alter_column(
             self.schema._sa_engine,
             self.oid,
             column_index,
@@ -211,14 +220,14 @@ class Table(DatabaseObject):
         )
 
     def drop_column(self, column_index):
-        columns.drop_column(
+        drop_column(
             self.oid,
             column_index,
             self.schema._sa_engine,
         )
 
     def duplicate_column(self, column_index, copy_data, copy_constraints, name=None):
-        return columns.duplicate_column(
+        return duplicate_column(
             self.oid,
             column_index,
             self.schema._sa_engine,
@@ -228,28 +237,28 @@ class Table(DatabaseObject):
         )
 
     def get_preview(self, column_definitions):
-        return alteration.get_column_cast_records(
+        return get_column_cast_records(
             self.schema._sa_engine, self._sa_table, column_definitions
         )
 
     @property
     def sa_all_records(self):
-        return record_operations.get_records(self._sa_table, self.schema._sa_engine)
+        return get_records(self._sa_table, self.schema._sa_engine)
 
     def sa_num_records(self, filters=[]):
-        return record_operations.get_count(self._sa_table, self.schema._sa_engine, filters=filters)
+        return get_count(self._sa_table, self.schema._sa_engine, filters=filters)
 
     def update_sa_table(self, update_params):
         return model_utils.update_sa_table(self, update_params)
 
     def delete_sa_table(self):
-        return table_operations.drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
+        return drop_table(self.name, self.schema.name, self.schema._sa_engine, cascade=True)
 
     def get_record(self, id_value):
-        return record_operations.get_record(self._sa_table, self.schema._sa_engine, id_value)
+        return get_record(self._sa_table, self.schema._sa_engine, id_value)
 
     def get_records(self, limit=None, offset=None, filters=[], order_by=[]):
-        return record_operations.get_records(
+        return get_records(
             self._sa_table,
             self.schema._sa_engine,
             limit,
@@ -259,7 +268,7 @@ class Table(DatabaseObject):
         )
 
     def get_group_counts(self, group_by, limit=None, offset=None, filters=[], order_by=[]):
-        return record_operations.get_group_counts(
+        return get_group_counts(
             self._sa_table,
             self.schema._sa_engine,
             group_by,
@@ -270,18 +279,18 @@ class Table(DatabaseObject):
         )
 
     def create_record_or_records(self, record_data):
-        return record_operations.insert_record_or_records(self._sa_table, self.schema._sa_engine, record_data)
+        return insert_record_or_records(self._sa_table, self.schema._sa_engine, record_data)
 
     def update_record(self, id_value, record_data):
-        return record_operations.update_record(self._sa_table, self.schema._sa_engine, id_value, record_data)
+        return update_record(self._sa_table, self.schema._sa_engine, id_value, record_data)
 
     def delete_record(self, id_value):
-        return record_operations.delete_record(self._sa_table, self.schema._sa_engine, id_value)
+        return delete_record(self._sa_table, self.schema._sa_engine, id_value)
 
     def add_constraint(self, constraint_type, columns, name=None):
         if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
             raise ValueError('Only creating unique constraints is currently supported.')
-        constraint_operations.create_unique_constraint(
+        create_unique_constraint(
             self.name,
             self._sa_table.schema,
             self.schema._sa_engine,
@@ -296,7 +305,7 @@ class Table(DatabaseObject):
         engine = self.schema.database._sa_engine
         if not name:
             name = constraint_utils.get_constraint_name(constraint_type, self.name, columns[0])
-        constraint_oid = constraint_operations.get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
+        constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         return Constraint.objects.create(oid=constraint_oid, table=self)
 
 
@@ -306,7 +315,7 @@ class Constraint(DatabaseObject):
     @property
     def _sa_constraint(self):
         engine = self.table.schema.database._sa_engine
-        return constraint_operations.get_constraint_from_oid(self.oid, engine, self.table._sa_table)
+        return get_constraint_from_oid(self.oid, engine, self.table._sa_table)
 
     @property
     def name(self):
@@ -321,7 +330,7 @@ class Constraint(DatabaseObject):
         return [column.name for column in self._sa_constraint.columns]
 
     def drop(self):
-        constraint_operations.drop_constraint(
+        drop_constraint(
             self.table._sa_table.name,
             self.table._sa_table.schema,
             self.table.schema._sa_engine,

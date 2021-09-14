@@ -1,6 +1,7 @@
 from sqlalchemy import MetaData, select
 
-from db import constants, columns
+from db import constants
+from db.columns.defaults import DEFAULT_COLUMNS
 from db.tables.operations.split import extract_columns_from_table
 
 
@@ -54,7 +55,7 @@ def test_extract_columns_extracts_correct_columns(extracted_remainder_roster, ro
     actual_extracted_names = sorted(
         [
             col.name for col in extracted.columns
-            if col.name not in columns.DEFAULT_COLUMNS
+            if col.name not in DEFAULT_COLUMNS
         ]
     )
     assert expect_extracted_names == actual_extracted_names
@@ -65,7 +66,7 @@ def test_extract_columns_leaves_correct_columns(extracted_remainder_roster, rost
     expect_remainder_names = sorted(
         [
             col.name for col in roster.columns
-            if col.name not in columns.DEFAULT_COLUMNS
+            if col.name not in DEFAULT_COLUMNS
             and col.name not in roster_extracted_cols
         ]
         + [roster_fkey_col]
@@ -73,7 +74,7 @@ def test_extract_columns_leaves_correct_columns(extracted_remainder_roster, rost
     actual_remainder_names = sorted(
         [
             col.name for col in remainder.columns
-            if col.name not in columns.DEFAULT_COLUMNS
+            if col.name not in DEFAULT_COLUMNS
         ]
     )
     assert expect_remainder_names == actual_remainder_names
@@ -104,7 +105,7 @@ def test_extract_columns_leaves_correct_data(extracted_remainder_roster, roster_
     extracted, remainder, roster, engine, _ = extracted_remainder_roster
     remainder_column_names = [
         col.name for col in roster.columns
-        if col.name not in columns.DEFAULT_COLUMNS
+        if col.name not in DEFAULT_COLUMNS
         and col.name not in roster_extracted_cols
     ]
     expect_tuple_sel = select(
