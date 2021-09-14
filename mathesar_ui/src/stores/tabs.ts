@@ -8,7 +8,7 @@ import {
   getAllImportDetailsForSchema,
   removeImportFromView,
 } from '@mathesar/stores/fileImports';
-import { removeTableContent } from '@mathesar/stores/table-data/store';
+import { removeTableContent } from '@mathesar/stores/table-data';
 import { getTablesStoreForSchema } from '@mathesar/stores/tables';
 import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
 

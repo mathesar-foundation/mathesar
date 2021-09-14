@@ -58,12 +58,6 @@ export class Meta {
 
   selected: Writable<Record<string | number, boolean>>;
 
-  showDisplayOptions: Writable<boolean>;
-
-  horizontalScrollOffset: Writable<number>;
-
-  columnPositionMap: Writable<ColumnPositionMap>;
-
   selectedRecords: Readable<string[]>;
 
   recordRequestParams: Readable<string>;
@@ -81,9 +75,6 @@ export class Meta {
     this.group = writable(new Set() as GroupOption);
     this.filter = writable(null as FilterOption);
     this.selected = writable({});
-    this.showDisplayOptions = writable(false);
-    this.horizontalScrollOffset = writable(0);
-    this.columnPositionMap = writable(new Map() as ColumnPositionMap);
 
     this.offset = derived([this.pageSize, this.page], ([$pageSize, $page], set) => {
       set($pageSize * ($page - 1));

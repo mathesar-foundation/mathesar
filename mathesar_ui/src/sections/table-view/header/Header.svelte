@@ -3,14 +3,16 @@
   import {
     GROUP_MARGIN_LEFT,
     ROW_CONTROL_COLUMN_WIDTH,
-  } from '@mathesar/stores/table-data/meta';
+  } from '@mathesar/stores/table-data';
 
-  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/store';
+  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
   import HeaderCell from './HeaderCell.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  $: ({ columns, records, meta } = $tabularData as TabularData);
-  $: ({ horizontalScrollOffset } = meta as TabularData['meta']);
+  $: ({
+    columns, records, meta, display,
+  } = $tabularData as TabularData);
+  $: ({ horizontalScrollOffset } = display as TabularData['display']);
 
   $: paddingLeft = $records.groupData ? GROUP_MARGIN_LEFT : 0;
 
@@ -51,6 +53,6 @@
   </div>
 
   {#each $columns.data as column (column.name)}
-    <HeaderCell {column} {meta} {paddingLeft}/>
+    <HeaderCell {column} {meta} {display} {paddingLeft}/>
   {/each}
 </div>

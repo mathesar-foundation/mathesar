@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getContext } from 'svelte';
   import { Pagination, Select } from '@mathesar-components';
-  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/store';
+  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
   $: ({

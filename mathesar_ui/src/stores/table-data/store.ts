@@ -4,17 +4,22 @@ import type { DBObjectEntry, TableEntry, ViewEntry } from '@mathesar/App.d';
 import { Meta } from './meta';
 import { Columns } from './columns';
 import { Records } from './records';
+import { Display } from './display';
 
 export interface TabularData {
   id: number,
   meta: Meta,
   columns: Columns,
   records: Records,
+  display: Display,
 }
 export type TabularDataStore = Writable<TabularData>;
+export interface TabularDataEntry extends TabularData {
+  destroy: () => void
+}
 
-const tableMap: Map<TableEntry['id'], TabularData> = new Map();
-const viewMap: Map<ViewEntry['id'], TabularData> = new Map();
+const tableMap: Map<TableEntry['id'], TabularDataEntry> = new Map();
+const viewMap: Map<ViewEntry['id'], TabularDataEntry> = new Map();
 
 function get(type: TabularType, id: DBObjectEntry['id'], metaInfo?: Meta): TabularData {
   const tabularMap = type === TabularType.View ? viewMap : tableMap;
@@ -22,11 +27,20 @@ function get(type: TabularType, id: DBObjectEntry['id'], metaInfo?: Meta): Tabul
   if (!entry) {
     const meta = new Meta(type, id);
     const columns = new Columns(type, id, meta);
+    const records = new Records(type, id, meta, columns);
+    const display = new Display(type, id);
+
     entry = {
       id,
       meta,
       columns,
-      records: new Records(type, id, meta, columns),
+      records,
+      display,
+
+      destroy(): void {
+        columns.destroy();
+        records.destroy();
+      },
     };
     tabularMap.set(id, entry);
   }

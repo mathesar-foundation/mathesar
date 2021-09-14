@@ -114,4 +114,9 @@ export class Columns implements Writable<TableColumnData> {
     }
     return null;
   }
+
+  destroy(): void {
+    this._promise?.cancel();
+    this._promise = null;
+  }
 }

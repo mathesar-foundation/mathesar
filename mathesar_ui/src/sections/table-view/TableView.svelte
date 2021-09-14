@@ -1,13 +1,13 @@
 <script lang="ts">
   import { setContext } from 'svelte';
   import { writable } from 'svelte/store';
-  import { getTableContent } from '@mathesar/stores/table-data/store';
+  import { getTableContent } from '@mathesar/stores/table-data';
   import type {
     TabularData,
-  } from '@mathesar/stores/table-data/store';
+    Columns,
+    Display,
+  } from '@mathesar/stores/table-data/types';
   // import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
-  import type { Columns } from '@mathesar/stores/table-data/columns';
-  import type { Meta } from '@mathesar/stores/table-data/meta';
 
   import ActionsPane from './actions-pane/ActionsPane.svelte';
   import DisplayOptions from './display-options/DisplayOptions.svelte';
@@ -31,7 +31,7 @@
    * props for virtual list.
    */
   let columns: Columns;
-  let showDisplayOptions: Meta['showDisplayOptions'];
+  let showDisplayOptions: Display['showDisplayOptions'];
 
   // let tableBodyRef: Body;
   let animateOpts = false;
@@ -44,7 +44,7 @@
       ...data,
     });
     ({ columns } = data);
-    ({ showDisplayOptions } = data.meta);
+    ({ showDisplayOptions } = data.display);
 
     animateOpts = false;
   }

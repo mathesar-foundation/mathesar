@@ -1,11 +1,12 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import { DEFAULT_ROW_RIGHT_PADDING } from '@mathesar/stores/table-data/meta';
-  import type { ColumnPositionMap } from '@mathesar/stores/table-data/meta';
-  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/store';
+  import { DEFAULT_ROW_RIGHT_PADDING } from '@mathesar/stores/table-data';
   import type {
+    ColumnPositionMap,
+    TabularDataStore,
+    TabularData,
     TableRecord,
-  } from '@mathesar/stores/table-data/records';
+  } from '@mathesar/stores/table-data/types';
   import RowControl from './RowControl.svelte';
 
   export let index: number;
@@ -13,10 +14,9 @@
   export let style: { [key: string]: string | number };
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  $: ({ columns, meta } = $tabularData as TabularData);
-  $: ({
-    columnPositionMap, horizontalScrollOffset, offset, selected,
-  } = meta as TabularData['meta']);
+  $: ({ columns, meta, display } = $tabularData as TabularData);
+  $: ({ columnPositionMap } = display as TabularData['display']);
+  $: ({ offset, selected } = meta as TabularData['meta']);
 
   $: rowNumber = $offset as number + index + 1;
 

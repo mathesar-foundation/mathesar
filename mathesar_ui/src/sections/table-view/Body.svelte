@@ -1,18 +1,21 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import { DEFAULT_ROW_RIGHT_PADDING, GROUP_MARGIN_LEFT } from '@mathesar/stores/table-data/meta';
-  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/store';
-  import type { ColumnPositionMap } from '@mathesar/stores/table-data/meta';
+  import { DEFAULT_ROW_RIGHT_PADDING, GROUP_MARGIN_LEFT } from '@mathesar/stores/table-data';
+  import type {
+    TabularDataStore,
+    TabularData,
+    ColumnPositionMap,
+  } from '@mathesar/stores/table-data/types';
 
   import Row from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  $: ({ id, records, meta } = $tabularData as TabularData);
+  $: ({ id, records, display } = $tabularData as TabularData);
   $: ({
     columnPositionMap, horizontalScrollOffset,
-  } = meta as TabularData['meta']);
+  } = display as TabularData['display']);
 
   // TODO: Compute the following in meta store
   let rowWidth: number;

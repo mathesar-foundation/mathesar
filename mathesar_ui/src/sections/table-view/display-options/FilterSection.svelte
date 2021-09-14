@@ -10,8 +10,8 @@
     Select,
     TextInput,
   } from '@mathesar-components';
-  import { filterCombinations } from '@mathesar/stores/table-data/meta';
-  import type { Meta, FilterCombination } from '@mathesar/stores/table-data/meta';
+  import { filterCombinations } from '@mathesar/stores/table-data';
+  import type { Meta, FilterCombination } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar-components/types';
   import FilterEntry from './FilterEntry.svelte';
 

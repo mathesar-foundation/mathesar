@@ -5,21 +5,22 @@
     faThList,
   } from '@fortawesome/free-solid-svg-icons';
   import { Dropdown, Icon } from '@mathesar-components';
-  import type { TableColumn } from '@mathesar/stores/table-data/columns';
   import type {
     Meta,
+    Display,
+    TableColumn,
     ColumnPositionMap,
     SortOption,
     GroupOption,
-  } from '@mathesar/stores/table-data/meta';
+  } from '@mathesar/stores/table-data/types';
 
   export let column: TableColumn;
   export let meta: Meta;
+  export let display: Display;
   export let paddingLeft: number;
 
-  $: ({
-    columnPositionMap, sort, group,
-  } = meta);
+  $: ({ sort, group } = meta);
+  $: ({ columnPositionMap } = display);
   $: position = ($columnPositionMap as ColumnPositionMap).get(column.name);
   $: sortDirection = ($sort as SortOption)?.get(column.name);
   $: hasGrouping = ($group as GroupOption)?.has(column.name);

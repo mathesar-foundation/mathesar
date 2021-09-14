@@ -5,8 +5,11 @@
     faTimes,
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-components';
-  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/store';
-  import type { TableColumnData } from '@mathesar/stores/table-data/columns';
+  import type {
+    TabularDataStore,
+    TabularData,
+    TableColumnData,
+  } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar-components/types';
   import FilterSection from './FilterSection.svelte';
   import SortSection from './SortSection.svelte';

@@ -3,7 +3,7 @@
     faTimes,
     faPlus,
   } from '@fortawesome/free-solid-svg-icons';
-  import type { Meta, SortOption } from '@mathesar/stores/table-data/meta';
+  import type { Meta, SortOption } from '@mathesar/stores/table-data/types';
   import { Icon, Button, Select } from '@mathesar-components';
   import type { SelectOption, SelectChangeEvent } from '@mathesar-components/types';
 

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher, getContext } from 'svelte';
-  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/store';
+  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
 
   import {
     faFilter,

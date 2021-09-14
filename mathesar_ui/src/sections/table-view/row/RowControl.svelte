@@ -3,10 +3,10 @@
   import {
     ROW_CONTROL_COLUMN_WIDTH,
     GROUP_MARGIN_LEFT,
-  } from '@mathesar/stores/table-data/meta';
+  } from '@mathesar/stores/table-data';
   import type {
     TableRecord,
-  } from '@mathesar/stores/table-data/records';
+  } from '@mathesar/stores/table-data/types';
 
   export let rowNumber: number;
   export let isGrouped = false;
