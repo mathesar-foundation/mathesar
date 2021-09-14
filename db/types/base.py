@@ -1,5 +1,6 @@
 from enum import Enum
 
+from babel import Locale
 from sqlalchemy import create_engine
 
 from db import constants
@@ -61,14 +62,33 @@ class PostgresType(Enum):
     UUID = 'uuid'
 
 
-class MathesarCustomType(Enum):
-    """
-    This is a list of custom Mathesar DB types.
-    Keys returned by get_available_types are of the format 'mathesar_types.VALUE'
-    """
+MathesarCurrencyCode = Enum(
+    'CurrencyCode',
+    {
+        f'money_{currency_code}'.upper(): f'money_{currency_code}'.lower()
+        # The Locale is fixed, since we can't handle it changing at this
+        # moment (so we can't read it from the system)
+        for currency_code in Locale('en', 'US').currencies
+    }
+)
+
+
+class MathesarOtherType(Enum):
     EMAIL = 'email'
     URI = 'uri'
     MONEY = 'money'
+
+
+# This is a list of custom Mathesar DB types.
+# Keys returned by get_available_types are of the format
+# 'mathesar_types.VALUE'
+MathesarCustomType = Enum(
+    'MathesarCustomType',
+    (
+        {type_.name: type_.value for type_ in MathesarOtherType}
+        | {currency.name: currency.value for currency in MathesarCurrencyCode}
+    )
+)
 
 
 SCHEMA = f"{constants.MATHESAR_PREFIX}types"

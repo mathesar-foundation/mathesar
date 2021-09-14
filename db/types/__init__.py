@@ -8,5 +8,7 @@ CUSTOM_TYPE_DICT = {
     # ischema_names supported by a PostgreSQL engine
     PostgresType.DECIMAL.value: sa_decimal,
     email.DB_TYPE: email.Email,
-    money.DB_TYPE: money.Money,
+    money.DB_TYPE: money.Money
+} | {
+    domain.value.DB_TYPE: domain.value for domain in money.MathesarMoneyDomain
 }
