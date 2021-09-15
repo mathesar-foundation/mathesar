@@ -10,6 +10,12 @@ export interface ColumnPosition {
 }
 export type ColumnPositionMap = Map<string, ColumnPosition>;
 
+export interface ActiveCell {
+  rowIndex: number,
+  column: string,
+  type: 'select' | 'edit'
+}
+
 export const ROW_CONTROL_COLUMN_WIDTH = 70;
 export const GROUP_MARGIN_LEFT = 30;
 export const DEFAULT_ROW_RIGHT_PADDING = 100;
@@ -54,6 +60,8 @@ export class Display {
 
   columnPositionMap: Writable<ColumnPositionMap>;
 
+  activeCell: Writable<ActiveCell>;
+
   rowWidth: Writable<number>;
 
   constructor(
@@ -69,6 +77,7 @@ export class Display {
     this.showDisplayOptions = writable(false);
     this.horizontalScrollOffset = writable(0);
     this.columnPositionMap = writable(new Map() as ColumnPositionMap);
+    this.activeCell = writable(null as ActiveCell);
     this.rowWidth = writable(0);
 
     // subscribers

@@ -29,12 +29,9 @@ export interface FilterOption {
   filters: FilterEntry[]
 }
 
-export interface ColumnPosition {
-  width: number,
-  left: number
-}
-export type ColumnPositionMap = Map<string, ColumnPosition>;
-
+// The Meta store is meant to be used by other stores for storing and operating on meta information.
+// This may also include display properties. Properties in Meta store do not depend on other stores.
+// For display specific properties that depend on other stores, the Display store can be used.
 export class Meta {
   _type: TabularType;
 

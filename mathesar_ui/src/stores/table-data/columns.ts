@@ -25,7 +25,7 @@ export interface TableColumnData {
   state: States,
   error?: string,
   data: TableColumn[],
-  primaryKey: string,
+  primaryKey?: string,
 }
 
 export class Columns implements Writable<TableColumnData> {

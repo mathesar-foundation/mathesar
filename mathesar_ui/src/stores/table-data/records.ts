@@ -17,6 +17,7 @@ export interface TableRecord {
   [key: string]: unknown,
   __isGroupHeader?: boolean,
   __rowNumber?: number,
+  __rowIndex?: number,
   __state: string,
   __groupInfo?: {
     columns: string[],
@@ -101,6 +102,7 @@ function preprocessRecords(offset: number, response: TableRecordResponse): Table
     combinedRecords.push({
       ...record,
       __rowNumber: offset + index + 1,
+      __rowIndex: index,
       __state: 'done',
     });
     index += 1;
