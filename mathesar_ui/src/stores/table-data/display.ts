@@ -3,6 +3,7 @@ import type { Writable, Unsubscriber } from 'svelte/store';
 import type { TabularType, DBObjectEntry } from '@mathesar/App.d';
 import type { Meta } from './meta';
 import type { Columns, TableColumn } from './columns';
+import type { TableRecord } from './records';
 
 export interface ColumnPosition {
   width: number,
@@ -41,6 +42,24 @@ function recalculateColumnPositions(columnPositionMap: ColumnPositionMap, column
     left: 0,
   });
   return newColumnPositionMap;
+}
+
+export function isCellActive(
+  activeCell: ActiveCell,
+  row: TableRecord,
+  column: TableColumn,
+): boolean {
+  return activeCell
+    && activeCell?.column === column.name
+    && activeCell.rowIndex === row.__rowIndex;
+}
+
+export function isCellBeingEdited(
+  activeCell: ActiveCell,
+  row: TableRecord,
+  column: TableColumn,
+): boolean {
+  return isCellActive(activeCell, row, column) && activeCell.type === 'edit';
 }
 
 export class Display {
@@ -88,6 +107,22 @@ export class Display {
       const width = get(this.columnPositionMap).get('__row')?.width;
       const widthWithPadding = width ? width + DEFAULT_ROW_RIGHT_PADDING : 0;
       this.rowWidth.set(widthWithPadding);
+    });
+  }
+
+  selectCell(row: TableRecord, column: TableColumn): void {
+    this.activeCell.set({
+      rowIndex: row.__rowIndex,
+      column: column.name,
+      type: 'select',
+    });
+  }
+
+  editCell(row: TableRecord, column: TableColumn): void {
+    this.activeCell.set({
+      rowIndex: row.__rowIndex,
+      column: column.name,
+      type: 'edit',
     });
   }
 

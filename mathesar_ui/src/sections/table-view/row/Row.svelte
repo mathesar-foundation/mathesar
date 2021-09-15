@@ -73,8 +73,12 @@
     <GroupHeader {row} groupData={$records.groupData}/>
   {:else}
     {#each $columns.data as column (column.name)}
-      <RowCell columnPosition={getColumnPosition($columnPositionMap, column.name)} {row} {column}/>
+      <RowCell {display} {row} {column}
+        columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
     {/each}
   {/if}
 </div>
  
+<style global lang="scss">
+  @import "Row.scss";
+</style>
