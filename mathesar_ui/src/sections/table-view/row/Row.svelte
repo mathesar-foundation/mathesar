@@ -73,7 +73,7 @@
     <GroupHeader {row} groupData={$records.groupData}/>
   {:else}
     {#each $columns.data as column (column.name)}
-      <RowCell {display} {row} {column}
+      <RowCell {display} bind:row {column} {records}
         columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
     {/each}
   {/if}

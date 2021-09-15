@@ -1,12 +1,15 @@
 <script lang="ts">
+  import { afterUpdate } from 'svelte';
   import { isCellActive, isCellBeingEdited } from '@mathesar/stores/table-data';
   import type {
     ColumnPosition,
     TableRecord,
     TableColumn,
     Display,
+    Records,
   } from '@mathesar/stores/table-data/types';
 
+  export let records: Records;
   export let display: Display;
   export let columnPosition: ColumnPosition;
   export let row: TableRecord;
@@ -19,10 +22,14 @@
   let inputRef: HTMLElement;
   let timer: number;
 
+  afterUpdate(() => {
+    inputRef?.focus();
+  });
+
   function setValue(val: string) {
     if (row[column.name] !== val) {
       row[column.name] = val;
-      // Send request
+      void records.updateRecord(row);
     }
   }
 

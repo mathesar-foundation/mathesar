@@ -46,6 +46,8 @@ section.table-section .tab-container .table-data .body {
         background: #fff;
       }
       &.groupheader {
+        display: flex;
+        align-items: center;
         border-bottom: none;
 
         .tag {

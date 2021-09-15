@@ -1,5 +1,10 @@
 import { writable, get as getStoreValue } from 'svelte/store';
-import { States, getAPI, deleteAPI } from '@mathesar/utils/api';
+import {
+  States,
+  getAPI,
+  deleteAPI,
+  patchAPI,
+} from '@mathesar/utils/api';
 import { TabularType } from '@mathesar/App.d';
 import type {
   Writable,
@@ -18,7 +23,7 @@ export interface TableRecord {
   __isGroupHeader?: boolean,
   __rowNumber?: number,
   __rowIndex?: number,
-  __state: string,
+  __state?: string,
   __groupInfo?: {
     columns: string[],
     values: Record<string, unknown>,
@@ -110,6 +115,16 @@ function preprocessRecords(offset: number, response: TableRecordResponse): Table
   return combinedRecords;
 }
 
+function prepareRowForPatch(row: TableRecord): TableRecord {
+  const rowForRequest: TableRecord = {};
+  Object.keys(row).forEach((key) => {
+    if (key.indexOf('__') !== 0) {
+      rowForRequest[key] = row[key];
+    }
+  });
+  return rowForRequest;
+}
+
 export class Records implements Writable<TableRecordData> {
   _type: TabularType;
 
@@ -117,13 +132,15 @@ export class Records implements Writable<TableRecordData> {
 
   _store: Writable<TableRecordData>;
 
-  _promise: CancellablePromise<TableRecordResponse>;
-
   _url: string;
 
   _meta: Meta;
 
   _columns: Columns;
+
+  _promise: CancellablePromise<TableRecordResponse>;
+
+  _updatePromises: Map<unknown, CancellablePromise<TableRecordResponse>>;
 
   _fetchCallback?: (storeData: TableRecordData) => void;
 
@@ -213,8 +230,6 @@ export class Records implements Writable<TableRecordData> {
         data: [],
         totalCount: null,
       });
-    } finally {
-      this._promise = null;
     }
     return null;
   }
@@ -313,6 +328,31 @@ export class Records implements Writable<TableRecordData> {
         });
       } finally {
         this._meta.clearSelectedRecords();
+      }
+    }
+  }
+
+  async updateRecord(row: TableRecord): Promise<void> {
+    const { primaryKey } = this._columns.get();
+    if (primaryKey && row[primaryKey]) {
+      this._updatePromises?.get(row[primaryKey])?.cancel();
+      const promise = patchAPI<TableRecordResponse>(
+        `${this._url}${row[primaryKey] as string}/`,
+        prepareRowForPatch(row),
+      );
+      if (!this._updatePromises) {
+        this._updatePromises = new Map();
+      }
+      this._updatePromises.set(row[primaryKey], promise);
+
+      try {
+        await promise;
+      } catch (err) {
+        //
+      } finally {
+        if (this._updatePromises.get(row[primaryKey]) === promise) {
+          this._updatePromises.clear();
+        }
       }
     }
   }
