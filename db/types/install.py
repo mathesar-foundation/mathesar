@@ -11,4 +11,5 @@ def install_mathesar_on_database(engine):
     create_type_schema(engine)
     email.install(engine)
     money.install(engine)
+    money.install_money_domain_types(engine)
     install_all_casts(engine)

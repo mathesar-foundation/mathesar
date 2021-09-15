@@ -56,7 +56,7 @@ def _build_money_domain_python_type(currency_code):
 MathesarMoneyDomain = Enum(
     'MathesarMoneyDomain',
     {
-        currency_code.name: _build_money_domain_python_type(currency_code)
+        currency_code.value: _build_money_domain_python_type(currency_code)
         for currency_code in base.MathesarCurrencyCode
     }
 )

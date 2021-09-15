@@ -56,6 +56,11 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),
     }
+    friendly_money_domain_map = {
+        domain.name: dialect_types.get(domain.value.DB_TYPE)
+        for domain in money.MathesarMoneyDomain
+    }
+    friendly_type_map.update(friendly_money_domain_map)
     if friendly_names:
         type_map = {k: v for k, v in friendly_type_map.items() if v is not None}
     else:
@@ -166,6 +171,15 @@ def create_money_casts(engine):
     type_body_map = _get_money_type_body_map()
     create_cast_functions(money.DB_TYPE, type_body_map, engine)
 
+    def _create_money_domain_cast(money_domain):
+        _type_body_map = _get_money_domain_type_body_map(money_domain)
+        create_cast_functions(money_domain, _type_body_map, engine)
+
+    for money_domain in [
+            domain.value.DB_TYPE for domain in money.MathesarMoneyDomain
+    ]:
+        _create_money_domain_cast(money_domain)
+
 
 def create_varchar_casts(engine):
     type_body_map = _get_varchar_type_body_map(engine)
@@ -204,6 +218,13 @@ def get_defined_source_target_cast_tuples(engine):
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
         VARCHAR: _get_varchar_type_body_map(engine),
     }
+    type_body_map_map.update(
+        {
+            money_domain: _get_money_domain_type_body_map(money_domain)
+            for money_domain
+            in [domain.value.DB_TYPE for domain in money.MathesarMoneyDomain]
+        }
+    )
     return {
         (source_type, target_type)
         for target_type in type_body_map_map
@@ -468,6 +489,17 @@ def _get_money_type_body_map():
             type_name: _get_base_textual_cast_to_money()
             for type_name in textual_types
         }
+    )
+    return type_body_map
+
+
+def _get_money_domain_type_body_map(target_domain):
+    default_behavior_source_types = [
+        BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
+        SMALLINT, TEXT, VARCHAR
+    ]
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, target_domain
     )
     return type_body_map
 

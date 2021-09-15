@@ -4,7 +4,10 @@ Mathesar data types are shown in the UI.
 """
 from enum import Enum
 
-from db.types.base import PostgresType, MathesarCustomType, get_available_types, get_qualified_name, get_db_type_name
+from db.types.base import (
+    PostgresType, MathesarCustomType, MathesarCurrencyCode, get_available_types,
+    get_qualified_name, get_db_type_name
+)
 
 
 class MathesarTypeIdentifier(Enum):
@@ -70,6 +73,9 @@ def _get_type_map():
         'sa_type_names': [
             PostgresType.MONEY.value,
             get_qualified_name(MathesarCustomType.MONEY.value)
+        ] + [
+            get_qualified_name(currency_code.value)
+            for currency_code in MathesarCurrencyCode
         ]
     }, {
         'identifier': MathesarTypeIdentifier.NUMBER.value,
