@@ -70,15 +70,22 @@ def create_data_types_table(data_types_csv_filename, create_schema):
     return _create_table
 
 
-@pytest.fixture
-def patent_schema(test_db_model, create_schema):
+@pytest.fixture(scope='module')
+def mathesar_installed_engine(test_db_model):
     engine = create_mathesar_engine(test_db_model.name)
     install.install_mathesar_on_database(engine)
-    with engine.begin() as conn:
-        conn.execute(text(f'DROP SCHEMA IF EXISTS "{PATENT_SCHEMA}" CASCADE;'))
-    yield create_schema(PATENT_SCHEMA)
+    yield engine
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA {base.SCHEMA} CASCADE;'))
+
+
+
+@pytest.fixture
+def patent_schema(mathesar_installed_engine, create_schema):
+    engine = mathesar_installed_engine
+    with engine.begin() as conn:
+        conn.execute(text(f'DROP SCHEMA IF EXISTS "{PATENT_SCHEMA}" CASCADE;'))
+    return create_schema(PATENT_SCHEMA)
 
 
 @pytest.fixture
