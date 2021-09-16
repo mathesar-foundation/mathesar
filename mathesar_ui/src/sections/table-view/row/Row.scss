@@ -94,6 +94,10 @@ section.table-section .tab-container .table-data .body {
           box-shadow: 0 0 0 3px #428af4;
         }
 
+        &.is-pk {
+          box-shadow: 0 0 0 2px #a8a8a8;
+        }
+
         .edit-input-box {
           border: none;
           outline: 0;

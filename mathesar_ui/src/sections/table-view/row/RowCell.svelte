@@ -51,6 +51,7 @@
 
 <div class="cell" class:is-active={isActive}
      class:is-in-edit={isBeingEdited}
+     class:is-pk={column.primary_key}
      style="width:{columnPosition?.width || 0}px;
       left:{columnPosition?.left || 0}px;">
 

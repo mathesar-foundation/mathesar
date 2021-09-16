@@ -119,11 +119,13 @@ export class Display {
   }
 
   editCell(row: TableRecord, column: TableColumn): void {
-    this.activeCell.set({
-      rowIndex: row.__rowIndex,
-      column: column.name,
-      type: 'edit',
-    });
+    if (!column.primary_key) {
+      this.activeCell.set({
+        rowIndex: row.__rowIndex,
+        column: column.name,
+        type: 'edit',
+      });
+    }
   }
 
   destroy(): void {
