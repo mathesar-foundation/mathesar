@@ -56,6 +56,7 @@ function sendXHRRequest<T>(method: string, url: string, data?: unknown): Cancell
   } else {
     request.send();
   }
+  let isManuallyAborted = false;
 
   return new CancellablePromise((resolve, reject) => {
     request.addEventListener('load', () => {
@@ -87,9 +88,12 @@ function sendXHRRequest<T>(method: string, url: string, data?: unknown): Cancell
     });
 
     request.addEventListener('abort', () => {
-      reject(new Error('Request was aborted'));
+      if (!isManuallyAborted) {
+        reject(new Error('Request was aborted'));
+      }
     });
   }, () => {
+    isManuallyAborted = true;
     request.abort();
   });
 }
