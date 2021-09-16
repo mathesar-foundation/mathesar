@@ -7,6 +7,9 @@
     faSort,
     faListAlt,
     faTrashAlt,
+    faPlus,
+    faSync,
+    faExclamationTriangle,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
   import { Button, Icon } from '@mathesar-components';
@@ -21,6 +24,12 @@
     filter, sort, group, selectedRecords,
   } = meta as TabularData['meta']);
 
+
+  $: isLoading = $columns.state === States.Loading
+    || $records.state === States.Loading;
+  $: isError = $columns.state === States.Error
+    || $records.state === States.Error;
+
   function openDisplayOptions() {
     dispatch('openDisplayOptions');
   }
@@ -28,10 +37,15 @@
   function deleteRecords() {
     void (records as TabularData['records']).deleteSelected();
   }
+
+  function refresh() {
+    void (columns as TabularData['columns']).fetch();
+    void (records as TabularData['records']).fetch();
+  }
 </script>
 
 <div class="actions-pane">
-  <Button appearance="plain" on:click={openDisplayOptions}>
+  <Button size="small" on:click={openDisplayOptions}>
     <Icon data={faFilter} size="0.8em"/>
     <span>
       Filters
@@ -41,7 +55,7 @@
     </span>
   </Button>
 
-  <Button appearance="plain" on:click={openDisplayOptions}>
+  <Button size="small" on:click={openDisplayOptions}>
     <Icon data={faSort}/>
     <span>
       Sort
@@ -51,7 +65,7 @@
     </span>
   </Button>
 
-  <Button appearance="plain" on:click={openDisplayOptions}>
+  <Button size="small" on:click={openDisplayOptions}>
     <Icon data={faListAlt}/>
     <span>
       Group
@@ -62,7 +76,7 @@
   </Button>
 
   {#if $selectedRecords.length > 0}
-    <Button appearance="plain" on:click={deleteRecords}>
+    <Button size="small" on:click={deleteRecords}>
       <Icon data={faTrashAlt}/>
       <span>
         Delete {$selectedRecords.length} records
@@ -70,20 +84,30 @@
     </Button>
   {/if}
 
+  <div class="divider"/>
+
+  <Button size="small">
+    <Icon data={faPlus}/>
+    <span>
+      Record
+    </span>
+  </Button>
+
   <div class="loading-info">
-    {#if $columns.state === States.Loading}
-      | Loading table
-
-    {:else if $columns.state === States.Error}
-      | Error in loading table: {$columns.error}
-    {/if}
-
-    {#if $records.state === States.Loading}
-      | Loading records
-
-    {:else if $records.state === States.Error}
-      | Error in loading records: {$records.error}
-    {/if}
+    <Button size="small" disabled={isLoading} on:click={refresh}>
+      <Icon data={
+        isError ? faExclamationTriangle : faSync
+      } spin={isLoading}/>
+      <span>
+        {#if isLoading}
+          Loading
+        {:else if isError}
+          Retry
+        {:else}
+          Refresh
+        {/if}
+      </span>
+    </Button>
   </div>
 </div>
 
