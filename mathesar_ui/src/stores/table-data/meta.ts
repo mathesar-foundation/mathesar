@@ -33,10 +33,27 @@ export type ModificationType = 'create' | 'created' | 'creationFailed'
 | 'update' | 'updated' | 'updateFailed'
 | 'delete' | 'deleteFailed';
 
-const inProgressSet: Set<ModificationType> = new Set(['create', 'update', 'delete']);
+export type ModificationStatus = 'inprocess' | 'complete' | 'error' | 'idle';
 
-export function isModificationInProgress(modificationType: ModificationType): boolean {
-  return inProgressSet.has(modificationType);
+const inProgressSet: Set<ModificationType> = new Set(['create', 'update', 'delete']);
+const completeSet: Set<ModificationType> = new Set(['created', 'updated']);
+const errorSet: Set<ModificationType> = new Set(['creationFailed', 'updateFailed', 'deleteFailed']);
+
+export function getModificationStatus(
+  modificationStatus: Map<unknown, ModificationType>,
+  primaryKeyValue: unknown,
+): ModificationStatus {
+  const type = modificationStatus.get(primaryKeyValue);
+  if (inProgressSet.has(type)) {
+    return 'inprocess';
+  }
+  if (completeSet.has(type)) {
+    return 'complete';
+  }
+  if (errorSet.has(type)) {
+    return 'error';
+  }
+  return 'idle';
 }
 
 // The Meta store is meant to be used by other stores for storing and operating on meta information.
@@ -63,6 +80,8 @@ export class Meta {
 
   recordModificationState: Writable<Map<unknown, ModificationType>>;
 
+  combinedModificationState: Readable<ModificationStatus>;
+
   recordRequestParams: Readable<string>;
 
   constructor(
@@ -86,6 +105,31 @@ export class Meta {
     this.offset = derived([this.pageSize, this.page], ([$pageSize, $page], set) => {
       set($pageSize * ($page - 1));
     });
+    this.combinedModificationState = derived(
+      this.recordModificationState,
+      ($recordModificationState, set) => {
+        if ($recordModificationState.size === 0) {
+          set('idle');
+        } else {
+          // eslint-disable-next-line no-restricted-syntax
+          for (const value of $recordModificationState.values()) {
+            if (inProgressSet.has(value)) {
+              set('inprocess');
+              return;
+            }
+            if (completeSet.has(value)) {
+              set('complete');
+              return;
+            }
+            if (errorSet.has(value)) {
+              set('error');
+              return;
+            }
+          }
+        }
+      },
+      'idle' as ModificationStatus,
+    );
     this._setRecordRequestParamsStore();
   }
 

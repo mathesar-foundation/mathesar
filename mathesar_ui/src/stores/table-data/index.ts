@@ -4,7 +4,7 @@ export {
   Meta,
   filterCombinations,
   DEFAULT_PAGE_SIZE,
-  isModificationInProgress,
+  getModificationStatus,
 } from './meta';
 export {
   Display,

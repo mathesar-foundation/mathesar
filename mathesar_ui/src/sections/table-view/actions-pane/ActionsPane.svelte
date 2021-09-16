@@ -1,18 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher, getContext } from 'svelte';
-  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
-
   import {
     faFilter,
     faSort,
     faListAlt,
     faTrashAlt,
-    faPlus,
     faSync,
     faExclamationTriangle,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
   import { Button, Icon } from '@mathesar-components';
+  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
 
   const dispatch = createEventDispatcher();
 
@@ -21,9 +19,8 @@
     columns, records, meta,
   } = $tabularData as TabularData);
   $: ({
-    filter, sort, group, selectedRecords,
+    filter, sort, group, selectedRecords, combinedModificationState,
   } = meta as TabularData['meta']);
-
 
   $: isLoading = $columns.state === States.Loading
     || $records.state === States.Loading;
@@ -84,14 +81,18 @@
     </Button>
   {/if}
 
-  <div class="divider"/>
-
-  <Button size="small">
-    <Icon data={faPlus}/>
-    <span>
-      Record
-    </span>
-  </Button>
+  {#if $combinedModificationState !== 'idle'}
+    <div class="divider"/>
+    <div class="save-status">
+      {#if $combinedModificationState === 'inprocess'}
+        Saving changes
+      {:else if $combinedModificationState === 'error'}
+        <span class="error">! Couldn't save changes</span>
+      {:else if $combinedModificationState === 'complete'}
+        All changes saved
+      {/if}
+    </div>
+  {/if}
 
   <div class="loading-info">
     <Button size="small" disabled={isLoading} on:click={refresh}>

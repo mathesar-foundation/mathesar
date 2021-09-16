@@ -9,7 +9,7 @@ section.table-section .tab-container .table-data .body {
     &:not(.group) {
       &:hover {
         .cell {
-          background: #f6f7f7;
+          background-color: #f6f7f7;
         }
       }
 
@@ -26,14 +26,14 @@ section.table-section .tab-container .table-data .body {
 
       &.selected {
         .cell {
-          background: #e4f2ff;
+          background-color: #e4f2ff;
         }
       }
 
       &.update, &.delete, &.create {
         .cell {
-          transition: all .20s cubic-bezier(0,0,.2,1);
-          background: #fff2bc;
+          transition: background-color .20s cubic-bezier(0,0,.2,1);
+          background-color: #fff7d7;
         }
       }
 
@@ -43,15 +43,15 @@ section.table-section .tab-container .table-data .body {
 
       &.updateFailed, &.deleteFailed, &.createFailed {
         .cell {
-          transition: all .20s cubic-bezier(0,0,.2,1);
-          background: #fef1f1;
+          transition: background-color .20s cubic-bezier(0,0,.2,1);
+          background-color: #fef1f1;
         }
       }
 
       &.updated, &.created {
         .cell {
-          transition: all .20s cubic-bezier(0,0,.2,1);
-          background: #ebfeef;
+          transition: background-color .20s cubic-bezier(0,0,.2,1);
+          background-color: #ebfeef;
         }
       }
     }
@@ -67,7 +67,7 @@ section.table-section .tab-container .table-data .body {
       overflow: hidden;
 
       &:not(.groupheader) {
-        background: #fff;
+        background-color: #fff;
       }
       &.groupheader {
         display: flex;

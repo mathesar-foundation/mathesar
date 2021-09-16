@@ -6,12 +6,11 @@
   import {
     ROW_CONTROL_COLUMN_WIDTH,
     GROUP_MARGIN_LEFT,
-    isModificationInProgress,
+    getModificationStatus,
   } from '@mathesar/stores/table-data';
   import type {
     Meta,
     TableRecord,
-    ModificationType,
   } from '@mathesar/stores/table-data/types';
 
   export let isGrouped = false;
@@ -23,9 +22,7 @@
 
   $: primaryKeyValue = row?.[primaryKeyColumn] ?? null;
   $: isRowSelected = ($selectedRecords as Set<unknown>).has(primaryKeyValue);
-  $: isModInProgress = isModificationInProgress(
-    ($recordModificationState as Map<unknown, ModificationType>).get(primaryKeyValue),
-  );
+  $: modificationStatus = getModificationStatus($recordModificationState, primaryKeyValue);
 
   function selectionChanged(event: CustomEvent<{ checked: boolean }>) {
     const { checked } = event.detail;
@@ -49,7 +46,7 @@
       <Checkbox checked={isRowSelected} on:change={selectionChanged}/>
     {/if}
 
-    {#if isModInProgress}
+    {#if modificationStatus === 'inprocess'}
       <Icon class="mod-indicator" size='0.9em' data={faSync} spin={true}/>
     {/if}
   {/if}
