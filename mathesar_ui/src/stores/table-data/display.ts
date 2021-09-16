@@ -24,7 +24,7 @@ export const GROUP_MARGIN_LEFT = 30;
 export const DEFAULT_ROW_RIGHT_PADDING = 100;
 export const DEFAULT_COLUMN_WIDTH = 160;
 
-const arrowKeys = new Set(['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft']);
+const movementKeys = new Set(['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Tab']);
 
 function recalculateColumnPositions(columnPositionMap: ColumnPositionMap, columns: TableColumn[]) {
   let left = ROW_CONTROL_COLUMN_WIDTH;
@@ -64,6 +64,34 @@ export function isCellBeingEdited(
   column: TableColumn,
 ): boolean {
   return isCellActive(activeCell, row, column) && activeCell.type === 'edit';
+}
+
+// TODO: Create a common utility action to handle active element based scroll
+export function scrollBasedOnActiveCell(): void {
+  const activeCell: HTMLElement = document.querySelector('.cell.is-active');
+  const activeRow = activeCell?.parentElement;
+  const container = document.querySelector('.virtual-list.outerElement');
+  if (container && activeRow) {
+    // Vertical scroll
+    if (activeRow.offsetTop + activeRow.clientHeight + 40
+      > (container.scrollTop + container.clientHeight)) {
+      const offsetValue: number = container.getBoundingClientRect().bottom
+        - activeRow.getBoundingClientRect().bottom - 40;
+      container.scrollTop -= offsetValue;
+    } else if (activeRow.offsetTop - 30 < container.scrollTop) {
+      container.scrollTop = activeRow.offsetTop - 30;
+    }
+
+    // Horizontal scroll
+    if (activeCell.offsetLeft + activeRow.clientWidth + 30
+      > (container.scrollLeft + container.clientWidth)) {
+      const offsetValue: number = container.getBoundingClientRect().right
+        - activeCell.getBoundingClientRect().right - 30;
+      container.scrollLeft -= offsetValue;
+    } else if (activeCell.offsetLeft - 30 < container.scrollLeft) {
+      container.scrollLeft = activeCell.offsetLeft - 30;
+    }
+  }
 }
 
 export class Display {
@@ -140,7 +168,7 @@ export class Display {
     }
   }
 
-  handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): void {
+  handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | 'changed' | null {
     const columnData = this._columns.get().data;
     const records = this._records.get();
     const offset = get(this._meta.offset);
@@ -148,7 +176,7 @@ export class Display {
     const maxRowIndex = Math.min(pageSize, records.totalCount - offset, records.data.length) - 1;
     const activeCell = get(this.activeCell);
 
-    if (arrowKeys.has(key) && activeCell?.type === 'select') {
+    if (movementKeys.has(key) && activeCell?.type === 'select') {
       this.activeCell.update((existing) => {
         const newActiveCell = { ...existing };
         switch (key) {
@@ -163,6 +191,7 @@ export class Display {
             }
             break;
           case 'ArrowRight':
+          case 'Tab':
             if (existing.columnIndex < columnData.length - 1) {
               newActiveCell.columnIndex += 1;
             }
@@ -177,19 +206,28 @@ export class Display {
         }
         return newActiveCell;
       });
-    } else if (key === 'Enter' && activeCell?.type === 'select') {
+      return 'moved';
+    }
+
+    if (key === 'Enter' && activeCell?.type === 'select') {
       if (!columnData[activeCell.columnIndex]?.primary_key) {
         this.activeCell.update((existing) => ({
           ...existing,
           type: 'edit',
         }));
+        return 'changed';
       }
-    } else if (key === 'Esc' && activeCell?.type === 'edit') {
+    }
+
+    if (key === 'Esc' && activeCell?.type === 'edit') {
       this.activeCell.update((existing) => ({
         ...existing,
         type: 'select',
       }));
+      return 'changed';
     }
+
+    return null;
   }
 
   destroy(): void {

@@ -1,6 +1,10 @@
 <script lang="ts">
-  import { afterUpdate, onDestroy } from 'svelte';
-  import { isCellActive, isCellBeingEdited } from '@mathesar/stores/table-data';
+  import { afterUpdate, onDestroy, tick } from 'svelte';
+  import {
+    isCellActive,
+    isCellBeingEdited,
+    scrollBasedOnActiveCell,
+  } from '@mathesar/stores/table-data';
   import type {
     ColumnPosition,
     TableRecord,
@@ -19,11 +23,16 @@
   $: isActive = isCellActive($activeCell, row, column);
   $: isBeingEdited = isCellBeingEdited($activeCell, row, column);
 
-  let inputRef: HTMLElement;
+  let cellRef: HTMLElement;
+  let inputRef: HTMLInputElement;
   let timer: number;
 
   afterUpdate(() => {
-    inputRef?.focus();
+    if (inputRef) {
+      inputRef.focus();
+    } else if (isActive) {
+      cellRef.focus();
+    }
   });
 
   onDestroy(() => {
@@ -51,13 +60,25 @@
     setValue(val);
     row = { ...row };
   }
+
+  async function handleKeyDown(event: KeyboardEvent) {
+    const type = display.handleKeyEventsOnActiveCell(event.key);
+    if (type === 'moved') {
+      event.stopPropagation();
+      event.preventDefault();
+
+      await tick();
+      scrollBasedOnActiveCell();
+    }
+  }
 </script>
 
-<div class="cell" class:is-active={isActive}
+<div bind:this={cellRef} class="cell" class:is-active={isActive}
      class:is-in-edit={isBeingEdited}
      class:is-pk={column.primary_key}
      style="width:{columnPosition?.width || 0}px;
-      left:{columnPosition?.left || 0}px;">
+      left:{columnPosition?.left || 0}px;"
+     tabindex={-1} on:keydown={handleKeyDown}>
 
   <div class="content"
     on:click={() => display.selectCell(row, column)}

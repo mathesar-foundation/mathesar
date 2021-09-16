@@ -30,45 +30,10 @@
     return `__index_${index}`;
   }
 
-  // TODO: Create a common utility action to handle active element based scroll
-  function handleScroll() {
-    const activeCell: HTMLElement = bodyRef.querySelector('.cell.is-active');
-    const activeRow = activeCell?.parentElement;
-    const container = bodyRef.querySelector('.virtual-list.outerElement');
-    if (container && activeRow) {
-      // Vertical scroll
-      if (activeRow.offsetTop + activeRow.clientHeight + 40
-        > (container.scrollTop + container.clientHeight)) {
-        const offsetValue: number = container.getBoundingClientRect().bottom
-          - activeRow.getBoundingClientRect().bottom - 40;
-        container.scrollTop -= offsetValue;
-      } else if (activeRow.offsetTop - 30 < container.scrollTop) {
-        container.scrollTop = activeRow.offsetTop - 30;
-      }
-
-      // Horizontal scroll
-      if (activeCell.offsetLeft + activeRow.clientWidth + 30
-        > (container.scrollLeft + container.clientWidth)) {
-        const offsetValue: number = container.getBoundingClientRect().right
-          - activeCell.getBoundingClientRect().right - 30;
-        container.scrollLeft -= offsetValue;
-      } else if (activeCell.offsetLeft - 30 < container.scrollLeft) {
-        container.scrollLeft = activeCell.offsetLeft - 30;
-      }
-    }
-  }
-
   function checkAndResetActiveCell(event: Event) {
     if (!bodyRef.contains(event.target as HTMLElement)) {
       (display as Display).resetActiveCell();
     }
-  }
-
-  async function handleKeyDownWithinBody(event: KeyboardEvent) {
-    (display as Display).handleKeyEventsOnActiveCell(event.key);
-    event.stopPropagation();
-    await tick();
-    handleScroll();
   }
 </script>
 
@@ -76,7 +41,7 @@
   on:keydown={checkAndResetActiveCell}
   on:mousedown={checkAndResetActiveCell}/>
 
-<div bind:this={bodyRef} class="body" tabindex="-1" on:keydown={handleKeyDownWithinBody}>
+<div bind:this={bodyRef} class="body" tabindex="-1">
   <Resizer let:height>
     {#key id}
       <VirtualList
