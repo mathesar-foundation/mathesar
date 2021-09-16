@@ -30,8 +30,8 @@
 
 <div class="status-pane">
   <div class="record-count">
-    {#if $selectedRecords?.length > 0}
-      {$selectedRecords.length} record{$selectedRecords.length > 1 ? 's' : ''} selected of {$records.totalCount}
+    {#if $selectedRecords?.size > 0}
+      {$selectedRecords.size} record{$selectedRecords.size > 1 ? 's' : ''} selected of {$records.totalCount}
 
     {:else if pageCount > 0 && $records.totalCount}
       Showing {$offset + 1} - {max} of {$records.totalCount} records

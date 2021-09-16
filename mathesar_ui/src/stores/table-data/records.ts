@@ -23,7 +23,7 @@ export interface TableRecord {
   __isGroupHeader?: boolean,
   __rowNumber?: number,
   __rowIndex?: number,
-  __state?: string,
+  __state?: string, // TODO: Remove __state in favour of _recordsInProcess
   __groupInfo?: {
     columns: string[],
     values: Record<string, unknown>,
@@ -253,10 +253,9 @@ export class Records implements Writable<TableRecordData> {
   }
 
   async deleteSelected(): Promise<void> {
-    const pks = getStoreValue(this._meta.selectedRecords);
+    const pkSet = getStoreValue(this._meta.selectedRecords);
 
-    if (pks.length > 0) {
-      const pkSet = new Set(pks);
+    if (pkSet.size > 0) {
       this._store.update((existingData) => {
         // TODO: Retain map with pk uuid hash for record operations
         const data = existingData.data.map((entry) => {
@@ -279,7 +278,7 @@ export class Records implements Writable<TableRecordData> {
         const success = new Set();
         const failed = new Set();
         // TODO: Convert this to single request
-        const promises = pks.map((pk) => deleteAPI<unknown>(`${this._url}${pk}/`)
+        const promises = [...pkSet].map((pk) => deleteAPI<unknown>(`${this._url}${pk as string}/`)
           .then(() => {
             success.add(pk);
             return success;

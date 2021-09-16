@@ -75,11 +75,11 @@
     </span>
   </Button>
 
-  {#if $selectedRecords.length > 0}
+  {#if $selectedRecords.size > 0}
     <Button size="small" on:click={deleteRecords}>
       <Icon data={faTrashAlt}/>
       <span>
-        Delete {$selectedRecords.length} records
+        Delete {$selectedRecords.size} records
       </span>
     </Button>
   {/if}

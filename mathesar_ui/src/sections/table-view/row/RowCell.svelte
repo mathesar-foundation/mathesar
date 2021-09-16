@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { afterUpdate } from 'svelte';
+  import { afterUpdate, onDestroy } from 'svelte';
   import { isCellActive, isCellBeingEdited } from '@mathesar/stores/table-data';
   import type {
     ColumnPosition,
@@ -24,6 +24,10 @@
 
   afterUpdate(() => {
     inputRef?.focus();
+  });
+
+  onDestroy(() => {
+    clearTimeout(timer);
   });
 
   function setValue(val: string) {

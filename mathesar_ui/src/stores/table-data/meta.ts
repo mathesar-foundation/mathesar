@@ -29,6 +29,10 @@ export interface FilterOption {
   filters: FilterEntry[]
 }
 
+export type ModificationType = 'create' | 'created' | 'creationFailed'
+| 'update' | 'updated' | 'updateFailed'
+| 'delete' | 'deleteFailed';
+
 // The Meta store is meant to be used by other stores for storing and operating on meta information.
 // This may also include display properties. Properties in Meta store do not depend on other stores.
 // For display specific properties that depend on other stores, the Display store can be used.
@@ -49,9 +53,9 @@ export class Meta {
 
   filter: Writable<FilterOption>;
 
-  selected: Writable<Record<string | number, boolean>>;
+  selectedRecords: Writable<Set<unknown>>;
 
-  selectedRecords: Readable<string[]>;
+  recordModificationState: Writable<Map<unknown, ModificationType>>;
 
   recordRequestParams: Readable<string>;
 
@@ -70,14 +74,11 @@ export class Meta {
       combination: filterCombinations[0],
       filters: [],
     });
-    this.selected = writable({});
+    this.selectedRecords = writable(new Set());
+    this.recordModificationState = writable(new Map<unknown, ModificationType>());
 
     this.offset = derived([this.pageSize, this.page], ([$pageSize, $page], set) => {
       set($pageSize * ($page - 1));
-    });
-    this.selectedRecords = derived(this.selected, ($selected, set) => {
-      const pks = Object.keys($selected).filter((key) => $selected[key]);
-      set(pks);
     });
     this._setRecordRequestParamsStore();
   }
@@ -143,7 +144,7 @@ export class Meta {
   }
 
   clearSelectedRecords(): void {
-    this.selected.set({});
+    this.selectedRecords.set(new Set());
   }
 
   addFilter(entry: FilterEntry, combination?: FilterCombination): void {
@@ -222,5 +223,25 @@ export class Meta {
       newGroup.delete(column);
       return newGroup;
     });
+  }
+
+  selectRecordByPrimaryKey(primaryKey: unknown): void {
+    if (!get(this.selectedRecords).has(primaryKey)) {
+      this.selectedRecords.update((existingSet) => {
+        const newSet = new Set(existingSet);
+        newSet.add(primaryKey);
+        return newSet;
+      });
+    }
+  }
+
+  deSelectRecordByPrimaryKey(primaryKey: unknown): void {
+    if (get(this.selectedRecords).has(primaryKey)) {
+      this.selectedRecords.update((existingSet) => {
+        const newSet = new Set(existingSet);
+        newSet.delete(primaryKey);
+        return newSet;
+      });
+    }
   }
 }

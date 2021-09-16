@@ -110,6 +110,10 @@ export class Display {
     });
   }
 
+  resetActiveCell(): void {
+    this.activeCell.set(null as ActiveCell);
+  }
+
   selectCell(row: TableRecord, column: TableColumn): void {
     this.activeCell.set({
       rowIndex: row.__rowIndex,
