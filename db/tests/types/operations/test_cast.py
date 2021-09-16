@@ -409,14 +409,15 @@ type_test_list = [
     "type_,target_type,options,expect_type", type_test_list
 )
 def test_alter_column_type_alters_column_type(
-        engine_email_type, type_, target_type, options, expect_type
+        engine_email_type, temporary_testing_schema,
+        type_, target_type, options, expect_type
 ):
     """
     The massive number of cases make sure all type casting functions at
     least pass a smoke test for each type mapping defined in
     MASTER_DB_TYPE_MAP_SPEC above.
     """
-    engine, schema = engine_email_type
+    engine, schema = engine_email_type, temporary_testing_schema
     available_types = get_available_types(engine)
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
@@ -463,9 +464,10 @@ type_test_data_args_list = [
     "type_,target_type,options,value,expect_value", type_test_data_args_list
 )
 def test_alter_column_type_casts_column_data_args(
-        engine_email_type, type_, target_type, options, value, expect_value,
+        engine_email_type, temporary_testing_schema,
+        type_, target_type, options, value, expect_value,
 ):
-    engine, schema = engine_email_type
+    engine, schema = engine_email_type, temporary_testing_schema
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
@@ -521,9 +523,10 @@ type_test_data_gen_list = [
     "source_type,target_type,in_val,out_val", type_test_data_gen_list
 )
 def test_alter_column_casts_data_gen(
-        engine_email_type, source_type, target_type, in_val, out_val
+        engine_email_type, temporary_testing_schema,
+        source_type, target_type, in_val, out_val
 ):
-    engine, schema = engine_email_type
+    engine, schema = engine_email_type, temporary_testing_schema
     available_types = get_available_types(engine)
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
@@ -584,9 +587,10 @@ type_test_bad_data_gen_list = [
     "type_,target_type,value", type_test_bad_data_gen_list
 )
 def test_alter_column_type_raises_on_bad_column_data(
-        engine_email_type, type_, target_type, value,
+        engine_email_type, temporary_testing_schema,
+        type_, target_type, value,
 ):
-    engine, schema = engine_email_type
+    engine, schema = engine_email_type, temporary_testing_schema
     available_types = get_available_types(engine)
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
@@ -612,9 +616,9 @@ def test_alter_column_type_raises_on_bad_column_data(
 
 
 def test_alter_column_type_raises_on_bad_parameters(
-        engine_email_type,
+        engine_email_type, temporary_testing_schema
 ):
-    engine, schema = engine_email_type
+    engine, schema = engine_email_type, temporary_testing_schema
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)

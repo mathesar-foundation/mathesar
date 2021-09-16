@@ -7,6 +7,7 @@ from db.tables.operations.select import get_oid_from_table, reflect_table_from_o
 from db.constraints.operations.select import get_column_constraints
 from db.tests.columns.utils import create_test_table
 from db.tests.types import fixtures
+from db.types import money
 from db.types.operations.cast import get_supported_alter_column_db_types
 
 
@@ -47,22 +48,14 @@ def _check_duplicate_unique_constraint(
         assert len(constraints_) == 0
 
 
-type_set = {
-    'BIGINT',
-    'BOOLEAN',
-    'DECIMAL',
-    'DOUBLE PRECISION',
-    'FLOAT',
-    'INTEGER',
-    'INTERVAL',
-    'MATHESAR_TYPES.EMAIL',
-    'NUMERIC',
-    'REAL',
-    'SMALLINT',
-    'VARCHAR',
-    'TEXT',
-    'DATE',
-}
+type_set = (
+    {
+        'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT', 'INTEGER',
+        'INTERVAL', 'MATHESAR_TYPES.EMAIL', 'NUMERIC', 'REAL', 'SMALLINT',
+        'VARCHAR', 'TEXT', 'DATE',
+    }
+    .union({type_.value().get_col_spec() for type_ in money.MathesarMoneyDomain})
+)
 
 
 def test_type_list_completeness(engine_with_types):
@@ -77,8 +70,11 @@ def test_type_list_completeness(engine_with_types):
 
 
 @pytest.mark.parametrize("target_type", type_set)
-def test_create_column(engine_email_type, target_type):
-    engine, schema = engine_email_type
+def test_create_column(
+        engine_email_type, temporary_testing_schema,
+        target_type
+):
+    engine, schema = engine_email_type, temporary_testing_schema
     table_name = "atableone"
     initial_column_name = "original_column"
     new_column_name = "added_column"
@@ -102,8 +98,11 @@ def test_create_column(engine_email_type, target_type):
 
 
 @pytest.mark.parametrize("target_type", ["NUMERIC", "DECIMAL"])
-def test_create_column_options(engine_email_type, target_type):
-    engine, schema = engine_email_type
+def test_create_column_options(
+        engine_email_type, temporary_testing_schema,
+        target_type
+):
+    engine, schema = engine_email_type, temporary_testing_schema
     table_name = "atableone"
     initial_column_name = "original_column"
     new_column_name = "added_column"
