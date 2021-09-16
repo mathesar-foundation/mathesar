@@ -117,12 +117,12 @@ export class Meta {
               set('inprocess');
               return;
             }
-            if (completeSet.has(value)) {
-              set('complete');
-              return;
-            }
             if (errorSet.has(value)) {
               set('error');
+              return;
+            }
+            if (completeSet.has(value)) {
+              set('complete');
               return;
             }
           }
