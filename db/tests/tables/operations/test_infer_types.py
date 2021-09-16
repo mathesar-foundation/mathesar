@@ -45,8 +45,11 @@ def create_test_table(engine, schema, table_name, column_name, column_type, valu
 
 
 @pytest.mark.parametrize("type_,value_list,expect_type", type_data_list)
-def test_type_inference(engine_email_type, type_, value_list, expect_type):
-    engine, schema = engine_email_type
+def test_type_inference(
+        engine_email_type, temporary_testing_schema,
+        type_, value_list, expect_type
+):
+    engine, schema = engine_email_type, temporary_testing_schema
     TEST_TABLE = "test_table"
     TEST_COLUMN = "test_column"
     create_test_table(
@@ -69,8 +72,11 @@ def test_type_inference(engine_email_type, type_, value_list, expect_type):
 
 
 @pytest.mark.parametrize("type_,value_list,expect_type", type_data_list)
-def test_table_inference(engine_email_type, type_, value_list, expect_type):
-    engine, schema = engine_email_type
+def test_table_inference(
+        engine_email_type, temporary_testing_schema,
+        type_, value_list, expect_type
+):
+    engine, schema = engine_email_type, temporary_testing_schema
     TEST_TABLE = "test_table"
     TEST_COLUMN = "test_column"
     input_table = create_test_table(
@@ -95,8 +101,8 @@ def test_table_inference(engine_email_type, type_, value_list, expect_type):
     assert original_table == new_table
 
 
-def test_table_inference_drop_temp(engine_email_type):
-    engine, schema = engine_email_type
+def test_table_inference_drop_temp(engine_email_type, temporary_testing_schema):
+    engine, schema = engine_email_type, temporary_testing_schema
     TEST_TABLE = "test_table"
     TEST_COLUMN = "test_column"
     TYPE = Numeric
@@ -111,8 +117,8 @@ def test_table_inference_drop_temp(engine_email_type):
     infer_operations.infer_table_column_types(schema, TEST_TABLE, engine)
 
 
-def test_table_inference_same_name(engine_email_type):
-    engine, schema = engine_email_type
+def test_table_inference_same_name(engine_email_type, temporary_testing_schema):
+    engine, schema = engine_email_type, temporary_testing_schema
     TEST_TABLE = "temp_table"
     TEST_COLUMN = "test_column"
     TYPE = Numeric

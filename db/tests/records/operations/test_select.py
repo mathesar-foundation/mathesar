@@ -32,13 +32,13 @@ def test_get_records_gets_limited_offset_records(roster_table_obj):
     assert len(offset_records) == 10 and offset_records[0] == base_records[5]
 
 
-def test_get_column_cast_records(engine_email_type):
+def test_get_column_cast_records(engine_email_type, temporary_testing_schema):
     COL1 = "col1"
     COL2 = "col2"
     col1 = Column(COL1, String)
     col2 = Column(COL2, String)
     column_list = [col1, col2]
-    engine, schema = engine_email_type
+    engine, schema = engine_email_type, temporary_testing_schema
     table_name = "table_with_columns"
     table = create_mathesar_table(
         table_name, schema, column_list, engine
@@ -63,13 +63,15 @@ def test_get_column_cast_records(engine_email_type):
         )
 
 
-def test_get_column_cast_records_options(engine_email_type):
+def test_get_column_cast_records_options(
+        engine_email_type, temporary_testing_schema
+):
     COL1 = "col1"
     COL2 = "col2"
     col1 = Column(COL1, String)
     col2 = Column(COL2, String)
     column_list = [col1, col2]
-    engine, schema = engine_email_type
+    engine, schema = engine_email_type, temporary_testing_schema
     table_name = "table_with_columns"
     table = create_mathesar_table(
         table_name, schema, column_list, engine
