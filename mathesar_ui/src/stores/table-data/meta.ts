@@ -225,23 +225,68 @@ export class Meta {
     });
   }
 
-  selectRecordByPrimaryKey(primaryKey: unknown): void {
-    if (!get(this.selectedRecords).has(primaryKey)) {
+  selectRecordByPrimaryKey(primaryKeyValue: unknown): void {
+    if (!get(this.selectedRecords).has(primaryKeyValue)) {
       this.selectedRecords.update((existingSet) => {
         const newSet = new Set(existingSet);
-        newSet.add(primaryKey);
+        newSet.add(primaryKeyValue);
         return newSet;
       });
     }
   }
 
-  deSelectRecordByPrimaryKey(primaryKey: unknown): void {
-    if (get(this.selectedRecords).has(primaryKey)) {
+  deSelectRecordByPrimaryKey(primaryKeyValue: unknown): void {
+    if (get(this.selectedRecords).has(primaryKeyValue)) {
       this.selectedRecords.update((existingSet) => {
         const newSet = new Set(existingSet);
-        newSet.delete(primaryKey);
+        newSet.delete(primaryKeyValue);
         return newSet;
       });
     }
+  }
+
+  setRecordModificationState(primaryKeyValue: unknown, state: ModificationType): void {
+    this.recordModificationState.update((existingMap) => {
+      const newMap = new Map(existingMap);
+      newMap.set(primaryKeyValue, state);
+      return newMap;
+    });
+  }
+
+  clearRecordModificationState(primaryKeyValue: unknown): void {
+    this.recordModificationState.update((existingMap) => {
+      const newMap = new Map(existingMap);
+      newMap.delete(primaryKeyValue);
+      return newMap;
+    });
+  }
+
+  clearAllRecordModificationStates(): void {
+    this.recordModificationState.set(new Map());
+  }
+
+  setMultipleRecordModificationStates(
+    primaryKeyValues: unknown[],
+    state: ModificationType,
+  ): void {
+    this.recordModificationState.update((existingMap) => {
+      const newMap = new Map(existingMap);
+      primaryKeyValues.forEach((value) => {
+        newMap.set(value, state);
+      });
+      return newMap;
+    });
+  }
+
+  clearMultipleRecordModificationStates(
+    primaryKeyValues: unknown[],
+  ): void {
+    this.recordModificationState.update((existingMap) => {
+      const newMap = new Map(existingMap);
+      primaryKeyValues.forEach((value) => {
+        newMap.delete(value);
+      });
+      return newMap;
+    });
   }
 }

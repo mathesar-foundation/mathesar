@@ -96,7 +96,7 @@
   <div class="loading-info">
     <Button size="small" disabled={isLoading} on:click={refresh}>
       <Icon data={
-        isError ? faExclamationTriangle : faSync
+        isError && !isLoading ? faExclamationTriangle : faSync
       } spin={isLoading}/>
       <span>
         {#if isLoading}

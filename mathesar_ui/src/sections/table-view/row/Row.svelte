@@ -8,6 +8,7 @@
     TabularData,
     TableRecord,
     TableColumn,
+    ModificationType,
   } from '@mathesar/stores/table-data/types';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
@@ -21,7 +22,7 @@
     records, columns, meta, display,
   } = $tabularData as TabularData);
   $: ({ columnPositionMap } = display as TabularData['display']);
-  $: ({ selectedRecords } = meta as TabularData['meta']);
+  $: ({ selectedRecords, recordModificationState } = meta as TabularData['meta']);
 
   function calculateStyle(
     _style: { [key: string]: string | number },
@@ -48,10 +49,17 @@
     return _columnPositionMap.get(_name);
   }
 
+  function getModificationState(
+    _recordModState: Map<unknown, ModificationType>,
+  ): ModificationType {
+    return _recordModState.get(row[$columns.primaryKey]);
+  }
+
   $: isSelected = ($selectedRecords as Set<unknown>).has(row[$columns.primaryKey]);
+  $: modificationState = getModificationState($recordModificationState);
 </script>
 
-<div class="row {row.__state}" class:selected={isSelected}
+<div class="row {modificationState || row.__state}" class:selected={isSelected}
       class:is-group-header={row.__isGroupHeader} style={styleString}>
   <RowControl primaryKeyColumn={$columns.primaryKey}
               {row} {meta}/>

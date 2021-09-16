@@ -9,5 +9,6 @@ export type {
   GroupOption,
   SortOption,
   FilterOption,
+  ModificationType,
 } from './meta';
 export type { Display } from './display';

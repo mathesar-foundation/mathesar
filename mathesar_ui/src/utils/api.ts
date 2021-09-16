@@ -81,6 +81,14 @@ function sendXHRRequest<T>(method: string, url: string, data?: unknown): Cancell
         }
       }
     });
+
+    request.addEventListener('error', () => {
+      reject(new Error('An unexpected error has occurred'));
+    });
+
+    request.addEventListener('abort', () => {
+      reject(new Error('Request was aborted'));
+    });
   }, () => {
     request.abort();
   });

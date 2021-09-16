@@ -198,6 +198,8 @@ export class Records implements Writable<TableRecordData> {
       };
     });
 
+    this._meta.clearAllRecordModificationStates();
+
     try {
       const params = getStoreValue(this._meta.recordRequestParams);
       this._promise = getAPI<TableRecordResponse>(`${this._url}?${params ?? ''}`);
@@ -224,12 +226,11 @@ export class Records implements Writable<TableRecordData> {
       this._fetchCallback?.(storeData);
       return storeData;
     } catch (err) {
-      this._store.set({
+      this._store.update((existing) => ({
+        ...existing,
         state: States.Error,
         error: err instanceof Error ? err.message : null,
-        data: [],
-        totalCount: null,
-      });
+      }));
     }
     return null;
   }
@@ -256,75 +257,21 @@ export class Records implements Writable<TableRecordData> {
     const pkSet = getStoreValue(this._meta.selectedRecords);
 
     if (pkSet.size > 0) {
-      this._store.update((existingData) => {
-        // TODO: Retain map with pk uuid hash for record operations
-        const data = existingData.data.map((entry) => {
-          if (entry && pkSet.has(entry[this._columns.get().primaryKey]?.toString())) {
-            return {
-              ...entry,
-              __state: 'deleting',
-            };
-          }
-          return entry;
-        });
-
-        return {
-          ...existingData,
-          data,
-        };
-      });
+      this._meta.setMultipleRecordModificationStates([...pkSet], 'delete');
 
       try {
-        const success = new Set();
-        const failed = new Set();
+        const failed: unknown[] = [];
         // TODO: Convert this to single request
         const promises = [...pkSet].map((pk) => deleteAPI<unknown>(`${this._url}${pk as string}/`)
-          .then(() => {
-            success.add(pk);
-            return success;
-          })
           .catch(() => {
-            failed.add(pk);
+            failed.push(pk);
             return failed;
           }));
         await Promise.all(promises);
-
-        this._store.update((existingData) => {
-          const data = existingData.data.map((entry) => {
-            if (entry && failed.has(entry[this._columns.get().primaryKey]?.toString())) {
-              return {
-                ...entry,
-                __state: 'deletionFailed',
-              };
-            }
-            return entry;
-          });
-
-          return {
-            ...existingData,
-            data,
-          };
-        });
-
-        void this.fetch(true);
+        await this.fetch(true);
+        this._meta.setMultipleRecordModificationStates(failed, 'deleteFailed');
       } catch (err) {
-        this._store.update((existingData) => {
-          // TODO: Retain map with pk uuid hash for record operations
-          const data = existingData.data.map((entry) => {
-            if (entry && pkSet.has(entry[this._columns.get().primaryKey]?.toString())) {
-              return {
-                ...entry,
-                __state: 'deletionError',
-              };
-            }
-            return entry;
-          });
-
-          return {
-            ...existingData,
-            data,
-          };
-        });
+        this._meta.setMultipleRecordModificationStates([...pkSet], 'deleteFailed');
       } finally {
         this._meta.clearSelectedRecords();
       }

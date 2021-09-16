@@ -30,10 +30,17 @@ section.table-section .tab-container .table-data .body {
         }
       }
 
-      &.deleting {
+      &.delete {
         .cell {
           transition: all .20s cubic-bezier(0,0,.2,1);
           background: #f1bfbf;
+        }
+      }
+
+      &.deleteFailed {
+        .cell {
+          transition: all .20s cubic-bezier(0,0,.2,1);
+          background: #eb4242;
         }
       }
     }
