@@ -56,6 +56,12 @@ section.table-section .tab-container .table-data .body {
       }
     }
 
+    .cell.row-control {
+      .mod-indicator {
+        margin-left: 5px;
+      }
+    }
+
     .cell {
       user-select: none;
       overflow: hidden;

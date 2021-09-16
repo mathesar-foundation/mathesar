@@ -33,6 +33,12 @@ export type ModificationType = 'create' | 'created' | 'creationFailed'
 | 'update' | 'updated' | 'updateFailed'
 | 'delete' | 'deleteFailed';
 
+const inProgressSet: Set<ModificationType> = new Set(['create', 'update', 'delete']);
+
+export function isModificationInProgress(modificationType: ModificationType): boolean {
+  return inProgressSet.has(modificationType);
+}
+
 // The Meta store is meant to be used by other stores for storing and operating on meta information.
 // This may also include display properties. Properties in Meta store do not depend on other stores.
 // For display specific properties that depend on other stores, the Display store can be used.

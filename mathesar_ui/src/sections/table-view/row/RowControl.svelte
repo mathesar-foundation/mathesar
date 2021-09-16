@@ -1,12 +1,17 @@
 <script lang="ts">
-  import { Checkbox } from '@mathesar-components';
+  import {
+    faSync,
+  } from '@fortawesome/free-solid-svg-icons';
+  import { Checkbox, Icon } from '@mathesar-components';
   import {
     ROW_CONTROL_COLUMN_WIDTH,
     GROUP_MARGIN_LEFT,
+    isModificationInProgress,
   } from '@mathesar/stores/table-data';
   import type {
     Meta,
     TableRecord,
+    ModificationType,
   } from '@mathesar/stores/table-data/types';
 
   export let isGrouped = false;
@@ -14,10 +19,13 @@
   export let row: TableRecord;
   export let meta: Meta;
 
-  $: ({ selectedRecords } = meta);
+  $: ({ selectedRecords, recordModificationState } = meta);
 
   $: primaryKeyValue = row?.[primaryKeyColumn] ?? null;
   $: isRowSelected = ($selectedRecords as Set<unknown>).has(primaryKeyValue);
+  $: isModInProgress = isModificationInProgress(
+    ($recordModificationState as Map<unknown, ModificationType>).get(primaryKeyValue),
+  );
 
   function selectionChanged(event: CustomEvent<{ checked: boolean }>) {
     const { checked } = event.detail;
@@ -39,6 +47,10 @@
 
     {#if primaryKeyValue}
       <Checkbox checked={isRowSelected} on:change={selectionChanged}/>
+    {/if}
+
+    {#if isModInProgress}
+      <Icon class="mod-indicator" size='0.9em' data={faSync} spin={true}/>
     {/if}
   {/if}
 </div>

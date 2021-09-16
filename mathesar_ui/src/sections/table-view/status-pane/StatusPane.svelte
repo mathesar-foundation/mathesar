@@ -2,6 +2,7 @@
   import { getContext } from 'svelte';
   import { Pagination, Select } from '@mathesar-components';
   import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
+  import { States } from '@mathesar/utils/api';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
   $: ({
@@ -36,7 +37,7 @@
     {:else if pageCount > 0 && $records.totalCount}
       Showing {$offset + 1} - {max} of {$records.totalCount} records
     
-    {:else}
+    {:else if $records.state !== States.Loading}
       No records found
     {/if}
   </div>

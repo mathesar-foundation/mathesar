@@ -11,6 +11,8 @@ export interface ColumnPosition {
 }
 export type ColumnPositionMap = Map<string, ColumnPosition>;
 
+// TODO: Select active cell using primary key instead of index
+// Checkout scenarios with pk consisting multiple columns
 export interface ActiveCell {
   rowIndex: number,
   column: string,
