@@ -8,13 +8,8 @@ from sqlalchemy import Column, Integer, String, MetaData, select
 from sqlalchemy import Table as SATable
 
 from db.tables.operations.select import get_oid_from_table
-from db.tests.types import fixtures
+from db.types.money import MathesarMoneyDomain
 from mathesar import models
-
-
-engine_with_types = fixtures.engine_with_types
-engine_email_type = fixtures.engine_email_type
-temporary_testing_schema = fixtures.temporary_testing_schema
 
 
 @pytest.fixture
@@ -38,7 +33,16 @@ def column_test_table(patent_schema):
     return table
 
 
-def test_column_list(column_test_table, client):
+@pytest.fixture
+def money_type_list():
+    return get_money_type_list()
+
+
+def get_money_type_list():
+    return [type_.value().get_col_spec() for type_ in MathesarMoneyDomain]
+
+
+def test_column_list(column_test_table, client, money_type_list):
     cache.clear()
     response = client.get(f"/api/v0/tables/{column_test_table.id}/columns/")
     response_data = response.json()
@@ -52,10 +56,13 @@ def test_column_list(column_test_table, client):
             'nullable': False,
             'primary_key': True,
             'default': None,
-            'valid_target_types': [
-                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
-            ],
+            'valid_target_types': sorted(
+                [
+                    'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                    'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
+                ]
+                + money_type_list
+            ),
         },
         {
             'name': 'mycolumn1',
@@ -65,10 +72,13 @@ def test_column_list(column_test_table, client):
             'nullable': False,
             'primary_key': False,
             'default': None,
-            'valid_target_types': [
-                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
-            ],
+            'valid_target_types': sorted(
+                [
+                    'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                    'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
+                ]
+                + money_type_list
+            ),
         },
         {
             'name': 'mycolumn2',
@@ -78,10 +88,13 @@ def test_column_list(column_test_table, client):
             'nullable': True,
             'primary_key': False,
             'default': 5,
-            'valid_target_types': [
-                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
-            ],
+            'valid_target_types': sorted(
+                [
+                    'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
+                    'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
+                ]
+                + money_type_list
+            ),
         },
         {
             'name': 'mycolumn3',
@@ -90,11 +103,14 @@ def test_column_list(column_test_table, client):
             'index': 3,
             'nullable': True,
             'primary_key': False,
-            'valid_target_types': [
-                'BIGINT', 'BOOLEAN', 'DATE', 'DECIMAL', 'DOUBLE PRECISION',
-                'FLOAT', 'INTEGER', 'INTERVAL', 'MATHESAR_TYPES.EMAIL',
-                'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
-            ],
+            'valid_target_types': sorted(
+                [
+                    'BIGINT', 'BOOLEAN', 'DATE', 'DECIMAL', 'DOUBLE PRECISION',
+                    'FLOAT', 'INTEGER', 'INTERVAL', 'MATHESAR_TYPES.EMAIL',
+                    'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
+                ]
+                + money_type_list
+            ),
             'default': None,
         }
     ]
@@ -114,10 +130,14 @@ def test_column_list(column_test_table, client):
                 'nullable': False,
                 'primary_key': True,
                 'default': None,
-                'valid_target_types': [
-                    'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                    'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
-                ],
+                'valid_target_types': sorted(
+                    [
+                        'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION',
+                        'FLOAT', 'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT',
+                        'VARCHAR',
+                    ]
+                    + get_money_type_list()
+                ),
             },
         ),
         (
@@ -130,10 +150,14 @@ def test_column_list(column_test_table, client):
                 'nullable': True,
                 'primary_key': False,
                 'default': 5,
-                'valid_target_types': [
-                    'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                    'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT', 'VARCHAR',
-                ],
+                'valid_target_types': sorted(
+                    [
+                        'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION',
+                        'FLOAT', 'INTEGER', 'NUMERIC', 'REAL', 'SMALLINT',
+                        'VARCHAR',
+                    ]
+                    + get_money_type_list()
+                ),
             },
         ),
     ]
@@ -402,7 +426,7 @@ def test_column_update_type_options(column_test_table, client):
     assert response.json()["type_options"] == type_options
 
 
-def test_column_update_invalid_type(create_table, client, engine_email_type):
+def test_column_update_invalid_type(create_table, client):
     table = create_table('Column Invalid Type')
     body = {"type": "BIGINT"}
     response = client.patch(
