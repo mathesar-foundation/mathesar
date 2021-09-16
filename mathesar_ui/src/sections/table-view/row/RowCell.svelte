@@ -63,13 +63,23 @@
 
   async function handleKeyDown(event: KeyboardEvent) {
     const type = display.handleKeyEventsOnActiveCell(event.key);
-    if (type === 'moved') {
+    if (type) {
       event.stopPropagation();
       event.preventDefault();
 
-      await tick();
-      scrollBasedOnActiveCell();
+      if (type === 'moved') {
+        await tick();
+        scrollBasedOnActiveCell();
+      }
     }
+  }
+
+  async function handleInputKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Tab' || event.key === 'Enter' || event.key === 'Escape') {
+      onBlur(event);
+    }
+
+    await handleKeyDown(event);
   }
 </script>
 
@@ -95,6 +105,7 @@
   {#if isBeingEdited}
     <input bind:this={inputRef} type="text" class="edit-input-box"
             value={row[column.name]?.toString() || ''}
+            on:keydown={handleInputKeyDown}
             on:keyup={debounceAndSet} on:blur={onBlur}/>
   {/if}
 

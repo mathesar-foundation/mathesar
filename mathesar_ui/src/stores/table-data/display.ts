@@ -209,17 +209,36 @@ export class Display {
       return 'moved';
     }
 
-    if (key === 'Enter' && activeCell?.type === 'select') {
-      if (!columnData[activeCell.columnIndex]?.primary_key) {
+    if (key === 'Tab' && activeCell?.type === 'edit') {
+      this.activeCell.update((existing) => {
+        const newActiveCell = { ...existing };
+        if (existing.columnIndex < columnData.length - 1) {
+          newActiveCell.columnIndex += 1;
+        }
+        return newActiveCell;
+      });
+      return 'moved';
+    }
+
+    if (key === 'Enter') {
+      if (activeCell?.type === 'select') {
+        if (!columnData[activeCell.columnIndex]?.primary_key) {
+          this.activeCell.update((existing) => ({
+            ...existing,
+            type: 'edit',
+          }));
+          return 'changed';
+        }
+      } else if (activeCell?.type === 'edit') {
         this.activeCell.update((existing) => ({
           ...existing,
-          type: 'edit',
+          type: 'select',
         }));
         return 'changed';
       }
     }
 
-    if (key === 'Esc' && activeCell?.type === 'edit') {
+    if (key === 'Escape' && activeCell?.type === 'edit') {
       this.activeCell.update((existing) => ({
         ...existing,
         type: 'select',
