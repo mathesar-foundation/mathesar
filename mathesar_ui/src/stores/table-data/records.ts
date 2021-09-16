@@ -281,6 +281,7 @@ export class Records implements Writable<TableRecordData> {
   async updateRecord(row: TableRecord): Promise<void> {
     const { primaryKey } = this._columns.get();
     if (primaryKey && row[primaryKey]) {
+      this._meta.setRecordModificationState(row[primaryKey], 'update');
       this._updatePromises?.get(row[primaryKey])?.cancel();
       const promise = patchAPI<TableRecordResponse>(
         `${this._url}${row[primaryKey] as string}/`,
@@ -293,8 +294,9 @@ export class Records implements Writable<TableRecordData> {
 
       try {
         await promise;
+        this._meta.setRecordModificationState(row[primaryKey], 'updated');
       } catch (err) {
-        //
+        this._meta.setRecordModificationState(row[primaryKey], 'updateFailed');
       } finally {
         if (this._updatePromises.get(row[primaryKey]) === promise) {
           this._updatePromises.clear();

@@ -59,7 +59,7 @@
   $: modificationState = getModificationState($recordModificationState);
 </script>
 
-<div class="row {modificationState || row.__state}" class:selected={isSelected}
+<div class="row {row.__state} {modificationState || ''}" class:selected={isSelected}
       class:is-group-header={row.__isGroupHeader} style={styleString}>
   <RowControl primaryKeyColumn={$columns.primaryKey}
               {row} {meta}/>
