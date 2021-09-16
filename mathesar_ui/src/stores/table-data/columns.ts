@@ -18,7 +18,8 @@ export interface TableColumn {
   index: number,
   nullable: boolean,
   primary_key: boolean,
-  valid_target_types: string[]
+  valid_target_types: string[],
+  __columnIndex?: number,
 }
 
 export interface TableColumnData {
@@ -26,6 +27,18 @@ export interface TableColumnData {
   error?: string,
   data: TableColumn[],
   primaryKey?: string,
+}
+
+function preprocessColumns(response?: TableColumn[]): TableColumn[] {
+  let index = 0;
+  return response?.map((column) => {
+    const newColumn = {
+      ...column,
+      __columnIndex: index,
+    };
+    index += 1;
+    return newColumn;
+  }) || [];
 }
 
 export class Columns implements Writable<TableColumnData> {
@@ -91,7 +104,7 @@ export class Columns implements Writable<TableColumnData> {
       this._promise = getAPI<PaginatedResponse<TableColumn>>(`${this._url}?limit=500`);
 
       const response = await this._promise;
-      const columnResponse = response.results || [];
+      const columnResponse = preprocessColumns(response.results);
       const pkColumn = columnResponse.find((column) => column.primary_key);
 
       const storeData: TableColumnData = {

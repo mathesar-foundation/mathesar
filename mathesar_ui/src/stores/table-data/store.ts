@@ -28,7 +28,7 @@ function get(type: TabularType, id: DBObjectEntry['id']): TabularData {
     const meta = new Meta(type, id);
     const columns = new Columns(type, id, meta);
     const records = new Records(type, id, meta, columns);
-    const display = new Display(type, id, meta, columns);
+    const display = new Display(type, id, meta, columns, records);
 
     entry = {
       id,

@@ -3,6 +3,7 @@
   import type {
     TabularDataStore,
     TabularData,
+    Display,
   } from '@mathesar/stores/table-data/types';
 
   import Row from './row/Row.svelte';
@@ -13,7 +14,9 @@
   $: ({ id, records, display } = $tabularData as TabularData);
   $: ({
     rowWidth, horizontalScrollOffset,
-  } = display as TabularData['display']);
+  } = display as Display);
+
+  let bodyRef: HTMLDivElement;
 
   function getItemSize() {
     const defaultRowHeight = 30;
@@ -26,9 +29,32 @@
     // Return index by default
     return `__index_${index}`;
   }
+
+  function handleKeyDown(event: KeyboardEvent) {
+    if (bodyRef.contains(event.target as HTMLElement)) {
+      (display as Display).handleKeyEventsOnActiveCell(event.key);
+    } else {
+      (display as Display).resetActiveCell();
+    }
+  }
+
+  function handleTab(event: KeyboardEvent) {
+    if (event.key === 'Tab') {
+      (display as Display).handleKeyEventsOnActiveCell('ArrowRight');
+      event.stopPropagation();
+    }
+  }
+
+  function handleClick(event: MouseEvent) {
+    if (!bodyRef.contains(event.target as HTMLElement)) {
+      (display as Display).resetActiveCell();
+    }
+  }
 </script>
 
-<div class="body">
+<svelte:window on:keydown={handleKeyDown} on:mousedown={handleClick}/>
+
+<div bind:this={bodyRef} class="body" tabindex="-1" on:keydown={handleTab}>
   <Resizer let:height>
     {#key id}
       <VirtualList

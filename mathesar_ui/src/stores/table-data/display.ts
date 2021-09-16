@@ -3,7 +3,7 @@ import type { Writable, Unsubscriber } from 'svelte/store';
 import type { TabularType, DBObjectEntry } from '@mathesar/App.d';
 import type { Meta } from './meta';
 import type { Columns, TableColumn } from './columns';
-import type { TableRecord } from './records';
+import type { TableRecord, Records } from './records';
 
 export interface ColumnPosition {
   width: number,
@@ -15,7 +15,7 @@ export type ColumnPositionMap = Map<string, ColumnPosition>;
 // Checkout scenarios with pk consisting multiple columns
 export interface ActiveCell {
   rowIndex: number,
-  column: string,
+  columnIndex: number,
   type: 'select' | 'edit'
 }
 
@@ -23,6 +23,8 @@ export const ROW_CONTROL_COLUMN_WIDTH = 70;
 export const GROUP_MARGIN_LEFT = 30;
 export const DEFAULT_ROW_RIGHT_PADDING = 100;
 export const DEFAULT_COLUMN_WIDTH = 160;
+
+const arrowKeys = new Set(['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft']);
 
 function recalculateColumnPositions(columnPositionMap: ColumnPositionMap, columns: TableColumn[]) {
   let left = ROW_CONTROL_COLUMN_WIDTH;
@@ -52,7 +54,7 @@ export function isCellActive(
   column: TableColumn,
 ): boolean {
   return activeCell
-    && activeCell?.column === column.name
+    && activeCell?.columnIndex === column.__columnIndex
     && activeCell.rowIndex === row.__rowIndex;
 }
 
@@ -73,6 +75,8 @@ export class Display {
 
   _columns: Columns;
 
+  _records: Records;
+
   _columnPositionMapUnsubscriber: Unsubscriber;
 
   showDisplayOptions: Writable<boolean>;
@@ -90,11 +94,13 @@ export class Display {
     parentId: number,
     meta: Meta,
     columns: Columns,
+    records: Records,
   ) {
     this._type = type;
     this._parentId = parentId;
     this._meta = meta;
     this._columns = columns;
+    this._records = records;
     this.showDisplayOptions = writable(false);
     this.horizontalScrollOffset = writable(0);
     this.columnPositionMap = writable(new Map() as ColumnPositionMap);
@@ -119,7 +125,7 @@ export class Display {
   selectCell(row: TableRecord, column: TableColumn): void {
     this.activeCell.set({
       rowIndex: row.__rowIndex,
-      column: column.name,
+      columnIndex: column.__columnIndex,
       type: 'select',
     });
   }
@@ -128,9 +134,61 @@ export class Display {
     if (!column.primary_key) {
       this.activeCell.set({
         rowIndex: row.__rowIndex,
-        column: column.name,
+        columnIndex: column.__columnIndex,
         type: 'edit',
       });
+    }
+  }
+
+  handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): void {
+    const columnData = this._columns.get().data;
+    const records = this._records.get();
+    const offset = get(this._meta.offset);
+    const pageSize = get(this._meta.pageSize);
+    const maxRowIndex = Math.min(pageSize, records.totalCount - offset, records.data.length) - 1;
+    const activeCell = get(this.activeCell);
+
+    if (arrowKeys.has(key) && activeCell?.type === 'select') {
+      this.activeCell.update((existing) => {
+        const newActiveCell = { ...existing };
+        switch (key) {
+          case 'ArrowDown':
+            if (existing.rowIndex < maxRowIndex) {
+              newActiveCell.rowIndex += 1;
+            }
+            break;
+          case 'ArrowUp':
+            if (existing.rowIndex > 0) {
+              newActiveCell.rowIndex -= 1;
+            }
+            break;
+          case 'ArrowRight':
+            if (existing.columnIndex < columnData.length - 1) {
+              newActiveCell.columnIndex += 1;
+            }
+            break;
+          case 'ArrowLeft':
+            if (existing.columnIndex > 0) {
+              newActiveCell.columnIndex -= 1;
+            }
+            break;
+          default:
+            break;
+        }
+        return newActiveCell;
+      });
+    } else if (key === 'Enter' && activeCell?.type === 'select') {
+      if (!columnData[activeCell.columnIndex]?.primary_key) {
+        this.activeCell.update((existing) => ({
+          ...existing,
+          type: 'edit',
+        }));
+      }
+    } else if (key === 'Esc' && activeCell?.type === 'edit') {
+      this.activeCell.update((existing) => ({
+        ...existing,
+        type: 'select',
+      }));
     }
   }
 
