@@ -108,6 +108,16 @@ export const currentDBMathesarTypes: Readable<MathesarType[]> =
     undefined,
   );
 
+/**
+ * We're creating a dummy subscription so that the number of subscribers does not drop to 0.
+ * If it drops to 0, and then goes up to 1, the store will be invalidated and its callback
+ * called unnecessarily. An invalidation in this case causes network IO.
+ *
+ * Dedicated issue: https://github.com/centerofci/mathesar/issues/670
+ */
+const dummySubscribe = (readable: Readable<unknown>) => readable.subscribe(() => {});
+dummySubscribe(currentDBMathesarTypes);
+
 export type DbTypeTargetsPerMathesarType = Map<MathesarType['identifier'], DbType[]>;
 
 function getValidDbTypeTargetsForColumnAndMathesarType(
