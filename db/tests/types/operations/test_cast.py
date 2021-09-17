@@ -12,7 +12,7 @@ from db.columns.operations.select import get_column_default
 from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
-from db.types import email
+from db.types import email, money
 from db.types.base import PostgresType, MathesarCustomType, get_qualified_name, get_available_types
 from db.types.operations import cast as cast_operations
 
@@ -87,7 +87,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
             SMALLINT: {VALID: [(500, 500)]},
-            VARCHAR: {VALID: [(3, "3")]},
+            VARCHAR: {VALID: [(3, "3")]}
         }
     },
     BOOLEAN: {
@@ -708,9 +708,32 @@ def test_get_column_cast_expression_numeric_options(
     assert str(cast_expr) == expect_cast_expr
 
 
-expect_cast_tuples = [
-    (key, [target for target in val[TARGET_DICT]])
+expect_cast_dict = {
+    key:  [target for target in val[TARGET_DICT]]
     for key, val in MASTER_DB_TYPE_MAP_SPEC.items()
+}
+
+# We have to handle money domain tests separately, or we'll end up with
+# about 90000 tests for type  casting involving them
+money_domain_source_types = [
+    BIGINT, DECIMAL, DOUBLE, FLOAT, INTEGER, NUMERIC, REAL, SMALLINT, VARCHAR
+]
+
+expect_cast_dict.update(
+    {
+        key: (
+            expect_cast_dict[key]
+            + [
+                type_.value().get_col_spec()
+                for type_ in money.MathesarMoneyDomain
+            ]
+        )
+        for key in money_domain_source_types
+    }
+)
+
+expect_cast_tuples = [
+    (key, list(set(val))) for key, val in expect_cast_dict.items()
 ]
 
 

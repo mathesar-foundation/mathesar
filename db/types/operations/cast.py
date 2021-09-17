@@ -496,7 +496,7 @@ def _get_money_type_body_map():
 def _get_money_domain_type_body_map(target_domain):
     default_behavior_source_types = [
         BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
-        SMALLINT, TEXT, VARCHAR
+        SMALLINT, TEXT, VARCHAR, target_domain
     ]
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, target_domain
