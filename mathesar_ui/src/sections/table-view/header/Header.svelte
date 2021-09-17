@@ -6,15 +6,14 @@
     SortOption,
     GroupOption,
   } from '@mathesar/stores/tableData';
-  import type { MathesarType } from '@mathesar/stores/mathesarTypes';
   import {
     DEFAULT_COUNT_COL_WIDTH,
     GROUP_MARGIN_LEFT,
     DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/tableData';
+  import { currentDBMathesarTypes } from '@mathesar/stores/mathesarTypes';
   import HeaderCell from './HeaderCell.svelte';
 
-  export let mathesarTypes: MathesarType[];
   export let tableId: number;
   export let columns: TableColumnData;
   export let sort: SortOption = new Map();
@@ -57,6 +56,8 @@
     };
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  $: mathesarTypes = $currentDBMathesarTypes;
 </script>
 
 <div bind:this={headerRef} class="header">
