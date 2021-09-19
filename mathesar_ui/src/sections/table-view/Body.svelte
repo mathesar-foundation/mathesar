@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getContext, tick } from 'svelte';
+  import { getContext } from 'svelte';
   import type {
     TabularDataStore,
     TabularData,
