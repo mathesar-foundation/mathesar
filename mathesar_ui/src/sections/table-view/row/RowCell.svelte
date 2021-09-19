@@ -52,7 +52,7 @@
     timer = window.setTimeout(() => {
       const val = (event.target as HTMLInputElement).value;
       setValue(val);
-    }, 500);
+    }, 300);
   }
 
   function onBlur(event: Event) {
