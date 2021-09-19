@@ -7,20 +7,30 @@
     faTrashAlt,
     faSync,
     faExclamationTriangle,
+    faPlus,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
   import { Button, Icon } from '@mathesar-components';
-  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
+  import type {
+    TabularDataStore,
+    TabularData,
+    Records,
+    Columns,
+    Meta,
+  } from '@mathesar/stores/table-data/types';
 
   const dispatch = createEventDispatcher();
 
   const tabularData = getContext<TabularDataStore>('tabularData');
+
+  let records: Records;
+  let columns: Columns;
   $: ({
     columns, records, meta,
   } = $tabularData as TabularData);
   $: ({
     filter, sort, group, selectedRecords, combinedModificationState,
-  } = meta as TabularData['meta']);
+  } = meta as Meta);
 
   $: isLoading = $columns.state === States.Loading
     || $records.state === States.Loading;
@@ -32,12 +42,16 @@
   }
 
   function deleteRecords() {
-    void (records as TabularData['records']).deleteSelected();
+    void records.deleteSelected();
+  }
+
+  function addRecord() {
+    records.addRecord();
   }
 
   function refresh() {
-    void (columns as TabularData['columns']).fetch();
-    void (records as TabularData['records']).fetch();
+    void columns.fetch();
+    void records.fetch();
   }
 </script>
 
@@ -69,6 +83,15 @@
       {#if $group?.size > 0}
         ({$group?.size})
       {/if}
+    </span>
+  </Button>
+
+  <div class="divider"/>
+
+  <Button size="small" on:click={addRecord}>
+    <Icon data={faPlus}/>
+    <span>
+      Record
     </span>
   </Button>
 

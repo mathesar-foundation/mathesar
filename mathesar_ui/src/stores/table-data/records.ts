@@ -20,18 +20,17 @@ import type { Columns, TableColumn } from './columns';
 
 export interface TableRecord {
   [key: string]: unknown,
+  __isAddPlaceholder?: boolean,
+  __isNew?: boolean,
   __isGroupHeader?: boolean,
   __rowNumber?: number,
   __rowIndex?: number,
   __state?: string, // TODO: Remove __state in favour of _recordsInProcess
-  __groupInfo?: {
-    columns: string[],
-    values: Record<string, unknown>,
-  }
+  __groupValues?: Record<string, unknown>,
 }
 
-export interface GroupData {
-  [key: string]: GroupData | number
+export interface GroupCount {
+  [key: string]: GroupCount | number
 }
 
 interface TableRecordData {
@@ -39,7 +38,8 @@ interface TableRecordData {
   error?: string,
   data: TableRecord[],
   totalCount: number,
-  groupData?: GroupData
+  groupCounts?: GroupCount,
+  groupColumns?: string[],
 }
 
 interface TableRecordResponse extends PaginatedResponse<TableRecord> {
@@ -52,9 +52,9 @@ interface TableRecordResponse extends PaginatedResponse<TableRecord> {
   }
 }
 
-function mapGroupCounts(groupInfo: TableRecordResponse['group_count']): GroupData {
+function mapGroupCounts(groupInfo: TableRecordResponse['group_count']): GroupCount {
   const groupResults = groupInfo.results;
-  const groupMap: GroupData = {};
+  const groupMap: GroupCount = {};
   groupResults?.forEach((result) => {
     let group = groupMap;
     for (let i = 0; i < result.values.length - 1; i += 1) {
@@ -62,55 +62,58 @@ function mapGroupCounts(groupInfo: TableRecordResponse['group_count']): GroupDat
       if (!group[value]) {
         group[value] = {};
       }
-      group = group[value] as GroupData;
+      group = group[value] as GroupCount;
     }
     group[result.values[result.values.length - 1]] = result.count;
   });
   return groupMap;
 }
 
-function preprocessRecords(offset: number, response: TableRecordResponse): TableRecord[] {
-  const groupColumns = response?.group_count?.group_count_by;
+function preprocessRecords(
+  offset: number,
+  records?: TableRecord[],
+  groupColumns?: string[],
+): TableRecord[] {
   const isResultGrouped = groupColumns?.length > 0;
-
-  const records = response.results || [];
-  const combinedRecords: TableRecord[] = [];
+  const combinedRecords: TableRecord[] = [{
+    __state: 'done',
+    __isAddPlaceholder: true,
+  }];
   let index = 0;
 
-  records.forEach((record) => {
-    if (isResultGrouped) {
-      let isGroup = false;
-      if (index === 0) {
-        isGroup = true;
-      } else {
-        // eslint-disable-next-line no-restricted-syntax
-        for (const column of groupColumns) {
-          if (records[index - 1][column] !== records[index][column]) {
-            isGroup = true;
-            break;
+  records?.forEach((record) => {
+    if (!record.__isGroupHeader && !record.__isAddPlaceholder) {
+      if (isResultGrouped && !record.__isNew) {
+        let isGroup = false;
+        if (index === 0) {
+          isGroup = true;
+        } else {
+          // eslint-disable-next-line no-restricted-syntax
+          for (const column of groupColumns) {
+            if (records[index - 1][column] !== records[index][column]) {
+              isGroup = true;
+              break;
+            }
           }
+        }
+
+        if (isGroup) {
+          combinedRecords.push({
+            __isGroupHeader: true,
+            __groupValues: record,
+            __state: 'done',
+          });
         }
       }
 
-      if (isGroup) {
-        combinedRecords.push({
-          __isGroupHeader: true,
-          __groupInfo: {
-            columns: groupColumns,
-            values: record,
-          },
-          __state: 'done',
-        });
-      }
+      combinedRecords.push({
+        ...record,
+        __rowNumber: offset + index + 1,
+        __rowIndex: index,
+        __state: 'done',
+      });
+      index += 1;
     }
-
-    combinedRecords.push({
-      ...record,
-      __rowNumber: offset + index + 1,
-      __rowIndex: index,
-      __state: 'done',
-    });
-    index += 1;
   });
   return combinedRecords;
 }
@@ -158,7 +161,7 @@ export class Records implements Writable<TableRecordData> {
     this._store = writable({
       state: States.Loading,
       data: [],
-      groupData: null,
+      groupCounts: null,
       totalCount: null,
     });
     this._meta = meta;
@@ -209,17 +212,22 @@ export class Records implements Writable<TableRecordData> {
 
       const groupColumns = response?.group_count?.group_count_by;
       const isResultGrouped = groupColumns?.length > 0;
-      let groupData: GroupData = null;
+      let groupCounts: GroupCount = null;
       if (isResultGrouped) {
-        groupData = mapGroupCounts(response.group_count);
+        groupCounts = mapGroupCounts(response.group_count);
       }
 
-      const records = preprocessRecords(getStoreValue(this._meta.offset), response);
+      const records = preprocessRecords(
+        getStoreValue(this._meta.offset),
+        response.results,
+        groupColumns,
+      );
 
       const storeData: TableRecordData = {
         state: States.Done,
         data: records,
-        groupData,
+        groupCounts,
+        groupColumns,
         totalCount,
       };
       this._store.set(storeData);
@@ -303,6 +311,21 @@ export class Records implements Writable<TableRecordData> {
         }
       }
     }
+  }
+
+  addRecord(): void {
+    const offset = getStoreValue(this._meta.offset);
+    this._store.update((existingData) => {
+      const { data, groupColumns } = existingData;
+      data.unshift({
+        __isNew: true,
+      });
+
+      return {
+        ...existingData,
+        data: preprocessRecords(offset, data, groupColumns),
+      };
+    });
   }
 
   destroy(): void {

@@ -60,12 +60,16 @@
 </script>
 
 <div class="row {row.__state} {modificationState || ''}" class:selected={isSelected}
-      class:is-group-header={row.__isGroupHeader} style={styleString}>
+      class:is-group-header={row.__isGroupHeader} class:is-add-placeholder={row.__isAddPlaceholder}
+      style={styleString}>
   <RowControl primaryKeyColumn={$columns.primaryKey}
               {row} {meta}/>
-
-  {#if row.__isGroupHeader}
-    <GroupHeader {row} groupData={$records.groupData}/>
+  {#if row.__isAddPlaceholder}
+    <div>
+      
+    </div>
+  {:else if row.__isGroupHeader}
+    <GroupHeader {row} groupColumns={$records.groupColumns} groupCounts={$records.groupCounts}/>
   {:else}
     {#each $columns.data as column (column.name)}
       <RowCell {display} bind:row {column} {records}

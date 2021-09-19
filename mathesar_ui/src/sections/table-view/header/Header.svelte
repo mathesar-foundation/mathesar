@@ -21,7 +21,7 @@
   } = $tabularData as TabularData);
   $: ({ horizontalScrollOffset, rowWidth, columnPositionMap } = display as TabularData['display']);
 
-  $: paddingLeft = $records.groupData ? GROUP_MARGIN_LEFT : 0;
+  $: paddingLeft = $records.groupCounts ? GROUP_MARGIN_LEFT : 0;
 
   let headerRef: HTMLElement;
 

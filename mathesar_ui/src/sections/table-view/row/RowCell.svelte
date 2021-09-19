@@ -91,7 +91,7 @@
      tabindex={-1} on:keydown={handleKeyDown}>
 
   <div class="content"
-    on:click={() => display.selectCell(row, column)}
+    on:mousedown={() => display.selectCell(row, column)}
     on:dblclick={() => display.editCell(row, column)}>
     {#if typeof row[column.name] !== 'undefined'}
       {#if row[column.name] === null}
