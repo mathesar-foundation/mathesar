@@ -43,6 +43,7 @@
     if (row[column.name] !== val) {
       row[column.name] = val;
       void records.updateRecord(row);
+      row = { ...row };
     }
   }
 
@@ -58,7 +59,6 @@
     const val = (event.target as HTMLInputElement).value;
     window.clearTimeout(timer);
     setValue(val);
-    row = { ...row };
   }
 
   async function handleKeyDown(event: KeyboardEvent) {
