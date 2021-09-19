@@ -50,13 +50,14 @@
   }
 
   function getModificationState(
+    _row: TableRecord,
     _recordModState: Map<unknown, ModificationType>,
   ): ModificationType {
-    return _recordModState.get(row[$columns.primaryKey]);
+    return _recordModState.get(_row[$columns.primaryKey]);
   }
 
   $: isSelected = ($selectedRecords as Set<unknown>).has(row[$columns.primaryKey]);
-  $: modificationState = getModificationState($recordModificationState);
+  $: modificationState = getModificationState(row, $recordModificationState);
 </script>
 
 <div class="row {row.__state} {modificationState || ''}" class:selected={isSelected}

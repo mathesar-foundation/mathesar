@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getContext, tick } from 'svelte';
+  import { getContext } from 'svelte';
   import type {
     TabularDataStore,
     TabularData,
@@ -55,9 +55,8 @@
         let:items
         >
         {#each items as it (it?.key || it)}
-          {#if it}
-            <Row style={it.style}
-                  row={$records.data[it.index] || { __state: 'loading' }}/>
+          {#if it && $records.data[it.index]}
+            <Row style={it.style} bind:row={$records.data[it.index]}/>
           {/if}
         {/each}
       </VirtualList>
