@@ -3,6 +3,7 @@
   import type {
     TabularDataStore,
     TabularData,
+    Display,
   } from '@mathesar/stores/table-data/types';
 
   import Row from './row/Row.svelte';
@@ -13,7 +14,9 @@
   $: ({ id, records, display } = $tabularData as TabularData);
   $: ({
     rowWidth, horizontalScrollOffset,
-  } = display as TabularData['display']);
+  } = display as Display);
+
+  let bodyRef: HTMLDivElement;
 
   function getItemSize() {
     const defaultRowHeight = 30;
@@ -26,9 +29,19 @@
     // Return index by default
     return `__index_${index}`;
   }
+
+  function checkAndResetActiveCell(event: Event) {
+    if (!bodyRef.contains(event.target as HTMLElement)) {
+      (display as Display).resetActiveCell();
+    }
+  }
 </script>
 
-<div class="body">
+<svelte:window
+  on:keydown={checkAndResetActiveCell}
+  on:mousedown={checkAndResetActiveCell}/>
+
+<div bind:this={bodyRef} class="body" tabindex="-1">
   <Resizer let:height>
     {#key id}
       <VirtualList
@@ -42,9 +55,8 @@
         let:items
         >
         {#each items as it (it?.key || it)}
-          {#if it}
-            <Row style={it.style}
-                  row={$records.data[it.index] || { __state: 'loading' }}/>
+          {#if it && $records.data[it.index]}
+            <Row style={it.style} bind:row={$records.data[it.index]}/>
           {/if}
         {/each}
       </VirtualList>

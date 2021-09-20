@@ -8,7 +8,7 @@
     TabularData,
     TableRecord,
     TableColumn,
-    TableColumnData,
+    ModificationType,
   } from '@mathesar/stores/table-data/types';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
@@ -22,7 +22,7 @@
     records, columns, meta, display,
   } = $tabularData as TabularData);
   $: ({ columnPositionMap } = display as TabularData['display']);
-  $: ({ selected } = meta as TabularData['meta']);
+  $: ({ selectedRecords, recordModificationState } = meta as TabularData['meta']);
 
   function calculateStyle(
     _style: { [key: string]: string | number },
@@ -49,32 +49,32 @@
     return _columnPositionMap.get(_name);
   }
 
-  function calcIsSelected(
-    _selectionObj: Record<string | number, boolean>,
+  function getModificationState(
     _row: TableRecord,
-    _columns: TableColumnData,
-  ): boolean {
-    const primaryKey = _columns?.primaryKey;
-    if (primaryKey && _row) {
-      return _selectionObj[_row[primaryKey] as string] || false;
-    }
-    return false;
+    _recordModState: Map<unknown, ModificationType>,
+  ): ModificationType {
+    return _recordModState.get(_row[$columns.primaryKey]);
   }
 
-  $: isSelected = calcIsSelected($selected, row, $columns);
+  $: isSelected = ($selectedRecords as Set<unknown>).has(row[$columns.primaryKey]);
+  $: modificationState = getModificationState(row, $recordModificationState);
 </script>
 
-<div class="row {row.__state}" class:selected={isSelected}
+<div class="row {row.__state} {modificationState || ''}" class:selected={isSelected}
       class:is-group-header={row.__isGroupHeader} style={styleString}>
-  <RowControl primaryKey={$columns.primaryKey}
-              {row} bind:selected={$selected}/>
+  <RowControl primaryKeyColumn={$columns.primaryKey}
+              {row} {meta}/>
 
   {#if row.__isGroupHeader}
     <GroupHeader {row} groupData={$records.groupData}/>
   {:else}
     {#each $columns.data as column (column.name)}
-      <RowCell columnPosition={getColumnPosition($columnPositionMap, column.name)} {row} {column}/>
+      <RowCell {display} bind:row {column} {records}
+        columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
     {/each}
   {/if}
 </div>
  
+<style global lang="scss">
+  @import "Row.scss";
+</style>

@@ -1,0 +1,145 @@
+section.table-section .tab-container .table-data .body {
+  .row {
+    transition: all .20s cubic-bezier(0,0,.2,1);
+
+    &:not(.done) {
+      pointer-events: none;
+    }
+
+    &:not(.group) {
+      &:hover {
+        .cell {
+          background-color: #f6f7f7;
+        }
+      }
+
+      &:hover, &.selected {
+        .cell.row-control {
+          .checkbox {
+            display: inline-flex;
+          }
+          .number {
+            display: none;
+          }
+        }
+      }
+
+      &.selected {
+        .cell {
+          background-color: #e4f2ff;
+        }
+      }
+
+      &.update, &.delete, &.create {
+        .cell {
+          transition: background-color .20s cubic-bezier(0,0,.2,1);
+          background-color: #fff7d7;
+        }
+      }
+
+      &.delete {
+        pointer-events: none;
+      }
+
+      &.updateFailed, &.deleteFailed, &.createFailed {
+        .cell {
+          transition: background-color .20s cubic-bezier(0,0,.2,1);
+          background-color: #fef1f1;
+        }
+      }
+
+      &.updated, &.created {
+        .cell {
+          transition: background-color .20s cubic-bezier(0,0,.2,1);
+          background-color: #ebfeef;
+        }
+      }
+    }
+
+    .cell.row-control {
+      .mod-indicator {
+        margin-left: 5px;
+      }
+    }
+
+    .cell {
+      user-select: none;
+      overflow: hidden;
+
+      &:not(.groupheader) {
+        background-color: #fff;
+      }
+      &.groupheader {
+        display: flex;
+        align-items: center;
+        border-bottom: none;
+
+        .tag {
+          & + .tag {
+            margin-left: 30px;
+          }
+        }
+      }
+
+      .content {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        padding: 7px 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .empty {
+        color: #9f9f9f;
+      }
+
+      .loader {
+        top: 6px;
+        left: 15px;
+        right: 15px;
+        bottom: 6px;
+        position: absolute;
+        background: #efefef;
+      }
+
+      &.is-active {
+        z-index: 5;
+        background: #fff !important;
+        box-shadow: 0 0 0 2px #428af4;
+        border-radius: 2px;
+        border: none;
+        bottom: 1px;
+
+        &.is-in-edit {
+          box-shadow: 0 0 0 3px #428af4;
+        }
+
+        &.is-pk {
+          box-shadow: 0 0 0 2px #a8a8a8;
+        }
+
+        .edit-input-box {
+          border: none;
+          outline: 0;
+          margin: 0;
+          padding: 6px 14px;
+          line-height: inherit;
+          font-family: inherit;
+          font-size: inherit;
+          display: block;
+          background: #fff;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 2px;
+          width: 100%;
+        }
+      }
+    }
+  }
+}

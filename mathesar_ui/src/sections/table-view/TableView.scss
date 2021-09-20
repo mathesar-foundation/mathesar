@@ -1,272 +1,188 @@
 $display-opts-pane-width: 360px;
 
-section.table-section .tab-container {
-  .tab-content-holder {
-    .table-data {
-      flex-grow: 1;
-      overflow: hidden;
-      position: relative;
+section.table-section .tab-container .table-data {
+  flex-grow: 1;
+  overflow: hidden;
+  position: relative;
 
-      .display-options-pane {
-        position: absolute;
-        left: -$display-opts-pane-width;
-        width: $display-opts-pane-width;
-        top: 0;
-        bottom: 0;
-        border-right: 1px solid #e2e2e2;
-        overflow-y: auto;
-        overflow-x: hidden;
-        background: #F4F4F6;
+  .display-options-pane {
+    position: absolute;
+    left: -$display-opts-pane-width;
+    width: $display-opts-pane-width;
+    top: 0;
+    bottom: 0;
+    border-right: 1px solid #e2e2e2;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #F4F4F6;
 
-        .display-opts {
-          padding: 10px 12px;
+    .display-opts {
+      padding: 10px 12px;
 
-          .header {
-            font-weight: 500;
-            display: flex;
-            justify-content: space-between;
-          }
+      .header {
+        font-weight: 500;
+        display: flex;
+        justify-content: space-between;
+      }
 
-          >section {
-            margin-top: 10px;
-            padding: 10px 0px;
+      >section {
+        margin-top: 10px;
+        padding: 10px 0px;
 
-            .content {
-              margin-top: 10px;
+        .content {
+          margin-top: 10px;
 
-              table {
-                width: 100%;
+          table {
+            width: 100%;
 
-                td.column {
-                  width: 104px;
-                  >button {
-                    width: 100px;
-                  }
-                }
-                td.dir {
-                  width: 78px;
-                  >button {
-                    width: 74px;
-                  }
-                }
-                td.groupcolumn {
-                  width: 182px;
-                  >button {
-                    width: 178px;
-                  }
-                }
-                td.filter-action {
-                  text-align: right;
-                }
-                td.value {
-                  .text-input {
-                    background: #fff;
-                  }
-                }
-
-                tr.add-option td {
-                  padding-top: 10px;
-                }
-              }
-
-              .empty-msg {
-                color: #606066;
+            td.column {
+              width: 104px;
+              >button {
+                width: 100px;
               }
             }
+            td.dir {
+              width: 78px;
+              >button {
+                width: 74px;
+              }
+            }
+            td.groupcolumn {
+              width: 182px;
+              >button {
+                width: 178px;
+              }
+            }
+            td.filter-action {
+              text-align: right;
+            }
+            td.value {
+              .text-input {
+                background: #fff;
+              }
+            }
+
+            tr.add-option td {
+              padding-top: 10px;
+            }
           }
-          >section + section {
-            border-top: 1px solid #e2e2e2;
+
+          .empty-msg {
+            color: #606066;
           }
         }
       }
+      >section + section {
+        border-top: 1px solid #e2e2e2;
+      }
+    }
+  }
 
-      .table-content {
-        overflow: hidden;
-        position: absolute;
+  .table-content {
+    overflow: hidden;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background: #f7f8f8;
+
+    .cell {
+      position: absolute;
+      display: block;
+      border-bottom: 1px solid #e7e7e7;
+      border-right: 1px solid #efefef;
+      left: 0;
+      top: 0;
+      bottom: 0;
+
+      &.row-control {
+        font-size: 12px;
+        padding: 7px 14px;
+        color: #959595;
         left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        background: #f7f8f8;
+        position: sticky;
+        z-index: 10;
+        display: inline-flex;
+        align-items: center;
+        height: 100%;
 
-        .cell {
-          position: absolute;
+        .checkbox {
+          display: none;
+        }
+      }
+    }
+
+    .header {
+      height: 32px;
+      min-width: 100%;
+      position: relative;
+      background: #f9f9f9;
+      border-bottom: 1px solid #e5e5e5;
+      user-select: none;
+      overflow: hidden;
+
+      .cell {
+        padding: 8px 28px 8px 10px;
+        display: flex;
+        border-bottom: none;
+
+        .type {
+          margin-right: 5px;
+          color: #7f7f7f;
+          font-weight: 500;
+        }
+
+        .name {
           display: block;
-          align-items: center;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          text-align: left;
-          border-bottom: 1px solid #e7e7e7;
-          border-right: 1px solid #efefef;
-          height: 100%;
-          left: 0;
-          top: 0;
-
-          &.row-control {
-            font-size: 12px;
-            color: #959595;
-            left: 0;
-            position: sticky;
-            z-index: 10;
-            display: inline-flex;
-            align-items: center;
-
-            .checkbox {
-              display: none;
-            }
-          }
         }
 
-        .header {
-          height: 32px;
-          min-width: 100%;
-          position: relative;
-          background: #f9f9f9;
-          border-bottom: 1px solid #e5e5e5;
-          user-select: none;
-          overflow: hidden;
-
-          .cell {
-            padding: 8px 28px 8px 10px;
-            display: flex;
-            border-bottom: none;
-
-            .type {
-              margin-right: 5px;
-              color: #7f7f7f;
-              font-weight: 500;
-            }
-
-            .name {
-              display: block;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            }
-
-            .opts {
-              position: absolute;
-              right: 8px;
-              padding: 8px;
-              color: #8f8f8f;
-
-              >.arrow {
-                padding-right: 1px;
-              }
-            }
-
-            .unsorted {
-              color: #d2d2d2;
-            }
-
-            &.row-control {
-              background: #f9f9f9;
-            }
-          }
-        }
-        
-        .body {
+        .opts {
           position: absolute;
-          top: 32px;
-          left: 0px;
-          right: 0px;
-          bottom: 0px;
-          overflow: hidden;
+          right: 8px;
+          padding: 8px;
+          color: #8f8f8f;
 
-          .cell {
-            user-select: none;
-            padding: 7px 14px;
-
-            .loader {
-              top: 6px;
-              left: 15px;
-              right: 15px;
-              bottom: 6px;
-              position: absolute;
-              background: #efefef;
-            }
+          >.arrow {
+            padding-right: 1px;
           }
+        }
 
-          .cell:not(.groupheader) {
-            background: #fff;
-          }
-          .cell.groupheader {
-            border-bottom: none;
+        .unsorted {
+          color: #d2d2d2;
+        }
 
-            .tag {
-              & + .tag {
-               margin-left: 30px;
-              }
-             }
-          }
-
-          .row {
-            transition: all .20s cubic-bezier(0,0,.2,1);
-
-            &:not(.done) {
-              pointer-events: none;
-            }
-
-            &:not(.group) {
-              &:hover {
-                .cell {
-                  background: #f6f7f7;
-                }
-              }
-  
-              &:hover, &.selected {
-                .cell.row-control {
-                  .checkbox {
-                    display: inline-flex;
-                  }
-                  .number {
-                    display: none;
-                  }
-                }
-              }
-  
-              &.selected {
-                .cell {
-                  background: #e4f2ff;
-                }
-              }
-
-              &.deleting {
-                .cell {
-                  transition: all .20s cubic-bezier(0,0,.2,1);
-                  background: #f1bfbf;
-                }
-              }
-            }
-          }
-
-          .group-padding {
-            position: sticky;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            height: 100%;
-            background: #f7f8f8;
-            width: 30px;
-          }
+        &.row-control {
+          background: #f9f9f9;
         }
       }
+    }
+    
+    .body {
+      position: absolute;
+      top: 32px;
+      left: 0px;
+      right: 0px;
+      bottom: 0px;
+      overflow: hidden;
+    }
+  }
 
-      &.has-display-opts {
-        .display-options-pane {
-          left: 0px;
-        }
+  &.has-display-opts {
+    .display-options-pane {
+      left: 0px;
+    }
 
-        .table-content {
-          left: $display-opts-pane-width;
-        }
-      }
-      &.animate-opts {
-        .display-options-pane, .table-content {
-          transition: left .25s cubic-bezier(0,0,.2,1);
-        }
-      }
+    .table-content {
+      left: $display-opts-pane-width;
+    }
+  }
+  &.animate-opts {
+    .display-options-pane, .table-content {
+      transition: left .25s cubic-bezier(0,0,.2,1);
     }
   }
 }

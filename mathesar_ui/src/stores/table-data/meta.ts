@@ -29,12 +29,36 @@ export interface FilterOption {
   filters: FilterEntry[]
 }
 
-export interface ColumnPosition {
-  width: number,
-  left: number
-}
-export type ColumnPositionMap = Map<string, ColumnPosition>;
+export type ModificationType = 'create' | 'created' | 'creationFailed'
+| 'update' | 'updated' | 'updateFailed'
+| 'delete' | 'deleteFailed';
 
+export type ModificationStatus = 'inprocess' | 'complete' | 'error' | 'idle';
+
+const inProgressSet: Set<ModificationType> = new Set(['create', 'update', 'delete']);
+const completeSet: Set<ModificationType> = new Set(['created', 'updated']);
+const errorSet: Set<ModificationType> = new Set(['creationFailed', 'updateFailed', 'deleteFailed']);
+
+export function getModificationStatus(
+  modificationStatus: Map<unknown, ModificationType>,
+  primaryKeyValue: unknown,
+): ModificationStatus {
+  const type = modificationStatus.get(primaryKeyValue);
+  if (inProgressSet.has(type)) {
+    return 'inprocess';
+  }
+  if (completeSet.has(type)) {
+    return 'complete';
+  }
+  if (errorSet.has(type)) {
+    return 'error';
+  }
+  return 'idle';
+}
+
+// The Meta store is meant to be used by other stores for storing and operating on meta information.
+// This may also include display properties. Properties in Meta store do not depend on other stores.
+// For display specific properties that depend on other stores, the Display store can be used.
 export class Meta {
   _type: TabularType;
 
@@ -52,9 +76,11 @@ export class Meta {
 
   filter: Writable<FilterOption>;
 
-  selected: Writable<Record<string | number, boolean>>;
+  selectedRecords: Writable<Set<unknown>>;
 
-  selectedRecords: Readable<string[]>;
+  recordModificationState: Writable<Map<unknown, ModificationType>>;
+
+  combinedModificationState: Readable<ModificationStatus>;
 
   recordRequestParams: Readable<string>;
 
@@ -73,15 +99,37 @@ export class Meta {
       combination: filterCombinations[0],
       filters: [],
     });
-    this.selected = writable({});
+    this.selectedRecords = writable(new Set());
+    this.recordModificationState = writable(new Map<unknown, ModificationType>());
 
     this.offset = derived([this.pageSize, this.page], ([$pageSize, $page], set) => {
       set($pageSize * ($page - 1));
     });
-    this.selectedRecords = derived(this.selected, ($selected, set) => {
-      const pks = Object.keys($selected).filter((key) => $selected[key]);
-      set(pks);
-    });
+    this.combinedModificationState = derived(
+      this.recordModificationState,
+      ($recordModificationState, set) => {
+        if ($recordModificationState.size === 0) {
+          set('idle');
+        } else {
+          // eslint-disable-next-line no-restricted-syntax
+          for (const value of $recordModificationState.values()) {
+            if (inProgressSet.has(value)) {
+              set('inprocess');
+              return;
+            }
+            if (errorSet.has(value)) {
+              set('error');
+              return;
+            }
+            if (completeSet.has(value)) {
+              set('complete');
+              return;
+            }
+          }
+        }
+      },
+      'idle' as ModificationStatus,
+    );
     this._setRecordRequestParamsStore();
   }
 
@@ -146,7 +194,7 @@ export class Meta {
   }
 
   clearSelectedRecords(): void {
-    this.selected.set({});
+    this.selectedRecords.set(new Set());
   }
 
   addFilter(entry: FilterEntry, combination?: FilterCombination): void {
@@ -224,6 +272,71 @@ export class Meta {
       const newGroup = new Set(existing);
       newGroup.delete(column);
       return newGroup;
+    });
+  }
+
+  selectRecordByPrimaryKey(primaryKeyValue: unknown): void {
+    if (!get(this.selectedRecords).has(primaryKeyValue)) {
+      this.selectedRecords.update((existingSet) => {
+        const newSet = new Set(existingSet);
+        newSet.add(primaryKeyValue);
+        return newSet;
+      });
+    }
+  }
+
+  deSelectRecordByPrimaryKey(primaryKeyValue: unknown): void {
+    if (get(this.selectedRecords).has(primaryKeyValue)) {
+      this.selectedRecords.update((existingSet) => {
+        const newSet = new Set(existingSet);
+        newSet.delete(primaryKeyValue);
+        return newSet;
+      });
+    }
+  }
+
+  setRecordModificationState(primaryKeyValue: unknown, state: ModificationType): void {
+    this.recordModificationState.update((existingMap) => {
+      const newMap = new Map(existingMap);
+      newMap.set(primaryKeyValue, state);
+      return newMap;
+    });
+  }
+
+  clearRecordModificationState(primaryKeyValue: unknown): void {
+    this.recordModificationState.update((existingMap) => {
+      const newMap = new Map(existingMap);
+      newMap.delete(primaryKeyValue);
+      return newMap;
+    });
+  }
+
+  clearAllRecordModificationStates(): void {
+    this.recordModificationState.set(new Map());
+  }
+
+  setMultipleRecordModificationStates(
+    primaryKeyValues: unknown[],
+    state: ModificationType,
+  ): void {
+    this.recordModificationState.update((existingMap) => {
+      const newMap = new Map(existingMap);
+      primaryKeyValues.forEach((value) => {
+        newMap.set(value, state);
+      });
+      return newMap;
+    });
+  }
+
+  clearMultipleRecordModificationStates(
+    primaryKeyValues: unknown[],
+  ): void {
+    this.recordModificationState.update((existingMap) => {
+      const newMap = new Map(existingMap);
+      primaryKeyValues.forEach((value) => {
+        newMap.delete(value);
+      });
+      return newMap;
     });
   }
 }

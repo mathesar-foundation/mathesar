@@ -1,15 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher, getContext } from 'svelte';
-  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
-
   import {
     faFilter,
     faSort,
     faListAlt,
     faTrashAlt,
+    faSync,
+    faExclamationTriangle,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
   import { Button, Icon } from '@mathesar-components';
+  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
 
   const dispatch = createEventDispatcher();
 
@@ -18,8 +19,13 @@
     columns, records, meta,
   } = $tabularData as TabularData);
   $: ({
-    filter, sort, group, selectedRecords,
+    filter, sort, group, selectedRecords, combinedModificationState,
   } = meta as TabularData['meta']);
+
+  $: isLoading = $columns.state === States.Loading
+    || $records.state === States.Loading;
+  $: isError = $columns.state === States.Error
+    || $records.state === States.Error;
 
   function openDisplayOptions() {
     dispatch('openDisplayOptions');
@@ -28,10 +34,15 @@
   function deleteRecords() {
     void (records as TabularData['records']).deleteSelected();
   }
+
+  function refresh() {
+    void (columns as TabularData['columns']).fetch();
+    void (records as TabularData['records']).fetch();
+  }
 </script>
 
 <div class="actions-pane">
-  <Button appearance="plain" on:click={openDisplayOptions}>
+  <Button size="small" on:click={openDisplayOptions}>
     <Icon data={faFilter} size="0.8em"/>
     <span>
       Filters
@@ -41,7 +52,7 @@
     </span>
   </Button>
 
-  <Button appearance="plain" on:click={openDisplayOptions}>
+  <Button size="small" on:click={openDisplayOptions}>
     <Icon data={faSort}/>
     <span>
       Sort
@@ -51,7 +62,7 @@
     </span>
   </Button>
 
-  <Button appearance="plain" on:click={openDisplayOptions}>
+  <Button size="small" on:click={openDisplayOptions}>
     <Icon data={faListAlt}/>
     <span>
       Group
@@ -61,29 +72,43 @@
     </span>
   </Button>
 
-  {#if $selectedRecords.length > 0}
-    <Button appearance="plain" on:click={deleteRecords}>
+  {#if $selectedRecords.size > 0}
+    <Button size="small" on:click={deleteRecords}>
       <Icon data={faTrashAlt}/>
       <span>
-        Delete {$selectedRecords.length} records
+        Delete {$selectedRecords.size} records
       </span>
     </Button>
   {/if}
 
+  {#if $combinedModificationState !== 'idle'}
+    <div class="divider"/>
+    <div class="save-status">
+      {#if $combinedModificationState === 'inprocess'}
+        Saving changes
+      {:else if $combinedModificationState === 'error'}
+        <span class="error">! Couldn't save changes</span>
+      {:else if $combinedModificationState === 'complete'}
+        All changes saved
+      {/if}
+    </div>
+  {/if}
+
   <div class="loading-info">
-    {#if $columns.state === States.Loading}
-      | Loading table
-
-    {:else if $columns.state === States.Error}
-      | Error in loading table: {$columns.error}
-    {/if}
-
-    {#if $records.state === States.Loading}
-      | Loading records
-
-    {:else if $records.state === States.Error}
-      | Error in loading records: {$records.error}
-    {/if}
+    <Button size="small" disabled={isLoading} on:click={refresh}>
+      <Icon data={
+        isError && !isLoading ? faExclamationTriangle : faSync
+      } spin={isLoading}/>
+      <span>
+        {#if isLoading}
+          Loading
+        {:else if isError}
+          Retry
+        {:else}
+          Refresh
+        {/if}
+      </span>
+    </Button>
   </div>
 </div>
 

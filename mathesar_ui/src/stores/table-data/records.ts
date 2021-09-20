@@ -1,5 +1,10 @@
 import { writable, get as getStoreValue } from 'svelte/store';
-import { States, getAPI, deleteAPI } from '@mathesar/utils/api';
+import {
+  States,
+  getAPI,
+  deleteAPI,
+  patchAPI,
+} from '@mathesar/utils/api';
 import { TabularType } from '@mathesar/App.d';
 import type {
   Writable,
@@ -17,7 +22,8 @@ export interface TableRecord {
   [key: string]: unknown,
   __isGroupHeader?: boolean,
   __rowNumber?: number,
-  __state: string,
+  __rowIndex?: number,
+  __state?: string, // TODO: Remove __state in favour of _recordsInProcess
   __groupInfo?: {
     columns: string[],
     values: Record<string, unknown>,
@@ -101,11 +107,22 @@ function preprocessRecords(offset: number, response: TableRecordResponse): Table
     combinedRecords.push({
       ...record,
       __rowNumber: offset + index + 1,
+      __rowIndex: index,
       __state: 'done',
     });
     index += 1;
   });
   return combinedRecords;
+}
+
+function prepareRowForPatch(row: TableRecord): TableRecord {
+  const rowForRequest: TableRecord = {};
+  Object.keys(row).forEach((key) => {
+    if (key.indexOf('__') !== 0) {
+      rowForRequest[key] = row[key];
+    }
+  });
+  return rowForRequest;
 }
 
 export class Records implements Writable<TableRecordData> {
@@ -115,13 +132,15 @@ export class Records implements Writable<TableRecordData> {
 
   _store: Writable<TableRecordData>;
 
-  _promise: CancellablePromise<TableRecordResponse>;
-
   _url: string;
 
   _meta: Meta;
 
   _columns: Columns;
+
+  _promise: CancellablePromise<TableRecordResponse>;
+
+  _updatePromises: Map<unknown, CancellablePromise<TableRecordResponse>>;
 
   _fetchCallback?: (storeData: TableRecordData) => void;
 
@@ -179,6 +198,8 @@ export class Records implements Writable<TableRecordData> {
       };
     });
 
+    this._meta.clearAllRecordModificationStates();
+
     try {
       const params = getStoreValue(this._meta.recordRequestParams);
       this._promise = getAPI<TableRecordResponse>(`${this._url}?${params ?? ''}`);
@@ -205,14 +226,11 @@ export class Records implements Writable<TableRecordData> {
       this._fetchCallback?.(storeData);
       return storeData;
     } catch (err) {
-      this._store.set({
+      this._store.update((existing) => ({
+        ...existing,
         state: States.Error,
         error: err instanceof Error ? err.message : null,
-        data: [],
-        totalCount: null,
-      });
-    } finally {
-      this._promise = null;
+      }));
     }
     return null;
   }
@@ -236,81 +254,53 @@ export class Records implements Writable<TableRecordData> {
   }
 
   async deleteSelected(): Promise<void> {
-    const pks = getStoreValue(this._meta.selectedRecords);
+    const pkSet = getStoreValue(this._meta.selectedRecords);
 
-    if (pks.length > 0) {
-      const pkSet = new Set(pks);
-      this._store.update((existingData) => {
-        // TODO: Retain map with pk uuid hash for record operations
-        const data = existingData.data.map((entry) => {
-          if (entry && pkSet.has(entry[this._columns.get().primaryKey]?.toString())) {
-            return {
-              ...entry,
-              __state: 'deleting',
-            };
-          }
-          return entry;
-        });
-
-        return {
-          ...existingData,
-          data,
-        };
-      });
+    if (pkSet.size > 0) {
+      this._meta.setMultipleRecordModificationStates([...pkSet], 'delete');
 
       try {
-        const success = new Set();
-        const failed = new Set();
+        const failed: unknown[] = [];
         // TODO: Convert this to single request
-        const promises = pks.map((pk) => deleteAPI<unknown>(`${this._url}${pk}/`)
-          .then(() => {
-            success.add(pk);
-            return success;
-          })
+        const promises = [...pkSet].map((pk) => deleteAPI<unknown>(`${this._url}${pk as string}/`)
           .catch(() => {
-            failed.add(pk);
+            failed.push(pk);
             return failed;
           }));
         await Promise.all(promises);
-
-        this._store.update((existingData) => {
-          const data = existingData.data.map((entry) => {
-            if (entry && failed.has(entry[this._columns.get().primaryKey]?.toString())) {
-              return {
-                ...entry,
-                __state: 'deletionFailed',
-              };
-            }
-            return entry;
-          });
-
-          return {
-            ...existingData,
-            data,
-          };
-        });
-
-        void this.fetch(true);
+        await this.fetch(true);
+        this._meta.setMultipleRecordModificationStates(failed, 'deleteFailed');
       } catch (err) {
-        this._store.update((existingData) => {
-          // TODO: Retain map with pk uuid hash for record operations
-          const data = existingData.data.map((entry) => {
-            if (entry && pkSet.has(entry[this._columns.get().primaryKey]?.toString())) {
-              return {
-                ...entry,
-                __state: 'deletionError',
-              };
-            }
-            return entry;
-          });
-
-          return {
-            ...existingData,
-            data,
-          };
-        });
+        this._meta.setMultipleRecordModificationStates([...pkSet], 'deleteFailed');
       } finally {
         this._meta.clearSelectedRecords();
+      }
+    }
+  }
+
+  async updateRecord(row: TableRecord): Promise<void> {
+    const { primaryKey } = this._columns.get();
+    if (primaryKey && row[primaryKey]) {
+      this._meta.setRecordModificationState(row[primaryKey], 'update');
+      this._updatePromises?.get(row[primaryKey])?.cancel();
+      const promise = patchAPI<TableRecordResponse>(
+        `${this._url}${row[primaryKey] as string}/`,
+        prepareRowForPatch(row),
+      );
+      if (!this._updatePromises) {
+        this._updatePromises = new Map();
+      }
+      this._updatePromises.set(row[primaryKey], promise);
+
+      try {
+        await promise;
+        this._meta.setRecordModificationState(row[primaryKey], 'updated');
+      } catch (err) {
+        this._meta.setRecordModificationState(row[primaryKey], 'updateFailed');
+      } finally {
+        if (this._updatePromises.get(row[primaryKey]) === promise) {
+          this._updatePromises.clear();
+        }
       }
     }
   }

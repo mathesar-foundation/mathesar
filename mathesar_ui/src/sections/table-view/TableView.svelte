@@ -22,14 +22,6 @@
   export let id: unknown;
   $: identifier = id as number;
 
-  /**
-   * idKey is only modified after table display properties
-   * are set.
-   *
-   * It is used for recreating the virtual list instance, so
-   * it should only be set in the same tick as the required
-   * props for virtual list.
-   */
   let columns: Columns;
   let showDisplayOptions: Display['showDisplayOptions'];
 
@@ -50,16 +42,6 @@
   }
 
   $: setStores(database, identifier);
-
-  // function reload(event: { detail: { resetPositions?: boolean } }) {
-  //   const resetPositions = event?.detail?.resetPositions || false;
-  //   void records.fetch();
-  //   // URLQueryHandler.setTableOptions(database, identifier, $options);
-  //   if (tableBodyRef) {
-  //     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  //     tableBodyRef.reloadPositions(resetPositions);
-  //   }
-  // }
 
   function openDisplayOptions() {
     animateOpts = true;
