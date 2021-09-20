@@ -1,10 +1,7 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  import type {
-    TableColumnStore,
-    TableRecordStore,
-    TableOptionsStore,
-  } from '@mathesar/stores/tableData';
+  import { createEventDispatcher, getContext } from 'svelte';
+  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
+
   import {
     faFilter,
     faSort,
@@ -16,14 +13,20 @@
 
   const dispatch = createEventDispatcher();
 
-  export let columns: TableColumnStore;
-  export let records: TableRecordStore;
-  export let options: TableOptionsStore;
-
-  export let selectedEntries: string[];
+  const tabularData = getContext<TabularDataStore>('tabularData');
+  $: ({
+    columns, records, meta,
+  } = $tabularData as TabularData);
+  $: ({
+    filter, sort, group, selectedRecords,
+  } = meta as TabularData['meta']);
 
   function openDisplayOptions() {
     dispatch('openDisplayOptions');
+  }
+
+  function deleteRecords() {
+    void (records as TabularData['records']).deleteSelected();
   }
 </script>
 
@@ -32,8 +35,8 @@
     <Icon data={faFilter} size="0.8em"/>
     <span>
       Filters
-      {#if $options.filter?.filters?.length > 0}
-        ({$options.filter?.filters?.length})
+      {#if $filter?.filters?.length > 0}
+        ({$filter?.filters?.length})
       {/if}
     </span>
   </Button>
@@ -42,8 +45,8 @@
     <Icon data={faSort}/>
     <span>
       Sort
-      {#if $options.sort?.size > 0}
-        ({$options.sort?.size})
+      {#if $sort?.size > 0}
+        ({$sort?.size})
       {/if}
     </span>
   </Button>
@@ -52,17 +55,17 @@
     <Icon data={faListAlt}/>
     <span>
       Group
-      {#if $options.group?.size > 0}
-        ({$options.group?.size})
+      {#if $group?.size > 0}
+        ({$group?.size})
       {/if}
     </span>
   </Button>
 
-  {#if selectedEntries.length > 0}
-    <Button appearance="plain" on:click={() => dispatch('deleteRecords')}>
+  {#if $selectedRecords.length > 0}
+    <Button appearance="plain" on:click={deleteRecords}>
       <Icon data={faTrashAlt}/>
       <span>
-        Delete {selectedEntries.length} records
+        Delete {$selectedRecords.length} records
       </span>
     </Button>
   {/if}
@@ -83,3 +86,7 @@
     {/if}
   </div>
 </div>
+
+<style global lang="scss">
+  @import "ActionsPane.scss";
+</style>

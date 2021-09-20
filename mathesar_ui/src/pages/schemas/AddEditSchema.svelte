@@ -18,7 +18,7 @@
 
   let name = '';
   let state: States = States.Idle;
-  let error;
+  let error: string;
 
   onMount(() => {
     if (isEditMode) {

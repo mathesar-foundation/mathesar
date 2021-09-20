@@ -1,20 +1,19 @@
 <script lang="ts">
   import { Checkbox } from '@mathesar-components';
   import {
-    DEFAULT_COUNT_COL_WIDTH,
+    ROW_CONTROL_COLUMN_WIDTH,
     GROUP_MARGIN_LEFT,
-  } from '@mathesar/stores/tableData';
+  } from '@mathesar/stores/table-data';
   import type {
     TableRecord,
-  } from '@mathesar/stores/tableData';
+  } from '@mathesar/stores/table-data/types';
 
-  export let index: number;
   export let isGrouped = false;
   export let primaryKey: string = null;
   export let selected: Record<string | number, boolean>;
   export let row: TableRecord;
 
-  function calculatePKValue(_row, _pkey) {
+  function calculatePKValue(_row: TableRecord, _pkey: string): string {
     if (_pkey && _row?.[_pkey]) {
       return _row[_pkey] as string;
     }
@@ -29,12 +28,17 @@
   }
 </script>
 
-<div class="cell row-control" style="width:{DEFAULT_COUNT_COL_WIDTH}px;
+<div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;
             left:{isGrouped ? GROUP_MARGIN_LEFT : 0}px">
-  <span class="number">{index + 1}</span>
+  
+  {#if !row.__isGroupHeader}
+    {#if row.__rowNumber}
+      <span class="number">{row.__rowNumber}</span>
+    {/if}
 
-  {#if primaryKeyValue}
-    <Checkbox bind:checked={selected[primaryKeyValue]}
-      on:change={selectionChanged}/>
+    {#if primaryKeyValue}
+      <Checkbox bind:checked={selected[primaryKeyValue]}
+        on:change={selectionChanged}/>
+    {/if}
   {/if}
 </div>

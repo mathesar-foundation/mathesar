@@ -24,6 +24,17 @@ export interface TableEntry extends DBObjectEntry {
   columns: { name: string }[],
 }
 
+export interface ViewEntry extends DBObjectEntry {
+  // TODO: Temporary, update when view endpoints are ready.
+  columns: { name: string }[],
+}
+
 export interface SchemaResponse extends SchemaEntry, TreeItem {
   tables: DBObjectEntry[],
+}
+
+// TODO: Come up with a better name for representing both tables and views
+export enum TabularType {
+  Table = 1,
+  View = 2,
 }
