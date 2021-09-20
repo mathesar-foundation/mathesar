@@ -4,6 +4,7 @@
     FileUpload,
     Button,
     Icon,
+    Radio,
   } from '@mathesar-components';
   import type { FileImport } from '@mathesar/stores/fileImports';
   import { States } from '@mathesar/utils/api';
@@ -16,6 +17,11 @@
   } from '../importUtils';
 
   export let fileImportStore: FileImport;
+  let group = "File";
+
+  const file = "File"
+  const copyPaste = "Copy-Paste"
+  const url = "Url"
 </script>
 
 <div>Add Table (Step 1 of 2)</div>
@@ -25,9 +31,15 @@
   Please do not close this tab, you may still open and view other tables in the meanwhile.
 </div>
 
+<Radio bind:group value={file}>File</Radio>
+<Radio bind:group value={copyPaste}>Copy and Paste Text</Radio>
+<Radio bind:group value={url}>Url</Radio>
+
+{#if group == file}
 <FileUpload bind:fileUploads={$fileImportStore.uploads}
             fileProgress={getFileUploadInfo($fileImportStore)}
             on:add={(e) => uploadNewFile(fileImportStore, e.detail)}/>
+{/if}
 
 <div class="help-content">
   You can import tabular (CSV, TSV) data.
