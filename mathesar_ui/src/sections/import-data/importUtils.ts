@@ -53,6 +53,11 @@ function completionCallback(
   }
 }
 
+export async function uploadURL(fileImportStore) {
+  const response = await postAPI('/data_files/', fileImportStore.uploads);
+  return response;
+}
+
 export function uploadNewFile(
   fileImportStore: FileImport,
   detail: FileUploadAddDetail,
