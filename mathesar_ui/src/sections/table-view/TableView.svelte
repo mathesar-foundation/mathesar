@@ -11,12 +11,8 @@
 
   import ActionsPane from './actions-pane/ActionsPane.svelte';
   import DisplayOptions from './display-options/DisplayOptions.svelte';
-<<<<<<< HEAD
   import DeleteTable from './actions-pane/DeleteTable.svelte';
   import Header from './Header.svelte';
-=======
-  import Header from './header/Header.svelte';
->>>>>>> master
   import Body from './Body.svelte';
   import StatusPane from './status-pane/StatusPane.svelte';
 

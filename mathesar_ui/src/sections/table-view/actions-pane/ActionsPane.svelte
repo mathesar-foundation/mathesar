@@ -1,15 +1,7 @@
 <script lang="ts">
-<<<<<<< HEAD
   import { createEventDispatcher } from 'svelte';
   import { get } from 'svelte/store';
-  import type {
-    TableColumnStore,
-    TableRecordStore,
-    TableOptionsStore,
-  } from '@mathesar/stores/tableData';
-=======
   import { createEventDispatcher, getContext } from 'svelte';
->>>>>>> master
   import {
     faFilter,
     faSort,
@@ -19,7 +11,6 @@
     faExclamationTriangle,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
-<<<<<<< HEAD
   import { Button, Icon, Dropdown } from '@mathesar-components';
   import { currentSchemaId, getSchemaInfo } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
@@ -35,11 +26,8 @@
     deleteTable,
   } from '@mathesar/stores/tables';
   
-=======
-  import { Button, Icon } from '@mathesar-components';
   import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
 
->>>>>>> master
   const dispatch = createEventDispatcher();
 
   const tabularData = getContext<TabularDataStore>('tabularData');
@@ -70,6 +58,7 @@
       await deleteTable(`/tables/${activeTabObj.id}`);
       await refetchTablesForSchema($currentSchemaId);
     }
+  }
 
   function deleteRecords() {
     void (records as TabularData['records']).deleteSelected();
@@ -82,7 +71,6 @@
 </script>
 
 <div class="actions-pane">
-<<<<<<< HEAD
   <Dropdown closeOnInnerClick={true} triggerClass="opts" 
   triggerAppearance="plain" contentClass="table-opts-content"> 
     <svelte:fragment slot="trigger">
@@ -97,9 +85,6 @@
   </Dropdown>
 
   <Button appearance="plain" on:click={openDisplayOptions}>
-=======
-  <Button size="small" on:click={openDisplayOptions}>
->>>>>>> master
     <Icon data={faFilter} size="0.8em"/>
     <span>
       Filters
