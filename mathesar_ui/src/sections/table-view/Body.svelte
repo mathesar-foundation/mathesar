@@ -1,111 +1,64 @@
 <script lang="ts">
+  import { getContext } from 'svelte';
   import type {
-    TableColumnData,
-    TableRecord,
-    ColumnPosition,
-    GroupIndex,
-    GroupData,
-  } from '@mathesar/stores/tableData';
-  import {
-    GROUP_ROW_HEIGHT,
-    DEFAULT_ROW_RIGHT_PADDING,
-    GROUP_MARGIN_LEFT,
-  } from '@mathesar/stores/tableData';
+    TabularDataStore,
+    TabularData,
+    Display,
+  } from '@mathesar/stores/table-data/types';
+
   import Row from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
 
-  export let id: number;
-  export let columns: TableColumnData;
-  export let data: TableRecord[];
-  export let groupData: GroupData;
-  export let columnPosition: ColumnPosition;
-  export let scrollOffset = 0;
-  export let horizontalScrollOffset = 0;
-  export let groupIndex: GroupIndex;
-  export let selected: Record<string | number, boolean>;
+  const tabularData = getContext<TabularDataStore>('tabularData');
+  $: ({ id, records, display } = $tabularData as TabularData);
+  $: ({
+    rowWidth, horizontalScrollOffset,
+  } = display as Display);
 
-  let rowWidth: number;
-  let widthWithPadding: number;
-  $: rowWidth = columnPosition?.get('__row')?.width || null;
-  $: widthWithPadding = rowWidth ? rowWidth + DEFAULT_ROW_RIGHT_PADDING : null;
-  $: totalWidth = widthWithPadding ? widthWithPadding + GROUP_MARGIN_LEFT : null;
+  let bodyRef: HTMLDivElement;
 
-  // Be careful while accessing this ref.
-  // Resizer may not have created it yet/destroyed it
-  let virtualListRef: VirtualList;
-
-  function onGroupIndexChange(_groupIndex: GroupIndex) {
-    if (!_groupIndex.bailOutOnReset && _groupIndex.latest !== _groupIndex.previous) {
-      // eslint-disable-next-line no-param-reassign
-      _groupIndex.previous = _groupIndex.latest;
-
-      if (virtualListRef) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        virtualListRef.resetAfterIndex(_groupIndex.latest);
-      }
-    }
-  }
-
-  $: onGroupIndexChange(groupIndex);
-
-  function getItemSize(index: number) {
+  function getItemSize() {
     const defaultRowHeight = 30;
-    if (data[index]?.__groupInfo) {
-      return GROUP_ROW_HEIGHT + defaultRowHeight;
-    }
+    // TODO: Check and set extra height for group. Needs UX rethought.
     return defaultRowHeight;
   }
 
   function getItemKey(index: number): number | string {
-    // Check and return primary key
+    // TODO: Check and return primary key
     // Return index by default
     return `__index_${index}`;
   }
 
-  export function reloadPositions(resetPositions: boolean): void {
-    if (virtualListRef) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      virtualListRef.scrollToPosition(0, 0);
-      if (resetPositions) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        virtualListRef.resetAfterIndex(0);
-      }
+  function checkAndResetActiveCell(event: Event) {
+    if (!bodyRef.contains(event.target as HTMLElement)) {
+      (display as Display).resetActiveCell();
     }
   }
 </script>
 
-<div class="body">
+<svelte:window
+  on:keydown={checkAndResetActiveCell}
+  on:mousedown={checkAndResetActiveCell}/>
+
+<div bind:this={bodyRef} class="body" tabindex="-1">
   <Resizer let:height>
     {#key id}
       <VirtualList
-        bind:this={virtualListRef}
-        bind:scrollOffset
-        bind:horizontalScrollOffset
+        bind:horizontalScrollOffset={$horizontalScrollOffset}
         {height}
-        width={totalWidth || null}
-        itemCount={data.length}
-        paddingBottom={100}
+        width={$rowWidth || null}
+        itemCount={$records.data.length}
+        paddingBottom={20}
         itemSize={getItemSize}
         itemKey={getItemKey}
-        on:refetch
         let:items
         >
         {#each items as it (it?.key || it)}
-          {#if it}
-            <Row {columns} style={it.style}
-                  row={data[it.index] || {}}
-                  index={it.index}
-                  {groupData}
-                  isGrouped={!!groupData}
-                  {columnPosition}
-                  bind:selected/>
+          {#if it && $records.data[it.index]}
+            <Row style={it.style} bind:row={$records.data[it.index]}/>
           {/if}
         {/each}
-
-        {#if groupData}
-          <div class="group-padding"></div>
-        {/if}
       </VirtualList>
     {/key}
   </Resizer>

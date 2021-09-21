@@ -2,7 +2,6 @@ from django.core.cache import cache
 from sqlalchemy import text
 from unittest.mock import patch
 
-from db.schemas import operations as schema_operations
 from db.schemas.utils import get_mathesar_schemas
 from mathesar import models
 from mathesar import reflection
@@ -165,7 +164,7 @@ def test_schema_delete(create_schema, client):
     schema_name = 'NASA Schema Delete'
     schema = create_schema(schema_name)
 
-    with patch.object(schema_operations, 'drop_schema') as mock_infer:
+    with patch.object(models, 'drop_schema') as mock_infer:
         response = client.delete(f'/api/v0/schemas/{schema.id}/')
     assert response.status_code == 204
 

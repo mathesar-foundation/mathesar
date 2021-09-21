@@ -51,11 +51,16 @@
   function scrollBehavior(): void {
     if (parentHoverElem) {
       const hoveredElem: HTMLElement = parentHoverElem.querySelector('.hovered');
-      const container: HTMLDivElement = parentHoverElem.parentElement;
+      const container = parentHoverElem.parentElement as HTMLDivElement;
       if (hoveredElem && container) {
-        const offsetValue: number = container.getBoundingClientRect().bottom
-        - hoveredElem.getBoundingClientRect().bottom;
-        container.scrollTop -= offsetValue;
+        if (hoveredElem.offsetTop + hoveredElem.clientHeight
+         > (container.scrollTop + container.clientHeight)) {
+          const offsetValue: number = container.getBoundingClientRect().bottom
+            - hoveredElem.getBoundingClientRect().bottom;
+          container.scrollTop -= offsetValue;
+        } else if (hoveredElem.offsetTop < container.scrollTop) {
+          container.scrollTop = hoveredElem.offsetTop;
+        }
       }
     }
   }
@@ -67,7 +72,7 @@
     }
   }
 
-  async function hoveredItem(index): void {
+  async function hoveredItem(index: number): Promise<void> {
     if (currentIndex === options.length - 1 && index > 0) {
       currentIndex = 0;
     } else if (currentIndex === 0 && index < 0) {
@@ -84,11 +89,11 @@
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
-          hoveredItem(1);
+          void hoveredItem(1);
           break;
         case 'ArrowUp':
           e.preventDefault();
-          hoveredItem(-1);
+          void hoveredItem(-1);
           break;
         case 'Escape':
           e.preventDefault();

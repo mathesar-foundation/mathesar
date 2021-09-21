@@ -47,6 +47,7 @@ module.exports = {
         'no-useless-escape': 'off',
         'no-underscore-dangle': 'off',
         'no-bitwise': 'off',
+        '@typescript-eslint/restrict-plus-operands': 'off',
       },
     },
     {

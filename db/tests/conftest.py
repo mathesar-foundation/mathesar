@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import MetaData, text
 
 from db import constants
-from db.tables import operations as table_operations
+from db.tables.operations.split import extract_columns_from_table
 
 
 APP_SCHEMA = "test_schema"
@@ -71,7 +71,7 @@ def roster_fkey_col(teachers_table_name):
 @pytest.fixture
 def extracted_remainder_roster(engine_with_roster, roster_table_name, roster_extracted_cols, teachers_table_name, roster_no_teachers_table_name):
     engine, schema = engine_with_roster
-    table_operations.extract_columns_from_table(
+    extract_columns_from_table(
         roster_table_name,
         roster_extracted_cols,
         teachers_table_name,

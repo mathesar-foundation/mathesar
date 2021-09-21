@@ -3,7 +3,13 @@ import warnings
 from sqlalchemy import Table, MetaData, select, join, inspect, and_
 
 from db.utils import execute_statement
-from db.tables.utils import reflect_table
+
+
+def reflect_table(name, schema, engine, metadata=None, connection_to_use=None):
+    if metadata is None:
+        metadata = MetaData(bind=engine)
+    autoload_with = engine if connection_to_use is None else connection_to_use
+    return Table(name, metadata, schema=schema, autoload_with=autoload_with, extend_existing=True)
 
 
 def reflect_table_from_oid(oid, engine, connection_to_use=None):

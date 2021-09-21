@@ -26,7 +26,7 @@
   let interalSelectedDB: Database['name'] = get(currentDBName);
   $: schemas = getSchemasStoreForDB(interalSelectedDB);
 
-  let isOpen;
+  let isOpen: boolean;
   let schemaFilter = '';
 
   function getFilteredSchemas(schemaData: DBSchemaStoreData['data'], filter: string): SchemaEntry[] {
@@ -74,7 +74,8 @@
             <li class="item" class:active={interalSelectedDB === database.name}>
               <button type="button"
                 on:click={() => selectDB(database)}
-                on:mouseover={() => selectDB(database)}>
+                on:mouseover={() => selectDB(database)}
+                on:focus={() => selectDB(database)}>
                   <TextAvatar text={database.name} />
                   {database.name}
               </button>
