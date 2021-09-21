@@ -12,7 +12,7 @@
   import ActionsPane from './actions-pane/ActionsPane.svelte';
   import DisplayOptions from './display-options/DisplayOptions.svelte';
   import DeleteTable from './actions-pane/DeleteTable.svelte';
-  import Header from './Header.svelte';
+  import Header from './header/Header.svelte';
   import Body from './Body.svelte';
   import StatusPane from './status-pane/StatusPane.svelte';
 

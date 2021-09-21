@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import { get } from 'svelte/store';
   import { createEventDispatcher, getContext } from 'svelte';
   import {
