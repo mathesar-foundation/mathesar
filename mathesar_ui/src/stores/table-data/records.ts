@@ -78,23 +78,17 @@ function mapGroupCounts(groupInfo: TableRecordResponse['group_count']): GroupCou
 function preprocessRecords(
   offset: number,
   records?: TableRecordInResponse[],
-  newRecords?: TableRecordInResponse[],
   groupColumns?: string[],
 ): TableRecord[] {
   const isResultGrouped = groupColumns?.length > 0;
-  const combinedRecords: TableRecord[] = [{
-    __state: 'done',
-    __identifier: '__add_placeholder',
-    __isAddPlaceholder: true,
-  }];
+  const combinedRecords: TableRecord[] = [];
   let index = 0;
   let groupIndex = 0;
   let existingRecordIndex = 0;
-  let newRecordIndex = 0;
 
   records?.forEach((record) => {
     if (!record.__isGroupHeader && !record.__isAddPlaceholder) {
-      if (isResultGrouped && !record.__isNew) {
+      if (isResultGrouped) {
         let isGroup = false;
         if (index === 0) {
           isGroup = true;
@@ -119,24 +113,16 @@ function preprocessRecords(
         }
       }
 
-      const recordIdentifier = record.__isNew
-        ? `__new_${newRecordIndex}`
-        : `__index_${existingRecordIndex}`;
-
       combinedRecords.push({
         ...record,
-        __identifier: `__${offset}_${recordIdentifier}`,
+        __identifier: `__${offset}_index_${existingRecordIndex}`,
         __rowNumber: offset + index + 1,
         __rowIndex: index,
         __state: 'done',
       });
       index += 1;
 
-      if (record.__isNew) {
-        newRecordIndex -= 1;
-      } else {
-        existingRecordIndex += 1;
-      }
+      existingRecordIndex += 1;
     }
   });
   return combinedRecords;
@@ -252,7 +238,6 @@ export class Records {
       const records = preprocessRecords(
         getStoreValue(this._meta.offset),
         response.results,
-        getStoreValue(this.newRecords),
         groupColumns,
       );
 
@@ -333,18 +318,20 @@ export class Records {
     }
   }
 
-  // addRecord(): void {
-  //   const offset = getStoreValue(this._meta.offset);
-  //   this._store.update((existingData) => {
-  //     const { data, groupColumns } = existingData;
-  //     this._newRows.push({});
-
-  //     return {
-  //       ...existingData,
-  //       data: preprocessRecords(offset, data, this._newRows, groupColumns),
-  //     };
-  //   });
-  // }
+  addRecord(): void {
+    const offset = getStoreValue(this._meta.offset);
+    this.newRecords.update((existing) => {
+      const identifier = `__${offset}_new_${-existing.length - 1}`;
+      return [
+        {
+          __identifier: identifier,
+          __state: States.Done,
+          __isNew: true,
+          __rowIndex: -existing.length - 1,
+        } as TableRecord,
+      ].concat(existing);
+    });
+  }
 
   destroy(): void {
     this._promise?.cancel();

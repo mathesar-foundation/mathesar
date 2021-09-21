@@ -170,10 +170,11 @@ export class Display {
 
   handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | 'changed' | null {
     const columnData = this._columns.get().data;
-    const records = this._records.get();
+    const totalCount = get(this._records.totalCount);
+    const savedRecords = get(this._records.savedRecords);
     const offset = get(this._meta.offset);
     const pageSize = get(this._meta.pageSize);
-    const maxRowIndex = Math.min(pageSize, records.totalCount - offset, records.data.length) - 1;
+    const maxRowIndex = Math.min(pageSize, totalCount - offset, savedRecords.length) - 1;
     const activeCell = get(this.activeCell);
 
     if (movementKeys.has(key) && activeCell?.type === 'select') {

@@ -14,11 +14,12 @@
 
   const tabularData = getContext<TabularDataStore>('tabularData');
   let savedRecords: Records['savedRecords'];
+  let newRecords: Records['newRecords'];
   $: ({ id, records, display } = $tabularData as TabularData);
   $: ({
     rowWidth, horizontalScrollOffset,
   } = display as Display);
-  $: ({ savedRecords } = records as Records);
+  $: ({ savedRecords, newRecords } = records as Records);
 
   let bodyRef: HTMLDivElement;
 
@@ -30,7 +31,15 @@
 
   function getItemKey(index: number): number | string {
     // TODO: Check and return primary key
-    return get(savedRecords)?.[index]?.__identifier || `__index_${index}`;
+    const newRecordsData = get(newRecords);
+    if (newRecordsData?.[index]) {
+      return newRecordsData[index].__identifier;
+    }
+    const savedRecordData = get(savedRecords);
+    if (savedRecordData?.[index - newRecordsData.length]) {
+      return savedRecordData[index - newRecordsData.length].__identifier;
+    }
+    return `__index_${index}`;
   }
 
   function checkAndResetActiveCell(event: Event) {
@@ -51,15 +60,19 @@
         bind:horizontalScrollOffset={$horizontalScrollOffset}
         {height}
         width={$rowWidth || null}
-        itemCount={$savedRecords.length}
+        itemCount={$savedRecords.length + $newRecords.length}
         paddingBottom={20}
         itemSize={getItemSize}
         itemKey={getItemKey}
         let:items
         >
         {#each items as it (it?.key || it)}
-          {#if it && $savedRecords[it.index]}
-            <Row style={it.style} bind:row={$savedRecords[it.index]}/>
+          {#if it}
+            {#if $newRecords[it.index]}
+              <Row style={it.style} bind:row={$newRecords[it.index]}/>
+            {:else if $savedRecords[it.index - $newRecords.length]}
+              <Row style={it.style} bind:row={$savedRecords[it.index - $newRecords.length]}/>
+            {/if}
           {/if}
         {/each}
       </VirtualList>

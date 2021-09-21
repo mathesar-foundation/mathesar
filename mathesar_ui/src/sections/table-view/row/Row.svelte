@@ -63,7 +63,7 @@
 
 <div class="row {row.__state} {modificationState || ''}" class:selected={isSelected}
       class:is-group-header={row.__isGroupHeader} class:is-add-placeholder={row.__isAddPlaceholder}
-      style={styleString}>
+      style={styleString} data-identifier={row.__identifier}>
   <RowControl primaryKeyColumn={$columns.primaryKey}
               {row} {meta}/>
   {#if row.__isAddPlaceholder}

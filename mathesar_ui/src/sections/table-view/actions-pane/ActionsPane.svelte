@@ -42,14 +42,6 @@
     dispatch('openDisplayOptions');
   }
 
-  function deleteRecords() {
-    void records.deleteSelected();
-  }
-
-  function addRecord() {
-    // records.addRecord();
-  }
-
   function refresh() {
     void columns.fetch();
     void records.fetch();
@@ -89,7 +81,7 @@
 
   <div class="divider"/>
 
-  <Button size="small" on:click={addRecord}>
+  <Button size="small" on:click={() => records.addRecord()}>
     <Icon data={faPlus}/>
     <span>
       Record
@@ -97,7 +89,7 @@
   </Button>
 
   {#if $selectedRecords.size > 0}
-    <Button size="small" on:click={deleteRecords}>
+    <Button size="small" on:click={() => records.deleteSelected()}>
       <Icon data={faTrashAlt}/>
       <span>
         Delete {$selectedRecords.size} records
