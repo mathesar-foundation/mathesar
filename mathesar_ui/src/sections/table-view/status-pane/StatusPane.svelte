@@ -8,7 +8,7 @@
   $: ({
     selectedRecords, pageSize, page, offset,
   } = $tabularData.meta as TabularData['meta']);
-  $: ({ records } = $tabularData as TabularData);
+  $: ({ totalCount, state: recordState } = $tabularData.records as TabularData['records']);
   $: selectedPageSize = { id: $pageSize as number, label: $pageSize as number };
 
   const pageSizeOpts = [
@@ -18,7 +18,7 @@
   ];
 
   let pageCount: number;
-  $: max = Math.min($records.totalCount, $offset + $pageSize);
+  $: max = Math.min($totalCount, $offset + $pageSize);
 
   function setPageSize(event: CustomEvent<{ value: { id: number, label: string } }>) {
     const newPageSize = event.detail.value.id;
@@ -32,19 +32,19 @@
 <div class="status-pane">
   <div class="record-count">
     {#if $selectedRecords?.size > 0}
-      {$selectedRecords.size} record{$selectedRecords.size > 1 ? 's' : ''} selected of {$records.totalCount}
+      {$selectedRecords.size} record{$selectedRecords.size > 1 ? 's' : ''} selected of {$totalCount}
 
-    {:else if pageCount > 0 && $records.totalCount}
-      Showing {$offset + 1} - {max} of {$records.totalCount} records
+    {:else if pageCount > 0 && $totalCount}
+      Showing {$offset + 1} - {max} of {$totalCount} records
     
-    {:else if $records.state !== States.Loading}
+    {:else if $recordState !== States.Loading}
       No records found
     {/if}
   </div>
 
   <div class="pagination-group">
-    {#if $records.totalCount}
-      <Pagination total={$records.totalCount} pageSize={$pageSize} bind:page={$page} bind:pageCount/>
+    {#if $totalCount}
+      <Pagination total={$totalCount} pageSize={$pageSize} bind:page={$page} bind:pageCount/>
       <Select options={pageSizeOpts} value={selectedPageSize} on:change={setPageSize}/>
     {/if}
   </div>

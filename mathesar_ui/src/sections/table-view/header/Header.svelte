@@ -20,8 +20,9 @@
     columns, records, meta, display,
   } = $tabularData as TabularData);
   $: ({ horizontalScrollOffset, rowWidth, columnPositionMap } = display as TabularData['display']);
+  $: ({ groupInfo } = records as TabularData['records']);
 
-  $: paddingLeft = $records.groupCounts ? GROUP_MARGIN_LEFT : 0;
+  $: paddingLeft = $groupInfo?.counts ? GROUP_MARGIN_LEFT : 0;
 
   let headerRef: HTMLElement;
 

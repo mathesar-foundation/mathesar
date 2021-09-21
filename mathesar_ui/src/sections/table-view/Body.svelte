@@ -1,9 +1,11 @@
 <script lang="ts">
   import { getContext } from 'svelte';
+  import { get } from 'svelte/store';
   import type {
     TabularDataStore,
     TabularData,
     Display,
+    Records,
   } from '@mathesar/stores/table-data/types';
 
   import Row from './row/Row.svelte';
@@ -11,10 +13,12 @@
   import VirtualList from './virtual-list/VirtualList.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
+  let savedRecords: Records['savedRecords'];
   $: ({ id, records, display } = $tabularData as TabularData);
   $: ({
     rowWidth, horizontalScrollOffset,
   } = display as Display);
+  $: ({ savedRecords } = records as Records);
 
   let bodyRef: HTMLDivElement;
 
@@ -26,8 +30,7 @@
 
   function getItemKey(index: number): number | string {
     // TODO: Check and return primary key
-    // Return index by default
-    return `__index_${index}`;
+    return get(savedRecords)?.[index]?.__identifier || `__index_${index}`;
   }
 
   function checkAndResetActiveCell(event: Event) {
@@ -48,15 +51,15 @@
         bind:horizontalScrollOffset={$horizontalScrollOffset}
         {height}
         width={$rowWidth || null}
-        itemCount={$records.data.length}
+        itemCount={$savedRecords.length}
         paddingBottom={20}
         itemSize={getItemSize}
         itemKey={getItemKey}
         let:items
         >
         {#each items as it (it?.key || it)}
-          {#if it && $records.data[it.index]}
-            <Row style={it.style} bind:row={$records.data[it.index]}/>
+          {#if it && $savedRecords[it.index]}
+            <Row style={it.style} bind:row={$savedRecords[it.index]}/>
           {/if}
         {/each}
       </VirtualList>

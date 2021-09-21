@@ -23,6 +23,7 @@
   } = $tabularData as TabularData);
   $: ({ columnPositionMap } = display as TabularData['display']);
   $: ({ selectedRecords, recordModificationState } = meta as TabularData['meta']);
+  $: ({ groupInfo } = records as TabularData['records']);
 
   function calculateStyle(
     _style: { [key: string]: string | number },
@@ -70,7 +71,7 @@
       
     </div>
   {:else if row.__isGroupHeader}
-    <GroupHeader {row} groupColumns={$records.groupColumns} groupCounts={$records.groupCounts}/>
+    <GroupHeader {row} groupColumns={$groupInfo.columns} groupCounts={$groupInfo.counts}/>
   {:else}
     {#each $columns.data as column (column.name)}
       <RowCell {display} bind:row {column} {records}

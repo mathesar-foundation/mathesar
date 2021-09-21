@@ -8,8 +8,6 @@ import {
 import { TabularType } from '@mathesar/App.d';
 import type {
   Writable,
-  Updater,
-  Subscriber,
   Unsubscriber,
 } from 'svelte/store';
 import type { PaginatedResponse } from '@mathesar/utils/api';
@@ -18,8 +16,11 @@ import type { DBObjectEntry } from '@mathesar/App.d';
 import type { Meta } from './meta';
 import type { Columns, TableColumn } from './columns';
 
-export interface TableRecord {
+interface TableRecordInResponse {
   [key: string]: unknown,
+}
+export interface TableRecord extends TableRecordInResponse {
+  __identifier: string,
   __isAddPlaceholder?: boolean,
   __isNew?: boolean,
   __isGroupHeader?: boolean,
@@ -33,16 +34,21 @@ export interface GroupCount {
   [key: string]: GroupCount | number
 }
 
+interface GroupInfo {
+  counts: GroupCount,
+  columns: TableColumn['name'][]
+}
+
 interface TableRecordData {
   state: States,
   error?: string,
-  data: TableRecord[],
+  savedRecords: TableRecord[],
   totalCount: number,
   groupCounts?: GroupCount,
   groupColumns?: string[],
 }
 
-interface TableRecordResponse extends PaginatedResponse<TableRecord> {
+interface TableRecordResponse extends PaginatedResponse<TableRecordInResponse> {
   group_count?: {
     group_count_by?: TableColumn['name'][],
     results?: {
@@ -71,15 +77,20 @@ function mapGroupCounts(groupInfo: TableRecordResponse['group_count']): GroupCou
 
 function preprocessRecords(
   offset: number,
-  records?: TableRecord[],
+  records?: TableRecordInResponse[],
+  newRecords?: TableRecordInResponse[],
   groupColumns?: string[],
 ): TableRecord[] {
   const isResultGrouped = groupColumns?.length > 0;
   const combinedRecords: TableRecord[] = [{
     __state: 'done',
+    __identifier: '__add_placeholder',
     __isAddPlaceholder: true,
   }];
   let index = 0;
+  let groupIndex = 0;
+  let existingRecordIndex = 0;
+  let newRecordIndex = 0;
 
   records?.forEach((record) => {
     if (!record.__isGroupHeader && !record.__isAddPlaceholder) {
@@ -100,26 +111,39 @@ function preprocessRecords(
         if (isGroup) {
           combinedRecords.push({
             __isGroupHeader: true,
+            __identifier: `__${offset}_group_header_${groupIndex}`,
             __groupValues: record,
             __state: 'done',
           });
+          groupIndex += 1;
         }
       }
 
+      const recordIdentifier = record.__isNew
+        ? `__new_${newRecordIndex}`
+        : `__index_${existingRecordIndex}`;
+
       combinedRecords.push({
         ...record,
+        __identifier: `__${offset}_${recordIdentifier}`,
         __rowNumber: offset + index + 1,
         __rowIndex: index,
         __state: 'done',
       });
       index += 1;
+
+      if (record.__isNew) {
+        newRecordIndex -= 1;
+      } else {
+        existingRecordIndex += 1;
+      }
     }
   });
   return combinedRecords;
 }
 
-function prepareRowForPatch(row: TableRecord): TableRecord {
-  const rowForRequest: TableRecord = {};
+function prepareRowForPatch(row: TableRecord): TableRecordInResponse {
+  const rowForRequest: TableRecordInResponse = {};
   Object.keys(row).forEach((key) => {
     if (key.indexOf('__') !== 0) {
       rowForRequest[key] = row[key];
@@ -128,18 +152,28 @@ function prepareRowForPatch(row: TableRecord): TableRecord {
   return rowForRequest;
 }
 
-export class Records implements Writable<TableRecordData> {
+export class Records {
   _type: TabularType;
 
   _parentId: DBObjectEntry['id'];
-
-  _store: Writable<TableRecordData>;
 
   _url: string;
 
   _meta: Meta;
 
   _columns: Columns;
+
+  state: Writable<States>;
+
+  savedRecords: Writable<TableRecord[]>;
+
+  newRecords: Writable<TableRecord[]>;
+
+  groupInfo: Writable<GroupInfo>;
+
+  totalCount: Writable<number>;
+
+  error: Writable<string>;
 
   _promise: CancellablePromise<TableRecordResponse>;
 
@@ -158,12 +192,14 @@ export class Records implements Writable<TableRecordData> {
   ) {
     this._type = type;
     this._parentId = parentId;
-    this._store = writable({
-      state: States.Loading,
-      data: [],
-      groupCounts: null,
-      totalCount: null,
-    });
+
+    this.state = writable(States.Loading);
+    this.savedRecords = writable([] as TableRecord[]);
+    this.newRecords = writable([] as TableRecord[]);
+    this.groupInfo = writable(null as GroupInfo);
+    this.totalCount = writable(null as number);
+    this.error = writable(null as string);
+
     this._meta = meta;
     this._columns = columns;
     this._url = `/${this._type === TabularType.Table ? 'tables' : 'views'}/${this._parentId}/records/`;
@@ -178,28 +214,24 @@ export class Records implements Writable<TableRecordData> {
 
   async fetch(hideLoadingOnExistingRows = false): Promise<TableRecordData> {
     this._promise?.cancel();
-    this._store.update((existingData) => {
-      let { data } = existingData;
+
+    this.savedRecords.update((existingData) => {
+      let data = [...existingData];
 
       data.length = getStoreValue(this._meta.pageSize);
-      if (hideLoadingOnExistingRows) {
-        data = data.map((entry) => {
-          if (!entry) {
-            return { __state: 'loading' };
-          }
-          return entry;
-        });
-      } else {
-        data.fill({ __state: 'loading' });
-      }
+      let index = -1;
+      data = data.map((entry) => {
+        index += 1;
+        if (!hideLoadingOnExistingRows || !entry) {
+          return { __state: 'loading', __identifier: `__dummy_index_${index}` };
+        }
+        return entry;
+      });
 
-      return {
-        ...existingData,
-        data,
-        state: States.Loading,
-        error: null,
-      };
+      return data;
     });
+    this.error.set(null);
+    this.state.set(States.Loading);
 
     this._meta.clearAllRecordModificationStates();
 
@@ -220,45 +252,33 @@ export class Records implements Writable<TableRecordData> {
       const records = preprocessRecords(
         getStoreValue(this._meta.offset),
         response.results,
+        getStoreValue(this.newRecords),
         groupColumns,
       );
 
       const storeData: TableRecordData = {
         state: States.Done,
-        data: records,
+        savedRecords: records,
         groupCounts,
         groupColumns,
         totalCount,
       };
-      this._store.set(storeData);
+      this.savedRecords.set(records);
+      this.state.set(States.Done);
+      this.groupInfo.set({
+        counts: groupCounts,
+        columns: groupColumns,
+      });
+      this.totalCount.set(totalCount);
+      this.error.set(null);
+
       this._fetchCallback?.(storeData);
       return storeData;
     } catch (err) {
-      this._store.update((existing) => ({
-        ...existing,
-        state: States.Error,
-        error: err instanceof Error ? err.message : null,
-      }));
+      this.state.set(States.Error);
+      this.error.set(err instanceof Error ? err.message : 'Unable to load records');
     }
     return null;
-  }
-
-  set(value: TableRecordData): void {
-    this._store.set(value);
-  }
-
-  update(updater: Updater<TableRecordData>): void {
-    this._store.update(updater);
-  }
-
-  subscribe(
-    run: Subscriber<TableRecordData>,
-  ): Unsubscriber {
-    return this._store.subscribe(run);
-  }
-
-  get(): TableRecordData {
-    return getStoreValue(this._store);
   }
 
   async deleteSelected(): Promise<void> {
@@ -313,20 +333,18 @@ export class Records implements Writable<TableRecordData> {
     }
   }
 
-  addRecord(): void {
-    const offset = getStoreValue(this._meta.offset);
-    this._store.update((existingData) => {
-      const { data, groupColumns } = existingData;
-      data.unshift({
-        __isNew: true,
-      });
+  // addRecord(): void {
+  //   const offset = getStoreValue(this._meta.offset);
+  //   this._store.update((existingData) => {
+  //     const { data, groupColumns } = existingData;
+  //     this._newRows.push({});
 
-      return {
-        ...existingData,
-        data: preprocessRecords(offset, data, groupColumns),
-      };
-    });
-  }
+  //     return {
+  //       ...existingData,
+  //       data: preprocessRecords(offset, data, this._newRows, groupColumns),
+  //     };
+  //   });
+  // }
 
   destroy(): void {
     this._promise?.cancel();

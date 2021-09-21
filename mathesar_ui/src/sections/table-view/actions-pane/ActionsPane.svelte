@@ -31,11 +31,12 @@
   $: ({
     filter, sort, group, selectedRecords, combinedModificationState,
   } = meta as Meta);
+  $: ({ state: recordState } = records);
 
   $: isLoading = $columns.state === States.Loading
-    || $records.state === States.Loading;
+    || $recordState === States.Loading;
   $: isError = $columns.state === States.Error
-    || $records.state === States.Error;
+    || $recordState === States.Error;
 
   function openDisplayOptions() {
     dispatch('openDisplayOptions');
@@ -46,7 +47,7 @@
   }
 
   function addRecord() {
-    records.addRecord();
+    // records.addRecord();
   }
 
   function refresh() {
