@@ -7,6 +7,7 @@
     Display,
     Records,
   } from '@mathesar/stores/table-data/types';
+  import { States } from '@mathesar/utils/api';
 
   import Row from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
@@ -68,10 +69,16 @@
         >
         {#each items as it (it?.key || it)}
           {#if it}
-            {#if $newRecords[it.index]}
-              <Row style={it.style} bind:row={$newRecords[it.index]}/>
-            {:else if $savedRecords[it.index - $newRecords.length]}
-              <Row style={it.style} bind:row={$savedRecords[it.index - $newRecords.length]}/>
+            {#if it.index === 0}
+              <Row style={it.style} row={{
+                __identifier: '__add_placeholder',
+                __isAddPlaceholder: true,
+                __state: States.Done,
+                }}/>
+            {:else if $newRecords[it.index - 1]}
+              <Row style={it.style} bind:row={$newRecords[it.index - 1]}/>
+            {:else if $savedRecords[it.index - $newRecords.length - 1]}
+              <Row style={it.style} bind:row={$savedRecords[it.index - $newRecords.length - 1]}/>
             {/if}
           {/if}
         {/each}

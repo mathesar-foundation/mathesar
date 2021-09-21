@@ -4,6 +4,7 @@ import {
   getAPI,
   deleteAPI,
   patchAPI,
+  postAPI,
 } from '@mathesar/utils/api';
 import { TabularType } from '@mathesar/App.d';
 import type {
@@ -128,7 +129,7 @@ function preprocessRecords(
   return combinedRecords;
 }
 
-function prepareRowForPatch(row: TableRecord): TableRecordInResponse {
+function prepareRowForRequest(row: TableRecord): TableRecordInResponse {
   const rowForRequest: TableRecordInResponse = {};
   Object.keys(row).forEach((key) => {
     if (key.indexOf('__') !== 0) {
@@ -162,6 +163,8 @@ export class Records {
   error: Writable<string>;
 
   _promise: CancellablePromise<TableRecordResponse>;
+
+  _createPromises: Map<unknown, CancellablePromise<TableRecordResponse>>;
 
   _updatePromises: Map<unknown, CancellablePromise<TableRecordResponse>>;
 
@@ -198,7 +201,7 @@ export class Records {
     });
   }
 
-  async fetch(hideLoadingOnExistingRows = false): Promise<TableRecordData> {
+  async fetch(retainExistingRows = false): Promise<TableRecordData> {
     this._promise?.cancel();
 
     this.savedRecords.update((existingData) => {
@@ -208,7 +211,7 @@ export class Records {
       let index = -1;
       data = data.map((entry) => {
         index += 1;
-        if (!hideLoadingOnExistingRows || !entry) {
+        if (!retainExistingRows || !entry) {
           return { __state: 'loading', __identifier: `__dummy_index_${index}` };
         }
         return entry;
@@ -218,6 +221,9 @@ export class Records {
     });
     this.error.set(null);
     this.state.set(States.Loading);
+    if (!retainExistingRows) {
+      this.newRecords.set([]);
+    }
 
     this._meta.clearAllRecordModificationStates();
 
@@ -298,7 +304,7 @@ export class Records {
       this._updatePromises?.get(row[primaryKey])?.cancel();
       const promise = patchAPI<TableRecordResponse>(
         `${this._url}${row[primaryKey] as string}/`,
-        prepareRowForPatch(row),
+        prepareRowForRequest(row),
       );
       if (!this._updatePromises) {
         this._updatePromises = new Map();
@@ -312,25 +318,64 @@ export class Records {
         this._meta.setRecordModificationState(row[primaryKey], 'updateFailed');
       } finally {
         if (this._updatePromises.get(row[primaryKey]) === promise) {
-          this._updatePromises.clear();
+          this._updatePromises.delete(row[primaryKey]);
         }
       }
     }
   }
 
-  addRecord(): void {
+  async createOrUpdateRecord(row: TableRecord): Promise<void> {
+    const { primaryKey } = this._columns.get();
+    if (row.__isNew && (!primaryKey || !row[primaryKey])) {
+      this._meta.setRecordModificationState(row.__identifier, 'create');
+      this._createPromises?.get(row.__identifier)?.cancel();
+      const promise = postAPI<TableRecordResponse>(
+        this._url,
+        prepareRowForRequest(row),
+      );
+      if (!this._createPromises) {
+        this._createPromises = new Map();
+      }
+      this._createPromises.set(row.__identifier, promise);
+
+      try {
+        const result = await promise;
+        this._meta.setRecordModificationState(row.__identifier, 'created');
+        this.newRecords.update((existing) => existing.map((entry) => {
+          if (entry.__identifier === row.__identifier) {
+            return {
+              ...row,
+              ...result,
+            };
+          }
+          return entry;
+        }));
+      } catch (err) {
+        this._meta.setRecordModificationState(row.__identifier, 'creationFailed');
+      } finally {
+        if (this._createPromises.get(row.__identifier) === promise) {
+          this._createPromises.delete(row.__identifier);
+        }
+      }
+    } else {
+      await this.updateRecord(row);
+    }
+  }
+
+  async addEmptyRecord(): Promise<void> {
     const offset = getStoreValue(this._meta.offset);
-    this.newRecords.update((existing) => {
-      const identifier = `__${offset}_new_${-existing.length - 1}`;
-      return [
-        {
-          __identifier: identifier,
-          __state: States.Done,
-          __isNew: true,
-          __rowIndex: -existing.length - 1,
-        } as TableRecord,
-      ].concat(existing);
-    });
+    const existingNewRecords = getStoreValue(this.newRecords);
+    const identifier = `__${offset}_new_${-existingNewRecords.length - 1}`;
+    const newRecord: TableRecord = {
+      __identifier: identifier,
+      __state: States.Done,
+      __isNew: true,
+      __rowIndex: -existingNewRecords.length - 1,
+    };
+    this.newRecords.update((existing) => [
+      newRecord,
+    ].concat(existing));
+    await this.createOrUpdateRecord(newRecord);
   }
 
   destroy(): void {

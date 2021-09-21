@@ -81,7 +81,7 @@
 
   <div class="divider"/>
 
-  <Button size="small" on:click={() => records.addRecord()}>
+  <Button size="small" on:click={() => records.addEmptyRecord()}>
     <Icon data={faPlus}/>
     <span>
       Record

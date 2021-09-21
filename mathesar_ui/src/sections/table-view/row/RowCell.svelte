@@ -42,7 +42,11 @@
   function setValue(val: string) {
     if (row[column.name] !== val) {
       row[column.name] = val;
-      void records.updateRecord(row);
+      if (row.__isNew) {
+        void records.createOrUpdateRecord(row);
+      } else {
+        void records.updateRecord(row);
+      }
       row = { ...row };
     }
   }
