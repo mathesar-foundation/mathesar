@@ -171,8 +171,10 @@ export class Display {
     const columnData = this._columns.get().data;
     const totalCount = get(this._records.totalCount);
     const savedRecords = get(this._records.savedRecords);
+    const newRecords = get(this._records.newRecords);
     const offset = get(this._meta.offset);
     const pageSize = get(this._meta.pageSize);
+    const minRowIndex = -(newRecords.length);
     const maxRowIndex = Math.min(pageSize, totalCount - offset, savedRecords.length) - 1;
     const activeCell = get(this.activeCell);
 
@@ -186,7 +188,7 @@ export class Display {
             }
             break;
           case 'ArrowUp':
-            if (existing.rowIndex > 0) {
+            if (existing.rowIndex > minRowIndex) {
               newActiveCell.rowIndex -= 1;
             }
             break;
