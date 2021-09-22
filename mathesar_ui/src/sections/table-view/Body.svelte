@@ -14,13 +14,13 @@
   import VirtualList from './virtual-list/VirtualList.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  let savedRecords: Records['savedRecords'];
-  let newRecords: Records['newRecords'];
+  let records: Records;
+  let display: Display;
   $: ({ id, records, display } = $tabularData as TabularData);
   $: ({
     rowWidth, horizontalScrollOffset,
-  } = display as Display);
-  $: ({ savedRecords, newRecords } = records as Records);
+  } = display);
+  $: ({ savedRecords, newRecords } = records);
 
   let bodyRef: HTMLDivElement;
 
@@ -30,22 +30,9 @@
     return defaultRowHeight;
   }
 
-  function getItemKey(index: number): number | string {
-    // TODO: Check and return primary key
-    const newRecordsData = get(newRecords);
-    if (newRecordsData?.[index]) {
-      return newRecordsData[index].__identifier;
-    }
-    const savedRecordData = get(savedRecords);
-    if (savedRecordData?.[index - newRecordsData.length]) {
-      return savedRecordData[index - newRecordsData.length].__identifier;
-    }
-    return `__index_${index}`;
-  }
-
   function checkAndResetActiveCell(event: Event) {
     if (!bodyRef.contains(event.target as HTMLElement)) {
-      (display as Display).resetActiveCell();
+      display.resetActiveCell();
     }
   }
 </script>
@@ -64,7 +51,7 @@
         itemCount={$savedRecords.length + $newRecords.length + 1}
         paddingBottom={20}
         itemSize={getItemSize}
-        itemKey={getItemKey}
+        itemKey={(index) => records.getIterationKey(index)}
         let:items
         >
         {#each items as it (it?.key || it)}

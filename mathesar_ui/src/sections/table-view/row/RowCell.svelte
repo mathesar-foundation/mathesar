@@ -56,7 +56,7 @@
     timer = window.setTimeout(() => {
       const val = (event.target as HTMLInputElement).value;
       setValue(val);
-    }, 300);
+    }, 500);
   }
 
   function onBlur(event: Event) {

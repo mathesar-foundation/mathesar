@@ -58,6 +58,25 @@ interface TableRecordResponse extends PaginatedResponse<TableRecordInResponse> {
   }
 }
 
+export function getRowKey(
+  row: TableRecord,
+  primaryKeyColumn?: TableColumn['name'],
+): unknown {
+  let key = row?.[primaryKeyColumn];
+  if (!key && row?.__isNew) {
+    key = row?.__identifier;
+  }
+  return key;
+}
+
+function generateRowIdentifier(
+  type: 'groupHeader' | 'normal' | 'dummy' | 'new',
+  offset: number,
+  index: number,
+): string {
+  return `__${offset}_${type}_${index}`;
+}
+
 function mapGroupCounts(groupInfo: TableRecordResponse['group_count']): GroupCount {
   const groupResults = groupInfo.results;
   const groupMap: GroupCount = {};
@@ -105,7 +124,7 @@ function preprocessRecords(
         if (isGroup) {
           combinedRecords.push({
             __isGroupHeader: true,
-            __identifier: `__${offset}_group_header_${groupIndex}`,
+            __identifier: generateRowIdentifier('groupHeader', offset, groupIndex),
             __groupValues: record,
             __state: 'done',
           });
@@ -115,12 +134,11 @@ function preprocessRecords(
 
       combinedRecords.push({
         ...record,
-        __identifier: `__${offset}_index_${existingRecordIndex}`,
+        __identifier: generateRowIdentifier('normal', offset, existingRecordIndex),
         __rowIndex: index,
         __state: 'done',
       });
       index += 1;
-
       existingRecordIndex += 1;
     }
   });
@@ -201,16 +219,17 @@ export class Records {
 
   async fetch(retainExistingRows = false): Promise<TableRecordData> {
     this._promise?.cancel();
+    const offset = getStoreValue(this._meta.offset);
 
     this.savedRecords.update((existingData) => {
       let data = [...existingData];
-
       data.length = getStoreValue(this._meta.pageSize);
+
       let index = -1;
       data = data.map((entry) => {
         index += 1;
         if (!retainExistingRows || !entry) {
-          return { __state: 'loading', __identifier: `__dummy_index_${index}` };
+          return { __state: 'loading', __identifier: generateRowIdentifier('dummy', offset, index) };
         }
         return entry;
       });
@@ -221,9 +240,8 @@ export class Records {
     this.state.set(States.Loading);
     if (!retainExistingRows) {
       this.newRecords.set([]);
+      this._meta.clearAllRecordModificationStates();
     }
-
-    this._meta.clearAllRecordModificationStates();
 
     try {
       const params = getStoreValue(this._meta.recordRequestParams);
@@ -240,7 +258,7 @@ export class Records {
       }
 
       const records = preprocessRecords(
-        getStoreValue(this._meta.offset),
+        offset,
         response.results,
         groupColumns,
       );
@@ -291,10 +309,24 @@ export class Records {
           }));
         await Promise.all(promises);
         await this.fetch(true);
+
+        const offset = getStoreValue(this._meta.offset);
         this.newRecords.update((existing) => {
-          const retained = existing.filter(
-            (entry) => !successSet.has(entry[this._columns.get()?.primaryKey]),
+          let retained = existing.filter(
+            (entry) => !successSet.has(getRowKey(entry, this._columns.get()?.primaryKey)),
           );
+          if (retained.length === existing.length) {
+            return existing;
+          }
+          let index = retained.length + 1;
+          retained = retained.map((entry) => {
+            index -= 1;
+            return {
+              ...entry,
+              __rowIndex: -index,
+              __identifier: generateRowIdentifier('new', offset, -index),
+            };
+          });
           return retained;
         });
         this._meta.setMultipleRecordModificationStates(failed, 'deleteFailed');
@@ -309,8 +341,9 @@ export class Records {
   async updateRecord(row: TableRecord): Promise<void> {
     const { primaryKey } = this._columns.get();
     if (primaryKey && row[primaryKey]) {
-      this._meta.setRecordModificationState(row[primaryKey], 'update');
-      this._updatePromises?.get(row[primaryKey])?.cancel();
+      const rowKey = getRowKey(row, primaryKey);
+      this._meta.setRecordModificationState(rowKey, 'update');
+      this._updatePromises?.get(rowKey)?.cancel();
       const promise = patchAPI<TableRecordResponse>(
         `${this._url}${row[primaryKey] as string}/`,
         prepareRowForRequest(row),
@@ -318,16 +351,16 @@ export class Records {
       if (!this._updatePromises) {
         this._updatePromises = new Map();
       }
-      this._updatePromises.set(row[primaryKey], promise);
+      this._updatePromises.set(rowKey, promise);
 
       try {
         await promise;
-        this._meta.setRecordModificationState(row[primaryKey], 'updated');
+        this._meta.setRecordModificationState(rowKey, 'updated');
       } catch (err) {
-        this._meta.setRecordModificationState(row[primaryKey], 'updateFailed');
+        this._meta.setRecordModificationState(rowKey, 'updateFailed');
       } finally {
-        if (this._updatePromises.get(row[primaryKey]) === promise) {
-          this._updatePromises.delete(row[primaryKey]);
+        if (this._updatePromises.get(rowKey) === promise) {
+          this._updatePromises.delete(rowKey);
         }
       }
     }
@@ -335,9 +368,10 @@ export class Records {
 
   async createOrUpdateRecord(row: TableRecord): Promise<void> {
     const { primaryKey } = this._columns.get();
+    const rowKey = getRowKey(row, primaryKey);
     if (row.__isNew && (!primaryKey || !row[primaryKey])) {
-      this._meta.setRecordModificationState(row.__identifier, 'create');
-      this._createPromises?.get(row.__identifier)?.cancel();
+      this._meta.setRecordModificationState(rowKey, 'create');
+      this._createPromises?.get(rowKey)?.cancel();
       const promise = postAPI<TableRecordResponse>(
         this._url,
         prepareRowForRequest(row),
@@ -345,25 +379,28 @@ export class Records {
       if (!this._createPromises) {
         this._createPromises = new Map();
       }
-      this._createPromises.set(row.__identifier, promise);
+      this._createPromises.set(rowKey, promise);
 
       try {
         const result = await promise;
-        this._meta.setRecordModificationState(row.__identifier, 'created');
+        const newRow = {
+          ...row,
+          ...result,
+        };
+        const updatedRowKey = getRowKey(newRow, primaryKey);
+        this._meta.clearRecordModificationState(rowKey);
+        this._meta.setRecordModificationState(updatedRowKey, 'created');
         this.newRecords.update((existing) => existing.map((entry) => {
           if (entry.__identifier === row.__identifier) {
-            return {
-              ...row,
-              ...result,
-            };
+            return newRow;
           }
           return entry;
         }));
       } catch (err) {
-        this._meta.setRecordModificationState(row.__identifier, 'creationFailed');
+        this._meta.setRecordModificationState(rowKey, 'creationFailed');
       } finally {
-        if (this._createPromises.get(row.__identifier) === promise) {
-          this._createPromises.delete(row.__identifier);
+        if (this._createPromises.get(rowKey) === promise) {
+          this._createPromises.delete(rowKey);
         }
       }
     } else {
@@ -374,7 +411,7 @@ export class Records {
   async addEmptyRecord(): Promise<void> {
     const offset = getStoreValue(this._meta.offset);
     const existingNewRecords = getStoreValue(this.newRecords);
-    const identifier = `__${offset}_new_${-existingNewRecords.length - 1}`;
+    const identifier = generateRowIdentifier('new', offset, -existingNewRecords.length - 1);
     const newRecord: TableRecord = {
       __identifier: identifier,
       __state: States.Done,
@@ -385,6 +422,18 @@ export class Records {
       newRecord,
     ].concat(existing));
     await this.createOrUpdateRecord(newRecord);
+  }
+
+  getIterationKey(index: number): string {
+    const newRecordsData = getStoreValue(this.newRecords);
+    if (newRecordsData?.[index]) {
+      return newRecordsData[index].__identifier;
+    }
+    const savedRecordData = getStoreValue(this.savedRecords);
+    if (savedRecordData?.[index - newRecordsData.length]) {
+      return savedRecordData[index - newRecordsData.length].__identifier;
+    }
+    return `__index_${index}`;
   }
 
   destroy(): void {

@@ -295,18 +295,18 @@ export class Meta {
     }
   }
 
-  setRecordModificationState(primaryKeyValue: unknown, state: ModificationType): void {
+  setRecordModificationState(key: unknown, state: ModificationType): void {
     this.recordModificationState.update((existingMap) => {
       const newMap = new Map(existingMap);
-      newMap.set(primaryKeyValue, state);
+      newMap.set(key, state);
       return newMap;
     });
   }
 
-  clearRecordModificationState(primaryKeyValue: unknown): void {
+  clearRecordModificationState(key: unknown): void {
     this.recordModificationState.update((existingMap) => {
       const newMap = new Map(existingMap);
-      newMap.delete(primaryKeyValue);
+      newMap.delete(key);
       return newMap;
     });
   }
@@ -316,12 +316,12 @@ export class Meta {
   }
 
   setMultipleRecordModificationStates(
-    primaryKeyValues: unknown[],
+    keys: unknown[],
     state: ModificationType,
   ): void {
     this.recordModificationState.update((existingMap) => {
       const newMap = new Map(existingMap);
-      primaryKeyValues.forEach((value) => {
+      keys.forEach((value) => {
         newMap.set(value, state);
       });
       return newMap;
@@ -329,11 +329,11 @@ export class Meta {
   }
 
   clearMultipleRecordModificationStates(
-    primaryKeyValues: unknown[],
+    keys: unknown[],
   ): void {
     this.recordModificationState.update((existingMap) => {
       const newMap = new Map(existingMap);
-      primaryKeyValues.forEach((value) => {
+      keys.forEach((value) => {
         newMap.delete(value);
       });
       return newMap;
