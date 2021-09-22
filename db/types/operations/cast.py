@@ -5,7 +5,7 @@ from sqlalchemy.sql.functions import Function
 from db.types import base, email, money
 from db.types.exceptions import UnsupportedTypeException
 
-
+# DB type name strings
 BIGINT = base.PostgresType.BIGINT.value
 BOOLEAN = base.PostgresType.BOOLEAN.value
 DECIMAL = base.PostgresType.DECIMAL.value
@@ -13,11 +13,9 @@ DOUBLE_PRECISION = base.PostgresType.DOUBLE_PRECISION.value
 FLOAT = base.PostgresType.FLOAT.value
 INTEGER = base.PostgresType.INTEGER.value
 INTERVAL = base.PostgresType.INTERVAL.value
-NAME = base.PostgresType.NAME.value
 NUMERIC = base.PostgresType.NUMERIC.value
 REAL = base.PostgresType.REAL.value
 SMALLINT = base.PostgresType.SMALLINT.value
-FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
 TEXT = base.PostgresType.TEXT.value
 DATE = base.PostgresType.DATE.value
 STRING = base.STRING
@@ -26,6 +24,15 @@ VARCHAR = base.VARCHAR
 # custom types
 EMAIL = base.MathesarCustomType.EMAIL.value
 MONEY = base.MathesarCustomType.MONEY.value
+
+# only needed for ischema lookup
+FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
+NAME = base.PostgresType.NAME.value
+
+DECIMAL_TYPES = frozenset([DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL])
+INTEGER_TYPES = frozenset([BIGINT, INTEGER, SMALLINT])
+NUMBER_TYPES = DECIMAL_TYPES | INTEGER_TYPES
+TEXT_TYPES = frozenset([TEXT, VARCHAR])
 
 
 def get_supported_alter_column_types(engine, friendly_names=True):
@@ -269,11 +276,8 @@ def _get_boolean_type_body_map():
                              PostgreSQL).  Others raise a custom
                              exception.
     """
-    source_number_types = [
-        BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
-        SMALLINT,
-    ]
-    default_behavior_source_types = [BOOLEAN]
+    source_number_types = NUMBER_TYPES
+    default_behavior_source_types = frozenset([BOOLEAN])
 
     not_bool_exception_str = f"RAISE EXCEPTION '% is not a {BOOLEAN}', $1;"
 
@@ -323,7 +327,7 @@ def _get_email_type_body_map():
                      just check that the VARCHAR object satisfies the email
                      DOMAIN).
     """
-    default_behavior_source_types = [email.DB_TYPE, VARCHAR, TEXT]
+    default_behavior_source_types = frozenset([email.DB_TYPE]) | TEXT_TYPES
     return _get_default_type_body_map(
         default_behavior_source_types, email.DB_TYPE,
     )
@@ -365,10 +369,8 @@ def _get_integer_type_body_map(target_type_str=INTEGER):
     We specifically disallow rounding or truncating when casting from numerics,
     etc.
     """
-    default_behavior_source_types = [BIGINT, INTEGER, SMALLINT, VARCHAR]
-    no_rounding_source_types = [
-        DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL
-    ]
+    default_behavior_source_types = INTEGER_TYPES | TEXT_TYPES
+    no_rounding_source_types = DECIMAL_TYPES
     cast_loss_exception_str = (
         f"RAISE EXCEPTION '% cannot be cast to {target_type_str} without loss', $1;"
     )
@@ -407,10 +409,7 @@ def _get_decimal_number_type_body_map(target_type_str=NUMERIC):
         boolean -> number:  We cast TRUE -> 1, FALSE -> 0
     """
 
-    default_behavior_source_types = [
-        BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
-        SMALLINT, VARCHAR,
-    ]
+    default_behavior_source_types = NUMBER_TYPES | TEXT_TYPES
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, target_type_str,
     )
@@ -438,11 +437,8 @@ def _get_money_type_body_map():
     and that the type can be cast through a numeric.
     """
     default_behavior_source_types = [money.DB_TYPE]
-    number_types = [
-        BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
-        SMALLINT,
-    ]
-    textual_types = [TEXT, VARCHAR]
+    number_types = NUMBER_TYPES
+    textual_types = TEXT_TYPES
 
     def _get_number_cast_to_money():
         return f"""
@@ -488,9 +484,10 @@ def _get_varchar_type_body_map(engine):
 
 
 def _get_date_type_body_map():
-    # Note that default postgres conversion for dates depends on the `DateStyle` option
-    # set on the server, which can be one of DMY, MDY, or YMD. Defaults to MDY.
-    default_behavior_source_types = [DATE, VARCHAR]
+    # Note that default postgres conversion for dates depends on the
+    # `DateStyle` option set on the server, which can be one of DMY, MDY,
+    # or YMD. Defaults to MDY.
+    default_behavior_source_types = frozenset([DATE]) | TEXT_TYPES
     return _get_default_type_body_map(
         default_behavior_source_types, DATE,
     )
