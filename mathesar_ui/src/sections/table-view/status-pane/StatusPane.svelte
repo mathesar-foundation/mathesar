@@ -1,14 +1,23 @@
 <script lang="ts">
   import { getContext } from 'svelte';
   import { Pagination, Select } from '@mathesar-components';
-  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
   import { States } from '@mathesar/utils/api';
+  import type {
+    TabularDataStore,
+    TabularData,
+    Meta,
+    Records,
+  } from '@mathesar/stores/table-data/types';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
+  let records: Records;
+  let meta: Meta;
+  let recordState: Records['state'];
+  $: ({ records, meta } = $tabularData as TabularData);
   $: ({
     selectedRecords, pageSize, page, offset,
-  } = $tabularData.meta as TabularData['meta']);
-  $: ({ totalCount, state: recordState } = $tabularData.records as TabularData['records']);
+  } = meta);
+  $: ({ totalCount, state: recordState } = records);
   $: selectedPageSize = { id: $pageSize as number, label: $pageSize as number };
 
   const pageSizeOpts = [

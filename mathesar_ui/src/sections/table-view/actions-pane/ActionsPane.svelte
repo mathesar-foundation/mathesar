@@ -25,12 +25,14 @@
 
   let records: Records;
   let columns: Columns;
+  let meta: Meta;
+  let recordState: Records['state'];
   $: ({
     columns, records, meta,
   } = $tabularData as TabularData);
   $: ({
     filter, sort, group, selectedRecords, combinedModificationState,
-  } = meta as Meta);
+  } = meta);
   $: ({ state: recordState } = records);
 
   $: isLoading = $columns.state === States.Loading

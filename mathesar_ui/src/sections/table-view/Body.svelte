@@ -1,6 +1,5 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import { get } from 'svelte/store';
   import type {
     TabularDataStore,
     TabularData,
@@ -14,6 +13,7 @@
   import VirtualList from './virtual-list/VirtualList.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
+  let id: TabularData['id'];
   let records: Records;
   let display: Display;
   $: ({ id, records, display } = $tabularData as TabularData);
