@@ -1,11 +1,13 @@
 <script lang="ts">
   import {
     faSync,
+    faExclamation,
   } from '@fortawesome/free-solid-svg-icons';
   import { Checkbox, Icon } from '@mathesar-components';
   import {
     ROW_CONTROL_COLUMN_WIDTH,
     getGenericModificationStatus,
+    getModificationState,
   } from '@mathesar/stores/table-data';
   import type {
     Meta,
@@ -18,12 +20,17 @@
   export let meta: Meta;
   export let records: Records;
 
+  let displayHelpMessage = false;
+
   $: ({ selectedRecords, recordModificationState, offset } = meta);
   $: ({ newRecords } = records);
 
   $: primaryKeyValue = row?.[primaryKeyColumn] ?? null;
   $: isRowSelected = ($selectedRecords as Set<unknown>).has(primaryKeyValue);
-  $: modificationStatus = getGenericModificationStatus(
+  $: genericModificationStatus = getGenericModificationStatus(
+    $recordModificationState, row, primaryKeyColumn,
+  );
+  $: modificationState = getModificationState(
     $recordModificationState, row, primaryKeyColumn,
   );
 
@@ -35,23 +42,51 @@
       meta.deSelectRecordByPrimaryKey(primaryKeyValue);
     }
   }
+
+  function showHelpMessage() {
+    if (!displayHelpMessage
+        && (genericModificationStatus === 'complete'
+          || genericModificationStatus === 'error')
+    ) {
+      displayHelpMessage = true;
+    }
+  }
+
+  function hideHelpMessage() {
+    if (displayHelpMessage) {
+      displayHelpMessage = false;
+    }
+  }
 </script>
 
 <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;left:0px">
-  {#if typeof row.__rowIndex === 'number'}
-    <span class="number">
-      {row.__rowIndex + $newRecords.length + $offset + 1}
-      {#if row.__isNew}
-        *
-      {/if}
-    </span>
-  {/if}
+  <div class="control">
+    {#if typeof row.__rowIndex === 'number'}
+      <span class="number">
+        {row.__rowIndex + $newRecords.length + $offset + 1}
+        {#if row.__isNew}
+          *
+        {/if}
+      </span>
+    {/if}
 
-  {#if primaryKeyValue}
-    <Checkbox checked={isRowSelected} on:change={selectionChanged}/>
-  {/if}
+    {#if primaryKeyValue}
+      <Checkbox checked={isRowSelected} on:change={selectionChanged}/>
+    {/if}
+  </div>
 
-  {#if modificationStatus === 'inprocess'}
+  {#if genericModificationStatus === 'inprocess'}
     <Icon class="mod-indicator" size='0.9em' data={faSync} spin={true}/>
   {/if}
+
+  {#if modificationState === 'created'}
+    <Icon size='0.9em' data={faExclamation} on:mouseover={showHelpMessage}
+      on:mouseout={hideHelpMessage}/>
+  {/if}
 </div>
+
+{#if modificationState === 'created' && displayHelpMessage}
+  <div class='row-help-text'>
+    This row is not in its correct position since its been newly added.
+  </div>
+{/if}
