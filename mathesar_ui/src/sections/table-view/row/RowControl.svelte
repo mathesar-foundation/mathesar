@@ -5,7 +5,7 @@
   import { Checkbox, Icon } from '@mathesar-components';
   import {
     ROW_CONTROL_COLUMN_WIDTH,
-    getModificationStatus,
+    getGenericModificationStatus,
   } from '@mathesar/stores/table-data';
   import type {
     Meta,
@@ -23,7 +23,9 @@
 
   $: primaryKeyValue = row?.[primaryKeyColumn] ?? null;
   $: isRowSelected = ($selectedRecords as Set<unknown>).has(primaryKeyValue);
-  $: modificationStatus = getModificationStatus($recordModificationState, primaryKeyValue);
+  $: modificationStatus = getGenericModificationStatus(
+    $recordModificationState, row, primaryKeyColumn,
+  );
 
   function selectionChanged(event: CustomEvent<{ checked: boolean }>) {
     const { checked } = event.detail;

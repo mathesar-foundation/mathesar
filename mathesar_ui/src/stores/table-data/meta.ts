@@ -39,7 +39,7 @@ const inProgressSet: Set<ModificationType> = new Set(['create', 'update', 'delet
 const completeSet: Set<ModificationType> = new Set(['created', 'updated']);
 const errorSet: Set<ModificationType> = new Set(['creationFailed', 'updateFailed', 'deleteFailed']);
 
-export function getModificationStatus(
+export function getGenericModificationStatusByPK(
   modificationStatus: Map<unknown, ModificationType>,
   primaryKeyValue: unknown,
 ): ModificationStatus {

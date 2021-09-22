@@ -277,15 +277,26 @@ export class Records {
       this._meta.setMultipleRecordModificationStates([...pkSet], 'delete');
 
       try {
+        const successSet: Set<unknown> = new Set();
         const failed: unknown[] = [];
         // TODO: Convert this to single request
         const promises = [...pkSet].map((pk) => deleteAPI<unknown>(`${this._url}${pk as string}/`)
+          .then(() => {
+            successSet.add(pk);
+            return successSet;
+          })
           .catch(() => {
             failed.push(pk);
             return failed;
           }));
         await Promise.all(promises);
         await this.fetch(true);
+        this.newRecords.update((existing) => {
+          const retained = existing.filter(
+            (entry) => !successSet.has(entry[this._columns.get()?.primaryKey]),
+          );
+          return retained;
+        });
         this._meta.setMultipleRecordModificationStates(failed, 'deleteFailed');
       } catch (err) {
         this._meta.setMultipleRecordModificationStates([...pkSet], 'deleteFailed');

@@ -1,6 +1,9 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import { DEFAULT_ROW_RIGHT_PADDING } from '@mathesar/stores/table-data';
+  import {
+    DEFAULT_ROW_RIGHT_PADDING,
+    getModificationState,
+  } from '@mathesar/stores/table-data';
   import type {
     ColumnPosition,
     ColumnPositionMap,
@@ -8,7 +11,6 @@
     TabularData,
     TableRecord,
     TableColumn,
-    ModificationType,
   } from '@mathesar/stores/table-data/types';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
@@ -50,15 +52,8 @@
     return _columnPositionMap.get(_name);
   }
 
-  function getModificationState(
-    _row: TableRecord,
-    _recordModState: Map<unknown, ModificationType>,
-  ): ModificationType {
-    return _recordModState.get(_row[$columns.primaryKey]);
-  }
-
   $: isSelected = ($selectedRecords as Set<unknown>).has(row[$columns.primaryKey]);
-  $: modificationState = getModificationState(row, $recordModificationState);
+  $: modificationState = getModificationState($recordModificationState, row, $columns.primaryKey);
 </script>
 
 <div class="row {row.__state} {modificationState || ''}" class:selected={isSelected}
