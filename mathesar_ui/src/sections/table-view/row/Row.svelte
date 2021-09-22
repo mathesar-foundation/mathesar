@@ -65,7 +65,7 @@
       class:is-group-header={row.__isGroupHeader} class:is-add-placeholder={row.__isAddPlaceholder}
       style={styleString} data-identifier={row.__identifier}>
   <RowControl primaryKeyColumn={$columns.primaryKey}
-              {row} {meta}/>
+              {row} {meta} {records}/>
   {#if row.__isAddPlaceholder}
     <div>
       

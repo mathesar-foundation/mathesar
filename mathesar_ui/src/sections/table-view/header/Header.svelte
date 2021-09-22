@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import {
-    GROUP_MARGIN_LEFT,
     ROW_CONTROL_COLUMN_WIDTH,
     DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/table-data';
@@ -17,12 +16,9 @@
 
   const tabularData = getContext<TabularDataStore>('tabularData');
   $: ({
-    columns, records, meta, display,
+    columns, meta, display,
   } = $tabularData as TabularData);
   $: ({ horizontalScrollOffset, rowWidth, columnPositionMap } = display as TabularData['display']);
-  $: ({ groupInfo } = records as TabularData['records']);
-
-  $: paddingLeft = $groupInfo?.counts ? GROUP_MARGIN_LEFT : 0;
 
   let headerRef: HTMLElement;
 
@@ -64,16 +60,14 @@
 </script>
 
 <div bind:this={headerRef} class="header">
-  <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH + paddingLeft}px;">
+  <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;">
   </div>
 
   {#each $columns.data as column (column.name)}
-    <HeaderCell {column} {meta} {paddingLeft}
+    <HeaderCell {column} {meta}
       columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
   {/each}
 
-  <div class="cell" style="
-    width:{DEFAULT_ROW_RIGHT_PADDING + paddingLeft}px;
-    left:{$rowWidth + paddingLeft}px">
+  <div class="cell" style="width:{DEFAULT_ROW_RIGHT_PADDING}px;left:{$rowWidth}px">
   </div>
 </div>

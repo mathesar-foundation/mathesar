@@ -61,7 +61,7 @@
         bind:horizontalScrollOffset={$horizontalScrollOffset}
         {height}
         width={$rowWidth || null}
-        itemCount={$savedRecords.length + $newRecords.length}
+        itemCount={$savedRecords.length + $newRecords.length + 1}
         paddingBottom={20}
         itemSize={getItemSize}
         itemKey={getItemKey}

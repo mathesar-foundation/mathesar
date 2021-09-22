@@ -20,7 +20,6 @@ export interface ActiveCell {
 }
 
 export const ROW_CONTROL_COLUMN_WIDTH = 70;
-export const GROUP_MARGIN_LEFT = 30;
 export const DEFAULT_ROW_RIGHT_PADDING = 100;
 export const DEFAULT_COLUMN_WIDTH = 160;
 

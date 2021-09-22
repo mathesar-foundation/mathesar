@@ -25,7 +25,6 @@ export interface TableRecord extends TableRecordInResponse {
   __isAddPlaceholder?: boolean,
   __isNew?: boolean,
   __isGroupHeader?: boolean,
-  __rowNumber?: number,
   __rowIndex?: number,
   __state?: string, // TODO: Remove __state in favour of _recordsInProcess
   __groupValues?: Record<string, unknown>,
@@ -117,7 +116,6 @@ function preprocessRecords(
       combinedRecords.push({
         ...record,
         __identifier: `__${offset}_index_${existingRecordIndex}`,
-        __rowNumber: offset + index + 1,
         __rowIndex: index,
         __state: 'done',
       });

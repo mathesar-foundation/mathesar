@@ -5,20 +5,21 @@
   import { Checkbox, Icon } from '@mathesar-components';
   import {
     ROW_CONTROL_COLUMN_WIDTH,
-    GROUP_MARGIN_LEFT,
     getModificationStatus,
   } from '@mathesar/stores/table-data';
   import type {
     Meta,
+    Records,
     TableRecord,
   } from '@mathesar/stores/table-data/types';
 
-  export let isGrouped = false;
   export let primaryKeyColumn: string = null;
   export let row: TableRecord;
   export let meta: Meta;
+  export let records: Records;
 
-  $: ({ selectedRecords, recordModificationState } = meta);
+  $: ({ selectedRecords, recordModificationState, offset } = meta);
+  $: ({ newRecords } = records);
 
   $: primaryKeyValue = row?.[primaryKeyColumn] ?? null;
   $: isRowSelected = ($selectedRecords as Set<unknown>).has(primaryKeyValue);
@@ -34,12 +35,15 @@
   }
 </script>
 
-<div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;
-            left:{isGrouped ? GROUP_MARGIN_LEFT : 0}px">
-  
+<div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;left:0px">
   {#if !row.__isGroupHeader}
-    {#if row.__rowNumber}
-      <span class="number">{row.__rowNumber}</span>
+    {#if typeof row.__rowIndex === 'number'}
+      <span class="number">
+        {row.__rowIndex + $newRecords.length + $offset + 1}
+        {#if row.__isNew}
+          *
+        {/if}
+      </span>
     {/if}
 
     {#if primaryKeyValue}
