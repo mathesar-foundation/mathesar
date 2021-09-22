@@ -17,7 +17,7 @@
   $: ({
     selectedRecords, pageSize, page, offset,
   } = meta);
-  $: ({ totalCount, state: recordState } = records);
+  $: ({ totalCount, state: recordState, newRecords } = records);
   $: selectedPageSize = { id: $pageSize as number, label: $pageSize as number };
 
   const pageSizeOpts = [
@@ -44,8 +44,12 @@
       {$selectedRecords.size} record{$selectedRecords.size > 1 ? 's' : ''} selected of {$totalCount}
 
     {:else if pageCount > 0 && $totalCount}
-      Showing {$offset + 1} - {max} of {$totalCount} records
-    
+      Showing {$offset + 1} to {max}
+      {#if $newRecords.length > 0}
+        (+ {$newRecords.length} new record{$newRecords.length > 1 ? 's' : ''})
+      {/if}
+      of {$totalCount} records
+
     {:else if $recordState !== States.Loading}
       No records found
     {/if}
