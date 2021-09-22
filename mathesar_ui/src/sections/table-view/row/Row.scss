@@ -56,6 +56,10 @@ section.table-section .tab-container .table-data .body {
       }
     }
 
+    &.is-add-placeholder {
+      cursor: pointer;
+    }
+
     .cell.row-control {
       .mod-indicator {
         margin-left: 5px;

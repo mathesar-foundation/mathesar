@@ -10,6 +10,7 @@
   export let row: TableRecord;
   export let groupCounts: GroupCount;
   export let groupColumns: string[];
+  export let rowWidth: number;
 
   function getCount(_groupCounts: GroupCount, _row: TableRecord): number {
     if (groupColumns) {
@@ -33,7 +34,10 @@
   $: count = getCount(groupCounts, row);
 </script>
 
-<div class="cell groupheader" style="left:{ROW_CONTROL_COLUMN_WIDTH}px;width:100%">
+<div class="cell row-control group-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;left:0px">
+</div>
+
+<div class="cell groupheader" style="left:{ROW_CONTROL_COLUMN_WIDTH}px;width:{rowWidth - ROW_CONTROL_COLUMN_WIDTH}px">
   {#each groupColumns as column (column)}
     <span class="tag">{column}: {row.__groupValues[column]}</span>
   {/each}

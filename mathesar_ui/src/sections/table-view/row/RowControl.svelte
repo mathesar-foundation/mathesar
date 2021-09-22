@@ -38,22 +38,20 @@
 </script>
 
 <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;left:0px">
-  {#if !row.__isGroupHeader}
-    {#if typeof row.__rowIndex === 'number'}
-      <span class="number">
-        {row.__rowIndex + $newRecords.length + $offset + 1}
-        {#if row.__isNew}
-          *
-        {/if}
-      </span>
-    {/if}
+  {#if typeof row.__rowIndex === 'number'}
+    <span class="number">
+      {row.__rowIndex + $newRecords.length + $offset + 1}
+      {#if row.__isNew}
+        *
+      {/if}
+    </span>
+  {/if}
 
-    {#if primaryKeyValue}
-      <Checkbox checked={isRowSelected} on:change={selectionChanged}/>
-    {/if}
+  {#if primaryKeyValue}
+    <Checkbox checked={isRowSelected} on:change={selectionChanged}/>
+  {/if}
 
-    {#if modificationStatus === 'inprocess'}
-      <Icon class="mod-indicator" size='0.9em' data={faSync} spin={true}/>
-    {/if}
+  {#if modificationStatus === 'inprocess'}
+    <Icon class="mod-indicator" size='0.9em' data={faSync} spin={true}/>
   {/if}
 </div>

@@ -329,6 +329,7 @@ export class Records {
           });
           return retained;
         });
+        this._meta.clearMultipleRecordModificationStates([...successSet]);
         this._meta.setMultipleRecordModificationStates(failed, 'deleteFailed');
       } catch (err) {
         this._meta.setMultipleRecordModificationStates([...pkSet], 'deleteFailed');
@@ -396,6 +397,7 @@ export class Records {
           }
           return entry;
         }));
+        this.totalCount.update((count) => count + 1);
       } catch (err) {
         this._meta.setRecordModificationState(rowKey, 'creationFailed');
       } finally {
