@@ -1,3 +1,5 @@
+from alembic.migration import MigrationContext
+from alembic.operations import Operations
 import pytest
 from sqlalchemy import String, Integer, Column, Table, MetaData, Sequence, DateTime, func
 
@@ -21,6 +23,63 @@ def test_get_column_index_from_name(engine_with_schema):
     table_oid = get_oid_from_table(table_name, schema, engine)
     assert get_column_index_from_name(table_oid, zero_name, engine) == 0
     assert get_column_index_from_name(table_oid, one_name, engine) == 1
+
+
+def test_get_column_index_from_name_after_delete(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "table_with_columns"
+    zero_name = "colzero"
+    one_name = "colone"
+    two_name = "coltwo"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(zero_name, Integer),
+        Column(one_name, String),
+        Column(two_name, String),
+    )
+    table.create()
+    with engine.begin() as conn:
+        op = Operations(MigrationContext.configure(conn))
+        op.drop_column(table.name, one_name, schema=schema)
+
+    table_oid = get_oid_from_table(table_name, schema, engine)
+    assert get_column_index_from_name(table_oid, zero_name, engine) == 0
+    assert get_column_index_from_name(table_oid, two_name, engine) == 1
+
+
+def test_get_column_index_from_name_after_delete_two_tables(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "table_with_columns"
+    zero_name = "colzero"
+    one_name = "colone"
+    two_name = "coltwo"
+
+    for suffix in ["1", "2"]:
+        table = Table(
+            table_name + suffix,
+            MetaData(bind=engine, schema=schema),
+            Column(zero_name + suffix, Integer),
+            Column(one_name + suffix, String),
+            Column(two_name + suffix, String),
+        )
+        table.create()
+
+    with engine.begin() as conn:
+        op = Operations(MigrationContext.configure(conn))
+        op.drop_column(table_name + "1", one_name + "1", schema=schema)
+
+    table_oid1 = get_oid_from_table(table_name + "1", schema, engine)
+    table_oid2 = get_oid_from_table(table_name + "2", schema, engine)
+    assert all(
+        [
+            get_column_index_from_name(table_oid1, zero_name + "1", engine) == 0,
+            get_column_index_from_name(table_oid1, two_name + "1", engine) == 1,
+            get_column_index_from_name(table_oid2, zero_name + "2", engine) == 0,
+            get_column_index_from_name(table_oid2, one_name + "2", engine) == 1,
+            get_column_index_from_name(table_oid2, two_name + "2", engine) == 2,
+        ]
+    )
 
 
 @pytest.mark.parametrize("filler", [True, False])
