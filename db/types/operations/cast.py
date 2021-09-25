@@ -220,7 +220,6 @@ def get_defined_source_target_cast_tuples(engine):
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
-        DATE: _get_date_type_body_map(),
         TIME_WITHOUT_TIME_ZONE: _get_time_type_body_map(TIME_WITHOUT_TIME_ZONE),
         TIME_WITH_TIME_ZONE: _get_time_type_body_map(TIME_WITH_TIME_ZONE),
         VARCHAR: _get_varchar_type_body_map(engine),
