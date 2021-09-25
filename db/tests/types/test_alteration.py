@@ -36,7 +36,8 @@ NUMERIC = PostgresType.NUMERIC.value.upper()
 REAL = PostgresType.REAL.value.upper()
 SMALLINT = PostgresType.SMALLINT.value.upper()
 DATE = PostgresType.DATE.value.upper()
-TIME = PostgresType.TIME.value.upper()
+TIME_WITHOUT_TIME_ZONE = PostgresType.TIME_WITHOUT_TIME_ZONE.value.upper()
+TIME_WITH_TIME_ZONE = PostgresType.TIME_WITH_TIME_ZONE.value.upper()
 VARCHAR = "VARCHAR"
 
 
@@ -282,12 +283,42 @@ MASTER_DB_TYPE_MAP_SPEC = {
             VARCHAR: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
         },
     },
-    TIME: {
-        ISCHEMA_NAME: PostgresType.TIME.value,
-        REFLECTED_NAME: TIME,
+    TIME_WITHOUT_TIME_ZONE: {
+        ISCHEMA_NAME: PostgresType.TIME_WITHOUT_TIME_ZONE.value,
+        REFLECTED_NAME: TIME_WITHOUT_TIME_ZONE,
         TARGET_DICT: {
-            TIME: {VALID: [(time(12, 30, 45), time(12, 30, 45))]},
+            TIME_WITHOUT_TIME_ZONE: {VALID: [(time(12, 30, 45), time(12, 30, 45))]},
+            TIME_WITH_TIME_ZONE: {
+                VALID: [
+                    (time(12, 30, 45),
+                     time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0))),
+                ]
+            },
             VARCHAR: {VALID: [(time(12, 30, 45), "12:30:45")]},
+        },
+    },
+    TIME_WITH_TIME_ZONE: {
+        ISCHEMA_NAME: PostgresType.TIME_WITH_TIME_ZONE.value,
+        REFLECTED_NAME: TIME_WITH_TIME_ZONE,
+        TARGET_DICT: {
+            TIME_WITH_TIME_ZONE: {
+                VALID: [
+                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=1)),
+                     time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=1))),
+                ]
+            },
+            TIME_WITHOUT_TIME_ZONE: {
+                VALID: [
+                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=1)),
+                     time(12, 30, 45))
+                ]
+            },
+            VARCHAR: {
+                VALID: [
+                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=6)),
+                     "12:30:45+360")
+                ]
+            },
         },
     },
     VARCHAR: {
@@ -362,10 +393,19 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     "1234",
                 ]
             },
-            TIME: {
+            TIME_WITHOUT_TIME_ZONE: {
                 VALID: [
                     ("04:05:06", time(4, 5, 6)),
                     ("04:05", time(4, 5)),
+                ],
+                INVALID: [
+                    "not a time",
+                ]
+            },
+            TIME_WITH_TIME_ZONE: {
+                VALID: [
+                    ("04:05:06", time(4, 5, 6, tzinfo=FixedOffsetTimezone(offset=0))),
+                    ("04:05+01", time(4, 5, tzinfo=FixedOffsetTimezone(offset=1))),
                 ],
                 INVALID: [
                     "not a time",
@@ -423,14 +463,11 @@ type_test_list = [
     (val[ISCHEMA_NAME], "decimal", {"precision": 5, "scale": 3}, "NUMERIC(5, 3)")
     for val in MASTER_DB_TYPE_MAP_SPEC.values() if DECIMAL in val[TARGET_DICT]
 ] + [
-    (val[ISCHEMA_NAME], "time", {"precision": 5}, "TIME(5)")
-    for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIME in val[TARGET_DICT]
+    (val[ISCHEMA_NAME], "time without time zone", {"precision": 5}, "TIME(5) WITHOUT TIME ZONE")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIME_WITHOUT_TIME_ZONE in val[TARGET_DICT]
 ] + [
-    (val[ISCHEMA_NAME], "time", {"timezone": True}, "TIME WITH TIME ZONE")
-    for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIME in val[TARGET_DICT]
-] + [
-    (val[ISCHEMA_NAME], "time", {"precision": 5, "timezone": True}, "TIME(5) WITH TIME ZONE")
-    for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIME in val[TARGET_DICT]
+    (val[ISCHEMA_NAME], "time with time zone", {"precision": 5}, "TIME(5) WITH TIME ZONE")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIME_WITH_TIME_ZONE in val[TARGET_DICT]
 ]
 
 
@@ -486,11 +523,11 @@ type_test_data_args_list = [
     (Numeric, "numeric", {"precision": 5, "scale": 2}, 1.235, Decimal("1.24")),
     (String, "numeric", {"precision": 5, "scale": 2}, "500.134", Decimal("500.13")),
 
-    (datetime.TIME, "time", {"precision": 0}, time(0, 0, 0, 9), time(0, 0, 0)),
-    (datetime.TIME, "time", {"timezone": True}, time(0, 0, 0),
-     time(0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0))),
-    (datetime.TIME(timezone=True), "time", {"timezone": False},
-     time(0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0)), time(0, 0, 0))
+    (datetime.TIME_WITHOUT_TIME_ZONE, "time without time zone", {"precision": 0},
+     time(0, 0, 0, 9), time(0, 0, 0)),
+    (datetime.TIME_WITH_TIME_ZONE, "time with time zone", {"precision": 0},
+     time(0, 0, 0, 9, tzinfo=FixedOffsetTimezone(offset=0)),
+     time(0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0)))
 ]
 
 

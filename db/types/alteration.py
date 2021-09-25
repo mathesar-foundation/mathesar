@@ -4,7 +4,7 @@ from sqlalchemy.sql.functions import Function
 
 from db import columns
 from db.tables import utils as table_utils
-from db.types import base, email
+from db.types import base, email, datetime
 from db.utils import execute_statement
 
 
@@ -23,7 +23,7 @@ SMALLINT = base.PostgresType.SMALLINT.value
 FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
 TEXT = base.PostgresType.TEXT.value
 DATE = base.PostgresType.DATE.value
-TIME = base.PostgresType.TIME.value
+TIME_WITHOUT_TIME_ZONE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
 TIME_WITH_TIME_ZONE = base.PostgresType.TIME_WITH_TIME_ZONE.value
 STRING = base.STRING
 VARCHAR = base.VARCHAR
@@ -58,7 +58,8 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         STRING: dialect_types.get(NAME),
         TEXT: dialect_types.get(TEXT),
         DATE: dialect_types.get(DATE),
-        TIME: datetime.TIME,
+        TIME_WITHOUT_TIME_ZONE: datetime.TIME_WITHOUT_TIME_ZONE,
+        TIME_WITH_TIME_ZONE: datetime.TIME_WITH_TIME_ZONE,
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),
@@ -127,7 +128,10 @@ def alter_column_type(
     prepared_table_name = _preparer.format_table(table)
     prepared_column_name = _preparer.format_column(column)
     prepared_type_name = target_type(**type_options).compile(dialect=engine.dialect)
+    print(target_type)
+    print(prepared_type_name)
     cast_function_name = get_cast_function_name(prepared_type_name)
+    print(cast_function_name)
     alter_stmt = f"""
     ALTER TABLE {prepared_table_name}
       ALTER COLUMN {prepared_column_name}
@@ -211,8 +215,11 @@ def create_decimal_number_casts(engine):
 
 
 def create_datetime_casts(engine):
-    type_body_map = _get_time_type_body_map()
-    create_cast_functions(TIME, type_body_map, engine)
+    time_types = [TIME_WITHOUT_TIME_ZONE, TIME_WITH_TIME_ZONE]
+    for time_type in time_types:
+        type_body_map = _get_time_type_body_map(time_type)
+        create_cast_functions(time_type, type_body_map, engine)
+
     type_body_map = _get_date_type_body_map()
     create_cast_functions(DATE, type_body_map, engine)
 
@@ -252,7 +259,8 @@ def get_defined_source_target_cast_tuples(engine):
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
         DATE: _get_date_type_body_map(),
-        TIME: _get_time_type_body_map(),
+        TIME_WITHOUT_TIME_ZONE: _get_time_type_body_map(TIME_WITHOUT_TIME_ZONE),
+        TIME_WITH_TIME_ZONE: _get_time_type_body_map(TIME_WITH_TIME_ZONE),
         VARCHAR: _get_varchar_type_body_map(engine),
     }
     return {
@@ -297,9 +305,13 @@ def assemble_function_creation_sql(argument_type, target_type, function_body):
 
 
 def get_cast_function_name(target_type):
-    target_type = target_type.split(' ')[0]  # Catch TIME WITH TIME ZONE edge case
     unqualified_type_name = target_type.split('.')[-1].lower()
-    bare_type_name = unqualified_type_name.split('(')[0]
+    if '(' in unqualified_type_name:
+        bare_type_name = unqualified_type_name[:unqualified_type_name.find('(')]
+        if unqualified_type_name[-1] != ')':
+            bare_type_name += unqualified_type_name[unqualified_type_name.find(')') + 1:]
+    else:
+        bare_type_name = unqualified_type_name
     function_type_name = '_'.join(bare_type_name.split())
     bare_function_name = f"cast_to_{function_type_name}"
     return f"{base.get_qualified_name(bare_function_name)}"
@@ -485,12 +497,12 @@ def _get_date_type_body_map():
     return _get_default_type_body_map(default_behavior_source_types, DATE)
 
 
-def _get_time_type_body_map():
+def _get_time_type_body_map(target_type):
     default_behavior_source_types = [
-        VARCHAR, TIME, TIME_WITH_TIME_ZONE
+        VARCHAR, TIME_WITHOUT_TIME_ZONE, TIME_WITH_TIME_ZONE
     ]
     return _get_default_type_body_map(
-        default_behavior_source_types, TIME,
+        default_behavior_source_types, target_type,
     )
 
 

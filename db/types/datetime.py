@@ -3,11 +3,18 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.dialects.postgresql.base import TIME as SA_TIME
 
 
-class TIME(SA_TIME):
-    impl = sa_types.TIME
+class TIME_WITHOUT_TIME_ZONE(sa_types.TypeDecorator):
+    impl = SA_TIME
 
-    def __init__(self, *args, timezone=False, precision=None, **kwargs):
-        super().__init__(*args, timezone=timezone, precision=precision, **kwargs)
+    def __init__(self, *args, precision=None, **kwargs):
+        super().__init__(*args, timezone=False, precision=precision, **kwargs)
+
+
+class TIME_WITH_TIME_ZONE(sa_types.TypeDecorator):
+    impl = SA_TIME
+
+    def __init__(self, *args, precision=None, **kwargs):
+        super().__init__(*args, timezone=True, precision=precision, **kwargs)
 
 
 @compiles(SA_TIME, "postgresql")
@@ -18,4 +25,6 @@ def compile_time_precision(element, compiler, **kwargs):
         stmt += f"({element.precision})"
     if element.timezone is True:
         stmt += " WITH TIME ZONE"
+    else:
+        stmt += " WITHOUT TIME ZONE"
     return stmt
