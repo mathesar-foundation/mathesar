@@ -2,11 +2,10 @@ import json
 from unittest.mock import patch
 
 import pytest
-from db import records
-from db.records import BadGroupFormat, GroupFieldNotFound
-from sqlalchemy_filters.exceptions import (BadFilterFormat, BadSortFormat,
-                                           FilterFieldNotFound,
-                                           SortFieldNotFound)
+from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
+
+from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
+from mathesar import models
 
 
 def test_record_list(create_table, client):
@@ -72,7 +71,7 @@ def test_record_list_filter(create_table, client):
     json_filter_list = json.dumps(filter_list)
 
     with patch.object(
-        records, "get_records", side_effect=records.get_records
+        models, "get_records", side_effect=models.get_records
     ) as mock_get:
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
@@ -95,7 +94,7 @@ def test_record_list_filter_duplicates(create_table, client):
     ]
     json_filter_list = json.dumps(filter_list)
 
-    with patch.object(records, "get_records") as mock_get:
+    with patch.object(models, "get_records") as mock_get:
         client.get(f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}')
     assert mock_get.call_args is not None
     assert mock_get.call_args[1]['filters'] == filter_list
@@ -123,7 +122,7 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
             json_filter_list = json.dumps(filter_list)
 
             with patch.object(
-                records, "get_records", side_effect=records.get_records
+                models, "get_records", side_effect=models.get_records
             ) as mock_get:
                 response = client.get(
                     f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
@@ -174,7 +173,7 @@ def test_record_list_sort(create_table, client):
     json_order_by = json.dumps(order_by)
 
     with patch.object(
-        records, "get_records", side_effect=records.get_records
+        models, "get_records", side_effect=models.get_records
     ) as mock_get:
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?order_by={json_order_by}'
@@ -199,7 +198,7 @@ def _test_record_list_group(table, client, group_count_by, expected_groups):
     query_str = f'group_count_by={json_group_count_by}&order_by={json_order_by}'
 
     with patch.object(
-        records, "get_group_counts", side_effect=records.get_group_counts
+        models, "get_group_counts", side_effect=models.get_group_counts
     ) as mock_get:
         response = client.get(f'/api/v0/tables/{table.id}/records/?{query_str}')
         response_data = response.json()
@@ -399,7 +398,7 @@ def test_record_list_filter_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
     filter_list = json.dumps([{"field": "Center", "op": "is_null"}])
-    with patch.object(records, "get_records", side_effect=exception):
+    with patch.object(models, "get_records", side_effect=exception):
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?filters={filter_list}'
         )
@@ -414,7 +413,7 @@ def test_record_list_sort_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
     order_by = json.dumps([{"field": "Center", "direction": "desc"}])
-    with patch.object(records, "get_records", side_effect=exception):
+    with patch.object(models, "get_records", side_effect=exception):
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?order_by={order_by}'
         )
@@ -429,7 +428,7 @@ def test_record_list_group_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
     group_by = json.dumps(["Center"])
-    with patch.object(records, "get_group_counts", side_effect=exception):
+    with patch.object(models, "get_group_counts", side_effect=exception):
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?group_count_by={group_by}'
         )

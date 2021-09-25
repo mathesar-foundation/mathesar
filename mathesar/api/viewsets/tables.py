@@ -7,7 +7,7 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from sqlalchemy.exc import ProgrammingError, DataError, IntegrityError
 
-from db.types.alteration import UnsupportedTypeException
+from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer

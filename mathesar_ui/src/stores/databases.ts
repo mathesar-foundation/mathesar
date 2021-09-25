@@ -1,11 +1,9 @@
-import {
-  writable,
-  Writable,
-} from 'svelte/store';
+import { writable } from 'svelte/store';
 
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { getAPI, States } from '@mathesar/utils/api';
 
+import type { Writable } from 'svelte/store';
 import type { Database } from '@mathesar/App.d';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';

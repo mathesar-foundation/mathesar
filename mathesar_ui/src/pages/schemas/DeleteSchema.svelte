@@ -15,7 +15,7 @@
   export let schema: SchemaEntry;
 
   let state: States = States.Idle;
-  let error;
+  let error: string;
 
   async function removeSchema() {
     if (schema) {

@@ -45,7 +45,7 @@
     }
   }
 
-  function dispatchOnOpen(_isOpen) {
+  function dispatchOnOpen(_isOpen: boolean) {
     if (_isOpen) {
       dispatch('open');
     }

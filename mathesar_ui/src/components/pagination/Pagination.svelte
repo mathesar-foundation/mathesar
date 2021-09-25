@@ -23,13 +23,11 @@
   $: pageInfo = calculatePages(page, pageCount);
 
   function setPage(e: Event, _page: number) {
-    if (_page > 0 && _page <= pageCount) {
-      const prevPage = page;
+    if (_page > 0 && _page <= pageCount && page !== _page) {
       page = _page;
       dispatch('change', {
         page,
         originalEvent: e,
-        prevPage,
       });
     }
   }
