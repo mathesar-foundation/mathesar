@@ -12,7 +12,6 @@ services:
     volumes:
       - ./.volumes:/var/lib/postgresql/data
   service:
-    privileged: true
     build: .
     environment:
       - MODE=${MODE-PRODUCTION}
