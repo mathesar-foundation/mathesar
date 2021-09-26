@@ -12,11 +12,13 @@ services:
     volumes:
       - ./.volumes:/var/lib/postgresql/data
   service:
+    privileged: true
     build: .
     environment:
       - MODE=${MODE-PRODUCTION}
     command: dockerize -wait tcp://db:5432 -timeout 30s ./run.sh
     volumes:
+      - ./tweaked-site-packages/sqlalchemy/engine/reflection.py:/usr/local/lib/python3.9/site-packages/sqlalchemy/engine/reflection.py
       - .:/code/
       - ui_node_modules:/code/mathesar_ui/node_modules/
     ports:
