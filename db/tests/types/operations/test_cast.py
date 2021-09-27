@@ -134,7 +134,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [("1", 1)], INVALID: ["b"]},
             EMAIL: {VALID: [], INVALID: ["a"]},
             FLOAT: {VALID: [("1", 1.0)], INVALID: ["b"]},
-            INTEGER: {VALID: [("4", 4)], INVALID: ["j"] },
+            INTEGER: {VALID: [("4", 4)], INVALID: ["j"]},
             INTERVAL: {VALID: []},
             MONEY: {
                 VALID: [("1", {money.VALUE: 1, money.CURRENCY: "USD"})],
@@ -142,7 +142,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             NUMERIC: {VALID: [("1", Decimal("1"))], INVALID: ["a"]},
             REAL: {VALID: [("1", 1.0)], INVALID: ["b"]},
-            SMALLINT: {VALID: [("4", 4)], INVALID: ["j"] },
+            SMALLINT: {VALID: [("4", 4)], INVALID: ["j"]},
             DATE: {VALID: [], INVALID: ["n"]},
             TEXT: {VALID: [("a", "a")]},
             VARCHAR: {VALID: [("a", "a")]},
@@ -610,6 +610,9 @@ type_test_list = [
 ] + [
     (val[ISCHEMA_NAME], "decimal", {"precision": 5, "scale": 3}, "NUMERIC(5, 3)")
     for val in MASTER_DB_TYPE_MAP_SPEC.values() if DECIMAL in val[TARGET_DICT]
+] + [
+    (val[ISCHEMA_NAME], "char", {"length": 5}, "CHAR(5)")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if CHAR in val[TARGET_DICT]
 ]
 
 
@@ -654,6 +657,7 @@ def test_alter_column_type_alters_column_type(
         autoload_with=engine
     ).columns[COLUMN_NAME]
     actual_type = actual_column.type.compile(dialect=engine.dialect)
+    expect_type = expect_type + '(1)' if expect_type == CHAR else expect_type
     assert actual_type == expect_type
 
 

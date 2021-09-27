@@ -50,6 +50,7 @@ def _check_duplicate_unique_constraint(
 type_set = {
     'BIGINT',
     'BOOLEAN',
+    'CHAR',
     'DECIMAL',
     'DOUBLE PRECISION',
     'FLOAT',
@@ -86,7 +87,7 @@ def test_create_column(engine_email_type, target_type):
     input_output_type_map = {type_: type_ for type_ in type_set}
     # update the map with types that reflect differently than they're
     # set when creating a column
-    input_output_type_map.update({'FLOAT': 'DOUBLE PRECISION', 'DECIMAL': 'NUMERIC'})
+    input_output_type_map.update({'FLOAT': 'DOUBLE PRECISION', 'DECIMAL': 'NUMERIC', 'CHAR': 'CHAR(1)'})
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),

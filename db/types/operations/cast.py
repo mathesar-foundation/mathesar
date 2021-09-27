@@ -358,6 +358,7 @@ def _get_interval_type_body_map():
                            to an interval.
     """
     source_text_types = TEXT_TYPES
+
     def _get_text_interval_type_body_map():
         # We need to check that a string isn't a valid number before
         # casting to intervals (since a number is more likely)
@@ -370,7 +371,6 @@ def _get_interval_type_body_map():
               RETURN $1::{INTERVAL};
         END;
         """
-
 
     type_body_map = {
         INTERVAL: """
