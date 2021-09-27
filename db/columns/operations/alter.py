@@ -64,7 +64,7 @@ def alter_column_type(table, column_name, engine, connection, target_type_str, t
     default = get_column_default(table_oid, column_index, engine, connection)
     if default is not None:
         default_text = column.server_default.arg.text
-        set_column_default(table, column_index, engine, connection, None)
+    set_column_default(table, column_index, engine, connection, None)
 
     prepared_table_name = _preparer.format_table(table)
     prepared_column_name = _preparer.format_column(column)
