@@ -230,10 +230,16 @@ def test_column_create_invalid_default(column_test_table, client):
     assert f'default "{data["default"]}" is invalid for type' in response.json()[0]
 
 
-def test_column_create_retrieve_options(column_test_table, client):
+@pytest.mark.parametrize(
+    "type_,type_options",
+    [
+        ("NUMERIC", {"precision": 5, "scale": 3}),
+        ("VARCHAR", {"length": 5}),
+        ("CHAR", {"length": 5}),
+    ]
+)
+def test_column_create_retrieve_options(column_test_table, client, type_, type_options):
     name = "anewcolumn"
-    type_ = "NUMERIC"
-    type_options = {"precision": 5, "scale": 3}
     cache.clear()
     num_columns = len(column_test_table.sa_columns)
     data = {
@@ -259,6 +265,7 @@ invalid_type_options = [
     {"precision": 5, "scale": 8},
     {"precision": "asd"},
     {"nonoption": 34},
+    {"length": "two"},
 ]
 
 
