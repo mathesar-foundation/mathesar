@@ -2,7 +2,9 @@ from sqlalchemy import select, func, true, and_
 from sqlalchemy_filters import apply_filters, apply_sort
 from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
+from db.columns.base import MathesarColumn
 from db.tables.utils import get_primary_key_column
+from db.types.operations.cast import get_column_cast_expression
 from db.utils import execute_query
 
 
@@ -123,3 +125,22 @@ def get_count(table, engine, filters=[]):
     cols = [func.count().label(col_name)]
     query = get_query(table, None, None, None, filters, cols)
     return execute_query(engine, query)[0][col_name]
+
+
+def get_column_cast_records(engine, table, column_definitions, num_records=20):
+    assert len(column_definitions) == len(table.columns)
+    cast_expression_list = [
+        (
+            get_column_cast_expression(
+                column, col_def["type"],
+                engine,
+                type_options=col_def.get("type_options", {})
+            )
+            .label(col_def["name"])
+        ) if not MathesarColumn.from_column(column).is_default else column
+        for column, col_def in zip(table.columns, column_definitions)
+    ]
+    sel = select(cast_expression_list).limit(num_records)
+    with engine.begin() as conn:
+        result = conn.execute(sel)
+    return result.fetchall()
