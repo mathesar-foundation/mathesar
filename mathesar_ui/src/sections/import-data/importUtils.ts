@@ -374,6 +374,7 @@ export function cancelImport(fileImportStore: FileImport): void {
       label: fileImportData.name,
       isNew: true,
     });
+    void deletePreviewTable(fileImportStore);
   }
 }
 

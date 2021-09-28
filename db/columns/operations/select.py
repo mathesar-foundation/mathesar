@@ -22,6 +22,7 @@ def get_column_index_from_name(table_oid, column_name, engine, connection_to_use
     sel = (
         select(func.count())
         .where(and_(
+            pg_attribute.c.attrelid == table_oid,
             pg_attribute.c.attisdropped.is_(True),
             pg_attribute.c.attnum < result,
         ))
