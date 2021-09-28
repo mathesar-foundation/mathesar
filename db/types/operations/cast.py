@@ -506,7 +506,7 @@ def _get_textual_type_body_map(engine, target_type_str=VARCHAR):
     """
     supported_types = get_supported_alter_column_db_types(engine)
 
-    text_cast_str = f"""
+    text_cast_str = """
         BEGIN
           RETURN $1::TEXT;
         END;

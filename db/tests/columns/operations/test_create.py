@@ -129,6 +129,32 @@ def test_create_column_options(engine_email_type, target_type):
     assert created_col.type_options == {"precision": 5, "scale": 3}
 
 
+@pytest.mark.parametrize("target_type", ["CHAR", "VARCHAR"])
+def test_create_column_length_options(engine_email_type, target_type):
+    engine, schema = engine_email_type
+    table_name = "atableone"
+    initial_column_name = "original_column"
+    new_column_name = "added_column"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(initial_column_name, Integer),
+    )
+    table.create()
+    table_oid = get_oid_from_table(table_name, schema, engine)
+    column_data = {
+        "name": new_column_name,
+        "type": target_type,
+        "type_options": {"length": 5},
+    }
+    created_col = create_column(engine, table_oid, column_data)
+    altered_table = reflect_table_from_oid(table_oid, engine)
+    assert len(altered_table.columns) == 2
+    assert created_col.name == new_column_name
+    assert created_col.plain_type == target_type
+    assert created_col.type_options == {"length": 5}
+
+
 def test_create_column_bad_options(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "atableone"

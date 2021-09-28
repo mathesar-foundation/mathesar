@@ -328,7 +328,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(1, True), (0, False), (1.0, True), (0.0, False)],
                 INVALID: [42, -1]
             },
-            CHAR: {VALID: [(3, "3")]},
+            CHAR: {VALID: [(3, "3")], INVALID: [1234, 1.2]},
             DECIMAL: {VALID: [(1, 1.0)]},
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
@@ -356,7 +356,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(1.0, True), (0.0, False)],
                 INVALID: [42, -1]
             },
-            CHAR: {VALID: [(3, "3")]},
+            CHAR: {VALID: [(3, "3")], INVALID: [234, 5.78]},
             DECIMAL: {VALID: [(1, 1.0)]},
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
@@ -661,6 +661,7 @@ type_test_data_args_list = [
     # test that rounding is as intended
     (Numeric, "numeric", {"precision": 5, "scale": 2}, 1.235, Decimal("1.24")),
     (String, "numeric", {"precision": 5, "scale": 2}, "500.134", Decimal("500.13")),
+    (String, "char", {"length": 5}, "abcde", "abcde"),
 ]
 
 
