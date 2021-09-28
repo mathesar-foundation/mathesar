@@ -83,7 +83,7 @@
     </svelte:fragment>
   </Dropdown>
 
-  <Button appearance="plain" on:click={openDisplayOptions}>
+  <Button size="small" on:click={openDisplayOptions}>
     <Icon data={faFilter} size="0.8em"/>
     <span>
       Filters
