@@ -110,7 +110,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             BIGINT: {VALID: [(True, 1), (False, 0)]},
             BOOLEAN: {VALID: [(True, True), (False, False)]},
-            CHAR: {VALID: [(True, 't'), (False, 'f')]},
+            CHAR: {VALID: []},
             DECIMAL: {VALID: [(True, Decimal('1.0')), (False, Decimal('0'))]},
             DOUBLE: {VALID: [(True, 1.0), (False, 0.0)]},
             FLOAT: {VALID: [(True, 1.0), (False, 0.0)]},
@@ -152,7 +152,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: PostgresType.DATE.value,
         REFLECTED_NAME: DATE,
         TARGET_DICT: {
-            CHAR: {VALID: [(date(1999, 1, 18), "1")]},
+            CHAR: {VALID: []},
             DATE: {VALID: [(date(1999, 1, 18), date(1999, 1, 18))]},
             TEXT: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
             VARCHAR: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
@@ -215,7 +215,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         SUPPORTED_MAP_NAME: MathesarCustomType.EMAIL.value,
         REFLECTED_NAME: EMAIL,
         TARGET_DICT: {
-            CHAR: {VALID: [("bob@example.com", "b")]},
+            CHAR: {VALID: []},
             EMAIL: {VALID: [("alice@example.com", "alice@example.com")]},
             TEXT: {VALID: [("bob@example.com", "bob@example.com")]},
             VARCHAR: {VALID: [("bob@example.com", "bob@example.com")]},
@@ -292,14 +292,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         SUPPORTED_MAP_NAME: MathesarCustomType.MONEY.value,
         REFLECTED_NAME: MONEY,
         TARGET_DICT: {
-            CHAR: {
-                VALID: [
-                    (
-                        {money.VALUE: 1234.12, money.CURRENCY: 'XYZ'},
-                        '('
-                    )
-                ]
-            },
+            CHAR: {VALID: []},
             MONEY: {
                 VALID: [
                     (
