@@ -506,26 +506,13 @@ def _get_textual_type_body_map(engine, target_type_str=VARCHAR):
     """
     supported_types = get_supported_alter_column_db_types(engine)
 
-    cast_loss_exception_str = (
-        f"RAISE EXCEPTION '% cannot be cast to {target_type_str} without loss', $1;"
-    )
-
-    def _get_no_truncating_cast_to_text_type():
-        return f"""
-        DECLARE text_res {target_type_str};
+    text_cast_str = f"""
         BEGIN
-          SELECT $1::{target_type_str} INTO text_res;
-          IF text_res = $1::TEXT THEN
-            RETURN text_res;
-          END IF;
-          {cast_loss_exception_str}
+          RETURN $1::TEXT;
         END;
-        """
+    """
 
-    return {
-        source_type_str: _get_no_truncating_cast_to_text_type()
-        for source_type_str in supported_types
-    }
+    return {type_: text_cast_str for type_ in supported_types}
 
 
 def _get_date_type_body_map():
