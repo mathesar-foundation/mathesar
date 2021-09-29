@@ -27,9 +27,22 @@
   export let ariaLabel:string = null;
   export let ariaControls: string = null;
   export let placement: Placement = 'bottom-start';
+  export let showArrow = true;
 
   let trigger: HTMLElement;
-  $: tgClasses = ['dropdown', 'trigger', triggerClass].join(' ');
+
+  function calculateTriggerClass(_triggerClass: string, _showArrow: boolean): string {
+    const classes = ['dropdown', 'trigger'];
+    if (_triggerClass) {
+      classes.push(_triggerClass);
+    }
+    if (!_showArrow) {
+      classes.push('no-arrow');
+    }
+    return classes.join(' ');
+  }
+
+  $: tgClasses = calculateTriggerClass(triggerClass, showArrow);
 
   function toggle() {
     isOpen = !isOpen;
@@ -55,13 +68,15 @@
 </script>
 
 <Button bind:element={trigger} appearance={triggerAppearance} class={tgClasses} on:click={toggle} 
-aria-controls={ariaControls} aria-haspopup="listbox" aria-label={ariaLabel} on:keydown>
+  aria-controls={ariaControls} aria-haspopup="listbox" aria-label={ariaLabel} on:keydown>
   <span class="label">
     <slot name="trigger"></slot>
   </span>
-  <span class="arrow">
-    <Icon data={faAngleDown}/>
-  </span>
+  {#if showArrow}
+    <span class="arrow">
+      <Icon data={faAngleDown}/>
+    </span>
+  {/if}
 </Button>
 
 {#if isOpen}

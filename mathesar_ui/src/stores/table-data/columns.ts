@@ -1,5 +1,5 @@
 import { writable, get as getStoreValue } from 'svelte/store';
-import { States, getAPI } from '@mathesar/utils/api';
+import { States, getAPI, postAPI } from '@mathesar/utils/api';
 import { TabularType } from '@mathesar/App.d';
 import type {
   Writable,
@@ -56,6 +56,8 @@ export class Columns implements Writable<TableColumnData> {
 
   _fetchCallback: (storeData: TableColumnData) => void;
 
+  _listeners: Map<string, Set<((value?: unknown) => unknown)>>;
+
   constructor(
     type: TabularType,
     parentId: number,
@@ -72,6 +74,7 @@ export class Columns implements Writable<TableColumnData> {
     this._meta = meta;
     this._url = `/${this._type === TabularType.Table ? 'tables' : 'views'}/${this._parentId}/columns/`;
     this._fetchCallback = fetchCallback;
+    this._listeners = new Map();
     void this.fetch();
   }
 
@@ -91,6 +94,26 @@ export class Columns implements Writable<TableColumnData> {
 
   get(): TableColumnData {
     return getStoreValue(this._store);
+  }
+
+  on(eventName: string, callback: (value?: unknown) => unknown): () => void {
+    if (!this._listeners.has(eventName)) {
+      this._listeners.set(eventName, new Set());
+    }
+    this._listeners.get(eventName).add(callback);
+    return () => {
+      this._listeners?.get(eventName)?.delete(callback);
+    };
+  }
+
+  _callListeners(eventName: string, value: unknown): void {
+    this._listeners?.get(eventName)?.forEach((entry) => {
+      try {
+        entry?.(value);
+      } catch (err) {
+        console.error(`Failed to call a listener for ${eventName}`, err);
+      }
+    });
   }
 
   async fetch(): Promise<TableColumnData> {
@@ -128,8 +151,15 @@ export class Columns implements Writable<TableColumnData> {
     return null;
   }
 
+  async add(newColumn: Partial<TableColumn>): Promise<Partial<TableColumn>> {
+    const column = await postAPI<Partial<TableColumn>>(this._url, newColumn);
+    await this.fetch();
+    return column;
+  }
+
   destroy(): void {
     this._promise?.cancel();
     this._promise = null;
+    this._listeners.clear();
   }
 }
