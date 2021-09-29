@@ -412,28 +412,29 @@ export class Records {
 
   async addEmptyRecord(): Promise<void> {
     const offset = getStoreValue(this._meta.offset);
+    const savedRecordData = getStoreValue(this.savedRecords);
+    const savedRecordLength = savedRecordData?.length || 0;
     const existingNewRecords = getStoreValue(this.newRecords);
-    const identifier = generateRowIdentifier('new', offset, -existingNewRecords.length - 1);
+    const identifier = generateRowIdentifier('new', offset, existingNewRecords.length);
     const newRecord: TableRecord = {
       __identifier: identifier,
       __state: States.Done,
       __isNew: true,
-      __rowIndex: -existingNewRecords.length - 1,
+      __rowIndex: existingNewRecords.length + savedRecordLength,
     };
-    this.newRecords.update((existing) => [
-      newRecord,
-    ].concat(existing));
+    this.newRecords.update((existing) => existing.concat(newRecord));
     await this.createOrUpdateRecord(newRecord);
   }
 
   getIterationKey(index: number): string {
-    const newRecordsData = getStoreValue(this.newRecords);
-    if (newRecordsData?.[index]) {
-      return newRecordsData[index].__identifier;
-    }
     const savedRecordData = getStoreValue(this.savedRecords);
-    if (savedRecordData?.[index - newRecordsData.length]) {
-      return savedRecordData[index - newRecordsData.length].__identifier;
+    if (savedRecordData?.[index]) {
+      return savedRecordData[index].__identifier;
+    }
+    const savedLength = savedRecordData?.length || 0;
+    const newRecordsData = getStoreValue(this.newRecords);
+    if (newRecordsData?.[index + savedLength]) {
+      return newRecordsData[index + savedLength].__identifier;
     }
     return `__index_${index}`;
   }

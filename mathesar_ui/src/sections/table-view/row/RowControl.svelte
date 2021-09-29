@@ -63,7 +63,7 @@
   <div class="control">
     {#if typeof row.__rowIndex === 'number'}
       <span class="number">
-        {row.__rowIndex + $newRecords.length + $offset + 1}
+        {row.__rowIndex + $offset + 1}
         {#if row.__isNew}
           *
         {/if}

@@ -13,7 +13,6 @@
     Columns,
     Display,
     Meta,
-    Records,
   } from '@mathesar/stores/table-data/types';
   import HeaderCell from './HeaderCell.svelte';
   import NewColumnCell from './NewColumnCell.svelte';
@@ -22,7 +21,6 @@
   let columns: Columns;
   let display: Display;
   let meta: Meta;
-  let records: Records;
   $: ({
     columns, meta, display,
   } = $tabularData as TabularData);

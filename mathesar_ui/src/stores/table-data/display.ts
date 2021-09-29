@@ -174,8 +174,12 @@ export class Display {
     const newRecords = get(this._records.newRecords);
     const offset = get(this._meta.offset);
     const pageSize = get(this._meta.pageSize);
-    const minRowIndex = -(newRecords.length);
-    const maxRowIndex = Math.min(pageSize, totalCount - offset, savedRecords.length) - 1;
+    const minRowIndex = 0;
+    const maxRowIndex = Math.min(
+      pageSize,
+      totalCount - offset,
+      savedRecords.length,
+    ) + newRecords.length - 1;
     const activeCell = get(this.activeCell);
 
     if (movementKeys.has(key) && activeCell?.type === 'select') {

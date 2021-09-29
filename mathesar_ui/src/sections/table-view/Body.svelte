@@ -56,16 +56,16 @@
         >
         {#each items as it (it?.key || it)}
           {#if it}
-            {#if it.index === 0}
+            {#if $savedRecords[it.index]}
+              <Row style={it.style} bind:row={$savedRecords[it.index]}/>
+            {:else if $newRecords[it.index - $savedRecords.length]}
+              <Row style={it.style} bind:row={$newRecords[it.index - $savedRecords.length]}/>
+            {:else if it.index === $savedRecords.length + $newRecords.length}
               <Row style={it.style} row={{
                 __identifier: '__add_placeholder',
                 __isAddPlaceholder: true,
                 __state: States.Done,
                 }}/>
-            {:else if $newRecords[it.index - 1]}
-              <Row style={it.style} bind:row={$newRecords[it.index - 1]}/>
-            {:else if $savedRecords[it.index - $newRecords.length - 1]}
-              <Row style={it.style} bind:row={$savedRecords[it.index - $newRecords.length - 1]}/>
             {/if}
           {/if}
         {/each}
