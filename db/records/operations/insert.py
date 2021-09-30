@@ -35,7 +35,7 @@ def insert_records_from_csv(table, engine, csv_filename, column_names, header, d
             formatted_columns = sql.SQL(",").join(
                 sql.Identifier(column_name) for column_name in column_names
             )
-
+            encoding = f"sql_{encoding}" if encoding == "ascii" else encoding
             copy_sql = sql.SQL(
                 "COPY {relation} ({formatted_columns}) FROM STDIN CSV {header} {delimiter} {escape} {quote} {encoding}"
             ).format(
