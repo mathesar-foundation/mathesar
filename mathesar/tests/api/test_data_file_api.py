@@ -209,10 +209,9 @@ def test_data_file_create_invalid_file(client):
     assert response_dict[0] == 'Unable to tabulate data'
 
 
-def test_data_file_create_non_unicode_file(client):
-    file = 'mathesar/tests/data/non_unicode.csv'
-    with open(file, 'rb') as f:
-        response = client.post('/api/v0/data_files/', data={'file': f})
+def test_data_file_create_non_unicode_file(client, non_unicode_csv_filename):
+    with open(non_unicode_csv_filename, 'rb') as non_unicode_file:
+        response = client.post('/api/v0/data_files/', data={'file': non_unicode_file})
     assert response.status_code == 201
 
 
