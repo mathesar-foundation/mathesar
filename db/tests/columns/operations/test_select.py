@@ -112,7 +112,8 @@ def test_get_column_default(engine_with_schema, filler, col_type):
 get_column_generated_default_test_list = [
     Column("generated_default_col", Integer, primary_key=True),
     Column("generated_default_col", Integer, Sequence("test_id")),
-    Column("generated_default_col", DateTime, server_default=func.now())
+    Column("generated_default_col", DateTime, server_default=func.now()),
+    Column("generated_default_col", DateTime, server_default=func.current_timestamp())
 ]
 
 

@@ -1,5 +1,6 @@
 import warnings
 
+from pglast import Node, parse_sql
 from sqlalchemy import Table, MetaData, and_, select, text, func
 
 from db.tables.operations.select import reflect_table_from_oid
@@ -37,38 +38,7 @@ def get_column_default(table_oid, column_index, engine, connection_to_use=None):
     column = table.columns[column_index]
     if column.server_default is None:
         return None
-
-    metadata = MetaData()
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_attribute = Table("pg_attribute", metadata, autoload_with=engine)
-        pg_attrdef = Table("pg_attrdef", metadata, autoload_with=engine)
-
-    query = (
-        select(pg_attrdef.c.adbin)
-        .select_from(
-            pg_attrdef
-            .join(
-                pg_attribute,
-                and_(
-                    pg_attribute.c.attnum == pg_attrdef.c.adnum,
-                    pg_attribute.c.attrelid == pg_attrdef.c.adrelid
-                )
-            )
-        )
-        .where(and_(
-            pg_attribute.c.attrelid == table_oid,
-            pg_attribute.c.attname == column.name,
-            pg_attribute.c.attnum >= 1,
-        ))
-    )
-
-    result = execute_statement(engine, query, connection_to_use).first()[0]
-
-    # Here, we get the 'adbin' value for the current column, stored in the attrdef
-    # system table. The prefix of this value tells us whether the default is static
-    # ('{CONSTANT') or generated ('{FUNCEXPR'). We do not return generated defaults.
-    if result.startswith("{FUNCEXPR"):
+    elif _is_default_expr_dynamic(column.server_default):
         return None
 
     default_textual_sql = column.server_default.arg.text
@@ -76,3 +46,13 @@ def get_column_default(table_oid, column_index, engine, connection_to_use=None):
     # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
     # Here, we execute the cast to get the proper python value
     return execute_statement(engine, select(text(default_textual_sql)), connection_to_use).first()[0]
+
+
+def _is_default_expr_dynamic(server_default):
+    prepared_expr = f"""SELECT {server_default.arg.text};"""
+    expr_ast_root = Node(parse_sql(prepared_expr))
+    ast_nodes = {
+        n.node_tag for n in expr_ast_root.traverse() if isinstance(n, Node)
+    }
+    dynamic_node_tags = {"SQLValueFunction", "FuncCall"}
+    return not ast_nodes.isdisjoint(dynamic_node_tags)
