@@ -22,7 +22,7 @@ def insert_record_or_records(table, engine, record_data):
     return None
 
 
-def insert_records_from_csv(table, engine, csv_filename, column_names, header, delimiter=None, escape=None, quote=None):
+def insert_records_from_csv(table, engine, csv_filename, column_names, header, delimiter=None, escape=None, quote=None, encoding=None):
     with open(csv_filename, "rb") as csv_file:
         with engine.begin() as conn:
             cursor = conn.connection.cursor()
@@ -37,7 +37,7 @@ def insert_records_from_csv(table, engine, csv_filename, column_names, header, d
             )
 
             copy_sql = sql.SQL(
-                "COPY {relation} ({formatted_columns}) FROM STDIN CSV {header} {delimiter} {escape} {quote}"
+                "COPY {relation} ({formatted_columns}) FROM STDIN CSV {header} {delimiter} {escape} {quote} {encoding}"
             ).format(
                 relation=relation,
                 formatted_columns=formatted_columns,
@@ -52,6 +52,7 @@ def insert_records_from_csv(table, engine, csv_filename, column_names, header, d
                     if quote
                     else ""
                 ),
+                encoding=sql.SQL(f"ENCODING '{encoding}'" if encoding else ""),
             )
 
             cursor.copy_expert(copy_sql, csv_file)

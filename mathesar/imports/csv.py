@@ -95,7 +95,8 @@ def get_sv_dialect(file):
 
 
 def get_sv_reader(file, header, dialect=None):
-    file = TextIOWrapper(file, encoding="utf-8-sig")
+    encoding = get_file_encoding(file)
+    file = TextIOWrapper(file, encoding=encoding)
     if dialect:
         reader = csv.DictReader(file, dialect=dialect)
     else:
@@ -115,6 +116,7 @@ def create_db_table_from_data_file(data_file, name, schema):
     header = data_file.header
     dialect = csv.dialect.SimpleDialect(data_file.delimiter, data_file.quotechar,
                                         data_file.escapechar)
+    encoding = get_file_encoding(data_file.file)
     with open(sv_filename, 'rb') as sv_file:
         sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
         column_names = sv_reader.fieldnames
@@ -133,6 +135,7 @@ def create_db_table_from_data_file(data_file, name, schema):
         delimiter=dialect.delimiter,
         escape=dialect.escapechar,
         quote=dialect.quotechar,
+        encoding=encoding
     )
     return table
 
