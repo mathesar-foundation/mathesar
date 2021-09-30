@@ -130,7 +130,6 @@ def test_data_file_create_csv(client, csv_filename, header):
         response = client.post('/api/v0/data_files/', data)
     with open(csv_filename, 'r') as csv_file:
         correct_dialect = csv.get_sv_dialect(csv_file)
-
     check_create_data_file_response(
         response, num_data_files, 'file', 'patents', correct_dialect.delimiter,
         correct_dialect.quotechar, correct_dialect.escapechar, header
@@ -208,6 +207,13 @@ def test_data_file_create_invalid_file(client):
             response_dict = response.json()
     assert response.status_code == 400
     assert response_dict[0] == 'Unable to tabulate data'
+
+
+def test_data_file_create_non_unicode_file(client):
+    file = 'mathesar/tests/data/non_unicode.csv'
+    with open(file, 'rb') as f:
+        response = client.post('/api/v0/data_files/', data={'file': f})
+    assert response.status_code == 201
 
 
 def test_data_file_create_url_invalid_format(client):
