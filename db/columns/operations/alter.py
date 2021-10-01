@@ -105,8 +105,12 @@ def retype_column(
     new_type = new_type if new_type is not None else column_db_type
     column_type_options = get_type_options(column)
 
-    if (new_type == column_db_type) and _check_type_option_equivalence(type_options, column_type_options):
+    if (
+            (new_type.lower() == column_db_type.lower())
+            and _check_type_option_equivalence(type_options, column_type_options)
+    ):
         return
+
     try:
         alter_column_type(
             table,
