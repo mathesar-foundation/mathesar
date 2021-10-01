@@ -1,9 +1,13 @@
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
 import pytest
-from sqlalchemy import String, Integer, Column, Table, MetaData, Sequence, DateTime, func
+from sqlalchemy import (
+    String, Integer, Column, Table, MetaData, Sequence, DateTime, func, text, DefaultClause
+)
 
-from db.columns.operations.select import get_column_default, get_column_index_from_name
+from db.columns.operations.select import (
+    get_column_default, get_column_index_from_name, _is_default_expr_dynamic
+)
 from db.tables.operations.select import get_oid_from_table
 from db.tests.columns.utils import column_test_dict, get_default
 
@@ -134,3 +138,23 @@ def test_get_column_generated_default(engine_with_schema, col):
     # We shouldn't evaluate generated defaults
     assert default is None
     assert default != created_default
+
+
+default_expression_test_list = [
+    ("CURRENT_TIMESTAMP", True),
+    ("CURRENT_TIMESTAMP::CHAR(64)", True),
+    ("NOW()", True),
+    ("myfunc()", True),
+    ("now()", True),
+    ("now()::VARCHAR", True),
+    ("'now()'::VARCHAR", False),
+    ("'3'::NUMERIC", False),
+    ("'3'::CHAR", False),
+    ("'abcde'::CHAR(3)", False),
+    ("'abcde'::CHAR(5)", False),
+]
+
+@pytest.mark.parametrize("default_expr,is_dynamic", default_expression_test_list)
+def test_is_default_expr_dynamic(default_expr, is_dynamic):
+    default_clause = DefaultClause(text(default_expr))
+    assert _is_default_expr_dynamic(default_clause) is is_dynamic

@@ -770,13 +770,9 @@ def test_alter_column_casts_data_gen(
     table_oid = get_oid_from_table(TABLE_NAME, schema, engine)
     actual_default = get_column_default(table_oid, 0, engine)
     # TODO This needs to be sorted out by fixing how server_default is set.
-    # Also, we cannot support (currently) defaults for CHAR type columns, since
-    # these are always function expressions
     if all([
             source_type != get_qualified_name(MathesarCustomType.MONEY.value),
             target_type != MathesarCustomType.MONEY.value,
-            source_type != PostgresType.CHARACTER.value,
-            target_type != "char",
     ]):
         assert actual_default == out_val
 
