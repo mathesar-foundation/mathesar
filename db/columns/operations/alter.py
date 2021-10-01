@@ -26,9 +26,17 @@ def alter_column(engine, table_oid, column_index, column_data):
 
     with engine.begin() as conn:
         if TYPE_KEY in column_data:
-            new_type = column_data[TYPE_KEY]
-            type_options = column_data.get(TYPE_OPTIONS_KEY, {})
-            retype_column(table, column_index, engine, conn, new_type, type_options)
+            retype_column(
+                table, column_index, engine, conn,
+                new_type=column_data[TYPE_KEY],
+                type_options=column_data.get(TYPE_OPTIONS_KEY, {})
+            )
+        elif TYPE_OPTIONS_KEY in column_data:
+            retype_column(
+                table, column_index, engine, conn,
+                type_options=column_data[TYPE_OPTIONS_KEY]
+            )
+
         if NULLABLE_KEY in column_data:
             nullable = column_data[NULLABLE_KEY]
             change_column_nullable(table, column_index, engine, conn, nullable)
@@ -47,7 +55,10 @@ def alter_column(engine, table_oid, column_index, column_data):
     )
 
 
-def alter_column_type(table, column_name, engine, connection, target_type_str, type_options={}, friendly_names=True,):
+def alter_column_type(
+        table, column_name, engine, connection, target_type_str,
+        type_options={}, friendly_names=True,
+):
     _preparer = engine.dialect.identifier_preparer
     supported_types = get_supported_alter_column_types(
         engine, friendly_names=friendly_names
@@ -86,10 +97,14 @@ def alter_column_type(table, column_name, engine, connection, target_type_str, t
         set_column_default(table, column_index, engine, connection, new_default)
 
 
-def retype_column(table, column_index, engine, connection, new_type, type_options={}):
+def retype_column(
+        table, column_index, engine, connection, new_type=None, type_options={},
+):
     column = table.columns[column_index]
     column_db_type = get_db_type_name(column.type, engine)
+    new_type = new_type if new_type is not None else column_db_type
     column_type_options = get_type_options(column)
+
     if (new_type == column_db_type) and _check_type_option_equivalence(type_options, column_type_options):
         return
     try:
