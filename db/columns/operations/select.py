@@ -41,7 +41,7 @@ def get_column_default(table_oid, column_index, engine, connection_to_use=None):
     elif _is_default_expr_dynamic(column.server_default):
         return None
 
-    default_textual_sql = column.server_default.arg.text
+    default_textual_sql = str(column.server_default.arg)
     # Defaults are stored as text with SQL casts appended
     # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
     # Here, we execute the cast to get the proper python value
