@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from db import constants
 
 
+CHAR = 'char'
 STRING = 'string'
 VARCHAR = 'varchar'
 
