@@ -23,7 +23,7 @@
   let displayHelpMessage = false;
 
   $: ({ selectedRecords, recordModificationState, offset } = meta);
-  $: ({ newRecords } = records);
+  $: ({ savedRecords, newRecords, totalCount } = records);
 
   $: primaryKeyValue = row?.[primaryKeyColumn] ?? null;
   $: isRowSelected = ($selectedRecords as Set<unknown>).has(primaryKeyValue);
@@ -63,7 +63,9 @@
   <div class="control">
     {#if typeof row.__rowIndex === 'number'}
       <span class="number">
-        {row.__rowIndex + $offset + 1}
+        {row.__rowIndex + (
+          row.__isNew ? $totalCount - $savedRecords.length - $newRecords.length : $offset
+          ) + 1}
         {#if row.__isNew}
           *
         {/if}

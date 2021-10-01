@@ -1,12 +1,12 @@
 <script lang="ts">
   import { getContext } from 'svelte';
+  import { get } from 'svelte/store';
   import type {
     TabularDataStore,
     TabularData,
     Display,
     Records,
   } from '@mathesar/stores/table-data/types';
-  import { States } from '@mathesar/utils/api';
 
   import Row from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
@@ -18,14 +18,18 @@
   let display: Display;
   $: ({ id, records, display } = $tabularData as TabularData);
   $: ({
-    rowWidth, horizontalScrollOffset,
+    rowWidth, horizontalScrollOffset, displayableRecords,
   } = display);
-  $: ({ savedRecords, newRecords } = records);
 
   let bodyRef: HTMLDivElement;
 
-  function getItemSize() {
+  function getItemSize(index: number) {
     const defaultRowHeight = 30;
+    const allRecords = get(displayableRecords);
+    if (allRecords?.[index]?.__identifier === '__new_help_text') {
+      return 20;
+    }
+
     // TODO: Check and set extra height for group. Needs UX rethought.
     return defaultRowHeight;
   }
@@ -48,25 +52,15 @@
         bind:horizontalScrollOffset={$horizontalScrollOffset}
         {height}
         width={$rowWidth || null}
-        itemCount={$savedRecords.length + $newRecords.length + 1}
+        itemCount={$displayableRecords.length}
         paddingBottom={20}
         itemSize={getItemSize}
         itemKey={(index) => records.getIterationKey(index)}
         let:items
         >
         {#each items as it (it?.key || it)}
-          {#if it}
-            {#if $savedRecords[it.index]}
-              <Row style={it.style} bind:row={$savedRecords[it.index]}/>
-            {:else if $newRecords[it.index - $savedRecords.length]}
-              <Row style={it.style} bind:row={$newRecords[it.index - $savedRecords.length]}/>
-            {:else if it.index === $savedRecords.length + $newRecords.length}
-              <Row style={it.style} row={{
-                __identifier: '__add_placeholder',
-                __isAddPlaceholder: true,
-                __state: States.Done,
-                }}/>
-            {/if}
+          {#if it && $displayableRecords[it.index]}
+            <Row style={it.style} bind:row={$displayableRecords[it.index]}/>
           {/if}
         {/each}
       </VirtualList>

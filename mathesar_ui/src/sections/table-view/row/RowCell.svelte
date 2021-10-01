@@ -18,6 +18,8 @@
   export let columnPosition: ColumnPosition;
   export let row: TableRecord;
   export let column: TableColumn;
+  // eslint-disable-next-line no-undef-init
+  export let value: unknown = undefined;
 
   $: ({ activeCell } = display);
   $: isActive = isCellActive($activeCell, row, column);
@@ -40,14 +42,13 @@
   });
 
   function setValue(val: string) {
-    if (row[column.name] !== val) {
-      row[column.name] = val;
+    if (value !== val) {
+      value = val;
       if (row.__isNew) {
         void records.createOrUpdateRecord(row);
       } else {
         void records.updateRecord(row);
       }
-      row = { ...row };
     }
   }
 
@@ -97,16 +98,18 @@
   <div class="content"
     on:mousedown={() => display.selectCell(row, column)}
     on:dblclick={() => display.editCell(row, column)}>
-    {#if typeof row[column.name] === 'undefined' || row[column.name] === null}
-      <span class="empty">null</span>
-    {:else}
-      {row[column.name]}
+    {#if typeof value !== 'undefined'}
+      {#if value === null}
+        <span class="empty">null</span>
+      {:else}
+        {value}
+      {/if}
     {/if}
   </div>
 
   {#if isBeingEdited}
     <input bind:this={inputRef} type="text" class="edit-input-box"
-            value={row[column.name]?.toString() || ''}
+            value={value?.toString() || ''}
             on:keydown={handleInputKeyDown}
             on:keyup={debounceAndSet} on:blur={onBlur}/>
   {/if}

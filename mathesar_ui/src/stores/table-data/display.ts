@@ -1,5 +1,6 @@
-import { writable, get } from 'svelte/store';
-import type { Writable, Unsubscriber } from 'svelte/store';
+import { writable, get, derived } from 'svelte/store';
+import { States } from '@mathesar/utils/api';
+import type { Writable, Readable, Unsubscriber } from 'svelte/store';
 import type { TabularType, DBObjectEntry } from '@mathesar/App.d';
 import type { Meta } from './meta';
 import type { Columns, TableColumn } from './columns';
@@ -116,6 +117,8 @@ export class Display {
 
   rowWidth: Writable<number>;
 
+  displayableRecords: Readable<TableRecord[]>;
+
   constructor(
     type: TabularType,
     parentId: number,
@@ -143,6 +146,27 @@ export class Display {
       const widthWithPadding = width ? width + DEFAULT_ROW_RIGHT_PADDING : 0;
       this.rowWidth.set(widthWithPadding);
     });
+
+    const { savedRecords, newRecords } = this._records;
+    this.displayableRecords = derived(
+      [savedRecords, newRecords],
+      ([$savedRecords, $newRecords], set) => {
+        let allRecords = [].concat($savedRecords);
+        if ($newRecords.length > 0) {
+          allRecords = allRecords.concat({
+            __identifier: '__new_help_text',
+            __isNewHelpText: true,
+            __state: States.Done,
+          }).concat($newRecords);
+        }
+        allRecords = allRecords.concat({
+          __identifier: '__add_placeholder',
+          __isAddPlaceholder: true,
+          __state: States.Done,
+        });
+        set(allRecords);
+      },
+    );
   }
 
   resetActiveCell(): void {

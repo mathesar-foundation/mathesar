@@ -159,19 +159,5 @@ section.table-section .tab-container .table-data .body {
         }
       }
     }
-
-    &.created:hover {
-      z-index: 12;
-
-      .cell.row-control {
-        z-index: 14;
-      }
-
-      .row-help-text {
-        z-index: 20;
-        background: #bef8c9;
-        padding: 6px 10px;
-      }
-    }
   }
 }

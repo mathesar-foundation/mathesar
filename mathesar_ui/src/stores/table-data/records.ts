@@ -311,6 +311,9 @@ export class Records {
         await this.fetch(true);
 
         const offset = getStoreValue(this._meta.offset);
+        const savedRecordData = getStoreValue(this.savedRecords);
+        const savedRecordLength = savedRecordData?.length || 0;
+
         this.newRecords.update((existing) => {
           let retained = existing.filter(
             (entry) => !successSet.has(getRowKey(entry, this._columns.get()?.primaryKey)),
@@ -318,13 +321,17 @@ export class Records {
           if (retained.length === existing.length) {
             return existing;
           }
-          let index = retained.length + 1;
+          let index = -1;
           retained = retained.map((entry) => {
-            index -= 1;
+            index += 1;
             return {
               ...entry,
-              __rowIndex: -index,
-              __identifier: generateRowIdentifier('new', offset, -index),
+              __rowIndex: savedRecordLength + index,
+              __identifier: generateRowIdentifier(
+                'new',
+                offset,
+                index,
+              ),
             };
           });
           return retained;

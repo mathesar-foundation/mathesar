@@ -74,7 +74,7 @@
                 {row} {meta} {records}/>
 
     {#each $columns.data as column (column.name)}
-      <RowCell {display} bind:row {column} {records}
+      <RowCell {display} {row} bind:value={row[column.name]} {column} {records}
         columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
     {/each}
   {/if}
