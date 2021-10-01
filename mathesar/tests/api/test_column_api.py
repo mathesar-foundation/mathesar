@@ -415,6 +415,26 @@ def test_column_update_type_options(column_test_table, client):
     assert response.json()["type_options"] == type_options
 
 
+def test_column_update_type_options_no_type(column_test_table, client):
+    cache.clear()
+    type_ = "NUMERIC"
+    data = {"type": type_}
+    client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/3/",
+        data,
+        format='json'
+    )
+    type_options = {"precision": 3, "scale": 1}
+    type_option_data = {"type_options": type_options}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/3/",
+        type_option_data,
+        format='json'
+    )
+    assert response.json()["type"] == type_
+    assert response.json()["type_options"] == type_options
+
+
 def test_column_update_invalid_type(create_table, client, engine_email_type):
     table = create_table('Column Invalid Type')
     body = {"type": "BIGINT"}
