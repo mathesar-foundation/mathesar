@@ -97,7 +97,7 @@ def test_column_list(column_test_table, client):
                 'BIGINT', 'BOOLEAN', 'DATE', 'DECIMAL', 'DOUBLE PRECISION',
                 'FLOAT', 'INTEGER', 'INTERVAL', 'MATHESAR_TYPES.EMAIL',
                 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL', 'SMALLINT',
-                'TIME', 'VARCHAR',
+                'TIME WITH TIME ZONE', 'TIME WITHOUT TIME ZONE', 'VARCHAR',
             ],
             'default': None,
         }

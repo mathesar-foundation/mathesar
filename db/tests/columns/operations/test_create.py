@@ -63,7 +63,8 @@ type_set = {
     'VARCHAR',
     'TEXT',
     'DATE',
-    'TIME',
+    'TIME WITH TIME ZONE',
+    'TIME WITHOUT TIME ZONE'
 }
 
 

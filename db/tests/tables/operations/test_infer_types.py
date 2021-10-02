@@ -26,7 +26,8 @@ type_data_list = [
     (String, ["a", "cat", "mat", "bat"], VARCHAR),
     (String, ["2", "1", "0", "0"], NUMERIC),
     (String, ["2000-01-12", "6/23/2004", "May-2007-29", "20200909"], DATE),
-    (String, ["9:24", "23:12", "03:04:05", "3:4:5"], datetime.TIME)
+    (String, ["9:24", "23:12", "03:04:05", "3:4:5"], datetime.TIME_WITHOUT_TIME_ZONE),
+    (String, ["9:24+01", "23:12+00", "03:04:05+01", "3:4:5+01"], datetime.TIME_WITH_TIME_ZONE)
 ]
 
 

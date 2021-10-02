@@ -7,7 +7,7 @@ from db.columns.exceptions import DagCycleError
 from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import reflect_table
 from db.types.operations.cast import get_supported_alter_column_types
-from db.types import base
+from db.types import base, datetime
 
 
 logger = logging.getLogger(__name__)
@@ -25,6 +25,8 @@ TYPE_INFERENCE_DAG = {
         base.PostgresType.BOOLEAN.value,
         base.PostgresType.NUMERIC.value,
         base.PostgresType.DATE.value,
+        base.PostgresType.TIME_WITH_TIME_ZONE.value,
+        base.PostgresType.TIME_WITHOUT_TIME_ZONE.value,
         base.PostgresType.INTERVAL.value,
         base.MathesarCustomType.EMAIL.value,
     ],
