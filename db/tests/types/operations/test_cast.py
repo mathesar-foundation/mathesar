@@ -353,8 +353,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             TIME_WITH_TIME_ZONE: {
                 VALID: [
-                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=1)),
-                     time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=1))),
+                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
+                     time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60))),
                 ]
             },
             TIME_WITHOUT_TIME_ZONE: {
@@ -365,8 +365,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             VARCHAR: {
                 VALID: [
-                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=6)),
-                     "12:30:45+360")
+                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
+                     "12:30:45+01")
                 ]
             },
         },
@@ -459,7 +459,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             TIME_WITH_TIME_ZONE: {
                 VALID: [
                     ("04:05:06", time(4, 5, 6, tzinfo=FixedOffsetTimezone(offset=0))),
-                    ("04:05+01", time(4, 5, tzinfo=FixedOffsetTimezone(offset=1))),
+                    ("04:05+01", time(4, 5, tzinfo=FixedOffsetTimezone(offset=60))),
                 ],
                 INVALID: [
                     "not a time",

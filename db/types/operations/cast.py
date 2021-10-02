@@ -2,7 +2,7 @@ from sqlalchemy import text
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 
-from db.types import base, email, money, datetime
+from db.types import base, email, money
 from db.types.exceptions import UnsupportedTypeException
 
 
@@ -20,14 +20,14 @@ SMALLINT = base.PostgresType.SMALLINT.value
 FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
 TEXT = base.PostgresType.TEXT.value
 DATE = base.PostgresType.DATE.value
-TIME_WITHOUT_TIME_ZONE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
-TIME_WITH_TIME_ZONE = base.PostgresType.TIME_WITH_TIME_ZONE.value
 STRING = base.STRING
 VARCHAR = base.VARCHAR
 
 # custom types
 EMAIL = base.MathesarCustomType.EMAIL.value
 MONEY = base.MathesarCustomType.MONEY.value
+TIME_WITHOUT_TIME_ZONE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
+TIME_WITH_TIME_ZONE = base.PostgresType.TIME_WITH_TIME_ZONE.value
 
 
 def get_supported_alter_column_types(engine, friendly_names=True):
@@ -55,8 +55,8 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         STRING: dialect_types.get(NAME),
         TEXT: dialect_types.get(TEXT),
         DATE: dialect_types.get(DATE),
-        TIME_WITHOUT_TIME_ZONE: datetime.TIME_WITHOUT_TIME_ZONE,
-        TIME_WITH_TIME_ZONE: datetime.TIME_WITH_TIME_ZONE,
+        TIME_WITHOUT_TIME_ZONE: dialect_types.get(TIME_WITHOUT_TIME_ZONE),
+        TIME_WITH_TIME_ZONE: dialect_types.get(TIME_WITH_TIME_ZONE),
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),

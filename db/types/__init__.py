@@ -1,5 +1,5 @@
 from sqlalchemy import DECIMAL as sa_decimal
-from db.types import email, money
+from db.types import email, money, datetime
 from db.types.base import PostgresType
 
 
@@ -9,4 +9,6 @@ CUSTOM_TYPE_DICT = {
     PostgresType.DECIMAL.value: sa_decimal,
     email.DB_TYPE: email.Email,
     money.DB_TYPE: money.Money,
+    datetime.TIME_ZONE_DB_TYPE: datetime.TIME_WITH_TIME_ZONE,
+    datetime.WITHOUT_TIME_ZONE_DB_TYPE: datetime.TIME_WITHOUT_TIME_ZONE,
 }
