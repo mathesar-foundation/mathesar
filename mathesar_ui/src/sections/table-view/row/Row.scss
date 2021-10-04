@@ -158,6 +158,14 @@ section.table-section .tab-container .table-data .body {
           width: 100%;
         }
       }
+
+      &.new-row-help-cell {
+        background: #069668 !important;
+        display: flex;
+        align-items: center;
+        color: #fff;
+        padding: 0px 14px;
+      }
     }
   }
 }

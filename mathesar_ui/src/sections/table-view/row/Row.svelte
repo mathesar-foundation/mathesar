@@ -18,6 +18,7 @@
   import RowCell from './RowCell.svelte';
   import GroupHeader from './GroupHeader.svelte';
   import AddRowPlaceholder from './AddRowPlaceholder.svelte';
+  import RowPlaceholder from './RowPlaceholder.svelte';
 
   export let row: TableRecord;
   export let style: { [key: string]: string | number };
@@ -65,7 +66,9 @@
 <div class="row {row.__state} {modificationState || ''}" class:selected={isSelected}
       class:is-group-header={row.__isGroupHeader} class:is-add-placeholder={row.__isAddPlaceholder}
       style={styleString} data-identifier={row.__identifier}>
-  {#if row.__isAddPlaceholder}
+  {#if row.__isNewHelpText}
+    <RowPlaceholder {rowWidth}/>
+  {:else if row.__isAddPlaceholder}
     <AddRowPlaceholder {rowWidth} on:click={() => records.addEmptyRecord()}/>
   {:else if row.__isGroupHeader}
     <GroupHeader {row} {rowWidth} groupColumns={$groupInfo.columns} groupCounts={$groupInfo.counts}/>
