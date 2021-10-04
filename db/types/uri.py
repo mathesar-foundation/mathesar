@@ -1,27 +1,52 @@
+from enum import Enum
+from sqlalchemy import text, Text
+from sqlalchemy.sql import quoted_name
+from sqlalchemy.sql.functions import GenericFunction
+from sqlalchemy.types import UserDefinedType
+
 from db.types import base
-from sqlalchemy import text
 
-# These constants are in the order (roughly) in which they appear in a
-# URI, rather than the usual lexicographical order.
 URI = base.MathesarCustomType.URI.value
-URI_PARTS = URI + "_parts"
-URI_SCHEME = URI + "_scheme"
-URI_AUTHORITY = URI + "_authority"
-URI_PATH = URI + "_path"
-URI_QUERY = URI + "_query"
-URI_FRAGMENT = URI + "_fragment"
-
 DB_TYPE = base.get_qualified_name(URI)
-QUALIFIED_URI_PARTS = base.get_qualified_name(URI_PARTS)
-QUALIFIED_URI_SCHEME = base.get_qualified_name(URI_SCHEME)
-QUALIFIED_URI_AUTHORITY = base.get_qualified_name(URI_AUTHORITY)
-QUALIFIED_URI_PATH = base.get_qualified_name(URI_PATH)
-QUALIFIED_URI_QUERY = base.get_qualified_name(URI_QUERY)
-QUALIFIED_URI_FRAGMENT = base.get_qualified_name(URI_FRAGMENT)
+
+class URIFunction(Enum):
+    PARTS = URI + "_parts"
+    SCHEME = URI + "_scheme"
+    AUTHORITY = URI + "_authority"
+    PATH = URI + "_path"
+    QUERY = URI + "_query"
+    FRAGMENT = URI + "_fragment"
+
+
+QualifiedURIFunction = Enum(
+    "QualifiedURIFunction",
+    {
+        func_name.name: base.get_qualified_name(func_name.value)
+        for func_name in URIFunction
+    }
+)
 
 
 # This regex and the use of it are based on the one given in RFC 3986.
 URI_REGEX_STR = r"'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?'"
+
+
+# This function lets us avoid having to define repetitive classes for
+# adding custom SQL functions to SQLAlchemy
+def build_genric_function_def_class(name):
+    class_dict = {
+        "type": Text,
+        "name": quoted_name(QualifiedURIFunction[name].value, False),
+        "identifier": URIFunction[name].value
+    }
+    return type(class_dict["identifier"], (GenericFunction,), class_dict)
+
+
+# We need to add these classes to the globals() dict so they get picked
+# up by SQLAlchemy
+globals().update(
+    {f.name: build_genric_function_def_class(f.name) for f in URIFunction}
+)
 
 
 def install(engine):
@@ -30,24 +55,24 @@ def install(engine):
     """
 
     create_uri_parts_query = f"""
-    CREATE OR REPLACE FUNCTION {QUALIFIED_URI_PARTS}({base.PostgresType.TEXT.value})
+    CREATE OR REPLACE FUNCTION {QualifiedURIFunction.PARTS.value}({base.PostgresType.TEXT.value})
     RETURNS {base.PostgresType.TEXT.value}[] AS $$
         SELECT regexp_match($1, {URI_REGEX_STR});
     $$
     LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
     """
     uri_parts_map = {
-        QUALIFIED_URI_SCHEME: 2,
-        QUALIFIED_URI_AUTHORITY: 4,
-        QUALIFIED_URI_PATH: 5,
-        QUALIFIED_URI_QUERY: 7,
-        QUALIFIED_URI_FRAGMENT: 9,
+        QualifiedURIFunction.SCHEME.value: 2,
+        QualifiedURIFunction.AUTHORITY.value: 4,
+        QualifiedURIFunction.PATH.value: 5,
+        QualifiedURIFunction.QUERY.value: 7,
+        QualifiedURIFunction.FRAGMENT.value: 9,
     }
 
     create_domain_query = f"""
     CREATE DOMAIN {DB_TYPE} AS text CHECK (
-        {QUALIFIED_URI_SCHEME}(value) IS NOT NULL
-        AND {QUALIFIED_URI_PATH}(value) IS NOT NULL
+        {QualifiedURIFunction.SCHEME.value}(value) IS NOT NULL
+        AND {QualifiedURIFunction.PATH.value}(value) IS NOT NULL
     );
     """
 
@@ -58,7 +83,7 @@ def install(engine):
             create_uri_part_getter_query = f"""
             CREATE OR REPLACE FUNCTION {part}({base.PostgresType.TEXT.value})
             RETURNS {base.PostgresType.TEXT.value} AS $$
-                SELECT ({QUALIFIED_URI_PARTS}($1))[{index}];
+                SELECT ({QualifiedURIFunction.PARTS.value}($1))[{index}];
             $$
             LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
             """
