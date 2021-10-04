@@ -18,6 +18,7 @@ class InputValueField(serializers.CharField):
 
 
 class TypeOptionSerializer(serializers.Serializer):
+    length = serializers.IntegerField(required=False)
     precision = serializers.IntegerField(required=False)
     scale = serializers.IntegerField(required=False)
 
