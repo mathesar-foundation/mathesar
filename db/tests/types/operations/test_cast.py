@@ -44,6 +44,7 @@ VARCHAR = "VARCHAR"
 # Custom types
 EMAIL = get_qualified_name(MathesarCustomType.EMAIL.value).upper()
 MONEY = get_qualified_name(MathesarCustomType.MONEY.value).upper()
+URI = get_qualified_name(MathesarCustomType.URI.value).upper()
 
 
 ISCHEMA_NAME = "ischema_name"
@@ -145,6 +146,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             SMALLINT: {VALID: [("4", 4)], INVALID: ["j"]},
             DATE: {VALID: [], INVALID: ["n"]},
             TEXT: {VALID: [("a", "a")]},
+            URI: {VALID: [], INVALID: ["a"]},
             VARCHAR: {VALID: [("a", "a")]},
         }
     },
@@ -470,8 +472,23 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     "1234",
                 ]
             },
+            URI: {
+                VALID: [("https://centerofci.org", "https://centerofci.org")],
+                INVALID: ["/sdf/"]
+            },
             TEXT: {VALID: [("a string", "a string")]},
             VARCHAR: {VALID: [("a string", "a string")]},
+        }
+    },
+    URI: {
+        ISCHEMA_NAME: get_qualified_name(MathesarCustomType.URI.value),
+        SUPPORTED_MAP_NAME: MathesarCustomType.URI.value,
+        REFLECTED_NAME: URI,
+        TARGET_DICT: {
+            CHAR: {VALID: []},
+            TEXT: {VALID: [("https://centerofci.org", "https://centerofci.org")]},
+            URI: {VALID: [("https://centerofci.org", "https://centerofci.org")]},
+            VARCHAR: {VALID: [("https://centerofci.org", "https://centerofci.org")]},
         }
     },
     VARCHAR: {
@@ -552,6 +569,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 INVALID: ["1.2234"]
             },
             TEXT: {VALID: [("a string", "a string")]},
+            URI: {
+                VALID: [("https://centerofci.org", "https://centerofci.org")],
+                INVALID: ["/sdf/"]
+            },
             VARCHAR: {VALID: [("a string", "a string")]},
         }
     }
