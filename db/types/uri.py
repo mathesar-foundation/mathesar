@@ -41,7 +41,7 @@ class URI(UserDefinedType):
 
 # This function lets us avoid having to define repetitive classes for
 # adding custom SQL functions to SQLAlchemy
-def build_genric_function_def_class(name):
+def build_generic_function_def_class(name):
     class_dict = {
         "type": Text,
         "name": quoted_name(QualifiedURIFunction[name].value, False),
@@ -53,7 +53,7 @@ def build_genric_function_def_class(name):
 # We need to add these classes to the globals() dict so they get picked
 # up by SQLAlchemy
 globals().update(
-    {f.name: build_genric_function_def_class(f.name) for f in URIFunction}
+    {f.name: build_generic_function_def_class(f.name) for f in URIFunction}
 )
 
 
