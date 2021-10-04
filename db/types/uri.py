@@ -2,20 +2,21 @@ from enum import Enum
 from sqlalchemy import text, Text
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction
+from sqlalchemy.types import UserDefinedType
 
 from db.types import base
 
-URI = base.MathesarCustomType.URI.value
-DB_TYPE = base.get_qualified_name(URI)
+URI_STR = base.MathesarCustomType.URI.value
+DB_TYPE = base.get_qualified_name(URI_STR)
 
 
 class URIFunction(Enum):
-    PARTS = URI + "_parts"
-    SCHEME = URI + "_scheme"
-    AUTHORITY = URI + "_authority"
-    PATH = URI + "_path"
-    QUERY = URI + "_query"
-    FRAGMENT = URI + "_fragment"
+    PARTS = URI_STR + "_parts"
+    SCHEME = URI_STR + "_scheme"
+    AUTHORITY = URI_STR + "_authority"
+    PATH = URI_STR + "_path"
+    QUERY = URI_STR + "_query"
+    FRAGMENT = URI_STR + "_fragment"
 
 
 QualifiedURIFunction = Enum(
@@ -29,6 +30,13 @@ QualifiedURIFunction = Enum(
 
 # This regex and the use of it are based on the one given in RFC 3986.
 URI_REGEX_STR = r"'^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?'"
+
+
+class URI(UserDefinedType):
+    def get_col_spec(self, **kw):
+        # This results in the type name being upper case when viewed.
+        # Actual usage in the DB is case-insensitive.
+        return DB_TYPE.upper()
 
 
 # This function lets us avoid having to define repetitive classes for
