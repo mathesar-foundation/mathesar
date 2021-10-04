@@ -3,6 +3,7 @@ import warnings
 from pglast import Node, parse_sql
 from sqlalchemy import Table, MetaData, and_, select, text, func
 
+from db.columns.exceptions import DynamicDefaultWarning
 from db.tables.operations.select import reflect_table_from_oid
 from db.utils import execute_statement
 
@@ -39,7 +40,10 @@ def get_column_default(table_oid, column_index, engine, connection_to_use=None):
     if column.server_default is None:
         return None
     elif _is_default_expr_dynamic(column.server_default):
-        return None
+        warnings.warn(
+            "Dynamic column defaults are not implemented", DynamicDefaultWarning
+        )
+        return str(column.server_default.arg)
 
     default_textual_sql = str(column.server_default.arg)
     # Defaults are stored as text with SQL casts appended

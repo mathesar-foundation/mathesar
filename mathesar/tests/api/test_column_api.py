@@ -51,7 +51,7 @@ def test_column_list(column_test_table, client):
             'index': 0,
             'nullable': False,
             'primary_key': True,
-            'default': None,
+            'default': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
                 'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
@@ -117,7 +117,7 @@ def test_column_list(column_test_table, client):
                 'index': 0,
                 'nullable': False,
                 'primary_key': True,
-                'default': None,
+                'default': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
                 'valid_target_types': [
                     'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
                     'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC',
