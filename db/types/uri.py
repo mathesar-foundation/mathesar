@@ -2,12 +2,12 @@ from enum import Enum
 from sqlalchemy import text, Text
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction
-from sqlalchemy.types import UserDefinedType
 
 from db.types import base
 
 URI = base.MathesarCustomType.URI.value
 DB_TYPE = base.get_qualified_name(URI)
+
 
 class URIFunction(Enum):
     PARTS = URI + "_parts"
