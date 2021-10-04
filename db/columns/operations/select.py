@@ -8,6 +8,9 @@ from db.tables.operations.select import reflect_table_from_oid
 from db.utils import execute_statement
 
 
+DYNAMIC_NODE_TAGS = {"SQLValueFunction", "FuncCall"}
+
+
 def get_column_index_from_name(table_oid, column_name, engine, connection_to_use=None):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
@@ -58,5 +61,4 @@ def _is_default_expr_dynamic(server_default):
     ast_nodes = {
         n.node_tag for n in expr_ast_root.traverse() if isinstance(n, Node)
     }
-    dynamic_node_tags = {"SQLValueFunction", "FuncCall"}
-    return not ast_nodes.isdisjoint(dynamic_node_tags)
+    return not ast_nodes.isdisjoint(DYNAMIC_NODE_TAGS)
