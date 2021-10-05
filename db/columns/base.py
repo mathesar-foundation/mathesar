@@ -144,6 +144,7 @@ class MathesarColumn(Column):
     @property
     def type_options(self):
         full_type_options = {
+            "length": getattr(self.type, "length", None),
             "precision": getattr(self.type, "precision", None),
             "scale": getattr(self.type, "scale", None),
         }
