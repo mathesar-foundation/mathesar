@@ -41,7 +41,7 @@ section.table-section .tab-container .table-data .body {
         pointer-events: none;
       }
 
-      &.updateFailed, &.deleteFailed, &.createFailed {
+      &.updateFailed, &.deleteFailed, &.creationFailed {
         .cell {
           transition: background-color .20s cubic-bezier(0,0,.2,1);
           background-color: #fef1f1;

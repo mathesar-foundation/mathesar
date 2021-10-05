@@ -17,7 +17,6 @@
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
   import GroupHeader from './GroupHeader.svelte';
-  import AddRowPlaceholder from './AddRowPlaceholder.svelte';
   import RowPlaceholder from './RowPlaceholder.svelte';
 
   export let row: TableRecord;

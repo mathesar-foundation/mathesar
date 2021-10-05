@@ -202,7 +202,7 @@ export class Display {
       pageSize,
       totalCount - offset,
       savedRecords.length,
-    ) + newRecords.length - 1;
+    ) + newRecords.length;
     const activeCell = get(this.activeCell);
 
     if (movementKeys.has(key) && activeCell?.type === 'select') {

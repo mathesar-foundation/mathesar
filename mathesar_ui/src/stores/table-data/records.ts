@@ -392,7 +392,23 @@ export class Records {
   async createOrUpdateRecord(row: TableRecord): Promise<void> {
     const { primaryKey } = this._columns.get();
     const rowKey = getRowKey(row, primaryKey);
-    if (row.__isNew && (!primaryKey || !row[primaryKey])) {
+
+    // Row may not have been updated yet in view when additional request is made.
+    // So check current values to ensure another row has not been created.
+    const existingNewRecordRow = getStoreValue(this.newRecords)
+      ?.find((entry) => entry.__identifier === row.__identifier);
+
+    if (!existingNewRecordRow && row.__isAddPlaceholder) {
+      this.newRecords.update((existing) => {
+        existing.push({
+          ...row,
+          __isAddPlaceholder: false,
+        });
+        return existing;
+      });
+    }
+
+    if (!existingNewRecordRow?.[primaryKey] && row.__isNew && !row[primaryKey]) {
       this._meta.setRecordModificationState(rowKey, 'create');
       this._createPromises?.get(rowKey)?.cancel();
       const promise = postAPI<TableRecordResponse>(
@@ -409,24 +425,16 @@ export class Records {
         const newRow = {
           ...row,
           ...result,
-          __isAddPlaceholder: false,
         };
         const updatedRowKey = getRowKey(newRow, primaryKey);
         this._meta.clearRecordModificationState(rowKey);
         this._meta.setRecordModificationState(updatedRowKey, 'created');
-        if (row.__isAddPlaceholder) {
-          this.newRecords.update((existing) => {
-            existing.push(newRow);
-            return existing;
-          });
-        } else {
-          this.newRecords.update((existing) => existing.map((entry) => {
-            if (entry.__identifier === row.__identifier) {
-              return newRow;
-            }
-            return entry;
-          }));
-        }
+        this.newRecords.update((existing) => existing.map((entry) => {
+          if (entry.__identifier === row.__identifier) {
+            return newRow;
+          }
+          return entry;
+        }));
         this.totalCount.update((count) => count + 1);
       } catch (err) {
         this._meta.setRecordModificationState(rowKey, 'creationFailed');

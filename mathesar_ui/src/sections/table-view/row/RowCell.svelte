@@ -33,7 +33,7 @@
     if (inputRef) {
       inputRef.focus();
     } else if (isActive) {
-      cellRef.focus();
+      cellRef?.focus();
     }
   });
 
