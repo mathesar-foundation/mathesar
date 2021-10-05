@@ -20,11 +20,6 @@ export interface MathesarTab extends Tab {
   label: string,
 }
 
-export interface ActiveTab extends Tab {
-  id: number,
-  label: string
-}
-
 export interface TabList {
   activeTab: Writable<MathesarTab>,
   tabs: Writable<MathesarTab[]>,

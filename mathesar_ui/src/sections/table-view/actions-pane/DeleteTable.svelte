@@ -12,9 +12,6 @@
     removeTab,
     getTabsForSchema,
   } from '@mathesar/stores/tabs';
-  import type {
-    ActiveTab,
-  } from '@mathesar/stores/tabs';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
   
@@ -22,14 +19,14 @@
   
   function getActiveTab(_currentDBName, _currentSchemaId) {
     const { activeTab } = getTabsForSchema(_currentDBName, _currentSchemaId);
-    const activeTabObj: ActiveTab = get(activeTab);
+    const activeTabObj = get(activeTab);
     return activeTabObj;
   }
 
   async function confirmDelete() {
     const objActiveTab = getActiveTab($currentDBName, $currentSchemaId);
     removeTab($currentDBName, $currentSchemaId, objActiveTab);
-    await deleteTable(`/tables/${objActiveTab.id}`);
+    await deleteTable(objActiveTab.id);
     isOpen = false;
     await refetchTablesForSchema($currentSchemaId);
   }
@@ -42,11 +39,10 @@
     <div class="header">
       Deleting '{nameActiveTab.label}' could break existing tables and views.
     </div >
+    <!-- Todo Show dependencies-->
     <div class="help-text">
       All Objects related to this table will be afected. 
     </div>
-    <!-- <ul class="dropdown content">
-    </ul> -->
   
   <svelte:fragment slot="footer">
       <Button on:click={() => { isOpen = false; }}>Cancel</Button>

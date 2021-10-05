@@ -17,9 +17,6 @@
     removeTab,
     getTabsForSchema,
   } from '@mathesar/stores/tabs';
-  import type {
-    ActiveTab,
-  } from '@mathesar/stores/tabs';
   import {
     refetchTablesForSchema,
     deleteTable,
@@ -52,9 +49,9 @@
       dispatch('deleteTable');
     } else {
       const { activeTab } = getTabsForSchema($currentDBName, $currentSchemaId);
-      const activeTabObj: ActiveTab = get(activeTab);
+      const activeTabObj = get(activeTab);
       removeTab($currentDBName, $currentSchemaId, activeTabObj);
-      await deleteTable(`/tables/${activeTabObj.id}`);
+      await deleteTable(activeTabObj.id);
       await refetchTablesForSchema($currentSchemaId);
     }
   }

@@ -215,24 +215,6 @@ section.table-section .tab-container .table-data {
     font-weight: bold;
     margin-bottom: 10px;
     }
-
-  .dropdown.content {
-    max-height: 150px;
-    padding-left:0;
-    overflow:auto;
-    }
-
-  ul{
-    list-style-type: none;
-
-    li{
-      padding: 10px;
-
-      &:hover {
-        background-color:#e2e2e4;
-        }
-      }
-    }
   .footer {
     text-align: right;
   }
