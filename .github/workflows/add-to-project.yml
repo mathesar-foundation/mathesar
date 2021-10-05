@@ -57,7 +57,7 @@ jobs:
         if: github.event_name == 'issues'
         env:
           GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
-          ISSUE_ID: ${{ github.event.issues.node_id }}
+          ISSUE_ID: ${{ github.event.issue.node_id }}
         run: |
           gh api graphql --header 'GraphQL-Features: projects_next_graphql' -f query='
             mutation($project:ID!, $issue:ID!) {
