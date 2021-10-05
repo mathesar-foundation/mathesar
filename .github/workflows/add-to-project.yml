@@ -86,7 +86,7 @@ jobs:
                   projectId: $project_id
                   itemId: $item_id
                   fieldId: $field_id
-                  value: $value
+                  value: "$value"
                 }
               ) {
                 projectNextItem {
@@ -112,7 +112,7 @@ jobs:
                   projectId: $project_id
                   itemId: $item_id
                   fieldId: $field_id
-                  value: $value
+                  value: "$value"
                 }
               ) {
                 projectNextItem {
