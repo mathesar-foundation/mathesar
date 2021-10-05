@@ -90,7 +90,7 @@ jobs:
               }) {
                 projectNextItem {
                   id
-                  }
+                }
               }
               set_priority: updateProjectNextItemField(input: {
                 projectId: $project
@@ -102,4 +102,4 @@ jobs:
                   id
                 }
               }
-            }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=${{ env.TRIAGE_OPTION_ID }} -f priority_field=$PRIORITY_FIELD_ID -f priority_value=$BACKLOG_OPTION_ID --silent
+            }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=$TRIAGE_OPTION_ID -f priority_field=$PRIORITY_FIELD_ID -f priority_value=$BACKLOG_OPTION_ID --silent
