@@ -77,10 +77,10 @@ jobs:
             mutation {
               updateProjectNextItemField(
                 input: {
-                  projectId: "$project_id"
-                  itemId: "$item_id"
-                  fieldId: "$field_id"
-                  value: "$value"
+                  projectId: $project_id
+                  itemId: $item_id
+                  fieldId: $field_id
+                  value: $value
                 }
               ) {
                 projectNextItem {
