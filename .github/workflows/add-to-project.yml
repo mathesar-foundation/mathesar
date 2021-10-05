@@ -6,7 +6,7 @@ on:
     types: [opened]
 
 jobs:
-  add_content_to_project:
+  add_item_to_project:
     runs-on: ubuntu-latest
     steps:
       - name: Get project data
@@ -43,16 +43,15 @@ jobs:
           GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
           PR_ID: ${{ github.event.pull_request.node_id }}
         run: |
-          item_id="$( gh api graphql --header 'GraphQL-Features: projects_next_graphql' -f query='
+          gh api graphql --header 'GraphQL-Features: projects_next_graphql' -f query='
             mutation($project:ID!, $pr:ID!) {
               addProjectNextItem(input: {projectId: $project, contentId: $pr}) {
                 projectNextItem {
                   id
                 }
               }
-            }' -f project=$PROJECT_ID -f pr=$PR_ID --jq '.data.addProjectNextItem.projectNextItem.id')"
-          
-          echo 'ITEM_ID='$item_id >> $GITHUB_ENV
+            }' -f project=$PROJECT_ID -f pr=$PR_ID > item_data.json
+          echo 'ITEM_ID='$(jq '.data.addProjectNextItem.projectNextItem.id' item_data.json) >> $GITHUB_ENV
 
       - name: Add issue to project
         if: github.event_name == 'issues'
@@ -60,16 +59,15 @@ jobs:
           GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
           ISSUE_ID: ${{ github.event.issues.node_id }}
         run: |
-          item_id="$( gh api graphql --header 'GraphQL-Features: projects_next_graphql' -f query='
+          gh api graphql --header 'GraphQL-Features: projects_next_graphql' -f query='
             mutation($project:ID!, $issue:ID!) {
               addProjectNextItem(input: {projectId: $project, contentId: $issue}) {
                 projectNextItem {
                   id
                 }
               }
-            }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.addProjectNextItem.projectNextItem.id')"
-          
-          echo 'ITEM_ID='$item_id >> $GITHUB_ENV
+            }' -f project=$PROJECT_ID -f issue=$ISSUE_ID > item_data.json
+          echo 'ITEM_ID='$(jq '.data.addProjectNextItem.projectNextItem.id' item_data.json) >> $GITHUB_ENV
 
       - name: Set fields
         env:
