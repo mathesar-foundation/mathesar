@@ -79,21 +79,21 @@ jobs:
               $project_id:ID!,
               $item_id:ID!,
               $field_id:ID!,
-              $value:String!
+              $option_id:String!
             ) {
               updateProjectNextItemField(
                 input: {
                   projectId: $project_id
                   itemId: $item_id
                   fieldId: $field_id
-                  value: "$value"
+                  value: $option_id
                 }
               ) {
                 projectNextItem {
                   id
                 }
               }
-            }' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$STATUS_FIELD_ID -f value=$TRIAGE_OPTION_ID
+            }' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$STATUS_FIELD_ID -f option_id=$TRIAGE_OPTION_ID
 
       - name: Set priority field
         if: always()
@@ -105,18 +105,18 @@ jobs:
               $project_id:ID!,
               $item_id:ID!,
               $field_id:ID!,
-              $value:String!
+              $option_id:String!
             ) {
               updateProjectNextItemField(
                 input: {
                   projectId: $project_id
                   itemId: $item_id
                   fieldId: $field_id
-                  value: "$value"
+                  value: $option_id
                 }
               ) {
                 projectNextItem {
                   id
                 }
               }
-            }' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$PRIORITY_FIELD_ID -f value=$BACKLOG_OPTION_ID
+            }' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$PRIORITY_FIELD_ID -f option_id=$BACKLOG_OPTION_ID
