@@ -69,37 +69,22 @@ jobs:
             }' -f project=$PROJECT_ID -f issue=$ISSUE_ID > item_data.json
           echo 'ITEM_ID='$(jq '.data.addProjectNextItem.projectNextItem.id' item_data.json) >> $GITHUB_ENV
 
-      - name: Set fields
+      - name: Set status field
         env:
           GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           gh api graphql --header 'GraphQL-Features: projects_next_graphql' -f query='
-            mutation (
-              $project: ID!
-              $item: ID!
-              $status_field: ID!
-              $status_value: String!
-              $priority_field: ID!
-              $priority_value: String!
-            ) {
-              set_status: updateProjectNextItemField(input: {
-                projectId: $project
-                itemId: $item
-                fieldId: $status_field
-                value: $status_value
-              }) {
+            mutation {
+              updateProjectNextItemField(
+                input: {
+                  projectId: "$project_id"
+                  itemId: "$item_id"
+                  fieldId: "$field_id"
+                  value: "$value"
+                }
+              ) {
                 projectNextItem {
                   id
                 }
               }
-              set_priority: updateProjectNextItemField(input: {
-                projectId: $project
-                itemId: $item
-                fieldId: $priority_field
-                value: $priority_value
-              }) {
-                projectNextItem {
-                  id
-                }
-              }
-            }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$STATUS_FIELD_ID -f status_value=$TRIAGE_OPTION_ID -f priority_field=$PRIORITY_FIELD_ID -f priority_value=$BACKLOG_OPTION_ID --silent
+            }' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$STATUS_FIELD_ID -f value=$TRIAGE_OPTION_ID --silent
