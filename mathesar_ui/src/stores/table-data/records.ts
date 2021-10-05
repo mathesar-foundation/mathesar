@@ -374,6 +374,21 @@ export class Records {
     }
   }
 
+  getNewEmptyRecord(): TableRecord {
+    const offset = getStoreValue(this._meta.offset);
+    const savedRecordData = getStoreValue(this.savedRecords);
+    const savedRecordLength = savedRecordData?.length || 0;
+    const existingNewRecords = getStoreValue(this.newRecords);
+    const identifier = generateRowIdentifier('new', offset, existingNewRecords.length);
+    const newRecord: TableRecord = {
+      __identifier: identifier,
+      __state: States.Done,
+      __isNew: true,
+      __rowIndex: existingNewRecords.length + savedRecordLength,
+    };
+    return newRecord;
+  }
+
   async createOrUpdateRecord(row: TableRecord): Promise<void> {
     const { primaryKey } = this._columns.get();
     const rowKey = getRowKey(row, primaryKey);
@@ -394,16 +409,24 @@ export class Records {
         const newRow = {
           ...row,
           ...result,
+          __isAddPlaceholder: false,
         };
         const updatedRowKey = getRowKey(newRow, primaryKey);
         this._meta.clearRecordModificationState(rowKey);
         this._meta.setRecordModificationState(updatedRowKey, 'created');
-        this.newRecords.update((existing) => existing.map((entry) => {
-          if (entry.__identifier === row.__identifier) {
-            return newRow;
-          }
-          return entry;
-        }));
+        if (row.__isAddPlaceholder) {
+          this.newRecords.update((existing) => {
+            existing.push(newRow);
+            return existing;
+          });
+        } else {
+          this.newRecords.update((existing) => existing.map((entry) => {
+            if (entry.__identifier === row.__identifier) {
+              return newRow;
+            }
+            return entry;
+          }));
+        }
         this.totalCount.update((count) => count + 1);
       } catch (err) {
         this._meta.setRecordModificationState(rowKey, 'creationFailed');
@@ -418,17 +441,7 @@ export class Records {
   }
 
   async addEmptyRecord(): Promise<void> {
-    const offset = getStoreValue(this._meta.offset);
-    const savedRecordData = getStoreValue(this.savedRecords);
-    const savedRecordLength = savedRecordData?.length || 0;
-    const existingNewRecords = getStoreValue(this.newRecords);
-    const identifier = generateRowIdentifier('new', offset, existingNewRecords.length);
-    const newRecord: TableRecord = {
-      __identifier: identifier,
-      __state: States.Done,
-      __isNew: true,
-      __rowIndex: existingNewRecords.length + savedRecordLength,
-    };
+    const newRecord = this.getNewEmptyRecord();
     this.newRecords.update((existing) => existing.concat(newRecord));
     await this.createOrUpdateRecord(newRecord);
   }

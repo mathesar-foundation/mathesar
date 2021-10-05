@@ -68,8 +68,6 @@
       style={styleString} data-identifier={row.__identifier}>
   {#if row.__isNewHelpText}
     <RowPlaceholder {rowWidth}/>
-  {:else if row.__isAddPlaceholder}
-    <AddRowPlaceholder {rowWidth} on:click={() => records.addEmptyRecord()}/>
   {:else if row.__isGroupHeader}
     <GroupHeader {row} {rowWidth} groupColumns={$groupInfo.columns} groupCounts={$groupInfo.counts}/>
   {:else}

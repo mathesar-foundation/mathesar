@@ -151,7 +151,7 @@ export class Display {
     this.displayableRecords = derived(
       [savedRecords, newRecords],
       ([$savedRecords, $newRecords], set) => {
-        let allRecords = [].concat($savedRecords);
+        let allRecords = $savedRecords;
         if ($newRecords.length > 0) {
           allRecords = allRecords.concat({
             __identifier: '__new_help_text',
@@ -160,9 +160,8 @@ export class Display {
           }).concat($newRecords);
         }
         allRecords = allRecords.concat({
-          __identifier: '__add_placeholder',
+          ...this._records.getNewEmptyRecord(),
           __isAddPlaceholder: true,
-          __state: States.Done,
         });
         set(allRecords);
       },
