@@ -37,22 +37,46 @@ def get_column_index_from_name(table_oid, column_name, engine, connection_to_use
     return result - 1 - dropped_count
 
 
-def get_column_default(table_oid, column_index, engine, connection_to_use=None):
+def get_column_default_dict(table_oid, column_index, engine, connection_to_use=None):
     table = reflect_table_from_oid(table_oid, engine, connection_to_use)
     column = table.columns[column_index]
-    if column.server_default is None:
-        return None
-    elif _is_default_expr_dynamic(column.server_default):
+    default_dict = None
+    if column.server_default is not None:
+        default_dict = {
+            "server_default": column.server_default,
+            "is_dynamic": _is_default_expr_dynamic(column.server_default),
+            "default_textual_sql": str(column.server_default.arg)
+        }
+    else:
+        return
+    if default_dict.get("is_dynamic"):
         warnings.warn(
             "Dynamic column defaults are not implemented", DynamicDefaultWarning
         )
-        return str(column.server_default.arg)
+    else:
+        # Defaults are stored as text with SQL casts appended
+        # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
+        # Here, we execute the cast to get the proper python value
+        default_dict.update(
+            executed_constant=execute_statement(
+                engine,
+                select(text(default_dict['default_textual_sql'])),
+                connection_to_use
+            ).first()[0]
+        )
+    return default_dict
 
-    default_textual_sql = str(column.server_default.arg)
-    # Defaults are stored as text with SQL casts appended
-    # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
-    # Here, we execute the cast to get the proper python value
-    return execute_statement(engine, select(text(default_textual_sql)), connection_to_use).first()[0]
+
+def get_column_default(table_oid, column_index, engine, connection_to_use=None):
+    default_dict = get_column_default_dict(
+        table_oid, column_index, engine, connection_to_use=connection_to_use
+    )
+    if default_dict is None:
+        return
+    else:
+        executed_constant = default_dict.get('executed_constant')
+
+    return executed_constant if executed_constant is not None else default_dict['default_textual_sql']
 
 
 def _is_default_expr_dynamic(server_default):
