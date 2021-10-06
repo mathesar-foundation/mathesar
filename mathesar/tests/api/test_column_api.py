@@ -352,6 +352,16 @@ def test_column_update_default_invalid_cast(column_test_table, client):
     assert response.status_code == 400
 
 
+def test_column_update_type_dynamic_default(column_test_table, client):
+    cache.clear()
+    type_ = "NUMERIC"
+    data = {"type": type_}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/0/", data=data
+    )
+    assert response.status_code == 400
+
+
 def test_column_update_type(column_test_table, client):
     cache.clear()
     type_ = "BOOLEAN"

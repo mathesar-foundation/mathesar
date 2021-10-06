@@ -45,13 +45,13 @@ def get_column_default_dict(table_oid, column_index, engine, connection_to_use=N
         default_dict = {
             "server_default": column.server_default,
             "is_dynamic": _is_default_expr_dynamic(column.server_default),
-            "default_textual_sql": str(column.server_default.arg)
+            "sql_text": str(column.server_default.arg)
         }
     else:
         return
     if default_dict.get("is_dynamic"):
         warnings.warn(
-            "Dynamic column defaults are not implemented", DynamicDefaultWarning
+            "Dynamic column defaults are read only", DynamicDefaultWarning
         )
     else:
         # Defaults are stored as text with SQL casts appended
@@ -60,7 +60,7 @@ def get_column_default_dict(table_oid, column_index, engine, connection_to_use=N
         default_dict.update(
             executed_constant=execute_statement(
                 engine,
-                select(text(default_dict['default_textual_sql'])),
+                select(text(default_dict['sql_text'])),
                 connection_to_use
             ).first()[0]
         )
@@ -76,7 +76,7 @@ def get_column_default(table_oid, column_index, engine, connection_to_use=None):
     else:
         executed_constant = default_dict.get('executed_constant')
 
-    return executed_constant if executed_constant is not None else default_dict['default_textual_sql']
+    return executed_constant if executed_constant is not None else default_dict['sql_text']
 
 
 def _is_default_expr_dynamic(server_default):
