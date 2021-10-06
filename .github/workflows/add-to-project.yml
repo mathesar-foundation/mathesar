@@ -9,114 +9,26 @@ jobs:
   add_item_to_project:
     runs-on: ubuntu-latest
     steps:
-      - name: Get project data
-        env:
-          GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
-          ORGANIZATION: centerofci
-          PROJECT_NUMBER: 1
-        run: |
-          gh api graphql --header 'GraphQL-Features: projects_next_graphql' -f query='
-            query($org: String!, $number: Int!) {
-              organization(login: $org){
-                projectNext(number: $number) {
-                  id
-                  fields(first:20) {
-                    nodes {
-                      id
-                      name
-                      settings
-                    }
-                  }
-                }
-              }
-            }' -f org=$ORGANIZATION -F number=$PROJECT_NUMBER > project_data.json
+      - name: Set up Python
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
 
-          echo 'PROJECT_ID='$(jq '.data.organization.projectNext.id' project_data.json) >> $GITHUB_ENV
-          echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectNext.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'PRIORITY_FIELD_ID='$(jq '.data.organization.projectNext.fields.nodes[] | select(.name== "Priority") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'TRIAGE_OPTION_ID='$(jq '.data.organization.projectNext.fields.nodes[] | select(.name== "Status") |.settings | fromjson.options[] | select(.name=="Triage") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'BACKLOG_OPTION_ID='$(jq '.data.organization.projectNext.fields.nodes[] | select(.name== "Priority") |.settings | fromjson.options[] | select(.name=="Backlog") |.id' project_data.json) >> $GITHUB_ENV
+     - name: Install dependencies
+       run: |
+         pip install -r ../actions/project_update/requirements.txt
 
       - name: Add PR to project
         if: github.event_name == 'pull_request'
         env:
           GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
-          PR_ID: ${{ github.event.pull_request.node_id }}
         run: |
-          gh api graphql --header 'GraphQL-Features: projects_next_graphql' -f query='
-            mutation($project:ID!, $pr:ID!) {
-              addProjectNextItem(input: {projectId: $project, contentId: $pr}) {
-                projectNextItem {
-                  id
-                }
-              }
-            }' -f project=$PROJECT_ID -f pr=$PR_ID > item_data.json
-          echo 'ITEM_ID='$(jq '.data.addProjectNextItem.projectNextItem.id' item_data.json) >> $GITHUB_ENV
+          python ../actions/project_update/project_update.py ${{ github.event.pull_request.node_id }} --priority Active
 
       - name: Add issue to project
         if: github.event_name == 'issues'
         env:
           GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
-          ISSUE_ID: ${{ github.event.issue.node_id }}
         run: |
-          gh api graphql --header 'GraphQL-Features: projects_next_graphql' -f query='
-            mutation($project:ID!, $issue:ID!) {
-              addProjectNextItem(input: {projectId: $project, contentId: $issue}) {
-                projectNextItem {
-                  id
-                }
-              }
-            }' -f project=$PROJECT_ID -f issue=$ISSUE_ID > item_data.json
-          echo 'ITEM_ID='$(jq '.data.addProjectNextItem.projectNextItem.id' item_data.json) >> $GITHUB_ENV
-
-      - name: Set status field
-        if: always()
-        env:
-          GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
-        run: |
-          gh api graphql --header 'GraphQL-Features: projects_next_graphql' -f query='
-            mutation (
-              $project_id:ID!,
-              $item_id:ID!,
-              $field_id:ID!,
-              $option_id:String!
-            ) {
-              updateProjectNextItemField(
-                input: {
-                  projectId: $project_id
-                  itemId: $item_id
-                  fieldId: $field_id
-                  value: $option_id
-                }
-              ) {
-                projectNextItem {
-                  id
-                }
-              }
-            }' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$STATUS_FIELD_ID -f option_id=$TRIAGE_OPTION_ID
-
-      - name: Set priority field
-        if: always()
-        env:
-          GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
-        run: |
-          gh api graphql --header 'GraphQL-Features: projects_next_graphql' -f query='
-            mutation (
-              $project_id:ID!,
-              $item_id:ID!,
-              $field_id:ID!,
-              $option_id:String!
-            ) {
-              updateProjectNextItemField(
-                input: {
-                  projectId: $project_id
-                  itemId: $item_id
-                  fieldId: $field_id
-                  value: $option_id
-                }
-              ) {
-                projectNextItem {
-                  id
-                }
-              }
-            }' -f project_id=$PROJECT_ID -f item_id=$ITEM_ID -f field_id=$PRIORITY_FIELD_ID -f option_id=$BACKLOG_OPTION_ID
+          python ../actions/project_update/project_update.py ${{ github.event.issue.node_id }} --priority Backlog
