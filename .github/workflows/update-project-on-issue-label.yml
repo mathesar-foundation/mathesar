@@ -20,73 +20,73 @@ jobs:
           pip install -r requirements.txt
 
       - name: Update Triage issues
-        if: contains( github.event.pull_request.labels.*.name, ${{ 'status:\ triage' }})
+        if: contains(github.event.issue.labels.*.name, 'status:\ triage')
         env:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.issue.node_id }} --status Triage
+          python project_update.py github.event.issue.node_id }} --status Triage
 
       - name: Update Draft issues
-        if: contains( github.event.pull_request.labels.*.name, ${{ 'status:\ draft' }})
+        if: contains(github.event.issue.labels.*.name, 'status:\ draft')
         env:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.issue.node_id }} --status Draft
+          python project_update.py github.event.issue.node_id }} --status Draft
 
       - name: Update Blocked issues
-        if: contains( github.event.pull_request.labels.*.name, ${{ 'status:\ blocked' }})
+        if: contains(github.event.issue.labels.*.name, 'status:\ blocked')
         env:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.issue.node_id }} --status Blocked
+          python project_update.py github.event.issue.node_id }} --status Blocked
 
       - name: Update Ready issues
-        if: contains( github.event.pull_request.labels.*.name, ${{ 'status:\ ready' }})
+        if: contains(github.event.issue.labels.*.name, 'status:\ ready')
         env:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.issue.node_id }} --status Ready
+          python project_update.py github.event.issue.node_id }} --status Ready
 
       - name: Update Started issues
-        if: contains( github.event.pull_request.labels.*.name, ${{ 'status:\ started' }})
+        if: contains(github.event.issue.labels.*.name, 'status:\ started')
         env:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.issue.node_id }} --status Started --priority Active
+          python project_update.py github.event.issue.node_id }} --status Started --priority Active
 
       - name: Update Review issues
-        if: contains( github.event.pull_request.labels.*.name, ${{ 'status:\ review' }})
+        if: contains(github.event.issue.labels.*.name, 'status:\ review')
         env:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.issue.node_id }} --status Review --priority Active
+          python project_update.py github.event.issue.node_id }} --status Review --priority Active
 
       - name: Update Done issues
-        if: contains( github.event.pull_request.labels.*.name, ${{ 'status:\ done' }})
+        if: contains(github.event.issue.labels.*.name, 'status:\ done')
         env:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.issue.node_id }} --status Done --priority Active
+          python project_update.py github.event.issue.node_id }} --status Done --priority Active
 
       - name: Update Future issues
-        if: contains( github.event.pull_request.labels.*.name, ${{ 'priority:\ future' }})
+        if: contains(github.event.issue.labels.*.name, 'priority:\ future')
         env:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.issue.node_id }} --status Draft --priority Future
+          python project_update.py github.event.issue.node_id }} --status Draft --priority Future
 
       - name: Update Urgent issues
-        if: contains( github.event.pull_request.labels.*.name, ${{ 'priority:\ urgent' }})
+        if: contains(github.event.issue.labels.*.name, 'priority:\ urgent')
         env:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
-          python project_update.py ${{ github.event.issue.node_id }} --priority Active
+          python project_update.py github.event.issue.node_id }} --priority Active
