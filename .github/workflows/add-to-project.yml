@@ -9,15 +9,16 @@ jobs:
   add_item_to_project:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Python
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
           python-version: '3.9'
-
-     - name: Install dependencies
-       run: |
-         pip install -r ../actions/project_update/requirements.txt
+      
+      - name: Install dependencies
+        run: |
+          pip install -r ../actions/project_update/requirements.txt
 
       - name: Add PR to project
         if: github.event_name == 'pull_request'
