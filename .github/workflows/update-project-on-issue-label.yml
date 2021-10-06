@@ -4,7 +4,7 @@ on:
     types: [labeled]
 
 jobs:
-  add_item_to_project:
+  update_project_on_issue_label_change:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
