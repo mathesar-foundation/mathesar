@@ -24,7 +24,7 @@ jobs:
       - name: Add PR to project
         if: github.event_name == 'pull_request'
         env:
-          GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
           python project_update.py ${{ github.event.pull_request.node_id }} --priority Active
@@ -32,7 +32,7 @@ jobs:
       - name: Add issue to project
         if: github.event_name == 'issues'
         env:
-          GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
           cd .github/actions/project_update/
           python project_update.py ${{ github.event.issue.node_id }} --priority Backlog
