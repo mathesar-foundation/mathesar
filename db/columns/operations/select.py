@@ -7,7 +7,13 @@ from db.columns.exceptions import DynamicDefaultWarning
 from db.tables.operations.select import reflect_table_from_oid
 from db.utils import execute_statement
 
-
+# These tags define which nodes in the AST built by pglast we consider to be
+# "dynamic" when found in a column default clause.  The nodes are best
+# documented by C header files that define the underlying structs:
+# https://github.com/pganalyze/libpg_query/blob/13-latest/src/postgres/include/nodes/parsenodes.h
+# https://github.com/pganalyze/libpg_query/blob/13-latest/src/postgres/include/nodes/primnodes.h
+# It's possible that more dynamic nodes will be found.  Their tags should be
+# added to this set.
 DYNAMIC_NODE_TAGS = {"SQLValueFunction", "FuncCall"}
 
 
