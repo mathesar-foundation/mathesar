@@ -1,0 +1,38 @@
+name: Add new issues and PRs to project
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+jobs:
+  add_item_to_project:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          cd .github/actions/project_update/
+          pip install -r requirements.txt
+
+      - name: Add PR to project
+        if: github.event_name == 'pull_request'
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Started --priority Active
+
+      - name: Add issue to project
+        if: github.event_name == 'issues'
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.issue.node_id }} --status Triage --priority Backlog
