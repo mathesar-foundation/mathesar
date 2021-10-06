@@ -20,7 +20,6 @@ jobs:
           pip install -r requirements.txt
 
       - name: Update status and priority
-        if: github.event.label.name == 'status:\ done'
         run: |
           cd .github/actions/project_update/
           python project_update.py ${{ github.event.issue.node_id }} --status Done --priority Active
