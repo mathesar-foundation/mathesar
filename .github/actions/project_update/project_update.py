@@ -1,8 +1,9 @@
-import argparse, json, os
+import argparse
+import json
+import os
 from string import Template
 
 import requests
-from github import Github
 
 
 GITHUB_TOKEN = os.environ['MATHESAR_ORG_GITHUB_TOKEN']
@@ -26,7 +27,7 @@ def run_graphql(graphql):
         print(f'\tResult of query:\n\t\t{result}')
         return result
     else:
-        raise Exception("Query failed to run by returning code of {}. {}".format(request.status_code, query))
+        raise Exception(f'\tQuery failed to run by returning code of {request.status_code}.\n\t\t{graphql}')
 
 
 def get_project_data():
@@ -130,6 +131,7 @@ def get_arguments():
     parser.add_argument("--status", help="Status to set ")
     parser.add_argument("--priority", help="Priority to set ")
     return parser.parse_args()
+
 
 if __name__ == '__main__':
     args = get_arguments()
