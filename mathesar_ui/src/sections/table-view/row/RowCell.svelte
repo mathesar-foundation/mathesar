@@ -45,7 +45,7 @@
     if (value !== val) {
       value = val;
       if (row.__isNew) {
-        void records.createOrUpdateRecord(row);
+        void records.createOrUpdateRecord(row, column);
       } else {
         void records.updateCell(row, column);
       }

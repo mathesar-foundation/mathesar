@@ -459,7 +459,7 @@ export class Records {
     }
   }
 
-  async createOrUpdateRecord(row: TableRecord): Promise<void> {
+  async createOrUpdateRecord(row: TableRecord, column?: TableColumn): Promise<void> {
     const { primaryKey } = this._columns.get();
 
     // Row may not have been updated yet in view when additional request is made.
@@ -479,6 +479,8 @@ export class Records {
 
     if (!existingNewRecordRow?.[primaryKey] && row.__isNew && !row[primaryKey]) {
       await this.createRecord(row);
+    } else if (column) {
+      await this.updateCell(row, column);
     } else {
       await this.updateRecord(row);
     }
@@ -487,7 +489,7 @@ export class Records {
   async addEmptyRecord(): Promise<void> {
     const newRecord = this.getNewEmptyRecord();
     this.newRecords.update((existing) => existing.concat(newRecord));
-    await this.createOrUpdateRecord(newRecord);
+    await this.createRecord(newRecord);
   }
 
   getIterationKey(index: number): string {
