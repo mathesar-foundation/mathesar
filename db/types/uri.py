@@ -1,5 +1,6 @@
 from enum import Enum
-from sqlalchemy import text, Text
+import os
+from sqlalchemy import text, Text, Table, Column, Integer, String, MetaData
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.types import UserDefinedType
@@ -8,6 +9,16 @@ from db.types import base
 
 URI_STR = base.MathesarCustomType.URI.value
 DB_TYPE = base.get_qualified_name(URI_STR)
+
+TLDS_PATH = os.path.join(
+    os.path.join(os.path.abspath(os.path.dirname(__file__)), "resources"),
+    "tlds.txt"
+)
+
+TLDS_TABLE_NAME = "top_level_domains"
+QUALIFIED_TLDS = base.get_qualified_name(TLDS_TABLE_NAME)
+
+
 
 
 class URIFunction(Enum):
@@ -98,3 +109,18 @@ def install(engine):
             conn.execute(text(create_uri_part_getter_query))
         conn.execute(text(create_domain_query))
         conn.commit()
+
+
+def install_tld_lookup_table(engine):
+    tlds_table = Table(
+        TLDS_TABLE_NAME,
+        MetaData(bind=engine),
+        Column("tld", String, primary_key=True),
+        schema=base.preparer.quote_schema(base.SCHEMA)
+    )
+    tlds_table.create()
+    with engine.begin() as conn, open(TLDS_PATH) as f:
+        conn.execute(
+            tlds_table.insert(),
+            [{"tld": tld.strip().lower()} for tld in f if tld[:2] != "# "],
+        )
