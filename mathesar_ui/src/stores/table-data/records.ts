@@ -346,6 +346,36 @@ export class Records {
     }
   }
 
+  // TODO: Handle states where cell update and row update happen in parallel
+  async updateCell(row: TableRecord, column: TableColumn): Promise<void> {
+    const { primaryKey } = this._columns.get();
+    if (primaryKey && row[primaryKey]) {
+      const rowKey = getRowKey(row, primaryKey);
+      const cellKey = `${rowKey.toString()}::${column.name}`;
+      this._meta.setCellUpdateState(rowKey, cellKey, 'update');
+      this._updatePromises?.get(cellKey)?.cancel();
+      const promise = patchAPI<TableRecordResponse>(
+        `${this._url}${row[primaryKey] as string}/`,
+        { [column.name]: row[column.name] },
+      );
+      if (!this._updatePromises) {
+        this._updatePromises = new Map();
+      }
+      this._updatePromises.set(cellKey, promise);
+
+      try {
+        await promise;
+        this._meta.setCellUpdateState(rowKey, cellKey, 'updated');
+      } catch (err) {
+        this._meta.setCellUpdateState(rowKey, cellKey, 'updateFailed');
+      } finally {
+        if (this._updatePromises.get(cellKey) === promise) {
+          this._updatePromises.delete(cellKey);
+        }
+      }
+    }
+  }
+
   async updateRecord(row: TableRecord): Promise<void> {
     const { primaryKey } = this._columns.get();
     if (primaryKey && row[primaryKey]) {
@@ -389,9 +419,48 @@ export class Records {
     return newRecord;
   }
 
-  async createOrUpdateRecord(row: TableRecord): Promise<void> {
+  async createRecord(row: TableRecord): Promise<void> {
     const { primaryKey } = this._columns.get();
     const rowKey = getRowKey(row, primaryKey);
+    this._meta.setRecordModificationState(rowKey, 'create');
+    this._createPromises?.get(rowKey)?.cancel();
+    const promise = postAPI<TableRecordResponse>(
+      this._url,
+      prepareRowForRequest(row),
+    );
+    if (!this._createPromises) {
+      this._createPromises = new Map();
+    }
+    this._createPromises.set(rowKey, promise);
+
+    try {
+      const result = await promise;
+      const newRow = {
+        ...row,
+        ...result,
+        __isAddPlaceholder: false,
+      };
+      const updatedRowKey = getRowKey(newRow, primaryKey);
+      this._meta.clearRecordModificationState(rowKey);
+      this._meta.setRecordModificationState(updatedRowKey, 'created');
+      this.newRecords.update((existing) => existing.map((entry) => {
+        if (entry.__identifier === row.__identifier) {
+          return newRow;
+        }
+        return entry;
+      }));
+      this.totalCount.update((count) => count + 1);
+    } catch (err) {
+      this._meta.setRecordModificationState(rowKey, 'creationFailed');
+    } finally {
+      if (this._createPromises.get(rowKey) === promise) {
+        this._createPromises.delete(rowKey);
+      }
+    }
+  }
+
+  async createOrUpdateRecord(row: TableRecord): Promise<void> {
+    const { primaryKey } = this._columns.get();
 
     // Row may not have been updated yet in view when additional request is made.
     // So check current values to ensure another row has not been created.
@@ -409,41 +478,7 @@ export class Records {
     }
 
     if (!existingNewRecordRow?.[primaryKey] && row.__isNew && !row[primaryKey]) {
-      this._meta.setRecordModificationState(rowKey, 'create');
-      this._createPromises?.get(rowKey)?.cancel();
-      const promise = postAPI<TableRecordResponse>(
-        this._url,
-        prepareRowForRequest(row),
-      );
-      if (!this._createPromises) {
-        this._createPromises = new Map();
-      }
-      this._createPromises.set(rowKey, promise);
-
-      try {
-        const result = await promise;
-        const newRow = {
-          ...row,
-          ...result,
-          __isAddPlaceholder: false,
-        };
-        const updatedRowKey = getRowKey(newRow, primaryKey);
-        this._meta.clearRecordModificationState(rowKey);
-        this._meta.setRecordModificationState(updatedRowKey, 'created');
-        this.newRecords.update((existing) => existing.map((entry) => {
-          if (entry.__identifier === row.__identifier) {
-            return newRow;
-          }
-          return entry;
-        }));
-        this.totalCount.update((count) => count + 1);
-      } catch (err) {
-        this._meta.setRecordModificationState(rowKey, 'creationFailed');
-      } finally {
-        if (this._createPromises.get(rowKey) === promise) {
-          this._createPromises.delete(rowKey);
-        }
-      }
+      await this.createRecord(row);
     } else {
       await this.updateRecord(row);
     }

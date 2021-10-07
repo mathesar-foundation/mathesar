@@ -47,7 +47,7 @@
       if (row.__isNew) {
         void records.createOrUpdateRecord(row);
       } else {
-        void records.updateRecord(row);
+        void records.updateCell(row, column);
       }
     }
   }

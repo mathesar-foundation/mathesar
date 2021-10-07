@@ -11,6 +11,8 @@
 </div>
 
 <div class="cell new-row-help-cell" on:click
-  style="left:{ROW_CONTROL_COLUMN_WIDTH}px;width:{rowWidth - ROW_CONTROL_COLUMN_WIDTH}px;">
+  style="left:{ROW_CONTROL_COLUMN_WIDTH}px;
+    width:{rowWidth - ROW_CONTROL_COLUMN_WIDTH}px;
+    min-width:400px">
   New records will be repositioned on refresh
 </div>
