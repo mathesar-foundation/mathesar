@@ -53,6 +53,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           create_pr_comments: false
           dedupe_issues: true
+          working_directory: ./mathesar_ui
 
   tests:
     runs-on: ubuntu-latest
