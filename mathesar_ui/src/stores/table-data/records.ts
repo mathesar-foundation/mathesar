@@ -425,6 +425,7 @@ export class Records {
         const newRow = {
           ...row,
           ...result,
+          __isAddPlaceholder: false,
         };
         const updatedRowKey = getRowKey(newRow, primaryKey);
         this._meta.clearRecordModificationState(rowKey);

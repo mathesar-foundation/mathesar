@@ -19,23 +19,25 @@
   let display: Display;
   let virtualListRef: VirtualList;
   let displayableRecords: Display['displayableRecords'];
+  let newRecords: Records['newRecords'];
   $: ({ id, records, display } = $tabularData as TabularData);
   $: ({ newRecords } = records);
   $: ({
     rowWidth, horizontalScrollOffset, displayableRecords,
   } = display);
 
-  async function resetIndex(_newRecords: TableRecord[]) {
-    const allRecordLength = get(displayableRecords)?.length;
+  async function resetIndex(_displayableRecords: TableRecord[]) {
+    const allRecordLength = _displayableRecords?.length;
+    const newRecordLength = get(newRecords)?.length || 0;
     if (allRecordLength) {
-      const index = allRecordLength - _newRecords.length - 3;
+      const index = Math.max(allRecordLength - newRecordLength - 3, 0);
       await tick();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       virtualListRef?.resetAfterIndex(index);
     }
   }
 
-  $: void resetIndex($newRecords);
+  $: void resetIndex($displayableRecords);
 
   let bodyRef: HTMLDivElement;
 
