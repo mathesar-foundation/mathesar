@@ -242,6 +242,13 @@
       }
     }
   }
+
+  export function scrollToBottom(): void {
+    if (outerRef && psRef) {
+      outerRef.scrollTop = outerRef.scrollHeight;
+      psRef.update();
+    }
+  }
 </script>
 
 <div

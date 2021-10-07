@@ -26,12 +26,19 @@
     rowWidth, horizontalScrollOffset, displayableRecords,
   } = display);
 
+  let previousNewRecordsCount = 0;
+
   async function resetIndex(_displayableRecords: TableRecord[]) {
     const allRecordLength = _displayableRecords?.length;
     const newRecordLength = get(newRecords)?.length || 0;
-    if (allRecordLength) {
+    if (allRecordLength && previousNewRecordsCount !== newRecordLength) {
       const index = Math.max(allRecordLength - newRecordLength - 3, 0);
       await tick();
+      if (previousNewRecordsCount < newRecordLength) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        virtualListRef?.scrollToBottom();
+      }
+      previousNewRecordsCount = newRecordLength;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       virtualListRef?.resetAfterIndex(index);
     }
