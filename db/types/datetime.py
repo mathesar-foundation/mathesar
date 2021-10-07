@@ -1,4 +1,3 @@
-from sqlalchemy import types as sa_types
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.dialects.postgresql.base import TIME as SA_TIME
 
@@ -6,6 +5,7 @@ from db.types import base
 
 TIME_ZONE_DB_TYPE = base.PostgresType.TIME_WITH_TIME_ZONE.value
 WITHOUT_TIME_ZONE_DB_TYPE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
+
 
 class TIME_WITHOUT_TIME_ZONE(SA_TIME):
     def __init__(self, *args, precision=None, **kwargs):
