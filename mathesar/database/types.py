@@ -49,7 +49,6 @@ def _get_type_map():
         'name': 'Date & Time',
         'sa_type_names': [
             PostgresType.DATE.value,
-            PostgresType.TIME.value,
             PostgresType.TIME_WITH_TIME_ZONE.value,
             PostgresType.TIME_WITHOUT_TIME_ZONE.value,
             PostgresType.TIMESTAMP.value,
