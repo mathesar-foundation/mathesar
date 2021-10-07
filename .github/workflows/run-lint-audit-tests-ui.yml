@@ -54,7 +54,7 @@ jobs:
           create_pr_comments: false
           dedupe_issues: true
           working_directory: './mathesar_ui'
-          issue_labels: 'restricted: maintainers,type: bug,work: frontend,status: review'
+          issue_labels: 'restricted: maintainers,type: bug,work: frontend,status: triage'
         continue-on-error: true
 
   tests:
