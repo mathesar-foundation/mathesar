@@ -133,22 +133,21 @@ export class Meta {
         if ($recordModificationState.size === 0) {
           set('idle');
         } else {
+          let finalState: ModificationStatus = 'idle';
           // eslint-disable-next-line no-restricted-syntax
           for (const value of $recordModificationState.values()) {
             const rowState = value?.get(RECORD_COMBINED_STATE_KEY);
             if (inProgressSet.has(rowState)) {
-              set('inprocess');
-              return;
+              finalState = 'inprocess';
+              break;
             }
             if (errorSet.has(rowState)) {
-              set('error');
-              return;
-            }
-            if (completeSet.has(rowState)) {
-              set('complete');
-              return;
+              finalState = 'error';
+            } else if (completeSet.has(rowState) && finalState === 'idle') {
+              finalState = 'complete';
             }
           }
+          set(finalState);
         }
       },
       'idle' as ModificationStatus,
