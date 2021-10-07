@@ -54,6 +54,7 @@ jobs:
           create_pr_comments: false
           dedupe_issues: true
           working_directory: ./mathesar_ui
+        continue-on-error: true
 
   tests:
     runs-on: ubuntu-latest
