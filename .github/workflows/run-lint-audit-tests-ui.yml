@@ -53,7 +53,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           create_pr_comments: false
           dedupe_issues: true
-          working_directory: ./mathesar_ui
+          working_directory: './mathesar_ui'
+          issue_labels: 'restricted: maintainers,type: bug,work: frontend,status: review'
         continue-on-error: true
 
   tests:
