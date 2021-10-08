@@ -19,6 +19,14 @@ jobs:
           cd .github/actions/project_update/
           pip install -r requirements.txt
 
+      - name: Dump GitHub context and debug
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "$GITHUB_CONTEXT"
+          echo ${{'status:\ triage'}}
+          echo contains(github.event.issue.labels.*.name, ${{'status:\ triage'}}
+
       - name: Update Triage issues
         if: contains(github.event.issue.labels.*.name, ${{'status:\ triage'}})
         env:
