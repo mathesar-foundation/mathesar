@@ -473,8 +473,14 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 ]
             },
             URI: {
-                VALID: [("https://centerofci.org", "https://centerofci.org")],
-                INVALID: ["/sdf/"]
+                VALID: [
+                    ("https://centerofci.org", "https://centerofci.org"),
+                    ("http://centerofci.org", "http://centerofci.org"),
+                    ("centerofci.org", "http://centerofci.org"),
+                    ("nasa.gov", "http://nasa.gov"),
+                    ("museumoflondon.org.uk", "http://museumoflondon.org.uk"),
+                ],
+                INVALID: ["/sdf/", "localhost", "$123.45", "154.23USD"]
             },
             TEXT: {VALID: [("a string", "a string")]},
             VARCHAR: {VALID: [("a string", "a string")]},
