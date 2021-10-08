@@ -95,7 +95,7 @@ def get_option_data(option_name, field_data):
 
 
 def update_field_for_item(item_id, field, value, project_data):
-    print(f'Updating {item_id} with field ID: {field}, field value: {option}...')
+    print(f'Updating {item_id} with field ID: {field}, field value: {value}...')
     query_template = Template(
         """
           mutation {
