@@ -90,3 +90,59 @@ jobs:
         run: |
           cd .github/actions/project_update/
           python project_update.py ${{ github.event.issue.node_id }} --priority Active
+
+      - name: Update documentation issues
+        if: "${{ contains(github.event.issue.labels.*.name, 'work: documentation') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.issue.node_id }} --work Documentation
+
+      - name: Update infrastructure issues
+        if: "${{ contains(github.event.issue.labels.*.name, 'work: infrastructure') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.issue.node_id }} --work Infrastructure
+
+      - name: Update product issues
+        if: "${{ contains(github.event.issue.labels.*.name, 'work: product') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.issue.node_id }} --work Product
+
+      - name: Update design issues
+        if: "${{ contains(github.event.issue.labels.*.name, 'work: design') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.issue.node_id }} --work Design
+
+      - name: Update frontend issues
+        if: "${{ contains(github.event.issue.labels.*.name, 'work: frontend') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.issue.node_id }} --work Frontend
+
+      - name: Update backend issues
+        if: "${{ contains(github.event.issue.labels.*.name, 'work: backend') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.issue.node_id }} --work Backend
+
+      - name: Update database issues
+        if: "${{ contains(github.event.issue.labels.*.name, 'work: database') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.issue.node_id }} --work Backend
