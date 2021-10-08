@@ -514,9 +514,9 @@ def _get_textual_type_body_map(engine, target_type_str=VARCHAR):
     """
     supported_types = get_supported_alter_column_db_types(engine)
 
-    text_cast_str = """
+    text_cast_str = f"""
         BEGIN
-          RETURN $1::TEXT;
+          RETURN $1::{TEXT};
         END;
     """
 
@@ -538,8 +538,29 @@ def _get_uri_type_body_map():
     Get SQL strings that create various functions for casting different
     types to URIs.
     """
-    default_behavior_source_types = frozenset([uri.DB_TYPE]) | TEXT_TYPES
-    return _get_default_type_body_map(default_behavior_source_types, uri.DB_TYPE)
+    def _get_text_uri_type_body_map():
+        # We need to check that a string isn't a valid number before
+        # casting to intervals (since a number is more likely)
+        auth_func = uri.QualifiedURIFunction.AUTHORITY.value
+        tld_regex = r"'(?<=\.)(?:.(?!\.))+$'"
+        not_uri_exception_str = f"RAISE EXCEPTION '% is not a {URI}', $1;"
+        return f"""
+        DECLARE uri_res {uri.DB_TYPE} := 'https://centerofci.org';
+        DECLARE uri_tld {TEXT};
+        BEGIN
+          RETURN $1::{uri.DB_TYPE};
+          EXCEPTION WHEN SQLSTATE '23514' THEN
+              SELECT lower(('http://' || $1)::{uri.DB_TYPE}) INTO uri_res;
+              SELECT (regexp_match({auth_func}(uri_res), {tld_regex}))[1]
+                INTO uri_tld;
+              IF EXISTS(SELECT 1 FROM {uri.QUALIFIED_TLDS} WHERE tld = uri_tld) THEN
+                RETURN uri_res;
+              END IF;
+          {not_uri_exception_str}
+        END;
+        """
+    source_types = frozenset([uri.DB_TYPE]) | TEXT_TYPES
+    return {type_: _get_text_uri_type_body_map() for type_ in source_types}
 
 
 def _get_default_type_body_map(source_types, target_type_str):

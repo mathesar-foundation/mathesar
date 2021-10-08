@@ -1,6 +1,6 @@
 from enum import Enum
 import os
-from sqlalchemy import text, Text, Table, Column, Integer, String, MetaData
+from sqlalchemy import text, Text, Table, Column, String, MetaData
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.types import UserDefinedType
@@ -17,8 +17,6 @@ TLDS_PATH = os.path.join(
 
 TLDS_TABLE_NAME = "top_level_domains"
 QUALIFIED_TLDS = base.get_qualified_name(TLDS_TABLE_NAME)
-
-
 
 
 class URIFunction(Enum):
