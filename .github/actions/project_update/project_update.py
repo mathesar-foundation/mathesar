@@ -115,7 +115,7 @@ def update_field_for_item(item_id, field, value, project_data):
         """
     )
     field_data = get_field_data(field, project_data)
-    if field is 'Timestamp':
+    if field == 'Timestamp':
         value_to_save = value
     else:
         option_data = get_option_data(value, field_data)
