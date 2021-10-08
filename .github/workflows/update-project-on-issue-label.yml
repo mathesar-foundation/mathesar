@@ -25,7 +25,7 @@ jobs:
         run: |
           echo "$GITHUB_CONTEXT"
           echo ${{'status:\ review'}}
-          echo github.event.label.name
+          echo ${{ github.event.label.name }}
 
       - name: Update Triage issues
         if: github.event.label.name == ${{'status:\ triage'}}
