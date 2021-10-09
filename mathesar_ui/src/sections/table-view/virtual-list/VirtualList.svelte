@@ -60,7 +60,6 @@
   let estimatedTotalSize: number;
 
   let outerRef: HTMLElement;
-  let innerRef;
 
   let requestResetIsScrolling = false;
   let resetIsScrollingTimeoutId = null;
@@ -249,7 +248,7 @@
   class={outerClass}
   style="height:{height}px;width:100%;direction:ltr;"
   bind:this={outerRef}>
-  <div bind:this={innerRef} style={innerStyle}>
+  <div style={innerStyle}>
       <slot {items} />
   </div>
 </div>

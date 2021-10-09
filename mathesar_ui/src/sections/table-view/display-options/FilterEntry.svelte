@@ -9,9 +9,7 @@
     Select,
     TextInput,
   } from '@mathesar-components';
-  import type {
-    FilterEntry,
-  } from '@mathesar/stores/tableData';
+  import type { FilterEntry } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar-components/types';
 
   const dispatch = createEventDispatcher();
@@ -24,19 +22,19 @@
   export let value: FilterEntry['value'];
 
   let inputValue: string;
-  let timer;
+  let timer: number;
 
   onMount(() => {
     inputValue = value;
   });
 
   onDestroy(() => {
-    clearTimeout(timer);
+    window.clearTimeout(timer);
   });
 
   function onValueChange(_inputValue: string) {
     clearTimeout(timer);
-    timer = setTimeout(() => {
+    timer = window.setTimeout(() => {
       if (value !== _inputValue) {
         value = _inputValue;
         dispatch('reload');

@@ -1,10 +1,10 @@
-export interface SelectOption {
-  [key: string]: unknown
+export interface SelectOption<T = unknown> {
+  [key: string]: T
 }
 
-export type SelectOptions = SelectOption[] | Promise<SelectOption>;
-export interface SelectChangeEvent extends Event {
+export type SelectOptions<T = unknown> = SelectOption<T>[] | Promise<SelectOption<T>>;
+export interface SelectChangeEvent<T = unknown> extends Event {
   detail: {
-    value: SelectOption
+    value: SelectOption<T>
   }
 }

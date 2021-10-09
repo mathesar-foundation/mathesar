@@ -1,11 +1,10 @@
 import {
   derived,
   writable,
-  Readable,
-  Writable,
-  Unsubscriber,
   get,
 } from 'svelte/store';
+import type { Readable, Writable, Unsubscriber } from 'svelte/store';
+
 import {
   getAPI,
   postAPI,

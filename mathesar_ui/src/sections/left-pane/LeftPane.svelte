@@ -26,7 +26,7 @@
 
   export let database: string;
   export let schemaId: SchemaEntry['id'];
-  export let activeTab;
+  export let activeTab: MathesarTab;
   export let getLink: (entry: MathesarTab) => string;
   
   let tree: TreeItem[] = [];

@@ -5,27 +5,38 @@ from sqlalchemy.sql.functions import Function
 from db.types import base, email, money
 from db.types.exceptions import UnsupportedTypeException
 
-
+# DB type name strings
 BIGINT = base.PostgresType.BIGINT.value
 BOOLEAN = base.PostgresType.BOOLEAN.value
+DATE = base.PostgresType.DATE.value
 DECIMAL = base.PostgresType.DECIMAL.value
 DOUBLE_PRECISION = base.PostgresType.DOUBLE_PRECISION.value
 FLOAT = base.PostgresType.FLOAT.value
 INTEGER = base.PostgresType.INTEGER.value
 INTERVAL = base.PostgresType.INTERVAL.value
-NAME = base.PostgresType.NAME.value
 NUMERIC = base.PostgresType.NUMERIC.value
 REAL = base.PostgresType.REAL.value
 SMALLINT = base.PostgresType.SMALLINT.value
-FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
 TEXT = base.PostgresType.TEXT.value
-DATE = base.PostgresType.DATE.value
+
+# one-off strings representing keys in ischema_names
+CHAR = base.CHAR
 STRING = base.STRING
 VARCHAR = base.VARCHAR
 
 # custom types
 EMAIL = base.MathesarCustomType.EMAIL.value
 MONEY = base.MathesarCustomType.MONEY.value
+
+# only needed for ischema lookup
+FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
+FULL_CHAR = base.PostgresType.CHARACTER.value
+NAME = base.PostgresType.NAME.value
+
+DECIMAL_TYPES = frozenset([DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL])
+INTEGER_TYPES = frozenset([BIGINT, INTEGER, SMALLINT])
+NUMBER_TYPES = DECIMAL_TYPES | INTEGER_TYPES
+TEXT_TYPES = frozenset([CHAR, TEXT, VARCHAR])
 
 
 def get_supported_alter_column_types(engine, friendly_names=True):
@@ -42,6 +53,8 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         # Default Postgres types
         BIGINT: dialect_types.get(BIGINT),
         BOOLEAN: dialect_types.get(BOOLEAN),
+        CHAR: dialect_types.get(FULL_CHAR),
+        DATE: dialect_types.get(DATE),
         DECIMAL: dialect_types.get(DECIMAL),
         DOUBLE_PRECISION: dialect_types.get(DOUBLE_PRECISION),
         FLOAT: dialect_types.get(FLOAT),
@@ -52,7 +65,6 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         SMALLINT: dialect_types.get(SMALLINT),
         STRING: dialect_types.get(NAME),
         TEXT: dialect_types.get(TEXT),
-        DATE: dialect_types.get(DATE),
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),
@@ -127,7 +139,7 @@ def install_all_casts(engine):
     create_integer_casts(engine)
     create_interval_casts(engine)
     create_money_casts(engine)
-    create_varchar_casts(engine)
+    create_textual_casts(engine)
 
 
 def create_boolean_casts(engine):
@@ -141,7 +153,7 @@ def create_date_casts(engine):
 
 
 def create_decimal_number_casts(engine):
-    decimal_number_types = [DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL]
+    decimal_number_types = DECIMAL_TYPES
     for type_str in decimal_number_types:
         type_body_map = _get_decimal_number_type_body_map(target_type_str=type_str)
         create_cast_functions(type_str, type_body_map, engine)
@@ -169,9 +181,11 @@ def create_money_casts(engine):
     create_cast_functions(money.DB_TYPE, type_body_map, engine)
 
 
-def create_varchar_casts(engine):
-    type_body_map = _get_varchar_type_body_map(engine)
-    create_cast_functions(VARCHAR, type_body_map, engine)
+def create_textual_casts(engine):
+    textual_types = TEXT_TYPES
+    for type_str in textual_types:
+        type_body_map = _get_textual_type_body_map(engine, target_type_str=type_str)
+        create_cast_functions(type_str, type_body_map, engine)
 
 
 def get_full_cast_map(engine):
@@ -194,6 +208,7 @@ def get_defined_source_target_cast_tuples(engine):
     type_body_map_map = {
         BIGINT: _get_integer_type_body_map(target_type_str=BIGINT),
         BOOLEAN: _get_boolean_type_body_map(),
+        CHAR: _get_textual_type_body_map(engine, target_type_str=CHAR),
         DATE: _get_date_type_body_map(),
         DECIMAL: _get_decimal_number_type_body_map(target_type_str=DECIMAL),
         DOUBLE_PRECISION: _get_decimal_number_type_body_map(target_type_str=DOUBLE_PRECISION),
@@ -205,7 +220,8 @@ def get_defined_source_target_cast_tuples(engine):
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
-        VARCHAR: _get_varchar_type_body_map(engine),
+        TEXT: _get_textual_type_body_map(engine, target_type_str=TEXT),
+        VARCHAR: _get_textual_type_body_map(engine, target_type_str=VARCHAR),
     }
     return {
         (source_type, target_type)
@@ -269,11 +285,9 @@ def _get_boolean_type_body_map():
                              PostgreSQL).  Others raise a custom
                              exception.
     """
-    source_number_types = [
-        BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
-        SMALLINT,
-    ]
-    default_behavior_source_types = [BOOLEAN]
+    source_number_types = NUMBER_TYPES
+    source_text_types = TEXT_TYPES
+    default_behavior_source_types = frozenset([BOOLEAN])
 
     not_bool_exception_str = f"RAISE EXCEPTION '% is not a {BOOLEAN}', $1;"
 
@@ -285,6 +299,20 @@ def _get_boolean_type_body_map():
           RETURN $1<>0;
         END;
         """
+
+    def _get_text_to_boolean_cast_str():
+        return f"""
+        DECLARE
+        istrue {BOOLEAN};
+        BEGIN
+          SELECT lower($1)='t' OR lower($1)='true' OR $1='1' INTO istrue;
+          IF istrue OR lower($1)='f' OR lower($1)='false' OR $1='0' THEN
+            RETURN istrue;
+          END IF;
+          {not_bool_exception_str}
+        END;
+        """
+
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, BOOLEAN,
     )
@@ -296,19 +324,9 @@ def _get_boolean_type_body_map():
     )
     type_body_map.update(
         {
-            VARCHAR: f"""
-            DECLARE
-            istrue {BOOLEAN};
-            BEGIN
-              SELECT lower($1)='t' OR lower($1)='true' OR $1='1' INTO istrue;
-              IF istrue OR lower($1)='f' OR lower($1)='false' OR $1='0' THEN
-                RETURN istrue;
-              END IF;
-              {not_bool_exception_str}
-            END;
-            """,
+            text_type: _get_text_to_boolean_cast_str()
+            for text_type in source_text_types
         }
-
     )
     return type_body_map
 
@@ -323,7 +341,7 @@ def _get_email_type_body_map():
                      just check that the VARCHAR object satisfies the email
                      DOMAIN).
     """
-    default_behavior_source_types = [email.DB_TYPE, VARCHAR, TEXT]
+    default_behavior_source_types = frozenset([email.DB_TYPE]) | TEXT_TYPES
     return _get_default_type_body_map(
         default_behavior_source_types, email.DB_TYPE,
     )
@@ -335,19 +353,16 @@ def _get_interval_type_body_map():
     types to interval.
 
     interval -> interval:  Identity. No remarks
-    varchar -> interval:   We first check that the varchar *cannot* be cast
+    text_type -> interval: We first check that the varchar *cannot* be cast
                            to a numeric, and then try to cast the varchar
                            to an interval.
     """
-    return {
-        INTERVAL: """
-        BEGIN
-          RETURN $1;
-        END;
-        """,
+    source_text_types = TEXT_TYPES
+
+    def _get_text_interval_type_body_map():
         # We need to check that a string isn't a valid number before
         # casting to intervals (since a number is more likely)
-        VARCHAR: f"""
+        return f"""
         BEGIN
           PERFORM $1::{NUMERIC};
           RAISE EXCEPTION '% is a {NUMERIC}', $1;
@@ -355,8 +370,22 @@ def _get_interval_type_body_map():
             WHEN sqlstate '22P02' THEN
               RETURN $1::{INTERVAL};
         END;
-        """,
+        """
+
+    type_body_map = {
+        INTERVAL: """
+        BEGIN
+          RETURN $1;
+        END;
+        """
     }
+    type_body_map.update(
+        {
+            text_type: _get_text_interval_type_body_map()
+            for text_type in source_text_types
+        }
+    )
+    return type_body_map
 
 
 def _get_integer_type_body_map(target_type_str=INTEGER):
@@ -365,10 +394,8 @@ def _get_integer_type_body_map(target_type_str=INTEGER):
     We specifically disallow rounding or truncating when casting from numerics,
     etc.
     """
-    default_behavior_source_types = [BIGINT, INTEGER, SMALLINT, VARCHAR]
-    no_rounding_source_types = [
-        DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL
-    ]
+    default_behavior_source_types = INTEGER_TYPES | TEXT_TYPES
+    no_rounding_source_types = DECIMAL_TYPES
     cast_loss_exception_str = (
         f"RAISE EXCEPTION '% cannot be cast to {target_type_str} without loss', $1;"
     )
@@ -407,10 +434,7 @@ def _get_decimal_number_type_body_map(target_type_str=NUMERIC):
         boolean -> number:  We cast TRUE -> 1, FALSE -> 0
     """
 
-    default_behavior_source_types = [
-        BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
-        SMALLINT, VARCHAR,
-    ]
+    default_behavior_source_types = NUMBER_TYPES | TEXT_TYPES
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, target_type_str,
     )
@@ -438,11 +462,8 @@ def _get_money_type_body_map():
     and that the type can be cast through a numeric.
     """
     default_behavior_source_types = [money.DB_TYPE]
-    number_types = [
-        BIGINT, DECIMAL, DOUBLE_PRECISION, FLOAT, INTEGER, NUMERIC, REAL,
-        SMALLINT,
-    ]
-    textual_types = [TEXT, VARCHAR]
+    number_types = NUMBER_TYPES
+    textual_types = TEXT_TYPES
 
     def _get_number_cast_to_money():
         return f"""
@@ -475,7 +496,7 @@ def _get_money_type_body_map():
     return type_body_map
 
 
-def _get_varchar_type_body_map(engine):
+def _get_textual_type_body_map(engine, target_type_str=VARCHAR):
     """
     Get SQL strings that create various functions for casting different
     types to varchar.
@@ -484,13 +505,21 @@ def _get_varchar_type_body_map(engine):
     All types in get_supported_alter_column_types are supported.
     """
     supported_types = get_supported_alter_column_db_types(engine)
-    return _get_default_type_body_map(supported_types, VARCHAR)
+
+    text_cast_str = """
+        BEGIN
+          RETURN $1::TEXT;
+        END;
+    """
+
+    return {type_: text_cast_str for type_ in supported_types}
 
 
 def _get_date_type_body_map():
-    # Note that default postgres conversion for dates depends on the `DateStyle` option
-    # set on the server, which can be one of DMY, MDY, or YMD. Defaults to MDY.
-    default_behavior_source_types = [DATE, VARCHAR]
+    # Note that default postgres conversion for dates depends on the
+    # `DateStyle` option set on the server, which can be one of DMY, MDY,
+    # or YMD. Defaults to MDY.
+    default_behavior_source_types = frozenset([DATE]) | TEXT_TYPES
     return _get_default_type_body_map(
         default_behavior_source_types, DATE,
     )

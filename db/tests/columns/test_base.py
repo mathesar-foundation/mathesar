@@ -1,7 +1,9 @@
 import re
 
 import pytest
-from sqlalchemy import String, Integer, ForeignKey, Table, MetaData, Numeric
+from sqlalchemy import (
+    String, Integer, ForeignKey, Table, MetaData, Numeric, VARCHAR, CHAR
+)
 
 from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT_COLUMNS
@@ -220,6 +222,16 @@ def test_MC_type_options(engine):
     mc = MathesarColumn('testable_col', Numeric(5, 2))
     mc.add_engine(engine)
     assert mc.type_options == {'precision': 5, 'scale': 2}
+
+
+@pytest.mark.parametrize(
+    "target_type,type_options",
+    [(VARCHAR(3), {'length': 3}), (CHAR(4), {'length': 4})]
+)
+def test_MC_type_options_str(engine, target_type, type_options):
+    mc = MathesarColumn('testable_col', target_type)
+    mc.add_engine(engine)
+    assert mc.type_options == type_options
 
 
 def get_mathesar_column_init_args():
