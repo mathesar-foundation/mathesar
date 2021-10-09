@@ -122,15 +122,17 @@ export function uploadFile<T>(
   const request = new XMLHttpRequest();
   request.open('POST', appendUrlPrefix(url));
   request.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
-  request.upload.onprogress = (e) => {
-    const { loaded, total } = e;
-    const percentCompleted = (loaded / total) * 100;
-    completionCallback({
-      loaded,
-      total,
-      percentCompleted,
-    });
-  };
+  if(formData.has('file')){
+    request.upload.onprogress = (e) => {
+      const { loaded, total } = e;
+      const percentCompleted = (loaded / total) * 100;
+      completionCallback({
+        loaded,
+        total,
+        percentCompleted,
+      });
+    };
+  }
   request.send(formData);
 
   return new CancellablePromise((resolve, reject) => {

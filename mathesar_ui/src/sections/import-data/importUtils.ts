@@ -36,6 +36,7 @@ function completionCallback(
 ): void {
   if (!completionStatus && typeof dataFileId === 'number') {
     const exisingProgress = get(fileImportStore).uploadProgress;
+    console.log(exisingProgress);
     setInFileStore(fileImportStore, {
       uploadProgress: {
         ...exisingProgress,
@@ -57,9 +58,13 @@ function completionCallback(
   }
 }
 
-export async function uploadURL(fileImportStore) {
-  const response = await postAPI('/data_files/', fileImportStore.uploads);
-  return response;
+export async function uploadURL(fileImportStore, url) {
+  const formData = new FormData();
+  formData.append('url', url);
+  const uploadPromise = await uploadFile('/data_files/', formData);
+  const { id } = uploadPromise;
+  await completionCallback(fileImportStore,null,id);
+  return uploadPromise;
 }
 
 export function uploadNewFile(

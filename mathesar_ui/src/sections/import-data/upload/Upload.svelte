@@ -22,26 +22,20 @@
 
   let group = "File";
   let inputValue:string;
-
-  const file = "File";
-  const copyPaste = "Copy-Paste";
-  const url = "Url";
+  let options = [
+    "File",
+    "Copy and Paste Text",
+    "Url"
+  ];
 
   async function confirmImport(url) {
-    if(group == file) {
+    if(group == "File") {
       loadPreview(fileImportStore);
     } else if(group == "Url") {
-      console.log('hola');
-      $fileImportStore.uploads = {
-      header: false,
-      delimiter:"",
-      escapacher:"",
-      url
+      const response = await uploadURL(fileImportStore, url);
+      loadPreview(fileImportStore);
     }
-    const response = await uploadURL($fileImportStore);
-    $fileImportStore["dataFileId"] = response.id;
-    loadPreview(fileImportStore);
-    }
+    //url = ''
   }
 
 </script>
@@ -53,27 +47,27 @@
   Please do not close this tab, you may still open and view other tables in the meanwhile.
 </div>
 
-<Radio bind:group value={file}>File</Radio>
-<Radio bind:group value={copyPaste}>Copy and Paste Text</Radio>
-<Radio bind:group value={url}>Url</Radio>
-
-<!--Make CSS changes -->
-{#if group == file}
-<FileUpload bind:fileUploads={$fileImportStore.uploads}
-            fileProgress={getFileUploadInfo($fileImportStore)}
-            on:add={(e) => uploadNewFile(fileImportStore, e.detail)}/>
-<div class="help-content">
-  You can import tabular (CSV, TSV) data.
-</div>
-            
+{#if $fileImportStore.uploadStatus !== States.Done}
+  {#each options as value}
+    <Radio bind:group {value}>{value}</Radio>
+  {/each}
 {/if}
 
-{#if group == url}
-<div class="help-content">
- Enter a URL pointing to data to download:
-</div>
+<!--Make CSS changes -->
+{#if group == 'File'}
+  <FileUpload bind:fileUploads={$fileImportStore.uploads}
+              fileProgress={getFileUploadInfo($fileImportStore)}
+              on:add={(e) => uploadNewFile(fileImportStore, e.detail)}/>
+  <div class="help-content">
+    You can import tabular (CSV, TSV) data.
+  </div>   
+{/if}
 
-<TextInput bind:value={inputValue}></TextInput>
+{#if group == "Url"}
+  <div class="help-content">
+  Enter a URL pointing to data to download:
+  </div>
+  <TextInput bind:value={inputValue}></TextInput>
 {/if}
 
 <div class="actions">
@@ -82,7 +76,11 @@
   </Button>
 
   <Button appearance="primary"
-          
+          disabled={
+            ($fileImportStore.uploadStatus !== States.Done
+            || $fileImportStore.previewTableCreationStatus === States.Loading)
+            && group !== 'Url'
+          }
           on:click={() => confirmImport(inputValue)}>
       Next
 

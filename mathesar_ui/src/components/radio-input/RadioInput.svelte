@@ -3,7 +3,13 @@
     export let group = undefined;
 </script>
 
-<label>
-    <input type="radio" bind:group value={value}>
-    <slot></slot>
-</label>
+<span class="radio-group">
+    <input type="radio" bind:group {value}>
+    <label class="radio-label">
+        <slot></slot>
+    </label>
+</span>
+
+<style global lang="scss">
+    @import "RadioInput.scss"
+</style>
