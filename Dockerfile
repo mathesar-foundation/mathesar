@@ -1,4 +1,4 @@
-FROM python:3-buster
+FROM python:3.9-buster
 
 RUN apt update
 RUN apt install -y sudo
