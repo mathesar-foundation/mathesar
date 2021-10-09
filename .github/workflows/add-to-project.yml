@@ -22,7 +22,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Add PR to project
-        if: github.event_name == 'pull_request'
+        if: ${{ github.event_name == 'pull_request' }}
         env:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |
@@ -30,7 +30,7 @@ jobs:
           python project_update.py ${{ github.event.pull_request.node_id }} --status Started --priority Active
 
       - name: Add issue to project
-        if: github.event_name == 'issues'
+        if: ${{ github.event_name == 'issues' }}
         env:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |

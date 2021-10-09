@@ -3,6 +3,7 @@ import json
 import os
 from string import Template
 
+from dateutil import parser
 import requests
 
 
@@ -93,8 +94,8 @@ def get_option_data(option_name, field_data):
     return option_data
 
 
-def update_field_for_item(item_id, field, option, project_data):
-    print(f'Updating {item_id} with field ID: {field}, field value: {option}...')
+def update_field_for_item(item_id, field, value, project_data):
+    print(f'Updating {item_id} with field ID: {field}, field value: {value}...')
     query_template = Template(
         """
           mutation {
@@ -114,12 +115,16 @@ def update_field_for_item(item_id, field, option, project_data):
         """
     )
     field_data = get_field_data(field, project_data)
-    option_data = get_option_data(option, field_data)
+    if field == 'Timestamp':
+        value_to_save = value
+    else:
+        option_data = get_option_data(value, field_data)
+        value_to_save = option_data['id']
     query = query_template.substitute(
         project_id=project_data['id'],
         item_id=item_id,
         field_id=field_data['id'],
-        value=option_data['id']
+        value=value_to_save
     )
     result = run_graphql(query)
     return result
@@ -130,6 +135,8 @@ def get_arguments():
     parser.add_argument("content_id", help="The issue/PR number to add/update")
     parser.add_argument("--status", help="Status to set ")
     parser.add_argument("--priority", help="Priority to set ")
+    parser.add_argument("--work", help="Work to set ")
+    parser.add_argument("--timestamp", help="Timestamp to set ")
     return parser.parse_args()
 
 
@@ -142,3 +149,9 @@ if __name__ == '__main__':
         update_field_for_item(item_id, 'Status', args.status, project_data)
     if args.priority:
         update_field_for_item(item_id, 'Priority', args.priority, project_data)
+    if args.work:
+        update_field_for_item(item_id, 'Work', args.work, project_data)
+    if args.timestamp:
+        timestamp = parser.parse(args.timestamp)
+        timestamp_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')
+        update_field_for_item(item_id, 'Timestamp', timestamp_str, project_data)
