@@ -46,14 +46,13 @@
   Create a table by importing data. Very large data sets can sometimes take some minutes to process.
   Please do not close this tab, you may still open and view other tables in the meanwhile.
 </div>
-
+<h3>Import From</h3>
 {#if $fileImportStore.uploadStatus !== States.Done}
   {#each options as value}
     <Radio bind:group {value}>{value}</Radio>
   {/each}
 {/if}
 
-<!--Make CSS changes -->
 {#if group == 'File'}
   <FileUpload bind:fileUploads={$fileImportStore.uploads}
               fileProgress={getFileUploadInfo($fileImportStore)}
