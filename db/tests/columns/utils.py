@@ -1,13 +1,16 @@
 from datetime import date
 
-from sqlalchemy import String, Integer, Boolean, Date, select, Table, MetaData
+from sqlalchemy import (
+    CHAR, String, Integer, Boolean, Date, select, Table, MetaData
+)
 
 
 column_test_dict = {
     Integer: {"start": "0", "set": "5", "expt": 5},
     String: {"start": "default", "set": "test", "expt": "test"},
     Boolean: {"start": "false", "set": "true", "expt": True},
-    Date: {"start": "2019-01-01", "set": "2020-01-01", "expt": date(2020, 1, 1)}
+    Date: {"start": "2019-01-01", "set": "2020-01-01", "expt": date(2020, 1, 1)},
+    CHAR: {"start": "a", "set": "b", "expt": "b"}
 }
 
 
