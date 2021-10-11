@@ -49,7 +49,7 @@
 <h3>Import From</h3>
 {#if $fileImportStore.uploadStatus !== States.Done}
   {#each options as value}
-    <Radio bind:group {value}>{value}</Radio>
+    <Radio bind:group {value}></Radio>
   {/each}
 {/if}
 
