@@ -68,7 +68,7 @@
 
 <div class="actions-pane">
   <Dropdown closeOnInnerClick={true} triggerClass="opts" 
-  triggerAppearance="plain" contentClass="table-opts-content"> 
+  triggerAppearance="plain" contentClass="table-opts-content" size="small"> 
     <svelte:fragment slot="trigger">
         Table
     </svelte:fragment>

@@ -28,6 +28,7 @@
   export let ariaControls: string = null;
   export let placement: Placement = 'bottom-start';
   export let showArrow = true;
+  export let size = '';
 
   let trigger: HTMLElement;
 
@@ -68,7 +69,7 @@
 </script>
 
 <Button bind:element={trigger} appearance={triggerAppearance} class={tgClasses} on:click={toggle} 
-  aria-controls={ariaControls} aria-haspopup="listbox" aria-label={ariaLabel} on:keydown>
+  aria-controls={ariaControls} aria-haspopup="listbox" aria-label={ariaLabel} {size} on:keydown>
   <span class="label">
     <slot name="trigger"></slot>
   </span>
