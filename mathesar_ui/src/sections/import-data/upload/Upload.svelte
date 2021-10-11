@@ -25,13 +25,13 @@
   let options = [
     "File",
     "Copy and Paste Text",
-    "Url"
+    "URL"
   ];
 
   async function confirmImport(url) {
     if(group == "File") {
       loadPreview(fileImportStore);
-    } else if(group == "Url") {
+    } else if(group == "URL") {
       const response = await uploadURL(fileImportStore, url);
       loadPreview(fileImportStore);
     }
@@ -62,7 +62,7 @@
   </div>   
 {/if}
 
-{#if group == "Url"}
+{#if group == "URL"}
   <div class="help-content">
   Enter a URL pointing to data to download:
   </div>
@@ -78,7 +78,7 @@
           disabled={
             ($fileImportStore.uploadStatus !== States.Done
             || $fileImportStore.previewTableCreationStatus === States.Loading)
-            && group !== 'Url'
+            && group !== 'URL'
           }
           on:click={() => confirmImport(inputValue)}>
       Next
