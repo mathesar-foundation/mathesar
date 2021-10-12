@@ -29,7 +29,7 @@
     'URL',
   ];
 
-  async function confirmImport(url) {
+  async function confirmImport(url: string) {
     if (group === 'File') {
       void loadPreview(fileImportStore);
     } else if (group === 'URL') {

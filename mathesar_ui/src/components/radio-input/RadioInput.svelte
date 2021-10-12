@@ -18,5 +18,5 @@
 </label>
 
 <style global lang="scss">
-    @import "RadioInput.scss"
+  @import "RadioInput.scss"
 </style>
