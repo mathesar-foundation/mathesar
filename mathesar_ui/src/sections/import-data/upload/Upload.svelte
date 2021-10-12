@@ -5,7 +5,7 @@
     Button,
     Icon,
     Radio,
-    TextInput
+    TextInput,
   } from '@mathesar-components';
   import type { FileImport } from '@mathesar/stores/fileImports';
   import { States } from '@mathesar/utils/api';
@@ -20,22 +20,22 @@
 
   export let fileImportStore: FileImport;
 
-  let group = "File";
+  let group = 'File';
   let inputValue:string;
-  let options = [
-    "File",
-    "Copy and Paste Text",
-    "URL"
+
+  const options = [
+    'File',
+    'Copy and Paste Text',
+    'URL',
   ];
 
   async function confirmImport(url) {
-    if(group == "File") {
-      loadPreview(fileImportStore);
-    } else if(group == "URL") {
-      const response = await uploadURL(fileImportStore, url);
-      loadPreview(fileImportStore);
+    if (group === 'File') {
+      void loadPreview(fileImportStore);
+    } else if (group === 'URL') {
+      await uploadURL(fileImportStore, url);
+      void loadPreview(fileImportStore);
     }
-    //url = ''
   }
 
 </script>
@@ -53,7 +53,7 @@
   {/each}
 {/if}
 
-{#if group == 'File'}
+{#if group === 'File'}
   <FileUpload bind:fileUploads={$fileImportStore.uploads}
               fileProgress={getFileUploadInfo($fileImportStore)}
               on:add={(e) => uploadNewFile(fileImportStore, e.detail)}/>
@@ -62,7 +62,7 @@
   </div>   
 {/if}
 
-{#if group == "URL"}
+{#if group === 'URL'}
   <div class="help-content">
   Enter a URL pointing to data to download:
   </div>

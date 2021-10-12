@@ -57,20 +57,24 @@ function completionCallback(
   }
 }
 
-export async function uploadURL(fileImportStore, url) {
+export async function uploadURL(fileImportStore: FileImport, url: string): Promise<void> {
   const formData = new FormData();
   formData.append('url', url);
-  try{
+  try {
     const uploadPromise = await uploadFile('/data_files/', formData);
-    const { id } = uploadPromise;
-    await completionCallback(fileImportStore,null,id);
-    return uploadPromise;
-  } catch(err){
+    const { id }: { id: number } = uploadPromise;
+    setInFileStore(fileImportStore, {
+      dataFileId: id,
+      firstRowHeader: true,
+      isDataFileInfoPresent: true,
+      uploadStatus: States.Done,
+    });
+  } catch (err: unknown) {
     setInFileStore(fileImportStore, {
       uploads: [],
       uploadProgress: null,
       uploadStatus: States.Error,
-      error: err.message,
+      error: (err as Error).message,
     });
   }
 }

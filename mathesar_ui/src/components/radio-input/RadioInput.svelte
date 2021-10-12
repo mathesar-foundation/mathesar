@@ -1,13 +1,13 @@
 <script context="module" lang="ts">
     let id = 0;
     function getId() {
-        id += 1;
-        return id;
+      id += 1;
+      return id;
     }
 </script>
 <script lang="ts">
-    export let value = undefined;
-    export let group = undefined;
+    export let value = '';
+    export let group;
 
     const radioId = getId();
 </script>
