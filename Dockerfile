@@ -1,4 +1,4 @@
-FROM python:3-buster
+FROM python:3.9-buster
 
 # These should be run as a single command to avoid caching issues.
 # See: http://lenguyenthedat.com/docker-cache/
