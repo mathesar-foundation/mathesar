@@ -96,8 +96,9 @@ def test_column_list(column_test_table, client):
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DATE', 'DECIMAL',
                 'DOUBLE PRECISION', 'FLOAT', 'INTEGER', 'INTERVAL',
-                'MATHESAR_TYPES.EMAIL', 'MATHESAR_TYPES.MONEY', 'NUMERIC',
-                'REAL', 'SMALLINT', 'TEXT', 'VARCHAR',
+                'MATHESAR_TYPES.EMAIL', 'MATHESAR_TYPES.MONEY',
+                'MATHESAR_TYPES.URI', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT',
+                'VARCHAR',
             ],
             'default': None,
         }
