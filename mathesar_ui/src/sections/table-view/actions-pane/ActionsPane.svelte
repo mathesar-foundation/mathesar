@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, getContext } from 'svelte';
+  import { getContext } from 'svelte';
   import {
     faFilter,
     faSort,
@@ -11,8 +11,6 @@
   import { States } from '@mathesar/utils/api';
   import { Button, Icon } from '@mathesar-components';
   import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
-
-  const dispatch = createEventDispatcher();
 
   const tabularData = getContext<TabularDataStore>('tabularData');
   $: ({
@@ -27,10 +25,6 @@
   $: isError = $columns.state === States.Error
     || $records.state === States.Error;
 
-  function openDisplayOptions() {
-    dispatch('openDisplayOptions');
-  }
-
   function deleteRecords() {
     void (records as TabularData['records']).deleteSelected();
   }
@@ -42,7 +36,7 @@
 </script>
 
 <div class="actions-pane">
-  <Button size="small" on:click={openDisplayOptions}>
+  <Button size="small">
     <Icon data={faFilter} size="0.8em"/>
     <span>
       Filters
@@ -52,7 +46,7 @@
     </span>
   </Button>
 
-  <Button size="small" on:click={openDisplayOptions}>
+  <Button size="small">
     <Icon data={faSort}/>
     <span>
       Sort
@@ -62,7 +56,7 @@
     </span>
   </Button>
 
-  <Button size="small" on:click={openDisplayOptions}>
+  <Button size="small">
     <Icon data={faListAlt}/>
     <span>
       Group

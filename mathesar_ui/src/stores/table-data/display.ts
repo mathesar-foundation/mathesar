@@ -107,8 +107,6 @@ export class Display {
 
   _columnPositionMapUnsubscriber: Unsubscriber;
 
-  showDisplayOptions: Writable<boolean>;
-
   horizontalScrollOffset: Writable<number>;
 
   columnPositionMap: Writable<ColumnPositionMap>;
@@ -129,7 +127,6 @@ export class Display {
     this._meta = meta;
     this._columns = columns;
     this._records = records;
-    this.showDisplayOptions = writable(false);
     this.horizontalScrollOffset = writable(0);
     this.columnPositionMap = writable(new Map() as ColumnPositionMap);
     this.activeCell = writable(null as ActiveCell);
