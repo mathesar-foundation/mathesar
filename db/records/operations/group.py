@@ -1,4 +1,5 @@
 from sqlalchemy import select, Column, func
+from sqlalchemy.dialects.postgresql import array
 
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 from db.records.operations.select import get_query, apply_filters
@@ -55,7 +56,7 @@ def get_distinct_tuple_values(
 
 
 def get_grouping_range_boundaries(
-        column,
+        column_list,
         engine,
         table=None,
         limit=None,
@@ -65,14 +66,16 @@ def get_grouping_range_boundaries(
         output_table=None,
 ):
     supported_group_types = {
-        'percentile': lambda column: select(
-            func.unnest(
-                func.percentile_disc(
-                    [n / num_groups for n in range(num_groups + 1)]
+        'percentile': lambda column_list: select(
+            func.row_to_json(
+                func.unnest(
+                    func.percentile_disc(
+                        [n / num_groups for n in range(num_groups + 1)]
+                    )
+                    .within_group(func.row(*[col for col in column_list]))
                 )
-                .within_group(column)
             )
-        )
+        ),
     }
     try:
         select_func = supported_group_types[group_type]
@@ -80,11 +83,11 @@ def get_grouping_range_boundaries(
         raise InvalidGroupType
 
     if table is not None:
-        column = get_column_object(table, column)
+        column_list = create_col_objects(table, column_list)
 
-    query = select_func(column).limit(limit).offset(offset)
+    query = select_func(column_list).limit(limit).offset(offset)
     result = execute_query(engine, query)
-    return tuple((result[i][0], result[i + 1][0]) for i in range(len(result) - 1))
+    return [tuple(row[0].values()) for row in result]
 
 
 def _get_filtered_group_by_count_query(
