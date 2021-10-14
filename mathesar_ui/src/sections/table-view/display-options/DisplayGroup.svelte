@@ -40,7 +40,7 @@
   }
 </script>
 
-<div>
+<div class="display-option">
   <div class="header">
     <span>
       Group
@@ -97,3 +97,7 @@
     </table>
   </div>
 </div>
+
+<style global lang="scss">
+  @import "DisplayOption.scss";
+</style>

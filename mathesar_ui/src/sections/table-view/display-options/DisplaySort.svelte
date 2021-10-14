@@ -61,7 +61,7 @@
   }
 </script>
 
-<div>
+<div class="display-option">
   <div class="header">
     <span>
       Sort
@@ -128,3 +128,7 @@
     </table>
   </div>
 </div>
+
+<style global lang="scss">
+  @import "DisplayOption.scss";
+</style>

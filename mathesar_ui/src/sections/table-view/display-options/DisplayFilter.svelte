@@ -58,7 +58,7 @@
   }
 </script>
 
-<div>
+<div class="display-option">
   <div class="header">
     <span>
       Filters
@@ -129,3 +129,7 @@
     </table>
   </div>
 </div>
+
+<style global lang="scss">
+  @import "DisplayOption.scss";
+</style>
