@@ -42,7 +42,7 @@
     const totalWidth = _columnPositionMap.get('__row')?.width || 0;
     return `position:${_style.position};left:${_style.left}px;`
       + `top:${_style.top}px;height:${_style.height}px;`
-      + `width:${totalWidth + DEFAULT_ROW_RIGHT_PADDING}px`;
+      + `width:${totalWidth}px`;
   }
 
   $: styleString = calculateStyle(
@@ -60,11 +60,18 @@
   $: isSelected = ($selectedRecords as Set<unknown>).has(row[$columns.primaryKey]);
   $: modificationState = getModificationState($recordModificationState, row, $columns.primaryKey);
   $: rowWidth = getColumnPosition($columnPositionMap, '__row')?.width || 0;
+
+  function checkAndCreateEmptyRow() {
+    if (row.__isAddPlaceholder) {
+      void records.createOrUpdateRecord(row);
+    }
+  }
 </script>
 
 <div class="row {row.__state} {modificationState || ''}" class:selected={isSelected}
       class:is-group-header={row.__isGroupHeader} class:is-add-placeholder={row.__isAddPlaceholder}
-      style={styleString} data-identifier={row.__identifier}>
+      style={styleString} data-identifier={row.__identifier}
+      on:mousedown={checkAndCreateEmptyRow}>
   {#if row.__isNewHelpText}
     <RowPlaceholder {rowWidth}/>
   {:else if row.__isGroupHeader}

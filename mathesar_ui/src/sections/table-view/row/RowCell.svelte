@@ -86,12 +86,6 @@
 
     await handleKeyDown(event);
   }
-
-  function checkAndcreateEmptyRow() {
-    if (row.__isAddPlaceholder) {
-      void records.createOrUpdateRecord(row);
-    }
-  }
 </script>
 
 <div bind:this={cellRef} class="cell" class:is-active={isActive}
@@ -99,8 +93,7 @@
      class:is-pk={column.primary_key}
      style="width:{columnPosition?.width || 0}px;
       left:{columnPosition?.left || 0}px;"
-     tabindex={-1} on:keydown={handleKeyDown}
-     on:mousedown={checkAndcreateEmptyRow}>
+     tabindex={-1} on:keydown={handleKeyDown}>
 
   <div class="content"
     on:mousedown={() => display.selectCell(row, column)}
