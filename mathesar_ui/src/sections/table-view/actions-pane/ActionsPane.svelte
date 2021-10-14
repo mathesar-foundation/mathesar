@@ -10,9 +10,26 @@
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
   import { Button, Icon } from '@mathesar-components';
-  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
+  import type {
+    TabularDataStore,
+    TabularData,
+    TableColumnData,
+  } from '@mathesar/stores/table-data/types';
+  import Dropdown from '@mathesar/components/dropdown/Dropdown.svelte';
+  import type { SelectOption } from '@mathesar/components/types';
+  import FilterSection from '../display-options/FilterSection.svelte';
+  import SortSection from '../display-options/SortSection.svelte';
+  import GroupSection from '../display-options/GroupSection.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
+
+  function getColumnOptions(_columns: TableColumnData): SelectOption<string>[] {
+    return _columns?.data?.map((column) => ({
+      id: column.name,
+      label: column.name,
+    })) || [];
+  }
+
   $: ({
     columns, records, meta,
   } = $tabularData as TabularData);
@@ -24,6 +41,7 @@
     || $records.state === States.Loading;
   $: isError = $columns.state === States.Error
     || $records.state === States.Error;
+  $: columnOptions = getColumnOptions($columns);
 
   function deleteRecords() {
     void (records as TabularData['records']).deleteSelected();
@@ -36,35 +54,50 @@
 </script>
 
 <div class="actions-pane">
-  <Button size="small">
-    <Icon data={faFilter} size="0.8em"/>
-    <span>
-      Filters
-      {#if $filter?.filters?.length > 0}
-        ({$filter?.filters?.length})
-      {/if}
-    </span>
-  </Button>
+  <Dropdown showArrow={false}>
+    <svelte:fragment slot="trigger">
+      <Icon data={faFilter} size="0.8em"/>
+      <span>
+        Filters
+        {#if $filter?.filters?.length > 0}
+          ({$filter?.filters?.length})
+        {/if}
+      </span>
+    </svelte:fragment>
+    <svelte:fragment slot="content">
+      <FilterSection options={columnOptions} {meta}/>
+    </svelte:fragment>
+  </Dropdown>
 
-  <Button size="small">
-    <Icon data={faSort}/>
-    <span>
-      Sort
-      {#if $sort?.size > 0}
-        ({$sort?.size})
-      {/if}
-    </span>
-  </Button>
+  <Dropdown showArrow={false}>
+    <svelte:fragment slot="trigger">
+      <Icon data={faSort}/>
+      <span>
+        Sort
+        {#if $sort?.size > 0}
+          ({$sort?.size})
+        {/if}
+      </span>
+    </svelte:fragment>
+    <svelte:fragment slot="content">
+      <SortSection options={columnOptions} {meta}/>
+    </svelte:fragment>
+  </Dropdown>
 
-  <Button size="small">
-    <Icon data={faListAlt}/>
-    <span>
-      Group
-      {#if $group?.size > 0}
-        ({$group?.size})
-      {/if}
-    </span>
-  </Button>
+  <Dropdown showArrow={false}>
+    <svelte:fragment slot="trigger">
+      <Icon data={faListAlt}/>
+      <span>
+        Group
+        {#if $group?.size > 0}
+          ({$group?.size})
+        {/if}
+      </span>
+    </svelte:fragment>
+    <svelte:fragment slot="content">
+      <GroupSection options={columnOptions} {meta}/>
+    </svelte:fragment>
+  </Dropdown>
 
   {#if $selectedRecords.size > 0}
     <Button size="small" on:click={deleteRecords}>
