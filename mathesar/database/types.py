@@ -96,7 +96,7 @@ def _get_type_map():
         ]
     }, {
         'identifier': MathesarTypeIdentifier.URI.value,
-        'name': 'URL',
+        'name': 'URI',
         'sa_type_names': [get_qualified_name(MathesarCustomType.URI.value)]
     }]
     type_map.append(_get_other_types(type_map))
