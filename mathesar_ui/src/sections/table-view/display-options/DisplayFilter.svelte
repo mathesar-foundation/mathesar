@@ -58,7 +58,7 @@
   }
 </script>
 
-<section>
+<div>
   <div class="header">
     <span>
       Filters
@@ -128,4 +128,4 @@
       {/if}
     </table>
   </div>
-</section>
+</div>

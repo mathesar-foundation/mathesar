@@ -17,9 +17,9 @@
   } from '@mathesar/stores/table-data/types';
   import Dropdown from '@mathesar/components/dropdown/Dropdown.svelte';
   import type { SelectOption } from '@mathesar/components/types';
-  import FilterSection from '../display-options/FilterSection.svelte';
-  import SortSection from '../display-options/SortSection.svelte';
-  import GroupSection from '../display-options/GroupSection.svelte';
+  import DisplayFilter from '../display-options/DisplayFilter.svelte';
+  import DisplaySort from '../display-options/DisplaySort.svelte';
+  import DisplayGroup from '../display-options/DisplayGroup.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
@@ -65,7 +65,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <FilterSection options={columnOptions} {meta}/>
+      <DisplayFilter options={columnOptions} {meta}/>
     </svelte:fragment>
   </Dropdown>
 
@@ -80,7 +80,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <SortSection options={columnOptions} {meta}/>
+      <DisplaySort options={columnOptions} {meta}/>
     </svelte:fragment>
   </Dropdown>
 
@@ -95,7 +95,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <GroupSection options={columnOptions} {meta}/>
+      <DisplayGroup options={columnOptions} {meta}/>
     </svelte:fragment>
   </Dropdown>
 

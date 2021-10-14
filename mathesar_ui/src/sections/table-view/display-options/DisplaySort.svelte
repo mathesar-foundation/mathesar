@@ -61,7 +61,7 @@
   }
 </script>
 
-<section>
+<div>
   <div class="header">
     <span>
       Sort
@@ -127,4 +127,4 @@
       {/if}
     </table>
   </div>
-</section>
+</div>

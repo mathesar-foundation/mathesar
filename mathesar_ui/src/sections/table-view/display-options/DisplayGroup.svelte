@@ -40,7 +40,7 @@
   }
 </script>
 
-<section>
+<div>
   <div class="header">
     <span>
       Group
@@ -96,4 +96,4 @@
       {/if}
     </table>
   </div>
-</section>
+</div>
