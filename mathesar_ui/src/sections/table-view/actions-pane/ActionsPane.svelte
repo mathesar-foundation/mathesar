@@ -86,7 +86,7 @@
   <Button size="small" on:click={() => records.addEmptyRecord()}>
     <Icon data={faPlus}/>
     <span>
-      Record
+      New Record
     </span>
   </Button>
 
