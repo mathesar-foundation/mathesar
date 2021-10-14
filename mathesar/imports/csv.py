@@ -8,6 +8,7 @@ from db.records.operations.insert import insert_records_from_csv
 from db.tables.operations.create import create_string_column_table
 from db.tables.operations.select import get_oid_from_table
 from mathesar.errors import InvalidTableError
+from db import constants
 
 ALLOWED_DELIMITERS = ",\t:|"
 SAMPLE_SIZE = 20000
@@ -94,7 +95,7 @@ def create_db_table_from_data_file(data_file, name, schema):
                                         data_file.escapechar)
     with open(sv_filename, 'rb') as sv_file:
         sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
-        column_names = [fieldname if fieldname != 'id' else 'id_original' for fieldname in sv_reader.fieldnames]
+        column_names = [fieldname if fieldname != constants.ID else constants.ID_ORIGINAL for fieldname in sv_reader.fieldnames]
         table = create_string_column_table(
             name=name,
             schema=schema.name,
