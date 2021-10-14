@@ -1,5 +1,6 @@
-import { writable, get } from 'svelte/store';
-import type { Writable, Unsubscriber } from 'svelte/store';
+import { writable, get, derived } from 'svelte/store';
+import { States } from '@mathesar/utils/api';
+import type { Writable, Readable, Unsubscriber } from 'svelte/store';
 import type { TabularType, DBObjectEntry } from '@mathesar/App.d';
 import type { Meta } from './meta';
 import type { Columns, TableColumn } from './columns';
@@ -20,7 +21,6 @@ export interface ActiveCell {
 }
 
 export const ROW_CONTROL_COLUMN_WIDTH = 70;
-export const GROUP_MARGIN_LEFT = 30;
 export const DEFAULT_ROW_RIGHT_PADDING = 100;
 export const DEFAULT_COLUMN_WIDTH = 160;
 
@@ -117,6 +117,8 @@ export class Display {
 
   rowWidth: Writable<number>;
 
+  displayableRecords: Readable<TableRecord[]>;
+
   constructor(
     type: TabularType,
     parentId: number,
@@ -144,6 +146,26 @@ export class Display {
       const widthWithPadding = width ? width + DEFAULT_ROW_RIGHT_PADDING : 0;
       this.rowWidth.set(widthWithPadding);
     });
+
+    const { savedRecords, newRecords } = this._records;
+    this.displayableRecords = derived(
+      [savedRecords, newRecords],
+      ([$savedRecords, $newRecords], set) => {
+        let allRecords = $savedRecords;
+        if ($newRecords.length > 0) {
+          allRecords = allRecords.concat({
+            __identifier: '__new_help_text',
+            __isNewHelpText: true,
+            __state: States.Done,
+          }).concat($newRecords);
+        }
+        allRecords = allRecords.concat({
+          ...this._records.getNewEmptyRecord(),
+          __isAddPlaceholder: true,
+        });
+        set(allRecords);
+      },
+    );
   }
 
   resetActiveCell(): void {
@@ -170,10 +192,17 @@ export class Display {
 
   handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | 'changed' | null {
     const columnData = this._columns.get().data;
-    const records = this._records.get();
+    const totalCount = get(this._records.totalCount);
+    const savedRecords = get(this._records.savedRecords);
+    const newRecords = get(this._records.newRecords);
     const offset = get(this._meta.offset);
     const pageSize = get(this._meta.pageSize);
-    const maxRowIndex = Math.min(pageSize, records.totalCount - offset, records.data.length) - 1;
+    const minRowIndex = 0;
+    const maxRowIndex = Math.min(
+      pageSize,
+      totalCount - offset,
+      savedRecords.length,
+    ) + newRecords.length;
     const activeCell = get(this.activeCell);
 
     if (movementKeys.has(key) && activeCell?.type === 'select') {
@@ -186,7 +215,7 @@ export class Display {
             }
             break;
           case 'ArrowUp':
-            if (existing.rowIndex > 0) {
+            if (existing.rowIndex > minRowIndex) {
               newActiveCell.rowIndex -= 1;
             }
             break;
