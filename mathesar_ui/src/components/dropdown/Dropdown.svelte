@@ -14,7 +14,7 @@
   } from '@mathesar-components/types';
   import type { Placement } from '@popperjs/core/lib/enums';
   import {
-    createEventDispatcher,
+    createEventDispatcher, getContext, setContext,
   } from 'svelte';
 
   const dispatch = createEventDispatcher();
@@ -29,6 +29,13 @@
   export let placement: Placement = 'bottom-start';
   export let showArrow = true;
 
+  // Relevant when this Dropdown is a child of another Dropdown. We need to
+  // "get" before we "set", otherwise the value will always be `true`.
+  const isWithinDropdown = getContext('isWithinDropdown') ?? false;
+
+  // Relevant when this Dropdown is a parent of another Dropdown.
+  setContext('isWithinDropdown', true);
+  
   let trigger: HTMLElement;
 
   function calculateTriggerClass(_triggerClass: string, _showArrow: boolean): string {
@@ -80,15 +87,16 @@
 </Button>
 
 {#if isOpen}
-  <div class={['dropdown content', contentClass].join(' ')}
-        use:portal use:popper={{ reference: trigger, options: { placement } }}
-        use:clickOffBounds={{
-          callback: close,
-          references: [
-            trigger,
-          ],
-        }}
-        on:click={checkAndCloseOnInnerClick}>
+  <div
+    class={['dropdown content', contentClass].join(' ')}
+    use:portal={{ isEnabled: !isWithinDropdown }}
+    use:popper={{ reference: trigger, options: { placement } }}
+    use:clickOffBounds={{
+      callback: close,
+      references: [trigger],
+    }}
+    on:click={checkAndCloseOnInnerClick}
+  >
     <slot name="content"></slot>
   </div>
 {/if}
