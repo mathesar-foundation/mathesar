@@ -7,6 +7,7 @@
     faTrashAlt,
     faSync,
     faExclamationTriangle,
+    faPlus,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
   import { Button, Icon } from '@mathesar-components';
@@ -14,6 +15,9 @@
     TabularDataStore,
     TabularData,
     TableColumnData,
+    Records,
+    Columns,
+    Meta,
   } from '@mathesar/stores/table-data/types';
   import Dropdown from '@mathesar/components/dropdown/Dropdown.svelte';
   import type { SelectOption } from '@mathesar/components/types';
@@ -30,26 +34,28 @@
     })) || [];
   }
 
+  let records: Records;
+  let columns: Columns;
+  let meta: Meta;
+  let recordState: Records['state'];
+
   $: ({
     columns, records, meta,
   } = $tabularData as TabularData);
   $: ({
     filter, sort, group, selectedRecords, combinedModificationState,
-  } = meta as TabularData['meta']);
+  } = meta);
+  $: ({ state: recordState } = records);
 
   $: isLoading = $columns.state === States.Loading
-    || $records.state === States.Loading;
+    || $recordState === States.Loading;
   $: isError = $columns.state === States.Error
-    || $records.state === States.Error;
+    || $recordState === States.Error;
   $: columnOptions = getColumnOptions($columns);
 
-  function deleteRecords() {
-    void (records as TabularData['records']).deleteSelected();
-  }
-
   function refresh() {
-    void (columns as TabularData['columns']).fetch();
-    void (records as TabularData['records']).fetch();
+    void columns.fetch();
+    void records.fetch();
   }
 </script>
 
@@ -99,8 +105,17 @@
     </svelte:fragment>
   </Dropdown>
 
+  <div class="divider"/>
+
+  <Button size="small" on:click={() => records.addEmptyRecord()}>
+    <Icon data={faPlus}/>
+    <span>
+      New Record
+    </span>
+  </Button>
+
   {#if $selectedRecords.size > 0}
-    <Button size="small" on:click={deleteRecords}>
+    <Button size="small" on:click={() => records.deleteSelected()}>
       <Icon data={faTrashAlt}/>
       <span>
         Delete {$selectedRecords.size} records
