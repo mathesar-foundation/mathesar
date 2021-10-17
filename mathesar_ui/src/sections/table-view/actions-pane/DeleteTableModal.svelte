@@ -41,7 +41,7 @@
     </div >
     <!-- Todo Show dependencies-->
     <div class="help-text">
-      All Objects related to this table will be afected. 
+      All Objects related to this table will be affected.
     </div>
   
   <svelte:fragment slot="footer">

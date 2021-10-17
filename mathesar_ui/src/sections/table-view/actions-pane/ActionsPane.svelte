@@ -75,7 +75,6 @@
     <svelte:fragment slot="content">
       <ul>
         <li class= "item" on:click={tableDelete}>Delete Table</li>
-        <li class= "item">Duplicate Table</li>
       </ul>
     </svelte:fragment>
   </Dropdown>

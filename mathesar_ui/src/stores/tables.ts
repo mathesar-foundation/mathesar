@@ -122,7 +122,7 @@ export function getTablesStoreForSchema(schemaId: SchemaEntry['id']): Writable<D
 }
 
 export function deleteTable(id: number): CancellablePromise<TableEntry> {
-  return deleteAPI(`/tables/${id}`);
+  return deleteAPI(`/tables/${id}/`);
 }
 
 export function createTable(

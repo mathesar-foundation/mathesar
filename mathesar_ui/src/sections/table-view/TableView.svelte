@@ -11,7 +11,7 @@
 
   import ActionsPane from './actions-pane/ActionsPane.svelte';
   import DisplayOptions from './display-options/DisplayOptions.svelte';
-  import DeleteTable from './actions-pane/DeleteTable.svelte';
+  import DeleteTableModal from './actions-pane/DeleteTableModal.svelte';
   import Header from './header/Header.svelte';
   import Body from './Body.svelte';
   import StatusPane from './status-pane/StatusPane.svelte';
@@ -75,7 +75,7 @@
       <Header/>
       <Body/>
       {#if isModalOpen}
-        <DeleteTable bind:isOpen={isModalOpen}/>
+        <DeleteTableModal bind:isOpen={isModalOpen}/>
       {/if}  
     {/if}
   </div>

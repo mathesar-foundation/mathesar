@@ -10,7 +10,7 @@
     clickOffBounds,
   } from '@mathesar-components';
   import type {
-    Appearance,
+    Appearance, Size,
   } from '@mathesar-components/types';
   import type { Placement } from '@popperjs/core/lib/enums';
   import {
@@ -28,7 +28,7 @@
   export let ariaControls: string = null;
   export let placement: Placement = 'bottom-start';
   export let showArrow = true;
-  export let size = '';
+  export let size: Size = 'medium';
 
   let trigger: HTMLElement;
 
