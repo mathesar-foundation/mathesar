@@ -10,7 +10,8 @@
     clickOffBounds,
   } from '@mathesar-components';
   import type {
-    Appearance, Size,
+    Appearance,
+    Size,
   } from '@mathesar-components/types';
   import type { Placement } from '@popperjs/core/lib/enums';
   import {
