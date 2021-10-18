@@ -1,9 +1,12 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
+  import { getContext, tick } from 'svelte';
+  import { get } from 'svelte/store';
   import type {
     TabularDataStore,
     TabularData,
     Display,
+    Records,
+    TableRecord,
   } from '@mathesar/stores/table-data/types';
 
   import Row from './row/Row.svelte';
@@ -11,28 +14,54 @@
   import VirtualList from './virtual-list/VirtualList.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
+  let id: TabularData['id'];
+  let records: Records;
+  let display: Display;
+  let virtualListRef: VirtualList;
+  let displayableRecords: Display['displayableRecords'];
+  let newRecords: Records['newRecords'];
   $: ({ id, records, display } = $tabularData as TabularData);
+  $: ({ newRecords } = records);
   $: ({
-    rowWidth, horizontalScrollOffset,
-  } = display as Display);
+    rowWidth, horizontalScrollOffset, displayableRecords,
+  } = display);
+
+  let previousNewRecordsCount = 0;
+
+  async function resetIndex(_displayableRecords: TableRecord[]) {
+    const allRecordLength = _displayableRecords?.length;
+    const newRecordLength = get(newRecords)?.length || 0;
+    if (allRecordLength && previousNewRecordsCount !== newRecordLength) {
+      const index = Math.max(allRecordLength - newRecordLength - 3, 0);
+      await tick();
+      if (previousNewRecordsCount < newRecordLength) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        virtualListRef?.scrollToBottom();
+      }
+      previousNewRecordsCount = newRecordLength;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      virtualListRef?.resetAfterIndex(index);
+    }
+  }
+
+  $: void resetIndex($displayableRecords);
 
   let bodyRef: HTMLDivElement;
 
-  function getItemSize() {
+  function getItemSize(index: number) {
     const defaultRowHeight = 30;
+    const allRecords = get(displayableRecords);
+    if (allRecords?.[index]?.__isNewHelpText) {
+      return 24;
+    }
+
     // TODO: Check and set extra height for group. Needs UX rethought.
     return defaultRowHeight;
   }
 
-  function getItemKey(index: number): number | string {
-    // TODO: Check and return primary key
-    // Return index by default
-    return `__index_${index}`;
-  }
-
   function checkAndResetActiveCell(event: Event) {
     if (!bodyRef.contains(event.target as HTMLElement)) {
-      (display as Display).resetActiveCell();
+      display.resetActiveCell();
     }
   }
 </script>
@@ -45,18 +74,19 @@
   <Resizer let:height>
     {#key id}
       <VirtualList
+        bind:this={virtualListRef}
         bind:horizontalScrollOffset={$horizontalScrollOffset}
         {height}
-        width={$rowWidth || null}
-        itemCount={$records.data.length}
+        width={$rowWidth}
+        itemCount={$displayableRecords.length}
         paddingBottom={20}
         itemSize={getItemSize}
-        itemKey={getItemKey}
+        itemKey={(index) => records.getIterationKey(index)}
         let:items
         >
         {#each items as it (it?.key || it)}
-          {#if it && $records.data[it.index]}
-            <Row style={it.style} bind:row={$records.data[it.index]}/>
+          {#if it && $displayableRecords[it.index]}
+            <Row style={it.style} bind:row={$displayableRecords[it.index]}/>
           {/if}
         {/each}
       </VirtualList>

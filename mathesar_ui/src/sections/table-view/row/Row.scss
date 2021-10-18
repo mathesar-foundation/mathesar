@@ -41,7 +41,7 @@ section.table-section .tab-container .table-data .body {
         pointer-events: none;
       }
 
-      &.updateFailed, &.deleteFailed, &.createFailed {
+      &.updateFailed, &.deleteFailed, &.creationFailed {
         .cell {
           transition: background-color .20s cubic-bezier(0,0,.2,1);
           background-color: #fef1f1;
@@ -56,9 +56,27 @@ section.table-section .tab-container .table-data .body {
       }
     }
 
+    &.is-add-placeholder {
+      cursor: pointer;
+    }
+
     .cell.row-control {
+      display: flex;
+      align-items: center;
+
+      .control {
+        display: inline-flex;
+        align-items: center;
+        min-width: 16px;
+      }
+
       .mod-indicator {
         margin-left: 5px;
+      }
+
+      &.group-control {
+        background: none;
+        border-right: 0;
       }
     }
 
@@ -72,7 +90,7 @@ section.table-section .tab-container .table-data .body {
       &.groupheader {
         display: flex;
         align-items: center;
-        border-bottom: none;
+        padding-left: 14px;
 
         .tag {
           & + .tag {
@@ -139,6 +157,14 @@ section.table-section .tab-container .table-data .body {
           bottom: 2px;
           width: 100%;
         }
+      }
+
+      &.new-row-help-cell {
+        background: #069668 !important;
+        display: flex;
+        align-items: center;
+        color: #fff;
+        padding: 0px 14px;
       }
     }
   }
