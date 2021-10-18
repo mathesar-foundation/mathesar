@@ -14,6 +14,7 @@
     refetchTablesForSchema,
     deleteTable,
   } from '@mathesar/stores/tables';
+  import type { MathesarTab } from '@mathesar/stores/tabs';
   // import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
 
   import ActionsPane from './actions-pane/ActionsPane.svelte';
@@ -36,7 +37,7 @@
   // let tableBodyRef: Body;
   let animateOpts = false;
   let isModalOpen = false;
-  let activeTab;
+  let activeTab: MathesarTab;
 
   function setStores(_database: string, _id: number) {
     // const opts = URLQueryHandler.getTableConfig(_database, _id);
