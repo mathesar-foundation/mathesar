@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { get } from 'svelte/store';
   import { createEventDispatcher, getContext } from 'svelte';
   import {
     faFilter,
@@ -11,16 +10,6 @@
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
   import { Button, Icon, Dropdown } from '@mathesar-components';
-  import { currentSchemaId, getSchemaInfo } from '@mathesar/stores/schemas';
-  import { currentDBName } from '@mathesar/stores/databases';
-  import {
-    removeTab,
-    getTabsForSchema,
-  } from '@mathesar/stores/tabs';
-  import {
-    refetchTablesForSchema,
-    deleteTable,
-  } from '@mathesar/stores/tables';
   
   import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
 
@@ -42,19 +31,6 @@
   function openDisplayOptions() {
     dispatch('openDisplayOptions');
   }
-  
-  async function tableDelete() {
-    const { has_dependencies: hasDependencies } = getSchemaInfo($currentDBName, $currentSchemaId);
-    if (hasDependencies) {
-      dispatch('deleteTable');
-    } else {
-      const { activeTab } = getTabsForSchema($currentDBName, $currentSchemaId);
-      const activeTabObj = get(activeTab);
-      removeTab($currentDBName, $currentSchemaId, activeTabObj);
-      await deleteTable(activeTabObj.id);
-      await refetchTablesForSchema($currentSchemaId);
-    }
-  }
 
   function deleteRecords() {
     void (records as TabularData['records']).deleteSelected();
@@ -68,13 +44,13 @@
 
 <div class="actions-pane">
   <Dropdown closeOnInnerClick={true} triggerClass="opts" 
-  triggerAppearance="plain" contentClass="table-opts-content" size="small"> 
+   contentClass="table-opts-content" size="small"> 
     <svelte:fragment slot="trigger">
         Table
     </svelte:fragment>
     <svelte:fragment slot="content">
       <ul>
-        <li class= "item" on:click={tableDelete}>Delete Table</li>
+        <li class= "item" on:click={() => dispatch('deleteTable')}>Delete Table</li>
       </ul>
     </svelte:fragment>
   </Dropdown>
