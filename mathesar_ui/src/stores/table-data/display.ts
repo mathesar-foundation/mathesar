@@ -28,9 +28,9 @@ const movementKeys = new Set(['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft',
 
 function recalculateColumnPositions(columnPositionMap: ColumnPositionMap, columns: TableColumn[]) {
   let left = ROW_CONTROL_COLUMN_WIDTH;
-  const newColumnPositionMap: ColumnPositionMap = new Map(columnPositionMap);
+  const newColumnPositionMap: ColumnPositionMap = new Map();
   columns.forEach((column) => {
-    const columnWidth = newColumnPositionMap.get(column.name)?.width;
+    const columnWidth = columnPositionMap.get(column.name)?.width;
     if (typeof columnWidth !== 'number') {
       newColumnPositionMap.set(column.name, {
         left,

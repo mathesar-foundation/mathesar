@@ -1,5 +1,10 @@
 import { writable, get as getStoreValue } from 'svelte/store';
-import { States, getAPI, postAPI } from '@mathesar/utils/api';
+import {
+  States,
+  getAPI,
+  postAPI,
+  deleteAPI,
+} from '@mathesar/utils/api';
 import { TabularType } from '@mathesar/App.d';
 import type {
   Writable,
@@ -161,5 +166,9 @@ export class Columns implements Writable<TableColumnData> {
     this._promise?.cancel();
     this._promise = null;
     this._listeners.clear();
+  }
+
+  async deleteColumn(columnId:number):Promise<void> {
+    await deleteAPI(`${this._url}${columnId}`);
   }
 }

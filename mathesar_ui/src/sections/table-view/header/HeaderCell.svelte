@@ -3,8 +3,14 @@
     faSortAmountDown,
     faSortAmountDownAlt,
     faThList,
+    faTrashAlt,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Dropdown, Icon } from '@mathesar-components';
+  import {
+    Dropdown,
+    Icon,
+    Modal,
+    Button,
+  } from '@mathesar-components';
   import type {
     Meta,
     TableColumn,
@@ -12,10 +18,15 @@
     GroupOption,
     ColumnPosition,
   } from '@mathesar/stores/table-data/types';
+  import { createEventDispatcher } from 'svelte';
 
   export let columnPosition: ColumnPosition;
   export let column: TableColumn;
   export let meta: Meta;
+
+  const dispatch = createEventDispatcher();
+
+  let isOpen = false;
 
   $: ({ sort, group } = meta);
   $: sortDirection = ($sort as SortOption)?.get(column.name);
@@ -34,6 +45,13 @@
       meta.removeGroup(column.name);
     } else {
       meta.addGroup(column.name);
+    }
+  }
+
+  function deleteColumn(_column) {
+    if (_column) {
+      dispatch('columnDelete', _column.index);
+      isOpen = false;
     }
   }
 </script>
@@ -86,7 +104,29 @@
             {/if}
           </span>
         </li>
+        <li on:click={() => { isOpen = true; } }>
+          <Icon class="opt" data={faTrashAlt}/>
+          <span>
+            Delete column
+          </span>
+        </li>
       </ul>
     </svelte:fragment>
   </Dropdown>
 </div>
+{#if isOpen}
+  <Modal class="delete-column">
+    <div class="header">
+      Deleting '{column.name}' could break existing tables and views.
+    </div>
+    <div class="help-text">
+      All Objects related to this column will be afected. 
+    </div>
+  <svelte:fragment slot="footer">
+      <Button on:click={() => { isOpen = false; }}>Cancel</Button>
+      <Button appearance="primary" on:click={() => { deleteColumn(column); }}>
+        Delete Column
+      </Button>
+  </svelte:fragment>
+  </Modal>
+{/if}

@@ -209,3 +209,12 @@ section.table-section .tab-container .table-data {
     }
   }
 }
+.delete-column {
+  .header {
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .footer {
+    text-align:right;
+  }
+}

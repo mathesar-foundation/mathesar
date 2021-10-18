@@ -13,6 +13,7 @@
     Columns,
     Display,
     Meta,
+    Records,
   } from '@mathesar/stores/table-data/types';
   import HeaderCell from './HeaderCell.svelte';
   import NewColumnCell from './NewColumnCell.svelte';
@@ -21,8 +22,9 @@
   let columns: Columns;
   let display: Display;
   let meta: Meta;
+  let records: Records;
   $: ({
-    columns, meta, display,
+    columns, records, meta, display,
   } = $tabularData as TabularData);
   $: ({ horizontalScrollOffset, columnPositionMap } = display);
 
@@ -64,6 +66,13 @@
     };
   });
 
+  async function columnDelete(event) {
+    const columnId: number | null = (event.detail ?? null) as number;
+    await columns.deleteColumn(columnId);
+    void columns.fetch();
+    void records.fetch();
+  }
+
   function addColumn(e: CustomEvent<Partial<TableColumn>>) {
     void columns.add(e.detail);
   }
@@ -75,7 +84,7 @@
 
   {#each $columns.data as column (column.name)}
     <HeaderCell {column} {meta}
-      columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
+      columnPosition={getColumnPosition($columnPositionMap, column.name)} on:columnDelete={columnDelete}/>
   {/each}
 
   <NewColumnCell {display} columnData={$columns.data} on:addColumn={addColumn}/>
