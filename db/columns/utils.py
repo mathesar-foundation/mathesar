@@ -4,6 +4,7 @@ from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT_COLUMNS
 from db import constants
 
+
 def get_default_mathesar_column_list():
     return [MathesarColumn(col_name, **DEFAULT_COLUMNS[col_name]) for col_name in DEFAULT_COLUMNS]
 
