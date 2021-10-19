@@ -72,7 +72,7 @@ def get_grouping_range_boundaries(
                     func.percentile_disc(
                         [n / num_groups for n in range(num_groups + 1)]
                     )
-                    .within_group(func.row(*[col for col in column_list]))
+                    .within_group(func.row(*column_list))
                 )
             )
         ),
@@ -114,7 +114,15 @@ def _get_filtered_group_by_count_query(
     return filtered_count_query
 
 
-def get_group_counts(table, engine, group_by, limit=None, offset=None, order_by=[], filters=[]):
+def get_group_counts(
+        table,
+        engine,
+        group_by,
+        limit=None,
+        offset=None,
+        order_by=[],
+        filters=[]
+):
     """
     Returns counts by specified groupings
 
