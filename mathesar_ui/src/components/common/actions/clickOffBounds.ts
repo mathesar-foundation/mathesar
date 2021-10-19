@@ -1,4 +1,5 @@
-import { get, Readable } from 'svelte/store';
+import { get } from 'svelte/store';
+import type { Readable } from 'svelte/store';
 import type { Action } from './types.d';
 
 type CallbackFn = (e: Event) => void;

@@ -1,5 +1,6 @@
-import {
-  Readable, Subscriber, Unsubscriber, writable,
+import { writable } from 'svelte/store';
+import type {
+  Readable, Subscriber, Unsubscriber,
 } from 'svelte/store';
 
 /**
