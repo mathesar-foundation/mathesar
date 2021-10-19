@@ -2,7 +2,7 @@ version: "3.9"
    
 services:
   db:
-    image: postgres
+    image: postgres:13
     environment:
       - POSTGRES_DB=${POSTGRES_DB-mathesar_django}
       - POSTGRES_USER=${POSTGRES_USER-mathesar}

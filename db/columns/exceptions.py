@@ -12,3 +12,7 @@ class InvalidTypeOptionError(Exception):
 
 class DagCycleError(Exception):
     pass
+
+
+class DynamicDefaultWarning(Warning):
+    pass

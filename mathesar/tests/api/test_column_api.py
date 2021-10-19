@@ -51,7 +51,7 @@ def test_column_list(column_test_table, client):
             'index': 0,
             'nullable': False,
             'primary_key': True,
-            'default': None,
+            'default': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
                 'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
@@ -96,8 +96,9 @@ def test_column_list(column_test_table, client):
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DATE', 'DECIMAL',
                 'DOUBLE PRECISION', 'FLOAT', 'INTEGER', 'INTERVAL',
-                'MATHESAR_TYPES.EMAIL', 'MATHESAR_TYPES.MONEY', 'NUMERIC',
-                'REAL', 'SMALLINT', 'TEXT', 'VARCHAR',
+                'MATHESAR_TYPES.EMAIL', 'MATHESAR_TYPES.MONEY',
+                'MATHESAR_TYPES.URI', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT',
+                'VARCHAR',
             ],
             'default': None,
         }
@@ -117,7 +118,7 @@ def test_column_list(column_test_table, client):
                 'index': 0,
                 'nullable': False,
                 'primary_key': True,
-                'default': None,
+                'default': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
                 'valid_target_types': [
                     'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
                     'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC',
@@ -348,6 +349,16 @@ def test_column_update_default_invalid_cast(column_test_table, client):
     data = {"default": "not an integer"}
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data,
+    )
+    assert response.status_code == 400
+
+
+def test_column_update_type_dynamic_default(column_test_table, client):
+    cache.clear()
+    type_ = "NUMERIC"
+    data = {"type": type_}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/0/", data=data
     )
     assert response.status_code == 400
 

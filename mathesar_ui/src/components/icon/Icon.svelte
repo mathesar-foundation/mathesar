@@ -50,7 +50,7 @@
       width={size} height={size} class={faClasses}
       class:fa-spin={spin} class:fa-pulse={pulse}
       aria-label={label} role={label ? 'img' : 'presentation'}
-      {...$$restProps}>
+      {...$$restProps} on:click on:mouseover on:focus on:mouseout on:blur>
   {#if Array.isArray(path)}
     {#each path as entry (entry)}
       <path d={entry}></path>
