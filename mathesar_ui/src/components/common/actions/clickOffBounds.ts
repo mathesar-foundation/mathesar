@@ -1,16 +1,18 @@
+import { get } from 'svelte/store';
+import type { Readable } from 'svelte/store';
 import type { Action } from './types.d';
 
 type CallbackFn = (e: Event) => void;
 interface Options {
   callback: CallbackFn,
-  references?: HTMLElement[]
+  references?: Readable<HTMLElement[]>,
 }
 
 export default function clickOffBounds(node: Element, options: Options) : Action {
   let { callback, references } = options;
 
   function outOfBoundsListener(event: Event) {
-    const isWithinReferenceElement = references?.some(
+    const isWithinReferenceElement = get(references)?.some(
       (reference) => reference.contains(event.target as Node),
     );
     if (!isWithinReferenceElement && !node.contains(event.target as Node)) {
