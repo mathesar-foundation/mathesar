@@ -77,6 +77,8 @@ def check_distinct_id(file):
         reader = csv.DictReader(csvfile)
         id_dict = {}
         for row in reader:
+            if not row[constants.ID].isnumeric():
+                return False
             if row[constants.ID] in id_dict.keys():
                 id_dict[row[constants.ID]] += 1
             else:

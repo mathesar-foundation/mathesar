@@ -1,9 +1,10 @@
-from sqlalchemy import Column, String, Table, MetaData
+from sqlalchemy import Column, String, Table, MetaData, Integer
 from sqlalchemy.ext import compiler
 from sqlalchemy.schema import DDLElement
 
 from db.columns.utils import init_mathesar_table_column_list_with_defaults
 from db.schemas.operations.create import create_schema
+from db import constants
 
 
 def create_mathesar_table(name, schema, columns, engine, metadata=None):
@@ -34,7 +35,7 @@ def create_string_column_table(name, schema, column_names, engine):
     This method creates a Postgres table in the specified schema, with all
     columns being String type.
     """
-    columns_ = [Column(column_name, String) for column_name in column_names]
+    columns_ = [Column(column_name, String) if column_name != constants.ID else Column(name=column_name, type_=Integer, primary_key=True) for column_name in column_names]
     table = create_mathesar_table(name, schema, columns_, engine)
     return table
 
