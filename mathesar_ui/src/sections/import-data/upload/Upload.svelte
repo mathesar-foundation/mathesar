@@ -21,7 +21,7 @@
   export let fileImportStore: FileImport;
 
   let group = 'File';
-  let inputValue:string;
+  let inputValue: string;
 
   const options = [
     'File',
