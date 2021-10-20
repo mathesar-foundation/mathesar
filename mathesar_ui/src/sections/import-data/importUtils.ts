@@ -61,8 +61,8 @@ export async function uploadURL(fileImportStore: FileImport, url: string): Promi
   const formData = new FormData();
   formData.append('url', url);
   try {
-    const uploadPromise = await uploadFile('/data_files/', formData);
-    const { id }: { id: number } = uploadPromise;
+    const uploadResponse = await uploadFile<{ id: number }>('/data_files/', formData);
+    const { id } = uploadResponse;
     setInFileStore(fileImportStore, {
       dataFileId: id,
       firstRowHeader: true,
