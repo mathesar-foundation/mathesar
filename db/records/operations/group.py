@@ -1,9 +1,9 @@
-from sqlalchemy import select, Column, func
+from sqlalchemy import select, Column, func, and_, case
 from sqlalchemy.dialects.postgresql import array
 
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 from db.records.operations.select import get_query, apply_filters
-from db.records.utils import create_col_objects, get_column_object
+from db.records.utils import create_col_objects
 from db.utils import execute_query
 
 
@@ -88,6 +88,46 @@ def get_grouping_range_boundaries(
     query = select_func(column_list).limit(limit).offset(offset)
     result = execute_query(engine, query)
     return [tuple(row[0].values()) for row in result]
+
+
+def _get_percentile_range_groups(column_list, num_groups, engine):
+    cume_dist = 'cume_dist'
+    cume_dist_cte = (
+        select(
+            *column_list,
+            func.cume_dist().over(order_by=column_list).label(cume_dist)
+        )
+        .cte()
+    )
+
+    ranges = [
+        (
+            and_(
+                cume_dist_cte.columns[cume_dist] > i / num_groups,
+                cume_dist_cte.columns[cume_dist] <= (i + 1) / num_groups
+            ),
+            i + 1
+        )
+        for i in range(num_groups)
+    ]
+    ranges_cte = select(cume_dist_cte, case(*ranges).label('range')).cte()
+    ranges_agg_cols = [
+        col for col in ranges_cte.columns if col.name in [c.name for c in column_list]
+    ]
+    final_sel = (
+        select(
+            ranges_cte.c.range,
+            func.min(array(ranges_agg_cols)),
+            func.max(array(ranges_agg_cols)),
+            func.count(1)
+        )
+        .group_by(ranges_cte.c.range)
+        .order_by(ranges_cte.c.range)
+    )
+    with engine.begin() as conn:
+        result = conn.execute(final_sel).fetchall()
+
+    return result
 
 
 def _get_filtered_group_by_count_query(
