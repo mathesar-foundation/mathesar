@@ -40,7 +40,7 @@
   export let height: Props['height'];
   export let scrollOffset: Props['scrollOffset'] = 0;
   export let itemCount: Props['itemCount'];
-  export let overscanCount: Props['overscanCount'] = 5;
+  export let overscanCount: Props['overscanCount'] = 2;
   export let itemSize: Props['itemSize'] = () : number => estimatedItemSize;
   export let paddingBottom = 0;
   export let horizontalScrollOffset = 0;
@@ -240,6 +240,13 @@
       if (isUpdateRequired) {
         psRef.update();
       }
+    }
+  }
+
+  export function scrollToBottom(): void {
+    if (outerRef && psRef) {
+      outerRef.scrollTop = outerRef.scrollHeight;
+      psRef.update();
     }
   }
 </script>

@@ -20,7 +20,6 @@
   const dispatch = createEventDispatcher();
   export let columnData: TableColumn[];
   export let display: Display;
-  export let paddingLeft: number;
 
   $: ({ rowWidth } = display);
 
@@ -45,7 +44,7 @@
 </script>
 
 <div class="cell new-column" style="
-  width:{DEFAULT_ROW_RIGHT_PADDING + paddingLeft}px;
+  width:{DEFAULT_ROW_RIGHT_PADDING}px;
   left:{$rowWidth - DEFAULT_ROW_RIGHT_PADDING}px">
   <Dropdown closeOnInnerClick={false}
             contentClass="content"
