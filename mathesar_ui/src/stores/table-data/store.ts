@@ -5,11 +5,13 @@ import { Meta } from './meta';
 import { Columns } from './columns';
 import { Records } from './records';
 import { Display } from './display';
+import { Constraints } from './constraints';
 
 export interface TabularData {
   id: number,
   meta: Meta,
   columns: Columns,
+  constraints: Constraints,
   records: Records,
   display: Display,
 }
@@ -27,6 +29,7 @@ function get(type: TabularType, id: DBObjectEntry['id']): TabularData {
   if (!entry) {
     const meta = new Meta(type, id);
     const columns = new Columns(type, id, meta);
+    const constraints = new Constraints(id);
     const records = new Records(type, id, meta, columns);
     const display = new Display(type, id, meta, columns, records);
 
@@ -34,11 +37,13 @@ function get(type: TabularType, id: DBObjectEntry['id']): TabularData {
       id,
       meta,
       columns,
+      constraints,
       records,
       display,
 
       destroy(): void {
         columns.destroy();
+        constraints.destroy();
         records.destroy();
         display.destroy();
       },

@@ -8,6 +8,8 @@
     faSync,
     faExclamationTriangle,
     faPlus,
+    faCog,
+    faKey,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
   import { Button, Icon } from '@mathesar-components';
@@ -18,6 +20,8 @@
     Columns,
     Meta,
   } from '@mathesar/stores/table-data/types';
+  import Dropdown from '@mathesar/components/dropdown/Dropdown.svelte';
+  import TableConstraints from '../constraints/TableConstraints.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -27,6 +31,8 @@
   let columns: Columns;
   let meta: Meta;
   let recordState: Records['state'];
+  let isTableConstraintsModalOpen = false;
+
   $: ({
     columns, records, meta,
   } = $tabularData as TabularData);
@@ -51,6 +57,26 @@
 </script>
 
 <div class="actions-pane">
+  <Dropdown closeOnInnerClick={true} ariaLabel="Table Actions">
+    <svelte:fragment slot="trigger">
+      <Icon data={faCog}/>
+      Table Actions
+    </svelte:fragment>
+    <svelte:fragment slot="content">
+      <div class="new-table-options">
+        <Button
+          appearance="plain"
+          on:click={() => { isTableConstraintsModalOpen = true; }}
+        >
+          <Icon data={faKey} size="0.8em"/>
+          <span>Table Constraints</span>
+        </Button>
+      </div>
+    </svelte:fragment>
+  </Dropdown>
+
+  <TableConstraints bind:isOpen={isTableConstraintsModalOpen} />
+
   <Button size="small" on:click={openDisplayOptions}>
     <Icon data={faFilter} size="0.8em"/>
     <span>
