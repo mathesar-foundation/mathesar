@@ -1,6 +1,12 @@
-.radio {
+fieldset {
+  padding: 0px;
+  border: 0px;
+
+  .radio {
     margin: 0px 10px 0px 0px;
+    
     .label {
         margin: 0px 0px 0px -5px;
+        }
     }
 }

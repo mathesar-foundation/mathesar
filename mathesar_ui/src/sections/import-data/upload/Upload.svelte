@@ -4,7 +4,7 @@
     FileUpload,
     Button,
     Icon,
-    Radio,
+    RadioGroup,
     TextInput,
   } from '@mathesar-components';
   import type { FileImport } from '@mathesar/stores/fileImports';
@@ -20,20 +20,19 @@
 
   export let fileImportStore: FileImport;
 
-  let group = 'File';
-  let inputValue: string;
+  let importMethod = 'File';
+  let fileUrl: string;
 
   const options = [
     'File',
-    'Copy and Paste Text',
     'URL',
   ];
 
-  async function confirmImport(url: string) {
-    if (group === 'File') {
+  async function confirmImport() {
+    if (importMethod === 'File') {
       void loadPreview(fileImportStore);
-    } else if (group === 'URL') {
-      await uploadURL(fileImportStore, url);
+    } else if (importMethod === 'URL') {
+      await uploadURL(fileImportStore, fileUrl);
       void loadPreview(fileImportStore);
     }
   }
@@ -46,14 +45,13 @@
   Create a table by importing data. Very large data sets can sometimes take some minutes to process.
   Please do not close this tab, you may still open and view other tables in the meanwhile.
 </div>
-<h3>Import From</h3>
 {#if $fileImportStore.uploadStatus !== States.Done}
-  {#each options as value}
-    <Radio bind:group {value}></Radio>
-  {/each}
+  <RadioGroup bind:group={importMethod} {options}>
+    <h3>Import From</h3>
+  </RadioGroup>
 {/if}
 
-{#if group === 'File'}
+{#if importMethod === 'File'}
   <FileUpload bind:fileUploads={$fileImportStore.uploads}
               fileProgress={getFileUploadInfo($fileImportStore)}
               on:add={(e) => uploadNewFile(fileImportStore, e.detail)}/>
@@ -62,11 +60,11 @@
   </div>   
 {/if}
 
-{#if group === 'URL'}
+{#if importMethod === 'URL'}
   <div class="help-content">
   Enter a URL pointing to data to download:
   </div>
-  <TextInput bind:value={inputValue}></TextInput>
+  <TextInput bind:value={fileUrl}></TextInput>
 {/if}
 
 <div class="actions">
@@ -78,9 +76,9 @@
           disabled={
             ($fileImportStore.uploadStatus !== States.Done
             || $fileImportStore.previewTableCreationStatus === States.Loading)
-            && group !== 'URL'
+            && importMethod !== 'URL'
           }
-          on:click={() => confirmImport(inputValue)}>
+          on:click={() => confirmImport()}>
       Next
 
     {#if $fileImportStore.previewTableCreationStatus === States.Loading}

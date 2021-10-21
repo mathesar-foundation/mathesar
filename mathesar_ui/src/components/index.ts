@@ -18,7 +18,7 @@ export { default as Button } from './button/Button.svelte';
 export { default as Icon } from './icon/Icon.svelte';
 export { default as Progress } from './progress/Progress.svelte';
 export { default as Skeleton } from './skeleton/Skeleton.svelte';
-export { default as Radio } from './radio-input/RadioInput.svelte';
+export { default as RadioGroup } from './radio-group/RadioGroup.svelte';
 
 // Compound Components (Ordered)
 export { default as Notification } from './notification/Notification.svelte';
