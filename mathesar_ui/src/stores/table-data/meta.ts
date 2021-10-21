@@ -4,6 +4,7 @@ import type { TabularType, DBObjectEntry } from '@mathesar/App.d';
 import type { SelectOption } from '@mathesar-components/types';
 
 export const DEFAULT_PAGE_SIZE = 500;
+export const RECORD_COMBINED_STATE_KEY = '__combined';
 
 export type SortOption = Map<string, 'asc' | 'desc'>;
 export type GroupOption = Set<string>;
@@ -29,21 +30,24 @@ export interface FilterOption {
   filters: FilterEntry[]
 }
 
+export type UpdateModificationType = 'update' | 'updated' | 'updateFailed';
+
 export type ModificationType = 'create' | 'created' | 'creationFailed'
-| 'update' | 'updated' | 'updateFailed'
+| UpdateModificationType
 | 'delete' | 'deleteFailed';
 
 export type ModificationStatus = 'inprocess' | 'complete' | 'error' | 'idle';
+export type ModificationStateMap = Map<unknown, Map<unknown, ModificationType>>;
 
 const inProgressSet: Set<ModificationType> = new Set(['create', 'update', 'delete']);
 const completeSet: Set<ModificationType> = new Set(['created', 'updated']);
 const errorSet: Set<ModificationType> = new Set(['creationFailed', 'updateFailed', 'deleteFailed']);
 
-export function getModificationStatus(
-  modificationStatus: Map<unknown, ModificationType>,
+export function getGenericModificationStatusByPK(
+  recordModificationState: ModificationStateMap,
   primaryKeyValue: unknown,
 ): ModificationStatus {
-  const type = modificationStatus.get(primaryKeyValue);
+  const type = recordModificationState.get(primaryKeyValue)?.get(RECORD_COMBINED_STATE_KEY);
   if (inProgressSet.has(type)) {
     return 'inprocess';
   }
@@ -54,6 +58,23 @@ export function getModificationStatus(
     return 'error';
   }
   return 'idle';
+}
+
+function getCombinedUpdateState(cellMap: Map<unknown, ModificationType>): UpdateModificationType {
+  let state: UpdateModificationType = 'updated';
+  // eslint-disable-next-line no-restricted-syntax
+  for (const [key, value] of cellMap) {
+    if (key !== RECORD_COMBINED_STATE_KEY) {
+      if (value === 'update') {
+        state = 'update';
+        break;
+      } else if (value === 'updateFailed') {
+        state = 'updateFailed';
+        break;
+      }
+    }
+  }
+  return state;
 }
 
 // The Meta store is meant to be used by other stores for storing and operating on meta information.
@@ -78,7 +99,8 @@ export class Meta {
 
   selectedRecords: Writable<Set<unknown>>;
 
-  recordModificationState: Writable<Map<unknown, ModificationType>>;
+  // Row -> Cell -> Type
+  recordModificationState: Writable<ModificationStateMap>;
 
   combinedModificationState: Readable<ModificationStatus>;
 
@@ -100,7 +122,7 @@ export class Meta {
       filters: [],
     });
     this.selectedRecords = writable(new Set());
-    this.recordModificationState = writable(new Map<unknown, ModificationType>());
+    this.recordModificationState = writable(new Map() as ModificationStateMap);
 
     this.offset = derived([this.pageSize, this.page], ([$pageSize, $page], set) => {
       set($pageSize * ($page - 1));
@@ -111,21 +133,21 @@ export class Meta {
         if ($recordModificationState.size === 0) {
           set('idle');
         } else {
+          let finalState: ModificationStatus = 'idle';
           // eslint-disable-next-line no-restricted-syntax
           for (const value of $recordModificationState.values()) {
-            if (inProgressSet.has(value)) {
-              set('inprocess');
-              return;
+            const rowState = value?.get(RECORD_COMBINED_STATE_KEY);
+            if (inProgressSet.has(rowState)) {
+              finalState = 'inprocess';
+              break;
             }
-            if (errorSet.has(value)) {
-              set('error');
-              return;
-            }
-            if (completeSet.has(value)) {
-              set('complete');
-              return;
+            if (errorSet.has(rowState)) {
+              finalState = 'error';
+            } else if (completeSet.has(rowState) && finalState === 'idle') {
+              finalState = 'complete';
             }
           }
+          set(finalState);
         }
       },
       'idle' as ModificationStatus,
@@ -295,18 +317,23 @@ export class Meta {
     }
   }
 
-  setRecordModificationState(primaryKeyValue: unknown, state: ModificationType): void {
+  setRecordModificationState(key: unknown, state: ModificationType): void {
     this.recordModificationState.update((existingMap) => {
       const newMap = new Map(existingMap);
-      newMap.set(primaryKeyValue, state);
+      let cellMap = newMap.get(key);
+      if (!cellMap) {
+        cellMap = new Map();
+        newMap.set(key, cellMap);
+      }
+      cellMap.set(RECORD_COMBINED_STATE_KEY, state);
       return newMap;
     });
   }
 
-  clearRecordModificationState(primaryKeyValue: unknown): void {
+  clearRecordModificationState(key: unknown): void {
     this.recordModificationState.update((existingMap) => {
       const newMap = new Map(existingMap);
-      newMap.delete(primaryKeyValue);
+      newMap.delete(key);
       return newMap;
     });
   }
@@ -315,25 +342,48 @@ export class Meta {
     this.recordModificationState.set(new Map());
   }
 
+  setCellUpdateState(
+    recordKey: unknown,
+    cellKey: unknown,
+    state: UpdateModificationType,
+  ): void {
+    this.recordModificationState.update((existingMap) => {
+      const newMap = new Map(existingMap);
+      let cellMap = newMap.get(recordKey);
+      if (!cellMap) {
+        cellMap = new Map();
+        newMap.set(recordKey, cellMap);
+      }
+      cellMap.set(cellKey, state);
+      cellMap.set(RECORD_COMBINED_STATE_KEY, getCombinedUpdateState(cellMap));
+      return newMap;
+    });
+  }
+
   setMultipleRecordModificationStates(
-    primaryKeyValues: unknown[],
+    keys: unknown[],
     state: ModificationType,
   ): void {
     this.recordModificationState.update((existingMap) => {
       const newMap = new Map(existingMap);
-      primaryKeyValues.forEach((value) => {
-        newMap.set(value, state);
+      keys.forEach((rowKey) => {
+        let cellMap = newMap.get(rowKey);
+        if (!cellMap) {
+          cellMap = new Map();
+          newMap.set(rowKey, cellMap);
+        }
+        cellMap.set(RECORD_COMBINED_STATE_KEY, state);
       });
       return newMap;
     });
   }
 
   clearMultipleRecordModificationStates(
-    primaryKeyValues: unknown[],
+    keys: unknown[],
   ): void {
     this.recordModificationState.update((existingMap) => {
       const newMap = new Map(existingMap);
-      primaryKeyValues.forEach((value) => {
+      keys.forEach((value) => {
         newMap.delete(value);
       });
       return newMap;

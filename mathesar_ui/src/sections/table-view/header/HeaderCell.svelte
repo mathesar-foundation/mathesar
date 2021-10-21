@@ -16,7 +16,6 @@
   export let columnPosition: ColumnPosition;
   export let column: TableColumn;
   export let meta: Meta;
-  export let paddingLeft: number;
 
   $: ({ sort, group } = meta);
   $: sortDirection = ($sort as SortOption)?.get(column.name);
@@ -40,7 +39,7 @@
 </script>
 
 <div class="cell" style="width:{columnPosition?.width || 0}px;
-      left:{(columnPosition?.left || 0) + paddingLeft}px;">
+      left:{(columnPosition?.left || 0)}px;">
   <span class="type">
     {#if column.type === 'INTEGER'}
       #

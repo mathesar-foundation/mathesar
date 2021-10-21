@@ -9,6 +9,7 @@ reviewers:
       - kgodey
       - mathemancer
       - pavish
+      - seancolsen
     designers:
       - ghislaineguerin
     backend-reviewers:
@@ -18,6 +19,7 @@ reviewers:
       - powellc
     frontend-reviewers:
       - pavish
+      - seancolsen
       - dhruvkb
       - zackkrida
 

@@ -1,9 +1,20 @@
 import warnings
 
+from pglast import Node, parse_sql
 from sqlalchemy import Table, MetaData, and_, select, text, func
 
+from db.columns.exceptions import DynamicDefaultWarning
 from db.tables.operations.select import reflect_table_from_oid
 from db.utils import execute_statement
+
+# These tags define which nodes in the AST built by pglast we consider to be
+# "dynamic" when found in a column default clause.  The nodes are best
+# documented by C header files that define the underlying structs:
+# https://github.com/pganalyze/libpg_query/blob/13-latest/src/postgres/include/nodes/parsenodes.h
+# https://github.com/pganalyze/libpg_query/blob/13-latest/src/postgres/include/nodes/primnodes.h
+# It's possible that more dynamic nodes will be found.  Their tags should be
+# added to this set.
+DYNAMIC_NODE_TAGS = {"SQLValueFunction", "FuncCall"}
 
 
 def get_column_index_from_name(table_oid, column_name, engine, connection_to_use=None):
@@ -32,47 +43,52 @@ def get_column_index_from_name(table_oid, column_name, engine, connection_to_use
     return result - 1 - dropped_count
 
 
-def get_column_default(table_oid, column_index, engine, connection_to_use=None):
+def get_column_default_dict(table_oid, column_index, engine, connection_to_use=None):
     table = reflect_table_from_oid(table_oid, engine, connection_to_use)
     column = table.columns[column_index]
-    if column.server_default is None:
-        return None
-
-    metadata = MetaData()
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_attribute = Table("pg_attribute", metadata, autoload_with=engine)
-        pg_attrdef = Table("pg_attrdef", metadata, autoload_with=engine)
-
-    query = (
-        select(pg_attrdef.c.adbin)
-        .select_from(
-            pg_attrdef
-            .join(
-                pg_attribute,
-                and_(
-                    pg_attribute.c.attnum == pg_attrdef.c.adnum,
-                    pg_attribute.c.attrelid == pg_attrdef.c.adrelid
-                )
-            )
+    default_dict = None
+    if column.server_default is not None:
+        default_dict = {
+            "server_default": column.server_default,
+            "is_dynamic": _is_default_expr_dynamic(column.server_default),
+            "sql_text": str(column.server_default.arg)
+        }
+    else:
+        return
+    if default_dict.get("is_dynamic"):
+        warnings.warn(
+            "Dynamic column defaults are read only", DynamicDefaultWarning
         )
-        .where(and_(
-            pg_attribute.c.attrelid == table_oid,
-            pg_attribute.c.attname == column.name,
-            pg_attribute.c.attnum >= 1,
-        ))
+    else:
+        # Defaults are stored as text with SQL casts appended
+        # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
+        # Here, we execute the cast to get the proper python value
+        default_dict.update(
+            executed_constant=execute_statement(
+                engine,
+                select(text(default_dict['sql_text'])),
+                connection_to_use
+            ).first()[0]
+        )
+    return default_dict
+
+
+def get_column_default(table_oid, column_index, engine, connection_to_use=None):
+    default_dict = get_column_default_dict(
+        table_oid, column_index, engine, connection_to_use=connection_to_use
     )
+    if default_dict is None:
+        return
+    else:
+        executed_constant = default_dict.get('executed_constant')
 
-    result = execute_statement(engine, query, connection_to_use).first()[0]
+    return executed_constant if executed_constant is not None else default_dict['sql_text']
 
-    # Here, we get the 'adbin' value for the current column, stored in the attrdef
-    # system table. The prefix of this value tells us whether the default is static
-    # ('{CONSTANT') or generated ('{FUNCEXPR'). We do not return generated defaults.
-    if result.startswith("{FUNCEXPR"):
-        return None
 
-    default_textual_sql = column.server_default.arg.text
-    # Defaults are stored as text with SQL casts appended
-    # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
-    # Here, we execute the cast to get the proper python value
-    return execute_statement(engine, select(text(default_textual_sql)), connection_to_use).first()[0]
+def _is_default_expr_dynamic(server_default):
+    prepared_expr = f"""SELECT {server_default.arg.text};"""
+    expr_ast_root = Node(parse_sql(prepared_expr))
+    ast_nodes = {
+        n.node_tag for n in expr_ast_root.traverse() if isinstance(n, Node)
+    }
+    return not ast_nodes.isdisjoint(DYNAMIC_NODE_TAGS)

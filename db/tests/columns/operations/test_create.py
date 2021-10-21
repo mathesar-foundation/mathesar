@@ -51,6 +51,7 @@ type_set = {
     'BIGINT',
     'BOOLEAN',
     'CHAR',
+    'DATE',
     'DECIMAL',
     'DOUBLE PRECISION',
     'FLOAT',
@@ -58,12 +59,12 @@ type_set = {
     'INTERVAL',
     'MATHESAR_TYPES.EMAIL',
     'MATHESAR_TYPES.MONEY',
+    'MATHESAR_TYPES.URI',
     'NUMERIC',
     'REAL',
     'SMALLINT',
-    'VARCHAR',
     'TEXT',
-    'DATE',
+    'VARCHAR',
 }
 
 

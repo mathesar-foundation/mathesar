@@ -187,6 +187,14 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
             ],
             "filters": None,
         },
+        {
+            "identifier": "uri",
+            "name": "URI",
+            "db_types": [
+                "MATHESAR_TYPES.URI"
+            ],
+            "filters": None,
+        },
     ]
     reflect_db_objects()
     default_database = Database.objects.get(name=test_db_name)
