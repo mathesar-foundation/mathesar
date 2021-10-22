@@ -17,9 +17,9 @@ jobs:
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
         with:
-          key: mathesar-docker-cache-{hash}
+          key: mathesar-docker-cache-integ-tests-{hash}
           restore-keys: |
-            mathesar-docker-cache-
+            mathesar-docker-cache-integ-tests-
 
       - name: Copy env file
         run: cp .env.example .env
@@ -33,4 +33,4 @@ jobs:
         run: docker-compose up --build -d
 
       - name: Run tests with pytest
-        run: docker exec mathesar_service pytest mathesar/
+        run: docker exec mathesar_service pytest --browser chromium --browser webkit --browser firefox tests/
