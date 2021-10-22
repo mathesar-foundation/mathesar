@@ -33,8 +33,8 @@ export interface FilterOption {
 export type UpdateModificationType = 'update' | 'updated' | 'updateFailed';
 
 export type ModificationType = 'create' | 'created' | 'creationFailed'
-| UpdateModificationType
-| 'delete' | 'deleteFailed';
+  | UpdateModificationType
+  | 'delete' | 'deleteFailed';
 
 export type ModificationStatus = 'inprocess' | 'complete' | 'error' | 'idle';
 export type ModificationStateMap = Map<unknown, Map<unknown, ModificationType>>;
@@ -81,9 +81,9 @@ function getCombinedUpdateState(cellMap: Map<unknown, ModificationType>): Update
 // This may also include display properties. Properties in Meta store do not depend on other stores.
 // For display specific properties that depend on other stores, the Display store can be used.
 export class Meta {
-  _type: TabularType;
+  private type: TabularType;
 
-  _parentId: DBObjectEntry['id'];
+  private parentId: DBObjectEntry['id'];
 
   pageSize: Writable<number>;
 
@@ -110,8 +110,8 @@ export class Meta {
     type: TabularType,
     parentId: number,
   ) {
-    this._type = type;
-    this._parentId = parentId;
+    this.type = type;
+    this.parentId = parentId;
 
     this.pageSize = writable(DEFAULT_PAGE_SIZE);
     this.page = writable(1);
@@ -152,10 +152,10 @@ export class Meta {
       },
       'idle' as ModificationStatus,
     );
-    this._setRecordRequestParamsStore();
+    this.setRecordRequestParamsStore();
   }
 
-  _setRecordRequestParamsStore(): void {
+  private setRecordRequestParamsStore(): void {
     this.recordRequestParams = derived(
       [
         this.pageSize,
