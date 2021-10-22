@@ -33,8 +33,8 @@ export interface FilterOption {
 export type UpdateModificationType = 'update' | 'updated' | 'updateFailed';
 
 export type ModificationType = 'create' | 'created' | 'creationFailed'
-  | UpdateModificationType
-  | 'delete' | 'deleteFailed';
+| UpdateModificationType
+| 'delete' | 'deleteFailed';
 
 export type ModificationStatus = 'inprocess' | 'complete' | 'error' | 'idle';
 export type ModificationStateMap = Map<unknown, Map<unknown, ModificationType>>;

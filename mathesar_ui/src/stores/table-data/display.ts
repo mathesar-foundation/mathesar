@@ -95,17 +95,17 @@ export function scrollBasedOnActiveCell(): void {
 }
 
 export class Display {
-private type: TabularType;
+  private type: TabularType;
 
-private parentId: DBObjectEntry['id'];
+  private parentId: DBObjectEntry['id'];
 
-private meta: Meta;
+  private meta: Meta;
 
-private columns: Columns;
+  private columns: Columns;
 
-private records: Records;
+  private records: Records;
 
-private columnPositionMapUnsubscriber: Unsubscriber;
+  private columnPositionMapUnsubscriber: Unsubscriber;
 
   showDisplayOptions: Writable<boolean>;
 
