@@ -69,6 +69,7 @@ export async function uploadURL(fileImportStore: FileImport, url: string): Promi
       isDataFileInfoPresent: true,
       uploadStatus: States.Done,
     });
+    loadPreview(fileImportStore);
   } catch (err: unknown) {
     setInFileStore(fileImportStore, {
       uploads: [],

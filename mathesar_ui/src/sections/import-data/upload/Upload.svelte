@@ -33,10 +33,9 @@
       void loadPreview(fileImportStore);
     } else if (importMethod === 'URL') {
       await uploadURL(fileImportStore, fileUrl);
-      void loadPreview(fileImportStore);
+      fileUrl = '';
     }
   }
-
 </script>
 
 <div>Add Table (Step 1 of 2)</div>
@@ -46,7 +45,7 @@
   Please do not close this tab, you may still open and view other tables in the meanwhile.
 </div>
 {#if $fileImportStore.uploadStatus !== States.Done}
-  <RadioGroup bind:group={importMethod} {options}>
+  <RadioGroup bind:group={importMethod} {options} inLine={false}>
     <h3>Import From</h3>
   </RadioGroup>
 {/if}

@@ -1,9 +1,14 @@
-fieldset {
+.fieldset {
   padding: 0px;
   border: 0px;
 
+  .inline {
+    display:flex;
+    flex-direction: column;
+  }
+
   .radio {
-    margin: 0px 10px 0px 0px;
+    margin: 2px;
     
     .label {
         margin: 0px 0px 0px -5px;
