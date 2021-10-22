@@ -49,7 +49,7 @@ If you want to add or remove packages, or bascially run any npm action, **always
 You can connect to the container and open the ui folder by running:
 
 ```bash
-docker exec -it mathesar_service_1 /bin/bash
+docker exec -it mathesar_service /bin/bash
 cd mathesar_ui
 ```
 
@@ -71,7 +71,7 @@ For guidelines on component development, refer [README of components](https://gi
 You can start storybook in dev mode by connecting to the container and then running `npm run storybook`:
 
 ```bash
-docker exec -it mathesar_service_1 /bin/bash
+docker exec -it mathesar_service /bin/bash
 
 root@c273da65c52d:/code/mathesar_ui$ cd mathesar_ui && npm run storybook
 ```
