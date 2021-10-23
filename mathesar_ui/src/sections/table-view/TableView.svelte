@@ -4,7 +4,7 @@
   import { getTableContent } from '@mathesar/stores/table-data';
   import type {
     TabularData,
-    Columns,
+    ColumnsDataStore,
     Display,
   } from '@mathesar/stores/table-data/types';
   // import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
@@ -22,7 +22,7 @@
   export let id: unknown;
   $: identifier = id as number;
 
-  let columns: Columns;
+  let columnsDataStore: ColumnsDataStore;
   let showDisplayOptions: Display['showDisplayOptions'];
 
   // let tableBodyRef: Body;
@@ -35,7 +35,7 @@
       id: _id,
       ...data,
     });
-    ({ columns } = data);
+    ({ columnsDataStore } = data);
     ({ showDisplayOptions } = data.display);
 
     animateOpts = false;
@@ -65,7 +65,7 @@
   </div>
 
   <div class="table-content">
-    {#if $columns.data.length > 0}
+    {#if $columnsDataStore.columns.length > 0}
       <Header/>
       <Body/>
     {/if}

@@ -12,7 +12,7 @@ import type { CancellablePromise } from '@mathesar/components';
 import type { DBObjectEntry } from '@mathesar/App.d';
 import type { Meta } from './meta';
 
-export interface TableColumn {
+export interface Column {
   name: string,
   type: string,
   index: number,
@@ -22,14 +22,14 @@ export interface TableColumn {
   __columnIndex?: number,
 }
 
-export interface TableColumnData {
+export interface ColumnsData {
   state: States,
   error?: string,
-  data: TableColumn[],
+  columns: Column[],
   primaryKey?: string,
 }
 
-function preprocessColumns(response?: TableColumn[]): TableColumn[] {
+function preprocessColumns(response?: Column[]): Column[] {
   let index = 0;
   return response?.map((column) => {
     const newColumn = {
@@ -41,20 +41,20 @@ function preprocessColumns(response?: TableColumn[]): TableColumn[] {
   }) || [];
 }
 
-export class Columns implements Writable<TableColumnData> {
+export class ColumnsDataStore implements Writable<ColumnsData> {
   private type: TabularType;
 
   private parentId: DBObjectEntry['id'];
 
-  private store: Writable<TableColumnData>;
+  private store: Writable<ColumnsData>;
 
-  private promise: CancellablePromise<PaginatedResponse<TableColumn>>;
+  private promise: CancellablePromise<PaginatedResponse<Column>>;
 
   private url: string;
 
   private meta: Meta;
 
-  private fetchCallback: (storeData: TableColumnData) => void;
+  private fetchCallback: (storeData: ColumnsData) => void;
 
   private listeners: Map<string, Set<((value?: unknown) => unknown)>>;
 
@@ -62,13 +62,13 @@ export class Columns implements Writable<TableColumnData> {
     type: TabularType,
     parentId: number,
     meta: Meta,
-    fetchCallback?: (storeData: TableColumnData) => void,
+    fetchCallback?: (storeData: ColumnsData) => void,
   ) {
     this.type = type;
     this.parentId = parentId;
     this.store = writable({
       state: States.Loading,
-      data: [],
+      columns: [],
       primaryKey: null,
     });
     this.meta = meta;
@@ -78,21 +78,21 @@ export class Columns implements Writable<TableColumnData> {
     void this.fetch();
   }
 
-  set(value: TableColumnData): void {
+  set(value: ColumnsData): void {
     this.store.set(value);
   }
 
-  update(updater: Updater<TableColumnData>): void {
+  update(updater: Updater<ColumnsData>): void {
     this.store.update(updater);
   }
 
   subscribe(
-    run: Subscriber<TableColumnData>,
+    run: Subscriber<ColumnsData>,
   ): Unsubscriber {
     return this.store.subscribe(run);
   }
 
-  get(): TableColumnData {
+  get(): ColumnsData {
     return getStoreValue(this.store);
   }
 
@@ -116,7 +116,7 @@ export class Columns implements Writable<TableColumnData> {
     });
   }
 
-  async fetch(): Promise<TableColumnData> {
+  async fetch(): Promise<ColumnsData> {
     this.update((existingData) => ({
       ...existingData,
       state: States.Loading,
@@ -124,15 +124,15 @@ export class Columns implements Writable<TableColumnData> {
 
     try {
       this.promise?.cancel();
-      this.promise = getAPI<PaginatedResponse<TableColumn>>(`${this.url}?limit=500`);
+      this.promise = getAPI<PaginatedResponse<Column>>(`${this.url}?limit=500`);
 
       const response = await this.promise;
       const columnResponse = preprocessColumns(response.results);
       const pkColumn = columnResponse.find((column) => column.primary_key);
 
-      const storeData: TableColumnData = {
+      const storeData: ColumnsData = {
         state: States.Done,
-        data: columnResponse,
+        columns: columnResponse,
         primaryKey: pkColumn?.name || null,
       };
       this.set(storeData);
@@ -142,7 +142,7 @@ export class Columns implements Writable<TableColumnData> {
       this.set({
         state: States.Error,
         error: err instanceof Error ? err.message : null,
-        data: [],
+        columns: [],
         primaryKey: null,
       });
     } finally {
@@ -151,8 +151,8 @@ export class Columns implements Writable<TableColumnData> {
     return null;
   }
 
-  async add(newColumn: Partial<TableColumn>): Promise<Partial<TableColumn>> {
-    const column = await postAPI<Partial<TableColumn>>(this.url, newColumn);
+  async add(newColumn: Partial<Column>): Promise<Partial<Column>> {
+    const column = await postAPI<Partial<Column>>(this.url, newColumn);
     await this.fetch();
     return column;
   }

@@ -8,7 +8,7 @@
   import type {
     TabularDataStore,
     TabularData,
-    TableColumnData,
+    ColumnsData,
   } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar-components/types';
   import FilterSection from './FilterSection.svelte';
@@ -18,18 +18,18 @@
   const dispatch = createEventDispatcher();
   
   const tabularData = getContext<TabularDataStore>('tabularData');
-  $: ({ columns, meta } = $tabularData as TabularData);
+  $: ({ columnsDataStore, meta } = $tabularData as TabularData);
 
   function getColumnOptions(
-    _columns: TableColumnData,
+    columnsData: ColumnsData,
   ): SelectOption<string>[] {
-    return _columns?.data?.map((column) => ({
+    return columnsData?.columns?.map((column) => ({
       id: column.name,
       label: column.name,
     })) || [];
   }
 
-  $: columnOptions = getColumnOptions($columns);
+  $: columnOptions = getColumnOptions($columnsDataStore);
 </script>
 
 <div class="display-opts" transition:fade|local={{ duration: 250 }}>

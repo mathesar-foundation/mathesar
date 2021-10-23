@@ -14,8 +14,8 @@
   import type {
     TabularDataStore,
     TabularData,
-    Records,
-    Columns,
+    RecordsData,
+    ColumnsDataStore,
     Meta,
   } from '@mathesar/stores/table-data/types';
 
@@ -23,21 +23,21 @@
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
-  let records: Records;
-  let columns: Columns;
+  let recordsData: RecordsData;
+  let columnsDataStore: ColumnsDataStore;
   let meta: Meta;
-  let recordState: Records['state'];
+  let recordState: RecordsData['state'];
   $: ({
-    columns, records, meta,
+    columnsDataStore, recordsData, meta,
   } = $tabularData as TabularData);
   $: ({
     filter, sort, group, selectedRecords, combinedModificationState,
   } = meta);
-  $: ({ state: recordState } = records);
+  $: ({ state: recordState } = recordsData);
 
-  $: isLoading = $columns.state === States.Loading
+  $: isLoading = $columnsDataStore.state === States.Loading
     || $recordState === States.Loading;
-  $: isError = $columns.state === States.Error
+  $: isError = $columnsDataStore.state === States.Error
     || $recordState === States.Error;
 
   function openDisplayOptions() {
@@ -45,8 +45,8 @@
   }
 
   function refresh() {
-    void columns.fetch();
-    void records.fetch();
+    void columnsDataStore.fetch();
+    void recordsData.fetch();
   }
 </script>
 
@@ -83,7 +83,7 @@
 
   <div class="divider"/>
 
-  <Button size="small" on:click={() => records.addEmptyRecord()}>
+  <Button size="small" on:click={() => recordsData.addEmptyRecord()}>
     <Icon data={faPlus}/>
     <span>
       New Record
@@ -91,7 +91,7 @@
   </Button>
 
   {#if $selectedRecords.size > 0}
-    <Button size="small" on:click={() => records.deleteSelected()}>
+    <Button size="small" on:click={() => recordsData.deleteSelected()}>
       <Icon data={faTrashAlt}/>
       <span>
         Delete {$selectedRecords.size} records

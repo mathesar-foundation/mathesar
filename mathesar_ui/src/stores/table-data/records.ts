@@ -15,7 +15,7 @@ import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
 import type { DBObjectEntry } from '@mathesar/App.d';
 import type { Meta } from './meta';
-import type { Columns, TableColumn } from './columns';
+import type { ColumnsDataStore, Column } from './columns';
 
 interface TableRecordInResponse {
   [key: string]: unknown,
@@ -36,10 +36,10 @@ export interface GroupCount {
 
 interface GroupInfo {
   counts: GroupCount,
-  columns: TableColumn['name'][]
+  columns: Column['name'][]
 }
 
-interface TableRecordData {
+interface TableRecordsData {
   state: States,
   error?: string,
   savedRecords: TableRecord[],
@@ -50,7 +50,7 @@ interface TableRecordData {
 
 interface TableRecordResponse extends PaginatedResponse<TableRecordInResponse> {
   group_count?: {
-    group_count_by?: TableColumn['name'][],
+    group_count_by?: Column['name'][],
     results?: {
       count: number,
       values: string[]
@@ -60,7 +60,7 @@ interface TableRecordResponse extends PaginatedResponse<TableRecordInResponse> {
 
 export function getRowKey(
   row: TableRecord,
-  primaryKeyColumn?: TableColumn['name'],
+  primaryKeyColumn?: Column['name'],
 ): unknown {
   let key = row?.[primaryKeyColumn];
   if (!key && row?.__isNew) {
@@ -155,7 +155,7 @@ function prepareRowForRequest(row: TableRecord): TableRecordInResponse {
   return rowForRequest;
 }
 
-export class Records {
+export class RecordsData {
   private type: TabularType;
 
   private parentId: DBObjectEntry['id'];
@@ -164,7 +164,7 @@ export class Records {
 
   private meta: Meta;
 
-  private columns: Columns;
+  private columnsDataStore: ColumnsDataStore;
 
   state: Writable<States>;
 
@@ -184,7 +184,7 @@ export class Records {
 
   private updatePromises: Map<unknown, CancellablePromise<TableRecordResponse>>;
 
-  private fetchCallback?: (storeData: TableRecordData) => void;
+  private fetchCallback?: (storeData: TableRecordsData) => void;
 
   private requestParamsUnsubscriber: Unsubscriber;
 
@@ -192,8 +192,8 @@ export class Records {
     type: TabularType,
     parentId: number,
     meta: Meta,
-    columns: Columns,
-    fetchCallback?: (storeData: TableRecordData) => void,
+    columnsDataStore: ColumnsDataStore,
+    fetchCallback?: (storeData: TableRecordsData) => void,
   ) {
     this.type = type;
     this.parentId = parentId;
@@ -206,7 +206,7 @@ export class Records {
     this.error = writable(null as string);
 
     this.meta = meta;
-    this.columns = columns;
+    this.columnsDataStore = columnsDataStore;
     this.url = `/${this.type === TabularType.Table ? 'tables' : 'views'}/${this.parentId}/records/`;
     this.fetchCallback = fetchCallback;
     void this.fetch();
@@ -217,7 +217,7 @@ export class Records {
     });
   }
 
-  async fetch(retainExistingRows = false): Promise<TableRecordData> {
+  async fetch(retainExistingRows = false): Promise<TableRecordsData> {
     this.promise?.cancel();
     const offset = getStoreValue(this.meta.offset);
 
@@ -263,7 +263,7 @@ export class Records {
         groupColumns,
       );
 
-      const storeData: TableRecordData = {
+      const storeData: TableRecordsData = {
         state: States.Done,
         savedRecords: records,
         groupCounts,
@@ -311,12 +311,12 @@ export class Records {
         await this.fetch(true);
 
         const offset = getStoreValue(this.meta.offset);
-        const savedRecordData = getStoreValue(this.savedRecords);
-        const savedRecordLength = savedRecordData?.length || 0;
+        const savedRecords = getStoreValue(this.savedRecords);
+        const savedRecordsLength = savedRecords?.length || 0;
 
         this.newRecords.update((existing) => {
           let retained = existing.filter(
-            (entry) => !successSet.has(getRowKey(entry, this.columns.get()?.primaryKey)),
+            (entry) => !successSet.has(getRowKey(entry, this.columnsDataStore.get()?.primaryKey)),
           );
           if (retained.length === existing.length) {
             return existing;
@@ -326,7 +326,7 @@ export class Records {
             index += 1;
             return {
               ...entry,
-              __rowIndex: savedRecordLength + index,
+              __rowIndex: savedRecordsLength + index,
               __identifier: generateRowIdentifier(
                 'new',
                 offset,
@@ -347,8 +347,8 @@ export class Records {
   }
 
   // TODO: Handle states where cell update and row update happen in parallel
-  async updateCell(row: TableRecord, column: TableColumn): Promise<void> {
-    const { primaryKey } = this.columns.get();
+  async updateCell(row: TableRecord, column: Column): Promise<void> {
+    const { primaryKey } = this.columnsDataStore.get();
     if (primaryKey && row[primaryKey]) {
       const rowKey = getRowKey(row, primaryKey);
       const cellKey = `${rowKey.toString()}::${column.name}`;
@@ -377,7 +377,7 @@ export class Records {
   }
 
   async updateRecord(row: TableRecord): Promise<void> {
-    const { primaryKey } = this.columns.get();
+    const { primaryKey } = this.columnsDataStore.get();
     if (primaryKey && row[primaryKey]) {
       const rowKey = getRowKey(row, primaryKey);
       this.meta.setRecordModificationState(rowKey, 'update');
@@ -406,21 +406,21 @@ export class Records {
 
   getNewEmptyRecord(): TableRecord {
     const offset = getStoreValue(this.meta.offset);
-    const savedRecordData = getStoreValue(this.savedRecords);
-    const savedRecordLength = savedRecordData?.length || 0;
+    const savedRecords = getStoreValue(this.savedRecords);
+    const savedRecordsLength = savedRecords?.length || 0;
     const existingNewRecords = getStoreValue(this.newRecords);
     const identifier = generateRowIdentifier('new', offset, existingNewRecords.length);
     const newRecord: TableRecord = {
       __identifier: identifier,
       __state: States.Done,
       __isNew: true,
-      __rowIndex: existingNewRecords.length + savedRecordLength,
+      __rowIndex: existingNewRecords.length + savedRecordsLength,
     };
     return newRecord;
   }
 
   async createRecord(row: TableRecord): Promise<void> {
-    const { primaryKey } = this.columns.get();
+    const { primaryKey } = this.columnsDataStore.get();
     const rowKey = getRowKey(row, primaryKey);
     this.meta.setRecordModificationState(rowKey, 'create');
     this.createPromises?.get(rowKey)?.cancel();
@@ -459,8 +459,8 @@ export class Records {
     }
   }
 
-  async createOrUpdateRecord(row: TableRecord, column?: TableColumn): Promise<void> {
-    const { primaryKey } = this.columns.get();
+  async createOrUpdateRecord(row: TableRecord, column?: Column): Promise<void> {
+    const { primaryKey } = this.columnsDataStore.get();
 
     // Row may not have been updated yet in view when additional request is made.
     // So check current values to ensure another row has not been created.
@@ -493,11 +493,11 @@ export class Records {
   }
 
   getIterationKey(index: number): string {
-    const savedRecordData = getStoreValue(this.savedRecords);
-    if (savedRecordData?.[index]) {
-      return savedRecordData[index].__identifier;
+    const savedRecords = getStoreValue(this.savedRecords);
+    if (savedRecords?.[index]) {
+      return savedRecords[index].__identifier;
     }
-    const savedLength = savedRecordData?.length || 0;
+    const savedLength = savedRecords?.length || 0;
     const newRecordsData = getStoreValue(this.newRecords);
     if (newRecordsData?.[index + savedLength]) {
       return newRecordsData[index + savedLength].__identifier;
