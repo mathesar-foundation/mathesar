@@ -2,7 +2,7 @@
   import Modal from '@mathesar/components/modal/Modal.svelte';
   import { getContext } from 'svelte';
   import type { TabularDataStore } from '@mathesar/stores/table-data/types';
-  import type { Constraint, Constraints } from '@mathesar/stores/table-data/constraints';
+  import type { Constraint, ConstraintsDataStore } from '@mathesar/stores/table-data/constraints';
   // TODO uncomment when adding the "Drop" button
   // import type { Constraint } from "@mathesar/stores/table-data/constraints";
   // import Icon from "@mathesar/components/icon/Icon.svelte";
@@ -12,8 +12,8 @@
   export let isOpen = false;
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  $: tabularDataConstraints = $tabularData.constraints as Constraints;
-  $: constraints = $tabularDataConstraints.data as Constraint[];
+  $: constraintsDataStore = $tabularData.constraintsDataStore as ConstraintsDataStore;
+  $: constraints = $constraintsDataStore.constraints as Constraint[];
   $: countText = constraints.length === 0 ? '' : ` (${constraints.length as number})`;
 
   function columnSummary(constraint: Constraint) {

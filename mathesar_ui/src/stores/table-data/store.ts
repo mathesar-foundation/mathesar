@@ -5,13 +5,13 @@ import { Meta } from './meta';
 import { Columns } from './columns';
 import { Records } from './records';
 import { Display } from './display';
-import { Constraints } from './constraints';
+import { ConstraintsDataStore } from './constraints';
 
 export interface TabularData {
   id: number,
   meta: Meta,
   columns: Columns,
-  constraints: Constraints,
+  constraintsDataStore: ConstraintsDataStore,
   records: Records,
   display: Display,
 }
@@ -29,7 +29,7 @@ function get(type: TabularType, id: DBObjectEntry['id']): TabularData {
   if (!entry) {
     const meta = new Meta(type, id);
     const columns = new Columns(type, id, meta);
-    const constraints = new Constraints(id);
+    const constraintsDataStore = new ConstraintsDataStore(id);
     const records = new Records(type, id, meta, columns);
     const display = new Display(type, id, meta, columns, records);
 
@@ -37,13 +37,13 @@ function get(type: TabularType, id: DBObjectEntry['id']): TabularData {
       id,
       meta,
       columns,
-      constraints,
+      constraintsDataStore,
       records,
       display,
 
       destroy(): void {
         columns.destroy();
-        constraints.destroy();
+        constraintsDataStore.destroy();
         records.destroy();
         display.destroy();
       },
