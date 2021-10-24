@@ -45,7 +45,7 @@
   Please do not close this tab, you may still open and view other tables in the meanwhile.
 </div>
 {#if $fileImportStore.uploadStatus !== States.Done}
-  <RadioGroup bind:group={importMethod} {options} inLine={false}>
+  <RadioGroup bind:group={importMethod} {options} isInLine={false}>
     <h3>Import From</h3>
   </RadioGroup>
 {/if}

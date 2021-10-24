@@ -1,14 +1,14 @@
 <script lang="ts">
-    export let group;
+    export let group: string;
     export let options = [];
-    export let inLine = true;
+    export let isInLine = true;
 </script>
 
 <fieldset class="fieldset">
   <legend>
     <slot></slot>
   </legend>
-  <div class:inline={inLine}>
+  <div class:inline={isInLine}>
     {#each options as value}
       <label class="radio">
           <input type="radio" bind:group {value}>

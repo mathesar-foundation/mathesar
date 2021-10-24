@@ -57,29 +57,6 @@ function completionCallback(
   }
 }
 
-export async function uploadURL(fileImportStore: FileImport, url: string): Promise<void> {
-  const formData = new FormData();
-  formData.append('url', url);
-  try {
-    const uploadResponse = await uploadFile<{ id: number }>('/data_files/', formData);
-    const { id } = uploadResponse;
-    setInFileStore(fileImportStore, {
-      dataFileId: id,
-      firstRowHeader: true,
-      isDataFileInfoPresent: true,
-      uploadStatus: States.Done,
-    });
-    loadPreview(fileImportStore);
-  } catch (err: unknown) {
-    setInFileStore(fileImportStore, {
-      uploads: [],
-      uploadProgress: null,
-      uploadStatus: States.Error,
-      error: (err as Error).message,
-    });
-  }
-}
-
 export function uploadNewFile(
   fileImportStore: FileImport,
   detail: FileUploadAddDetail,
@@ -398,6 +375,29 @@ export function cancelImport(fileImportStore: FileImport): void {
       isNew: true,
     });
     void deletePreviewTable(fileImportStore);
+  }
+}
+
+export async function uploadURL(fileImportStore: FileImport, url: string): Promise<void> {
+  const formData = new FormData();
+  formData.append('url', url);
+  try {
+    const uploadResponse = await uploadFile<{ id: number }>('/data_files/', formData);
+    const { id } = uploadResponse;
+    setInFileStore(fileImportStore, {
+      dataFileId: id,
+      firstRowHeader: true,
+      isDataFileInfoPresent: true,
+      uploadStatus: States.Done,
+    });
+    void loadPreview(fileImportStore);
+  } catch (err: unknown) {
+    setInFileStore(fileImportStore, {
+      uploads: [],
+      uploadProgress: null,
+      uploadStatus: States.Error,
+      error: (err as Error).message,
+    });
   }
 }
 
