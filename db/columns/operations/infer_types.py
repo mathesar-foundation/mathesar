@@ -25,7 +25,10 @@ TYPE_INFERENCE_DAG = {
         base.PostgresType.BOOLEAN.value,
         base.PostgresType.NUMERIC.value,
         base.PostgresType.DATE.value,
-        base.PostgresType.TIME_WITH_TIME_ZONE.value,
+        # We only infer to TIME_WITHOUT_TIME_ZONE as time zones don't make much sense
+        # without additional date information. See postgres documentation for further
+        # details: https://www.postgresql.org/docs/13/datatype-datetime.html
+        base.PostgresType.TIME_WITHOUT_TIME_ZONE.value,
         base.PostgresType.INTERVAL.value,
         base.MathesarCustomType.EMAIL.value,
     ],
