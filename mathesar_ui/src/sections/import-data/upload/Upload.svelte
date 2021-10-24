@@ -15,7 +15,7 @@
     getFileUploadInfo,
     loadPreview,
     cancelImport,
-    uploadURL,
+    uploadUrl,
   } from '../importUtils';
 
   export let fileImportStore: FileImport;
@@ -32,7 +32,7 @@
     if (importMethod === 'File') {
       void loadPreview(fileImportStore);
     } else if (importMethod === 'URL') {
-      await uploadURL(fileImportStore, fileUrl);
+      await uploadUrl(fileImportStore, fileUrl);
       fileUrl = '';
     }
   }

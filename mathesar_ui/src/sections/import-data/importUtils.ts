@@ -378,7 +378,7 @@ export function cancelImport(fileImportStore: FileImport): void {
   }
 }
 
-export async function uploadURL(fileImportStore: FileImport, url: string): Promise<void> {
+export async function uploadUrl(fileImportStore: FileImport, url: string): Promise<void> {
   const formData = new FormData();
   formData.append('url', url);
   try {
