@@ -10,7 +10,7 @@
     faPlus,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
-  import { Button, Icon } from '@mathesar-components';
+  import { Button, Icon, Dropdown } from '@mathesar-components';
   import type {
     TabularDataStore,
     TabularData,
@@ -51,6 +51,18 @@
 </script>
 
 <div class="actions-pane">
+  <Dropdown closeOnInnerClick={true} triggerClass="opts" 
+   contentClass="table-opts-content" size="small"> 
+    <svelte:fragment slot="trigger">
+        Table
+    </svelte:fragment>
+    <svelte:fragment slot="content">
+      <ul>
+        <li class= "item" on:click={() => dispatch('deleteTable')}>Delete Table</li>
+      </ul>
+    </svelte:fragment>
+  </Dropdown>
+
   <Button size="small" on:click={openDisplayOptions}>
     <Icon data={faFilter} size="0.8em"/>
     <span>
