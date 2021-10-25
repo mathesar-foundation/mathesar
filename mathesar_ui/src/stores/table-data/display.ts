@@ -95,17 +95,17 @@ export function scrollBasedOnActiveCell(): void {
 }
 
 export class Display {
-  _type: TabularType;
+  private type: TabularType;
 
-  _parentId: DBObjectEntry['id'];
+  private parentId: DBObjectEntry['id'];
 
-  _meta: Meta;
+  private meta: Meta;
 
-  _columns: Columns;
+  private columns: Columns;
 
-  _records: Records;
+  private records: Records;
 
-  _columnPositionMapUnsubscriber: Unsubscriber;
+  private columnPositionMapUnsubscriber: Unsubscriber;
 
   showDisplayOptions: Writable<boolean>;
 
@@ -126,11 +126,11 @@ export class Display {
     columns: Columns,
     records: Records,
   ) {
-    this._type = type;
-    this._parentId = parentId;
-    this._meta = meta;
-    this._columns = columns;
-    this._records = records;
+    this.type = type;
+    this.parentId = parentId;
+    this.meta = meta;
+    this.columns = columns;
+    this.records = records;
     this.showDisplayOptions = writable(false);
     this.horizontalScrollOffset = writable(0);
     this.columnPositionMap = writable(new Map() as ColumnPositionMap);
@@ -138,7 +138,7 @@ export class Display {
     this.rowWidth = writable(0);
 
     // subscribers
-    this._columnPositionMapUnsubscriber = this._columns.subscribe((columnData) => {
+    this.columnPositionMapUnsubscriber = this.columns.subscribe((columnData) => {
       this.columnPositionMap.update(
         (map) => recalculateColumnPositions(map, columnData.data),
       );
@@ -147,7 +147,7 @@ export class Display {
       this.rowWidth.set(widthWithPadding);
     });
 
-    const { savedRecords, newRecords } = this._records;
+    const { savedRecords, newRecords } = this.records;
     this.displayableRecords = derived(
       [savedRecords, newRecords],
       ([$savedRecords, $newRecords], set) => {
@@ -160,7 +160,7 @@ export class Display {
           }).concat($newRecords);
         }
         allRecords = allRecords.concat({
-          ...this._records.getNewEmptyRecord(),
+          ...this.records.getNewEmptyRecord(),
           __isAddPlaceholder: true,
         });
         set(allRecords);
@@ -191,12 +191,12 @@ export class Display {
   }
 
   handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | 'changed' | null {
-    const columnData = this._columns.get().data;
-    const totalCount = get(this._records.totalCount);
-    const savedRecords = get(this._records.savedRecords);
-    const newRecords = get(this._records.newRecords);
-    const offset = get(this._meta.offset);
-    const pageSize = get(this._meta.pageSize);
+    const columnData = this.columns.get().data;
+    const totalCount = get(this.records.totalCount);
+    const savedRecords = get(this.records.savedRecords);
+    const newRecords = get(this.records.newRecords);
+    const offset = get(this.meta.offset);
+    const pageSize = get(this.meta.pageSize);
     const minRowIndex = 0;
     const maxRowIndex = Math.min(
       pageSize,
@@ -279,6 +279,6 @@ export class Display {
   }
 
   destroy(): void {
-    this._columnPositionMapUnsubscriber();
+    this.columnPositionMapUnsubscriber();
   }
 }

@@ -47,21 +47,21 @@ function preprocessColumns(response?: TableColumn[]): TableColumn[] {
 }
 
 export class Columns implements Writable<TableColumnData> {
-  _type: TabularType;
+  private type: TabularType;
 
-  _parentId: DBObjectEntry['id'];
+  private parentId: DBObjectEntry['id'];
 
-  _store: Writable<TableColumnData>;
+  private store: Writable<TableColumnData>;
 
-  _promise: CancellablePromise<PaginatedResponse<TableColumn>>;
+  private promise: CancellablePromise<PaginatedResponse<TableColumn>>;
 
-  _url: string;
+  private url: string;
 
-  _meta: Meta;
+  private meta: Meta;
 
-  _fetchCallback: (storeData: TableColumnData) => void;
+  private fetchCallback: (storeData: TableColumnData) => void;
 
-  _listeners: Map<string, Set<((value?: unknown) => unknown)>>;
+  private listeners: Map<string, Set<((value?: unknown) => unknown)>>;
 
   constructor(
     type: TabularType,
@@ -69,50 +69,50 @@ export class Columns implements Writable<TableColumnData> {
     meta: Meta,
     fetchCallback?: (storeData: TableColumnData) => void,
   ) {
-    this._type = type;
-    this._parentId = parentId;
-    this._store = writable({
+    this.type = type;
+    this.parentId = parentId;
+    this.store = writable({
       state: States.Loading,
       data: [],
       primaryKey: null,
     });
-    this._meta = meta;
-    this._url = `/${this._type === TabularType.Table ? 'tables' : 'views'}/${this._parentId}/columns/`;
-    this._fetchCallback = fetchCallback;
-    this._listeners = new Map();
+    this.meta = meta;
+    this.url = `/${this.type === TabularType.Table ? 'tables' : 'views'}/${this.parentId}/columns/`;
+    this.fetchCallback = fetchCallback;
+    this.listeners = new Map();
     void this.fetch();
   }
 
   set(value: TableColumnData): void {
-    this._store.set(value);
+    this.store.set(value);
   }
 
   update(updater: Updater<TableColumnData>): void {
-    this._store.update(updater);
+    this.store.update(updater);
   }
 
   subscribe(
     run: Subscriber<TableColumnData>,
   ): Unsubscriber {
-    return this._store.subscribe(run);
+    return this.store.subscribe(run);
   }
 
   get(): TableColumnData {
-    return getStoreValue(this._store);
+    return getStoreValue(this.store);
   }
 
   on(eventName: string, callback: (value?: unknown) => unknown): () => void {
-    if (!this._listeners.has(eventName)) {
-      this._listeners.set(eventName, new Set());
+    if (!this.listeners.has(eventName)) {
+      this.listeners.set(eventName, new Set());
     }
-    this._listeners.get(eventName).add(callback);
+    this.listeners.get(eventName).add(callback);
     return () => {
-      this._listeners?.get(eventName)?.delete(callback);
+      this.listeners?.get(eventName)?.delete(callback);
     };
   }
 
-  _callListeners(eventName: string, value: unknown): void {
-    this._listeners?.get(eventName)?.forEach((entry) => {
+  private callListeners(eventName: string, value: unknown): void {
+    this.listeners?.get(eventName)?.forEach((entry) => {
       try {
         entry?.(value);
       } catch (err) {
@@ -128,10 +128,10 @@ export class Columns implements Writable<TableColumnData> {
     }));
 
     try {
-      this._promise?.cancel();
-      this._promise = getAPI<PaginatedResponse<TableColumn>>(`${this._url}?limit=500`);
+      this.promise?.cancel();
+      this.promise = getAPI<PaginatedResponse<TableColumn>>(`${this.url}?limit=500`);
 
-      const response = await this._promise;
+      const response = await this.promise;
       const columnResponse = preprocessColumns(response.results);
       const pkColumn = columnResponse.find((column) => column.primary_key);
 
@@ -141,7 +141,7 @@ export class Columns implements Writable<TableColumnData> {
         primaryKey: pkColumn?.name || null,
       };
       this.set(storeData);
-      this._fetchCallback?.(storeData);
+      this.fetchCallback?.(storeData);
       return storeData;
     } catch (err) {
       this.set({
@@ -151,21 +151,21 @@ export class Columns implements Writable<TableColumnData> {
         primaryKey: null,
       });
     } finally {
-      this._promise = null;
+      this.promise = null;
     }
     return null;
   }
 
   async add(newColumn: Partial<TableColumn>): Promise<Partial<TableColumn>> {
-    const column = await postAPI<Partial<TableColumn>>(this._url, newColumn);
+    const column = await postAPI<Partial<TableColumn>>(this.url, newColumn);
     await this.fetch();
     return column;
   }
 
   destroy(): void {
-    this._promise?.cancel();
-    this._promise = null;
-    this._listeners.clear();
+    this.promise?.cancel();
+    this.promise = null;
+    this.listeners.clear();
   }
 
   async deleteColumn(columnId:number):Promise<void> {
