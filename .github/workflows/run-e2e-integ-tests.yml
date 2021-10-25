@@ -41,7 +41,11 @@ jobs:
         run: docker exec mathesar_service python manage.py migrate
       
       - name: Run type installation
-        run: docker exec mathesar_service python install.py
+        run: docker exec mathesar_service python install.py --skip-confirm
+
+      - name: Sleep for 15 seconds
+        run: sleep 15s
+        shell: bash
 
       - name: Run integ tests with pytest
         run: docker exec mathesar_service pytest --browser chromium --browser webkit --browser firefox tests/
