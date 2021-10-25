@@ -51,11 +51,11 @@ def test_column_list(column_test_table, client):
             'index': 0,
             'nullable': False,
             'primary_key': True,
-            'default': None,
+            'default': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
             'valid_target_types': [
-                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
-                'SMALLINT', 'VARCHAR',
+                'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
+                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
+                'SMALLINT', 'TEXT', 'VARCHAR',
             ],
         },
         {
@@ -67,9 +67,9 @@ def test_column_list(column_test_table, client):
             'primary_key': False,
             'default': None,
             'valid_target_types': [
-                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
-                'SMALLINT', 'VARCHAR',
+                'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
+                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
+                'SMALLINT', 'TEXT', 'VARCHAR',
             ],
         },
         {
@@ -81,9 +81,9 @@ def test_column_list(column_test_table, client):
             'primary_key': False,
             'default': 5,
             'valid_target_types': [
-                'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
-                'SMALLINT', 'VARCHAR',
+                'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
+                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
+                'SMALLINT', 'TEXT', 'VARCHAR',
             ],
         },
         {
@@ -94,9 +94,10 @@ def test_column_list(column_test_table, client):
             'nullable': True,
             'primary_key': False,
             'valid_target_types': [
-                'BIGINT', 'BOOLEAN', 'DATE', 'DECIMAL', 'DOUBLE PRECISION',
-                'FLOAT', 'INTEGER', 'INTERVAL', 'MATHESAR_TYPES.EMAIL',
-                'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL', 'SMALLINT',
+                'BIGINT', 'BOOLEAN', 'CHAR', 'DATE', 'DECIMAL',
+                'DOUBLE PRECISION', 'FLOAT', 'INTEGER', 'INTERVAL',
+                'MATHESAR_TYPES.EMAIL', 'MATHESAR_TYPES.MONEY',
+                'MATHESAR_TYPES.URI', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT',
                 'TIME WITH TIME ZONE', 'TIME WITHOUT TIME ZONE', 'VARCHAR',
             ],
             'default': None,
@@ -117,11 +118,11 @@ def test_column_list(column_test_table, client):
                 'index': 0,
                 'nullable': False,
                 'primary_key': True,
-                'default': None,
+                'default': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
                 'valid_target_types': [
-                    'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                    'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
-                    'SMALLINT', 'VARCHAR',
+                    'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
+                    'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC',
+                    'REAL', 'SMALLINT', 'TEXT', 'VARCHAR',
                 ],
             },
         ),
@@ -136,9 +137,9 @@ def test_column_list(column_test_table, client):
                 'primary_key': False,
                 'default': 5,
                 'valid_target_types': [
-                    'BIGINT', 'BOOLEAN', 'DECIMAL', 'DOUBLE PRECISION', 'FLOAT',
-                    'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
-                    'SMALLINT', 'VARCHAR',
+                    'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
+                    'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC',
+                    'REAL', 'SMALLINT', 'TEXT', 'VARCHAR',
                 ],
             },
         ),
@@ -230,10 +231,16 @@ def test_column_create_invalid_default(column_test_table, client):
     assert f'default "{data["default"]}" is invalid for type' in response.json()[0]
 
 
-def test_column_create_retrieve_options(column_test_table, client):
+@pytest.mark.parametrize(
+    "type_,type_options",
+    [
+        ("NUMERIC", {"precision": 5, "scale": 3}),
+        ("VARCHAR", {"length": 5}),
+        ("CHAR", {"length": 5}),
+    ]
+)
+def test_column_create_retrieve_options(column_test_table, client, type_, type_options):
     name = "anewcolumn"
-    type_ = "NUMERIC"
-    type_options = {"precision": 5, "scale": 3}
     cache.clear()
     num_columns = len(column_test_table.sa_columns)
     data = {
@@ -259,6 +266,7 @@ invalid_type_options = [
     {"precision": 5, "scale": 8},
     {"precision": "asd"},
     {"nonoption": 34},
+    {"length": "two"},
 ]
 
 
@@ -345,6 +353,16 @@ def test_column_update_default_invalid_cast(column_test_table, client):
     assert response.status_code == 400
 
 
+def test_column_update_type_dynamic_default(column_test_table, client):
+    cache.clear()
+    type_ = "NUMERIC"
+    data = {"type": type_}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/0/", data=data
+    )
+    assert response.status_code == 400
+
+
 def test_column_update_type(column_test_table, client):
     cache.clear()
     type_ = "BOOLEAN"
@@ -402,6 +420,26 @@ def test_column_update_type_options(column_test_table, client):
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/3/",
         data,
+        format='json'
+    )
+    assert response.json()["type"] == type_
+    assert response.json()["type_options"] == type_options
+
+
+def test_column_update_type_options_no_type(column_test_table, client):
+    cache.clear()
+    type_ = "NUMERIC"
+    data = {"type": type_}
+    client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/3/",
+        data,
+        format='json'
+    )
+    type_options = {"precision": 3, "scale": 1}
+    type_option_data = {"type_options": type_options}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/3/",
+        type_option_data,
         format='json'
     )
     assert response.json()["type"] == type_

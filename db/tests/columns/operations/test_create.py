@@ -50,6 +50,8 @@ def _check_duplicate_unique_constraint(
 type_set = {
     'BIGINT',
     'BOOLEAN',
+    'CHAR',
+    'DATE',
     'DECIMAL',
     'DOUBLE PRECISION',
     'FLOAT',
@@ -57,14 +59,15 @@ type_set = {
     'INTERVAL',
     'MATHESAR_TYPES.EMAIL',
     'MATHESAR_TYPES.MONEY',
+    'MATHESAR_TYPES.URI',
     'NUMERIC',
     'REAL',
     'SMALLINT',
-    'VARCHAR',
     'TEXT',
     'DATE',
     'TIME WITH TIME ZONE',
-    'TIME WITHOUT TIME ZONE'
+    'TIME WITHOUT TIME ZONE',
+    'VARCHAR',
 }
 
 
@@ -88,7 +91,7 @@ def test_create_column(engine_email_type, target_type):
     input_output_type_map = {type_: type_ for type_ in type_set}
     # update the map with types that reflect differently than they're
     # set when creating a column
-    input_output_type_map.update({'FLOAT': 'DOUBLE PRECISION', 'DECIMAL': 'NUMERIC'})
+    input_output_type_map.update({'FLOAT': 'DOUBLE PRECISION', 'DECIMAL': 'NUMERIC', 'CHAR': 'CHAR(1)'})
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -128,6 +131,32 @@ def test_create_column_options(engine_email_type, target_type):
     assert created_col.name == new_column_name
     assert created_col.plain_type == "NUMERIC"
     assert created_col.type_options == {"precision": 5, "scale": 3}
+
+
+@pytest.mark.parametrize("target_type", ["CHAR", "VARCHAR"])
+def test_create_column_length_options(engine_email_type, target_type):
+    engine, schema = engine_email_type
+    table_name = "atableone"
+    initial_column_name = "original_column"
+    new_column_name = "added_column"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(initial_column_name, Integer),
+    )
+    table.create()
+    table_oid = get_oid_from_table(table_name, schema, engine)
+    column_data = {
+        "name": new_column_name,
+        "type": target_type,
+        "type_options": {"length": 5},
+    }
+    created_col = create_column(engine, table_oid, column_data)
+    altered_table = reflect_table_from_oid(table_oid, engine)
+    assert len(altered_table.columns) == 2
+    assert created_col.name == new_column_name
+    assert created_col.plain_type == target_type
+    assert created_col.type_options == {"length": 5}
 
 
 def test_create_column_bad_options(engine_with_schema):

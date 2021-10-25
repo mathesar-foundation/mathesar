@@ -1,6 +1,9 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import { DEFAULT_ROW_RIGHT_PADDING } from '@mathesar/stores/table-data';
+  import {
+    DEFAULT_ROW_RIGHT_PADDING,
+    getModificationState,
+  } from '@mathesar/stores/table-data';
   import type {
     ColumnPosition,
     ColumnPositionMap,
@@ -8,21 +11,26 @@
     TabularData,
     TableRecord,
     TableColumn,
-    ModificationType,
+    Records,
+    Columns,
   } from '@mathesar/stores/table-data/types';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
   import GroupHeader from './GroupHeader.svelte';
+  import RowPlaceholder from './RowPlaceholder.svelte';
 
   export let row: TableRecord;
   export let style: { [key: string]: string | number };
 
   const tabularData = getContext<TabularDataStore>('tabularData');
+  let records: Records;
+  let columns: Columns;
   $: ({
     records, columns, meta, display,
   } = $tabularData as TabularData);
   $: ({ columnPositionMap } = display as TabularData['display']);
   $: ({ selectedRecords, recordModificationState } = meta as TabularData['meta']);
+  $: ({ groupInfo } = records);
 
   function calculateStyle(
     _style: { [key: string]: string | number },
@@ -34,7 +42,7 @@
     const totalWidth = _columnPositionMap.get('__row')?.width || 0;
     return `position:${_style.position};left:${_style.left}px;`
       + `top:${_style.top}px;height:${_style.height}px;`
-      + `width:${totalWidth + DEFAULT_ROW_RIGHT_PADDING}px`;
+      + `width:${totalWidth}px`;
   }
 
   $: styleString = calculateStyle(
@@ -49,27 +57,31 @@
     return _columnPositionMap.get(_name);
   }
 
-  function getModificationState(
-    _row: TableRecord,
-    _recordModState: Map<unknown, ModificationType>,
-  ): ModificationType {
-    return _recordModState.get(_row[$columns.primaryKey]);
-  }
-
   $: isSelected = ($selectedRecords as Set<unknown>).has(row[$columns.primaryKey]);
-  $: modificationState = getModificationState(row, $recordModificationState);
+  $: modificationState = getModificationState($recordModificationState, row, $columns.primaryKey);
+  $: rowWidth = getColumnPosition($columnPositionMap, '__row')?.width || 0;
+
+  function checkAndCreateEmptyRow() {
+    if (row.__isAddPlaceholder) {
+      void records.createOrUpdateRecord(row);
+    }
+  }
 </script>
 
 <div class="row {row.__state} {modificationState || ''}" class:selected={isSelected}
-      class:is-group-header={row.__isGroupHeader} style={styleString}>
-  <RowControl primaryKeyColumn={$columns.primaryKey}
-              {row} {meta}/>
-
-  {#if row.__isGroupHeader}
-    <GroupHeader {row} groupData={$records.groupData}/>
+      class:is-group-header={row.__isGroupHeader} class:is-add-placeholder={row.__isAddPlaceholder}
+      style={styleString} data-identifier={row.__identifier}
+      on:mousedown={checkAndCreateEmptyRow}>
+  {#if row.__isNewHelpText}
+    <RowPlaceholder {rowWidth}/>
+  {:else if row.__isGroupHeader}
+    <GroupHeader {row} {rowWidth} groupColumns={$groupInfo.columns} groupCounts={$groupInfo.counts}/>
   {:else}
+    <RowControl primaryKeyColumn={$columns.primaryKey}
+                {row} {meta} {records}/>
+
     {#each $columns.data as column (column.name)}
-      <RowCell {display} bind:row {column} {records}
+      <RowCell {display} {row} bind:value={row[column.name]} {column} {records}
         columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
     {/each}
   {/if}

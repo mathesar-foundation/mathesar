@@ -31,6 +31,7 @@ TYPE_INFERENCE_DAG = {
         base.PostgresType.TIME_WITHOUT_TIME_ZONE.value,
         base.PostgresType.INTERVAL.value,
         base.MathesarCustomType.EMAIL.value,
+        base.MathesarCustomType.URI.value,
     ],
 }
 

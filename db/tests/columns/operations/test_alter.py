@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from psycopg2.errors import NotNullViolation
 import pytest
-from sqlalchemy import String, Integer, Column, select, Table, MetaData
+from sqlalchemy import String, Integer, Column, select, Table, MetaData, VARCHAR
 from sqlalchemy.exc import IntegrityError
 
 from db import constants
@@ -77,6 +77,7 @@ def _get_pizza_column_data():
     [
         ({"name": "blah"}, "rename_column"),
         ({"plain_type": "blah"}, "retype_column"),
+        ({"type_options": {"blah": "blah"}}, "retype_column"),
         ({"nullable": True}, "change_column_nullable"),
         ({"default_value": 1}, "set_column_default"),
     ]
@@ -209,6 +210,34 @@ def test_retype_column_adds_options(engine_with_schema, target_type):
     with engine.begin() as conn:
         with patch.object(alter_operations, "alter_column_type") as mock_retyper:
             retype_column(table, 0, engine, conn, target_type, type_options)
+        mock_retyper.assert_called_with(
+            table,
+            target_column_name,
+            engine,
+            conn,
+            target_type,
+            type_options,
+            friendly_names=False
+        )
+
+
+def test_retype_column_options_only(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "atableone"
+    target_column_name = "thecolumntochange"
+    target_type = "VARCHAR"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(target_column_name, VARCHAR),
+    )
+    table.create()
+    type_options = {"length": 5}
+    with engine.begin() as conn:
+        with patch.object(alter_operations, "alter_column_type") as mock_retyper:
+            retype_column(
+                table, 0, engine, conn, new_type=None, type_options=type_options
+            )
         mock_retyper.assert_called_with(
             table,
             target_column_name,

@@ -1,9 +1,7 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import {
-    GROUP_MARGIN_LEFT,
     ROW_CONTROL_COLUMN_WIDTH,
-    DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/table-data';
 
   import type {
@@ -12,16 +10,21 @@
     TableColumn,
     ColumnPosition,
     ColumnPositionMap,
+    Columns,
+    Display,
+    Meta,
   } from '@mathesar/stores/table-data/types';
   import HeaderCell from './HeaderCell.svelte';
+  import NewColumnCell from './NewColumnCell.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
+  let columns: Columns;
+  let display: Display;
+  let meta: Meta;
   $: ({
-    columns, records, meta, display,
+    columns, meta, display,
   } = $tabularData as TabularData);
-  $: ({ horizontalScrollOffset, rowWidth, columnPositionMap } = display as TabularData['display']);
-
-  $: paddingLeft = $records.groupData ? GROUP_MARGIN_LEFT : 0;
+  $: ({ horizontalScrollOffset, columnPositionMap } = display);
 
   let headerRef: HTMLElement;
 
@@ -60,19 +63,20 @@
       headerRef.removeEventListener('scroll', scrollListener);
     };
   });
+
+  function addColumn(e: CustomEvent<Partial<TableColumn>>) {
+    void columns.add(e.detail);
+  }
 </script>
 
 <div bind:this={headerRef} class="header">
-  <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH + paddingLeft}px;">
+  <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;">
   </div>
 
   {#each $columns.data as column (column.name)}
-    <HeaderCell {column} {meta} {paddingLeft}
+    <HeaderCell {column} {meta}
       columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
   {/each}
 
-  <div class="cell" style="
-    width:{DEFAULT_ROW_RIGHT_PADDING + paddingLeft}px;
-    left:{$rowWidth + paddingLeft}px">
-  </div>
+  <NewColumnCell {display} columnData={$columns.data} on:addColumn={addColumn}/>
 </div>

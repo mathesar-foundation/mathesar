@@ -28,6 +28,7 @@ temporary_testing_schema = fixtures.temporary_testing_schema
 
 BIGINT = PostgresType.BIGINT.value.upper()
 BOOLEAN = PostgresType.BOOLEAN.value.upper()
+DATE = PostgresType.DATE.value.upper()
 DECIMAL = PostgresType.DECIMAL.value.upper()
 DOUBLE = PostgresType.DOUBLE_PRECISION.value.upper()
 FLOAT = PostgresType.FLOAT.value.upper()
@@ -39,10 +40,15 @@ SMALLINT = PostgresType.SMALLINT.value.upper()
 DATE = PostgresType.DATE.value.upper()
 TIME_WITHOUT_TIME_ZONE = PostgresType.TIME_WITHOUT_TIME_ZONE.value.upper()
 TIME_WITH_TIME_ZONE = PostgresType.TIME_WITH_TIME_ZONE.value.upper()
+TEXT = PostgresType.TEXT.value.upper()
+
+CHAR = "CHAR"
 VARCHAR = "VARCHAR"
+
 # Custom types
 EMAIL = get_qualified_name(MathesarCustomType.EMAIL.value).upper()
 MONEY = get_qualified_name(MathesarCustomType.MONEY.value).upper()
+URI = get_qualified_name(MathesarCustomType.URI.value).upper()
 
 
 ISCHEMA_NAME = "ischema_name"
@@ -83,6 +89,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             BIGINT: {VALID: [(500, 500), (500000000000, 500000000000)]},
             BOOLEAN: {VALID: [(1, True), (0, False)], INVALID: [3]},
+            CHAR: {VALID: [(3, "3")]},
             DECIMAL: {VALID: [(1, Decimal('1.0'))]},
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
@@ -98,6 +105,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
             SMALLINT: {VALID: [(500, 500)]},
+            TEXT: {VALID: [(3, "3")]},
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
@@ -107,6 +115,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             BIGINT: {VALID: [(True, 1), (False, 0)]},
             BOOLEAN: {VALID: [(True, True), (False, False)]},
+            CHAR: {VALID: []},
             DECIMAL: {VALID: [(True, Decimal('1.0')), (False, Decimal('0'))]},
             DOUBLE: {VALID: [(True, 1.0), (False, 0.0)]},
             FLOAT: {VALID: [(True, 1.0), (False, 0.0)]},
@@ -114,8 +123,46 @@ MASTER_DB_TYPE_MAP_SPEC = {
             NUMERIC: {VALID: [(True, Decimal('1.0')), (False, Decimal('0'))]},
             REAL: {VALID: [(True, 1.0), (False, 0.0)]},
             SMALLINT: {VALID: [(True, 1), (False, 0)]},
+            TEXT: {VALID: [(True, 'true'), (False, 'false')]},
             VARCHAR: {VALID: [(True, 'true'), (False, 'false')]},
         }
+    },
+    CHAR: {
+        ISCHEMA_NAME: PostgresType.CHARACTER.value,
+        SUPPORTED_MAP_NAME: "char",
+        REFLECTED_NAME: CHAR,
+        TARGET_DICT: {
+            BIGINT: {VALID: [("4", 4)], INVALID: ["c"]},
+            BOOLEAN: {VALID: [("t", True), ("f", False)], INVALID: ["c"]},
+            CHAR: {VALID: [("a", "a")]},
+            DECIMAL: {VALID: [("1", Decimal("1"))], INVALID: ["a"]},
+            DOUBLE: {VALID: [("1", 1)], INVALID: ["b"]},
+            EMAIL: {VALID: [], INVALID: ["a"]},
+            FLOAT: {VALID: [("1", 1.0)], INVALID: ["b"]},
+            INTEGER: {VALID: [("4", 4)], INVALID: ["j"]},
+            INTERVAL: {VALID: []},
+            MONEY: {
+                VALID: [("1", {money.VALUE: 1, money.CURRENCY: "USD"})],
+                INVALID: ["n"],
+            },
+            NUMERIC: {VALID: [("1", Decimal("1"))], INVALID: ["a"]},
+            REAL: {VALID: [("1", 1.0)], INVALID: ["b"]},
+            SMALLINT: {VALID: [("4", 4)], INVALID: ["j"]},
+            DATE: {VALID: [], INVALID: ["n"]},
+            TEXT: {VALID: [("a", "a")]},
+            URI: {VALID: [], INVALID: ["a"]},
+            VARCHAR: {VALID: [("a", "a")]},
+        }
+    },
+    DATE: {
+        ISCHEMA_NAME: PostgresType.DATE.value,
+        REFLECTED_NAME: DATE,
+        TARGET_DICT: {
+            CHAR: {VALID: []},
+            DATE: {VALID: [(date(1999, 1, 18), date(1999, 1, 18))]},
+            TEXT: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
+            VARCHAR: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
+        },
     },
     DECIMAL: {
         ISCHEMA_NAME: PostgresType.DECIMAL.value,
@@ -126,6 +173,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(1, True), (0, False), (1.0, True), (0.0, False)],
                 INVALID: [Decimal('1.3')]
             },
+            CHAR: {VALID: [(3, "3")]},
             DECIMAL: {VALID: [(1, 1.0)]},
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
@@ -144,10 +192,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
-            SMALLINT: {
-                VALID: [(500, 500)],
-                INVALID: [12341234]
-            },
+            SMALLINT: {VALID: [(500, 500)], INVALID: [12341234]},
+            TEXT: {VALID: [(3, "3")]},
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
@@ -157,6 +203,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             BIGINT: {VALID: [(500, 500)]},
             BOOLEAN: {VALID: [(1.0, True), (0.0, False)]},
+            CHAR: {VALID: [(3, "3")]},
             DECIMAL: {VALID: [(1, 1.0)]},
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
@@ -165,6 +212,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {VALID: [(500, 500)]},
+            TEXT: {VALID: [(3, "3")]},
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
@@ -173,7 +221,9 @@ MASTER_DB_TYPE_MAP_SPEC = {
         SUPPORTED_MAP_NAME: MathesarCustomType.EMAIL.value,
         REFLECTED_NAME: EMAIL,
         TARGET_DICT: {
+            CHAR: {VALID: []},
             EMAIL: {VALID: [("alice@example.com", "alice@example.com")]},
+            TEXT: {VALID: [("bob@example.com", "bob@example.com")]},
             VARCHAR: {VALID: [("bob@example.com", "bob@example.com")]},
         }
     },
@@ -183,6 +233,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             BIGINT: {VALID: [(500, 500)]},
             BOOLEAN: {VALID: [(1.0, True), (0.0, False)], INVALID: [1.234]},
+            CHAR: {VALID: [(3, "3")]},
             DECIMAL: {VALID: [(1, 1.0)]},
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
@@ -191,6 +242,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {VALID: [(500, 500), (-5, -5)], INVALID: [-3.234, 234.34]},
+            TEXT: {VALID: [(3, "3")]},
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
@@ -200,6 +252,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             BIGINT: {VALID: [(500, 500)]},
             BOOLEAN: {VALID: [(1, True), (0, False)], INVALID: [3]},
+            CHAR: {VALID: [(3, "3")]},
             DECIMAL: {VALID: [(1, Decimal('1.0'))]},
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
@@ -208,6 +261,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
             SMALLINT: {VALID: [(500, 500)]},
+            TEXT: {VALID: [(3, "3")]},
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
@@ -215,6 +269,9 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: PostgresType.INTERVAL.value,
         REFLECTED_NAME: INTERVAL,
         TARGET_DICT: {
+            CHAR: {
+                VALID: []
+            },
             INTERVAL: {
                 VALID: [
                     (
@@ -222,6 +279,9 @@ MASTER_DB_TYPE_MAP_SPEC = {
                         timedelta(days=3, hours=3, minutes=5, seconds=30),
                     )
                 ]
+            },
+            TEXT: {
+                VALID: []
             },
             VARCHAR: {
                 VALID: [
@@ -238,11 +298,20 @@ MASTER_DB_TYPE_MAP_SPEC = {
         SUPPORTED_MAP_NAME: MathesarCustomType.MONEY.value,
         REFLECTED_NAME: MONEY,
         TARGET_DICT: {
+            CHAR: {VALID: []},
             MONEY: {
                 VALID: [
                     (
                         {money.VALUE: 1234.12, money.CURRENCY: 'XYZ'},
                         {money.VALUE: 1234.12, money.CURRENCY: 'XYZ'}
+                    )
+                ]
+            },
+            TEXT: {
+                VALID: [
+                    (
+                        {money.VALUE: 1234.12, money.CURRENCY: 'XYZ'},
+                        '(1234.12,XYZ)'
                     )
                 ]
             },
@@ -265,6 +334,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(1, True), (0, False), (1.0, True), (0.0, False)],
                 INVALID: [42, -1]
             },
+            CHAR: {VALID: [(3, "3")], INVALID: [1234, 1.2]},
             DECIMAL: {VALID: [(1, 1.0)]},
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
@@ -279,6 +349,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [1.234, 12341234]
             },
+            TEXT: {VALID: [(3, "3")]},
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
@@ -291,6 +362,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(1.0, True), (0.0, False)],
                 INVALID: [42, -1]
             },
+            CHAR: {VALID: [(3, "3")], INVALID: [234, 5.78]},
             DECIMAL: {VALID: [(1, 1.0)]},
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
@@ -305,6 +377,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [3.345]
             },
+            TEXT: {VALID: [(3, "3")]},
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
@@ -314,6 +387,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             BIGINT: {VALID: [(500, 500)]},
             BOOLEAN: {VALID: [(1, True), (0, False)], INVALID: [3]},
+            CHAR: {VALID: [(3, "3")]},
             DECIMAL: {VALID: [(1, Decimal('1.0'))]},
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
@@ -322,21 +396,15 @@ MASTER_DB_TYPE_MAP_SPEC = {
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
             SMALLINT: {VALID: [(500, 500)]},
+            TEXT: {VALID: [(3, "3")]},
             VARCHAR: {VALID: [(3, "3")]},
         }
-    },
-    DATE: {
-        ISCHEMA_NAME: PostgresType.DATE.value,
-        REFLECTED_NAME: DATE,
-        TARGET_DICT: {
-            DATE: {VALID: [(date(1999, 1, 18), date(1999, 1, 18))]},
-            VARCHAR: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
-        },
     },
     TIME_WITHOUT_TIME_ZONE: {
         ISCHEMA_NAME: PostgresType.TIME_WITHOUT_TIME_ZONE.value,
         REFLECTED_NAME: TIME_WITHOUT_TIME_ZONE,
         TARGET_DICT: {
+            CHAR: {VALID: []},
             TIME_WITHOUT_TIME_ZONE: {VALID: [(time(12, 30, 45), time(12, 30, 45))]},
             TIME_WITH_TIME_ZONE: {
                 VALID: [
@@ -344,6 +412,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                      time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0))),
                 ]
             },
+            TEXT: {VALID: [(time(12, 30, 45), "12:30:45")]},
             VARCHAR: {VALID: [(time(12, 30, 45), "12:30:45")]},
         },
     },
@@ -351,6 +420,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: PostgresType.TIME_WITH_TIME_ZONE.value,
         REFLECTED_NAME: TIME_WITH_TIME_ZONE,
         TARGET_DICT: {
+            CHAR: {VALID: []},
             TIME_WITH_TIME_ZONE: {
                 VALID: [
                     (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
@@ -363,6 +433,12 @@ MASTER_DB_TYPE_MAP_SPEC = {
                      time(12, 30, 45))
                 ]
             },
+            TEXT: {
+                VALID: [
+                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
+                     "12:30:45+01")
+                ]
+            },
             VARCHAR: {
                 VALID: [
                     (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
@@ -371,10 +447,9 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
         },
     },
-    VARCHAR: {
-        ISCHEMA_NAME: PostgresType.CHARACTER_VARYING.value,
-        SUPPORTED_MAP_NAME: "varchar",
-        REFLECTED_NAME: VARCHAR,
+    TEXT: {
+        ISCHEMA_NAME: PostgresType.TEXT.value,
+        REFLECTED_NAME: TEXT,
         TARGET_DICT: {
             BIGINT: {
                 VALID: [("432", 432), ("1234123412341234", 1234123412341234)],
@@ -386,6 +461,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 ],
                 INVALID: ["cat"],
             },
+            CHAR: {VALID: [("a", "a")]},
             DECIMAL: {
                 VALID: [("1.2", Decimal("1.2")), ("1", Decimal("1"))],
                 INVALID: ["abc"],
@@ -447,6 +523,17 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     "1234",
                 ]
             },
+            URI: {
+                VALID: [
+                    ("https://centerofci.org", "https://centerofci.org"),
+                    ("http://centerofci.org", "http://centerofci.org"),
+                    ("centerofci.org", "http://centerofci.org"),
+                    ("nasa.gov", "http://nasa.gov"),
+                    ("museumoflondon.org.uk", "http://museumoflondon.org.uk"),
+                ],
+                INVALID: ["/sdf/", "localhost", "$123.45", "154.23USD"]
+            },
+            TEXT: {VALID: [("a string", "a string")]},
             TIME_WITHOUT_TIME_ZONE: {
                 VALID: [
                     ("04:05:06", time(4, 5, 6)),
@@ -464,6 +551,120 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 INVALID: [
                     "not a time",
                 ]
+            },
+            VARCHAR: {VALID: [("a string", "a string")]},
+        }
+    },
+    URI: {
+        ISCHEMA_NAME: get_qualified_name(MathesarCustomType.URI.value),
+        SUPPORTED_MAP_NAME: MathesarCustomType.URI.value,
+        REFLECTED_NAME: URI,
+        TARGET_DICT: {
+            CHAR: {VALID: []},
+            TEXT: {VALID: [("https://centerofci.org", "https://centerofci.org")]},
+            URI: {VALID: [("https://centerofci.org", "https://centerofci.org")]},
+            VARCHAR: {VALID: [("https://centerofci.org", "https://centerofci.org")]},
+        }
+    },
+    VARCHAR: {
+         ISCHEMA_NAME: PostgresType.CHARACTER_VARYING.value,
+        SUPPORTED_MAP_NAME: "varchar",
+        REFLECTED_NAME: VARCHAR,
+        TARGET_DICT: {
+            BIGINT: {
+                VALID: [("432", 432), ("1234123412341234", 1234123412341234)],
+                INVALID: ["1.2234"]
+            },
+            BOOLEAN: {
+                VALID: [
+                    ("true", True), ("false", False), ("t", True), ("f", False)
+                ],
+                INVALID: ["cat"],
+            },
+            CHAR: {VALID: [("a", "a")]},
+            DATE: {
+                VALID: [
+                    ("1999-01-18", date(1999, 1, 18)),
+                    ("1/18/1999", date(1999, 1, 18)),
+                    ("jan-1999-18", date(1999, 1, 18)),
+                    ("19990118", date(1999, 1, 18)),
+                ],
+                INVALID: [
+                    "18/1/1999",
+                    "not a date",
+                    "1234",
+                ]
+            },
+            DECIMAL: {
+                VALID: [("1.2", Decimal("1.2")), ("1", Decimal("1"))],
+                INVALID: ["abc"],
+            },
+            DOUBLE: {
+                VALID: [("1.234", 1.234)],
+                INVALID: ["bat"],
+            },
+            EMAIL: {
+                VALID: [("alice@example.com", "alice@example.com")],
+                INVALID: ["alice-example.com"]
+            },
+            FLOAT: {
+                VALID: [("1.234", 1.234)],
+                INVALID: ["bat"],
+            },
+            INTEGER: {
+                VALID: [("432", 432)],
+                INVALID: ["1.2234"]
+            },
+            INTERVAL: {
+                VALID: [
+                    ("1 day", timedelta(days=1)),
+                    ("1 week", timedelta(days=7)),
+                    ("3:30", timedelta(hours=3, minutes=30)),
+                    ("00:03:30", timedelta(minutes=3, seconds=30)),
+                ],
+                INVALID: ["1 potato", "3"],
+            },
+            MONEY: {
+                VALID: [("1234", {money.VALUE: 1234, money.CURRENCY: "USD"})],
+                INVALID: ["nanumb"],
+            },
+            NUMERIC: {
+                VALID: [
+                    ("1.2", Decimal("1.2")),
+                    ("1", Decimal("1")),
+                ],
+                INVALID: ["not a number"],
+            },
+            REAL: {
+                VALID: [("1.234", 1.234)],
+                INVALID: ["real"]
+            },
+            SMALLINT: {
+                VALID: [("432", 432)],
+                INVALID: ["1.2234"]
+            },
+            TEXT: {VALID: [("a string", "a string")]},
+            TIME_WITHOUT_TIME_ZONE: {
+                VALID: [
+                    ("04:05:06", time(4, 5, 6)),
+                    ("04:05", time(4, 5)),
+                ],
+                INVALID: [
+                    "not a time",
+                ]
+            },
+            TIME_WITH_TIME_ZONE: {
+                VALID: [
+                    ("04:05:06", time(4, 5, 6, tzinfo=FixedOffsetTimezone(offset=0))),
+                    ("04:05+01", time(4, 5, tzinfo=FixedOffsetTimezone(offset=60))),
+                ],
+                INVALID: [
+                    "not a time",
+                ]
+            },
+            URI: {
+                VALID: [("https://centerofci.org", "https://centerofci.org")],
+                INVALID: ["/sdf/"]
             },
             VARCHAR: {VALID: [("a string", "a string")]},
         }
@@ -522,6 +723,9 @@ type_test_list = [
 ] + [
     (val[ISCHEMA_NAME], "time with time zone", {"precision": 5}, "TIME(5) WITH TIME ZONE")
     for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIME_WITH_TIME_ZONE in val[TARGET_DICT]
+] + [
+    (val[ISCHEMA_NAME], "char", {"length": 5}, "CHAR(5)")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if CHAR in val[TARGET_DICT]
 ]
 
 
@@ -566,6 +770,7 @@ def test_alter_column_type_alters_column_type(
         autoload_with=engine
     ).columns[COLUMN_NAME]
     actual_type = actual_column.type.compile(dialect=engine.dialect)
+    expect_type = expect_type + '(1)' if expect_type == CHAR else expect_type
     assert actual_type == expect_type
 
 
@@ -581,7 +786,8 @@ type_test_data_args_list = [
      time(0, 0, 0, 9), time(0, 0, 0)),
     (datetime.TIME_WITH_TIME_ZONE, "time with time zone", {"precision": 0},
      time(0, 0, 0, 9, tzinfo=FixedOffsetTimezone(offset=0)),
-     time(0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0)))
+     time(0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0))),
+    (String, "char", {"length": 5}, "abcde", "abcde"),
 ]
 
 
@@ -691,8 +897,8 @@ def test_alter_column_casts_data_gen(
     actual_default = get_column_default(table_oid, 0, engine)
     # TODO This needs to be sorted out by fixing how server_default is set.
     if all([
-        source_type != get_qualified_name(MathesarCustomType.MONEY.value),
-        target_type != MathesarCustomType.MONEY.value
+            source_type != get_qualified_name(MathesarCustomType.MONEY.value),
+            target_type != MathesarCustomType.MONEY.value,
     ]):
         assert actual_default == out_val
 
@@ -845,5 +1051,4 @@ expect_cast_tuples = [
 def test_get_full_cast_map(engine_with_types, source_type, expect_target_types):
     actual_cast_map = cast_operations.get_full_cast_map(engine_with_types)
     actual_target_types = actual_cast_map[source_type]
-    assert len(actual_target_types) == len(expect_target_types)
     assert sorted(actual_target_types) == sorted(expect_target_types)
