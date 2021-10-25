@@ -156,15 +156,15 @@ function prepareRowForRequest(row: TableRecord): TableRecordInResponse {
 }
 
 export class Records {
-  _type: TabularType;
+  private type: TabularType;
 
-  _parentId: DBObjectEntry['id'];
+  private parentId: DBObjectEntry['id'];
 
-  _url: string;
+  private url: string;
 
-  _meta: Meta;
+  private meta: Meta;
 
-  _columns: Columns;
+  private columns: Columns;
 
   state: Writable<States>;
 
@@ -178,15 +178,15 @@ export class Records {
 
   error: Writable<string>;
 
-  _promise: CancellablePromise<TableRecordResponse>;
+  private promise: CancellablePromise<TableRecordResponse>;
 
-  _createPromises: Map<unknown, CancellablePromise<TableRecordResponse>>;
+  private createPromises: Map<unknown, CancellablePromise<TableRecordResponse>>;
 
-  _updatePromises: Map<unknown, CancellablePromise<TableRecordResponse>>;
+  private updatePromises: Map<unknown, CancellablePromise<TableRecordResponse>>;
 
-  _fetchCallback?: (storeData: TableRecordData) => void;
+  private fetchCallback?: (storeData: TableRecordData) => void;
 
-  _requestParamsUnsubscriber: Unsubscriber;
+  private requestParamsUnsubscriber: Unsubscriber;
 
   constructor(
     type: TabularType,
@@ -195,8 +195,8 @@ export class Records {
     columns: Columns,
     fetchCallback?: (storeData: TableRecordData) => void,
   ) {
-    this._type = type;
-    this._parentId = parentId;
+    this.type = type;
+    this.parentId = parentId;
 
     this.state = writable(States.Loading);
     this.savedRecords = writable([] as TableRecord[]);
@@ -205,25 +205,25 @@ export class Records {
     this.totalCount = writable(null as number);
     this.error = writable(null as string);
 
-    this._meta = meta;
-    this._columns = columns;
-    this._url = `/${this._type === TabularType.Table ? 'tables' : 'views'}/${this._parentId}/records/`;
-    this._fetchCallback = fetchCallback;
+    this.meta = meta;
+    this.columns = columns;
+    this.url = `/${this.type === TabularType.Table ? 'tables' : 'views'}/${this.parentId}/records/`;
+    this.fetchCallback = fetchCallback;
     void this.fetch();
 
     // subscribers
-    this._requestParamsUnsubscriber = this._meta.recordRequestParams.subscribe(() => {
+    this.requestParamsUnsubscriber = this.meta.recordRequestParams.subscribe(() => {
       void this.fetch();
     });
   }
 
   async fetch(retainExistingRows = false): Promise<TableRecordData> {
-    this._promise?.cancel();
-    const offset = getStoreValue(this._meta.offset);
+    this.promise?.cancel();
+    const offset = getStoreValue(this.meta.offset);
 
     this.savedRecords.update((existingData) => {
       let data = [...existingData];
-      data.length = getStoreValue(this._meta.pageSize);
+      data.length = getStoreValue(this.meta.pageSize);
 
       let index = -1;
       data = data.map((entry) => {
@@ -240,14 +240,14 @@ export class Records {
     this.state.set(States.Loading);
     if (!retainExistingRows) {
       this.newRecords.set([]);
-      this._meta.clearAllRecordModificationStates();
+      this.meta.clearAllRecordModificationStates();
     }
 
     try {
-      const params = getStoreValue(this._meta.recordRequestParams);
-      this._promise = getAPI<TableRecordResponse>(`${this._url}?${params ?? ''}`);
+      const params = getStoreValue(this.meta.recordRequestParams);
+      this.promise = getAPI<TableRecordResponse>(`${this.url}?${params ?? ''}`);
 
-      const response = await this._promise;
+      const response = await this.promise;
       const totalCount = response.count || 0;
 
       const groupColumns = response?.group_count?.group_count_by;
@@ -279,7 +279,7 @@ export class Records {
       this.totalCount.set(totalCount);
       this.error.set(null);
 
-      this._fetchCallback?.(storeData);
+      this.fetchCallback?.(storeData);
       return storeData;
     } catch (err) {
       this.state.set(States.Error);
@@ -289,16 +289,16 @@ export class Records {
   }
 
   async deleteSelected(): Promise<void> {
-    const pkSet = getStoreValue(this._meta.selectedRecords);
+    const pkSet = getStoreValue(this.meta.selectedRecords);
 
     if (pkSet.size > 0) {
-      this._meta.setMultipleRecordModificationStates([...pkSet], 'delete');
+      this.meta.setMultipleRecordModificationStates([...pkSet], 'delete');
 
       try {
         const successSet: Set<unknown> = new Set();
         const failed: unknown[] = [];
         // TODO: Convert this to single request
-        const promises = [...pkSet].map((pk) => deleteAPI<unknown>(`${this._url}${pk as string}/`)
+        const promises = [...pkSet].map((pk) => deleteAPI<unknown>(`${this.url}${pk as string}/`)
           .then(() => {
             successSet.add(pk);
             return successSet;
@@ -310,13 +310,13 @@ export class Records {
         await Promise.all(promises);
         await this.fetch(true);
 
-        const offset = getStoreValue(this._meta.offset);
+        const offset = getStoreValue(this.meta.offset);
         const savedRecordData = getStoreValue(this.savedRecords);
         const savedRecordLength = savedRecordData?.length || 0;
 
         this.newRecords.update((existing) => {
           let retained = existing.filter(
-            (entry) => !successSet.has(getRowKey(entry, this._columns.get()?.primaryKey)),
+            (entry) => !successSet.has(getRowKey(entry, this.columns.get()?.primaryKey)),
           );
           if (retained.length === existing.length) {
             return existing;
@@ -336,76 +336,76 @@ export class Records {
           });
           return retained;
         });
-        this._meta.clearMultipleRecordModificationStates([...successSet]);
-        this._meta.setMultipleRecordModificationStates(failed, 'deleteFailed');
+        this.meta.clearMultipleRecordModificationStates([...successSet]);
+        this.meta.setMultipleRecordModificationStates(failed, 'deleteFailed');
       } catch (err) {
-        this._meta.setMultipleRecordModificationStates([...pkSet], 'deleteFailed');
+        this.meta.setMultipleRecordModificationStates([...pkSet], 'deleteFailed');
       } finally {
-        this._meta.clearSelectedRecords();
+        this.meta.clearSelectedRecords();
       }
     }
   }
 
   // TODO: Handle states where cell update and row update happen in parallel
   async updateCell(row: TableRecord, column: TableColumn): Promise<void> {
-    const { primaryKey } = this._columns.get();
+    const { primaryKey } = this.columns.get();
     if (primaryKey && row[primaryKey]) {
       const rowKey = getRowKey(row, primaryKey);
       const cellKey = `${rowKey.toString()}::${column.name}`;
-      this._meta.setCellUpdateState(rowKey, cellKey, 'update');
-      this._updatePromises?.get(cellKey)?.cancel();
+      this.meta.setCellUpdateState(rowKey, cellKey, 'update');
+      this.updatePromises?.get(cellKey)?.cancel();
       const promise = patchAPI<TableRecordResponse>(
-        `${this._url}${row[primaryKey] as string}/`,
+        `${this.url}${row[primaryKey] as string}/`,
         { [column.name]: row[column.name] },
       );
-      if (!this._updatePromises) {
-        this._updatePromises = new Map();
+      if (!this.updatePromises) {
+        this.updatePromises = new Map();
       }
-      this._updatePromises.set(cellKey, promise);
+      this.updatePromises.set(cellKey, promise);
 
       try {
         await promise;
-        this._meta.setCellUpdateState(rowKey, cellKey, 'updated');
+        this.meta.setCellUpdateState(rowKey, cellKey, 'updated');
       } catch (err) {
-        this._meta.setCellUpdateState(rowKey, cellKey, 'updateFailed');
+        this.meta.setCellUpdateState(rowKey, cellKey, 'updateFailed');
       } finally {
-        if (this._updatePromises.get(cellKey) === promise) {
-          this._updatePromises.delete(cellKey);
+        if (this.updatePromises.get(cellKey) === promise) {
+          this.updatePromises.delete(cellKey);
         }
       }
     }
   }
 
   async updateRecord(row: TableRecord): Promise<void> {
-    const { primaryKey } = this._columns.get();
+    const { primaryKey } = this.columns.get();
     if (primaryKey && row[primaryKey]) {
       const rowKey = getRowKey(row, primaryKey);
-      this._meta.setRecordModificationState(rowKey, 'update');
-      this._updatePromises?.get(rowKey)?.cancel();
+      this.meta.setRecordModificationState(rowKey, 'update');
+      this.updatePromises?.get(rowKey)?.cancel();
       const promise = patchAPI<TableRecordResponse>(
-        `${this._url}${row[primaryKey] as string}/`,
+        `${this.url}${row[primaryKey] as string}/`,
         prepareRowForRequest(row),
       );
-      if (!this._updatePromises) {
-        this._updatePromises = new Map();
+      if (!this.updatePromises) {
+        this.updatePromises = new Map();
       }
-      this._updatePromises.set(rowKey, promise);
+      this.updatePromises.set(rowKey, promise);
 
       try {
         await promise;
-        this._meta.setRecordModificationState(rowKey, 'updated');
+        this.meta.setRecordModificationState(rowKey, 'updated');
       } catch (err) {
-        this._meta.setRecordModificationState(rowKey, 'updateFailed');
+        this.meta.setRecordModificationState(rowKey, 'updateFailed');
       } finally {
-        if (this._updatePromises.get(rowKey) === promise) {
-          this._updatePromises.delete(rowKey);
+        if (this.updatePromises.get(rowKey) === promise) {
+          this.updatePromises.delete(rowKey);
         }
       }
     }
   }
 
   getNewEmptyRecord(): TableRecord {
-    const offset = getStoreValue(this._meta.offset);
+    const offset = getStoreValue(this.meta.offset);
     const savedRecordData = getStoreValue(this.savedRecords);
     const savedRecordLength = savedRecordData?.length || 0;
     const existingNewRecords = getStoreValue(this.newRecords);
@@ -420,18 +420,18 @@ export class Records {
   }
 
   async createRecord(row: TableRecord): Promise<void> {
-    const { primaryKey } = this._columns.get();
+    const { primaryKey } = this.columns.get();
     const rowKey = getRowKey(row, primaryKey);
-    this._meta.setRecordModificationState(rowKey, 'create');
-    this._createPromises?.get(rowKey)?.cancel();
+    this.meta.setRecordModificationState(rowKey, 'create');
+    this.createPromises?.get(rowKey)?.cancel();
     const promise = postAPI<TableRecordResponse>(
-      this._url,
+      this.url,
       prepareRowForRequest(row),
     );
-    if (!this._createPromises) {
-      this._createPromises = new Map();
+    if (!this.createPromises) {
+      this.createPromises = new Map();
     }
-    this._createPromises.set(rowKey, promise);
+    this.createPromises.set(rowKey, promise);
 
     try {
       const result = await promise;
@@ -441,8 +441,8 @@ export class Records {
         __isAddPlaceholder: false,
       };
       const updatedRowKey = getRowKey(newRow, primaryKey);
-      this._meta.clearRecordModificationState(rowKey);
-      this._meta.setRecordModificationState(updatedRowKey, 'created');
+      this.meta.clearRecordModificationState(rowKey);
+      this.meta.setRecordModificationState(updatedRowKey, 'created');
       this.newRecords.update((existing) => existing.map((entry) => {
         if (entry.__identifier === row.__identifier) {
           return newRow;
@@ -451,16 +451,16 @@ export class Records {
       }));
       this.totalCount.update((count) => count + 1);
     } catch (err) {
-      this._meta.setRecordModificationState(rowKey, 'creationFailed');
+      this.meta.setRecordModificationState(rowKey, 'creationFailed');
     } finally {
-      if (this._createPromises.get(rowKey) === promise) {
-        this._createPromises.delete(rowKey);
+      if (this.createPromises.get(rowKey) === promise) {
+        this.createPromises.delete(rowKey);
       }
     }
   }
 
   async createOrUpdateRecord(row: TableRecord, column?: TableColumn): Promise<void> {
-    const { primaryKey } = this._columns.get();
+    const { primaryKey } = this.columns.get();
 
     // Row may not have been updated yet in view when additional request is made.
     // So check current values to ensure another row has not been created.
@@ -506,9 +506,9 @@ export class Records {
   }
 
   destroy(): void {
-    this._promise?.cancel();
-    this._promise = null;
+    this.promise?.cancel();
+    this.promise = null;
 
-    this._requestParamsUnsubscriber();
+    this.requestParamsUnsubscriber();
   }
 }

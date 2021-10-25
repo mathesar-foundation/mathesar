@@ -100,6 +100,11 @@ If you need to do some work on the container that's running the code, here's how
 docker exec -it mathesar_service_1 bash
 ```
 
+To open a PostgreSQL psql terminal for the data in Mathesar:
+```
+docker exec -it mathesar_db_1 psql -U mathesar
+```
+
 ### Troubleshooting
 Please refer to our [Common Issues wiki page](https://wiki.mathesar.org/engineering/common-issues) for instruction on troubleshooting common issues while setting up and running Mathesar.
 
