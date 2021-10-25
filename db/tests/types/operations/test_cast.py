@@ -567,7 +567,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         }
     },
     VARCHAR: {
-         ISCHEMA_NAME: PostgresType.CHARACTER_VARYING.value,
+        ISCHEMA_NAME: PostgresType.CHARACTER_VARYING.value,
         SUPPORTED_MAP_NAME: "varchar",
         REFLECTED_NAME: VARCHAR,
         TARGET_DICT: {

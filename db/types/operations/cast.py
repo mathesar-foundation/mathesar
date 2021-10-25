@@ -68,7 +68,6 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         SMALLINT: dialect_types.get(SMALLINT),
         STRING: dialect_types.get(NAME),
         TEXT: dialect_types.get(TEXT),
-        DATE: dialect_types.get(DATE),
         TIME_WITHOUT_TIME_ZONE: dialect_types.get(TIME_WITHOUT_TIME_ZONE),
         TIME_WITH_TIME_ZONE: dialect_types.get(TIME_WITH_TIME_ZONE),
         VARCHAR: dialect_types.get(FULL_VARCHAR),
@@ -482,13 +481,6 @@ def _get_boolean_to_number_cast(target_type):
       RETURN 0::{target_type};
     END;
     """
-
-
-def _get_date_type_body_map():
-    # Note that default postgres conversion for dates depends on the `DateStyle` option
-    # set on the server, which can be one of DMY, MDY, or YMD. Defaults to MDY.
-    default_behavior_source_types = [DATE, VARCHAR]
-    return _get_default_type_body_map(default_behavior_source_types, DATE)
 
 
 def _get_time_type_body_map(target_type):
