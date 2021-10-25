@@ -43,9 +43,11 @@ jobs:
       - name: Run type installation
         run: docker exec mathesar_service python install.py --skip-confirm
 
-      - name: Sleep for 15 seconds
-        run: sleep 15s
-        shell: bash
-
       - name: Run integ tests with pytest
         run: docker exec mathesar_service pytest --browser chromium --browser webkit --browser firefox tests/
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ failure() || success() }}
+        with:
+          name: Recordings
+          path: videos/
