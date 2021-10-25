@@ -63,6 +63,12 @@ export function getTabsForSchema(db: string, schemaId: number): TabList {
   return schemaTabs;
 }
 
+export function getActiveTabValue(_currentDBName: string, _currentSchemaId: SchemaEntry['id']): MathesarTab {
+  const { activeTab } = getTabsForSchema(_currentDBName, _currentSchemaId);
+  const activeTabObj = get(activeTab);
+  return activeTabObj;
+}
+
 export function addTab(
   db: string,
   schemaId: SchemaEntry['id'],
