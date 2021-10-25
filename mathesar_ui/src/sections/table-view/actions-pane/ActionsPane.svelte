@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
+  import { createEventDispatcher, getContext } from 'svelte';
   import {
     faFilter,
     faSort,
@@ -10,7 +10,7 @@
     faPlus,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
-  import { Button, Icon } from '@mathesar-components';
+  import { Button, Icon, Dropdown } from '@mathesar-components';
   import type {
     TabularDataStore,
     TabularData,
@@ -19,12 +19,13 @@
     Columns,
     Meta,
   } from '@mathesar/stores/table-data/types';
-  import Dropdown from '@mathesar/components/dropdown/Dropdown.svelte';
   import type { SelectOption } from '@mathesar/components/types';
   import DisplayFilter from '../display-options/DisplayFilter.svelte';
   import DisplaySort from '../display-options/DisplaySort.svelte';
   import DisplayGroup from '../display-options/DisplayGroup.svelte';
 
+  const dispatch = createEventDispatcher();
+  
   const tabularData = getContext<TabularDataStore>('tabularData');
 
   function getColumnOptions(_columns: TableColumnData): SelectOption<string>[] {
@@ -60,6 +61,18 @@
 </script>
 
 <div class="actions-pane">
+  <Dropdown closeOnInnerClick={true} triggerClass="opts" 
+   contentClass="table-opts-content" size="small"> 
+    <svelte:fragment slot="trigger">
+        Table
+    </svelte:fragment>
+    <svelte:fragment slot="content">
+      <ul>
+        <li class= "item" on:click={() => dispatch('deleteTable')}>Delete Table</li>
+      </ul>
+    </svelte:fragment>
+  </Dropdown>
+
   <Dropdown showArrow={false}>
     <svelte:fragment slot="trigger">
       <Icon data={faFilter} size="0.8em"/>
