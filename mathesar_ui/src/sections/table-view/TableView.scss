@@ -216,5 +216,13 @@ section.table-section .tab-container .table-data {
   }
   .footer {
     text-align:right;
+
+.delete-modal{
+  .header {
+    font-weight: bold;
+    margin-bottom: 10px;
+    }
+  .footer {
+    text-align: right;
   }
 }
