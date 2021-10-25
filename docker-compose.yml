@@ -17,7 +17,7 @@ services:
     container_name: mathesar_service
     environment:
       - MODE=${MODE-PRODUCTION}
-    command: dockerize -wait tcp://db:5432 -timeout 30s ./run.sh
+    command: dockerize -wait tcp://mathesar_db:5432 -timeout 30s ./run.sh
     volumes:
       - .:/code/
       - ui_node_modules:/code/mathesar_ui/node_modules/

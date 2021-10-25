@@ -102,7 +102,7 @@ docker exec -it mathesar_service bash
 
 To open a PostgreSQL psql terminal for the data in Mathesar:
 ```
-docker exec -it mathesar_db_1 psql -U mathesar
+docker exec -it mathesar_db psql -U mathesar
 ```
 
 ### Troubleshooting
