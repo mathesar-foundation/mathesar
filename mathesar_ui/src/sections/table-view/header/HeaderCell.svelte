@@ -115,7 +115,7 @@
   </Dropdown>
 </div>
 {#if isOpen}
-  <Modal class="delete-column">
+  <Modal class="delete-modal">
     <div class="header">
       Deleting '{column.name}' could break existing tables and views.
     </div>
