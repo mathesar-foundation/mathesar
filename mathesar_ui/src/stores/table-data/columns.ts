@@ -168,7 +168,7 @@ export class Columns implements Writable<TableColumnData> {
     this.listeners.clear();
   }
 
-  async deleteColumn(columnId:number):Promise<void> {
-    await deleteAPI(`${this.url}${columnId}/`);
+  deleteColumn(columnId:number): Promise<void> {
+    return deleteAPI(`${this.url}${columnId}/`);
   }
 }
