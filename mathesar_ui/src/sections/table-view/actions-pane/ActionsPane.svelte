@@ -8,6 +8,7 @@
     faSync,
     faExclamationTriangle,
     faPlus,
+    faCog,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
   import { Button, Icon, Dropdown } from '@mathesar-components';
@@ -20,6 +21,9 @@
     Meta,
   } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar/components/types';
+  import { refreshTableContent } from '@mathesar/stores/table-data/store';
+  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/constraints';
+  import TableConstraints from '../constraints/TableConstraints.svelte';
   import DisplayFilter from '../display-options/DisplayFilter.svelte';
   import DisplaySort from '../display-options/DisplaySort.svelte';
   import DisplayGroup from '../display-options/DisplayGroup.svelte';
@@ -37,11 +41,13 @@
 
   let recordsData: RecordsData;
   let columnsDataStore: ColumnsDataStore;
+  let constraintsDataStore: ConstraintsDataStore;
   let meta: Meta;
   let recordState: RecordsData['state'];
+  let isTableConstraintsModalOpen = false;
 
   $: ({
-    columnsDataStore, recordsData, meta,
+    columnsDataStore, recordsData, meta, constraintsDataStore,
   } = $tabularData as TabularData);
   $: ({
     filter, sort, group, selectedRecords, combinedModificationState,
@@ -49,29 +55,44 @@
   $: ({ state: recordState } = recordsData);
 
   $: isLoading = $columnsDataStore.state === States.Loading
-    || $recordState === States.Loading;
+    || $recordState === States.Loading
+    || $constraintsDataStore.state === States.Loading;
   $: isError = $columnsDataStore.state === States.Error
-    || $recordState === States.Error;
+    || $recordState === States.Error
+    || $constraintsDataStore.state === States.Error;
   $: columnOptions = getColumnOptions($columnsDataStore);
 
   function refresh() {
-    void columnsDataStore.fetch();
-    void recordsData.fetch();
+    void refreshTableContent($tabularData.id);
   }
 </script>
 
 <div class="actions-pane">
-  <Dropdown closeOnInnerClick={true} triggerClass="opts" 
-   contentClass="table-opts-content" size="small"> 
+  <Dropdown
+    closeOnInnerClick={true}
+    triggerClass="opts"
+    contentClass="table-opts-content"
+    ariaLabel="Table Actions"
+  >
     <svelte:fragment slot="trigger">
-        Table
+      <Icon data={faCog}/>
+      Table
     </svelte:fragment>
     <svelte:fragment slot="content">
       <ul>
-        <li class= "item" on:click={() => dispatch('deleteTable')}>Delete Table</li>
+        <li class="item" on:click={() => dispatch('deleteTable')}>
+          Delete
+        </li>
+        <li class="item" on:click={() => { isTableConstraintsModalOpen = true; }}>
+          Constraints
+        </li>
       </ul>
     </svelte:fragment>
   </Dropdown>
+
+  <TableConstraints bind:isOpen={isTableConstraintsModalOpen} />
+
+  <div class="divider"/>
 
   <Dropdown showArrow={false}>
     <svelte:fragment slot="trigger">
