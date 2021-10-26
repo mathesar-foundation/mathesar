@@ -2,8 +2,10 @@ import type { Writable } from 'svelte/store';
 import { TabularType } from '@mathesar/App.d';
 import type { DBObjectEntry, TableEntry, ViewEntry } from '@mathesar/App.d';
 import { Meta } from './meta';
+import type { TableColumnData } from './columns';
 import { Columns } from './columns';
 import { Records } from './records';
+import type { TableRecordData } from './records';
 import { Display } from './display';
 import { ConstraintsDataStore } from './constraints';
 
@@ -17,13 +19,14 @@ export interface TabularData {
 }
 export type TabularDataStore = Writable<TabularData>;
 export interface TabularDataEntry extends TabularData {
-  destroy: () => void
+  refresh: () => Promise<[TableColumnData, TableRecordData]>,
+  destroy: () => void,
 }
 
 const tableMap: Map<TableEntry['id'], TabularDataEntry> = new Map();
 const viewMap: Map<ViewEntry['id'], TabularDataEntry> = new Map();
 
-function get(type: TabularType, id: DBObjectEntry['id']): TabularData {
+function get(type: TabularType, id: DBObjectEntry['id']): TabularDataEntry {
   const tabularMap = type === TabularType.View ? viewMap : tableMap;
   let entry = tabularMap.get(id);
   if (!entry) {
@@ -41,6 +44,13 @@ function get(type: TabularType, id: DBObjectEntry['id']): TabularData {
       records,
       display,
 
+      refresh() {
+        return Promise.all([
+          columns.fetch(),
+          records.fetch(),
+        ]);
+      },
+
       destroy(): void {
         columns.destroy();
         constraintsDataStore.destroy();
@@ -51,6 +61,18 @@ function get(type: TabularType, id: DBObjectEntry['id']): TabularData {
     tabularMap.set(id, entry);
   }
   return entry;
+}
+
+function refresh(
+  type: TabularType,
+  id: DBObjectEntry['id'],
+): ReturnType<TabularDataEntry['refresh']> {
+  const tabularMap = type === TabularType.View ? viewMap : tableMap;
+  const entry = tabularMap.get(id);
+  if (!entry) {
+    return Promise.reject(new Error('Unable to to find entry within tabularMap'));
+  }
+  return entry.refresh();
 }
 
 export function remove(type: TabularType, id: DBObjectEntry['id']): void {
@@ -77,4 +99,16 @@ export function removeTableContent(id: TableEntry['id']): void {
 
 export function removeViewContent(id: ViewEntry['id']): void {
   remove(TabularType.View, id);
+}
+
+export function refreshTableContent(
+  id: TableEntry['id'],
+): ReturnType<TabularDataEntry['refresh']> {
+  return refresh(TabularType.Table, id);
+}
+
+export function refreshViewContent(
+  id: TableEntry['id'],
+): ReturnType<TabularDataEntry['refresh']> {
+  return refresh(TabularType.View, id);
 }

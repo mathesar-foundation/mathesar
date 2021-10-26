@@ -39,7 +39,7 @@ interface GroupInfo {
   columns: TableColumn['name'][]
 }
 
-interface TableRecordData {
+export interface TableRecordData {
   state: States,
   error?: string,
   savedRecords: TableRecord[],

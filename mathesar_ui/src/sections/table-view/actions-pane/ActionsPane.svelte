@@ -21,6 +21,7 @@
     Meta,
   } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar/components/types';
+  import { refreshTableContent } from '@mathesar/stores/table-data/store';
   import TableConstraints from '../constraints/TableConstraints.svelte';
   import DisplayFilter from '../display-options/DisplayFilter.svelte';
   import DisplaySort from '../display-options/DisplaySort.svelte';
@@ -58,8 +59,7 @@
   $: columnOptions = getColumnOptions($columns);
 
   function refresh() {
-    void columns.fetch();
-    void records.fetch();
+    void refreshTableContent($tabularData.id);
   }
 </script>
 
