@@ -11,6 +11,7 @@
   } from '@mathesar-components';
   import type {
     Appearance,
+    Size,
   } from '@mathesar-components/types';
   import type { Placement } from '@popperjs/core/lib/enums';
   import {
@@ -30,6 +31,7 @@
   export let ariaControls: string = null;
   export let placement: Placement = 'bottom-start';
   export let showArrow = true;
+  export let size: Size = 'medium';
 
   let triggerElement: HTMLElement | undefined;
   let contentElement: HTMLElement | undefined;
@@ -95,7 +97,7 @@
 </script>
 
 <Button bind:element={triggerElement} appearance={triggerAppearance} class={tgClasses} on:click={toggle} 
-  aria-controls={ariaControls} aria-haspopup="listbox" aria-label={ariaLabel} on:keydown>
+  aria-controls={ariaControls} aria-haspopup="listbox" aria-label={ariaLabel} {size} on:keydown>
   <span class="label">
     <slot name="trigger"></slot>
   </span>

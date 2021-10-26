@@ -40,7 +40,7 @@
   }
 </script>
 
-<section>
+<div class="display-option">
   <div class="header">
     <span>
       Group
@@ -96,4 +96,8 @@
       {/if}
     </table>
   </div>
-</section>
+</div>
+
+<style global lang="scss">
+  @import "DisplayOption.scss";
+</style>
