@@ -15,15 +15,27 @@
   import type {
     TabularDataStore,
     TabularData,
+    TableColumnData,
     Records,
     Columns,
     Meta,
   } from '@mathesar/stores/table-data/types';
   import TableConstraints from '../constraints/TableConstraints.svelte';
+  import type { SelectOption } from '@mathesar/components/types';
+  import DisplayFilter from '../display-options/DisplayFilter.svelte';
+  import DisplaySort from '../display-options/DisplaySort.svelte';
+  import DisplayGroup from '../display-options/DisplayGroup.svelte';
 
   const dispatch = createEventDispatcher();
-
+  
   const tabularData = getContext<TabularDataStore>('tabularData');
+
+  function getColumnOptions(_columns: TableColumnData): SelectOption<string>[] {
+    return _columns?.data?.map((column) => ({
+      id: column.name,
+      label: column.name,
+    })) || [];
+  }
 
   let records: Records;
   let columns: Columns;
@@ -43,10 +55,7 @@
     || $recordState === States.Loading;
   $: isError = $columns.state === States.Error
     || $recordState === States.Error;
-
-  function openDisplayOptions() {
-    dispatch('openDisplayOptions');
-  }
+  $: columnOptions = getColumnOptions($columns);
 
   function refresh() {
     void columns.fetch();
@@ -63,15 +72,15 @@
   >
     <svelte:fragment slot="trigger">
       <Icon data={faCog}/>
-      Table Actions
+      Table
     </svelte:fragment>
     <svelte:fragment slot="content">
       <ul>
         <li class="item" on:click={() => dispatch('deleteTable')}>
-          Delete Table
+          Delete
         </li>
         <li class="item" on:click={() => { isTableConstraintsModalOpen = true; }}>
-          Table Constraints
+          Constraints
         </li>
       </ul>
     </svelte:fragment>
@@ -79,35 +88,52 @@
 
   <TableConstraints bind:isOpen={isTableConstraintsModalOpen} />
 
-  <Button size="small" on:click={openDisplayOptions}>
-    <Icon data={faFilter} size="0.8em"/>
-    <span>
-      Filters
-      {#if $filter?.filters?.length > 0}
-        ({$filter?.filters?.length})
-      {/if}
-    </span>
-  </Button>
+  <div class="divider"/>
 
-  <Button size="small" on:click={openDisplayOptions}>
-    <Icon data={faSort}/>
-    <span>
-      Sort
-      {#if $sort?.size > 0}
-        ({$sort?.size})
-      {/if}
-    </span>
-  </Button>
+  <Dropdown showArrow={false}>
+    <svelte:fragment slot="trigger">
+      <Icon data={faFilter} size="0.8em"/>
+      <span>
+        Filters
+        {#if $filter?.filters?.length > 0}
+          ({$filter?.filters?.length})
+        {/if}
+      </span>
+    </svelte:fragment>
+    <svelte:fragment slot="content">
+      <DisplayFilter options={columnOptions} {meta}/>
+    </svelte:fragment>
+  </Dropdown>
 
-  <Button size="small" on:click={openDisplayOptions}>
-    <Icon data={faListAlt}/>
-    <span>
-      Group
-      {#if $group?.size > 0}
-        ({$group?.size})
-      {/if}
-    </span>
-  </Button>
+  <Dropdown showArrow={false}>
+    <svelte:fragment slot="trigger">
+      <Icon data={faSort}/>
+      <span>
+        Sort
+        {#if $sort?.size > 0}
+          ({$sort?.size})
+        {/if}
+      </span>
+    </svelte:fragment>
+    <svelte:fragment slot="content">
+      <DisplaySort options={columnOptions} {meta}/>
+    </svelte:fragment>
+  </Dropdown>
+
+  <Dropdown showArrow={false}>
+    <svelte:fragment slot="trigger">
+      <Icon data={faListAlt}/>
+      <span>
+        Group
+        {#if $group?.size > 0}
+          ({$group?.size})
+        {/if}
+      </span>
+    </svelte:fragment>
+    <svelte:fragment slot="content">
+      <DisplayGroup options={columnOptions} {meta}/>
+    </svelte:fragment>
+  </Dropdown>
 
   <div class="divider"/>
 
