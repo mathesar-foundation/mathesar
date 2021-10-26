@@ -9,9 +9,9 @@
     TabularDataStore,
     TabularData,
     TableRecord,
-    TableColumn,
-    Records,
-    Columns,
+    Column,
+    RecordsData,
+    ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
@@ -22,14 +22,14 @@
   export let style: { [key: string]: string | number };
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  let records: Records;
-  let columns: Columns;
+  let recordsData: RecordsData;
+  let columnsDataStore: ColumnsDataStore;
   $: ({
-    records, columns, meta, display,
+    recordsData, columnsDataStore, meta, display,
   } = $tabularData as TabularData);
   $: ({ columnPositionMap } = display as TabularData['display']);
   $: ({ selectedRecords, recordModificationState } = meta as TabularData['meta']);
-  $: ({ groupInfo } = records);
+  $: ({ groupInfo } = recordsData);
 
   function calculateStyle(
     _style: { [key: string]: string | number },
@@ -51,18 +51,22 @@
 
   function getColumnPosition(
     _columnPositionMap: ColumnPositionMap,
-    _name: TableColumn['name'],
+    _name: Column['name'],
   ): ColumnPosition {
     return _columnPositionMap.get(_name);
   }
 
-  $: isSelected = ($selectedRecords as Set<unknown>).has(row[$columns.primaryKey]);
-  $: modificationState = getModificationState($recordModificationState, row, $columns.primaryKey);
+  $: isSelected = ($selectedRecords as Set<unknown>).has(row[$columnsDataStore.primaryKey]);
+  $: modificationState = getModificationState(
+    $recordModificationState,
+    row,
+    $columnsDataStore.primaryKey,
+  );
   $: rowWidth = getColumnPosition($columnPositionMap, '__row')?.width || 0;
 
   function checkAndCreateEmptyRow() {
     if (row.__isAddPlaceholder) {
-      void records.createOrUpdateRecord(row);
+      void recordsData.createOrUpdateRecord(row);
     }
   }
 </script>
@@ -76,11 +80,11 @@
   {:else if row.__isGroupHeader}
     <GroupHeader {row} {rowWidth} groupColumns={$groupInfo.columns} groupCounts={$groupInfo.counts}/>
   {:else}
-    <RowControl primaryKeyColumn={$columns.primaryKey}
-                {row} {meta} {records}/>
+    <RowControl primaryKeyColumn={$columnsDataStore.primaryKey}
+                {row} {meta} recordsData={recordsData}/>
 
-    {#each $columns.data as column (column.name)}
-      <RowCell {display} {row} bind:value={row[column.name]} {column} {records}
+    {#each $columnsDataStore.columns as column (column.name)}
+      <RowCell {display} {row} bind:value={row[column.name]} {column} recordsData={recordsData}
         columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
     {/each}
   {/if}

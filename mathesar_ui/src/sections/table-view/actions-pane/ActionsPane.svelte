@@ -14,9 +14,9 @@
   import type {
     TabularDataStore,
     TabularData,
-    TableColumnData,
-    Records,
-    Columns,
+    RecordsData,
+    ColumnsDataStore,
+    ColumnsData,
     Meta,
   } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar/components/types';
@@ -27,36 +27,36 @@
   const dispatch = createEventDispatcher();
   
   const tabularData = getContext<TabularDataStore>('tabularData');
-
-  function getColumnOptions(_columns: TableColumnData): SelectOption<string>[] {
-    return _columns?.data?.map((column) => ({
+  
+  function getColumnOptions(columnsData: ColumnsData): SelectOption<string>[] {
+    return columnsData?.columns?.map((column) => ({
       id: column.name,
       label: column.name,
     })) || [];
   }
 
-  let records: Records;
-  let columns: Columns;
+  let recordsData: RecordsData;
+  let columnsDataStore: ColumnsDataStore;
   let meta: Meta;
-  let recordState: Records['state'];
+  let recordState: RecordsData['state'];
 
   $: ({
-    columns, records, meta,
+    columnsDataStore, recordsData, meta,
   } = $tabularData as TabularData);
   $: ({
     filter, sort, group, selectedRecords, combinedModificationState,
   } = meta);
-  $: ({ state: recordState } = records);
+  $: ({ state: recordState } = recordsData);
 
-  $: isLoading = $columns.state === States.Loading
+  $: isLoading = $columnsDataStore.state === States.Loading
     || $recordState === States.Loading;
-  $: isError = $columns.state === States.Error
+  $: isError = $columnsDataStore.state === States.Error
     || $recordState === States.Error;
-  $: columnOptions = getColumnOptions($columns);
+  $: columnOptions = getColumnOptions($columnsDataStore);
 
   function refresh() {
-    void columns.fetch();
-    void records.fetch();
+    void columnsDataStore.fetch();
+    void recordsData.fetch();
   }
 </script>
 
@@ -120,7 +120,7 @@
 
   <div class="divider"/>
 
-  <Button size="small" on:click={() => records.addEmptyRecord()}>
+  <Button size="small" on:click={() => recordsData.addEmptyRecord()}>
     <Icon data={faPlus}/>
     <span>
       New Record
@@ -128,7 +128,7 @@
   </Button>
 
   {#if $selectedRecords.size > 0}
-    <Button size="small" on:click={() => records.deleteSelected()}>
+    <Button size="small" on:click={() => recordsData.deleteSelected()}>
       <Icon data={faTrashAlt}/>
       <span>
         Delete {$selectedRecords.size} records

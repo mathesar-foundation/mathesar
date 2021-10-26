@@ -2,15 +2,15 @@ import type { Writable } from 'svelte/store';
 import { TabularType } from '@mathesar/App.d';
 import type { DBObjectEntry, TableEntry, ViewEntry } from '@mathesar/App.d';
 import { Meta } from './meta';
-import { Columns } from './columns';
-import { Records } from './records';
+import { ColumnsDataStore } from './columns';
+import { RecordsData } from './records';
 import { Display } from './display';
 
 export interface TabularData {
   id: number,
   meta: Meta,
-  columns: Columns,
-  records: Records,
+  columnsDataStore: ColumnsDataStore,
+  recordsData: RecordsData,
   display: Display,
 }
 export type TabularDataStore = Writable<TabularData>;
@@ -26,20 +26,20 @@ function get(type: TabularType, id: DBObjectEntry['id']): TabularData {
   let entry = tabularMap.get(id);
   if (!entry) {
     const meta = new Meta(type, id);
-    const columns = new Columns(type, id, meta);
-    const records = new Records(type, id, meta, columns);
-    const display = new Display(type, id, meta, columns, records);
+    const columnsDataStore = new ColumnsDataStore(type, id, meta);
+    const recordsData = new RecordsData(type, id, meta, columnsDataStore);
+    const display = new Display(type, id, meta, columnsDataStore, recordsData);
 
     entry = {
       id,
       meta,
-      columns,
-      records,
+      columnsDataStore,
+      recordsData,
       display,
 
       destroy(): void {
-        columns.destroy();
-        records.destroy();
+        columnsDataStore.destroy();
+        recordsData.destroy();
         display.destroy();
       },
     };
@@ -53,7 +53,7 @@ export function remove(type: TabularType, id: DBObjectEntry['id']): void {
   // destroy all objects in table
   const entry = tabularMap.get(id);
   if (entry) {
-    entry.records.destroy();
+    entry.recordsData.destroy();
     tabularMap.delete(id);
   }
 }
