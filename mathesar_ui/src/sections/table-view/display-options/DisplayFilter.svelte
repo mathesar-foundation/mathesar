@@ -58,7 +58,7 @@
   }
 </script>
 
-<section>
+<div class="display-option">
   <div class="header">
     <span>
       Filters
@@ -128,4 +128,8 @@
       {/if}
     </table>
   </div>
-</section>
+</div>
+
+<style global lang="scss">
+  @import "DisplayOption.scss";
+</style>
