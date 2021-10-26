@@ -1,5 +1,4 @@
 from io import TextIOWrapper
-from typing import BinaryIO
 
 import clevercsv as csv
 
@@ -15,26 +14,19 @@ SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
 
 
-def get_file_encoding(file: BinaryIO) -> str:
+def get_file_encoding(file):
     """
     Given a file, uses charset_normalizer if installed or chardet which is installed as part of clevercsv module to
     detect the file encoding. Returns a default value of utf-8-sig if encoding could not be detected or detection
     libraries are missing.
     """
-    try:
-        from charset_normalizer import detect
-    except ImportError:
-        try:
-            from chardet import detect
-        except ImportError:
-            detect = None
-    if detect is not None:
-        # Sample Size reduces the accuracy
-        encoding = detect(file.read()).get('encoding', None)
-        file.seek(0)
-        if encoding is not None:
-            return encoding
-    return "utf-8-sig"
+    from charset_normalizer import detect
+    # Sample Size reduces the accuracy
+    encoding = detect(file.read()).get('encoding', None)
+    file.seek(0)
+    if encoding is not None:
+        return encoding
+    return "utf-8"
 
 
 def check_dialect(file, dialect):
