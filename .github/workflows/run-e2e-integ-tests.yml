@@ -21,6 +21,9 @@ jobs:
           restore-keys: |
             mathesar-docker-cache-e2e-tests-
 
+      - name: Copy env file
+        run: cp .env.example .env
+
       # The code is checked out under uid 1001 - reset this to 1000 for the
       # container to run tests successfully
       - name: Fix permissions
@@ -29,7 +32,6 @@ jobs:
       - name: Build the stack
         run: docker-compose up --build -d
       
-      # This is to allow time for the frontend to build
       - name: Sleep for 60 seconds
         run: sleep 60s
         shell: bash
