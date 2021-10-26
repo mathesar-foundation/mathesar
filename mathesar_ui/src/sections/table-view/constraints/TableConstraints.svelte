@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Modal from '@mathesar/components/modal/Modal.svelte';
+  import { Modal } from '@mathesar-components';
   import { getContext } from 'svelte';
   import type { TabularDataStore } from '@mathesar/stores/table-data/types';
   import type { Constraint, ConstraintsDataStore } from '@mathesar/stores/table-data/constraints';
@@ -32,7 +32,7 @@
     </div>
   
     <div class="constraints-list">
-      {#each constraints as constraint}
+      {#each constraints as constraint (constraint.id)}
         <div class="table-constraint">
           <div>
             <div class="name">{constraint.name}</div>
