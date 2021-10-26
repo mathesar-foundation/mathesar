@@ -63,7 +63,6 @@ def insert_records_from_csv(table, engine, csv_filename, column_names, header, d
                 cursor.copy_expert(copy_sql, csv_file)
             else:
                 # File needs to be converted to compatible database supported encoding
-                print(sql_encoding, encoding)
                 with tempfile.SpooledTemporaryFile(mode='wb+', encoding=conversion_encoding) as temp_file:
                     while True:
                         contents = csv_file.read(READ_SIZE).encode(conversion_encoding)
