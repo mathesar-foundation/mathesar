@@ -50,10 +50,10 @@ def create_schema(engine, test_db_model):
 
 @pytest.fixture
 def create_data_file():
-    def _create_data_file(file_name, name):
-        with open(file_name, 'rb') as csv_file:
+    def _create_data_file(file_path, file_name):
+        with open(file_path, 'rb') as csv_file:
             data_file = DataFile.objects.create(file=File(csv_file), created_from='file',
-                                                base_name=name)
+                                                base_name=file_name)
 
         return data_file
     return _create_data_file
