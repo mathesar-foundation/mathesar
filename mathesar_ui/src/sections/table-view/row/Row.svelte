@@ -1,7 +1,6 @@
 <script lang="ts">
   import { getContext } from 'svelte';
   import {
-    DEFAULT_ROW_RIGHT_PADDING,
     getModificationState,
   } from '@mathesar/stores/table-data';
   import type {
