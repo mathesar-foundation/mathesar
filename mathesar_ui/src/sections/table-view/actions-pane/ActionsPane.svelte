@@ -22,6 +22,7 @@
   } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar/components/types';
   import { refreshTableContent } from '@mathesar/stores/table-data/store';
+  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/constraints';
   import TableConstraints from '../constraints/TableConstraints.svelte';
   import DisplayFilter from '../display-options/DisplayFilter.svelte';
   import DisplaySort from '../display-options/DisplaySort.svelte';
@@ -40,12 +41,13 @@
 
   let records: Records;
   let columns: Columns;
+  let constraintsDataStore: ConstraintsDataStore;
   let meta: Meta;
   let recordState: Records['state'];
   let isTableConstraintsModalOpen = false;
 
   $: ({
-    columns, records, meta,
+    columns, records, meta, constraintsDataStore,
   } = $tabularData as TabularData);
   $: ({
     filter, sort, group, selectedRecords, combinedModificationState,
@@ -53,9 +55,11 @@
   $: ({ state: recordState } = records);
 
   $: isLoading = $columns.state === States.Loading
-    || $recordState === States.Loading;
+    || $recordState === States.Loading
+    || $constraintsDataStore.state === States.Loading;
   $: isError = $columns.state === States.Error
-    || $recordState === States.Error;
+    || $recordState === States.Error
+    || $constraintsDataStore.state === States.Error;
   $: columnOptions = getColumnOptions($columns);
 
   function refresh() {

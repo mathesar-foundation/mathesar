@@ -7,6 +7,7 @@ import { Columns } from './columns';
 import { Records } from './records';
 import type { TableRecordData } from './records';
 import { Display } from './display';
+import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
 
 export interface TabularData {
@@ -19,7 +20,7 @@ export interface TabularData {
 }
 export type TabularDataStore = Writable<TabularData>;
 export interface TabularDataEntry extends TabularData {
-  refresh: () => Promise<[TableColumnData, TableRecordData]>,
+  refresh: () => Promise<[TableColumnData, TableRecordData, ConstraintsData]>,
   destroy: () => void,
 }
 
@@ -48,6 +49,7 @@ function get(type: TabularType, id: DBObjectEntry['id']): TabularDataEntry {
         return Promise.all([
           columns.fetch(),
           records.fetch(),
+          constraintsDataStore.fetch(),
         ]);
       },
 
