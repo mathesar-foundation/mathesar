@@ -8,7 +8,6 @@
   import type {
     TabularData,
     Columns,
-    Display,
   } from '@mathesar/stores/table-data/types';
   import {
     refetchTablesForSchema,
@@ -18,7 +17,6 @@
   // import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
 
   import ActionsPane from './actions-pane/ActionsPane.svelte';
-  import DisplayOptions from './display-options/DisplayOptions.svelte';
   import DeleteTableModal from './actions-pane/DeleteTableModal.svelte';
   import Header from './header/Header.svelte';
   import Body from './Body.svelte';
@@ -32,10 +30,8 @@
   $: identifier = id as number;
 
   let columns: Columns;
-  let showDisplayOptions: Display['showDisplayOptions'];
 
   // let tableBodyRef: Body;
-  let animateOpts = false;
   let isModalOpen = false;
   let activeTab: MathesarTab;
 
@@ -47,22 +43,9 @@
       ...data,
     });
     ({ columns } = data);
-    ({ showDisplayOptions } = data.display);
-
-    animateOpts = false;
   }
 
   $: setStores(database, identifier);
-
-  function openDisplayOptions() {
-    animateOpts = true;
-    showDisplayOptions.set(true);
-  }
-
-  function closeDisplayOptions() {
-    animateOpts = true;
-    showDisplayOptions.set(false);
-  }
 
   async function deleteConfirm() {
     removeTab($currentDBName, $currentSchemaId, activeTab);
@@ -83,16 +66,9 @@
   }
 </script>
 
-<ActionsPane on:openDisplayOptions={openDisplayOptions} on:deleteTable={tableDelete}/>
+<ActionsPane on:deleteTable={tableDelete}/>
 
-<div class="table-data" class:animate-opts={animateOpts}
-      class:has-display-opts={$showDisplayOptions}>
-  <div class="display-options-pane">
-    {#if $showDisplayOptions}
-      <DisplayOptions on:close={closeDisplayOptions}/>
-    {/if}
-  </div>
-
+<div class="table-data">
   <div class="table-content">
     {#if $columns.data.length > 0}
       <Header/>
