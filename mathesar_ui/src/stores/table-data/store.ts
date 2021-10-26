@@ -2,10 +2,10 @@ import type { Writable } from 'svelte/store';
 import { TabularType } from '@mathesar/App.d';
 import type { DBObjectEntry, TableEntry, ViewEntry } from '@mathesar/App.d';
 import { Meta } from './meta';
-import type { TableColumnData } from './columns';
-import { Columns } from './columns';
-import { Records } from './records';
-import type { TableRecordData } from './records';
+import type { TableRecordsData } from './records';
+import type { ColumnsData } from './columns';
+import { ColumnsDataStore } from './columns';
+import { RecordsData } from './records';
 import { Display } from './display';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
@@ -13,14 +13,14 @@ import { ConstraintsDataStore } from './constraints';
 export interface TabularData {
   id: number,
   meta: Meta,
-  columns: Columns,
+  columnsDataStore: ColumnsDataStore,
   constraintsDataStore: ConstraintsDataStore,
-  records: Records,
+  recordsData: RecordsData,
   display: Display,
 }
 export type TabularDataStore = Writable<TabularData>;
 export interface TabularDataEntry extends TabularData {
-  refresh: () => Promise<[TableColumnData, TableRecordData, ConstraintsData]>,
+  refresh: () => Promise<[ColumnsData, TableRecordsData, ConstraintsData]>,
   destroy: () => void,
 }
 
@@ -32,31 +32,31 @@ function get(type: TabularType, id: DBObjectEntry['id']): TabularDataEntry {
   let entry = tabularMap.get(id);
   if (!entry) {
     const meta = new Meta(type, id);
-    const columns = new Columns(type, id, meta);
+    const columnsDataStore = new ColumnsDataStore(type, id, meta);
     const constraintsDataStore = new ConstraintsDataStore(id);
-    const records = new Records(type, id, meta, columns);
-    const display = new Display(type, id, meta, columns, records);
+    const recordsData = new RecordsData(type, id, meta, columnsDataStore);
+    const display = new Display(type, id, meta, columnsDataStore, recordsData);
 
     entry = {
       id,
       meta,
-      columns,
+      columnsDataStore,
       constraintsDataStore,
-      records,
+      recordsData,
       display,
 
       refresh() {
         return Promise.all([
-          columns.fetch(),
-          records.fetch(),
+          columnsDataStore.fetch(),
+          recordsData.fetch(),
           constraintsDataStore.fetch(),
         ]);
       },
 
       destroy(): void {
-        columns.destroy();
+        columnsDataStore.destroy();
         constraintsDataStore.destroy();
-        records.destroy();
+        recordsData.destroy();
         display.destroy();
       },
     };
@@ -82,7 +82,7 @@ export function remove(type: TabularType, id: DBObjectEntry['id']): void {
   // destroy all objects in table
   const entry = tabularMap.get(id);
   if (entry) {
-    entry.records.destroy();
+    entry.recordsData.destroy();
     tabularMap.delete(id);
   }
 }

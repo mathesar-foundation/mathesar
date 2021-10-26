@@ -7,7 +7,7 @@
   import { getActiveTabValue, removeTab } from '@mathesar/stores/tabs';
   import type {
     TabularData,
-    Columns,
+    ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
   import {
     refetchTablesForSchema,
@@ -29,7 +29,7 @@
   export let id: unknown;
   $: identifier = id as number;
 
-  let columns: Columns;
+  let columnsDataStore: ColumnsDataStore;
 
   // let tableBodyRef: Body;
   let isModalOpen = false;
@@ -42,7 +42,7 @@
       id: _id,
       ...data,
     });
-    ({ columns } = data);
+    ({ columnsDataStore } = data);
   }
 
   $: setStores(database, identifier);
@@ -70,7 +70,7 @@
 
 <div class="table-data">
   <div class="table-content">
-    {#if $columns.data.length > 0}
+    {#if $columnsDataStore.columns.length > 0}
       <Header/>
       <Body/>
       {#if isModalOpen}

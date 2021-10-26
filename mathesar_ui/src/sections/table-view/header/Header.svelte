@@ -7,10 +7,10 @@
   import type {
     TabularDataStore,
     TabularData,
-    TableColumn,
+    Column,
     ColumnPosition,
     ColumnPositionMap,
-    Columns,
+    ColumnsDataStore,
     Display,
     Meta,
   } from '@mathesar/stores/table-data/types';
@@ -18,11 +18,11 @@
   import NewColumnCell from './NewColumnCell.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  let columns: Columns;
+  let columnsDataStore: ColumnsDataStore;
   let display: Display;
   let meta: Meta;
   $: ({
-    columns, meta, display,
+    columnsDataStore, meta, display,
   } = $tabularData as TabularData);
   $: ({ horizontalScrollOffset, columnPositionMap } = display);
 
@@ -44,7 +44,7 @@
 
   function getColumnPosition(
     _columnPositionMap: ColumnPositionMap,
-    _name: TableColumn['name'],
+    _name: Column['name'],
   ): ColumnPosition {
     return _columnPositionMap.get(_name);
   }
@@ -64,8 +64,8 @@
     };
   });
 
-  function addColumn(e: CustomEvent<Partial<TableColumn>>) {
-    void columns.add(e.detail);
+  function addColumn(e: CustomEvent<Partial<Column>>) {
+    void columnsDataStore.add(e.detail);
   }
 </script>
 
@@ -73,10 +73,10 @@
   <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;">
   </div>
 
-  {#each $columns.data as column (column.name)}
+  {#each $columnsDataStore.columns as column (column.name)}
     <HeaderCell {column} {meta}
       columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
   {/each}
 
-  <NewColumnCell {display} columnData={$columns.data} on:addColumn={addColumn}/>
+  <NewColumnCell {display} columns={$columnsDataStore.columns} on:addColumn={addColumn}/>
 </div>
