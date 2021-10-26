@@ -20,8 +20,8 @@
     Columns,
     Meta,
   } from '@mathesar/stores/table-data/types';
-  import TableConstraints from '../constraints/TableConstraints.svelte';
   import type { SelectOption } from '@mathesar/components/types';
+  import TableConstraints from '../constraints/TableConstraints.svelte';
   import DisplayFilter from '../display-options/DisplayFilter.svelte';
   import DisplaySort from '../display-options/DisplaySort.svelte';
   import DisplayGroup from '../display-options/DisplayGroup.svelte';
