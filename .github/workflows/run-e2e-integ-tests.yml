@@ -19,7 +19,7 @@ jobs:
         with:
           key: mathesar-docker-cache-integ-tests-{hash}
           restore-keys: |
-            mathesar-docker-cache-integ-tests-
+            mathesar-docker-cache-e2e-tests-
 
       # The code is checked out under uid 1001 - reset this to 1000 for the
       # container to run tests successfully
