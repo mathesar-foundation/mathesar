@@ -17,8 +17,9 @@
   $: constraints = $constraintsDataStore.constraints as Constraint[];
   $: countText = constraints.length === 0 ? '' : ` (${constraints.length as number})`;
 
-  function drop(constraint: Constraint) {
-    console.log(`DROP ${constraint.id}`); // TODO
+  async function drop(constraint: Constraint) {
+    await (constraintsDataStore as ConstraintsDataStore).drop(constraint.id);
+    await (constraintsDataStore as ConstraintsDataStore).fetch({ showLoading: false });
   }
 </script>
 
@@ -33,7 +34,10 @@
     {:else if state === States.Done}
       <div class="constraints-list">
         {#each constraints as constraint (constraint.id)}
-          <TableConstraint {constraint} on:drop={() => drop(constraint)}/>
+          <TableConstraint
+            {constraint}
+            drop={() => drop(constraint)}
+          />
         {/each}
       </div>
     {:else if state === States.Error}

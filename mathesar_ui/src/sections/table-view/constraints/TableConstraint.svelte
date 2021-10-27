@@ -1,5 +1,11 @@
 <script lang='ts'>
-  import { Icon, Seesaw } from '@mathesar-components';
+  import { fly } from 'svelte/transition';
+  import {
+    Icon,
+    Seesaw,
+    Button,
+    Spinner,
+  } from '@mathesar-components';
   import type { Constraint } from '@mathesar/stores/table-data/constraints';
   import {
     faTrash,
@@ -7,19 +13,31 @@
     faArrowLeft,
     faExclamationTriangle,
   } from '@fortawesome/free-solid-svg-icons';
-  import Button from '@mathesar/components/button/Button.svelte';
-  import { createEventDispatcher } from 'svelte';
-
-  const dispatch = createEventDispatcher();
   
   export let constraint: Constraint;
+  export let drop: () => Promise<void>;
 
   let isConfirmingDrop = false;
+  let isSubmittingDrop = false;
+  let useTransitionOut = false;
+
+  async function handleDrop() {
+    isSubmittingDrop = true;
+    useTransitionOut = true;
+    try {
+      await drop();
+    } catch (error) {
+      // TODO display toast message with error
+    } finally {
+      isSubmittingDrop = false;
+    }
+  }
   
   $: columnSummary = constraint.columns.join(', ');
+  $: transitionDuration = useTransitionOut ? 200 : 0;
 </script>
 
-<div class='table-constraint' class:isConfirmingDrop>
+<div class='table-constraint' class:isConfirmingDrop class:isSubmittingDrop>
   <Seesaw position={isConfirmingDrop ? 'left' : 'right'}>
 
     <div class='view' slot='right' >
@@ -42,7 +60,7 @@
       </div>
     </div>
 
-    <div class='confirm-drop' slot='left'>
+    <div class='confirm-drop' slot='left' out:fly={{ x: 200, duration: transitionDuration }}>
       <div class='warning-icon'><Icon data={faExclamationTriangle} size='3em'/></div>
       <div>
         <div>Drop constaint '<span class='name'>{constraint.name}</span>'?</div>
@@ -58,10 +76,15 @@
           </Button>
           <Button
             size='small'
-            on:click={() => dispatch('drop')}
+            on:click={handleDrop}
             title='Confirm drop constraint'
+            disabled={isSubmittingDrop}
           >
-            <Icon data={faCheck}/>
+            {#if isSubmittingDrop}
+              <Spinner />
+            {:else}
+              <Icon data={faCheck}/>
+            {/if}
             <span>Drop</span>
           </Button>
         </div>

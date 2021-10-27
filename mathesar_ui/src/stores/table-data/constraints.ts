@@ -1,5 +1,5 @@
 import { writable, get as getStoreValue } from 'svelte/store';
-import { getAPI, States } from '@mathesar/utils/api';
+import { deleteAPI, getAPI, States } from '@mathesar/utils/api';
 import type {
   Writable,
   Updater,
@@ -63,11 +63,17 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     return getStoreValue(this._store);
   }
 
-  async fetch(): Promise<ConstraintsData> {
-    this.update((existingData) => ({
-      ...existingData,
-      state: States.Loading,
-    }));
+  async fetch({
+    showLoading = true,
+  }: {
+    showLoading?: boolean,
+  } = {}): Promise<ConstraintsData> {
+    if (showLoading) {
+      this.update((existingData) => ({
+        ...existingData,
+        state: States.Loading,
+      }));
+    }
 
     try {
       this._promise?.cancel();
@@ -92,6 +98,10 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
       this._promise = null;
     }
     return null;
+  }
+
+  drop(constraintId: Constraint['id']): CancellablePromise<undefined> {
+    return deleteAPI(`/tables/${this._parentId}/constraints/${constraintId}`);
   }
 
   destroy(): void {
