@@ -24,43 +24,43 @@ export interface ConstraintsData {
 }
 
 export class ConstraintsDataStore implements Writable<ConstraintsData> {
-  _parentId: DBObjectEntry['id'];
+  private parentId: DBObjectEntry['id'];
 
-  _store: Writable<ConstraintsData>;
+  private store: Writable<ConstraintsData>;
 
-  _promise: CancellablePromise<PaginatedResponse<Constraint>> | null;
+  private promise: CancellablePromise<PaginatedResponse<Constraint>> | null;
 
-  _fetchCallback: (storeData: ConstraintsData) => void;
+  private fetchCallback: (storeData: ConstraintsData) => void;
 
   constructor(
     parentId: number,
     fetchCallback?: (storeData: ConstraintsData) => void,
   ) {
-    this._parentId = parentId;
-    this._store = writable({
+    this.parentId = parentId;
+    this.store = writable({
       state: States.Loading,
       constraints: [],
     });
-    this._fetchCallback = fetchCallback;
+    this.fetchCallback = fetchCallback;
     void this.fetch();
   }
 
   set(value: ConstraintsData): void {
-    this._store.set(value);
+    this.store.set(value);
   }
 
   update(updater: Updater<ConstraintsData>): void {
-    this._store.update(updater);
+    this.store.update(updater);
   }
 
   subscribe(
     run: Subscriber<ConstraintsData>,
   ): Unsubscriber {
-    return this._store.subscribe(run);
+    return this.store.subscribe(run);
   }
 
   get(): ConstraintsData {
-    return getStoreValue(this._store);
+    return getStoreValue(this.store);
   }
 
   async fetch({
@@ -76,17 +76,18 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     }
 
     try {
-      this._promise?.cancel();
-      const url = `/tables/${this._parentId}/constraints/?limit=500`;
-      this._promise = getAPI<PaginatedResponse<Constraint>>(url);
+      this.promise?.cancel();
+      const url = `/tables/${this.parentId}/constraints/?limit=500`;
+      this.promise = getAPI<PaginatedResponse<Constraint>>(url);
 
-      const response = await this._promise;
+      const response = await this.promise;
 
       const storeData: ConstraintsData = {
         state: States.Done,
         constraints: response.results,
       };
       this.set(storeData);
+      this.fetchCallback?.(storeData);
       return storeData;
     } catch (err) {
       this.set({
@@ -95,7 +96,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
         constraints: [],
       });
     } finally {
-      this._promise = null;
+      this.promise = null;
     }
     return null;
   }
@@ -105,7 +106,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
   }
 
   destroy(): void {
-    this._promise?.cancel();
-    this._promise = null;
+    this.promise?.cancel();
+    this.promise = null;
   }
 }
