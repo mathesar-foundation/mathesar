@@ -29,6 +29,7 @@
       await drop();
     } catch (error) {
       // TODO display toast message with error
+      useTransitionOut = false;
     } finally {
       isSubmittingDrop = false;
     }
