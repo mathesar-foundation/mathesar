@@ -1,4 +1,4 @@
-from sqlalchemy import Table, MetaData
+from sqlalchemy import Table, MetaData, Integer
 
 from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT_COLUMNS
@@ -33,8 +33,14 @@ def get_enriched_column_table(table, engine=None):
 
 
 def init_mathesar_table_column_list_with_defaults(column_list):
+    given_columns = []
+    for c in column_list:
+        if c.name == constants.ID:
+            c.type = Integer
+            c.primary_key = True
+            c.autoincrement = True
+        given_columns.append(MathesarColumn.from_column(c))
     default_columns = get_default_mathesar_column_list()
-    given_columns = [MathesarColumn.from_column(c) for c in column_list]
     given_column_names = [col_name.name for col_name in given_columns if col_name.name == constants.ID]
     if len(given_column_names) > 0:
         default_columns = [column for column in default_columns if column.name not in given_column_names]

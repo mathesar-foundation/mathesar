@@ -7,8 +7,11 @@ from mathesar.models import Table
 from db.records.operations.insert import insert_records_from_csv
 from db.tables.operations.create import create_string_column_table
 from db.tables.operations.select import get_oid_from_table
+from db.tables.operations.drop import drop_table
 from mathesar.errors import InvalidTableError
 from db import constants
+from psycopg2.errors import IntegrityError, DataError
+
 
 ALLOWED_DELIMITERS = ",\t:|"
 SAMPLE_SIZE = 20000
@@ -72,20 +75,6 @@ def get_sv_dialect(file):
         raise InvalidTableError
 
 
-def check_distinct_id(file):
-    with open(file, 'r', encoding='utf-8-sig') as csvfile:
-        reader = csv.DictReader(csvfile)
-        id_dict = {}
-        for row in reader:
-            if not row[constants.ID].isnumeric():
-                return False
-            if row[constants.ID] in id_dict.keys():
-                id_dict[row[constants.ID]] += 1
-            else:
-                id_dict[row[constants.ID]] = 0
-    return len(list(id_dict.keys())) == reader.line_num - 1
-
-
 def get_sv_reader(file, header, dialect=None):
     file = TextIOWrapper(file, encoding="utf-8-sig")
     if dialect:
@@ -109,27 +98,43 @@ def create_db_table_from_data_file(data_file, name, schema):
                                         data_file.escapechar)
     with open(sv_filename, 'rb') as sv_file:
         sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
-        if ((constants.ID in sv_reader.fieldnames) and (check_distinct_id(sv_filename))):
-            column_names = sv_reader.fieldnames
-        else:
-            column_names = [fieldname if fieldname != constants.ID else constants.ID_ORIGINAL for fieldname in
-                            sv_reader.fieldnames]
+        column_names = sv_reader.fieldnames
+        column_names_alt = [fieldname if fieldname != constants.ID else constants.ID_ORIGINAL for fieldname in sv_reader.fieldnames]
         table = create_string_column_table(
             name=name,
             schema=schema.name,
             column_names=column_names,
             engine=engine
         )
-    insert_records_from_csv(
-        table,
-        engine,
-        sv_filename,
-        column_names,
-        header,
-        delimiter=dialect.delimiter,
-        escape=dialect.escapechar,
-        quote=dialect.quotechar,
-    )
+    try:
+        insert_records_from_csv(
+            table,
+            engine,
+            sv_filename,
+            column_names,
+            header,
+            delimiter=dialect.delimiter,
+            escape=dialect.escapechar,
+            quote=dialect.quotechar,
+        )
+    except (IntegrityError, DataError):
+        drop_table(name=name, schema=schema.name, engine=engine)
+        table = create_string_column_table(
+            name=name,
+            schema=schema.name,
+            column_names=column_names_alt,
+            engine=engine
+        )
+        insert_records_from_csv(
+            table,
+            engine,
+            sv_filename,
+            column_names_alt,
+            header,
+            delimiter=dialect.delimiter,
+            escape=dialect.escapechar,
+            quote=dialect.quotechar,
+        )
     return table
 
 
