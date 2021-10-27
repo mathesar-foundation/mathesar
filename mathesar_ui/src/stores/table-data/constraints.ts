@@ -102,7 +102,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
   }
 
   drop(constraintId: Constraint['id']): CancellablePromise<undefined> {
-    return deleteAPI(`/tables/${this._parentId}/constraints/${constraintId}`);
+    return deleteAPI(`/tables/${this.parentId}/constraints/${constraintId}`);
   }
 
   destroy(): void {
