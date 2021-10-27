@@ -1,5 +1,6 @@
 <script lang='ts'>
   import { fly } from 'svelte/transition';
+  import type { FlyParams } from 'svelte/transition';
   import {
     Icon,
     Seesaw,
@@ -34,7 +35,9 @@
   }
   
   $: columnSummary = constraint.columns.join(', ');
-  $: transitionDuration = useTransitionOut ? 200 : 0;
+  $: transitionDuration = useTransitionOut ? 200 : 0 as number;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  $: transition = { x: 200, duration: transitionDuration } as FlyParams;
 </script>
 
 <div class='table-constraint' class:isConfirmingDrop class:isSubmittingDrop>
@@ -60,7 +63,7 @@
       </div>
     </div>
 
-    <div class='confirm-drop' slot='left' out:fly={{ x: 200, duration: transitionDuration }}>
+    <div class='confirm-drop' slot='left' out:fly={transition}>
       <div class='warning-icon'><Icon data={faExclamationTriangle} size='3em'/></div>
       <div>
         <div>Drop constaint '<span class='name'>{constraint.name}</span>'?</div>
