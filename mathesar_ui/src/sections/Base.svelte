@@ -72,9 +72,15 @@
 
 <section class="table-section">
   {#if $tabs?.length > 0}
-    <TabContainer bind:tabs={$tabs} bind:activeTab={$activeTab}
-                  allowRemoval={true} preventDefault={true} {getLink}
-                  on:tabSelected={tabSelected} on:tabRemoved={tabRemoved}>
+    <TabContainer
+      {getLink}
+      bind:tabs={$tabs}
+      bind:activeTab={$activeTab}
+      allowRemoval={true}
+      preventDefault={true}
+      on:tabSelected={tabSelected}
+      on:tabRemoved={tabRemoved}
+    >
       <span slot="tab" let:tab>
         <Icon data={faTable}/>
         <span>{tab.label}</span>

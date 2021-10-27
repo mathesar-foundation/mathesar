@@ -75,11 +75,18 @@
 <div class="tab-container" role="navigation">
   <ul role="tablist" class="tabs">
     {#each tabs as tab, index (tab[idKey] || tab)}
-      <TabComponent {componentId} {tab} {allowRemoval} totalTabs={tabs.length}
-        {getTabURL} isActive={tab[idKey] === activeTab[idKey]}
+      <TabComponent
+        {componentId}
+        {tab}
+        {allowRemoval}
+        {getTabURL}
+        totalTabs={tabs.length}
+        isActive={tab[idKey] === activeTab[idKey]}
         on:focus={focusTab} on:blur={blurTab}
-        on:click={checkAndPreventDefault} on:mousedown={(e) => selectActiveTab(e, tab)}
-        on:remove={(e) => removeTab(e, index)}>
+        on:click={checkAndPreventDefault}
+        on:mousedown={(e) => selectActiveTab(e, tab)}
+        on:remove={(e) => removeTab(e, index)}
+      >
         <slot name="tab" {tab}>
           {tab[labelKey]}
         </slot>
@@ -88,10 +95,13 @@
   </ul>
 
   <div class="tab-content-holder">
-    <div role="tabpanel" aria-hidden="false"
-          id="mtsr-{componentId}-tabpanel"
-          aria-labelledby="mtsr-{componentId}-tab"
-          tabindex="0">
+    <div
+      role="tabpanel"
+      aria-hidden="false"
+      id="mtsr-{componentId}-tabpanel"
+      aria-labelledby="mtsr-{componentId}-tab"
+      tabindex="0"
+    >
       {#if activeTab}
         <slot></slot>
       {/if}
