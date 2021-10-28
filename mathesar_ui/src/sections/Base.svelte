@@ -81,11 +81,6 @@
       on:tabSelected={tabSelected}
       on:tabRemoved={tabRemoved}
     >
-      <span slot="tab" let:tab>
-        <Icon data={faTable}/>
-        <span>{tab.label}</span>
-      </span>
-
       {#if $activeTab}
         {#if $activeTab.isNew}
           <ImportData {database} {schemaId} id={$activeTab.id}/>

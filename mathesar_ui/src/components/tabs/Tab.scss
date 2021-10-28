@@ -1,0 +1,18 @@
+li.tab {
+  >a {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+
+    label {
+      display: block;
+      flex-grow: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    * + .label {
+      margin-left: 6px;
+    }
+  }
+}

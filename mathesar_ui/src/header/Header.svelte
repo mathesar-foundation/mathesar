@@ -11,8 +11,9 @@
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
   import { newImport, importStatuses } from '@mathesar/stores/fileImports';
+  import type { MathesarTab } from '@mathesar/stores/tabs';
   import {
-    addTab,
+    addTab, makeTab,
   } from '@mathesar/stores/tabs';
 
   import {
@@ -27,17 +28,20 @@
   async function handleCreateEmptyTable() {
     const table = await createTable($currentSchemaId);
     await refetchTablesForSchema($currentSchemaId);
-    addTab($currentDBName, $currentSchemaId, { id: table.id, label: table.name });
+    addTab($currentDBName, $currentSchemaId, makeTab({ id: table.id, label: table.name }));
   }
   
   function beginDataImport() {
     if ($currentDBName && $currentSchemaId) {
       const fileData = get(newImport($currentDBName, $currentSchemaId));
-      addTab($currentDBName, $currentSchemaId, {
-        id: fileData.id,
-        label: fileData.name || 'Import data',
+      const tab: MathesarTab = {
+        ...makeTab({
+          id: fileData.id,
+          label: fileData.name || 'Import data',
+        }),
         isNew: true,
-      });
+      };
+      addTab($currentDBName, $currentSchemaId, tab);
     }
   }
 </script>

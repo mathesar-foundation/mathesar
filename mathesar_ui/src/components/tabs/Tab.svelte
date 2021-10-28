@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { Icon } from '@mathesar-components';
   import type { Tab } from './TabContainer';
 
   const dispatch = createEventDispatcher();
@@ -33,7 +34,10 @@
     on:mousedown
     on:click
   >
-    <slot></slot>
+    {#if tab.icon}
+      <Icon data={tab.icon} />
+    {/if}
+    <span class="label">{tab.label}</span>
   </a>
   {#if allowRemoval}
     <button
@@ -46,3 +50,7 @@
     </button>
   {/if}
 </li>
+
+<style global lang="scss">
+  @import "Tab.scss";
+</style>

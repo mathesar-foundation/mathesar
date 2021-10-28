@@ -21,27 +21,6 @@ section.table-section {
     bottom: 5px;
     top: 5px;
 
-    .tabs {
-      .tab {
-        >a {
-          >span {
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-
-            >span {
-              margin-left: 6px;
-              display: block;
-              flex-grow: 1;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            }
-          }
-        }
-      }
-    }
-
     .tab-content-holder {
       flex-grow: 1;
       background: #fff;

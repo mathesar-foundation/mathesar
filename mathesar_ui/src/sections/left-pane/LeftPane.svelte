@@ -1,12 +1,12 @@
 <script lang="ts">
   import { get } from 'svelte/store';
-  import { faTable } from '@fortawesome/free-solid-svg-icons';
+  import { faTable, faUpload } from '@fortawesome/free-solid-svg-icons';
   import {
     Icon,
     Tree,
   } from '@mathesar-components';
   import {
-    addTab,
+    addTab, makeTab,
   } from '@mathesar/stores/tabs';
   import {
     tables,
@@ -68,10 +68,10 @@
     const { node, originalEvent } = e.detail;
     originalEvent.preventDefault();
 
-    let newTab: MathesarTab = {
+    let newTab: MathesarTab = makeTab({
       id: node.id,
       label: node.name,
-    };
+    });
     if (node.import_verified === false) {
       const fileImport = loadIncompleteImport(database, schemaId, node);
       newTab = {

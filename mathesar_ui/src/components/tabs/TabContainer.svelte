@@ -86,11 +86,7 @@
         on:click={checkAndPreventDefault}
         on:mousedown={(e) => selectActiveTab(e, tab)}
         on:remove={(e) => removeTab(e, index)}
-      >
-        <slot name="tab" {tab}>
-          {tab[labelKey]}
-        </slot>
-      </TabComponent>
+      />
     {/each}
   </ul>
 

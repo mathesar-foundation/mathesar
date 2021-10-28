@@ -14,10 +14,10 @@ import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
 
 import type { Tab } from '@mathesar-components/types';
 import type { SchemaEntry } from '@mathesar/App';
+import { faTable } from '@fortawesome/free-solid-svg-icons';
 
 export interface MathesarTab extends Tab {
   id: unknown,
-  label: string,
 }
 
 export interface TabList {
@@ -26,6 +26,14 @@ export interface TabList {
 }
 
 const schemaMap: Map<number, TabList> = new Map();
+
+export function makeTab({ id, label }: Pick<MathesarTab, 'id' | 'label'>): MathesarTab {
+  return {
+    id,
+    label,
+    icon: faTable,
+  };
+}
 
 export function getTabsForSchema(db: string, schemaId: number): TabList {
   let schemaTabs = schemaMap.get(schemaId);
@@ -37,10 +45,10 @@ export function getTabsForSchema(db: string, schemaId: number): TabList {
       (entry) => {
         const table = tableStoreData.data.get(entry.id);
         if (table) {
-          tabTables.push({
+          tabTables.push(makeTab({
             id: entry.id,
             label: table.name,
-          });
+          }));
         } else {
           URLQueryHandler.removeTable(db, entry.id);
         }
