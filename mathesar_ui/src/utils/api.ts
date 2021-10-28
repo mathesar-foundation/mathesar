@@ -1,5 +1,5 @@
 import Cookies from 'js-cookie';
-import { CancellablePromise } from '@mathesar-components';
+import { CancellablePromise } from '@mathesar-component-library';
 
 export enum States {
   /** Before any requests have been made */

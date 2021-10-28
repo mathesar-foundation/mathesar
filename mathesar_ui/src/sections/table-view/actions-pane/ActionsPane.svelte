@@ -11,7 +11,7 @@
     faCog,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
-  import { Button, Icon, Dropdown } from '@mathesar-components';
+  import { Button, Icon, Dropdown } from '@mathesar-component-library';
   import type {
     TabularDataStore,
     TabularData,

@@ -1,4 +1,4 @@
-import type { TreeItem } from '@mathesar-components/types';
+import type { TreeItem } from '@mathesar-component-library/types';
 
 export interface Database {
   id: number,

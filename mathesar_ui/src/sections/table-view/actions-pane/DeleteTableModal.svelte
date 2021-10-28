@@ -3,7 +3,7 @@
   import {
     Button,
     Modal,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
   import type { MathesarTab } from '@mathesar/stores/tabs';
   
   export let isOpen = false;

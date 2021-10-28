@@ -6,7 +6,7 @@ import { States } from '@mathesar/utils/api';
 
 import type { Writable } from 'svelte/store';
 import type { UploadCompletionOpts, PaginatedResponse } from '@mathesar/utils/api';
-import type { FileUpload } from '@mathesar-components/types';
+import type { FileUpload } from '@mathesar-component-library/types';
 import type { CancellablePromise } from '@mathesar/components';
 import type { Database, SchemaEntry, TableEntry } from '@mathesar/App.d';
 

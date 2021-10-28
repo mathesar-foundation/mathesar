@@ -4,7 +4,7 @@
     faSortAmountDownAlt,
     faThList,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Dropdown, Icon } from '@mathesar-components';
+  import { Dropdown, Icon } from '@mathesar-component-library';
   import type {
     Meta,
     Column,
