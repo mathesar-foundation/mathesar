@@ -1,14 +1,16 @@
-import { writable, get as getStoreValue } from 'svelte/store';
+import { writable, get as getStoreValue, derived } from 'svelte/store';
 import { getAPI, States } from '@mathesar/utils/api';
 import type {
   Writable,
   Updater,
   Subscriber,
   Unsubscriber,
+  Readable,
 } from 'svelte/store';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
 import type { DBObjectEntry } from '@mathesar/App.d';
+import type { Column } from './columns';
 
 export interface Constraint {
   id: number,
@@ -93,6 +95,30 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
       this.promise = null;
     }
     return null;
+  }
+
+  /**
+   * A constraint only matches if the set of its columns strictly equals the set
+   * of columns supplied here. For example, if a constraint is set on three
+   * columns, two of which are passed to this function, that constraint will
+   * _not_ be returned.
+   */
+  constraintsThatMatchSetOfColumns(columns: Column[]): Readable<Constraint[]> {
+    const columnsNames = columns.map((c) => c.name);
+    function isMatch(constraint: Constraint) {
+      if (constraint.columns.length !== columnsNames.length) {
+        return false;
+      }
+      return constraint.columns.every(
+        (constraintColumn) => columnsNames.includes(constraintColumn),
+      );
+    }
+    return derived(this.store, (s) => s.constraints.filter(isMatch));
+  }
+
+  columnHasUniqueConstraint(column: Column): Readable<boolean> {
+    const constraints = this.constraintsThatMatchSetOfColumns([column]);
+    return derived(constraints, (c) => c.some((constraint) => constraint.type === 'unique'));
   }
 
   destroy(): void {

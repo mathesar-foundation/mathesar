@@ -5,6 +5,7 @@
     faThList,
   } from '@fortawesome/free-solid-svg-icons';
   import { Dropdown, Icon } from '@mathesar-components';
+  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/constraints';
   import type {
     Meta,
     Column,
@@ -12,14 +13,21 @@
     GroupOption,
     ColumnPosition,
   } from '@mathesar/stores/table-data/types';
+  import type { Writable } from 'svelte/store';
 
   export let columnPosition: ColumnPosition;
   export let column: Column;
   export let meta: Meta;
+  export let constraintsDataStore: ConstraintsDataStore;
+  
 
   $: ({ sort, group } = meta);
   $: sortDirection = ($sort as SortOption)?.get(column.name);
   $: hasGrouping = ($group as GroupOption)?.has(column.name);
+
+  $: allowsDuplicatesStore = constraintsDataStore
+    .columnHasUniqueConstraint(column) as Writable<boolean>;
+  $: allowsDuplicates = $allowsDuplicatesStore as boolean;
 
   function handleSort(order: 'asc' | 'desc') {
     if (sortDirection === order) {
@@ -85,6 +93,15 @@
               Group by column
             {/if}
           </span>
+        </li>
+        <li>
+          <!-- TODO: style -->
+          {#if allowsDuplicates}
+            <span>[Y]</span>
+          {:else}
+            <span>[N]</span>
+          {/if}
+          <span> Allow Duplicates</span>
         </li>
       </ul>
     </svelte:fragment>
