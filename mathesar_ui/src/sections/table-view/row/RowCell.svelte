@@ -12,6 +12,7 @@
     Display,
     RecordsData,
   } from '@mathesar/stores/table-data/types';
+import Null from '@mathesar/mathesar-components/Null.svelte';
 
   export let recordsData: RecordsData;
   export let display: Display;
@@ -100,7 +101,7 @@
     on:dblclick={() => display.editCell(row, column)}>
     {#if typeof value !== 'undefined'}
       {#if value === null}
-        <span class="empty">null</span>
+        <Null />
       {:else}
         {value}
       {/if}
