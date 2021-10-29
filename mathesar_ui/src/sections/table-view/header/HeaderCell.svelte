@@ -13,20 +13,19 @@
     GroupOption,
     ColumnPosition,
   } from '@mathesar/stores/table-data/types';
-  import type { Writable } from 'svelte/store';
 
   export let columnPosition: ColumnPosition;
   export let column: Column;
   export let meta: Meta;
   export let constraintsDataStore: ConstraintsDataStore;
-  
 
+  let isRequestingToggleAllowDuplicates = false;
+  
   $: ({ sort, group } = meta);
   $: sortDirection = ($sort as SortOption)?.get(column.name);
   $: hasGrouping = ($group as GroupOption)?.has(column.name);
 
-  $: allowsDuplicatesStore = constraintsDataStore
-    .columnHasUniqueConstraint(column) as Writable<boolean>;
+  $: allowsDuplicatesStore = constraintsDataStore.columnAllowsDuplicates(column);
   $: allowsDuplicates = $allowsDuplicatesStore as boolean;
 
   function handleSort(order: 'asc' | 'desc') {
@@ -42,6 +41,20 @@
       meta.removeGroup(column.name);
     } else {
       meta.addGroup(column.name);
+    }
+  }
+
+  async function toggleAllowDuplicates() {
+    isRequestingToggleAllowDuplicates = true;
+    try {
+      const isUnique = await constraintsDataStore.updateUniquenessOfColumn(column, (u) => !u);
+      const msg = `Column ${column.name} will ${isUnique ? 'no longer' : ''} allow duplicates.`;
+      console.log(msg); // TODO display success toast message: msg
+    } catch (error) {
+      const msg = `Unable to update "Allow Duplicates" of column ${column.name}. ${error.message as string}.`;
+      console.log(msg); // TODO display error toast message
+    } finally {
+      isRequestingToggleAllowDuplicates = false;
     }
   }
 </script>
@@ -94,7 +107,7 @@
             {/if}
           </span>
         </li>
-        <li>
+        <li on:click={toggleAllowDuplicates}>
           <!-- TODO: style -->
           {#if allowsDuplicates}
             <span>[Y]</span>

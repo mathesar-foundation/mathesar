@@ -1,5 +1,7 @@
 import { writable, get as getStoreValue, derived } from 'svelte/store';
-import { getAPI, States } from '@mathesar/utils/api';
+import {
+  deleteAPI, getAPI, postAPI, States,
+} from '@mathesar/utils/api';
 import type {
   Writable,
   Updater,
@@ -12,10 +14,12 @@ import type { CancellablePromise } from '@mathesar/components';
 import type { DBObjectEntry } from '@mathesar/App.d';
 import type { Column } from './columns';
 
+export type ConstraintType = 'foreignkey' | 'primary' | 'unique' | 'check' | 'exclude';
+
 export interface Constraint {
   id: number,
   name: string,
-  type: string,
+  type: ConstraintType,
   columns: string[],
 }
 
@@ -32,6 +36,8 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
   private promise: CancellablePromise<PaginatedResponse<Constraint>> | null;
 
+  private url: string;
+
   private fetchCallback: (storeData: ConstraintsData) => void;
 
   constructor(
@@ -43,6 +49,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
       state: States.Loading,
       constraints: [],
     });
+    this.url = `/tables/${this.parentId}/constraints/`;
     this.fetchCallback = fetchCallback;
     void this.fetch();
   }
@@ -73,7 +80,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
     try {
       this.promise?.cancel();
-      const url = `/tables/${this.parentId}/constraints/?limit=500`;
+      const url = `${this.url}?limit=500`;
       this.promise = getAPI<PaginatedResponse<Constraint>>(url);
 
       const response = await this.promise;
@@ -97,6 +104,17 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     return null;
   }
 
+  async add(constraintDetails: Partial<Constraint>): Promise<Partial<Constraint>> {
+    const constraint = await postAPI<Partial<Constraint>>(this.url, constraintDetails);
+    await this.fetch();
+    return constraint;
+  }
+
+  async remove(constraintId: number): Promise<void> {
+    await deleteAPI(`${this.url}${constraintId}`);
+    await this.fetch();
+  }
+
   /**
    * A constraint only matches if the set of its columns strictly equals the set
    * of columns supplied here. For example, if a constraint is set on three
@@ -116,9 +134,60 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     return derived(this.store, (s) => s.constraints.filter(isMatch));
   }
 
+  /**
+   * Caveat: even though primary key columns must be unique, this function will
+   * give `false` for them because they don't usually have unique constraints
+   * set too.
+   */
   columnHasUniqueConstraint(column: Column): Readable<boolean> {
     const constraints = this.constraintsThatMatchSetOfColumns([column]);
     return derived(constraints, (c) => c.some((constraint) => constraint.type === 'unique'));
+  }
+
+  columnAllowsDuplicates(column: Column): Readable<boolean> {
+    return derived(
+      this.columnHasUniqueConstraint(column),
+      (hasUniqueConstraint) => {
+        if (column.primary_key) {
+          return false;
+        }
+        return !hasUniqueConstraint;
+      },
+    );
+  }
+
+  async updateUniquenessOfColumn(
+    column: Column,
+    updater: (isUnique: boolean) => boolean,
+  ): Promise<boolean> {
+    if (column.primary_key) {
+      const currentlyIsUnique = true; // PK columns are always unique
+      const shouldBeUnique = updater(currentlyIsUnique);
+      if (!shouldBeUnique) {
+        throw new Error(`Column ${column.name} must remain unique because it is a primary key.`);
+      }
+      return true;
+    }
+
+    const uniqueConstraintsForColumn = getStoreValue(
+      this.constraintsThatMatchSetOfColumns([column]),
+    ).filter((c) => c.type === 'unique');
+    const currentlyIsUnique = uniqueConstraintsForColumn.length > 0;
+    const shouldBeUnique = updater(currentlyIsUnique);
+    if (shouldBeUnique === currentlyIsUnique) {
+      return currentlyIsUnique;
+    }
+    if (shouldBeUnique) {
+      await this.add({ type: 'unique', columns: [column.name] });
+      return true;
+    }
+    // Technically, one column can have two unique constraints applied on it,
+    // with different names. So we need to make sure do delete _all_ of them.
+    // TODO address problem with concurrent fetching in `remove`
+    await Promise.all(uniqueConstraintsForColumn.map(
+      (constraint) => this.remove(constraint.id),
+    ));
+    return false;
   }
 
   destroy(): void {
