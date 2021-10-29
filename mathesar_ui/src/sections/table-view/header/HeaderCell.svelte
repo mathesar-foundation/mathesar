@@ -3,8 +3,9 @@
     faSortAmountDown,
     faSortAmountDownAlt,
     faThList,
+    faSpinner,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Dropdown, Icon } from '@mathesar-components';
+  import { Checkbox, Dropdown, Icon } from '@mathesar-components';
   import type { ConstraintsDataStore } from '@mathesar/stores/table-data/constraints';
   import type {
     Meta,
@@ -18,8 +19,9 @@
   export let column: Column;
   export let meta: Meta;
   export let constraintsDataStore: ConstraintsDataStore;
-
+  
   let isRequestingToggleAllowDuplicates = false;
+  let menuIsOpen = false;
   
   $: ({ sort, group } = meta);
   $: sortDirection = ($sort as SortOption)?.get(column.name);
@@ -28,12 +30,17 @@
   $: allowsDuplicatesStore = constraintsDataStore.columnAllowsDuplicates(column);
   $: allowsDuplicates = $allowsDuplicatesStore as boolean;
 
+  function closeMenu() {
+    menuIsOpen = false;
+  }
+  
   function handleSort(order: 'asc' | 'desc') {
     if (sortDirection === order) {
       meta.removeSort(column.name);
     } else {
       meta.addUpdateSort(column.name, order);
     }
+    closeMenu();
   }
 
   function toggleGroup() {
@@ -42,16 +49,18 @@
     } else {
       meta.addGroup(column.name);
     }
+    closeMenu();
   }
 
   async function toggleAllowDuplicates() {
     isRequestingToggleAllowDuplicates = true;
     try {
       const isUnique = await constraintsDataStore.updateUniquenessOfColumn(column, (u) => !u);
-      const msg = `Column ${column.name} will ${isUnique ? 'no longer' : ''} allow duplicates.`;
+      const msg = `Column "${column.name}" will ${isUnique ? 'no longer ' : ''}allow duplicates.`;
       console.log(msg); // TODO display success toast message: msg
+      closeMenu();
     } catch (error) {
-      const msg = `Unable to update "Allow Duplicates" of column ${column.name}. ${error.message as string}.`;
+      const msg = `Unable to update "Allow Duplicates" of column "${column.name}". ${error.message as string}.`;
       console.log(msg); // TODO display error toast message
     } finally {
       isRequestingToggleAllowDuplicates = false;
@@ -72,9 +81,12 @@
   </span>
   <span class="name">{column.name}</span>
 
-  <Dropdown closeOnInnerClick={true}
-            triggerClass="opts" triggerAppearance="plain"
-            contentClass="table-opts-content">
+  <Dropdown
+    triggerClass="opts"
+    triggerAppearance="plain"
+    contentClass="table-opts-content"
+    bind:isOpen={menuIsOpen}
+  >
     <svelte:fragment slot="content">
       <ul>
         <li on:click={() => handleSort('asc')}>
@@ -107,14 +119,17 @@
             {/if}
           </span>
         </li>
+        <!--
+          TODO Once we have a DropdownMenu component, make this option
+          disabled if the column is a primary key.
+        -->
         <li on:click={toggleAllowDuplicates}>
-          <!-- TODO: style -->
-          {#if allowsDuplicates}
-            <span>[Y]</span>
+          {#if isRequestingToggleAllowDuplicates}
+            <Icon class="opt" data={faSpinner} spin={true}/>
           {:else}
-            <span>[N]</span>
+            <span class="opt"><Checkbox checked={allowsDuplicates} /></span>
           {/if}
-          <span> Allow Duplicates</span>
+          <span>Allow Duplicates</span>
         </li>
       </ul>
     </svelte:fragment>
