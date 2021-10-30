@@ -43,6 +43,14 @@ jobs:
           cd .github/actions/project_update/
           python project_update.py ${{ github.event.issue.node_id }} --status Blocked
 
+      - name: Update Waiting issues
+        if: "${{ contains(github.event.issue.labels.*.name, 'status: waiting') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.issue.node_id }} --status Blocked
+
       - name: Update Ready issues
         if: "${{ contains(github.event.issue.labels.*.name, 'status: ready') }}"
         env:
