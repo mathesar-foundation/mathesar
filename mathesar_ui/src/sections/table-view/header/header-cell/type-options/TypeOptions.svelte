@@ -1,51 +1,55 @@
 <script lang="ts">
+  import { createEventDispatcher, getContext } from 'svelte';
+  import {
+    currentDBMathesarTypes,
+    getMathesarTypeIcon,
+    getValidDbTypeTargetsPerMathesarType,
+    mathesarTypeHasAtLeastOneValidDbTypeTarget,
+    determineMathesarType,
+  } from '@mathesar/stores/mathesarTypes';
+  import { Button } from '@mathesar-components';
+
+  import type {
+    Column,
+    ColumnsDataStore,
+    TabularData,
+    TabularDataStore,
+  } from '@mathesar/stores/table-data/types';
   import type {
     MathesarType,
     DbTypeTargetsPerMathesarType,
   } from '@mathesar/stores/mathesarTypes';
-  import {
-    getMathesarTypeIcon,
-    getValidDbTypeTargetsPerMathesarType,
-    mathesarTypeHasAtLeastOneValidDbTypeTarget,
-    patchColumnToMathesarType,
-    determineMathesarType,
-  } from '@mathesar/stores/mathesarTypes';
-  import type { TableColumn } from '@mathesar/stores/tableData';
-  import { Button } from '@mathesar-components';
-  import { isDefined } from '@mathesar/utils/language';
-  import { createEventDispatcher } from 'svelte';
 
-  export let mathesarTypes: MathesarType[];
-  export let tableId: number;
-  export let column: TableColumn;
-  export let isOpen: boolean;
-  export let isDataTypeOptionsOpen: boolean;
+  const dispatch = createEventDispatcher();
 
-  $: columnId = column.index;
+  const tabularData = getContext<TabularDataStore>('tabularData');
+  let columnsDataStore: ColumnsDataStore;
+  $: ({ columnsDataStore } = $tabularData as TabularData);
+
+  export let column: Column;
 
   let columnMathesarType: MathesarType;
   $: {
-    if (mathesarTypes && column) {
-      columnMathesarType = determineMathesarType(mathesarTypes, column.type);
+    if ($currentDBMathesarTypes && column) {
+      columnMathesarType = determineMathesarType($currentDBMathesarTypes, column.type);
     }
   }
 
-
   let validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType | undefined;
   $: {
-    if (mathesarTypes) {
+    if ($currentDBMathesarTypes) {
       // eslint-disable-next-line operator-linebreak
       validDbTypeTargetsPerMathesarType =
-        getValidDbTypeTargetsPerMathesarType(column, mathesarTypes);
+        getValidDbTypeTargetsPerMathesarType(column, $currentDBMathesarTypes);
     }
   }
 
   let validMathesarTypeTargets: MathesarType[] | undefined;
   $: {
-    if (mathesarTypes && validDbTypeTargetsPerMathesarType) {
+    if ($currentDBMathesarTypes && validDbTypeTargetsPerMathesarType) {
       // eslint-disable-next-line operator-linebreak
       validMathesarTypeTargets =
-        mathesarTypes
+        $currentDBMathesarTypes
           .filter(
             (mt: MathesarType) =>
               // eslint-disable-next-line implicit-arrow-linebreak
@@ -64,43 +68,15 @@
     selectedMathesarType = undefined;
   }
 
-  function closeDropdown() {
+  function close() {
     resetSelection();
-    isOpen = false;
-    isDataTypeOptionsOpen = false;
+    dispatch('close');
   }
-
-  function onCancel() {
-    closeDropdown();
-  }
-
-  const dispatch = createEventDispatcher();
 
   function onSave() {
-    patchColumnToMathesarType(
-      dispatch,
-      tableId,
-      columnId,
-      validDbTypeTargetsPerMathesarType,
-      selectedMathesarType,
-    );
-    closeDropdown();
+    // void columnsDataStore.patchType(column.index, selectedMathesarType);
+    close();
   }
-
-  let isMathesarTypeSelected: boolean;
-  let shouldSavingBeDisabled: boolean;
-  $: {
-    isMathesarTypeSelected = isDefined(selectedMathesarType);
-    shouldSavingBeDisabled = !isMathesarTypeSelected;
-  }
-
-  function isNotAnIdentityConversion(
-    a: MathesarType,
-    b: MathesarType,
-  ): boolean {
-    return a !== b;
-  }
-
 </script>
 
 <div class="container">
@@ -108,12 +84,11 @@
   <span class="title">Set Column Type</span>
   <ul class="type-list">
     {#each validMathesarTypeTargets as mathesarType (mathesarType.identifier)}
-      {#if isNotAnIdentityConversion(mathesarType, columnMathesarType)}
+      {#if mathesarType !== columnMathesarType}
         <li>
-          <!-- TODO is button the right semantic element? -->
           <button
-            on:click={ () => selectMathesarType(mathesarType) }
-            selected={ selectedMathesarType === mathesarType }
+            on:click={() => selectMathesarType(mathesarType)}
+            selected={selectedMathesarType === mathesarType}
           >
             <div>
               <span class="data-icon">{getMathesarTypeIcon(mathesarType)}</span>
@@ -130,10 +105,10 @@
   <span><i>Placeholder for type options</i></span>
   <div class="divider"></div>
   <div class="button-row">
-    <Button appearance="secondary" on:click={onCancel}>
+    <Button appearance="secondary" on:click={close}>
       Cancel
     </Button>
-    <Button appearance="primary" disabled={shouldSavingBeDisabled} on:click={onSave}>
+    <Button appearance="primary" disabled={!selectedMathesarType} on:click={onSave}>
       Save
     </Button>
   </div>

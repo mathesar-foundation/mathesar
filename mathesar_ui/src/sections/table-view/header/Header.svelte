@@ -15,10 +15,9 @@
     Meta,
   } from '@mathesar/stores/table-data/types';
   import HeaderCell from './header-cell/HeaderCell.svelte';
-  import NewColumnCell from './NewColumnCell.svelte';
+  import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  let id: TabularData['id'];
   let columnsDataStore: ColumnsDataStore;
   let display: Display;
   let meta: Meta;
@@ -75,7 +74,7 @@
   </div>
 
   {#each $columnsDataStore.columns as column (column.name)}
-    <HeaderCell tabularEntityId={id} {column} {meta}
+    <HeaderCell {column} {meta}
       columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
   {/each}
 

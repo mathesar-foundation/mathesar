@@ -1,5 +1,10 @@
 import { writable, get as getStoreValue } from 'svelte/store';
-import { States, getAPI, postAPI } from '@mathesar/utils/api';
+import {
+  States,
+  getAPI,
+  postAPI,
+  patchAPI,
+} from '@mathesar/utils/api';
 import { TabularType } from '@mathesar/App.d';
 import type {
   Writable,
@@ -154,6 +159,18 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
   async add(newColumn: Partial<Column>): Promise<Partial<Column>> {
     const column = await postAPI<Partial<Column>>(this.url, newColumn);
     await this.fetch();
+    return column;
+  }
+
+  // TODO: Analyze: Might be cleaner to make this a property of Column class
+  // but are the object instantiations worth it?
+  async patchType(columnIndex: Column['index'], type: string): Promise<Partial<Column>> {
+    const column = await patchAPI<Partial<Column>>(
+      `${this.url}${columnIndex}/`,
+      { type },
+    );
+    await this.fetch();
+    this.callListeners('columnPatched', column);
     return column;
   }
 
