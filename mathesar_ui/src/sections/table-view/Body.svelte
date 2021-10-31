@@ -1,111 +1,94 @@
 <script lang="ts">
+  import { getContext, tick } from 'svelte';
+  import { get } from 'svelte/store';
   import type {
-    TableColumnData,
+    TabularDataStore,
+    TabularData,
+    Display,
+    RecordsData,
     TableRecord,
-    ColumnPosition,
-    GroupIndex,
-    GroupData,
-  } from '@mathesar/stores/tableData';
-  import {
-    GROUP_ROW_HEIGHT,
-    DEFAULT_ROW_RIGHT_PADDING,
-    GROUP_MARGIN_LEFT,
-  } from '@mathesar/stores/tableData';
+  } from '@mathesar/stores/table-data/types';
+
   import Row from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
 
-  export let id: number;
-  export let columns: TableColumnData;
-  export let data: TableRecord[];
-  export let groupData: GroupData;
-  export let columnPosition: ColumnPosition;
-  export let scrollOffset = 0;
-  export let horizontalScrollOffset = 0;
-  export let groupIndex: GroupIndex;
-  export let selected: Record<string | number, boolean>;
-
-  let rowWidth: number;
-  let widthWithPadding: number;
-  $: rowWidth = columnPosition?.get('__row')?.width || null;
-  $: widthWithPadding = rowWidth ? rowWidth + DEFAULT_ROW_RIGHT_PADDING : null;
-  $: totalWidth = widthWithPadding ? widthWithPadding + GROUP_MARGIN_LEFT : null;
-
-  // Be careful while accessing this ref.
-  // Resizer may not have created it yet/destroyed it
+  const tabularData = getContext<TabularDataStore>('tabularData');
+  let id: TabularData['id'];
+  let recordsData: RecordsData;
+  let display: Display;
   let virtualListRef: VirtualList;
+  let displayableRecords: Display['displayableRecords'];
+  let newRecords: RecordsData['newRecords'];
+  $: ({ id, recordsData, display } = $tabularData as TabularData);
+  $: ({ newRecords } = recordsData);
+  $: ({
+    rowWidth, horizontalScrollOffset, displayableRecords,
+  } = display);
 
-  function onGroupIndexChange(_groupIndex: GroupIndex) {
-    if (!_groupIndex.bailOutOnReset && _groupIndex.latest !== _groupIndex.previous) {
-      // eslint-disable-next-line no-param-reassign
-      _groupIndex.previous = _groupIndex.latest;
+  let previousNewRecordsCount = 0;
 
-      if (virtualListRef) {
+  async function resetIndex(_displayableRecords: TableRecord[]) {
+    const allRecordLength = _displayableRecords?.length;
+    const newRecordLength = get(newRecords)?.length || 0;
+    if (allRecordLength && previousNewRecordsCount !== newRecordLength) {
+      const index = Math.max(allRecordLength - newRecordLength - 3, 0);
+      await tick();
+      if (previousNewRecordsCount < newRecordLength) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        virtualListRef.resetAfterIndex(_groupIndex.latest);
+        virtualListRef?.scrollToBottom();
       }
+      previousNewRecordsCount = newRecordLength;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      virtualListRef?.resetAfterIndex(index);
     }
   }
 
-  $: onGroupIndexChange(groupIndex);
+  $: void resetIndex($displayableRecords);
+
+  let bodyRef: HTMLDivElement;
 
   function getItemSize(index: number) {
     const defaultRowHeight = 30;
-    if (data[index]?.__groupInfo) {
-      return GROUP_ROW_HEIGHT + defaultRowHeight;
+    const allRecords = get(displayableRecords);
+    if (allRecords?.[index]?.__isNewHelpText) {
+      return 24;
     }
+
+    // TODO: Check and set extra height for group. Needs UX rethought.
     return defaultRowHeight;
   }
 
-  function getItemKey(index: number): number | string {
-    // Check and return primary key
-    // Return index by default
-    return `__index_${index}`;
-  }
-
-  export function reloadPositions(resetPositions: boolean): void {
-    if (virtualListRef) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      virtualListRef.scrollToPosition(0, 0);
-      if (resetPositions) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        virtualListRef.resetAfterIndex(0);
-      }
+  function checkAndResetActiveCell(event: Event) {
+    if (!bodyRef.contains(event.target as HTMLElement)) {
+      display.resetActiveCell();
     }
   }
 </script>
 
-<div class="body">
+<svelte:window
+  on:keydown={checkAndResetActiveCell}
+  on:mousedown={checkAndResetActiveCell}/>
+
+<div bind:this={bodyRef} class="body" tabindex="-1">
   <Resizer let:height>
     {#key id}
       <VirtualList
         bind:this={virtualListRef}
-        bind:scrollOffset
-        bind:horizontalScrollOffset
+        bind:horizontalScrollOffset={$horizontalScrollOffset}
         {height}
-        width={totalWidth || null}
-        itemCount={data.length}
-        paddingBottom={100}
+        width={$rowWidth}
+        itemCount={$displayableRecords.length}
+        paddingBottom={20}
         itemSize={getItemSize}
-        itemKey={getItemKey}
-        on:refetch
+        itemKey={(index) => recordsData.getIterationKey(index)}
         let:items
         >
         {#each items as it (it?.key || it)}
-          {#if it}
-            <Row {columns} style={it.style}
-                  row={data[it.index] || {}}
-                  index={it.index}
-                  {groupData}
-                  isGrouped={!!groupData}
-                  {columnPosition}
-                  bind:selected/>
+          {#if it && $displayableRecords[it.index]}
+            <Row style={it.style} bind:row={$displayableRecords[it.index]}/>
           {/if}
         {/each}
-
-        {#if groupData}
-          <div class="group-padding"></div>
-        {/if}
       </VirtualList>
     {/key}
   </Resizer>

@@ -1,87 +1,95 @@
 <script lang="ts">
-  import type {
-    TableColumnData,
-    ColumnPosition,
-    TableRecord,
-    GroupData,
-  } from '@mathesar/stores/tableData';
+  import { getContext } from 'svelte';
   import {
-    GROUP_ROW_HEIGHT,
-    GROUP_MARGIN_LEFT,
-    DEFAULT_ROW_RIGHT_PADDING,
-  } from '@mathesar/stores/tableData';
-  import GroupHeader from './GroupHeader.svelte';
+    getModificationState,
+  } from '@mathesar/stores/table-data';
+  import type {
+    ColumnPosition,
+    ColumnPositionMap,
+    TabularDataStore,
+    TabularData,
+    TableRecord,
+    Column,
+    RecordsData,
+    ColumnsDataStore,
+  } from '@mathesar/stores/table-data/types';
   import RowControl from './RowControl.svelte';
+  import RowCell from './RowCell.svelte';
+  import GroupHeader from './GroupHeader.svelte';
+  import RowPlaceholder from './RowPlaceholder.svelte';
 
-  export let index: number;
-  export let columns: TableColumnData;
   export let row: TableRecord;
-  export let isGrouped = false;
-  export let columnPosition: ColumnPosition;
   export let style: { [key: string]: string | number };
-  export let groupData: GroupData;
-  export let selected: Record<string | number, boolean>;
+
+  const tabularData = getContext<TabularDataStore>('tabularData');
+  let recordsData: RecordsData;
+  let columnsDataStore: ColumnsDataStore;
+  $: ({
+    recordsData, columnsDataStore, meta, display,
+  } = $tabularData as TabularData);
+  $: ({ columnPositionMap } = display as TabularData['display']);
+  $: ({ selectedRecords, recordModificationState } = meta as TabularData['meta']);
+  $: ({ groupInfo } = recordsData);
 
   function calculateStyle(
     _style: { [key: string]: string | number },
-    _columnPosition: ColumnPosition,
-    _isGrouped = false,
-    isGroupHeaderRow = false,
+    _columnPositionMap: ColumnPositionMap,
   ) {
     if (!_style) {
-      return {};
+      return '';
     }
-    const totalWidth = _columnPosition.get('__row').width;
-    const left = _isGrouped ? _style.left as number + GROUP_MARGIN_LEFT : _style.left;
-
-    const styleStr = `position:${_style.position};left:${left}px`;
-
-    if (isGrouped && isGroupHeaderRow) {
-      const top = _style.top as number;
-      const height = _style.height as number;
-      return {
-        group: `${styleStr};top:${top + 25}px;height:${GROUP_ROW_HEIGHT - 25}px;`
-                + `width:${totalWidth}px`,
-        default: `${styleStr};top:${top + GROUP_ROW_HEIGHT}px;`
-                  + `height:${height - GROUP_ROW_HEIGHT}px;`
-                  + `width:${totalWidth + DEFAULT_ROW_RIGHT_PADDING}px`,
-      };
-    }
-
-    return {
-      default: `${styleStr};top:${_style.top}px;height:${_style.height}px;`
-                + `width:${totalWidth + DEFAULT_ROW_RIGHT_PADDING}px`,
-    };
+    const totalWidth = _columnPositionMap.get('__row')?.width || 0;
+    return `position:${_style.position};left:${_style.left}px;`
+      + `top:${_style.top}px;height:${_style.height}px;`
+      + `width:${totalWidth}px`;
   }
 
   $: styleString = calculateStyle(
     style,
-    columnPosition,
-    isGrouped,
-    !!row.__groupInfo,
+    $columnPositionMap,
   );
 
-  $: isSelected = selected[row?.[columns?.primaryKey] as string] || false;
+  function getColumnPosition(
+    _columnPositionMap: ColumnPositionMap,
+    _name: Column['name'],
+  ): ColumnPosition {
+    return _columnPositionMap.get(_name);
+  }
+
+  $: isSelected = ($selectedRecords as Set<unknown>).has(row[$columnsDataStore.primaryKey]);
+  $: modificationState = getModificationState(
+    $recordModificationState,
+    row,
+    $columnsDataStore.primaryKey,
+  );
+  $: rowWidth = getColumnPosition($columnPositionMap, '__row')?.width || 0;
+
+  function checkAndCreateEmptyRow() {
+    if (row.__isAddPlaceholder) {
+      void recordsData.createOrUpdateRecord(row);
+    }
+  }
 </script>
 
-{#if groupData && row.__groupInfo}
-  <GroupHeader style={styleString.group} {row} {groupData}/>
-{/if}
+<div class="row {row.__state} {modificationState || ''}" class:selected={isSelected}
+      class:is-group-header={row.__isGroupHeader} class:is-add-placeholder={row.__isAddPlaceholder}
+      style={styleString} data-identifier={row.__identifier}
+      on:mousedown={checkAndCreateEmptyRow}>
+  {#if row.__isNewHelpText}
+    <RowPlaceholder {rowWidth}/>
+  {:else if row.__isGroupHeader}
+    <GroupHeader {row} {rowWidth} groupColumns={$groupInfo.columns} groupCounts={$groupInfo.counts}/>
+  {:else}
+    <RowControl primaryKeyColumn={$columnsDataStore.primaryKey}
+                {row} {meta} recordsData={recordsData}/>
 
-<div class="row {row.__state || ''}" class:in-group={isGrouped} class:selected={isSelected}
-      style={styleString.default}>
-  <RowControl {index} {isGrouped} primaryKey={columns.primaryKey}
-              {row} bind:selected/>
-
-  {#each columns.data as column (column.name)}
-    <div class="cell" style="
-      width:{columnPosition.get(column.name).width}px;
-      left:{columnPosition.get(column.name).left}px;">
-      {typeof row[column.name] !== 'undefined' ? row[column.name] : ''}
-
-      {#if !row.__state || row.__state === 'loading'}
-        <div class="loader"></div>
-      {/if}
-    </div>
-  {/each}
+    {#each $columnsDataStore.columns as column (column.name)}
+      <RowCell {display} {row} bind:value={row[column.name]} {column} recordsData={recordsData}
+        columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
+    {/each}
+  {/if}
 </div>
+ 
+<style global lang="scss">
+  @import "Row.scss";
+</style>

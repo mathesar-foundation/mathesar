@@ -1,85 +1,193 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  import type {
-    TableColumnStore,
-    TableRecordStore,
-    TableOptionsStore,
-  } from '@mathesar/stores/tableData';
+  import { createEventDispatcher, getContext } from 'svelte';
   import {
     faFilter,
     faSort,
     faListAlt,
     faTrashAlt,
+    faSync,
+    faExclamationTriangle,
+    faPlus,
+    faCog,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
-  import { Button, Icon } from '@mathesar-components';
+  import { Button, Icon, Dropdown } from '@mathesar-components';
+  import type {
+    TabularDataStore,
+    TabularData,
+    RecordsData,
+    ColumnsDataStore,
+    ColumnsData,
+    Meta,
+  } from '@mathesar/stores/table-data/types';
+  import type { SelectOption } from '@mathesar/components/types';
+  import { refreshTableContent } from '@mathesar/stores/table-data/store';
+  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/constraints';
+  import TableConstraints from '../constraints/TableConstraints.svelte';
+  import DisplayFilter from '../display-options/DisplayFilter.svelte';
+  import DisplaySort from '../display-options/DisplaySort.svelte';
+  import DisplayGroup from '../display-options/DisplayGroup.svelte';
 
   const dispatch = createEventDispatcher();
+  
+  const tabularData = getContext<TabularDataStore>('tabularData');
+  
+  function getColumnOptions(columnsData: ColumnsData): SelectOption<string>[] {
+    return columnsData?.columns?.map((column) => ({
+      id: column.name,
+      label: column.name,
+    })) || [];
+  }
 
-  export let columns: TableColumnStore;
-  export let records: TableRecordStore;
-  export let options: TableOptionsStore;
+  let recordsData: RecordsData;
+  let columnsDataStore: ColumnsDataStore;
+  let constraintsDataStore: ConstraintsDataStore;
+  let meta: Meta;
+  let recordState: RecordsData['state'];
+  let isTableConstraintsModalOpen = false;
 
-  export let selectedEntries: string[];
+  $: ({
+    columnsDataStore, recordsData, meta, constraintsDataStore,
+  } = $tabularData as TabularData);
+  $: ({
+    filter, sort, group, selectedRecords, combinedModificationState,
+  } = meta);
+  $: ({ state: recordState } = recordsData);
 
-  function openDisplayOptions() {
-    dispatch('openDisplayOptions');
+  $: isLoading = $columnsDataStore.state === States.Loading
+    || $recordState === States.Loading
+    || $constraintsDataStore.state === States.Loading;
+  $: isError = $columnsDataStore.state === States.Error
+    || $recordState === States.Error
+    || $constraintsDataStore.state === States.Error;
+  $: columnOptions = getColumnOptions($columnsDataStore);
+
+  function refresh() {
+    void refreshTableContent($tabularData.id);
   }
 </script>
 
 <div class="actions-pane">
-  <Button appearance="plain" on:click={openDisplayOptions}>
-    <Icon data={faFilter} size="0.8em"/>
+  <Dropdown
+    closeOnInnerClick={true}
+    triggerClass="opts"
+    contentClass="table-opts-content"
+    ariaLabel="Table Actions"
+  >
+    <svelte:fragment slot="trigger">
+      <Icon data={faCog}/>
+      Table
+    </svelte:fragment>
+    <svelte:fragment slot="content">
+      <ul>
+        <li class="item" on:click={() => dispatch('deleteTable')}>
+          Delete
+        </li>
+        <li class="item" on:click={() => { isTableConstraintsModalOpen = true; }}>
+          Constraints
+        </li>
+      </ul>
+    </svelte:fragment>
+  </Dropdown>
+
+  <TableConstraints bind:isOpen={isTableConstraintsModalOpen} />
+
+  <div class="divider"/>
+
+  <Dropdown showArrow={false}>
+    <svelte:fragment slot="trigger">
+      <Icon data={faFilter} size="0.8em"/>
+      <span>
+        Filters
+        {#if $filter?.filters?.length > 0}
+          ({$filter?.filters?.length})
+        {/if}
+      </span>
+    </svelte:fragment>
+    <svelte:fragment slot="content">
+      <DisplayFilter options={columnOptions} {meta}/>
+    </svelte:fragment>
+  </Dropdown>
+
+  <Dropdown showArrow={false}>
+    <svelte:fragment slot="trigger">
+      <Icon data={faSort}/>
+      <span>
+        Sort
+        {#if $sort?.size > 0}
+          ({$sort?.size})
+        {/if}
+      </span>
+    </svelte:fragment>
+    <svelte:fragment slot="content">
+      <DisplaySort options={columnOptions} {meta}/>
+    </svelte:fragment>
+  </Dropdown>
+
+  <Dropdown showArrow={false}>
+    <svelte:fragment slot="trigger">
+      <Icon data={faListAlt}/>
+      <span>
+        Group
+        {#if $group?.size > 0}
+          ({$group?.size})
+        {/if}
+      </span>
+    </svelte:fragment>
+    <svelte:fragment slot="content">
+      <DisplayGroup options={columnOptions} {meta}/>
+    </svelte:fragment>
+  </Dropdown>
+
+  <div class="divider"/>
+
+  <Button size="small" on:click={() => recordsData.addEmptyRecord()}>
+    <Icon data={faPlus}/>
     <span>
-      Filters
-      {#if $options.filter?.filters?.length > 0}
-        ({$options.filter?.filters?.length})
-      {/if}
+      New Record
     </span>
   </Button>
 
-  <Button appearance="plain" on:click={openDisplayOptions}>
-    <Icon data={faSort}/>
-    <span>
-      Sort
-      {#if $options.sort?.size > 0}
-        ({$options.sort?.size})
-      {/if}
-    </span>
-  </Button>
-
-  <Button appearance="plain" on:click={openDisplayOptions}>
-    <Icon data={faListAlt}/>
-    <span>
-      Group
-      {#if $options.group?.size > 0}
-        ({$options.group?.size})
-      {/if}
-    </span>
-  </Button>
-
-  {#if selectedEntries.length > 0}
-    <Button appearance="plain" on:click={() => dispatch('deleteRecords')}>
+  {#if $selectedRecords.size > 0}
+    <Button size="small" on:click={() => recordsData.deleteSelected()}>
       <Icon data={faTrashAlt}/>
       <span>
-        Delete {selectedEntries.length} records
+        Delete {$selectedRecords.size} records
       </span>
     </Button>
   {/if}
 
+  {#if $combinedModificationState !== 'idle'}
+    <div class="divider"/>
+    <div class="save-status">
+      {#if $combinedModificationState === 'inprocess'}
+        Saving changes
+      {:else if $combinedModificationState === 'error'}
+        <span class="error">! Couldn't save changes</span>
+      {:else if $combinedModificationState === 'complete'}
+        All changes saved
+      {/if}
+    </div>
+  {/if}
+
   <div class="loading-info">
-    {#if $columns.state === States.Loading}
-      | Loading table
-
-    {:else if $columns.state === States.Error}
-      | Error in loading table: {$columns.error}
-    {/if}
-
-    {#if $records.state === States.Loading}
-      | Loading records
-
-    {:else if $records.state === States.Error}
-      | Error in loading records: {$records.error}
-    {/if}
+    <Button size="small" disabled={isLoading} on:click={refresh}>
+      <Icon data={
+        isError && !isLoading ? faExclamationTriangle : faSync
+      } spin={isLoading}/>
+      <span>
+        {#if isLoading}
+          Loading
+        {:else if isError}
+          Retry
+        {:else}
+          Refresh
+        {/if}
+      </span>
+    </Button>
   </div>
 </div>
+
+<style global lang="scss">
+  @import "ActionsPane.scss";
+</style>

@@ -40,7 +40,7 @@
   export let height: Props['height'];
   export let scrollOffset: Props['scrollOffset'] = 0;
   export let itemCount: Props['itemCount'];
-  export let overscanCount: Props['overscanCount'] = 5;
+  export let overscanCount: Props['overscanCount'] = 2;
   export let itemSize: Props['itemSize'] = () : number => estimatedItemSize;
   export let paddingBottom = 0;
   export let horizontalScrollOffset = 0;
@@ -60,7 +60,6 @@
   let estimatedTotalSize: number;
 
   let outerRef: HTMLElement;
-  let innerRef;
 
   let requestResetIsScrolling = false;
   let resetIsScrollingTimeoutId = null;
@@ -243,13 +242,20 @@
       }
     }
   }
+
+  export function scrollToBottom(): void {
+    if (outerRef && psRef) {
+      outerRef.scrollTop = outerRef.scrollHeight;
+      psRef.update();
+    }
+  }
 </script>
 
 <div
   class={outerClass}
   style="height:{height}px;width:100%;direction:ltr;"
   bind:this={outerRef}>
-  <div bind:this={innerRef} style={innerStyle}>
+  <div style={innerStyle}>
       <slot {items} />
   </div>
 </div>

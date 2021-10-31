@@ -1,191 +1,86 @@
 <script lang="ts">
-  import { get } from 'svelte/store';
-  import {
-    getTable,
-    fetchTableRecords,
-    fetchTableDetails,
-    deleteRecords,
-  } from '@mathesar/stores/tableData';
-  import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
+  import { setContext } from 'svelte';
+  import { writable } from 'svelte/store';
+  import { getTableContent } from '@mathesar/stores/table-data';
+  import { currentSchemaId, getSchemaInfo } from '@mathesar/stores/schemas';
+  import { currentDBName } from '@mathesar/stores/databases';
+  import { getActiveTabValue, removeTab } from '@mathesar/stores/tabs';
   import type {
-    TableColumnStore,
-    TableRecordStore,
-    TableOptionsStore,
-    TableDisplayStores,
-  } from '@mathesar/stores/tableData';
+    TabularData,
+    ColumnsDataStore,
+  } from '@mathesar/stores/table-data/types';
+  import {
+    refetchTablesForSchema,
+    deleteTable,
+  } from '@mathesar/stores/tables';
+  import type { MathesarTab } from '@mathesar/stores/tabs';
+  // import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
+
   import ActionsPane from './actions-pane/ActionsPane.svelte';
-  import DisplayOptions from './display-options/DisplayOptions.svelte';
+  import DeleteTableModal from './actions-pane/DeleteTableModal.svelte';
   import Header from './header/Header.svelte';
   import Body from './Body.svelte';
   import StatusPane from './status-pane/StatusPane.svelte';
-  import type { ItemInfo } from './virtual-list/listUtils';
+
+  const tabularData = writable(null as TabularData);
+  setContext('tabularData', tabularData);
 
   export let database: string;
   export let id: unknown;
   $: identifier = id as number;
 
-  /**
-   * idKey is only modified after table display properties
-   * are set.
-   *
-   * It is used for recreating the virtual list instance, so
-   * it should only be set in the same tick as the required
-   * props for virtual list.
-   */
-  let idKey = id as number;
+  let columnsDataStore: ColumnsDataStore;
 
-  let columns: TableColumnStore;
-  let records: TableRecordStore;
-  let options: TableOptionsStore;
-  let tableBodyRef: Body;
-
-  let columnPosition: TableDisplayStores['columnPosition'];
-  let horizontalScrollOffset: TableDisplayStores['horizontalScrollOffset'];
-  let scrollOffset: TableDisplayStores['scrollOffset'];
-  let groupIndex: TableDisplayStores['groupIndex'];
-  let showDisplayOptions: TableDisplayStores['showDisplayOptions'];
-  let selected: TableDisplayStores['selected'];
-
-  let animateOpts = false;
-
-  $: selectedEntries = Object.keys($selected || []).filter(
-    (key) => $selected?.[key],
-  );
+  // let tableBodyRef: Body;
+  let isModalOpen = false;
+  let activeTab: MathesarTab;
 
   function setStores(_database: string, _id: number) {
-    const opts = URLQueryHandler.getTableConfig(_database, _id);
-    const table = getTable(_database, _id, opts);
-    columns = table.columns;
-    records = table.records;
-    options = table.options;
-
-    columnPosition = table.display.columnPosition;
-    horizontalScrollOffset = table.display.horizontalScrollOffset;
-    scrollOffset = table.display.scrollOffset;
-    groupIndex = table.display.groupIndex;
-    showDisplayOptions = table.display.showDisplayOptions;
-    selected = table.display.selected;
-
-    animateOpts = false;
-    idKey = _id;
+    // const opts = URLQueryHandler.getTableConfig(_database, _id);
+    const data = getTableContent(_id);
+    tabularData.set({
+      id: _id,
+      ...data,
+    });
+    ({ columnsDataStore } = data);
   }
 
   $: setStores(database, identifier);
 
-  function refetch(event: { detail: ItemInfo }) {
-    const itemInfo = event.detail;
-    const optInfo = get(options);
-    const recordInfo = get(records);
-
-    const offset = Math.max(itemInfo.startIndex - 20, 0);
-    let limit = itemInfo.stopIndex - itemInfo.startIndex + 26;
-    if (
-      recordInfo.totalCount !== null
-    && offset + limit > recordInfo.totalCount
-    ) {
-      limit = recordInfo.totalCount - offset;
-    }
-    options.set({
-      ...optInfo,
-      limit,
-      offset,
-    });
-
-    void fetchTableRecords(database, identifier);
+  async function deleteConfirm() {
+    removeTab($currentDBName, $currentSchemaId, activeTab);
+    await deleteTable(identifier);
+    isModalOpen = false;
+    await refetchTablesForSchema($currentSchemaId);
   }
 
-  function reload(event: { detail: { resetPositions?: boolean } }) {
-    const resetPositions = event?.detail?.resetPositions || false;
-    const optInfo = get(options);
-    options.set({
-      ...optInfo,
-      limit: 50,
-      offset: 0,
-    });
-    void fetchTableDetails(database, identifier);
-    void fetchTableRecords(database, identifier, true);
-    URLQueryHandler.setTableOptions(database, identifier, $options);
-    if (tableBodyRef) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      tableBodyRef.reloadPositions(resetPositions);
-    }
-  }
-
-  function openDisplayOptions() {
-    animateOpts = true;
-    showDisplayOptions.set(true);
-  }
-
-  function closeDisplayOptions() {
-    animateOpts = true;
-    showDisplayOptions.set(false);
-  }
-
-  function recordDelete() {
-    if (selectedEntries.length > 0) {
-      void deleteRecords(database, identifier, selectedEntries);
+  function tableDelete() {
+    const { has_dependencies: hasDependencies } = getSchemaInfo($currentDBName, $currentSchemaId);
+    const nameActiveTab = getActiveTabValue($currentDBName, $currentSchemaId);
+    activeTab = nameActiveTab;
+    if (hasDependencies) {
+      isModalOpen = true;
+    } else {
+      void deleteConfirm();
     }
   }
 </script>
 
-<ActionsPane
-  {columns}
-  {records}
-  {options}
-  {selectedEntries}
-  on:openDisplayOptions={openDisplayOptions}
-  on:deleteRecords={recordDelete}
-/>
+<ActionsPane on:deleteTable={tableDelete}/>
 
-<div
-  class="table-data"
-  class:animate-opts={animateOpts}
-  class:has-display-opts={$showDisplayOptions}
->
-  <div class="display-options-pane">
-    {#if $showDisplayOptions}
-      <DisplayOptions
-        columns={$columns}
-        bind:sort={$options.sort}
-        bind:group={$options.group}
-        bind:filter={$options.filter}
-        on:reload={reload}
-        on:close={closeDisplayOptions}
-      />
-    {/if}
-  </div>
-
+<div class="table-data">
   <div class="table-content">
-    {#if $columns.data.length > 0}
-      <Header
-        tableId={idKey}
-        columns={$columns}
-        bind:sort={$options.sort}
-        bind:group={$options.group}
-        isResultGrouped={!!$records.groupData}
-        bind:columnPosition={$columnPosition}
-        bind:horizontalScrollOffset={$horizontalScrollOffset}
-        on:reload={reload}
-      />
-
-      <Body
-        bind:this={tableBodyRef}
-        id={idKey}
-        columns={$columns}
-        data={$records.data}
-        groupData={$records.groupData}
-        groupIndex={$groupIndex}
-        columnPosition={$columnPosition}
-        bind:selected={$selected}
-        bind:scrollOffset={$scrollOffset}
-        bind:horizontalScrollOffset={$horizontalScrollOffset}
-        on:refetch={refetch}
-      />
+    {#if $columnsDataStore.columns.length > 0}
+      <Header/>
+      <Body/>
+      {#if isModalOpen}
+        <DeleteTableModal bind:isOpen={isModalOpen} bind:activeTab on:deleteConfirm={deleteConfirm}/>
+      {/if}  
     {/if}
   </div>
 </div>
 
-<StatusPane totalCount={$records.totalCount} {selectedEntries} />
+<StatusPane/>
 
 <style global lang="scss">
   @import "TableView.scss";

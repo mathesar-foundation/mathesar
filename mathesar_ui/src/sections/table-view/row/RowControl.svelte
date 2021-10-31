@@ -1,40 +1,66 @@
 <script lang="ts">
-  import { Checkbox } from '@mathesar-components';
   import {
-    DEFAULT_COUNT_COL_WIDTH,
-    GROUP_MARGIN_LEFT,
-  } from '@mathesar/stores/tableData';
+    faSync,
+    faPlus,
+  } from '@fortawesome/free-solid-svg-icons';
+  import { Checkbox, Icon } from '@mathesar-components';
+  import {
+    ROW_CONTROL_COLUMN_WIDTH,
+    getGenericModificationStatus,
+  } from '@mathesar/stores/table-data';
   import type {
+    Meta,
+    RecordsData,
     TableRecord,
-  } from '@mathesar/stores/tableData';
+  } from '@mathesar/stores/table-data/types';
 
-  export let index: number;
-  export let isGrouped = false;
-  export let primaryKey: string = null;
-  export let selected: Record<string | number, boolean>;
+  export let primaryKeyColumn: string = null;
   export let row: TableRecord;
+  export let meta: Meta;
+  export let recordsData: RecordsData;
 
-  function calculatePKValue(_row, _pkey) {
-    if (_pkey && _row?.[_pkey]) {
-      return _row[_pkey] as string;
+  $: ({ selectedRecords, recordModificationState, offset } = meta);
+  $: ({ savedRecords, newRecords, totalCount } = recordsData);
+
+  $: primaryKeyValue = row?.[primaryKeyColumn] ?? null;
+  $: isRowSelected = ($selectedRecords as Set<unknown>).has(primaryKeyValue);
+  $: genericModificationStatus = getGenericModificationStatus(
+    $recordModificationState, row, primaryKeyColumn,
+  );
+
+  function selectionChanged(event: CustomEvent<{ checked: boolean }>) {
+    const { checked } = event.detail;
+    if (checked) {
+      meta.selectRecordByPrimaryKey(primaryKeyValue);
+    } else {
+      meta.deSelectRecordByPrimaryKey(primaryKeyValue);
     }
-    return null;
-  }
-
-  $: primaryKeyValue = calculatePKValue(row, primaryKey);
-
-  function selectionChanged() {
-    // Setting selected again to trigger re-render
-    selected = { ...selected };
   }
 </script>
 
-<div class="cell row-control" style="width:{DEFAULT_COUNT_COL_WIDTH}px;
-            left:{isGrouped ? GROUP_MARGIN_LEFT : 0}px">
-  <span class="number">{index + 1}</span>
+<div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;left:0px">
+  <div class="control">
+    {#if row.__isAddPlaceholder}
+      <Icon data={faPlus}/>
+    {:else}
+      {#if typeof row.__rowIndex === 'number'}
+        <span class="number">
+          {row.__rowIndex + (
+            row.__isNew ? $totalCount - $savedRecords.length - $newRecords.length : $offset
+            ) + 1}
+          {#if row.__isNew}
+            *
+          {/if}
+        </span>
+      {/if}
 
-  {#if primaryKeyValue}
-    <Checkbox bind:checked={selected[primaryKeyValue]}
-      on:change={selectionChanged}/>
+      {#if primaryKeyValue}
+        <Checkbox checked={isRowSelected} on:change={selectionChanged}/>
+      {/if}
+    {/if}
+  </div>
+
+  {#if genericModificationStatus === 'inprocess'}
+    <Icon class="mod-indicator" size='0.9em' data={faSync} spin={true}/>
   {/if}
 </div>

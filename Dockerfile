@@ -1,7 +1,8 @@
-FROM python:3-buster
+FROM python:3.9-buster
 
-RUN apt update
-RUN apt install -y sudo
+# These should be run as a single command to avoid caching issues.
+# See: http://lenguyenthedat.com/docker-cache/
+RUN apt update && apt install -y sudo
 
 # Add mathesar user
 ENV PYTHONUNBUFFERED=1
@@ -28,3 +29,5 @@ COPY . .
 
 RUN sudo npm install -g npm-force-resolutions
 RUN cd mathesar_ui && npm install --unsafe-perm && npm run build
+
+EXPOSE 8000 3000 6006

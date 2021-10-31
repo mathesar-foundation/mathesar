@@ -1,8 +1,10 @@
 from sqlalchemy import Column, func, select, ForeignKey, literal, exists
 
-from db import columns, constants
+from db import constants
+from db.columns.base import MathesarColumn
+from db.columns.defaults import ID_TYPE
 from db.tables.operations.create import create_mathesar_table
-from db.tables.utils import reflect_table
+from db.tables.operations.select import reflect_table
 
 
 def _split_column_list(columns_, extracted_column_names):
@@ -24,7 +26,7 @@ def _create_split_tables(extracted_table_name, extracted_columns, remainder_tabl
     )
     remainder_fk_column = Column(
         f"{extracted_table.name}_{constants.ID}",
-        columns.ID_TYPE,
+        ID_TYPE,
         ForeignKey(f"{extracted_table.name}.{constants.ID}"),
         nullable=False,
     )
@@ -85,9 +87,7 @@ def _create_split_insert_stmt(old_table, extracted_table, extracted_columns, rem
 
 def extract_columns_from_table(old_table_name, extracted_column_names, extracted_table_name, remainder_table_name, schema, engine, drop_original_table=False):
     old_table = reflect_table(old_table_name, schema, engine)
-    old_columns = (
-        columns.MathesarColumn.from_column(col) for col in old_table.columns
-    )
+    old_columns = (MathesarColumn.from_column(col) for col in old_table.columns)
     old_non_default_columns = [
         col for col in old_columns if not col.is_default
     ]

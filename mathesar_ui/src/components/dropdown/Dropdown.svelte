@@ -7,11 +7,16 @@
     Icon,
     clickOffBounds,
   } from '@mathesar-components';
-  import type { Appearance } from '@mathesar-components/types';
+  import type {
+    Appearance,
+    Size,
+  } from '@mathesar-components/types';
   import type { Placement } from '@popperjs/core/lib/enums';
   import {
-    createEventDispatcher,
+    createEventDispatcher, getContext, onDestroy, setContext, tick,
   } from 'svelte';
+  import { derived } from 'svelte/store';
+  import { AccompanyingElements } from './AccompanyingElements';
 
   const dispatch = createEventDispatcher();
 
@@ -23,27 +28,64 @@
   export let ariaLabel: string = null;
   export let ariaControls: string = null;
   export let placement: Placement = 'bottom-start';
+  export let showArrow = true;
+  export let size: Size = 'medium';
 
-  let trigger: HTMLElement;
-  $: tgClasses = ['dropdown', 'trigger', triggerClass].join(' ');
+  let triggerElement: HTMLElement | undefined;
+  let contentElement: HTMLElement | undefined;
 
-  function open() {
-    isOpen = true;
-    dispatch('open');
+  const parentAccompanyingElements = getContext<AccompanyingElements | undefined>('dropdownAccompanyingElements');
+  async function setThisContentToAccompanyParent() {
+    if (!contentElement) {
+      await tick();
+    }
+    parentAccompanyingElements?.add(contentElement);
+  }
+  async function unsetThisContentToAccompanyParent() {
+    if (!contentElement) {
+      await tick();
+    }
+    parentAccompanyingElements?.delete(contentElement);
+  }
+  onDestroy(unsetThisContentToAccompanyParent);
+
+  const accompanyingElements = new AccompanyingElements(parentAccompanyingElements);
+  setContext('dropdownAccompanyingElements', accompanyingElements);
+
+  const clickOffBoundsReferences = derived(accompanyingElements,
+    (_accompanyingElements) => [triggerElement, ..._accompanyingElements]);
+
+  function calculateTriggerClass(_triggerClass: string, _showArrow: boolean): string {
+    const classes = ['dropdown', 'trigger'];
+    if (_triggerClass) {
+      classes.push(_triggerClass);
+    }
+    if (!_showArrow) {
+      classes.push('no-arrow');
+    }
+    return classes.join(' ');
+  }
+
+  $: tgClasses = calculateTriggerClass(triggerClass, showArrow);
+
+  function toggle() {
+    isOpen = !isOpen;
   }
 
   function close() {
     isOpen = false;
-    dispatch('close');
   }
 
-  function toggle() {
-    if (isOpen) {
-      close();
+  function watchIsOpen(_isOpen: boolean) {
+    if (_isOpen) {
+      dispatch('open');
+      void setThisContentToAccompanyParent();
     } else {
-      open();
+      dispatch('close');
+      void unsetThisContentToAccompanyParent();
     }
   }
+  $: watchIsOpen(isOpen);
 
   function checkAndCloseOnInnerClick() {
     if (closeOnInnerClick) {
@@ -53,35 +95,39 @@
 </script>
 
 <Button
-  bind:element={trigger}
+  bind:element={triggerElement}
   appearance={triggerAppearance}
   class={tgClasses}
   on:click={toggle} 
   aria-controls={ariaControls}
   aria-haspopup="listbox"
   aria-label={ariaLabel}
+  {size}
   on:keydown
 >
   <span class="label">
-    <slot name="trigger" />
+    <slot name="trigger"/>
   </span>
-  <span class="arrow">
-    <Icon data={faAngleDown} />
-  </span>
+  {#if showArrow}
+    <span class="arrow">
+      <Icon data={faAngleDown}/>
+    </span>
+  {/if}
 </Button>
 
 {#if isOpen}
   <div
     class={['dropdown content', contentClass].join(' ')}
+    bind:this={contentElement}
     use:portal
-    use:popper={{ reference: trigger, options: { placement } }}
+    use:popper={{ reference: triggerElement, options: { placement } }}
     use:clickOffBounds={{
       callback: close,
-      references: [trigger],
+      references: clickOffBoundsReferences,
     }}
     on:click={checkAndCloseOnInnerClick}
   >
-    <slot name="content" />
+    <slot name="content"/>
   </div>
 {/if}
 

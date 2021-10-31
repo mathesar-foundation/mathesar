@@ -1,26 +1,31 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import type {
-    TableColumnData,
-    ColumnPosition,
-    SortOption,
-    GroupOption,
-  } from '@mathesar/stores/tableData';
+  import { onMount, getContext } from 'svelte';
   import {
-    DEFAULT_COUNT_COL_WIDTH,
-    GROUP_MARGIN_LEFT,
-    DEFAULT_ROW_RIGHT_PADDING,
-  } from '@mathesar/stores/tableData';
-  import { currentDBMathesarTypes } from '@mathesar/stores/mathesarTypes';
-  import HeaderCell from './HeaderCell.svelte';
+    ROW_CONTROL_COLUMN_WIDTH,
+  } from '@mathesar/stores/table-data';
 
-  export let tableId: number;
-  export let columns: TableColumnData;
-  export let sort: SortOption = new Map();
-  export let group: GroupOption = new Set();
-  export let columnPosition: ColumnPosition = new Map();
-  export let horizontalScrollOffset = 0;
-  export let isResultGrouped: boolean;
+  import type {
+    TabularDataStore,
+    TabularData,
+    Column,
+    ColumnPosition,
+    ColumnPositionMap,
+    ColumnsDataStore,
+    Display,
+    Meta,
+  } from '@mathesar/stores/table-data/types';
+  import HeaderCell from './header-cell/HeaderCell.svelte';
+  import NewColumnCell from './NewColumnCell.svelte';
+
+  const tabularData = getContext<TabularDataStore>('tabularData');
+  let id: TabularData['id'];
+  let columnsDataStore: ColumnsDataStore;
+  let display: Display;
+  let meta: Meta;
+  $: ({
+    id: tabularEntityId, columnsDataStore, meta, display,
+  } = $tabularData as TabularData);
+  $: ({ horizontalScrollOffset, columnPositionMap } = display);
 
   let headerRef: HTMLElement;
 
@@ -30,19 +35,23 @@
     }
   }
 
-  $: onHScrollOffsetChange(horizontalScrollOffset);
-
-  let paddingLeft: number;
-  $: paddingLeft = isResultGrouped ? GROUP_MARGIN_LEFT : 0;
+  $: onHScrollOffsetChange($horizontalScrollOffset);
 
   function onHeaderScroll(scrollLeft: number) {
-    if (horizontalScrollOffset !== scrollLeft) {
-      horizontalScrollOffset = scrollLeft;
+    if ($horizontalScrollOffset !== scrollLeft) {
+      $horizontalScrollOffset = scrollLeft;
     }
   }
 
+  function getColumnPosition(
+    _columnPositionMap: ColumnPositionMap,
+    _name: Column['name'],
+  ): ColumnPosition {
+    return _columnPositionMap.get(_name);
+  }
+
   onMount(() => {
-    onHScrollOffsetChange(horizontalScrollOffset);
+    onHScrollOffsetChange($horizontalScrollOffset);
 
     const scrollListener = (event: Event) => {
       const { scrollLeft } = event.target as HTMLElement;
@@ -56,38 +65,19 @@
     };
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  $: mathesarTypes = $currentDBMathesarTypes;
+  function addColumn(e: CustomEvent<Partial<Column>>) {
+    void columnsDataStore.add(e.detail);
+  }
 </script>
 
 <div bind:this={headerRef} class="header">
-  <div
-    class="cell row-control"
-    style="width:{DEFAULT_COUNT_COL_WIDTH + paddingLeft}px;"
-  />
-
-  {#each columns.data as column (column.name)}
-    <HeaderCell
-      tableId={tableId}
-      mathesarTypes={mathesarTypes}
-      bind:sort
-      bind:group
-      column={column}
-      columnPosition={columnPosition}
-      paddingLeft={paddingLeft}
-      on:reload
-    />
-  {/each}
-  <div
-    class="cell"
-    style="width:{70 + DEFAULT_ROW_RIGHT_PADDING}px;left:{columnPosition.get(
-      '__row',
-    ).width + paddingLeft}px;"
-  >
-    <div class="add">+</div>
+  <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;">
   </div>
-</div>
 
-<style global lang="scss">
-  @import "Header.scss";
-</style>
+  {#each $columnsDataStore.columns as column (column.name)}
+    <HeaderCell tabularEntityId={id} {column} {meta}
+      columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
+  {/each}
+
+  <NewColumnCell {display} columns={$columnsDataStore.columns} on:addColumn={addColumn}/>
+</div>

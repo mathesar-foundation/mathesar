@@ -1,86 +1,92 @@
 <script lang="ts">
-  import { Dropdown } from '@mathesar-components';
+  import {
+    faSortAmountDown,
+    faSortAmountDownAlt,
+    faThList,
+  } from '@fortawesome/free-solid-svg-icons';
+  import { Dropdown, Icon } from '@mathesar-components';
   import type {
-    ColumnPosition,
-    GroupOption,
+    Meta,
+    Column,
     SortOption,
-    TableColumn,
-  } from '@mathesar/stores/tableData';
-  import type { MathesarType } from '@mathesar/stores/mathesarTypes';
-  import { determineMathesarType, getMathesarTypeIcon } from '@mathesar/stores/mathesarTypes';
-  import HeaderCellDropdownGeneral from './HeaderCellDropdownGeneral.svelte';
-  import HeaderCellDropdownTypeOptions from './HeaderCellDropdownTypeOptions.svelte';
+    GroupOption,
+    ColumnPosition,
+  } from '@mathesar/stores/table-data/types';
 
-  export let mathesarTypes: MathesarType[];
-  export let tableId: number;
-  export let sort: SortOption;
-  export let group: GroupOption;
-  export let column: TableColumn;
   export let columnPosition: ColumnPosition;
-  export let paddingLeft: number;
+  export let column: Column;
+  export let meta: Meta;
 
-  let isOpen = false;
+  $: ({ sort, group } = meta);
+  $: sortDirection = ($sort as SortOption)?.get(column.name);
+  $: hasGrouping = ($group as GroupOption)?.has(column.name);
 
-  /**
-   * If more than one sub-view should be introduced,
-   * a better state mechanism than boolean flags would be desired.
-   */
-  let isDataTypeOptionsOpen = false;
-
-  function closeDataTypeOptions() {
-    isDataTypeOptionsOpen = false;
-  }
-
-  let mathesarType: MathesarType | undefined;
-  let mathesarTypeIcon: string | undefined;
-  $: {
-    if (mathesarTypes) {
-      mathesarType = determineMathesarType(mathesarTypes, column.type);
-      mathesarTypeIcon = getMathesarTypeIcon(mathesarType);
+  function handleSort(order: 'asc' | 'desc') {
+    if (sortDirection === order) {
+      meta.removeSort(column.name);
+    } else {
+      meta.addUpdateSort(column.name, order);
     }
   }
 
+  function toggleGroup() {
+    if (hasGrouping) {
+      meta.removeGroup(column.name);
+    } else {
+      meta.addGroup(column.name);
+    }
+  }
 </script>
 
-<div
-  class="cell"
-  style="
-      width:{columnPosition.get(column.name).width}px;
-      left:{columnPosition.get(column.name).left + paddingLeft}px;"
->
+<div class="cell" style="width:{columnPosition?.width || 0}px;
+      left:{(columnPosition?.left || 0)}px;">
   <span class="type">
-    {mathesarTypeIcon}
+    {#if column.type === 'INTEGER'}
+      #
+    {:else if column.type === 'VARCHAR'}
+      T
+    {:else}
+      i
+    {/if}
   </span>
   <span class="name">{column.name}</span>
 
-  <Dropdown
-    bind:isOpen
-    triggerClass="opts"
-    triggerAppearance="plain"
-    contentClass="table-opts-content"
-    on:close={closeDataTypeOptions}
-  >
+  <Dropdown closeOnInnerClick={true}
+            triggerClass="opts" triggerAppearance="plain"
+            contentClass="table-opts-content">
     <svelte:fragment slot="content">
-      {#if isDataTypeOptionsOpen}
-        <HeaderCellDropdownTypeOptions
-          on:reload
-          mathesarTypes={mathesarTypes}
-          tableId={tableId}
-          column={column}
-          bind:isOpen
-          bind:isDataTypeOptionsOpen
-        />
-      {:else}
-        <HeaderCellDropdownGeneral
-          on:reload
-          mathesarType={mathesarType}
-          mathesarTypeIcon={mathesarTypeIcon}
-          bind:sort
-          bind:group
-          column={column}
-          bind:isDataTypeOptionsOpen
-        />
-      {/if}
+      <ul>
+        <li on:click={() => handleSort('asc')}>
+          <Icon class="opt" data={faSortAmountDownAlt}/>
+          <span>
+            {#if sortDirection === 'asc'}
+              Remove asc sort
+            {:else}
+              Sort Ascending
+            {/if}
+          </span>
+        </li>
+        <li on:click={() => handleSort('desc')}>
+          <Icon class="opt" data={faSortAmountDown}/>
+          <span>
+            {#if sortDirection === 'desc'}
+              Remove desc sort
+            {:else}
+              Sort Descending
+            {/if}
+          </span>
+        </li>
+        <li on:click={toggleGroup}>
+          <Icon class="opt" data={faThList}/>
+          <span>
+            {#if hasGrouping}
+              Remove grouping
+            {:else}
+              Group by column
+            {/if}
+          </span>
+        </li>
+      </ul>
     </svelte:fragment>
   </Dropdown>
 </div>

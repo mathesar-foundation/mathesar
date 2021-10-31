@@ -1,6 +1,10 @@
 button.dropdown.trigger {
-  padding: 6px 26px 6px 12px;
+  padding: 5px 26px 5px 12px;
   position: relative;
+
+  &.no-arrow {
+    padding: 6px 12px;
+  }
 
   >.label {
     display: inline-block;

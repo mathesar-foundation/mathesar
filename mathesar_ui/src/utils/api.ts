@@ -2,8 +2,10 @@ import Cookies from 'js-cookie';
 import { CancellablePromise } from '@mathesar-components';
 
 export enum States {
+  /** Before any requests have been made */
   Idle = 'idle',
   Loading = 'loading',
+  /** After a request has completed successfully */
   Done = 'done',
   Error = 'error',
 }
@@ -56,6 +58,7 @@ function sendXHRRequest<T>(method: string, url: string, data?: unknown): Cancell
   } else {
     request.send();
   }
+  let isManuallyAborted = false;
 
   return new CancellablePromise((resolve, reject) => {
     request.addEventListener('load', () => {
@@ -81,7 +84,18 @@ function sendXHRRequest<T>(method: string, url: string, data?: unknown): Cancell
         }
       }
     });
+
+    request.addEventListener('error', () => {
+      reject(new Error('An unexpected error has occurred'));
+    });
+
+    request.addEventListener('abort', () => {
+      if (!isManuallyAborted) {
+        reject(new Error('Request was aborted'));
+      }
+    });
   }, () => {
+    isManuallyAborted = true;
     request.abort();
   });
 }

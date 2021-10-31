@@ -1,9 +1,11 @@
 import {
   writable,
-  Writable,
   derived,
-  Readable,
   get,
+} from 'svelte/store';
+import type {
+  Writable,
+  Readable,
   Unsubscriber,
 } from 'svelte/store';
 

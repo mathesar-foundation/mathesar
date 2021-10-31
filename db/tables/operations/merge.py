@@ -1,8 +1,8 @@
 from sqlalchemy import select
 
-from db import columns
+from db.columns.base import MathesarColumn
 from db.tables.operations.create import create_mathesar_table
-from db.tables.utils import reflect_table
+from db.tables.operations.select import reflect_table
 
 
 def merge_tables(table_name_one, table_name_two, merged_table_name, schema, engine, drop_original_tables=False):
@@ -20,7 +20,7 @@ def merge_tables(table_name_one, table_name_two, merged_table_name, schema, engi
         if col.foreign_keys
     ]
     merged_columns_all = [
-        columns.MathesarColumn.from_column(col)
+        MathesarColumn.from_column(col)
         for col in list(table_one.columns) + list(table_two.columns)
         if col not in referencing_columns
     ]

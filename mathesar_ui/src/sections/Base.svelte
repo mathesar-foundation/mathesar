@@ -68,7 +68,7 @@
   <title>Mathesar - {$activeTab?.label || 'Home'}</title>
 </svelte:head>
 
-<LeftPane {getLink} {database} schemaId={$currentSchemaId} activeTab={$activeTab}/>
+<LeftPane {getLink} {database} {schemaId} activeTab={$activeTab}/>
 
 <section class="table-section">
   {#if $tabs?.length > 0}
@@ -82,7 +82,7 @@
 
       {#if $activeTab}
         {#if $activeTab.isNew}
-          <ImportData {database} schemaId={$currentSchemaId} id={$activeTab.id}/>
+          <ImportData {database} {schemaId} id={$activeTab.id}/>
         {:else}
           <TableView {database} id={$activeTab.id}/>
         {/if}

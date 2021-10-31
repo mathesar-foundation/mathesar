@@ -248,7 +248,9 @@ function getItemsInfo(props: Props): ItemInfo {
   } = props;
   const [startIndex, stopIndex] = getRangeToRender(props);
   const items: Item[] = [];
-  items.length = stopIndex - startIndex + 1;
+  if (startIndex < stopIndex) {
+    items.length = stopIndex - startIndex + 1;
+  }
 
   if (itemCount > 0) {
     let i = 0;

@@ -1,10 +1,13 @@
+import warnings
 from psycopg2.errors import DuplicateColumn, UndefinedFunction
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError, APIException
 from rest_framework.response import Response
 from sqlalchemy.exc import ProgrammingError
 
-from db.columns import InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
+from db.columns.exceptions import (
+    DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
+)
 from mathesar.api.pagination import ColumnLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
@@ -81,32 +84,40 @@ class ColumnViewSet(viewsets.ViewSet):
         table = get_table_or_404(table_pk)
         serializer = ColumnSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        try:
-            column = table.alter_column(pk, serializer.validated_data)
-        except ProgrammingError as e:
-            if type(e.orig) == UndefinedFunction:
-                raise ValidationError('This type cast is not implemented')
-            else:
-                raise ValidationError
-        except IndexError:
-            raise NotFound
-        except TypeError:
-            raise ValidationError("Unknown type_option passed")
-        except InvalidDefaultError:
-            raise ValidationError(
-                f'default "{request.data["default"]}" is'
-                f' invalid for this column'
-            )
-        except InvalidTypeOptionError:
-            type_options = request.data.get('type_options', '')
-            raise ValidationError(
-                f'parameter dict {type_options} is'
-                f' invalid for type {request.data["type"]}'
-            )
-        except InvalidTypeError:
-            raise ValidationError('This type casting is invalid.')
-        except Exception as e:
-            raise APIException(e)
+        with warnings.catch_warnings():
+            warnings.filterwarnings("error", category=DynamicDefaultWarning)
+            try:
+                column = table.alter_column(pk, serializer.validated_data)
+            except ProgrammingError as e:
+                if type(e.orig) == UndefinedFunction:
+                    raise ValidationError('This type cast is not implemented')
+                else:
+                    raise ValidationError
+            except IndexError:
+                raise NotFound
+            except TypeError:
+                raise ValidationError("Unknown type_option passed")
+            except InvalidDefaultError:
+                raise ValidationError(
+                    f'default "{request.data["default"]}" is'
+                    f' invalid for this column'
+                )
+            except DynamicDefaultWarning:
+                raise ValidationError(
+                    'Changing type of columns with dynamically-generated'
+                    ' defaults is not supported.'
+                    ' Delete or change the default first.'
+                )
+            except InvalidTypeOptionError:
+                type_options = request.data.get('type_options', '')
+                raise ValidationError(
+                    f'parameter dict {type_options} is'
+                    f' invalid for type {request.data["type"]}'
+                )
+            except InvalidTypeError:
+                raise ValidationError('This type casting is invalid.')
+            except Exception as e:
+                raise APIException(e)
         out_serializer = ColumnSerializer(column)
         return Response(out_serializer.data)
 

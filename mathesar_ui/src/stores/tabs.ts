@@ -1,13 +1,14 @@
 import {
   get,
   writable,
-  Writable,
 } from 'svelte/store';
+import type { Writable } from 'svelte/store';
+
 import {
   getAllImportDetailsForSchema,
   removeImportFromView,
 } from '@mathesar/stores/fileImports';
-import { clearTable } from '@mathesar/stores/tableData';
+import { removeTableContent } from '@mathesar/stores/table-data';
 import { getTablesStoreForSchema } from '@mathesar/stores/tables';
 import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
 
@@ -60,6 +61,12 @@ export function getTabsForSchema(db: string, schemaId: number): TabList {
     schemaMap.set(schemaId, schemaTabs);
   }
   return schemaTabs;
+}
+
+export function getActiveTabValue(_currentDBName: string, _currentSchemaId: SchemaEntry['id']): MathesarTab {
+  const { activeTab } = getTabsForSchema(_currentDBName, _currentSchemaId);
+  const activeTabObj = get(activeTab);
+  return activeTabObj;
 }
 
 export function addTab(
@@ -146,7 +153,7 @@ export function removeTab(
       removeImportFromView(schemaId, removedTab.id as string);
     } else {
       URLQueryHandler.removeTable(db, removedTab.id as number, get(activeTab)?.id as number);
-      clearTable(db, removedTab.id as number);
+      removeTableContent(removedTab.id as number);
     }
   } else {
     // eslint-disable-next-line no-console
