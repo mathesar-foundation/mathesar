@@ -91,43 +91,71 @@ def get_grouping_range_boundaries(
 
 
 def _get_percentile_range_groups(column_list, num_groups, engine):
-    cume_dist = 'cume_dist'
+    COUNT = 'count'
+    CUME_DIST = 'cume_dist'
+    MIN_ROW = 'min_row'
+    MAX_ROW = 'max_row'
+    ORDER_BY = 'order_by'
+    PARTITION_BY = 'partition_by'
+    RANGE_ID = 'range_id'
+    RANGE_ = 'range_'
+
+    column_names = [col.name for col in column_list]
+
     cume_dist_cte = (
         select(
             *column_list,
-            func.cume_dist().over(order_by=column_list).label(cume_dist)
+            func.cume_dist().over(order_by=column_list).label(CUME_DIST)
         )
         .cte()
     )
-
-    ranges = [
-        (
-            and_(
-                cume_dist_cte.columns[cume_dist] > i / num_groups,
-                cume_dist_cte.columns[cume_dist] <= (i + 1) / num_groups
-            ),
-            i + 1
-        )
-        for i in range(num_groups)
-    ]
-    ranges_cte = select(cume_dist_cte, case(*ranges).label('range')).cte()
+    ranges = _get_fractional_cases(cume_dist_cte.columns[CUME_DIST], num_groups)
+    ranges_cte = select(cume_dist_cte, case(*ranges).label(RANGE_ID)).cte()
     ranges_agg_cols = [
-        col for col in ranges_cte.columns if col.name in [c.name for c in column_list]
+        col for col in ranges_cte.columns if col.name in column_names
     ]
+    window_def = {
+        PARTITION_BY: ranges_cte.columns[RANGE_ID],
+        ORDER_BY: ranges_agg_cols,
+        RANGE_: (None, None)
+    }
     final_sel = (
         select(
-            ranges_cte.c.range,
-            func.min(array(ranges_agg_cols)),
-            func.max(array(ranges_agg_cols)),
-            func.count(1)
-        )
-        .group_by(ranges_cte.c.range)
-        .order_by(ranges_cte.c.range)
+            ranges_cte.columns[RANGE_ID],
+            _get_row_jsonb_window_expr(func.first_value, ranges_agg_cols, window_def).label(MIN_ROW),
+            _get_row_jsonb_window_expr(func.last_value, ranges_agg_cols, window_def).label(MAX_ROW),
+            func.count(1).over(partition_by=window_def[PARTITION_BY]).label(COUNT)
+        ).distinct()
     )
     with engine.begin() as conn:
-        result = conn.execute(final_sel).fetchall()
+        result = [
+            {
+                RANGE_ID: row[RANGE_ID],
+                MIN_ROW: {column_names[i]: row[MIN_ROW][f'f{i+1}'] for i in range(len(column_list))},
+                MAX_ROW: {column_names[i]: row[MAX_ROW][f'f{i+1}'] for i in range(len(column_list))},
+                COUNT: row[COUNT]
+            }
+            for row in conn.execute(final_sel).fetchall()
+        ]
 
     return result
+
+
+def _get_row_jsonb_window_expr(window_function, row_columns, window_def):
+    return func.to_jsonb(window_function(func.row(*row_columns)).over(**window_def))
+
+
+def _get_fractional_cases(column, num_groups):
+    """
+    The column should be numeric values between 0 and 1.  This writes a
+    list of cases (expressed as tuples for the SQLAlchemy case function)
+    splitting such a column into num_groups different parts.  Does not
+    include zero.
+    """
+    return [
+        (and_(column > i / num_groups, column <= (i + 1) / num_groups), i)
+        for i in range(num_groups)
+    ]
 
 
 def _get_filtered_group_by_count_query(
