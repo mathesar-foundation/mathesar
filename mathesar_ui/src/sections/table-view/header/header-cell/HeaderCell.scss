@@ -1,28 +1,60 @@
-.dropdown.content.table-opts-content {
+.dropdown.trigger.column-opts {
+  width: 100%;
+
+  .label {
+    display: flex;
+  }
+
+  .type {
+    margin-right: 5px;
+    color: #7f7f7f;
+    font-weight: 500;
+  }
+
+  .name {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.dropdown.content.column-opts-content {
   max-height: none;
-  min-width: 15rem !important;
+  padding: 0.3125rem 0;
 
   .container {
     display: flex;
     flex-direction: column;
-    margin: 0.75rem;
+    min-width: 14rem;
 
-    & > * {
-      margin: 0.5rem 0;
-    }
-
-    & > button {
-      margin: 0;
-      /* use padding since these top-level buttons use it for background effects */
-      padding: 1rem 0.75rem 1rem 0.5rem;
-    }
-
-    h6 {
+    h6.category {
       color: gray;
+      margin: 0;
+      padding: 0.3125rem 0.625rem;
     }
 
+    .section {
+      &.type-header {
+        button.type-switch {
+          width: 100%;
+          display: flex;
+  
+          >span {
+            margin-right: auto;
+          }
+        }
+      }
+      li {
+        button {
+          width: 100%;
+        }
+      }
+    }
     .divider {
-      border-top: 1px lightgray solid;
+      height: 1px;
+      background: #efefef;
+      margin: 0.3125rem 0.625rem 0.3125rem;
     }
 
     .button-row {
@@ -34,6 +66,7 @@
     ul {
       list-style: none;
       padding: 0px;
+      margin: 0px;
     }
 
     .list-button {

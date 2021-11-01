@@ -22,7 +22,7 @@
   let display: Display;
   let meta: Meta;
   $: ({
-    id: tabularEntityId, columnsDataStore, meta, display,
+    columnsDataStore, meta, display,
   } = $tabularData as TabularData);
   $: ({ horizontalScrollOffset, columnPositionMap } = display);
 
