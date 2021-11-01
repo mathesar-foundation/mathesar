@@ -24,8 +24,8 @@
   let fileUrl: string;
 
   const options = [
-    'File',
-    'URL',
+    { id: 'File', label: 'File' },
+    { id: 'URL', label: 'URL' },
   ];
 
   async function confirmImport() {
@@ -33,7 +33,6 @@
       void loadPreview(fileImportStore);
     } else if (importMethod === 'URL') {
       await uploadUrl(fileImportStore, fileUrl);
-      fileUrl = '';
     }
   }
 </script>
@@ -45,7 +44,7 @@
   Please do not close this tab, you may still open and view other tables in the meanwhile.
 </div>
 {#if $fileImportStore.uploadStatus !== States.Done}
-  <RadioGroup bind:group={importMethod} {options} isInLine={false}>
+  <RadioGroup bind:group={importMethod} {options} isInline={false}>
     <h3>Import From</h3>
   </RadioGroup>
 {/if}
@@ -75,7 +74,7 @@
           disabled={
             ($fileImportStore.uploadStatus !== States.Done
             || $fileImportStore.previewTableCreationStatus === States.Loading)
-            && importMethod !== 'URL'
+            && (importMethod !== 'URL' || $fileImportStore.uploadStatus === States.Loading)
           }
           on:click={() => confirmImport()}>
       Next

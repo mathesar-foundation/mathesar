@@ -1,18 +1,20 @@
 <script lang="ts">
     export let group: string;
+    export let idKey = 'id';
+    export let labelKey = 'label';
+    export let isInline = true;
     export let options = [];
-    export let isInLine = true;
 </script>
 
-<fieldset class="fieldset">
+<fieldset class="radio-group">
   <legend>
     <slot></slot>
   </legend>
-  <div class:inline={isInLine}>
-    {#each options as value}
+  <div class:inline={isInline}>
+    {#each options as option (option[idKey])}
       <label class="radio">
-          <input type="radio" bind:group {value}>
-          <span class="label">{value}</span>
+          <input type="radio" bind:group value={option[idKey]}>
+          <span class="label">{option[labelKey]}</span>
       </label>
     {/each}
   </div>
