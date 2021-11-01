@@ -1,5 +1,5 @@
-export { Records } from './records';
-export { Columns } from './columns';
+export { RecordsData } from './records';
+export { ColumnsDataStore } from './columns';
 export {
   Meta,
   filterCombinations,

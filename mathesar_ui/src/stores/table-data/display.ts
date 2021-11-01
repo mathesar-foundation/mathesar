@@ -3,8 +3,8 @@ import { States } from '@mathesar/utils/api';
 import type { Writable, Readable, Unsubscriber } from 'svelte/store';
 import type { TabularType, DBObjectEntry } from '@mathesar/App.d';
 import type { Meta } from './meta';
-import type { Columns, TableColumn } from './columns';
-import type { TableRecord, Records } from './records';
+import type { ColumnsDataStore, Column } from './columns';
+import type { TableRecord, RecordsData } from './records';
 
 export interface ColumnPosition {
   width: number,
@@ -26,7 +26,7 @@ export const DEFAULT_COLUMN_WIDTH = 160;
 
 const movementKeys = new Set(['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Tab']);
 
-function recalculateColumnPositions(columnPositionMap: ColumnPositionMap, columns: TableColumn[]) {
+function recalculateColumnPositions(columnPositionMap: ColumnPositionMap, columns: Column[]) {
   let left = ROW_CONTROL_COLUMN_WIDTH;
   const newColumnPositionMap: ColumnPositionMap = new Map(columnPositionMap);
   columns.forEach((column) => {
@@ -51,7 +51,7 @@ function recalculateColumnPositions(columnPositionMap: ColumnPositionMap, column
 export function isCellActive(
   activeCell: ActiveCell,
   row: TableRecord,
-  column: TableColumn,
+  column: Column,
 ): boolean {
   return activeCell
     && activeCell?.columnIndex === column.__columnIndex
@@ -61,7 +61,7 @@ export function isCellActive(
 export function isCellBeingEdited(
   activeCell: ActiveCell,
   row: TableRecord,
-  column: TableColumn,
+  column: Column,
 ): boolean {
   return isCellActive(activeCell, row, column) && activeCell.type === 'edit';
 }
@@ -95,19 +95,17 @@ export function scrollBasedOnActiveCell(): void {
 }
 
 export class Display {
-  _type: TabularType;
+  private type: TabularType;
 
-  _parentId: DBObjectEntry['id'];
+  private parentId: DBObjectEntry['id'];
 
-  _meta: Meta;
+  private meta: Meta;
 
-  _columns: Columns;
+  private columnsDataStore: ColumnsDataStore;
 
-  _records: Records;
+  private recordsData: RecordsData;
 
-  _columnPositionMapUnsubscriber: Unsubscriber;
-
-  showDisplayOptions: Writable<boolean>;
+  private columnPositionMapUnsubscriber: Unsubscriber;
 
   horizontalScrollOffset: Writable<number>;
 
@@ -123,31 +121,30 @@ export class Display {
     type: TabularType,
     parentId: number,
     meta: Meta,
-    columns: Columns,
-    records: Records,
+    columnsDataStore: ColumnsDataStore,
+    recordsData: RecordsData,
   ) {
-    this._type = type;
-    this._parentId = parentId;
-    this._meta = meta;
-    this._columns = columns;
-    this._records = records;
-    this.showDisplayOptions = writable(false);
+    this.type = type;
+    this.parentId = parentId;
+    this.meta = meta;
+    this.columnsDataStore = columnsDataStore;
+    this.recordsData = recordsData;
     this.horizontalScrollOffset = writable(0);
     this.columnPositionMap = writable(new Map() as ColumnPositionMap);
     this.activeCell = writable(null as ActiveCell);
     this.rowWidth = writable(0);
 
     // subscribers
-    this._columnPositionMapUnsubscriber = this._columns.subscribe((columnData) => {
+    this.columnPositionMapUnsubscriber = this.columnsDataStore.subscribe((columnData) => {
       this.columnPositionMap.update(
-        (map) => recalculateColumnPositions(map, columnData.data),
+        (map) => recalculateColumnPositions(map, columnData.columns),
       );
       const width = get(this.columnPositionMap).get('__row')?.width;
       const widthWithPadding = width ? width + DEFAULT_ROW_RIGHT_PADDING : 0;
       this.rowWidth.set(widthWithPadding);
     });
 
-    const { savedRecords, newRecords } = this._records;
+    const { savedRecords, newRecords } = this.recordsData;
     this.displayableRecords = derived(
       [savedRecords, newRecords],
       ([$savedRecords, $newRecords], set) => {
@@ -160,7 +157,7 @@ export class Display {
           }).concat($newRecords);
         }
         allRecords = allRecords.concat({
-          ...this._records.getNewEmptyRecord(),
+          ...this.recordsData.getNewEmptyRecord(),
           __isAddPlaceholder: true,
         });
         set(allRecords);
@@ -172,7 +169,7 @@ export class Display {
     this.activeCell.set(null as ActiveCell);
   }
 
-  selectCell(row: TableRecord, column: TableColumn): void {
+  selectCell(row: TableRecord, column: Column): void {
     this.activeCell.set({
       rowIndex: row.__rowIndex,
       columnIndex: column.__columnIndex,
@@ -180,7 +177,7 @@ export class Display {
     });
   }
 
-  editCell(row: TableRecord, column: TableColumn): void {
+  editCell(row: TableRecord, column: Column): void {
     if (!column.primary_key) {
       this.activeCell.set({
         rowIndex: row.__rowIndex,
@@ -191,12 +188,12 @@ export class Display {
   }
 
   handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | 'changed' | null {
-    const columnData = this._columns.get().data;
-    const totalCount = get(this._records.totalCount);
-    const savedRecords = get(this._records.savedRecords);
-    const newRecords = get(this._records.newRecords);
-    const offset = get(this._meta.offset);
-    const pageSize = get(this._meta.pageSize);
+    const { columns } = this.columnsDataStore.get();
+    const totalCount = get(this.recordsData.totalCount);
+    const savedRecords = get(this.recordsData.savedRecords);
+    const newRecords = get(this.recordsData.newRecords);
+    const offset = get(this.meta.offset);
+    const pageSize = get(this.meta.pageSize);
     const minRowIndex = 0;
     const maxRowIndex = Math.min(
       pageSize,
@@ -221,7 +218,7 @@ export class Display {
             break;
           case 'ArrowRight':
           case 'Tab':
-            if (existing.columnIndex < columnData.length - 1) {
+            if (existing.columnIndex < columns.length - 1) {
               newActiveCell.columnIndex += 1;
             }
             break;
@@ -241,7 +238,7 @@ export class Display {
     if (key === 'Tab' && activeCell?.type === 'edit') {
       this.activeCell.update((existing) => {
         const newActiveCell = { ...existing };
-        if (existing.columnIndex < columnData.length - 1) {
+        if (existing.columnIndex < columns.length - 1) {
           newActiveCell.columnIndex += 1;
         }
         return newActiveCell;
@@ -251,7 +248,7 @@ export class Display {
 
     if (key === 'Enter') {
       if (activeCell?.type === 'select') {
-        if (!columnData[activeCell.columnIndex]?.primary_key) {
+        if (!columns[activeCell.columnIndex]?.primary_key) {
           this.activeCell.update((existing) => ({
             ...existing,
             type: 'edit',
@@ -279,6 +276,6 @@ export class Display {
   }
 
   destroy(): void {
-    this._columnPositionMapUnsubscriber();
+    this.columnPositionMapUnsubscriber();
   }
 }
