@@ -14,11 +14,11 @@
   } from '@mathesar/stores/table-data';
   import type {
     Display,
-    TableColumn,
+    Column,
   } from '@mathesar/stores/table-data/types.d';
 
   const dispatch = createEventDispatcher();
-  export let columnData: TableColumn[];
+  export let columns: Column[];
   export let display: Display;
 
   $: ({ rowWidth } = display);
@@ -26,7 +26,7 @@
   let isDropdownOpen = false;
   let columnName = '';
 
-  $: isDuplicateColumn = columnData?.some(
+  $: isDuplicateColumn = columns?.some(
     (column) => column.name.toLowerCase() === columnName?.toLowerCase(),
   );
 
