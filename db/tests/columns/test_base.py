@@ -90,13 +90,13 @@ def test_MC_inits_with_non_empty_foreign_keys(column_builder):
 
 
 @pytest.mark.parametrize("column_builder", column_builder_list)
-def test_MC_inits_with_autoincrement_true(column_builder):
+def test_MC_inits_with_autoincrement_false(column_builder):
     col = column_builder("anycol", String)
     assert not col.autoincrement
 
 
 @pytest.mark.parametrize("column_builder", column_builder_list)
-def test_MC_inits_with_autoincrement_false(column_builder):
+def test_MC_inits_with_autoincrement_true(column_builder):
     col = column_builder("anycol", String, autoincrement=True)
     assert col.autoincrement
 
