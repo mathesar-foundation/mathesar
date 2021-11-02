@@ -29,6 +29,13 @@ export interface AbstractType extends Omit<AbstractTypeResponse, 'db_types'> {
   icon: string
 }
 
+export const UnknownAbstractType: AbstractType = {
+  name: 'Unknown',
+  identifier: 'unknown',
+  dbTypes: new Set(),
+  icon: '?',
+};
+
 export type AbstractTypeStoreData = Map<AbstractType['identifier'], AbstractType>;
 
 export interface AbstractTypeStore {
@@ -143,5 +150,5 @@ export function getAbstractTypeForDBType(
       }
     }
   }
-  return null;
+  return UnknownAbstractType;
 }
