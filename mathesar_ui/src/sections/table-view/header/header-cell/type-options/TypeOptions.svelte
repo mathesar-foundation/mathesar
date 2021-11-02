@@ -1,83 +1,69 @@
 <script lang="ts">
   import { createEventDispatcher, getContext } from 'svelte';
-  import {
-    faDatabase,
-  } from '@fortawesome/free-solid-svg-icons';
-  import {
-    currentDBMathesarTypes,
-    getMathesarTypeIcon,
-    getValidDbTypeTargetsPerMathesarType,
-    mathesarTypeHasAtLeastOneValidDbTypeTarget,
-    determineMathesarType,
-  } from '@mathesar/stores/mathesarTypes';
+  import { faDatabase } from '@fortawesome/free-solid-svg-icons';
   import { Button, Icon, Select } from '@mathesar-components';
+  import { abstractTypes, getAbstractTypeForDBType } from '@mathesar/stores/abstractTypes';
+  import {
+    ColumnsDataStore,
+  } from '@mathesar/stores/table-data';
 
+  import type { DbType } from '@mathesar/App.d';
   import type {
     Column,
-    ColumnsDataStore,
     TabularData,
     TabularDataStore,
   } from '@mathesar/stores/table-data/types';
-  import type {
-    MathesarType,
-    DbTypeTargetsPerMathesarType,
-  } from '@mathesar/stores/mathesarTypes';
+  import type { AbstractType } from '@mathesar/stores/abstractTypes';
+  import type { SelectOption } from '@mathesar-components/types';
 
   const dispatch = createEventDispatcher();
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  let columnsDataStore: ColumnsDataStore;
   $: ({ columnsDataStore } = $tabularData as TabularData);
 
   export let column: Column;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  $: allowedTypeConversions = ColumnsDataStore.getAllowedTypeConversions(column, $abstractTypes.data);
+  $: abstractTypeOfColumn = getAbstractTypeForDBType(column.type, $abstractTypes.data);
+  
+  let selectedAbstractType: AbstractType = null;
+  let selectedDBTypeOption: SelectOption<DbType> = null;
 
-  let columnMathesarType: MathesarType;
-  $: {
-    if ($currentDBMathesarTypes && column) {
-      columnMathesarType = determineMathesarType($currentDBMathesarTypes, column.type);
+  function selectAbstractType(abstractType: AbstractType) {
+    selectedAbstractType = abstractType;
+  }
+
+  function resetAbstractType() {
+    selectedAbstractType = abstractTypeOfColumn;
+    selectedDBTypeOption = {
+      id: column.type,
+      label: column.type,
+    };
+  }
+
+  $: if (!selectedAbstractType && abstractTypeOfColumn) {
+    resetAbstractType();
+  }
+
+  function calculateDBTypeOptions(_selectedAbstractType: AbstractType): SelectOption[] {
+    if (_selectedAbstractType) {
+      return Array.from(_selectedAbstractType?.dbTypes).map((entry) => ({
+        id: entry,
+        label: entry,
+      }));
     }
+    return [];
   }
 
-  let validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType | undefined;
-  $: {
-    if ($currentDBMathesarTypes) {
-      // eslint-disable-next-line operator-linebreak
-      validDbTypeTargetsPerMathesarType =
-        getValidDbTypeTargetsPerMathesarType(column, $currentDBMathesarTypes);
-    }
-  }
-
-  let validMathesarTypeTargets: MathesarType[] | undefined;
-  $: {
-    if ($currentDBMathesarTypes && validDbTypeTargetsPerMathesarType) {
-      // eslint-disable-next-line operator-linebreak
-      validMathesarTypeTargets =
-        $currentDBMathesarTypes
-          .filter(
-            (mt: MathesarType) =>
-              // eslint-disable-next-line implicit-arrow-linebreak
-              mathesarTypeHasAtLeastOneValidDbTypeTarget(validDbTypeTargetsPerMathesarType, mt),
-          );
-    }
-  }
-
-  let selectedMathesarType: MathesarType;
-
-  function selectMathesarType(mathesarType: MathesarType) {
-    selectedMathesarType = mathesarType;
-  }
-
-  function resetSelection() {
-    selectedMathesarType = undefined;
-  }
+  $: dbTypeOptions = calculateDBTypeOptions(selectedAbstractType);
 
   function close() {
-    resetSelection();
+    resetAbstractType();
     dispatch('close');
   }
 
   function onSave() {
-    // void columnsDataStore.patchType(column.index, selectedMathesarType);
+    void columnsDataStore.patchType(column.index, selectedDBTypeOption.id);
     close();
   }
 </script>
@@ -85,11 +71,11 @@
 <div class="column-type-menu">
   <h5 class="menu-header">Set Column Type</h5>
   <ul class="type-list">
-    {#each validMathesarTypeTargets as mathesarType (mathesarType.identifier)}
-      <li class:selected={selectedMathesarType === mathesarType}>
-        <Button appearance="plain" on:click={() => selectMathesarType(mathesarType)}>
-          <span class="data-icon">{getMathesarTypeIcon(mathesarType)}</span>
-          <span>{mathesarType.name}</span>
+    {#each allowedTypeConversions as abstractType (abstractType.identifier)}
+      <li class:selected={selectedAbstractType?.identifier === abstractType?.identifier}>
+        <Button appearance="plain" on:click={() => selectAbstractType(abstractType)}>
+          <span class="data-icon">{abstractType.icon}</span>
+          <span>{abstractType.name}</span>
         </Button>
       </li>
     {/each}
@@ -100,7 +86,7 @@
     <ul class="type-option-tabs">
       <li>
         <Button appearance="ghost" class="padding-zero type-option-tab">
-          <Icon size="0.75rem" data={faDatabase}/>
+          <Icon size="0.75em" data={faDatabase}/>
           <span>Database</span>
         </Button>
       </li>
@@ -108,13 +94,14 @@
     <div class="type-options-content">
       <div>Type in db</div>
       <Select triggerAppearance="default" triggerClass="db-type-select"
-        options={column.valid_target_types.map((entry) => ({ id: entry, label: entry }))}/>
+        bind:value={selectedDBTypeOption}
+        options={dbTypeOptions}/>
     </div>
   </div>
 
   <div class="divider"></div>
   <div class="type-menu-footer">
-    <Button appearance="primary" disabled={!selectedMathesarType} on:click={onSave}>
+    <Button appearance="primary" disabled={!selectedAbstractType} on:click={onSave}>
       Save
     </Button>
     <Button appearance="default" on:click={close}>
