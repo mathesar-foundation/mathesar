@@ -1,11 +1,11 @@
 import { writable, derived } from 'svelte/store';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { getAPI, States } from '@mathesar/utils/api';
+import { notEmpty } from '@mathesar/utils/language';
 
 import type { Writable, Readable } from 'svelte/store';
 import type { Database } from '@mathesar/App.d';
 import type { PaginatedResponse } from '@mathesar/utils/api';
-import { notEmpty } from '@mathesar/utils/language';
 import type { CancellablePromise } from '@mathesar/components';
 
 const commonData = preloadCommonData();
@@ -24,7 +24,6 @@ export interface DatabaseStoreData {
 export const databases = writable<DatabaseStoreData>({
   preload: true,
   state: States.Loading,
-  // TODO an empty list is ambiguous, undefined would be preferable
   data: commonData.databases || [],
 });
 
