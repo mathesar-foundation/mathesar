@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
+  import {
+    faAngleDown,
+  } from '@fortawesome/free-solid-svg-icons';
   import {
     portal,
     popper,
@@ -21,11 +23,11 @@
   const dispatch = createEventDispatcher();
 
   export let triggerClass = '';
-  export let triggerAppearance: Appearance = 'default';
+  export let triggerAppearance : Appearance = 'default';
   export let contentClass = '';
   export let isOpen = false;
   export let closeOnInnerClick = false;
-  export let ariaLabel: string = null;
+  export let ariaLabel:string = null;
   export let ariaControls: string = null;
   export let placement: Placement = 'bottom-start';
   export let showArrow = true;
@@ -94,19 +96,10 @@
   }
 </script>
 
-<Button
-  bind:element={triggerElement}
-  appearance={triggerAppearance}
-  class={tgClasses}
-  on:click={toggle} 
-  aria-controls={ariaControls}
-  aria-haspopup="listbox"
-  aria-label={ariaLabel}
-  {size}
-  on:keydown
->
+<Button bind:element={triggerElement} appearance={triggerAppearance} class={tgClasses} on:click={toggle} 
+  aria-controls={ariaControls} aria-haspopup="listbox" aria-label={ariaLabel} {size} on:keydown>
   <span class="label">
-    <slot name="trigger"/>
+    <slot name="trigger"></slot>
   </span>
   {#if showArrow}
     <span class="arrow">
@@ -127,7 +120,7 @@
     }}
     on:click={checkAndCloseOnInnerClick}
   >
-    <slot name="content"/>
+    <slot name="content"></slot>
   </div>
 {/if}
 
