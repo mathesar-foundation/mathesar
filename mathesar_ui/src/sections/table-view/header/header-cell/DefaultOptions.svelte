@@ -42,8 +42,8 @@
 </script>
 
 <ul>
-  <li on:click={() => handleSort('asc')}>
-    <Button appearance="plain">
+  <li>
+    <Button appearance="plain" on:click={() => handleSort('asc')}>
       <Icon class="opt" data={faSortAmountDownAlt}/>
       <span>
         {#if sortDirection === 'asc'}
@@ -54,8 +54,8 @@
       </span>
     </Button>
   </li>
-  <li on:click={() => handleSort('desc')}>
-    <Button appearance="plain">
+  <li>
+    <Button appearance="plain" on:click={() => handleSort('desc')}>
       <Icon class="opt" data={faSortAmountDown}/>
       <span>
         {#if sortDirection === 'desc'}
@@ -66,8 +66,8 @@
       </span>
     </Button>
   </li>
-  <li on:click={toggleGroup}>
-    <Button appearance="plain">
+  <li>
+    <Button appearance="plain" on:click={toggleGroup}>
       <Icon class="opt" data={faThList}/>
       <span>
         {#if hasGrouping}

@@ -1,13 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher, getContext } from 'svelte';
   import {
+    faDatabase,
+  } from '@fortawesome/free-solid-svg-icons';
+  import {
     currentDBMathesarTypes,
     getMathesarTypeIcon,
     getValidDbTypeTargetsPerMathesarType,
     mathesarTypeHasAtLeastOneValidDbTypeTarget,
     determineMathesarType,
   } from '@mathesar/stores/mathesarTypes';
-  import { Button } from '@mathesar-components';
+  import { Button, Icon, Select } from '@mathesar-components';
 
   import type {
     Column,
@@ -79,37 +82,47 @@
   }
 </script>
 
-<div class="container">
-  <h6 class="category">Data Type Options</h6>
-  <span class="title">Set Column Type</span>
+<div class="column-type-menu">
+  <h5 class="menu-header">Set Column Type</h5>
   <ul class="type-list">
     {#each validMathesarTypeTargets as mathesarType (mathesarType.identifier)}
-      {#if mathesarType !== columnMathesarType}
-        <li>
-          <button
-            on:click={() => selectMathesarType(mathesarType)}
-            selected={selectedMathesarType === mathesarType}
-          >
-            <div>
-              <span class="data-icon">{getMathesarTypeIcon(mathesarType)}</span>
-              <span>{mathesarType.name}</span>
-            </div>
-          </button>
-        </li>
-      {/if}
-    {:else}
-      <li>
+      <li class:selected={selectedMathesarType === mathesarType}>
+        <Button appearance="plain" on:click={() => selectMathesarType(mathesarType)}>
+          <span class="data-icon">{getMathesarTypeIcon(mathesarType)}</span>
+          <span>{mathesarType.name}</span>
+        </Button>
       </li>
     {/each}
   </ul>
-  <span><i>Placeholder for type options</i></span>
+  
+  <div class="type-options">
+    <!-- TODO: Make tab container more generic to be used here -->
+    <ul class="type-option-tabs">
+      <li>
+        <Button appearance="ghost" class="padding-zero type-option-tab">
+          <Icon size="0.75rem" data={faDatabase}/>
+          <span>Database</span>
+        </Button>
+      </li>
+    </ul>
+    <div class="type-options-content">
+      <div>Type in db</div>
+      <Select triggerAppearance="default" triggerClass="db-type-select"
+        options={column.valid_target_types.map((entry) => ({ id: entry, label: entry }))}/>
+    </div>
+  </div>
+
   <div class="divider"></div>
-  <div class="button-row">
-    <Button appearance="secondary" on:click={close}>
-      Cancel
-    </Button>
+  <div class="type-menu-footer">
     <Button appearance="primary" disabled={!selectedMathesarType} on:click={onSave}>
       Save
     </Button>
-  </div>
+    <Button appearance="default" on:click={close}>
+      Cancel
+    </Button>
+  </div>  
 </div>
+
+<style global lang="scss">
+  @import "TypeOptions.scss";
+</style>

@@ -1,12 +1,11 @@
 import type { Database } from '@mathesar/App.d';
 import { getAPI } from '@mathesar/utils/api';
 import { intersection, pair, notEmpty } from '@mathesar/utils/language';
-import { patchColumnType } from '@mathesar/stores/tableData';
 import { derived } from 'svelte/store';
 import type { Readable } from 'svelte/store';
 import type { DatabaseStoreData } from '@mathesar/stores/databases';
 import { databases, currentDBId } from '@mathesar/stores/databases';
-import type { TableColumn } from '@mathesar/stores/tableData';
+import type { Column } from '@mathesar/stores/table-data/types';
 
 // TODO move to App.d.ts, next to Database
 export type DbType = string;
@@ -121,11 +120,11 @@ dummySubscribe(currentDBMathesarTypes);
 export type DbTypeTargetsPerMathesarType = Map<MathesarType['identifier'], DbType[]>;
 
 function getValidDbTypeTargetsForColumnAndMathesarType(
-  column: TableColumn,
+  column: Column,
   mathesarType: MathesarType,
 ): DbType[] {
   return intersection(
-    new Set(column.validTargetTypes),
+    new Set(column.valid_target_types),
     new Set(mathesarType.db_types),
   );
 }
@@ -136,7 +135,7 @@ function getValidDbTypeTargetsForColumnAndMathesarType(
  * and DbType targets on the column (as returned by the column API).
  */
 export function getValidDbTypeTargetsPerMathesarType(
-  column: TableColumn,
+  column: Column,
   mathesarTypes: MathesarType[],
 ): DbTypeTargetsPerMathesarType {
   const pairs = mathesarTypes.map(
@@ -167,10 +166,10 @@ export function patchColumnToMathesarType(
   validDbTypeTargetsPerMathesarType: DbTypeTargetsPerMathesarType,
   mathesarType: MathesarType,
 ): void {
-  if (validDbTypeTargetsPerMathesarType) {
-    const newDbType = choosePreferredDbTypeTarget(mathesarType);
-    const reloadTable = () => dispatch('reload');
-    void patchColumnType(tableId, columnId, newDbType)
-      .then(reloadTable);
-  }
+  // if (validDbTypeTargetsPerMathesarType) {
+  //   const newDbType = choosePreferredDbTypeTarget(mathesarType);
+  //   const reloadTable = () => dispatch('reload');
+  //   void patchColumnType(tableId, columnId, newDbType)
+  //     .then(reloadTable);
+  // }
 }

@@ -52,7 +52,7 @@
           {#if view === 'default'}
           <h6 class="category">Data Type</h6>
           <Button class="type-switch" appearance="plain" on:click={setTypeView}>
-            <span>Text</span>
+            <span>{column.type}</span>
             <Icon size="0.8em" data={faCog}/>
             <Icon size="0.7em" data={faChevronRight}/>
           </Button>
@@ -70,6 +70,7 @@
 
         <div class="section">
           {#if view === 'default'}
+            <h6 class="category">Operations</h6>
             <DefaultOptions {meta} {column} on:close={closeDropdown}/>
           {:else if view === 'type'}
             <TypeOptions {column} on:close={closeDropdown}/>
