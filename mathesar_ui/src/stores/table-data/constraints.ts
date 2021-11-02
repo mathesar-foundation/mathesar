@@ -1,6 +1,9 @@
 import { writable, get as getStoreValue, derived } from 'svelte/store';
 import {
-  deleteAPI, getAPI, postAPI, States,
+  deleteAPI,
+  getAPI,
+  postAPI,
+  States,
 } from '@mathesar/utils/api';
 import type {
   Writable,
@@ -29,6 +32,20 @@ export interface ConstraintsData {
   constraints: Constraint[],
 }
 
+function api(url: string) {
+  return {
+    get() {
+      return getAPI<PaginatedResponse<Constraint>>(`${url}?limit=500`);
+    },
+    add(constraintDetails: Partial<Constraint>) {
+      return postAPI<Partial<Constraint>>(url, constraintDetails);
+    },
+    remove(constraintId: Constraint['id']) {
+      return deleteAPI(`${url}${constraintId}`);
+    },
+  };
+}
+
 export class ConstraintsDataStore implements Writable<ConstraintsData> {
   private parentId: DBObjectEntry['id'];
 
@@ -36,7 +53,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
   private promise: CancellablePromise<PaginatedResponse<Constraint>> | null;
 
-  private url: string;
+  private api: ReturnType<typeof api>;
 
   private fetchCallback: (storeData: ConstraintsData) => void;
 
@@ -49,8 +66,8 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
       state: States.Loading,
       constraints: [],
     });
-    this.url = `/tables/${this.parentId}/constraints/`;
     this.fetchCallback = fetchCallback;
+    this.api = api(`/tables/${this.parentId}/constraints/`);
     void this.fetch();
   }
 
@@ -80,8 +97,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
     try {
       this.promise?.cancel();
-      const url = `${this.url}?limit=500`;
-      this.promise = getAPI<PaginatedResponse<Constraint>>(url);
+      this.promise = this.api.get();
 
       const response = await this.promise;
 
@@ -105,13 +121,13 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
   }
 
   async add(constraintDetails: Partial<Constraint>): Promise<Partial<Constraint>> {
-    const constraint = await postAPI<Partial<Constraint>>(this.url, constraintDetails);
+    const constraint = await this.api.add(constraintDetails);
     await this.fetch();
     return constraint;
   }
 
   async remove(constraintId: number): Promise<void> {
-    await deleteAPI(`${this.url}${constraintId}`);
+    await this.api.remove(constraintId);
     await this.fetch();
   }
 
@@ -183,10 +199,10 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     }
     // Technically, one column can have two unique constraints applied on it,
     // with different names. So we need to make sure do delete _all_ of them.
-    // TODO address problem with concurrent fetching in `remove`
     await Promise.all(uniqueConstraintsForColumn.map(
-      (constraint) => this.remove(constraint.id),
+      (constraint) => this.api.remove(constraint.id),
     ));
+    await this.fetch();
     return false;
   }
 
