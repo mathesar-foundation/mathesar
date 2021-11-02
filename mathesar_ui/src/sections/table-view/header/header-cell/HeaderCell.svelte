@@ -5,17 +5,22 @@
     faChevronLeft,
   } from '@fortawesome/free-solid-svg-icons';
   import { Dropdown, Icon, Button } from '@mathesar-components';
+  import { abstractTypes, getAbstractTypeForDBType } from '@mathesar/stores/abstractTypes';
+
   import type {
     Meta,
     Column,
     ColumnPosition,
   } from '@mathesar/stores/table-data/types';
+
   import DefaultOptions from './DefaultOptions.svelte';
   import TypeOptions from './type-options/TypeOptions.svelte';
 
   export let columnPosition: ColumnPosition;
   export let column: Column;
   export let meta: Meta;
+
+  $: abstractTypeOfColumn = getAbstractTypeForDBType(column.type, $abstractTypes.data);
 
   let isOpen = false;
   let view: 'default' | 'type' = 'default';
@@ -42,7 +47,7 @@
             on:close={setDefaultView}>
     <svelte:fragment slot="trigger">
       <span class="type">
-        #
+        {abstractTypeOfColumn.icon}
       </span>
       <span class="name">{column.name}</span>
     </svelte:fragment>
@@ -52,7 +57,7 @@
           {#if view === 'default'}
           <h6 class="category">Data Type</h6>
           <Button class="type-switch" appearance="plain" on:click={setTypeView}>
-            <span>{column.type}</span>
+            <span>{abstractTypeOfColumn.name}</span>
             <Icon size="0.8em" data={faCog}/>
             <Icon size="0.7em" data={faChevronRight}/>
           </Button>
@@ -73,7 +78,7 @@
             <h6 class="category">Operations</h6>
             <DefaultOptions {meta} {column} on:close={closeDropdown}/>
           {:else if view === 'type'}
-            <TypeOptions {column} on:close={closeDropdown}/>
+            <TypeOptions {column} {abstractTypeOfColumn} on:close={closeDropdown}/>
           {/if}
         </div>
     </svelte:fragment>

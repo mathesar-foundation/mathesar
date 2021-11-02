@@ -2,7 +2,7 @@
   import { createEventDispatcher, getContext } from 'svelte';
   import { faDatabase } from '@fortawesome/free-solid-svg-icons';
   import { Button, Icon, Select } from '@mathesar-components';
-  import { abstractTypes, getAbstractTypeForDBType } from '@mathesar/stores/abstractTypes';
+  import { abstractTypes } from '@mathesar/stores/abstractTypes';
   import {
     ColumnsDataStore,
   } from '@mathesar/stores/table-data';
@@ -22,9 +22,9 @@
   $: ({ columnsDataStore } = $tabularData as TabularData);
 
   export let column: Column;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  export let abstractTypeOfColumn: AbstractType;
+
   $: allowedTypeConversions = ColumnsDataStore.getAllowedTypeConversions(column, $abstractTypes.data);
-  $: abstractTypeOfColumn = getAbstractTypeForDBType(column.type, $abstractTypes.data);
   
   let selectedAbstractType: AbstractType = null;
   let selectedDBTypeOption: SelectOption<DbType> = null;
