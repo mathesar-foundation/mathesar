@@ -49,7 +49,14 @@ const dbMTTypesRequestMap: Map<Database['id'], CancellablePromise<AbstractTypeRe
 
 // TODO: Remove this temporary function once api sends icon related information.
 function getIconForType(typeResponse: AbstractTypeResponse) {
-  return '#';
+  switch (typeResponse.identifier) {
+    case 'number':
+      return '#';
+    case 'text':
+      return 'T';
+    default:
+      return '?';
+  }
 }
 
 export async function refetchTypesForDB(databaseId: Database['id']): Promise<AbstractTypeStoreData> {
