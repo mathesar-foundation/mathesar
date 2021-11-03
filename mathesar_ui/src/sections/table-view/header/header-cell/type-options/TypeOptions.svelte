@@ -1,11 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher, getContext } from 'svelte';
-  import { faDatabase } from '@fortawesome/free-solid-svg-icons';
+  import { faDatabase, faSpinner } from '@fortawesome/free-solid-svg-icons';
   import { Button, Icon, Select } from '@mathesar-components';
   import { abstractTypes } from '@mathesar/stores/abstractTypes';
   import {
     ColumnsDataStore,
   } from '@mathesar/stores/table-data';
+  import { States } from '@mathesar/utils/api';
 
   import type { DbType } from '@mathesar/App.d';
   import type {
@@ -31,6 +32,7 @@
 
   let selectedAbstractType: AbstractType = null;
   let selectedDBTypeOption: SelectOption<DbType> = null;
+  let typeChangeState = States.Idle;
 
   function selectAbstractType(abstractType: AbstractType) {
     selectedAbstractType = abstractType;
@@ -73,12 +75,16 @@
 
   function close() {
     resetAbstractType();
+    typeChangeState = States.Done;
     dispatch('close');
   }
 
-  function onSave() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    void columnsDataStore.patchType(column.index, selectedDBTypeOption.id);
+  async function onSave() {
+    if (selectedDBTypeOption.id !== column.type) {
+      typeChangeState = States.Loading;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      await columnsDataStore.patchType(column.index, selectedDBTypeOption.id);
+    }
     close();
   }
 </script>
@@ -116,11 +122,16 @@
 
   <div class="divider"></div>
   <div class="type-menu-footer">
-    <Button appearance="primary" disabled={!selectedAbstractType} on:click={onSave}>
-      Save
+    <Button appearance="primary" disabled={
+        !selectedAbstractType || typeChangeState === States.Loading
+      } on:click={onSave}>
+      {#if typeChangeState === States.Loading}
+        <Icon data={faSpinner} spin={true}/>
+      {/if}
+      <span>Save</span>
     </Button>
     <Button appearance="default" on:click={close}>
-      Cancel
+      Close
     </Button>
   </div>  
 </div>
