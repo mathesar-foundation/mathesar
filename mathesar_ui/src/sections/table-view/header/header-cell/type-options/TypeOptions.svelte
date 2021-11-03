@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, getContext } from 'svelte';
+  import { createEventDispatcher, getContext, tick } from 'svelte';
   import { faDatabase, faSpinner } from '@fortawesome/free-solid-svg-icons';
   import { Button, Icon, Select } from '@mathesar-components';
   import { abstractTypes } from '@mathesar/stores/abstractTypes';
@@ -24,6 +24,7 @@
 
   export let column: Column;
   export let abstractTypeOfColumn: AbstractType;
+  let abstractTypeContainer: HTMLUListElement;
 
   $: allowedTypeConversions = ColumnsDataStore.getAllowedTypeConversions(
     column,
@@ -57,8 +58,17 @@
     };
   }
 
+  async function scrollToSelectedType() {
+    await tick();
+    const selectedElement: HTMLLIElement = abstractTypeContainer?.querySelector('li.selected');
+    if (selectedElement) {
+      abstractTypeContainer.scrollTop = selectedElement.offsetTop;
+    }
+  }
+
   $: if (!selectedAbstractType && abstractTypeOfColumn) {
     resetAbstractType();
+    void scrollToSelectedType();
   }
 
   function calculateDBTypeOptions(_selectedAbstractType: AbstractType): SelectOption[] {
@@ -91,7 +101,7 @@
 
 <div class="column-type-menu">
   <h5 class="menu-header">Set Column Type</h5>
-  <ul class="type-list">
+  <ul bind:this={abstractTypeContainer} class="type-list">
     {#each allowedTypeConversions as abstractType (abstractType.identifier)}
       <li class:selected={selectedAbstractType?.identifier === abstractType?.identifier}>
         <Button appearance="plain" on:click={() => selectAbstractType(abstractType)}>

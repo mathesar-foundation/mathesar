@@ -22,7 +22,7 @@
         border-bottom: none;
       }
 
-      &.selected {
+      &.selected > button {
         background: #dfdfdf;
         font-weight: 600;
       }
