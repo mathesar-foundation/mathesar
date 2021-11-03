@@ -20,7 +20,7 @@
     ColumnsData,
     Meta,
   } from '@mathesar/stores/table-data/types';
-  import type { SelectOption } from '@mathesar/components/types';
+  import type { SelectOption } from '@mathesar-component-library/types';
   import { refreshTableContent } from '@mathesar/stores/table-data/store';
   import type { ConstraintsDataStore } from '@mathesar/stores/table-data/constraints';
   import TableConstraints from '../constraints/TableConstraints.svelte';

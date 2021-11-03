@@ -6,7 +6,7 @@ import { getAPI, States } from '@mathesar/utils/api';
 import type { Writable } from 'svelte/store';
 import type { Database } from '@mathesar/App.d';
 import type { PaginatedResponse } from '@mathesar/utils/api';
-import type { CancellablePromise } from '@mathesar/components';
+import type { CancellablePromise } from '@mathesar-component-library';
 
 const commonData = preloadCommonData();
 export const currentDBName: Writable<Database['name']> = writable(
