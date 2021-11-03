@@ -24,11 +24,10 @@
   export let column: Column;
   export let abstractTypeOfColumn: AbstractType;
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   $: allowedTypeConversions = ColumnsDataStore.getAllowedTypeConversions(
     column,
     $abstractTypes.data,
-  ) as AbstractType[];
+  );
 
   let selectedAbstractType: AbstractType = null;
   let selectedDBTypeOption: SelectOption<DbType> = null;
