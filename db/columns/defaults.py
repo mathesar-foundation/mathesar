@@ -8,6 +8,7 @@ NULLABLE = "nullable"
 PRIMARY_KEY = "primary_key"
 TYPE = "sa_type"
 DEFAULT = "default"
+AUTOINCREMENT = "autoincrement"
 
 ID_TYPE = Integer
 
@@ -16,6 +17,7 @@ DEFAULT_COLUMNS = {
     constants.ID: {
         TYPE: ID_TYPE,
         PRIMARY_KEY: True,
-        NULLABLE: False
+        NULLABLE: False,
+        AUTOINCREMENT: True
     }
 }

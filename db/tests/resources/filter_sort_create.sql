@@ -1,5 +1,5 @@
 CREATE TABLE "filter_sort" (
-    mathesar_id integer NOT NULL,
+    id integer NOT NULL,
     str_id varchar(32) NOT NULL,
     "varchar" varchar(32),
     "numeric" integer,
@@ -115,4 +115,4 @@ INSERT INTO "filter_sort" VALUES
 (105,'a',NULL,NULL,NULL,NULL);
 
 ALTER TABLE ONLY "filter_sort"
-    ADD CONSTRAINT "filter_sort_pkey" PRIMARY KEY (mathesar_id, str_id);
+    ADD CONSTRAINT "filter_sort_pkey" PRIMARY KEY (id, str_id);

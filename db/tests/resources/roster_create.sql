@@ -1,5 +1,5 @@
 CREATE TABLE "Roster" (
-    mathesar_id integer NOT NULL,
+    id integer NOT NULL,
     "Student Number" uuid,
     "Student Name" character varying(100),
     "Student Email" character varying(150),
@@ -9,7 +9,7 @@ CREATE TABLE "Roster" (
     "Grade" integer
 );
 
-CREATE SEQUENCE "Roster_mathesar_id_seq"
+CREATE SEQUENCE "Roster_id_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -17,9 +17,9 @@ CREATE SEQUENCE "Roster_mathesar_id_seq"
     NO MAXVALUE
     CACHE 1;
 
-ALTER SEQUENCE "Roster_mathesar_id_seq" OWNED BY "Roster".mathesar_id;
+ALTER SEQUENCE "Roster_id_seq" OWNED BY "Roster".id;
 
-ALTER TABLE ONLY "Roster" ALTER COLUMN mathesar_id SET DEFAULT nextval('"Roster_mathesar_id_seq"'::regclass);
+ALTER TABLE ONLY "Roster" ALTER COLUMN id SET DEFAULT nextval('"Roster_id_seq"'::regclass);
 
 INSERT INTO "Roster" VALUES
 (1, '9f9b4f81-5d07-4760-acb3-3bd3bccbaa35'::uuid, 'Stephanie Norris', 'stephanienorris@hotmail.com', 'James Jones', 'jamesjones@gmail.com', 'Physics', 43),
@@ -1023,7 +1023,7 @@ INSERT INTO "Roster" VALUES
 (999, '751a2130-0254-408a-8885-2ac4b6473ee3'::uuid, 'Carlos Kennedy', 'carloskennedy@gmail.com', 'Barbara Riley', 'barbarariley@hotmail.com', 'Biology', 83),
 (1000, '751a2130-0254-408a-8885-2ac4b6473ee3'::uuid, 'Carlos Kennedy', 'carloskennedy@gmail.com', 'James Mccarthy', 'jamesmccarthy@yahoo.com', 'History', 80);
 
-SELECT pg_catalog.setval('"Roster_mathesar_id_seq"', 1000, true);
+SELECT pg_catalog.setval('"Roster_id_seq"', 1000, true);
 
 ALTER TABLE ONLY "Roster"
-    ADD CONSTRAINT "Roster_pkey" PRIMARY KEY (mathesar_id);
+    ADD CONSTRAINT "Roster_pkey" PRIMARY KEY (id);
