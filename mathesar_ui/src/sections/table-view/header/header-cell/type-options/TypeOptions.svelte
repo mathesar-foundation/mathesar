@@ -35,6 +35,17 @@
 
   function selectAbstractType(abstractType: AbstractType) {
     selectedAbstractType = abstractType;
+    if (abstractType.identifier === abstractTypeOfColumn.identifier) {
+      selectedDBTypeOption = {
+        id: column.type,
+        label: column.type,
+      };
+    } else if (abstractType.defaultDbType) {
+      selectedDBTypeOption = {
+        id: abstractType.defaultDbType,
+        label: abstractType.defaultDbType,
+      };
+    }
   }
 
   function resetAbstractType() {

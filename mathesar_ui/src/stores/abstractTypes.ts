@@ -26,7 +26,8 @@ interface AbstractTypeResponse {
 export interface AbstractType extends Omit<AbstractTypeResponse, 'db_types'> {
   dbTypes: Set<DbType>,
   // In the future, this would be base64 or link to svg. Currently it is just a direct string.
-  icon: string
+  icon: string,
+  defaultDbType?: DbType,
 }
 
 export const UnknownAbstractType: AbstractType = {
@@ -59,6 +60,18 @@ function getIconForType(typeResponse: AbstractTypeResponse) {
   }
 }
 
+// TODO: Remove this temporary function once api sends default db type related information.
+function getDefaultDbTypeForType(typeResponse: AbstractTypeResponse) {
+  switch (typeResponse.identifier) {
+    case 'number':
+      return 'NUMERIC';
+    case 'text':
+      return 'VARCHAR';
+    default:
+      return typeResponse.db_types[0];
+  }
+}
+
 export async function refetchTypesForDB(databaseId: Database['id']): Promise<AbstractTypeStoreData> {
   const store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
@@ -85,6 +98,7 @@ export async function refetchTypesForDB(databaseId: Database['id']): Promise<Abs
         ...entry,
         dbTypes: new Set(entry.db_types),
         icon: getIconForType(entry),
+        defaultDbType: getDefaultDbTypeForType(entry),
       };
       delete typeInfo.db_types;
       abstractTypeStoreData.set(typeInfo.identifier, typeInfo);
