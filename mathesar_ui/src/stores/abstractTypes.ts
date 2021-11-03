@@ -1,27 +1,13 @@
 import { derived, writable, get } from 'svelte/store';
 import { getAPI, States } from '@mathesar/utils/api';
 import { currentDBId } from '@mathesar/stores/databases';
+import { preloadCommonData } from '@mathesar/utils/preloadData';
 
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
-import type { Database, DbType } from '@mathesar/App.d';
+import type { Database, DbType, AbstractTypeResponse } from '@mathesar/App.d';
 import type { CancellablePromise } from '@mathesar/components';
 
-export interface FilterConfiguration {
-  db_type: DbType,
-  opitons: {
-    op?: string,
-    value?: {
-      allowed_types: DbType[]
-    }
-  }[]
-}
-
-interface AbstractTypeResponse {
-  name: string,
-  identifier: string,
-  db_types: DbType[],
-  filters?: FilterConfiguration
-}
+const commonData = preloadCommonData();
 
 export interface AbstractType extends Omit<AbstractTypeResponse, 'db_types'> {
   dbTypes: Set<DbType>,
@@ -72,6 +58,23 @@ function getDefaultDbTypeForType(typeResponse: AbstractTypeResponse) {
   }
 }
 
+function processTypeResponse(abstractTypeReponse: AbstractTypeResponse[]): AbstractTypeStoreData {
+  const abstractTypeStoreData: AbstractTypeStoreData = new Map();
+
+  abstractTypeReponse.forEach((entry) => {
+    const typeInfo = {
+      ...entry,
+      dbTypes: new Set(entry.db_types),
+      icon: getIconForType(entry),
+      defaultDbType: getDefaultDbTypeForType(entry),
+    };
+    delete typeInfo.db_types;
+    abstractTypeStoreData.set(typeInfo.identifier, typeInfo);
+  });
+
+  return abstractTypeStoreData;
+}
+
 export async function refetchTypesForDB(databaseId: Database['id']): Promise<AbstractTypeStoreData> {
   const store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
@@ -91,18 +94,7 @@ export async function refetchTypesForDB(databaseId: Database['id']): Promise<Abs
     dbMTTypesRequestMap.set(databaseId, typesRequest);
     const response = await typesRequest;
 
-    const abstractTypeStoreData: AbstractTypeStoreData = new Map();
-
-    response.forEach((entry) => {
-      const typeInfo = {
-        ...entry,
-        dbTypes: new Set(entry.db_types),
-        icon: getIconForType(entry),
-        defaultDbType: getDefaultDbTypeForType(entry),
-      };
-      delete typeInfo.db_types;
-      abstractTypeStoreData.set(typeInfo.identifier, typeInfo);
-    });
+    const abstractTypeStoreData = processTypeResponse(response);
 
     store.update((currentData) => ({
       ...currentData,
@@ -121,6 +113,8 @@ export async function refetchTypesForDB(databaseId: Database['id']): Promise<Abs
   }
 }
 
+let preload = true;
+
 function getTypesForDatabase(databaseId: Database['id']): Writable<AbstractTypeStore> {
   let store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
@@ -130,7 +124,15 @@ function getTypesForDatabase(databaseId: Database['id']): Writable<AbstractTypeS
     });
     databasesToAbstractTypesStoreMap.set(databaseId, store);
 
-    void refetchTypesForDB(databaseId);
+    if (preload) {
+      preload = false;
+      store = writable({
+        state: States.Done,
+        data: processTypeResponse(commonData.abstract_types),
+      });
+    } else {
+      void refetchTypesForDB(databaseId);
+    }
   } else if (get(store).error) {
     void refetchTypesForDB(databaseId);
   }
