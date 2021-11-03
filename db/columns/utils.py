@@ -1,4 +1,4 @@
-from sqlalchemy import Table, MetaData, Integer
+from sqlalchemy import Table, MetaData
 
 from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT_COLUMNS
