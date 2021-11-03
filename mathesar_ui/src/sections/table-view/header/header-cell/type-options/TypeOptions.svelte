@@ -24,8 +24,12 @@
   export let column: Column;
   export let abstractTypeOfColumn: AbstractType;
 
-  $: allowedTypeConversions = ColumnsDataStore.getAllowedTypeConversions(column, $abstractTypes.data);
-  
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  $: allowedTypeConversions = ColumnsDataStore.getAllowedTypeConversions(
+    column,
+    $abstractTypes.data,
+  ) as AbstractType[];
+
   let selectedAbstractType: AbstractType = null;
   let selectedDBTypeOption: SelectOption<DbType> = null;
 
@@ -63,6 +67,7 @@
   }
 
   function onSave() {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     void columnsDataStore.patchType(column.index, selectedDBTypeOption.id);
     close();
   }
