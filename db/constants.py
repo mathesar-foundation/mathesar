@@ -1,2 +1,3 @@
 MATHESAR_PREFIX = "mathesar_"
-ID = f"{MATHESAR_PREFIX}id"
+ID = "id"
+ID_ORIGINAL = "id_original"

@@ -7,14 +7,14 @@
   import { Dropdown, Icon } from '@mathesar-components';
   import type {
     Meta,
-    TableColumn,
+    Column,
     SortOption,
     GroupOption,
     ColumnPosition,
   } from '@mathesar/stores/table-data/types';
 
   export let columnPosition: ColumnPosition;
-  export let column: TableColumn;
+  export let column: Column;
   export let meta: Meta;
 
   $: ({ sort, group } = meta);
