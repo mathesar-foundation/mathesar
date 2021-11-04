@@ -21,26 +21,14 @@ def _validate_nested_ops(filters):
                 _validate_nested_ops(op[field])
 
 
-def _create_query_with_duplicate_filter(table, duplicate_columns, cols=None):
-    subq_table = table.alias()
-    table_duplicate_columns = [c for c in table.c if c.name in duplicate_columns]
-    subq_duplicate_columns = [c for c in subq_table.c if c.name in duplicate_columns]
-    subq = (
-        select(true().label(DUPLICATE_LABEL))
-        .select_from(subq_table)
-        .group_by(*subq_duplicate_columns)
-        .having(and_(
-            func.count() > 1,
-            *[c == subq_c for c, subq_c in zip(table_duplicate_columns, subq_duplicate_columns)]
-        ))
-        .lateral("lateral_subq")
-    )
-    query = (
-        select(*(cols or table.c))
-        .select_from(table.join(subq, true()))
-        .where(subq.c[DUPLICATE_LABEL])
-    )
-    return query
+def _get_duplicate_only_cte(table, duplicate_columns):
+    duplicate_flag_cte = (
+        select(
+            *table.c,
+            (func.count(1).over(partition_by=duplicate_columns) > 1).label(DUPLICATE_LABEL),
+        ).select_from(table)
+    ).cte()
+    return select(duplicate_flag_cte).where(duplicate_flag_cte.c[DUPLICATE_LABEL]).cte()
 
 
 def _get_duplicate_data_columns(table, filters):
@@ -67,9 +55,11 @@ def _get_duplicate_data_columns(table, filters):
 def get_query(table, limit, offset, order_by, filters, cols=None):
     duplicate_columns, filters = _get_duplicate_data_columns(table, filters)
     if duplicate_columns:
-        query = _create_query_with_duplicate_filter(table, duplicate_columns, cols)
+        select_target = _get_duplicate_only_cte(table, duplicate_columns)
     else:
-        query = select(*(cols or table.c)).select_from(table)
+        select_target = table
+
+    query = select(*(cols or select_target.c)).select_from(select_target)
 
     query = query.limit(limit).offset(offset)
     if order_by is not None:
@@ -109,7 +99,7 @@ def get_records(
         # Set default ordering if none was requested
         if len(table.primary_key.columns) > 0:
             # If there are primary keys, order by all primary keys
-            order_by = [{'field': col, 'direction': 'asc'}
+            order_by = [{'field': str(col.name), 'direction': 'asc'}
                         for col in table.primary_key.columns]
         else:
             # If there aren't primary keys, order by all columns
