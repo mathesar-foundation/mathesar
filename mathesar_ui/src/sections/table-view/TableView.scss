@@ -1,82 +1,7 @@
-$display-opts-pane-width: 360px;
-
 section.table-section .tab-container .table-data {
   flex-grow: 1;
   overflow: hidden;
   position: relative;
-
-  .display-options-pane {
-    position: absolute;
-    left: -$display-opts-pane-width;
-    width: $display-opts-pane-width;
-    top: 0;
-    bottom: 0;
-    border-right: 1px solid #e2e2e2;
-    overflow-y: auto;
-    overflow-x: hidden;
-    background: #F4F4F6;
-
-    .display-opts {
-      padding: 10px 12px;
-
-      .header {
-        font-weight: 500;
-        display: flex;
-        justify-content: space-between;
-      }
-
-      >section {
-        margin-top: 10px;
-        padding: 10px 0px;
-
-        .content {
-          margin-top: 10px;
-
-          table {
-            width: 100%;
-
-            td.column {
-              width: 104px;
-              >button {
-                width: 100px;
-              }
-            }
-            td.dir {
-              width: 78px;
-              >button {
-                width: 74px;
-              }
-            }
-            td.groupcolumn {
-              width: 182px;
-              >button {
-                width: 178px;
-              }
-            }
-            td.filter-action {
-              text-align: right;
-            }
-            td.value {
-              .text-input {
-                background: #fff;
-              }
-            }
-
-            tr.add-option td {
-              padding-top: 10px;
-            }
-          }
-
-          .empty-msg {
-            color: #606066;
-          }
-        }
-      }
-      >section + section {
-        border-top: 1px solid #e2e2e2;
-      }
-    }
-  }
 
   .table-content {
     overflow: hidden;
@@ -123,37 +48,8 @@ section.table-section .tab-container .table-data {
       overflow: hidden;
 
       .cell {
-        padding: 8px 28px 8px 10px;
         display: flex;
         border-bottom: none;
-
-        .type {
-          margin-right: 5px;
-          color: #7f7f7f;
-          font-weight: 500;
-        }
-
-        .name {
-          display: block;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .opts {
-          position: absolute;
-          right: 8px;
-          padding: 8px;
-          color: #8f8f8f;
-
-          >.arrow {
-            padding-right: 1px;
-          }
-        }
-
-        .unsorted {
-          color: #d2d2d2;
-        }
 
         &.row-control {
           background: #f9f9f9;
@@ -168,21 +64,6 @@ section.table-section .tab-container .table-data {
       right: 0px;
       bottom: 0px;
       overflow: hidden;
-    }
-  }
-
-  &.has-display-opts {
-    .display-options-pane {
-      left: 0px;
-    }
-
-    .table-content {
-      left: $display-opts-pane-width;
-    }
-  }
-  &.animate-opts {
-    .display-options-pane, .table-content {
-      transition: left .25s cubic-bezier(0,0,.2,1);
     }
   }
 }
