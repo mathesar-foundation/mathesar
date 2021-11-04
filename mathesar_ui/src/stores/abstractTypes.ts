@@ -126,10 +126,11 @@ function getTypesForDatabase(databaseId: Database['id']): Writable<AbstractTypeS
 
     if (preload) {
       preload = false;
-      store = writable({
+      store.update((currentData) => ({
+        ...currentData,
         state: States.Done,
         data: processTypeResponse(commonData.abstract_types),
-      });
+      }));
     } else {
       void refetchTypesForDB(databaseId);
     }
