@@ -22,6 +22,9 @@
 
   let importMethod = 'File';
   let fileUrl: string;
+  $:buttonControl = ($fileImportStore.uploadStatus !== States.Done
+            || $fileImportStore.previewTableCreationStatus === States.Loading)
+            && (importMethod !== 'URL' || $fileImportStore.uploadStatus === States.Loading);
 
   const options = [
     { id: 'File', label: 'File' },
@@ -71,14 +74,9 @@
   </Button>
 
   <Button appearance="primary"
-          disabled={
-            ($fileImportStore.uploadStatus !== States.Done
-            || $fileImportStore.previewTableCreationStatus === States.Loading)
-            && (importMethod !== 'URL' || $fileImportStore.uploadStatus === States.Loading)
-          }
+          disabled={buttonControl}
           on:click={() => confirmImport()}>
       Next
-
     {#if $fileImportStore.previewTableCreationStatus === States.Loading}
       <Icon data={faSpinner} spin={true}/>
     {/if}

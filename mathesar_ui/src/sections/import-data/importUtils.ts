@@ -379,10 +379,10 @@ export function cancelImport(fileImportStore: FileImport): void {
 }
 
 export async function uploadUrl(fileImportStore: FileImport, url: string): Promise<void> {
-  const formData = new FormData();
-  formData.append('url', url);
+  //does not work on error and console error when cancelling really fast
+  //work on spinner
   try {
-    const uploadResponse = await uploadFile<{ id: number }>('/data_files/', formData);
+    const uploadResponse = await postAPI<{ id: number }>('/data_files/', { url });
     const { id } = uploadResponse;
     setInFileStore(fileImportStore, {
       dataFileId: id,
@@ -390,7 +390,7 @@ export async function uploadUrl(fileImportStore: FileImport, url: string): Promi
       isDataFileInfoPresent: true,
       uploadStatus: States.Done,
     });
-    void loadPreview(fileImportStore);
+    void await loadPreview(fileImportStore);
   } catch (err: unknown) {
     setInFileStore(fileImportStore, {
       uploads: [],
