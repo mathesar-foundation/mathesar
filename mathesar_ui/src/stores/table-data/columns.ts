@@ -1,6 +1,13 @@
 import { writable, get as getStoreValue } from 'svelte/store';
-import { States, getAPI, postAPI } from '@mathesar/utils/api';
+import {
+  States,
+  getAPI,
+  postAPI,
+  patchAPI,
+} from '@mathesar/utils/api';
 import { TabularType } from '@mathesar/App.d';
+import { intersection } from '@mathesar/utils/language';
+
 import type {
   Writable,
   Updater,
@@ -9,16 +16,17 @@ import type {
 } from 'svelte/store';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
-import type { DBObjectEntry } from '@mathesar/App.d';
+import type { DBObjectEntry, DbType } from '@mathesar/App.d';
+import type { AbstractTypesMap, AbstractType } from '@mathesar/stores/abstractTypes';
 import type { Meta } from './meta';
 
 export interface Column {
   name: string,
-  type: string,
+  type: DbType,
   index: number,
   nullable: boolean,
   primary_key: boolean,
-  valid_target_types: string[],
+  valid_target_types: DbType[],
   __columnIndex?: number,
 }
 
@@ -155,6 +163,51 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
     const column = await postAPI<Partial<Column>>(this.url, newColumn);
     await this.fetch();
     return column;
+  }
+
+  // TODO: Analyze: Might be cleaner to move following functions as a property of Column class
+  // but are the object instantiations worth it?
+
+  async patchType(columnIndex: Column['index'], type: DbType): Promise<Partial<Column>> {
+    const column = await patchAPI<Partial<Column>>(
+      `${this.url}${columnIndex}/`,
+      { type },
+    );
+    await this.fetch();
+    this.callListeners('columnPatched', column);
+    return column;
+  }
+
+  /**
+   * Getting store data as argument for reactivity in components
+   * Another approach would be to subscribe to types store on class initialization
+   *  - That would require us to store the database id in Columns (which is probably a good idea)
+   *  - It would lead to calculation of allowed types when columns are fetched. Considering that
+   *    this would only be required when user opens particular views, it seems unnessary.
+   *  - It would cache the calculated allowed types, which benefits us.
+   * TODO: Subscribe to types store from Columns, when dynamic type related information is provided
+   * by server.
+   */
+  static getAllowedTypeConversions(
+    column: Column, abstractTypesMap: AbstractTypesMap,
+  ): AbstractType[] {
+    const allowedTypeConversions: AbstractType[] = [];
+    if (column && abstractTypesMap) {
+      const dbTargetTypeSet = new Set(column.valid_target_types);
+      abstractTypesMap.forEach((entry) => {
+        const allowedDBTypesInMTType = intersection(
+          dbTargetTypeSet,
+          entry.dbTypes,
+        );
+        if (allowedDBTypesInMTType.length > 0) {
+          allowedTypeConversions.push({
+            ...entry,
+            dbTypes: new Set(allowedDBTypesInMTType),
+          });
+        }
+      });
+    }
+    return allowedTypeConversions;
   }
 
   destroy(): void {
