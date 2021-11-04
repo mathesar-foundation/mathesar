@@ -92,8 +92,13 @@
   async function onSave() {
     if (selectedDBTypeOption.id !== column.type) {
       typeChangeState = States.Loading;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      await columnsDataStore.patchType(column.index, selectedDBTypeOption.id);
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        await columnsDataStore.patchType(column.index, selectedDBTypeOption.id);
+      } catch (err) {
+        // TODO: Figure out where to place error boundaries for toast system
+        console.error(err);
+      }
     }
     close();
   }
