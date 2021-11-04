@@ -23,16 +23,16 @@ export const UnknownAbstractType: AbstractType = {
   icon: '?',
 };
 
-export type AbstractTypeStoreData = Map<AbstractType['identifier'], AbstractType>;
+export type AbstractTypesMap = Map<AbstractType['identifier'], AbstractType>;
 
-export interface AbstractTypeStore {
+interface AbstractTypesSubstance {
   state: States,
-  data: AbstractTypeStoreData,
+  data: AbstractTypesMap,
   error?: string
 }
 
-const databasesToAbstractTypesStoreMap: Map<Database['id'], Writable<AbstractTypeStore>> = new Map();
-const dbMTTypesRequestMap: Map<Database['id'], CancellablePromise<AbstractTypeResponse[]>> = new Map();
+const databasesToAbstractTypesStoreMap: Map<Database['id'], Writable<AbstractTypesSubstance>> = new Map();
+const abstractTypesRequestMap: Map<Database['id'], CancellablePromise<AbstractTypeResponse[]>> = new Map();
 
 // TODO: Remove this temporary function once api sends icon related information.
 function getIconForType(typeResponse: AbstractTypeResponse) {
@@ -58,10 +58,10 @@ function getDefaultDbTypeForType(typeResponse: AbstractTypeResponse) {
   }
 }
 
-function processTypeResponse(abstractTypeReponse: AbstractTypeResponse[]): AbstractTypeStoreData {
-  const abstractTypeStoreData: AbstractTypeStoreData = new Map();
+function processTypeResponse(abstractTypesResponse: AbstractTypeResponse[]): AbstractTypesMap {
+  const abstractTypesMap: AbstractTypesMap = new Map();
 
-  abstractTypeReponse.forEach((entry) => {
+  abstractTypesResponse.forEach((entry) => {
     const typeInfo = {
       ...entry,
       dbTypes: new Set(entry.db_types),
@@ -69,13 +69,13 @@ function processTypeResponse(abstractTypeReponse: AbstractTypeResponse[]): Abstr
       defaultDbType: getDefaultDbTypeForType(entry),
     };
     delete typeInfo.db_types;
-    abstractTypeStoreData.set(typeInfo.identifier, typeInfo);
+    abstractTypesMap.set(typeInfo.identifier, typeInfo);
   });
 
-  return abstractTypeStoreData;
+  return abstractTypesMap;
 }
 
-export async function refetchTypesForDB(databaseId: Database['id']): Promise<AbstractTypeStoreData> {
+export async function refetchTypesForDB(databaseId: Database['id']): Promise<AbstractTypesMap> {
   const store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
     console.error(`DB Types store for db: ${databaseId} not found.`);
@@ -88,21 +88,21 @@ export async function refetchTypesForDB(databaseId: Database['id']): Promise<Abs
       state: States.Loading,
     }));
 
-    dbMTTypesRequestMap.get(databaseId)?.cancel();
+    abstractTypesRequestMap.get(databaseId)?.cancel();
 
     const typesRequest = getAPI<AbstractTypeResponse[]>(`/databases/${databaseId}/types/`);
-    dbMTTypesRequestMap.set(databaseId, typesRequest);
+    abstractTypesRequestMap.set(databaseId, typesRequest);
     const response = await typesRequest;
 
-    const abstractTypeStoreData = processTypeResponse(response);
+    const abstractTypesMap = processTypeResponse(response);
 
     store.update((currentData) => ({
       ...currentData,
       state: States.Done,
-      data: abstractTypeStoreData,
+      data: abstractTypesMap,
     }));
 
-    return abstractTypeStoreData;
+    return abstractTypesMap;
   } catch (err) {
     store.update((currentData) => ({
       ...currentData,
@@ -115,7 +115,7 @@ export async function refetchTypesForDB(databaseId: Database['id']): Promise<Abs
 
 let preload = true;
 
-function getTypesForDatabase(databaseId: Database['id']): Writable<AbstractTypeStore> {
+function getTypesForDatabase(databaseId: Database['id']): Writable<AbstractTypesSubstance> {
   let store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
     store = writable({
@@ -140,7 +140,7 @@ function getTypesForDatabase(databaseId: Database['id']): Writable<AbstractTypeS
   return store;
 }
 
-export const abstractTypes: Readable<AbstractTypeStore> = derived(
+export const abstractTypes: Readable<AbstractTypesSubstance> = derived(
   currentDBId,
   ($currentDBId, set) => {
     let unsubscribe: Unsubscriber;
@@ -164,11 +164,11 @@ export const abstractTypes: Readable<AbstractTypeStore> = derived(
 );
 
 export function getAbstractTypeForDBType(
-  dbType: DbType, abstractTypeStoreData: AbstractTypeStoreData,
+  dbType: DbType, abstractTypesMap: AbstractTypesMap,
 ): AbstractType | null {
-  if (dbType && abstractTypeStoreData) {
+  if (dbType && abstractTypesMap) {
     // eslint-disable-next-line no-restricted-syntax
-    for (const [, abstractType] of abstractTypeStoreData) {
+    for (const [, abstractType] of abstractTypesMap) {
       if (abstractType.dbTypes.has(dbType)) {
         return abstractType;
       }

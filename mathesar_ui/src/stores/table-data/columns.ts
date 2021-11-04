@@ -17,7 +17,7 @@ import type {
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar/components';
 import type { DBObjectEntry, DbType } from '@mathesar/App.d';
-import type { AbstractTypeStoreData, AbstractType } from '@mathesar/stores/abstractTypes';
+import type { AbstractTypesMap, AbstractType } from '@mathesar/stores/abstractTypes';
 import type { Meta } from './meta';
 
 export interface Column {
@@ -189,12 +189,12 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
    * by server.
    */
   static getAllowedTypeConversions(
-    column: Column, abstractTypesData: AbstractTypeStoreData,
+    column: Column, abstractTypesMap: AbstractTypesMap,
   ): AbstractType[] {
     const allowedTypeConversions: AbstractType[] = [];
-    if (column && abstractTypesData) {
+    if (column && abstractTypesMap) {
       const dbTargetTypeSet = new Set(column.valid_target_types);
-      abstractTypesData.forEach((entry) => {
+      abstractTypesMap.forEach((entry) => {
         const allowedDBTypesInMTType = intersection(
           dbTargetTypeSet,
           entry.dbTypes,
