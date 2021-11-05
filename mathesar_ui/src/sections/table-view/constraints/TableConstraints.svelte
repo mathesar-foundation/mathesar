@@ -15,11 +15,16 @@
   $: state = $constraintsDataStore.state as States;
   $: errorMsg = $constraintsDataStore.error as string;
   $: constraints = $constraintsDataStore.constraints as Constraint[];
-  $: countText = constraints.length === 0 ? '' : ` (${constraints.length as number})`;
+  $: isEmpty = constraints.length === 0;
+  $: isLoading = state === States.Idle || state === States.Loading;
+  // Only show the spinner during the _initial_ loading event. Hide it for
+  // subsequent updates so that we can rely on the spinner used on the button
+  // for the more specific update.
+  $: shouldShowLoadingSpinner = isEmpty && isLoading as boolean;
+  $: countText = isEmpty ? '' : ` (${constraints.length as number})`;
 
-  async function drop(constraint: Constraint) {
-    await (constraintsDataStore as ConstraintsDataStore).drop(constraint.id);
-    await (constraintsDataStore as ConstraintsDataStore).fetch({ showLoading: false });
+  function remove(constraint: Constraint) {
+    return (constraintsDataStore as ConstraintsDataStore).remove(constraint.id);
   }
 </script>
 
@@ -28,20 +33,20 @@
     <div class="header">
       Table Constraints{countText}
     </div>
-  
-    {#if state === States.Idle || state === States.Loading}
+
+    {#if shouldShowLoadingSpinner}
       <Icon data={faSpinner} spin={true}/>
     {:else if state === States.Error}
       <div>Unable to fetch table constraints</div>
       <div>{errorMsg}</div>
-    {:else if constraints.length === 0}
+    {:else if isEmpty}
       <div>No constraints</div>
     {:else}
       <div class="constraints-list">
         {#each constraints as constraint (constraint.id)}
           <TableConstraint
             {constraint}
-            drop={() => drop(constraint)}
+            drop={() => remove(constraint)}
           />
         {/each}
       </div>
