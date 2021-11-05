@@ -49,7 +49,7 @@
 
   async function deleteConfirm() {
     removeTab($currentDBName, $currentSchemaId, activeTab);
-    await deleteTable(activeTab.id);
+    await deleteTable(identifier);
     isModalOpen = false;
     await refetchTablesForSchema($currentSchemaId);
   }

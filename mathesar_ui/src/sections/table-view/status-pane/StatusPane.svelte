@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import { Pagination, Select } from '@mathesar-components';
+  import { Pagination, Select } from '@mathesar-component-library';
   import { States } from '@mathesar/utils/api';
   import type {
     TabularDataStore,

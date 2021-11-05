@@ -51,7 +51,7 @@ def test_get_column_cast_records(engine_email_type):
     COL1_MOD = COL1 + "_mod"
     COL2_MOD = COL2 + "_mod"
     column_definitions = [
-        {"name": "mathesar_id", "type": "INTEGER"},
+        {"name": "id", "type": "INTEGER"},
         {"name": COL1_MOD, "type": "VARCHAR"},
         {"name": COL2_MOD, "type": "NUMERIC"},
     ]
@@ -82,7 +82,7 @@ def test_get_column_cast_records_options(engine_email_type):
     COL1_MOD = COL1 + "_mod"
     COL2_MOD = COL2 + "_mod"
     column_definitions = [
-        {"name": "mathesar_id", "type": "INTEGER"},
+        {"name": "id", "type": "INTEGER"},
         {"name": COL1_MOD, "type": "VARCHAR"},
         {"name": COL2_MOD, "type": "NUMERIC", "type_options": {"precision": 5, "scale": 2}},
     ]

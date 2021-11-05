@@ -23,7 +23,7 @@ def test_default_constraint_list(create_table, client):
 
     assert response.status_code == 200
     assert response_data['count'] == 1
-    assert constraint_data['columns'] == ['mathesar_id']
+    assert constraint_data['columns'] == ['id']
     assert 'id' in constraint_data and type(constraint_data['id']) == int
     assert constraint_data['name'] == 'NASA Constraint List 0_pkey'
     assert constraint_data['type'] == 'primary'
