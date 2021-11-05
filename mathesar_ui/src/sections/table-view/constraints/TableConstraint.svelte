@@ -41,7 +41,7 @@
   $: transition = { x: 200, duration: transitionDuration } as FlyParams;
 </script>
 
-<div class='table-constraint' class:isConfirmingDrop class:isSubmittingDrop>
+<div class='table-constraint' class:is-submitting-drop={isSubmittingDrop}>
   <Seesaw position={isConfirmingDrop ? 'left' : 'right'}>
 
     <div class='view' slot='right' >
