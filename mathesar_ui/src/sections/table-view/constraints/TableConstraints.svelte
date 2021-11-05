@@ -31,7 +31,12 @@
   
     {#if state === States.Idle || state === States.Loading}
       <Icon data={faSpinner} spin={true}/>
-    {:else if state === States.Done}
+    {:else if state === States.Error}
+      <div>Unable to fetch table constraints</div>
+      <div>{errorMsg}</div>
+    {:else if constraints.length === 0}
+      <div>No constraints</div>
+    {:else}
       <div class="constraints-list">
         {#each constraints as constraint (constraint.id)}
           <TableConstraint
@@ -40,9 +45,6 @@
           />
         {/each}
       </div>
-    {:else if state === States.Error}
-      <div>Unable to fetch table constraints</div>
-      <div>{errorMsg}</div>
     {/if}
 
   </div>
