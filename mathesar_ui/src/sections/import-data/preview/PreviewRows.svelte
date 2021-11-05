@@ -9,8 +9,8 @@
     FileImport,
     PreviewRow,
   } from '@mathesar/stores/fileImports';
-  import type { CancellablePromise } from '@mathesar/components';
-import Null from '@mathesar/mathesar-components/Null.svelte';
+  import Null from '@mathesar/components/Null.svelte';
+  import type { CancellablePromise } from '@mathesar-component-library';
 
   interface Response {
     records: PreviewRow[]

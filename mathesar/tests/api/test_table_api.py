@@ -158,7 +158,7 @@ def test_table_list(create_table, client):
                 "updated_at": "2021-04-27T18:43:41.201898Z",
                 "columns": [
                     {
-                        "name": "mathesar_id",
+                        "name": "id",
                         "type": "INTEGER"
                     },
                     {
@@ -355,7 +355,7 @@ def test_table_previews(client, schema, engine_email_type):
 
     post_body = {
         'columns': [
-            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "id", "type": "INTEGER"},
             {"name": "col_1", "type": "NUMERIC"},
             {"name": "col_2", "type": "BOOLEAN"},
             {"name": "col_3", "type": "BOOLEAN"},
@@ -370,10 +370,10 @@ def test_table_previews(client, schema, engine_email_type):
         'name': 'Type Modification Table',
         'columns': post_body['columns'],
         'records': [
-            {'mathesar_id': 1, 'col_1': 0.0, 'col_2': False, 'col_3': True, 'col_4': 't', 'col_5': 'a', 'col_6': 2.0},
-            {'mathesar_id': 2, 'col_1': 2.0, 'col_2': True, 'col_3': False, 'col_4': 'false', 'col_5': 'cat', 'col_6': 1.0},
-            {'mathesar_id': 3, 'col_1': 1.0, 'col_2': True, 'col_3': True, 'col_4': '2', 'col_5': 'mat', 'col_6': 0.0},
-            {'mathesar_id': 4, 'col_1': 0.0, 'col_2': False, 'col_3': False, 'col_4': '0', 'col_5': 'bat', 'col_6': 0.0}
+            {'id': 1, 'col_1': 0.0, 'col_2': False, 'col_3': True, 'col_4': 't', 'col_5': 'a', 'col_6': 2.0},
+            {'id': 2, 'col_1': 2.0, 'col_2': True, 'col_3': False, 'col_4': 'false', 'col_5': 'cat', 'col_6': 1.0},
+            {'id': 3, 'col_1': 1.0, 'col_2': True, 'col_3': True, 'col_4': '2', 'col_5': 'mat', 'col_6': 0.0},
+            {'id': 4, 'col_1': 0.0, 'col_2': False, 'col_3': False, 'col_4': '0', 'col_5': 'bat', 'col_6': 0.0}
         ],
     }
     actual_dict = response.json()
@@ -397,7 +397,7 @@ def test_table_previews_wrong_column_number(client, schema, engine_email_type):
 
     post_body = {
         'columns': [
-            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "id", "type": "INTEGER"},
             {"name": "col_2", "type": "BOOLEAN"},
             {"name": "col_3", "type": "BOOLEAN"},
             {"name": "col_4", "type": "VARCHAR"},
@@ -426,7 +426,7 @@ def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
 
     post_body = {
         'columns': [
-            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "id", "type": "INTEGER"},
             {"name": "col_1", "type": "NUMERIC"},
             {"name": "col_2", "type": "BOOLEAN"},
             {"name": "col_3", "type": "BOOLEAN"},
@@ -456,7 +456,7 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_email_typ
 
     post_body = {
         'columns': [
-            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "id", "type": "INTEGER"},
             {"name": "col_1", "type": "NUMERIC"},
             {"name": "col_2", "type": "BOOLEAN"},
             {"name": "col_3", "type": "BOOLEAN"},
@@ -486,7 +486,7 @@ def test_table_previews_unsupported_type(client, schema, engine_email_type):
 
     post_body = {
         'columns': [
-            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "id", "type": "INTEGER"},
             {"name": "col_1", "type": "notatype"},
             {"name": "col_2", "type": "BOOLEAN"},
             {"name": "col_3", "type": "BOOLEAN"},
@@ -571,7 +571,7 @@ def test_table_create_without_datafile(client, schema, data_files, table_name):
 
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1
-    assert len(table.sa_columns) == 1  # only the internal `mathesar_id` column
+    assert len(table.sa_columns) == 1  # only the internal `id` column
     assert len(table.get_records()) == 0
     check_table_response(response_table, table, expt_name)
 
@@ -891,7 +891,7 @@ def test_table_viewset_checks_cache(client):
 
 def _get_patents_column_data():
     return [{
-        'name': 'mathesar_id',
+        'name': 'id',
         'type': 'INTEGER',
     }, {
         'name': 'Center',
@@ -1013,7 +1013,7 @@ def test_table_patch_columns_one_type_change(create_table, client, engine_email_
 
 def _get_data_types_column_data():
     return [{
-        'name': 'mathesar_id',
+        'name': 'id',
         'type': 'INTEGER'
     }, {
         'name': 'Integer',

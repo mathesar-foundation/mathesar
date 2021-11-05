@@ -6,7 +6,7 @@
     TextInput,
     Modal,
     Icon,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/App.d';
   import { currentDBName } from '@mathesar/stores/databases';
   import { schemas, createSchema, updateSchema } from '@mathesar/stores/schemas';

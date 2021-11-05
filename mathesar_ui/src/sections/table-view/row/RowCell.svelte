@@ -12,7 +12,7 @@
     Display,
     RecordsData,
   } from '@mathesar/stores/table-data/types';
-import Null from '@mathesar/mathesar-components/Null.svelte';
+  import Null from '@mathesar/components/Null.svelte';
 
   export let recordsData: RecordsData;
   export let display: Display;
