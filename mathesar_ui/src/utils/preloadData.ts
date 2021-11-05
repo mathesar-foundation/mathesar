@@ -1,4 +1,9 @@
-import type { Database, SchemaResponse, TableEntry } from '@mathesar/App.d';
+import type {
+  Database,
+  SchemaResponse,
+  TableEntry,
+  AbstractTypeResponse,
+} from '@mathesar/App.d';
 
 interface CommonData {
   databases: Database[],
@@ -6,6 +11,7 @@ interface CommonData {
   tables: TableEntry[],
   current_db: string,
   current_schema: number,
+  abstract_types: AbstractTypeResponse[]
 }
 
 function getData<T>(selector: string, retainData = false): T {

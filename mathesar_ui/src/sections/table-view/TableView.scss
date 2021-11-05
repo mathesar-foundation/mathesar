@@ -48,37 +48,8 @@ section.table-section .tab-container .table-data {
       overflow: hidden;
 
       .cell {
-        padding: 8px 28px 8px 10px;
         display: flex;
         border-bottom: none;
-
-        .type {
-          margin-right: 5px;
-          color: #7f7f7f;
-          font-weight: 500;
-        }
-
-        .name {
-          display: block;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .opts {
-          position: absolute;
-          right: 8px;
-          padding: 8px;
-          color: #8f8f8f;
-
-          >.arrow {
-            padding-right: 1px;
-          }
-        }
-
-        .unsorted {
-          color: #d2d2d2;
-        }
 
         &.row-control {
           background: #f9f9f9;

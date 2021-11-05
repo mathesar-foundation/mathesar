@@ -188,6 +188,8 @@ export class RecordsData {
 
   private requestParamsUnsubscriber: Unsubscriber;
 
+  private columnPatchUnsubscriber: () => void;
+
   constructor(
     type: TabularType,
     parentId: number,
@@ -211,8 +213,11 @@ export class RecordsData {
     this.fetchCallback = fetchCallback;
     void this.fetch();
 
-    // subscribers
+    // TODO: Create base class to abstract subscriptions and unsubscriptions
     this.requestParamsUnsubscriber = this.meta.recordRequestParams.subscribe(() => {
+      void this.fetch();
+    });
+    this.columnPatchUnsubscriber = this.columnsDataStore.on('columnPatched', () => {
       void this.fetch();
     });
   }
@@ -510,5 +515,6 @@ export class RecordsData {
     this.promise = null;
 
     this.requestParamsUnsubscriber();
+    this.columnPatchUnsubscriber();
   }
 }

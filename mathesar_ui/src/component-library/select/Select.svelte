@@ -43,8 +43,14 @@
   }
   
   function setOptions(opts: SelectOption[]) {
-    if (!value && opts.length > 0) {
-      setValue(opts[0]);
+    if (opts.length > 0) {
+      if (!value) {
+        setValue(opts[0]);
+      } else if (!opts.find((entry) => entry[idKey] === value[idKey])) {
+        setValue(opts[0]);
+      }
+    } else {
+      setValue(null);
     }
   }
 

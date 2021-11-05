@@ -1,14 +1,15 @@
-import { writable } from 'svelte/store';
-
+import { writable, derived } from 'svelte/store';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { getAPI, States } from '@mathesar/utils/api';
+import { notEmpty } from '@mathesar/utils/language';
 
-import type { Writable } from 'svelte/store';
+import type { Writable, Readable } from 'svelte/store';
 import type { Database } from '@mathesar/App.d';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
 
 const commonData = preloadCommonData();
+
 export const currentDBName: Writable<Database['name']> = writable(
   commonData.current_db || null,
 );
@@ -25,6 +26,17 @@ export const databases = writable<DatabaseStoreData>({
   state: States.Loading,
   data: commonData.databases || [],
 });
+
+export const currentDBId: Readable<Database['id']> = derived(
+  [currentDBName, databases],
+  ([_currentDBName, databasesStore]) => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const _databases = databasesStore.data;
+    return notEmpty(_databases)
+      ? _databases.find((database) => database.name === _currentDBName).id
+      : undefined;
+  },
+);
 
 let databaseRequest: CancellablePromise<PaginatedResponse<Database>>;
 
