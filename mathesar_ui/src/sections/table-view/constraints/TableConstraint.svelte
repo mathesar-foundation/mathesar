@@ -6,7 +6,7 @@
     Seesaw,
     Button,
     Spinner,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
   import type { Constraint } from '@mathesar/stores/table-data/constraints';
   import {
     faTrash,

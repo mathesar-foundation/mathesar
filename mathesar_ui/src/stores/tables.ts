@@ -18,7 +18,7 @@ import type {
   TableEntry,
 } from '@mathesar/App.d';
 import type { PaginatedResponse } from '@mathesar/utils/api';
-import type { CancellablePromise } from '@mathesar/components';
+import type { CancellablePromise } from '@mathesar-component-library';
 
 import { currentSchemaId } from './schemas';
 

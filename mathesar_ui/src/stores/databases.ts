@@ -6,7 +6,7 @@ import { notEmpty } from '@mathesar/utils/language';
 import type { Writable, Readable } from 'svelte/store';
 import type { Database } from '@mathesar/App.d';
 import type { PaginatedResponse } from '@mathesar/utils/api';
-import type { CancellablePromise } from '@mathesar/components';
+import type { CancellablePromise } from '@mathesar-component-library';
 
 const commonData = preloadCommonData();
 

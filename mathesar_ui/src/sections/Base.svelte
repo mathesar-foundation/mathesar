@@ -3,7 +3,7 @@
   import {
     TabContainer,
     Icon,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
   import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId } from '@mathesar/stores/schemas';
