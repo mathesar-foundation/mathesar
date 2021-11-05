@@ -7,7 +7,7 @@
     Button,
     Spinner,
   } from '@mathesar-component-library';
-  import type { Constraint } from '@mathesar/stores/table-data/constraints';
+  import type { Constraint } from '@mathesar/stores/table-data/types';
   import {
     faTrash,
     faCheck,
