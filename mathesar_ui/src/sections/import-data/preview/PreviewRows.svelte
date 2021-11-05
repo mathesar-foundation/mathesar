@@ -9,7 +9,7 @@
     FileImport,
     PreviewRow,
   } from '@mathesar/stores/fileImports';
-  import type { CancellablePromise } from '@mathesar/components';
+  import type { CancellablePromise } from '@mathesar-component-library';
 
   interface Response {
     records: PreviewRow[]

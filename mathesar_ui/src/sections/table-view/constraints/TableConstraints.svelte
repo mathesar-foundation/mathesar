@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Icon, Modal } from '@mathesar-components';
+  import { Icon, Modal } from '@mathesar-component-library';
   import { getContext } from 'svelte';
   import type { TabularDataStore } from '@mathesar/stores/table-data/types';
   import type { Constraint, ConstraintsDataStore } from '@mathesar/stores/table-data/constraints';

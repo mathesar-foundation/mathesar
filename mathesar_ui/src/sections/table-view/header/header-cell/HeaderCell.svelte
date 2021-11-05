@@ -4,7 +4,7 @@
     faChevronRight,
     faChevronLeft,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Dropdown, Icon, Button } from '@mathesar-components';
+  import { Dropdown, Icon, Button } from '@mathesar-component-library';
   import { abstractTypes, getAbstractTypeForDBType } from '@mathesar/stores/abstractTypes';
 
   import type {

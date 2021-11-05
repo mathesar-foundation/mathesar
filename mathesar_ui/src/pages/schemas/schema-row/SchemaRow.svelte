@@ -6,7 +6,7 @@
     faTrash,
     faPencilAlt,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Icon, Button } from '@mathesar-components';
+  import { Icon, Button } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/App.d';
 
   const dispatch = createEventDispatcher();

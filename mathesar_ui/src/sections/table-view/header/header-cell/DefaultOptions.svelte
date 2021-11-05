@@ -5,7 +5,7 @@
     faSortAmountDownAlt,
     faThList,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Icon, Button } from '@mathesar-components';
+  import { Icon, Button } from '@mathesar-component-library';
   import type {
     Meta,
     Column,

@@ -15,7 +15,7 @@ import type {
   Unsubscriber,
 } from 'svelte/store';
 import type { PaginatedResponse } from '@mathesar/utils/api';
-import type { CancellablePromise } from '@mathesar/components';
+import type { CancellablePromise } from '@mathesar-component-library';
 import type { DBObjectEntry, DbType } from '@mathesar/App.d';
 import type { AbstractTypesMap, AbstractType } from '@mathesar/stores/abstractTypes';
 import type { Meta } from './meta';
