@@ -8,16 +8,18 @@
   import type {
     ColumnPosition,
     TableRecord,
-    TableColumn,
+    Column,
     Display,
-    Records,
+    RecordsData,
   } from '@mathesar/stores/table-data/types';
 
-  export let records: Records;
+  export let recordsData: RecordsData;
   export let display: Display;
   export let columnPosition: ColumnPosition;
   export let row: TableRecord;
-  export let column: TableColumn;
+  export let column: Column;
+  // eslint-disable-next-line no-undef-init
+  export let value: unknown = undefined;
 
   $: ({ activeCell } = display);
   $: isActive = isCellActive($activeCell, row, column);
@@ -31,7 +33,7 @@
     if (inputRef) {
       inputRef.focus();
     } else if (isActive) {
-      cellRef.focus();
+      cellRef?.focus();
     }
   });
 
@@ -40,10 +42,13 @@
   });
 
   function setValue(val: string) {
-    if (row[column.name] !== val) {
-      row[column.name] = val;
-      void records.updateRecord(row);
-      row = { ...row };
+    if (value !== val) {
+      value = val;
+      if (row.__isNew) {
+        void recordsData.createOrUpdateRecord(row, column);
+      } else {
+        void recordsData.updateCell(row, column);
+      }
     }
   }
 
@@ -52,7 +57,7 @@
     timer = window.setTimeout(() => {
       const val = (event.target as HTMLInputElement).value;
       setValue(val);
-    }, 300);
+    }, 500);
   }
 
   function onBlur(event: Event) {
@@ -91,18 +96,20 @@
      tabindex={-1} on:keydown={handleKeyDown}>
 
   <div class="content"
-    on:click={() => display.selectCell(row, column)}
+    on:mousedown={() => display.selectCell(row, column)}
     on:dblclick={() => display.editCell(row, column)}>
-    {#if typeof row[column.name] === 'undefined' || row[column.name] === null}
-      <span class="empty">null</span>
-    {:else}
-      {row[column.name]}
+    {#if typeof value !== 'undefined'}
+      {#if value === null}
+        <span class="empty">null</span>
+      {:else}
+        {value}
+      {/if}
     {/if}
   </div>
 
   {#if isBeingEdited}
     <input bind:this={inputRef} type="text" class="edit-input-box"
-            value={row[column.name]?.toString() || ''}
+            value={value?.toString() || ''}
             on:keydown={handleInputKeyDown}
             on:keyup={debounceAndSet} on:blur={onBlur}/>
   {/if}

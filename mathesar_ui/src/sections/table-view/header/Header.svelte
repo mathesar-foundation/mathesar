@@ -1,35 +1,30 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import {
-    GROUP_MARGIN_LEFT,
     ROW_CONTROL_COLUMN_WIDTH,
   } from '@mathesar/stores/table-data';
 
   import type {
     TabularDataStore,
     TabularData,
-    TableColumn,
+    Column,
     ColumnPosition,
     ColumnPositionMap,
-    Columns,
+    ColumnsDataStore,
     Display,
     Meta,
-    Records,
   } from '@mathesar/stores/table-data/types';
-  import HeaderCell from './HeaderCell.svelte';
-  import NewColumnCell from './NewColumnCell.svelte';
+  import HeaderCell from './header-cell/HeaderCell.svelte';
+  import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  let columns: Columns;
+  let columnsDataStore: ColumnsDataStore;
   let display: Display;
   let meta: Meta;
-  let records: Records;
   $: ({
-    columns, records, meta, display,
+    columnsDataStore, meta, display,
   } = $tabularData as TabularData);
   $: ({ horizontalScrollOffset, columnPositionMap } = display);
-
-  $: paddingLeft = $records.groupData ? GROUP_MARGIN_LEFT : 0;
 
   let headerRef: HTMLElement;
 
@@ -49,7 +44,7 @@
 
   function getColumnPosition(
     _columnPositionMap: ColumnPositionMap,
-    _name: TableColumn['name'],
+    _name: Column['name'],
   ): ColumnPosition {
     return _columnPositionMap.get(_name);
   }
@@ -69,19 +64,19 @@
     };
   });
 
-  function addColumn(e: CustomEvent<Partial<TableColumn>>) {
-    void columns.add(e.detail);
+  function addColumn(e: CustomEvent<Partial<Column>>) {
+    void columnsDataStore.add(e.detail);
   }
 </script>
 
 <div bind:this={headerRef} class="header">
-  <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH + paddingLeft}px;">
+  <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;">
   </div>
 
-  {#each $columns.data as column (column.name)}
-    <HeaderCell {column} {meta} {paddingLeft}
+  {#each $columnsDataStore.columns as column (column.name)}
+    <HeaderCell {column} {meta}
       columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
   {/each}
 
-  <NewColumnCell {display} {paddingLeft} columnData={$columns.data} on:addColumn={addColumn}/>
+  <NewColumnCell {display} columns={$columnsDataStore.columns} on:addColumn={addColumn}/>
 </div>

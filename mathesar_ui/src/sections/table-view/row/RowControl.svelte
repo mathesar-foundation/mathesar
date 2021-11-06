@@ -1,28 +1,32 @@
 <script lang="ts">
   import {
     faSync,
+    faPlus,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Checkbox, Icon } from '@mathesar-components';
+  import { Checkbox, Icon } from '@mathesar-component-library';
   import {
     ROW_CONTROL_COLUMN_WIDTH,
-    GROUP_MARGIN_LEFT,
-    getModificationStatus,
+    getGenericModificationStatus,
   } from '@mathesar/stores/table-data';
   import type {
     Meta,
+    RecordsData,
     TableRecord,
   } from '@mathesar/stores/table-data/types';
 
-  export let isGrouped = false;
   export let primaryKeyColumn: string = null;
   export let row: TableRecord;
   export let meta: Meta;
+  export let recordsData: RecordsData;
 
-  $: ({ selectedRecords, recordModificationState } = meta);
+  $: ({ selectedRecords, recordModificationState, offset } = meta);
+  $: ({ savedRecords, newRecords, totalCount } = recordsData);
 
   $: primaryKeyValue = row?.[primaryKeyColumn] ?? null;
   $: isRowSelected = ($selectedRecords as Set<unknown>).has(primaryKeyValue);
-  $: modificationStatus = getModificationStatus($recordModificationState, primaryKeyValue);
+  $: genericModificationStatus = getGenericModificationStatus(
+    $recordModificationState, row, primaryKeyColumn,
+  );
 
   function selectionChanged(event: CustomEvent<{ checked: boolean }>) {
     const { checked } = event.detail;
@@ -34,20 +38,29 @@
   }
 </script>
 
-<div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;
-            left:{isGrouped ? GROUP_MARGIN_LEFT : 0}px">
-  
-  {#if !row.__isGroupHeader}
-    {#if row.__rowNumber}
-      <span class="number">{row.__rowNumber}</span>
-    {/if}
+<div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;left:0px">
+  <div class="control">
+    {#if row.__isAddPlaceholder}
+      <Icon data={faPlus}/>
+    {:else}
+      {#if typeof row.__rowIndex === 'number'}
+        <span class="number">
+          {row.__rowIndex + (
+            row.__isNew ? $totalCount - $savedRecords.length - $newRecords.length : $offset
+            ) + 1}
+          {#if row.__isNew}
+            *
+          {/if}
+        </span>
+      {/if}
 
-    {#if primaryKeyValue}
-      <Checkbox checked={isRowSelected} on:change={selectionChanged}/>
+      {#if primaryKeyValue}
+        <Checkbox checked={isRowSelected} on:change={selectionChanged}/>
+      {/if}
     {/if}
+  </div>
 
-    {#if modificationStatus === 'inprocess'}
-      <Icon class="mod-indicator" size='0.9em' data={faSync} spin={true}/>
-    {/if}
+  {#if genericModificationStatus === 'inprocess'}
+    <Icon class="mod-indicator" size='0.9em' data={faSync} spin={true}/>
   {/if}
 </div>

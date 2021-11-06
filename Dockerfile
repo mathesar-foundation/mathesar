@@ -1,7 +1,4 @@
-FROM python:3-buster
-
-RUN apt update
-RUN apt install -y sudo
+FROM python:3.9-buster
 
 # Add mathesar user
 ENV PYTHONUNBUFFERED=1
@@ -14,7 +11,7 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
 
 # Install node
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
-RUN apt install -y nodejs
+RUN apt install -y sudo nodejs && rm -rf /var/lib/apt/lists/*
 
 # Change work directory
 WORKDIR /code/

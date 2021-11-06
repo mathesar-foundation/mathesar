@@ -12,7 +12,7 @@ import { removeTableContent } from '@mathesar/stores/table-data';
 import { getTablesStoreForSchema } from '@mathesar/stores/tables';
 import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
 
-import type { Tab } from '@mathesar-components/types';
+import type { Tab } from '@mathesar-component-library/types';
 import type { SchemaEntry } from '@mathesar/App';
 
 export interface MathesarTab extends Tab {
@@ -61,6 +61,12 @@ export function getTabsForSchema(db: string, schemaId: number): TabList {
     schemaMap.set(schemaId, schemaTabs);
   }
   return schemaTabs;
+}
+
+export function getActiveTabValue(_currentDBName: string, _currentSchemaId: SchemaEntry['id']): MathesarTab {
+  const { activeTab } = getTabsForSchema(_currentDBName, _currentSchemaId);
+  const activeTabObj = get(activeTab);
+  return activeTabObj;
 }
 
 export function addTab(

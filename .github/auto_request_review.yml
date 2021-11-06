@@ -9,15 +9,18 @@ reviewers:
       - kgodey
       - mathemancer
       - pavish
+      - seancolsen
+      - silentninja
     designers:
       - ghislaineguerin
     backend-reviewers:
       - kgodey
       - mathemancer
       - eito-fis
-      - powellc
+      - silentninja
     frontend-reviewers:
       - pavish
+      - seancolsen
       - dhruvkb
       - zackkrida
 
