@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, getContext, tick } from 'svelte';
   import { faDatabase, faSpinner } from '@fortawesome/free-solid-svg-icons';
-  import { Button, Icon, Select } from '@mathesar-components';
+  import { Button, Icon, Select } from '@mathesar-component-library';
   import { abstractTypes } from '@mathesar/stores/abstractTypes';
   import {
     ColumnsDataStore,
@@ -15,7 +15,7 @@
     TabularDataStore,
   } from '@mathesar/stores/table-data/types';
   import type { AbstractType } from '@mathesar/stores/abstractTypes';
-  import type { SelectOption } from '@mathesar-components/types';
+  import type { SelectOption } from '@mathesar-component-library/types';
 
   const dispatch = createEventDispatcher();
 

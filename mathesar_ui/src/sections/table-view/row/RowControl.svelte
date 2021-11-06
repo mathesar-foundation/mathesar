@@ -3,7 +3,7 @@
     faSync,
     faPlus,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Checkbox, Icon } from '@mathesar-components';
+  import { Checkbox, Icon } from '@mathesar-component-library';
   import {
     ROW_CONTROL_COLUMN_WIDTH,
     getGenericModificationStatus,

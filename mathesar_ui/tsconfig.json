@@ -17,9 +17,9 @@
     "baseUrl": "./",
     "paths": {
       "@mathesar/*": ["src/*"],
-      "@mathesar-components-dir/*": ["src/components/*"],
-      "@mathesar-components/types": ["src/components/types.d.ts"],
-      "@mathesar-components": ["src/components/index.ts"]
+      "@mathesar-component-library-dir/*": ["src/component-library/*"],
+      "@mathesar-component-library/types": ["src/component-library/types.d.ts"],
+      "@mathesar-component-library": ["src/component-library/index.ts"]
     }
   },
   "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.svelte", "**.cjs", "**.config.js"]

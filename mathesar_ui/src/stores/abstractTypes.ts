@@ -5,7 +5,7 @@ import { preloadCommonData } from '@mathesar/utils/preloadData';
 
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
 import type { Database, DbType, AbstractTypeResponse } from '@mathesar/App.d';
-import type { CancellablePromise } from '@mathesar/components';
+import type { CancellablePromise } from '@mathesar-component-library';
 
 const commonData = preloadCommonData();
 
