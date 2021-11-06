@@ -1,6 +1,6 @@
 <script lang="ts">
   import { faSpinner } from '@fortawesome/free-solid-svg-icons';
-  import { Icon, Button, Modal } from '@mathesar-components';
+  import { Icon, Button, Modal } from '@mathesar-component-library';
   import { States } from '@mathesar/utils/api';
   import type {
     ColumnsDataStore,
