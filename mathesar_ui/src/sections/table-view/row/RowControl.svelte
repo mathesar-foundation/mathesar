@@ -3,24 +3,24 @@
     faSync,
     faPlus,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Checkbox, Icon } from '@mathesar-components';
+  import { Checkbox, Icon } from '@mathesar-component-library';
   import {
     ROW_CONTROL_COLUMN_WIDTH,
     getGenericModificationStatus,
   } from '@mathesar/stores/table-data';
   import type {
     Meta,
-    Records,
+    RecordsData,
     TableRecord,
   } from '@mathesar/stores/table-data/types';
 
   export let primaryKeyColumn: string = null;
   export let row: TableRecord;
   export let meta: Meta;
-  export let records: Records;
+  export let recordsData: RecordsData;
 
   $: ({ selectedRecords, recordModificationState, offset } = meta);
-  $: ({ savedRecords, newRecords, totalCount } = records);
+  $: ({ savedRecords, newRecords, totalCount } = recordsData);
 
   $: primaryKeyValue = row?.[primaryKeyColumn] ?? null;
   $: isRowSelected = ($selectedRecords as Set<unknown>).has(primaryKeyValue);

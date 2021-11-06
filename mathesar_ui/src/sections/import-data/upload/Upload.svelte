@@ -6,7 +6,7 @@
     Icon,
     RadioGroup,
     TextInput,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
   import type { FileImport } from '@mathesar/stores/fileImports';
   import { States } from '@mathesar/utils/api';
 

@@ -9,6 +9,7 @@ import {
   getAPI,
   postAPI,
   States,
+  deleteAPI,
 } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
@@ -17,7 +18,7 @@ import type {
   TableEntry,
 } from '@mathesar/App.d';
 import type { PaginatedResponse } from '@mathesar/utils/api';
-import type { CancellablePromise } from '@mathesar/components';
+import type { CancellablePromise } from '@mathesar-component-library';
 
 import { currentSchemaId } from './schemas';
 
@@ -118,6 +119,10 @@ export function getTablesStoreForSchema(schemaId: SchemaEntry['id']): Writable<D
     void refetchTablesForSchema(schemaId);
   }
   return store;
+}
+
+export function deleteTable(id: number): CancellablePromise<TableEntry> {
+  return deleteAPI(`/tables/${id}/`);
 }
 
 export function createTable(

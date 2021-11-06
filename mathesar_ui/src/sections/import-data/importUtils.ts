@@ -16,7 +16,7 @@ import {
   patchAPI,
   deleteAPI,
 } from '@mathesar/utils/api';
-import { CancellablePromise } from '@mathesar-components';
+import { CancellablePromise } from '@mathesar-component-library';
 import type {
   FileImportInfo,
   PreviewColumn,
@@ -27,7 +27,7 @@ import type { UploadCompletionOpts, PaginatedResponse } from '@mathesar/utils/ap
 import type {
   FileUploadAddDetail,
   FileUploadProgress,
-} from '@mathesar-components/types';
+} from '@mathesar-component-library/types';
 
 function completionCallback(
   fileImportStore: FileImport,
