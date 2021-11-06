@@ -4,6 +4,7 @@
     faSortAmountDown,
     faSortAmountDownAlt,
     faThList,
+    faTrashAlt,
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-components';
   import type {
@@ -38,6 +39,11 @@
       meta.addGroup(column.name);
     }
     dispatch('close');
+  }
+
+  function deleteColumn() {
+    dispatch('close');
+    dispatch('columnDelete');
   }
 </script>
 
@@ -75,6 +81,14 @@
         {:else}
           Group by column
         {/if}
+      </span>
+    </Button>
+  </li>
+  <li>
+    <Button appearance="plain" on:click={deleteColumn}>
+      <Icon class="opt" data={faTrashAlt}/>
+      <span>
+        Delete column
       </span>
     </Button>
   </li>

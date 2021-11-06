@@ -13,18 +13,20 @@
     ColumnsDataStore,
     Display,
     Meta,
-    Records,
   } from '@mathesar/stores/table-data/types';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
+  import DeleteColumnModal from './DeleteColumnModal.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
   let columnsDataStore: ColumnsDataStore;
   let display: Display;
   let meta: Meta;
-  let records: Records;
+  let isDeleteModalOpen = false;
+  let column: Column;
+
   $: ({
-    columnsDataStore, records, meta, display,
+    columnsDataStore, meta, display,
   } = $tabularData as TabularData);
   $: ({ horizontalScrollOffset, columnPositionMap } = display);
 
@@ -66,15 +68,13 @@
     };
   });
 
-  async function columnDelete(event) {
-    const columnId: number | null = (event.detail ?? null) as number;
-    await columnsDataStore.deleteColumn(columnId);
-    void columnsDataStore.fetch();
-    void records.fetch();
-  }
-
   function addColumn(e: CustomEvent<Partial<Column>>) {
     void columnsDataStore.add(e.detail);
+  }
+
+  function openColumnModal(_column: Column) {
+    column = _column;
+    isDeleteModalOpen = true;
   }
 </script>
 
@@ -84,8 +84,12 @@
 
   {#each $columnsDataStore.columns as column (column.name)}
     <HeaderCell {column} {meta}
-      columnPosition={getColumnPosition($columnPositionMap, column.name)} on:columnDelete={columnDelete}/>
+      columnPosition={getColumnPosition($columnPositionMap, column.name)} on:columnDelete={openColumnModal(column)}/>
   {/each}
 
   <NewColumnCell {display} columns={$columnsDataStore.columns} on:addColumn={addColumn}/>
+
+  {#if isDeleteModalOpen}
+    <DeleteColumnModal bind:isOpen={isDeleteModalOpen} {columnsDataStore} {column}/>
+  {/if}
 </div>

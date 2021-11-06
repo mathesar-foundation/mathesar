@@ -3,11 +3,8 @@ import {
   States,
   getAPI,
   postAPI,
-<<<<<<< HEAD
   deleteAPI,
-=======
   patchAPI,
->>>>>>> master
 } from '@mathesar/utils/api';
 import { TabularType } from '@mathesar/App.d';
 import { intersection } from '@mathesar/utils/language';

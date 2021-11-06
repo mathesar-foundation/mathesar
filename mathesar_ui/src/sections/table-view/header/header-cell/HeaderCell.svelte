@@ -6,7 +6,6 @@
   } from '@fortawesome/free-solid-svg-icons';
   import { Dropdown, Icon, Button } from '@mathesar-components';
   import { abstractTypes, getAbstractTypeForDBType } from '@mathesar/stores/abstractTypes';
-
   import type {
     Meta,
     Column,
@@ -76,7 +75,7 @@
         <div class="section">
           {#if view === 'default'}
             <h6 class="category">Operations</h6>
-            <DefaultOptions {meta} {column} on:close={closeDropdown}/>
+            <DefaultOptions {meta} {column} on:close={closeDropdown} on:columnDelete/>
           {:else if view === 'type'}
             <TypeOptions {column} {abstractTypeOfColumn} on:close={closeDropdown}/>
           {/if}
