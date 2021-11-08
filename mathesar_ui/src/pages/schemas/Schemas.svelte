@@ -6,7 +6,7 @@
     Icon,
     Button,
     TextInput,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/App.d';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import SchemaRow from './schema-row/SchemaRow.svelte';

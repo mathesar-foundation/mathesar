@@ -2,6 +2,7 @@ export type { TabularData, TabularDataStore } from './store';
 export type { RecordsData, TableRecord, GroupCount } from './records';
 export type { ColumnPosition, ColumnPositionMap } from './display';
 export type { Column, ColumnsData, ColumnsDataStore } from './columns';
+export type { Constraint, ConstraintsData, ConstraintsDataStore } from './constraints';
 export type {
   Meta,
   FilterEntry,

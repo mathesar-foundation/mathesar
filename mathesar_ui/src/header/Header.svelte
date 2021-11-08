@@ -19,7 +19,7 @@
     Icon,
     Button,
     Dropdown,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
 
   import SchemaSelector from './schema-selector/SchemaSelector.svelte';
   import ImportIndicator from './import-indicator/ImportIndicator.svelte';
