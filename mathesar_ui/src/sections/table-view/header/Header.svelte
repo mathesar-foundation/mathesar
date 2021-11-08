@@ -76,8 +76,13 @@
   </div>
 
   {#each $columnsDataStore.columns as column (column.name)}
-    <HeaderCell {column} {meta} {constraintsDataStore}
-      columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
+    <HeaderCell
+      {column}
+      {meta}
+      {columnsDataStore}
+      {constraintsDataStore}
+      columnPosition={getColumnPosition($columnPositionMap, column.name)}
+    />
   {/each}
 
   <NewColumnCell {display} columns={$columnsDataStore.columns} on:addColumn={addColumn}/>
