@@ -1,10 +1,21 @@
-from sqlalchemy import select, Column, func, and_, case
+from collections import namedtuple
+from sqlalchemy import select, Column, func, and_, case, text, literal
 from sqlalchemy.dialects.postgresql import array
 
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 from db.records.operations.select import get_query, apply_filters
 from db.records.utils import create_col_objects
 from db.utils import execute_query
+
+
+COUNT = 'count'
+CUME_DIST = 'cume_dist'
+MIN_ROW = 'min_row'
+MAX_ROW = 'max_row'
+ORDER_BY = 'order_by'
+PARTITION_BY = 'partition_by'
+RANGE_ID = 'range_id'
+RANGE_ = 'range_'
 
 
 def append_distinct_tuples_to_filter(distinct_tuples):
@@ -91,15 +102,6 @@ def get_grouping_range_boundaries(
 
 
 def _get_percentile_range_groups(column_list, num_groups, engine):
-    COUNT = 'count'
-    CUME_DIST = 'cume_dist'
-    MIN_ROW = 'min_row'
-    MAX_ROW = 'max_row'
-    ORDER_BY = 'order_by'
-    PARTITION_BY = 'partition_by'
-    RANGE_ID = 'range_id'
-    RANGE_ = 'range_'
-
     column_names = [col.name for col in column_list]
 
     cume_dist_cte = (
@@ -207,16 +209,7 @@ def get_group_counts(
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
     """
-    if type(group_by) not in (tuple, list):
-        raise BadGroupFormat(f"Group spec {group_by} must be list or tuple.")
-    for field in group_by:
-        if type(field) not in (str, Column):
-            raise BadGroupFormat(f"Group field {field} must be a string or Column.")
-        field_name = field if type(field) == str else field.name
-        if field_name not in table.c:
-            raise GroupFieldNotFound(f"Group field {field} not found in {table}.")
-
-    table_columns = create_col_objects(table, group_by)
+    table_columns = _get_validated_group_by_columns(table, group_by)
     count_query = (
         select(*table_columns, func.count(table_columns[0]))
         .group_by(*table_columns)
@@ -233,3 +226,71 @@ def get_group_counts(
     else:
         counts = {}
     return counts
+
+
+def get_group_augmented_records_query(
+        table,
+        engine,
+        group_by,
+        limit=None,
+        offset=None,
+        order_by=[],
+        filters=[]
+):
+    """
+    Returns counts by specified groupings
+
+    Args:
+        table:    SQLAlchemy table object
+        engine:   SQLAlchemy engine object
+        limit:    int, gives number of rows to return
+        offset:   int, gives number of rows to skip
+        group_by: list or tuple of column names or column objects to group by
+        order_by: list of dictionaries, where each dictionary has a 'field' and
+                  'direction' field.
+                  See: https://github.com/centerofci/sqlalchemy-filters#sort-format
+        filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
+                  field, in addition to an 'value' field if appropriate.
+                  See: https://github.com/centerofci/sqlalchemy-filters#filters-format
+    """
+    grouping_columns = _get_validated_group_by_columns(table, group_by)
+    window_def = {
+        PARTITION_BY: grouping_columns,
+        ORDER_BY: grouping_columns,
+        RANGE_: (None, None),
+    }
+
+    col_key_value_tuples = ((literal(str(col.name)), col) for col in grouping_columns)
+    col_key_value_list = [
+        col_part for col_tup in col_key_value_tuples for col_part in col_tup
+    ]
+    inner_grouping_object = func.json_build_object(*col_key_value_list)
+
+    sel = select(
+        table, func.json_build_object(
+            literal('count'),
+            func.count(1).over(**window_def),
+            literal('first_value'),
+            func.first_value(inner_grouping_object).over(**window_def),
+            literal('last_value'),
+            func.last_value(inner_grouping_object).over(**window_def),
+            literal('group_id'),
+            func.dense_rank().over(
+                order_by=window_def[ORDER_BY],
+                range_=window_def[RANGE_],
+            )
+        )
+    )
+    return sel
+
+
+def _get_validated_group_by_columns(table, group_by):
+    if type(group_by) not in (tuple, list):
+        raise BadGroupFormat(f"Group spec {group_by} must be list or tuple.")
+    for field in group_by:
+        if type(field) not in (str, Column):
+            raise BadGroupFormat(f"Group field {field} must be a string or Column.")
+        field_name = field if isinstance(field, str) else field.name
+        if field_name not in table.c:
+            raise GroupFieldNotFound(f"Group field {field} not found in {table}.")
+    return create_col_objects(table, group_by)
