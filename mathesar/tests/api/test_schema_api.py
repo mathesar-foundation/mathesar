@@ -109,6 +109,13 @@ def test_schema_sort_by_name(create_schema, client):
     schema_5 = create_schema("Schema 5")
     schema_2 = create_schema("Schema 2")
     schema_4 = create_schema("Schema 4")
+    unsorted_expected_schemas = [
+        schema_4,
+        schema_2,
+        schema_5,
+        schema_1,
+        schema_3
+    ]
     expected_schemas = [
         schema_1,
         schema_2,
@@ -116,11 +123,19 @@ def test_schema_sort_by_name(create_schema, client):
         schema_4,
         schema_5
     ]
-    response = client.get('/api/v0/schemas/?sort_by=name')
+    response = client.get('/api/v0/schemas/')
     response_data = response.json()
-    response_tables = response_data['results']
-    comparison_tuple = zip(response_tables, expected_schemas)
-    for comparison_tuple in comparison_tuple:
+    response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
+    comparison_tuples = zip(response_schemas, unsorted_expected_schemas)
+    for comparison_tuple in comparison_tuples:
+        check_schema_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
+                              comparison_tuple[1].database.name)
+    sort_field = "name"
+    response = client.get(f'/api/v0/schemas/?sort_by={sort_field}')
+    response_data = response.json()
+    response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
+    comparison_tuples = zip(response_schemas, expected_schemas)
+    for comparison_tuple in comparison_tuples:
         check_schema_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
                               comparison_tuple[1].database.name)
 
@@ -135,6 +150,13 @@ def test_schema_sort_by_id(create_schema, client):
     schema_3 = create_schema("Historias")
     schema_4 = create_schema("Confucius says")
     schema_5 = create_schema("Nanomachines")
+    unsorted_expected_schemas = [
+        schema_5,
+        schema_4,
+        schema_3,
+        schema_2,
+        schema_1
+    ]
     expected_schemas = [
         schema_1,
         schema_2,
@@ -142,11 +164,19 @@ def test_schema_sort_by_id(create_schema, client):
         schema_4,
         schema_5
     ]
+    response = client.get('/api/v0/schemas/')
+    response_data = response.json()
+    response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
+    comparison_tuples = zip(response_schemas, unsorted_expected_schemas)
+    for comparison_tuple in comparison_tuples:
+        check_schema_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
+                              comparison_tuple[1].database.name)
+
     response = client.get('/api/v0/schemas/?sort_by=id')
     response_data = response.json()
-    response_tables = response_data['results']
-    comparison_tuple = zip(response_tables, expected_schemas)
-    for comparison_tuple in comparison_tuple:
+    response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
+    comparison_tuples = zip(response_schemas, expected_schemas)
+    for comparison_tuple in comparison_tuples:
         check_schema_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
                               comparison_tuple[1].database.name)
 

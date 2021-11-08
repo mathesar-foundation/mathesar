@@ -237,27 +237,51 @@ def test_table_list_order_by_name(create_table, client):
     table_4 = create_table('Filter Name 4')
     table_3 = create_table('Filter Name 3')
     table_5 = create_table('Filter Name 5')
+    unsorted_expected_tables = [table_5, table_3, table_4, table_1, table_2]
     expected_tables = [table_1, table_2, table_3, table_4, table_5]
-    response = client.get(f'/api/v0/tables/?sort_by=name')
+    response = client.get('/api/v0/tables/')
     response_data = response.json()
     response_tables = response_data['results']
-    comparison_tuple = zip(response_tables, expected_tables)
-    for comparison_tuple in comparison_tuple:
+    comparison_tuples = zip(response_tables, unsorted_expected_tables)
+    for comparison_tuple in comparison_tuples:
+        check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
+    sort_field = "name"
+    response = client.get(f'/api/v0/tables/?sort_by={sort_field}')
+    response_data = response.json()
+    response_tables = response_data['results']
+    comparison_tuples = zip(response_tables, expected_tables)
+    for comparison_tuple in comparison_tuples:
         check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
 
 
 def test_table_list_order_by_id(create_table, client):
+    table_1 = create_table('Filter Name 1')
+    table_2 = create_table('Filter Name 2')
+    table_3 = create_table('Filter Name 3')
+    unsorted_expected_tables = [
+        table_3,
+        table_2,
+        table_1
+    ]
     expected_tables = [
-        create_table('Filter Name 1'),
-        create_table('Filter Name 2'),
-        create_table('Filter Name 3')
+        table_1,
+        table_2,
+        table_3
     ]
 
-    response = client.get(f'/api/v0/tables/?sort_by=id')
+    response = client.get('/api/v0/tables/')
     response_data = response.json()
     response_tables = response_data['results']
-    comparison_tuple = zip(response_tables, expected_tables)
-    for comparison_tuple in comparison_tuple:
+    comparison_tuples = zip(response_tables, unsorted_expected_tables)
+    for comparison_tuple in comparison_tuples:
+        check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
+
+    sort_field = "id"
+    response = client.get(f'/api/v0/tables/?sort_by={sort_field}')
+    response_data = response.json()
+    response_tables = response_data['results']
+    comparison_tuples = zip(response_tables, expected_tables)
+    for comparison_tuple in comparison_tuples:
         check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
 
 
