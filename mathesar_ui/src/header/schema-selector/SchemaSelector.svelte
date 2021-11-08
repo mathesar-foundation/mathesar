@@ -19,7 +19,7 @@
     Dropdown,
     Icon,
     TextInput,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
 
   import type { Database, SchemaEntry } from '@mathesar/App.d';
 

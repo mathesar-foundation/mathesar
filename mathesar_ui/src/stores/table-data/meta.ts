@@ -1,7 +1,7 @@
 import { writable, derived, get } from 'svelte/store';
 import type { Writable, Readable } from 'svelte/store';
 import type { TabularType, DBObjectEntry } from '@mathesar/App.d';
-import type { SelectOption } from '@mathesar-components/types';
+import type { SelectOption } from '@mathesar-component-library/types';
 
 export const DEFAULT_PAGE_SIZE = 500;
 export const RECORD_COMBINED_STATE_KEY = '__combined';

@@ -15,7 +15,7 @@ def test_record_list(create_table, client):
         "count": 25,
         "results": [
             {
-                "mathesar_id": 1,
+                "id": 1,
                 "Center": "NASA Kennedy Space Center",
                 "Status": "Application",
                 "Case Number": "KSC-12871",
@@ -25,7 +25,7 @@ def test_record_list(create_table, client):
                 "Patent Expiration Date": ""
             },
             {
-                "mathesar_id": 2,
+                "id": 2,
                 "Center": "NASA Ames Research Center",
                 "Status": "Issued",
                 "Case Number": "ARC-14048-1",
@@ -277,7 +277,7 @@ def test_record_list_pagination_offset(create_table, client):
     assert len(response_1_data['results']) == 5
     assert len(response_2_data['results']) == 5
 
-    assert record_1_data['mathesar_id'] != record_2_data['mathesar_id']
+    assert record_1_data['id'] != record_2_data['id']
     assert record_1_data['Case Number'] != record_2_data['Case Number']
     assert record_1_data['Patent Number'] != record_2_data['Patent Number']
     assert record_1_data['Application SN'] != record_2_data['Application SN']
@@ -329,7 +329,7 @@ def test_record_partial_update(create_table, client):
     table_name = 'NASA Record Patch'
     table = create_table(table_name)
     records = table.get_records()
-    record_id = records[0]['mathesar_id']
+    record_id = records[0]['id']
 
     original_response = client.get(f'/api/v0/tables/{table.id}/records/{record_id}/')
     original_data = original_response.json()
@@ -359,7 +359,7 @@ def test_record_delete(create_table, client):
     table = create_table(table_name)
     records = table.get_records()
     original_num_records = len(records)
-    record_id = records[0]['mathesar_id']
+    record_id = records[0]['id']
 
     response = client.delete(f'/api/v0/tables/{table.id}/records/{record_id}/')
     assert response.status_code == 204
@@ -370,7 +370,7 @@ def test_record_update(create_table, client):
     table_name = 'NASA Record Put'
     table = create_table(table_name)
     records = table.get_records()
-    record_id = records[0]['mathesar_id']
+    record_id = records[0]['id']
 
     data = {
         'Center': 'NASA Example Space Center',
@@ -385,7 +385,7 @@ def test_record_404(create_table, client):
     table_name = 'NASA Record 404'
     table = create_table(table_name)
     records = table.get_records()
-    record_id = records[0]['mathesar_id']
+    record_id = records[0]['id']
 
     client.delete(f'/api/v0/tables/{table.id}/records/{record_id}/')
     response = client.get(f'/api/v0/tables/{table.id}/records/{record_id}/')

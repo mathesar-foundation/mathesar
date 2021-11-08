@@ -21,6 +21,7 @@ class MathesarColumn(Column):
             foreign_keys=set(),
             primary_key=False,
             nullable=True,
+            autoincrement=False,
             server_default=None,
     ):
         """
@@ -42,6 +43,7 @@ class MathesarColumn(Column):
             type_=sa_type,
             primary_key=primary_key,
             nullable=nullable,
+            autoincrement=autoincrement,
             server_default=server_default
         )
 
@@ -59,6 +61,7 @@ class MathesarColumn(Column):
             foreign_keys=fkeys,
             primary_key=column.primary_key,
             nullable=column.nullable,
+            autoincrement=column.autoincrement,
             server_default=column.server_default,
         )
         new_column.original_table = column.table

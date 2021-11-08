@@ -14,8 +14,8 @@
     Display,
     Meta,
   } from '@mathesar/stores/table-data/types';
-  import HeaderCell from './HeaderCell.svelte';
-  import NewColumnCell from './NewColumnCell.svelte';
+  import HeaderCell from './header-cell/HeaderCell.svelte';
+  import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
   let columnsDataStore: ColumnsDataStore;
