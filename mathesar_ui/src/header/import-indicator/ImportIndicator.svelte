@@ -3,7 +3,7 @@
   import { States } from '@mathesar/utils/api';
   import {
     Dropdown,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
 
   import type {
     FileImportStatusMap,

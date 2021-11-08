@@ -1,5 +1,10 @@
 import { writable, get as getStoreValue } from 'svelte/store';
-import { getAPI, States } from '@mathesar/utils/api';
+import {
+  deleteAPI,
+  getAPI,
+  postAPI,
+  States,
+} from '@mathesar/utils/api';
 import type {
   Writable,
   Updater,
@@ -7,7 +12,7 @@ import type {
   Unsubscriber,
 } from 'svelte/store';
 import type { PaginatedResponse } from '@mathesar/utils/api';
-import type { CancellablePromise } from '@mathesar/components';
+import type { CancellablePromise } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/App.d';
 
 export interface Constraint {
@@ -23,12 +28,28 @@ export interface ConstraintsData {
   constraints: Constraint[],
 }
 
+function api(url: string) {
+  return {
+    get() {
+      return getAPI<PaginatedResponse<Constraint>>(`${url}?limit=500`);
+    },
+    add(constraintDetails: Partial<Constraint>) {
+      return postAPI<Partial<Constraint>>(url, constraintDetails);
+    },
+    remove(constraintId: Constraint['id']) {
+      return deleteAPI(`${url}${constraintId}`);
+    },
+  };
+}
+
 export class ConstraintsDataStore implements Writable<ConstraintsData> {
   private parentId: DBObjectEntry['id'];
 
   private store: Writable<ConstraintsData>;
 
   private promise: CancellablePromise<PaginatedResponse<Constraint>> | null;
+
+  private api: ReturnType<typeof api>;
 
   private fetchCallback: (storeData: ConstraintsData) => void;
 
@@ -42,6 +63,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
       constraints: [],
     });
     this.fetchCallback = fetchCallback;
+    this.api = api(`/tables/${this.parentId}/constraints/`);
     void this.fetch();
   }
 
@@ -71,8 +93,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
     try {
       this.promise?.cancel();
-      const url = `/tables/${this.parentId}/constraints/?limit=500`;
-      this.promise = getAPI<PaginatedResponse<Constraint>>(url);
+      this.promise = this.api.get();
 
       const response = await this.promise;
 
@@ -93,6 +114,11 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
       this.promise = null;
     }
     return null;
+  }
+
+  async remove(constraintId: number): Promise<void> {
+    await this.api.remove(constraintId);
+    await this.fetch();
   }
 
   destroy(): void {

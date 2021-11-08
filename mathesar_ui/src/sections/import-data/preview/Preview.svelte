@@ -6,7 +6,7 @@
     Checkbox,
     Button,
     Icon,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
   import { setInFileStore } from '@mathesar/stores/fileImports';
   import type { FileImport } from '@mathesar/stores/fileImports';
   import { States } from '@mathesar/utils/api';

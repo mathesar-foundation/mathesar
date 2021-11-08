@@ -4,7 +4,7 @@
   import {
     Icon,
     Tree,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
   import {
     addTab,
   } from '@mathesar/stores/tabs';
@@ -22,7 +22,7 @@
   import type { SchemaEntry, TableEntry } from '@mathesar/App.d';
   import type {
     TreeItem,
-  } from '@mathesar-components/types';
+  } from '@mathesar-component-library/types';
 
   export let database: string;
   export let schemaId: SchemaEntry['id'];
