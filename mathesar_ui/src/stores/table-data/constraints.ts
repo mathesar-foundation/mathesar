@@ -13,7 +13,7 @@ import type {
   Readable,
 } from 'svelte/store';
 import type { PaginatedResponse } from '@mathesar/utils/api';
-import type { CancellablePromise } from '@mathesar/components';
+import type { CancellablePromise } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/App.d';
 import type { Column } from './columns';
 
