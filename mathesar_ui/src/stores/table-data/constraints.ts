@@ -172,30 +172,24 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     );
   }
 
-  async updateUniquenessOfColumn(
-    column: Column,
-    updater: (isUnique: boolean) => boolean,
-  ): Promise<boolean> {
+  async setUniquenessOfColumn(column: Column, shouldBeUnique: boolean): Promise<void> {
     if (column.primary_key) {
-      const currentlyIsUnique = true; // PK columns are always unique
-      const shouldBeUnique = updater(currentlyIsUnique);
       if (!shouldBeUnique) {
         throw new Error(`Column ${column.name} must remain unique because it is a primary key.`);
       }
-      return true;
+      return;
     }
 
     const uniqueConstraintsForColumn = getStoreValue(
       this.constraintsThatMatchSetOfColumns([column]),
     ).filter((c) => c.type === 'unique');
     const currentlyIsUnique = uniqueConstraintsForColumn.length > 0;
-    const shouldBeUnique = updater(currentlyIsUnique);
     if (shouldBeUnique === currentlyIsUnique) {
-      return currentlyIsUnique;
+      return;
     }
     if (shouldBeUnique) {
       await this.add({ type: 'unique', columns: [column.name] });
-      return true;
+      return;
     }
     // Technically, one column can have two unique constraints applied on it,
     // with different names. So we need to make sure do delete _all_ of them.
@@ -203,7 +197,6 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
       (constraint) => this.api.remove(constraint.id),
     ));
     await this.fetch();
-    return false;
   }
 
   destroy(): void {

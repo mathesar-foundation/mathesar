@@ -55,8 +55,9 @@
   async function toggleAllowDuplicates() {
     isRequestingToggleAllowDuplicates = true;
     try {
-      const isUnique = await constraintsDataStore.updateUniquenessOfColumn(column, (u) => !u);
-      const msg = `Column "${column.name}" will ${isUnique ? 'no longer ' : ''}allow duplicates.`;
+      const newAllowsDuplicates = !allowsDuplicates;
+      await constraintsDataStore.setUniquenessOfColumn(column, !newAllowsDuplicates);
+      const msg = `Column "${column.name}" will ${newAllowsDuplicates ? '' : 'no longer '}allow duplicates.`;
       // eslint-disable-next-line no-console
       console.log(msg); // TODO display success toast message: msg
       closeMenu();
