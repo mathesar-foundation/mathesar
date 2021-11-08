@@ -6,7 +6,7 @@
     faSpinner,
   } from '@fortawesome/free-solid-svg-icons';
   import { Checkbox, Dropdown, Icon } from '@mathesar-components';
-  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/constraints';
+  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import type {
     Meta,
     Column,
@@ -57,10 +57,12 @@
     try {
       const isUnique = await constraintsDataStore.updateUniquenessOfColumn(column, (u) => !u);
       const msg = `Column "${column.name}" will ${isUnique ? 'no longer ' : ''}allow duplicates.`;
+      // eslint-disable-next-line no-console
       console.log(msg); // TODO display success toast message: msg
       closeMenu();
     } catch (error) {
       const msg = `Unable to update "Allow Duplicates" of column "${column.name}". ${error.message as string}.`;
+      // eslint-disable-next-line no-console
       console.log(msg); // TODO display error toast message
     } finally {
       isRequestingToggleAllowDuplicates = false;

@@ -55,7 +55,7 @@ function api(url: string) {
       return postAPI<Partial<Column>>(url, columnDetails);
     },
     remove(index: Column['index']) {
-      return deleteAPI(`${url}${index}`);
+      return deleteAPI(`${url}${index}/`);
     },
   };
 }

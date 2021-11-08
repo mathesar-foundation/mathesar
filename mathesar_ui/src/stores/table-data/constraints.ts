@@ -41,7 +41,7 @@ function api(url: string) {
       return postAPI<Partial<Constraint>>(url, constraintDetails);
     },
     remove(constraintId: Constraint['id']) {
-      return deleteAPI(`${url}${constraintId}`);
+      return deleteAPI(`${url}${constraintId}/`);
     },
   };
 }
