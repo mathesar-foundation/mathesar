@@ -231,6 +231,36 @@ def test_table_list_filter_schema(create_table, client):
     check_table_response(response_table, table, table.name)
 
 
+def test_table_list_order_by_name(create_table, client):
+    table_2 = create_table('Filter Name 2')
+    table_1 = create_table('Filter Name 1')
+    table_4 = create_table('Filter Name 4')
+    table_3 = create_table('Filter Name 3')
+    table_5 = create_table('Filter Name 5')
+    expected_tables = [table_1, table_2, table_3, table_4, table_5]
+    response = client.get(f'/api/v0/tables/?sort_by=name')
+    response_data = response.json()
+    response_tables = response_data['results']
+    comparison_tuple = zip(response_tables, expected_tables)
+    for comparison_tuple in comparison_tuple:
+        check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
+
+
+def test_table_list_order_by_id(create_table, client):
+    expected_tables = [
+        create_table('Filter Name 1'),
+        create_table('Filter Name 2'),
+        create_table('Filter Name 3')
+    ]
+
+    response = client.get(f'/api/v0/tables/?sort_by=id')
+    response_data = response.json()
+    response_tables = response_data['results']
+    comparison_tuple = zip(response_tables, expected_tables)
+    for comparison_tuple in comparison_tuple:
+        check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
+
+
 @pytest.mark.parametrize('timestamp_type', ['created', 'updated'])
 def test_table_list_filter_timestamps(create_table, client, timestamp_type):
     table_name = f'Fitler {timestamp_type}'
