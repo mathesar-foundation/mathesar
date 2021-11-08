@@ -175,7 +175,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
   async setUniquenessOfColumn(column: Column, shouldBeUnique: boolean): Promise<void> {
     if (column.primary_key) {
       if (!shouldBeUnique) {
-        throw new Error(`Column ${column.name} must remain unique because it is a primary key.`);
+        throw new Error(`Column "${column.name}" must remain unique because it is a primary key.`);
       }
       return;
     }
