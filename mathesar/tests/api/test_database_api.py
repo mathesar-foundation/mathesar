@@ -152,25 +152,12 @@ def test_database_list_ordered_by_id(client, test_db_name, database_api_db):
     settings.DATABASES[test_db_name_2] = settings.DATABASES[test_db_name]
 
     cache.clear()
-    unsorted_expected_databases = [
-        Database.objects.get(name=test_db_name_1),
-        Database.objects.get(name=test_db_name_2),
-        Database.objects.get(name=database_api_db),
-        Database.objects.get(name=test_db_name),
-    ]
     expected_databases = [
         Database.objects.get(name=test_db_name),
         Database.objects.get(name=database_api_db),
         Database.objects.get(name=test_db_name_2),
         Database.objects.get(name=test_db_name_1),
     ]
-    response = client.get('/api/v0/databases/')
-    response_data = response.json()
-    response_databases = response_data['results']
-    comparison_tuples = zip(unsorted_expected_databases, response_databases)
-    for comparison_tuple in comparison_tuples:
-        check_database(comparison_tuple[0], comparison_tuple[1])
-
     sort_field = "id"
     response = client.get(f'/api/v0/databases/?sort_by={sort_field}')
     response_data = response.json()
@@ -180,6 +167,8 @@ def test_database_list_ordered_by_id(client, test_db_name, database_api_db):
         check_database(comparison_tuple[0], comparison_tuple[1])
     del settings.DATABASES[test_db_name_2]
     del settings.DATABASES[test_db_name_1]
+    Database.objects.get(name=test_db_name_1).delete()
+    Database.objects.get(name=test_db_name_2).delete()
 
 
 def test_database_list_ordered_by_name(client, test_db_name, database_api_db):
@@ -190,25 +179,12 @@ def test_database_list_ordered_by_name(client, test_db_name, database_api_db):
     settings.DATABASES[test_db_name_2] = settings.DATABASES[test_db_name]
 
     cache.clear()
-    unsorted_expected_databases = [
-        Database.objects.get(name=test_db_name_1),
-        Database.objects.get(name=test_db_name_2),
-        Database.objects.get(name=database_api_db),
-        Database.objects.get(name=test_db_name),
-    ]
     expected_databases = [
         Database.objects.get(name=test_db_name),
         Database.objects.get(name=test_db_name_1),
         Database.objects.get(name=test_db_name_2),
         Database.objects.get(name=database_api_db),
     ]
-    response = client.get('/api/v0/databases/')
-    response_data = response.json()
-    response_databases = response_data['results']
-    comparison_tuples = zip(unsorted_expected_databases, response_databases)
-    for comparison_tuple in comparison_tuples:
-        check_database(comparison_tuple[0], comparison_tuple[1])
-
     sort_field = "name"
     response = client.get(f'/api/v0/databases/?sort_by={sort_field}')
     response_data = response.json()
@@ -218,6 +194,8 @@ def test_database_list_ordered_by_name(client, test_db_name, database_api_db):
         check_database(comparison_tuple[0], comparison_tuple[1])
     del settings.DATABASES[test_db_name_2]
     del settings.DATABASES[test_db_name_1]
+    Database.objects.get(name=test_db_name_1).delete()
+    Database.objects.get(name=test_db_name_2).delete()
 
 
 def test_database_detail(client):
