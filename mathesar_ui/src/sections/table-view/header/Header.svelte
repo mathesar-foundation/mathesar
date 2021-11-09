@@ -83,8 +83,12 @@
   </div>
 
   {#each $columnsDataStore.columns as column (column.name)}
-    <HeaderCell {column} {meta}
-      columnPosition={getColumnPosition($columnPositionMap, column.name)} on:columnDelete={openColumnModal(column)}/>
+    <HeaderCell
+      {column}
+      {meta}
+      columnPosition={getColumnPosition($columnPositionMap, column.name)}
+      on:columnDelete={openColumnModal(column)}
+    />
   {/each}
 
   <NewColumnCell {display} columns={$columnsDataStore.columns} on:addColumn={addColumn}/>
