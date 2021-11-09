@@ -8,25 +8,4 @@
     border: solid #CCC 1px;
     border-radius: 4px;
   }
-  .table-constraint {
-    margin: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    line-height: 1.4;
-    > * + * {
-      margin-left: 10px;
-    }
-    .type {
-      text-transform: uppercase;
-      color: #666;
-    }
-    .columns {
-      color: #666;
-      font-size: 0.9rem;
-    }
-    .drop {
-      color: #f47171;
-    }
-  }
 }
