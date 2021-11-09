@@ -87,7 +87,7 @@
       {column}
       {meta}
       columnPosition={getColumnPosition($columnPositionMap, column.name)}
-      on:columnDelete={openColumnModal(column)}
+      on:columnDelete={() => openColumnModal(column)}
     />
   {/each}
 
