@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  // import type { Readable } from 'svelte/store';
   import {
     faSortAmountDown,
     faSortAmountDownAlt,
@@ -27,8 +28,9 @@
   $: sortDirection = ($sort as SortOption)?.get(column.name);
   $: hasGrouping = ($group as GroupOption)?.has(column.name);
 
-  $: allowsDuplicatesStore = constraintsDataStore.columnAllowsDuplicates(column);
-  $: allowsDuplicates = $allowsDuplicatesStore as boolean;
+  $: uniqueColumns = constraintsDataStore.uniqueColumns;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  $: allowsDuplicates = !(column.primary_key || $uniqueColumns.has(column.name));
 
   function handleSort(order: 'asc' | 'desc') {
     if (sortDirection === order) {

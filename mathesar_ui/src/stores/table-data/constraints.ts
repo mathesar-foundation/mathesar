@@ -32,6 +32,45 @@ export interface ConstraintsData {
   constraints: Constraint[],
 }
 
+/**
+ * A constraint only matches if the set of its columns strictly equals the set
+ * of columns supplied here. For example, if a constraint is set on three
+ * columns, two of which are passed to this function, that constraint will
+ * _not_ be returned.
+ */
+function filterConstraintsByColumnSet(
+  constraints: Constraint[],
+  columns: Column[],
+): Constraint[] {
+  const columnsNames = columns.map((c) => c.name);
+  function isMatch(constraint: Constraint) {
+    if (constraint.columns.length !== columnsNames.length) {
+      return false;
+    }
+    return constraint.columns.every(
+      (constraintColumn) => columnsNames.includes(constraintColumn),
+    );
+  }
+  return constraints.filter(isMatch);
+}
+
+/**
+ * A set of column names representing columns which have single-column unique
+ * constraints set.
+ *
+ * - Primary key constraints will not be reflected here.
+ * - Multi-column unique constraints will not be reflected here.
+ */
+function uniqueColumns(
+  constraintsDataStore: Writable<ConstraintsData>,
+): Readable<Set<string>> {
+  return derived(constraintsDataStore, ({ constraints }) => new Set(
+    constraints
+      .filter((c) => c.type === 'unique' && c.columns.length === 1)
+      .map((c) => c.columns[0]),
+  ));
+}
+
 function api(url: string) {
   return {
     get() {
@@ -57,6 +96,9 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
   private fetchCallback: (storeData: ConstraintsData) => void;
 
+  /** @see uniqueColumns */
+  uniqueColumns: Readable<Set<string>>;
+
   constructor(
     parentId: number,
     fetchCallback?: (storeData: ConstraintsData) => void,
@@ -66,6 +108,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
       state: States.Loading,
       constraints: [],
     });
+    this.uniqueColumns = uniqueColumns(this.store);
     this.fetchCallback = fetchCallback;
     this.api = api(`/tables/${this.parentId}/constraints/`);
     void this.fetch();
@@ -131,47 +174,6 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     await this.fetch();
   }
 
-  /**
-   * A constraint only matches if the set of its columns strictly equals the set
-   * of columns supplied here. For example, if a constraint is set on three
-   * columns, two of which are passed to this function, that constraint will
-   * _not_ be returned.
-   */
-  constraintsThatMatchSetOfColumns(columns: Column[]): Readable<Constraint[]> {
-    const columnsNames = columns.map((c) => c.name);
-    function isMatch(constraint: Constraint) {
-      if (constraint.columns.length !== columnsNames.length) {
-        return false;
-      }
-      return constraint.columns.every(
-        (constraintColumn) => columnsNames.includes(constraintColumn),
-      );
-    }
-    return derived(this.store, (s) => s.constraints.filter(isMatch));
-  }
-
-  /**
-   * Caveat: even though primary key columns must be unique, this function will
-   * give `false` for them because they don't usually have unique constraints
-   * set too.
-   */
-  columnHasUniqueConstraint(column: Column): Readable<boolean> {
-    const constraints = this.constraintsThatMatchSetOfColumns([column]);
-    return derived(constraints, (c) => c.some((constraint) => constraint.type === 'unique'));
-  }
-
-  columnAllowsDuplicates(column: Column): Readable<boolean> {
-    return derived(
-      this.columnHasUniqueConstraint(column),
-      (hasUniqueConstraint) => {
-        if (column.primary_key) {
-          return false;
-        }
-        return !hasUniqueConstraint;
-      },
-    );
-  }
-
   async setUniquenessOfColumn(column: Column, shouldBeUnique: boolean): Promise<void> {
     if (column.primary_key) {
       if (!shouldBeUnique) {
@@ -180,10 +182,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
       return;
     }
 
-    const uniqueConstraintsForColumn = getStoreValue(
-      this.constraintsThatMatchSetOfColumns([column]),
-    ).filter((c) => c.type === 'unique');
-    const currentlyIsUnique = uniqueConstraintsForColumn.length > 0;
+    const currentlyIsUnique = getStoreValue(this.uniqueColumns).has(column.name);
     if (shouldBeUnique === currentlyIsUnique) {
       return;
     }
@@ -193,6 +192,9 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     }
     // Technically, one column can have two unique constraints applied on it,
     // with different names. So we need to make sure do delete _all_ of them.
+    const { constraints } = getStoreValue(this.store);
+    const uniqueConstraintsForColumn = filterConstraintsByColumnSet(constraints, [column])
+      .filter((c) => c.type === 'unique');
     await Promise.all(uniqueConstraintsForColumn.map(
       (constraint) => this.api.remove(constraint.id),
     ));
