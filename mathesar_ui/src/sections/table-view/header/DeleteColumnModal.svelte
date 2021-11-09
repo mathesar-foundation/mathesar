@@ -19,7 +19,6 @@
         state = States.Loading;
         error = null;
         await columnsDataStore.deleteColumn(column.index);
-        void columnsDataStore.fetch();
         state = States.Done;
       } catch (err) {
         state = States.Error;
