@@ -14,19 +14,21 @@
     Display,
     Meta,
   } from '@mathesar/stores/table-data/types';
+  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
   import DeleteColumnModal from './DeleteColumnModal.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
   let columnsDataStore: ColumnsDataStore;
+  let constraintsDataStore: ConstraintsDataStore;
   let display: Display;
   let meta: Meta;
   let isDeleteModalOpen = false;
   let column: Column;
 
   $: ({
-    columnsDataStore, meta, display,
+    columnsDataStore, meta, display, constraintsDataStore,
   } = $tabularData as TabularData);
   $: ({ horizontalScrollOffset, columnPositionMap } = display);
 
@@ -86,6 +88,7 @@
     <HeaderCell
       {column}
       {meta}
+      {constraintsDataStore}
       columnPosition={getColumnPosition($columnPositionMap, column.name)}
       on:columnDelete={() => openColumnModal(column)}
     />

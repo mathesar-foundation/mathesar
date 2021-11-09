@@ -2,7 +2,7 @@
   import { Icon, Modal } from '@mathesar-component-library';
   import { getContext } from 'svelte';
   import type { TabularDataStore } from '@mathesar/stores/table-data/types';
-  import type { Constraint, ConstraintsDataStore } from '@mathesar/stores/table-data/constraints';
+  import type { Constraint, ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import { States } from '@mathesar/utils/api';
   import { faSpinner } from '@fortawesome/free-solid-svg-icons';
   import TableConstraint from './TableConstraint.svelte';
