@@ -14,7 +14,7 @@
     Display,
     Meta,
   } from '@mathesar/stores/table-data/types';
-  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/constraints';
+  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
