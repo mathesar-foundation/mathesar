@@ -23,6 +23,10 @@ export interface Constraint {
   id: number,
   name: string,
   type: ConstraintType,
+  /**
+   * Why use an Array instead of a Set? See discussion in
+   * https://github.com/centerofci/mathesar/pull/776#issuecomment-963514261
+   */
   columns: string[],
 }
 
