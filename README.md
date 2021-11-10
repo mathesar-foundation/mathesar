@@ -54,7 +54,6 @@ It is recommended that you keep the Docker containers running while you make cha
 Windows users who want to run the Mathesar Docker development environment in WSL are advised to clone the repository in a Linux filesystem. When the project resides in a Windows filesystem, WSL does not work well with hot module replacement (HMR), which is required for frontend development. Please refer to our [Common Issues wiki page](https://wiki.mathesar.org/engineering/common-issues), and the [frontend development README file](https://github.com/centerofci/mathesar/blob/master/mathesar_ui/README.md#developing-in-windows) for more details.
 
 ### Configuration Options
-By default [Chardet](https://github.com/chardet/chardet) is used for parsing csv in order to maintain compatability with other libraries, but if you need faster detection or wider encoding support [Chartset-normalizer](https://github.com/Ousret/charset_normalizer) can be installed optionally.
 
 If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASES.mathesar_tables` entry of the `config/settings.py` file with appropriate connection details before installing the Mathesar types and functions by running `install.py` as described in the previous step. 
 
