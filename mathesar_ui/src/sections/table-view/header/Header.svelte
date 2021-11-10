@@ -14,15 +14,17 @@
     Display,
     Meta,
   } from '@mathesar/stores/table-data/types';
-  import HeaderCell from './HeaderCell.svelte';
-  import NewColumnCell from './NewColumnCell.svelte';
+  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
+  import HeaderCell from './header-cell/HeaderCell.svelte';
+  import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
   let columnsDataStore: ColumnsDataStore;
+  let constraintsDataStore: ConstraintsDataStore;
   let display: Display;
   let meta: Meta;
   $: ({
-    columnsDataStore, meta, display,
+    columnsDataStore, meta, display, constraintsDataStore,
   } = $tabularData as TabularData);
   $: ({ horizontalScrollOffset, columnPositionMap } = display);
 
@@ -74,7 +76,7 @@
   </div>
 
   {#each $columnsDataStore.columns as column (column.name)}
-    <HeaderCell {column} {meta}
+    <HeaderCell {column} {meta} {constraintsDataStore}
       columnPosition={getColumnPosition($columnPositionMap, column.name)}/>
   {/each}
 

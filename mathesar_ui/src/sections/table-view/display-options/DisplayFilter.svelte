@@ -9,10 +9,10 @@
     Button,
     Select,
     TextInput,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
   import { filterCombinations } from '@mathesar/stores/table-data';
   import type { Meta, FilterCombination } from '@mathesar/stores/table-data/types';
-  import type { SelectOption } from '@mathesar-components/types';
+  import type { SelectOption } from '@mathesar-component-library/types';
   import FilterEntry from './FilterEntry.svelte';
 
   export let meta: Meta;

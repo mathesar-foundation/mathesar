@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { TextInput, Checkbox, Select } from '@mathesar-components';
+  import { TextInput, Checkbox, Select } from '@mathesar-component-library';
   import type { PreviewColumn } from '@mathesar/stores/fileImports';
 
   const dispatch = createEventDispatcher();
