@@ -11,10 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
+      - name: Install Vulture
+        run: pip3 install vulture
       - name: Run Vulture
-        uses: anaynayak/python-vulture-action@v1.0
-        id: vulture
-        with:
-          vulture-args: "."
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: vulture .
