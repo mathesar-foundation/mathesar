@@ -1,4 +1,4 @@
-export type { TabularData, TabularDataStore } from './store';
+export type { TabularData, TabularDataStore } from './tabularData';
 export type { RecordsData, TableRecord, GroupCount } from './records';
 export type { ColumnPosition, ColumnPositionMap } from './display';
 export type { Column, ColumnsData, ColumnsDataStore } from './columns';

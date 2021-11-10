@@ -31,17 +31,13 @@
 
   let columnsDataStore: ColumnsDataStore;
 
-  // let tableBodyRef: Body;
   let isModalOpen = false;
   let activeTab: MathesarTab;
 
   function setStores(_database: string, _id: number) {
     // const opts = URLQueryHandler.getTableConfig(_database, _id);
     const data = getTableContent(_id);
-    tabularData.set({
-      id: _id,
-      ...data,
-    });
+    tabularData.set(data);
     ({ columnsDataStore } = data);
   }
 
