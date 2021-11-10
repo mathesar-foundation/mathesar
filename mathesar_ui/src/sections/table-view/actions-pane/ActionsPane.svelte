@@ -11,7 +11,7 @@
     faCog,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
-  import { Button, Icon, Dropdown } from '@mathesar-components';
+  import { Button, Icon, Dropdown } from '@mathesar-component-library';
   import type {
     TabularDataStore,
     TabularData,
@@ -20,9 +20,9 @@
     ColumnsData,
     Meta,
   } from '@mathesar/stores/table-data/types';
-  import type { SelectOption } from '@mathesar/components/types';
+  import type { SelectOption } from '@mathesar-component-library/types';
   import { refreshTableContent } from '@mathesar/stores/table-data/store';
-  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/constraints';
+  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import TableConstraints from '../constraints/TableConstraints.svelte';
   import DisplayFilter from '../display-options/DisplayFilter.svelte';
   import DisplaySort from '../display-options/DisplaySort.svelte';
