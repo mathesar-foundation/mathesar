@@ -15,7 +15,7 @@
     getFileUploadInfo,
     loadPreview,
     cancelImport,
-    uploadUrl,
+    importFromURL,
   } from '../importUtils';
 
   export let fileImportStore: FileImport;
@@ -24,18 +24,18 @@
   let fileUrl: string;
   $:buttonControl = ($fileImportStore.uploadStatus !== States.Done
             || $fileImportStore.previewTableCreationStatus === States.Loading)
-            && (importMethod !== 'URL' || $fileImportStore.uploadStatus === States.Loading);
+            && (importMethod !== 'URL' || $fileImportStore.previewTableCreationStatus === States.Loading);
 
   const options = [
     { id: 'File', label: 'File' },
     { id: 'URL', label: 'URL' },
   ];
 
-  async function confirmImport() {
+  function confirmImport() {
     if (importMethod === 'File') {
       void loadPreview(fileImportStore);
     } else if (importMethod === 'URL') {
-      await uploadUrl(fileImportStore, fileUrl);
+        importFromURL(fileImportStore, fileUrl);
     }
   }
 </script>
@@ -65,7 +65,8 @@
   <div class="help-content">
   Enter a URL pointing to data to download:
   </div>
-  <TextInput bind:value={fileUrl}></TextInput>
+  <TextInput disabled={$fileImportStore.previewTableCreationStatus === States.Loading}
+             bind:value={fileUrl}/>
 {/if}
 
 <div class="actions">

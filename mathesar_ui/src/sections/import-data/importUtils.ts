@@ -151,7 +151,7 @@ async function createPreviewTable(
 
     try {
       const res = await previewCreatePromise as { id: number, name: string };
-
+     
       const toUpdate: FileImportWritableInfo = {
         previewTableCreationStatus: States.Done,
         previewId: res.id,
@@ -378,9 +378,10 @@ export function cancelImport(fileImportStore: FileImport): void {
   }
 }
 
-export async function uploadUrl(fileImportStore: FileImport, url: string): Promise<void> {
-  //does not work on error and console error when cancelling really fast
-  //work on spinner
+export async function importFromURL(fileImportStore: FileImport, url: string): Promise<void> {
+  setInFileStore(fileImportStore, {
+    previewTableCreationStatus: States.Loading
+  });
   try {
     const uploadResponse = await postAPI<{ id: number }>('/data_files/', { url });
     const { id } = uploadResponse;
@@ -388,14 +389,15 @@ export async function uploadUrl(fileImportStore: FileImport, url: string): Promi
       dataFileId: id,
       firstRowHeader: true,
       isDataFileInfoPresent: true,
-      uploadStatus: States.Done,
     });
-    void await loadPreview(fileImportStore);
+    const res = await loadPreview(fileImportStore);
+    setImportStatus(get(fileImportStore).id, {
+      status: States.Loading,
+      dataFileName: res.name,
+    });
   } catch (err: unknown) {
     setInFileStore(fileImportStore, {
-      uploads: [],
-      uploadProgress: null,
-      uploadStatus: States.Error,
+      previewTableCreationStatus: States.Error,
       error: (err as Error).message,
     });
   }

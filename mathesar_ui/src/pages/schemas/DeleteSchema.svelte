@@ -4,7 +4,7 @@
     Button,
     Modal,
     Icon,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/App.d';
   import { States } from '@mathesar/utils/api';
   import { deleteSchema } from '@mathesar/stores/schemas';

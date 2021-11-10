@@ -1,9 +1,11 @@
 <script lang="ts">
-    export let group: string;
-    export let idKey = 'id';
-    export let labelKey = 'label';
-    export let isInline = true;
-    export let options = [];
+  import type { RadioGroupOption } from '@mathesar-component-library/types';
+
+  export let group: string;
+  export let idKey = 'id';
+  export let labelKey = 'label';
+  export let isInline = true;
+  export let options: RadioGroupOption[] = [];
 </script>
 
 <fieldset class="radio-group">
