@@ -8,6 +8,7 @@ from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
+from db.columns.operations.select import get_column_name_from_index
 from db.constraints.operations.create import create_unique_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
@@ -45,13 +46,22 @@ class DatabaseObjectManager(models.Manager):
         return super().get_queryset()
 
 
-class DatabaseObject(BaseModel):
-    oid = models.IntegerField()
+class ReflectingObject(BaseModel):
     # The default manager, current_objects, does not reflect database objects.
     # This saves us from having to deal with Django trying to automatically reflect db
     # objects in the background when we might not expect it.
     current_objects = models.Manager()
     objects = DatabaseObjectManager()
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{self.__class__.__name__}"
+
+
+class DatabaseObject(ReflectingObject):
+    oid = models.IntegerField()
 
     class Meta:
         abstract = True
@@ -65,7 +75,7 @@ class DatabaseObject(BaseModel):
 _engines = {}
 
 
-class Database(BaseModel):
+class Database(ReflectingObject):
     current_objects = models.Manager()
     objects = DatabaseObjectManager()
     name = models.CharField(max_length=128, unique=True)
@@ -307,6 +317,35 @@ class Table(DatabaseObject):
             name = constraint_utils.get_constraint_name(constraint_type, self.name, columns[0])
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         return Constraint.objects.create(oid=constraint_oid, table=self)
+
+
+class Column(ReflectingObject):
+    table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='columns')
+    index = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.__class__.__name__}: {self.table_id}-{self.index}"
+
+    @property
+    def _sa_column(self):
+        return self.table.sa_columns[self.name]
+
+    @property
+    def name(self):
+        return get_column_name_from_index(
+            self.table.oid, self.index, self.table.schema._sa_engine
+        )
+
+    @property
+    def plain_type(self):
+        """
+        Get the type name without arguments
+        """
+        return self._sa_column.plain_type
+
+    @property
+    def type_options(self):
+        return self._sa_column.type_options
 
 
 class Constraint(DatabaseObject):
