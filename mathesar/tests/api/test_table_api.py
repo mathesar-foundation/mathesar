@@ -675,6 +675,30 @@ def test_table_create_base_name_too_long(client, data_file, schema):
     )
 
 
+get_encoding_test_list = [
+    ("mathesar/tests/data/non_unicode_files/cp1250.csv", "cp1250", (1, '2',
+                                                                    '1.7 Cubic Foot Compact "Cube" Office Refrigerators',
+                                                                    'Barry French',
+                                                                    '293', '457.81', '208.16', '68.02', 'Nunavut',
+                                                                    'Appliances', '0.58'),
+     ['1', "Eldon Base for stackable storage shelf, platinum", "Muhammed MacIntyre",
+      '3', '-213.25', '38.94', '35', "Nunavut", "Storage & Organization", '0.8']),
+
+    ("mathesar/tests/data/non_unicode_files/utf_16_le.csv", "utf_16_le", (1, 'Troy', '2004', 'English'),
+     ['Title', 'Year', 'Language']),
+]
+
+
+@pytest.mark.parametrize("non_unicode_file_path, filename, first_row, column_names", get_encoding_test_list)
+def test_table_create_non_unicode(client, non_unicode_file_path, filename, first_row, column_names,
+                                  schema, create_data_file):
+    expt_name = filename
+    non_unicode_datafile = create_data_file(non_unicode_file_path, filename)
+    check_create_table_response(
+        client, '', expt_name, non_unicode_datafile, schema, first_row, column_names
+    )
+
+
 def test_table_create_with_same_name(client, schema):
     table_name = 'test_table_duplicate'
     body = {
