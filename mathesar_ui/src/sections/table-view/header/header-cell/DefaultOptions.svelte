@@ -5,6 +5,7 @@
     faSortAmountDown,
     faSortAmountDownAlt,
     faThList,
+    faTrashAlt,
     faSpinner,
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button, Checkbox } from '@mathesar-component-library';
@@ -50,6 +51,11 @@
     dispatch('close');
   }
 
+  function deleteColumn() {
+    dispatch('close');
+    dispatch('columnDelete');
+  }
+  
   async function toggleAllowDuplicates() {
     isRequestingToggleAllowDuplicates = true;
     try {
@@ -103,6 +109,14 @@
         {:else}
           Group by column
         {/if}
+      </span>
+    </Button>
+  </li>
+  <li>
+    <Button appearance="plain" on:click={deleteColumn}>
+      <Icon class="opt" data={faTrashAlt}/>
+      <span>
+        Delete column
       </span>
     </Button>
   </li>
