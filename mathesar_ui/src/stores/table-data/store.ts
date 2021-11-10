@@ -19,9 +19,45 @@ export interface TabularData {
   display: Display,
 }
 export type TabularDataStore = Writable<TabularData>;
-export interface TabularDataEntry extends TabularData {
-  refresh: () => Promise<[ColumnsData, TableRecordsData, ConstraintsData]>,
-  destroy: () => void,
+export class TabularDataEntry implements TabularData {
+  private type: TabularType;
+
+  id: DBObjectEntry['id'];
+
+  meta: Meta;
+
+  columnsDataStore: ColumnsDataStore;
+
+  constraintsDataStore: ConstraintsDataStore;
+
+  recordsData: RecordsData;
+
+  display: Display;
+
+  constructor(type: TabularType, id: DBObjectEntry['id']) {
+    this.type = type;
+    this.id = id;
+    this.meta = new Meta(type, id);
+    this.columnsDataStore = new ColumnsDataStore(type, id, this.meta);
+    this.constraintsDataStore = new ConstraintsDataStore(id);
+    this.recordsData = new RecordsData(type, id, this.meta, this.columnsDataStore);
+    this.display = new Display(type, id, this.meta, this.columnsDataStore, this.recordsData);
+  }
+
+  refresh(): Promise<[ColumnsData, TableRecordsData, ConstraintsData]> {
+    return Promise.all([
+      this.columnsDataStore.fetch(),
+      this.recordsData.fetch(),
+      this.constraintsDataStore.fetch(),
+    ]);
+  }
+
+  destroy(): void {
+    this.columnsDataStore.destroy();
+    this.constraintsDataStore.destroy();
+    this.recordsData.destroy();
+    this.display.destroy();
+  }
 }
 
 const tableMap: Map<TableEntry['id'], TabularDataEntry> = new Map();
@@ -31,35 +67,7 @@ function get(type: TabularType, id: DBObjectEntry['id']): TabularDataEntry {
   const tabularMap = type === TabularType.View ? viewMap : tableMap;
   let entry = tabularMap.get(id);
   if (!entry) {
-    const meta = new Meta(type, id);
-    const columnsDataStore = new ColumnsDataStore(type, id, meta);
-    const constraintsDataStore = new ConstraintsDataStore(id);
-    const recordsData = new RecordsData(type, id, meta, columnsDataStore);
-    const display = new Display(type, id, meta, columnsDataStore, recordsData);
-
-    entry = {
-      id,
-      meta,
-      columnsDataStore,
-      constraintsDataStore,
-      recordsData,
-      display,
-
-      refresh() {
-        return Promise.all([
-          columnsDataStore.fetch(),
-          recordsData.fetch(),
-          constraintsDataStore.fetch(),
-        ]);
-      },
-
-      destroy(): void {
-        columnsDataStore.destroy();
-        constraintsDataStore.destroy();
-        recordsData.destroy();
-        display.destroy();
-      },
-    };
+    entry = new TabularDataEntry(type, id);
     tabularMap.set(id, entry);
   }
   return entry;
@@ -82,7 +90,7 @@ export function remove(type: TabularType, id: DBObjectEntry['id']): void {
   // destroy all objects in table
   const entry = tabularMap.get(id);
   if (entry) {
-    entry.recordsData.destroy();
+    entry.destroy();
     tabularMap.delete(id);
   }
 }
