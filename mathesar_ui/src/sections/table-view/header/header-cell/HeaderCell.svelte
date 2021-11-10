@@ -7,7 +7,6 @@
   import { Dropdown, Icon, Button } from '@mathesar-component-library';
   import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import { abstractTypes, getAbstractTypeForDBType } from '@mathesar/stores/abstractTypes';
-
   import type {
     Meta,
     Column,
@@ -96,6 +95,7 @@
               {column}
               {constraintsDataStore}
               on:close={closeMenu}
+              on:columnDelete
             />
           {:else if view === 'type'}
             <TypeOptions {column} {abstractTypeOfColumn} on:close={closeMenu}/>
