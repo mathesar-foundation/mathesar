@@ -5,6 +5,7 @@
     faSortAmountDown,
     faSortAmountDownAlt,
     faThList,
+    faTrashAlt,
     faSpinner,
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button, Checkbox } from '@mathesar-component-library';
@@ -60,16 +61,23 @@
       const newAllowsNull = !allowsNull;
       await columnsDataStore.setNullabilityOfColumn(column, newAllowsNull);
       const msg = `Column "${column.name}" will ${newAllowsNull ? '' : 'no longer '}allow NULL.`;
+      // eslint-disable-next-line no-console
       console.log(msg); // TODO display success toast message: msg
       dispatch('close');
     } catch (error) {
       const msg = `Unable to update "Allow NULL" of column "${column.name}". ${error.message as string}.`;
+      // eslint-disable-next-line no-console
       console.log(msg); // TODO display error toast message
     } finally {
       isRequestingToggleAllowNull = false;
     }
   }
 
+  function deleteColumn() {
+    dispatch('close');
+    dispatch('columnDelete');
+  }
+  
   async function toggleAllowDuplicates() {
     isRequestingToggleAllowDuplicates = true;
     try {
@@ -123,6 +131,14 @@
         {:else}
           Group by column
         {/if}
+      </span>
+    </Button>
+  </li>
+  <li>
+    <Button appearance="plain" on:click={deleteColumn}>
+      <Icon class="opt" data={faTrashAlt}/>
+      <span>
+        Delete column
       </span>
     </Button>
   </li>

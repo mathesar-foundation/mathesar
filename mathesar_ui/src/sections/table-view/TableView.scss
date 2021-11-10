@@ -93,10 +93,30 @@ section.table-section .tab-container .table-data {
 
 .delete-modal{
   .header {
-    font-weight: bold;
+    font-weight: 500;
+    font-size: 1.1rem;
     margin-bottom: 10px;
     }
+
+  .help-text {
+    color: #606066;
+    line-height: 1.4rem;
+    }
+
+  .sub-text {
+    margin-top: 10px;
+
+    &.error {
+      color: #f47171;
+    }
+    &.success {
+      color: #1bc47d;
+    }
+  }
   .footer {
     text-align: right;
+    button + button {
+      margin-left: 6px;
+    }
   }
 }
