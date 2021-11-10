@@ -1,9 +1,10 @@
 import { writable, get as getStoreValue } from 'svelte/store';
 import {
-  States,
+  deleteAPI,
   getAPI,
-  postAPI,
   patchAPI,
+  postAPI,
+  States,
 } from '@mathesar/utils/api';
 import { TabularType } from '@mathesar/App.d';
 import { intersection } from '@mathesar/utils/language';
@@ -49,6 +50,23 @@ function preprocessColumns(response?: Column[]): Column[] {
   }) || [];
 }
 
+function api(url: string) {
+  return {
+    get() {
+      return getAPI<PaginatedResponse<Column>>(`${url}?limit=500`);
+    },
+    add(columnDetails: Partial<Column>) {
+      return postAPI<Partial<Column>>(url, columnDetails);
+    },
+    remove(index: Column['index']) {
+      return deleteAPI(`${url}${index}/`);
+    },
+    update(index: Column['index'], data: Partial<Column>) {
+      return patchAPI<Partial<Column>>(`${url}${index}/`, data);
+    },
+  };
+}
+
 export class ColumnsDataStore implements Writable<ColumnsData> {
   private type: TabularType;
 
@@ -58,7 +76,7 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
 
   private promise: CancellablePromise<PaginatedResponse<Column>>;
 
-  private url: string;
+  private api: ReturnType<typeof api>;
 
   private meta: Meta;
 
@@ -80,7 +98,7 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
       primaryKey: null,
     });
     this.meta = meta;
-    this.url = `/${this.type === TabularType.Table ? 'tables' : 'views'}/${this.parentId}/columns/`;
+    this.api = api(`/${this.type === TabularType.Table ? 'tables' : 'views'}/${this.parentId}/columns/`);
     this.fetchCallback = fetchCallback;
     this.listeners = new Map();
     void this.fetch();
@@ -132,7 +150,7 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
 
     try {
       this.promise?.cancel();
-      this.promise = getAPI<PaginatedResponse<Column>>(`${this.url}?limit=500`);
+      this.promise = this.api.get();
 
       const response = await this.promise;
       const columnResponse = preprocessColumns(response.results);
@@ -159,8 +177,8 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
     return null;
   }
 
-  async add(newColumn: Partial<Column>): Promise<Partial<Column>> {
-    const column = await postAPI<Partial<Column>>(this.url, newColumn);
+  async add(columnDetails: Partial<Column>): Promise<Partial<Column>> {
+    const column = await this.api.add(columnDetails);
     await this.fetch();
     return column;
   }
@@ -169,10 +187,7 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
   // but are the object instantiations worth it?
 
   async patchType(columnIndex: Column['index'], type: DbType): Promise<Partial<Column>> {
-    const column = await patchAPI<Partial<Column>>(
-      `${this.url}${columnIndex}/`,
-      { type },
-    );
+    const column = await this.api.update(columnIndex, { type });
     await this.fetch();
     this.callListeners('columnPatched', column);
     return column;
@@ -214,5 +229,10 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
     this.promise?.cancel();
     this.promise = null;
     this.listeners.clear();
+  }
+
+  async deleteColumn(index: Column['index']): Promise<void> {
+    await this.api.remove(index);
+    await this.fetch();
   }
 }
