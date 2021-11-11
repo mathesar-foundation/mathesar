@@ -11,13 +11,21 @@ import {
   getAllImportDetailsForSchema,
   removeImportFromView,
 } from '@mathesar/stores/fileImports';
+import type {
+  FileImportInfo,
+} from '@mathesar/stores/fileImports';
 import { parseTabListConfigFromURL, TabListConfig } from './utils';
 
 export interface MathesarTab extends Tab {
   id: string,
   label: string,
+
+  // TODO: Use a enum to determine type of tab
   isNew: boolean,
   tabularData?: TabularData,
+
+  // Discuss: Remove imports from within the tab context to a higher level modal context
+  fileImportId?: FileImportInfo['id']
 }
 
 interface TabAddOptions {
@@ -25,8 +33,12 @@ interface TabAddOptions {
   status?: 'active' | 'inactive'
 }
 
-function calculateTabId(type: TabularType, id: DBObjectEntry['id']): MathesarTab['id'] {
-  return `type_${type}_id_${id}`;
+function calculateTabularTabId(type: TabularType, id: DBObjectEntry['id']): MathesarTab['id'] {
+  return `tabular_type_${type}_id_${id}`;
+}
+
+function calculateImportTabId(id: FileImportInfo['id']): MathesarTab['id'] {
+  return `import_id_${id}`;
 }
 
 function getTabsFromImports(schemaId: SchemaEntry['id']): MathesarTab[] {
@@ -34,7 +46,7 @@ function getTabsFromImports(schemaId: SchemaEntry['id']): MathesarTab[] {
     (entry) => ({
       ...entry,
       isNew: true,
-      label: 'New Table',
+      label: 'Import data',
     }),
   );
   return imports;
@@ -51,7 +63,7 @@ function getTabsFromConfig(
       const table = tableStoreData.data.get(entry[1]);
       if (table) {
         tabs.push({
-          id: calculateTabId(entry[0], entry[1]),
+          id: calculateTabularTabId(entry[0], entry[1]),
           label: table.name,
           isNew: false,
           tabularData: getTabularContent(entry[0], entry[1], entry),
@@ -62,6 +74,33 @@ function getTabsFromConfig(
     },
   );
   return tabs;
+}
+
+export function constructTabularTab(
+  type: TabularData['type'],
+  id: TabularData['id'],
+  label: DBObjectEntry['name'],
+): MathesarTab {
+  const newTab: MathesarTab = {
+    id: calculateTabularTabId(type, id),
+    label,
+    isNew: false,
+    tabularData: getTabularContent(type, id),
+  };
+  return newTab;
+}
+
+export function constructImportTab(
+  fileImportId: FileImportInfo['id'],
+  label?: FileImportInfo['name'],
+): MathesarTab {
+  const newTab: MathesarTab = {
+    id: calculateImportTabId(fileImportId),
+    label: label || 'Import data',
+    isNew: true,
+    fileImportId,
+  };
+  return newTab;
 }
 
 /**
@@ -130,6 +169,25 @@ export class TabList {
     }
   }
 
+  getTabularTabByTabularID(
+    type: TabularData['type'],
+    id: TabularData['id'],
+  ): MathesarTab {
+    const tabSubstance = get(this.tabs);
+    const tabularTabId = calculateTabularTabId(type, id);
+    return tabSubstance.find(
+      (entry) => entry.id === tabularTabId,
+    );
+  }
+
+  getImportTabByImportID(id: FileImportInfo['id']): MathesarTab {
+    const tabSubstance = get(this.tabs);
+    const importTabId = calculateImportTabId(id);
+    return tabSubstance.find(
+      (entry) => entry.id === importTabId,
+    );
+  }
+
   remove(tab: MathesarTab): void {
     const tabSubstance = get(this.tabs);
     const activeTabSubstance = get(this.activeTab);
@@ -175,11 +233,11 @@ export class TabList {
     }
   }
 
-  replace(oldTabId: MathesarTab['id'], tab: MathesarTab): void {
+  replace(oldTab: MathesarTab, tab: MathesarTab): void {
     const tabSubstance = get(this.tabs);
     const activeTabSubstance = get(this.activeTab);
 
-    const existingTabIndex = tabSubstance.findIndex((tabEntry) => tabEntry.id === oldTabId);
+    const existingTabIndex = tabSubstance.findIndex((tabEntry) => tabEntry.id === oldTab.id);
     const existingTab = tabSubstance[existingTabIndex];
 
     this.add(tab, {

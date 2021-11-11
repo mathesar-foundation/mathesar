@@ -9,11 +9,8 @@
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
     getTabsForSchema,
-    removeTab,
-    selectTab,
   } from '@mathesar/stores/tabs';
-  import type { MathesarTab } from '@mathesar/stores/tabs';
-  import type { Writable } from 'svelte/store';
+  import type { MathesarTab, TabList } from '@mathesar/stores/tabs/types';
 
   import ImportData from './import-data/ImportData.svelte';
   import TableView from './table-view/TableView.svelte';
@@ -23,44 +20,37 @@
   export let database : string;
   export let schemaId: number;
 
-  let tabs: Writable<MathesarTab[]>;
-  let activeTab: Writable<MathesarTab>;
+  let tabList: TabList;
+  $: tabList = getTabsForSchema(database, schemaId);
+  $: ({ tabs, activeTab } = tabList);
 
   function changeCurrentSchema(_database: string, _schemaId: number) {
-    let isChanged = false;
     if ($currentDBName !== _database) {
       $currentDBName = _database;
-      isChanged = true;
     }
     if ($currentSchemaId !== _schemaId) {
       $currentSchemaId = _schemaId;
-      isChanged = true;
-    }
-
-    if (isChanged || !tabs) {
-      ({ tabs, activeTab } = getTabsForSchema($currentDBName, $currentSchemaId));
-      // Sync tabs to url here!
     }
   }
 
+  // TODO: Move this entire logic to data layer without involving view layer
   $: changeCurrentSchema(database, schemaId);
 
   function getLink(entry: MathesarTab) {
     if (entry.isNew) {
       return null;
     }
-    return `/${database}/${schemaId}/${URLQueryHandler.constructTableLink(entry.id as number)}`;
+    return `/${database}/${schemaId}/${URLQueryHandler.constructTableLink(entry.tabularData.id)}`;
   }
 
   function tabSelected(e: { detail: { tab: MathesarTab, originalEvent: Event } }) {
     const { originalEvent, tab } = e.detail;
     originalEvent.preventDefault();
-
-    selectTab(database, tab);
+    // selectTab(database, tab);
   }
 
   function tabRemoved(e: { detail: { removedTab: MathesarTab } }) {
-    removeTab(database, schemaId, e.detail.removedTab);
+    tabList.remove(e.detail.removedTab);
   }
 </script>
 

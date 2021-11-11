@@ -4,7 +4,7 @@
   import { getTableContent } from '@mathesar/stores/table-data';
   import { currentSchemaId, getSchemaInfo } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
-  import { getActiveTabValue, removeTab } from '@mathesar/stores/tabs';
+  import { getTabsForSchema } from '@mathesar/stores/tabs';
   import type {
     TabularData,
     ColumnsDataStore,
@@ -13,7 +13,6 @@
     refetchTablesForSchema,
     deleteTable,
   } from '@mathesar/stores/tables';
-  import type { MathesarTab } from '@mathesar/stores/tabs';
   // import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
 
   import ActionsPane from './actions-pane/ActionsPane.svelte';
@@ -30,9 +29,7 @@
   $: identifier = id as number;
 
   let columnsDataStore: ColumnsDataStore;
-
   let isModalOpen = false;
-  let activeTab: MathesarTab;
 
   function setStores(_database: string, _id: number) {
     // const opts = URLQueryHandler.getTableConfig(_database, _id);
@@ -44,7 +41,10 @@
   $: setStores(database, identifier);
 
   async function deleteConfirm() {
-    removeTab($currentDBName, $currentSchemaId, activeTab);
+    const tabList = getTabsForSchema($currentDBName, $currentSchemaId);
+    const tab = tabList.getTabularTabByTabularID($tabularData.type, $tabularData.id);
+    tabList.remove(tab);
+
     await deleteTable(identifier);
     isModalOpen = false;
     await refetchTablesForSchema($currentSchemaId);
@@ -52,8 +52,6 @@
 
   function tableDelete() {
     const { has_dependencies: hasDependencies } = getSchemaInfo($currentDBName, $currentSchemaId);
-    const nameActiveTab = getActiveTabValue($currentDBName, $currentSchemaId);
-    activeTab = nameActiveTab;
     if (hasDependencies) {
       isModalOpen = true;
     } else {
@@ -70,7 +68,7 @@
       <Header/>
       <Body/>
       {#if isModalOpen}
-        <DeleteTableModal bind:isOpen={isModalOpen} bind:activeTab on:deleteConfirm={deleteConfirm}/>
+        <DeleteTableModal bind:isOpen={isModalOpen} on:deleteConfirm={deleteConfirm}/>
       {/if}  
     {/if}
   </div>
