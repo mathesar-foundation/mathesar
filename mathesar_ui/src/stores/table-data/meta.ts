@@ -274,54 +274,64 @@ export class Meta {
   }
 
   loadFromParams(params: MetaParams): void {
-    const [paginationOption, sortOption, groupOption, filterOption] = params;
-    this.pageSize.set(paginationOption[0]);
-    this.page.set(paginationOption[1]);
-
-    const sortOptionMap: SortOption = new Map();
-    for (let i = 0; i < sortOption.length; i += 2) {
-      const sortOrder = sortOption[i + 1] === 'd' ? 'desc' : 'asc';
-      sortOptionMap.set(sortOption[i], sortOrder);
-    }
-    if (sortOption.length > 0) {
-      this.sort.set(sortOptionMap);
-    }
-
-    const groupOptionSet: GroupOption = new Set(groupOption);
-    if (groupOptionSet.size > 0) {
-      this.group.set(groupOptionSet);
-    }
-
-    const filters: FilterEntry[] = [];
-    const combination: FilterCombination['id'] = filterOption[0] === 'o' ? 'or' : 'and';
-    for (let i = 1; i < filterOption.length;) {
-      const column = filterOption[i];
-      const condition = filterOption[i + 1];
-
-      if (column && condition) {
-        const value = filterOption[i + 2] || '';
-        filters.push({
-          column: {
-            id: column,
-            label: column,
-          },
-          condition: {
-            id: condition,
-            label: condition,
-          },
-          value,
-        });
+    try {
+      const [paginationOption, sortOption, groupOption, filterOption] = params;
+      if (paginationOption?.length === 2) {
+        this.pageSize.set(paginationOption[0] || DEFAULT_PAGE_SIZE);
+        this.page.set(paginationOption[1] || 1);
       }
-      i += 3;
-    }
-    if (filters.length > 0) {
-      this.filter.set({
-        combination: {
-          id: combination,
-          label: combination,
-        },
-        filters,
-      });
+
+      if (sortOption?.length > 0) {
+        const sortOptionMap: SortOption = new Map();
+        for (let i = 0; i < sortOption.length; i += 2) {
+          const sortOrder = sortOption[i + 1] === 'd' ? 'desc' : 'asc';
+          sortOptionMap.set(sortOption[i], sortOrder);
+        }
+        if (sortOption.length > 0) {
+          this.sort.set(sortOptionMap);
+        }
+      }
+
+      const groupOptionSet: GroupOption = new Set(groupOption);
+      if (groupOptionSet.size > 0) {
+        this.group.set(groupOptionSet);
+      }
+
+      if (filterOption?.length > 0) {
+        const filters: FilterEntry[] = [];
+        const combination: FilterCombination['id'] = filterOption[0] === 'o' ? 'or' : 'and';
+        for (let i = 1; i < filterOption.length;) {
+          const column = filterOption[i];
+          const condition = filterOption[i + 1];
+
+          if (column && condition) {
+            const value = filterOption[i + 2] || '';
+            filters.push({
+              column: {
+                id: column,
+                label: column,
+              },
+              condition: {
+                id: condition,
+                label: condition,
+              },
+              value,
+            });
+          }
+          i += 3;
+        }
+        if (filters.length > 0) {
+          this.filter.set({
+            combination: {
+              id: combination,
+              label: combination,
+            },
+            filters,
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Unable to load meta information from params', err);
     }
   }
 
