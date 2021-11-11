@@ -1,5 +1,7 @@
-import type { Writable } from 'svelte/store';
+import { get } from 'svelte/store';
+import type { Writable, Unsubscriber } from 'svelte/store';
 import type { DBObjectEntry, TabularType } from '@mathesar/App.d';
+import { EventHandler } from '@mathesar-component-library';
 import type { MetaParams } from './meta';
 import { Meta } from './meta';
 import type { ColumnsData } from './columns';
@@ -16,7 +18,7 @@ export type TabularDataParams = [
   ...MetaParams,
 ];
 
-export class TabularData {
+export class TabularData extends EventHandler {
   type: TabularType;
 
   id: DBObjectEntry['id'];
@@ -31,7 +33,10 @@ export class TabularData {
 
   display: Display;
 
+  private metaParametersUnsubscriber: Unsubscriber;
+
   constructor(type: TabularType, id: DBObjectEntry['id'], params?: TabularDataParams) {
+    super();
     this.type = type;
     this.id = id;
     this.meta = new Meta(type, id, params?.slice(2) as MetaParams);
@@ -39,10 +44,14 @@ export class TabularData {
     this.constraintsDataStore = new ConstraintsDataStore(id);
     this.recordsData = new RecordsData(type, id, this.meta, this.columnsDataStore);
     this.display = new Display(type, id, this.meta, this.columnsDataStore, this.recordsData);
+
+    this.metaParametersUnsubscriber = this.meta.metaParameters.subscribe(() => {
+      this.dispatch('paramsUpdated', this.parameterize());
+    });
   }
 
   parameterize(): TabularDataParams {
-    const metaParams = this.meta.parameterize();
+    const metaParams = get(this.meta.metaParameters);
     return [this.type, this.id, ...metaParams];
   }
 
@@ -56,10 +65,12 @@ export class TabularData {
 
   destroy(): void {
     // Destroy in reverse order of creation
+    this.metaParametersUnsubscriber();
     this.display.destroy();
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
+    super.destroy();
   }
 }
 

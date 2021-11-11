@@ -59,7 +59,7 @@
       <Body/>
       {#if isModalOpen}
         <DeleteTableModal bind:isOpen={isModalOpen} on:deleteConfirm={deleteConfirm}/>
-      {/if}  
+      {/if}
     {/if}
   </div>
 </div>

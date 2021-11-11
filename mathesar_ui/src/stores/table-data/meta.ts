@@ -113,6 +113,8 @@ export class Meta {
 
   recordRequestParams: Readable<string>;
 
+  metaParameters: Readable<MetaParams>;
+
   constructor(
     type: TabularType,
     parentId: number,
@@ -165,6 +167,7 @@ export class Meta {
       'idle' as ModificationStatus,
     );
     this.setRecordRequestParamsStore();
+    this.setMetaParametersStore();
   }
 
   private setRecordRequestParamsStore(): void {
@@ -176,10 +179,7 @@ export class Meta {
         this.sort,
         this.filter,
       ],
-      (
-        [$pageSize, $offset, $group, $sort, $filter],
-        set,
-      ) => {
+      ([$pageSize, $offset, $group, $sort, $filter]) => {
         const params: string[] = [];
         params.push(`limit=${$pageSize}`);
         params.push(`offset=${$offset}`);
@@ -222,44 +222,55 @@ export class Meta {
             `filters=${encodeURIComponent(JSON.stringify(filter))}`,
           );
         }
-        set(params.join('&'));
+        return params.join('&');
       },
     );
   }
 
-  parameterize(): MetaParams {
-    const paginationOption: number[] = [
-      get(this.pageSize),
-      get(this.page),
-    ];
+  private setMetaParametersStore(): void {
+    this.metaParameters = derived(
+      [
+        this.pageSize,
+        this.page,
+        this.sort,
+        this.group,
+        this.filter,
+      ],
+      ([$pageSize, $page, $sort, $group, $filter]) => {
+        const paginationOption: number[] = [
+          $pageSize,
+          $page,
+        ];
 
-    const sortOption: string[] = [];
-    get(this.sort).forEach((value, key) => {
-      sortOption.push(key);
-      const sortOrder = value === 'desc' ? 'd' : 'a';
-      sortOption.push(sortOrder);
-    });
+        const sortOption: string[] = [];
+        $sort.forEach((value, key) => {
+          sortOption.push(key);
+          const sortOrder = value === 'desc' ? 'd' : 'a';
+          sortOption.push(sortOrder);
+        });
 
-    const groupOption: string[] = [...(get(this.group) ?? [])];
+        const groupOption: string[] = [...($group ?? [])];
 
-    const filterOptions: string[] = [];
-    const filterConfig = get(this.filter);
-    if (filterConfig?.filters?.length > 0) {
-      filterOptions.push(filterConfig.combination.id === 'or' ? 'o' : 'a');
-      filterConfig.filters.forEach((filter) => {
-        filterOptions.push(filter.column.id as string);
-        filterOptions.push(filter.condition.id as string);
-        filterOptions.push(filter.value);
-      });
-    }
+        const filterOptions: string[] = [];
+        const filterConfig = $filter;
+        if (filterConfig?.filters?.length > 0) {
+          filterOptions.push(filterConfig.combination.id === 'or' ? 'o' : 'a');
+          filterConfig.filters.forEach((filter) => {
+            filterOptions.push(filter.column.id as string);
+            filterOptions.push(filter.condition.id as string);
+            filterOptions.push(filter.value);
+          });
+        }
 
-    const metaParams: MetaParams = [
-      paginationOption,
-      sortOption,
-      groupOption,
-      filterOptions,
-    ];
-    return metaParams;
+        const metaParams: MetaParams = [
+          paginationOption,
+          sortOption,
+          groupOption,
+          filterOptions,
+        ];
+        return metaParams;
+      },
+    );
   }
 
   loadFromParams(params: MetaParams): void {
