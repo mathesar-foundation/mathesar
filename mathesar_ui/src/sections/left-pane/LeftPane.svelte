@@ -33,7 +33,7 @@
   export let getLink: (entry: TableEntry) => string;
   
   let tree: TreeItem[] = [];
-  let activeTable: Set<unknown>;
+  let activeOptionSet: Set<unknown>;
   const expandedItems = new Set(['table_header']);
 
   function generateTree(_tables: DBTablesStoreData) {
@@ -62,7 +62,13 @@
   $: tree = generateTree($tables);
 
   function onActiveTabChange(_activeTab: MathesarTab) {
-    activeTable = new Set([_activeTab?.id]);
+    if (_activeTab?.tabularData) {
+      activeOptionSet = new Set([
+        _activeTab.tabularData.id,
+      ]);
+    } else {
+      activeOptionSet = new Set();
+    }
   }
 
   $: onActiveTabChange(activeTab);
@@ -87,7 +93,7 @@
   <nav>
     <Tree data={tree} idKey="treeId" childKey="tables"
           search={true} {getLink} {expandedItems}
-          bind:selectedItems={activeTable} on:nodeSelected={tableSelected}
+          bind:selectedItems={activeOptionSet} on:nodeSelected={tableSelected}
           let:entry>
       <Icon data={faTable}/>
       <span>{entry.label}</span>
