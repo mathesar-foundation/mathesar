@@ -17,7 +17,7 @@ export type TabularDataParams = [
 ];
 
 export class TabularData {
-  private type: TabularType;
+  type: TabularType;
 
   id: DBObjectEntry['id'];
 

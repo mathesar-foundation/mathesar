@@ -1,21 +1,26 @@
 import { TabularType } from '@mathesar/App.d';
 import type { DBObjectEntry, TableEntry, ViewEntry } from '@mathesar/App.d';
 import { TabularData } from './tabularData';
+import type { TabularDataParams } from './tabularData';
 
 const tableMap: Map<TableEntry['id'], TabularData> = new Map();
 const viewMap: Map<ViewEntry['id'], TabularData> = new Map();
 
-function get(type: TabularType, id: DBObjectEntry['id']): TabularData {
+export function getTabularContent(
+  type: TabularType,
+  id: DBObjectEntry['id'],
+  params?: TabularDataParams,
+): TabularData {
   const tabularMap = type === TabularType.View ? viewMap : tableMap;
   let entry = tabularMap.get(id);
   if (!entry) {
-    entry = new TabularData(type, id);
+    entry = new TabularData(type, id, params);
     tabularMap.set(id, entry);
   }
   return entry;
 }
 
-function remove(type: TabularType, id: DBObjectEntry['id']): void {
+export function removeTabularContent(type: TabularType, id: DBObjectEntry['id']): void {
   const tabularMap = type === TabularType.View ? viewMap : tableMap;
   // destroy all objects in table
   const entry = tabularMap.get(id);
@@ -26,17 +31,9 @@ function remove(type: TabularType, id: DBObjectEntry['id']): void {
 }
 
 export function getTableContent(id: TableEntry['id']): TabularData {
-  return get(TabularType.Table, id);
-}
-
-export function getViewContent(id: ViewEntry['id']): TabularData {
-  return get(TabularType.View, id);
+  return getTabularContent(TabularType.Table, id);
 }
 
 export function removeTableContent(id: TableEntry['id']): void {
-  remove(TabularType.Table, id);
-}
-
-export function removeViewContent(id: ViewEntry['id']): void {
-  remove(TabularType.View, id);
+  removeTabularContent(TabularType.Table, id);
 }
