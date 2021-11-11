@@ -1,7 +1,7 @@
 import { get, writable } from 'svelte/store';
-import type { Writable } from 'svelte/store';
+import type { Writable, Unsubscriber } from 'svelte/store';
 import type { Tab } from '@mathesar-component-library/types';
-import type { TabularData } from '@mathesar/stores/table-data/types';
+import type { TabularData, TabularDataParams } from '@mathesar/stores/table-data/types';
 import type {
   Database, DBObjectEntry, SchemaEntry, TabularType,
 } from '@mathesar/App.d';
@@ -14,7 +14,11 @@ import {
 import type {
   FileImportInfo,
 } from '@mathesar/stores/fileImports';
-import { parseTabListConfigFromURL } from './utils';
+import {
+  parseTabListConfigFromURL,
+  syncTabularParamListToURL,
+  syncSingleTabularParamToURL,
+} from './utils';
 import type { TabListConfig } from './utils';
 
 export interface MathesarTab extends Tab {
@@ -69,8 +73,6 @@ function getTabsFromConfig(
           isNew: false,
           tabularData: getTabularContent(entry[0], entry[1], entry),
         });
-      } else {
-        // URLQueryHandler.removeTable(db, entry.id);
       }
     },
   );
@@ -119,6 +121,8 @@ export class TabList {
 
   activeTab: Writable<MathesarTab | null>;
 
+  private tabsUnsubscriber: Unsubscriber;
+
   constructor(dbName: Database['name'], schemaId: SchemaEntry['id']) {
     this.dbName = dbName;
     this.schemaId = schemaId;
@@ -138,6 +142,30 @@ export class TabList {
 
     this.tabs = writable(tabs);
     this.activeTab = writable(activeTab);
+
+    this.tabsUnsubscriber = this.tabs.subscribe((tabsSubstance) => {
+      const tabularDataParamList: TabularDataParams[] = [];
+      tabsSubstance.forEach((entry) => {
+        if (entry.tabularData) {
+          tabularDataParamList.push(entry.tabularData.parameterize());
+        }
+      });
+      syncTabularParamListToURL(this.dbName, this.schemaId, tabularDataParamList);
+    });
+    tabularTabs.forEach((tabularTab) => {
+      this.addParamListenerToTab(tabularTab);
+    });
+  }
+
+  addParamListenerToTab(tab: MathesarTab): void {
+    /**
+     * We do not have to explicity unlisten to this event.
+     * When tabularData is removed through `removeTabularContent` in remove method,
+     * all listeners for that tabularData are cleared.
+     */
+    tab.tabularData?.on('paramsUpdated', (params: TabularDataParams) => {
+      syncSingleTabularParamToURL(this.dbName, this.schemaId, params);
+    });
   }
 
   add(tab: MathesarTab, options?: TabAddOptions): void {
@@ -168,6 +196,8 @@ export class TabList {
         this.activeTab.set(existingTab || tab);
       }
     }
+
+    this.addParamListenerToTab(tab);
   }
 
   getTabularTabByTabularID(
@@ -192,10 +222,6 @@ export class TabList {
   remove(tab: MathesarTab): void {
     const tabSubstance = get(this.tabs);
     const activeTabSubstance = get(this.activeTab);
-
-    if (activeTabSubstance?.isNew) {
-      // URLQueryHandler.removeActiveTable(db);
-    }
 
     const removedTabIndexInTabsArray = tabSubstance.findIndex(
       (entry) => entry.id === tab.id,
@@ -229,7 +255,6 @@ export class TabList {
     if (tab.isNew) {
       removeImportFromView(this.schemaId, tab.id);
     } else if (tab.tabularData) {
-      // URLQueryHandler.removeTable(db, tab.id as number, get(activeTab)?.id as number);
       removeTabularContent(tab.tabularData.type, tab.tabularData.id);
     }
   }
@@ -248,5 +273,9 @@ export class TabList {
     if (existingTab) {
       this.remove(existingTab);
     }
+  }
+
+  destroy(): void {
+    this.tabsUnsubscriber();
   }
 }
