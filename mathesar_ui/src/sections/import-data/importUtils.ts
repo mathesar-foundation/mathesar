@@ -151,7 +151,7 @@ async function createPreviewTable(
 
     try {
       const res = await previewCreatePromise as { id: number, name: string };
-     
+
       const toUpdate: FileImportWritableInfo = {
         previewTableCreationStatus: States.Done,
         previewId: res.id,
@@ -380,7 +380,7 @@ export function cancelImport(fileImportStore: FileImport): void {
 
 export async function importFromURL(fileImportStore: FileImport, url: string): Promise<void> {
   setInFileStore(fileImportStore, {
-    previewTableCreationStatus: States.Loading
+    previewTableCreationStatus: States.Loading,
   });
   try {
     const uploadResponse = await postAPI<{ id: number }>('/data_files/', { url });

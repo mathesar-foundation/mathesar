@@ -35,7 +35,7 @@
     if (importMethod === 'File') {
       void loadPreview(fileImportStore);
     } else if (importMethod === 'URL') {
-        importFromURL(fileImportStore, fileUrl);
+      void importFromURL(fileImportStore, fileUrl);
     }
   }
 </script>

@@ -132,7 +132,7 @@ export function uploadFile<T>(
       total,
       percentCompleted,
     });
-  }
+  };
   request.send(formData);
 
   return new CancellablePromise((resolve, reject) => {
