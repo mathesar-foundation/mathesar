@@ -7,7 +7,7 @@ from rest_framework.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
 
-from mathesar.imports.csv import get_sv_dialect
+from mathesar.imports.csv import get_sv_dialect, get_file_encoding
 from mathesar.models import DataFile
 
 
@@ -51,7 +51,8 @@ def create_datafile(data):
         base_name, _ = os.path.splitext(os.path.basename(raw_file.name))
         base_name = base_name[:max_length]
 
-    text_file = TextIOWrapper(raw_file.file, encoding='utf-8-sig')
+    encoding = get_file_encoding(raw_file.file)
+    text_file = TextIOWrapper(raw_file.file, encoding=encoding)
     dialect = get_sv_dialect(text_file)
 
     datafile = DataFile(

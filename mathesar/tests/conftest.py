@@ -82,3 +82,8 @@ def patents_url_filename():
 @pytest.fixture(scope='session')
 def data_types_csv_filename():
     return 'mathesar/tests/data/data_types.csv'
+
+
+@pytest.fixture(scope='session')
+def non_unicode_csv_filename():
+    return 'mathesar/tests/data/non_unicode_files/utf_16_le.csv'
