@@ -77,7 +77,7 @@ export class TabList {
 
   tabs: Writable<MathesarTab[]>;
 
-  activeTab: Writable<MathesarTab>;
+  activeTab: Writable<MathesarTab | null>;
 
   constructor(dbName: Database['name'], schemaId: SchemaEntry['id']) {
     this.dbName = dbName;
@@ -125,7 +125,7 @@ export class TabList {
 
     if (options?.status !== 'inactive') {
       if (activeTabSubstance?.id !== tab.id) {
-        this.activeTab.set(tab);
+        this.activeTab.set(existingTab || tab);
       }
     }
   }
@@ -138,45 +138,40 @@ export class TabList {
       // URLQueryHandler.removeActiveTable(db);
     }
 
-    if (tab) {
-      const removedTabIndexInTabsArray = tabSubstance.findIndex(
-        (entry) => entry.id === tab.id,
+    const removedTabIndexInTabsArray = tabSubstance.findIndex(
+      (entry) => entry.id === tab.id,
+    );
+
+    /**
+     * If directly called without changing the active tab to a tab other than the removed one,
+     * active tab has to be manually changed.
+     */
+    if (activeTabSubstance?.id === tab.id) {
+      if (tabSubstance[removedTabIndexInTabsArray + 1]) {
+        this.activeTab.set(tabSubstance[removedTabIndexInTabsArray + 1]);
+      } else if (tabSubstance[removedTabIndexInTabsArray - 1]) {
+        this.activeTab.set(tabSubstance[removedTabIndexInTabsArray - 1]);
+      } else {
+        this.activeTab.set(null);
+      }
+    }
+
+    /**
+     * If called from component event, the tab would already have been removed in previous tick.
+     * If called directly, tab will have to be removed.
+     * We have a find check to avoid unnessary re-renders incase of component events.
+     */
+    if (removedTabIndexInTabsArray > -1) {
+      this.tabs.set(
+        tabSubstance.filter((entry) => entry.id !== tab.id),
       );
+    }
 
-      /**
-       * If directly called without changing the active tab to a tab other than the removed one,
-       * active tab has to be manually changed.
-       */
-      if (activeTabSubstance?.id === tab.id) {
-        if (tabSubstance[removedTabIndexInTabsArray + 1]) {
-          this.activeTab.set(tabSubstance[removedTabIndexInTabsArray + 1]);
-        } else if (tabSubstance[removedTabIndexInTabsArray - 1]) {
-          this.activeTab.set(tabSubstance[removedTabIndexInTabsArray - 1]);
-        } else {
-          this.activeTab.set(null);
-        }
-      }
-
-      /**
-       * If called from component event, the tab would already have been removed in previous tick.
-       * If called directly, tab will have to be removed.
-       * We have a find check to avoid unnessary re-renders incase of component events.
-       */
-      if (removedTabIndexInTabsArray > -1) {
-        this.tabs.set(
-          tabSubstance.filter((entry) => entry.id !== tab.id),
-        );
-      }
-
-      if (tab.isNew) {
-        removeImportFromView(this.schemaId, tab.id);
-      } else if (tab.tabularData) {
-        // URLQueryHandler.removeTable(db, tab.id as number, get(activeTab)?.id as number);
-        removeTabularContent(tab.tabularData.type, tab.tabularData.id);
-      }
-    } else {
-      // eslint-disable-next-line no-console
-      console.error('Tab removal failed. RemovedTab information is missing');
+    if (tab.isNew) {
+      removeImportFromView(this.schemaId, tab.id);
+    } else if (tab.tabularData) {
+      // URLQueryHandler.removeTable(db, tab.id as number, get(activeTab)?.id as number);
+      removeTabularContent(tab.tabularData.type, tab.tabularData.id);
     }
   }
 
@@ -186,10 +181,13 @@ export class TabList {
 
     const existingTabIndex = tabSubstance.findIndex((tabEntry) => tabEntry.id === oldTabId);
     const existingTab = tabSubstance[existingTabIndex];
+
     this.add(tab, {
       position: existingTabIndex,
-      status: activeTabSubstance?.id === existingTab.id ? 'active' : 'inactive',
+      status: existingTab && activeTabSubstance?.id === existingTab.id ? 'active' : 'inactive',
     });
-    this.remove(existingTab);
+    if (existingTab) {
+      this.remove(existingTab);
+    }
   }
 }
