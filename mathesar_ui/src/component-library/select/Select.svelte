@@ -21,13 +21,45 @@
   const dispatch = createEventDispatcher();
   const selectId: number = getSelectId();
 
+  /**
+   * Specifies the key on which the options ID is stored.
+   */
   export let idKey = 'id';
+
+  /**
+   * Specifies the key on which the options label is stored.
+   */
   export let labelKey = 'label';
+
+  /**
+   * List of options to select from. Must be an array of SelectOption.
+   * @required
+   */
   export let options: SelectOption[] = [];
+
+  /**
+   * Currently selected option.
+   */
   export let value: SelectOption = null;
+
+  /**
+   * Classes to apply to the content (each of the options).
+   */
   export let contentClass = '';
+
+  /**
+   * Classes to apply to the trigger button (the dropdown button).
+   */
   export let triggerClass = '';
+
+  /**
+   * Appearance of the trigger button. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.
+   */
   export let triggerAppearance: Appearance = 'plain';
+
+  /**
+   * The ARIA label for this select component.
+   */
   export let ariaLabel: string = null;
 
   let isOpen = false;
