@@ -1,4 +1,4 @@
-import type { Database, SchemaEntry } from '@mathesar/App';
+import type { Database, SchemaEntry } from '@mathesar/App.d';
 import { TabList } from './tabList';
 
 const schemaTabsMap: Map<SchemaEntry['id'], TabList> = new Map();

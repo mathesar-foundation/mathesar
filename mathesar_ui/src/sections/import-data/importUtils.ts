@@ -28,7 +28,7 @@ import type {
   FileUploadAddDetail,
   FileUploadProgress,
 } from '@mathesar-component-library/types';
-import { TabularType } from '@mathesar/App';
+import { TabularType } from '@mathesar/App.d';
 
 function completionCallback(
   fileImportStore: FileImport,

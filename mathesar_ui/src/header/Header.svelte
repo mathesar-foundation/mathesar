@@ -22,7 +22,7 @@
     Button,
     Dropdown,
   } from '@mathesar-component-library';
-  import { TabularType } from '@mathesar/App';
+  import { TabularType } from '@mathesar/App.d';
 
   import SchemaSelector from './schema-selector/SchemaSelector.svelte';
   import ImportIndicator from './import-indicator/ImportIndicator.svelte';

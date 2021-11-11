@@ -4,7 +4,7 @@ import type { Tab } from '@mathesar-component-library/types';
 import type { TabularData } from '@mathesar/stores/table-data/types';
 import type {
   Database, DBObjectEntry, SchemaEntry, TabularType,
-} from '@mathesar/App';
+} from '@mathesar/App.d';
 import { getTabularContent, removeTabularContent } from '@mathesar/stores/table-data';
 import { getTablesStoreForSchema } from '@mathesar/stores/tables';
 import {
@@ -14,7 +14,8 @@ import {
 import type {
   FileImportInfo,
 } from '@mathesar/stores/fileImports';
-import { parseTabListConfigFromURL, TabListConfig } from './utils';
+import { parseTabListConfigFromURL } from './utils';
+import type { TabListConfig } from './utils';
 
 export interface MathesarTab extends Tab {
   id: string,

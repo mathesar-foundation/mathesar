@@ -1,7 +1,7 @@
 import { router } from 'tinro';
 import type {
   Database, DBObjectEntry, SchemaEntry, TabularType,
-} from '@mathesar/App';
+} from '@mathesar/App.d';
 import type { TabularDataParams } from '@mathesar/stores/table-data/types';
 
 export interface TabListConfig {

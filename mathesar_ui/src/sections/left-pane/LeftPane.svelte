@@ -21,7 +21,8 @@
     DBTablesStoreData,
   } from '@mathesar/stores/tables';
   import type { MathesarTab } from '@mathesar/stores/tabs/types';
-  import { SchemaEntry, TableEntry, TabularType } from '@mathesar/App.d';
+  import type { SchemaEntry, TableEntry } from '@mathesar/App.d';
+  import { TabularType } from '@mathesar/App.d';
   import type {
     TreeItem,
   } from '@mathesar-component-library/types';
@@ -29,7 +30,7 @@
   export let database: string;
   export let schemaId: SchemaEntry['id'];
   export let activeTab: MathesarTab;
-  export let getLink: (entry: MathesarTab) => string;
+  export let getLink: (entry: TableEntry) => string;
   
   let tree: TreeItem[] = [];
   let activeTable: Set<unknown>;
