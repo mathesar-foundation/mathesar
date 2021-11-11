@@ -4,13 +4,14 @@
     TabContainer,
     Icon,
   } from '@mathesar-component-library';
-  import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
     getTabsForSchema,
+    constructTabularTabLink,
   } from '@mathesar/stores/tabs';
   import type { MathesarTab, TabList } from '@mathesar/stores/tabs/types';
+  import { TabularType } from '@mathesar/App.d';
   import type { TableEntry } from '@mathesar/App.d';
 
   import ImportData from './import-data/ImportData.svelte';
@@ -41,17 +42,21 @@
     if (entry.isNew) {
       return null;
     }
-    return `/${database}/${schemaId}/${URLQueryHandler.constructTableLink(entry.tabularData.id)}`;
+    return constructTabularTabLink(
+      database,
+      schemaId,
+      entry.tabularData.type,
+      entry.tabularData.id,
+    );
   }
 
   function getLeftPaneLink(entry: TableEntry) {
-    return `/${database}/${schemaId}/${URLQueryHandler.constructTableLink(entry.id)}`;
-  }
-
-  function tabSelected(e: { detail: { tab: MathesarTab, originalEvent: Event } }) {
-    const { originalEvent, tab } = e.detail;
-    originalEvent.preventDefault();
-    // selectTab(database, tab);
+    return constructTabularTabLink(
+      database,
+      schemaId,
+      TabularType.Table,
+      entry.id,
+    );
   }
 
   function tabRemoved(e: { detail: { removedTab: MathesarTab } }) {
@@ -69,7 +74,7 @@
   {#if $tabs?.length > 0}
     <TabContainer bind:tabs={$tabs} bind:activeTab={$activeTab}
                   allowRemoval={true} preventDefault={true} getLink={getTabLink}
-                  on:tabSelected={tabSelected} on:tabRemoved={tabRemoved}>
+                  on:tabRemoved={tabRemoved}>
       <span slot="tab" let:tab>
         <Icon data={faTable}/>
         <span>{tab.label}</span>

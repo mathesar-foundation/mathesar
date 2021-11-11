@@ -113,3 +113,15 @@ export function syncActiveTabToURL(
     }
   }
 }
+
+export function constructTabularTabLink(
+  db: Database['name'],
+  schemaId: SchemaEntry['id'],
+  type: TabularType,
+  tabularId: DBObjectEntry['id'],
+): string {
+  const tab = [type, tabularId];
+  const active = encodeURIComponent(JSON.stringify(tab));
+  const list = encodeURIComponent(JSON.stringify([tab]));
+  return `/${db}/${schemaId}/?${TAB_QUERY_PARAM}=${list}&${ACTIVE_TAB_QUERY_PARAM}=${active}`;
+}
