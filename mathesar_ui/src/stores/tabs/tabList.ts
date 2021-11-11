@@ -18,6 +18,7 @@ import {
   parseTabListConfigFromURL,
   syncTabularParamListToURL,
   syncSingleTabularParamToURL,
+  syncActiveTabToURL,
 } from './utils';
 import type { TabListConfig } from './utils';
 
@@ -123,6 +124,8 @@ export class TabList {
 
   private tabsUnsubscriber: Unsubscriber;
 
+  private activeTabUnsubscriber: Unsubscriber;
+
   constructor(dbName: Database['name'], schemaId: SchemaEntry['id']) {
     this.dbName = dbName;
     this.schemaId = schemaId;
@@ -143,6 +146,7 @@ export class TabList {
     this.tabs = writable(tabs);
     this.activeTab = writable(activeTab);
 
+    // Tabular tabs <-> url subscribers
     this.tabsUnsubscriber = this.tabs.subscribe((tabsSubstance) => {
       const tabularDataParamList: TabularDataParams[] = [];
       tabsSubstance.forEach((entry) => {
@@ -154,6 +158,18 @@ export class TabList {
     });
     tabularTabs.forEach((tabularTab) => {
       this.addParamListenerToTab(tabularTab);
+    });
+
+    // Active tab <-> url subscriber
+    this.activeTabUnsubscriber = this.activeTab.subscribe((activeTabSubstance) => {
+      let activeTabularTab: TabListConfig['activeTabularTab'] = null;
+      if (activeTabSubstance?.tabularData) {
+        activeTabularTab = [
+          activeTabSubstance.tabularData.type,
+          activeTabSubstance.tabularData.id,
+        ];
+      }
+      syncActiveTabToURL(this.dbName, this.schemaId, activeTabularTab);
     });
   }
 
@@ -276,6 +292,7 @@ export class TabList {
   }
 
   destroy(): void {
+    this.activeTabUnsubscriber();
     this.tabsUnsubscriber();
   }
 }

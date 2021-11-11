@@ -92,3 +92,24 @@ export function syncSingleTabularParamToURL(
     }
   }
 }
+
+export function syncActiveTabToURL(
+  db: Database['name'],
+  schemaId: SchemaEntry['id'],
+  activeTabularTab?: TabListConfig['activeTabularTab'],
+): void {
+  if (isInPath(db, schemaId)) {
+    try {
+      if (activeTabularTab) {
+        router.location.query.set(
+          ACTIVE_TAB_QUERY_PARAM,
+          encodeURIComponent(JSON.stringify(activeTabularTab)),
+        );
+      } else {
+        router.location.query.delete(ACTIVE_TAB_QUERY_PARAM);
+      }
+    } catch (err) {
+      console.error('Unable to set active tabular tab param in url', err);
+    }
+  }
+}
