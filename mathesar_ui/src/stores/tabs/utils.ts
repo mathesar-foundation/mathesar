@@ -56,3 +56,39 @@ export function parseTabListConfigFromURL(
     activeTabularTab,
   };
 }
+
+export function syncTabularParamListToURL(
+  db: Database['name'],
+  schemaId: SchemaEntry['id'],
+  tabularDataParamList: TabListConfig['tabularDataParamList'],
+): void {
+  if (isInPath(db, schemaId)) {
+    try {
+      const queryParam = encodeURIComponent(JSON.stringify(tabularDataParamList));
+      router.location.query.set(TAB_QUERY_PARAM, queryParam);
+    } catch (err) {
+      console.error('Unable to set tabular params in url', err);
+    }
+  }
+}
+
+export function syncSingleTabularParamToURL(
+  db: Database['name'],
+  schemaId: SchemaEntry['id'],
+  tabularDataParam: TabularDataParams,
+): void {
+  if (isInPath(db, schemaId)) {
+    try {
+      const { tabularDataParamList } = parseTabListConfigFromURL(db, schemaId);
+      const replacementIndex = tabularDataParamList.findIndex(
+        (entry) => entry[0] === tabularDataParam[0] && entry[1] === tabularDataParam[1],
+      );
+      if (replacementIndex > -1) {
+        tabularDataParamList[replacementIndex] = tabularDataParam;
+      }
+      syncTabularParamListToURL(db, schemaId, tabularDataParamList);
+    } catch (err) {
+      console.error('Unable to set single tabular param in url', err);
+    }
+  }
+}
