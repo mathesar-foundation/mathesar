@@ -82,7 +82,7 @@
 
       {#if $activeTab}
         {#if $activeTab.isNew}
-          <ImportData {database} {schemaId} id={$activeTab.id}/>
+          <ImportData {database} {schemaId} id={$activeTab.fileImportId}/>
         {:else if $activeTab.tabularData}
           <TableView tabularData={$activeTab.tabularData}/>
         {/if}

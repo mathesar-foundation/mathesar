@@ -50,7 +50,8 @@ function calculateImportTabId(id: FileImportInfo['id']): MathesarTab['id'] {
 function getTabsFromImports(schemaId: SchemaEntry['id']): MathesarTab[] {
   const imports: MathesarTab[] = getAllImportDetailsForSchema(schemaId).map(
     (entry) => ({
-      ...entry,
+      id: calculateImportTabId(entry.id),
+      fileImportId: entry.id,
       isNew: true,
       label: 'Import data',
     }),
@@ -269,7 +270,7 @@ export class TabList {
     }
 
     if (tab.isNew) {
-      removeImportFromView(this.schemaId, tab.id);
+      removeImportFromView(this.schemaId, tab.fileImportId);
     } else if (tab.tabularData) {
       removeTabularContent(tab.tabularData.type, tab.tabularData.id);
     }
