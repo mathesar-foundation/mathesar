@@ -29,11 +29,3 @@ export function removeTabularContent(type: TabularType, id: DBObjectEntry['id'])
     tabularMap.delete(id);
   }
 }
-
-export function getTableContent(id: TableEntry['id']): TabularData {
-  return getTabularContent(TabularType.Table, id);
-}
-
-export function removeTableContent(id: TableEntry['id']): void {
-  removeTabularContent(TabularType.Table, id);
-}

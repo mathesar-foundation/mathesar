@@ -21,6 +21,4 @@ export {
 export {
   getTabularContent,
   removeTabularContent,
-  getTableContent,
-  removeTableContent,
 } from './manager';
