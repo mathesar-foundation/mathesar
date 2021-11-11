@@ -1,13 +1,20 @@
 import type { Writable } from 'svelte/store';
 import type { DBObjectEntry, TabularType } from '@mathesar/App.d';
+import type { MetaParams } from './meta';
 import { Meta } from './meta';
-import type { TableRecordsData } from './records';
 import type { ColumnsData } from './columns';
 import { ColumnsDataStore } from './columns';
+import type { TableRecordsData } from './records';
 import { RecordsData } from './records';
 import { Display } from './display';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
+
+export type TabularDataParams = [
+  TabularType,
+  DBObjectEntry['id'],
+  ...MetaParams,
+];
 
 export class TabularData {
   private type: TabularType;
@@ -24,14 +31,19 @@ export class TabularData {
 
   display: Display;
 
-  constructor(type: TabularType, id: DBObjectEntry['id']) {
+  constructor(type: TabularType, id: DBObjectEntry['id'], params?: TabularDataParams) {
     this.type = type;
     this.id = id;
-    this.meta = new Meta(type, id);
+    this.meta = new Meta(type, id, params?.slice(2) as MetaParams);
     this.columnsDataStore = new ColumnsDataStore(type, id, this.meta);
     this.constraintsDataStore = new ConstraintsDataStore(id);
     this.recordsData = new RecordsData(type, id, this.meta, this.columnsDataStore);
     this.display = new Display(type, id, this.meta, this.columnsDataStore, this.recordsData);
+  }
+
+  parameterize(): TabularDataParams {
+    const metaParams = this.meta.parameterize();
+    return [this.type, this.id, ...metaParams];
   }
 
   refresh(): Promise<[ColumnsData, TableRecordsData, ConstraintsData]> {

@@ -30,6 +30,13 @@ export interface FilterOption {
   filters: FilterEntry[]
 }
 
+export type MetaParams = [
+  number[], // [pageSize, page]
+  string[], // [sortcolumn, sortorder:'a'|'d', sc, so ...]
+  string[], // [groupcolumn, gc, gc]
+  string[], // [filtercombination:'a'|'o', filtercolumn, condition, value ...]
+];
+
 export type UpdateModificationType = 'update' | 'updated' | 'updateFailed';
 
 export type ModificationType = 'create' | 'created' | 'creationFailed'
@@ -109,6 +116,7 @@ export class Meta {
   constructor(
     type: TabularType,
     parentId: number,
+    params?: MetaParams,
   ) {
     this.type = type;
     this.parentId = parentId;
@@ -121,6 +129,10 @@ export class Meta {
       combination: filterCombinations[0],
       filters: [],
     });
+    if (params) {
+      this.loadFromParams(params);
+    }
+
     this.selectedRecords = writable(new Set());
     this.recordModificationState = writable(new Map() as ModificationStateMap);
 
@@ -213,6 +225,93 @@ export class Meta {
         set(params.join('&'));
       },
     );
+  }
+
+  parameterize(): MetaParams {
+    const paginationOption: number[] = [
+      get(this.pageSize),
+      get(this.page),
+    ];
+
+    const sortOption: string[] = [];
+    get(this.sort).forEach((value, key) => {
+      sortOption.push(key);
+      const sortOrder = value === 'desc' ? 'd' : 'a';
+      sortOption.push(sortOrder);
+    });
+
+    const groupOption: string[] = [...(get(this.group) ?? [])];
+
+    const filterOptions: string[] = [];
+    const filterConfig = get(this.filter);
+    if (filterConfig?.filters?.length > 0) {
+      filterOptions.push(filterConfig.combination.id === 'or' ? 'o' : 'a');
+      filterConfig.filters.forEach((filter) => {
+        filterOptions.push(filter.column.id as string);
+        filterOptions.push(filter.condition.id as string);
+        filterOptions.push(filter.value);
+      });
+    }
+
+    const metaParams: MetaParams = [
+      paginationOption,
+      sortOption,
+      groupOption,
+      filterOptions,
+    ];
+    return metaParams;
+  }
+
+  loadFromParams(params: MetaParams): void {
+    const [paginationOption, sortOption, groupOption, filterOption] = params;
+    this.pageSize.set(paginationOption[0]);
+    this.page.set(paginationOption[1]);
+
+    const sortOptionMap: SortOption = new Map();
+    for (let i = 0; i < sortOption.length; i += 2) {
+      const sortOrder = sortOption[i + 1] === 'd' ? 'desc' : 'asc';
+      sortOptionMap.set(sortOption[i], sortOrder);
+    }
+    if (sortOption.length > 0) {
+      this.sort.set(sortOptionMap);
+    }
+
+    const groupOptionSet: GroupOption = new Set(groupOption);
+    if (groupOptionSet.size > 0) {
+      this.group.set(groupOptionSet);
+    }
+
+    const filters: FilterEntry[] = [];
+    const combination: FilterCombination['id'] = filterOption[0] === 'o' ? 'or' : 'and';
+    for (let i = 1; i < filterOption.length;) {
+      const column = filterOption[i];
+      const condition = filterOption[i + 1];
+
+      if (column && condition) {
+        const value = filterOption[i + 2] || '';
+        filters.push({
+          column: {
+            id: column,
+            label: column,
+          },
+          condition: {
+            id: condition,
+            label: condition,
+          },
+          value,
+        });
+      }
+      i += 3;
+    }
+    if (filters.length > 0) {
+      this.filter.set({
+        combination: {
+          id: combination,
+          label: combination,
+        },
+        filters,
+      });
+    }
   }
 
   clearSelectedRecords(): void {

@@ -198,7 +198,7 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
    * Another approach would be to subscribe to types store on class initialization
    *  - That would require us to store the database id in Columns (which is probably a good idea)
    *  - It would lead to calculation of allowed types when columns are fetched. Considering that
-   *    this would only be required when user opens particular views, it seems unnessary.
+   *    this would only be required when user opens particular views, it seems unnecessary.
    *  - It would cache the calculated allowed types, which benefits us.
    * TODO: Subscribe to types store from Columns, when dynamic type related information is provided
    * by server.
