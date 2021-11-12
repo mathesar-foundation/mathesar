@@ -230,4 +230,9 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
     this.promise = null;
     this.listeners.clear();
   }
+
+  async deleteColumn(index: Column['index']): Promise<void> {
+    await this.api.remove(index);
+    await this.fetch();
+  }
 }
