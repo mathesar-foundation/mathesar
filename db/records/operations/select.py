@@ -1,8 +1,9 @@
-from sqlalchemy import select, func, true, and_
+from sqlalchemy import select, func
 from sqlalchemy_filters import apply_filters, apply_sort
 from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
 from db.columns.base import MathesarColumn
+from db.records.operations.group import get_group_augmented_records_query
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.utils import execute_query
@@ -52,14 +53,17 @@ def _get_duplicate_data_columns(table, filters):
         return None, filters
 
 
-def get_query(table, limit, offset, order_by, filters, cols=None):
+def get_query(table, limit, offset, order_by, filters, cols=None, group_by=None):
     duplicate_columns, filters = _get_duplicate_data_columns(table, filters)
     if duplicate_columns:
         select_target = _get_duplicate_only_cte(table, duplicate_columns)
     else:
         select_target = table
 
-    query = select(*(cols or select_target.c)).select_from(select_target)
+    if group_by:
+        query = get_group_augmented_records_query(table, group_by)
+    else:
+        query = select(*(cols or select_target.c)).select_from(select_target)
 
     query = query.limit(limit).offset(offset)
     if order_by is not None:
@@ -78,10 +82,10 @@ def get_record(table, engine, id_value):
 
 
 def get_records(
-        table, engine, limit=None, offset=None, order_by=[], filters=[],
+        table, engine, limit=None, offset=None, order_by=[], filters=[], group_by=[],
 ):
     """
-    Returns records from a table.
+    Returns annotated records from a table.
 
     Args:
         table:    SQLAlchemy table object
@@ -94,6 +98,7 @@ def get_records(
         filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
+        group_by: list or tuple of column names or column objects to group by
     """
     if not order_by:
         # Set default ordering if none was requested
@@ -106,7 +111,7 @@ def get_records(
             order_by = [{'field': col, 'direction': 'asc'}
                         for col in table.columns]
 
-    query = get_query(table, limit, offset, order_by, filters)
+    query = get_query(table, limit, offset, order_by, filters, group_by=group_by)
     return execute_query(engine, query)
 
 
