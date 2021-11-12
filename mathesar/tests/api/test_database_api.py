@@ -24,6 +24,14 @@ def database_api_db(test_db_name):
         del settings.DATABASES[TEST_DB]
 
 
+@pytest.fixture
+def create_database(test_db_name, request):
+    def _create_database(db_name):
+        settings.DATABASES[db_name] = settings.DATABASES[test_db_name]
+        request.addfinalizer(lambda: (settings.DATABASES.pop(db_name, None)))
+    return _create_database
+
+
 @pytest.fixture(autouse=True)
 def clear_cache():
     cache.clear()
@@ -142,6 +150,48 @@ def test_database_list_filter_deleted(client, deleted, test_db_name, database_ap
     expected_database = expected_databases[deleted]
     response_database = response_data['results'][0]
     check_database(expected_database, response_database)
+
+
+def test_database_list_ordered_by_id(client, test_db_name, database_api_db, create_database):
+    reflect_db_objects()
+    test_db_name_1 = "mathesar_db_test_1"
+    create_database(test_db_name_1)
+    cache.clear()
+    expected_databases = [
+        Database.objects.get(name=test_db_name),
+        Database.objects.get(name=database_api_db),
+        Database.objects.get(name=test_db_name_1),
+    ]
+    sort_field = "id"
+    response = client.get(f'/api/v0/databases/?sort_by={sort_field}')
+    response_data = response.json()
+    response_databases = response_data['results']
+    comparison_tuples = zip(expected_databases, response_databases)
+    for comparison_tuple in comparison_tuples:
+        check_database(comparison_tuple[0], comparison_tuple[1])
+
+
+def test_database_list_ordered_by_name(client, test_db_name, database_api_db, create_database):
+    reflect_db_objects()
+    test_db_name_1 = "mathesar_db_test_1"
+    test_db_name_2 = "mathesar_db_test_2"
+    create_database(test_db_name_1)
+    create_database(test_db_name_2)
+
+    cache.clear()
+    expected_databases = [
+        Database.objects.get(name=test_db_name),
+        Database.objects.get(name=test_db_name_1),
+        Database.objects.get(name=test_db_name_2),
+        Database.objects.get(name=database_api_db),
+    ]
+    sort_field = "name"
+    response = client.get(f'/api/v0/databases/?sort_by={sort_field}')
+    response_data = response.json()
+    response_databases = response_data['results']
+    comparison_tuples = zip(expected_databases, response_databases)
+    for comparison_tuple in comparison_tuples:
+        check_database(comparison_tuple[0], comparison_tuple[1])
 
 
 def test_database_detail(client):

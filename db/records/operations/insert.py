@@ -1,6 +1,11 @@
+import tempfile
+
 from psycopg2 import sql
 
+from db.encoding_utils import get_sql_compatible_encoding
 from db.records.operations.select import get_record
+
+READ_SIZE = 20000
 
 
 def insert_record_or_records(table, engine, record_data):
@@ -22,8 +27,8 @@ def insert_record_or_records(table, engine, record_data):
     return None
 
 
-def insert_records_from_csv(table, engine, csv_filename, column_names, header, delimiter=None, escape=None, quote=None):
-    with open(csv_filename, "rb") as csv_file:
+def insert_records_from_csv(table, engine, csv_filename, column_names, header, delimiter=None, escape=None, quote=None, encoding=None):
+    with open(csv_filename, "r", encoding=encoding) as csv_file:
         with engine.begin() as conn:
             cursor = conn.connection.cursor()
             # We should convert our entire query to sql.SQL class in order to keep its original header's name
@@ -35,9 +40,9 @@ def insert_records_from_csv(table, engine, csv_filename, column_names, header, d
             formatted_columns = sql.SQL(",").join(
                 sql.Identifier(column_name) for column_name in column_names
             )
-
+            conversion_encoding, sql_encoding = get_sql_compatible_encoding(encoding)
             copy_sql = sql.SQL(
-                "COPY {relation} ({formatted_columns}) FROM STDIN CSV {header} {delimiter} {escape} {quote}"
+                "COPY {relation} ({formatted_columns}) FROM STDIN CSV {header} {delimiter} {escape} {quote} {encoding}"
             ).format(
                 relation=relation,
                 formatted_columns=formatted_columns,
@@ -52,6 +57,18 @@ def insert_records_from_csv(table, engine, csv_filename, column_names, header, d
                     if quote
                     else ""
                 ),
+                encoding=sql.SQL(f"ENCODING '{sql_encoding}'" if sql_encoding else ""),
             )
-
-            cursor.copy_expert(copy_sql, csv_file)
+            if conversion_encoding == encoding:
+                cursor.copy_expert(copy_sql, csv_file)
+            else:
+                # File needs to be converted to compatible database supported encoding
+                with tempfile.SpooledTemporaryFile(mode='wb+', encoding=conversion_encoding) as temp_file:
+                    while True:
+                        # TODO: Raise an exception instead of silently replacing the characters
+                        contents = csv_file.read(READ_SIZE).encode(conversion_encoding, "replace")
+                        if not contents:
+                            break
+                        temp_file.write(contents)
+                    temp_file.seek(0)
+                    cursor.copy_expert(copy_sql, temp_file)
