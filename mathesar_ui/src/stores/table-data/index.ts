@@ -18,4 +18,7 @@ export {
   getModificationState,
 } from './utils';
 
-export { getTableContent, removeTableContent } from './store';
+export {
+  getTabularContent,
+  removeTabularContent,
+} from './manager';
