@@ -1,8 +1,4 @@
-<script lang="ts">
-  import { nullValueLabel } from '@mathesar/constants';
-</script>
-
-<span>{nullValueLabel}</span>
+<span>NULL</span>
 
 <style>
   span {
