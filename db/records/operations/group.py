@@ -168,7 +168,7 @@ def extract_group_metadata(
         return {data_key: data, metadata_key: metadata}, group_metadata if group_metadata else None
 
     record_tup, group_tup = zip(
-        *(_get_record_pieces(record) for  record in record_dictionaries)
+        *(_get_record_pieces(record) for record in record_dictionaries)
     )
 
     reduced_groups = sorted(
@@ -176,7 +176,7 @@ def extract_group_metadata(
         key=lambda x: x['group_id']
     )
 
-    return  list(record_tup), reduced_groups
+    return list(record_tup), reduced_groups
 
 
 def _get_validated_group_by_columns(table, group_by):
