@@ -162,6 +162,17 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
     return column;
   }
 
+  async setNullabilityOfColumn(
+    column: Column,
+    nullable: boolean,
+  ): Promise<void> {
+    if (column.primary_key) {
+      throw new Error(`Column "${column.name}" cannot allow NULL because it is a primary key.`);
+    }
+    await this.api.update(column.index, { nullable });
+    await this.fetch();
+  }
+
   // TODO: Analyze: Might be cleaner to move following functions as a property of Column class
   // but are the object instantiations worth it?
 
