@@ -1,3 +1,4 @@
+import json
 from sqlalchemy import select, Column, func, and_, case, literal
 
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
@@ -150,6 +151,32 @@ def get_group_augmented_records_query(table, group_by):
         ).label(MATHESAR_GROUP_METADATA)
     )
     return sel
+
+
+def extract_group_metadata(
+        record_dictionaries, data_key='data', metadata_key='metadata',
+):
+    """
+    This function takes an iterable of record dictionaries with record data and
+    record metadata, and moves the group metadata from the data section to the
+    metadata section.
+    """
+    def _get_record_pieces(record):
+        data = {k: v for k, v in record[data_key].items() if k != MATHESAR_GROUP_METADATA}
+        group_metadata = record[data_key].get(MATHESAR_GROUP_METADATA, {})
+        metadata = record[metadata_key] | {GROUP_ID: group_metadata.get(GROUP_ID)}
+        return {data_key: data, metadata_key: metadata}, group_metadata if group_metadata else None
+
+    record_tup, group_tup = zip(
+        *(_get_record_pieces(record) for  record in record_dictionaries)
+    )
+
+    reduced_groups = sorted(
+        [json.loads(blob) for blob in set([json.dumps(group) for group in group_tup])],
+        key=lambda x: x['group_id']
+    )
+
+    return  list(record_tup), reduced_groups
 
 
 def _get_validated_group_by_columns(table, group_by):
