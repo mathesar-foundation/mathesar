@@ -3,7 +3,11 @@
   import Base from '@mathesar/sections/Base.svelte';
   import Schemas from '@mathesar/pages/schemas/Schemas.svelte';
   import Header from './header/Header.svelte';
+  import { ToastPresenter } from './component-library';
+  import { toast } from './stores/toast';
 </script>
+
+<ToastPresenter entries={toast.entries} />
 
 <Header/>
 

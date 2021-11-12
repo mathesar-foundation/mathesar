@@ -16,6 +16,7 @@
     GroupOption,
     ConstraintsDataStore,
   } from '@mathesar/stores/table-data/types';
+  import { toast } from '@mathesar/stores/toast';
 
   const dispatch = createEventDispatcher();
 
@@ -61,14 +62,12 @@
     try {
       const newAllowsDuplicates = !allowsDuplicates;
       await constraintsDataStore.setUniquenessOfColumn(column, !newAllowsDuplicates);
-      const msg = `Column "${column.name}" will ${newAllowsDuplicates ? '' : 'no longer '}allow duplicates.`;
-      // eslint-disable-next-line no-console
-      console.log(msg); // TODO display success toast message: msg
+      const message = `Column "${column.name}" will ${newAllowsDuplicates ? '' : 'no longer '}allow duplicates.`;
+      toast.show({ message });
       dispatch('close');
     } catch (error) {
-      const msg = `Unable to update "Allow Duplicates" of column "${column.name}". ${error.message as string}.`;
-      // eslint-disable-next-line no-console
-      console.log(msg); // TODO display error toast message
+      const message = `Unable to update "Allow Duplicates" of column "${column.name}". ${error.message as string}.`;
+      toast.show({ message });
     } finally {
       isRequestingToggleAllowDuplicates = false;
     }
