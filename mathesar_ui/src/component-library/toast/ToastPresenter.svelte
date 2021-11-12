@@ -8,25 +8,14 @@
   export let entries: Readable<ToastEntry[]>;
 </script>
   
-<style>
-  .toastContainer {
-    top: var(--toastContainerTop, 1.5rem);
-    right: var(--toastContainerRight, 2rem);
-    bottom: var(--toastContainerBottom, auto);
-    left: var(--toastContainerLeft, auto);
-    position: fixed;
-    margin: 0;
-    padding: 0;
-    list-style-type: none;
-    /* pointer-events: none; */
-    z-index: 9999;
-  }
-</style>
-  
-<ul class="toastContainer">
+<ul class="toast-presenter">
   {#each $entries as entry (entry.id)}
     <li in:fly={{ x: 256 }} out:fade animate:flip={{ duration: 200 }}>
       <ToastItem {entry} />
     </li>
   {/each}
 </ul>
+
+<style global lang="scss">
+  @import "ToastPresenter.scss";
+</style>
