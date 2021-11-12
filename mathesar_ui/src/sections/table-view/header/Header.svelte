@@ -88,6 +88,7 @@
     <HeaderCell
       {column}
       {meta}
+      {columnsDataStore}
       {constraintsDataStore}
       columnPosition={getColumnPosition($columnPositionMap, column.name)}
       on:columnDelete={() => openColumnModal(column)}

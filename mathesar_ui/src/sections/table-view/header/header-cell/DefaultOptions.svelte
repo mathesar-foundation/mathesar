@@ -14,6 +14,7 @@
     Column,
     SortOption,
     GroupOption,
+    ColumnsDataStore,
     ConstraintsDataStore,
   } from '@mathesar/stores/table-data/types';
 
@@ -21,14 +22,17 @@
 
   export let meta: Meta;
   export let column: Column;
+  export let columnsDataStore: ColumnsDataStore;
   export let constraintsDataStore: ConstraintsDataStore;
 
+  let isRequestingToggleAllowNull = false;
   let isRequestingToggleAllowDuplicates = false;
 
   $: ({ sort, group } = meta);
   $: sortDirection = ($sort as SortOption)?.get(column.name);
   $: hasGrouping = ($group as GroupOption)?.has(column.name);
 
+  $: allowsNull = column.nullable;
   $: uniqueColumns = constraintsDataStore.uniqueColumns;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   $: allowsDuplicates = !(column.primary_key || $uniqueColumns.has(column.name));
@@ -49,6 +53,24 @@
       meta.addGroup(column.name);
     }
     dispatch('close');
+  }
+
+  async function toggleAllowNull() {
+    isRequestingToggleAllowNull = true;
+    try {
+      const newAllowsNull = !allowsNull;
+      await columnsDataStore.setNullabilityOfColumn(column, newAllowsNull);
+      const msg = `Column "${column.name}" will ${newAllowsNull ? '' : 'no longer '}allow NULL.`;
+      // eslint-disable-next-line no-console
+      console.log(msg); // TODO display success toast message: msg
+      dispatch('close');
+    } catch (error) {
+      const msg = `Unable to update "Allow NULL" of column "${column.name}". ${error.message as string}.`;
+      // eslint-disable-next-line no-console
+      console.log(msg); // TODO display error toast message
+    } finally {
+      isRequestingToggleAllowNull = false;
+    }
   }
 
   function deleteColumn() {
@@ -118,6 +140,20 @@
       <span>
         Delete column
       </span>
+    </Button>
+  </li>
+  <!--
+    TODO Once we have a DropdownMenu component, make this option
+    disabled if the column is a primary key.
+  -->
+  <li>
+    <Button appearance="plain" on:click={toggleAllowNull}>
+      {#if isRequestingToggleAllowNull}
+        <Icon class="opt" data={faSpinner} spin={true}/>
+      {:else}
+        <span class="opt"><Checkbox checked={allowsNull} /></span>
+      {/if}
+      <span>Allow NULL</span>
     </Button>
   </li>
   <!--
