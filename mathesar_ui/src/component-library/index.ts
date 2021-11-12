@@ -1,5 +1,6 @@
 // Utility Classes
 export { default as CancellablePromise } from './common/utils/CancellablePromise';
+export { default as EventHandler } from './common/utils/EventHandler';
 
 // Utility Functions
 export * from './common/utils/filterUtils';
