@@ -9,4 +9,4 @@ class RecordListParameterSerializer(serializers.Serializer):
 
 class RecordSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
-        return instance._asdict()
+        return instance._asdict() if not isinstance(instance, dict) else instance
