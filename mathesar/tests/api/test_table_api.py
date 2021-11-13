@@ -868,10 +868,16 @@ def test_table_get_with_reflect_new(client, table_for_reflection):
     created_table = actual_created[0]
     assert created_table['name'] == table_name
     created_columns = created_table['columns']
-    assert created_columns == [
+    check_columns_response(created_columns, [
         {'name': 'id', 'type': 'INTEGER', 'type_options': None},
         {'name': 'name', 'type': 'VARCHAR', 'type_options': None}
-    ]
+    ])
+
+
+def check_columns_response(created_columns, expected_response):
+    for created_column in created_columns:
+        created_column.pop('id')
+    assert created_columns == expected_response
 
 
 def test_table_get_with_reflect_column_change(client, table_for_reflection):
@@ -896,10 +902,10 @@ def test_table_get_with_reflect_column_change(client, table_for_reflection):
     ][0]
     new_columns = altered_table['columns']
     assert altered_table['id'] == orig_id
-    assert new_columns == [
+    check_columns_response(new_columns,[
         {'name': 'id', 'type': 'INTEGER', 'type_options': None},
         {'name': new_column_name, 'type': 'VARCHAR', 'type_options': None}
-    ]
+    ])
 
 
 def test_table_get_with_reflect_name_change(client, table_for_reflection):

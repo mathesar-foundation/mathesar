@@ -65,13 +65,13 @@ def reflect_tables_from_schema(schema):
 
 
 def reflect_columns_from_table(table):
-    column_indexes = {
+    attnums = {
         column['attnum']
         for column in get_column_indexes_from_table(table.oid, table.schema._sa_engine)
     }
-    for column_index in column_indexes:
-        models.Column.current_objects.get_or_create(index=column_index, table=table)
-    models.Column.current_objects.filter(table=table).filter(~Q(index__in=column_indexes)).delete()
+    for attnum in attnums:
+        models.Column.current_objects.get_or_create(attnum=attnum, table=table)
+    models.Column.current_objects.filter(table=table).filter(~Q(attnum__in=attnums)).delete()
 
 
 def reflect_constraints_from_database(database):

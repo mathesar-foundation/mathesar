@@ -10,7 +10,7 @@ from sqlalchemy import Table as SATable
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
 from mathesar import models
-
+from mathesar.tests.api.test_table_api import check_columns_response
 
 engine_with_types = fixtures.engine_with_types
 engine_email_type = fixtures.engine_email_type
@@ -51,6 +51,7 @@ def test_column_list(column_test_table, client):
             'index': 0,
             'nullable': False,
             'primary_key': True,
+            'display_options': None,
             'default': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
@@ -65,6 +66,7 @@ def test_column_list(column_test_table, client):
             'index': 1,
             'nullable': False,
             'primary_key': False,
+            'display_options': None,
             'default': None,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
@@ -79,6 +81,7 @@ def test_column_list(column_test_table, client):
             'index': 2,
             'nullable': True,
             'primary_key': False,
+            'display_options': None,
             'default': 5,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
@@ -93,6 +96,7 @@ def test_column_list(column_test_table, client):
             'index': 3,
             'nullable': True,
             'primary_key': False,
+            'display_options': None,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DATE', 'DECIMAL',
                 'DOUBLE PRECISION', 'FLOAT', 'INTEGER', 'INTERVAL',
@@ -103,65 +107,7 @@ def test_column_list(column_test_table, client):
             'default': None,
         }
     ]
-    assert response_data['results'] == expect_results
-
-
-@pytest.mark.parametrize(
-    "index,expect_data",
-    [
-        (
-            0,
-            {
-                'name': 'mycolumn0',
-                'type': 'INTEGER',
-                'type_options': None,
-                'index': 0,
-                'nullable': False,
-                'primary_key': True,
-                'default': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
-                'valid_target_types': [
-                    'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
-                    'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC',
-                    'REAL', 'SMALLINT', 'TEXT', 'VARCHAR',
-                ],
-            },
-        ),
-        (
-            2,
-            {
-                'name': 'mycolumn2',
-                'type': 'INTEGER',
-                'type_options': None,
-                'index': 2,
-                'nullable': True,
-                'primary_key': False,
-                'default': 5,
-                'valid_target_types': [
-                    'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
-                    'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC',
-                    'REAL', 'SMALLINT', 'TEXT', 'VARCHAR',
-                ],
-            },
-        ),
-    ]
-)
-def test_column_retrieve(index, expect_data, column_test_table, client):
-    cache.clear()
-    response = client.get(
-        f"/api/v0/tables/{column_test_table.id}/columns/{index}/"
-    )
-    response_data = response.json()
-    assert response_data == expect_data
-
-
-def test_column_retrieve_when_missing(column_test_table, client):
-    cache.clear()
-    response = client.get(
-        f"/api/v0/tables/{column_test_table.id}/columns/15/"
-    )
-    response_data = response.json()
-    assert response_data == {"detail": "Not found."}
-    assert response.status_code == 404
+    check_columns_response(response_data['results'], expect_results)
 
 
 def test_column_create(column_test_table, client):
@@ -170,10 +116,11 @@ def test_column_create(column_test_table, client):
     cache.clear()
     num_columns = len(column_test_table.sa_columns)
     data = {
-        "name": name, "type": type_
+        "name": name, "type": type_, "display_options": {'fghgf': 'gyjh'}, 'nullable': False
     }
     response = client.post(
-        f"/api/v0/tables/{column_test_table.id}/columns/", data=data
+        f"/api/v0/tables/{column_test_table.id}/columns/",         data=json.dumps(data),
+        content_type='application/json'
     )
     assert response.status_code == 201
     new_columns_response = client.get(

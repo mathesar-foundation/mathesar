@@ -1,6 +1,9 @@
+from typing import Any
+
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
+from django.db.models import JSONField
 from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 
@@ -321,31 +324,27 @@ class Table(DatabaseObject):
 
 class Column(ReflectingObject):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='columns')
-    index = models.IntegerField()
+    attnum = models.IntegerField()
+    display_options = JSONField(null=True)
 
     def __str__(self):
-        return f"{self.__class__.__name__}: {self.table_id}-{self.index}"
+        return f"{self.__class__.__name__}: {self.table_id}-{self.attnum}"
 
-    @property
+    def __getattribute__(self, name: str) -> Any:
+        try:
+            return super().__getattribute__(name)
+        except AttributeError:
+            return getattr(self._sa_column, name)
+
+    @cached_property
     def _sa_column(self):
         return self.table.sa_columns[self.name]
 
     @property
     def name(self):
         return get_column_name_from_index(
-            self.table.oid, self.index, self.table.schema._sa_engine
+            self.table.oid, self.attnum, self.table.schema._sa_engine
         )
-
-    @property
-    def plain_type(self):
-        """
-        Get the type name without arguments
-        """
-        return self._sa_column.plain_type
-
-    @property
-    def type_options(self):
-        return self._sa_column.type_options
 
 
 class Constraint(DatabaseObject):

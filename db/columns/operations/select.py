@@ -17,17 +17,24 @@ from db.utils import execute_statement
 DYNAMIC_NODE_TAGS = {"SQLValueFunction", "FuncCall"}
 
 
-def get_column_index_from_name(table_oid, column_name, engine, connection_to_use=None):
+def get_columns_attnum_from_names(table_oid, column_names, engine, connection_to_use=None):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
         pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
     sel = select(pg_attribute.c.attnum).where(
         and_(
             pg_attribute.c.attrelid == table_oid,
-            pg_attribute.c.attname == column_name
+            pg_attribute.c.attname.in_(column_names)
         )
     )
-    result = execute_statement(engine, sel, connection_to_use).fetchone()[0]
+    return execute_statement(engine, sel, connection_to_use).fetchall()
+
+
+def get_column_index_from_name(table_oid, column_name, engine, connection_to_use=None):
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
+    result = get_columns_attnum_from_names(table_oid, [column_name], engine, connection_to_use)[0][0]
 
     # Account for dropped columns that don't appear in the SQLAlchemy tables
     sel = (
@@ -51,6 +58,7 @@ def get_column_indexes_from_table(table_oid, engine, connection_to_use=None):
         and_(
             pg_attribute.c.attrelid == table_oid,
             pg_attribute.c.attnum > 0,
+            pg_attribute.c.attisdropped.is_(False)
         )
     )
     results = execute_statement(engine, sel, connection_to_use).fetchall()
