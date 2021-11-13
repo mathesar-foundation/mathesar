@@ -1,0 +1,156 @@
+name: Update project on PR label change
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  update_project_on_pr_label_change:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          cd .github/actions/project_update/
+          pip install -r requirements.txt
+
+      - name: Update Triage PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'status: triage') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Triage
+
+      - name: Update Draft PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'status: draft') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Draft
+
+      - name: Update Blocked PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'status: blocked') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Blocked
+
+      - name: Update Waiting PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'status: waiting') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Blocked
+
+      - name: Update Ready PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'status: ready') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Ready
+
+      - name: Update Started PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'status: started') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Started --priority Active
+
+      - name: Update Review PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'status: review') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Review --priority Active
+
+      - name: Update Done PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'status: done') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Done --priority Active
+
+      - name: Update Future PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'priority: future') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --status Draft --priority Future
+
+      - name: Update Urgent PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'priority: urgent') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --priority Active
+
+      - name: Update documentation PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'work: documentation') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --work Documentation
+
+      - name: Update infrastructure PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'work: infrastructure') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --work Infrastructure
+
+      - name: Update product PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'work: product') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --work Product
+
+      - name: Update design PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'work: design') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --work Design
+
+      - name: Update frontend PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'work: frontend') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --work Frontend
+
+      - name: Update backend PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'work: backend') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --work Backend
+
+      - name: Update database PRs
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'work: database') }}"
+        env:
+          MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+        run: |
+          cd .github/actions/project_update/
+          python project_update.py ${{ github.event.pull_request.node_id }} --work Backend
