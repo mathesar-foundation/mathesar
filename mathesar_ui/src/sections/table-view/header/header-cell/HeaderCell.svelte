@@ -11,6 +11,7 @@
     Meta,
     Column,
     ColumnPosition,
+    ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
 
   import DefaultOptions from './DefaultOptions.svelte';
@@ -19,6 +20,7 @@
   export let columnPosition: ColumnPosition;
   export let column: Column;
   export let meta: Meta;
+  export let columnsDataStore: ColumnsDataStore;
   export let constraintsDataStore: ConstraintsDataStore;
 
   $: abstractTypeOfColumn = getAbstractTypeForDBType(column.type, $abstractTypes.data);
@@ -93,6 +95,7 @@
             <DefaultOptions
               {meta}
               {column}
+              {columnsDataStore}
               {constraintsDataStore}
               on:close={closeMenu}
               on:columnDelete

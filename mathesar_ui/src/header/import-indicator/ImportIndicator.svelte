@@ -10,7 +10,8 @@
     FileImportStatusInfo,
   } from '@mathesar/stores/fileImports';
   import {
-    addTab,
+    getTabsForSchema,
+    constructImportTab,
   } from '@mathesar/stores/tabs';
   import {
     currentSchemaId,
@@ -36,15 +37,15 @@
     if ($currentSchemaId !== importInfo.schemaId) {
       router.goto(`/${importInfo.databaseName}/${importInfo.schemaId}/`);
     }
-    addTab(
+    const tabList = getTabsForSchema(
       importInfo.databaseName,
       importInfo.schemaId,
-      {
-        id: importInfo.id,
-        label: importInfo.name || 'New table',
-        isNew: true,
-      },
     );
+    const tab = constructImportTab(
+      importInfo.id,
+      importInfo.name,
+    );
+    tabList.add(tab);
     isOpen = false;
   }
 </script>
