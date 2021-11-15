@@ -1,4 +1,4 @@
-import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, IconDefinition, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import { linear } from 'svelte/easing';
 import type { Writable, Readable } from 'svelte/store';
 import { writable, derived } from 'svelte/store';
@@ -22,26 +22,23 @@ interface Icon {
 }
 
 interface ToastEntryProps {
-  icon?: Icon,
   title?: string,
   message?: string,
+  icon?: Icon,
+  backgroundColor: string,
+  textColor: string,
+  progressColor: string,
+  /**
+   * The time (ms) the toast message will stay open. When 0, the toast will not
+   * auto-close.
+   */
+  lifetime: number,
   /**
    * When true, the toast message will provide a close button for the user to
    * dismiss the message. When false, the toast message can still be dismissed
    * via its controller.
    */
   allowDismiss: boolean,
-  /**
-   * When true the toast will dismiss automatically after the specified
-   * duration. When false, it will remain open until dismissed either via code
-   * or manually by the user.
-   */
-  autoDismiss: true,
-  /**
-   * The time (ms) the toast message will stay open. Or, the easing duration
-   * used when manually changing the progress indicator.
-   */
-  duration: number,
   /**
    * When true, the progress bar will display.
    */
@@ -74,8 +71,10 @@ interface ToastEntryProps {
 }
 
 const baseDefaultProps: ToastEntryProps = {
-  autoDismiss: true,
-  duration: 6000,
+  backgroundColor: 'rgba(77, 77, 77, 0.9)',
+  textColor: 'white',
+  progressColor: 'rgba(0, 0, 0, 0.5)',
+  lifetime: 6000,
   hasProgress: true,
   initialProgress: 1,
   finalProgress: 0,
@@ -121,7 +120,7 @@ export class ToastController {
     const dismiss = () => this.dismiss(id);
     const progress = pauseableTweened(
       props.initialProgress,
-      { duration: props.duration, easing: linear },
+      { duration: 100, easing: linear },
     );
     const controller: ToastEntryController = { progress, dismiss };
     const entry: ToastEntry = { id, props, controller };
@@ -130,8 +129,9 @@ export class ToastController {
       map.set(id, entry);
       return map;
     });
-    if (props.autoDismiss) {
-      void controller.progress.set(props.finalProgress).then(controller.dismiss);
+    if (props.lifetime) {
+      void controller.progress.set(props.finalProgress, { duration: props.lifetime })
+        .then(controller.dismiss);
     }
     props.onShow(controller);
     return controller;
@@ -149,4 +149,40 @@ export class ToastController {
       return newEntriesMap;
     });
   }
+}
+
+export type ToastShowFn = (p: Partial<ToastEntryProps>) => ToastEntryController;
+
+interface DefaultMakeToast {
+  entries: Readable<ToastEntry[]>,
+  info: ToastShowFn,
+  success: ToastShowFn,
+  error: ToastShowFn,
+}
+
+export function makeToast(): DefaultMakeToast {
+  const controller = new ToastController();
+  return {
+    entries: controller.entries,
+
+    info(partialProps: Partial<ToastEntryProps> = {}) {
+      return controller.show(partialProps);
+    },
+
+    success(partialProps: Partial<ToastEntryProps> = {}) {
+      return controller.show({
+        ...partialProps,
+        icon: { data: faCheck },
+        backgroundColor: 'rgba(92, 159, 84, 0.9)',
+      });
+    },
+
+    error(partialProps: Partial<ToastEntryProps> = {}) {
+      return controller.show({
+        ...partialProps,
+        icon: { data: faExclamationTriangle },
+        backgroundColor: 'rgba(159, 86, 77, 0.9)',
+      });
+    },
+  };
 }

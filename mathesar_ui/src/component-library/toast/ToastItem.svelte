@@ -12,7 +12,16 @@
   $: ({ pause, resume } = progress);
 </script>
 
-<div class="toast-item" on:mouseenter={pause} on:mouseleave={resume}>
+<div
+  class="toast-item"
+  on:mouseenter={pause}
+  on:mouseleave={resume}
+  style={`
+    --toast-item-background-color: ${props.backgroundColor};
+    --toast-item-text-color: ${props.textColor};
+    --toast-item-progress-color: ${props.progressColor};
+  `}
+>
   {#if props.icon}
     <div class="icon"><Icon {...props.icon} /></div>
   {/if}

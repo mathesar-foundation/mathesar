@@ -4,8 +4,8 @@
   min-height: 3.5rem;
   margin: 0 0 0.5rem 0;
   padding: 0;
-  background: rgba(66, 66, 66, 0.9);
-  color: #fff;
+  background-color: var(--toast-item-background-color);
+  color: var(--toast-item-text-color);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   border: none;
   border-radius: 0.125rem;
@@ -61,10 +61,10 @@
     background: transparent;
   }
   progress::-webkit-progress-value {
-    background: rgba(33, 150, 243, 0.75);
+    background: var(--toast-item-progress-color);
   }
   progress::-moz-progress-bar {
-    background: rgba(33, 150, 243, 0.75);
+    background: var(--toast-item-progress-color);
   }
 }
 
