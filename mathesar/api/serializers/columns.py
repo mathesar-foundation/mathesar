@@ -3,6 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 from rest_framework.settings import api_settings
 
+from mathesar.api.utils import ReadWritePolymorphicSerializerMappingMixin
 from mathesar.models import Column
 
 
@@ -37,13 +38,37 @@ class TypeOptionSerializer(serializers.Serializer):
         return super(TypeOptionSerializer, self).run_validation(data)
 
 
+class BooleanDisplayOptionSerializer(serializers.Serializer):
+    input = serializers.ChoiceField(choices=[("dropdown", 1), ("checkbox", 2)])
+    use_custom_columns = serializers.BooleanField()
+    custom_labels = serializers.DictField(required=False)
+
+
+class DisplayOptionsMappingSerializer(ReadWritePolymorphicSerializerMappingMixin, serializers.Serializer):
+    template_serializers = {"BOOLEAN": BooleanDisplayOptionSerializer}
+
+    def get_mapping_field(self):
+        return self.context['column_type']
+
 class SimpleColumnSerializer(serializers.ModelSerializer):
     class Meta:
         model = Column
-        fields = ('id', 'name', 'type', 'type_options')
+        fields = ('id', 'name', 'type', 'type_options', 'display_options')
     name = serializers.CharField()
     type = serializers.CharField(source='plain_type')
     type_options = TypeOptionSerializer(required=False, allow_null=True)
+    display_options = DisplayOptionsMappingSerializer(required=False)
+
+    def to_representation(self, instance):
+        self.context['column_type'] = str(instance.type)
+        return super().to_representation(instance)
+
+    def to_internal_value(self, data):
+        if self.partial and 'type' not in data:
+            self.context['column_type'] = self.instance.type
+        else:
+            self.context['column_type'] = data['type']
+        return super().to_internal_value(data)
 
 
 class ColumnSerializer(SimpleColumnSerializer):
@@ -51,7 +76,7 @@ class ColumnSerializer(SimpleColumnSerializer):
         fields = SimpleColumnSerializer.Meta.fields + ('nullable', 'primary_key', 'source_column', 'copy_source_data',
                                                        'copy_source_constraints',
                                                        'index',
-                                                       'valid_target_types', 'default', 'display_options')
+                                                       'valid_target_types', 'default')
         model_fields = ('display_options', )
 
     name = serializers.CharField(required=False)

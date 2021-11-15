@@ -152,6 +152,7 @@ def test_column_create_default(
     name = "anewcolumn"
     data = {"name": name, "type": type_, "default": default}
     response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", data)
+    print(response.json())
     assert response.status_code == 201
 
     # Ensure the correct serialized date is returned by the API
@@ -176,6 +177,50 @@ def test_column_create_invalid_default(column_test_table, client):
     response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", data)
     assert response.status_code == 400
     assert f'default "{data["default"]}" is invalid for type' in response.json()[0]
+
+
+create_display_options_test_list = [
+    ("BOOLEAN", {"input": "dropdown", "use_custom_columns": False}),
+    ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
+]
+
+
+@pytest.mark.parametrize("type_,display_options", create_display_options_test_list)
+def test_column_create_display_options(
+    column_test_table, type_, display_options, client, engine
+):
+    cache.clear()
+    name = "anewcolumn"
+    data = {"name": name, "type": type_, "display_options": display_options}
+    response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", json.dumps(data),
+                           content_type="application/json")
+    print(response.json())
+    assert response.status_code == 201
+
+    # Ensure the correct serialized date is returned by the API
+    new_columns_response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    actual_new_col = new_columns_response.json()["results"][-1]
+    assert actual_new_col["display_options"] == display_options
+
+
+
+create_display_options_invalid_test_list = [
+    ("BOOLEAN", {"input": "invalid", "use_custom_columns": False}),
+    ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"yes": "yes", "1": "no"}}),
+]
+
+@pytest.mark.parametrize("type_,display_options", create_display_options_invalid_test_list)
+def test_column_create_wrong_display_options(
+    column_test_table, type_, display_options, client, engine
+):
+    cache.clear()
+    name = "anewcolumn"
+    data = {"name": name, "type": type_, "display_options": display_options}
+    response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", json.dumps(data),
+                           content_type="application/json")
+    assert response.status_code == 400
 
 
 @pytest.mark.parametrize(
