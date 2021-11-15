@@ -50,6 +50,7 @@ class DisplayOptionsMappingSerializer(ReadWritePolymorphicSerializerMappingMixin
     def get_mapping_field(self):
         return self.context['column_type']
 
+
 class SimpleColumnSerializer(serializers.ModelSerializer):
     class Meta:
         model = Column

@@ -1,4 +1,4 @@
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound
 
 from mathesar.models import Table
 
@@ -30,8 +30,8 @@ class ReadOnlyPolymorphicSerializerMappingMixin(object):
         mapping_field = getattr(self, "mapping_field", None)
         if mapping_field is None:
             # TODO replace this with a proper error message
-            raise Exception("Add a `mapping_field` to be used as a identifier to determine the serializer"
-                            "or override this method to return a identifier.")
+            raise Exception("Add a `mapping_field` to be used as a identifier"
+                            "or override this method to return a identifier to identify a proper serializer")
         return mapping_field
 
 

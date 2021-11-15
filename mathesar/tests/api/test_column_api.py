@@ -153,7 +153,6 @@ def test_column_create_default(
     name = "anewcolumn"
     data = {"name": name, "type": type_, "default": default}
     response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", data)
-    print(response.json())
     assert response.status_code == 201
 
     # Ensure the correct serialized date is returned by the API
@@ -195,7 +194,6 @@ def test_column_create_display_options(
     data = {"name": name, "type": type_, "display_options": display_options}
     response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", json.dumps(data),
                            content_type="application/json")
-    print(response.json())
     assert response.status_code == 201
 
     # Ensure the correct serialized date is returned by the API
@@ -204,7 +202,6 @@ def test_column_create_display_options(
     )
     actual_new_col = new_columns_response.json()["results"][-1]
     assert actual_new_col["display_options"] == display_options
-
 
 
 create_display_options_invalid_test_list = [
