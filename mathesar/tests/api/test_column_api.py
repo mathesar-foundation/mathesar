@@ -209,6 +209,7 @@ create_display_options_invalid_test_list = [
     ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"yes": "yes", "1": "no"}}),
 ]
 
+
 @pytest.mark.parametrize("type_,display_options", create_display_options_invalid_test_list)
 def test_column_create_wrong_display_options(
     column_test_table, type_, display_options, client, engine
