@@ -116,10 +116,11 @@ def test_column_create(column_test_table, client):
     cache.clear()
     num_columns = len(column_test_table.sa_columns)
     data = {
-        "name": name, "type": type_, "display_options": {'fghgf': 'gyjh'}, 'nullable': False
+        "name": name, "type": type_, "display_options": {'input': 'dropdown'}, 'nullable': False
     }
     response = client.post(
-        f"/api/v0/tables/{column_test_table.id}/columns/",         data=json.dumps(data),
+        f"/api/v0/tables/{column_test_table.id}/columns/",
+        data=json.dumps(data),
         content_type='application/json'
     )
     assert response.status_code == 201
@@ -308,8 +309,17 @@ def test_column_update_name(column_test_table, client):
     cache.clear()
     name = "updatedname"
     data = {"name": name}
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[1]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
+    )
+    assert response.json()["name"] == name
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/"
     )
     assert response.json()["name"] == name
 
@@ -318,8 +328,13 @@ def test_column_update_default(column_test_table, client):
     cache.clear()
     expt_default = 5
     data = f'{{"default": {expt_default}}}'  # Ensure we pass a int and not a str
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[1]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data,
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
         content_type="application/json"
     )
     assert response.json()["default"] == expt_default
@@ -329,8 +344,13 @@ def test_column_update_delete_default(column_test_table, client):
     cache.clear()
     expt_default = None
     data = json.dumps({"default": None})
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[2]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/2/", data=data,
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
         content_type="application/json"
     )
     assert response.json()["default"] == expt_default
@@ -339,8 +359,13 @@ def test_column_update_delete_default(column_test_table, client):
 def test_column_update_default_invalid_cast(column_test_table, client):
     cache.clear()
     data = {"default": "not an integer"}
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[1]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data,
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
     )
     assert response.status_code == 400
 
@@ -349,8 +374,13 @@ def test_column_update_type_dynamic_default(column_test_table, client):
     cache.clear()
     type_ = "NUMERIC"
     data = {"type": type_}
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[0]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/0/", data=data
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
     assert response.status_code == 400
 
@@ -359,8 +389,13 @@ def test_column_update_type(column_test_table, client):
     cache.clear()
     type_ = "BOOLEAN"
     data = {"type": type_}
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[3]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/3/", data=data
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
     assert response.json()["type"] == type_
 
@@ -370,8 +405,13 @@ def test_column_update_name_and_type(column_test_table, client):
     type_ = "BOOLEAN"
     new_name = 'new name'
     data = {"type": type_, "name": new_name}
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[3]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/3/", data=data
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
     assert response.json()["type"] == type_
     assert response.json()["name"] == new_name
@@ -382,8 +422,13 @@ def test_column_update_name_type_nullable(column_test_table, client):
     type_ = "BOOLEAN"
     new_name = 'new name'
     data = {"type": type_, "name": new_name, "nullable": True}
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[3]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/3/", data=data
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
     assert response.json()["type"] == type_
     assert response.json()["name"] == new_name
@@ -395,8 +440,13 @@ def test_column_update_name_type_nullable_default(column_test_table, client):
     type_ = "BOOLEAN"
     new_name = 'new name'
     data = {"type": type_, "name": new_name, "nullable": True, "default": True}
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[3]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/3/", data=data
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
     assert response.json()["type"] == type_
     assert response.json()["name"] == new_name
@@ -409,8 +459,13 @@ def test_column_update_type_options(column_test_table, client):
     type_ = "NUMERIC"
     type_options = {"precision": 3, "scale": 1}
     data = {"type": type_, "type_options": type_options}
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[3]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/3/",
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
         data,
         format='json'
     )
@@ -422,15 +477,20 @@ def test_column_update_type_options_no_type(column_test_table, client):
     cache.clear()
     type_ = "NUMERIC"
     data = {"type": type_}
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[3]['id']
     client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/3/",
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
         data,
         format='json'
     )
     type_options = {"precision": 3, "scale": 1}
     type_option_data = {"type_options": type_options}
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/3/",
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
         type_option_data,
         format='json'
     )
@@ -441,20 +501,47 @@ def test_column_update_type_options_no_type(column_test_table, client):
 def test_column_update_invalid_type(create_table, client, engine_email_type):
     table = create_table('Column Invalid Type')
     body = {"type": "BIGINT"}
+    response = client.get(
+        f"/api/v0/tables/{table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[3]['id']
     response = client.patch(
-        f"/api/v0/tables/{table.id}/columns/3/",
+        f"/api/v0/tables/{table.id}/columns/{column_id}/",
         body
     )
     assert response.status_code == 400
     assert response.json() == ["This type casting is invalid."]
 
 
+def test_column_update_display_options(column_test_table, client):
+    cache.clear()
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[3]['id']
+    display_options = {"show_as_percentage": True}
+    display_options_data = {"display_options": display_options}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
+        display_options_data,
+        format='json'
+    )
+    assert response.json()["display_options"] == display_options
+
+
 def test_column_update_returns_table_dependent_fields(column_test_table, client):
     cache.clear()
     expt_default = 5
     data = {"default": expt_default}
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[1]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data,
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
     )
     assert response.json()["default"] is not None
     assert response.json()["index"] is not None
@@ -465,8 +552,13 @@ def test_column_update_type_invalid_options(column_test_table, client, type_opti
     cache.clear()
     type_ = "NUMERIC"
     data = {"type": type_, "type_options": type_options}
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[3]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/3/",
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
         data=json.dumps(data),
         content_type='application/json'
     )
@@ -477,8 +569,13 @@ def test_column_update_type_invalid_cast(column_test_table, client):
     cache.clear()
     type_ = "MATHESAR_TYPES.EMAIL"
     data = {"type": type_}
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[1]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/1/", data=data
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
     assert response.status_code == 400
 
@@ -488,7 +585,7 @@ def test_column_update_when_missing(column_test_table, client):
     name = "updatedname"
     data = {"name": name}
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/15/", data=data
+        f"/api/v0/tables/{column_test_table.id}/columns/99999/", data=data
     )
     response_data = response.json()
     assert response_data == {"detail": "Not found."}
@@ -499,8 +596,13 @@ def test_column_destroy(column_test_table, client):
     cache.clear()
     num_columns = len(column_test_table.sa_columns)
     col_one_name = column_test_table.sa_columns[1].name
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_id = columns[1]['id']
     response = client.delete(
-        f"/api/v0/tables/{column_test_table.id}/columns/1/"
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/"
     )
     assert response.status_code == 204
     new_columns_response = client.get(
@@ -514,7 +616,7 @@ def test_column_destroy(column_test_table, client):
 def test_column_destroy_when_missing(column_test_table, client):
     cache.clear()
     response = client.delete(
-        f"/api/v0/tables/{column_test_table.id}/columns/15/"
+        f"/api/v0/tables/{column_test_table.id}/columns/99999/"
     )
     response_data = response.json()
     assert response_data == {"detail": "Not found."}
