@@ -11,7 +11,7 @@ from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
-from db.columns.operations.select import get_column_name_from_index
+from db.columns.operations.select import get_column_name_from_attnum
 from db.constraints.operations.create import create_unique_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
@@ -342,7 +342,7 @@ class Column(ReflectingObject):
 
     @property
     def name(self):
-        return get_column_name_from_index(
+        return get_column_name_from_attnum(
             self.table.oid, self.attnum, self.table.schema._sa_engine
         )
 

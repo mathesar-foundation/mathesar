@@ -268,7 +268,8 @@ def test_column_update_name(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[1]['id']
+    column_index = 1
+    column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
@@ -279,6 +280,24 @@ def test_column_update_name(column_test_table, client):
     assert response.json()["name"] == name
 
 
+def test_column_update_display_options(column_test_table, client):
+    cache.clear()
+    response = client.get(
+        f"/api/v0/tables/{column_test_table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_index = 3
+    column_id = columns[column_index]['id']
+    display_options = {"show_as_percentage": True}
+    display_options_data = {"display_options": display_options}
+    response = client.patch(
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
+        display_options_data,
+        format='json'
+    )
+    assert response.json()["display_options"] == display_options
+
+
 def test_column_update_default(column_test_table, client):
     cache.clear()
     expt_default = 5
@@ -287,7 +306,8 @@ def test_column_update_default(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[1]['id']
+    column_index = 1
+    column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
         content_type="application/json"
@@ -303,7 +323,8 @@ def test_column_update_delete_default(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[2]['id']
+    column_index = 2
+    column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
         content_type="application/json"
@@ -318,7 +339,8 @@ def test_column_update_default_invalid_cast(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[1]['id']
+    column_index = 1
+    column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
     )
@@ -333,7 +355,8 @@ def test_column_update_type_dynamic_default(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[0]['id']
+    column_index = 0
+    column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
@@ -348,7 +371,8 @@ def test_column_update_type(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[3]['id']
+    column_index = 3
+    column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
@@ -364,7 +388,8 @@ def test_column_update_name_and_type(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[3]['id']
+    column_index = 3
+    column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
@@ -381,7 +406,8 @@ def test_column_update_name_type_nullable(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[3]['id']
+    column_index = 3
+    column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
@@ -399,7 +425,8 @@ def test_column_update_name_type_nullable_default(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[3]['id']
+    column_index = 3
+    column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
@@ -418,7 +445,8 @@ def test_column_update_type_options(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[3]['id']
+    column_index = 3
+    column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
         data,
@@ -436,7 +464,8 @@ def test_column_update_type_options_no_type(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[3]['id']
+    column_index = 3
+    column_id = columns[column_index]['id']
     client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
         data,
@@ -460,30 +489,14 @@ def test_column_update_invalid_type(create_table, client, engine_email_type):
         f"/api/v0/tables/{table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[3]['id']
+    column_index = 3
+    column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/v0/tables/{table.id}/columns/{column_id}/",
         body
     )
     assert response.status_code == 400
     assert response.json() == ["This type casting is invalid."]
-
-
-def test_column_update_display_options(column_test_table, client):
-    cache.clear()
-    response = client.get(
-        f"/api/v0/tables/{column_test_table.id}/columns/"
-    )
-    columns = response.json()['results']
-    column_id = columns[3]['id']
-    display_options = {"show_as_percentage": True}
-    display_options_data = {"display_options": display_options}
-    response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
-        display_options_data,
-        format='json'
-    )
-    assert response.json()["display_options"] == display_options
 
 
 def test_column_update_returns_table_dependent_fields(column_test_table, client):
@@ -494,7 +507,8 @@ def test_column_update_returns_table_dependent_fields(column_test_table, client)
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[1]['id']
+    column_index = 1
+    column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
     )
@@ -511,7 +525,8 @@ def test_column_update_type_invalid_options(column_test_table, client, type_opti
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[3]['id']
+    column_index = 3
+    column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
         data=json.dumps(data),
@@ -528,7 +543,8 @@ def test_column_update_type_invalid_cast(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[1]['id']
+    column_index = 1
+    column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
@@ -555,7 +571,8 @@ def test_column_destroy(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     columns = response.json()['results']
-    column_id = columns[1]['id']
+    column_index = 1
+    column_id = columns[column_index]['id']
     response = client.delete(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/"
     )

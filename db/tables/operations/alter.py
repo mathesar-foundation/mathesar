@@ -4,7 +4,6 @@ from alembic.operations import Operations
 from db.columns.operations.alter import batch_update_columns
 from db.tables.operations.select import reflect_table
 
-# Enums should be preferred
 SUPPORTED_TABLE_ALTER_ARGS = {'name', 'columns'}
 
 

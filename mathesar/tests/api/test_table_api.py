@@ -875,8 +875,11 @@ def test_table_get_with_reflect_new(client, table_for_reflection):
 
 
 def check_columns_response(created_columns, expected_response):
+    # Id's are auto incrementing and vary depending up previous test cases, better to remove them before comparing
+    created_columns_id = []
     for created_column in created_columns:
-        created_column.pop('id')
+        created_columns_id.append(created_column.pop('id'))
+    assert len(created_columns_id) == len(expected_response)
     assert created_columns == expected_response
 
 
