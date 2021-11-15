@@ -1,5 +1,5 @@
 .toast-item {
-  width: 16rem;
+  width: 18rem;
   height: auto;
   min-height: 3.5rem;
   margin: 0 0 0.5rem 0;
@@ -17,21 +17,30 @@
   will-change: transform, opacity;
   -webkit-tap-highlight-color: transparent;
 
-  .message {
+  .content {
     padding: 0.75rem 0.5rem;
     flex: 1 1 0%;
+    .title {
+      font-weight: bold;
+      margin-bottom: 1em;
+    }
   }
 
-  .close-button {
+  .close-button,
+  .icon {
     width: 2rem;
     height: 100%;
-    font: 1rem sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
+    outline: none;
+  }
+
+  .close-button {
     cursor: pointer;
     outline: none;
   }
+
   progress {
     top: auto;
     right: auto;

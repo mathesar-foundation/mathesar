@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { fade, fly } from 'svelte/transition'
-  import { flip } from 'svelte/animate'
+  import { fade, fly } from 'svelte/transition';
+  import { flip } from 'svelte/animate';
   import type { Readable } from 'svelte/store';
   import type { ToastEntry } from './ToastController';
-  import ToastItem from './ToastItem.svelte'
+  import ToastItem from './ToastItem.svelte';
 
   export let entries: Readable<ToastEntry[]>;
 </script>

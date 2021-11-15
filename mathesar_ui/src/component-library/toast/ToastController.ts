@@ -1,10 +1,10 @@
+import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { linear } from 'svelte/easing';
 import type { Writable, Readable } from 'svelte/store';
 import { writable, derived } from 'svelte/store';
-import type { PauseableTweened } from '..';
-import { pauseableTweened } from '..';
-
-type ToastType = 'info' | 'success' | 'error';
+import type { PauseableTweened } from '../common/utils/pauseableTweened';
+import { pauseableTweened } from '../common/utils/pauseableTweened';
+import type { IconFlip, IconRotate } from '../icon/Icon.d';
 
 /**
  * Allows control of the toast message after it is displayed
@@ -14,10 +14,29 @@ interface ToastEntryController {
   dismiss: () => void,
 }
 
+interface Icon {
+  data: IconDefinition,
+  spin?: boolean,
+  flip?: IconFlip,
+  rotate?: IconRotate,
+}
+
 interface ToastEntryProps {
+  icon?: Icon,
   title?: string,
   message?: string,
-  type: ToastType,
+  /**
+   * When true, the toast message will provide a close button for the user to
+   * dismiss the message. When false, the toast message can still be dismissed
+   * via its controller.
+   */
+  allowDismiss: boolean,
+  /**
+   * When true the toast will dismiss automatically after the specified
+   * duration. When false, it will remain open until dismissed either via code
+   * or manually by the user.
+   */
+  autoDismiss: true,
   /**
    * The time (ms) the toast message will stay open. Or, the easing duration
    * used when manually changing the progress indicator.
@@ -28,24 +47,23 @@ interface ToastEntryProps {
    */
   hasProgress: boolean,
   /**
+   * The value of the progress indicator when the toast message first appears.
+   * Should be between 0 and 1.
+   */
+  initialProgress: number,
+  /**
+   * The value of the progress indicator immediately before the toast message
+   * closes. Should be between 0 and 1.
+   */
+  finalProgress: number,
+  /**
    * When true, the auto-close behavior will be paused while the user hovers on
    * the toast message.
    */
   allowPause: boolean,
   /**
-   * When true, the toast message will provide a close button for the user to
-   * dismiss the message. When false, the toast message can still be dismissed
-   * via its controller.
-   */
-  allowDismiss: boolean,
-  /**
-   * This function will run when the toast item is shown.
-   *
-   * With the default props, this function will transition the progress
-   * indicator from 100% to 0% and then dismiss the toast message. You can
-   * override this behavior by supplying your own function here. For example,
-   * passing `() => {}` will disable automatic movement of the progress
-   * indicator and disable automatic closing of the toast message.
+   * This function will run when the toast item is shown. The toast controller
+   * is passed to the function.
    */
   onShow: (c: ToastEntryController) => void,
   /**
@@ -56,12 +74,14 @@ interface ToastEntryProps {
 }
 
 const baseDefaultProps: ToastEntryProps = {
-  type: 'info',
+  autoDismiss: true,
   duration: 6000,
   hasProgress: true,
+  initialProgress: 1,
+  finalProgress: 0,
   allowPause: true,
   allowDismiss: true,
-  onShow: (c) => c.progress.set(0).then(c.dismiss),
+  onShow: () => {},
   onDismiss: () => {},
 };
 
@@ -99,7 +119,10 @@ export class ToastController {
     const id = this.maxId + 1;
     this.maxId = id;
     const dismiss = () => this.dismiss(id);
-    const progress = pauseableTweened(1, { duration: props.duration, easing: linear });
+    const progress = pauseableTweened(
+      props.initialProgress,
+      { duration: props.duration, easing: linear },
+    );
     const controller: ToastEntryController = { progress, dismiss };
     const entry: ToastEntry = { id, props, controller };
     this.entriesMap.update((entries) => {
@@ -107,6 +130,9 @@ export class ToastController {
       map.set(id, entry);
       return map;
     });
+    if (props.autoDismiss) {
+      void controller.progress.set(props.finalProgress).then(controller.dismiss);
+    }
     props.onShow(controller);
     return controller;
   }
