@@ -78,13 +78,14 @@ class ColumnViewSet(viewsets.ModelViewSet):
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
-        table = get_table_or_404(table_pk)
-        serializer = ColumnSerializer(data=request.data, partial=True)
+        column_instance = self.get_object()
+        table = column_instance.table
+        serializer = ColumnSerializer(instance=column_instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         with warnings.catch_warnings():
             warnings.filterwarnings("error", category=DynamicDefaultWarning)
             try:
-                column = table.alter_column(pk, serializer.validated_data)
+                column = table.alter_column(column_instance._sa_column.column_index, serializer.validated_data)
             except ProgrammingError as e:
                 if type(e.orig) == UndefinedFunction:
                     raise ValidationError('This type cast is not implemented')
@@ -116,13 +117,16 @@ class ColumnViewSet(viewsets.ModelViewSet):
             except Exception as e:
                 raise APIException(e)
         # TODO Add partial update columns
-        out_serializer = ColumnSerializer(column)
+        updated_instance = serializer.update(column_instance, serializer.validated_model_fields)
+        out_serializer = ColumnSerializer(self.get_object())
         return Response(out_serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
-        table = get_table_or_404(table_pk)
+        column_instance = self.get_object()
+        table = column_instance.table
         try:
-            table.drop_column(pk)
+            table.drop_column(column_instance._sa_column.column_index)
+            column_instance.delete()
         except IndexError:
             raise NotFound
         return Response(status=status.HTTP_204_NO_CONTENT)
