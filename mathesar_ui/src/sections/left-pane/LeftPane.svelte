@@ -6,7 +6,9 @@
     Tree,
   } from '@mathesar-component-library';
   import {
-    addTab,
+    getTabsForSchema,
+    constructTabularTab,
+    constructImportTab,
   } from '@mathesar/stores/tabs';
   import {
     tables,
@@ -18,8 +20,9 @@
   import type {
     DBTablesStoreData,
   } from '@mathesar/stores/tables';
-  import type { MathesarTab } from '@mathesar/stores/tabs';
+  import type { MathesarTab } from '@mathesar/stores/tabs/types';
   import type { SchemaEntry, TableEntry } from '@mathesar/App.d';
+  import { TabularType } from '@mathesar/App.d';
   import type {
     TreeItem,
   } from '@mathesar-component-library/types';
@@ -27,10 +30,10 @@
   export let database: string;
   export let schemaId: SchemaEntry['id'];
   export let activeTab: MathesarTab;
-  export let getLink: (entry: MathesarTab) => string;
+  export let getLink: (entry: TableEntry) => string;
   
   let tree: TreeItem[] = [];
-  let activeTable: Set<unknown>;
+  let activeOptionSet: Set<unknown>;
   const expandedItems = new Set(['table_header']);
 
   function generateTree(_tables: DBTablesStoreData) {
@@ -38,11 +41,11 @@
       treeId: 'table_header',
       id: 't_h',
       label: 'Tables',
-      tables: [] as MathesarTab[],
+      tables: [] as (TableEntry & TreeItem)[],
     };
 
     _tables?.data?.forEach((value) => {
-      const tableInfo: MathesarTab = {
+      const tableInfo: TableEntry & TreeItem = {
         ...value,
         label: value.name,
         treeId: value.id,
@@ -59,7 +62,13 @@
   $: tree = generateTree($tables);
 
   function onActiveTabChange(_activeTab: MathesarTab) {
-    activeTable = new Set([_activeTab?.id]);
+    if (_activeTab?.tabularData) {
+      activeOptionSet = new Set([
+        _activeTab.tabularData.id,
+      ]);
+    } else {
+      activeOptionSet = new Set();
+    }
   }
 
   $: onActiveTabChange(activeTab);
@@ -68,21 +77,15 @@
     const { node, originalEvent } = e.detail;
     originalEvent.preventDefault();
 
-    let newTab: MathesarTab = {
-      id: node.id,
-      label: node.name,
-    };
+    const tabList = getTabsForSchema(database, schemaId);
     if (node.import_verified === false) {
       const fileImport = loadIncompleteImport(database, schemaId, node);
-      newTab = {
-        ...newTab,
-        id: get(fileImport).id,
-        label: 'New table',
-        isNew: true,
-      };
+      const tab = constructImportTab(get(fileImport).id);
+      tabList.add(tab);
+    } else {
+      const tab = constructTabularTab(TabularType.Table, node.id, node.name);
+      tabList.add(tab);
     }
-
-    addTab(database, schemaId, newTab);
   }
 </script>
 
@@ -90,7 +93,7 @@
   <nav>
     <Tree data={tree} idKey="treeId" childKey="tables"
           search={true} {getLink} {expandedItems}
-          bind:selectedItems={activeTable} on:nodeSelected={tableSelected}
+          bind:selectedItems={activeOptionSet} on:nodeSelected={tableSelected}
           let:entry>
       <Icon data={faTable}/>
       <span>{entry.label}</span>
