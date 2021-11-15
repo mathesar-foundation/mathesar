@@ -902,7 +902,7 @@ def test_table_get_with_reflect_column_change(client, table_for_reflection):
     ][0]
     new_columns = altered_table['columns']
     assert altered_table['id'] == orig_id
-    check_columns_response(new_columns,[
+    check_columns_response(new_columns, [
         {'name': 'id', 'type': 'INTEGER', 'type_options': None},
         {'name': new_column_name, 'type': 'VARCHAR', 'type_options': None}
     ])

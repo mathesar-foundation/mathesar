@@ -3,17 +3,16 @@ from psycopg2.errors import DuplicateColumn, UndefinedFunction
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError, APIException
 from rest_framework.response import Response
-from rest_framework_nested.viewsets import NestedViewSetMixin
 from sqlalchemy.exc import ProgrammingError
 
 from db.columns.exceptions import (
     DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
 )
 from db.columns.operations.select import get_columns_attnum_from_names
-from mathesar.api.pagination import ColumnLimitOffsetPagination, DefaultLimitOffsetPagination
+from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
-from mathesar.models import Table, Column
+from mathesar.models import Column
 
 
 class ColumnViewSet(viewsets.ModelViewSet):
@@ -22,11 +21,12 @@ class ColumnViewSet(viewsets.ModelViewSet):
     parent_lookup_kwargs = {
         'table_pk': 'table__pk'
     }
+
     def get_queryset(self):
         table = get_table_or_404(pk=self.kwargs['table_pk'])
         sa_column_name = [column.name for column in table.sa_columns]
         column_attnum_list = [result[0] for result in get_columns_attnum_from_names(table.oid, sa_column_name, table.schema._sa_engine)]
-        return Column.objects.filter(table=table, attnum__in=column_attnum_list)
+        return Column.objects.filter(table=table, attnum__in=column_attnum_list).order_by("attnum")
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
@@ -85,7 +85,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
         with warnings.catch_warnings():
             warnings.filterwarnings("error", category=DynamicDefaultWarning)
             try:
-                column = table.alter_column(column_instance._sa_column.column_index, serializer.validated_data)
+                table.alter_column(column_instance._sa_column.column_index, serializer.validated_data)
             except ProgrammingError as e:
                 if type(e.orig) == UndefinedFunction:
                     raise ValidationError('This type cast is not implemented')
@@ -116,8 +116,8 @@ class ColumnViewSet(viewsets.ModelViewSet):
                 raise ValidationError('This type casting is invalid.')
             except Exception as e:
                 raise APIException(e)
-        # TODO Add partial update columns
-        updated_instance = serializer.update(column_instance, serializer.validated_model_fields)
+        serializer.update(column_instance, serializer.validated_model_fields)
+        # Invalidate the cache as the underlying columns have changed
         out_serializer = ColumnSerializer(self.get_object())
         return Response(out_serializer.data)
 

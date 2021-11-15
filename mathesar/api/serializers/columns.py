@@ -117,7 +117,3 @@ class ColumnSerializer(SimpleColumnSerializer):
     @property
     def validated_model_fields(self):
         return {key: self.validated_data[key] for key in self.validated_data if key in self.Meta.model_fields}
-
-
-
-
