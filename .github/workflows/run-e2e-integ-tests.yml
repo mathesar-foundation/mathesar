@@ -25,7 +25,7 @@ jobs:
         run: cp .env.example .env
 
       - name: Use integ test dockerfile
-        run: rm Dockefile && mv Dockerfile.integ-tests Dockerfile
+        run: rm Dockerfile && mv Dockerfile.integ-tests Dockerfile
 
       # The code is checked out under uid 1001 - reset this to 1000 for the
       # container to run tests successfully
