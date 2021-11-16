@@ -4,14 +4,16 @@
   import type { Readable } from 'svelte/store';
   import type { ToastEntry } from './ToastController';
   import ToastItem from './ToastItem.svelte';
+  import type { SvelteComponent } from 'svelte';
 
   export let entries: Readable<ToastEntry[]>;
+  export let toastItemComponent: typeof SvelteComponent = ToastItem;
 </script>
   
 <ul class="toast-presenter">
   {#each $entries as entry (entry.id)}
     <li in:fly={{ x: 256 }} out:fade animate:flip={{ duration: 200 }}>
-      <ToastItem {entry} />
+      <svelte:component this={toastItemComponent} {entry} />
     </li>
   {/each}
 </ul>
