@@ -16,6 +16,7 @@ import type { IconFlip, IconRotate } from '../icon/Icon.d';
  * Allows control of the toast message after it is displayed
  */
 interface ToastEntryController {
+  id: number,
   progress: PauseableTweened,
   dismiss: () => void,
 }
@@ -28,6 +29,11 @@ interface Icon {
 }
 
 interface ToastEntryProps {
+  /**
+   * When given, the new toast message will replace an existing toast message
+   * with the specified id.
+   */
+  id?: number,
   title?: Readable<string> | string,
   message?: Readable<string> | string,
   /**
@@ -124,16 +130,20 @@ export class ToastController {
     this.entries = derived(this.entriesMap, (entriesMap) => [...entriesMap.values()]);
   }
 
+  private makeId() {
+    this.maxId += 1;
+    return this.maxId;
+  }
+
   show(partialProps: Partial<ToastEntryProps> = {}): ToastEntryController {
     const props = { ...this.defaultProps, ...partialProps };
-    const id = this.maxId + 1;
-    this.maxId = id;
+    const id = props.id ?? this.makeId();
     const dismiss = () => this.dismiss(id);
     const progress = pauseableTweened(
       props.initialProgress,
       { duration: 200, easing: linear },
     );
-    const controller: ToastEntryController = { progress, dismiss };
+    const controller: ToastEntryController = { id, progress, dismiss };
     const entry: ToastEntry = { id, props, controller };
     this.entriesMap.update((entries) => {
       const map = new Map(entries);

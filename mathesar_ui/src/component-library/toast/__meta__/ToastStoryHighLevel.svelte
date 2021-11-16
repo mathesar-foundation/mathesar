@@ -37,9 +37,11 @@
       return targetValue;
     });
     if (targetValue >= 1) {
-      progressToast?.dismiss();
+      toast.success({
+        id: progressToast.id,
+        message: 'Launch succesful',
+      });
       progressToast = undefined;
-      toast.success({ message: 'Launch succesful' });
     }
   }
 
