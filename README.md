@@ -85,12 +85,37 @@ If you'd like to run tests before pushing, here's how you do it:
 
 Backend tests:
 ```
-docker exec mathesar_service pytest
+docker exec mathesar_service pytest mathesar/ db/
 ```
 
 Frontend tests:
 ```
 docker exec mathesar_service bash -c "cd mathesar_ui && npm test"
+```
+
+### E2E integration tests
+
+#### Setting up the environment for E2E tests
+
+Running E2E integration tests requires a separate docker setup. The dockerfile for it can be found [here](Dockerfile.integ-tests).
+
+Inorder to make use of it, you can change line 18 in docker-compose.yml:
+
+```
+# change this
+dockerfile: Dockerfile
+
+# to this
+dockerfile: Dockerfile.integ-tests
+```
+
+If you are working on the frontend and would like to run integration tests regularly, you could make use of this for your default development environment setup.
+
+#### Running E2E tests
+
+The E2E tests require the server to be up and running. You can run the tests by executing the following command:
+```
+docker exec mathesar_service pytest integration_tests/
 ```
 
 ### Opening a shell in the container
