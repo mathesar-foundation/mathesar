@@ -73,7 +73,7 @@ interface ToastEntryProps {
 const baseDefaultProps: ToastEntryProps = {
   backgroundColor: 'rgba(77, 77, 77, 0.9)',
   textColor: 'white',
-  progressColor: 'rgba(0, 0, 0, 0.5)',
+  progressColor: 'rgba(255, 255, 255, 0.7)',
   lifetime: 6000,
   hasProgress: true,
   initialProgress: 1,
@@ -160,8 +160,8 @@ interface DefaultMakeToast {
   error: ToastShowFn,
 }
 
-export function makeToast(): DefaultMakeToast {
-  const controller = new ToastController();
+export function makeToast(defaultProps: Partial<ToastEntryProps>): DefaultMakeToast {
+  const controller = new ToastController({ defaultProps });
   return {
     entries: controller.entries,
 
@@ -171,17 +171,17 @@ export function makeToast(): DefaultMakeToast {
 
     success(partialProps: Partial<ToastEntryProps> = {}) {
       return controller.show({
-        ...partialProps,
         icon: { data: faCheck },
         backgroundColor: 'rgba(92, 159, 84, 0.9)',
+        ...partialProps,
       });
     },
 
     error(partialProps: Partial<ToastEntryProps> = {}) {
       return controller.show({
-        ...partialProps,
         icon: { data: faExclamationTriangle },
         backgroundColor: 'rgba(159, 86, 77, 0.9)',
+        ...partialProps,
       });
     },
   };
