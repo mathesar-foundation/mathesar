@@ -1,11 +1,14 @@
 <script>
   import { faRocket } from '@fortawesome/free-solid-svg-icons';
   import { derived, writable } from 'svelte/store';
-  import TextInput from '../../text-input/TextInput.svelte';
   import Button from '../../button/Button.svelte';
   import { makeToast } from '../ToastController';
   import ToastPresenter from '../ToastPresenter.svelte';
-  import ToastStoryRichTextContent from "./ToastStoryRichTextContent.svelte";
+  import ToastStoryRichTextContent from './ToastStoryRichTextContent.svelte';
+
+  /* eslint-disable @typescript-eslint/no-unsafe-call */
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-disable @typescript-eslint/no-unsafe-return */
 
   const toast = makeToast();
 
@@ -32,8 +35,8 @@
   }
   function incrementProgress(incrementAmount) {
     let targetValue;
-    void progressToast.progress.update((_targetValue, _value) => {
-      targetValue = _targetValue + incrementAmount
+    void progressToast.progress.update((_targetValue) => {
+      targetValue = _targetValue + incrementAmount;
       return targetValue;
     });
     if (targetValue >= 1) {
@@ -59,6 +62,10 @@
       },
     });
   }
+
+  /* eslint-enable @typescript-eslint/no-unsafe-call */
+  /* eslint-enable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-enable @typescript-eslint/no-unsafe-return */
 </script>
 
 <ToastPresenter entries={toast.entries} />

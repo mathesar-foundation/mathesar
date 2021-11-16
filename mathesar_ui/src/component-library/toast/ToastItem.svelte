@@ -19,17 +19,18 @@
   $: readableBackgroundColor = ensureReadable(props.backgroundColor);
   $: readableTextColor = ensureReadable(props.textColor);
   $: readableProgressColor = ensureReadable(props.progressColor);
+  $: style = `
+    --toast-item-background-color: ${$readableBackgroundColor as string};
+    --toast-item-text-color: ${$readableTextColor as string};
+    --toast-item-progress-color: ${$readableProgressColor as string};
+  `;
 </script>
 
 <div
   class="toast-item"
   on:mouseenter={pause}
   on:mouseleave={resume}
-  style={`
-    --toast-item-background-color: ${$readableBackgroundColor};
-    --toast-item-text-color: ${$readableTextColor};
-    --toast-item-progress-color: ${$readableProgressColor};
-  `}
+  {style}
 >
   {#if props.icon}
     <div class="icon"><Icon {...$readableIcon} /></div>

@@ -1,10 +1,10 @@
 <script lang="ts">
+  import type { SvelteComponent } from 'svelte';
   import { fade, fly } from 'svelte/transition';
   import { flip } from 'svelte/animate';
   import type { Readable } from 'svelte/store';
   import type { ToastEntry } from './ToastController';
   import ToastItem from './ToastItem.svelte';
-  import type { SvelteComponent } from 'svelte';
 
   export let entries: Readable<ToastEntry[]>;
   export let toastItemComponent: typeof SvelteComponent = ToastItem;
