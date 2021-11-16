@@ -24,6 +24,9 @@ jobs:
       - name: Copy env file
         run: cp .env.example .env
 
+      - name: Use integ test dockerfile
+        run: rm Dockefile && mv Dockerfile.integ-tests Dockerfile
+
       # The code is checked out under uid 1001 - reset this to 1000 for the
       # container to run tests successfully
       - name: Fix permissions
@@ -44,7 +47,7 @@ jobs:
         run: docker exec mathesar_service python install.py --skip-confirm
 
       - name: Run integ tests with pytest
-        run: docker exec mathesar_service pytest --browser chromium --browser webkit --browser firefox tests/
+        run: docker exec mathesar_service pytest --browser chromium --browser webkit --browser firefox integration_tests/
 
       - uses: actions/upload-artifact@v2
         if: ${{ failure() || success() }}
