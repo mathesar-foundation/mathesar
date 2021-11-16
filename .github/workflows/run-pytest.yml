@@ -33,4 +33,4 @@ jobs:
         run: docker-compose up --build -d
 
       - name: Run tests with pytest
-        run: docker exec mathesar_service pytest mathesar/
+        run: docker exec mathesar_service pytest mathesar/ db/
