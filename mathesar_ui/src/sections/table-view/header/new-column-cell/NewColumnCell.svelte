@@ -8,7 +8,7 @@
     Dropdown,
     TextInput,
     Icon,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
   import {
     DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/table-data';

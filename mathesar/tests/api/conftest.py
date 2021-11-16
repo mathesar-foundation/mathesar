@@ -49,6 +49,17 @@ def create_schema(engine, test_db_model):
 
 
 @pytest.fixture
+def create_data_file():
+    def _create_data_file(file_path, file_name):
+        with open(file_path, 'rb') as csv_file:
+            data_file = DataFile.objects.create(file=File(csv_file), created_from='file',
+                                                base_name=file_name)
+
+        return data_file
+    return _create_data_file
+
+
+@pytest.fixture
 def create_table(csv_filename, create_schema):
     with open(csv_filename, 'rb') as csv_file:
         data_file = DataFile.objects.create(file=File(csv_file))

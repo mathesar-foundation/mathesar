@@ -99,6 +99,88 @@ def test_schema_detail(create_table, client, test_db_name):
     check_schema_response(response_schema, schema, 'Patents', test_db_name)
 
 
+def test_schema_sort_by_name(create_schema, client):
+    """
+    Desired format:
+    One item in the results list in the schema list view, see above.
+    """
+    schema_3 = create_schema("Schema 3")
+    schema_1 = create_schema("Schema 1")
+    schema_5 = create_schema("Schema 5")
+    schema_2 = create_schema("Schema 2")
+    schema_4 = create_schema("Schema 4")
+    unsorted_expected_schemas = [
+        schema_4,
+        schema_2,
+        schema_5,
+        schema_1,
+        schema_3
+    ]
+    expected_schemas = [
+        schema_1,
+        schema_2,
+        schema_3,
+        schema_4,
+        schema_5
+    ]
+    response = client.get('/api/v0/schemas/')
+    response_data = response.json()
+    response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
+    comparison_tuples = zip(response_schemas, unsorted_expected_schemas)
+    for comparison_tuple in comparison_tuples:
+        check_schema_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
+                              comparison_tuple[1].database.name)
+    sort_field = "name"
+    response = client.get(f'/api/v0/schemas/?sort_by={sort_field}')
+    response_data = response.json()
+    response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
+    comparison_tuples = zip(response_schemas, expected_schemas)
+    for comparison_tuple in comparison_tuples:
+        check_schema_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
+                              comparison_tuple[1].database.name)
+
+
+def test_schema_sort_by_id(create_schema, client):
+    """
+    Desired format:
+    One item in the results list in the schema list view, see above.
+    """
+    schema_1 = create_schema("desiderium parma!")
+    schema_2 = create_schema("Cur bursa messis?")
+    schema_3 = create_schema("Historias")
+    schema_4 = create_schema("Confucius says")
+    schema_5 = create_schema("Nanomachines")
+    unsorted_expected_schemas = [
+        schema_5,
+        schema_4,
+        schema_3,
+        schema_2,
+        schema_1
+    ]
+    expected_schemas = [
+        schema_1,
+        schema_2,
+        schema_3,
+        schema_4,
+        schema_5
+    ]
+    response = client.get('/api/v0/schemas/')
+    response_data = response.json()
+    response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
+    comparison_tuples = zip(response_schemas, unsorted_expected_schemas)
+    for comparison_tuple in comparison_tuples:
+        check_schema_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
+                              comparison_tuple[1].database.name)
+
+    response = client.get('/api/v0/schemas/?sort_by=id')
+    response_data = response.json()
+    response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
+    comparison_tuples = zip(response_schemas, expected_schemas)
+    for comparison_tuple in comparison_tuples:
+        check_schema_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
+                              comparison_tuple[1].database.name)
+
+
 def test_schema_create(client, test_db_name):
     num_schemas = models.Schema.objects.count()
 

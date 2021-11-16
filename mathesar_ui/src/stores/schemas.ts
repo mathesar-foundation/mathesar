@@ -24,7 +24,7 @@ import type {
   SchemaEntry,
   SchemaResponse,
 } from '@mathesar/App.d';
-import type { CancellablePromise } from '@mathesar/components';
+import type { CancellablePromise } from '@mathesar-component-library';
 
 import { currentDBName } from './databases';
 

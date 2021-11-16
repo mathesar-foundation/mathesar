@@ -12,7 +12,7 @@ import { removeTableContent } from '@mathesar/stores/table-data';
 import { getTablesStoreForSchema } from '@mathesar/stores/tables';
 import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
 
-import type { Tab } from '@mathesar-components/types';
+import type { Tab } from '@mathesar-component-library/types';
 import type { SchemaEntry } from '@mathesar/App';
 
 export interface MathesarTab extends Tab {
