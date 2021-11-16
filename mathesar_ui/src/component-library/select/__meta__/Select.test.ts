@@ -17,8 +17,7 @@ test('renders select button in default appearance', () => {
   // Check if the select button is rendered, along with the correct classes.
   const selectBtn = getByRole('button');
   expect(selectBtn).toBeInTheDocument();
-  expect(selectBtn).toHaveClass('btn-default');
-  expect(selectBtn).toHaveClass('size-medium');
+  expect(selectBtn).toHaveClass('btn-default', 'size-medium');
 
   // Expect the button to contain the correct label.
   expect(selectBtn).toHaveTextContent('Option 1');
@@ -42,9 +41,7 @@ test('renders select with custom classes and primary appearance', async () => {
   // Check if the select button is rendered, along with the correct classes.
   const selectBtn = getByRole('button');
   expect(selectBtn).toBeInTheDocument();
-  expect(selectBtn).toHaveClass('btn-primary');
-  expect(selectBtn).toHaveClass('size-medium');
-  expect(selectBtn).toHaveClass('trigger-custom-class');
+  expect(selectBtn).toHaveClass('btn-primary', 'size-medium', 'trigger-custom-class');
 
   // Expect the button to contain the correct label.
   expect(selectBtn).toHaveTextContent('Option 1');
@@ -76,9 +73,7 @@ test('renders select options in default appearance', async () => {
 
   const selectUl = getByRole('listbox');
   // Check if select has the correct classes.
-  expect(selectUl.parentElement).toHaveClass('dropdown');
-  expect(selectUl.parentElement).toHaveClass('content');
-  expect(selectUl.parentElement).toHaveClass('select');
+  expect(selectUl.parentElement).toHaveClass('dropdown', 'content', 'select');
 
   for (let i = 0; i < options.length; i += 1) {
     // For some reason, a space is added at the end of each option.
@@ -116,11 +111,9 @@ test('updates currently selected option', async () => {
   selectOptions = getAllByRole('option');
 
   // Expect the selected option to have the correct classes.
-  expect(selectOptions[1]).toHaveClass('selected');
-  expect(selectOptions[1]).toHaveClass('hovered');
+  expect(selectOptions[1]).toHaveClass('selected', 'hovered');
 
-  expect(selectOptions[0]).not.toHaveClass('selected');
-  expect(selectOptions[0]).not.toHaveClass('hovered');
+  expect(selectOptions[0]).not.toHaveClass('selected', 'hovered');
 });
 
 test('select option using keyboard', async () => {
@@ -164,7 +157,7 @@ test('hide select dropdown by pressing ESC', async () => {
     { id: 2, label: 'Option 2' },
   ];
 
-  const { getByRole, queryByText } = render(Select, {
+  const { getByRole, queryByRole } = render(Select, {
     props: {
       options,
       triggerAppearance: 'default',
@@ -180,6 +173,6 @@ test('hide select dropdown by pressing ESC', async () => {
   await fireEvent.keyUp(selectBtn, { key: 'Escape', code: 'Escape' });
 
   // Use `queryBy` to avoid throwing an error with `getBy`.
-  const selectOption2 = queryByText(options[1].label);
+  const selectOption2 = queryByRole('listbox');
   expect(selectOption2).not.toBeInTheDocument();
 });
