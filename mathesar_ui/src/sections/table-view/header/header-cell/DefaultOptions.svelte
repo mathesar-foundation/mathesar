@@ -63,11 +63,11 @@
       const newAllowsDuplicates = !allowsDuplicates;
       await constraintsDataStore.setUniquenessOfColumn(column, !newAllowsDuplicates);
       const message = `Column "${column.name}" will ${newAllowsDuplicates ? '' : 'no longer '}allow duplicates.`;
-      toast.show({ message });
+      toast.success({ message });
       dispatch('close');
     } catch (error) {
       const message = `Unable to update "Allow Duplicates" of column "${column.name}". ${error.message as string}.`;
-      toast.show({ message });
+      toast.error({ message });
     } finally {
       isRequestingToggleAllowDuplicates = false;
     }

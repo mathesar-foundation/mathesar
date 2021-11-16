@@ -1,9 +1,9 @@
 import {
   faCheck,
-  IconDefinition,
   faExclamationTriangle,
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
+import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import type { SvelteComponent } from 'svelte';
 import { linear } from 'svelte/easing';
 import type { Writable, Readable } from 'svelte/store';
@@ -183,7 +183,7 @@ interface DefaultMakeToast {
   progress: ToastShowFn,
 }
 
-export function makeToast(defaultProps: Partial<ToastEntryProps>): DefaultMakeToast {
+export function makeToast(defaultProps: Partial<ToastEntryProps> = {}): DefaultMakeToast {
   const controller = new ToastController({ defaultProps });
   return {
     entries: controller.entries,

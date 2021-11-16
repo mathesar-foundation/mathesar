@@ -33,7 +33,6 @@ export { default as FileUpload } from './file-upload/FileUpload.svelte';
 export { default as Modal } from './modal/Modal.svelte';
 
 // Toast
-export { ToastController } from './toast/ToastController';
-export type { ToastEntry } from './toast/ToastController';
+export * from './toast/ToastController';
 export { default as ToastPresenter } from './toast/ToastPresenter.svelte';
 export { default as ToastItem } from './toast/ToastItem.svelte';
