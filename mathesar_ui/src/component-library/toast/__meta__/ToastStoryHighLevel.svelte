@@ -5,9 +5,22 @@
   import ToastStoryRichTextContent from "./ToastStoryRichTextContent.svelte";
 
   const toast = makeToast();
+
+  let spinner;
+  
+  function startSpinner() {
+    spinner?.dismiss();
+    spinner = toast.spinner({ message: 'Hang tight' });
+  }
+  function stopSpinner() {
+    spinner?.dismiss();
+    spinner = undefined;
+  }
 </script>
 
 <ToastPresenter entries={toast.entries} />
+
+<h2>Simple</h2>
 
 <p>
   <Button
@@ -27,7 +40,16 @@
   >Success</Button>
 </p>
 
-<hr/>
+<p>
+  <Button on:click={startSpinner}>Spinner</Button>
+  {#if spinner}
+    <Button on:click={stopSpinner}>Stop</Button>
+  {/if}
+</p>
+
+
+
+<h2>Complex</h2>
 
 <p>
   <Button
