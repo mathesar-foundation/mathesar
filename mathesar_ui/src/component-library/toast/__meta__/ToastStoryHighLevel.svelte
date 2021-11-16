@@ -1,4 +1,5 @@
 <script>
+  import { faRocket } from '@fortawesome/free-solid-svg-icons';
   import Button from '../../button/Button.svelte';
   import { makeToast } from '../ToastController';
   import ToastPresenter from '../ToastPresenter.svelte';
@@ -15,6 +16,29 @@
   function stopSpinner() {
     spinner?.dismiss();
     spinner = undefined;
+  }
+
+
+  let progress;
+
+  function startProgress() {
+    progress?.dismiss();
+    progress = toast.progress({
+      message: 'Hold on to your hats!',
+      icon: { data: faRocket },
+    });
+  }
+  function incrementProgress(incrementAmount) {
+    let targetValue;
+    void progress.progress.update((_targetValue, _value) => {
+      targetValue = _targetValue + incrementAmount
+      return targetValue;
+    });
+    if (targetValue >= 1) {
+      progress?.dismiss();
+      progress = undefined;
+      toast.success({ message: 'Launch succesful' });
+    }
   }
 </script>
 
@@ -40,16 +64,25 @@
   >Success</Button>
 </p>
 
+
+<h2>Interactive</h2>
+
 <p>
-  <Button on:click={startSpinner}>Spinner</Button>
+  <Button on:click={startSpinner} disabled={spinner}>Spinner</Button>
   {#if spinner}
     <Button on:click={stopSpinner}>Stop</Button>
   {/if}
 </p>
 
+<p>
+  <Button on:click={startProgress} disabled={progress}>Progress</Button>
+  {#if progress}
+    <Button on:click={() => incrementProgress(0.25)}>+25%</Button>
+  {/if}
+</p>
 
 
-<h2>Complex</h2>
+<h2>Rich text</h2>
 
 <p>
   <Button

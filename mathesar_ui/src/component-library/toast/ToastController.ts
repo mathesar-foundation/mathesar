@@ -131,7 +131,7 @@ export class ToastController {
     const dismiss = () => this.dismiss(id);
     const progress = pauseableTweened(
       props.initialProgress,
-      { duration: 100, easing: linear },
+      { duration: 200, easing: linear },
     );
     const controller: ToastEntryController = { progress, dismiss };
     const entry: ToastEntry = { id, props, controller };
@@ -170,6 +170,7 @@ interface DefaultMakeToast {
   success: ToastShowFn,
   error: ToastShowFn,
   spinner: ToastShowFn,
+  progress: ToastShowFn,
 }
 
 export function makeToast(defaultProps: Partial<ToastEntryProps>): DefaultMakeToast {
@@ -203,6 +204,15 @@ export function makeToast(defaultProps: Partial<ToastEntryProps>): DefaultMakeTo
         lifetime: 0,
         allowDismiss: false,
         hasProgress: false,
+        ...partialProps,
+      });
+    },
+
+    progress(partialProps: Partial<ToastEntryProps> = {}) {
+      return controller.show({
+        lifetime: 0,
+        allowDismiss: false,
+        initialProgress: 0,
         ...partialProps,
       });
     },
