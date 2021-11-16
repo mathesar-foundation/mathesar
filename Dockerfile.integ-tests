@@ -3,6 +3,9 @@ FROM buildpack-deps:focal
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install python
+# Some of this is ported from docker file for python-3.9:
+# https://github.com/docker-library/python/blob/33751272d8171cece37c59180c049ab77cf9c837/3.9/buster/Dockerfile
+
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
 
@@ -23,7 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	&& rm -rf /var/lib/apt/lists/*
 
 ENV GPG_KEY E3FF2839C048B25C084DEBE9B26995E310250568
-ENV PYTHON_VERSION 3.9.7
+ENV PYTHON_VERSION 3.9.8
 
 RUN set -ex \
 	\
