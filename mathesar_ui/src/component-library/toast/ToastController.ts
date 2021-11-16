@@ -1,4 +1,5 @@
 import { faCheck, IconDefinition, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import type { SvelteComponent } from 'svelte';
 import { linear } from 'svelte/easing';
 import type { Writable, Readable } from 'svelte/store';
 import { writable, derived } from 'svelte/store';
@@ -24,6 +25,11 @@ interface Icon {
 interface ToastEntryProps {
   title?: string,
   message?: string,
+  /**
+   * If provided, will be used in place of `title` and `message`.
+   */
+  contentComponent?: typeof SvelteComponent,
+  contentComponentProps?: unknown,
   icon?: Icon,
   backgroundColor: string,
   textColor: string,

@@ -26,11 +26,18 @@
     <div class="icon"><Icon {...props.icon} /></div>
   {/if}
   <div class="content">
-    {#if props.title}
-      <div class="title">{props.title}</div>
-    {/if}
-    {#if props.message}
-      <div class="message">{props.message}</div>
+    {#if props.contentComponent}
+       <svelte:component
+        this={props.contentComponent}
+        {...props.contentComponentProps}
+      />
+    {:else}
+      {#if props.title}
+        <div class="title">{props.title}</div>
+      {/if}
+      {#if props.message}
+        <div class="message">{props.message}</div>
+      {/if}
     {/if}
   </div>
   {#if props.allowDismiss}

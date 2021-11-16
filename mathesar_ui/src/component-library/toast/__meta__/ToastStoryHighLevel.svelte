@@ -1,7 +1,8 @@
 <script>
-  import ToastPresenter from '../ToastPresenter.svelte';
-  import { makeToast } from '../ToastController';
   import Button from '../../button/Button.svelte';
+  import { makeToast } from '../ToastController';
+  import ToastPresenter from '../ToastPresenter.svelte';
+  import ToastStoryRichTextContent from "./ToastStoryRichTextContent.svelte";
 
   const toast = makeToast();
 </script>
@@ -26,3 +27,13 @@
   >Success</Button>
 </p>
 
+<hr/>
+
+<p>
+  <Button
+    on:click={() => toast.success({
+      contentComponent: ToastStoryRichTextContent,
+      contentComponentProps: { name: 'Foo Bar' },
+    })}
+  >Success with rich text</Button>
+</p>
