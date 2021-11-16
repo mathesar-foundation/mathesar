@@ -57,7 +57,9 @@ def get_column_indexes_from_table(table_oid, engine, connection_to_use=None):
     sel = select(pg_attribute.c.attnum).where(
         and_(
             pg_attribute.c.attrelid == table_oid,
+            # Ignore system columns
             pg_attribute.c.attnum > 0,
+            # Ignore removed columns
             pg_attribute.c.attisdropped.is_(False)
         )
     )
@@ -65,14 +67,14 @@ def get_column_indexes_from_table(table_oid, engine, connection_to_use=None):
     return results
 
 
-def get_column_name_from_index(table_oid, column_index, engine, connection_to_use=None):
+def get_column_name_from_attnum(table_oid, attnum, engine, connection_to_use=None):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
         pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
     sel = select(pg_attribute.c.attname).where(
         and_(
             pg_attribute.c.attrelid == table_oid,
-            pg_attribute.c.attnum == column_index
+            pg_attribute.c.attnum == attnum
         )
     )
     result = execute_statement(engine, sel, connection_to_use).fetchone()[0]

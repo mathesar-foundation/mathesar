@@ -18,7 +18,7 @@
       try {
         state = States.Loading;
         error = null;
-        await columnsDataStore.deleteColumn(column.index);
+        await columnsDataStore.deleteColumn(column.id);
         state = States.Done;
       } catch (err) {
         state = States.Error;

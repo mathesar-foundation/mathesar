@@ -18,9 +18,6 @@ from mathesar.models import Column
 class ColumnViewSet(viewsets.ModelViewSet):
     serializer_class = ColumnSerializer
     pagination_class = DefaultLimitOffsetPagination
-    parent_lookup_kwargs = {
-        'table_pk': 'table__pk'
-    }
 
     def get_queryset(self):
         table = get_table_or_404(pk=self.kwargs['table_pk'])
@@ -125,7 +122,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
         column_instance = self.get_object()
         table = column_instance.table
         try:
-            table.drop_column(column_instance._sa_column.column_index)
+            table.drop_column(column_instance.column_index)
             column_instance.delete()
         except IndexError:
             raise NotFound
