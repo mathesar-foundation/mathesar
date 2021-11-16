@@ -31,15 +31,13 @@ function recalculateColumnPositions(columnPositionMap: ColumnPositionMap, column
   const newColumnPositionMap: ColumnPositionMap = new Map();
   columns.forEach((column) => {
     const columnWidth = columnPositionMap.get(column.name)?.width;
-    if (typeof columnWidth !== 'number') {
-      newColumnPositionMap.set(column.name, {
-        left,
-        width: DEFAULT_COLUMN_WIDTH,
-      });
-      left += DEFAULT_COLUMN_WIDTH;
-    } else {
-      left += columnWidth;
-    }
+    const isColumnWidthValid = typeof columnWidth === 'number';
+    const newWidth = isColumnWidthValid ? columnWidth : DEFAULT_COLUMN_WIDTH;
+    newColumnPositionMap.set(column.name, {
+      left,
+      width: newWidth,
+    });
+    left += newWidth;
   });
   newColumnPositionMap.set('__row', {
     width: left,

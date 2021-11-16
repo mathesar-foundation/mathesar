@@ -1,4 +1,4 @@
-name: Run Python tests
+name: Run E2E integration tests
 on: [push, pull_request]
 
 jobs:
@@ -17,12 +17,15 @@ jobs:
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
         with:
-          key: mathesar-docker-cache-{hash}
+          key: mathesar-docker-cache-integ-tests-{hash}
           restore-keys: |
-            mathesar-docker-cache-
+            mathesar-docker-cache-e2e-tests-
 
       - name: Copy env file
         run: cp .env.example .env
+
+      - name: Use integ test dockerfile
+        run: rm Dockerfile && mv Dockerfile.integ-tests Dockerfile
 
       # The code is checked out under uid 1001 - reset this to 1000 for the
       # container to run tests successfully
@@ -31,6 +34,23 @@ jobs:
 
       - name: Build the stack
         run: docker-compose up --build -d
+      
+      - name: Sleep for 60 seconds
+        run: sleep 60s
+        shell: bash
 
-      - name: Run tests with pytest
-        run: docker exec mathesar_service pytest mathesar/ db/
+      # TODO: This needs to be handled inside the tests
+      - name: Run migrations
+        run: docker exec mathesar_service python manage.py migrate
+      
+      - name: Run type installation
+        run: docker exec mathesar_service python install.py --skip-confirm
+
+      - name: Run integ tests with pytest
+        run: docker exec mathesar_service pytest --browser chromium --browser webkit --browser firefox integration_tests/
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ failure() || success() }}
+        with:
+          name: Recordings
+          path: ${{ github.workspace }}/videos/
