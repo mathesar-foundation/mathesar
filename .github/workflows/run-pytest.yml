@@ -34,3 +34,12 @@ jobs:
 
       - name: Run tests with pytest
         run: docker exec mathesar_service pytest --cov=mathesar --cov-report=xml
+
+      - name: Save the coverage report
+        uses: codecov/codecov-action@v2
+        with: 
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
+          flags: pytest-backend
+          name: codecov-mathesar
+          verbose: true
