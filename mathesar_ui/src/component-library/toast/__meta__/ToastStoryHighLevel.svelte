@@ -1,5 +1,7 @@
 <script>
   import { faRocket } from '@fortawesome/free-solid-svg-icons';
+  import { derived, writable } from 'svelte/store';
+  import TextInput from '../../text-input/TextInput.svelte';
   import Button from '../../button/Button.svelte';
   import { makeToast } from '../ToastController';
   import ToastPresenter from '../ToastPresenter.svelte';
@@ -7,38 +9,53 @@
 
   const toast = makeToast();
 
-  let spinner;
+  let spinnerToast;
   
   function startSpinner() {
-    spinner?.dismiss();
-    spinner = toast.spinner({ message: 'Hang tight' });
+    spinnerToast?.dismiss();
+    spinnerToast = toast.spinner({ message: 'Hang tight' });
   }
   function stopSpinner() {
-    spinner?.dismiss();
-    spinner = undefined;
+    spinnerToast?.dismiss();
+    spinnerToast = undefined;
   }
 
 
-  let progress;
+  let progressToast;
 
   function startProgress() {
-    progress?.dismiss();
-    progress = toast.progress({
+    progressToast?.dismiss();
+    progressToast = toast.progress({
       message: 'Hold on to your hats!',
       icon: { data: faRocket },
     });
   }
   function incrementProgress(incrementAmount) {
     let targetValue;
-    void progress.progress.update((_targetValue, _value) => {
+    void progressToast.progress.update((_targetValue, _value) => {
       targetValue = _targetValue + incrementAmount
       return targetValue;
     });
     if (targetValue >= 1) {
-      progress?.dismiss();
-      progress = undefined;
+      progressToast?.dismiss();
+      progressToast = undefined;
       toast.success({ message: 'Launch succesful' });
     }
+  }
+
+
+  let dynamicToast;
+  const dynamicWord = writable('Foo');
+
+  function startDynamic() {
+    dynamicToast = toast.info({
+      message: derived(dynamicWord, (w) => `The word is: ${w}`),
+      lifetime: 0,
+      hasProgress: false,
+      onDismiss: () => {
+        dynamicToast = undefined;
+      },
+    });
   }
 </script>
 
@@ -68,16 +85,25 @@
 <h2>Interactive</h2>
 
 <p>
-  <Button on:click={startSpinner} disabled={spinner}>Spinner</Button>
-  {#if spinner}
+  <Button on:click={startSpinner} disabled={spinnerToast}>Spinner</Button>
+  {#if spinnerToast}
     <Button on:click={stopSpinner}>Stop</Button>
   {/if}
 </p>
 
 <p>
-  <Button on:click={startProgress} disabled={progress}>Progress</Button>
-  {#if progress}
+  <Button on:click={startProgress} disabled={progressToast}>Progress</Button>
+  {#if progressToast}
     <Button on:click={() => incrementProgress(0.25)}>+25%</Button>
+  {/if}
+</p>
+
+<p>
+  <Button on:click={startDynamic} disabled={dynamicToast}>Dynamic content</Button>
+  {#if dynamicToast}
+    <ul>
+      <li><label><span>Word: </span><input type="text" bind:value={$dynamicWord}/></label></li>
+    </ul>
   {/if}
 </p>
 
@@ -92,3 +118,9 @@
     })}
   >Success with rich text</Button>
 </p>
+
+<style>
+  input[type="text"] {
+    width: 20ch;
+  }
+</style>

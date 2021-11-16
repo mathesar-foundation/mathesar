@@ -28,17 +28,17 @@ interface Icon {
 }
 
 interface ToastEntryProps {
-  title?: string,
-  message?: string,
+  title?: Readable<string> | string,
+  message?: Readable<string> | string,
   /**
    * If provided, will be used in place of `title` and `message`.
    */
   contentComponent?: typeof SvelteComponent,
-  contentComponentProps?: unknown,
-  icon?: Icon,
-  backgroundColor: string,
-  textColor: string,
-  progressColor: string,
+  contentComponentProps?: Readable<unknown> | unknown,
+  icon?: Readable<Icon> | Icon,
+  backgroundColor: Readable<string> | string,
+  textColor: Readable<string> | string,
+  progressColor: Readable<string> | string,
   /**
    * The time (ms) the toast message will stay open. When 0, the toast will not
    * auto-close.

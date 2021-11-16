@@ -1,6 +1,7 @@
 <script lang="ts">
   import { faTimes } from '@fortawesome/free-solid-svg-icons';
   import { Icon } from '..';
+  import { ensureReadable } from '../common/utils/storeUtils';
   import type { ToastEntry } from './ToastController';
   
   export let entry: ToastEntry;
@@ -10,6 +11,14 @@
   $: ({ progress, dismiss } = controller);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   $: ({ pause, resume } = progress);
+
+  $: readableTitle = ensureReadable(props.title);
+  $: readableMessage = ensureReadable(props.message);
+  $: readableContentComponentProps = ensureReadable(props.contentComponentProps);
+  $: readableIcon = ensureReadable(props.icon);
+  $: readableBackgroundColor = ensureReadable(props.backgroundColor);
+  $: readableTextColor = ensureReadable(props.textColor);
+  $: readableProgressColor = ensureReadable(props.progressColor);
 </script>
 
 <div
@@ -17,26 +26,26 @@
   on:mouseenter={pause}
   on:mouseleave={resume}
   style={`
-    --toast-item-background-color: ${props.backgroundColor};
-    --toast-item-text-color: ${props.textColor};
-    --toast-item-progress-color: ${props.progressColor};
+    --toast-item-background-color: ${$readableBackgroundColor};
+    --toast-item-text-color: ${$readableTextColor};
+    --toast-item-progress-color: ${$readableProgressColor};
   `}
 >
   {#if props.icon}
-    <div class="icon"><Icon {...props.icon} /></div>
+    <div class="icon"><Icon {...$readableIcon} /></div>
   {/if}
   <div class="content">
     {#if props.contentComponent}
        <svelte:component
         this={props.contentComponent}
-        {...props.contentComponentProps}
+        {...$readableContentComponentProps}
       />
     {:else}
       {#if props.title}
-        <div class="title">{props.title}</div>
+        <div class="title">{$readableTitle}</div>
       {/if}
       {#if props.message}
-        <div class="message">{props.message}</div>
+        <div class="message">{$readableMessage}</div>
       {/if}
     {/if}
   </div>
