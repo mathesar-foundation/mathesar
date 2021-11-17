@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 from rest_framework.settings import api_settings
 
-from mathesar.api.utils import ReadWritePolymorphicSerializerMappingMixin
+from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer
 from mathesar.models import Column
 
 
@@ -38,17 +38,6 @@ class TypeOptionSerializer(serializers.Serializer):
         return super(TypeOptionSerializer, self).run_validation(data)
 
 
-class BooleanDisplayOptionSerializer(serializers.Serializer):
-    input = serializers.ChoiceField(choices=[("dropdown", 1), ("checkbox", 2)])
-    use_custom_columns = serializers.BooleanField()
-    custom_labels = serializers.DictField(required=False)
-
-
-class DisplayOptionsMappingSerializer(ReadWritePolymorphicSerializerMappingMixin, serializers.Serializer):
-    template_serializers = {"BOOLEAN": BooleanDisplayOptionSerializer}
-
-    def get_mapping_field(self):
-        return self.context['column_type']
 
 
 class SimpleColumnSerializer(serializers.ModelSerializer):
@@ -58,7 +47,7 @@ class SimpleColumnSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
     type = serializers.CharField(source='plain_type')
     type_options = TypeOptionSerializer(required=False, allow_null=True)
-    display_options = DisplayOptionsMappingSerializer(required=False)
+    display_options = DisplayOptionsMappingSerializer(required=False, allow_null=True)
 
     def to_representation(self, instance):
         self.context['column_type'] = str(instance.type)
@@ -66,7 +55,7 @@ class SimpleColumnSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         if self.partial and 'type' not in data:
-            self.context['column_type'] = self.instance.type
+            self.context['column_type'] = str(self.instance.type)
         else:
             self.context['column_type'] = data['type']
         return super().to_internal_value(data)

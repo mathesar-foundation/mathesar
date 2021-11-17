@@ -4,12 +4,16 @@ from datetime import date, timedelta
 import pytest
 from unittest.mock import patch
 from django.core.cache import cache
-from sqlalchemy import Column, Integer, String, MetaData, select
+from sqlalchemy import Column, Integer, String, MetaData, select, Boolean, DDL
 from sqlalchemy import Table as SATable
 
+from db.columns.operations.alter import alter_column_type
+from db.columns.operations.select import get_columns_attnum_from_names
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
+from db.utils import execute_statement
 from mathesar import models
+from mathesar.models import Column as ServiceLayerColumn, Table
 from mathesar.tests.api.test_table_api import check_columns_response
 
 engine_with_types = fixtures.engine_with_types
@@ -36,6 +40,35 @@ def column_test_table(patent_schema):
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     table = models.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     return table
+
+
+@pytest.fixture
+def column_test_table_with_service_layer_options(patent_schema):
+    engine = patent_schema._sa_engine
+    column_list_in = [
+        Column("mycolumn0", Integer, primary_key=True),
+        Column("mycolumn1", Boolean),
+        Column("mycolumn2", Integer),
+    ]
+    column_data_list = [{},
+                        {'display_options': {'input': "dropdown", 'use_custom_labels': False}},
+                        {'display_options': {"show_as_percentage": True,  "locale": "en_US"}}]
+    db_table = SATable(
+        "anewtable",
+        MetaData(bind=engine),
+        *column_list_in,
+        schema=patent_schema.name
+    )
+    db_table.create()
+    db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
+    table = models.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+    service_columns = []
+    for column_data in zip(column_list_in, column_data_list):
+        attnum = get_columns_attnum_from_names(db_table_oid, [column_data[0].name], engine)[0][0]
+        service_columns.append(ServiceLayerColumn.current_objects.get_or_create(table=table,
+                                                                                attnum=attnum,
+                                                                                display_options=column_data[1].get('display_options', {}))[0])
+    return table, service_columns
 
 
 def test_column_list(column_test_table, client):
@@ -180,8 +213,8 @@ def test_column_create_invalid_default(column_test_table, client):
 
 
 create_display_options_test_list = [
-    ("BOOLEAN", {"input": "dropdown", "use_custom_columns": False}),
-    ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
+    ("BOOLEAN", {"input": "dropdown"}),
+    ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
 ]
 
 
@@ -323,22 +356,36 @@ def test_column_update_name(column_test_table, client):
     assert response.json()["name"] == name
 
 
-def test_column_update_display_options(column_test_table, client):
+def test_column_update_display_options(column_test_table_with_service_layer_options, client):
     cache.clear()
-    response = client.get(
-        f"/api/v0/tables/{column_test_table.id}/columns/"
-    )
-    columns = response.json()['results']
-    column_index = 3
-    column_id = columns[column_index]['id']
-    display_options = {"show_as_percentage": True}
+    table, columns = column_test_table_with_service_layer_options
+    column_index = 1
+    column = columns[column_index]
+    column_id = column.id
+    display_options = {"input": "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}
     display_options_data = {"display_options": display_options}
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
+        f"/api/v0/tables/{table.id}/columns/{column_id}/",
         display_options_data,
         format='json'
     )
     assert response.json()["display_options"] == display_options
+
+
+def test_column_invalid_display_options_type_on_reflection(column_test_table_with_service_layer_options,
+                                                           client, engine):
+    cache.clear()
+    table, columns = column_test_table_with_service_layer_options
+    column_index = 2
+    column = columns[column_index]
+    with engine.begin() as conn:
+        alter_column_type(table._sa_table, column.name, engine, conn, 'boolean')
+    column_id = column.id
+    response = client.get(
+        f"/api/v0/tables/{table.id}/columns/{column_id}/",
+    )
+    assert response.json()["display_options"] is None
+
 
 
 def test_column_update_default(column_test_table, client):
