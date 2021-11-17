@@ -8,6 +8,7 @@ import {
 } from '@mathesar/utils/api';
 import { TabularType } from '@mathesar/App.d';
 import { intersection } from '@mathesar/utils/language';
+import { EventHandler } from '@mathesar-component-library';
 
 import type {
   Writable,
@@ -67,7 +68,7 @@ function api(url: string) {
   };
 }
 
-export class ColumnsDataStore implements Writable<ColumnsData> {
+export class ColumnsDataStore extends EventHandler implements Writable<ColumnsData> {
   private type: TabularType;
 
   private parentId: DBObjectEntry['id'];
@@ -82,14 +83,13 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
 
   private fetchCallback: (storeData: ColumnsData) => void;
 
-  private listeners: Map<string, Set<((value?: unknown) => unknown)>>;
-
   constructor(
     type: TabularType,
     parentId: number,
     meta: Meta,
     fetchCallback?: (storeData: ColumnsData) => void,
   ) {
+    super();
     this.type = type;
     this.parentId = parentId;
     this.store = writable({
@@ -100,7 +100,6 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
     this.meta = meta;
     this.api = api(`/${this.type === TabularType.Table ? 'tables' : 'views'}/${this.parentId}/columns/`);
     this.fetchCallback = fetchCallback;
-    this.listeners = new Map();
     void this.fetch();
   }
 
@@ -120,26 +119,6 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
 
   get(): ColumnsData {
     return getStoreValue(this.store);
-  }
-
-  on(eventName: string, callback: (value?: unknown) => unknown): () => void {
-    if (!this.listeners.has(eventName)) {
-      this.listeners.set(eventName, new Set());
-    }
-    this.listeners.get(eventName).add(callback);
-    return () => {
-      this.listeners?.get(eventName)?.delete(callback);
-    };
-  }
-
-  private callListeners(eventName: string, value: unknown): void {
-    this.listeners?.get(eventName)?.forEach((entry) => {
-      try {
-        entry?.(value);
-      } catch (err) {
-        console.error(`Failed to call a listener for ${eventName}`, err);
-      }
-    });
   }
 
   async fetch(): Promise<ColumnsData> {
@@ -183,13 +162,24 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
     return column;
   }
 
+  async setNullabilityOfColumn(
+    column: Column,
+    nullable: boolean,
+  ): Promise<void> {
+    if (column.primary_key) {
+      throw new Error(`Column "${column.name}" cannot allow NULL because it is a primary key.`);
+    }
+    await this.api.update(column.index, { nullable });
+    await this.fetch();
+  }
+
   // TODO: Analyze: Might be cleaner to move following functions as a property of Column class
   // but are the object instantiations worth it?
 
   async patchType(columnIndex: Column['index'], type: DbType): Promise<Partial<Column>> {
     const column = await this.api.update(columnIndex, { type });
     await this.fetch();
-    this.callListeners('columnPatched', column);
+    this.dispatch('columnPatched', column);
     return column;
   }
 
@@ -198,7 +188,7 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
    * Another approach would be to subscribe to types store on class initialization
    *  - That would require us to store the database id in Columns (which is probably a good idea)
    *  - It would lead to calculation of allowed types when columns are fetched. Considering that
-   *    this would only be required when user opens particular views, it seems unnessary.
+   *    this would only be required when user opens particular views, it seems unnecessary.
    *  - It would cache the calculated allowed types, which benefits us.
    * TODO: Subscribe to types store from Columns, when dynamic type related information is provided
    * by server.
@@ -228,7 +218,7 @@ export class ColumnsDataStore implements Writable<ColumnsData> {
   destroy(): void {
     this.promise?.cancel();
     this.promise = null;
-    this.listeners.clear();
+    super.destroy();
   }
 
   async deleteColumn(index: Column['index']): Promise<void> {
