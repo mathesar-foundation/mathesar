@@ -2,27 +2,38 @@
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import { Button } from '@mathesar-component-library';
   import Modal from '../Modal.svelte';
+  import { ModalMultiplexer } from '../ModalMultiplexer';
 
   const meta = {
-    title: 'Components/Modal',
-    component: Modal,
+    title: 'Systems/Modal',
   };
 
-  let isBasicModalOpen = false;
+  const modal = new ModalMultiplexer();
+
+  const exampleA = modal.createVisibilityStore();
+  const exampleB = modal.createVisibilityStore();
 </script>
 
 <Meta {...meta} />
 
-<Story
-  name="Basic">
-  <Button on:click={() => { isBasicModalOpen = true; }}>Open Modal</Button>
-  <Modal bind:isOpen={isBasicModalOpen}>
-    Render anything in the slot!
-    <svelte:fragment slot="footer">
-      Render anything in the footer slot!
-      <Button on:click={() => { isBasicModalOpen = false; }}>
-        Close
-      </Button>
-    </svelte:fragment>
+<Story name="Basic">
+  <Button on:click={() => exampleA.open()}>Open Modal A</Button>
+  <Button on:click={() => exampleB.open()}>Open Modal B</Button>
+
+  <Modal isOpen={exampleA} title="Modal A">
+    Here is modal content
+
+    <div slot="footer">
+      <p>This is the modal footer</p>
+      <p><Button on:click={() => exampleA.close()}>Close</Button></p>
+    </div>
   </Modal>
+
+
+  <Modal isOpen={exampleB} title="Modal B">
+    <p>Here is modal content</p>
+
+    <Button on:click={() => exampleA.open()}>Open Modal A instead (Modal B will close)</Button>
+  </Modal>
+
 </Story>

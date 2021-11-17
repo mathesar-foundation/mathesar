@@ -1,56 +1,43 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import type { Size } from '@mathesar-component-library/types';
   import { portal } from '@mathesar-component-library';
+  import type { ModalVisibilityStore } from './ModalVisibilityStore';
+  import type { ModalCloseAction } from './modal';
 
-  const dispatch = createEventDispatcher();
-
-  // Additional classes
+  export let isOpen: ModalVisibilityStore;
+  export let title: string;
   let classes = '';
   export { classes as class };
-
-  // Inline styles
   export let style = '';
-
-  // Size
   export let size: Size = 'medium';
-
-  // Boolean to open/close modal
-  export let isOpen = true;
-
-  // Close when esc key is pressed
-  export let closeOnEsc = true;
+  
+  export let closeOn: ModalCloseAction[] = ['button', 'esc', 'overlay'];
 
   function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape' && isOpen && closeOnEsc) {
-      isOpen = false;
+    if (event.key === 'Escape' && $isOpen && closeOn.includes('esc')) {
+      $isOpen = false;
     }
   }
-
-  function dispatchOpenEvent(_isOpen: boolean) {
-    if (_isOpen) {
-      dispatch('open');
-    } else {
-      dispatch('close');
-    }
-  }
-
-  $: dispatchOpenEvent(isOpen);
 </script>
 
 <svelte:window on:keydown={handleKeydown}/>
 
-{#if isOpen}
+{#if $isOpen}
   <div class="modal-wrapper" use:portal>
     <div class={['modal', `modal-size-${size}`, classes].join(' ')} {style}>
+
+      {#if $$slots.title || title}
+        <div class="title">
+          {#if $$slots.title}<slot name="title"/>{:else}{title}{/if}
+        </div>
+      {/if}
+      
       <div class="body">
         <slot/>
       </div>
 
       {#if $$slots.footer}
-        <div class="footer">
-          <slot name="footer"/>
-        </div>
+        <div class="footer"><slot name="footer"/></div>
       {/if}
     </div>
   </div>
