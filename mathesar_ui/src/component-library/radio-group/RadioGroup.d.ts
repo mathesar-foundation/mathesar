@@ -1,3 +1,3 @@
-export interface RadioGroupOption<T = unknown> {
-  [key: string]: T
+export interface RadioGroupOption {
+  [key: string]: string | number | string[]
 }

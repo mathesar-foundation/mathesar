@@ -393,7 +393,8 @@ export function cancelImport(fileImportStore: FileImport): void {
 
 export async function importFromURL(fileImportStore: FileImport, url: string): Promise<void> {
   setInFileStore(fileImportStore, {
-    previewTableCreationStatus: States.Loading,
+    uploadStatus: States.Loading,
+    error: null,
   });
   try {
     const uploadResponse = await postAPI<{ id: number }>('/data_files/', { url });
@@ -410,7 +411,7 @@ export async function importFromURL(fileImportStore: FileImport, url: string): P
     });
   } catch (err: unknown) {
     setInFileStore(fileImportStore, {
-      previewTableCreationStatus: States.Error,
+      uploadStatus: States.Error,
       error: (err as Error).message,
     });
   }

@@ -65,7 +65,7 @@
   <div class="help-content">
   Enter a URL pointing to data to download:
   </div>
-  <TextInput disabled={$fileImportStore.previewTableCreationStatus === States.Loading}
+  <TextInput disabled={$fileImportStore.uploadStatus === States.Loading}
              bind:value={fileUrl}/>
 {/if}
 
@@ -78,7 +78,8 @@
           disabled={buttonControl}
           on:click={() => confirmImport()}>
       Next
-    {#if $fileImportStore.previewTableCreationStatus === States.Loading}
+    {#if $fileImportStore.previewTableCreationStatus === States.Loading
+      || (importMethod === 'URL' && $fileImportStore.uploadStatus === States.Loading)}
       <Icon data={faSpinner} spin={true}/>
     {/if}
   </Button>
