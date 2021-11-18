@@ -4,7 +4,7 @@
   import { faTimes } from '@fortawesome/free-solid-svg-icons';
   import type { Size } from '@mathesar-component-library/types';
   import { Button, Icon, portal } from '@mathesar-component-library';
-  import type { ModalCloseAction } from './modal';
+  import type { ModalCloseAction } from './modal.d';
 
   const dispatch = createEventDispatcher();
 

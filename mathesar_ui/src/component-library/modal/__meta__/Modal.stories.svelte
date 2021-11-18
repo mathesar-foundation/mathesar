@@ -2,7 +2,7 @@
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import { Button } from '@mathesar-component-library';
   import Modal from '../Modal.svelte';
-  import { ModalMultiplexer } from '../ModalMultiplexer';
+  import ModalMultiplexer from '../ModalMultiplexer';
 
   const meta = {
     title: 'Systems/Modal',

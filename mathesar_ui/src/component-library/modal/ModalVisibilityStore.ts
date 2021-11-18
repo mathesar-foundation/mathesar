@@ -1,39 +1,39 @@
 import type {
   Subscriber, Unsubscriber, Writable, Updater,
 } from 'svelte/store';
-import type { ModalMultiplexer } from './ModalMultiplexer';
+import type ActiveModalStore from './ActiveModalStore';
 
 /**
  * This store acts somewhat like a radio button interface to the
- * ModalMultiplexer. You can read from this store to determine whether a
+ * ActiveModalStore. You can read from this store to determine whether a
  * specific modal is open. And when you write to this store, that write will get
- * passed up to the ModalMultiplexer which ultimately sets the value, ensuring
+ * passed up to the ActiveModalStore which ultimately sets the value, ensuring
  * that only one modal is open at a time.
  */
-export class ModalVisibilityStore implements Writable<boolean> {
+export default class ModalVisibilityStore implements Writable<boolean> {
   id: number;
 
-  multiplexer: ModalMultiplexer;
+  activeModalStore: ActiveModalStore;
 
   constructor({
     id,
-    multiplexer,
+    activeModalStore,
   }: {
     id: number,
-    multiplexer: ModalMultiplexer,
+    activeModalStore: ActiveModalStore,
   }) {
     this.id = id;
-    this.multiplexer = multiplexer;
+    this.activeModalStore = activeModalStore;
   }
 
   subscribe(subscription: Subscriber<boolean>): Unsubscriber {
-    return this.multiplexer.openModalId.subscribe((openModalId) => {
+    return this.activeModalStore.subscribe((openModalId) => {
       subscription(openModalId === this.id);
     });
   }
 
   update(updater: Updater<boolean>): void {
-    this.multiplexer.openModalId.update((openModalId) => {
+    this.activeModalStore.update((openModalId) => {
       const isCurrentlyVisible = this.id === openModalId;
       const shouldBecomeVisible = updater(isCurrentlyVisible);
       if (shouldBecomeVisible) {
@@ -45,9 +45,9 @@ export class ModalVisibilityStore implements Writable<boolean> {
 
   set(isVisible: boolean): void {
     if (isVisible) {
-      this.multiplexer.open(this.id);
+      this.activeModalStore.open(this.id);
     } else {
-      this.multiplexer.close();
+      this.activeModalStore.close();
     }
   }
 
