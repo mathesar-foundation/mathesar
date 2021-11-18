@@ -12,7 +12,9 @@
   import { currentDBName } from '@mathesar/stores/databases';
   import { newImport, importStatuses } from '@mathesar/stores/fileImports';
   import {
-    addTab,
+    getTabsForSchema,
+    constructImportTab,
+    constructTabularTab,
   } from '@mathesar/stores/tabs';
 
   import {
@@ -20,6 +22,7 @@
     Button,
     Dropdown,
   } from '@mathesar-component-library';
+  import { TabularType } from '@mathesar/App.d';
 
   import SchemaSelector from './schema-selector/SchemaSelector.svelte';
   import ImportIndicator from './import-indicator/ImportIndicator.svelte';
@@ -27,17 +30,22 @@
   async function handleCreateEmptyTable() {
     const table = await createTable($currentSchemaId);
     await refetchTablesForSchema($currentSchemaId);
-    addTab($currentDBName, $currentSchemaId, { id: table.id, label: table.name });
+    const tab = constructTabularTab(
+      TabularType.Table,
+      table.id,
+      table.name,
+    );
+    getTabsForSchema($currentDBName, $currentSchemaId).add(tab);
   }
   
   function beginDataImport() {
     if ($currentDBName && $currentSchemaId) {
       const fileData = get(newImport($currentDBName, $currentSchemaId));
-      addTab($currentDBName, $currentSchemaId, {
-        id: fileData.id,
-        label: fileData.name || 'Import data',
-        isNew: true,
-      });
+      const tab = constructImportTab(
+        fileData.id,
+        fileData.name,
+      );
+      getTabsForSchema($currentDBName, $currentSchemaId).add(tab);
     }
   }
 </script>

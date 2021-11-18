@@ -1,6 +1,5 @@
 FROM python:3.9-buster
 
-# Add mathesar user
 ENV PYTHONUNBUFFERED=1
 ENV DOCKERIZE_VERSION v0.6.1
 

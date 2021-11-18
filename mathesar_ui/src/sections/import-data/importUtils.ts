@@ -6,7 +6,7 @@ import {
   removeImportFromView,
   deleteImport,
 } from '@mathesar/stores/fileImports';
-import { replaceTab, removeTab } from '@mathesar/stores/tabs';
+import { getTabsForSchema, constructTabularTab } from '@mathesar/stores/tabs';
 import { refetchTablesForSchema } from '@mathesar/stores/tables';
 import {
   uploadFile,
@@ -28,6 +28,7 @@ import type {
   FileUploadAddDetail,
   FileUploadProgress,
 } from '@mathesar-component-library/types';
+import { TabularType } from '@mathesar/App.d';
 
 function completionCallback(
   fileImportStore: FileImport,
@@ -352,10 +353,19 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
       });
       removeImportFromView(fileImportData.schemaId, fileImportData.id);
 
-      replaceTab(fileImportData.databaseName, fileImportData.schemaId, fileImportData.id, {
-        id: fileImportData.previewId,
-        label: fileImportData.name,
-      });
+      const tabList = getTabsForSchema(
+        fileImportData.databaseName,
+        fileImportData.schemaId,
+      );
+      const existingTab = tabList.getImportTabByImportID(fileImportData.id);
+      if (existingTab) {
+        const newTab = constructTabularTab(
+          TabularType.Table,
+          fileImportData.previewId,
+          fileImportData.name,
+        );
+        tabList.replace(existingTab, newTab);
+      }
     } catch (err: unknown) {
       setInFileStore(fileImportStore, {
         importStatus: States.Error,
@@ -369,12 +379,41 @@ export function cancelImport(fileImportStore: FileImport): void {
   const fileImportData = get(fileImportStore);
   if (fileImportData) {
     deleteImport(fileImportData.schemaId, fileImportData.id);
-    removeTab(fileImportData.databaseName, fileImportData.schemaId, {
-      id: fileImportData.id,
-      label: fileImportData.name,
-      isNew: true,
-    });
+    const tabList = getTabsForSchema(
+      fileImportData.databaseName,
+      fileImportData.schemaId,
+    );
+    const existingTab = tabList.getImportTabByImportID(fileImportData.id);
+    if (existingTab) {
+      tabList.remove(existingTab);
+    }
     void deletePreviewTable(fileImportStore);
+  }
+}
+
+export async function importFromURL(fileImportStore: FileImport, url: string): Promise<void> {
+  setInFileStore(fileImportStore, {
+    uploadStatus: States.Loading,
+    error: null,
+  });
+  try {
+    const uploadResponse = await postAPI<{ id: number }>('/data_files/', { url });
+    const { id } = uploadResponse;
+    setInFileStore(fileImportStore, {
+      dataFileId: id,
+      firstRowHeader: true,
+      isDataFileInfoPresent: true,
+    });
+    const res = await loadPreview(fileImportStore);
+    setImportStatus(get(fileImportStore).id, {
+      status: States.Loading,
+      dataFileName: res.name,
+    });
+  } catch (err: unknown) {
+    setInFileStore(fileImportStore, {
+      uploadStatus: States.Error,
+      error: (err as Error).message,
+    });
   }
 }
 
