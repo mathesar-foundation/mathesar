@@ -1,11 +1,13 @@
 <script lang="ts">
+  import type { Writable } from 'svelte/store';
+  import { faTimes } from '@fortawesome/free-solid-svg-icons';
   import type { Size } from '@mathesar-component-library/types';
-  import { portal } from '@mathesar-component-library';
-  import type { ModalVisibilityStore } from './ModalVisibilityStore';
+  import { Button, Icon, portal } from '@mathesar-component-library';
   import type { ModalCloseAction } from './modal';
 
-  export let isOpen: ModalVisibilityStore;
-  export let title: string;
+  export let isOpen: Writable<boolean>;
+  // eslint-disable-next-line no-undef-init
+  export let title: string | undefined = undefined;
   let classes = '';
   export { classes as class };
   export let style = '';
@@ -13,9 +15,23 @@
   
   export let closeOn: ModalCloseAction[] = ['button', 'esc', 'overlay'];
 
+  $: closeOnButton = closeOn.includes('button');
+  $: closeOnEsc = closeOn.includes('esc');
+  $: closeOnOverlay = closeOn.includes('overlay');
+
+  function close() {
+    $isOpen = false;
+  }
+  
   function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape' && $isOpen && closeOn.includes('esc')) {
-      $isOpen = false;
+    if (event.key === 'Escape' && $isOpen && closeOnEsc) {
+      close();
+    }
+  }
+
+  function handleOverlayClick() {
+    if (closeOnOverlay) {
+      close();
     }
   }
 </script>
@@ -23,8 +39,12 @@
 <svelte:window on:keydown={handleKeydown}/>
 
 {#if $isOpen}
-  <div class="modal-wrapper" use:portal>
+  <div class="modal-wrapper" use:portal >
+    <div class="overlay" on:click={handleOverlayClick}/>
     <div class={['modal', `modal-size-${size}`, classes].join(' ')} {style}>
+      {#if closeOnButton}
+        <Button class="close-button" on:click={close}><Icon data={faTimes}/></Button>
+      {/if}
 
       {#if $$slots.title || title}
         <div class="title">
