@@ -1,11 +1,10 @@
 <script lang="ts">
-  import type { Writable } from 'svelte/store';
   import { faTimes } from '@fortawesome/free-solid-svg-icons';
   import type { Size } from '@mathesar-component-library/types';
   import { Button, Icon, portal } from '@mathesar-component-library';
   import type { ModalCloseAction } from './modal';
 
-  export let isOpen: Writable<boolean>;
+  export let isOpen = false;
   // eslint-disable-next-line no-undef-init
   export let title: string | undefined = undefined;
   let classes = '';
@@ -20,11 +19,11 @@
   $: closeOnOverlay = closeOn.includes('overlay');
 
   function close() {
-    $isOpen = false;
+    isOpen = false;
   }
   
   function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Escape' && $isOpen && closeOnEsc) {
+    if (event.key === 'Escape' && isOpen && closeOnEsc) {
       close();
     }
   }
@@ -38,7 +37,7 @@
 
 <svelte:window on:keydown={handleKeydown}/>
 
-{#if $isOpen}
+{#if isOpen}
   <div class="modal-wrapper" use:portal >
     <div class="overlay" on:click={handleOverlayClick}/>
     <div class={['modal', `modal-size-${size}`, classes].join(' ')} {style}>
