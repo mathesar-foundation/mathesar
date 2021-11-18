@@ -23,24 +23,42 @@
     background-color: white;
     border-radius: 0.4em;
     max-height: calc(100vh - 10em);
-    min-height: 110px;
-    overflow-y: auto;
+    min-height: 7em;
     position: relative;
+    overflow: hidden;
     z-index: 52;
+    display: flex;
+    flex-direction: column;
 
-    .close-button {
-      position: absolute;
-      top: 0.2em;
-      right: 0.2em;
+    .title-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-start;
+      .title {
+        flex: 1 1 100%;
+        padding: 1em 1em 0.5em 1em;
+        font-weight: bold;
+      }
     }
   
     >.body, >.footer {
       padding: 1em;
+
+      :first-child {
+        margin-top: 0;
+      }
+      :last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    >.body {
+      overflow-y: auto;
     }
   
     >.footer {
       border-top: 1px solid #f5f5f5;
-      background: #f9fafb;
+      background: #f3f6f8;
     }
   
     &.modal-size-medium {

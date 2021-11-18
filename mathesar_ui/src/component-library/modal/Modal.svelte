@@ -1,8 +1,12 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
+  import { fade, fly } from 'svelte/transition';
   import { faTimes } from '@fortawesome/free-solid-svg-icons';
   import type { Size } from '@mathesar-component-library/types';
   import { Button, Icon, portal } from '@mathesar-component-library';
   import type { ModalCloseAction } from './modal';
+
+  const dispatch = createEventDispatcher();
 
   export let isOpen = false;
   // eslint-disable-next-line no-undef-init
@@ -11,12 +15,12 @@
   export { classes as class };
   export let style = '';
   export let size: Size = 'medium';
-  
-  export let closeOn: ModalCloseAction[] = ['button', 'esc', 'overlay'];
+  export let allowClose = true;
+  export let closeOn: ModalCloseAction[] = ['button'];
 
-  $: closeOnButton = closeOn.includes('button');
-  $: closeOnEsc = closeOn.includes('esc');
-  $: closeOnOverlay = closeOn.includes('overlay');
+  $: closeOnButton = allowClose && closeOn.includes('button');
+  $: closeOnEsc = allowClose && closeOn.includes('esc');
+  $: closeOnOverlay = allowClose && closeOn.includes('overlay');
 
   function close() {
     isOpen = false;
@@ -33,26 +37,42 @@
       close();
     }
   }
+
+  $: if (isOpen) { dispatch('open'); } else { dispatch('close'); }
 </script>
 
 <svelte:window on:keydown={handleKeydown}/>
 
 {#if isOpen}
   <div class="modal-wrapper" use:portal >
-    <div class="overlay" on:click={handleOverlayClick}/>
-    <div class={['modal', `modal-size-${size}`, classes].join(' ')} {style}>
-      {#if closeOnButton}
-        <Button class="close-button" on:click={close}><Icon data={faTimes}/></Button>
-      {/if}
-
-      {#if $$slots.title || title}
-        <div class="title">
-          {#if $$slots.title}<slot name="title"/>{:else}{title}{/if}
+    <div
+      class="overlay"
+      on:click={handleOverlayClick}
+      in:fade="{{ duration: 100 }}"
+      out:fade="{{ duration: 100 }}"
+    />
+    <div
+      class={['modal', `modal-size-${size}`, classes].join(' ')}
+      {style}
+      in:fly="{{ y: 100, duration: 100 }}"
+      out:fly="{{ y: 100, duration: 100 }}"
+    >
+      {#if $$slots.title || title || closeOnButton}
+        <div class=title-bar>
+          <div class="title">
+            {#if $$slots.title}<slot name="title"/>{/if}
+            {#if title}{title}{/if}
+          </div>
+          {#if closeOnButton}
+            <Button appearance=plain class=close-button on:click={close}>
+              <Icon data={faTimes}/>
+            </Button>
+          {/if}
         </div>
       {/if}
       
       <div class="body">
-        <slot/>
+        <slot {close}/>
       </div>
 
       {#if $$slots.footer}
