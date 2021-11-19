@@ -35,6 +35,9 @@ jobs:
       - name: Run tests with pytest
         run: docker exec mathesar_service pytest mathesar/ db/ --cov=mathesar --cov=db --cov-report=xml
 
+      - name: Tries to retrieve coverage results
+        run: cat ./coverage.xml
+
       - name: Refix permissions
         run: sudo chown -R 1000:1000 .
 
@@ -42,7 +45,7 @@ jobs:
         uses: codecov/codecov-action@v2
         with: 
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.xml
+          file: ./coverage.xml
           flags: pytest-backend
           name: codecov-mathesar
           verbose: true
