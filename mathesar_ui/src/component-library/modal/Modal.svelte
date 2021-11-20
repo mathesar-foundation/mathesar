@@ -48,14 +48,14 @@
     <div
       class="overlay"
       on:click={handleOverlayClick}
-      in:fade="{{ duration: 100 }}"
-      out:fade="{{ duration: 100 }}"
+      in:fade="{{ duration: 150 }}"
+      out:fade="{{ duration: 150 }}"
     />
     <div
       class={['modal', `modal-size-${size}`, classes].join(' ')}
       {style}
-      in:fly="{{ y: 100, duration: 100 }}"
-      out:fly="{{ y: 100, duration: 100 }}"
+      in:fly="{{ y: 20, duration: 150 }}"
+      out:fly="{{ y: 20, duration: 150 }}"
     >
       {#if $$slots.title || title || closeOnButton}
         <div class=title-bar>
