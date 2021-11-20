@@ -1,6 +1,8 @@
 from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
+from mathesar.database.types import MathesarTypeIdentifier, get_mathesar_type_from_db_type
+
 
 class ReadOnlyPolymorphicSerializerMappingMixin:
     def __new__(cls, *args, **kwargs):
@@ -82,14 +84,22 @@ class CustomBooleanLabelSerializer(serializers.Serializer):
     FALSE = serializers.CharField()
 
 
+DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY = 'mathesar_type'
+
+
 class BooleanDisplayOptionSerializer(OverrideRootPartialMixin, serializers.Serializer):
     input = serializers.ChoiceField(choices=[("dropdown", 1), ("checkbox", 2)])
     custom_labels = CustomBooleanLabelSerializer(required=False)
 
 
+class NumberDisplayOptionSerializer(OverrideRootPartialMixin, serializers.Serializer):
+    show_as_percentage = serializers.BooleanField(default=False)
+    locale = serializers.CharField(required=False)
+
+
 class DisplayOptionsMappingSerializer(ReadWritePolymorphicSerializerMappingMixin, serializers.Serializer):
-    serializers_mapping = {"BOOLEAN": BooleanDisplayOptionSerializer}
+    serializers_mapping = {MathesarTypeIdentifier.BOOLEAN.value: BooleanDisplayOptionSerializer,
+                           MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer}
 
     def get_mapping_field(self):
-        return self.context['column_type']
-
+        return get_mathesar_type_from_db_type(self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY])

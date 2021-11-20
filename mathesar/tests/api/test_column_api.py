@@ -4,16 +4,15 @@ from datetime import date, timedelta
 import pytest
 from unittest.mock import patch
 from django.core.cache import cache
-from sqlalchemy import Column, Integer, String, MetaData, select, Boolean, DDL
+from sqlalchemy import Column, Integer, String, MetaData, select, Boolean
 from sqlalchemy import Table as SATable
 
 from db.columns.operations.alter import alter_column_type
 from db.columns.operations.select import get_columns_attnum_from_names
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
-from db.utils import execute_statement
 from mathesar import models
-from mathesar.models import Column as ServiceLayerColumn, Table
+from mathesar.models import Column as ServiceLayerColumn
 from mathesar.tests.api.test_table_api import check_columns_response
 
 engine_with_types = fixtures.engine_with_types
@@ -52,7 +51,7 @@ def column_test_table_with_service_layer_options(patent_schema):
     ]
     column_data_list = [{},
                         {'display_options': {'input': "dropdown", 'use_custom_labels': False}},
-                        {'display_options': {"show_as_percentage": True,  "locale": "en_US"}}]
+                        {'display_options': {"show_as_percentage": True, "locale": "en_US"}}]
     db_table = SATable(
         "anewtable",
         MetaData(bind=engine),
@@ -149,7 +148,7 @@ def test_column_create(column_test_table, client):
     cache.clear()
     num_columns = len(column_test_table.sa_columns)
     data = {
-        "name": name, "type": type_, "display_options": {'input': 'dropdown'}, 'nullable': False
+        "name": name, "type": type_, "display_options": {"show_as_percentage": True}, 'nullable': False
     }
     response = client.post(
         f"/api/v0/tables/{column_test_table.id}/columns/",
@@ -215,6 +214,8 @@ def test_column_create_invalid_default(column_test_table, client):
 create_display_options_test_list = [
     ("BOOLEAN", {"input": "dropdown"}),
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
+    ("NUMERIC", {"show_as_percentage": True}),
+    ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}),
 ]
 
 
@@ -240,6 +241,7 @@ def test_column_create_display_options(
 create_display_options_invalid_test_list = [
     ("BOOLEAN", {"input": "invalid", "use_custom_columns": False}),
     ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"yes": "yes", "1": "no"}}),
+    ("NUMERIC", {"show_as_percentage": "wrong value type"}),
 ]
 
 
@@ -385,7 +387,6 @@ def test_column_invalid_display_options_type_on_reflection(column_test_table_wit
         f"/api/v0/tables/{table.id}/columns/{column_id}/",
     )
     assert response.json()["display_options"] is None
-
 
 
 def test_column_update_default(column_test_table, client):

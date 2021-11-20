@@ -16,4 +16,3 @@ def get_table_or_404(pk):
     except Table.DoesNotExist:
         raise NotFound
     return table
-

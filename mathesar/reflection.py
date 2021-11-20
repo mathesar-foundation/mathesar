@@ -8,7 +8,8 @@ from db.schemas.operations.select import get_mathesar_schemas_with_oids
 from db.tables.operations.select import get_table_oids_from_schema
 # We import the entire models module to avoid a circular import error
 from mathesar import models
-from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer
+from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer, \
+    DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY
 from mathesar.database.base import create_mathesar_engine
 
 DB_REFLECTION_KEY = 'database_reflected_recently'
@@ -76,7 +77,7 @@ def reflect_columns_from_table(table):
                                                                       defaults={'display_options': None})
         if not created and column.display_options:
             serializer = DisplayOptionsMappingSerializer(data=column.display_options,
-                                                         context={'column_type': str(column.type)})
+                                                         context={DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY: str(column.type)})
             if not serializer.is_valid(False):
                 column.display_options = None
                 column.save()
