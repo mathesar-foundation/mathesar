@@ -66,7 +66,7 @@ def column_test_table_with_service_layer_options(patent_schema):
         attnum = get_columns_attnum_from_names(db_table_oid, [column_data[0].name], engine)[0][0]
         service_columns.append(ServiceLayerColumn.current_objects.get_or_create(table=table,
                                                                                 attnum=attnum,
-                                                                                display_options=column_data[1].get('display_options', {}))[0])
+                                                                                display_options=column_data[1].get('display_options', None))[0])
     return table, service_columns
 
 
@@ -372,6 +372,18 @@ def test_column_update_display_options(column_test_table_with_service_layer_opti
         format='json'
     )
     assert response.json()["display_options"] == display_options
+
+
+def test_column_display_options_type_on_reflection(column_test_table,
+                                                   client, engine):
+    cache.clear()
+    table = column_test_table
+    response = client.get(
+        f"/api/v0/tables/{table.id}/columns/",
+    )
+    columns = response.json()['results']
+    for column in columns:
+        assert column["display_options"] is None
 
 
 def test_column_invalid_display_options_type_on_reflection(column_test_table_with_service_layer_options,
