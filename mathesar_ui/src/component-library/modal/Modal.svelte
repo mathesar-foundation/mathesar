@@ -9,7 +9,6 @@
   const dispatch = createEventDispatcher();
 
   export let isOpen = false;
-  // eslint-disable-next-line no-undef-init
   export let title: string | undefined = undefined;
   let classes = '';
   export { classes as class };
