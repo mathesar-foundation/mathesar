@@ -48,10 +48,17 @@ class SimpleColumnSerializer(serializers.ModelSerializer):
 
 class ColumnSerializer(SimpleColumnSerializer):
     class Meta(SimpleColumnSerializer.Meta):
-        fields = SimpleColumnSerializer.Meta.fields + ('nullable', 'primary_key', 'source_column', 'copy_source_data',
-                                                       'copy_source_constraints',
-                                                       'index',
-                                                       'valid_target_types', 'default', 'display_options')
+        fields = SimpleColumnSerializer.Meta.fields + (
+            'nullable',
+            'primary_key',
+            'source_column',
+            'copy_source_data',
+            'copy_source_constraints',
+            'index',
+            'valid_target_types',
+            'default',
+            'display_options'
+        )
         model_fields = ('display_options', )
 
     name = serializers.CharField(required=False)

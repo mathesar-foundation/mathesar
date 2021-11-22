@@ -49,7 +49,10 @@ class DatabaseObjectManager(models.Manager):
         return super().get_queryset()
 
 
-class ReflectingObject(BaseModel):
+class ReflectionManagerMixin(models.Model):
+    """
+    Used to reflect objects that exists on the user database but does not have a equivalent mathesar reference object.
+    """
     # The default manager, current_objects, does not reflect database objects.
     # This saves us from having to deal with Django trying to automatically reflect db
     # objects in the background when we might not expect it.
@@ -63,7 +66,10 @@ class ReflectingObject(BaseModel):
         return f"{self.__class__.__name__}"
 
 
-class DatabaseObject(ReflectingObject):
+class DatabaseObject(ReflectionManagerMixin, BaseModel):
+    """
+    Objects that can be referenced using a database identifier
+    """
     oid = models.IntegerField()
 
     class Meta:
@@ -78,7 +84,7 @@ class DatabaseObject(ReflectingObject):
 _engines = {}
 
 
-class Database(ReflectingObject):
+class Database(ReflectionManagerMixin, BaseModel):
     current_objects = models.Manager()
     objects = DatabaseObjectManager()
     name = models.CharField(max_length=128, unique=True)
@@ -322,7 +328,7 @@ class Table(DatabaseObject):
         return Constraint.objects.create(oid=constraint_oid, table=self)
 
 
-class Column(ReflectingObject):
+class Column(ReflectionManagerMixin, BaseModel):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='columns')
     attnum = models.IntegerField()
     display_options = JSONField(null=True)
