@@ -391,6 +391,32 @@ export function cancelImport(fileImportStore: FileImport): void {
   }
 }
 
+export async function importFromURL(fileImportStore: FileImport, url: string): Promise<void> {
+  setInFileStore(fileImportStore, {
+    uploadStatus: States.Loading,
+    error: null,
+  });
+  try {
+    const uploadResponse = await postAPI<{ id: number }>('/data_files/', { url });
+    const { id } = uploadResponse;
+    setInFileStore(fileImportStore, {
+      dataFileId: id,
+      firstRowHeader: true,
+      isDataFileInfoPresent: true,
+    });
+    const res = await loadPreview(fileImportStore);
+    setImportStatus(get(fileImportStore).id, {
+      status: States.Loading,
+      dataFileName: res.name,
+    });
+  } catch (err: unknown) {
+    setInFileStore(fileImportStore, {
+      uploadStatus: States.Error,
+      error: (err as Error).message,
+    });
+  }
+}
+
 // When errors are manually closed
 export function clearErrors(fileImportStore: FileImport): void {
   setInFileStore(fileImportStore, {
