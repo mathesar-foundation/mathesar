@@ -1,10 +1,13 @@
+from enum import Enum
 import json
+import logging
 from sqlalchemy import select, Column, func, and_, case, literal
 
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 from db.records.utils import create_col_objects
 from db.utils import execute_query
 
+logger = logging.getLogger(__name__)
 
 COUNT = 'count'
 CUME_DIST = 'cume_dist'
@@ -20,42 +23,34 @@ RANGE_ = 'range_'
 MATHESAR_GROUP_METADATA = '__mathesar_group_metadata'
 
 
-def get_grouping_range_boundaries(
-        column_list,
-        engine,
-        table=None,
-        limit=None,
-        offset=None,
-        num_groups=12,
-        group_type='percentile',
-        output_table=None,
+class GroupingMode(Enum):
+    DISTINCT = 'distinct'
+    PERCENTILE = 'percentile'
+
+
+def get_group_augmented_records_query(
+        table, column_list, group_mode=GroupingMode.DISTINCT.value, num_groups=12,
 ):
-    supported_group_types = {
-        'percentile': lambda column_list: select(
-            func.row_to_json(
-                func.unnest(
-                    func.percentile_disc(
-                        [n / num_groups for n in range(num_groups + 1)]
-                    )
-                    .within_group(func.row(*column_list))
-                )
-            )
-        ),
-    }
-    try:
-        select_func = supported_group_types[group_type]
-    except KeyError:
-        raise InvalidGroupType
+    """
+    Returns counts by specified groupings
 
-    if table is not None:
-        column_list = create_col_objects(table, column_list)
+    Args:
+        table:      SQLAlchemy table object
+        group_by:   list or tuple of column names or column objects to group by
+        group_mode: string defining how to perform grouping
+    """
+    grouping_columns = _get_validated_group_by_columns(table, column_list)
 
-    query = select_func(column_list).limit(limit).offset(offset)
-    result = execute_query(engine, query)
-    return [tuple(row[0].values()) for row in result]
+    if group_mode == GroupingMode.PERCENTILE.value:
+        return _get_percentile_range_group_select(table, grouping_columns, num_groups)
+    elif group_mode == GroupingMode.DISTINCT.value:
+        return _get_distinct_group_select(table, grouping_columns)
+    else:
+        logger.warn(f'group_mode "{group_mode}" not known.  falling back to default')
+        return get_group_augmented_records_query(table, column_list)
 
 
-def _get_percentile_range_groups(table, column_list, num_groups, engine):
+def _get_percentile_range_group_select(table, column_list, num_groups):
     column_names = [col.name for col in column_list]
     cume_dist_cte = select(
         table,
@@ -119,16 +114,8 @@ def _get_fractional_cases(column, num_groups):
     ]
 
 
-def get_group_augmented_records_query(table, group_by, group_mode='distinct'):
-    """
-    Returns counts by specified groupings
+def _get_distinct_group_select(table, grouping_columns):
 
-    Args:
-        table:      SQLAlchemy table object
-        group_by:   list or tuple of column names or column objects to group by
-        group_mode: string defining how to perform grouping
-    """
-    grouping_columns = _get_validated_group_by_columns(table, group_by)
     window_def = {
         PARTITION_BY: grouping_columns,
         ORDER_BY: grouping_columns,
