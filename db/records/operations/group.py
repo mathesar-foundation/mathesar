@@ -55,18 +55,17 @@ def get_grouping_range_boundaries(
     return [tuple(row[0].values()) for row in result]
 
 
-def _get_percentile_range_groups(column_list, num_groups, engine):
+def _get_percentile_range_groups(table, column_list, num_groups, engine):
     column_names = [col.name for col in column_list]
-
-    cume_dist_cte = (
-        select(
-            *column_list,
-            func.cume_dist().over(order_by=column_list).label(CUME_DIST)
-        )
-        .cte()
-    )
+    cume_dist_cte = select(
+        table,
+        func.cume_dist().over(order_by=column_list).label(CUME_DIST)
+    ).cte()
     ranges = _get_fractional_cases(cume_dist_cte.columns[CUME_DIST], num_groups)
-    ranges_cte = select(cume_dist_cte, case(*ranges).label(RANGE_ID)).cte()
+    ranges_cte = select(
+        *[col for col in cume_dist_cte.columns if col.name != CUME_DIST],
+        case(*ranges).label(RANGE_ID)
+    ).cte()
     ranges_agg_cols = [
         col for col in ranges_cte.columns if col.name in column_names
     ]
@@ -75,24 +74,30 @@ def _get_percentile_range_groups(column_list, num_groups, engine):
         ORDER_BY: ranges_agg_cols,
         RANGE_: (None, None)
     }
-    final_sel = (
-        select(
-            ranges_cte.columns[RANGE_ID],
-            _get_row_jsonb_window_expr(func.first_value, ranges_agg_cols, window_def).label(MIN_ROW),
-            _get_row_jsonb_window_expr(func.last_value, ranges_agg_cols, window_def).label(MAX_ROW),
-            func.count(1).over(partition_by=window_def[PARTITION_BY]).label(COUNT)
-        ).distinct()
+
+    col_key_value_tuples = ((literal(str(col.name)), col) for col in ranges_agg_cols)
+    col_key_value_list = [
+        col_part for col_tup in col_key_value_tuples for col_part in col_tup
+    ]
+    inner_grouping_object = func.json_build_object(*col_key_value_list)
+
+
+    final_sel = select(
+        *[col for col in ranges_cte.columns if col.name in table.columns],
+        func.json_build_object(
+            literal(COUNT),
+            func.count(1).over(partition_by=window_def[PARTITION_BY]),
+            literal(FIRST_VALUE),
+            func.first_value(inner_grouping_object).over(**window_def),
+            literal(LAST_VALUE),
+            func.last_value(inner_grouping_object).over(**window_def),
+            literal(GROUP_ID),
+            window_def[PARTITION_BY]
+        ).label(MATHESAR_GROUP_METADATA)
     )
+
     with engine.begin() as conn:
-        result = [
-            {
-                RANGE_ID: row[RANGE_ID],
-                MIN_ROW: {column_names[i]: row[MIN_ROW][f'f{i+1}'] for i in range(len(column_list))},
-                MAX_ROW: {column_names[i]: row[MAX_ROW][f'f{i+1}'] for i in range(len(column_list))},
-                COUNT: row[COUNT]
-            }
-            for row in conn.execute(final_sel).fetchall()
-        ]
+        result = conn.execute(final_sel).fetchall()
 
     return result
 
@@ -109,18 +114,19 @@ def _get_fractional_cases(column, num_groups):
     include zero.
     """
     return [
-        (and_(column > i / num_groups, column <= (i + 1) / num_groups), i)
+        (and_(column > i / num_groups, column <= (i + 1) / num_groups), i + 1)
         for i in range(num_groups)
     ]
 
 
-def get_group_augmented_records_query(table, group_by):
+def get_group_augmented_records_query(table, group_by, group_mode='distinct'):
     """
     Returns counts by specified groupings
 
     Args:
-        table:    SQLAlchemy table object
-        group_by: list or tuple of column names or column objects to group by
+        table:      SQLAlchemy table object
+        group_by:   list or tuple of column names or column objects to group by
+        group_mode: string defining how to perform grouping
     """
     grouping_columns = _get_validated_group_by_columns(table, group_by)
     window_def = {
