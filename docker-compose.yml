@@ -13,7 +13,10 @@ services:
     volumes:
       - ./.volumes:/var/lib/postgresql/data
   service:
-    build: .
+    build:
+      context: .
+      # Change this to Dockerfile.integ-tests to be able to run e2e integ tests
+      dockerfile: Dockerfile
     container_name: mathesar_service
     environment:
       - MODE=${MODE-PRODUCTION}

@@ -28,7 +28,7 @@
   }
 </script>
 
-<Modal bind:isOpen class="delete-modal" closeOnEsc={state !== States.Loading}>
+<Modal bind:isOpen class="delete-modal" allowClose={state !== States.Loading}>
     <div class="header">
       Deleting '{column?.name}' could break existing tables and views.
     </div>
