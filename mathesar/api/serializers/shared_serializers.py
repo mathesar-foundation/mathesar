@@ -5,6 +5,10 @@ from mathesar.database.types import MathesarTypeIdentifier, get_mathesar_type_fr
 
 
 class ReadOnlyPolymorphicSerializerMappingMixin:
+    """
+    This serializer mixin is helpful in serializing polymorphic models,
+    by switching to correct serializer based on the mapping field value.
+    """
     def __new__(cls, *args, **kwargs):
         if cls.serializers_mapping is None:
             raise ImproperlyConfigured(
@@ -37,7 +41,6 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
     def get_mapping_field(self):
         mapping_field = getattr(self, "mapping_field", None)
         if mapping_field is None:
-            # TODO replace this with a proper error message
             raise Exception("Add a `mapping_field` to be used as a identifier"
                             "or override this method to return a identifier to identify a proper serializer")
         return mapping_field
@@ -72,6 +75,12 @@ class MonkeyPatchPartial:
 
 
 class OverrideRootPartialMixin:
+    """
+    This mixin is used to convert a serializer into a partial serializer,
+    based on the serializer `partial` property rather than the parent's `partial` property.
+    Refer to the issue
+        https://github.com/encode/django-rest-framework/issues/3847
+    """
     def run_validation(self, *args, **kwargs):
         if not self.partial:
             with MonkeyPatchPartial(self.root):
