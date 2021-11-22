@@ -13,7 +13,7 @@ import type ActiveModalStore from './ActiveModalStore';
 export default class ModalVisibilityStore implements Writable<boolean> {
   id: number;
 
-  activeModalStore: ActiveModalStore;
+  private activeModalStore: ActiveModalStore;
 
   constructor({
     id,
