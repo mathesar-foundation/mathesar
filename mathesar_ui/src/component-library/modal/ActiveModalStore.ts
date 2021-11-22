@@ -3,25 +3,27 @@ import type {
 } from 'svelte/store';
 import { writable } from 'svelte/store';
 
+type ModalId = number | string;
+
 /**
  * Stores the ID of the currently opened modal
  */
-export default class ActiveModalStore implements Writable<number | undefined> {
-  private openModalId = writable<number | undefined>(undefined);
+export default class ActiveModalStore implements Writable<ModalId | undefined> {
+  private openModalId = writable<ModalId | undefined>(undefined);
 
-  subscribe(subscriber: Subscriber<number | undefined>): Unsubscriber {
+  subscribe(subscriber: Subscriber<ModalId | undefined>): Unsubscriber {
     return this.openModalId.subscribe(subscriber);
   }
 
-  set(value: number | undefined): void {
+  set(value: ModalId | undefined): void {
     this.openModalId.set(value);
   }
 
-  update(updater: Updater<number | undefined>): void {
+  update(updater: Updater<ModalId | undefined>): void {
     this.openModalId.update(updater);
   }
 
-  open(modalId: number): void {
+  open(modalId: ModalId): void {
     this.set(modalId);
   }
 
