@@ -51,6 +51,24 @@ class SimpleColumnSerializer(serializers.ModelSerializer):
     name = serializers.CharField()
     type = serializers.CharField(source='plain_type')
     type_options = TypeOptionSerializer(required=False, allow_null=True)
+    display_options = DisplayOptionsMappingSerializer(required=False, allow_null=True)
+
+    def to_representation(self, instance):
+        if isinstance(instance, dict):
+            instance_type = instance.get('type')
+        else:
+            instance_type = instance.type
+        self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY] = str(instance_type)
+        return super().to_representation(instance)
+
+    def to_internal_value(self, data):
+        if self.partial and 'type' not in data:
+            instance_type = getattr(self.instance, 'type', None)
+            if instance_type is not None:
+                self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY] = str(instance_type)
+        else:
+            self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY] = data.get('type', None)
+        return super().to_internal_value(data)
 
 
 class ColumnSerializer(SimpleColumnSerializer):
