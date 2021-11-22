@@ -39,7 +39,10 @@ export default class ModalVisibilityStore implements Writable<boolean> {
       if (shouldBecomeVisible) {
         return this.id;
       }
-      return undefined;
+      if (isCurrentlyVisible) {
+        return undefined;
+      }
+      return openModalId;
     });
   }
 
