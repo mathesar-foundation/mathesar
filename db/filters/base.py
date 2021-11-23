@@ -110,6 +110,22 @@ class Equal(LeafPredicateSingleParameter):
     type: LeafPredicateType = fauxStatic(LeafPredicateType.EQUAL)
 
 @frozen_dataclass
+class Greater(LeafPredicateSingleParameter):
+    type: LeafPredicateType = fauxStatic(LeafPredicateType.GREATER)
+
+@frozen_dataclass
+class GreaterOrEqual(LeafPredicateSingleParameter):
+    type: LeafPredicateType = fauxStatic(LeafPredicateType.GREATER_OR_EQUAL)
+
+@frozen_dataclass
+class Lesser(LeafPredicateSingleParameter):
+    type: LeafPredicateType = fauxStatic(LeafPredicateType.LESSER)
+
+@frozen_dataclass
+class LesserOrEqual(LeafPredicateSingleParameter):
+    type: LeafPredicateType = fauxStatic(LeafPredicateType.LESSER_OR_EQUAL)
+
+@frozen_dataclass
 class Empty(LeafPredicateNoParameter):
     type: LeafPredicateType = fauxStatic(LeafPredicateType.EMPTY)
 
@@ -124,6 +140,10 @@ class Not(BranchPredicateSingleParameter):
 @frozen_dataclass
 class And(BranchPredicateMultiParameter):
     type: BranchPredicateType = fauxStatic(BranchPredicateType.AND)
+
+@frozen_dataclass
+class Or(BranchPredicateMultiParameter):
+    type: BranchPredicateType = fauxStatic(BranchPredicateType.OR)
 
 def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
     if isinstance(pred, LeafPredicate):
