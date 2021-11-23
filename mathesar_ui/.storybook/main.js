@@ -4,10 +4,15 @@ const path = require("path");
 
 function getAlias() {
   const { paths } = data.compilerOptions;
+  const newPaths = {};
   Object.keys(paths).forEach((alias) => {
-    paths[alias] = path.resolve(__dirname, `../${paths[alias][0]}`);
+    const strippedAlias = alias.replace('/*', '');
+    newPaths[strippedAlias] = path.resolve(
+      __dirname,
+      `../${paths[alias][0].replace('/*', '/')}`,
+    );
   });
-  return paths;
+  return newPaths;
 }
 
 module.exports = {
