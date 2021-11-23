@@ -111,7 +111,7 @@ def get_records(
             order_by = [{'field': col, 'direction': 'asc'}
                         for col in table.columns]
 
-    query = get_query(table, limit, offset, order_by, filters, group_by=group_by)
+    query = get_query(table, limit, offset, order_by, filters, group_by=group.GroupBy(**group_by))
     return execute_query(engine, query)
 
 
