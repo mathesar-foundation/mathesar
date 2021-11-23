@@ -32,9 +32,7 @@ export { default as Pagination } from './pagination/Pagination.svelte';
 export { default as Dropdown } from './dropdown/Dropdown.svelte';
 export { default as Select } from './select/Select.svelte';
 export { default as FileUpload } from './file-upload/FileUpload.svelte';
-export { default as Modal } from './modal/Modal.svelte';
 
-// Toast
-export * from './toast/ToastController';
-export { default as ToastPresenter } from './toast/ToastPresenter.svelte';
-export { default as ToastItem } from './toast/ToastItem.svelte';
+// Systems
+export * from './modal';
+export * from './toast';
