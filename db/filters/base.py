@@ -52,8 +52,7 @@ def frozen_dataclass(f):
 
 def fauxStatic(value):
     """
-    Python <3.10 requires this sort of declaration for adding static fields
-    to dataclasses where subclasses might use non-default fields.
+    Declares a static field on a dataclass.
     """
     return field(init=False, default=value)
 
