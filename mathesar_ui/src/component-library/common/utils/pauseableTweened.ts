@@ -51,6 +51,20 @@ export function pauseableTweened(
       startingValue = _currentValue;
       return value;
     }, opts).then(promiseResolve);
+
+    // Why not directly return the Promise from `store.update`?
+    //
+    // Because if `pause` is called, it will call `store.update` again. Due to
+    // the internal behavior of Tweened, that second call to `store.update` will
+    // mean that the Promise returned from the first `store.update` will never
+    // resolve.
+    //
+    // By creating a custom Promise, we can ensure that it will resolve, even in
+    // the case where we've called `pause` and then `resume`.
+    //
+    // This approach definitely feels a bit hacky. It would be cleaner to
+    // implement PauseableTweened from scratch, but it seemed a bit easier to
+    // wrap Svelte's Tweened store.
     return promise;
   }
 
@@ -60,6 +74,8 @@ export function pauseableTweened(
     targetValue = updater(targetValue, startingValue);
     const promise = makePromise();
     void store.set(targetValue, opts).then(promiseResolve);
+    // Why not directly return the Promise from `store.update`? See notes above
+    // within `set`.
     return promise;
   }
 

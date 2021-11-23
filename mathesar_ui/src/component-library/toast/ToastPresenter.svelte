@@ -13,7 +13,7 @@
 <ul class="toast-presenter">
   {#each $entries as entry (entry.id)}
     <li in:fly={{ x: 256 }} out:fade animate:flip={{ duration: 200 }}>
-      <svelte:component this={toastItemComponent} {entry} />
+      <svelte:component this={toastItemComponent} {...$$restProps} {entry} />
     </li>
   {/each}
 </ul>
