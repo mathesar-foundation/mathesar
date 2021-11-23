@@ -50,7 +50,7 @@ def getSAIdFromPredicateType(type: Union[LeafPredicateType, BranchPredicateType]
 def frozen_dataclass(f):
     return dataclass(frozen=True)(f)
 
-def fauxStatic(value):
+def static(value):
     """
     Declares a static field on a dataclass.
     """
@@ -67,68 +67,68 @@ class Predicate:
 
 @frozen_dataclass
 class Leaf(Predicate):
-    superType: PredicateSuperType = fauxStatic(PredicateSuperType.LEAF)
+    superType: PredicateSuperType = static(PredicateSuperType.LEAF)
     type: LeafPredicateType
     field: str 
 
 @frozen_dataclass
 class SingleParameter:
-    parameterType: ParameterType = fauxStatic(ParameterType.SINGLE)
+    parameterType: ParameterType = static(ParameterType.SINGLE)
     parameter: Any
 
 @frozen_dataclass
 class MultiParameter:
-    parameterType: ParameterType = fauxStatic(ParameterType.MULTI)
+    parameterType: ParameterType = static(ParameterType.MULTI)
     parameters: List[Any]
 
 @frozen_dataclass
 class NoParameter:
-    parameterType: ParameterType = fauxStatic(ParameterType.NONE)
+    parameterType: ParameterType = static(ParameterType.NONE)
 
 @frozen_dataclass
 class Branch(Predicate):
-    superType: PredicateSuperType = fauxStatic(PredicateSuperType.BRANCH)
+    superType: PredicateSuperType = static(PredicateSuperType.BRANCH)
     type: BranchPredicateType
 
 @frozen_dataclass
 class Equal(SingleParameter, Leaf, Predicate):
-    type: LeafPredicateType = fauxStatic(LeafPredicateType.EQUAL)
+    type: LeafPredicateType = static(LeafPredicateType.EQUAL)
 
 @frozen_dataclass
 class Greater(SingleParameter, Leaf, Predicate):
-    type: LeafPredicateType = fauxStatic(LeafPredicateType.GREATER)
+    type: LeafPredicateType = static(LeafPredicateType.GREATER)
 
 @frozen_dataclass
 class GreaterOrEqual(SingleParameter, Leaf, Predicate):
-    type: LeafPredicateType = fauxStatic(LeafPredicateType.GREATER_OR_EQUAL)
+    type: LeafPredicateType = static(LeafPredicateType.GREATER_OR_EQUAL)
 
 @frozen_dataclass
 class Lesser(SingleParameter, Leaf, Predicate):
-    type: LeafPredicateType = fauxStatic(LeafPredicateType.LESSER)
+    type: LeafPredicateType = static(LeafPredicateType.LESSER)
 
 @frozen_dataclass
 class LesserOrEqual(SingleParameter, Leaf, Predicate):
-    type: LeafPredicateType = fauxStatic(LeafPredicateType.LESSER_OR_EQUAL)
+    type: LeafPredicateType = static(LeafPredicateType.LESSER_OR_EQUAL)
 
 @frozen_dataclass
 class Empty(NoParameter, Leaf, Predicate):
-    type: LeafPredicateType = fauxStatic(LeafPredicateType.EMPTY)
+    type: LeafPredicateType = static(LeafPredicateType.EMPTY)
 
 @frozen_dataclass
 class In(MultiParameter, Leaf, Predicate):
-    type: LeafPredicateType = fauxStatic(LeafPredicateType.IN)
+    type: LeafPredicateType = static(LeafPredicateType.IN)
 
 @frozen_dataclass
 class Not(SingleParameter, Branch, Predicate):
-    type: BranchPredicateType = fauxStatic(BranchPredicateType.NOT)
+    type: BranchPredicateType = static(BranchPredicateType.NOT)
 
 @frozen_dataclass
 class And(MultiParameter, Branch, Predicate):
-    type: BranchPredicateType = fauxStatic(BranchPredicateType.AND)
+    type: BranchPredicateType = static(BranchPredicateType.AND)
 
 @frozen_dataclass
 class Or(MultiParameter, Branch, Predicate):
-    type: BranchPredicateType = fauxStatic(BranchPredicateType.OR)
+    type: BranchPredicateType = static(BranchPredicateType.OR)
 
 def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
     if isinstance(pred, Leaf):
