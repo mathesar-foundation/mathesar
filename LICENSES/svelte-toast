@@ -1,0 +1,34 @@
+Component: svelte-toast
+Version: 0.6.2
+Copyright: 2021, Jason Lee <jason@zerodevx.com>
+License: ISC
+License Text: https://github.com/zerodevx/svelte-toast/blob/master/LICENSE
+Derivative files:
+    /mathesar_ui/src/component-library/toast/ToastItem.scss
+    /mathesar_ui/src/component-library/toast/ToastItem.svelte
+    /mathesar_ui/src/component-library/toast/ToastPresenter.scss
+    /mathesar_ui/src/component-library/toast/ToastPresenter.svelte
+
+=================================
+BEGIN of license
+=================================
+
+ISC License
+
+Copyright (c) 2021, Jason Lee <jason@zerodevx.com>
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+=================================
+END of license
+=================================
