@@ -2,13 +2,13 @@ from dataclasses import dataclass, field#, replace
 from enum import Enum
 from typing import Any, List, Union
 
-class OperatorPredicateType(Enum):
+class BranchPredicateType(Enum):
     NOT = "not"
     OR = "or"
     AND = "and"
 
-class PrimitivePredicateType(Enum):
-    """Note that negation is achieved via OperatorPredicateType.NOT"""
+class LeafPredicateType(Enum):
+    """Note that negation is achieved via BranchPredicateType.NOT"""
     EQUAL = "equal"
     GREATER = "greater"
     GREATER_OR_EQUAL = "greater_or_equal"
@@ -18,19 +18,19 @@ class PrimitivePredicateType(Enum):
     IN = "in"
 
 predicateTypesToSAIds = {
-    OperatorPredicateType.NOT: 'not',
-    OperatorPredicateType.AND: 'and',
-    OperatorPredicateType.OR: 'or',
-    PrimitivePredicateType.EQUAL: 'eq',
-    PrimitivePredicateType.GREATER: 'gt',
-    PrimitivePredicateType.GREATER_OR_EQUAL: 'ge',
-    PrimitivePredicateType.LESSER: 'lt',
-    PrimitivePredicateType.LESSER_OR_EQUAL: 'le',
-    PrimitivePredicateType.EMPTY: 'is_null',
-    PrimitivePredicateType.IN: 'in',
+    BranchPredicateType.NOT: 'not',
+    BranchPredicateType.AND: 'and',
+    BranchPredicateType.OR: 'or',
+    LeafPredicateType.EQUAL: 'eq',
+    LeafPredicateType.GREATER: 'gt',
+    LeafPredicateType.GREATER_OR_EQUAL: 'ge',
+    LeafPredicateType.LESSER: 'lt',
+    LeafPredicateType.LESSER_OR_EQUAL: 'le',
+    LeafPredicateType.EMPTY: 'is_null',
+    LeafPredicateType.IN: 'in',
 }
 
-def getSAIdFromPredicateType(type: Union[PrimitivePredicateType, OperatorPredicateType]) -> str:
+def getSAIdFromPredicateType(type: Union[LeafPredicateType, BranchPredicateType]) -> str:
     if type in predicateTypesToSAIds:
         return predicateTypesToSAIds[type]
     else:
@@ -43,19 +43,19 @@ def frozen_dataclass(f):
 
 @frozen_dataclass
 class Predicate:
-    type: Union[PrimitivePredicateType, OperatorPredicateType]
+    type: Union[LeafPredicateType, BranchPredicateType]
 
     def saId(self) -> str:
         return getSAIdFromPredicateType(self.type)
 
 @frozen_dataclass
-class PrimitivePredicate(Predicate):
-    type: PrimitivePredicateType
+class LeafPredicate(Predicate):
+    type: LeafPredicateType
     field: str 
 
 @frozen_dataclass
-class OperatorPredicate(Predicate):
-    type: OperatorPredicateType
+class BranchPredicate(Predicate):
+    type: BranchPredicateType
 
 @frozen_dataclass
 class SingleSubject:
@@ -70,33 +70,33 @@ class HasParameter:
     parameter: Any
 
 @frozen_dataclass
-class Equal(PrimitivePredicate, HasParameter):
-    type: PrimitivePredicateType = field(init=False, default=PrimitivePredicateType.EQUAL)
+class Equal(LeafPredicate, HasParameter):
+    type: LeafPredicateType = field(init=False, default=LeafPredicateType.EQUAL)
 
 @frozen_dataclass
-class Empty(PrimitivePredicate):
-    type: PrimitivePredicateType = field(init=False, default=PrimitivePredicateType.EMPTY)
+class Empty(LeafPredicate):
+    type: LeafPredicateType = field(init=False, default=LeafPredicateType.EMPTY)
 
 @frozen_dataclass
-class Not(OperatorPredicate, SingleSubject):
-    type: OperatorPredicateType = field(init=False, default=OperatorPredicateType.NOT)
+class Not(BranchPredicate, SingleSubject):
+    type: BranchPredicateType = field(init=False, default=BranchPredicateType.NOT)
 
 @frozen_dataclass
-class And(OperatorPredicate, MultiSubject):
-    type: OperatorPredicateType = field(init=False, default=OperatorPredicateType.AND)
+class And(BranchPredicate, MultiSubject):
+    type: BranchPredicateType = field(init=False, default=BranchPredicateType.AND)
 
-def getSASpecFromPredicate(pred: Predicate) -> dict:
-    if isinstance(pred, PrimitivePredicate):
+def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
+    if isinstance(pred, LeafPredicate):
         if isinstance(pred, HasParameter):
             return {'field': pred.field, 'op': pred.saId(), 'value': pred.parameter}
         else:
             return {'field': pred.field, 'op': pred.saId()}
-    elif isinstance(pred, OperatorPredicateType):
+    elif isinstance(pred, BranchPredicateType):
         if isinstance(pred, SingleSubject):
-            subject = getSASpecFromPredicate(pred.subject)
+            subject = getSAFilterSpecFromPredicate(pred.subject)
             return {pred.saId(): [subject]}
         if isinstance(pred, MultiSubject):
-            subjects = [ getSASpecFromPredicate(subject) for subject in pred.subjects ]
+            subjects = [ getSAFilterSpecFromPredicate(subject) for subject in pred.subjects ]
             return {pred.saId(): subjects}
         else:
             raise Exception("This should never happen.")
