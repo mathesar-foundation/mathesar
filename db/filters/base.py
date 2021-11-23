@@ -58,11 +58,11 @@ class BranchPredicate(Predicate):
     type: BranchPredicateType
 
 @frozen_dataclass
-class SingleSubject:
+class SingleBranch:
     subject: Predicate
 
 @frozen_dataclass
-class MultiSubject:
+class MultiBranch:
     subjects: List[Predicate]
 
 @frozen_dataclass
@@ -78,11 +78,11 @@ class Empty(LeafPredicate):
     type: LeafPredicateType = field(init=False, default=LeafPredicateType.EMPTY)
 
 @frozen_dataclass
-class Not(BranchPredicate, SingleSubject):
+class Not(BranchPredicate, SingleBranch):
     type: BranchPredicateType = field(init=False, default=BranchPredicateType.NOT)
 
 @frozen_dataclass
-class And(BranchPredicate, MultiSubject):
+class And(BranchPredicate, MultiBranch):
     type: BranchPredicateType = field(init=False, default=BranchPredicateType.AND)
 
 def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
@@ -92,10 +92,10 @@ def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
         else:
             return {'field': pred.field, 'op': pred.saId()}
     elif isinstance(pred, BranchPredicateType):
-        if isinstance(pred, SingleSubject):
+        if isinstance(pred, SingleBranch):
             subject = getSAFilterSpecFromPredicate(pred.subject)
             return {pred.saId(): [subject]}
-        if isinstance(pred, MultiSubject):
+        if isinstance(pred, MultiBranch):
             subjects = [ getSAFilterSpecFromPredicate(subject) for subject in pred.subjects ]
             return {pred.saId(): subjects}
         else:
