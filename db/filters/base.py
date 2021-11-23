@@ -11,10 +11,6 @@ class BranchPredicateType(Enum):
     OR = "or"
     AND = "and"
 
-class BranchType(Enum):
-    SINGLE = "single"
-    MULTI = "multi"
-
 class LeafPredicateType(Enum):
     """Note that negation is achieved via BranchPredicateType.NOT"""
     EQUAL = "equal"
@@ -27,7 +23,8 @@ class LeafPredicateType(Enum):
 
 class ParameterType(Enum):
     SINGLE = "single"
-    LIST = "list"
+    MULTI = "multi"
+    NONE = "none"
 
 predicateTypesToSAIds = {
     BranchPredicateType.NOT: 'not',
@@ -53,79 +50,97 @@ def getSAIdFromPredicateType(type: Union[LeafPredicateType, BranchPredicateType]
 def frozen_dataclass(f):
     return dataclass(frozen=True)(f)
 
+def fauxStatic(value):
+    """
+    Python <3.10 requires this sort of declaration for adding static fields
+    to dataclasses where subclasses might use non-default fields.
+    """
+    return field(init=False, default=value)
+
 @frozen_dataclass
 class Predicate:
     superType: PredicateSuperType
     type: Union[LeafPredicateType, BranchPredicateType]
+    parameterType: ParameterType
 
     def saId(self) -> str:
         return getSAIdFromPredicateType(self.type)
 
 @frozen_dataclass
 class LeafPredicate(Predicate):
-    superType: PredicateSuperType = field(init=False, default=PredicateSuperType.LEAF)
+    superType: PredicateSuperType = fauxStatic(PredicateSuperType.LEAF)
     type: LeafPredicateType
-    parameterType: ParameterType
     field: str 
 
 @frozen_dataclass
-class BranchPredicate(Predicate):
-    superType: PredicateSuperType = field(init=False, default=PredicateSuperType.BRANCH)
-    type: BranchPredicateType
-    branchType: BranchType
-
-@frozen_dataclass
-class SingleBranch:
-    branchType: BranchType = field(init=False, default=BranchType.SINGLE)
-    subject: Predicate
-
-@frozen_dataclass
-class MultiBranch:
-    branchType: BranchType = field(init=False, default=BranchType.MULTI)
-    subjects: List[Predicate]
-
-@frozen_dataclass
-class TakesSingleParameter:
-    parameterType: ParameterType = field(init=False, default=ParameterType.SINGLE)
+class LeafPredicateSingleParameter(LeafPredicate):
+    parameterType: ParameterType = fauxStatic(ParameterType.SINGLE)
     parameter: Any
 
 @frozen_dataclass
-class TakesListParameter:
-    parameterType: ParameterType = field(init=False, default=ParameterType.LIST)
+class LeafPredicateMultiParameter(LeafPredicate):
+    parameterType: ParameterType = fauxStatic(ParameterType.MULTI)
     parameters: List[Any]
 
 @frozen_dataclass
-class Equal(LeafPredicate, TakesSingleParameter):
-    type: LeafPredicateType = field(init=False, default=LeafPredicateType.EQUAL)
+class LeafPredicateNoParameter(LeafPredicate):
+    parameterType: ParameterType = fauxStatic(ParameterType.NONE)
 
 @frozen_dataclass
-class Empty(LeafPredicate):
-    type: LeafPredicateType = field(init=False, default=LeafPredicateType.EMPTY)
+class BranchPredicate(Predicate):
+    superType: PredicateSuperType = fauxStatic(PredicateSuperType.BRANCH)
+    type: BranchPredicateType
 
 @frozen_dataclass
-class In(LeafPredicate, TakesListParameter):
-    type: LeafPredicateType = field(init=False, default=LeafPredicateType.IN)
+class BranchPredicateSingleParameter(BranchPredicate):
+    parameterType: ParameterType = fauxStatic(ParameterType.SINGLE)
+    parameter: Predicate
 
 @frozen_dataclass
-class Not(BranchPredicate, SingleBranch):
-    type: BranchPredicateType = field(init=False, default=BranchPredicateType.NOT)
+class BranchPredicateMultiParameter(BranchPredicate):
+    parameterType: ParameterType = fauxStatic(ParameterType.MULTI)
+    parameters: List[Predicate]
 
 @frozen_dataclass
-class And(BranchPredicate, MultiBranch):
-    type: BranchPredicateType = field(init=False, default=BranchPredicateType.AND)
+class BranchPredicateNoParameter(BranchPredicate):
+    parameterType: ParameterType = fauxStatic(ParameterType.NONE)
+
+@frozen_dataclass
+class Equal(LeafPredicateSingleParameter):
+    type: LeafPredicateType = fauxStatic(LeafPredicateType.EQUAL)
+
+@frozen_dataclass
+class Empty(LeafPredicateNoParameter):
+    type: LeafPredicateType = fauxStatic(LeafPredicateType.EMPTY)
+
+@frozen_dataclass
+class In(LeafPredicateMultiParameter):
+    type: LeafPredicateType = fauxStatic(LeafPredicateType.IN)
+
+@frozen_dataclass
+class Not(BranchPredicateSingleParameter):
+    type: BranchPredicateType = fauxStatic(BranchPredicateType.NOT)
+
+@frozen_dataclass
+class And(BranchPredicateMultiParameter):
+    type: BranchPredicateType = fauxStatic(BranchPredicateType.AND)
 
 def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
     if isinstance(pred, LeafPredicate):
-        if isinstance(pred, TakesSingleParameter):
+        if isinstance(pred, LeafPredicateSingleParameter):
             return {'field': pred.field, 'op': pred.saId(), 'value': pred.parameter}
-        else:
+        elif isinstance(pred, LeafPredicateMultiParameter):
+            return {'field': pred.field, 'op': pred.saId(), 'value': pred.parameters}
+        elif isinstance(pred, LeafPredicateNoParameter):
             return {'field': pred.field, 'op': pred.saId()}
-    elif isinstance(pred, BranchPredicateType):
-        if isinstance(pred, SingleBranch):
-            subject = getSAFilterSpecFromPredicate(pred.subject)
+        else:
+            raise Exception("This should never happen.")
+    elif isinstance(pred, BranchPredicate):
+        if isinstance(pred, BranchPredicateSingleParameter):
+            subject = getSAFilterSpecFromPredicate(pred.parameter)
             return {pred.saId(): [subject]}
-        if isinstance(pred, MultiBranch):
-            subjects = [ getSAFilterSpecFromPredicate(subject) for subject in pred.subjects ]
+        elif isinstance(pred, BranchPredicateMultiParameter):
+            subjects = [ getSAFilterSpecFromPredicate(subject) for subject in pred.parameters ]
             return {pred.saId(): subjects}
         else:
             raise Exception("This should never happen.")
@@ -133,9 +148,9 @@ def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
         raise Exception("This should never happen.")
 
 def getMAFilterSpecFromPredicate(pred: Predicate) -> dict:
-    spec = { 'superType': pred.superType, 'type': pred.type, }
-    if isinstance(pred, LeafPredicate):
-        spec['parameterType'] = pred.parameterType
-    if isinstance(pred, BranchPredicate):
-        spec['branchType'] = pred.branchType
+    spec = {
+        'superType': pred.superType.value,
+        'type': pred.type.value,
+        'parameterType': pred.parameterType.value,
+    }
     return spec
