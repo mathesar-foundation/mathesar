@@ -3,7 +3,7 @@ from sqlalchemy_filters import apply_filters, apply_sort
 from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
 from db.columns.base import MathesarColumn
-from db.records.operations.group import get_group_augmented_records_query
+from db.records.operations import group
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.utils import execute_query
@@ -60,8 +60,8 @@ def get_query(table, limit, offset, order_by, filters, cols=None, group_by=None)
     else:
         select_target = table
 
-    if group_by:
-        query = get_group_augmented_records_query(table, group_by)
+    if isinstance(group_by, group.GroupBy):
+        query = group.get_group_augmented_records_query(table, group_by)
     else:
         query = select(*(cols or select_target.c)).select_from(select_target)
 
@@ -82,7 +82,7 @@ def get_record(table, engine, id_value):
 
 
 def get_records(
-        table, engine, limit=None, offset=None, order_by=[], filters=[], group_by=[],
+        table, engine, limit=None, offset=None, order_by=[], filters=[], group_by=None,
 ):
     """
     Returns annotated records from a table.
@@ -98,7 +98,7 @@ def get_records(
         filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
-        group_by: list or tuple of column names or column objects to group by
+        group_by: group.GroupBy object
     """
     if not order_by:
         # Set default ordering if none was requested
