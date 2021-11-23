@@ -1,7 +1,7 @@
 <script lang="ts">
   import { faTimes } from '@fortawesome/free-solid-svg-icons';
-  import { Icon } from '..';
-  import { ensureReadable } from '../common/utils/storeUtils';
+  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
+  import { ensureReadable } from '@mathesar-component-library-dir/common/utils/storeUtils';
   import type { ToastEntry } from './ToastController';
   
   export let entry: ToastEntry;
