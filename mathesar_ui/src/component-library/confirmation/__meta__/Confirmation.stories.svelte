@@ -21,7 +21,8 @@
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import { Button } from '@mathesar-component-library';
   import { faFire, faRecycle, faCut } from '@fortawesome/free-solid-svg-icons';
-  import { ModalMultiplexer } from '../../modal';
+  import { makeToast, ToastPresenter } from '@mathesar-component-library-dir/toast';
+  import { ModalMultiplexer } from '@mathesar-component-library-dir/modal';
   import { makeConfirm } from '../ConfirmationController';
   import Confirmation from '../Confirmation.svelte';
 
@@ -29,20 +30,19 @@
     title: 'Systems/Confirmation',
   };
 
+  const toast = makeToast();
   const modal = new ModalMultiplexer();
   const confirmationModal = modal.createVisibilityStore();
   const { confirm, confirmationController } = makeConfirm({ confirmationModal });
   
-  /* eslint-disable no-console */
-
   function handleRecycle() {
     void confirm({
       title: 'Recycle document?',
       body: 'It will be permanently destroyed',
       proceedButton: { label: 'Recycle', icon: { data: faRecycle } },
       onProceed: () => api.recycle(),
-      onSuccess: () => console.log('Document recycled.'),
-      onError: (e) => console.log(`Unable to recycle document. ${e.message}`),
+      onSuccess: () => toast.success({ message: 'Document recycled.' }),
+      onError: (e) => toast.error({ message: `Unable to recycle document. ${e.message}` }),
     });
   }
 
@@ -55,8 +55,8 @@
       ],
       proceedButton: { label: 'Shred', icon: { data: faCut } },
       onProceed: () => api.shred(),
-      onSuccess: () => console.log('Document shredded.'),
-      onError: (e) => console.log(`Unable to shred document. ${e.message}`),
+      onSuccess: () => toast.success({ message: 'Document shredded.' }),
+      onError: (e) => toast.error({ message: `Unable to shred document. ${e.message}` }),
     });
   }
 
@@ -69,15 +69,15 @@
       ],
       proceedButton: { label: 'Burn', icon: { data: faFire } },
       onProceed: () => api.burn(),
-      onSuccess: () => console.log('Document burned.'),
-      onError: (e) => console.log(`Unable to burn document. ${e.message}`),
+      onSuccess: () => toast.success({ message: 'Document burned.' }),
+      onError: (e) => toast.error({ message: `Unable to burn document. ${e.message}` }),
     });
   }
-
-  /* eslint-enable no-console */
 </script>
 
 <Meta {...meta} />
+
+<ToastPresenter entries={toast.entries} />
 
 <Story name="Basic">
 
