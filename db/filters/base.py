@@ -2,10 +2,18 @@ from dataclasses import dataclass, field#, replace
 from enum import Enum
 from typing import Any, List, Union
 
+class PredicateSuperType(Enum):
+    LEAF = "leaf"
+    BRANCH = "branch"
+
 class BranchPredicateType(Enum):
     NOT = "not"
     OR = "or"
     AND = "and"
+
+class BranchType(Enum):
+    SINGLE = "single"
+    MULTI = "multi"
 
 class LeafPredicateType(Enum):
     """Note that negation is achieved via BranchPredicateType.NOT"""
@@ -16,6 +24,10 @@ class LeafPredicateType(Enum):
     LESSER_OR_EQUAL = "lesser_or_equal"
     EMPTY = "empty"
     IN = "in"
+
+class ParameterType(Enum):
+    SINGLE = "single"
+    LIST = "list"
 
 predicateTypesToSAIds = {
     BranchPredicateType.NOT: 'not',
@@ -43,6 +55,7 @@ def frozen_dataclass(f):
 
 @frozen_dataclass
 class Predicate:
+    superType: PredicateSuperType
     type: Union[LeafPredicateType, BranchPredicateType]
 
     def saId(self) -> str:
@@ -50,32 +63,48 @@ class Predicate:
 
 @frozen_dataclass
 class LeafPredicate(Predicate):
+    superType: PredicateSuperType = field(init=False, default=PredicateSuperType.LEAF)
     type: LeafPredicateType
+    parameterType: ParameterType
     field: str 
 
 @frozen_dataclass
 class BranchPredicate(Predicate):
+    superType: PredicateSuperType = field(init=False, default=PredicateSuperType.BRANCH)
     type: BranchPredicateType
+    branchType: BranchType
 
 @frozen_dataclass
 class SingleBranch:
+    branchType: BranchType = field(init=False, default=BranchType.SINGLE)
     subject: Predicate
 
 @frozen_dataclass
 class MultiBranch:
+    branchType: BranchType = field(init=False, default=BranchType.MULTI)
     subjects: List[Predicate]
 
 @frozen_dataclass
-class HasParameter:
+class TakesSingleParameter:
+    parameterType: ParameterType = field(init=False, default=ParameterType.SINGLE)
     parameter: Any
 
 @frozen_dataclass
-class Equal(LeafPredicate, HasParameter):
+class TakesListParameter:
+    parameterType: ParameterType = field(init=False, default=ParameterType.LIST)
+    parameters: List[Any]
+
+@frozen_dataclass
+class Equal(LeafPredicate, TakesSingleParameter):
     type: LeafPredicateType = field(init=False, default=LeafPredicateType.EQUAL)
 
 @frozen_dataclass
 class Empty(LeafPredicate):
     type: LeafPredicateType = field(init=False, default=LeafPredicateType.EMPTY)
+
+@frozen_dataclass
+class In(LeafPredicate, TakesListParameter):
+    type: LeafPredicateType = field(init=False, default=LeafPredicateType.IN)
 
 @frozen_dataclass
 class Not(BranchPredicate, SingleBranch):
@@ -87,7 +116,7 @@ class And(BranchPredicate, MultiBranch):
 
 def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
     if isinstance(pred, LeafPredicate):
-        if isinstance(pred, HasParameter):
+        if isinstance(pred, TakesSingleParameter):
             return {'field': pred.field, 'op': pred.saId(), 'value': pred.parameter}
         else:
             return {'field': pred.field, 'op': pred.saId()}
@@ -102,3 +131,11 @@ def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
             raise Exception("This should never happen.")
     else:
         raise Exception("This should never happen.")
+
+def getMAFilterSpecFromPredicate(pred: Predicate) -> dict:
+    spec = { 'superType': pred.superType, 'type': pred.type, }
+    if isinstance(pred, LeafPredicate):
+        spec['parameterType'] = pred.parameterType
+    if isinstance(pred, BranchPredicate):
+        spec['branchType'] = pred.branchType
+    return spec
