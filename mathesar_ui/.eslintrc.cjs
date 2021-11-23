@@ -49,6 +49,8 @@ module.exports = {
         'no-bitwise': 'off',
         '@typescript-eslint/restrict-plus-operands': 'off',
         'no-undef-init': 'off',
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+        '@typescript-eslint/no-unsafe-call': 'off',
       },
     },
     {
