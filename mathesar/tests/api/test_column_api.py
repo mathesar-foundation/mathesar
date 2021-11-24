@@ -120,8 +120,8 @@ def test_column_create(column_test_table, client):
     }
     response = client.post(
         f"/api/v0/tables/{column_test_table.id}/columns/",
-        data=json.dumps(data),
-        content_type='application/json'
+        data=data,
+        format="json",
     )
     assert response.status_code == 201
     new_columns_response = client.get(
@@ -318,7 +318,7 @@ def test_column_update_default(column_test_table, client):
 def test_column_update_delete_default(column_test_table, client):
     cache.clear()
     expt_default = None
-    data = json.dumps({"default": None})
+    data = {"default": None}
     response = client.get(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
@@ -326,8 +326,9 @@ def test_column_update_delete_default(column_test_table, client):
     column_index = 2
     column_id = columns[column_index]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
-        content_type="application/json"
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
+        data=data,
+        format="json",
     )
     assert response.json()["default"] == expt_default
 
