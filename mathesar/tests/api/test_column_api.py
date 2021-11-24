@@ -248,8 +248,8 @@ def test_column_create_retrieve_options(column_test_table, client, type_, type_o
     }
     response = client.post(
         f"/api/v0/tables/{column_test_table.id}/columns/",
-        data=json.dumps(data),
-        content_type='application/json'
+        data=data,
+        format="json",
     )
     assert response.status_code == 201
     new_columns_response = client.get(
@@ -280,8 +280,8 @@ def test_column_create_bad_options(column_test_table, client, type_options):
     }
     response = client.post(
         f"/api/v0/tables/{column_test_table.id}/columns/",
-        data=json.dumps(data),
-        content_type='application/json'
+        data=data,
+        format="json",
     )
     assert response.status_code == 400
 
@@ -336,10 +336,11 @@ def test_column_update_default(column_test_table, client):
 def test_column_update_delete_default(column_test_table, client):
     cache.clear()
     expt_default = None
-    data = json.dumps({"default": None})
+    data = {"default": None}
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/2/", data=data,
-        content_type="application/json"
+        f"/api/v0/tables/{column_test_table.id}/columns/2/",
+        data=data,
+        format="json",
     )
     assert response.json()["default"] == expt_default
 
@@ -475,8 +476,8 @@ def test_column_update_type_invalid_options(column_test_table, client, type_opti
     data = {"type": type_, "type_options": type_options}
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/3/",
-        data=json.dumps(data),
-        content_type='application/json'
+        data=data,
+        format="json",
     )
     assert response.status_code == 400
 
