@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field#, replace
 from enum import Enum
-from typing import Any, List, Union
+from typing import Any, List, Union, Type
 
 class PredicateSuperType(Enum):
     LEAF = "leaf"
@@ -21,7 +21,7 @@ class LeafPredicateType(Enum):
     EMPTY = "empty"
     IN = "in"
 
-class ParameterType(Enum):
+class ParameterCount(Enum):
     SINGLE = "single"
     MULTI = "multi"
     NONE = "none"
@@ -60,10 +60,16 @@ def static(value):
 class Predicate:
     superType: PredicateSuperType
     type: Union[LeafPredicateType, BranchPredicateType]
-    parameterType: ParameterType
+    parameterCount: ParameterCount
 
     def saId(self) -> str:
         return getSAIdFromPredicateType(self.type)
+
+def takesParameterThatsAMathesarType(predicateSubClass: Type[Predicate]) -> bool:
+    return (
+        issubclass(predicateSubClass, Leaf)
+        and not issubclass(predicateSubClass, NoParameter)
+    )
 
 @frozen_dataclass
 class Leaf(Predicate):
@@ -73,17 +79,17 @@ class Leaf(Predicate):
 
 @frozen_dataclass
 class SingleParameter:
-    parameterType: ParameterType = static(ParameterType.SINGLE)
+    parameterCount: ParameterCount = static(ParameterCount.SINGLE)
     parameter: Any
 
 @frozen_dataclass
 class MultiParameter:
-    parameterType: ParameterType = static(ParameterType.MULTI)
+    parameterCount: ParameterCount = static(ParameterCount.MULTI)
     parameters: List[Any]
 
 @frozen_dataclass
 class NoParameter:
-    parameterType: ParameterType = static(ParameterType.NONE)
+    parameterCount: ParameterCount = static(ParameterCount.NONE)
 
 @frozen_dataclass
 class Branch(Predicate):
@@ -156,6 +162,19 @@ def getMAFilterSpecFromPredicate(pred: Predicate) -> dict:
     spec = {
         'superType': pred.superType.value,
         'type': pred.type.value,
-        'parameterType': pred.parameterType.value,
+        'parameterCount': pred.parameterCount.value,
     }
     return spec
+
+allPredicateSubClasses = [
+    Equal,
+    Greater,
+    GreaterOrEqual,
+    Lesser,
+    LesserOrEqual,
+    Empty,
+    In,
+    Not,
+    And,
+    Or,
+    ]
