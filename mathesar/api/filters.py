@@ -4,20 +4,31 @@ from django_property_filter import PropertyFilterSet, PropertyBaseInFilter, Prop
 from mathesar.database.types import MathesarTypeIdentifier
 from mathesar.models import Schema, Table, Database
 
-FILTER_OPTIONS_BY_TYPE_IDENTIFIER = {
-    MathesarTypeIdentifier.BOOLEAN.value:
-    {
-        "db_type": "BOOLEAN",
-        "options": [{
-            "op": "eq",
-            "value": {
-                "allowed_types": ["BOOLEAN"],
-            }
-        }, {
-            "op": "is_null",
-            "value": "null",
-        }]
+from db.filters.base import Predicate, allPredicateSubClasses, takesParameterThatsAMathesarType
+from typing import List, Type
+
+
+# TODO turn this spec into a class
+def getSpecForPredicateAndMAType(predicateSubClass: Type[Predicate], maType: MathesarTypeIdentifier) -> dict:
+    spec = {
+        'superType': predicateSubClass.superType.value,
+        'type': predicateSubClass.type.value,
+        'parameterCount': predicateSubClass.parameterCount.value,
     }
+    if takesParameterThatsAMathesarType(predicateSubClass):
+        spec['parameterMathesarType'] = maType.value
+    return spec
+
+
+def getSpecsForMAType(maType: MathesarTypeIdentifier) -> List[dict]:
+    return [
+        getSpecForPredicateAndMAType(predicateSubClass, maType)
+        for predicateSubClass in allPredicateSubClasses
+    ]
+
+
+FILTER_OPTIONS_BY_TYPE_IDENTIFIER = {
+    maType.value: getSpecsForMAType(maType) for maType in MathesarTypeIdentifier
 }
 
 
