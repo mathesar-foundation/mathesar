@@ -3,6 +3,7 @@ from rest_framework.exceptions import ValidationError
 
 from db.tables.operations.alter import alter_table, SUPPORTED_TABLE_ALTER_ARGS
 from db.schemas.operations.alter import alter_schema, SUPPORTED_SCHEMA_ALTER_ARGS
+from mathesar.reflection import reflect_columns_from_table
 
 
 def user_directory_path(instance, filename):
@@ -20,6 +21,7 @@ def update_sa_table(table, validated_data):
         raise ValidationError(errors)
     try:
         alter_table(table.name, table.oid, table.schema.name, table.schema._sa_engine, validated_data)
+        reflect_columns_from_table(table)
     # TODO: Catch more specific exceptions
     except Exception as e:
         raise ValidationError(e)
