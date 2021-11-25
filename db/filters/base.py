@@ -158,14 +158,6 @@ def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
     else:
         raise Exception("This should never happen.")
 
-def getMAFilterSpecFromPredicate(pred: Predicate) -> dict:
-    spec = {
-        'superType': pred.superType.value,
-        'type': pred.type.value,
-        'parameterCount': pred.parameterCount.value,
-    }
-    return spec
-
 allPredicateSubClasses = [
     Equal,
     Greater,
