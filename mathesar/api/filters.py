@@ -11,12 +11,12 @@ from typing import List, Type
 # TODO turn this spec into a class
 def getSpecForPredicateAndMAType(predicateSubClass: Type[Predicate], maType: MathesarTypeIdentifier) -> dict:
     spec = {
-        'superType': predicateSubClass.superType.value,
+        'super_type': predicateSubClass.superType.value,
         'type': predicateSubClass.type.value,
-        'parameterCount': predicateSubClass.parameterCount.value,
+        'parameter_count': predicateSubClass.parameterCount.value,
     }
     if takesParameterThatsAMathesarType(predicateSubClass):
-        spec['parameterMathesarType'] = maType.value
+        spec['parameter_mathesar_type'] = maType.value
     return spec
 
 
