@@ -27,7 +27,7 @@ def getSpecsForMAType(maType: MathesarTypeIdentifier) -> List[dict]:
     ]
 
 
-FILTER_OPTIONS_BY_TYPE_IDENTIFIER = {
+FILTER_OPTIONS_BY_MATHESAR_TYPE_IDENTIFIER = {
     maType.value: getSpecsForMAType(maType) for maType in MathesarTypeIdentifier
 }
 

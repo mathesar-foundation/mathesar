@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework import serializers
 
-from mathesar.api.filters import FILTER_OPTIONS_BY_TYPE_IDENTIFIER
+from mathesar.api.filters import FILTER_OPTIONS_BY_MATHESAR_TYPE_IDENTIFIER
 from mathesar.models import Database
 
 
@@ -29,4 +29,4 @@ class TypeSerializer(serializers.Serializer):
     filters = serializers.SerializerMethodField()
 
     def get_filters(self, obj):
-        return FILTER_OPTIONS_BY_TYPE_IDENTIFIER.get(obj.get('identifier'))
+        return FILTER_OPTIONS_BY_MATHESAR_TYPE_IDENTIFIER.get(obj.get('identifier'))
