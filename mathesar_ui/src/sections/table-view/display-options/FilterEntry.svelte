@@ -17,6 +17,8 @@
   export let options: SelectOption[];
   export let conditions: SelectOption[];
 
+  export let filterByDuplicates: boolean;
+
   export let column: FilterEntry['column'];
   export let condition: FilterEntry['condition'];
   export let value: FilterEntry['value'];
@@ -54,9 +56,11 @@
     <Select options={conditions} bind:value={condition}
       on:change={() => dispatch('reload')}/>
   </td>
-  <td class="value">
-    <TextInput bind:value={inputValue}/>
-  </td>
+  {#if !filterByDuplicates}
+    <td class="value">
+      <TextInput bind:value={inputValue}/>
+    </td>
+  {/if}
   <td>
     <Button size="small" on:click={() => dispatch('removeFilter')}>
       <Icon data={faTimes}/>

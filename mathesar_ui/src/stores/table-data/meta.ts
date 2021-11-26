@@ -218,9 +218,15 @@ export class Meta {
             value: term.value,
           }));
           filter[$filter.combination.id as string] = terms;
-          params.push(
-            `filters=${encodeURIComponent(JSON.stringify(filter))}`,
-          );
+          if ('and' in filter && filter.and.length > 0 && filter.and[0].op === 'get_duplicates') {
+            params.push(
+              `filters=${encodeURIComponent(JSON.stringify([filter.and[0]]))}`,
+            );
+          } else {
+            params.push(
+              `filters=${encodeURIComponent(JSON.stringify(filter))}`,
+            );
+          }
         }
         return params.join('&');
       },
