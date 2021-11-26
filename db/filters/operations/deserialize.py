@@ -1,6 +1,6 @@
 from typing import Any
 from db.filters.base import (
-    Predicate, Leaf, SingleParameter, MultiParameter, NoParameter, Branch, getPredicateSubClassByType, BadFilterFormat
+    Predicate, Leaf, SingleParameter, MultiParameter, NoParameter, Branch, getPredicateSubClassByTypeStr, BadFilterFormat
 )
 
 def getPredicateFromMAFilterSpec(spec: dict) -> Predicate:
@@ -9,7 +9,7 @@ def getPredicateFromMAFilterSpec(spec: dict) -> Predicate:
     try:
         assert isinstance(spec, dict)
         predicateTypeStr = getFirstDictKey(spec)
-        predicateSubClass = getPredicateSubClassByType(predicateTypeStr)
+        predicateSubClass = getPredicateSubClassByTypeStr(predicateTypeStr)
         predicateBody = spec[predicateTypeStr]
         if issubclass(predicateSubClass, Leaf):
             columnName = predicateBody['column']

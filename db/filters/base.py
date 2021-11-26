@@ -139,8 +139,7 @@ class And(MultiParameter, Branch, Predicate):
 class Or(MultiParameter, Branch, Predicate):
     type: BranchPredicateType = static(BranchPredicateType.OR)
 
-# TODO rename to getPredicateSubClassByTypeStr
-def getPredicateSubClassByType(predicateTypeStr: str) -> Union[Type[LeafPredicateType], Type[BranchPredicateType]]:
+def getPredicateSubClassByTypeStr(predicateTypeStr: str) -> Union[Type[LeafPredicateType], Type[BranchPredicateType]]:
     for subClass in allPredicateSubClasses:
         if subClass.type.value == predicateTypeStr:
             return subClass
@@ -162,4 +161,4 @@ allPredicateSubClasses = [
     Not,
     And,
     Or,
-    ]
+]
