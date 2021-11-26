@@ -49,7 +49,6 @@ def getSAIdFromPredicateType(type: Union[LeafPredicateType, BranchPredicateType]
         raise Exception("This should never happen.")
 
 # frozen=True provides immutability
-# TODO add kw_only=True on upgrade to Python 3.10, improves readability and prevents argument order errors
 def frozen_dataclass(f):
     return dataclass(frozen=True)(f)
 
@@ -68,11 +67,8 @@ class Predicate:
     def saId(self) -> str:
         return getSAIdFromPredicateType(self.type)
 
-def takesParameterThatsAMathesarType(predicateSubClass: Type[Predicate]) -> bool:
-    return (
-        issubclass(predicateSubClass, Leaf)
-        and not issubclass(predicateSubClass, NoParameter)
-    )
+    def __post_init__(self):
+        assertPredicateCorrect(self)
 
 @frozen_dataclass
 class Leaf(Predicate):
@@ -84,6 +80,7 @@ class Leaf(Predicate):
 class SingleParameter:
     parameterCount: ParameterCount = static(ParameterCount.SINGLE)
     parameter: Any
+
 
 @frozen_dataclass
 class MultiParameter:
@@ -162,3 +159,46 @@ allPredicateSubClasses = [
     And,
     Or,
 ]
+
+def takesParameterThatsAMathesarType(predicateSubClass: Type[Predicate]) -> bool:
+    return (
+        issubclass(predicateSubClass, Leaf)
+        and not issubclass(predicateSubClass, NoParameter)
+    )
+
+def not_empty(l): return len(l) > 0
+
+def assertPredicateCorrect(predicate):
+    try:
+        if isinstance(predicate, Leaf):
+            column = predicate.column
+            columnNameValid = column is not None and type(column) is str and column != ""
+            assert columnNameValid
+
+        if isinstance(predicate, SingleParameter):
+            parameter = predicate.parameter
+            assert parameter is not None
+            isParameterList = isinstance(parameter, list)
+            assert not isParameterList
+            isParameterPredicate = isinstance(parameter, Predicate)
+            if isinstance(predicate, Leaf):
+                assert not isParameterPredicate
+            elif isinstance(predicate, Branch):
+                assert isParameterPredicate
+        elif isinstance(predicate, MultiParameter):
+            parameters = predicate.parameters
+            assert parameters is not None
+            isParameterList = isinstance(parameters, list)
+            assert isParameterList
+            assert not_empty(parameters)
+            areParametersPredicates = (
+                isinstance(parameter, Predicate) for parameter in parameters
+            )
+            if isinstance(predicate, Leaf):
+                noneOfParametersArePredicates = not any(areParametersPredicates)
+                assert noneOfParametersArePredicates
+            elif isinstance(predicate, Branch):
+                allParametersArePredicates = all(areParametersPredicates)
+                assert allParametersArePredicates
+    except AssertionError as err:
+        raise BadFilterFormat from err
