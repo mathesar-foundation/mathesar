@@ -24,25 +24,41 @@
   let filterCondition: SelectOption;
   let filterValue = '';
   let addNew = false;
-
-  function onMetaChange(_meta: Meta) {
-    ({ filter } = _meta);
-    filterCombination = _meta.getFilterCombination();
-  }
-
-  $: onMetaChange(meta);
+  let filterByDuplicates = false;
 
   const conditions = [
     { id: 'eq', label: 'equals' },
     { id: 'ne', label: 'not equals' },
+    { id: 'get_duplicates', label: 'has duplicates' },
   ];
 
-  function addFilter() {
-    meta.addFilter({
-      column: filterColumn,
-      condition: filterCondition,
-      value: filterValue,
+  function onMetaChange(_meta: Meta) {
+    ({ filter } = _meta);
+    filterCombination = _meta.getFilterCombination();
+    filter.subscribe((value) => {
+      filterByDuplicates = (value.filters[0] && value.filters[0].condition.id === conditions[2].id);
+      if (filterByDuplicates && value.filters[0]) {
+        value.filters[0].value = [value.filters[0]?.column?.id];
+      }
     });
+  }
+
+  $: onMetaChange(meta);
+
+  function addFilter() {
+    if (filterCondition === conditions[2]) {
+      meta.addFilter({
+        column: filterColumn,
+        condition: filterCondition,
+        value: [filterColumn.id],
+      });
+    } else {
+      meta.addFilter({
+        column: filterColumn,
+        condition: filterCondition,
+        value: filterValue,
+      });
+    }
   
     [filterColumn] = options;
     [filterCondition] = conditions;
@@ -63,7 +79,11 @@
     <span>
       Filters
       {#if $filter?.filters?.length > 0}
-        ({$filter?.filters?.length})
+        {#if filterByDuplicates}
+          (1)
+        {:else}
+          ({$filter?.filters?.length})
+        {/if}
       {/if}
     </span>
   </div>
@@ -78,12 +98,14 @@
         </tr>
       {/if}
       {#each $filter?.filters || [] as option, index (option)}
-        <FilterEntry {options} {conditions}
-          bind:column={option.column}
-          bind:condition={option.condition}
-          bind:value={option.value}
-          on:removeFilter={() => meta.removeFilter(index)}
-          on:reload={() => updateFilters()}/>
+        {#if index === 0 || (index > 0 && !filterByDuplicates)}
+          <FilterEntry {options} {conditions} {filterByDuplicates}
+            bind:column={option.column}
+            bind:condition={option.condition}
+            bind:value={option.value}
+            on:removeFilter={() => meta.removeFilter(index)}
+            on:reload={() => updateFilters()}/>
+        {/if}
       {:else}
         <tr>
           <td class="empty-msg" colspan="3">
@@ -96,9 +118,11 @@
         {#if !addNew}
           <tr class="add-option">
             <td colspan="3">
-              <Button on:click={() => { addNew = true; }}>
-                Add new filter
-              </Button>
+              {#if !filterByDuplicates}
+                <Button on:click={() => { addNew = true; }}>
+                  Add new filter
+                </Button>
+              {/if}
             </td>
           </tr>
 
@@ -107,12 +131,16 @@
             <td class="column">
               <Select {options} bind:value={filterColumn}/>
             </td>
-            <td class="dir">
-              <Select options={conditions} bind:value={filterCondition}/>
-            </td>
-            <td class="value" colspan="2">
-              <TextInput bind:value={filterValue}/>
-            </td>
+            {#if !filterByDuplicates}
+              <td class="dir">
+                <Select options={conditions} bind:value={filterCondition}/>
+              </td>
+            {/if}
+            {#if filterCondition !== conditions[2] && !filterByDuplicates}
+              <td class="value" colspan="2">
+                <TextInput bind:value={filterValue}/>
+              </td>
+            {/if}
           </tr>
           <tr>
             <td class="filter-action" colspan="4">
