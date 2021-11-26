@@ -78,7 +78,7 @@ def takesParameterThatsAMathesarType(predicateSubClass: Type[Predicate]) -> bool
 class Leaf(Predicate):
     superType: PredicateSuperType = static(PredicateSuperType.LEAF)
     type: LeafPredicateType
-    field: str 
+    column: str 
 
 @frozen_dataclass
 class SingleParameter:
@@ -142,11 +142,11 @@ class Or(MultiParameter, Branch, Predicate):
 def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
     if isinstance(pred, Leaf):
         if isinstance(pred, SingleParameter):
-            return {'field': pred.field, 'op': pred.saId(), 'value': pred.parameter}
+            return {'column': pred.column, 'op': pred.saId(), 'value': pred.parameter}
         elif isinstance(pred, MultiParameter):
-            return {'field': pred.field, 'op': pred.saId(), 'value': pred.parameters}
+            return {'column': pred.column, 'op': pred.saId(), 'value': pred.parameters}
         elif isinstance(pred, NoParameter):
-            return {'field': pred.field, 'op': pred.saId()}
+            return {'column': pred.column, 'op': pred.saId()}
         else:
             raise Exception("This should never happen.")
     elif isinstance(pred, Branch):
@@ -176,12 +176,13 @@ def getPredicateFromMAFilterSpec(spec: dict) -> Predicate:
         predicateSubClass = getPredicateSubClassByType(predicateTypeStr)
         predicateBody = spec[predicateTypeStr]
         if issubclass(predicateSubClass, Leaf):
+            columnName = predicateBody['column']
             if issubclass(predicateSubClass, SingleParameter):
-                return predicateSubClass(field=predicateBody['field'], parameter=predicateBody['parameter'])
+                return predicateSubClass(column=columnName, parameter=predicateBody['parameter'])
             elif issubclass(predicateSubClass, MultiParameter):
-                return predicateSubClass(field=predicateBody['field'], parameters=predicateBody['parameters'])
+                return predicateSubClass(column=columnName, parameters=predicateBody['parameters'])
             elif issubclass(predicateSubClass, NoParameter):
-                return predicateSubClass(field=predicateBody['field'])
+                return predicateSubClass(column=columnName)
             else:
                 raise Exception("This should never happen.")
         elif issubclass(predicateSubClass, Branch):
