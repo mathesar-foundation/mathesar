@@ -98,7 +98,7 @@ def get_records(
         filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
-        group_by: group.GroupBy object
+        group_by: group.GroupBy object kwargs dict
     """
     if not order_by:
         # Set default ordering if none was requested
@@ -110,8 +110,9 @@ def get_records(
             # If there aren't primary keys, order by all columns
             order_by = [{'field': col, 'direction': 'asc'}
                         for col in table.columns]
+    group_by_obj = group.GroupBy(**group_by) if group_by else None
 
-    query = get_query(table, limit, offset, order_by, filters, group_by=group.GroupBy(**group_by))
+    query = get_query(table, limit, offset, order_by, filters, group_by=group_by_obj)
     return execute_query(engine, query)
 
 

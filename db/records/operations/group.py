@@ -10,11 +10,6 @@ from db.utils import execute_query
 
 logger = logging.getLogger(__name__)
 
-COUNT = 'count'
-CUME_DIST = 'cume_dist'
-FIRST_VALUE = 'first_value'
-GROUP_ID = 'group_id'
-LAST_VALUE = 'last_value'
 MIN_ROW = 'min_row'
 MAX_ROW = 'max_row'
 ORDER_BY = 'order_by'
@@ -29,11 +24,29 @@ class GroupMode(Enum):
     PERCENTILE = 'percentile'
 
 
+class GroupMetadataField(Enum):
+    COUNT = 'count'
+    GROUP_ID = 'group_id'
+    FIRST_VALUE = 'first_value'
+    LAST_VALUE = 'last_value'
+
+
 @dataclass(frozen=True, eq=True)
 class GroupBy:
     column_list: 'a list of columns or column names'
     group_mode: 'a string from in the GroupMode Enum' = GroupMode.DISTINCT.value
     num_groups: 'an int giving how many groups to produce for certain modes' = 12
+
+    def get_validated_group_by_columns(self, table):
+        if type(self.column_list) not in (tuple, list):
+            raise BadGroupFormat(f"column_list must be list or tuple.")
+        for field in self.column_list:
+            if type(field) not in (str, Column):
+                raise BadGroupFormat(f"Group field {field} must be a string or Column.")
+            field_name = field if isinstance(field, str) else field.name
+            if field_name not in table.columns:
+                raise GroupFieldNotFound(f"Group field {field} not found in {table}.")
+        return create_col_objects(table, self.column_list)
 
 
 def get_group_augmented_records_query(table, group_by):
@@ -44,7 +57,7 @@ def get_group_augmented_records_query(table, group_by):
         table:      SQLAlchemy table object
         group_by:   GroupBy object giving args for grouping
     """
-    grouping_columns = _get_validated_group_by_columns(table, group_by.column_list)
+    grouping_columns = group_by.get_validated_group_by_columns(table)
 
     if group_by.group_mode == GroupMode.PERCENTILE.value:
         query = _get_percentile_range_group_select(
@@ -63,43 +76,38 @@ def get_group_augmented_records_query(table, group_by):
 
 
 def _get_distinct_group_select(table, grouping_columns):
-
     window_def = {
         PARTITION_BY: grouping_columns,
         ORDER_BY: grouping_columns,
         RANGE_: (None, None),
     }
-
-    col_key_value_tuples = ((literal(str(col.name)), col) for col in grouping_columns)
-    col_key_value_list = [
-        col_part for col_tup in col_key_value_tuples for col_part in col_tup
-    ]
-    inner_grouping_object = func.json_build_object(*col_key_value_list)
-
+    group_id_expr = func.dense_rank().over(
+        order_by=window_def[ORDER_BY], range_=window_def[RANGE_]
+    )
     return select(
-        table, func.json_build_object(
-            literal(COUNT),
-            func.count(1).over(**window_def),
-            literal(FIRST_VALUE),
-            func.first_value(inner_grouping_object).over(**window_def),
-            literal(LAST_VALUE),
-            func.last_value(inner_grouping_object).over(**window_def),
-            literal(GROUP_ID),
-            func.dense_rank().over(
-                order_by=window_def[ORDER_BY],
-                range_=window_def[RANGE_],
-            )
-        ).label(MATHESAR_GROUP_METADATA)
+        table,
+        _get_group_metadata_definition(window_def, grouping_columns, group_id_expr)
     )
 
 
 def _get_percentile_range_group_select(table, column_list, num_groups):
     column_names = [col.name for col in column_list]
+    CUME_DIST = 'cume_dist'
     cume_dist_cte = select(
         table,
         func.cume_dist().over(order_by=column_list).label(CUME_DIST)
     ).cte()
-    ranges = _get_fractional_cases(cume_dist_cte.columns[CUME_DIST], num_groups)
+    ranges = [
+        (
+            and_(
+                cume_dist_cte.columns[CUME_DIST] > i / num_groups,
+                cume_dist_cte.columns[CUME_DIST] <= (i + 1) / num_groups
+            ),
+            i + 1
+        )
+        for i in range(num_groups)
+    ]
+
     ranges_cte = select(
         *[col for col in cume_dist_cte.columns if col.name != CUME_DIST],
         case(*ranges).label(RANGE_ID)
@@ -112,43 +120,31 @@ def _get_percentile_range_group_select(table, column_list, num_groups):
         ORDER_BY: ranges_agg_cols,
         RANGE_: (None, None)
     }
+    group_id_expr = window_def[PARTITION_BY]
 
-    col_key_value_tuples = ((literal(str(col.name)), col) for col in ranges_agg_cols)
+    return select(
+        *[col for col in ranges_cte.columns if col.name in table.columns],
+        _get_group_metadata_definition(window_def, ranges_agg_cols, group_id_expr)
+    )
+
+
+def _get_group_metadata_definition(window_def, grouping_columns, group_id_expr):
+    col_key_value_tuples = ((literal(str(col.name)), col) for col in grouping_columns)
     col_key_value_list = [
         col_part for col_tup in col_key_value_tuples for col_part in col_tup
     ]
     inner_grouping_object = func.json_build_object(*col_key_value_list)
 
-    return select(
-        *[col for col in ranges_cte.columns if col.name in table.columns],
-        func.json_build_object(
-            literal(COUNT),
-            func.count(1).over(partition_by=window_def[PARTITION_BY]),
-            literal(FIRST_VALUE),
-            func.first_value(inner_grouping_object).over(**window_def),
-            literal(LAST_VALUE),
-            func.last_value(inner_grouping_object).over(**window_def),
-            literal(GROUP_ID),
-            window_def[PARTITION_BY]
-        ).label(MATHESAR_GROUP_METADATA)
-    )
-
-
-def _get_row_jsonb_window_expr(window_function, row_columns, window_def):
-    return func.to_jsonb(window_function(func.row(*row_columns)).over(**window_def))
-
-
-def _get_fractional_cases(column, num_groups):
-    """
-    The column should be numeric values between 0 and 1.  This writes a
-    list of cases (expressed as tuples for the SQLAlchemy case function)
-    splitting such a column into num_groups different parts.  Does not
-    include zero.
-    """
-    return [
-        (and_(column > i / num_groups, column <= (i + 1) / num_groups), i + 1)
-        for i in range(num_groups)
-    ]
+    return func.json_build_object(
+        literal(GroupMetadataField.GROUP_ID.value),
+        group_id_expr,
+        literal(GroupMetadataField.COUNT.value),
+        func.count(1).over(partition_by=window_def[PARTITION_BY]),
+        literal(GroupMetadataField.FIRST_VALUE.value),
+        func.first_value(inner_grouping_object).over(**window_def),
+        literal(GroupMetadataField.LAST_VALUE.value),
+        func.last_value(inner_grouping_object).over(**window_def),
+    ).label(MATHESAR_GROUP_METADATA)
 
 
 def extract_group_metadata(
@@ -162,8 +158,15 @@ def extract_group_metadata(
     def _get_record_pieces(record):
         data = {k: v for k, v in record[data_key].items() if k != MATHESAR_GROUP_METADATA}
         group_metadata = record[data_key].get(MATHESAR_GROUP_METADATA, {})
-        metadata = record[metadata_key] | {GROUP_ID: group_metadata.get(GROUP_ID)}
+        metadata = (
+            record[metadata_key]
+            | {
+                GroupMetadataField.GROUP_ID.value: group_metadata.get(GroupMetadataField.GROUP_ID.value)
+            }
+        )
         return {data_key: data, metadata_key: metadata}, group_metadata if group_metadata else None
+
+
 
     record_tup, group_tup = zip(
         *(_get_record_pieces(record) for record in record_dictionaries)
@@ -175,15 +178,3 @@ def extract_group_metadata(
     )
 
     return list(record_tup), reduced_groups
-
-
-def _get_validated_group_by_columns(table, group_by):
-    if type(group_by) not in (tuple, list):
-        raise BadGroupFormat(f"Group spec {group_by} must be list or tuple.")
-    for field in group_by:
-        if type(field) not in (str, Column):
-            raise BadGroupFormat(f"Group field {field} must be a string or Column.")
-        field_name = field if isinstance(field, str) else field.name
-        if field_name not in table.c:
-            raise GroupFieldNotFound(f"Group field {field} not found in {table}.")
-    return create_col_objects(table, group_by)
