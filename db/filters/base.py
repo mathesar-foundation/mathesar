@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field#, replace
 from enum import Enum
 from typing import Any, List, Union, Type
+from sqlalchemy_filters.exceptions import BadFilterFormat as SABadFilterFormat
 
 class PredicateSuperType(Enum):
     LEAF = "leaf"
@@ -11,6 +12,8 @@ class BranchPredicateType(Enum):
     OR = "or"
     AND = "and"
 
+# TODO switch to using SA filter names directly
+# TODO what to do about duplication https://github.com/centerofci/mathesar/pull/844 ?
 class LeafPredicateType(Enum):
     """Note that negation is achieved via BranchPredicateType.NOT"""
     EQUAL = "equal"
@@ -157,6 +160,49 @@ def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
             raise Exception("This should never happen.")
     else:
         raise Exception("This should never happen.")
+
+def getPredicateSubClassByType(predicateTypeStr: str) -> Union[Type[LeafPredicateType], Type[BranchPredicateType]]:
+    for subClass in allPredicateSubClasses:
+        if subClass.type.value == predicateTypeStr:
+            return subClass
+    raise Exception(f'Unknown predicate type: {predicateTypeStr}')
+
+def getPredicateFromMAFilterSpec(spec: dict) -> Predicate:
+    def getFirstDictKey(dict: dict) -> Any:
+        return next(iter(dict))
+    try:
+        assert isinstance(spec, dict)
+        predicateTypeStr = getFirstDictKey(spec)
+        predicateSubClass = getPredicateSubClassByType(predicateTypeStr)
+        predicateBody = spec[predicateTypeStr]
+        if issubclass(predicateSubClass, Leaf):
+            if issubclass(predicateSubClass, SingleParameter):
+                return predicateSubClass(field=predicateBody['field'], parameter=predicateBody['parameter'])
+            elif issubclass(predicateSubClass, MultiParameter):
+                return predicateSubClass(field=predicateBody['field'], parameters=predicateBody['parameters'])
+            elif issubclass(predicateSubClass, NoParameter):
+                return predicateSubClass(field=predicateBody['field'])
+            else:
+                raise Exception("This should never happen.")
+        elif issubclass(predicateSubClass, Branch):
+            if issubclass(predicateSubClass, SingleParameter):
+                parameterPredicate = getPredicateFromMAFilterSpec(predicateBody)
+                return predicateSubClass(parameter=parameterPredicate)
+            elif issubclass(predicateSubClass, MultiParameter):
+                parameterPredicates = \
+                    [ getPredicateFromMAFilterSpec(parameter) for parameter in predicateBody ]
+                return predicateSubClass(parameters=parameterPredicates)
+            else:
+                raise Exception("This should never happen.")
+        else:
+            raise Exception("This should never happen.")
+    except:
+        raise BadFilterFormat("Parsing of Mathesar filter specification failed.")
+
+
+class BadFilterFormat(SABadFilterFormat):
+    pass
+
 
 allPredicateSubClasses = [
     Equal,
