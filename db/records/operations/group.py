@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 import json
 import logging
@@ -10,12 +10,6 @@ from db.utils import execute_query
 
 logger = logging.getLogger(__name__)
 
-MIN_ROW = 'min_row'
-MAX_ROW = 'max_row'
-ORDER_BY = 'order_by'
-PARTITION_BY = 'partition_by'
-RANGE_ID = 'range_id'
-RANGE_ = 'range_'
 MATHESAR_GROUP_METADATA = '__mathesar_group_metadata'
 
 
@@ -49,6 +43,13 @@ class GroupBy:
         return create_col_objects(table, self.column_list)
 
 
+@dataclass(frozen=True, eq=True)
+class GroupingWindowDefinition:
+    partition_by: 'column or iterable of columns'
+    order_by: 'column or iterable of columns'
+    range_ : 'do not modify' = field(default=(None, None), init=False)
+
+
 def get_group_augmented_records_query(table, group_by):
     """
     Returns counts by specified groupings
@@ -76,13 +77,12 @@ def get_group_augmented_records_query(table, group_by):
 
 
 def _get_distinct_group_select(table, grouping_columns):
-    window_def = {
-        PARTITION_BY: grouping_columns,
-        ORDER_BY: grouping_columns,
-        RANGE_: (None, None),
-    }
+    window_def = GroupingWindowDefinition(
+        order_by=grouping_columns, partition_by=grouping_columns
+    )
+
     group_id_expr = func.dense_rank().over(
-        order_by=window_def[ORDER_BY], range_=window_def[RANGE_]
+        order_by=window_def.order_by, range_=window_def.range_
     )
     return select(
         table,
@@ -93,6 +93,7 @@ def _get_distinct_group_select(table, grouping_columns):
 def _get_percentile_range_group_select(table, column_list, num_groups):
     column_names = [col.name for col in column_list]
     CUME_DIST = 'cume_dist'
+    RANGE_ID = 'range_id'
     cume_dist_cte = select(
         table,
         func.cume_dist().over(order_by=column_list).label(CUME_DIST)
@@ -115,12 +116,10 @@ def _get_percentile_range_group_select(table, column_list, num_groups):
     ranges_agg_cols = [
         col for col in ranges_cte.columns if col.name in column_names
     ]
-    window_def = {
-        PARTITION_BY: ranges_cte.columns[RANGE_ID],
-        ORDER_BY: ranges_agg_cols,
-        RANGE_: (None, None)
-    }
-    group_id_expr = window_def[PARTITION_BY]
+    window_def = GroupingWindowDefinition(
+        order_by=ranges_agg_cols, partition_by=ranges_cte.columns[RANGE_ID]
+    )
+    group_id_expr = window_def.partition_by
 
     return select(
         *[col for col in ranges_cte.columns if col.name in table.columns],
@@ -139,11 +138,19 @@ def _get_group_metadata_definition(window_def, grouping_columns, group_id_expr):
         literal(GroupMetadataField.GROUP_ID.value),
         group_id_expr,
         literal(GroupMetadataField.COUNT.value),
-        func.count(1).over(partition_by=window_def[PARTITION_BY]),
+        func.count(1).over(partition_by=window_def.partition_by),
         literal(GroupMetadataField.FIRST_VALUE.value),
-        func.first_value(inner_grouping_object).over(**window_def),
+        func.first_value(inner_grouping_object).over(
+            partition_by=window_def.partition_by,
+            order_by=window_def.order_by,
+            range_=window_def.range_,
+        ),
         literal(GroupMetadataField.LAST_VALUE.value),
-        func.last_value(inner_grouping_object).over(**window_def),
+        func.last_value(inner_grouping_object).over(
+            partition_by=window_def.partition_by,
+            order_by=window_def.order_by,
+            range_=window_def.range_,
+        ),
     ).label(MATHESAR_GROUP_METADATA)
 
 
