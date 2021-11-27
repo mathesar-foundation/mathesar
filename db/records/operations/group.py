@@ -4,7 +4,7 @@ import json
 import logging
 from sqlalchemy import select, Column, func, and_, case, literal
 
-from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
+from db.records import exceptions as rec_exc
 from db.records.utils import create_col_objects
 from db.utils import execute_query
 
@@ -31,15 +31,35 @@ class GroupBy:
     group_mode: 'a string from in the GroupMode Enum' = GroupMode.DISTINCT.value
     num_groups: 'an int giving how many groups to produce for certain modes' = 12
 
-    def get_validated_group_by_columns(self, table):
+    def validate(self):
         if type(self.column_list) not in (tuple, list):
-            raise BadGroupFormat(f"column_list must be list or tuple.")
-        for field in self.column_list:
-            if type(field) not in (str, Column):
-                raise BadGroupFormat(f"Group field {field} must be a string or Column.")
-            field_name = field if isinstance(field, str) else field.name
-            if field_name not in table.columns:
-                raise GroupFieldNotFound(f"Group field {field} not found in {table}.")
+            raise rec_exc.BadGroupFormat(f"column_list must be list or tuple.")
+        if self.group_mode not in {mode.value for mode in GroupMode}:
+            raise rec_exc.InvalidGroupType(
+                f'Group_mode "{self.group_mode}" is invalid.'
+            )
+        if (
+                self.group_mode == GroupMode.PERCENTILE.value
+                and not type(self.num_groups) == int
+        ):
+            raise rec_exc.BadGroupFormat(
+                'percentile group_mode requires integer num_groups'
+            )
+
+        for col in self.column_list:
+            if type(col) not in (str, Column):
+                raise rec_exc.BadGroupFormat(
+                    f"Group column {col} must be a string or Column."
+                )
+
+    def get_validated_group_by_columns(self, table):
+        self.validate()
+        for col in self.column_list:
+            col_name = col if isinstance(col, str) else col.name
+            if col_name not in table.columns:
+                raise rec_exc.GroupFieldNotFound(
+                    f"Group col {col} not found in {table}."
+                )
         return create_col_objects(table, self.column_list)
 
 
@@ -67,12 +87,7 @@ def get_group_augmented_records_query(table, group_by):
     elif group_by.group_mode == GroupMode.DISTINCT.value:
         query = _get_distinct_group_select(table, grouping_columns)
     else:
-        logger.warn(
-            f'group_mode "{group_by.group_mode}" not known. Falling back to default.'
-        )
-        query = get_group_augmented_records_query(
-            table, GroupBy(column_list=group_by.column_list)
-        )
+        raise rec_exc.BadGroupFormat(f"Unknown error")
     return query
 
 
