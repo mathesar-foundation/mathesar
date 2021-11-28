@@ -22,7 +22,7 @@ class MathesarTypeIdentifier(Enum):
     CUSTOM = 'custom'
 
 
-comparableMathesarTypes = [
+comparable_mathesar_types = [
     MathesarTypeIdentifier.DATETIME,
     MathesarTypeIdentifier.DURATION,
     MathesarTypeIdentifier.MONEY,
@@ -30,8 +30,8 @@ comparableMathesarTypes = [
 ]
 
 
-def isMathesarTypeComparable(maType: MathesarTypeIdentifier) -> bool:
-    return maType in comparableMathesarTypes
+def is_mathesar_type_comparable(ma_type: MathesarTypeIdentifier) -> bool:
+    return ma_type in comparable_mathesar_types
 
 
 def _get_mapped_types(type_map):

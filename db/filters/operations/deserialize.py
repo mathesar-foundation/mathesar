@@ -1,34 +1,34 @@
 from typing import Any
 from db.filters.base import (
-    Predicate, Leaf, SingleParameter, MultiParameter, NoParameter, Branch, getPredicateSubClassByTypeStr, BadFilterFormat
+    Predicate, Leaf, SingleParameter, MultiParameter, NoParameter, Branch, get_predicate_subclass_by_type_str, BadFilterFormat
 )
 
-def getPredicateFromMAFilterSpec(spec: dict) -> Predicate:
-    def getFirstDictKey(dict: dict) -> Any:
+def get_predicate_from_MA_filter_spec(spec: dict) -> Predicate:
+    def get_first_dict_key(dict: dict) -> Any:
         return next(iter(dict))
     try:
         assert isinstance(spec, dict)
-        predicateTypeStr = getFirstDictKey(spec)
-        predicateSubClass = getPredicateSubClassByTypeStr(predicateTypeStr)
-        predicateBody = spec[predicateTypeStr]
-        if issubclass(predicateSubClass, Leaf):
-            columnName = predicateBody['column']
-            if issubclass(predicateSubClass, SingleParameter):
-                return predicateSubClass(column=columnName, parameter=predicateBody['parameter'])
-            elif issubclass(predicateSubClass, MultiParameter):
-                return predicateSubClass(column=columnName, parameters=predicateBody['parameters'])
-            elif issubclass(predicateSubClass, NoParameter):
-                return predicateSubClass(column=columnName)
+        predicate_type_str = get_first_dict_key(spec)
+        predicate_subclass = get_predicate_subclass_by_type_str(predicate_type_str)
+        predicate_body = spec[predicate_type_str]
+        if issubclass(predicate_subclass, Leaf):
+            columnName = predicate_body['column']
+            if issubclass(predicate_subclass, SingleParameter):
+                return predicate_subclass(column=columnName, parameter=predicate_body['parameter'])
+            elif issubclass(predicate_subclass, MultiParameter):
+                return predicate_subclass(column=columnName, parameters=predicate_body['parameters'])
+            elif issubclass(predicate_subclass, NoParameter):
+                return predicate_subclass(column=columnName)
             else:
                 raise Exception("This should never happen.")
-        elif issubclass(predicateSubClass, Branch):
-            if issubclass(predicateSubClass, SingleParameter):
-                parameterPredicate = getPredicateFromMAFilterSpec(predicateBody)
-                return predicateSubClass(parameter=parameterPredicate)
-            elif issubclass(predicateSubClass, MultiParameter):
-                parameterPredicates = \
-                    [ getPredicateFromMAFilterSpec(parameter) for parameter in predicateBody ]
-                return predicateSubClass(parameters=parameterPredicates)
+        elif issubclass(predicate_subclass, Branch):
+            if issubclass(predicate_subclass, SingleParameter):
+                parameter_predicate = getPredicateFromMAFilterSpec(predicate_body)
+                return predicate_subclass(parameter=parameter_predicate)
+            elif issubclass(predicate_subclass, MultiParameter):
+                parameter_predicates = \
+                    [ get_predicate_from_MA_filter_spec(parameter) for parameter in predicate_body ]
+                return predicate_subclass(parameters=parameter_predicates)
             else:
                 raise Exception("This should never happen.")
         else:

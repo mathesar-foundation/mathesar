@@ -1,6 +1,6 @@
 import pytest
 
-from db.filters.operations.serialize import getSAFilterSpecFromPredicate
+from db.filters.operations.serialize import get_SA_filter_spec_from_predicate
 from db.filters.base import And, Or, Not, Equal, Empty, In
 
 def test_serialization():
@@ -13,12 +13,12 @@ def test_serialization():
             Empty(column="col1")
         ),
     ])
-    expectedSAFilterSpec = {'and': [
+    expected_SA_filter_spec = {'and': [
         {'or': [
             {'field': 'col3', 'op': 'in', 'value': ['value31', 'value32']},
             {'field': 'col2', 'op': 'eq', 'value': 'value2'}
         ]},
         {'not': [{'field': 'col1', 'op': 'is_null'}]}
     ]}
-    saFilterSpec = getSAFilterSpecFromPredicate(predicate)
-    assert saFilterSpec == expectedSAFilterSpec
+    sa_filter_spec = get_SA_filter_spec_from_predicate(predicate)
+    assert sa_filter_spec == expected_SA_filter_spec

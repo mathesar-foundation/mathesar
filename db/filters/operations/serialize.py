@@ -1,6 +1,6 @@
 from db.filters.base import Predicate, Leaf, SingleParameter, MultiParameter, NoParameter, Branch
 
-def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
+def get_SA_filter_spec_from_predicate(pred: Predicate) -> dict:
     if isinstance(pred, Leaf):
         if isinstance(pred, SingleParameter):
             return {'field': pred.column, 'op': pred.saId(), 'value': pred.parameter}
@@ -12,10 +12,10 @@ def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
             raise Exception("This should never happen.")
     elif isinstance(pred, Branch):
         if isinstance(pred, SingleParameter):
-            subject = getSAFilterSpecFromPredicate(pred.parameter)
+            subject = get_SA_filter_spec_from_predicate(pred.parameter)
             return {pred.saId(): [subject]}
         elif isinstance(pred, MultiParameter):
-            subjects = [ getSAFilterSpecFromPredicate(subject) for subject in pred.parameters ]
+            subjects = [ get_SA_filter_spec_from_predicate(subject) for subject in pred.parameters ]
             return {pred.saId(): subjects}
         else:
             raise Exception("This should never happen.")

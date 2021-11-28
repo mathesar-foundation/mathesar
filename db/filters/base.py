@@ -29,7 +29,7 @@ class ParameterCount(Enum):
     MULTI = "multi"
     NONE = "none"
 
-predicateTypesToSAIds = {
+predicate_types_to_SA_ids = {
     BranchPredicateType.NOT: 'not',
     BranchPredicateType.AND: 'and',
     BranchPredicateType.OR: 'or',
@@ -42,9 +42,9 @@ predicateTypesToSAIds = {
     LeafPredicateType.IN: 'in',
 }
 
-def getSAIdFromPredicateType(type: Union[LeafPredicateType, BranchPredicateType]) -> str:
-    if type in predicateTypesToSAIds:
-        return predicateTypesToSAIds[type]
+def get_SA_id_from_predicate_type(type: Union[LeafPredicateType, BranchPredicateType]) -> str:
+    if type in predicate_types_to_SA_ids:
+        return predicate_types_to_SA_ids[type]
     else:
         raise Exception("This should never happen.")
 
@@ -60,47 +60,47 @@ def static(value):
 
 @frozen_dataclass
 class Predicate:
-    superType: PredicateSuperType
+    super_type: PredicateSuperType
     type: Union[LeafPredicateType, BranchPredicateType]
-    parameterCount: ParameterCount
+    parameter_count: ParameterCount
 
     def saId(self) -> str:
-        return getSAIdFromPredicateType(self.type)
+        return get_SA_id_from_predicate_type(self.type)
 
     def __post_init__(self):
-        assertPredicateCorrect(self)
+        assert_predicate_correct(self)
 
 @frozen_dataclass
 class Leaf(Predicate):
-    superType: PredicateSuperType = static(PredicateSuperType.LEAF)
+    super_type: PredicateSuperType = static(PredicateSuperType.LEAF)
     type: LeafPredicateType
     column: str 
 
 @frozen_dataclass
 class SingleParameter:
-    parameterCount: ParameterCount = static(ParameterCount.SINGLE)
+    parameter_count: ParameterCount = static(ParameterCount.SINGLE)
     parameter: Any
 
 @frozen_dataclass
 class MultiParameter:
-    parameterCount: ParameterCount = static(ParameterCount.MULTI)
+    parameter_count: ParameterCount = static(ParameterCount.MULTI)
     parameters: List[Any]
 
 @frozen_dataclass
 class NoParameter:
-    parameterCount: ParameterCount = static(ParameterCount.NONE)
+    parameter_count: ParameterCount = static(ParameterCount.NONE)
 
 @frozen_dataclass
 class Branch(Predicate):
-    superType: PredicateSuperType = static(PredicateSuperType.BRANCH)
+    super_type: PredicateSuperType = static(PredicateSuperType.BRANCH)
     type: BranchPredicateType
 
 @frozen_dataclass
 class ReliesOnComparability:
     pass
 
-def reliesOnComparability(predicateSubClass: Type[Predicate]) -> bool:
-    return issubclass(predicateSubClass, ReliesOnComparability)
+def relies_on_comparability(predicate_subclass: Type[Predicate]) -> bool:
+    return issubclass(predicate_subclass, ReliesOnComparability)
 
 @frozen_dataclass
 class Equal(SingleParameter, Leaf, Predicate):
@@ -142,17 +142,17 @@ class And(MultiParameter, Branch, Predicate):
 class Or(MultiParameter, Branch, Predicate):
     type: BranchPredicateType = static(BranchPredicateType.OR)
 
-def getPredicateSubClassByTypeStr(predicateTypeStr: str) -> Union[Type[LeafPredicateType], Type[BranchPredicateType]]:
-    for subClass in allPredicates:
-        if subClass.type.value == predicateTypeStr:
-            return subClass
-    raise Exception(f'Unknown predicate type: {predicateTypeStr}')
+def get_predicate_subclass_by_type_str(predicate_type_str: str) -> Union[Type[LeafPredicateType], Type[BranchPredicateType]]:
+    for subclass in all_predicates:
+        if subclass.type.value == predicate_type_str:
+            return subclass
+    raise Exception(f'Unknown predicate type: {predicate_type_str}')
 
 
 class BadFilterFormat(SABadFilterFormat):
     pass
 
-allPredicates = [
+all_predicates = [
     Equal,
     Greater,
     GreaterOrEqual,
@@ -165,49 +165,49 @@ allPredicates = [
     Or,
 ]
 
-predicatesThatDontNeedComparability = [
-    predicate for predicate in allPredicates if not reliesOnComparability(predicate)
+predicates_that_dont_need_comparability = [
+    predicate for predicate in all_predicates if not relies_on_comparability(predicate)
 ]
 
-def takesParameterThatsAMathesarType(predicateSubClass: Type[Predicate]) -> bool:
+def takes_parameter_thats_mathesar_type(predicate_subclass: Type[Predicate]) -> bool:
     return (
-        issubclass(predicateSubClass, Leaf)
-        and not issubclass(predicateSubClass, NoParameter)
+        issubclass(predicate_subclass, Leaf)
+        and not issubclass(predicate_subclass, NoParameter)
     )
 
 def not_empty(l): return len(l) > 0
 
-def assertPredicateCorrect(predicate):
+def assert_predicate_correct(predicate):
     try:
         if isinstance(predicate, Leaf):
             column = predicate.column
-            columnNameValid = column is not None and type(column) is str and column != ""
-            assert columnNameValid
+            column_name_valid = column is not None and type(column) is str and column != ""
+            assert column_name_valid
 
         if isinstance(predicate, SingleParameter):
             parameter = predicate.parameter
             assert parameter is not None
-            isParameterList = isinstance(parameter, list)
-            assert not isParameterList
-            isParameterPredicate = isinstance(parameter, Predicate)
+            is_parameter_list = isinstance(parameter, list)
+            assert not is_parameter_list
+            is_parameter_predicate = isinstance(parameter, Predicate)
             if isinstance(predicate, Leaf):
-                assert not isParameterPredicate
+                assert not is_parameter_predicate
             elif isinstance(predicate, Branch):
-                assert isParameterPredicate
+                assert is_parameter_predicate
         elif isinstance(predicate, MultiParameter):
             parameters = predicate.parameters
             assert parameters is not None
-            isParameterList = isinstance(parameters, list)
-            assert isParameterList
+            is_parameter_list = isinstance(parameters, list)
+            assert is_parameter_list
             assert not_empty(parameters)
-            areParametersPredicates = (
+            are_parameters_predicates = (
                 isinstance(parameter, Predicate) for parameter in parameters
             )
             if isinstance(predicate, Leaf):
-                noneOfParametersArePredicates = not any(areParametersPredicates)
-                assert noneOfParametersArePredicates
+                none_of_parameters_are_predicates = not any(are_parameters_predicates)
+                assert none_of_parameters_are_predicates
             elif isinstance(predicate, Branch):
-                allParametersArePredicates = all(areParametersPredicates)
-                assert allParametersArePredicates
+                all_parameters_are_predicates = all(are_parameters_predicates)
+                assert all_parameters_are_predicates
     except AssertionError as err:
         raise BadFilterFormat from err
