@@ -22,6 +22,18 @@ class MathesarTypeIdentifier(Enum):
     CUSTOM = 'custom'
 
 
+comparableMathesarTypes = [
+    MathesarTypeIdentifier.DATETIME,
+    MathesarTypeIdentifier.DURATION,
+    MathesarTypeIdentifier.MONEY,
+    MathesarTypeIdentifier.NUMBER,
+]
+
+
+def isMathesarTypeComparable(maType: MathesarTypeIdentifier) -> bool:
+    return maType in comparableMathesarTypes
+
+
 def _get_mapped_types(type_map):
     mapped_types = []
     for type_dict in type_map:

@@ -81,7 +81,6 @@ class SingleParameter:
     parameterCount: ParameterCount = static(ParameterCount.SINGLE)
     parameter: Any
 
-
 @frozen_dataclass
 class MultiParameter:
     parameterCount: ParameterCount = static(ParameterCount.MULTI)
@@ -97,23 +96,30 @@ class Branch(Predicate):
     type: BranchPredicateType
 
 @frozen_dataclass
+class ReliesOnComparability:
+    pass
+
+def reliesOnComparability(predicateSubClass: Type[Predicate]) -> bool:
+    return issubclass(predicateSubClass, ReliesOnComparability)
+
+@frozen_dataclass
 class Equal(SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.EQUAL)
 
 @frozen_dataclass
-class Greater(SingleParameter, Leaf, Predicate):
+class Greater(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.GREATER)
 
 @frozen_dataclass
-class GreaterOrEqual(SingleParameter, Leaf, Predicate):
+class GreaterOrEqual(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.GREATER_OR_EQUAL)
 
 @frozen_dataclass
-class Lesser(SingleParameter, Leaf, Predicate):
+class Lesser(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.LESSER)
 
 @frozen_dataclass
-class LesserOrEqual(SingleParameter, Leaf, Predicate):
+class LesserOrEqual(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.LESSER_OR_EQUAL)
 
 @frozen_dataclass
@@ -137,7 +143,7 @@ class Or(MultiParameter, Branch, Predicate):
     type: BranchPredicateType = static(BranchPredicateType.OR)
 
 def getPredicateSubClassByTypeStr(predicateTypeStr: str) -> Union[Type[LeafPredicateType], Type[BranchPredicateType]]:
-    for subClass in allPredicateSubClasses:
+    for subClass in allPredicates:
         if subClass.type.value == predicateTypeStr:
             return subClass
     raise Exception(f'Unknown predicate type: {predicateTypeStr}')
@@ -146,8 +152,7 @@ def getPredicateSubClassByTypeStr(predicateTypeStr: str) -> Union[Type[LeafPredi
 class BadFilterFormat(SABadFilterFormat):
     pass
 
-
-allPredicateSubClasses = [
+allPredicates = [
     Equal,
     Greater,
     GreaterOrEqual,
@@ -158,6 +163,10 @@ allPredicateSubClasses = [
     Not,
     And,
     Or,
+]
+
+predicatesThatDontNeedComparability = [
+    predicate for predicate in allPredicates if not reliesOnComparability(predicate)
 ]
 
 def takesParameterThatsAMathesarType(predicateSubClass: Type[Predicate]) -> bool:

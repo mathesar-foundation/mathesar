@@ -75,6 +75,7 @@ def get_query(table, limit, offset, order_by, filters, cols=None):
     if order_by is not None:
         query = apply_sort(query, order_by)
     if filters is not None:
+        # TODO parse new custom filter spec
         query = apply_filters(query, filters)
     return query
 

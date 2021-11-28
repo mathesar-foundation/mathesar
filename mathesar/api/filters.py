@@ -1,14 +1,16 @@
 from django_filters import BooleanFilter, DateTimeFromToRangeFilter, OrderingFilter
 from django_property_filter import PropertyFilterSet, PropertyBaseInFilter, PropertyCharFilter, PropertyOrderingFilter
 
-from mathesar.database.types import MathesarTypeIdentifier
+from mathesar.database.types import MathesarTypeIdentifier, isMathesarTypeComparable
 from mathesar.models import Schema, Table, Database
 
-from db.filters.base import Predicate, allPredicateSubClasses, takesParameterThatsAMathesarType
+from db.filters.base import (
+    Predicate, allPredicates, takesParameterThatsAMathesarType, predicatesThatDontNeedComparability
+)
 from typing import List, Type
 
 
-# TODO turn this spec into a class
+# TODO consider turning this spec into a class
 def getSpecForPredicateAndMAType(predicateSubClass: Type[Predicate], maType: MathesarTypeIdentifier) -> dict:
     spec = {
         'position': predicateSubClass.superType.value,
@@ -21,11 +23,12 @@ def getSpecForPredicateAndMAType(predicateSubClass: Type[Predicate], maType: Mat
 
 
 def getSpecsForMAType(maType: MathesarTypeIdentifier) -> List[dict]:
+    comparable = isMathesarTypeComparable(maType)
+    supportedPredicateSet = allPredicates if comparable else predicatesThatDontNeedComparability
     return [
-        getSpecForPredicateAndMAType(predicateSubClass, maType)
-        for predicateSubClass in allPredicateSubClasses
+        getSpecForPredicateAndMAType(predicate, maType)
+        for predicate in supportedPredicateSet
     ]
-
 
 FILTER_OPTIONS_BY_MATHESAR_TYPE_IDENTIFIER = {
     maType.value: getSpecsForMAType(maType) for maType in MathesarTypeIdentifier
