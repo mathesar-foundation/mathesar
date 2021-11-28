@@ -15,10 +15,10 @@ def test_serialization():
     ])
     expectedSAFilterSpec = {'and': [
         {'or': [
-            {'column': 'col3', 'op': 'in', 'value': ['value31', 'value32']},
-            {'column': 'col2', 'op': 'eq', 'value': 'value2'}
+            {'field': 'col3', 'op': 'in', 'value': ['value31', 'value32']},
+            {'field': 'col2', 'op': 'eq', 'value': 'value2'}
         ]},
-        {'not': [{'column': 'col1', 'op': 'is_null'}]}
+        {'not': [{'field': 'col1', 'op': 'is_null'}]}
     ]}
     saFilterSpec = getSAFilterSpecFromPredicate(predicate)
     assert saFilterSpec == expectedSAFilterSpec

@@ -3,11 +3,11 @@ from db.filters.base import Predicate, Leaf, SingleParameter, MultiParameter, No
 def getSAFilterSpecFromPredicate(pred: Predicate) -> dict:
     if isinstance(pred, Leaf):
         if isinstance(pred, SingleParameter):
-            return {'column': pred.column, 'op': pred.saId(), 'value': pred.parameter}
+            return {'field': pred.column, 'op': pred.saId(), 'value': pred.parameter}
         elif isinstance(pred, MultiParameter):
-            return {'column': pred.column, 'op': pred.saId(), 'value': pred.parameters}
+            return {'field': pred.column, 'op': pred.saId(), 'value': pred.parameters}
         elif isinstance(pred, NoParameter):
-            return {'column': pred.column, 'op': pred.saId()}
+            return {'field': pred.column, 'op': pred.saId()}
         else:
             raise Exception("This should never happen.")
     elif isinstance(pred, Branch):
