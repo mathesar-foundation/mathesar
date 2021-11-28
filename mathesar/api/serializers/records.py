@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 
 class RecordListParameterSerializer(serializers.Serializer):
-    filters = serializers.JSONField(required=False, default=[])
+    filters = serializers.JSONField(required=False, default=None)
     order_by = serializers.JSONField(required=False, default=[])
     group_count_by = serializers.JSONField(required=False, default=[])
 

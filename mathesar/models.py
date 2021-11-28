@@ -257,7 +257,7 @@ class Table(DatabaseObject):
     def get_record(self, id_value):
         return get_record(self._sa_table, self.schema._sa_engine, id_value)
 
-    def get_records(self, limit=None, offset=None, filters=[], order_by=[]):
+    def get_records(self, limit=None, offset=None, filters=None, order_by=[]):
         return get_records(
             self._sa_table,
             self.schema._sa_engine,
