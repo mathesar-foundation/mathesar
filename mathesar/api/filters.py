@@ -11,8 +11,8 @@ from typing import List, Type
 # TODO turn this spec into a class
 def getSpecForPredicateAndMAType(predicateSubClass: Type[Predicate], maType: MathesarTypeIdentifier) -> dict:
     spec = {
-        'super_type': predicateSubClass.superType.value,
-        'type': predicateSubClass.type.value,
+        'position': predicateSubClass.superType.value,
+        'name': predicateSubClass.type.value,
         'parameter_count': predicateSubClass.parameterCount.value,
     }
     if takesParameterThatsAMathesarType(predicateSubClass):
