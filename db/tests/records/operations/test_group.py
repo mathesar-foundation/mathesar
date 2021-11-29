@@ -22,6 +22,23 @@ def roster_distinct_setup(roster_table_obj):
     return res
 
 
+@pytest.fixture
+def roster_percentile_subj_grade_setup(roster_table_obj):
+    roster, engine = roster_table_obj
+    input_cols = ['Subject', 'Grade']
+    group_by = group.GroupBy(
+        column_list=input_cols,
+        group_mode=group.GroupMode.PERCENTILE.value,
+        num_groups=12
+    )
+    grouping_columns = group_by.get_validated_group_by_columns(roster)
+    num_groups = group_by.num_groups
+    sel = group._get_percentile_range_group_select(roster, grouping_columns, num_groups)
+    with engine.begin() as conn:
+        res = conn.execute(sel).fetchall()
+    return res
+
+
 def test_GB_validate_passes_defaults():
     gb = group.GroupBy(
         column_list=['col1', 'col2'],
@@ -118,8 +135,15 @@ def _group_id(row):
     return row[group.MATHESAR_GROUP_METADATA][group.GroupMetadataField.GROUP_ID.value]
 
 
-def test_get_distinct_group_select_correct_metadata_fields(roster_distinct_setup):
-    res = roster_distinct_setup
+group_modes = [group.GroupMode.DISTINCT.value, group.GroupMode.PERCENTILE.value]
+
+@pytest.mark.parametrize('group_mode', group_modes)
+def test_get_group_augmented_records_query_metadata_fields(roster_table_obj, group_mode):
+    roster, engine = roster_table_obj
+    group_by = group.GroupBy(['Student Number', 'Student Name'], group_mode=group_mode)
+    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_query).fetchall()
     for row in res:
         assert all(
             [
@@ -129,12 +153,62 @@ def test_get_distinct_group_select_correct_metadata_fields(roster_distinct_setup
         )
 
 
-def test_get_distinct_group_select_correct_num_distinct(roster_distinct_setup):
-    res = roster_distinct_setup
-    assert max([_group_id(row) for row in res]) == 259
+group_by_num_list = [
+    (
+        group.GroupBy(
+            ['Student Number', 'Student Email'],
+            group_mode=group.GroupMode.DISTINCT.value
+        ),
+        259
+    ),
+    (
+        group.GroupBy(
+            ['Student Number', 'Student Email'],
+            group_mode=group.GroupMode.PERCENTILE.value,
+            num_groups=12,
+        ),
+        12
+    ),
+    (
+        group.GroupBy(
+            ['Subject', 'Grade'],
+            group_mode=group.GroupMode.PERCENTILE.value,
+            num_groups=12,
+        ),
+        12
+    ),
+    (
+        group.GroupBy(
+            ['Subject', 'Grade'],
+            group_mode=group.GroupMode.PERCENTILE.value,
+            num_groups=100,
+        ),
+        100
+    ),
+    (
+        group.GroupBy(
+            ['Subject', 'Grade'],
+            group_mode=group.GroupMode.PERCENTILE.value,
+            num_groups=1500,
+        ),
+        1500
+    )
+]
 
 
-def test_get_distinct_group_select_correct_first_last(roster_distinct_setup):
+@pytest.mark.parametrize('group_by,num', group_by_num_list)
+def test_get_distinct_group_select_correct_num_group_id(
+        roster_table_obj, group_by, num
+):
+    roster, engine = roster_table_obj
+    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_query).fetchall()
+
+    assert max([_group_id(row) for row in res]) == num
+
+
+def test_get_distinct_group_select_correct_first_last_row_match(roster_distinct_setup):
     res = roster_distinct_setup
     for row in res:
         first_val = _group_first_val(row)
@@ -144,6 +218,20 @@ def test_get_distinct_group_select_correct_first_last(roster_distinct_setup):
         assert first_val == last_val
 
 
+def test_get_distinct_group_select_groups_distinct(roster_distinct_setup):
+    res = roster_distinct_setup
+    group_member_tuples = {
+        (_group_id(row), row['Student Number'], row['Student Email']) for row in res
+    }
+    assert (
+        len({tup[0] for tup in group_member_tuples})
+        == len({(tup[1], tup[2]) for tup in group_member_tuples})
+        == len(group_member_tuples)
+    )
+
+
+def test_get_percentile_range_group_select(roster_percentile_subj_grade_setup):
+    pass
 
 
 
