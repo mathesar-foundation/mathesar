@@ -230,8 +230,35 @@ def test_get_distinct_group_select_groups_distinct(roster_distinct_setup):
     )
 
 
-def test_get_percentile_range_group_select(roster_percentile_subj_grade_setup):
-    pass
+def test_get_percentile_range_group_first_last(roster_percentile_subj_grade_setup):
+    res = roster_percentile_subj_grade_setup
+    for row in res:
+        first_val = _group_first_val(row)
+        last_val = _group_last_val(row)
+        assert (first_val['Subject'], first_val['Grade']) <= (row['Subject'], row['Grade'])
+        assert (last_val['Subject'], last_val['Grade']) >= (row['Subject'], row['Grade'])
+
+
+def test_get_percentile_range_group_groups_correct(roster_percentile_subj_grade_setup):
+    res = roster_percentile_subj_grade_setup
+    group_member_tuples = {
+        (
+            _group_id(row),
+            _group_first_val(row)['Subject'],
+            _group_first_val(row)['Grade'],
+            _group_last_val(row)['Subject'],
+            _group_last_val(row)['Grade'],
+        )
+        for row in res
+    }
+    assert (
+        len({tup[0] for tup in group_member_tuples})
+        == len({(tup[1], tup[2]) for tup in group_member_tuples})
+        == len({(tup[3], tup[4]) for tup in group_member_tuples})
+        == len({(tup[1], tup[2], tup[3], tup[4]) for tup in group_member_tuples})
+        == len(group_member_tuples)
+    )
+
 
 
 
