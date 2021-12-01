@@ -1,6 +1,5 @@
-from sqlalchemy import select, func, true, and_
+from sqlalchemy import select, func
 from sqlalchemy_filters import apply_filters, apply_sort
-from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
 from db.columns.base import MathesarColumn
 from db.tables.utils import get_primary_key_column
@@ -10,70 +9,8 @@ from db.filters.operations.deserialize import get_predicate_from_MA_filter_spec
 from db.filters.operations.serialize import get_SA_filter_spec_from_predicate
 
 
-DUPLICATE_LABEL = "_is_dupe"
-CONJUNCTIONS = ("and", "or", "not")
-
-
-def _validate_nested_ops(filters):
-    for op in filters:
-        if op.get("op") == "get_duplicates":
-            raise BadFilterFormat("get_duplicates can not be nested")
-        for field in CONJUNCTIONS:
-            if field in op:
-                _validate_nested_ops(op[field])
-
-
-def _create_query_with_duplicate_filter(table, duplicate_columns, cols=None):
-    subq_table = table.alias()
-    table_duplicate_columns = [c for c in table.c if c.name in duplicate_columns]
-    subq_duplicate_columns = [c for c in subq_table.c if c.name in duplicate_columns]
-    subq = (
-        select(true().label(DUPLICATE_LABEL))
-        .select_from(subq_table)
-        .group_by(*subq_duplicate_columns)
-        .having(and_(
-            func.count() > 1,
-            *[c == subq_c for c, subq_c in zip(table_duplicate_columns, subq_duplicate_columns)]
-        ))
-        .lateral("lateral_subq")
-    )
-    query = (
-        select(*(cols or table.c))
-        .select_from(table.join(subq, true()))
-        .where(subq.c[DUPLICATE_LABEL])
-    )
-    return query
-
-
-def _get_duplicate_data_columns(table, filters):
-    try:
-        duplicate_ops = [f for f in filters if f.get("op") == "get_duplicates"]
-        non_duplicate_ops = [f for f in filters if f.get("op") != "get_duplicates"]
-    except AttributeError:
-        # Ignore formatting errors - they will be handled by sqlalchemy_filters
-        return None, filters
-
-    _validate_nested_ops(non_duplicate_ops)
-    if len(duplicate_ops) > 1:
-        raise BadFilterFormat("get_duplicates can only be specified a single time")
-    elif len(duplicate_ops) == 1:
-        duplicate_cols = duplicate_ops[0]['value']
-        for col in duplicate_cols:
-            if col not in table.c:
-                raise FilterFieldNotFound(f"Table {table.name} has no column `{col}`.")
-        return duplicate_ops[0]['value'], non_duplicate_ops
-    else:
-        return None, filters
-
-
 def get_query(table, limit, offset, order_by, filters, cols=None):
-    duplicate_columns, filters = _get_duplicate_data_columns(table, filters)
-    if duplicate_columns:
-        query = _create_query_with_duplicate_filter(table, duplicate_columns, cols)
-    else:
-        query = select(*(cols or table.c)).select_from(table)
-
-    query = query.limit(limit).offset(offset)
+    query = select(*(cols or table.c)).select_from(table).limit(limit).offset(offset)
     if order_by is not None:
         query = apply_sort(query, order_by)
     if filters is not None:
@@ -92,7 +29,7 @@ def get_record(table, engine, id_value):
 
 
 def get_records(
-        table, engine, limit=None, offset=None, order_by=[], filters=[],
+        table, engine, limit=None, offset=None, order_by=[], filters=None,
 ):
     """
     Returns records from a table.
