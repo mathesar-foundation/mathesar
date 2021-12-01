@@ -2,9 +2,8 @@ import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
 import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 import type { Writable } from 'svelte/store';
 import { writable } from 'svelte/store';
-import type { ComponentAndProps } from '@mathesar-component-library-dir/StringOrComponent/StringOrComponent.svelte';
-import type { ModalVisibilityStore } from '../modal';
-import type { IconFlip, IconRotate } from '../types';
+import type { ModalVisibilityStore } from '@mathesar-component-library';
+import type { IconFlip, IconRotate, ComponentAndProps } from '@mathesar-component-library/types';
 
 interface IconDetails {
   data: IconDefinition,

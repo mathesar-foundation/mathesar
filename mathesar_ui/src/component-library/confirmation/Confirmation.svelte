@@ -3,7 +3,7 @@
   import Icon from '../icon/Icon.svelte';
   import Modal from '../modal/Modal.svelte';
   import Spinner from '../spinner/Spinner.svelte';
-import StringOrComponent from '../StringOrComponent/StringOrComponent.svelte';
+import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
   import type { ConfirmationController } from './ConfirmationController';
 
   export let controller: ConfirmationController;

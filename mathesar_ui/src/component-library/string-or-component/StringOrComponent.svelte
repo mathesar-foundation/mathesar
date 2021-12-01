@@ -1,12 +1,5 @@
-<script context="module" lang="ts">
-  export interface ComponentAndProps {
-    component: typeof SvelteComponent,
-    props?: unknown,
-  }
-</script>
-
 <script lang="ts">
-  import type { SvelteComponent } from 'svelte';
+  import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
 
   export let arg: string | string[] | ComponentAndProps;
 </script>
