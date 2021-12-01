@@ -33,14 +33,20 @@ export interface DBTablesStoreData {
 const schemaTablesStoreMap: Map<SchemaEntry['id'], Writable<DBTablesStoreData>> = new Map();
 const schemaTablesRequestMap: Map<SchemaEntry['id'], CancellablePromise<PaginatedResponse<TableEntry>>> = new Map();
 
+function sortedTableEntries(tableEntries: TableEntry[]): TableEntry[] {
+  return [...tableEntries].sort((a, b) => a.name.localeCompare(b.name));
+}
+
 function setSchemaTablesStore(
   schemaId: SchemaEntry['id'],
-  tableEntries: TableEntry[],
+  tableEntries?: TableEntry[],
 ): Writable<DBTablesStoreData> {
   const tables: DBTablesStoreData['data'] = new Map();
-  tableEntries?.forEach((entry) => {
-    tables.set(entry.id, entry);
-  });
+  if (tableEntries) {
+    sortedTableEntries(tableEntries).forEach((entry) => {
+      tables.set(entry.id, entry);
+    });
+  }
 
   const storeValue: DBTablesStoreData = {
     state: States.Done,
