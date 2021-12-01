@@ -17,12 +17,15 @@ class BranchPredicateType(Enum):
 class LeafPredicateType(Enum):
     """Note that negation is achieved via BranchPredicateType.NOT"""
     EQUAL = "equal"
+    NOT_EQUAL = "not_equal"
     GREATER = "greater"
     GREATER_OR_EQUAL = "greater_or_equal"
     LESSER = "lesser"
     LESSER_OR_EQUAL = "lesser_or_equal"
     EMPTY = "empty"
+    NOT_EMPTY = "not_empty"
     IN = "in"
+    NOT_IN = "not_in"
 
 class ParameterCount(Enum):
     SINGLE = "single"
@@ -34,12 +37,15 @@ predicate_types_to_SA_ids = {
     BranchPredicateType.AND: 'and',
     BranchPredicateType.OR: 'or',
     LeafPredicateType.EQUAL: 'eq',
+    LeafPredicateType.NOT_EQUAL: 'ne',
     LeafPredicateType.GREATER: 'gt',
     LeafPredicateType.GREATER_OR_EQUAL: 'ge',
     LeafPredicateType.LESSER: 'lt',
     LeafPredicateType.LESSER_OR_EQUAL: 'le',
     LeafPredicateType.EMPTY: 'is_null',
+    LeafPredicateType.NOT_EMPTY: 'is_not_null',
     LeafPredicateType.IN: 'in',
+    LeafPredicateType.NOT_IN: 'not_in',
 }
 
 def get_SA_id_from_predicate_type(type: Union[LeafPredicateType, BranchPredicateType]) -> str:
@@ -107,6 +113,10 @@ class Equal(SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.EQUAL)
 
 @frozen_dataclass
+class NotEqual(SingleParameter, Leaf, Predicate):
+    type: LeafPredicateType = static(LeafPredicateType.NOT_EQUAL)
+
+@frozen_dataclass
 class Greater(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.GREATER)
 
@@ -127,8 +137,16 @@ class Empty(NoParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.EMPTY)
 
 @frozen_dataclass
+class NotEmpty(NoParameter, Leaf, Predicate):
+    type: LeafPredicateType = static(LeafPredicateType.NOT_EMPTY)
+
+@frozen_dataclass
 class In(MultiParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.IN)
+    
+@frozen_dataclass
+class NotIn(MultiParameter, Leaf, Predicate):
+    type: LeafPredicateType = static(LeafPredicateType.NOT_IN)
 
 @frozen_dataclass
 class Not(SingleParameter, Branch, Predicate):
@@ -154,12 +172,15 @@ class BadFilterFormat(SABadFilterFormat):
 
 all_predicates = [
     Equal,
+    NotEqual,
     Greater,
     GreaterOrEqual,
     Lesser,
     LesserOrEqual,
     Empty,
+    NotEmpty,
     In,
+    NotIn,
     Not,
     And,
     Or,
