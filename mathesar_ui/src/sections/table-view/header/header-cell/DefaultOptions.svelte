@@ -18,6 +18,7 @@
     ConstraintsDataStore,
   } from '@mathesar/stores/table-data/types';
   import { toast } from '@mathesar/stores/toast';
+import { confirmDelete } from '@mathesar/stores/confirmation';
 
   const dispatch = createEventDispatcher();
 
@@ -76,7 +77,16 @@
 
   function deleteColumn() {
     dispatch('close');
-    dispatch('columnDelete');
+    confirmDelete({
+      identifierType: 'column',
+      identifierName: column.name,
+      body: [
+        'All objects related to this column will be afected.',
+        'This could break existing tables and views.',
+        'Are you sure you want to proceed?',
+      ],
+      onProceed: () => columnsDataStore.deleteColumn(column.id),
+    });
   }
   
   async function toggleAllowDuplicates() {
