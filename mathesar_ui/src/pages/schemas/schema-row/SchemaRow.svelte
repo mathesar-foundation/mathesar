@@ -21,7 +21,7 @@
   $: isLocked = schema.name === 'public';
 
   function handleDelete() {
-    confirmDelete({
+    void confirmDelete({
       identifierType: 'Schema',
       identifierName: schema.name,
       body: [

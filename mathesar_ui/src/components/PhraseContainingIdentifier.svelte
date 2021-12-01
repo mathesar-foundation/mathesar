@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Identifier from "@mathesar/components/Identifier.svelte";
+  import Identifier from '@mathesar/components/Identifier.svelte';
 
   export let identifier: string;
   export let pre: string | undefined = undefined;

@@ -77,7 +77,7 @@ import { confirmDelete } from '@mathesar/stores/confirmation';
 
   function deleteColumn() {
     dispatch('close');
-    confirmDelete({
+    void confirmDelete({
       identifierType: 'column',
       identifierName: column.name,
       body: [

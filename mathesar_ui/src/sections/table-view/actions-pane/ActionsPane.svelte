@@ -30,7 +30,6 @@
   import { currentDBName } from '@mathesar/stores/databases';
   import { getTabsForSchema } from '@mathesar/stores/tabs';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import { toast } from '@mathesar/stores/toast';
   import TableConstraints from '../constraints/TableConstraints.svelte';
   import DisplayFilter from '../display-options/DisplayFilter.svelte';
   import DisplaySort from '../display-options/DisplaySort.svelte';
@@ -72,8 +71,8 @@
     void ($tabularData as TabularData).refresh();
   }
 
-  async function handleDeleteTable() {
-    await confirmDelete({
+  function handleDeleteTable() {
+    void confirmDelete({
       identifierType: 'Table',
       onProceed: async () => {
         await deleteTable($tabularData.id);
