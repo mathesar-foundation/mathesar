@@ -3,6 +3,7 @@
   import Icon from '../icon/Icon.svelte';
   import Modal from '../modal/Modal.svelte';
   import Spinner from '../spinner/Spinner.svelte';
+import StringOrComponent from '../StringOrComponent/StringOrComponent.svelte';
   import type { ConfirmationController } from './ConfirmationController';
 
   export let controller: ConfirmationController;
@@ -17,7 +18,6 @@
     onSuccess,
     onError,
   } = $confirmationProps);
-  $: bodyParagraphs = Array.isArray(body) ? body : [body];
 
   let isProcessing = false;
 
@@ -59,14 +59,12 @@
 
 <Modal
   bind:isOpen={$modal}
-  {title}
   allowClose={!isProcessing}
   on:close={onClose}
   class="confirmation"
 >
-  {#each bodyParagraphs as paragraph}
-     <p>{paragraph}</p>
-  {/each}
+  <StringOrComponent slot=title arg={title} />
+  <StringOrComponent arg={body} />
   <div slot=footer class=buttons>
     <Button
       on:click={handleCancelButton}

@@ -13,6 +13,7 @@
   import { confirm } from '@mathesar/stores/confirmation';
   import { currentDBName } from '@mathesar/stores/databases';
   import { toast } from '@mathesar/stores/toast';
+  import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -23,7 +24,7 @@
 
   function handleDelete() {
     confirm({
-      title: `Delete schema "${schema.name}"`,
+      title: { component: PhraseContainingIdentifier, props: { identifier: schema.name, pre: 'Delete Schema ', post: '?' } },
       body: [
         'All objects in this schema will be deleted permanently, including (but not limited to) tables and views. Some of these objects may not be visible in the Mathesar UI.',
         'Are you sure you want to proceed?',
