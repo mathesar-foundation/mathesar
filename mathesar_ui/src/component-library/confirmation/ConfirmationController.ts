@@ -69,7 +69,7 @@ export function makeConfirm({
   defaultConfirmationProps,
 }: {
   confirmationModal: ModalVisibilityStore,
-  defaultConfirmationProps: ConfirmationProps,
+  defaultConfirmationProps?: ConfirmationProps,
 }): MakeConfirm {
   const fullDefaultConfirmationProps = {
     ...baseConfirmationProps,
