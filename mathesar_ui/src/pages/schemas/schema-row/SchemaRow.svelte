@@ -3,19 +3,40 @@
   import {
     faLock,
     faProjectDiagram,
-    faTrash,
     faPencilAlt,
+    faTrashAlt,
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/App.d';
+  import { deleteSchema } from '@mathesar/stores/schemas';
+  import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
+  import { confirm } from '@mathesar/stores/confirmation';
+  import { currentDBName } from '@mathesar/stores/databases';
+  import { toast } from '@mathesar/stores/toast';
 
   const dispatch = createEventDispatcher();
 
-  // Props
   export let schema: SchemaEntry;
 
   $: isDefault = schema.name === 'public';
   $: isLocked = schema.name === 'public';
+
+  function handleDelete() {
+    confirm({
+      title: `Delete schema "${schema.name}"`,
+      body: [
+        'All objects in this schema will be deleted permanently, including (but not limited to) tables and views. Some of these objects may not be visible in the Mathesar UI.',
+        'Are you sure you want to proceed?',
+      ],
+      proceedButton: { label: 'Delete', icon: { data: faTrashAlt, } },
+      onProceed: async () => {
+        await deleteSchema($currentDBName, schema.id);
+        // TODO: Create common util to handle data clearing & sync between stores
+        removeTablesInSchemaTablesStore(schema.id);
+      },
+      onError: (e) => toast.fromError(e),
+    });
+  }
 </script>
 
 <div class="schema-row">
@@ -38,8 +59,8 @@
       <Button class="edit" on:click={() => dispatch('edit', schema)}>
         <Icon data={faPencilAlt}/>
       </Button>
-      <Button class="delete" on:click={() => dispatch('delete', schema)}>
-        <Icon data={faTrash}/>
+      <Button class="delete" on:click={handleDelete}>
+        <Icon data={faTrashAlt}/>
       </Button>
       <slot/>
     </div>
