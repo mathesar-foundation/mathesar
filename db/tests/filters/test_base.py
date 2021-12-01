@@ -1,6 +1,6 @@
 import pytest
 from db.filters.base import (
-    allPredicateSubClasses, Leaf, Branch, MultiParameter, SingleParameter, NoParameter, Empty, BadFilterFormat
+    all_predicates, Leaf, Branch, MultiParameter, SingleParameter, NoParameter, Empty, BadFilterFormat
 )
 
 def instantiate_subclass(subclass, column=None, parameter=None):
@@ -48,25 +48,25 @@ parametersSpec = {
     },
 }
 
-def getSpecParams(predicateSubClass, valid):
+def get_spec_params(predicate_subclass, valid):
     validityKey = 'valid' if valid else 'invalid'
-    if issubclass(predicateSubClass, Leaf):
-        if issubclass(predicateSubClass, MultiParameter):
+    if issubclass(predicate_subclass, Leaf):
+        if issubclass(predicate_subclass, MultiParameter):
             return parametersSpec['leaf']['multi'][validityKey]
-        elif issubclass(predicateSubClass, SingleParameter):
+        elif issubclass(predicate_subclass, SingleParameter):
             return parametersSpec['leaf']['single'][validityKey]
-    elif issubclass(predicateSubClass, Branch):
-        if issubclass(predicateSubClass, MultiParameter):
+    elif issubclass(predicate_subclass, Branch):
+        if issubclass(predicate_subclass, MultiParameter):
             return parametersSpec['branch']['multi'][validityKey]
-        elif issubclass(predicateSubClass, SingleParameter):
+        elif issubclass(predicate_subclass, SingleParameter):
             return parametersSpec['branch']['single'][validityKey]
     return []
 
-testCases = []
+test_cases = []
 for valid in [True, False]:
-    for predicateSubClass in allPredicateSubClasses:
-        for param in getSpecParams(predicateSubClass, valid=valid):
-            testCases.append([predicateSubClass, param, valid])
+    for predicate_subclass in all_predicates:
+        for param in get_spec_params(predicate_subclass, valid=valid):
+            test_cases.append([predicate_subclass, param, valid])
 
 @pytest.mark.parametrize("columnName, valid", [["", False],[None, False],["col1", True]])
 def test_column_name(columnName, valid):
@@ -76,11 +76,11 @@ def test_column_name(columnName, valid):
         with pytest.raises(BadFilterFormat):
             instantiate_subclass(Empty, columnName)
 
-@pytest.mark.parametrize("predicateSubClass, param, valid", testCases)
-def test_params(predicateSubClass, param, valid):
+@pytest.mark.parametrize("predicate_subclass, param, valid", test_cases)
+def test_params(predicate_subclass, param, valid):
     validColumnName = "col1"
     if valid:
-        instantiate_subclass(predicateSubClass, validColumnName, parameter=param)
+        instantiate_subclass(predicate_subclass, validColumnName, parameter=param)
     else:
         with pytest.raises(BadFilterFormat):
-            instantiate_subclass(predicateSubClass, validColumnName, parameter=param)
+            instantiate_subclass(predicate_subclass, validColumnName, parameter=param)

@@ -23,7 +23,7 @@ def get_predicate_from_MA_filter_spec(spec: dict) -> Predicate:
                 raise Exception("This should never happen.")
         elif issubclass(predicate_subclass, Branch):
             if issubclass(predicate_subclass, SingleParameter):
-                parameter_predicate = getPredicateFromMAFilterSpec(predicate_body)
+                parameter_predicate = get_predicate_from_MA_filter_spec(predicate_body)
                 return predicate_subclass(parameter=parameter_predicate)
             elif issubclass(predicate_subclass, MultiParameter):
                 parameter_predicates = \
