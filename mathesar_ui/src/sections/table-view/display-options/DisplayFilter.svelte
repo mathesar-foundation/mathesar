@@ -24,7 +24,6 @@
   let filterCondition: SelectOption;
   let filterValue = '';
   let addNew = false;
-  let filterByDuplicates = false;
 
   const conditions = [
     { id: 'eq', label: 'equals' },
@@ -35,30 +34,16 @@
   function onMetaChange(_meta: Meta) {
     ({ filter } = _meta);
     filterCombination = _meta.getFilterCombination();
-    filter.subscribe((value) => {
-      filterByDuplicates = (value.filters[0] && value.filters[0].condition.id === conditions[2].id);
-      if (filterByDuplicates && value.filters[0]) {
-        value.filters[0].value = [value.filters[0]?.column?.id];
-      }
-    });
   }
 
   $: onMetaChange(meta);
 
   function addFilter() {
-    if (filterCondition === conditions[2]) {
-      meta.addFilter({
-        column: filterColumn,
-        condition: filterCondition,
-        value: [filterColumn.id],
-      });
-    } else {
-      meta.addFilter({
-        column: filterColumn,
-        condition: filterCondition,
-        value: filterValue,
-      });
-    }
+    meta.addFilter({
+      column: filterColumn,
+      condition: filterCondition,
+      value: filterValue,
+    });
   
     [filterColumn] = options;
     [filterCondition] = conditions;
@@ -79,11 +64,7 @@
     <span>
       Filters
       {#if $filter?.filters?.length > 0}
-        {#if filterByDuplicates}
-          (1)
-        {:else}
-          ({$filter?.filters?.length})
-        {/if}
+        ({$filter?.filters?.length})
       {/if}
     </span>
   </div>
@@ -98,14 +79,12 @@
         </tr>
       {/if}
       {#each $filter?.filters || [] as option, index (option)}
-        {#if index === 0 || (index > 0 && !filterByDuplicates)}
-          <FilterEntry {options} {conditions} {filterByDuplicates}
-            bind:column={option.column}
-            bind:condition={option.condition}
-            bind:value={option.value}
-            on:removeFilter={() => meta.removeFilter(index)}
-            on:reload={() => updateFilters()}/>
-        {/if}
+        <FilterEntry {options} {conditions} filterByDuplicates={option.condition.id === conditions[2].id}
+          bind:column={option.column}
+          bind:condition={option.condition}
+          bind:value={option.value}
+          on:removeFilter={() => meta.removeFilter(index)}
+          on:reload={() => updateFilters()}/>
       {:else}
         <tr>
           <td class="empty-msg" colspan="3">
@@ -118,11 +97,9 @@
         {#if !addNew}
           <tr class="add-option">
             <td colspan="3">
-              {#if !filterByDuplicates}
-                <Button on:click={() => { addNew = true; }}>
-                  Add new filter
-                </Button>
-              {/if}
+              <Button on:click={() => { addNew = true; }}>
+                Add new filter
+              </Button>
             </td>
           </tr>
 
@@ -131,12 +108,10 @@
             <td class="column">
               <Select {options} bind:value={filterColumn}/>
             </td>
-            {#if !filterByDuplicates}
-              <td class="dir">
-                <Select options={conditions} bind:value={filterCondition}/>
-              </td>
-            {/if}
-            {#if filterCondition !== conditions[2] && !filterByDuplicates}
+            <td class="dir">
+              <Select options={conditions} bind:value={filterCondition}/>
+            </td>
+            {#if filterCondition !== conditions[2]}
               <td class="value" colspan="2">
                 <TextInput bind:value={filterValue}/>
               </td>

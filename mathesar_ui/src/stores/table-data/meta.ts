@@ -218,11 +218,16 @@ export class Meta {
             value: term.value,
           }));
           filter[$filter.combination.id as string] = terms;
-          if ('and' in filter && filter.and.length > 0 && filter.and[0].op === 'get_duplicates') {
+          if ('and' in filter && filter.and.length === 1 && filter.and[0].op === 'get_duplicates') {
+            // Special handling for the get_duplicates operation due to backend bug
+            // The backend can only handle the get_duplicates operation by itself
+            // The "and" must be removed and the value must be in an array
+            filter.and[0].value = [filter.and[0].field];
             params.push(
               `filters=${encodeURIComponent(JSON.stringify([filter.and[0]]))}`,
             );
           } else {
+            // Handle other filters normally
             params.push(
               `filters=${encodeURIComponent(JSON.stringify(filter))}`,
             );
