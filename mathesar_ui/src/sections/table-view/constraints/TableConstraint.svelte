@@ -14,6 +14,7 @@
     faArrowLeft,
     faExclamationTriangle,
   } from '@fortawesome/free-solid-svg-icons';
+  import { toast } from '@mathesar/stores/toast';
   
   export let constraint: Constraint;
   export let drop: () => Promise<void>;
@@ -28,7 +29,7 @@
     try {
       await drop();
     } catch (error) {
-      // TODO display toast message with error
+      toast.fromError(error);
       useTransitionOut = false;
     } finally {
       isSubmittingDrop = false;
