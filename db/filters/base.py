@@ -198,6 +198,17 @@ def takes_parameter_thats_mathesar_type(predicate_subclass: Type[Predicate]) -> 
 
 def not_empty(l): return len(l) > 0
 
+def all_items_unique(l):
+    for item1 in l:
+        times_seen = 0
+        for item2 in l:
+            if item1 == item2:
+                times_seen += 1
+            # A non-duplicate will be seen only once.
+            if times_seen == 2:
+                return False
+    return True
+
 def assert_predicate_correct(predicate):
     try:
         if isinstance(predicate, Leaf):
@@ -230,5 +241,7 @@ def assert_predicate_correct(predicate):
             elif isinstance(predicate, Branch):
                 all_parameters_are_predicates = all(are_parameters_predicates)
                 assert all_parameters_are_predicates
+                all_parameters_unique = all_items_unique(parameters)
+                assert all_parameters_unique
     except AssertionError as err:
         raise BadFilterFormat from err
