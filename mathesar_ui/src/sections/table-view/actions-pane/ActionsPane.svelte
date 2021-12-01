@@ -29,7 +29,7 @@
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
   import { getTabsForSchema } from '@mathesar/stores/tabs';
-  import { confirm } from '@mathesar/stores/confirmation';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
   import { toast } from '@mathesar/stores/toast';
   import TableConstraints from '../constraints/TableConstraints.svelte';
   import DisplayFilter from '../display-options/DisplayFilter.svelte';
@@ -73,9 +73,8 @@
   }
 
   async function handleDeleteTable() {
-    await confirm({
-      title: 'Delete Table',
-      proceedButton: { label: 'Delete Table', icon: { data: faTrashAlt } },
+    await confirmDelete({
+      identifierType: 'Table',
       onProceed: async () => {
         await deleteTable($tabularData.id);
         const tabList = getTabsForSchema($currentDBName, $currentSchemaId);
@@ -83,7 +82,6 @@
         tabList.remove(tab);
         await refetchTablesForSchema($currentSchemaId);
       },
-      onError: (error) => toast.error(`Unable to delete table. ${error.message}`),
     });
   }
 </script>

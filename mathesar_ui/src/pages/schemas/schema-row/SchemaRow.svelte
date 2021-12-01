@@ -10,10 +10,8 @@
   import type { SchemaEntry } from '@mathesar/App.d';
   import { deleteSchema } from '@mathesar/stores/schemas';
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
-  import { confirm } from '@mathesar/stores/confirmation';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
   import { currentDBName } from '@mathesar/stores/databases';
-  import { toast } from '@mathesar/stores/toast';
-  import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIdentifier.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -23,19 +21,18 @@
   $: isLocked = schema.name === 'public';
 
   function handleDelete() {
-    confirm({
-      title: { component: PhraseContainingIdentifier, props: { identifier: schema.name, pre: 'Delete Schema ', post: '?' } },
+    confirmDelete({
+      identifierType: 'Schema',
+      identifierName: schema.name,
       body: [
         'All objects in this schema will be deleted permanently, including (but not limited to) tables and views. Some of these objects may not be visible in the Mathesar UI.',
         'Are you sure you want to proceed?',
       ],
-      proceedButton: { label: 'Delete', icon: { data: faTrashAlt, } },
       onProceed: async () => {
         await deleteSchema($currentDBName, schema.id);
         // TODO: Create common util to handle data clearing & sync between stores
         removeTablesInSchemaTablesStore(schema.id);
       },
-      onError: (e) => toast.fromError(e),
     });
   }
 </script>
