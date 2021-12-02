@@ -5,6 +5,7 @@
     "preinstall": "npx npm-force-resolutions",
     "dev": "vite",
     "format": "prettier --write .",
+    "check-format": "prettier --check .",
     "lint": "eslint .",
     "typecheck": "svelte-check",
     "build": "vite build",
