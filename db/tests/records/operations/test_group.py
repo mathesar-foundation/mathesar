@@ -1,12 +1,7 @@
-import itertools
-from collections import Counter
-
 import pytest
-from sqlalchemy import select, Column
-from sqlalchemy_filters import apply_sort, apply_filters
+from sqlalchemy import Column
 
 from db.records.operations import group
-from db.records.operations.select import get_records
 from db.records import exceptions as rec_exc
 
 
@@ -37,6 +32,45 @@ def roster_percentile_subj_grade_setup(roster_table_obj):
     with engine.begin() as conn:
         res = conn.execute(sel).fetchall()
     return res
+
+
+@pytest.fixture
+def record_dictionary_list():
+    return [
+        {
+            'data': {
+                'id': 1, 'Center': 'NASA KSC', 'Status': 'Application', 'Case Number': 'KSC-12871',
+                '__mathesar_group_metadata': {
+                    'group_id': 15, 'count': 29,
+                    'first_value': {'Center': 'NASA KSC', 'Status': 'Application'},
+                    'last_value': {'Center': 'NASA KSC', 'Status': 'Application'},
+                }
+            },
+            'metadata': {}
+        },
+        {
+            'data': {
+                'id': 2, 'Center': 'NASA ARC', 'Status': 'Issued', 'Case Number': 'ARC-14048-1',
+                '__mathesar_group_metadata': {
+                    'group_id': 2, 'count': 100,
+                    'first_value': {'Center': 'NASA ARC', 'Status': 'Issued'},
+                    'last_value': {'Center': 'NASA ARC', 'Status': 'Issued'}
+                }
+            },
+            'metadata': {}
+        },
+        {
+            'data': {
+                'id': 3, 'Center': 'NASA ARC', 'Status': 'Issued', 'Case Number': 'ARC-14231-1',
+                '__mathesar_group_metadata': {
+                    'group_id': 2, 'count': 100,
+                    'first_value': {'Center': 'NASA ARC', 'Status': 'Issued'},
+                    'last_value': {'Center': 'NASA ARC', 'Status': 'Issued'}
+                }
+            },
+            'metadata': {}
+        }
+    ]
 
 
 def test_GB_validate_passes_defaults():
@@ -122,20 +156,23 @@ def test_GB_get_valid_group_by_columns_invalid_col(roster_table_obj):
     input_cols = ['notintable']
     gb = group.GroupBy(column_list=input_cols)
     with pytest.raises(rec_exc.GroupFieldNotFound):
-        cols = gb.get_validated_group_by_columns(roster)
+        gb.get_validated_group_by_columns(roster)
 
 
 def _group_first_val(row):
     return row[group.MATHESAR_GROUP_METADATA][group.GroupMetadataField.FIRST_VALUE.value]
 
+
 def _group_last_val(row):
     return row[group.MATHESAR_GROUP_METADATA][group.GroupMetadataField.LAST_VALUE.value]
+
 
 def _group_id(row):
     return row[group.MATHESAR_GROUP_METADATA][group.GroupMetadataField.GROUP_ID.value]
 
 
 group_modes = [group.GroupMode.DISTINCT.value, group.GroupMode.PERCENTILE.value]
+
 
 @pytest.mark.parametrize('group_mode', group_modes)
 def test_get_group_augmented_records_query_metadata_fields(roster_table_obj, group_mode):
@@ -260,222 +297,40 @@ def test_get_percentile_range_group_groups_correct(roster_percentile_subj_grade_
     )
 
 
+def test_extract_group_metadata_correct_data(record_dictionary_list):
+    records, _ = group.extract_group_metadata(
+        record_dictionary_list, data_key='data', metadata_key='metadata'
+    )
+    data_no_meta = [
+        {k: v for k, v in rec['data'].items() if k != group.MATHESAR_GROUP_METADATA}
+        for rec in record_dictionary_list
+    ]
+    assert all(
+        [rec['data'] == expect for rec, expect in zip(records, data_no_meta)]
+    )
 
 
-#
-#
-# def test_get_distinct_tuple_values_distinct(roster_table_obj):
-#     roster, engine = roster_table_obj
-#     column_list = [
-#         roster.columns["Student Number"],
-#         roster.columns["Student Email"],
-#     ]
-#     record_list = get_distinct_tuple_values(
-#         column_list, engine
-#     )
-#     for i in range(len(record_list) - 1):
-#         assert record_list[i] != record_list[i + 1]
-#
-#
-# def test_get_distinct_tuple_values_raises_when_no_table(roster_table_obj):
-#     roster, engine = roster_table_obj
-#     column_list = [
-#         "Student Number",
-#         "Student Email",
-#     ]
-#     with pytest.raises(AssertionError):
-#         get_distinct_tuple_values(
-#             column_list, engine
-#         )
-#
-#
-# def test_get_distinct_tuple_values_with_string_column_input(roster_table_obj):
-#     roster, engine = roster_table_obj
-#     column_list = [
-#         "Student Number",
-#         "Student Email",
-#     ]
-#     record_list = get_distinct_tuple_values(
-#         column_list, engine, table=roster,
-#     )
-#     assert len(record_list) == 259
-#
-#
-# def test_get_distinct_tuple_values_limit(roster_table_obj):
-#     roster, engine = roster_table_obj
-#     column_list = [
-#         "Student Number",
-#         "Student Email",
-#     ]
-#     record_list = get_distinct_tuple_values(
-#         column_list, engine, table=roster, limit=10
-#     )
-#     assert len(record_list) == 10
-#
-#
-# def test_get_distinct_tuple_values_offset(roster_table_obj):
-#     roster, engine = roster_table_obj
-#     column_list = [
-#         "Student Number",
-#         "Student Email",
-#     ]
-#     record_list_base = get_distinct_tuple_values(
-#         column_list, engine, table=roster, limit=20
-#     )
-#     record_list_offset = get_distinct_tuple_values(
-#         column_list, engine, table=roster, limit=10, offset=10
-#     )
-#     assert record_list_offset == record_list_base[10:]
-#
-#
-# def test_get_distinct_tuple_values_feeds_get_records(roster_table_obj):
-#     roster, engine = roster_table_obj
-#     column_list = [
-#         "Student Number",
-#         "Student Email",
-#     ]
-#     distinct_tuples = get_distinct_tuple_values(
-#         column_list, engine, table=roster, limit=2
-#     )
-#     filter_list = append_distinct_tuples_to_filter(distinct_tuples[0])
-#     record_list = get_records(
-#         roster, engine, filters=filter_list
-#     )
-#     assert all(
-#         [
-#             record[1] == distinct_tuples[0][0][1]
-#             and record[3] == distinct_tuples[0][1][1]
-#             for record in record_list
-#         ]
-#     )
-#
-#
-# def test_get_group_counts_str_field(filter_sort_table_obj):
-#     filter_sort, engine = filter_sort_table_obj
-#     group_by = ["varchar"]
-#     counts = get_group_counts(filter_sort, engine, group_by)
-#     assert len(counts) == 101
-#     assert ("string1",) in counts
-#
-#
-# def test_get_group_counts_col_field(filter_sort_table_obj):
-#     filter_sort, engine = filter_sort_table_obj
-#     group_by = [filter_sort.c.varchar]
-#     counts = get_group_counts(filter_sort, engine, group_by)
-#     assert len(counts) == 101
-#     assert ("string1",) in counts
-#
-#
-# def test_get_group_counts_mixed_str_col_field(filter_sort_table_obj):
-#     filter_sort, engine = filter_sort_table_obj
-#     group_by = ["varchar", filter_sort.c.numeric]
-#     counts = get_group_counts(filter_sort, engine, group_by)
-#     assert len(counts) == 101
-#     assert ("string1", 1) in counts
-#
-#
-# limit_offset_test_list = [
-#     (limit, offset)
-#     for limit in [None, 0, 25, 50, 100]
-#     for offset in [None, 0, 25, 50, 100]
-# ]
-#
-#
-# @pytest.mark.parametrize("limit,offset", limit_offset_test_list)
-# def test_get_group_counts_limit_offset_ordering(roster_table_obj, limit, offset):
-#     roster, engine = roster_table_obj
-#     order_by = [{"field": "Grade", "direction": "desc", "nullslast": True}]
-#     group_by = [roster.c["Grade"]]
-#     counts = get_group_counts(roster, engine, group_by, limit=limit, offset=offset, order_by=order_by)
-#     query = select(group_by[0])
-#     query = apply_sort(query, order_by)
-#     with engine.begin() as conn:
-#         all_records = conn.execute(query).fetchall()
-#     if limit is None:
-#         end = None
-#     elif offset is None:
-#         end = limit
-#     else:
-#         end = limit + offset
-#     limit_offset_records = all_records[offset:end]
-#     values_to_count = set([record["Grade"] for record in limit_offset_records])
-#
-#     manual_all_count = Counter(all_records).items()
-#     manual_count = {
-#         k: v for k, v in manual_all_count if int(k[0]) in values_to_count
-#     }
-#
-#     assert len(counts) == len(manual_count)
-#     for value, count in manual_count.items():
-#         assert value in counts
-#         assert counts[value] == count
-#
-#
-# count_values_test_list = itertools.chain(*[
-#     itertools.combinations([
-#         "Student Name",
-#         "Student Email",
-#         "Teacher Email",
-#         "Subject",
-#         "Grade"
-#     ], i) for i in range(1, 5)
-# ])
-#
-#
-# @pytest.mark.parametrize("group_by", count_values_test_list)
-# def test_get_group_counts_count_values(roster_table_obj, group_by):
-#     roster, engine = roster_table_obj
-#     counts = get_group_counts(roster, engine, group_by)
-#
-#     cols = [roster.c[f] for f in group_by]
-#     with engine.begin() as conn:
-#         all_records = conn.execute(select(*cols)).fetchall()
-#     manual_count = Counter(all_records)
-#
-#     for value, count in manual_count.items():
-#         assert value in counts
-#         assert counts[value] == count
-#
-#
-# filter_values_test_list = itertools.chain(*[
-#     itertools.combinations([
-#         {"field": "Student Name", "op": "ge", "value": "Test Name"},
-#         {"field": "Student Email", "op": "le", "value": "Test Email"},
-#         {"field": "Teacher Email", "op": "like", "value": "%gmail.com"},
-#         {"field": "Subject", "op": "eq", "value": "Non-Existent Subject"},
-#         {"field": "Grade", "op": "ne", "value": 99}
-#     ], i) for i in range(1, 3)
-# ])
-#
-#
-# @pytest.mark.parametrize("filter_by", filter_values_test_list)
-# def test_get_group_counts_filter_values(roster_table_obj, filter_by):
-#     roster, engine = roster_table_obj
-#     group_by = ["Student Name"]
-#     counts = get_group_counts(roster, engine, group_by, filters=filter_by)
-#
-#     cols = [roster.c[f] for f in group_by]
-#     query = select(*cols)
-#     query = apply_filters(query, filter_by)
-#     with engine.begin() as conn:
-#         all_records = conn.execute(query).fetchall()
-#     manual_count = Counter(all_records)
-#
-#     for value, count in manual_count.items():
-#         assert value in counts
-#         assert counts[value] == count
-#
-#
-# exceptions_test_list = [
-#     ("string", BadGroupFormat),
-#     ({"dictionary": ""}, BadGroupFormat),
-#     ([{"field": "varchar"}], BadGroupFormat),
-#     (["non_existent_field"], GroupFieldNotFound),
-# ]
-#
-#
-# @pytest.mark.parametrize("group_by,exception", exceptions_test_list)
-# def test_get_group_counts_exceptions(filter_sort_table_obj, group_by, exception):
-#     filter_sort, engine = filter_sort_table_obj
-#     with pytest.raises(exception):
-#         get_group_counts(filter_sort, engine, group_by)
+def test_extract_group_metadata_correct_metadata(record_dictionary_list):
+    records, _ = group.extract_group_metadata(
+        record_dictionary_list, data_key='data', metadata_key='metadata'
+    )
+    assert all(
+        [
+            rec['metadata'][group.GroupMetadataField.GROUP_ID.value] == _group_id(orig['data'])
+            for rec, orig in zip(records, record_dictionary_list)
+        ]
+    )
+
+
+def test_extract_group_metadata_correct_groups(record_dictionary_list):
+    _, groups = group.extract_group_metadata(
+        record_dictionary_list, data_key='data', metadata_key='metadata'
+    )
+    assert len(groups) == 2
+    actual_ids = [
+        gr_dict[group.GroupMetadataField.GROUP_ID.value] for gr_dict in groups
+    ]
+    expect_ids = [
+        _group_id(rec['data']) for rec in record_dictionary_list
+    ]
+    assert set(actual_ids) == set(expect_ids)
