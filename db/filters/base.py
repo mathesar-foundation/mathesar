@@ -1,16 +1,19 @@
-from dataclasses import dataclass, field#, replace
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, List, Union, Type
 from sqlalchemy_filters.exceptions import BadFilterFormat as SABadFilterFormat
+
 
 class PredicateSuperType(Enum):
     LEAF = "leaf"
     BRANCH = "branch"
 
+
 class BranchPredicateType(Enum):
     NOT = "not"
     OR = "or"
     AND = "and"
+
 
 # TODO switch to using SA filter names directly
 # TODO what to do about duplication https://github.com/centerofci/mathesar/pull/844 ?
@@ -27,10 +30,12 @@ class LeafPredicateType(Enum):
     IN = "in"
     NOT_IN = "not_in"
 
+
 class ParameterCount(Enum):
     SINGLE = "single"
     MULTI = "multi"
     NONE = "none"
+
 
 predicate_types_to_SA_ids = {
     BranchPredicateType.NOT: 'not',
@@ -48,21 +53,25 @@ predicate_types_to_SA_ids = {
     LeafPredicateType.NOT_IN: 'not_in',
 }
 
+
 def get_SA_id_from_predicate_type(type: Union[LeafPredicateType, BranchPredicateType]) -> str:
     if type in predicate_types_to_SA_ids:
         return predicate_types_to_SA_ids[type]
     else:
         raise Exception("This should never happen.")
 
+
 # frozen=True provides immutability
 def frozen_dataclass(f):
     return dataclass(frozen=True)(f)
+
 
 def static(value):
     """
     Declares a static field on a dataclass.
     """
     return field(init=False, default=value)
+
 
 @frozen_dataclass
 class Predicate:
@@ -76,89 +85,110 @@ class Predicate:
     def __post_init__(self):
         assert_predicate_correct(self)
 
+
 @frozen_dataclass
 class Leaf(Predicate):
     super_type: PredicateSuperType = static(PredicateSuperType.LEAF)
     type: LeafPredicateType
-    column: str 
+    column: str
+
 
 @frozen_dataclass
 class SingleParameter:
     parameter_count: ParameterCount = static(ParameterCount.SINGLE)
     parameter: Any
 
+
 @frozen_dataclass
 class MultiParameter:
     parameter_count: ParameterCount = static(ParameterCount.MULTI)
     parameters: List[Any]
 
+
 @frozen_dataclass
 class NoParameter:
     parameter_count: ParameterCount = static(ParameterCount.NONE)
+
 
 @frozen_dataclass
 class Branch(Predicate):
     super_type: PredicateSuperType = static(PredicateSuperType.BRANCH)
     type: BranchPredicateType
 
+
 @frozen_dataclass
 class ReliesOnComparability:
     pass
 
+
 def relies_on_comparability(predicate_subclass: Type[Predicate]) -> bool:
     return issubclass(predicate_subclass, ReliesOnComparability)
+
 
 @frozen_dataclass
 class Equal(SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.EQUAL)
 
+
 @frozen_dataclass
 class NotEqual(SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.NOT_EQUAL)
+
 
 @frozen_dataclass
 class Greater(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.GREATER)
 
+
 @frozen_dataclass
 class GreaterOrEqual(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.GREATER_OR_EQUAL)
+
 
 @frozen_dataclass
 class Lesser(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.LESSER)
 
+
 @frozen_dataclass
 class LesserOrEqual(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.LESSER_OR_EQUAL)
+
 
 @frozen_dataclass
 class Empty(NoParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.EMPTY)
 
+
 @frozen_dataclass
 class NotEmpty(NoParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.NOT_EMPTY)
 
+
 @frozen_dataclass
 class In(MultiParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.IN)
-    
+
+
 @frozen_dataclass
 class NotIn(MultiParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.NOT_IN)
+
 
 @frozen_dataclass
 class Not(SingleParameter, Branch, Predicate):
     type: BranchPredicateType = static(BranchPredicateType.NOT)
 
+
 @frozen_dataclass
 class And(MultiParameter, Branch, Predicate):
     type: BranchPredicateType = static(BranchPredicateType.AND)
 
+
 @frozen_dataclass
 class Or(MultiParameter, Branch, Predicate):
     type: BranchPredicateType = static(BranchPredicateType.OR)
+
 
 def get_predicate_subclass_by_type_str(predicate_type_str: str) -> Union[Type[LeafPredicateType], Type[BranchPredicateType]]:
     for subclass in all_predicates:
@@ -169,6 +199,7 @@ def get_predicate_subclass_by_type_str(predicate_type_str: str) -> Union[Type[Le
 
 class BadFilterFormat(SABadFilterFormat):
     pass
+
 
 all_predicates = [
     Equal,
@@ -186,9 +217,11 @@ all_predicates = [
     Or,
 ]
 
+
 predicates_that_dont_need_comparability = [
     predicate for predicate in all_predicates if not relies_on_comparability(predicate)
 ]
+
 
 def takes_parameter_thats_mathesar_type(predicate_subclass: Type[Predicate]) -> bool:
     return (
@@ -196,18 +229,22 @@ def takes_parameter_thats_mathesar_type(predicate_subclass: Type[Predicate]) -> 
         and not issubclass(predicate_subclass, NoParameter)
     )
 
-def not_empty(l): return len(l) > 0
 
-def all_items_unique(l):
-    for item1 in l:
+def not_empty(xs):
+    return len(xs) > 0
+
+
+def all_items_unique(xs):
+    for item1 in xs:
         times_seen = 0
-        for item2 in l:
+        for item2 in xs:
             if item1 == item2:
                 times_seen += 1
             # A non-duplicate will be seen only once.
             if times_seen == 2:
                 return False
     return True
+
 
 def assert_predicate_correct(predicate):
     try:

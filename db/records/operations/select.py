@@ -1,5 +1,5 @@
 from sqlalchemy import select, func
-from sqlalchemy_filters import apply_filters, apply_sort
+from sqlalchemy_filters import apply_sort
 
 from db.columns.base import MathesarColumn
 from db.tables.utils import get_primary_key_column

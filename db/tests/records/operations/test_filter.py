@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
 from db.records.operations.select import get_records
-from db.filters.base import MultiParameter, SingleParameter, NoParameter, get_predicate_subclass_by_type_str
+from db.filters.base import MultiParameter, SingleParameter, get_predicate_subclass_by_type_str
 
 
 def test_get_records_filters_using_col_str_names(roster_table_obj):
@@ -95,13 +95,13 @@ parameter_to_python_func = {
     "lesser": lambda x, v: x < v,
     "greater_or_equal": lambda x, v: x >= v,
     "lesser_or_equal": lambda x, v: x <= v,
-   #"like": _like,
-   #"ilike": _ilike,
-   #"not_ilike": lambda x, v: not _ilike(x, v),
+    # "like": _like,
+    # "ilike": _ilike,
+    # "not_ilike": lambda x, v: not _ilike(x, v),
     "in": lambda x, v: x in v,
     "not_in": lambda x, v: x not in v,
-   #"any": lambda x, v: v in x,
-   #"not_any": lambda x, v: v not in x,
+    # "any": lambda x, v: v in x,
+    # "not_any": lambda x, v: v not in x,
     "and": lambda x: all(x),
     "or": lambda x: any(x),
     "not": lambda x: not x[0]
@@ -145,22 +145,22 @@ parameter_test_list = [
     ("varchar", "lesser_or_equal", "string2", 13),
     ("numeric", "lesser_or_equal", 51, 51),
     ("date", "lesser_or_equal", "2099-01-01", 100),
-   ## like
-   #("varchar", "like", "%1", 10),
-   ## ilike
-   #("varchar", "ilike", "STRING1%", 12),
-   ## not_ilike
-   #("varchar", "not_ilike", "STRING1%", 88),
-   ## in
+    # like
+    # ("varchar", "like", "%1", 10),
+    # ilike
+    # ("varchar", "ilike", "STRING1%", 12),
+    # not_ilike
+    # ("varchar", "not_ilike", "STRING1%", 88),
+    # in
     ("varchar", "in", ["string1", "string2", "string3"], 3),
     ("numeric", "in", [1, 2, 3], 3),
     # not_in
     ("varchar", "not_in", ["string1", "string2", "string3"], 97),
     ("numeric", "not_in", [1, 2, 3], 97),
-   ## any
-   #("array", "any", 1, 1),
-   ## not_any
-   #("array", "not_any", 1, 99),
+    # any
+    # ("array", "any", 1, 1),
+    # not_any
+    # ("array", "not_any", 1, 99),
 ]
 
 

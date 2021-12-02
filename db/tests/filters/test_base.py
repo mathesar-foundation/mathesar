@@ -3,6 +3,7 @@ from db.filters.base import (
     all_predicates, Leaf, Branch, MultiParameter, SingleParameter, NoParameter, Empty, BadFilterFormat
 )
 
+
 def instantiate_subclass(subclass, column=None, parameter=None):
     if issubclass(subclass, Leaf):
         if issubclass(subclass, MultiParameter):
@@ -23,12 +24,14 @@ def instantiate_subclass(subclass, column=None, parameter=None):
     else:
         raise Exception("This should never happen")
 
+
 someLeafPredicate = Empty(column="x")
+
 
 parametersSpec = {
     'leaf': {
         'multi': {
-            'valid': [[1], [1,2,3]],
+            'valid': [[1], [1, 2, 3]],
             'invalid': [1, [], someLeafPredicate, [someLeafPredicate, someLeafPredicate], None]
         },
         'single': {
@@ -39,7 +42,7 @@ parametersSpec = {
     'branch': {
         'multi': {
             'valid': [[someLeafPredicate, someLeafPredicate], [someLeafPredicate]],
-            'invalid': [[1], [1,2,3], [], someLeafPredicate, None],
+            'invalid': [[1], [1, 2, 3], [], someLeafPredicate, None],
         },
         'single': {
             'valid': [someLeafPredicate],
@@ -47,6 +50,7 @@ parametersSpec = {
         },
     },
 }
+
 
 def get_spec_params(predicate_subclass, valid):
     validityKey = 'valid' if valid else 'invalid'
@@ -62,19 +66,22 @@ def get_spec_params(predicate_subclass, valid):
             return parametersSpec['branch']['single'][validityKey]
     return []
 
+
 test_cases = []
 for valid in [True, False]:
     for predicate_subclass in all_predicates:
         for param in get_spec_params(predicate_subclass, valid=valid):
             test_cases.append([predicate_subclass, param, valid])
 
-@pytest.mark.parametrize("columnName, valid", [["", False],[None, False],["col1", True]])
+
+@pytest.mark.parametrize("columnName, valid", [["", False], [None, False], ["col1", True]])
 def test_column_name(columnName, valid):
     if valid:
         instantiate_subclass(Empty, columnName)
     else:
         with pytest.raises(BadFilterFormat):
             instantiate_subclass(Empty, columnName)
+
 
 @pytest.mark.parametrize("predicate_subclass, param, valid", test_cases)
 def test_params(predicate_subclass, param, valid):

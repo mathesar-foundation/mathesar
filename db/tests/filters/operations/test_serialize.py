@@ -1,13 +1,12 @@
-import pytest
-
 from db.filters.operations.serialize import get_SA_filter_spec_from_predicate
 from db.filters.base import And, Or, Not, Equal, Empty, In
+
 
 def test_serialization():
     predicate = And([
         Or([
-            In(column="col3", parameters=["value31","value32"]),
-            Equal(column="col2",parameter="value2"),
+            In(column="col3", parameters=["value31", "value32"]),
+            Equal(column="col2", parameter="value2"),
         ]),
         Not(
             Empty(column="col1")

@@ -3,6 +3,7 @@ from db.filters.base import (
     Predicate, Leaf, SingleParameter, MultiParameter, NoParameter, Branch, get_predicate_subclass_by_type_str, BadFilterFormat
 )
 
+
 def get_predicate_from_MA_filter_spec(spec: dict) -> Predicate:
     def get_first_dict_key(dict: dict) -> Any:
         return next(iter(dict))
@@ -28,11 +29,11 @@ def get_predicate_from_MA_filter_spec(spec: dict) -> Predicate:
                 return predicate_subclass(parameter=parameter_predicate)
             elif issubclass(predicate_subclass, MultiParameter):
                 parameter_predicates = \
-                    [ get_predicate_from_MA_filter_spec(parameter) for parameter in predicate_body ]
+                    [get_predicate_from_MA_filter_spec(parameter) for parameter in predicate_body]
                 return predicate_subclass(parameters=parameter_predicates)
             else:
                 raise Exception("This should never happen.")
         else:
             raise Exception("This should never happen.")
-    except:
-        raise BadFilterFormat("Parsing of Mathesar filter specification failed.")
+    except Exception as exception:
+        raise BadFilterFormat("Parsing of Mathesar filter specification failed.") from exception
