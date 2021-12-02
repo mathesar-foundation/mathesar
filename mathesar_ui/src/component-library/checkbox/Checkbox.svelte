@@ -1,9 +1,9 @@
 <script context="module" lang="ts">
-  let id = 0;
+  let maxId = 0;
 
   function getId() {
-    id += 1;
-    return id;
+    maxId += 1;
+    return maxId;
   }
 </script>
 
@@ -17,8 +17,7 @@
   export let indeterminate = false;
   export let disabled = false;
   export let label: string = null;
-
-  const componentId = getId();
+  export let id = `checkbox-${getId()}`;
 
   function onChange(e: Event) {
     checked = !checked;
@@ -29,10 +28,10 @@
   }
 </script>
 
-<label class="checkbox" for="checkbox-{componentId}"
+<label class="checkbox" for={id}
         class:checked class:indeterminate class:disabled>
   <span class="wrapper">
-    <input type="checkbox" id="checkbox-{componentId}"
+    <input type="checkbox" id={id}
             checked={checked}
             {indeterminate} {disabled} {value}
             on:change={onChange}/>

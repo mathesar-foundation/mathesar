@@ -1,3 +1,12 @@
+<script context="module" lang="ts">
+  let maxId = 0;
+
+  function getId() {
+    maxId += 1;
+    return maxId;
+  }
+</script>
+
 <script lang="ts">
   /**
    * Value of the input. Use bind tag for two-way binding.
@@ -18,6 +27,9 @@
   // Underlying DOM element for direct access
   export let element: HTMLElement = null;
 
+  // Id for the input
+  export let id = `text-input-${getId()}`;
+
   let focus = false;
 
   function focusInput(e: Event) {
@@ -34,7 +46,7 @@
     </span>
   {/if}
   <input bind:this={element} {...$$restProps} type='text' bind:value
-          {disabled}
+          {id} {disabled}
           on:focus={() => { focus = true; }}
           on:blur={() => { focus = false; }}/>
   {#if $$slots.append}
