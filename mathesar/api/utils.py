@@ -3,6 +3,9 @@ from rest_framework.exceptions import NotFound
 from db.records.operations import group
 from mathesar.models import Table
 
+DATA_KEY = 'data'
+METADATA_KEY = 'metadata'
+
 
 def get_table_or_404(pk):
     """
@@ -25,9 +28,9 @@ def process_annotated_records(record_list):
         return record._asdict() if not isinstance(record, dict) else record
 
     split_records = (
-        {"data": record_dict, "metadata": {}}
+        {DATA_KEY: record_dict, METADATA_KEY: {}}
         for record_dict in (_get_record_dict(record) for record in record_list)
     )
     return group.extract_group_metadata(
-        split_records, data_key='data', metadata_key='metadata'
+        split_records, data_key=DATA_KEY, metadata_key=METADATA_KEY
     )

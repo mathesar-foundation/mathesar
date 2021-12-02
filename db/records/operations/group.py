@@ -2,11 +2,11 @@ from dataclasses import dataclass, field
 from enum import Enum
 import json
 import logging
+from typing import List, Tuple
 from sqlalchemy import select, Column, func, and_, case, literal
 
 from db.records import exceptions as rec_exc
 from db.records.utils import create_col_objects
-from db.utils import execute_query
 
 logger = logging.getLogger(__name__)
 
@@ -27,13 +27,13 @@ class GroupMetadataField(Enum):
 
 @dataclass(frozen=True, eq=True)
 class GroupBy:
-    column_list: 'a list of columns or column names'
-    group_mode: 'a string from in the GroupMode Enum' = GroupMode.DISTINCT.value
-    num_groups: 'an int giving how many groups to produce for certain modes' = 12
+    column_list: List
+    group_mode: str = GroupMode.DISTINCT.value
+    num_groups: int = 12
 
     def validate(self):
         if type(self.column_list) not in (tuple, list):
-            raise rec_exc.BadGroupFormat(f"column_list must be list or tuple.")
+            raise rec_exc.BadGroupFormat("column_list must be list or tuple.")
         if self.group_mode not in {mode.value for mode in GroupMode}:
             raise rec_exc.InvalidGroupType(
                 f'Group_mode "{self.group_mode}" is invalid.'
@@ -65,9 +65,9 @@ class GroupBy:
 
 @dataclass(frozen=True, eq=True)
 class GroupingWindowDefinition:
-    partition_by: 'column or iterable of columns'
-    order_by: 'column or iterable of columns'
-    range_ : 'do not modify' = field(default=(None, None), init=False)
+    partition_by: List
+    order_by: List
+    range_: Tuple[int] = field(default=(None, None), init=False)
 
 
 def get_group_augmented_records_query(table, group_by):
@@ -87,7 +87,7 @@ def get_group_augmented_records_query(table, group_by):
     elif group_by.group_mode == GroupMode.DISTINCT.value:
         query = _get_distinct_group_select(table, grouping_columns)
     else:
-        raise rec_exc.BadGroupFormat(f"Unknown error")
+        raise rec_exc.BadGroupFormat("Unknown error")
     return query
 
 
@@ -178,17 +178,23 @@ def extract_group_metadata(
     metadata section.
     """
     def _get_record_pieces(record):
-        data = {k: v for k, v in record[data_key].items() if k != MATHESAR_GROUP_METADATA}
+        data = {
+            k: v for k, v in record[data_key].items()
+            if k != MATHESAR_GROUP_METADATA
+        }
         group_metadata = record[data_key].get(MATHESAR_GROUP_METADATA, {})
         metadata = (
-            record[metadata_key]
+            record.get(metadata_key, {})
             | {
-                GroupMetadataField.GROUP_ID.value: group_metadata.get(GroupMetadataField.GROUP_ID.value)
+                GroupMetadataField.GROUP_ID.value: group_metadata.get(
+                    GroupMetadataField.GROUP_ID.value
+                )
             }
         )
-        return {data_key: data, metadata_key: metadata}, group_metadata if group_metadata else None
-
-
+        return (
+            {data_key: data, metadata_key: metadata},
+            group_metadata if group_metadata else None
+        )
 
     record_tup, group_tup = zip(
         *(_get_record_pieces(record) for record in record_dictionaries)
