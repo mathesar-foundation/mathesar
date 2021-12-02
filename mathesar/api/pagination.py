@@ -73,18 +73,20 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
             group_count_by=group_count_by,
         )
 
-        if group_count_by:
-            records, groups = process_annotated_records(records)
+        if records:
+            processed_records, groups = process_annotated_records(records)
+        else:
+            processed_records, groups = None, None
 
+        if group_count_by:
             self.group_count = {
                 'group_count_by': group_count_by,
                 'results': groups
             }
-
         else:
             self.group_count = {
                 'group_count_by': None,
                 'results': None,
             }
 
-        return records
+        return processed_records

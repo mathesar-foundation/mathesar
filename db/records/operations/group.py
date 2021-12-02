@@ -202,7 +202,7 @@ def extract_group_metadata(
 
     reduced_groups = sorted(
         [json.loads(blob) for blob in set([json.dumps(group) for group in group_tup])],
-        key=lambda x: x[GroupMetadataField.GROUP_ID.value]
+        key=lambda x: x[GroupMetadataField.GROUP_ID.value] if x else None
     )
 
-    return list(record_tup), reduced_groups
+    return list(record_tup), reduced_groups if reduced_groups != [None] else None

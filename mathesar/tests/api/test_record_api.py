@@ -49,7 +49,7 @@ def test_record_list(create_table, client):
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 50
     for column_name in table.sa_column_names:
-        assert column_name in record_data
+        assert column_name in record_data['data']
 
 
 def test_record_list_filter(create_table, client):
@@ -71,7 +71,7 @@ def test_record_list_filter(create_table, client):
     json_filter_list = json.dumps(filter_list)
 
     with patch.object(
-        models, "get_records", side_effect=models.get_records
+        models, "db_get_records", side_effect=models.db_get_records
     ) as mock_get:
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
@@ -94,7 +94,7 @@ def test_record_list_filter_duplicates(create_table, client):
     ]
     json_filter_list = json.dumps(filter_list)
 
-    with patch.object(models, "get_records") as mock_get:
+    with patch.object(models, "db_get_records", return_value=[]) as mock_get:
         client.get(f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}')
     assert mock_get.call_args is not None
     assert mock_get.call_args[1]['filters'] == filter_list
@@ -122,7 +122,7 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
             json_filter_list = json.dumps(filter_list)
 
             with patch.object(
-                models, "get_records", side_effect=models.get_records
+                models, "db_get_records", side_effect=models.db_get_records
             ) as mock_get:
                 response = client.get(
                     f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
@@ -173,7 +173,7 @@ def test_record_list_sort(create_table, client):
     json_order_by = json.dumps(order_by)
 
     with patch.object(
-        models, "get_records", side_effect=models.get_records
+        models, "db_get_records", side_effect=models.db_get_records
     ) as mock_get:
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?order_by={json_order_by}'
@@ -197,38 +197,32 @@ def _test_record_list_group(table, client, group_count_by, expected_groups):
     json_group_count_by = json.dumps(group_count_by)
     query_str = f'group_count_by={json_group_count_by}&order_by={json_order_by}'
 
-    with patch.object(
-        models, "get_group_counts", side_effect=models.get_group_counts
-    ) as mock_get:
-        response = client.get(f'/api/v0/tables/{table.id}/records/?{query_str}')
-        response_data = response.json()
+    response = client.get(f'/api/v0/tables/{table.id}/records/?{query_str}')
+    response_data = response.json()
 
     assert response.status_code == 200
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 50
 
-    assert 'group_count' in response_data
     assert response_data['group_count']['group_count_by'] == group_count_by
-    assert 'results' in response_data['group_count']
-    assert 'values' in response_data['group_count']['results'][0]
-    assert 'count' in response_data['group_count']['results'][0]
-
     results = response_data['group_count']['results']
-    returned_groups = {tuple(group['values']) for group in results}
-    for expected_group in expected_groups:
-        assert expected_group in returned_groups
-
-    assert mock_get.call_args is not None
-    assert mock_get.call_args[0][2] == group_count_by
+    assert results == expected_groups
 
 
 def test_record_list_group_single_column(create_table, client):
     table_name = 'NASA Record List Group Single'
     table = create_table(table_name)
-    group_count_by = ['Center']
+    group_count_by = {'column_list': ['Center']}
     expected_groups = [
-        ('NASA Marshall Space Flight Center',),
-        ('NASA Stennis Space Center',)
+        {
+            'group_id': 10, 'count': 144,
+            'first_value': {'Center': 'NASA Marshall Space Flight Center'},
+            'last_value': {'Center': 'NASA Marshall Space Flight Center'}
+        }, {
+            'group_id': 11, 'count': 5,
+            'first_value': {'Center': 'NASA Stennis Space Center'},
+            'last_value': {'Center': 'NASA Stennis Space Center'}
+        }
     ]
     _test_record_list_group(table, client, group_count_by, expected_groups)
 
@@ -236,10 +230,17 @@ def test_record_list_group_single_column(create_table, client):
 def test_record_list_group_multi_column(create_table, client):
     table_name = 'NASA Record List Group Multi'
     table = create_table(table_name)
-    group_count_by = ['Center', 'Status']
+    group_count_by = {'column_list': ['Center', 'Status']}
     expected_groups = [
-        ('NASA Marshall Space Flight Center', 'Issued'),
-        ('NASA Stennis Space Center', 'Issued'),
+        {
+            'group_id': 20, 'count': 113,
+            'first_value': {'Center': 'NASA Marshall Space Flight Center', 'Status': 'Issued'},
+            'last_value': {'Center': 'NASA Marshall Space Flight Center', 'Status': 'Issued'}
+        }, {
+            'group_id': 21, 'count': 5,
+            'first_value': {'Center': 'NASA Stennis Space Center', 'Status': 'Issued'},
+            'last_value': {'Center': 'NASA Stennis Space Center', 'Status': 'Issued'}
+        }
     ]
     _test_record_list_group(table, client, group_count_by, expected_groups)
 
@@ -256,7 +257,7 @@ def test_record_list_pagination_limit(create_table, client):
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 5
     for column_name in table.sa_column_names:
-        assert column_name in record_data
+        assert column_name in record_data['data']
 
 
 def test_record_list_pagination_offset(create_table, client):
@@ -265,10 +266,10 @@ def test_record_list_pagination_offset(create_table, client):
 
     response_1 = client.get(f'/api/v0/tables/{table.id}/records/?limit=5&offset=5')
     response_1_data = response_1.json()
-    record_1_data = response_1_data['results'][0]
+    record_1_data = response_1_data['results'][0]['data']
     response_2 = client.get(f'/api/v0/tables/{table.id}/records/?limit=5&offset=10')
     response_2_data = response_2.json()
-    record_2_data = response_2_data['results'][0]
+    record_2_data = response_2_data['results'][0]['data']
 
     assert response_1.status_code == 200
     assert response_2.status_code == 200
@@ -398,7 +399,7 @@ def test_record_list_filter_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
     filter_list = json.dumps([{"field": "Center", "op": "is_null"}])
-    with patch.object(models, "get_records", side_effect=exception):
+    with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?filters={filter_list}'
         )
@@ -413,7 +414,7 @@ def test_record_list_sort_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
     order_by = json.dumps([{"field": "Center", "direction": "desc"}])
-    with patch.object(models, "get_records", side_effect=exception):
+    with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?order_by={order_by}'
         )
@@ -428,7 +429,7 @@ def test_record_list_group_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
     group_by = json.dumps(["Center"])
-    with patch.object(models, "get_group_counts", side_effect=exception):
+    with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?group_count_by={group_by}'
         )
