@@ -18,12 +18,18 @@
   let name = '';
   let proceed: () => Promise<void>;
 
+  function schemaContainsTableName(_name: string): boolean {
+    return [...$tables.data.values()].map((t) => t.name).includes(_name);
+  }
+
   function getNameValidationErrors(_name: string): string[] {
-    const errors: string[] = [];
     if (_name.length === 0) {
-      errors.push('Name cannot be empty.');
+      return ['Name cannot be empty.'];
     }
-    return errors;
+    if (_name !== originalName && schemaContainsTableName(_name)) {
+      return ['A table with that name already exists.'];
+    }
+    return [];
   }
 
   $: validationErrors = getNameValidationErrors(name);
@@ -70,9 +76,9 @@
     on:enter={proceed}
   />
   {#if validationErrors.length}
-    <div class='error'>
+    <p class='error'>
       {validationErrors.join(' ')}
-    </div>
+    </p>
   {/if}
   <CancelOrProceedButtonPair
     bind:proceed
@@ -83,3 +89,9 @@
     {canProceed}
   />
 </Modal>
+
+<style>
+  .error {
+    color: #f47171;
+  }
+</style>
