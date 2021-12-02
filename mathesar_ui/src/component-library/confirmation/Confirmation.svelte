@@ -64,8 +64,8 @@
   {/each}
   <CancelOrProceedButtonPair
     slot=footer
-    cancel={cancelButton}
-    proceed={proceedButton}
+    {cancelButton}
+    {proceedButton}
     onCancel={handleCancelButton}
     onProceed={handleProceedButton}
   />

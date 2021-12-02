@@ -28,19 +28,19 @@
     icon: { data: faCheck },
   };
   
-  export let cancel: Partial<ButtonDetails> = {};
-  export let proceed: Partial<ButtonDetails> = {};
+  export let cancelButton: Partial<ButtonDetails> = {};
+  export let proceedButton: Partial<ButtonDetails> = {};
   export let onCancel: () => void;
   export let onProceed: () => Promise<void>;
   export let canProceed = true;
   export let canCancel = true;
 
-  $: cancelButton = { ...cancelButtonDefaults, ...cancel };
-  $: proceedButton = { ...proceedButtonDefaults, ...proceed };
+  $: fullCancelButton = { ...cancelButtonDefaults, ...cancelButton };
+  $: fullProceedButton = { ...proceedButtonDefaults, ...proceedButton };
 
   let isProcessing = false;
 
-  async function handleProceed() {
+  export async function proceed() {
     isProcessing = true;
     try {
       await onProceed();
@@ -55,20 +55,20 @@
     on:click={onCancel}
     disabled={!canCancel || isProcessing}
   >
-    {#if cancelButton.icon}<Icon {...cancelButton.icon} />{/if}
-    <span>{cancelButton.label}</span>
+    {#if fullCancelButton.icon}<Icon {...fullCancelButton.icon} />{/if}
+    <span>{fullCancelButton.label}</span>
   </Button>
   <Button
-    on:click={handleProceed}
+    on:click={proceed}
     appearance=primary
     disabled={!canProceed || isProcessing}
   >
     {#if isProcessing}
       <Spinner />
-    {:else if proceedButton.icon}
-      <Icon {...proceedButton.icon} />
+    {:else if fullProceedButton.icon}
+      <Icon {...fullProceedButton.icon} />
     {/if}
-    <span>{proceedButton.label}</span>
+    <span>{fullProceedButton.label}</span>
   </Button>
 </div>
 

@@ -16,6 +16,7 @@
   let inputElement: HTMLInputElement;
   let originalName = '';
   let name = '';
+  let proceed: () => Promise<void>;
 
   function getNameValidationErrors(_name: string): string[] {
     const errors: string[] = [];
@@ -62,15 +63,21 @@
 
 <Modal bind:isOpen={isOpen} let:close {allowClose} on:open={init}>
   <span slot=title>Rename <em>{originalName}</em> Table</span>
-  <TextInput bind:value={name} bind:element={inputElement} aria-label='Name' />
+  <TextInput
+    bind:value={name}
+    bind:element={inputElement}
+    aria-label='Name'
+    on:enter={proceed}
+  />
   {#if validationErrors.length}
     <div class='error'>
       {validationErrors.join(' ')}
     </div>
   {/if}
   <CancelOrProceedButtonPair
+    bind:proceed
     slot=footer
-    proceed={{ label: 'Save' }}
+    proceedButton={{ label: 'Save' }}
     onCancel={close}
     onProceed={handleSave}
     {canProceed}

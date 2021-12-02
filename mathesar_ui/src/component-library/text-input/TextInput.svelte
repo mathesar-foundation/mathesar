@@ -1,4 +1,8 @@
 <script lang="ts">
+  import { createEventDispatcher } from "svelte";
+
+  const dispatch = createEventDispatcher();
+
   /**
    * Value of the input. Use bind tag for two-way binding.
    * Refer Svelte docs for more info on binding form input values.
@@ -25,9 +29,22 @@
       element?.focus();
     }
   }
+
+  function handleKeypress(e: KeyboardEvent) {
+    if (e.key === 'Enter') {
+      dispatch('enter');
+    }
+  }
 </script>
 
-<div class={['text-input', classes].join(' ')} class:focus class:disabled {style} on:click={focusInput}>
+<div
+  class={['text-input', classes].join(' ')}
+  class:focus
+  class:disabled
+  {style}
+  on:click={focusInput}
+  on:keypress={handleKeypress}
+>
   {#if $$slots.prepend}
     <span class="prepend">
       <slot name="prepend"></slot>
