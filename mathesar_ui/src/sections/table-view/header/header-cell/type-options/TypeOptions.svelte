@@ -94,7 +94,7 @@
       typeChangeState = States.Loading;
       try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        await columnsDataStore.patchType(column.index, selectedDBTypeOption.id);
+        await columnsDataStore.patchType(column.id, selectedDBTypeOption.id);
       } catch (err) {
         // TODO: Figure out where to place error boundaries for toast system
         console.error(err);

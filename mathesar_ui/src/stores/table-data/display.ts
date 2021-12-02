@@ -28,18 +28,16 @@ const movementKeys = new Set(['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft',
 
 function recalculateColumnPositions(columnPositionMap: ColumnPositionMap, columns: Column[]) {
   let left = ROW_CONTROL_COLUMN_WIDTH;
-  const newColumnPositionMap: ColumnPositionMap = new Map(columnPositionMap);
+  const newColumnPositionMap: ColumnPositionMap = new Map();
   columns.forEach((column) => {
-    const columnWidth = newColumnPositionMap.get(column.name)?.width;
-    if (typeof columnWidth !== 'number') {
-      newColumnPositionMap.set(column.name, {
-        left,
-        width: DEFAULT_COLUMN_WIDTH,
-      });
-      left += DEFAULT_COLUMN_WIDTH;
-    } else {
-      left += columnWidth;
-    }
+    const columnWidth = columnPositionMap.get(column.name)?.width;
+    const isColumnWidthValid = typeof columnWidth === 'number';
+    const newWidth = isColumnWidthValid ? columnWidth : DEFAULT_COLUMN_WIDTH;
+    newColumnPositionMap.set(column.name, {
+      left,
+      width: newWidth,
+    });
+    left += newWidth;
   });
   newColumnPositionMap.set('__row', {
     width: left,

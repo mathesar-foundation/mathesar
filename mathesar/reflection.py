@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.core.cache import cache
+from django.db.models import Q
 
+from db.columns.operations.select import get_column_indexes_from_table
 from db.constraints.operations.select import get_constraints_with_oids
 from db.schemas.operations.select import get_mathesar_schemas_with_oids
 from db.tables.operations.select import get_table_oids_from_schema
@@ -62,6 +64,16 @@ def reflect_tables_from_schema(schema):
             table.delete()
 
 
+def reflect_columns_from_table(table):
+    attnums = {
+        column['attnum']
+        for column in get_column_indexes_from_table(table.oid, table.schema._sa_engine)
+    }
+    for attnum in attnums:
+        models.Column.current_objects.get_or_create(attnum=attnum, table=table)
+    models.Column.current_objects.filter(table=table).filter(~Q(attnum__in=attnums)).delete()
+
+
 def reflect_constraints_from_database(database):
     engine = create_mathesar_engine(database)
     db_constraints = get_constraints_with_oids(engine)
@@ -96,5 +108,7 @@ def reflect_db_objects():
             reflect_schemas_from_database(database.name)
         for schema in models.Schema.current_objects.all():
             reflect_tables_from_schema(schema)
+        for table in models.Table.current_objects.all():
+            reflect_columns_from_table(table)
         reflect_constraints_from_database(database.name)
         cache.set(DB_REFLECTION_KEY, True, DB_REFLECTION_INTERVAL)

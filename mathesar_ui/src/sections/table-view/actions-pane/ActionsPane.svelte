@@ -21,8 +21,7 @@
     Meta,
   } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar-component-library/types';
-  import { refreshTableContent } from '@mathesar/stores/table-data/store';
-  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/constraints';
+  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import TableConstraints from '../constraints/TableConstraints.svelte';
   import DisplayFilter from '../display-options/DisplayFilter.svelte';
   import DisplaySort from '../display-options/DisplaySort.svelte';
@@ -63,7 +62,7 @@
   $: columnOptions = getColumnOptions($columnsDataStore);
 
   function refresh() {
-    void refreshTableContent($tabularData.id);
+    void ($tabularData as TabularData).refresh();
   }
 </script>
 

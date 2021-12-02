@@ -34,7 +34,7 @@
   }
 </script>
 
-<Modal class="schema-modal" bind:isOpen closeOnEsc={state !== States.Loading}>
+<Modal class="schema-modal" bind:isOpen allowClose={state !== States.Loading}>
   <div class="header">
     Delete schema '{schema?.name}'
   </div>

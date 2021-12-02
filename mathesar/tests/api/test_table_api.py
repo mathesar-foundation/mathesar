@@ -231,6 +231,60 @@ def test_table_list_filter_schema(create_table, client):
     check_table_response(response_table, table, table.name)
 
 
+def test_table_list_order_by_name(create_table, client):
+    table_2 = create_table('Filter Name 2')
+    table_1 = create_table('Filter Name 1')
+    table_4 = create_table('Filter Name 4')
+    table_3 = create_table('Filter Name 3')
+    table_5 = create_table('Filter Name 5')
+    unsorted_expected_tables = [table_5, table_3, table_4, table_1, table_2]
+    expected_tables = [table_1, table_2, table_3, table_4, table_5]
+    response = client.get('/api/v0/tables/')
+    response_data = response.json()
+    response_tables = response_data['results']
+    comparison_tuples = zip(response_tables, unsorted_expected_tables)
+    for comparison_tuple in comparison_tuples:
+        check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
+    sort_field = "name"
+    response = client.get(f'/api/v0/tables/?sort_by={sort_field}')
+    response_data = response.json()
+    response_tables = response_data['results']
+    comparison_tuples = zip(response_tables, expected_tables)
+    for comparison_tuple in comparison_tuples:
+        check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
+
+
+def test_table_list_order_by_id(create_table, client):
+    table_1 = create_table('Filter Name 1')
+    table_2 = create_table('Filter Name 2')
+    table_3 = create_table('Filter Name 3')
+    unsorted_expected_tables = [
+        table_3,
+        table_2,
+        table_1
+    ]
+    expected_tables = [
+        table_1,
+        table_2,
+        table_3
+    ]
+
+    response = client.get('/api/v0/tables/')
+    response_data = response.json()
+    response_tables = response_data['results']
+    comparison_tuples = zip(response_tables, unsorted_expected_tables)
+    for comparison_tuple in comparison_tuples:
+        check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
+
+    sort_field = "id"
+    response = client.get(f'/api/v0/tables/?sort_by={sort_field}')
+    response_data = response.json()
+    response_tables = response_data['results']
+    comparison_tuples = zip(response_tables, expected_tables)
+    for comparison_tuple in comparison_tuples:
+        check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
+
+
 @pytest.mark.parametrize('timestamp_type', ['created', 'updated'])
 def test_table_list_filter_timestamps(create_table, client, timestamp_type):
     table_name = f'Fitler {timestamp_type}'
@@ -621,6 +675,30 @@ def test_table_create_base_name_too_long(client, data_file, schema):
     )
 
 
+get_encoding_test_list = [
+    ("mathesar/tests/data/non_unicode_files/cp1250.csv", "cp1250", (1, '2',
+                                                                    '1.7 Cubic Foot Compact "Cube" Office Refrigerators',
+                                                                    'Barry French',
+                                                                    '293', '457.81', '208.16', '68.02', 'Nunavut',
+                                                                    'Appliances', '0.58'),
+     ['1', "Eldon Base for stackable storage shelf, platinum", "Muhammed MacIntyre",
+      '3', '-213.25', '38.94', '35', "Nunavut", "Storage & Organization", '0.8']),
+
+    ("mathesar/tests/data/non_unicode_files/utf_16_le.csv", "utf_16_le", (1, 'Troy', '2004', 'English'),
+     ['Title', 'Year', 'Language']),
+]
+
+
+@pytest.mark.parametrize("non_unicode_file_path, filename, first_row, column_names", get_encoding_test_list)
+def test_table_create_non_unicode(client, non_unicode_file_path, filename, first_row, column_names,
+                                  schema, create_data_file):
+    expt_name = filename
+    non_unicode_datafile = create_data_file(non_unicode_file_path, filename)
+    check_create_table_response(
+        client, '', expt_name, non_unicode_datafile, schema, first_row, column_names
+    )
+
+
 def test_table_create_with_same_name(client, schema):
     table_name = 'test_table_duplicate'
     body = {
@@ -790,10 +868,19 @@ def test_table_get_with_reflect_new(client, table_for_reflection):
     created_table = actual_created[0]
     assert created_table['name'] == table_name
     created_columns = created_table['columns']
-    assert created_columns == [
+    check_columns_response(created_columns, [
         {'name': 'id', 'type': 'INTEGER', 'type_options': None},
         {'name': 'name', 'type': 'VARCHAR', 'type_options': None}
-    ]
+    ])
+
+
+def check_columns_response(created_columns, expected_response):
+    # Id's are auto incrementing and vary depending up previous test cases, better to remove them before comparing
+    created_columns_id = []
+    for created_column in created_columns:
+        created_columns_id.append(created_column.pop('id'))
+    assert len(created_columns_id) == len(expected_response)
+    assert created_columns == expected_response
 
 
 def test_table_get_with_reflect_column_change(client, table_for_reflection):
@@ -818,10 +905,10 @@ def test_table_get_with_reflect_column_change(client, table_for_reflection):
     ][0]
     new_columns = altered_table['columns']
     assert altered_table['id'] == orig_id
-    assert new_columns == [
+    check_columns_response(new_columns, [
         {'name': 'id', 'type': 'INTEGER', 'type_options': None},
         {'name': new_column_name, 'type': 'VARCHAR', 'type_options': None}
-    ]
+    ])
 
 
 def test_table_get_with_reflect_name_change(client, table_for_reflection):

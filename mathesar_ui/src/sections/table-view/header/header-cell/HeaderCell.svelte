@@ -5,12 +5,13 @@
     faChevronLeft,
   } from '@fortawesome/free-solid-svg-icons';
   import { Dropdown, Icon, Button } from '@mathesar-component-library';
+  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import { abstractTypes, getAbstractTypeForDBType } from '@mathesar/stores/abstractTypes';
-
   import type {
     Meta,
     Column,
     ColumnPosition,
+    ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
 
   import DefaultOptions from './DefaultOptions.svelte';
@@ -19,10 +20,12 @@
   export let columnPosition: ColumnPosition;
   export let column: Column;
   export let meta: Meta;
+  export let columnsDataStore: ColumnsDataStore;
+  export let constraintsDataStore: ConstraintsDataStore;
 
   $: abstractTypeOfColumn = getAbstractTypeForDBType(column.type, $abstractTypes.data);
 
-  let isOpen = false;
+  let menuIsOpen = false;
   let view: 'default' | 'type' = 'default';
 
   function setDefaultView() {
@@ -33,18 +36,26 @@
     view = 'type';
   }
 
-  function closeDropdown() {
-    isOpen = false;
+  function closeMenu() {
+    menuIsOpen = false;
     setDefaultView();
   }
 </script>
 
-<div class="cell" style="width:{columnPosition?.width || 0}px;
-      left:{(columnPosition?.left || 0)}px;">
-  <Dropdown bind:isOpen
-            triggerClass="column-opts" triggerAppearance="plain"
-            contentClass="column-opts-content"
-            on:close={setDefaultView}>
+<div
+  class="cell"
+  style="
+    width:{columnPosition?.width || 0}px;
+    left:{(columnPosition?.left || 0)}px;
+  "
+>
+  <Dropdown
+    bind:isOpen={menuIsOpen}
+    triggerClass="column-opts"
+    triggerAppearance="plain"
+    contentClass="column-opts-content"
+    on:close={setDefaultView}
+  >
     <svelte:fragment slot="trigger">
       <span class="type">
         {abstractTypeOfColumn.icon}
@@ -63,7 +74,12 @@
           </Button>
           {:else if view === 'type'}
           <h6 class="category">
-            <Button size="small" appearance="plain" class="padding-zero" on:click={setDefaultView}>
+            <Button
+              size="small"
+              appearance="plain"
+              class="padding-zero"
+              on:click={setDefaultView}
+            >
               <Icon data={faChevronLeft}/>
               Go back
             </Button>
@@ -76,9 +92,16 @@
         <div class="section">
           {#if view === 'default'}
             <h6 class="category">Operations</h6>
-            <DefaultOptions {meta} {column} on:close={closeDropdown}/>
+            <DefaultOptions
+              {meta}
+              {column}
+              {columnsDataStore}
+              {constraintsDataStore}
+              on:close={closeMenu}
+              on:columnDelete
+            />
           {:else if view === 'type'}
-            <TypeOptions {column} {abstractTypeOfColumn} on:close={closeDropdown}/>
+            <TypeOptions {column} {abstractTypeOfColumn} on:close={closeMenu}/>
           {/if}
         </div>
     </svelte:fragment>
