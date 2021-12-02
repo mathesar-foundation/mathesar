@@ -1,4 +1,5 @@
 <script lang='ts'>
+  import { tick } from 'svelte';
   import { CancelOrProceedButtonPair, Modal, TextInput } from '@mathesar-component-library';
   import type { TabularData } from '@mathesar/stores/table-data/types';
   import { refetchTablesForSchema, renameTable, tables } from '@mathesar/stores/tables';
@@ -12,7 +13,7 @@
   export let tabularData: TabularData;
 
   let allowClose = true;
-  
+  let inputElement: HTMLInputElement;
   let originalName = '';
   let name = '';
 
@@ -28,9 +29,15 @@
   $: canProceed = !validationErrors.length;
   $: tabList = getTabsForSchema($currentDBName, $currentSchemaId);
 
-  function init() {
+  async function init() {
     originalName = $tables.data.get(tabularData.id)?.name ?? '';
     name = originalName;
+    if (!inputElement) {
+      return;
+    }
+    await tick();
+    inputElement.focus();
+    inputElement.setSelectionRange(0, inputElement.value.length);
   }
   
   async function handleSave() {
@@ -55,9 +62,7 @@
 
 <Modal bind:isOpen={isOpen} let:close {allowClose} on:open={init}>
   <span slot=title>Rename <em>{originalName}</em> Table</span>
-  <!-- TODO add label -->
-  <!-- TODO auto focus and select -->
-  <TextInput bind:value={name} />
+  <TextInput bind:value={name} bind:element={inputElement} aria-label='Name' />
   {#if validationErrors.length}
     <div class='error'>
       {validationErrors.join(' ')}
