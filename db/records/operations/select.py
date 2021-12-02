@@ -5,8 +5,7 @@ from db.columns.base import MathesarColumn
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.utils import execute_query
-from db.filters.operations.deserialize import get_predicate_from_MA_filter_spec
-from db.filters.operations.serialize import get_SA_filter_spec_from_predicate
+from db.filters.operations.apply import apply_ma_filter_spec
 
 
 def get_query(table, limit, offset, order_by, filters, cols=None):
@@ -14,9 +13,7 @@ def get_query(table, limit, offset, order_by, filters, cols=None):
     if order_by is not None:
         query = apply_sort(query, order_by)
     if filters is not None:
-        predicate = get_predicate_from_MA_filter_spec(filters)
-        sa_filter_spec = get_SA_filter_spec_from_predicate(predicate)
-        query = apply_filters(query, sa_filter_spec)
+        query = apply_ma_filter_spec(query, filters)
     return query
 
 
