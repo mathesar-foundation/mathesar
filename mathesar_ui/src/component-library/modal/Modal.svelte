@@ -42,7 +42,7 @@
     dispatch(_isOpen ? 'open' : 'close');
   }
 
-  $: dispatchOpenOrClose(isOpen);
+  $: void dispatchOpenOrClose(isOpen);
 </script>
 
 <svelte:window on:keydown={handleKeydown}/>

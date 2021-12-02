@@ -40,7 +40,7 @@
 
   let isProcessing = false;
 
-  export async function proceed() {
+  export async function proceed(): Promise<void> {
     isProcessing = true;
     try {
       await onProceed();
