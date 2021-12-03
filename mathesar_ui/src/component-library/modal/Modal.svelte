@@ -1,56 +1,81 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { fade, fly } from 'svelte/transition';
+  import { faTimes } from '@fortawesome/free-solid-svg-icons';
   import type { Size } from '@mathesar-component-library/types';
-  import { portal } from '@mathesar-component-library';
+  import { Button, Icon, portal } from '@mathesar-component-library';
+  import type { ModalCloseAction } from './modal.d';
 
   const dispatch = createEventDispatcher();
 
-  // Additional classes
+  export let isOpen = false;
+  export let title: string | undefined = undefined;
   let classes = '';
   export { classes as class };
-
-  // Inline styles
   export let style = '';
-
-  // Size
   export let size: Size = 'medium';
+  export let allowClose = true;
+  export let closeOn: ModalCloseAction[] = ['button'];
 
-  // Boolean to open/close modal
-  export let isOpen = true;
+  $: closeOnButton = allowClose && closeOn.includes('button');
+  $: closeOnEsc = allowClose && closeOn.includes('esc');
+  $: closeOnOverlay = allowClose && closeOn.includes('overlay');
 
-  // Close when esc key is pressed
-  export let closeOnEsc = true;
-
+  function close() {
+    isOpen = false;
+  }
+  
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape' && isOpen && closeOnEsc) {
-      isOpen = false;
+      close();
     }
   }
 
-  function dispatchOpenEvent(_isOpen: boolean) {
-    if (_isOpen) {
-      dispatch('open');
-    } else {
-      dispatch('close');
+  function handleOverlayClick() {
+    if (closeOnOverlay) {
+      close();
     }
   }
 
-  $: dispatchOpenEvent(isOpen);
+  $: if (isOpen) { dispatch('open'); } else { dispatch('close'); }
 </script>
 
 <svelte:window on:keydown={handleKeydown}/>
 
 {#if isOpen}
-  <div class="modal-wrapper" use:portal>
-    <div class={['modal', `modal-size-${size}`, classes].join(' ')} {style}>
+  <div class="modal-wrapper" use:portal >
+    <div
+      class="overlay"
+      on:click={handleOverlayClick}
+      in:fade="{{ duration: 150 }}"
+      out:fade="{{ duration: 150 }}"
+    />
+    <div
+      class={['modal', `modal-size-${size}`, classes].join(' ')}
+      {style}
+      in:fly="{{ y: 20, duration: 150 }}"
+      out:fly="{{ y: 20, duration: 150 }}"
+    >
+      {#if $$slots.title || title || closeOnButton}
+        <div class=title-bar>
+          <div class="title">
+            {#if $$slots.title}<slot name="title"/>{/if}
+            {#if title}{title}{/if}
+          </div>
+          {#if closeOnButton}
+            <Button appearance=plain class=close-button on:click={close}>
+              <Icon data={faTimes}/>
+            </Button>
+          {/if}
+        </div>
+      {/if}
+      
       <div class="body">
-        <slot/>
+        <slot {close}/>
       </div>
 
       {#if $$slots.footer}
-        <div class="footer">
-          <slot name="footer"/>
-        </div>
+        <div class="footer"><slot name="footer"/></div>
       {/if}
     </div>
   </div>

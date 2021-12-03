@@ -3,6 +3,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 from rest_framework.settings import api_settings
 
+from mathesar.models import Column
+
 
 class InputValueField(serializers.CharField):
     """
@@ -35,13 +37,30 @@ class TypeOptionSerializer(serializers.Serializer):
         return super(TypeOptionSerializer, self).run_validation(data)
 
 
-class SimpleColumnSerializer(serializers.Serializer):
+class SimpleColumnSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Column
+        fields = ('id', 'name', 'type', 'type_options')
     name = serializers.CharField()
     type = serializers.CharField(source='plain_type')
     type_options = TypeOptionSerializer(required=False, allow_null=True)
 
 
 class ColumnSerializer(SimpleColumnSerializer):
+    class Meta(SimpleColumnSerializer.Meta):
+        fields = SimpleColumnSerializer.Meta.fields + (
+            'nullable',
+            'primary_key',
+            'source_column',
+            'copy_source_data',
+            'copy_source_constraints',
+            'index',
+            'valid_target_types',
+            'default',
+            'display_options'
+        )
+        model_fields = ('display_options', )
+
     name = serializers.CharField(required=False)
 
     # From scratch fields
@@ -101,3 +120,7 @@ class ColumnSerializer(SimpleColumnSerializer):
                     if f not in self.initial_data
                 })
         return data
+
+    @property
+    def validated_model_fields(self):
+        return {key: self.validated_data[key] for key in self.validated_data if key in self.Meta.model_fields}
