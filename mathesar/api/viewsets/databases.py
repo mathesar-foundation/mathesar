@@ -5,9 +5,9 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
 from mathesar.models import Database
-from mathesar.api.filters import DatabaseFilter
+from mathesar.api.filters import DatabaseFilter, get_filter_options
 from mathesar.api.pagination import DefaultLimitOffsetPagination
-from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
+from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer, FilterSerializer
 
 
 class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -23,4 +23,12 @@ class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
     def types(self, request, pk=None):
         database = self.get_object()
         serializer = TypeSerializer(database.supported_types, many=True)
+        return Response(serializer.data)
+
+    @action(methods=['get'], detail=True)
+    def filters(self, request, pk=None):
+        database = self.get_object()
+        supported_ma_types = [ ma_type_info['identifier'] for ma_type_info in database.supported_types ]
+        filter_options = get_filter_options(supported_ma_types)
+        serializer = FilterSerializer(filter_options, many=True)
         return Response(serializer.data)

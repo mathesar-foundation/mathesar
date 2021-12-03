@@ -5,6 +5,9 @@ Mathesar data types are shown in the UI.
 from enum import Enum
 
 from db.types.base import PostgresType, MathesarCustomType, get_available_types, get_qualified_name, get_db_type_name
+from db.filters.base import Predicate, relies_on_comparability
+
+from typing import List, Type
 
 
 class MathesarTypeIdentifier(Enum):
@@ -22,16 +25,23 @@ class MathesarTypeIdentifier(Enum):
     CUSTOM = 'custom'
 
 
-comparable_mathesar_types = [
+comparable_mathesar_types = {
     MathesarTypeIdentifier.DATETIME,
     MathesarTypeIdentifier.DURATION,
     MathesarTypeIdentifier.MONEY,
     MathesarTypeIdentifier.NUMBER,
-]
+}
 
 
-def is_mathesar_type_comparable(ma_type: MathesarTypeIdentifier) -> bool:
+def _is_ma_type_comparable(ma_type: MathesarTypeIdentifier) -> bool:
     return ma_type in comparable_mathesar_types
+
+
+def is_ma_type_supported_by_predicate(ma_type: MathesarTypeIdentifier, predicate: Type[Predicate]):
+    if relies_on_comparability(predicate):
+        return _is_ma_type_comparable(ma_type)
+    else:
+        return True
 
 
 def _get_mapped_types(type_map):

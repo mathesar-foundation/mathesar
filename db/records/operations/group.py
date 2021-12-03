@@ -1,7 +1,8 @@
 from sqlalchemy import select, Column, func
 
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
-from db.records.operations.select import get_query, apply_filters
+from db.records.operations.select import get_query
+from db.filters.operations.apply import apply_ma_filter_spec
 from db.records.utils import create_col_objects
 from db.utils import execute_query
 
@@ -72,7 +73,7 @@ def _get_filtered_group_by_count_query(
                 ]
             }
         ]
-        filtered_count_query = apply_filters(count_query, limited_filters)
+        filtered_count_query = apply_ma_filter_spec(count_query, limited_filters)
     else:
         filtered_count_query = None
     return filtered_count_query
@@ -110,7 +111,7 @@ def get_group_counts(table, engine, group_by, limit=None, offset=None, order_by=
         .group_by(*table_columns)
     )
     if filters is not None:
-        count_query = apply_filters(count_query, filters)
+        count_query = apply_ma_filter_spec(count_query, filters)
     filtered_count_query = _get_filtered_group_by_count_query(
         table, engine, group_by, limit, offset, order_by, filters, count_query
     )

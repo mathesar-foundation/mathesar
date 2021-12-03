@@ -218,18 +218,6 @@ all_predicates = [
 ]
 
 
-predicates_that_dont_need_comparability = [
-    predicate for predicate in all_predicates if not relies_on_comparability(predicate)
-]
-
-
-def takes_parameter_thats_mathesar_type(predicate_subclass: Type[Predicate]) -> bool:
-    return (
-        issubclass(predicate_subclass, Leaf)
-        and not issubclass(predicate_subclass, NoParameter)
-    )
-
-
 def not_empty(xs):
     return len(xs) > 0
 
