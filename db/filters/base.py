@@ -1,3 +1,11 @@
+"""
+This module contains Predicate subclasses, and relevenat mixins, that describe nodes in a
+predicate tree, or, in other words, predicates that compose into a tree. A predicate is
+described by whether it's a Leaf or a Branch, whether it takes parameters and how many
+(SingleParameter, MultiParameter, NoParameter) and whether it relies on comparability
+(ReliesOnComparability), as well as its identifier and its human-friendly name.
+"""
+
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, List, Union, Type
@@ -5,6 +13,9 @@ from sqlalchemy_filters.exceptions import BadFilterFormat as SABadFilterFormat
 
 
 class PredicateSuperType(Enum):
+    """Every Predicate is either a leaf node in the predicate tree, or a branch node.
+    A leaf node (e.g. EMPTY, EQUAL) has no predicate children, while a branch node
+    (e.g. AND, OR, NOT) always has predicate children."""
     LEAF = "leaf"
     BRANCH = "branch"
 
@@ -15,8 +26,6 @@ class BranchPredicateType(Enum):
     AND = "and"
 
 
-# TODO switch to using SA filter names directly
-# TODO what to do about duplication https://github.com/centerofci/mathesar/pull/844 ?
 class LeafPredicateType(Enum):
     """Note that negation is achieved via BranchPredicateType.NOT"""
     EQUAL = "equal"
@@ -32,6 +41,10 @@ class LeafPredicateType(Enum):
 
 
 class ParameterCount(Enum):
+    """Predicates (currently only leaf predicates) can take single parameters (e.g. EQUAL
+    predicate takes a value to check equality against), lists of parameters (e.g. the IN
+    predicate takes a list of values to check membership against), or no paramaters (e.g.
+    the EMPTY predicate).""" 
     SINGLE = "single"
     MULTI = "multi"
     NONE = "none"
@@ -119,6 +132,8 @@ class Branch(Predicate):
 
 @frozen_dataclass
 class ReliesOnComparability:
+    """Some predicates require the data types they are being applied to be comparable
+    (lesser, greater, etc.)."""
     pass
 
 
@@ -249,38 +264,39 @@ def all_items_unique(xs):
 
 
 def assert_predicate_correct(predicate):
+    """Enforces constraints on predicate instances."""
     try:
         if isinstance(predicate, Leaf):
             column = predicate.column
             column_name_valid = column is not None and type(column) is str and column != ""
-            assert column_name_valid
+            assert column_name_valid, f"Column name invalid: {column}. It must be a non-empty string."
 
         if isinstance(predicate, SingleParameter):
             parameter = predicate.parameter
-            assert parameter is not None
+            assert parameter is not None, "A parameter must not be None."
             is_parameter_list = isinstance(parameter, list)
-            assert not is_parameter_list
+            assert not is_parameter_list, "This parameter cannot be a list."
             is_parameter_predicate = isinstance(parameter, Predicate)
             if isinstance(predicate, Leaf):
-                assert not is_parameter_predicate
+                assert not is_parameter_predicate, "This parameter cannot be a predicate."
             elif isinstance(predicate, Branch):
-                assert is_parameter_predicate
+                assert is_parameter_predicate, "This parameter must a predicate."
         elif isinstance(predicate, MultiParameter):
             parameters = predicate.parameters
-            assert parameters is not None
+            assert parameters is not None, "This parameter list cannot be None."
             is_parameter_list = isinstance(parameters, list)
-            assert is_parameter_list
-            assert not_empty(parameters)
+            assert is_parameter_list, "This parameter list must be a list."
+            assert not_empty(parameters), "This parameter list must not be empty"
             are_parameters_predicates = (
                 isinstance(parameter, Predicate) for parameter in parameters
             )
             if isinstance(predicate, Leaf):
                 none_of_parameters_are_predicates = not any(are_parameters_predicates)
-                assert none_of_parameters_are_predicates
+                assert none_of_parameters_are_predicates, "A leaf predicate does not accept predicate parameters."
             elif isinstance(predicate, Branch):
                 all_parameters_are_predicates = all(are_parameters_predicates)
-                assert all_parameters_are_predicates
-                all_parameters_unique = all_items_unique(parameters)
-                assert all_parameters_unique
+                assert all_parameters_are_predicates, "A branch predicate only accepts predicate parameters."
+            all_parameters_unique = all_items_unique(parameters)
+            assert all_parameters_unique, "All parameters on a single predicate must be unique."
     except AssertionError as err:
         raise BadFilterFormat from err
