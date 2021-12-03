@@ -25,27 +25,27 @@ def instantiate_subclass(subclass, column=None, parameter=None):
         raise Exception("This should never happen")
 
 
-someLeafPredicate = Empty(column="x")
+someLeafPredicates = [Empty(column="x"), Empty(column="y"), Empty(column="z")]
 
 
 parametersSpec = {
     'leaf': {
         'multi': {
             'valid': [[1], [1, 2, 3]],
-            'invalid': [1, [], someLeafPredicate, [someLeafPredicate, someLeafPredicate], None]
+            'invalid': [1, [], someLeafPredicates[0], [someLeafPredicates[0], someLeafPredicates[1]], None]
         },
         'single': {
             'valid': [1],
-            'invalid': [None, [], someLeafPredicate],
+            'invalid': [None, [], someLeafPredicates[0]],
         },
     },
     'branch': {
         'multi': {
-            'valid': [[someLeafPredicate, someLeafPredicate], [someLeafPredicate]],
-            'invalid': [[1], [1, 2, 3], [], someLeafPredicate, None],
+            'valid': [[someLeafPredicates[0], someLeafPredicates[1]], [someLeafPredicates[0]]],
+            'invalid': [[1], [1, 2, 3], [], someLeafPredicates[0], None],
         },
         'single': {
-            'valid': [someLeafPredicate],
+            'valid': [someLeafPredicates[0]],
             'invalid': [None, [], 1],
         },
     },

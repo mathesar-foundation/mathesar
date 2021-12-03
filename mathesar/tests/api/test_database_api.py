@@ -235,7 +235,6 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
             "db_types": [
                 "MATHESAR_TYPES.EMAIL"
             ],
-            "filters": None,
         },
         {
             "identifier": "money",
@@ -244,7 +243,6 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
                 "MONEY",
                 "MATHESAR_TYPES.MONEY"
             ],
-            "filters": None,
         },
         {
             "identifier": "uri",
@@ -252,7 +250,6 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
             "db_types": [
                 "MATHESAR_TYPES.URI"
             ],
-            "filters": None,
         },
     ]
     reflect_db_objects()
