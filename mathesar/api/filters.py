@@ -13,7 +13,7 @@ def get_filter_options(supported_ma_types):
         {
             "identifier": predicate.type.value,
             "name": predicate.name,
-            "position": predicate.superType.value,
+            "position": predicate.super_type.value,
             "parameter_count": predicate.parameter_count.value,
             "ma_types": [
                 ma_type.value
