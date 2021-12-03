@@ -19,35 +19,18 @@ temporary_testing_schema = fixtures.temporary_testing_schema
 
 
 type_data_list = [
-    (Numeric, [0, 2, 1, 0], NUMERIC),
-    (Numeric, [0, 1, 1, 0], BOOLEAN),
-    (String, ["t", "false", "true", "f", "f"], BOOLEAN),
-    (String, ["t", "false", "2", "0"], VARCHAR),
-    (String, ["a", "cat", "mat", "bat"], VARCHAR),
-    (String, ["2", "1", "0", "0"], NUMERIC),
+
     (String, ["2000-01-12", "6/23/2004", "May-2007-29", "20200909"], DATE),
     (String, ["9:24+01", "23:12", "03:04:05", "3:4:5"], datetime.TIME_WITHOUT_TIME_ZONE),
     (
         String,
-        ["alice@example.com", "bob@example.com", "jon.doe@example.ca"],
-        email.Email
+        ["2000-01-12 9:24", "6/23/2004 23:12", "May-2007-29 03:04:05", "20200909 3:4:5"],
+        datetime.TIMESTAMP_WITHOUT_TIME_ZONE
     ),
     (
         String,
-        [
-            "https://centerofci.org",
-            "ldap://[2001:db8::7]/c=GB?objectClass?one"
-            "mailto:John.Doe@example.com",
-            "news:comp.infosystems.www.servers.unix",
-            "tel:+1-816-555-1212",
-            "telnet://192.0.2.16:80/",
-            "urn:oasis:names:specification:docbook:dtd:xml:4.1.2",
-            "centerofci.org",
-            "nasa.gov",
-            "lwn.net",
-            "github.com",
-        ],
-        uri.URI
+        ["2000-01-12 9:24-3", "6/23/2004 23:12+01", "May-2007-29 03:04:05", "20200909 3:4:5+01:30"],
+        datetime.TIMESTAMP_WITH_TIME_ZONE
     ),
 ]
 

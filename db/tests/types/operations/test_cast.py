@@ -1,4 +1,5 @@
 from datetime import timedelta, date, time
+from datetime import datetime as py_datetime
 from decimal import Decimal
 
 import pytest
@@ -37,9 +38,10 @@ INTERVAL = PostgresType.INTERVAL.value.upper()
 NUMERIC = PostgresType.NUMERIC.value.upper()
 REAL = PostgresType.REAL.value.upper()
 SMALLINT = PostgresType.SMALLINT.value.upper()
-DATE = PostgresType.DATE.value.upper()
 TIME_WITHOUT_TIME_ZONE = PostgresType.TIME_WITHOUT_TIME_ZONE.value.upper()
 TIME_WITH_TIME_ZONE = PostgresType.TIME_WITH_TIME_ZONE.value.upper()
+TIMESTAMP_WITHOUT_TIME_ZONE = PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value.upper()
+TIMESTAMP_WITH_TIME_ZONE = PostgresType.TIMESTAMP_WITH_TIME_ZONE.value.upper()
 TEXT = PostgresType.TEXT.value.upper()
 
 CHAR = "CHAR"
@@ -149,6 +151,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             REAL: {VALID: [("1", 1.0)], INVALID: ["b"]},
             SMALLINT: {VALID: [("4", 4)], INVALID: ["j"]},
             DATE: {VALID: [], INVALID: ["n"]},
+            TIMESTAMP_WITH_TIME_ZONE: {VALID: [], INVALID: ["n"]},
+            TIMESTAMP_WITHOUT_TIME_ZONE: {VALID: [], INVALID: ["n"]},
             TEXT: {VALID: [("a", "a")]},
             URI: {VALID: [], INVALID: ["a"]},
             VARCHAR: {VALID: [("a", "a")]},
@@ -162,6 +166,20 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DATE: {VALID: [(date(1999, 1, 18), date(1999, 1, 18))]},
             TEXT: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
             VARCHAR: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
+            TIMESTAMP_WITH_TIME_ZONE: {
+                VALID: [(
+                    date(1999, 1, 18),
+                    py_datetime(1999, 1, 18, 0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0))
+                ),
+                ]
+            },
+            TIMESTAMP_WITHOUT_TIME_ZONE: {
+                VALID: [(
+                    date(1999, 1, 18),
+                    py_datetime(1999, 1, 18, 0, 0, 0)
+                ),
+                ]
+            },
         },
     },
     DECIMAL: {
@@ -447,6 +465,49 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
         },
     },
+    TIMESTAMP_WITHOUT_TIME_ZONE: {
+        ISCHEMA_NAME: PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value,
+        REFLECTED_NAME: TIMESTAMP_WITHOUT_TIME_ZONE,
+        TARGET_DICT: {
+            CHAR: {VALID: []},
+            TIMESTAMP_WITHOUT_TIME_ZONE: {VALID: [(py_datetime(1999, 1, 18, 12, 30, 45),
+                                                   py_datetime(1999, 1, 18, 12, 30, 45))]},
+            TIMESTAMP_WITH_TIME_ZONE: {
+                VALID: [(
+                         py_datetime(1999, 1, 18, 12, 30, 45),
+                         py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0))
+                        ),
+                ]
+            },
+            TEXT: {VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), "1999-01-18 12:30:45")]},
+            VARCHAR: {VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), "1999-01-18 12:30:45")]},
+        },
+    },
+    TIMESTAMP_WITH_TIME_ZONE: {
+        ISCHEMA_NAME: PostgresType.TIMESTAMP_WITH_TIME_ZONE.value,
+        REFLECTED_NAME: TIMESTAMP_WITH_TIME_ZONE,
+        TARGET_DICT: {
+            CHAR: {VALID: []},
+            TIMESTAMP_WITH_TIME_ZONE: {
+                VALID: [
+                    (py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
+                     py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60))),
+                ]
+            },
+            TEXT: {
+                VALID: [
+                    (py_datetime(1999, 1, 18, 12, 30, 45),
+                     "1999-01-18 12:30:45+00")
+                ]
+            },
+            VARCHAR: {
+                VALID: [
+                    (py_datetime(1999, 1, 18, 12, 30, 45),
+                     "1999-01-18 12:30:45+00")
+                ]
+            },
+        },
+    },
     TEXT: {
         ISCHEMA_NAME: PostgresType.TEXT.value,
         REFLECTED_NAME: TEXT,
@@ -550,6 +611,25 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 ],
                 INVALID: [
                     "not a time",
+                ]
+            },
+            TIMESTAMP_WITH_TIME_ZONE: {
+                VALID: [
+                    ("1999-01-18 12:30:45+00",
+                     py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0)),
+                     )
+                ],
+                INVALID: [
+                    "not a timestamp",
+                ]
+            },
+            TIMESTAMP_WITHOUT_TIME_ZONE: {
+                VALID: [
+                    ("1999-01-18 12:30:45", py_datetime(1999, 1, 18, 12, 30, 45),
+                     )
+                ],
+                INVALID: [
+                    "not a timestamp",
                 ]
             },
             VARCHAR: {VALID: [("a string", "a string")]},
@@ -662,6 +742,25 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     "not a time",
                 ]
             },
+            TIMESTAMP_WITH_TIME_ZONE: {
+                VALID: [
+                    ("1999-01-18 12:30:45+00",
+                     py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0)),
+                     )
+                ],
+                INVALID: [
+                    "not a timestamp",
+                ]
+            },
+            TIMESTAMP_WITHOUT_TIME_ZONE: {
+                VALID: [
+                    ("1999-01-18 12:30:45", py_datetime(1999, 1, 18, 12, 30, 45),
+                     )
+                ],
+                INVALID: [
+                    "not a timestamp",
+                ]
+            },
             URI: {
                 VALID: [("https://centerofci.org", "https://centerofci.org")],
                 INVALID: ["/sdf/"]
@@ -723,6 +822,9 @@ type_test_list = [
 ] + [
     (val[ISCHEMA_NAME], "time with time zone", {"precision": 5}, "TIME(5) WITH TIME ZONE")
     for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIME_WITH_TIME_ZONE in val[TARGET_DICT]
+] + [
+    (val[ISCHEMA_NAME], "timestamp with time zone", {"precision": 5}, "TIMESTAMP(5) WITH TIME ZONE")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIMESTAMP_WITH_TIME_ZONE in val[TARGET_DICT]
 ] + [
     (val[ISCHEMA_NAME], "char", {"length": 5}, "CHAR(5)")
     for val in MASTER_DB_TYPE_MAP_SPEC.values() if CHAR in val[TARGET_DICT]
@@ -787,6 +889,8 @@ type_test_data_args_list = [
     (datetime.TIME_WITH_TIME_ZONE, "time with time zone", {"precision": 0},
      time(0, 0, 0, 9, tzinfo=FixedOffsetTimezone(offset=0)),
      time(0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0))),
+    (datetime.TIMESTAMP_WITHOUT_TIME_ZONE, "timestamp without time zone", {"precision": 0},
+     py_datetime(1999, 1, 1, 0, 0, 0), py_datetime(1999, 1, 1, 0, 0, 0)),
     (String, "char", {"length": 5}, "abcde", "abcde"),
 ]
 

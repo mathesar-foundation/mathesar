@@ -38,6 +38,7 @@ def engine(test_db):
             test_db,
         ),
         future=True,
+        connect_args={"options": "-c timezone=utc"}
     )
 
 

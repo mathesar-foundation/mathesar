@@ -29,6 +29,8 @@ EMAIL = base.MathesarCustomType.EMAIL.value
 MONEY = base.MathesarCustomType.MONEY.value
 TIME_WITHOUT_TIME_ZONE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
 TIME_WITH_TIME_ZONE = base.PostgresType.TIME_WITH_TIME_ZONE.value
+TIMESTAMP_WITHOUT_TIME_ZONE = base.PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value
+TIMESTAMP_WITH_TIME_ZONE = base.PostgresType.TIMESTAMP_WITH_TIME_ZONE.value
 URI = base.MathesarCustomType.URI.value
 
 # only needed for ischema lookup
@@ -70,6 +72,8 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         TEXT: dialect_types.get(TEXT),
         TIME_WITHOUT_TIME_ZONE: dialect_types.get(TIME_WITHOUT_TIME_ZONE),
         TIME_WITH_TIME_ZONE: dialect_types.get(TIME_WITH_TIME_ZONE),
+        TIMESTAMP_WITHOUT_TIME_ZONE: dialect_types.get(TIMESTAMP_WITHOUT_TIME_ZONE),
+        TIMESTAMP_WITH_TIME_ZONE: dialect_types.get(TIMESTAMP_WITH_TIME_ZONE),
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),
@@ -190,6 +194,11 @@ def create_datetime_casts(engine):
         type_body_map = _get_time_type_body_map(time_type)
         create_cast_functions(time_type, type_body_map, engine)
 
+    type_body_map = _get_timestamp_with_timezone_type_body_map(TIMESTAMP_WITH_TIME_ZONE)
+    create_cast_functions(TIMESTAMP_WITH_TIME_ZONE, type_body_map, engine)
+    type_body_map = _get_timestamp_without_timezone_type_body_map()
+    create_cast_functions(TIMESTAMP_WITHOUT_TIME_ZONE, type_body_map, engine)
+
     type_body_map = _get_date_type_body_map()
     create_cast_functions(DATE, type_body_map, engine)
 
@@ -245,6 +254,8 @@ def get_defined_source_target_cast_tuples(engine):
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
         TIME_WITHOUT_TIME_ZONE: _get_time_type_body_map(TIME_WITHOUT_TIME_ZONE),
         TIME_WITH_TIME_ZONE: _get_time_type_body_map(TIME_WITH_TIME_ZONE),
+        TIMESTAMP_WITHOUT_TIME_ZONE: _get_timestamp_without_timezone_type_body_map(),
+        TIMESTAMP_WITH_TIME_ZONE: _get_timestamp_with_timezone_type_body_map(TIMESTAMP_WITH_TIME_ZONE),
         TEXT: _get_textual_type_body_map(engine, target_type_str=TEXT),
         URI: _get_uri_type_body_map(),
         VARCHAR: _get_textual_type_body_map(engine, target_type_str=VARCHAR),
@@ -492,6 +503,55 @@ def _get_time_type_body_map(target_type):
     )
 
 
+def get_text_to_datetime_cast_str(type_condition, exception_string):
+    return f"""
+    DECLARE
+    timestamp_value_with_tz NUMERIC;
+    timestamp_value NUMERIC;
+    date_value NUMERIC;
+    BEGIN
+        SET TIME ZONE 'UTC';
+        SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
+        SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
+        SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
+        {type_condition}
+
+      {exception_string}
+    END;
+    """
+
+
+def _get_timestamp_with_timezone_type_body_map(target_type):
+    default_behavior_source_types = frozenset([TIMESTAMP_WITH_TIME_ZONE, TIMESTAMP_WITHOUT_TIME_ZONE, DATE]) | TEXT_TYPES
+    return _get_default_type_body_map(
+        default_behavior_source_types, target_type,
+    )
+
+
+def _get_timestamp_without_timezone_type_body_map():
+    source_text_types = TEXT_TYPES
+    default_behavior_source_types = frozenset([TIMESTAMP_WITHOUT_TIME_ZONE, DATE])
+
+    not_timestamp_without_tz_exception_str = f"RAISE EXCEPTION '% is not a {TIMESTAMP_WITHOUT_TIME_ZONE}', $1;"
+    timestamp_without_tz_condition_str = f"""
+            IF (timestamp_value_with_tz = timestamp_value) AND (timestamp_value_with_tz <> date_value) THEN
+            RETURN $1::{TIMESTAMP_WITHOUT_TIME_ZONE};
+            END IF;
+        """
+
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, TIMESTAMP_WITHOUT_TIME_ZONE,
+    )
+    type_body_map.update(
+        {
+            text_type: get_text_to_datetime_cast_str(timestamp_without_tz_condition_str,
+                                                     not_timestamp_without_tz_exception_str
+                                                     )
+            for text_type in source_text_types
+        }
+    )
+    return type_body_map
+
 def _get_money_type_body_map():
     """
     Get SQL strings that create various functions for casting different
@@ -558,10 +618,26 @@ def _get_date_type_body_map():
     # Note that default postgres conversion for dates depends on the
     # `DateStyle` option set on the server, which can be one of DMY, MDY,
     # or YMD. Defaults to MDY.
-    default_behavior_source_types = frozenset([DATE]) | TEXT_TYPES
-    return _get_default_type_body_map(
-        default_behavior_source_types, DATE,
+    source_text_types = TEXT_TYPES
+    default_behavior_source_types = frozenset([DATE])
+
+    not_date_exception_str = f"RAISE EXCEPTION '% is not a {DATE}', $1;"
+    date_condition_str = f"""
+            IF (timestamp_value_with_tz = date_value) THEN
+            RETURN $1::TIMESTAMP WITH TIME ZONE;
+            END IF;
+        """
+
+    type_body_map = _get_default_type_body_map(
+            default_behavior_source_types, TIMESTAMP_WITH_TIME_ZONE,
     )
+    type_body_map.update(
+            {
+                text_type: get_text_to_datetime_cast_str(date_condition_str, not_date_exception_str)
+                for text_type in source_text_types
+            }
+    )
+    return type_body_map
 
 
 def _get_uri_type_body_map():

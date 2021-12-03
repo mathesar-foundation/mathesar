@@ -52,8 +52,8 @@ def _get_type_map():
             PostgresType.TIME_WITH_TIME_ZONE.value,
             PostgresType.TIME_WITHOUT_TIME_ZONE.value,
             PostgresType.TIMESTAMP.value,
-            PostgresType.TIMESTAMP_WITH_TIMESTAMP_ZONE.value,
-            PostgresType.TIMESTAMP_WITHOUT_TIMESTAMP_ZONE.value
+            PostgresType.TIMESTAMP_WITH_TIME_ZONE.value,
+            PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value
         ]
     }, {
         'identifier': MathesarTypeIdentifier.DURATION.value,
