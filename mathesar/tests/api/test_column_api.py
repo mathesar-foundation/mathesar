@@ -121,7 +121,6 @@ def test_column_create(column_test_table, client):
     response = client.post(
         f"/api/v0/tables/{column_test_table.id}/columns/",
         data=data,
-        format="json",
     )
     assert response.status_code == 201
     new_columns_response = client.get(
@@ -152,7 +151,7 @@ def test_column_create_default(
     cache.clear()
     name = "anewcolumn"
     data = {"name": name, "type": type_, "default": default}
-    response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", data)
+    response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", data, format='multipart')
     assert response.status_code == 201
 
     # Ensure the correct serialized date is returned by the API
@@ -197,7 +196,6 @@ def test_column_create_retrieve_options(column_test_table, client, type_, type_o
     response = client.post(
         f"/api/v0/tables/{column_test_table.id}/columns/",
         data=data,
-        format="json",
     )
     assert response.status_code == 201
     new_columns_response = client.get(
@@ -229,7 +227,6 @@ def test_column_create_bad_options(column_test_table, client, type_options):
     response = client.post(
         f"/api/v0/tables/{column_test_table.id}/columns/",
         data=data,
-        format="json",
     )
     assert response.status_code == 400
 
@@ -293,7 +290,6 @@ def test_column_update_display_options(column_test_table, client):
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
         display_options_data,
-        format='json'
     )
     assert response.json()["display_options"] == display_options
 
@@ -328,7 +324,6 @@ def test_column_update_delete_default(column_test_table, client):
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
         data=data,
-        format="json",
     )
     assert response.json()["default"] == expt_default
 
@@ -451,7 +446,6 @@ def test_column_update_type_options(column_test_table, client):
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
         data,
-        format='json'
     )
     assert response.json()["type"] == type_
     assert response.json()["type_options"] == type_options
@@ -470,14 +464,12 @@ def test_column_update_type_options_no_type(column_test_table, client):
     client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
         data,
-        format='json'
     )
     type_options = {"precision": 3, "scale": 1}
     type_option_data = {"type_options": type_options}
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
         type_option_data,
-        format='json'
     )
     assert response.json()["type"] == type_
     assert response.json()["type_options"] == type_options
@@ -531,7 +523,6 @@ def test_column_update_type_invalid_options(column_test_table, client, type_opti
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
         data=data,
-        format="json",
     )
     assert response.status_code == 400
 
