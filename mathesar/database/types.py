@@ -7,7 +7,7 @@ from enum import Enum
 from db.types.base import PostgresType, MathesarCustomType, get_available_types, get_qualified_name, get_db_type_name
 from db.filters.base import Predicate, relies_on_comparability
 
-from typing import List, Type
+from typing import Type
 
 
 class MathesarTypeIdentifier(Enum):
