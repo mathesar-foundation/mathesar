@@ -77,6 +77,7 @@ def static(value):
 class Predicate:
     super_type: PredicateSuperType
     type: Union[LeafPredicateType, BranchPredicateType]
+    name: str
     parameter_count: ParameterCount
 
     def saId(self) -> str:
@@ -128,66 +129,79 @@ def relies_on_comparability(predicate_subclass: Type[Predicate]) -> bool:
 @frozen_dataclass
 class Equal(SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.EQUAL)
+    name: str = static("Equal")
 
 
 @frozen_dataclass
 class NotEqual(SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.NOT_EQUAL)
+    name: str = static("Not equal")
 
 
 @frozen_dataclass
 class Greater(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.GREATER)
+    name: str = static("Greater")
 
 
 @frozen_dataclass
 class GreaterOrEqual(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.GREATER_OR_EQUAL)
+    name: str = static("Greater or equal")
 
 
 @frozen_dataclass
 class Lesser(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.LESSER)
+    name: str = static("Lesser")
 
 
 @frozen_dataclass
 class LesserOrEqual(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.LESSER_OR_EQUAL)
+    name: str = static("Lesser or equal")
 
 
 @frozen_dataclass
 class Empty(NoParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.EMPTY)
+    name: str = static("Empty")
 
 
 @frozen_dataclass
 class NotEmpty(NoParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.NOT_EMPTY)
+    name: str = static("Not empty")
 
 
 @frozen_dataclass
 class In(MultiParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.IN)
+    name: str = static("In")
 
 
 @frozen_dataclass
 class NotIn(MultiParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.NOT_IN)
+    name: str = static("Not in")
 
 
 @frozen_dataclass
 class Not(SingleParameter, Branch, Predicate):
     type: BranchPredicateType = static(BranchPredicateType.NOT)
+    name: str = static("Not")
 
 
 @frozen_dataclass
 class And(MultiParameter, Branch, Predicate):
     type: BranchPredicateType = static(BranchPredicateType.AND)
+    name: str = static("And")
 
 
 @frozen_dataclass
 class Or(MultiParameter, Branch, Predicate):
     type: BranchPredicateType = static(BranchPredicateType.OR)
+    name: str = static("Or")
 
 
 def get_predicate_subclass_by_type_str(predicate_type_str: str) -> Union[Type[LeafPredicateType], Type[BranchPredicateType]]:
