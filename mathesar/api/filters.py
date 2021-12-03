@@ -5,10 +5,15 @@ from db.filters.base import all_predicates
 
 from mathesar.database.types import is_ma_type_supported_by_predicate
 from mathesar.models import Schema, Table, Database
+from mathesar.database.types import MathesarTypeIdentifier
 
 
 # TODO move to other namespace?
-def get_filter_options(supported_ma_types):
+def get_filter_options_for_database(database):
+    supported_ma_types = [
+        MathesarTypeIdentifier(ma_type_info['identifier'])
+        for ma_type_info in database.supported_types
+    ]
     return [
         {
             "identifier": predicate.type.value,
