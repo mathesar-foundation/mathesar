@@ -211,13 +211,22 @@ export class Meta {
           );
         }
         if ($filter.filters?.length > 0) {
-          const filter = {};
+          // Specify fields to pass style checks for special handling of get_duplicates op
+          const filter: {
+            and: {
+              field: string,
+              op: string,
+              value: string
+            }[]
+          } = { and: [] };
+
           const terms = $filter.filters.map((term) => ({
             field: term.column.id,
             op: term.condition.id,
             value: term.value,
           }));
           filter[$filter.combination.id as string] = terms;
+          console.log(filter);
           if ('and' in filter && filter.and.length === 1 && filter.and[0].op === 'get_duplicates') {
             // Special handling for the get_duplicates operation due to backend bug
             // The backend can only handle the get_duplicates operation by itself
