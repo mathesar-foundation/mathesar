@@ -397,11 +397,10 @@ def test_record_404(create_table, client):
 def test_record_list_filter_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    data = {"filters": [{"field": "Center", "op": "is_null"}]}
+    filter_list = json.dumps([{"field": "Center", "op": "is_null"}])
     with patch.object(models, "get_records", side_effect=exception):
         response = client.get(
-            f'/api/v0/tables/{table.id}/records/',
-            data=data,
+            f'/api/v0/tables/{table.id}/records/?filters={filter_list}'
         )
         response_data = response.json()
     assert response.status_code == 400
@@ -413,11 +412,10 @@ def test_record_list_filter_exceptions(create_table, client, exception):
 def test_record_list_sort_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    data = {"order_by": [{"field": "Center", "direction": "desc"}]}
+    order_by = json.dumps([{"field": "Center", "direction": "desc"}])
     with patch.object(models, "get_records", side_effect=exception):
         response = client.get(
-            f'/api/v0/tables/{table.id}/records/',
-            data=data,
+            f'/api/v0/tables/{table.id}/records/?order_by={order_by}'
         )
         response_data = response.json()
     assert response.status_code == 400
@@ -429,11 +427,10 @@ def test_record_list_sort_exceptions(create_table, client, exception):
 def test_record_list_group_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    data = {"group_count_by": ["Center"]}
+    group_by = json.dumps(["Center"])
     with patch.object(models, "get_group_counts", side_effect=exception):
         response = client.get(
-            f'/api/v0/tables/{table.id}/records/',
-            data=data,
+            f'/api/v0/tables/{table.id}/records/?group_count_by={group_by}'
         )
         response_data = response.json()
     assert response.status_code == 400
