@@ -226,7 +226,6 @@ export class Meta {
             value: term.value,
           }));
           filter[$filter.combination.id as string] = terms;
-          console.log(filter);
           if ('and' in filter && filter.and.length === 1 && filter.and[0].op === 'get_duplicates') {
             // Special handling for the get_duplicates operation due to backend bug
             // The backend can only handle the get_duplicates operation by itself
