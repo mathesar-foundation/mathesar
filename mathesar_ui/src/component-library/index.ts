@@ -25,6 +25,7 @@ export { default as Skeleton } from './skeleton/Skeleton.svelte';
 export { default as RadioGroup } from './radio-group/RadioGroup.svelte';
 export { default as Seesaw } from './seesaw/Seesaw.svelte';
 export { default as Spinner } from './spinner/Spinner.svelte';
+export { default as SpinnerButton } from './spinner-button/SpinnerButton.svelte';
 
 // Compound Components (Ordered)
 export { default as Notification } from './notification/Notification.svelte';
