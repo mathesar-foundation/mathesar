@@ -15,6 +15,7 @@ export { default as clickOffBounds } from './common/actions/clickOffBounds';
 // Simple Components
 export { default as TextAvatar } from './text-avatar/TextAvatar.svelte';
 export { default as TextInput } from './text-input/TextInput.svelte';
+export { default as TextArea } from './text-area/TextArea.svelte';
 export { default as Checkbox } from './checkbox/Checkbox.svelte';
 export { default as Button } from './button/Button.svelte';
 export { default as Icon } from './icon/Icon.svelte';
