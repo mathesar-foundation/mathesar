@@ -470,14 +470,13 @@ MASTER_DB_TYPE_MAP_SPEC = {
         REFLECTED_NAME: TIMESTAMP_WITHOUT_TIME_ZONE,
         TARGET_DICT: {
             CHAR: {VALID: []},
-            TIMESTAMP_WITHOUT_TIME_ZONE: {VALID: [(py_datetime(1999, 1, 18, 12, 30, 45),
-                                                   py_datetime(1999, 1, 18, 12, 30, 45))]},
+            TIMESTAMP_WITHOUT_TIME_ZONE: {
+                VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), py_datetime(1999, 1, 18, 12, 30, 45))]
+            },
             TIMESTAMP_WITH_TIME_ZONE: {
-                VALID: [(
-                         py_datetime(1999, 1, 18, 12, 30, 45),
-                         py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0))
-                        ),
-                ]
+                VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), py_datetime(1999, 1, 18, 12, 30, 45,
+                                                                           tzinfo=FixedOffsetTimezone(offset=0)))
+                        ]
             },
             TEXT: {VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), "1999-01-18 12:30:45")]},
             VARCHAR: {VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), "1999-01-18 12:30:45")]},
@@ -826,6 +825,9 @@ type_test_list = [
     (val[ISCHEMA_NAME], "timestamp with time zone", {"precision": 5}, "TIMESTAMP(5) WITH TIME ZONE")
     for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIMESTAMP_WITH_TIME_ZONE in val[TARGET_DICT]
 ] + [
+    (val[ISCHEMA_NAME], "timestamp without time zone", {"precision": 5}, "TIMESTAMP(5) WITHOUT TIME ZONE")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIMESTAMP_WITHOUT_TIME_ZONE in val[TARGET_DICT]
+] + [
     (val[ISCHEMA_NAME], "char", {"length": 5}, "CHAR(5)")
     for val in MASTER_DB_TYPE_MAP_SPEC.values() if CHAR in val[TARGET_DICT]
 ]
@@ -889,6 +891,8 @@ type_test_data_args_list = [
     (datetime.TIME_WITH_TIME_ZONE, "time with time zone", {"precision": 0},
      time(0, 0, 0, 9, tzinfo=FixedOffsetTimezone(offset=0)),
      time(0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0))),
+    (datetime.TIMESTAMP_WITH_TIME_ZONE, "timestamp with time zone", {"precision": 0},
+     py_datetime(1999, 1, 1, 0, 0, 0), py_datetime(1999, 1, 1, 0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0))),
     (datetime.TIMESTAMP_WITHOUT_TIME_ZONE, "timestamp without time zone", {"precision": 0},
      py_datetime(1999, 1, 1, 0, 0, 0), py_datetime(1999, 1, 1, 0, 0, 0)),
     (String, "char", {"length": 5}, "abcde", "abcde"),

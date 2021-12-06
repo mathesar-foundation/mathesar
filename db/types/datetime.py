@@ -30,7 +30,7 @@ class TIME_WITH_TIME_ZONE(SA_TIME):
 class TIMESTAMP_WITHOUT_TIME_ZONE(SA_TIMESTAMP):
     def __init__(self, *args, precision=None, **kwargs):
         # On reflection timezone is passed as a kwarg, so we need to make sure it isn't
-        # included in the TIME init call twice
+        # included in the TIMESTAMP init call twice
         if "timezone" in kwargs:
             kwargs.pop("timezone")
         super().__init__(*args, timezone=False, precision=precision, **kwargs)
@@ -39,7 +39,7 @@ class TIMESTAMP_WITHOUT_TIME_ZONE(SA_TIMESTAMP):
 class TIMESTAMP_WITH_TIME_ZONE(SA_TIMESTAMP):
     def __init__(self, *args, precision=None, **kwargs):
         # On reflection timezone is passed as a kwarg, so we need to make sure it isn't
-        # included in the TIME init call twice
+        # included in the TIMESTAMP init call twice
         if "timezone" in kwargs:
             kwargs.pop("timezone")
         super().__init__(*args, timezone=True, precision=precision, **kwargs)

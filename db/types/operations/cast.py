@@ -196,6 +196,7 @@ def create_datetime_casts(engine):
 
     type_body_map = _get_timestamp_with_timezone_type_body_map(TIMESTAMP_WITH_TIME_ZONE)
     create_cast_functions(TIMESTAMP_WITH_TIME_ZONE, type_body_map, engine)
+
     type_body_map = _get_timestamp_without_timezone_type_body_map()
     create_cast_functions(TIMESTAMP_WITHOUT_TIME_ZONE, type_body_map, engine)
 
@@ -533,8 +534,10 @@ def _get_timestamp_without_timezone_type_body_map():
     default_behavior_source_types = frozenset([TIMESTAMP_WITHOUT_TIME_ZONE, DATE])
 
     not_timestamp_without_tz_exception_str = f"RAISE EXCEPTION '% is not a {TIMESTAMP_WITHOUT_TIME_ZONE}', $1;"
+    # Check if the value is missing timezone by casting it to a timestamp with timezone
+    # and comparing if the value is equal to a timestamp without timezone
     timestamp_without_tz_condition_str = f"""
-            IF (timestamp_value_with_tz = timestamp_value) AND (timestamp_value_with_tz <> date_value) THEN
+            IF ($1 IS NULL) OR (timestamp_value_with_tz = timestamp_value AND timestamp_value_with_tz <> date_value) THEN
             RETURN $1::{TIMESTAMP_WITHOUT_TIME_ZONE};
             END IF;
         """
@@ -551,6 +554,7 @@ def _get_timestamp_without_timezone_type_body_map():
         }
     )
     return type_body_map
+
 
 def _get_money_type_body_map():
     """
@@ -623,19 +627,19 @@ def _get_date_type_body_map():
 
     not_date_exception_str = f"RAISE EXCEPTION '% is not a {DATE}', $1;"
     date_condition_str = f"""
-            IF (timestamp_value_with_tz = date_value) THEN
-            RETURN $1::TIMESTAMP WITH TIME ZONE;
+            IF $1 IS NULL OR (timestamp_value_with_tz = date_value) THEN
+            RETURN $1::{DATE};
             END IF;
         """
 
     type_body_map = _get_default_type_body_map(
-            default_behavior_source_types, TIMESTAMP_WITH_TIME_ZONE,
+        default_behavior_source_types, TIMESTAMP_WITH_TIME_ZONE
     )
     type_body_map.update(
-            {
-                text_type: get_text_to_datetime_cast_str(date_condition_str, not_date_exception_str)
-                for text_type in source_text_types
-            }
+        {
+            text_type: get_text_to_datetime_cast_str(date_condition_str, not_date_exception_str)
+            for text_type in source_text_types
+        }
     )
     return type_body_map
 
