@@ -36,10 +36,10 @@ function completionCallback(
   dataFileId?: number,
 ): void {
   if (!completionStatus && typeof dataFileId === 'number') {
-    const exisingProgress = get(fileImportStore).uploadProgress;
+    const existingProgress = get(fileImportStore).uploadProgress;
     setInFileStore(fileImportStore, {
       uploadProgress: {
-        ...exisingProgress,
+        ...existingProgress,
         percentCompleted: 100,
       },
       dataFileId,
@@ -137,43 +137,43 @@ async function createPreviewTable(
 
   fileImportData.previewCreatePromise?.cancel();
 
-  if (fileImportData.dataFileId) {
-    const previewCreatePromise = postAPI('/tables/', {
-      name: fileImportData.previewName,
-      schema: fileImportData.schemaId,
-      data_files: [fileImportData.dataFileId],
-    });
-
-    setInFileStore(fileImportStore, {
-      previewTableCreationStatus: States.Loading,
-      previewCreatePromise,
-      error: null,
-    });
-
-    try {
-      const res = await previewCreatePromise as { id: number, name: string };
-
-      const toUpdate: FileImportWritableInfo = {
-        previewTableCreationStatus: States.Done,
-        previewId: res.id,
-        previewName: res.name,
-      };
-      if (!fileImportData.name?.trim()) {
-        toUpdate.name = res.name;
-      }
-
-      setInFileStore(fileImportStore, toUpdate);
-
-      return res;
-    } catch (err: unknown) {
-      setInFileStore(fileImportStore, {
-        previewTableCreationStatus: States.Error,
-        error: (err as Error).message,
-      });
-      throw err;
-    }
-  } else {
+  if (fileImportData.dataFileId === undefined) {
     throw new Error('Unexpected error: Data file not found');
+  }
+
+  const previewCreatePromise = postAPI('/tables/', {
+    name: fileImportData.previewName,
+    schema: fileImportData.schemaId,
+    data_files: [fileImportData.dataFileId],
+  });
+
+  setInFileStore(fileImportStore, {
+    previewTableCreationStatus: States.Loading,
+    previewCreatePromise,
+    error: null,
+  });
+
+  try {
+    const res = await previewCreatePromise as { id: number, name: string };
+
+    const toUpdate: FileImportWritableInfo = {
+      previewTableCreationStatus: States.Done,
+      previewId: res.id,
+      previewName: res.name,
+    };
+    if (!fileImportData.name?.trim()) {
+      toUpdate.name = res.name;
+    }
+
+    setInFileStore(fileImportStore, toUpdate);
+
+    return res;
+  } catch (err: unknown) {
+    setInFileStore(fileImportStore, {
+      previewTableCreationStatus: States.Error,
+      error: (err as Error).message,
+    });
+    throw err;
   }
 }
 
@@ -205,7 +205,7 @@ export async function fetchPreviewTableInfo(
 
     const previewColumnResponse = await previewColumnPromise;
     const typesResponse = await suggestedTypesPromise;
-    const dataFileReponse = await dataFilePromise;
+    const dataFileResponse = await dataFilePromise;
 
     const previewColumns = previewColumnResponse.results.map((column) => ({
       ...column,
@@ -224,8 +224,8 @@ export async function fetchPreviewTableInfo(
       error: null,
     };
 
-    if (dataFileReponse !== null) {
-      dataToSet.firstRowHeader = dataFileReponse.header;
+    if (dataFileResponse !== null) {
+      dataToSet.firstRowHeader = dataFileResponse.header;
     }
 
     setInFileStore(fileImportStore, dataToSet);
