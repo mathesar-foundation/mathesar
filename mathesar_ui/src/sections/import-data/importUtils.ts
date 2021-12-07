@@ -391,13 +391,18 @@ export function cancelImport(fileImportStore: FileImport): void {
   }
 }
 
-export async function importFromURL(fileImportStore: FileImport, url: string): Promise<void> {
+interface DataFilesRequestData {
+  url?: string,
+  paste?: string,
+}
+
+async function importData(fileImportStore: FileImport, data: DataFilesRequestData): Promise<void> {
   setInFileStore(fileImportStore, {
     uploadStatus: States.Loading,
     error: null,
   });
   try {
-    const uploadResponse = await postAPI<{ id: number }>('/data_files/', { url });
+    const uploadResponse = await postAPI<{ id: number }>('/data_files/', data);
     const { id } = uploadResponse;
     setInFileStore(fileImportStore, {
       dataFileId: id,
@@ -415,6 +420,14 @@ export async function importFromURL(fileImportStore: FileImport, url: string): P
       error: (err as Error).message,
     });
   }
+}
+
+export async function importFromURL(fileImportStore: FileImport, url: string): Promise<void> {
+  return importData(fileImportStore, { url });
+}
+
+export async function importFromText(fileImportStore: FileImport, text: string): Promise<void> {
+  return importData(fileImportStore, { paste: text });
 }
 
 // When errors are manually closed
