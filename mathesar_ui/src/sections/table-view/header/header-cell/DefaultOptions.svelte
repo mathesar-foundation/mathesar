@@ -7,6 +7,7 @@
     faThList,
     faTrashAlt,
     faSpinner,
+    faICursor,
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button, Checkbox } from '@mathesar-component-library';
   import type {
@@ -74,9 +75,14 @@
     }
   }
 
-  function deleteColumn() {
+  function handleDelete() {
     dispatch('close');
-    dispatch('columnDelete');
+    dispatch('delete');
+  }
+
+  function handleRename() {
+    dispatch('close');
+    dispatch('rename');
   }
   
   async function toggleAllowDuplicates() {
@@ -96,6 +102,7 @@
   }
 </script>
 
+<h6 class="category">Display</h6>
 <ul>
   <li>
     <Button appearance="plain" on:click={() => handleSort('asc')}>
@@ -133,8 +140,20 @@
       </span>
     </Button>
   </li>
+</ul>
+<div class="divider"/>
+<h6 class="category">Operations</h6>
+<ul>
   <li>
-    <Button appearance="plain" on:click={deleteColumn}>
+    <Button appearance="plain" on:click={handleRename}>
+      <Icon class="opt" data={faICursor}/>
+      <span>
+        Rename
+      </span>
+    </Button>
+  </li>
+  <li>
+    <Button appearance="plain" on:click={handleDelete}>
       <Icon class="opt" data={faTrashAlt}/>
       <span>
         Delete column

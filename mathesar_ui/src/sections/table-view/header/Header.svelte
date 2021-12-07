@@ -74,7 +74,7 @@
     void columnsDataStore.add(e.detail);
   }
 
-  function openColumnModal(_column: Column) {
+  function handleDelete(_column: Column) {
     column = _column;
     isDeleteModalOpen = true;
   }
@@ -91,7 +91,7 @@
       {columnsDataStore}
       {constraintsDataStore}
       columnPosition={getColumnPosition($columnPositionMap, column.name)}
-      on:columnDelete={() => openColumnModal(column)}
+      on:delete={() => handleDelete(column)}
     />
   {/each}
 

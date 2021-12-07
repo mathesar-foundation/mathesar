@@ -163,6 +163,10 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
     return column;
   }
 
+  async rename(id: Column['id'], newName: string): Promise<void> {
+    await this.api.update(id, { name: newName });
+  }
+
   async setNullabilityOfColumn(
     column: Column,
     nullable: boolean,
