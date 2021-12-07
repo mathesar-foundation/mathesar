@@ -1,7 +1,7 @@
 import { writable, derived, get } from 'svelte/store';
 import type { Writable, Readable } from 'svelte/store';
 import type { TabularType, DBObjectEntry } from '@mathesar/App.d';
-import type { SelectOption } from '@mathesar-components/types';
+import type { SelectOption } from '@mathesar-component-library/types';
 
 export const DEFAULT_PAGE_SIZE = 500;
 export const RECORD_COMBINED_STATE_KEY = '__combined';
@@ -29,6 +29,13 @@ export interface FilterOption {
   combination: FilterCombination,
   filters: FilterEntry[]
 }
+
+export type MetaParams = [
+  number[], // [pageSize, page]
+  string[], // [sortcolumn, sortorder:'a'|'d', sc, so ...]
+  string[], // [groupcolumn, gc, gc]
+  string[], // [filtercombination:'a'|'o', filtercolumn, condition, value ...]
+];
 
 export type UpdateModificationType = 'update' | 'updated' | 'updateFailed';
 
@@ -106,9 +113,12 @@ export class Meta {
 
   recordRequestParams: Readable<string>;
 
+  metaParameters: Readable<MetaParams>;
+
   constructor(
     type: TabularType,
     parentId: number,
+    params?: MetaParams,
   ) {
     this.type = type;
     this.parentId = parentId;
@@ -121,6 +131,10 @@ export class Meta {
       combination: filterCombinations[0],
       filters: [],
     });
+    if (params) {
+      this.loadFromParams(params);
+    }
+
     this.selectedRecords = writable(new Set());
     this.recordModificationState = writable(new Map() as ModificationStateMap);
 
@@ -153,6 +167,7 @@ export class Meta {
       'idle' as ModificationStatus,
     );
     this.setRecordRequestParamsStore();
+    this.setMetaParametersStore();
   }
 
   private setRecordRequestParamsStore(): void {
@@ -164,10 +179,7 @@ export class Meta {
         this.sort,
         this.filter,
       ],
-      (
-        [$pageSize, $offset, $group, $sort, $filter],
-        set,
-      ) => {
+      ([$pageSize, $offset, $group, $sort, $filter]) => {
         const params: string[] = [];
         params.push(`limit=${$pageSize}`);
         params.push(`offset=${$offset}`);
@@ -210,9 +222,117 @@ export class Meta {
             `filters=${encodeURIComponent(JSON.stringify(filter))}`,
           );
         }
-        set(params.join('&'));
+        return params.join('&');
       },
     );
+  }
+
+  private setMetaParametersStore(): void {
+    this.metaParameters = derived(
+      [
+        this.pageSize,
+        this.page,
+        this.sort,
+        this.group,
+        this.filter,
+      ],
+      ([$pageSize, $page, $sort, $group, $filter]) => {
+        const paginationOption: number[] = [
+          $pageSize,
+          $page,
+        ];
+
+        const sortOption: string[] = [];
+        $sort.forEach((value, key) => {
+          sortOption.push(key);
+          const sortOrder = value === 'desc' ? 'd' : 'a';
+          sortOption.push(sortOrder);
+        });
+
+        const groupOption: string[] = [...($group ?? [])];
+
+        const filterOptions: string[] = [];
+        const filterConfig = $filter;
+        if (filterConfig?.filters?.length > 0) {
+          filterOptions.push(filterConfig.combination.id === 'or' ? 'o' : 'a');
+          filterConfig.filters.forEach((filter) => {
+            filterOptions.push(filter.column.id as string);
+            filterOptions.push(filter.condition.id as string);
+            filterOptions.push(filter.value);
+          });
+        }
+
+        const metaParams: MetaParams = [
+          paginationOption,
+          sortOption,
+          groupOption,
+          filterOptions,
+        ];
+        return metaParams;
+      },
+    );
+  }
+
+  loadFromParams(params: MetaParams): void {
+    try {
+      const [paginationOption, sortOption, groupOption, filterOption] = params;
+      if (paginationOption?.length === 2) {
+        this.pageSize.set(paginationOption[0] || DEFAULT_PAGE_SIZE);
+        this.page.set(paginationOption[1] || 1);
+      }
+
+      if (sortOption?.length > 0) {
+        const sortOptionMap: SortOption = new Map();
+        for (let i = 0; i < sortOption.length; i += 2) {
+          const sortOrder = sortOption[i + 1] === 'd' ? 'desc' : 'asc';
+          sortOptionMap.set(sortOption[i], sortOrder);
+        }
+        if (sortOption.length > 0) {
+          this.sort.set(sortOptionMap);
+        }
+      }
+
+      const groupOptionSet: GroupOption = new Set(groupOption);
+      if (groupOptionSet.size > 0) {
+        this.group.set(groupOptionSet);
+      }
+
+      if (filterOption?.length > 0) {
+        const filters: FilterEntry[] = [];
+        const combination: FilterCombination['id'] = filterOption[0] === 'o' ? 'or' : 'and';
+        for (let i = 1; i < filterOption.length;) {
+          const column = filterOption[i];
+          const condition = filterOption[i + 1];
+
+          if (column && condition) {
+            const value = filterOption[i + 2] || '';
+            filters.push({
+              column: {
+                id: column,
+                label: column,
+              },
+              condition: {
+                id: condition,
+                label: condition,
+              },
+              value,
+            });
+          }
+          i += 3;
+        }
+        if (filters.length > 0) {
+          this.filter.set({
+            combination: {
+              id: combination,
+              label: combination,
+            },
+            filters,
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Unable to load meta information from params', err);
+    }
   }
 
   clearSelectedRecords(): void {

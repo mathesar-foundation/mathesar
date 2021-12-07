@@ -158,7 +158,7 @@ def test_table_list(create_table, client):
                 "updated_at": "2021-04-27T18:43:41.201898Z",
                 "columns": [
                     {
-                        "name": "mathesar_id",
+                        "name": "id",
                         "type": "INTEGER"
                     },
                     {
@@ -229,6 +229,60 @@ def test_table_list_filter_schema(create_table, client):
     table = expected_tables[schema_name]
     response_table = response_tables[schema_id]
     check_table_response(response_table, table, table.name)
+
+
+def test_table_list_order_by_name(create_table, client):
+    table_2 = create_table('Filter Name 2')
+    table_1 = create_table('Filter Name 1')
+    table_4 = create_table('Filter Name 4')
+    table_3 = create_table('Filter Name 3')
+    table_5 = create_table('Filter Name 5')
+    unsorted_expected_tables = [table_5, table_3, table_4, table_1, table_2]
+    expected_tables = [table_1, table_2, table_3, table_4, table_5]
+    response = client.get('/api/v0/tables/')
+    response_data = response.json()
+    response_tables = response_data['results']
+    comparison_tuples = zip(response_tables, unsorted_expected_tables)
+    for comparison_tuple in comparison_tuples:
+        check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
+    sort_field = "name"
+    response = client.get(f'/api/v0/tables/?sort_by={sort_field}')
+    response_data = response.json()
+    response_tables = response_data['results']
+    comparison_tuples = zip(response_tables, expected_tables)
+    for comparison_tuple in comparison_tuples:
+        check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
+
+
+def test_table_list_order_by_id(create_table, client):
+    table_1 = create_table('Filter Name 1')
+    table_2 = create_table('Filter Name 2')
+    table_3 = create_table('Filter Name 3')
+    unsorted_expected_tables = [
+        table_3,
+        table_2,
+        table_1
+    ]
+    expected_tables = [
+        table_1,
+        table_2,
+        table_3
+    ]
+
+    response = client.get('/api/v0/tables/')
+    response_data = response.json()
+    response_tables = response_data['results']
+    comparison_tuples = zip(response_tables, unsorted_expected_tables)
+    for comparison_tuple in comparison_tuples:
+        check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
+
+    sort_field = "id"
+    response = client.get(f'/api/v0/tables/?sort_by={sort_field}')
+    response_data = response.json()
+    response_tables = response_data['results']
+    comparison_tuples = zip(response_tables, expected_tables)
+    for comparison_tuple in comparison_tuples:
+        check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
 
 
 @pytest.mark.parametrize('timestamp_type', ['created', 'updated'])
@@ -355,7 +409,7 @@ def test_table_previews(client, schema, engine_email_type):
 
     post_body = {
         'columns': [
-            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "id", "type": "INTEGER"},
             {"name": "col_1", "type": "NUMERIC"},
             {"name": "col_2", "type": "BOOLEAN"},
             {"name": "col_3", "type": "BOOLEAN"},
@@ -364,16 +418,16 @@ def test_table_previews(client, schema, engine_email_type):
             {"name": "col_6", "type": "NUMERIC"}
         ]
     }
-    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body, format='json')
+    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 200
     expect_dict = {
         'name': 'Type Modification Table',
         'columns': post_body['columns'],
         'records': [
-            {'mathesar_id': 1, 'col_1': 0.0, 'col_2': False, 'col_3': True, 'col_4': 't', 'col_5': 'a', 'col_6': 2.0},
-            {'mathesar_id': 2, 'col_1': 2.0, 'col_2': True, 'col_3': False, 'col_4': 'false', 'col_5': 'cat', 'col_6': 1.0},
-            {'mathesar_id': 3, 'col_1': 1.0, 'col_2': True, 'col_3': True, 'col_4': '2', 'col_5': 'mat', 'col_6': 0.0},
-            {'mathesar_id': 4, 'col_1': 0.0, 'col_2': False, 'col_3': False, 'col_4': '0', 'col_5': 'bat', 'col_6': 0.0}
+            {'id': 1, 'col_1': 0.0, 'col_2': False, 'col_3': True, 'col_4': 't', 'col_5': 'a', 'col_6': 2.0},
+            {'id': 2, 'col_1': 2.0, 'col_2': True, 'col_3': False, 'col_4': 'false', 'col_5': 'cat', 'col_6': 1.0},
+            {'id': 3, 'col_1': 1.0, 'col_2': True, 'col_3': True, 'col_4': '2', 'col_5': 'mat', 'col_6': 0.0},
+            {'id': 4, 'col_1': 0.0, 'col_2': False, 'col_3': False, 'col_4': '0', 'col_5': 'bat', 'col_6': 0.0}
         ],
     }
     actual_dict = response.json()
@@ -397,7 +451,7 @@ def test_table_previews_wrong_column_number(client, schema, engine_email_type):
 
     post_body = {
         'columns': [
-            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "id", "type": "INTEGER"},
             {"name": "col_2", "type": "BOOLEAN"},
             {"name": "col_3", "type": "BOOLEAN"},
             {"name": "col_4", "type": "VARCHAR"},
@@ -405,7 +459,7 @@ def test_table_previews_wrong_column_number(client, schema, engine_email_type):
             {"name": "col_6", "type": "NUMERIC"}
         ]
     }
-    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body, format='json')
+    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
     assert "number" in response.json()[0]
 
@@ -426,7 +480,7 @@ def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
 
     post_body = {
         'columns': [
-            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "id", "type": "INTEGER"},
             {"name": "col_1", "type": "NUMERIC"},
             {"name": "col_2", "type": "BOOLEAN"},
             {"name": "col_3", "type": "BOOLEAN"},
@@ -435,7 +489,7 @@ def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
             {"name": "col_6", "type": "NUMERIC"}
         ]
     }
-    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body, format='json')
+    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
     assert "Invalid type" in response.json()[0]
 
@@ -456,7 +510,7 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_email_typ
 
     post_body = {
         'columns': [
-            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "id", "type": "INTEGER"},
             {"name": "col_1", "type": "NUMERIC"},
             {"name": "col_2", "type": "BOOLEAN"},
             {"name": "col_3", "type": "BOOLEAN"},
@@ -465,7 +519,7 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_email_typ
             {"name": "col_6", "type": "NUMERIC"}
         ]
     }
-    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body, format='json')
+    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
     assert "Invalid type" in response.json()[0]
 
@@ -486,7 +540,7 @@ def test_table_previews_unsupported_type(client, schema, engine_email_type):
 
     post_body = {
         'columns': [
-            {"name": "mathesar_id", "type": "INTEGER"},
+            {"name": "id", "type": "INTEGER"},
             {"name": "col_1", "type": "notatype"},
             {"name": "col_2", "type": "BOOLEAN"},
             {"name": "col_3", "type": "BOOLEAN"},
@@ -495,7 +549,7 @@ def test_table_previews_unsupported_type(client, schema, engine_email_type):
             {"name": "col_6", "type": "NUMERIC"}
         ]
     }
-    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body, format='json')
+    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
     assert "not supported" in response.json()[0]
 
@@ -515,7 +569,7 @@ def test_table_previews_missing_columns(client, schema, engine_email_type):
     table = Table.objects.get(id=response_table['id'])
 
     post_body = {}
-    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body, format='json')
+    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
     assert "columns" in response.json()
 
@@ -571,7 +625,7 @@ def test_table_create_without_datafile(client, schema, data_files, table_name):
 
     assert response.status_code == 201
     assert Table.objects.count() == num_tables + 1
-    assert len(table.sa_columns) == 1  # only the internal `mathesar_id` column
+    assert len(table.sa_columns) == 1  # only the internal `id` column
     assert len(table.get_records()) == 0
     check_table_response(response_table, table, expt_name)
 
@@ -618,6 +672,30 @@ def test_table_create_base_name_too_long(client, data_file, schema):
 
     check_create_table_response(
         client, '', expt_name, data_file, schema, first_row, column_names
+    )
+
+
+get_encoding_test_list = [
+    ("mathesar/tests/data/non_unicode_files/cp1250.csv", "cp1250", (1, '2',
+                                                                    '1.7 Cubic Foot Compact "Cube" Office Refrigerators',
+                                                                    'Barry French',
+                                                                    '293', '457.81', '208.16', '68.02', 'Nunavut',
+                                                                    'Appliances', '0.58'),
+     ['1', "Eldon Base for stackable storage shelf, platinum", "Muhammed MacIntyre",
+      '3', '-213.25', '38.94', '35', "Nunavut", "Storage & Organization", '0.8']),
+
+    ("mathesar/tests/data/non_unicode_files/utf_16_le.csv", "utf_16_le", (1, 'Troy', '2004', 'English'),
+     ['Title', 'Year', 'Language']),
+]
+
+
+@pytest.mark.parametrize("non_unicode_file_path, filename, first_row, column_names", get_encoding_test_list)
+def test_table_create_non_unicode(client, non_unicode_file_path, filename, first_row, column_names,
+                                  schema, create_data_file):
+    expt_name = filename
+    non_unicode_datafile = create_data_file(non_unicode_file_path, filename)
+    check_create_table_response(
+        client, '', expt_name, non_unicode_datafile, schema, first_row, column_names
     )
 
 
@@ -790,10 +868,19 @@ def test_table_get_with_reflect_new(client, table_for_reflection):
     created_table = actual_created[0]
     assert created_table['name'] == table_name
     created_columns = created_table['columns']
-    assert created_columns == [
-        {'name': 'id', 'type': 'INTEGER', 'type_options': None},
-        {'name': 'name', 'type': 'VARCHAR', 'type_options': None}
-    ]
+    check_columns_response(created_columns, [
+        {'name': 'id', 'type': 'INTEGER', 'type_options': None, 'display_options': None},
+        {'name': 'name', 'type': 'VARCHAR', 'type_options': None, 'display_options': None}
+    ])
+
+
+def check_columns_response(created_columns, expected_response):
+    # Id's are auto incrementing and vary depending up previous test cases, better to remove them before comparing
+    created_columns_id = []
+    for created_column in created_columns:
+        created_columns_id.append(created_column.pop('id'))
+    assert len(created_columns_id) == len(expected_response)
+    assert created_columns == expected_response
 
 
 def test_table_get_with_reflect_column_change(client, table_for_reflection):
@@ -818,10 +905,10 @@ def test_table_get_with_reflect_column_change(client, table_for_reflection):
     ][0]
     new_columns = altered_table['columns']
     assert altered_table['id'] == orig_id
-    assert new_columns == [
-        {'name': 'id', 'type': 'INTEGER', 'type_options': None},
-        {'name': new_column_name, 'type': 'VARCHAR', 'type_options': None}
-    ]
+    check_columns_response(new_columns, [
+        {'name': 'id', 'type': 'INTEGER', 'type_options': None, 'display_options': None},
+        {'name': new_column_name, 'type': 'VARCHAR', 'type_options': None, 'display_options': None}
+    ])
 
 
 def test_table_get_with_reflect_name_change(client, table_for_reflection):
@@ -891,7 +978,7 @@ def test_table_viewset_checks_cache(client):
 
 def _get_patents_column_data():
     return [{
-        'name': 'mathesar_id',
+        'name': 'id',
         'type': 'INTEGER',
     }, {
         'name': 'Center',
@@ -924,7 +1011,7 @@ def test_table_patch_same_table_name(create_table, client):
     body = {'name': table_name}
     # Need to specify format here because otherwise the body gets sent
     # as a multi-part form, which can't handle nested keys.
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
 
     assert response.status_code == 200
     assert response.json()['name'] == table_name
@@ -940,7 +1027,7 @@ def test_table_patch_columns_and_table_name(create_table, client):
     }
     # Need to specify format here because otherwise the body gets sent
     # as a multi-part form, which can't handle nested keys.
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
 
     response_error = response.json()
     assert response.status_code == 400
@@ -955,7 +1042,7 @@ def test_table_patch_columns_no_changes(create_table, client, engine_email_type)
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -971,7 +1058,7 @@ def test_table_patch_columns_one_name_change(create_table, client, engine_email_
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -988,7 +1075,7 @@ def test_table_patch_columns_two_name_changes(create_table, client, engine_email
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1004,7 +1091,7 @@ def test_table_patch_columns_one_type_change(create_table, client, engine_email_
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1013,7 +1100,7 @@ def test_table_patch_columns_one_type_change(create_table, client, engine_email_
 
 def _get_data_types_column_data():
     return [{
-        'name': 'mathesar_id',
+        'name': 'id',
         'type': 'INTEGER'
     }, {
         'name': 'Integer',
@@ -1041,7 +1128,7 @@ def test_table_patch_columns_multiple_type_change(create_data_types_table, clien
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1063,7 +1150,7 @@ def test_table_patch_columns_one_drop(create_data_types_table, client, engine_em
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1081,7 +1168,7 @@ def test_table_patch_columns_multiple_drop(create_data_types_table, client, engi
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1098,7 +1185,7 @@ def test_table_patch_columns_diff_name_type_change(create_data_types_table, clie
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1115,7 +1202,7 @@ def test_table_patch_columns_same_name_type_change(create_data_types_table, clie
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1134,7 +1221,7 @@ def test_table_patch_columns_multiple_name_type_change(create_data_types_table, 
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1152,7 +1239,7 @@ def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1171,7 +1258,7 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1187,7 +1274,7 @@ def test_table_patch_columns_invalid_type(create_data_types_table, client, engin
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 400
@@ -1204,7 +1291,7 @@ def test_table_patch_columns_invalid_type_with_name(create_data_types_table, cli
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
     assert 'Pizza is not a boolean' in response_json[0]
@@ -1225,7 +1312,7 @@ def test_table_patch_columns_invalid_type_with_type(create_data_types_table, cli
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
     assert 'Pizza is not a boolean' in response_json[0]
@@ -1246,7 +1333,7 @@ def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, cli
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
     assert 'Pizza is not a boolean' in response_json[0]
@@ -1269,7 +1356,7 @@ def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_type
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body, format='json')
+    response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
     assert 'Pizza is not a boolean' in response_json[0]

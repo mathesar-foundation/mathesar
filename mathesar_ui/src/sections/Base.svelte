@@ -3,17 +3,16 @@
   import {
     TabContainer,
     Icon,
-  } from '@mathesar-components';
-  import URLQueryHandler from '@mathesar/utils/urlQueryHandler';
+  } from '@mathesar-component-library';
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
     getTabsForSchema,
-    removeTab,
-    selectTab,
+    constructTabularTabLink,
   } from '@mathesar/stores/tabs';
-  import type { MathesarTab } from '@mathesar/stores/tabs';
-  import type { Writable } from 'svelte/store';
+  import type { MathesarTab, TabList } from '@mathesar/stores/tabs/types';
+  import { TabularType } from '@mathesar/App.d';
+  import type { TableEntry } from '@mathesar/App.d';
 
   import ImportData from './import-data/ImportData.svelte';
   import TableView from './table-view/TableView.svelte';
@@ -23,44 +22,45 @@
   export let database : string;
   export let schemaId: number;
 
-  let tabs: Writable<MathesarTab[]>;
-  let activeTab: Writable<MathesarTab>;
+  let tabList: TabList;
+  $: tabList = getTabsForSchema(database, schemaId);
+  $: ({ tabs, activeTab } = tabList);
 
   function changeCurrentSchema(_database: string, _schemaId: number) {
-    let isChanged = false;
     if ($currentDBName !== _database) {
       $currentDBName = _database;
-      isChanged = true;
     }
     if ($currentSchemaId !== _schemaId) {
       $currentSchemaId = _schemaId;
-      isChanged = true;
-    }
-
-    if (isChanged || !tabs) {
-      ({ tabs, activeTab } = getTabsForSchema($currentDBName, $currentSchemaId));
-      // Sync tabs to url here!
     }
   }
 
+  // TODO: Move this entire logic to data layer without involving view layer
   $: changeCurrentSchema(database, schemaId);
 
-  function getLink(entry: MathesarTab) {
+  function getTabLink(entry: MathesarTab) {
     if (entry.isNew) {
       return null;
     }
-    return `/${database}/${schemaId}/${URLQueryHandler.constructTableLink(entry.id as number)}`;
+    return constructTabularTabLink(
+      database,
+      schemaId,
+      entry.tabularData.type,
+      entry.tabularData.id,
+    );
   }
 
-  function tabSelected(e: { detail: { tab: MathesarTab, originalEvent: Event } }) {
-    const { originalEvent, tab } = e.detail;
-    originalEvent.preventDefault();
-
-    selectTab(database, tab);
+  function getLeftPaneLink(entry: TableEntry) {
+    return constructTabularTabLink(
+      database,
+      schemaId,
+      TabularType.Table,
+      entry.id,
+    );
   }
 
   function tabRemoved(e: { detail: { removedTab: MathesarTab } }) {
-    removeTab(database, schemaId, e.detail.removedTab);
+    tabList.remove(e.detail.removedTab);
   }
 </script>
 
@@ -68,13 +68,13 @@
   <title>Mathesar - {$activeTab?.label || 'Home'}</title>
 </svelte:head>
 
-<LeftPane {getLink} {database} {schemaId} activeTab={$activeTab}/>
+<LeftPane getLink={getLeftPaneLink} {database} {schemaId} activeTab={$activeTab}/>
 
 <section class="table-section">
   {#if $tabs?.length > 0}
     <TabContainer bind:tabs={$tabs} bind:activeTab={$activeTab}
-                  allowRemoval={true} preventDefault={true} {getLink}
-                  on:tabSelected={tabSelected} on:tabRemoved={tabRemoved}>
+                  allowRemoval={true} preventDefault={true} getLink={getTabLink}
+                  on:tabRemoved={tabRemoved}>
       <span slot="tab" let:tab>
         <Icon data={faTable}/>
         <span>{tab.label}</span>
@@ -82,9 +82,9 @@
 
       {#if $activeTab}
         {#if $activeTab.isNew}
-          <ImportData {database} {schemaId} id={$activeTab.id}/>
-        {:else}
-          <TableView {database} id={$activeTab.id}/>
+          <ImportData {database} {schemaId} id={$activeTab.fileImportId}/>
+        {:else if $activeTab.tabularData}
+          <TableView tabularData={$activeTab.tabularData}/>
         {/if}
       {/if}
     </TabContainer>

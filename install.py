@@ -18,7 +18,7 @@ def main():
 
 
 def install_on_db_with_key(database_key, skip_confirm):
-    if DATABASES[database_key]["HOST"] == "db":
+    if DATABASES[database_key]["HOST"] == "mathesar_db":
         # if we're going to install on the docker-created Postgres, we'll
         # create the DB
         print("Creating Mathesar DB on docker-created PostgreSQL instance")
@@ -39,7 +39,7 @@ def install_on_db_with_key(database_key, skip_confirm):
         host = DATABASES[database_key]["HOST"]
         db_name = DATABASES[database_key]["NAME"]
         port = DATABASES[database_key]["PORT"]
-        print("Installing Mathesar DB on preexisting PostgreSQL instance...")
+        print(f"Installing Mathesar DB {db_name} on preexisting PostgreSQL instance at host {host}...")
         if skip_confirm is False:
             confirmation = input(
                 f"Mathesar will be installed on DB {db_name} at host {host}."
