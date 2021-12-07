@@ -5,6 +5,7 @@
   align-items: center;
   border-radius: 4px;
   background: #fff;
+  position: relative;
 
   .prepend {
     margin-left: 8px;
@@ -30,7 +31,22 @@
     box-shadow: 0 0 0 2px #2087e633;
   }
 
+  &.has-validation-errors {
+    background: #fde9e9;
+  }
+
   &.disabled {
     background: #efefef;
+  }
+
+  .spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }

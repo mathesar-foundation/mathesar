@@ -56,6 +56,14 @@
   </div>
 </Story>
 
+<Story
+  name="Loading"
+  args={{ value: 'New name' }}
+  let:args
+>
+  <TextInput {...args} isLoading />
+</Story>
+
 <Story name="Slotted" parameters={disabledAddons}>
   <TextInput class="slot-bg" bind:value style="width:280px">
     <svelte:fragment slot="append">

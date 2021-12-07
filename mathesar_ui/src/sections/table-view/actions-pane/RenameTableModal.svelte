@@ -13,7 +13,7 @@
   export let tabularData: TabularData;
 
   let allowClose = true;
-  let inputElement: HTMLInputElement;
+  let focusInput = () => {};
   let originalName = '';
   let name = '';
   let proceed: () => Promise<void>;
@@ -39,12 +39,8 @@
   async function init() {
     originalName = $tables.data.get(tabularData.id)?.name ?? '';
     name = originalName;
-    if (!inputElement) {
-      return;
-    }
     await tick();
-    inputElement.focus();
-    inputElement.setSelectionRange(0, inputElement.value.length);
+    focusInput();
   }
   
   async function handleSave() {
@@ -71,7 +67,7 @@
   <span slot=title>Rename <em>{originalName}</em> Table</span>
   <TextInput
     bind:value={name}
-    bind:element={inputElement}
+    bind:focusAndSelectAll={focusInput}
     aria-label='Name'
     on:enter={proceed}
   />
