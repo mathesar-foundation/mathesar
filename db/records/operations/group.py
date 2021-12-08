@@ -3,7 +3,7 @@ from enum import Enum
 import json
 import logging
 from typing import List, Tuple
-from sqlalchemy import select, Column, func, and_, case, literal
+from sqlalchemy import select, func, and_, case, literal
 
 from db.records import exceptions as rec_exc
 from db.records.utils import create_col_objects
@@ -27,7 +27,7 @@ class GroupMetadataField(Enum):
 
 @dataclass(frozen=True, eq=True)
 class GroupBy:
-    column_list: List
+    column_list: List[str]
     group_mode: str = GroupMode.DISTINCT.value
     num_groups: int = 12
 
@@ -47,9 +47,9 @@ class GroupBy:
             )
 
         for col in self.column_list:
-            if type(col) not in (str, Column):
+            if type(col) != str:
                 raise rec_exc.BadGroupFormat(
-                    f"Group column {col} must be a string or Column."
+                    f"Group column {col} must be a string."
                 )
 
     def get_validated_group_by_columns(self, table):

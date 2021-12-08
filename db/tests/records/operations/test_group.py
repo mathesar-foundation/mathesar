@@ -138,19 +138,6 @@ def test_GB_get_valid_group_by_columns_str_cols(roster_table_obj):
     )
 
 
-def test_GB_get_valid_group_by_columns_sa_cols(roster_table_obj):
-    roster, _ = roster_table_obj
-    input_cols = [roster.columns['Student Number'], roster.columns['Student Email']]
-    gb = group.GroupBy(column_list=input_cols)
-    cols = gb.get_validated_group_by_columns(roster)
-    assert all(
-        [
-            isinstance(out_col, Column) and out_col.name == in_col.name
-            for out_col, in_col in zip(cols, input_cols)
-        ]
-    )
-
-
 def test_GB_get_valid_group_by_columns_invalid_col(roster_table_obj):
     roster, _ = roster_table_obj
     input_cols = ['notintable']
