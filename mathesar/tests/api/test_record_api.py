@@ -83,6 +83,19 @@ def test_record_list_filter(create_table, client):
     assert mock_get.call_args[1]['filters'] == filters
 
 
+def test_record_list_duplicate_only(create_table, client):
+    table_name = 'NASA Record List Filter Duplicates'
+    table = create_table(table_name)
+    duplicate_only = ['Patent Expiration Date']
+    json_duplicate_only = json.dumps(duplicate_only)
+
+    with patch.object(models, "get_records", return_value=[]) as mock_get:
+        client.get(f'/api/v0/tables/{table.id}/records/?duplicate_only={json_duplicate_only}')
+
+    assert mock_get.call_args is not None
+    assert mock_get.call_args[1]['duplicate_only'] == duplicate_only
+
+
 def _test_filter_with_added_columns(table, client, columns_to_add, operators_and_expected_values):
 
     for new_column in columns_to_add:
