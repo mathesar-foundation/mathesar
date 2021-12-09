@@ -216,7 +216,7 @@ export class Meta {
             and: {
               field: string,
               op: string,
-              value: string
+              value: string[]
             }[]
           } = { and: [] };
 
