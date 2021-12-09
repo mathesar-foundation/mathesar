@@ -414,6 +414,10 @@ async function importData(fileImportStore: FileImport, data: DataFilesRequestDat
       status: States.Loading,
       dataFileName: res.name,
     });
+    setInFileStore(fileImportStore, {
+      uploadStatus: States.Done,
+      error: null,
+    });
   } catch (err: unknown) {
     setInFileStore(fileImportStore, {
       uploadStatus: States.Error,
