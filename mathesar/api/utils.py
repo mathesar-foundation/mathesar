@@ -28,7 +28,7 @@ def process_annotated_records(record_list):
         return record._asdict() if not isinstance(record, dict) else record
 
     split_records = (
-        {DATA_KEY: record_dict, METADATA_KEY: {}}
+        {DATA_KEY: record_dict}
         for record_dict in (_get_record_dict(record) for record in record_list)
     )
     return group.extract_group_metadata(

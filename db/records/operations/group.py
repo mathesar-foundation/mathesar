@@ -205,14 +205,17 @@ def extract_group_metadata(
             if k != MATHESAR_GROUP_METADATA
         }
         group_metadata = record[data_key].get(MATHESAR_GROUP_METADATA, {})
-        metadata = (
-            record.get(metadata_key, {})
-            | {
-                GroupMetadataField.GROUP_ID.value: group_metadata.get(
-                    GroupMetadataField.GROUP_ID.value
-                )
-            }
-        )
+        if group_metadata:
+            metadata = (
+                record.get(metadata_key, {})
+                | {
+                    GroupMetadataField.GROUP_ID.value: group_metadata.get(
+                        GroupMetadataField.GROUP_ID.value
+                    )
+                }
+            )
+        else:
+            metadata = record.get(metadata_key)
         return (
             {data_key: data, metadata_key: metadata},
             group_metadata if group_metadata else None
