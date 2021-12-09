@@ -1,8 +1,6 @@
-from dataclasses import dataclass, field
 from enum import Enum
 import json
 import logging
-from typing import List, Tuple
 from sqlalchemy import select, func, and_, case, literal
 
 from db.records import exceptions as rec_exc
@@ -25,15 +23,27 @@ class GroupMetadataField(Enum):
     LAST_VALUE = 'last_value'
 
 
-@dataclass(frozen=True, eq=True)
 class GroupBy:
-    column_list: List[str]
-    group_mode: str = GroupMode.DISTINCT.value
-    num_groups: int = 12
+    def __init__(
+            self, columns, group_mode=GroupMode.DISTINCT.value, num_groups=12
+    ):
+        self._columns = tuple(columns) if type(columns) != str else tuple([columns])
+        self._group_mode = group_mode
+        self._num_groups = num_groups
+
+    @property
+    def columns(self):
+        return self._columns
+
+    @property
+    def group_mode(self):
+        return self._group_mode
+
+    @property
+    def num_groups(self):
+        return self._num_groups
 
     def validate(self):
-        if type(self.column_list) not in (tuple, list):
-            raise rec_exc.BadGroupFormat("column_list must be list or tuple.")
         if self.group_mode not in {mode.value for mode in GroupMode}:
             raise rec_exc.InvalidGroupType(
                 f'Group_mode "{self.group_mode}" is invalid.'
@@ -46,7 +56,7 @@ class GroupBy:
                 'percentile group_mode requires integer num_groups'
             )
 
-        for col in self.column_list:
+        for col in self.columns:
             if type(col) != str:
                 raise rec_exc.BadGroupFormat(
                     f"Group column {col} must be a string."
@@ -54,20 +64,32 @@ class GroupBy:
 
     def get_validated_group_by_columns(self, table):
         self.validate()
-        for col in self.column_list:
+        for col in self.columns:
             col_name = col if isinstance(col, str) else col.name
             if col_name not in table.columns:
                 raise rec_exc.GroupFieldNotFound(
                     f"Group col {col} not found in {table}."
                 )
-        return create_col_objects(table, self.column_list)
+        return create_col_objects(table, self.columns)
 
 
-@dataclass(frozen=True, eq=True)
 class GroupingWindowDefinition:
-    partition_by: List
-    order_by: List
-    range_: Tuple[int] = field(default=(None, None), init=False)
+    def __init__(self, partition_by, order_by):
+        self._partition_by = partition_by
+        self._order_by = tuple(order_by)
+        self._range = (None, None)
+
+    @property
+    def partition_by(self):
+        return self._partition_by
+
+    @property
+    def order_by(self):
+        return self._order_by
+
+    @property
+    def range_(self):
+        return self._range
 
 
 def get_group_augmented_records_query(table, group_by):
@@ -105,13 +127,13 @@ def _get_distinct_group_select(table, grouping_columns):
     )
 
 
-def _get_percentile_range_group_select(table, column_list, num_groups):
-    column_names = [col.name for col in column_list]
+def _get_percentile_range_group_select(table, columns, num_groups):
+    column_names = [col.name for col in columns]
     CUME_DIST = 'cume_dist'
     RANGE_ID = 'range_id'
     cume_dist_cte = select(
         table,
-        func.cume_dist().over(order_by=column_list).label(CUME_DIST)
+        func.cume_dist().over(order_by=columns).label(CUME_DIST)
     ).cte()
     ranges = [
         (

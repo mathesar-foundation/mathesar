@@ -9,7 +9,7 @@ from db.records import exceptions as rec_exc
 def roster_distinct_setup(roster_table_obj):
     roster, engine = roster_table_obj
     input_cols = ['Student Number', 'Student Email']
-    gb = group.GroupBy(column_list=input_cols)
+    gb = group.GroupBy(columns=input_cols)
     grouping_columns = gb.get_validated_group_by_columns(roster)
     sel = group._get_distinct_group_select(roster, grouping_columns)
     with engine.begin() as conn:
@@ -22,7 +22,7 @@ def roster_percentile_subj_grade_setup(roster_table_obj):
     roster, engine = roster_table_obj
     input_cols = ['Subject', 'Grade']
     group_by = group.GroupBy(
-        column_list=input_cols,
+        columns=input_cols,
         group_mode=group.GroupMode.PERCENTILE.value,
         num_groups=12
     )
@@ -75,14 +75,14 @@ def record_dictionary_list():
 
 def test_GB_validate_passes_defaults():
     gb = group.GroupBy(
-        column_list=['col1', 'col2'],
+        columns=['col1', 'col2'],
     )
     gb.validate()
 
 
 def test_GB_validate_passes_valid_kwargs():
     gb = group.GroupBy(
-        column_list=['col1', 'col2'],
+        columns=['col1', 'col2'],
         group_mode=group.GroupMode.DISTINCT.value
     )
     gb.validate()
@@ -90,24 +90,16 @@ def test_GB_validate_passes_valid_kwargs():
 
 def test_GB_validate_passes_valid_kwargs_perc():
     gb = group.GroupBy(
-        column_list=['col1', 'col2'],
+        columns=['col1', 'col2'],
         group_mode=group.GroupMode.PERCENTILE.value,
         num_groups=1234,
     )
     gb.validate()
 
 
-def test_GB_validate_fails_invalid_col_list():
-    gb = group.GroupBy(
-        column_list='col1',
-    )
-    with pytest.raises(rec_exc.BadGroupFormat):
-        gb.validate()
-
-
 def test_GB_validate_fails_invalid_group_mode():
     gb = group.GroupBy(
-        column_list=['col1', 'col2'],
+        columns=['col1', 'col2'],
         group_mode='potato',
         num_groups=1234,
     )
@@ -117,7 +109,7 @@ def test_GB_validate_fails_invalid_group_mode():
 
 def test_GB_validate_fails_invalid_num_group():
     gb = group.GroupBy(
-        column_list=['col1', 'col2'],
+        columns=['col1', 'col2'],
         group_mode=group.GroupMode.PERCENTILE.value,
         num_groups=None,
     )
@@ -128,7 +120,7 @@ def test_GB_validate_fails_invalid_num_group():
 def test_GB_get_valid_group_by_columns_str_cols(roster_table_obj):
     roster, _ = roster_table_obj
     column_names = ['Student Number', 'Student Email']
-    gb = group.GroupBy(column_list=column_names)
+    gb = group.GroupBy(columns=column_names)
     cols = gb.get_validated_group_by_columns(roster)
     assert all(
         [
@@ -141,7 +133,7 @@ def test_GB_get_valid_group_by_columns_str_cols(roster_table_obj):
 def test_GB_get_valid_group_by_columns_invalid_col(roster_table_obj):
     roster, _ = roster_table_obj
     input_cols = ['notintable']
-    gb = group.GroupBy(column_list=input_cols)
+    gb = group.GroupBy(columns=input_cols)
     with pytest.raises(rec_exc.GroupFieldNotFound):
         gb.get_validated_group_by_columns(roster)
 
