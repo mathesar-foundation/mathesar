@@ -3,6 +3,7 @@ from collections import OrderedDict
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
+from db.records.operations.group import GroupBy
 from mathesar.api.utils import get_table_or_404, process_annotated_records
 
 
@@ -33,7 +34,7 @@ class ColumnLimitOffsetPagination(DefaultLimitOffsetPagination):
 class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
 
     def paginate_queryset(
-            self, queryset, request, table_id, filters=[], order_by=[], group_count_by={},
+            self, queryset, request, table_id, filters=[], order_by=[], group_by=None,
     ):
         self.limit = self.get_limit(request)
         if self.limit is None:
@@ -49,7 +50,7 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
             self.offset,
             filters=filters,
             order_by=order_by,
-            group_by=group_count_by,
+            group_by=group_by,
         )
 
 
@@ -64,13 +65,15 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
     def paginate_queryset(
             self, queryset, request, table_id, filters=[], order_by=[], group_count_by={},
     ):
+        group_by = GroupBy(**group_count_by) if group_count_by else None
+
         records = super().paginate_queryset(
             queryset,
             request,
             table_id,
             filters=filters,
             order_by=order_by,
-            group_count_by=group_count_by,
+            group_by=group_by,
         )
 
         if records:
@@ -80,7 +83,11 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
 
         if group_count_by:
             self.group_count = {
-                'group_count_by': group_count_by,
+                'group_count_by': {
+                    "columns": group_by.columns,
+                    "group_mode": group_by.group_mode,
+                    "num_groups": group_by.num_groups,
+                },
                 'results': groups
             }
         else:

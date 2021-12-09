@@ -25,7 +25,7 @@ class GroupMetadataField(Enum):
 
 class GroupBy:
     def __init__(
-            self, columns, group_mode=GroupMode.DISTINCT.value, num_groups=12
+            self, columns, group_mode=GroupMode.DISTINCT.value, num_groups=None
     ):
         self._columns = tuple(columns) if type(columns) != str else tuple([columns])
         self._group_mode = group_mode

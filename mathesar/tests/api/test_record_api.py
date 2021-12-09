@@ -5,6 +5,7 @@ import pytest
 from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
 
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
+from db.records.operations.group import GroupBy
 from mathesar import models
 
 
@@ -204,7 +205,12 @@ def _test_record_list_group(table, client, group_count_by, expected_groups):
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 50
 
-    assert response_data['group_count']['group_count_by'] == group_count_by
+    group_by = GroupBy(**group_count_by)
+    assert response_data['group_count']['group_count_by'] == {
+        "columns": list(group_by.columns),
+        "group_mode": group_by.group_mode,
+        "num_groups": group_by.num_groups
+    }
     results = response_data['group_count']['results']
     assert results == expected_groups
 
@@ -428,7 +434,7 @@ def test_record_list_sort_exceptions(create_table, client, exception):
 def test_record_list_group_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    group_by = json.dumps(["Center"])
+    group_by = json.dumps({"columns": ["Center"]})
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?group_count_by={group_by}'

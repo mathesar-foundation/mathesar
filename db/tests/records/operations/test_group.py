@@ -156,7 +156,9 @@ group_modes = [group.GroupMode.DISTINCT.value, group.GroupMode.PERCENTILE.value]
 @pytest.mark.parametrize('group_mode', group_modes)
 def test_get_group_augmented_records_query_metadata_fields(roster_table_obj, group_mode):
     roster, engine = roster_table_obj
-    group_by = group.GroupBy(['Student Number', 'Student Name'], group_mode=group_mode)
+    group_by = group.GroupBy(
+        ['Student Number', 'Student Name'], group_mode=group_mode, num_groups=12
+    )
     augmented_query = group.get_group_augmented_records_query(roster, group_by)
     with engine.begin() as conn:
         res = conn.execute(augmented_query).fetchall()
