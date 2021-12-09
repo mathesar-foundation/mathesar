@@ -212,7 +212,7 @@ def _test_record_list_group(table, client, group_count_by, expected_groups):
 def test_record_list_group_single_column(create_table, client):
     table_name = 'NASA Record List Group Single'
     table = create_table(table_name)
-    group_count_by = {'column_list': ['Center']}
+    group_count_by = {'columns': ['Center']}
     expected_groups = [
         {
             'group_id': 10, 'count': 144,
@@ -230,7 +230,7 @@ def test_record_list_group_single_column(create_table, client):
 def test_record_list_group_multi_column(create_table, client):
     table_name = 'NASA Record List Group Multi'
     table = create_table(table_name)
-    group_count_by = {'column_list': ['Center', 'Status']}
+    group_count_by = {'columns': ['Center', 'Status']}
     expected_groups = [
         {
             'group_id': 20, 'count': 113,
