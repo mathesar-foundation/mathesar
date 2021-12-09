@@ -8,8 +8,23 @@ from db.utils import execute_query
 from db.filters.operations.apply import apply_ma_filter_spec
 
 
-def get_query(table, limit, offset, order_by, filters, cols=None):
-    query = select(*(cols or table.c)).select_from(table).limit(limit).offset(offset)
+def _get_duplicate_only_cte(table, duplicate_columns):
+    DUPLICATE_LABEL = "_is_dupe"
+    duplicate_flag_cte = (
+        select(
+            *table.c,
+            (func.count(1).over(partition_by=duplicate_columns) > 1).label(DUPLICATE_LABEL),
+        ).select_from(table)
+    ).cte()
+    return select(duplicate_flag_cte).where(duplicate_flag_cte.c[DUPLICATE_LABEL]).cte()
+
+
+def get_query(table, limit=None, offset=None, order_by=None, filters=None, duplicate_only=None, cols=None):
+    if duplicate_only:
+        select_target = _get_duplicate_only_cte(table, duplicate_only)
+    else:
+        select_target = table
+    query = select(*(cols or select_target.c)).select_from(select_target).limit(limit).offset(offset)
     if order_by is not None:
         query = apply_sort(query, order_by)
     if filters is not None:
@@ -25,8 +40,10 @@ def get_record(table, engine, id_value):
     return result[0] if result else None
 
 
+# TODO update doc for filters and duplicate_only
+# TODO handle columns specified in order_by, filters, duplicate_only not existing on the table
 def get_records(
-        table, engine, limit=None, offset=None, order_by=[], filters=None,
+        table, engine, limit=None, offset=None, order_by=[], filters=None, duplicate_only=None
 ):
     """
     Returns records from a table.
@@ -45,23 +62,28 @@ def get_records(
     """
     if not order_by:
         # Set default ordering if none was requested
+        # NOTE: str(col.name) must be used, because otherwise the table's identifier is
+        # included which clashes with CTE aliases.
         if len(table.primary_key.columns) > 0:
             # If there are primary keys, order by all primary keys
-            order_by = [{'field': col, 'direction': 'asc'}
+            order_by = [{'field': str(col.name), 'direction': 'asc'}
                         for col in table.primary_key.columns]
         else:
             # If there aren't primary keys, order by all columns
-            order_by = [{'field': col, 'direction': 'asc'}
+            order_by = [{'field': str(col.name), 'direction': 'asc'}
                         for col in table.columns]
 
-    query = get_query(table, limit, offset, order_by, filters)
+    query = get_query(
+        table=table, limit=limit, offset=offset,
+        order_by=order_by, filters=filters, duplicate_only=duplicate_only
+    )
     return execute_query(engine, query)
 
 
 def get_count(table, engine, filters=[]):
     col_name = "_count"
     cols = [func.count().label(col_name)]
-    query = get_query(table, None, None, None, filters, cols)
+    query = get_query(table=table, filters=filters, cols=cols)
     return execute_query(engine, query)[0][col_name]
 
 

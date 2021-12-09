@@ -276,14 +276,15 @@ class Table(DatabaseObject):
     def get_record(self, id_value):
         return get_record(self._sa_table, self.schema._sa_engine, id_value)
 
-    def get_records(self, limit=None, offset=None, filters=None, order_by=[]):
+    def get_records(self, limit=None, offset=None, filters=None, order_by=[], duplicate_only=None):
         return get_records(
             self._sa_table,
             self.schema._sa_engine,
             limit,
             offset,
             filters=filters,
-            order_by=order_by
+            order_by=order_by,
+            duplicate_only=duplicate_only,
         )
 
     def get_group_counts(self, group_by, limit=None, offset=None, filters=[], order_by=[]):

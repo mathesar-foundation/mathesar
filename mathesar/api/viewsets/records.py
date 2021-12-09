@@ -33,6 +33,7 @@ class RecordViewSet(viewsets.ViewSet):
                 filters=serializer.validated_data['filters'],
                 order_by=serializer.validated_data['order_by'],
                 group_count_by=serializer.validated_data['group_count_by'],
+                duplicate_only=serializer.validated_data['duplicate_only'],
             )
         except (BadFilterFormat, FilterFieldNotFound) as e:
             raise ValidationError({'filters': e})
