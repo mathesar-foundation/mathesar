@@ -23,7 +23,7 @@ def roster_percentile_subj_grade_setup(roster_table_obj):
     input_cols = ['Subject', 'Grade']
     group_by = group.GroupBy(
         columns=input_cols,
-        group_mode=group.GroupMode.PERCENTILE.value,
+        mode=group.GroupMode.PERCENTILE.value,
         num_groups=12
     )
     grouping_columns = group_by.get_validated_group_by_columns(roster)
@@ -83,7 +83,7 @@ def test_GB_validate_passes_defaults():
 def test_GB_validate_passes_valid_kwargs():
     gb = group.GroupBy(
         columns=['col1', 'col2'],
-        group_mode=group.GroupMode.DISTINCT.value
+        mode=group.GroupMode.DISTINCT.value
     )
     gb.validate()
 
@@ -91,16 +91,16 @@ def test_GB_validate_passes_valid_kwargs():
 def test_GB_validate_passes_valid_kwargs_perc():
     gb = group.GroupBy(
         columns=['col1', 'col2'],
-        group_mode=group.GroupMode.PERCENTILE.value,
+        mode=group.GroupMode.PERCENTILE.value,
         num_groups=1234,
     )
     gb.validate()
 
 
-def test_GB_validate_fails_invalid_group_mode():
+def test_GB_validate_fails_invalid_mode():
     gb = group.GroupBy(
         columns=['col1', 'col2'],
-        group_mode='potato',
+        mode='potato',
         num_groups=1234,
     )
     with pytest.raises(rec_exc.InvalidGroupType):
@@ -110,7 +110,7 @@ def test_GB_validate_fails_invalid_group_mode():
 def test_GB_validate_fails_invalid_num_group():
     gb = group.GroupBy(
         columns=['col1', 'col2'],
-        group_mode=group.GroupMode.PERCENTILE.value,
+        mode=group.GroupMode.PERCENTILE.value,
         num_groups=None,
     )
     with pytest.raises(rec_exc.BadGroupFormat):
@@ -157,7 +157,7 @@ group_modes = [group.GroupMode.DISTINCT.value, group.GroupMode.PERCENTILE.value]
 def test_get_group_augmented_records_query_metadata_fields(roster_table_obj, group_mode):
     roster, engine = roster_table_obj
     group_by = group.GroupBy(
-        ['Student Number', 'Student Name'], group_mode=group_mode, num_groups=12
+        ['Student Number', 'Student Name'], mode=group_mode, num_groups=12
     )
     augmented_query = group.get_group_augmented_records_query(roster, group_by)
     with engine.begin() as conn:
@@ -175,14 +175,14 @@ group_by_num_list = [
     (
         group.GroupBy(
             ['Student Number', 'Student Email'],
-            group_mode=group.GroupMode.DISTINCT.value
+            mode=group.GroupMode.DISTINCT.value
         ),
         259
     ),
     (
         group.GroupBy(
             ['Student Number', 'Student Email'],
-            group_mode=group.GroupMode.PERCENTILE.value,
+            mode=group.GroupMode.PERCENTILE.value,
             num_groups=12,
         ),
         12
@@ -190,7 +190,7 @@ group_by_num_list = [
     (
         group.GroupBy(
             ['Subject', 'Grade'],
-            group_mode=group.GroupMode.PERCENTILE.value,
+            mode=group.GroupMode.PERCENTILE.value,
             num_groups=12,
         ),
         12
@@ -198,7 +198,7 @@ group_by_num_list = [
     (
         group.GroupBy(
             ['Subject', 'Grade'],
-            group_mode=group.GroupMode.PERCENTILE.value,
+            mode=group.GroupMode.PERCENTILE.value,
             num_groups=100,
         ),
         100
@@ -206,7 +206,7 @@ group_by_num_list = [
     (
         group.GroupBy(
             ['Subject', 'Grade'],
-            group_mode=group.GroupMode.PERCENTILE.value,
+            mode=group.GroupMode.PERCENTILE.value,
             num_groups=1500,
         ),
         1500
