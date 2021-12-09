@@ -32,14 +32,14 @@ class RecordViewSet(viewsets.ViewSet):
                 self.get_queryset(), request, table_pk,
                 filters=serializer.validated_data['filters'],
                 order_by=serializer.validated_data['order_by'],
-                group_count_by=serializer.validated_data['group_count_by'],
+                grouping=serializer.validated_data['grouping'],
             )
         except (BadFilterFormat, FilterFieldNotFound) as e:
             raise ValidationError({'filters': e})
         except (BadSortFormat, SortFieldNotFound) as e:
             raise ValidationError({'order_by': e})
         except (BadGroupFormat, GroupFieldNotFound) as e:
-            raise ValidationError({'group_count_by': e})
+            raise ValidationError({'grouping': e})
 
         serializer = RecordSerializer(records, many=True)
         return paginator.get_paginated_response(serializer.data)

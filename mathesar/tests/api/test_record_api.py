@@ -189,14 +189,14 @@ def test_record_list_sort(create_table, client):
     assert mock_get.call_args[1]['order_by'] == order_by
 
 
-def _test_record_list_group(table, client, group_count_by, expected_groups):
+def _test_record_list_group(table, client, grouping, expected_groups):
     order_by = [
         {'field': 'Center', 'direction': 'desc'},
         {'field': 'Case Number', 'direction': 'asc'},
     ]
     json_order_by = json.dumps(order_by)
-    json_group_count_by = json.dumps(group_count_by)
-    query_str = f'group_count_by={json_group_count_by}&order_by={json_order_by}'
+    json_grouping = json.dumps(grouping)
+    query_str = f'grouping={json_grouping}&order_by={json_order_by}'
 
     response = client.get(f'/api/v0/tables/{table.id}/records/?{query_str}')
     response_data = response.json()
@@ -205,20 +205,19 @@ def _test_record_list_group(table, client, group_count_by, expected_groups):
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 50
 
-    group_by = GroupBy(**group_count_by)
-    assert response_data['group_count']['group_count_by'] == {
+    group_by = GroupBy(**grouping)
+    assert response_data['metadata']['grouping'] == {
         "columns": list(group_by.columns),
-        "group_mode": group_by.group_mode,
-        "num_groups": group_by.num_groups
+        "mode": group_by.mode,
+        "num_groups": group_by.num_groups,
+        "groups": expected_groups,
     }
-    results = response_data['group_count']['results']
-    assert results == expected_groups
 
 
 def test_record_list_group_single_column(create_table, client):
     table_name = 'NASA Record List Group Single'
     table = create_table(table_name)
-    group_count_by = {'columns': ['Center']}
+    grouping = {'columns': ['Center']}
     expected_groups = [
         {
             'group_id': 10, 'count': 144,
@@ -230,13 +229,13 @@ def test_record_list_group_single_column(create_table, client):
             'last_value': {'Center': 'NASA Stennis Space Center'}
         }
     ]
-    _test_record_list_group(table, client, group_count_by, expected_groups)
+    _test_record_list_group(table, client, grouping, expected_groups)
 
 
 def test_record_list_group_multi_column(create_table, client):
     table_name = 'NASA Record List Group Multi'
     table = create_table(table_name)
-    group_count_by = {'columns': ['Center', 'Status']}
+    grouping = {'columns': ['Center', 'Status']}
     expected_groups = [
         {
             'group_id': 20, 'count': 113,
@@ -248,7 +247,7 @@ def test_record_list_group_multi_column(create_table, client):
             'last_value': {'Center': 'NASA Stennis Space Center', 'Status': 'Issued'}
         }
     ]
-    _test_record_list_group(table, client, group_count_by, expected_groups)
+    _test_record_list_group(table, client, grouping, expected_groups)
 
 
 def test_record_list_pagination_limit(create_table, client):
@@ -437,9 +436,9 @@ def test_record_list_group_exceptions(create_table, client, exception):
     group_by = json.dumps({"columns": ["Center"]})
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
-            f'/api/v0/tables/{table.id}/records/?group_count_by={group_by}'
+            f'/api/v0/tables/{table.id}/records/?grouping={group_by}'
         )
         response_data = response.json()
     assert response.status_code == 400
     assert len(response_data) == 1
-    assert "group_count_by" in response_data
+    assert "grouping" in response_data

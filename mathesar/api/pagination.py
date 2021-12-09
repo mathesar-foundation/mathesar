@@ -58,14 +58,14 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
     def get_paginated_response(self, data):
         return Response(OrderedDict([
             ('count', self.count),
-            ('group_count', self.group_count),
+            ('metadata', self.metadata),
             ('results', data)
         ]))
 
     def paginate_queryset(
-            self, queryset, request, table_id, filters=[], order_by=[], group_count_by={},
+            self, queryset, request, table_id, filters=[], order_by=[], grouping={},
     ):
-        group_by = GroupBy(**group_count_by) if group_count_by else None
+        group_by = GroupBy(**grouping) if grouping else None
 
         records = super().paginate_queryset(
             queryset,
@@ -81,19 +81,16 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         else:
             processed_records, groups = None, None
 
-        if group_count_by:
-            self.group_count = {
-                'group_count_by': {
-                    "columns": group_by.columns,
-                    "group_mode": group_by.group_mode,
-                    "num_groups": group_by.num_groups,
+        if grouping:
+            self.metadata = {
+                'grouping': {
+                    'columns': group_by.columns,
+                    'mode': group_by.mode,
+                    'num_groups': group_by.num_groups,
+                    'groups': groups
                 },
-                'results': groups
             }
         else:
-            self.group_count = {
-                'group_count_by': None,
-                'results': None,
-            }
+            self.metadata = None
 
         return processed_records

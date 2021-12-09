@@ -25,10 +25,10 @@ class GroupMetadataField(Enum):
 
 class GroupBy:
     def __init__(
-            self, columns, group_mode=GroupMode.DISTINCT.value, num_groups=None
+            self, columns, mode=GroupMode.DISTINCT.value, num_groups=None
     ):
         self._columns = tuple(columns) if type(columns) != str else tuple([columns])
-        self._group_mode = group_mode
+        self._mode = mode
         self._num_groups = num_groups
 
     @property
@@ -36,24 +36,24 @@ class GroupBy:
         return self._columns
 
     @property
-    def group_mode(self):
-        return self._group_mode
+    def mode(self):
+        return self._mode
 
     @property
     def num_groups(self):
         return self._num_groups
 
     def validate(self):
-        if self.group_mode not in {mode.value for mode in GroupMode}:
+        if self.mode not in {group_mode.value for group_mode in GroupMode}:
             raise rec_exc.InvalidGroupType(
-                f'Group_mode "{self.group_mode}" is invalid.'
+                f'mode "{self.mode}" is invalid.'
             )
         if (
-                self.group_mode == GroupMode.PERCENTILE.value
+                self.mode == GroupMode.PERCENTILE.value
                 and not type(self.num_groups) == int
         ):
             raise rec_exc.BadGroupFormat(
-                'percentile group_mode requires integer num_groups'
+                'percentile mode requires integer num_groups'
             )
 
         for col in self.columns:
@@ -102,11 +102,11 @@ def get_group_augmented_records_query(table, group_by):
     """
     grouping_columns = group_by.get_validated_group_by_columns(table)
 
-    if group_by.group_mode == GroupMode.PERCENTILE.value:
+    if group_by.mode == GroupMode.PERCENTILE.value:
         query = _get_percentile_range_group_select(
             table, grouping_columns, group_by.num_groups
         )
-    elif group_by.group_mode == GroupMode.DISTINCT.value:
+    elif group_by.mode == GroupMode.DISTINCT.value:
         query = _get_distinct_group_select(table, grouping_columns)
     else:
         raise rec_exc.BadGroupFormat("Unknown error")
