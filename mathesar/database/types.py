@@ -148,3 +148,17 @@ def get_types(engine):
                     type_info['db_types'][db_type] = [sa_type_info]
         types.append(type_info)
     return types
+
+
+def get_sa_type_map():
+    sa_types_map = {}
+    for type_map in _get_type_map():
+        mathesar_type = type_map['identifier']
+        for sa_type in type_map['sa_type_names']:
+            sa_types_map[sa_type] = mathesar_type
+    return sa_types_map
+
+
+def get_mathesar_type_from_db_type(db_type_string):
+    type_map = get_sa_type_map()
+    return type_map[db_type_string.lower()]

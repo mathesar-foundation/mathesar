@@ -7,7 +7,7 @@ from mathesar.models import Table, DataFile
 
 
 class TableSerializer(serializers.ModelSerializer):
-    columns = SimpleColumnSerializer(many=True, source='sa_columns', required=False)
+    columns = SimpleColumnSerializer(many=True, required=False)
     records_url = serializers.SerializerMethodField()
     constraints_url = serializers.SerializerMethodField()
     columns_url = serializers.SerializerMethodField()

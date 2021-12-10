@@ -1,9 +1,12 @@
+# Mathesar UI
+
 This directory contains the frontend code for Mathesar. However, part of the frontend setup is based on prerendered json which is done through django templates. We use Svelte as the frontend library, Scss for styling, and Vite for dev tooling.
 
 ## Development setup
-Refer the [main README file](https://github.com/centerofci/mathesar/blob/master/README.md) on how to spin up the entire dev setup for Mathesar as containers.
 
-### Default - Containers
+Refer the [main README file](../README.md) on how to spin up the entire dev setup for Mathesar as containers.
+
+### Option 1: Setup with containers (recommended)
 
 Once the containers are running, the changes made in frontend code will reflect immediately through HMR. You do not need any additional dev setup.
 
@@ -19,9 +22,10 @@ A simpler approach would be to copy the `node_modules` folder from the container
 
 If you choose the last approach, make sure that you're using the same version of node and npm in your local as it is in the container, and that `package-lock.json` file is not modified before commiting.
 
-### Manual
+### Option 2: Manual setup
 
 You could however prefer to run the frontend locally, which is straight forward:
+
 ```bash
 cd mathesar_ui
 npm install
@@ -31,11 +35,13 @@ npm run dev
 This will start a vite js server at port 3000. The vite client and main files are referenced by our server rendered html files. Refer [backend integration in vite docs](https://vitejs.dev/guide/backend-integration.html).
 
 For testing:
+
 ```bash
 npm run test
 ```
 
 For building the files:
+
 ```bash
 npm run build
 ```
@@ -49,11 +55,12 @@ If you want to add or remove packages, or bascially run any npm action, **always
 You can connect to the container and open the ui folder by running:
 
 ```bash
-docker exec -it mathesar_service_1 /bin/bash
+docker exec -it mathesar_service /bin/bash
 cd mathesar_ui
 ```
 
 and then perform any action from within it. Example:
+
 ```bash
 root@c273da65c52d:/code/mathesar_ui$ ls
 Dockerfile  jsconfig.json  package-lock.json  public  vite.config.js
@@ -64,23 +71,29 @@ root@c273da65c52d:/code/mathesar_ui$ npm install <package>
 root@c273da65c52d:/code/mathesar_ui$ npm uninstall <package>
 ```
 
-### Components
+## Components
 
-For guidelines on component development, refer [README of components](https://github.com/centerofci/mathesar/tree/master/mathesar_ui/src/components#readme).
+- The `src/component-library` directory contains general-purpose components which will eventually be spun off into its own package, separate from Mathesar.
+- See the [Components README](./src/component-library/README.md) for more details.
 
-You can start storybook in dev mode by connecting to the container and then running `npm run storybook`:
+### Storybook 
 
-```bash
-docker exec -it mathesar_service_1 /bin/bash
+We use [Storybook](https://storybook.js.org/) to develop and document our components.
 
-root@c273da65c52d:/code/mathesar_ui$ cd mathesar_ui && npm run storybook
-```
+- __Start__ Storybook in dev mode with:
 
-This should start storybook at port 6006.
+    ```bash
+    docker exec -it -w /code/mathesar_ui mathesar_service npm run storybook
+    ```
 
-To build storybook, run `npm run build-storybook`. The static storybook build will be present within __storybook-static__ folder.
+- __Build__ Storybook with:
+
+    ```bash
+    docker exec -it -w /code/mathesar_ui mathesar_service npm run build-storybook
+    ```
 
 ### Developing in Windows
+
 Hot module replacement does not work well with WSL when the project is present within a Windows filesystem, as mentioned in [this issue](https://github.com/microsoft/WSL/issues/4739).
 
 The simplest way to get this to work (and the one we advise) is to move the project to a Linux filesystem. This can be achieved by cloning the repo within the WSL shell in a Linux filesystem.
@@ -91,40 +104,40 @@ If you have to work in the Windows filesystem, you could configure Vite to poll 
 
 ## Naming conventions
 
-* File names for Components, Classes and Stylesheets should be CamelCased.
-  - Valid names:
-    ```bash
+* File names for Components, Classes and Stylesheets should be CamelCased. Examples:
+    
+    ```txt
     App.svelte
     CancellablePromise.ts
     App.scss
     ```
 
-* Typescript file names should be lowerCamelCased.
-  - Valid names:
-    ```bash
+* Typescript file names should be lowerCamelCased. Examples:
+    
+    ```txt
     index.ts
     utilityFunctions.ts
     ```
 
-* All variables and constants should be lowerCamelCased.
-  - Valid names:
+* All variables and constants should be lowerCamelCased. Examples:
+    
     ```javascript
     export let randomVariable;
     let aNewVariable = 'new variable';
     const someValue = 'constant value';
     ```
 
-* All function names should be lowerCamelCased.
-  - Valid names:
+* All function names should be lowerCamelCased. Examples:
+    
     ```javascript
     function someFunction() { ... }
     let someOtherFn = () => { ... };
     const someConstFn = () => { ... };
     ```
 
-* All directory names should be kebab-cased (hyphen-delimited).
-  - Valid names:
-    ```bash
+* All directory names should be kebab-cased (hyphen-delimited). Examples:
+    
+    ```txt
     /components/text-input/
     /components/combo-boxes/multi-select/
     ```

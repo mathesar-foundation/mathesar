@@ -170,7 +170,12 @@ MEDIA_URL = "/media/"
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication'
-    ]
+    ],
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    ),
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
 }
 
 # Mathesar settings
