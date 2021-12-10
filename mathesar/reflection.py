@@ -8,6 +8,8 @@ from db.schemas.operations.select import get_mathesar_schemas_with_oids
 from db.tables.operations.select import get_table_oids_from_schema
 # We import the entire models module to avoid a circular import error
 from mathesar import models
+from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer, \
+    DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY
 from mathesar.database.base import create_mathesar_engine
 
 DB_REFLECTION_KEY = 'database_reflected_recently'
@@ -70,7 +72,15 @@ def reflect_columns_from_table(table):
         for column in get_column_indexes_from_table(table.oid, table.schema._sa_engine)
     }
     for attnum in attnums:
-        models.Column.current_objects.get_or_create(attnum=attnum, table=table)
+        column, created = models.Column.current_objects.get_or_create(attnum=attnum,
+                                                                      table=table,
+                                                                      defaults={'display_options': None})
+        if not created and column.display_options:
+            serializer = DisplayOptionsMappingSerializer(data=column.display_options,
+                                                         context={DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY: str(column.type)})
+            if not serializer.is_valid(False):
+                column.display_options = None
+                column.save()
     models.Column.current_objects.filter(table=table).filter(~Q(attnum__in=attnums)).delete()
 
 

@@ -331,7 +331,7 @@ class Table(DatabaseObject):
 class Column(ReflectionManagerMixin, BaseModel):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='columns')
     attnum = models.IntegerField()
-    display_options = JSONField(null=True)
+    display_options = JSONField(null=True, default=None)
 
     def __str__(self):
         return f"{self.__class__.__name__}: {self.table_id}-{self.attnum}"
