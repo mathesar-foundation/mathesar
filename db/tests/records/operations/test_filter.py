@@ -26,6 +26,7 @@ def test_get_records_filters_using_col_str_names(roster_table_obj):
     )
 
 
+# TODO no: remove these tests
 @pytest.mark.skip(reason="should this be implemented?")
 def test_get_records_filters_using_col_objects(roster_table_obj):
     roster, engine = roster_table_obj
@@ -98,13 +99,16 @@ parameter_to_python_func = {
     # "like": _like,
     # "ilike": _ilike,
     # "not_ilike": lambda x, v: not _ilike(x, v),
+    "starts_with": lambda x, v: x.startswith(v),
+    "ends_with": lambda x, v: x.endswith(v),
+    "contains": lambda x, v: x.find(v) != -1,
     "in": lambda x, v: x in v,
     "not_in": lambda x, v: x not in v,
     # "any": lambda x, v: v in x,
     # "not_any": lambda x, v: v not in x,
     "and": lambda x: all(x),
     "or": lambda x: any(x),
-    "not": lambda x: not x[0]
+    "not": lambda x: not x[0],
 }
 
 
@@ -147,8 +151,14 @@ parameter_test_list = [
     ("date", "lesser_or_equal", "2099-01-01", 100),
     # like
     # ("varchar", "like", "%1", 10),
+    # ends_with
+    ("varchar", "ends_with", "1", 10),
     # ilike
     # ("varchar", "ilike", "STRING1%", 12),
+    # starts_with
+    ("varchar", "starts_with", "string1", 12),
+    # contains
+    ("varchar", "contains", "g1", 12),
     # not_ilike
     # ("varchar", "not_ilike", "STRING1%", 88),
     # in

@@ -7,6 +7,7 @@ described by whether it's a Leaf or a Branch, whether it takes parameters and ho
 """
 
 from dataclasses import dataclass, field
+from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Any, List, Union, Type
 from sqlalchemy_filters.exceptions import BadFilterFormat as SABadFilterFormat
@@ -38,6 +39,9 @@ class LeafPredicateType(Enum):
     NOT_EMPTY = "not_empty"
     IN = "in"
     NOT_IN = "not_in"
+    STARTS_WITH = "starts_with"
+    ENDS_WITH = "ends_with"
+    CONTAINS = "contains"
 
 
 class ParameterCount(Enum):
@@ -64,6 +68,9 @@ predicate_types_to_SA_ids = {
     LeafPredicateType.NOT_EMPTY: 'is_not_null',
     LeafPredicateType.IN: 'in',
     LeafPredicateType.NOT_IN: 'not_in',
+    LeafPredicateType.STARTS_WITH: 'like',
+    LeafPredicateType.ENDS_WITH: 'like',
+    LeafPredicateType.CONTAINS: 'like',
 }
 
 
@@ -219,13 +226,76 @@ class Or(MultiParameter, Branch, Predicate):
     name: str = static("Or")
 
 
+@frozen_dataclass
+class BasedOnLike(ABC):
+    """Some predicates represent specific patterns applied with the SQL LIKE expression.
+    These will invariably operate on text."""
+    
+    @property
+    @abstractmethod
+    def like_pattern(self) -> str:
+        """
+        A class that's based on the LIKE expression needs to define how the LIKE
+        expression pattern should be constructed. See PostgreSQL docs:
+        https://www.postgresql.org/docs/8.3/functions-matching.html"""
+        return ""
+    
+    @staticmethod
+    def escape(parameter: str) -> str:
+        """
+        This method is static, since this mixin class doesn't know that it will be composed with a SingleParameter class.
+        """
+        escape_character = "\\"
+        # NOTE: "\\" must be first in the list: otherwise the escape character could be escaped when it shouldn't be
+        characters_to_escape = ("\\", "_", "%")
+        escaped_parameter = parameter
+        for character_to_escape in characters_to_escape:
+            character_escaped = f"{escape_character}{character_to_escape}"
+            escaped_parameter = escaped_parameter.replace(character_to_escape, character_escaped)
+        return escaped_parameter
+
+
+@frozen_dataclass
+class StartsWith(BasedOnLike, SingleParameter, Leaf, Predicate):
+    type: LeafPredicateType = static(LeafPredicateType.STARTS_WITH)
+    name: str = static("Starts with")
+
+    @property
+    def like_pattern(self) -> str:
+        escaped_parameter = self.escape(self.parameter)
+        return f"{escaped_parameter}%"
+
+
+@frozen_dataclass
+class EndsWith(BasedOnLike, SingleParameter, Leaf, Predicate):
+    type: LeafPredicateType = static(LeafPredicateType.ENDS_WITH)
+    name: str = static("Ends with")
+
+    @property
+    def like_pattern(self) -> str:
+        escaped_parameter = self.escape(self.parameter)
+        return f"%{escaped_parameter}"
+
+
+@frozen_dataclass
+class Contains(BasedOnLike, SingleParameter, Leaf, Predicate):
+    type: LeafPredicateType = static(LeafPredicateType.CONTAINS)
+    name: str = static("Contains")
+
+    @property
+    def like_pattern(self) -> str:
+        escaped_parameter = self.escape(self.parameter)
+        return f"%{escaped_parameter}%"
+
+
 def get_predicate_subclass_by_type_str(predicate_type_str: str) -> Union[Type[LeafPredicateType], Type[BranchPredicateType]]:
     for subclass in all_predicates:
         if subclass.type.value == predicate_type_str:
             return subclass
-    raise Exception(f'Unknown predicate type: {predicate_type_str}')
+    raise BadFilterFormat(f'Unknown predicate type: {predicate_type_str}')
 
 
+# TODO should our filter format exception extend SA's? We're using this exception for SA-unrelated formats (the MA filters spec).
 class BadFilterFormat(SABadFilterFormat):
     pass
 
@@ -244,6 +314,9 @@ all_predicates = [
     Not,
     And,
     Or,
+    StartsWith,
+    EndsWith,
+    Contains,
 ]
 
 
@@ -263,6 +336,7 @@ def all_items_unique(xs):
     return True
 
 
+# TODO can these asserts be moved to their respective class definitions?
 def assert_predicate_correct(predicate):
     """Enforces constraints on predicate instances."""
     try:
@@ -278,7 +352,11 @@ def assert_predicate_correct(predicate):
             assert not is_parameter_list, "This parameter cannot be a list."
             is_parameter_predicate = isinstance(parameter, Predicate)
             if isinstance(predicate, Leaf):
-                assert not is_parameter_predicate, "This parameter cannot be a predicate."
+                if isinstance(predicate, BasedOnLike):
+                    is_parameter_string = isinstance(parameter, str)
+                    assert is_parameter_string, "This parameter must be a string."
+                else:
+                    assert not is_parameter_predicate, "This parameter cannot be a predicate."
             elif isinstance(predicate, Branch):
                 assert is_parameter_predicate, "This parameter must a predicate."
         elif isinstance(predicate, MultiParameter):

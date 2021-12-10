@@ -1,6 +1,6 @@
 import pytest
 from db.filters.base import (
-    all_predicates, Leaf, Branch, MultiParameter, SingleParameter, NoParameter, Empty, BadFilterFormat
+    all_predicates, Leaf, Branch, MultiParameter, SingleParameter, NoParameter, Empty, BadFilterFormat, BasedOnLike
 )
 
 
@@ -37,6 +37,10 @@ parametersSpec = {
         'single': {
             'valid': [1],
             'invalid': [None, [], someLeafPredicates[0]],
+            'based_on_like': {
+                'valid': ["abc"],
+                'invalid': [None, [], someLeafPredicates[0], 1],
+            },
         },
     },
     'branch': {
@@ -58,7 +62,10 @@ def get_spec_params(predicate_subclass, valid):
         if issubclass(predicate_subclass, MultiParameter):
             return parametersSpec['leaf']['multi'][validityKey]
         elif issubclass(predicate_subclass, SingleParameter):
-            return parametersSpec['leaf']['single'][validityKey]
+            if issubclass(predicate_subclass, BasedOnLike):
+                return parametersSpec['leaf']['single']['based_on_like'][validityKey]
+            else:
+                return parametersSpec['leaf']['single'][validityKey]
     elif issubclass(predicate_subclass, Branch):
         if issubclass(predicate_subclass, MultiParameter):
             return parametersSpec['branch']['multi'][validityKey]
