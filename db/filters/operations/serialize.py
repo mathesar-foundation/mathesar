@@ -1,10 +1,10 @@
-from db.filters.base import Predicate, Leaf, SingleParameter, MultiParameter, NoParameter, Branch, BasedOnLike
+from db.filters.base import Predicate, Leaf, SingleParameter, MultiParameter, NoParameter, Branch, ReliesOnLike
 
 
 def get_SA_filter_spec_from_predicate(pred: Predicate) -> dict:
     if isinstance(pred, Leaf):
         if isinstance(pred, SingleParameter):
-            if isinstance(pred, BasedOnLike):
+            if isinstance(pred, ReliesOnLike):
                 return {'field': pred.column, 'op': pred.saId(), 'value': pred.like_pattern}
             else:
                 return {'field': pred.column, 'op': pred.saId(), 'value': pred.parameter}

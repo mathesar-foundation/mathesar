@@ -227,7 +227,7 @@ class Or(MultiParameter, Branch, Predicate):
 
 
 @frozen_dataclass
-class BasedOnLike(ABC):
+class ReliesOnLike(ABC):
     """Some predicates represent specific patterns applied with the SQL LIKE expression.
     These will invariably operate on text."""
     
@@ -255,8 +255,12 @@ class BasedOnLike(ABC):
         return escaped_parameter
 
 
+def relies_on_like(predicate_subclass: Type[Predicate]) -> bool:
+    return issubclass(predicate_subclass, ReliesOnLike)
+
+
 @frozen_dataclass
-class StartsWith(BasedOnLike, SingleParameter, Leaf, Predicate):
+class StartsWith(ReliesOnLike, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.STARTS_WITH)
     name: str = static("Starts with")
 
@@ -267,7 +271,7 @@ class StartsWith(BasedOnLike, SingleParameter, Leaf, Predicate):
 
 
 @frozen_dataclass
-class EndsWith(BasedOnLike, SingleParameter, Leaf, Predicate):
+class EndsWith(ReliesOnLike, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.ENDS_WITH)
     name: str = static("Ends with")
 
@@ -278,7 +282,7 @@ class EndsWith(BasedOnLike, SingleParameter, Leaf, Predicate):
 
 
 @frozen_dataclass
-class Contains(BasedOnLike, SingleParameter, Leaf, Predicate):
+class Contains(ReliesOnLike, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.CONTAINS)
     name: str = static("Contains")
 
@@ -352,7 +356,7 @@ def assert_predicate_correct(predicate):
             assert not is_parameter_list, "This parameter cannot be a list."
             is_parameter_predicate = isinstance(parameter, Predicate)
             if isinstance(predicate, Leaf):
-                if isinstance(predicate, BasedOnLike):
+                if isinstance(predicate, ReliesOnLike):
                     is_parameter_string = isinstance(parameter, str)
                     assert is_parameter_string, "This parameter must be a string."
                 else:
