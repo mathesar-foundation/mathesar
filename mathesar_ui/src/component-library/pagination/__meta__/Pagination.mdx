@@ -1,0 +1,38 @@
+import { Story, Canvas, ArgsTable, Source } from '@storybook/addon-docs/blocks';
+import Pagination from '../Pagination.svelte';
+
+# Pagination
+
+<p>
+  Pagination component design specification.
+</p>
+
+## Usage
+
+<p></p>
+
+### Basic
+<Canvas withSource="none">
+  <Story name="basic" id="components-pagination--basic" />
+</Canvas>
+
+<Source language='html' code={`
+<script>
+  import { Pagination } from '@mathesar-component-library';
+<\/script>
+
+<Pagination bind:page={page} total={totalCount}/>
+`}/>
+
+### 2-8 pages
+<Canvas withSource="open">
+  <Story id="components-pagination--second"/>
+</Canvas>
+
+### 9+ pages
+<Canvas withSource="open">
+  <Story id="components-pagination--third"/>
+</Canvas>
+
+## Arguments
+<ArgsTable of={Pagination} />
