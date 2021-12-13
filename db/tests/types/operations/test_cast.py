@@ -1,7 +1,8 @@
-from datetime import timedelta, date
+from datetime import timedelta, date, time
 from decimal import Decimal
 
 import pytest
+from psycopg2.tz import FixedOffsetTimezone
 from psycopg2.errors import InvalidParameterValue
 from sqlalchemy import Table, Column, MetaData, select, cast
 from sqlalchemy import String, Numeric
@@ -12,7 +13,7 @@ from db.columns.operations.select import get_column_default
 from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
-from db.types import money
+from db.types import money, datetime
 from db.types.operations import cast as cast_operations
 from db.types.base import PostgresType, MathesarCustomType, get_qualified_name, get_available_types
 
@@ -36,6 +37,8 @@ INTERVAL = PostgresType.INTERVAL.value.upper()
 NUMERIC = PostgresType.NUMERIC.value.upper()
 REAL = PostgresType.REAL.value.upper()
 SMALLINT = PostgresType.SMALLINT.value.upper()
+TIME_WITHOUT_TIME_ZONE = PostgresType.TIME_WITHOUT_TIME_ZONE.value.upper()
+TIME_WITH_TIME_ZONE = PostgresType.TIME_WITH_TIME_ZONE.value.upper()
 TEXT = PostgresType.TEXT.value.upper()
 
 CHAR = "CHAR"
@@ -396,6 +399,53 @@ MASTER_DB_TYPE_MAP_SPEC = {
             VARCHAR: {VALID: [(3, "3")]},
         }
     },
+    TIME_WITHOUT_TIME_ZONE: {
+        ISCHEMA_NAME: PostgresType.TIME_WITHOUT_TIME_ZONE.value,
+        REFLECTED_NAME: TIME_WITHOUT_TIME_ZONE,
+        TARGET_DICT: {
+            CHAR: {VALID: []},
+            TIME_WITHOUT_TIME_ZONE: {VALID: [(time(12, 30, 45), time(12, 30, 45))]},
+            TIME_WITH_TIME_ZONE: {
+                VALID: [
+                    (time(12, 30, 45),
+                     time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0))),
+                ]
+            },
+            TEXT: {VALID: [(time(12, 30, 45), "12:30:45")]},
+            VARCHAR: {VALID: [(time(12, 30, 45), "12:30:45")]},
+        },
+    },
+    TIME_WITH_TIME_ZONE: {
+        ISCHEMA_NAME: PostgresType.TIME_WITH_TIME_ZONE.value,
+        REFLECTED_NAME: TIME_WITH_TIME_ZONE,
+        TARGET_DICT: {
+            CHAR: {VALID: []},
+            TIME_WITH_TIME_ZONE: {
+                VALID: [
+                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
+                     time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60))),
+                ]
+            },
+            TIME_WITHOUT_TIME_ZONE: {
+                VALID: [
+                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=1)),
+                     time(12, 30, 45))
+                ]
+            },
+            TEXT: {
+                VALID: [
+                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
+                     "12:30:45+01")
+                ]
+            },
+            VARCHAR: {
+                VALID: [
+                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
+                     "12:30:45+01")
+                ]
+            },
+        },
+    },
     TEXT: {
         ISCHEMA_NAME: PostgresType.TEXT.value,
         REFLECTED_NAME: TEXT,
@@ -483,6 +533,24 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 INVALID: ["/sdf/", "localhost", "$123.45", "154.23USD"]
             },
             TEXT: {VALID: [("a string", "a string")]},
+            TIME_WITHOUT_TIME_ZONE: {
+                VALID: [
+                    ("04:05:06", time(4, 5, 6)),
+                    ("04:05", time(4, 5)),
+                ],
+                INVALID: [
+                    "not a time",
+                ]
+            },
+            TIME_WITH_TIME_ZONE: {
+                VALID: [
+                    ("04:05:06", time(4, 5, 6, tzinfo=FixedOffsetTimezone(offset=0))),
+                    ("04:05+01", time(4, 5, tzinfo=FixedOffsetTimezone(offset=60))),
+                ],
+                INVALID: [
+                    "not a time",
+                ]
+            },
             VARCHAR: {VALID: [("a string", "a string")]},
         }
     },
@@ -575,6 +643,24 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 INVALID: ["1.2234"]
             },
             TEXT: {VALID: [("a string", "a string")]},
+            TIME_WITHOUT_TIME_ZONE: {
+                VALID: [
+                    ("04:05:06", time(4, 5, 6)),
+                    ("04:05", time(4, 5)),
+                ],
+                INVALID: [
+                    "not a time",
+                ]
+            },
+            TIME_WITH_TIME_ZONE: {
+                VALID: [
+                    ("04:05:06", time(4, 5, 6, tzinfo=FixedOffsetTimezone(offset=0))),
+                    ("04:05+01", time(4, 5, tzinfo=FixedOffsetTimezone(offset=60))),
+                ],
+                INVALID: [
+                    "not a time",
+                ]
+            },
             URI: {
                 VALID: [("https://centerofci.org", "https://centerofci.org")],
                 INVALID: ["/sdf/"]
@@ -630,6 +716,12 @@ type_test_list = [
 ] + [
     (val[ISCHEMA_NAME], "decimal", {"precision": 5, "scale": 3}, "NUMERIC(5, 3)")
     for val in MASTER_DB_TYPE_MAP_SPEC.values() if DECIMAL in val[TARGET_DICT]
+] + [
+    (val[ISCHEMA_NAME], "time without time zone", {"precision": 5}, "TIME(5) WITHOUT TIME ZONE")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIME_WITHOUT_TIME_ZONE in val[TARGET_DICT]
+] + [
+    (val[ISCHEMA_NAME], "time with time zone", {"precision": 5}, "TIME(5) WITH TIME ZONE")
+    for val in MASTER_DB_TYPE_MAP_SPEC.values() if TIME_WITH_TIME_ZONE in val[TARGET_DICT]
 ] + [
     (val[ISCHEMA_NAME], "char", {"length": 5}, "CHAR(5)")
     for val in MASTER_DB_TYPE_MAP_SPEC.values() if CHAR in val[TARGET_DICT]
@@ -688,6 +780,12 @@ type_test_data_args_list = [
     # test that rounding is as intended
     (Numeric, "numeric", {"precision": 5, "scale": 2}, 1.235, Decimal("1.24")),
     (String, "numeric", {"precision": 5, "scale": 2}, "500.134", Decimal("500.13")),
+
+    (datetime.TIME_WITHOUT_TIME_ZONE, "time without time zone", {"precision": 0},
+     time(0, 0, 0, 9), time(0, 0, 0)),
+    (datetime.TIME_WITH_TIME_ZONE, "time with time zone", {"precision": 0},
+     time(0, 0, 0, 9, tzinfo=FixedOffsetTimezone(offset=0)),
+     time(0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0))),
     (String, "char", {"length": 5}, "abcde", "abcde"),
 ]
 
