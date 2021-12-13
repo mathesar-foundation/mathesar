@@ -3,7 +3,7 @@ from datetime import date, timedelta
 import pytest
 from unittest.mock import patch
 from django.core.cache import cache
-from sqlalchemy import Column, Integer, String, MetaData, select, Boolean
+from sqlalchemy import Column, Integer, String, MetaData, select, Boolean, TIMESTAMP
 from sqlalchemy import Table as SATable
 
 from db.columns.operations.alter import alter_column_type
@@ -47,10 +47,12 @@ def column_test_table_with_service_layer_options(patent_schema):
         Column("mycolumn0", Integer, primary_key=True),
         Column("mycolumn1", Boolean),
         Column("mycolumn2", Integer),
+        Column("mycolumn4", TIMESTAMP),
     ]
     column_data_list = [{},
                         {'display_options': {'input': "dropdown", 'use_custom_labels': False}},
-                        {'display_options': {"show_as_percentage": True, "locale": "en_US"}}]
+                        {'display_options': {"show_as_percentage": True, "locale": "en_US"}},
+                        {'display_options': {'format': 'xyz'}}]
     db_table = SATable(
         "anewtable",
         MetaData(bind=engine),
@@ -216,6 +218,11 @@ create_display_options_test_list = [
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
     ("NUMERIC", {"show_as_percentage": True}),
     ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}),
+    ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
+    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm'}),
+    ("TIME WITH TIME ZONE", {'format': 'hh:mm Z'}),
+
 ]
 
 
@@ -241,6 +248,13 @@ create_display_options_invalid_test_list = [
     ("BOOLEAN", {"input": "invalid", "use_custom_columns": False}),
     ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"yes": "yes", "1": "no"}}),
     ("NUMERIC", {"show_as_percentage": "wrong value type"}),
+    ("TIMESTAMP WITH TIME ZONE", {'format': 'xyz'}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'xyz'}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm Z'}),
+    ("DATE", {'format': 'YYYY-MM-DD hh:mm Z'}),
+    ("TIME WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm Z'}),
+    ("TIME WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
+    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm Z'}),
 ]
 
 
