@@ -1,7 +1,10 @@
+from dataclasses import fields as dataclass_fields
+from typing import Optional, Type
+
 from django_filters import BooleanFilter, DateTimeFromToRangeFilter, OrderingFilter
 from django_property_filter import PropertyFilterSet, PropertyBaseInFilter, PropertyCharFilter, PropertyOrderingFilter
 
-from db.filters.base import all_predicates
+from db.filters.base import all_predicates, Predicate, ReliesOnLike
 
 from mathesar.database.types import is_ma_type_supported_by_predicate
 from mathesar.models import Schema, Table, Database
@@ -24,9 +27,31 @@ def get_filter_options_for_database(database):
                 ma_type.value
                 for ma_type in supported_ma_types
                 if is_ma_type_supported_by_predicate(ma_type, predicate)
-            ]
+            ],
+            "settings": _get_settings_for_predicate(predicate),
         } for predicate in all_predicates
     ]
+
+
+def _get_type_name(type) -> str:
+    return type.__name__
+
+
+def _get_settings_for_predicate(predicate_class: Type[Predicate]) -> Optional[dict]:
+    if issubclass(predicate_class, ReliesOnLike):
+        case_sensitive_field = tuple(
+            field
+            for field in dataclass_fields(predicate_class)
+            if field.name == "case_sensitive"
+        )[0]
+        return {
+            case_sensitive_field.name: {
+                "default": case_sensitive_field.default,
+                "type": _get_type_name(case_sensitive_field.type),
+            }
+        }
+    else:
+        return None
 
 
 class CharInFilter(PropertyBaseInFilter, PropertyCharFilter):
