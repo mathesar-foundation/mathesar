@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, getContext } from 'svelte';
+  import { getContext } from 'svelte';
   import {
     faFilter,
     faSort,
@@ -22,13 +22,20 @@
   } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar-component-library/types';
   import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
+  import {
+    refetchTablesForSchema,
+    deleteTable,
+  } from '@mathesar/stores/tables';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { currentDBName } from '@mathesar/stores/databases';
+  import { getTabsForSchema } from '@mathesar/stores/tabs';
+  import { confirm } from '@mathesar/stores/confirmation';
+  import { toast } from '@mathesar/stores/toast';
   import TableConstraints from '../constraints/TableConstraints.svelte';
   import DisplayFilter from '../display-options/DisplayFilter.svelte';
   import DisplaySort from '../display-options/DisplaySort.svelte';
   import DisplayGroup from '../display-options/DisplayGroup.svelte';
 
-  const dispatch = createEventDispatcher();
-  
   const tabularData = getContext<TabularDataStore>('tabularData');
   
   function getColumnOptions(columnsData: ColumnsData): SelectOption<string>[] {
@@ -64,6 +71,21 @@
   function refresh() {
     void ($tabularData as TabularData).refresh();
   }
+
+  async function handleDeleteTable() {
+    await confirm({
+      title: 'Delete Table',
+      proceedButton: { label: 'Delete Table', icon: { data: faTrashAlt } },
+      onProceed: async () => {
+        await deleteTable($tabularData.id);
+        const tabList = getTabsForSchema($currentDBName, $currentSchemaId);
+        const tab = tabList.getTabularTabByTabularID($tabularData.type, $tabularData.id);
+        tabList.remove(tab);
+        await refetchTablesForSchema($currentSchemaId);
+      },
+      onError: (error) => toast.error(`Unable to delete table. ${error.message}`),
+    });
+  }
 </script>
 
 <div class="actions-pane">
@@ -79,7 +101,7 @@
     </svelte:fragment>
     <svelte:fragment slot="content">
       <ul>
-        <li class="item" on:click={() => dispatch('deleteTable')}>
+        <li class="item" on:click={handleDeleteTable}>
           Delete
         </li>
         <li class="item" on:click={() => { isTableConstraintsModalOpen = true; }}>
