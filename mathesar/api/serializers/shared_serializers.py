@@ -16,10 +16,8 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
     def __new__(cls, *args, **kwargs):
         if cls.serializers_mapping is None:
             raise ImproperlyConfigured(
-                    '`{cls}` is missing a '
-                    '`{cls}.model_serializer_mapping` attribute'.format(
-                            cls=cls.__name__
-                    )
+                '`{cls}` is missing a '
+                '`{cls}.model_serializer_mapping` attribute'.format(cls=cls.__name__)
             )
         return super().__new__(cls, *args, **kwargs)
 
@@ -54,8 +52,7 @@ class ReadWritePolymorphicSerializerMappingMixin(ReadOnlyPolymorphicSerializerMa
     def to_internal_value(self, data):
         serializer = self.serializers_mapping.get(self.get_mapping_field())
         if serializer is not None:
-            return serializer.to_internal_value(
-                    data=data)
+            return serializer.to_internal_value(data=data)
         else:
             raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
 
@@ -146,7 +143,7 @@ class TimestampWithoutTimeZoneFormatValidator(AbstractDateTimeFormatValidator):
     def validate(self, datetime_obj, display_format):
         if 'z' in display_format.lower():
             raise serializers.ValidationError(
-                    "Timestamp without timezone column cannot contain timezone display format")
+                "Timestamp without timezone column cannot contain timezone display format")
 
 
 class DateFormatValidator(AbstractDateTimeFormatValidator):
@@ -154,7 +151,7 @@ class DateFormatValidator(AbstractDateTimeFormatValidator):
     def validate(self, datetime_obj, display_format):
         date_obj = arrow.get('2013-09-30')
         if datetime_obj.time() != date_obj:
-            raise serializers.ValidationError(f"Date column cannot contain time or timezone display format")
+            raise serializers.ValidationError("Date column cannot contain time or timezone display format")
 
 
 class TimeWithTimeZoneFormatValidator(AbstractDateTimeFormatValidator):
@@ -164,16 +161,15 @@ class TimeWithTimeZoneFormatValidator(AbstractDateTimeFormatValidator):
         time_str = arrow.get('2013-09-30T15:34:00.000-07:00').format(time_only_format)
         parsed_time_str = arrow.get(time_str, time_only_format)
         if parsed_time_str.date() != datetime_obj.date():
-            raise serializers.ValidationError(f"Time column cannot contain date display format")
+            raise serializers.ValidationError("Time column cannot contain date display format")
 
 
 class TimeWithoutTimeZoneFormatValidator(TimeWithTimeZoneFormatValidator):
 
     def validate(self, datetime_obj, display_format):
         if 'z' in display_format.lower():
-            raise serializers.ValidationError(f"Time without timezone column cannot contain timezone display format")
+            raise serializers.ValidationError("Time without timezone column cannot contain timezone display format")
         return super().validate(datetime_obj, display_format)
-
 
 
 class DateDisplayOptionSerializer(OverrideRootPartialMixin, serializers.Serializer):
@@ -200,8 +196,10 @@ class DisplayOptionsMappingSerializer(ReadWritePolymorphicSerializerMappingMixin
     serializers_mapping = {
         MathesarTypeIdentifier.BOOLEAN.value: BooleanDisplayOptionSerializer,
         MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,
-        ('timestamp with time zone', MathesarTypeIdentifier.DATETIME.value): TimestampWithTimezoneDisplayOptionSerializer,
-        ('timestamp without time zone', MathesarTypeIdentifier.DATETIME.value): TimestampWithoutTimezoneDisplayOptionSerializer,
+        ('timestamp with time zone',
+         MathesarTypeIdentifier.DATETIME.value): TimestampWithTimezoneDisplayOptionSerializer,
+        ('timestamp without time zone',
+         MathesarTypeIdentifier.DATETIME.value): TimestampWithoutTimezoneDisplayOptionSerializer,
         ('date', MathesarTypeIdentifier.DATETIME.value): DateDisplayOptionSerializer,
         ('time with time zone', MathesarTypeIdentifier.DATETIME.value): TimeWithTimezoneDisplayOptionSerializer,
         ('time without time zone', MathesarTypeIdentifier.DATETIME.value): TimeWithoutTimezoneDisplayOptionSerializer,
