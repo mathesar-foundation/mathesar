@@ -52,7 +52,7 @@ def column_test_table_with_service_layer_options(patent_schema):
     column_data_list = [{},
                         {'display_options': {'input': "dropdown", 'use_custom_labels': False}},
                         {'display_options': {"show_as_percentage": True, "locale": "en_US"}},
-                        {'display_options': {'format': 'xyz'}}]
+                        {'display_options': {'format': 'YYYY-MM-DD hh:mm'}}]
     db_table = SATable(
         "anewtable",
         MetaData(bind=engine),
