@@ -1,6 +1,7 @@
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
+from rest_framework.renderers import BrowsableAPIRenderer
 from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
 
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
@@ -8,6 +9,7 @@ from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.models import Table
+from mathesar.utils.json import MathesarJSONRenderer
 
 
 class RecordViewSet(viewsets.ViewSet):
@@ -16,6 +18,8 @@ class RecordViewSet(viewsets.ViewSet):
     # where the entire record needs to be replaced, PATCH suffices for updates.
     def get_queryset(self):
         return Table.objects.all().order_by('-created_at')
+
+    renderer_classes = [MathesarJSONRenderer, BrowsableAPIRenderer]
 
     # For filter parameter formatting, see:
     # https://github.com/centerofci/sqlalchemy-filters#filters-format

@@ -27,6 +27,8 @@ VARCHAR = base.VARCHAR
 # custom types
 EMAIL = base.MathesarCustomType.EMAIL.value
 MONEY = base.MathesarCustomType.MONEY.value
+TIME_WITHOUT_TIME_ZONE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
+TIME_WITH_TIME_ZONE = base.PostgresType.TIME_WITH_TIME_ZONE.value
 URI = base.MathesarCustomType.URI.value
 
 # only needed for ischema lookup
@@ -66,6 +68,8 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         SMALLINT: dialect_types.get(SMALLINT),
         STRING: dialect_types.get(NAME),
         TEXT: dialect_types.get(TEXT),
+        TIME_WITHOUT_TIME_ZONE: dialect_types.get(TIME_WITHOUT_TIME_ZONE),
+        TIME_WITH_TIME_ZONE: dialect_types.get(TIME_WITH_TIME_ZONE),
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),
@@ -140,6 +144,7 @@ def install_all_casts(engine):
     create_email_casts(engine)
     create_integer_casts(engine)
     create_interval_casts(engine)
+    create_datetime_casts(engine)
     create_money_casts(engine)
     create_textual_casts(engine)
     create_uri_casts(engine)
@@ -177,6 +182,16 @@ def create_integer_casts(engine):
 def create_interval_casts(engine):
     type_body_map = _get_interval_type_body_map()
     create_cast_functions(INTERVAL, type_body_map, engine)
+
+
+def create_datetime_casts(engine):
+    time_types = [TIME_WITHOUT_TIME_ZONE, TIME_WITH_TIME_ZONE]
+    for time_type in time_types:
+        type_body_map = _get_time_type_body_map(time_type)
+        create_cast_functions(time_type, type_body_map, engine)
+
+    type_body_map = _get_date_type_body_map()
+    create_cast_functions(DATE, type_body_map, engine)
 
 
 def create_money_casts(engine):
@@ -228,6 +243,8 @@ def get_defined_source_target_cast_tuples(engine):
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
+        TIME_WITHOUT_TIME_ZONE: _get_time_type_body_map(TIME_WITHOUT_TIME_ZONE),
+        TIME_WITH_TIME_ZONE: _get_time_type_body_map(TIME_WITH_TIME_ZONE),
         TEXT: _get_textual_type_body_map(engine, target_type_str=TEXT),
         URI: _get_uri_type_body_map(),
         VARCHAR: _get_textual_type_body_map(engine, target_type_str=VARCHAR),
@@ -275,7 +292,12 @@ def assemble_function_creation_sql(argument_type, target_type, function_body):
 
 def get_cast_function_name(target_type):
     unqualified_type_name = target_type.split('.')[-1].lower()
-    bare_type_name = unqualified_type_name.split('(')[0]
+    if '(' in unqualified_type_name:
+        bare_type_name = unqualified_type_name[:unqualified_type_name.find('(')]
+        if unqualified_type_name[-1] != ')':
+            bare_type_name += unqualified_type_name[unqualified_type_name.find(')') + 1:]
+    else:
+        bare_type_name = unqualified_type_name
     function_type_name = '_'.join(bare_type_name.split())
     bare_function_name = f"cast_to_{function_type_name}"
     return f"{base.get_qualified_name(bare_function_name)}"
@@ -459,6 +481,15 @@ def _get_boolean_to_number_cast(target_type):
       RETURN 0::{target_type};
     END;
     """
+
+
+def _get_time_type_body_map(target_type):
+    default_behavior_source_types = [
+        TEXT, VARCHAR, TIME_WITHOUT_TIME_ZONE, TIME_WITH_TIME_ZONE
+    ]
+    return _get_default_type_body_map(
+        default_behavior_source_types, target_type,
+    )
 
 
 def _get_money_type_body_map():
