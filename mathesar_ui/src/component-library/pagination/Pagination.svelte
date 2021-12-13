@@ -12,10 +12,7 @@
 
   const dispatch = createEventDispatcher();
 
-  /**
-   * The active page number.
-   * @required
-   */
+  // The active page number.
   export let page = 1;
 
   // Number of records per page.

@@ -21,17 +21,12 @@ import Pagination from '../Pagination.svelte';
   import { Pagination } from '@mathesar-component-library';
 <\/script>
 
-<Pagination bind:page={page} total={totalCount}/>
+<Pagination {total}/>
 `}/>
 
-### 2-8 pages
+### Multiple Pages
 <Canvas withSource="open">
-  <Story id="components-pagination--second"/>
-</Canvas>
-
-### 9+ pages
-<Canvas withSource="open">
-  <Story id="components-pagination--third"/>
+  <Story id="components-pagination--multiple-pages" />
 </Canvas>
 
 ## Arguments

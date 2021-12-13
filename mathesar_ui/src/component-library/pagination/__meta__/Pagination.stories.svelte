@@ -5,9 +5,20 @@
   const meta = {
     title: 'Components/Pagination',
     component: Pagination,
+    argTypes: {
+      getLink: {
+        control: {
+          disable: true,
+        }
+      },
+      pageCount: {
+        control: {
+          disable: true,
+        }
+      }
+    },
     parameters: {
       controls: {
-        //hide
         expanded: true
       },
       docs: {
@@ -19,16 +30,30 @@
       },
     }
   };
+
+  const disabledAddons = {
+    controls: {
+      disabled: true,
+    },
+    actions: {
+      disabled: true,
+    },
+  };
 </script>
 
 <Meta {...meta} />
 
-<Story name="Basic">
-  <Pagination page={1} total={1}/>
+<Story 
+  name="Basic"
+  args={{
+    page: 1,
+    total: 1,
+    pageSize: 10
+    }}
+  let:args>
+  <Pagination {...args}/>
 </Story>
-<Story name="Second">
-  <Pagination page={1} total={2} pageSize={1}/>
-</Story>
-<Story name="Third">
-  <Pagination page={1} total={1000}/>
+<Story name="Multiple Pages" parameters={disabledAddons}>
+  <Pagination total={20}/>
+  <Pagination total={200}/>
 </Story>
