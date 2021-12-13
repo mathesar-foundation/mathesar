@@ -133,7 +133,7 @@ def test_column_list(column_test_table, client):
                 'DOUBLE PRECISION', 'FLOAT', 'INTEGER', 'INTERVAL',
                 'MATHESAR_TYPES.EMAIL', 'MATHESAR_TYPES.MONEY',
                 'MATHESAR_TYPES.URI', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT',
-                'VARCHAR',
+                'TIME WITH TIME ZONE', 'TIME WITHOUT TIME ZONE', 'VARCHAR',
             ],
             'default': None,
         }
