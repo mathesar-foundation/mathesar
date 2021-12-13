@@ -10,7 +10,7 @@
   const dispatch = createEventDispatcher();
 </script>
 
-<Modal class="delete-modal">
+<Modal bind:isOpen class="delete-modal">
   <div class="header">
     <!-- TODO: Fetch all table related information within table-data store -->
     Deleting this table could break existing tables and views.
