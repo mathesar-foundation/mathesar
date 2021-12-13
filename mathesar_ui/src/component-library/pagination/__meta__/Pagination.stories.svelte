@@ -1,7 +1,8 @@
 <script lang="ts">
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import Pagination from '../Pagination.svelte';
-  import PaginationDocs from './Pagination.mdx'
+  import PaginationDocs from './Pagination.mdx';
+
   const meta = {
     title: 'Components/Pagination',
     component: Pagination,
@@ -9,17 +10,17 @@
       getLink: {
         control: {
           disable: true,
-        }
+        },
       },
       pageCount: {
         control: {
           disable: true,
-        }
-      }
+        },
+      },
     },
     parameters: {
       controls: {
-        expanded: true
+        expanded: true,
       },
       docs: {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -28,7 +29,7 @@
           type: 'code',
         },
       },
-    }
+    },
   };
 
   const disabledAddons = {
@@ -48,7 +49,7 @@
   args={{
     page: 1,
     total: 1,
-    pageSize: 10
+    pageSize: 10,
     }}
   let:args>
   <Pagination {...args}/>
