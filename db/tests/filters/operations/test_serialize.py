@@ -23,16 +23,17 @@ valid_cases = [
         ]}
     ],
     [
-        # Notice that escaping of _, % and \ is tested too:
+        # NOTE: escaping of _, % and \ is tested too:
         Or([
             StartsWith(column="col1", parameter="start_"),
             EndsWith(column="col1", parameter="end%"),
-            Contains(column="col1", parameter="contained\\"),
+            # NOTE: below line tests case sensitivity setting
+            Contains(column="col1", parameter="contained\\", case_sensitive=False),
         ]),
         {'or': [
             {'field': 'col1', 'op': 'like', 'value': 'start\\_%'},
             {'field': 'col1', 'op': 'like', 'value': '%end\\%'},
-            {'field': 'col1', 'op': 'like', 'value': '%contained\\\\%'},
+            {'field': 'col1', 'op': 'ilike', 'value': '%contained\\\\%'},
         ]}
     ],
 ]
