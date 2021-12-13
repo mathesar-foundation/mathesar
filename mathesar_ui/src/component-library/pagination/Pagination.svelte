@@ -54,7 +54,7 @@
   {/if}
 
   {#if pageInfo.start > 1}
-    <li class:active={page === pageInfo.start}>
+    <li class:active={page === pageInfo.start - 1}>
       {#if getLink}
         <a tabindex="0" class="page" href={getLink(1, pageSize)}
             on:click={(e) => setPage(e, 1)} data-tinro-ignore>
