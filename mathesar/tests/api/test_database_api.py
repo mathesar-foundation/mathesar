@@ -2,6 +2,7 @@ import pytest
 from django.conf import settings
 from django.core.cache import cache
 
+from mathesar.api.display_options import DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER
 from mathesar.api.filters import FILTER_OPTIONS_BY_TYPE_IDENTIFIER
 from mathesar.reflection import reflect_db_objects
 from mathesar.models import Table, Schema, Database
@@ -22,6 +23,14 @@ def database_api_db(test_db_name):
     yield TEST_DB
     if TEST_DB in settings.DATABASES:
         del settings.DATABASES[TEST_DB]
+
+
+@pytest.fixture
+def create_database(test_db_name, request):
+    def _create_database(db_name):
+        settings.DATABASES[db_name] = settings.DATABASES[test_db_name]
+        request.addfinalizer(lambda: (settings.DATABASES.pop(db_name, None)))
+    return _create_database
 
 
 @pytest.fixture(autouse=True)
@@ -144,6 +153,48 @@ def test_database_list_filter_deleted(client, deleted, test_db_name, database_ap
     check_database(expected_database, response_database)
 
 
+def test_database_list_ordered_by_id(client, test_db_name, database_api_db, create_database):
+    reflect_db_objects()
+    test_db_name_1 = "mathesar_db_test_1"
+    create_database(test_db_name_1)
+    cache.clear()
+    expected_databases = [
+        Database.objects.get(name=test_db_name),
+        Database.objects.get(name=database_api_db),
+        Database.objects.get(name=test_db_name_1),
+    ]
+    sort_field = "id"
+    response = client.get(f'/api/v0/databases/?sort_by={sort_field}')
+    response_data = response.json()
+    response_databases = response_data['results']
+    comparison_tuples = zip(expected_databases, response_databases)
+    for comparison_tuple in comparison_tuples:
+        check_database(comparison_tuple[0], comparison_tuple[1])
+
+
+def test_database_list_ordered_by_name(client, test_db_name, database_api_db, create_database):
+    reflect_db_objects()
+    test_db_name_1 = "mathesar_db_test_1"
+    test_db_name_2 = "mathesar_db_test_2"
+    create_database(test_db_name_1)
+    create_database(test_db_name_2)
+
+    cache.clear()
+    expected_databases = [
+        Database.objects.get(name=test_db_name),
+        Database.objects.get(name=test_db_name_1),
+        Database.objects.get(name=test_db_name_2),
+        Database.objects.get(name=database_api_db),
+    ]
+    sort_field = "name"
+    response = client.get(f'/api/v0/databases/?sort_by={sort_field}')
+    response_data = response.json()
+    response_databases = response_data['results']
+    comparison_tuples = zip(expected_databases, response_databases)
+    for comparison_tuple in comparison_tuples:
+        check_database(comparison_tuple[0], comparison_tuple[1])
+
+
 def test_database_detail(client):
     expected_database = Database.objects.get()
 
@@ -166,6 +217,9 @@ def test_type_list(client, test_db_name):
         found_filters = supported_type.get('filters')
         expected_filters = FILTER_OPTIONS_BY_TYPE_IDENTIFIER.get(supported_type.get('identifier'))
         assert found_filters == expected_filters
+        found_display_options = supported_type.get('display_options')
+        expected_display_options = DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER.get(supported_type.get('identifier'))
+        assert found_display_options == expected_display_options
 
 
 def test_database_types_installed(client, test_db_name, engine_email_type):
@@ -177,6 +231,7 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
                 "MATHESAR_TYPES.EMAIL"
             ],
             "filters": None,
+            'display_options': None
         },
         {
             "identifier": "money",
@@ -186,6 +241,7 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
                 "MATHESAR_TYPES.MONEY"
             ],
             "filters": None,
+            'display_options': None
         },
         {
             "identifier": "uri",
@@ -194,6 +250,7 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
                 "MATHESAR_TYPES.URI"
             ],
             "filters": None,
+            'display_options': None
         },
     ]
     reflect_db_objects()

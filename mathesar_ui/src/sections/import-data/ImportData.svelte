@@ -3,7 +3,7 @@
   import type { FileImport } from '@mathesar/stores/fileImports';
   import {
     Notification,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/App.d';
 
   import Preview from './preview/Preview.svelte';

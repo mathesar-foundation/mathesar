@@ -17,6 +17,10 @@ class TIME_WITHOUT_TIME_ZONE(SA_TIME):
             kwargs.pop("timezone")
         super().__init__(*args, timezone=False, precision=precision, **kwargs)
 
+    @classmethod
+    def __str__(cls):
+        return cls.__name__
+
 
 class TIME_WITH_TIME_ZONE(SA_TIME):
     def __init__(self, *args, precision=None, **kwargs):
@@ -25,6 +29,10 @@ class TIME_WITH_TIME_ZONE(SA_TIME):
         if "timezone" in kwargs:
             kwargs.pop("timezone")
         super().__init__(*args, timezone=True, precision=precision, **kwargs)
+
+    @classmethod
+    def __str__(cls):
+        return cls.__name__
 
 
 class TIMESTAMP_WITHOUT_TIME_ZONE(SA_TIMESTAMP):
@@ -35,6 +43,10 @@ class TIMESTAMP_WITHOUT_TIME_ZONE(SA_TIMESTAMP):
             kwargs.pop("timezone")
         super().__init__(*args, timezone=False, precision=precision, **kwargs)
 
+    @classmethod
+    def __str__(cls):
+        return cls.__name__
+
 
 class TIMESTAMP_WITH_TIME_ZONE(SA_TIMESTAMP):
     def __init__(self, *args, precision=None, **kwargs):
@@ -43,3 +55,7 @@ class TIMESTAMP_WITH_TIME_ZONE(SA_TIMESTAMP):
         if "timezone" in kwargs:
             kwargs.pop("timezone")
         super().__init__(*args, timezone=True, precision=precision, **kwargs)
+
+    @classmethod
+    def __str__(cls):
+        return cls.__name__

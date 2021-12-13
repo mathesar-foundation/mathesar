@@ -5,7 +5,7 @@
     TabularDataStore,
     TabularData,
     Display,
-    Records,
+    RecordsData,
     TableRecord,
   } from '@mathesar/stores/table-data/types';
 
@@ -15,13 +15,13 @@
 
   const tabularData = getContext<TabularDataStore>('tabularData');
   let id: TabularData['id'];
-  let records: Records;
+  let recordsData: RecordsData;
   let display: Display;
   let virtualListRef: VirtualList;
   let displayableRecords: Display['displayableRecords'];
-  let newRecords: Records['newRecords'];
-  $: ({ id, records, display } = $tabularData as TabularData);
-  $: ({ newRecords } = records);
+  let newRecords: RecordsData['newRecords'];
+  $: ({ id, recordsData, display } = $tabularData as TabularData);
+  $: ({ newRecords } = recordsData);
   $: ({
     rowWidth, horizontalScrollOffset, displayableRecords,
   } = display);
@@ -81,7 +81,7 @@
         itemCount={$displayableRecords.length}
         paddingBottom={20}
         itemSize={getItemSize}
-        itemKey={(index) => records.getIterationKey(index)}
+        itemKey={(index) => recordsData.getIterationKey(index)}
         let:items
         >
         {#each items as it (it?.key || it)}

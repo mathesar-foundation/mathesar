@@ -8,16 +8,17 @@
   import type {
     ColumnPosition,
     TableRecord,
-    TableColumn,
+    Column,
     Display,
-    Records,
+    RecordsData,
   } from '@mathesar/stores/table-data/types';
+  import Null from '@mathesar/components/Null.svelte';
 
-  export let records: Records;
+  export let recordsData: RecordsData;
   export let display: Display;
   export let columnPosition: ColumnPosition;
   export let row: TableRecord;
-  export let column: TableColumn;
+  export let column: Column;
   // eslint-disable-next-line no-undef-init
   export let value: unknown = undefined;
 
@@ -45,9 +46,9 @@
     if (value !== val) {
       value = val;
       if (row.__isNew) {
-        void records.createOrUpdateRecord(row, column);
+        void recordsData.createOrUpdateRecord(row, column);
       } else {
-        void records.updateCell(row, column);
+        void recordsData.updateCell(row, column);
       }
     }
   }
@@ -100,7 +101,7 @@
     on:dblclick={() => display.editCell(row, column)}>
     {#if typeof value !== 'undefined'}
       {#if value === null}
-        <span class="empty">null</span>
+        <Null />
       {:else}
         {value}
       {/if}

@@ -4,7 +4,7 @@
     Button,
     Modal,
     Icon,
-  } from '@mathesar-components';
+  } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/App.d';
   import { States } from '@mathesar/utils/api';
   import { deleteSchema } from '@mathesar/stores/schemas';
@@ -34,7 +34,7 @@
   }
 </script>
 
-<Modal class="schema-modal" bind:isOpen closeOnEsc={state !== States.Loading}>
+<Modal class="schema-modal" bind:isOpen allowClose={state !== States.Loading}>
   <div class="header">
     Delete schema '{schema?.name}'
   </div>

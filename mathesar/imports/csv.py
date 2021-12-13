@@ -7,11 +7,31 @@ from mathesar.models import Table
 from db.records.operations.insert import insert_records_from_csv
 from db.tables.operations.create import create_string_column_table
 from db.tables.operations.select import get_oid_from_table
+from db.tables.operations.drop import drop_table
 from mathesar.errors import InvalidTableError
+from db import constants
+from psycopg2.errors import IntegrityError, DataError
+
+from mathesar.reflection import reflect_columns_from_table
 
 ALLOWED_DELIMITERS = ",\t:|"
 SAMPLE_SIZE = 20000
 CHECK_ROWS = 10
+
+
+def get_file_encoding(file):
+    """
+    Given a file, uses charset_normalizer if installed or chardet which is installed as part of clevercsv module to
+    detect the file encoding. Returns a default value of utf-8-sig if encoding could not be detected or detection
+    libraries are missing.
+    """
+    from charset_normalizer import detect
+    # Sample Size reduces the accuracy
+    encoding = detect(file.read()).get('encoding', None)
+    file.seek(0)
+    if encoding is not None:
+        return encoding
+    return "utf-8"
 
 
 def check_dialect(file, dialect):
@@ -72,7 +92,8 @@ def get_sv_dialect(file):
 
 
 def get_sv_reader(file, header, dialect=None):
-    file = TextIOWrapper(file, encoding="utf-8-sig")
+    encoding = get_file_encoding(file)
+    file = TextIOWrapper(file, encoding=encoding)
     if dialect:
         reader = csv.DictReader(file, dialect=dialect)
     else:
@@ -92,25 +113,48 @@ def create_db_table_from_data_file(data_file, name, schema):
     header = data_file.header
     dialect = csv.dialect.SimpleDialect(data_file.delimiter, data_file.quotechar,
                                         data_file.escapechar)
+    encoding = get_file_encoding(data_file.file)
     with open(sv_filename, 'rb') as sv_file:
         sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
         column_names = sv_reader.fieldnames
+        column_names_alt = [fieldname if fieldname != constants.ID else constants.ID_ORIGINAL for fieldname in sv_reader.fieldnames]
         table = create_string_column_table(
             name=name,
             schema=schema.name,
             column_names=column_names,
             engine=engine
         )
-    insert_records_from_csv(
-        table,
-        engine,
-        sv_filename,
-        column_names,
-        header,
-        delimiter=dialect.delimiter,
-        escape=dialect.escapechar,
-        quote=dialect.quotechar,
-    )
+    try:
+        insert_records_from_csv(
+            table,
+            engine,
+            sv_filename,
+            column_names,
+            header,
+            delimiter=dialect.delimiter,
+            escape=dialect.escapechar,
+            quote=dialect.quotechar,
+            encoding=encoding
+        )
+    except (IntegrityError, DataError):
+        drop_table(name=name, schema=schema.name, engine=engine)
+        table = create_string_column_table(
+            name=name,
+            schema=schema.name,
+            column_names=column_names_alt,
+            engine=engine
+        )
+        insert_records_from_csv(
+            table,
+            engine,
+            sv_filename,
+            column_names_alt,
+            header,
+            delimiter=dialect.delimiter,
+            escape=dialect.escapechar,
+            quote=dialect.quotechar,
+            encoding=encoding
+        )
     return table
 
 
@@ -127,6 +171,7 @@ def create_table_from_csv(data_file, name, schema):
         schema=schema,
         import_verified=False
     )
+    reflect_columns_from_table(table)
     data_file.table_imported_to = table
     data_file.save()
     return table

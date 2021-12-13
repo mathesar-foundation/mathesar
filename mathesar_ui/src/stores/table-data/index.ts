@@ -1,5 +1,5 @@
-export { Records } from './records';
-export { Columns } from './columns';
+export { RecordsData } from './records';
+export { ColumnsDataStore } from './columns';
 export {
   Meta,
   filterCombinations,
@@ -18,4 +18,7 @@ export {
   getModificationState,
 } from './utils';
 
-export { getTableContent, removeTableContent } from './store';
+export {
+  getTabularContent,
+  removeTabularContent,
+} from './manager';
