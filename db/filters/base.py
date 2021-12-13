@@ -54,29 +54,29 @@ class ParameterCount(Enum):
     NONE = "none"
 
 
-predicate_types_to_SA_ids = {
-    BranchPredicateType.NOT: 'not',
-    BranchPredicateType.AND: 'and',
-    BranchPredicateType.OR: 'or',
-    LeafPredicateType.EQUAL: 'eq',
-    LeafPredicateType.NOT_EQUAL: 'ne',
-    LeafPredicateType.GREATER: 'gt',
-    LeafPredicateType.GREATER_OR_EQUAL: 'ge',
-    LeafPredicateType.LESSER: 'lt',
-    LeafPredicateType.LESSER_OR_EQUAL: 'le',
-    LeafPredicateType.EMPTY: 'is_null',
-    LeafPredicateType.NOT_EMPTY: 'is_not_null',
-    LeafPredicateType.IN: 'in',
-    LeafPredicateType.NOT_IN: 'not_in',
-    LeafPredicateType.STARTS_WITH: 'like',
-    LeafPredicateType.ENDS_WITH: 'like',
-    LeafPredicateType.CONTAINS: 'like',
-}
-
-
-def get_SA_id_from_predicate_type(type: Union[LeafPredicateType, BranchPredicateType]) -> str:
-    if type in predicate_types_to_SA_ids:
-        return predicate_types_to_SA_ids[type]
+def _get_static_SA_id_for_predicate_type(type: Union[LeafPredicateType, BranchPredicateType]) -> str:
+    """Provides static predicate type -> SQLAlchemy id mapping
+    Some predicate types like LeafPredicateType.STARTS_WITH have a dynamic mapping,
+    switching between 'like' and 'ilike' depending on whether case-sensitivity is desired:
+    they are not covered by below mapping. Below mapping is used to not have to declare a
+    saId property on every predicate that has a simple one-to-one mapping to an saId."""
+    static_mapping = {
+        BranchPredicateType.NOT: 'not',
+        BranchPredicateType.AND: 'and',
+        BranchPredicateType.OR: 'or',
+        LeafPredicateType.EQUAL: 'eq',
+        LeafPredicateType.NOT_EQUAL: 'ne',
+        LeafPredicateType.GREATER: 'gt',
+        LeafPredicateType.GREATER_OR_EQUAL: 'ge',
+        LeafPredicateType.LESSER: 'lt',
+        LeafPredicateType.LESSER_OR_EQUAL: 'le',
+        LeafPredicateType.EMPTY: 'is_null',
+        LeafPredicateType.NOT_EMPTY: 'is_not_null',
+        LeafPredicateType.IN: 'in',
+        LeafPredicateType.NOT_IN: 'not_in',
+    }
+    if type in static_mapping:
+        return static_mapping[type]
     else:
         raise Exception("This should never happen.")
 
@@ -100,8 +100,9 @@ class Predicate:
     name: str
     parameter_count: ParameterCount
 
+    @property
     def saId(self) -> str:
-        return get_SA_id_from_predicate_type(self.type)
+        return _get_static_SA_id_for_predicate_type(self.type)
 
     def __post_init__(self):
         assert_predicate_correct(self)
@@ -230,6 +231,7 @@ class Or(MultiParameter, Branch, Predicate):
 class ReliesOnLike(ABC):
     """Some predicates represent specific patterns applied with the SQL LIKE expression.
     These will invariably operate on text."""
+    case_sensitive: bool = True
     
     @property
     @abstractmethod
@@ -239,11 +241,22 @@ class ReliesOnLike(ABC):
         expression pattern should be constructed. See PostgreSQL docs:
         https://www.postgresql.org/docs/8.3/functions-matching.html"""
         return ""
+
+    @property
+    def saId(self) -> str:
+        """
+        We're overriding saId, since LIKE-based predicates will rely on `like` or `ilike`
+        SA filters, depending on whether case-sensitivity is desired.
+        """
+        if self.case_sensitive:
+            return 'like'
+        else:
+            return 'ilike'
     
     @staticmethod
     def escape(parameter: str) -> str:
         """
-        This method is static, since this mixin class doesn't know that it will be composed with a SingleParameter class.
+        This method is static, since this mixin class doesn't know that/if it will be composed with a SingleParameter class.
         """
         escape_character = "\\"
         # NOTE: "\\" must be first in the list: otherwise the escape character could be escaped when it shouldn't be
