@@ -14,8 +14,9 @@ class TIME_WITHOUT_TIME_ZONE(SA_TIME):
             kwargs.pop("timezone")
         super().__init__(*args, timezone=False, precision=precision, **kwargs)
 
-    def __str__(self):
-        return self.__name__
+    @classmethod
+    def __str__(cls):
+        return cls.__name__
 
 
 class TIME_WITH_TIME_ZONE(SA_TIME):
@@ -26,5 +27,6 @@ class TIME_WITH_TIME_ZONE(SA_TIME):
             kwargs.pop("timezone")
         super().__init__(*args, timezone=True, precision=precision, **kwargs)
 
-    def __str__(self):
-        return self.__name__
+    @classmethod
+    def __str__(cls):
+        return cls.__name__
