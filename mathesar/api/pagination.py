@@ -77,9 +77,9 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         )
 
         if records:
-            processed_records, groups = process_annotated_records(records)
+            processed_records, record_metadata, groups = process_annotated_records(records)
         else:
-            processed_records, groups = None, None
+            processed_records, record_metadata, groups = None, None, None
 
         if grouping:
             self.metadata = {
@@ -87,8 +87,9 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
                     'columns': group_by.columns,
                     'mode': group_by.mode,
                     'num_groups': group_by.num_groups,
-                    'groups': groups
+                    'groups': groups,
                 },
+                'results': record_metadata,
             }
         else:
             self.metadata = None

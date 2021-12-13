@@ -31,6 +31,13 @@ def process_annotated_records(record_list):
         {DATA_KEY: record_dict}
         for record_dict in (_get_record_dict(record) for record in record_list)
     )
-    return group.extract_group_metadata(
+
+    combined_records, groups = group.extract_group_metadata(
         split_records, data_key=DATA_KEY, metadata_key=METADATA_KEY
     )
+
+    processed_records, record_metadata = zip(
+        *tuple(tuple(d.values()) for d in combined_records)
+    )
+
+    return processed_records, record_metadata, groups

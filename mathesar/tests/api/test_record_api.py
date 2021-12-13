@@ -50,7 +50,7 @@ def test_record_list(create_table, client):
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 50
     for column_name in table.sa_column_names:
-        assert column_name in record_data['data']
+        assert column_name in record_data
 
 
 def test_record_list_filter(create_table, client):
@@ -262,7 +262,7 @@ def test_record_list_pagination_limit(create_table, client):
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 5
     for column_name in table.sa_column_names:
-        assert column_name in record_data['data']
+        assert column_name in record_data
 
 
 def test_record_list_pagination_offset(create_table, client):
@@ -271,10 +271,10 @@ def test_record_list_pagination_offset(create_table, client):
 
     response_1 = client.get(f'/api/v0/tables/{table.id}/records/?limit=5&offset=5')
     response_1_data = response_1.json()
-    record_1_data = response_1_data['results'][0]['data']
+    record_1_data = response_1_data['results'][0]
     response_2 = client.get(f'/api/v0/tables/{table.id}/records/?limit=5&offset=10')
     response_2_data = response_2.json()
-    record_2_data = response_2_data['results'][0]['data']
+    record_2_data = response_2_data['results'][0]
 
     assert response_1.status_code == 200
     assert response_2.status_code == 200
