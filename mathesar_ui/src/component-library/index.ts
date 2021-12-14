@@ -19,6 +19,7 @@ export { default as Checkbox } from './checkbox/Checkbox.svelte';
 export { default as Button } from './button/Button.svelte';
 export { default as Icon } from './icon/Icon.svelte';
 export { default as Progress } from './progress/Progress.svelte';
+export { default as CancelOrProceedButtonPair } from './cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
 export { default as Skeleton } from './skeleton/Skeleton.svelte';
 export { default as RadioGroup } from './radio-group/RadioGroup.svelte';
 export { default as Seesaw } from './seesaw/Seesaw.svelte';

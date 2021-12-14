@@ -1,8 +1,6 @@
 <script lang="ts">
-  import Button from '../button/Button.svelte';
-  import Icon from '../icon/Icon.svelte';
+  import CancelOrProceedButtonPair from '@mathesar-component-library-dir/cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
   import Modal from '../modal/Modal.svelte';
-  import Spinner from '../spinner/Spinner.svelte';
   import type { ConfirmationController } from './ConfirmationController';
 
   export let controller: ConfirmationController;
@@ -19,7 +17,7 @@
   } = $confirmationProps);
   $: bodyParagraphs = Array.isArray(body) ? body : [body];
 
-  let isProcessing = false;
+  let allowClose = true;
 
   function handleCancelButton() {
     $resolve(false);
@@ -28,7 +26,7 @@
 
   async function handleProceedButton() {
     try {
-      isProcessing = true;
+      allowClose = false;
       await onProceed();
       onSuccess();
       $resolve(true);
@@ -36,7 +34,7 @@
     } catch (error) {
       onError(error);
     } finally {
-      isProcessing = false;
+      allowClose = true;
     }
   }
 
@@ -50,46 +48,25 @@
     // and then `$resolve(false)` which may seem a bit strange. This is fine
     // because though because a Promise can only be resolved once.
     $resolve(false);
-    // There are many places in the code where we could potentially reset the
-    // spinnner. We do it here because it's the lowest level which ensures there
-    // is no way to close the modal without resetting the spinner.
-    isProcessing = false;
+    allowClose = true;
   }
 </script>
 
 <Modal
   bind:isOpen={$modal}
   {title}
-  allowClose={!isProcessing}
+  {allowClose}
   on:close={onClose}
   class="confirmation"
 >
   {#each bodyParagraphs as paragraph}
      <p>{paragraph}</p>
   {/each}
-  <div slot=footer class=buttons>
-    <Button
-      on:click={handleCancelButton}
-      disabled={isProcessing}
-    >
-      {#if cancelButton.icon}<Icon {...cancelButton.icon} />{/if}
-      <span>{cancelButton.label}</span>
-    </Button>
-    <Button
-      on:click={handleProceedButton}
-      appearance=primary
-      disabled={isProcessing}
-    >
-      {#if isProcessing}
-        <Spinner />
-      {:else if proceedButton.icon}
-        <Icon {...proceedButton.icon} />
-      {/if}
-      <span>{proceedButton.label}</span>
-    </Button>
-  </div>
+  <CancelOrProceedButtonPair
+    slot=footer
+    {cancelButton}
+    {proceedButton}
+    onCancel={handleCancelButton}
+    onProceed={handleProceedButton}
+  />
 </Modal>
-
-<style global lang="scss">
-  @import './Confirmation.scss';
-</style>
