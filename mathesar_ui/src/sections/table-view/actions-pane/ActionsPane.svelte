@@ -30,10 +30,12 @@
   import { currentDBName } from '@mathesar/stores/databases';
   import { getTabsForSchema } from '@mathesar/stores/tabs';
   import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { modal } from '@mathesar/stores/modal';
   import TableConstraints from '../constraints/TableConstraints.svelte';
   import DisplayFilter from '../display-options/DisplayFilter.svelte';
   import DisplaySort from '../display-options/DisplaySort.svelte';
   import DisplayGroup from '../display-options/DisplayGroup.svelte';
+  import RenameTableModal from './RenameTableModal.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
   
@@ -50,6 +52,7 @@
   let meta: Meta;
   let recordState: RecordsData['state'];
   let isTableConstraintsModalOpen = false;
+  const tableRenameModal = modal.createVisibilityStore();
 
   $: ({
     columnsDataStore, recordsData, meta, constraintsDataStore,
@@ -98,6 +101,9 @@
     </svelte:fragment>
     <svelte:fragment slot="content">
       <ul>
+        <li class="item" on:click={() => tableRenameModal.open()}>
+          Rename
+        </li>
         <li class="item" on:click={handleDeleteTable}>
           Delete
         </li>
@@ -109,6 +115,8 @@
   </Dropdown>
 
   <TableConstraints bind:isOpen={isTableConstraintsModalOpen} />
+
+  <RenameTableModal bind:isOpen={$tableRenameModal} tabularData={$tabularData} />
 
   <div class="divider"/>
 
