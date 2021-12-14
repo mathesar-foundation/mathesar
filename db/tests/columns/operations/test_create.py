@@ -64,6 +64,8 @@ type_set = {
     'REAL',
     'SMALLINT',
     'TEXT',
+    'TIME WITH TIME ZONE',
+    'TIME WITHOUT TIME ZONE',
     'VARCHAR',
 }
 

@@ -52,6 +52,24 @@ def test_record_list(create_table, client):
         assert column_name in record_data
 
 
+serialization_test_list = [
+    ("TIME WITH TIME ZONE", "12:30:10+01:00"),
+]
+
+
+@pytest.mark.parametrize("type_, value", serialization_test_list)
+def test_record_serialization(empty_nasa_table, client, type_, value):
+    col_name = "TEST COL"
+    empty_nasa_table.add_column({"name": col_name, "type": type_})
+    empty_nasa_table.create_record_or_records([{col_name: value}])
+
+    response = client.get(f'/api/v0/tables/{empty_nasa_table.id}/records/')
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data["results"][0][col_name] == value
+
+
 def test_record_list_filter(create_table, client):
     table_name = 'NASA Record List Filter'
     table = create_table(table_name)
