@@ -38,6 +38,11 @@ def _get_type_name(type) -> str:
 
 
 def _get_settings_for_predicate(predicate_class: Type[Predicate]) -> Optional[dict]:
+    """
+    Returns optional settings applicable to predicate. At the moment this is an adhoc
+    implementation: notice that instead of hardcoding, as done below, this can be automated
+    to find any non-standard fields and describe their defaults and types.
+    """
     if issubclass(predicate_class, ReliesOnLike):
         case_sensitive_field = tuple(
             field
