@@ -1,5 +1,5 @@
 from dataclasses import fields as dataclass_fields
-from typing import Optional, Type
+from typing import Optional, Type, List
 
 from django_filters import BooleanFilter, DateTimeFromToRangeFilter, OrderingFilter
 from django_property_filter import PropertyFilterSet, PropertyBaseInFilter, PropertyCharFilter, PropertyOrderingFilter
@@ -37,7 +37,11 @@ def _get_type_name(type) -> str:
     return type.__name__
 
 
-def _get_settings_for_predicate(predicate_class: Type[Predicate]) -> Optional[dict]:
+def _get_human_name_for_field(field) -> str:
+    return field.name.replace("_", " ").capitalize()
+
+
+def _get_settings_for_predicate(predicate_class: Type[Predicate]) -> Optional[List[dict]]:
     """
     Returns optional settings applicable to predicate. At the moment this is an adhoc
     implementation: notice that instead of hardcoding, as done below, this can be automated
@@ -49,12 +53,14 @@ def _get_settings_for_predicate(predicate_class: Type[Predicate]) -> Optional[di
             for field in dataclass_fields(predicate_class)
             if field.name == "case_sensitive"
         )[0]
-        return {
-            case_sensitive_field.name: {
+        return [
+            {
+                "identifier": case_sensitive_field.name,
+                "name": _get_human_name_for_field(case_sensitive_field),
                 "default": case_sensitive_field.default,
                 "type": _get_type_name(case_sensitive_field.type),
             }
-        }
+        ]
     else:
         return None
 

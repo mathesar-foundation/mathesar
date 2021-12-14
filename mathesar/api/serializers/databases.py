@@ -33,4 +33,4 @@ class FilterSerializer(serializers.Serializer):
     position = serializers.CharField()
     parameter_count = serializers.CharField()
     ma_types = serializers.ListField(child=serializers.CharField())
-    settings = serializers.DictField(child=serializers.DictField(), allow_null=True)
+    settings = serializers.ListField(child=serializers.DictField(), allow_null=True)
