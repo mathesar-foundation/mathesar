@@ -58,7 +58,7 @@ def _get_settings_for_predicate(predicate_class: Type[Predicate]) -> Optional[Li
                 "identifier": case_sensitive_field.name,
                 "name": _get_human_name_for_field(case_sensitive_field),
                 "default": case_sensitive_field.default,
-                "type": _get_type_name(case_sensitive_field.type),
+                "python_type": _get_type_name(case_sensitive_field.type),
             }
         ]
     else:
