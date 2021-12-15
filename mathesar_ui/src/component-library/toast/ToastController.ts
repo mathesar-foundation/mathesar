@@ -172,59 +172,81 @@ export class ToastController {
   }
 }
 
-export type ToastShowFn = (p: Partial<ToastEntryProps>) => ToastEntryController;
+export type ToastDetail = Partial<ToastEntryProps> | string;
+export type ToastShowFn = (d: ToastDetail) => ToastEntryController;
 
-interface DefaultMakeToast {
+interface MakeToast {
   entries: Readable<ToastEntry[]>,
   info: ToastShowFn,
   success: ToastShowFn,
   error: ToastShowFn,
+  fromError: (error?: unknown) => ToastEntryController,
   spinner: ToastShowFn,
   progress: ToastShowFn,
 }
 
-export function makeToast(defaultProps: Partial<ToastEntryProps> = {}): DefaultMakeToast {
+export function makeToastProps(detail: ToastDetail): Partial<ToastEntryProps> {
+  if (typeof detail === 'string') {
+    return { message: detail };
+  }
+  return detail;
+}
+
+export function makeToast(defaultProps: Partial<ToastEntryProps> = {}): MakeToast {
   const controller = new ToastController({ defaultProps });
+
+  function info(detail: ToastDetail = {}) {
+    return controller.show(makeToastProps(detail));
+  }
+
+  function success(detail: ToastDetail = {}) {
+    return controller.show({
+      icon: { data: faCheck },
+      backgroundColor: 'rgba(92, 159, 84, 0.9)',
+      ...makeToastProps(detail),
+    });
+  }
+
+  function error(detail: ToastDetail = {}) {
+    return controller.show({
+      icon: { data: faExclamationTriangle },
+      backgroundColor: 'rgba(159, 86, 77, 0.9)',
+      ...makeToastProps(detail),
+    });
+  }
+
+  function fromError(err?: unknown) {
+    return error(
+      err instanceof Error ? err.message : 'Something went wrong.',
+    );
+  }
+
+  function spinner(detail: ToastDetail = {}) {
+    return controller.show({
+      icon: { data: faSpinner, spin: true },
+      lifetime: 0,
+      allowDismiss: false,
+      hasProgress: false,
+      ...makeToastProps(detail),
+    });
+  }
+
+  function progress(detail: ToastDetail = {}) {
+    return controller.show({
+      lifetime: 0,
+      allowDismiss: false,
+      initialProgress: 0,
+      ...makeToastProps(detail),
+    });
+  }
+
   return {
     entries: controller.entries,
-
-    info(partialProps: Partial<ToastEntryProps> = {}) {
-      return controller.show(partialProps);
-    },
-
-    success(partialProps: Partial<ToastEntryProps> = {}) {
-      return controller.show({
-        icon: { data: faCheck },
-        backgroundColor: 'rgba(92, 159, 84, 0.9)',
-        ...partialProps,
-      });
-    },
-
-    error(partialProps: Partial<ToastEntryProps> = {}) {
-      return controller.show({
-        icon: { data: faExclamationTriangle },
-        backgroundColor: 'rgba(159, 86, 77, 0.9)',
-        ...partialProps,
-      });
-    },
-
-    spinner(partialProps: Partial<ToastEntryProps> = {}) {
-      return controller.show({
-        icon: { data: faSpinner, spin: true },
-        lifetime: 0,
-        allowDismiss: false,
-        hasProgress: false,
-        ...partialProps,
-      });
-    },
-
-    progress(partialProps: Partial<ToastEntryProps> = {}) {
-      return controller.show({
-        lifetime: 0,
-        allowDismiss: false,
-        initialProgress: 0,
-        ...partialProps,
-      });
-    },
+    info,
+    success,
+    error,
+    fromError,
+    spinner,
+    progress,
   };
 }
