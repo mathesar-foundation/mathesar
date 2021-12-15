@@ -9,11 +9,11 @@ described by whether it's a Leaf or a Branch, whether it takes parameters and ho
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, List, Union, Type
+from typing import Any, List, Union, Type, Optional
 from sqlalchemy_filters.exceptions import BadFilterFormat as SABadFilterFormat
 
 
-class PredicateSuperType(Enum):
+class PredicatePositionId(Enum):
     """Every Predicate is either a leaf node in the predicate tree, or a branch node.
     A leaf node (e.g. EMPTY, EQUAL) has no predicate children, while a branch node
     (e.g. AND, OR, NOT) always has predicate children."""
@@ -21,14 +21,14 @@ class PredicateSuperType(Enum):
     BRANCH = "branch"
 
 
-class BranchPredicateType(Enum):
+class BranchPredicateId(Enum):
     NOT = "not"
     OR = "or"
     AND = "and"
 
 
-class LeafPredicateType(Enum):
-    """Note that negation is achieved via BranchPredicateType.NOT"""
+class LeafPredicateId(Enum):
+    """Note that negation is achieved via BranchPredicateId.NOT"""
     EQUAL = "equal"
     NOT_EQUAL = "not_equal"
     GREATER = "greater"
@@ -54,29 +54,29 @@ class ParameterCount(Enum):
     NONE = "none"
 
 
-def _get_static_SA_id_for_predicate_type(type: Union[LeafPredicateType, BranchPredicateType]) -> str:
-    """Provides static predicate type -> SQLAlchemy id mapping
-    Some predicate types like LeafPredicateType.STARTS_WITH have a dynamic mapping,
+def _get_static_SA_id_for_predicate_id(id: Union[LeafPredicateId, BranchPredicateId]) -> str:
+    """Provides static predicate id -> SQLAlchemy id mapping
+    Some predicate ids like LeafPredicateId.STARTS_WITH have a dynamic mapping,
     switching between 'like' and 'ilike' depending on whether case-sensitivity is desired:
     they are not covered by below mapping. Below mapping is used to not have to declare a
     saId property on every predicate that has a simple one-to-one mapping to an saId."""
     static_mapping = {
-        BranchPredicateType.NOT: 'not',
-        BranchPredicateType.AND: 'and',
-        BranchPredicateType.OR: 'or',
-        LeafPredicateType.EQUAL: 'eq',
-        LeafPredicateType.NOT_EQUAL: 'ne',
-        LeafPredicateType.GREATER: 'gt',
-        LeafPredicateType.GREATER_OR_EQUAL: 'ge',
-        LeafPredicateType.LESSER: 'lt',
-        LeafPredicateType.LESSER_OR_EQUAL: 'le',
-        LeafPredicateType.EMPTY: 'is_null',
-        LeafPredicateType.NOT_EMPTY: 'is_not_null',
-        LeafPredicateType.IN: 'in',
-        LeafPredicateType.NOT_IN: 'not_in',
+        BranchPredicateId.NOT: 'not',
+        BranchPredicateId.AND: 'and',
+        BranchPredicateId.OR: 'or',
+        LeafPredicateId.EQUAL: 'eq',
+        LeafPredicateId.NOT_EQUAL: 'ne',
+        LeafPredicateId.GREATER: 'gt',
+        LeafPredicateId.GREATER_OR_EQUAL: 'ge',
+        LeafPredicateId.LESSER: 'lt',
+        LeafPredicateId.LESSER_OR_EQUAL: 'le',
+        LeafPredicateId.EMPTY: 'is_null',
+        LeafPredicateId.NOT_EMPTY: 'is_not_null',
+        LeafPredicateId.IN: 'in',
+        LeafPredicateId.NOT_IN: 'not_in',
     }
-    if type in static_mapping:
-        return static_mapping[type]
+    if id in static_mapping:
+        return static_mapping[id]
     else:
         raise Exception("This should never happen.")
 
@@ -95,23 +95,34 @@ def static(value):
 
 @frozen_dataclass
 class Predicate:
-    super_type: PredicateSuperType
-    type: Union[LeafPredicateType, BranchPredicateType]
+    position: PredicatePositionId
+    id: Union[LeafPredicateId, BranchPredicateId]
     name: str
     parameter_count: ParameterCount
 
     @property
     def saId(self) -> str:
-        return _get_static_SA_id_for_predicate_type(self.type)
+        return _get_static_SA_id_for_predicate_id(self.id)
 
     def __post_init__(self):
         assert_predicate_correct(self)
 
+    @property
+    @abstractmethod
+    def sa_parameter(self) -> Optional[Any]:
+        """
+        A concrete predicate has to define how to express its parameters in a SA spec,
+        if it takes parameters (this method should return None otherwise). This is
+        useful, because the MA spec is strict and explicit about expected number of
+        parameters, while SA isn't.
+        """
+        return ""
+
 
 @frozen_dataclass
 class Leaf(Predicate):
-    super_type: PredicateSuperType = static(PredicateSuperType.LEAF)
-    type: LeafPredicateType
+    position: PredicatePositionId = static(PredicatePositionId.LEAF)
+    id: LeafPredicateId
     column: str
 
 
@@ -120,22 +131,38 @@ class SingleParameter:
     parameter_count: ParameterCount = static(ParameterCount.SINGLE)
     parameter: Any
 
+    @property
+    def sa_parameter(self):
+        if isinstance(self, Branch):
+            # SA's branching predicates always expect a list of parameters (that are predicates).
+            return [self.parameter]
+        else:
+            return self.parameter
+
 
 @frozen_dataclass
 class MultiParameter:
     parameter_count: ParameterCount = static(ParameterCount.MULTI)
     parameters: List[Any]
 
+    @property
+    def sa_parameter(self):
+        return self.parameters
+
 
 @frozen_dataclass
 class NoParameter:
     parameter_count: ParameterCount = static(ParameterCount.NONE)
 
+    @property
+    def sa_parameter(self):
+        return None
+
 
 @frozen_dataclass
 class Branch(Predicate):
-    super_type: PredicateSuperType = static(PredicateSuperType.BRANCH)
-    type: BranchPredicateType
+    position: PredicatePositionId = static(PredicatePositionId.BRANCH)
+    id: BranchPredicateId
 
 
 @frozen_dataclass
@@ -151,79 +178,79 @@ def relies_on_comparability(predicate_subclass: Type[Predicate]) -> bool:
 
 @frozen_dataclass
 class Equal(SingleParameter, Leaf, Predicate):
-    type: LeafPredicateType = static(LeafPredicateType.EQUAL)
+    id: LeafPredicateId = static(LeafPredicateId.EQUAL)
     name: str = static("Equal")
 
 
 @frozen_dataclass
 class NotEqual(SingleParameter, Leaf, Predicate):
-    type: LeafPredicateType = static(LeafPredicateType.NOT_EQUAL)
+    id: LeafPredicateId = static(LeafPredicateId.NOT_EQUAL)
     name: str = static("Not equal")
 
 
 @frozen_dataclass
 class Greater(ReliesOnComparability, SingleParameter, Leaf, Predicate):
-    type: LeafPredicateType = static(LeafPredicateType.GREATER)
+    id: LeafPredicateId = static(LeafPredicateId.GREATER)
     name: str = static("Greater")
 
 
 @frozen_dataclass
 class GreaterOrEqual(ReliesOnComparability, SingleParameter, Leaf, Predicate):
-    type: LeafPredicateType = static(LeafPredicateType.GREATER_OR_EQUAL)
+    id: LeafPredicateId = static(LeafPredicateId.GREATER_OR_EQUAL)
     name: str = static("Greater or equal")
 
 
 @frozen_dataclass
 class Lesser(ReliesOnComparability, SingleParameter, Leaf, Predicate):
-    type: LeafPredicateType = static(LeafPredicateType.LESSER)
+    id: LeafPredicateId = static(LeafPredicateId.LESSER)
     name: str = static("Lesser")
 
 
 @frozen_dataclass
 class LesserOrEqual(ReliesOnComparability, SingleParameter, Leaf, Predicate):
-    type: LeafPredicateType = static(LeafPredicateType.LESSER_OR_EQUAL)
+    id: LeafPredicateId = static(LeafPredicateId.LESSER_OR_EQUAL)
     name: str = static("Lesser or equal")
 
 
 @frozen_dataclass
 class Empty(NoParameter, Leaf, Predicate):
-    type: LeafPredicateType = static(LeafPredicateType.EMPTY)
+    id: LeafPredicateId = static(LeafPredicateId.EMPTY)
     name: str = static("Empty")
 
 
 @frozen_dataclass
 class NotEmpty(NoParameter, Leaf, Predicate):
-    type: LeafPredicateType = static(LeafPredicateType.NOT_EMPTY)
+    id: LeafPredicateId = static(LeafPredicateId.NOT_EMPTY)
     name: str = static("Not empty")
 
 
 @frozen_dataclass
 class In(MultiParameter, Leaf, Predicate):
-    type: LeafPredicateType = static(LeafPredicateType.IN)
+    id: LeafPredicateId = static(LeafPredicateId.IN)
     name: str = static("In")
 
 
 @frozen_dataclass
 class NotIn(MultiParameter, Leaf, Predicate):
-    type: LeafPredicateType = static(LeafPredicateType.NOT_IN)
+    id: LeafPredicateId = static(LeafPredicateId.NOT_IN)
     name: str = static("Not in")
 
 
 @frozen_dataclass
 class Not(SingleParameter, Branch, Predicate):
-    type: BranchPredicateType = static(BranchPredicateType.NOT)
+    id: BranchPredicateId = static(BranchPredicateId.NOT)
     name: str = static("Not")
 
 
 @frozen_dataclass
 class And(MultiParameter, Branch, Predicate):
-    type: BranchPredicateType = static(BranchPredicateType.AND)
+    id: BranchPredicateId = static(BranchPredicateId.AND)
     name: str = static("And")
 
 
 @frozen_dataclass
 class Or(MultiParameter, Branch, Predicate):
-    type: BranchPredicateType = static(BranchPredicateType.OR)
+    id: BranchPredicateId = static(BranchPredicateId.OR)
     name: str = static("Or")
 
 
@@ -232,6 +259,10 @@ class ReliesOnLike(ABC):
     """Some predicates represent specific patterns applied with the SQL LIKE expression.
     These will invariably operate on text."""
     case_sensitive: bool = True
+
+    @property
+    def sa_parameter(self):
+        return self.like_pattern
     
     @property
     @abstractmethod
@@ -274,7 +305,7 @@ def relies_on_like(predicate_subclass: Type[Predicate]) -> bool:
 
 @frozen_dataclass
 class StartsWith(ReliesOnLike, SingleParameter, Leaf, Predicate):
-    type: LeafPredicateType = static(LeafPredicateType.STARTS_WITH)
+    id: LeafPredicateId = static(LeafPredicateId.STARTS_WITH)
     name: str = static("Starts with")
 
     @property
@@ -285,7 +316,7 @@ class StartsWith(ReliesOnLike, SingleParameter, Leaf, Predicate):
 
 @frozen_dataclass
 class EndsWith(ReliesOnLike, SingleParameter, Leaf, Predicate):
-    type: LeafPredicateType = static(LeafPredicateType.ENDS_WITH)
+    id: LeafPredicateId = static(LeafPredicateId.ENDS_WITH)
     name: str = static("Ends with")
 
     @property
@@ -296,7 +327,7 @@ class EndsWith(ReliesOnLike, SingleParameter, Leaf, Predicate):
 
 @frozen_dataclass
 class Contains(ReliesOnLike, SingleParameter, Leaf, Predicate):
-    type: LeafPredicateType = static(LeafPredicateType.CONTAINS)
+    id: LeafPredicateId = static(LeafPredicateId.CONTAINS)
     name: str = static("Contains")
 
     @property
@@ -305,11 +336,11 @@ class Contains(ReliesOnLike, SingleParameter, Leaf, Predicate):
         return f"%{escaped_parameter}%"
 
 
-def get_predicate_subclass_by_type_str(predicate_type_str: str) -> Union[Type[LeafPredicateType], Type[BranchPredicateType]]:
+def get_predicate_subclass_by_id_str(predicate_id_str: str) -> Union[Type[LeafPredicateId], Type[BranchPredicateId]]:
     for subclass in all_predicates:
-        if subclass.type.value == predicate_type_str:
+        if subclass.id.value == predicate_id_str:
             return subclass
-    raise BadFilterFormat(f'Unknown predicate type: {predicate_type_str}')
+    raise BadFilterFormat(f'Unknown predicate id: {predicate_id_str}')
 
 
 # TODO should our filter format exception extend SA's? We're using this exception for SA-unrelated formats (the MA filters spec).

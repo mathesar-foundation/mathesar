@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
 from db.records.operations.select import get_records
-from db.filters.base import MultiParameter, SingleParameter, get_predicate_subclass_by_type_str
+from db.filters.base import MultiParameter, SingleParameter, get_predicate_subclass_by_id_str
 
 
 def test_get_records_filters_using_col_str_names(roster_table_obj):
@@ -179,7 +179,7 @@ def test_get_records_filters_ops(
     filter_sort_table_obj, column, predicate_id, parameter, res_len
 ):
     filter_sort, engine = filter_sort_table_obj
-    predicate = get_predicate_subclass_by_type_str(predicate_id)
+    predicate = get_predicate_subclass_by_id_str(predicate_id)
     if issubclass(predicate, MultiParameter):
         filters = {predicate_id: {"column": column, "parameters": parameter}}
     elif issubclass(predicate, SingleParameter):
@@ -246,7 +246,7 @@ def test_get_records_filters_boolean_ops(
 ):
     filter_sort, engine = filter_sort_table_obj
 
-    predicate = get_predicate_subclass_by_type_str(op)
+    predicate = get_predicate_subclass_by_id_str(op)
     if issubclass(predicate, SingleParameter):
         filters = {op: [
             {"equal": {"column": column, "parameter": parameter}}

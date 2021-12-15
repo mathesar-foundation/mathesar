@@ -1,26 +1,19 @@
-from db.filters.base import Predicate, Leaf, SingleParameter, MultiParameter, NoParameter, Branch, ReliesOnLike
+from db.filters.base import Predicate, Leaf, SingleParameter, MultiParameter, NoParameter, Branch
 
 
 def get_SA_filter_spec_from_predicate(pred: Predicate) -> dict:
     if isinstance(pred, Leaf):
-        if isinstance(pred, SingleParameter):
-            if isinstance(pred, ReliesOnLike):
-                return {'field': pred.column, 'op': pred.saId, 'value': pred.like_pattern}
-            else:
-                return {'field': pred.column, 'op': pred.saId, 'value': pred.parameter}
-        elif isinstance(pred, MultiParameter):
-            return {'field': pred.column, 'op': pred.saId, 'value': pred.parameters}
-        elif isinstance(pred, NoParameter):
-            return {'field': pred.column, 'op': pred.saId}
-        else:
-            raise Exception("This should never happen.")
+        sa_spec = {'field': pred.column, 'op': pred.saId}
+        sa_parameter = pred.sa_parameter
+        if sa_parameter:
+            sa_spec['value'] = sa_parameter
+        return sa_spec
     elif isinstance(pred, Branch):
-        if isinstance(pred, SingleParameter):
-            subject = get_SA_filter_spec_from_predicate(pred.parameter)
-            return {pred.saId: [subject]}
-        elif isinstance(pred, MultiParameter):
-            subjects = [get_SA_filter_spec_from_predicate(subject) for subject in pred.parameters]
-            return {pred.saId: subjects}
+        sa_parameter = pred.sa_parameter
+        # A branch predicate will always be parametrized (with another predicate)
+        if sa_parameter is not None:
+            sa_parameters = [get_SA_filter_spec_from_predicate(sub_pred) for sub_pred in sa_parameter]
+            return {pred.saId: sa_parameters}
         else:
             raise Exception("This should never happen.")
     else:
