@@ -189,65 +189,139 @@ def test_record_list_sort(create_table, client):
     assert mock_get.call_args[1]['order_by'] == order_by
 
 
-def _test_record_list_group(table, client, grouping, expected_groups):
+grouping_params = [
+    (
+        'NASA Record List Group Single',
+        {'columns': ['Center']},
+        [
+            {
+                'group_id': 1, 'count': 138,
+                'first_value': {'Center': 'NASA Ames Research Center'},
+                'last_value': {'Center': 'NASA Ames Research Center'}
+            }, {
+                'group_id': 2, 'count': 21,
+                'first_value': {'Center': 'NASA Armstrong Flight Research Center'},
+                'last_value': {'Center': 'NASA Armstrong Flight Research Center'}
+            }, {
+                'group_id': 8, 'count': 87,
+                'first_value': {'Center': 'NASA Kennedy Space Center'},
+                'last_value': {'Center': 'NASA Kennedy Space Center'}
+            },
+        ],
+    ),
+    (
+        'NASA Record List Group Single Percentile',
+        {'columns': ['Center'], 'mode': 'percentile', 'num_groups': 5},
+        [
+            {
+                'group_id': 1, 'count': 159,
+                'first_value': {'Center': 'NASA Ames Research Center'},
+                'last_value': {'Center': 'NASA Armstrong Flight Research Center'}
+            }, {
+                'group_id': 4, 'count': 87,
+                'first_value': {'Center': 'NASA Kennedy Space Center'},
+                'last_value': {'Center': 'NASA Kennedy Space Center'}
+            }
+        ],
+    ),
+    (
+        'NASA Record List Group Multi',
+        {'columns': ['Center', 'Status']},
+        [
+            {
+                'group_id': 1, 'count': 38,
+                'first_value': {
+                    'Center': 'NASA Ames Research Center',
+                    'Status': 'Application'
+                },
+                'last_value': {
+                    'Center': 'NASA Ames Research Center',
+                    'Status': 'Application'
+                }
+            }, {
+                'group_id': 2, 'count': 100,
+                'first_value': {
+                    'Center': 'NASA Ames Research Center', 'Status': 'Issued'
+                },
+                'last_value': {
+                    'Center': 'NASA Ames Research Center', 'Status': 'Issued'
+                }
+            }, {
+                'group_id': 4, 'count': 12,
+                'first_value': {
+                    'Center': 'NASA Armstrong Flight Research Center',
+                    'Status': 'Issued'
+                }, 'last_value': {
+                    'Center': 'NASA Armstrong Flight Research Center',
+                    'Status': 'Issued'
+                }
+            }, {
+                'group_id': 15, 'count': 29,
+                'first_value': {
+                    'Center': 'NASA Kennedy Space Center', 'Status': 'Application'
+                }, 'last_value': {
+                    'Center': 'NASA Kennedy Space Center', 'Status': 'Application'
+                }
+            },
+        ],
+    ),
+    (
+        'NASA Record List Group Multi Percentile',
+        {'columns': ['Center', 'Status'], 'mode': 'percentile', 'num_groups': 5},
+        [
+            {
+                'group_id': 1, 'count': 159,
+                'first_value': {
+                    'Center': 'NASA Ames Research Center', 'Status': 'Application'
+                },
+                'last_value': {
+                    'Center': 'NASA Armstrong Flight Research Center',
+                    'Status': 'Issued'
+                }
+            }, {
+                'group_id': 4, 'count': 197,
+                'first_value': {
+                    'Center': 'NASA Kennedy Space Center',
+                    'Status': 'Application'
+                },
+                'last_value': {
+                    'Center': 'NASA Langley Research Center',
+                    'Status': 'Application'
+                }
+            },
+        ],
+    ),
+]
+
+
+@pytest.mark.parametrize('table_name,grouping,expected_groups', grouping_params)
+def test_record_list_groups(
+        table_name, grouping, expected_groups, create_table, client,
+):
+    table = create_table(table_name)
     order_by = [
-        {'field': 'Center', 'direction': 'desc'},
-        {'field': 'Case Number', 'direction': 'asc'},
+        {'field': 'id', 'direction': 'asc'},
     ]
     json_order_by = json.dumps(order_by)
     json_grouping = json.dumps(grouping)
-    query_str = f'grouping={json_grouping}&order_by={json_order_by}'
+    limit = 100
+    query_str = f'grouping={json_grouping}&order_by={json_order_by}&limit={limit}'
 
     response = client.get(f'/api/v0/tables/{table.id}/records/?{query_str}')
     response_data = response.json()
 
     assert response.status_code == 200
     assert response_data['count'] == 1393
-    assert len(response_data['results']) == 50
+    assert len(response_data['results']) == limit
 
     group_by = GroupBy(**grouping)
-    assert response_data['metadata']['grouping'] == {
-        "columns": list(group_by.columns),
-        "mode": group_by.mode,
-        "num_groups": group_by.num_groups,
-        "groups": expected_groups,
-    }
-
-
-def test_record_list_group_single_column(create_table, client):
-    table_name = 'NASA Record List Group Single'
-    table = create_table(table_name)
-    grouping = {'columns': ['Center']}
-    expected_groups = [
-        {
-            'group_id': 10, 'count': 144,
-            'first_value': {'Center': 'NASA Marshall Space Flight Center'},
-            'last_value': {'Center': 'NASA Marshall Space Flight Center'}
-        }, {
-            'group_id': 11, 'count': 5,
-            'first_value': {'Center': 'NASA Stennis Space Center'},
-            'last_value': {'Center': 'NASA Stennis Space Center'}
-        }
-    ]
-    _test_record_list_group(table, client, grouping, expected_groups)
-
-
-def test_record_list_group_multi_column(create_table, client):
-    table_name = 'NASA Record List Group Multi'
-    table = create_table(table_name)
-    grouping = {'columns': ['Center', 'Status']}
-    expected_groups = [
-        {
-            'group_id': 20, 'count': 113,
-            'first_value': {'Center': 'NASA Marshall Space Flight Center', 'Status': 'Issued'},
-            'last_value': {'Center': 'NASA Marshall Space Flight Center', 'Status': 'Issued'}
-        }, {
-            'group_id': 21, 'count': 5,
-            'first_value': {'Center': 'NASA Stennis Space Center', 'Status': 'Issued'},
-            'last_value': {'Center': 'NASA Stennis Space Center', 'Status': 'Issued'}
-        }
-    ]
-    _test_record_list_group(table, client, grouping, expected_groups)
+    grouping_dict = response_data['metadata']['grouping']
+    print(grouping_dict['groups'])
+    assert grouping_dict['columns'] == list(group_by.columns)
+    assert grouping_dict['mode'] == group_by.mode
+    assert grouping_dict['num_groups'] == group_by.num_groups
+    assert grouping_dict['ranged'] == group_by.ranged
+    assert grouping_dict['groups'] == expected_groups
 
 
 def test_record_list_pagination_limit(create_table, client):
