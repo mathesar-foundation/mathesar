@@ -81,12 +81,13 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         else:
             processed_records, record_metadata, groups = None, None, None
 
-        if grouping:
+        if group_by:
             self.metadata = {
                 'grouping': {
                     'columns': group_by.columns,
                     'mode': group_by.mode,
                     'num_groups': group_by.num_groups,
+                    'ranged': group_by.ranged,
                     'groups': groups,
                 },
                 'results': record_metadata,

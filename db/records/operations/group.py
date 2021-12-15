@@ -30,6 +30,7 @@ class GroupBy:
         self._columns = tuple(columns) if type(columns) != str else tuple([columns])
         self._mode = mode
         self._num_groups = num_groups
+        self._ranged = bool(mode != GroupMode.DISTINCT.value)
 
     @property
     def columns(self):
@@ -42,6 +43,10 @@ class GroupBy:
     @property
     def num_groups(self):
         return self._num_groups
+
+    @property
+    def ranged(self):
+        return self._ranged
 
     def validate(self):
         if self.mode not in {group_mode.value for group_mode in GroupMode}:
