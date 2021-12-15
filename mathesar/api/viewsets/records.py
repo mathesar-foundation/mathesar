@@ -3,7 +3,7 @@ from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
 
-from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
+from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
@@ -38,7 +38,7 @@ class RecordViewSet(viewsets.ViewSet):
             raise ValidationError({'filters': e})
         except (BadSortFormat, SortFieldNotFound) as e:
             raise ValidationError({'order_by': e})
-        except (BadGroupFormat, GroupFieldNotFound) as e:
+        except (BadGroupFormat, GroupFieldNotFound, InvalidGroupType) as e:
             raise ValidationError({'grouping': e})
 
         serializer = RecordSerializer(records, many=True)

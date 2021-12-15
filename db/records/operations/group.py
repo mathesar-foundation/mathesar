@@ -49,9 +49,11 @@ class GroupBy:
         return self._ranged
 
     def validate(self):
-        if self.mode not in {group_mode.value for group_mode in GroupMode}:
+        group_modes = {group_mode.value for group_mode in GroupMode}
+        if self.mode not in group_modes:
             raise rec_exc.InvalidGroupType(
-                f'mode "{self.mode}" is invalid.'
+                f'mode "{self.mode}" is invalid. valid modes are: '
+                + ', '.join([f"'{gm}'" for gm in group_modes])
             )
         if (
                 self.mode == GroupMode.PERCENTILE.value
