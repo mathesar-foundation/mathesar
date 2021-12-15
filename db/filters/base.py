@@ -42,6 +42,8 @@ class LeafPredicateId(Enum):
     STARTS_WITH = "starts_with"
     ENDS_WITH = "ends_with"
     CONTAINS = "contains"
+    EMAIL_DOMAIN_CONTAINS = "email_domain_contains"
+    EMAIL_DOMAIN_EQUALS = "email_domain_equals"
 
 
 class ParameterCount(Enum):
@@ -336,6 +338,37 @@ class Contains(ReliesOnLike, SingleParameter, Leaf, Predicate):
         return f"%{escaped_parameter}%"
 
 
+@frozen_dataclass
+class AppliesToEmail:
+    pass
+
+
+def applies_to_email(predicate_subclass: Type[Predicate]) -> bool:
+    return issubclass(predicate_subclass, AppliesToEmail)
+
+
+@frozen_dataclass
+class EmailDomainContains(AppliesToEmail, ReliesOnLike, SingleParameter, Leaf, Predicate):
+    id: LeafPredicateId = static(LeafPredicateId.EMAIL_DOMAIN_CONTAINS)
+    name: str = static("Email domain contains")
+
+    @property
+    def like_pattern(self) -> str:
+        escaped_parameter = self.escape(self.parameter)
+        return f"%@%{escaped_parameter}%"
+
+
+@frozen_dataclass
+class EmailDomainEquals(AppliesToEmail, ReliesOnLike, SingleParameter, Leaf, Predicate):
+    id: LeafPredicateId = static(LeafPredicateId.EMAIL_DOMAIN_EQUALS)
+    name: str = static("Email domain equals")
+
+    @property
+    def like_pattern(self) -> str:
+        escaped_parameter = self.escape(self.parameter)
+        return f"%@{escaped_parameter}"
+
+
 def get_predicate_subclass_by_id_str(predicate_id_str: str) -> Union[Type[LeafPredicateId], Type[BranchPredicateId]]:
     for subclass in all_predicates:
         if subclass.id.value == predicate_id_str:
@@ -365,6 +398,8 @@ all_predicates = [
     StartsWith,
     EndsWith,
     Contains,
+    EmailDomainContains,
+    EmailDomainEquals
 ]
 
 

@@ -5,7 +5,7 @@ Mathesar data types are shown in the UI.
 from enum import Enum
 
 from db.types.base import PostgresType, MathesarCustomType, get_available_types, get_qualified_name, get_db_type_name
-from db.filters.base import Predicate, relies_on_comparability, relies_on_like
+from db.filters.base import Predicate, relies_on_comparability, relies_on_like, applies_to_email
 
 from typing import Type
 
@@ -48,11 +48,17 @@ def _is_ma_type_supported_by_like(ma_type: MathesarTypeIdentifier) -> bool:
     return ma_type in supported_by_like_mathesar_types
 
 
+def _is_ma_type_an_email_string(ma_type: MathesarTypeIdentifier) -> bool:
+    return ma_type is MathesarTypeIdentifier.EMAIL
+
+
 def is_ma_type_supported_by_predicate(ma_type: MathesarTypeIdentifier, predicate: Type[Predicate]):
     if relies_on_comparability(predicate):
         return _is_ma_type_comparable(ma_type)
     elif relies_on_like(predicate):
         return _is_ma_type_supported_by_like(ma_type)
+    elif applies_to_email(predicate):
+        return _is_ma_type_an_email_string(ma_type)
     else:
         return True
 
