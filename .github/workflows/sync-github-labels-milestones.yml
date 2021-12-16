@@ -1,6 +1,8 @@
 name: Sync labels and milestones
 
-on: [push]
+on:
+  schedule:
+    0 0 * * *
 
 jobs:
   build:
