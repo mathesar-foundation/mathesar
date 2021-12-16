@@ -10,15 +10,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: composer global require 'vanilla/github-sync'
-    - run: ls /home/runner/.composer/vendor/bin
-    - run: export PATH="$PATH:/home/runner/.composer/vendor/bin"
-    - run: github-sync labels -f centerofci/mathesar -t centerofci/mathesar-ansible -d
-    - run: github-sync labels -f centerofci/mathesar -t centerofci/mathesar-design -d
-    - run: github-sync labels -f centerofci/mathesar -t centerofci/mathesar-private-notes -d
-    - run: github-sync labels -f centerofci/mathesar -t centerofci/mathesar-scripts -d
-    - run: github-sync labels -f centerofci/mathesar -t centerofci/mathesar-wiki -d
-    - run: github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-ansible -d
-    - run: github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-design -d
-    - run: github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-private-notes -d
-    - run: github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-scripts -d
-    - run: github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-wiki -d
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f centerofci/mathesar -t centerofci/mathesar-ansible -d
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f centerofci/mathesar -t centerofci/mathesar-design -d
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f centerofci/mathesar -t centerofci/mathesar-private-notes -d
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f centerofci/mathesar -t centerofci/mathesar-scripts -d
+    - run: /home/runner/.composer/vendor/bin/github-sync labels -f centerofci/mathesar -t centerofci/mathesar-wiki -d
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-ansible -d
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-design -d
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-private-notes -d
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-scripts -d
+    - run: /home/runner/.composer/vendor/bin/github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-wiki -d
