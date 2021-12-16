@@ -25,3 +25,6 @@ jobs:
         inventory: hosts/staging
         vault_password: ${{ secrets.ANSIBLE_VAULT_PASS }}
         deploy_key: ${{ secrets.STAGING_DEPLOY_KEY }}
+      env:
+        ANSIBLE_HOST_KEY_CHECKING: False
+        DEBIAN_FRONTEND: noninteractive # needed so that apt doesn't show interactive prompts
