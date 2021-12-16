@@ -5,12 +5,14 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError, APIException
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
+from rest_framework.views import exception_handler
 from sqlalchemy.exc import ProgrammingError, DataError, IntegrityError
 
 from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer
+from mathesar.errors import exception_transformer
 from mathesar.models import Table
 from mathesar.utils.tables import (
     get_table_column_types, create_table_from_datafile, create_empty_table,
@@ -105,18 +107,8 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
             raise ValidationError("Incorrect number of columns in request.")
 
         table_data = TableSerializer(table, context={"request": request}).data
-        try:
+        with exception_transformer({**dict.fromkeys([DataError, IntegrityError], "Invalid type cast requested."), UnsupportedTypeException: None}):
             preview_records = table.get_preview(columns)
-        except (DataError, IntegrityError) as e:
-            if type(e.orig) == InvalidTextRepresentation or type(e.orig) == CheckViolation:
-                raise ValidationError("Invalid type cast requested.")
-            else:
-                raise APIException
-        except UnsupportedTypeException as e:
-            raise ValidationError(e)
-        except Exception as e:
-            raise APIException(e)
-
         table_data.update(
             {
                 # There's no way to reflect actual column data without
