@@ -339,17 +339,17 @@ class Contains(ReliesOnLike, SingleParameter, Leaf, Predicate):
 
 
 @frozen_dataclass
-class AppliesToEmail(ReliesOnLike):
+class AppliesOnlyToEmail(ReliesOnLike):
     # Emails are case-insensitive
     case_sensitive: bool = static(False)
 
 
-def applies_to_email(predicate_subclass: Type[Predicate]) -> bool:
-    return issubclass(predicate_subclass, AppliesToEmail)
+def applies_only_to_email(predicate_subclass: Type[Predicate]) -> bool:
+    return issubclass(predicate_subclass, AppliesOnlyToEmail)
 
 
 @frozen_dataclass
-class EmailDomainContains(AppliesToEmail, ReliesOnLike, SingleParameter, Leaf, Predicate):
+class EmailDomainContains(AppliesOnlyToEmail, ReliesOnLike, SingleParameter, Leaf, Predicate):
     id: LeafPredicateId = static(LeafPredicateId.EMAIL_DOMAIN_CONTAINS)
     name: str = static("Email domain contains")
 
@@ -360,7 +360,7 @@ class EmailDomainContains(AppliesToEmail, ReliesOnLike, SingleParameter, Leaf, P
 
 
 @frozen_dataclass
-class EmailDomainEquals(AppliesToEmail, ReliesOnLike, SingleParameter, Leaf, Predicate):
+class EmailDomainEquals(AppliesOnlyToEmail, ReliesOnLike, SingleParameter, Leaf, Predicate):
     id: LeafPredicateId = static(LeafPredicateId.EMAIL_DOMAIN_EQUALS)
     name: str = static("Email domain equals")
 
