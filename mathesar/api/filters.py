@@ -19,9 +19,9 @@ def get_filter_options_for_database(database):
     ]
     return [
         {
-            "identifier": predicate.type.value,
+            "identifier": predicate.id.value,
             "name": predicate.name,
-            "position": predicate.super_type.value,
+            "position": predicate.position.value,
             "parameter_count": predicate.parameter_count.value,
             "ma_types": [
                 ma_type.value
