@@ -1,0 +1,23 @@
+name: Sync labels and milestones
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_API_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: php-actions/composer@v6
+    - run: composer global require 'vanilla/github-sync'
+    - run: github-sync labels -f centerofci/mathesar -t centerofci/mathesar-ansible -d
+    - run: github-sync labels -f centerofci/mathesar -t centerofci/mathesar-design -d
+    - run: github-sync labels -f centerofci/mathesar -t centerofci/mathesar-private-notes -d
+    - run: github-sync labels -f centerofci/mathesar -t centerofci/mathesar-scripts -d
+    - run: github-sync labels -f centerofci/mathesar -t centerofci/mathesar-wiki -d
+    - run: github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-ansible -d
+    - run: github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-design -d
+    - run: github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-private-notes -d
+    - run: github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-scripts -d
+    - run: github-sync milestones -f centerofci/mathesar -t centerofci/mathesar-wiki -d
