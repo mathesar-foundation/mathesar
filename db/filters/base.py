@@ -339,8 +339,9 @@ class Contains(ReliesOnLike, SingleParameter, Leaf, Predicate):
 
 
 @frozen_dataclass
-class AppliesToEmail:
-    pass
+class AppliesToEmail(ReliesOnLike):
+    # Emails are case-insensitive
+    case_sensitive: bool = static(False)
 
 
 def applies_to_email(predicate_subclass: Type[Predicate]) -> bool:
