@@ -1,7 +1,7 @@
 import pytest
 
 from db.filters.operations.serialize import get_SA_filter_spec_from_predicate
-from db.filters.base import And, Or, Not, Equal, Empty, In, StartsWith, EndsWith, Contains
+from db.filters.base import And, Or, Not, Equal, Empty, In, StartsWith, EndsWith, Contains, EmailDomainEquals
 
 valid_cases = [
     [
@@ -29,11 +29,13 @@ valid_cases = [
             EndsWith(column="col1", parameter="end%"),
             # NOTE: below line tests case sensitivity setting
             Contains(column="col1", parameter="contained\\", case_sensitive=False),
+            EmailDomainEquals(column="col1", parameter="domain.com"),
         ]),
         {'or': [
             {'field': 'col1', 'op': 'like', 'value': 'start\\_%'},
             {'field': 'col1', 'op': 'like', 'value': '%end\\%'},
             {'field': 'col1', 'op': 'ilike', 'value': '%contained\\\\%'},
+            {'field': 'col1', 'op': 'ilike', 'value': '%@domain.com'},
         ]}
     ],
 ]
