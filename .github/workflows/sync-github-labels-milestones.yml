@@ -10,6 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: composer global require 'vanilla/github-sync'
+    - run: composer global config --list
     - run: export PATH="$PATH:$HOME/.composer/vendor/bin"
     - run: github-sync labels -f centerofci/mathesar -t centerofci/mathesar-ansible -d
     - run: github-sync labels -f centerofci/mathesar -t centerofci/mathesar-design -d
