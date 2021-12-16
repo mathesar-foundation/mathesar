@@ -12,7 +12,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: 'centerofci/mathesar-ansible'
-        token: ${{ secrets.GH_PAT_ANSIBLE_REPO }} # Repo is private, so an access token is used
+        token: ${{ secrets.MATHESAR_ORG_GITHUB_TOKEN }} # Repo is private, so an access token is used
     # This checkout is used for getting the 'action' from the current repo
     - name: Checkout mathesar repo
       uses: actions/checkout@v2
