@@ -58,7 +58,7 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
     def get_paginated_response(self, data):
         return Response(OrderedDict([
             ('count', self.count),
-            ('metadata', self.metadata),
+            ('grouping', self.grouping),
             ('results', data)
         ]))
 
@@ -77,22 +77,19 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         )
 
         if records:
-            processed_records, record_metadata, groups = process_annotated_records(records)
+            processed_records, groups = process_annotated_records(records)
         else:
-            processed_records, record_metadata, groups = None, None, None
+            processed_records, groups = None, None
 
         if group_by:
-            self.metadata = {
-                'grouping': {
-                    'columns': group_by.columns,
-                    'mode': group_by.mode,
-                    'num_groups': group_by.num_groups,
-                    'ranged': group_by.ranged,
-                    'groups': groups,
-                },
-                'results': record_metadata,
+            self.grouping = {
+                'columns': group_by.columns,
+                'mode': group_by.mode,
+                'num_groups': group_by.num_groups,
+                'ranged': group_by.ranged,
+                'groups': groups,
             }
         else:
-            self.metadata = None
+            self.grouping = None
 
         return processed_records
