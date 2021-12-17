@@ -21,6 +21,7 @@ export { default as Icon } from './icon/Icon.svelte';
 export { default as Label } from './label/Label.svelte';
 export { default as LabeledInput } from './labeled-input/LabeledInput.svelte';
 export { default as Progress } from './progress/Progress.svelte';
+export { default as Radio } from './radio/Radio.svelte';
 export { default as RadioGroup } from './radio-group/RadioGroup.svelte';
 export { default as Seesaw } from './seesaw/Seesaw.svelte';
 export { default as Skeleton } from './skeleton/Skeleton.svelte';
