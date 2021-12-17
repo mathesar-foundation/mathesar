@@ -17,6 +17,7 @@ export { default as portal } from './common/actions/portal';
 export { default as Button } from './button/Button.svelte';
 export { default as CancelOrProceedButtonPair } from './cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
 export { default as Checkbox } from './checkbox/Checkbox.svelte';
+export { default as CheckboxGroup } from './checkbox-group/CheckboxGroup.svelte';
 export { default as Icon } from './icon/Icon.svelte';
 export { default as Label } from './label/Label.svelte';
 export { default as LabeledInput } from './labeled-input/LabeledInput.svelte';
