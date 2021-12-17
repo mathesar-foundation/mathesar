@@ -40,8 +40,8 @@ REAL = PostgresType.REAL.value.upper()
 SMALLINT = PostgresType.SMALLINT.value.upper()
 TIME_WITHOUT_TIME_ZONE = PostgresType.TIME_WITHOUT_TIME_ZONE.value.upper()
 TIME_WITH_TIME_ZONE = PostgresType.TIME_WITH_TIME_ZONE.value.upper()
-TIMESTAMP_WITHOUT_TIME_ZONE = PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value.upper()
 TIMESTAMP_WITH_TIME_ZONE = PostgresType.TIMESTAMP_WITH_TIME_ZONE.value.upper()
+TIMESTAMP_WITHOUT_TIME_ZONE = PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value.upper()
 TEXT = PostgresType.TEXT.value.upper()
 
 CHAR = "CHAR"

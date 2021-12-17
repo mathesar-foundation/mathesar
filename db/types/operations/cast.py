@@ -29,8 +29,8 @@ EMAIL = base.MathesarCustomType.EMAIL.value
 MONEY = base.MathesarCustomType.MONEY.value
 TIME_WITHOUT_TIME_ZONE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
 TIME_WITH_TIME_ZONE = base.PostgresType.TIME_WITH_TIME_ZONE.value
-TIMESTAMP_WITHOUT_TIME_ZONE = base.PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value
 TIMESTAMP_WITH_TIME_ZONE = base.PostgresType.TIMESTAMP_WITH_TIME_ZONE.value
+TIMESTAMP_WITHOUT_TIME_ZONE = base.PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value
 URI = base.MathesarCustomType.URI.value
 
 # only needed for ischema lookup
@@ -72,8 +72,8 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         TEXT: dialect_types.get(TEXT),
         TIME_WITHOUT_TIME_ZONE: dialect_types.get(TIME_WITHOUT_TIME_ZONE),
         TIME_WITH_TIME_ZONE: dialect_types.get(TIME_WITH_TIME_ZONE),
-        TIMESTAMP_WITHOUT_TIME_ZONE: dialect_types.get(TIMESTAMP_WITHOUT_TIME_ZONE),
         TIMESTAMP_WITH_TIME_ZONE: dialect_types.get(TIMESTAMP_WITH_TIME_ZONE),
+        TIMESTAMP_WITHOUT_TIME_ZONE: dialect_types.get(TIMESTAMP_WITHOUT_TIME_ZONE),
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),
@@ -255,8 +255,8 @@ def get_defined_source_target_cast_tuples(engine):
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
         TIME_WITHOUT_TIME_ZONE: _get_time_type_body_map(TIME_WITHOUT_TIME_ZONE),
         TIME_WITH_TIME_ZONE: _get_time_type_body_map(TIME_WITH_TIME_ZONE),
-        TIMESTAMP_WITHOUT_TIME_ZONE: _get_timestamp_without_timezone_type_body_map(),
         TIMESTAMP_WITH_TIME_ZONE: _get_timestamp_with_timezone_type_body_map(TIMESTAMP_WITH_TIME_ZONE),
+        TIMESTAMP_WITHOUT_TIME_ZONE: _get_timestamp_without_timezone_type_body_map(),
         TEXT: _get_textual_type_body_map(engine, target_type_str=TEXT),
         URI: _get_uri_type_body_map(),
         VARCHAR: _get_textual_type_body_map(engine, target_type_str=VARCHAR),
