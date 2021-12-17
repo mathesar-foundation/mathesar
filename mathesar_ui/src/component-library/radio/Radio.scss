@@ -2,7 +2,7 @@
 // may want to set up a way to share those CSS properties at some point.
 
 .radio {
-  --size: var(--radio-size, 1.1em);
+  --size: var(--radio-size, 0.9em);
   --hue: var(--radio-hue, 207);
   --saturation: var(--radio-saturation, 90%);
   --base-lightness: var(--radio-lightness, 59%);
@@ -14,7 +14,7 @@
   font-size: inherit;
   display: inline-block;
   vertical-align: baseline;
-  margin: 0 0 -0.2em 0;
+  margin: 0 0 -0.1em 0;
   width: var(--size);
   height: var(--size);
   appearance: none;

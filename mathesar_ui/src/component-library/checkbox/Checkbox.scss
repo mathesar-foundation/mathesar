@@ -2,7 +2,7 @@
 // may want to set up a way to share those CSS properties at some point.
 
 .checkbox {
-  --size: var(--checkbox-size, 1.1em);
+  --size: var(--checkbox-size, 0.9em);
   --hue: var(--checkbox-hue, 207);
   --saturation: var(--checkbox-saturation, 90%);
   --base-lightness: var(--checkbox-lightness, 59%);
@@ -15,12 +15,12 @@
   font-size: inherit;
   display: inline-block;
   vertical-align: baseline;
-  margin: 0 0 -0.2em 0;
+  margin: 0 0 -0.1em 0;
   width: var(--size);
   height: var(--size);
   appearance: none;
   border: solid var(--color-unchecked) 0.15em;
-  border-radius: 0.2em;
+  border-radius: 0.15em;
   background: white;
 
   &:not(:disabled):hover {
@@ -39,7 +39,7 @@
     background: var(--color-checked);
     background-position: center;
     background-repeat: no-repeat;
-    background-size: 0.9em auto;
+    background-size: 0.75em auto;
   }
   &:checked {
     background-image: var(--icon-check);
