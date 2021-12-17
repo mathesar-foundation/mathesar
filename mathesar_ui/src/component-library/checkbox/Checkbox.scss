@@ -2,7 +2,7 @@
 // may want to set up a way to share those CSS properties at some point.
 
 .checkbox {
-  --size: var(--checkbox-size, 0.9em);
+  --size: var(--checkbox-size, 1em);
   --hue: var(--checkbox-hue, 207);
   --saturation: var(--checkbox-saturation, 90%);
   --base-lightness: var(--checkbox-lightness, 59%);
