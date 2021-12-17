@@ -62,14 +62,10 @@
     try {
       const newAllowsNull = !allowsNull;
       await columnsDataStore.setNullabilityOfColumn(column, newAllowsNull);
-      const msg = `Column "${column.name}" will ${newAllowsNull ? '' : 'no longer '}allow NULL.`;
-      // eslint-disable-next-line no-console
-      console.log(msg); // TODO display success toast message: msg
+      toast.success(`Column "${column.name}" will ${newAllowsNull ? '' : 'no longer '}allow NULL.`);
       dispatch('close');
     } catch (error) {
-      const msg = `Unable to update "Allow NULL" of column "${column.name}". ${error.message as string}.`;
-      // eslint-disable-next-line no-console
-      console.log(msg); // TODO display error toast message
+      toast.error(`Unable to update "Allow NULL" of column "${column.name}". ${error.message as string}.`);
     } finally {
       isRequestingToggleAllowNull = false;
     }
