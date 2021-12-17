@@ -34,29 +34,26 @@
     { value: 4, label: 'Incididunt ut' },
   ];
   let manyValue;
-
-  
 </script>
 
 <Meta {...meta} />
 
 <Story name="Basic">
   <RadioGroup options={simpleOptions} bind:value={simpleValue} label="Simple options" />
+</Story>
 
-  <hr />
-
+<Story name="Inline">
   <RadioGroup options={simpleOptions} bind:value={simpleValue} isInline label="Simple inline options"/>
+</Story>
 
-  <hr />
-
+<Story name="Rich text">
   <RadioGroup options={richOptions} bind:value={richValue} isInline label="Rich text"/>
+</Story>
 
-  <hr />
-
+<Story name="Inline wrapping">
   <RadioGroup options={manyOptions} bind:value={manyValue} isInline label="Inline options with wrapping"/>
+</Story>
 
-  <hr />
-
+<Story name="Long options">
   <RadioGroup options={longOptions} bind:value={longValue} label="Long options"/>
-
 </Story>

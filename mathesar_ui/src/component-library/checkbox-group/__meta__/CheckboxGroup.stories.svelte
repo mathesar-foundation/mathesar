@@ -41,28 +41,26 @@
 
 <Story name="Basic">
   <CheckboxGroup options={simpleOptions} bind:values={simpleValue} label="Simple options" />
-
   <p>Values: [{simpleValue}]</p>
-
   <p>
     <Button
       on:click={() => { simpleValue = [2]; }}
     >Set to [2]</Button>
   </p>
+</Story>
 
-  <hr />
-
+<Story name="Inline">
   <CheckboxGroup options={simpleOptions} bind:values={simpleValue} isInline label="Simple inline options"/>
+</Story>
 
-  <hr />
-
+<Story name="Rich text">
   <CheckboxGroup options={richOptions} bind:values={richValue} isInline label="Rich text"/>
+</Story>
 
-  <hr />
-
+<Story name="Many values">
   <CheckboxGroup options={manyOptions} bind:values={manyValue} isInline label="Inline options with wrapping"/>
+</Story>
 
-  <hr />
-
+<Story name="Long values">
   <CheckboxGroup options={longOptions} bind:values={longValue} label="Long options"/>
 </Story>
