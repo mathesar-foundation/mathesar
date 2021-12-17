@@ -10,6 +10,7 @@ import {
   postAPI,
   States,
   deleteAPI,
+  patchAPI,
 } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
@@ -129,6 +130,10 @@ export function getTablesStoreForSchema(schemaId: SchemaEntry['id']): Writable<D
 
 export function deleteTable(id: number): CancellablePromise<TableEntry> {
   return deleteAPI(`/tables/${id}/`);
+}
+
+export function renameTable(id: number, name: string): CancellablePromise<TableEntry> {
+  return patchAPI(`/tables/${id}/`, { name });
 }
 
 export function createTable(
