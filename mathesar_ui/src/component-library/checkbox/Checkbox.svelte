@@ -1,24 +1,25 @@
-<script context="module" lang="ts">
-  let id = 0;
-
-  function getId() {
-    id += 1;
-    return id;
-  }
-</script>
-
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { getLabelControllerFromContainingLabel } from '@mathesar-component-library-dir/label/LabelController';
+  import { getGloballyUniqueId } from '@mathesar-component-library-dir/common/utils/domUtils';
 
   const dispatch = createEventDispatcher();
 
-  export let checked = false;
-  export let value = null;
-  export let indeterminate = false;
+  /**
+   * `null` puts the checkbox in an indeterminate state.
+   *
+   * We need to use `null` here instead of `undefined` because the prop won't
+   * get sent to the component if we pass `undefined`.
+   */
+  export let checked: boolean | null = false;
+  export let value: string | number | string[] | undefined = undefined;
   export let disabled = false;
-  export let label: string = null;
+  export let id = getGloballyUniqueId();
+  export let labelController = getLabelControllerFromContainingLabel();
 
-  const componentId = getId();
+  $: indeterminate = checked === null;
+  $: labelController?.disabled.set(disabled);
+  $: labelController?.inputId.set(id);
 
   function onChange(e: Event) {
     checked = !checked;
@@ -29,20 +30,22 @@
   }
 </script>
 
-<label class="checkbox" for="checkbox-{componentId}"
-        class:checked class:indeterminate class:disabled>
-  <span class="wrapper">
-    <input type="checkbox" id="checkbox-{componentId}"
-            checked={checked}
-            {indeterminate} {disabled} {value}
-            on:change={onChange}/>
-    <span class="alias"></span>
-  </span>
+<input
+  class="checkbox"
+  type="checkbox"
+  {id}
+  {checked}
+  {indeterminate}
+  {disabled}
+  {value}
+  on:change={onChange}
+/>
 
-  {#if label}
-    <span class="label">{label}</span>
-  {/if}
-</label>
+<!--
+  TODO
+  How to we set `bind:group` on `input` without causing an error?
+  Maybe we manually build the array instead of having Svelte do it for us?
+-->
 
 <style global lang="scss">
   @import "Checkbox.scss";

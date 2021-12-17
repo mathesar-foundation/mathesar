@@ -4,6 +4,7 @@
   import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
   import {
     TextInput,
+    LabeledInput,
     Checkbox,
     Spinner,
     CancelOrProceedButtonPair,
@@ -68,12 +69,14 @@
     Table name: <TextInput bind:value={$fileImportStore.name}/>
   </div>
   
-  <Checkbox
-    bind:checked={$fileImportStore.firstRowHeader}
-    disabled={$fileImportStore.previewStatus === States.Loading}
-    label="Use first row as header"
-    on:change={handleChangeFirstRowAsHeader}
-  />
+  <LabeledInput label="Use first row as header" inputFirst>
+    <Checkbox
+      bind:checked={$fileImportStore.firstRowHeader}
+      disabled={$fileImportStore.previewStatus === States.Loading}
+      on:change={handleChangeFirstRowAsHeader}
+    />
+  </LabeledInput>
+  
 </div>
 
 <div class="preview-table-header">

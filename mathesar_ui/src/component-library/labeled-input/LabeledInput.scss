@@ -1,0 +1,29 @@
+.input-with-label-after {
+  --spacing: 0.3em;
+
+  .label-content {
+    display: inline-flex;
+  }
+
+  .label {
+    flex: 1 1 auto;
+  }
+  .input {
+    flex: 0 0 auto;
+  }
+
+  &:not(.input-first) {
+    .input {
+      margin-left: var(--spacing);
+    }
+  }
+
+  &.input-first  {
+    .label-content {
+      flex-direction: row-reverse;
+    }
+    .input {
+      margin-right: var(--spacing);
+    }
+  }
+}

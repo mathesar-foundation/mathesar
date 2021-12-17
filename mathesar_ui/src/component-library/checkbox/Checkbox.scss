@@ -1,85 +1,55 @@
+// NOTE some CSS is duplicated here between Checkbox.scss and Radio.scss. We
+// may want to set up a way to share those CSS properties at some point.
+
 .checkbox {
-  display: inline-flex;
-  align-items: center;
-  position: relative;
+  --size: var(--checkbox-size, 1.1em);
+  --hue: var(--checkbox-hue, 207);
+  --saturation: var(--checkbox-saturation, 90%);
+  --base-lightness: var(--checkbox-lightness, 59%);
 
-  .wrapper {
-    position: relative;
+  --lightness: var(--base-lightness);
+  --color-unchecked: hsl(0, 0%, var(--lightness));
+  --color-checked: hsl(var(--hue), var(--saturation), var(--lightness));
+  --icon-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23FFF' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  --icon-minus: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23FFF' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='5' y1='12' x2='19' y2='12'%3E%3C/line%3E%3C/svg%3E");
+  font-size: inherit;
+  display: inline-block;
+  vertical-align: baseline;
+  margin: 0 0 -0.2em 0;
+  width: var(--size);
+  height: var(--size);
+  appearance: none;
+  border: solid var(--color-unchecked) 0.15em;
+  border-radius: 0.2em;
+  background: white;
 
-    >input[type="checkbox"] {
-      margin: 0;
-      padding: 0;
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      z-index: 1;
-      cursor: pointer;
-      opacity: 0;
-
-      &:focus, &:hover {
-        &+span.alias {
-          border-color: #39a0f5;
-        }
-      }
-    }
-
-    >span.alias {
-      position: relative;
-      display: block;
-      width: 1rem;
-      height: 1rem;
-      background-color: #fff;
-      border: 1px solid #dfdfdf;
-      border-radius: 2px;
-    }
+  &:not(:disabled):hover {
+    --lightness: calc(var(--base-lightness) - 15%);
+  }
+  &:disabled {
+    --lightness: calc(var(--base-lightness) + 25%);
+  }
+  &:disabled:not(:checked):not(:indeterminate) {
+    background: hsl(0, 0%, 97%);
   }
 
-  &.checked {
-    .wrapper {
-      >span.alias {
-        border-color: #39a0f5;
-        background: #39a0f5;
-
-        &:after {
-          position: absolute;
-          top: 5px;
-          left: 2px;
-          width: 0.25em;
-          height: 0.6em;
-          border: 2px solid #fff;
-          border-top: 0;
-          border-left: 0;
-          transform: rotate(45deg) scale(1) translate(-50%, -50%);
-          opacity: 1;
-          transition: all 0.2s cubic-bezier(0.12, 0.4, 0.29, 1.46) 0.1s;
-          content: " ";
-        }
-      }
-    }
+  &:checked,
+  &:indeterminate {
+    border-color: var(--color-checked);
+    background: var(--color-checked);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 0.9em auto;
+  }
+  &:checked {
+    background-image: var(--icon-check);
+  }
+  &:indeterminate {
+    background-image: var(--icon-minus);
   }
 
-  &.disabled {
-    pointer-events: none;
-
-    .wrapper {
-      >span.alias {
-        background: #f2f2f2;
-      }
-    }
-
-    &.checked {
-      .wrapper {
-        >span.alias {
-          border-color: #7f7f7f;
-          background: #8f8f8f;
-        }
-      }
-    }
-  }
-
-  .label {
-    margin-left: 4px;
+  cursor: pointer;
+  &:disabled {
+    cursor: not-allowed;
   }
 }
