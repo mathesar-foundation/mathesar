@@ -491,7 +491,8 @@ def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
     }
     response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    assert "Invalid type" in response.json()[0]
+    assert "Invalid type" in response.json()[0]['message']
+    assert "columns" in response.json()[0]['field']
 
 
 def test_table_previews_invalid_type_cast_check(client, schema, engine_email_type):
@@ -521,7 +522,7 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_email_typ
     }
     response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    assert "Invalid type" in response.json()[0]
+    assert "Invalid type" in response.json()[0]['message']
 
 
 def test_table_previews_unsupported_type(client, schema, engine_email_type):
@@ -551,7 +552,8 @@ def test_table_previews_unsupported_type(client, schema, engine_email_type):
     }
     response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    assert "not supported" in response.json()[0]
+    assert "not supported" in response.json()[0]['message']
+    assert "columns" in response.json()[0]['field']
 
 
 def test_table_previews_missing_columns(client, schema, engine_email_type):

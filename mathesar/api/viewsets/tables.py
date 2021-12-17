@@ -12,7 +12,7 @@ from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer
-from mathesar.errors import exception_transformer
+from mathesar.errors import exception_transformer, ExceptionTransformerDetail
 from mathesar.models import Table
 from mathesar.utils.tables import (
     get_table_column_types, create_table_from_datafile, create_empty_table,
@@ -98,7 +98,8 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         table = self.get_object()
         serializer = TablePreviewSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        columns = serializer.data["columns"]
+        columns_field_key = "columns"
+        columns = serializer.data[columns_field_key]
 
         column_names = [col["name"] for col in columns]
         if not len(column_names) == len(set(column_names)):
@@ -107,7 +108,20 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
             raise ValidationError("Incorrect number of columns in request.")
 
         table_data = TableSerializer(table, context={"request": request}).data
-        with exception_transformer({**dict.fromkeys([DataError, IntegrityError], "Invalid type cast requested."), UnsupportedTypeException: None}):
+        with exception_transformer({**dict.fromkeys([DataError, IntegrityError], ExceptionTransformerDetail(400,
+                                                                                                            4001,
+                                                                                                            None,
+                                                                                                            "Invalid type cast requested.",
+                                                                                                            columns_field_key,
+                                                                                                            None)
+                                                    ),
+                                    UnsupportedTypeException: ExceptionTransformerDetail(400,
+                                                                                         4001,
+                                                                                         None,
+                                                                                         None,
+                                                                                         columns_field_key,
+                                                                                         None)
+                                    }):
             preview_records = table.get_preview(columns)
         table_data.update(
             {

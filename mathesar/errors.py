@@ -1,14 +1,33 @@
+from collections import namedtuple
 from contextlib import contextmanager
 
-from rest_framework import exceptions
 from rest_framework.exceptions import APIException, ValidationError
 
 
 class InvalidTableError(Exception):
     pass
 
-def default_exception_parser(exception):
-    return ValidationError(exception)
+
+ExceptionTransformerDetail = namedtuple('ExceptionTransformerDetail',
+                                        [
+                                         'status_code',
+                                         'error_code',
+                                         'parser',
+                                         'message',
+                                         'field_name',
+                                         'details']
+                                        )
+
+
+
+def default_exception_parser(exception, error_code, message=None, field_name=None, details=None):
+    return APIException([{
+        "message": str(exception) if message is None else message ,
+        "error_code": error_code,
+        "field": field_name,
+        "details": details
+    }])
+
 
 @contextmanager
 def exception_transformer(mapping):
@@ -19,7 +38,12 @@ def exception_transformer(mapping):
     try:
         yield
     except tuple(mapping.keys()) as exc:
-        exc = default_exception_parser(exc)
-        exc.status_code = 400
+        exception_transformation_details = mapping[type(exc)]
+        status_code, error_code, parser, message, field_name, details = exception_transformation_details
+        if parser is None:
+            exception = default_exception_parser(exc, error_code, message, field_name, details)
+        else:
+            exception = parser(error_code, message, field_name, details)
+        exception.status_code = status_code
 
-        raise exc
+        raise exception
