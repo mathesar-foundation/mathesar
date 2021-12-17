@@ -6,6 +6,7 @@ export { default as EventHandler } from './common/utils/EventHandler';
 export * from './common/utils/filterUtils';
 export * from './common/utils/formatUtils';
 export * from './common/utils/pauseableTweened';
+export * from './common/utils/ImmutableSet';
 
 // Actions
 export { default as portal } from './common/actions/portal';
