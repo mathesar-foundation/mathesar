@@ -1,7 +1,7 @@
 from django.core.files import File
 import pytest
 from rest_framework.test import APIClient
-from sqlalchemy import Column, String, MetaData, text
+from sqlalchemy import Column, MetaData, text, Integer
 from sqlalchemy import Table as SATable
 
 from db.types import base, install
@@ -96,12 +96,18 @@ def patent_schema(test_db_model, create_schema):
 def empty_nasa_table(patent_schema):
     engine = create_mathesar_engine(patent_schema.database.name)
     db_table = SATable(
-        NASA_TABLE, MetaData(bind=engine), Column('nasa_col1', String), schema=patent_schema.name
+        NASA_TABLE, MetaData(bind=engine),
+        Column('id', Integer, primary_key=True),
+        schema=patent_schema.name,
     )
     db_table.create()
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
     table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
-    return table
+
+    yield table
+
+    table.delete_sa_table()
+    table.delete()
 
 
 @pytest.fixture
