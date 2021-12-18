@@ -2,10 +2,10 @@ import re
 import pytest
 from datetime import datetime
 
-from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
+from sqlalchemy_filters.exceptions import BadFilterFormat
 
 from db.records.operations.select import get_records
-from db.filters.base import MultiParameter, SingleParameter, get_predicate_subclass_by_type_str
+from db.filters.base import MultiParameter, SingleParameter, get_predicate_subclass_by_type_str, ReferencedColumnsDontExist
 
 
 def test_get_records_filters_using_col_str_names(roster_table_obj):
@@ -217,7 +217,7 @@ exceptions_test_list = [
     ({"or": []}, BadFilterFormat),
     ({"not": []}, BadFilterFormat),
     ({"and": [{"empty": {"column": "date"}} for _ in range(2)]}, BadFilterFormat),
-    ({"equal": {"column": "non_existent", "parameter": "test"}}, FilterFieldNotFound),
+    ({"equal": {"column": "non_existent", "parameter": "test"}}, ReferencedColumnsDontExist),
 ]
 
 

@@ -1,9 +1,10 @@
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
-from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
+from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, SortFieldNotFound
 
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
+from db.filters.base import ReferencedColumnsDontExist
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
@@ -35,7 +36,7 @@ class RecordViewSet(viewsets.ViewSet):
                 group_count_by=serializer.validated_data['group_count_by'],
                 duplicate_only=serializer.validated_data['duplicate_only'],
             )
-        except (BadFilterFormat, FilterFieldNotFound) as e:
+        except (BadFilterFormat, ReferencedColumnsDontExist) as e:
             raise ValidationError({'filters': e})
         except (BadSortFormat, SortFieldNotFound) as e:
             raise ValidationError({'order_by': e})

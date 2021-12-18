@@ -8,7 +8,7 @@ described by whether it's a Leaf or a Branch, whether it takes parameters and ho
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, List, Union, Type
+from typing import Any, List, Union, Type, Set
 from sqlalchemy_filters.exceptions import BadFilterFormat as SABadFilterFormat
 from sqlalchemy import column, not_, and_, or_
 from abc import ABC, abstractmethod
@@ -82,8 +82,27 @@ class Predicate(ABC):
         """
         return None
 
+    # TODO dead code
     def apply(self, query):
         return query.filter(self.to_sa_filter())
+
+    @property
+    @abstractmethod
+    def referenced_columns(self) -> Set[str]:
+        """
+        A predicate will reference zero or more columns. We want to know their names, to
+        be able to check that they exist on the table-like the filter will be
+        applied to.
+        """
+        return set()
+
+    @property
+    @abstractmethod
+    def parameter_list(self) -> List[Any]:
+        """
+        Parameter-count-agnostic way to get parameters (always returns a tuple).
+        """
+        return tuple()
 
 
 @frozen_dataclass
@@ -92,11 +111,19 @@ class Leaf(Predicate):
     type: LeafPredicateType
     column: str
 
+    @property
+    def referenced_columns(self) -> Set[str]:
+        return set([self.column])
+
 
 @frozen_dataclass
 class SingleParameter:
     parameter_count: ParameterCount = static(ParameterCount.SINGLE)
     parameter: Any
+
+    @property
+    def parameter_list(self):
+        return [self.parameter]
 
 
 @frozen_dataclass
@@ -104,10 +131,18 @@ class MultiParameter:
     parameter_count: ParameterCount = static(ParameterCount.MULTI)
     parameters: List[Any]
 
+    @property
+    def parameter_list(self):
+        return self.parameters
+
 
 @frozen_dataclass
 class NoParameter:
     parameter_count: ParameterCount = static(ParameterCount.NONE)
+
+    @property
+    def parameter_list(self):
+        return []
 
 
 @frozen_dataclass
@@ -115,10 +150,26 @@ class Branch(Predicate):
     super_type: PredicateSuperType = static(PredicateSuperType.BRANCH)
     type: BranchPredicateType
 
+    @property
+    def child_predicates(self):
+        return self.parameter_list
+
+    def get_child_sa_filters(self):
+        """
+        Method instead of property, due to unknown SA filter mutability properties.
+        """
+        child_sa_filters = tuple(child_predicate.to_sa_filter() for child_predicate in self.child_predicates)
+        return child_sa_filters
+
+    @property
+    def referenced_columns(self) -> Set[str]:
+        sets_of_columns = (child_predicate.referenced_columns for child_predicate in self.child_predicates)
+        return set.union(*sets_of_columns)
+
 
 @frozen_dataclass
 class ReliesOnComparability:
-    """Some predicates require the data types they are being applied to be comparable
+    """Some predicates require the data types they are being applied to to be comparable
     (lesser, greater, etc.)."""
     pass
 
@@ -127,6 +178,7 @@ def relies_on_comparability(predicate_subclass: Type[Predicate]) -> bool:
     return issubclass(predicate_subclass, ReliesOnComparability)
 
 
+# TODO get rid of redundant mixins (e.g. Predicate)
 @frozen_dataclass
 class Equal(SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.EQUAL)
@@ -223,7 +275,7 @@ class Not(SingleParameter, Branch, Predicate):
     name: str = static("Not")
 
     def to_sa_filter(self):
-        return not_(self.parameter.to_sa_filter())
+        return not_(*self.get_child_sa_filters())
 
 
 @frozen_dataclass
@@ -232,8 +284,7 @@ class And(MultiParameter, Branch, Predicate):
     name: str = static("And")
 
     def to_sa_filter(self):
-        child_sa_filters = [child_predicate.to_sa_filter() for child_predicate in self.parameters]
-        return and_(*child_sa_filters)
+        return and_(*self.get_child_sa_filters())
 
 
 @frozen_dataclass
@@ -242,8 +293,7 @@ class Or(MultiParameter, Branch, Predicate):
     name: str = static("Or")
 
     def to_sa_filter(self):
-        child_sa_filters = [child_predicate.to_sa_filter() for child_predicate in self.parameters]
-        return or_(*child_sa_filters)
+        return or_(*self.get_child_sa_filters())
 
 
 def get_predicate_subclass_by_type_str(predicate_type_str: str) -> Union[Type[LeafPredicateType], Type[BranchPredicateType]]:
@@ -258,6 +308,9 @@ class BadFilterFormat(SABadFilterFormat):
 
 
 class UnknownPredicateType(BadFilterFormat):
+    pass
+
+class ReferencedColumnsDontExist(BadFilterFormat):
     pass
 
 
