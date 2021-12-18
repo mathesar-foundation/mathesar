@@ -8,7 +8,7 @@ def get_predicate_from_MA_filter_spec(spec: dict) -> Predicate:
     def get_first_dict_key(dict: dict) -> Any:
         return next(iter(dict))
     if not isinstance(spec, dict):
-        raise BadFilterFormat("Parsing of Mathesar filter specification failed.")
+        raise BadFilterFormat("Mathesar filter specification must be a dict.")
     try:
         predicate_type_str = get_first_dict_key(spec)
         predicate_subclass = get_predicate_subclass_by_type_str(predicate_type_str)
