@@ -26,58 +26,6 @@ def test_get_records_filters_using_col_str_names(roster_table_obj):
     )
 
 
-@pytest.mark.skip(reason="should this be implemented?")
-def test_get_records_filters_using_col_objects(roster_table_obj):
-    roster, engine = roster_table_obj
-    filters = {"and": [
-        {"column": roster.columns["Student Name"], "parameter": "Amy Gamble"},
-        {"column": roster.columns["Subject"], "parameter": "Math"}
-    ]}
-    record_list = get_records(
-        roster, engine, filters=filters
-    )
-    assert all(
-        [
-            len(record_list) == 1,
-            record_list[0][2] == "Amy Gamble",
-            record_list[0][6] == "Math",
-        ]
-    )
-
-
-@pytest.mark.skip(reason="should this be implemented?")
-def test_get_records_filters_using_mixed_col_objects_and_str(roster_table_obj):
-    roster, engine = roster_table_obj
-    filters = {"and": [
-        {"column": roster.columns["Student Name"], "parameter": "Amy Gamble"},
-        {"equal": {"column": "Subject", "parameter": "Math"}},
-    ]}
-    record_list = get_records(
-        roster, engine, filters=filters
-    )
-    assert all(
-        [
-            len(record_list) == 1,
-            record_list[0][2] == "Amy Gamble",
-            record_list[0][6] == "Math",
-        ]
-    )
-
-
-@pytest.mark.skip(reason="should this be implemented?")
-def test_get_records_filters_with_miss(roster_table_obj):
-    roster, engine = roster_table_obj
-    # TODO rewrite filter spec
-    filters = [
-        {"column": roster.columns["Student Name"], "op": "==", "parameter": "Amy Gamble"},
-        {"column": roster.columns["Grade"], "op": "==", "parameter": 75}
-    ]
-    record_list = get_records(
-        roster, engine, filters=filters
-    )
-    assert len(record_list) == 0
-
-
 def _like(x, v):
     return re.match(v.replace("%", ".*"), x) is not None
 
@@ -198,24 +146,6 @@ variant_ops_test_list = [
     ("greater_or_equal", ">="),
     ("lesser_or_equal", "<=")
 ]
-
-
-@pytest.mark.skip(reason="should this be implemented?")
-@pytest.mark.parametrize("predicate_id,variant_op", variant_ops_test_list)
-def test_get_records_filters_variant_ops(
-    filter_sort_table_obj, predicate_id, variant_op
-):
-    filter_sort, engine = filter_sort_table_obj
-
-    filters = {predicate_id: {"column": "numeric", "parameter": 50}}
-    record_list = get_records(filter_sort, engine, filters=filters)
-
-    filters = {variant_op: {"column": "numeric", "parameter": 50}}
-    variant_record_list = get_records(filter_sort, engine, filters=filters)
-
-    assert len(record_list) == len(variant_record_list)
-    for record, variant_record in zip(record_list, variant_record_list):
-        assert record == variant_record
 
 
 boolean_ops_test_list = [

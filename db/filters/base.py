@@ -10,6 +10,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, List, Union, Type
 from sqlalchemy_filters.exceptions import BadFilterFormat as SABadFilterFormat
+from sqlalchemy import column, not_, and_, or_
+from abc import ABC, abstractmethod
 
 
 class PredicateSuperType(Enum):
@@ -50,30 +52,6 @@ class ParameterCount(Enum):
     NONE = "none"
 
 
-predicate_types_to_SA_ids = {
-    BranchPredicateType.NOT: 'not',
-    BranchPredicateType.AND: 'and',
-    BranchPredicateType.OR: 'or',
-    LeafPredicateType.EQUAL: 'eq',
-    LeafPredicateType.NOT_EQUAL: 'ne',
-    LeafPredicateType.GREATER: 'gt',
-    LeafPredicateType.GREATER_OR_EQUAL: 'ge',
-    LeafPredicateType.LESSER: 'lt',
-    LeafPredicateType.LESSER_OR_EQUAL: 'le',
-    LeafPredicateType.EMPTY: 'is_null',
-    LeafPredicateType.NOT_EMPTY: 'is_not_null',
-    LeafPredicateType.IN: 'in',
-    LeafPredicateType.NOT_IN: 'not_in',
-}
-
-
-def get_SA_id_from_predicate_type(type: Union[LeafPredicateType, BranchPredicateType]) -> str:
-    if type in predicate_types_to_SA_ids:
-        return predicate_types_to_SA_ids[type]
-    else:
-        raise Exception("This should never happen.")
-
-
 # frozen=True provides immutability
 def frozen_dataclass(f):
     return dataclass(frozen=True)(f)
@@ -87,17 +65,25 @@ def static(value):
 
 
 @frozen_dataclass
-class Predicate:
+class Predicate(ABC):
     super_type: PredicateSuperType
     type: Union[LeafPredicateType, BranchPredicateType]
     name: str
     parameter_count: ParameterCount
 
-    def saId(self) -> str:
-        return get_SA_id_from_predicate_type(self.type)
-
     def __post_init__(self):
         assert_predicate_correct(self)
+
+    @abstractmethod
+    def to_sa_filter(self):
+        """
+        Returns the equivalent SQLAlchemy filter usable as argument to a Query.filter call.
+        Not a property, since SA filter's mutability properties are unclear.
+        """
+        return None
+
+    def apply(self, query):
+        return query.filter(self.to_sa_filter())
 
 
 @frozen_dataclass
@@ -146,11 +132,17 @@ class Equal(SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.EQUAL)
     name: str = static("Equal")
 
+    def to_sa_filter(self):
+        return column(self.column) == self.parameter
+
 
 @frozen_dataclass
 class NotEqual(SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.NOT_EQUAL)
     name: str = static("Not equal")
+
+    def to_sa_filter(self):
+        return column(self.column) != self.parameter
 
 
 @frozen_dataclass
@@ -158,11 +150,17 @@ class Greater(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.GREATER)
     name: str = static("Greater")
 
+    def to_sa_filter(self):
+        return column(self.column) > self.parameter
+
 
 @frozen_dataclass
 class GreaterOrEqual(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.GREATER_OR_EQUAL)
     name: str = static("Greater or equal")
+
+    def to_sa_filter(self):
+        return column(self.column) >= self.parameter
 
 
 @frozen_dataclass
@@ -170,11 +168,17 @@ class Lesser(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.LESSER)
     name: str = static("Lesser")
 
+    def to_sa_filter(self):
+        return column(self.column) < self.parameter
+
 
 @frozen_dataclass
 class LesserOrEqual(ReliesOnComparability, SingleParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.LESSER_OR_EQUAL)
     name: str = static("Lesser or equal")
+
+    def to_sa_filter(self):
+        return column(self.column) <= self.parameter
 
 
 @frozen_dataclass
@@ -182,11 +186,17 @@ class Empty(NoParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.EMPTY)
     name: str = static("Empty")
 
+    def to_sa_filter(self):
+        return column(self.column) == None
+
 
 @frozen_dataclass
 class NotEmpty(NoParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.NOT_EMPTY)
     name: str = static("Not empty")
+
+    def to_sa_filter(self):
+        return column(self.column) != None
 
 
 @frozen_dataclass
@@ -194,11 +204,17 @@ class In(MultiParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.IN)
     name: str = static("In")
 
+    def to_sa_filter(self):
+        return column(self.column).in_(self.parameters)
+
 
 @frozen_dataclass
 class NotIn(MultiParameter, Leaf, Predicate):
     type: LeafPredicateType = static(LeafPredicateType.NOT_IN)
     name: str = static("Not in")
+
+    def to_sa_filter(self):
+        return column(self.column).not_in(self.parameters)
 
 
 @frozen_dataclass
@@ -206,11 +222,18 @@ class Not(SingleParameter, Branch, Predicate):
     type: BranchPredicateType = static(BranchPredicateType.NOT)
     name: str = static("Not")
 
+    def to_sa_filter(self):
+        return not_(self.parameter.to_sa_filter())
+
 
 @frozen_dataclass
 class And(MultiParameter, Branch, Predicate):
     type: BranchPredicateType = static(BranchPredicateType.AND)
     name: str = static("And")
+
+    def to_sa_filter(self):
+        child_sa_filters = [child_predicate.to_sa_filter() for child_predicate in self.parameters]
+        return and_(*child_sa_filters)
 
 
 @frozen_dataclass
@@ -218,15 +241,23 @@ class Or(MultiParameter, Branch, Predicate):
     type: BranchPredicateType = static(BranchPredicateType.OR)
     name: str = static("Or")
 
+    def to_sa_filter(self):
+        child_sa_filters = [child_predicate.to_sa_filter() for child_predicate in self.parameters]
+        return or_(*child_sa_filters)
+
 
 def get_predicate_subclass_by_type_str(predicate_type_str: str) -> Union[Type[LeafPredicateType], Type[BranchPredicateType]]:
     for subclass in all_predicates:
         if subclass.type.value == predicate_type_str:
             return subclass
-    raise Exception(f'Unknown predicate type: {predicate_type_str}')
+    raise UnknownPredicateType(predicate_type_str)
 
 
 class BadFilterFormat(SABadFilterFormat):
+    pass
+
+
+class UnknownPredicateType(BadFilterFormat):
     pass
 
 
@@ -247,11 +278,11 @@ all_predicates = [
 ]
 
 
-def not_empty(xs):
+def _not_empty(xs):
     return len(xs) > 0
 
 
-def all_items_unique(xs):
+def _all_items_unique(xs):
     for item1 in xs:
         times_seen = 0
         for item2 in xs:
@@ -286,7 +317,7 @@ def assert_predicate_correct(predicate):
             assert parameters is not None, "This parameter list cannot be None."
             is_parameter_list = isinstance(parameters, list)
             assert is_parameter_list, "This parameter list must be a list."
-            assert not_empty(parameters), "This parameter list must not be empty"
+            assert _not_empty(parameters), "This parameter list must not be empty"
             are_parameters_predicates = (
                 isinstance(parameter, Predicate) for parameter in parameters
             )
@@ -296,7 +327,7 @@ def assert_predicate_correct(predicate):
             elif isinstance(predicate, Branch):
                 all_parameters_are_predicates = all(are_parameters_predicates)
                 assert all_parameters_are_predicates, "A branch predicate only accepts predicate parameters."
-            all_parameters_unique = all_items_unique(parameters)
+            all_parameters_unique = _all_items_unique(parameters)
             assert all_parameters_unique, "All parameters on a single predicate must be unique."
     except AssertionError as err:
         raise BadFilterFormat from err

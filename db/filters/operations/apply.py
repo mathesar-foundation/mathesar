@@ -1,10 +1,14 @@
 from db.filters.operations.deserialize import get_predicate_from_MA_filter_spec
-from db.filters.operations.serialize import get_SA_filter_spec_from_predicate
-from sqlalchemy_filters import apply_filters
+from db.filters.base import Predicate
 
 
-def apply_ma_filter_spec(query, ma_filter_spec):
+def apply_ma_filter_spec(query, ma_filter_spec: dict):
     predicate = get_predicate_from_MA_filter_spec(ma_filter_spec)
-    sa_filter_spec = get_SA_filter_spec_from_predicate(predicate)
-    query = apply_filters(query, sa_filter_spec)
+    query = apply_ma_predicate(query, predicate)
+    return query
+
+
+def apply_ma_predicate(query, predicate: Predicate):
+    sa_filter = predicate.to_sa_filter()
+    query = query.filter(sa_filter)
     return query
