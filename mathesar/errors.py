@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from rest_framework.exceptions import APIException
 from psycopg2 import errors as pg_errors
 
+
 class InvalidTableError(Exception):
     pass
 
@@ -28,10 +29,10 @@ def default_exception_parser(exception, error_code, message=None, field_name=Non
         "details": details
     }])
 
-def integrity_exception_parser(exception, error_code, message=None, field_name=None, details=None):
 
+def integrity_exception_parser(exception, error_code, message=None, field_name=None, details=None):
     if isinstance(exception.orig, pg_errors.NotNullViolation):
-        message_str, row_detail  = exception.orig.args[0].split("DETAIL")
+        message_str, row_detail = exception.orig.args[0].split("DETAIL")
         return APIException([{
             "message": message_str,
             "error_code": error_code,
@@ -39,7 +40,7 @@ def integrity_exception_parser(exception, error_code, message=None, field_name=N
             "details": {'row_parameters': exception.params, 'row_detail': row_detail}
         }])
     return APIException([{
-        "message": str(exception) if message is None else message ,
+        "message": str(exception) if message is None else message,
         "error_code": error_code,
         "field": field_name,
         "details": details

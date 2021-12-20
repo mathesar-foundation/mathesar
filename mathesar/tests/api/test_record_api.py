@@ -342,10 +342,10 @@ def test_record_create(create_table, client):
         if column_name in data:
             assert data[column_name] == record_data[column_name]
 
+
 def test_null_error_record_create(create_table, client):
     table_name = 'NASA Record Create'
     table = create_table(table_name)
-    records = table.get_records()
     response = client.get(
         f"/api/v0/tables/{table.id}/columns/"
     )
