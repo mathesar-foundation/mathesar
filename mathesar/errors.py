@@ -32,7 +32,7 @@ def default_exception_parser(exception, error_code, message=None, field_name=Non
 @contextmanager
 def exception_transformer(mapping):
     """
-    This context manager captures any exception that is thrown and converts it into proper API exception
+    Context manager to capture any exception that is thrown and convert it into proper API exception
 
     """
     try:
@@ -45,5 +45,8 @@ def exception_transformer(mapping):
         else:
             exception = parser(exc, error_code, message, field_name, details)
         exception.status_code = status_code
-
+        raise exception
+    except Exception as exc:
+        exception = default_exception_parser(exc, 5000)
+        exception.status_code = 500
         raise exception
