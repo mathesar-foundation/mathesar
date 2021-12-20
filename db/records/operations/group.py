@@ -3,9 +3,6 @@ import json
 import logging
 from sqlalchemy import select, func, and_, case, literal
 
-from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
-from db.records.operations.select import get_query
-from db.filters.operations.apply import apply_ma_filter_spec
 from db.records import exceptions as rec_exc
 from db.records.utils import create_col_objects
 
