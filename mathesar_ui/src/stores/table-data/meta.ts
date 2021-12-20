@@ -207,7 +207,7 @@ export class Meta {
         }
         if (groupOptions.length > 0) {
           params.push(
-            `group_count_by=${encodeURIComponent(JSON.stringify(groupOptions))}`,
+            `grouping=${encodeURIComponent(JSON.stringify({ columns: groupOptions }))}`,
           );
         }
         if ($filter.filters?.length > 0) {
