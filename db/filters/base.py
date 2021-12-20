@@ -82,10 +82,6 @@ class Predicate(ABC):
         """
         return None
 
-    # TODO dead code
-    def apply(self, query):
-        return query.filter(self.to_sa_filter())
-
     @property
     @abstractmethod
     def referenced_columns(self) -> Set[str]:
@@ -178,7 +174,6 @@ def relies_on_comparability(predicate_subclass: Type[Predicate]) -> bool:
     return issubclass(predicate_subclass, ReliesOnComparability)
 
 
-# TODO get rid of redundant mixins (e.g. Predicate)
 @frozen_dataclass
 class Equal(SingleParameter, Leaf):
     type: LeafPredicateType = static(LeafPredicateType.EQUAL)
