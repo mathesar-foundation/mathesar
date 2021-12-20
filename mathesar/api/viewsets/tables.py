@@ -1,11 +1,10 @@
 from django_filters import rest_framework as filters
-from psycopg2.errors import CheckViolation, DuplicateTable, InvalidTextRepresentation
+from psycopg2.errors import DuplicateTable
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError, APIException
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
-from rest_framework.views import exception_handler
 from sqlalchemy.exc import ProgrammingError, DataError, IntegrityError
 
 from db.types.exceptions import UnsupportedTypeException
