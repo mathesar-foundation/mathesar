@@ -180,7 +180,7 @@ def relies_on_comparability(predicate_subclass: Type[Predicate]) -> bool:
 
 # TODO get rid of redundant mixins (e.g. Predicate)
 @frozen_dataclass
-class Equal(SingleParameter, Leaf, Predicate):
+class Equal(SingleParameter, Leaf):
     type: LeafPredicateType = static(LeafPredicateType.EQUAL)
     name: str = static("Equal")
 
@@ -189,7 +189,7 @@ class Equal(SingleParameter, Leaf, Predicate):
 
 
 @frozen_dataclass
-class NotEqual(SingleParameter, Leaf, Predicate):
+class NotEqual(SingleParameter, Leaf):
     type: LeafPredicateType = static(LeafPredicateType.NOT_EQUAL)
     name: str = static("Not equal")
 
@@ -198,7 +198,7 @@ class NotEqual(SingleParameter, Leaf, Predicate):
 
 
 @frozen_dataclass
-class Greater(ReliesOnComparability, SingleParameter, Leaf, Predicate):
+class Greater(ReliesOnComparability, SingleParameter, Leaf):
     type: LeafPredicateType = static(LeafPredicateType.GREATER)
     name: str = static("Greater")
 
@@ -207,7 +207,7 @@ class Greater(ReliesOnComparability, SingleParameter, Leaf, Predicate):
 
 
 @frozen_dataclass
-class GreaterOrEqual(ReliesOnComparability, SingleParameter, Leaf, Predicate):
+class GreaterOrEqual(ReliesOnComparability, SingleParameter, Leaf):
     type: LeafPredicateType = static(LeafPredicateType.GREATER_OR_EQUAL)
     name: str = static("Greater or equal")
 
@@ -216,7 +216,7 @@ class GreaterOrEqual(ReliesOnComparability, SingleParameter, Leaf, Predicate):
 
 
 @frozen_dataclass
-class Lesser(ReliesOnComparability, SingleParameter, Leaf, Predicate):
+class Lesser(ReliesOnComparability, SingleParameter, Leaf):
     type: LeafPredicateType = static(LeafPredicateType.LESSER)
     name: str = static("Lesser")
 
@@ -225,7 +225,7 @@ class Lesser(ReliesOnComparability, SingleParameter, Leaf, Predicate):
 
 
 @frozen_dataclass
-class LesserOrEqual(ReliesOnComparability, SingleParameter, Leaf, Predicate):
+class LesserOrEqual(ReliesOnComparability, SingleParameter, Leaf):
     type: LeafPredicateType = static(LeafPredicateType.LESSER_OR_EQUAL)
     name: str = static("Lesser or equal")
 
@@ -234,7 +234,7 @@ class LesserOrEqual(ReliesOnComparability, SingleParameter, Leaf, Predicate):
 
 
 @frozen_dataclass
-class Empty(NoParameter, Leaf, Predicate):
+class Empty(NoParameter, Leaf):
     type: LeafPredicateType = static(LeafPredicateType.EMPTY)
     name: str = static("Empty")
 
@@ -243,7 +243,7 @@ class Empty(NoParameter, Leaf, Predicate):
 
 
 @frozen_dataclass
-class NotEmpty(NoParameter, Leaf, Predicate):
+class NotEmpty(NoParameter, Leaf):
     type: LeafPredicateType = static(LeafPredicateType.NOT_EMPTY)
     name: str = static("Not empty")
 
@@ -252,7 +252,7 @@ class NotEmpty(NoParameter, Leaf, Predicate):
 
 
 @frozen_dataclass
-class In(MultiParameter, Leaf, Predicate):
+class In(MultiParameter, Leaf):
     type: LeafPredicateType = static(LeafPredicateType.IN)
     name: str = static("In")
 
@@ -261,7 +261,7 @@ class In(MultiParameter, Leaf, Predicate):
 
 
 @frozen_dataclass
-class NotIn(MultiParameter, Leaf, Predicate):
+class NotIn(MultiParameter, Leaf):
     type: LeafPredicateType = static(LeafPredicateType.NOT_IN)
     name: str = static("Not in")
 
@@ -270,7 +270,7 @@ class NotIn(MultiParameter, Leaf, Predicate):
 
 
 @frozen_dataclass
-class Not(SingleParameter, Branch, Predicate):
+class Not(SingleParameter, Branch):
     type: BranchPredicateType = static(BranchPredicateType.NOT)
     name: str = static("Not")
 
@@ -279,7 +279,7 @@ class Not(SingleParameter, Branch, Predicate):
 
 
 @frozen_dataclass
-class And(MultiParameter, Branch, Predicate):
+class And(MultiParameter, Branch):
     type: BranchPredicateType = static(BranchPredicateType.AND)
     name: str = static("And")
 
@@ -288,7 +288,7 @@ class And(MultiParameter, Branch, Predicate):
 
 
 @frozen_dataclass
-class Or(MultiParameter, Branch, Predicate):
+class Or(MultiParameter, Branch):
     type: BranchPredicateType = static(BranchPredicateType.OR)
     name: str = static("Or")
 
