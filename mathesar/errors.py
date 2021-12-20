@@ -43,7 +43,7 @@ def exception_transformer(mapping):
         if parser is None:
             exception = default_exception_parser(exc, error_code, message, field_name, details)
         else:
-            exception = parser(error_code, message, field_name, details)
+            exception = parser(exc, error_code, message, field_name, details)
         exception.status_code = status_code
 
         raise exception
