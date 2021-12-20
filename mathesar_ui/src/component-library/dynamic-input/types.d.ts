@@ -8,7 +8,7 @@ export type DynamicInputElementType =
 
 export interface DynamicInputSelectElement {
   inputType: 'select',
-  options: Record<string, {
+  options?: Record<string, {
     label?: string,
   }>
 }

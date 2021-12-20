@@ -27,4 +27,5 @@
 <Story name="String">
   <DynamicInput type="string"/>
   <DynamicInput type="string" inputType="textarea"/>
+  <DynamicInput type="string" enum={['Pichu', 'Pikachu', 'Raichu']}/>
 </Story>
