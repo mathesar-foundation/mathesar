@@ -22,9 +22,6 @@
   let classes = '';
   export { classes as class };
 
-  // Inline styles
-  export let style = '';
-
   // Disable input
   export let disabled = false;
 
@@ -34,14 +31,6 @@
   // Id for the input
   export let id = `text-input-${getId()}`;
 
-  let focus = false;
-
-  function focusInput(e: Event) {
-    if (e.target !== element) {
-      element?.focus();
-    }
-  }
-
   function handleKeypress(e: KeyboardEvent) {
     if (e.key === 'Enter') {
       dispatch('enter');
@@ -49,29 +38,11 @@
   }
 </script>
 
-<div
-  class={['text-input', classes].join(' ')}
-  class:focus
-  class:disabled
-  {style}
-  on:click={focusInput}
-  on:keypress={handleKeypress}
->
-  {#if $$slots.prepend}
-    <span class="prepend">
-      <slot name="prepend"></slot>
-    </span>
-  {/if}
-  <input bind:this={element} {...$$restProps} type='text' bind:value
-          {id} {disabled}
-          on:focus={() => { focus = true; }}
-          on:blur={() => { focus = false; }}/>
-  {#if $$slots.append}
-    <span class="append">
-      <slot name="append"></slot>
-    </span>
-  {/if}
-</div>
+<input bind:this={element} {...$$restProps} type='text'
+  class={['input-element', 'text-input', classes].join(' ')}
+  bind:value
+  {id} {disabled}
+  on:keypress={handleKeypress}/>
 
 <style global lang="scss">
   @import "TextInput.scss";

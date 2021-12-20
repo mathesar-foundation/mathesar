@@ -1,36 +1,24 @@
 .text-input {
   border: 1px solid #dfdfdf;
   transition: all .2s;
-  display: flex;
   align-items: center;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   background: #fff;
+  margin: 0;
+  padding: 6px 8px;
+  line-height: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  display: block;
+  width: 100%;
 
-  .prepend {
-    margin-left: 8px;
-  }
-
-  input {
-    border: none;
-    outline: 0;
-    margin: 0;
-    padding: 6px 8px;
-    line-height: inherit;
-    font-family: inherit;
-    font-size: inherit;
-    display: inline-block;
-    width: 100%;
-    border-radius: 4px;
-    background: transparent;
-  }
-
-  &.focus {
+  &:focus {
     border-color: #489ee4;
     outline: 0;
     box-shadow: 0 0 0 2px #2087e633;
   }
 
-  &.disabled {
+  &:disabled {
     background: #efefef;
   }
 }
