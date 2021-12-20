@@ -1,17 +1,29 @@
 <script lang='ts'>
-  import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
-  import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
-  import type { DynamicInputType } from './types.d';
+  import EnumInput from './EnumInput.svelte';
+  import StringInput from './StringInput..svelte';
+  import BooleanInput from './BooleanInput.svelte';
+  import type { DynamicInputType, DynamicInputElementType } from './types.d';
 
   export let type: DynamicInputType;
-  export let value;
+  export let value = undefined;
+
+  // For use with label
   export let id: string = undefined;
+  export let inputType: DynamicInputElementType = undefined;
+
+  let enumValues: unknown[] = undefined;
+  export { enumValues as enum };
+  export let options = undefined;
 </script>
 
 <div class="dynamic-input">
-  {#if type === 'boolean'}
-    <Checkbox {...$$restProps} {id} bind:value/>
-  {:else if type === 'string' || type === 'integer'}
-    <TextInput {...$$restProps} {id} bind:value/>
+  {#if enumValues || inputType === 'select'}
+    <EnumInput {...$$restProps} {enumValues} {type} {options} bind:value/>
+  {:else}
+    {#if type === 'boolean'}
+      <BooleanInput {...$$restProps} {inputType} bind:value/>
+    {:else if type === 'string'}
+      <StringInput {...$$restProps} {inputType} bind:value/>
+    {/if}
   {/if}
 </div>
