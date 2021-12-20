@@ -2,11 +2,12 @@ import warnings
 
 from sqlalchemy import MetaData, select, and_, not_, or_, Table
 
+from db import constants
 from db import types
 
-
 TYPES_SCHEMA = types.base.SCHEMA
-EXCLUDED_SCHEMATA = [TYPES_SCHEMA, "information_schema"]
+TEMP_INFER_SCHEMA = constants.INFERENCE_SCHEMA
+EXCLUDED_SCHEMATA = [TYPES_SCHEMA, TEMP_INFER_SCHEMA, "information_schema"]
 
 
 def reflect_schema(engine, name=None, oid=None):
