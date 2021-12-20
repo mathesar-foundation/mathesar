@@ -2,7 +2,7 @@ from collections import namedtuple
 from contextlib import contextmanager
 
 from rest_framework.exceptions import APIException, ValidationError
-
+from psycopg2 import errors as pg_errors
 
 class InvalidTableError(Exception):
     pass
@@ -21,6 +21,23 @@ ExceptionTransformerDetail = namedtuple('ExceptionTransformerDetail',
 
 
 def default_exception_parser(exception, error_code, message=None, field_name=None, details=None):
+    return APIException([{
+        "message": str(exception) if message is None else message ,
+        "error_code": error_code,
+        "field": field_name,
+        "details": details
+    }])
+
+def integrity_exception_parser(exception, error_code, message=None, field_name=None, details=None):
+
+    if isinstance(exception.orig, pg_errors.NotNullViolation):
+        message_str, row_detail  = exception.orig.args[0].split("DETAIL")
+        return APIException([{
+            "message": message_str,
+            "error_code": error_code,
+            "field": field_name,
+            "details": {'row_parameters': exception.params, 'row_detail': row_detail}
+        }])
     return APIException([{
         "message": str(exception) if message is None else message ,
         "error_code": error_code,

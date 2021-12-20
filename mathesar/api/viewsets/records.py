@@ -2,12 +2,14 @@ from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.renderers import BrowsableAPIRenderer
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
 
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
+from mathesar.errors import exception_transformer, ExceptionTransformerDetail, integrity_exception_parser
 from mathesar.models import Table
 from mathesar.utils.json import MathesarJSONRenderer
 
@@ -60,7 +62,8 @@ class RecordViewSet(viewsets.ViewSet):
         table = get_table_or_404(table_pk)
         # We only support adding a single record through the API.
         assert isinstance((request.data), dict)
-        record = table.create_record_or_records(request.data)
+        with exception_transformer({IntegrityError: ExceptionTransformerDetail(400, 4001, integrity_exception_parser, None, None, None)}):
+            record = table.create_record_or_records(request.data)
         serializer = RecordSerializer(record)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
