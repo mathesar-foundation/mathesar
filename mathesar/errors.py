@@ -1,7 +1,7 @@
 from collections import namedtuple
 from contextlib import contextmanager
 
-from rest_framework.exceptions import APIException, ValidationError
+from rest_framework.exceptions import APIException
 
 
 class InvalidTableError(Exception):
@@ -10,19 +10,19 @@ class InvalidTableError(Exception):
 
 ExceptionTransformerDetail = namedtuple('ExceptionTransformerDetail',
                                         [
-                                         'status_code',
-                                         'error_code',
-                                         'parser',
-                                         'message',
-                                         'field_name',
-                                         'details']
+                                            'status_code',
+                                            'error_code',
+                                            'parser',
+                                            'message',
+                                            'field_name',
+                                            'details'
+                                        ]
                                         )
-
 
 
 def default_exception_parser(exception, error_code, message=None, field_name=None, details=None):
     return APIException([{
-        "message": str(exception) if message is None else message ,
+        "message": str(exception) if message is None else message,
         "error_code": error_code,
         "field": field_name,
         "details": details
