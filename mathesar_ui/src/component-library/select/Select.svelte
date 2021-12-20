@@ -21,6 +21,7 @@
   const dispatch = createEventDispatcher();
   const selectId: number = getSelectId();
 
+  // DISCUSS: Maybe valueKey = 'value' is a better term to use than idKey
   /**
    * Specifies the key on which the options ID is stored.
    */
@@ -69,7 +70,8 @@
   function setValue(opt: SelectOption) {
     value = opt;
     dispatch('change', {
-      value,
+      value, // TODO: Change this to reflect value within option
+      option: value,
     });
     isOpen = false;
   }

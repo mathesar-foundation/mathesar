@@ -1,3 +1,5 @@
+import type { SelectOption } from '@mathesar-component-library-dir/select/Select.d';
+
 export type DynamicInputType =
   'boolean' | 'integer' | 'float' | 'string' | 'date' | 'datetime' | 'time';
 
@@ -9,4 +11,9 @@ export interface DynamicInputSelectElement {
   options: Record<string, {
     label?: string,
   }>
+}
+
+export interface EnumSelectOption extends SelectOption<unknown> {
+  value: unknown,
+  label: string
 }
