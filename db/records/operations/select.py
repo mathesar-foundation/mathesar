@@ -1,7 +1,9 @@
 from sqlalchemy import select, func
 from sqlalchemy_filters import apply_sort
+from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
 from db.columns.base import MathesarColumn
+from db.records.operations import group
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.utils import execute_query
@@ -19,12 +21,26 @@ def _get_duplicate_only_cte(table, duplicate_columns):
     return select(duplicate_flag_cte).where(duplicate_flag_cte.c[DUPLICATE_LABEL]).cte()
 
 
-def get_query(table, limit=None, offset=None, order_by=None, filters=None, duplicate_only=None, cols=None):
+def get_query(
+    table,
+    limit=None,
+    offset=None,
+    order_by=None,
+    filters=None,
+    duplicate_only=None,
+    cols=None,
+    group_by=None
+):
     if duplicate_only:
         select_target = _get_duplicate_only_cte(table, duplicate_only)
     else:
         select_target = table
-    query = select(*(cols or select_target.c)).select_from(select_target).limit(limit).offset(offset)
+    if isinstance(group_by, group.GroupBy):
+        query = group.get_group_augmented_records_query(table, group_by)
+    else:
+        query = select(*(cols or select_target.c)).select_from(select_target)
+
+    query = query.limit(limit).offset(offset)
     if order_by is not None:
         query = apply_sort(query, order_by)
     if filters is not None:
@@ -43,10 +59,10 @@ def get_record(table, engine, id_value):
 # TODO update doc for filters and duplicate_only
 # TODO handle columns specified in order_by, filters, duplicate_only not existing on the table
 def get_records(
-        table, engine, limit=None, offset=None, order_by=[], filters=None, duplicate_only=None
+    table, engine, limit=None, offset=None, order_by=[], filters=None, duplicate_only=None, group_by=None,
 ):
     """
-    Returns records from a table.
+    Returns annotated records from a table.
 
     Args:
         table:    SQLAlchemy table object
@@ -59,6 +75,7 @@ def get_records(
         filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
+        group_by: group.GroupBy object
     """
     if not order_by:
         # Set default ordering if none was requested
@@ -74,8 +91,8 @@ def get_records(
                         for col in table.columns]
 
     query = get_query(
-        table=table, limit=limit, offset=offset,
-        order_by=order_by, filters=filters, duplicate_only=duplicate_only
+        table=table, limit=limit, offset=offset, order_by=order_by,
+        filters=filters, duplicate_only=duplicate_only, group_by=group_by
     )
     return execute_query(engine, query)
 

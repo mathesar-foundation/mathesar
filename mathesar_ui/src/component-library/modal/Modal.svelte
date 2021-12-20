@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, tick } from 'svelte';
   import { fade, fly } from 'svelte/transition';
   import { faTimes } from '@fortawesome/free-solid-svg-icons';
   import type { Size } from '@mathesar-component-library/types';
@@ -37,7 +37,12 @@
     }
   }
 
-  $: if (isOpen) { dispatch('open'); } else { dispatch('close'); }
+  async function dispatchOpenOrClose(_isOpen: boolean) {
+    await tick();
+    dispatch(_isOpen ? 'open' : 'close');
+  }
+
+  $: void dispatchOpenOrClose(isOpen);
 </script>
 
 <svelte:window on:keydown={handleKeydown}/>

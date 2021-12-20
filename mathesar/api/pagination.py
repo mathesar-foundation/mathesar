@@ -3,7 +3,8 @@ from collections import OrderedDict
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
-from mathesar.api.utils import get_table_or_404
+from db.records.operations.group import GroupBy
+from mathesar.api.utils import get_table_or_404, process_annotated_records
 
 
 class DefaultLimitOffsetPagination(LimitOffsetPagination):
@@ -33,8 +34,8 @@ class ColumnLimitOffsetPagination(DefaultLimitOffsetPagination):
 class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
 
     def paginate_queryset(
-        self, queryset, request, table_id,
-        filters=None, order_by=[], duplicate_only=None
+        self, queryset, request, table_id, filters=None,
+        order_by=[], duplicate_only=None, group_by=None,
     ):
         self.limit = self.get_limit(request)
         if self.limit is None:
@@ -46,7 +47,12 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         self.request = request
 
         return table.get_records(
-            self.limit, self.offset, filters=filters, order_by=order_by, duplicate_only=duplicate_only,
+            self.limit,
+            self.offset,
+            filters=filters,
+            order_by=order_by,
+            group_by=group_by,
+            duplicate_only=duplicate_only,
         )
 
 
@@ -54,36 +60,40 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
     def get_paginated_response(self, data):
         return Response(OrderedDict([
             ('count', self.count),
-            ('group_count', self.group_count),
+            ('grouping', self.grouping),
             ('results', data)
         ]))
 
     def paginate_queryset(
         self, queryset, request, table_id,
-        filters=None, order_by=[], group_count_by=[], duplicate_only=None
+        filters=None, order_by=[], duplicate_only=None, grouping={},
     ):
+        group_by = GroupBy(**grouping) if grouping else None
+
         records = super().paginate_queryset(
-            queryset, request, table_id,
-            filters=filters, order_by=order_by, duplicate_only=duplicate_only
+            queryset,
+            request,
+            table_id,
+            filters=filters,
+            duplicate_only=duplicate_only,
+            order_by=order_by,
+            group_by=group_by,
         )
 
-        table = get_table_or_404(pk=table_id)
-        if group_count_by:
-            group_count = table.get_group_counts(
-                group_count_by, self.limit, self.offset,
-                filters=filters, order_by=order_by
-            )
-            # Convert the tuple keys into strings so it can be converted to JSON
-            group_count = [{"values": list(cols), "count": count}
-                           for cols, count in group_count.items()]
-            self.group_count = {
-                'group_count_by': group_count_by,
-                'results': group_count,
+        if records:
+            processed_records, groups = process_annotated_records(records)
+        else:
+            processed_records, groups = None, None
+
+        if group_by:
+            self.grouping = {
+                'columns': group_by.columns,
+                'mode': group_by.mode,
+                'num_groups': group_by.num_groups,
+                'ranged': group_by.ranged,
+                'groups': groups,
             }
         else:
-            self.group_count = {
-                'group_count_by': None,
-                'results': None,
-            }
+            self.grouping = None
 
-        return records
+        return processed_records

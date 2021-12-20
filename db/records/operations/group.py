@@ -1,124 +1,243 @@
-from sqlalchemy import select, Column, func
+from enum import Enum
+import json
+import logging
+from sqlalchemy import select, func, and_, case, literal
 
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.select import get_query
 from db.filters.operations.apply import apply_ma_filter_spec
+from db.records import exceptions as rec_exc
 from db.records.utils import create_col_objects
-from db.utils import execute_query
+
+logger = logging.getLogger(__name__)
+
+MATHESAR_GROUP_METADATA = '__mathesar_group_metadata'
 
 
-def append_distinct_tuples_to_filter(distinct_tuples):
-    filters = []
-    for col, value in distinct_tuples:
-        filters.append({
-            "field": col,
-            "op": "==",
-            "value": value,
-        })
-    return filters
+class GroupMode(Enum):
+    DISTINCT = 'distinct'
+    PERCENTILE = 'percentile'
 
 
-def get_distinct_tuple_values(
-        column_list, engine, table=None, limit=None, offset=None, output_table=None
-):
-    """
-    Returns distinct tuples from a given list of columns.
-
-    Args:
-        column_list: list of column names or SQLAlchemy column objects
-        engine:   SQLAlchemy engine object
-        table:    SQLAlchemy table object
-        limit:    int, gives number of rows to return
-        offset:   int, gives number of rows to skip
-
-    If no table is given, the column_list must consist entirely of
-    SQLAlchemy column objects associated with a table.
-    """
-    if table is not None:
-        column_objects = create_col_objects(table, column_list)
-    else:
-        column_objects = column_list
-    try:
-        assert all([type(col) == Column for col in column_objects])
-    except AssertionError as e:
-        raise e
-
-    query = (
-        select(*column_objects)
-        .distinct()
-        .limit(limit)
-        .offset(offset)
-    )
-    result = execute_query(engine, query)
-    if output_table is not None:
-        column_objects = [output_table.columns[col.name] for col in column_objects]
-    return [tuple(zip(column_objects, row)) for row in result]
+class GroupMetadataField(Enum):
+    COUNT = 'count'
+    GROUP_ID = 'group_id'
+    FIRST_VALUE = 'first_value'
+    LAST_VALUE = 'last_value'
 
 
-def _get_filtered_group_by_count_query(
-        table, engine, group_by, limit, offset, order_by, filters, count_query
-):
-    # Get the list of groups that we should count.
-    # We're considering limit and offset here so that we only count relevant groups
-    relevant_subtable_query = get_query(table, limit, offset, order_by, filters)
-    relevant_subtable_cte = relevant_subtable_query.cte()
-    cte_columns = create_col_objects(relevant_subtable_cte, group_by)
-    distinct_tuples = get_distinct_tuple_values(cte_columns, engine, output_table=table)
-    if distinct_tuples:
-        limited_filters = [
-            {
-                "or": [
-                    append_distinct_tuples_to_filter(distinct_tuple_spec)
-                    for distinct_tuple_spec in distinct_tuples
-                ]
-            }
-        ]
-        filtered_count_query = apply_ma_filter_spec(count_query, limited_filters)
-    else:
-        filtered_count_query = None
-    return filtered_count_query
+class GroupBy:
+    def __init__(
+            self, columns, mode=GroupMode.DISTINCT.value, num_groups=None
+    ):
+        self._columns = tuple(columns) if type(columns) != str else tuple([columns])
+        self._mode = mode
+        self._num_groups = num_groups
+        self._ranged = bool(mode != GroupMode.DISTINCT.value)
+
+    @property
+    def columns(self):
+        return self._columns
+
+    @property
+    def mode(self):
+        return self._mode
+
+    @property
+    def num_groups(self):
+        return self._num_groups
+
+    @property
+    def ranged(self):
+        return self._ranged
+
+    def validate(self):
+        group_modes = {group_mode.value for group_mode in GroupMode}
+        if self.mode not in group_modes:
+            raise rec_exc.InvalidGroupType(
+                f'mode "{self.mode}" is invalid. valid modes are: '
+                + ', '.join([f"'{gm}'" for gm in group_modes])
+            )
+        if (
+                self.mode == GroupMode.PERCENTILE.value
+                and not type(self.num_groups) == int
+        ):
+            raise rec_exc.BadGroupFormat(
+                'percentile mode requires integer num_groups'
+            )
+
+        for col in self.columns:
+            if type(col) != str:
+                raise rec_exc.BadGroupFormat(
+                    f"Group column {col} must be a string."
+                )
+
+    def get_validated_group_by_columns(self, table):
+        self.validate()
+        for col in self.columns:
+            col_name = col if isinstance(col, str) else col.name
+            if col_name not in table.columns:
+                raise rec_exc.GroupFieldNotFound(
+                    f"Group col {col} not found in {table}."
+                )
+        return create_col_objects(table, self.columns)
 
 
-def get_group_counts(table, engine, group_by, limit=None, offset=None, order_by=[], filters=[]):
+class GroupingWindowDefinition:
+    def __init__(self, partition_by, order_by):
+        self._partition_by = partition_by
+        self._order_by = tuple(order_by)
+        self._range = (None, None)
+
+    @property
+    def partition_by(self):
+        return self._partition_by
+
+    @property
+    def order_by(self):
+        return self._order_by
+
+    @property
+    def range_(self):
+        return self._range
+
+
+def get_group_augmented_records_query(table, group_by):
     """
     Returns counts by specified groupings
 
     Args:
-        table:    SQLAlchemy table object
-        engine:   SQLAlchemy engine object
-        limit:    int, gives number of rows to return
-        offset:   int, gives number of rows to skip
-        group_by: list or tuple of column names or column objects to group by
-        order_by: list of dictionaries, where each dictionary has a 'field' and
-                  'direction' field.
-                  See: https://github.com/centerofci/sqlalchemy-filters#sort-format
-        filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
-                  field, in addition to an 'value' field if appropriate.
-                  See: https://github.com/centerofci/sqlalchemy-filters#filters-format
+        table:      SQLAlchemy table object
+        group_by:   GroupBy object giving args for grouping
     """
-    if type(group_by) not in (tuple, list):
-        raise BadGroupFormat(f"Group spec {group_by} must be list or tuple.")
-    for field in group_by:
-        if type(field) not in (str, Column):
-            raise BadGroupFormat(f"Group field {field} must be a string or Column.")
-        field_name = field if type(field) == str else field.name
-        if field_name not in table.c:
-            raise GroupFieldNotFound(f"Group field {field} not found in {table}.")
+    grouping_columns = group_by.get_validated_group_by_columns(table)
 
-    table_columns = create_col_objects(table, group_by)
-    count_query = (
-        select(*table_columns, func.count(table_columns[0]))
-        .group_by(*table_columns)
-    )
-    if filters is not None:
-        count_query = apply_ma_filter_spec(count_query, filters)
-    filtered_count_query = _get_filtered_group_by_count_query(
-        table, engine, group_by, limit, offset, order_by, filters, count_query
-    )
-    if filtered_count_query is not None:
-        records = execute_query(engine, filtered_count_query)
-        # Last field is the count, preceding fields are the group by fields
-        counts = {(*record[:-1],): record[-1] for record in records}
+    if group_by.mode == GroupMode.PERCENTILE.value:
+        query = _get_percentile_range_group_select(
+            table, grouping_columns, group_by.num_groups
+        )
+    elif group_by.mode == GroupMode.DISTINCT.value:
+        query = _get_distinct_group_select(table, grouping_columns)
     else:
-        counts = {}
-    return counts
+        raise rec_exc.BadGroupFormat("Unknown error")
+    return query
+
+
+def _get_distinct_group_select(table, grouping_columns):
+    window_def = GroupingWindowDefinition(
+        order_by=grouping_columns, partition_by=grouping_columns
+    )
+
+    group_id_expr = func.dense_rank().over(
+        order_by=window_def.order_by, range_=window_def.range_
+    )
+    return select(
+        table,
+        _get_group_metadata_definition(window_def, grouping_columns, group_id_expr)
+    )
+
+
+def _get_percentile_range_group_select(table, columns, num_groups):
+    column_names = [col.name for col in columns]
+    CUME_DIST = 'cume_dist'
+    RANGE_ID = 'range_id'
+    cume_dist_cte = select(
+        table,
+        func.cume_dist().over(order_by=columns).label(CUME_DIST)
+    ).cte()
+    ranges = [
+        (
+            and_(
+                cume_dist_cte.columns[CUME_DIST] > i / num_groups,
+                cume_dist_cte.columns[CUME_DIST] <= (i + 1) / num_groups
+            ),
+            i + 1
+        )
+        for i in range(num_groups)
+    ]
+
+    ranges_cte = select(
+        *[col for col in cume_dist_cte.columns if col.name != CUME_DIST],
+        case(*ranges).label(RANGE_ID)
+    ).cte()
+    ranges_agg_cols = [
+        col for col in ranges_cte.columns if col.name in column_names
+    ]
+    window_def = GroupingWindowDefinition(
+        order_by=ranges_agg_cols, partition_by=ranges_cte.columns[RANGE_ID]
+    )
+    group_id_expr = window_def.partition_by
+
+    return select(
+        *[col for col in ranges_cte.columns if col.name in table.columns],
+        _get_group_metadata_definition(window_def, ranges_agg_cols, group_id_expr)
+    )
+
+
+def _get_group_metadata_definition(window_def, grouping_columns, group_id_expr):
+    col_key_value_tuples = ((literal(str(col.name)), col) for col in grouping_columns)
+    col_key_value_list = [
+        col_part for col_tup in col_key_value_tuples for col_part in col_tup
+    ]
+    inner_grouping_object = func.json_build_object(*col_key_value_list)
+
+    return func.json_build_object(
+        literal(GroupMetadataField.GROUP_ID.value),
+        group_id_expr,
+        literal(GroupMetadataField.COUNT.value),
+        func.count(1).over(partition_by=window_def.partition_by),
+        literal(GroupMetadataField.FIRST_VALUE.value),
+        func.first_value(inner_grouping_object).over(
+            partition_by=window_def.partition_by,
+            order_by=window_def.order_by,
+            range_=window_def.range_,
+        ),
+        literal(GroupMetadataField.LAST_VALUE.value),
+        func.last_value(inner_grouping_object).over(
+            partition_by=window_def.partition_by,
+            order_by=window_def.order_by,
+            range_=window_def.range_,
+        ),
+    ).label(MATHESAR_GROUP_METADATA)
+
+
+def extract_group_metadata(
+        record_dictionaries, data_key='data', metadata_key='metadata',
+):
+    """
+    This function takes an iterable of record dictionaries with record data and
+    record metadata, and moves the group metadata from the data section to the
+    metadata section.
+    """
+    def _get_record_pieces(record):
+        data = {
+            k: v for k, v in record[data_key].items()
+            if k != MATHESAR_GROUP_METADATA
+        }
+        group_metadata = record[data_key].get(MATHESAR_GROUP_METADATA, {})
+        if group_metadata:
+            metadata = (
+                record.get(metadata_key, {})
+                | {
+                    GroupMetadataField.GROUP_ID.value: group_metadata.get(
+                        GroupMetadataField.GROUP_ID.value
+                    )
+                }
+            )
+        else:
+            metadata = record.get(metadata_key)
+        return (
+            {data_key: data, metadata_key: metadata},
+            group_metadata if group_metadata else None
+        )
+
+    record_tup, group_tup = zip(
+        *(_get_record_pieces(record) for record in record_dictionaries)
+    )
+
+    reduced_groups = sorted(
+        [json.loads(blob) for blob in set([json.dumps(group) for group in group_tup])],
+        key=lambda x: x[GroupMetadataField.GROUP_ID.value] if x else None
+    )
+
+    return list(record_tup), reduced_groups if reduced_groups != [None] else None

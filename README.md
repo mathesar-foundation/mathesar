@@ -1,8 +1,10 @@
 # Mathesar
 
-Mathesar is a project to make databases easier to use for non-technical users. Our aim is help users of all skill levels store, manipulate, visualize, and collaborate with others on data.
+Mathesar is an open source software project to help users store, organize, visualize, and collaborate on data. Our goal is to provide an intuitive user experience for non-technical users. Mathesar is backed by PostgreSQL, which gives it the flexibility to be interoperable with thousands of other existing tools and applications.
 
-We are currently in early development and hope to release an alpha version by late 2021. Please see the [Mathesar wiki](https://wiki.mathesar.org/) for more information about the project.
+Potential use cases for Mathesar include publishing and exploring public datasets, running business processes such inventory management and project tracking, providing a ready-made interface for speedy data entry and custom reporting, collecting and processing data from large groups of people, simple data cleaning and analysis, and automatic web API generation.
+
+We started building Mathesar in March 2021 and are making steady progress towards releasing an initial version of the project by spring 2022. Please visit [our public wiki](https://wiki.mathesar.org/) to learn more about the project.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->

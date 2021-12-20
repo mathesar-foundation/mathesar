@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.cache import cache
 
 from mathesar.api.filters import get_filter_options_for_database
+from mathesar.api.display_options import DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER
 from mathesar.reflection import reflect_db_objects
 from mathesar.models import Table, Schema, Database
 from db.tests.types import fixtures
@@ -213,6 +214,9 @@ def test_type_list(client, test_db_name):
     assert len(response_data) == len(database.supported_types)
     for supported_type in response_data:
         assert all([key in supported_type for key in ['identifier', 'name', 'db_types']])
+        found_display_options = supported_type.get('display_options')
+        expected_display_options = DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER.get(supported_type.get('identifier'))
+        assert found_display_options == expected_display_options
 
 
 def test_filter_list(client, test_db_name):
@@ -235,6 +239,7 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
             "db_types": [
                 "MATHESAR_TYPES.EMAIL"
             ],
+            'display_options': None
         },
         {
             "identifier": "money",
@@ -243,6 +248,7 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
                 "MONEY",
                 "MATHESAR_TYPES.MONEY"
             ],
+            'display_options': None
         },
         {
             "identifier": "uri",
@@ -250,6 +256,7 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
             "db_types": [
                 "MATHESAR_TYPES.URI"
             ],
+            'display_options': None
         },
     ]
     reflect_db_objects()

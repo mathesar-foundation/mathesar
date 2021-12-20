@@ -1,14 +1,17 @@
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
+from rest_framework.renderers import BrowsableAPIRenderer
 from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, SortFieldNotFound
 
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.filters.base import ReferencedColumnsDontExist
+from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.models import Table
+from mathesar.utils.json import MathesarJSONRenderer
 
 
 class RecordViewSet(viewsets.ViewSet):
@@ -17,6 +20,8 @@ class RecordViewSet(viewsets.ViewSet):
     # where the entire record needs to be replaced, PATCH suffices for updates.
     def get_queryset(self):
         return Table.objects.all().order_by('-created_at')
+
+    renderer_classes = [MathesarJSONRenderer, BrowsableAPIRenderer]
 
     # For filter parameter formatting, see:
     # https://github.com/centerofci/sqlalchemy-filters#filters-format
@@ -33,15 +38,15 @@ class RecordViewSet(viewsets.ViewSet):
                 self.get_queryset(), request, table_pk,
                 filters=serializer.validated_data['filters'],
                 order_by=serializer.validated_data['order_by'],
-                group_count_by=serializer.validated_data['group_count_by'],
                 duplicate_only=serializer.validated_data['duplicate_only'],
+                grouping=serializer.validated_data['grouping'],
             )
         except (BadFilterFormat, ReferencedColumnsDontExist) as e:
             raise ValidationError({'filters': e})
         except (BadSortFormat, SortFieldNotFound) as e:
             raise ValidationError({'order_by': e})
-        except (BadGroupFormat, GroupFieldNotFound) as e:
-            raise ValidationError({'group_count_by': e})
+        except (BadGroupFormat, GroupFieldNotFound, InvalidGroupType) as e:
+            raise ValidationError({'grouping': e})
 
         serializer = RecordSerializer(records, many=True)
         return paginator.get_paginated_response(serializer.data)
