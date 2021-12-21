@@ -4,12 +4,11 @@
  * out of the main project.
  */
 
+@import "common/styles/main.scss";
+
 @import "text-avatar/TextAvatar.scss";
 @import "input-group/InputGroup.scss";
-@import "text-input/TextInput.scss";
-@import "text-area/TextArea.scss";
 @import "checkbox/Checkbox.scss";
-@import "number-input/NumberInput.scss";
 @import "button/Button.scss";
 @import "icon/Icon.scss";
 @import "progress/Progress.scss";

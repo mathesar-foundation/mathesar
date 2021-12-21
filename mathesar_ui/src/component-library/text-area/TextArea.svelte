@@ -6,4 +6,4 @@
   export let value = '';
 </script>
 
-<textarea class="text-area" bind:value {...$$restProps} />
+<textarea class="input-element text-area" bind:value {...$$restProps} />
