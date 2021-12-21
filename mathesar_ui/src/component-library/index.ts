@@ -18,6 +18,7 @@ export * from './input-group';
 export { default as TextInput } from './text-input/TextInput.svelte';
 export { default as TextArea } from './text-area/TextArea.svelte';
 export { default as Checkbox } from './checkbox/Checkbox.svelte';
+export { default as NumberInput } from './number-input/NumberInput.svelte';
 export { default as Button } from './button/Button.svelte';
 export { default as Icon } from './icon/Icon.svelte';
 export { default as Progress } from './progress/Progress.svelte';
