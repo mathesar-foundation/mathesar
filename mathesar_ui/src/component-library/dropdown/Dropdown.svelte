@@ -123,7 +123,3 @@
     <slot name="content"></slot>
   </div>
 {/if}
-
-<style global lang="scss">
-  @import "Dropdown.scss";
-</style>

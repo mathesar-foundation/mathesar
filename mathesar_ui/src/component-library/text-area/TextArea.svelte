@@ -7,7 +7,3 @@
 </script>
 
 <textarea class="text-area" bind:value {...$$restProps} />
-
-<style global lang="scss">
-  @import "TextArea.scss";
-</style>

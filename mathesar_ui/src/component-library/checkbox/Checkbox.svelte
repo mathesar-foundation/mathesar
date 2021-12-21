@@ -42,7 +42,3 @@
     <span class="label">{label}</span>
   {/if}
 </label>
-
-<style global lang="scss">
-  @import "Checkbox.scss";
-</style>

@@ -25,7 +25,3 @@
 <div class="text-avatar" style="background:{color}">
   <div>{initials}</div>
 </div>
-
-<style global lang="scss">
-  @import "TextAvatar.scss";
-</style>

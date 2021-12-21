@@ -111,7 +111,3 @@
     </li>
   {/if}
 </ul>
-
-<style global lang="scss">
-  @import "Pagination.scss";
-</style>

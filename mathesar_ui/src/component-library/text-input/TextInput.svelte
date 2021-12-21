@@ -43,7 +43,3 @@
   bind:value
   {id} {disabled}
   on:keypress={handleKeypress}/>
-
-<style global lang="scss">
-  @import "TextInput.scss";
-</style>

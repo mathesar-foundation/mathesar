@@ -59,7 +59,3 @@
     <path d={path}></path>
   {/if}
 </svg>
-
-<style global lang="scss">
-  @import "Icon.scss";
-</style>

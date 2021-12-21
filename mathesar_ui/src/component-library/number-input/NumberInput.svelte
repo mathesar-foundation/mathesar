@@ -77,7 +77,3 @@
   class={['input-element', 'number-input', classes].join(' ')}
   {value} {id} {disabled} {min} {max}
   on:input={onInput}/>
-
-<style global lang="scss">
-  @import "NumberInput.scss";
-</style>

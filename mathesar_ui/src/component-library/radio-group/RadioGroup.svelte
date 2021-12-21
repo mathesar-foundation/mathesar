@@ -21,7 +21,3 @@
     {/each}
   </div>
 </fieldset>
-
-<style global lang="scss">
-  @import "RadioGroup.scss"
-</style>

@@ -53,7 +53,3 @@
     {/each}
   </ul>
 </div>
-
-<style global lang="scss">
-  @import "Tree.scss";
-</style>

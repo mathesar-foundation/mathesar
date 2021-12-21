@@ -184,7 +184,3 @@
     </ul>
   </svelte:fragment>
 </Dropdown>
-
-<style global lang="scss">
-  @import "Select.scss";
-</style>

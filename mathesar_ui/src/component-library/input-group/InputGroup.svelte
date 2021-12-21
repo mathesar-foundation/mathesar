@@ -10,7 +10,3 @@
 >
   <slot></slot>
 </div>
-
-<style global lang="scss">
-  @import "InputGroup.scss";
-</style>
