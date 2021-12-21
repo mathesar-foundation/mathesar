@@ -2,6 +2,7 @@
   import EnumInput from './EnumInput.svelte';
   import StringInput from './StringInput..svelte';
   import BooleanInput from './BooleanInput.svelte';
+  import NumberInput from '../number-input/NumberInput.svelte';
   import type { DynamicInputType, DynamicInputElementType } from './types.d';
 
   /**
@@ -44,11 +45,11 @@
 <div class="dynamic-input">
   {#if enumValues || inputType === 'select'}
     <EnumInput {...$$restProps} {enumValues} {type} {options} bind:value/>
-  {:else}
-    {#if type === 'boolean'}
-      <BooleanInput {...$$restProps} {inputType} bind:value/>
-    {:else if type === 'string'}
-      <StringInput {...$$restProps} {inputType} bind:value/>
-    {/if}
+  {:else if type === 'boolean'}
+    <BooleanInput {...$$restProps} {inputType} bind:value/>
+  {:else if type === 'integer' || type === 'float'}
+    <NumberInput {...$$restProps} isInteger={type === 'integer'} bind:value/>
+  {:else if type === 'string'}
+    <StringInput {...$$restProps} {inputType} bind:value/>
   {/if}
 </div>
