@@ -3,28 +3,58 @@ import type { DynamicInputType } from '@mathesar-component-library-dir/dynamic-i
 
 export type InputDataType = boolean | string | number | undefined;
 
-export type LayoutInputElement = {
+export interface LayoutInputBaseElement {
   type: 'input',
+  inputType?: string,
   variable: string,
-  title?: string
-};
+  label?: string,
+}
+
+export interface LayoutInputSelectElement extends LayoutInputBaseElement {
+  inputType: 'select',
+  options: Record<string, {
+    label?: string,
+  }>
+}
+
+export type LayoutInputElement = LayoutInputBaseElement | LayoutInputSelectElement;
 
 export type LayoutDividerElement = {
   type: 'divider'
 };
 
-export type LayoutElement = LayoutInputElement | LayoutDividerElement;
+export type LayoutConditionalSwitchElement = {
+  type: 'switch',
+  switch: string,
+  cases: Record<string, LayoutElement[]>
+};
+
+export type LayoutConditionalIfElement = {
+  type: 'if',
+  if: string,
+  condition: 'eq' | 'neq',
+  value: unknown,
+  elements: LayoutElement[]
+};
+
+export type LayoutConditionalElement = LayoutConditionalSwitchElement | LayoutConditionalIfElement;
+
+export type LayoutElement = LayoutInputElement
+| LayoutDividerElement
+| LayoutConditionalElement
+| Layout;
 
 export interface Layout {
   type?: 'layout',
-  orientation: 'vertical' | 'horizonal',
-  elements: (LayoutElement | Layout)[],
+  orientation: 'vertical' | 'horizontal',
+  elements: LayoutElement[],
 }
 
 export interface FormConfiguration {
   variables: Record<string, {
     type: DynamicInputType,
-    default: InputDataType
+    default: InputDataType,
+    enum?: unknown[]
   }>,
   layout: Layout
 }
