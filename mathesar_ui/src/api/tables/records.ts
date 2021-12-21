@@ -33,8 +33,13 @@ export interface Grouping {
   /** Each string is a column name */
   columns: string[],
   mode: GroupingMode,
-  /** TODO clarify purpose and behavior from back end team */
-  num_groups: unknown,
+  /**
+   * When `mode` === 'distinct', `num_groups` will always be `null`.
+   *
+   * When `mode` === 'percentile', `num_groups` will give the number of groups,
+   * as specified in the request params.
+   */
+  num_groups: number | null,
   ranged: boolean,
   groups: Group[],
 }
