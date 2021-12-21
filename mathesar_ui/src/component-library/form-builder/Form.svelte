@@ -1,6 +1,6 @@
 <script lang='ts'>
   import { createEventDispatcher } from 'svelte';
-  import FormLayout from './FormLayout.svelte';
+  import FormElement from './FormElement.svelte';
   import type { FormBuildConfiguration } from './types.d';
 
   const dispatch = createEventDispatcher();
@@ -15,6 +15,6 @@
 
 <div class="form">
   <form on:submit|preventDefault={submit}>
-    <FormLayout {...form}/>
+    <FormElement stores={form.stores} variables={form.variables} element={form.layout}/>
   </form>
 </div>
