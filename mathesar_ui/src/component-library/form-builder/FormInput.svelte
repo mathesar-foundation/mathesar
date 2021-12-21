@@ -13,15 +13,16 @@
   import type { LayoutInputElement } from './types.d';
 
   export let type: DynamicInputType;
-  export let title: LayoutInputElement['title'];
+  export let label: LayoutInputElement['label'];
   export let store;
 
   const inputId = `form-input-${getId()}`;
 </script>
 
 <div class="form-input">
+  <!-- TODO: Use common Label component here -->
   {#if type !== 'boolean'}
-    <label for={inputId}>{title}</label>
+    <label for={inputId}>{label}</label>
   {/if}
-  <DynamicInput id={inputId} {type} label={title} bind:value={$store}/>
+  <DynamicInput {...$$restProps} id={inputId} {type} {label} bind:value={$store}/>
 </div>
