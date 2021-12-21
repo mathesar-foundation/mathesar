@@ -1,10 +1,10 @@
-import type { FormConfiguration } from '../types.d';
+import type { FormConfiguration } from '../types';
 
 const formConfig: FormConfiguration = {
   variables: {
     restrictFieldSize: {
       type: 'boolean',
-      default: true,
+      default: false,
     },
     fieldSizeLimit: {
       type: 'integer',
@@ -17,12 +17,18 @@ const formConfig: FormConfiguration = {
       {
         type: 'input',
         variable: 'restrictFieldSize',
-        title: 'Restrict Field Size',
+        label: 'Restrict Field Size',
       },
       {
-        type: 'input',
-        variable: 'fieldSizeLimit',
-        title: 'Field Size Limit',
+        type: 'if',
+        if: 'restrictFieldSize',
+        condition: 'eq',
+        value: true,
+        elements: [{
+          type: 'input',
+          variable: 'fieldSizeLimit',
+          label: 'Field Size Limit',
+        }],
       },
     ],
   },

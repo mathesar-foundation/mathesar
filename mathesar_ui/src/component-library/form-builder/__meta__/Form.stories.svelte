@@ -1,7 +1,9 @@
 <script lang="ts">
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import FormStory from './FormStory.svelte';
-  import TextConfigForm from './textConfigForm';
+  import BasicForm from './basicForm';
+  import FormWithIfCondition from './formWithIfCondition';
+  import FormWithSwitchCondition from './formWithSwitchCondition';
   import Docs from './Form.mdx';
 
   const meta = {
@@ -21,5 +23,13 @@
 <Meta {...meta} />
 
 <Story name="Basic">
-  <FormStory formConfig={TextConfigForm}/>
+  <FormStory formConfig={BasicForm}/>
+</Story>
+
+<Story name="If Condition">
+  <FormStory formConfig={FormWithIfCondition}/>
+</Story>
+
+<Story name="Switch Condition">
+  <FormStory formConfig={FormWithSwitchCondition}/>
 </Story>
