@@ -537,7 +537,7 @@ def _get_timestamp_without_timezone_type_body_map():
     # Check if the value is missing timezone by casting it to a timestamp with timezone
     # and comparing if the value is equal to a timestamp without timezone
     timestamp_without_tz_condition_str = f"""
-            IF ($1 IS NULL) OR (timestamp_value_with_tz = timestamp_value AND timestamp_value_with_tz <> date_value) THEN
+            IF ($1 IS NULL) OR (timestamp_value_with_tz = timestamp_value) THEN
             RETURN $1::{TIMESTAMP_WITHOUT_TIME_ZONE};
             END IF;
         """
