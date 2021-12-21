@@ -8,16 +8,17 @@ class InvalidTableError(Exception):
     pass
 
 
-ExceptionTransformerDetail = namedtuple('ExceptionTransformerDetail',
-                                        [
-                                            'status_code',
-                                            'error_code',
-                                            'parser',
-                                            'message',
-                                            'field_name',
-                                            'details'
-                                        ]
-                                        )
+ExceptionTransformerDetail = namedtuple(
+    'ExceptionTransformerDetail',
+    [
+        'status_code',
+        'error_code',
+        'parser',
+        'message',
+        'field_name',
+        'details'
+    ]
+)
 
 
 def default_exception_parser(exception, error_code, message=None, field_name=None, details=None):
