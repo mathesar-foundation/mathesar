@@ -12,7 +12,7 @@
     Display,
     RecordsData,
   } from '@mathesar/stores/table-data/types';
-  import Null from '@mathesar/components/Null.svelte';
+  import CellValue from '@mathesar/components/CellValue.svelte';
 
   export let recordsData: RecordsData;
   export let display: Display;
@@ -100,11 +100,7 @@
     on:mousedown={() => display.selectCell(row, column)}
     on:dblclick={() => display.editCell(row, column)}>
     {#if typeof value !== 'undefined'}
-      {#if value === null}
-        <Null />
-      {:else}
-        {value}
-      {/if}
+      <CellValue {value} />
     {/if}
   </div>
 
