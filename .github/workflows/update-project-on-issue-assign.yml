@@ -20,7 +20,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Update priority for assigned issues
-        if: github.event.issue.assignees != []
+        if: ${{ github.event.issue.assignees != [] }}
         run: |
           cd .github/actions/project_update/
           python project_update.py ${{ github.event.issue.node_id }} --priority Active
@@ -28,7 +28,7 @@ jobs:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
 
       - name: Update priority for non-assigned issues
-        if: github.event.issue.assignees == []
+        if: ${{ github.event.issue.assignees == [] }}
         run: |
           cd .github/actions/project_update/
           python project_update.py ${{ github.event.issue.node_id }} --priority Backlog
