@@ -5,6 +5,7 @@ import pytest
 from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
 
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
+from db.records.operations.group import GroupBy
 from mathesar import models
 
 
@@ -89,7 +90,7 @@ def test_record_list_filter(create_table, client):
     json_filter_list = json.dumps(filter_list)
 
     with patch.object(
-        models, "get_records", side_effect=models.get_records
+        models, "db_get_records", side_effect=models.db_get_records
     ) as mock_get:
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
@@ -112,7 +113,7 @@ def test_record_list_filter_duplicates(create_table, client):
     ]
     json_filter_list = json.dumps(filter_list)
 
-    with patch.object(models, "get_records") as mock_get:
+    with patch.object(models, "db_get_records", return_value=[]) as mock_get:
         client.get(f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}')
     assert mock_get.call_args is not None
     assert mock_get.call_args[1]['filters'] == filter_list
@@ -140,7 +141,7 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
             json_filter_list = json.dumps(filter_list)
 
             with patch.object(
-                models, "get_records", side_effect=models.get_records
+                models, "db_get_records", side_effect=models.db_get_records
             ) as mock_get:
                 response = client.get(
                     f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
@@ -191,7 +192,7 @@ def test_record_list_sort(create_table, client):
     json_order_by = json.dumps(order_by)
 
     with patch.object(
-        models, "get_records", side_effect=models.get_records
+        models, "db_get_records", side_effect=models.db_get_records
     ) as mock_get:
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?order_by={json_order_by}'
@@ -206,60 +207,173 @@ def test_record_list_sort(create_table, client):
     assert mock_get.call_args[1]['order_by'] == order_by
 
 
-def _test_record_list_group(table, client, group_count_by, expected_groups):
+grouping_params = [
+    (
+        'NASA Record List Group Single',
+        {'columns': ['Center']},
+        [
+            {
+                'count': 87,
+                'first_value': {'Center': 'NASA Kennedy Space Center'},
+                'last_value': {'Center': 'NASA Kennedy Space Center'},
+                'result_indices': [0]
+            }, {
+                'count': 138,
+                'first_value': {'Center': 'NASA Ames Research Center'},
+                'last_value': {'Center': 'NASA Ames Research Center'},
+                'result_indices': [
+                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+                    18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33,
+                    34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+                    49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
+                    64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78,
+                    79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93,
+                    94, 95, 96, 97, 98, 99,
+                ]
+            }, {
+                'count': 21,
+                'first_value': {'Center': 'NASA Armstrong Flight Research Center'},
+                'last_value': {'Center': 'NASA Armstrong Flight Research Center'},
+                'result_indices': [30]
+            },
+        ],
+    ),
+    (
+        'NASA Record List Group Single Percentile',
+        {'columns': ['Center'], 'mode': 'percentile', 'num_groups': 5},
+        [
+            {
+                'count': 87,
+                'first_value': {'Center': 'NASA Kennedy Space Center'},
+                'last_value': {'Center': 'NASA Kennedy Space Center'},
+                'result_indices': [0]
+            }, {
+                'count': 159,
+                'first_value': {'Center': 'NASA Ames Research Center'},
+                'last_value': {'Center': 'NASA Armstrong Flight Research Center'},
+                'result_indices': [
+                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+                    18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
+                    33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+                    48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62,
+                    63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77,
+                    78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92,
+                    93, 94, 95, 96, 97, 98, 99
+                ],
+            },
+        ],
+    ),
+    (
+        'NASA Record List Group Multi',
+        {'columns': ['Center', 'Status']},
+        [
+            {
+                'count': 29,
+                'first_value': {
+                    'Center': 'NASA Kennedy Space Center', 'Status': 'Application'
+                },
+                'last_value': {
+                    'Center': 'NASA Kennedy Space Center', 'Status': 'Application'
+                },
+                'result_indices': [0]
+            }, {
+                'count': 100,
+                'first_value': {
+                    'Center': 'NASA Ames Research Center', 'Status': 'Issued'
+                },
+                'last_value': {
+                    'Center': 'NASA Ames Research Center', 'Status': 'Issued'
+                }, 'result_indices': [
+                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+                    18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33,
+                    34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+                    49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
+                    64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78,
+                    79, 80, 81, 82, 83, 84, 85, 88, 90, 91, 92, 94, 96, 98, 99
+                ]
+            }, {
+                'count': 12,
+                'first_value': {
+                    'Center': 'NASA Armstrong Flight Research Center', 'Status': 'Issued'
+                },
+                'last_value': {
+                    'Center': 'NASA Armstrong Flight Research Center', 'Status': 'Issued'
+                },
+                'result_indices': [30]
+            }, {
+                'count': 38,
+                'first_value': {
+                    'Center': 'NASA Ames Research Center', 'Status': 'Application'
+                },
+                'last_value': {
+                    'Center': 'NASA Ames Research Center', 'Status': 'Application'
+                }, 'result_indices': [86, 87, 89, 93, 95, 97]
+            },
+        ],
+    ),
+    (
+        'NASA Record List Group Multi Percentile',
+        {'columns': ['Center', 'Status'], 'mode': 'percentile', 'num_groups': 5},
+        [
+            {
+                'count': 197,
+                'first_value': {
+                    'Center': 'NASA Kennedy Space Center', 'Status': 'Application'
+                },
+                'last_value': {
+                    'Center': 'NASA Langley Research Center', 'Status': 'Application'
+                },
+                'result_indices': [0]
+            }, {
+                'count': 159,
+                'first_value': {
+                    'Center': 'NASA Ames Research Center', 'Status': 'Application'
+                },
+                'last_value': {
+                    'Center': 'NASA Armstrong Flight Research Center', 'Status': 'Issued'
+                },
+                'result_indices': [
+                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+                    18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
+                    33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+                    48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62,
+                    63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77,
+                    78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92,
+                    93, 94, 95, 96, 97, 98, 99
+                ],
+            },
+        ],
+    ),
+]
+
+
+@pytest.mark.parametrize('table_name,grouping,expected_groups', grouping_params)
+def test_record_list_groups(
+        table_name, grouping, expected_groups, create_table, client,
+):
+    table = create_table(table_name)
     order_by = [
-        {'field': 'Center', 'direction': 'desc'},
-        {'field': 'Case Number', 'direction': 'asc'},
+        {'field': 'id', 'direction': 'asc'},
     ]
     json_order_by = json.dumps(order_by)
-    json_group_count_by = json.dumps(group_count_by)
-    query_str = f'group_count_by={json_group_count_by}&order_by={json_order_by}'
+    json_grouping = json.dumps(grouping)
+    limit = 100
+    query_str = f'grouping={json_grouping}&order_by={json_order_by}&limit={limit}'
 
-    with patch.object(
-        models, "get_group_counts", side_effect=models.get_group_counts
-    ) as mock_get:
-        response = client.get(f'/api/v0/tables/{table.id}/records/?{query_str}')
-        response_data = response.json()
+    response = client.get(f'/api/v0/tables/{table.id}/records/?{query_str}')
+    response_data = response.json()
 
     assert response.status_code == 200
     assert response_data['count'] == 1393
-    assert len(response_data['results']) == 50
+    assert len(response_data['results']) == limit
 
-    assert 'group_count' in response_data
-    assert response_data['group_count']['group_count_by'] == group_count_by
-    assert 'results' in response_data['group_count']
-    assert 'values' in response_data['group_count']['results'][0]
-    assert 'count' in response_data['group_count']['results'][0]
-
-    results = response_data['group_count']['results']
-    returned_groups = {tuple(group['values']) for group in results}
-    for expected_group in expected_groups:
-        assert expected_group in returned_groups
-
-    assert mock_get.call_args is not None
-    assert mock_get.call_args[0][2] == group_count_by
-
-
-def test_record_list_group_single_column(create_table, client):
-    table_name = 'NASA Record List Group Single'
-    table = create_table(table_name)
-    group_count_by = ['Center']
-    expected_groups = [
-        ('NASA Marshall Space Flight Center',),
-        ('NASA Stennis Space Center',)
-    ]
-    _test_record_list_group(table, client, group_count_by, expected_groups)
-
-
-def test_record_list_group_multi_column(create_table, client):
-    table_name = 'NASA Record List Group Multi'
-    table = create_table(table_name)
-    group_count_by = ['Center', 'Status']
-    expected_groups = [
-        ('NASA Marshall Space Flight Center', 'Issued'),
-        ('NASA Stennis Space Center', 'Issued'),
-    ]
-    _test_record_list_group(table, client, group_count_by, expected_groups)
+    group_by = GroupBy(**grouping)
+    grouping_dict = response_data['grouping']
+    assert grouping_dict['columns'] == list(group_by.columns)
+    assert grouping_dict['mode'] == group_by.mode
+    assert grouping_dict['num_groups'] == group_by.num_groups
+    assert grouping_dict['ranged'] == group_by.ranged
+    assert grouping_dict['groups'] == expected_groups
 
 
 def test_record_list_pagination_limit(create_table, client):
@@ -416,7 +530,7 @@ def test_record_list_filter_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
     filter_list = json.dumps([{"field": "Center", "op": "is_null"}])
-    with patch.object(models, "get_records", side_effect=exception):
+    with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?filters={filter_list}'
         )
@@ -431,7 +545,7 @@ def test_record_list_sort_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
     order_by = json.dumps([{"field": "Center", "direction": "desc"}])
-    with patch.object(models, "get_records", side_effect=exception):
+    with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?order_by={order_by}'
         )
@@ -445,12 +559,12 @@ def test_record_list_sort_exceptions(create_table, client, exception):
 def test_record_list_group_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    group_by = json.dumps(["Center"])
-    with patch.object(models, "get_group_counts", side_effect=exception):
+    group_by = json.dumps({"columns": ["Center"]})
+    with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
-            f'/api/v0/tables/{table.id}/records/?group_count_by={group_by}'
+            f'/api/v0/tables/{table.id}/records/?grouping={group_by}'
         )
         response_data = response.json()
     assert response.status_code == 400
     assert len(response_data) == 1
-    assert "group_count_by" in response_data
+    assert "grouping" in response_data

@@ -97,6 +97,17 @@ section.table-section .tab-container .table-data .body {
             margin-left: 30px;
           }
         }
+
+        .count {
+          background: white;
+          padding: 0.2em;
+          border-radius: 0.3em;
+          border: solid 0.1em #DDD;
+          .label {
+            color: #777;
+            font-size: 0.8rem;
+          }
+        }
       }
 
       .content {
