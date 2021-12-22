@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from rest_framework.renderers import BrowsableAPIRenderer
 from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, SortFieldNotFound
 
-from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.filters.base import ReferencedColumnsDontExist
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 from mathesar.api.pagination import TableLimitOffsetGroupPagination

@@ -46,7 +46,7 @@ class ParameterCount(Enum):
     """Predicates (currently only leaf predicates) can take single parameters (e.g. EQUAL
     predicate takes a value to check equality against), lists of parameters (e.g. the IN
     predicate takes a list of values to check membership against), or no paramaters (e.g.
-    the EMPTY predicate).""" 
+    the EMPTY predicate)."""
     SINGLE = "single"
     MULTI = "multi"
     NONE = "none"
@@ -234,7 +234,7 @@ class Empty(NoParameter, Leaf):
     name: str = static("Empty")
 
     def to_sa_filter(self):
-        return column(self.column) == None
+        return column(self.column).is_(None)
 
 
 @frozen_dataclass
@@ -243,7 +243,7 @@ class NotEmpty(NoParameter, Leaf):
     name: str = static("Not empty")
 
     def to_sa_filter(self):
-        return column(self.column) != None
+        return column(self.column).is_not(None)
 
 
 @frozen_dataclass
@@ -304,6 +304,7 @@ class BadFilterFormat(SABadFilterFormat):
 
 class UnknownPredicateType(BadFilterFormat):
     pass
+
 
 class ReferencedColumnsDontExist(BadFilterFormat):
     pass
