@@ -69,7 +69,7 @@
     Table name: <TextInput bind:value={$fileImportStore.name}/>
   </div>
   
-  <LabeledInput label="Use first row as header" inputFirst>
+  <LabeledInput label="Use first row as header" layout="inline-input-first">
     <Checkbox
       bind:checked={$fileImportStore.firstRowHeader}
       disabled={$fileImportStore.previewStatus === States.Loading}

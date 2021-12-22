@@ -17,7 +17,7 @@
   <ul class="options">
     {#each options as option (option.value)}
       <li class="option">
-        <LabeledInput inputFirst>
+        <LabeledInput layout='inline-input-first'>
           <svelte:fragment slot=label>
             {#if option.label}
                {option.label}
