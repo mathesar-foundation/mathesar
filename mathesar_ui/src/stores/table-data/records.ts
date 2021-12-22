@@ -11,32 +11,62 @@ import type {
   Writable,
   Unsubscriber,
 } from 'svelte/store';
-import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/App.d';
+import type {
+  Result as ApiResult,
+  Response as ApiRecordsResponse,
+  Group as ApiGroup,
+  Grouping as ApiGrouping,
+  ResultValue,
+  GroupingMode,
+} from '@mathesar/api/tables/records';
 import type { Meta } from './meta';
 import type { ColumnsDataStore, Column } from './columns';
+
+export interface Group {
+  count: number,
+  firstValue: ResultValue,
+  lastValue: ResultValue,
+  resultIndices: number[],
+}
+
+export interface Grouping {
+  columns: string[],
+  mode: GroupingMode,
+  groups: Group[],
+}
+
+function buildGroup(apiGroup: ApiGroup): Group {
+  return {
+    count: apiGroup.count,
+    firstValue: apiGroup.first_value,
+    lastValue: apiGroup.last_value,
+    resultIndices: apiGroup.result_indices,
+  };
+}
+
+function buildGrouping(apiGrouping: ApiGrouping): Grouping {
+  return {
+    columns: apiGrouping.columns,
+    mode: apiGrouping.mode,
+    groups: apiGrouping.groups.map(buildGroup),
+  };
+}
 
 interface TableRecordInResponse {
   [key: string]: unknown,
 }
+
 export interface TableRecord extends TableRecordInResponse {
   __identifier: string,
   __isAddPlaceholder?: boolean,
   __isNew?: boolean,
   __isGroupHeader?: boolean,
+  __group?: Group,
   __rowIndex?: number,
   __state?: string, // TODO: Remove __state in favour of _recordsInProcess
   __groupValues?: Record<string, unknown>,
-}
-
-export interface GroupCount {
-  [key: string]: GroupCount | number
-}
-
-interface GroupInfo {
-  counts: GroupCount,
-  columns: Column['name'][]
 }
 
 export interface TableRecordsData {
@@ -44,18 +74,7 @@ export interface TableRecordsData {
   error?: string,
   savedRecords: TableRecord[],
   totalCount: number,
-  groupCounts?: GroupCount,
-  groupColumns?: string[],
-}
-
-interface TableRecordResponse extends PaginatedResponse<TableRecordInResponse> {
-  group_count?: {
-    group_count_by?: Column['name'][],
-    results?: {
-      count: number,
-      values: string[]
-    }[]
-  }
+  grouping?: Grouping,
 }
 
 export function getRowKey(
@@ -77,33 +96,29 @@ function generateRowIdentifier(
   return `__${offset}_${type}_${index}`;
 }
 
-function mapGroupCounts(groupInfo: TableRecordResponse['group_count']): GroupCount {
-  const groupResults = groupInfo.results;
-  const groupMap: GroupCount = {};
-  groupResults?.forEach((result) => {
-    let group = groupMap;
-    for (let i = 0; i < result.values.length - 1; i += 1) {
-      const value = result.values[i];
-      if (!group[value]) {
-        group[value] = {};
-      }
-      group = group[value] as GroupCount;
-    }
-    group[result.values[result.values.length - 1]] = result.count;
+function getRecordIndexToGroupMap(groups: Group[]): Map<number, Group> {
+  const map = new Map<number, Group>();
+  groups.forEach((group) => {
+    group.resultIndices.forEach((resultIndex) => {
+      map.set(resultIndex, group);
+    });
   });
-  return groupMap;
+  return map;
 }
 
 function preprocessRecords(
   offset: number,
   records?: TableRecordInResponse[],
-  groupColumns?: string[],
+  grouping?: Grouping,
 ): TableRecord[] {
-  const isResultGrouped = groupColumns?.length > 0;
+  const groupingColumnNames = grouping?.columns ?? [];
+  const isResultGrouped = groupingColumnNames.length > 0;
   const combinedRecords: TableRecord[] = [];
   let index = 0;
   let groupIndex = 0;
   let existingRecordIndex = 0;
+
+  const recordIndexToGroupMap = getRecordIndexToGroupMap(grouping?.groups ?? []);
 
   records?.forEach((record) => {
     if (!record.__isGroupHeader && !record.__isAddPlaceholder) {
@@ -113,7 +128,7 @@ function preprocessRecords(
           isGroup = true;
         } else {
           // eslint-disable-next-line no-restricted-syntax
-          for (const column of groupColumns) {
+          for (const column of groupingColumnNames) {
             if (records[index - 1][column] !== records[index][column]) {
               isGroup = true;
               break;
@@ -124,6 +139,7 @@ function preprocessRecords(
         if (isGroup) {
           combinedRecords.push({
             __isGroupHeader: true,
+            __group: recordIndexToGroupMap.get(index),
             __identifier: generateRowIdentifier('groupHeader', offset, groupIndex),
             __groupValues: record,
             __state: 'done',
@@ -172,17 +188,17 @@ export class RecordsData {
 
   newRecords: Writable<TableRecord[]>;
 
-  groupInfo: Writable<GroupInfo>;
+  grouping: Writable<Grouping | undefined>;
 
   totalCount: Writable<number>;
 
   error: Writable<string>;
 
-  private promise: CancellablePromise<TableRecordResponse>;
+  private promise: CancellablePromise<ApiRecordsResponse>;
 
-  private createPromises: Map<unknown, CancellablePromise<TableRecordResponse>>;
+  private createPromises: Map<unknown, CancellablePromise<unknown>>;
 
-  private updatePromises: Map<unknown, CancellablePromise<TableRecordResponse>>;
+  private updatePromises: Map<unknown, CancellablePromise<unknown>>;
 
   private fetchCallback?: (storeData: TableRecordsData) => void;
 
@@ -203,7 +219,7 @@ export class RecordsData {
     this.state = writable(States.Loading);
     this.savedRecords = writable([] as TableRecord[]);
     this.newRecords = writable([] as TableRecord[]);
-    this.groupInfo = writable(null as GroupInfo);
+    this.grouping = writable<Grouping | undefined>(undefined);
     this.totalCount = writable(null as number);
     this.error = writable(null as string);
 
@@ -250,42 +266,24 @@ export class RecordsData {
 
     try {
       const params = getStoreValue(this.meta.recordRequestParams);
-      this.promise = getAPI<TableRecordResponse>(`${this.url}?${params ?? ''}`);
-
+      this.promise = getAPI<ApiRecordsResponse>(`${this.url}?${params ?? ''}`);
       const response = await this.promise;
       const totalCount = response.count || 0;
-
-      const groupColumns = response?.group_count?.group_count_by;
-      const isResultGrouped = groupColumns?.length > 0;
-      let groupCounts: GroupCount = null;
-      if (isResultGrouped) {
-        groupCounts = mapGroupCounts(response.group_count);
-      }
-
-      const records = preprocessRecords(
-        offset,
-        response.results,
-        groupColumns,
-      );
-
-      const storeData: TableRecordsData = {
+      const grouping = response.grouping ? buildGrouping(response.grouping) : undefined;
+      const records = preprocessRecords(offset, response.results, grouping);
+      const tableRecordsData: TableRecordsData = {
         state: States.Done,
         savedRecords: records,
-        groupCounts,
-        groupColumns,
+        grouping,
         totalCount,
       };
       this.savedRecords.set(records);
       this.state.set(States.Done);
-      this.groupInfo.set({
-        counts: groupCounts,
-        columns: groupColumns,
-      });
+      this.grouping.set(grouping);
       this.totalCount.set(totalCount);
       this.error.set(null);
-
-      this.fetchCallback?.(storeData);
-      return storeData;
+      this.fetchCallback?.(tableRecordsData);
+      return tableRecordsData;
     } catch (err) {
       this.state.set(States.Error);
       this.error.set(err instanceof Error ? err.message : 'Unable to load records');
@@ -359,7 +357,7 @@ export class RecordsData {
       const cellKey = `${rowKey.toString()}::${column.name}`;
       this.meta.setCellUpdateState(rowKey, cellKey, 'update');
       this.updatePromises?.get(cellKey)?.cancel();
-      const promise = patchAPI<TableRecordResponse>(
+      const promise = patchAPI<unknown>(
         `${this.url}${row[primaryKey] as string}/`,
         { [column.name]: row[column.name] },
       );
@@ -387,7 +385,7 @@ export class RecordsData {
       const rowKey = getRowKey(row, primaryKey);
       this.meta.setRecordModificationState(rowKey, 'update');
       this.updatePromises?.get(rowKey)?.cancel();
-      const promise = patchAPI<TableRecordResponse>(
+      const promise = patchAPI<unknown>(
         `${this.url}${row[primaryKey] as string}/`,
         prepareRowForRequest(row),
       );
@@ -429,7 +427,7 @@ export class RecordsData {
     const rowKey = getRowKey(row, primaryKey);
     this.meta.setRecordModificationState(rowKey, 'create');
     this.createPromises?.get(rowKey)?.cancel();
-    const promise = postAPI<TableRecordResponse>(
+    const promise = postAPI<ApiResult>(
       this.url,
       prepareRowForRequest(row),
     );
