@@ -115,7 +115,7 @@ def get_records(
     return execute_query(engine, query)
 
 
-def get_count(table, engine, filters=[]):
+def get_count(table, engine, filters=None):
     col_name = "_count"
     columns_to_select = [func.count().label(col_name)]
     query = get_query(table=table, filters=filters, columns_to_select=columns_to_select)

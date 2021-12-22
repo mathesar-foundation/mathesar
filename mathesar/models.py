@@ -264,7 +264,7 @@ class Table(DatabaseObject):
     def sa_all_records(self):
         return db_get_records(self._sa_table, self.schema._sa_engine)
 
-    def sa_num_records(self, filters=[]):
+    def sa_num_records(self, filters=None):
         return get_count(self._sa_table, self.schema._sa_engine, filters=filters)
 
     def update_sa_table(self, update_params):
