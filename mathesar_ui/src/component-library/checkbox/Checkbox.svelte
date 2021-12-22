@@ -41,12 +41,6 @@
   on:change={onChange}
 />
 
-<!--
-  TODO
-  How to we set `bind:group` on `input` without causing an error?
-  Maybe we manually build the array instead of having Svelte do it for us?
--->
-
 <style global lang="scss">
   @import "Checkbox.scss";
 </style>
