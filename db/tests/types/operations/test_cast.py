@@ -465,33 +465,28 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
         },
     },
-    TIMESTAMP_WITHOUT_TIME_ZONE: {
-        ISCHEMA_NAME: PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value,
-        REFLECTED_NAME: TIMESTAMP_WITHOUT_TIME_ZONE,
-        TARGET_DICT: {
-            CHAR: {VALID: []},
-            TIMESTAMP_WITHOUT_TIME_ZONE: {
-                VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), py_datetime(1999, 1, 18, 12, 30, 45))]
-            },
-            TIMESTAMP_WITH_TIME_ZONE: {
-                VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), py_datetime(1999, 1, 18, 12, 30, 45,
-                                                                           tzinfo=FixedOffsetTimezone(offset=0)))
-                        ]
-            },
-            TEXT: {VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), "1999-01-18 12:30:45")]},
-            VARCHAR: {VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), "1999-01-18 12:30:45")]},
-        },
-    },
     TIMESTAMP_WITH_TIME_ZONE: {
         ISCHEMA_NAME: PostgresType.TIMESTAMP_WITH_TIME_ZONE.value,
         REFLECTED_NAME: TIMESTAMP_WITH_TIME_ZONE,
         TARGET_DICT: {
             CHAR: {VALID: []},
+            DATE: {VALID: [(py_datetime(1999, 1, 18, 0, 0, 0), date(1999, 1, 18)),
+                           (
+                           py_datetime(1999, 1, 18, 0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0)), date(1999, 1, 18))],
+                   INVALID: [py_datetime(1999, 1, 18, 12, 30, 45),
+                             py_datetime(1999, 1, 18, 0, 0, 0, tzinfo=FixedOffsetTimezone(offset=60))
+                             ]
+                   },
             TIMESTAMP_WITH_TIME_ZONE: {
                 VALID: [
                     (py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
                      py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60))),
                 ]
+            },
+            TIMESTAMP_WITHOUT_TIME_ZONE: {
+                VALID: [(py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0)),
+                         py_datetime(1999, 1, 18, 12, 30, 45)
+                         )],
             },
             TEXT: {
                 VALID: [
@@ -505,6 +500,25 @@ MASTER_DB_TYPE_MAP_SPEC = {
                      "1999-01-18 12:30:45+00")
                 ]
             },
+        },
+    },
+    TIMESTAMP_WITHOUT_TIME_ZONE: {
+        ISCHEMA_NAME: PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value,
+        REFLECTED_NAME: TIMESTAMP_WITHOUT_TIME_ZONE,
+        TARGET_DICT: {
+            CHAR: {VALID: []},
+            DATE: {VALID: [(py_datetime(1999, 1, 18, 0, 0, 0), date(1999, 1, 18))],
+                   INVALID: [(py_datetime(1999, 1, 18, 12, 30, 45), date(1999, 1, 18))]},
+            TIMESTAMP_WITHOUT_TIME_ZONE: {
+                VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), py_datetime(1999, 1, 18, 12, 30, 45))]
+            },
+            TIMESTAMP_WITH_TIME_ZONE: {
+                VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), py_datetime(1999, 1, 18, 12, 30, 45,
+                                                                           tzinfo=FixedOffsetTimezone(offset=0)))
+                        ]
+            },
+            TEXT: {VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), "1999-01-18 12:30:45")]},
+            VARCHAR: {VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), "1999-01-18 12:30:45")]},
         },
     },
     TEXT: {

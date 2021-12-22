@@ -504,7 +504,7 @@ def _get_time_type_body_map(target_type):
     )
 
 
-def get_text_to_datetime_cast_str(type_condition, exception_string):
+def get_text_and_datetime_to_datetime_cast_str(type_condition, exception_string):
     return f"""
     DECLARE
     timestamp_value_with_tz NUMERIC;
@@ -531,7 +531,8 @@ def _get_timestamp_with_timezone_type_body_map(target_type):
 
 def _get_timestamp_without_timezone_type_body_map():
     source_text_types = TEXT_TYPES
-    default_behavior_source_types = frozenset([TIMESTAMP_WITHOUT_TIME_ZONE, DATE])
+    source_datetime_types = frozenset([TIMESTAMP_WITH_TIME_ZONE, DATE])
+    default_behavior_source_types = frozenset([TIMESTAMP_WITHOUT_TIME_ZONE])
 
     not_timestamp_without_tz_exception_str = f"RAISE EXCEPTION '% is not a {TIMESTAMP_WITHOUT_TIME_ZONE}', $1;"
     # Check if the value is missing timezone by casting it to a timestamp with timezone
@@ -547,10 +548,18 @@ def _get_timestamp_without_timezone_type_body_map():
     )
     type_body_map.update(
         {
-            text_type: get_text_to_datetime_cast_str(timestamp_without_tz_condition_str,
-                                                     not_timestamp_without_tz_exception_str
-                                                     )
+            text_type: get_text_and_datetime_to_datetime_cast_str(timestamp_without_tz_condition_str,
+                                                                  not_timestamp_without_tz_exception_str
+                                                                  )
             for text_type in source_text_types
+        }
+    )
+    type_body_map.update(
+        {
+            datetime_type: get_text_and_datetime_to_datetime_cast_str(timestamp_without_tz_condition_str,
+                                                                      not_timestamp_without_tz_exception_str
+                                                                      )
+            for datetime_type in source_datetime_types
         }
     )
     return type_body_map
@@ -623,6 +632,7 @@ def _get_date_type_body_map():
     # `DateStyle` option set on the server, which can be one of DMY, MDY,
     # or YMD. Defaults to MDY.
     source_text_types = TEXT_TYPES
+    source_datetime_types = frozenset([TIMESTAMP_WITH_TIME_ZONE, TIMESTAMP_WITHOUT_TIME_ZONE])
     default_behavior_source_types = frozenset([DATE])
 
     not_date_exception_str = f"RAISE EXCEPTION '% is not a {DATE}', $1;"
@@ -637,8 +647,14 @@ def _get_date_type_body_map():
     )
     type_body_map.update(
         {
-            text_type: get_text_to_datetime_cast_str(date_condition_str, not_date_exception_str)
+            text_type: get_text_and_datetime_to_datetime_cast_str(date_condition_str, not_date_exception_str)
             for text_type in source_text_types
+        }
+    )
+    type_body_map.update(
+        {
+            datetime_type: get_text_and_datetime_to_datetime_cast_str(date_condition_str, not_date_exception_str)
+            for datetime_type in source_datetime_types
         }
     )
     return type_body_map
