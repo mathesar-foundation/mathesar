@@ -95,11 +95,11 @@ def test_record_list_filter(create_table, client):
         )
         response_data = response.json()
 
+    assert mock_get.call_args is not None
+    assert mock_get.call_args[1]['filters'] == filters
     assert response.status_code == 200
     assert response_data['count'] == 2
     assert len(response_data['results']) == 2
-    assert mock_get.call_args is not None
-    assert mock_get.call_args[1]['filters'] == filters
 
 
 def test_record_list_duplicate_only(create_table, client):

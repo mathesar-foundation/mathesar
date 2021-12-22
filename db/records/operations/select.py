@@ -1,4 +1,4 @@
-from sqlalchemy import select, func
+from sqlalchemy import select, func, column
 from sqlalchemy_filters import apply_sort
 
 from db.columns.base import MathesarColumn
@@ -20,6 +20,14 @@ def _get_duplicate_only_cte(table, duplicate_columns):
     return select(duplicate_flag_cte).where(duplicate_flag_cte.c[DUPLICATE_LABEL]).cte()
 
 
+def _sort_and_filter(query, order_by, filters):
+    if order_by is not None:
+        query = apply_sort(query, order_by)
+    if filters is not None:
+        query = apply_ma_filter_spec(query, filters)
+    return query
+
+
 def get_query(
     table,
     limit=None,
@@ -27,23 +35,34 @@ def get_query(
     order_by=None,
     filters=None,
     duplicate_only=None,
-    cols=None,
+    columns_to_select=None,
     group_by=None
 ):
     if duplicate_only:
         select_target = _get_duplicate_only_cte(table, duplicate_only)
     else:
         select_target = table
+
+    # Scrub/decontextualize select_target columns, otherwise they will corrupt
+    # select statements
+    all_columns = [column(col.name) for col in select_target.columns]
+
+    columns_to_select = columns_to_select or all_columns
+
     if isinstance(group_by, group.GroupBy):
-        query = group.get_group_augmented_records_query(table, group_by)
+        query = group.get_group_augmented_records_query(select_target, group_by)
     else:
-        query = select(*(cols or select_target.c)).select_from(select_target)
+        query = select(select_target)
+
+    query = _sort_and_filter(query, order_by, filters)
+
+    should_select_subset_of_columns = columns_to_select != all_columns
+    if should_select_subset_of_columns:
+        query = query.cte()
+        query = select(*columns_to_select).select_from(query)
 
     query = query.limit(limit).offset(offset)
-    if order_by is not None:
-        query = apply_sort(query, order_by)
-    if filters is not None:
-        query = apply_ma_filter_spec(query, filters)
+
     return query
 
 
@@ -98,8 +117,8 @@ def get_records(
 
 def get_count(table, engine, filters=[]):
     col_name = "_count"
-    cols = [func.count().label(col_name)]
-    query = get_query(table=table, filters=filters, cols=cols)
+    columns_to_select = [func.count().label(col_name)]
+    query = get_query(table=table, filters=filters, columns_to_select=columns_to_select)
     return execute_query(engine, query)[0][col_name]
 
 
