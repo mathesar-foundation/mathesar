@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import Column
 
 from db.records.operations import group
-from db.records import exceptions as rec_exc
+from db.records import exceptions as records_exceptions
 
 
 @pytest.fixture
@@ -103,7 +103,7 @@ def test_GB_validate_fails_invalid_mode():
         mode='potato',
         num_groups=1234,
     )
-    with pytest.raises(rec_exc.InvalidGroupType):
+    with pytest.raises(records_exceptions.InvalidGroupType):
         gb.validate()
 
 
@@ -113,7 +113,7 @@ def test_GB_validate_fails_invalid_num_group():
         mode=group.GroupMode.PERCENTILE.value,
         num_groups=None,
     )
-    with pytest.raises(rec_exc.BadGroupFormat):
+    with pytest.raises(records_exceptions.BadGroupFormat):
         gb.validate()
 
 
@@ -134,7 +134,7 @@ def test_GB_get_valid_group_by_columns_invalid_col(roster_table_obj):
     roster, _ = roster_table_obj
     input_cols = ['notintable']
     gb = group.GroupBy(columns=input_cols)
-    with pytest.raises(rec_exc.GroupFieldNotFound):
+    with pytest.raises(records_exceptions.GroupFieldNotFound):
         gb.get_validated_group_by_columns(roster)
 
 

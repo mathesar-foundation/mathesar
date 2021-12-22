@@ -3,7 +3,7 @@ import json
 import logging
 from sqlalchemy import select, func, and_, case, literal
 
-from db.records import exceptions as rec_exc
+from db.records import exceptions as records_exceptions
 from db.records.utils import create_col_objects
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ class GroupBy:
     def validate(self):
         group_modes = {group_mode.value for group_mode in GroupMode}
         if self.mode not in group_modes:
-            raise rec_exc.InvalidGroupType(
+            raise records_exceptions.InvalidGroupType(
                 f'mode "{self.mode}" is invalid. valid modes are: '
                 + ', '.join([f"'{gm}'" for gm in group_modes])
             )
@@ -59,13 +59,13 @@ class GroupBy:
                 self.mode == GroupMode.PERCENTILE.value
                 and not type(self.num_groups) == int
         ):
-            raise rec_exc.BadGroupFormat(
+            raise records_exceptions.BadGroupFormat(
                 'percentile mode requires integer num_groups'
             )
 
         for col in self.columns:
             if type(col) != str:
-                raise rec_exc.BadGroupFormat(
+                raise records_exceptions.BadGroupFormat(
                     f"Group column {col} must be a string."
                 )
 
@@ -74,7 +74,7 @@ class GroupBy:
         for col in self.columns:
             col_name = col if isinstance(col, str) else col.name
             if col_name not in table.columns:
-                raise rec_exc.GroupFieldNotFound(
+                raise records_exceptions.GroupFieldNotFound(
                     f"Group col {col} not found in {table}."
                 )
         return create_col_objects(table, self.columns)
@@ -116,7 +116,7 @@ def get_group_augmented_records_query(table, group_by):
     elif group_by.mode == GroupMode.DISTINCT.value:
         query = _get_distinct_group_select(table, grouping_columns)
     else:
-        raise rec_exc.BadGroupFormat("Unknown error")
+        raise records_exceptions.BadGroupFormat("Unknown error")
     return query
 
 
@@ -136,6 +136,9 @@ def _get_distinct_group_select(table, grouping_columns):
 
 def _get_percentile_range_group_select(table, columns, num_groups):
     column_names = [col.name for col in columns]
+    # cume_dist is a PostgreSQL function that calculates the cumulative
+    # distribution.
+    # See https://www.postgresql.org/docs/13/functions-window.html
     CUME_DIST = 'cume_dist'
     RANGE_ID = 'range_id'
     cume_dist_cte = select(
@@ -157,24 +160,27 @@ def _get_percentile_range_group_select(table, columns, num_groups):
         *[col for col in cume_dist_cte.columns if col.name != CUME_DIST],
         case(*ranges).label(RANGE_ID)
     ).cte()
-    ranges_agg_cols = [
+    ranges_aggregation_cols = [
         col for col in ranges_cte.columns if col.name in column_names
     ]
     window_def = GroupingWindowDefinition(
-        order_by=ranges_agg_cols, partition_by=ranges_cte.columns[RANGE_ID]
+        order_by=ranges_aggregation_cols,
+        partition_by=ranges_cte.columns[RANGE_ID]
     )
     group_id_expr = window_def.partition_by
 
     return select(
         *[col for col in ranges_cte.columns if col.name in table.columns],
-        _get_group_metadata_definition(window_def, ranges_agg_cols, group_id_expr)
+        _get_group_metadata_definition(
+            window_def, ranges_aggregation_cols, group_id_expr
+        )
     )
 
 
 def _get_group_metadata_definition(window_def, grouping_columns, group_id_expr):
     col_key_value_tuples = ((literal(str(col.name)), col) for col in grouping_columns)
     col_key_value_list = [
-        col_part for col_tup in col_key_value_tuples for col_part in col_tup
+        col_part for col_tuple in col_key_value_tuples for col_part in col_tuple
     ]
     inner_grouping_object = func.json_build_object(*col_key_value_list)
 
