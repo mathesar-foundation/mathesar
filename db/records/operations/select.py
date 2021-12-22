@@ -35,6 +35,7 @@ def get_query(
     order_by=None,
     filters=None,
     duplicate_only=None,
+    # Currently columns_to_select is only set by get_count
     columns_to_select=None,
     group_by=None
 ):
@@ -50,20 +51,19 @@ def get_query(
     columns_to_select = columns_to_select or all_columns
 
     if isinstance(group_by, group.GroupBy):
-        query = group.get_group_augmented_records_query(select_target, group_by)
+        selectable = group.get_group_augmented_records_query(select_target, group_by)
     else:
-        query = select(select_target)
+        selectable = select(select_target)
 
-    query = _sort_and_filter(query, order_by, filters)
+    selectable = _sort_and_filter(selectable, order_by, filters)
 
-    should_select_subset_of_columns = columns_to_select != all_columns
-    if should_select_subset_of_columns:
-        query = query.cte()
-        query = select(*columns_to_select).select_from(query)
+    selectable = selectable.cte()
 
-    query = query.limit(limit).offset(offset)
+    selectable = select(*columns_to_select).select_from(selectable)
 
-    return query
+    selectable = selectable.limit(limit).offset(offset)
+
+    return selectable
 
 
 def get_record(table, engine, id_value):
