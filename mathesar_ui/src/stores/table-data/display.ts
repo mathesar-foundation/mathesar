@@ -66,29 +66,30 @@ export function isCellBeingEdited(
 
 // TODO: Create a common utility action to handle active element based scroll
 export function scrollBasedOnActiveCell(): void {
-  const activeCell: HTMLElement = document.querySelector('.cell.is-active');
+  const activeCell: HTMLElement | null = document.querySelector('.cell.is-active');
   const activeRow = activeCell?.parentElement;
   const container = document.querySelector('.virtual-list.outerElement');
-  if (container && activeRow) {
-    // Vertical scroll
-    if (activeRow.offsetTop + activeRow.clientHeight + 40
-      > (container.scrollTop + container.clientHeight)) {
-      const offsetValue: number = container.getBoundingClientRect().bottom
-        - activeRow.getBoundingClientRect().bottom - 40;
-      container.scrollTop -= offsetValue;
-    } else if (activeRow.offsetTop - 30 < container.scrollTop) {
-      container.scrollTop = activeRow.offsetTop - 30;
-    }
+  if (!container || !activeRow) {
+    return;
+  }
+  // Vertical scroll
+  if (activeRow.offsetTop + activeRow.clientHeight + 40
+    > (container.scrollTop + container.clientHeight)) {
+    const offsetValue: number = container.getBoundingClientRect().bottom
+      - activeRow.getBoundingClientRect().bottom - 40;
+    container.scrollTop -= offsetValue;
+  } else if (activeRow.offsetTop - 30 < container.scrollTop) {
+    container.scrollTop = activeRow.offsetTop - 30;
+  }
 
-    // Horizontal scroll
-    if (activeCell.offsetLeft + activeRow.clientWidth + 30
-      > (container.scrollLeft + container.clientWidth)) {
-      const offsetValue: number = container.getBoundingClientRect().right
-        - activeCell.getBoundingClientRect().right - 30;
-      container.scrollLeft -= offsetValue;
-    } else if (activeCell.offsetLeft - 30 < container.scrollLeft) {
-      container.scrollLeft = activeCell.offsetLeft - 30;
-    }
+  // Horizontal scroll
+  if (activeCell.offsetLeft + activeRow.clientWidth + 30
+    > (container.scrollLeft + container.clientWidth)) {
+    const offsetValue: number = container.getBoundingClientRect().right
+      - activeCell.getBoundingClientRect().right - 30;
+    container.scrollLeft -= offsetValue;
+  } else if (activeCell.offsetLeft - 30 < container.scrollLeft) {
+    container.scrollLeft = activeCell.offsetLeft - 30;
   }
 }
 
@@ -109,7 +110,7 @@ export class Display {
 
   columnPositionMap: Writable<ColumnPositionMap>;
 
-  activeCell: Writable<ActiveCell>;
+  activeCell: Writable<ActiveCell | undefined>;
 
   rowWidth: Writable<number>;
 
@@ -129,7 +130,7 @@ export class Display {
     this.recordsData = recordsData;
     this.horizontalScrollOffset = writable(0);
     this.columnPositionMap = writable(new Map() as ColumnPositionMap);
-    this.activeCell = writable(null as ActiveCell);
+    this.activeCell = writable<ActiveCell | undefined>(undefined);
     this.rowWidth = writable(0);
 
     // subscribers
@@ -164,7 +165,7 @@ export class Display {
   }
 
   resetActiveCell(): void {
-    this.activeCell.set(null as ActiveCell);
+    this.activeCell.set(undefined);
   }
 
   selectCell(row: TableRecord, column: Column): void {
@@ -185,7 +186,7 @@ export class Display {
     }
   }
 
-  handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | 'changed' | null {
+  handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | 'changed' | undefined {
     const { columns } = this.columnsDataStore.get();
     const totalCount = get(this.recordsData.totalCount);
     const savedRecords = get(this.recordsData.savedRecords);
@@ -202,6 +203,9 @@ export class Display {
 
     if (movementKeys.has(key) && activeCell?.type === 'select') {
       this.activeCell.update((existing) => {
+        if (!existing) {
+          return undefined;
+        }
         const newActiveCell = { ...existing };
         switch (key) {
           case 'ArrowDown':
@@ -235,6 +239,9 @@ export class Display {
 
     if (key === 'Tab' && activeCell?.type === 'edit') {
       this.activeCell.update((existing) => {
+        if (!existing) {
+          return undefined;
+        }
         const newActiveCell = { ...existing };
         if (existing.columnIndex < columns.length - 1) {
           newActiveCell.columnIndex += 1;
@@ -247,30 +254,27 @@ export class Display {
     if (key === 'Enter') {
       if (activeCell?.type === 'select') {
         if (!columns[activeCell.columnIndex]?.primary_key) {
-          this.activeCell.update((existing) => ({
-            ...existing,
-            type: 'edit',
-          }));
+          this.activeCell.update(
+            (existing) => (existing ? { ...existing, type: 'edit' } : undefined),
+          );
           return 'changed';
         }
       } else if (activeCell?.type === 'edit') {
-        this.activeCell.update((existing) => ({
-          ...existing,
-          type: 'select',
-        }));
+        this.activeCell.update(
+          (existing) => (existing ? { ...existing, type: 'select' } : undefined),
+        );
         return 'changed';
       }
     }
 
     if (key === 'Escape' && activeCell?.type === 'edit') {
-      this.activeCell.update((existing) => ({
-        ...existing,
-        type: 'select',
-      }));
+      this.activeCell.update(
+        (existing) => (existing ? { ...existing, type: 'select' } : undefined),
+      );
       return 'changed';
     }
 
-    return null;
+    return undefined;
   }
 
   destroy(): void {

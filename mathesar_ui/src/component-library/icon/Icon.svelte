@@ -16,17 +16,17 @@
   export let pulse = false;
 
   // Flips the icon. Allowed values are 'vertical', 'horizontal' or 'both'.
-  export let flip: IconFlip = null;
+  export let flip: IconFlip | undefined = undefined;
 
   // Rotates the icon to a specified angle. Allowed values are '90', '180', '270'.
-  export let rotate: IconRotate = null;
+  export let rotate: IconRotate | undefined = undefined;
 
   // Additional classes
   let classes = '';
   export { classes as class };
 
   // The aria-label for the icon. Typically describes the icon.
-  export let label: string = null;
+  export let label: string | undefined = undefined;
 
   function concatClasses(_classes?: string, _flip?: IconFlip, _rotate?: IconRotate): string {
     const faClass = ['fa-icon'];

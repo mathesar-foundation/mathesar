@@ -16,15 +16,14 @@
 
   export let recordsData: RecordsData;
   export let display: Display;
-  export let columnPosition: ColumnPosition;
+  export let columnPosition: ColumnPosition | undefined = undefined;
   export let row: TableRecord;
   export let column: Column;
-  // eslint-disable-next-line no-undef-init
   export let value: unknown = undefined;
 
   $: ({ activeCell } = display);
-  $: isActive = isCellActive($activeCell, row, column);
-  $: isBeingEdited = isCellBeingEdited($activeCell, row, column);
+  $: isActive = $activeCell && isCellActive($activeCell, row, column);
+  $: isBeingEdited = $activeCell && isCellBeingEdited($activeCell, row, column);
 
   let cellRef: HTMLElement;
   let inputRef: HTMLInputElement;
@@ -92,8 +91,10 @@
 <div bind:this={cellRef} class="cell" class:is-active={isActive}
      class:is-in-edit={isBeingEdited}
      class:is-pk={column.primary_key}
-     style="width:{columnPosition?.width || 0}px;
-      left:{columnPosition?.left || 0}px;"
+     style="
+      width:{columnPosition?.width ?? 0}px;
+      left:{columnPosition?.left ?? 0}px;
+    "
      tabindex={-1} on:keydown={handleKeyDown}>
 
   <div class="content"
@@ -106,7 +107,7 @@
 
   {#if isBeingEdited}
     <input bind:this={inputRef} type="text" class="edit-input-box"
-            value={value?.toString() || ''}
+            value={typeof value === 'string' || typeof value === 'number' ? value : ''}
             on:keydown={handleInputKeyDown}
             on:keyup={debounceAndSet} on:blur={onBlur}/>
   {/if}

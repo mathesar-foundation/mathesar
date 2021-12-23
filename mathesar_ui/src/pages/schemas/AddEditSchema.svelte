@@ -14,11 +14,11 @@
 
   export let isOpen = false;
   export let isEditMode = false;
-  export let schema: SchemaEntry = null;
+  export let schema: SchemaEntry;
 
   let name = '';
   let state: States = States.Idle;
-  let error: string;
+  let error: string | undefined;
 
   onMount(() => {
     if (isEditMode) {
@@ -27,7 +27,7 @@
   });
 
   function isDuplicateName(_isEditMode: boolean, _name: string): boolean {
-    if (_isEditMode && _name.toLowerCase().trim() === schema?.name.toLowerCase().trim()) {
+    if (_isEditMode && _name.toLowerCase().trim() === schema.name.toLowerCase().trim()) {
       return false;
     }
     return Array.from($schemas?.data || []).some(
@@ -46,12 +46,9 @@
   async function saveSchema() {
     try {
       state = States.Loading;
-      error = null;
+      error = undefined;
       if (isEditMode) {
-        await updateSchema($currentDBName, {
-          ...schema,
-          name,
-        });
+        await updateSchema($currentDBName, { ...schema, name });
       } else {
         await createSchema($currentDBName, name);
       }

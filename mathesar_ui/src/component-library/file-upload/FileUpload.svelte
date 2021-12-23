@@ -23,9 +23,9 @@
   const dispatch = createEventDispatcher();
   const componentId = `file-import-${getId()}`;
 
-  export let fileProgress: Record<string, FileUploadProgress> = null;
+  export let fileProgress: Record<string, FileUploadProgress> | undefined = undefined;
   export let multiple = false;
-  export let fileUploads: FileUpload[] = null;
+  export let fileUploads: FileUpload[] | undefined = undefined;
 
   let fileId = 0;
   let state = 'idle';
@@ -71,7 +71,10 @@
   }
 
   function onFileDrop(event: DragEvent) {
-    const fileList = event.dataTransfer.files;
+    const fileList = event.dataTransfer?.files;
+    if (!fileList) {
+      return;
+    }
     if (multiple) {
       processFiles(event, fileList);
     } else {
@@ -86,8 +89,8 @@
   }
 </script>
 
-<div class="file-upload" class:inprogress={fileUploads?.length > 0}>
-  {#if fileUploads?.length > 0}
+<div class="file-upload" class:inprogress={fileUploads && fileUploads.length > 0}>
+  {#if fileUploads && fileUploads.length > 0}
     <div class="files">
       {#each fileUploads as upload (upload.fileId)}
         <div class="file">

@@ -33,14 +33,17 @@
 
   function handleChangeType(e: CustomEvent) {
     const { previewColumns } = get(fileImportStore);
-    const changedColumn = previewColumns.find((column) => column.name === e.detail.name);
-    if (changedColumn) {
-      changedColumn.type = e.detail.type as string;
-
-      setInFileStore(fileImportStore, {
-        previewColumns: [...previewColumns],
-      });
+    if (!previewColumns) {
+      return;
     }
+    const changedColumn = previewColumns.find((column) => column.name === e.detail.name);
+    if (!changedColumn) {
+      return;
+    }
+    changedColumn.type = e.detail.type as string;
+    setInFileStore(fileImportStore, {
+      previewColumns: [...previewColumns],
+    });
   }
 
   function handleChangeFirstRowAsHeader(e: CustomEvent) {
@@ -81,7 +84,7 @@
   {#if isLoading}<Spinner />{/if}
 </div>
 
-{#if $fileImportStore.previewColumns?.length > 0}
+{#if $fileImportStore.previewColumns?.length}
   <div class="preview-table" class:disabled={$fileImportStore.previewStatus === States.Loading}>
     <table>
       <thead>

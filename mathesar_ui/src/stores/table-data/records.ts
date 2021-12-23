@@ -81,7 +81,7 @@ export function getRowKey(
   row: TableRecord,
   primaryKeyColumn?: Column['name'],
 ): unknown {
-  let key = row?.[primaryKeyColumn];
+  let key: unknown = row?.[primaryKeyColumn];
   if (!key && row?.__isNew) {
     key = row?.__identifier;
   }
@@ -190,9 +190,9 @@ export class RecordsData {
 
   grouping: Writable<Grouping | undefined>;
 
-  totalCount: Writable<number>;
+  totalCount: Writable<number | undefined>;
 
-  error: Writable<string>;
+  error: Writable<string | undefined>;
 
   private promise: CancellablePromise<ApiRecordsResponse>;
 
@@ -220,8 +220,8 @@ export class RecordsData {
     this.savedRecords = writable([] as TableRecord[]);
     this.newRecords = writable([] as TableRecord[]);
     this.grouping = writable<Grouping | undefined>(undefined);
-    this.totalCount = writable(null as number);
-    this.error = writable(null as string);
+    this.totalCount = writable<number | undefined>(undefined);
+    this.error = writable<string | undefined>(undefined);
 
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
@@ -238,7 +238,7 @@ export class RecordsData {
     });
   }
 
-  async fetch(retainExistingRows = false): Promise<TableRecordsData> {
+  async fetch(retainExistingRows = false): Promise<TableRecordsData | undefined> {
     this.promise?.cancel();
     const offset = getStoreValue(this.meta.offset);
 
@@ -257,7 +257,7 @@ export class RecordsData {
 
       return data;
     });
-    this.error.set(null);
+    this.error.set(undefined);
     this.state.set(States.Loading);
     if (!retainExistingRows) {
       this.newRecords.set([]);
@@ -281,14 +281,14 @@ export class RecordsData {
       this.state.set(States.Done);
       this.grouping.set(grouping);
       this.totalCount.set(totalCount);
-      this.error.set(null);
+      this.error.set(undefined);
       this.fetchCallback?.(tableRecordsData);
       return tableRecordsData;
     } catch (err) {
       this.state.set(States.Error);
       this.error.set(err instanceof Error ? err.message : 'Unable to load records');
     }
-    return null;
+    return undefined;
   }
 
   async deleteSelected(): Promise<void> {
@@ -452,7 +452,7 @@ export class RecordsData {
         }
         return entry;
       }));
-      this.totalCount.update((count) => count + 1);
+      this.totalCount.update((count) => (count ?? 0) + 1);
     } catch (err) {
       this.meta.setRecordModificationState(rowKey, 'creationFailed');
     } finally {
@@ -480,7 +480,7 @@ export class RecordsData {
       });
     }
 
-    if (!existingNewRecordRow?.[primaryKey] && row.__isNew && !row[primaryKey]) {
+    if (primaryKey && !existingNewRecordRow?.[primaryKey] && row.__isNew && !row[primaryKey]) {
       await this.createRecord(row);
     } else if (column) {
       await this.updateCell(row, column);
@@ -510,7 +510,7 @@ export class RecordsData {
 
   destroy(): void {
     this.promise?.cancel();
-    this.promise = null;
+    this.promise = undefined;
 
     this.requestParamsUnsubscriber();
     this.columnPatchUnsubscriber();

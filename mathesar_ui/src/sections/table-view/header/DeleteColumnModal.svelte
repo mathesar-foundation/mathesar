@@ -11,18 +11,18 @@
   export let column: Column;
   export let isOpen = false;
   let state = States.Idle;
-  let error: string;
+  let errorMessage: string | undefined;
 
   async function deleteColumn() {
     if (column) {
       try {
         state = States.Loading;
-        error = null;
+        errorMessage = undefined;
         await columnsDataStore.deleteColumn(column.id);
         state = States.Done;
-      } catch (err) {
+      } catch (error) {
         state = States.Error;
-        error = (err as Error).message;
+        errorMessage = (error as Error).message;
       }
     }
   }
@@ -50,9 +50,9 @@
         Column {column?.name} deleted successfully
       </div>
 
-    {:else if error}
+    {:else if errorMessage}
       <div class="sub-text error">
-        {error}
+        {errorMessage}
       </div>
     {/if}
 

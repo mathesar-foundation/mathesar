@@ -24,7 +24,7 @@ export function getModificationState(
   recordModificationState: ModificationStateMap,
   row: TableRecord,
   primaryKeyColumn?: Column['name'],
-): ModificationType {
+): ModificationType | undefined {
   const key = getRowKey(row, primaryKeyColumn);
   return recordModificationState.get(key)?.get(RECORD_COMBINED_STATE_KEY);
 }

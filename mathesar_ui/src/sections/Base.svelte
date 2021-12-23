@@ -38,9 +38,9 @@
   // TODO: Move this entire logic to data layer without involving view layer
   $: changeCurrentSchema(database, schemaId);
 
-  function getTabLink(entry: MathesarTab) {
-    if (entry.isNew) {
-      return null;
+  function getTabLink(entry: MathesarTab): string | undefined {
+    if (entry.isNew || !entry.tabularData) {
+      return undefined;
     }
     return constructTabularTabLink(
       database,

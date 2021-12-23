@@ -25,7 +25,7 @@
   export let total = 0;
 
   // Can be used to specify a path.
-  export let getLink: (page: number, pageSize: number) => string = null;
+  export let getLink: ((page: number, pageSize: number) => string) | undefined = undefined;
 
   // Total number of pages.
   export let pageCount = 0;

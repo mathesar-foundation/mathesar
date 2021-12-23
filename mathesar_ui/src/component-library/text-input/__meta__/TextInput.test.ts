@@ -14,9 +14,9 @@ test('renders text-input with value', () => {
   expect(inputWrapper).not.toBeNull();
   expect(inputWrapper).toHaveClass('some-class');
 
-  const inputElement = inputWrapper.querySelector('input');
+  const inputElement = inputWrapper?.querySelector('input');
   expect(inputElement).not.toBeNull();
-  expect(inputElement.value).toEqual('somevalue');
+  expect(inputElement?.value).toEqual('somevalue');
 });
 
 test('renders slotted content', () => {
@@ -29,9 +29,9 @@ test('renders slotted content', () => {
   const inputWrapper = container.querySelector('.text-input');
   expect(inputWrapper).not.toBeNull();
 
-  const inputElement = inputWrapper.querySelector('input');
+  const inputElement = inputWrapper?.querySelector('input');
   expect(inputElement).not.toBeNull();
-  expect(inputElement.value).toEqual('testvalue');
+  expect(inputElement?.value).toEqual('testvalue');
 
   expect(getByTestId('prepend')).toBeInTheDocument();
   expect(getByTestId('append')).toBeInTheDocument();
@@ -43,12 +43,15 @@ test('focuses/blurs parent on focus/blur of input', async () => {
   const inputWrapper = container.querySelector('.text-input');
   expect(inputWrapper).not.toBeNull();
 
-  const inputElement = inputWrapper.querySelector('input');
+  const inputElement = inputWrapper?.querySelector('input');
   expect(inputElement).not.toBeNull();
 
+  if (!inputElement) {
+    return;
+  }
   await fireEvent.focus(inputElement);
-  expect(inputWrapper.className).toContain('focus');
+  expect(inputWrapper?.className).toContain('focus');
 
   await fireEvent.blur(inputElement);
-  expect(inputWrapper.className).not.toContain('focus');
+  expect(inputWrapper?.className).not.toContain('focus');
 });

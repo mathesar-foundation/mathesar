@@ -20,7 +20,7 @@
   export let disabled = false;
 
   // Underlying DOM element for direct access
-  export let element: HTMLElement = null;
+  export let element: HTMLElement | undefined = undefined;
 
   let focus = false;
 

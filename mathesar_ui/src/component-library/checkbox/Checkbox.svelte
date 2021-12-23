@@ -13,10 +13,10 @@
   const dispatch = createEventDispatcher();
 
   export let checked = false;
-  export let value = null;
+  export let value: string | undefined = undefined;
   export let indeterminate = false;
   export let disabled = false;
-  export let label: string = null;
+  export let label: string | undefined = undefined;
 
   const componentId = getId();
 

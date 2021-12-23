@@ -67,21 +67,25 @@
     <div class="schema-selector">
       <div class="databases">
         <div class="section-header">
-          Databases ({$databases.data.length})
+          Databases ({$databases?.data?.length ?? 0})
         </div>
-        <ul>
-          {#each $databases.data as database (database.name)}
-            <li class="item" class:active={interalSelectedDB === database.name}>
-              <button type="button"
-                on:click={() => selectDB(database)}
-                on:mouseover={() => selectDB(database)}
-                on:focus={() => selectDB(database)}>
-                  <TextAvatar text={database.name} />
-                  {database.name}
-              </button>
-            </li>
-          {/each}
-        </ul>
+        {#if $databases.data && $databases.data.length}
+          <ul>
+            {#each $databases.data as database (database.name)}
+              <li class="item" class:active={interalSelectedDB === database.name}>
+                <button type="button"
+                  on:click={() => selectDB(database)}
+                  on:mouseover={() => selectDB(database)}
+                  on:focus={() => selectDB(database)}>
+                    <TextAvatar text={database.name} />
+                    {database.name}
+                </button>
+              </li>
+            {/each}
+          </ul>
+        {:else}
+          <div>No databases</div>
+        {/if}
       </div>
     
       <div class="schemas">
