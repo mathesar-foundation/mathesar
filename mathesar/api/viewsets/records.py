@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.renderers import BrowsableAPIRenderer
 from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
 
-from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
+from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
@@ -36,14 +36,14 @@ class RecordViewSet(viewsets.ViewSet):
                 self.get_queryset(), request, table_pk,
                 filters=serializer.validated_data['filters'],
                 order_by=serializer.validated_data['order_by'],
-                group_count_by=serializer.validated_data['group_count_by'],
+                grouping=serializer.validated_data['grouping'],
             )
         except (BadFilterFormat, FilterFieldNotFound) as e:
             raise ValidationError({'filters': e})
         except (BadSortFormat, SortFieldNotFound) as e:
             raise ValidationError({'order_by': e})
-        except (BadGroupFormat, GroupFieldNotFound) as e:
-            raise ValidationError({'group_count_by': e})
+        except (BadGroupFormat, GroupFieldNotFound, InvalidGroupType) as e:
+            raise ValidationError({'grouping': e})
 
         serializer = RecordSerializer(records, many=True)
         return paginator.get_paginated_response(serializer.data)
