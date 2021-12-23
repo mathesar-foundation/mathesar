@@ -511,7 +511,7 @@ def get_text_and_datetime_to_datetime_cast_str(type_condition, exception_string)
     timestamp_value NUMERIC;
     date_value NUMERIC;
     BEGIN
-        SET TIME ZONE 'UTC';
+        SET LOCAL TIME ZONE 'UTC';
         SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITH TIME ZONE ) INTO timestamp_value_with_tz;
         SELECT EXTRACT(EPOCH FROM $1::TIMESTAMP WITHOUT TIME ZONE) INTO timestamp_value;
         SELECT EXTRACT(EPOCH FROM $1::DATE ) INTO date_value;
