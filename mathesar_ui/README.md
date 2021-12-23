@@ -58,6 +58,20 @@ If you have to work in the Windows filesystem, you could configure Vite to poll 
 
 [This issue](https://github.com/centerofci/mathesar/issues/570) keeps track of problems encountered by Mathesar developers using Windows for local development.
 
+## Linting
+
+- Lint all front end files:
+
+    ```
+    docker exec -it -w /code/mathesar_ui mathesar_service npm run lint
+    ```
+
+- Lint a specific file:
+
+    ```
+    docker exec -it -w /code/mathesar_ui mathesar_service npx eslint src/sections/Base.svelte
+    ```
+
 ## Adding/Removing packages
 
 If you want to add or remove packages, or basically run any npm action, **always do it from within the container**. Never do it from your local node setup, since it may modify the `package-lock.json` in ways we would not want it to.
