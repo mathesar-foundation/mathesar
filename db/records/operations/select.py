@@ -1,4 +1,4 @@
-from sqlalchemy import select, func, text
+from sqlalchemy import select, func
 from sqlalchemy_filters import apply_sort
 
 from db.columns.base import MathesarColumn
