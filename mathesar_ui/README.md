@@ -48,7 +48,17 @@ npm run build
 
 When running manually, the `package-lock.json` file may change depending on your node/npm version or your OS. Make sure to not commit those changes. If you want to add/remove packages, follow the steps in the following section.
 
-### Adding/Removing packages
+## Developing on Windows
+
+Hot module replacement does not work well with WSL when the project is present within a Windows filesystem, as mentioned in [this issue](https://github.com/microsoft/WSL/issues/4739).
+
+The simplest way to get this to work (and the one we advise) is to move the project to a Linux filesystem. This can be achieved by cloning the repo within the WSL shell in a Linux filesystem.
+
+If you have to work in the Windows filesystem, you could configure Vite to poll files to identify changes, as mentioned in [this issue](https://github.com/vitejs/vite/issues/1153#issuecomment-785467271) and in the [Vite documentation](https://vitejs.dev/config/#server-watch). However, this is a resource intensive process so we advise the previous option instead.
+
+[This issue](https://github.com/centerofci/mathesar/issues/570) keeps track of problems encountered by Mathesar developers using Windows for local development.
+
+## Adding/Removing packages
 
 If you want to add or remove packages, or bascially run any npm action, **always do it from within the container**. Never do it from your local node setup, since it may modify the `package-lock.json` in ways we would not want it to.
 
@@ -91,16 +101,6 @@ We use [Storybook](https://storybook.js.org/) to develop and document our compon
     ```bash
     docker exec -it -w /code/mathesar_ui mathesar_service npm run build-storybook
     ```
-
-### Developing in Windows
-
-Hot module replacement does not work well with WSL when the project is present within a Windows filesystem, as mentioned in [this issue](https://github.com/microsoft/WSL/issues/4739).
-
-The simplest way to get this to work (and the one we advise) is to move the project to a Linux filesystem. This can be achieved by cloning the repo within the WSL shell in a Linux filesystem.
-
-If you have to work in the Windows filesystem, you could configure Vite to poll files to identify changes, as mentioned in [this issue](https://github.com/vitejs/vite/issues/1153#issuecomment-785467271) and in the [Vite documentation](https://vitejs.dev/config/#server-watch). However, this is a resource intensive process so we advise the previous option instead.
-
-[This issue](https://github.com/centerofci/mathesar/issues/570) keeps track of problems encountered by Mathesar developers using Windows for local development.
 
 ## Naming conventions
 
