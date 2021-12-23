@@ -14,49 +14,43 @@ Once the containers are running, the changes made in frontend code will reflect 
 
 There is one catch when running in containers. Your IDEs will not be able to perform any intellisense or linting because there is no local `node_modules` folder.
 
-If you're using VS Code, you can develop inside the container, by installing [Visual Studio Code Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension. Refer [VS Code docs](https://code.visualstudio.com/docs/remote/containers) for more details.
+Options:
 
-You could also bind mount the node_modules named volume to your local path. This introduces additional complexity, depends on the OS, and the requirement that the path needs to exist. Hence, it is not configured by default in Mathesar. Using normal volumes will not work, since the host directories will override the container directories.
+- Run `npm install` locally (or copy the `node_modules` folder from the container to your host file system). This will not be used for anything except for helping the IDEs provide intellisense.
 
-A simpler approach would be to copy the `node_modules` folder from the container to your local, or run `npm install` locally. This will not be used for anything except for helping the IDEs provide intellisense.
+    If you choose this approach, make sure that you're using the same version of node and npm in your local as it is in the container, and that `package-lock.json` file is not modified before committing.
 
-If you choose the last approach, make sure that you're using the same version of node and npm in your local as it is in the container, and that `package-lock.json` file is not modified before committing.
+- Bind mount the `node_modules` named volume to your local path. This introduces additional complexity, depends on the OS, and the requirement that the path needs to exist. Hence, it is not configured by default in Mathesar. Using normal volumes will not work, since the host directories will override the container directories.
+
+- Use VS Code with the [Visual Studio Code Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension. Refer [VS Code docs](https://code.visualstudio.com/docs/remote/containers) for more details.
+
 
 ### Option 2: Manual setup
 
-You could however prefer to run the frontend locally, which is straight forward:
+If you don't want to use Docker, you can run the front end locally.
 
-```bash
-cd mathesar_ui
-npm install
-npm run dev
-```
+1. `cd mathesar_ui`
+1. `npm install`
+1. `npm run dev`
 
-This will start a vite js server at port 3000. The vite client and main files are referenced by our server rendered html files. Refer [backend integration in vite docs](https://vitejs.dev/guide/backend-integration.html).
+    This will start a vite server at port 3000. The vite client and main files are referenced by our server rendered html files. Refer [backend integration in vite docs](https://vitejs.dev/guide/backend-integration.html).
 
-For testing:
 
-```bash
-npm run test
-```
+Caveats
 
-For building the files:
+- When running manually, the `package-lock.json` file may change depending on your node/npm version or your OS. Make sure to not commit those changes. If you want to add/remove packages, follow the steps in the following section.
 
-```bash
-npm run build
-```
-
-When running manually, the `package-lock.json` file may change depending on your node/npm version or your OS. Make sure to not commit those changes. If you want to add/remove packages, follow the steps in the following section.
+- The rest of the documentation within this README assumes a Docker setup. If you use a local setup instead, you'll need to interpret the remaining documentation for your specific setup.
 
 ## Developing on Windows
 
-Hot module replacement does not work well with WSL when the project is present within a Windows filesystem, as mentioned in [this issue](https://github.com/microsoft/WSL/issues/4739).
+- Hot module replacement does not work well with WSL when the project is present within a Windows filesystem, as mentioned in [this issue](https://github.com/microsoft/WSL/issues/4739).
 
-The simplest way to get this to work (and the one we advise) is to move the project to a Linux filesystem. This can be achieved by cloning the repo within the WSL shell in a Linux filesystem.
+- The simplest way to get this to work (and the one we advise) is to move the project to a Linux filesystem. This can be achieved by cloning the repo within the WSL shell in a Linux filesystem.
 
-If you have to work in the Windows filesystem, you could configure Vite to poll files to identify changes, as mentioned in [this issue](https://github.com/vitejs/vite/issues/1153#issuecomment-785467271) and in the [Vite documentation](https://vitejs.dev/config/#server-watch). However, this is a resource intensive process so we advise the previous option instead.
+- If you have to work in the Windows filesystem, you could configure Vite to poll files to identify changes, as mentioned in [this issue](https://github.com/vitejs/vite/issues/1153#issuecomment-785467271) and in the [Vite documentation](https://vitejs.dev/config/#server-watch). However, this is a resource intensive process so we advise the previous option instead.
 
-[This issue](https://github.com/centerofci/mathesar/issues/570) keeps track of problems encountered by Mathesar developers using Windows for local development.
+- [This issue](https://github.com/centerofci/mathesar/issues/570) keeps track of problems encountered by Mathesar developers using Windows for local development.
 
 ## Linting
 
@@ -76,24 +70,24 @@ If you have to work in the Windows filesystem, you could configure Vite to poll 
 
 If you want to add or remove packages, or basically run any npm action, **always do it from within the container**. Never do it from your local node setup, since it may modify the `package-lock.json` in ways we would not want it to.
 
-You can connect to the container and open the ui folder by running:
+1. Connect to the container and open the ui folder:
 
-```bash
-docker exec -it mathesar_service /bin/bash
-cd mathesar_ui
-```
+    ```bash
+    docker exec -it mathesar_service /bin/bash
+    cd mathesar_ui
+    ```
 
-and then perform any action from within it. Example:
+1. Perform any action from within it.
 
-```bash
-root@c273da65c52d:/code/mathesar_ui$ ls
-Dockerfile  jsconfig.json  package-lock.json  public  vite.config.js
-README.md   node_modules   package.json       src
+    ```bash
+    root@c273da65c52d:/code/mathesar_ui$ ls
+    Dockerfile  jsconfig.json  package-lock.json  public  vite.config.js
+    README.md   node_modules   package.json       src
 
-root@c273da65c52d:/code/mathesar_ui$ npm install <package>
+    root@c273da65c52d:/code/mathesar_ui$ npm install <package>
 
-root@c273da65c52d:/code/mathesar_ui$ npm uninstall <package>
-```
+    root@c273da65c52d:/code/mathesar_ui$ npm uninstall <package>
+    ```
 
 ## Components
 
