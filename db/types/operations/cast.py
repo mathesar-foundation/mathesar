@@ -298,7 +298,7 @@ def assemble_function_creation_sql(argument_type, target_type, function_body):
     RETURNS {target_type}
     AS $$
     {function_body}
-    $$ LANGUAGE plpgsql;
+    $$ LANGUAGE plpgsql STRICT;
     """
 
 
@@ -538,7 +538,7 @@ def _get_timestamp_without_timezone_type_body_map():
     # Check if the value is missing timezone by casting it to a timestamp with timezone
     # and comparing if the value is equal to a timestamp without timezone
     timestamp_without_tz_condition_str = f"""
-            IF ($1 IS NULL) OR (timestamp_value_with_tz = timestamp_value) THEN
+            IF (timestamp_value_with_tz = timestamp_value) THEN
             RETURN $1::{TIMESTAMP_WITHOUT_TIME_ZONE};
             END IF;
         """
@@ -637,7 +637,7 @@ def _get_date_type_body_map():
 
     not_date_exception_str = f"RAISE EXCEPTION '% is not a {DATE}', $1;"
     date_condition_str = f"""
-            IF $1 IS NULL OR (timestamp_value_with_tz = date_value) THEN
+            IF (timestamp_value_with_tz = date_value) THEN
             RETURN $1::{DATE};
             END IF;
         """
