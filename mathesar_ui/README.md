@@ -66,6 +66,64 @@ Caveats
     docker exec -it -w /code/mathesar_ui mathesar_service npx eslint src/sections/Base.svelte
     ```
 
+## Testing
+
+We use [Jest](https://jestjs.io/) to run our tests and test utils functions. And we use [Testing Library](https://testing-library.com/docs/svelte-testing-library/intro/) to test our Svelte components.
+
+### Running tests
+
+- Run all our tests:
+
+    ```
+    docker exec -it -w /code/mathesar_ui mathesar_service npm test
+    ```
+
+- Re-run a specific test by name:
+
+    ```
+    docker exec -it -w /code/mathesar_ui mathesar_service npx jest TextInput
+    ```
+
+    This will run all test files with file names containing `TextInput`.
+
+
+### Writing tests
+
+- Let's pretend we have a file `primeUtils.ts` containing function `getPrimality` that returns `true` for prime numbers.
+
+    We can test function with a file `primeUtils.test.ts` as follows:
+
+    ```ts
+    import { getPrimality } from './primeUtils';
+
+    test('getPrimality', () => {
+      expect(getPrimality(2)).toBe(true);
+      expect(getPrimality(3)).toBe(true);
+      expect(getPrimality(4)).toBe(false);
+      expect(getPrimality(5)).toBe(true);
+      expect(getPrimality(6)).toBe(false);
+      expect(getPrimality(7)).toBe(true);
+
+      expect(getPrimality(3484403346821219)).toBe(true);
+      expect(getPrimality(4508972191266181)).toBe(false);
+
+      expect(() => getPrimality(0)).toThrow(); // Can't check zero
+      expect(() => getPrimality(-7)).toThrow(); // No negative numbers
+      expect(() => getPrimality(1)).toThrow(); // Primality of 1 is historically ambiguous
+      expect(() => getPrimality(5.5)).toThrow(); // No decimals
+    });
+    ```
+
+- Functions like `test` and `expect` are automatically imported into scope by the test runner. Your editor should hopefully be smart enough to see that Jest is configured for our project and provide you some assistance in using those functions. You can find more in the [Jest docs](https://jestjs.io/docs/getting-started), but there's not much else you'll need if you follow the pattern above.
+- After, `expect`, you'll use a [matcher](https://jestjs.io/docs/using-matchers). In the example above, we've used `toBe` which is one of the simplest matchers. However `toBe` only works for primitives like numbers, booleans, and strings. If you want to compare two objects or arrays, you'll need to use `toEqual` instead, which performs a deep comparison.
+- The `expect` call is an "assertion". We can put many of them within the same test, but the test will stop running when it hits the first failure.
+- We can put many tests within the same file.
+- Commonly we'll have one test for each function, and many assertions within that test. You can also declare variables and do other logic within the test too if you're trying to build up complex scenarios with assertions throughout a workflow. As the scenarios get more complex, it can be helpful to create multiple tests for the same function.
+- Deciding _what to test_, and _how_ can be an art! You generally want to try poking and the boundaries and edge cases. We don't have to go crazy with all sorts of assertions for every scenario. Just a few will do. We're not trying to test every possible input -- just some of the important ones.
+- If you find a bug, it's great practice to write a test that fails before even beginning work on the fix.
+
+
+
 ## Adding/Removing packages
 
 If you want to add or remove packages, or basically run any npm action, **always do it from within the container**. Never do it from your local node setup, since it may modify the `package-lock.json` in ways we would not want it to.
