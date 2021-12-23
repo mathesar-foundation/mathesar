@@ -1,6 +1,6 @@
 # Mathesar UI
 
-This directory contains the frontend code for Mathesar. However, part of the frontend setup is based on prerendered json which is done through django templates. We use Svelte as the frontend library, Scss for styling, and Vite for dev tooling.
+This directory contains the frontend code for Mathesar. However, part of the frontend setup is based on pre-rendered json which is done through django templates. We use Svelte as the frontend library, Scss for styling, and Vite for dev tooling.
 
 ## Development setup
 
@@ -20,7 +20,7 @@ You could also bind mount the node_modules named volume to your local path. This
 
 A simpler approach would be to copy the `node_modules` folder from the container to your local, or run `npm install` locally. This will not be used for anything except for helping the IDEs provide intellisense.
 
-If you choose the last approach, make sure that you're using the same version of node and npm in your local as it is in the container, and that `package-lock.json` file is not modified before commiting.
+If you choose the last approach, make sure that you're using the same version of node and npm in your local as it is in the container, and that `package-lock.json` file is not modified before committing.
 
 ### Option 2: Manual setup
 
@@ -60,7 +60,7 @@ If you have to work in the Windows filesystem, you could configure Vite to poll 
 
 ## Adding/Removing packages
 
-If you want to add or remove packages, or bascially run any npm action, **always do it from within the container**. Never do it from your local node setup, since it may modify the `package-lock.json` in ways we would not want it to.
+If you want to add or remove packages, or basically run any npm action, **always do it from within the container**. Never do it from your local node setup, since it may modify the `package-lock.json` in ways we would not want it to.
 
 You can connect to the container and open the ui folder by running:
 
