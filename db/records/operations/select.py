@@ -1,4 +1,4 @@
-from sqlalchemy import select, func, column
+from sqlalchemy import select, func, text
 from sqlalchemy_filters import apply_sort
 
 from db.columns.base import MathesarColumn
@@ -44,12 +44,6 @@ def get_query(
     else:
         select_target = table
 
-    # Scrub/decontextualize select_target columns, otherwise they will corrupt
-    # select statements
-    all_columns = [column(col.name) for col in select_target.columns]
-
-    columns_to_select = columns_to_select or all_columns
-
     if isinstance(group_by, group.GroupBy):
         selectable = group.get_group_augmented_records_query(select_target, group_by)
     else:
@@ -57,9 +51,9 @@ def get_query(
 
     selectable = _sort_and_filter(selectable, order_by, filters)
 
-    selectable = selectable.cte()
-
-    selectable = select(*columns_to_select).select_from(selectable)
+    if columns_to_select:
+        selectable = selectable.cte()
+        selectable = select(*columns_to_select).select_from(selectable)
 
     selectable = selectable.limit(limit).offset(offset)
 
