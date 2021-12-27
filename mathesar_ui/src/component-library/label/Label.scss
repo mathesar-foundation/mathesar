@@ -1,0 +1,9 @@
+.label-component {
+  &:hover {
+    cursor: pointer;
+  }
+  &.disabled {
+    color: #777;
+    cursor: not-allowed;
+  }
+}

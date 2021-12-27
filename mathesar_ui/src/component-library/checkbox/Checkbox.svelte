@@ -1,24 +1,36 @@
-<script context="module" lang="ts">
-  let id = 0;
-
-  function getId() {
-    id += 1;
-    return id;
-  }
-</script>
-
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { getLabelControllerFromContainingLabel } from '@mathesar-component-library-dir/label/LabelController';
+  import { getGloballyUniqueId } from '@mathesar-component-library-dir/common/utils/domUtils';
 
   const dispatch = createEventDispatcher();
 
-  export let checked = false;
-  export let value = null;
-  export let indeterminate = false;
+  /**
+   * When `allowIndeterminate={true}`, then setting `checked={null}` will put
+   * the checkbox in an indeterminate state.
+   *
+   * We need to use `null` here instead of `undefined` because the prop won't
+   * get sent to the component if we pass `undefined`.
+   */
+  export let checked: boolean | null = false;
+  /**
+   * By default, all falsy values (including `null`) will set the checkbox to
+   * unchecked. If you set `allowIndeterminate = true`, then the `checked` prop
+   * will treat `null` as indeterminate.
+   *
+   * When `allowIndeterminate={true}`, the only way to to put the checkdox into
+   * an indeterminate state is to pass `checked={null}` -- the user cannot
+   * change the value to indeterminate with the pointer.
+   */
+  export let allowIndeterminate = false;
+  export let value: string | number | string[] | undefined = undefined;
   export let disabled = false;
-  export let label: string = null;
+  export let id = getGloballyUniqueId();
+  export let labelController = getLabelControllerFromContainingLabel();
 
-  const componentId = getId();
+  $: indeterminate = allowIndeterminate && checked === null;
+  $: labelController?.disabled.set(disabled);
+  $: labelController?.inputId.set(id);
 
   function onChange(e: Event) {
     checked = !checked;
@@ -29,20 +41,16 @@
   }
 </script>
 
-<label class="checkbox" for="checkbox-{componentId}"
-        class:checked class:indeterminate class:disabled>
-  <span class="wrapper">
-    <input type="checkbox" id="checkbox-{componentId}"
-            checked={checked}
-            {indeterminate} {disabled} {value}
-            on:change={onChange}/>
-    <span class="alias"></span>
-  </span>
-
-  {#if label}
-    <span class="label">{label}</span>
-  {/if}
-</label>
+<input
+  class="checkbox"
+  type="checkbox"
+  {id}
+  {checked}
+  {indeterminate}
+  {disabled}
+  {value}
+  on:change={onChange}
+/>
 
 <style global lang="scss">
   @import "Checkbox.scss";
