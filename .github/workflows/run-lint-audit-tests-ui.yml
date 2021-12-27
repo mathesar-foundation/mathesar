@@ -47,7 +47,7 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-
       - run: npm install
-      - uses: oke-py/npm-audit-action@v1.8.0
+      - uses: oke-py/npm-audit-action@v1.8.2
         with:
           audit_level: moderate
           github_token: ${{ secrets.GITHUB_TOKEN }}

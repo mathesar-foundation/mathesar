@@ -12,11 +12,22 @@
 
   const dispatch = createEventDispatcher();
 
+  // The active page number.
   export let page = 1;
+
+  // Number of records per page.
   export let pageSize = 10;
+
+  /**
+   * Total number of records.
+   * @required
+   */
   export let total = 0;
+
+  // Can be used to specify a path.
   export let getLink: (page: number, pageSize: number) => string = null;
 
+  // Total number of pages.
   export let pageCount = 0;
 
   $: pageCount = Math.ceil(total / pageSize);

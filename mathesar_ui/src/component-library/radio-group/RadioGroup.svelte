@@ -1,23 +1,14 @@
 <script lang="ts">
-  import type { RadioGroupOption } from '@mathesar-component-library/types';
+  import type { Option } from '@mathesar-component-library-dir/types';
+  import FieldsetGroup from '@mathesar-component-library-dir/fieldset-group/FieldsetGroup.svelte';
+  import Radio from '@mathesar-component-library-dir/radio/Radio.svelte';
 
-  export let group: string;
-  export let idKey = 'id';
-  export let labelKey = 'label';
-  export let isInline = true;
-  export let options: RadioGroupOption[] = [];
+  export let value: string;
+  export let isInline = false;
+  export let options: Option[] = [];
+  export let label: string | undefined = undefined;
 </script>
 
-<fieldset class="radio-group">
-  <legend>
-    <slot></slot>
-  </legend>
-  <div class:inline={isInline}>
-    {#each options as option (option[idKey])}
-      <label class="radio">
-          <input type="radio" bind:group value={option[idKey]}>
-          <span class="label">{option[labelKey]}</span>
-      </label>
-    {/each}
-  </div>
-</fieldset>
+<FieldsetGroup {isInline} {options} {label} let:option>
+  <Radio bind:group={value} value={option.value} disabled={option.disabled} />
+</FieldsetGroup>

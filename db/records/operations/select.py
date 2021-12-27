@@ -1,8 +1,9 @@
-from sqlalchemy import select, func, true, and_
+from sqlalchemy import select, func
 from sqlalchemy_filters import apply_filters, apply_sort
 from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
 from db.columns.base import MathesarColumn
+from db.records.operations import group
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.utils import execute_query
@@ -21,26 +22,14 @@ def _validate_nested_ops(filters):
                 _validate_nested_ops(op[field])
 
 
-def _create_query_with_duplicate_filter(table, duplicate_columns, cols=None):
-    subq_table = table.alias()
-    table_duplicate_columns = [c for c in table.c if c.name in duplicate_columns]
-    subq_duplicate_columns = [c for c in subq_table.c if c.name in duplicate_columns]
-    subq = (
-        select(true().label(DUPLICATE_LABEL))
-        .select_from(subq_table)
-        .group_by(*subq_duplicate_columns)
-        .having(and_(
-            func.count() > 1,
-            *[c == subq_c for c, subq_c in zip(table_duplicate_columns, subq_duplicate_columns)]
-        ))
-        .lateral("lateral_subq")
-    )
-    query = (
-        select(*(cols or table.c))
-        .select_from(table.join(subq, true()))
-        .where(subq.c[DUPLICATE_LABEL])
-    )
-    return query
+def _get_duplicate_only_cte(table, duplicate_columns):
+    duplicate_flag_cte = (
+        select(
+            *table.c,
+            (func.count(1).over(partition_by=duplicate_columns) > 1).label(DUPLICATE_LABEL),
+        ).select_from(table)
+    ).cte()
+    return select(duplicate_flag_cte).where(duplicate_flag_cte.c[DUPLICATE_LABEL]).cte()
 
 
 def _get_duplicate_data_columns(table, filters):
@@ -64,12 +53,17 @@ def _get_duplicate_data_columns(table, filters):
         return None, filters
 
 
-def get_query(table, limit, offset, order_by, filters, cols=None):
+def get_query(table, limit, offset, order_by, filters, cols=None, group_by=None):
     duplicate_columns, filters = _get_duplicate_data_columns(table, filters)
     if duplicate_columns:
-        query = _create_query_with_duplicate_filter(table, duplicate_columns, cols)
+        select_target = _get_duplicate_only_cte(table, duplicate_columns)
     else:
-        query = select(*(cols or table.c)).select_from(table)
+        select_target = table
+
+    if isinstance(group_by, group.GroupBy):
+        query = group.get_group_augmented_records_query(table, group_by)
+    else:
+        query = select(*(cols or select_target.c)).select_from(select_target)
 
     query = query.limit(limit).offset(offset)
     if order_by is not None:
@@ -88,10 +82,10 @@ def get_record(table, engine, id_value):
 
 
 def get_records(
-        table, engine, limit=None, offset=None, order_by=[], filters=[],
+        table, engine, limit=None, offset=None, order_by=[], filters=[], group_by=None,
 ):
     """
-    Returns records from a table.
+    Returns annotated records from a table.
 
     Args:
         table:    SQLAlchemy table object
@@ -104,19 +98,20 @@ def get_records(
         filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
                   field, in addition to an 'value' field if appropriate.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
+        group_by: group.GroupBy object
     """
     if not order_by:
         # Set default ordering if none was requested
         if len(table.primary_key.columns) > 0:
             # If there are primary keys, order by all primary keys
-            order_by = [{'field': col, 'direction': 'asc'}
+            order_by = [{'field': str(col.name), 'direction': 'asc'}
                         for col in table.primary_key.columns]
         else:
             # If there aren't primary keys, order by all columns
             order_by = [{'field': col, 'direction': 'asc'}
                         for col in table.columns]
 
-    query = get_query(table, limit, offset, order_by, filters)
+    query = get_query(table, limit, offset, order_by, filters, group_by=group_by)
     return execute_query(engine, query)
 
 
