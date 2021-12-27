@@ -7,11 +7,8 @@
     ColumnPosition,
     ColumnPositionMap,
     TabularDataStore,
-    TabularData,
     TableRecord,
     Column,
-    RecordsData,
-    ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
@@ -22,14 +19,16 @@
   export let style: { [key: string]: string | number };
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  let recordsData: RecordsData;
-  let columnsDataStore: ColumnsDataStore;
+
   $: ({
-    recordsData, columnsDataStore, meta, display,
-  } = $tabularData as TabularData);
-  $: ({ columnPositionMap } = display as TabularData['display']);
-  $: ({ selectedRecords, recordModificationState } = meta as TabularData['meta']);
-  $: ({ groupInfo } = recordsData);
+    recordsData,
+    columnsDataStore,
+    meta,
+    display,
+  } = $tabularData);
+  $: ({ columnPositionMap } = display);
+  $: ({ selectedRecords, recordModificationState } = meta);
+  $: ({ grouping } = recordsData);
 
   function calculateStyle(
     _style: { [key: string]: string | number },
@@ -44,10 +43,7 @@
       + `width:${totalWidth}px`;
   }
 
-  $: styleString = calculateStyle(
-    style,
-    $columnPositionMap,
-  );
+  $: styleString = calculateStyle(style, $columnPositionMap);
 
   function getColumnPosition(
     _columnPositionMap: ColumnPositionMap,
@@ -78,7 +74,7 @@
   {#if row.__isNewHelpText}
     <RowPlaceholder {rowWidth}/>
   {:else if row.__isGroupHeader}
-    <GroupHeader {row} {rowWidth} groupColumns={$groupInfo.columns} groupCounts={$groupInfo.counts}/>
+    <GroupHeader {row} {rowWidth} grouping={$grouping} group={row.__group}/>
   {:else}
     <RowControl primaryKeyColumn={$columnsDataStore.primaryKey}
                 {row} {meta} recordsData={recordsData}/>

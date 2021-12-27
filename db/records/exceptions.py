@@ -8,3 +8,7 @@ class BadGroupFormat(Exception):
 
 class GroupFieldNotFound(FieldNotFound):
     pass
+
+
+class InvalidGroupType(Exception):
+    pass

@@ -17,9 +17,9 @@ from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
 from db.constraints import utils as constraint_utils
 from db.records.operations.delete import delete_record
-from db.records.operations.group import get_group_counts
 from db.records.operations.insert import insert_record_or_records
-from db.records.operations.select import get_column_cast_records, get_count, get_record, get_records
+from db.records.operations.select import get_column_cast_records, get_count, get_record
+from db.records.operations.select import get_records as db_get_records
 from db.records.operations.update import update_record
 from db.schemas.operations.drop import drop_schema
 from db.schemas import utils as schema_utils
@@ -262,7 +262,7 @@ class Table(DatabaseObject):
 
     @property
     def sa_all_records(self):
-        return get_records(self._sa_table, self.schema._sa_engine)
+        return db_get_records(self._sa_table, self.schema._sa_engine)
 
     def sa_num_records(self, filters=[]):
         return get_count(self._sa_table, self.schema._sa_engine, filters=filters)
@@ -276,25 +276,15 @@ class Table(DatabaseObject):
     def get_record(self, id_value):
         return get_record(self._sa_table, self.schema._sa_engine, id_value)
 
-    def get_records(self, limit=None, offset=None, filters=[], order_by=[]):
-        return get_records(
+    def get_records(self, limit=None, offset=None, filters=[], order_by=[], group_by=None):
+        return db_get_records(
             self._sa_table,
             self.schema._sa_engine,
             limit,
             offset,
             filters=filters,
-            order_by=order_by
-        )
-
-    def get_group_counts(self, group_by, limit=None, offset=None, filters=[], order_by=[]):
-        return get_group_counts(
-            self._sa_table,
-            self.schema._sa_engine,
-            group_by,
-            limit,
-            offset,
-            filters=filters,
-            order_by=order_by
+            order_by=order_by,
+            group_by=group_by
         )
 
     def create_record_or_records(self, record_data):

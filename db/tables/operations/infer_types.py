@@ -10,7 +10,7 @@ from db.tables.operations.create import CreateTableAs
 from db.tables.operations.select import reflect_table
 
 
-TEMP_SCHEMA = f"{constants.MATHESAR_PREFIX}temp_schema"
+TEMP_SCHEMA = constants.INFERENCE_SCHEMA
 TEMP_TABLE = f"{constants.MATHESAR_PREFIX}temp_table_%s"
 
 
