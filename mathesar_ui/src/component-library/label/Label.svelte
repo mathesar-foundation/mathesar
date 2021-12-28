@@ -14,7 +14,3 @@
 <label for={$inputId} class="label-component" class:disabled={$disabled}>
   <slot inputId={$inputId} />
 </label>
-
-<style global lang="scss">
-  @import './Label.scss';
-</style>

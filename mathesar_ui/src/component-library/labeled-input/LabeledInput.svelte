@@ -21,7 +21,3 @@
     </span>
   </Label>
 </div>
-
-<style global lang="scss">
-  @import './LabeledInput.scss';
-</style>

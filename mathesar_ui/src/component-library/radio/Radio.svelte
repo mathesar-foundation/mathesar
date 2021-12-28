@@ -20,7 +20,3 @@
   {id}
   {disabled}
 />
-
-<style global lang="scss">
-  @import "./Radio.scss";
-</style>

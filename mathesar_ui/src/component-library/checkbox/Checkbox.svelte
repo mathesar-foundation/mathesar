@@ -51,7 +51,3 @@
   {value}
   on:change={onChange}
 />
-
-<style global lang="scss">
-  @import "Checkbox.scss";
-</style>
