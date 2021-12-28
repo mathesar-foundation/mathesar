@@ -20,11 +20,11 @@ export function calculatePages(page: number, pageCount: number): PageInfo {
   if (end - start < 4) {
     start = Math.max(end - 4, 1);
   }
-  if (start < 3) {
-    end = Math.min(end + 2 - (start - 1), pageCount);
-  }
   if (end > (pageCount - 2)) {
     start = Math.max(end - (6 - (pageCount - end)), 1);
+  }
+  if (start < 3) {
+    end = Math.min(end + 2 - (start - 1), pageCount);
   }
   const pages = getFilledPages(start, end);
 
