@@ -8,21 +8,21 @@
 
   export let fileImportStore: FileImport;
 
-  type UploadMethodId = 'File' | 'URL' | 'Clipboard';
-  interface UploadMethod {
-    id: UploadMethodId,
+  type UploadMethod = 'File' | 'URL' | 'Copy and Paste Text';
+  interface UploadMethodOption {
+    value: UploadMethod,
     component: typeof SvelteComponent,
   }
-  const uploadMethods: UploadMethod[] = [
-    { id: 'File', component: UploadViaFile },
-    { id: 'URL', component: UploadViaUrl },
-    { id: 'Clipboard', component: UploadViaClipboard },
+  const uploadMethods: UploadMethodOption[] = [
+    { value: 'File', component: UploadViaFile },
+    { value: 'URL', component: UploadViaUrl },
+    { value: 'Copy and Paste Text', component: UploadViaClipboard },
   ];
-  const radioOptions = uploadMethods.map(({ id }) => ({ id, label: id }));
+  const radioOptions = uploadMethods.map(({ value }) => ({ value, label: value }));
 
-  let uploadMethodId: UploadMethodId = 'File';
+  let uploadMethodId: UploadMethod = 'File';
   
-  $: uploadMethod = uploadMethods.find((m) => m.id === uploadMethodId);
+  $: uploadMethod = uploadMethods.find((m) => m.value === uploadMethodId);
 </script>
 
 <h2>Import your data</h2>
@@ -32,7 +32,12 @@
   Please do not close this tab, you may still open and view other tables in the meanwhile.
 </div>
 
-<RadioGroup bind:group={uploadMethodId} options={radioOptions} isInline={false}>
+<RadioGroup
+  bind:value={uploadMethodId}
+  options={radioOptions}
+  isInline
+  label="Upload Method"
+>
   <h3>Import From</h3>
 </RadioGroup>
 

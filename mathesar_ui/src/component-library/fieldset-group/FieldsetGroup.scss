@@ -1,0 +1,27 @@
+.fieldset-group {
+  padding: 0;
+  border: 0;
+  --spacing-y: 0.5em;
+  --spacing-x: 1em;
+
+  legend {
+    padding: 0;
+  }
+  .options {
+    padding-left: 0;
+    list-style-type: none;
+    margin: 1em 0 0 0;
+  }
+  &:not(.inline) .option {
+
+    margin-top: var(--spacing-y);
+    margin-bottom: var(--spacing-y);
+  }
+
+  &.inline .options {
+    display: flex;
+    .option + .option {
+      margin-left: var(--spacing-x);
+    }
+  }
+}
