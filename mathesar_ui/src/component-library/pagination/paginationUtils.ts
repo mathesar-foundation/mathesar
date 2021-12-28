@@ -1,4 +1,4 @@
-function getFilledPages(start: number, end: number): number[] {
+function getCurrentWindow(start: number, end: number): number[] {
   const arr: number[] = [];
   for (let i = start; i <= end; i += 1) {
     arr.push(i);
@@ -7,15 +7,15 @@ function getFilledPages(start: number, end: number): number[] {
 }
 
 interface PageInfo {
-  pages: number[],
+  currentWindow: number[],
   start: number,
   end: number,
   prevPageWindow: number,
   nextPageWindow: number
 }
 
-export function calculatePages(page: number, pageCount: number): PageInfo {
-  let start = Math.max(page - 2, 1);
+export function calculatePages(currentPage: number, pageCount: number): PageInfo {
+  let start = Math.max(currentPage - 2, 1);
   let end = Math.min(start + 4, pageCount);
   if (end - start < 4) {
     start = Math.max(end - 4, 1);
@@ -26,10 +26,10 @@ export function calculatePages(page: number, pageCount: number): PageInfo {
   if (start < 3) {
     end = Math.min(end + 2 - (start - 1), pageCount);
   }
-  const pages = getFilledPages(start, end);
+  const currentWindow = getCurrentWindow(start, end);
 
   return {
-    pages,
+    currentWindow,
     start,
     end,
     prevPageWindow: Math.max(start - 3, 1),
