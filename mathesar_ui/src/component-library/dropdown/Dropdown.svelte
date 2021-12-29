@@ -97,7 +97,8 @@
 </script>
 
 <Button bind:element={triggerElement} appearance={triggerAppearance} class={tgClasses} on:click={toggle} 
-  aria-controls={ariaControls} aria-haspopup="listbox" aria-label={ariaLabel} {size} on:keydown>
+  aria-controls={ariaControls} aria-haspopup="listbox" aria-label={ariaLabel} {size} on:keydown
+  {...$$restProps}>
   <span class="label">
     <slot name="trigger"></slot>
   </span>

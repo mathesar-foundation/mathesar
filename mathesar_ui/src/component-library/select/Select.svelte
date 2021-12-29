@@ -165,7 +165,7 @@
 
 <BaseInput {...$$restProps} bind:id {disabled}/>
 
-<Dropdown ariaControls={id} {ariaLabel} bind:isOpen 
+<Dropdown ariaControls="{id}-select-options" {ariaLabel} bind:isOpen {disabled} {id}
           contentClass="select {contentClass}" {triggerAppearance} {triggerClass} 
           on:keydown={keyAccessibility} on:open={setSelectedItem}>
   <svelte:fragment slot="trigger">
@@ -173,7 +173,7 @@
   </svelte:fragment>
   
   <svelte:fragment slot="content">
-    <ul bind:this={parentHoverElem} {id} tabindex="0" role="listbox" aria-expanded="true">
+    <ul bind:this={parentHoverElem} id="{id}-select-options" tabindex="0" role="listbox" aria-expanded="true">
       {#each options as option (option[idKey])}
         <li role='option' class:selected={option[idKey] === value[idKey]} class:hovered={option[idKey] === options[currentIndex]?.[idKey]} on:click={() => setValue(option)}>
           <span>{option[labelKey]}</span>

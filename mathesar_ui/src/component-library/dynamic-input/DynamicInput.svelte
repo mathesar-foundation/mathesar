@@ -36,14 +36,12 @@
   export let options = undefined;
 </script>
 
-<div class="dynamic-input">
-  {#if enumValues || inputType === 'select'}
-    <EnumInput {...$$restProps} {enumValues} {type} {options} bind:value/>
-  {:else if type === 'boolean'}
-    <BooleanInput {...$$restProps} {inputType} bind:value/>
-  {:else if type === 'integer' || type === 'float'}
-    <NumberInput {...$$restProps} isInteger={type === 'integer'} bind:value/>
-  {:else if type === 'string'}
-    <StringInput {...$$restProps} {inputType} bind:value/>
-  {/if}
-</div>
+{#if enumValues || inputType === 'select'}
+  <EnumInput {...$$restProps} {enumValues} {type} {options} bind:value/>
+{:else if type === 'boolean'}
+  <BooleanInput {...$$restProps} {inputType} bind:value/>
+{:else if type === 'integer' || type === 'float'}
+  <NumberInput {...$$restProps} isInteger={type === 'integer'} bind:value/>
+{:else if type === 'string'}
+  <StringInput {...$$restProps} {inputType} bind:value/>
+{/if}
