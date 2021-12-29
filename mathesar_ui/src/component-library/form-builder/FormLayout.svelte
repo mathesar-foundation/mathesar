@@ -3,7 +3,7 @@
   export let elements;
 </script>
 
-<div class='form-layout {orientation}'>
+<div class='form-element form-layout {orientation}'>
   {#each (elements || []) as element (element)}
     <slot {element}></slot>
   {/each}

@@ -9,7 +9,7 @@
   export let store;
 </script>
 
-<div class="form-input">
+<div class="form-element form-input">
   <LabeledInput {label} layout={type === 'boolean' ? 'inline-input-first' : 'stacked'}>
     <DynamicInput {...$$restProps} {type} {label} bind:value={$store}/>
   </LabeledInput>

@@ -11,6 +11,7 @@
   font-size: inherit;
   display: block;
   width: 100%;
+  box-sizing: border-box;
 
   &:focus {
     border-color: #489ee4;
