@@ -15,12 +15,6 @@
    */
   export let value = undefined;
 
-  // TODO: Use with label system
-  /**
-   * Id of the input.
-   */
-  export let id: string = undefined;
-
   /**
    * DOM input type for input.<br/>
    * boolean -> checkbox, toggle, select. Default: checkbox.<br/>
