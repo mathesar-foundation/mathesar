@@ -1,16 +1,13 @@
 <script lang="ts">
-  import { getLabelControllerFromContainingLabel } from '@mathesar-component-library-dir/label/LabelController';
-  import { getGloballyUniqueId } from '@mathesar-component-library-dir/common/utils/domUtils';
+  import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
 
   export let group: string | number | string[] | undefined = undefined;
   export let value: string | number | string[] | undefined = undefined;
   export let disabled = false;
-  export let id = getGloballyUniqueId();
-  export let labelController = getLabelControllerFromContainingLabel();
-
-  $: labelController?.disabled.set(disabled);
-  $: labelController?.inputId.set(id);
+  export let id: string = undefined;
 </script>
+
+<BaseInput {...$$restProps} bind:id {disabled}/>
 
 <input
   class="radio"

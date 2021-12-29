@@ -1,14 +1,6 @@
-<script context="module" lang="ts">
-  let maxId = 0;
-
-  function getId() {
-    maxId += 1;
-    return maxId;
-  }
-</script>
-
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -29,7 +21,7 @@
   export let element: HTMLElement = null;
 
   // Id for the input
-  export let id = `text-input-${getId()}`;
+  export let id: string = undefined;
 
   function handleKeypress(e: KeyboardEvent) {
     if (e.key === 'Enter') {
@@ -37,6 +29,8 @@
     }
   }
 </script>
+
+<BaseInput {...$$restProps} bind:id {disabled}/>
 
 <input bind:this={element} {...$$restProps} type='text'
   class={['input-element', 'text-input', classes].join(' ')}

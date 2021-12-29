@@ -1,13 +1,5 @@
-<script context="module" lang="ts">
-  let maxId = 0;
-
-  function getId() {
-    maxId += 1;
-    return maxId;
-  }
-</script>
-
 <script lang="ts">
+  import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
   import type { HTMLNumberInputElement } from './types.d';
 
   /**
@@ -36,7 +28,7 @@
   export let element: HTMLElement = null;
 
   // Id for the input
-  export let id = `number-input-${getId()}`;
+  export let id: string = undefined;
 
   // Forces input to only allow integer values
   export let isInteger = false;
@@ -72,6 +64,8 @@
     }
   }
 </script>
+
+<BaseInput {...$$restProps} bind:id {disabled}/>
 
 <input bind:this={element} {...$$restProps} type='number'
   class={['input-element', 'number-input', classes].join(' ')}
