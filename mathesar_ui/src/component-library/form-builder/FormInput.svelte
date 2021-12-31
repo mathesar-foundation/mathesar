@@ -2,11 +2,11 @@
   import LabeledInput from '@mathesar-component-library-dir/labeled-input/LabeledInput.svelte';
   import DynamicInput from '@mathesar-component-library-dir/dynamic-input/DynamicInput.svelte';
   import type { DynamicInputType } from '@mathesar-component-library-dir/dynamic-input/types.d';
-  import type { LayoutInputElement } from './types.d';
+  import type { FormInputElement, FormInputStore } from './types.d';
 
   export let type: DynamicInputType;
-  export let label: LayoutInputElement['label'];
-  export let store;
+  export let label: FormInputElement['label'] = undefined;
+  export let store: FormInputStore;
 </script>
 
 <div class="form-element form-input">

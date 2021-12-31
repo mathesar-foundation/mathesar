@@ -1,11 +1,11 @@
 <script lang='ts'>
   import { checkCondition } from './utils';
-  import type { LayoutConditionalIfElement } from './types.d';
+  import type { FormInputStore, ConditionalIfElement } from './types.d';
 
-  export let store;
-  export let condition: LayoutConditionalIfElement['condition'] = 'eq';
-  export let value: unknown;
-  export let elements: LayoutConditionalIfElement['elements'];
+  export let store: FormInputStore;
+  export let condition: ConditionalIfElement['condition'] = 'eq';
+  export let value: ConditionalIfElement['value'];
+  export let elements: ConditionalIfElement['elements'];
 
   $: isConditionSatisfied = checkCondition($store, condition, value);
 </script>

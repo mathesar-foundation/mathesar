@@ -3,10 +3,13 @@
   import FormLayout from './FormLayout.svelte';
   import Switch from './Switch.svelte';
   import If from './If.svelte';
+  import type {
+    FormElement, FormBuildConfiguration,
+  } from './types.d';
 
-  export let element;
-  export let stores;
-  export let variables;
+  export let element: FormElement;
+  export let stores: FormBuildConfiguration['stores'];
+  export let variables: FormBuildConfiguration['variables'];
 </script>
 
 {#if element.type === 'input'}
@@ -24,7 +27,7 @@
     <svelte:self {variables} {stores} element={childElement}/>
   </If>
 
-{:else if element.type === 'layout' || !element.type}
+{:else}
   <FormLayout orientation={element.orientation}
     elements={element.elements} let:element={childElement}>
       <svelte:self {variables} {stores} element={childElement}/>

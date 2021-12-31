@@ -1,9 +1,9 @@
-import type { LayoutConditionalIfElement } from './types.d';
+import type { FormInputDataType, ConditionalIfElement } from './types.d';
 
 export function checkCondition(
-  term: unknown,
-  condition: LayoutConditionalIfElement['condition'],
-  value: LayoutConditionalIfElement['value'],
+  term: FormInputDataType,
+  condition: ConditionalIfElement['condition'],
+  value: ConditionalIfElement['value'],
 ): boolean {
   if (condition === 'eq') {
     return term === value;
