@@ -8,7 +8,7 @@ export interface AbstractTypeResponse {
 }
 
 export interface AbstractTypeConfiguration {
-  defaultDBType?: DbType,
+  defaultDbType?: DbType,
   icon: string,
   input: {
     type: DynamicInputType,

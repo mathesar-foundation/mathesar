@@ -2,7 +2,7 @@
   import { createEventDispatcher, getContext, tick } from 'svelte';
   import { faDatabase, faSpinner } from '@fortawesome/free-solid-svg-icons';
   import { Button, Icon, Select } from '@mathesar-component-library';
-  import { abstractTypes } from '@mathesar/stores/abstractTypes';
+  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
     ColumnsDataStore,
   } from '@mathesar/stores/table-data';
@@ -14,7 +14,7 @@
     TabularData,
     TabularDataStore,
   } from '@mathesar/stores/table-data/types';
-  import type { AbstractType } from '@mathesar/stores/abstractTypes';
+  import type { AbstractType } from '@mathesar/stores/abstract-types/types';
   import type { SelectOption } from '@mathesar-component-library/types';
   import { toast } from '@mathesar/stores/toast';
 
@@ -29,7 +29,7 @@
 
   $: allowedTypeConversions = ColumnsDataStore.getAllowedTypeConversions(
     column,
-    $abstractTypes.data,
+    $currentDbAbstractTypes.data,
   );
 
   let selectedAbstractType: AbstractType = null;
