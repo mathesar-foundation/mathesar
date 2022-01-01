@@ -2,10 +2,10 @@
   import { createEventDispatcher, getContext, tick } from 'svelte';
   import { faDatabase, faSpinner } from '@fortawesome/free-solid-svg-icons';
   import { Button, Icon, Select } from '@mathesar-component-library';
-  import { currentDbAbstractTypes } from '@mathesar/stores/abstract-types';
   import {
-    ColumnsDataStore,
-  } from '@mathesar/stores/table-data';
+    currentDbAbstractTypes,
+    getAbstractTypesForDBTypeList,
+  } from '@mathesar/stores/abstract-types';
   import { States } from '@mathesar/utils/api';
 
   import type { DbType } from '@mathesar/App.d';
@@ -27,8 +27,8 @@
   export let abstractTypeOfColumn: AbstractType;
   let abstractTypeContainer: HTMLUListElement;
 
-  $: allowedTypeConversions = ColumnsDataStore.getAllowedTypeConversions(
-    column,
+  $: allowedTypeConversions = getAbstractTypesForDBTypeList(
+    column?.valid_target_types,
     $currentDbAbstractTypes.data,
   );
 

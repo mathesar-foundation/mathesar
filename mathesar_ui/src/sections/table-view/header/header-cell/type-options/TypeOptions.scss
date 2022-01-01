@@ -14,9 +14,11 @@
     border: 1px solid #eaeaea;
     max-height: 7.5rem;
     overflow: auto;
+    position: relative;
     
     li {
       border-bottom: 1px solid #f1f1f1;
+      position: relative;
 
       &:last-child {
         border-bottom: none;

@@ -50,16 +50,50 @@ export function constructAbstractTypeMapFromResponse(
   return abstractTypesMap;
 }
 
+/**
+ * For columns, allowed db types should be an intersection of valid_target_types
+ * and dbTypes of each abstract type. i.e
+ * const allowedDBTypes = intersection(dbTargetTypeSet, abstractType.dbTypes);
+ *
+ * However, it is not handled here yet, since it requires additional confirmation.
+ */
+export function getAbstractTypesForDBTypeList(
+  dbTypes: DbType[],
+  abstractTypesMap: AbstractTypesMap,
+): AbstractType[] {
+  if (dbTypes && abstractTypesMap) {
+    const abstractTypeSet: Set<AbstractType> = new Set();
+    let isUnknownTypeRequired = false;
+    dbTypes.forEach((dbType) => {
+      let isKnownType = false;
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [, abstractType] of abstractTypesMap) {
+        if (abstractType.dbTypes.has(dbType)) {
+          abstractTypeSet.add(abstractType);
+          isKnownType = true;
+          break;
+        }
+      }
+      if (!isKnownType) {
+        isUnknownTypeRequired = true;
+      }
+    });
+    const abstractTypeList = [...abstractTypeSet].sort(
+      (a, b) => a.name.localeCompare(b.name),
+    );
+    if (isUnknownTypeRequired) {
+      abstractTypeList.push(
+        constructAbstractTypeFromResponse(unknownAbstractTypeResponse),
+      );
+    }
+    return abstractTypeList;
+  }
+  return [];
+}
+
 export function getAbstractTypeForDBType(
   dbType: DbType, abstractTypesMap: AbstractTypesMap,
 ): AbstractType {
-  if (dbType && abstractTypesMap) {
-    // eslint-disable-next-line no-restricted-syntax
-    for (const [, abstractType] of abstractTypesMap) {
-      if (abstractType.dbTypes.has(dbType)) {
-        return abstractType;
-      }
-    }
-  }
-  return constructAbstractTypeFromResponse(unknownAbstractTypeResponse);
+  return getAbstractTypesForDBTypeList([dbType], abstractTypesMap)[0]
+    || constructAbstractTypeFromResponse(unknownAbstractTypeResponse);
 }

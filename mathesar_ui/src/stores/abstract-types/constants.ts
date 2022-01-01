@@ -11,7 +11,7 @@ export const abstractTypeCategory = {
 };
 
 export const unknownAbstractTypeResponse = {
-  name: 'Unknown',
+  name: 'Other',
   identifier: 'other',
   db_types: [],
 };
