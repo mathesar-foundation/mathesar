@@ -28,7 +28,7 @@
   let abstractTypeContainer: HTMLUListElement;
 
   $: allowedTypeConversions = getAbstractTypesForDBTypeList(
-    column?.valid_target_types,
+    [...(column.valid_target_types || []), column.type],
     $currentDbAbstractTypes.data,
   );
 
