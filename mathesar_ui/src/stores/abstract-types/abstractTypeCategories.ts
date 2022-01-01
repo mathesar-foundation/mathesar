@@ -35,7 +35,7 @@ function getAbstractTypeConfiguration(
 function constructAbstractTypeFromResponse(response: AbstractTypeResponse): AbstractType {
   return {
     ...response,
-    ...getAbstractTypeConfiguration[response.identifier],
+    ...getAbstractTypeConfiguration(response.identifier),
     dbTypes: new Set(response.db_types),
   } as AbstractType;
 }
