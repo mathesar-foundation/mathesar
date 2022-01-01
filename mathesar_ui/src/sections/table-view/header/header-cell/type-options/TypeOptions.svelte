@@ -1,12 +1,13 @@
 <script lang="ts">
   import { createEventDispatcher, getContext, tick } from 'svelte';
   import { faDatabase, faSpinner } from '@fortawesome/free-solid-svg-icons';
-  import { Button, Icon, Select } from '@mathesar-component-library';
+  import { Button, Icon } from '@mathesar-component-library';
   import {
     currentDbAbstractTypes,
     getAbstractTypesForDBTypeList,
   } from '@mathesar/stores/abstract-types';
   import { States } from '@mathesar/utils/api';
+  import { toast } from '@mathesar/stores/toast';
 
   import type { DbType } from '@mathesar/App.d';
   import type {
@@ -15,8 +16,8 @@
     TabularDataStore,
   } from '@mathesar/stores/table-data/types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
-  import type { SelectOption } from '@mathesar-component-library/types';
-  import { toast } from '@mathesar/stores/toast';
+
+  import DatabaseForm from './database-options/DatabaseOptions.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -25,38 +26,31 @@
 
   export let column: Column;
   export let abstractTypeOfColumn: AbstractType;
-  let abstractTypeContainer: HTMLUListElement;
 
   $: allowedTypeConversions = getAbstractTypesForDBTypeList(
     [...(column.valid_target_types || []), column.type],
     $currentDbAbstractTypes.data,
   );
 
+  let abstractTypeContainer: HTMLUListElement;
   let selectedAbstractType: AbstractType = null;
-  let selectedDBTypeOption: SelectOption<DbType> = null;
+  let selectedDbType: DbType = null;
   let typeChangeState = States.Idle;
 
   function selectAbstractType(abstractType: AbstractType) {
     selectedAbstractType = abstractType;
     if (abstractType.identifier === abstractTypeOfColumn.identifier) {
-      selectedDBTypeOption = {
-        id: column.type,
-        label: column.type,
-      };
+      selectedDbType = column.type;
     } else if (abstractType.defaultDbType) {
-      selectedDBTypeOption = {
-        id: abstractType.defaultDbType,
-        label: abstractType.defaultDbType,
-      };
+      selectedDbType = abstractType.defaultDbType;
+    } else if (abstractType.dbTypes.size > 0) {
+      [selectedDbType] = abstractType.dbTypes;
     }
   }
 
   function resetAbstractType() {
+    selectedDbType = column.type;
     selectedAbstractType = abstractTypeOfColumn;
-    selectedDBTypeOption = {
-      id: column.type,
-      label: column.type,
-    };
   }
 
   async function scrollToSelectedType() {
@@ -72,18 +66,6 @@
     void scrollToSelectedType();
   }
 
-  function calculateDBTypeOptions(_selectedAbstractType: AbstractType): SelectOption[] {
-    if (_selectedAbstractType) {
-      return Array.from(_selectedAbstractType?.dbTypes).map((entry) => ({
-        id: entry,
-        label: entry,
-      }));
-    }
-    return [];
-  }
-
-  $: dbTypeOptions = calculateDBTypeOptions(selectedAbstractType);
-
   function close() {
     resetAbstractType();
     typeChangeState = States.Done;
@@ -91,11 +73,11 @@
   }
 
   async function onSave() {
-    if (selectedDBTypeOption.id !== column.type) {
+    if (selectedDbType !== column.type) {
       typeChangeState = States.Loading;
       try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        await columnsDataStore.patchType(column.id, selectedDBTypeOption.id);
+        await columnsDataStore.patchType(column.id, selectedDbType);
       } catch (err) {
         toast.error(`Unable to change column type. ${err.message as string}`);
       }
@@ -128,10 +110,8 @@
       </li>
     </ul>
     <div class="type-options-content">
-      <div>Type in db</div>
-      <Select triggerAppearance="default" triggerClass="db-type-select"
-        bind:value={selectedDBTypeOption}
-        options={dbTypeOptions}/>
+      <DatabaseForm bind:selectedDbType {selectedAbstractType}
+        dbOptions={selectedAbstractType?.typeSwitchOptions?.database}/>
     </div>
   </div>
 

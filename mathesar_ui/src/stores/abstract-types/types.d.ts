@@ -7,6 +7,15 @@ export interface AbstractTypeResponse {
   db_types: DbType[]
 }
 
+export interface AbstractTypeDbConfigOptions {
+  allowDefault: boolean,
+  form: FormConfiguration,
+  determinationRules?: {
+    resolve: string,
+    rule: unknown,
+  }[]
+}
+
 export interface AbstractTypeConfiguration {
   defaultDbType?: DbType,
   icon: string,
@@ -19,14 +28,7 @@ export interface AbstractTypeConfiguration {
     }>
   },
   typeSwitchOptions?: {
-    database: {
-      allowDefault: boolean,
-      form: FormConfiguration,
-      determinationRules?: {
-        resolve: string,
-        rule: unknown,
-      }[]
-    },
+    database: AbstractTypeDbConfigOptions,
     display?: {
       form: FormConfiguration,
     }
