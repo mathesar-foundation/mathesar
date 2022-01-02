@@ -13,7 +13,7 @@
   const dispatch = createEventDispatcher();
 
   // The active page number.
-  export let page = 1;
+  export let currentPage = 1;
 
   // Number of records per page.
   export let pageSize = 10;
@@ -31,13 +31,13 @@
   export let pageCount = 0;
 
   $: pageCount = Math.ceil(total / pageSize);
-  $: pageInfo = calculatePages(page, pageCount);
+  $: pageInfo = calculatePages(currentPage, pageCount);
 
   function setPage(e: Event, _page: number) {
-    if (_page > 0 && _page <= pageCount && page !== _page) {
-      page = _page;
+    if (_page > 0 && _page <= pageCount && currentPage !== _page) {
+      currentPage = _page;
       dispatch('change', {
-        page,
+        currentPage,
         originalEvent: e,
       });
     }
@@ -47,14 +47,14 @@
 <ul class="pagination">
   {#if pageCount > 1}
     <li>
-      <span tabindex="0" on:click={(e) => setPage(e, page - 1)}>
+      <span tabindex="0" on:click={(e) => setPage(e, currentPage - 1)}>
         <Icon data={faAngleLeft}/>
       </span>
     </li>
   {/if}
 
   {#if pageInfo.start > 1}
-    <li class:active={page === pageInfo.start}>
+    <li class:active={currentPage === pageInfo.start}>
       {#if getLink}
         <a tabindex="0" class="page" href={getLink(1, pageSize)}
             on:click={(e) => setPage(e, 1)} data-tinro-ignore>
@@ -76,8 +76,8 @@
     {/if}
   {/if}
 
-  {#each pageInfo.pages as _page (_page)}
-    <li class:active={page === _page}>
+  {#each pageInfo.currentWindow as _page (_page)}
+    <li class:active={currentPage === _page}>
       {#if getLink}
         <a tabindex="0" class="page" href={getLink(_page, pageSize)}
             on:click={(e) => setPage(e, _page)} data-tinro-ignore>
@@ -100,7 +100,7 @@
         </span>
       </li>
     {/if}
-    <li class:active={page === pageInfo.end}>
+    <li class:active={currentPage === pageInfo.end}>
       {#if getLink}
         <a tabindex="0" class="page" href={getLink(pageCount, pageSize)}
             on:click={(e) => setPage(e, pageCount)} data-tinro-ignore>
@@ -116,7 +116,7 @@
 
   {#if pageCount > 1}
     <li>
-      <span tabindex="0" on:click={(e) => setPage(e, page + 1)}>
+      <span tabindex="0" on:click={(e) => setPage(e, currentPage + 1)}>
         <Icon data={faAngleRight}/>
       </span>
     </li>
