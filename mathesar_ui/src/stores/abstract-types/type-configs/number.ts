@@ -5,6 +5,7 @@ const numberType: AbstractTypeConfiguration = {
   input: {
     type: 'integer',
   },
+  defaultDbType: 'INTEGER',
   typeSwitchOptions: {
     database: {
       allowDefault: true,
@@ -88,6 +89,9 @@ const numberType: AbstractTypeConfiguration = {
           ],
         },
       },
+      determinationRules: [
+
+      ],
     },
     display: {
       form: {

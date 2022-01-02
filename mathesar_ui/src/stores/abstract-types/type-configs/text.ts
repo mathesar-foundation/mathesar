@@ -17,6 +17,7 @@ const textType: AbstractTypeConfiguration = {
       },
     },
   },
+  defaultDbType: 'VARCHAR',
   typeSwitchOptions: {
     database: {
       allowDefault: true,
@@ -57,7 +58,8 @@ const textType: AbstractTypeConfiguration = {
         {
           resolve: 'CHAR',
           rule: {
-            and: [
+            combination: 'and',
+            terms: [
               {
                 id: 'restrictFieldSize',
                 op: 'eq',
@@ -74,7 +76,8 @@ const textType: AbstractTypeConfiguration = {
         {
           resolve: 'VARCHAR',
           rule: {
-            and: [
+            combination: 'and',
+            terms: [
               {
                 id: 'restrictFieldSize',
                 op: 'eq',
