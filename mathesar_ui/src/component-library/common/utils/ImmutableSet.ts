@@ -1,4 +1,4 @@
-export class ImmutableSet<T extends string | number | boolean | null> {
+export default class ImmutableSet<T extends string | number | boolean | null> {
   private set: Set<T>;
 
   constructor(i?: Iterable<T>) {
