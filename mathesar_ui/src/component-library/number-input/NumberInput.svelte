@@ -45,22 +45,31 @@
     // Basic validation to prevent entering invalid characters
     const key = (e as InputEvent).data;
     const inputElement = (e.target as HTMLNumberInputElement);
-    if (key !== null) {
-      if (!validKeyRegex.test(key)) {
-        inputElement.value = value;
-      } else if (
-        !inputElement.value
-        && value
-        && (key === 'e' || key === '+' || key === '-')
-      ) {
-        inputElement.value = value;
+    if (inputElement.value === '') {
+      inputElement.value = null;
+      value = null;
+    } else {
+      if (key !== null) {
+        if (!validKeyRegex.test(key)) {
+          inputElement.value = value;
+        } else if (
+          !inputElement.value
+          && value
+          && (key === 'e' || key === '+' || key === '-')
+        ) {
+          inputElement.value = value;
+        }
       }
-    }
-    if (isInteger && inputElement.value !== null && !Number.isInteger(inputElement.value)) {
-      inputElement.value = Math.floor(inputElement.value);
-    }
-    if (value !== inputElement.value) {
-      value = inputElement.value;
+      if (
+        isInteger
+        && inputElement.value !== null
+        && !Number.isInteger(inputElement.value)
+      ) {
+        inputElement.value = Math.floor(inputElement.value);
+      }
+      if (value !== inputElement.value) {
+        value = inputElement.value;
+      }
     }
   }
 </script>
