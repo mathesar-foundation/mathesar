@@ -1,4 +1,4 @@
-import type { FormConfiguration, DynamicInputType } from '@mathesar-component-library/types';
+import type { FormConfiguration, DynamicInputType, Rule } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/App.d';
 
 export interface AbstractTypeResponse {
@@ -9,11 +9,13 @@ export interface AbstractTypeResponse {
 
 export interface AbstractTypeDbConfigOptions {
   allowDefault: boolean,
-  form: FormConfiguration,
-  determinationRules?: {
-    resolve: string,
-    rule: unknown,
-  }[]
+  configuration: {
+    form: FormConfiguration,
+    determinationRules: {
+      resolve: string,
+      rule: Rule,
+    }[]
+  }
 }
 
 export interface AbstractTypeConfiguration {

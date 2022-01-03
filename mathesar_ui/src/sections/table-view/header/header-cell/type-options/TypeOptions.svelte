@@ -17,7 +17,7 @@
   } from '@mathesar/stores/table-data/types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
 
-  import DatabaseForm from './database-options/DatabaseOptions.svelte';
+  import DatabaseOptions from './database-options/DatabaseOptions.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -110,7 +110,7 @@
       </li>
     </ul>
     <div class="type-options-content">
-      <DatabaseForm bind:selectedDbType {selectedAbstractType}
+      <DatabaseOptions bind:selectedDbType {selectedAbstractType}
         dbOptions={selectedAbstractType?.typeSwitchOptions?.database}/>
     </div>
   </div>

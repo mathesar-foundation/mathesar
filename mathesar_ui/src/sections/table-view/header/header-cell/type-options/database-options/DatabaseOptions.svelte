@@ -14,8 +14,8 @@
   export let dbOptions: AbstractTypeDbConfigOptions = undefined;
 </script>
 
-{#if dbOptions}
-  <DbForm bind:selectedDbType {dbOptions}/>
+{#if dbOptions.configuration}
+  <DbForm bind:selectedDbType configuration={dbOptions.configuration}/>
   <DbTypeIndicator {selectedDbType}/>
 
 {:else if selectedAbstractType.dbTypes.size > 1}

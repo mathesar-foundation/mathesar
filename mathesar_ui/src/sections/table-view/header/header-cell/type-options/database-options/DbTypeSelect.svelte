@@ -25,7 +25,7 @@
   }
 </script>
 
-<LabeledInput label="Type in DB" layout="stacked">
+<LabeledInput label="Database type" layout="stacked">
   <Select triggerAppearance="default" triggerClass="db-type-select"
     value={{
       id: selectedDbType,
