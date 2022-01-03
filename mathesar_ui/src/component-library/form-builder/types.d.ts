@@ -1,4 +1,4 @@
-import type { Writable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
 import type { DynamicInputType } from '@mathesar-component-library-dir/dynamic-input/types.d';
 
 export type FormInputDataType = boolean | string | number | undefined;
@@ -57,5 +57,7 @@ export interface FormConfiguration {
 export type FormInputStore = Writable<FormInputDataType>;
 
 export interface FormBuildConfiguration extends FormConfiguration {
-  stores: Record<string, FormInputStore>
+  stores: Map<string, FormInputStore>,
+  values: Readable<Record<string, FormInputDataType>>,
+  getValues: () => Record<string, FormInputDataType>,
 }
