@@ -1,4 +1,4 @@
-import ImmutableSet from './ImmutableSet';
+import ImmutableSet from '../ImmutableSet';
 
 test('ImmutableSet', () => {
   const s = new ImmutableSet<number>([7, 8]);

@@ -52,7 +52,7 @@ export function executeRule(
   values: Record<RuleTerm['id'], unknown>,
 ): boolean {
   if ('combination' in rule) {
-    let isSuccess = false;
+    let isSuccess = rule.combination === 'and';
     rule.terms.forEach((term) => {
       isSuccess = combine(
         rule.combination,
@@ -62,5 +62,6 @@ export function executeRule(
     });
     return isSuccess;
   }
-  return executureTerm(rule, values);
+  const result = executureTerm(rule, values);
+  return result;
 }
