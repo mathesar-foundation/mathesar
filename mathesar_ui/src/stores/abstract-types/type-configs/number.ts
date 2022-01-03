@@ -9,89 +9,188 @@ const numberType: AbstractTypeConfiguration = {
   typeSwitchOptions: {
     database: {
       allowDefault: true,
-      form: {
-        variables: {
-          numberType: {
-            type: 'string',
-            default: 'Integer',
-            enum: ['Integer', 'Decimal', 'Float'],
-          },
-          integerDataSize: {
-            type: 'string',
-            default: 'default',
-            enum: ['default', 'bigInt', 'smallInt'],
-          },
-          decimalPlaces: {
-            type: 'integer',
-            default: 2,
-          },
-          maxDigits: {
-            type: 'integer',
-            default: 2,
-          },
-          floatingPointType: {
-            type: 'string',
-            default: 'real',
-            enum: ['real', 'doublePrecision'],
-          },
-        },
-        layout: {
-          orientation: 'vertical',
-          elements: [
-            {
-              type: 'input',
-              variable: 'numberType',
-              label: 'Number Type',
+      configuration: {
+        form: {
+          variables: {
+            numberType: {
+              type: 'string',
+              default: 'Integer',
+              enum: ['Integer', 'Decimal', 'Float'],
             },
-            {
-              type: 'switch',
-              switch: 'numberType',
-              cases: {
-                Integer: [{
-                  type: 'input',
-                  variable: 'integerDataSize',
-                  label: 'Integer Data Size',
-                  inputType: 'select',
-                  options: {
-                    default: { label: 'Default (4 bytes)' },
-                    bigInt: { label: 'Big Integer (8 bytes)' },
-                    smallInt: { label: 'Small Integer (2 bytes)' },
-                  },
-                }],
-                Decimal: [{
-                  type: 'layout',
-                  orientation: 'horizontal',
-                  elements: [
-                    {
-                      type: 'input',
-                      variable: 'decimalPlaces',
-                      label: 'Decimal Places',
-                    },
-                    {
-                      type: 'input',
-                      variable: 'maxDigits',
-                      label: 'Max Digits',
-                    },
-                  ],
-                }],
-                Float: [{
-                  type: 'input',
-                  variable: 'floatingPointType',
-                  label: 'Floating Point Type',
-                  inputType: 'select',
-                  options: {
-                    real: { label: 'Real (6 digits)' },
-                    doublePrecision: { label: 'Double Precision (15 digits)' },
-                  },
-                }],
+            integerDataSize: {
+              type: 'string',
+              default: 'default',
+              enum: ['default', 'bigInt', 'smallInt'],
+            },
+            decimalPlaces: {
+              type: 'integer',
+              default: 2,
+            },
+            maxDigits: {
+              type: 'integer',
+              default: 2,
+            },
+            floatingPointType: {
+              type: 'string',
+              default: 'real',
+              enum: ['real', 'doublePrecision'],
+            },
+          },
+          layout: {
+            orientation: 'vertical',
+            elements: [
+              {
+                type: 'input',
+                variable: 'numberType',
+                label: 'Number Type',
               },
-            },
-          ],
+              {
+                type: 'switch',
+                switch: 'numberType',
+                cases: {
+                  Integer: [{
+                    type: 'input',
+                    variable: 'integerDataSize',
+                    label: 'Integer Data Size',
+                    inputType: 'select',
+                    options: {
+                      default: { label: 'Default (4 bytes)' },
+                      bigInt: { label: 'Big Integer (8 bytes)' },
+                      smallInt: { label: 'Small Integer (2 bytes)' },
+                    },
+                  }],
+                  Decimal: [{
+                    type: 'layout',
+                    orientation: 'horizontal',
+                    elements: [
+                      {
+                        type: 'input',
+                        variable: 'decimalPlaces',
+                        label: 'Decimal Places',
+                      },
+                      {
+                        type: 'input',
+                        variable: 'maxDigits',
+                        label: 'Max Digits',
+                      },
+                    ],
+                  }],
+                  Float: [{
+                    type: 'input',
+                    variable: 'floatingPointType',
+                    label: 'Floating Point Type',
+                    inputType: 'select',
+                    options: {
+                      real: { label: 'Real (6 digits)' },
+                      doublePrecision: { label: 'Double Precision (15 digits)' },
+                    },
+                  }],
+                },
+              },
+            ],
+          },
         },
+        determinationRules: [
+          {
+            resolve: 'INTEGER',
+            rule: {
+              combination: 'and',
+              terms: [
+                {
+                  id: 'numberType',
+                  op: 'eq',
+                  value: 'Integer',
+                },
+                {
+                  id: 'integerDataSize',
+                  op: 'eq',
+                  value: 'default',
+                },
+              ],
+            },
+          },
+          {
+            resolve: 'SMALLINT',
+            rule: {
+              combination: 'and',
+              terms: [
+                {
+                  id: 'numberType',
+                  op: 'eq',
+                  value: 'Integer',
+                },
+                {
+                  id: 'integerDataSize',
+                  op: 'eq',
+                  value: 'smallInt',
+                },
+              ],
+            },
+          },
+          {
+            resolve: 'BIGINT',
+            rule: {
+              combination: 'and',
+              terms: [
+                {
+                  id: 'numberType',
+                  op: 'eq',
+                  value: 'Integer',
+                },
+                {
+                  id: 'integerDataSize',
+                  op: 'eq',
+                  value: 'bigInt',
+                },
+              ],
+            },
+          },
+          {
+            resolve: 'DECIMAL',
+            rule: {
+              id: 'numberType',
+              op: 'eq',
+              value: 'Decimal',
+            },
+          },
+          {
+            resolve: 'REAL',
+            rule: {
+              combination: 'and',
+              terms: [
+                {
+                  id: 'numberType',
+                  op: 'eq',
+                  value: 'Float',
+                },
+                {
+                  id: 'floatingPointType',
+                  op: 'eq',
+                  value: 'real',
+                },
+              ],
+            },
+          },
+          {
+            resolve: 'DOUBLE_PRECISION',
+            rule: {
+              combination: 'and',
+              terms: [
+                {
+                  id: 'numberType',
+                  op: 'eq',
+                  value: 'Float',
+                },
+                {
+                  id: 'floatingPointType',
+                  op: 'eq',
+                  value: 'doublePrecision',
+                },
+              ],
+            },
+          },
+        ],
       },
-      determinationRules: [
-
-      ],
     },
     display: {
       form: {
