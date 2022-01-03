@@ -93,6 +93,7 @@ module.exports = {
   },
   settings: {
     'svelte3/typescript': () => typescript,
+    'svelte3/ignore-styles': ({ lang }) => lang === 'scss',
     'import/resolver': {
       node: {
         extensions: ['.js', '.ts'],

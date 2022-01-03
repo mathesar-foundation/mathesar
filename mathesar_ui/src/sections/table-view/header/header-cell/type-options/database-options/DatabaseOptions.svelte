@@ -7,6 +7,7 @@
 
   import DbForm from './DbForm.svelte';
   import DbTypeSelect from './DbTypeSelect.svelte';
+  import DbTypeIndicator from './DbTypeIndicator.svelte';
 
   export let selectedDbType: DbType;
   export let selectedAbstractType: AbstractType;
@@ -15,11 +16,11 @@
 
 {#if dbOptions}
   <DbForm bind:selectedDbType {dbOptions}/>
-  Type in DB {selectedDbType}
+  <DbTypeIndicator {selectedDbType}/>
 
 {:else if selectedAbstractType.dbTypes.size > 1}
   <DbTypeSelect bind:selectedDbType {selectedAbstractType}/>
 
 {:else}
-  Type in DB {selectedDbType}
+  <DbTypeIndicator {selectedDbType}/>
 {/if}
