@@ -123,6 +123,10 @@ def _ignore_type(sa_type_name):
     return False
 
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 def get_types(engine):
     types = []
     installed_types = get_available_types(engine)
@@ -138,6 +142,7 @@ def get_types(engine):
             if sa_type_name in installed_types and (not _ignore_type(sa_type_name)):
                 sa_type = installed_types[sa_type_name]
                 db_type = get_db_type_name(sa_type, engine)
+                logger.warn(f"sa_type_name {sa_type_name}\ndb_type      {db_type}")
                 sa_type_info = {
                     'sa_type_name': sa_type_name,
                     'sa_type': sa_type,
