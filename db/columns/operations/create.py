@@ -22,7 +22,8 @@ def create_column(engine, table_oid, column_data):
     column_type = column_data.get(TYPE, column_data.get("type"))
     column_type_options = column_data.get("type_options", {})
     column_nullable = column_data.get(NULLABLE, True)
-    column_default_value = str(column_data.get(DEFAULT, {}).get('default_value'))
+    default_value = column_data.get(DEFAULT, {}).get('default_value')
+    prepared_default_value = str(default_value) if default_value is not None else None
     supported_types = get_supported_alter_column_types(
         engine, friendly_names=False,
     )
@@ -36,7 +37,7 @@ def create_column(engine, table_oid, column_data):
     try:
         column = MathesarColumn(
             column_data[NAME], sa_type(**column_type_options), nullable=column_nullable,
-            server_default=column_default_value,
+            server_default=prepared_default_value,
         )
     except DataError as e:
         if type(e.orig) == InvalidTextRepresentation:

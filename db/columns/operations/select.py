@@ -94,7 +94,7 @@ def get_column_default_dict(table_oid, column_index, engine, connection_to_use=N
         warnings.warn(
             "Dynamic column defaults are read only", DynamicDefaultWarning
         )
-        default_value = str(column.server_default.arg)
+        default_value = sql_text
     else:
         # Defaults are stored as text with SQL casts appended
         # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
