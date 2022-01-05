@@ -79,7 +79,7 @@ def _get_pizza_column_data():
         ({"plain_type": "blah"}, "retype_column"),
         ({"type_options": {"blah": "blah"}}, "retype_column"),
         ({"nullable": True}, "change_column_nullable"),
-        ({"default_value": 1}, "set_column_default"),
+        ({"column_default_dict": {"default_value": 1}}, "set_column_default"),
     ]
 )
 def test_alter_column_chooses_wisely(column_dict, func_name, engine_with_schema):
