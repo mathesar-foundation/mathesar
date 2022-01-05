@@ -1,5 +1,4 @@
 from enum import Enum
-from inspect import isclass
 
 from sqlalchemy import create_engine
 
@@ -88,9 +87,8 @@ def get_available_types(engine):
 
 
 def get_db_type_name(sa_type, engine):
-    USER_DEFINED_STR = 'user_defined'
-    sa_type = sa_type() if isclass(sa_type) else sa_type
-    db_type = sa_type.compile(dialect=engine.dialect)
-    if db_type == USER_DEFINED_STR:
-        db_type = sa_type.compile(engine.dialect)
+    try:
+        db_type = sa_type.compile(dialect=engine.dialect)
+    except TypeError:
+        db_type = sa_type().compile(dialect=engine.dialect)
     return db_type
