@@ -1,3 +1,4 @@
+import json
 from datetime import date, timedelta
 
 import pytest
@@ -83,7 +84,10 @@ def test_column_list(column_test_table, client):
             'nullable': False,
             'primary_key': True,
             'display_options': None,
-            'default': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
+            'default': {
+                'default_value': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
+                'is_dynamic': True
+            },
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
                 'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
@@ -113,7 +117,10 @@ def test_column_list(column_test_table, client):
             'nullable': True,
             'primary_key': False,
             'display_options': None,
-            'default': 5,
+            'default': {
+                'default_value': 5,
+                'is_dynamic': False,
+            },
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
                 'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
@@ -159,30 +166,36 @@ def test_column_create(column_test_table, client):
     )
     assert new_columns_response.json()["count"] == num_columns + 1
     actual_new_col = new_columns_response.json()["results"][-1]
+    print(actual_new_col)
     assert actual_new_col["name"] == name
     assert actual_new_col["type"] == type_
     assert actual_new_col["default"] is None
 
 
 create_default_test_list = [
-    ("BOOLEAN", True, True),
-    ("INTERVAL", timedelta(minutes=42), "2520.0"),
-    ("NUMERIC", 42, 42.0),
-    ("STRING", "test_string", "test_string"),
-    ("VARCHAR", "test_string", "test_string"),
-    ("DATE", date(2020, 1, 1), "2020-01-01"),
-    ("EMAIL", "test@test.com", "test@test.com"),
+    ("BOOLEAN", True, True, True),
+    ("INTERVAL", "00:42:00", timedelta(minutes=42), "2520.0"),
+    ("NUMERIC", 42, 42, 42),
+    ("STRING", "test_string", "test_string", "test_string"),
+    ("VARCHAR", "test_string", "test_string", "test_string"),
+    ("DATE", "2020-1-1", date(2020, 1, 1), "2020-01-01"),
+    ("EMAIL", "test@test.com", "test@test.com", "test@test.com"),
 ]
 
 
-@pytest.mark.parametrize("type_,default,expt_default", create_default_test_list)
+@pytest.mark.parametrize(
+    "type_,default,default_obj,expt_default", create_default_test_list
+)
 def test_column_create_default(
-    column_test_table, type_, default, expt_default, client, engine
+        column_test_table, type_, default, default_obj, expt_default, client, engine
 ):
     cache.clear()
     name = "anewcolumn"
-    data = {"name": name, "type": type_, "default": default}
-    response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", data, format='multipart')
+    data = {"name": name, "type": type_, "default": {"default_value": default}}
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/",
+        json.dumps(data), content_type='application/json'
+    )
     assert response.status_code == 201
 
     # Ensure the correct serialized date is returned by the API
@@ -190,14 +203,14 @@ def test_column_create_default(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     actual_new_col = new_columns_response.json()["results"][-1]
-    assert actual_new_col["default"] == expt_default
+    assert actual_new_col["default"]["default_value"] == expt_default
 
     # Ensure the correct date value is generated when inserting a new record
     sa_table = column_test_table._sa_table
     with engine.begin() as conn:
         conn.execute(sa_table.insert((1, 1, 1, 'str')))
         created_default = conn.execute(select(sa_table)).fetchall()[0][-1]
-    assert created_default == default
+    assert created_default == default_obj
 
 
 def test_column_create_invalid_default(column_test_table, client):
