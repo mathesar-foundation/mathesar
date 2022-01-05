@@ -84,31 +84,27 @@ def get_column_name_from_attnum(table_oid, attnum, engine, connection_to_use=Non
 def get_column_default_dict(table_oid, column_index, engine, connection_to_use=None):
     table = reflect_table_from_oid(table_oid, engine, connection_to_use)
     column = table.columns[column_index]
-    default_dict = None
-    if column.server_default is not None:
-        default_dict = {
-            "server_default": column.server_default,
-            "is_dynamic": _is_default_expr_dynamic(column.server_default),
-            "sql_text": str(column.server_default.arg)
-        }
-    else:
+    if column.server_default is None:
         return
-    if default_dict.get("is_dynamic"):
+
+    is_dynamic = _is_default_expr_dynamic(column.server_default)
+    sql_text = str(column.server_default.arg)
+
+    if is_dynamic:
         warnings.warn(
             "Dynamic column defaults are read only", DynamicDefaultWarning
         )
-        default_dict.update(default_value=default_dict['sql_text'])
+        default_value = str(column.server_default.arg)
     else:
         # Defaults are stored as text with SQL casts appended
         # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
         # Here, we execute the cast to get the proper python value
-        executed_constant = execute_statement(
+        default_value = execute_statement(
             engine,
-            select(text(default_dict['sql_text'])),
+            select(text(sql_text)),
             connection_to_use
         ).first()[0]
-        default_dict.update(default_value=executed_constant)
-    return default_dict
+    return {"default_value": default_value, "is_dynamic": is_dynamic}
 
 
 def get_column_default(table_oid, column_index, engine, connection_to_use=None):
