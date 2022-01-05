@@ -166,7 +166,6 @@ def test_column_create(column_test_table, client):
     )
     assert new_columns_response.json()["count"] == num_columns + 1
     actual_new_col = new_columns_response.json()["results"][-1]
-    print(actual_new_col)
     assert actual_new_col["name"] == name
     assert actual_new_col["type"] == type_
     assert actual_new_col["default"] is None
@@ -216,8 +215,16 @@ def test_column_create_default(
 def test_column_create_invalid_default(column_test_table, client):
     cache.clear()
     name = "anewcolumn"
-    data = {"name": name, "type": "BOOLEAN", "default": "Not a boolean"}
-    response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", data)
+    data = {
+        "name": name,
+        "type": "BOOLEAN",
+        "default": {"default_value": "Not a boolean"},
+    }
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/",
+        json.dumps(data),
+        content_type="application/json",
+    )
     assert response.status_code == 400
     assert f'default "{data["default"]}" is invalid for type' in response.json()[0]
 
@@ -410,7 +417,7 @@ def test_column_invalid_display_options_type_on_reflection(column_test_table_wit
 def test_column_update_default(column_test_table, client):
     cache.clear()
     expt_default = 5
-    data = f'{{"default": {expt_default}}}'  # Ensure we pass a int and not a str
+    data = {"default": {"default_value": expt_default}}  # Ensure we pass a int and not a str
     response = client.get(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
@@ -418,10 +425,11 @@ def test_column_update_default(column_test_table, client):
     column_index = 1
     column_id = columns[column_index]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
-        content_type="application/json"
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
+        data=json.dumps(data),
+        content_type="application/json",
     )
-    assert response.json()["default"] == expt_default
+    assert response.json()["default"]["default_value"] == expt_default
 
 
 def test_column_update_delete_default(column_test_table, client):
@@ -443,7 +451,7 @@ def test_column_update_delete_default(column_test_table, client):
 
 def test_column_update_default_invalid_cast(column_test_table, client):
     cache.clear()
-    data = {"default": "not an integer"}
+    data = {"default": {"default_value": "not an integer"}}
     response = client.get(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
@@ -451,7 +459,9 @@ def test_column_update_default_invalid_cast(column_test_table, client):
     column_index = 1
     column_id = columns[column_index]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
+        data=json.dumps(data),
+        content_type="application/json"
     )
     assert response.status_code == 400
 
@@ -529,7 +539,12 @@ def test_column_update_name_type_nullable_default(column_test_table, client):
     cache.clear()
     type_ = "BOOLEAN"
     new_name = 'new name'
-    data = {"type": type_, "name": new_name, "nullable": True, "default": True}
+    data = {
+        "type": type_,
+        "name": new_name,
+        "nullable": True,
+        "default": {"default_value": True},
+    }
     response = client.get(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
@@ -537,12 +552,14 @@ def test_column_update_name_type_nullable_default(column_test_table, client):
     column_index = 3
     column_id = columns[column_index]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
+        data=json.dumps(data),
+        content_type='application/json'
     )
     assert response.json()["type"] == type_
     assert response.json()["name"] == new_name
     assert response.json()["nullable"] is True
-    assert response.json()["default"] is True
+    assert response.json()["default"]["default_value"] is True
 
 
 def test_column_update_type_options(column_test_table, client):
@@ -608,7 +625,7 @@ def test_column_update_invalid_type(create_table, client, engine_email_type):
 def test_column_update_returns_table_dependent_fields(column_test_table, client):
     cache.clear()
     expt_default = 5
-    data = {"default": expt_default}
+    data = {"default": {"default_value": expt_default}}
     response = client.get(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
@@ -616,7 +633,9 @@ def test_column_update_returns_table_dependent_fields(column_test_table, client)
     column_index = 1
     column_id = columns[column_index]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
+        data=json.dumps(data),
+        content_type="application/json"
     )
     assert response.json()["default"] is not None
     assert response.json()["index"] is not None

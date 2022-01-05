@@ -97,7 +97,7 @@ class ColumnSerializer(SimpleColumnSerializer):
     nullable = serializers.BooleanField(default=True)
     primary_key = serializers.BooleanField(default=False)
     default = ColumnDefaultSerializer(
-        source='column_default_dict', required=False, default=None
+        source='column_default_dict', required=False, allow_null=True, default=None
     )
 
     # From duplication fields
