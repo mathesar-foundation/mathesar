@@ -96,6 +96,9 @@ class ColumnSerializer(SimpleColumnSerializer):
     type = serializers.CharField(source='plain_type', required=False)
     nullable = serializers.BooleanField(default=True)
     primary_key = serializers.BooleanField(default=False)
+    default = ColumnDefaultSerializer(
+        source='column_default_dict', required=False, default=None
+    )
 
     # From duplication fields
     source_column = serializers.IntegerField(required=False, write_only=True)
@@ -105,7 +108,6 @@ class ColumnSerializer(SimpleColumnSerializer):
     # Read only fields
     index = serializers.IntegerField(source='column_index', read_only=True)
     valid_target_types = serializers.ListField(read_only=True)
-    default = ColumnDefaultSerializer(source='column_default_dict', required=False)
 
     def validate(self, data):
         if not self.partial:
