@@ -71,6 +71,11 @@ class SimpleColumnSerializer(serializers.ModelSerializer):
         return super().to_internal_value(data)
 
 
+class ColumnDefaultSerializer(serializers.Serializer):
+    default_value = serializers.CharField()
+    is_dynamic = serializers.BooleanField(read_only=True)
+
+
 class ColumnSerializer(SimpleColumnSerializer):
     class Meta(SimpleColumnSerializer.Meta):
         fields = SimpleColumnSerializer.Meta.fields + (
@@ -100,9 +105,7 @@ class ColumnSerializer(SimpleColumnSerializer):
     # Read only fields
     index = serializers.IntegerField(source='column_index', read_only=True)
     valid_target_types = serializers.ListField(read_only=True)
-    default = InputValueField(
-        source='default_value', read_only=False, default=None, allow_null=True
-    )
+    default = ColumnDefaultSerializer(source='column_default_dict')
 
     def validate(self, data):
         if not self.partial:

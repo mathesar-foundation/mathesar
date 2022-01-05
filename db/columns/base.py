@@ -1,7 +1,9 @@
 from sqlalchemy import Column, ForeignKey, inspect
 
 from db.columns.defaults import TYPE, PRIMARY_KEY, NULLABLE, DEFAULT_COLUMNS
-from db.columns.operations.select import get_column_default, get_column_index_from_name
+from db.columns.operations.select import (
+    get_column_default, get_column_default_dict, get_column_index_from_name
+)
 from db.tables.operations.select import get_oid_from_table
 from db.types.operations.cast import get_full_cast_map
 
@@ -80,6 +82,16 @@ class MathesarColumn(Column):
         return None
 
     @property
+    def table_oid(self):
+        if self.table_ is not None:
+            oid = get_oid_from_table(
+                self.table_.name, self.table_.schema, self.engine
+            )
+        else:
+            oid = None
+        return oid
+
+    @property
     def is_default(self):
         default_def = DEFAULT_COLUMNS.get(self.name, False)
         return (
@@ -120,22 +132,29 @@ class MathesarColumn(Column):
                 and self.table_ is not None
                 and inspect(self.engine).has_table(self.table_.name, schema=self.table_.schema)
         ):
-            table_oid = get_oid_from_table(
-                self.table_.name, self.table_.schema, self.engine
-            )
             return get_column_index_from_name(
-                table_oid,
+                self.table_oid,
                 self.name,
                 self.engine
             )
 
     @property
+    def column_default_dict(self):
+        if self.table_ is None:
+            return
+        default_dict = get_column_default_dict(
+            self.table_oid, self.column_index, self.engine
+        )
+        if default_dict:
+            return {
+                'is_dynamic': default_dict['is_dynamic'],
+                'default_value': default_dict['default_value']
+            }
+
+    @property
     def default_value(self):
         if self.table_ is not None:
-            table_oid = get_oid_from_table(
-                self.table_.name, self.table_.schema, self.engine
-            )
-            return get_column_default(table_oid, self.column_index, self.engine)
+            return get_column_default(self.table_oid, self.column_index, self.engine)
 
     @property
     def plain_type(self):

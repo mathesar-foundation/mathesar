@@ -97,17 +97,17 @@ def get_column_default_dict(table_oid, column_index, engine, connection_to_use=N
         warnings.warn(
             "Dynamic column defaults are read only", DynamicDefaultWarning
         )
+        default_dict.update(default_value=default_dict['sql_text'])
     else:
         # Defaults are stored as text with SQL casts appended
         # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
         # Here, we execute the cast to get the proper python value
-        default_dict.update(
-            executed_constant=execute_statement(
-                engine,
-                select(text(default_dict['sql_text'])),
-                connection_to_use
-            ).first()[0]
-        )
+        executed_constant = execute_statement(
+            engine,
+            select(text(default_dict['sql_text'])),
+            connection_to_use
+        ).first()[0]
+        default_dict.update(default_value=executed_constant)
     return default_dict
 
 
@@ -115,12 +115,8 @@ def get_column_default(table_oid, column_index, engine, connection_to_use=None):
     default_dict = get_column_default_dict(
         table_oid, column_index, engine, connection_to_use=connection_to_use
     )
-    if default_dict is None:
-        return
-    else:
-        executed_constant = default_dict.get('executed_constant')
-
-    return executed_constant if executed_constant is not None else default_dict['sql_text']
+    if default_dict is not None:
+        return default_dict['default_value']
 
 
 def _is_default_expr_dynamic(server_default):
