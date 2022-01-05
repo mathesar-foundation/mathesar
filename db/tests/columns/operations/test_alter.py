@@ -425,7 +425,7 @@ def test_batch_update_columns_no_changes(engine_email_type):
 
     assert len(table.columns) == len(updated_table.columns)
     for index, column in enumerate(table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine_email_type)
+        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
         assert new_column_type == 'VARCHAR'
         assert updated_table.columns[index].name == table.columns[index].name
 
@@ -444,7 +444,7 @@ def test_batch_update_column_names(engine_email_type):
 
     assert len(table.columns) == len(updated_table.columns)
     for index, column in enumerate(table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine_email_type)
+        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
         assert new_column_type == column_data[index]['plain_type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
@@ -463,7 +463,7 @@ def test_batch_update_column_types(engine_email_type):
 
     assert len(table.columns) == len(updated_table.columns)
     for index, column in enumerate(table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine_email_type)
+        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
         assert new_column_type == column_data[index]['plain_type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
@@ -484,7 +484,7 @@ def test_batch_update_column_names_and_types(engine_email_type):
 
     assert len(table.columns) == len(updated_table.columns)
     for index, column in enumerate(table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine_email_type)
+        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
         assert new_column_type == column_data[index]['plain_type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
@@ -503,7 +503,7 @@ def test_batch_update_column_drop_columns(engine_email_type):
 
     assert len(updated_table.columns) == len(table.columns) - 2
     for index, column in enumerate(updated_table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine_email_type)
+        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
         assert new_column_type == column_data[index - 2]['plain_type']
         assert updated_table.columns[index].name == column_data[index - 2]['name']
 
@@ -525,6 +525,6 @@ def test_batch_update_column_all_operations(engine_email_type):
 
     assert len(updated_table.columns) == len(table.columns) - 1
     for index, column in enumerate(updated_table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine_email_type)
+        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
         assert new_column_type == column_data[index]['plain_type']
         assert updated_table.columns[index].name == column_data[index]['name']
