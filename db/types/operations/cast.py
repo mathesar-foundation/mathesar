@@ -298,7 +298,7 @@ def assemble_function_creation_sql(argument_type, target_type, function_body):
     RETURNS {target_type}
     AS $$
     {function_body}
-    $$ LANGUAGE plpgsql STRICT;
+    $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
     """
 
 
