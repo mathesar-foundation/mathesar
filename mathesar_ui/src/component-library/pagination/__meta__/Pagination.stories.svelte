@@ -47,7 +47,7 @@
 <Story 
   name="Basic"
   args={{
-    page: 1,
+    currentPage: 1,
     total: 1,
     pageSize: 10,
     }}
