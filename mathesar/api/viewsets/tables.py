@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-from psycopg2.errors import DuplicateTable
+from psycopg2.errors import DuplicateTable, InvalidTextRepresentation, CheckViolation
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError, APIException
@@ -11,7 +11,8 @@ from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer
-from mathesar.errors import exception_transformer, ExceptionTransformerDetail
+from mathesar.error_codes import ErrorCodes
+from mathesar.errors import ExceptionBody, CustomApiException, CustomValidationError, get_default_exception_detail
 from mathesar.models import Table
 from mathesar.utils.tables import (
     get_table_column_types, create_table_from_datafile, create_empty_table,
@@ -102,26 +103,27 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
 
         column_names = [col["name"] for col in columns]
         if not len(column_names) == len(set(column_names)):
-            raise ValidationError("Column names must be distinct")
+            raise CustomValidationError([ExceptionBody(ErrorCodes.DistinctColumnNameRequired.value,
+                                                       "Column names must be distinct", 'columns')])
         if not len(columns) == len(table.sa_columns):
-            raise ValidationError("Incorrect number of columns in request.")
+            raise CustomValidationError([ExceptionBody(ErrorCodes.ColumnSizeMismatch.value,
+                                                       "Incorrect number of columns in request.", 'columns')])
 
         table_data = TableSerializer(table, context={"request": request}).data
-        with exception_transformer({**dict.fromkeys([DataError, IntegrityError], ExceptionTransformerDetail(400,
-                                                                                                            4001,
-                                                                                                            None,
-                                                                                                            "Invalid type cast requested.",
-                                                                                                            columns_field_key,
-                                                                                                            None)
-                                                    ),
-                                    UnsupportedTypeException: ExceptionTransformerDetail(400,
-                                                                                         4001,
-                                                                                         None,
-                                                                                         None,
-                                                                                         columns_field_key,
-                                                                                         None)
-                                    }):
+        try:
             preview_records = table.get_preview(columns)
+        except (DataError, IntegrityError) as e:
+            if type(e.orig) == InvalidTextRepresentation or type(e.orig) == CheckViolation:
+                raise CustomValidationError(
+                    [ExceptionBody(ErrorCodes.InvalidTypeCast.value, "Invalid type cast requested.",
+                     field='columns')])
+            else:
+                raise CustomApiException(e, ErrorCodes.NonClassifiedIntegrityError.value)
+        except UnsupportedTypeException as e:
+            raise CustomValidationError([get_default_exception_detail(e, ErrorCodes.UnsupportedType.value, message=None,
+                                                                      field='columns')])
+        except Exception as e:
+            raise CustomApiException(e)
         table_data.update(
             {
                 # There's no way to reflect actual column data without
