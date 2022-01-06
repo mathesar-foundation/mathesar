@@ -29,6 +29,7 @@ export { default as RadioGroup } from './radio-group/RadioGroup.svelte';
 export { default as Seesaw } from './seesaw/Seesaw.svelte';
 export { default as Skeleton } from './skeleton/Skeleton.svelte';
 export { default as Spinner } from './spinner/Spinner.svelte';
+export { default as StringOrComponent } from './string-or-component/StringOrComponent.svelte';
 export { default as SpinnerButton } from './spinner-button/SpinnerButton.svelte';
 export { default as TextArea } from './text-area/TextArea.svelte';
 export { default as TextAvatar } from './text-avatar/TextAvatar.svelte';
