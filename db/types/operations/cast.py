@@ -303,6 +303,10 @@ def assemble_function_creation_sql(argument_type, target_type, function_body):
 
 
 def get_cast_function_name(target_type):
+    """
+    Some casting functions change postgres config parameters  for the transaction they are run on like cast function for casting different data type to timestamp with timezone,
+    So they used be in an isolated transaction
+    """
     unqualified_type_name = target_type.split('.')[-1].lower()
     if '(' in unqualified_type_name:
         bare_type_name = unqualified_type_name[:unqualified_type_name.find('(')]
@@ -530,6 +534,15 @@ def _get_timestamp_with_timezone_type_body_map(target_type):
 
 
 def _get_timestamp_without_timezone_type_body_map():
+    """
+    Get SQL strings that create various functions for casting different
+    types to timestamp without timezone.
+    We allow casting any text, timezone and date type to be cast into a timestamp without timezone,
+     provided it does not any timezone information as this could lead to a information loss
+
+    The cast function changes the timezone to `utc` for the transaction is called on.
+     So this function call should be used in a isolated transaction to avoid timezone change causing unintended side effect
+    """
     source_text_types = TEXT_TYPES
     source_datetime_types = frozenset([TIMESTAMP_WITH_TIME_ZONE, DATE])
     default_behavior_source_types = frozenset([TIMESTAMP_WITHOUT_TIME_ZONE])
@@ -628,6 +641,15 @@ def _get_textual_type_body_map(engine, target_type_str=VARCHAR):
 
 
 def _get_date_type_body_map():
+    """
+    Get SQL strings that create various functions for casting different
+    types to date.
+    We allow casting any text, timezone and date type to be cast into a timestamp without timezone,
+     provided it does not any timezone information as this could lead to a information loss
+
+    The cast function changes the timezone to `utc` for the transaction is called on.
+     So this function call should be used in a isolated transaction to avoid timezone change causing unintended side effect
+    """
     # Note that default postgres conversion for dates depends on the
     # `DateStyle` option set on the server, which can be one of DMY, MDY,
     # or YMD. Defaults to MDY.
