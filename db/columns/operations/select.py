@@ -104,7 +104,7 @@ def get_column_default_dict(table_oid, column_index, engine, connection_to_use=N
             select(text(sql_text)),
             connection_to_use
         ).first()[0]
-    return {"default_value": default_value, "is_dynamic": is_dynamic}
+    return {"value": default_value, "is_dynamic": is_dynamic}
 
 
 def get_column_default(table_oid, column_index, engine, connection_to_use=None):
@@ -112,7 +112,7 @@ def get_column_default(table_oid, column_index, engine, connection_to_use=None):
         table_oid, column_index, engine, connection_to_use=connection_to_use
     )
     if default_dict is not None:
-        return default_dict['default_value']
+        return default_dict['value']
 
 
 def _is_default_expr_dynamic(server_default):

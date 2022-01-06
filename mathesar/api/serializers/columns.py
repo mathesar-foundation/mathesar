@@ -72,7 +72,7 @@ class SimpleColumnSerializer(serializers.ModelSerializer):
 
 
 class ColumnDefaultSerializer(serializers.Serializer):
-    default_value = InputValueField()
+    value = InputValueField()
     is_dynamic = serializers.BooleanField(read_only=True)
 
 

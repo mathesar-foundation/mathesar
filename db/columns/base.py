@@ -148,7 +148,7 @@ class MathesarColumn(Column):
         if default_dict:
             return {
                 'is_dynamic': default_dict['is_dynamic'],
-                'default_value': default_dict['default_value']
+                'value': default_dict['value']
             }
 
     @property

@@ -85,7 +85,7 @@ def test_column_list(column_test_table, client):
             'primary_key': True,
             'display_options': None,
             'default': {
-                'default_value': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
+                'value': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
                 'is_dynamic': True
             },
             'valid_target_types': [
@@ -118,7 +118,7 @@ def test_column_list(column_test_table, client):
             'primary_key': False,
             'display_options': None,
             'default': {
-                'default_value': 5,
+                'value': 5,
                 'is_dynamic': False,
             },
             'valid_target_types': [
@@ -190,7 +190,7 @@ def test_column_create_default(
 ):
     cache.clear()
     name = "anewcolumn"
-    data = {"name": name, "type": type_, "default": {"default_value": default}}
+    data = {"name": name, "type": type_, "default": {"value": default}}
     response = client.post(
         f"/api/v0/tables/{column_test_table.id}/columns/",
         json.dumps(data), content_type='application/json'
@@ -202,7 +202,7 @@ def test_column_create_default(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     actual_new_col = new_columns_response.json()["results"][-1]
-    assert actual_new_col["default"]["default_value"] == expt_default
+    assert actual_new_col["default"]["value"] == expt_default
 
     # Ensure the correct date value is generated when inserting a new record
     sa_table = column_test_table._sa_table
@@ -218,7 +218,7 @@ def test_column_create_invalid_default(column_test_table, client):
     data = {
         "name": name,
         "type": "BOOLEAN",
-        "default": {"default_value": "Not a boolean"},
+        "default": {"value": "Not a boolean"},
     }
     response = client.post(
         f"/api/v0/tables/{column_test_table.id}/columns/",
@@ -417,7 +417,7 @@ def test_column_invalid_display_options_type_on_reflection(column_test_table_wit
 def test_column_update_default(column_test_table, client):
     cache.clear()
     expt_default = 5
-    data = {"default": {"default_value": expt_default}}  # Ensure we pass a int and not a str
+    data = {"default": {"value": expt_default}}  # Ensure we pass a int and not a str
     response = client.get(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
@@ -429,7 +429,7 @@ def test_column_update_default(column_test_table, client):
         data=json.dumps(data),
         content_type="application/json",
     )
-    assert response.json()["default"]["default_value"] == expt_default
+    assert response.json()["default"]["value"] == expt_default
 
 
 def test_column_update_delete_default(column_test_table, client):
@@ -451,7 +451,7 @@ def test_column_update_delete_default(column_test_table, client):
 
 def test_column_update_default_invalid_cast(column_test_table, client):
     cache.clear()
-    data = {"default": {"default_value": "not an integer"}}
+    data = {"default": {"value": "not an integer"}}
     response = client.get(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
@@ -543,7 +543,7 @@ def test_column_update_name_type_nullable_default(column_test_table, client):
         "type": type_,
         "name": new_name,
         "nullable": True,
-        "default": {"default_value": True},
+        "default": {"value": True},
     }
     response = client.get(
         f"/api/v0/tables/{column_test_table.id}/columns/"
@@ -559,7 +559,7 @@ def test_column_update_name_type_nullable_default(column_test_table, client):
     assert response.json()["type"] == type_
     assert response.json()["name"] == new_name
     assert response.json()["nullable"] is True
-    assert response.json()["default"]["default_value"] is True
+    assert response.json()["default"]["value"] is True
 
 
 def test_column_update_type_options(column_test_table, client):
@@ -625,7 +625,7 @@ def test_column_update_invalid_type(create_table, client, engine_email_type):
 def test_column_update_returns_table_dependent_fields(column_test_table, client):
     cache.clear()
     expt_default = 5
-    data = {"default": {"default_value": expt_default}}
+    data = {"default": {"value": expt_default}}
     response = client.get(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )

@@ -19,7 +19,7 @@ def alter_column(engine, table_oid, column_index, column_data):
     TYPE_OPTIONS_KEY = 'type_options'
     NULLABLE_KEY = NULLABLE
     DEFAULT_DICT = 'column_default_dict'
-    DEFAULT_KEY = 'default_value'
+    DEFAULT_KEY = 'value'
     NAME_KEY = NAME
 
     table = reflect_table_from_oid(table_oid, engine)
