@@ -1,6 +1,7 @@
 <script lang="ts">
   import CancelOrProceedButtonPair from '@mathesar-component-library-dir/cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
   import Modal from '../modal/Modal.svelte';
+  import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
   import type { ConfirmationController } from './ConfirmationController';
 
   export let controller: ConfirmationController;
@@ -15,7 +16,6 @@
     onSuccess,
     onError,
   } = $confirmationProps);
-  $: bodyParagraphs = Array.isArray(body) ? body : [body];
 
   let allowClose = true;
 
@@ -54,14 +54,12 @@
 
 <Modal
   bind:isOpen={$modal}
-  {title}
   {allowClose}
   on:close={onClose}
   class="confirmation"
 >
-  {#each bodyParagraphs as paragraph}
-     <p>{paragraph}</p>
-  {/each}
+  <StringOrComponent slot=title arg={title} />
+  <StringOrComponent arg={body} />
   <CancelOrProceedButtonPair
     slot=footer
     {cancelButton}
