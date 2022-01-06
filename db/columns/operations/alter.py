@@ -18,7 +18,8 @@ def alter_column(engine, table_oid, column_index, column_data):
     TYPE_KEY = 'plain_type'
     TYPE_OPTIONS_KEY = 'type_options'
     NULLABLE_KEY = NULLABLE
-    DEFAULT_KEY = 'default_value'
+    DEFAULT_DICT = 'column_default_dict'
+    DEFAULT_KEY = 'value'
     NAME_KEY = NAME
 
     table = reflect_table_from_oid(table_oid, engine)
@@ -40,8 +41,9 @@ def alter_column(engine, table_oid, column_index, column_data):
         if NULLABLE_KEY in column_data:
             nullable = column_data[NULLABLE_KEY]
             change_column_nullable(table, column_index, engine, conn, nullable)
-        if DEFAULT_KEY in column_data:
-            default = column_data[DEFAULT_KEY]
+        if DEFAULT_DICT in column_data:
+            default_dict = column_data[DEFAULT_DICT]
+            default = default_dict[DEFAULT_KEY] if default_dict is not None else None
             set_column_default(table, column_index, engine, conn, default)
         if NAME_KEY in column_data:
             # Name always needs to be the last item altered

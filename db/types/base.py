@@ -87,8 +87,8 @@ def get_available_types(engine):
 
 
 def get_db_type_name(sa_type, engine):
-    USER_DEFINED_STR = 'user_defined'
-    db_type = sa_type.__visit_name__
-    if db_type == USER_DEFINED_STR:
-        db_type = sa_type().compile(engine.dialect)
+    try:
+        db_type = sa_type.compile(dialect=engine.dialect)
+    except TypeError:
+        db_type = sa_type().compile(dialect=engine.dialect)
     return db_type
