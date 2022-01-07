@@ -1,4 +1,4 @@
 [tool.vulture]
-exclude = ["mathesar/migrations"]
-ignore_names = ["kw", "sender", "empty_nasa_table", "django_db_setup", "multi_db_test_db"]
+exclude = []
+ignore_names = []
 min_confidence = 90
