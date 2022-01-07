@@ -2,6 +2,7 @@ import warnings
 from sqlalchemy import select, Table, MetaData
 
 from db import types
+from db.tables.operations import infer_types
 from db.schemas.operations.select import get_mathesar_schemas_with_oids
 
 
@@ -20,13 +21,19 @@ def test_get_mathesar_schemas_with_oids_avoids_pg_schemas(engine_with_schema):
 def test_get_mathesar_schemas_with_oids_avoids_information_schema(engine_with_schema):
     engine, schema = engine_with_schema
     actual_schemas = get_mathesar_schemas_with_oids(engine)
-    assert all([schema != "information_schema" for schema, oid in actual_schemas])
+    assert all([schema != "information_schema" for schema, _ in actual_schemas])
 
 
 def test_get_mathesar_schemas_with_oids_avoids_types_schema(engine_with_schema):
     engine, schema = engine_with_schema
     actual_schemas = get_mathesar_schemas_with_oids(engine)
-    assert all([schema != types.base.SCHEMA for schema, oid in actual_schemas])
+    assert all([schema != types.base.SCHEMA for schema, _ in actual_schemas])
+
+
+def test_get_mathesar_schemas_with_oids_avoids_temp_schema(engine_with_schema):
+    engine, schema = engine_with_schema
+    actual_schemas = get_mathesar_schemas_with_oids(engine)
+    assert all([schema != infer_types.TEMP_SCHEMA for schema, _ in actual_schemas])
 
 
 def test_get_mathesar_schemas_with_oids_gets_correct_oid(engine_with_schema):

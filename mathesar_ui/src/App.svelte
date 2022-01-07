@@ -1,9 +1,15 @@
 <script lang="ts">
   import { Route } from 'tinro';
+  import { ToastPresenter, Confirmation } from '@mathesar-component-library';
   import Base from '@mathesar/sections/Base.svelte';
   import Schemas from '@mathesar/pages/schemas/Schemas.svelte';
-  import Header from './header/Header.svelte';
+  import Header from '@mathesar/header/Header.svelte';
+  import { toast } from '@mathesar/stores/toast';
+  import { confirmationController } from '@mathesar/stores/confirmation';
 </script>
+
+<ToastPresenter entries={toast.entries} />
+<Confirmation controller={confirmationController} />
 
 <Header/>
 

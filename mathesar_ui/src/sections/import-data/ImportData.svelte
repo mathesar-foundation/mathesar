@@ -1,24 +1,17 @@
 <script lang="ts">
   import { getFileStore, Stages } from '@mathesar/stores/fileImports';
-  import type { FileImport } from '@mathesar/stores/fileImports';
-  import {
-    Notification,
-  } from '@mathesar-component-library';
+  import { Notification } from '@mathesar-component-library';
   import type { Database, SchemaEntry } from '@mathesar/App.d';
-
   import Preview from './preview/Preview.svelte';
   import Upload from './upload/Upload.svelte';
-  import {
-    clearErrors,
-  } from './importUtils';
+  import { clearErrors } from './importUtils';
 
-  export let id: unknown = null;
+  export let id: string;
   export let database: Database['name'];
   export let schemaId: SchemaEntry['id'];
-  $: identifier = id as string;
 
-  let fileImportStore: FileImport;
-  $: fileImportStore = getFileStore(database, schemaId, identifier);
+  $: fileImportStore = getFileStore(database, schemaId, id);
+  $: stepNumber = $fileImportStore.stage === Stages.UPLOAD ? 1 : 2;
 </script>
 
 <div class="import-file-view">
@@ -29,6 +22,8 @@
       {$fileImportStore.error}
     </svelte:fragment>
   </Notification>
+
+  <div>Add Table (Step {stepNumber} of 2)</div>
 
   {#if $fileImportStore.stage === Stages.UPLOAD}
     <Upload {fileImportStore}/>

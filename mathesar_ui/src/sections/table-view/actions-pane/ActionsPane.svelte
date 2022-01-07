@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, getContext } from 'svelte';
+  import { getContext } from 'svelte';
   import {
     faFilter,
     faSort,
@@ -22,13 +22,21 @@
   } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar-component-library/types';
   import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
+  import {
+    refetchTablesForSchema,
+    deleteTable,
+  } from '@mathesar/stores/tables';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { currentDBName } from '@mathesar/stores/databases';
+  import { getTabsForSchema } from '@mathesar/stores/tabs';
+  import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { modal } from '@mathesar/stores/modal';
   import TableConstraints from '../constraints/TableConstraints.svelte';
   import DisplayFilter from '../display-options/DisplayFilter.svelte';
   import DisplaySort from '../display-options/DisplaySort.svelte';
   import DisplayGroup from '../display-options/DisplayGroup.svelte';
+  import RenameTableModal from './RenameTableModal.svelte';
 
-  const dispatch = createEventDispatcher();
-  
   const tabularData = getContext<TabularDataStore>('tabularData');
   
   function getColumnOptions(columnsData: ColumnsData): SelectOption<string>[] {
@@ -44,6 +52,7 @@
   let meta: Meta;
   let recordState: RecordsData['state'];
   let isTableConstraintsModalOpen = false;
+  const tableRenameModal = modal.createVisibilityStore();
 
   $: ({
     columnsDataStore, recordsData, meta, constraintsDataStore,
@@ -64,6 +73,19 @@
   function refresh() {
     void ($tabularData as TabularData).refresh();
   }
+
+  function handleDeleteTable() {
+    void confirmDelete({
+      identifierType: 'Table',
+      onProceed: async () => {
+        await deleteTable($tabularData.id);
+        const tabList = getTabsForSchema($currentDBName, $currentSchemaId);
+        const tab = tabList.getTabularTabByTabularID($tabularData.type, $tabularData.id);
+        tabList.remove(tab);
+        await refetchTablesForSchema($currentSchemaId);
+      },
+    });
+  }
 </script>
 
 <div class="actions-pane">
@@ -79,7 +101,10 @@
     </svelte:fragment>
     <svelte:fragment slot="content">
       <ul>
-        <li class="item" on:click={() => dispatch('deleteTable')}>
+        <li class="item" on:click={() => tableRenameModal.open()}>
+          Rename
+        </li>
+        <li class="item" on:click={handleDeleteTable}>
           Delete
         </li>
         <li class="item" on:click={() => { isTableConstraintsModalOpen = true; }}>
@@ -90,6 +115,8 @@
   </Dropdown>
 
   <TableConstraints bind:isOpen={isTableConstraintsModalOpen} />
+
+  <RenameTableModal bind:isOpen={$tableRenameModal} tabularData={$tabularData} />
 
   <div class="divider"/>
 

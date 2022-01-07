@@ -36,10 +36,10 @@ function completionCallback(
   dataFileId?: number,
 ): void {
   if (!completionStatus && typeof dataFileId === 'number') {
-    const exisingProgress = get(fileImportStore).uploadProgress;
+    const existingProgress = get(fileImportStore).uploadProgress;
     setInFileStore(fileImportStore, {
       uploadProgress: {
-        ...exisingProgress,
+        ...existingProgress,
         percentCompleted: 100,
       },
       dataFileId,
@@ -137,43 +137,43 @@ async function createPreviewTable(
 
   fileImportData.previewCreatePromise?.cancel();
 
-  if (fileImportData.dataFileId) {
-    const previewCreatePromise = postAPI('/tables/', {
-      name: fileImportData.previewName,
-      schema: fileImportData.schemaId,
-      data_files: [fileImportData.dataFileId],
-    });
-
-    setInFileStore(fileImportStore, {
-      previewTableCreationStatus: States.Loading,
-      previewCreatePromise,
-      error: null,
-    });
-
-    try {
-      const res = await previewCreatePromise as { id: number, name: string };
-
-      const toUpdate: FileImportWritableInfo = {
-        previewTableCreationStatus: States.Done,
-        previewId: res.id,
-        previewName: res.name,
-      };
-      if (!fileImportData.name?.trim()) {
-        toUpdate.name = res.name;
-      }
-
-      setInFileStore(fileImportStore, toUpdate);
-
-      return res;
-    } catch (err: unknown) {
-      setInFileStore(fileImportStore, {
-        previewTableCreationStatus: States.Error,
-        error: (err as Error).message,
-      });
-      throw err;
-    }
-  } else {
+  if (fileImportData.dataFileId === undefined) {
     throw new Error('Unexpected error: Data file not found');
+  }
+
+  const previewCreatePromise = postAPI('/tables/', {
+    name: fileImportData.previewName,
+    schema: fileImportData.schemaId,
+    data_files: [fileImportData.dataFileId],
+  });
+
+  setInFileStore(fileImportStore, {
+    previewTableCreationStatus: States.Loading,
+    previewCreatePromise,
+    error: null,
+  });
+
+  try {
+    const res = await previewCreatePromise as { id: number, name: string };
+
+    const toUpdate: FileImportWritableInfo = {
+      previewTableCreationStatus: States.Done,
+      previewId: res.id,
+      previewName: res.name,
+    };
+    if (!fileImportData.name?.trim()) {
+      toUpdate.name = res.name;
+    }
+
+    setInFileStore(fileImportStore, toUpdate);
+
+    return res;
+  } catch (err: unknown) {
+    setInFileStore(fileImportStore, {
+      previewTableCreationStatus: States.Error,
+      error: (err as Error).message,
+    });
+    throw err;
   }
 }
 
@@ -205,7 +205,7 @@ export async function fetchPreviewTableInfo(
 
     const previewColumnResponse = await previewColumnPromise;
     const typesResponse = await suggestedTypesPromise;
-    const dataFileReponse = await dataFilePromise;
+    const dataFileResponse = await dataFilePromise;
 
     const previewColumns = previewColumnResponse.results.map((column) => ({
       ...column,
@@ -224,8 +224,8 @@ export async function fetchPreviewTableInfo(
       error: null,
     };
 
-    if (dataFileReponse !== null) {
-      dataToSet.firstRowHeader = dataFileReponse.header;
+    if (dataFileResponse !== null) {
+      dataToSet.firstRowHeader = dataFileResponse.header;
     }
 
     setInFileStore(fileImportStore, dataToSet);
@@ -389,6 +389,49 @@ export function cancelImport(fileImportStore: FileImport): void {
     }
     void deletePreviewTable(fileImportStore);
   }
+}
+
+interface DataFilesRequestData {
+  url?: string,
+  paste?: string,
+}
+
+async function importData(fileImportStore: FileImport, data: DataFilesRequestData): Promise<void> {
+  setInFileStore(fileImportStore, {
+    uploadStatus: States.Loading,
+    error: null,
+  });
+  try {
+    const uploadResponse = await postAPI<{ id: number }>('/data_files/', data);
+    const { id } = uploadResponse;
+    setInFileStore(fileImportStore, {
+      dataFileId: id,
+      firstRowHeader: true,
+      isDataFileInfoPresent: true,
+    });
+    const res = await loadPreview(fileImportStore);
+    setImportStatus(get(fileImportStore).id, {
+      status: States.Loading,
+      dataFileName: res.name,
+    });
+    setInFileStore(fileImportStore, {
+      uploadStatus: States.Done,
+      error: null,
+    });
+  } catch (err: unknown) {
+    setInFileStore(fileImportStore, {
+      uploadStatus: States.Error,
+      error: (err as Error).message,
+    });
+  }
+}
+
+export async function importFromURL(fileImportStore: FileImport, url: string): Promise<void> {
+  return importData(fileImportStore, { url });
+}
+
+export async function importFromText(fileImportStore: FileImport, text: string): Promise<void> {
+  return importData(fileImportStore, { paste: text });
 }
 
 // When errors are manually closed

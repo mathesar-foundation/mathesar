@@ -23,6 +23,7 @@ import type { AbstractTypesMap, AbstractType } from '@mathesar/stores/abstractTy
 import type { Meta } from './meta';
 
 export interface Column {
+  id: number,
   name: string,
   type: DbType,
   index: number,
@@ -59,11 +60,11 @@ function api(url: string) {
     add(columnDetails: Partial<Column>) {
       return postAPI<Partial<Column>>(url, columnDetails);
     },
-    remove(index: Column['index']) {
-      return deleteAPI(`${url}${index}/`);
+    remove(id: Column['id']) {
+      return deleteAPI(`${url}${id}/`);
     },
-    update(index: Column['index'], data: Partial<Column>) {
-      return patchAPI<Partial<Column>>(`${url}${index}/`, data);
+    update(id: Column['id'], data: Partial<Column>) {
+      return patchAPI<Partial<Column>>(`${url}${id}/`, data);
     },
   };
 }
@@ -169,15 +170,15 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
     if (column.primary_key) {
       throw new Error(`Column "${column.name}" cannot allow NULL because it is a primary key.`);
     }
-    await this.api.update(column.index, { nullable });
+    await this.api.update(column.id, { nullable });
     await this.fetch();
   }
 
   // TODO: Analyze: Might be cleaner to move following functions as a property of Column class
   // but are the object instantiations worth it?
 
-  async patchType(columnIndex: Column['index'], type: DbType): Promise<Partial<Column>> {
-    const column = await this.api.update(columnIndex, { type });
+  async patchType(columnId: Column['id'], type: DbType): Promise<Partial<Column>> {
+    const column = await this.api.update(columnId, { type });
     await this.fetch();
     this.dispatch('columnPatched', column);
     return column;
@@ -221,8 +222,8 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
     super.destroy();
   }
 
-  async deleteColumn(index: Column['index']): Promise<void> {
-    await this.api.remove(index);
+  async deleteColumn(columnId: Column['id']): Promise<void> {
+    await this.api.remove(columnId);
     await this.fetch();
   }
 }
