@@ -16,6 +16,7 @@
   } from '@mathesar/stores/table-data/types';
   import type { AbstractType } from '@mathesar/stores/abstractTypes';
   import type { SelectOption } from '@mathesar-component-library/types';
+  import { toast } from '@mathesar/stores/toast';
 
   const dispatch = createEventDispatcher();
 
@@ -96,8 +97,7 @@
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         await columnsDataStore.patchType(column.id, selectedDBTypeOption.id);
       } catch (err) {
-        // TODO: Figure out where to place error boundaries for toast system
-        console.error(err);
+        toast.error(`Unable to change column type. ${err.message as string}`);
       }
     }
     close();

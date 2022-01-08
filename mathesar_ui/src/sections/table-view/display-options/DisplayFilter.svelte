@@ -25,17 +25,18 @@
   let filterValue = '';
   let addNew = false;
 
+  const conditions = [
+    { id: 'eq', label: 'equals' },
+    { id: 'ne', label: 'not equals' },
+    { id: 'get_duplicates', label: 'has duplicates' },
+  ];
+
   function onMetaChange(_meta: Meta) {
     ({ filter } = _meta);
     filterCombination = _meta.getFilterCombination();
   }
 
   $: onMetaChange(meta);
-
-  const conditions = [
-    { id: 'eq', label: 'equals' },
-    { id: 'ne', label: 'not equals' },
-  ];
 
   function addFilter() {
     meta.addFilter({
@@ -78,7 +79,7 @@
         </tr>
       {/if}
       {#each $filter?.filters || [] as option, index (option)}
-        <FilterEntry {options} {conditions}
+        <FilterEntry {options} {conditions} filterByDuplicates={option.condition.id === conditions[2].id}
           bind:column={option.column}
           bind:condition={option.condition}
           bind:value={option.value}
@@ -110,9 +111,11 @@
             <td class="dir">
               <Select options={conditions} bind:value={filterCondition}/>
             </td>
-            <td class="value" colspan="2">
-              <TextInput bind:value={filterValue}/>
-            </td>
+            {#if filterCondition !== conditions[2]}
+              <td class="value" colspan="2">
+                <TextInput bind:value={filterValue}/>
+              </td>
+            {/if}
           </tr>
           <tr>
             <td class="filter-action" colspan="4">

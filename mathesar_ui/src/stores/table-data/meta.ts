@@ -207,20 +207,39 @@ export class Meta {
         }
         if (groupOptions.length > 0) {
           params.push(
-            `group_count_by=${encodeURIComponent(JSON.stringify(groupOptions))}`,
+            `grouping=${encodeURIComponent(JSON.stringify({ columns: groupOptions }))}`,
           );
         }
         if ($filter.filters?.length > 0) {
-          const filter = {};
+          // Specify fields to pass style checks for special handling of get_duplicates op
+          const filter: {
+            and: {
+              field: string,
+              op: string,
+              value: string[]
+            }[]
+          } = { and: [] };
+
           const terms = $filter.filters.map((term) => ({
             field: term.column.id,
             op: term.condition.id,
             value: term.value,
           }));
           filter[$filter.combination.id as string] = terms;
-          params.push(
-            `filters=${encodeURIComponent(JSON.stringify(filter))}`,
-          );
+          if ('and' in filter && filter.and.length === 1 && filter.and[0].op === 'get_duplicates') {
+            // Special handling for the get_duplicates operation due to backend bug
+            // The backend can only handle the get_duplicates operation by itself
+            // The "and" must be removed and the value must be in an array
+            filter.and[0].value = [filter.and[0].field];
+            params.push(
+              `filters=${encodeURIComponent(JSON.stringify([filter.and[0]]))}`,
+            );
+          } else {
+            // Handle other filters normally
+            params.push(
+              `filters=${encodeURIComponent(JSON.stringify(filter))}`,
+            );
+          }
         }
         return params.join('&');
       },

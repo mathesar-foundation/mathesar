@@ -9,7 +9,7 @@
     FileImport,
     PreviewRow,
   } from '@mathesar/stores/fileImports';
-  import Null from '@mathesar/components/Null.svelte';
+  import CellValue from '@mathesar/components/CellValue.svelte';
   import type { CancellablePromise } from '@mathesar-component-library';
 
   interface Response {
@@ -61,11 +61,7 @@
   <tr>
     {#each ($fileImportStore.previewColumns || []) as column (column.name)}
       <td>
-        {#if row[column.name] === null}
-          <Null />
-        {:else}
-          {row[column.name]}
-        {/if}
+        <CellValue value={row[column.name]} />
       </td>
     {/each}
   </tr>
