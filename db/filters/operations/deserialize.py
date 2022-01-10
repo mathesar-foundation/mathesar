@@ -4,11 +4,21 @@ from db.filters.base import (
 
 
 def get_expression_from_MA_filter_spec(spec: dict) -> Expression:
-    expression_subclass_id = _get_first_dict_key(spec)
-    expression_subclass = _get_expression_subclass_by_id(expression_subclass_id)
-    expression_body = spec[expression_subclass_id]
+    def _deserialize_parameter_if_necessary(parameter):
+        if isinstance(parameter, dict):
+            return get_expression_from_MA_filter_spec(parameter)
+        else:
+            return parameter
     try:
-        return expression_subclass(**expression_body)
+        expression_subclass_id = _get_first_dict_key(spec)
+        expression_subclass = _get_expression_subclass_by_id(expression_subclass_id)
+        raw_parameters = spec[expression_subclass_id]
+        assert isinstance(raw_parameters, list)
+        parameters = [
+            _deserialize_parameter_if_necessary(raw_parameter)
+            for raw_parameter in raw_parameters
+        ]
+        return expression_subclass(parameters=parameters)
     except (TypeError, KeyError) as e:
         # Raised when the objects in the spec don't have the right fields (e.g. column or parameter).
         raise BadFilterFormat from e
