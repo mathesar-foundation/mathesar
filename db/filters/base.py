@@ -37,6 +37,18 @@ class Expression(ABC):
     suggestions: List = static(None)
     parameters: Sequence
 
+    @property
+    def referenced_columns(self):
+        """Walks the expression tree, collecting referenced columns.
+        Useful when checking if all referenced columns are present in the queried relation."""
+        columns = []
+        for parameter in self.parameters:
+            if isinstance(parameter, ColumnReference):
+                columns.append(parameter.column)
+            elif isinstance(parameter, Expression):
+                columns.append(parameter.referenced_columns)
+        return columns
+
     @staticmethod
     @abstractmethod
     def to_sa_expression():
@@ -51,6 +63,9 @@ class ColumnReference(Expression):
         suggestions.parameter_count(1),
         suggestions.parameter(1, suggestions.column),
     ])
+
+    def column(self):
+        return self.parameters[0]
 
     @staticmethod
     def to_sa_expression(p):
@@ -170,21 +185,6 @@ supported_expressions = tuple(
         ExtractURIAuthority,
     ]
 )
-
-
-# Sample filter expression tree
-And([
-    StartsWith([
-        ExtractURIAuthority([
-            ColumnReference("uri_col")
-        ]),
-        "google"
-    ]),
-    Greater([
-        ColumnReference("some_col"),
-        ColumnReference("some_other_col"),
-    ]),
-])
 
 
 class BadFilterFormat(SABadFilterFormat):
