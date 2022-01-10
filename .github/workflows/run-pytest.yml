@@ -40,12 +40,15 @@ jobs:
         
       - name: Show files
         run: ls -lah .
+        
+      - name: Show directory
+        run: pwd
 
       - name: Save the coverage report
         uses: codecov/codecov-action@v2
         with: 
           token: ${{ secrets.CODECOV_TOKEN }}
-          file: ./coverage.xml
+          files: ./coverage.xml
           flags: pytest-backend
           name: codecov-mathesar
           verbose: true
