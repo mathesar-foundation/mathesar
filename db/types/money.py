@@ -13,10 +13,10 @@ CURRENCY = 'currency'
 
 class Money(UserDefinedType):
 
-    def get_col_spec(self, **kw):
+    def get_col_spec(self, **_):
         return DB_TYPE.upper()
 
-    def bind_processor(self, dialect):
+    def bind_processor(self, _):
         return lambda x: Json(x)
 
     def bind_expression(self, bindvalue):
