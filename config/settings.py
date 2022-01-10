@@ -177,7 +177,7 @@ REST_FRAMEWORK = {
     ),
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'EXCEPTION_HANDLER':
-        'mathesar.errors.mathesar_exception_handler'
+        'mathesar.exceptions.handlers.mathesar_exception_handler'
 }
 
 # Mathesar settings

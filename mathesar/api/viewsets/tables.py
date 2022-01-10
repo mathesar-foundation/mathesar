@@ -11,8 +11,9 @@ from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer
-from mathesar.error_codes import ErrorCodes
-from mathesar.errors import ExceptionBody, CustomApiException, CustomValidationError, get_default_exception_detail
+from mathesar.exceptions.error_codes import ErrorCodes
+from mathesar.exceptions.exceptions import ExceptionBody, get_default_exception_detail, CustomApiException, \
+    CustomValidationError
 from mathesar.models import Table
 from mathesar.utils.tables import (
     get_table_column_types, create_table_from_datafile, create_empty_table,
@@ -114,14 +115,18 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
             preview_records = table.get_preview(columns)
         except (DataError, IntegrityError) as e:
             if type(e.orig) == InvalidTextRepresentation or type(e.orig) == CheckViolation:
-                raise CustomValidationError(
-                    [ExceptionBody(ErrorCodes.InvalidTypeCast.value, "Invalid type cast requested.",
-                     field='columns')])
+                exception_details = ExceptionBody(ErrorCodes.InvalidTypeCast.value,
+                                                  "Invalid type cast requested.",
+                                                  field='columns')
+                raise CustomValidationError([exception_details])
             else:
                 raise CustomApiException(e, ErrorCodes.NonClassifiedIntegrityError.value)
         except UnsupportedTypeException as e:
-            raise CustomValidationError([get_default_exception_detail(e, ErrorCodes.UnsupportedType.value, message=None,
-                                                                      field='columns')])
+            exception_details = get_default_exception_detail(e,
+                                                             ErrorCodes.UnsupportedType.value,
+                                                             message=None,
+                                                             field='columns')
+            raise CustomValidationError([exception_details])
         except Exception as e:
             raise CustomApiException(e)
         table_data.update(
