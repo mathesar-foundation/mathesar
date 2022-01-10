@@ -8,48 +8,15 @@ described by whether it's a Leaf or a Branch, whether it takes parameters and ho
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, List, Union, Type, Set
-from sqlalchemy_filters.exceptions import BadFilterFormat as SABadFilterFormat
-from sqlalchemy import column, not_, and_, or_
+from typing import Any, List, Union, Type, Set, Tuple
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 
+from sqlalchemy_filters.exceptions import BadFilterFormat as SABadFilterFormat
+from sqlalchemy import column, not_, and_, or_, func
+from db.types.uri import URIFunction
 
-class PredicateSuperType(Enum):
-    """Every Predicate is either a leaf node in the predicate tree, or a branch node.
-    A leaf node (e.g. EMPTY, EQUAL) has no predicate children, while a branch node
-    (e.g. AND, OR, NOT) always has predicate children."""
-    LEAF = "leaf"
-    BRANCH = "branch"
-
-
-class BranchPredicateType(Enum):
-    NOT = "not"
-    OR = "or"
-    AND = "and"
-
-
-class LeafPredicateType(Enum):
-    """Note that negation is achieved via BranchPredicateType.NOT"""
-    EQUAL = "equal"
-    NOT_EQUAL = "not_equal"
-    GREATER = "greater"
-    GREATER_OR_EQUAL = "greater_or_equal"
-    LESSER = "lesser"
-    LESSER_OR_EQUAL = "lesser_or_equal"
-    EMPTY = "empty"
-    NOT_EMPTY = "not_empty"
-    IN = "in"
-    NOT_IN = "not_in"
-
-
-class ParameterCount(Enum):
-    """Predicates (currently only leaf predicates) can take single parameters (e.g. EQUAL
-    predicate takes a value to check equality against), lists of parameters (e.g. the IN
-    predicate takes a list of values to check membership against), or no paramaters (e.g.
-    the EMPTY predicate)."""
-    SINGLE = "single"
-    MULTI = "multi"
-    NONE = "none"
+import suggestions
 
 
 # frozen=True provides immutability
@@ -65,237 +32,160 @@ def static(value):
 
 
 @frozen_dataclass
-class Predicate(ABC):
-    super_type: PredicateSuperType
-    type: Union[LeafPredicateType, BranchPredicateType]
+class Expression(ABC):
+    id: str
     name: str
-    parameter_count: ParameterCount
+    suggestions: Set = static(None)
+    parameters: Sequence
 
-    def __post_init__(self):
-        assert_predicate_correct(self)
-
+    @staticmethod
     @abstractmethod
-    def to_sa_filter(self):
-        """
-        Returns the equivalent SQLAlchemy filter usable as argument to a Query.filter call.
-        Not a property, since SA filter's mutability properties are unclear.
-        """
+    def to_sa_expression():
         return None
 
-    @property
-    @abstractmethod
-    def referenced_columns(self) -> Set[str]:
-        """
-        A predicate will reference zero or more columns. We want to know their names, to
-        be able to check that they exist on the table-like the filter will be
-        applied to.
-        """
-        return set()
 
-    @property
-    @abstractmethod
-    def parameter_list(self) -> List[Any]:
-        """
-        Parameter-count-agnostic way to get parameters (always returns a tuple).
-        """
-        return tuple()
+@frozen_dataclass
+class ColumnReference(Expression):
+    id: str = static("column_reference")
+    name: str = static("Column Reference")
+    suggestions: Set = static({
+        suggestions.ParameterCount(1),
+        suggestions.Parameter(1, suggestions.Column)
+    })
+
+    @staticmethod
+    def to_sa_expression(p):
+        return column(p)
 
 
 @frozen_dataclass
-class Leaf(Predicate):
-    super_type: PredicateSuperType = static(PredicateSuperType.LEAF)
-    type: LeafPredicateType
-    column: str
-
-    @property
-    def referenced_columns(self) -> Set[str]:
-        return set([self.column])
-
-
-@frozen_dataclass
-class SingleParameter:
-    parameter_count: ParameterCount = static(ParameterCount.SINGLE)
-    parameter: Any
-
-    @property
-    def parameter_list(self):
-        return [self.parameter]
-
-
-@frozen_dataclass
-class MultiParameter:
-    parameter_count: ParameterCount = static(ParameterCount.MULTI)
-    parameters: List[Any]
-
-    @property
-    def parameter_list(self):
-        return self.parameters
-
-
-@frozen_dataclass
-class NoParameter:
-    parameter_count: ParameterCount = static(ParameterCount.NONE)
-
-    @property
-    def parameter_list(self):
-        return []
-
-
-@frozen_dataclass
-class Branch(Predicate):
-    super_type: PredicateSuperType = static(PredicateSuperType.BRANCH)
-    type: BranchPredicateType
-
-    @property
-    def child_predicates(self):
-        return self.parameter_list
-
-    def get_child_sa_filters(self):
-        """
-        Method instead of property, due to unknown SA filter mutability properties.
-        """
-        child_sa_filters = tuple(child_predicate.to_sa_filter() for child_predicate in self.child_predicates)
-        return child_sa_filters
-
-    @property
-    def referenced_columns(self) -> Set[str]:
-        sets_of_columns = (child_predicate.referenced_columns for child_predicate in self.child_predicates)
-        return set.union(*sets_of_columns)
-
-
-@frozen_dataclass
-class ReliesOnComparability:
-    """Some predicates require the data types they are being applied to to be comparable
-    (lesser, greater, etc.)."""
-    pass
-
-
-def relies_on_comparability(predicate_subclass: Type[Predicate]) -> bool:
-    return issubclass(predicate_subclass, ReliesOnComparability)
-
-
-@frozen_dataclass
-class Equal(SingleParameter, Leaf):
-    type: LeafPredicateType = static(LeafPredicateType.EQUAL)
-    name: str = static("Equal")
-
-    def to_sa_filter(self):
-        return column(self.column) == self.parameter
-
-
-@frozen_dataclass
-class NotEqual(SingleParameter, Leaf):
-    type: LeafPredicateType = static(LeafPredicateType.NOT_EQUAL)
-    name: str = static("Not equal")
-
-    def to_sa_filter(self):
-        return column(self.column) != self.parameter
-
-
-@frozen_dataclass
-class Greater(ReliesOnComparability, SingleParameter, Leaf):
-    type: LeafPredicateType = static(LeafPredicateType.GREATER)
-    name: str = static("Greater")
-
-    def to_sa_filter(self):
-        return column(self.column) > self.parameter
-
-
-@frozen_dataclass
-class GreaterOrEqual(ReliesOnComparability, SingleParameter, Leaf):
-    type: LeafPredicateType = static(LeafPredicateType.GREATER_OR_EQUAL)
-    name: str = static("Greater or equal")
-
-    def to_sa_filter(self):
-        return column(self.column) >= self.parameter
-
-
-@frozen_dataclass
-class Lesser(ReliesOnComparability, SingleParameter, Leaf):
-    type: LeafPredicateType = static(LeafPredicateType.LESSER)
-    name: str = static("Lesser")
-
-    def to_sa_filter(self):
-        return column(self.column) < self.parameter
-
-
-@frozen_dataclass
-class LesserOrEqual(ReliesOnComparability, SingleParameter, Leaf):
-    type: LeafPredicateType = static(LeafPredicateType.LESSER_OR_EQUAL)
-    name: str = static("Lesser or equal")
-
-    def to_sa_filter(self):
-        return column(self.column) <= self.parameter
-
-
-@frozen_dataclass
-class Empty(NoParameter, Leaf):
-    type: LeafPredicateType = static(LeafPredicateType.EMPTY)
+class Empty(Expression):
+    id: str = static("empty")
     name: str = static("Empty")
+    suggestions: Set = static({
+        suggestions.Returns(suggestions.Boolean)
+        suggestions.ParameterCount(1),
+    })
 
-    def to_sa_filter(self):
-        return column(self.column).is_(None)
-
-
-@frozen_dataclass
-class NotEmpty(NoParameter, Leaf):
-    type: LeafPredicateType = static(LeafPredicateType.NOT_EMPTY)
-    name: str = static("Not empty")
-
-    def to_sa_filter(self):
-        return column(self.column).is_not(None)
+    @staticmethod
+    def to_sa_expression(p):
+        return p.is_(None)
 
 
 @frozen_dataclass
-class In(MultiParameter, Leaf):
-    type: LeafPredicateType = static(LeafPredicateType.IN)
+class Greater(Expression):
+    id: str = static("greater")
+    name: str = static("Greater")
+    suggestions: Set = static({
+        suggestions.Returns(suggestions.Boolean),
+        suggestions.ParameterCount(2),
+        suggestions.AllParameters(suggestions.Comparable)
+    })
+
+    @staticmethod
+    def to_sa_expression(p1, p2):
+        return p1.gt(p2)
+
+
+@frozen_dataclass
+class In(Expression):
+    id: str = static("in")
     name: str = static("In")
+    suggestions: Set = static({
+        suggestions.Returns(suggestions.Boolean),
+        suggestions.ParameterCount(2),
+        suggestions.Parameter(2, suggestions.Array)
+    })
 
-    def to_sa_filter(self):
-        return column(self.column).in_(self.parameters)
-
-
-@frozen_dataclass
-class NotIn(MultiParameter, Leaf):
-    type: LeafPredicateType = static(LeafPredicateType.NOT_IN)
-    name: str = static("Not in")
-
-    def to_sa_filter(self):
-        return column(self.column).not_in(self.parameters)
+    @staticmethod
+    def to_sa_expression(p1, p2):
+        return p1.in_(p2)
 
 
 @frozen_dataclass
-class Not(SingleParameter, Branch):
-    type: BranchPredicateType = static(BranchPredicateType.NOT)
-    name: str = static("Not")
-
-    def to_sa_filter(self):
-        return not_(*self.get_child_sa_filters())
-
-
-@frozen_dataclass
-class And(MultiParameter, Branch):
-    type: BranchPredicateType = static(BranchPredicateType.AND)
+class And(Expression):
+    id: str = static("and")
     name: str = static("And")
+    suggestions: Set = static({
+        suggestions.Returns(suggestions.Boolean)
+    })
 
-    def to_sa_filter(self):
-        return and_(*self.get_child_sa_filters())
+    @staticmethod
+    def to_sa_expression(*ps):
+        return and_(*ps)
 
 
 @frozen_dataclass
-class Or(MultiParameter, Branch):
-    type: BranchPredicateType = static(BranchPredicateType.OR)
-    name: str = static("Or")
+class StartsWith(Expression):
+    id: str = static("starts_with")
+    name: str = static("Starts With")
+    suggestions: Set = static({
+        suggestions.Returns(suggestions.Boolean)
+        suggestions.ParameterCount(2),
+        suggestions.AllParameters(suggestions.StringLike)
+    })
 
-    def to_sa_filter(self):
-        return or_(*self.get_child_sa_filters())
+    @staticmethod
+    def to_sa_expression(p1, p2):
+        return p1.like(f"{p2}%")
 
 
-def get_predicate_subclass_by_type_str(predicate_type_str: str) -> Union[Type[LeafPredicateType], Type[BranchPredicateType]]:
-    for subclass in all_predicates:
-        if subclass.type.value == predicate_type_str:
-            return subclass
-    raise UnknownPredicateType(predicate_type_str)
+@frozen_dataclass
+class ToLowercase(Expression):
+    id: str = static("to_lowercase")
+    name: str = static("To Lowercase")
+    suggestions: Set = static({
+        suggestions.ParameterCount(1),
+        suggestions.AllParameters(suggestions.StringLike)
+    })
+
+    @staticmethod
+    def to_sa_expression(p1):
+        return func.lower(p1)
+
+
+@frozen_dataclass
+class ExtractURIAuthority(Expression):
+    id: str = static("extract_uri_authority")
+    name: str = static("Extract URI Authority")
+    suggestions: Set = static({
+        suggestions.ParameterCount(1)
+        suggestions.Parameter(1, suggestions.URI)
+    })
+
+    @staticmethod
+    def to_sa_expression(p1):
+        return func.getattr(URIFunction.AUTHORITY)(p1)
+
+
+# Enumeration of supported Expression subclasses; useful when parsing.
+supported_expressions = tuple(
+    [
+        ColumnReference,
+        Empty,
+        Greater,
+        In,
+        And,
+        StartsWith,
+        ToLowercase,
+        ExtractURIAuthority,
+    ]
+)
+
+
+# Sample filter expression tree
+And([
+    StartsWith([
+        ExtractURIAuthority([
+            ColumnReference("uri_col")
+        ]),
+        "google"
+    ]),
+    Greater([
+        ColumnReference("some_col"),
+        ColumnReference("some_other_col"),
+    ]),
+])
 
 
 class BadFilterFormat(SABadFilterFormat):
@@ -308,75 +198,3 @@ class UnknownPredicateType(BadFilterFormat):
 
 class ReferencedColumnsDontExist(BadFilterFormat):
     pass
-
-
-all_predicates = [
-    Equal,
-    NotEqual,
-    Greater,
-    GreaterOrEqual,
-    Lesser,
-    LesserOrEqual,
-    Empty,
-    NotEmpty,
-    In,
-    NotIn,
-    Not,
-    And,
-    Or,
-]
-
-
-def _not_empty(xs):
-    return len(xs) > 0
-
-
-def _all_items_unique(xs):
-    for item1 in xs:
-        times_seen = 0
-        for item2 in xs:
-            if item1 == item2:
-                times_seen += 1
-            # A non-duplicate will be seen only once.
-            if times_seen == 2:
-                return False
-    return True
-
-
-def assert_predicate_correct(predicate):
-    """Enforces constraints on predicate instances."""
-    try:
-        if isinstance(predicate, Leaf):
-            column = predicate.column
-            column_name_valid = column is not None and type(column) is str and column != ""
-            assert column_name_valid, f"Column name invalid: {column}. It must be a non-empty string."
-
-        if isinstance(predicate, SingleParameter):
-            parameter = predicate.parameter
-            assert parameter is not None, "A parameter must not be None."
-            is_parameter_list = isinstance(parameter, list)
-            assert not is_parameter_list, "This parameter cannot be a list."
-            is_parameter_predicate = isinstance(parameter, Predicate)
-            if isinstance(predicate, Leaf):
-                assert not is_parameter_predicate, "This parameter cannot be a predicate."
-            elif isinstance(predicate, Branch):
-                assert is_parameter_predicate, "This parameter must a predicate."
-        elif isinstance(predicate, MultiParameter):
-            parameters = predicate.parameters
-            assert parameters is not None, "This parameter list cannot be None."
-            is_parameter_list = isinstance(parameters, list)
-            assert is_parameter_list, "This parameter list must be a list."
-            assert _not_empty(parameters), "This parameter list must not be empty"
-            are_parameters_predicates = (
-                isinstance(parameter, Predicate) for parameter in parameters
-            )
-            if isinstance(predicate, Leaf):
-                none_of_parameters_are_predicates = not any(are_parameters_predicates)
-                assert none_of_parameters_are_predicates, "A leaf predicate does not accept predicate parameters."
-            elif isinstance(predicate, Branch):
-                all_parameters_are_predicates = all(are_parameters_predicates)
-                assert all_parameters_are_predicates, "A branch predicate only accepts predicate parameters."
-            all_parameters_unique = _all_items_unique(parameters)
-            assert all_parameters_unique, "All parameters on a single predicate must be unique."
-    except AssertionError as err:
-        raise BadFilterFormat from err
