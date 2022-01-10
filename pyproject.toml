@@ -1,0 +1,4 @@
+[tool.vulture]
+exclude = ["mathesar/migrations"]
+ignore_names = []
+min_confidence = 90

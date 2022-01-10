@@ -9,6 +9,8 @@ class MathesarJSONEncoder(JSONEncoder):
         if isinstance(obj, datetime.time):
             representation = obj.isoformat()
             return representation
+        elif isinstance(obj, datetime.datetime):
+            return obj.isoformat()
         else:
             return super().default(obj)
 

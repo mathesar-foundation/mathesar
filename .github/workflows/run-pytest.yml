@@ -32,5 +32,17 @@ jobs:
       - name: Build the stack
         run: docker-compose up --build -d
 
+      - name: create coverage directory
+        run: docker exec mathesar_service mkdir coverage_report
+
       - name: Run tests with pytest
-        run: docker exec mathesar_service pytest mathesar/ db/
+        run: docker exec mathesar_service pytest --cov-report=xml:coverage_report/coverage.xml
+
+      - name: Save the coverage report
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage_report
+          flags: pytest-backend
+          name: codecov-mathesar
+          verbose: true
