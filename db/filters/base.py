@@ -1,9 +1,6 @@
+# TODO
 """
-This module contains Predicate subclasses, and relevenat mixins, that describe nodes in a
-predicate tree, or, in other words, predicates that compose into a tree. A predicate is
-described by whether it's a Leaf or a Branch, whether it takes parameters and how many
-(SingleParameter, MultiParameter, NoParameter) and whether it relies on comparability
-(ReliesOnComparability), as well as its identifier and its human-friendly name.
+TBD
 """
 
 from dataclasses import dataclass, field
