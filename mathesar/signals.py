@@ -6,7 +6,7 @@ from mathesar.reflection import reflect_new_table_constraints
 
 
 @receiver(post_save, sender=Table)
-def sync_table_constraints(sender, instance, created, **kwargs):
+def sync_table_constraints(_, instance, created, **kwargs):
     # When a table is created, we want to immediately make the appropriate
     # Constraint model instances for that table's constraints.
     if created:
