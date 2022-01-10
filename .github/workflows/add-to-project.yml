@@ -2,7 +2,7 @@ name: Add new issues and PRs to project
 on:
   issues:
     types: [opened]
-  pull_request:
+  pull_request_target:
     types: [opened]
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Add PR to project
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request_target' }}
         env:
           MATHESAR_ORG_GITHUB_TOKEN: ${{secrets.MATHESAR_ORG_GITHUB_TOKEN}}
         run: |

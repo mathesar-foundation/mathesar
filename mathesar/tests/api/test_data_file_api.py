@@ -127,7 +127,7 @@ def test_data_file_create_csv(client, csv_filename, header):
 
     with open(csv_filename, 'rb') as csv_file:
         data = {'file': csv_file, 'header': header}
-        response = client.post('/api/v0/data_files/', data)
+        response = client.post('/api/v0/data_files/', data, format='multipart')
     with open(csv_filename, 'r') as csv_file:
         correct_dialect = csv.get_sv_dialect(csv_file)
     check_create_data_file_response(
@@ -140,7 +140,7 @@ def test_data_file_create_csv_long_name(client, csv_filename):
     with open(csv_filename, 'rb') as csv_file:
         with patch.object(os.path, 'basename', lambda _: '0' * 101):
             data = {'file': csv_file}
-            response = client.post('/api/v0/data_files/', data)
+            response = client.post('/api/v0/data_files/', data, format='multipart')
             data_file_dict = response.json()
     assert response.status_code == 400
     assert 'Ensure this filename has at most 100' in data_file_dict['file'][0]
@@ -203,7 +203,7 @@ def test_data_file_create_invalid_file(client):
     with patch.object(csv, "get_sv_dialect") as mock_infer:
         mock_infer.side_effect = InvalidTableError
         with open(file, 'r') as f:
-            response = client.post('/api/v0/data_files/', data={'file': f})
+            response = client.post('/api/v0/data_files/', data={'file': f}, format='multipart')
             response_dict = response.json()
     assert response.status_code == 400
     assert response_dict[0] == 'Unable to tabulate data'
@@ -211,7 +211,7 @@ def test_data_file_create_invalid_file(client):
 
 def test_data_file_create_non_unicode_file(client, non_unicode_csv_filename):
     with open(non_unicode_csv_filename, 'rb') as non_unicode_file:
-        response = client.post('/api/v0/data_files/', data={'file': non_unicode_file})
+        response = client.post('/api/v0/data_files/', data={'file': non_unicode_file}, format='multipart')
     assert response.status_code == 201
 
 
@@ -257,7 +257,7 @@ def test_data_file_create_multiple_source_fields(client, csv_filename, paste_fil
         paste_text = paste_file.read()
     with open(csv_filename, 'rb') as csv_file:
         data = {'file': csv_file, 'paste': paste_text}
-        response = client.post('/api/v0/data_files/', data)
+        response = client.post('/api/v0/data_files/', data, format='multipart')
         response_dict = response.json()
     assert response.status_code == 400
     assert 'Multiple source fields passed:' in response_dict['non_field_errors'][0]

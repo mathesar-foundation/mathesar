@@ -1,6 +1,9 @@
+from typing import Any
+
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
+from django.db.models import JSONField
 from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 
@@ -8,14 +11,15 @@ from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
+from db.columns.operations.select import get_column_name_from_attnum
 from db.constraints.operations.create import create_unique_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
 from db.constraints import utils as constraint_utils
 from db.records.operations.delete import delete_record
-from db.records.operations.group import get_group_counts
 from db.records.operations.insert import insert_record_or_records
-from db.records.operations.select import get_column_cast_records, get_count, get_record, get_records
+from db.records.operations.select import get_column_cast_records, get_count, get_record
+from db.records.operations.select import get_records as db_get_records
 from db.records.operations.update import update_record
 from db.schemas.operations.drop import drop_schema
 from db.schemas import utils as schema_utils
@@ -45,13 +49,28 @@ class DatabaseObjectManager(models.Manager):
         return super().get_queryset()
 
 
-class DatabaseObject(BaseModel):
-    oid = models.IntegerField()
+class ReflectionManagerMixin(models.Model):
+    """
+    Used to reflect objects that exists on the user database but does not have a equivalent mathesar reference object.
+    """
     # The default manager, current_objects, does not reflect database objects.
     # This saves us from having to deal with Django trying to automatically reflect db
     # objects in the background when we might not expect it.
     current_objects = models.Manager()
     objects = DatabaseObjectManager()
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return f"{self.__class__.__name__}"
+
+
+class DatabaseObject(ReflectionManagerMixin, BaseModel):
+    """
+    Objects that can be referenced using a database identifier
+    """
+    oid = models.IntegerField()
 
     class Meta:
         abstract = True
@@ -65,7 +84,7 @@ class DatabaseObject(BaseModel):
 _engines = {}
 
 
-class Database(BaseModel):
+class Database(ReflectionManagerMixin, BaseModel):
     current_objects = models.Manager()
     objects = DatabaseObjectManager()
     name = models.CharField(max_length=128, unique=True)
@@ -243,7 +262,7 @@ class Table(DatabaseObject):
 
     @property
     def sa_all_records(self):
-        return get_records(self._sa_table, self.schema._sa_engine)
+        return db_get_records(self._sa_table, self.schema._sa_engine)
 
     def sa_num_records(self, filters=[]):
         return get_count(self._sa_table, self.schema._sa_engine, filters=filters)
@@ -257,25 +276,15 @@ class Table(DatabaseObject):
     def get_record(self, id_value):
         return get_record(self._sa_table, self.schema._sa_engine, id_value)
 
-    def get_records(self, limit=None, offset=None, filters=[], order_by=[]):
-        return get_records(
+    def get_records(self, limit=None, offset=None, filters=[], order_by=[], group_by=None):
+        return db_get_records(
             self._sa_table,
             self.schema._sa_engine,
             limit,
             offset,
             filters=filters,
-            order_by=order_by
-        )
-
-    def get_group_counts(self, group_by, limit=None, offset=None, filters=[], order_by=[]):
-        return get_group_counts(
-            self._sa_table,
-            self.schema._sa_engine,
-            group_by,
-            limit,
-            offset,
-            filters=filters,
-            order_by=order_by
+            order_by=order_by,
+            group_by=group_by
         )
 
     def create_record_or_records(self, record_data):
@@ -307,6 +316,31 @@ class Table(DatabaseObject):
             name = constraint_utils.get_constraint_name(constraint_type, self.name, columns[0])
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         return Constraint.objects.create(oid=constraint_oid, table=self)
+
+
+class Column(ReflectionManagerMixin, BaseModel):
+    table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='columns')
+    attnum = models.IntegerField()
+    display_options = JSONField(null=True, default=None)
+
+    def __str__(self):
+        return f"{self.__class__.__name__}: {self.table_id}-{self.attnum}"
+
+    def __getattribute__(self, name: str) -> Any:
+        try:
+            return super().__getattribute__(name)
+        except AttributeError:
+            return getattr(self._sa_column, name)
+
+    @cached_property
+    def _sa_column(self):
+        return self.table.sa_columns[self.name]
+
+    @property
+    def name(self):
+        return get_column_name_from_attnum(
+            self.table.oid, self.attnum, self.table.schema._sa_engine
+        )
 
 
 class Constraint(DatabaseObject):

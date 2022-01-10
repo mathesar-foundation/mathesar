@@ -11,7 +11,7 @@ def test_schema_name_sets_cache(monkeypatch, test_db_model):
         models.Schema, '_sa_engine', lambda x: None
     )
     monkeypatch.setattr(
-        models.schema_utils, 'get_schema_name_from_oid', lambda x, y: 'myname'
+        models.schema_utils, 'get_schema_name_from_oid', lambda *_: 'myname'
     )
     cache.clear()
     schema = models.Schema(oid=123, database=test_db_model)
@@ -21,7 +21,7 @@ def test_schema_name_sets_cache(monkeypatch, test_db_model):
 
 def test_schema_name_uses_cache(monkeypatch, test_db_model):
     monkeypatch.setattr(
-        models.Schema, '_sa_engine', lambda x: None
+        models.Schema, '_sa_engine', lambda _: None
     )
     cache.clear()
     with patch.object(
@@ -36,11 +36,11 @@ def test_schema_name_uses_cache(monkeypatch, test_db_model):
 
 def test_schema_name_handles_missing(monkeypatch, test_db_model):
     monkeypatch.setattr(
-        models.Schema, '_sa_engine', lambda x: None
+        models.Schema, '_sa_engine', lambda _: None
     )
     cache.clear()
 
-    def mock_name_getter(oid, engine):
+    def mock_name_getter(*_):
         raise TypeError
     monkeypatch.setattr(
         models.schema_utils, 'get_schema_name_from_oid', mock_name_getter

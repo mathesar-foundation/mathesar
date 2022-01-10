@@ -17,6 +17,8 @@
     ColumnsDataStore,
     ConstraintsDataStore,
   } from '@mathesar/stores/table-data/types';
+  import { toast } from '@mathesar/stores/toast';
+import { confirmDelete } from '@mathesar/stores/confirmation';
 
   const dispatch = createEventDispatcher();
 
@@ -60,14 +62,10 @@
     try {
       const newAllowsNull = !allowsNull;
       await columnsDataStore.setNullabilityOfColumn(column, newAllowsNull);
-      const msg = `Column "${column.name}" will ${newAllowsNull ? '' : 'no longer '}allow NULL.`;
-      // eslint-disable-next-line no-console
-      console.log(msg); // TODO display success toast message: msg
+      toast.success(`Column "${column.name}" will ${newAllowsNull ? '' : 'no longer '}allow NULL.`);
       dispatch('close');
     } catch (error) {
-      const msg = `Unable to update "Allow NULL" of column "${column.name}". ${error.message as string}.`;
-      // eslint-disable-next-line no-console
-      console.log(msg); // TODO display error toast message
+      toast.error(`Unable to update "Allow NULL" of column "${column.name}". ${error.message as string}.`);
     } finally {
       isRequestingToggleAllowNull = false;
     }
@@ -75,7 +73,16 @@
 
   function deleteColumn() {
     dispatch('close');
-    dispatch('columnDelete');
+    void confirmDelete({
+      identifierType: 'column',
+      identifierName: column.name,
+      body: [
+        'All objects related to this column will be afected.',
+        'This could break existing tables and views.',
+        'Are you sure you want to proceed?',
+      ],
+      onProceed: () => columnsDataStore.deleteColumn(column.id),
+    });
   }
   
   async function toggleAllowDuplicates() {
@@ -83,14 +90,12 @@
     try {
       const newAllowsDuplicates = !allowsDuplicates;
       await constraintsDataStore.setUniquenessOfColumn(column, !newAllowsDuplicates);
-      const msg = `Column "${column.name}" will ${newAllowsDuplicates ? '' : 'no longer '}allow duplicates.`;
-      // eslint-disable-next-line no-console
-      console.log(msg); // TODO display success toast message: msg
+      const message = `Column "${column.name}" will ${newAllowsDuplicates ? '' : 'no longer '}allow duplicates.`;
+      toast.success({ message });
       dispatch('close');
     } catch (error) {
-      const msg = `Unable to update "Allow Duplicates" of column "${column.name}". ${error.message as string}.`;
-      // eslint-disable-next-line no-console
-      console.log(msg); // TODO display error toast message
+      const message = `Unable to update "Allow Duplicates" of column "${column.name}". ${error.message as string}.`;
+      toast.error({ message });
     } finally {
       isRequestingToggleAllowDuplicates = false;
     }

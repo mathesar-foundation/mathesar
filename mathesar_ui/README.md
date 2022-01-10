@@ -1,9 +1,12 @@
-This directory contains the frontend code for Mathesar. However, part of the frontend setup is based on prerendered json which is done through django templates. We use Svelte as the frontend library, Scss for styling, and Vite for dev tooling.
+# Mathesar UI
+
+This directory contains the frontend code for Mathesar. However, part of the frontend setup is based on pre-rendered json which is done through django templates. We use Svelte as the frontend library, Scss for styling, and Vite for dev tooling.
 
 ## Development setup
-Refer the [main README file](https://github.com/centerofci/mathesar/blob/master/README.md) on how to spin up the entire dev setup for Mathesar as containers.
 
-### Default - Containers
+Refer the [main README file](../README.md) on how to spin up the entire dev setup for Mathesar as containers.
+
+### Option 1: Setup with containers (recommended)
 
 Once the containers are running, the changes made in frontend code will reflect immediately through HMR. You do not need any additional dev setup.
 
@@ -11,120 +14,226 @@ Once the containers are running, the changes made in frontend code will reflect 
 
 There is one catch when running in containers. Your IDEs will not be able to perform any intellisense or linting because there is no local `node_modules` folder.
 
-If you're using VS Code, you can develop inside the container, by installing [Visual Studio Code Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension. Refer [VS Code docs](https://code.visualstudio.com/docs/remote/containers) for more details.
+Options:
 
-You could also bind mount the node_modules named volume to your local path. This introduces additional complexity, depends on the OS, and the requirement that the path needs to exist. Hence, it is not configured by default in Mathesar. Using normal volumes will not work, since the host directories will override the container directories.
+- Run `npm install` locally (or copy the `node_modules` folder from the container to your host file system). This will not be used for anything except for helping the IDEs provide intellisense.
 
-A simpler approach would be to copy the `node_modules` folder from the container to your local, or run `npm install` locally. This will not be used for anything except for helping the IDEs provide intellisense.
+    If you choose this approach, make sure that you're using the same version of node and npm in your local as it is in the container, and that `package-lock.json` file is not modified before committing.
 
-If you choose the last approach, make sure that you're using the same version of node and npm in your local as it is in the container, and that `package-lock.json` file is not modified before commiting.
+- Bind mount the `node_modules` named volume to your local path. This introduces additional complexity, depends on the OS, and the requirement that the path needs to exist. Hence, it is not configured by default in Mathesar. Using normal volumes will not work, since the host directories will override the container directories.
 
-### Manual
+- Use VS Code with the [Visual Studio Code Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension. Refer [VS Code docs](https://code.visualstudio.com/docs/remote/containers) for more details.
 
-You could however prefer to run the frontend locally, which is straight forward:
-```bash
-cd mathesar_ui
-npm install
-npm run dev
-```
 
-This will start a vite js server at port 3000. The vite client and main files are referenced by our server rendered html files. Refer [backend integration in vite docs](https://vitejs.dev/guide/backend-integration.html).
+### Option 2: Manual setup
 
-For testing:
-```bash
-npm run test
-```
+If you don't want to use Docker, you can run the front end locally.
 
-For building the files:
-```bash
-npm run build
-```
+1. `cd mathesar_ui`
+1. `npm install`
+1. `npm run dev`
 
-When running manually, the `package-lock.json` file may change depending on your node/npm version or your OS. Make sure to not commit those changes. If you want to add/remove packages, follow the steps in the following section.
+    This will start a vite server at port 3000. The vite client and main files are referenced by our server rendered html files. Refer [backend integration in vite docs](https://vitejs.dev/guide/backend-integration.html).
 
-### Adding/Removing packages
 
-If you want to add or remove packages, or bascially run any npm action, **always do it from within the container**. Never do it from your local node setup, since it may modify the `package-lock.json` in ways we would not want it to.
+Caveats
 
-You can connect to the container and open the ui folder by running:
+- When running manually, the `package-lock.json` file may change depending on your node/npm version or your OS. Make sure to not commit those changes. If you want to add/remove packages, follow the steps in the following section.
 
-```bash
-docker exec -it mathesar_service /bin/bash
-cd mathesar_ui
-```
+- The rest of the documentation within this README assumes a Docker setup. If you use a local setup instead, you'll need to interpret the remaining documentation for your specific setup.
 
-and then perform any action from within it. Example:
-```bash
-root@c273da65c52d:/code/mathesar_ui$ ls
-Dockerfile  jsconfig.json  package-lock.json  public  vite.config.js
-README.md   node_modules   package.json       src
+## Developing on Windows
 
-root@c273da65c52d:/code/mathesar_ui$ npm install <package>
+- Hot module replacement does not work well with WSL when the project is present within a Windows filesystem, as mentioned in [this issue](https://github.com/microsoft/WSL/issues/4739).
 
-root@c273da65c52d:/code/mathesar_ui$ npm uninstall <package>
-```
+- The simplest way to get this to work (and the one we advise) is to move the project to a Linux filesystem. This can be achieved by cloning the repo within the WSL shell in a Linux filesystem.
 
-### Components
+- If you have to work in the Windows filesystem, you could configure Vite to poll files to identify changes, as mentioned in [this issue](https://github.com/vitejs/vite/issues/1153#issuecomment-785467271) and in the [Vite documentation](https://vitejs.dev/config/#server-watch). However, this is a resource intensive process so we advise the previous option instead.
 
-For guidelines on component development, refer [README of components](https://github.com/centerofci/mathesar/tree/master/mathesar_ui/src/components#readme).
+- [This issue](https://github.com/centerofci/mathesar/issues/570) keeps track of problems encountered by Mathesar developers using Windows for local development.
 
-You can start storybook in dev mode by connecting to the container and then running `npm run storybook`:
+## Linting
 
-```bash
-docker exec -it mathesar_service /bin/bash
+- Lint all front end files:
 
-root@c273da65c52d:/code/mathesar_ui$ cd mathesar_ui && npm run storybook
-```
+    ```
+    docker exec -it -w /code/mathesar_ui mathesar_service npm run lint
+    ```
 
-This should start storybook at port 6006.
+- Lint a specific file:
 
-To build storybook, run `npm run build-storybook`. The static storybook build will be present within __storybook-static__ folder.
+    ```
+    docker exec -it -w /code/mathesar_ui mathesar_service npx eslint src/sections/Base.svelte
+    ```
 
-### Developing in Windows
-Hot module replacement does not work well with WSL when the project is present within a Windows filesystem, as mentioned in [this issue](https://github.com/microsoft/WSL/issues/4739).
+## Testing
 
-The simplest way to get this to work (and the one we advise) is to move the project to a Linux filesystem. This can be achieved by cloning the repo within the WSL shell in a Linux filesystem.
+We use [Jest](https://jestjs.io/) to run our tests and test utils functions. And we use [Testing Library](https://testing-library.com/docs/svelte-testing-library/intro/) to test our Svelte components.
 
-If you have to work in the Windows filesystem, you could configure Vite to poll files to identify changes, as mentioned in [this issue](https://github.com/vitejs/vite/issues/1153#issuecomment-785467271) and in the [Vite documentation](https://vitejs.dev/config/#server-watch). However, this is a resource intensive process so we advise the previous option instead.
+### Running tests
 
-[This issue](https://github.com/centerofci/mathesar/issues/570) keeps track of problems encountered by Mathesar developers using Windows for local development.
+- Run all our tests:
+
+    ```
+    docker exec -it -w /code/mathesar_ui mathesar_service npm test
+    ```
+
+- Re-run a specific test by name:
+
+    ```
+    docker exec -it -w /code/mathesar_ui mathesar_service npx jest TextInput
+    ```
+
+    This will run all test files with file names containing `TextInput`.
+
+
+### Writing tests
+
+- Let's pretend we have a file `primeUtils.ts` containing function `getPrimality` that returns `true` for prime numbers.
+
+    We can test function with a file `primeUtils.test.ts` as follows:
+
+    ```ts
+    import { getPrimality } from './primeUtils';
+
+    test('getPrimality', () => {
+      expect(getPrimality(2)).toBe(true);
+      expect(getPrimality(3)).toBe(true);
+      expect(getPrimality(4)).toBe(false);
+      expect(getPrimality(5)).toBe(true);
+      expect(getPrimality(6)).toBe(false);
+      expect(getPrimality(7)).toBe(true);
+
+      expect(getPrimality(3484403346821219)).toBe(true);
+      expect(getPrimality(4508972191266181)).toBe(false);
+
+      expect(() => getPrimality(0)).toThrow(); // Can't check zero
+      expect(() => getPrimality(-7)).toThrow(); // No negative numbers
+      expect(() => getPrimality(1)).toThrow(); // Primality of 1 is historically ambiguous
+      expect(() => getPrimality(5.5)).toThrow(); // No decimals
+    });
+    ```
+
+- Functions like `test` and `expect` are automatically imported into scope by the test runner. Your editor should hopefully be smart enough to see that Jest is configured for our project and provide you some assistance in using those functions. You can find more in the [Jest docs](https://jestjs.io/docs/getting-started), but there's not much else you'll need if you follow the pattern above.
+- After, `expect`, you'll use a [matcher](https://jestjs.io/docs/using-matchers). In the example above, we've used `toBe` which is one of the simplest matchers. However `toBe` only works for primitives like numbers, booleans, and strings. If you want to compare two objects or arrays, you'll need to use `toEqual` instead, which performs a deep comparison.
+- The `expect` call is an "assertion". We can put many of them within the same test, but the test will stop running when it hits the first failure.
+- We can put many tests within the same file.
+- Commonly we'll have one test for each function, and many assertions within that test. You can also declare variables and do other logic within the test too if you're trying to build up complex scenarios with assertions throughout a workflow. As the scenarios get more complex, it can be helpful to create multiple tests for the same function.
+- Deciding _what to test_, and _how_ can be an art! You generally want to try poking and the boundaries and edge cases. We don't have to go crazy with all sorts of assertions for every scenario. Just a few will do. We're not trying to test every possible input -- just some of the important ones.
+- If you find a bug, it's great practice to write a test that fails before even beginning work on the fix.
+
+
+
+## Adding/Removing packages
+
+If you want to add or remove packages, or basically run any npm action, **always do it from within the container**. Never do it from your local node setup, since it may modify the `package-lock.json` in ways we would not want it to.
+
+1. Connect to the container and open the ui folder:
+
+    ```bash
+    docker exec -it mathesar_service /bin/bash
+    cd mathesar_ui
+    ```
+
+1. Perform any action from within it.
+
+    ```bash
+    root@c273da65c52d:/code/mathesar_ui$ ls
+    Dockerfile  jsconfig.json  package-lock.json  public  vite.config.js
+    README.md   node_modules   package.json       src
+
+    root@c273da65c52d:/code/mathesar_ui$ npm install <package>
+
+    root@c273da65c52d:/code/mathesar_ui$ npm uninstall <package>
+    ```
+
+## Components
+
+- The `src/component-library` directory contains general-purpose components which will eventually be spun off into its own package, separate from Mathesar.
+- See the [Components README](./src/component-library/README.md) for more details.
+
+### Storybook 
+
+We use [Storybook](https://storybook.js.org/) to develop and document our components.
+
+- __Start__ Storybook in dev mode with:
+
+    ```bash
+    docker exec -it -w /code/mathesar_ui mathesar_service npm run storybook
+    ```
+
+- __Build__ Storybook with:
+
+    ```bash
+    docker exec -it -w /code/mathesar_ui mathesar_service npm run build-storybook
+    ```
 
 ## Naming conventions
 
-* File names for Components, Classes and Stylesheets should be CamelCased.
-  - Valid names:
-    ```bash
+* File names for Components, Classes and Stylesheets should be in PascalCase. Examples:
+    
+    ```txt
     App.svelte
     CancellablePromise.ts
     App.scss
     ```
 
-* Typescript file names should be lowerCamelCased.
-  - Valid names:
-    ```bash
+* Typescript file names should be in lowerCamelCase. Examples:
+    
+    ```txt
     index.ts
     utilityFunctions.ts
     ```
 
-* All variables and constants should be lowerCamelCased.
-  - Valid names:
+* All variables and constants should be in lowerCamelCase. Examples:
+    
     ```javascript
     export let randomVariable;
     let aNewVariable = 'new variable';
     const someValue = 'constant value';
     ```
 
-* All function names should be lowerCamelCased.
-  - Valid names:
+* All function names should be in lowerCamelCase. Examples:
+    
     ```javascript
-    function someFunction() { ... }
-    let someOtherFn = () => { ... };
-    const someConstFn = () => { ... };
+    function someFunction() { /* ... */ }
+    let someOtherFn = () => { /* ... */ };
+    const someConstFn = () => { /* ... */ };
     ```
 
-* All directory names should be kebab-cased (hyphen-delimited).
-  - Valid names:
-    ```bash
+* All directory names should be in kebab-case (hyphen-delimited). Examples:
+    
+    ```txt
     /components/text-input/
     /components/combo-boxes/multi-select/
     ```
+
+* Acronyms within PascalCase and camelCase should be treated as words. Examples:
+
+    ```txt
+    UrlInput.svelte
+    ```
+
+    ```ts
+    function getApiUrl() { /* ... */ }
+    let currentDbName;
+    ```
+
+    - [discussion](https://github.com/centerofci/mathesar/discussions/908)
+    - Not all code conforms to this standard yet, and bringing existing code into conformance is a low priority.
+
+* Use American English spelling instead of British English spelling. Examples:
+
+    ```txt
+    LabeledInput.svelte
+    ColorSelector.svelte
+    ```
+
+    - [discussion](https://github.com/centerofci/mathesar/discussions/891)
+
+* If a TypeScript file contains _only_ type definitions (without any values or implementation), then use the file extension `.d.ts` instead of `.ts`. If you use `enum` or `const` you'll need make the file a `.ts` file. If you only use `type` and `interface`, then make the file a `.d.ts` file.
+
+* Prefer the term "delete" in code and UI over similar terms like "remove" and "drop".
+
+    - [discussion](https://github.com/centerofci/mathesar/discussions/872)
+

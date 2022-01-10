@@ -6,7 +6,7 @@ import pytest
 from mathesar.models import Database
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def django_db_setup(request, django_db_blocker) -> None:
     """
     A stripped down version of pytest-django's original django_db_setup fixture
@@ -43,7 +43,7 @@ def django_db_setup(request, django_db_blocker) -> None:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def test_db_model(test_db_name, django_db_blocker, django_db_setup):
+def test_db_model(test_db_name, django_db_blocker):
     with django_db_blocker.unblock():
         database_model = Database.current_objects.create(name=test_db_name)
     return database_model
