@@ -33,13 +33,13 @@ jobs:
         run: docker-compose up --build -d
 
       - name: Run tests with pytest
-        run: docker exec mathesar_service pytest mathesar/ db/ --cov=mathesar --cov=db --cov-report=xml
-
-      - name: Tries to retrieve coverage results
-        run: cat ./coverage.xml
+        run: docker exec mathesar_service pytest mathesar/tests/api/test_column_api.py db/tests/columns/test_base.py --cov=mathesar --cov=db --cov-report=xml
 
       - name: Refix permissions
         run: sudo chown -R 1000:1000 .
+        
+      - name: Show files
+        run: ls -lah .
 
       - name: Save the coverage report
         uses: codecov/codecov-action@v2
