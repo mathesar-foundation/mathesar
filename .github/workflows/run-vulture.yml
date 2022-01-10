@@ -14,5 +14,4 @@ jobs:
       - name: Install Vulture
         run: pip3 install vulture
       - name: Run Vulture
-        continue-on-error: true
         run: vulture .
