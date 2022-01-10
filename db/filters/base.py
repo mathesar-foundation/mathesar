@@ -73,6 +73,16 @@ class ColumnReference(Expression):
 
 
 @frozen_dataclass
+class List(Expression):
+    id: str = static("list")
+    name: str = static("List")
+
+    @staticmethod
+    def to_sa_expression(*ps):
+        return list(ps)
+
+
+@frozen_dataclass
 class Empty(Expression):
     id: str = static("empty")
     name: str = static("Empty")
@@ -172,7 +182,7 @@ class ExtractURIAuthority(Expression):
         return func.getattr(URIFunction.AUTHORITY)(p1)
 
 
-# Enumeration of supported Expression subclasses; useful when parsing.
+# Enumeration of supported Expression subclasses; needed when parsing.
 supported_expressions = tuple(
     [
         ColumnReference,
