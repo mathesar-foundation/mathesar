@@ -31,11 +31,14 @@ jobs:
 
       - name: Build the stack
         run: docker-compose up --build -d
+        
+      - name: create coverage directory
+        run: docker exec mathesar_service mkdir coverage_report
 
       - name: Run tests with pytest
-        run: docker exec mathesar_service pytest mathesar/tests/api/test_column_api.py db/tests/columns/test_base.py --cov=mathesar --cov=db --cov-report=xml:coverage_report
+        run: docker exec mathesar_service pytest mathesar/tests/api/test_column_api.py db/tests/columns/test_base.py --cov=mathesar --cov=db --cov-report=xml:coverage_report/coverage.xml
 
-      - name: Show files before chown
+      - name: Show files
         run: ls -lah coverage_report
 
       - name: Save the coverage report
