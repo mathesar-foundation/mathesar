@@ -56,10 +56,10 @@ class Expression(ABC):
 class ColumnReference(Expression):
     id: str = static("column_reference")
     name: str = static("Column Reference")
-    suggestions: Sequence = static([
+    suggestions: Sequence = static(tuple([
         suggestions.parameter_count(1),
         suggestions.parameter(1, suggestions.column),
-    ])
+    ]))
 
     def column(self):
         return self.parameters[0]
@@ -83,10 +83,10 @@ class List(Expression):
 class Empty(Expression):
     id: str = static("empty")
     name: str = static("Empty")
-    suggestions: Sequence = static([
+    suggestions: Sequence = static(tuple([
         suggestions.returns(suggestions.boolean),
         suggestions.parameter_count(1),
-    ])
+    ]))
 
     @staticmethod
     def to_sa_expression(p):
@@ -97,11 +97,11 @@ class Empty(Expression):
 class Greater(Expression):
     id: str = static("greater")
     name: str = static("Greater")
-    suggestions: Sequence = static([
+    suggestions: Sequence = static(tuple([
         suggestions.returns(suggestions.boolean),
         suggestions.parameter_count(2),
         suggestions.all_parameters(suggestions.comparable),
-    ])
+    ]))
 
     @staticmethod
     def to_sa_expression(p1, p2):
@@ -112,11 +112,11 @@ class Greater(Expression):
 class In(Expression):
     id: str = static("in")
     name: str = static("In")
-    suggestions: Sequence = static([
+    suggestions: Sequence = static(tuple([
         suggestions.returns(suggestions.boolean),
         suggestions.parameter_count(2),
         suggestions.parameter(2, suggestions.array),
-    ])
+    ]))
 
     @staticmethod
     def to_sa_expression(p1, p2):
@@ -127,9 +127,9 @@ class In(Expression):
 class And(Expression):
     id: str = static("and")
     name: str = static("And")
-    suggestions: Sequence = static([
+    suggestions: Sequence = static(tuple([
         suggestions.returns(suggestions.boolean),
-    ])
+    ]))
 
     @staticmethod
     def to_sa_expression(*ps):
@@ -140,11 +140,11 @@ class And(Expression):
 class StartsWith(Expression):
     id: str = static("starts_with")
     name: str = static("Starts With")
-    suggestions: Sequence = static([
+    suggestions: Sequence = static(tuple([
         suggestions.returns(suggestions.boolean),
         suggestions.parameter_count(2),
         suggestions.all_parameters(suggestions.string_like),
-    ])
+    ]))
 
     @staticmethod
     def to_sa_expression(p1, p2):
@@ -155,10 +155,10 @@ class StartsWith(Expression):
 class ToLowercase(Expression):
     id: str = static("to_lowercase")
     name: str = static("To Lowercase")
-    suggestions: Sequence = static([
+    suggestions: Sequence = static(tuple([
         suggestions.parameter_count(1),
         suggestions.all_parameters(suggestions.string_like),
-    ])
+    ]))
 
     @staticmethod
     def to_sa_expression(p1):
@@ -169,10 +169,10 @@ class ToLowercase(Expression):
 class ExtractURIAuthority(Expression):
     id: str = static("extract_uri_authority")
     name: str = static("Extract URI Authority")
-    suggestions: Sequence = static([
+    suggestions: Sequence = static(tuple([
         suggestions.parameter_count(1),
         suggestions.parameter(1, suggestions.uri),
-    ])
+    ]))
 
     @staticmethod
     def to_sa_expression(p1):
