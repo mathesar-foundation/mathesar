@@ -21,13 +21,13 @@ export type FormInputElement = FormInputBaseElement | FormInputSelectElement;
 
 export type ConditionalSwitchElement = {
   type: 'switch',
-  switch: string,
+  variable: string,
   cases: Record<string, FormElement[]>
 };
 
 export type ConditionalIfElement = {
   type: 'if',
-  if: string,
+  variable: string,
   condition: 'eq' | 'neq',
   value: unknown,
   elements: FormElement[]

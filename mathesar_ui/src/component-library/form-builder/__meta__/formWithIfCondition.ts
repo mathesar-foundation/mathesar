@@ -21,7 +21,7 @@ const formConfig: FormConfiguration = {
       },
       {
         type: 'if',
-        if: 'restrictFieldSize',
+        variable: 'restrictFieldSize',
         condition: 'eq',
         value: true,
         elements: [{

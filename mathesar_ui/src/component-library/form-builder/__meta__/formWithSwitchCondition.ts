@@ -36,7 +36,7 @@ const formConfig: FormConfiguration = {
       },
       {
         type: 'switch',
-        switch: 'numberType',
+        variable: 'numberType',
         cases: {
           Integer: [{
             type: 'input',
