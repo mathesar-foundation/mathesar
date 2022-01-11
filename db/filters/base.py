@@ -4,7 +4,7 @@ TBD
 """
 
 from dataclasses import dataclass, field
-from typing import List
+#from typing import List
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 
@@ -31,7 +31,7 @@ def static(value):
 class Expression(ABC):
     id: str
     name: str
-    suggestions: List = static(None)
+    suggestions: Sequence = static(None)
     parameters: Sequence
 
     @property
@@ -56,7 +56,7 @@ class Expression(ABC):
 class ColumnReference(Expression):
     id: str = static("column_reference")
     name: str = static("Column Reference")
-    suggestions: List = static([
+    suggestions: Sequence = static([
         suggestions.parameter_count(1),
         suggestions.parameter(1, suggestions.column),
     ])
@@ -83,7 +83,7 @@ class List(Expression):
 class Empty(Expression):
     id: str = static("empty")
     name: str = static("Empty")
-    suggestions: List = static([
+    suggestions: Sequence = static([
         suggestions.returns(suggestions.boolean),
         suggestions.parameter_count(1),
     ])
@@ -97,7 +97,7 @@ class Empty(Expression):
 class Greater(Expression):
     id: str = static("greater")
     name: str = static("Greater")
-    suggestions: List = static([
+    suggestions: Sequence = static([
         suggestions.returns(suggestions.boolean),
         suggestions.parameter_count(2),
         suggestions.all_parameters(suggestions.comparable),
@@ -112,7 +112,7 @@ class Greater(Expression):
 class In(Expression):
     id: str = static("in")
     name: str = static("In")
-    suggestions: List = static([
+    suggestions: Sequence = static([
         suggestions.returns(suggestions.boolean),
         suggestions.parameter_count(2),
         suggestions.parameter(2, suggestions.array),
@@ -127,7 +127,7 @@ class In(Expression):
 class And(Expression):
     id: str = static("and")
     name: str = static("And")
-    suggestions: List = static([
+    suggestions: Sequence = static([
         suggestions.returns(suggestions.boolean),
     ])
 
@@ -140,7 +140,7 @@ class And(Expression):
 class StartsWith(Expression):
     id: str = static("starts_with")
     name: str = static("Starts With")
-    suggestions: List = static([
+    suggestions: Sequence = static([
         suggestions.returns(suggestions.boolean),
         suggestions.parameter_count(2),
         suggestions.all_parameters(suggestions.string_like),
@@ -155,7 +155,7 @@ class StartsWith(Expression):
 class ToLowercase(Expression):
     id: str = static("to_lowercase")
     name: str = static("To Lowercase")
-    suggestions: List = static([
+    suggestions: Sequence = static([
         suggestions.parameter_count(1),
         suggestions.all_parameters(suggestions.string_like),
     ])
@@ -169,7 +169,7 @@ class ToLowercase(Expression):
 class ExtractURIAuthority(Expression):
     id: str = static("extract_uri_authority")
     name: str = static("Extract URI Authority")
-    suggestions: List = static([
+    suggestions: Sequence = static([
         suggestions.parameter_count(1),
         suggestions.parameter(1, suggestions.uri),
     ])
@@ -182,6 +182,7 @@ class ExtractURIAuthority(Expression):
 # Enumeration of supported Expression subclasses; needed when parsing.
 supported_expressions = tuple(
     [
+        List,
         ColumnReference,
         Empty,
         Greater,
