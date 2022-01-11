@@ -12,7 +12,7 @@ from sqlalchemy_filters.exceptions import BadFilterFormat as SABadFilterFormat
 from sqlalchemy import column, not_, and_, or_, func
 from db.types.uri import URIFunction
 
-import suggestions
+from db.filters import suggestions
 
 
 # frozen=True provides immutability
