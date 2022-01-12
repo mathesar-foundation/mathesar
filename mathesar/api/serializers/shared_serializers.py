@@ -115,9 +115,9 @@ class AbstractDateTimeFormatValidator(ABC):
         pass
 
     def __call__(self, value, serializer_field):
-        self.date_format_validator(value)
+        self.date_format_validator(value, serializer_field)
 
-    def date_format_validator(self, value):
+    def date_format_validator(self, value, serializer_field):
         try:
             timestamp_with_tz_obj = arrow.get('2013-09-30T15:34:00.000-07:00')
             parsed_datetime_str = timestamp_with_tz_obj.format(value)
@@ -125,22 +125,22 @@ class AbstractDateTimeFormatValidator(ABC):
         except ValueError:
             raise serializers.ValidationError(f"{value} is not a valid format used for parsing a datetime.")
         else:
-            self.validate(datetime_object, value)
+            self.validate(datetime_object, value, serializer_field)
 
     @abstractmethod
-    def validate(self, datetime_obj, display_format):
+    def validate(self, datetime_obj, display_format, serializer_field):
         pass
 
 
 class TimestampWithTimeZoneFormatValidator(AbstractDateTimeFormatValidator):
 
-    def validate(self, datetime_obj, display_format):
+    def validate(self, datetime_obj, display_format, serializer_field):
         pass
 
 
 class TimestampWithoutTimeZoneFormatValidator(AbstractDateTimeFormatValidator):
 
-    def validate(self, datetime_obj, display_format):
+    def validate(self, datetime_obj, display_format, serializer_field):
         if 'z' in display_format.lower():
             raise serializers.ValidationError(
                 "Timestamp without timezone column cannot contain timezone display format")
@@ -148,7 +148,7 @@ class TimestampWithoutTimeZoneFormatValidator(AbstractDateTimeFormatValidator):
 
 class DateFormatValidator(AbstractDateTimeFormatValidator):
 
-    def validate(self, datetime_obj, display_format):
+    def validate(self, datetime_obj, display_format, serializer_field):
         date_obj = arrow.get('2013-09-30')
         if datetime_obj.time() != date_obj.time():
             raise serializers.ValidationError("Date column cannot contain time or timezone display format")
@@ -156,7 +156,7 @@ class DateFormatValidator(AbstractDateTimeFormatValidator):
 
 class TimeWithTimeZoneFormatValidator(AbstractDateTimeFormatValidator):
 
-    def validate(self, datetime_obj, display_format):
+    def validate(self, datetime_obj, display_format, serializer_field):
         time_only_format = 'HH:mm:ssZZ'
         time_str = arrow.get('2013-09-30T15:34:00.000-07:00').format(time_only_format)
         parsed_time_str = arrow.get(time_str, time_only_format)
@@ -166,10 +166,10 @@ class TimeWithTimeZoneFormatValidator(AbstractDateTimeFormatValidator):
 
 class TimeWithoutTimeZoneFormatValidator(TimeWithTimeZoneFormatValidator):
 
-    def validate(self, datetime_obj, display_format):
+    def validate(self, datetime_obj, display_format, serializer_field):
         if 'z' in display_format.lower():
             raise serializers.ValidationError("Time without timezone column cannot contain timezone display format")
-        return super().validate(datetime_obj, display_format)
+        return super().validate(datetime_obj, display_format, serializer_field)
 
 
 class DateDisplayOptionSerializer(OverrideRootPartialMixin, serializers.Serializer):
