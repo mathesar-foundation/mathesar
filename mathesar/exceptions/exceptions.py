@@ -8,12 +8,8 @@ from rest_framework.exceptions import APIException
 from mathesar.exceptions.error_codes import ErrorCodes
 
 ExceptionBody = namedtuple('ExceptionBody',
-                           [
-                               'code',
-                               'message',
-                               'field',
-                               'details'
-                           ], defaults=[None, None]
+                           ['code', 'message', 'field', 'details'],
+                           defaults=[None, None]
                            )
 
 
@@ -38,7 +34,8 @@ def get_default_api_exception(exc):
 class CustomApiException(APIException):
     def __init__(self, exception, error_code=ErrorCodes.NonClassifiedError.value, message=None, field=None,
                  details=None):
-        self.detail = [get_default_exception_detail(exception, error_code, message, field, details)._asdict()]
+        exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
+        self.detail = [exception_detail]
 
 
 class CustomValidationError(CustomApiException):

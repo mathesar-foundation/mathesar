@@ -206,7 +206,7 @@ def test_column_create_invalid_default(column_test_table, client):
     data = {"name": name, "type": "BOOLEAN", "default": "Not a boolean"}
     response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", data)
     assert response.status_code == 400
-    assert f'default "{data["default"]}" is invalid for type' in response.json()[0]
+    assert f'default "{data["default"]}" is invalid for type' in response.json()[0]['message']
 
 
 create_display_options_test_list = [

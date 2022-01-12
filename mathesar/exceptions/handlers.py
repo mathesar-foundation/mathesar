@@ -1,10 +1,12 @@
-from django.utils.encoding import force_str
+import warnings
+
+from rest_framework.exceptions import ValidationError
 from rest_framework.views import exception_handler
 from rest_framework_friendly_errors.mixins import FriendlyErrorMessagesMixin
-from rest_framework_friendly_errors.settings import FRIENDLY_EXCEPTION_DICT
 from sqlalchemy.exc import IntegrityError
 
 from db.types.exceptions import UnsupportedTypeException
+from mathesar.exceptions.api_exception_converters import validation_exception_converter, default_api_exception_converter
 from mathesar.exceptions.error_codes import ErrorCodes
 from mathesar.exceptions.exceptions import CustomApiException, CustomValidationError, get_default_exception_detail, \
     get_default_api_exception
@@ -14,6 +16,10 @@ exception_map = {
     IntegrityError: lambda exc: CustomApiException(exc, ErrorCodes.NonClassifiedIntegrityError.value),
     UnsupportedTypeException: lambda exc: CustomValidationError(
         [get_default_exception_detail(exc, ErrorCodes.UnsupportedType.value, message=None)])
+}
+
+non_spec_api_exception_converter_map = {
+    ValidationError: validation_exception_converter
 }
 
 
@@ -38,9 +44,10 @@ def mathesar_exception_handler(exc, context):
         # Check if conforms to the api spec
         if is_pretty(response):
             return response
-        error_code = FRIENDLY_EXCEPTION_DICT.get(exc.__class__.__name__)
-        error_data = {'code': error_code, 'message': force_str(exc), 'details': response.data.pop('detail', {})}
-        response.data = [{error_data}]
+        warnings.warn("Error Response does not conform to the api spec. Please handle the exception properly")
+        response_data = non_spec_api_exception_converter_map.get(exc.__class__,
+                                                                 default_api_exception_converter)(exc, response)
+        response.data = response_data
     return response
 
 
