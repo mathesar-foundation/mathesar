@@ -7,7 +7,7 @@ from sqlalchemy import text
 
 from mathesar import reflection
 from mathesar import models
-from mathesar.exceptions.error_codes import ErrorCodes
+from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models import Table, DataFile
 from db.tests.types import fixtures
 

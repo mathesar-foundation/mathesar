@@ -3,7 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
-from mathesar.exceptions.exceptions import InvalidTableError
+from mathesar.errors import InvalidTableError
 from mathesar.models import DataFile
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.data_files import DataFileSerializer

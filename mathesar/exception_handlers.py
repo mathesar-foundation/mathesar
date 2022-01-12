@@ -6,9 +6,9 @@ from rest_framework_friendly_errors.mixins import FriendlyErrorMessagesMixin
 from sqlalchemy.exc import IntegrityError
 
 from db.types.exceptions import UnsupportedTypeException
-from mathesar.exceptions.api_exception_converters import validation_exception_converter, default_api_exception_converter
-from mathesar.exceptions.error_codes import ErrorCodes
-from mathesar.exceptions.exceptions import CustomApiException, CustomValidationError, get_default_exception_detail, \
+from mathesar.api.exceptions.api_exception_converters import validation_exception_converter, default_api_exception_converter
+from mathesar.api.exceptions.error_codes import ErrorCodes
+from mathesar.api.exceptions.exceptions import CustomApiException, CustomValidationError, get_default_exception_detail, \
     get_default_api_exception
 
 exception_map = {
@@ -23,11 +23,7 @@ non_spec_api_exception_converter_map = {
 }
 
 
-class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
 
-    def build_pretty_errors(self, errors):
-        e = super().build_pretty_errors(errors)
-        return e['errors']
 
 
 def mathesar_exception_handler(exc, context):

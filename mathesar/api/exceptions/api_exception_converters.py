@@ -1,7 +1,7 @@
 from django.utils.encoding import force_str
 from rest_framework_friendly_errors.settings import FRIENDLY_EXCEPTION_DICT
 
-from mathesar.exceptions.error_codes import ErrorCodes
+from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
 def validation_exception_converter(exc, response):

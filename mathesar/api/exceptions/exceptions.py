@@ -5,16 +5,12 @@ from django.utils.encoding import force_str
 from rest_framework import status
 from rest_framework.exceptions import APIException
 
-from mathesar.exceptions.error_codes import ErrorCodes
+from mathesar.api.exceptions.error_codes import ErrorCodes
 
 ExceptionBody = namedtuple('ExceptionBody',
                            ['code', 'message', 'field', 'details'],
                            defaults=[None, None]
                            )
-
-
-class InvalidTableError(Exception):
-    pass
 
 
 def get_default_exception_detail(exception, error_code=ErrorCodes.NonClassifiedError.value,

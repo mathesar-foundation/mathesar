@@ -4,8 +4,8 @@ from django.core.files import File
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy import text
 
+from mathesar.errors import InvalidTableError
 from mathesar.models import DataFile, Schema
-from mathesar.exceptions.exceptions import InvalidTableError
 from mathesar.imports.csv import create_table_from_csv, get_sv_dialect, get_sv_reader
 from db.schemas.operations.create import create_schema
 from db.schemas.utils import get_schema_oid_from_name

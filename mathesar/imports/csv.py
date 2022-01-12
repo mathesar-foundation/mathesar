@@ -3,12 +3,12 @@ from io import TextIOWrapper
 import clevercsv as csv
 
 from mathesar.database.base import create_mathesar_engine
+from mathesar.errors import InvalidTableError
 from mathesar.models import Table
 from db.records.operations.insert import insert_records_from_csv
 from db.tables.operations.create import create_string_column_table
 from db.tables.operations.select import get_oid_from_table
 from db.tables.operations.drop import drop_table
-from mathesar.exceptions.exceptions import InvalidTableError
 from db import constants
 from psycopg2.errors import IntegrityError, DataError
 

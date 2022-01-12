@@ -7,7 +7,7 @@ from django.core.files import File
 
 from mathesar.imports import csv
 from mathesar.models import DataFile
-from mathesar.exceptions.exceptions import InvalidTableError
+from mathesar.errors import InvalidTableError
 
 
 def verify_data_file_data(data_file, data_file_dict):

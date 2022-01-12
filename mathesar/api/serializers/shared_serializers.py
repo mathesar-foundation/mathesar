@@ -1,6 +1,7 @@
 from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
+from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.database.types import MathesarTypeIdentifier, get_mathesar_type_from_db_type
 
 
@@ -88,7 +89,7 @@ class OverrideRootPartialMixin:
         return super().run_validation(*args, **kwargs)
 
 
-class CustomBooleanLabelSerializer(serializers.Serializer):
+class CustomBooleanLabelSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     TRUE = serializers.CharField()
     FALSE = serializers.CharField()
 
@@ -96,12 +97,12 @@ class CustomBooleanLabelSerializer(serializers.Serializer):
 DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY = 'mathesar_type'
 
 
-class BooleanDisplayOptionSerializer(OverrideRootPartialMixin, serializers.Serializer):
+class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
     input = serializers.ChoiceField(choices=[("dropdown", 1), ("checkbox", 2)])
     custom_labels = CustomBooleanLabelSerializer(required=False)
 
 
-class NumberDisplayOptionSerializer(OverrideRootPartialMixin, serializers.Serializer):
+class NumberDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
     show_as_percentage = serializers.BooleanField(default=False)
     locale = serializers.CharField(required=False)
 

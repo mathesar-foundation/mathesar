@@ -11,8 +11,8 @@ from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer
-from mathesar.exceptions.error_codes import ErrorCodes
-from mathesar.exceptions.exceptions import ExceptionBody, get_default_exception_detail, CustomApiException, \
+from mathesar.api.exceptions.error_codes import ErrorCodes
+from mathesar.api.exceptions.exceptions import ExceptionBody, get_default_exception_detail, CustomApiException, \
     CustomValidationError
 from mathesar.models import Table
 from mathesar.utils.tables import (

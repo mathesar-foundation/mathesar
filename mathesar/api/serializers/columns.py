@@ -3,6 +3,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 from rest_framework.settings import api_settings
 
+from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer, \
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY
 from mathesar.models import Column
@@ -21,7 +22,7 @@ class InputValueField(serializers.CharField):
         return value
 
 
-class TypeOptionSerializer(serializers.Serializer):
+class TypeOptionSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     length = serializers.IntegerField(required=False)
     precision = serializers.IntegerField(required=False)
     scale = serializers.IntegerField(required=False)
