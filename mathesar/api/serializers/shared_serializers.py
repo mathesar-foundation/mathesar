@@ -150,7 +150,7 @@ class DateFormatValidator(AbstractDateTimeFormatValidator):
 
     def validate(self, datetime_obj, display_format):
         date_obj = arrow.get('2013-09-30')
-        if datetime_obj.time() != date_obj:
+        if datetime_obj.time() != date_obj.time():
             raise serializers.ValidationError("Date column cannot contain time or timezone display format")
 
 
