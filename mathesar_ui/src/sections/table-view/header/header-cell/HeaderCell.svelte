@@ -98,7 +98,6 @@
               {columnsDataStore}
               {constraintsDataStore}
               on:close={closeMenu}
-              on:columnDelete
             />
           {:else if view === 'type'}
             <TypeOptions {column} {abstractTypeOfColumn} on:close={closeMenu}/>

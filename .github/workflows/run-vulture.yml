@@ -1,0 +1,17 @@
+name: Find unused code
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # We only want to run on external PRs, since internal PRs are covered by "push"
+    # This prevents this from running twice on internal PRs
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - name: Install Vulture
+        run: pip3 install vulture
+      - name: Run Vulture
+        run: vulture .

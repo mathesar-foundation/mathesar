@@ -283,13 +283,13 @@ export class TabList {
     const existingTabIndex = tabSubstance.findIndex((tabEntry) => tabEntry.id === oldTab.id);
     const existingTab = tabSubstance[existingTabIndex];
 
+    if (existingTab) {
+      this.remove(existingTab);
+    }
     this.add(tab, {
       position: existingTabIndex,
       status: existingTab && activeTabSubstance?.id === existingTab.id ? 'active' : 'inactive',
     });
-    if (existingTab) {
-      this.remove(existingTab);
-    }
   }
 
   destroy(): void {

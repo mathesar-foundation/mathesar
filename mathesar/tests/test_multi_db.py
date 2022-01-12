@@ -46,7 +46,7 @@ def multi_db_test_db_connection_string(multi_db_test_db_name):
     )
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="module", autouse=True)
 def multi_db_test_db(multi_db_test_db_connection_string):
     superuser_engine = _get_superuser_engine()
     with superuser_engine.connect() as conn:
@@ -68,7 +68,7 @@ def multi_db_test_db(multi_db_test_db_connection_string):
 
 
 @pytest.fixture(scope="module")
-def multi_db_engine(multi_db_test_db, multi_db_test_db_connection_string):
+def multi_db_engine(multi_db_test_db_connection_string):
     return create_engine(
         multi_db_test_db_connection_string,
         future=True,
