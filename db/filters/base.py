@@ -3,10 +3,7 @@
 TBD
 """
 
-from dataclasses import dataclass, field
-#from typing import List
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
 
 from sqlalchemy_filters.exceptions import BadFilterFormat as SABadFilterFormat
 from sqlalchemy import column, not_, and_, or_, func
@@ -15,24 +12,17 @@ from db.types.uri import URIFunction
 from db.filters import suggestions
 
 
-# frozen=True provides immutability
-def frozen_dataclass(f):
-    return dataclass(frozen=True)(f)
-
-
-def static(value):
-    """
-    Declares a static field on a dataclass.
-    """
-    return field(init=False, default=value)
-
-
-@frozen_dataclass
 class Expression(ABC):
-    id: str
-    name: str
-    suggestions: Sequence = static(None)
-    parameters: Sequence
+    id = None
+    name = None
+    suggestions = None
+
+    def __init__(self, parameters):
+        if self.id is None:
+            raise ValueError('Expression subclasses must define an ID.')
+        if self.name is None:
+            raise ValueError('Expression subclasses must define a name.')
+        self.parameters = parameters
 
     @property
     def referenced_columns(self):
@@ -52,15 +42,15 @@ class Expression(ABC):
         return None
 
 
-@frozen_dataclass
 class ColumnReference(Expression):
-    id: str = static("column_reference")
-    name: str = static("Column Reference")
-    suggestions: Sequence = static(tuple([
+    id = "column_reference"
+    name = "Column Reference"
+    suggestions = tuple([
         suggestions.parameter_count(1),
         suggestions.parameter(1, suggestions.column),
-    ]))
+    ])
 
+    @property
     def column(self):
         return self.parameters[0]
 
@@ -69,110 +59,102 @@ class ColumnReference(Expression):
         return column(p)
 
 
-@frozen_dataclass
 class List(Expression):
-    id: str = static("list")
-    name: str = static("List")
+    id = "list"
+    name = "List"
 
     @staticmethod
     def to_sa_expression(*ps):
         return list(ps)
 
 
-@frozen_dataclass
 class Empty(Expression):
-    id: str = static("empty")
-    name: str = static("Empty")
-    suggestions: Sequence = static(tuple([
+    id = "empty"
+    name = "Empty"
+    suggestions = tuple([
         suggestions.returns(suggestions.boolean),
         suggestions.parameter_count(1),
-    ]))
+    ])
 
     @staticmethod
     def to_sa_expression(p):
         return p.is_(None)
 
 
-@frozen_dataclass
 class Greater(Expression):
-    id: str = static("greater")
-    name: str = static("Greater")
-    suggestions: Sequence = static(tuple([
+    id = "greater"
+    name = "Greater"
+    suggestions = tuple([
         suggestions.returns(suggestions.boolean),
         suggestions.parameter_count(2),
         suggestions.all_parameters(suggestions.comparable),
-    ]))
+    ])
 
     @staticmethod
     def to_sa_expression(p1, p2):
         return p1.gt(p2)
 
 
-@frozen_dataclass
 class In(Expression):
-    id: str = static("in")
-    name: str = static("In")
-    suggestions: Sequence = static(tuple([
+    id = "in"
+    name = "In"
+    suggestions = tuple([
         suggestions.returns(suggestions.boolean),
         suggestions.parameter_count(2),
         suggestions.parameter(2, suggestions.array),
-    ]))
+    ])
 
     @staticmethod
     def to_sa_expression(p1, p2):
         return p1.in_(p2)
 
 
-@frozen_dataclass
 class And(Expression):
-    id: str = static("and")
-    name: str = static("And")
-    suggestions: Sequence = static(tuple([
+    id = "and"
+    name = "And"
+    suggestions = tuple([
         suggestions.returns(suggestions.boolean),
-    ]))
+    ])
 
     @staticmethod
     def to_sa_expression(*ps):
         return and_(*ps)
 
 
-@frozen_dataclass
 class StartsWith(Expression):
-    id: str = static("starts_with")
-    name: str = static("Starts With")
-    suggestions: Sequence = static(tuple([
+    id = "starts_with"
+    name = "Starts With"
+    suggestions = tuple([
         suggestions.returns(suggestions.boolean),
         suggestions.parameter_count(2),
         suggestions.all_parameters(suggestions.string_like),
-    ]))
+    ])
 
     @staticmethod
     def to_sa_expression(p1, p2):
         return p1.like(f"{p2}%")
 
 
-@frozen_dataclass
 class ToLowercase(Expression):
-    id: str = static("to_lowercase")
-    name: str = static("To Lowercase")
-    suggestions: Sequence = static(tuple([
+    id = "to_lowercase"
+    name = "To Lowercase"
+    suggestions = tuple([
         suggestions.parameter_count(1),
         suggestions.all_parameters(suggestions.string_like),
-    ]))
+    ])
 
     @staticmethod
     def to_sa_expression(p1):
         return func.lower(p1)
 
 
-@frozen_dataclass
 class ExtractURIAuthority(Expression):
-    id: str = static("extract_uri_authority")
-    name: str = static("Extract URI Authority")
-    suggestions: Sequence = static(tuple([
+    id = "extract_uri_authority"
+    name = "Extract URI Authority"
+    suggestions = tuple([
         suggestions.parameter_count(1),
         suggestions.parameter(1, suggestions.uri),
-    ]))
+    ])
 
     @staticmethod
     def to_sa_expression(p1):
@@ -182,8 +164,8 @@ class ExtractURIAuthority(Expression):
 # Enumeration of supported Expression subclasses; needed when parsing.
 supported_expressions = tuple(
     [
-        List,
         ColumnReference,
+        List,
         Empty,
         Greater,
         In,
