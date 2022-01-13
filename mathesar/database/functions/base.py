@@ -1,6 +1,6 @@
 """
-This package defines the DB Function abstract class and its subclasses. These subclasses represent
-functions that have identifiers, display names and hints, and their instances
+This namespace defines the DB Function abstract class and its subclasses. These subclasses
+represent functions that have identifiers, display names and hints, and their instances
 hold parameters. Each function subclass defines how its instance can be converted into an
 SQLAlchemy expression.
 
@@ -8,7 +8,8 @@ Hints hold information about what kind of input the function might expect and wh
 can be expected from it. This is used to provide interface information without constraining its
 user.
 
-These functions might be used, for example, to define a filter for a table.
+These functions might be used, for example, to define a filter for a table and to tell the
+frontend what it can use when constructing that filter.
 """
 
 from abc import ABC, abstractmethod
