@@ -1,4 +1,2 @@
-
-
 class InvalidTableError(Exception):
     pass

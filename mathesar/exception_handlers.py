@@ -6,7 +6,8 @@ from rest_framework_friendly_errors.mixins import FriendlyErrorMessagesMixin
 from sqlalchemy.exc import IntegrityError
 
 from db.types.exceptions import UnsupportedTypeException
-from mathesar.api.exceptions.api_exception_converters import validation_exception_converter, default_api_exception_converter
+from mathesar.api.exceptions.api_exception_converters import validation_exception_converter, \
+    default_api_exception_converter
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.exceptions import CustomApiException, CustomValidationError, get_default_exception_detail, \
     get_default_api_exception
@@ -15,15 +16,12 @@ exception_map = {
     # Temporary handlers, must be replaced with proper api exceptions
     IntegrityError: lambda exc: CustomApiException(exc, ErrorCodes.NonClassifiedIntegrityError.value),
     UnsupportedTypeException: lambda exc: CustomValidationError(
-        [get_default_exception_detail(exc, ErrorCodes.UnsupportedType.value, message=None)])
+            [get_default_exception_detail(exc, ErrorCodes.UnsupportedType.value, message=None)])
 }
 
 non_spec_api_exception_converter_map = {
     ValidationError: validation_exception_converter
 }
-
-
-
 
 
 def mathesar_exception_handler(exc, context):

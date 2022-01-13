@@ -524,7 +524,6 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_email_typ
     }
     response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    print(response.json)
     assert "Invalid type" in response.json()[0]['message']
 
 
@@ -714,7 +713,8 @@ def test_table_create_with_same_name(client, schema):
     response = client.post('/api/v0/tables/', body)
     response_error = response.json()
     assert response.status_code == 400
-    assert response_error[0] == f"Relation {table_name} already exists in schema {schema.id}"
+    assert response_error[0]['code'] == ErrorCodes.DuplicateTableError.value
+    assert response_error[0]['message'] == f"Relation {table_name} already exists in schema {schema.id}"
 
 
 def test_table_partial_update(create_table, client):
