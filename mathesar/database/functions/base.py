@@ -51,8 +51,8 @@ class Function(ABC):
 
 
 class ColumnReference(Function):
-    id = "column_reference"
-    name = "Column Reference"
+    id = 'column_reference'
+    name = 'Column Reference'
     hints = tuple([
         hints.parameter_count(1),
         hints.parameter(1, hints.column),
@@ -68,8 +68,8 @@ class ColumnReference(Function):
 
 
 class List(Function):
-    id = "list"
-    name = "List"
+    id = 'list'
+    name = 'List'
 
     @staticmethod
     def to_sa_expression(*ps):
@@ -77,8 +77,8 @@ class List(Function):
 
 
 class Empty(Function):
-    id = "empty"
-    name = "Empty"
+    id = 'empty'
+    name = 'Empty'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(1),
@@ -89,9 +89,35 @@ class Empty(Function):
         return p.is_(None)
 
 
+class Not(Function):
+    id = 'not'
+    name = 'Not'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(1),
+    ])
+
+    @staticmethod
+    def to_sa_expression(*p):
+        return not_(*p)
+        
+
+class Equal(Function):
+    id = 'equal'
+    name = 'Equal'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+    ])
+
+    @staticmethod
+    def to_sa_expression(p1, p2):
+        return p1.eq(p2)
+
+
 class Greater(Function):
-    id = "greater"
-    name = "Greater"
+    id = 'greater'
+    name = 'Greater'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
@@ -104,8 +130,8 @@ class Greater(Function):
 
 
 class In(Function):
-    id = "in"
-    name = "In"
+    id = 'in'
+    name = 'In'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
@@ -118,8 +144,8 @@ class In(Function):
 
 
 class And(Function):
-    id = "and"
-    name = "And"
+    id = 'and'
+    name = 'And'
     hints = tuple([
         hints.returns(hints.boolean),
     ])
@@ -129,9 +155,21 @@ class And(Function):
         return and_(*ps)
 
 
+class Or(Function):
+    id = 'or'
+    name = 'Or'
+    hints = tuple([
+        hints.returns(hints.boolean),
+    ])
+
+    @staticmethod
+    def to_sa_expression(*ps):
+        return or_(*ps)
+
+
 class StartsWith(Function):
-    id = "starts_with"
-    name = "Starts With"
+    id = 'starts_with'
+    name = 'Starts With'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
@@ -140,12 +178,12 @@ class StartsWith(Function):
 
     @staticmethod
     def to_sa_expression(p1, p2):
-        return p1.like(f"{p2}%")
+        return p1.like(f'{p2}%')
 
 
 class ToLowercase(Function):
-    id = "to_lowercase"
-    name = "To Lowercase"
+    id = 'to_lowercase'
+    name = 'To Lowercase'
     hints = tuple([
         hints.parameter_count(1),
         hints.all_parameters(hints.string_like),
@@ -157,8 +195,8 @@ class ToLowercase(Function):
 
 
 class ExtractURIAuthority(Function):
-    id = "extract_uri_authority"
-    name = "Extract URI Authority"
+    id = 'extract_uri_authority'
+    name = 'Extract URI Authority'
     hints = tuple([
         hints.parameter_count(1),
         hints.parameter(1, hints.uri),
