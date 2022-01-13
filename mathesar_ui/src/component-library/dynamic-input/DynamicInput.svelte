@@ -3,12 +3,16 @@
   import StringInput from './StringInput..svelte';
   import BooleanInput from './BooleanInput.svelte';
   import NumberInput from '../number-input/NumberInput.svelte';
-  import type { DynamicInputType, DynamicInputElementType } from './types.d';
+  import type {
+    DynamicInputDataType,
+    DynamicInputInterfaceType,
+    DynamicInputSelectElement,
+  } from './types.d';
 
   /**
    * Type of input, one of: 'boolean', 'integer', 'float', 'string', 'date', 'datetime', 'time'
    */
-  export let type: DynamicInputType;
+  export let dataType: DynamicInputDataType;
 
   /**
    * Value of input. Depends on type.
@@ -20,28 +24,28 @@
    * boolean -> checkbox, toggle, select. Default: checkbox.<br/>
    * string -> text, textarea, select. Default: text.
    */
-  export let inputType: DynamicInputElementType = undefined;
+  export let interfaceType: DynamicInputInterfaceType = undefined;
 
   let enumValues: unknown[] = undefined;
 
   /**
-   * Applies when inputType is select. List of values to allow for value.
+   * Applies when interfaceType is select. List of values to allow for value.
    */
   export { enumValues as enum };
 
   /**
-   * Applies when inputType is select. Additional configuration for options
+   * Applies when interfaceType is select. Additional configuration for options
    * that are displayed.
    */
-  export let options = undefined;
+  export let options: DynamicInputSelectElement['options'] = undefined;
 </script>
 
-{#if enumValues || inputType === 'select'}
-  <EnumInput {...$$restProps} {enumValues} {type} {options} bind:value/>
-{:else if type === 'boolean'}
-  <BooleanInput {...$$restProps} {inputType} bind:value/>
-{:else if type === 'integer' || type === 'float'}
-  <NumberInput {...$$restProps} isInteger={type === 'integer'} bind:value/>
-{:else if type === 'string'}
-  <StringInput {...$$restProps} {inputType} bind:value/>
+{#if enumValues || interfaceType === 'select'}
+  <EnumInput {...$$restProps} {enumValues} {dataType} {options} bind:value/>
+{:else if dataType === 'boolean'}
+  <BooleanInput {...$$restProps} {interfaceType} bind:value/>
+{:else if dataType === 'integer' || dataType === 'float'}
+  <NumberInput {...$$restProps} isInteger={dataType === 'integer'} bind:value/>
+{:else if dataType === 'string'}
+  <StringInput {...$$restProps} {interfaceType} bind:value/>
 {/if}

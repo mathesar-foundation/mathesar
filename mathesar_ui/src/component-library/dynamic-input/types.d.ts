@@ -1,13 +1,13 @@
 import type { SelectOption } from '@mathesar-component-library-dir/select/Select.d';
 
-export type DynamicInputType =
+export type DynamicInputDataType =
   'boolean' | 'integer' | 'float' | 'string' | 'date' | 'datetime' | 'time';
 
-export type DynamicInputElementType =
+export type DynamicInputInterfaceType =
   'text' | 'textarea' | 'number' | 'checkbox' | 'toggle' | 'select';
 
 export interface DynamicInputSelectElement {
-  inputType: 'select',
+  interfaceType: 'select',
   options?: Record<string, {
     label?: string,
   }>

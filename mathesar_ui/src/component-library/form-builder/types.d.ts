@@ -1,17 +1,17 @@
 import type { Writable } from 'svelte/store';
-import type { DynamicInputType } from '@mathesar-component-library-dir/dynamic-input/types.d';
+import type { DynamicInputDataType } from '@mathesar-component-library-dir/dynamic-input/types.d';
 
 export type FormInputDataType = boolean | string | number | undefined;
 
 export interface FormInputBaseElement {
   type: 'input',
-  inputType?: string,
+  interfaceType?: string,
   variable: string,
   label?: string,
 }
 
 export interface FormInputSelectElement extends FormInputBaseElement {
-  inputType: 'select',
+  interfaceType: 'select',
   options: Record<string, {
     label?: string,
   }>
@@ -47,7 +47,7 @@ export interface FormLayout {
 
 export interface FormConfiguration {
   variables: Record<string, {
-    type: DynamicInputType,
+    type: DynamicInputDataType,
     default: FormInputDataType,
     enum?: unknown[]
   }>,

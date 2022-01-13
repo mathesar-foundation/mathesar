@@ -54,13 +54,13 @@ const formConfig: FormConfiguration = {
       {
         type: 'input',
         variable: 'stringTextAreaValue',
-        inputType: 'textarea',
+        interfaceType: 'textarea',
         label: 'String value: TextArea',
       },
       {
         type: 'input',
         variable: 'enumValue',
-        inputType: 'select',
+        interfaceType: 'select',
         label: 'Enum value',
       },
     ],
