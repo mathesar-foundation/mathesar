@@ -30,6 +30,9 @@
   // Total number of pages.
   export let pageCount = 0;
 
+  // ARIA Label for component 
+  export let ariaLabel: string = "Pagination";
+
   $: pageCount = Math.ceil(total / pageSize);
   $: pageInfo = calculatePages(currentPage, pageCount);
 
@@ -44,7 +47,7 @@
   }
 </script>
 
-<nav role="navigation" aria-label="Pagination Navigation">
+<nav role="navigation" aria-label={ariaLabel}>
   <ul class="pagination">
     {#if pageCount > 1}
       <li>
