@@ -9,6 +9,7 @@ router.register(r'tables', viewsets.TableViewSet, basename='table')
 router.register(r'schemas', viewsets.SchemaViewSet, basename='schema')
 router.register(r'databases', viewsets.DatabaseViewSet, basename='database')
 router.register(r'data_files', viewsets.DataFileViewSet, basename='data-file')
+router.register(r'functions', viewsets.DbFunctionViewSet, basename='functions')
 
 table_router = routers.NestedSimpleRouter(router, r'tables', lookup='table')
 table_router.register(r'records', viewsets.RecordViewSet, basename='table-record')

@@ -5,3 +5,4 @@ from mathesar.api.viewsets.databases import DatabaseViewSet # noqa
 from mathesar.api.viewsets.records import RecordViewSet # noqa
 from mathesar.api.viewsets.schemas import SchemaViewSet # noqa
 from mathesar.api.viewsets.tables import TableViewSet # noqa
+from mathesar.api.viewsets.functions import DbFunctionViewSet # noqa
