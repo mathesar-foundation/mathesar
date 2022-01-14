@@ -9,7 +9,7 @@ ul.pagination {
   li {
     margin: 0 2px;
 
-    a, span {
+    a, button:focus {
       padding: 5px 3px;
       min-width: 26px;
       display: inline-block;
@@ -24,7 +24,7 @@ ul.pagination {
       background: #fff;
     }
 
-    span {
+    button {
       .ellipsis {
         color: #afafaf;
       }

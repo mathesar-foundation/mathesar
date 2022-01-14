@@ -51,10 +51,10 @@
   <ul class="pagination">
     {#if pageCount > 1}
       <li>
-        <span tabindex="0" role="link" aria-label="Previous"
+        <button tabindex="0" role="link" aria-label="Previous"
               on:click={(e) => setPage(e, currentPage - 1)}>
           <Icon data={faAngleLeft}/>
-        </span>
+        </button>
       </li>
     {/if}
 
@@ -66,19 +66,19 @@
             1
           </a>
         {:else}
-          <span tabindex="0" role="link" aria-label= "Goto Page 1" class="page"
+          <button tabindex="0" role="link" aria-label= "Goto Page 1" class="page"
                 on:click={(e) => setPage(e, 1)}>
             1
-          </span>
+          </button>
         {/if}
       </li>
       {#if pageInfo.start > 2}
         <li>
-          <span tabindex="0" role="link" aria-label="Goto Page {pageInfo.prevPageWindow}" 
+          <button tabindex="0" role="link" aria-label="Goto Page {pageInfo.prevPageWindow}" 
                 on:click={(e) => setPage(e, pageInfo.prevPageWindow)}>
             <Icon class="ellipsis" data={faEllipsisH}/>
             <Icon class="arrow" data={faAngleDoubleLeft}/>
-          </span>
+          </button>
         </li>
       {/if}
     {/if}
@@ -93,11 +93,11 @@
             {_page}
           </a>
         {:else}
-          <span tabindex="0" role="link" aria-label="{currentPage === _page
+          <button tabindex="0" role="link" aria-label="{currentPage === _page
                 ? `Current Page, Page ${currentPage}` : `Goto Page ${_page}`}"
                 class="page" on:click={(e) => setPage(e, _page)} aria-selected={currentPage === _page}>
             {_page}
-          </span>
+          </button>
         {/if}
       </li>
     {/each}
@@ -105,11 +105,11 @@
     {#if pageInfo.end < pageCount}
       {#if pageInfo.end < pageCount - 1}
         <li>
-          <span tabindex="0" role="link" aria-label="Goto Page {pageInfo.nextPageWindow}" 
+          <button tabindex="0" role="link" aria-label="Goto Page {pageInfo.nextPageWindow}" 
                 on:click={(e) => setPage(e, pageInfo.nextPageWindow)}>
             <Icon class="ellipsis" data={faEllipsisH}/>
             <Icon class="arrow" data={faAngleDoubleRight}/>
-          </span>
+          </button>
         </li>
       {/if}
       <li class:active={currentPage === pageInfo.end}>
@@ -120,19 +120,19 @@
             {pageCount}
           </a>
         {:else}
-          <span tabindex="0" role="link" aria-label="Goto Page {pageCount}" 
+          <button tabindex="0" role="link" aria-label="Goto Page {pageCount}" 
                 on:click={(e) => setPage(e, pageCount)}>
             {pageCount}
-          </span>
+          </button>
         {/if}
       </li>
     {/if}
 
     {#if pageCount > 1}
       <li>
-        <span tabindex="0" role="link" aria-label="Next" on:click={(e) => setPage(e, currentPage + 1)}>
+        <button tabindex="0" role="link" aria-label="Next" on:click={(e) => setPage(e, currentPage + 1)}>
           <Icon data={faAngleRight}/>
-        </span>
+        </button>
       </li>
     {/if}
   </ul>
