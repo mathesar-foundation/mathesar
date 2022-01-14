@@ -132,7 +132,3 @@
     </label>
   {/if}
 </div>
-
-<style global lang="scss">
-  @import "FileUpload.scss";
-</style>

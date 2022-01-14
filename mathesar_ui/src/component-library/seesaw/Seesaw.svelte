@@ -15,8 +15,3 @@
     </div>
   </div>
 </div>
-
-<style global lang="scss">
-  @import "Seesaw.scss";
-</style>
-

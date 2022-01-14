@@ -63,7 +63,3 @@
     disabled={isProcessing || !canProceed}
   />
 </div>
-
-<style global lang='scss'>
-  @import './CancelOrProceedButtonPair.scss';
-</style>

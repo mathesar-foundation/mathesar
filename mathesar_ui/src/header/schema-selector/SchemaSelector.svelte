@@ -85,7 +85,9 @@
       </div>
     
       <div class="schemas">
-        <TextInput placeholder="Search schemas" bind:value={schemaFilter}/>
+        <div class="schema-searchbox">
+          <TextInput placeholder="Search schemas" bind:value={schemaFilter}/>
+        </div>
         <div class="section-header">
           Schemas ({displayedSchemas.length})
         </div>

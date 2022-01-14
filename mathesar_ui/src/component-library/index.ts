@@ -19,8 +19,10 @@ export { default as CancelOrProceedButtonPair } from './cancel-or-proceed-button
 export { default as Checkbox } from './checkbox/Checkbox.svelte';
 export { default as CheckboxGroup } from './checkbox-group/CheckboxGroup.svelte';
 export { default as Icon } from './icon/Icon.svelte';
+export { InputGroup, InputGroupText } from './input-group';
 export { default as Label } from './label/Label.svelte';
 export { default as LabeledInput } from './labeled-input/LabeledInput.svelte';
+export { default as NumberInput } from './number-input/NumberInput.svelte';
 export { default as Progress } from './progress/Progress.svelte';
 export { default as Radio } from './radio/Radio.svelte';
 export { default as RadioGroup } from './radio-group/RadioGroup.svelte';
@@ -46,3 +48,4 @@ export { default as Tree } from './tree/Tree.svelte';
 export * from './confirmation';
 export * from './modal';
 export * from './toast';
+export * from './form-builder';

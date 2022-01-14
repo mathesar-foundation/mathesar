@@ -134,7 +134,3 @@
     {/if}
   </ul>
 </nav>
-
-<style global lang="scss">
-  @import "Pagination.scss";
-</style>

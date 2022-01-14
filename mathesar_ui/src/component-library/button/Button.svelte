@@ -30,7 +30,3 @@
         on:keydown>
   <slot></slot>
 </button>
-
-<style global lang="scss">
-  @import "Button.scss";
-</style>

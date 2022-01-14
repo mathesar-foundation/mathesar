@@ -34,7 +34,3 @@
     {/each}
   </ul>
 </fieldset>
-
-<style global lang="scss">
-  @import "FieldsetGroup.scss"
-</style>
