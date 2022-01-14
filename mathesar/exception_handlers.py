@@ -9,13 +9,13 @@ from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.exceptions.api_exception_converters import validation_exception_converter, \
     default_api_exception_converter
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.api.exceptions.exceptions import CustomApiException, CustomValidationError, get_default_exception_detail, \
+from mathesar.api.exceptions.exceptions import CustomApiException, GenericValidationError, get_default_exception_detail, \
     get_default_api_exception
 
 exception_map = {
     # Temporary handlers, must be replaced with proper api exceptions
     IntegrityError: lambda exc: CustomApiException(exc, ErrorCodes.NonClassifiedIntegrityError.value),
-    UnsupportedTypeException: lambda exc: CustomValidationError(
+    UnsupportedTypeException: lambda exc: GenericValidationError(
             [get_default_exception_detail(exc, ErrorCodes.UnsupportedType.value, message=None)])
 }
 

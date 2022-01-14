@@ -10,7 +10,7 @@ from sqlalchemy.exc import DataError, IntegrityError
 from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.exceptions import ExceptionBody, get_default_exception_detail, CustomApiException, \
-    CustomValidationError
+    GenericValidationError
 from mathesar.api.filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer
@@ -72,19 +72,10 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     @action(methods=['post'], detail=True)
     def previews(self, request, pk=None):
         table = self.get_object()
-        serializer = TablePreviewSerializer(data=request.data)
+        serializer = TablePreviewSerializer(data=request.data, context={"request": request, 'table': table})
         serializer.is_valid(raise_exception=True)
         columns_field_key = "columns"
         columns = serializer.data[columns_field_key]
-
-        column_names = [col["name"] for col in columns]
-        if not len(column_names) == len(set(column_names)):
-            raise CustomValidationError([ExceptionBody(ErrorCodes.DistinctColumnNameRequired.value,
-                                                       "Column names must be distinct", 'columns')])
-        if not len(columns) == len(table.sa_columns):
-            raise CustomValidationError([ExceptionBody(ErrorCodes.ColumnSizeMismatch.value,
-                                                       "Incorrect number of columns in request.", 'columns')])
-
         table_data = TableSerializer(table, context={"request": request}).data
         try:
             preview_records = table.get_preview(columns)
@@ -93,7 +84,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
                 exception_details = ExceptionBody(ErrorCodes.InvalidTypeCast.value,
                                                   "Invalid type cast requested.",
                                                   field='columns')
-                raise CustomValidationError([exception_details])
+                raise GenericValidationError([exception_details])
             else:
                 raise CustomApiException(e, ErrorCodes.NonClassifiedIntegrityError.value)
         except UnsupportedTypeException as e:
@@ -101,7 +92,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
                                                              ErrorCodes.UnsupportedType.value,
                                                              message=None,
                                                              field='columns')
-            raise CustomValidationError([exception_details])
+            raise GenericValidationError([exception_details])
         except Exception as e:
             raise CustomApiException(e)
         table_data.update(

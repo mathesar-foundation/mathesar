@@ -3,7 +3,7 @@ from typing import List
 
 from django.utils.encoding import force_str
 from rest_framework import status
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, ValidationError as DrfValidationError
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
@@ -35,6 +35,16 @@ class CustomApiException(APIException):
         self.status_code = status_code
 
 
+class ValidationError(DrfValidationError):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_code = 'invalid'
+
+    def __init__(self, exception, error_code=ErrorCodes.NonClassifiedError.value, message=None, field=None,
+                 details=None):
+        exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
+        self.detail = exception_detail
+
+
 class ProgrammingException(CustomApiException):
 
     def __init__(self, exception, error_code=ErrorCodes.ProgrammingError.value, message=None, field=None,
@@ -49,17 +59,37 @@ class DuplicateTableException(CustomApiException):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class MultipleDataFileException(CustomApiException):
+class MultipleDataFileException(ValidationError):
 
     def __init__(self, error_code=ErrorCodes.MultipleDataFiles.value,
                  message="Multiple data files are unsupported.",
                  field=None,
                  details=None,
-                 status_code=status.HTTP_400_BAD_REQUEST):
-        super().__init__(None, error_code, message, field, details, status_code)
+                 ):
+        super().__init__(None, error_code, message, field, details)
 
 
-class CustomValidationError(CustomApiException):
+class DistinctColumnRequiredException(ValidationError):
+
+    def __init__(self, error_code=ErrorCodes.DistinctColumnNameRequired.value,
+                 message="Column names must be distinct",
+                 field=None,
+                 details=None,
+                 ):
+        super().__init__(None, error_code, message, field, details)
+
+
+class ColumnSizeMismatchException(ValidationError):
+
+    def __init__(self, error_code=ErrorCodes.DistinctColumnNameRequired.value,
+                 message="Incorrect number of columns in request.",
+                 field=None,
+                 details=None,
+                 ):
+        super().__init__(None, error_code, message, field, details)
+
+
+class GenericValidationError(CustomApiException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_code = 'invalid'
 
