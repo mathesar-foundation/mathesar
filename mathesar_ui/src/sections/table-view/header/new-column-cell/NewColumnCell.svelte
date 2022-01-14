@@ -8,6 +8,8 @@
     Dropdown,
     TextInput,
     Icon,
+    InputGroup,
+    InputGroupText,
   } from '@mathesar-component-library';
   import {
     DEFAULT_ROW_RIGHT_PADDING,
@@ -59,9 +61,10 @@
     <svelte:fragment slot="content">
       <div class="new-column-dropdown" style="width:250px">
         <div class="grid">
-          <TextInput bind:value={columnName}>
-            <svelte:fragment slot="prepend">Name:</svelte:fragment>
-          </TextInput>
+          <InputGroup>
+            <InputGroupText>Name</InputGroupText>
+            <TextInput bind:value={columnName}/>
+          </InputGroup>
           <Button appearance="primary" disabled={!columnName?.trim() || isDuplicateColumn} on:click={() => addColumn()}>
             Add
           </Button>

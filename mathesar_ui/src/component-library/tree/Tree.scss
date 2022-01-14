@@ -1,11 +1,7 @@
 .tree {
-  >.search.text-input {
-    margin: 0px 15px 10px;
+  >.search-box {
+    padding: 0px 15px 10px;
     background: #f9fafdcc;
-
-    .search-icon {
-      color: #858aa3cc;
-    }
   }
 
   >.empty {

@@ -85,7 +85,3 @@
     </div>
   </div>
 {/if}
-
-<style global lang="scss">
-  @import "Modal.scss";
-</style>

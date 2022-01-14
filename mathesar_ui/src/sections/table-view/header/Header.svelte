@@ -17,15 +17,12 @@
   import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
-  import DeleteColumnModal from './DeleteColumnModal.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
   let columnsDataStore: ColumnsDataStore;
   let constraintsDataStore: ConstraintsDataStore;
   let display: Display;
   let meta: Meta;
-  let isDeleteModalOpen = false;
-  let column: Column;
 
   $: ({
     columnsDataStore, meta, display, constraintsDataStore,
@@ -73,11 +70,6 @@
   function addColumn(e: CustomEvent<Partial<Column>>) {
     void columnsDataStore.add(e.detail);
   }
-
-  function openColumnModal(_column: Column) {
-    column = _column;
-    isDeleteModalOpen = true;
-  }
 </script>
 
 <div bind:this={headerRef} class="header">
@@ -91,13 +83,8 @@
       {columnsDataStore}
       {constraintsDataStore}
       columnPosition={getColumnPosition($columnPositionMap, column.name)}
-      on:columnDelete={() => openColumnModal(column)}
     />
   {/each}
 
   <NewColumnCell {display} columns={$columnsDataStore.columns} on:addColumn={addColumn}/>
-
-  {#if isDeleteModalOpen}
-    <DeleteColumnModal bind:isOpen={isDeleteModalOpen} {columnsDataStore} {column}/>
-  {/if}
 </div>

@@ -1,9 +1,10 @@
+import json
 from datetime import date, timedelta
 
 import pytest
 from unittest.mock import patch
 from django.core.cache import cache
-from sqlalchemy import Column, Integer, String, MetaData, select, Boolean
+from sqlalchemy import Column, Integer, String, MetaData, select, Boolean, TIMESTAMP
 from sqlalchemy import Table as SATable
 
 from db.columns.operations.alter import alter_column_type
@@ -47,10 +48,12 @@ def column_test_table_with_service_layer_options(patent_schema):
         Column("mycolumn0", Integer, primary_key=True),
         Column("mycolumn1", Boolean),
         Column("mycolumn2", Integer),
+        Column("mycolumn4", TIMESTAMP),
     ]
     column_data_list = [{},
                         {'display_options': {'input': "dropdown", 'use_custom_labels': False}},
-                        {'display_options': {"show_as_percentage": True, "locale": "en_US"}}]
+                        {'display_options': {"show_as_percentage": True, "locale": "en_US"}},
+                        {'display_options': {'format': 'YYYY-MM-DD hh:mm'}}]
     db_table = SATable(
         "anewtable",
         MetaData(bind=engine),
@@ -83,7 +86,10 @@ def test_column_list(column_test_table, client):
             'nullable': False,
             'primary_key': True,
             'display_options': None,
-            'default': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
+            'default': {
+                'value': """nextval('"Patents".anewtable_mycolumn0_seq'::regclass)""",
+                'is_dynamic': True
+            },
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
                 'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
@@ -113,7 +119,10 @@ def test_column_list(column_test_table, client):
             'nullable': True,
             'primary_key': False,
             'display_options': None,
-            'default': 5,
+            'default': {
+                'value': 5,
+                'is_dynamic': False,
+            },
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
                 'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
@@ -133,7 +142,9 @@ def test_column_list(column_test_table, client):
                 'DOUBLE PRECISION', 'FLOAT', 'INTEGER', 'INTERVAL',
                 'MATHESAR_TYPES.EMAIL', 'MATHESAR_TYPES.MONEY',
                 'MATHESAR_TYPES.URI', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT',
-                'TIME WITH TIME ZONE', 'TIME WITHOUT TIME ZONE', 'VARCHAR',
+                'TIME WITH TIME ZONE', 'TIME WITHOUT TIME ZONE',
+                'TIMESTAMP WITH TIME ZONE', 'TIMESTAMP WITHOUT TIME ZONE',
+                'VARCHAR',
             ],
             'default': None,
         }
@@ -165,24 +176,29 @@ def test_column_create(column_test_table, client):
 
 
 create_default_test_list = [
-    ("BOOLEAN", True, True),
-    ("INTERVAL", timedelta(minutes=42), "2520.0"),
-    ("NUMERIC", 42, 42.0),
-    ("STRING", "test_string", "test_string"),
-    ("VARCHAR", "test_string", "test_string"),
-    ("DATE", date(2020, 1, 1), "2020-01-01"),
-    ("EMAIL", "test@test.com", "test@test.com"),
+    ("BOOLEAN", True, True, True),
+    ("INTERVAL", "00:42:00", timedelta(minutes=42), "2520.0"),
+    ("NUMERIC", 42, 42, 42),
+    ("STRING", "test_string", "test_string", "test_string"),
+    ("VARCHAR", "test_string", "test_string", "test_string"),
+    ("DATE", "2020-1-1", date(2020, 1, 1), "2020-01-01"),
+    ("EMAIL", "test@test.com", "test@test.com", "test@test.com"),
 ]
 
 
-@pytest.mark.parametrize("type_,default,expt_default", create_default_test_list)
+@pytest.mark.parametrize(
+    "type_,default,default_obj,expt_default", create_default_test_list
+)
 def test_column_create_default(
-    column_test_table, type_, default, expt_default, client, engine
+        column_test_table, type_, default, default_obj, expt_default, client, engine
 ):
     cache.clear()
     name = "anewcolumn"
-    data = {"name": name, "type": type_, "default": default}
-    response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", data, format='multipart')
+    data = {"name": name, "type": type_, "default": {"value": default}}
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/",
+        json.dumps(data), content_type='application/json'
+    )
     assert response.status_code == 201
 
     # Ensure the correct serialized date is returned by the API
@@ -190,21 +206,29 @@ def test_column_create_default(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
     actual_new_col = new_columns_response.json()["results"][-1]
-    assert actual_new_col["default"] == expt_default
+    assert actual_new_col["default"]["value"] == expt_default
 
     # Ensure the correct date value is generated when inserting a new record
     sa_table = column_test_table._sa_table
     with engine.begin() as conn:
         conn.execute(sa_table.insert((1, 1, 1, 'str')))
         created_default = conn.execute(select(sa_table)).fetchall()[0][-1]
-    assert created_default == default
+    assert created_default == default_obj
 
 
 def test_column_create_invalid_default(column_test_table, client):
     cache.clear()
     name = "anewcolumn"
-    data = {"name": name, "type": "BOOLEAN", "default": "Not a boolean"}
-    response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", data)
+    data = {
+        "name": name,
+        "type": "BOOLEAN",
+        "default": {"value": "Not a boolean"},
+    }
+    response = client.post(
+        f"/api/v0/tables/{column_test_table.id}/columns/",
+        json.dumps(data),
+        content_type="application/json",
+    )
     assert response.status_code == 400
     assert f'default "{data["default"]}" is invalid for type' in response.json()[0]
 
@@ -212,8 +236,13 @@ def test_column_create_invalid_default(column_test_table, client):
 create_display_options_test_list = [
     ("BOOLEAN", {"input": "dropdown"}),
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
+    ("DATE", {'format': 'YYYY-MM-DD'}),
     ("NUMERIC", {"show_as_percentage": True}),
     ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}),
+    ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
+    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm'}),
+    ("TIME WITH TIME ZONE", {'format': 'hh:mm Z'}),
 ]
 
 
@@ -238,7 +267,15 @@ def test_column_create_display_options(
 create_display_options_invalid_test_list = [
     ("BOOLEAN", {"input": "invalid", "use_custom_columns": False}),
     ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"yes": "yes", "1": "no"}}),
+    ("DATE", {'format': 'YYYY-MM-DD hh:mm Z'}),
+    ("DATE", {'format': 'hh:mm Z'}),
     ("NUMERIC", {"show_as_percentage": "wrong value type"}),
+    ("TIMESTAMP WITH TIME ZONE", {'format': 'xyz'}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'xyz'}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm Z'}),
+    ("TIME WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm Z'}),
+    ("TIME WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
+    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm Z'}),
 ]
 
 
@@ -250,6 +287,7 @@ def test_column_create_wrong_display_options(
     name = "anewcolumn"
     data = {"name": name, "type": type_, "display_options": display_options}
     response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", data)
+    print(response.data)
     assert response.status_code == 400
 
 
@@ -397,7 +435,7 @@ def test_column_invalid_display_options_type_on_reflection(column_test_table_wit
 def test_column_update_default(column_test_table, client):
     cache.clear()
     expt_default = 5
-    data = f'{{"default": {expt_default}}}'  # Ensure we pass a int and not a str
+    data = {"default": {"value": expt_default}}  # Ensure we pass a int and not a str
     response = client.get(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
@@ -405,10 +443,11 @@ def test_column_update_default(column_test_table, client):
     column_index = 1
     column_id = columns[column_index]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
-        content_type="application/json"
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
+        data=json.dumps(data),
+        content_type="application/json",
     )
-    assert response.json()["default"] == expt_default
+    assert response.json()["default"]["value"] == expt_default
 
 
 def test_column_update_delete_default(column_test_table, client):
@@ -430,7 +469,7 @@ def test_column_update_delete_default(column_test_table, client):
 
 def test_column_update_default_invalid_cast(column_test_table, client):
     cache.clear()
-    data = {"default": "not an integer"}
+    data = {"default": {"value": "not an integer"}}
     response = client.get(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
@@ -438,7 +477,9 @@ def test_column_update_default_invalid_cast(column_test_table, client):
     column_index = 1
     column_id = columns[column_index]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
+        data=json.dumps(data),
+        content_type="application/json"
     )
     assert response.status_code == 400
 
@@ -516,7 +557,12 @@ def test_column_update_name_type_nullable_default(column_test_table, client):
     cache.clear()
     type_ = "BOOLEAN"
     new_name = 'new name'
-    data = {"type": type_, "name": new_name, "nullable": True, "default": True}
+    data = {
+        "type": type_,
+        "name": new_name,
+        "nullable": True,
+        "default": {"value": True},
+    }
     response = client.get(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
@@ -524,12 +570,14 @@ def test_column_update_name_type_nullable_default(column_test_table, client):
     column_index = 3
     column_id = columns[column_index]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
+        data=json.dumps(data),
+        content_type='application/json'
     )
     assert response.json()["type"] == type_
     assert response.json()["name"] == new_name
     assert response.json()["nullable"] is True
-    assert response.json()["default"] is True
+    assert response.json()["default"]["value"] is True
 
 
 def test_column_update_type_options(column_test_table, client):
@@ -595,7 +643,7 @@ def test_column_update_invalid_type(create_table, client, engine_email_type):
 def test_column_update_returns_table_dependent_fields(column_test_table, client):
     cache.clear()
     expt_default = 5
-    data = {"default": expt_default}
+    data = {"default": {"value": expt_default}}
     response = client.get(
         f"/api/v0/tables/{column_test_table.id}/columns/"
     )
@@ -603,7 +651,9 @@ def test_column_update_returns_table_dependent_fields(column_test_table, client)
     column_index = 1
     column_id = columns[column_index]['id']
     response = client.patch(
-        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data,
+        f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/",
+        data=json.dumps(data),
+        content_type="application/json"
     )
     assert response.json()["default"] is not None
     assert response.json()["index"] is not None

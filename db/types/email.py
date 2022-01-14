@@ -23,7 +23,7 @@ EMAIL_REGEX_STR = (
 
 class Email(UserDefinedType):
 
-    def get_col_spec(self, **kw):
+    def get_col_spec(self, **_):
         # This results in the type name being upper case when viewed.
         # Actual usage in the DB is case-insensitive.
         return DB_TYPE.upper()

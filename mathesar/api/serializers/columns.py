@@ -57,18 +57,23 @@ class SimpleColumnSerializer(serializers.ModelSerializer):
         if isinstance(instance, dict):
             instance_type = instance.get('type')
         else:
-            instance_type = instance.type
+            instance_type = instance.plain_type
         self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY] = str(instance_type)
         return super().to_representation(instance)
 
     def to_internal_value(self, data):
         if self.partial and 'type' not in data:
-            instance_type = getattr(self.instance, 'type', None)
+            instance_type = getattr(self.instance, 'plain_type', None)
             if instance_type is not None:
                 self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY] = str(instance_type)
         else:
             self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY] = data.get('type', None)
         return super().to_internal_value(data)
+
+
+class ColumnDefaultSerializer(serializers.Serializer):
+    value = InputValueField()
+    is_dynamic = serializers.BooleanField(read_only=True)
 
 
 class ColumnSerializer(SimpleColumnSerializer):
@@ -91,6 +96,9 @@ class ColumnSerializer(SimpleColumnSerializer):
     type = serializers.CharField(source='plain_type', required=False)
     nullable = serializers.BooleanField(default=True)
     primary_key = serializers.BooleanField(default=False)
+    default = ColumnDefaultSerializer(
+        source='column_default_dict', required=False, allow_null=True, default=None
+    )
 
     # From duplication fields
     source_column = serializers.IntegerField(required=False, write_only=True)
@@ -100,9 +108,6 @@ class ColumnSerializer(SimpleColumnSerializer):
     # Read only fields
     index = serializers.IntegerField(source='column_index', read_only=True)
     valid_target_types = serializers.ListField(read_only=True)
-    default = InputValueField(
-        source='default_value', read_only=False, default=None, allow_null=True
-    )
 
     def validate(self, data):
         if not self.partial:

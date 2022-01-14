@@ -49,7 +49,7 @@
 
   <div class="pagination-group">
     {#if $totalCount}
-      <Pagination total={$totalCount} pageSize={$pageSize} bind:page={$page} bind:pageCount/>
+      <Pagination total={$totalCount} pageSize={$pageSize} bind:currentPage={$page} bind:pageCount/>
       <Select options={pageSizeOpts} value={selectedPageSize} on:change={setPageSize}/>
     {/if}
   </div>

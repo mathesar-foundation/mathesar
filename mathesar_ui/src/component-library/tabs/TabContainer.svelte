@@ -98,7 +98,3 @@
     </div>
   </div>  
 </div>
-
-<style global lang="scss">
-  @import "TabContainer.scss";
-</style>

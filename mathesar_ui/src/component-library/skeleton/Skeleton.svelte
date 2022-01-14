@@ -7,7 +7,3 @@
 {#if loading}
   <div class="skeleton" transition:fade="{{ duration: 120 }}"></div>
 {/if}
-
-<style global lang="scss">
-  @import "Skeleton.scss";
-</style>

@@ -14,5 +14,9 @@ DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER = {
         {
             "options": [{"name": "show_as_percentage", "type": "boolean"},
                         {"name": "locale", "type": "string"}]
+        },
+    MathesarTypeIdentifier.DATETIME.value:
+        {
+            "options": [{"name": "format", "type": "string"}]
         }
 }

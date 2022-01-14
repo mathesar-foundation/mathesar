@@ -17,7 +17,3 @@
     </li>
   {/each}
 </ul>
-
-<style global lang="scss">
-  @import "ToastPresenter.scss";
-</style>
