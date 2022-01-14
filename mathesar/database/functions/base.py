@@ -1,5 +1,5 @@
 """
-This namespace defines the DB Function abstract class and its subclasses. These subclasses
+This namespace defines the DbFunction abstract class and its subclasses. These subclasses
 represent functions that have identifiers, display names and hints, and their instances
 hold parameters. Each function subclass defines how its instance can be converted into an
 SQLAlchemy expression.
@@ -19,17 +19,19 @@ from db.types.uri import URIFunction
 
 from mathesar.database.functions import hints
 
+import importlib, inspect
 
-class Function(ABC):
+
+class DbFunction(ABC):
     id = None
     name = None
     hints = None
 
     def __init__(self, parameters):
         if self.id is None:
-            raise ValueError('Function subclasses must define an ID.')
+            raise ValueError('DbFunction subclasses must define an ID.')
         if self.name is None:
-            raise ValueError('Function subclasses must define a name.')
+            raise ValueError('DbFunction subclasses must define a name.')
         self.parameters = parameters
 
     @property
@@ -40,7 +42,7 @@ class Function(ABC):
         for parameter in self.parameters:
             if isinstance(parameter, ColumnReference):
                 columns.add(parameter.column)
-            elif isinstance(parameter, Function):
+            elif isinstance(parameter, DbFunction):
                 columns.update(parameter.referenced_columns)
         return columns
 
@@ -50,7 +52,7 @@ class Function(ABC):
         return None
 
 
-class ColumnReference(Function):
+class ColumnReference(DbFunction):
     id = 'column_reference'
     name = 'Column Reference'
     hints = tuple([
@@ -67,7 +69,7 @@ class ColumnReference(Function):
         return column(p)
 
 
-class List(Function):
+class List(DbFunction):
     id = 'list'
     name = 'List'
 
@@ -76,7 +78,7 @@ class List(Function):
         return list(ps)
 
 
-class Empty(Function):
+class Empty(DbFunction):
     id = 'empty'
     name = 'Empty'
     hints = tuple([
@@ -89,7 +91,7 @@ class Empty(Function):
         return p.is_(None)
 
 
-class Not(Function):
+class Not(DbFunction):
     id = 'not'
     name = 'Not'
     hints = tuple([
@@ -102,7 +104,7 @@ class Not(Function):
         return not_(*p)
         
 
-class Equal(Function):
+class Equal(DbFunction):
     id = 'equal'
     name = 'Equal'
     hints = tuple([
@@ -115,7 +117,7 @@ class Equal(Function):
         return p1.eq(p2)
 
 
-class Greater(Function):
+class Greater(DbFunction):
     id = 'greater'
     name = 'Greater'
     hints = tuple([
@@ -129,7 +131,21 @@ class Greater(Function):
         return p1.gt(p2)
 
 
-class In(Function):
+class Lesser(DbFunction):
+    id = 'lesser'
+    name = 'Lesser'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.all_parameters(hints.comparable),
+    ])
+
+    @staticmethod
+    def to_sa_expression(p1, p2):
+        return p1.lt(p2)
+
+
+class In(DbFunction):
     id = 'in'
     name = 'In'
     hints = tuple([
@@ -143,7 +159,7 @@ class In(Function):
         return p1.in_(p2)
 
 
-class And(Function):
+class And(DbFunction):
     id = 'and'
     name = 'And'
     hints = tuple([
@@ -155,7 +171,7 @@ class And(Function):
         return and_(*ps)
 
 
-class Or(Function):
+class Or(DbFunction):
     id = 'or'
     name = 'Or'
     hints = tuple([
@@ -167,7 +183,7 @@ class Or(Function):
         return or_(*ps)
 
 
-class StartsWith(Function):
+class StartsWith(DbFunction):
     id = 'starts_with'
     name = 'Starts With'
     hints = tuple([
@@ -181,7 +197,7 @@ class StartsWith(Function):
         return p1.like(f'{p2}%')
 
 
-class ToLowercase(Function):
+class ToLowercase(DbFunction):
     id = 'to_lowercase'
     name = 'To Lowercase'
     hints = tuple([
@@ -194,7 +210,7 @@ class ToLowercase(Function):
         return func.lower(p1)
 
 
-class ExtractURIAuthority(Function):
+class ExtractURIAuthority(DbFunction):
     id = 'extract_uri_authority'
     name = 'Extract URI Authority'
     hints = tuple([
@@ -207,17 +223,25 @@ class ExtractURIAuthority(Function):
         return func.getattr(URIFunction.AUTHORITY)(p1)
 
 
-# Enumeration of supported Function subclasses; needed when parsing.
-supported_db_functions = tuple(
-    [
-        ColumnReference,
-        List,
-        Empty,
-        Greater,
-        In,
-        And,
-        StartsWith,
-        ToLowercase,
-        ExtractURIAuthority,
-    ]
-)
+def _get_defining_module_members_that_satisfy(predicate):
+    # NOTE: the value returned by globals() (when it's called within a function) is set when the
+    # function is defined and does not change depending on where the function is called from.
+    # See https://docs.python.org/3/library/functions.html#globals
+    # If we wanted to move this function into another namespace, we would have to additionally
+    # pass it this namespace's globals().
+    defining_module_name = globals()['__name__']
+    defining_module = importlib.import_module(defining_module_name)
+    all_members_in_defining_module = inspect.getmembers(defining_module)
+    return tuple(
+        member
+        for _, member in all_members_in_defining_module
+        if predicate(member)
+    )
+
+
+def _is_concrete_db_function_subclass(member):
+    return inspect.isclass(member) and member != DbFunction and issubclass(member, DbFunction)
+
+
+# Enumeration of supported DbFunction subclasses; needed when parsing.
+supported_db_functions = _get_defining_module_members_that_satisfy(_is_concrete_db_function_subclass)
