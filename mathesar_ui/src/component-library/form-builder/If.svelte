@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
   import { checkCondition } from './utils';
   import type { FormInputStore, ConditionalIfElement } from './types.d';
 
@@ -11,7 +11,7 @@
 </script>
 
 {#if isConditionSatisfied}
-  {#each (elements || []) as element (element)}
-    <slot {element}></slot>
+  {#each elements || [] as element (element)}
+    <slot {element} />
   {/each}
 {/if}

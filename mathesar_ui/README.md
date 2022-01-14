@@ -18,12 +18,11 @@ Options:
 
 - Run `npm install` locally (or copy the `node_modules` folder from the container to your host file system). This will not be used for anything except for helping the IDEs provide intellisense.
 
-    If you choose this approach, make sure that you're using the same version of node and npm in your local as it is in the container, and that `package-lock.json` file is not modified before committing.
+  If you choose this approach, make sure that you're using the same version of node and npm in your local as it is in the container, and that `package-lock.json` file is not modified before committing.
 
 - Bind mount the `node_modules` named volume to your local path. This introduces additional complexity, depends on the OS, and the requirement that the path needs to exist. Hence, it is not configured by default in Mathesar. Using normal volumes will not work, since the host directories will override the container directories.
 
 - Use VS Code with the [Visual Studio Code Remote - Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension. Refer [VS Code docs](https://code.visualstudio.com/docs/remote/containers) for more details.
-
 
 ### Option 2: Manual setup
 
@@ -33,8 +32,7 @@ If you don't want to use Docker, you can run the front end locally.
 1. `npm install`
 1. `npm run dev`
 
-    This will start a vite server at port 3000. The vite client and main files are referenced by our server rendered html files. Refer [backend integration in vite docs](https://vitejs.dev/guide/backend-integration.html).
-
+   This will start a vite server at port 3000. The vite client and main files are referenced by our server rendered html files. Refer [backend integration in vite docs](https://vitejs.dev/guide/backend-integration.html).
 
 Caveats
 
@@ -56,15 +54,15 @@ Caveats
 
 - Lint all front end files:
 
-    ```
-    docker exec -it -w /code/mathesar_ui mathesar_service npm run lint
-    ```
+  ```
+  docker exec -it -w /code/mathesar_ui mathesar_service npm run lint
+  ```
 
 - Lint a specific file:
 
-    ```
-    docker exec -it -w /code/mathesar_ui mathesar_service npx eslint src/sections/Base.svelte
-    ```
+  ```
+  docker exec -it -w /code/mathesar_ui mathesar_service npx eslint src/sections/Base.svelte
+  ```
 
 ## Testing
 
@@ -74,45 +72,44 @@ We use [Jest](https://jestjs.io/) to run our tests and test utils functions. And
 
 - Run all our tests:
 
-    ```
-    docker exec -it -w /code/mathesar_ui mathesar_service npm test
-    ```
+  ```
+  docker exec -it -w /code/mathesar_ui mathesar_service npm test
+  ```
 
 - Re-run a specific test by name:
 
-    ```
-    docker exec -it -w /code/mathesar_ui mathesar_service npx jest TextInput
-    ```
+  ```
+  docker exec -it -w /code/mathesar_ui mathesar_service npx jest TextInput
+  ```
 
-    This will run all test files with file names containing `TextInput`.
-
+  This will run all test files with file names containing `TextInput`.
 
 ### Writing tests
 
 - Let's pretend we have a file `primeUtils.ts` containing function `getPrimality` that returns `true` for prime numbers.
 
-    We can test function with a file `primeUtils.test.ts` as follows:
+  We can test function with a file `primeUtils.test.ts` as follows:
 
-    ```ts
-    import { getPrimality } from './primeUtils';
+  ```ts
+  import { getPrimality } from './primeUtils';
 
-    test('getPrimality', () => {
-      expect(getPrimality(2)).toBe(true);
-      expect(getPrimality(3)).toBe(true);
-      expect(getPrimality(4)).toBe(false);
-      expect(getPrimality(5)).toBe(true);
-      expect(getPrimality(6)).toBe(false);
-      expect(getPrimality(7)).toBe(true);
+  test('getPrimality', () => {
+    expect(getPrimality(2)).toBe(true);
+    expect(getPrimality(3)).toBe(true);
+    expect(getPrimality(4)).toBe(false);
+    expect(getPrimality(5)).toBe(true);
+    expect(getPrimality(6)).toBe(false);
+    expect(getPrimality(7)).toBe(true);
 
-      expect(getPrimality(3484403346821219)).toBe(true);
-      expect(getPrimality(4508972191266181)).toBe(false);
+    expect(getPrimality(3484403346821219)).toBe(true);
+    expect(getPrimality(4508972191266181)).toBe(false);
 
-      expect(() => getPrimality(0)).toThrow(); // Can't check zero
-      expect(() => getPrimality(-7)).toThrow(); // No negative numbers
-      expect(() => getPrimality(1)).toThrow(); // Primality of 1 is historically ambiguous
-      expect(() => getPrimality(5.5)).toThrow(); // No decimals
-    });
-    ```
+    expect(() => getPrimality(0)).toThrow(); // Can't check zero
+    expect(() => getPrimality(-7)).toThrow(); // No negative numbers
+    expect(() => getPrimality(1)).toThrow(); // Primality of 1 is historically ambiguous
+    expect(() => getPrimality(5.5)).toThrow(); // No decimals
+  });
+  ```
 
 - Functions like `test` and `expect` are automatically imported into scope by the test runner. Your editor should hopefully be smart enough to see that Jest is configured for our project and provide you some assistance in using those functions. You can find more in the [Jest docs](https://jestjs.io/docs/getting-started), but there's not much else you'll need if you follow the pattern above.
 - After, `expect`, you'll use a [matcher](https://jestjs.io/docs/using-matchers). In the example above, we've used `toBe` which is one of the simplest matchers. However `toBe` only works for primitives like numbers, booleans, and strings. If you want to compare two objects or arrays, you'll need to use `toEqual` instead, which performs a deep comparison.
@@ -122,118 +119,123 @@ We use [Jest](https://jestjs.io/) to run our tests and test utils functions. And
 - Deciding _what to test_, and _how_ can be an art! You generally want to try poking and the boundaries and edge cases. We don't have to go crazy with all sorts of assertions for every scenario. Just a few will do. We're not trying to test every possible input -- just some of the important ones.
 - If you find a bug, it's great practice to write a test that fails before even beginning work on the fix.
 
-
-
 ## Adding/Removing packages
 
 If you want to add or remove packages, or basically run any npm action, **always do it from within the container**. Never do it from your local node setup, since it may modify the `package-lock.json` in ways we would not want it to.
 
 1. Connect to the container and open the ui folder:
 
-    ```bash
-    docker exec -it mathesar_service /bin/bash
-    cd mathesar_ui
-    ```
+   ```bash
+   docker exec -it mathesar_service /bin/bash
+   cd mathesar_ui
+   ```
 
 1. Perform any action from within it.
 
-    ```bash
-    root@c273da65c52d:/code/mathesar_ui$ ls
-    Dockerfile  jsconfig.json  package-lock.json  public  vite.config.js
-    README.md   node_modules   package.json       src
+   ```bash
+   root@c273da65c52d:/code/mathesar_ui$ ls
+   Dockerfile  jsconfig.json  package-lock.json  public  vite.config.js
+   README.md   node_modules   package.json       src
 
-    root@c273da65c52d:/code/mathesar_ui$ npm install <package>
+   root@c273da65c52d:/code/mathesar_ui$ npm install <package>
 
-    root@c273da65c52d:/code/mathesar_ui$ npm uninstall <package>
-    ```
+   root@c273da65c52d:/code/mathesar_ui$ npm uninstall <package>
+   ```
 
 ## Components
 
 - The `src/component-library` directory contains general-purpose components which will eventually be spun off into its own package, separate from Mathesar.
 - See the [Components README](./src/component-library/README.md) for more details.
 
-### Storybook 
+### Storybook
 
 We use [Storybook](https://storybook.js.org/) to develop and document our components.
 
-- __Start__ Storybook in dev mode with:
+- **Start** Storybook in dev mode with:
 
-    ```bash
-    docker exec -it -w /code/mathesar_ui mathesar_service npm run storybook
-    ```
+  ```bash
+  docker exec -it -w /code/mathesar_ui mathesar_service npm run storybook
+  ```
 
-- __Build__ Storybook with:
+- **Build** Storybook with:
 
-    ```bash
-    docker exec -it -w /code/mathesar_ui mathesar_service npm run build-storybook
-    ```
+  ```bash
+  docker exec -it -w /code/mathesar_ui mathesar_service npm run build-storybook
+  ```
 
 ## Naming conventions
 
-* File names for Components, Classes and Stylesheets should be in PascalCase. Examples:
-    
-    ```txt
-    App.svelte
-    CancellablePromise.ts
-    App.scss
-    ```
+- File names for Components, Classes and Stylesheets should be in PascalCase. Examples:
 
-* Typescript file names should be in lowerCamelCase. Examples:
-    
-    ```txt
-    index.ts
-    utilityFunctions.ts
-    ```
+  ```txt
+  App.svelte
+  CancellablePromise.ts
+  App.scss
+  ```
 
-* All variables and constants should be in lowerCamelCase. Examples:
-    
-    ```javascript
-    export let randomVariable;
-    let aNewVariable = 'new variable';
-    const someValue = 'constant value';
-    ```
+- Typescript file names should be in lowerCamelCase. Examples:
 
-* All function names should be in lowerCamelCase. Examples:
-    
-    ```javascript
-    function someFunction() { /* ... */ }
-    let someOtherFn = () => { /* ... */ };
-    const someConstFn = () => { /* ... */ };
-    ```
+  ```txt
+  index.ts
+  utilityFunctions.ts
+  ```
 
-* All directory names should be in kebab-case (hyphen-delimited). Examples:
-    
-    ```txt
-    /components/text-input/
-    /components/combo-boxes/multi-select/
-    ```
+- All variables and constants should be in lowerCamelCase. Examples:
 
-* Acronyms within PascalCase and camelCase should be treated as words. Examples:
+  ```javascript
+  export let randomVariable;
+  let aNewVariable = 'new variable';
+  const someValue = 'constant value';
+  ```
 
-    ```txt
-    UrlInput.svelte
-    ```
+- All function names should be in lowerCamelCase. Examples:
 
-    ```ts
-    function getApiUrl() { /* ... */ }
-    let currentDbName;
-    ```
+  ```javascript
+  function someFunction() {
+    /* ... */
+  }
+  let someOtherFn = () => {
+    /* ... */
+  };
+  const someConstFn = () => {
+    /* ... */
+  };
+  ```
 
-    - [discussion](https://github.com/centerofci/mathesar/discussions/908)
-    - Not all code conforms to this standard yet, and bringing existing code into conformance is a low priority.
+- All directory names should be in kebab-case (hyphen-delimited). Examples:
 
-* Use American English spelling instead of British English spelling. Examples:
+  ```txt
+  /components/text-input/
+  /components/combo-boxes/multi-select/
+  ```
 
-    ```txt
-    LabeledInput.svelte
-    ColorSelector.svelte
-    ```
+- Acronyms within PascalCase and camelCase should be treated as words. Examples:
 
-    - [discussion](https://github.com/centerofci/mathesar/discussions/891)
+  ```txt
+  UrlInput.svelte
+  ```
 
-* If a TypeScript file contains _only_ type definitions (without any values or implementation), then use the file extension `.d.ts` instead of `.ts`. If you use `enum` or `const` you'll need make the file a `.ts` file. If you only use `type` and `interface`, then make the file a `.d.ts` file.
+  ```ts
+  function getApiUrl() {
+    /* ... */
+  }
+  let currentDbName;
+  ```
 
-* Prefer the term "delete" in code and UI over similar terms like "remove" and "drop".
+  - [discussion](https://github.com/centerofci/mathesar/discussions/908)
+  - Not all code conforms to this standard yet, and bringing existing code into conformance is a low priority.
 
-    - [discussion](https://github.com/centerofci/mathesar/discussions/872)
+- Use American English spelling instead of British English spelling. Examples:
 
+  ```txt
+  LabeledInput.svelte
+  ColorSelector.svelte
+  ```
+
+  - [discussion](https://github.com/centerofci/mathesar/discussions/891)
+
+- If a TypeScript file contains _only_ type definitions (without any values or implementation), then use the file extension `.d.ts` instead of `.ts`. If you use `enum` or `const` you'll need make the file a `.ts` file. If you only use `type` and `interface`, then make the file a `.d.ts` file.
+
+- Prefer the term "delete" in code and UI over similar terms like "remove" and "drop".
+
+  - [discussion](https://github.com/centerofci/mathesar/discussions/872)

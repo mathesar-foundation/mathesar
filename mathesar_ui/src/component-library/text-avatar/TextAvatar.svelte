@@ -4,8 +4,10 @@
   function getInitials(_text: string) {
     const splitText = _text?.split(/,|_| |\./) || [];
     if (splitText.length > 1) {
-      return splitText[0][0]?.toUpperCase()
-        + splitText[splitText.length - 1][0]?.toUpperCase();
+      return (
+        splitText[0][0]?.toUpperCase() +
+        splitText[splitText.length - 1][0]?.toUpperCase()
+      );
     }
     return splitText[0]?.[0]?.toUpperCase() || '';
   }
@@ -15,7 +17,7 @@
     for (let i = 0; i < _text.length; i += 1) {
       hash = _text.charCodeAt(i) + ((hash << 5) - hash);
     }
-    return `hsla(${(360 * hash)},70%,70%,1)`;
+    return `hsla(${360 * hash},70%,70%,1)`;
   }
 
   $: initials = getInitials(text);

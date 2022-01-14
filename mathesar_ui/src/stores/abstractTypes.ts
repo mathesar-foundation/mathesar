@@ -10,10 +10,10 @@ import type { CancellablePromise } from '@mathesar-component-library';
 const commonData = preloadCommonData();
 
 export interface AbstractType extends Omit<AbstractTypeResponse, 'db_types'> {
-  dbTypes: Set<DbType>,
+  dbTypes: Set<DbType>;
   // In the future, this would be base64 or link to svg. Currently it is just a direct string.
-  icon: string,
-  defaultDbType?: DbType,
+  icon: string;
+  defaultDbType?: DbType;
 }
 
 export const UnknownAbstractType: AbstractType = {
@@ -26,13 +26,19 @@ export const UnknownAbstractType: AbstractType = {
 export type AbstractTypesMap = Map<AbstractType['identifier'], AbstractType>;
 
 interface AbstractTypesSubstance {
-  state: States,
-  data: AbstractTypesMap,
-  error?: string
+  state: States;
+  data: AbstractTypesMap;
+  error?: string;
 }
 
-const databasesToAbstractTypesStoreMap: Map<Database['id'], Writable<AbstractTypesSubstance>> = new Map();
-const abstractTypesRequestMap: Map<Database['id'], CancellablePromise<AbstractTypeResponse[]>> = new Map();
+const databasesToAbstractTypesStoreMap: Map<
+  Database['id'],
+  Writable<AbstractTypesSubstance>
+> = new Map();
+const abstractTypesRequestMap: Map<
+  Database['id'],
+  CancellablePromise<AbstractTypeResponse[]>
+> = new Map();
 
 // TODO: Remove this temporary function once api sends icon related information.
 function getIconForType(typeResponse: AbstractTypeResponse) {
@@ -58,7 +64,9 @@ function getDefaultDbTypeForType(typeResponse: AbstractTypeResponse) {
   }
 }
 
-function processTypeResponse(abstractTypesResponse: AbstractTypeResponse[]): AbstractTypesMap {
+function processTypeResponse(
+  abstractTypesResponse: AbstractTypeResponse[],
+): AbstractTypesMap {
   const abstractTypesMap: AbstractTypesMap = new Map();
 
   abstractTypesResponse.forEach((entry) => {
@@ -75,7 +83,9 @@ function processTypeResponse(abstractTypesResponse: AbstractTypeResponse[]): Abs
   return abstractTypesMap;
 }
 
-export async function refetchTypesForDB(databaseId: Database['id']): Promise<AbstractTypesMap | undefined> {
+export async function refetchTypesForDB(
+  databaseId: Database['id'],
+): Promise<AbstractTypesMap | undefined> {
   const store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
     console.error(`DB Types store for db: ${databaseId} not found.`);
@@ -90,7 +100,9 @@ export async function refetchTypesForDB(databaseId: Database['id']): Promise<Abs
 
     abstractTypesRequestMap.get(databaseId)?.cancel();
 
-    const typesRequest = getAPI<AbstractTypeResponse[]>(`/databases/${databaseId}/types/`);
+    const typesRequest = getAPI<AbstractTypeResponse[]>(
+      `/databases/${databaseId}/types/`,
+    );
     abstractTypesRequestMap.set(databaseId, typesRequest);
     const response = await typesRequest;
 
@@ -115,7 +127,9 @@ export async function refetchTypesForDB(databaseId: Database['id']): Promise<Abs
 
 let preload = true;
 
-function getTypesForDatabase(databaseId: Database['id']): Writable<AbstractTypesSubstance> {
+function getTypesForDatabase(
+  databaseId: Database['id'],
+): Writable<AbstractTypesSubstance> {
   let store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
     store = writable({
@@ -164,7 +178,8 @@ export const abstractTypes: Readable<AbstractTypesSubstance> = derived(
 );
 
 export function getAbstractTypeForDBType(
-  dbType: DbType, abstractTypesMap: AbstractTypesMap,
+  dbType: DbType,
+  abstractTypesMap: AbstractTypesMap,
 ): AbstractType | undefined {
   if (dbType && abstractTypesMap) {
     // eslint-disable-next-line no-restricted-syntax

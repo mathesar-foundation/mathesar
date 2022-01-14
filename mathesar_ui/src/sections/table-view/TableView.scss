@@ -56,7 +56,7 @@ section.table-section .tab-container .table-data {
         }
       }
     }
-    
+
     .body {
       position: absolute;
       top: 32px;
@@ -80,7 +80,7 @@ section.table-section .tab-container .table-data {
       align-items: center;
       cursor: pointer;
 
-      >.opt {
+      > .opt {
         margin-right: 8px;
       }
 
@@ -91,17 +91,17 @@ section.table-section .tab-container .table-data {
   }
 }
 
-.delete-modal{
+.delete-modal {
   .header {
     font-weight: 500;
     font-size: 1.1rem;
     margin-bottom: 10px;
-    }
+  }
 
   .help-text {
     color: #606066;
     line-height: 1.4rem;
-    }
+  }
 
   .sub-text {
     margin-top: 10px;

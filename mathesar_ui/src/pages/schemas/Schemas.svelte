@@ -2,11 +2,7 @@
   import { faPlus } from '@fortawesome/free-solid-svg-icons';
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
-  import {
-    Icon,
-    Button,
-    TextInput,
-  } from '@mathesar-component-library';
+  import { Icon, Button, TextInput } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/App.d';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import SchemaRow from './schema-row/SchemaRow.svelte';
@@ -27,7 +23,10 @@
   let filterQuery = '';
   let activeSchema: SchemaEntry | undefined;
 
-  function filterSchemas(schemaData: DBSchemaStoreData['data'], filter: string): SchemaEntry[] {
+  function filterSchemas(
+    schemaData: DBSchemaStoreData['data'],
+    filter: string,
+  ): SchemaEntry[] {
     const filtered: SchemaEntry[] = [];
     schemaData.forEach((schema) => {
       if (schema.name?.toLowerCase().includes(filter.toLowerCase())) {
@@ -59,7 +58,7 @@
     <div class="container">
       <h1>{$currentDBName}</h1>
       <Button class="add" on:click={addSchema}>
-        <Icon data={faPlus}/>
+        <Icon data={faPlus} />
         New Schema
       </Button>
     </div>
@@ -67,9 +66,7 @@
 
   <div class="container">
     <h2>Schemas ({$schemas.data.size})</h2>
-    <TextInput
-        placeholder="Find a schema..."
-        bind:value={filterQuery}/>
+    <TextInput placeholder="Find a schema..." bind:value={filterQuery} />
     <ul class="schema-list">
       {#each displayList as schema (schema.id)}
         <li>
@@ -81,10 +78,13 @@
 </main>
 
 {#if isAddModalOpen && activeSchema}
-  <AddEditSchema bind:isOpen={isAddModalOpen}
-    isEditMode={activeSchema !== undefined} schema={activeSchema}/>
+  <AddEditSchema
+    bind:isOpen={isAddModalOpen}
+    isEditMode={activeSchema !== undefined}
+    schema={activeSchema}
+  />
 {/if}
 
 <style global lang="scss">
-  @import "Schemas.scss";
+  @import 'Schemas.scss';
 </style>

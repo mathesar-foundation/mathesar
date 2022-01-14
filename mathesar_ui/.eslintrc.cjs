@@ -9,11 +9,7 @@ module.exports = {
     project: ['./tsconfig.json'],
     extraFileExtensions: ['.svelte', '.cjs'],
   },
-  plugins: [
-    'svelte3',
-    'jest',
-    '@typescript-eslint',
-  ],
+  plugins: ['svelte3', 'jest', '@typescript-eslint'],
   extends: [
     'airbnb-typescript/base',
     'plugin:eslint-comments/recommended',
@@ -24,16 +20,11 @@ module.exports = {
   ],
   rules: {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
-    'no-console': [
-      'warn',
-      { allow: ['error'] },
-    ],
+    'no-console': ['warn', { allow: ['error'] }],
   },
   overrides: [
     {
-      files: [
-        '*.svelte',
-      ],
+      files: ['*.svelte'],
       processor: 'svelte3/svelte3',
       rules: {
         'import/first': 'off',
@@ -65,9 +56,7 @@ module.exports = {
       },
     },
     {
-      files: [
-        '*.cjs', '*.config.js',
-      ],
+      files: ['*.cjs', '*.config.js'],
       rules: {
         '@typescript-eslint/no-var-requires': 'off',
         '@typescript-eslint/no-unsafe-assignment': 'off',

@@ -13,7 +13,7 @@ interface TweenedOptions<T> {
 }
 
 interface Options extends TweenedOptions<number> {
-  allowPause: boolean,
+  allowPause: boolean;
 }
 
 const defaults = {
@@ -22,8 +22,8 @@ const defaults = {
 };
 
 export interface PauseableTweened extends Tweened<number> {
-  pause: () => void,
-  resume: () => void,
+  pause: () => void;
+  resume: () => void;
 }
 
 export function pauseableTweened(
@@ -40,17 +40,21 @@ export function pauseableTweened(
   let promiseResolve = () => {};
 
   function makePromise() {
-    return new Promise<void>((resolve) => { promiseResolve = resolve; });
+    return new Promise<void>((resolve) => {
+      promiseResolve = resolve;
+    });
   }
 
   function set(value: number, opts?: TweenedOptions<number>): Promise<void> {
     targetValue = value;
     duration = opts?.duration ?? fullOptions.duration;
     const promise = makePromise();
-    void store.update((_targetValue, _currentValue) => {
-      startingValue = _currentValue;
-      return value;
-    }, opts).then(promiseResolve);
+    void store
+      .update((_targetValue, _currentValue) => {
+        startingValue = _currentValue;
+        return value;
+      }, opts)
+      .then(promiseResolve);
 
     // Why not directly return the Promise from `store.update`?
     //
@@ -68,7 +72,10 @@ export function pauseableTweened(
     return promise;
   }
 
-  function update(updater: Updater<number>, opts?: TweenedOptions<number>): Promise<void> {
+  function update(
+    updater: Updater<number>,
+    opts?: TweenedOptions<number>,
+  ): Promise<void> {
     duration = opts?.duration ?? fullOptions.duration;
     startingValue = get(store);
     targetValue = updater(targetValue, startingValue);
@@ -84,10 +91,13 @@ export function pauseableTweened(
       return;
     }
     isPaused = true;
-    void store.update((_targetValue, _currentValue) => {
-      targetValue = _targetValue;
-      return _currentValue;
-    }, { duration: 0 });
+    void store.update(
+      (_targetValue, _currentValue) => {
+        targetValue = _targetValue;
+        return _currentValue;
+      },
+      { duration: 0 },
+    );
   }
 
   function resume() {
@@ -97,7 +107,8 @@ export function pauseableTweened(
     const currentValue = get(store);
     const rate = (targetValue - startingValue) / duration;
     const durationRemaining = (targetValue - currentValue) / rate;
-    void store.set(targetValue, { duration: durationRemaining })
+    void store
+      .set(targetValue, { duration: durationRemaining })
       .then(promiseResolve);
   }
 

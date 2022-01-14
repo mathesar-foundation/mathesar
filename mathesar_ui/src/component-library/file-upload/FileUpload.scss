@@ -12,32 +12,32 @@
       border-radius: 3px;
       display: flex;
 
-      &+.file {
+      & + .file {
         margin-top: 8px;
       }
 
-      >svg {
+      > svg {
         color: #c4c7ca;
       }
 
-      >.file-info {
+      > .file-info {
         display: flex;
         flex-direction: column;
         width: 100%;
         margin-left: 14px;
 
-        >.name {
+        > .name {
           font-weight: 500;
         }
 
-        >.progress {
+        > .progress {
           height: 10px;
           border-radius: 4px;
           margin-top: 7px;
           margin-bottom: 5px;
         }
 
-        >.upload-info {
+        > .upload-info {
           font-size: 0.8em;
           display: flex;
           justify-content: space-between;
@@ -49,7 +49,7 @@
   .file-upload-trigger {
     display: block;
     background: transparent;
-    border: 1px dashed #5193F0;
+    border: 1px dashed #5193f0;
     border-radius: 3px;
     color: inherit;
     font-family: inherit;
@@ -67,8 +67,8 @@
       flex-direction: column;
       text-align: center;
 
-      >svg {
-        color: #5193F0;
+      > svg {
+        color: #5193f0;
       }
 
       .text {
@@ -80,12 +80,14 @@
         }
       }
     }
-  
-    &:focus, &:hover {
+
+    &:focus,
+    &:hover {
       background: #f5f9ff;
     }
-  
-    &:active, &.in {
+
+    &:active,
+    &.in {
       background: #ebf3ff;
     }
   }

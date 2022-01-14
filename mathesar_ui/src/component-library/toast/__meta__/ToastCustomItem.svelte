@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ToastEntry } from '../ToastController';
-  
+
   export let entry: ToastEntry;
 
   $: ({ props, controller } = entry);
@@ -11,7 +11,7 @@
   <div class="message">{props.message}</div>
   <div><button on:click={controller.dismiss}>bye</button></div>
 </div>
-  
+
 <style>
   .custom-toast-item {
     background: #ff1eec;

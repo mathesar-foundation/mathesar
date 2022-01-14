@@ -1,7 +1,10 @@
 <script lang="ts">
   import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
-  import { InputGroup, InputGroupText } from '@mathesar-component-library-dir/input-group';
+  import {
+    InputGroup,
+    InputGroupText,
+  } from '@mathesar-component-library-dir/input-group';
   import { filterTree } from '@mathesar-component-library-dir/common/utils/filterUtils';
   import { faSearch } from '@fortawesome/free-solid-svg-icons';
   import TreeItemComponent from './TreeItem.svelte';
@@ -26,26 +29,35 @@
   {#if search}
     <InputGroup class="search-box">
       <InputGroupText>
-        <Icon class="search-icon" data={faSearch}/>
+        <Icon class="search-icon" data={faSearch} />
       </InputGroupText>
-      <TextInput placeholder="search" bind:value={searchText}/>
+      <TextInput placeholder="search" bind:value={searchText} />
     </InputGroup>
 
     {#if searchText && displayData.length === 0}
       <div class="empty">
-        <slot name="empty">
-          No data found
-        </slot>
+        <slot name="empty">No data found</slot>
       </div>
     {/if}
   {/if}
 
   <ul role="tree">
     {#each displayData as entry (entry[idKey] || entry)}
-      <TreeItemComponent {idKey} {labelKey} {childKey} {linkKey} {entry}
-                {searchText} {getLink} level={0} on:nodeSelected
-                let:level let:entry={innerEntry} bind:expandedItems
-                bind:selectedItems>
+      <TreeItemComponent
+        {idKey}
+        {labelKey}
+        {childKey}
+        {linkKey}
+        {entry}
+        {searchText}
+        {getLink}
+        level={0}
+        on:nodeSelected
+        let:level
+        let:entry={innerEntry}
+        bind:expandedItems
+        bind:selectedItems
+      >
         <slot entry={innerEntry} {level}>
           {innerEntry[labelKey]}
         </slot>

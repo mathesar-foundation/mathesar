@@ -3,9 +3,7 @@
   import { faDatabase, faSpinner } from '@fortawesome/free-solid-svg-icons';
   import { Button, Icon, Select } from '@mathesar-component-library';
   import { abstractTypes } from '@mathesar/stores/abstractTypes';
-  import {
-    ColumnsDataStore,
-  } from '@mathesar/stores/table-data';
+  import { ColumnsDataStore } from '@mathesar/stores/table-data';
   import { States } from '@mathesar/utils/api';
 
   import type { DbType } from '@mathesar/App.d';
@@ -61,7 +59,8 @@
 
   async function scrollToSelectedType() {
     await tick();
-    const selectedElement: HTMLLIElement | null = abstractTypeContainer?.querySelector('li.selected');
+    const selectedElement: HTMLLIElement | null =
+      abstractTypeContainer?.querySelector('li.selected');
     if (selectedElement) {
       abstractTypeContainer.scrollTop = selectedElement.offsetTop;
     }
@@ -72,7 +71,9 @@
     void scrollToSelectedType();
   }
 
-  function calculateDBTypeOptions(_selectedAbstractType: AbstractType | undefined): SelectOption[] {
+  function calculateDBTypeOptions(
+    _selectedAbstractType: AbstractType | undefined,
+  ): SelectOption[] {
     if (_selectedAbstractType) {
       return Array.from(_selectedAbstractType?.dbTypes).map((entry) => ({
         id: entry,
@@ -108,49 +109,58 @@
   <h5 class="menu-header">Set Column Type</h5>
   <ul bind:this={abstractTypeContainer} class="type-list">
     {#each allowedTypeConversions as abstractType (abstractType.identifier)}
-      <li class:selected={selectedAbstractType?.identifier === abstractType?.identifier}>
-        <Button appearance="plain" on:click={() => selectAbstractType(abstractType)}>
+      <li
+        class:selected={selectedAbstractType?.identifier ===
+          abstractType?.identifier}
+      >
+        <Button
+          appearance="plain"
+          on:click={() => selectAbstractType(abstractType)}
+        >
           <span class="data-icon">{abstractType.icon}</span>
           <span>{abstractType.name}</span>
         </Button>
       </li>
     {/each}
   </ul>
-  
+
   <div class="type-options">
     <!-- TODO: Make tab container more generic to be used here -->
     <ul class="type-option-tabs">
       <li>
         <Button appearance="ghost" class="padding-zero type-option-tab">
-          <Icon size="0.75em" data={faDatabase}/>
+          <Icon size="0.75em" data={faDatabase} />
           <span>Database</span>
         </Button>
       </li>
     </ul>
     <div class="type-options-content">
       <div>Type in db</div>
-      <Select triggerAppearance="default" triggerClass="db-type-select"
+      <Select
+        triggerAppearance="default"
+        triggerClass="db-type-select"
         bind:value={selectedDBTypeOption}
-        options={dbTypeOptions}/>
+        options={dbTypeOptions}
+      />
     </div>
   </div>
 
-  <div class="divider"></div>
+  <div class="divider" />
   <div class="type-menu-footer">
-    <Button appearance="primary" disabled={
-        !selectedAbstractType || typeChangeState === States.Loading
-      } on:click={onSave}>
+    <Button
+      appearance="primary"
+      disabled={!selectedAbstractType || typeChangeState === States.Loading}
+      on:click={onSave}
+    >
       {#if typeChangeState === States.Loading}
-        <Icon data={faSpinner} spin={true}/>
+        <Icon data={faSpinner} spin={true} />
       {/if}
       <span>Save</span>
     </Button>
-    <Button appearance="default" on:click={close}>
-      Close
-    </Button>
-  </div>  
+    <Button appearance="default" on:click={close}>Close</Button>
+  </div>
 </div>
 
 <style global lang="scss">
-  @import "TypeOptions.scss";
+  @import 'TypeOptions.scss';
 </style>
