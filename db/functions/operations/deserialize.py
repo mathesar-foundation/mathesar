@@ -1,11 +1,11 @@
-from mathesar.database.functions.base import Function, supported_db_functions
-from db.filters.base import UnknownPredicateType, BadFilterFormat
+from ..base import DbFunction, supported_db_functions
+from ..exceptions import UnknownDbFunctionId, BadDbFunctionFormat
 
 
-def get_db_function_from_MA_filter_spec(spec: dict) -> Function:
+def get_db_function_from_ma_function_spec(spec: dict) -> DbFunction:
     def _deserialize_parameter_if_necessary(parameter):
         if isinstance(parameter, dict):
-            return get_db_function_from_MA_filter_spec(parameter)
+            return get_db_function_from_ma_function_spec(parameter)
         else:
             return parameter
     try:
@@ -20,14 +20,14 @@ def get_db_function_from_MA_filter_spec(spec: dict) -> Function:
         return db_function_subclass(parameters=parameters)
     except (TypeError, KeyError) as e:
         # Raised when the objects in the spec don't have the right fields (e.g. column or parameter).
-        raise BadFilterFormat from e
+        raise BadDbFunctionFormat from e
 
 
 def _get_db_function_subclass_by_id(subclass_id):
     for db_function_subclass in supported_db_functions:
         if db_function_subclass.id == subclass_id:
             return db_function_subclass
-    raise UnknownPredicateType
+    raise UnknownDbFunctionId
 
 
 def _get_first_dict_key(dict):

@@ -30,11 +30,3 @@ class TypeSerializer(serializers.Serializer):
 
     def get_display_options(self, obj):
         return DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER.get(obj.get('identifier'))
-
-
-class FilterSerializer(serializers.Serializer):
-    identifier = serializers.CharField()
-    name = serializers.CharField()
-    position = serializers.CharField()
-    parameter_count = serializers.CharField()
-    ma_types = serializers.ListField(child=serializers.CharField())

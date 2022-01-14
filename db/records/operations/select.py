@@ -6,7 +6,7 @@ from db.records.operations import group
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.utils import execute_query
-from db.filters.operations.apply import apply_ma_filter_spec
+from db.functions.operations.apply import apply_ma_function_spec_as_filter
 
 
 def _get_duplicate_only_cte(table, duplicate_columns):
@@ -24,7 +24,8 @@ def _sort_and_filter(query, order_by, filters):
     if order_by is not None:
         query = apply_sort(query, order_by)
     if filters is not None:
-        query = apply_ma_filter_spec(query, filters)
+        # TODO rename filters to something appropriate
+        query = apply_ma_function_spec_as_filter(query, filters)
     return query
 
 
