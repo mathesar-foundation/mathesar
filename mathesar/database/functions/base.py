@@ -1,15 +1,15 @@
 """
 This namespace defines the DbFunction abstract class and its subclasses. These subclasses
 represent functions that have identifiers, display names and hints, and their instances
-hold parameters. Each function subclass defines how its instance can be converted into an
+hold parameters. Each DbFunction subclass defines how its instance can be converted into an
 SQLAlchemy expression.
 
 Hints hold information about what kind of input the function might expect and what output
 can be expected from it. This is used to provide interface information without constraining its
 user.
 
-These functions might be used, for example, to define a filter for a table and to tell the
-frontend what it can use when constructing that filter.
+These classes might be used, for example, to define a filter for an SQL query, or to
+access hints on what composition of functions and parameters should be valid.
 """
 
 from abc import ABC, abstractmethod
