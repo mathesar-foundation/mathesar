@@ -1,12 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  // import type { Readable } from 'svelte/store';
   import {
     faSortAmountDown,
     faSortAmountDownAlt,
     faThList,
     faTrashAlt,
     faSpinner,
+    faICursor,
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button, Checkbox } from '@mathesar-component-library';
   import type {
@@ -95,6 +95,11 @@
     });
   }
 
+  function handleRename() {
+    dispatch('close');
+    dispatch('rename');
+  }
+
   async function toggleAllowDuplicates() {
     isRequestingToggleAllowDuplicates = true;
     try {
@@ -119,6 +124,7 @@
   }
 </script>
 
+<h6 class="category">Display</h6>
 <ul>
   <li>
     <Button appearance="plain" on:click={() => handleSort('asc')}>
@@ -154,6 +160,16 @@
           Group by column
         {/if}
       </span>
+    </Button>
+  </li>
+</ul>
+<div class="divider" />
+<h6 class="category">Operations</h6>
+<ul>
+  <li>
+    <Button appearance="plain" on:click={handleRename}>
+      <Icon class="opt" data={faICursor} />
+      <span> Rename </span>
     </Button>
   </li>
   <li>
