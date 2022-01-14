@@ -81,7 +81,7 @@ class DistinctColumnRequiredException(ValidationError):
 
 class ColumnSizeMismatchException(ValidationError):
 
-    def __init__(self, error_code=ErrorCodes.DistinctColumnNameRequired.value,
+    def __init__(self, error_code=ErrorCodes.ColumnSizeMismatch.value,
                  message="Incorrect number of columns in request.",
                  field=None,
                  details=None,
