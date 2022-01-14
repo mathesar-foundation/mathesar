@@ -2,15 +2,12 @@ from django_filters import rest_framework as filters
 from psycopg2.errors import InvalidTextRepresentation, CheckViolation
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
 from sqlalchemy.exc import DataError, IntegrityError
 
 from db.types.exceptions import UnsupportedTypeException
-from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.api.exceptions.exceptions import ExceptionBody, get_default_exception_detail, CustomApiException, \
-    GenericValidationError
+from mathesar.api.exceptions import exceptions as api_exceptions
 from mathesar.api.filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer
@@ -50,7 +47,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         try:
             table.update_sa_table(serializer.validated_data)
         except ValueError as e:
-            raise ValidationError(e)
+            raise api_exceptions.CustomApiException(e, status_code=status.HTTP_400_BAD_REQUEST)
 
         # Reload the table to avoid cached properties
         table = self.get_object()
@@ -81,20 +78,13 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             preview_records = table.get_preview(columns)
         except (DataError, IntegrityError) as e:
             if type(e.orig) == InvalidTextRepresentation or type(e.orig) == CheckViolation:
-                exception_details = ExceptionBody(ErrorCodes.InvalidTypeCast.value,
-                                                  "Invalid type cast requested.",
-                                                  field='columns')
-                raise GenericValidationError([exception_details])
+                raise api_exceptions.ApiInvalidTypeCastException(e, status_code=status.HTTP_400_BAD_REQUEST)
             else:
-                raise CustomApiException(e, ErrorCodes.NonClassifiedIntegrityError.value)
+                raise api_exceptions.ApiIntegrityException(e, status_code=status.HTTP_400_BAD_REQUEST)
         except UnsupportedTypeException as e:
-            exception_details = get_default_exception_detail(e,
-                                                             ErrorCodes.UnsupportedType.value,
-                                                             message=None,
-                                                             field='columns')
-            raise GenericValidationError([exception_details])
+            raise api_exceptions.ApiUnsupportedTypeException(e, field='columns')
         except Exception as e:
-            raise CustomApiException(e)
+            raise api_exceptions.CustomApiException(e)
         table_data.update(
             {
                 # There's no way to reflect actual column data without

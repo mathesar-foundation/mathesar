@@ -93,5 +93,32 @@ class GenericValidationError(CustomApiException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_code = 'invalid'
 
-    def __init__(self, detail: List[ExceptionBody]):
-        self.detail = [exception_body._asdict() for exception_body in detail]
+    def __init__(self, detail_list: List[ExceptionBody]):
+        self.detail = [exception_body._asdict() for exception_body in detail_list]
+
+
+class ApiIntegrityException(CustomApiException):
+
+    def __init__(self, exception, error_code=ErrorCodes.NonClassifiedIntegrityError.value,
+                 message=None,
+                 field=None,
+                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class ApiInvalidTypeCastException(ApiIntegrityException):
+
+    def __init__(self, exception, error_code=ErrorCodes.InvalidTypeCast.value,
+                 message="Invalid type cast requested.",
+                 field=None,
+                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class ApiUnsupportedTypeException(CustomApiException):
+
+    def __init__(self, exception, error_code=ErrorCodes.UnsupportedType.value,
+                 message=None,
+                 field=None,
+                 details=None, status_code=status.HTTP_400_BAD_REQUEST):
+        super().__init__(exception, error_code, message, field, details, status_code)
