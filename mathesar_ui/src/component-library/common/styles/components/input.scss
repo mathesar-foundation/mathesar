@@ -1,6 +1,5 @@
 .input-element {
   border: 1px solid #dfdfdf;
-  transition: all .2s;
   align-items: center;
   border-radius: 0.25rem;
   background: #fff;
@@ -21,5 +20,9 @@
 
   &:disabled {
     background: #efefef;
+  }
+  
+  &.has-validation-errors {
+    background: #fde9e9;
   }
 }
