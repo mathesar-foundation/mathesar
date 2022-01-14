@@ -18,14 +18,19 @@
   export let disabled = false;
 
   // Underlying DOM element for direct access
-  export let element: HTMLElement = null;
+  export let element: HTMLInputElement | undefined = undefined;
 
   // Id for the input
   export let id: string = undefined;
 
-  function handleKeypress(e: KeyboardEvent) {
+  export let hasValidationErrors = false;
+
+  function handleKeydown(e: KeyboardEvent) {
     if (e.key === 'Enter') {
       dispatch('enter');
+    }
+    if (e.key === 'Escape') {
+      dispatch('esc');
     }
   }
 </script>
@@ -34,6 +39,9 @@
 
 <input bind:this={element} {...$$restProps} type='text'
   class={['input-element', 'text-input', classes].join(' ')}
+  class:has-validation-errors={hasValidationErrors}
   bind:value
   {id} {disabled}
-  on:keypress={handleKeypress}/>
+  on:focus
+  on:blur
+  on:keydown={handleKeydown}/>
