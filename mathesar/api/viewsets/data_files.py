@@ -1,12 +1,12 @@
 from rest_framework import status, viewsets
-from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
-from mathesar.errors import InvalidTableError
-from mathesar.models import DataFile
+from mathesar.api.exceptions.exceptions import ApiInvalidTableError
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.data_files import DataFileSerializer
+from mathesar.errors import InvalidTableError
+from mathesar.models import DataFile
 from mathesar.utils.datafiles import create_datafile
 
 
@@ -38,7 +38,7 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
         serializer.is_valid(raise_exception=True)
         try:
             datafile = create_datafile(serializer.validated_data)
-        except InvalidTableError:
-            raise ValidationError('Unable to tabulate data')
+        except InvalidTableError as e:
+            raise ApiInvalidTableError(e, status_code=status.HTTP_400_BAD_REQUEST)
         serializer = DataFileSerializer(datafile, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)

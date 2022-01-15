@@ -82,7 +82,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             else:
                 raise api_exceptions.ApiIntegrityException(e, status_code=status.HTTP_400_BAD_REQUEST)
         except UnsupportedTypeException as e:
-            raise api_exceptions.ApiUnsupportedTypeException(e, field='columns')
+            raise api_exceptions.ApiUnsupportedTypeException(e, field='columns', status_code=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             raise api_exceptions.CustomApiException(e)
         table_data.update(

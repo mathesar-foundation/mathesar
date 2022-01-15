@@ -120,5 +120,41 @@ class ApiUnsupportedTypeException(CustomApiException):
     def __init__(self, exception, error_code=ErrorCodes.UnsupportedType.value,
                  message=None,
                  field=None,
-                 details=None, status_code=status.HTTP_400_BAD_REQUEST):
+                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class BadFilterException(CustomApiException):
+
+    def __init__(self, exception, error_code=ErrorCodes.UnsupportedType.value,
+                 message=None,
+                 field=None,
+                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class BadSortException(CustomApiException):
+
+    def __init__(self, exception, error_code=ErrorCodes.UnsupportedType.value,
+                 message=None,
+                 field=None,
+                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class BadGroupException(CustomApiException):
+
+    def __init__(self, exception, error_code=ErrorCodes.UnsupportedType.value,
+                 message=None,
+                 field=None,
+                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class ApiInvalidTableError(CustomApiException):
+
+    def __init__(self, exception, error_code=ErrorCodes.InvalidTableError.value,
+                 message='Unable to tabulate data',
+                 field=None,
+                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         super().__init__(exception, error_code, message, field, details, status_code)
