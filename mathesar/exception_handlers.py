@@ -1,22 +1,23 @@
 import warnings
 
+from django.conf import settings
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import exception_handler
-from rest_framework_friendly_errors.mixins import FriendlyErrorMessagesMixin
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.exceptions.api_exception_converters import validation_exception_converter, \
     default_api_exception_converter
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.api.exceptions.exceptions import CustomApiException, GenericValidationError, get_default_exception_detail, \
-    get_default_api_exception
+from mathesar.api.exceptions.exceptions import GenericValidationError, get_default_exception_detail, \
+    get_default_api_exception, CustomApiException, ProgrammingException
 
 exception_map = {
     # Temporary handlers, must be replaced with proper api exceptions
     IntegrityError: lambda exc: CustomApiException(exc, ErrorCodes.NonClassifiedIntegrityError.value),
     UnsupportedTypeException: lambda exc: GenericValidationError(
-            [get_default_exception_detail(exc, ErrorCodes.UnsupportedType.value, message=None)])
+            [get_default_exception_detail(exc, ErrorCodes.UnsupportedType.value, message=None)]),
+    ProgrammingError: lambda exc: ProgrammingException(exc)
 }
 
 non_spec_api_exception_converter_map = {
@@ -36,8 +37,10 @@ def mathesar_exception_handler(exc, context):
 
     if response is not None:
         # Check if conforms to the api spec
-        if is_pretty(response):
+        if is_pretty(response.data):
             return response
+        if settings.DEBUG:
+            raise Exception("Error response is not formatted correctly")
         warnings.warn("Error Response does not conform to the api spec. Please handle the exception properly")
         response_data = non_spec_api_exception_converter_map.get(exc.__class__,
                                                                  default_api_exception_converter)(exc, response)
@@ -45,8 +48,7 @@ def mathesar_exception_handler(exc, context):
     return response
 
 
-def is_pretty(response):
-    data = response.data
+def is_pretty(data):
     if isinstance(data, list):
         for error_details in data:
             if 'message' in error_details and 'code' in error_details and isinstance(error_details, dict):
