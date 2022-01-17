@@ -19,7 +19,8 @@ from db.types.uri import URIFunction
 
 from db.functions import hints
 
-import importlib, inspect
+import importlib
+import inspect
 
 
 class DbFunction(ABC):
@@ -102,7 +103,7 @@ class Not(DbFunction):
     @staticmethod
     def to_sa_expression(*p):
         return not_(*p)
-        
+
 
 class Equal(DbFunction):
     id = 'equal'

@@ -1,7 +1,9 @@
 from frozendict import frozendict
 
+
 def _make_hint(id, **rest):
     return frozendict({"id": id, **rest})
+
 
 def parameter_count(count):
     return _make_hint("parameter_count", count=count)
