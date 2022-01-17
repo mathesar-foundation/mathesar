@@ -15,5 +15,7 @@ class ErrorCodes(Enum):
     DuplicateTableError = 4101
     UniqueViolation = 4052
     UnsupportedType = 4054
+    # Mathesar db Error Codes
+    InvalidTableError = 4102
     # Validation Error
     MultipleDataFiles = 4200

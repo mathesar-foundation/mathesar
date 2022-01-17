@@ -575,7 +575,8 @@ def test_table_previews_missing_columns(client, schema, engine_email_type):
     post_body = {}
     response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    assert "columns" in response.json()
+    assert "required" in response.json()[0]['message']
+    assert "columns" in response.json()[0]['field']
 
 
 @pytest.mark.parametrize('table_name', ['Test Table Create From Datafile', ''])

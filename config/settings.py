@@ -179,7 +179,13 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER':
         'mathesar.exception_handlers.mathesar_exception_handler'
 }
-
+FRIENDLY_ERRORS = {
+    'FIELD_ERRORS': {
+        'ListSerializer': {'required': 2007, 'null': 2027,
+                           'invalid_choice': 2083, 'not_a_list': 2123,
+                           'empty': 2093}
+    }
+}
 # Mathesar settings
 MATHESAR_MODE = decouple_config('MODE', default='PRODUCTION')
 MATHESAR_UI_BUILD_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/mathesar/')

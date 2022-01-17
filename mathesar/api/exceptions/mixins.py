@@ -38,3 +38,25 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         ugly_errors = super(FriendlyErrorMessagesMixin, self).errors
         pretty_errors = self.build_pretty_errors(ugly_errors)
         return ReturnList(pretty_errors, serializer=self)
+
+    @property
+    def field_map(self):
+        return {
+            'boolean': ['BooleanField', 'NullBooleanField'],
+            'string': ['CharField', 'EmailField', 'RegexField', 'SlugField',
+                       'URLField', 'UUIDField', 'FilePathField',
+                       'IPAddressField'],
+            'numeric': ['IntegerField', 'FloatField', 'DecimalField'],
+            'date': {'DateTimeField': self.DATETIME_FORMAT,
+                     'DateField': self.DATE_FORMAT,
+                     'TimeField': self.TIME_FORMAT,
+                     'DurationField': self.DURATION_FORMAT},
+            'choice': ['ChoiceField', 'MultipleChoiceField'],
+            'file': ['FileField', 'ImageField'],
+            'composite': ['ListField', 'DictField', 'JSONField'],
+            'relation': ['StringRelatedField', 'PrimaryKeyRelatedField',
+                         'HyperlinkedRelatedField', 'SlugRelatedField',
+                         'HyperlinkedIdentityField', 'ManyRelatedField', 'ListSerializer'],
+            'miscellaneous': ['ReadOnlyField', 'HiddenField', 'ModelField',
+                              'SerializerMethodField']
+        }
