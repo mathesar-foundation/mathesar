@@ -17,13 +17,13 @@
     store={stores.get(element.variable)}/>
 
 {:else if element.type === 'switch'}
-  <Switch store={stores.get(element.switch)}
+  <Switch store={stores.get(element.variable)}
     cases={element.cases} let:element={childElement}>
       <svelte:self {variables} {stores} element={childElement}/>
   </Switch>
 
 {:else if element.type === 'if'}
-  <If store={stores.get(element.if)} {...element} let:element={childElement}>
+  <If store={stores.get(element.variable)} {...element} let:element={childElement}>
     <svelte:self {variables} {stores} element={childElement}/>
   </If>
 

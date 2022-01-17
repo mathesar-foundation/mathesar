@@ -36,13 +36,13 @@ const formConfig: FormConfiguration = {
       },
       {
         type: 'switch',
-        switch: 'numberType',
+        variable: 'numberType',
         cases: {
           Integer: [{
             type: 'input',
             variable: 'integerDataSize',
             label: 'Integer Data Size',
-            inputType: 'select',
+            interfaceType: 'select',
             options: {
               default: { label: 'Default (4 bytes)' },
               bigInt: { label: 'Big Integer (8 bytes)' },
@@ -69,7 +69,7 @@ const formConfig: FormConfiguration = {
             type: 'input',
             variable: 'floatingPointType',
             label: 'Floating Point Type',
-            inputType: 'select',
+            interfaceType: 'select',
             options: {
               real: { label: 'Real (6 digits)' },
               doublePrecision: { label: 'Double Precision (15 digits)' },

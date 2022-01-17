@@ -1,11 +1,11 @@
-import type { DynamicInputType, DynamicInputSelectElement, EnumSelectOption } from './types';
+import type { DynamicInputDataType, DynamicInputSelectElement, EnumSelectOption } from './types';
 
 export function generateSelectOptions(
-  type: DynamicInputType,
+  dataType: DynamicInputDataType,
   enumValues?: unknown[],
   options?: DynamicInputSelectElement['options'],
 ): EnumSelectOption[] {
-  if (type === 'boolean') {
+  if (dataType === 'boolean') {
     return [
       {
         value: true,
@@ -33,10 +33,10 @@ export function getSelectedValue(
 }
 
 export function getInitialValue(
-  type: DynamicInputType,
+  dataType: DynamicInputDataType,
   enumValues?: unknown[],
 ): unknown {
-  if (type === 'boolean') {
+  if (dataType === 'boolean') {
     return true;
   }
   return enumValues?.[0];

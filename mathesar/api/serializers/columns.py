@@ -57,13 +57,13 @@ class SimpleColumnSerializer(serializers.ModelSerializer):
         if isinstance(instance, dict):
             instance_type = instance.get('type')
         else:
-            instance_type = instance.type
+            instance_type = instance.plain_type
         self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY] = str(instance_type)
         return super().to_representation(instance)
 
     def to_internal_value(self, data):
         if self.partial and 'type' not in data:
-            instance_type = getattr(self.instance, 'type', None)
+            instance_type = getattr(self.instance, 'plain_type', None)
             if instance_type is not None:
                 self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY] = str(instance_type)
         else:

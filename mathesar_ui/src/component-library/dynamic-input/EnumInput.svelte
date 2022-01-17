@@ -2,15 +2,15 @@
   import Select from '@mathesar-component-library-dir/select/Select.svelte';
   import type { Appearance } from '@mathesar-component-library-dir/types.d';
   import { generateSelectOptions, getSelectedValue, getInitialValue } from './utils';
-  import type { DynamicInputType } from './types';
+  import type { DynamicInputDataType, DynamicInputSelectElement } from './types.d';
 
-  export let type: DynamicInputType;
+  export let dataType: DynamicInputDataType;
   export let enumValues: unknown[] = undefined;
-  export let options = undefined;
+  export let options: DynamicInputSelectElement['options'] = undefined;
   export let triggerAppearance: Appearance = 'default';
-  export let value = getInitialValue(type, enumValues);
+  export let value = getInitialValue(dataType, enumValues);
 
-  $: selectOptions = generateSelectOptions(type, enumValues, options);
+  $: selectOptions = generateSelectOptions(dataType, enumValues, options);
   $: selectedValue = getSelectedValue(selectOptions, value);
 
   // TODO: Handle indeterminate state for boolean
