@@ -21,13 +21,13 @@
         },
       },
       flip: {
-        control: { type: 'inline-radio', options: ['horizontal', 'vertical', 'both', null] },
+        control: { type: 'inline-radio', options: ['horizontal', 'vertical', 'both', undefined] },
         table: {
           type: { summary: 'enum' },
         },
       },
       rotate: {
-        control: { type: 'inline-radio', options: [90, 180, 270, null] },
+        control: { type: 'inline-radio', options: [90, 180, 270, undefined] },
         table: {
           type: { summary: 'enum' },
         },

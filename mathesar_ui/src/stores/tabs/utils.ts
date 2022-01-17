@@ -80,6 +80,9 @@ export function syncSingleTabularParamToURL(
   if (isInPath(db, schemaId)) {
     try {
       const { tabularDataParamList } = parseTabListConfigFromURL(db, schemaId);
+      if (!tabularDataParamList) {
+        return;
+      }
       const replacementIndex = tabularDataParamList.findIndex(
         (entry) => entry[0] === tabularDataParam[0] && entry[1] === tabularDataParam[1],
       );

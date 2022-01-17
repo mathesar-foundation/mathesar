@@ -25,7 +25,7 @@
   $: ({ columnsDataStore } = $tabularData as TabularData);
 
   export let column: Column;
-  export let abstractTypeOfColumn: AbstractType;
+  export let abstractTypeOfColumn: AbstractType | undefined;
 
   $: allowedTypeConversions = getAbstractTypesForDBTypeList(
     [...(column.valid_target_types || []), column.type],
@@ -33,13 +33,13 @@
   );
 
   let abstractTypeContainer: HTMLUListElement;
-  let selectedAbstractType: AbstractType = null;
-  let selectedDbType: DbType = null;
+  let selectedAbstractType: AbstractType | undefined;
+  let selectedDbType: DbType | undefined;
   let typeChangeState = States.Idle;
 
   function selectAbstractType(abstractType: AbstractType) {
     selectedAbstractType = abstractType;
-    if (abstractType.identifier === abstractTypeOfColumn.identifier) {
+    if (abstractType.identifier === abstractTypeOfColumn?.identifier) {
       selectedDbType = column.type;
     } else if (abstractType.defaultDbType) {
       selectedDbType = abstractType.defaultDbType;
@@ -55,7 +55,7 @@
 
   async function scrollToSelectedType() {
     await tick();
-    const selectedElement: HTMLLIElement = abstractTypeContainer?.querySelector('li.selected');
+    const selectedElement: HTMLLIElement | null = abstractTypeContainer?.querySelector('li.selected');
     if (selectedElement) {
       abstractTypeContainer.scrollTop = selectedElement.offsetTop;
     }

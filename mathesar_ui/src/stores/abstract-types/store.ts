@@ -21,7 +21,7 @@ export async function refetchTypesForDB(databaseId: Database['id']): Promise<Abs
   const store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
     console.error(`DB Types store for db: ${databaseId} not found.`);
-    return null;
+    return undefined;
   }
 
   try {
@@ -51,7 +51,7 @@ export async function refetchTypesForDB(databaseId: Database['id']): Promise<Abs
       state: States.Error,
       error: err instanceof Error ? err.message : 'Error in fetching schemas',
     }));
-    return null;
+    return undefined;
   }
 }
 

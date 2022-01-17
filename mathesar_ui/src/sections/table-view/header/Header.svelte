@@ -48,7 +48,7 @@
   function getColumnPosition(
     _columnPositionMap: ColumnPositionMap,
     _name: Column['name'],
-  ): ColumnPosition {
+  ): ColumnPosition | undefined {
     return _columnPositionMap.get(_name);
   }
 

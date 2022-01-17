@@ -27,8 +27,8 @@
   export let contentClass = '';
   export let isOpen = false;
   export let closeOnInnerClick = false;
-  export let ariaLabel:string = null;
-  export let ariaControls: string = null;
+  export let ariaLabel: string | undefined = undefined;
+  export let ariaControls: string | undefined = undefined;
   export let placement: Placement = 'bottom-start';
   export let showArrow = true;
   export let size: Size = 'medium';
@@ -41,11 +41,17 @@
     if (!contentElement) {
       await tick();
     }
+    if (!contentElement) {
+      return;
+    }
     parentAccompanyingElements?.add(contentElement);
   }
   async function unsetThisContentToAccompanyParent() {
     if (!contentElement) {
       await tick();
+    }
+    if (!contentElement) {
+      return;
     }
     parentAccompanyingElements?.delete(contentElement);
   }

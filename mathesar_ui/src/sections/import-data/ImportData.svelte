@@ -6,7 +6,7 @@
   import Upload from './upload/Upload.svelte';
   import { clearErrors } from './importUtils';
 
-  export let id: string;
+  export let id: string | undefined = undefined;
   export let database: Database['name'];
   export let schemaId: SchemaEntry['id'];
 

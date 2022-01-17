@@ -9,7 +9,7 @@ export default class EventHandler {
     if (!this.listeners.has(eventName)) {
       this.listeners.set(eventName, new Set());
     }
-    this.listeners.get(eventName).add(callback);
+    this.listeners.get(eventName)?.add(callback);
     return () => {
       this.listeners?.get(eventName)?.delete(callback);
     };
