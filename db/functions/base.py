@@ -17,7 +17,7 @@ from abc import ABC, abstractmethod
 from sqlalchemy import column, not_, and_, or_, func
 from db.types.uri import URIFunction
 
-from . import hints
+from db.functions import hints
 
 import importlib, inspect
 

@@ -1,5 +1,5 @@
-from ..base import DbFunction, supported_db_functions
-from ..exceptions import UnknownDbFunctionId, BadDbFunctionFormat
+from db.functions.base import DbFunction, supported_db_functions
+from db.functions.exceptions import UnknownDbFunctionId, BadDbFunctionFormat
 
 
 def get_db_function_from_ma_function_spec(spec: dict) -> DbFunction:

@@ -1,6 +1,6 @@
-from ..base import DbFunction
-from ..exceptions import ReferencedColumnsDontExist
-from .deserialize import get_db_function_from_ma_function_spec
+from db.functions.base import DbFunction
+from db.functions.exceptions import ReferencedColumnsDontExist
+from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
 
 
 def apply_ma_function_spec_as_filter(query, ma_function_spec):
