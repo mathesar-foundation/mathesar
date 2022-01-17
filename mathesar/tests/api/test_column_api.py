@@ -11,6 +11,7 @@ from db.columns.operations.select import get_columns_attnum_from_names
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
 from mathesar import models
+from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models import Column as ServiceLayerColumn
 from mathesar.tests.api.test_table_api import check_columns_response
 
@@ -250,6 +251,7 @@ def test_column_create_wrong_display_options(
     name = "anewcolumn"
     data = {"name": name, "type": type_, "display_options": display_options}
     response = client.post(f"/api/v0/tables/{column_test_table.id}/columns/", data)
+    print(response.json())
     assert response.status_code == 400
 
 
@@ -589,8 +591,9 @@ def test_column_update_invalid_type(create_table, client, engine_email_type):
         body
     )
     assert response.status_code == 400
-    assert response.json() == ["This type casting is invalid."]
-
+    response_json = response.json()
+    assert response_json[0]['code'] == ErrorCodes.NonClassifiedError.value
+    assert response_json[0]['message'] == "This type casting is invalid."
 
 def test_column_update_returns_table_dependent_fields(column_test_table, client):
     cache.clear()
@@ -650,9 +653,9 @@ def test_column_update_when_missing(column_test_table, client):
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/99999/", data=data
     )
-    response_data = response.json()
-    assert response_data == {"detail": "Not found."}
+    response_data = response.json()[0]
     assert response.status_code == 404
+    assert "not found" in response_data['details']
 
 
 def test_column_destroy(column_test_table, client):
@@ -683,8 +686,9 @@ def test_column_destroy_when_missing(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/99999/"
     )
     response_data = response.json()
-    assert response_data == {"detail": "Not found."}
+    response_data = response.json()[0]
     assert response.status_code == 404
+    assert "not found" in response_data['details']
 
 
 def test_column_duplicate(column_test_table, client):
@@ -727,9 +731,9 @@ def test_column_duplicate_when_missing(column_test_table, client):
     response = client.post(
         f"/api/v0/tables/{column_test_table.id}/columns/", data=data
     )
-    response_data = response.json()
     assert response.status_code == 400
-    assert "not found" in response_data[0]
+    response_data = response.json()[0]
+    assert "not found" in response_data['message']
 
 
 def test_column_duplicate_some_parameters(column_test_table, client):
@@ -750,5 +754,9 @@ def test_column_duplicate_no_parameters(column_test_table, client):
     )
     response_data = response.json()
     assert response.status_code == 400
-    assert response_data["name"][0] == "This field is required."
-    assert response_data["type"][0] == "This field is required."
+    assert response_data[0]["message"] == "This field is required."
+    assert response_data[0]["field"] == "name"
+    assert response_data[0]["code"] == 2002
+    assert response_data[1]["message"] == "This field is required."
+    assert response_data[1]["field"] == "type"
+    assert response_data[1]["code"] == 2002

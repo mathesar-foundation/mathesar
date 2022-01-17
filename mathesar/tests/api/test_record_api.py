@@ -396,7 +396,7 @@ def test_record_update(create_table, client):
     }
     response = client.put(f'/api/v0/tables/{table.id}/records/{record_id}/', data=data)
     assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "PUT" not allowed.'
+    assert response.json()[0]['message'] == 'Method "PUT" not allowed.'
 
 
 def test_record_404(create_table, client):
@@ -408,7 +408,7 @@ def test_record_404(create_table, client):
     client.delete(f'/api/v0/tables/{table.id}/records/{record_id}/')
     response = client.get(f'/api/v0/tables/{table.id}/records/{record_id}/')
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
+    assert response.json()[0]['message'] == 'Not found.'
 
 
 @pytest.mark.parametrize("exception", [BadFilterFormat, FilterFieldNotFound])

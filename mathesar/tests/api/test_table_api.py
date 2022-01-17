@@ -803,7 +803,8 @@ def test_table_404(client):
 def test_table_type_suggestion_404(client):
     response = client.get('/api/v0/tables/3000/type_suggestions/')
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
+    response_data = response.json()[0]
+    assert response_data['message'] == 'Not found.'
 
 
 def test_table_create_from_datafile_404(client):

@@ -145,7 +145,7 @@ def test_create_unique_constraint_with_duplicate_name(create_table, client):
     }
     response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
     assert response.status_code == 400
-    assert response.json() == ['Relation with the same name already exists']
+    assert response.json()[0]['message'] == 'Relation with the same name already exists'
 
 
 def test_create_unique_constraint_for_non_unique_column(create_table, client):
@@ -158,7 +158,7 @@ def test_create_unique_constraint_for_non_unique_column(create_table, client):
     }
     response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
     assert response.status_code == 400
-    assert response.json() == ['This column has non-unique values so a unique constraint cannot be set']
+    assert response.json()[0]['message'] == 'This column has non-unique values so a unique constraint cannot be set'
 
 
 def test_drop_nonexistent_constraint(create_table, client):
@@ -167,10 +167,8 @@ def test_drop_nonexistent_constraint(create_table, client):
 
     response = client.delete(f'/api/v0/tables/{table.id}/constraints/345/')
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
 
 
 def test_drop_nonexistent_table(create_table, client):
     response = client.delete('/api/v0/tables/9387489/constraints/4234/')
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'

@@ -78,11 +78,17 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             preview_records = table.get_preview(columns)
         except (DataError, IntegrityError) as e:
             if type(e.orig) == InvalidTextRepresentation or type(e.orig) == CheckViolation:
-                raise api_exceptions.ApiInvalidTypeCastException(e, status_code=status.HTTP_400_BAD_REQUEST)
+                raise api_exceptions.ApiInvalidTypeCastException(e,
+                                                                 status_code=status.HTTP_400_BAD_REQUEST,
+                                                                 field='columns')
             else:
-                raise api_exceptions.ApiIntegrityException(e, status_code=status.HTTP_400_BAD_REQUEST)
+                raise api_exceptions.ApiIntegrityException(e,
+                                                           status_code=status.HTTP_400_BAD_REQUEST,
+                                                           field='columns')
         except UnsupportedTypeException as e:
-            raise api_exceptions.ApiUnsupportedTypeException(e, field='columns', status_code=status.HTTP_400_BAD_REQUEST)
+            raise api_exceptions.ApiUnsupportedTypeException(e,
+                                                             field='columns',
+                                                             status_code=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             raise api_exceptions.CustomApiException(e)
         table_data.update(

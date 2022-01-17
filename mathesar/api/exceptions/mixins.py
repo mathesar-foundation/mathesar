@@ -9,6 +9,7 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         return isinstance(error, dict) and tuple(error.keys()) == ExceptionBody._fields
 
     def build_pretty_errors(self, errors):
+
         pretty = []
         for error_type in errors:
             error = errors[error_type]

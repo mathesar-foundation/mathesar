@@ -175,19 +175,19 @@ def test_data_file_create_url(client, header, patents_url, mock_get_patents_url)
 def test_data_file_update(client, data_file):
     response = client.put(f'/api/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "PUT" not allowed.'
+    assert response.json()[0]['message'] == 'Method "PUT" not allowed.'
 
 
 def test_data_file_partial_update(client, data_file):
     response = client.patch(f'/api/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "PATCH" allowed only for header.'
+    assert response.json()[0]['message'] == 'Method "PATCH" allowed only for header.'
 
 
 def test_data_file_delete(client, data_file):
     response = client.delete(f'/api/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "DELETE" not allowed.'
+    assert response.json()[0]['message'] == 'Method "DELETE" not allowed.'
 
 
 def test_data_file_404(client, data_file):
@@ -195,7 +195,7 @@ def test_data_file_404(client, data_file):
     data_file.delete()
     response = client.get(f'/api/v0/data_files/{data_file_id}/')
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
+    assert response.json()[0]['message'] == 'Not found.'
 
 
 def test_data_file_create_invalid_file(client):
@@ -206,7 +206,7 @@ def test_data_file_create_invalid_file(client):
             response = client.post('/api/v0/data_files/', data={'file': f}, format='multipart')
             response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict[0] == 'Unable to tabulate data'
+    assert response_dict[0]['message'] == 'Unable to tabulate data'
 
 
 def test_data_file_create_non_unicode_file(client, non_unicode_csv_filename):
@@ -220,7 +220,7 @@ def test_data_file_create_url_invalid_format(client):
     response = client.post('/api/v0/data_files/', data={'url': url})
     response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict['url'][0] == 'Enter a valid URL.'
+    assert response_dict[0]['message'] == 'Enter a valid URL.'
 
 
 def test_data_file_create_url_invalid_address(client):

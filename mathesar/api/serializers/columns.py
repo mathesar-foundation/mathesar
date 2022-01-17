@@ -40,7 +40,7 @@ class TypeOptionSerializer(MathesarErrorMessageMixin, serializers.Serializer):
         return super(TypeOptionSerializer, self).run_validation(data)
 
 
-class SimpleColumnSerializer(serializers.ModelSerializer):
+class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     class Meta:
         model = Column
         fields = ('id',

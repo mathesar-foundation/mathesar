@@ -9,12 +9,18 @@ def validation_exception_converter(exc, response):
         converted_data = []
         for data in response.data:
             new_data = {'code': ErrorCodes.NonClassifiedError.value,
-                        'message': force_str(data)}
+                        'message': force_str(data), 'details': {}}
+            converted_data.append(new_data)
+        return converted_data
+    elif isinstance(response.data, dict):
+        converted_data = []
+        for key, data in response.data.items():
+            new_data = {'code': ErrorCodes.NonClassifiedError.value,
+                        'message': data, 'field': None if key == 'non_field_errors' else key, 'details': {}}
             converted_data.append(new_data)
         return converted_data
     else:
         return response.data
-
 
 def default_api_exception_converter(exc, response):
     if isinstance(response.data, list):
@@ -28,4 +34,4 @@ def default_api_exception_converter(exc, response):
     else:
         error_code = FRIENDLY_EXCEPTION_DICT.get(exc.__class__.__name__)
         error_data = {'code': error_code, 'message': force_str(exc), 'details': response.data.pop('detail', {})}
-        return error_data
+        return [error_data]
