@@ -7,15 +7,15 @@ def parameter_count(count):
     return make_hint("parameter_count", count=count)
 
 
-def parameter(index, hints):
+def parameter(index, *hints):
     return make_hint("parameter", index=index, hints=hints)
 
 
-def all_parameters(hints):
+def all_parameters(*hints):
     return make_hint("all_parameters", hints=hints)
 
 
-def returns(hints):
+def returns(*hints):
     return make_hint("returns", hints=hints)
 
 
