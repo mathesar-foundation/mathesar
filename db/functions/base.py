@@ -58,6 +58,7 @@ class Literal(DbFunction):
     name = 'Literal'
     hints = tuple([
         hints.parameter_count(1),
+        hints.parameter(1, hints.literal),
     ])
 
     @staticmethod

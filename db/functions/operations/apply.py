@@ -24,7 +24,6 @@ def _assert_that_all_referenced_columns_exist(query, db_function):
         raise ReferencedColumnsDontExist(f"These referenced columns don't exist on the relevant relation: {referenced_columns_that_dont_exist}")
 
 
-# TODO create a DbFunction subclass called Literal for encapsulating literals
 def _db_function_to_sa_expression(db_function):
     """
     Everything is considered to be either a DbFunction subclass or a literal.
