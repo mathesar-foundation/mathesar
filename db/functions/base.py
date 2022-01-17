@@ -14,7 +14,7 @@ access hints on what composition of functions and parameters should be valid.
 
 from abc import ABC, abstractmethod
 
-from sqlalchemy import column, not_, and_, or_, func
+from sqlalchemy import column, not_, and_, or_, func, literal
 from db.types.uri import URIFunction
 
 from db.functions import hints
@@ -51,6 +51,18 @@ class DbFunction(ABC):
     @abstractmethod
     def to_sa_expression():
         return None
+
+
+class Literal(DbFunction):
+    id = 'literal'
+    name = 'Literal'
+    hints = tuple([
+        hints.parameter_count(1),
+    ])
+
+    @staticmethod
+    def to_sa_expression(p):
+        return literal(p)
 
 
 class ColumnReference(DbFunction):
