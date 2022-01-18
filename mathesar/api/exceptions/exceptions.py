@@ -128,7 +128,7 @@ class ApiUnsupportedTypeException(CustomApiException):
 class BadFilterException(CustomApiException):
 
     def __init__(self, exception, error_code=ErrorCodes.UnsupportedType.value,
-                 message=None,
+                 message="Filter arguments are not correct",
                  field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         super().__init__(exception, error_code, message, field, details, status_code)
@@ -165,8 +165,17 @@ class ApiRaiseException(CustomApiException):
     """
     Exception raised inside a postgres function
     """
+
     def __init__(self, exception, error_code=ErrorCodes.RaiseException.value,
                  message=None,
                  field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class GenericApiError(CustomApiException):
+    default_code = 'error'
+
+    def __init__(self, detail_list: List[ExceptionBody], status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        self.detail = [exception_body._asdict() for exception_body in detail_list]
+        self.status_code = status_code

@@ -20,3 +20,5 @@ class ErrorCodes(Enum):
     InvalidTableError = 4102
     # Validation Error
     MultipleDataFiles = 4200
+    # Api methods Error
+    MethodNotAllowed = 4500

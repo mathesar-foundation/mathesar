@@ -3,6 +3,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
+from mathesar.api.exceptions.error_codes import ErrorCodes
+from mathesar.api.exceptions.exceptions import CustomApiException, GenericApiError, ExceptionBody, ApiInvalidTableError
 from mathesar.errors import InvalidTableError
 from mathesar.models import DataFile
 from mathesar.api.pagination import DefaultLimitOffsetPagination
@@ -28,17 +30,16 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
             serializer = DataFileSerializer(data_file, context={'request': request})
             return Response(serializer.data)
         else:
-            return Response(
-                {'detail': 'Method "PATCH" allowed only for header.'},
-                status=status.HTTP_405_METHOD_NOT_ALLOWED
-            )
+            raise GenericApiError([ExceptionBody(code=ErrorCodes.MethodNotAllowed.value,
+                                                 message='Method "PATCH" allowed only for header.')],
+                                  status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def create(self, request):
         serializer = DataFileSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         try:
             datafile = create_datafile(serializer.validated_data)
-        except InvalidTableError:
-            raise ValidationError('Unable to tabulate data')
+        except InvalidTableError as e:
+            raise ApiInvalidTableError(e, status_code=status.HTTP_400_BAD_REQUEST)
         serializer = DataFileSerializer(datafile, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
