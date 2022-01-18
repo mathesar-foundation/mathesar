@@ -55,6 +55,9 @@ export function getGenericModificationStatusByPK(
   primaryKeyValue: unknown,
 ): ModificationStatus {
   const type = recordModificationState.get(primaryKeyValue)?.get(RECORD_COMBINED_STATE_KEY);
+  if (!type) {
+    return 'idle';
+  }
   if (inProgressSet.has(type)) {
     return 'inprocess';
   }
@@ -151,14 +154,16 @@ export class Meta {
           // eslint-disable-next-line no-restricted-syntax
           for (const value of $recordModificationState.values()) {
             const rowState = value?.get(RECORD_COMBINED_STATE_KEY);
-            if (inProgressSet.has(rowState)) {
-              finalState = 'inprocess';
-              break;
-            }
-            if (errorSet.has(rowState)) {
-              finalState = 'error';
-            } else if (completeSet.has(rowState) && finalState === 'idle') {
-              finalState = 'complete';
+            if (rowState) {
+              if (inProgressSet.has(rowState)) {
+                finalState = 'inprocess';
+                break;
+              }
+              if (errorSet.has(rowState)) {
+                finalState = 'error';
+              } else if (completeSet.has(rowState) && finalState === 'idle') {
+                finalState = 'complete';
+              }
             }
           }
           set(finalState);

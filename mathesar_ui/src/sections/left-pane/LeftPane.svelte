@@ -29,7 +29,7 @@
 
   export let database: string;
   export let schemaId: SchemaEntry['id'];
-  export let activeTab: MathesarTab;
+  export let activeTab: MathesarTab | undefined = undefined;
   export let getLink: (entry: TableEntry) => string;
   
   let tree: TreeItem[] = [];
@@ -61,7 +61,7 @@
 
   $: tree = generateTree($tables);
 
-  function onActiveTabChange(_activeTab: MathesarTab) {
+  function onActiveTabChange(_activeTab: MathesarTab | undefined) {
     if (_activeTab?.tabularData) {
       activeOptionSet = new Set([
         _activeTab.tabularData.id,

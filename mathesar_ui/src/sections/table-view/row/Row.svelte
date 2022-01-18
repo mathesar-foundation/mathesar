@@ -48,16 +48,13 @@
   function getColumnPosition(
     _columnPositionMap: ColumnPositionMap,
     _name: Column['name'],
-  ): ColumnPosition {
+  ): ColumnPosition | undefined {
     return _columnPositionMap.get(_name);
   }
 
-  $: isSelected = ($selectedRecords as Set<unknown>).has(row[$columnsDataStore.primaryKey]);
-  $: modificationState = getModificationState(
-    $recordModificationState,
-    row,
-    $columnsDataStore.primaryKey,
-  );
+  $: ({ primaryKey } = $columnsDataStore);
+  $: isSelected = primaryKey && $selectedRecords.has(row[primaryKey]);
+  $: modificationState = getModificationState($recordModificationState, row, primaryKey);
   $: rowWidth = getColumnPosition($columnPositionMap, '__row')?.width || 0;
 
   function checkAndCreateEmptyRow() {
@@ -76,7 +73,7 @@
   {:else if row.__isGroupHeader}
     <GroupHeader {row} {rowWidth} grouping={$grouping} group={row.__group}/>
   {:else}
-    <RowControl primaryKeyColumn={$columnsDataStore.primaryKey}
+    <RowControl primaryKeyColumn={primaryKey}
                 {row} {meta} recordsData={recordsData}/>
 
     {#each $columnsDataStore.columns as column (column.name)}

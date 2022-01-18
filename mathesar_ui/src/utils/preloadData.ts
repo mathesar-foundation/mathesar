@@ -14,27 +14,28 @@ interface CommonData {
   abstract_types: AbstractTypeResponse[]
 }
 
-function getData<T>(selector: string, retainData = false): T {
-  const preloadedData: Element = document.querySelector<Element>(selector);
-  if (preloadedData?.textContent) {
-    try {
-      const data = JSON.parse(preloadedData.textContent) as T;
-      if (!retainData) {
-        preloadedData.remove();
-      }
-      return data;
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(err);
-    }
+function getData<T>(selector: string, retainData = false): T | undefined {
+  const preloadedData = document.querySelector<Element>(selector);
+  if (!preloadedData?.textContent) {
+    return undefined;
   }
-  return null;
+  try {
+    const data = JSON.parse(preloadedData.textContent) as T;
+    if (!retainData) {
+      preloadedData.remove();
+    }
+    return data;
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log(err);
+  }
+  return undefined;
 }
 
-export function preloadRouteData<T>(routeName: string): T {
+export function preloadRouteData<T>(routeName: string): T | undefined {
   return getData<T>(`#${routeName}`);
 }
 
-export function preloadCommonData(): CommonData {
+export function preloadCommonData(): CommonData | undefined {
   return getData('#common-data', true);
 }
