@@ -43,6 +43,14 @@ class ApiUniqueViolation(APIException):
         self.status_code = status_code
 
 
+class NotFoundApiException(APIException):
+    def __init__(self, exception, error_code=ErrorCodes.NotFound.value, message=None, field=None,
+                 details=None, status_code=status.HTTP_404_NOT_FOUND):
+        exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
+        self.detail = [exception_detail]
+        self.status_code = status_code
+
+
 class ValidationError(DrfValidationError):
     status_code = status.HTTP_400_BAD_REQUEST
     default_code = 'invalid'
@@ -60,9 +68,37 @@ class ProgrammingException(CustomApiException):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class DuplicateTableException(CustomApiException):
+class DuplicateTableException(ProgrammingException):
     # Default message is not needed as the exception string provides enough details
     def __init__(self, exception, error_code=ErrorCodes.DuplicateTableError.value, message=None, field=None,
+                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class DuplicateColumnException(ProgrammingException):
+    # Default message is not needed as the exception string provides enough details
+    def __init__(self, exception, error_code=ErrorCodes.DuplicateColumnError.value, message=None, field=None,
+                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class TypeErrorApiException(CustomApiException):
+    # Default message is not needed as the exception string provides enough details
+    def __init__(self, exception, error_code=ErrorCodes.TypeError.value, message=None, field=None,
+                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class InvalidDefaultApiException(CustomApiException):
+    # Default message is not needed as the exception string provides enough details
+    def __init__(self, exception, error_code=ErrorCodes.InvalidDefault.value, message=None, field=None,
+                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class ApiInvalidTypeOptionException(CustomApiException):
+    # Default message is not needed as the exception string provides enough details
+    def __init__(self, exception, error_code=ErrorCodes.InvalidTypeOption.value, message=None, field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         super().__init__(exception, error_code, message, field, details, status_code)
 
@@ -115,10 +151,28 @@ class ApiValueError(CustomApiException):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class ApiInvalidTypeCastException(ApiIntegrityException):
+class ApiInvalidTypeCastException(CustomApiException):
 
     def __init__(self, exception, error_code=ErrorCodes.InvalidTypeCast.value,
                  message="Invalid type cast requested.",
+                 field=None,
+                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class UndefinedFunctionApiException(CustomApiException):
+
+    def __init__(self, exception, error_code=ErrorCodes.UndefinedFunction.value,
+                 message=None,
+                 field=None,
+                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class DynamicDefaultApiException(CustomApiException):
+
+    def __init__(self, exception, error_code=ErrorCodes.UndefinedFunction.value,
+                 message=None,
                  field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         super().__init__(exception, error_code, message, field, details, status_code)
