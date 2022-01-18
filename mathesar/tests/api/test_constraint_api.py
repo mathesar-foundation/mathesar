@@ -1,3 +1,6 @@
+from mathesar.api.exceptions.error_codes import ErrorCodes
+
+
 def _verify_primary_and_unique_constraints(response):
     response_data = response.json()
     constraints_data = response_data['results']
@@ -145,7 +148,9 @@ def test_create_unique_constraint_with_duplicate_name(create_table, client):
     }
     response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
     assert response.status_code == 400
-    assert response.json() == ['Relation with the same name already exists']
+    response_body = response.json()[0]
+    assert response_body['message'] == 'Relation with the same name already exists'
+    assert response_body['code'] == ErrorCodes.DuplicateTableError.value
 
 
 def test_create_unique_constraint_for_non_unique_column(create_table, client):
@@ -158,7 +163,9 @@ def test_create_unique_constraint_for_non_unique_column(create_table, client):
     }
     response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
     assert response.status_code == 400
-    assert response.json() == ['This column has non-unique values so a unique constraint cannot be set']
+    response_body = response.json()[0]
+    assert response_body['message'] == 'This column has non-unique values so a unique constraint cannot be set'
+    assert response_body['code'] == ErrorCodes.UniqueViolation.value
 
 
 def test_drop_nonexistent_constraint(create_table, client):

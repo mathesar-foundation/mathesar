@@ -263,7 +263,6 @@ def test_data_file_create_multiple_source_fields(client, csv_filename, paste_fil
         data = {'file': csv_file, 'paste': paste_text}
         response = client.post('/api/v0/data_files/', data, format='multipart')
         response_dict = response.json()
-        print(response_dict)
     assert response.status_code == 400
     assert 'Multiple source fields passed:' in response_dict[0]['message']
 

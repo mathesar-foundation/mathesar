@@ -35,6 +35,14 @@ class CustomApiException(APIException):
         self.status_code = status_code
 
 
+class ApiUniqueViolation(APIException):
+    def __init__(self, exception, error_code=ErrorCodes.UniqueViolation.value, message=None, field=None,
+                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
+        self.detail = [exception_detail]
+        self.status_code = status_code
+
+
 class ValidationError(DrfValidationError):
     status_code = status.HTTP_400_BAD_REQUEST
     default_code = 'invalid'
