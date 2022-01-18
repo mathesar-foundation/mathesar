@@ -1,10 +1,14 @@
 from django.urls import reverse
-from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
+from psycopg2.errors import DuplicateTable
+from rest_framework import serializers, status
+from sqlalchemy.exc import ProgrammingError
 
+from mathesar.api.exceptions.exceptions import ProgrammingException, DuplicateTableException, MultipleDataFileException, \
+    DistinctColumnRequiredException, ColumnSizeMismatchException
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.columns import SimpleColumnSerializer
 from mathesar.models import Table, DataFile
+from mathesar.utils.tables import gen_table_name, create_table_from_datafile, create_empty_table
 
 
 class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
@@ -68,10 +72,38 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
 
     def validate_data_files(self, data_files):
         if data_files and len(data_files) > 1:
-            raise ValidationError('Multiple data files are unsupported.')
+            raise MultipleDataFileException()
         return data_files
+
+    def create(self, validated_data):
+        schema = validated_data['schema']
+        data_files = validated_data.get('data_files')
+        name = validated_data.get('name') or gen_table_name(schema, data_files)
+
+        try:
+            if data_files:
+                table = create_table_from_datafile(data_files, name, schema)
+            else:
+                table = create_empty_table(name, schema)
+        except ProgrammingError as e:
+            if type(e.orig) == DuplicateTable:
+                raise DuplicateTableException(e, message=f"Relation {validated_data['name']}"
+                                                         f" already exists in schema {schema.id}",
+                                              field="name", status_code=status.HTTP_400_BAD_REQUEST)
+            else:
+                raise ProgrammingException(e)
+        return table
 
 
 class TablePreviewSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     name = serializers.CharField(required=False)
     columns = SimpleColumnSerializer(many=True)
+
+    def validate_columns(self, columns):
+        table = self.context['table']
+        column_names = [col["name"] for col in columns]
+        if not len(column_names) == len(set(column_names)):
+            raise DistinctColumnRequiredException()
+        if not len(columns) == len(table.sa_columns):
+            raise ColumnSizeMismatchException()
+        return columns

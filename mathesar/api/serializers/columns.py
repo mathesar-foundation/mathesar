@@ -77,7 +77,7 @@ class ColumnDefaultSerializer(MathesarErrorMessageMixin, serializers.Serializer)
     is_dynamic = serializers.BooleanField(read_only=True)
 
 
-class ColumnSerializer(MathesarErrorMessageMixin, SimpleColumnSerializer):
+class ColumnSerializer(SimpleColumnSerializer):
     class Meta(SimpleColumnSerializer.Meta):
         fields = SimpleColumnSerializer.Meta.fields + (
             'nullable',
