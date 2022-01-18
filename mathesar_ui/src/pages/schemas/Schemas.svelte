@@ -77,12 +77,8 @@
   </div>
 </main>
 
-{#if isAddModalOpen && activeSchema}
-  <AddEditSchema
-    bind:isOpen={isAddModalOpen}
-    isEditMode={activeSchema !== undefined}
-    schema={activeSchema}
-  />
+{#if isAddModalOpen}
+  <AddEditSchema bind:isOpen={isAddModalOpen} schema={activeSchema} />
 {/if}
 
 <style global lang="scss">

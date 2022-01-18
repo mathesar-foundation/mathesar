@@ -12,22 +12,24 @@
   import { States } from '@mathesar/utils/api';
 
   export let isOpen = false;
-  export let isEditMode = false;
-  export let schema: SchemaEntry;
+  export let schema: SchemaEntry | undefined = undefined;
 
   let name = '';
   let state: States = States.Idle;
   let error: string | undefined;
 
   onMount(() => {
-    if (isEditMode) {
+    if (schema) {
       name = schema.name;
     }
   });
 
-  function isDuplicateName(_isEditMode: boolean, _name: string): boolean {
+  function isDuplicateName(
+    _schema: SchemaEntry | undefined,
+    _name: string,
+  ): boolean {
     if (
-      _isEditMode &&
+      !!_schema &&
       _name.toLowerCase().trim() === schema.name.toLowerCase().trim()
     ) {
       return false;
@@ -46,7 +48,7 @@
     return _isEditDisabled || !name.trim() || _isDuplicate;
   }
 
-  $: isDuplicate = isDuplicateName(isEditMode, name);
+  $: isDuplicate = isDuplicateName(schema, name);
   $: isInputDisabled = state === States.Loading || state === States.Done;
   $: isCreationDisabled = isDisabled(isInputDisabled, name, isDuplicate);
 
@@ -54,7 +56,7 @@
     try {
       state = States.Loading;
       error = undefined;
-      if (isEditMode) {
+      if (schema) {
         await updateSchema($currentDBName, { ...schema, name });
       } else {
         await createSchema($currentDBName, name);
@@ -69,9 +71,9 @@
 
 <Modal class="schema-modal" bind:isOpen allowClose={state !== States.Loading}>
   <div class="header">
-    {isEditMode ? 'Update schema' : 'Create a schema'}
+    {schema ? 'Update schema' : 'Create a schema'}
   </div>
-  {#if !isEditMode}
+  {#if !schema}
     <div class="help-text">
       Schemas are collections of database objects such as tables and views. They
       are best when used to organize data for a specific project.
@@ -112,7 +114,7 @@
         appearance="primary"
         on:click={saveSchema}
       >
-        {isEditMode ? 'Save' : 'Create'} schema
+        {schema ? 'Save' : 'Create'} schema
         {#if state === States.Loading}
           <Icon data={faSpinner} spin={true} />
         {/if}
