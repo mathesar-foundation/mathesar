@@ -331,7 +331,8 @@ def test_column_create_some_parameters(column_test_table, client):
     )
     response_data = response.json()
     assert response.status_code == 400
-    assert response_data["type"][0] == "This field is required."
+    assert response_data[0]['message'] == "This field is required."
+    assert response_data[0]['field'] == "type"
 
 
 def test_column_update_name(column_test_table, client):
@@ -653,9 +654,10 @@ def test_column_update_when_missing(column_test_table, client):
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/99999/", data=data
     )
+    print(response.json())
     response_data = response.json()[0]
     assert response.status_code == 404
-    assert "not found" in response_data['details']
+    assert "not found" in response_data['message']
 
 
 def test_column_destroy(column_test_table, client):
@@ -688,7 +690,7 @@ def test_column_destroy_when_missing(column_test_table, client):
     response_data = response.json()
     response_data = response.json()[0]
     assert response.status_code == 404
-    assert "not found" in response_data['details']
+    assert "not found" in response_data['message']
 
 
 def test_column_duplicate(column_test_table, client):
@@ -745,7 +747,8 @@ def test_column_duplicate_some_parameters(column_test_table, client):
     )
     response_data = response.json()
     assert response.status_code == 400
-    assert response_data["source_column"][0] == "This field is required."
+    assert response_data[0]['message'] == "This field is required."
+    assert response_data[0]['field'] == "source_column"
 
 
 def test_column_duplicate_no_parameters(column_test_table, client):

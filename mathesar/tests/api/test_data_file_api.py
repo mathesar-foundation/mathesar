@@ -143,7 +143,8 @@ def test_data_file_create_csv_long_name(client, csv_filename):
             response = client.post('/api/v0/data_files/', data, format='multipart')
             data_file_dict = response.json()
     assert response.status_code == 400
-    assert 'Ensure this filename has at most 100' in data_file_dict['file'][0]
+    assert 'Ensure this filename has at most 100' in data_file_dict[0]['message']
+    assert data_file_dict[0]['code'] == 2043
 
 
 @pytest.mark.parametrize('header', [True, False])
@@ -221,7 +222,7 @@ def test_data_file_create_url_invalid_format(client):
     response_dict = response.json()
     assert response.status_code == 400
     assert response_dict[0]['message'] == 'Enter a valid URL.'
-
+    assert response_dict[0]['field'] == 'url'
 
 def test_data_file_create_url_invalid_address(client):
     url = 'https://www.test.invalid'
@@ -229,8 +230,8 @@ def test_data_file_create_url_invalid_address(client):
         response = client.post('/api/v0/data_files/', data={'url': url})
         response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict['url'][0] == 'URL cannot be reached.'
-
+    assert response_dict[0]['message']== 'URL cannot be reached.'
+    assert response_dict[0]['field'] == 'url'
 
 def test_data_file_create_url_invalid_download(
     client, patents_url, mock_get_patents_url
@@ -239,7 +240,8 @@ def test_data_file_create_url_invalid_download(
     response = client.post('/api/v0/data_files/', data={'url': patents_url})
     response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict['url'][0] == 'URL cannot be downloaded.'
+    assert response_dict[0]['message'] == 'URL cannot be downloaded.'
+    assert response_dict[0]['field'] == 'url'
 
 
 def test_data_file_create_url_invalid_content_type(client):
@@ -249,7 +251,8 @@ def test_data_file_create_url_invalid_content_type(client):
         response = client.post('/api/v0/data_files/', data={'url': url})
         response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict['url'][0] == "URL resource 'text/html' not a valid type."
+    assert response_dict[0]['message'] == "URL resource 'text/html' not a valid type."
+    assert response_dict[0]['field'] == "url"
 
 
 def test_data_file_create_multiple_source_fields(client, csv_filename, paste_filename):
@@ -260,11 +263,13 @@ def test_data_file_create_multiple_source_fields(client, csv_filename, paste_fil
         response = client.post('/api/v0/data_files/', data, format='multipart')
         response_dict = response.json()
     assert response.status_code == 400
-    assert 'Multiple source fields passed:' in response_dict['non_field_errors'][0]
+    assert 'Multiple source fields passed:' in response_dict[0]['message']
+    assert 'non_field_errors' in response_dict[0]['field']
 
 
 def test_data_file_create_no_source_fields(client):
     response = client.post('/api/v0/data_files/', {})
     response_dict = response.json()
     assert response.status_code == 400
-    assert 'should be specified.' in response_dict['non_field_errors'][0]
+    assert 'should be specified.' in response_dict[0]['message']
+    assert 'non_field_errors' in response_dict[0]['field']

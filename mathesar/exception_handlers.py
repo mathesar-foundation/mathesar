@@ -27,9 +27,9 @@ non_spec_api_exception_converter_map = {
 def fix_error_response(data):
     for index, error in enumerate(data):
         if 'code' in error:
-            data[index]['code'] = int(error['code'])
+            data[index]['code'] = int(error['code']) if error['code'] is not None and str(error['code']) != 'None' else ErrorCodes.NonClassifiedError.value
         if 'detail' not in error:
-            data[index]['detail'] = {}
+            data[index]['detail'] = error.pop('details', {})
     return data
 
 

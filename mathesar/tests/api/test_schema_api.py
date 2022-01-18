@@ -204,7 +204,7 @@ def test_schema_update(client, test_db_name):
     }
     response = client.put(f'/api/v0/schemas/{schema.id}/', data=data)
     assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "PUT" not allowed.'
+    assert response.json()[0]['message'] == 'Method "PUT" not allowed.'
 
 
 def test_schema_partial_update(create_schema, client, test_db_name):
