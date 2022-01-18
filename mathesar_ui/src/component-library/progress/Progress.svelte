@@ -8,7 +8,3 @@
      {...$$restProps}>
   <div style="width:{percentage}%"></div>
 </div>
-
-<style global lang="scss">
-  @import "Progress.scss";
-</style>

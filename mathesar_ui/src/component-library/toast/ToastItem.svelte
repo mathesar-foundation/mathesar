@@ -64,7 +64,3 @@
     <progress value={$progress} />
   {/if}
 </div>
-  
-<style global lang="scss">
-  @import "ToastItem.scss";
-</style>

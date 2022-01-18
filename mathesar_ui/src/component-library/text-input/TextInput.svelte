@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -13,54 +14,34 @@
   let classes = '';
   export { classes as class };
 
-  // Inline styles
-  export let style = '';
-
   // Disable input
   export let disabled = false;
 
   // Underlying DOM element for direct access
-  export let element: HTMLElement = null;
+  export let element: HTMLInputElement | undefined = undefined;
 
-  let focus = false;
+  // Id for the input
+  export let id: string = undefined;
 
-  function focusInput(e: Event) {
-    if (e.target !== element) {
-      element?.focus();
-    }
-  }
+  export let hasValidationErrors = false;
 
-  function handleKeypress(e: KeyboardEvent) {
+  function handleKeydown(e: KeyboardEvent) {
     if (e.key === 'Enter') {
       dispatch('enter');
+    }
+    if (e.key === 'Escape') {
+      dispatch('esc');
     }
   }
 </script>
 
-<div
-  class={['text-input', classes].join(' ')}
-  class:focus
-  class:disabled
-  {style}
-  on:click={focusInput}
-  on:keypress={handleKeypress}
->
-  {#if $$slots.prepend}
-    <span class="prepend">
-      <slot name="prepend"></slot>
-    </span>
-  {/if}
-  <input bind:this={element} {...$$restProps} type='text' bind:value
-          {disabled}
-          on:focus={() => { focus = true; }}
-          on:blur={() => { focus = false; }}/>
-  {#if $$slots.append}
-    <span class="append">
-      <slot name="append"></slot>
-    </span>
-  {/if}
-</div>
+<BaseInput {...$$restProps} bind:id {disabled}/>
 
-<style global lang="scss">
-  @import "TextInput.scss";
-</style>
+<input bind:this={element} {...$$restProps} type='text'
+  class={['input-element', 'text-input', classes].join(' ')}
+  class:has-validation-errors={hasValidationErrors}
+  bind:value
+  {id} {disabled}
+  on:focus
+  on:blur
+  on:keydown={handleKeydown}/>

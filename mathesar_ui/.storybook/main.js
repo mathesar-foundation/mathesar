@@ -24,6 +24,16 @@ module.exports = {
       svelte: path.resolve('node_modules', 'svelte')
     }
     config.resolve.extensions.push(".ts", ".tsx", ".mjs", ".js", ".svelte");
+    config.module.rules.push({
+      test: /\.scss$/,
+      use: ['style-loader', 'css-loader', 'sass-loader'],
+      include: path.resolve(__dirname, '../'),
+      resolve: {
+        alias: {
+          "@": path.resolve(__dirname, "../src/"),
+        },
+      },
+    });
     return config;
   },
   "stories": [

@@ -41,7 +41,3 @@
     {/if}
   </div>
 {/if}
-
-<style global lang="scss">
-  @import 'Notification.scss';
-</style>
