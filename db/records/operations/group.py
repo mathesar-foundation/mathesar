@@ -134,6 +134,27 @@ def _get_distinct_group_select(table, grouping_columns):
     )
 
 
+def _get_tens_powers_range_group_select(columns):
+    column = columns[0]  # For now, this only works on single columns
+    extrema_cte = select(
+        column, func.min(column).over().label('minimum'), func.max(column).over().label('maximum')
+    ).cte('extrema_cte')
+    diff_cte = select(
+        extrema_cte,
+        (extrema_cte.c.maximum - extrema_cte.c.minimum).label('extrema_difference')
+    ).cte('diff_cte')
+    power_cte = select(
+        diff_cte,
+        (func.floor(func.log(diff_cte.c.extrema_difference)) - 1).label('power')
+    ).cte('power_cte')
+    raw_id_cte = select(
+        power_cte,
+        func.ceil(power_cte.columns[column.name] / func.pow(literal(10.0), power_cte.c.power)).label('raw_id')
+    ).cte('raw_id_cte')
+    built_cte = select(raw_id_cte)
+    return built_cte
+
+
 def _get_percentile_range_group_select(table, columns, num_groups):
     column_names = [col.name for col in columns]
     # cume_dist is a PostgreSQL function that calculates the cumulative
