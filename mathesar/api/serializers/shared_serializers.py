@@ -4,6 +4,7 @@ import arrow
 from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
+from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.database.types import MathesarTypeIdentifier, get_mathesar_type_from_db_type
 
 
@@ -90,7 +91,7 @@ class OverrideRootPartialMixin:
         return super().run_validation(*args, **kwargs)
 
 
-class CustomBooleanLabelSerializer(serializers.Serializer):
+class CustomBooleanLabelSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     TRUE = serializers.CharField()
     FALSE = serializers.CharField()
 
@@ -98,12 +99,12 @@ class CustomBooleanLabelSerializer(serializers.Serializer):
 DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY = 'mathesar_type'
 
 
-class BooleanDisplayOptionSerializer(OverrideRootPartialMixin, serializers.Serializer):
+class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
     input = serializers.ChoiceField(choices=[("dropdown", 1), ("checkbox", 2)])
     custom_labels = CustomBooleanLabelSerializer(required=False)
 
 
-class NumberDisplayOptionSerializer(OverrideRootPartialMixin, serializers.Serializer):
+class NumberDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
     show_as_percentage = serializers.BooleanField(default=False)
     locale = serializers.CharField(required=False)
 
@@ -172,27 +173,27 @@ class TimeWithoutTimeZoneFormatValidator(TimeWithTimeZoneFormatValidator):
         return super().validate(datetime_obj, display_format, serializer_field)
 
 
-class DateDisplayOptionSerializer(OverrideRootPartialMixin, serializers.Serializer):
+class DateDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
     format = serializers.CharField(validators=[DateFormatValidator()])
 
 
-class TimestampWithoutTimezoneDisplayOptionSerializer(OverrideRootPartialMixin, serializers.Serializer):
+class TimestampWithoutTimezoneDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
     format = serializers.CharField(validators=[TimestampWithoutTimeZoneFormatValidator()])
 
 
-class TimestampWithTimezoneDisplayOptionSerializer(OverrideRootPartialMixin, serializers.Serializer):
+class TimestampWithTimezoneDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
     format = serializers.CharField(validators=[TimestampWithTimeZoneFormatValidator()])
 
 
-class TimeWithTimezoneDisplayOptionSerializer(OverrideRootPartialMixin, serializers.Serializer):
+class TimeWithTimezoneDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
     format = serializers.CharField(validators=[TimeWithTimeZoneFormatValidator()])
 
 
-class TimeWithoutTimezoneDisplayOptionSerializer(OverrideRootPartialMixin, serializers.Serializer):
+class TimeWithoutTimezoneDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
     format = serializers.CharField(validators=[TimeWithoutTimeZoneFormatValidator()])
 
 
-class DisplayOptionsMappingSerializer(ReadWritePolymorphicSerializerMappingMixin, serializers.Serializer):
+class DisplayOptionsMappingSerializer(MathesarErrorMessageMixin, ReadWritePolymorphicSerializerMappingMixin, serializers.Serializer):
     serializers_mapping = {
         MathesarTypeIdentifier.BOOLEAN.value: BooleanDisplayOptionSerializer,
         MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,

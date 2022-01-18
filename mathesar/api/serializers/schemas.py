@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models import Schema
 
 
@@ -13,7 +14,7 @@ class ModelNameField(serializers.CharField):
         return value.name
 
 
-class SchemaSerializer(serializers.HyperlinkedModelSerializer):
+class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSerializer):
     name = serializers.CharField()
     database = ModelNameField(max_length=128)
 

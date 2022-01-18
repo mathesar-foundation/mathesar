@@ -3,13 +3,14 @@ import requests
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models import DataFile
 
 
 SUPPORTED_URL_CONTENT_TYPES = {'text/csv', 'text/plain'}
 
 
-class DataFileSerializer(serializers.ModelSerializer):
+class DataFileSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(
         default=serializers.CurrentUserDefault(), read_only=True
     )

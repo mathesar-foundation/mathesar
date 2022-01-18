@@ -2,11 +2,12 @@ from django.urls import reverse
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.columns import SimpleColumnSerializer
 from mathesar.models import Table, DataFile
 
 
-class TableSerializer(serializers.ModelSerializer):
+class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     columns = SimpleColumnSerializer(many=True, required=False)
     records_url = serializers.SerializerMethodField()
     constraints_url = serializers.SerializerMethodField()
@@ -71,6 +72,6 @@ class TableSerializer(serializers.ModelSerializer):
         return data_files
 
 
-class TablePreviewSerializer(serializers.Serializer):
+class TablePreviewSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     name = serializers.CharField(required=False)
     columns = SimpleColumnSerializer(many=True)
