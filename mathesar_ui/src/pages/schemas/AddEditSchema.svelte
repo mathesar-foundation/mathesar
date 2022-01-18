@@ -35,8 +35,7 @@
       return false;
     }
     return Array.from($schemas?.data || []).some(
-      ([, _schema]) =>
-        (_schema.name as string).toLowerCase().trim() === _name.trim(),
+      ([, s]) => (s.name as string).toLowerCase().trim() === _name.trim(),
     );
   }
 
