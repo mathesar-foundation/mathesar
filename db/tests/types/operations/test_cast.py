@@ -531,7 +531,9 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             BOOLEAN: {
                 VALID: [
-                    ("true", True), ("false", False), ("t", True), ("f", False)
+                    ("true", True), ("false", False), ("t", True), ("f", False),
+                    ("yes", True), ("y", True), ("no", False), ("n", False),
+                    ("on", True), ("off", False),
                 ],
                 INVALID: ["cat"],
             },
@@ -670,7 +672,9 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             BOOLEAN: {
                 VALID: [
-                    ("true", True), ("false", False), ("t", True), ("f", False)
+                    ("true", True), ("false", False), ("t", True), ("f", False),
+                    ("yes", True), ("y", True), ("no", False), ("n", False),
+                    ("on", True), ("off", False),
                 ],
                 INVALID: ["cat"],
             },
