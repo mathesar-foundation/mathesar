@@ -9,12 +9,27 @@ ul.pagination {
   li {
     margin: 0 2px;
 
-    a, button:focus {
+    a, button {
       padding: 5px 3px;
       min-width: 26px;
       display: inline-block;
       text-align: center;
       cursor: pointer;
+
+      &:hover {
+        background-color: #aeb9be21 ;
+      }
+
+      &:disabled {
+        color: #ccc;
+        background-color: inherit;
+        cursor: not-allowed;
+      }
+    }
+    
+    button:focus {
+      border: 1.4px solid #6bc3ec;
+      color: #6bc3ec;
     }
 
     .page {
@@ -25,6 +40,9 @@ ul.pagination {
     }
 
     button {
+      border: none;
+      background: inherit;
+
       .ellipsis {
         color: #afafaf;
       }

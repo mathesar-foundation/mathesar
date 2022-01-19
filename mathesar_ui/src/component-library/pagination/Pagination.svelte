@@ -52,8 +52,8 @@
     {#if pageCount > 1}
       <li>
         <button tabindex="0" role="link" aria-label="Previous"
-              on:click={(e) => setPage(e, currentPage - 1)}>
-          <Icon data={faAngleLeft}/>
+              on:click={(e) => setPage(e, currentPage - 1)} disabled={currentPage === 1}>
+          <Icon data={faAngleLeft} tabindex="-1"/>
         </button>
       </li>
     {/if}
@@ -76,7 +76,7 @@
         <li>
           <button tabindex="0" role="link" aria-label="Goto Page {pageInfo.prevPageWindow}" 
                 on:click={(e) => setPage(e, pageInfo.prevPageWindow)}>
-            <Icon class="ellipsis" data={faEllipsisH}/>
+            <Icon class="ellipsis" tabindex="-1" data={faEllipsisH}/>
             <Icon class="arrow" data={faAngleDoubleLeft}/>
           </button>
         </li>
@@ -107,7 +107,7 @@
         <li>
           <button tabindex="0" role="link" aria-label="Goto Page {pageInfo.nextPageWindow}" 
                 on:click={(e) => setPage(e, pageInfo.nextPageWindow)}>
-            <Icon class="ellipsis" data={faEllipsisH}/>
+            <Icon class="ellipsis" tabindex="-1" data={faEllipsisH}/>
             <Icon class="arrow" data={faAngleDoubleRight}/>
           </button>
         </li>
@@ -120,7 +120,7 @@
             {pageCount}
           </a>
         {:else}
-          <button tabindex="0" role="link" aria-label="Goto Page {pageCount}" 
+          <button tabindex="0" class="page" role="link" aria-label="Goto Page {pageCount}" 
                 on:click={(e) => setPage(e, pageCount)}>
             {pageCount}
           </button>
@@ -130,7 +130,8 @@
 
     {#if pageCount > 1}
       <li>
-        <button tabindex="0" role="link" aria-label="Next" on:click={(e) => setPage(e, currentPage + 1)}>
+        <button tabindex="0" role="link" aria-label="Next" on:click={(e) => setPage(e, currentPage + 1)}
+                disabled={currentPage === pageCount}>
           <Icon data={faAngleRight}/>
         </button>
       </li>
