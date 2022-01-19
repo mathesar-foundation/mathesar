@@ -40,11 +40,11 @@ class RecordViewSet(viewsets.ViewSet):
                 grouping=serializer.validated_data['grouping'],
             )
         except (BadFilterFormat, FilterFieldNotFound) as e:
-            raise api_exceptions.BadFilterException(e, field='filters', status_code=status.HTTP_400_BAD_REQUEST)
+            raise api_exceptions.BadFilterAPIError(e, field='filters', status_code=status.HTTP_400_BAD_REQUEST)
         except (BadSortFormat, SortFieldNotFound) as e:
-            raise api_exceptions.BadSortException(e, field='order_by', status_code=status.HTTP_400_BAD_REQUEST)
+            raise api_exceptions.BadSortAPIError(e, field='order_by', status_code=status.HTTP_400_BAD_REQUEST)
         except (BadGroupFormat, GroupFieldNotFound, InvalidGroupType) as e:
-            raise api_exceptions.BadGroupException(e, field='grouping', status_code=status.HTTP_400_BAD_REQUEST)
+            raise api_exceptions.BadGroupAPIError(e, field='grouping', status_code=status.HTTP_400_BAD_REQUEST)
 
         serializer = RecordSerializer(records, many=True)
         return paginator.get_paginated_response(serializer.data)

@@ -30,9 +30,9 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
             serializer = DataFileSerializer(data_file, context={'request': request})
             return Response(serializer.data)
         else:
-            exception_body = exceptions.ExceptionBody(code=ErrorCodes.MethodNotAllowed.value,
+            exception_body = exceptions.ErrorBody(code=ErrorCodes.MethodNotAllowed.value,
                                                       message='Method "PATCH" allowed only for header.')
-            raise exceptions.GenericApiError([exception_body],
+            raise exceptions.GenericAPIError([exception_body],
                                              status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def create(self, request, *args, **kwargs):
@@ -41,6 +41,6 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
         try:
             datafile = create_datafile(serializer.validated_data)
         except InvalidTableError as e:
-            raise exceptions.ApiInvalidTableError(e, status_code=status.HTTP_400_BAD_REQUEST)
+            raise exceptions.InvalidTableAPIError(e, status_code=status.HTTP_400_BAD_REQUEST)
         serializer = DataFileSerializer(datafile, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)

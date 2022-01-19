@@ -3,8 +3,8 @@ from psycopg2.errors import DuplicateTable
 from rest_framework import serializers, status
 from sqlalchemy.exc import ProgrammingError
 
-from mathesar.api.exceptions.exceptions import ProgrammingException, DuplicateTableException, MultipleDataFileException, \
-    DistinctColumnRequiredException, ColumnSizeMismatchException
+from mathesar.api.exceptions.exceptions import ProgrammingAPIError, DuplicateTableAPIError, MultipleDataFileAPIError, \
+    DistinctColumnRequiredAPIError, ColumnSizeMismatchAPIError
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.columns import SimpleColumnSerializer
 from mathesar.models import Table, DataFile
@@ -72,7 +72,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
 
     def validate_data_files(self, data_files):
         if data_files and len(data_files) > 1:
-            raise MultipleDataFileException()
+            raise MultipleDataFileAPIError()
         return data_files
 
     def create(self, validated_data):
@@ -87,11 +87,11 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
                 table = create_empty_table(name, schema)
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
-                raise DuplicateTableException(e, message=f"Relation {validated_data['name']}"
+                raise DuplicateTableAPIError(e, message=f"Relation {validated_data['name']}"
                                                          f" already exists in schema {schema.id}",
-                                              field="name", status_code=status.HTTP_400_BAD_REQUEST)
+                                             field="name", status_code=status.HTTP_400_BAD_REQUEST)
             else:
-                raise ProgrammingException(e)
+                raise ProgrammingAPIError(e)
         return table
 
 
@@ -103,7 +103,7 @@ class TablePreviewSerializer(MathesarErrorMessageMixin, serializers.Serializer):
         table = self.context['table']
         column_names = [col["name"] for col in columns]
         if not len(column_names) == len(set(column_names)):
-            raise DistinctColumnRequiredException()
+            raise DistinctColumnRequiredAPIError()
         if not len(columns) == len(table.sa_columns):
-            raise ColumnSizeMismatchException()
+            raise ColumnSizeMismatchAPIError()
         return columns

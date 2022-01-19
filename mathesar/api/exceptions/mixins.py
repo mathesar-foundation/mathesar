@@ -3,12 +3,12 @@ from rest_framework.utils.serializer_helpers import ReturnList
 from rest_framework_friendly_errors.mixins import FriendlyErrorMessagesMixin
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.exceptions import ValidationError as RestValidationError
-from mathesar.api.exceptions.exceptions import ExceptionBody
+from mathesar.api.exceptions.exceptions import ErrorBody
 
 
 class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
     def is_pretty(self, error):
-        return isinstance(error, dict) and tuple(error.keys()) == ExceptionBody._fields
+        return isinstance(error, dict) and tuple(error.keys()) == ErrorBody._fields
 
     def build_pretty_errors(self, errors, serializer=None):
 

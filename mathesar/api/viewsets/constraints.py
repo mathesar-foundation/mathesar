@@ -36,19 +36,19 @@ class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
             constraint = table.add_constraint(data['type'], data['columns'], name)
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
-                raise exceptions.DuplicateTableException(e,
-                                                         message='Relation with the same name already exists',
+                raise exceptions.DuplicateTableAPIError(e,
+                                                        message='Relation with the same name already exists',
+                                                        status_code=status.HTTP_400_BAD_REQUEST
+                                                        )
+            else:
+                raise exceptions.APIError(e)
+        except IntegrityError as e:
+            if type(e.orig) == UniqueViolation:
+                raise exceptions.UniqueViolationAPIError(e,
                                                          status_code=status.HTTP_400_BAD_REQUEST
                                                          )
             else:
-                raise exceptions.CustomApiException(e)
-        except IntegrityError as e:
-            if type(e.orig) == UniqueViolation:
-                raise exceptions.ApiUniqueViolation(e,
-                                                    status_code=status.HTTP_400_BAD_REQUEST
-                                                    )
-            else:
-                raise exceptions.CustomApiException(e)
+                raise exceptions.APIError(e)
 
         out_serializer = ConstraintSerializer(constraint, context={'request': request})
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
