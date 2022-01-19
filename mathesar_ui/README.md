@@ -50,7 +50,40 @@ Caveats
 
 - [This issue](https://github.com/centerofci/mathesar/issues/570) keeps track of problems encountered by Mathesar developers using Windows for local development.
 
+## Formatting
+
+We use [Prettier](https://prettier.io/) to automatically format code.
+
+### Automatically when you save a file
+
+Prettier works great when configured to automatically format files when you save them in your editor.
+
+- VS Code
+
+  1. In "Settings" > "Workspace", search for "format on save".
+  1. Install the "Prettier" extension (`esbenp.prettier-vscode`).
+  1. Set "Editor: Default Formatter" to "Prettier".
+  1. Enable "Editor: Format On Save".
+
+### Manually before you submit a PR
+
+If you don't have your editor configured to auto-format your code, then you'll need to make sure to manually run Prettier before submitting a PR, otherwise your code might fail a test in our continuous integration pipeline which checks to ensure that all code matches the way that Prettier would format it.
+
+- Format all front end files
+
+  ```
+  docker exec -it -w /code/mathesar_ui mathesar_service npm run format
+  ```
+
+- Format a specific file
+
+  ```
+  docker exec -it -w /code/mathesar_ui mathesar_service npx prettier --write src/sections/Base.svelte
+  ```
+
 ## Linting
+
+We use [ESLint](https://eslint.org/) to help spot more complex issues within code that cannot be fixed automatically with formatting changes. The code you write will need to be free of linting errors before it can be merged. Make sure to run the linter to check for theses errors before submitting a PR.
 
 - Lint all front end files:
 
