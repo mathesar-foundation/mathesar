@@ -7,19 +7,19 @@ from rest_framework.exceptions import APIException as DRFApiException
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 ErrorBody = namedtuple(
-        'ErrorBody',
-        ['code', 'message', 'field', 'details'],
-        defaults=[None, None]
+    'ErrorBody',
+    ['code', 'message', 'field', 'details'],
+    defaults=[None, None]
 )
 
 
 def get_default_exception_detail(exception, error_code=ErrorCodes.NonClassifiedError.value,
                                  message=None, field=None, details=None):
     return ErrorBody(
-            message=force_str(exception) if message is None else message,
-            code=error_code,
-            field=field,
-            details=details
+        message=force_str(exception) if message is None else message,
+        code=error_code,
+        field=field,
+        details=details
     )
 
 
@@ -40,6 +40,7 @@ class GenericApiError(APIException):
     """
     Class which is used to convert list of errors into proper APIException
     """
+
     def __init__(self, error_body_list, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         self.detail = [error_body._asdict() for error_body in error_body_list]
         self.status_code = status_code
