@@ -45,7 +45,6 @@ class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
         except IntegrityError as e:
             if type(e.orig) == UniqueViolation:
                 raise exceptions.ApiUniqueViolation(e,
-                                                    message='This column has non-unique values so a unique constraint cannot be set',
                                                     status_code=status.HTTP_400_BAD_REQUEST
                                                     )
             else:

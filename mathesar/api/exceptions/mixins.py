@@ -11,6 +11,13 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         return isinstance(error, dict) and tuple(error.keys()) == ExceptionBody._fields
 
     def build_pretty_errors(self, errors, serializer=None):
+
+        """
+        This method build on top of `build_pretty_errors` method of the superclass
+        It provides the following additional features
+        1. Avoids processing prettified exceptions
+        2. Add field to the pretty exception body if raised by field validation method
+        """
         pretty = []
         for error_type in errors:
             error = errors[error_type]
@@ -41,6 +48,11 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         return []
 
     def _run_validator(self, validator, field, message):
+        """
+        This method build on top of `_run_validator` method of the superclass
+        It provides the following additional features
+        1. Includes serializer if `required_context` is True similar to the behaviour of drf
+        """
         try:
             args = []
             if getattr(validator, 'requires_context', False):
@@ -53,12 +65,20 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
 
     @property
     def errors(self):
+        """
+        This method build on top of `errors` property of the superclass to return a list instead of a dictionary
+        """
         ugly_errors = super(FriendlyErrorMessagesMixin, self).errors
         pretty_errors = self.build_pretty_errors(ugly_errors)
         return ReturnList(pretty_errors, serializer=self)
 
     @property
     def field_map(self):
+        """
+        This method build on top of `field_map` property of the superclass
+        It provides the following additional features
+        1. Adds `ListSerializer` to `relation` field list
+        """
         return {
             'boolean': ['BooleanField', 'NullBooleanField'],
             'string': ['CharField', 'EmailField', 'RegexField', 'SlugField',
@@ -80,6 +100,12 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         }
 
     def get_field_kwargs(self, field, field_data):
+        """
+        This method build on top of `field_map` method of the superclass
+        It provides the following fixes
+        1. Fixes file type length value to use name of the file instead of the size of the file,
+         matching the default behaviour of drf
+        """
         field_type = field.__class__.__name__
         kwargs = {
             'data_type': type(field_data).__name__

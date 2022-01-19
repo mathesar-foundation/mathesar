@@ -36,8 +36,14 @@ class CustomApiException(APIException):
 
 
 class ApiUniqueViolation(APIException):
-    def __init__(self, exception, error_code=ErrorCodes.UniqueViolation.value, message=None, field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(self,
+                 exception,
+                 error_code=ErrorCodes.UniqueViolation.value,
+                 message="This column has non-unique values so a unique constraint cannot be set",
+                 field=None,
+                 details=None,
+                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+
         exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
         self.detail = [exception_detail]
         self.status_code = status_code
