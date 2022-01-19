@@ -46,11 +46,13 @@ const textType: AbstractTypeConfiguration = {
                 variable: 'restrictFieldSize',
                 condition: 'eq',
                 value: true,
-                elements: [{
-                  type: 'input',
-                  variable: 'fieldSizeLimit',
-                  label: 'Field Size Limit',
-                }],
+                elements: [
+                  {
+                    type: 'input',
+                    variable: 'fieldSizeLimit',
+                    label: 'Field Size Limit',
+                  },
+                ],
               },
             ],
           },

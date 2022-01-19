@@ -6,7 +6,10 @@
   } from '@fortawesome/free-solid-svg-icons';
   import { Dropdown, Icon, Button } from '@mathesar-component-library';
   import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
-  import { currentDbAbstractTypes, getAbstractTypeForDBType } from '@mathesar/stores/abstract-types';
+  import {
+    currentDbAbstractTypes,
+    getAbstractTypeForDBType,
+  } from '@mathesar/stores/abstract-types';
   import type {
     Meta,
     Column,
@@ -23,7 +26,10 @@
   export let columnsDataStore: ColumnsDataStore;
   export let constraintsDataStore: ConstraintsDataStore;
 
-  $: abstractTypeOfColumn = getAbstractTypeForDBType(column.type, $currentDbAbstractTypes.data);
+  $: abstractTypeOfColumn = getAbstractTypeForDBType(
+    column.type,
+    $currentDbAbstractTypes.data,
+  );
 
   let menuIsOpen = false;
   let view: 'default' | 'type' = 'default';

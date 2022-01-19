@@ -1,8 +1,5 @@
 import type { DbType } from '@mathesar/App.d';
-import {
-  abstractTypeCategory,
-  unknownAbstractTypeResponse,
-} from './constants';
+import { abstractTypeCategory, unknownAbstractTypeResponse } from './constants';
 import Text from './type-configs/text';
 import Number from './type-configs/number';
 import Boolean from './type-configs/boolean';
@@ -28,11 +25,15 @@ const abstractTypeCategories = {
 function getAbstractTypeConfiguration(
   identifier: AbstractType['identifier'],
 ): AbstractTypeConfiguration {
-  return abstractTypeCategories[identifier]
-    || abstractTypeCategories[abstractTypeCategory.Other];
+  return (
+    abstractTypeCategories[identifier] ||
+    abstractTypeCategories[abstractTypeCategory.Other]
+  );
 }
 
-function constructAbstractTypeFromResponse(response: AbstractTypeResponse): AbstractType {
+function constructAbstractTypeFromResponse(
+  response: AbstractTypeResponse,
+): AbstractType {
   return {
     ...response,
     ...getAbstractTypeConfiguration(response.identifier),
@@ -45,7 +46,10 @@ export function constructAbstractTypeMapFromResponse(
 ): AbstractTypesMap {
   const abstractTypesMap: AbstractTypesMap = new Map();
   abstractTypesResponse.forEach((entry) => {
-    abstractTypesMap.set(entry.identifier, constructAbstractTypeFromResponse(entry));
+    abstractTypesMap.set(
+      entry.identifier,
+      constructAbstractTypeFromResponse(entry),
+    );
   });
   return abstractTypesMap;
 }
@@ -78,8 +82,8 @@ export function getAbstractTypesForDBTypeList(
         isUnknownTypeRequired = true;
       }
     });
-    const abstractTypeList = [...abstractTypeSet].sort(
-      (a, b) => a.name.localeCompare(b.name),
+    const abstractTypeList = [...abstractTypeSet].sort((a, b) =>
+      a.name.localeCompare(b.name),
     );
     if (isUnknownTypeRequired) {
       abstractTypeList.push(
@@ -92,8 +96,11 @@ export function getAbstractTypesForDBTypeList(
 }
 
 export function getAbstractTypeForDBType(
-  dbType: DbType, abstractTypesMap: AbstractTypesMap,
+  dbType: DbType,
+  abstractTypesMap: AbstractTypesMap,
 ): AbstractType {
-  return getAbstractTypesForDBTypeList([dbType], abstractTypesMap)[0]
-    || constructAbstractTypeFromResponse(unknownAbstractTypeResponse);
+  return (
+    getAbstractTypesForDBTypeList([dbType], abstractTypesMap)[0] ||
+    constructAbstractTypeFromResponse(unknownAbstractTypeResponse)
+  );
 }

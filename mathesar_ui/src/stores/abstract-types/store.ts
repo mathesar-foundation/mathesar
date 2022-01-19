@@ -7,7 +7,9 @@ import type { Readable, Writable, Unsubscriber } from 'svelte/store';
 import type { Database } from '@mathesar/App.d';
 import type { CancellablePromise } from '@mathesar-component-library';
 import type {
-  AbstractTypesMap, AbstractTypesSubstance, AbstractTypeResponse,
+  AbstractTypesMap,
+  AbstractTypesSubstance,
+  AbstractTypeResponse,
 } from './types.d';
 
 import { constructAbstractTypeMapFromResponse } from './abstractTypeCategories';
@@ -23,7 +25,9 @@ const abstractTypesRequestMap: Map<
   CancellablePromise<AbstractTypeResponse[]>
 > = new Map();
 
-export async function refetchTypesForDB(databaseId: Database['id']): Promise<AbstractTypesMap | null> {
+export async function refetchTypesForDB(
+  databaseId: Database['id'],
+): Promise<AbstractTypesMap | null> {
   const store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
     console.error(`DB Types store for db: ${databaseId} not found.`);

@@ -7,7 +7,9 @@
   export let selectedDbType: DbType | undefined;
   export let selectedAbstractType: AbstractType | undefined;
 
-  function calculateDBTypeOptions(_selectedAbstractType: AbstractType | undefined): SelectOption[] {
+  function calculateDBTypeOptions(
+    _selectedAbstractType: AbstractType | undefined,
+  ): SelectOption[] {
     if (_selectedAbstractType) {
       return Array.from(_selectedAbstractType?.dbTypes).map((entry) => ({
         id: entry,
@@ -26,11 +28,14 @@
 </script>
 
 <LabeledInput label="Database type" layout="stacked">
-  <Select triggerAppearance="default" triggerClass="db-type-select"
+  <Select
+    triggerAppearance="default"
+    triggerClass="db-type-select"
     value={{
       id: selectedDbType,
       label: selectedDbType,
     }}
     options={dbTypeOptions}
-    on:change={onDbTypeChange}/>
+    on:change={onDbTypeChange}
+  />
 </LabeledInput>

@@ -1,14 +1,14 @@
 export type RuleTermOperator = 'eq' | 'neq' | 'lt' | 'gt' | 'lte' | 'gte';
 
 export interface RuleTerm {
-  id: string,
-  op: RuleTermOperator,
-  value: unknown,
+  id: string;
+  op: RuleTermOperator;
+  value: unknown;
 }
 
 export interface RuleTermCombination {
-  combination: 'and' | 'or',
-  terms: Rule[]
+  combination: 'and' | 'or';
+  terms: Rule[];
 }
 
 export type Rule = RuleTerm | RuleTermCombination;

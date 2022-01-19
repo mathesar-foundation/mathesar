@@ -117,8 +117,11 @@
       </li>
     </ul>
     <div class="type-options-content">
-      <DatabaseOptions bind:selectedDbType {selectedAbstractType}
-        dbOptions={selectedAbstractType?.typeSwitchOptions?.database}/>
+      <DatabaseOptions
+        bind:selectedDbType
+        {selectedAbstractType}
+        dbOptions={selectedAbstractType?.typeSwitchOptions?.database}
+      />
     </div>
   </div>
 

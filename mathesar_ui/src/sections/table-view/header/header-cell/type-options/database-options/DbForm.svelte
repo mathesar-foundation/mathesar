@@ -5,7 +5,9 @@
   import type { AbstractTypeDbConfigOptions } from '@mathesar/stores/abstract-types/types';
 
   export let selectedDbType: DbType | undefined;
-  export let configuration: AbstractTypeDbConfigOptions['configuration'] | undefined;
+  export let configuration:
+    | AbstractTypeDbConfigOptions['configuration']
+    | undefined;
 
   $: form = makeForm(configuration.form);
   $: values = form.values;
@@ -24,4 +26,4 @@
   $: setSelectedDBType($values);
 </script>
 
-<Form {form}/>
+<Form {form} />

@@ -11,17 +11,26 @@
 </script>
 
 {#if element.type === 'input'}
-  <FormInput {...element} {...variables[element.variable]}
-    store={stores.get(element.variable)}/>
-
+  <FormInput
+    {...element}
+    {...variables[element.variable]}
+    store={stores.get(element.variable)}
+  />
 {:else if element.type === 'switch'}
-  <Switch store={stores.get(element.variable)}
-    cases={element.cases} let:element={childElement}>
-      <svelte:self {variables} {stores} element={childElement}/>
+  <Switch
+    store={stores.get(element.variable)}
+    cases={element.cases}
+    let:element={childElement}
+  >
+    <svelte:self {variables} {stores} element={childElement} />
   </Switch>
 {:else if element.type === 'if'}
-  <If store={stores.get(element.variable)} {...element} let:element={childElement}>
-    <svelte:self {variables} {stores} element={childElement}/>
+  <If
+    store={stores.get(element.variable)}
+    {...element}
+    let:element={childElement}
+  >
+    <svelte:self {variables} {stores} element={childElement} />
   </If>
 {:else}
   <FormLayout

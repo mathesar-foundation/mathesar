@@ -1,8 +1,14 @@
 import { derived, get, writable } from 'svelte/store';
 import type { Readable } from 'svelte/store';
-import type { FormInputDataType, FormConfiguration, FormBuildConfiguration } from './types';
+import type {
+  FormInputDataType,
+  FormConfiguration,
+  FormBuildConfiguration,
+} from './types';
 
-export function makeForm(formConfig: FormConfiguration): FormBuildConfiguration {
+export function makeForm(
+  formConfig: FormConfiguration,
+): FormBuildConfiguration {
   const stores: FormBuildConfiguration['stores'] = new Map();
   Object.keys(formConfig.variables)?.forEach((key) => {
     stores.set(key, writable(formConfig.variables[key].default));

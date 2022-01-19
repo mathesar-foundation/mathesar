@@ -31,18 +31,30 @@ describe('Rule executer', () => {
       ],
     };
 
-    expect(executeRule(rule, {
-      restrictFieldSize: true, fieldSizeLimit: 200,
-    })).toBe(true);
-    expect(executeRule(rule, {
-      restrictFieldSize: false, fieldSizeLimit: 200,
-    })).toBe(false);
-    expect(executeRule(rule, {
-      restrictFieldSize: true, fieldSizeLimit: 300,
-    })).toBe(false);
-    expect(executeRule(rule, {
-      restrictFieldSize: false, fieldSizeLimit: 300,
-    })).toBe(false);
+    expect(
+      executeRule(rule, {
+        restrictFieldSize: true,
+        fieldSizeLimit: 200,
+      }),
+    ).toBe(true);
+    expect(
+      executeRule(rule, {
+        restrictFieldSize: false,
+        fieldSizeLimit: 200,
+      }),
+    ).toBe(false);
+    expect(
+      executeRule(rule, {
+        restrictFieldSize: true,
+        fieldSizeLimit: 300,
+      }),
+    ).toBe(false);
+    expect(
+      executeRule(rule, {
+        restrictFieldSize: false,
+        fieldSizeLimit: 300,
+      }),
+    ).toBe(false);
     expect(executeRule(rule, {})).toBe(false);
   });
 
@@ -63,18 +75,30 @@ describe('Rule executer', () => {
       ],
     };
 
-    expect(executeRule(rule, {
-      restrictFieldSize: true, fieldSizeLimit: 200,
-    })).toBe(true);
-    expect(executeRule(rule, {
-      restrictFieldSize: false, fieldSizeLimit: 200,
-    })).toBe(true);
-    expect(executeRule(rule, {
-      restrictFieldSize: true, fieldSizeLimit: 300,
-    })).toBe(true);
-    expect(executeRule(rule, {
-      restrictFieldSize: false, fieldSizeLimit: 300,
-    })).toBe(false);
+    expect(
+      executeRule(rule, {
+        restrictFieldSize: true,
+        fieldSizeLimit: 200,
+      }),
+    ).toBe(true);
+    expect(
+      executeRule(rule, {
+        restrictFieldSize: false,
+        fieldSizeLimit: 200,
+      }),
+    ).toBe(true);
+    expect(
+      executeRule(rule, {
+        restrictFieldSize: true,
+        fieldSizeLimit: 300,
+      }),
+    ).toBe(true);
+    expect(
+      executeRule(rule, {
+        restrictFieldSize: false,
+        fieldSizeLimit: 300,
+      }),
+    ).toBe(false);
     expect(executeRule(rule, {})).toBe(false);
   });
 });

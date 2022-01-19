@@ -15,12 +15,10 @@
 </script>
 
 {#if dbOptions?.configuration}
-  <DbForm bind:selectedDbType configuration={dbOptions.configuration}/>
-  <DbTypeIndicator {selectedDbType}/>
-
+  <DbForm bind:selectedDbType configuration={dbOptions.configuration} />
+  <DbTypeIndicator {selectedDbType} />
 {:else if selectedAbstractType?.dbTypes.size > 1}
-  <DbTypeSelect bind:selectedDbType {selectedAbstractType}/>
-
+  <DbTypeSelect bind:selectedDbType {selectedAbstractType} />
 {:else}
-  <DbTypeIndicator {selectedDbType}/>
+  <DbTypeIndicator {selectedDbType} />
 {/if}
