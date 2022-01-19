@@ -1,5 +1,5 @@
 export default class EventHandler {
-  protected listeners: Map<string, Set<(value?: unknown) => unknown>>;
+  private listeners: Map<string, Set<(value?: unknown) => unknown>>;
 
   constructor() {
     this.listeners = new Map();
@@ -15,7 +15,7 @@ export default class EventHandler {
     };
   }
 
-  protected dispatch(eventName: string, value: unknown): void {
+  dispatch(eventName: string, value: unknown): void {
     this.listeners?.get(eventName)?.forEach((entry) => {
       try {
         entry?.(value);
@@ -25,7 +25,7 @@ export default class EventHandler {
     });
   }
 
-  protected destroy(): void {
+  destroy(): void {
     this.listeners.clear();
   }
 }

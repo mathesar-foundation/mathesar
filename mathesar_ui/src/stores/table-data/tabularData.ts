@@ -18,7 +18,7 @@ export type TabularDataParams = [
   ...MetaParams
 ];
 
-export class TabularData extends EventHandler {
+export class TabularData {
   type: TabularType;
 
   id: DBObjectEntry['id'];
@@ -33,6 +33,8 @@ export class TabularData extends EventHandler {
 
   display: Display;
 
+  eventHandler = new EventHandler();
+
   private metaParametersUnsubscriber: Unsubscriber;
 
   constructor(
@@ -40,7 +42,6 @@ export class TabularData extends EventHandler {
     id: DBObjectEntry['id'],
     params?: TabularDataParams,
   ) {
-    super();
     this.type = type;
     this.id = id;
     this.meta = new Meta(type, id, params?.slice(2) as MetaParams);
@@ -61,7 +62,7 @@ export class TabularData extends EventHandler {
     );
 
     this.metaParametersUnsubscriber = this.meta.metaParameters.subscribe(() => {
-      this.dispatch('paramsUpdated', this.parameterize());
+      this.eventHandler.dispatch('paramsUpdated', this.parameterize());
     });
   }
 
@@ -91,7 +92,7 @@ export class TabularData extends EventHandler {
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
-    super.destroy();
+    this.eventHandler.destroy();
   }
 }
 

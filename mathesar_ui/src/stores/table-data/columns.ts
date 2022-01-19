@@ -8,11 +8,10 @@ import {
 } from '@mathesar/utils/api';
 import { TabularType } from '@mathesar/App.d';
 import { intersection } from '@mathesar/utils/language';
-import { EventHandler } from '@mathesar-component-library';
 
 import type { Writable, Updater, Subscriber, Unsubscriber } from 'svelte/store';
 import type { PaginatedResponse } from '@mathesar/utils/api';
-import type { CancellablePromise } from '@mathesar-component-library';
+import { CancellablePromise, EventHandler } from '@mathesar-component-library';
 import type { DBObjectEntry, DbType } from '@mathesar/App.d';
 import type {
   AbstractTypesMap,
@@ -69,10 +68,7 @@ function api(url: string) {
   };
 }
 
-export class ColumnsDataStore
-  extends EventHandler
-  implements Writable<ColumnsData>
-{
+export class ColumnsDataStore implements Writable<ColumnsData> {
   private type: TabularType;
 
   private parentId: DBObjectEntry['id'];
@@ -87,13 +83,14 @@ export class ColumnsDataStore
 
   private fetchCallback: (storeData: ColumnsData) => void;
 
+  eventHandler = new EventHandler();
+
   constructor(
     type: TabularType,
     parentId: number,
     meta: Meta,
     fetchCallback: (storeData: ColumnsData) => void = () => {},
   ) {
-    super();
     this.type = type;
     this.parentId = parentId;
     this.store = writable({
@@ -190,7 +187,7 @@ export class ColumnsDataStore
   ): Promise<Partial<Column>> {
     const column = await this.api.update(columnId, { type });
     await this.fetch();
-    this.dispatch('columnPatched', column);
+    this.eventHandler.dispatch('columnPatched', column);
     return column;
   }
 
@@ -230,7 +227,7 @@ export class ColumnsDataStore
   destroy(): void {
     this.promise?.cancel();
     this.promise = undefined;
-    super.destroy();
+    this.eventHandler.destroy();
   }
 
   async deleteColumn(columnId: Column['id']): Promise<void> {

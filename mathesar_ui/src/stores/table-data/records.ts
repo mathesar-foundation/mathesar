@@ -244,7 +244,7 @@ export class RecordsData {
         void this.fetch();
       },
     );
-    this.columnPatchUnsubscriber = this.columnsDataStore.on(
+    this.columnPatchUnsubscriber = this.columnsDataStore.eventHandler.on(
       'columnPatched',
       () => {
         void this.fetch();
