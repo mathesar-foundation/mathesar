@@ -463,7 +463,7 @@ def test_table_previews_wrong_column_number(client, schema, engine_email_type):
     response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
     assert "number" in response.json()[0]['message']
-    assert str(ErrorCodes.ColumnSizeMismatch.value) == response.json()[0]['code']
+    assert ErrorCodes.ColumnSizeMismatch.value == response.json()[0]['code']
 
 
 def test_table_previews_invalid_type_cast(client, schema, engine_email_type):

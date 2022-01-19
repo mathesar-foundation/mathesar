@@ -1,7 +1,21 @@
 from rest_framework.views import exception_handler
 
+from mathesar.api.exceptions.error_codes import ErrorCodes
+
 exception_map = {
 }
+
+
+def fix_error_response(data):
+    for index, error in enumerate(data):
+        if 'code' in error:
+            if error['code'] is not None and str(error['code']) != 'None':
+                data[index]['code'] = int(error['code'])
+            else:
+                data[index]['code'] = ErrorCodes.NonClassifiedError.value
+        if 'detail' not in error:
+            data[index]['detail'] = error.pop('details', {})
+    return data
 
 
 def mathesar_exception_handler(exc, context):
@@ -20,6 +34,8 @@ def mathesar_exception_handler(exc, context):
     if response is not None:
         # Check if conforms to the api spec
         if is_pretty(response.data):
+            # Validation exception converts error_codes from integer to string, we need to convert it back into
+            response.data = fix_error_response(response.data)
             return response
     return response
 
