@@ -41,11 +41,10 @@ def mathesar_exception_handler(exc, context):
 
 
 def is_pretty(data):
-    if isinstance(data, list):
+    if not isinstance(data, list):
+        return False
+    else:
         for error_details in data:
-            if isinstance(error_details, dict) and 'code' in error_details and 'message' in error_details:
-                pass
-            else:
+            if not isinstance(error_details, dict) or 'code' not in error_details or 'message' not in error_details:
                 return False
         return True
-    return False
