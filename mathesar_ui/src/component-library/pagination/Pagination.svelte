@@ -30,8 +30,8 @@
   // Total number of pages.
   export let pageCount = 0;
 
-  // ARIA Label for component 
-  export let ariaLabel: string = "Pagination";
+  // ARIA Label for component
+  export let ariaLabel = 'Pagination';
 
   $: pageCount = Math.ceil(total / pageSize);
   $: pageInfo = calculatePages(currentPage, pageCount);
