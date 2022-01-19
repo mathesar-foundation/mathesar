@@ -813,12 +813,12 @@ def test_table_create_from_datafile_404(client):
         'schema': -999,
     }
     response = client.post('/api/v0/tables/', body)
-    response_table = response.json()[0]
+    response_table = response.json()
     assert response.status_code == 400
-    assert 'object does not exist' in response_table['message']
-    assert response_table['field'] == 'data_files'
-    assert 'object does not exist' in response_table['message']
-    assert response_table['field'] == 'schema'
+    assert 'object does not exist' in response_table[0]['message']
+    assert response_table[0]['field'] == 'schema'
+    assert 'object does not exist' in response_table[1]['message']
+    assert response_table[1]['field'] == 'data_files'
 
 
 def test_table_create_from_multiple_datafile(client, data_file, schema):

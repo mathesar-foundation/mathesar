@@ -1,7 +1,8 @@
 from rest_framework.serializers import Serializer
 from rest_framework.utils.serializer_helpers import ReturnList
 from rest_framework_friendly_errors.mixins import FriendlyErrorMessagesMixin
-
+from django.core.exceptions import ValidationError as DjangoValidationError
+from rest_framework.exceptions import ValidationError as RestValidationError
 from mathesar.api.exceptions.exceptions import ExceptionBody
 
 
@@ -38,6 +39,17 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         if pretty:
             return pretty
         return []
+
+    def _run_validator(self, validator, field, message):
+        try:
+            args = []
+            if getattr(validator, 'requires_context', False):
+                args.append(field)
+            validator(self.initial_data[field.field_name], *args)
+        except (DjangoValidationError, RestValidationError) as err:
+            err_message = err.detail[0] \
+                if hasattr(err, 'detail') else err.message
+            return err_message == message
 
     @property
     def errors(self):
