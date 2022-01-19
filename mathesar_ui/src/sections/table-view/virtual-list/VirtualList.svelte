@@ -26,6 +26,7 @@
     onDestroy,
   } from 'svelte';
   import PerfectScrollbar from 'perfect-scrollbar';
+  import type { Timeout } from './timer';
   import { cancelTimeout, requestTimeout } from './timer';
   import listUtils from './listUtils';
   import type { Props, ItemInfo } from './listUtils';
@@ -45,7 +46,7 @@
   export let paddingBottom = 0;
   export let horizontalScrollOffset = 0;
   export let itemKey: Props['itemKey'] = listUtils.defaultItemKey;
-  export let width: number = null;
+  export let width: number | undefined = undefined;
   
   let instanceProps: Props['instanceProps'] = {
     lastMeasuredIndex: -1,
@@ -62,10 +63,10 @@
   let outerRef: HTMLElement;
 
   let requestResetIsScrolling = false;
-  let resetIsScrollingTimeoutId = null;
+  let resetIsScrollingTimeoutId: Timeout | undefined;
 
   let requestGetItemStyleCache = false;
-  let psRef: PerfectScrollbar = null;
+  let psRef: PerfectScrollbar | undefined;
 
   let itemInfo: ItemInfo;
 
@@ -167,19 +168,19 @@
     return (() => {
       outerRef.removeEventListener('ps-scroll-y', callback);
       outerRef.removeEventListener('ps-scroll-x', hCallback);
-      psRef.destroy();
+      psRef?.destroy();
     });
   });
 
   const scrollStopped = () => {
-    resetIsScrollingTimeoutId = null;
+    resetIsScrollingTimeoutId = undefined;
     isScrolling = false;
     requestGetItemStyleCache = true;
     dispatch('refetch', itemInfo);
   };
 
   function resetIsScrollingDebounced() {
-    if (resetIsScrollingTimeoutId !== null) {
+    if (resetIsScrollingTimeoutId !== undefined) {
       cancelTimeout(resetIsScrollingTimeoutId);
     }
     resetIsScrollingTimeoutId = requestTimeout(
@@ -204,7 +205,7 @@
   });
 
   onDestroy(() => {
-    if (resetIsScrollingTimeoutId !== null) {
+    if (resetIsScrollingTimeoutId !== undefined) {
       cancelTimeout(resetIsScrollingTimeoutId);
     }
   });

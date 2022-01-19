@@ -75,11 +75,11 @@ function processTypeResponse(abstractTypesResponse: AbstractTypeResponse[]): Abs
   return abstractTypesMap;
 }
 
-export async function refetchTypesForDB(databaseId: Database['id']): Promise<AbstractTypesMap> {
+export async function refetchTypesForDB(databaseId: Database['id']): Promise<AbstractTypesMap | undefined> {
   const store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
     console.error(`DB Types store for db: ${databaseId} not found.`);
-    return null;
+    return undefined;
   }
 
   try {
@@ -109,7 +109,7 @@ export async function refetchTypesForDB(databaseId: Database['id']): Promise<Abs
       state: States.Error,
       error: err instanceof Error ? err.message : 'Error in fetching schemas',
     }));
-    return null;
+    return undefined;
   }
 }
 
@@ -165,7 +165,7 @@ export const abstractTypes: Readable<AbstractTypesSubstance> = derived(
 
 export function getAbstractTypeForDBType(
   dbType: DbType, abstractTypesMap: AbstractTypesMap,
-): AbstractType | null {
+): AbstractType | undefined {
   if (dbType && abstractTypesMap) {
     // eslint-disable-next-line no-restricted-syntax
     for (const [, abstractType] of abstractTypesMap) {

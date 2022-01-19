@@ -55,7 +55,7 @@
 {#if entry[childKey]}
   <li aria-level={level + 1} role="treeitem" tabindex="-1">
     <Button appearance="plain" class="item parent" on:click={toggle}>
-      <Icon data={faCaretRight} rotate={isOpen ? IconRotate.NINETY : null}/>
+      <Icon data={faCaretRight} rotate={isOpen ? IconRotate.NINETY : undefined}/>
       <span>{entry[labelKey]}</span>
     </Button>
 

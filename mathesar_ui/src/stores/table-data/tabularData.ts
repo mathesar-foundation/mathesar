@@ -55,7 +55,11 @@ export class TabularData extends EventHandler {
     return [this.type, this.id, ...metaParams];
   }
 
-  refresh(): Promise<[ColumnsData, TableRecordsData, ConstraintsData]> {
+  refresh(): Promise<[
+    ColumnsData | undefined,
+    TableRecordsData | undefined,
+    ConstraintsData | undefined,
+  ]> {
     return Promise.all([
       this.columnsDataStore.fetch(),
       this.recordsData.fetch(),

@@ -24,7 +24,7 @@
   $: ({ columnsDataStore } = $tabularData as TabularData);
 
   export let column: Column;
-  export let abstractTypeOfColumn: AbstractType;
+  export let abstractTypeOfColumn: AbstractType | undefined;
   let abstractTypeContainer: HTMLUListElement;
 
   $: allowedTypeConversions = ColumnsDataStore.getAllowedTypeConversions(
@@ -32,13 +32,13 @@
     $abstractTypes.data,
   );
 
-  let selectedAbstractType: AbstractType = null;
-  let selectedDBTypeOption: SelectOption<DbType> = null;
+  let selectedAbstractType: AbstractType | undefined;
+  let selectedDBTypeOption: SelectOption<DbType> | undefined;
   let typeChangeState = States.Idle;
 
   function selectAbstractType(abstractType: AbstractType) {
     selectedAbstractType = abstractType;
-    if (abstractType.identifier === abstractTypeOfColumn.identifier) {
+    if (abstractType.identifier === abstractTypeOfColumn?.identifier) {
       selectedDBTypeOption = {
         id: column.type,
         label: column.type,
@@ -61,7 +61,7 @@
 
   async function scrollToSelectedType() {
     await tick();
-    const selectedElement: HTMLLIElement = abstractTypeContainer?.querySelector('li.selected');
+    const selectedElement: HTMLLIElement | null = abstractTypeContainer?.querySelector('li.selected');
     if (selectedElement) {
       abstractTypeContainer.scrollTop = selectedElement.offsetTop;
     }
@@ -72,7 +72,7 @@
     void scrollToSelectedType();
   }
 
-  function calculateDBTypeOptions(_selectedAbstractType: AbstractType): SelectOption[] {
+  function calculateDBTypeOptions(_selectedAbstractType: AbstractType | undefined): SelectOption[] {
     if (_selectedAbstractType) {
       return Array.from(_selectedAbstractType?.dbTypes).map((entry) => ({
         id: entry,
@@ -91,7 +91,7 @@
   }
 
   async function onSave() {
-    if (selectedDBTypeOption.id !== column.type) {
+    if (selectedDBTypeOption && selectedDBTypeOption.id !== column.type) {
       typeChangeState = States.Loading;
       try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call

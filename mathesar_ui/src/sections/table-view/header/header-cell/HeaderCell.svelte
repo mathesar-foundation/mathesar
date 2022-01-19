@@ -17,7 +17,7 @@
   import DefaultOptions from './DefaultOptions.svelte';
   import TypeOptions from './type-options/TypeOptions.svelte';
 
-  export let columnPosition: ColumnPosition;
+  export let columnPosition: ColumnPosition | undefined = undefined;
   export let column: Column;
   export let meta: Meta;
   export let columnsDataStore: ColumnsDataStore;
@@ -58,7 +58,7 @@
   >
     <svelte:fragment slot="trigger">
       <span class="type">
-        {abstractTypeOfColumn.icon}
+        {abstractTypeOfColumn?.icon}
       </span>
       <span class="name">{column.name}</span>
     </svelte:fragment>
@@ -68,7 +68,7 @@
           {#if view === 'default'}
           <h6 class="category">Data Type</h6>
           <Button class="type-switch" appearance="plain" on:click={setTypeView}>
-            <span>{abstractTypeOfColumn.name}</span>
+            <span>{abstractTypeOfColumn?.name}</span>
             <Icon size="0.8em" data={faCog}/>
             <Icon size="0.7em" data={faChevronRight}/>
           </Button>
