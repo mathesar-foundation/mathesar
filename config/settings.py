@@ -176,6 +176,8 @@ REST_FRAMEWORK = {
         'rest_framework.filters.OrderingFilter',
     ),
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    'EXCEPTION_HANDLER':
+        'mathesar.exception_handlers.mathesar_exception_handler'
 }
 FRIENDLY_ERRORS = {
     'FIELD_ERRORS': {
