@@ -1,6 +1,4 @@
-import type {
-  Subscriber, Unsubscriber, Writable, Updater,
-} from 'svelte/store';
+import type { Subscriber, Unsubscriber, Writable, Updater } from 'svelte/store';
 import type ActiveModalStore from './ActiveModalStore';
 
 /**
@@ -19,8 +17,8 @@ export default class ModalVisibilityStore implements Writable<boolean> {
     id,
     activeModalStore,
   }: {
-    id: number,
-    activeModalStore: ActiveModalStore,
+    id: number;
+    activeModalStore: ActiveModalStore;
   }) {
     this.id = id;
     this.activeModalStore = activeModalStore;

@@ -23,13 +23,13 @@
 <Meta {...meta} />
 
 <Story name="Basic">
-  <FormStory formConfig={BasicForm}/>
+  <FormStory formConfig={BasicForm} />
 </Story>
 
 <Story name="If Condition">
-  <FormStory formConfig={FormWithIfCondition}/>
+  <FormStory formConfig={FormWithIfCondition} />
 </Story>
 
 <Story name="Switch Condition">
-  <FormStory formConfig={FormWithSwitchCondition}/>
+  <FormStory formConfig={FormWithSwitchCondition} />
 </Story>

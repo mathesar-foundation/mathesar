@@ -16,11 +16,12 @@
     }
   }
 
-  >.header {
+  > .header {
     display: flex;
     align-items: flex-start;
 
-    .icon, .close {
+    .icon,
+    .close {
       flex-shrink: 0;
       flex-basis: 1rem;
     }
@@ -36,7 +37,7 @@
       color: #fff;
     }
   }
-  >.description {
+  > .description {
     margin-top: 10px;
   }
 }

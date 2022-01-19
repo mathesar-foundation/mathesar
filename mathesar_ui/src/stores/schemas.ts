@@ -1,13 +1,5 @@
-import {
-  writable,
-  derived,
-  get,
-} from 'svelte/store';
-import type {
-  Writable,
-  Readable,
-  Unsubscriber,
-} from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
+import type { Writable, Readable, Unsubscriber } from 'svelte/store';
 
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import {
@@ -19,29 +11,30 @@ import {
 } from '@mathesar/utils/api';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 
-import type {
-  Database,
-  SchemaEntry,
-  SchemaResponse,
-} from '@mathesar/App.d';
+import type { Database, SchemaEntry, SchemaResponse } from '@mathesar/App.d';
 import type { CancellablePromise } from '@mathesar-component-library';
 
 import { currentDBName } from './databases';
 
 const commonData = preloadCommonData();
 
-export const currentSchemaId: Writable<SchemaEntry['id'] | undefined> = writable(
-  commonData?.current_schema || undefined,
-);
+export const currentSchemaId: Writable<SchemaEntry['id'] | undefined> =
+  writable(commonData?.current_schema || undefined);
 
 export interface DBSchemaStoreData {
-  state: States,
-  data: Map<SchemaEntry['id'], SchemaEntry>,
-  error?: string
+  state: States;
+  data: Map<SchemaEntry['id'], SchemaEntry>;
+  error?: string;
 }
 
-const dbSchemaStoreMap: Map<Database['name'], Writable<DBSchemaStoreData>> = new Map();
-const dbSchemasRequestMap: Map<Database['name'], CancellablePromise<PaginatedResponse<SchemaResponse> | undefined>> = new Map();
+const dbSchemaStoreMap: Map<
+  Database['name'],
+  Writable<DBSchemaStoreData>
+> = new Map();
+const dbSchemasRequestMap: Map<
+  Database['name'],
+  CancellablePromise<PaginatedResponse<SchemaResponse> | undefined>
+> = new Map();
 
 function setDBSchemaStore(
   database: Database['name'],
@@ -114,7 +107,9 @@ export async function refetchSchemasForDB(
 
     dbSchemasRequestMap.get(database)?.cancel();
 
-    const schemaRequest = getAPI<PaginatedResponse<SchemaResponse>>(`/schemas/?database=${database}&limit=500`);
+    const schemaRequest = getAPI<PaginatedResponse<SchemaResponse>>(
+      `/schemas/?database=${database}&limit=500`,
+    );
     dbSchemasRequestMap.set(database, schemaRequest);
     const response = await schemaRequest;
     const schemas = response?.results || [];
@@ -157,7 +152,9 @@ export async function refetchSchema(
 
 let preload = true;
 
-export function getSchemasStoreForDB(database: Database['name']): Writable<DBSchemaStoreData> {
+export function getSchemasStoreForDB(
+  database: Database['name'],
+): Writable<DBSchemaStoreData> {
   let store = dbSchemaStoreMap.get(database);
   if (!store) {
     store = writable({
@@ -178,7 +175,10 @@ export function getSchemasStoreForDB(database: Database['name']): Writable<DBSch
   return store;
 }
 
-export function getSchemaInfo(database: Database['name'], schemaId: SchemaEntry['id']): SchemaEntry | undefined {
+export function getSchemaInfo(
+  database: Database['name'],
+  schemaId: SchemaEntry['id'],
+): SchemaEntry | undefined {
   const store = dbSchemaStoreMap.get(database);
   if (!store) {
     return undefined;
@@ -241,7 +241,7 @@ export const schemas: Readable<DBSchemaStoreData> = derived(
 );
 
 export const currentSchema: Readable<SchemaEntry | undefined> = derived(
-  [currentSchemaId, schemas], ([$currentSchemaId, $schemas]) => (
-    $currentSchemaId ? $schemas.data.get($currentSchemaId) : undefined
-  ),
+  [currentSchemaId, schemas],
+  ([$currentSchemaId, $schemas]) =>
+    $currentSchemaId ? $schemas.data.get($currentSchemaId) : undefined,
 );

@@ -10,46 +10,46 @@ import { TabularType } from '@mathesar/App.d';
 import { intersection } from '@mathesar/utils/language';
 import { EventHandler } from '@mathesar-component-library';
 
-import type {
-  Writable,
-  Updater,
-  Subscriber,
-  Unsubscriber,
-} from 'svelte/store';
+import type { Writable, Updater, Subscriber, Unsubscriber } from 'svelte/store';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
 import type { DBObjectEntry, DbType } from '@mathesar/App.d';
-import type { AbstractTypesMap, AbstractType } from '@mathesar/stores/abstractTypes';
+import type {
+  AbstractTypesMap,
+  AbstractType,
+} from '@mathesar/stores/abstractTypes';
 import type { Meta } from './meta';
 
 export interface Column {
-  id: number,
-  name: string,
-  type: DbType,
-  index: number,
-  nullable: boolean,
-  primary_key: boolean,
-  valid_target_types: DbType[],
-  __columnIndex?: number,
+  id: number;
+  name: string;
+  type: DbType;
+  index: number;
+  nullable: boolean;
+  primary_key: boolean;
+  valid_target_types: DbType[];
+  __columnIndex?: number;
 }
 
 export interface ColumnsData {
-  state: States,
-  error?: string,
-  columns: Column[],
-  primaryKey?: string,
+  state: States;
+  error?: string;
+  columns: Column[];
+  primaryKey?: string;
 }
 
 function preprocessColumns(response?: Column[]): Column[] {
   let index = 0;
-  return response?.map((column) => {
-    const newColumn = {
-      ...column,
-      __columnIndex: index,
-    };
-    index += 1;
-    return newColumn;
-  }) || [];
+  return (
+    response?.map((column) => {
+      const newColumn = {
+        ...column,
+        __columnIndex: index,
+      };
+      index += 1;
+      return newColumn;
+    }) || []
+  );
 }
 
 function api(url: string) {
@@ -69,7 +69,10 @@ function api(url: string) {
   };
 }
 
-export class ColumnsDataStore extends EventHandler implements Writable<ColumnsData> {
+export class ColumnsDataStore
+  extends EventHandler
+  implements Writable<ColumnsData>
+{
   private type: TabularType;
 
   private parentId: DBObjectEntry['id'];
@@ -99,7 +102,11 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
       primaryKey: undefined,
     });
     this.meta = meta;
-    this.api = api(`/${this.type === TabularType.Table ? 'tables' : 'views'}/${this.parentId}/columns/`);
+    this.api = api(
+      `/${this.type === TabularType.Table ? 'tables' : 'views'}/${
+        this.parentId
+      }/columns/`,
+    );
     this.fetchCallback = fetchCallback;
     void this.fetch();
   }
@@ -112,9 +119,7 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
     this.store.update(updater);
   }
 
-  subscribe(
-    run: Subscriber<ColumnsData>,
-  ): Unsubscriber {
+  subscribe(run: Subscriber<ColumnsData>): Unsubscriber {
     return this.store.subscribe(run);
   }
 
@@ -168,7 +173,9 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
     nullable: boolean,
   ): Promise<void> {
     if (column.primary_key) {
-      throw new Error(`Column "${column.name}" cannot allow NULL because it is a primary key.`);
+      throw new Error(
+        `Column "${column.name}" cannot allow NULL because it is a primary key.`,
+      );
     }
     await this.api.update(column.id, { nullable });
     await this.fetch();
@@ -177,7 +184,10 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
   // TODO: Analyze: Might be cleaner to move following functions as a property of Column class
   // but are the object instantiations worth it?
 
-  async patchType(columnId: Column['id'], type: DbType): Promise<Partial<Column>> {
+  async patchType(
+    columnId: Column['id'],
+    type: DbType,
+  ): Promise<Partial<Column>> {
     const column = await this.api.update(columnId, { type });
     await this.fetch();
     this.dispatch('columnPatched', column);
@@ -195,7 +205,8 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
    * by server.
    */
   static getAllowedTypeConversions(
-    column: Column, abstractTypesMap: AbstractTypesMap,
+    column: Column,
+    abstractTypesMap: AbstractTypesMap,
   ): AbstractType[] {
     const allowedTypeConversions: AbstractType[] = [];
     if (column && abstractTypesMap) {

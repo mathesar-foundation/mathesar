@@ -2,7 +2,10 @@
   import { Icon, Modal } from '@mathesar-component-library';
   import { getContext } from 'svelte';
   import type { TabularDataStore } from '@mathesar/stores/table-data/types';
-  import type { Constraint, ConstraintsDataStore } from '@mathesar/stores/table-data/types';
+  import type {
+    Constraint,
+    ConstraintsDataStore,
+  } from '@mathesar/stores/table-data/types';
   import { States } from '@mathesar/utils/api';
   import { faSpinner } from '@fortawesome/free-solid-svg-icons';
   import TableConstraint from './TableConstraint.svelte';
@@ -11,7 +14,8 @@
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
-  $: constraintsDataStore = $tabularData.constraintsDataStore as ConstraintsDataStore;
+  $: constraintsDataStore =
+    $tabularData.constraintsDataStore as ConstraintsDataStore;
   $: state = $constraintsDataStore.state as States;
   $: errorMsg = $constraintsDataStore.error as string;
   $: constraints = $constraintsDataStore.constraints as Constraint[];
@@ -20,7 +24,7 @@
   // Only show the spinner during the _initial_ loading event. Hide it for
   // subsequent updates so that we can rely on the spinner used on the button
   // for the more specific update.
-  $: shouldShowLoadingSpinner = isEmpty && isLoading as boolean;
+  $: shouldShowLoadingSpinner = isEmpty && (isLoading as boolean);
   $: countText = isEmpty ? '' : ` (${constraints.length as number})`;
 
   function remove(constraint: Constraint) {
@@ -35,7 +39,7 @@
     </div>
 
     {#if shouldShowLoadingSpinner}
-      <Icon data={faSpinner} spin={true}/>
+      <Icon data={faSpinner} spin={true} />
     {:else if state === States.Error}
       <div>Unable to fetch table constraints</div>
       <div>{errorMsg}</div>
@@ -44,17 +48,13 @@
     {:else}
       <div class="constraints-list">
         {#each constraints as constraint (constraint.id)}
-          <TableConstraint
-            {constraint}
-            drop={() => remove(constraint)}
-          />
+          <TableConstraint {constraint} drop={() => remove(constraint)} />
         {/each}
       </div>
     {/if}
-
   </div>
 </Modal>
 
 <style global lang="scss">
-  @import "TableConstraints.scss";
+  @import 'TableConstraints.scss';
 </style>

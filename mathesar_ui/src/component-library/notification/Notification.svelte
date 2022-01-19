@@ -20,23 +20,23 @@
 </script>
 
 {#if show}
-  <div class="notification {type}" transition:fade="{{ duration: 120 }}">
+  <div class="notification {type}" transition:fade={{ duration: 120 }}>
     <div class="header">
       <div class="icon">
-        <Icon data={faExclamationCircle}/>
+        <Icon data={faExclamationCircle} />
       </div>
       <strong class="message">
-        <slot></slot>
+        <slot />
       </strong>
       {#if closable}
         <Button class="close" appearance="ghost" size="medium" on:click={close}>
-          <Icon data={faTimes}/>
+          <Icon data={faTimes} />
         </Button>
       {/if}
     </div>
     {#if $$slots.description}
       <div class="description">
-        <slot name='description'></slot>
+        <slot name="description" />
       </div>
     {/if}
   </div>

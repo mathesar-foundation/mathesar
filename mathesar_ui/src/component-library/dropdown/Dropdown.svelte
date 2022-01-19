@@ -1,7 +1,5 @@
 <script lang="ts">
-  import {
-    faAngleDown,
-  } from '@fortawesome/free-solid-svg-icons';
+  import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
   import {
     portal,
     popper,
@@ -9,13 +7,14 @@
     Icon,
     clickOffBounds,
   } from '@mathesar-component-library';
-  import type {
-    Appearance,
-    Size,
-  } from '@mathesar-component-library/types';
+  import type { Appearance, Size } from '@mathesar-component-library/types';
   import type { Placement } from '@popperjs/core/lib/enums';
   import {
-    createEventDispatcher, getContext, onDestroy, setContext, tick,
+    createEventDispatcher,
+    getContext,
+    onDestroy,
+    setContext,
+    tick,
   } from 'svelte';
   import { derived } from 'svelte/store';
   import { AccompanyingElements } from './AccompanyingElements';
@@ -23,7 +22,7 @@
   const dispatch = createEventDispatcher();
 
   export let triggerClass = '';
-  export let triggerAppearance : Appearance = 'default';
+  export let triggerAppearance: Appearance = 'default';
   export let contentClass = '';
   export let isOpen = false;
   export let closeOnInnerClick = false;
@@ -36,7 +35,9 @@
   let triggerElement: HTMLElement | undefined;
   let contentElement: HTMLElement | undefined;
 
-  const parentAccompanyingElements = getContext<AccompanyingElements | undefined>('dropdownAccompanyingElements');
+  const parentAccompanyingElements = getContext<
+    AccompanyingElements | undefined
+  >('dropdownAccompanyingElements');
   async function setThisContentToAccompanyParent() {
     if (!contentElement) {
       await tick();
@@ -57,13 +58,20 @@
   }
   onDestroy(unsetThisContentToAccompanyParent);
 
-  const accompanyingElements = new AccompanyingElements(parentAccompanyingElements);
+  const accompanyingElements = new AccompanyingElements(
+    parentAccompanyingElements,
+  );
   setContext('dropdownAccompanyingElements', accompanyingElements);
 
-  const clickOffBoundsReferences = derived(accompanyingElements,
-    (_accompanyingElements) => [triggerElement, ..._accompanyingElements]);
+  const clickOffBoundsReferences = derived(
+    accompanyingElements,
+    (_accompanyingElements) => [triggerElement, ..._accompanyingElements],
+  );
 
-  function calculateTriggerClass(_triggerClass: string, _showArrow: boolean): string {
+  function calculateTriggerClass(
+    _triggerClass: string,
+    _showArrow: boolean,
+  ): string {
     const classes = ['dropdown', 'trigger'];
     if (_triggerClass) {
       classes.push(_triggerClass);
@@ -102,15 +110,24 @@
   }
 </script>
 
-<Button bind:element={triggerElement} appearance={triggerAppearance} class={tgClasses} on:click={toggle} 
-  aria-controls={ariaControls} aria-haspopup="listbox" aria-label={ariaLabel} {size} on:keydown
-  {...$$restProps}>
+<Button
+  bind:element={triggerElement}
+  appearance={triggerAppearance}
+  class={tgClasses}
+  on:click={toggle}
+  aria-controls={ariaControls}
+  aria-haspopup="listbox"
+  aria-label={ariaLabel}
+  {size}
+  on:keydown
+  {...$$restProps}
+>
   <span class="label">
-    <slot name="trigger"></slot>
+    <slot name="trigger" />
   </span>
   {#if showArrow}
     <span class="arrow">
-      <Icon data={faAngleDown}/>
+      <Icon data={faAngleDown} />
     </span>
   {/if}
 </Button>
@@ -127,6 +144,6 @@
     }}
     on:click={checkAndCloseOnInnerClick}
   >
-    <slot name="content"></slot>
+    <slot name="content" />
   </div>
 {/if}

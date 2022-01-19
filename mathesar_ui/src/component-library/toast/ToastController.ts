@@ -10,22 +10,25 @@ import type { Writable, Readable } from 'svelte/store';
 import { writable, derived } from 'svelte/store';
 import type { PauseableTweened } from '@mathesar-component-library-dir/common/utils/pauseableTweened';
 import { pauseableTweened } from '@mathesar-component-library-dir/common/utils/pauseableTweened';
-import type { IconFlip, IconRotate } from '@mathesar-component-library-dir/icon/Icon.d';
+import type {
+  IconFlip,
+  IconRotate,
+} from '@mathesar-component-library-dir/icon/Icon.d';
 
 /**
  * Allows control of the toast message after it is displayed
  */
 interface ToastEntryController {
-  id: number,
-  progress: PauseableTweened,
-  dismiss: () => void,
+  id: number;
+  progress: PauseableTweened;
+  dismiss: () => void;
 }
 
 interface Icon {
-  data: IconDefinition,
-  spin?: boolean,
-  flip?: IconFlip,
-  rotate?: IconRotate,
+  data: IconDefinition;
+  spin?: boolean;
+  flip?: IconFlip;
+  rotate?: IconRotate;
 }
 
 interface ToastEntryProps {
@@ -33,58 +36,58 @@ interface ToastEntryProps {
    * When given, the new toast message will replace an existing toast message
    * with the specified id.
    */
-  id?: number,
-  title?: Readable<string> | string,
-  message?: Readable<string> | string,
+  id?: number;
+  title?: Readable<string> | string;
+  message?: Readable<string> | string;
   /**
    * If provided, will be used in place of `title` and `message`.
    */
-  contentComponent?: typeof SvelteComponent,
-  contentComponentProps?: Readable<unknown> | unknown,
-  icon?: Readable<Icon> | Icon,
-  backgroundColor: Readable<string> | string,
-  textColor: Readable<string> | string,
-  progressColor: Readable<string> | string,
+  contentComponent?: typeof SvelteComponent;
+  contentComponentProps?: Readable<unknown> | unknown;
+  icon?: Readable<Icon> | Icon;
+  backgroundColor: Readable<string> | string;
+  textColor: Readable<string> | string;
+  progressColor: Readable<string> | string;
   /**
    * The time (ms) the toast message will stay open. When 0, the toast will not
    * auto-close.
    */
-  lifetime: number,
+  lifetime: number;
   /**
    * When true, the toast message will provide a close button for the user to
    * dismiss the message. When false, the toast message can still be dismissed
    * via its controller.
    */
-  allowDismiss: boolean,
+  allowDismiss: boolean;
   /**
    * When true, the progress bar will display.
    */
-  hasProgress: boolean,
+  hasProgress: boolean;
   /**
    * The value of the progress indicator when the toast message first appears.
    * Should be between 0 and 1.
    */
-  initialProgress: number,
+  initialProgress: number;
   /**
    * The value of the progress indicator immediately before the toast message
    * closes. Should be between 0 and 1.
    */
-  finalProgress: number,
+  finalProgress: number;
   /**
    * When true, the auto-close behavior will be paused while the user hovers on
    * the toast message.
    */
-  allowPause: boolean,
+  allowPause: boolean;
   /**
    * This function will run when the toast item is shown. The toast controller
    * is passed to the function.
    */
-  onShow: (c: ToastEntryController) => void,
+  onShow: (c: ToastEntryController) => void;
   /**
    * This function will run when the toast item closes (either manually or
    * automatically).
    */
-  onDismiss: () => void,
+  onDismiss: () => void;
 }
 
 const baseDefaultProps: ToastEntryProps = {
@@ -102,9 +105,9 @@ const baseDefaultProps: ToastEntryProps = {
 };
 
 export interface ToastEntry {
-  id: number,
-  props: ToastEntryProps,
-  controller: ToastEntryController,
+  id: number;
+  props: ToastEntryProps;
+  controller: ToastEntryController;
 }
 
 export class ToastController {
@@ -120,14 +123,18 @@ export class ToastController {
 
   entries: Readable<ToastEntry[]>;
 
-  constructor({
-    defaultProps,
-  }: {
-    defaultProps: Partial<ToastEntryProps>,
-  } = { defaultProps: {} }) {
+  constructor(
+    {
+      defaultProps,
+    }: {
+      defaultProps: Partial<ToastEntryProps>;
+    } = { defaultProps: {} },
+  ) {
     this.entriesMap = writable<Map<number, ToastEntry>>(new Map());
     this.defaultProps = { ...baseDefaultProps, ...defaultProps };
-    this.entries = derived(this.entriesMap, (entriesMap) => [...entriesMap.values()]);
+    this.entries = derived(this.entriesMap, (entriesMap) => [
+      ...entriesMap.values(),
+    ]);
   }
 
   private makeId() {
@@ -139,10 +146,10 @@ export class ToastController {
     const props = { ...this.defaultProps, ...partialProps };
     const id = props.id ?? this.makeId();
     const dismiss = () => this.dismiss(id);
-    const progress = pauseableTweened(
-      props.initialProgress,
-      { duration: 200, easing: linear },
-    );
+    const progress = pauseableTweened(props.initialProgress, {
+      duration: 200,
+      easing: linear,
+    });
     const controller: ToastEntryController = { id, progress, dismiss };
     const entry: ToastEntry = { id, props, controller };
     this.entriesMap.update((entries) => {
@@ -151,7 +158,8 @@ export class ToastController {
       return map;
     });
     if (props.lifetime) {
-      void controller.progress.set(props.finalProgress, { duration: props.lifetime })
+      void controller.progress
+        .set(props.finalProgress, { duration: props.lifetime })
         .then(controller.dismiss);
     }
     props.onShow(controller);
@@ -176,13 +184,13 @@ export type ToastDetail = Partial<ToastEntryProps> | string;
 export type ToastShowFn = (d: ToastDetail) => ToastEntryController;
 
 interface MakeToast {
-  entries: Readable<ToastEntry[]>,
-  info: ToastShowFn,
-  success: ToastShowFn,
-  error: ToastShowFn,
-  fromError: (error?: unknown) => ToastEntryController,
-  spinner: ToastShowFn,
-  progress: ToastShowFn,
+  entries: Readable<ToastEntry[]>;
+  info: ToastShowFn;
+  success: ToastShowFn;
+  error: ToastShowFn;
+  fromError: (error?: unknown) => ToastEntryController;
+  spinner: ToastShowFn;
+  progress: ToastShowFn;
 }
 
 export function makeToastProps(detail: ToastDetail): Partial<ToastEntryProps> {
@@ -192,7 +200,9 @@ export function makeToastProps(detail: ToastDetail): Partial<ToastEntryProps> {
   return detail;
 }
 
-export function makeToast(defaultProps: Partial<ToastEntryProps> = {}): MakeToast {
+export function makeToast(
+  defaultProps: Partial<ToastEntryProps> = {},
+): MakeToast {
   const controller = new ToastController({ defaultProps });
 
   function info(detail: ToastDetail = {}) {
@@ -216,9 +226,7 @@ export function makeToast(defaultProps: Partial<ToastEntryProps> = {}): MakeToas
   }
 
   function fromError(err?: unknown) {
-    return error(
-      err instanceof Error ? err.message : 'Something went wrong.',
-    );
+    return error(err instanceof Error ? err.message : 'Something went wrong.');
   }
 
   function spinner(detail: ToastDetail = {}) {

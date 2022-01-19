@@ -1,9 +1,6 @@
 <script lang="ts">
   import { faTable } from '@fortawesome/free-solid-svg-icons';
-  import {
-    TabContainer,
-    Icon,
-  } from '@mathesar-component-library';
+  import { TabContainer, Icon } from '@mathesar-component-library';
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import {
@@ -19,7 +16,7 @@
   import EmptyState from './empty-state/EmptyState.svelte';
   import LeftPane from './left-pane/LeftPane.svelte';
 
-  export let database : string;
+  export let database: string;
   export let schemaId: number;
 
   let tabList: TabList;
@@ -68,32 +65,41 @@
   <title>Mathesar - {$activeTab?.label || 'Home'}</title>
 </svelte:head>
 
-<LeftPane getLink={getLeftPaneLink} {database} {schemaId} activeTab={$activeTab}/>
+<LeftPane
+  getLink={getLeftPaneLink}
+  {database}
+  {schemaId}
+  activeTab={$activeTab}
+/>
 
 <section class="table-section">
   {#if $tabs?.length > 0}
-    <TabContainer bind:tabs={$tabs} bind:activeTab={$activeTab}
-                  allowRemoval={true} preventDefault={true} getLink={getTabLink}
-                  on:tabRemoved={tabRemoved}>
+    <TabContainer
+      bind:tabs={$tabs}
+      bind:activeTab={$activeTab}
+      allowRemoval={true}
+      preventDefault={true}
+      getLink={getTabLink}
+      on:tabRemoved={tabRemoved}
+    >
       <span slot="tab" let:tab>
-        <Icon data={faTable}/>
+        <Icon data={faTable} />
         <span>{tab.label}</span>
       </span>
 
       {#if $activeTab}
         {#if $activeTab.isNew}
-          <ImportData {database} {schemaId} id={$activeTab.fileImportId}/>
+          <ImportData {database} {schemaId} id={$activeTab.fileImportId} />
         {:else if $activeTab.tabularData}
-          <TableView tabularData={$activeTab.tabularData}/>
+          <TableView tabularData={$activeTab.tabularData} />
         {/if}
       {/if}
     </TabContainer>
-
   {:else}
-    <EmptyState/>
+    <EmptyState />
   {/if}
 </section>
 
 <style global lang="scss">
-  @import "Base.scss";
+  @import 'Base.scss';
 </style>

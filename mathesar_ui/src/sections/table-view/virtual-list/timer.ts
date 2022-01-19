@@ -9,15 +9,15 @@
  * 1. Ported to TS
  */
 
-const hasNativePerformanceNow = typeof performance === 'object'
-  && typeof performance.now === 'function';
+const hasNativePerformanceNow =
+  typeof performance === 'object' && typeof performance.now === 'function';
 
 const now = hasNativePerformanceNow
   ? () => performance.now()
   : () => Date.now();
 
 export interface Timeout {
-  id: number | undefined,
+  id: number | undefined;
 }
 
 export function cancelTimeout(timeout: Timeout): void {

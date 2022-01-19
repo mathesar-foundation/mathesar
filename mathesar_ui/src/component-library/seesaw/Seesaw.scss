@@ -4,7 +4,7 @@
     display: flex;
     align-items: stretch;
     width: 200%;
-    transition: transform .1s;
+    transition: transform 0.1s;
     > * {
       flex-basis: 100%;
     }

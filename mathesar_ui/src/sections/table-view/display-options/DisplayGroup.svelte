@@ -1,8 +1,5 @@
 <script lang="ts">
-  import {
-    faTimes,
-    faPlus,
-  } from '@fortawesome/free-solid-svg-icons';
+  import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
   import type { Meta, GroupOption } from '@mathesar/stores/table-data/types';
   import { Button, Select, Icon } from '@mathesar-component-library';
   import type { SelectOption } from '@mathesar-component-library/types';
@@ -22,9 +19,7 @@
   ) {
     let groupOptions = _columns;
     if (_group) {
-      groupOptions = groupOptions.filter(
-        (option) => !_group.has(option.id),
-      );
+      groupOptions = groupOptions.filter((option) => !_group.has(option.id));
     }
     groupColumns = groupOptions;
   }
@@ -55,16 +50,12 @@
         <tr>
           <td class="groupcolumn">{option}</td>
           <td class="action">
-            <Button on:click={() => meta.removeGroup(option)}>
-              Clear
-            </Button>
+            <Button on:click={() => meta.removeGroup(option)}>Clear</Button>
           </td>
         </tr>
       {:else}
         <tr>
-          <td class="empty-msg" colspan="3">
-            No column selected
-          </td>
+          <td class="empty-msg" colspan="3"> No column selected </td>
         </tr>
       {/each}
 
@@ -72,23 +63,31 @@
         {#if !addNew}
           <tr class="add-option">
             <td colspan="3">
-              <Button on:click={() => { addNew = true; }}>
+              <Button
+                on:click={() => {
+                  addNew = true;
+                }}
+              >
                 Add new group column
               </Button>
             </td>
           </tr>
-
         {:else}
           <tr class="add-option">
             <td class="groupcolumn">
-              <Select options={groupColumns} bind:value={groupColumnValue}/>
+              <Select options={groupColumns} bind:value={groupColumnValue} />
             </td>
             <td class="action">
               <Button size="small" on:click={addGroupColumn}>
-                <Icon data={faPlus}/>
+                <Icon data={faPlus} />
               </Button>
-              <Button size="small" on:click={() => { addNew = false; }}>
-                <Icon data={faTimes}/>
+              <Button
+                size="small"
+                on:click={() => {
+                  addNew = false;
+                }}
+              >
+                <Icon data={faTimes} />
               </Button>
             </td>
           </tr>
@@ -99,5 +98,5 @@
 </div>
 
 <style global lang="scss">
-  @import "DisplayOption.scss";
+  @import 'DisplayOption.scss';
 </style>

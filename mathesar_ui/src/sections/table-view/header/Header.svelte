@@ -1,8 +1,6 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
-  import {
-    ROW_CONTROL_COLUMN_WIDTH,
-  } from '@mathesar/stores/table-data';
+  import { ROW_CONTROL_COLUMN_WIDTH } from '@mathesar/stores/table-data';
 
   import type {
     TabularDataStore,
@@ -24,9 +22,8 @@
   let display: Display;
   let meta: Meta;
 
-  $: ({
-    columnsDataStore, meta, display, constraintsDataStore,
-  } = $tabularData as TabularData);
+  $: ({ columnsDataStore, meta, display, constraintsDataStore } =
+    $tabularData as TabularData);
   $: ({ horizontalScrollOffset, columnPositionMap } = display);
 
   let headerRef: HTMLElement;
@@ -73,8 +70,7 @@
 </script>
 
 <div bind:this={headerRef} class="header">
-  <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;">
-  </div>
+  <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;" />
 
   {#each $columnsDataStore.columns as column (column.name)}
     <HeaderCell
@@ -86,5 +82,9 @@
     />
   {/each}
 
-  <NewColumnCell {display} columns={$columnsDataStore.columns} on:addColumn={addColumn}/>
+  <NewColumnCell
+    {display}
+    columns={$columnsDataStore.columns}
+    on:addColumn={addColumn}
+  />
 </div>

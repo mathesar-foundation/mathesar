@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
 
-  >ul.tabs {
+  > ul.tabs {
     align-items: center;
     display: flex;
     position: relative;
@@ -11,8 +11,8 @@
     padding: 0;
     list-style: none;
     border-bottom: 1px solid #dfdfdf;
-  
-    >li.tab {
+
+    > li.tab {
       align-items: stretch;
       background: 0 0;
       cursor: pointer;
@@ -26,11 +26,11 @@
       user-select: none;
       list-style: none;
       overflow: hidden;
-      transition: width 0.200s cubic-bezier(0.39, 0.575, 0.565, 1);
+      transition: width 0.2s cubic-bezier(0.39, 0.575, 0.565, 1);
       border-radius: 2px 2px 0px 0px;
       margin-bottom: -1px;
 
-      >a {
+      > a {
         padding: 7px 12px;
         white-space: nowrap;
         text-decoration: none;
@@ -43,11 +43,11 @@
         color: inherit;
       }
 
-      >a:focus {
+      > a:focus {
         outline: none;
       }
 
-      &+li.tab {
+      & + li.tab {
         margin-left: -1px;
       }
 
@@ -61,7 +61,7 @@
         z-index: 1;
       }
 
-      >button.remove {
+      > button.remove {
         display: none;
         cursor: pointer;
         padding: 4px 10px;
@@ -75,16 +75,16 @@
         }
       }
 
-      &:hover>button.remove {
+      &:hover > button.remove {
         display: inline-block;
       }
     }
   }
 
-  >ul.tabs:before {
+  > ul.tabs:before {
     border-bottom: 1px solid #efefef;
   }
-  
+
   .tab-content-holder {
     min-height: 0;
     min-width: 0;

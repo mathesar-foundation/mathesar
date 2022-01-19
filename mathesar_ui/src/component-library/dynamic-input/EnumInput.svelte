@@ -1,8 +1,15 @@
-<script lang='ts'>
+<script lang="ts">
   import Select from '@mathesar-component-library-dir/select/Select.svelte';
   import type { Appearance } from '@mathesar-component-library-dir/types.d';
-  import { generateSelectOptions, getSelectedValue, getInitialValue } from './utils';
-  import type { DynamicInputDataType, DynamicInputSelectElement } from './types.d';
+  import {
+    generateSelectOptions,
+    getSelectedValue,
+    getInitialValue,
+  } from './utils';
+  import type {
+    DynamicInputDataType,
+    DynamicInputSelectElement,
+  } from './types.d';
 
   export let dataType: DynamicInputDataType;
   export let enumValues: unknown[] = undefined;
@@ -20,5 +27,11 @@
   }
 </script>
 
-<Select idKey="value" {...$$restProps} {triggerAppearance}
-  options={selectOptions} value={selectedValue} on:change={onChange}/>
+<Select
+  idKey="value"
+  {...$$restProps}
+  {triggerAppearance}
+  options={selectOptions}
+  value={selectedValue}
+  on:change={onChange}
+/>

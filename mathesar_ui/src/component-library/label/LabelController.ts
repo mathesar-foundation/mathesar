@@ -14,6 +14,8 @@ export function setLabelControllerInContext(c: LabelController): void {
   setContext(key, c);
 }
 
-export function getLabelControllerFromContainingLabel(): LabelController | undefined {
+export function getLabelControllerFromContainingLabel():
+  | LabelController
+  | undefined {
   return getContext<LabelController>(key);
 }

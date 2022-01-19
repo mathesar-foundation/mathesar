@@ -1,6 +1,6 @@
 section.table-section .tab-container .table-data .body {
   .row {
-    transition: all .20s cubic-bezier(0,0,.2,1);
+    transition: all 0.2s cubic-bezier(0, 0, 0.2, 1);
 
     &:not(.done) {
       pointer-events: none;
@@ -13,7 +13,8 @@ section.table-section .tab-container .table-data .body {
         }
       }
 
-      &:hover, &.selected {
+      &:hover,
+      &.selected {
         .cell.row-control {
           .checkbox {
             display: inline-flex;
@@ -30,9 +31,11 @@ section.table-section .tab-container .table-data .body {
         }
       }
 
-      &.update, &.delete, &.create {
+      &.update,
+      &.delete,
+      &.create {
         .cell {
-          transition: background-color .20s cubic-bezier(0,0,.2,1);
+          transition: background-color 0.2s cubic-bezier(0, 0, 0.2, 1);
           background-color: #fff7d7;
         }
       }
@@ -41,16 +44,19 @@ section.table-section .tab-container .table-data .body {
         pointer-events: none;
       }
 
-      &.updateFailed, &.deleteFailed, &.creationFailed {
+      &.updateFailed,
+      &.deleteFailed,
+      &.creationFailed {
         .cell {
-          transition: background-color .20s cubic-bezier(0,0,.2,1);
+          transition: background-color 0.2s cubic-bezier(0, 0, 0.2, 1);
           background-color: #fef1f1;
         }
       }
 
-      &.updated, &.created {
+      &.updated,
+      &.created {
         .cell {
-          transition: background-color .20s cubic-bezier(0,0,.2,1);
+          transition: background-color 0.2s cubic-bezier(0, 0, 0.2, 1);
           background-color: #ebfeef;
         }
       }
@@ -102,7 +108,7 @@ section.table-section .tab-container .table-data .body {
           background: white;
           padding: 0.2em;
           border-radius: 0.3em;
-          border: solid 0.1em #DDD;
+          border: solid 0.1em #ddd;
           .label {
             color: #777;
             font-size: 0.8rem;

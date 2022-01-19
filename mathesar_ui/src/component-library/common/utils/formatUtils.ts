@@ -8,7 +8,7 @@ export function formatSize(sizeInBytes: number): string {
    * TODO: Analyze on what is the best option to go with.
    */
   const repIndex = Math.floor(Math.log(sizeInBytes) / Math.log(1024));
-  const repValue = sizeInBytes / (1024 ** repIndex);
+  const repValue = sizeInBytes / 1024 ** repIndex;
   const repUnit = ' KMGTP'.charAt(repIndex);
 
   return `${repValue.toFixed(2)} ${repUnit}B`;
