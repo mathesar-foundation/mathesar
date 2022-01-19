@@ -9,10 +9,7 @@
 
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import {
-    faFile,
-    faFileUpload,
-  } from '@fortawesome/free-solid-svg-icons';
+  import { faFile, faFileUpload } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Progress, formatSize } from '@mathesar-component-library';
   import type {
     FileUpload,
@@ -23,7 +20,8 @@
   const dispatch = createEventDispatcher();
   const componentId = `file-import-${getId()}`;
 
-  export let fileProgress: Record<string, FileUploadProgress> | undefined = undefined;
+  export let fileProgress: Record<string, FileUploadProgress> | undefined =
+    undefined;
   export let multiple = false;
   export let fileUploads: FileUpload[] | undefined = undefined;
 
@@ -33,7 +31,7 @@
   export function updateState(
     fileIdentifier: string,
     progress: FileUploadProgress,
-  ) : void {
+  ): void {
     fileProgress = {
       ...fileProgress,
       [fileIdentifier]: progress,
@@ -94,13 +92,19 @@
     <div class="files">
       {#each fileUploads as upload (upload.fileId)}
         <div class="file">
-          <Icon data={faFile} size="3.5em"/>
+          <Icon data={faFile} size="3.5em" />
           <div class="file-info">
             <div class="name">{upload.file.name}</div>
-            <Progress percentage={Math.round(fileProgress?.[upload.fileId]?.progress || 0)} />
+            <Progress
+              percentage={Math.round(
+                fileProgress?.[upload.fileId]?.progress || 0,
+              )}
+            />
             <div class="upload-info">
               <span>
-                Uploaded {Math.round(fileProgress?.[upload.fileId]?.progress || 0)}%
+                Uploaded {Math.round(
+                  fileProgress?.[upload.fileId]?.progress || 0,
+                )}%
               </span>
               <span>{formatSize(upload.file.size)}</span>
             </div>
@@ -110,22 +114,37 @@
     </div>
   {/if}
 
-  <input type='file' id={componentId}
-          {multiple}
-          style="display: none;"
-          on:change={onChange}/>
+  <input
+    type="file"
+    id={componentId}
+    {multiple}
+    style="display: none;"
+    on:change={onChange}
+  />
 
   {#if multiple || !fileUploads || fileUploads.length === 0}
-    <label tabindex="0" for={componentId} class="file-upload-trigger {state}"
+    <label
+      tabindex="0"
+      for={componentId}
+      class="file-upload-trigger {state}"
       on:keydown={checkAndOpen}
-      on:drop|preventDefault|stopPropagation={onFileDrop} 
-      on:dragenter|preventDefault|stopPropagation={() => { state = 'in'; }}
-      on:dragover|preventDefault|stopPropagation={() => { state = 'in'; }}
-      on:dragleave|preventDefault|stopPropagation={() => { state = 'out'; }}
-      on:dragend|preventDefault|stopPropagation={() => { state = 'out'; }}>      
+      on:drop|preventDefault|stopPropagation={onFileDrop}
+      on:dragenter|preventDefault|stopPropagation={() => {
+        state = 'in';
+      }}
+      on:dragover|preventDefault|stopPropagation={() => {
+        state = 'in';
+      }}
+      on:dragleave|preventDefault|stopPropagation={() => {
+        state = 'out';
+      }}
+      on:dragend|preventDefault|stopPropagation={() => {
+        state = 'out';
+      }}
+    >
       <slot>
         <div class="message">
-          <Icon size="60px" data={faFileUpload}/>
+          <Icon size="60px" data={faFileUpload} />
           <div class="text">
             <div class="title">Drag a file here</div>
             <div>or click to browse a file from your computer</div>

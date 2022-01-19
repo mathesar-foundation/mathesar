@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
   import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
   import type { DynamicInputInterfaceType } from './types.d';
 
@@ -10,5 +10,5 @@
   <!--TODO: Add css to checkbox to show a toggle view -->
   Toggle not implemented yet
 {:else}
-  <Checkbox {...$$restProps} bind:checked={value}/>
+  <Checkbox {...$$restProps} bind:checked={value} />
 {/if}

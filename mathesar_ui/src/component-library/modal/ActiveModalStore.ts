@@ -1,6 +1,4 @@
-import type {
-  Subscriber, Unsubscriber, Updater, Writable,
-} from 'svelte/store';
+import type { Subscriber, Unsubscriber, Updater, Writable } from 'svelte/store';
 import { writable } from 'svelte/store';
 
 type ModalId = number | string;

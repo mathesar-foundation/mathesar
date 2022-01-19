@@ -74,9 +74,17 @@
   }
 </script>
 
-<BaseInput {...$$restProps} bind:id {disabled}/>
+<BaseInput {...$$restProps} bind:id {disabled} />
 
-<input bind:this={element} {...$$restProps} type='number'
+<input
+  bind:this={element}
+  {...$$restProps}
+  type="number"
   class={['input-element', 'number-input', classes].join(' ')}
-  {value} {id} {disabled} {min} {max}
-  on:input={onInput}/>
+  {value}
+  {id}
+  {disabled}
+  {min}
+  {max}
+  on:input={onInput}
+/>

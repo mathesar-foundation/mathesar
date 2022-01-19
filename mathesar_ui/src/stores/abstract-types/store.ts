@@ -14,8 +14,14 @@ import { constructAbstractTypeMapFromResponse } from './abstractTypeCategories';
 
 const commonData = preloadCommonData();
 
-const databasesToAbstractTypesStoreMap: Map<Database['id'], Writable<AbstractTypesSubstance>> = new Map();
-const abstractTypesRequestMap: Map<Database['id'], CancellablePromise<AbstractTypeResponse[]>> = new Map();
+const databasesToAbstractTypesStoreMap: Map<
+  Database['id'],
+  Writable<AbstractTypesSubstance>
+> = new Map();
+const abstractTypesRequestMap: Map<
+  Database['id'],
+  CancellablePromise<AbstractTypeResponse[]>
+> = new Map();
 
 export async function refetchTypesForDB(databaseId: Database['id']): Promise<AbstractTypesMap | null> {
   const store = databasesToAbstractTypesStoreMap.get(databaseId);
@@ -32,7 +38,9 @@ export async function refetchTypesForDB(databaseId: Database['id']): Promise<Abs
 
     abstractTypesRequestMap.get(databaseId)?.cancel();
 
-    const typesRequest = getAPI<AbstractTypeResponse[]>(`/databases/${databaseId}/types/`);
+    const typesRequest = getAPI<AbstractTypeResponse[]>(
+      `/databases/${databaseId}/types/`,
+    );
     abstractTypesRequestMap.set(databaseId, typesRequest);
     const response = await typesRequest;
 
@@ -62,7 +70,9 @@ export async function refetchTypesForDB(databaseId: Database['id']): Promise<Abs
  */
 let preload = true;
 
-function getTypesForDatabase(databaseId: Database['id']): Writable<AbstractTypesSubstance> {
+function getTypesForDatabase(
+  databaseId: Database['id'],
+): Writable<AbstractTypesSubstance> {
   let store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
     store = writable({

@@ -46,7 +46,7 @@
   class="cell"
   style="
     width:{columnPosition?.width || 0}px;
-    left:{(columnPosition?.left || 0)}px;
+    left:{columnPosition?.left || 0}px;
   "
 >
   <Dropdown
@@ -66,28 +66,32 @@
       <div class="container">
         <div class="section type-header">
           {#if view === 'default'}
-          <h6 class="category">Data Type</h6>
-          <Button class="type-switch" appearance="plain" on:click={setTypeView}>
-            <span>{abstractTypeOfColumn?.name}</span>
-            <Icon size="0.8em" data={faCog}/>
-            <Icon size="0.7em" data={faChevronRight}/>
-          </Button>
-          {:else if view === 'type'}
-          <h6 class="category">
+            <h6 class="category">Data Type</h6>
             <Button
-              size="small"
+              class="type-switch"
               appearance="plain"
-              class="padding-zero"
-              on:click={setDefaultView}
+              on:click={setTypeView}
             >
-              <Icon data={faChevronLeft}/>
-              Go back
+              <span>{abstractTypeOfColumn?.name}</span>
+              <Icon size="0.8em" data={faCog} />
+              <Icon size="0.7em" data={faChevronRight} />
             </Button>
-          </h6>
+          {:else if view === 'type'}
+            <h6 class="category">
+              <Button
+                size="small"
+                appearance="plain"
+                class="padding-zero"
+                on:click={setDefaultView}
+              >
+                <Icon data={faChevronLeft} />
+                Go back
+              </Button>
+            </h6>
           {/if}
         </div>
 
-        <div class="divider"/>
+        <div class="divider" />
 
         <div class="section">
           {#if view === 'default'}
@@ -100,13 +104,14 @@
               on:close={closeMenu}
             />
           {:else if view === 'type'}
-            <TypeOptions {column} {abstractTypeOfColumn} on:close={closeMenu}/>
+            <TypeOptions {column} {abstractTypeOfColumn} on:close={closeMenu} />
           {/if}
         </div>
-    </svelte:fragment>
+      </div></svelte:fragment
+    >
   </Dropdown>
 </div>
 
 <style global lang="scss">
-  @import "HeaderCell.scss";
+  @import 'HeaderCell.scss';
 </style>

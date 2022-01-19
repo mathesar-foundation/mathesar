@@ -42,19 +42,19 @@
   export let scrollOffset: Props['scrollOffset'] = 0;
   export let itemCount: Props['itemCount'];
   export let overscanCount: Props['overscanCount'] = 2;
-  export let itemSize: Props['itemSize'] = () : number => estimatedItemSize;
+  export let itemSize: Props['itemSize'] = (): number => estimatedItemSize;
   export let paddingBottom = 0;
   export let horizontalScrollOffset = 0;
   export let itemKey: Props['itemKey'] = listUtils.defaultItemKey;
   export let width: number | undefined = undefined;
-  
+
   let instanceProps: Props['instanceProps'] = {
     lastMeasuredIndex: -1,
     itemMetadataMap: {},
     styleCache: {},
   };
   let isScrolling: Props['isScrolling'] = false;
-  let scrollDirection : Props['scrollDirection'] = 'forward';
+  let scrollDirection: Props['scrollDirection'] = 'forward';
   let lastHeight: Props['height'] = height;
 
   let items: ItemInfo['items'] = [];
@@ -95,28 +95,27 @@
     estimatedItemSize,
   });
 
-  $: innerStyle = `height:${estimatedTotalSize + paddingBottom}px;`
-              + `width:${width ? `${width}px` : '100%'};`
-              + `${isScrolling ? 'pointer-events:none;' : ''}`;
+  $: innerStyle =
+    `height:${estimatedTotalSize + paddingBottom}px;` +
+    `width:${width ? `${width}px` : '100%'};` +
+    `${isScrolling ? 'pointer-events:none;' : ''}`;
 
   function onHscrollChange(_hscrollOffset: number) {
-    if (outerRef
-          && typeof _hscrollOffset === 'number'
-          && outerRef.scrollLeft !== _hscrollOffset) {
+    if (
+      outerRef &&
+      typeof _hscrollOffset === 'number' &&
+      outerRef.scrollLeft !== _hscrollOffset
+    ) {
       outerRef.scrollLeft = _hscrollOffset;
     }
   }
 
   // For direct updates on horizontalScrollOffset
   $: onHscrollChange(horizontalScrollOffset);
-  
+
   function onScroll(event: Event): void {
-    const {
-      clientHeight,
-      scrollHeight,
-      scrollTop,
-      scrollLeft,
-    } = event.target as HTMLElement;
+    const { clientHeight, scrollHeight, scrollTop, scrollLeft } =
+      event.target as HTMLElement;
     requestResetIsScrolling = true;
     horizontalScrollOffset = scrollLeft;
 
@@ -136,9 +135,7 @@
   }
 
   function onHorizontalScroll(event: Event): void {
-    const {
-      scrollLeft,
-    } = event.target as HTMLElement;
+    const { scrollLeft } = event.target as HTMLElement;
     horizontalScrollOffset = scrollLeft;
   }
 
@@ -165,11 +162,11 @@
     outerRef.addEventListener('ps-scroll-y', callback);
     outerRef.addEventListener('ps-scroll-x', hCallback);
 
-    return (() => {
+    return () => {
       outerRef.removeEventListener('ps-scroll-y', callback);
       outerRef.removeEventListener('ps-scroll-x', hCallback);
       psRef?.destroy();
-    });
+    };
   });
 
   const scrollStopped = () => {
@@ -255,12 +252,13 @@
 <div
   class={outerClass}
   style="height:{height}px;width:100%;direction:ltr;"
-  bind:this={outerRef}>
+  bind:this={outerRef}
+>
   <div style={innerStyle}>
-      <slot {items} />
+    <slot {items} />
   </div>
 </div>
 
 <style global lang="scss">
-  @import "VirtualList.scss";
+  @import 'VirtualList.scss';
 </style>

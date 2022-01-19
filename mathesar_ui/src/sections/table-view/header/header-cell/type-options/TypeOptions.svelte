@@ -55,7 +55,8 @@
 
   async function scrollToSelectedType() {
     await tick();
-    const selectedElement: HTMLLIElement | null = abstractTypeContainer?.querySelector('li.selected');
+    const selectedElement: HTMLLIElement | null =
+      abstractTypeContainer?.querySelector('li.selected');
     if (selectedElement) {
       abstractTypeContainer.scrollTop = selectedElement.offsetTop;
     }
@@ -90,21 +91,27 @@
   <h5 class="menu-header">Set Column Type</h5>
   <ul bind:this={abstractTypeContainer} class="type-list">
     {#each allowedTypeConversions as abstractType (abstractType.identifier)}
-      <li class:selected={selectedAbstractType?.identifier === abstractType?.identifier}>
-        <Button appearance="plain" on:click={() => selectAbstractType(abstractType)}>
+      <li
+        class:selected={selectedAbstractType?.identifier ===
+          abstractType?.identifier}
+      >
+        <Button
+          appearance="plain"
+          on:click={() => selectAbstractType(abstractType)}
+        >
           <span class="data-icon">{abstractType.icon}</span>
           <span>{abstractType.name}</span>
         </Button>
       </li>
     {/each}
   </ul>
-  
+
   <div class="type-options">
     <!-- TODO: Make tab container more generic to be used here -->
     <ul class="type-option-tabs">
       <li>
         <Button appearance="ghost" class="padding-zero type-option-tab">
-          <Icon size="0.75em" data={faDatabase}/>
+          <Icon size="0.75em" data={faDatabase} />
           <span>Database</span>
         </Button>
       </li>
@@ -115,22 +122,22 @@
     </div>
   </div>
 
-  <div class="divider"></div>
+  <div class="divider" />
   <div class="type-menu-footer">
-    <Button appearance="primary" disabled={
-        !selectedAbstractType || typeChangeState === States.Loading
-      } on:click={onSave}>
+    <Button
+      appearance="primary"
+      disabled={!selectedAbstractType || typeChangeState === States.Loading}
+      on:click={onSave}
+    >
       {#if typeChangeState === States.Loading}
-        <Icon data={faSpinner} spin={true}/>
+        <Icon data={faSpinner} spin={true} />
       {/if}
       <span>Save</span>
     </Button>
-    <Button appearance="default" on:click={close}>
-      Close
-    </Button>
-  </div>  
+    <Button appearance="default" on:click={close}>Close</Button>
+  </div>
 </div>
 
 <style global lang="scss">
-  @import "TypeOptions.scss";
+  @import 'TypeOptions.scss';
 </style>

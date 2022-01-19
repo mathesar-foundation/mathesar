@@ -24,7 +24,7 @@
   function close() {
     isOpen = false;
   }
-  
+
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape' && isOpen && closeOnEsc) {
       close();
@@ -45,42 +45,42 @@
   $: void dispatchOpenOrClose(isOpen);
 </script>
 
-<svelte:window on:keydown={handleKeydown}/>
+<svelte:window on:keydown={handleKeydown} />
 
 {#if isOpen}
-  <div class="modal-wrapper" use:portal >
+  <div class="modal-wrapper" use:portal>
     <div
       class="overlay"
       on:click={handleOverlayClick}
-      in:fade="{{ duration: 150 }}"
-      out:fade="{{ duration: 150 }}"
+      in:fade={{ duration: 150 }}
+      out:fade={{ duration: 150 }}
     />
     <div
       class={['modal', `modal-size-${size}`, classes].join(' ')}
       {style}
-      in:fly="{{ y: 20, duration: 150 }}"
-      out:fly="{{ y: 20, duration: 150 }}"
+      in:fly={{ y: 20, duration: 150 }}
+      out:fly={{ y: 20, duration: 150 }}
     >
       {#if $$slots.title || title || closeOnButton}
-        <div class=title-bar>
+        <div class="title-bar">
           <div class="title">
-            {#if $$slots.title}<slot name="title"/>{/if}
+            {#if $$slots.title}<slot name="title" />{/if}
             {#if title}{title}{/if}
           </div>
           {#if closeOnButton}
-            <Button appearance=plain class=close-button on:click={close}>
-              <Icon data={faTimes}/>
+            <Button appearance="plain" class="close-button" on:click={close}>
+              <Icon data={faTimes} />
             </Button>
           {/if}
         </div>
       {/if}
-      
+
       <div class="body">
-        <slot {close}/>
+        <slot {close} />
       </div>
 
       {#if $$slots.footer}
-        <div class="footer"><slot name="footer"/></div>
+        <div class="footer"><slot name="footer" /></div>
       {/if}
     </div>
   </div>

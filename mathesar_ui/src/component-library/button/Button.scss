@@ -14,7 +14,8 @@ button.btn {
     margin-left: 4px;
   }
 
-  &:active, &:focus {
+  &:active,
+  &:focus {
     outline: 0;
   }
 
@@ -64,21 +65,24 @@ button.btn {
     background: transparent;
   }
 
-  &.btn-plain, &.btn-ghost {
+  &.btn-plain,
+  &.btn-ghost {
     border-color: transparent;
     border-radius: 0px;
     box-shadow: none !important;
   }
 
-  &.btn-default, &.btn-plain {
+  &.btn-default,
+  &.btn-plain {
     &:hover {
       background: #f3f4f5;
     }
-  
-    &:active, &:focus {
+
+    &:active,
+    &:focus {
       box-shadow: 0 0 0 2px #2087e633;
     }
-  
+
     &:active {
       background: #e7e7e7;
     }

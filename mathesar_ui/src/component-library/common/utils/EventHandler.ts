@@ -1,5 +1,5 @@
 export default class EventHandler {
-  protected listeners: Map<string, Set<((value?: unknown) => unknown)>>;
+  protected listeners: Map<string, Set<(value?: unknown) => unknown>>;
 
   constructor() {
     this.listeners = new Map();

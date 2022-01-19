@@ -1,5 +1,9 @@
 <script>
-  import { faBreadSlice, faCheck, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+  import {
+    faBreadSlice,
+    faCheck,
+    faExclamationTriangle,
+  } from '@fortawesome/free-solid-svg-icons';
   import { onMount } from 'svelte';
   import Button from '../../button/Button.svelte';
   import ToastPresenter from '../ToastPresenter.svelte';
@@ -13,7 +17,11 @@
   const iconChoices = [
     { id: 0, label: '(None)', value: undefined },
     { id: 1, label: 'Bread', value: { data: faBreadSlice } },
-    { id: 2, label: 'Exclamation Triangle', value: { data: faExclamationTriangle } },
+    {
+      id: 2,
+      label: 'Exclamation Triangle',
+      value: { data: faExclamationTriangle },
+    },
     { id: 3, label: 'Check', value: { data: faCheck } },
   ];
 
@@ -50,8 +58,7 @@
   });
 </script>
 
-
-<ToastPresenter entries={entries} />
+<ToastPresenter {entries} />
 
 <label>
   <span>Title</span>
@@ -143,7 +150,7 @@
     display: block;
     margin: 1em 0;
   }
-  input[type="number"] {
+  input[type='number'] {
     width: 8ch;
   }
 </style>

@@ -8,7 +8,7 @@
   .input-group-text {
     display: flex;
     align-items: center;
-    padding: .375rem .5rem;
+    padding: 0.375rem 0.5rem;
     color: #212323;
     text-align: center;
     white-space: nowrap;
@@ -28,12 +28,12 @@
     }
   }
 
-  >*:not(:last-child) {
+  > *:not(:last-child) {
     border-top-right-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
   }
 
-  >* + * {
+  > * + * {
     border-top-left-radius: 0 !important;
     border-bottom-left-radius: 0 !important;
     margin-left: -1px !important;

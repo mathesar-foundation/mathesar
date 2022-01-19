@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
   import EnumInput from './EnumInput.svelte';
   import StringInput from './StringInput..svelte';
   import BooleanInput from './BooleanInput.svelte';
@@ -41,11 +41,11 @@
 </script>
 
 {#if enumValues || interfaceType === 'select'}
-  <EnumInput {...$$restProps} {enumValues} {dataType} {options} bind:value/>
+  <EnumInput {...$$restProps} {enumValues} {dataType} {options} bind:value />
 {:else if dataType === 'boolean'}
-  <BooleanInput {...$$restProps} {interfaceType} bind:value/>
+  <BooleanInput {...$$restProps} {interfaceType} bind:value />
 {:else if dataType === 'integer' || dataType === 'float'}
-  <NumberInput {...$$restProps} isInteger={dataType === 'integer'} bind:value/>
+  <NumberInput {...$$restProps} isInteger={dataType === 'integer'} bind:value />
 {:else if dataType === 'string'}
-  <StringInput {...$$restProps} {interfaceType} bind:value/>
+  <StringInput {...$$restProps} {interfaceType} bind:value />
 {/if}
