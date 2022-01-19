@@ -1,7 +1,6 @@
 import { writable, derived } from 'svelte/store';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import { getAPI, States } from '@mathesar/utils/api';
-import { notEmpty } from '@mathesar/utils/language';
 
 import type { Writable, Readable } from 'svelte/store';
 import type { Database } from '@mathesar/App.d';
@@ -11,7 +10,7 @@ import type { CancellablePromise } from '@mathesar-component-library';
 const commonData = preloadCommonData();
 
 export const currentDBName: Writable<Database['name']> = writable(
-  commonData.current_db || null,
+  commonData?.current_db ?? undefined,
 );
 
 export interface DatabaseStoreData {
@@ -24,23 +23,24 @@ export interface DatabaseStoreData {
 export const databases = writable<DatabaseStoreData>({
   preload: true,
   state: States.Loading,
-  data: commonData.databases || [],
+  data: commonData?.databases ?? [],
 });
 
-export const currentDBId: Readable<Database['id']> = derived(
+export const currentDBId: Readable<Database['id'] | undefined> = derived(
   [currentDBName, databases],
   ([_currentDBName, databasesStore]) => {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const _databases = databasesStore.data;
-    return notEmpty(_databases)
-      ? _databases.find((database) => database.name === _currentDBName).id
-      : undefined;
+    if (!_databases?.length) {
+      return undefined;
+    }
+    return _databases?.find((database) => database.name === _currentDBName)?.id;
   },
 );
 
 let databaseRequest: CancellablePromise<PaginatedResponse<Database>>;
 
-export async function reloadDatabases(): Promise<PaginatedResponse<Database>> {
+export async function reloadDatabases(): Promise<PaginatedResponse<Database> | undefined> {
   databases.update((currentData) => ({
     ...currentData,
     state: States.Loading,
@@ -59,8 +59,8 @@ export async function reloadDatabases(): Promise<PaginatedResponse<Database>> {
   } catch (err) {
     databases.set({
       state: States.Error,
-      error: err instanceof Error ? err.message : null,
+      error: err instanceof Error ? err.message : undefined,
     });
-    return null;
+    return undefined;
   }
 }

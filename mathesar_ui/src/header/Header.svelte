@@ -28,6 +28,9 @@
   import ImportIndicator from './import-indicator/ImportIndicator.svelte';
 
   async function handleCreateEmptyTable() {
+    if (!$currentSchemaId) {
+      return;
+    }
     const table = await createTable($currentSchemaId);
     await refetchTablesForSchema($currentSchemaId);
     const tab = constructTabularTab(

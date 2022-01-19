@@ -1,38 +1,51 @@
 from collections import namedtuple
-from typing import List
 
+from rest_framework.exceptions import APIException as DRFApiException
 from django.utils.encoding import force_str
 from rest_framework import status
 from rest_framework.exceptions import APIException, ValidationError as DrfValidationError
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
-ExceptionBody = namedtuple('ExceptionBody',
-                           ['code', 'message', 'field', 'details'],
-                           defaults=[None, None]
-                           )
+ErrorBody = namedtuple(
+    'ErrorBody',
+    ['code', 'message', 'field', 'details'],
+    defaults=[None, None]
+)
 
 
 def get_default_exception_detail(exception, error_code=ErrorCodes.NonClassifiedError.value,
                                  message=None, field=None, details=None):
-    return ExceptionBody(
-            message=force_str(exception) if message is None else message,
-            code=error_code,
-            field=field,
-            details=details
+    return ErrorBody(
+        message=force_str(exception) if message is None else message,
+        code=error_code,
+        field=field,
+        details=details
     )
 
 
 def get_default_api_exception(exc):
-    return CustomApiException(exc, ErrorCodes.NonClassifiedIntegrityError.value)
+    return APIException(exc, ErrorCodes.NonClassifiedError.value)
 
 
-class CustomApiException(APIException):
+class APIException(DRFApiException):
     def __init__(self, exception, error_code=ErrorCodes.NonClassifiedError.value, message=None, field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
         self.detail = [exception_detail]
         self.status_code = status_code
+
+
+class GenericApiError(APIException):
+    default_code = 'error'
+    """
+    Class which is used to convert list of errors into proper APIException
+    """
+
+    def __init__(self, error_body_list, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        self.detail = [error_body._asdict() for error_body in error_body_list]
+        self.status_code = status_code
+
 
 
 class ApiUniqueViolation(APIException):
@@ -239,11 +252,3 @@ class ApiRaiseException(CustomApiException):
                  field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         super().__init__(exception, error_code, message, field, details, status_code)
-
-
-class GenericApiError(CustomApiException):
-    default_code = 'error'
-
-    def __init__(self, detail_list: List[ExceptionBody], status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
-        self.detail = [exception_body._asdict() for exception_body in detail_list]
-        self.status_code = status_code
