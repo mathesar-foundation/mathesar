@@ -10,14 +10,14 @@ export type SortOption = Map<string, 'asc' | 'desc'>;
 export type GroupOption = Set<string>;
 
 export interface FilterEntry {
-  column: SelectOption,
-  condition: SelectOption,
-  value: string
+  column: SelectOption;
+  condition: SelectOption;
+  value: string;
 }
 
 export interface FilterCombination extends SelectOption {
-  id: 'and' | 'or',
-  label: string
+  id: 'and' | 'or';
+  label: string;
 }
 
 export const filterCombinations: FilterCombination[] = [
@@ -26,8 +26,8 @@ export const filterCombinations: FilterCombination[] = [
 ];
 
 export interface FilterOption {
-  combination: FilterCombination,
-  filters: FilterEntry[]
+  combination: FilterCombination;
+  filters: FilterEntry[];
 }
 
 export type MetaParams = [
@@ -39,22 +39,39 @@ export type MetaParams = [
 
 export type UpdateModificationType = 'update' | 'updated' | 'updateFailed';
 
-export type ModificationType = 'create' | 'created' | 'creationFailed'
-| UpdateModificationType
-| 'delete' | 'deleteFailed';
+export type ModificationType =
+  | 'create'
+  | 'created'
+  | 'creationFailed'
+  | UpdateModificationType
+  | 'delete'
+  | 'deleteFailed';
 
 export type ModificationStatus = 'inprocess' | 'complete' | 'error' | 'idle';
 export type ModificationStateMap = Map<unknown, Map<unknown, ModificationType>>;
 
-const inProgressSet: Set<ModificationType> = new Set(['create', 'update', 'delete']);
+const inProgressSet: Set<ModificationType> = new Set([
+  'create',
+  'update',
+  'delete',
+]);
 const completeSet: Set<ModificationType> = new Set(['created', 'updated']);
-const errorSet: Set<ModificationType> = new Set(['creationFailed', 'updateFailed', 'deleteFailed']);
+const errorSet: Set<ModificationType> = new Set([
+  'creationFailed',
+  'updateFailed',
+  'deleteFailed',
+]);
 
 export function getGenericModificationStatusByPK(
   recordModificationState: ModificationStateMap,
   primaryKeyValue: unknown,
 ): ModificationStatus {
-  const type = recordModificationState.get(primaryKeyValue)?.get(RECORD_COMBINED_STATE_KEY);
+  const type = recordModificationState
+    .get(primaryKeyValue)
+    ?.get(RECORD_COMBINED_STATE_KEY);
+  if (!type) {
+    return 'idle';
+  }
   if (inProgressSet.has(type)) {
     return 'inprocess';
   }
@@ -67,7 +84,9 @@ export function getGenericModificationStatusByPK(
   return 'idle';
 }
 
-function getCombinedUpdateState(cellMap: Map<unknown, ModificationType>): UpdateModificationType {
+function getCombinedUpdateState(
+  cellMap: Map<unknown, ModificationType>,
+): UpdateModificationType {
   let state: UpdateModificationType = 'updated';
   // eslint-disable-next-line no-restricted-syntax
   for (const [key, value] of cellMap) {
@@ -115,11 +134,7 @@ export class Meta {
 
   metaParameters: Readable<MetaParams>;
 
-  constructor(
-    type: TabularType,
-    parentId: number,
-    params?: MetaParams,
-  ) {
+  constructor(type: TabularType, parentId: number, params?: MetaParams) {
     this.type = type;
     this.parentId = parentId;
 
@@ -138,9 +153,12 @@ export class Meta {
     this.selectedRecords = writable(new Set());
     this.recordModificationState = writable(new Map() as ModificationStateMap);
 
-    this.offset = derived([this.pageSize, this.page], ([$pageSize, $page], set) => {
-      set($pageSize * ($page - 1));
-    });
+    this.offset = derived(
+      [this.pageSize, this.page],
+      ([$pageSize, $page], set) => {
+        set($pageSize * ($page - 1));
+      },
+    );
     this.combinedModificationState = derived(
       this.recordModificationState,
       ($recordModificationState, set) => {
@@ -151,14 +169,16 @@ export class Meta {
           // eslint-disable-next-line no-restricted-syntax
           for (const value of $recordModificationState.values()) {
             const rowState = value?.get(RECORD_COMBINED_STATE_KEY);
-            if (inProgressSet.has(rowState)) {
-              finalState = 'inprocess';
-              break;
-            }
-            if (errorSet.has(rowState)) {
-              finalState = 'error';
-            } else if (completeSet.has(rowState) && finalState === 'idle') {
-              finalState = 'complete';
+            if (rowState) {
+              if (inProgressSet.has(rowState)) {
+                finalState = 'inprocess';
+                break;
+              }
+              if (errorSet.has(rowState)) {
+                finalState = 'error';
+              } else if (completeSet.has(rowState) && finalState === 'idle') {
+                finalState = 'complete';
+              }
             }
           }
           set(finalState);
@@ -172,13 +192,7 @@ export class Meta {
 
   private setRecordRequestParamsStore(): void {
     this.recordRequestParams = derived(
-      [
-        this.pageSize,
-        this.offset,
-        this.group,
-        this.sort,
-        this.filter,
-      ],
+      [this.pageSize, this.offset, this.group, this.sort, this.filter],
       ([$pageSize, $offset, $group, $sort, $filter]) => {
         const params: string[] = [];
         params.push(`limit=${$pageSize}`);
@@ -190,7 +204,7 @@ export class Meta {
           direction: $sort.get(field) ?? 'asc',
         }));
 
-        let sortOptions: { 'field': string, 'direction': string }[] = [];
+        let sortOptions: { field: string; direction: string }[] = [];
         $sort.forEach((value, key) => {
           if (!$group.has(key)) {
             sortOptions.unshift({
@@ -203,21 +217,25 @@ export class Meta {
         sortOptions = [...groupSortOptions, ...sortOptions];
 
         if (sortOptions.length > 0) {
-          params.push(`order_by=${encodeURIComponent(JSON.stringify(sortOptions))}`);
+          params.push(
+            `order_by=${encodeURIComponent(JSON.stringify(sortOptions))}`,
+          );
         }
         if (groupOptions.length > 0) {
           params.push(
-            `grouping=${encodeURIComponent(JSON.stringify({ columns: groupOptions }))}`,
+            `grouping=${encodeURIComponent(
+              JSON.stringify({ columns: groupOptions }),
+            )}`,
           );
         }
         if ($filter.filters?.length > 0) {
           // Specify fields to pass style checks for special handling of get_duplicates op
           const filter: {
             and: {
-              field: string,
-              op: string,
-              value: string[]
-            }[]
+              field: string;
+              op: string;
+              value: string[];
+            }[];
           } = { and: [] };
 
           const terms = $filter.filters.map((term) => ({
@@ -226,7 +244,11 @@ export class Meta {
             value: term.value,
           }));
           filter[$filter.combination.id as string] = terms;
-          if ('and' in filter && filter.and.length === 1 && filter.and[0].op === 'get_duplicates') {
+          if (
+            'and' in filter &&
+            filter.and.length === 1 &&
+            filter.and[0].op === 'get_duplicates'
+          ) {
             // Special handling for the get_duplicates operation due to backend bug
             // The backend can only handle the get_duplicates operation by itself
             // The "and" must be removed and the value must be in an array
@@ -248,18 +270,9 @@ export class Meta {
 
   private setMetaParametersStore(): void {
     this.metaParameters = derived(
-      [
-        this.pageSize,
-        this.page,
-        this.sort,
-        this.group,
-        this.filter,
-      ],
+      [this.pageSize, this.page, this.sort, this.group, this.filter],
       ([$pageSize, $page, $sort, $group, $filter]) => {
-        const paginationOption: number[] = [
-          $pageSize,
-          $page,
-        ];
+        const paginationOption: number[] = [$pageSize, $page];
 
         const sortOption: string[] = [];
         $sort.forEach((value, key) => {
@@ -318,8 +331,9 @@ export class Meta {
 
       if (filterOption?.length > 0) {
         const filters: FilterEntry[] = [];
-        const combination: FilterCombination['id'] = filterOption[0] === 'o' ? 'or' : 'and';
-        for (let i = 1; i < filterOption.length;) {
+        const combination: FilterCombination['id'] =
+          filterOption[0] === 'o' ? 'or' : 'and';
+        for (let i = 1; i < filterOption.length; ) {
           const column = filterOption[i];
           const condition = filterOption[i + 1];
 
@@ -361,10 +375,7 @@ export class Meta {
   addFilter(entry: FilterEntry, combination?: FilterCombination): void {
     this.filter.update((existing) => ({
       combination: combination || existing.combination || filterCombinations[0],
-      filters: [
-        ...existing.filters,
-        entry,
-      ],
+      filters: [...existing.filters, entry],
     }));
   }
 
@@ -517,9 +528,7 @@ export class Meta {
     });
   }
 
-  clearMultipleRecordModificationStates(
-    keys: unknown[],
-  ): void {
+  clearMultipleRecordModificationStates(keys: unknown[]): void {
     this.recordModificationState.update((existingMap) => {
       const newMap = new Map(existingMap);
       keys.forEach((value) => {

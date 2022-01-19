@@ -2,18 +2,13 @@
   import { get } from 'svelte/store';
   import { onMount } from 'svelte';
   import { postAPI, States } from '@mathesar/utils/api';
-  import {
-    setInFileStore,
-  } from '@mathesar/stores/fileImports';
-  import type {
-    FileImport,
-    PreviewRow,
-  } from '@mathesar/stores/fileImports';
+  import { setInFileStore } from '@mathesar/stores/fileImports';
+  import type { FileImport, PreviewRow } from '@mathesar/stores/fileImports';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import type { CancellablePromise } from '@mathesar-component-library';
 
   interface Response {
-    records: PreviewRow[]
+    records: PreviewRow[];
   }
 
   export let fileImportStore: FileImport;
@@ -31,9 +26,12 @@
         previewRowsLoadStatus: States.Loading,
         error: null,
       });
-      previewPromise = postAPI<Response>(`/tables/${fileImportData.previewId}/previews/`, {
-        columns: columnInfo,
-      });
+      previewPromise = postAPI<Response>(
+        `/tables/${fileImportData.previewId}/previews/`,
+        {
+          columns: columnInfo,
+        },
+      );
       const result = await previewPromise;
       setInFileStore(fileImportStore, {
         previewRowsLoadStatus: States.Done,
@@ -57,9 +55,9 @@
   });
 </script>
 
-{#each ($fileImportStore.previewRows || []) as row (row)}
+{#each $fileImportStore.previewRows || [] as row (row)}
   <tr>
-    {#each ($fileImportStore.previewColumns || []) as column (column.name)}
+    {#each $fileImportStore.previewColumns || [] as column (column.name)}
       <td>
         <CellValue value={row[column.name]} />
       </td>

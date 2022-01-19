@@ -6,7 +6,7 @@
 
 <InputGroup>
   <InputGroupText data-testid="prepend">Prepended data</InputGroupText>
-  <TextInput data-testid="input-1" value="value1"/>
-  <TextInput data-testid="input-2" value="value2"/>
+  <TextInput data-testid="input-1" value="value1" />
+  <TextInput data-testid="input-2" value="value2" />
   <InputGroupText data-testid="append">Appended data</InputGroupText>
 </InputGroup>

@@ -1,4 +1,4 @@
-<script lang='ts'>
+<script lang="ts">
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import Select from '../../select/Select.svelte';
   import Dropdown from '../Dropdown.svelte';
@@ -17,26 +17,24 @@
 
 <Meta {...meta} />
 
-<Story name='Basic'>
+<Story name="Basic">
   <Dropdown>
-    <svelte:fragment slot='trigger'>
+    <svelte:fragment slot="trigger">
       <span>Click to open</span>
     </svelte:fragment>
-    <svelte:fragment slot='content'>
-      <div class='content'>
-        Here is some content
-      </div>
+    <svelte:fragment slot="content">
+      <div class="content">Here is some content</div>
     </svelte:fragment>
   </Dropdown>
 </Story>
 
-<Story name='Nested' >
+<Story name="Nested">
   <Dropdown>
-    <svelte:fragment slot='trigger'>
+    <svelte:fragment slot="trigger">
       <span>Favorites</span>
     </svelte:fragment>
-    <svelte:fragment slot='content'>
-      <div class='content'>
+    <svelte:fragment slot="content">
+      <div class="content">
         <div>
           Color:
           <Select
@@ -62,22 +60,22 @@
       </div>
     </svelte:fragment>
   </Dropdown>
-  <div style='height: 200px;' ></div>
+  <div style="height: 200px;" />
 </Story>
 
-<Story name='Deeply Nested' >
+<Story name="Deeply Nested">
   <Dropdown>
-    <svelte:fragment slot='trigger'>
+    <svelte:fragment slot="trigger">
       <span>Preferences</span>
     </svelte:fragment>
-    <svelte:fragment slot='content'>
-      <div class='content'>
+    <svelte:fragment slot="content">
+      <div class="content">
         <Dropdown>
-          <svelte:fragment slot='trigger'>
+          <svelte:fragment slot="trigger">
             <span>Favorites</span>
           </svelte:fragment>
-          <svelte:fragment slot='content'>
-            <div class='content'>
+          <svelte:fragment slot="content">
+            <div class="content">
               <div>
                 Color:
                 <Select
@@ -106,7 +104,7 @@
       </div>
     </svelte:fragment>
   </Dropdown>
-  <div style='height: 300px;' ></div>
+  <div style="height: 300px;" />
 </Story>
 
 <style>

@@ -20,12 +20,12 @@
 <Meta {...meta} />
 
 <Story name="Boolean">
-  <DynamicInput dataType="boolean"/>
-  <DynamicInput dataType="boolean" interfaceType="select"/>
+  <DynamicInput dataType="boolean" />
+  <DynamicInput dataType="boolean" interfaceType="select" />
 </Story>
 
 <Story name="String">
-  <DynamicInput dataType="string"/>
-  <DynamicInput dataType="string" interfaceType="textarea"/>
-  <DynamicInput dataType="string" enum={['Pichu', 'Pikachu', 'Raichu']}/>
+  <DynamicInput dataType="string" />
+  <DynamicInput dataType="string" interfaceType="textarea" />
+  <DynamicInput dataType="string" enum={['Pichu', 'Pikachu', 'Raichu']} />
 </Story>

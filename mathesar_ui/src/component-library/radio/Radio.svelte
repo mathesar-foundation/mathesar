@@ -7,13 +7,6 @@
   export let id: string = undefined;
 </script>
 
-<BaseInput {...$$restProps} bind:id {disabled}/>
+<BaseInput {...$$restProps} bind:id {disabled} />
 
-<input
-  class="radio"
-  type="radio"
-  bind:group
-  {value}
-  {id}
-  {disabled}
-/>
+<input class="radio" type="radio" bind:group {value} {id} {disabled} />

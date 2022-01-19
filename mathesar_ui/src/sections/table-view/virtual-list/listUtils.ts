@@ -13,46 +13,43 @@
  */
 
 interface Item {
-  key: number | string,
-  index: number,
-  isScrolling: boolean,
-  style: { [key: string]: string | number },
+  key: number | string;
+  index: number;
+  isScrolling: boolean;
+  style: { [key: string]: string | number };
 }
 
 interface ItemMetaData {
-  offset: number,
-  size: number
+  offset: number;
+  size: number;
 }
 
 export interface Props {
-  itemSize: (index: number) => number,
+  itemSize: (index: number) => number;
   instanceProps: {
-    lastMeasuredIndex: number,
-    itemMetadataMap: Record<number, ItemMetaData>,
-    styleCache: Record<number, Item['style']>,
-  },
-  isScrolling: boolean,
-  scrollDirection: 'forward' | 'backward',
-  itemCount: number,
-  overscanCount: number,
-  scrollOffset: number,
-  height: number,
-  itemKey: (index: number) => number | string,
-  estimatedItemSize: number
+    lastMeasuredIndex: number;
+    itemMetadataMap: Record<number, ItemMetaData>;
+    styleCache: Record<number, Item['style']>;
+  };
+  isScrolling: boolean;
+  scrollDirection: 'forward' | 'backward';
+  itemCount: number;
+  overscanCount: number;
+  scrollOffset: number;
+  height: number;
+  itemKey: (index: number) => number | string;
+  estimatedItemSize: number;
 }
 
 export interface ItemInfo {
-  items: Item[],
-  startIndex: number,
-  stopIndex: number
+  items: Item[];
+  startIndex: number;
+  stopIndex: number;
 }
 
 const defaultItemKey: Props['itemKey'] = (index: number) => index;
 
-function getItemMetadata(
-  props: Props,
-  index: number,
-): ItemMetaData {
+function getItemMetadata(props: Props, index: number): ItemMetaData {
   const { itemSize, instanceProps } = props;
   const { itemMetadataMap, lastMeasuredIndex } = instanceProps;
 
@@ -108,17 +105,14 @@ function findNearestItemBinarySearch(
   return 0;
 }
 
-function findNearestItemExponentialSearch(
-  props: Props,
-  index: number,
-): number {
+function findNearestItemExponentialSearch(props: Props, index: number): number {
   const { itemCount, scrollOffset } = props;
   let interval = 1;
   let itemIndex = index;
 
   while (
-    itemIndex < itemCount
-      && getItemMetadata(props, itemIndex).offset < scrollOffset
+    itemIndex < itemCount &&
+    getItemMetadata(props, itemIndex).offset < scrollOffset
   ) {
     itemIndex += interval;
     interval *= 2;
@@ -135,17 +129,12 @@ function findNearestItem(props: Props): number {
   const { instanceProps, scrollOffset } = props;
   const { itemMetadataMap, lastMeasuredIndex } = instanceProps;
 
-  const lastMeasuredItemOffset = lastMeasuredIndex > 0
-    ? itemMetadataMap[lastMeasuredIndex].offset
-    : 0;
+  const lastMeasuredItemOffset =
+    lastMeasuredIndex > 0 ? itemMetadataMap[lastMeasuredIndex].offset : 0;
 
   if (lastMeasuredItemOffset >= scrollOffset) {
     // If we've already measured items within this range just use a binary search as it's faster.
-    return findNearestItemBinarySearch(
-      props,
-      lastMeasuredIndex,
-      0,
-    );
+    return findNearestItemBinarySearch(props, lastMeasuredIndex, 0);
   }
   /**
    * If we haven't yet measured this high, fallback to an exponential
@@ -162,10 +151,7 @@ function findNearestItem(props: Props): number {
   );
 }
 
-function getStopIndexForStartIndex(
-  props: Props,
-  startIndex: number,
-): number {
+function getStopIndexForStartIndex(props: Props, startIndex: number): number {
   const { height, itemCount, scrollOffset } = props;
 
   const itemMetadata = getItemMetadata(props, startIndex);
@@ -183,12 +169,7 @@ function getStopIndexForStartIndex(
 }
 
 function getRangeToRender(props: Props): number[] {
-  const {
-    isScrolling,
-    scrollDirection,
-    itemCount,
-    overscanCount,
-  } = props;
+  const { isScrolling, scrollDirection, itemCount, overscanCount } = props;
 
   if (itemCount === 0) {
     return [0, 0, 0, 0];
@@ -199,12 +180,14 @@ function getRangeToRender(props: Props): number[] {
 
   // Overscan by one item in each direction so that tab/focus works.
   // If there isn't at least one extra item, tab loops back around.
-  const overscanBackward = !isScrolling || scrollDirection === 'backward'
-    ? Math.max(1, overscanCount)
-    : 1;
-  const overscanForward = !isScrolling || scrollDirection === 'forward'
-    ? Math.max(1, overscanCount)
-    : 1;
+  const overscanBackward =
+    !isScrolling || scrollDirection === 'backward'
+      ? Math.max(1, overscanCount)
+      : 1;
+  const overscanForward =
+    !isScrolling || scrollDirection === 'forward'
+      ? Math.max(1, overscanCount)
+      : 1;
 
   return [
     Math.max(0, startIndex - overscanBackward),
@@ -214,10 +197,7 @@ function getRangeToRender(props: Props): number[] {
   ];
 }
 
-function getItemStyle(
-  props: Props,
-  index: number,
-): Item['style'] {
+function getItemStyle(props: Props, index: number): Item['style'] {
   const { instanceProps } = props;
   const { styleCache } = instanceProps;
   let style: Item['style'];
@@ -241,11 +221,7 @@ function getItemStyle(
 }
 
 function getItemsInfo(props: Props): ItemInfo {
-  const {
-    itemKey,
-    itemCount,
-    isScrolling,
-  } = props;
+  const { itemKey, itemCount, isScrolling } = props;
   const [startIndex, stopIndex] = getRangeToRender(props);
   const items: Item[] = [];
   if (startIndex < stopIndex) {

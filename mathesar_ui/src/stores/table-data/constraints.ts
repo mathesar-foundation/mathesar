@@ -1,10 +1,5 @@
 import { writable, get as getStoreValue, derived } from 'svelte/store';
-import {
-  deleteAPI,
-  getAPI,
-  postAPI,
-  States,
-} from '@mathesar/utils/api';
+import { deleteAPI, getAPI, postAPI, States } from '@mathesar/utils/api';
 import type {
   Writable,
   Updater,
@@ -17,23 +12,28 @@ import type { CancellablePromise } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/App.d';
 import type { Column } from './columns';
 
-export type ConstraintType = 'foreignkey' | 'primary' | 'unique' | 'check' | 'exclude';
+export type ConstraintType =
+  | 'foreignkey'
+  | 'primary'
+  | 'unique'
+  | 'check'
+  | 'exclude';
 
 export interface Constraint {
-  id: number,
-  name: string,
-  type: ConstraintType,
+  id: number;
+  name: string;
+  type: ConstraintType;
   /**
    * Why use an Array instead of a Set? See discussion in
    * https://github.com/centerofci/mathesar/pull/776#issuecomment-963514261
    */
-  columns: string[],
+  columns: string[];
 }
 
 export interface ConstraintsData {
-  state: States,
-  error?: string,
-  constraints: Constraint[],
+  state: States;
+  error?: string;
+  constraints: Constraint[];
 }
 
 /**
@@ -51,8 +51,8 @@ function filterConstraintsByColumnSet(
     if (constraint.columns.length !== columnsNames.length) {
       return false;
     }
-    return constraint.columns.every(
-      (constraintColumn) => columnsNames.includes(constraintColumn),
+    return constraint.columns.every((constraintColumn) =>
+      columnsNames.includes(constraintColumn),
     );
   }
   return constraints.filter(isMatch);
@@ -68,11 +68,15 @@ function filterConstraintsByColumnSet(
 function uniqueColumns(
   constraintsDataStore: Writable<ConstraintsData>,
 ): Readable<Set<string>> {
-  return derived(constraintsDataStore, ({ constraints }) => new Set(
-    constraints
-      .filter((c) => c.type === 'unique' && c.columns.length === 1)
-      .map((c) => c.columns[0]),
-  ));
+  return derived(
+    constraintsDataStore,
+    ({ constraints }) =>
+      new Set(
+        constraints
+          .filter((c) => c.type === 'unique' && c.columns.length === 1)
+          .map((c) => c.columns[0]),
+      ),
+  );
 }
 
 function api(url: string) {
@@ -94,7 +98,9 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
   private store: Writable<ConstraintsData>;
 
-  private promise: CancellablePromise<PaginatedResponse<Constraint>> | null;
+  private promise:
+    | CancellablePromise<PaginatedResponse<Constraint>>
+    | undefined;
 
   private api: ReturnType<typeof api>;
 
@@ -105,7 +111,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
   constructor(
     parentId: number,
-    fetchCallback?: (storeData: ConstraintsData) => void,
+    fetchCallback: (storeData: ConstraintsData) => void = () => {},
   ) {
     this.parentId = parentId;
     this.store = writable({
@@ -126,9 +132,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     this.store.update(updater);
   }
 
-  subscribe(
-    run: Subscriber<ConstraintsData>,
-  ): Unsubscriber {
+  subscribe(run: Subscriber<ConstraintsData>): Unsubscriber {
     return this.store.subscribe(run);
   }
 
@@ -136,7 +140,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     return getStoreValue(this.store);
   }
 
-  async fetch(): Promise<ConstraintsData> {
+  async fetch(): Promise<ConstraintsData | undefined> {
     this.update((existingData) => ({
       ...existingData,
       state: States.Loading,
@@ -158,16 +162,18 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     } catch (err) {
       this.set({
         state: States.Error,
-        error: err instanceof Error ? err.message : null,
+        error: err instanceof Error ? err.message : undefined,
         constraints: [],
       });
     } finally {
-      this.promise = null;
+      this.promise = undefined;
     }
-    return null;
+    return undefined;
   }
 
-  async add(constraintDetails: Partial<Constraint>): Promise<Partial<Constraint>> {
+  async add(
+    constraintDetails: Partial<Constraint>,
+  ): Promise<Partial<Constraint>> {
     const constraint = await this.api.add(constraintDetails);
     await this.fetch();
     return constraint;
@@ -178,15 +184,22 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     await this.fetch();
   }
 
-  async setUniquenessOfColumn(column: Column, shouldBeUnique: boolean): Promise<void> {
+  async setUniquenessOfColumn(
+    column: Column,
+    shouldBeUnique: boolean,
+  ): Promise<void> {
     if (column.primary_key) {
       if (!shouldBeUnique) {
-        throw new Error(`Column "${column.name}" must remain unique because it is a primary key.`);
+        throw new Error(
+          `Column "${column.name}" must remain unique because it is a primary key.`,
+        );
       }
       return;
     }
 
-    const currentlyIsUnique = getStoreValue(this.uniqueColumns).has(column.name);
+    const currentlyIsUnique = getStoreValue(this.uniqueColumns).has(
+      column.name,
+    );
     if (shouldBeUnique === currentlyIsUnique) {
       return;
     }
@@ -197,16 +210,20 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     // Technically, one column can have two unique constraints applied on it,
     // with different names. So we need to make sure do delete _all_ of them.
     const { constraints } = getStoreValue(this.store);
-    const uniqueConstraintsForColumn = filterConstraintsByColumnSet(constraints, [column])
-      .filter((c) => c.type === 'unique');
-    await Promise.all(uniqueConstraintsForColumn.map(
-      (constraint) => this.api.remove(constraint.id),
-    ));
+    const uniqueConstraintsForColumn = filterConstraintsByColumnSet(
+      constraints,
+      [column],
+    ).filter((c) => c.type === 'unique');
+    await Promise.all(
+      uniqueConstraintsForColumn.map((constraint) =>
+        this.api.remove(constraint.id),
+      ),
+    );
     await this.fetch();
   }
 
   destroy(): void {
     this.promise?.cancel();
-    this.promise = null;
+    this.promise = undefined;
   }
 }

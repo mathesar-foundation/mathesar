@@ -1,8 +1,11 @@
 <script lang="ts">
-  import { LabelController, setLabelControllerInContext } from './LabelController';
+  import {
+    LabelController,
+    setLabelControllerInContext,
+  } from './LabelController';
 
   export let controller = new LabelController();
-  
+
   $: setLabelControllerInContext(controller);
   $: ({ inputId, disabled } = controller);
 </script>

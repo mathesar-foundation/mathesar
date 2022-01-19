@@ -6,7 +6,7 @@ button.dropdown.trigger {
     padding: 6px 12px;
   }
 
-  >.label {
+  > .label {
     display: inline-block;
     position: relative;
     overflow: hidden;
@@ -14,7 +14,7 @@ button.dropdown.trigger {
     white-space: nowrap;
   }
 
-  >.arrow {
+  > .arrow {
     position: absolute;
     right: 0;
     top: 0;
@@ -26,20 +26,17 @@ button.dropdown.trigger {
 }
 
 .dropdown.content {
-  box-shadow: #000 0 0 0 0,
-              rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
-              rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
-              rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+  box-shadow: #000 0 0 0 0, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
+    rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   border-radius: 0.25rem;
   background: #fff;
   z-index: 100;
   max-height: 210px;
   overflow: auto;
 
-  &[data-popper-placement="top-start"] {
+  &[data-popper-placement='top-start'] {
     box-shadow: rgba(0, 0, 0, 0.1) 0px -10px 15px -3px,
-                rgba(0, 0, 0, 0.05) 0px -4px 2px -2px,
-                rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
-                #000 0 0 0 0;
+      rgba(0, 0, 0, 0.05) 0px -4px 2px -2px, rgba(0, 0, 0, 0.05) 0px 0px 0px 1px,
+      #000 0 0 0 0;
   }
 }
