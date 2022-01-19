@@ -23,6 +23,7 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.serializers_cls_mapping = {}
         serializers_mapping = self.serializers_mapping
         self.serializers_mapping = {}
         for identifier, serializer_cls in serializers_mapping.items():
@@ -32,10 +33,11 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
             else:
                 serializer = serializer_cls
             self.serializers_mapping[identifier] = serializer
-
+            self.serializers_cls_mapping[identifier] = serializer_cls
     def to_representation(self, instance):
         serializer = self.serializers_mapping.get(self.get_mapping_field(), None)
         if serializer is not None:
+            self.__class__ = self.serializers_cls_mapping.get(self.get_mapping_field())
             return serializer.to_representation(instance)
         else:
             raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
@@ -52,6 +54,7 @@ class ReadWritePolymorphicSerializerMappingMixin(ReadOnlyPolymorphicSerializerMa
     def to_internal_value(self, data):
         serializer = self.serializers_mapping.get(self.get_mapping_field())
         if serializer is not None:
+            self.__class__ = self.serializers_cls_mapping.get(self.get_mapping_field())
             return serializer.to_internal_value(data=data)
         else:
             raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
