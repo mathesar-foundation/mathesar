@@ -1,6 +1,6 @@
 from psycopg2.errors import DuplicateTable, UniqueViolation, UndefinedObject
 from rest_framework import status, viewsets
-from rest_framework.exceptions import NotFound, ValidationError, APIException
+from rest_framework.exceptions import NotFound
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from sqlalchemy.exc import ProgrammingError, IntegrityError

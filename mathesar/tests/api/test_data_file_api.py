@@ -226,14 +226,16 @@ def test_data_file_create_url_invalid_format(client):
     assert response_dict[0]['message'] == 'Enter a valid URL.'
     assert response_dict[0]['field'] == 'url'
 
+
 def test_data_file_create_url_invalid_address(client):
     url = 'https://www.test.invalid'
     with patch('requests.head', side_effect=requests.exceptions.ConnectionError):
         response = client.post('/api/v0/data_files/', data={'url': url})
         response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict[0]['message']== 'URL cannot be reached.'
+    assert response_dict[0]['message'] == 'URL cannot be reached.'
     assert response_dict[0]['field'] == 'url'
+
 
 def test_data_file_create_url_invalid_download(
     client, patents_url, mock_get_patents_url

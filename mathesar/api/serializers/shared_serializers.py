@@ -35,6 +35,7 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
                 serializer = serializer_cls
             self.serializers_mapping[identifier] = serializer
             self.serializers_cls_mapping[identifier] = serializer_cls
+
     def to_representation(self, instance):
         serializer = self.serializers_mapping.get(self.get_mapping_field(), None)
         if serializer is not None:

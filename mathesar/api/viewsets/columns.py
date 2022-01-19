@@ -1,7 +1,7 @@
 import warnings
 from psycopg2.errors import DuplicateColumn, UndefinedFunction
 from rest_framework import status, viewsets
-from rest_framework.exceptions import NotFound, ValidationError, APIException
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from sqlalchemy.exc import ProgrammingError
 
@@ -66,13 +66,13 @@ class ColumnViewSet(viewsets.ModelViewSet):
             except InvalidDefaultError as e:
                 raise exceptions.InvalidDefaultAPIError(e,
                                                         message=f'default "{request.data["default"]}" is'
-                                                                    f' invalid for type {request.data["type"]}',
+                                                                f' invalid for type {request.data["type"]}',
                                                         status_code=status.HTTP_400_BAD_REQUEST)
             except InvalidTypeOptionError as e:
                 type_options = request.data.get('type_options', '')
                 raise exceptions.InvalidTypeOptionAPIError(e,
                                                            message=f'parameter dict {type_options} is'
-                                                                       f' invalid for type {request.data["type"]}',
+                                                                   f' invalid for type {request.data["type"]}',
                                                            field="type_options",
                                                            status_code=status.HTTP_400_BAD_REQUEST)
             except InvalidTypeError as e:
@@ -111,21 +111,21 @@ class ColumnViewSet(viewsets.ModelViewSet):
             except InvalidDefaultError as e:
                 raise exceptions.InvalidDefaultAPIError(e,
                                                         message=f'default "{request.data["default"]}" is'
-                                                                    f' invalid for this column',
+                                                                f' invalid for this column',
                                                         status_code=status.HTTP_400_BAD_REQUEST
                                                         )
             except DynamicDefaultWarning as e:
                 raise exceptions.DynamicDefaultAPIError(e,
                                                         message='Changing type of columns with dynamically-generated'
-                                                                    ' defaults is not supported.'
-                                                                    ' Delete or change the default first.',
+                                                                ' defaults is not supported.'
+                                                                ' Delete or change the default first.',
                                                         status_code=status.HTTP_400_BAD_REQUEST
                                                         )
             except InvalidTypeOptionError as e:
                 type_options = request.data.get('type_options', '')
                 raise exceptions.InvalidTypeOptionAPIError(e,
                                                            message=f'parameter dict {type_options} is'
-                                                                       f' invalid for type {request.data["type"]}',
+                                                                   f' invalid for type {request.data["type"]}',
                                                            status_code=status.HTTP_400_BAD_REQUEST
                                                            )
             except InvalidTypeError as e:

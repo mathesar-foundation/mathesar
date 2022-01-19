@@ -26,8 +26,7 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                 if self.is_pretty(error):
                     pretty.append(error)
                 else:
-                    pretty.extend(self.get_non_field_error_entries(
-                            errors[error_type]))
+                    pretty.extend(self.get_non_field_error_entries(errors[error_type]))
             else:
                 field = self.fields.fields[error_type]
                 if isinstance(field, Serializer) and type(errors[error_type]) == dict:
@@ -40,9 +39,7 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                         error['field'] = error_type
                     pretty.append(error)
                 else:
-                    pretty.extend(
-                            self.get_field_error_entries(errors[error_type], field),
-                    )
+                    pretty.extend(self.get_field_error_entries(errors[error_type], field))
         if pretty:
             return pretty
         return []
@@ -139,7 +136,7 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         elif field_type in self.field_map['file']:
             kwargs.update({'max_length': field.max_length,
                            'length': len(field.parent.data.get(
-                                   field.source, '').name)})
+                               field.source, '').name)})
         elif field_type in self.field_map['composite']:
             kwargs.update({'input_type': type(field_data).__name__,
                            'max_length': getattr(field, 'max_length', None),

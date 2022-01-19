@@ -642,6 +642,7 @@ def test_column_update_invalid_type(create_table, client, engine_email_type):
     assert response_json[0]['code'] == ErrorCodes.InvalidTypeCast.value
     assert response_json[0]['message'] == "This type casting is invalid."
 
+
 def test_column_update_returns_table_dependent_fields(column_test_table, client):
     cache.clear()
     expt_default = 5

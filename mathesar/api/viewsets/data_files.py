@@ -1,5 +1,4 @@
 from rest_framework import status, viewsets
-from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
@@ -31,7 +30,7 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
             return Response(serializer.data)
         else:
             exception_body = exceptions.ErrorBody(code=ErrorCodes.MethodNotAllowed.value,
-                                                      message='Method "PATCH" allowed only for header.')
+                                                  message='Method "PATCH" allowed only for header.')
             raise exceptions.GenericAPIError([exception_body],
                                              status.HTTP_405_METHOD_NOT_ALLOWED)
 
