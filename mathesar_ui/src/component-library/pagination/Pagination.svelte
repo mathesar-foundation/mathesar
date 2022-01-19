@@ -9,7 +9,6 @@
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon } from '@mathesar-component-library';
   import { calculatePages } from './paginationUtils';
-import Tab from '../tabs/Tab.svelte';
 
   const dispatch = createEventDispatcher();
 
