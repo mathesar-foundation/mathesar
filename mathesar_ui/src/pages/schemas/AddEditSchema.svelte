@@ -13,25 +13,24 @@
   import { States } from '@mathesar/utils/api';
 
   export let isOpen = false;
-  export let isEditMode = false;
-  export let schema: SchemaEntry = null;
+  export let schema: SchemaEntry | undefined = undefined;
 
   let name = '';
   let state: States = States.Idle;
-  let error: string;
+  let error: string | undefined;
 
   onMount(() => {
-    if (isEditMode) {
+    if (schema) {
       name = schema.name;
     }
   });
 
-  function isDuplicateName(_isEditMode: boolean, _name: string): boolean {
-    if (_isEditMode && _name.toLowerCase().trim() === schema?.name.toLowerCase().trim()) {
+  function isDuplicateName(_schema: SchemaEntry | undefined, _name: string): boolean {
+    if (!!_schema && _name.toLowerCase().trim() === schema.name.toLowerCase().trim()) {
       return false;
     }
     return Array.from($schemas?.data || []).some(
-      ([, _schema]) => (_schema.name as string).toLowerCase().trim() === _name.trim(),
+      ([, s]) => (s.name as string).toLowerCase().trim() === _name.trim(),
     );
   }
 
@@ -39,19 +38,16 @@
     return _isEditDisabled || !name.trim() || _isDuplicate;
   }
 
-  $: isDuplicate = isDuplicateName(isEditMode, name);
+  $: isDuplicate = isDuplicateName(schema, name);
   $: isInputDisabled = state === States.Loading || state === States.Done;
   $: isCreationDisabled = isDisabled(isInputDisabled, name, isDuplicate);
 
   async function saveSchema() {
     try {
       state = States.Loading;
-      error = null;
-      if (isEditMode) {
-        await updateSchema($currentDBName, {
-          ...schema,
-          name,
-        });
+      error = undefined;
+      if (schema) {
+        await updateSchema($currentDBName, { ...schema, name });
       } else {
         await createSchema($currentDBName, name);
       }
@@ -65,9 +61,9 @@
 
 <Modal class="schema-modal" bind:isOpen allowClose={state !== States.Loading}>
   <div class="header">
-    {isEditMode ? 'Update schema' : 'Create a schema'}
+    {schema ? 'Update schema' : 'Create a schema'}
   </div>
-  {#if !isEditMode}
+  {#if !schema}
     <div class="help-text">
       Schemas are collections of database objects such as tables and views.
       They are best when used to organize data for a specific project.
@@ -103,7 +99,7 @@
     <Button disabled={state === States.Loading} on:click={() => { isOpen = false; }}>Close</Button>
     {#if state !== States.Done}
       <Button disabled={isCreationDisabled} appearance="primary" on:click={saveSchema}>
-        {isEditMode ? 'Save' : 'Create'} schema
+        {schema ? 'Save' : 'Create'} schema
         {#if state === States.Loading}
           <Icon data={faSpinner} spin={true}/>
         {/if}

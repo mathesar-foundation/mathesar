@@ -2,22 +2,14 @@
   import { getContext } from 'svelte';
   import { Pagination, Select } from '@mathesar-component-library';
   import { States } from '@mathesar/utils/api';
-  import type {
-    TabularDataStore,
-    TabularData,
-    Meta,
-    RecordsData,
-  } from '@mathesar/stores/table-data/types';
+  import type { TabularDataStore, TabularData } from '@mathesar/stores/table-data/types';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  let recordsData: RecordsData;
-  let meta: Meta;
-  let recordState: RecordsData['state'];
+
   $: ({ recordsData, meta } = $tabularData as TabularData);
-  $: ({
-    selectedRecords, pageSize, page, offset,
-  } = meta);
-  $: ({ totalCount, state: recordState, newRecords } = recordsData);
+  $: ({ selectedRecords, pageSize, page, offset } = meta);
+  $: ({ totalCount, state, newRecords } = recordsData);
+  $: recordState = $state;
   $: selectedPageSize = { id: $pageSize as number, label: $pageSize as number };
 
   const pageSizeOpts = [
@@ -27,7 +19,7 @@
   ];
 
   let pageCount: number;
-  $: max = Math.min($totalCount, $offset + $pageSize);
+  $: max = Math.min($totalCount ?? 0, $offset + $pageSize);
 
   function setPageSize(event: CustomEvent<{ value: { id: number, label: string } }>) {
     const newPageSize = event.detail.value.id;
@@ -50,7 +42,7 @@
       {/if}
       of {$totalCount} records
 
-    {:else if $recordState !== States.Loading}
+    {:else if recordState !== States.Loading}
       No records found
     {/if}
   </div>

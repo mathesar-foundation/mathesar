@@ -65,7 +65,7 @@ function getTabsFromConfig(
 ): MathesarTab[] {
   const tabs: MathesarTab[] = [];
   const tableStoreData = get(getTablesStoreForSchema(schemaId));
-  tabListConfig.tabularDataParamList?.forEach(
+  tabListConfig?.tabularDataParamList?.forEach(
     (entry) => {
       const table = tableStoreData.data.get(entry[1]);
       if (table) {
@@ -121,7 +121,7 @@ export class TabList {
 
   tabs: Writable<MathesarTab[]>;
 
-  activeTab: Writable<MathesarTab | null>;
+  activeTab: Writable<MathesarTab | undefined>;
 
   private tabsUnsubscriber: Unsubscriber;
 
@@ -140,8 +140,8 @@ export class TabList {
 
     const tabs = [...importedFileTabs, ...tabularTabs];
     const activeTab = tabularTabs.find(
-      (tab) => tab.tabularData.type === tabListConfig.activeTabularTab?.[0]
-        && tab.tabularData.id === tabListConfig.activeTabularTab?.[1],
+      (tab) => tab.tabularData?.type === tabListConfig.activeTabularTab?.[0]
+        && tab.tabularData?.id === tabListConfig.activeTabularTab?.[1],
     ) || tabs[0];
 
     this.tabs = writable(tabs);
@@ -163,7 +163,7 @@ export class TabList {
 
     // Active tab <-> url subscriber
     this.activeTabUnsubscriber = this.activeTab.subscribe((activeTabSubstance) => {
-      let activeTabularTab: TabListConfig['activeTabularTab'] = null;
+      let activeTabularTab: TabListConfig['activeTabularTab'] | undefined;
       if (activeTabSubstance?.tabularData) {
         activeTabularTab = [
           activeTabSubstance.tabularData.type,
@@ -220,7 +220,7 @@ export class TabList {
   getTabularTabByTabularID(
     type: TabularData['type'],
     id: TabularData['id'],
-  ): MathesarTab {
+  ): MathesarTab | undefined {
     const tabSubstance = get(this.tabs);
     const tabularTabId = calculateTabularTabId(type, id);
     return tabSubstance.find(
@@ -228,7 +228,7 @@ export class TabList {
     );
   }
 
-  getImportTabByImportID(id: FileImportInfo['id']): MathesarTab {
+  getImportTabByImportID(id: FileImportInfo['id']): MathesarTab | undefined {
     const tabSubstance = get(this.tabs);
     const importTabId = calculateImportTabId(id);
     return tabSubstance.find(
@@ -254,7 +254,7 @@ export class TabList {
       } else if (tabSubstance[removedTabIndexInTabsArray - 1]) {
         this.activeTab.set(tabSubstance[removedTabIndexInTabsArray - 1]);
       } else {
-        this.activeTab.set(null);
+        this.activeTab.set(undefined);
       }
     }
 
@@ -270,7 +270,9 @@ export class TabList {
     }
 
     if (tab.isNew) {
-      removeImportFromView(this.schemaId, tab.fileImportId);
+      if (tab.fileImportId) {
+        removeImportFromView(this.schemaId, tab.fileImportId);
+      }
     } else if (tab.tabularData) {
       removeTabularContent(tab.tabularData.type, tab.tabularData.id);
     }

@@ -18,7 +18,7 @@
   export { classes as class };
 
   // Underlying DOM element for direct access
-  export let element: HTMLElement = null;
+  export let element: HTMLElement | undefined = undefined;
 
   $: allClasses = ['btn', `btn-${appearance}`, `size-${size}`, classes].join(' ');
 </script>

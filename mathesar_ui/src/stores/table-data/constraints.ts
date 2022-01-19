@@ -94,7 +94,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
   private store: Writable<ConstraintsData>;
 
-  private promise: CancellablePromise<PaginatedResponse<Constraint>> | null;
+  private promise: CancellablePromise<PaginatedResponse<Constraint>> | undefined;
 
   private api: ReturnType<typeof api>;
 
@@ -105,7 +105,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
   constructor(
     parentId: number,
-    fetchCallback?: (storeData: ConstraintsData) => void,
+    fetchCallback: (storeData: ConstraintsData) => void = () => {},
   ) {
     this.parentId = parentId;
     this.store = writable({
@@ -136,7 +136,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     return getStoreValue(this.store);
   }
 
-  async fetch(): Promise<ConstraintsData> {
+  async fetch(): Promise<ConstraintsData | undefined> {
     this.update((existingData) => ({
       ...existingData,
       state: States.Loading,
@@ -158,13 +158,13 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     } catch (err) {
       this.set({
         state: States.Error,
-        error: err instanceof Error ? err.message : null,
+        error: err instanceof Error ? err.message : undefined,
         constraints: [],
       });
     } finally {
-      this.promise = null;
+      this.promise = undefined;
     }
-    return null;
+    return undefined;
   }
 
   async add(constraintDetails: Partial<Constraint>): Promise<Partial<Constraint>> {
@@ -207,6 +207,6 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
   destroy(): void {
     this.promise?.cancel();
-    this.promise = null;
+    this.promise = undefined;
   }
 }

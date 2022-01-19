@@ -19,13 +19,13 @@
     if ($currentDBName !== _db) {
       $currentDBName = _db;
     }
-    $currentSchemaId = null;
+    $currentSchemaId = undefined;
   }
 
   $: changeCurrentDB(database);
 
   let filterQuery = '';
-  let activeSchema: SchemaEntry = null;
+  let activeSchema: SchemaEntry | undefined;
 
   function filterSchemas(schemaData: DBSchemaStoreData['data'], filter: string): SchemaEntry[] {
     const filtered: SchemaEntry[] = [];
@@ -40,7 +40,7 @@
   $: displayList = filterSchemas($schemas.data, filterQuery);
 
   function addSchema() {
-    activeSchema = null;
+    activeSchema = undefined;
     isAddModalOpen = true;
   }
 
@@ -81,8 +81,7 @@
 </main>
 
 {#if isAddModalOpen}
-  <AddEditSchema bind:isOpen={isAddModalOpen}
-    isEditMode={activeSchema !== null} schema={activeSchema}/>
+  <AddEditSchema bind:isOpen={isAddModalOpen} schema={activeSchema}/>
 {/if}
 
 <style global lang="scss">

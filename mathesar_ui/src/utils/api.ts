@@ -52,7 +52,10 @@ function sendXHRRequest<T>(method: string, url: string, data?: unknown): Cancell
   const request = new XMLHttpRequest();
   request.open(method, appendUrlPrefix(url));
   request.setRequestHeader('Content-Type', 'application/json');
-  request.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+  const csrfToken = Cookies.get('csrftoken');
+  if (csrfToken) {
+    request.setRequestHeader('X-CSRFToken', csrfToken);
+  }
   if (data) {
     request.send(JSON.stringify(data));
   } else {
@@ -64,7 +67,7 @@ function sendXHRRequest<T>(method: string, url: string, data?: unknown): Cancell
     request.addEventListener('load', () => {
       if (successStatusCodes.has(request.status)) {
         const result = request.status === NO_CONTENT
-          ? null
+          ? undefined
           : JSON.parse(request.response) as T;
         resolve(result);
       } else {
@@ -123,11 +126,14 @@ export function uploadFile<T>(
 ): CancellablePromise<T> {
   const request = new XMLHttpRequest();
   request.open('POST', appendUrlPrefix(url));
-  request.setRequestHeader('X-CSRFToken', Cookies.get('csrftoken'));
+  const csrfToken = Cookies.get('csrftoken');
+  if (csrfToken) {
+    request.setRequestHeader('X-CSRFToken', csrfToken);
+  }
   request.upload.onprogress = (e) => {
     const { loaded, total } = e;
     const percentCompleted = (loaded / total) * 100;
-    completionCallback({
+    completionCallback?.({
       loaded,
       total,
       percentCompleted,
