@@ -98,7 +98,7 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
 
     def get_field_kwargs(self, field, field_data):
         """
-        This method build on top of `field_map` method of the superclass
+        This method build on top of `get_field_kwargs` method of the superclass
         It provides the following fixes
         1. Fixes file type length value to use name of the file instead of the size of the file,
          matching the default behaviour of drf
