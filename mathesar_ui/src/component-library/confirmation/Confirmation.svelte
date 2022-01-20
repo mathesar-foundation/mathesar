@@ -1,6 +1,6 @@
 <script lang="ts">
   import CancelOrProceedButtonPair from '@mathesar-component-library-dir/cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
-  import Modal from '../modal/Modal.svelte';
+  import { ControlledModal } from '@mathesar-component-library-dir/modal';
   import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
   import type { ConfirmationController } from './ConfirmationController';
 
@@ -52,8 +52,8 @@
   }
 </script>
 
-<Modal
-  bind:isOpen={$modal}
+<ControlledModal
+  controller={modal}
   {allowClose}
   on:close={onClose}
   class="confirmation"
@@ -67,4 +67,4 @@
     onCancel={handleCancelButton}
     onProceed={handleProceedButton}
   />
-</Modal>
+</ControlledModal>

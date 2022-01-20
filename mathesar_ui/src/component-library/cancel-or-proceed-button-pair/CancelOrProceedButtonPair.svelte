@@ -1,25 +1,9 @@
 <script lang="ts">
-  import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import SpinnerButton from '@mathesar-component-library-dir/spinner-button/SpinnerButton.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
-  import type {
-    IconFlip,
-    IconRotate,
-  } from '@mathesar-component-library-dir/types';
   import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
-
-  interface IconDetails {
-    data: IconDefinition;
-    spin?: boolean;
-    flip?: IconFlip;
-    rotate?: IconRotate;
-  }
-
-  interface ButtonDetails {
-    label: string;
-    icon: IconDetails;
-  }
+  import type { ButtonDetails } from './CancelOrProceedButtonPair';
 
   const cancelButtonDefaults: ButtonDetails = {
     label: 'Cancel',

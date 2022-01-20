@@ -5,11 +5,13 @@
   import { Icon, Button, TextInput } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/App.d';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
+  import { modal } from '@mathesar/stores/modal';
   import SchemaRow from './schema-row/SchemaRow.svelte';
   import AddEditSchema from './AddEditSchema.svelte';
 
   export let database: string;
-  let isAddModalOpen = false;
+
+  const addEditModal = modal.spawnModalController();
 
   function changeCurrentDB(_db: string) {
     if ($currentDBName !== _db) {
@@ -40,12 +42,12 @@
 
   function addSchema() {
     activeSchema = undefined;
-    isAddModalOpen = true;
+    addEditModal.open();
   }
 
   function editSchema(schema: SchemaEntry) {
     activeSchema = schema;
-    isAddModalOpen = true;
+    addEditModal.open();
   }
 </script>
 
@@ -67,6 +69,13 @@
   <div class="container">
     <h2>Schemas ({$schemas.data.size})</h2>
     <TextInput placeholder="Find a schema..." bind:value={filterQuery} />
+
+    <!-- TODO Move the p below into a help popover when we have a popover component -->
+    <p>
+      Schemas are collections of database objects such as tables and views. They
+      are best when used to organize data for a specific project.
+    </p>
+
     <ul class="schema-list">
       {#each displayList as schema (schema.id)}
         <li>
@@ -77,9 +86,7 @@
   </div>
 </main>
 
-{#if isAddModalOpen}
-  <AddEditSchema bind:isOpen={isAddModalOpen} schema={activeSchema} />
-{/if}
+<AddEditSchema controller={addEditModal} schema={activeSchema} />
 
 <style global lang="scss">
   @import 'Schemas.scss';

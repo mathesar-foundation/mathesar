@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Icon, Modal } from '@mathesar-component-library';
+  import type { ModalController } from '@mathesar-component-library';
+  import { Icon, ControlledModal, Button } from '@mathesar-component-library';
   import { getContext } from 'svelte';
   import type { TabularDataStore } from '@mathesar/stores/table-data/types';
   import type {
@@ -10,7 +11,7 @@
   import { faSpinner } from '@fortawesome/free-solid-svg-icons';
   import TableConstraint from './TableConstraint.svelte';
 
-  export let isOpen = false;
+  export let controller: ModalController;
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
@@ -32,12 +33,8 @@
   }
 </script>
 
-<Modal bind:isOpen>
+<ControlledModal {controller} title={`Table Constraints${countText}`}>
   <div class="table-constraints">
-    <div class="header">
-      Table Constraints{countText}
-    </div>
-
     {#if shouldShowLoadingSpinner}
       <Icon data={faSpinner} spin={true} />
     {:else if state === States.Error}
@@ -53,7 +50,7 @@
       </div>
     {/if}
   </div>
-</Modal>
+</ControlledModal>
 
 <style global lang="scss">
   @import 'TableConstraints.scss';
