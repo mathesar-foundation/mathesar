@@ -7,26 +7,35 @@ import type { ColumnsDataStore, Column } from './columns';
 import type { TableRecord, RecordsData } from './records';
 
 export interface ColumnPosition {
-  width: number,
-  left: number
+  width: number;
+  left: number;
 }
 export type ColumnPositionMap = Map<string, ColumnPosition>;
 
 // TODO: Select active cell using primary key instead of index
 // Checkout scenarios with pk consisting multiple columns
 export interface ActiveCell {
-  rowIndex: number,
-  columnIndex: number,
-  type: 'select' | 'edit'
+  rowIndex: number;
+  columnIndex: number;
+  type: 'select' | 'edit';
 }
 
 export const ROW_CONTROL_COLUMN_WIDTH = 70;
 export const DEFAULT_ROW_RIGHT_PADDING = 100;
 export const DEFAULT_COLUMN_WIDTH = 160;
 
-const movementKeys = new Set(['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft', 'Tab']);
+const movementKeys = new Set([
+  'ArrowDown',
+  'ArrowUp',
+  'ArrowRight',
+  'ArrowLeft',
+  'Tab',
+]);
 
-function recalculateColumnPositions(columnPositionMap: ColumnPositionMap, columns: Column[]) {
+function recalculateColumnPositions(
+  columnPositionMap: ColumnPositionMap,
+  columns: Column[],
+) {
   let left = ROW_CONTROL_COLUMN_WIDTH;
   const newColumnPositionMap: ColumnPositionMap = new Map();
   columns.forEach((column) => {
@@ -51,9 +60,11 @@ export function isCellActive(
   row: TableRecord,
   column: Column,
 ): boolean {
-  return activeCell
-    && activeCell?.columnIndex === column.__columnIndex
-    && activeCell.rowIndex === row.__rowIndex;
+  return (
+    activeCell &&
+    activeCell?.columnIndex === column.__columnIndex &&
+    activeCell.rowIndex === row.__rowIndex
+  );
 }
 
 export function isCellBeingEdited(
@@ -66,27 +77,36 @@ export function isCellBeingEdited(
 
 // TODO: Create a common utility action to handle active element based scroll
 export function scrollBasedOnActiveCell(): void {
-  const activeCell: HTMLElement | null = document.querySelector('.cell.is-active');
+  const activeCell: HTMLElement | null =
+    document.querySelector('.cell.is-active');
   const activeRow = activeCell?.parentElement;
   const container = document.querySelector('.virtual-list.outerElement');
   if (!container || !activeRow) {
     return;
   }
   // Vertical scroll
-  if (activeRow.offsetTop + activeRow.clientHeight + 40
-    > (container.scrollTop + container.clientHeight)) {
-    const offsetValue: number = container.getBoundingClientRect().bottom
-      - activeRow.getBoundingClientRect().bottom - 40;
+  if (
+    activeRow.offsetTop + activeRow.clientHeight + 40 >
+    container.scrollTop + container.clientHeight
+  ) {
+    const offsetValue: number =
+      container.getBoundingClientRect().bottom -
+      activeRow.getBoundingClientRect().bottom -
+      40;
     container.scrollTop -= offsetValue;
   } else if (activeRow.offsetTop - 30 < container.scrollTop) {
     container.scrollTop = activeRow.offsetTop - 30;
   }
 
   // Horizontal scroll
-  if (activeCell.offsetLeft + activeRow.clientWidth + 30
-    > (container.scrollLeft + container.clientWidth)) {
-    const offsetValue: number = container.getBoundingClientRect().right
-      - activeCell.getBoundingClientRect().right - 30;
+  if (
+    activeCell.offsetLeft + activeRow.clientWidth + 30 >
+    container.scrollLeft + container.clientWidth
+  ) {
+    const offsetValue: number =
+      container.getBoundingClientRect().right -
+      activeCell.getBoundingClientRect().right -
+      30;
     container.scrollLeft -= offsetValue;
   } else if (activeCell.offsetLeft - 30 < container.scrollLeft) {
     container.scrollLeft = activeCell.offsetLeft - 30;
@@ -134,14 +154,16 @@ export class Display {
     this.rowWidth = writable(0);
 
     // subscribers
-    this.columnPositionMapUnsubscriber = this.columnsDataStore.subscribe((columnData) => {
-      this.columnPositionMap.update(
-        (map) => recalculateColumnPositions(map, columnData.columns),
-      );
-      const width = get(this.columnPositionMap).get('__row')?.width;
-      const widthWithPadding = width ? width + DEFAULT_ROW_RIGHT_PADDING : 0;
-      this.rowWidth.set(widthWithPadding);
-    });
+    this.columnPositionMapUnsubscriber = this.columnsDataStore.subscribe(
+      (columnData) => {
+        this.columnPositionMap.update((map) =>
+          recalculateColumnPositions(map, columnData.columns),
+        );
+        const width = get(this.columnPositionMap).get('__row')?.width;
+        const widthWithPadding = width ? width + DEFAULT_ROW_RIGHT_PADDING : 0;
+        this.rowWidth.set(widthWithPadding);
+      },
+    );
 
     const { savedRecords, newRecords } = this.recordsData;
     this.displayableRecords = derived(
@@ -149,11 +171,13 @@ export class Display {
       ([$savedRecords, $newRecords], set) => {
         let allRecords = $savedRecords;
         if ($newRecords.length > 0) {
-          allRecords = allRecords.concat({
-            __identifier: '__new_help_text',
-            __isNewHelpText: true,
-            __state: States.Done,
-          }).concat($newRecords);
+          allRecords = allRecords
+            .concat({
+              __identifier: '__new_help_text',
+              __isNewHelpText: true,
+              __state: States.Done,
+            })
+            .concat($newRecords);
         }
         allRecords = allRecords.concat({
           ...this.recordsData.getNewEmptyRecord(),
@@ -186,7 +210,9 @@ export class Display {
     }
   }
 
-  handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | 'changed' | undefined {
+  handleKeyEventsOnActiveCell(
+    key: KeyboardEvent['key'],
+  ): 'moved' | 'changed' | undefined {
     const { columns } = this.columnsDataStore.get();
     const totalCount = get(this.recordsData.totalCount);
     const savedRecords = get(this.recordsData.savedRecords);
@@ -194,11 +220,9 @@ export class Display {
     const offset = get(this.meta.offset);
     const pageSize = get(this.meta.pageSize);
     const minRowIndex = 0;
-    const maxRowIndex = Math.min(
-      pageSize,
-      totalCount - offset,
-      savedRecords.length,
-    ) + newRecords.length;
+    const maxRowIndex =
+      Math.min(pageSize, totalCount - offset, savedRecords.length) +
+      newRecords.length;
     const activeCell = get(this.activeCell);
 
     if (movementKeys.has(key) && activeCell?.type === 'select') {
@@ -254,22 +278,22 @@ export class Display {
     if (key === 'Enter') {
       if (activeCell?.type === 'select') {
         if (!columns[activeCell.columnIndex]?.primary_key) {
-          this.activeCell.update(
-            (existing) => (existing ? { ...existing, type: 'edit' } : undefined),
+          this.activeCell.update((existing) =>
+            existing ? { ...existing, type: 'edit' } : undefined,
           );
           return 'changed';
         }
       } else if (activeCell?.type === 'edit') {
-        this.activeCell.update(
-          (existing) => (existing ? { ...existing, type: 'select' } : undefined),
+        this.activeCell.update((existing) =>
+          existing ? { ...existing, type: 'select' } : undefined,
         );
         return 'changed';
       }
     }
 
     if (key === 'Escape' && activeCell?.type === 'edit') {
-      this.activeCell.update(
-        (existing) => (existing ? { ...existing, type: 'select' } : undefined),
+      this.activeCell.update((existing) =>
+        existing ? { ...existing, type: 'select' } : undefined,
       );
       return 'changed';
     }

@@ -1,15 +1,15 @@
 import { router } from 'tinro';
 import type {
-  Database, DBObjectEntry, SchemaEntry, TabularType,
+  Database,
+  DBObjectEntry,
+  SchemaEntry,
+  TabularType,
 } from '@mathesar/App.d';
 import type { TabularDataParams } from '@mathesar/stores/table-data/types';
 
 export interface TabListConfig {
-  tabularDataParamList?: TabularDataParams[],
-  activeTabularTab?: [
-    TabularType,
-    DBObjectEntry['id'],
-  ]
+  tabularDataParamList?: TabularDataParams[];
+  activeTabularTab?: [TabularType, DBObjectEntry['id']];
 }
 
 const TAB_QUERY_PARAM = 't';
@@ -64,7 +64,9 @@ export function syncTabularParamListToURL(
 ): void {
   if (isInPath(db, schemaId)) {
     try {
-      const queryParam = encodeURIComponent(JSON.stringify(tabularDataParamList));
+      const queryParam = encodeURIComponent(
+        JSON.stringify(tabularDataParamList),
+      );
       router.location.query.set(TAB_QUERY_PARAM, queryParam);
     } catch (err) {
       console.error('Unable to set tabular params in url', err);
@@ -84,7 +86,8 @@ export function syncSingleTabularParamToURL(
         return;
       }
       const replacementIndex = tabularDataParamList.findIndex(
-        (entry) => entry[0] === tabularDataParam[0] && entry[1] === tabularDataParam[1],
+        (entry) =>
+          entry[0] === tabularDataParam[0] && entry[1] === tabularDataParam[1],
       );
       if (replacementIndex > -1) {
         tabularDataParamList[replacementIndex] = tabularDataParam;

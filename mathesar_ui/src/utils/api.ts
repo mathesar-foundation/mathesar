@@ -11,19 +11,19 @@ export enum States {
 }
 
 export interface UploadCompletionOpts {
-  loaded:number,
-  total: number,
-  percentCompleted: number
+  loaded: number;
+  total: number;
+  percentCompleted: number;
 }
 
 export interface URLObject {
-  url: string,
-  avoidPrefix?: boolean
+  url: string;
+  avoidPrefix?: boolean;
 }
 
 export interface PaginatedResponse<T> {
-  count: number,
-  results: T[]
+  count: number;
+  results: T[];
 }
 
 const urlPrefix = '/api/v0';
@@ -48,7 +48,11 @@ function appendUrlPrefix(url: string | URLObject): string {
   return `${urlPrefix}${url.url}`;
 }
 
-function sendXHRRequest<T>(method: string, url: string, data?: unknown): CancellablePromise<T> {
+function sendXHRRequest<T>(
+  method: string,
+  url: string,
+  data?: unknown,
+): CancellablePromise<T> {
   const request = new XMLHttpRequest();
   request.open(method, appendUrlPrefix(url));
   request.setRequestHeader('Content-Type', 'application/json');
@@ -63,44 +67,48 @@ function sendXHRRequest<T>(method: string, url: string, data?: unknown): Cancell
   }
   let isManuallyAborted = false;
 
-  return new CancellablePromise((resolve, reject) => {
-    request.addEventListener('load', () => {
-      if (successStatusCodes.has(request.status)) {
-        const result = request.status === NO_CONTENT
-          ? undefined
-          : JSON.parse(request.response) as T;
-        resolve(result);
-      } else {
-        let errorMessage = 'An unexpected error has occurred';
-        try {
-          // TODO: Follow a proper error message structure
-          const message = JSON.parse(request.response) as string | string[];
-          if (Array.isArray(message)) {
-            errorMessage = message.join(', ');
-          } else if (typeof message === 'string') {
-            errorMessage = message;
-          } else if (message) {
-            errorMessage = JSON.stringify(message);
+  return new CancellablePromise(
+    (resolve, reject) => {
+      request.addEventListener('load', () => {
+        if (successStatusCodes.has(request.status)) {
+          const result =
+            request.status === NO_CONTENT
+              ? undefined
+              : (JSON.parse(request.response) as T);
+          resolve(result);
+        } else {
+          let errorMessage = 'An unexpected error has occurred';
+          try {
+            // TODO: Follow a proper error message structure
+            const message = JSON.parse(request.response) as string | string[];
+            if (Array.isArray(message)) {
+              errorMessage = message.join(', ');
+            } else if (typeof message === 'string') {
+              errorMessage = message;
+            } else if (message) {
+              errorMessage = JSON.stringify(message);
+            }
+          } finally {
+            reject(new Error(errorMessage));
           }
-        } finally {
-          reject(new Error(errorMessage));
         }
-      }
-    });
+      });
 
-    request.addEventListener('error', () => {
-      reject(new Error('An unexpected error has occurred'));
-    });
+      request.addEventListener('error', () => {
+        reject(new Error('An unexpected error has occurred'));
+      });
 
-    request.addEventListener('abort', () => {
-      if (!isManuallyAborted) {
-        reject(new Error('Request was aborted'));
-      }
-    });
-  }, () => {
-    isManuallyAborted = true;
-    request.abort();
-  });
+      request.addEventListener('abort', () => {
+        if (!isManuallyAborted) {
+          reject(new Error('Request was aborted'));
+        }
+      });
+    },
+    () => {
+      isManuallyAborted = true;
+      request.abort();
+    },
+  );
 }
 
 export function getAPI<T>(url: string): CancellablePromise<T> {
@@ -141,20 +149,23 @@ export function uploadFile<T>(
   };
   request.send(formData);
 
-  return new CancellablePromise((resolve, reject) => {
-    request.addEventListener('load', () => {
-      if (successStatusCodes.has(request.status)) {
-        try {
-          const response = JSON.parse(request.response) as T;
-          resolve(response);
-        } catch (exp) {
-          resolve(request.response);
+  return new CancellablePromise(
+    (resolve, reject) => {
+      request.addEventListener('load', () => {
+        if (successStatusCodes.has(request.status)) {
+          try {
+            const response = JSON.parse(request.response) as T;
+            resolve(response);
+          } catch (exp) {
+            resolve(request.response);
+          }
+        } else {
+          reject(new Error('An error has occurred while uploading file'));
         }
-      } else {
-        reject(new Error('An error has occurred while uploading file'));
-      }
-    });
-  }, () => {
-    request.abort();
-  });
+      });
+    },
+    () => {
+      request.abort();
+    },
+  );
 }

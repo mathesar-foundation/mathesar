@@ -8,9 +8,9 @@
 <div class="spinner-area" class:has-overlay={hasOverlay}>
   <slot />
   {#if isSpinning}
-    <div class=facade>
+    <div class="facade">
       {#if hasOverlay}
-        <div class=overlay />
+        <div class="overlay" />
       {/if}
       <Spinner />
     </div>

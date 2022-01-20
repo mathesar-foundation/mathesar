@@ -1,14 +1,18 @@
 import { createPopper } from '@popperjs/core/dist/umd/popper.min';
-import type { ModifierArguments, Options, Instance } from '@popperjs/core/lib/types';
+import type {
+  ModifierArguments,
+  Options,
+  Instance,
+} from '@popperjs/core/lib/types';
 import type { Action } from './types';
 
 export default function popper(
   node: HTMLElement,
   actionOpts: {
-    reference: HTMLElement,
-    options?: Partial<Options>
+    reference: HTMLElement;
+    options?: Partial<Options>;
   },
-) : Action {
+): Action {
   let popperInstance: Instance;
   let prevReference: HTMLElement = null;
 
@@ -28,7 +32,8 @@ export default function popper(
               obj.state.styles.popper.minWidth = `${obj.state.rects.reference.width}px`;
             },
             effect: (obj: ModifierArguments<unknown>): void => {
-              const width = (obj.state.elements.reference as HTMLElement).offsetWidth;
+              const width = (obj.state.elements.reference as HTMLElement)
+                .offsetWidth;
               // eslint-disable-next-line no-param-reassign
               obj.state.elements.popper.style.minWidth = `${width}px`;
             },
@@ -52,10 +57,7 @@ export default function popper(
     prevReference = null;
   }
 
-  async function update(opts: {
-    reference: HTMLElement,
-    options?: Options
-  }) {
+  async function update(opts: { reference: HTMLElement; options?: Options }) {
     const { reference, options } = opts;
 
     if (popperInstance) {

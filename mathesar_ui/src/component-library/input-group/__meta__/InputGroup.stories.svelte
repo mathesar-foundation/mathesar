@@ -21,9 +21,7 @@
 
 <Meta {...meta} />
 
-<Story
-  name="Basic - Group inputs"
->
+<Story name="Basic - Group inputs">
   <div style="position:relative;height:30px;width:280px;">
     <InputGroup>
       <TextInput value="Pikachu" />
@@ -32,22 +30,27 @@
   </div>
 </Story>
 
-<Story
-  name="Prepend and Append Content"
->
+<Story name="Prepend and Append Content">
   <InputGroup>
     <TextInput placeholder="user" />
-    <InputGroupText>
-      @domain.com
-    </InputGroupText>
+    <InputGroupText>@domain.com</InputGroupText>
   </InputGroup>
 
   <InputGroup>
     <InputGroupText>
-      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-        <circle cx="12" cy="7" r="4"></circle>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="1em"
+        height="1em"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
       </svg>
     </InputGroupText>
     <TextInput placeholder="Username" />

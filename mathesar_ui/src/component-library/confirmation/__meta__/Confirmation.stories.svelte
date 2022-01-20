@@ -12,7 +12,7 @@
     },
     async burn() {
       await sleep(1000);
-      throw new Error('Can\'t start fire. Wood is too wet.');
+      throw new Error("Can't start fire. Wood is too wet.");
     },
   };
 </script>
@@ -21,7 +21,10 @@
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import { Button } from '@mathesar-component-library';
   import { faFire, faRecycle, faCut } from '@fortawesome/free-solid-svg-icons';
-  import { makeToast, ToastPresenter } from '@mathesar-component-library-dir/toast';
+  import {
+    makeToast,
+    ToastPresenter,
+  } from '@mathesar-component-library-dir/toast';
   import { ModalMultiplexer } from '@mathesar-component-library-dir/modal';
   import { makeConfirm } from '../ConfirmationController';
   import Confirmation from '../Confirmation.svelte';
@@ -33,8 +36,10 @@
   const toast = makeToast();
   const modal = new ModalMultiplexer();
   const confirmationModal = modal.createVisibilityStore();
-  const { confirm, confirmationController } = makeConfirm({ confirmationModal });
-  
+  const { confirm, confirmationController } = makeConfirm({
+    confirmationModal,
+  });
+
   function handleRecycle() {
     void confirm({
       title: 'Recycle document?',
@@ -42,7 +47,8 @@
       proceedButton: { label: 'Recycle', icon: { data: faRecycle } },
       onProceed: () => api.recycle(),
       onSuccess: () => toast.success({ message: 'Document recycled.' }),
-      onError: (e) => toast.error({ message: `Unable to recycle document. ${e.message}` }),
+      onError: (e) =>
+        toast.error({ message: `Unable to recycle document. ${e.message}` }),
     });
   }
 
@@ -56,7 +62,8 @@
       proceedButton: { label: 'Shred', icon: { data: faCut } },
       onProceed: () => api.shred(),
       onSuccess: () => toast.success({ message: 'Document shredded.' }),
-      onError: (e) => toast.error({ message: `Unable to shred document. ${e.message}` }),
+      onError: (e) =>
+        toast.error({ message: `Unable to shred document. ${e.message}` }),
     });
   }
 
@@ -70,7 +77,8 @@
       proceedButton: { label: 'Burn', icon: { data: faFire } },
       onProceed: () => api.burn(),
       onSuccess: () => toast.success({ message: 'Document burned.' }),
-      onError: (e) => toast.error({ message: `Unable to burn document. ${e.message}` }),
+      onError: (e) =>
+        toast.error({ message: `Unable to burn document. ${e.message}` }),
     });
   }
 </script>
@@ -80,20 +88,24 @@
 <ToastPresenter entries={toast.entries} />
 
 <Story name="Basic">
-
   <Confirmation controller={confirmationController} />
 
   <h2>Examples</h2>
   <ul>
-    <li><Button on:click={handleRecycle}>Recycle document</Button> (synchronous)</li>
-    <li><Button on:click={handleShred}>Shred document</Button> (asynchronous)</li>
-    <li><Button on:click={handleBurn}>Burn document</Button> (asynchronous, with failure)</li>
+    <li>
+      <Button on:click={handleRecycle}>Recycle document</Button> (synchronous)
+    </li>
+    <li>
+      <Button on:click={handleShred}>Shred document</Button> (asynchronous)
+    </li>
+    <li>
+      <Button on:click={handleBurn}>Burn document</Button> (asynchronous, with failure)
+    </li>
   </ul>
-
 </Story>
 
 <style>
-li {
-  margin: 1em 0;
-}
+  li {
+    margin: 1em 0;
+  }
 </style>

@@ -1,8 +1,4 @@
-import {
-  derived,
-  writable,
-  get,
-} from 'svelte/store';
+import { derived, writable, get } from 'svelte/store';
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
 
 import {
@@ -14,10 +10,7 @@ import {
 } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
-import type {
-  SchemaEntry,
-  TableEntry,
-} from '@mathesar/App.d';
+import type { SchemaEntry, TableEntry } from '@mathesar/App.d';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
 
@@ -26,13 +19,19 @@ import { currentSchemaId } from './schemas';
 const commonData = preloadCommonData();
 
 export interface DBTablesStoreData {
-  state: States,
-  data: Map<TableEntry['id'], TableEntry>,
-  error?: string
+  state: States;
+  data: Map<TableEntry['id'], TableEntry>;
+  error?: string;
 }
 
-const schemaTablesStoreMap: Map<SchemaEntry['id'], Writable<DBTablesStoreData>> = new Map();
-const schemaTablesRequestMap: Map<SchemaEntry['id'], CancellablePromise<PaginatedResponse<TableEntry>>> = new Map();
+const schemaTablesStoreMap: Map<
+  SchemaEntry['id'],
+  Writable<DBTablesStoreData>
+> = new Map();
+const schemaTablesRequestMap: Map<
+  SchemaEntry['id'],
+  CancellablePromise<PaginatedResponse<TableEntry>>
+> = new Map();
 
 function sortedTableEntries(tableEntries: TableEntry[]): TableEntry[] {
   return [...tableEntries].sort((a, b) => a.name.localeCompare(b.name));
@@ -88,7 +87,9 @@ export async function refetchTablesForSchema(
 
     schemaTablesRequestMap.get(schemaId)?.cancel();
 
-    const tablesRequest = getAPI<PaginatedResponse<TableEntry>>(`/tables/?schema=${schemaId}&limit=500`);
+    const tablesRequest = getAPI<PaginatedResponse<TableEntry>>(
+      `/tables/?schema=${schemaId}&limit=500`,
+    );
     schemaTablesRequestMap.set(schemaId, tablesRequest);
     const response = await tablesRequest;
     const tableEntries = response.results || [];
@@ -108,7 +109,9 @@ export async function refetchTablesForSchema(
 
 let preload = true;
 
-export function getTablesStoreForSchema(schemaId: SchemaEntry['id']): Writable<DBTablesStoreData> {
+export function getTablesStoreForSchema(
+  schemaId: SchemaEntry['id'],
+): Writable<DBTablesStoreData> {
   let store = schemaTablesStoreMap.get(schemaId);
   if (!store) {
     store = writable({
@@ -132,7 +135,10 @@ export function deleteTable(id: number): CancellablePromise<TableEntry> {
   return deleteAPI(`/tables/${id}/`);
 }
 
-export function renameTable(id: number, name: string): CancellablePromise<TableEntry> {
+export function renameTable(
+  id: number,
+  name: string,
+): CancellablePromise<TableEntry> {
   return patchAPI(`/tables/${id}/`, { name });
 }
 

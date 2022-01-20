@@ -15,15 +15,31 @@
   let simpleValue;
 
   const richOptions = [
-    { value: 'faRocket', labelComponent: Icon, labelComponentProps: { data: faRocket } },
-    { value: 'faCoffee', labelComponent: Icon, labelComponentProps: { data: faCoffee } },
+    {
+      value: 'faRocket',
+      labelComponent: Icon,
+      labelComponentProps: { data: faRocket },
+    },
+    {
+      value: 'faCoffee',
+      labelComponent: Icon,
+      labelComponentProps: { data: faCoffee },
+    },
   ];
   let richValue;
 
   const longOptions = [
-    { value: 1, label: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' },
+    {
+      value: 1,
+      label:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    },
     { value: 2, label: 'Ut enim ad minim veniam.' },
-    { value: 3, label: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.' },
+    {
+      value: 3,
+      label:
+        'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    },
   ];
   let longValue;
 
@@ -39,21 +55,44 @@
 <Meta {...meta} />
 
 <Story name="Basic">
-  <RadioGroup options={simpleOptions} bind:value={simpleValue} label="Simple options" />
+  <RadioGroup
+    options={simpleOptions}
+    bind:value={simpleValue}
+    label="Simple options"
+  />
 </Story>
 
 <Story name="Inline">
-  <RadioGroup options={simpleOptions} bind:value={simpleValue} isInline label="Simple inline options"/>
+  <RadioGroup
+    options={simpleOptions}
+    bind:value={simpleValue}
+    isInline
+    label="Simple inline options"
+  />
 </Story>
 
 <Story name="Rich text">
-  <RadioGroup options={richOptions} bind:value={richValue} isInline label="Rich text"/>
+  <RadioGroup
+    options={richOptions}
+    bind:value={richValue}
+    isInline
+    label="Rich text"
+  />
 </Story>
 
 <Story name="Inline wrapping">
-  <RadioGroup options={manyOptions} bind:value={manyValue} isInline label="Inline options with wrapping"/>
+  <RadioGroup
+    options={manyOptions}
+    bind:value={manyValue}
+    isInline
+    label="Inline options with wrapping"
+  />
 </Story>
 
 <Story name="Long options">
-  <RadioGroup options={longOptions} bind:value={longValue} label="Long options"/>
+  <RadioGroup
+    options={longOptions}
+    bind:value={longValue}
+    label="Long options"
+  />
 </Story>

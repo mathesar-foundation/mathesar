@@ -19,6 +19,4 @@
   fileProgress={getFileUploadInfo($fileImportStore)}
   on:add={(e) => uploadNewFile(fileImportStore, e.detail)}
 />
-<div class="help-content">
-  You can import tabular (CSV, TSV) data.
-</div>
+<div class="help-content">You can import tabular (CSV, TSV) data.</div>

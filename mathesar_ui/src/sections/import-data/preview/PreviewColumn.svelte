@@ -25,10 +25,15 @@
 
 <th class:disabled={!column.isEditable}>
   <div class="name">
-    <Checkbox disabled={!column.isEditable} bind:checked={column.isSelected}/>
-    <TextInput disabled={!column.isEditable} bind:value={column.displayName}/>
+    <Checkbox disabled={!column.isEditable} bind:checked={column.isSelected} />
+    <TextInput disabled={!column.isEditable} bind:value={column.displayName} />
   </div>
   <div class="type">
-    <Select {options} triggerAppearance="plain" bind:value={selectedOption} on:change={onTypeChange}/>
+    <Select
+      {options}
+      triggerAppearance="plain"
+      bind:value={selectedOption}
+      on:change={onTypeChange}
+    />
   </div>
 </th>

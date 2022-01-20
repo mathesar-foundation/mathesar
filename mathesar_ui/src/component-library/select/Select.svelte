@@ -1,13 +1,8 @@
 <script lang="ts">
-  import {
-    createEventDispatcher,
-    tick,
-  } from 'svelte';
+  import { createEventDispatcher, tick } from 'svelte';
   import { Dropdown } from '@mathesar-component-library';
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
-  import type {
-    Appearance,
-  } from '@mathesar-component-library/types';
+  import type { Appearance } from '@mathesar-component-library/types';
   import type { SelectOption } from './Select.d';
 
   const dispatch = createEventDispatcher();
@@ -70,7 +65,7 @@
     });
     isOpen = false;
   }
-  
+
   function setOptions(opts: SelectOption[]) {
     if (opts.length > 0) {
       if (!value) {
@@ -85,13 +80,17 @@
 
   function scrollBehavior(): void {
     if (parentHoverElem) {
-      const hoveredElem: HTMLElement = parentHoverElem.querySelector('.hovered');
+      const hoveredElem: HTMLElement =
+        parentHoverElem.querySelector('.hovered');
       const container = parentHoverElem.parentElement as HTMLDivElement;
       if (hoveredElem && container) {
-        if (hoveredElem.offsetTop + hoveredElem.clientHeight
-         > (container.scrollTop + container.clientHeight)) {
-          const offsetValue: number = container.getBoundingClientRect().bottom
-            - hoveredElem.getBoundingClientRect().bottom;
+        if (
+          hoveredElem.offsetTop + hoveredElem.clientHeight >
+          container.scrollTop + container.clientHeight
+        ) {
+          const offsetValue: number =
+            container.getBoundingClientRect().bottom -
+            hoveredElem.getBoundingClientRect().bottom;
           container.scrollTop -= offsetValue;
         } else if (hoveredElem.offsetTop < container.scrollTop) {
           container.scrollTop = hoveredElem.offsetTop;
@@ -163,19 +162,39 @@
   $: setOptions(options);
 </script>
 
-<BaseInput {...$$restProps} bind:id {disabled}/>
+<BaseInput {...$$restProps} bind:id {disabled} />
 
-<Dropdown ariaControls="{id}-select-options" {ariaLabel} bind:isOpen {disabled} {id}
-          contentClass="select {contentClass}" {triggerAppearance} {triggerClass} 
-          on:keydown={keyAccessibility} on:open={setSelectedItem}>
+<Dropdown
+  ariaControls="{id}-select-options"
+  {ariaLabel}
+  bind:isOpen
+  {disabled}
+  {id}
+  contentClass="select {contentClass}"
+  {triggerAppearance}
+  {triggerClass}
+  on:keydown={keyAccessibility}
+  on:open={setSelectedItem}
+>
   <svelte:fragment slot="trigger">
     {value?.[labelKey]}
   </svelte:fragment>
-  
+
   <svelte:fragment slot="content">
-    <ul bind:this={parentHoverElem} id="{id}-select-options" tabindex="0" role="listbox" aria-expanded="true">
+    <ul
+      bind:this={parentHoverElem}
+      id="{id}-select-options"
+      tabindex="0"
+      role="listbox"
+      aria-expanded="true"
+    >
       {#each options as option (option[idKey])}
-        <li role='option' class:selected={option[idKey] === value[idKey]} class:hovered={option[idKey] === options[currentIndex]?.[idKey]} on:click={() => setValue(option)}>
+        <li
+          role="option"
+          class:selected={option[idKey] === value[idKey]}
+          class:hovered={option[idKey] === options[currentIndex]?.[idKey]}
+          on:click={() => setValue(option)}
+        >
           <span>{option[labelKey]}</span>
         </li>
       {/each}

@@ -6,12 +6,12 @@ import type {
 } from '@mathesar/App.d';
 
 interface CommonData {
-  databases: Database[],
-  schemas: SchemaResponse[],
-  tables: TableEntry[],
-  current_db: string,
-  current_schema: number,
-  abstract_types: AbstractTypeResponse[]
+  databases: Database[];
+  schemas: SchemaResponse[];
+  tables: TableEntry[];
+  current_db: string;
+  current_schema: number;
+  abstract_types: AbstractTypeResponse[];
 }
 
 function getData<T>(selector: string, retainData = false): T | undefined {
