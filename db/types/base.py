@@ -4,6 +4,10 @@ from sqlalchemy import create_engine
 
 from db import constants
 
+from db.functions import hints
+
+from frozendict import frozendict
+
 
 CHAR = 'char'
 STRING = 'string'
@@ -70,6 +74,28 @@ class MathesarCustomType(Enum):
     EMAIL = 'email'
     URI = 'uri'
     MONEY = 'money'
+
+
+db_types_hinted = frozendict({
+    PostgresType.BOOLEAN: tuple([
+        hints.boolean
+    ]),
+    PostgresType.CHARACTER_VARYING: tuple([
+        hints.string_like
+    ]),
+    PostgresType.CHARACTER: tuple([
+        hints.string_like
+    ]),
+    PostgresType.NUMERIC: tuple([
+        hints.comparable
+    ]),
+    PostgresType.TEXT: tuple([
+        hints.string_like
+    ]),
+    MathesarCustomType.URI: tuple([
+        hints.uri
+    ]),
+})
 
 
 SCHEMA = f"{constants.MATHESAR_PREFIX}types"
