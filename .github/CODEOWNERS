@@ -4,3 +4,6 @@
 /db/ @centerofci/mathesar-backend 
 /mathesar/ @centerofci/mathesar-backend 
 /mathesar_ui/ @centerofci/mathesar-frontend
+/mathesar/templates/ @centerofci/mathesar-frontend
+/mathesar/urls.py @centerofci/mathesar-maintainers
+/mathesar/views.py @centerofci/mathesar-maintainers
