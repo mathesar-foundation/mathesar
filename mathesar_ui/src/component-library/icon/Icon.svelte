@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
   import type { IconFlip, IconRotate } from './Icon.d';
-  
+
   // The Font-awesome icon definition from 'fortawesome' package.
   export let data: IconDefinition;
   $: [viewBoxWith, viewBoxHeight, , , path] = data.icon;
@@ -28,7 +28,11 @@
   // The aria-label for the icon. Typically describes the icon.
   export let label: string | undefined = undefined;
 
-  function concatClasses(_classes?: string, _flip?: IconFlip, _rotate?: IconRotate): string {
+  function concatClasses(
+    _classes?: string,
+    _flip?: IconFlip,
+    _rotate?: IconRotate,
+  ): string {
     const faClass = ['fa-icon'];
     if (_classes) {
       faClass.push(_classes);
@@ -46,16 +50,28 @@
   $: faClasses = concatClasses(classes, flip, rotate);
 </script>
 
-<svg version="1.1" viewBox="0 0 {viewBoxWith} {viewBoxHeight}"
-      width={size} height={size} class={faClasses}
-      class:fa-spin={spin} class:fa-pulse={pulse}
-      aria-label={label} role={label ? 'img' : 'presentation'}
-      {...$$restProps} on:click on:mouseover on:focus on:mouseout on:blur>
+<svg
+  version="1.1"
+  viewBox="0 0 {viewBoxWith} {viewBoxHeight}"
+  width={size}
+  height={size}
+  class={faClasses}
+  class:fa-spin={spin}
+  class:fa-pulse={pulse}
+  aria-label={label}
+  role={label ? 'img' : 'presentation'}
+  {...$$restProps}
+  on:click
+  on:mouseover
+  on:focus
+  on:mouseout
+  on:blur
+>
   {#if Array.isArray(path)}
     {#each path as entry (entry)}
-      <path d={entry}></path>
+      <path d={entry} />
     {/each}
   {:else}
-    <path d={path}></path>
+    <path d={path} />
   {/if}
 </svg>

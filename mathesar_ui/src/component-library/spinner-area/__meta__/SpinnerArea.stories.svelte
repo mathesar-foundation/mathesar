@@ -19,7 +19,7 @@
     <TextInput disabled={isLoading} />
   </SpinnerArea>
 
-  <LabeledInput label="Is loading" layout='inline-input-first'>
+  <LabeledInput label="Is loading" layout="inline-input-first">
     <Checkbox bind:checked={isLoading} />
   </LabeledInput>
 </Story>

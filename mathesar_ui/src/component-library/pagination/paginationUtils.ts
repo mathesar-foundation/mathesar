@@ -7,20 +7,23 @@ function getCurrentWindow(start: number, end: number): number[] {
 }
 
 interface PageInfo {
-  currentWindow: number[],
-  start: number,
-  end: number,
-  prevPageWindow: number,
-  nextPageWindow: number
+  currentWindow: number[];
+  start: number;
+  end: number;
+  prevPageWindow: number;
+  nextPageWindow: number;
 }
 
-export function calculatePages(currentPage: number, pageCount: number): PageInfo {
+export function calculatePages(
+  currentPage: number,
+  pageCount: number,
+): PageInfo {
   let start = Math.max(currentPage - 2, 1);
   let end = Math.min(start + 4, pageCount);
   if (end - start < 4) {
     start = Math.max(end - 4, 1);
   }
-  if (end > (pageCount - 2)) {
+  if (end > pageCount - 2) {
     start = Math.max(end - (6 - (pageCount - end)), 1);
   }
   if (start < 3) {

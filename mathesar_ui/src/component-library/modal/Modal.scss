@@ -40,8 +40,9 @@
         font-weight: bold;
       }
     }
-  
-    >.body, >.footer {
+
+    > .body,
+    > .footer {
       padding: 1em;
 
       :first-child {
@@ -52,19 +53,17 @@
       }
     }
 
-    >.body {
+    > .body {
       overflow-y: auto;
     }
-  
-    >.footer {
+
+    > .footer {
       border-top: 1px solid #f5f5f5;
       background: #f3f6f8;
     }
-  
+
     &.modal-size-medium {
       width: 500px;
     }
   }
 }
-
-

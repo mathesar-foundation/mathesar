@@ -11,7 +11,10 @@
 
   $: set = new ImmutableSet<Option['value']>(values);
 
-  function handleChange({ value }: Option, e: CustomEvent<{ checked: boolean }>) {
+  function handleChange(
+    { value }: Option,
+    e: CustomEvent<{ checked: boolean }>,
+  ) {
     const { checked } = e.detail;
     set = checked ? set.with(value) : set.without(value);
     values = [...set.values()];

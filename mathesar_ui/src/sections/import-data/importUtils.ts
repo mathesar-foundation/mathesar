@@ -23,7 +23,10 @@ import type {
   FileImportWritableInfo,
   FileImport,
 } from '@mathesar/stores/fileImports';
-import type { UploadCompletionOpts, PaginatedResponse } from '@mathesar/utils/api';
+import type {
+  UploadCompletionOpts,
+  PaginatedResponse,
+} from '@mathesar/utils/api';
 import type {
   FileUploadAddDetail,
   FileUploadProgress,
@@ -87,17 +90,19 @@ export function uploadNewFile(
     dataFileName: file.name,
   });
 
-  uploadPromise.then((res: { id: number }) => {
-    completionCallback(fileImportStore, null, res.id);
-    return res;
-  }).catch((err: Error) => {
-    setInFileStore(fileImportStore, {
-      uploads: [],
-      uploadProgress: null,
-      uploadStatus: States.Error,
-      error: err.message,
+  uploadPromise
+    .then((res: { id: number }) => {
+      completionCallback(fileImportStore, null, res.id);
+      return res;
+    })
+    .catch((err: Error) => {
+      setInFileStore(fileImportStore, {
+        uploads: [],
+        uploadProgress: null,
+        uploadStatus: States.Error,
+        error: err.message,
+      });
     });
-  });
 }
 
 export function getFileUploadInfo(
@@ -120,7 +125,9 @@ async function deletePreviewTable(fileImportStore: FileImport): Promise<void> {
   fileImportData.previewDeletePromise?.cancel();
 
   if (fileImportData.previewId) {
-    const previewDeletePromise = deleteAPI(`/tables/${fileImportData.previewId}/`);
+    const previewDeletePromise = deleteAPI(
+      `/tables/${fileImportData.previewId}/`,
+    );
     setInFileStore(fileImportStore, {
       previewDeletePromise,
       previewId: null,
@@ -132,7 +139,7 @@ async function deletePreviewTable(fileImportStore: FileImport): Promise<void> {
 
 async function createPreviewTable(
   fileImportStore: FileImport,
-): Promise<{ id: number, name: string }> {
+): Promise<{ id: number; name: string }> {
   const fileImportData = get(fileImportStore);
 
   fileImportData.previewCreatePromise?.cancel();
@@ -154,7 +161,7 @@ async function createPreviewTable(
   });
 
   try {
-    const res = await previewCreatePromise as { id: number, name: string };
+    const res = (await previewCreatePromise) as { id: number; name: string };
 
     const toUpdate: FileImportWritableInfo = {
       previewTableCreationStatus: States.Done,
@@ -194,7 +201,9 @@ export async function fetchPreviewTableInfo(
     type DataFileResponse = Record<'header', boolean>;
     let dataFilePromise: CancellablePromise<DataFileResponse> = null;
     if (!fileImportData.isDataFileInfoPresent) {
-      dataFilePromise = getAPI<DataFileResponse>(`/data_files/${fileImportData.dataFileId}/`);
+      dataFilePromise = getAPI<DataFileResponse>(
+        `/data_files/${fileImportData.dataFileId}/`,
+      );
     }
 
     setInFileStore(fileImportStore, {
@@ -269,9 +278,9 @@ export async function updateDataFileHeader(
 // When next is clicked after upload
 export async function loadPreview(
   fileImportStore: FileImport,
-): Promise<{ id: number, name: string }> {
+): Promise<{ id: number; name: string }> {
   const fileImportData = get(fileImportStore);
-  let tableCreationResult: { id: number, name: string } = null;
+  let tableCreationResult: { id: number; name: string } = null;
 
   if (fileImportData.previewTableCreationStatus === States.Done) {
     tableCreationResult = {
@@ -295,8 +304,8 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
 
   if (fileImportData.previewId) {
     const columns: {
-      name?: PreviewColumn['name'],
-      type?: PreviewColumn['type']
+      name?: PreviewColumn['name'];
+      type?: PreviewColumn['type'];
     }[] = [];
     fileImportData.previewColumns.forEach((column) => {
       if (column.isSelected) {
@@ -326,16 +335,25 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
         if (fileImportData.name !== fileImportData.previewName) {
           verificationRequest.name = fileImportData.name;
         }
-        verificationPromise = patchAPI(`/tables/${fileImportData.previewId}/`, verificationRequest);
+        verificationPromise = patchAPI(
+          `/tables/${fileImportData.previewId}/`,
+          verificationRequest,
+        );
         await verificationPromise;
       };
 
-      const importPromise = new CancellablePromise((resolve, reject) => {
-        void saveTable().then(() => resolve(), (err) => reject(err));
-      }, () => {
-        columnChangePromise?.cancel();
-        verificationPromise?.cancel();
-      });
+      const importPromise = new CancellablePromise(
+        (resolve, reject) => {
+          void saveTable().then(
+            () => resolve(),
+            (err) => reject(err),
+          );
+        },
+        () => {
+          columnChangePromise?.cancel();
+          verificationPromise?.cancel();
+        },
+      );
       setInFileStore(fileImportStore, {
         importStatus: States.Loading,
         importPromise,
@@ -392,11 +410,14 @@ export function cancelImport(fileImportStore: FileImport): void {
 }
 
 interface DataFilesRequestData {
-  url?: string,
-  paste?: string,
+  url?: string;
+  paste?: string;
 }
 
-async function importData(fileImportStore: FileImport, data: DataFilesRequestData): Promise<void> {
+async function importData(
+  fileImportStore: FileImport,
+  data: DataFilesRequestData,
+): Promise<void> {
   setInFileStore(fileImportStore, {
     uploadStatus: States.Loading,
     error: null,
@@ -426,11 +447,17 @@ async function importData(fileImportStore: FileImport, data: DataFilesRequestDat
   }
 }
 
-export async function importFromURL(fileImportStore: FileImport, url: string): Promise<void> {
+export async function importFromURL(
+  fileImportStore: FileImport,
+  url: string,
+): Promise<void> {
   return importData(fileImportStore, { url });
 }
 
-export async function importFromText(fileImportStore: FileImport, text: string): Promise<void> {
+export async function importFromText(
+  fileImportStore: FileImport,
+  text: string,
+): Promise<void> {
   return importData(fileImportStore, { paste: text });
 }
 

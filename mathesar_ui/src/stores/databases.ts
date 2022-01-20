@@ -14,10 +14,10 @@ export const currentDBName: Writable<Database['name']> = writable(
 );
 
 export interface DatabaseStoreData {
-  preload?: boolean,
-  state: States,
-  data?: Database[],
-  error?: string
+  preload?: boolean;
+  state: States;
+  data?: Database[];
+  error?: string;
 }
 
 export const databases = writable<DatabaseStoreData>({
@@ -40,7 +40,9 @@ export const currentDBId: Readable<Database['id'] | undefined> = derived(
 
 let databaseRequest: CancellablePromise<PaginatedResponse<Database>>;
 
-export async function reloadDatabases(): Promise<PaginatedResponse<Database> | undefined> {
+export async function reloadDatabases(): Promise<
+  PaginatedResponse<Database> | undefined
+> {
   databases.update((currentData) => ({
     ...currentData,
     state: States.Loading,
@@ -48,7 +50,9 @@ export async function reloadDatabases(): Promise<PaginatedResponse<Database> | u
 
   try {
     databaseRequest?.cancel();
-    databaseRequest = getAPI<PaginatedResponse<Database>>('/databases/?limit=500');
+    databaseRequest = getAPI<PaginatedResponse<Database>>(
+      '/databases/?limit=500',
+    );
     const response = await databaseRequest;
     const data = response.results || [];
     databases.set({
