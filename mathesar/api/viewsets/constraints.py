@@ -59,7 +59,7 @@ class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
             constraint.drop()
         except ProgrammingError as e:
             if type(e.orig) == UndefinedObject:
-                raise NotFound()
+                raise exceptions.NotFoundAPIError()
             else:
-                raise exceptions.ProgrammingException(e)
+                raise exceptions.ProgrammingAPIError(e)
         return Response(status=status.HTTP_204_NO_CONTENT)
