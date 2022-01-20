@@ -1,1 +1,6 @@
+# CODEOWNERS files are parsed top-to-bottom, so the first line
+# is a catch-all for files that are not specified later.
 * @centerofci/mathesar-maintainers 
+/db/ @centerofci/mathesar-backend 
+/mathesar/ @centerofci/mathesar-backend 
+/mathesar_ui/ @centerofci/mathesar-frontend
