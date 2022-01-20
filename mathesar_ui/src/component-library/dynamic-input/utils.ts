@@ -1,4 +1,8 @@
-import type { DynamicInputDataType, DynamicInputSelectElement, EnumSelectOption } from './types';
+import type {
+  DynamicInputDataType,
+  DynamicInputSelectElement,
+  EnumSelectOption,
+} from './types';
 
 export function generateSelectOptions(
   dataType: DynamicInputDataType,
@@ -19,10 +23,12 @@ export function generateSelectOptions(
   }
 
   // Treat all other types in a similar manner to string
-  return enumValues?.map((value: string) => ({
-    value,
-    label: options?.[value]?.label ?? value,
-  })) || [];
+  return (
+    enumValues?.map((value: string) => ({
+      value,
+      label: options?.[value]?.label ?? value,
+    })) || []
+  );
 }
 
 export function getSelectedValue(

@@ -35,13 +35,18 @@
   }
 </script>
 
-<BaseInput {...$$restProps} bind:id {disabled}/>
+<BaseInput {...$$restProps} bind:id {disabled} />
 
-<input bind:this={element} {...$$restProps} type='text'
+<input
+  bind:this={element}
+  {...$$restProps}
+  type="text"
   class={['input-element', 'text-input', classes].join(' ')}
   class:has-validation-errors={hasValidationErrors}
   bind:value
-  {id} {disabled}
+  {id}
+  {disabled}
   on:focus
   on:blur
-  on:keydown={handleKeydown}/>
+  on:keydown={handleKeydown}
+/>

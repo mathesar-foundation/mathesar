@@ -16,15 +16,31 @@
   let simpleValue;
 
   const richOptions = [
-    { value: 'faRocket', labelComponent: Icon, labelComponentProps: { data: faRocket } },
-    { value: 'faCoffee', labelComponent: Icon, labelComponentProps: { data: faCoffee } },
+    {
+      value: 'faRocket',
+      labelComponent: Icon,
+      labelComponentProps: { data: faRocket },
+    },
+    {
+      value: 'faCoffee',
+      labelComponent: Icon,
+      labelComponentProps: { data: faCoffee },
+    },
   ];
   let richValue;
 
   const longOptions = [
-    { value: 1, label: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' },
+    {
+      value: 1,
+      label:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    },
     { value: 2, label: 'Ut enim ad minim veniam.' },
-    { value: 3, label: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.' },
+    {
+      value: 3,
+      label:
+        'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+    },
   ];
   let longValue;
 
@@ -36,31 +52,56 @@
   ];
   let manyValue;
 </script>
-  
+
 <Meta {...meta} />
 
 <Story name="Basic">
-  <CheckboxGroup options={simpleOptions} bind:values={simpleValue} label="Simple options" />
+  <CheckboxGroup
+    options={simpleOptions}
+    bind:values={simpleValue}
+    label="Simple options"
+  />
   <p>Values: [{simpleValue}]</p>
   <p>
     <Button
-      on:click={() => { simpleValue = [2]; }}
-    >Set to [2]</Button>
+      on:click={() => {
+        simpleValue = [2];
+      }}>Set to [2]</Button
+    >
   </p>
 </Story>
 
 <Story name="Inline">
-  <CheckboxGroup options={simpleOptions} bind:values={simpleValue} isInline label="Simple inline options"/>
+  <CheckboxGroup
+    options={simpleOptions}
+    bind:values={simpleValue}
+    isInline
+    label="Simple inline options"
+  />
 </Story>
 
 <Story name="Rich text">
-  <CheckboxGroup options={richOptions} bind:values={richValue} isInline label="Rich text"/>
+  <CheckboxGroup
+    options={richOptions}
+    bind:values={richValue}
+    isInline
+    label="Rich text"
+  />
 </Story>
 
 <Story name="Many values">
-  <CheckboxGroup options={manyOptions} bind:values={manyValue} isInline label="Inline options with wrapping"/>
+  <CheckboxGroup
+    options={manyOptions}
+    bind:values={manyValue}
+    isInline
+    label="Inline options with wrapping"
+  />
 </Story>
 
 <Story name="Long values">
-  <CheckboxGroup options={longOptions} bind:values={longValue} label="Long options"/>
+  <CheckboxGroup
+    options={longOptions}
+    bind:values={longValue}
+    label="Long options"
+  />
 </Story>

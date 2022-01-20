@@ -13,7 +13,7 @@
   const toast = makeToast();
 
   let spinnerToast;
-  
+
   function startSpinner() {
     spinnerToast?.dismiss();
     spinnerToast = toast.spinner({ message: 'Hang tight' });
@@ -22,7 +22,6 @@
     spinnerToast?.dismiss();
     spinnerToast = undefined;
   }
-
 
   let progressToast;
 
@@ -48,7 +47,6 @@
     }
   }
 
-
   let dynamicToast;
   const dynamicWord = writable('Foo');
 
@@ -73,23 +71,22 @@
 <h2>Simple</h2>
 
 <p>
-  <Button
-    on:click={() => toast.info({ message: 'Here is your info.' })}
-  >Info</Button>
+  <Button on:click={() => toast.info({ message: 'Here is your info.' })}
+    >Info</Button
+  >
 </p>
 
 <p>
-  <Button
-    on:click={() => toast.error({ message: 'Something went wrong.' })}
-  >Error</Button>
+  <Button on:click={() => toast.error({ message: 'Something went wrong.' })}
+    >Error</Button
+  >
 </p>
 
 <p>
-  <Button
-    on:click={() => toast.success({ message: 'You did it!' })}
-  >Success</Button>
+  <Button on:click={() => toast.success({ message: 'You did it!' })}
+    >Success</Button
+  >
 </p>
-
 
 <h2>Interactive</h2>
 
@@ -108,28 +105,37 @@
 </p>
 
 <p>
-  <Button on:click={startDynamic} disabled={dynamicToast}>Dynamic content</Button>
+  <Button on:click={startDynamic} disabled={dynamicToast}
+    >Dynamic content</Button
+  >
   {#if dynamicToast}
     <ul>
-      <li><label><span>Word: </span><input type="text" bind:value={$dynamicWord}/></label></li>
+      <li>
+        <label
+          ><span>Word: </span><input
+            type="text"
+            bind:value={$dynamicWord}
+          /></label
+        >
+      </li>
     </ul>
   {/if}
 </p>
-
 
 <h2>Rich text</h2>
 
 <p>
   <Button
-    on:click={() => toast.success({
-      contentComponent: ToastStoryRichTextContent,
-      contentComponentProps: { name: 'Foo Bar' },
-    })}
-  >Success with rich text</Button>
+    on:click={() =>
+      toast.success({
+        contentComponent: ToastStoryRichTextContent,
+        contentComponentProps: { name: 'Foo Bar' },
+      })}>Success with rich text</Button
+  >
 </p>
 
 <style>
-  input[type="text"] {
+  input[type='text'] {
     width: 20ch;
   }
 </style>

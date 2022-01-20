@@ -10,26 +10,30 @@
 
   type UploadMethod = 'File' | 'URL' | 'Copy and Paste Text';
   interface UploadMethodOption {
-    value: UploadMethod,
-    component: typeof SvelteComponent,
+    value: UploadMethod;
+    component: typeof SvelteComponent;
   }
   const uploadMethods: UploadMethodOption[] = [
     { value: 'File', component: UploadViaFile },
     { value: 'URL', component: UploadViaUrl },
     { value: 'Copy and Paste Text', component: UploadViaClipboard },
   ];
-  const radioOptions = uploadMethods.map(({ value }) => ({ value, label: value }));
+  const radioOptions = uploadMethods.map(({ value }) => ({
+    value,
+    label: value,
+  }));
 
   let uploadMethodId: UploadMethod = 'File';
-  
+
   $: uploadMethod = uploadMethods.find((m) => m.value === uploadMethodId);
 </script>
 
 <h2>Import your data</h2>
 
 <div class="help-content">
-  Create a table by importing data. Very large data sets can sometimes take some minutes to process.
-  Please do not close this tab, you may still open and view other tables in the meanwhile.
+  Create a table by importing data. Very large data sets can sometimes take some
+  minutes to process. Please do not close this tab, you may still open and view
+  other tables in the meanwhile.
 </div>
 
 <RadioGroup

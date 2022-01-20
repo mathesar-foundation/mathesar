@@ -1,7 +1,7 @@
 <script lang="ts">
   import Label from '@mathesar-component-library-dir/label/Label.svelte';
   import type { LabeledInputLayout } from './LabeledInput.d';
-  
+
   export let label: string | undefined = undefined;
   export let layout: LabeledInputLayout = 'inline';
 </script>
@@ -14,10 +14,10 @@
 >
   <Label>
     <span class="label-content">
-      <span class=label>
-        {#if $$slots.label}<slot name=label />{:else}{label}{/if}
+      <span class="label">
+        {#if $$slots.label}<slot name="label" />{:else}{label}{/if}
       </span>
-      <span class=input><slot /></span>
+      <span class="input"><slot /></span>
     </span>
   </Label>
 </div>

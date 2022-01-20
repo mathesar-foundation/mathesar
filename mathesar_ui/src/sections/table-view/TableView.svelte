@@ -6,7 +6,6 @@
     ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
 
-
   import ActionsPane from './actions-pane/ActionsPane.svelte';
   import Header from './header/Header.svelte';
   import Body from './Body.svelte';
@@ -28,14 +27,14 @@
 <div class="table-data">
   <div class="table-content">
     {#if $columnsDataStore.columns.length > 0}
-      <Header/>
-      <Body/>
+      <Header />
+      <Body />
     {/if}
   </div>
 </div>
 
-<StatusPane/>
+<StatusPane />
 
 <style global lang="scss">
-  @import "TableView.scss";
+  @import 'TableView.scss';
 </style>

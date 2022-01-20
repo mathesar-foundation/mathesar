@@ -1,10 +1,6 @@
 export { RecordsData } from './records';
 export { ColumnsDataStore } from './columns';
-export {
-  Meta,
-  filterCombinations,
-  DEFAULT_PAGE_SIZE,
-} from './meta';
+export { Meta, filterCombinations, DEFAULT_PAGE_SIZE } from './meta';
 export {
   Display,
   isCellActive,
@@ -13,12 +9,6 @@ export {
   ROW_CONTROL_COLUMN_WIDTH,
   DEFAULT_ROW_RIGHT_PADDING,
 } from './display';
-export {
-  getGenericModificationStatus,
-  getModificationState,
-} from './utils';
+export { getGenericModificationStatus, getModificationState } from './utils';
 
-export {
-  getTabularContent,
-  removeTabularContent,
-} from './manager';
+export { getTabularContent, removeTabularContent } from './manager';

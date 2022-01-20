@@ -1,22 +1,14 @@
 <script lang="ts">
   import { router } from 'tinro';
   import { States } from '@mathesar/utils/api';
-  import {
-    Dropdown,
-  } from '@mathesar-component-library';
+  import { Dropdown } from '@mathesar-component-library';
 
   import type {
     FileImportStatusMap,
     FileImportStatusInfo,
   } from '@mathesar/stores/fileImports';
-  import {
-    getTabsForSchema,
-    constructImportTab,
-  } from '@mathesar/stores/tabs';
-  import {
-    currentSchemaId,
-    getSchemaInfo,
-  } from '@mathesar/stores/schemas';
+  import { getTabsForSchema, constructImportTab } from '@mathesar/stores/tabs';
+  import { currentSchemaId, getSchemaInfo } from '@mathesar/stores/schemas';
 
   export let importStatusMap: FileImportStatusMap;
   let isOpen = false;
@@ -41,19 +33,20 @@
       importInfo.databaseName,
       importInfo.schemaId,
     );
-    const tab = constructImportTab(
-      importInfo.id,
-      importInfo.name,
-    );
+    const tab = constructImportTab(importInfo.id, importInfo.name);
     tabList.add(tab);
     isOpen = false;
   }
 </script>
 
 {#if nonIdleImports.length > 0}
-  <Dropdown bind:isOpen triggerAppearance="plain" placement="bottom-end"
-            triggerClass="import-indicator"
-            contentClass="import-content">
+  <Dropdown
+    bind:isOpen
+    triggerAppearance="plain"
+    placement="bottom-end"
+    triggerClass="import-indicator"
+    contentClass="import-content"
+  >
     <svelte:fragment slot="trigger">
       {nonIdleImports.length} table creation in progress
     </svelte:fragment>
@@ -64,7 +57,8 @@
           <div class="location">
             {fileImport.databaseName}
             /
-            {getSchemaInfo(fileImport.databaseName, fileImport.schemaId)?.name || ''}
+            {getSchemaInfo(fileImport.databaseName, fileImport.schemaId)
+              ?.name || ''}
           </div>
           <div class="name">
             {fileImport.name || fileImport.dataFileName}
@@ -80,5 +74,5 @@
 {/if}
 
 <style global lang="scss">
-  @import "ImportIndicator.scss";
+  @import 'ImportIndicator.scss';
 </style>

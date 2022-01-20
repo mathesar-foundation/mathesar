@@ -1,5 +1,5 @@
 export default class EventHandler {
-  protected listeners: Map<string, Set<((value?: unknown) => unknown)>>;
+  protected listeners: Map<string, Set<(value?: unknown) => unknown>>;
 
   constructor() {
     this.listeners = new Map();
@@ -9,7 +9,7 @@ export default class EventHandler {
     if (!this.listeners.has(eventName)) {
       this.listeners.set(eventName, new Set());
     }
-    this.listeners.get(eventName).add(callback);
+    this.listeners.get(eventName)?.add(callback);
     return () => {
       this.listeners?.get(eventName)?.delete(callback);
     };

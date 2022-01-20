@@ -304,8 +304,10 @@ def assemble_function_creation_sql(argument_type, target_type, function_body):
 
 def get_cast_function_name(target_type):
     """
-    Some casting functions change postgres config parameters  for the transaction they are run on like cast function for casting different data type to timestamp with timezone,
-    So they used be in an isolated transaction
+    Some casting functions change postgres config parameters  for the
+    transaction they are run on like cast function for casting different
+    data type to timestamp with timezone, So they used be in an isolated
+    transaction
     """
     unqualified_type_name = target_type.split('.')[-1].lower()
     if '(' in unqualified_type_name:
@@ -352,8 +354,16 @@ def _get_boolean_type_body_map():
         DECLARE
         istrue {BOOLEAN};
         BEGIN
-          SELECT lower($1)='t' OR lower($1)='true' OR $1='1' INTO istrue;
-          IF istrue OR lower($1)='f' OR lower($1)='false' OR $1='0' THEN
+          SELECT
+            $1='1' OR lower($1) = 'on'
+            OR lower($1)='t' OR lower($1)='true'
+            OR lower($1)='y' OR lower($1)='yes'
+          INTO istrue;
+          IF istrue
+            OR $1='0' OR lower($1) = 'off'
+            OR lower($1)='f' OR lower($1)='false'
+            OR lower($1)='n' OR lower($1)='no'
+          THEN
             RETURN istrue;
           END IF;
           {not_bool_exception_str}
@@ -527,29 +537,35 @@ def get_text_and_datetime_to_datetime_cast_str(type_condition, exception_string)
 
 
 def _get_timestamp_with_timezone_type_body_map(target_type):
-    default_behavior_source_types = frozenset([TIMESTAMP_WITH_TIME_ZONE, TIMESTAMP_WITHOUT_TIME_ZONE, DATE]) | TEXT_TYPES
-    return _get_default_type_body_map(
-        default_behavior_source_types, target_type,
+    datetime_source_types = frozenset(
+        [TIMESTAMP_WITH_TIME_ZONE, TIMESTAMP_WITHOUT_TIME_ZONE, DATE]
     )
+    default_behavior_source_types = datetime_source_types | TEXT_TYPES
+    return _get_default_type_body_map(default_behavior_source_types, target_type)
 
 
 def _get_timestamp_without_timezone_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to timestamp without timezone.
-    We allow casting any text, timezone and date type to be cast into a timestamp without timezone,
-     provided it does not any timezone information as this could lead to a information loss
+    We allow casting any text, timezone and date type to be cast into a
+    timestamp without timezone, provided it does not any timezone
+    information as this could lead to a information loss
 
-    The cast function changes the timezone to `utc` for the transaction is called on.
-     So this function call should be used in a isolated transaction to avoid timezone change causing unintended side effect
+    The cast function changes the timezone to `utc` for the transaction
+    is called on.  So this function call should be used in a isolated
+    transaction to avoid timezone change causing unintended side effect
     """
     source_text_types = TEXT_TYPES
     source_datetime_types = frozenset([TIMESTAMP_WITH_TIME_ZONE, DATE])
     default_behavior_source_types = frozenset([TIMESTAMP_WITHOUT_TIME_ZONE])
 
-    not_timestamp_without_tz_exception_str = f"RAISE EXCEPTION '% is not a {TIMESTAMP_WITHOUT_TIME_ZONE}', $1;"
-    # Check if the value is missing timezone by casting it to a timestamp with timezone
-    # and comparing if the value is equal to a timestamp without timezone
+    not_timestamp_without_tz_exception_str = (
+        f"RAISE EXCEPTION '% is not a {TIMESTAMP_WITHOUT_TIME_ZONE}', $1;"
+    )
+    # Check if the value is missing timezone by casting it to a timestamp
+    # with timezone and comparing if the value is equal to a timestamp
+    # without timezone.
     timestamp_without_tz_condition_str = f"""
             IF (timestamp_value_with_tz = timestamp_value) THEN
             RETURN $1::{TIMESTAMP_WITHOUT_TIME_ZONE};
@@ -561,17 +577,19 @@ def _get_timestamp_without_timezone_type_body_map():
     )
     type_body_map.update(
         {
-            text_type: get_text_and_datetime_to_datetime_cast_str(timestamp_without_tz_condition_str,
-                                                                  not_timestamp_without_tz_exception_str
-                                                                  )
+            text_type: get_text_and_datetime_to_datetime_cast_str(
+                timestamp_without_tz_condition_str,
+                not_timestamp_without_tz_exception_str
+            )
             for text_type in source_text_types
         }
     )
     type_body_map.update(
         {
-            datetime_type: get_text_and_datetime_to_datetime_cast_str(timestamp_without_tz_condition_str,
-                                                                      not_timestamp_without_tz_exception_str
-                                                                      )
+            datetime_type: get_text_and_datetime_to_datetime_cast_str(
+                timestamp_without_tz_condition_str,
+                not_timestamp_without_tz_exception_str
+            )
             for datetime_type in source_datetime_types
         }
     )
@@ -624,13 +642,15 @@ def _get_money_type_body_map():
 def _get_textual_type_body_map(engine, target_type_str=VARCHAR):
     """
     Get SQL strings that create various functions for casting different
-    types to varchar.
+    types to text types through the TEXT type.
 
     All casts to varchar use default PostgreSQL behavior.
     All types in get_supported_alter_column_types are supported.
     """
     supported_types = get_supported_alter_column_db_types(engine)
 
+    # We cast everything through TEXT so that formatting is done correctly
+    # for CHAR.
     text_cast_str = f"""
         BEGIN
           RETURN $1::{TEXT};
@@ -644,11 +664,14 @@ def _get_date_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to date.
-    We allow casting any text, timezone and date type to be cast into a timestamp without timezone,
-     provided it does not any timezone information as this could lead to a information loss
 
-    The cast function changes the timezone to `utc` for the transaction is called on.
-     So this function call should be used in a isolated transaction to avoid timezone change causing unintended side effect
+    We allow casting any text, timezone and date type to be cast into a
+    timestamp without timezone, provided it does not any timezone
+    information as this could lead to a information loss.
+
+    The cast function changes the timezone to `utc` for the transaction
+    is called on.  So this function call should be used in a isolated
+    transaction to avoid timezone change causing unintended side effect.
     """
     # Note that default postgres conversion for dates depends on the
     # `DateStyle` option set on the server, which can be one of DMY, MDY,

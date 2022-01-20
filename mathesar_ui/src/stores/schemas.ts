@@ -1,13 +1,5 @@
-import {
-  writable,
-  derived,
-  get,
-} from 'svelte/store';
-import type {
-  Writable,
-  Readable,
-  Unsubscriber,
-} from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
+import type { Writable, Readable, Unsubscriber } from 'svelte/store';
 
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 import {
@@ -19,29 +11,30 @@ import {
 } from '@mathesar/utils/api';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 
-import type {
-  Database,
-  SchemaEntry,
-  SchemaResponse,
-} from '@mathesar/App.d';
+import type { Database, SchemaEntry, SchemaResponse } from '@mathesar/App.d';
 import type { CancellablePromise } from '@mathesar-component-library';
 
 import { currentDBName } from './databases';
 
 const commonData = preloadCommonData();
 
-export const currentSchemaId: Writable<SchemaEntry['id']> = writable(
-  commonData.current_schema || null,
-);
+export const currentSchemaId: Writable<SchemaEntry['id'] | undefined> =
+  writable(commonData?.current_schema || undefined);
 
 export interface DBSchemaStoreData {
-  state: States,
-  data: Map<SchemaEntry['id'], SchemaEntry>,
-  error?: string
+  state: States;
+  data: Map<SchemaEntry['id'], SchemaEntry>;
+  error?: string;
 }
 
-const dbSchemaStoreMap: Map<Database['name'], Writable<DBSchemaStoreData>> = new Map();
-const dbSchemasRequestMap: Map<Database['name'], CancellablePromise<PaginatedResponse<SchemaResponse>>> = new Map();
+const dbSchemaStoreMap: Map<
+  Database['name'],
+  Writable<DBSchemaStoreData>
+> = new Map();
+const dbSchemasRequestMap: Map<
+  Database['name'],
+  CancellablePromise<PaginatedResponse<SchemaResponse> | undefined>
+> = new Map();
 
 function setDBSchemaStore(
   database: Database['name'],
@@ -51,10 +44,10 @@ function setDBSchemaStore(
   schemas.forEach((schema) => {
     schemaMap.set(schema.id, schema);
   });
-  const storeValue = {
+  const storeValue: DBSchemaStoreData = {
     state: States.Done,
     data: schemaMap,
-    error: null,
+    error: undefined,
   };
 
   let store = dbSchemaStoreMap.get(database);
@@ -99,11 +92,11 @@ function removeSchemaInDBSchemaStore(
 
 export async function refetchSchemasForDB(
   database: Database['name'],
-): Promise<DBSchemaStoreData> {
+): Promise<DBSchemaStoreData | undefined> {
   const store = dbSchemaStoreMap.get(database);
   if (!store) {
     console.error(`DB Schemas store for db: ${database} not found.`);
-    return null;
+    return undefined;
   }
 
   try {
@@ -114,10 +107,12 @@ export async function refetchSchemasForDB(
 
     dbSchemasRequestMap.get(database)?.cancel();
 
-    const schemaRequest = getAPI<PaginatedResponse<SchemaResponse>>(`/schemas/?database=${database}&limit=500`);
+    const schemaRequest = getAPI<PaginatedResponse<SchemaResponse>>(
+      `/schemas/?database=${database}&limit=500`,
+    );
     dbSchemasRequestMap.set(database, schemaRequest);
     const response = await schemaRequest;
-    const schemas = response.results || [];
+    const schemas = response?.results || [];
 
     const dbSchemasStore = setDBSchemaStore(database, schemas);
 
@@ -128,33 +123,38 @@ export async function refetchSchemasForDB(
       state: States.Error,
       error: err instanceof Error ? err.message : 'Error in fetching schemas',
     }));
-    return null;
+    return undefined;
   }
 }
 
 export async function refetchSchema(
   database: Database['name'],
   schemaId: SchemaEntry['id'],
-): Promise<SchemaResponse> {
+): Promise<SchemaResponse | undefined> {
   const store = dbSchemaStoreMap.get(database);
   if (!store) {
     console.error(`DB Schemas store for db: ${database} not found.`);
-    return null;
+    return undefined;
   }
 
   try {
     const schemaRequest = getAPI<SchemaResponse>(`/schemas/${schemaId}/`);
     const response = await schemaRequest;
+    if (!response) {
+      return undefined;
+    }
     updateSchemaInDBSchemaStore(database, response);
     return response;
   } catch (err) {
-    return null;
+    return undefined;
   }
 }
 
 let preload = true;
 
-export function getSchemasStoreForDB(database: Database['name']): Writable<DBSchemaStoreData> {
+export function getSchemasStoreForDB(
+  database: Database['name'],
+): Writable<DBSchemaStoreData> {
   let store = dbSchemaStoreMap.get(database);
   if (!store) {
     store = writable({
@@ -165,7 +165,7 @@ export function getSchemasStoreForDB(database: Database['name']): Writable<DBSch
 
     if (preload) {
       preload = false;
-      store = setDBSchemaStore(database, commonData.schemas || []);
+      store = setDBSchemaStore(database, commonData?.schemas || []);
     } else {
       void refetchSchemasForDB(database);
     }
@@ -175,10 +175,13 @@ export function getSchemasStoreForDB(database: Database['name']): Writable<DBSch
   return store;
 }
 
-export function getSchemaInfo(database: Database['name'], schemaId: SchemaEntry['id']): SchemaEntry {
+export function getSchemaInfo(
+  database: Database['name'],
+  schemaId: SchemaEntry['id'],
+): SchemaEntry | undefined {
   const store = dbSchemaStoreMap.get(database);
   if (!store) {
-    return null;
+    return undefined;
   }
   return get(store).data.get(schemaId);
 }
@@ -237,13 +240,8 @@ export const schemas: Readable<DBSchemaStoreData> = derived(
   },
 );
 
-export const currentSchema: Readable<SchemaEntry> = derived(
+export const currentSchema: Readable<SchemaEntry | undefined> = derived(
   [currentSchemaId, schemas],
-  ([$currentSchemaId, $schemas], set) => {
-    if (!currentSchemaId) {
-      set(null);
-    } else {
-      set($schemas.data.get($currentSchemaId));
-    }
-  },
+  ([$currentSchemaId, $schemas]) =>
+    $currentSchemaId ? $schemas.data.get($currentSchemaId) : undefined,
 );

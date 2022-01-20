@@ -27,21 +27,28 @@
     void fetchPreviewTableInfo(fileImportStore);
   });
 
-  $: isLoading = $fileImportStore.previewStatus === States.Loading
-    || $fileImportStore.previewRowsLoadStatus === States.Loading;
-  $: canProceed = $fileImportStore.previewStatus === States.Done
-    && $fileImportStore.previewRowsLoadStatus === States.Done;
+  $: isLoading =
+    $fileImportStore.previewStatus === States.Loading ||
+    $fileImportStore.previewRowsLoadStatus === States.Loading;
+  $: canProceed =
+    $fileImportStore.previewStatus === States.Done &&
+    $fileImportStore.previewRowsLoadStatus === States.Done;
 
   function handleChangeType(e: CustomEvent) {
     const { previewColumns } = get(fileImportStore);
-    const changedColumn = previewColumns.find((column) => column.name === e.detail.name);
-    if (changedColumn) {
-      changedColumn.type = e.detail.type as string;
-
-      setInFileStore(fileImportStore, {
-        previewColumns: [...previewColumns],
-      });
+    if (!previewColumns) {
+      return;
     }
+    const changedColumn = previewColumns.find(
+      (column) => column.name === e.detail.name,
+    );
+    if (!changedColumn) {
+      return;
+    }
+    changedColumn.type = e.detail.type as string;
+    setInFileStore(fileImportStore, {
+      previewColumns: [...previewColumns],
+    });
   }
 
   function handleChangeFirstRowAsHeader(e: CustomEvent) {
@@ -54,21 +61,20 @@
 <div class="help-content">
   {#if $fileImportStore.previewStatus === States.Loading}
     Please wait until we prepare a preview
-
   {:else if $fileImportStore.previewStatus === States.Error}
     {$fileImportStore.error ?? ''}
-
   {:else}
-    To finish, review suggestions for the field types and column names.
-    To ensure your import is correct we have included a preview of your first few rows.
+    To finish, review suggestions for the field types and column names. To
+    ensure your import is correct we have included a preview of your first few
+    rows.
   {/if}
 </div>
 
 <div class="table-config-options">
   <div class="name">
-    Table name: <TextInput bind:value={$fileImportStore.name}/>
+    Table name: <TextInput bind:value={$fileImportStore.name} />
   </div>
-  
+
   <LabeledInput label="Use first row as header" layout="inline-input-first">
     <Checkbox
       bind:checked={$fileImportStore.firstRowHeader}
@@ -76,7 +82,6 @@
       on:change={handleChangeFirstRowAsHeader}
     />
   </LabeledInput>
-  
 </div>
 
 <div class="preview-table-header">
@@ -84,13 +89,16 @@
   {#if isLoading}<Spinner />{/if}
 </div>
 
-{#if $fileImportStore.previewColumns?.length > 0}
-  <div class="preview-table" class:disabled={$fileImportStore.previewStatus === States.Loading}>
+{#if $fileImportStore.previewColumns?.length}
+  <div
+    class="preview-table"
+    class:disabled={$fileImportStore.previewStatus === States.Loading}
+  >
     <table>
       <thead>
         <tr>
           {#each $fileImportStore.previewColumns as column (column.name)}
-            <PreviewColumn {column} on:typechange={handleChangeType}/>
+            <PreviewColumn {column} on:typechange={handleChangeType} />
           {/each}
         </tr>
       </thead>
@@ -116,5 +124,5 @@
 {/if}
 
 <style global lang="scss">
-  @import "Preview.scss";
+  @import 'Preview.scss';
 </style>

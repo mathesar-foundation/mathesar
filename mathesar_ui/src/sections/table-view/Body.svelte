@@ -22,9 +22,7 @@
   let newRecords: RecordsData['newRecords'];
   $: ({ id, recordsData, display } = $tabularData as TabularData);
   $: ({ newRecords } = recordsData);
-  $: ({
-    rowWidth, horizontalScrollOffset, displayableRecords,
-  } = display);
+  $: ({ rowWidth, horizontalScrollOffset, displayableRecords } = display);
 
   let previousNewRecordsCount = 0;
 
@@ -68,7 +66,8 @@
 
 <svelte:window
   on:keydown={checkAndResetActiveCell}
-  on:mousedown={checkAndResetActiveCell}/>
+  on:mousedown={checkAndResetActiveCell}
+/>
 
 <div bind:this={bodyRef} class="body" tabindex="-1">
   <Resizer let:height>
@@ -83,10 +82,10 @@
         itemSize={getItemSize}
         itemKey={(index) => recordsData.getIterationKey(index)}
         let:items
-        >
+      >
         {#each items as it (it?.key || it)}
           {#if it && $displayableRecords[it.index]}
-            <Row style={it.style} bind:row={$displayableRecords[it.index]}/>
+            <Row style={it.style} bind:row={$displayableRecords[it.index]} />
           {/if}
         {/each}
       </VirtualList>

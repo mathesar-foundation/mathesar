@@ -3,7 +3,10 @@ import { TabList } from './tabList';
 
 const schemaTabsMap: Map<SchemaEntry['id'], TabList> = new Map();
 
-export function getTabsForSchema(db: Database['name'], schemaId: SchemaEntry['id']): TabList {
+export function getTabsForSchema(
+  db: Database['name'],
+  schemaId: SchemaEntry['id'],
+): TabList {
   let tabList = schemaTabsMap.get(schemaId);
   if (!tabList) {
     tabList = new TabList(db, schemaId);

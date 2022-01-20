@@ -4,9 +4,6 @@
   export { classes as class };
 </script>
 
-<div
-  class={['input-group', classes].join(' ')}
-  {...$$restProps}
->
-  <slot></slot>
+<div class={['input-group', classes].join(' ')} {...$$restProps}>
+  <slot />
 </div>

@@ -9,24 +9,40 @@
   export let totalTabs: number;
   export let isActive = false;
   export let allowRemoval = false;
-  export let getTabURL: (tab: Tab) => string;
+  export let getTabURL: (tab: Tab) => string | undefined;
 </script>
 
-<li role="presentation" class="tab" class:active={isActive} tabindex="-1" 
-    style={isActive ? null : `width: ${Math.floor(100 / totalTabs)}%;`}>
-
-  <a role="tab" href={getTabURL(tab) || '#'} tabindex="0"
-      aria-selected={isActive} aria-disabled="{!!tab.disabled}"
-      id={isActive ? `mtsr-${componentId}-tab` : null} data-tinro-ignore
-      aria-controls={isActive ? `mtsr-${componentId}-tabpanel` : null}
-      on:focus on:blur on:mousedown
-      on:click>
-        <slot></slot>
+<li
+  role="presentation"
+  class="tab"
+  class:active={isActive}
+  tabindex="-1"
+  style={isActive ? undefined : `width: ${Math.floor(100 / totalTabs)}%;`}
+>
+  <a
+    role="tab"
+    href={getTabURL(tab) ?? '#'}
+    tabindex="0"
+    aria-selected={isActive}
+    aria-disabled={!!tab.disabled}
+    id={isActive ? `mtsr-${componentId}-tab` : undefined}
+    data-tinro-ignore
+    aria-controls={isActive ? `mtsr-${componentId}-tabpanel` : undefined}
+    on:focus
+    on:blur
+    on:mousedown
+    on:click
+  >
+    <slot />
   </a>
 
   {#if allowRemoval}
-    <button type="button" aria-label="remove" class="remove"
-      on:click={(e) => dispatch('remove', e)}>
+    <button
+      type="button"
+      aria-label="remove"
+      class="remove"
+      on:click={(e) => dispatch('remove', e)}
+    >
       &times;
     </button>
   {/if}

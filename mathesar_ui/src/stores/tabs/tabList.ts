@@ -1,19 +1,26 @@
 import { get, writable } from 'svelte/store';
 import type { Writable, Unsubscriber } from 'svelte/store';
 import type { Tab } from '@mathesar-component-library/types';
-import type { TabularData, TabularDataParams } from '@mathesar/stores/table-data/types';
 import type {
-  Database, DBObjectEntry, SchemaEntry, TabularType,
+  TabularData,
+  TabularDataParams,
+} from '@mathesar/stores/table-data/types';
+import type {
+  Database,
+  DBObjectEntry,
+  SchemaEntry,
+  TabularType,
 } from '@mathesar/App.d';
-import { getTabularContent, removeTabularContent } from '@mathesar/stores/table-data';
+import {
+  getTabularContent,
+  removeTabularContent,
+} from '@mathesar/stores/table-data';
 import { getTablesStoreForSchema } from '@mathesar/stores/tables';
 import {
   getAllImportDetailsForSchema,
   removeImportFromView,
 } from '@mathesar/stores/fileImports';
-import type {
-  FileImportInfo,
-} from '@mathesar/stores/fileImports';
+import type { FileImportInfo } from '@mathesar/stores/fileImports';
 import {
   parseTabListConfigFromURL,
   syncTabularParamListToURL,
@@ -23,23 +30,26 @@ import {
 import type { TabListConfig } from './utils';
 
 export interface MathesarTab extends Tab {
-  id: string,
-  label: string,
+  id: string;
+  label: string;
 
   // TODO: Use a enum to determine type of tab
-  isNew: boolean,
-  tabularData?: TabularData,
+  isNew: boolean;
+  tabularData?: TabularData;
 
   // Discuss: Remove imports from within the tab context to a higher level modal context
-  fileImportId?: FileImportInfo['id']
+  fileImportId?: FileImportInfo['id'];
 }
 
 interface TabAddOptions {
-  position?: number,
-  status?: 'active' | 'inactive'
+  position?: number;
+  status?: 'active' | 'inactive';
 }
 
-function calculateTabularTabId(type: TabularType, id: DBObjectEntry['id']): MathesarTab['id'] {
+function calculateTabularTabId(
+  type: TabularType,
+  id: DBObjectEntry['id'],
+): MathesarTab['id'] {
   return `tabular_type_${type}_id_${id}`;
 }
 
@@ -65,19 +75,17 @@ function getTabsFromConfig(
 ): MathesarTab[] {
   const tabs: MathesarTab[] = [];
   const tableStoreData = get(getTablesStoreForSchema(schemaId));
-  tabListConfig.tabularDataParamList?.forEach(
-    (entry) => {
-      const table = tableStoreData.data.get(entry[1]);
-      if (table) {
-        tabs.push({
-          id: calculateTabularTabId(entry[0], entry[1]),
-          label: table.name,
-          isNew: false,
-          tabularData: getTabularContent(entry[0], entry[1], entry),
-        });
-      }
-    },
-  );
+  tabListConfig?.tabularDataParamList?.forEach((entry) => {
+    const table = tableStoreData.data.get(entry[1]);
+    if (table) {
+      tabs.push({
+        id: calculateTabularTabId(entry[0], entry[1]),
+        label: table.name,
+        isNew: false,
+        tabularData: getTabularContent(entry[0], entry[1], entry),
+      });
+    }
+  });
   return tabs;
 }
 
@@ -121,7 +129,7 @@ export class TabList {
 
   tabs: Writable<MathesarTab[]>;
 
-  activeTab: Writable<MathesarTab | null>;
+  activeTab: Writable<MathesarTab | undefined>;
 
   private tabsUnsubscriber: Unsubscriber;
 
@@ -139,10 +147,12 @@ export class TabList {
     const tabularTabs = getTabsFromConfig(schemaId, tabListConfig);
 
     const tabs = [...importedFileTabs, ...tabularTabs];
-    const activeTab = tabularTabs.find(
-      (tab) => tab.tabularData.type === tabListConfig.activeTabularTab?.[0]
-        && tab.tabularData.id === tabListConfig.activeTabularTab?.[1],
-    ) || tabs[0];
+    const activeTab =
+      tabularTabs.find(
+        (tab) =>
+          tab.tabularData?.type === tabListConfig.activeTabularTab?.[0] &&
+          tab.tabularData?.id === tabListConfig.activeTabularTab?.[1],
+      ) || tabs[0];
 
     this.tabs = writable(tabs);
     this.activeTab = writable(activeTab);
@@ -155,23 +165,29 @@ export class TabList {
           tabularDataParamList.push(entry.tabularData.parameterize());
         }
       });
-      syncTabularParamListToURL(this.dbName, this.schemaId, tabularDataParamList);
+      syncTabularParamListToURL(
+        this.dbName,
+        this.schemaId,
+        tabularDataParamList,
+      );
     });
     tabularTabs.forEach((tabularTab) => {
       this.addParamListenerToTab(tabularTab);
     });
 
     // Active tab <-> url subscriber
-    this.activeTabUnsubscriber = this.activeTab.subscribe((activeTabSubstance) => {
-      let activeTabularTab: TabListConfig['activeTabularTab'] = null;
-      if (activeTabSubstance?.tabularData) {
-        activeTabularTab = [
-          activeTabSubstance.tabularData.type,
-          activeTabSubstance.tabularData.id,
-        ];
-      }
-      syncActiveTabToURL(this.dbName, this.schemaId, activeTabularTab);
-    });
+    this.activeTabUnsubscriber = this.activeTab.subscribe(
+      (activeTabSubstance) => {
+        let activeTabularTab: TabListConfig['activeTabularTab'] | undefined;
+        if (activeTabSubstance?.tabularData) {
+          activeTabularTab = [
+            activeTabSubstance.tabularData.type,
+            activeTabSubstance.tabularData.id,
+          ];
+        }
+        syncActiveTabToURL(this.dbName, this.schemaId, activeTabularTab);
+      },
+    );
   }
 
   addParamListenerToTab(tab: MathesarTab): void {
@@ -192,19 +208,14 @@ export class TabList {
     const existingTab = tabSubstance.find((tabEntry) => tabEntry.id === tab.id);
     if (!existingTab) {
       if (
-        typeof options?.position === 'number'
-        && options?.position > -1
-        && options?.position < tabSubstance.length
+        typeof options?.position === 'number' &&
+        options?.position > -1 &&
+        options?.position < tabSubstance.length
       ) {
         tabSubstance.splice(options?.position, 0, tab);
-        this.tabs.set([
-          ...tabSubstance,
-        ]);
+        this.tabs.set([...tabSubstance]);
       } else {
-        this.tabs.set([
-          ...tabSubstance,
-          tab,
-        ]);
+        this.tabs.set([...tabSubstance, tab]);
       }
     }
 
@@ -220,20 +231,16 @@ export class TabList {
   getTabularTabByTabularID(
     type: TabularData['type'],
     id: TabularData['id'],
-  ): MathesarTab {
+  ): MathesarTab | undefined {
     const tabSubstance = get(this.tabs);
     const tabularTabId = calculateTabularTabId(type, id);
-    return tabSubstance.find(
-      (entry) => entry.id === tabularTabId,
-    );
+    return tabSubstance.find((entry) => entry.id === tabularTabId);
   }
 
-  getImportTabByImportID(id: FileImportInfo['id']): MathesarTab {
+  getImportTabByImportID(id: FileImportInfo['id']): MathesarTab | undefined {
     const tabSubstance = get(this.tabs);
     const importTabId = calculateImportTabId(id);
-    return tabSubstance.find(
-      (entry) => entry.id === importTabId,
-    );
+    return tabSubstance.find((entry) => entry.id === importTabId);
   }
 
   remove(tab: MathesarTab): void {
@@ -254,7 +261,7 @@ export class TabList {
       } else if (tabSubstance[removedTabIndexInTabsArray - 1]) {
         this.activeTab.set(tabSubstance[removedTabIndexInTabsArray - 1]);
       } else {
-        this.activeTab.set(null);
+        this.activeTab.set(undefined);
       }
     }
 
@@ -264,13 +271,13 @@ export class TabList {
      * We have a find check to avoid unnessary re-renders incase of component events.
      */
     if (removedTabIndexInTabsArray > -1) {
-      this.tabs.set(
-        tabSubstance.filter((entry) => entry.id !== tab.id),
-      );
+      this.tabs.set(tabSubstance.filter((entry) => entry.id !== tab.id));
     }
 
     if (tab.isNew) {
-      removeImportFromView(this.schemaId, tab.fileImportId);
+      if (tab.fileImportId) {
+        removeImportFromView(this.schemaId, tab.fileImportId);
+      }
     } else if (tab.tabularData) {
       removeTabularContent(tab.tabularData.type, tab.tabularData.id);
     }
@@ -280,7 +287,9 @@ export class TabList {
     const tabSubstance = get(this.tabs);
     const activeTabSubstance = get(this.activeTab);
 
-    const existingTabIndex = tabSubstance.findIndex((tabEntry) => tabEntry.id === oldTab.id);
+    const existingTabIndex = tabSubstance.findIndex(
+      (tabEntry) => tabEntry.id === oldTab.id,
+    );
     const existingTab = tabSubstance[existingTabIndex];
 
     if (existingTab) {
@@ -288,7 +297,10 @@ export class TabList {
     }
     this.add(tab, {
       position: existingTabIndex,
-      status: existingTab && activeTabSubstance?.id === existingTab.id ? 'active' : 'inactive',
+      status:
+        existingTab && activeTabSubstance?.id === existingTab.id
+          ? 'active'
+          : 'inactive',
     });
   }
 

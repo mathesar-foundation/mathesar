@@ -14,6 +14,12 @@
   export let value = '';
 </script>
 
-<BaseInput {...$$restProps} bind:id {disabled}/>
+<BaseInput {...$$restProps} bind:id {disabled} />
 
-<textarea class="input-element text-area" {id} {disabled} bind:value {...$$restProps} />
+<textarea
+  class="input-element text-area"
+  {id}
+  {disabled}
+  bind:value
+  {...$$restProps}
+/>
