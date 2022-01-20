@@ -22,7 +22,5 @@ module.exports = {
   },
   moduleNameMapper: getAlias(),
   moduleFileExtensions: ['js', 'ts', 'svelte'],
-  setupFilesAfterEnv: [
-    '@testing-library/jest-dom/extend-expect',
-  ],
+  setupFilesAfterEnv: ['@testing-library/jest-dom/extend-expect'],
 };

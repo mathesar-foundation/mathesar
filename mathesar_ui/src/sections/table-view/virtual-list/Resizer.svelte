@@ -27,7 +27,8 @@
   function onResize() {
     if (parentNode) {
       const parentOffsetHeight = parentNode.offsetHeight || 0;
-      const style = window.getComputedStyle(parentNode) || {} as CSSStyleDeclaration;
+      const style =
+        window.getComputedStyle(parentNode) || ({} as CSSStyleDeclaration);
       const paddingTop = parseInt(style.paddingTop, 10) || 0;
       const paddingBottom = parseInt(style.paddingBottom, 10) || 0;
       const newHeight = parentOffsetHeight - paddingTop - paddingBottom;
@@ -47,15 +48,15 @@
       onResize();
     }
 
-    return (() => {
+    return () => {
       if (detectElementResize && parentNode) {
         detectElementResize.removeResizeListener(parentNode, onResize);
       }
-    });
+    };
   });
 
   function onHeightChange(_height: number) {
-    bailoutOnSlot = (_height === 0);
+    bailoutOnSlot = _height === 0;
   }
 
   $: onHeightChange(height);
@@ -63,6 +64,6 @@
 
 <div class={outerClass} bind:this={wrapperRef}>
   {#if !bailoutOnSlot}
-      <slot {height} />
+    <slot {height} />
   {/if}
 </div>

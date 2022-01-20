@@ -41,7 +41,11 @@ test('renders select with custom classes and primary appearance', async () => {
   // Check if the select button is rendered, along with the correct classes.
   const selectBtn = getByRole('button');
   expect(selectBtn).toBeInTheDocument();
-  expect(selectBtn).toHaveClass('btn-primary', 'size-medium', 'trigger-custom-class');
+  expect(selectBtn).toHaveClass(
+    'btn-primary',
+    'size-medium',
+    'trigger-custom-class',
+  );
 
   // Expect the button to contain the correct label.
   expect(selectBtn).toHaveTextContent('Option 1');

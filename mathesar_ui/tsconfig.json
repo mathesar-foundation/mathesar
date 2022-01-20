@@ -22,5 +22,11 @@
       "@mathesar-component-library": ["src/component-library/index.ts"]
     }
   },
-  "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.svelte", "**.cjs", "**.config.js"]
+  "include": [
+    "src/**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.svelte",
+    "**.cjs",
+    "**.config.js"
+  ]
 }

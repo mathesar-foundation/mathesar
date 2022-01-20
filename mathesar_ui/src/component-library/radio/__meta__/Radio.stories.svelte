@@ -14,13 +14,13 @@
   <p>Within <Radio /> some text.</p>
 
   <p>
-    <LabeledInput label="With a form label" layout='inline-input-first'>
+    <LabeledInput label="With a form label" layout="inline-input-first">
       <Radio group={null} />
     </LabeledInput>
   </p>
 
   <p>
-    <LabeledInput label="Disabled" layout='inline-input-first'>
+    <LabeledInput label="Disabled" layout="inline-input-first">
       <Radio group={null} disabled />
     </LabeledInput>
   </p>

@@ -38,43 +38,49 @@ const formConfig: FormConfiguration = {
         type: 'switch',
         variable: 'numberType',
         cases: {
-          Integer: [{
-            type: 'input',
-            variable: 'integerDataSize',
-            label: 'Integer Data Size',
-            interfaceType: 'select',
-            options: {
-              default: { label: 'Default (4 bytes)' },
-              bigInt: { label: 'Big Integer (8 bytes)' },
-              smallInt: { label: 'Small Integer (2 bytes)' },
-            },
-          }],
-          Decimal: [{
-            type: 'layout',
-            orientation: 'horizontal',
-            elements: [
-              {
-                type: 'input',
-                variable: 'decimalPlaces',
-                label: 'Decimal Places',
+          Integer: [
+            {
+              type: 'input',
+              variable: 'integerDataSize',
+              label: 'Integer Data Size',
+              interfaceType: 'select',
+              options: {
+                default: { label: 'Default (4 bytes)' },
+                bigInt: { label: 'Big Integer (8 bytes)' },
+                smallInt: { label: 'Small Integer (2 bytes)' },
               },
-              {
-                type: 'input',
-                variable: 'maxDigits',
-                label: 'Max Digits',
-              },
-            ],
-          }],
-          Float: [{
-            type: 'input',
-            variable: 'floatingPointType',
-            label: 'Floating Point Type',
-            interfaceType: 'select',
-            options: {
-              real: { label: 'Real (6 digits)' },
-              doublePrecision: { label: 'Double Precision (15 digits)' },
             },
-          }],
+          ],
+          Decimal: [
+            {
+              type: 'layout',
+              orientation: 'horizontal',
+              elements: [
+                {
+                  type: 'input',
+                  variable: 'decimalPlaces',
+                  label: 'Decimal Places',
+                },
+                {
+                  type: 'input',
+                  variable: 'maxDigits',
+                  label: 'Max Digits',
+                },
+              ],
+            },
+          ],
+          Float: [
+            {
+              type: 'input',
+              variable: 'floatingPointType',
+              label: 'Floating Point Type',
+              interfaceType: 'select',
+              options: {
+                real: { label: 'Real (6 digits)' },
+                doublePrecision: { label: 'Double Precision (15 digits)' },
+              },
+            },
+          ],
         },
       },
     ],

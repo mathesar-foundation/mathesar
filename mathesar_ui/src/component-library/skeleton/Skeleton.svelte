@@ -5,5 +5,5 @@
 </script>
 
 {#if loading}
-  <div class="skeleton" transition:fade="{{ duration: 120 }}"></div>
+  <div class="skeleton" transition:fade={{ duration: 120 }} />
 {/if}

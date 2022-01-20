@@ -10,8 +10,7 @@
 <ToastPresenter entries={toast.entries} toastItemComponent={ToastCustomItem} />
 
 <p>
-  <Button
-    on:click={() => toast.info({ message: 'Here is your info.' })}
-  >Info</Button>
+  <Button on:click={() => toast.info({ message: 'Here is your info.' })}
+    >Info</Button
+  >
 </p>
-

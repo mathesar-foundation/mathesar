@@ -37,7 +37,7 @@
   }
 </script>
 
-<BaseInput {...$$restProps} bind:id {disabled}/>
+<BaseInput {...$$restProps} bind:id {disabled} />
 
 <input
   class="checkbox"

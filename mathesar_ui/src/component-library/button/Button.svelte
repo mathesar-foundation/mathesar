@@ -5,13 +5,13 @@
    * Button appearance. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.
    * @required
    */
-  export let appearance : Appearance = 'default';
+  export let appearance: Appearance = 'default';
 
   /**
    * Button size. One of: 'small', 'medium', 'large'.
    * @required
    */
-  export let size : Size = 'medium';
+  export let size: Size = 'medium';
 
   // Additional classes
   let classes = '';
@@ -20,13 +20,18 @@
   // Underlying DOM element for direct access
   export let element: HTMLElement | undefined = undefined;
 
-  $: allClasses = ['btn', `btn-${appearance}`, `size-${size}`, classes].join(' ');
+  $: allClasses = ['btn', `btn-${appearance}`, `size-${size}`, classes].join(
+    ' ',
+  );
 </script>
 
-<button bind:this={element} type="button"
-        class={allClasses}
-        {...$$restProps}
-        on:click
-        on:keydown>
-  <slot></slot>
+<button
+  bind:this={element}
+  type="button"
+  class={allClasses}
+  {...$$restProps}
+  on:click
+  on:keydown
+>
+  <slot />
 </button>
