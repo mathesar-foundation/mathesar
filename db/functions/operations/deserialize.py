@@ -1,25 +1,37 @@
-from db.functions.base import DbFunction, supported_db_functions
+from db.functions.base import DbFunction, Literal, supported_db_functions
 from db.functions.exceptions import UnknownDbFunctionId, BadDbFunctionFormat
 
 
 def get_db_function_from_ma_function_spec(spec: dict) -> DbFunction:
-    def _deserialize_parameter_if_necessary(parameter):
+    def _process_parameter(parameter, parent_db_function_subclass):
         if isinstance(parameter, dict):
+            # A dict parameter is a nested function call.
             return get_db_function_from_ma_function_spec(parameter)
-        else:
+        elif parent_db_function_subclass is Literal:
+            # Everything except for a dict is considered a literal parameter.
+            # And, only the Literal DbFunction can have a literal parameter.
             return parameter
+        else:
+            raise BadDbFunctionFormat(
+                "A literal must be specified as such by wrapping it in the literal function."
+            )
     try:
         db_function_subclass_id = _get_first_dict_key(spec)
         db_function_subclass = _get_db_function_subclass_by_id(db_function_subclass_id)
         raw_parameters = spec[db_function_subclass_id]
-        assert isinstance(raw_parameters, list)
+        if not isinstance(raw_parameters, list):
+            raise BadDbFunctionFormat(
+                "The value in the function's key-value pair must be a list."
+            )
         parameters = [
-            _deserialize_parameter_if_necessary(raw_parameter)
+            _process_parameter(
+                raw_parameter,
+                parent_db_function_subclass = db_function_subclass
+            )
             for raw_parameter in raw_parameters
         ]
         return db_function_subclass(parameters=parameters)
     except (TypeError, KeyError) as e:
-        # Raised when the objects in the spec don't have the right fields (e.g. column or parameter).
         raise BadDbFunctionFormat from e
 
 
