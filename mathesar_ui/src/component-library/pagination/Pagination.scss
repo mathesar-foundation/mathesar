@@ -18,7 +18,7 @@ ul.pagination {
       cursor: pointer;
 
       &:hover {
-        background-color: #aeb9be21 ;
+        background-color: #aeb9be21;
       }
 
       &:disabled {
@@ -27,7 +27,7 @@ ul.pagination {
         cursor: not-allowed;
       }
     }
-    
+
     button:focus {
       border: 1.4px solid #39a0f5;
       color: #39a0f5;
