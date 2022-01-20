@@ -63,6 +63,9 @@ export class TabularData extends EventHandler {
     this.metaParametersUnsubscriber = this.meta.metaParameters.subscribe(() => {
       this.dispatch('paramsUpdated', this.parameterize());
     });
+    this.columnsDataStore.on('columnRenamed', () => {
+      void this.refresh();
+    });
   }
 
   parameterize(): TabularDataParams {

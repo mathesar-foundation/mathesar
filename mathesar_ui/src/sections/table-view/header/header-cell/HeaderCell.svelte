@@ -119,7 +119,6 @@
     try {
       isSubmittingRename = true;
       await columnsDataStore.rename(column.id, newName);
-      await $tabularData.refresh();
       isRenaming = false;
     } catch (error) {
       toast.error(`Unable to rename column. ${error?.message as string}`);
