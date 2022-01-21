@@ -66,6 +66,7 @@
   function init() {
     constraintColumnNames = [];
     namingStrategy = 'auto';
+    constraintName = undefined;
   }
 
   $: constraintsDataStore = $tabularData.constraintsDataStore;
@@ -108,6 +109,11 @@
         type: 'unique',
         name: constraintName,
       });
+      // Why init before close when we also init on open? Because without init
+      // there's a weird UI state during the out-transition of the modal where
+      // the constraint name validation shows an error due to the name being a
+      // duplicate at that point.
+      init();
       controller.close();
     } catch (error) {
       toast.error(`Unable to add constraint. ${error.message as string}`);
