@@ -1,20 +1,8 @@
-from db.functions.base import DbFunction, Literal, supported_db_functions
+from db.functions.base import DbFunction, Literal, ColumnReference, supported_db_functions
 from db.functions.exceptions import UnknownDbFunctionId, BadDbFunctionFormat
 
 
 def get_db_function_from_ma_function_spec(spec: dict) -> DbFunction:
-    def _process_parameter(parameter, parent_db_function_subclass):
-        if isinstance(parameter, dict):
-            # A dict parameter is a nested function call.
-            return get_db_function_from_ma_function_spec(parameter)
-        elif parent_db_function_subclass is Literal:
-            # Everything except for a dict is considered a literal parameter.
-            # And, only the Literal DbFunction can have a literal parameter.
-            return parameter
-        else:
-            raise BadDbFunctionFormat(
-                "A literal must be specified as such by wrapping it in the literal function."
-            )
     try:
         db_function_subclass_id = _get_first_dict_key(spec)
         db_function_subclass = _get_db_function_subclass_by_id(db_function_subclass_id)
@@ -25,7 +13,7 @@ def get_db_function_from_ma_function_spec(spec: dict) -> DbFunction:
             )
         parameters = [
             _process_parameter(
-                raw_parameter,
+                parameter = raw_parameter,
                 parent_db_function_subclass = db_function_subclass
             )
             for raw_parameter in raw_parameters
@@ -33,6 +21,23 @@ def get_db_function_from_ma_function_spec(spec: dict) -> DbFunction:
         return db_function_subclass(parameters=parameters)
     except (TypeError, KeyError) as e:
         raise BadDbFunctionFormat from e
+
+
+def _process_parameter(parameter, parent_db_function_subclass):
+    if isinstance(parameter, dict):
+        # A dict parameter is a nested function call.
+        return get_db_function_from_ma_function_spec(parameter)
+    elif (
+            parent_db_function_subclass is Literal or
+            parent_db_function_subclass is ColumnReference
+        ):
+        # Everything except for a dict is considered a literal parameter.
+        # And, only the Literal and ColumnReference DbFunctions can have a literal parameter.
+        return parameter
+    else:
+        raise BadDbFunctionFormat(
+            "A literal must be specified as such by wrapping it in the literal function."
+        )
 
 
 def _get_db_function_subclass_by_id(subclass_id):
