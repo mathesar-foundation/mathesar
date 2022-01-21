@@ -26,7 +26,6 @@ export { default as NumberInput } from './number-input/NumberInput.svelte';
 export { default as Progress } from './progress/Progress.svelte';
 export { default as Radio } from './radio/Radio.svelte';
 export { default as RadioGroup } from './radio-group/RadioGroup.svelte';
-export { default as Seesaw } from './seesaw/Seesaw.svelte';
 export { default as Skeleton } from './skeleton/Skeleton.svelte';
 export { default as Spinner } from './spinner/Spinner.svelte';
 export { default as SpinnerArea } from './spinner-area/SpinnerArea.svelte';
