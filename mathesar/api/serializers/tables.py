@@ -88,7 +88,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
                 raise DuplicateTableAPIException(e, message=f"Relation {validated_data['name']}"
-                                                        f" already exists in schema {schema.id}",
+                                                            f" already exists in schema {schema.id}",
                                                  field="name", status_code=status.HTTP_400_BAD_REQUEST)
             else:
                 raise ProgrammingAPIException(e)

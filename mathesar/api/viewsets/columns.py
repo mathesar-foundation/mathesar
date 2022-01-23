@@ -66,13 +66,13 @@ class ColumnViewSet(viewsets.ModelViewSet):
             except InvalidDefaultError as e:
                 raise exceptions.InvalidDefaultAPIException(e,
                                                             message=f'default "{request.data["default"]}" is'
-                                                                f' invalid for type {request.data["type"]}',
+                                                                    f' invalid for type {request.data["type"]}',
                                                             status_code=status.HTTP_400_BAD_REQUEST)
             except InvalidTypeOptionError as e:
                 type_options = request.data.get('type_options', '')
                 raise exceptions.InvalidTypeOptionAPIException(e,
                                                                message=f'parameter dict {type_options} is'
-                                                                   f' invalid for type {request.data["type"]}',
+                                                                       f' invalid for type {request.data["type"]}',
                                                                field="type_options",
                                                                status_code=status.HTTP_400_BAD_REQUEST)
             except InvalidTypeError as e:
@@ -111,21 +111,21 @@ class ColumnViewSet(viewsets.ModelViewSet):
             except InvalidDefaultError as e:
                 raise exceptions.InvalidDefaultAPIException(e,
                                                             message=f'default "{request.data["default"]}" is'
-                                                                f' invalid for this column',
+                                                                    f' invalid for this column',
                                                             status_code=status.HTTP_400_BAD_REQUEST
                                                             )
             except DynamicDefaultWarning as e:
                 raise exceptions.DynamicDefaultAPIException(e,
-                                                            message='Changing type of columns with dynamically-generated'
-                                                                ' defaults is not supported.'
-                                                                ' Delete or change the default first.',
+                                                            message='Changing type of columns with'
+                                                                    ' dynamically-generated defaults is not supported.'
+                                                                    ' Delete or change the default first.',
                                                             status_code=status.HTTP_400_BAD_REQUEST
                                                             )
             except InvalidTypeOptionError as e:
                 type_options = request.data.get('type_options', '')
                 raise exceptions.InvalidTypeOptionAPIException(e,
                                                                message=f'parameter dict {type_options} is'
-                                                                   f' invalid for type {request.data["type"]}',
+                                                                       f' invalid for type {request.data["type"]}',
                                                                status_code=status.HTTP_400_BAD_REQUEST
                                                                )
             except InvalidTypeError as e:
