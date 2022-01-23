@@ -2,7 +2,7 @@ from collections import namedtuple
 
 from django.utils.encoding import force_str
 from rest_framework import status
-from rest_framework.exceptions import APIException as DRFApiException, ValidationError as DrfValidationError
+from rest_framework.exceptions import APIException
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
@@ -24,10 +24,10 @@ def get_default_exception_detail(exception, error_code=ErrorCodes.NonClassifiedE
 
 
 def get_default_api_exception(exc):
-    return APIError(exc, ErrorCodes.NonClassifiedError.value)
+    return MathesarAPIException(exc, ErrorCodes.NonClassifiedError.value)
 
 
-class APIError(DRFApiException):
+class MathesarAPIException(APIException):
     def __init__(self, exception, error_code=ErrorCodes.NonClassifiedError.value, message=None, field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
@@ -35,10 +35,10 @@ class APIError(DRFApiException):
         self.status_code = status_code
 
 
-class GenericAPIError(APIError):
+class GenericAPIError(MathesarAPIException):
     default_code = 'error'
     """
-    Class which is used to convert list of errors into proper APIError
+    Class which is used to convert list of errors into proper MathesarAPIException
     """
 
     def __init__(self, error_body_list, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
