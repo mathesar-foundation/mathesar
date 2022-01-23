@@ -35,19 +35,19 @@ class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
             constraint = table.add_constraint(data['type'], data['columns'], name)
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
-                raise exceptions.DuplicateTableAPIError(e,
-                                                        message='Relation with the same name already exists',
-                                                        status_code=status.HTTP_400_BAD_REQUEST
-                                                        )
+                raise exceptions.DuplicateTableAPIException(e,
+                                                            message='Relation with the same name already exists',
+                                                            status_code=status.HTTP_400_BAD_REQUEST
+                                                            )
             else:
-                raise exceptions.APIError(e)
+                raise exceptions.MathesarAPIException(e)
         except IntegrityError as e:
             if type(e.orig) == UniqueViolation:
-                raise exceptions.UniqueViolationAPIError(e,
-                                                         status_code=status.HTTP_400_BAD_REQUEST
-                                                         )
+                raise exceptions.UniqueViolationAPIException(e,
+                                                             status_code=status.HTTP_400_BAD_REQUEST
+                                                             )
             else:
-                raise exceptions.APIError(e)
+                raise exceptions.MathesarAPIException(e)
 
         out_serializer = ConstraintSerializer(constraint, context={'request': request})
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
@@ -58,7 +58,7 @@ class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
             constraint.drop()
         except ProgrammingError as e:
             if type(e.orig) == UndefinedObject:
-                raise exceptions.NotFoundAPIError(e)
+                raise exceptions.NotFoundAPIException(e)
             else:
-                raise exceptions.ProgrammingAPIError(e)
+                raise exceptions.ProgrammingAPIException(e)
         return Response(status=status.HTTP_204_NO_CONTENT)

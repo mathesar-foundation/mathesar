@@ -47,7 +47,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         try:
             table.update_sa_table(serializer.validated_data)
         except ValueError as e:
-            raise api_exceptions.ValueAPIError(e, status_code=status.HTTP_400_BAD_REQUEST)
+            raise api_exceptions.ValueAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
 
         # Reload the table to avoid cached properties
         table = self.get_object()
@@ -78,19 +78,19 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             preview_records = table.get_preview(columns)
         except (DataError, IntegrityError) as e:
             if type(e.orig) == InvalidTextRepresentation or type(e.orig) == CheckViolation:
-                raise api_exceptions.InvalidTypeCastAPIError(e,
-                                                             status_code=status.HTTP_400_BAD_REQUEST,
-                                                             field='columns')
+                raise api_exceptions.InvalidTypeCastAPIException(e,
+                                                                 status_code=status.HTTP_400_BAD_REQUEST,
+                                                                 field='columns')
             else:
-                raise api_exceptions.IntegrityAPIError(e,
-                                                       status_code=status.HTTP_400_BAD_REQUEST,
-                                                       field='columns')
+                raise api_exceptions.IntegrityAPIException(e,
+                                                           status_code=status.HTTP_400_BAD_REQUEST,
+                                                           field='columns')
         except UnsupportedTypeException as e:
-            raise api_exceptions.UnsupportedTypeAPIError(e,
-                                                         field='columns',
-                                                         status_code=status.HTTP_400_BAD_REQUEST)
+            raise api_exceptions.UnsupportedTypeAPIException(e,
+                                                             field='columns',
+                                                             status_code=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            raise api_exceptions.APIError(e)
+            raise api_exceptions.MathesarAPIException(e)
         table_data.update(
             {
                 # There's no way to reflect actual column data without

@@ -3,8 +3,8 @@ from psycopg2.errors import DuplicateTable
 from rest_framework import serializers, status
 from sqlalchemy.exc import ProgrammingError
 
-from mathesar.api.exceptions.exceptions import ProgrammingAPIError, DuplicateTableAPIError, MultipleDataFileAPIError, \
-    DistinctColumnRequiredAPIError, ColumnSizeMismatchAPIError
+from mathesar.api.exceptions.exceptions import ProgrammingAPIException, DuplicateTableAPIException, MultipleDataFileAPIException, \
+    DistinctColumnRequiredAPIException, ColumnSizeMismatchAPIException
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.columns import SimpleColumnSerializer
 from mathesar.models import Table, DataFile
@@ -72,7 +72,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
 
     def validate_data_files(self, data_files):
         if data_files and len(data_files) > 1:
-            raise MultipleDataFileAPIError()
+            raise MultipleDataFileAPIException()
         return data_files
 
     def create(self, validated_data):
@@ -87,11 +87,11 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
                 table = create_empty_table(name, schema)
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
-                raise DuplicateTableAPIError(e, message=f"Relation {validated_data['name']}"
+                raise DuplicateTableAPIException(e, message=f"Relation {validated_data['name']}"
                                                         f" already exists in schema {schema.id}",
-                                             field="name", status_code=status.HTTP_400_BAD_REQUEST)
+                                                 field="name", status_code=status.HTTP_400_BAD_REQUEST)
             else:
-                raise ProgrammingAPIError(e)
+                raise ProgrammingAPIException(e)
         return table
 
 
@@ -103,7 +103,7 @@ class TablePreviewSerializer(MathesarErrorMessageMixin, serializers.Serializer):
         table = self.context['table']
         column_names = [col["name"] for col in columns]
         if not len(column_names) == len(set(column_names)):
-            raise DistinctColumnRequiredAPIError()
+            raise DistinctColumnRequiredAPIException()
         if not len(columns) == len(table.sa_columns):
-            raise ColumnSizeMismatchAPIError()
+            raise ColumnSizeMismatchAPIException()
         return columns

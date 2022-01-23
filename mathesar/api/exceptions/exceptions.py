@@ -2,7 +2,7 @@ from collections import namedtuple
 
 from django.utils.encoding import force_str
 from rest_framework import status
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, ValidationError
 
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
@@ -35,7 +35,7 @@ class MathesarAPIException(APIException):
         self.status_code = status_code
 
 
-class GenericAPIError(MathesarAPIException):
+class GenericAPIException(MathesarAPIException):
     default_code = 'error'
     """
     Class which is used to convert list of errors into proper MathesarAPIException
@@ -46,7 +46,7 @@ class GenericAPIError(MathesarAPIException):
         self.status_code = status_code
 
 
-class UniqueViolationAPIError(APIError):
+class UniqueViolationAPIException(MathesarAPIException):
     def __init__(self,
                  exception,
                  error_code=ErrorCodes.UniqueViolation.value,
@@ -59,7 +59,7 @@ class UniqueViolationAPIError(APIError):
         self.status_code = status_code
 
 
-class NotFoundAPIError(APIError):
+class NotFoundAPIException(MathesarAPIException):
     def __init__(self, exception, error_code=ErrorCodes.NotFound.value, message=None, field=None,
                  details=None, status_code=status.HTTP_404_NOT_FOUND):
         exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
@@ -67,7 +67,7 @@ class NotFoundAPIError(APIError):
         self.status_code = status_code
 
 
-class ValidationError(DrfValidationError):
+class MathesarValidationException(ValidationError):
     status_code = status.HTTP_400_BAD_REQUEST
     default_code = 'invalid'
 
@@ -77,49 +77,49 @@ class ValidationError(DrfValidationError):
         self.detail = exception_detail
 
 
-class ProgrammingAPIError(APIError):
+class ProgrammingAPIException(MathesarAPIException):
 
     def __init__(self, exception, error_code=ErrorCodes.ProgrammingError.value, message=None, field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class DuplicateTableAPIError(ProgrammingAPIError):
+class DuplicateTableAPIException(ProgrammingAPIException):
     # Default message is not needed as the exception string provides enough details
     def __init__(self, exception, error_code=ErrorCodes.DuplicateTableError.value, message=None, field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class DuplicateColumnAPIError(ProgrammingAPIError):
+class DuplicateColumnAPIException(ProgrammingAPIException):
     # Default message is not needed as the exception string provides enough details
     def __init__(self, exception, error_code=ErrorCodes.DuplicateColumnError.value, message=None, field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class TypeErrorAPIError(APIError):
+class TypeErrorAPIException(MathesarAPIException):
     # Default message is not needed as the exception string provides enough details
     def __init__(self, exception, error_code=ErrorCodes.TypeError.value, message=None, field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class InvalidDefaultAPIError(APIError):
+class InvalidDefaultAPIException(MathesarAPIException):
     # Default message is not needed as the exception string provides enough details
     def __init__(self, exception, error_code=ErrorCodes.InvalidDefault.value, message=None, field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class InvalidTypeOptionAPIError(APIError):
+class InvalidTypeOptionAPIException(MathesarAPIException):
     # Default message is not needed as the exception string provides enough details
     def __init__(self, exception, error_code=ErrorCodes.InvalidTypeOption.value, message=None, field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class MultipleDataFileAPIError(ValidationError):
+class MultipleDataFileAPIException(MathesarValidationException):
 
     def __init__(self, error_code=ErrorCodes.MultipleDataFiles.value,
                  message="Multiple data files are unsupported.",
@@ -129,7 +129,7 @@ class MultipleDataFileAPIError(ValidationError):
         super().__init__(None, error_code, message, field, details)
 
 
-class DistinctColumnRequiredAPIError(ValidationError):
+class DistinctColumnRequiredAPIException(MathesarValidationException):
 
     def __init__(self, error_code=ErrorCodes.DistinctColumnNameRequired.value,
                  message="Column names must be distinct",
@@ -139,7 +139,7 @@ class DistinctColumnRequiredAPIError(ValidationError):
         super().__init__(None, error_code, message, field, details)
 
 
-class ColumnSizeMismatchAPIError(ValidationError):
+class ColumnSizeMismatchAPIException(MathesarValidationException):
 
     def __init__(self, error_code=ErrorCodes.ColumnSizeMismatch.value,
                  message="Incorrect number of columns in request.",
@@ -149,8 +149,8 @@ class ColumnSizeMismatchAPIError(ValidationError):
         super().__init__(None, error_code, message, field, details)
 
 
-class IntegrityAPIError(APIError):
-
+class IntegrityAPIException(MathesarAPIException):
+    # Default message is not needed as the exception string provides enough details
     def __init__(self, exception, error_code=ErrorCodes.NonClassifiedIntegrityError.value,
                  message=None,
                  field=None,
@@ -158,8 +158,8 @@ class IntegrityAPIError(APIError):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class ValueAPIError(APIError):
-
+class ValueAPIException(MathesarAPIException):
+    # Default message is not needed as the exception string provides enough details
     def __init__(self, exception, error_code=ErrorCodes.ValueError.value,
                  message=None,
                  field=None,
@@ -167,8 +167,8 @@ class ValueAPIError(APIError):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class InvalidTypeCastAPIError(APIError):
-
+class InvalidTypeCastAPIException(MathesarAPIException):
+    # Default message is not needed as the exception string provides enough details
     def __init__(self, exception, error_code=ErrorCodes.InvalidTypeCast.value,
                  message="Invalid type cast requested.",
                  field=None,
@@ -176,8 +176,9 @@ class InvalidTypeCastAPIError(APIError):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class UndefinedFunctionAPIError(APIError):
+class UndefinedFunctionAPIException(MathesarAPIException):
 
+    # Default message is not needed as the exception string provides enough details
     def __init__(self, exception, error_code=ErrorCodes.UndefinedFunction.value,
                  message=None,
                  field=None,
@@ -185,8 +186,9 @@ class UndefinedFunctionAPIError(APIError):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class DynamicDefaultAPIError(APIError):
+class DynamicDefaultAPIException(MathesarAPIException):
 
+    # Default message is not needed as the exception string provides enough details
     def __init__(self, exception, error_code=ErrorCodes.UndefinedFunction.value,
                  message=None,
                  field=None,
@@ -194,8 +196,9 @@ class DynamicDefaultAPIError(APIError):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class UnsupportedTypeAPIError(APIError):
+class UnsupportedTypeAPIException(MathesarAPIException):
 
+    # Default message is not needed as the exception string provides enough details
     def __init__(self, exception, error_code=ErrorCodes.UnsupportedType.value,
                  message=None,
                  field=None,
@@ -203,7 +206,7 @@ class UnsupportedTypeAPIError(APIError):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class BadFilterAPIError(APIError):
+class BadFilterAPIException(MathesarAPIException):
 
     def __init__(self, exception, error_code=ErrorCodes.UnsupportedType.value,
                  message="Filter arguments are not correct",
@@ -212,8 +215,9 @@ class BadFilterAPIError(APIError):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class BadSortAPIError(APIError):
+class BadSortAPIException(MathesarAPIException):
 
+    # Default message is not needed as the exception string provides enough details
     def __init__(self, exception, error_code=ErrorCodes.UnsupportedType.value,
                  message=None,
                  field=None,
@@ -221,8 +225,9 @@ class BadSortAPIError(APIError):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class BadGroupAPIError(APIError):
+class BadGroupAPIException(MathesarAPIException):
 
+    # Default message is not needed as the exception string provides enough details
     def __init__(self, exception, error_code=ErrorCodes.UnsupportedType.value,
                  message=None,
                  field=None,
@@ -230,7 +235,7 @@ class BadGroupAPIError(APIError):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class InvalidTableAPIError(APIError):
+class InvalidTableAPIException(MathesarAPIException):
 
     def __init__(self, exception, error_code=ErrorCodes.InvalidTableError.value,
                  message='Unable to tabulate data',
@@ -239,7 +244,7 @@ class InvalidTableAPIError(APIError):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
-class RaiseExceptionAPIError(APIError):
+class RaiseExceptionAPIException(MathesarAPIException):
     """
     Exception raised inside a postgres function
     """

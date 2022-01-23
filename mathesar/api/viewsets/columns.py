@@ -43,41 +43,41 @@ class ColumnViewSet(viewsets.ModelViewSet):
                 )
             except IndexError as e:
                 _col_idx = serializer.validated_data['source_column']
-                raise exceptions.NotFoundAPIError(e,
-                                                  message=f'column index "{_col_idx}" not found',
-                                                  field='source_column',
-                                                  status_code=status.HTTP_400_BAD_REQUEST)
+                raise exceptions.NotFoundAPIException(e,
+                                                      message=f'column index "{_col_idx}" not found',
+                                                      field='source_column',
+                                                      status_code=status.HTTP_400_BAD_REQUEST)
         else:
             try:
                 column = table.add_column(request.data)
             except ProgrammingError as e:
                 if type(e.orig) == DuplicateColumn:
                     name = request.data['name']
-                    raise exceptions.DuplicateTableAPIError(e,
-                                                            message=f'Column {name} already exists',
-                                                            field='name',
-                                                            status_code=status.HTTP_400_BAD_REQUEST)
+                    raise exceptions.DuplicateTableAPIException(e,
+                                                                message=f'Column {name} already exists',
+                                                                field='name',
+                                                                status_code=status.HTTP_400_BAD_REQUEST)
                 else:
-                    raise exceptions.ProgrammingAPIError(e)
+                    raise exceptions.ProgrammingAPIException(e)
             except TypeError as e:
-                raise exceptions.TypeErrorAPIError(e,
-                                                   message="Unknown type_option passed",
-                                                   status_code=status.HTTP_400_BAD_REQUEST)
+                raise exceptions.TypeErrorAPIException(e,
+                                                       message="Unknown type_option passed",
+                                                       status_code=status.HTTP_400_BAD_REQUEST)
             except InvalidDefaultError as e:
-                raise exceptions.InvalidDefaultAPIError(e,
-                                                        message=f'default "{request.data["default"]}" is'
+                raise exceptions.InvalidDefaultAPIException(e,
+                                                            message=f'default "{request.data["default"]}" is'
                                                                 f' invalid for type {request.data["type"]}',
-                                                        status_code=status.HTTP_400_BAD_REQUEST)
+                                                            status_code=status.HTTP_400_BAD_REQUEST)
             except InvalidTypeOptionError as e:
                 type_options = request.data.get('type_options', '')
-                raise exceptions.InvalidTypeOptionAPIError(e,
-                                                           message=f'parameter dict {type_options} is'
+                raise exceptions.InvalidTypeOptionAPIException(e,
+                                                               message=f'parameter dict {type_options} is'
                                                                    f' invalid for type {request.data["type"]}',
-                                                           field="type_options",
-                                                           status_code=status.HTTP_400_BAD_REQUEST)
+                                                               field="type_options",
+                                                               status_code=status.HTTP_400_BAD_REQUEST)
             except InvalidTypeError as e:
-                raise exceptions.InvalidTypeCastAPIError(e, message='This type casting is invalid.',
-                                                         status_code=status.HTTP_400_BAD_REQUEST)
+                raise exceptions.InvalidTypeCastAPIException(e, message='This type casting is invalid.',
+                                                             status_code=status.HTTP_400_BAD_REQUEST)
         dj_column = Column(table=table,
                            attnum=get_columns_attnum_from_names(table.oid, [column.name], table.schema._sa_engine)[0][
                                0],
@@ -97,43 +97,43 @@ class ColumnViewSet(viewsets.ModelViewSet):
                 table.alter_column(column_instance._sa_column.column_index, serializer.validated_data)
             except ProgrammingError as e:
                 if type(e.orig) == UndefinedFunction:
-                    raise exceptions.UndefinedFunctionAPIError(e,
-                                                               message='This type cast is not implemented',
-                                                               status_code=status.HTTP_400_BAD_REQUEST)
+                    raise exceptions.UndefinedFunctionAPIException(e,
+                                                                   message='This type cast is not implemented',
+                                                                   status_code=status.HTTP_400_BAD_REQUEST)
                 else:
-                    raise exceptions.ProgrammingAPIError(e, status_code=status.HTTP_400_BAD_REQUEST)
+                    raise exceptions.ProgrammingAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
             except IndexError as e:
-                raise exceptions.NotFoundAPIError(e)
+                raise exceptions.NotFoundAPIException(e)
             except TypeError as e:
-                raise exceptions.InvalidTypeOptionAPIError(e,
-                                                           message="Unknown type_option passed",
-                                                           status_code=status.HTTP_400_BAD_REQUEST)
+                raise exceptions.InvalidTypeOptionAPIException(e,
+                                                               message="Unknown type_option passed",
+                                                               status_code=status.HTTP_400_BAD_REQUEST)
             except InvalidDefaultError as e:
-                raise exceptions.InvalidDefaultAPIError(e,
-                                                        message=f'default "{request.data["default"]}" is'
+                raise exceptions.InvalidDefaultAPIException(e,
+                                                            message=f'default "{request.data["default"]}" is'
                                                                 f' invalid for this column',
-                                                        status_code=status.HTTP_400_BAD_REQUEST
-                                                        )
+                                                            status_code=status.HTTP_400_BAD_REQUEST
+                                                            )
             except DynamicDefaultWarning as e:
-                raise exceptions.DynamicDefaultAPIError(e,
-                                                        message='Changing type of columns with dynamically-generated'
+                raise exceptions.DynamicDefaultAPIException(e,
+                                                            message='Changing type of columns with dynamically-generated'
                                                                 ' defaults is not supported.'
                                                                 ' Delete or change the default first.',
-                                                        status_code=status.HTTP_400_BAD_REQUEST
-                                                        )
+                                                            status_code=status.HTTP_400_BAD_REQUEST
+                                                            )
             except InvalidTypeOptionError as e:
                 type_options = request.data.get('type_options', '')
-                raise exceptions.InvalidTypeOptionAPIError(e,
-                                                           message=f'parameter dict {type_options} is'
+                raise exceptions.InvalidTypeOptionAPIException(e,
+                                                               message=f'parameter dict {type_options} is'
                                                                    f' invalid for type {request.data["type"]}',
-                                                           status_code=status.HTTP_400_BAD_REQUEST
-                                                           )
+                                                               status_code=status.HTTP_400_BAD_REQUEST
+                                                               )
             except InvalidTypeError as e:
-                raise exceptions.InvalidTypeCastAPIError(e,
-                                                         message='This type casting is invalid.',
-                                                         status_code=status.HTTP_400_BAD_REQUEST)
+                raise exceptions.InvalidTypeCastAPIException(e,
+                                                             message='This type casting is invalid.',
+                                                             status_code=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
-                raise exceptions.APIError(e)
+                raise exceptions.MathesarAPIException(e)
         serializer.update(column_instance, serializer.validated_model_fields)
         # Invalidate the cache as the underlying columns have changed
         out_serializer = ColumnSerializer(self.get_object())
