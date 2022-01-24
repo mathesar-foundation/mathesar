@@ -693,7 +693,6 @@ def test_column_update_type_invalid_cast(column_test_table, client):
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
-    print(response.json())
     assert response.status_code == 400
 
 
@@ -704,9 +703,11 @@ def test_column_update_when_missing(column_test_table, client):
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/99999/", data=data
     )
-    response_data = response.json()
-    assert response_data == {"detail": "Not found."}
     assert response.status_code == 404
+    response_data = response.json()[0]
+    assert response_data['message'] == "Not found."
+    assert response_data['code'] == ErrorCodes.NonClassifiedError.value
+
 
 
 def test_column_destroy(column_test_table, client):
@@ -736,8 +737,9 @@ def test_column_destroy_when_missing(column_test_table, client):
     response = client.delete(
         f"/api/v0/tables/{column_test_table.id}/columns/99999/"
     )
-    response_data = response.json()
-    assert response_data == {"detail": "Not found."}
+    response_data = response.json()[0]
+    assert response_data['detail'] == "Not found."
+    assert response_data['code'] == ErrorCodes.NonClassifiedError.value
     assert response.status_code == 404
 
 

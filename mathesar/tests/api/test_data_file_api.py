@@ -177,7 +177,9 @@ def test_data_file_create_url(client, header, patents_url, mock_get_patents_url)
 def test_data_file_update(client, data_file):
     response = client.put(f'/api/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "PUT" not allowed.'
+    response_data = response.json()[0]
+    assert response_data['message'] == 'Method "PUT" not allowed.'
+    assert response_data['code'] == ErrorCodes.MethodNotAllowed.value
 
 
 def test_data_file_partial_update(client, data_file):
@@ -190,15 +192,16 @@ def test_data_file_partial_update(client, data_file):
 def test_data_file_delete(client, data_file):
     response = client.delete(f'/api/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "DELETE" not allowed.'
+    assert response.json()[0]['message'] == 'Method "DELETE" not allowed.'
+    assert response.json()[0]['code'] == ErrorCodes.MethodNotAllowed.value
 
 
 def test_data_file_404(client, data_file):
     data_file_id = data_file.id
     data_file.delete()
     response = client.get(f'/api/v0/data_files/{data_file_id}/')
-    assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
+    assert response.json()[0]['message'] == 'Not found.'
+    assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
 def test_data_file_create_invalid_file(client):
@@ -244,7 +247,8 @@ def test_data_file_create_url_invalid_download(
     response = client.post('/api/v0/data_files/', data={'url': patents_url})
     response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict['url'][0] == 'URL cannot be downloaded.'
+    assert response_dict[0]['message'] == 'URL cannot be downloaded.'
+    assert response_dict[0]['field'] == 'url'
 
 
 def test_data_file_create_url_invalid_content_type(client):

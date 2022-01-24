@@ -753,9 +753,11 @@ def test_table_partial_update_schema(create_table, client):
     body = {'schema': table.schema.id}
     response = client.patch(f'/api/v0/tables/{table.id}/', body)
 
-    response_error = response.json()
+    response_error = response.json()[0]
     assert response.status_code == 400
-    assert response_error['schema'] == 'Updating schema for tables is not supported.'
+    assert response_error['message'] == 'Updating schema for tables is not supported.'
+    assert response_error['code'] == ErrorCodes.NotFound.value
+    assert response_error['field'] == 'schema'
 
 
 def test_table_delete(create_table, client):
@@ -797,13 +799,15 @@ def test_table_dependencies(client, create_table):
 def test_table_404(client):
     response = client.get('/api/v0/tables/3000/')
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
+    assert response.json()[0]['message'] == 'Not found.'
+    assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
 def test_table_type_suggestion_404(client):
     response = client.get('/api/v0/tables/3000/type_suggestions/')
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
+    assert response.json()[0]['message'] == 'Not found.'
+    assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
 def test_table_create_from_datafile_404(client):
@@ -842,26 +846,30 @@ def test_table_partial_update_invalid_field(create_table, client):
     response = client.patch(f'/api/v0/tables/{table.id}/', body)
 
     assert response.status_code == 400
-    assert 'is not supported' in response.json()['schema']
+    assert 'is not supported' in response.json()[0]['message']
+    assert response.json()[0]['field'] == 'schema'
 
 
 def test_table_partial_update_404(client):
     response = client.patch('/api/v0/tables/3000/', {})
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
+    assert response.json()[0]['message'] == 'Not found.'
+    assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
 def test_table_delete_404(client):
     response = client.delete('/api/v0/tables/3000/')
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
+    assert response.json()[0]['message'] == 'Not found.'
+    assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
 def test_table_update(client, create_table):
     table = create_table('update_table_test')
     response = client.put(f'/api/v0/tables/{table.id}/')
     assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "PUT" not allowed.'
+    assert response.json()[0]['message'] == 'Method "PUT" not allowed.'
+    assert response.json()[0]['code'] == ErrorCodes.MethodNotAllowed.value
 
 
 def test_table_get_with_reflect_new(client, table_for_reflection):

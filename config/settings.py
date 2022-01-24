@@ -185,6 +185,9 @@ FRIENDLY_ERRORS = {
         'ListSerializer': {'required': 2007, 'null': 2027,
                            'invalid_choice': 2083, 'not_a_list': 2123,
                            'empty': 2093}
+    },
+    'EXCEPTION_DICT': {
+        'Http404': 4005
     }
 }
 # Mathesar settings
