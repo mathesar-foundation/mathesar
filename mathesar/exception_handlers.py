@@ -12,7 +12,7 @@ def fix_error_response(data):
             if error['code'] is not None and str(error['code']) != 'None':
                 data[index]['code'] = int(error['code'])
             else:
-                data[index]['code'] = ErrorCodes.NonClassifiedError.value
+                data[index]['code'] = ErrorCodes.UnknownError.value
         if 'detail' not in error:
             data[index]['detail'] = error.pop('details', {})
     return data

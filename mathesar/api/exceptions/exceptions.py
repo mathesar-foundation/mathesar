@@ -13,7 +13,7 @@ ErrorBody = namedtuple(
 )
 
 
-def get_default_exception_detail(exception, error_code=ErrorCodes.NonClassifiedError.value,
+def get_default_exception_detail(exception, error_code=ErrorCodes.UnknownError.value,
                                  message=None, field=None, details=None):
     return ErrorBody(
         message=force_str(exception) if message is None else message,
@@ -24,11 +24,11 @@ def get_default_exception_detail(exception, error_code=ErrorCodes.NonClassifiedE
 
 
 def get_default_api_exception(exc):
-    return MathesarAPIException(exc, ErrorCodes.NonClassifiedError.value)
+    return MathesarAPIException(exc, ErrorCodes.UnknownError.value)
 
 
 class MathesarAPIException(APIException):
-    def __init__(self, exception, error_code=ErrorCodes.NonClassifiedError.value, message=None, field=None,
+    def __init__(self, exception, error_code=ErrorCodes.UnknownError.value, message=None, field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
         self.detail = [exception_detail]
@@ -71,7 +71,7 @@ class MathesarValidationException(ValidationError):
     status_code = status.HTTP_400_BAD_REQUEST
     default_code = 'invalid'
 
-    def __init__(self, exception, error_code=ErrorCodes.NonClassifiedError.value, message=None, field=None,
+    def __init__(self, exception, error_code=ErrorCodes.UnknownError.value, message=None, field=None,
                  details=None):
         exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
         self.detail = exception_detail

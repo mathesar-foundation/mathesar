@@ -3,28 +3,33 @@ from enum import Enum, unique
 
 @unique
 class ErrorCodes(Enum):
-    NonClassifiedIntegrityError = 4900
-    NonClassifiedError = 4999
-    ValueError = 4003
-    RaiseException = 4005
-    NotFound = 4004
-    TypeError = 4006
+    # Matches with default code of drf-friendly-errors library
+    # Api Error
+    MethodNotAllowed = 4006
+    NotFound = 4005
+    UnknownError = 4999
+    # Generic Errors
+    ProgrammingError = 4101
+    TypeError = 4102
+    ValueError = 4103
+
     # Db Error Codes
-    ColumnSizeMismatch = 4002
-    DistinctColumnNameRequired = 4001
-    InvalidTypeCast = 4053
-    NotNull = 4051
-    ProgrammingError = 4100
-    DuplicateTableError = 4101
-    DuplicateColumnError = 4103
-    UndefinedFunction = 4104
-    UniqueViolation = 4052
-    UnsupportedType = 4054
-    InvalidTypeOption = 4055
-    InvalidDefault = 4056
+    DuplicateTableError = 4205
+    DuplicateColumnError = 4206
+    InvalidTypeCast = 4203
+    InvalidTypeOption = 4210
+    InvalidDefault = 4211
+    NonClassifiedIntegrityError = 4201
+    NotNull = 4204
+    RaiseException = 4202
+    UndefinedFunction = 4207
+    UniqueViolation = 4208
+    UnsupportedType = 4209
+
     # Mathesar db Error Codes
-    InvalidTableError = 4102
+    InvalidTableError = 4301
+
     # Validation Error
-    MultipleDataFiles = 4200
-    # Api methods Error
-    MethodNotAllowed = 4500
+    ColumnSizeMismatch = 4401
+    DistinctColumnNameRequired = 4402
+    MultipleDataFiles = 4400
