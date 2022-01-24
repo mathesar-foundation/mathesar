@@ -144,7 +144,6 @@
     {#if namingStrategy === 'manual'}
       <FormField errors={nameValidationErrors}>
         <LabeledInput label="Constraint Name" layout="stacked">
-          <span slot="label">Constraint Name</span>
           <TextInput
             bind:value={constraintName}
             hasValidationErrors={nameValidationErrors.length > 0}
