@@ -55,6 +55,7 @@ def test_record_list(create_table, client):
 
 serialization_test_list = [
     ("TIME WITH TIME ZONE", "12:30:10+01:00"),
+    ("TIMESTAMP WITHOUT TIME ZONE", "2000-05-23T12:30:10"),
 ]
 
 
@@ -75,44 +76,48 @@ def test_record_list_filter(create_table, client):
     table_name = 'NASA Record List Filter'
     table = create_table(table_name)
 
-    filters = {'or': [
-        {'and': [
-            {'equal': {'column': 'Center', 'parameter': 'NASA Ames Research Center'}},
-            {'equal': {'column': 'Case Number', 'parameter': 'ARC-14048-1'}},
-        ]},
-        {'and': [
-            {'equal': {'column': 'Center', 'parameter': 'NASA Kennedy Space Center'}},
-            {'equal': {'column': 'Case Number', 'parameter': 'KSC-12871'}},
+    filter_list = [
+        {'or': [
+            {'and': [
+                {'field': 'Center', 'op': '==', 'value': 'NASA Ames Research Center'},
+                {'field': 'Case Number', 'op': '==', 'value': 'ARC-14048-1'}
+            ]},
+            {'and': [
+                {'field': 'Center', 'op': '==', 'value': 'NASA Kennedy Space Center'},
+                {'field': 'Case Number', 'op': '==', 'value': 'KSC-12871'}
+            ]}
         ]}
-    ]}
-    json_filters = json.dumps(filters)
+    ]
+    json_filter_list = json.dumps(filter_list)
 
     with patch.object(
         models, "db_get_records", side_effect=models.db_get_records
     ) as mock_get:
         response = client.get(
-            f'/api/v0/tables/{table.id}/records/?filters={json_filters}'
+            f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
         )
         response_data = response.json()
 
-    assert mock_get.call_args is not None
-    assert mock_get.call_args[1]['filters'] == filters
     assert response.status_code == 200
     assert response_data['count'] == 2
     assert len(response_data['results']) == 2
+    assert mock_get.call_args is not None
+    assert mock_get.call_args[1]['filters'] == filter_list
 
 
-def test_record_list_duplicate_only(create_table, client):
+def test_record_list_filter_duplicates(create_table, client):
     table_name = 'NASA Record List Filter Duplicates'
     table = create_table(table_name)
-    duplicate_only = ['Patent Expiration Date']
-    json_duplicate_only = json.dumps(duplicate_only)
+
+    filter_list = [
+        {'field': '', 'op': 'get_duplicates', 'value': ['Patent Expiration Date']}
+    ]
+    json_filter_list = json.dumps(filter_list)
 
     with patch.object(models, "db_get_records", return_value=[]) as mock_get:
-        client.get(f'/api/v0/tables/{table.id}/records/?duplicate_only={json_duplicate_only}')
-
+        client.get(f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}')
     assert mock_get.call_args is not None
-    assert mock_get.call_args[1]['duplicate_only'] == duplicate_only
+    assert mock_get.call_args[1]['filters'] == filter_list
 
 
 def _test_filter_with_added_columns(table, client, columns_to_add, operators_and_expected_values):
@@ -133,17 +138,14 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
         table.create_record_or_records(row_values_list)
 
         for op, value, expected in operators_and_expected_values:
-            if value is None:
-                filters = {op: {'column': new_column_name}}
-            else:
-                filters = {op: {'column': new_column_name, 'parameter': value}}
-            json_filters = json.dumps(filters)
+            filter_list = [{'field': new_column_name, 'op': op, 'value': value}]
+            json_filter_list = json.dumps(filter_list)
 
             with patch.object(
                 models, "db_get_records", side_effect=models.db_get_records
             ) as mock_get:
                 response = client.get(
-                    f'/api/v0/tables/{table.id}/records/?filters={json_filters}'
+                    f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
                 )
                 response_data = response.json()
 
@@ -154,7 +156,7 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
             assert response_data['count'] == expected
             assert len(response_data['results']) == num_results
             assert mock_get.call_args is not None
-            assert mock_get.call_args[1]['filters'] == filters
+            assert mock_get.call_args[1]['filters'] == filter_list
 
 
 def test_record_list_filter_for_boolean_type(create_table, client):
@@ -171,10 +173,10 @@ def test_record_list_filter_for_boolean_type(create_table, client):
     ]
 
     op_value_and_expected = [
-        ('not_equal', True, 2),
-        ('equal', False, 2),
-        ('empty', None, 1394),
-        ('not_empty', None, 49)
+        ('ne', True, 2),
+        ('eq', False, 2),
+        ('is_null', None, 1394),
+        ('is_not_null', None, 49)
     ]
 
     _test_filter_with_added_columns(table, client, columns_to_add, op_value_and_expected)

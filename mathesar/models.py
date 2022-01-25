@@ -264,7 +264,7 @@ class Table(DatabaseObject):
     def sa_all_records(self):
         return db_get_records(self._sa_table, self.schema._sa_engine)
 
-    def sa_num_records(self, filters=None):
+    def sa_num_records(self, filters=[]):
         return get_count(self._sa_table, self.schema._sa_engine, filters=filters)
 
     def update_sa_table(self, update_params):
@@ -276,7 +276,7 @@ class Table(DatabaseObject):
     def get_record(self, id_value):
         return get_record(self._sa_table, self.schema._sa_engine, id_value)
 
-    def get_records(self, limit=None, offset=None, filters=None, order_by=[], duplicate_only=None, group_by=None):
+    def get_records(self, limit=None, offset=None, filters=[], order_by=[], group_by=None):
         return db_get_records(
             self._sa_table,
             self.schema._sa_engine,
@@ -284,8 +284,7 @@ class Table(DatabaseObject):
             offset,
             filters=filters,
             order_by=order_by,
-            duplicate_only=duplicate_only,
-            group_by=group_by,
+            group_by=group_by
         )
 
     def create_record_or_records(self, record_data):

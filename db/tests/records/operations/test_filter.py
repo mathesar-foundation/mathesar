@@ -1,21 +1,21 @@
 import re
 import pytest
 from datetime import datetime
+from collections import Counter
 
-from sqlalchemy_filters.exceptions import BadFilterFormat
+from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
 from db.records.operations.select import get_records
-from db.filters.base import MultiParameter, SingleParameter, get_predicate_subclass_by_type_str, ReferencedColumnsDontExist
 
 
 def test_get_records_filters_using_col_str_names(roster_table_obj):
     roster, engine = roster_table_obj
-    filters = {"and": [
-        {"equal": {"column": "Student Name", "parameter": "Amy Gamble"}},
-        {"equal": {"column": "Subject", "parameter": "Math"}},
-    ]}
+    filter_list = [
+        {"field": "Student Name", "op": "==", "value": "Amy Gamble"},
+        {"field": "Subject", "op": "==", "value": "Math"}
+    ]
     record_list = get_records(
-        roster, engine, filters=filters
+        roster, engine, filters=filter_list
     )
     assert all(
         [
@@ -26,6 +26,72 @@ def test_get_records_filters_using_col_str_names(roster_table_obj):
     )
 
 
+def test_get_records_filters_using_col_objects(roster_table_obj):
+    roster, engine = roster_table_obj
+    filter_list = [
+        {"field": roster.columns["Student Name"], "op": "==", "value": "Amy Gamble"},
+        {"field": roster.columns["Subject"], "op": "==", "value": "Math"}
+    ]
+    record_list = get_records(
+        roster, engine, filters=filter_list
+    )
+    assert all(
+        [
+            len(record_list) == 1,
+            record_list[0][2] == "Amy Gamble",
+            record_list[0][6] == "Math",
+        ]
+    )
+
+
+def test_get_records_filters_using_mixed_col_objects_and_str(roster_table_obj):
+    roster, engine = roster_table_obj
+    filter_list = [
+        {"field": roster.columns["Student Name"], "op": "==", "value": "Amy Gamble"},
+        {"field": "Subject", "op": "==", "value": "Math"}
+    ]
+    record_list = get_records(
+        roster, engine, filters=filter_list
+    )
+    assert all(
+        [
+            len(record_list) == 1,
+            record_list[0][2] == "Amy Gamble",
+            record_list[0][6] == "Math",
+        ]
+    )
+
+
+def test_get_records_filters_with_miss(roster_table_obj):
+    roster, engine = roster_table_obj
+    filter_list = [
+        {"field": roster.columns["Student Name"], "op": "==", "value": "Amy Gamble"},
+        {"field": roster.columns["Grade"], "op": "==", "value": 75}
+    ]
+    record_list = get_records(
+        roster, engine, filters=filter_list
+    )
+    assert len(record_list) == 0
+
+
+def test_get_records_filters_duplicates(roster_table_obj):
+    roster, engine = roster_table_obj
+    dupe_cols = ["Grade", "Subject"]
+    filter_list = [{"field": "", "op": "get_duplicates", "value": dupe_cols}]
+
+    full_record_list = get_records(roster, engine)
+    dupe_record_list = get_records(roster, engine, filters=filter_list)
+
+    # Ensures that:
+    #   - All duplicate values in the table appeared in our query
+    #   - All values in our query are duplicate values
+    #   - All duplicate values appear the correct number of times
+    all_counter = Counter(tuple(r[c] for c in dupe_cols) for r in full_record_list)
+    all_counter = {k: v for k, v in all_counter.items() if v > 1}
+    got_counter = Counter(tuple(r[c] for c in dupe_cols) for r in dupe_record_list)
+    assert all_counter == got_counter
+
+
 def _like(x, v):
     return re.match(v.replace("%", ".*"), x) is not None
 
@@ -34,99 +100,71 @@ def _ilike(x, v):
     return re.match(v.replace("%", ".*").lower(), x.lower()) is not None
 
 
-parameter_to_python_func = {
-    "empty": lambda x, _: x is None,
-    "not_empty": lambda x, _: x is not None,
-    "equal": lambda x, v: x == v,
-    "not_equal": lambda x, v: x != v,
-    "greater": lambda x, v: x > v,
-    "lesser": lambda x, v: x < v,
-    "greater_or_equal": lambda x, v: x >= v,
-    "lesser_or_equal": lambda x, v: x <= v,
-    # "like": _like,
-    # "ilike": _ilike,
-    # "not_ilike": lambda x, v: not _ilike(x, v),
+op_to_python_func = {
+    "is_null": lambda x, _: x is None,
+    "is_not_null": lambda x, _: x is not None,
+    "eq": lambda x, v: x == v,
+    "ne": lambda x, v: x != v,
+    "gt": lambda x, v: x > v,
+    "lt": lambda x, v: x < v,
+    "ge": lambda x, v: x >= v,
+    "le": lambda x, v: x <= v,
+    "like": _like,
+    "ilike": _ilike,
+    "not_ilike": lambda x, v: not _ilike(x, v),
     "in": lambda x, v: x in v,
     "not_in": lambda x, v: x not in v,
-    # "any": lambda x, v: v in x,
-    # "not_any": lambda x, v: v not in x,
+    "any": lambda x, v: v in x,
+    "not_any": lambda x, v: v not in x,
     "and": lambda x: all(x),
     "or": lambda x: any(x),
     "not": lambda x: not x[0]
 }
 
 
-db_function_expressions = {
-    "empty": lambda col: {"empty": [{"column_reference": col}]},
-    "not_empty": lambda col: {"not": [{"empty": [{"column_reference": col}]}]},
-    "equal": lambda col, val: {"equal": [{"column_reference": [col]}, {"literal": [val]}]},
-    "not_equal": lambda col, val: {"not": [{"equal": [{"column_reference": [col]}, {"literal": [val]}]}]},
-    "greater": lambda col, val: {"greater": [{"column_reference": [col]}, {"literal": [val]}]},
-    "lesser": lambda col, val: {"lesser": [{"column_reference": [col]}, {"literal": [val]}]},
-    "greater_or_equal": lambda col, val: {"or": [
-        {"greater": [{"column_reference": [col]}, {"literal": [val]}]},
-        {"equal": [{"column_reference": [col]}, {"literal": [val]}]},
-    ]},
-    "lesser_or_equal": lambda col, val: {"or": [
-        {"lesser": [{"column_reference": [col]}, {"literal": [val]}]},
-        {"equal": [{"column_reference": [col]}, {"literal": [val]}]},
-    ]},
-    "in": lambda col, val: {
-        "in": [
-            {"column_reference": [col]},
-            {"list": [{"literal": [sub_val]} for sub_val in val]}
-        ]},
-    "not_in": lambda col, val: {"not": [{
-        "in": [
-            {"column_reference": [col]},
-            {"list": [{"literal": [sub_val]} for sub_val in val]}
-        ]}]},
-}
-
-
-parameter_test_list = [
-    # empty
-    ("varchar", "empty", None, 5),
-    ("numeric", "empty", None, 5),
-    ("date", "empty", None, 5),
-    ("array", "empty", None, 5),
-    # not_empty
-    ("varchar", "not_empty", None, 100),
-    ("numeric", "not_empty", None, 100),
-    ("date", "not_empty", None, 100),
-    ("array", "not_empty", None, 100),
-    # equal
-    ("varchar", "equal", "string42", 1),
-    ("numeric", "equal", 1, 1),
-    ("date", "equal", "2000-01-01", 1),
-    ("array", "equal", "{0,0}", 1),
-    # not_equal
-    ("varchar", "not_equal", "string42", 99),
-    ("numeric", "not_equal", 1, 99),
-    ("date", "not_equal", "2000-01-01", 99),
-    ("array", "not_equal", "{0,0}", 99),
-    # greater
-    ("varchar", "greater", "string0", 100),
-    ("numeric", "greater", 50, 50),
-    ("date", "greater", "2000-01-01", 99),
-    # lesser
-    ("varchar", "lesser", "stringA", 100),
-    ("numeric", "lesser", 51, 50),
-    ("date", "lesser", "2099-01-01", 99),
-    # greater_or_equal
-    ("varchar", "greater_or_equal", "string1", 100),
-    ("numeric", "greater_or_equal", 50, 51),
-    ("date", "greater_or_equal", "2000-01-01", 100),
-    # lesser_or_equal
-    ("varchar", "lesser_or_equal", "string2", 13),
-    ("numeric", "lesser_or_equal", 51, 51),
-    ("date", "lesser_or_equal", "2099-01-01", 100),
+ops_test_list = [
+    # is_null
+    ("varchar", "is_null", None, 5),
+    ("numeric", "is_null", None, 5),
+    ("date", "is_null", None, 5),
+    ("array", "is_null", None, 5),
+    # is_not_null
+    ("varchar", "is_not_null", None, 100),
+    ("numeric", "is_not_null", None, 100),
+    ("date", "is_not_null", None, 100),
+    ("array", "is_not_null", None, 100),
+    # eq
+    ("varchar", "eq", "string42", 1),
+    ("numeric", "eq", 1, 1),
+    ("date", "eq", "2000-01-01", 1),
+    ("array", "eq", "{0,0}", 1),
+    # ne
+    ("varchar", "ne", "string42", 99),
+    ("numeric", "ne", 1, 99),
+    ("date", "ne", "2000-01-01", 99),
+    ("array", "ne", "{0,0}", 99),
+    # gt
+    ("varchar", "gt", "string0", 100),
+    ("numeric", "gt", 50, 50),
+    ("date", "gt", "2000-01-01", 99),
+    # lt
+    ("varchar", "lt", "stringA", 100),
+    ("numeric", "lt", 51, 50),
+    ("date", "lt", "2099-01-01", 99),
+    # ge
+    ("varchar", "ge", "string1", 100),
+    ("numeric", "ge", 50, 51),
+    ("date", "ge", "2000-01-01", 100),
+    # le
+    ("varchar", "le", "string2", 13),
+    ("numeric", "le", 51, 51),
+    ("date", "le", "2099-01-01", 100),
     # like
-    # ("varchar", "like", "%1", 10),
+    ("varchar", "like", "%1", 10),
     # ilike
-    # ("varchar", "ilike", "STRING1%", 12),
+    ("varchar", "ilike", "STRING1%", 12),
     # not_ilike
-    # ("varchar", "not_ilike", "STRING1%", 88),
+    ("varchar", "not_ilike", "STRING1%", 88),
     # in
     ("varchar", "in", ["string1", "string2", "string3"], 3),
     ("numeric", "in", [1, 2, 3], 3),
@@ -134,44 +172,59 @@ parameter_test_list = [
     ("varchar", "not_in", ["string1", "string2", "string3"], 97),
     ("numeric", "not_in", [1, 2, 3], 97),
     # any
-    # ("array", "any", 1, 1),
+    ("array", "any", 1, 1),
     # not_any
-    # ("array", "not_any", 1, 99),
+    ("array", "not_any", 1, 99),
 ]
 
 
-@pytest.mark.parametrize("column,expression_id,parameter,res_len", parameter_test_list)
+@pytest.mark.parametrize("field,op,value,res_len", ops_test_list)
 def test_get_records_filters_ops(
-    filter_sort_table_obj, column, expression_id, parameter, res_len
+    filter_sort_table_obj, field, op, value, res_len
 ):
     filter_sort, engine = filter_sort_table_obj
-    expression_lambda = db_function_expressions[expression_id]
-    if parameter:
-        filters = expression_lambda(column, parameter)
-    else:
-        filters = expression_lambda(column)
+    filter_list = [{"field": field, "op": op}]
+    if value is not None:
+        filter_list[0]["value"] = value
 
-    record_list = get_records(filter_sort, engine, filters=filters)
+    record_list = get_records(filter_sort, engine, filters=filter_list)
 
-    if column == "date" and parameter is not None:
-        parameter = datetime.strptime(parameter, "%Y-%m-%d").date()
-    elif column == "array" and parameter is not None and expression_id not in ["any", "not_any"]:
-        parameter = [int(c) for c in parameter[1:-1].split(",")]
+    if field == "date" and value is not None:
+        value = datetime.strptime(value, "%Y-%m-%d").date()
+    elif field == "array" and value is not None and op not in ["any", "not_any"]:
+        value = [int(c) for c in value[1:-1].split(",")]
 
     assert len(record_list) == res_len
     for record in record_list:
-        val_func = parameter_to_python_func[expression_id]
-        assert val_func(getattr(record, column), parameter)
+        val_func = op_to_python_func[op]
+        assert val_func(getattr(record, field), value)
 
 
 variant_ops_test_list = [
-    ("equal", "=="),
-    ("not_equal", "!="),
-    ("greater", ">"),
-    ("lesser", "<"),
-    ("greater_or_equal", ">="),
-    ("lesser_or_equal", "<=")
+    ("eq", "=="),
+    ("ne", "!="),
+    ("gt", ">"),
+    ("lt", "<"),
+    ("ge", ">="),
+    ("le", "<=")
 ]
+
+
+@pytest.mark.parametrize("op,variant_op", variant_ops_test_list)
+def test_get_records_filters_variant_ops(
+    filter_sort_table_obj, op, variant_op
+):
+    filter_sort, engine = filter_sort_table_obj
+
+    filter_list = [{"field": "numeric", "op": op, "value": 50}]
+    record_list = get_records(filter_sort, engine, filters=filter_list)
+
+    filter_list = [{"field": "numeric", "op": variant_op, "value": 50}]
+    variant_record_list = get_records(filter_sort, engine, filters=filter_list)
+
+    assert len(record_list) == len(variant_record_list)
+    for record, variant_record in zip(record_list, variant_record_list):
+        assert record == variant_record
 
 
 boolean_ops_test_list = [
@@ -186,46 +239,39 @@ boolean_ops_test_list = [
 ]
 
 
-@pytest.mark.parametrize("op,column_val_pairs,res_len", boolean_ops_test_list)
+@pytest.mark.parametrize("op,field_val_pairs,res_len", boolean_ops_test_list)
 def test_get_records_filters_boolean_ops(
-    filter_sort_table_obj, op, column_val_pairs, res_len
+    filter_sort_table_obj, op, field_val_pairs, res_len
 ):
     filter_sort, engine = filter_sort_table_obj
 
-    predicate = get_predicate_subclass_by_type_str(op)
-    if issubclass(predicate, SingleParameter):
-        filters = {op: [
-            {"equal": {"column": column, "parameter": parameter}}
-            for column, parameter in column_val_pairs
-        ][0]}
-    else:
-        filters = {op: [
-            {"equal": {"column": column, "parameter": parameter}}
-            for column, parameter in column_val_pairs
-        ]}
-    record_list = get_records(filter_sort, engine, filters=filters)
+    filter_list = [{op: [
+        {"field": field, "op": "eq", "value": value}
+        for field, value in field_val_pairs
+    ]}]
+    record_list = get_records(filter_sort, engine, filters=filter_list)
 
     assert len(record_list) == res_len
     for record in record_list:
-        val_func = parameter_to_python_func[op]
-        args = [getattr(record, column) == parameter for column, parameter in column_val_pairs]
+        val_func = op_to_python_func[op]
+        args = [getattr(record, field) == value for field, value in field_val_pairs]
         assert val_func(args)
 
 
 def test_get_records_filters_nested_boolean_ops(filter_sort_table_obj):
     filter_sort, engine = filter_sort_table_obj
 
-    filters = {"and": [
+    filter_list = [{"and": [
         {"or": [
-            {"equal": {"column": "varchar", "parameter": "string24"}},
-            {"equal": {"column": "numeric", "parameter": 42}},
+            {"field": "varchar", "op": "eq", "value": "string24"},
+            {"field": "numeric", "op": "eq", "value": 42},
         ]},
         {"or": [
-            {"equal": {"column": "varchar", "parameter": "string42"}},
-            {"equal": {"column": "numeric", "parameter": 24}},
+            {"field": "varchar", "op": "eq", "value": "string42"},
+            {"field": "numeric", "op": "eq", "value": 24},
         ]},
-    ]}
-    record_list = get_records(filter_sort, engine, filters=filters)
+    ]}]
+    record_list = get_records(filter_sort, engine, filters=filter_list)
 
     assert len(record_list) == 2
     for record in record_list:
@@ -234,16 +280,25 @@ def test_get_records_filters_nested_boolean_ops(filter_sort_table_obj):
 
 
 exceptions_test_list = [
-    ({"column": "tuple", "op": "equal", "parameter": "test"}, BadFilterFormat),
-    (["column", "tuple", "op", "equal", "parameter", "test"], BadFilterFormat),
-    ({"non_existant": {"column": "varchar", "parameter": "test"}}, BadFilterFormat),
-    ({"equal": {"parameter": "test"}}, BadFilterFormat),
-    ({"equal": {"column": "varchar"}}, BadFilterFormat),
-    ({"and": []}, BadFilterFormat),
-    ({"or": []}, BadFilterFormat),
-    ({"not": []}, BadFilterFormat),
-    ({"and": [{"empty": {"column": "date"}} for _ in range(2)]}, BadFilterFormat),
-    ({"equal": {"column": "non_existent", "parameter": "test"}}, ReferencedColumnsDontExist),
+    (("field", "tuple", "op", "eq", "value", "test"), BadFilterFormat),
+    ([{"field": "varchar", "op": "non_existent", "value": "test"}], BadFilterFormat),
+    ([{"op": "eq", "value": "test"}], BadFilterFormat),
+    ([{"field": "varchar", "op": "eq"}], BadFilterFormat),
+    ([{"and": []}], BadFilterFormat),
+    ([{"or": []}], BadFilterFormat),
+    ([{"not": []}], BadFilterFormat),
+    ([{"not": [{"field": "date", "op": "is_null"} for _ in range(2)]}], BadFilterFormat),
+    ([{"field": "non_existent", "op": "eq", "value": "test"}], FilterFieldNotFound),
+    ([
+        {"field": "date", "op": "get_duplicates", "value": ["non_existent"]},
+    ], FilterFieldNotFound),
+    ([
+        {"field": "", "op": "get_duplicates", "value": ["date"]},
+        {"field": "", "op": "get_duplicates", "value": ["date"]}
+    ], BadFilterFormat),
+    ([
+        {"not": [{"field": "", "op": "get_duplicates", "value": "date"}]}
+    ], BadFilterFormat),
 ]
 
 

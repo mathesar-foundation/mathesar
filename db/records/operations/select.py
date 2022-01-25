@@ -1,16 +1,28 @@
 from sqlalchemy import select, func
-from sqlalchemy_filters import apply_sort
+from sqlalchemy_filters import apply_filters, apply_sort
+from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
 from db.columns.base import MathesarColumn
 from db.records.operations import group
 from db.tables.utils import get_primary_key_column
 from db.types.operations.cast import get_column_cast_expression
 from db.utils import execute_query
-from db.functions.operations.apply import apply_ma_function_spec_as_filter
+
+
+DUPLICATE_LABEL = "_is_dupe"
+CONJUNCTIONS = ("and", "or", "not")
+
+
+def _validate_nested_ops(filters):
+    for op in filters:
+        if op.get("op") == "get_duplicates":
+            raise BadFilterFormat("get_duplicates can not be nested")
+        for field in CONJUNCTIONS:
+            if field in op:
+                _validate_nested_ops(op[field])
 
 
 def _get_duplicate_only_cte(table, duplicate_columns):
-    DUPLICATE_LABEL = "_is_dupe"
     duplicate_flag_cte = (
         select(
             *table.c,
@@ -20,45 +32,45 @@ def _get_duplicate_only_cte(table, duplicate_columns):
     return select(duplicate_flag_cte).where(duplicate_flag_cte.c[DUPLICATE_LABEL]).cte()
 
 
-def _sort_and_filter(query, order_by, filters):
-    if order_by is not None:
-        query = apply_sort(query, order_by)
-    if filters is not None:
-        # TODO rename filters to something appropriate
-        query = apply_ma_function_spec_as_filter(query, filters)
-    return query
+def _get_duplicate_data_columns(table, filters):
+    try:
+        duplicate_ops = [f for f in filters if f.get("op") == "get_duplicates"]
+        non_duplicate_ops = [f for f in filters if f.get("op") != "get_duplicates"]
+    except AttributeError:
+        # Ignore formatting errors - they will be handled by sqlalchemy_filters
+        return None, filters
+
+    _validate_nested_ops(non_duplicate_ops)
+    if len(duplicate_ops) > 1:
+        raise BadFilterFormat("get_duplicates can only be specified a single time")
+    elif len(duplicate_ops) == 1:
+        duplicate_cols = duplicate_ops[0]['value']
+        for col in duplicate_cols:
+            if col not in table.c:
+                raise FilterFieldNotFound(f"Table {table.name} has no column `{col}`.")
+        return duplicate_ops[0]['value'], non_duplicate_ops
+    else:
+        return None, filters
 
 
-def get_query(
-    table,
-    limit=None,
-    offset=None,
-    order_by=None,
-    filters=None,
-    duplicate_only=None,
-    # Currently columns_to_select is only set by get_count
-    columns_to_select=None,
-    group_by=None
-):
-    if duplicate_only:
-        select_target = _get_duplicate_only_cte(table, duplicate_only)
+def get_query(table, limit, offset, order_by, filters, cols=None, group_by=None):
+    duplicate_columns, filters = _get_duplicate_data_columns(table, filters)
+    if duplicate_columns:
+        select_target = _get_duplicate_only_cte(table, duplicate_columns)
     else:
         select_target = table
 
     if isinstance(group_by, group.GroupBy):
-        selectable = group.get_group_augmented_records_query(select_target, group_by)
+        query = group.get_group_augmented_records_query(table, group_by)
     else:
-        selectable = select(select_target)
+        query = select(*(cols or select_target.c)).select_from(select_target)
 
-    selectable = _sort_and_filter(selectable, order_by, filters)
-
-    if columns_to_select:
-        selectable = selectable.cte()
-        selectable = select(*columns_to_select).select_from(selectable)
-
-    selectable = selectable.limit(limit).offset(offset)
-
-    return selectable
+    query = query.limit(limit).offset(offset)
+    if order_by is not None:
+        query = apply_sort(query, order_by)
+    if filters is not None:
+        query = apply_filters(query, filters)
+    return query
 
 
 def get_record(table, engine, id_value):
@@ -69,10 +81,8 @@ def get_record(table, engine, id_value):
     return result[0] if result else None
 
 
-# TODO update doc for filters and duplicate_only
-# TODO handle columns specified in order_by, filters, duplicate_only not existing on the table
 def get_records(
-    table, engine, limit=None, offset=None, order_by=[], filters=None, duplicate_only=None, group_by=None,
+        table, engine, limit=None, offset=None, order_by=[], filters=[], group_by=None,
 ):
     """
     Returns annotated records from a table.
@@ -92,28 +102,23 @@ def get_records(
     """
     if not order_by:
         # Set default ordering if none was requested
-        # NOTE: str(col.name) must be used, because otherwise the table's identifier is
-        # included which clashes with CTE aliases.
         if len(table.primary_key.columns) > 0:
             # If there are primary keys, order by all primary keys
             order_by = [{'field': str(col.name), 'direction': 'asc'}
                         for col in table.primary_key.columns]
         else:
             # If there aren't primary keys, order by all columns
-            order_by = [{'field': str(col.name), 'direction': 'asc'}
+            order_by = [{'field': col, 'direction': 'asc'}
                         for col in table.columns]
 
-    query = get_query(
-        table=table, limit=limit, offset=offset, order_by=order_by,
-        filters=filters, duplicate_only=duplicate_only, group_by=group_by
-    )
+    query = get_query(table, limit, offset, order_by, filters, group_by=group_by)
     return execute_query(engine, query)
 
 
-def get_count(table, engine, filters=None):
+def get_count(table, engine, filters=[]):
     col_name = "_count"
-    columns_to_select = [func.count().label(col_name)]
-    query = get_query(table=table, filters=filters, columns_to_select=columns_to_select)
+    cols = [func.count().label(col_name)]
+    query = get_query(table, None, None, None, filters, cols)
     return execute_query(engine, query)[0][col_name]
 
 

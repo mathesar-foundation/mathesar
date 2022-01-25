@@ -2,8 +2,8 @@ import pytest
 from django.conf import settings
 from django.core.cache import cache
 
-from mathesar.api.filters import get_filter_options_for_database
 from mathesar.api.display_options import DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER
+from mathesar.api.filters import FILTER_OPTIONS_BY_TYPE_IDENTIFIER
 from mathesar.reflection import reflect_db_objects
 from mathesar.models import Table, Schema, Database
 from db.tests.types import fixtures
@@ -213,22 +213,13 @@ def test_type_list(client, test_db_name):
     assert response.status_code == 200
     assert len(response_data) == len(database.supported_types)
     for supported_type in response_data:
-        assert all([key in supported_type for key in ['identifier', 'name', 'db_types']])
+        assert all([key in supported_type for key in ['identifier', 'name', 'db_types', 'filters']])
+        found_filters = supported_type.get('filters')
+        expected_filters = FILTER_OPTIONS_BY_TYPE_IDENTIFIER.get(supported_type.get('identifier'))
+        assert found_filters == expected_filters
         found_display_options = supported_type.get('display_options')
         expected_display_options = DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER.get(supported_type.get('identifier'))
         assert found_display_options == expected_display_options
-
-
-def test_filter_list(client, test_db_name):
-    database = Database.objects.get(name=test_db_name)
-
-    response = client.get(f'/api/v0/databases/{database.id}/filters/')
-    response_data = response.json()
-    assert response.status_code == 200
-    filter_options = get_filter_options_for_database(database)
-    assert len(response_data) == len(filter_options)
-    for filter_option in response_data:
-        assert all([key in filter_option for key in ['identifier', 'name', 'position', 'parameter_count', 'ma_types']])
 
 
 def test_database_types_installed(client, test_db_name, engine_email_type):
@@ -239,6 +230,7 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
             "db_types": [
                 "MATHESAR_TYPES.EMAIL"
             ],
+            "filters": None,
             'display_options': None
         },
         {
@@ -248,6 +240,7 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
                 "MONEY",
                 "MATHESAR_TYPES.MONEY"
             ],
+            "filters": None,
             'display_options': None
         },
         {
@@ -256,6 +249,7 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
             "db_types": [
                 "MATHESAR_TYPES.URI"
             ],
+            "filters": None,
             'display_options': None
         },
     ]
