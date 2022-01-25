@@ -13,8 +13,8 @@ def get_db_function_from_ma_function_spec(spec: dict) -> DbFunction:
             )
         parameters = [
             _process_parameter(
-                parameter = raw_parameter,
-                parent_db_function_subclass = db_function_subclass
+                parameter=raw_parameter,
+                parent_db_function_subclass=db_function_subclass
             )
             for raw_parameter in raw_parameters
         ]
@@ -28,9 +28,9 @@ def _process_parameter(parameter, parent_db_function_subclass):
         # A dict parameter is a nested function call.
         return get_db_function_from_ma_function_spec(parameter)
     elif (
-            parent_db_function_subclass is Literal or
-            parent_db_function_subclass is ColumnReference
-        ):
+        parent_db_function_subclass is Literal
+        or parent_db_function_subclass is ColumnReference
+    ):
         # Everything except for a dict is considered a literal parameter.
         # And, only the Literal and ColumnReference DbFunctions can have a literal parameter.
         return parameter
