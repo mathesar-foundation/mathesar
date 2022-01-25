@@ -25,9 +25,10 @@
     color: #606066;
   }
 
-  >.actions {
-    text-align: right;
-    margin: 20px 0px 0px;
+  >.buttons {
+    margin: 15px 0px;
+    display: flex;
+    justify-content: flex-end;
   }
 
   >.notification {

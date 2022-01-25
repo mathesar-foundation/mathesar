@@ -1,0 +1,41 @@
+.labeled-input {
+  --spacing-y: 0.8em;
+  --spacing-x: 0.3em;
+
+  .label,
+  .input {
+    display: block;
+  }
+
+  &.layout-stacked {
+    .input {
+      margin-top: var(--spacing-y);
+    }
+  }
+  
+  &.layout-inline .label-content,
+  &.layout-inline-input-first .label-content {
+    display: inline-flex;
+    .label {
+      flex: 1 1 auto;
+    }
+    .input {
+      flex: 0 0 auto;
+    }
+  }
+
+  &.layout-inline .label-content {
+    flex-direction: row;
+    align-items: center; // To support a text input that's taller than the label
+    .input {
+      margin-left: var(--spacing-x);
+    }
+  }
+  &.layout-inline-input-first .label-content {
+    flex-direction: row-reverse;
+    align-items: flex-start; // To support a checkbox with a wrapping label
+    .input {
+      margin-right: var(--spacing-x);
+    }
+  }
+}

@@ -58,8 +58,8 @@ class PostgresType(Enum):
     TIME_WITH_TIME_ZONE = 'time with time zone'
     TIME_WITHOUT_TIME_ZONE = 'time without time zone'
     TIMESTAMP = 'timestamp'
-    TIMESTAMP_WITH_TIMESTAMP_ZONE = 'timestamp with time zone'
-    TIMESTAMP_WITHOUT_TIMESTAMP_ZONE = 'timestamp without time zone'
+    TIMESTAMP_WITH_TIME_ZONE = 'timestamp with time zone'
+    TIMESTAMP_WITHOUT_TIME_ZONE = 'timestamp without time zone'
     TSRANGE = 'tsrange'
     TSTZRANGE = 'tstzrange'
     TSVECTOR = 'tsvector'
@@ -113,8 +113,8 @@ def get_available_types(engine):
 
 
 def get_db_type_name(sa_type, engine):
-    USER_DEFINED_STR = 'user_defined'
-    db_type = sa_type.__visit_name__
-    if db_type == USER_DEFINED_STR:
-        db_type = sa_type().compile(engine.dialect)
+    try:
+        db_type = sa_type.compile(dialect=engine.dialect)
+    except TypeError:
+        db_type = sa_type().compile(dialect=engine.dialect)
     return db_type

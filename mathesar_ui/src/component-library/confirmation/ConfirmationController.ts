@@ -2,8 +2,8 @@ import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
 import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 import type { Writable } from 'svelte/store';
 import { writable } from 'svelte/store';
-import type { ModalVisibilityStore } from '../modal';
-import type { IconFlip, IconRotate } from '../types';
+import type { ModalVisibilityStore } from '@mathesar-component-library';
+import type { IconFlip, IconRotate, ComponentAndProps } from '@mathesar-component-library/types';
 
 interface IconDetails {
   data: IconDefinition,
@@ -18,9 +18,9 @@ interface ButtonDetails {
 }
 
 export interface ConfirmationProps {
-  title?: string,
+  title?: string | ComponentAndProps,
   /** An array of strings will be transformed into paragraphs. */
-  body: string | string[],
+  body: string | string[] | ComponentAndProps,
   proceedButton: ButtonDetails,
   cancelButton: ButtonDetails,
   onProceed: () => Promise<void>,
