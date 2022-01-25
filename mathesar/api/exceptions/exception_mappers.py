@@ -1,5 +1,5 @@
 
-from psycopg2.errors import InvalidTextRepresentation, CheckViolation, UniqueViolation
+from psycopg2.errors import CheckViolation, UniqueViolation
 
 from mathesar.api.exceptions import exceptions as api_exceptions
 
