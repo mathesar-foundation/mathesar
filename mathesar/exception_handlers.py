@@ -9,12 +9,12 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError
 from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions import exceptions
+from mathesar.api.exceptions.exception_mappers import integrity_error_mapper
 from mathesar.api.exceptions.exceptions import get_default_api_exception
 from mathesar.errors import URLDownloadError, URLNotReachable, URLInvalidContentTypeError
 
 exception_map = {
-    # Temporary handlers, must be replaced with proper api exceptions
-    IntegrityError: lambda exc: exceptions.IntegrityAPIException(exc),
+    IntegrityError: integrity_error_mapper,
     UnsupportedTypeException: lambda exc: exceptions.UnsupportedTypeAPIException(exc),
     ProgrammingError: lambda exc: exceptions.ProgrammingAPIException(exc),
     URLDownloadError: lambda exc: exceptions.URLDownloadErrorAPIException(exc),
@@ -42,8 +42,8 @@ def mathesar_exception_handler(exc, context):
     if not response:
         if getattr(settings, 'MATHESAR_CAPTURE_UNHANDLED_EXCEPTION', False):
             # Check if we have an equivalent Api exception that is able to convert the exception to proper error
-            APIExceptionClass = exception_map.get(exc.__class__, get_default_api_exception)
-            api_exception = APIExceptionClass(exc)
+            exception_mapper = exception_map.get(exc.__class__, get_default_api_exception)
+            api_exception = exception_mapper(exc)
             response = exception_handler(api_exception, context)
         else:
             raise exc
