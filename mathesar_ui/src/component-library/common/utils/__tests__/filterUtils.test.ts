@@ -19,12 +19,16 @@ const dummyData = [
   },
   {
     blevel1Key1: 'level1Value1',
-    targetChildKey: [{
-      level2Key1: 'level2Value1',
-      targetChildKey: [{
-        level3Key1: 'randomValue',
-      }],
-    }],
+    targetChildKey: [
+      {
+        level2Key1: 'level2Value1',
+        targetChildKey: [
+          {
+            level3Key1: 'randomValue',
+          },
+        ],
+      },
+    ],
   },
 ];
 
@@ -44,6 +48,10 @@ const testRes = [
   },
 ];
 test('filterUtils', () => {
-  expect(filterTree(dummyData, 'level3Key1', 'targetChildKey', 'get')).toEqual(testRes);
-  expect(filterTree(dummyData, 'level3Key1', 'targetChildKey', '')).toEqual(dummyData);
+  expect(filterTree(dummyData, 'level3Key1', 'targetChildKey', 'get')).toEqual(
+    testRes,
+  );
+  expect(filterTree(dummyData, 'level3Key1', 'targetChildKey', '')).toEqual(
+    dummyData,
+  );
 });
