@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
+from mathesar.errors import URLNotReachable, URLInvalidContentTypeError
 from mathesar.models import DataFile
 
 
@@ -64,9 +65,9 @@ class DataFileSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer)
         try:
             response = requests.head(url, allow_redirects=True)
         except requests.exceptions.ConnectionError:
-            raise ValidationError('URL cannot be reached.')
+            raise URLNotReachable
 
         content_type = response.headers.get('content-type')
         if content_type not in SUPPORTED_URL_CONTENT_TYPES:
-            raise ValidationError(f"URL resource '{content_type}' not a valid type.")
+            raise URLInvalidContentTypeError(content_type)
         return url

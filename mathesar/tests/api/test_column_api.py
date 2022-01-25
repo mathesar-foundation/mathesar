@@ -706,8 +706,7 @@ def test_column_update_when_missing(column_test_table, client):
     assert response.status_code == 404
     response_data = response.json()[0]
     assert response_data['message'] == "Not found."
-    assert response_data['code'] == ErrorCodes.NonClassifiedError.value
-
+    assert response_data['code'] == ErrorCodes.NotFound.value
 
 
 def test_column_destroy(column_test_table, client):
@@ -738,8 +737,8 @@ def test_column_destroy_when_missing(column_test_table, client):
         f"/api/v0/tables/{column_test_table.id}/columns/99999/"
     )
     response_data = response.json()[0]
-    assert response_data['detail'] == "Not found."
-    assert response_data['code'] == ErrorCodes.NonClassifiedError.value
+    assert response_data['message'] == "Not found."
+    assert response_data['code'] == ErrorCodes.NotFound.value
     assert response.status_code == 404
 
 

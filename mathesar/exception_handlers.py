@@ -2,7 +2,6 @@ import warnings
 
 from django.conf import settings
 from django.utils.encoding import force_str
-from rest_framework.exceptions import ValidationError
 from rest_framework.views import exception_handler
 from rest_framework_friendly_errors.settings import FRIENDLY_EXCEPTION_DICT
 from sqlalchemy.exc import IntegrityError, ProgrammingError
@@ -10,18 +9,17 @@ from sqlalchemy.exc import IntegrityError, ProgrammingError
 from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions import exceptions
-from mathesar.api.exceptions.exception_converters import validation_exception_converter
 from mathesar.api.exceptions.exceptions import get_default_api_exception
+from mathesar.errors import URLDownloadError, URLNotReachable, URLInvalidContentTypeError
 
 exception_map = {
     # Temporary handlers, must be replaced with proper api exceptions
     IntegrityError: lambda exc: exceptions.IntegrityAPIException(exc),
     UnsupportedTypeException: lambda exc: exceptions.UnsupportedTypeAPIException(exc),
-    ProgrammingError: lambda exc: exceptions.ProgrammingAPIException(exc)
-}
-
-non_spec_api_exception_converter_map = {
-    ValidationError: validation_exception_converter
+    ProgrammingError: lambda exc: exceptions.ProgrammingAPIException(exc),
+    URLDownloadError: lambda exc: exceptions.URLDownloadErrorAPIException(exc),
+    URLNotReachable: lambda exc: exceptions.URLNotReachableAPIException(exc),
+    URLInvalidContentTypeError: lambda exc: exceptions.URLInvalidContentTypeAPIException(exc)
 }
 
 
@@ -42,7 +40,7 @@ def mathesar_exception_handler(exc, context):
     # DRF default exception handler does not handle non Api errors,
     # So we convert it to proper api response
     if not response:
-        if getattr(settings, 'CAPTURE_UNHANDLED_EXCEPTION', False):
+        if getattr(settings, 'MATHESAR_CAPTURE_UNHANDLED_EXCEPTION', False):
             # Check if we have an equivalent Api exception that is able to convert the exception to proper error
             APIExceptionClass = exception_map.get(exc.__class__, get_default_api_exception)
             api_exception = APIExceptionClass(exc)
@@ -61,11 +59,11 @@ def mathesar_exception_handler(exc, context):
         else:
             warnings.warn("Error Response does not conform to the api spec. Please handle the exception properly")
             error_code = FRIENDLY_EXCEPTION_DICT.get(
-                    exc.__class__.__name__, None)
+                exc.__class__.__name__, None)
             if error_code is None and settings.MATHESAR_MODE != "PRODUCTION":
                 raise Exception("Error Response does not conform to the api spec. Please handle the exception properly")
             if isinstance(response.data, dict):
-                error_message = response.data.pop('detail', {})
+                error_message = response.data.pop('detail', '')
 
                 response_data = {}
                 response_data['code'] = error_code

@@ -236,8 +236,8 @@ def test_data_file_create_url_invalid_address(client):
         response = client.post('/api/v0/data_files/', data={'url': url})
         response_dict = response.json()
     assert response.status_code == 400
+    print(response_dict)
     assert response_dict[0]['message'] == 'URL cannot be reached.'
-    assert response_dict[0]['field'] == 'url'
 
 
 def test_data_file_create_url_invalid_download(
@@ -248,7 +248,6 @@ def test_data_file_create_url_invalid_download(
     response_dict = response.json()
     assert response.status_code == 400
     assert response_dict[0]['message'] == 'URL cannot be downloaded.'
-    assert response_dict[0]['field'] == 'url'
 
 
 def test_data_file_create_url_invalid_content_type(client):
@@ -259,7 +258,6 @@ def test_data_file_create_url_invalid_content_type(client):
         response_dict = response.json()
     assert response.status_code == 400
     assert response_dict[0]['message'] == "URL resource 'text/html' not a valid type."
-    assert response_dict[0]['field'] == "url"
 
 
 def test_data_file_create_multiple_source_fields(client, csv_filename, paste_filename):

@@ -461,6 +461,7 @@ def test_table_previews_wrong_column_number(client, schema, engine_email_type):
         ]
     }
     response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
+    print(response.json())
     assert response.status_code == 400
     assert "number" in response.json()[0]['message']
     assert ErrorCodes.ColumnSizeMismatch.value == response.json()[0]['code']
@@ -756,8 +757,7 @@ def test_table_partial_update_schema(create_table, client):
     response_error = response.json()[0]
     assert response.status_code == 400
     assert response_error['message'] == 'Updating schema for tables is not supported.'
-    assert response_error['code'] == ErrorCodes.NotFound.value
-    assert response_error['field'] == 'schema'
+    assert response_error['code'] == ErrorCodes.UnsupportedAlter.value
 
 
 def test_table_delete(create_table, client):
@@ -847,7 +847,6 @@ def test_table_partial_update_invalid_field(create_table, client):
 
     assert response.status_code == 400
     assert 'is not supported' in response.json()[0]['message']
-    assert response.json()[0]['field'] == 'schema'
 
 
 def test_table_partial_update_404(client):
@@ -1046,9 +1045,9 @@ def test_table_patch_columns_and_table_name(create_table, client):
     # as a multi-part form, which can't handle nested keys.
     response = client.patch(f'/api/v0/tables/{table.id}/', body)
 
-    response_error = response.json()
+    response_error = response.json()[0]
     assert response.status_code == 400
-    assert response_error == ['Only name or columns can be passed in, not both.']
+    assert response_error['message'] == 'Only name or columns can be passed in, not both.'
 
 
 def test_table_patch_columns_no_changes(create_table, client, engine_email_type):
@@ -1295,7 +1294,7 @@ def test_table_patch_columns_invalid_type(create_data_types_table, client, engin
     response_json = response.json()
 
     assert response.status_code == 400
-    assert 'Pizza is not a boolean' in response_json[0]
+    assert 'Pizza is not a boolean' in response_json[0]['message']
 
 
 def test_table_patch_columns_invalid_type_with_name(create_data_types_table, client, engine_email_type):
@@ -1311,7 +1310,7 @@ def test_table_patch_columns_invalid_type_with_name(create_data_types_table, cli
     response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
-    assert 'Pizza is not a boolean' in response_json[0]
+    assert 'Pizza is not a boolean' in response_json[0]['message']
 
     current_table_response = client.get(f'/api/v0/tables/{table.id}/')
     # The table should not have changed
@@ -1332,7 +1331,7 @@ def test_table_patch_columns_invalid_type_with_type(create_data_types_table, cli
     response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
-    assert 'Pizza is not a boolean' in response_json[0]
+    assert 'Pizza is not a boolean' in response_json[0]['message']
 
     current_table_response = client.get(f'/api/v0/tables/{table.id}/')
     # The table should not have changed
@@ -1353,7 +1352,7 @@ def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, cli
     response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
-    assert 'Pizza is not a boolean' in response_json[0]
+    assert 'Pizza is not a boolean' in response_json[0]['message']
 
     current_table_response = client.get(f'/api/v0/tables/{table.id}/')
     # The table should not have changed
@@ -1376,7 +1375,7 @@ def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_type
     response = client.patch(f'/api/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
-    assert 'Pizza is not a boolean' in response_json[0]
+    assert 'Pizza is not a boolean' in response_json[0]['message']
 
     current_table_response = client.get(f'/api/v0/tables/{table.id}/')
     # The table should not have changed
