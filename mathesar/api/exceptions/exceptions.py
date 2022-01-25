@@ -254,3 +254,18 @@ class RaiseExceptionAPIException(MathesarAPIException):
                  field=None,
                  details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
         super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class NotNullViolationAPIException(MathesarAPIException):
+    """
+    Exception raised when trying to add not null constraint to column with null value
+     or when trying to add non-null value to a column with not null constraint
+    """
+
+    def __init__(self, exception, error_code=ErrorCodes.NotNullViolation.value,
+                 message=None,
+                 field=None,
+                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+        message_str, row_detail = exception.orig.args[0].split("DETAIL")
+        details = {'row_parameters': exception.params, 'row_detail': row_detail}
+        super().__init__(exception, error_code, message_str, field, details, status_code)
