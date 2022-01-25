@@ -38,4 +38,5 @@ string_like = _make_hint("string_like")
 
 uri = _make_hint("uri")
 
+
 literal = _make_hint("literal")
