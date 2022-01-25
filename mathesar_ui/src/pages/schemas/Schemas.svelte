@@ -8,6 +8,7 @@
   import { modal } from '@mathesar/stores/modal';
   import SchemaRow from './schema-row/SchemaRow.svelte';
   import AddEditSchema from './AddEditSchema.svelte';
+  import SchemasHelp from './__help__/SchemasHelp.svelte';
 
   export let database: string;
 
@@ -67,14 +68,8 @@
   </section>
 
   <div class="container">
-    <h2>Schemas ({$schemas.data.size})</h2>
+    <h2>Schemas ({$schemas.data.size}) <SchemasHelp /></h2>
     <TextInput placeholder="Find a schema..." bind:value={filterQuery} />
-
-    <!-- TODO Move the p below into a help popover when we have a popover component -->
-    <p>
-      Schemas are collections of database objects such as tables and views. They
-      are best when used to organize data for a specific project.
-    </p>
 
     <ul class="schema-list">
       {#each displayList as schema (schema.id)}
