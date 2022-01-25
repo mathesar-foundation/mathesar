@@ -56,6 +56,34 @@ parameter_to_python_func = {
 }
 
 
+db_function_expressions = {
+    "empty": lambda col: {"empty": [{"column_reference": col}]},
+    "not_empty": lambda col: {"not": [{"empty": [{"column_reference": col}]}]},
+    "equal": lambda col, val: {"equal": [{"column_reference": [col]}, {"literal": [val]}]},
+    "not_equal": lambda col, val: {"not": [{"equal": [{"column_reference": [col]}, {"literal": [val]}]}]},
+    "greater": lambda col, val: {"greater": [{"column_reference": [col]}, {"literal": [val]}]},
+    "lesser": lambda col, val: {"lesser": [{"column_reference": [col]}, {"literal": [val]}]},
+    "greater_or_equal": lambda col, val: {"or": [
+        {"greater": [{"column_reference": [col]}, {"literal": [val]}]},
+        {"equal": [{"column_reference": [col]}, {"literal": [val]}]},
+    ]},
+    "lesser_or_equal": lambda col, val: {"or": [
+        {"lesser": [{"column_reference": [col]}, {"literal": [val]}]},
+        {"equal": [{"column_reference": [col]}, {"literal": [val]}]},
+    ]},
+    "in": lambda col, val: {
+        "in": [
+            {"column_reference": [col]},
+            {"list": [{"literal": [sub_val]} for sub_val in val]}
+        ]},
+    "not_in": lambda col, val: {"not": [{
+        "in": [
+            {"column_reference": [col]},
+            {"list": [{"literal": [sub_val]} for sub_val in val]}
+        ]}]},
+}
+
+
 parameter_test_list = [
     # empty
     ("varchar", "empty", None, 5),
@@ -112,29 +140,27 @@ parameter_test_list = [
 ]
 
 
-@pytest.mark.parametrize("column,predicate_id,parameter,res_len", parameter_test_list)
+@pytest.mark.parametrize("column,expression_id,parameter,res_len", parameter_test_list)
 def test_get_records_filters_ops(
-    filter_sort_table_obj, column, predicate_id, parameter, res_len
+    filter_sort_table_obj, column, expression_id, parameter, res_len
 ):
     filter_sort, engine = filter_sort_table_obj
-    predicate = get_predicate_subclass_by_type_str(predicate_id)
-    if issubclass(predicate, MultiParameter):
-        filters = {predicate_id: {"column": column, "parameters": parameter}}
-    elif issubclass(predicate, SingleParameter):
-        filters = {predicate_id: {"column": column, "parameter": parameter}}
+    expression_lambda = db_function_expressions[expression_id]
+    if parameter:
+        filters = expression_lambda(column, parameter)
     else:
-        filters = {predicate_id: {"column": column}}
+        filters = expression_lambda(column)
 
     record_list = get_records(filter_sort, engine, filters=filters)
 
     if column == "date" and parameter is not None:
         parameter = datetime.strptime(parameter, "%Y-%m-%d").date()
-    elif column == "array" and parameter is not None and predicate_id not in ["any", "not_any"]:
+    elif column == "array" and parameter is not None and expression_id not in ["any", "not_any"]:
         parameter = [int(c) for c in parameter[1:-1].split(",")]
 
     assert len(record_list) == res_len
     for record in record_list:
-        val_func = parameter_to_python_func[predicate_id]
+        val_func = parameter_to_python_func[expression_id]
         assert val_func(getattr(record, column), parameter)
 
 
