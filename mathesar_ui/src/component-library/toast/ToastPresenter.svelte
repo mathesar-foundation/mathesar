@@ -9,7 +9,7 @@
   export let entries: Readable<ToastEntry[]>;
   export let toastItemComponent: typeof SvelteComponent = ToastItem;
 </script>
-  
+
 <ul class="toast-presenter">
   {#each $entries as entry (entry.id)}
     <li in:fly={{ x: 256 }} out:fade animate:flip={{ duration: 200 }}>
@@ -17,7 +17,3 @@
     </li>
   {/each}
 </ul>
-
-<style global lang="scss">
-  @import "ToastPresenter.scss";
-</style>

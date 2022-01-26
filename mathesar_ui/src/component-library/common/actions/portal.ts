@@ -1,6 +1,6 @@
 import type { Action } from './types.d';
 
-export default function portal(node: Element, target?: HTMLElement) : Action {
+export default function portal(node: Element, target?: HTMLElement): Action {
   const targetElement = target ?? document.querySelector('body');
 
   function update(newTarget: HTMLElement) {

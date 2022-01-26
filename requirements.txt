@@ -1,4 +1,5 @@
 alembic==1.6.5
+arrow==1.2.1
 charset-normalizer==2.0.7
 clevercsv==0.6.8
 Django==3.1.14
@@ -13,4 +14,4 @@ psycopg2==2.8.6
 python-decouple==3.4
 requests==2.20.0
 SQLAlchemy==1.4.18
-git+git://github.com/centerofci/sqlalchemy-filters@models_to_tables#egg=sqlalchemy_filters
+git+https://github.com/centerofci/sqlalchemy-filters@models_to_tables#egg=sqlalchemy_filters

@@ -1,21 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import {
-    faPlus,
-  } from '@fortawesome/free-solid-svg-icons';
+  import { faPlus } from '@fortawesome/free-solid-svg-icons';
   import {
     Button,
     Dropdown,
     TextInput,
     Icon,
+    InputGroup,
+    InputGroupText,
   } from '@mathesar-component-library';
-  import {
-    DEFAULT_ROW_RIGHT_PADDING,
-  } from '@mathesar/stores/table-data';
-  import type {
-    Display,
-    Column,
-  } from '@mathesar/stores/table-data/types.d';
+  import { DEFAULT_ROW_RIGHT_PADDING } from '@mathesar/stores/table-data';
+  import type { Display, Column } from '@mathesar/stores/table-data/types.d';
 
   const dispatch = createEventDispatcher();
   export let columns: Column[];
@@ -43,26 +38,36 @@
   }
 </script>
 
-<div class="cell new-column" style="
+<div
+  class="cell new-column"
+  style="
   width:{DEFAULT_ROW_RIGHT_PADDING}px;
-  left:{$rowWidth - DEFAULT_ROW_RIGHT_PADDING}px">
-  <Dropdown closeOnInnerClick={false}
-            contentClass="content"
-            bind:isOpen={isDropdownOpen}
-            triggerAppearance="plain"
-            showArrow={false}>
+  left:{$rowWidth - DEFAULT_ROW_RIGHT_PADDING}px"
+>
+  <Dropdown
+    closeOnInnerClick={false}
+    contentClass="content"
+    bind:isOpen={isDropdownOpen}
+    triggerAppearance="plain"
+    showArrow={false}
+  >
     <svelte:fragment slot="trigger">
       <span class="name">
-        <Icon class="opt" data={faPlus} size="0.8em"/>
+        <Icon class="opt" data={faPlus} size="0.8em" />
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
       <div class="new-column-dropdown" style="width:250px">
         <div class="grid">
-          <TextInput bind:value={columnName}>
-            <svelte:fragment slot="prepend">Name:</svelte:fragment>
-          </TextInput>
-          <Button appearance="primary" disabled={!columnName?.trim() || isDuplicateColumn} on:click={() => addColumn()}>
+          <InputGroup>
+            <InputGroupText>Name</InputGroupText>
+            <TextInput bind:value={columnName} />
+          </InputGroup>
+          <Button
+            appearance="primary"
+            disabled={!columnName?.trim() || isDuplicateColumn}
+            on:click={() => addColumn()}
+          >
             Add
           </Button>
         </div>
@@ -77,5 +82,5 @@
 </div>
 
 <style global lang="scss">
-  @import "NewColumnCell.scss";
+  @import 'NewColumnCell.scss';
 </style>

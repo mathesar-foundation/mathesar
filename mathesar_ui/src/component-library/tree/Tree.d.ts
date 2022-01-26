@@ -1,3 +1,3 @@
 export interface TreeItem {
-  [key: string]: string | unknown
+  [key: string]: string | unknown;
 }

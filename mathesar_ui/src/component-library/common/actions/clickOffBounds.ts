@@ -4,16 +4,19 @@ import type { Action } from './types.d';
 
 type CallbackFn = (e: Event) => void;
 interface Options {
-  callback: CallbackFn,
-  references?: Readable<HTMLElement[]>,
+  callback: CallbackFn;
+  references?: Readable<HTMLElement[]>;
 }
 
-export default function clickOffBounds(node: Element, options: Options) : Action {
+export default function clickOffBounds(
+  node: Element,
+  options: Options,
+): Action {
   let { callback, references } = options;
 
   function outOfBoundsListener(event: Event) {
-    const isWithinReferenceElement = get(references)?.some(
-      (reference) => reference.contains(event.target as Node),
+    const isWithinReferenceElement = get(references)?.some((reference) =>
+      reference.contains(event.target as Node),
     );
     if (!isWithinReferenceElement && !node.contains(event.target as Node)) {
       callback(event);

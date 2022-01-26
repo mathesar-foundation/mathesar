@@ -21,13 +21,16 @@
         },
       },
       flip: {
-        control: { type: 'inline-radio', options: ['horizontal', 'vertical', 'both', null] },
+        control: {
+          type: 'inline-radio',
+          options: ['horizontal', 'vertical', 'both', undefined],
+        },
         table: {
           type: { summary: 'enum' },
         },
       },
       rotate: {
-        control: { type: 'inline-radio', options: [90, 180, 270, null] },
+        control: { type: 'inline-radio', options: [90, 180, 270, undefined] },
         table: {
           type: { summary: 'enum' },
         },
@@ -75,16 +78,16 @@
 </Story>
 
 <Story name="Customizations" parameters={disabledAddons}>
-  <Icon data={faCat} size='25px'/>
+  <Icon data={faCat} size="25px" />
 
-  <Icon data={faCat} flip={IconFlip.VERTICAL}/>
-  <Icon data={faCat} rotate={IconRotate.ONE_EIGHTY}/>
-  
-  <Icon data={faDog} class='color-red' size='20px'/>
-  <Icon data={faHippo} style='color:blue' size='24px'/>
+  <Icon data={faCat} flip={IconFlip.VERTICAL} />
+  <Icon data={faCat} rotate={IconRotate.ONE_EIGHTY} />
 
-  <Icon data={faBug} spin={true}/>
-  <Icon data={faKiwiBird} pulse={true} size='1.2em' style='color:green'/>
+  <Icon data={faDog} class="color-red" size="20px" />
+  <Icon data={faHippo} style="color:blue" size="24px" />
+
+  <Icon data={faBug} spin={true} />
+  <Icon data={faKiwiBird} pulse={true} size="1.2em" style="color:green" />
 
   <style>
     .color-red {

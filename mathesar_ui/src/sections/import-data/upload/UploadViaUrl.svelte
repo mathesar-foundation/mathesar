@@ -4,20 +4,18 @@
   import { importFromURL } from '@mathesar/sections/import-data/importUtils';
 
   export let fileImportStore: FileImport;
-  
+
   let url: string;
 </script>
 
-<div class="help-content">
-  Enter a URL pointing to data to download:
-</div>
+<div class="help-content">Enter a URL pointing to data to download:</div>
 
 <TextInput bind:value={url} aria-label="URL" />
 
 <div class="buttons">
   <SpinnerButton
     onClick={() => importFromURL(fileImportStore, url)}
-    label=Continue
+    label="Continue"
     disabled={!url}
   />
 </div>

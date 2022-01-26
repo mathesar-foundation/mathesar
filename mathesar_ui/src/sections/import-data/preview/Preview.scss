@@ -40,7 +40,8 @@
   table {
     border-collapse: collapse;
 
-    th, td {
+    th,
+    td {
       &:not(:first-child) {
         border-left: 1px solid #e0e0e0;
       }
@@ -54,16 +55,17 @@
           position: sticky;
           top: 0;
 
-          .name, .type {
+          .name,
+          .type {
             border-bottom: 1px solid #efefef;
           }
-  
+
           .name {
             min-width: 150px;
             display: flex;
             padding: 4px 10px;
             background: #efefef;
-  
+
             .text-input {
               margin-left: 10px;
             }

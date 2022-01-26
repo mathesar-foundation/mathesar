@@ -1,33 +1,36 @@
-<script lang='ts'>
+<script lang="ts">
   import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import SpinnerButton from '@mathesar-component-library-dir/spinner-button/SpinnerButton.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
-  import type { IconFlip, IconRotate } from '@mathesar-component-library-dir/types';
+  import type {
+    IconFlip,
+    IconRotate,
+  } from '@mathesar-component-library-dir/types';
   import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 
   interface IconDetails {
-    data: IconDefinition,
-    spin?: boolean,
-    flip?: IconFlip,
-    rotate?: IconRotate,
+    data: IconDefinition;
+    spin?: boolean;
+    flip?: IconFlip;
+    rotate?: IconRotate;
   }
 
   interface ButtonDetails {
-    label: string,
-    icon: IconDetails,
+    label: string;
+    icon: IconDetails;
   }
 
   const cancelButtonDefaults: ButtonDetails = {
     label: 'Cancel',
     icon: { data: faArrowLeft },
   };
-  
+
   const proceedButtonDefaults: ButtonDetails = {
     label: 'Proceed',
     icon: { data: faCheck },
   };
-  
+
   export let cancelButton: Partial<ButtonDetails> = {};
   export let proceedButton: Partial<ButtonDetails> = {};
   export let onCancel: () => void;
@@ -46,11 +49,8 @@
   $: fullProceedButton = { ...proceedButtonDefaults, ...proceedButton };
 </script>
 
-<div class=cancel-or-proceed-button-pair>
-  <Button
-    on:click={onCancel}
-    disabled={isProcessing || !canCancel}
-  >
+<div class="cancel-or-proceed-button-pair">
+  <Button on:click={onCancel} disabled={isProcessing || !canCancel}>
     {#if fullCancelButton.icon}<Icon {...fullCancelButton.icon} />{/if}
     <span>{fullCancelButton.label}</span>
   </Button>
@@ -63,7 +63,3 @@
     disabled={isProcessing || !canProceed}
   />
 </div>
-
-<style global lang='scss'>
-  @import './CancelOrProceedButtonPair.scss';
-</style>

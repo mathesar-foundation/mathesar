@@ -3,7 +3,7 @@
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import { ensureReadable } from '@mathesar-component-library-dir/common/utils/storeUtils';
   import type { ToastEntry } from './ToastController';
-  
+
   export let entry: ToastEntry;
 
   $: ({ props, controller } = entry);
@@ -14,7 +14,9 @@
 
   $: readableTitle = ensureReadable(props.title);
   $: readableMessage = ensureReadable(props.message);
-  $: readableContentComponentProps = ensureReadable(props.contentComponentProps);
+  $: readableContentComponentProps = ensureReadable(
+    props.contentComponentProps,
+  );
   $: readableIcon = ensureReadable(props.icon);
   $: readableBackgroundColor = ensureReadable(props.backgroundColor);
   $: readableTextColor = ensureReadable(props.textColor);
@@ -26,18 +28,13 @@
   `;
 </script>
 
-<div
-  class="toast-item"
-  on:mouseenter={pause}
-  on:mouseleave={resume}
-  {style}
->
+<div class="toast-item" on:mouseenter={pause} on:mouseleave={resume} {style}>
   {#if props.icon}
     <div class="icon"><Icon {...$readableIcon} /></div>
   {/if}
   <div class="content">
     {#if props.contentComponent}
-       <svelte:component
+      <svelte:component
         this={props.contentComponent}
         {...$readableContentComponentProps}
       />
@@ -51,12 +48,7 @@
     {/if}
   </div>
   {#if props.allowDismiss}
-    <div
-      class="close-button"
-      role="button"
-      tabindex="-1"
-      on:click={dismiss}
-    >
+    <div class="close-button" role="button" tabindex="-1" on:click={dismiss}>
       <Icon data={faTimes} />
     </div>
   {/if}
@@ -64,7 +56,3 @@
     <progress value={$progress} />
   {/if}
 </div>
-  
-<style global lang="scss">
-  @import "ToastItem.scss";
-</style>

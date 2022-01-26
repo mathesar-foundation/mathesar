@@ -1,0 +1,41 @@
+.input-group {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  width: 100%;
+
+  .input-group-text {
+    display: flex;
+    align-items: center;
+    padding: 0.375rem 0.5rem;
+    color: #212323;
+    text-align: center;
+    white-space: nowrap;
+    background-color: #f3f4f4;
+    border: 1px solid #dfdfdf;
+    border-radius: 0.25rem;
+  }
+
+  .input-element {
+    position: relative;
+    flex: 1 1 auto;
+    width: 1%;
+    min-width: 0;
+
+    &:focus {
+      z-index: 10;
+    }
+  }
+
+  > *:not(:last-child) {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+
+  > * + * {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+    margin-left: -1px !important;
+  }
+}

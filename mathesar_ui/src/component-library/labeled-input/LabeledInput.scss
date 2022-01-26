@@ -1,10 +1,18 @@
 .labeled-input {
-  --spacing-y: 0.8em;
+  --spacing-y: 0.4em;
   --spacing-x: 0.3em;
 
-  .label,
+  .label {
+    display: inline-block;
+  }
   .input {
     display: block;
+
+    // TODO: Unify styling for all form elements
+    > button.dropdown.trigger {
+      display: flex;
+      width: 100%;
+    }
   }
 
   &.layout-stacked {
@@ -12,7 +20,7 @@
       margin-top: var(--spacing-y);
     }
   }
-  
+
   &.layout-inline .label-content,
   &.layout-inline-input-first .label-content {
     display: inline-flex;

@@ -6,4 +6,5 @@
   export let post: string | undefined = undefined;
 </script>
 
-{#if pre}<span>{pre}</span>{/if}<Identifier>{identifier}</Identifier>{#if post}<span>{post}</span>{/if}
+{#if pre}<span>{pre}</span>{/if}<Identifier>{identifier}</Identifier
+>{#if post}<span>{post}</span>{/if}

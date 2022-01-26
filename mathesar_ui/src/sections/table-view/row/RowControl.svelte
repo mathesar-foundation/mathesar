@@ -1,8 +1,5 @@
 <script lang="ts">
-  import {
-    faSync,
-    faPlus,
-  } from '@fortawesome/free-solid-svg-icons';
+  import { faSync, faPlus } from '@fortawesome/free-solid-svg-icons';
   import { Checkbox, Icon } from '@mathesar-component-library';
   import {
     ROW_CONTROL_COLUMN_WIDTH,
@@ -14,7 +11,7 @@
     TableRecord,
   } from '@mathesar/stores/table-data/types';
 
-  export let primaryKeyColumn: string = null;
+  export let primaryKeyColumn: string | undefined = undefined;
   export let row: TableRecord;
   export let meta: Meta;
   export let recordsData: RecordsData;
@@ -22,10 +19,12 @@
   $: ({ selectedRecords, recordModificationState, offset } = meta);
   $: ({ savedRecords, newRecords, totalCount } = recordsData);
 
-  $: primaryKeyValue = row?.[primaryKeyColumn] ?? null;
+  $: primaryKeyValue = primaryKeyColumn ? row[primaryKeyColumn] : undefined;
   $: isRowSelected = ($selectedRecords as Set<unknown>).has(primaryKeyValue);
   $: genericModificationStatus = getGenericModificationStatus(
-    $recordModificationState, row, primaryKeyColumn,
+    $recordModificationState,
+    row,
+    primaryKeyColumn,
   );
 
   function selectionChanged(event: CustomEvent<{ checked: boolean }>) {
@@ -38,16 +37,21 @@
   }
 </script>
 
-<div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;left:0px">
+<div
+  class="cell row-control"
+  style="width:{ROW_CONTROL_COLUMN_WIDTH}px;left:0px"
+>
   <div class="control">
     {#if row.__isAddPlaceholder}
-      <Icon data={faPlus}/>
+      <Icon data={faPlus} />
     {:else}
       {#if typeof row.__rowIndex === 'number'}
         <span class="number">
-          {row.__rowIndex + (
-            row.__isNew ? $totalCount - $savedRecords.length - $newRecords.length : $offset
-            ) + 1}
+          {row.__rowIndex +
+            (row.__isNew
+              ? ($totalCount ?? 0) - $savedRecords.length - $newRecords.length
+              : $offset) +
+            1}
           {#if row.__isNew}
             *
           {/if}
@@ -55,12 +59,12 @@
       {/if}
 
       {#if primaryKeyValue}
-        <Checkbox checked={isRowSelected} on:change={selectionChanged}/>
+        <Checkbox checked={isRowSelected} on:change={selectionChanged} />
       {/if}
     {/if}
   </div>
 
   {#if genericModificationStatus === 'inprocess'}
-    <Icon class="mod-indicator" size='0.9em' data={faSync} spin={true}/>
+    <Icon class="mod-indicator" size="0.9em" data={faSync} spin={true} />
   {/if}
 </div>

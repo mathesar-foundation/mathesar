@@ -9,28 +9,34 @@
  * 1. Ported to TS
  */
 
-const hasNativePerformanceNow = typeof performance === 'object'
-  && typeof performance.now === 'function';
+const hasNativePerformanceNow =
+  typeof performance === 'object' && typeof performance.now === 'function';
 
 const now = hasNativePerformanceNow
   ? () => performance.now()
   : () => Date.now();
 
-export function cancelTimeout(timeout: { id: number }): void {
-  cancelAnimationFrame(timeout.id);
+export interface Timeout {
+  id: number | undefined;
+}
+
+export function cancelTimeout(timeout: Timeout): void {
+  if (timeout.id !== undefined) {
+    cancelAnimationFrame(timeout.id);
+  }
 }
 
 export function requestTimeout(
   callback: () => unknown,
   delay: number,
-): { id: number } {
+): Timeout {
   const start = now();
   // Using an object instead of number, to reuse same object on tick
-  const timeout = { id: null };
+  const timeout: Timeout = { id: undefined };
 
   function tick() {
     if (now() - start >= delay) {
-      callback.call(null);
+      callback.call(undefined);
     } else {
       timeout.id = requestAnimationFrame(tick);
     }

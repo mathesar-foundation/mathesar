@@ -8,15 +8,10 @@
 <div class="seesaw" class:isLeft class:isRight>
   <div class="switcher">
     <div class="left">
-      <slot name="left"/>
+      <slot name="left" />
     </div>
     <div class="right">
-      <slot name="right"/>
+      <slot name="right" />
     </div>
   </div>
 </div>
-
-<style global lang="scss">
-  @import "Seesaw.scss";
-</style>
-

@@ -15,7 +15,7 @@ import { ConstraintsDataStore } from './constraints';
 export type TabularDataParams = [
   TabularType,
   DBObjectEntry['id'],
-  ...MetaParams,
+  ...MetaParams
 ];
 
 export class TabularData extends EventHandler {
@@ -35,15 +35,30 @@ export class TabularData extends EventHandler {
 
   private metaParametersUnsubscriber: Unsubscriber;
 
-  constructor(type: TabularType, id: DBObjectEntry['id'], params?: TabularDataParams) {
+  constructor(
+    type: TabularType,
+    id: DBObjectEntry['id'],
+    params?: TabularDataParams,
+  ) {
     super();
     this.type = type;
     this.id = id;
     this.meta = new Meta(type, id, params?.slice(2) as MetaParams);
     this.columnsDataStore = new ColumnsDataStore(type, id, this.meta);
     this.constraintsDataStore = new ConstraintsDataStore(id);
-    this.recordsData = new RecordsData(type, id, this.meta, this.columnsDataStore);
-    this.display = new Display(type, id, this.meta, this.columnsDataStore, this.recordsData);
+    this.recordsData = new RecordsData(
+      type,
+      id,
+      this.meta,
+      this.columnsDataStore,
+    );
+    this.display = new Display(
+      type,
+      id,
+      this.meta,
+      this.columnsDataStore,
+      this.recordsData,
+    );
 
     this.metaParametersUnsubscriber = this.meta.metaParameters.subscribe(() => {
       this.dispatch('paramsUpdated', this.parameterize());
@@ -55,7 +70,13 @@ export class TabularData extends EventHandler {
     return [this.type, this.id, ...metaParams];
   }
 
-  refresh(): Promise<[ColumnsData, TableRecordsData, ConstraintsData]> {
+  refresh(): Promise<
+    [
+      ColumnsData | undefined,
+      TableRecordsData | undefined,
+      ConstraintsData | undefined,
+    ]
+  > {
     return Promise.all([
       this.columnsDataStore.fetch(),
       this.recordsData.fetch(),

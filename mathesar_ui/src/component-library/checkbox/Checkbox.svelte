@@ -1,7 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { getLabelControllerFromContainingLabel } from '@mathesar-component-library-dir/label/LabelController';
-  import { getGloballyUniqueId } from '@mathesar-component-library-dir/common/utils/domUtils';
+  import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -25,12 +24,9 @@
   export let allowIndeterminate = false;
   export let value: string | number | string[] | undefined = undefined;
   export let disabled = false;
-  export let id = getGloballyUniqueId();
-  export let labelController = getLabelControllerFromContainingLabel();
+  export let id: string = undefined;
 
   $: indeterminate = allowIndeterminate && checked === null;
-  $: labelController?.disabled.set(disabled);
-  $: labelController?.inputId.set(id);
 
   function onChange(e: Event) {
     checked = !checked;
@@ -40,6 +36,8 @@
     });
   }
 </script>
+
+<BaseInput {...$$restProps} bind:id {disabled} />
 
 <input
   class="checkbox"
@@ -51,7 +49,3 @@
   {value}
   on:change={onChange}
 />
-
-<style global lang="scss">
-  @import "Checkbox.scss";
-</style>

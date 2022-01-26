@@ -15,7 +15,8 @@ button.dropdown.trigger.selector {
     color: #a0a0a0;
   }
 
-  svg.schema, svg.manage {
+  svg.schema,
+  svg.manage {
     margin-right: 3px;
     color: #647dde;
   }
@@ -32,12 +33,13 @@ button.dropdown.trigger.selector {
     overflow: hidden;
     position: relative;
 
-    .databases, .schemas {
+    .databases,
+    .schemas {
       flex-shrink: 0;
       flex-grow: 0;
 
-      .text-input {
-        margin: 10px 10px 5px;
+      .schema-searchbox {
+        padding: 10px 10px 5px;
       }
 
       .section-header {
@@ -54,7 +56,8 @@ button.dropdown.trigger.selector {
       }
 
       .item {
-        >button, a {
+        > button,
+        a {
           display: flex;
           align-items: center;
           border: none;
@@ -85,7 +88,8 @@ button.dropdown.trigger.selector {
       }
     }
 
-    svg.schema, svg.manage {
+    svg.schema,
+    svg.manage {
       margin-right: 8px;
     }
     svg.schema {
@@ -116,7 +120,7 @@ button.dropdown.trigger.selector {
       }
 
       .item {
-        >button {
+        > button {
           padding: 4px 12px 4px 5px;
         }
       }
@@ -132,7 +136,7 @@ button.dropdown.trigger.selector {
       }
 
       .item {
-        >a {
+        > a {
           padding: 9px 12px;
         }
       }
@@ -142,5 +146,5 @@ button.dropdown.trigger.selector {
         padding: 9px 12px;
       }
     }
-  }  
+  }
 }

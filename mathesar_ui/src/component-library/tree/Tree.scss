@@ -1,24 +1,20 @@
 .tree {
-  >.search.text-input {
-    margin: 0px 15px 10px;
+  > .search-box {
+    padding: 0px 15px 10px;
     background: #f9fafdcc;
-
-    .search-icon {
-      color: #858aa3cc;
-    }
   }
 
-  >.empty {
+  > .empty {
     margin: 18px 15px;
     color: #777;
   }
 
-  >ul {
+  > ul {
     margin: 0;
     list-style: none;
     list-style-type: none;
     padding: 0;
-  
+
     li {
       .item {
         display: flex;
@@ -37,11 +33,11 @@
           display: inline-block;
           vertical-align: middle;
         }
-  
+
         svg + span {
           margin-left: 3px;
         }
-  
+
         &:hover {
           background: #f6f7fd;
         }
@@ -59,17 +55,17 @@
           }
         }
       }
-  
-      >a {
+
+      > a {
         text-decoration: none;
         color: inherit;
       }
-  
-      &:hover >a {
+
+      &:hover > a {
         text-decoration: underline;
       }
     }
-  
+
     ul {
       margin: 0;
       list-style: none;

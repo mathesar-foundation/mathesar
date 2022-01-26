@@ -58,10 +58,10 @@
   on:close={onClose}
   class="confirmation"
 >
-  <StringOrComponent slot=title arg={title} />
+  <StringOrComponent slot="title" arg={title} />
   <StringOrComponent arg={body} />
   <CancelOrProceedButtonPair
-    slot=footer
+    slot="footer"
     {cancelButton}
     {proceedButton}
     onCancel={handleCancelButton}

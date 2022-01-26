@@ -7,16 +7,20 @@ import { toast } from './toast';
 
 const confirmationModal = modal.createVisibilityStore();
 
-export const { confirm, confirmationController } = makeConfirm({ confirmationModal });
+export const { confirm, confirmationController } = makeConfirm({
+  confirmationModal,
+});
 
 interface ConfirmDeleteProps extends Partial<ConfirmationProps> {
   /** e.g. the name of the table, column, etc */
-  identifierName?: string,
+  identifierName?: string;
   /** the "thing" you're deleting, e.g. 'column', 'table', 'tables', '3 rows' etc. */
-  identifierType?: string,
+  identifierType?: string;
 }
 
-export function confirmDelete(props: ConfirmDeleteProps): ReturnType<typeof confirm> {
+export function confirmDelete(
+  props: ConfirmDeleteProps,
+): ReturnType<typeof confirm> {
   const type = props.identifierType;
   const deletePhrase = `Delete${type ? ' ' : ''}${type}`;
 
@@ -25,7 +29,11 @@ export function confirmDelete(props: ConfirmDeleteProps): ReturnType<typeof conf
     if (props.identifierName) {
       return {
         component: PhraseContainingIdentifier,
-        props: { pre: `${deletePhrase} `, identifier: props.identifierName, post },
+        props: {
+          pre: `${deletePhrase} `,
+          identifier: props.identifierName,
+          post,
+        },
       };
     }
     return `${deletePhrase}${post}`;
