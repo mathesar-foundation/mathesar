@@ -316,7 +316,7 @@ class Table(DatabaseObject):
         if not name:
             name = constraint_utils.get_constraint_name(constraint_type, self.name, column_names[0])
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
-        return Constraint.objects.create(oid=constraint_oid, table=self)
+        return Constraint.current_objects.create(oid=constraint_oid, table=self)
 
 
 class Column(ReflectionManagerMixin, BaseModel):
