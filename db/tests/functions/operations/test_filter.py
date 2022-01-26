@@ -115,8 +115,9 @@ def test_filter_with_db_functions(
     else:
         db_function = db_function_lambda(field)
 
-    # TODO fix table.select()
-    query = apply_db_function_as_filter(table.select(), db_function)
+    relation = table.select()
+
+    query = apply_db_function_as_filter(relation, db_function)
 
     record_list = execute_query(engine, query)
 

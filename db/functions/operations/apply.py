@@ -3,9 +3,6 @@ from db.functions.exceptions import ReferencedColumnsDontExist
 from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
 
 
-# TODO is relation the appropriate generalization here?
-
-
 def apply_ma_function_spec_as_filter(relation, ma_function_spec):
     db_function = get_db_function_from_ma_function_spec(ma_function_spec)
     return apply_db_function_as_filter(relation, db_function)
