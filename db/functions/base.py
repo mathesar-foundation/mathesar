@@ -128,7 +128,7 @@ class Equal(DbFunction):
 
     @staticmethod
     def to_sa_expression(p1, p2):
-        return p1.eq(p2)
+        return p1 == p2
 
 
 class Greater(DbFunction):
@@ -142,7 +142,7 @@ class Greater(DbFunction):
 
     @staticmethod
     def to_sa_expression(p1, p2):
-        return p1.gt(p2)
+        return p1 > p2
 
 
 class Lesser(DbFunction):
@@ -156,7 +156,7 @@ class Lesser(DbFunction):
 
     @staticmethod
     def to_sa_expression(p1, p2):
-        return p1.lt(p2)
+        return p1 < p2
 
 
 class In(DbFunction):
