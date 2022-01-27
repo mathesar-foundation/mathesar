@@ -1,5 +1,5 @@
 from sqlalchemy import DECIMAL as sa_decimal
-from db.types import email, money, datetime, uri
+from db.types import email, money, datetime, uri, interval
 from db.types.base import PostgresType
 
 
@@ -7,6 +7,7 @@ CUSTOM_TYPE_DICT = {
     # For some reason, SQLAlchemy doesn't add DECIMAL to the default
     # ischema_names supported by a PostgreSQL engine
     PostgresType.DECIMAL.value: sa_decimal,
+    PostgresType.INTERVAL.value: interval.Interval,
     email.DB_TYPE: email.Email,
     money.DB_TYPE: money.Money,
     datetime.TIME_ZONE_DB_TYPE: datetime.TIME_WITH_TIME_ZONE,
