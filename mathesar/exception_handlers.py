@@ -45,6 +45,10 @@ def is_pretty(data):
         return False
     else:
         for error_details in data:
-            if not isinstance(error_details, dict) or 'code' not in error_details or 'message' not in error_details:
+            if (
+                    not isinstance(error_details, dict)
+                    or 'code' not in error_details
+                    or 'message' not in error_details
+            ):
                 return False
         return True

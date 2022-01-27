@@ -13,8 +13,13 @@ ErrorBody = namedtuple(
 )
 
 
-def get_default_exception_detail(exception, error_code=ErrorCodes.UnknownError.value,
-                                 message=None, field=None, details=None):
+def get_default_exception_detail(
+        exception,
+        error_code=ErrorCodes.UnknownError.value,
+        message=None,
+        field=None,
+        details=None
+):
     return ErrorBody(
         message=force_str(exception) if message is None else message,
         code=error_code,
@@ -28,8 +33,15 @@ def get_default_api_exception(exc):
 
 
 class MathesarAPIException(APIException):
-    def __init__(self, exception, error_code=ErrorCodes.UnknownError.value, message=None, field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.UnknownError.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
         self.detail = [exception_detail]
         self.status_code = status_code
@@ -47,21 +59,30 @@ class GenericAPIException(MathesarAPIException):
 
 
 class UniqueViolationAPIException(MathesarAPIException):
-    def __init__(self,
-                 exception,
-                 error_code=ErrorCodes.UniqueViolation.value,
-                 message="This column has non-unique values so a unique constraint cannot be set",
-                 field=None,
-                 details=None,
-                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.UniqueViolation.value,
+            message="This column has non-unique values so a unique constraint cannot be set",
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
         self.detail = [exception_detail]
         self.status_code = status_code
 
 
 class NotFoundAPIException(MathesarAPIException):
-    def __init__(self, exception, error_code=ErrorCodes.NotFound.value, message=None, field=None,
-                 details=None, status_code=status.HTTP_404_NOT_FOUND):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.NotFound.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_404_NOT_FOUND
+    ):
         exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
         self.detail = [exception_detail]
         self.status_code = status_code
@@ -71,176 +92,280 @@ class MathesarValidationException(ValidationError):
     status_code = status.HTTP_400_BAD_REQUEST
     default_code = 'invalid'
 
-    def __init__(self, exception, error_code=ErrorCodes.UnknownError.value, message=None, field=None,
-                 details=None):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.UnknownError.value,
+            message=None,
+            field=None,
+            details=None
+    ):
         exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
         self.detail = exception_detail
 
 
 class ProgrammingAPIException(MathesarAPIException):
 
-    def __init__(self, exception, error_code=ErrorCodes.ProgrammingError.value, message=None, field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.ProgrammingError.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class DuplicateTableAPIException(ProgrammingAPIException):
     # Default message is not needed as the exception string provides enough details
-    def __init__(self, exception, error_code=ErrorCodes.DuplicateTableError.value, message=None, field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.DuplicateTableError.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class DuplicateColumnAPIException(ProgrammingAPIException):
     # Default message is not needed as the exception string provides enough details
-    def __init__(self, exception, error_code=ErrorCodes.DuplicateColumnError.value, message=None, field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.DuplicateColumnError.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class TypeErrorAPIException(MathesarAPIException):
     # Default message is not needed as the exception string provides enough details
-    def __init__(self, exception, error_code=ErrorCodes.TypeError.value, message=None, field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.TypeError.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class InvalidDefaultAPIException(MathesarAPIException):
     # Default message is not needed as the exception string provides enough details
-    def __init__(self, exception, error_code=ErrorCodes.InvalidDefault.value, message=None, field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.InvalidDefault.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class InvalidTypeOptionAPIException(MathesarAPIException):
     # Default message is not needed as the exception string provides enough details
-    def __init__(self, exception, error_code=ErrorCodes.InvalidTypeOption.value, message=None, field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.InvalidTypeOption.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class MultipleDataFileAPIException(MathesarValidationException):
 
-    def __init__(self, error_code=ErrorCodes.MultipleDataFiles.value,
-                 message="Multiple data files are unsupported.",
-                 field=None,
-                 details=None,
-                 ):
+    def __init__(
+            self,
+            error_code=ErrorCodes.MultipleDataFiles.value,
+            message="Multiple data files are unsupported.",
+            field=None,
+            details=None,
+    ):
         super().__init__(None, error_code, message, field, details)
 
 
 class DistinctColumnRequiredAPIException(MathesarValidationException):
 
-    def __init__(self, error_code=ErrorCodes.DistinctColumnNameRequired.value,
-                 message="Column names must be distinct",
-                 field=None,
-                 details=None,
-                 ):
+    def __init__(
+            self,
+            error_code=ErrorCodes.DistinctColumnNameRequired.value,
+            message="Column names must be distinct",
+            field=None,
+            details=None,
+    ):
         super().__init__(None, error_code, message, field, details)
 
 
 class ColumnSizeMismatchAPIException(MathesarValidationException):
 
-    def __init__(self, error_code=ErrorCodes.ColumnSizeMismatch.value,
-                 message="Incorrect number of columns in request.",
-                 field=None,
-                 details=None,
-                 ):
+    def __init__(
+            self,
+            error_code=ErrorCodes.ColumnSizeMismatch.value,
+            message="Incorrect number of columns in request.",
+            field=None,
+            details=None,
+    ):
         super().__init__(None, error_code, message, field, details)
 
 
 class IntegrityAPIException(MathesarAPIException):
     # Default message is not needed as the exception string provides enough details
-    def __init__(self, exception, error_code=ErrorCodes.NonClassifiedIntegrityError.value,
-                 message=None,
-                 field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.NonClassifiedIntegrityError.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class ValueAPIException(MathesarAPIException):
     # Default message is not needed as the exception string provides enough details
-    def __init__(self, exception, error_code=ErrorCodes.ValueError.value,
-                 message=None,
-                 field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.ValueError.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class InvalidTypeCastAPIException(MathesarAPIException):
     # Default message is not needed as the exception string provides enough details
-    def __init__(self, exception, error_code=ErrorCodes.InvalidTypeCast.value,
-                 message="Invalid type cast requested.",
-                 field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.InvalidTypeCast.value,
+            message="Invalid type cast requested.",
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class UndefinedFunctionAPIException(MathesarAPIException):
 
     # Default message is not needed as the exception string provides enough details
-    def __init__(self, exception, error_code=ErrorCodes.UndefinedFunction.value,
-                 message=None,
-                 field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.UndefinedFunction.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class DynamicDefaultAPIException(MathesarAPIException):
 
     # Default message is not needed as the exception string provides enough details
-    def __init__(self, exception, error_code=ErrorCodes.UndefinedFunction.value,
-                 message=None,
-                 field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.UndefinedFunction.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class UnsupportedTypeAPIException(MathesarAPIException):
 
     # Default message is not needed as the exception string provides enough details
-    def __init__(self, exception, error_code=ErrorCodes.UnsupportedType.value,
-                 message=None,
-                 field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.UnsupportedType.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class BadFilterAPIException(MathesarAPIException):
 
-    def __init__(self, exception, error_code=ErrorCodes.UnsupportedType.value,
-                 message="Filter arguments are not correct",
-                 field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.UnsupportedType.value,
+            message="Filter arguments are not correct",
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class BadSortAPIException(MathesarAPIException):
 
     # Default message is not needed as the exception string provides enough details
-    def __init__(self, exception, error_code=ErrorCodes.UnsupportedType.value,
-                 message=None,
-                 field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.UnsupportedType.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class BadGroupAPIException(MathesarAPIException):
 
     # Default message is not needed as the exception string provides enough details
-    def __init__(self, exception, error_code=ErrorCodes.UnsupportedType.value,
-                 message=None,
-                 field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.UnsupportedType.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
 class InvalidTableAPIException(MathesarAPIException):
 
-    def __init__(self, exception, error_code=ErrorCodes.InvalidTableError.value,
-                 message='Unable to tabulate data',
-                 field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.InvalidTableError.value,
+            message='Unable to tabulate data',
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)
 
 
@@ -249,8 +374,13 @@ class RaiseExceptionAPIException(MathesarAPIException):
     Exception raised inside a postgres function
     """
 
-    def __init__(self, exception, error_code=ErrorCodes.RaiseException.value,
-                 message=None,
-                 field=None,
-                 details=None, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.RaiseException.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(exception, error_code, message, field, details, status_code)

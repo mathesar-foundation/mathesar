@@ -4,7 +4,7 @@ from enum import Enum, unique
 @unique
 class ErrorCodes(Enum):
     # Matches with default code of drf-friendly-errors library
-    # Api Error
+    # API Error
     MethodNotAllowed = 4006
     NotFound = 4005
     UnknownError = 4999

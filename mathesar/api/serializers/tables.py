@@ -3,8 +3,11 @@ from psycopg2.errors import DuplicateTable
 from rest_framework import serializers, status
 from sqlalchemy.exc import ProgrammingError
 
-from mathesar.api.exceptions.exceptions import ProgrammingAPIException, DuplicateTableAPIException, MultipleDataFileAPIException, \
-    DistinctColumnRequiredAPIException, ColumnSizeMismatchAPIException
+from mathesar.api.exceptions.exceptions import (
+    ProgrammingAPIException, DuplicateTableAPIException,
+    MultipleDataFileAPIException,
+    DistinctColumnRequiredAPIException, ColumnSizeMismatchAPIException,
+)
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.columns import SimpleColumnSerializer
 from mathesar.models import Table, DataFile
@@ -87,9 +90,12 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
                 table = create_empty_table(name, schema)
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
-                raise DuplicateTableAPIException(e, message=f"Relation {validated_data['name']}"
-                                                            f" already exists in schema {schema.id}",
-                                                 field="name", status_code=status.HTTP_400_BAD_REQUEST)
+                raise DuplicateTableAPIException(
+                    e,
+                    message=f"Relation {validated_data['name']} already exists in schema {schema.id}",
+                    field="name",
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
             else:
                 raise ProgrammingAPIException(e)
         return table
