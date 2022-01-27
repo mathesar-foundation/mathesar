@@ -1,10 +1,10 @@
-class BadDbFunctionFormat(Exception):
+class BadDBFunctionFormat(Exception):
     pass
 
 
-class UnknownDbFunctionId(BadDbFunctionFormat):
+class UnknownDBFunctionId(BadDBFunctionFormat):
     pass
 
 
-class ReferencedColumnsDontExist(BadDbFunctionFormat):
+class ReferencedColumnsDontExist(BadDBFunctionFormat):
     pass

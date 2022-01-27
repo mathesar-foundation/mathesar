@@ -1,10 +1,10 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from db.functions.base import supported_db_functions
-from mathesar.api.serializers.functions import DbFunctionSerializer
+from mathesar.api.serializers.functions import DBFunctionSerializer
 
 
-class DbFunctionViewSet(viewsets.ViewSet):
+class DBFunctionViewSet(viewsets.ViewSet):
     def list(self, _):
-        serializer = DbFunctionSerializer(supported_db_functions, many=True)
+        serializer = DBFunctionSerializer(supported_db_functions, many=True)
         return Response(serializer.data)

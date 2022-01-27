@@ -1,4 +1,4 @@
-from db.functions.base import DbFunction
+from db.functions.base import DBFunction
 from db.functions.exceptions import ReferencedColumnsDontExist
 from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
 
@@ -34,9 +34,9 @@ def _get_columns_that_exist(relation):
 
 def _db_function_to_sa_expression(db_function):
     """
-    Everything is considered to be either a DbFunction subclass or a literal.
+    Everything is considered to be either a DBFunction subclass or a literal.
     """
-    if isinstance(db_function, DbFunction):
+    if isinstance(db_function, DBFunction):
         raw_parameters = db_function.parameters
         parameters = [
             _db_function_to_sa_expression(raw_parameter)

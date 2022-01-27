@@ -1,7 +1,7 @@
 """
-This namespace defines the DbFunction abstract class and its subclasses. These subclasses
+This namespace defines the DBFunction abstract class and its subclasses. These subclasses
 represent functions that have identifiers, display names and hints, and their instances
-hold parameters. Each DbFunction subclass defines how its instance can be converted into an
+hold parameters. Each DBFunction subclass defines how its instance can be converted into an
 SQLAlchemy expression.
 
 Hints hold information about what kind of input the function might expect and what output
@@ -23,16 +23,16 @@ import importlib
 import inspect
 
 
-class DbFunction(ABC):
+class DBFunction(ABC):
     id = None
     name = None
     hints = None
 
     def __init__(self, parameters):
         if self.id is None:
-            raise ValueError('DbFunction subclasses must define an ID.')
+            raise ValueError('DBFunction subclasses must define an ID.')
         if self.name is None:
-            raise ValueError('DbFunction subclasses must define a name.')
+            raise ValueError('DBFunction subclasses must define a name.')
         self.parameters = parameters
 
     @property
@@ -43,7 +43,7 @@ class DbFunction(ABC):
         for parameter in self.parameters:
             if isinstance(parameter, ColumnReference):
                 columns.add(parameter.column)
-            elif isinstance(parameter, DbFunction):
+            elif isinstance(parameter, DBFunction):
                 columns.update(parameter.referenced_columns)
         return columns
 
@@ -53,7 +53,7 @@ class DbFunction(ABC):
         return None
 
 
-class Literal(DbFunction):
+class Literal(DBFunction):
     id = 'literal'
     name = 'Literal'
     hints = tuple([
@@ -66,7 +66,7 @@ class Literal(DbFunction):
         return literal(p)
 
 
-class ColumnReference(DbFunction):
+class ColumnReference(DBFunction):
     id = 'column_reference'
     name = 'Column Reference'
     hints = tuple([
@@ -83,7 +83,7 @@ class ColumnReference(DbFunction):
         return column(p)
 
 
-class List(DbFunction):
+class List(DBFunction):
     id = 'list'
     name = 'List'
 
@@ -92,7 +92,7 @@ class List(DbFunction):
         return list(ps)
 
 
-class Empty(DbFunction):
+class Empty(DBFunction):
     id = 'empty'
     name = 'Empty'
     hints = tuple([
@@ -105,7 +105,7 @@ class Empty(DbFunction):
         return p.is_(None)
 
 
-class Not(DbFunction):
+class Not(DBFunction):
     id = 'not'
     name = 'Not'
     hints = tuple([
@@ -118,7 +118,7 @@ class Not(DbFunction):
         return not_(*p)
 
 
-class Equal(DbFunction):
+class Equal(DBFunction):
     id = 'equal'
     name = 'Equal'
     hints = tuple([
@@ -131,7 +131,7 @@ class Equal(DbFunction):
         return p1 == p2
 
 
-class Greater(DbFunction):
+class Greater(DBFunction):
     id = 'greater'
     name = 'Greater'
     hints = tuple([
@@ -145,7 +145,7 @@ class Greater(DbFunction):
         return p1 > p2
 
 
-class Lesser(DbFunction):
+class Lesser(DBFunction):
     id = 'lesser'
     name = 'Lesser'
     hints = tuple([
@@ -159,7 +159,7 @@ class Lesser(DbFunction):
         return p1 < p2
 
 
-class In(DbFunction):
+class In(DBFunction):
     id = 'in'
     name = 'In'
     hints = tuple([
@@ -173,7 +173,7 @@ class In(DbFunction):
         return p1.in_(p2)
 
 
-class And(DbFunction):
+class And(DBFunction):
     id = 'and'
     name = 'And'
     hints = tuple([
@@ -185,7 +185,7 @@ class And(DbFunction):
         return and_(*ps)
 
 
-class Or(DbFunction):
+class Or(DBFunction):
     id = 'or'
     name = 'Or'
     hints = tuple([
@@ -197,7 +197,7 @@ class Or(DbFunction):
         return or_(*ps)
 
 
-class StartsWith(DbFunction):
+class StartsWith(DBFunction):
     id = 'starts_with'
     name = 'Starts With'
     hints = tuple([
@@ -211,7 +211,7 @@ class StartsWith(DbFunction):
         return p1.like(f'{p2}%')
 
 
-class ToLowercase(DbFunction):
+class ToLowercase(DBFunction):
     id = 'to_lowercase'
     name = 'To Lowercase'
     hints = tuple([
@@ -224,7 +224,7 @@ class ToLowercase(DbFunction):
         return func.lower(p1)
 
 
-class ExtractURIAuthority(DbFunction):
+class ExtractURIAuthority(DBFunction):
     id = 'extract_uri_authority'
     name = 'Extract URI Authority'
     hints = tuple([
@@ -254,8 +254,8 @@ def _get_defining_module_members_that_satisfy(predicate):
 
 
 def _is_concrete_db_function_subclass(member):
-    return inspect.isclass(member) and member != DbFunction and issubclass(member, DbFunction)
+    return inspect.isclass(member) and member != DBFunction and issubclass(member, DBFunction)
 
 
-# Enumeration of supported DbFunction subclasses; needed when parsing.
+# Enumeration of supported DBFunction subclasses; needed when parsing.
 supported_db_functions = _get_defining_module_members_that_satisfy(_is_concrete_db_function_subclass)

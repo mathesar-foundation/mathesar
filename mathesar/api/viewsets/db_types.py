@@ -4,7 +4,7 @@ from db.types.base import db_types_hinted, PostgresType, MathesarCustomType
 from itertools import chain
 
 
-class DbTypeViewSet(viewsets.ViewSet):
+class DBTypeViewSet(viewsets.ViewSet):
     def list(self, _):
         known_vanilla_types = (postgres_type for postgres_type in PostgresType)
         known_custom_types = (mathesar_custom_type for mathesar_custom_type in MathesarCustomType)
