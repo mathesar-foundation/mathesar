@@ -13,7 +13,7 @@ class ErrorCodes(Enum):
     TypeError = 4102
     ValueError = 4103
 
-    # Db Error Codes
+    # DB Error Codes
     DuplicateTableError = 4205
     DuplicateColumnError = 4206
     InvalidTypeCast = 4203
@@ -26,7 +26,7 @@ class ErrorCodes(Enum):
     UniqueViolation = 4208
     UnsupportedType = 4209
 
-    # Mathesar db Error Codes
+    # Data Imports error code
     InvalidTableError = 4301
 
     # Validation Error
