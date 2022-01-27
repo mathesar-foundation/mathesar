@@ -47,8 +47,10 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
     def get_mapping_field(self):
         mapping_field = getattr(self, "mapping_field", None)
         if mapping_field is None:
-            raise Exception("Add a `mapping_field` to be used as a identifier"
-                            "or override this method to return a identifier to identify a proper serializer")
+            raise Exception(
+                "Add a `mapping_field` to be used as a identifier"
+                "or override this method to return a identifier to identify a proper serializer"
+            )
         return mapping_field
 
 
@@ -148,7 +150,8 @@ class TimestampWithoutTimeZoneFormatValidator(AbstractDateTimeFormatValidator):
     def validate(self, datetime_obj, display_format, serializer_field):
         if 'z' in display_format.lower():
             raise serializers.ValidationError(
-                "Timestamp without timezone column cannot contain timezone display format")
+                "Timestamp without timezone column cannot contain timezone display format"
+            )
 
 
 class DateFormatValidator(AbstractDateTimeFormatValidator):
@@ -181,23 +184,43 @@ class DateDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartial
     format = serializers.CharField(validators=[DateFormatValidator()])
 
 
-class TimestampWithoutTimezoneDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
+class TimestampWithoutTimezoneDisplayOptionSerializer(
+    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    serializers.Serializer
+):
     format = serializers.CharField(validators=[TimestampWithoutTimeZoneFormatValidator()])
 
 
-class TimestampWithTimezoneDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
+class TimestampWithTimezoneDisplayOptionSerializer(
+    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    serializers.Serializer
+):
     format = serializers.CharField(validators=[TimestampWithTimeZoneFormatValidator()])
 
 
-class TimeWithTimezoneDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
+class TimeWithTimezoneDisplayOptionSerializer(
+    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    serializers.Serializer
+):
     format = serializers.CharField(validators=[TimeWithTimeZoneFormatValidator()])
 
 
-class TimeWithoutTimezoneDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
+class TimeWithoutTimezoneDisplayOptionSerializer(
+    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    serializers.Serializer
+):
     format = serializers.CharField(validators=[TimeWithoutTimeZoneFormatValidator()])
 
 
-class DisplayOptionsMappingSerializer(MathesarErrorMessageMixin, ReadWritePolymorphicSerializerMappingMixin, serializers.Serializer):
+class DisplayOptionsMappingSerializer(
+    MathesarErrorMessageMixin,
+    ReadWritePolymorphicSerializerMappingMixin,
+    serializers.Serializer
+):
     serializers_mapping = {
         MathesarTypeIdentifier.BOOLEAN.value: BooleanDisplayOptionSerializer,
         MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,

@@ -107,15 +107,8 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                 {
                     'min_value': field.min_value,
                     'max_value': field.max_value,
-                    'decimal_places': getattr(
-                        field, 'decimal_places',
-                        None
-                    ),
-                    'max_decimal_places': getattr(
-                        field,
-                        'decimal_places',
-                        None
-                    ),
+                    'decimal_places': getattr(field, 'decimal_places', None),
+                    'max_decimal_places': getattr(field, 'decimal_places', None),
                     'max_digits': getattr(field, 'max_digits', None)
                 }
             )
@@ -137,9 +130,9 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
             kwargs.update(
                 {
                     'max_length': field.max_length,
-                    'length': len(
-                        field.parent.data.get(field.source, '').name
-                    )
+                    # Parent method calculates the length of the file instead of the filename,
+                    # we are changing it to calculate length of the file name
+                    'length': len(field.parent.data.get(field.source, '').name)
                 }
             )
         elif field_type in self.field_map['composite']:

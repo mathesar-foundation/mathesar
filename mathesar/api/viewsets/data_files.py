@@ -29,10 +29,14 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
             serializer = DataFileSerializer(data_file, context={'request': request})
             return Response(serializer.data)
         else:
-            exception_body = exceptions.ErrorBody(code=ErrorCodes.MethodNotAllowed.value,
-                                                  message='Method "PATCH" allowed only for header.')
-            raise exceptions.GenericAPIException([exception_body],
-                                                 status.HTTP_405_METHOD_NOT_ALLOWED)
+            exception_body = exceptions.ErrorBody(
+                code=ErrorCodes.MethodNotAllowed.value,
+                message='Method "PATCH" allowed only for header.'
+            )
+            raise exceptions.GenericAPIException(
+                [exception_body],
+                status.HTTP_405_METHOD_NOT_ALLOWED
+            )
 
     def create(self, request, *args, **kwargs):
         serializer = DataFileSerializer(data=request.data, context={'request': request})
