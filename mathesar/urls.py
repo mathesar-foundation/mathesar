@@ -17,6 +17,9 @@ table_router.register(r'records', viewsets.RecordViewSet, basename='table-record
 table_router.register(r'columns', viewsets.ColumnViewSet, basename='table-column')
 table_router.register(r'constraints', viewsets.ConstraintViewSet, basename='table-constraint')
 
+abstractions_router = routers.NestedSimpleRouter(router, r'abstractions', lookup='abstraction')
+abstractions_router.register(r'filters', viewsets.FiltersViewSet, basename='filters')
+
 urlpatterns = [
     path('api/v0/', include(router.urls)),
     path('api/v0/', include(table_router.urls)),
