@@ -2,7 +2,10 @@
   import { fly } from 'svelte/transition';
   import type { FlyParams } from 'svelte/transition';
   import { Icon, Seesaw, Button, Spinner } from '@mathesar-component-library';
-  import type { Constraint } from '@mathesar/stores/table-data/types';
+  import type {
+    Constraint,
+    TabularDataStore,
+  } from '@mathesar/stores/table-data/types';
   import {
     faTrash,
     faCheck,
@@ -10,9 +13,12 @@
     faExclamationTriangle,
   } from '@fortawesome/free-solid-svg-icons';
   import { toast } from '@mathesar/stores/toast';
+  import { getContext } from 'svelte';
 
   export let constraint: Constraint;
   export let drop: () => Promise<void>;
+
+  const tabularData = getContext<TabularDataStore>('tabularData');
 
   let isConfirmingDrop = false;
   let isSubmittingDrop = false;
@@ -31,7 +37,12 @@
     }
   }
 
-  $: columnSummary = constraint.columns.join(', ');
+  $: ({ columnsDataStore } = $tabularData);
+  $: columnsData = $columnsDataStore;
+  $: columnsInTable = columnsData.columns;
+  $: columns = columnsInTable.filter((c) => constraint.columns.includes(c.id));
+  $: columnNames = columns.map((columnInConstraint) => columnInConstraint.name);
+  $: columnSummary = columnNames.join(', ');
   $: transitionDuration = useTransitionOut ? 200 : (0 as number);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   $: transition = { x: 200, duration: transitionDuration } as FlyParams;
