@@ -81,10 +81,12 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                        'URLField', 'UUIDField', 'FilePathField',
                        'IPAddressField'],
             'numeric': ['IntegerField', 'FloatField', 'DecimalField'],
-            'date': {'DateTimeField': self.DATETIME_FORMAT,
-                     'DateField': self.DATE_FORMAT,
-                     'TimeField': self.TIME_FORMAT,
-                     'DurationField': self.DURATION_FORMAT},
+            'date': {
+                'DateTimeField': self.DATETIME_FORMAT,
+                'DateField': self.DATE_FORMAT,
+                'TimeField': self.TIME_FORMAT,
+                'DurationField': self.DURATION_FORMAT
+            },
             'choice': ['ChoiceField', 'MultipleChoiceField'],
             'file': ['FileField', 'ImageField'],
             'composite': ['ListField', 'DictField', 'JSONField'],
@@ -115,7 +117,7 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                     'min_length': getattr(field, 'min_length', None),
                     'value': field_data
                 }
-                )
+            )
         elif field_type in self.field_map['numeric']:
 
             kwargs.update(
@@ -125,15 +127,15 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                     'decimal_places': getattr(
                         field, 'decimal_places',
                         None
-                        ),
+                    ),
                     'max_decimal_places': getattr(
                         field,
                         'decimal_places',
                         None
-                        ),
+                    ),
                     'max_digits': getattr(field, 'max_digits', None)
                 }
-                )
+            )
             max_digits = kwargs['max_digits']
             decimal_places = kwargs['decimal_places']
             if max_digits is not None and decimal_places is not None:
@@ -147,18 +149,16 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                     'input': field_data,
                     'input_type': type(field_data).__name__
                 }
-                )
+            )
         elif field_type in self.field_map['file']:
             kwargs.update(
                 {
                     'max_length': field.max_length,
                     'length': len(
-                        field.parent.data.get(
-                            field.source, ''
-                        ).name
-                        )
+                        field.parent.data.get(field.source, '').name
+                    )
                 }
-                )
+            )
         elif field_type in self.field_map['composite']:
             kwargs.update(
                 {
@@ -166,7 +166,7 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                     'max_length': getattr(field, 'max_length', None),
                     'min_length': getattr(field, 'min_length', None)
                 }
-                )
+            )
         elif field_type in self.field_map['relation']:
             kwargs.update(
                 {
@@ -176,7 +176,7 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                     'slug_name': getattr(field, 'slug_field', None),
                     'value': field_data
                 }
-                )
+            )
         else:
             kwargs.update({'max_length': getattr(field, 'max_length', None)})
         return kwargs
