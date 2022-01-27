@@ -75,27 +75,10 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         It provides the following additional features
         1. Adds `ListSerializer` to `relation` field list
         """
-        return {
-            'boolean': ['BooleanField', 'NullBooleanField'],
-            'string': ['CharField', 'EmailField', 'RegexField', 'SlugField',
-                       'URLField', 'UUIDField', 'FilePathField',
-                       'IPAddressField'],
-            'numeric': ['IntegerField', 'FloatField', 'DecimalField'],
-            'date': {
-                'DateTimeField': self.DATETIME_FORMAT,
-                'DateField': self.DATE_FORMAT,
-                'TimeField': self.TIME_FORMAT,
-                'DurationField': self.DURATION_FORMAT
-            },
-            'choice': ['ChoiceField', 'MultipleChoiceField'],
-            'file': ['FileField', 'ImageField'],
-            'composite': ['ListField', 'DictField', 'JSONField'],
-            'relation': ['StringRelatedField', 'PrimaryKeyRelatedField',
-                         'HyperlinkedRelatedField', 'SlugRelatedField',
-                         'HyperlinkedIdentityField', 'ManyRelatedField', 'ListSerializer'],
-            'miscellaneous': ['ReadOnlyField', 'HiddenField', 'ModelField',
-                              'SerializerMethodField']
-        }
+        parent_field_map = super(FriendlyErrorMessagesMixin, self).field_map
+        # Add missing `ListSerializer to existing relation list`
+        parent_field_map['relation'].append('ListSerializer')
+        return parent_field_map
 
     def get_field_kwargs(self, field, field_data):
         """
