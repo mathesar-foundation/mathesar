@@ -18,8 +18,6 @@ We started building Mathesar in March 2021 and are making steady progress toward
   - [Linting](#linting)
   - [Running tests](#running-tests)
   - [E2E integration tests](#e2e-integration-tests)
-    - [Setting up the environment for E2E tests](#setting-up-the-environment-for-e2e-tests)
-    - [Running E2E tests](#running-e2e-tests)
   - [Opening a shell in the container](#opening-a-shell-in-the-container)
   - [Troubleshooting](#troubleshooting)
 - [License](#license)
