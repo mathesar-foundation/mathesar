@@ -176,8 +176,8 @@ section.table-section .tab-container .table-data .body {
         }
 
         .is-null-displayed {
-          left: 54px;
-          padding: 6px 0px;
+          z-index: -1;
+          left: -4px;
         }
       }
 

@@ -68,10 +68,11 @@
     setValue(val);
   }
 
+  function hideNullElement() {
+    if (isNullDisplayed === true) isNullDisplayed = false;
+  }
+
   async function handleKeyDown(event: KeyboardEvent) {
-    if (isNullDisplayed === true) {
-      isNullDisplayed = false;
-    }
     const type = display.handleKeyEventsOnActiveCell(event.key);
     if (type) {
       event.stopPropagation();
@@ -132,6 +133,7 @@
       on:keydown={handleInputKeyDown}
       on:keyup={debounceAndSet}
       on:blur={onBlur}
+      on:input={hideNullElement}
     />
   {/if}
 
