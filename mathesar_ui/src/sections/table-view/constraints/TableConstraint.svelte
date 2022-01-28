@@ -37,10 +37,9 @@
     }
   }
 
-  $: ({ columnsDataStore } = $tabularData);
-  $: columnsData = $columnsDataStore;
-  $: columnsInTable = columnsData.columns;
-  $: columns = columnsInTable.filter((c) => constraint.columns.includes(c.id));
+  $: columns = $tabularData.columnsDataStore.getColumnsByIds(
+    constraint.columns,
+  );
   $: columnNames = columns.map((columnInConstraint) => columnInConstraint.name);
   $: columnSummary = columnNames.join(', ');
   $: transitionDuration = useTransitionOut ? 200 : (0 as number);
