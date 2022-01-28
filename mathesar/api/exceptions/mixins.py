@@ -3,7 +3,7 @@ from rest_framework.utils.serializer_helpers import ReturnList
 from rest_framework_friendly_errors.mixins import FriendlyErrorMessagesMixin
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.exceptions import ValidationError as RestValidationError
-from mathesar.api.exceptions.exceptions import ErrorBody
+from mathesar.api.exceptions.generic_exceptions.base_exceptions import ErrorBody
 
 
 class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):

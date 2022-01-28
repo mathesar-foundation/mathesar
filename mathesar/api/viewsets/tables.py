@@ -6,6 +6,9 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateMode
 from rest_framework.response import Response
 from sqlalchemy.exc import DataError, IntegrityError
 
+import mathesar.api.exceptions.database_exceptions.base_exceptions
+import mathesar.api.exceptions.database_exceptions.exceptions
+import mathesar.api.exceptions.generic_exceptions.base_exceptions
 from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.exceptions import exceptions as api_exceptions
 from mathesar.api.filters import TableFilter
@@ -78,25 +81,25 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             preview_records = table.get_preview(columns)
         except (DataError, IntegrityError) as e:
             if type(e.orig) == InvalidTextRepresentation or type(e.orig) == CheckViolation:
-                raise api_exceptions.InvalidTypeCastAPIException(
+                raise mathesar.api.exceptions.database_exceptions.exceptions.InvalidTypeCastAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST,
                     field='columns'
                 )
             else:
-                raise api_exceptions.IntegrityAPIException(
+                raise mathesar.api.exceptions.database_exceptions.base_exceptions.IntegrityAPIException(
                     e,
                     status_code=status.HTTP_400_BAD_REQUEST,
                     field='columns'
                 )
         except UnsupportedTypeException as e:
-            raise api_exceptions.UnsupportedTypeAPIException(
+            raise mathesar.api.exceptions.database_exceptions.exceptions.UnsupportedTypeAPIException(
                 e,
                 field='columns',
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
-            raise api_exceptions.MathesarAPIException(e)
+            raise mathesar.api.exceptions.generic_exceptions.base_exceptions.MathesarAPIException(e)
         table_data.update(
             {
                 # There's no way to reflect actual column data without

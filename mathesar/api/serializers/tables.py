@@ -4,10 +4,11 @@ from rest_framework import serializers, status
 from sqlalchemy.exc import ProgrammingError
 
 from mathesar.api.exceptions.exceptions import (
-    ProgrammingAPIException, DuplicateTableAPIException,
     MultipleDataFileAPIException,
     DistinctColumnRequiredAPIException, ColumnSizeMismatchAPIException,
 )
+from mathesar.api.exceptions.database_exceptions.exceptions import DuplicateTableAPIException
+from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.columns import SimpleColumnSerializer
 from mathesar.models import Table, DataFile
