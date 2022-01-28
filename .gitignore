@@ -184,3 +184,6 @@ storybook-static/
 # Client Build files
 mathesar/static/
 static/
+
+# Playwright trace files
+test-results/
