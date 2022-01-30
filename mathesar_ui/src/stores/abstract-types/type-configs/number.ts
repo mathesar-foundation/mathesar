@@ -180,7 +180,7 @@ const numberType: AbstractTypeConfiguration = {
             },
           },
           {
-            resolve: 'DOUBLE_PRECISION',
+            resolve: 'DOUBLE PRECISION',
             rule: {
               combination: 'and',
               terms: [
@@ -225,7 +225,7 @@ const numberType: AbstractTypeConfiguration = {
             numberType: 'Float',
             floatingPointType: 'real',
           },
-          DOUBLE_PRECISION: {
+          'DOUBLE PRECISION': {
             numberType: 'Float',
             floatingPointType: 'doublePrecision',
           },
