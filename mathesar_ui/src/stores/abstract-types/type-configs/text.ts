@@ -91,8 +91,8 @@ const textType: AbstractTypeConfiguration = {
                       id: 'fieldSizeLimit',
                       op: 'eq',
                       value: null,
-                    }
-                  ]
+                    },
+                  ],
                 },
               ],
             },
