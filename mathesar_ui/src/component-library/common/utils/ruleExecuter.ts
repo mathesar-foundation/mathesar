@@ -62,6 +62,5 @@ export function executeRule(
     });
     return isSuccess;
   }
-  const result = executureTerm(rule, values);
-  return result;
+  return executureTerm(rule, values);
 }

@@ -1,15 +1,26 @@
 <script lang="ts">
   import { Form, makeForm, executeRule } from '@mathesar-component-library';
-  import type { FormInputDataType } from '@mathesar-component-library/types';
+  import type {
+    FormBuildConfiguration,
+    FormInputDataType,
+  } from '@mathesar-component-library/types';
   import type { DbType } from '@mathesar/App.d';
   import type { AbstractTypeDbConfigOptions } from '@mathesar/stores/abstract-types/types';
 
   export let selectedDbType: DbType | undefined;
-  export let configuration:
-    | AbstractTypeDbConfigOptions['configuration']
-    | undefined;
+  export let configuration: AbstractTypeDbConfigOptions['configuration'];
 
-  $: form = makeForm(configuration.form);
+  function constructForm(
+    formConfig: AbstractTypeDbConfigOptions['configuration']['form'],
+    formValues?: AbstractTypeDbConfigOptions['configuration']['ruleReversalValues'],
+  ): FormBuildConfiguration {
+    if (selectedDbType && formValues?.[selectedDbType]) {
+      return makeForm(formConfig, formValues[selectedDbType]);
+    }
+    return makeForm(formConfig);
+  }
+
+  $: form = constructForm(configuration.form, configuration.ruleReversalValues);
   $: values = form.values;
 
   function setSelectedDBType(formValues: Record<string, FormInputDataType>) {

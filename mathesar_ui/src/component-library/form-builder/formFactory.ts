@@ -4,14 +4,20 @@ import type {
   FormInputDataType,
   FormConfiguration,
   FormBuildConfiguration,
+  FormValues,
 } from './types';
 
 export function makeForm(
   formConfig: FormConfiguration,
+  formValues?: FormValues,
 ): FormBuildConfiguration {
   const stores: FormBuildConfiguration['stores'] = new Map();
   Object.keys(formConfig.variables)?.forEach((key) => {
-    stores.set(key, writable(formConfig.variables[key].default));
+    const value =
+      typeof formValues?.[key] !== 'undefined'
+        ? formValues[key]
+        : formConfig.variables[key].default;
+    stores.set(key, writable(value));
   });
 
   const values: Readable<Record<string, FormInputDataType>> = derived(

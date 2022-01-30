@@ -62,8 +62,10 @@ export interface FormConfiguration {
 
 export type FormInputStore = Writable<FormInputDataType>;
 
+export type FormValues = Record<string, FormInputDataType>;
+
 export interface FormBuildConfiguration extends FormConfiguration {
   stores: Map<string, FormInputStore>;
-  values: Readable<Record<string, FormInputDataType>>;
+  values: Readable<FormValues>;
   getValues: () => Record<string, FormInputDataType>;
 }

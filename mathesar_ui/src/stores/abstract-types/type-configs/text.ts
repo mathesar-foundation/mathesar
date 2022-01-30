@@ -4,18 +4,6 @@ const textType: AbstractTypeConfiguration = {
   icon: 'T',
   input: {
     type: 'string',
-    validationRules: {
-      CHAR: {
-        method: 'length',
-        op: 'lte',
-        value: 255,
-      },
-      VARCHAR: {
-        method: 'length',
-        op: 'lte',
-        value: 32672,
-      },
-    },
   },
   defaultDbType: 'VARCHAR',
   typeSwitchOptions: {
@@ -73,6 +61,11 @@ const textType: AbstractTypeConfiguration = {
                   op: 'lte',
                   value: 255,
                 },
+                {
+                  id: 'fieldSizeLimit',
+                  op: 'neq',
+                  value: null,
+                },
               ],
             },
           },
@@ -87,9 +80,19 @@ const textType: AbstractTypeConfiguration = {
                   value: true,
                 },
                 {
-                  id: 'fieldSizeLimit',
-                  op: 'lte',
-                  value: 32672,
+                  combination: 'or',
+                  terms: [
+                    {
+                      id: 'fieldSizeLimit',
+                      op: 'gt',
+                      value: 255,
+                    },
+                    {
+                      id: 'fieldSizeLimit',
+                      op: 'eq',
+                      value: null,
+                    }
+                  ]
                 },
               ],
             },
@@ -97,22 +100,26 @@ const textType: AbstractTypeConfiguration = {
           {
             resolve: 'TEXT',
             rule: {
-              combination: 'or',
-              terms: [
-                {
-                  id: 'restrictFieldSize',
-                  op: 'eq',
-                  value: false,
-                },
-                {
-                  id: 'fieldSizeLimit',
-                  op: 'gt',
-                  value: 32672,
-                },
-              ],
+              id: 'restrictFieldSize',
+              op: 'eq',
+              value: false,
             },
           },
         ],
+        ruleReversalValues: {
+          CHAR: {
+            restrictFieldSize: true,
+            fieldSizeLimit: 255,
+          },
+          VARCHAR: {
+            restrictFieldSize: true,
+            fieldSizeLimit: null,
+          },
+          TEXT: {
+            restrictFieldSize: false,
+            fieldSizeLimit: null,
+          },
+        },
       },
     },
   },

@@ -198,6 +198,38 @@ const numberType: AbstractTypeConfiguration = {
             },
           },
         ],
+        ruleReversalValues: {
+          INTEGER: {
+            numberType: 'Integer',
+            integerDataSize: 'default',
+          },
+          SMALLINT: {
+            numberType: 'Integer',
+            integerDataSize: 'smallInt',
+          },
+          BIGINT: {
+            numberType: 'Integer',
+            integerDataSize: 'bigInt',
+          },
+          DECIMAL: {
+            numberType: 'Decimal',
+            decimalPlaces: null,
+            maxDigits: null,
+          },
+          NUMERIC: {
+            numberType: 'Decimal',
+            decimalPlaces: null,
+            maxDigits: null,
+          },
+          REAL: {
+            numberType: 'Float',
+            floatingPointType: 'real',
+          },
+          DOUBLE_PRECISION: {
+            numberType: 'Float',
+            floatingPointType: 'doublePrecision',
+          },
+        },
       },
     },
     display: {

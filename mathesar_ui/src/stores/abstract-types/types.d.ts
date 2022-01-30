@@ -1,5 +1,6 @@
 import type {
   FormConfiguration,
+  FormValues,
   DynamicInputType,
   Rule,
 } from '@mathesar-component-library/types';
@@ -19,6 +20,7 @@ export interface AbstractTypeDbConfigOptions {
       resolve: string;
       rule: Rule;
     }[];
+    ruleReversalValues: Record<string, FormValues>;
   };
 }
 
@@ -27,14 +29,6 @@ export interface AbstractTypeConfiguration {
   icon: string;
   input: {
     type: DynamicInputType;
-    validationRules?: Record<
-      string,
-      {
-        method: string;
-        op: string;
-        value: unknown;
-      }
-    >;
   };
   typeSwitchOptions?: {
     database: AbstractTypeDbConfigOptions;
