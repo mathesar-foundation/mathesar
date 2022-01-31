@@ -538,7 +538,7 @@ def test_record_list_filter_exceptions(create_table, client, exception):
         response_data = response.json()
     assert response.status_code == 400
     assert len(response_data) == 1
-    assert "filters" in response_data
+    assert "filters" in response_data[0]['field']
 
 
 @pytest.mark.parametrize("exception", [BadSortFormat, SortFieldNotFound])
@@ -553,7 +553,7 @@ def test_record_list_sort_exceptions(create_table, client, exception):
         response_data = response.json()
     assert response.status_code == 400
     assert len(response_data) == 1
-    assert "order_by" in response_data
+    assert "order_by" in response_data[0]['field']
 
 
 @pytest.mark.parametrize("exception", [BadGroupFormat, GroupFieldNotFound])
@@ -568,4 +568,4 @@ def test_record_list_group_exceptions(create_table, client, exception):
         response_data = response.json()
     assert response.status_code == 400
     assert len(response_data) == 1
-    assert "grouping" in response_data
+    assert "grouping" in response_data[0]['field']

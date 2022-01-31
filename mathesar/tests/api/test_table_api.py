@@ -7,6 +7,7 @@ from sqlalchemy import text
 
 from mathesar import reflection
 from mathesar import models
+from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models import Table, DataFile
 from db.tests.types import fixtures
 
@@ -461,7 +462,8 @@ def test_table_previews_wrong_column_number(client, schema, engine_email_type):
     }
     response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    assert "number" in response.json()[0]
+    assert "number" in response.json()[0]['message']
+    assert ErrorCodes.ColumnSizeMismatch.value == response.json()[0]['code']
 
 
 def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
@@ -491,7 +493,8 @@ def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
     }
     response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    assert "Invalid type" in response.json()[0]
+    assert "Invalid type" in response.json()[0]['message']
+    assert "columns" in response.json()[0]['field']
 
 
 def test_table_previews_invalid_type_cast_check(client, schema, engine_email_type):
@@ -521,7 +524,7 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_email_typ
     }
     response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    assert "Invalid type" in response.json()[0]
+    assert "Invalid type" in response.json()[0]['message']
 
 
 def test_table_previews_unsupported_type(client, schema, engine_email_type):
@@ -551,7 +554,8 @@ def test_table_previews_unsupported_type(client, schema, engine_email_type):
     }
     response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    assert "not supported" in response.json()[0]
+    assert "not supported" in response.json()[0]['message']
+    assert "columns" in response.json()[0]['field']
 
 
 def test_table_previews_missing_columns(client, schema, engine_email_type):
@@ -571,7 +575,8 @@ def test_table_previews_missing_columns(client, schema, engine_email_type):
     post_body = {}
     response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    assert "columns" in response.json()
+    assert "required" in response.json()[0]['message']
+    assert "columns" in response.json()[0]['field']
 
 
 @pytest.mark.parametrize('table_name', ['Test Table Create From Datafile', ''])
@@ -709,7 +714,8 @@ def test_table_create_with_same_name(client, schema):
     response = client.post('/api/v0/tables/', body)
     response_error = response.json()
     assert response.status_code == 400
-    assert response_error[0] == f"Relation {table_name} already exists in schema {schema.id}"
+    assert response_error[0]['code'] == ErrorCodes.DuplicateTableError.value
+    assert response_error[0]['message'] == f"Relation {table_name} already exists in schema {schema.id}"
 
 
 def test_table_partial_update(create_table, client):
@@ -809,8 +815,10 @@ def test_table_create_from_datafile_404(client):
     response = client.post('/api/v0/tables/', body)
     response_table = response.json()
     assert response.status_code == 400
-    assert 'object does not exist' in response_table['schema'][0]
-    assert 'object does not exist' in response_table['data_files'][0]
+    assert 'object does not exist' in response_table[0]['message']
+    assert response_table[0]['field'] == 'schema'
+    assert 'object does not exist' in response_table[1]['message']
+    assert response_table[1]['field'] == 'data_files'
 
 
 def test_table_create_from_multiple_datafile(client, data_file, schema):
@@ -822,7 +830,8 @@ def test_table_create_from_multiple_datafile(client, data_file, schema):
     response = client.post('/api/v0/tables/', body)
     response_table = response.json()
     assert response.status_code == 400
-    assert response_table['data_files'][0] == 'Multiple data files are unsupported.'
+    assert response_table[0]['message'] == 'Multiple data files are unsupported.'
+    assert response_table[0]['field'] == 'data_files'
 
 
 def test_table_partial_update_invalid_field(create_table, client):
