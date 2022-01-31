@@ -73,7 +73,6 @@ class TypeErrorAPIException(MathesarAPIException):
 
 
 class NotFoundAPIException(MathesarAPIException):
-    status_code = status.HTTP_404_NOT_FOUND
 
     def __init__(
             self,
@@ -82,9 +81,11 @@ class NotFoundAPIException(MathesarAPIException):
             message=None,
             field=None,
             details=None,
+            status_code=status.HTTP_404_NOT_FOUND
     ):
         exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
         self.detail = [exception_detail]
+        self.status_code = status_code
 
 
 class ValueAPIException(MathesarAPIException):
