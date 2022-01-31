@@ -14,7 +14,7 @@ access hints on what composition of functions and parameters should be valid.
 
 from abc import ABC, abstractmethod
 
-from sqlalchemy import column, not_, and_, or_, func, literal
+from sqlalchemy import column, not_, and_, or_, func, literal, select, Table
 from db.types.uri import URIFunction
 
 from db.functions import hints
@@ -28,11 +28,19 @@ class DBFunction(ABC):
     name = None
     hints = None
 
+    # Optionally lists the SQL functions this DBFunction depends on.
+    # Will be used to determine if a given database has the necessary SQL
+    # functions necessary to execute this DBFunction. Either None or a
+    # tuple of SQL function name strings.
+    depends_on = None
+
     def __init__(self, parameters):
         if self.id is None:
             raise ValueError('DBFunction subclasses must define an ID.')
         if self.name is None:
             raise ValueError('DBFunction subclasses must define a name.')
+        if self.depends_on is not None and not isinstance(self.depends_on, tuple):
+            raise ValueError('DBFunction subclasses\' depends_on attribute must either be None or a tuple of SQL function names.')
         self.parameters = parameters
 
     @property
@@ -231,12 +239,14 @@ class ExtractURIAuthority(DBFunction):
         hints.parameter_count(1),
         hints.parameter(1, hints.uri),
     ])
+    depends_on = tuple([URIFunction.AUTHORITY])
 
     @staticmethod
     def to_sa_expression(p1):
         return func.getattr(URIFunction.AUTHORITY)(p1)
 
 
+# TODO docstring
 def _get_defining_module_members_that_satisfy(predicate):
     # NOTE: the value returned by globals() (when it's called within a function) is set when the
     # function is defined and does not change depending on where the function is called from.
@@ -254,8 +264,21 @@ def _get_defining_module_members_that_satisfy(predicate):
 
 
 def _is_concrete_db_function_subclass(member):
-    return inspect.isclass(member) and member != DBFunction and issubclass(member, DBFunction)
+    return (
+        inspect.isclass(member)
+        and member != DBFunction
+        and issubclass(member, DBFunction)
+    )
 
 
-# Enumeration of supported DBFunction subclasses; needed when parsing.
-supported_db_functions = _get_defining_module_members_that_satisfy(_is_concrete_db_function_subclass)
+_db_functions_in_this_module = (
+    _get_defining_module_members_that_satisfy(
+        _is_concrete_db_function_subclass
+    )
+)
+
+
+_db_functions_in_other_modules = tuple([])
+
+
+known_db_functions = _db_functions_in_this_module + _db_functions_in_other_modules
