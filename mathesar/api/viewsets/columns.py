@@ -5,13 +5,12 @@ from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from sqlalchemy.exc import ProgrammingError
 
-from mathesar.api.exceptions.database_exceptions import exceptions as database_exceptions, base_exceptions as base_database_exceptions
+from mathesar.api.exceptions.database_exceptions import exceptions as database_exceptions, base_exceptions as base_database_api_exceptions
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from db.columns.exceptions import (
     DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError,
 )
 from db.columns.operations.select import get_columns_attnum_from_names
-from mathesar.api.exceptions import exceptions
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
@@ -47,7 +46,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
                 )
             except IndexError as e:
                 _col_idx = serializer.validated_data['source_column']
-                raise exceptions.NotFoundAPIException(
+                raise base_api_exceptions.NotFoundAPIException(
                     e,
                     message=f'column index "{_col_idx}" not found',
                     field='source_column',
@@ -66,7 +65,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
                         status_code=status.HTTP_400_BAD_REQUEST
                     )
                 else:
-                    raise base_database_exceptions.ProgrammingAPIException(e)
+                    raise base_database_api_exceptions.ProgrammingAPIException(e)
             except TypeError as e:
                 raise base_api_exceptions.TypeErrorAPIException(
                     e,
@@ -119,9 +118,9 @@ class ColumnViewSet(viewsets.ModelViewSet):
                         status_code=status.HTTP_400_BAD_REQUEST
                     )
                 else:
-                    raise base_database_exceptions.ProgrammingAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
+                    raise base_database_api_exceptions.ProgrammingAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
             except IndexError as e:
-                raise exceptions.NotFoundAPIException(e)
+                raise base_api_exceptions.NotFoundAPIException(e)
             except TypeError as e:
                 raise database_exceptions.InvalidTypeOptionAPIException(
                     e,

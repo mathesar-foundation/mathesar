@@ -4,9 +4,8 @@ from rest_framework.response import Response
 from rest_framework.renderers import BrowsableAPIRenderer
 from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
 
-import mathesar.api.exceptions.database_exceptions.exceptions
+import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
-from mathesar.api.exceptions import exceptions as api_exceptions
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
@@ -41,11 +40,11 @@ class RecordViewSet(viewsets.ViewSet):
                 grouping=serializer.validated_data['grouping'],
             )
         except (BadFilterFormat, FilterFieldNotFound) as e:
-            raise mathesar.api.exceptions.database_exceptions.exceptions.BadFilterAPIException(e, field='filters', status_code=status.HTTP_400_BAD_REQUEST)
+            raise database_api_exceptions.BadFilterAPIException(e, field='filters', status_code=status.HTTP_400_BAD_REQUEST)
         except (BadSortFormat, SortFieldNotFound) as e:
-            raise mathesar.api.exceptions.database_exceptions.exceptions.BadSortAPIException(e, field='order_by', status_code=status.HTTP_400_BAD_REQUEST)
+            raise database_api_exceptions.BadSortAPIException(e, field='order_by', status_code=status.HTTP_400_BAD_REQUEST)
         except (BadGroupFormat, GroupFieldNotFound, InvalidGroupType) as e:
-            raise mathesar.api.exceptions.database_exceptions.exceptions.BadGroupAPIException(e, field='grouping', status_code=status.HTTP_400_BAD_REQUEST)
+            raise database_api_exceptions.BadGroupAPIException(e, field='grouping', status_code=status.HTTP_400_BAD_REQUEST)
 
         serializer = RecordSerializer(records, many=True)
         return paginator.get_paginated_response(serializer.data)

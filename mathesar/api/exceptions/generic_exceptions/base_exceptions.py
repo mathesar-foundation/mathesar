@@ -48,7 +48,6 @@ class MathesarAPIException(APIException):
 
 
 class GenericAPIException(MathesarAPIException):
-    default_code = 'error'
     """
     Class which is used to convert list of errors into proper MathesarAPIException
     """
@@ -60,14 +59,45 @@ class GenericAPIException(MathesarAPIException):
 
 class TypeErrorAPIException(MathesarAPIException):
     # Default message is not needed as the exception string provides enough details
-    error_code = ErrorCodes.TypeError.value
 
     def __init__(
             self,
             exception,
+            error_code=ErrorCodes.TypeError.value,
             message=None,
             field=None,
             details=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
-        super().__init__(exception, self.error_code, message, field, details, status_code)
+        super().__init__(exception, error_code, message, field, details, status_code)
+
+
+class NotFoundAPIException(MathesarAPIException):
+
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.NotFound.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_404_NOT_FOUND
+    ):
+        exception_detail = get_default_exception_detail(exception, error_code, message, field, details)._asdict()
+        self.detail = [exception_detail]
+        self.status_code = status_code
+
+
+class ValueAPIException(MathesarAPIException):
+    # Default message is not needed as the exception string provides enough details
+
+    def __init__(
+            self,
+            exception,
+            error_code=ErrorCodes.ValueError.value,
+            message=None,
+            field=None,
+            details=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
+        super().__init__(exception, error_code, message, field, details, status_code)

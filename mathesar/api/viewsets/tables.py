@@ -10,7 +10,6 @@ import mathesar.api.exceptions.database_exceptions.base_exceptions
 import mathesar.api.exceptions.database_exceptions.exceptions
 import mathesar.api.exceptions.generic_exceptions.base_exceptions
 from db.types.exceptions import UnsupportedTypeException
-from mathesar.api.exceptions import exceptions as api_exceptions
 from mathesar.api.filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer
@@ -50,7 +49,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         try:
             table.update_sa_table(serializer.validated_data)
         except ValueError as e:
-            raise api_exceptions.ValueAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
+            raise mathesar.api.exceptions.generic_exceptions.base_exceptions.ValueAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
 
         # Reload the table to avoid cached properties
         table = self.get_object()

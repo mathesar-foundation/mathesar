@@ -3,9 +3,9 @@ from psycopg2.errors import DuplicateTable
 from rest_framework import serializers, status
 from sqlalchemy.exc import ProgrammingError
 
-from mathesar.api.exceptions.exceptions import (
-    MultipleDataFileAPIException,
-    DistinctColumnRequiredAPIException, ColumnSizeMismatchAPIException,
+from mathesar.api.exceptions.validation_exceptions.exceptions import (
+    ColumnSizeMismatchAPIException,
+    DistinctColumnRequiredAPIException, MultipleDataFileAPIException,
 )
 from mathesar.api.exceptions.database_exceptions.exceptions import DuplicateTableAPIException
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException

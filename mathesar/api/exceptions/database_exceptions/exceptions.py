@@ -2,8 +2,10 @@ from rest_framework import status
 
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.api.exceptions.generic_exceptions.base_exceptions import MathesarAPIException, \
-    get_default_exception_detail
+from mathesar.api.exceptions.generic_exceptions.base_exceptions import (
+    MathesarAPIException,
+    get_default_exception_detail,
+)
 
 
 class UniqueViolationAPIException(MathesarAPIException):

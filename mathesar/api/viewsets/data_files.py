@@ -4,9 +4,8 @@ from rest_framework.response import Response
 
 import mathesar.api.exceptions.data_import_exceptions.exceptions
 import mathesar.api.exceptions.database_exceptions.exceptions
-import mathesar.api.exceptions.generic_exceptions.base_exceptions
+import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.api.exceptions import exceptions
 from mathesar.errors import InvalidTableError
 from mathesar.models import DataFile
 from mathesar.api.pagination import DefaultLimitOffsetPagination
@@ -32,11 +31,11 @@ class DataFileViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
             serializer = DataFileSerializer(data_file, context={'request': request})
             return Response(serializer.data)
         else:
-            exception_body = mathesar.api.exceptions.generic_exceptions.base_exceptions.ErrorBody(
+            exception_body = base_api_exceptions.ErrorBody(
                 code=ErrorCodes.MethodNotAllowed.value,
                 message='Method "PATCH" allowed only for header.'
             )
-            raise mathesar.api.exceptions.generic_exceptions.base_exceptions.GenericAPIException(
+            raise base_api_exceptions.GenericAPIException(
                 [exception_body],
                 status.HTTP_405_METHOD_NOT_ALLOWED
             )

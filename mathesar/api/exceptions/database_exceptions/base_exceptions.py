@@ -5,7 +5,6 @@ from mathesar.api.exceptions.generic_exceptions.base_exceptions import MathesarA
 
 
 class ProgrammingAPIException(MathesarAPIException):
-    error_code = ErrorCodes.ProgrammingError.value
 
     def __init__(
             self,
@@ -21,14 +20,14 @@ class ProgrammingAPIException(MathesarAPIException):
 
 class IntegrityAPIException(MathesarAPIException):
     # Default message is not needed as the exception string provides enough details
-    error_code = ErrorCodes.NonClassifiedIntegrityError.value
 
     def __init__(
             self,
             exception,
+            error_code=ErrorCodes.NonClassifiedIntegrityError.value,
             message=None,
             field=None,
             details=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
-        super().__init__(exception, self.error_code, message, field, details, status_code)
+        super().__init__(exception, error_code, message, field, details, status_code)
