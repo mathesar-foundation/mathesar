@@ -69,7 +69,7 @@
   }
 
   function hideNullElement() {
-    if (isNullDisplayed === true) isNullDisplayed = false;
+    isNullDisplayed = false;
   }
 
   async function handleKeyDown(event: KeyboardEvent) {
