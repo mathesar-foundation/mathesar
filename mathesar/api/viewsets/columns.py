@@ -5,7 +5,10 @@ from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from sqlalchemy.exc import ProgrammingError
 
-from mathesar.api.exceptions.database_exceptions import exceptions as database_exceptions, base_exceptions as base_database_api_exceptions
+from mathesar.api.exceptions.database_exceptions import (
+    exceptions as database_api_exceptions,
+    base_exceptions as database_base_api_exceptions,
+)
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from db.columns.exceptions import (
     DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError,
@@ -58,14 +61,14 @@ class ColumnViewSet(viewsets.ModelViewSet):
             except ProgrammingError as e:
                 if type(e.orig) == DuplicateColumn:
                     name = request.data['name']
-                    raise database_exceptions.DuplicateTableAPIException(
+                    raise database_api_exceptions.DuplicateTableAPIException(
                         e,
                         message=f'Column {name} already exists',
                         field='name',
                         status_code=status.HTTP_400_BAD_REQUEST
                     )
                 else:
-                    raise base_database_api_exceptions.ProgrammingAPIException(e)
+                    raise database_base_api_exceptions.ProgrammingAPIException(e)
             except TypeError as e:
                 raise base_api_exceptions.TypeErrorAPIException(
                     e,
@@ -73,21 +76,21 @@ class ColumnViewSet(viewsets.ModelViewSet):
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
             except InvalidDefaultError as e:
-                raise database_exceptions.InvalidDefaultAPIException(
+                raise database_api_exceptions.InvalidDefaultAPIException(
                     e,
                     message=f'default "{request.data["default"]}" is invalid for type {request.data["type"]}',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
             except InvalidTypeOptionError as e:
                 type_options = request.data.get('type_options', '')
-                raise database_exceptions.InvalidTypeOptionAPIException(
+                raise database_api_exceptions.InvalidTypeOptionAPIException(
                     e,
                     message=f'parameter dict {type_options} is invalid for type {request.data["type"]}',
                     field="type_options",
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
             except InvalidTypeError as e:
-                raise database_exceptions.InvalidTypeCastAPIException(
+                raise database_api_exceptions.InvalidTypeCastAPIException(
                     e, message='This type casting is invalid.',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
@@ -112,29 +115,32 @@ class ColumnViewSet(viewsets.ModelViewSet):
                 table.alter_column(column_instance._sa_column.column_index, serializer.validated_data)
             except ProgrammingError as e:
                 if type(e.orig) == UndefinedFunction:
-                    raise database_exceptions.UndefinedFunctionAPIException(
+                    raise database_api_exceptions.UndefinedFunctionAPIException(
                         e,
                         message='This type cast is not implemented',
                         status_code=status.HTTP_400_BAD_REQUEST
                     )
                 else:
-                    raise base_database_api_exceptions.ProgrammingAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
+                    raise database_base_api_exceptions.ProgrammingAPIException(
+                        e,
+                        status_code=status.HTTP_400_BAD_REQUEST
+                    )
             except IndexError as e:
                 raise base_api_exceptions.NotFoundAPIException(e)
             except TypeError as e:
-                raise database_exceptions.InvalidTypeOptionAPIException(
+                raise database_api_exceptions.InvalidTypeOptionAPIException(
                     e,
                     message="Unknown type_option passed",
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
             except InvalidDefaultError as e:
-                raise database_exceptions.InvalidDefaultAPIException(
+                raise database_api_exceptions.InvalidDefaultAPIException(
                     e,
                     message=f'default "{request.data["default"]}" is invalid for this column',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
             except DynamicDefaultWarning as e:
-                raise database_exceptions.DynamicDefaultAPIException(
+                raise database_api_exceptions.DynamicDefaultAPIException(
                     e,
                     message='Changing type of columns with dynamically-generated defaults is not supported.'
                             'Delete or change the default first.',
@@ -142,13 +148,13 @@ class ColumnViewSet(viewsets.ModelViewSet):
                 )
             except InvalidTypeOptionError as e:
                 type_options = request.data.get('type_options', '')
-                raise database_exceptions.InvalidTypeOptionAPIException(
+                raise database_api_exceptions.InvalidTypeOptionAPIException(
                     e,
                     message=f'parameter dict {type_options} is invalid for type {request.data["type"]}',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
             except InvalidTypeError as e:
-                raise database_exceptions.InvalidTypeCastAPIException(
+                raise database_api_exceptions.InvalidTypeCastAPIException(
                     e,
                     message='This type casting is invalid.',
                     status_code=status.HTTP_400_BAD_REQUEST
