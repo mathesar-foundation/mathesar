@@ -7,19 +7,23 @@ from rest_framework_friendly_errors.settings import FRIENDLY_EXCEPTION_DICT
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 
 from db.types.exceptions import UnsupportedTypeException
+from mathesar.api.exceptions.database_exceptions import (
+    base_exceptions as base_api_exceptions,
+    exceptions as database_api_exceptions,
+)
+from mathesar.api.exceptions.data_import_exceptions import exceptions as data_import_api_exceptions
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.api.exceptions import exceptions
 from mathesar.api.exceptions.exception_mappers import integrity_error_mapper
-from mathesar.api.exceptions.exceptions import get_default_api_exception
+from mathesar.api.exceptions.generic_exceptions.base_exceptions import get_default_api_exception
 from mathesar.errors import URLDownloadError, URLNotReachable, URLInvalidContentTypeError
 
 exception_map = {
     IntegrityError: integrity_error_mapper,
-    UnsupportedTypeException: lambda exc: exceptions.UnsupportedTypeAPIException(exc),
-    ProgrammingError: lambda exc: exceptions.ProgrammingAPIException(exc),
-    URLDownloadError: lambda exc: exceptions.URLDownloadErrorAPIException(exc),
-    URLNotReachable: lambda exc: exceptions.URLNotReachableAPIException(exc),
-    URLInvalidContentTypeError: lambda exc: exceptions.URLInvalidContentTypeAPIException(exc)
+    UnsupportedTypeException: lambda exc: database_api_exceptions.UnsupportedTypeAPIException(exc),
+    ProgrammingError: lambda exc: base_api_exceptions.ProgrammingAPIException(exc),
+    URLDownloadError: lambda exc: data_import_api_exceptions.URLDownloadErrorAPIException(exc),
+    URLNotReachable: lambda exc: data_import_api_exceptions.URLNotReachableAPIException(exc),
+    URLInvalidContentTypeError: lambda exc: data_import_api_exceptions.URLInvalidContentTypeAPIException(exc)
 }
 
 
@@ -59,7 +63,8 @@ def mathesar_exception_handler(exc, context):
         else:
             warnings.warn("Error Response does not conform to the api spec. Please handle the exception properly")
             error_code = FRIENDLY_EXCEPTION_DICT.get(
-                exc.__class__.__name__, None)
+                exc.__class__.__name__, None
+            )
             if error_code is None and settings.MATHESAR_MODE != "PRODUCTION":
                 raise Exception("Error Response does not conform to the api spec. Please handle the exception properly")
             if isinstance(response.data, dict):
@@ -78,6 +83,10 @@ def is_pretty(data):
         return False
     else:
         for error_details in data:
-            if not isinstance(error_details, dict) or 'code' not in error_details or 'message' not in error_details:
+            if (
+                    not isinstance(error_details, dict)
+                    or 'code' not in error_details
+                    or 'message' not in error_details
+            ):
                 return False
         return True

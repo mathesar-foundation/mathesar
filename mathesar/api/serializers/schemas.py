@@ -10,6 +10,7 @@ class ModelNameField(serializers.CharField):
     `model.name`. Required to support passing and returing a model name from the
     endpoint, while also storing the model as a related field.
     """
+
     def to_representation(self, value):
         return value.name
 

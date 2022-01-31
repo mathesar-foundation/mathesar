@@ -6,8 +6,12 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateMode
 from rest_framework.response import Response
 from sqlalchemy.exc import DataError, IntegrityError
 
+from mathesar.api.exceptions.database_exceptions import (
+    exceptions as database_api_exceptions,
+    base_exceptions as database_base_api_exceptions,
+)
+from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from db.types.exceptions import UnsupportedTypeException
-from mathesar.api.exceptions import exceptions as api_exceptions
 from mathesar.api.filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer
@@ -47,7 +51,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         try:
             table.update_sa_table(serializer.validated_data)
         except ValueError as e:
-            raise api_exceptions.ValueAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
+            raise base_api_exceptions.ValueAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
 
         # Reload the table to avoid cached properties
         table = self.get_object()
@@ -78,19 +82,25 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             preview_records = table.get_preview(columns)
         except (DataError, IntegrityError) as e:
             if type(e.orig) == InvalidTextRepresentation or type(e.orig) == CheckViolation:
-                raise api_exceptions.InvalidTypeCastAPIException(e,
-                                                                 status_code=status.HTTP_400_BAD_REQUEST,
-                                                                 field='columns')
+                raise database_api_exceptions.InvalidTypeCastAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    field='columns'
+                )
             else:
-                raise api_exceptions.IntegrityAPIException(e,
-                                                           status_code=status.HTTP_400_BAD_REQUEST,
-                                                           field='columns')
+                raise database_base_api_exceptions.IntegrityAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    field='columns'
+                )
         except UnsupportedTypeException as e:
-            raise api_exceptions.UnsupportedTypeAPIException(e,
-                                                             field='columns',
-                                                             status_code=status.HTTP_400_BAD_REQUEST)
+            raise database_api_exceptions.UnsupportedTypeAPIException(
+                e,
+                field='columns',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         except Exception as e:
-            raise api_exceptions.MathesarAPIException(e)
+            raise base_api_exceptions.MathesarAPIException(e)
         table_data.update(
             {
                 # There's no way to reflect actual column data without
