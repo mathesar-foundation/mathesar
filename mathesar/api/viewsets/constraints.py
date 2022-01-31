@@ -22,13 +22,7 @@ class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
         table = get_table_or_404(table_pk)
         serializer = ConstraintSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        # If we don't do this, the request.data QueryDict will only return the last column's name
-        # if there are multiple columns.
-        if type(request.data) != dict:
-            data = request.data.dict()
-            data['columns'] = request.data.getlist('columns')
-        else:
-            data = request.data
+        data = serializer.validated_data
         try:
             name = data['name'] if 'name' in data else None
             constraint = table.add_constraint(data['type'], data['columns'], name)
