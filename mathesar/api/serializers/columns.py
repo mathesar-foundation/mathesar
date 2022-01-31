@@ -4,8 +4,10 @@ from rest_framework.fields import empty
 from rest_framework.settings import api_settings
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer, \
-    DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY
+from mathesar.api.serializers.shared_serializers import (
+    DisplayOptionsMappingSerializer,
+    DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY,
+)
 from mathesar.models import Column
 
 
@@ -15,6 +17,7 @@ class InputValueField(serializers.CharField):
     which takes in arbitrary values (un-validated and un-processed request.data).
     This field replicates that behavior in a serializer.
     """
+
     def to_internal_value(self, data):
         return data
 
@@ -89,7 +92,7 @@ class ColumnSerializer(SimpleColumnSerializer):
             'valid_target_types',
             'default'
         )
-        model_fields = ('display_options', )
+        model_fields = ('display_options',)
 
     name = serializers.CharField(required=False)
 

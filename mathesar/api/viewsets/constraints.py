@@ -4,7 +4,9 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from sqlalchemy.exc import ProgrammingError, IntegrityError
 
-from mathesar.api.exceptions import exceptions
+import mathesar.api.exceptions.database_exceptions.base_exceptions as base_database_api_exceptions
+import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
+import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.constraints import ConstraintSerializer
 from mathesar.api.utils import get_table_or_404
@@ -35,19 +37,21 @@ class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
             constraint = table.add_constraint(data['type'], data['columns'], name)
         except ProgrammingError as e:
             if type(e.orig) == DuplicateTable:
-                raise exceptions.DuplicateTableAPIException(e,
-                                                            message='Relation with the same name already exists',
-                                                            status_code=status.HTTP_400_BAD_REQUEST
-                                                            )
+                raise database_api_exceptions.DuplicateTableAPIException(
+                    e,
+                    message='Relation with the same name already exists',
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
             else:
-                raise exceptions.MathesarAPIException(e)
+                raise base_api_exceptions.MathesarAPIException(e)
         except IntegrityError as e:
             if type(e.orig) == UniqueViolation:
-                raise exceptions.UniqueViolationAPIException(e,
-                                                             status_code=status.HTTP_400_BAD_REQUEST
-                                                             )
+                raise database_api_exceptions.UniqueViolationAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
             else:
-                raise exceptions.MathesarAPIException(e)
+                raise base_api_exceptions.MathesarAPIException(e)
 
         out_serializer = ConstraintSerializer(constraint, context={'request': request})
         return Response(out_serializer.data, status=status.HTTP_201_CREATED)
@@ -58,7 +62,7 @@ class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
             constraint.drop()
         except ProgrammingError as e:
             if type(e.orig) == UndefinedObject:
-                raise exceptions.NotFoundAPIException(e)
+                raise base_api_exceptions.NotFoundAPIException(e)
             else:
-                raise exceptions.ProgrammingAPIException(e)
+                raise base_database_api_exceptions.ProgrammingAPIException(e)
         return Response(status=status.HTTP_204_NO_CONTENT)

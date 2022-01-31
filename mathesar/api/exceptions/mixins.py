@@ -3,7 +3,7 @@ from rest_framework.utils.serializer_helpers import ReturnList
 from rest_framework_friendly_errors.mixins import FriendlyErrorMessagesMixin
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.exceptions import ValidationError as RestValidationError
-from mathesar.api.exceptions.exceptions import ErrorBody
+from mathesar.api.exceptions.generic_exceptions.base_exceptions import ErrorBody
 
 
 class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
@@ -22,7 +22,6 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         for error_type in errors:
             error = errors[error_type]
             if error_type == 'non_field_errors':
-
                 if self.is_pretty(error):
                     pretty.append(error)
                 else:
@@ -56,8 +55,7 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                 args.append(field)
             validator(self.initial_data[field.field_name], *args)
         except (DjangoValidationError, RestValidationError) as err:
-            err_message = err.detail[0] \
-                if hasattr(err, 'detail') else err.message
+            err_message = err.detail[0] if hasattr(err, 'detail') else err.message
             return err_message == message
 
     @property
@@ -76,25 +74,10 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         It provides the following additional features
         1. Adds `ListSerializer` to `relation` field list
         """
-        return {
-            'boolean': ['BooleanField', 'NullBooleanField'],
-            'string': ['CharField', 'EmailField', 'RegexField', 'SlugField',
-                       'URLField', 'UUIDField', 'FilePathField',
-                       'IPAddressField'],
-            'numeric': ['IntegerField', 'FloatField', 'DecimalField'],
-            'date': {'DateTimeField': self.DATETIME_FORMAT,
-                     'DateField': self.DATE_FORMAT,
-                     'TimeField': self.TIME_FORMAT,
-                     'DurationField': self.DURATION_FORMAT},
-            'choice': ['ChoiceField', 'MultipleChoiceField'],
-            'file': ['FileField', 'ImageField'],
-            'composite': ['ListField', 'DictField', 'JSONField'],
-            'relation': ['StringRelatedField', 'PrimaryKeyRelatedField',
-                         'HyperlinkedRelatedField', 'SlugRelatedField',
-                         'HyperlinkedIdentityField', 'ManyRelatedField', 'ListSerializer'],
-            'miscellaneous': ['ReadOnlyField', 'HiddenField', 'ModelField',
-                              'SerializerMethodField']
-        }
+        parent_field_map = super(FriendlyErrorMessagesMixin, self).field_map
+        # Add missing `ListSerializer to existing relation list`
+        parent_field_map['relation'].append('ListSerializer')
+        return parent_field_map
 
     def get_field_kwargs(self, field, field_data):
         """
@@ -110,19 +93,24 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         if field_type in self.field_map['boolean']:
             kwargs.update({'input': field_data})
         elif field_type in self.field_map['string']:
-            kwargs.update({'max_length': getattr(field, 'max_length', None),
-                           'min_length': getattr(field, 'min_length', None),
-                           'value': field_data})
+            kwargs.update(
+                {
+                    'max_length': getattr(field, 'max_length', None),
+                    'min_length': getattr(field, 'min_length', None),
+                    'value': field_data
+                }
+            )
         elif field_type in self.field_map['numeric']:
 
-            kwargs.update({'min_value': field.min_value,
-                           'max_value': field.max_value,
-                           'decimal_places': getattr(field, 'decimal_places',
-                                                     None),
-                           'max_decimal_places': getattr(field,
-                                                         'decimal_places',
-                                                         None),
-                           'max_digits': getattr(field, 'max_digits', None)})
+            kwargs.update(
+                {
+                    'min_value': field.min_value,
+                    'max_value': field.max_value,
+                    'decimal_places': getattr(field, 'decimal_places', None),
+                    'max_decimal_places': getattr(field, 'decimal_places', None),
+                    'max_digits': getattr(field, 'max_digits', None)
+                }
+            )
             max_digits = kwargs['max_digits']
             decimal_places = kwargs['decimal_places']
             if max_digits is not None and decimal_places is not None:
@@ -131,22 +119,39 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         elif field_type in self.field_map['date'].keys():
             kwargs.update({'format': self.field_map['date'][field_type]})
         elif field_type in self.field_map['choice']:
-            kwargs.update({'input': field_data,
-                           'input_type': type(field_data).__name__})
+            kwargs.update(
+                {
+                    'input': field_data,
+                    'input_type': type(field_data).__name__
+                }
+            )
         elif field_type in self.field_map['file']:
-            kwargs.update({'max_length': field.max_length,
-                           'length': len(field.parent.data.get(
-                               field.source, '').name)})
+            kwargs.update(
+                {
+                    'max_length': field.max_length,
+                    # Parent method calculates the length of the file instead of the filename,
+                    # we are changing it to calculate length of the file name
+                    'length': len(field.parent.data.get(field.source, '').name)
+                }
+            )
         elif field_type in self.field_map['composite']:
-            kwargs.update({'input_type': type(field_data).__name__,
-                           'max_length': getattr(field, 'max_length', None),
-                           'min_length': getattr(field, 'min_length', None)})
+            kwargs.update(
+                {
+                    'input_type': type(field_data).__name__,
+                    'max_length': getattr(field, 'max_length', None),
+                    'min_length': getattr(field, 'min_length', None)
+                }
+            )
         elif field_type in self.field_map['relation']:
-            kwargs.update({'pk_value': field_data,
-                           'data_type': type(field_data).__name__,
-                           'input_type': type(field_data).__name__,
-                           'slug_name': getattr(field, 'slug_field', None),
-                           'value': field_data})
+            kwargs.update(
+                {
+                    'pk_value': field_data,
+                    'data_type': type(field_data).__name__,
+                    'input_type': type(field_data).__name__,
+                    'slug_name': getattr(field, 'slug_field', None),
+                    'value': field_data
+                }
+            )
         else:
             kwargs.update({'max_length': getattr(field, 'max_length', None)})
         return kwargs

@@ -6,7 +6,6 @@ from rest_framework.exceptions import ValidationError
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models import DataFile
 
-
 SUPPORTED_URL_CONTENT_TYPES = {'text/csv', 'text/plain'}
 
 
