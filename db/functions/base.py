@@ -29,9 +29,9 @@ class DBFunction(ABC):
     hints = None
 
     # Optionally lists the SQL functions this DBFunction depends on.
-    # Will be used to determine if a given database has the necessary SQL
-    # functions necessary to execute this DBFunction. Either None or a
-    # tuple of SQL function name strings.
+    # Will be checked against SQL functions defined on a database to tell if it
+    # supports this DBFunction. Either None or a tuple of SQL function name
+    # strings.
     depends_on = None
 
     def __init__(self, parameters):
