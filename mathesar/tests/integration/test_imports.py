@@ -10,3 +10,9 @@ def test_create_empty_table(page: Page, live_server):
     table_name = "Table 0"
     table_entry = tables_list.locator(f"li:has-text('{table_name}')")
     expect(table_entry).to_be_visible()
+
+def test_import_from_clipboard(page: Page, live_server):
+    page.goto(f"{live_server}")
+    page.click("[aria-label='New Table']")
+    page.click("button:has-text('Import Data')")
+    page.pause()
