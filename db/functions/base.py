@@ -18,8 +18,6 @@ from sqlalchemy import column, not_, and_, or_, func, literal
 
 from db.functions import hints
 
-from db.types import uri
-
 import importlib
 import inspect
 
@@ -231,35 +229,3 @@ class ToLowercase(DBFunction):
     @staticmethod
     def to_sa_expression(string):
         return func.lower(string)
-
-
-# TODO docstring
-def _get_defining_module_members_that_satisfy(predicate):
-    # NOTE: the value returned by globals() (when it's called within a function) is set when the
-    # function is defined and does not change depending on where the function is called from.
-    # See https://docs.python.org/3/library/functions.html#globals
-    # If we wanted to move this function into another namespace, we would have to additionally
-    # pass it this namespace's globals().
-    defining_module_name = globals()['__name__']
-    defining_module = importlib.import_module(defining_module_name)
-    all_members_in_defining_module = inspect.getmembers(defining_module)
-    return tuple(
-        member
-        for _, member in all_members_in_defining_module
-        if predicate(member)
-    )
-
-
-def _is_concrete_db_function_subclass(member):
-    return (
-        inspect.isclass(member)
-        and member != DBFunction
-        and issubclass(member, DBFunction)
-    )
-
-
-db_functions_in_base_module = (
-    _get_defining_module_members_that_satisfy(
-        _is_concrete_db_function_subclass
-    )
-)

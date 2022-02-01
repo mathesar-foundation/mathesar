@@ -9,9 +9,44 @@ declared outside the base module.
 These variables were broken off into a discrete module to avoid circular imports.
 """
 
+import inspect
+
+import db.functions.base
+
+from db.functions.base import DBFunction
+
 from db.types import uri
 
-from db.functions.base import db_functions_in_base_module
+
+def _get_module_members_that_satisfy(module, predicate):
+    """
+    Looks at the members of the provided module and filters them using the provided predicate.
+
+    In this context, it (together with the appropriate predicate) is used to automatically collect
+    all DBFunction subclasses found as top-level members of a module.
+    """
+    all_members_in_defining_module = inspect.getmembers(module)
+    return tuple(
+        member
+        for _, member in all_members_in_defining_module
+        if predicate(member)
+    )
+
+
+def _is_concrete_db_function_subclass(member):
+    return (
+        inspect.isclass(member)
+        and member != DBFunction
+        and issubclass(member, DBFunction)
+    )
+
+
+_db_functions_in_base_module = (
+    _get_module_members_that_satisfy(
+        db.functions.base,
+        _is_concrete_db_function_subclass
+    )
+)
 
 
 _db_functions_in_other_modules = tuple([
@@ -19,4 +54,4 @@ _db_functions_in_other_modules = tuple([
 ])
 
 
-known_db_functions = db_functions_in_base_module + _db_functions_in_other_modules
+known_db_functions = _db_functions_in_base_module + _db_functions_in_other_modules
