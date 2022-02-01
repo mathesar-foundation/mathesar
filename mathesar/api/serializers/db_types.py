@@ -11,4 +11,4 @@ class DBTypeSerializer(serializers.Serializer):
         return {
             "id": db_type.value,
             "hints": db_types_hinted.get(db_type, None),
-        } 
+        }

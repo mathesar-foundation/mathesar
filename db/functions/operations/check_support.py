@@ -31,7 +31,7 @@ def _are_db_function_dependencies_satisfied(db_function, functions_on_database):
     no_dependencies = not db_function.depends_on
     return (
         no_dependencies
-        or all( # all `db_function.depends_on` entries are in `functions_on_database`
+        or all(
             dependency_function in functions_on_database
             for dependency_function in db_function.depends_on
         )

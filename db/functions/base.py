@@ -14,7 +14,7 @@ access hints on what composition of functions and parameters should be valid.
 
 from abc import ABC, abstractmethod
 
-from sqlalchemy import column, not_, and_, or_, func, literal, select, Table
+from sqlalchemy import column, not_, and_, or_, func, literal
 from db.types.uri import URIFunction
 
 from db.functions import hints
