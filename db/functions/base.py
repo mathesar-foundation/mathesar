@@ -70,8 +70,8 @@ class Literal(DBFunction):
     ])
 
     @staticmethod
-    def to_sa_expression(p):
-        return literal(p)
+    def to_sa_expression(primitive):
+        return literal(primitive)
 
 
 class ColumnReference(DBFunction):
@@ -87,8 +87,8 @@ class ColumnReference(DBFunction):
         return self.parameters[0]
 
     @staticmethod
-    def to_sa_expression(p):
-        return column(p)
+    def to_sa_expression(column_name):
+        return column(column_name)
 
 
 class List(DBFunction):
@@ -96,8 +96,8 @@ class List(DBFunction):
     name = 'List'
 
     @staticmethod
-    def to_sa_expression(*ps):
-        return list(ps)
+    def to_sa_expression(*items):
+        return list(items)
 
 
 class Empty(DBFunction):
@@ -109,8 +109,8 @@ class Empty(DBFunction):
     ])
 
     @staticmethod
-    def to_sa_expression(p):
-        return p.is_(None)
+    def to_sa_expression(value):
+        return value.is_(None)
 
 
 class Not(DBFunction):
@@ -122,8 +122,8 @@ class Not(DBFunction):
     ])
 
     @staticmethod
-    def to_sa_expression(*p):
-        return not_(*p)
+    def to_sa_expression(value):
+        return not_(value)
 
 
 class Equal(DBFunction):
@@ -135,8 +135,8 @@ class Equal(DBFunction):
     ])
 
     @staticmethod
-    def to_sa_expression(p1, p2):
-        return p1 == p2
+    def to_sa_expression(value1, value2):
+        return value1 == value2
 
 
 class Greater(DBFunction):
@@ -149,8 +149,8 @@ class Greater(DBFunction):
     ])
 
     @staticmethod
-    def to_sa_expression(p1, p2):
-        return p1 > p2
+    def to_sa_expression(value1, value2):
+        return value1 > value2
 
 
 class Lesser(DBFunction):
@@ -163,8 +163,8 @@ class Lesser(DBFunction):
     ])
 
     @staticmethod
-    def to_sa_expression(p1, p2):
-        return p1 < p2
+    def to_sa_expression(value1, value2):
+        return value1 < value2
 
 
 class In(DBFunction):
@@ -177,8 +177,8 @@ class In(DBFunction):
     ])
 
     @staticmethod
-    def to_sa_expression(p1, p2):
-        return p1.in_(p2)
+    def to_sa_expression(value1, value2):
+        return value1.in_(value2)
 
 
 class And(DBFunction):
@@ -189,8 +189,8 @@ class And(DBFunction):
     ])
 
     @staticmethod
-    def to_sa_expression(*ps):
-        return and_(*ps)
+    def to_sa_expression(*values):
+        return and_(*values)
 
 
 class Or(DBFunction):
@@ -201,8 +201,8 @@ class Or(DBFunction):
     ])
 
     @staticmethod
-    def to_sa_expression(*ps):
-        return or_(*ps)
+    def to_sa_expression(*values):
+        return or_(*values)
 
 
 class StartsWith(DBFunction):
@@ -215,8 +215,8 @@ class StartsWith(DBFunction):
     ])
 
     @staticmethod
-    def to_sa_expression(p1, p2):
-        return p1.like(f'{p2}%')
+    def to_sa_expression(string, prefix):
+        return string.like(f'{prefix}%')
 
 
 class ToLowercase(DBFunction):
@@ -228,8 +228,8 @@ class ToLowercase(DBFunction):
     ])
 
     @staticmethod
-    def to_sa_expression(p1):
-        return func.lower(p1)
+    def to_sa_expression(string):
+        return func.lower(string)
 
 
 class ExtractURIAuthority(DBFunction):
@@ -242,8 +242,8 @@ class ExtractURIAuthority(DBFunction):
     depends_on = tuple([URIFunction.AUTHORITY])
 
     @staticmethod
-    def to_sa_expression(p1):
-        return func.getattr(URIFunction.AUTHORITY)(p1)
+    def to_sa_expression(uri):
+        return func.getattr(URIFunction.AUTHORITY)(uri)
 
 
 # TODO docstring
