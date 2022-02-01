@@ -21,11 +21,27 @@ Running integration tests requires a separate Docker setup using a much beefier 
 
 ## Running tests
 
-The integration tests require the server to be up and running. You can run the tests by executing the following command:
+1. Start the Docker container, if needed.
 
-```
-docker exec mathesar_service pytest --no-cov mathesar/tests/integration
-```
+    ```
+    docker-compose up
+    ```
+
+1. Build the front end.
+
+    ```
+    docker exec -w /code/mathesar_ui mathesar_service npx vite build
+    ```
+
+    **Important:** if you make changes to front end files, you'll need to execute the above command again to _re-build_ the front end before those changes will be reflected when running your test. We would like to set the E2E tests to run off the vite dev server, but we haven't yet figured out how to do that.
+
+1. Run tests.
+
+    ```
+    docker exec mathesar_service pytest --no-cov mathesar/tests/integration
+    ```
+
+    Passing `mathesar/tests/integration` (as above) will run all the integration tests. If you want to be more selective, you can pass the path to one file instead, or you can pass `-k test_foo` to run a single test by the name of its defining function.
 
 ## Writing tests
 
