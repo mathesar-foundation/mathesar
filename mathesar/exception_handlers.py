@@ -27,7 +27,7 @@ exception_map = {
 }
 
 
-def fix_error_response(data):
+def standardize_error_response(data):
     for index, error in enumerate(data):
         if 'code' in error:
             if error['code'] is not None and str(error['code']) != 'None':
@@ -55,8 +55,8 @@ def mathesar_exception_handler(exc, context):
     if response is not None:
         # Check if conforms to the api spec
         if is_pretty(response.data):
-            # Validation exception converts error_codes from integer to string, we need to convert it back into integer
-            response.data = fix_error_response(response.data)
+            # Validation exception converts error_codes from integer to string, we need to convert it back into
+            response.data = standardize_error_response(response.data)
             return response
         # Certain error raised by drf automatically don't follow the api error spec,
         # so we convert those into proper format
