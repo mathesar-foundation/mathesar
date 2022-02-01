@@ -159,14 +159,9 @@ class MathesarColumn(Column):
     @property
     def plain_type(self):
         """
-        Get the type name without arguments.
-
-        The compiled name is further lowercased to counteract what seems to be SQLAlchemy
-        uppercasing its output.
+        Get the type name without arguments
         """
-        type_name = self.type.__class__().compile(self.engine.dialect)
-        if type_name:
-            return type_name.lower()
+        return self.type.__class__().compile(self.engine.dialect)
 
     @property
     def type_options(self):
