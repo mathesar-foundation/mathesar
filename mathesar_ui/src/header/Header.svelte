@@ -58,22 +58,22 @@
 
     {#if $currentSchemaId}
       <div class="quick-links">
-        <Dropdown closeOnInnerClick={true} ariaLabel="New table">
+        <Dropdown closeOnInnerClick={true} ariaLabel="New Table">
           <svelte:fragment slot="trigger">
             <div class="new-table">
               <Icon data={faPlus} />
-              <span class="label">New table</span>
+              <span class="label">New Table</span>
             </div>
           </svelte:fragment>
           <svelte:fragment slot="content">
             <div class="new-table-options">
               <Button on:click={handleCreateEmptyTable} appearance="plain">
                 <Icon data={faTable} size="0.8em" />
-                <span>Empty table</span>
+                <span>Empty Table</span>
               </Button>
               <Button on:click={beginDataImport} appearance="plain">
                 <Icon data={faUpload} size="0.8em" />
-                <span>Import data</span>
+                <span>Import Data</span>
               </Button>
             </div>
           </svelte:fragment>
