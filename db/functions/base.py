@@ -15,9 +15,10 @@ access hints on what composition of functions and parameters should be valid.
 from abc import ABC, abstractmethod
 
 from sqlalchemy import column, not_, and_, or_, func, literal
-from db.types.uri import URIFunction
 
 from db.functions import hints
+
+from db.types import uri
 
 import importlib
 import inspect
@@ -232,20 +233,6 @@ class ToLowercase(DBFunction):
         return func.lower(string)
 
 
-class ExtractURIAuthority(DBFunction):
-    id = 'extract_uri_authority'
-    name = 'Extract URI Authority'
-    hints = tuple([
-        hints.parameter_count(1),
-        hints.parameter(1, hints.uri),
-    ])
-    depends_on = tuple([URIFunction.AUTHORITY])
-
-    @staticmethod
-    def to_sa_expression(uri):
-        return func.getattr(URIFunction.AUTHORITY)(uri)
-
-
 # TODO docstring
 def _get_defining_module_members_that_satisfy(predicate):
     # NOTE: the value returned by globals() (when it's called within a function) is set when the
@@ -271,14 +258,8 @@ def _is_concrete_db_function_subclass(member):
     )
 
 
-_db_functions_in_this_module = (
+db_functions_in_base_module = (
     _get_defining_module_members_that_satisfy(
         _is_concrete_db_function_subclass
     )
 )
-
-
-_db_functions_in_other_modules = tuple([])
-
-
-known_db_functions = _db_functions_in_this_module + _db_functions_in_other_modules

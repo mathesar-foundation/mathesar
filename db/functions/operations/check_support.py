@@ -1,6 +1,6 @@
 from sqlalchemy import select, Table, MetaData
 
-from db.functions.base import known_db_functions
+from db.functions.known_db_functions import known_db_functions
 
 
 def get_supported_db_functions(engine):
