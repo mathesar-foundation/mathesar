@@ -38,12 +38,18 @@
   export let canProceed = true;
   export let canCancel = true;
   export let isProcessing = false;
-  /**
-   * Bind to this function if you want to be able to programmatically call the
-   * proceed function from within the parent component and show the loading
-   * spinner while the promise is resolving.
-   */
-  export let proceed: () => Promise<void> = async () => {};
+
+  let spinnerButtonProceed: () => Promise<void> = async () => {};
+
+  export function proceed(): Promise<void> {
+    // Why do we have `spinnerButtonProceed` and `proceed` separately?
+    //
+    // Because we want to export a const (`proceed` here) to make it clear to
+    // consuming components that they can't supply their own function. AND we
+    // need for _this_ component to be able to change the function in the
+    // process of binding to the value from lower down in the component tree.
+    return spinnerButtonProceed();
+  }
 
   $: fullCancelButton = { ...cancelButtonDefaults, ...cancelButton };
   $: fullProceedButton = { ...proceedButtonDefaults, ...proceedButton };
@@ -56,7 +62,7 @@
   </Button>
   <SpinnerButton
     bind:isProcessing
-    bind:proceed
+    bind:proceed={spinnerButtonProceed}
     onClick={onProceed}
     icon={fullProceedButton.icon}
     label={fullProceedButton.label}

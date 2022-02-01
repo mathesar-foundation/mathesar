@@ -35,11 +35,8 @@
   $: hasGrouping = ($group as GroupOption)?.has(column.name);
 
   $: allowsNull = column.nullable;
-  $: uniqueColumns = constraintsDataStore.uniqueColumns;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  $: allowsDuplicates = !(
-    column.primary_key || $uniqueColumns.has(column.name)
-  );
+  $: ({ uniqueColumns } = constraintsDataStore);
+  $: allowsDuplicates = !(column.primary_key || $uniqueColumns.has(column.id));
 
   function handleSort(order: 'asc' | 'desc') {
     if (sortDirection === order) {
@@ -87,7 +84,7 @@
       identifierType: 'column',
       identifierName: column.name,
       body: [
-        'All objects related to this column will be afected.',
+        'All objects related to this column will be affected.',
         'This could break existing tables and views.',
         'Are you sure you want to proceed?',
       ],
