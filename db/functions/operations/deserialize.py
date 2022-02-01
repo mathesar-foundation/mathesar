@@ -1,4 +1,5 @@
-from db.functions.base import DBFunction, Literal, ColumnReference, supported_db_functions
+from db.functions.base import DBFunction, Literal, ColumnReference
+from db.functions.known_db_functions import known_db_functions
 from db.functions.exceptions import UnknownDBFunctionId, BadDBFunctionFormat
 
 
@@ -41,7 +42,7 @@ def _process_parameter(parameter, parent_db_function_subclass):
 
 
 def _get_db_function_subclass_by_id(subclass_id):
-    for db_function_subclass in supported_db_functions:
+    for db_function_subclass in known_db_functions:
         if db_function_subclass.id == subclass_id:
             return db_function_subclass
     raise UnknownDBFunctionId
