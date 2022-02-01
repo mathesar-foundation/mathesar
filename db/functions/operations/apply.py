@@ -34,7 +34,9 @@ def _get_columns_that_exist(relation):
 
 def _db_function_to_sa_expression(db_function):
     """
-    Everything is considered to be either a DBFunction subclass or a literal.
+    Takes a DBFunction, looks at the tree of its parameters (and the parameters of nested
+    DBFunctions), and turns it into an SQLAlchemy expression. Each parameter is expected to either
+    be a DBFunction instance or a literal primitive.
     """
     if isinstance(db_function, DBFunction):
         raw_parameters = db_function.parameters
