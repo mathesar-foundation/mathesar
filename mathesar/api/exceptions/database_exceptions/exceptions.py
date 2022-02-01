@@ -212,10 +212,12 @@ class NotNullViolationAPIException(MathesarAPIException):
     """
     error_code = ErrorCodes.NotNullViolation.value
 
-    def __init__(self, exception,
-                 message=None,
-                 field=None,
-                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self, exception,
+            message=None,
+            field=None,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         message_str, row_detail = exception.orig.args[0].split("DETAIL")
         message_str = message if message is not None else message_str
         details = {'row_parameters': exception.params, 'row_detail': row_detail}
