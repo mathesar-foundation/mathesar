@@ -122,6 +122,10 @@ export class ColumnsDataStore
     return getStoreValue(this.store);
   }
 
+  getColumnsByIds(ids: Column['id'][]): Column[] {
+    return this.get().columns.filter((column) => ids.includes(column.id));
+  }
+
   async fetch(): Promise<ColumnsData | undefined> {
     this.update((existingData) => ({
       ...existingData,
