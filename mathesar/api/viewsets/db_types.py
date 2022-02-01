@@ -3,7 +3,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-from db.types.base import db_types_hinted, get_available_known_db_types
+from db.types.base import get_available_known_db_types
+
+from mathesar.api.serializers.db_types import DBTypeSerializer
 
 from mathesar.models import Database
 
@@ -20,10 +22,5 @@ class DBTypeViewSet(viewsets.ViewSet):
             raise Exception({"database": f"Database '{db_name}' not found"}) from e
         engine = db_model._sa_engine
         available_known_db_types = get_available_known_db_types(engine)
-        data = [
-            {
-                "id": db_type.value,
-                "hints": db_types_hinted.get(db_type, None)
-            } for db_type in available_known_db_types
-        ]
-        return Response(data)
+        serializer = DBTypeSerializer(available_known_db_types, many=True)
+        return Response(serializer.data)
