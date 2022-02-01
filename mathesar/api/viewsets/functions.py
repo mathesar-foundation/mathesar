@@ -1,7 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from django.core.exceptions import ObjectDoesNotExist
-from sqlalchemy.schema import MetaData
 
 from db.functions.operations.check_support import get_supported_db_functions
 
@@ -20,7 +19,6 @@ class DBFunctionViewSet(viewsets.ViewSet):
         except ObjectDoesNotExist as e:
             raise Exception({"database": f"Database '{db_name}' not found"}) from e
         engine = db_model._sa_engine
-        metadata = MetaData()
-        supported_db_functions = get_supported_db_functions(engine, metadata)
+        supported_db_functions = get_supported_db_functions(engine)
         serializer = DBFunctionSerializer(supported_db_functions, many=True)
         return Response(serializer.data)

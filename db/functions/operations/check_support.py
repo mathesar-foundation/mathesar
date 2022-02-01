@@ -1,10 +1,10 @@
-from sqlalchemy import select, Table
+from sqlalchemy import select, Table, MetaData
 
 from db.functions.base import known_db_functions
 
 
-def get_supported_db_functions(engine, metadata):
-    functions_on_database = _get_functions_defined_on_database(engine, metadata)
+def get_supported_db_functions(engine):
+    functions_on_database = _get_functions_defined_on_database(engine)
     supported_db_functions = tuple(
         db_function
         for db_function in known_db_functions
@@ -17,7 +17,8 @@ def get_supported_db_functions(engine, metadata):
 
 
 # TODO consider caching
-def _get_functions_defined_on_database(engine, metadata):
+def _get_functions_defined_on_database(engine):
+    metadata = MetaData()
     pg_proc = Table('pg_proc', metadata, autoload_with=engine, schema='pg_catalog')
     select_statement = select(pg_proc.c.proname)
     return tuple(
