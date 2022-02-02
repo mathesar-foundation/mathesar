@@ -116,7 +116,6 @@
               : `Goto Page ${_page}`}
             aria-selected={currentPage === _page}
             on:click={(e) => setPage(e, _page)}
-            on:mousedown={(e) => e.preventDefault()}
             data-tinro-ignore
           >
             {_page}
@@ -130,7 +129,6 @@
               : `Goto Page ${_page}`}
             class="page"
             on:click={(e) => setPage(e, _page)}
-            on:mousedown={(e) => e.preventDefault()}
             aria-selected={currentPage === _page}
           >
             {_page}
