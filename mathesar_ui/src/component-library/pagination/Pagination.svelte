@@ -65,7 +65,7 @@
     {/if}
 
     {#if pageInfo.start > 1}
-      <li class:active={currentPage === pageInfo.start}>
+      <li>
         {#if getLink}
           <a
             tabindex="0"
@@ -153,7 +153,7 @@
           </button>
         </li>
       {/if}
-      <li class:active={currentPage === pageInfo.end}>
+      <li>
         {#if getLink}
           <a
             tabindex="0"
