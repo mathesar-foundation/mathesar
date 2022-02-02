@@ -7,4 +7,3 @@ from mathesar.api.viewsets.schemas import SchemaViewSet # noqa
 from mathesar.api.viewsets.tables import TableViewSet # noqa
 from mathesar.api.viewsets.functions import DBFunctionViewSet # noqa
 from mathesar.api.viewsets.db_types import DBTypeViewSet # noqa
-from mathesar.api.viewsets.filters import FiltersViewSet # noqa

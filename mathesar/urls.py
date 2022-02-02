@@ -19,7 +19,6 @@ table_router.register(r'columns', viewsets.ColumnViewSet, basename='table-column
 table_router.register(r'constraints', viewsets.ConstraintViewSet, basename='table-constraint')
 
 abstractions_router = routers.DefaultRouter()
-abstractions_router.register(r'filters', viewsets.FiltersViewSet, basename='filters')
 
 urlpatterns = [
     path('api/db/v0/', include(db_router.urls)),
