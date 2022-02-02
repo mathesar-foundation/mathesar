@@ -9,7 +9,10 @@
   } from '@mathesar-component-library';
   import { CancelOrProceedButtonPair } from '@mathesar-component-library';
   import { ControlledModal } from '@mathesar-component-library';
-  import type { TabularDataStore } from '@mathesar/stores/table-data/types';
+  import type {
+    Column,
+    TabularDataStore,
+  } from '@mathesar/stores/table-data/types';
   import { tables } from '@mathesar/stores/tables';
   import FormField from '@mathesar/components/FormField.svelte';
   import ColumnName from '@mathesar/components/ColumnName.svelte';
@@ -31,9 +34,13 @@
 
   function getSuggestedName(
     _tableName: string,
-    columnNames: string[],
+    columnIds: number[],
+    _columnsInTable: Column[],
     _existingConstraintNames: string[],
   ): string | undefined {
+    const getColumnName = (id: number) =>
+      _columnsInTable.find((c) => c.id === id)?.name;
+    const columnNames = columnIds.map(getColumnName);
     let ordinal = 0;
     while (true) {
       const suffix = ordinal ? `_${ordinal}` : '';
@@ -62,12 +69,12 @@
     return [];
   }
 
-  let constraintColumnNames: string[] = [];
+  let constraintColumnIds: number[] = [];
   let namingStrategy: NamingStrategy = 'auto';
   let constraintName: string | undefined;
 
   function init() {
-    constraintColumnNames = [];
+    constraintColumnIds = [];
     namingStrategy = 'auto';
     constraintName = undefined;
   }
@@ -80,7 +87,7 @@
   $: columnsDataStore = $tabularData.columnsDataStore;
   $: columnsInTable = $columnsDataStore.columns;
   $: columnsOptions = columnsInTable.map((column) => ({
-    value: column.name,
+    value: column.id,
     labelComponent: ColumnName,
     labelComponentProps: { column },
   }));
@@ -90,7 +97,7 @@
     existingConstraintNames,
   );
   $: canProceed =
-    constraintColumnNames.length > 0 && !nameValidationErrors.length;
+    constraintColumnIds.length > 0 && !nameValidationErrors.length;
 
   function handleNamingStrategyChange() {
     // Begin with a suggested name as the starting value, but only do it when
@@ -99,7 +106,8 @@
       namingStrategy === 'manual'
         ? getSuggestedName(
             tableName,
-            constraintColumnNames,
+            constraintColumnIds,
+            columnsInTable,
             existingConstraintNames,
           )
         : undefined;
@@ -108,7 +116,7 @@
   async function handleSave() {
     try {
       await constraintsDataStore.add({
-        columns: constraintColumnNames,
+        columns: constraintColumnIds,
         type: 'unique',
         name: constraintName,
       });
@@ -128,10 +136,7 @@
   <span slot="title">New Unique Constraint <UniqueConstraintsHelp /></span>
   <Form>
     <FormField>
-      <CheckboxGroup
-        options={columnsOptions}
-        bind:values={constraintColumnNames}
-      >
+      <CheckboxGroup options={columnsOptions} bind:values={constraintColumnIds}>
         Columns <UniqueConstraintColumnsHelp />
       </CheckboxGroup>
     </FormField>
