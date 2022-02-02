@@ -25,7 +25,9 @@ export default class EventHandler {
   protected async dispatch(eventName: string, value: unknown): Promise<void> {
     const callbacks = this.listeners.get(eventName);
     if (!callbacks) {
-      throw new Error(`Unable to dispatch unknown event '${eventName}'.`);
+      // eslint-disable-next-line no-console
+      console.warn(`No listeners found when dispatching event '${eventName}'.`);
+      return;
     }
     await Promise.all(
       [...callbacks.values()].map((callback) => callback(value)),
