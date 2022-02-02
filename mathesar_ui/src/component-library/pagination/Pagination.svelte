@@ -97,7 +97,7 @@
             aria-label="Goto Page {pageInfo.prevPageWindow}"
             on:click={(e) => setPage(e, pageInfo.prevPageWindow)}
           >
-            <Icon class="ellipsis" tabindex="-1" data={faEllipsisH} />
+            <Icon class="ellipsis" data={faEllipsisH} />
             <Icon class="arrow" data={faAngleDoubleLeft} />
           </button>
         </li>
@@ -148,7 +148,7 @@
             aria-label="Goto Page {pageInfo.nextPageWindow}"
             on:click={(e) => setPage(e, pageInfo.nextPageWindow)}
           >
-            <Icon class="ellipsis" tabindex="-1" data={faEllipsisH} />
+            <Icon class="ellipsis" data={faEllipsisH} />
             <Icon class="arrow" data={faAngleDoubleRight} />
           </button>
         </li>
