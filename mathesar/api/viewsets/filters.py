@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from django.core.exceptions import ObjectDoesNotExist
 
-from mathesar.filters.operations.check_support import get_supported_filters
+#from mathesar.filters.operations.check_support import get_supported_filters
 
 from mathesar.api.serializers.filters import FilterSerializer
 from mathesar.models import Database
@@ -21,6 +21,7 @@ class FiltersViewSet(viewsets.ViewSet):
         except ObjectDoesNotExist as e:
             raise Exception({"database": f"Database '{db_name}' not found"}) from e
         engine = db_model._sa_engine
-        supported_filters = get_supported_filters(engine)
-        serializer = FilterSerializer(supported_filters, many=True)
-        return Response(serializer.data)
+        #supported_filters = get_supported_filters(engine)
+        #serializer = FilterSerializer(supported_filters, many=True)
+        #return Response(serializer.data)
+        return None
