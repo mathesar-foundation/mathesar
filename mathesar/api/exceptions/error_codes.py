@@ -20,7 +20,7 @@ class ErrorCodes(Enum):
     InvalidTypeOption = 4210
     InvalidDefault = 4211
     NonClassifiedIntegrityError = 4201
-    NotNull = 4204
+    NotNullViolation = 4204
     RaiseException = 4202
     UndefinedFunction = 4207
     UniqueViolation = 4208
