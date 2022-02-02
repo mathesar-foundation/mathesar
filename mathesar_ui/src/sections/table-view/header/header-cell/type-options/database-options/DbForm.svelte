@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { Form, makeForm, executeRule } from '@mathesar-component-library';
+  import {
+    FormBuilder,
+    makeForm,
+    executeRule,
+  } from '@mathesar-component-library';
   import type {
     FormBuildConfiguration,
     FormInputDataType,
@@ -37,4 +41,4 @@
   $: setSelectedDBType($values);
 </script>
 
-<Form {form} />
+<FormBuilder {form} />
