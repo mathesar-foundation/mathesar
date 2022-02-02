@@ -348,6 +348,34 @@ grouping_params = [
 ]
 
 
+def test_null_error_record_create(create_table, client):
+    table_name = 'NASA Record Create'
+    table = create_table(table_name)
+    response = client.get(
+        f"/api/v0/tables/{table.id}/columns/"
+    )
+    columns = response.json()['results']
+    column_index = 3
+    column_id = columns[column_index]['id']
+    data = {"nullable": False}
+    client.patch(
+        f"/api/v0/tables/{table.id}/columns/{column_id}/", data=data
+    )
+    data = {
+        'Center': 'NASA Example Space Center',
+        'Status': 'Application',
+        'Case Number': None,
+        'Patent Number': '01234',
+        'Application SN': '01/000,001',
+        'Title': 'Example Patent Name',
+        'Patent Expiration Date': ''
+    }
+    response = client.post(f'/api/v0/tables/{table.id}/records/', data=data)
+    record_data = response.json()
+    assert response.status_code == 400
+    assert 'null value in column "Case Number"' in record_data[0]['message']
+
+
 @pytest.mark.parametrize('table_name,grouping,expected_groups', grouping_params)
 def test_record_list_groups(
         table_name, grouping, expected_groups, create_table, client,
@@ -538,7 +566,7 @@ def test_record_list_filter_exceptions(create_table, client, exception):
         response_data = response.json()
     assert response.status_code == 400
     assert len(response_data) == 1
-    assert "filters" in response_data
+    assert "filters" in response_data[0]['field']
 
 
 @pytest.mark.parametrize("exception", [BadSortFormat, SortFieldNotFound])
@@ -553,7 +581,7 @@ def test_record_list_sort_exceptions(create_table, client, exception):
         response_data = response.json()
     assert response.status_code == 400
     assert len(response_data) == 1
-    assert "order_by" in response_data
+    assert "order_by" in response_data[0]['field']
 
 
 @pytest.mark.parametrize("exception", [BadGroupFormat, GroupFieldNotFound])
@@ -568,4 +596,4 @@ def test_record_list_group_exceptions(create_table, client, exception):
         response_data = response.json()
     assert response.status_code == 400
     assert len(response_data) == 1
-    assert "grouping" in response_data
+    assert "grouping" in response_data[0]['field']
