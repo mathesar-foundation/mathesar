@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.cache import cache
 
 from mathesar.api.display_options import DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER
-from mathesar.api.filters import FILTER_OPTIONS_BY_TYPE_IDENTIFIER
+from mathesar.api.dj_filters import FILTER_OPTIONS_BY_TYPE_IDENTIFIER
 from mathesar.reflection import reflect_db_objects
 from mathesar.models import Table, Schema, Database
 from db.tests.types import fixtures
