@@ -1,11 +1,17 @@
 <script lang="ts">
   import { Icon, Button } from '@mathesar-component-library';
-  import type { Constraint } from '@mathesar/stores/table-data/types';
   import { faTrash } from '@fortawesome/free-solid-svg-icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
+  import type {
+    Constraint,
+    TabularDataStore,
+  } from '@mathesar/stores/table-data/types';
+  import { getContext } from 'svelte';
 
   export let constraint: Constraint;
   export let drop: () => Promise<void>;
+
+  const tabularData = getContext<TabularDataStore>('tabularData');
 
   function handleDrop() {
     void confirmDelete({
@@ -16,8 +22,12 @@
     });
   }
 
-  $: columnSummary = constraint.columns.join(', ');
   $: dropTitle = `Delete constraint '${constraint.name}'`;
+  $: columns = $tabularData.columnsDataStore.getColumnsByIds(
+    constraint.columns,
+  );
+  $: columnNames = columns.map((columnInConstraint) => columnInConstraint.name);
+  $: columnSummary = columnNames.join(', ');
 </script>
 
 <div class="table-constraint">

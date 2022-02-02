@@ -7,7 +7,7 @@
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "lint": "eslint .",
-    "typecheck": "svelte-check",
+    "typecheck": "svelte-check --tsconfig tsconfig.json --threshold error .",
     "build": "vite build",
     "test": "jest",
     "storybook": "start-storybook -p 6006",
