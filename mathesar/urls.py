@@ -5,13 +5,10 @@ from mathesar import views
 from mathesar.api import viewsets
 
 db_router = routers.DefaultRouter()
-
 db_router.register(r'tables', viewsets.TableViewSet, basename='table')
 db_router.register(r'schemas', viewsets.SchemaViewSet, basename='schema')
 db_router.register(r'databases', viewsets.DatabaseViewSet, basename='database')
 db_router.register(r'data_files', viewsets.DataFileViewSet, basename='data-file')
-db_router.register(r'functions', viewsets.DBFunctionViewSet, basename='functions')
-db_router.register(r'db_types', viewsets.DBTypeViewSet, basename='db_types')
 
 table_router = routers.NestedSimpleRouter(db_router, r'tables', lookup='table')
 table_router.register(r'records', viewsets.RecordViewSet, basename='table-record')
