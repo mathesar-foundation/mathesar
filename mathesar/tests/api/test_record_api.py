@@ -185,12 +185,13 @@ def test_record_list_filter_for_boolean_type(create_table, client):
 def test_record_list_sort(create_table, client):
     table_name = 'NASA Record List Order'
     table = create_table(table_name)
-
+    columns = table.columns.all()
     order_by = [
-        {'field': 'Center', 'direction': 'desc'},
-        {'field': 'Case Number', 'direction': 'asc'},
+        {'field': columns[3], 'direction': 'desc'},
+        {'field': columns[1], 'direction': 'asc'},
     ]
-    json_order_by = json.dumps(order_by)
+    id_converted_order_by = [{**column, 'field': column['field'].id} for column in order_by]
+    json_order_by = json.dumps(id_converted_order_by)
 
     with patch.object(
         models, "db_get_records", side_effect=models.db_get_records
@@ -205,7 +206,8 @@ def test_record_list_sort(create_table, client):
     assert len(response_data['results']) == 50
 
     assert mock_get.call_args is not None
-    assert mock_get.call_args[1]['order_by'] == order_by
+    name_converted_order_by = [{**column, 'field': column['field'].name} for column in order_by]
+    assert mock_get.call_args[1]['order_by'] == name_converted_order_by
 
 
 grouping_params = [
@@ -381,11 +383,16 @@ def test_record_list_groups(
         table_name, grouping, expected_groups, create_table, client,
 ):
     table = create_table(table_name)
+    columns = table.columns.all()
+
     order_by = [
-        {'field': 'id', 'direction': 'asc'},
+        {'field': columns[0].id, 'direction': 'asc'},
     ]
     json_order_by = json.dumps(order_by)
-    json_grouping = json.dumps(grouping)
+    columns_name_dict = {column.name: column for column in columns}
+    group_by_columns_ids = [columns_name_dict[column_name].id for column_name in grouping['columns']]
+    ids_converted_group_by = {**grouping, 'columns': group_by_columns_ids}
+    json_grouping = json.dumps(ids_converted_group_by)
     limit = 100
     query_str = f'grouping={json_grouping}&order_by={json_order_by}&limit={limit}'
 
@@ -573,7 +580,8 @@ def test_record_list_filter_exceptions(create_table, client, exception):
 def test_record_list_sort_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    order_by = json.dumps([{"field": "Center", "direction": "desc"}])
+    columns = table.columns.all()
+    order_by = json.dumps([{"field": columns[0].id, "direction": "desc"}])
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?order_by={order_by}'
@@ -588,7 +596,8 @@ def test_record_list_sort_exceptions(create_table, client, exception):
 def test_record_list_group_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    group_by = json.dumps({"columns": ["Center"]})
+    columns = table.columns.all()
+    group_by = json.dumps({"columns": [columns[3].id]})
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
             f'/api/v0/tables/{table.id}/records/?grouping={group_by}'

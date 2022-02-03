@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from db.records.operations.group import GroupBy
 from mathesar.api.utils import get_table_or_404, process_annotated_records
+from mathesar.models import Column
 
 
 class DefaultLimitOffsetPagination(LimitOffsetPagination):
@@ -12,10 +13,14 @@ class DefaultLimitOffsetPagination(LimitOffsetPagination):
     max_limit = 500
 
     def get_paginated_response(self, data):
-        return Response(OrderedDict([
-            ('count', self.count),
-            ('results', data)
-        ]))
+        return Response(
+            OrderedDict(
+                [
+                    ('count', self.count),
+                    ('results', data)
+                ]
+            )
+        )
 
 
 class ColumnLimitOffsetPagination(DefaultLimitOffsetPagination):
@@ -56,23 +61,38 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
 
 class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
     def get_paginated_response(self, data):
-        return Response(OrderedDict([
-            ('count', self.count),
-            ('grouping', self.grouping),
-            ('results', data)
-        ]))
+        return Response(
+            OrderedDict(
+                [
+                    ('count', self.count),
+                    ('grouping', self.grouping),
+                    ('results', data)
+                ]
+            )
+        )
 
     def paginate_queryset(
             self, queryset, request, table_id, filters=[], order_by=[], grouping={},
     ):
-        group_by = GroupBy(**grouping) if grouping else None
-
+        columns_ids = []
+        columns_ids += [column['field'] for column in order_by]
+        if grouping:
+            columns_ids += grouping['columns']
+        # TODO Extract column ids from filter parameter
+        columns = Column.objects.filter(id__in=columns_ids)
+        columns_name_dict = {column.id: column for column in columns}
+        name_converted_order_by = [{**column, 'field': columns_name_dict[column['field']].name} for column in order_by]
+        group_by_columns_names = []
+        if grouping:
+            group_by_columns_names = [columns_name_dict[column_id].name for column_id in grouping['columns']]
+        name_converted_group_by = {**grouping, 'columns': group_by_columns_names}
+        group_by = GroupBy(**name_converted_group_by) if name_converted_group_by else None
         records = super().paginate_queryset(
             queryset,
             request,
             table_id,
             filters=filters,
-            order_by=order_by,
+            order_by=name_converted_order_by,
             group_by=group_by,
         )
 
