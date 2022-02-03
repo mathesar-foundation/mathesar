@@ -21,6 +21,7 @@
   import { modal } from '@mathesar/stores/modal';
   import NewUniqueConstraintModal from './NewUniqueConstraintModal.svelte';
   import TableConstraint from './TableConstraint.svelte';
+  import ConstraintHelp from './__help__/ConstraintHelp.svelte';
 
   export let controller: ModalController;
 
@@ -38,14 +39,14 @@
   // for the more specific update.
   $: shouldShowLoadingSpinner = isEmpty && isLoading;
   $: countText = isEmpty ? '' : ` (${constraints.length as number})`;
-  $: title = `Table Constraints${countText as string}`;
 
   function remove(constraint: Constraint) {
     return (constraintsDataStore as ConstraintsDataStore).remove(constraint.id);
   }
 </script>
 
-<ControlledModal {controller} {title}>
+<ControlledModal {controller}>
+  <span slot="title">Table Constraints{countText} <ConstraintHelp /></span>
   <div class="table-constraints">
     {#if shouldShowLoadingSpinner}
       <Icon data={faSpinner} spin={true} />

@@ -18,6 +18,9 @@
   import ColumnName from '@mathesar/components/ColumnName.svelte';
   import { toast } from '@mathesar/stores/toast';
   import Form from '@mathesar/components/Form.svelte';
+  import UniqueConstraintsHelp from './__help__/UniqueConstraintsHelp.svelte';
+  import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
+  import UniqueConstraintColumnsHelp from './__help__/UniqueConstraintColumnsHelp.svelte';
 
   export let controller: ModalController;
 
@@ -129,24 +132,24 @@
   }
 </script>
 
-<ControlledModal title="New Unique Constraint" {controller} on:open={init}>
+<ControlledModal {controller} on:open={init}>
+  <span slot="title">New Unique Constraint <UniqueConstraintsHelp /></span>
   <Form>
     <FormField>
-      <CheckboxGroup
-        label="Columns"
-        options={columnsOptions}
-        bind:values={constraintColumnIds}
-      />
+      <CheckboxGroup options={columnsOptions} bind:values={constraintColumnIds}>
+        Columns <UniqueConstraintColumnsHelp />
+      </CheckboxGroup>
     </FormField>
 
     <FormField>
       <RadioGroup
-        label="Set Constraint Name"
         options={namingStrategyOptions}
         bind:value={namingStrategy}
         isInline
         on:change={handleNamingStrategyChange}
-      />
+      >
+        Set Constraint Name <ConstraintNameHelp />
+      </RadioGroup>
     </FormField>
 
     {#if namingStrategy === 'manual'}

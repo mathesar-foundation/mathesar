@@ -27,4 +27,5 @@
     checked={set.has(option.value)}
     disabled={option.disabled}
   />
+  <slot slot="label" />
 </FieldsetGroup>
