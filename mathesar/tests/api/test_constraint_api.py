@@ -97,7 +97,6 @@ def test_create_multiple_column_unique_constraint(create_table, client):
         'columns': constraint_column_id_list
     }
     response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
-    print(response.json())
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), constraint_column_id_list, 'NASA Constraint List 4_Center_key')
 
@@ -120,7 +119,6 @@ def test_create_unique_constraint_with_name_specified(create_table, client):
     table = create_table(table_name)
     columns = table.columns.all()
     constraint_column_2 = columns[3]
-    print(constraint_column_2)
     constraint_column_id_list = [constraint_column_2.id]
     data = {
         'name': 'awesome_constraint',
@@ -128,7 +126,6 @@ def test_create_unique_constraint_with_name_specified(create_table, client):
         'columns': constraint_column_id_list
     }
     response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
-    print(response.data)
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), constraint_column_id_list, 'awesome_constraint')
 

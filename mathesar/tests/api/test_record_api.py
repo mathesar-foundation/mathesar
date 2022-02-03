@@ -185,7 +185,7 @@ def test_record_list_filter_for_boolean_type(create_table, client):
 def test_record_list_sort(create_table, client):
     table_name = 'NASA Record List Order'
     table = create_table(table_name)
-    columns = table.columns.all()
+    columns = table.columns.all().order_by('id')
     order_by = [
         {'field': columns[3], 'direction': 'desc'},
         {'field': columns[1], 'direction': 'asc'},
@@ -383,7 +383,7 @@ def test_record_list_groups(
         table_name, grouping, expected_groups, create_table, client,
 ):
     table = create_table(table_name)
-    columns = table.columns.all()
+    columns = table.columns.all().order_by('id')
 
     order_by = [
         {'field': columns[0].id, 'direction': 'asc'},
@@ -580,7 +580,7 @@ def test_record_list_filter_exceptions(create_table, client, exception):
 def test_record_list_sort_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    columns = table.columns.all()
+    columns = table.columns.all().order_by('id')
     order_by = json.dumps([{"field": columns[0].id, "direction": "desc"}])
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
@@ -596,7 +596,7 @@ def test_record_list_sort_exceptions(create_table, client, exception):
 def test_record_list_group_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    columns = table.columns.all()
+    columns = table.columns.all().order_by('id')
     group_by = json.dumps({"columns": [columns[3].id]})
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(

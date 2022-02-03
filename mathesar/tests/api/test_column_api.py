@@ -693,7 +693,6 @@ def test_column_update_type_invalid_cast(column_test_table, client):
     response = client.patch(
         f"/api/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
-    print(response.json())
     assert response.status_code == 400
 
 
