@@ -187,3 +187,6 @@ static/
 
 # Playwright trace files
 test-results/
+
+# core dumps generated sometimes when something goes wrong with Playwright
+core

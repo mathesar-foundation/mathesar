@@ -9,5 +9,4 @@ def clear_cache():
 
 def test_page_shows_welcome_text(page, live_server):
     page.goto(f"{live_server}")
-    page.pause()
     assert page.inner_text('h1') == 'Welcome to Mathesar!'

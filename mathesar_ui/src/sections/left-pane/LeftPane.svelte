@@ -78,7 +78,7 @@
   }
 </script>
 
-<aside>
+<aside id="sidebar">
   <nav>
     <Tree
       data={tree}
