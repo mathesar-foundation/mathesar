@@ -46,6 +46,7 @@
   bind:value
   {id}
   {disabled}
+  on:input
   on:focus
   on:blur
   on:keydown={handleKeydown}

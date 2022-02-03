@@ -22,3 +22,4 @@ export type { ComponentAndProps } from './common/types/ComponentAndProps.d';
 export * from './icon/Icon.d';
 export * from './select/Select.d';
 export * from './file-upload/FileUpload.d';
+export * from './cancel-or-proceed-button-pair/CancelOrProceedButtonPair.d';
