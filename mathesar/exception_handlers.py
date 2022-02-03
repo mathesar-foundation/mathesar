@@ -67,6 +67,8 @@ def mathesar_exception_handler(exc, context):
             )
             if error_code is None and settings.MATHESAR_MODE != "PRODUCTION":
                 raise Exception("Error Response does not conform to the api spec. Please handle the exception properly")
+
+            # Errors thrown by drf automatically
             if isinstance(response.data, dict):
                 error_message = response.data.pop('detail', '')
 
