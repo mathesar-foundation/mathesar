@@ -189,6 +189,9 @@ FRIENDLY_ERRORS = {
             'not_a_list': 2123,
             'empty': 2093
         }
+    },
+    'EXCEPTION_DICT': {
+        'Http404': 4005
     }
 }
 # Mathesar settings
@@ -196,6 +199,6 @@ MATHESAR_MODE = decouple_config('MODE', default='PRODUCTION')
 MATHESAR_UI_BUILD_LOCATION = os.path.join(BASE_DIR, 'mathesar/static/mathesar/')
 MATHESAR_MANIFEST_LOCATION = os.path.join(MATHESAR_UI_BUILD_LOCATION, 'manifest.json')
 MATHESAR_CLIENT_DEV_URL = 'http://localhost:3000'
-
+MATHESAR_CAPTURE_UNHANDLED_EXCEPTION = decouple_config('CAPTURE_UNHANDLED_EXCEPTION', default=True)
 
 STATICFILES_DIRS = [MATHESAR_UI_BUILD_LOCATION]
