@@ -11,6 +11,14 @@ export class ImmutableSet<T extends string | number | boolean | null> {
     return new ImmutableSet(set);
   }
 
+  union(other: ImmutableSet<T>): ImmutableSet<T> {
+    const set = new Set(this.set);
+    [...other.values()].forEach((value) => {
+      set.add(value);
+    });
+    return new ImmutableSet(set);
+  }
+
   without(item: T): ImmutableSet<T> {
     const set = new Set(this.set);
     set.delete(item);

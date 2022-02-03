@@ -172,6 +172,11 @@ export class ColumnsDataStore
     return column;
   }
 
+  async rename(id: Column['id'], newName: string): Promise<void> {
+    await this.api.update(id, { name: newName });
+    await this.dispatch('columnRenamed', id);
+  }
+
   async setNullabilityOfColumn(
     column: Column,
     nullable: boolean,
@@ -194,7 +199,7 @@ export class ColumnsDataStore
   ): Promise<Partial<Column>> {
     const column = await this.api.update(columnId, { type });
     await this.fetch();
-    this.dispatch('columnPatched', column);
+    await this.dispatch('columnPatched', column);
     return column;
   }
 

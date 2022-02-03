@@ -50,8 +50,8 @@
   let constraintsDataStore: ConstraintsDataStore;
   let meta: Meta;
   let recordState: RecordsData['state'];
-  let isTableConstraintsModalOpen = false;
-  const tableRenameModal = modal.createVisibilityStore();
+  const tableConstraintsModal = modal.spawnModalController();
+  const tableRenameModal = modal.spawnModalController();
 
   $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
     $tabularData as TabularData);
@@ -108,7 +108,7 @@
         <li
           class="item"
           on:click={() => {
-            isTableConstraintsModalOpen = true;
+            tableConstraintsModal.open();
           }}
         >
           Constraints
@@ -117,12 +117,9 @@
     </svelte:fragment>
   </Dropdown>
 
-  <TableConstraints bind:isOpen={isTableConstraintsModalOpen} />
+  <TableConstraints controller={tableConstraintsModal} />
 
-  <RenameTableModal
-    bind:isOpen={$tableRenameModal}
-    tabularData={$tabularData}
-  />
+  <RenameTableModal controller={tableRenameModal} tabularData={$tabularData} />
 
   <div class="divider" />
 
