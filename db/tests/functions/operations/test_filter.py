@@ -62,43 +62,10 @@ ops_test_list = [
     ("numeric", "eq", 1, 1),
     ("date", "eq", "2000-01-01", 1),
     ("array", "eq", "{0,0}", 1),
-    # ne
-    # ("varchar", "ne", "string42", 99),
-    # ("numeric", "ne", 1, 99),
-    # ("date", "ne", "2000-01-01", 99),
-    # ("array", "ne", "{0,0}", 99),
     # gt
     ("varchar", "gt", "string0", 100),
     ("numeric", "gt", 50, 50),
     ("date", "gt", "2000-01-01", 99),
-    # lt
-    # ("varchar", "lt", "stringA", 100),
-    # ("numeric", "lt", 51, 50),
-    # ("date", "lt", "2099-01-01", 99),
-    # ge
-    # ("varchar", "ge", "string1", 100),
-    # ("numeric", "ge", 50, 51),
-    # ("date", "ge", "2000-01-01", 100),
-    # le
-    # ("varchar", "le", "string2", 13),
-    # ("numeric", "le", 51, 51),
-    # ("date", "le", "2099-01-01", 100),
-    # like
-    # ("varchar", "like", "%1", 10),
-    # ilike
-    # ("varchar", "ilike", "STRING1%", 12),
-    # not_ilike
-    # ("varchar", "not_ilike", "STRING1%", 88),
-    # in
-    # ("varchar", "in", ["string1", "string2", "string3"], 3),
-    # ("numeric", "in", [1, 2, 3], 3),
-    # not_in
-    # ("varchar", "not_in", ["string1", "string2", "string3"], 97),
-    # ("numeric", "not_in", [1, 2, 3], 97),
-    # any
-    # ("array", "any", 1, 1),
-    # not_any
-    # ("array", "not_any", 1, 99),
 ]
 
 
