@@ -53,6 +53,7 @@ module.exports = {
         'operator-linebreak': 'off',
         'space-in-parens': 'off',
         'no-confusing-arrow': 'off',
+        'no-constant-condition': 'off',
       },
     },
     {
@@ -91,6 +92,7 @@ module.exports = {
         'operator-linebreak': 'off',
         'space-in-parens': 'off',
         'no-confusing-arrow': 'off',
+        'no-constant-condition': 'off',
         '@typescript-eslint/require-await': 'off',
       },
     },

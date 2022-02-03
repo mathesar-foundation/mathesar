@@ -16,7 +16,6 @@
 @import 'labeled-input/LabeledInput.scss';
 @import 'progress/Progress.scss';
 @import 'radio/Radio.scss';
-@import 'seesaw/Seesaw.scss';
 @import 'skeleton/Skeleton.scss';
 @import 'text-avatar/TextAvatar.scss';
 @import 'spinner-area/SpinnerArea.scss';
@@ -30,7 +29,7 @@
 @import 'tree/Tree.scss';
 
 @import 'form-builder/Form.scss';
-@import 'modal/Modal.scss';
+@import 'modal/IndependentModal.scss';
 // Limit to one scss export from a component/system
 @import 'toast/ToastPresenter.scss';
 @import 'toast/ToastItem.scss';
