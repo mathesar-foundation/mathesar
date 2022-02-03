@@ -1,5 +1,13 @@
 from playwright.sync_api import Page, expect
 
+import pytest
+from django.core.cache import cache
+
+
+@pytest.fixture(autouse=True)
+def clear_cache():
+    cache.clear()
+
 
 def test_create_empty_table(page: Page, live_server):
     page.goto(f"{live_server}")
@@ -10,6 +18,7 @@ def test_create_empty_table(page: Page, live_server):
     table_name = "Table 0"
     table_entry = tables_list.locator(f"li:has-text('{table_name}')")
     expect(table_entry).to_be_visible()
+
 
 def test_import_from_clipboard(page: Page, live_server):
     page.goto(f"{live_server}")
