@@ -16,6 +16,7 @@ from mathesar.api.serializers.functions import DBFunctionSerializer
 from db.types.base import get_available_known_db_types
 from mathesar.api.serializers.db_types import DBTypeSerializer
 
+
 class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     serializer_class = DatabaseSerializer
     pagination_class = DefaultLimitOffsetPagination
