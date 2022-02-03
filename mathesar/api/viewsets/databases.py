@@ -7,8 +7,14 @@ from rest_framework.response import Response
 from mathesar.models import Database
 from mathesar.api.filters import DatabaseFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
+
 from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
 
+from db.functions.operations.check_support import get_supported_db_functions
+from mathesar.api.serializers.functions import DBFunctionSerializer
+
+from db.types.base import get_available_known_db_types
+from mathesar.api.serializers.db_types import DBTypeSerializer
 
 class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     serializer_class = DatabaseSerializer
@@ -23,4 +29,20 @@ class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
     def types(self, request, pk=None):
         database = self.get_object()
         serializer = TypeSerializer(database.supported_types, many=True)
+        return Response(serializer.data)
+
+    @action(methods=['get'], detail=True)
+    def functions(self, request, pk=None):
+        database = self.get_object()
+        engine = database._sa_engine
+        supported_db_functions = get_supported_db_functions(engine)
+        serializer = DBFunctionSerializer(supported_db_functions, many=True)
+        return Response(serializer.data)
+
+    @action(methods=['get'], detail=True)
+    def db_types(self, request, pk=None):
+        database = self.get_object()
+        engine = database._sa_engine
+        available_known_db_types = get_available_known_db_types(engine)
+        serializer = DBTypeSerializer(available_known_db_types, many=True)
         return Response(serializer.data)
