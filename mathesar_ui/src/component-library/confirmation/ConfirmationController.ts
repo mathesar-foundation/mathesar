@@ -2,7 +2,7 @@ import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
 import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 import type { Writable } from 'svelte/store';
 import { writable } from 'svelte/store';
-import type { ModalVisibilityStore } from '@mathesar-component-library';
+import type { ModalController } from '@mathesar-component-library-dir/modal';
 import type {
   IconFlip,
   IconRotate,
@@ -48,17 +48,17 @@ const baseConfirmationProps: ConfirmationProps = {
 };
 
 export class ConfirmationController {
-  modal: ModalVisibilityStore;
+  modal: ModalController;
 
   confirmationProps: Writable<ConfirmationProps>;
 
   resolve = writable<(isConfirmed: boolean) => void>(() => {});
 
   constructor(
-    modalVisibilityStore: ModalVisibilityStore,
+    modalController: ModalController,
     initialConfirmationProps: ConfirmationProps,
   ) {
-    this.modal = modalVisibilityStore;
+    this.modal = modalController;
     this.confirmationProps = writable(initialConfirmationProps);
   }
 }
@@ -72,7 +72,7 @@ export function makeConfirm({
   confirmationModal,
   defaultConfirmationProps,
 }: {
-  confirmationModal: ModalVisibilityStore;
+  confirmationModal: ModalController;
   defaultConfirmationProps?: ConfirmationProps;
 }): MakeConfirm {
   const fullDefaultConfirmationProps = {

@@ -15,6 +15,7 @@
   export let style = '';
   export let size: Size = 'medium';
   export let allowClose = true;
+  export let hasOverlay = true;
   export let closeOn: ModalCloseAction[] = ['button'];
 
   $: closeOnButton = allowClose && closeOn.includes('button');
@@ -49,12 +50,14 @@
 
 {#if isOpen}
   <div class="modal-wrapper" use:portal>
-    <div
-      class="overlay"
-      on:click={handleOverlayClick}
-      in:fade={{ duration: 150 }}
-      out:fade={{ duration: 150 }}
-    />
+    {#if hasOverlay}
+      <div
+        class="overlay"
+        on:click={handleOverlayClick}
+        in:fade={{ duration: 150 }}
+        out:fade={{ duration: 150 }}
+      />
+    {/if}
     <div
       class={['modal', `modal-size-${size}`, classes].join(' ')}
       {style}
@@ -64,8 +67,8 @@
       {#if $$slots.title || title || closeOnButton}
         <div class="title-bar">
           <div class="title">
-            {#if $$slots.title}<slot name="title" />{/if}
-            {#if title}{title}{/if}
+            <slot name="title" />
+            {title ?? ''}
           </div>
           {#if closeOnButton}
             <Button appearance="plain" class="close-button" on:click={close}>
@@ -79,9 +82,7 @@
         <slot {close} />
       </div>
 
-      {#if $$slots.footer}
-        <div class="footer"><slot name="footer" /></div>
-      {/if}
+      <div class="footer"><slot name="footer" /></div>
     </div>
   </div>
 {/if}

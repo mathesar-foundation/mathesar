@@ -3,9 +3,9 @@
 <style>
   span {
     font-size: 90%;
-    padding: 1px 4px;
-    background: #f4f4f4;
+    padding: 0.02em 0.3em;
+    background: rgba(0, 0, 0, 0.08);
     border-radius: 3px;
-    color: #888;
+    color: rgba(0, 0, 0, 0.7);
   }
 </style>
