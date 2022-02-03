@@ -91,6 +91,7 @@ module.exports = {
         'operator-linebreak': 'off',
         'space-in-parens': 'off',
         'no-confusing-arrow': 'off',
+        '@typescript-eslint/require-await': 'off',
       },
     },
   ],

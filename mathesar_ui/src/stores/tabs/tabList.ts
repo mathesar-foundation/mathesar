@@ -191,12 +191,7 @@ export class TabList {
   }
 
   addParamListenerToTab(tab: MathesarTab): void {
-    /**
-     * We do not have to explicity unlisten to this event.
-     * When tabularData is removed through `removeTabularContent` in remove method,
-     * all listeners for that tabularData are cleared.
-     */
-    tab.tabularData?.on('paramsUpdated', (params: TabularDataParams) => {
+    tab.tabularData?.on('paramsUpdated', async (params: TabularDataParams) => {
       syncSingleTabularParamToURL(this.dbName, this.schemaId, params);
     });
   }
