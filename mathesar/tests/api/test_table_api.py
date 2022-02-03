@@ -80,11 +80,11 @@ def check_table_response(response_table, table, table_name):
     assert response_table['constraints_url'].startswith('http')
     assert response_table['type_suggestions_url'].startswith('http')
     assert response_table['previews_url'].startswith('http')
-    assert '/api/v0/tables/' in response_table['records_url']
-    assert '/api/v0/tables/' in response_table['columns_url']
-    assert '/api/v0/tables/' in response_table['constraints_url']
-    assert '/api/v0/tables/' in response_table['type_suggestions_url']
-    assert '/api/v0/tables/' in response_table['previews_url']
+    assert '/api/db/v0/tables/' in response_table['records_url']
+    assert '/api/db/v0/tables/' in response_table['columns_url']
+    assert '/api/db/v0/tables/' in response_table['constraints_url']
+    assert '/api/db/v0/tables/' in response_table['type_suggestions_url']
+    assert '/api/db/v0/tables/' in response_table['previews_url']
     assert response_table['records_url'].endswith('/records/')
     assert response_table['columns_url'].endswith('/columns/')
     assert response_table['constraints_url'].endswith('/constraints/')
@@ -109,7 +109,7 @@ def _create_table(client, data_files, table_name, schema):
     if data_files is not None:
         body['data_files'] = [df.id for df in data_files]
 
-    response = client.post('/api/v0/tables/', body)
+    response = client.post('/api/db/v0/tables/', body)
     response_table = response.json()
     table = Table.objects.get(id=response_table['id'])
 
@@ -153,7 +153,7 @@ def test_table_list(create_table, client):
             {
                 "id": 1,
                 "name": "NASA Table List",
-                "schema": "http://testserver/api/v0/schemas/1/",
+                "schema": "http://testserver/api/db/v0/schemas/1/",
                 "created_at": "2021-04-27T18:43:41.201851Z",
                 "updated_at": "2021-04-27T18:43:41.201898Z",
                 "columns": [
@@ -167,7 +167,7 @@ def test_table_list(create_table, client):
                     },
                     # etc.
                 ],
-                "records_url": "http://testserver/api/v0/tables/3/records/"
+                "records_url": "http://testserver/api/db/v0/tables/3/records/"
             }
         ]
     }
@@ -175,7 +175,7 @@ def test_table_list(create_table, client):
     table_name = 'NASA Table List'
     table = create_table(table_name)
 
-    response = client.get('/api/v0/tables/')
+    response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     response_table = None
     for table_data in response_data['results']:
@@ -197,7 +197,7 @@ def test_table_list_filter_name(create_table, client):
 
     filter_tables = ['Filter Name 1', 'Filter Name 2']
     query_str = ','.join(filter_tables)
-    response = client.get(f'/api/v0/tables/?name={query_str}')
+    response = client.get(f'/api/db/v0/tables/?name={query_str}')
     response_data = response.json()
     check_table_filter_response(response, status_code=200, count=2)
 
@@ -218,7 +218,7 @@ def test_table_list_filter_schema(create_table, client):
 
     schema_name = 'Schema 1'
     schema_id = expected_tables[schema_name].schema.id
-    response = client.get(f'/api/v0/tables/?schema={schema_id}')
+    response = client.get(f'/api/db/v0/tables/?schema={schema_id}')
     response_data = response.json()
     check_table_filter_response(response, status_code=200, count=1)
 
@@ -239,14 +239,14 @@ def test_table_list_order_by_name(create_table, client):
     table_5 = create_table('Filter Name 5')
     unsorted_expected_tables = [table_5, table_3, table_4, table_1, table_2]
     expected_tables = [table_1, table_2, table_3, table_4, table_5]
-    response = client.get('/api/v0/tables/')
+    response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     response_tables = response_data['results']
     comparison_tuples = zip(response_tables, unsorted_expected_tables)
     for comparison_tuple in comparison_tuples:
         check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
     sort_field = "name"
-    response = client.get(f'/api/v0/tables/?sort_by={sort_field}')
+    response = client.get(f'/api/db/v0/tables/?sort_by={sort_field}')
     response_data = response.json()
     response_tables = response_data['results']
     comparison_tuples = zip(response_tables, expected_tables)
@@ -269,7 +269,7 @@ def test_table_list_order_by_id(create_table, client):
         table_3
     ]
 
-    response = client.get('/api/v0/tables/')
+    response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     response_tables = response_data['results']
     comparison_tuples = zip(response_tables, unsorted_expected_tables)
@@ -277,7 +277,7 @@ def test_table_list_order_by_id(create_table, client):
         check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
 
     sort_field = "id"
-    response = client.get(f'/api/v0/tables/?sort_by={sort_field}')
+    response = client.get(f'/api/db/v0/tables/?sort_by={sort_field}')
     response_data = response.json()
     response_tables = response_data['results']
     comparison_tuples = zip(response_tables, expected_tables)
@@ -291,17 +291,17 @@ def test_table_list_filter_timestamps(create_table, client, timestamp_type):
     table = create_table(table_name)
     query_str = '2020-01-01 8:00'
 
-    response = client.get(f'/api/v0/tables/?{timestamp_type}_before={query_str}')
+    response = client.get(f'/api/db/v0/tables/?{timestamp_type}_before={query_str}')
     response_data = response.json()
     check_table_filter_response(response, status_code=200, count=0)
 
-    response = client.get(f'/api/v0/tables/?{timestamp_type}_after={query_str}')
+    response = client.get(f'/api/db/v0/tables/?{timestamp_type}_after={query_str}')
     response_data = response.json()
     check_table_filter_response(response, status_code=200, count=1)
     check_table_response(response_data['results'][0], table, table_name)
 
     timestamp = table.created_at if timestamp_type == 'created' else table.updated_at
-    response = client.get(f'/api/v0/tables/?{timestamp_type}={timestamp}')
+    response = client.get(f'/api/db/v0/tables/?{timestamp_type}={timestamp}')
     response_data = response.json()
     check_table_filter_response(response, status_code=200, count=1)
     check_table_response(response_data['results'][0], table, table_name)
@@ -318,7 +318,7 @@ def test_table_list_filter_import_verified(create_table, client):
 
     for verified, table in expected_tables.items():
         query_str = str(verified).lower()
-        response = client.get(f'/api/v0/tables/?import_verified={query_str}')
+        response = client.get(f'/api/db/v0/tables/?import_verified={query_str}')
         response_data = response.json()
         check_table_filter_response(response, status_code=200, count=1)
         check_table_response(response_data['results'][0], table, table.name)
@@ -334,11 +334,11 @@ def test_table_list_filter_imported(create_table, client):
         table.import_verified = verified
         table.save()
 
-    response = client.get('/api/v0/tables/?not_imported=false')
+    response = client.get('/api/db/v0/tables/?not_imported=false')
     check_table_filter_response(response, status_code=200, count=2)
 
     table = expected_tables[None]
-    response = client.get('/api/v0/tables/?not_imported=true')
+    response = client.get('/api/db/v0/tables/?not_imported=true')
     response_data = response.json()
     check_table_filter_response(response, status_code=200, count=1)
     check_table_response(response_data['results'][0], table, table.name)
@@ -352,7 +352,7 @@ def test_table_detail(create_table, client):
     table_name = 'NASA Table Detail'
     table = create_table(table_name)
 
-    response = client.get(f'/api/v0/tables/{table.id}/')
+    response = client.get(f'/api/db/v0/tables/{table.id}/')
     response_table = response.json()
     assert response.status_code == 200
     check_table_response(response_table, table, table_name)
@@ -369,7 +369,7 @@ def test_table_type_suggestion(client, schema, engine_email_type):
         'name': table_name,
         'schema': schema.id,
     }
-    response_table = client.post('/api/v0/tables/', body).json()
+    response_table = client.post('/api/db/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
 
     EXPECTED_TYPES = {
@@ -380,7 +380,7 @@ def test_table_type_suggestion(client, schema, engine_email_type):
         'col_5': 'VARCHAR',
         'col_6': 'NUMERIC'
     }
-    response = client.get(f'/api/v0/tables/{table.id}/type_suggestions/')
+    response = client.get(f'/api/db/v0/tables/{table.id}/type_suggestions/')
     response_table = response.json()
     assert response.status_code == 200
     assert response_table == EXPECTED_TYPES
@@ -404,7 +404,7 @@ def test_table_previews(client, schema, engine_email_type):
         'name': table_name,
         'schema': schema.id,
     }
-    response_table = client.post('/api/v0/tables/', body).json()
+    response_table = client.post('/api/db/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
 
     post_body = {
@@ -418,7 +418,7 @@ def test_table_previews(client, schema, engine_email_type):
             {"name": "col_6", "type": "NUMERIC"}
         ]
     }
-    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
+    response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 200
     expect_dict = {
         'name': 'Type Modification Table',
@@ -446,7 +446,7 @@ def test_table_previews_wrong_column_number(client, schema, engine_email_type):
         'name': table_name,
         'schema': schema.id,
     }
-    response_table = client.post('/api/v0/tables/', body).json()
+    response_table = client.post('/api/db/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
 
     post_body = {
@@ -459,7 +459,7 @@ def test_table_previews_wrong_column_number(client, schema, engine_email_type):
             {"name": "col_6", "type": "NUMERIC"}
         ]
     }
-    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
+    response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
     assert "number" in response.json()[0]
 
@@ -475,7 +475,7 @@ def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
         'name': table_name,
         'schema': schema.id,
     }
-    response_table = client.post('/api/v0/tables/', body).json()
+    response_table = client.post('/api/db/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
 
     post_body = {
@@ -489,7 +489,7 @@ def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
             {"name": "col_6", "type": "NUMERIC"}
         ]
     }
-    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
+    response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
     assert "Invalid type" in response.json()[0]
 
@@ -505,7 +505,7 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_email_typ
         'name': table_name,
         'schema': schema.id,
     }
-    response_table = client.post('/api/v0/tables/', body).json()
+    response_table = client.post('/api/db/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
 
     post_body = {
@@ -519,7 +519,7 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_email_typ
             {"name": "col_6", "type": "NUMERIC"}
         ]
     }
-    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
+    response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
     assert "Invalid type" in response.json()[0]
 
@@ -535,7 +535,7 @@ def test_table_previews_unsupported_type(client, schema, engine_email_type):
         'name': table_name,
         'schema': schema.id,
     }
-    response_table = client.post('/api/v0/tables/', body).json()
+    response_table = client.post('/api/db/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
 
     post_body = {
@@ -549,7 +549,7 @@ def test_table_previews_unsupported_type(client, schema, engine_email_type):
             {"name": "col_6", "type": "NUMERIC"}
         ]
     }
-    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
+    response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
     assert "not supported" in response.json()[0]
 
@@ -565,11 +565,11 @@ def test_table_previews_missing_columns(client, schema, engine_email_type):
         'name': table_name,
         'schema': schema.id,
     }
-    response_table = client.post('/api/v0/tables/', body).json()
+    response_table = client.post('/api/db/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
 
     post_body = {}
-    response = client.post(f'/api/v0/tables/{table.id}/previews/', data=post_body)
+    response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
     assert "columns" in response.json()
 
@@ -705,8 +705,8 @@ def test_table_create_with_same_name(client, schema):
         'name': table_name,
         'schema': schema.id,
     }
-    client.post('/api/v0/tables/', body)
-    response = client.post('/api/v0/tables/', body)
+    client.post('/api/db/v0/tables/', body)
+    response = client.post('/api/db/v0/tables/', body)
     response_error = response.json()
     assert response.status_code == 400
     assert response_error[0] == f"Relation {table_name} already exists in schema {schema.id}"
@@ -718,7 +718,7 @@ def test_table_partial_update(create_table, client):
     table = create_table(table_name)
 
     body = {'name': new_table_name}
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
 
     response_table = response.json()
     assert response.status_code == 200
@@ -733,7 +733,7 @@ def test_table_partial_update_import_verified(create_table, client):
     table = create_table(table_name)
 
     body = {'import_verified': True}
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
 
     response_table = response.json()
     assert response.status_code == 200
@@ -745,7 +745,7 @@ def test_table_partial_update_schema(create_table, client):
     table = create_table(table_name)
 
     body = {'schema': table.schema.id}
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
 
     response_error = response.json()
     assert response.status_code == 400
@@ -758,7 +758,7 @@ def test_table_delete(create_table, client):
     table_count = len(Table.objects.all())
 
     with patch.object(models, 'drop_table') as mock_delete:
-        response = client.delete(f'/api/v0/tables/{table.id}/')
+        response = client.delete(f'/api/db/v0/tables/{table.id}/')
     assert response.status_code == 204
 
     # Ensure the Django model was deleted
@@ -782,20 +782,20 @@ def test_table_dependencies(client, create_table):
     table_name = 'NASA Table Dependencies'
     table = create_table(table_name)
 
-    response = client.get(f'/api/v0/tables/{table.id}/')
+    response = client.get(f'/api/db/v0/tables/{table.id}/')
     response_table = response.json()
     assert response.status_code == 200
     assert response_table['has_dependencies'] is True
 
 
 def test_table_404(client):
-    response = client.get('/api/v0/tables/3000/')
+    response = client.get('/api/db/v0/tables/3000/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
 
 
 def test_table_type_suggestion_404(client):
-    response = client.get('/api/v0/tables/3000/type_suggestions/')
+    response = client.get('/api/db/v0/tables/3000/type_suggestions/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
 
@@ -806,7 +806,7 @@ def test_table_create_from_datafile_404(client):
         'name': 'test_table',
         'schema': -999,
     }
-    response = client.post('/api/v0/tables/', body)
+    response = client.post('/api/db/v0/tables/', body)
     response_table = response.json()
     assert response.status_code == 400
     assert 'object does not exist' in response_table['schema'][0]
@@ -819,7 +819,7 @@ def test_table_create_from_multiple_datafile(client, data_file, schema):
         'name': 'test_table',
         'schema': schema.id,
     }
-    response = client.post('/api/v0/tables/', body)
+    response = client.post('/api/db/v0/tables/', body)
     response_table = response.json()
     assert response.status_code == 400
     assert response_table['data_files'][0] == 'Multiple data files are unsupported.'
@@ -830,27 +830,27 @@ def test_table_partial_update_invalid_field(create_table, client):
     table = create_table(table_name)
 
     body = {'schema': table.schema.id}
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
 
     assert response.status_code == 400
     assert 'is not supported' in response.json()['schema']
 
 
 def test_table_partial_update_404(client):
-    response = client.patch('/api/v0/tables/3000/', {})
+    response = client.patch('/api/db/v0/tables/3000/', {})
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
 
 
 def test_table_delete_404(client):
-    response = client.delete('/api/v0/tables/3000/')
+    response = client.delete('/api/db/v0/tables/3000/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
 
 
 def test_table_update(client, create_table):
     table = create_table('update_table_test')
-    response = client.put(f'/api/v0/tables/{table.id}/')
+    response = client.put(f'/api/db/v0/tables/{table.id}/')
     assert response.status_code == 405
     assert response.json()['detail'] == 'Method "PUT" not allowed.'
 
@@ -858,7 +858,7 @@ def test_table_update(client, create_table):
 def test_table_get_with_reflect_new(client, table_for_reflection):
     _, table_name, _ = table_for_reflection
     cache.clear()
-    response = client.get('/api/v0/tables/')
+    response = client.get('/api/db/v0/tables/')
     # The table number should only change after the GET request
     response_data = response.json()
     actual_created = [
@@ -886,7 +886,7 @@ def check_columns_response(created_columns, expected_response):
 def test_table_get_with_reflect_column_change(client, table_for_reflection):
     schema_name, table_name, engine = table_for_reflection
     cache.clear()
-    response = client.get('/api/v0/tables/')
+    response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     orig_created = [
         table for table in response_data['results'] if table['name'] == table_name
@@ -898,7 +898,7 @@ def test_table_get_with_reflect_column_change(client, table_for_reflection):
             text(f'ALTER TABLE {schema_name}.{table_name} RENAME COLUMN name TO {new_column_name};')
         )
     cache.clear()
-    response = client.get('/api/v0/tables/')
+    response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     altered_table = [
         table for table in response_data['results'] if table['name'] == table_name
@@ -914,7 +914,7 @@ def test_table_get_with_reflect_column_change(client, table_for_reflection):
 def test_table_get_with_reflect_name_change(client, table_for_reflection):
     schema_name, table_name, engine = table_for_reflection
     cache.clear()
-    response = client.get('/api/v0/tables/')
+    response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     orig_created = [
         table for table in response_data['results'] if table['name'] == table_name
@@ -928,7 +928,7 @@ def test_table_get_with_reflect_name_change(client, table_for_reflection):
             )
         )
     cache.clear()
-    response = client.get('/api/v0/tables/')
+    response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     orig_created_2 = [
         table for table in response_data['results'] if table['name'] == table_name
@@ -945,7 +945,7 @@ def test_table_get_with_reflect_name_change(client, table_for_reflection):
 def test_table_get_with_reflect_delete(client, table_for_reflection):
     schema_name, table_name, engine = table_for_reflection
     cache.clear()
-    response = client.get('/api/v0/tables/')
+    response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     orig_created = [
         table for table in response_data['results'] if table['name'] == table_name
@@ -954,7 +954,7 @@ def test_table_get_with_reflect_delete(client, table_for_reflection):
     with engine.begin() as conn:
         conn.execute(text(f'DROP TABLE {schema_name}.{table_name};'))
     cache.clear()
-    response = client.get('/api/v0/tables/')
+    response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     new_created = [
         table for table in response_data['results'] if table['name'] == table_name
@@ -965,14 +965,14 @@ def test_table_get_with_reflect_delete(client, table_for_reflection):
 def test_table_viewset_sets_cache(client):
     cache.delete(reflection.DB_REFLECTION_KEY)
     assert not cache.get(reflection.DB_REFLECTION_KEY)
-    client.get('/api/v0/schemas/')
+    client.get('/api/db/v0/schemas/')
     assert cache.get(reflection.DB_REFLECTION_KEY)
 
 
 def test_table_viewset_checks_cache(client):
     cache.delete(reflection.DB_REFLECTION_KEY)
     with patch.object(reflection, 'reflect_tables_from_schema') as mock_reflect:
-        client.get('/api/v0/tables/')
+        client.get('/api/db/v0/tables/')
     mock_reflect.assert_called()
 
 
@@ -1011,7 +1011,7 @@ def test_table_patch_same_table_name(create_table, client):
     body = {'name': table_name}
     # Need to specify format here because otherwise the body gets sent
     # as a multi-part form, which can't handle nested keys.
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
 
     assert response.status_code == 200
     assert response.json()['name'] == table_name
@@ -1027,7 +1027,7 @@ def test_table_patch_columns_and_table_name(create_table, client):
     }
     # Need to specify format here because otherwise the body gets sent
     # as a multi-part form, which can't handle nested keys.
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
 
     response_error = response.json()
     assert response.status_code == 400
@@ -1042,7 +1042,7 @@ def test_table_patch_columns_no_changes(create_table, client, engine_email_type)
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1058,7 +1058,7 @@ def test_table_patch_columns_one_name_change(create_table, client, engine_email_
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1075,7 +1075,7 @@ def test_table_patch_columns_two_name_changes(create_table, client, engine_email
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1091,7 +1091,7 @@ def test_table_patch_columns_one_type_change(create_table, client, engine_email_
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1128,7 +1128,7 @@ def test_table_patch_columns_multiple_type_change(create_data_types_table, clien
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1150,7 +1150,7 @@ def test_table_patch_columns_one_drop(create_data_types_table, client, engine_em
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1168,7 +1168,7 @@ def test_table_patch_columns_multiple_drop(create_data_types_table, client, engi
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1185,7 +1185,7 @@ def test_table_patch_columns_diff_name_type_change(create_data_types_table, clie
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1202,7 +1202,7 @@ def test_table_patch_columns_same_name_type_change(create_data_types_table, clie
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1221,7 +1221,7 @@ def test_table_patch_columns_multiple_name_type_change(create_data_types_table, 
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1239,7 +1239,7 @@ def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1258,7 +1258,7 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
@@ -1274,7 +1274,7 @@ def test_table_patch_columns_invalid_type(create_data_types_table, client, engin
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 400
@@ -1291,12 +1291,12 @@ def test_table_patch_columns_invalid_type_with_name(create_data_types_table, cli
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
     assert 'Pizza is not a boolean' in response_json[0]
 
-    current_table_response = client.get(f'/api/v0/tables/{table.id}/')
+    current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
     original_column_data = _get_data_types_column_data()
     _check_columns(current_table_response.json()['columns'], original_column_data)
@@ -1312,12 +1312,12 @@ def test_table_patch_columns_invalid_type_with_type(create_data_types_table, cli
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
     assert 'Pizza is not a boolean' in response_json[0]
 
-    current_table_response = client.get(f'/api/v0/tables/{table.id}/')
+    current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
     original_column_data = _get_data_types_column_data()
     _check_columns(current_table_response.json()['columns'], original_column_data)
@@ -1333,12 +1333,12 @@ def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, cli
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
     assert 'Pizza is not a boolean' in response_json[0]
 
-    current_table_response = client.get(f'/api/v0/tables/{table.id}/')
+    current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
     original_column_data = _get_data_types_column_data()
     _check_columns(current_table_response.json()['columns'], original_column_data)
@@ -1356,12 +1356,12 @@ def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_type
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
     assert response.status_code == 400
     assert 'Pizza is not a boolean' in response_json[0]
 
-    current_table_response = client.get(f'/api/v0/tables/{table.id}/')
+    current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
     original_column_data = _get_data_types_column_data()
     _check_columns(current_table_response.json()['columns'], original_column_data)

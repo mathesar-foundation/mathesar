@@ -42,7 +42,7 @@ def test_record_list(create_table, client):
     table_name = 'NASA Record List'
     table = create_table(table_name)
 
-    response = client.get(f'/api/v0/tables/{table.id}/records/')
+    response = client.get(f'/api/db/v0/tables/{table.id}/records/')
     response_data = response.json()
     record_data = response_data['results'][0]
 
@@ -65,7 +65,7 @@ def test_record_serialization(empty_nasa_table, client, type_, value):
     empty_nasa_table.add_column({"name": col_name, "type": type_})
     empty_nasa_table.create_record_or_records([{col_name: value}])
 
-    response = client.get(f'/api/v0/tables/{empty_nasa_table.id}/records/')
+    response = client.get(f'/api/db/v0/tables/{empty_nasa_table.id}/records/')
     response_data = response.json()
 
     assert response.status_code == 200
@@ -94,7 +94,7 @@ def test_record_list_filter(create_table, client):
         models, "db_get_records", side_effect=models.db_get_records
     ) as mock_get:
         response = client.get(
-            f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
+            f'/api/db/v0/tables/{table.id}/records/?filters={json_filter_list}'
         )
         response_data = response.json()
 
@@ -115,7 +115,7 @@ def test_record_list_filter_duplicates(create_table, client):
     json_filter_list = json.dumps(filter_list)
 
     with patch.object(models, "db_get_records", return_value=[]) as mock_get:
-        client.get(f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}')
+        client.get(f'/api/db/v0/tables/{table.id}/records/?filters={json_filter_list}')
     assert mock_get.call_args is not None
     assert mock_get.call_args[1]['filters'] == filter_list
 
@@ -128,7 +128,7 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
         table.add_column({"name": new_column_name, "type": new_column_type})
         row_values_list = []
 
-        response_data = client.get(f'/api/v0/tables/{table.id}/records/').json()
+        response_data = client.get(f'/api/db/v0/tables/{table.id}/records/').json()
         existing_records = response_data['results']
 
         for row_number, row in enumerate(existing_records, 1):
@@ -145,7 +145,7 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
                 models, "db_get_records", side_effect=models.db_get_records
             ) as mock_get:
                 response = client.get(
-                    f'/api/v0/tables/{table.id}/records/?filters={json_filter_list}'
+                    f'/api/db/v0/tables/{table.id}/records/?filters={json_filter_list}'
                 )
                 response_data = response.json()
 
@@ -196,7 +196,7 @@ def test_record_list_sort(create_table, client):
         models, "db_get_records", side_effect=models.db_get_records
     ) as mock_get:
         response = client.get(
-            f'/api/v0/tables/{table.id}/records/?order_by={json_order_by}'
+            f'/api/db/v0/tables/{table.id}/records/?order_by={json_order_by}'
         )
         response_data = response.json()
 
@@ -361,7 +361,7 @@ def test_record_list_groups(
     limit = 100
     query_str = f'grouping={json_grouping}&order_by={json_order_by}&limit={limit}'
 
-    response = client.get(f'/api/v0/tables/{table.id}/records/?{query_str}')
+    response = client.get(f'/api/db/v0/tables/{table.id}/records/?{query_str}')
     response_data = response.json()
 
     assert response.status_code == 200
@@ -381,7 +381,7 @@ def test_record_list_pagination_limit(create_table, client):
     table_name = 'NASA Record List Pagination Limit'
     table = create_table(table_name)
 
-    response = client.get(f'/api/v0/tables/{table.id}/records/?limit=5')
+    response = client.get(f'/api/db/v0/tables/{table.id}/records/?limit=5')
     response_data = response.json()
     record_data = response_data['results'][0]
 
@@ -396,10 +396,10 @@ def test_record_list_pagination_offset(create_table, client):
     table_name = 'NASA Record List Pagination Offset'
     table = create_table(table_name)
 
-    response_1 = client.get(f'/api/v0/tables/{table.id}/records/?limit=5&offset=5')
+    response_1 = client.get(f'/api/db/v0/tables/{table.id}/records/?limit=5&offset=5')
     response_1_data = response_1.json()
     record_1_data = response_1_data['results'][0]
-    response_2 = client.get(f'/api/v0/tables/{table.id}/records/?limit=5&offset=10')
+    response_2 = client.get(f'/api/db/v0/tables/{table.id}/records/?limit=5&offset=10')
     response_2_data = response_2.json()
     record_2_data = response_2_data['results'][0]
 
@@ -422,7 +422,7 @@ def test_record_detail(create_table, client):
     record_id = 1
     record = table.get_record(record_id)
 
-    response = client.get(f'/api/v0/tables/{table.id}/records/{record_id}/')
+    response = client.get(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
     record_data = response.json()
     record_as_dict = record._asdict()
 
@@ -447,7 +447,7 @@ def test_record_create(create_table, client):
         'Title': 'Example Patent Name',
         'Patent Expiration Date': ''
     }
-    response = client.post(f'/api/v0/tables/{table.id}/records/', data=data)
+    response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
     record_data = response.json()
 
     assert response.status_code == 201
@@ -464,14 +464,14 @@ def test_record_partial_update(create_table, client):
     records = table.get_records()
     record_id = records[0]['id']
 
-    original_response = client.get(f'/api/v0/tables/{table.id}/records/{record_id}/')
+    original_response = client.get(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
     original_data = original_response.json()
 
     data = {
         'Center': 'NASA Example Space Center',
         'Status': 'Example',
     }
-    response = client.patch(f'/api/v0/tables/{table.id}/records/{record_id}/', data=data)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/records/{record_id}/', data=data)
     record_data = response.json()
 
     assert response.status_code == 200
@@ -494,7 +494,7 @@ def test_record_delete(create_table, client):
     original_num_records = len(records)
     record_id = records[0]['id']
 
-    response = client.delete(f'/api/v0/tables/{table.id}/records/{record_id}/')
+    response = client.delete(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
     assert response.status_code == 204
     assert len(table.get_records()) == original_num_records - 1
 
@@ -509,7 +509,7 @@ def test_record_update(create_table, client):
         'Center': 'NASA Example Space Center',
         'Status': 'Example',
     }
-    response = client.put(f'/api/v0/tables/{table.id}/records/{record_id}/', data=data)
+    response = client.put(f'/api/db/v0/tables/{table.id}/records/{record_id}/', data=data)
     assert response.status_code == 405
     assert response.json()['detail'] == 'Method "PUT" not allowed.'
 
@@ -520,8 +520,8 @@ def test_record_404(create_table, client):
     records = table.get_records()
     record_id = records[0]['id']
 
-    client.delete(f'/api/v0/tables/{table.id}/records/{record_id}/')
-    response = client.get(f'/api/v0/tables/{table.id}/records/{record_id}/')
+    client.delete(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
+    response = client.get(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
 
@@ -533,7 +533,7 @@ def test_record_list_filter_exceptions(create_table, client, exception):
     filter_list = json.dumps([{"field": "Center", "op": "is_null"}])
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
-            f'/api/v0/tables/{table.id}/records/?filters={filter_list}'
+            f'/api/db/v0/tables/{table.id}/records/?filters={filter_list}'
         )
         response_data = response.json()
     assert response.status_code == 400
@@ -548,7 +548,7 @@ def test_record_list_sort_exceptions(create_table, client, exception):
     order_by = json.dumps([{"field": "Center", "direction": "desc"}])
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
-            f'/api/v0/tables/{table.id}/records/?order_by={order_by}'
+            f'/api/db/v0/tables/{table.id}/records/?order_by={order_by}'
         )
         response_data = response.json()
     assert response.status_code == 400
@@ -563,7 +563,7 @@ def test_record_list_group_exceptions(create_table, client, exception):
     group_by = json.dumps({"columns": ["Center"]})
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
-            f'/api/v0/tables/{table.id}/records/?grouping={group_by}'
+            f'/api/db/v0/tables/{table.id}/records/?grouping={group_by}'
         )
         response_data = response.json()
     assert response.status_code == 400

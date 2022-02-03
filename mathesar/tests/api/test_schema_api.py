@@ -22,7 +22,7 @@ def check_schema_response(response_schema, schema, schema_name, test_db_name, ch
 
 def test_schema_list(client, patent_schema, empty_nasa_table):
     cache.clear()
-    response = client.get('/api/v0/schemas/')
+    response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     response_schema = [
         s for s in response_data['results'] if s['name'] != 'public'
@@ -64,7 +64,7 @@ def test_schema_list_filter(client, monkeypatch):
     database_query = ",".join(databases)
     query = f"name={names_query}&database={database_query}"
 
-    response = client.get(f'/api/v0/schemas/?{query}')
+    response = client.get(f'/api/db/v0/schemas/?{query}')
     response_data = response.json()
     response_schemas = response_data['results']
 
@@ -93,7 +93,7 @@ def test_schema_detail(create_table, client, test_db_name):
     create_table('NASA Schema Detail')
 
     schema = models.Schema.objects.get()
-    response = client.get(f'/api/v0/schemas/{schema.id}/')
+    response = client.get(f'/api/db/v0/schemas/{schema.id}/')
     response_schema = response.json()
     assert response.status_code == 200
     check_schema_response(response_schema, schema, 'Patents', test_db_name)
@@ -123,7 +123,7 @@ def test_schema_sort_by_name(create_schema, client):
         schema_4,
         schema_5
     ]
-    response = client.get('/api/v0/schemas/')
+    response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
     comparison_tuples = zip(response_schemas, unsorted_expected_schemas)
@@ -131,7 +131,7 @@ def test_schema_sort_by_name(create_schema, client):
         check_schema_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
                               comparison_tuple[1].database.name)
     sort_field = "name"
-    response = client.get(f'/api/v0/schemas/?sort_by={sort_field}')
+    response = client.get(f'/api/db/v0/schemas/?sort_by={sort_field}')
     response_data = response.json()
     response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
     comparison_tuples = zip(response_schemas, expected_schemas)
@@ -164,7 +164,7 @@ def test_schema_sort_by_id(create_schema, client):
         schema_4,
         schema_5
     ]
-    response = client.get('/api/v0/schemas/')
+    response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
     comparison_tuples = zip(response_schemas, unsorted_expected_schemas)
@@ -172,7 +172,7 @@ def test_schema_sort_by_id(create_schema, client):
         check_schema_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
                               comparison_tuple[1].database.name)
 
-    response = client.get('/api/v0/schemas/?sort_by=id')
+    response = client.get('/api/db/v0/schemas/?sort_by=id')
     response_data = response.json()
     response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
     comparison_tuples = zip(response_schemas, expected_schemas)
@@ -188,7 +188,7 @@ def test_schema_create(client, test_db_name):
         'name': 'Test Schema',
         'database': test_db_name
     }
-    response = client.post('/api/v0/schemas/', data=data)
+    response = client.post('/api/db/v0/schemas/', data=data)
     response_schema = response.json()
     schema = models.Schema.objects.get(id=response_schema['id'])
 
@@ -202,7 +202,7 @@ def test_schema_update(client, test_db_name):
     data = {
         'name': 'blah'
     }
-    response = client.put(f'/api/v0/schemas/{schema.id}/', data=data)
+    response = client.put(f'/api/db/v0/schemas/{schema.id}/', data=data)
     assert response.status_code == 405
     assert response.json()['detail'] == 'Method "PUT" not allowed.'
 
@@ -213,7 +213,7 @@ def test_schema_partial_update(create_schema, client, test_db_name):
     schema = create_schema(schema_name)
 
     body = {'name': new_schema_name}
-    response = client.patch(f'/api/v0/schemas/{schema.id}/', body)
+    response = client.patch(f'/api/db/v0/schemas/{schema.id}/', body)
 
     response_schema = response.json()
     assert response.status_code == 200
@@ -228,7 +228,7 @@ def test_schema_patch_same_name(create_schema, client, test_db_name):
     schema = create_schema(schema_name)
 
     body = {'name': schema_name}
-    response = client.patch(f'/api/v0/schemas/{schema.id}/', body)
+    response = client.patch(f'/api/db/v0/schemas/{schema.id}/', body)
 
     response_schema = response.json()
     assert response.status_code == 200
@@ -247,7 +247,7 @@ def test_schema_delete(create_schema, client):
     schema = create_schema(schema_name)
 
     with patch.object(models, 'drop_schema') as mock_infer:
-        response = client.delete(f'/api/v0/schemas/{schema.id}/')
+        response = client.delete(f'/api/db/v0/schemas/{schema.id}/')
     assert response.status_code == 204
 
     # Ensure the Django model was deleted
@@ -269,26 +269,26 @@ def test_schema_dependencies(client, create_schema):
     schema_name = 'NASA Schema Dependencies'
     schema = create_schema(schema_name)
 
-    response = client.get(f'/api/v0/schemas/{schema.id}/')
+    response = client.get(f'/api/db/v0/schemas/{schema.id}/')
     response_schema = response.json()
     assert response.status_code == 200
     assert response_schema['has_dependencies'] is True
 
 
 def test_schema_detail_404(client):
-    response = client.get('/api/v0/schemas/3000/')
+    response = client.get('/api/db/v0/schemas/3000/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
 
 
 def test_schema_partial_update_404(client):
-    response = client.patch('/api/v0/schemas/3000/', {})
+    response = client.patch('/api/db/v0/schemas/3000/', {})
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
 
 
 def test_schema_delete_404(client):
-    response = client.delete('/api/v0/schemas/3000/')
+    response = client.delete('/api/db/v0/schemas/3000/')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Not found.'
 
@@ -299,7 +299,7 @@ def test_schema_get_with_reflect_new(client, test_db_name):
     with engine.begin() as conn:
         conn.execute(text(f'CREATE SCHEMA {schema_name};'))
     cache.clear()
-    response = client.get('/api/v0/schemas/')
+    response = client.get('/api/db/v0/schemas/')
     # The schema number should only change after the GET request
     response_data = response.json()
     actual_created = [
@@ -317,7 +317,7 @@ def test_schema_get_with_reflect_change(client, test_db_name):
         conn.execute(text(f'CREATE SCHEMA {schema_name};'))
 
     cache.clear()
-    response = client.get('/api/v0/schemas/')
+    response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     orig_created = [
         schema for schema in response_data['results'] if schema['name'] == schema_name
@@ -328,7 +328,7 @@ def test_schema_get_with_reflect_change(client, test_db_name):
     with engine.begin() as conn:
         conn.execute(text(f'ALTER SCHEMA {schema_name} RENAME TO {new_schema_name};'))
     cache.clear()
-    response = client.get('/api/v0/schemas/')
+    response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     orig_created = [
         schema for schema in response_data['results'] if schema['name'] == schema_name
@@ -347,9 +347,9 @@ def test_schema_create_duplicate(client, test_db_name):
         'name': 'Test Duplication Schema',
         'database': test_db_name
     }
-    response = client.post('/api/v0/schemas/', data=data)
+    response = client.post('/api/db/v0/schemas/', data=data)
     assert response.status_code == 201
-    response = client.post('/api/v0/schemas/', data=data)
+    response = client.post('/api/db/v0/schemas/', data=data)
     assert response.status_code == 400
 
 
@@ -360,7 +360,7 @@ def test_schema_get_with_reflect_delete(client, test_db_name):
         conn.execute(text(f'CREATE SCHEMA {schema_name};'))
 
     cache.clear()
-    response = client.get('/api/v0/schemas/')
+    response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     orig_created = [
         schema for schema in response_data['results'] if schema['name'] == schema_name
@@ -369,7 +369,7 @@ def test_schema_get_with_reflect_delete(client, test_db_name):
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA {schema_name};'))
     cache.clear()
-    response = client.get('/api/v0/schemas/')
+    response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     orig_created = [
         schema for schema in response_data['results'] if schema['name'] == schema_name
@@ -380,12 +380,12 @@ def test_schema_get_with_reflect_delete(client, test_db_name):
 def test_schema_viewset_sets_cache(client):
     cache.delete(reflection.DB_REFLECTION_KEY)
     assert not cache.get(reflection.DB_REFLECTION_KEY)
-    client.get('/api/v0/schemas/')
+    client.get('/api/db/v0/schemas/')
     assert cache.get(reflection.DB_REFLECTION_KEY)
 
 
 def test_schema_viewset_checks_cache(client):
     cache.delete(reflection.DB_REFLECTION_KEY)
     with patch.object(reflection, 'reflect_schemas_from_database') as mock_reflect:
-        client.get('/api/v0/schemas/')
+        client.get('/api/db/v0/schemas/')
     mock_reflect.assert_called()
