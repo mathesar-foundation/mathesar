@@ -3,6 +3,7 @@ from mathesar.api.dj_filters import FILTER_OPTIONS_BY_TYPE_IDENTIFIER
 from mathesar.models import Database
 from mathesar.reflection import reflect_db_objects
 
+
 def test_type_list(client, test_db_name):
     database = Database.objects.get(name=test_db_name)
 
