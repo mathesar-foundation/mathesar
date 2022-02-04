@@ -9,19 +9,33 @@ def clear_cache():
     cache.clear()
 
 
+def get_tables_list(page: Page):
+    return page.locator("#sidebar li[aria-level='1']:has(button:has-text('Tables')) ul")
+
+
+def get_table_entry(tables_list, table_name):
+    return tables_list.locator(f"li:has-text('{table_name}')")
+
+
 def test_create_empty_table(page: Page, live_server):
     page.goto(f"{live_server}")
-    tables_list = page.locator("#sidebar li[aria-level='1']:has(button:has-text('Tables')) ul")
+    tables_list = get_tables_list(page)
     expect(tables_list).to_be_empty()
     page.click("[aria-label='New Table']")
     page.click("button:has-text('Empty Table')")
-    table_name = "Table 0"
-    table_entry = tables_list.locator(f"li:has-text('{table_name}')")
+    table_entry = get_table_entry(tables_list, "Table 0")
     expect(table_entry).to_be_visible()
 
 
 def test_import_from_clipboard(page: Page, live_server):
     page.goto(f"{live_server}")
+    tables_list = get_tables_list(page)
+    expect(tables_list).to_be_empty()
     page.click("[aria-label='New Table']")
     page.click("button:has-text('Import Data')")
-    page.pause()
+    page.click("text=Copy and Paste Text")
+    page.fill("textarea", "foo,bar\n2,3")
+    page.click("button:has-text('Continue')")
+    page.click("button:has-text('Finish Import')")
+    table_entry = get_table_entry(tables_list, "Table 0")
+    expect(table_entry).to_be_visible()
