@@ -1,15 +1,15 @@
 <script lang="ts">
   import type { Column } from '@mathesar/stores/table-data/types';
   import {
-    abstractTypes,
+    currentDbAbstractTypes,
     getAbstractTypeForDBType,
-  } from '@mathesar/stores/abstractTypes';
+  } from '@mathesar/stores/abstract-types';
 
   export let column: Column;
 
   $: abstractTypeOfColumn = getAbstractTypeForDBType(
     column.type,
-    $abstractTypes.data,
+    $currentDbAbstractTypes.data,
   );
 </script>
 

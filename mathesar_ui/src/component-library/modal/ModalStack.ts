@@ -1,4 +1,4 @@
-import { ImmutableSet } from '@mathesar-component-library-dir/common/utils/ImmutableSet';
+import ImmutableSet from '@mathesar-component-library-dir/common/utils/ImmutableSet';
 
 type ModalId = number | string;
 

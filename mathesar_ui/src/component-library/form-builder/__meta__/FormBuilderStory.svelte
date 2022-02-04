@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { makeForm, Form } from '../index';
+  import { makeForm, FormBuilder } from '../index';
 
   export let formConfig;
 
@@ -7,7 +7,7 @@
 </script>
 
 <p>
-  <Form {form} />
+  <FormBuilder {form} />
 </p>
 
 <br />

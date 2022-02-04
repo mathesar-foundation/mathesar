@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getContext, tick } from 'svelte';
+  import { tick } from 'svelte';
   import {
     faCog,
     faChevronRight,
@@ -13,14 +13,11 @@
     TextInput,
     SpinnerArea,
   } from '@mathesar-component-library';
-  import type {
-    ConstraintsDataStore,
-    TabularDataStore,
-  } from '@mathesar/stores/table-data/types';
+  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import {
-    abstractTypes,
+    currentDbAbstractTypes,
     getAbstractTypeForDBType,
-  } from '@mathesar/stores/abstractTypes';
+  } from '@mathesar/stores/abstract-types';
   import { focusAndSelectAll } from '@mathesar/utils/domUtils';
   import type {
     Meta,
@@ -32,8 +29,6 @@
   import DefaultOptions from './DefaultOptions.svelte';
   import TypeOptions from './type-options/TypeOptions.svelte';
 
-  const tabularData = getContext<TabularDataStore>('tabularData');
-
   export let columnPosition: ColumnPosition | undefined = undefined;
   export let column: Column;
   export let meta: Meta;
@@ -42,7 +37,7 @@
 
   $: abstractTypeOfColumn = getAbstractTypeForDBType(
     column.type,
-    $abstractTypes.data,
+    $currentDbAbstractTypes.data,
   );
 
   let menuIsOpen = false;

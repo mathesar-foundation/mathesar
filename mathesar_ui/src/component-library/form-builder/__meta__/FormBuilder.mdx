@@ -1,5 +1,5 @@
 import { Story, Canvas, ArgsTable, Source } from '@storybook/addon-docs/blocks';
-import Form from '../Form.svelte';
+import FormBuilder from '../FormBuilder.svelte';
 
 # Form
 
@@ -9,12 +9,12 @@ Form system design specification.
 
 <Source language='html' code={`
 <script>
-  import { makeForm, Form } from '@mathesar-component-library';
+  import { makeForm, FormBuilder } from '@mathesar-component-library';
   const formConfig = { ... };
   const form = makeForm(formConfig);
 <\/script>
 
-<Form {form}/>
+<FormBuilder {form}/>
 `}/>
 
 ### Basic example

@@ -13,5 +13,3 @@ export function formatSize(sizeInBytes: number): string {
 
   return `${repValue.toFixed(2)} ${repUnit}B`;
 }
-
-export default {};
