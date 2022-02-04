@@ -208,7 +208,7 @@ def test_database_detail(client):
 def test_type_list(client, test_db_name):
     database = Database.objects.get(name=test_db_name)
 
-    response = client.get(f'/api/abst/v0/databases/{database.id}/types/')
+    response = client.get(f'/api/ui/v0/databases/{database.id}/types/')
     response_data = response.json()
     assert response.status_code == 200
     assert len(response_data) == len(database.supported_types)
@@ -256,5 +256,5 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
     reflect_db_objects()
     default_database = Database.objects.get(name=test_db_name)
 
-    response = client.get(f'/api/abst/v0/databases/{default_database.id}/types/').json()
+    response = client.get(f'/api/ui/v0/databases/{default_database.id}/types/').json()
     assert all([type_data in response for type_data in expected_custom_types])

@@ -3,7 +3,7 @@ from rest_framework_nested import routers
 
 from mathesar import views
 from mathesar.api.db import viewsets as db_viewsets
-from mathesar.api.abst import viewsets as abst_viewsets
+from mathesar.api.ui import viewsets as ui_viewsets
 
 db_router = routers.DefaultRouter()
 db_router.register(r'tables', db_viewsets.TableViewSet, basename='table')
@@ -16,13 +16,13 @@ db_table_router.register(r'records', db_viewsets.RecordViewSet, basename='table-
 db_table_router.register(r'columns', db_viewsets.ColumnViewSet, basename='table-column')
 db_table_router.register(r'constraints', db_viewsets.ConstraintViewSet, basename='table-constraint')
 
-abst_router = routers.DefaultRouter()
-abst_router.register(r'databases', abst_viewsets.DatabaseViewSet, basename='database')
+ui_router = routers.DefaultRouter()
+ui_router.register(r'databases', ui_viewsets.DatabaseViewSet, basename='database')
 
 urlpatterns = [
     path('api/db/v0/', include(db_router.urls)),
     path('api/db/v0/', include(db_table_router.urls)),
-    path('api/abst/v0/', include(abst_router.urls)),
+    path('api/ui/v0/', include(ui_router.urls)),
 
     # Specifying each route individually to facilitate redirection and data pre-rendering based on route
     path('', views.home, name="home"),
