@@ -189,10 +189,14 @@ def test_drop_nonexistent_constraint(create_table, client):
 
     response = client.delete(f'/api/v0/tables/{table.id}/constraints/345/')
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
+    response_data = response.json()[0]
+    assert response_data['message'] == "Not found."
+    assert response_data['code'] == ErrorCodes.NotFound.value
 
 
 def test_drop_nonexistent_table(create_table, client):
     response = client.delete('/api/v0/tables/9387489/constraints/4234/')
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
+    response_data = response.json()[0]
+    assert response_data['message'] == "Not found."
+    assert response_data['code'] == ErrorCodes.NotFound.value

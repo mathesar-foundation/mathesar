@@ -1,15 +1,24 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import {
     faCog,
     faChevronRight,
     faChevronLeft,
   } from '@fortawesome/free-solid-svg-icons';
-  import { Dropdown, Icon, Button } from '@mathesar-component-library';
+  import { toast } from '@mathesar/stores/toast';
+  import {
+    Dropdown,
+    Icon,
+    Button,
+    TextInput,
+    SpinnerArea,
+  } from '@mathesar-component-library';
   import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import {
     currentDbAbstractTypes,
     getAbstractTypeForDBType,
   } from '@mathesar/stores/abstract-types';
+  import { focusAndSelectAll } from '@mathesar/utils/domUtils';
   import type {
     Meta,
     Column,
@@ -32,6 +41,10 @@
   );
 
   let menuIsOpen = false;
+  let renamingInputElement: HTMLInputElement | undefined;
+  let isRenaming = false;
+  let isSubmittingRename = false;
+  let newName = '';
   let view: 'default' | 'type' = 'default';
 
   function setDefaultView() {
@@ -46,6 +59,71 @@
     menuIsOpen = false;
     setDefaultView();
   }
+
+  $: newNameValidationErrors = (() => {
+    if (newName === column.name) {
+      return [];
+    }
+    if (!newName) {
+      return ['Name cannot be empty.'];
+    }
+    const columnNames = $columnsDataStore.columns.map((c) => c.name);
+    if (columnNames.includes(newName)) {
+      return ['A column with that name already exists.'];
+    }
+    return [];
+  })();
+
+  async function handleStartRenaming() {
+    isRenaming = true;
+    newName = column.name;
+    await tick();
+    focusAndSelectAll(renamingInputElement);
+  }
+
+  function handleCancelRename() {
+    isRenaming = false;
+  }
+
+  async function submitRename({
+    allowRetry,
+  }: {
+    /** Keep the renaming state active if we get an error. */
+    allowRetry: boolean;
+  }) {
+    if (isSubmittingRename || !isRenaming) {
+      // When the user presses Enter, the TextInput will dispatch an 'enter'
+      // event as well as a 'blur' event. Since we're handling both events, we
+      // need to make sure this function dosen't run twice.
+      //
+      // Similarly, when the user presses Esc, we need to make sure not to
+      // proceed with submitting a rename operation.
+      return;
+    }
+    if (newName === column.name) {
+      isRenaming = false;
+      return;
+    }
+    if (newNameValidationErrors.length) {
+      toast.error(newNameValidationErrors.join(' '));
+      if (!allowRetry) {
+        isRenaming = false;
+      }
+      return;
+    }
+    try {
+      isSubmittingRename = true;
+      await columnsDataStore.rename(column.id, newName);
+      isRenaming = false;
+    } catch (error) {
+      toast.error(`Unable to rename column. ${error?.message as string}`);
+      if (!allowRetry) {
+        isRenaming = false;
+      }
+    } finally {
+      isSubmittingRename = false;
+    }
+  }
 </script>
 
 <div
@@ -55,67 +133,86 @@
     left:{columnPosition?.left || 0}px;
   "
 >
-  <Dropdown
-    bind:isOpen={menuIsOpen}
-    triggerClass="column-opts"
-    triggerAppearance="plain"
-    contentClass="column-opts-content"
-    on:close={setDefaultView}
-  >
-    <svelte:fragment slot="trigger">
-      <span class="type">
-        {abstractTypeOfColumn?.icon}
-      </span>
-      <span class="name">{column.name}</span>
-    </svelte:fragment>
-    <svelte:fragment slot="content">
-      <div class="container">
-        <div class="section type-header">
-          {#if view === 'default'}
-            <h6 class="category">Data Type</h6>
-            <Button
-              class="type-switch"
-              appearance="plain"
-              on:click={setTypeView}
-            >
-              <span>{abstractTypeOfColumn?.name}</span>
-              <Icon size="0.8em" data={faCog} />
-              <Icon size="0.7em" data={faChevronRight} />
-            </Button>
-          {:else if view === 'type'}
-            <h6 class="category">
-              <Button
-                size="small"
-                appearance="plain"
-                class="padding-zero"
-                on:click={setDefaultView}
-              >
-                <Icon data={faChevronLeft} />
-                Go back
-              </Button>
-            </h6>
-          {/if}
-        </div>
-
-        <div class="divider" />
-
-        <div class="section">
-          {#if view === 'default'}
-            <h6 class="category">Operations</h6>
-            <DefaultOptions
-              {meta}
-              {column}
-              {columnsDataStore}
-              {constraintsDataStore}
-              on:close={closeMenu}
-            />
-          {:else if view === 'type'}
-            <TypeOptions {column} {abstractTypeOfColumn} on:close={closeMenu} />
-          {/if}
-        </div>
-      </div></svelte:fragment
+  {#if isRenaming}
+    <SpinnerArea isSpinning={isSubmittingRename} hasOverlay={false}>
+      <TextInput
+        bind:value={newName}
+        bind:element={renamingInputElement}
+        disabled={isSubmittingRename}
+        hasValidationErrors={!!newNameValidationErrors.length}
+        aria-label="Column name"
+        on:enter={() => submitRename({ allowRetry: true })}
+        on:blur={() => submitRename({ allowRetry: false })}
+        on:esc={handleCancelRename}
+      />
+    </SpinnerArea>
+  {:else}
+    <Dropdown
+      bind:isOpen={menuIsOpen}
+      triggerClass="column-opts"
+      triggerAppearance="plain"
+      contentClass="column-opts-content"
+      on:close={setDefaultView}
     >
-  </Dropdown>
+      <svelte:fragment slot="trigger">
+        <span class="type">
+          {abstractTypeOfColumn?.icon}
+        </span>
+        <span class="name">{column.name}</span>
+      </svelte:fragment>
+      <svelte:fragment slot="content">
+        <div class="container">
+          <div class="section type-header">
+            {#if view === 'default'}
+              <h6 class="category">Data Type</h6>
+              <Button
+                class="type-switch"
+                appearance="plain"
+                on:click={setTypeView}
+              >
+                <span>{abstractTypeOfColumn?.name}</span>
+                <Icon size="0.8em" data={faCog} />
+                <Icon size="0.7em" data={faChevronRight} />
+              </Button>
+            {:else if view === 'type'}
+              <h6 class="category">
+                <Button
+                  size="small"
+                  appearance="plain"
+                  class="padding-zero"
+                  on:click={setDefaultView}
+                >
+                  <Icon data={faChevronLeft} />
+                  Go back
+                </Button>
+              </h6>
+            {/if}
+          </div>
+
+          <div class="divider" />
+
+          <div class="section">
+            {#if view === 'default'}
+              <DefaultOptions
+                {meta}
+                {column}
+                {columnsDataStore}
+                {constraintsDataStore}
+                on:close={closeMenu}
+                on:rename={handleStartRenaming}
+              />
+            {:else if view === 'type'}
+              <TypeOptions
+                {column}
+                {abstractTypeOfColumn}
+                on:close={closeMenu}
+              />
+            {/if}
+          </div>
+        </div></svelte:fragment
+      >
+    </Dropdown>
+  {/if}
 </div>
 
 <style global lang="scss">

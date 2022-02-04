@@ -21,10 +21,11 @@
   }
 </script>
 
-<FieldsetGroup {isInline} {options} {label} let:option>
+<FieldsetGroup {isInline} {options} {label} let:option on:change>
   <Checkbox
     on:change={(e) => handleChange(option, e)}
     checked={set.has(option.value)}
     disabled={option.disabled}
   />
+  <slot slot="label" />
 </FieldsetGroup>

@@ -26,3 +26,4 @@ export * from './select/Select.d';
 export * from './file-upload/FileUpload.d';
 export * from './dynamic-input/types.d';
 export * from './form-builder/types.d';
+export * from './cancel-or-proceed-button-pair/CancelOrProceedButtonPair.d';
