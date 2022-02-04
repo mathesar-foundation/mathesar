@@ -35,7 +35,7 @@ class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
         return Response(serializer.data)
 
     @action(methods=['get'], detail=True)
-    def db_types(self, request, pk=None):
+    def types(self, request, pk=None):
         database = self.get_object()
         engine = database._sa_engine
         available_known_db_types = get_available_known_db_types(engine)
