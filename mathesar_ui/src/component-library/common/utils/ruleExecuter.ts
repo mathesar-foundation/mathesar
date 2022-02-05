@@ -24,7 +24,7 @@ function combine(
   return term1 || term2;
 }
 
-function executureTerm(
+function executeTerm(
   term: RuleTerm,
   values: Record<RuleTerm['id'], unknown>,
 ): boolean {
@@ -62,5 +62,5 @@ export function executeRule(
     });
     return isSuccess;
   }
-  return executureTerm(rule, values);
+  return executeTerm(rule, values);
 }
