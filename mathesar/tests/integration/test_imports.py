@@ -17,8 +17,8 @@ def get_table_entry(tables_list, table_name):
     return tables_list.locator(f"li:has-text('{table_name}')")
 
 
-def test_create_empty_table(page: Page, live_server):
-    page.goto(f"{live_server}")
+def test_create_empty_table(page: Page, base_schema_url):
+    page.goto(base_schema_url)
     tables_list = get_tables_list(page)
     expect(tables_list).to_be_empty()
     page.click("[aria-label='New Table']")
@@ -27,8 +27,8 @@ def test_create_empty_table(page: Page, live_server):
     expect(table_entry).to_be_visible()
 
 
-def test_import_from_clipboard(page: Page, live_server):
-    page.goto(f"{live_server}")
+def test_import_from_clipboard(page: Page, base_schema_url):
+    page.goto(base_schema_url)
     tables_list = get_tables_list(page)
     expect(tables_list).to_be_empty()
     page.click("[aria-label='New Table']")
