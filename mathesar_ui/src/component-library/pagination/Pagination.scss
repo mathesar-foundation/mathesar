@@ -10,12 +10,26 @@ ul.pagination {
     margin: 0 2px;
 
     a,
-    span {
+    button {
       padding: 5px 3px;
       min-width: 26px;
       display: inline-block;
       text-align: center;
       cursor: pointer;
+
+      &:hover {
+        background-color: #aeb9be21;
+      }
+
+      &:disabled {
+        color: #ccc;
+        background-color: inherit;
+        cursor: not-allowed;
+      }
+    }
+
+    button:focus {
+      outline: #39a0f5 solid 1px;
     }
 
     .page {
@@ -25,7 +39,10 @@ ul.pagination {
       background: #fff;
     }
 
-    span {
+    button {
+      border: none;
+      background: inherit;
+
       .ellipsis {
         color: #afafaf;
       }

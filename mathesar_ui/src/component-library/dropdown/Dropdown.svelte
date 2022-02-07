@@ -1,13 +1,5 @@
 <script lang="ts">
   import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
-  import {
-    portal,
-    popper,
-    Button,
-    Icon,
-    clickOffBounds,
-  } from '@mathesar-component-library';
-  import type { Appearance, Size } from '@mathesar-component-library/types';
   import type { Placement } from '@popperjs/core/lib/enums';
   import {
     createEventDispatcher,
@@ -17,6 +9,12 @@
     tick,
   } from 'svelte';
   import { derived } from 'svelte/store';
+  import type { Appearance, Size } from '@mathesar-component-library-dir/types';
+  import Button from '@mathesar-component-library-dir/button/Button.svelte';
+  import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
+  import portal from '@mathesar-component-library-dir/common/actions/portal';
+  import popper from '@mathesar-component-library-dir/common/actions/popper';
+  import clickOffBounds from '@mathesar-component-library-dir/common/actions/clickOffBounds';
   import { AccompanyingElements } from './AccompanyingElements';
 
   const dispatch = createEventDispatcher();

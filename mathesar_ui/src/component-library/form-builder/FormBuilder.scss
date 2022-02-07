@@ -1,0 +1,23 @@
+.form-builder {
+  .form-element + .form-element {
+    margin-top: 0.6rem;
+  }
+
+  .form-layout {
+    &.horizontal {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      width: 100%;
+      gap: 0.6rem;
+
+      .form-input {
+        position: relative;
+        flex: 1 1 auto;
+        width: 1%;
+        min-width: 0;
+        margin-top: 0;
+      }
+    }
+  }
+}

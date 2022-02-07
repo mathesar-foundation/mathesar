@@ -35,7 +35,7 @@
 
   const toast = makeToast();
   const modal = new ModalMultiplexer();
-  const confirmationModal = modal.createVisibilityStore();
+  const confirmationModal = modal.spawnModalController();
   const { confirm, confirmationController } = makeConfirm({
     confirmationModal,
   });

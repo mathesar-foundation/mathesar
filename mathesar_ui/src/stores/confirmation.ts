@@ -5,7 +5,7 @@ import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIde
 import { modal } from './modal';
 import { toast } from './toast';
 
-const confirmationModal = modal.createVisibilityStore();
+const confirmationModal = modal.spawnModalController();
 
 export const { confirm, confirmationController } = makeConfirm({
   confirmationModal,

@@ -43,5 +43,3 @@ export function filterTree(
         .indexOf(searchTerm.toLowerCase()) > -1,
   );
 }
-
-export default {};

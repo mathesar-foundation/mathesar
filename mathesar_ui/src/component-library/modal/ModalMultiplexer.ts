@@ -1,20 +1,20 @@
 import type { Readable } from 'svelte/store';
-import { derived } from 'svelte/store';
-import ActiveModalStore from './ActiveModalStore';
-import ModalVisibilityStore from './ModalVisibilityStore';
+import { writable, derived } from 'svelte/store';
+import ModalStack from './ModalStack';
+import ModalController from './ModalController';
 
 /**
- * Opens/closes modals, ensuring that only one modal is open at a time.
+ * Controls all the modals in the system.
  */
 export default class ModalMultiplexer {
-  private activeModal = new ActiveModalStore();
+  private stack = writable(new ModalStack());
 
   isModalOpen: Readable<boolean>;
 
   private maxId = 0;
 
   constructor() {
-    this.isModalOpen = derived(this.activeModal, (a) => !!a);
+    this.isModalOpen = derived(this.stack, (stack) => stack.size > 0);
   }
 
   private getId(): number {
@@ -22,18 +22,10 @@ export default class ModalMultiplexer {
     return this.maxId;
   }
 
-  open(modalId: number): void {
-    this.activeModal.set(modalId);
-  }
-
-  close(): void {
-    this.activeModal.set(undefined);
-  }
-
-  createVisibilityStore(): ModalVisibilityStore {
-    return new ModalVisibilityStore({
-      id: this.getId(),
-      activeModalStore: this.activeModal,
+  spawnModalController(): ModalController {
+    return new ModalController({
+      modalId: this.getId(),
+      modalStackStore: this.stack,
     });
   }
 }

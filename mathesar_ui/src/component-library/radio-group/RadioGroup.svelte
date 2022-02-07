@@ -9,6 +9,7 @@
   export let label: string | undefined = undefined;
 </script>
 
-<FieldsetGroup {isInline} {options} {label} let:option>
+<FieldsetGroup {isInline} {options} {label} let:option on:change>
   <Radio bind:group={value} value={option.value} disabled={option.disabled} />
+  <slot slot="label" />
 </FieldsetGroup>
