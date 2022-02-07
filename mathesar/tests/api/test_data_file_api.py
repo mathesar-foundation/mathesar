@@ -5,6 +5,7 @@ import requests
 from unittest.mock import patch
 from django.core.files import File
 
+from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.imports import csv
 from mathesar.models import DataFile
 from mathesar.errors import InvalidTableError
@@ -143,7 +144,8 @@ def test_data_file_create_csv_long_name(client, csv_filename):
             response = client.post('/api/v0/data_files/', data, format='multipart')
             data_file_dict = response.json()
     assert response.status_code == 400
-    assert 'Ensure this filename has at most 100' in data_file_dict['file'][0]
+    assert 'Ensure this filename has at most 100' in data_file_dict[0]['message']
+    assert data_file_dict[0]['code'] == 2043
 
 
 @pytest.mark.parametrize('header', [True, False])
@@ -175,27 +177,31 @@ def test_data_file_create_url(client, header, patents_url, mock_get_patents_url)
 def test_data_file_update(client, data_file):
     response = client.put(f'/api/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "PUT" not allowed.'
+    response_data = response.json()[0]
+    assert response_data['message'] == 'Method "PUT" not allowed.'
+    assert response_data['code'] == ErrorCodes.MethodNotAllowed.value
 
 
 def test_data_file_partial_update(client, data_file):
     response = client.patch(f'/api/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "PATCH" allowed only for header.'
+    assert response.json()[0]['message'] == 'Method "PATCH" allowed only for header.'
+    assert response.json()[0]['code'] == ErrorCodes.MethodNotAllowed.value
 
 
 def test_data_file_delete(client, data_file):
     response = client.delete(f'/api/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "DELETE" not allowed.'
+    assert response.json()[0]['message'] == 'Method "DELETE" not allowed.'
+    assert response.json()[0]['code'] == ErrorCodes.MethodNotAllowed.value
 
 
 def test_data_file_404(client, data_file):
     data_file_id = data_file.id
     data_file.delete()
     response = client.get(f'/api/v0/data_files/{data_file_id}/')
-    assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
+    assert response.json()[0]['message'] == 'Not found.'
+    assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
 def test_data_file_create_invalid_file(client):
@@ -206,7 +212,7 @@ def test_data_file_create_invalid_file(client):
             response = client.post('/api/v0/data_files/', data={'file': f}, format='multipart')
             response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict[0] == 'Unable to tabulate data'
+    assert response_dict[0]['message'] == 'Unable to tabulate data'
 
 
 def test_data_file_create_non_unicode_file(client, non_unicode_csv_filename):
@@ -220,7 +226,8 @@ def test_data_file_create_url_invalid_format(client):
     response = client.post('/api/v0/data_files/', data={'url': url})
     response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict['url'][0] == 'Enter a valid URL.'
+    assert response_dict[0]['message'] == 'Enter a valid URL.'
+    assert response_dict[0]['field'] == 'url'
 
 
 def test_data_file_create_url_invalid_address(client):
@@ -229,7 +236,8 @@ def test_data_file_create_url_invalid_address(client):
         response = client.post('/api/v0/data_files/', data={'url': url})
         response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict['url'][0] == 'URL cannot be reached.'
+    print(response_dict)
+    assert response_dict[0]['message'] == 'URL cannot be reached.'
 
 
 def test_data_file_create_url_invalid_download(
@@ -239,7 +247,7 @@ def test_data_file_create_url_invalid_download(
     response = client.post('/api/v0/data_files/', data={'url': patents_url})
     response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict['url'][0] == 'URL cannot be downloaded.'
+    assert response_dict[0]['message'] == 'URL cannot be downloaded.'
 
 
 def test_data_file_create_url_invalid_content_type(client):
@@ -249,7 +257,7 @@ def test_data_file_create_url_invalid_content_type(client):
         response = client.post('/api/v0/data_files/', data={'url': url})
         response_dict = response.json()
     assert response.status_code == 400
-    assert response_dict['url'][0] == "URL resource 'text/html' not a valid type."
+    assert response_dict[0]['message'] == "URL resource 'text/html' not a valid type."
 
 
 def test_data_file_create_multiple_source_fields(client, csv_filename, paste_filename):
@@ -260,11 +268,11 @@ def test_data_file_create_multiple_source_fields(client, csv_filename, paste_fil
         response = client.post('/api/v0/data_files/', data, format='multipart')
         response_dict = response.json()
     assert response.status_code == 400
-    assert 'Multiple source fields passed:' in response_dict['non_field_errors'][0]
+    assert 'Multiple source fields passed:' in response_dict[0]['message']
 
 
 def test_data_file_create_no_source_fields(client):
     response = client.post('/api/v0/data_files/', {})
     response_dict = response.json()
     assert response.status_code == 400
-    assert 'should be specified.' in response_dict['non_field_errors'][0]
+    assert 'should be specified.' in response_dict[0]['message']

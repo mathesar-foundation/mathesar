@@ -1,24 +1,27 @@
 from django_filters import rest_framework as filters
-from psycopg2.errors import CheckViolation, DuplicateTable, InvalidTextRepresentation
+from psycopg2.errors import InvalidTextRepresentation, CheckViolation
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError, APIException
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
 from rest_framework.response import Response
-from sqlalchemy.exc import ProgrammingError, DataError, IntegrityError
+from sqlalchemy.exc import DataError, IntegrityError
 
+from mathesar.api.exceptions.database_exceptions import (
+    exceptions as database_api_exceptions,
+    base_exceptions as database_base_api_exceptions,
+)
+from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer
 from mathesar.models import Table
 from mathesar.utils.tables import (
-    get_table_column_types, create_table_from_datafile, create_empty_table,
-    gen_table_name
+    get_table_column_types
 )
 
 
-class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
+class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewsets.GenericViewSet):
     serializer_class = TableSerializer
     pagination_class = DefaultLimitOffsetPagination
     filter_backends = (filters.DjangoFilterBackend,)
@@ -26,30 +29,6 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
 
     def get_queryset(self):
         return Table.objects.all().order_by('-created_at')
-
-    def create(self, request):
-        serializer = TableSerializer(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-
-        schema = serializer.validated_data['schema']
-        data_files = serializer.validated_data.get('data_files')
-        name = serializer.validated_data.get('name') or gen_table_name(schema, data_files)
-
-        try:
-            if data_files:
-                table = create_table_from_datafile(data_files, name, schema)
-            else:
-                table = create_empty_table(name, schema)
-        except ProgrammingError as e:
-            if type(e.orig) == DuplicateTable:
-                raise ValidationError(
-                    f"Relation {request.data['name']} already exists in schema {request.data['schema']}"
-                )
-            else:
-                raise APIException(e)
-
-        serializer = TableSerializer(table, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):
         serializer = TableSerializer(
@@ -72,7 +51,7 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
         try:
             table.update_sa_table(serializer.validated_data)
         except ValueError as e:
-            raise ValidationError(e)
+            raise base_api_exceptions.ValueAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
 
         # Reload the table to avoid cached properties
         table = self.get_object()
@@ -94,29 +73,34 @@ class TableViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
     @action(methods=['post'], detail=True)
     def previews(self, request, pk=None):
         table = self.get_object()
-        serializer = TablePreviewSerializer(data=request.data)
+        serializer = TablePreviewSerializer(data=request.data, context={"request": request, 'table': table})
         serializer.is_valid(raise_exception=True)
-        columns = serializer.data["columns"]
-
-        column_names = [col["name"] for col in columns]
-        if not len(column_names) == len(set(column_names)):
-            raise ValidationError("Column names must be distinct")
-        if not len(columns) == len(table.sa_columns):
-            raise ValidationError("Incorrect number of columns in request.")
-
+        columns_field_key = "columns"
+        columns = serializer.data[columns_field_key]
         table_data = TableSerializer(table, context={"request": request}).data
         try:
             preview_records = table.get_preview(columns)
         except (DataError, IntegrityError) as e:
             if type(e.orig) == InvalidTextRepresentation or type(e.orig) == CheckViolation:
-                raise ValidationError("Invalid type cast requested.")
+                raise database_api_exceptions.InvalidTypeCastAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    field='columns'
+                )
             else:
-                raise APIException
+                raise database_base_api_exceptions.IntegrityAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    field='columns'
+                )
         except UnsupportedTypeException as e:
-            raise ValidationError(e)
+            raise database_api_exceptions.UnsupportedTypeAPIException(
+                e,
+                field='columns',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         except Exception as e:
-            raise APIException(e)
-
+            raise base_api_exceptions.MathesarAPIException(e)
         table_data.update(
             {
                 # There's no way to reflect actual column data without
