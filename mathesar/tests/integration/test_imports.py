@@ -1,13 +1,5 @@
 from playwright.sync_api import Page, expect
 
-import pytest
-from django.core.cache import cache
-
-
-@pytest.fixture(autouse=True)
-def clear_cache():
-    cache.clear()
-
 
 def get_tables_list(page: Page):
     return page.locator("#sidebar li[aria-level='1']:has(button:has-text('Tables')) ul")

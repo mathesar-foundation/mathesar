@@ -1,6 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 from sqlalchemy import text
+from django.core.cache import cache
 
 from db.schemas.operations.create import create_schema as create_sa_schema
 from db.schemas.utils import get_schema_name_from_oid, get_schema_oid_from_name
@@ -9,6 +10,11 @@ from mathesar.models import Database, Schema
 TEST_SCHEMA = 'import_csv_schema'
 PATENT_SCHEMA = 'Patents'
 NASA_TABLE = 'NASA Schema List'
+
+
+@pytest.fixture(autouse=True)
+def clear_cache():
+    cache.clear()
 
 
 @pytest.fixture
