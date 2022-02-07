@@ -4,32 +4,17 @@ import { currentDBId } from '@mathesar/stores/databases';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
-import type { Database, DbType, AbstractTypeResponse } from '@mathesar/App.d';
+import type { Database } from '@mathesar/App.d';
 import type { CancellablePromise } from '@mathesar-component-library';
+import type {
+  AbstractTypesMap,
+  AbstractTypesSubstance,
+  AbstractTypeResponse,
+} from './types.d';
+
+import { constructAbstractTypeMapFromResponse } from './abstractTypeCategories';
 
 const commonData = preloadCommonData();
-
-export interface AbstractType extends Omit<AbstractTypeResponse, 'db_types'> {
-  dbTypes: Set<DbType>;
-  // In the future, this would be base64 or link to svg. Currently it is just a direct string.
-  icon: string;
-  defaultDbType?: DbType;
-}
-
-export const UnknownAbstractType: AbstractType = {
-  name: 'Unknown',
-  identifier: 'unknown',
-  dbTypes: new Set(),
-  icon: '?',
-};
-
-export type AbstractTypesMap = Map<AbstractType['identifier'], AbstractType>;
-
-interface AbstractTypesSubstance {
-  state: States;
-  data: AbstractTypesMap;
-  error?: string;
-}
 
 const databasesToAbstractTypesStoreMap: Map<
   Database['id'],
@@ -40,52 +25,9 @@ const abstractTypesRequestMap: Map<
   CancellablePromise<AbstractTypeResponse[]>
 > = new Map();
 
-// TODO: Remove this temporary function once api sends icon related information.
-function getIconForType(typeResponse: AbstractTypeResponse) {
-  switch (typeResponse.identifier) {
-    case 'number':
-      return '#';
-    case 'text':
-      return 'T';
-    default:
-      return '?';
-  }
-}
-
-// TODO: Remove this temporary function once api sends default db type related information.
-function getDefaultDbTypeForType(typeResponse: AbstractTypeResponse) {
-  switch (typeResponse.identifier) {
-    case 'number':
-      return 'NUMERIC';
-    case 'text':
-      return 'VARCHAR';
-    default:
-      return typeResponse.db_types[0];
-  }
-}
-
-function processTypeResponse(
-  abstractTypesResponse: AbstractTypeResponse[],
-): AbstractTypesMap {
-  const abstractTypesMap: AbstractTypesMap = new Map();
-
-  abstractTypesResponse.forEach((entry) => {
-    const typeInfo = {
-      ...entry,
-      dbTypes: new Set(entry.db_types),
-      icon: getIconForType(entry),
-      defaultDbType: getDefaultDbTypeForType(entry),
-    };
-    delete typeInfo.db_types;
-    abstractTypesMap.set(typeInfo.identifier, typeInfo);
-  });
-
-  return abstractTypesMap;
-}
-
 export async function refetchTypesForDB(
   databaseId: Database['id'],
-): Promise<AbstractTypesMap | undefined> {
+): Promise<AbstractTypesMap | null> {
   const store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
     console.error(`DB Types store for db: ${databaseId} not found.`);
@@ -106,7 +48,7 @@ export async function refetchTypesForDB(
     abstractTypesRequestMap.set(databaseId, typesRequest);
     const response = await typesRequest;
 
-    const abstractTypesMap = processTypeResponse(response);
+    const abstractTypesMap = constructAbstractTypeMapFromResponse(response);
 
     store.update((currentData) => ({
       ...currentData,
@@ -125,6 +67,11 @@ export async function refetchTypesForDB(
   }
 }
 
+/**
+ * TODO: Find a better way to preload data instead of using this variable.
+ * Each store needs to be able to use the common data and preloading is
+ * specific to each of them and not common.
+ */
 let preload = true;
 
 function getTypesForDatabase(
@@ -143,7 +90,7 @@ function getTypesForDatabase(
       store.update((currentData) => ({
         ...currentData,
         state: States.Done,
-        data: processTypeResponse(commonData.abstract_types),
+        data: constructAbstractTypeMapFromResponse(commonData.abstract_types),
       }));
     } else {
       void refetchTypesForDB(databaseId);
@@ -154,7 +101,7 @@ function getTypesForDatabase(
   return store;
 }
 
-export const abstractTypes: Readable<AbstractTypesSubstance> = derived(
+export const currentDbAbstractTypes: Readable<AbstractTypesSubstance> = derived(
   currentDBId,
   ($currentDBId, set) => {
     let unsubscribe: Unsubscriber;
@@ -176,18 +123,3 @@ export const abstractTypes: Readable<AbstractTypesSubstance> = derived(
     };
   },
 );
-
-export function getAbstractTypeForDBType(
-  dbType: DbType,
-  abstractTypesMap: AbstractTypesMap,
-): AbstractType | undefined {
-  if (dbType && abstractTypesMap) {
-    // eslint-disable-next-line no-restricted-syntax
-    for (const [, abstractType] of abstractTypesMap) {
-      if (abstractType.dbTypes.has(dbType)) {
-        return abstractType;
-      }
-    }
-  }
-  return UnknownAbstractType;
-}

@@ -13,7 +13,7 @@
   }
 </script>
 
-<div class="form">
+<div class="form-builder">
   <form on:submit|preventDefault={submit}>
     <FormElement
       stores={form.stores}
