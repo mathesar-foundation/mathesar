@@ -72,18 +72,22 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
             )
         )
 
-    def iterate_filter_tree_and_apply_field_function(self, obj, field_function):
+    def _iterate_filter_tree_and_apply_field_function(self, obj, field_function):
+        """
+        Recursively loop and get to the last child object which contains the `field` property
+         and apply the `field_function`
+        """
         if type(obj) == list:
             for filter_object in obj:
-                self.iterate_filter_tree_and_apply_field_function(filter_object, field_function)
+                self._iterate_filter_tree_and_apply_field_function(filter_object, field_function)
         elif type(obj) == dict:
             if 'field' in obj.keys():
                 field_function(obj)
             else:
                 for operator, filter_object in obj.items():
-                    self.iterate_filter_tree_and_apply_field_function(filter_object, field_function)
+                    self._iterate_filter_tree_and_apply_field_function(filter_object, field_function)
 
-    def extract_field_names(self, field_names):
+    def _extract_field_names(self, field_names):
         def append_to_field_names(filter_obj):
             if filter_obj['op'] == 'get_duplicates':
                 field_names.update(filter_obj['value'])
@@ -92,46 +96,77 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
 
         return append_to_field_names
 
-    def convert_filter_field_id_to_name(self, column_map):
-        def x(filter_obj):
+    def _convert_filter_field_id_to_name(self, column_map):
+        def convert_filter_field_ids(filter_obj):
+            # Duplicates filter is a peculiar filter which does not contain a field property,
+            # rather the `value` property contains the column id which we need to convert to a column name
             if filter_obj['op'] == 'get_duplicates':
                 filter_obj['value'] = [column_map[field_id].name for field_id in filter_obj['value']]
             else:
                 field_id = filter_obj['field']
                 filter_obj['field'] = column_map[field_id].name
 
-        return x
+        return convert_filter_field_ids
 
-    def paginate_queryset(
-            self, queryset, request, table_id, filters=[], order_by=[], grouping={},
-    ):
+    def _replace_column_ids_to_names(self, filters, order_by, grouping):
+        # Collect list of column id's from query parameters
         columns_ids = set()
         columns_ids.update({column['field'] for column in order_by})
         if grouping:
             columns_ids.update(set(grouping['columns']))
         filter_field_names = set()
-        self.iterate_filter_tree_and_apply_field_function(filters, self.extract_field_names(filter_field_names))
+        # Filters object contains nested objects
+        # [{
+        #     "and": [
+        #         {
+        #             "or": [
+        #                 {"field": "varchar", "op": "eq", "value": "string24"},
+        #                 {"field": "numeric", "op": "eq", "value": 42},
+        #             ]
+        #         }]
+        # }]
+        # So we need to recursively loop and get to the last child object which contains the column id values
+        # and extract the column ids
+        self._iterate_filter_tree_and_apply_field_function(filters, self._extract_field_names(filter_field_names))
         columns_ids.update(filter_field_names)
         columns = Column.objects.filter(id__in=columns_ids)
         columns_name_dict = {column.id: column for column in columns}
-        name_converted_order_by = [{**column, 'field': columns_name_dict[column['field']].name} for column in order_by]
+        # Replace column id value used in the `field` property with column name
+        converted_order_by = [{**column, 'field': columns_name_dict[column['field']].name} for column in order_by]
         group_by_columns_names = []
         if grouping:
             group_by_columns_names = [columns_name_dict[column_id].name for column_id in grouping['columns']]
-        filters_obj = copy.deepcopy(filters)
-        self.iterate_filter_tree_and_apply_field_function(
-            filters_obj,
-            self.convert_filter_field_id_to_name(columns_name_dict)
+
+        # Replace column id values used in the `columns` property with column names
+        name_converted_group_by = {**grouping, 'columns': group_by_columns_names}
+        # self._convert_filter_field_id_to_name modifies the argument passed which affects the original object
+        converted_filters_object = copy.deepcopy(filters)
+        # recursively loop and get to the last child object which contains the `field` property that holds the column id
+        # and column ids with name
+        self._iterate_filter_tree_and_apply_field_function(
+            converted_filters_object,
+            self._convert_filter_field_id_to_name(columns_name_dict)
+        )
+        return converted_filters_object, name_converted_group_by, converted_order_by
+
+    def paginate_queryset(
+            self, queryset, request, table_id, filters=[], order_by=[], grouping={},
+    ):
+
+        # Convert column ids from `filters`, `order_by` and `grouping` into column names before passing it to the db layer.
+        converted_filters_object, converted_group_by, converted_order_by = self._replace_column_ids_to_names(
+            filters,
+            order_by,
+            grouping
         )
 
-        name_converted_group_by = {**grouping, 'columns': group_by_columns_names}
-        group_by = GroupBy(**name_converted_group_by) if name_converted_group_by else None
+        group_by = GroupBy(**converted_group_by) if converted_group_by else None
         records = super().paginate_queryset(
             queryset,
             request,
             table_id,
-            filters=filters_obj,
-            order_by=name_converted_order_by,
+            filters=converted_filters_object,
+            order_by=converted_order_by,
             group_by=group_by,
         )
 
