@@ -2,7 +2,7 @@ from datetime import datetime as dt
 from psycopg2.errors import CheckViolation
 import pytest
 from sqlalchemy import text, Table, Column, MetaData, select, cast
-from sqlalchemy import Interval as SAInterval
+from sqlalchemy.dialects.postgresql import INTERVAL as SAInterval
 from sqlalchemy.exc import IntegrityError
 from db.engine import _add_custom_types_to_engine
 from db.tests.types import fixtures
@@ -48,6 +48,29 @@ def test_interval_type_column_reflection(engine_email_type):
     expect_cls = interval.Interval
     actual_cls = reflect_table.columns["time_intervals"].type.__class__
     assert actual_cls == expect_cls
+
+
+def test_interval_type_column_reflection_precision(engine_email_type):
+    engine, app_schema = engine_email_type
+    engine.echo = True
+    with engine.begin() as conn:
+        metadata = MetaData(bind=conn, schema=app_schema)
+        test_table = Table(
+            "test_table",
+            metadata,
+            Column("time_intervals", SAInterval(precision=2))
+        )
+        test_table.create()
+
+    _add_custom_types_to_engine(engine)
+    with engine.begin() as conn:
+        metadata = MetaData(bind=conn, schema=app_schema)
+        reflect_table = Table("test_table", metadata, autoload_with=conn)
+    expect_cls = interval.Interval
+    actual_cls = reflect_table.columns["time_intervals"].type.__class__
+    assert actual_cls == expect_cls
+    actual_interval = reflect_table.columns["time_intervals"].type
+    assert actual_interval.precision == 2
 
 
 intervals_out_to_ins = {
@@ -141,6 +164,6 @@ def test_interval_interval_addition(engine_with_types):
     five_days_interval = cast('5 days', interval.Interval)
     with engine_with_types.begin() as conn:
         res = conn.execute(
-            select(three_days_interval + five_days_interval)
+            select(cast(three_days_interval + five_days_interval, interval.Interval))
         ).scalar()
     assert res == 'P0Y0M8DT4H30M0S'

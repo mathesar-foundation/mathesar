@@ -1,11 +1,58 @@
-from sqlalchemy import Interval as SAInterval
+from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy import func, case
 from sqlalchemy.types import TypeDecorator
 
+from db.types.exceptions import InvalidTypeParameters
+
 
 class Interval(TypeDecorator):
-    impl = SAInterval
+    impl = INTERVAL
     cache_ok = True
+
+    def __init__(self, *arg, **kwarg):
+        TypeDecorator.__init__(self, *arg, **kwarg)
+        self.validate_arguments()
+
+    def validate_arguments(self):
+        seconds_fields = {
+            'SECOND',
+            'DAY TO SECOND',
+            'HOUR TO SECOND',
+            'MINUTE TO SECOND',
+        }
+        other_fields = {
+            'YEAR',
+            'MONTH',
+            'DAY',
+            'HOUR',
+            'MINUTE',
+            'YEAR TO MONTH',
+            'DAY TO HOUR',
+            'DAY TO MINUTE',
+            'HOUR TO MINUTE',
+        }
+        if self.impl.precision is not None:
+            try:
+                assert isinstance(self.impl.precision, int)
+            except AssertionError:
+                raise InvalidTypeParameters('precision must be an integer')
+            try:
+                assert (
+                    self.impl.fields is None
+                    or self.impl.fields.upper() in seconds_fields
+                )
+            except AssertionError:
+                raise InvalidTypeParameters(
+                    'If precision and fields are both given,'
+                    ' seconds must be included in fields.'
+                )
+        elif self.impl.fields is not None:
+            try:
+                assert self.impl.fields.upper() in seconds_fields.union(other_fields)
+            except AssertionError:
+                raise InvalidTypeParameters(
+                    f'fields "{self.impl.fields}" is not in {seconds_fields.union(other_fields)}'
+                )
 
     def column_expression(self, col):
         """
