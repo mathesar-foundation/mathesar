@@ -67,7 +67,7 @@ class RecordViewSet(viewsets.ViewSet):
         try:
             record = table.create_record_or_records(request.data)
         except IntegrityError as e:
-            if e.orig == NotNullViolation:
+            if type(e.orig) == NotNullViolation:
                 raise database_api_exceptions.NotNullViolationAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
             else:
                 raise database_api_exceptions.MathesarAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)

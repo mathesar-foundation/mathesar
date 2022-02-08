@@ -218,7 +218,11 @@ class NotNullViolationAPIException(MathesarAPIException):
             field=None,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
     ):
-        message_str, row_detail = exception.orig.args[0].split("DETAIL")
-        message_str = message if message is not None else message_str
-        details = {'row_parameters': exception.params, 'row_detail': row_detail}
+        exception_diagnostics = exception.orig.diag
+        message_str = message if message is not None else exception_diagnostics.message_primary
+        details = {
+            'row_parameters': exception.params,
+            'row_detail': exception_diagnostics.message_detail,
+            'column': exception.orig.diag.column_name
+        }
         super().__init__(exception, self.error_code, message_str, field, details, status_code)
