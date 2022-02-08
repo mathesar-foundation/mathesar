@@ -42,6 +42,7 @@ class RecordViewSet(viewsets.ViewSet):
                 order_by=serializer.validated_data['order_by'],
                 grouping=serializer.validated_data['grouping'],
             )
+            print(serializer.validated_data['filters'])
         except (BadFilterFormat, FilterFieldNotFound) as e:
             raise database_api_exceptions.BadFilterAPIException(e, field='filters', status_code=status.HTTP_400_BAD_REQUEST)
         except (BadSortFormat, SortFieldNotFound) as e:
