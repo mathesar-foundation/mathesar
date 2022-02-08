@@ -4,7 +4,10 @@ Mathesar data types are shown in the UI.
 """
 from enum import Enum
 
-from db.types.base import PostgresType, MathesarCustomType, get_available_types, get_qualified_name, get_db_type_name
+from db.types.base import (
+    PostgresType, MathesarCustomType, get_available_types, get_qualified_name,
+    get_db_type_name, db_types_hinted, get_db_type_enum_from_id
+    )
 
 
 class MathesarTypeIdentifier(Enum):
@@ -122,7 +125,68 @@ def _ignore_type(sa_type_name):
     return False
 
 
+def find_ma_type_that_satisfies_hintset(ma_types_mapped_to_hintsets, hintset):
+    """
+    Provided a mapping of Mathesar types to their hintsets and a hintset, tries to find a Mathesar
+    type whose hintset satisfies the passed hintset, meaning the Mathesar type whose hintset is a
+    superset of the passed hintset.
+    """
+    hintset = set(hintset)
+    for ma_type, ma_type_hintset in ma_types_mapped_to_hintsets:
+        ma_type_satisfies_hintset = set.issubset(hintset, ma_type_hintset)
+        if ma_type_satisfies_hintset:
+            return ma_type
+    return None
+
+
+
+def get_ma_types_mapped_to_hintsets(engine):
+    """
+    Returns a dict where the keys are Mathesar types and the values their hintsets.
+    A Mathesar type's hintset is defined as the intersection of the hintsets of its associated
+    database types.
+    """
+    type_descriptions = get_types(engine)
+    ma_types_mapped_to_hintsets = {}
+    for type_description in type_descriptions:
+        type = get_db_type_enum_from_id(type_description['identifier'])
+        associated_db_type_descriptions = type_description['db_types']
+        associated_db_types = (
+            get_db_type_enum_from_id(associated_db_type_description['sa_type'])
+            for associated_db_type_description in associated_db_type_descriptions
+        )
+        associated_db_type_hintsets = (
+            set(db_types_hinted[associated_db_type])
+            for associated_db_type in associated_db_types
+            if associated_db_type in db_types_hinted
+        )
+        hintsets_intersection = set.intersection(associated_db_type_hintsets)
+        ma_types_mapped_to_hintsets[type] = tuple(hintsets_intersection)
+    return ma_types_mapped_to_hintsets
+
+
+# TODO improve readability
+# TODO improve naming (e.g. what's the difference between sa_type_name and sa_type?)
 def get_types(engine):
+    """
+    Returns a sequence of dicts describing Mathesar types supported by the database
+    associated with the provided engine. It has the following structure:
+
+    ```
+    [
+        dict(
+            identifier,
+            name,
+            db_types=[
+                dict(sa_type_name, sa_type),
+                dict(sa_type_name, sa_type),
+                ...
+            ]
+        ),
+        ...
+    ]
+    ```
+    """
     types = []
     installed_types = get_available_types(engine)
     type_map = _get_type_map()

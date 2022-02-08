@@ -76,6 +76,21 @@ class MathesarCustomType(Enum):
     MONEY = 'money'
 
 
+def get_db_type_enum_from_id(db_type_id):
+    """
+    Gets an instance of either the PostgresType enum or the MathesarCustomType enum corresponding
+    to the provided db_type_id. If the id doesn't correspond to any of the mentioned enums,
+    returns None.
+    """
+    try:
+        return PostgresType(db_type_id)
+    except ValueError:
+        try:
+            return MathesarCustomType(db_type_id)
+        except ValueError:
+            return None
+
+
 db_types_hinted = frozendict({
     PostgresType.BOOLEAN: tuple([
         hints.boolean
