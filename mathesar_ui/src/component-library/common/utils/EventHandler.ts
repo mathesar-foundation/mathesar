@@ -1,11 +1,18 @@
 export default class EventHandler {
-  protected listeners: Map<string, Set<(value?: unknown) => unknown>>;
+  protected listeners: Map<string, Set<(value?: unknown) => Promise<unknown>>>;
 
   constructor() {
     this.listeners = new Map();
   }
 
-  on(eventName: string, callback: (value?: unknown) => unknown): () => void {
+  /**
+   * We do not have to explicity un-listen to these events as long as all
+   * listeners are cleared with the `destroy` function.
+   */
+  on(
+    eventName: string,
+    callback: (value?: unknown) => Promise<unknown>,
+  ): () => void {
     if (!this.listeners.has(eventName)) {
       this.listeners.set(eventName, new Set());
     }
@@ -15,14 +22,16 @@ export default class EventHandler {
     };
   }
 
-  protected dispatch(eventName: string, value: unknown): void {
-    this.listeners?.get(eventName)?.forEach((entry) => {
-      try {
-        entry?.(value);
-      } catch (err) {
-        console.error(`Failed to call a listener for ${eventName}`, err);
-      }
-    });
+  protected async dispatch(eventName: string, value: unknown): Promise<void> {
+    const callbacks = this.listeners.get(eventName);
+    if (!callbacks) {
+      // eslint-disable-next-line no-console
+      console.warn(`No listeners found when dispatching event '${eventName}'.`);
+      return;
+    }
+    await Promise.all(
+      [...callbacks.values()].map((callback) => callback(value)),
+    );
   }
 
   protected destroy(): void {

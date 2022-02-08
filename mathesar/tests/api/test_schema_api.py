@@ -5,6 +5,7 @@ from unittest.mock import patch
 from db.schemas.utils import get_mathesar_schemas
 from mathesar import models
 from mathesar import reflection
+from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.database.base import create_mathesar_engine
 from mathesar.utils.schemas import create_schema_and_object
 
@@ -204,7 +205,8 @@ def test_schema_update(client, test_db_name):
     }
     response = client.put(f'/api/db/v0/schemas/{schema.id}/', data=data)
     assert response.status_code == 405
-    assert response.json()['detail'] == 'Method "PUT" not allowed.'
+    assert response.json()[0]['message'] == 'Method "PUT" not allowed.'
+    assert response.json()[0]['code'] == ErrorCodes.MethodNotAllowed.value
 
 
 def test_schema_partial_update(create_schema, client, test_db_name):
@@ -278,19 +280,22 @@ def test_schema_dependencies(client, create_schema):
 def test_schema_detail_404(client):
     response = client.get('/api/db/v0/schemas/3000/')
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
+    assert response.json()[0]['message'] == 'Not found.'
+    assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
 def test_schema_partial_update_404(client):
     response = client.patch('/api/db/v0/schemas/3000/', {})
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
+    assert response.json()[0]['message'] == 'Not found.'
+    assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
 def test_schema_delete_404(client):
     response = client.delete('/api/db/v0/schemas/3000/')
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Not found.'
+    assert response.json()[0]['message'] == 'Not found.'
+    assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
 def test_schema_get_with_reflect_new(client, test_db_name):

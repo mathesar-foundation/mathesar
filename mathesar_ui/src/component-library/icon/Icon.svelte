@@ -61,11 +61,6 @@
   aria-label={label}
   role={label ? 'img' : 'presentation'}
   {...$$restProps}
-  on:click
-  on:mouseover
-  on:focus
-  on:mouseout
-  on:blur
 >
   {#if Array.isArray(path)}
     {#each path as entry (entry)}
