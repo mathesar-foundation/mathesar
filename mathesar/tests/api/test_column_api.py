@@ -142,7 +142,7 @@ def test_column_list(column_test_table, client):
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DATE', 'DECIMAL',
                 'DOUBLE PRECISION', 'FLOAT', 'INTEGER', 'INTERVAL',
                 'MATHESAR_TYPES.EMAIL', 'MATHESAR_TYPES.MONEY',
-                'MATHESAR_TYPES.URI', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT',
+                'MATHESAR_TYPES.URI', 'MONEY', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT',
                 'TIME WITH TIME ZONE', 'TIME WITHOUT TIME ZONE',
                 'TIMESTAMP WITH TIME ZONE', 'TIMESTAMP WITHOUT TIME ZONE',
                 'VARCHAR',

@@ -60,6 +60,7 @@ type_set = {
     'MATHESAR_TYPES.EMAIL',
     'MATHESAR_TYPES.MONEY',
     'MATHESAR_TYPES.URI',
+    'MONEY',
     'NUMERIC',
     'REAL',
     'SMALLINT',
