@@ -1,12 +1,10 @@
 from datetime import datetime as dt
-from psycopg2.errors import CheckViolation
 import pytest
 from sqlalchemy import text, Table, Column, MetaData, select, cast
 from sqlalchemy.dialects.postgresql import INTERVAL as SAInterval
-from sqlalchemy.exc import IntegrityError
 from db.engine import _add_custom_types_to_engine
 from db.tests.types import fixtures
-from db.types import interval, datetime
+from db.types import interval, datetime, exceptions
 
 
 # We need to set these variables when the file loads, or pytest can't
@@ -50,7 +48,7 @@ def test_interval_type_column_reflection(engine_email_type):
     assert actual_cls == expect_cls
 
 
-def test_interval_type_column_reflection_precision(engine_email_type):
+def test_interval_type_column_args(engine_email_type):
     engine, app_schema = engine_email_type
     engine.echo = True
     with engine.begin() as conn:
@@ -58,7 +56,10 @@ def test_interval_type_column_reflection_precision(engine_email_type):
         test_table = Table(
             "test_table",
             metadata,
-            Column("time_intervals", SAInterval(precision=2))
+            Column(
+                "time_intervals",
+                interval.Interval(precision=5, fields="SECOND")
+            )
         )
         test_table.create()
 
@@ -70,7 +71,21 @@ def test_interval_type_column_reflection_precision(engine_email_type):
     actual_cls = reflect_table.columns["time_intervals"].type.__class__
     assert actual_cls == expect_cls
     actual_interval = reflect_table.columns["time_intervals"].type
-    assert actual_interval.precision == 2
+    assert actual_interval.precision == 5
+    assert actual_interval.fields.upper() == "SECOND"
+
+
+invalid_args_list = [
+    (None, "SECONDS"),
+    (1.34, None),
+    (5, "HOURS")
+]
+
+
+@pytest.mark.parametrize("precision,fields", invalid_args_list)
+def test_interval_type_column_invalid_args(precision, fields):
+    with pytest.raises(exceptions.InvalidTypeParameters):
+        interval.Interval(precision=precision, fields=fields)
 
 
 intervals_out_to_ins = {

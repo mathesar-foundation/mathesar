@@ -31,6 +31,7 @@ class Interval(TypeDecorator):
             'DAY TO MINUTE',
             'HOUR TO MINUTE',
         }
+        all_fields = seconds_fields.union(other_fields)
         if self.impl.precision is not None:
             try:
                 assert isinstance(self.impl.precision, int)
@@ -48,10 +49,10 @@ class Interval(TypeDecorator):
                 )
         elif self.impl.fields is not None:
             try:
-                assert self.impl.fields.upper() in seconds_fields.union(other_fields)
+                assert self.impl.fields.upper() in all_fields
             except AssertionError:
                 raise InvalidTypeParameters(
-                    f'fields "{self.impl.fields}" is not in {seconds_fields.union(other_fields)}'
+                    f'fields "{self.impl.fields}" is not in {all_fields}'
                 )
 
     def column_expression(self, col):
