@@ -16,6 +16,7 @@ export default function portal(node: Element, target?: HTMLElement): Action {
   update(targetElement);
 
   return {
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     update,
     destroy,
   };

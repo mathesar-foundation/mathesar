@@ -18,7 +18,7 @@
       {...$$restProps}
       dataType={type}
       {label}
-      bind:value={$store}
+      bind:value={/* @ts-ignore: https://github.com/centerofci/mathesar/issues/1055 */ $store}
     />
   </LabeledInput>
 </div>

@@ -127,6 +127,7 @@
       init();
       controller.close();
     } catch (error) {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       toast.error(`Unable to add constraint. ${error.message as string}`);
     }
   }

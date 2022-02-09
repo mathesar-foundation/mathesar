@@ -24,8 +24,10 @@
    * boolean -> checkbox, toggle, select. Default: checkbox.<br/>
    * string -> text, textarea, select. Default: text.
    */
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   export let interfaceType: DynamicInputInterfaceType = undefined;
 
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   let enumValues: unknown[] = undefined;
 
   /**

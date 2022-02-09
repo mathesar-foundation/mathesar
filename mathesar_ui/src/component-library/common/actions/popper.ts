@@ -1,3 +1,4 @@
+// @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
 import { createPopper } from '@popperjs/core/dist/umd/popper.min';
 import type {
   ModifierArguments,
@@ -27,10 +28,12 @@ export default function popper(
             enabled: true,
             phase: 'beforeWrite',
             requires: ['computeStyles'],
+            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
             fn: (obj: ModifierArguments<unknown>): void => {
               // eslint-disable-next-line no-param-reassign
               obj.state.styles.popper.minWidth = `${obj.state.rects.reference.width}px`;
             },
+            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
             effect: (obj: ModifierArguments<unknown>): void => {
               const width = (obj.state.elements.reference as HTMLElement)
                 .offsetWidth;
@@ -76,6 +79,7 @@ export default function popper(
   create(actionOpts.reference, actionOpts.options);
 
   return {
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     update,
     destroy,
   };

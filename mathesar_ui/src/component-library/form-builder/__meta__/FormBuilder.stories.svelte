@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import FormBuilderStory from './FormBuilderStory.svelte';
   import BasicForm from './basicForm';

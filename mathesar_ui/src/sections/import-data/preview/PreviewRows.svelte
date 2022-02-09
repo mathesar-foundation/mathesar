@@ -27,6 +27,7 @@
         error: null,
       });
       previewPromise = postAPI<Response>(
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         `/tables/${fileImportData.previewId}/previews/`,
         {
           columns: columnInfo,

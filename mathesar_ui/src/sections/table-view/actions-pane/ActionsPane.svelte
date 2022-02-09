@@ -78,12 +78,15 @@
       identifierType: 'Table',
       onProceed: async () => {
         await deleteTable($tabularData.id);
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         const tabList = getTabsForSchema($currentDBName, $currentSchemaId);
         const tab = tabList.getTabularTabByTabularID(
           $tabularData.type,
           $tabularData.id,
         );
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         tabList.remove(tab);
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         await refetchTablesForSchema($currentSchemaId);
       },
     });

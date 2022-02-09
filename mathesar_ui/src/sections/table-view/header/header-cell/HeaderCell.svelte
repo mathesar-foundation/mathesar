@@ -116,6 +116,7 @@
       await columnsDataStore.rename(column.id, newName);
       isRenaming = false;
     } catch (error) {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       toast.error(`Unable to rename column. ${error?.message as string}`);
       if (!allowRetry) {
         isRenaming = false;

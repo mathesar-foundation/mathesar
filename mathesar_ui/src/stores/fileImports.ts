@@ -245,6 +245,7 @@ export function setImportStatus(
   const importmap = get(importStatuses);
   if (importmap.get(id)) {
     importStatuses.update((existingMap) => {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       existingMap.set(id, {
         ...existingMap.get(id),
         ...data,

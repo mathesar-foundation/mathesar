@@ -24,6 +24,7 @@ export function generateSelectOptions(
 
   // Treat all other types in a similar manner to string
   return (
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     enumValues?.map((value: string) => ({
       value,
       label: options?.[value]?.label ?? value,

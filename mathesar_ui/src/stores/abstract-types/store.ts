@@ -90,6 +90,7 @@ function getTypesForDatabase(
       store.update((currentData) => ({
         ...currentData,
         state: States.Done,
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         data: constructAbstractTypeMapFromResponse(commonData.abstract_types),
       }));
     } else {

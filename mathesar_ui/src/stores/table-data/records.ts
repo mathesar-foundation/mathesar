@@ -78,6 +78,7 @@ export function getRowKey(
   row: TableRecord,
   primaryKeyColumn?: Column['name'],
 ): unknown {
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   let key: unknown = row?.[primaryKeyColumn];
   if (!key && row?.__isNew) {
     key = row?.__identifier;
@@ -203,8 +204,10 @@ export class RecordsData {
 
   private promise: CancellablePromise<ApiRecordsResponse>;
 
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   private createPromises: Map<unknown, CancellablePromise<unknown>>;
 
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   private updatePromises: Map<unknown, CancellablePromise<unknown>>;
 
   private fetchCallback?: (storeData: TableRecordsData) => void;
@@ -379,7 +382,10 @@ export class RecordsData {
     const { primaryKey } = this.columnsDataStore.get();
     if (primaryKey && row[primaryKey]) {
       const rowKey = getRowKey(row, primaryKey);
-      const cellKey = `${rowKey.toString()}::${column.name}`;
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+      const rowKeyString: string = rowKey.toString();
+      const cellKey = `${rowKeyString}::${column.name}`;
       this.meta.setCellUpdateState(rowKey, cellKey, 'update');
       this.updatePromises?.get(cellKey)?.cancel();
       const promise = patchAPI<unknown>(

@@ -35,6 +35,7 @@ export default function clickOffBounds(
   }
 
   return {
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     update,
     destroy,
   };

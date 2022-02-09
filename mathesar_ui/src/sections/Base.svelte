@@ -59,6 +59,10 @@
   function tabRemoved(e: { detail: { removedTab: MathesarTab } }) {
     tabList.remove(e.detail.removedTab);
   }
+
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const getLink__withTypeCoercion: (arg0: unknown) => string = getTabLink;
 </script>
 
 <svelte:head>
@@ -79,7 +83,7 @@
       bind:activeTab={$activeTab}
       allowRemoval={true}
       preventDefault={true}
-      getLink={getTabLink}
+      getLink={getLink__withTypeCoercion}
       on:tabRemoved={tabRemoved}
     >
       <span slot="tab" let:tab>
