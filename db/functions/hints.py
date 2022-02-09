@@ -64,4 +64,9 @@ uri = _make_hint("uri")
 literal = _make_hint("literal")
 
 
+# Meant to mark a DBFunction for the filtering API to use.
 mathesar_filter = _make_hint("mathesar_filter")
+
+
+# A hint that all types are meant to satisfy.
+any = _make_hint("any")

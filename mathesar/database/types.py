@@ -125,18 +125,19 @@ def _ignore_type(sa_type_name):
     return False
 
 
-def find_ma_type_that_satisfies_hintset(ma_types_mapped_to_hintsets, hintset):
+def ma_types_that_satisfy_hintset(ma_types_mapped_to_hintsets, hintset):
     """
-    Provided a mapping of Mathesar types to their hintsets and a hintset, tries to find a Mathesar
-    type whose hintset satisfies the passed hintset, meaning the Mathesar type whose hintset is a
-    superset of the passed hintset.
+    Provided a mapping of Mathesar types to their hintsets and a hintset, tries to find Mathesar
+    types whose hintsets satisfy the passed hintset, meaning the Mathesar types whose hintsets are
+    supersets of the passed hintset.
     """
     hintset = set(hintset)
-    for ma_type, ma_type_hintset in ma_types_mapped_to_hintsets:
-        ma_type_satisfies_hintset = set.issubset(hintset, ma_type_hintset)
-        if ma_type_satisfies_hintset:
-            return ma_type
-    return None
+    return tuple(
+        ma_type
+        for ma_type, ma_type_hintset
+        in ma_types_mapped_to_hintsets
+        if set.issubset(hintset, ma_type_hintset)
+    )
 
 
 

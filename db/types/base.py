@@ -91,26 +91,53 @@ def get_db_type_enum_from_id(db_type_id):
             return None
 
 
-db_types_hinted = frozendict({
-    PostgresType.BOOLEAN: tuple([
-        hints.boolean
-    ]),
-    PostgresType.CHARACTER_VARYING: tuple([
-        hints.string_like
-    ]),
-    PostgresType.CHARACTER: tuple([
-        hints.string_like
-    ]),
-    PostgresType.NUMERIC: tuple([
-        hints.comparable
-    ]),
-    PostgresType.TEXT: tuple([
-        hints.string_like
-    ]),
-    MathesarCustomType.URI: tuple([
-        hints.uri
-    ]),
-})
+def _build_db_types_hinted():
+    db_types_hinted = {
+        PostgresType.BOOLEAN: tuple([
+            hints.boolean
+        ]),
+        PostgresType.CHARACTER_VARYING: tuple([
+            hints.string_like
+        ]),
+        PostgresType.CHARACTER: tuple([
+            hints.string_like
+        ]),
+        PostgresType.TEXT: tuple([
+            hints.string_like
+        ]),
+        MathesarCustomType.URI: tuple([
+            hints.uri
+        ]),
+    }
+
+    # mutates db_types_hinted
+    def _add_to_db_type_hintsets(db_types, hints):
+        for db_type in db_types:
+            if db_type in db_types_hinted:
+                updated_hintset = tuple(set(db_types_hinted[db_type] + tuple(hints)))
+                db_types_hinted[db_type] = updated_hintset
+            else:
+                db_types_hinted[db_type] = tuple(hints)
+
+    numeric_db_types = (
+        PostgresType.BIGINT,
+        PostgresType.DECIMAL,
+        PostgresType.DOUBLE_PRECISION,
+        PostgresType.FLOAT,
+        PostgresType.INTEGER,
+        PostgresType.SMALLINT,
+        PostgresType.NUMERIC,
+        PostgresType.REAL,
+    )
+
+    hints_for_numeric_db_types = (hints.comparable,)
+
+    _add_to_db_type_hintsets(numeric_db_types, hints_for_numeric_db_types)
+
+    return frozendict(db_types_hinted)
+
+
+db_types_hinted = _build_db_types_hinted()
 
 
 SCHEMA = f"{constants.MATHESAR_PREFIX}types"

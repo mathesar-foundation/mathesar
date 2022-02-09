@@ -102,6 +102,8 @@ class Empty(DBFunction):
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(1),
+        hints.parameter(0, hints.any),
+        hints.mathesar_filter,
     ])
 
     @staticmethod
@@ -114,12 +116,15 @@ class Not(DBFunction):
     name = 'Not'
     hints = tuple([
         hints.returns(hints.boolean),
-        hints.parameter_count(1),
     ])
 
     @staticmethod
-    def to_sa_expression(value):
-        return not_(value)
+    def to_sa_expression(*values):
+        length = len(values)
+        if length > 1:
+            return not_(and_(*values))
+        else:
+            return not_(values[0])
 
 
 class Equal(DBFunction):
@@ -128,6 +133,8 @@ class Equal(DBFunction):
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
+        hints.all_parameters(hints.any),
+        hints.mathesar_filter,
     ])
 
     @staticmethod
@@ -142,6 +149,7 @@ class Greater(DBFunction):
         hints.returns(hints.boolean),
         hints.parameter_count(2),
         hints.all_parameters(hints.comparable),
+        hints.mathesar_filter,
     ])
 
     @staticmethod
@@ -156,6 +164,7 @@ class Lesser(DBFunction):
         hints.returns(hints.boolean),
         hints.parameter_count(2),
         hints.all_parameters(hints.comparable),
+        hints.mathesar_filter,
     ])
 
     @staticmethod
@@ -208,6 +217,7 @@ class StartsWith(DBFunction):
         hints.returns(hints.boolean),
         hints.parameter_count(2),
         hints.all_parameters(hints.string_like),
+        hints.mathesar_filter,
     ])
 
     @staticmethod
@@ -219,8 +229,10 @@ class ToLowercase(DBFunction):
     id = 'to_lowercase'
     name = 'To Lowercase'
     hints = tuple([
+        hints.returns(hints.string_like),
         hints.parameter_count(1),
         hints.all_parameters(hints.string_like),
+        hints.mathesar_filter,
     ])
 
     @staticmethod
