@@ -1,9 +1,9 @@
 import type { Action } from './types.d';
 
 export default function portal(node: Element, target?: HTMLElement): Action {
-  const targetElement = target ?? document.querySelector('body');
+  const targetElement = target ?? document.querySelector('body') ?? undefined;
 
-  function update(newTarget: HTMLElement) {
+  function update(newTarget: HTMLElement | undefined) {
     if (newTarget && newTarget instanceof HTMLElement) {
       newTarget.appendChild(node);
     }

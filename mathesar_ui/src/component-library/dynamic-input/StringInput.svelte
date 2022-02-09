@@ -3,8 +3,8 @@
   import TextArea from '@mathesar-component-library-dir/text-area/TextArea.svelte';
   import type { DynamicInputInterfaceType } from './types.d';
 
-  export let value = undefined;
-  export let interfaceType: DynamicInputInterfaceType = undefined;
+  export let value: string | undefined = undefined;
+  export let interfaceType: DynamicInputInterfaceType | undefined = undefined;
 </script>
 
 {#if interfaceType === 'textarea'}

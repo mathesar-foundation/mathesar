@@ -35,7 +35,7 @@ export function generateSelectOptions(
 export function getSelectedValue(
   options: EnumSelectOption[],
   value: unknown,
-): EnumSelectOption {
+): EnumSelectOption | undefined {
   return options.find((elem) => elem.value === value);
 }
 

@@ -21,7 +21,7 @@
   export let element: HTMLInputElement | undefined = undefined;
 
   // Id for the input
-  export let id: string = undefined;
+  export let id: string | undefined = undefined;
 
   export let hasValidationErrors = false;
 

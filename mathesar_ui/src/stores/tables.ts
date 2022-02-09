@@ -121,7 +121,7 @@ export function getTablesStoreForSchema(
     schemaTablesStoreMap.set(schemaId, store);
     if (preload) {
       preload = false;
-      store = setSchemaTablesStore(schemaId, commonData.tables || []);
+      store = setSchemaTablesStore(schemaId, commonData?.tables ?? []);
     } else {
       void refetchTablesForSchema(schemaId);
     }

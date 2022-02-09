@@ -14,14 +14,9 @@
   import { Button, Icon, Dropdown } from '@mathesar-component-library';
   import type {
     TabularDataStore,
-    TabularData,
-    RecordsData,
-    ColumnsDataStore,
     ColumnsData,
-    Meta,
   } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar-component-library/types';
-  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import { refetchTablesForSchema, deleteTable } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
@@ -45,19 +40,14 @@
     );
   }
 
-  let recordsData: RecordsData;
-  let columnsDataStore: ColumnsDataStore;
-  let constraintsDataStore: ConstraintsDataStore;
-  let meta: Meta;
-  let recordState: RecordsData['state'];
   const tableConstraintsModal = modal.spawnModalController();
   const tableRenameModal = modal.spawnModalController();
 
   $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
-    $tabularData as TabularData);
+    $tabularData);
   $: ({ filter, sort, group, selectedRecords, combinedModificationState } =
     meta);
-  $: ({ state: recordState } = recordsData);
+  $: recordState = recordsData.state;
 
   $: isLoading =
     $columnsDataStore.state === States.Loading ||
@@ -70,7 +60,7 @@
   $: columnOptions = getColumnOptions($columnsDataStore);
 
   function refresh() {
-    void ($tabularData as TabularData).refresh();
+    void $tabularData.refresh();
   }
 
   function handleDeleteTable() {

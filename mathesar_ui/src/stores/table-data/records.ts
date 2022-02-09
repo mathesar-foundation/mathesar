@@ -202,7 +202,7 @@ export class RecordsData {
 
   error: Writable<string | undefined>;
 
-  private promise: CancellablePromise<ApiRecordsResponse>;
+  private promise: CancellablePromise<ApiRecordsResponse> | undefined;
 
   // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   private createPromises: Map<unknown, CancellablePromise<unknown>>;

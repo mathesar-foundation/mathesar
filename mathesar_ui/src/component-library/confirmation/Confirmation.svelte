@@ -59,7 +59,11 @@
   on:close={onClose}
   class="confirmation"
 >
-  <StringOrComponent slot="title" arg={title} />
+  <svelte:fragment slot="title">
+    {#if title}
+      <StringOrComponent arg={title} />
+    {/if}
+  </svelte:fragment>
   <StringOrComponent arg={body} />
   <CancelOrProceedButtonPair
     slot="footer"

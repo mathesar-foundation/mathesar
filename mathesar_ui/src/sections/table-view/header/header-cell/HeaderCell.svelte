@@ -78,7 +78,9 @@
     isRenaming = true;
     newName = column.name;
     await tick();
-    focusAndSelectAll(renamingInputElement);
+    if (renamingInputElement) {
+      focusAndSelectAll(renamingInputElement);
+    }
   }
 
   function handleCancelRename() {

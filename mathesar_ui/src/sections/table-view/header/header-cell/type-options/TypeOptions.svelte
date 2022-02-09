@@ -12,7 +12,6 @@
   import type { DbType } from '@mathesar/App.d';
   import type {
     Column,
-    TabularData,
     TabularDataStore,
   } from '@mathesar/stores/table-data/types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
@@ -22,7 +21,7 @@
   const dispatch = createEventDispatcher();
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  $: ({ columnsDataStore } = $tabularData as TabularData);
+  $: ({ columnsDataStore } = $tabularData);
 
   export let column: Column;
   export let abstractTypeOfColumn: AbstractType | undefined;

@@ -74,7 +74,7 @@
 >
   {#if row.__isNewHelpText}
     <RowPlaceholder {rowWidth} />
-  {:else if row.__isGroupHeader}
+  {:else if row.__isGroupHeader && $grouping && row.__group}
     <GroupHeader {row} {rowWidth} grouping={$grouping} group={row.__group} />
   {:else}
     <RowControl primaryKeyColumn={primaryKey} {row} {meta} {recordsData} />

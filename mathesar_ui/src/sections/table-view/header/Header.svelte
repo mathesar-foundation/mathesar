@@ -1,29 +1,18 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import { ROW_CONTROL_COLUMN_WIDTH } from '@mathesar/stores/table-data';
-
   import type {
     TabularDataStore,
-    TabularData,
     Column,
     ColumnPosition,
     ColumnPositionMap,
-    ColumnsDataStore,
-    Display,
-    Meta,
   } from '@mathesar/stores/table-data/types';
-  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  let columnsDataStore: ColumnsDataStore;
-  let constraintsDataStore: ConstraintsDataStore;
-  let display: Display;
-  let meta: Meta;
 
-  $: ({ columnsDataStore, meta, display, constraintsDataStore } =
-    $tabularData as TabularData);
+  $: ({ columnsDataStore, meta, display, constraintsDataStore } = $tabularData);
   $: ({ horizontalScrollOffset, columnPositionMap } = display);
 
   let headerRef: HTMLElement;

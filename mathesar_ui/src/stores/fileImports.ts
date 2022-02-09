@@ -208,7 +208,7 @@ export function deleteImport(schemaId: SchemaEntry['id'], id: string): void {
     const fileImportData = get(fileImport);
     fileImportData.importPromise?.cancel();
     fileImportData.uploadPromise?.cancel();
-    imports.delete(id);
+    imports?.delete(id);
   }
   importStatuses.update((existingMap) => {
     existingMap.delete(id);

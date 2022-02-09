@@ -18,13 +18,13 @@
     previewPromise?.cancel();
     try {
       const fileImportData = get(fileImportStore);
-      const columnInfo = fileImportData.previewColumns.map((column) => ({
+      const columnInfo = fileImportData.previewColumns?.map((column) => ({
         name: column.name,
         type: column.type,
       }));
       setInFileStore(fileImportStore, {
         previewRowsLoadStatus: States.Loading,
-        error: null,
+        error: undefined,
       });
       previewPromise = postAPI<Response>(
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
