@@ -177,7 +177,7 @@ def test_column_create(column_test_table, client):
 
 create_default_test_list = [
     ("BOOLEAN", True, True, True),
-    ("INTERVAL", "00:42:00", timedelta(minutes=42), "2520.0"),
+    ("INTERVAL", "00:42:00", "P0Y0M0DT0H42M0S", "P0Y0M0DT0H42M0S"),
     ("NUMERIC", 42, 42, 42),
     ("STRING", "test_string", "test_string", "test_string"),
     ("VARCHAR", "test_string", "test_string", "test_string"),
