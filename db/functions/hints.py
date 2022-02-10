@@ -8,18 +8,18 @@ def get_parameter_hints(index, db_function_subclass):
     """
     hints_for_all_parameters = None
     for hint in db_function_subclass.hints:
-        if hint.id == "parameter" and hint.index == index:
-            hints_for_parameter_at_index = hint.hints
+        if hint['id'] == "parameter" and hint['index'] == index:
+            hints_for_parameter_at_index = hint['hints']
             return hints_for_parameter_at_index
-        if hint.id == "all_parameters":
-            hints_for_all_parameters = hint.hints
+        if hint['id'] == "all_parameters":
+            hints_for_all_parameters = hint['hints']
     return hints_for_all_parameters
 
 
 def get_parameter_count(db_function_subclass):
     for hint in db_function_subclass.hints:
-        if hint.id == "parameter_count":
-            return hint.count
+        if hint['id'] == "parameter_count":
+            return hint['count']
     return None
 
 

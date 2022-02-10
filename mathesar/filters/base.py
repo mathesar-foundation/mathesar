@@ -27,7 +27,11 @@ def get_available_filters(engine):
 def _is_db_function_subclass_castable_to_filter(db_function_subclass):
     # Provisionary implementation; ideally would examine parameter and output
     # related hints.
-    return hints.mathesar_filter in db_function_subclass.hints
+    db_function_hints = db_function_subclass.hints
+    if db_function_hints:
+        return hints.mathesar_filter in db_function_hints
+    else:
+        return False
 
 
 def _filter_from_db_function(mathesar_type_hints, db_function_subclass):
@@ -61,8 +65,12 @@ def _get_filter_parameters(mathesar_type_hints, db_function_subclass):
 
 
 def _make_filter_param(mathesar_types):
+    mathesar_type_strings = tuple(
+        mathesar_type.value
+        for mathesar_type in mathesar_types
+    )
     return dict(
-        mathesar_types=mathesar_types
+        mathesar_types=mathesar_type_strings
     )
 
 

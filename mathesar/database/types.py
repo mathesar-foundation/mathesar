@@ -135,7 +135,7 @@ def ma_types_that_satisfy_hintset(ma_types_mapped_to_hintsets, hintset):
     return tuple(
         ma_type
         for ma_type, ma_type_hintset
-        in ma_types_mapped_to_hintsets
+        in ma_types_mapped_to_hintsets.items()
         if set.issubset(hintset, ma_type_hintset)
     )
 
@@ -147,23 +147,33 @@ def get_ma_types_mapped_to_hintsets(engine):
     A Mathesar type's hintset is defined as the intersection of the hintsets of its associated
     database types.
     """
-    type_descriptions = get_types(engine)
+    ma_type_descriptions = get_types(engine)
     ma_types_mapped_to_hintsets = {}
-    for type_description in type_descriptions:
-        type = get_db_type_enum_from_id(type_description['identifier'])
-        associated_db_type_descriptions = type_description['db_types']
+    for ma_type_description in ma_type_descriptions:
+        # TODO
+        ma_type = get_ma_type_enum_from_id(ma_type_description['identifier'])
+        associated_db_type_descriptions = ma_type_description['db_types']
         associated_db_types = (
-            get_db_type_enum_from_id(associated_db_type_description['sa_type'])
-            for associated_db_type_description in associated_db_type_descriptions
+            # TODO why is db_type_descriptions a list that seems to always have one element?
+            get_db_type_enum_from_id(db_type_descriptions[0]["sa_type_name"])
+            for _db_type_id, db_type_descriptions in associated_db_type_descriptions.items()
         )
-        associated_db_type_hintsets = (
+        associated_db_type_hintsets = tuple(
             set(db_types_hinted[associated_db_type])
             for associated_db_type in associated_db_types
             if associated_db_type in db_types_hinted
         )
-        hintsets_intersection = set.intersection(associated_db_type_hintsets)
-        ma_types_mapped_to_hintsets[type] = tuple(hintsets_intersection)
+        hintsets_intersection = _safe_set_intersection(associated_db_type_hintsets)
+        ma_types_mapped_to_hintsets[ma_type] = tuple(hintsets_intersection)
     return ma_types_mapped_to_hintsets
+
+
+def _safe_set_intersection(sets):
+    # set.intersection fails if it is not passed anything.
+    if len(sets) > 0:
+        return set.intersection(*sets)
+    else:
+        return set()
 
 
 # TODO improve readability
@@ -226,3 +236,14 @@ def get_sa_type_map():
 def get_mathesar_type_from_db_type(db_type_string):
     type_map = get_sa_type_map()
     return type_map[db_type_string.lower()]
+
+
+def get_ma_type_enum_from_id(ma_type_id):
+    """
+    Gets an instance of MathesarTypeIdentifier enum corresponding to the provided ma_type_id.
+    If the id doesn't correspond to the mentioned enum, returns None.
+    """
+    try:
+        return MathesarTypeIdentifier(ma_type_id)
+    except ValueError:
+        return None
