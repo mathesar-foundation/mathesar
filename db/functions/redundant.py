@@ -17,7 +17,7 @@ from db.functions import hints
 
 class LesserOrEqual(DBFunction):
     id = 'lesser_or_equal'
-    name = 'Lesser or Equal'
+    name = 'is lesser or equal to'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
@@ -32,7 +32,7 @@ class LesserOrEqual(DBFunction):
 
 class GreaterOrEqual(DBFunction):
     id = 'greater_or_equal'
-    name = 'Greater or Equal'
+    name = 'is greater or equal to'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),

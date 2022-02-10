@@ -59,7 +59,7 @@ class DBFunction(ABC):
 
 class Literal(DBFunction):
     id = 'literal'
-    name = 'Literal'
+    name = 'as literal'
     hints = tuple([
         hints.parameter_count(1),
         hints.parameter(1, hints.literal),
@@ -72,7 +72,7 @@ class Literal(DBFunction):
 
 class ColumnReference(DBFunction):
     id = 'column_reference'
-    name = 'Column Reference'
+    name = 'as column Reference'
     hints = tuple([
         hints.parameter_count(1),
         hints.parameter(1, hints.column),
@@ -89,7 +89,7 @@ class ColumnReference(DBFunction):
 
 class List(DBFunction):
     id = 'list'
-    name = 'List'
+    name = 'as list'
 
     @staticmethod
     def to_sa_expression(*items):
@@ -98,7 +98,7 @@ class List(DBFunction):
 
 class Empty(DBFunction):
     id = 'empty'
-    name = 'Empty'
+    name = 'is empty'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(1),
@@ -113,7 +113,7 @@ class Empty(DBFunction):
 
 class Not(DBFunction):
     id = 'not'
-    name = 'Not'
+    name = 'negate'
     hints = tuple([
         hints.returns(hints.boolean),
     ])
@@ -129,7 +129,7 @@ class Not(DBFunction):
 
 class Equal(DBFunction):
     id = 'equal'
-    name = 'Equal'
+    name = 'is equal to'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
@@ -144,7 +144,7 @@ class Equal(DBFunction):
 
 class Greater(DBFunction):
     id = 'greater'
-    name = 'Greater'
+    name = 'is greater than'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
@@ -159,7 +159,7 @@ class Greater(DBFunction):
 
 class Lesser(DBFunction):
     id = 'lesser'
-    name = 'Lesser'
+    name = 'is lesser than'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
@@ -174,7 +174,7 @@ class Lesser(DBFunction):
 
 class In(DBFunction):
     id = 'in'
-    name = 'In'
+    name = 'is in'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
@@ -188,7 +188,7 @@ class In(DBFunction):
 
 class And(DBFunction):
     id = 'and'
-    name = 'And'
+    name = 'and'
     hints = tuple([
         hints.returns(hints.boolean),
     ])
@@ -200,7 +200,7 @@ class And(DBFunction):
 
 class Or(DBFunction):
     id = 'or'
-    name = 'Or'
+    name = 'or'
     hints = tuple([
         hints.returns(hints.boolean),
     ])
@@ -212,7 +212,7 @@ class Or(DBFunction):
 
 class StartsWith(DBFunction):
     id = 'starts_with'
-    name = 'Starts With'
+    name = 'starts with'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
@@ -227,7 +227,7 @@ class StartsWith(DBFunction):
 
 class ToLowercase(DBFunction):
     id = 'to_lowercase'
-    name = 'To Lowercase'
+    name = 'to lowercase'
     hints = tuple([
         hints.returns(hints.string_like),
         hints.parameter_count(1),
