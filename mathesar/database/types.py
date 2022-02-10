@@ -7,7 +7,7 @@ from enum import Enum
 from db.types.base import (
     PostgresType, MathesarCustomType, get_available_types, get_qualified_name,
     get_db_type_name, db_types_hinted, get_db_type_enum_from_id
-    )
+)
 
 
 class MathesarTypeIdentifier(Enum):
@@ -138,7 +138,6 @@ def ma_types_that_satisfy_hintset(ma_types_mapped_to_hintsets, hintset):
         in ma_types_mapped_to_hintsets.items()
         if set.issubset(hintset, ma_type_hintset)
     )
-
 
 
 def get_ma_types_mapped_to_hintsets(engine):

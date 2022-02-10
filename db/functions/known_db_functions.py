@@ -65,6 +65,6 @@ _db_functions_in_other_modules = tuple([
 
 known_db_functions = (
     _db_functions_in_base_module
-        + _db_functions_in_redundant_module
-        + _db_functions_in_other_modules
+    + _db_functions_in_redundant_module
+    + _db_functions_in_other_modules
 )
