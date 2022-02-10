@@ -51,7 +51,7 @@ def test_multiple_constraint_list(create_table, client):
 def test_multiple_column_constraint_list(create_table, client):
     table_name = 'NASA Constraint List 2'
     table = create_table(table_name)
-    columns = table.columns.all().order_by('id')
+    columns = table.columns.all()
     constraint_column_1 = columns[1]
     constraint_column_2 = columns[3]
     constraint_column_id_list = [constraint_column_1.id, constraint_column_2.id]
