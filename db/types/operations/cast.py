@@ -26,7 +26,8 @@ VARCHAR = base.VARCHAR
 
 # custom types
 EMAIL = base.MathesarCustomType.EMAIL.value
-MONEY = base.MathesarCustomType.MONEY.value
+MATHESAR_MONEY = base.MathesarCustomType.MATHESAR_MONEY.value
+MONEY = base.PostgresType.MONEY.value
 TIME_WITHOUT_TIME_ZONE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
 TIME_WITH_TIME_ZONE = base.PostgresType.TIME_WITH_TIME_ZONE.value
 TIMESTAMP_WITH_TIME_ZONE = base.PostgresType.TIMESTAMP_WITH_TIME_ZONE.value
@@ -65,6 +66,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         FLOAT: dialect_types.get(FLOAT),
         INTEGER: dialect_types.get(INTEGER),
         INTERVAL: dialect_types.get(INTERVAL),
+        MONEY: dialect_types.get(MONEY),
         NUMERIC: dialect_types.get(NUMERIC),
         REAL: dialect_types.get(REAL),
         SMALLINT: dialect_types.get(SMALLINT),
@@ -77,7 +79,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),
-        MONEY: dialect_types.get(money.DB_TYPE),
+        MATHESAR_MONEY: dialect_types.get(money.DB_TYPE),
         URI: dialect_types.get(uri.DB_TYPE),
     }
     if friendly_names:
@@ -150,6 +152,7 @@ def install_all_casts(engine):
     create_interval_casts(engine)
     create_datetime_casts(engine)
     create_money_casts(engine)
+    create_mathesar_money_casts(engine)
     create_textual_casts(engine)
     create_uri_casts(engine)
 
@@ -206,6 +209,11 @@ def create_datetime_casts(engine):
 
 def create_money_casts(engine):
     type_body_map = _get_money_type_body_map()
+    create_cast_functions(MONEY, type_body_map, engine)
+
+
+def create_mathesar_money_casts(engine):
+    type_body_map = _get_mathesar_money_type_body_map()
     create_cast_functions(money.DB_TYPE, type_body_map, engine)
 
 
@@ -248,6 +256,7 @@ def get_defined_source_target_cast_tuples(engine):
         EMAIL: _get_email_type_body_map(),
         FLOAT: _get_decimal_number_type_body_map(target_type_str=FLOAT),
         INTEGER: _get_integer_type_body_map(target_type_str=INTEGER),
+        MATHESAR_MONEY: _get_mathesar_money_type_body_map(),
         MONEY: _get_money_type_body_map(),
         INTERVAL: _get_interval_type_body_map(),
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
@@ -467,6 +476,7 @@ def _get_integer_type_body_map(target_type_str=INTEGER):
           {cast_loss_exception_str}
         END;
         """
+
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, target_type_str,
     )
@@ -604,6 +614,58 @@ def _get_money_type_body_map():
     We allow casting any textual type to money, assuming currency is USD
     and that the type can be cast through a numeric.
     """
+    default_behavior_source_types = [MONEY]
+    number_types = NUMBER_TYPES
+    textual_types = TEXT_TYPES
+    cast_loss_exception_str = (
+        f"RAISE EXCEPTION '% cannot be cast to {MONEY} as currency symbol is missing', $1;"
+    )
+
+    def _get_number_cast_to_money():
+        return f"""
+        BEGIN
+          RETURN $1::numeric::{MONEY};
+        END;
+        """
+
+    def _get_base_textual_cast_to_money():
+        return f"""
+        DECLARE currency {TEXT};
+        BEGIN
+          SELECT to_char(1, 'L') INTO currency;
+          IF ($1 LIKE '%' || currency) OR ($1 LIKE currency || '%') THEN
+            RETURN $1::{MONEY};
+          END IF;
+          {cast_loss_exception_str}
+        END;
+        """
+
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, MONEY,
+    )
+    type_body_map.update(
+        {
+            type_name: _get_number_cast_to_money()
+            for type_name in number_types
+        }
+    )
+    type_body_map.update(
+        {
+            type_name: _get_base_textual_cast_to_money()
+            for type_name in textual_types
+        }
+    )
+    return type_body_map
+
+
+def _get_mathesar_money_type_body_map():
+    """
+    Get SQL strings that create various functions for casting different
+    types to money.
+    We allow casting any number type to money, assuming currency is USD.
+    We allow casting any textual type to money, assuming currency is USD
+    and that the type can be cast through a numeric.
+    """
     default_behavior_source_types = [money.DB_TYPE]
     number_types = NUMBER_TYPES
     textual_types = TEXT_TYPES
@@ -621,6 +683,7 @@ def _get_money_type_body_map():
           RETURN ROW($1::numeric, 'USD')::{money.DB_TYPE};
         END;
         """
+
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, money.DB_TYPE,
     )
@@ -710,6 +773,7 @@ def _get_uri_type_body_map():
     Get SQL strings that create various functions for casting different
     types to URIs.
     """
+
     def _get_text_uri_type_body_map():
         # We need to check that a string isn't a valid number before
         # casting to intervals (since a number is more likely)
@@ -731,6 +795,7 @@ def _get_uri_type_body_map():
           {not_uri_exception_str}
         END;
         """
+
     source_types = frozenset([uri.DB_TYPE]) | TEXT_TYPES
     return {type_: _get_text_uri_type_body_map() for type_ in source_types}
 
