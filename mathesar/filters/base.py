@@ -55,7 +55,7 @@ def _get_filter_parameters(mathesar_type_hints, db_function_subclass):
         mathesar_types = _get_parameter_mathesar_types(
             mathesar_type_hints=mathesar_type_hints,
             db_function_subclass=db_function_subclass,
-            index=parameter_index,
+            parameter_index=parameter_index,
         )
         filter_param = _make_filter_param(
             mathesar_types=mathesar_types,
@@ -74,7 +74,13 @@ def _make_filter_param(mathesar_types):
     )
 
 
-def _get_parameter_mathesar_types(mathesar_type_hints, db_function_subclass, index):
-    parameter_hints = hints.get_parameter_hints(index, db_function_subclass)
+def _get_parameter_mathesar_types(mathesar_type_hints, db_function_subclass, parameter_index):
+    parameter_hints = hints.get_parameter_hints(parameter_index, db_function_subclass)
     parameter_mathesar_types = ma_types_that_satisfy_hintset(mathesar_type_hints, parameter_hints)
+    if len(parameter_mathesar_types) == 0:
+        raise Exception(
+            f"Hints of DB function {db_function_subclass.id}"
+            + f" parameter at index {parameter_index} must match"
+            + " at least one Mathesar type (it didn't)."
+        )
     return parameter_mathesar_types
