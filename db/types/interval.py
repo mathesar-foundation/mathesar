@@ -63,13 +63,13 @@ class Interval(TypeDecorator):
         """
         iso_8601_format_str = 'PFMYYYY"Y"FMMM"M"FMDD"D""T"FMHH24"H"FMMI"M"'
         return case(
-            (col == None, None),
+            (col == None, None),  # noqa
             # For some reason, it's not possible to nicely format
             # including the seconds, so those are concatenated to the
             # end.
             else_=func.concat(
-                    func.to_char(col, iso_8601_format_str),
-                    func.date_part('seconds', col),
-                    'S',
+                func.to_char(col, iso_8601_format_str),
+                func.date_part('seconds', col),
+                'S',
             )
         )

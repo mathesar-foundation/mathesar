@@ -75,11 +75,7 @@ def test_interval_type_column_args(engine_email_type):
     assert actual_interval.fields.upper() == "SECOND"
 
 
-invalid_args_list = [
-    (None, "SECONDS"),
-    (1.34, None),
-    (5, "HOURS")
-]
+invalid_args_list = [(None, "SECONDS"), (1.34, None), (5, "HOURS")]
 
 
 @pytest.mark.parametrize("precision,fields", invalid_args_list)
