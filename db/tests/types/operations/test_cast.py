@@ -1,4 +1,4 @@
-from datetime import timedelta, date, time
+from datetime import date, time
 from datetime import datetime as py_datetime
 from decimal import Decimal
 
@@ -292,10 +292,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             INTERVAL: {
                 VALID: [
-                    (
-                        timedelta(days=3, hours=3, minutes=5, seconds=30),
-                        timedelta(days=3, hours=3, minutes=5, seconds=30),
-                    )
+                    ("P0Y0M3DT3H5M30S", "P0Y0M3DT3H5M30S")
                 ]
             },
             TEXT: {
@@ -303,10 +300,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             VARCHAR: {
                 VALID: [
-                    (
-                        timedelta(days=3, hours=3, minutes=5, seconds=30),
-                        '3 days 03:05:30'
-                    )
+                    ("P0Y0M3DT3H5M30S", "3 days 03:05:30")
                 ]
             },
         }
@@ -560,10 +554,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             INTERVAL: {
                 VALID: [
-                    ("1 day", timedelta(days=1)),
-                    ("1 week", timedelta(days=7)),
-                    ("3:30", timedelta(hours=3, minutes=30)),
-                    ("00:03:30", timedelta(minutes=3, seconds=30)),
+                    ("1 day", "P0Y0M1DT0H0M0S"),
+                    ("1 week", "P0Y0M7DT0H0M0S"),
+                    ("3:30", "P0Y0M0DT3H30M0S"),
+                    ("00:03:30", "P0Y0M0DT0H3M30S"),
                 ],
                 INVALID: ["1 potato", "3"],
             },
@@ -714,10 +708,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             INTERVAL: {
                 VALID: [
-                    ("1 day", timedelta(days=1)),
-                    ("1 week", timedelta(days=7)),
-                    ("3:30", timedelta(hours=3, minutes=30)),
-                    ("00:03:30", timedelta(minutes=3, seconds=30)),
+                    ("1 day", "P0Y0M1DT0H0M0S"),
+                    ("1 week", "P0Y0M7DT0H0M0S"),
+                    ("3:30", "P0Y0M0DT3H30M0S"),
+                    ("00:03:30", "P0Y0M0DT0H3M30S"),
                 ],
                 INVALID: ["1 potato", "3"],
             },
