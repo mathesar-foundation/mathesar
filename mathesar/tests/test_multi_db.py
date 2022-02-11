@@ -82,7 +82,7 @@ def test_multi_db_schema(engine, multi_db_engine, client):
         create_schema("multi_db_" + schema, multi_db_engine)
 
     cache.clear()
-    response = client.get('/api/v0/schemas/')
+    response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     response_schemas = [
         s['name'] for s in response_data['results'] if s['name'] != 'public'
@@ -110,7 +110,7 @@ def test_multi_db_tables(engine, multi_db_engine, client):
         )
 
     cache.clear()
-    response = client.get('/api/v0/tables/')
+    response = client.get('/api/db/v0/tables/')
     response_tables = [s['name'] for s in response.json()['results']]
 
     assert response.status_code == 200
