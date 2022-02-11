@@ -96,14 +96,14 @@ def test_data_file_list(client, data_file):
                 "table": {
                     "id": 1,
                     "name": "NASA Patents",
-                    "url": "http://testserver/api/v0/tables/1/"
+                    "url": "http://testserver/api/db/v0/tables/1/"
                 },
                 "user": 1
             }
         ]
     }
     """
-    response = client.get('/api/v0/data_files/')
+    response = client.get('/api/db/v0/data_files/')
     response_data = response.json()
 
     assert response.status_code == 200
@@ -115,7 +115,7 @@ def test_data_file_list(client, data_file):
 
 
 def test_data_file_detail(client, data_file):
-    response = client.get(f'/api/v0/data_files/{data_file.id}/')
+    response = client.get(f'/api/db/v0/data_files/{data_file.id}/')
     data_file_dict = response.json()
 
     assert response.status_code == 200
@@ -128,7 +128,7 @@ def test_data_file_create_csv(client, csv_filename, header):
 
     with open(csv_filename, 'rb') as csv_file:
         data = {'file': csv_file, 'header': header}
-        response = client.post('/api/v0/data_files/', data, format='multipart')
+        response = client.post('/api/db/v0/data_files/', data, format='multipart')
     with open(csv_filename, 'r') as csv_file:
         correct_dialect = csv.get_sv_dialect(csv_file)
     check_create_data_file_response(
@@ -141,7 +141,7 @@ def test_data_file_create_csv_long_name(client, csv_filename):
     with open(csv_filename, 'rb') as csv_file:
         with patch.object(os.path, 'basename', lambda _: '0' * 101):
             data = {'file': csv_file}
-            response = client.post('/api/v0/data_files/', data, format='multipart')
+            response = client.post('/api/db/v0/data_files/', data, format='multipart')
             data_file_dict = response.json()
     assert response.status_code == 400
     assert 'Ensure this filename has at most 100' in data_file_dict[0]['message']
@@ -155,7 +155,7 @@ def test_data_file_create_paste(client, paste_filename, header):
         paste_text = paste_file.read()
 
     data = {'paste': paste_text, 'header': header}
-    response = client.post('/api/v0/data_files/', data)
+    response = client.post('/api/db/v0/data_files/', data)
 
     check_create_data_file_response(
         response, num_data_files, 'paste', '', '\t', '', '', header
@@ -166,7 +166,7 @@ def test_data_file_create_paste(client, paste_filename, header):
 def test_data_file_create_url(client, header, patents_url, mock_get_patents_url):
     num_data_files = DataFile.objects.count()
     data = {'url': patents_url, 'header': header}
-    response = client.post('/api/v0/data_files/', data)
+    response = client.post('/api/db/v0/data_files/', data)
 
     base_name = patents_url.split('/')[-1].split('.')[0]
     check_create_data_file_response(
@@ -175,7 +175,7 @@ def test_data_file_create_url(client, header, patents_url, mock_get_patents_url)
 
 
 def test_data_file_update(client, data_file):
-    response = client.put(f'/api/v0/data_files/{data_file.id}/')
+    response = client.put(f'/api/db/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
     response_data = response.json()[0]
     assert response_data['message'] == 'Method "PUT" not allowed.'
@@ -183,14 +183,14 @@ def test_data_file_update(client, data_file):
 
 
 def test_data_file_partial_update(client, data_file):
-    response = client.patch(f'/api/v0/data_files/{data_file.id}/')
+    response = client.patch(f'/api/db/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
     assert response.json()[0]['message'] == 'Method "PATCH" allowed only for header.'
     assert response.json()[0]['code'] == ErrorCodes.MethodNotAllowed.value
 
 
 def test_data_file_delete(client, data_file):
-    response = client.delete(f'/api/v0/data_files/{data_file.id}/')
+    response = client.delete(f'/api/db/v0/data_files/{data_file.id}/')
     assert response.status_code == 405
     assert response.json()[0]['message'] == 'Method "DELETE" not allowed.'
     assert response.json()[0]['code'] == ErrorCodes.MethodNotAllowed.value
@@ -199,7 +199,7 @@ def test_data_file_delete(client, data_file):
 def test_data_file_404(client, data_file):
     data_file_id = data_file.id
     data_file.delete()
-    response = client.get(f'/api/v0/data_files/{data_file_id}/')
+    response = client.get(f'/api/db/v0/data_files/{data_file_id}/')
     assert response.json()[0]['message'] == 'Not found.'
     assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
@@ -209,7 +209,7 @@ def test_data_file_create_invalid_file(client):
     with patch.object(csv, "get_sv_dialect") as mock_infer:
         mock_infer.side_effect = InvalidTableError
         with open(file, 'r') as f:
-            response = client.post('/api/v0/data_files/', data={'file': f}, format='multipart')
+            response = client.post('/api/db/v0/data_files/', data={'file': f}, format='multipart')
             response_dict = response.json()
     assert response.status_code == 400
     assert response_dict[0]['message'] == 'Unable to tabulate data'
@@ -217,13 +217,13 @@ def test_data_file_create_invalid_file(client):
 
 def test_data_file_create_non_unicode_file(client, non_unicode_csv_filename):
     with open(non_unicode_csv_filename, 'rb') as non_unicode_file:
-        response = client.post('/api/v0/data_files/', data={'file': non_unicode_file}, format='multipart')
+        response = client.post('/api/db/v0/data_files/', data={'file': non_unicode_file}, format='multipart')
     assert response.status_code == 201
 
 
 def test_data_file_create_url_invalid_format(client):
     url = 'invalid_url'
-    response = client.post('/api/v0/data_files/', data={'url': url})
+    response = client.post('/api/db/v0/data_files/', data={'url': url})
     response_dict = response.json()
     assert response.status_code == 400
     assert response_dict[0]['message'] == 'Enter a valid URL.'
@@ -233,7 +233,7 @@ def test_data_file_create_url_invalid_format(client):
 def test_data_file_create_url_invalid_address(client):
     url = 'https://www.test.invalid'
     with patch('requests.head', side_effect=requests.exceptions.ConnectionError):
-        response = client.post('/api/v0/data_files/', data={'url': url})
+        response = client.post('/api/db/v0/data_files/', data={'url': url})
         response_dict = response.json()
     assert response.status_code == 400
     assert response_dict[0]['message'] == 'URL cannot be reached.'
@@ -243,7 +243,7 @@ def test_data_file_create_url_invalid_download(
     client, patents_url, mock_get_patents_url
 ):
     mock_get_patents_url.return_value.__enter__.return_value.ok = False
-    response = client.post('/api/v0/data_files/', data={'url': patents_url})
+    response = client.post('/api/db/v0/data_files/', data={'url': patents_url})
     response_dict = response.json()
     assert response.status_code == 400
     assert response_dict[0]['message'] == 'URL cannot be downloaded.'
@@ -253,7 +253,7 @@ def test_data_file_create_url_invalid_content_type(client):
     url = 'https://www.google.com'
     with patch('requests.head') as mock:
         mock.return_value.headers = {'content-type': 'text/html'}
-        response = client.post('/api/v0/data_files/', data={'url': url})
+        response = client.post('/api/db/v0/data_files/', data={'url': url})
         response_dict = response.json()
     assert response.status_code == 400
     assert response_dict[0]['message'] == "URL resource 'text/html' not a valid type."
@@ -264,14 +264,14 @@ def test_data_file_create_multiple_source_fields(client, csv_filename, paste_fil
         paste_text = paste_file.read()
     with open(csv_filename, 'rb') as csv_file:
         data = {'file': csv_file, 'paste': paste_text}
-        response = client.post('/api/v0/data_files/', data, format='multipart')
+        response = client.post('/api/db/v0/data_files/', data, format='multipart')
         response_dict = response.json()
     assert response.status_code == 400
     assert 'Multiple source fields passed:' in response_dict[0]['message']
 
 
 def test_data_file_create_no_source_fields(client):
-    response = client.post('/api/v0/data_files/', {})
+    response = client.post('/api/db/v0/data_files/', {})
     response_dict = response.json()
     assert response.status_code == 400
     assert 'should be specified.' in response_dict[0]['message']
