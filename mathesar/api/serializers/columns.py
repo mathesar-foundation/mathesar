@@ -25,6 +25,7 @@ class TypeOptionSerializer(serializers.Serializer):
     length = serializers.IntegerField(required=False)
     precision = serializers.IntegerField(required=False)
     scale = serializers.IntegerField(required=False)
+    fields = serializers.CharField(required=False)
 
     def run_validation(self, data=empty):
         # Ensure that there are no unknown type options passed in.

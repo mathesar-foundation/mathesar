@@ -296,6 +296,9 @@ def test_column_create_wrong_display_options(
         ("NUMERIC", {"precision": 5, "scale": 3}),
         ("VARCHAR", {"length": 5}),
         ("CHAR", {"length": 5}),
+        ("INTERVAL", {"precision": 5}),
+        ("INTERVAL", {"precision": 5, "fields": "second"}),
+        ("INTERVAL", {"fields": "day"}),
     ]
 )
 def test_column_create_retrieve_options(column_test_table, client, type_, type_options):

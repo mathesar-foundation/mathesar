@@ -9,6 +9,7 @@ from db.columns.exceptions import (
     DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError
 )
 from db.columns.operations.select import get_columns_attnum_from_names
+from db.types.exceptions import InvalidTypeParameters
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
@@ -65,6 +66,10 @@ class ColumnViewSet(viewsets.ModelViewSet):
                 raise ValidationError(
                     f'parameter dict {type_options} is'
                     f' invalid for type {request.data["type"]}'
+                )
+            except InvalidTypeParameters as e:
+                raise ValidationError(
+                    e
                 )
             except InvalidTypeError:
                 raise ValidationError('This type casting is invalid.')
