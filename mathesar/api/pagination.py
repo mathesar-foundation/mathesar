@@ -34,7 +34,14 @@ class ColumnLimitOffsetPagination(DefaultLimitOffsetPagination):
 class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
 
     def paginate_queryset(
-            self, queryset, request, table_id, filter=None, order_by=[], group_by=None,
+        self,
+        queryset,
+        request,
+        table_id,
+        filter=None,
+        order_by=[],
+        group_by=None,
+        duplicate_only=None,
     ):
         self.limit = self.get_limit(request)
         if self.limit is None:
@@ -51,6 +58,7 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
             filter=filter,
             order_by=order_by,
             group_by=group_by,
+            duplicate_only=duplicate_only,
         )
 
 
@@ -63,7 +71,14 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         ]))
 
     def paginate_queryset(
-            self, queryset, request, table_id, filter=None, order_by=[], grouping={},
+        self,
+        queryset,
+        request,
+        table_id,
+        filter=None,
+        order_by=[],
+        grouping={},
+        duplicate_only=None,
     ):
         group_by = GroupBy(**grouping) if grouping else None
 
@@ -74,6 +89,7 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
             filter=filter,
             order_by=order_by,
             group_by=group_by,
+            duplicate_only=duplicate_only,
         )
 
         if records:

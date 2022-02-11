@@ -7,6 +7,7 @@ class RecordListParameterSerializer(MathesarErrorMessageMixin, serializers.Seria
     filter = serializers.JSONField(required=False, default=None)
     order_by = serializers.JSONField(required=False, default=[])
     grouping = serializers.JSONField(required=False, default={})
+    duplicate_only = serializers.JSONField(required=False, default=None)
 
 
 class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):

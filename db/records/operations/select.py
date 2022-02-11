@@ -1,6 +1,5 @@
 from sqlalchemy import select, func
 from sqlalchemy_filters import apply_sort
-from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
 from db.functions.operations.apply import apply_ma_function_spec_as_filter
 from db.columns.base import MathesarColumn
@@ -10,20 +9,8 @@ from db.types.operations.cast import get_column_cast_expression
 from db.utils import execute_query
 
 
-DUPLICATE_LABEL = "_is_dupe"
-CONJUNCTIONS = ("and", "or", "not")
-
-
-def _validate_nested_ops(filters):
-    for op in filters:
-        if op.get("op") == "get_duplicates":
-            raise BadFilterFormat("get_duplicates can not be nested")
-        for field in CONJUNCTIONS:
-            if field in op:
-                _validate_nested_ops(op[field])
-
-
 def _get_duplicate_only_cte(table, duplicate_columns):
+    DUPLICATE_LABEL = "_is_dupe"
     duplicate_flag_cte = (
         select(
             *table.c,
@@ -33,32 +20,18 @@ def _get_duplicate_only_cte(table, duplicate_columns):
     return select(duplicate_flag_cte).where(duplicate_flag_cte.c[DUPLICATE_LABEL]).cte()
 
 
-def _get_duplicate_data_columns(table, filters):
-    try:
-        duplicate_ops = [f for f in filters if f.get("op") == "get_duplicates"]
-        non_duplicate_ops = [f for f in filters if f.get("op") != "get_duplicates"]
-    except AttributeError:
-        # Ignore formatting errors - they will be handled by sqlalchemy_filters
-        return None, filters
-
-    _validate_nested_ops(non_duplicate_ops)
-    if len(duplicate_ops) > 1:
-        raise BadFilterFormat("get_duplicates can only be specified a single time")
-    elif len(duplicate_ops) == 1:
-        duplicate_cols = duplicate_ops[0]['value']
-        for col in duplicate_cols:
-            if col not in table.c:
-                raise FilterFieldNotFound(f"Table {table.name} has no column `{col}`.")
-        return duplicate_ops[0]['value'], non_duplicate_ops
-    else:
-        return None, filters
-
-
-def get_query(table, limit, offset, order_by, filter, cols=None, group_by=None):
-    # TODO
-    duplicate_columns, filters = _get_duplicate_data_columns(table, filter)
-    if duplicate_columns:
-        select_target = _get_duplicate_only_cte(table, duplicate_columns)
+def get_query(
+    table,
+    limit,
+    offset,
+    order_by,
+    filter=None,
+    cols=None,
+    group_by=None,
+    duplicate_only=None
+):
+    if duplicate_only:
+        select_target = _get_duplicate_only_cte(table, duplicate_only)
     else:
         select_target = table
 
@@ -84,23 +57,32 @@ def get_record(table, engine, id_value):
 
 
 def get_records(
-        table, engine, limit=None, offset=None, order_by=[], filter=None, group_by=None,
+    table,
+    engine,
+    limit=None,
+    offset=None,
+    order_by=[],
+    filter=None,
+    group_by=None,
+    duplicate_only=None,
 ):
     """
     Returns annotated records from a table.
 
     Args:
-        table:    SQLAlchemy table object
-        engine:   SQLAlchemy engine object
-        limit:    int, gives number of rows to return
-        offset:   int, gives number of rows to skip
-        order_by: list of dictionaries, where each dictionary has a 'field' and
-                  'direction' field.
-                  See: https://github.com/centerofci/sqlalchemy-filters#sort-format
-        filter:   a dictionary with one key-value pair, where the key is the filter id and the
-                  value is a list of parameters; supports composition/nesting.
-                  See: https://github.com/centerofci/sqlalchemy-filters#filters-format
-        group_by: group.GroupBy object
+        table:           SQLAlchemy table object
+        engine:          SQLAlchemy engine object
+        limit:           int, gives number of rows to return
+        offset:          int, gives number of rows to skip
+        order_by:        list of dictionaries, where each dictionary has a 'field' and
+                         'direction' field.
+                         See: https://github.com/centerofci/sqlalchemy-filters#sort-format
+        filter:          a dictionary with one key-value pair, where the key is the filter id and
+                         the value is a list of parameters; supports composition/nesting.
+                         See: https://github.com/centerofci/sqlalchemy-filters#filters-format
+        group_by:        group.GroupBy object
+        duplicate_only:  list of column names; only rows that have duplicates across those rows
+                         will be returned
     """
     if not order_by:
         # Set default ordering if none was requested
@@ -113,7 +95,15 @@ def get_records(
             order_by = [{'field': col, 'direction': 'asc'}
                         for col in table.columns]
 
-    query = get_query(table, limit, offset, order_by, filter, group_by=group_by)
+    query = get_query(
+        table=table,
+        limit=limit,
+        offset=offset,
+        order_by=order_by,
+        filter=filter,
+        group_by=group_by,
+        duplicate_only=duplicate_only
+    )
     return execute_query(engine, query)
 
 

@@ -43,6 +43,7 @@ class RecordViewSet(viewsets.ViewSet):
                 filter=serializer.validated_data['filter'],
                 order_by=serializer.validated_data['order_by'],
                 grouping=serializer.validated_data['grouping'],
+                duplicate_only=serializer.validated_data['duplicate_only'],
             )
         except (BadDBFunctionFormat, UnknownDBFunctionId, ReferencedColumnsDontExist) as e:
             raise database_api_exceptions.BadFilterAPIException(e, field='filter', status_code=status.HTTP_400_BAD_REQUEST)

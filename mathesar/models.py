@@ -276,7 +276,15 @@ class Table(DatabaseObject):
     def get_record(self, id_value):
         return get_record(self._sa_table, self.schema._sa_engine, id_value)
 
-    def get_records(self, limit=None, offset=None, filter=None, order_by=[], group_by=None):
+    def get_records(
+        self,
+        limit=None,
+        offset=None,
+        filter=None,
+        order_by=[],
+        group_by=None,
+        duplicate_only=None,
+    ):
         return db_get_records(
             self._sa_table,
             self.schema._sa_engine,
@@ -284,7 +292,8 @@ class Table(DatabaseObject):
             offset,
             filter=filter,
             order_by=order_by,
-            group_by=group_by
+            group_by=group_by,
+            duplicate_only=duplicate_only,
         )
 
     def create_record_or_records(self, record_data):
