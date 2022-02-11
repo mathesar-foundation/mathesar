@@ -610,9 +610,8 @@ def _get_money_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to money.
-    We allow casting any number type to money, assuming currency is USD.
-    We allow casting any textual type to money, assuming currency is USD
-    and that the type can be cast through a numeric.
+    We allow casting any number type to money, assuming currency is same as the locale currency.
+    We allow casting any textual type to money with the text prefixed or suffixed with the locale currency.
     """
     default_behavior_source_types = [MONEY]
     number_types = NUMBER_TYPES
