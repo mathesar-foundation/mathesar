@@ -15,7 +15,7 @@
    * Value of the input. Use bind tag for two-way binding.
    * Refer Svelte docs for more info on binding form input values.
    */
-  export let value: number = undefined;
+  export let value: number | undefined = undefined;
 
   // Additional classes
   let classes = '';
@@ -25,19 +25,19 @@
   export let disabled = false;
 
   // Underlying DOM element for direct access
-  export let element: HTMLElement = null;
+  export let element: HTMLElement | undefined = undefined;
 
   // Id for the input
-  export let id: string = undefined;
+  export let id: string | undefined = undefined;
 
   // Forces input to only allow integer values
   export let isInteger = false;
 
   // Minimum value for input
-  export let min: number = undefined;
+  export let min: number | undefined = undefined;
 
   // Maximum value for input
-  export let max: number = undefined;
+  export let max: number | undefined = undefined;
 
   const validKeyRegex = /^([0-9]|\.|-|\+|e)$/;
 
@@ -47,11 +47,11 @@
     const inputElement = e.target as HTMLNumberInputElement;
     if (inputElement.value === '') {
       inputElement.value = null;
-      value = null;
+      value = undefined;
     } else {
       if (key !== null) {
         if (!validKeyRegex.test(key)) {
-          inputElement.value = value;
+          inputElement.value = value ?? null;
         } else if (
           !inputElement.value &&
           value &&
@@ -68,7 +68,7 @@
         inputElement.value = Math.floor(inputElement.value);
       }
       if (value !== inputElement.value) {
-        value = inputElement.value;
+        value = inputElement.value ?? undefined;
       }
     }
   }

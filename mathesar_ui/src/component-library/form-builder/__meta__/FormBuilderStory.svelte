@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { makeForm, FormBuilder } from '../index';
 
   export let formConfig;

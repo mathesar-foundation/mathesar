@@ -25,7 +25,8 @@
 
   let uploadMethodId: UploadMethod = 'File';
 
-  $: uploadMethod = uploadMethods.find((m) => m.value === uploadMethodId);
+  $: uploadMethod =
+    uploadMethods.find((m) => m.value === uploadMethodId) ?? uploadMethods[0];
 </script>
 
 <h2>Import your data</h2>

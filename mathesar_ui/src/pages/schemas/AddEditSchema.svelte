@@ -16,7 +16,7 @@
 
   function nameIsDuplicate(name: string) {
     return Array.from($schemas?.data || []).some(
-      ([, s]) => (s.name as string).toLowerCase().trim() === name.trim(),
+      ([, s]) => s.name.toLowerCase().trim() === name.trim(),
     );
   }
 
