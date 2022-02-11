@@ -4,7 +4,7 @@ from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 
 
 class RecordListParameterSerializer(MathesarErrorMessageMixin, serializers.Serializer):
-    filters = serializers.JSONField(required=False, default=[])
+    filter = serializers.JSONField(required=False, default=None)
     order_by = serializers.JSONField(required=False, default=[])
     grouping = serializers.JSONField(required=False, default={})
 

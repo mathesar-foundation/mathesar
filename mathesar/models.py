@@ -276,13 +276,13 @@ class Table(DatabaseObject):
     def get_record(self, id_value):
         return get_record(self._sa_table, self.schema._sa_engine, id_value)
 
-    def get_records(self, limit=None, offset=None, filters=[], order_by=[], group_by=None):
+    def get_records(self, limit=None, offset=None, filter=None, order_by=[], group_by=None):
         return db_get_records(
             self._sa_table,
             self.schema._sa_engine,
             limit,
             offset,
-            filters=filters,
+            filter=filter,
             order_by=order_by,
             group_by=group_by
         )

@@ -1,7 +1,8 @@
 from sqlalchemy import select, func
-from sqlalchemy_filters import apply_filters, apply_sort
+from sqlalchemy_filters import apply_sort
 from sqlalchemy_filters.exceptions import BadFilterFormat, FilterFieldNotFound
 
+from db.functions.operations.apply import apply_ma_function_spec_as_filter
 from db.columns.base import MathesarColumn
 from db.records.operations import group
 from db.tables.utils import get_primary_key_column
@@ -53,8 +54,9 @@ def _get_duplicate_data_columns(table, filters):
         return None, filters
 
 
-def get_query(table, limit, offset, order_by, filters, cols=None, group_by=None):
-    duplicate_columns, filters = _get_duplicate_data_columns(table, filters)
+def get_query(table, limit, offset, order_by, filter, cols=None, group_by=None):
+    # TODO
+    duplicate_columns, filters = _get_duplicate_data_columns(table, filter)
     if duplicate_columns:
         select_target = _get_duplicate_only_cte(table, duplicate_columns)
     else:
@@ -68,8 +70,8 @@ def get_query(table, limit, offset, order_by, filters, cols=None, group_by=None)
     query = query.limit(limit).offset(offset)
     if order_by is not None:
         query = apply_sort(query, order_by)
-    if filters is not None:
-        query = apply_filters(query, filters)
+    if filter is not None:
+        query = apply_ma_function_spec_as_filter(query, filter)
     return query
 
 
@@ -82,7 +84,7 @@ def get_record(table, engine, id_value):
 
 
 def get_records(
-        table, engine, limit=None, offset=None, order_by=[], filters=[], group_by=None,
+        table, engine, limit=None, offset=None, order_by=[], filter=None, group_by=None,
 ):
     """
     Returns annotated records from a table.
@@ -95,8 +97,8 @@ def get_records(
         order_by: list of dictionaries, where each dictionary has a 'field' and
                   'direction' field.
                   See: https://github.com/centerofci/sqlalchemy-filters#sort-format
-        filters:  list of dictionaries, where each dictionary has a 'field' and 'op'
-                  field, in addition to an 'value' field if appropriate.
+        filter:   a dictionary with one key-value pair, where the key is the filter id and the
+                  value is a list of parameters; supports composition/nesting.
                   See: https://github.com/centerofci/sqlalchemy-filters#filters-format
         group_by: group.GroupBy object
     """
@@ -111,14 +113,14 @@ def get_records(
             order_by = [{'field': col, 'direction': 'asc'}
                         for col in table.columns]
 
-    query = get_query(table, limit, offset, order_by, filters, group_by=group_by)
+    query = get_query(table, limit, offset, order_by, filter, group_by=group_by)
     return execute_query(engine, query)
 
 
-def get_count(table, engine, filters=[]):
+def get_count(table, engine, filter=None):
     col_name = "_count"
     cols = [func.count().label(col_name)]
-    query = get_query(table, None, None, None, filters, cols)
+    query = get_query(table, None, None, None, filter, cols)
     return execute_query(engine, query)[0][col_name]
 
 
