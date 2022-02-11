@@ -43,11 +43,23 @@ class RecordViewSet(viewsets.ViewSet):
                 grouping=serializer.validated_data['grouping'],
             )
         except (BadFilterFormat, FilterFieldNotFound) as e:
-            raise database_api_exceptions.BadFilterAPIException(e, field='filters', status_code=status.HTTP_400_BAD_REQUEST)
+            raise database_api_exceptions.BadFilterAPIException(
+                e,
+                field='filters',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         except (BadSortFormat, SortFieldNotFound) as e:
-            raise database_api_exceptions.BadSortAPIException(e, field='order_by', status_code=status.HTTP_400_BAD_REQUEST)
+            raise database_api_exceptions.BadSortAPIException(
+                e,
+                field='order_by',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         except (BadGroupFormat, GroupFieldNotFound, InvalidGroupType) as e:
-            raise database_api_exceptions.BadGroupAPIException(e, field='grouping', status_code=status.HTTP_400_BAD_REQUEST)
+            raise database_api_exceptions.BadGroupAPIException(
+                e,
+                field='grouping',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
 
         serializer = RecordSerializer(records, many=True)
         return paginator.get_paginated_response(serializer.data)
@@ -68,7 +80,11 @@ class RecordViewSet(viewsets.ViewSet):
             record = table.create_record_or_records(request.data)
         except IntegrityError as e:
             if type(e.orig) == NotNullViolation:
-                raise database_api_exceptions.NotNullViolationAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
+                raise database_api_exceptions.NotNullViolationAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    table=table
+                )
             else:
                 raise database_api_exceptions.MathesarAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
         serializer = RecordSerializer(record)

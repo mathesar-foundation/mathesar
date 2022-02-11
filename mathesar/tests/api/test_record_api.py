@@ -375,7 +375,7 @@ def test_null_error_record_create(create_table, client):
     record_data = response.json()
     assert response.status_code == 400
     assert 'null value in column "Case Number"' in record_data[0]['message']
-    assert 'Case Number' in record_data[0]['detail']['column']
+    assert column_id == record_data[0]['detail']['column_id']
 
 
 @pytest.mark.parametrize('table_name,grouping,expected_groups', grouping_params)
