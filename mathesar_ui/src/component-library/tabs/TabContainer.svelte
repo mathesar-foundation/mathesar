@@ -40,6 +40,7 @@
       } else if (tabs[index - 1]) {
         activeTab = tabs[index - 1];
       } else {
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         activeTab = null;
       }
     }
@@ -52,10 +53,12 @@
   }
 
   function focusTab(e: Event) {
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     (e.target as Node).parentElement.classList.add('focused');
   }
 
   function blurTab(e: Event) {
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     (e.target as Node).parentElement.classList.remove('focused');
   }
 
@@ -68,6 +71,7 @@
   }
 
   function getTabURL(tab: Tab): string {
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     return getLink ? getLink(tab) : (tab[linkKey] as string) || null;
   }
 </script>

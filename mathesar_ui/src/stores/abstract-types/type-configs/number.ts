@@ -213,12 +213,16 @@ const numberType: AbstractTypeConfiguration = {
           },
           DECIMAL: {
             numberType: 'Decimal',
+            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
             decimalPlaces: null,
+            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
             maxDigits: null,
           },
           NUMERIC: {
             numberType: 'Decimal',
+            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
             decimalPlaces: null,
+            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
             maxDigits: null,
           },
           REAL: {

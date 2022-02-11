@@ -135,9 +135,14 @@
     class={['dropdown content', contentClass].join(' ')}
     bind:this={contentElement}
     use:portal
-    use:popper={{ reference: triggerElement, options: { placement } }}
+    use:popper={{
+      /* @ts-ignore: https://github.com/centerofci/mathesar/issues/1055 */
+      reference: triggerElement,
+      options: { placement },
+    }}
     use:clickOffBounds={{
       callback: close,
+      /* @ts-ignore: https://github.com/centerofci/mathesar/issues/1055 */
       references: clickOffBoundsReferences,
     }}
     on:click={checkAndCloseOnInnerClick}

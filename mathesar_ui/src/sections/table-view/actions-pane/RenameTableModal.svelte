@@ -35,15 +35,17 @@
     try {
       const { id } = tabularData;
       await renameTable(id, name);
-      await refetchTablesForSchema($currentSchemaId);
-      const tabList = getTabsForSchema($currentDBName, $currentSchemaId);
-      const existingTab = tabList.getTabularTabByTabularID(
-        TabularType.Table,
-        id,
-      );
-      if (existingTab) {
-        const newTab = constructTabularTab(TabularType.Table, id, name);
-        tabList.replace(existingTab, newTab);
+      if ($currentSchemaId) {
+        await refetchTablesForSchema($currentSchemaId);
+        const tabList = getTabsForSchema($currentDBName, $currentSchemaId);
+        const existingTab = tabList.getTabularTabByTabularID(
+          TabularType.Table,
+          id,
+        );
+        if (existingTab) {
+          const newTab = constructTabularTab(TabularType.Table, id, name);
+          tabList.replace(existingTab, newTab);
+        }
       }
       controller.close();
     } catch (error) {

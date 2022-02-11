@@ -8,31 +8,21 @@
   export let element: FormElement;
   export let stores: FormBuildConfiguration['stores'];
   export let variables: FormBuildConfiguration['variables'];
+
+  $: store = 'variable' in element ? stores.get(element.variable) : undefined;
 </script>
 
-{#if element.type === 'input'}
-  <FormInput
-    {...element}
-    {...variables[element.variable]}
-    store={stores.get(element.variable)}
-  />
-{:else if element.type === 'switch'}
-  <Switch
-    store={stores.get(element.variable)}
-    cases={element.cases}
-    let:element={childElement}
-  >
+{#if element.type === 'input' && store}
+  <FormInput {...element} {...variables[element.variable]} {store} />
+{:else if element.type === 'switch' && store}
+  <Switch {store} cases={element.cases} let:element={childElement}>
     <svelte:self {variables} {stores} element={childElement} />
   </Switch>
-{:else if element.type === 'if'}
-  <If
-    store={stores.get(element.variable)}
-    {...element}
-    let:element={childElement}
-  >
+{:else if element.type === 'if' && store}
+  <If {store} {...element} let:element={childElement}>
     <svelte:self {variables} {stores} element={childElement} />
   </If>
-{:else}
+{:else if element.type === 'layout'}
   <FormLayout
     orientation={element.orientation}
     elements={element.elements}

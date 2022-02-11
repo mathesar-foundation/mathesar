@@ -17,7 +17,7 @@
 {#if dbOptions?.configuration}
   <DbForm bind:selectedDbType configuration={dbOptions.configuration} />
   <DbTypeIndicator {selectedDbType} />
-{:else if selectedAbstractType?.dbTypes.size > 1}
+{:else if selectedAbstractType?.dbTypes.size}
   <DbTypeSelect bind:selectedDbType {selectedAbstractType} />
 {:else}
   <DbTypeIndicator {selectedDbType} />

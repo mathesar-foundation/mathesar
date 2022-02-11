@@ -3,9 +3,6 @@
   import { get } from 'svelte/store';
   import type {
     TabularDataStore,
-    TabularData,
-    Display,
-    RecordsData,
     TableRecord,
   } from '@mathesar/stores/table-data/types';
 
@@ -14,13 +11,10 @@
   import VirtualList from './virtual-list/VirtualList.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  let id: TabularData['id'];
-  let recordsData: RecordsData;
-  let display: Display;
+
   let virtualListRef: VirtualList;
-  let displayableRecords: Display['displayableRecords'];
-  let newRecords: RecordsData['newRecords'];
-  $: ({ id, recordsData, display } = $tabularData as TabularData);
+
+  $: ({ id, recordsData, display } = $tabularData);
   $: ({ newRecords } = recordsData);
   $: ({ rowWidth, horizontalScrollOffset, displayableRecords } = display);
 

@@ -4,7 +4,7 @@
   export let group: string | number | string[] | undefined = undefined;
   export let value: string | number | string[] | undefined = undefined;
   export let disabled = false;
-  export let id: string = undefined;
+  export let id: string | undefined = undefined;
 </script>
 
 <BaseInput {...$$restProps} bind:id {disabled} />

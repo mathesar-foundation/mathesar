@@ -27,7 +27,7 @@ const abstractTypesRequestMap: Map<
 
 export async function refetchTypesForDB(
   databaseId: Database['id'],
-): Promise<AbstractTypesMap | null> {
+): Promise<AbstractTypesMap | undefined> {
   const store = databasesToAbstractTypesStoreMap.get(databaseId);
   if (!store) {
     console.error(`DB Types store for db: ${databaseId} not found.`);
@@ -43,7 +43,7 @@ export async function refetchTypesForDB(
     abstractTypesRequestMap.get(databaseId)?.cancel();
 
     const typesRequest = getAPI<AbstractTypeResponse[]>(
-      `/databases/${databaseId}/types/`,
+      `/api/ui/v0/databases/${databaseId}/types/`,
     );
     abstractTypesRequestMap.set(databaseId, typesRequest);
     const response = await typesRequest;
@@ -90,6 +90,7 @@ function getTypesForDatabase(
       store.update((currentData) => ({
         ...currentData,
         state: States.Done,
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         data: constructAbstractTypeMapFromResponse(commonData.abstract_types),
       }));
     } else {

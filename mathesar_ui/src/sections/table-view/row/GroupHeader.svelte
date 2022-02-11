@@ -10,6 +10,9 @@
   export let rowWidth: number;
 
   $: ({ columns } = grouping);
+
+  $: cellValue = (column: string) =>
+    row.__groupValues ? row.__groupValues[column] : undefined;
 </script>
 
 <div
@@ -23,9 +26,7 @@
     ROW_CONTROL_COLUMN_WIDTH}px"
 >
   {#each columns as column (column)}
-    <span class="tag"
-      >{column}: <CellValue value={row.__groupValues[column]} /></span
-    >
+    <span class="tag">{column}: <CellValue value={cellValue(column)} /></span>
   {/each}
   <span class="tag count"><span class="label">count:</span> {group.count}</span>
 </div>

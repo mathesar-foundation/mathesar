@@ -83,7 +83,7 @@
   $: existingConstraintNames = $constraintsDataStore.constraints.map(
     (c) => c.name,
   );
-  $: tableName = $tables.data.get($tabularData.id)?.name;
+  $: tableName = $tables.data.get($tabularData.id)?.name ?? '';
   $: columnsDataStore = $tabularData.columnsDataStore;
   $: columnsInTable = $columnsDataStore.columns;
   $: columnsOptions = columnsInTable.map((column) => ({
@@ -127,6 +127,7 @@
       init();
       controller.close();
     } catch (error) {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       toast.error(`Unable to add constraint. ${error.message as string}`);
     }
   }
