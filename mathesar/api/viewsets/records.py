@@ -12,7 +12,7 @@ from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGro
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
-from mathesar.models import Table
+from mathesar.models import Column, Table
 from mathesar.utils.json import MathesarJSONRenderer
 
 
@@ -49,7 +49,10 @@ class RecordViewSet(viewsets.ViewSet):
         except (BadGroupFormat, GroupFieldNotFound, InvalidGroupType) as e:
             raise database_api_exceptions.BadGroupAPIException(e, field='grouping', status_code=status.HTTP_400_BAD_REQUEST)
 
-        serializer = RecordSerializer(records, many=True)
+        # TODO: Prefetch column names to avoid N+1 queries
+        columns = Column.objects.filter(table_id=table_pk)
+        columns_map = {column.name: column.id for column in columns}
+        serializer = RecordSerializer(records, many=True, context={'request': request, 'columns_map': columns_map, 'table_pk': table_pk})
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):

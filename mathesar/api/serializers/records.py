@@ -11,4 +11,7 @@ class RecordListParameterSerializer(MathesarErrorMessageMixin, serializers.Seria
 
 class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
     def to_representation(self, instance):
-        return instance._asdict() if not isinstance(instance, dict) else instance
+        records = instance._asdict() if not isinstance(instance, dict) else instance
+        columns_map = self.context['columns_map']
+        records = {columns_map[column_name]: column_value for column_name, column_value in records.items()}
+        return records

@@ -51,8 +51,8 @@ def test_record_list(create_table, client):
     assert response.status_code == 200
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 50
-    for column_name in table.sa_column_names:
-        assert column_name in record_data
+    for column_name in table.columns.all().values_list('id', flat=True):
+        assert str(column_name) in record_data
 
 
 serialization_test_list = [
