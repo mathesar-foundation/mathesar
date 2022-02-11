@@ -105,7 +105,6 @@ def test_record_list_filter(create_table, client):
     assert mock_get.call_args[1]['filter'] == filter
 
 
-
 def test_record_list_filter_duplicates(create_table, client):
     table_name = 'NASA Record List Filter Duplicates'
     table = create_table(table_name)

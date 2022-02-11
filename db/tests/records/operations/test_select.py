@@ -110,4 +110,3 @@ def test_get_records_duplicate_only(roster_table_obj):
     all_counter = {k: v for k, v in all_counter.items() if v > 1}
     got_counter = Counter(tuple(r[c] for c in duplicate_only) for r in dupe_record_list)
     assert all_counter == got_counter
-
