@@ -5,12 +5,10 @@ from sqlalchemy import Column, MetaData, text, Integer
 from sqlalchemy import Table as SATable
 
 from db.types import base, install
-from db.schemas.operations.create import create_schema as create_sa_schema
-from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
 from db.tables.operations.select import get_oid_from_table
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import create_table_from_csv
-from mathesar.models import Schema, Table, DataFile
+from mathesar.models import Table, DataFile
 
 
 TEST_SCHEMA = 'import_csv_schema'
@@ -24,31 +22,6 @@ def client():
 
 
 @pytest.fixture
-def create_schema(engine, test_db_model):
-    """
-    Creates a schema factory, making sure to track and clean up new instances
-    """
-    function_schemas = {}
-
-    def _create_schema(schema_name):
-        if schema_name in function_schemas:
-            schema_oid = function_schemas[schema_name]
-        else:
-            create_sa_schema(schema_name, engine)
-            schema_oid = get_schema_oid_from_name(schema_name, engine)
-            function_schemas[schema_name] = schema_oid
-        schema_model, _ = Schema.current_objects.get_or_create(oid=schema_oid, database=test_db_model)
-        return schema_model
-    yield _create_schema
-
-    for oid in function_schemas.values():
-        # Handle schemas being renamed during test
-        schema = get_schema_name_from_oid(oid, engine)
-        with engine.begin() as conn:
-            conn.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE;'))
-
-
-@pytest.fixture
 def create_data_file():
     def _create_data_file(file_path, file_name):
         with open(file_path, 'rb') as csv_file:
@@ -57,17 +30,6 @@ def create_data_file():
 
         return data_file
     return _create_data_file
-
-
-@pytest.fixture
-def create_table(csv_filename, create_schema):
-    with open(csv_filename, 'rb') as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file))
-
-    def _create_table(table_name, schema='Patents'):
-        schema_model = create_schema(schema)
-        return create_table_from_csv(data_file, table_name, schema_model)
-    return _create_table
 
 
 @pytest.fixture
