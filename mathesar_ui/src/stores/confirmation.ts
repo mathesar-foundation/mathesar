@@ -22,6 +22,7 @@ export function confirmDelete(
   props: ConfirmDeleteProps,
 ): ReturnType<typeof confirm> {
   const type = props.identifierType;
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   const deletePhrase = `Delete${type ? ' ' : ''}${type}`;
 
   function getTitle() {

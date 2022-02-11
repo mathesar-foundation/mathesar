@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import LabeledInput from '@mathesar-component-library-dir/labeled-input/LabeledInput.svelte';
   import Radio from '../Radio.svelte';
