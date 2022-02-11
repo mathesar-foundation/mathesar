@@ -2,7 +2,7 @@ import json
 from unittest.mock import patch
 
 import pytest
-from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
+from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.functions.exceptions import UnknownDBFunctionId
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
@@ -106,21 +106,17 @@ def test_record_list_filter(create_table, client):
 
 
 
-# TODO redo
-@pytest.mark.skip(reason="redo to use query param (duplicates_only not a filter anymore)")
 def test_record_list_filter_duplicates(create_table, client):
     table_name = 'NASA Record List Filter Duplicates'
     table = create_table(table_name)
 
-    filter_list = [
-        {'field': '', 'op': 'get_duplicates', 'value': ['Patent Expiration Date']}
-    ]
-    json_filter_list = json.dumps(filter_list)
+    duplicate_only = ['Patent Expiration Date']
+    json_duplicate_only = json.dumps(duplicate_only)
 
     with patch.object(models, "db_get_records", return_value=[]) as mock_get:
-        client.get(f'/api/db/v0/tables/{table.id}/records/?filters={json_filter_list}')
+        client.get(f'/api/db/v0/tables/{table.id}/records/?duplicate_only={json_duplicate_only}')
     assert mock_get.call_args is not None
-    assert mock_get.call_args[1]['filters'] == filter_list
+    assert mock_get.call_args[1]['duplicate_only'] == duplicate_only
 
 
 def _test_filter_with_added_columns(table, client, columns_to_add, operators_and_expected_values):
