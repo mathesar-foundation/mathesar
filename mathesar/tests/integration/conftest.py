@@ -68,7 +68,7 @@ def schema(create_schema, schema_name):
 def base_schema_url(schema, live_server):
     return f"{live_server}/{schema.database.name}/{schema.id}"
 
-    
+
 @pytest.fixture
 def schemas_page_url(schema, live_server):
     return f"{live_server}/{schema.database.name}/schemas/"
