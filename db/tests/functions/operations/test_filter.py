@@ -150,12 +150,12 @@ def test_filtering_nested_boolean_ops(filter_sort_table_obj):
 
     db_function = And([
         Or([
-            Equal([ColumnReference("varchar"), Literal(["string24"])]),
-            Equal([ColumnReference("numeric"), Literal([42])]),
+            Equal([ColumnReference(["varchar"]), Literal(["string24"])]),
+            Equal([ColumnReference(["numeric"]), Literal([42])]),
         ]),
         Or([
-            Equal([ColumnReference("varchar"), Literal(["string42"])]),
-            Equal([ColumnReference("numeric"), Literal([24])]),
+            Equal([ColumnReference(["varchar"]), Literal(["string42"])]),
+            Equal([ColumnReference(["numeric"]), Literal([24])]),
         ]),
     ])
 

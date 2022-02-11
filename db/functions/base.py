@@ -17,6 +17,7 @@ from abc import ABC, abstractmethod
 from sqlalchemy import column, not_, and_, or_, func, literal
 
 from db.functions import hints
+from db.functions.exceptions import BadDBFunctionFormat
 
 
 class DBFunction(ABC):
@@ -37,6 +38,8 @@ class DBFunction(ABC):
             raise ValueError('DBFunction subclasses must define a name.')
         if self.depends_on is not None and not isinstance(self.depends_on, tuple):
             raise ValueError('DBFunction subclasses\' depends_on attribute must either be None or a tuple of SQL function names.')
+        if not isinstance(parameters, list):
+            raise BadDBFunctionFormat('DBFunction instance parameter `parameters` must be a list.')
         self.parameters = parameters
 
     @property

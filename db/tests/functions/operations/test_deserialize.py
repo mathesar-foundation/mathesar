@@ -12,15 +12,9 @@ exceptions_test_list = [
         UnknownDBFunctionId
     ),
     (
-        {"equal": [
-            {"literal": ["test"]},
-        ]},
-        BadDBFunctionFormat
-    ),
-    (
-        {"equal": [
+        {"empty":
             {"column_reference": ["varchar"]},
-        ]},
+        },
         BadDBFunctionFormat
     ),
 ]
