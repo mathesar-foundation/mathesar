@@ -4,6 +4,7 @@ from unittest.mock import patch
 import pytest
 from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
 
+from db.functions.exceptions import UnknownDBFunctionId
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
 from mathesar import models
@@ -77,25 +78,23 @@ def test_record_list_filter(create_table, client):
     table_name = 'NASA Record List Filter'
     table = create_table(table_name)
 
-    filter_list = [
-        {'or': [
-            {'and': [
-                {'field': 'Center', 'op': '==', 'value': 'NASA Ames Research Center'},
-                {'field': 'Case Number', 'op': '==', 'value': 'ARC-14048-1'}
-            ]},
-            {'and': [
-                {'field': 'Center', 'op': '==', 'value': 'NASA Kennedy Space Center'},
-                {'field': 'Case Number', 'op': '==', 'value': 'KSC-12871'}
-            ]}
-        ]}
-    ]
-    json_filter_list = json.dumps(filter_list)
+    filter = {"or": [
+        {"and": [
+            {"equal": [{"column_reference": ["Center"]}, {"literal": ["NASA Ames Research Center"]}]},
+            {"equal": [{"column_reference": ["Case Number"]}, {"literal": ["ARC-14048-1"]}]},
+        ]},
+        {"and": [
+            {"equal": [{"column_reference": ["Center"]}, {"literal": ["NASA Kennedy Research Center"]}]},
+            {"equal": [{"column_reference": ["Case Number"]}, {"literal": ["KSC-12871"]}]},
+        ]},
+    ]}
+    json_filter = json.dumps(filter)
 
     with patch.object(
         models, "db_get_records", side_effect=models.db_get_records
     ) as mock_get:
         response = client.get(
-            f'/api/db/v0/tables/{table.id}/records/?filters={json_filter_list}'
+            f'/api/db/v0/tables/{table.id}/records/?filter={json_filter}'
         )
         response_data = response.json()
 
@@ -103,9 +102,12 @@ def test_record_list_filter(create_table, client):
     assert response_data['count'] == 2
     assert len(response_data['results']) == 2
     assert mock_get.call_args is not None
-    assert mock_get.call_args[1]['filters'] == filter_list
+    assert mock_get.call_args[1]['filter'] == filter
 
 
+
+# TODO redo
+@pytest.mark.skip(reason="redo to use query param (duplicates_only not a filter anymore)")
 def test_record_list_filter_duplicates(create_table, client):
     table_name = 'NASA Record List Filter Duplicates'
     table = create_table(table_name)
@@ -138,15 +140,15 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
 
         table.create_record_or_records(row_values_list)
 
-        for op, value, expected in operators_and_expected_values:
-            filter_list = [{'field': new_column_name, 'op': op, 'value': value}]
-            json_filter_list = json.dumps(filter_list)
+        for filter_id, value, expected in operators_and_expected_values:
+            filter = {filter_id: [{"column_reference": [new_column_name]}, {"literal": [value]}]}
+            json_filter = json.dumps(filter)
 
             with patch.object(
                 models, "db_get_records", side_effect=models.db_get_records
             ) as mock_get:
                 response = client.get(
-                    f'/api/db/v0/tables/{table.id}/records/?filters={json_filter_list}'
+                    f'/api/db/v0/tables/{table.id}/records/?filter={json_filter}'
                 )
                 response_data = response.json()
 
@@ -157,7 +159,7 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
             assert response_data['count'] == expected
             assert len(response_data['results']) == num_results
             assert mock_get.call_args is not None
-            assert mock_get.call_args[1]['filters'] == filter_list
+            assert mock_get.call_args[1]['filter'] == filter
 
 
 def test_record_list_filter_for_boolean_type(create_table, client):
@@ -174,10 +176,18 @@ def test_record_list_filter_for_boolean_type(create_table, client):
     ]
 
     op_value_and_expected = [
-        ('ne', True, 2),
-        ('eq', False, 2),
-        ('is_null', None, 1394),
-        ('is_not_null', None, 49)
+        (
+            lambda new_column_name, value: {"not": [{"equal": [{"column_reference": [new_column_name]}, {"literal": [value]}]}]},
+            True, 2),
+        (
+            lambda new_column_name, value: {"equal": [{"column_reference": [new_column_name]}, {"literal": [value]}]},
+            False, 2),
+        (
+            lambda new_column_name, value: {"empty": [{"column_reference": [new_column_name]}, {"literal": [value]}]},
+            None, 1394),
+        (
+            lambda new_column_name, value: {"not": [{"empty": [{"column_reference": [new_column_name]}, {"literal": [value]}]}]},
+            None, 49),
     ]
 
     _test_filter_with_added_columns(table, client, columns_to_add, op_value_and_expected)
@@ -557,19 +567,19 @@ def test_record_404(create_table, client):
     assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
-@pytest.mark.parametrize("exception", [BadFilterFormat, FilterFieldNotFound])
-def test_record_list_filter_exceptions(create_table, client, exception):
+def test_record_list_filter_exceptions(create_table, client):
+    exception = UnknownDBFunctionId
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    filter_list = json.dumps([{"field": "Center", "op": "is_null"}])
+    filter = json.dumps({"empty": [{"column_reference": ["Center"]}]})
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
-            f'/api/db/v0/tables/{table.id}/records/?filters={filter_list}'
+            f'/api/db/v0/tables/{table.id}/records/?filter={filter}'
         )
         response_data = response.json()
     assert response.status_code == 400
     assert len(response_data) == 1
-    assert "filters" in response_data[0]['field']
+    assert "filter" in response_data[0]['field']
 
 
 @pytest.mark.parametrize("exception", [BadSortFormat, SortFieldNotFound])

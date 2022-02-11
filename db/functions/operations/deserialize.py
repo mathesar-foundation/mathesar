@@ -4,6 +4,26 @@ from db.functions.exceptions import UnknownDBFunctionId, BadDBFunctionFormat
 
 
 def get_db_function_from_ma_function_spec(spec: dict) -> DBFunction:
+    """
+    Expects a db function specification in the following format:
+
+    ```
+    {"and": [
+        {"empty": [
+            {"column_reference": ["some_column"]},
+        ]},
+        {"equal": [
+            {"to_lowercase": [
+                {"column_reference": ["some_string_like_column"]},
+            ]},
+            {"literal": ["some_string_literal"]},
+        ]},
+    ]}
+    ```
+
+    Every serialized DBFunction is a dict containing one key-value pair. The key is the DBFunction
+    id, and the value is always a list of parameters.
+    """
     try:
         db_function_subclass_id = _get_first_dict_key(spec)
         db_function_subclass = _get_db_function_subclass_by_id(db_function_subclass_id)
