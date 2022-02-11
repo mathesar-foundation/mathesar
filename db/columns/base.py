@@ -169,6 +169,7 @@ class MathesarColumn(Column):
             "length": getattr(self.type, "length", None),
             "precision": getattr(self.type, "precision", None),
             "scale": getattr(self.type, "scale", None),
+            "fields": getattr(self.type, "fields", None),
         }
         _type_options = {k: v for k, v in full_type_options.items() if v is not None}
         return _type_options if _type_options else None
