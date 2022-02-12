@@ -1,16 +1,17 @@
 from django.core.files import File
 import pytest
 from rest_framework.test import APIClient
-from sqlalchemy import Column, MetaData, text, Integer
-from sqlalchemy import Table as SATable
+from sqlalchemy import MetaData, text, Integer
+from sqlalchemy import Table as SATable, Column as SAColumn
 
+from db.columns.operations.select import get_columns_attnum_from_names
 from db.types import base, install
 from db.schemas.operations.create import create_schema as create_sa_schema
 from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
 from db.tables.operations.select import get_oid_from_table
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import create_table_from_csv
-from mathesar.models import Schema, Table, DataFile
+from mathesar.models import Column, Schema, Table, DataFile
 
 
 TEST_SCHEMA = 'import_csv_schema'
@@ -97,7 +98,7 @@ def empty_nasa_table(patent_schema):
     engine = create_mathesar_engine(patent_schema.database.name)
     db_table = SATable(
         NASA_TABLE, MetaData(bind=engine),
-        Column('id', Integer, primary_key=True),
+        SAColumn('id', Integer, primary_key=True),
         schema=patent_schema.name,
     )
     db_table.create()
@@ -108,6 +109,16 @@ def empty_nasa_table(patent_schema):
 
     table.delete_sa_table()
     table.delete()
+
+
+@pytest.fixture
+def create_column():
+    def _create_column(table, column_data):
+        column = table.add_column(column_data)
+        attnum = get_columns_attnum_from_names(table.oid, [column.name], table.schema._sa_engine)[0][0]
+        column = Column.current_objects.get_or_create(attnum=attnum, table=table)
+        return column[0]
+    return _create_column
 
 
 @pytest.fixture

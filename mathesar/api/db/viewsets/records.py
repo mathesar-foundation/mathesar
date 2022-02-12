@@ -60,7 +60,9 @@ class RecordViewSet(viewsets.ViewSet):
         record = table.get_record(pk)
         if not record:
             raise NotFound
-        serializer = RecordSerializer(record)
+        columns = Column.objects.filter(table_id=table_pk)
+        columns_map = {column.name: column.id for column in columns}
+        serializer = RecordSerializer(record, context={'columns_map': columns_map, 'table_pk': table_pk})
         return Response(serializer.data)
 
     def create(self, request, table_pk=None):

@@ -51,8 +51,8 @@ def test_record_list(create_table, client):
     assert response.status_code == 200
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 50
-    for column_name in table.columns.all().values_list('id', flat=True):
-        assert str(column_name) in record_data
+    for column_id in table.columns.all().values_list('id', flat=True):
+        assert str(column_id) in record_data
 
 
 serialization_test_list = [
@@ -62,16 +62,15 @@ serialization_test_list = [
 
 
 @pytest.mark.parametrize("type_, value", serialization_test_list)
-def test_record_serialization(empty_nasa_table, client, type_, value):
+def test_record_serialization(empty_nasa_table, create_column, client, type_, value):
+    cache.clear()
     col_name = "TEST COL"
-    empty_nasa_table.add_column({"name": col_name, "type": type_})
+    column = create_column(empty_nasa_table, {"name": col_name, "type": type_})
     empty_nasa_table.create_record_or_records([{col_name: value}])
-
     response = client.get(f'/api/db/v0/tables/{empty_nasa_table.id}/records/')
     response_data = response.json()
-
     assert response.status_code == 200
-    assert response_data["results"][0][col_name] == value
+    assert response_data["results"][0][str(column.id)] == value
 
 
 def test_record_list_filter(create_table, client):
@@ -444,13 +443,14 @@ def test_record_list_pagination_limit(create_table, client):
     assert response.status_code == 200
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 5
-    for column_name in table.sa_column_names:
-        assert column_name in record_data
+    for column_id in table.columns.all().values_list('id', flat=True):
+        assert str(column_id) in record_data
 
 
 def test_record_list_pagination_offset(create_table, client):
     table_name = 'NASA Record List Pagination Offset'
     table = create_table(table_name)
+    columns_id = table.columns.all().order_by('id').values_list('id', flat=True)
 
     response_1 = client.get(f'/api/db/v0/tables/{table.id}/records/?limit=5&offset=5')
     response_1_data = response_1.json()
@@ -466,10 +466,10 @@ def test_record_list_pagination_offset(create_table, client):
     assert len(response_1_data['results']) == 5
     assert len(response_2_data['results']) == 5
 
-    assert record_1_data['id'] != record_2_data['id']
-    assert record_1_data['Case Number'] != record_2_data['Case Number']
-    assert record_1_data['Patent Number'] != record_2_data['Patent Number']
-    assert record_1_data['Application SN'] != record_2_data['Application SN']
+    assert record_1_data[str(columns_id[0])] != record_2_data[str(columns_id[0])]
+    assert record_1_data[str(columns_id[3])] != record_2_data[str(columns_id[3])]
+    assert record_1_data[str(columns_id[4])] != record_2_data[str(columns_id[4])]
+    assert record_1_data[str(columns_id[5])] != record_2_data[str(columns_id[5])]
 
 
 def test_record_detail(create_table, client):
@@ -483,9 +483,11 @@ def test_record_detail(create_table, client):
     record_as_dict = record._asdict()
 
     assert response.status_code == 200
+    columns_name_id_map = {column.name: column.id for column in table.columns.all().order_by('id')}
     for column_name in table.sa_column_names:
-        assert column_name in record_data
-        assert record_as_dict[column_name] == record_data[column_name]
+        column_id_str = str(columns_name_id_map[column_name])
+        assert column_id_str in record_data
+        assert record_as_dict[column_name] == record_data[column_id_str]
 
 
 def test_record_create(create_table, client):
