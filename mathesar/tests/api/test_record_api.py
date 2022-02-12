@@ -122,12 +122,12 @@ def test_record_list_filter_duplicates(create_table, client):
     table_name = 'NASA Record List Filter Duplicates'
     table = create_table(table_name)
     columns = table.columns.all().order_by('id')
-
+    column = columns[7]
     filter_list = [
-        {'field': '', 'op': 'get_duplicates', 'value': [columns[7].id]}
+        {'field': '', 'op': 'get_duplicates', 'value': [column.id]}
     ]
     name_converted_filter_list = [
-        {'field': '', 'op': 'get_duplicates', 'value': [columns[7].name]}
+        {'field': '', 'op': 'get_duplicates', 'value': [column.name]}
     ]
     json_filter_list = json.dumps(filter_list)
 
@@ -510,10 +510,12 @@ def test_record_create(create_table, client):
 
     assert response.status_code == 201
     assert len(table.get_records()) == original_num_records + 1
+    columns_name_id_map = {column.name: column.id for column in table.columns.all().order_by('id')}
     for column_name in table.sa_column_names:
-        assert column_name in record_data
+        column_id_str = str(columns_name_id_map[column_name])
+        assert column_id_str in record_data
         if column_name in data:
-            assert data[column_name] == record_data[column_name]
+            assert data[column_name] == record_data[column_id_str]
 
 
 def test_record_partial_update(create_table, client):
@@ -533,15 +535,17 @@ def test_record_partial_update(create_table, client):
     record_data = response.json()
 
     assert response.status_code == 200
+    columns_name_id_map = {column.name: column.id for column in table.columns.all().order_by('id')}
     for column_name in table.sa_column_names:
-        assert column_name in record_data
+        column_id_str = str(columns_name_id_map[column_name])
+        assert column_id_str in record_data
         if column_name in data and column_name not in ['Center', 'Status']:
-            assert original_data[column_name] == record_data[column_name]
+            assert original_data[column_name] == record_data[column_id_str]
         elif column_name == 'Center':
-            assert original_data[column_name] != record_data[column_name]
-            assert record_data[column_name] == 'NASA Example Space Center'
+            assert original_data[column_name] != record_data[column_id_str]
+            assert record_data[column_id_str] == 'NASA Example Space Center'
         elif column_name == 'Status':
-            assert original_data[column_name] != record_data[column_name]
+            assert original_data[column_name] != record_data[column_id_str]
             assert record_data[column_name] == 'Example'
 
 
