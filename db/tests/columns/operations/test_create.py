@@ -190,7 +190,6 @@ def test_create_column_interval_options(engine_email_type, type_options):
     assert created_col.type_options == type_options
 
 
-
 def test_create_column_bad_options(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "atableone"
