@@ -5,10 +5,10 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
 from mathesar.models import Database
-from mathesar.api.filters import DatabaseFilter
+from mathesar.api.dj_filters import DatabaseFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 
-from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
+from mathesar.api.serializers.databases import DatabaseSerializer
 
 from db.functions.operations.check_support import get_supported_db_functions
 from mathesar.api.serializers.functions import DBFunctionSerializer
@@ -27,12 +27,6 @@ class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
         return Database.objects.all().order_by('-created_at')
 
     @action(methods=['get'], detail=True)
-    def types(self, request, pk=None):
-        database = self.get_object()
-        serializer = TypeSerializer(database.supported_types, many=True)
-        return Response(serializer.data)
-
-    @action(methods=['get'], detail=True)
     def functions(self, request, pk=None):
         database = self.get_object()
         engine = database._sa_engine
@@ -41,7 +35,7 @@ class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
         return Response(serializer.data)
 
     @action(methods=['get'], detail=True)
-    def db_types(self, request, pk=None):
+    def types(self, request, pk=None):
         database = self.get_object()
         engine = database._sa_engine
         available_known_db_types = get_available_known_db_types(engine)

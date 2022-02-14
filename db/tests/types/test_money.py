@@ -19,7 +19,7 @@ def test_money_type_column_creation(engine_email_type):
         test_table = Table(
             "test_table",
             metadata,
-            Column("money_col", money.Money),
+            Column("money_col", money.MathesarMoney),
         )
         test_table.create()
 
@@ -31,7 +31,7 @@ def test_money_type_column_reflection(engine_email_type):
         test_table = Table(
             "test_table",
             metadata,
-            Column("sales_amounts", money.Money),
+            Column("sales_amounts", money.MathesarMoney),
         )
         test_table.create()
 
@@ -39,7 +39,7 @@ def test_money_type_column_reflection(engine_email_type):
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table("test_table", metadata, autoload_with=conn)
-    expect_cls = money.Money
+    expect_cls = money.MathesarMoney
     actual_cls = reflect_table.columns["sales_amounts"].type.__class__
     assert actual_cls == expect_cls
 
@@ -60,7 +60,7 @@ def test_money_type_insert_from_dict(engine_email_type):
     test_table = Table(
         "test_table",
         metadata,
-        Column("sales_amounts", money.Money),
+        Column("sales_amounts", money.MathesarMoney),
     )
     test_table.create()
     ins = test_table.insert().values(
@@ -85,7 +85,7 @@ def test_money_type_select_to_dict(engine_email_type):
     test_table = Table(
         "test_table",
         metadata,
-        Column("sales_amounts", money.Money),
+        Column("sales_amounts", money.MathesarMoney),
     )
     test_table.create()
     with engine.begin() as conn:

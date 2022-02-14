@@ -35,12 +35,16 @@ function executeTerm(
     case 'neq':
       return termValue !== term.value;
     case 'gt':
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       return termValue > term.value;
     case 'gte':
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       return termValue >= term.value;
     case 'lt':
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       return termValue < term.value;
     case 'lte':
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       return termValue <= term.value;
     default:
       return false;

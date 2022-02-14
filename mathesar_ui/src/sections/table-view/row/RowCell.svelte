@@ -24,7 +24,8 @@
 
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
-  $: isBeingEdited = $activeCell && isCellBeingEdited($activeCell, row, column);
+  $: isBeingEdited =
+    !!$activeCell && isCellBeingEdited($activeCell, row, column);
   $: isNullDisplayed = isBeingEdited && value === null;
 
   let cellRef: HTMLElement;

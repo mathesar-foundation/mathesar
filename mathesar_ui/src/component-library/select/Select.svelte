@@ -7,7 +7,7 @@
 
   const dispatch = createEventDispatcher();
 
-  export let id: string = undefined;
+  export let id: string | undefined = undefined;
 
   export let disabled = false;
 
@@ -30,8 +30,11 @@
 
   /**
    * Currently selected option.
+   *
+   * TODO: convert this to use undefined instead of null or explain why we're
+   * using null here.
    */
-  export let value: SelectOption = null;
+  export let value: SelectOption | null = null;
 
   /**
    * Classes to apply to the content (each of the options).
@@ -51,13 +54,13 @@
   /**
    * The ARIA label for this select component.
    */
-  export let ariaLabel: string = null;
+  export let ariaLabel: string | undefined = undefined;
 
   let isOpen = false;
   let currentIndex = 0;
   let parentHoverElem: HTMLElement;
 
-  function setValue(opt: SelectOption) {
+  function setValue(opt: SelectOption | null) {
     value = opt;
     dispatch('change', {
       value, // TODO: Change this to reflect value within option
@@ -70,7 +73,9 @@
     if (opts.length > 0) {
       if (!value) {
         setValue(opts[0]);
-      } else if (!opts.find((entry) => entry[idKey] === value[idKey])) {
+      } else if (
+        !opts.find((entry) => value && entry[idKey] === value[idKey])
+      ) {
         setValue(opts[0]);
       }
     } else {
@@ -80,7 +85,7 @@
 
   function scrollBehavior(): void {
     if (parentHoverElem) {
-      const hoveredElem: HTMLElement =
+      const hoveredElem: HTMLElement | null =
         parentHoverElem.querySelector('.hovered');
       const container = parentHoverElem.parentElement as HTMLDivElement;
       if (hoveredElem && container) {
@@ -191,7 +196,7 @@
       {#each options as option (option[idKey])}
         <li
           role="option"
-          class:selected={option[idKey] === value[idKey]}
+          class:selected={value && option[idKey] === value[idKey]}
           class:hovered={option[idKey] === options[currentIndex]?.[idKey]}
           on:click={() => setValue(option)}
         >

@@ -16,17 +16,12 @@ export interface UploadCompletionOpts {
   percentCompleted: number;
 }
 
-export interface URLObject {
-  url: string;
-  avoidPrefix?: boolean;
-}
-
 export interface PaginatedResponse<T> {
   count: number;
   results: T[];
 }
 
-const urlPrefix = '/api/v0';
+const dbUrlPrefix = '/api/db/v0';
 const NO_CONTENT = 204;
 const successStatusCodes = new Set([200, 201, NO_CONTENT]);
 
@@ -34,18 +29,11 @@ const successStatusCodes = new Set([200, 201, NO_CONTENT]);
  * We might need to use multiple versions of apis
  * simultaneously, later on
  */
-function appendUrlPrefix(url: string | URLObject): string {
-  if (typeof url === 'string') {
-    if (url.indexOf('/api/v') === 0) {
-      return url;
-    }
-    return `${urlPrefix}${url}`;
+function appendUrlPrefix(url: string): string {
+  if (url.indexOf('/api/') === 0) {
+    return url;
   }
-
-  if (url.avoidPrefix) {
-    return url.url;
-  }
-  return `${urlPrefix}${url.url}`;
+  return `${dbUrlPrefix}${url}`;
 }
 
 function sendXHRRequest<T>(
@@ -128,7 +116,7 @@ export function deleteAPI<T>(url: string): CancellablePromise<T> {
 }
 
 export function uploadFile<T>(
-  url: string | URLObject,
+  url: string,
   formData: FormData,
   completionCallback?: (obj: UploadCompletionOpts) => unknown,
 ): CancellablePromise<T> {

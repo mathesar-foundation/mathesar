@@ -21,7 +21,7 @@ def test_default_constraint_list(create_table, client):
     table = create_table(table_name)
     constraint_column_id = table.columns.all()[0].id
 
-    response = client.get(f'/api/v0/tables/{table.id}/constraints/')
+    response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     response_data = response.json()
     constraint_data = response_data['results'][0]
 
@@ -39,7 +39,7 @@ def test_multiple_constraint_list(create_table, client):
     constraint_column = table.columns.all()[3]
     table.add_constraint('unique', [constraint_column])
 
-    response = client.get(f'/api/v0/tables/{table.id}/constraints/')
+    response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     response_data = response.json()
 
     _verify_primary_and_unique_constraints(response)
@@ -57,7 +57,7 @@ def test_multiple_column_constraint_list(create_table, client):
     constraint_column_id_list = [constraint_column_1.id, constraint_column_2.id]
     table.add_constraint('unique', [constraint_column_1, constraint_column_2])
 
-    response = client.get(f'/api/v0/tables/{table.id}/constraints/')
+    response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     response_data = response.json()
 
     _verify_primary_and_unique_constraints(response)
@@ -72,7 +72,7 @@ def test_retrieve_constraint(create_table, client):
     constraint_column = table.columns.all()[3]
     constraint_column_id_list = [constraint_column.id]
     table.add_constraint('unique', [constraint_column])
-    list_response = client.get(f'/api/v0/tables/{table.id}/constraints/')
+    list_response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     list_response_data = list_response.json()
     assert list_response_data['count'] == 2
     for constraint_data in list_response_data['results']:
@@ -80,7 +80,7 @@ def test_retrieve_constraint(create_table, client):
             constraint_id = constraint_data['id']
             break
 
-    response = client.get(f'/api/v0/tables/{table.id}/constraints/{constraint_id}/')
+    response = client.get(f'/api/db/v0/tables/{table.id}/constraints/{constraint_id}/')
     assert response.status_code == 200
     _verify_unique_constraint(response.json(), constraint_column_id_list, 'NASA Constraint List 3_Case Number_key')
 
@@ -96,7 +96,7 @@ def test_create_multiple_column_unique_constraint(create_table, client):
         'type': 'unique',
         'columns': constraint_column_id_list
     }
-    response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
+    response = client.post(f'/api/db/v0/tables/{table.id}/constraints/', data=data)
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), constraint_column_id_list, 'NASA Constraint List 4_Center_key')
 
@@ -109,7 +109,7 @@ def test_create_single_column_unique_constraint(create_table, client):
         'type': 'unique',
         'columns': [constraint_column_id]
     }
-    response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
+    response = client.post(f'/api/db/v0/tables/{table.id}/constraints/', data=data)
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), [constraint_column_id], 'NASA Constraint List 5_Case Number_key')
 
@@ -125,7 +125,7 @@ def test_create_unique_constraint_with_name_specified(create_table, client):
         'type': 'unique',
         'columns': constraint_column_id_list
     }
-    response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
+    response = client.post(f'/api/db/v0/tables/{table.id}/constraints/', data=data)
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), constraint_column_id_list, 'awesome_constraint')
 
@@ -133,9 +133,10 @@ def test_create_unique_constraint_with_name_specified(create_table, client):
 def test_drop_constraint(create_table, client):
     table_name = 'NASA Constraint List 7'
     table = create_table(table_name)
+
     constraint_column = table.columns.all()[3]
     table.add_constraint('unique', [constraint_column])
-    list_response = client.get(f'/api/v0/tables/{table.id}/constraints/')
+    list_response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     list_response_data = list_response.json()
     assert list_response_data['count'] == 2
     for constraint_data in list_response_data['results']:
@@ -143,9 +144,9 @@ def test_drop_constraint(create_table, client):
             constraint_id = constraint_data['id']
             break
 
-    response = client.delete(f'/api/v0/tables/{table.id}/constraints/{constraint_id}/')
+    response = client.delete(f'/api/db/v0/tables/{table.id}/constraints/{constraint_id}/')
     assert response.status_code == 204
-    new_list_response = client.get(f'/api/v0/tables/{table.id}/constraints/')
+    new_list_response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     assert new_list_response.json()['count'] == 1
 
 
@@ -161,7 +162,7 @@ def test_create_unique_constraint_with_duplicate_name(create_table, client):
         'type': 'unique',
         'columns': constraint_column_id_list
     }
-    response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
+    response = client.post(f'/api/db/v0/tables/{table.id}/constraints/', data=data)
     assert response.status_code == 400
     response_body = response.json()[0]
     assert response_body['message'] == 'Relation with the same name already exists'
@@ -176,7 +177,7 @@ def test_create_unique_constraint_for_non_unique_column(create_table, client):
         'type': 'unique',
         'columns': [constraint_column.id]
     }
-    response = client.post(f'/api/v0/tables/{table.id}/constraints/', data=data)
+    response = client.post(f'/api/db/v0/tables/{table.id}/constraints/', data=data)
     assert response.status_code == 400
     response_body = response.json()[0]
     assert response_body['message'] == 'This column has non-unique values so a unique constraint cannot be set'
@@ -187,7 +188,7 @@ def test_drop_nonexistent_constraint(create_table, client):
     table_name = 'NASA Constraint List 10'
     table = create_table(table_name)
 
-    response = client.delete(f'/api/v0/tables/{table.id}/constraints/345/')
+    response = client.delete(f'/api/db/v0/tables/{table.id}/constraints/345/')
     assert response.status_code == 404
     response_data = response.json()[0]
     assert response_data['message'] == "Not found."
@@ -195,7 +196,7 @@ def test_drop_nonexistent_constraint(create_table, client):
 
 
 def test_drop_nonexistent_table(create_table, client):
-    response = client.delete('/api/v0/tables/9387489/constraints/4234/')
+    response = client.delete('/api/db/v0/tables/9387489/constraints/4234/')
     assert response.status_code == 404
     response_data = response.json()[0]
     assert response_data['message'] == "Not found."

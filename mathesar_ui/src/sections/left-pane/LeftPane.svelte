@@ -21,6 +21,10 @@
   export let activeTab: MathesarTab | undefined = undefined;
   export let getLink: (entry: TableEntry) => string;
 
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const getLink__withTypeCoercion: (arg0: unknown) => string = getLink;
+
   let tree: TreeItem[] = [];
   let activeOptionSet: Set<unknown>;
   const expandedItems = new Set(['table_header']);
@@ -85,7 +89,7 @@
       idKey="treeId"
       childKey="tables"
       search={true}
-      {getLink}
+      getLink={getLink__withTypeCoercion}
       {expandedItems}
       bind:selectedItems={activeOptionSet}
       on:nodeSelected={tableSelected}
