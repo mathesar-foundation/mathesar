@@ -44,8 +44,7 @@ docker-compose up
 
 If it's your first time running the application, you'll also need to run database migrations and install Mathesar types and functions:
 ```
-docker exec mathesar_service python manage.py migrate
-docker exec -it mathesar_service python install.py
+docker exec mathesar_service sh -c "python manage.py migrate && python install.py"
 ```
 
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application. For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`. 

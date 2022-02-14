@@ -208,7 +208,7 @@ export function deleteImport(schemaId: SchemaEntry['id'], id: string): void {
     const fileImportData = get(fileImport);
     fileImportData.importPromise?.cancel();
     fileImportData.uploadPromise?.cancel();
-    imports.delete(id);
+    imports?.delete(id);
   }
   importStatuses.update((existingMap) => {
     existingMap.delete(id);
@@ -245,6 +245,7 @@ export function setImportStatus(
   const importmap = get(importStatuses);
   if (importmap.get(id)) {
     importStatuses.update((existingMap) => {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       existingMap.set(id, {
         ...existingMap.get(id),
         ...data,

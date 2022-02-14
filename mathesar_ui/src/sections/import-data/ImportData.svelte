@@ -10,6 +10,7 @@
   export let database: Database['name'];
   export let schemaId: SchemaEntry['id'];
 
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   $: fileImportStore = getFileStore(database, schemaId, id);
   $: stepNumber = $fileImportStore.stage === Stages.UPLOAD ? 1 : 2;
 </script>

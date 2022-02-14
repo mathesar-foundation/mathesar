@@ -3,7 +3,7 @@ from rest_framework import status, viewsets
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 
-from mathesar.api.filters import SchemaFilter
+from mathesar.api.dj_filters import SchemaFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.schemas import SchemaSerializer
 from mathesar.models import Schema

@@ -87,8 +87,11 @@
   }
 </script>
 
-<div class="file-upload" class:inprogress={fileUploads?.length > 0}>
-  {#if fileUploads?.length > 0}
+<div
+  class="file-upload"
+  class:inprogress={fileUploads && fileUploads.length > 0}
+>
+  {#if fileUploads && fileUploads.length > 0}
     <div class="files">
       {#each fileUploads as upload (upload.fileId)}
         <div class="file">

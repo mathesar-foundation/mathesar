@@ -113,10 +113,12 @@ const textType: AbstractTypeConfiguration = {
           },
           VARCHAR: {
             restrictFieldSize: true,
+            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
             fieldSizeLimit: null,
           },
           TEXT: {
             restrictFieldSize: false,
+            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
             fieldSizeLimit: null,
           },
         },
