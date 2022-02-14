@@ -39,7 +39,7 @@ def engine(test_db):
         ),
         future=True,
         # Setting a fixed timezone makes the timezone aware test cases predictable.
-        connect_args={"options": "-c timezone=utc"}
+        connect_args={"options": "-c timezone=utc -c lc_monetary=en_US.UTF-8"}
     )
 
 
