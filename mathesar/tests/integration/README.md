@@ -13,7 +13,12 @@ Running integration tests requires a separate Docker setup using a much beefier 
 
 1. Modify `docker-compose.yml`
 
-    Change `dockerfile: Dockerfile` to `dockerfile: Dockerfile.integ-tests`
+    1. (All platforms): Change `dockerfile: Dockerfile` to `dockerfile: Dockerfile.integ-tests`
+    1. (For Mac OS only): Also change `DISPLAY=${DISPLAY}` to `DISPLAY=${YOUR_IP}:0`, e.g. `DISPLAY=192.168.29.198:0`
+
+1. (For Mac OS only):
+    1. Install and open [XQuartz](https://www.xquartz.org/).
+    1. In "XQuartz" -> "Preferences" -> "Security", Enable "Allow connections from network clients"
 
 1. Re-build the container by running `docker-compose up --build`
 1. Discard your changes to `docker-compose.yml` so you don't commit them.
@@ -59,9 +64,15 @@ Playwright has a number of fully-featured [GUI debugging tools](https://playwrig
 
 Before using any of these tools, you'll need to run the following command on your host machine to permit other clients to connect to your X server. You'll need to re-run this command again if you come back after restarting your X server.
 
-```
-xhost +
-```
+- For Linux:
+
+    ```
+    xhost +
+    ```
+
+- For Mac OS:
+
+    Run `xhost +${YOUR_IP}`. e.g. `xhost +192.168.29.198`
 
 ### Inspector
 
