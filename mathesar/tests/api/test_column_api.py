@@ -93,7 +93,7 @@ def test_column_list(column_test_table, client):
             },
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
-                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
+                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MATHESAR_MONEY', 'MONEY', 'NUMERIC', 'REAL',
                 'SMALLINT', 'TEXT', 'VARCHAR',
             ],
         },
@@ -108,7 +108,7 @@ def test_column_list(column_test_table, client):
             'default': None,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
-                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
+                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MATHESAR_MONEY', 'MONEY', 'NUMERIC', 'REAL',
                 'SMALLINT', 'TEXT', 'VARCHAR',
             ],
         },
@@ -126,7 +126,7 @@ def test_column_list(column_test_table, client):
             },
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
-                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MONEY', 'NUMERIC', 'REAL',
+                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MATHESAR_MONEY', 'MONEY', 'NUMERIC', 'REAL',
                 'SMALLINT', 'TEXT', 'VARCHAR',
             ],
         },
@@ -141,8 +141,8 @@ def test_column_list(column_test_table, client):
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DATE', 'DECIMAL',
                 'DOUBLE PRECISION', 'FLOAT', 'INTEGER', 'INTERVAL',
-                'MATHESAR_TYPES.EMAIL', 'MATHESAR_TYPES.MONEY',
-                'MATHESAR_TYPES.URI', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT',
+                'MATHESAR_TYPES.EMAIL', 'MATHESAR_TYPES.MATHESAR_MONEY',
+                'MATHESAR_TYPES.URI', 'MONEY', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT',
                 'TIME WITH TIME ZONE', 'TIME WITHOUT TIME ZONE',
                 'TIMESTAMP WITH TIME ZONE', 'TIMESTAMP WITHOUT TIME ZONE',
                 'VARCHAR',
