@@ -140,7 +140,7 @@ def get_column_cast_expression(column, target_type_str, engine, type_options={})
         )
     if type_options:
         type_with_options = target_type(**type_options)
-        cast_expr = cast_expr.cast(type_with_options).compile(dialect=engine.dialect)
+        cast_expr = cast_expr.cast(type_with_options)
     return cast_expr
 
 

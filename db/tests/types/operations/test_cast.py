@@ -1241,7 +1241,8 @@ def test_get_column_cast_expression_type_options(
     cast_expr = cast_operations.get_column_cast_expression(
         column, target_type, engine_with_types, type_options=options,
     )
-    assert str(cast_expr) == expect_cast_expr
+    actual_cast_expr = str(cast_expr.compile(engine_with_types))
+    assert actual_cast_expr == expect_cast_expr
 
 
 expect_cast_tuples = [
