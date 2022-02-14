@@ -45,10 +45,10 @@ def test_record_list(create_table, client):
     table = create_table(table_name)
 
     response = client.get(f'/api/db/v0/tables/{table.id}/records/')
+    assert response.status_code == 200
+
     response_data = response.json()
     record_data = response_data['results'][0]
-
-    assert response.status_code == 200
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 50
     for column_name in table.sa_column_names:
@@ -84,7 +84,7 @@ def test_record_list_filter(create_table, client):
             {"equal": [{"column_reference": ["Case Number"]}, {"literal": ["ARC-14048-1"]}]},
         ]},
         {"and": [
-            {"equal": [{"column_reference": ["Center"]}, {"literal": ["NASA Kennedy Research Center"]}]},
+            {"equal": [{"column_reference": ["Center"]}, {"literal": ["NASA Kennedy Space Center"]}]},
             {"equal": [{"column_reference": ["Case Number"]}, {"literal": ["KSC-12871"]}]},
         ]},
     ]}
@@ -96,9 +96,9 @@ def test_record_list_filter(create_table, client):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?filter={json_filter}'
         )
-        response_data = response.json()
 
     assert response.status_code == 200
+    response_data = response.json()
     assert response_data['count'] == 2
     assert len(response_data['results']) == 2
     assert mock_get.call_args is not None
@@ -135,8 +135,8 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
 
         table.create_record_or_records(row_values_list)
 
-        for filter_id, value, expected in operators_and_expected_values:
-            filter = {filter_id: [{"column_reference": [new_column_name]}, {"literal": [value]}]}
+        for filter_lambda, value, expected in operators_and_expected_values:
+            filter = filter_lambda(new_column_name, value)
             json_filter = json.dumps(filter)
 
             with patch.object(
@@ -178,10 +178,10 @@ def test_record_list_filter_for_boolean_type(create_table, client):
             lambda new_column_name, value: {"equal": [{"column_reference": [new_column_name]}, {"literal": [value]}]},
             False, 2),
         (
-            lambda new_column_name, value: {"empty": [{"column_reference": [new_column_name]}, {"literal": [value]}]},
+            lambda new_column_name, _: {"empty": [{"column_reference": [new_column_name]}]},
             None, 1394),
         (
-            lambda new_column_name, value: {"not": [{"empty": [{"column_reference": [new_column_name]}, {"literal": [value]}]}]},
+            lambda new_column_name, _: {"not": [{"empty": [{"column_reference": [new_column_name]}]}]},
             None, 49),
     ]
 

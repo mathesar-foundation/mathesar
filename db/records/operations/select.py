@@ -20,13 +20,21 @@ def _get_duplicate_only_cte(table, duplicate_columns):
     return select(duplicate_flag_cte).where(duplicate_flag_cte.c[DUPLICATE_LABEL]).cte()
 
 
+def _sort_and_filter(query, order_by, filter):
+    if order_by is not None:
+        query = apply_sort(query, order_by)
+    if filter is not None:
+        query = apply_ma_function_spec_as_filter(query, filter)
+    return query
+
+
 def get_query(
     table,
     limit,
     offset,
     order_by,
     filter=None,
-    cols=None,
+    columns_to_select=None,
     group_by=None,
     duplicate_only=None
 ):
@@ -36,16 +44,18 @@ def get_query(
         select_target = table
 
     if isinstance(group_by, group.GroupBy):
-        query = group.get_group_augmented_records_query(table, group_by)
+        selectable = group.get_group_augmented_records_query(select_target, group_by)
     else:
-        query = select(*(cols or select_target.c)).select_from(select_target)
+        selectable = select(select_target)
 
-    query = query.limit(limit).offset(offset)
-    if order_by is not None:
-        query = apply_sort(query, order_by)
-    if filter is not None:
-        query = apply_ma_function_spec_as_filter(query, filter)
-    return query
+    selectable = _sort_and_filter(selectable, order_by, filter)
+
+    if columns_to_select:
+        selectable = selectable.cte()
+        selectable = select(*columns_to_select).select_from(selectable)
+
+    selectable = selectable.limit(limit).offset(offset)
+    return selectable
 
 
 def get_record(table, engine, id_value):
@@ -109,8 +119,15 @@ def get_records(
 
 def get_count(table, engine, filter=None):
     col_name = "_count"
-    cols = [func.count().label(col_name)]
-    query = get_query(table, None, None, None, filter, cols)
+    columns_to_select = [func.count().label(col_name)]
+    query = get_query(
+        table=table,
+        limit=None,
+        offset=None,
+        order_by=None,
+        filter=filter,
+        columns_to_select=columns_to_select
+    )
     return execute_query(engine, query)[0][col_name]
 
 
