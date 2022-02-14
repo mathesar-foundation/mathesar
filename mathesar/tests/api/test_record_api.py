@@ -80,12 +80,24 @@ def test_record_list_filter(create_table, client):
 
     filter = {"or": [
         {"and": [
-            {"equal": [{"column_reference": ["Center"]}, {"literal": ["NASA Ames Research Center"]}]},
-            {"equal": [{"column_reference": ["Case Number"]}, {"literal": ["ARC-14048-1"]}]},
+            {"equal": [
+                {"column_reference": ["Center"]},
+                {"literal": ["NASA Ames Research Center"]}
+            ]},
+            {"equal": [
+                {"column_reference": ["Case Number"]},
+                {"literal": ["ARC-14048-1"]}
+            ]},
         ]},
         {"and": [
-            {"equal": [{"column_reference": ["Center"]}, {"literal": ["NASA Kennedy Space Center"]}]},
-            {"equal": [{"column_reference": ["Case Number"]}, {"literal": ["KSC-12871"]}]},
+            {"equal": [
+                {"column_reference": ["Center"]},
+                {"literal": ["NASA Kennedy Space Center"]}
+            ]},
+            {"equal": [
+                {"column_reference": ["Case Number"]},
+                {"literal": ["KSC-12871"]}
+            ]},
         ]},
     ]}
     json_filter = json.dumps(filter)
