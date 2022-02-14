@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import call, patch
 from sqlalchemy import Column, MetaData, Table, select
 from sqlalchemy import BOOLEAN, Numeric, NUMERIC, String, VARCHAR, DATE
+from sqlalchemy.dialects.postgresql import MONEY
 
 from db.columns.operations.infer_types import infer_column_type
 from db.tables.operations import infer_types as infer_operations
@@ -25,6 +26,7 @@ type_data_list = [
     (String, ["t", "false", "2", "0"], VARCHAR),
     (String, ["a", "cat", "mat", "bat"], VARCHAR),
     (String, ["2", "1", "0", "0"], NUMERIC),
+    (String, ["$2", "$1", "$0"], MONEY),
     (String, ["2000-01-12", "6/23/2004", "May-2007-29", "May-2007-29 00:00:00+0", "20200909"], DATE),
     (String, ["9:24+01", "23:12", "03:04:05", "3:4:5"], datetime.TIME_WITHOUT_TIME_ZONE),
     (
