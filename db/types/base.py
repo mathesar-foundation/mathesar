@@ -73,7 +73,7 @@ class MathesarCustomType(Enum):
     """
     EMAIL = 'email'
     URI = 'uri'
-    MONEY = 'money'
+    MATHESAR_MONEY = 'mathesar_money'
 
 
 _known_vanilla_db_types = tuple(postgres_type for postgres_type in PostgresType)
