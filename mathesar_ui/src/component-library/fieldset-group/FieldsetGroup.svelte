@@ -7,7 +7,7 @@
   export let label: string | undefined = undefined;
 </script>
 
-<fieldset class="fieldset-group" class:inline={isInline}>
+<fieldset class="fieldset-group" class:inline={isInline} on:change>
   {#if $$slots.label || label}
     <legend>
       {#if $$slots.label}<slot name="label" />{/if}

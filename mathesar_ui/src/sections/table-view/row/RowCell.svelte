@@ -20,10 +20,13 @@
   export let row: TableRecord;
   export let column: Column;
   export let value: unknown = undefined;
+  let isNullDisplayed = false;
 
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
-  $: isBeingEdited = $activeCell && isCellBeingEdited($activeCell, row, column);
+  $: isBeingEdited =
+    !!$activeCell && isCellBeingEdited($activeCell, row, column);
+  $: isNullDisplayed = isBeingEdited && value === null;
 
   let cellRef: HTMLElement;
   let inputRef: HTMLInputElement;
@@ -64,6 +67,10 @@
     const val = (event.target as HTMLInputElement).value;
     window.clearTimeout(timer);
     setValue(val);
+  }
+
+  function hideNullElement() {
+    isNullDisplayed = false;
   }
 
   async function handleKeyDown(event: KeyboardEvent) {
@@ -120,12 +127,14 @@
       bind:this={inputRef}
       type="text"
       class="edit-input-box"
+      class:is-null-displayed={isNullDisplayed}
       value={typeof value === 'string' || typeof value === 'number'
         ? value
         : ''}
       on:keydown={handleInputKeyDown}
       on:keyup={debounceAndSet}
       on:blur={onBlur}
+      on:input={hideNullElement}
     />
   {/if}
 

@@ -4,6 +4,10 @@ from sqlalchemy import create_engine
 
 from db import constants
 
+from db.functions import hints
+
+from frozendict import frozendict
+
 
 CHAR = 'char'
 STRING = 'string'
@@ -72,6 +76,28 @@ class MathesarCustomType(Enum):
     MONEY = 'money'
 
 
+db_types_hinted = frozendict({
+    PostgresType.BOOLEAN: tuple([
+        hints.boolean
+    ]),
+    PostgresType.CHARACTER_VARYING: tuple([
+        hints.string_like
+    ]),
+    PostgresType.CHARACTER: tuple([
+        hints.string_like
+    ]),
+    PostgresType.NUMERIC: tuple([
+        hints.comparable
+    ]),
+    PostgresType.TEXT: tuple([
+        hints.string_like
+    ]),
+    MathesarCustomType.URI: tuple([
+        hints.uri
+    ]),
+})
+
+
 SCHEMA = f"{constants.MATHESAR_PREFIX}types"
 # Since we want to have our identifiers quoted appropriately for use in
 # PostgreSQL, we want to use the postgres dialect preparer to set this up.
@@ -83,7 +109,34 @@ def get_qualified_name(name):
 
 
 def get_available_types(engine):
+    """
+    Returns a dict where the keys are database type names defined on the database associated with
+    provided Engine, and the values are their SQLAlchemy classes.
+    """
     return engine.dialect.ischema_names
+
+
+_known_vanilla_db_types = tuple(postgres_type for postgres_type in PostgresType)
+
+
+_known_custom_db_types = tuple(mathesar_custom_type for mathesar_custom_type in MathesarCustomType)
+
+
+# Known database types are those that are defined on our PostgresType and MathesarCustomType Enums.
+known_db_types = _known_vanilla_db_types + _known_custom_db_types
+
+
+def get_available_known_db_types(engine):
+    """
+    Returns database types that are both available on the database and known through our Enums
+    above.
+    """
+    available_db_types = get_available_types(engine)
+    return tuple(
+        known_db_type
+        for known_db_type in known_db_types
+        if known_db_type.value in available_db_types
+    )
 
 
 def get_db_type_name(sa_type, engine):

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import { Button } from '@mathesar-component-library';
-  import Modal from '../Modal.svelte';
+  import ControlledModal from '../ControlledModal.svelte';
   import ModalMultiplexer from '../ModalMultiplexer';
 
   const meta = {
@@ -10,13 +10,13 @@
 
   const modal = new ModalMultiplexer();
 
-  const basicModal = modal.createVisibilityStore();
-  const chainModal = modal.createVisibilityStore();
-  const hardToCloseModal = modal.createVisibilityStore();
-  const titleFreeModal = modal.createVisibilityStore();
-  const extraLongTitleModal = modal.createVisibilityStore();
-  const richTextTitle = modal.createVisibilityStore();
-  const verboseModal = modal.createVisibilityStore();
+  const basicModal = modal.spawnModalController();
+  const chainModal = modal.spawnModalController();
+  const hardToCloseModal = modal.spawnModalController();
+  const titleFreeModal = modal.spawnModalController();
+  const extraLongTitleModal = modal.spawnModalController();
+  const richTextTitle = modal.spawnModalController();
+  const verboseModal = modal.spawnModalController();
 
   let answer = '';
   $: answerIsCorrect = answer === '4';
@@ -28,64 +28,65 @@
   <h2>Example modals</h2>
   <ul>
     <li>
-      <Button on:click={() => basicModal.open()}>One that's pretty basic</Button
+      <Button appearance="primary" on:click={() => basicModal.open()}
+        >Basic</Button
       >
     </li>
     <li>
-      <Button on:click={() => chainModal.open()}
-        >One that opens another one</Button
+      <Button appearance="primary" on:click={() => chainModal.open()}
+        >Nested</Button
       >
     </li>
     <li>
-      <Button on:click={() => hardToCloseModal.open()}
-        >One that's hard to close</Button
+      <Button appearance="primary" on:click={() => hardToCloseModal.open()}
+        >Hard to close</Button
       >
     </li>
     <li>
-      <Button on:click={() => titleFreeModal.open()}>One without a title</Button
+      <Button appearance="primary" on:click={() => titleFreeModal.open()}
+        >No title</Button
       >
     </li>
     <li>
-      <Button on:click={() => extraLongTitleModal.open()}
-        >One with a super long title</Button
+      <Button appearance="primary" on:click={() => extraLongTitleModal.open()}
+        >Long title</Button
       >
     </li>
     <li>
-      <Button on:click={() => richTextTitle.open()}
-        >One with a rich text title</Button
+      <Button appearance="primary" on:click={() => richTextTitle.open()}
+        >Rich text title</Button
       >
     </li>
     <li>
-      <Button on:click={() => verboseModal.open()}
-        >One with a lot of text</Button
+      <Button appearance="primary" on:click={() => verboseModal.open()}
+        >Long content</Button
       >
     </li>
   </ul>
 
-  <Modal bind:isOpen={$basicModal} title="Basic modal" let:close>
+  <ControlledModal controller={basicModal} title="Basic modal">
     Here is modal content
     <div slot="footer">
       <p>This is the modal footer</p>
-      <p>
-        <Button on:click={close}
-          >Here's a close button that uses the slot prop</Button
-        >
-      </p>
     </div>
-  </Modal>
+  </ControlledModal>
 
-  <Modal bind:isOpen={$chainModal} title="Go ahead and open another modal">
-    <p>
-      This modal has a button which opens another modal. Generally we don't want
-      to do this, because it's poor UX, but this demonstrates what happens.
-    </p>
-    <Button on:click={() => basicModal.open()}
-      >Open that basic modal (this one will close)</Button
+  <ControlledModal
+    controller={chainModal}
+    title="Go ahead and open another modal"
+  >
+    <p>This modal has a button which opens another modal.</p>
+    <Button appearance="primary" on:click={() => basicModal.open()}
+      >Open that basic modal</Button
     >
-  </Modal>
+    <p>
+      Notice that this modal remains open undeneath the overlay and there is no
+      way to close it until the upper modal is closed.
+    </p>
+  </ControlledModal>
 
-  <Modal
-    bind:isOpen={$hardToCloseModal}
+  <ControlledModal
+    controller={hardToCloseModal}
     title="Hard to close"
     allowClose={answerIsCorrect}
     on:close={() => {
@@ -94,23 +95,25 @@
   >
     <p>Answer the quesion to unlock the close button.</p>
     <p>2 + 2 = <input type="text" bind:value={answer} /></p>
-  </Modal>
+  </ControlledModal>
 
-  <Modal bind:isOpen={$titleFreeModal}>Wow, this one is small</Modal>
+  <ControlledModal controller={titleFreeModal}>
+    Wow, this one is small
+  </ControlledModal>
 
-  <Modal
-    bind:isOpen={$extraLongTitleModal}
+  <ControlledModal
+    controller={extraLongTitleModal}
     title="You are now seeing a modal dialog with a title long enough to cause it to wrap and display on multiple lines"
   >
     This is the content
-  </Modal>
+  </ControlledModal>
 
-  <Modal bind:isOpen={$richTextTitle}>
+  <ControlledModal controller={richTextTitle}>
     <div slot="title">Here's a title with <em>formatting!</em></div>
     This is the content
-  </Modal>
+  </ControlledModal>
 
-  <Modal bind:isOpen={$verboseModal}>
+  <ControlledModal controller={verboseModal}>
     <p>
       Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
       tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
@@ -149,7 +152,7 @@
       consequatur aut perferendis doloribus asperiores repellat.
     </p>
     <div slot="footer">This is the footer</div>
-  </Modal>
+  </ControlledModal>
 </Story>
 
 <style>

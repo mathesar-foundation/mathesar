@@ -21,6 +21,16 @@ module.exports = {
   rules: {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'no-console': ['warn', { allow: ['error'] }],
+    '@typescript-eslint/ban-ts-comment': [
+      'error',
+      {
+        'ts-expect-error': 'allow-with-description',
+        'ts-ignore': 'allow-with-description',
+        'ts-nocheck': 'allow-with-description',
+        'ts-check': false,
+        minimumDescriptionLength: 10,
+      },
+    ],
   },
   overrides: [
     {
@@ -53,6 +63,7 @@ module.exports = {
         'operator-linebreak': 'off',
         'space-in-parens': 'off',
         'no-confusing-arrow': 'off',
+        'no-constant-condition': 'off',
       },
     },
     {
@@ -91,6 +102,8 @@ module.exports = {
         'operator-linebreak': 'off',
         'space-in-parens': 'off',
         'no-confusing-arrow': 'off',
+        'no-constant-condition': 'off',
+        '@typescript-eslint/require-await': 'off',
       },
     },
   ],
@@ -102,6 +115,7 @@ module.exports = {
   },
   settings: {
     'svelte3/typescript': () => typescript,
+    'svelte3/ignore-styles': ({ lang }) => lang === 'scss',
     'import/resolver': {
       node: {
         extensions: ['.js', '.ts'],

@@ -1,5 +1,5 @@
 .dropdown.content.column-opts-content .container .column-type-menu {
-  min-width: 18rem;
+  width: 18rem;
   padding: 0.3125rem 0.75rem;
 
   .menu-header {
@@ -14,9 +14,11 @@
     border: 1px solid #eaeaea;
     max-height: 7.5rem;
     overflow: auto;
+    position: relative;
 
     li {
       border-bottom: 1px solid #f1f1f1;
+      position: relative;
 
       &:last-child {
         border-bottom: none;
@@ -41,11 +43,6 @@
     }
     .type-options-content {
       margin-top: 0.625rem;
-
-      button.db-type-select {
-        margin-top: 0.5rem;
-        width: 100%;
-      }
     }
   }
 

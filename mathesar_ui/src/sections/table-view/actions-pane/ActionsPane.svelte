@@ -14,14 +14,9 @@
   import { Button, Icon, Dropdown } from '@mathesar-component-library';
   import type {
     TabularDataStore,
-    TabularData,
-    RecordsData,
-    ColumnsDataStore,
     ColumnsData,
-    Meta,
   } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar-component-library/types';
-  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import { refetchTablesForSchema, deleteTable } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
@@ -45,19 +40,14 @@
     );
   }
 
-  let recordsData: RecordsData;
-  let columnsDataStore: ColumnsDataStore;
-  let constraintsDataStore: ConstraintsDataStore;
-  let meta: Meta;
-  let recordState: RecordsData['state'];
-  let isTableConstraintsModalOpen = false;
-  const tableRenameModal = modal.createVisibilityStore();
+  const tableConstraintsModal = modal.spawnModalController();
+  const tableRenameModal = modal.spawnModalController();
 
   $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
-    $tabularData as TabularData);
+    $tabularData);
   $: ({ filter, sort, group, selectedRecords, combinedModificationState } =
     meta);
-  $: ({ state: recordState } = recordsData);
+  $: recordState = recordsData.state;
 
   $: isLoading =
     $columnsDataStore.state === States.Loading ||
@@ -70,7 +60,7 @@
   $: columnOptions = getColumnOptions($columnsDataStore);
 
   function refresh() {
-    void ($tabularData as TabularData).refresh();
+    void $tabularData.refresh();
   }
 
   function handleDeleteTable() {
@@ -78,12 +68,15 @@
       identifierType: 'Table',
       onProceed: async () => {
         await deleteTable($tabularData.id);
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         const tabList = getTabsForSchema($currentDBName, $currentSchemaId);
         const tab = tabList.getTabularTabByTabularID(
           $tabularData.type,
           $tabularData.id,
         );
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         tabList.remove(tab);
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         await refetchTablesForSchema($currentSchemaId);
       },
     });
@@ -108,7 +101,7 @@
         <li
           class="item"
           on:click={() => {
-            isTableConstraintsModalOpen = true;
+            tableConstraintsModal.open();
           }}
         >
           Constraints
@@ -117,12 +110,9 @@
     </svelte:fragment>
   </Dropdown>
 
-  <TableConstraints bind:isOpen={isTableConstraintsModalOpen} />
+  <TableConstraints controller={tableConstraintsModal} />
 
-  <RenameTableModal
-    bind:isOpen={$tableRenameModal}
-    tabularData={$tabularData}
-  />
+  <RenameTableModal controller={tableRenameModal} tabularData={$tabularData} />
 
   <div class="divider" />
 

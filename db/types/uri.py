@@ -1,9 +1,12 @@
 from enum import Enum
 import os
-from sqlalchemy import text, Text, Table, Column, String, MetaData
+from sqlalchemy import text, Text, Table, Column, String, MetaData, func
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.types import UserDefinedType
+
+from db.functions import hints
+from db.functions.base import DBFunction
 
 from db.types import base
 
@@ -122,3 +125,17 @@ def install_tld_lookup_table(engine):
             tlds_table.insert(),
             [{"tld": tld.strip().lower()} for tld in f if tld[:2] != "# "],
         )
+
+
+class ExtractURIAuthority(DBFunction):
+    id = 'extract_uri_authority'
+    name = 'Extract URI Authority'
+    hints = tuple([
+        hints.parameter_count(1),
+        hints.parameter(1, hints.uri),
+    ])
+    depends_on = tuple([URIFunction.AUTHORITY])
+
+    @staticmethod
+    def to_sa_expression(uri):
+        return func.getattr(URIFunction.AUTHORITY)(uri)

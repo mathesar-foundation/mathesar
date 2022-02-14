@@ -5,7 +5,7 @@ import PhraseContainingIdentifier from '@mathesar/components/PhraseContainingIde
 import { modal } from './modal';
 import { toast } from './toast';
 
-const confirmationModal = modal.createVisibilityStore();
+const confirmationModal = modal.spawnModalController();
 
 export const { confirm, confirmationController } = makeConfirm({
   confirmationModal,
@@ -22,6 +22,7 @@ export function confirmDelete(
   props: ConfirmDeleteProps,
 ): ReturnType<typeof confirm> {
   const type = props.identifierType;
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
   const deletePhrase = `Delete${type ? ' ' : ''}${type}`;
 
   function getTitle() {

@@ -2,11 +2,12 @@ from django.urls import reverse
 from rest_framework import serializers
 
 from mathesar.api.display_options import DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER
-from mathesar.api.filters import FILTER_OPTIONS_BY_TYPE_IDENTIFIER
+from mathesar.api.dj_filters import FILTER_OPTIONS_BY_TYPE_IDENTIFIER
+from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models import Database
 
 
-class DatabaseSerializer(serializers.ModelSerializer):
+class DatabaseSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     supported_types_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -23,7 +24,7 @@ class DatabaseSerializer(serializers.ModelSerializer):
             return None
 
 
-class TypeSerializer(serializers.Serializer):
+class TypeSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     identifier = serializers.CharField()
     name = serializers.CharField()
     db_types = serializers.ListField(child=serializers.CharField())

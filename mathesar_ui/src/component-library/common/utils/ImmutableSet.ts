@@ -1,4 +1,4 @@
-export class ImmutableSet<T extends string | number | boolean | null> {
+export default class ImmutableSet<T extends string | number | boolean | null> {
   private set: Set<T>;
 
   constructor(i?: Iterable<T>) {
@@ -8,6 +8,14 @@ export class ImmutableSet<T extends string | number | boolean | null> {
   with(item: T): ImmutableSet<T> {
     const set = new Set(this.set);
     set.add(item);
+    return new ImmutableSet(set);
+  }
+
+  union(other: ImmutableSet<T>): ImmutableSet<T> {
+    const set = new Set(this.set);
+    [...other.values()].forEach((value) => {
+      set.add(value);
+    });
     return new ImmutableSet(set);
   }
 

@@ -1,12 +1,12 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  // import type { Readable } from 'svelte/store';
   import {
     faSortAmountDown,
     faSortAmountDownAlt,
     faThList,
     faTrashAlt,
     faSpinner,
+    faICursor,
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button, Checkbox } from '@mathesar-component-library';
   import type {
@@ -35,11 +35,8 @@
   $: hasGrouping = ($group as GroupOption)?.has(column.name);
 
   $: allowsNull = column.nullable;
-  $: uniqueColumns = constraintsDataStore.uniqueColumns;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  $: allowsDuplicates = !(
-    column.primary_key || $uniqueColumns.has(column.name)
-  );
+  $: ({ uniqueColumns } = constraintsDataStore);
+  $: allowsDuplicates = !(column.primary_key || $uniqueColumns.has(column.id));
 
   function handleSort(order: 'asc' | 'desc') {
     if (sortDirection === order) {
@@ -73,6 +70,7 @@
     } catch (error) {
       toast.error(
         `Unable to update "Allow NULL" of column "${column.name}". ${
+          // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
           error.message as string
         }.`,
       );
@@ -87,12 +85,17 @@
       identifierType: 'column',
       identifierName: column.name,
       body: [
-        'All objects related to this column will be afected.',
+        'All objects related to this column will be affected.',
         'This could break existing tables and views.',
         'Are you sure you want to proceed?',
       ],
       onProceed: () => columnsDataStore.deleteColumn(column.id),
     });
+  }
+
+  function handleRename() {
+    dispatch('close');
+    dispatch('rename');
   }
 
   async function toggleAllowDuplicates() {
@@ -111,6 +114,7 @@
     } catch (error) {
       const message = `Unable to update "Allow Duplicates" of column "${
         column.name
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       }". ${error.message as string}.`;
       toast.error({ message });
     } finally {
@@ -119,6 +123,7 @@
   }
 </script>
 
+<h6 class="category">Display</h6>
 <ul>
   <li>
     <Button appearance="plain" on:click={() => handleSort('asc')}>
@@ -154,6 +159,16 @@
           Group by column
         {/if}
       </span>
+    </Button>
+  </li>
+</ul>
+<div class="divider" />
+<h6 class="category">Operations</h6>
+<ul>
+  <li>
+    <Button appearance="plain" on:click={handleRename}>
+      <Icon class="opt" data={faICursor} />
+      <span> Rename </span>
     </Button>
   </li>
   <li>

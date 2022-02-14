@@ -194,7 +194,9 @@ export class Display {
 
   selectCell(row: TableRecord, column: Column): void {
     this.activeCell.set({
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       rowIndex: row.__rowIndex,
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       columnIndex: column.__columnIndex,
       type: 'select',
     });
@@ -203,7 +205,9 @@ export class Display {
   editCell(row: TableRecord, column: Column): void {
     if (!column.primary_key) {
       this.activeCell.set({
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         rowIndex: row.__rowIndex,
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         columnIndex: column.__columnIndex,
         type: 'edit',
       });
@@ -221,6 +225,7 @@ export class Display {
     const pageSize = get(this.meta.pageSize);
     const minRowIndex = 0;
     const maxRowIndex =
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       Math.min(pageSize, totalCount - offset, savedRecords.length) +
       newRecords.length;
     const activeCell = get(this.activeCell);

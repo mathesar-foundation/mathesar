@@ -37,11 +37,10 @@ export function filterTree(
   return recursiveFilter(
     tree,
     childKey,
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     (entry: Record<string, unknown>) =>
       (entry[searchKey] as string)
         ?.toLowerCase()
         .indexOf(searchTerm.toLowerCase()) > -1,
   );
 }
-
-export default {};

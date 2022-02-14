@@ -3,10 +3,10 @@ from time import time
 from io import TextIOWrapper
 
 import requests
-from rest_framework.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
 
+from mathesar.errors import URLDownloadError
 from mathesar.imports.csv import get_sv_dialect, get_file_encoding
 from mathesar.models import DataFile
 
@@ -21,7 +21,7 @@ def _download_datafile(url):
             name, r.headers.get('content-type'), r.headers.get('content-length'), None,
         )
         if not r.ok:
-            raise ValidationError({'url': ['URL cannot be downloaded.']})
+            raise URLDownloadError
         for chunk in r.iter_content(chunk_size=8192):
             temp_file.write(chunk)
     temp_file.seek(0)

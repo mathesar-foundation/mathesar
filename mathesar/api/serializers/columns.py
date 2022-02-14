@@ -3,8 +3,11 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.fields import empty
 from rest_framework.settings import api_settings
 
-from mathesar.api.serializers.shared_serializers import DisplayOptionsMappingSerializer, \
-    DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY
+from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
+from mathesar.api.serializers.shared_serializers import (
+    DisplayOptionsMappingSerializer,
+    DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY,
+)
 from mathesar.models import Column
 
 
@@ -14,6 +17,7 @@ class InputValueField(serializers.CharField):
     which takes in arbitrary values (un-validated and un-processed request.data).
     This field replicates that behavior in a serializer.
     """
+
     def to_internal_value(self, data):
         return data
 
@@ -21,7 +25,7 @@ class InputValueField(serializers.CharField):
         return value
 
 
-class TypeOptionSerializer(serializers.Serializer):
+class TypeOptionSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     length = serializers.IntegerField(required=False)
     precision = serializers.IntegerField(required=False)
     scale = serializers.IntegerField(required=False)
@@ -40,7 +44,7 @@ class TypeOptionSerializer(serializers.Serializer):
         return super(TypeOptionSerializer, self).run_validation(data)
 
 
-class SimpleColumnSerializer(serializers.ModelSerializer):
+class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     class Meta:
         model = Column
         fields = ('id',
@@ -72,7 +76,7 @@ class SimpleColumnSerializer(serializers.ModelSerializer):
         return super().to_internal_value(data)
 
 
-class ColumnDefaultSerializer(serializers.Serializer):
+class ColumnDefaultSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     value = InputValueField()
     is_dynamic = serializers.BooleanField(read_only=True)
 
@@ -89,7 +93,7 @@ class ColumnSerializer(SimpleColumnSerializer):
             'valid_target_types',
             'default'
         )
-        model_fields = ('display_options', )
+        model_fields = ('display_options',)
 
     name = serializers.CharField(required=False)
 
