@@ -127,7 +127,9 @@ def test_create_unique_constraint_with_name_specified(create_table, client):
     table_name = 'NASA Constraint List 6'
     table = create_table(table_name)
     columns = table.columns.all()
+    print(columns)
     constraint_column_2 = columns[3]
+    print(constraint_column_2.id, constraint_column_2.name)
     constraint_column_id_list = [constraint_column_2.id]
     data = {
         'name': 'awesome_constraint',
