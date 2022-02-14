@@ -139,6 +139,7 @@ def test_create_unique_constraint_with_name_specified(create_table, client):
         data=json.dumps(data),
         content_type='application/json'
     )
+    print(response.json())
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), constraint_column_id_list, 'awesome_constraint')
 
