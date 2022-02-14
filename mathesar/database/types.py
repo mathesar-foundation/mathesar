@@ -70,7 +70,7 @@ def _get_type_map():
         'name': 'Money',
         'sa_type_names': [
             PostgresType.MONEY.value,
-            get_qualified_name(MathesarCustomType.MONEY.value)
+            get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value)
         ]
     }, {
         'identifier': MathesarTypeIdentifier.NUMBER.value,
