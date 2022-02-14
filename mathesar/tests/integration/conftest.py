@@ -6,6 +6,7 @@ from django.core.cache import cache
 from db.schemas.operations.create import create_schema as create_sa_schema
 from db.schemas.utils import get_schema_name_from_oid, get_schema_oid_from_name
 from mathesar.models import Database, Schema
+from mathesar.tests.integration.utils.locators import get_table_entry
 
 TEST_SCHEMA = 'import_csv_schema'
 PATENT_SCHEMA = 'Patents'
@@ -72,3 +73,18 @@ def base_schema_url(schema, live_server):
 @pytest.fixture
 def schemas_page_url(schema, live_server):
     return f"{live_server}/{schema.database.name}/schemas/"
+
+
+@pytest.fixture
+def go_to_patents_data_table(page, create_table, schema_name, base_schema_url):
+    """
+    Imports the `patents.csv` data into a table named "patents" and navigates to
+    the view of that table before starting the test.
+    """
+    table_name = "patents"
+    table = create_table(table_name, schema_name)
+    table.import_verified = True
+    table.save()
+    page.goto(base_schema_url)
+    get_table_entry(page, table_name).click()
+    yield table_name
