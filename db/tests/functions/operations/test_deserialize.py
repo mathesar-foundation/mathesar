@@ -5,16 +5,16 @@ from db.functions.operations.deserialize import get_db_function_from_ma_function
 
 exceptions_test_list = [
     (
-        {"non_existent_fn": [
-            {"column_reference": ["varchar"]},
-            {"literal": ["test"]},
-        ]},
+        {
+            "non_existent_fn": [
+                {"column_reference": ["varchar"]},
+                {"literal": ["test"]},
+            ]
+        },
         UnknownDBFunctionId
     ),
     (
-        {"empty":
-            {"column_reference": ["varchar"]},
-        },
+        {"empty": {"column_reference": ["varchar"]}, },
         BadDBFunctionFormat
     ),
 ]
