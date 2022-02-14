@@ -50,7 +50,6 @@ def test_interval_type_column_reflection(engine_email_type):
 
 def test_interval_type_column_args(engine_email_type):
     engine, app_schema = engine_email_type
-    engine.echo = True
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         test_table = Table(
