@@ -12,7 +12,6 @@
   import type { DbType } from '@mathesar/App.d';
   import type {
     Column,
-    TabularData,
     TabularDataStore,
   } from '@mathesar/stores/table-data/types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
@@ -22,7 +21,7 @@
   const dispatch = createEventDispatcher();
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  $: ({ columnsDataStore } = $tabularData as TabularData);
+  $: ({ columnsDataStore } = $tabularData);
 
   export let column: Column;
   export let abstractTypeOfColumn: AbstractType | undefined;
@@ -77,9 +76,11 @@
     if (selectedDbType !== column.type) {
       typeChangeState = States.Loading;
       try {
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         await columnsDataStore.patchType(column.id, selectedDbType);
       } catch (err) {
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         toast.error(`Unable to change column type. ${err.message as string}`);
       }
     }

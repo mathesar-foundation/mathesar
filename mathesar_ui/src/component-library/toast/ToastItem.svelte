@@ -18,6 +18,7 @@
     props.contentComponentProps,
   );
   $: readableIcon = ensureReadable(props.icon);
+  $: icon = $readableIcon;
   $: readableBackgroundColor = ensureReadable(props.backgroundColor);
   $: readableTextColor = ensureReadable(props.textColor);
   $: readableProgressColor = ensureReadable(props.progressColor);
@@ -29,8 +30,8 @@
 </script>
 
 <div class="toast-item" on:mouseenter={pause} on:mouseleave={resume} {style}>
-  {#if props.icon}
-    <div class="icon"><Icon {...$readableIcon} /></div>
+  {#if icon}
+    <div class="icon"><Icon {...icon} /></div>
   {/if}
   <div class="content">
     {#if props.contentComponent}

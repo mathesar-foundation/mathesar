@@ -12,5 +12,5 @@ test('renders text-input with value', () => {
   const inputElement = container.querySelector('input');
   expect(inputElement).not.toBeNull();
   expect(inputElement).toHaveClass('some-class');
-  expect(inputElement.value).toEqual('somevalue');
+  expect(inputElement?.value).toEqual('somevalue');
 });

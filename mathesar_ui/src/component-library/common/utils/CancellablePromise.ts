@@ -10,7 +10,9 @@ export default class CancellablePromise<T> extends Promise<T> {
     ) => void,
     onCancel?: () => void,
   ) {
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     super(executor);
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     this.onCancel = onCancel;
   }
 
@@ -31,6 +33,7 @@ export default class CancellablePromise<T> extends Promise<T> {
   ): Promise<TResult1 | TResult2> {
     const resolve = (value: T): TResult1 | Promise<TResult1> => {
       if (this.isCancelled) {
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         return null;
       }
       return onFulfilled?.(value) || (value as unknown as TResult1);
@@ -38,6 +41,7 @@ export default class CancellablePromise<T> extends Promise<T> {
 
     const reject = (reason: unknown): TResult2 | Promise<TResult2> => {
       if (this.isCancelled) {
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         return null;
       }
       if (!onRejected) {
@@ -47,6 +51,7 @@ export default class CancellablePromise<T> extends Promise<T> {
     };
 
     if (this.isCancelled) {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       return null;
     }
     return super.then(resolve, reject);

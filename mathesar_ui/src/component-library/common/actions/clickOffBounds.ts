@@ -15,9 +15,11 @@ export default function clickOffBounds(
   let { callback, references } = options;
 
   function outOfBoundsListener(event: Event) {
-    const isWithinReferenceElement = get(references)?.some((reference) =>
-      reference.contains(event.target as Node),
-    );
+    const isWithinReferenceElement =
+      references &&
+      get(references)?.some((reference) =>
+        reference.contains(event.target as Node),
+      );
     if (!isWithinReferenceElement && !node.contains(event.target as Node)) {
       callback(event);
     }
@@ -35,6 +37,7 @@ export default function clickOffBounds(
   }
 
   return {
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     update,
     destroy,
   };

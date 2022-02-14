@@ -88,12 +88,12 @@ def check_database(database, response_database):
     assert database.name == response_database['name']
     assert database.deleted == response_database['deleted']
     assert 'supported_types_url' in response_database
-    assert '/api/v0/databases/' in response_database['supported_types_url']
+    assert '/api/ui/v0/databases/' in response_database['supported_types_url']
     assert response_database['supported_types_url'].endswith('/types/')
 
 
 def test_database_list(client, test_db_name, database_api_db):
-    response = client.get('/api/v0/databases/')
+    response = client.get('/api/db/v0/databases/')
     response_data = response.json()
 
     expected_databases = {
@@ -114,7 +114,7 @@ def test_database_list_deleted(client, test_db_name, database_api_db):
     del settings.DATABASES[database_api_db]
 
     cache.clear()
-    response = client.get('/api/v0/databases/')
+    response = client.get('/api/db/v0/databases/')
     response_data = response.json()
 
     expected_databases = {
@@ -136,7 +136,7 @@ def test_database_list_filter_deleted(client, deleted, test_db_name, database_ap
     del settings.DATABASES[database_api_db]
 
     cache.clear()
-    response = client.get(f'/api/v0/databases/?deleted={deleted}')
+    response = client.get(f'/api/db/v0/databases/?deleted={deleted}')
     response_data = response.json()
 
     expected_databases = {
@@ -164,7 +164,7 @@ def test_database_list_ordered_by_id(client, test_db_name, database_api_db, crea
         Database.objects.get(name=test_db_name_1),
     ]
     sort_field = "id"
-    response = client.get(f'/api/v0/databases/?sort_by={sort_field}')
+    response = client.get(f'/api/db/v0/databases/?sort_by={sort_field}')
     response_data = response.json()
     response_databases = response_data['results']
     comparison_tuples = zip(expected_databases, response_databases)
@@ -187,7 +187,7 @@ def test_database_list_ordered_by_name(client, test_db_name, database_api_db, cr
         Database.objects.get(name=database_api_db),
     ]
     sort_field = "name"
-    response = client.get(f'/api/v0/databases/?sort_by={sort_field}')
+    response = client.get(f'/api/db/v0/databases/?sort_by={sort_field}')
     response_data = response.json()
     response_databases = response_data['results']
     comparison_tuples = zip(expected_databases, response_databases)
@@ -198,7 +198,7 @@ def test_database_list_ordered_by_name(client, test_db_name, database_api_db, cr
 def test_database_detail(client):
     expected_database = Database.objects.get()
 
-    response = client.get(f'/api/v0/databases/{expected_database.id}/')
+    response = client.get(f'/api/db/v0/databases/{expected_database.id}/')
     response_database = response.json()
 
     assert response.status_code == 200
@@ -208,7 +208,7 @@ def test_database_detail(client):
 def test_type_list(client, test_db_name):
     database = Database.objects.get(name=test_db_name)
 
-    response = client.get(f'/api/v0/databases/{database.id}/types/')
+    response = client.get(f'/api/db/v0/databases/{database.id}/types/')
     response_data = response.json()
     assert response.status_code == 200
     assert len(response_data) == len(database.supported_types)
@@ -256,5 +256,5 @@ def test_database_types_installed(client, test_db_name, engine_email_type):
     reflect_db_objects()
     default_database = Database.objects.get(name=test_db_name)
 
-    response = client.get(f'/api/v0/databases/{default_database.id}/types/').json()
+    response = client.get(f'/api/db/v0/databases/{default_database.id}/types/').json()
     assert all([type_data in response for type_data in expected_custom_types])

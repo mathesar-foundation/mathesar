@@ -19,10 +19,10 @@
   export let expandedItems = new Set();
   export let selectedItems = new Set();
 
-  let link: string;
+  let link: string | undefined;
   $: link = getLink
     ? getLink(entry, level)
-    : (entry[linkKey] as string) || null;
+    : (entry[linkKey] as string) ?? undefined;
 
   $: id = entry[idKey] as string;
   $: children = entry[childKey] as TreeItem[];

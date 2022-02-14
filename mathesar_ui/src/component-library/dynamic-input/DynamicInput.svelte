@@ -1,6 +1,6 @@
 <script lang="ts">
   import EnumInput from './EnumInput.svelte';
-  import StringInput from './StringInput..svelte';
+  import StringInput from './StringInput.svelte';
   import BooleanInput from './BooleanInput.svelte';
   import NumberInput from '../number-input/NumberInput.svelte';
   import type {
@@ -17,15 +17,18 @@
   /**
    * Value of input. Depends on type.
    */
-  export let value = undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  export let value: any = undefined;
 
   /**
    * DOM input type for input.<br/>
    * boolean -> checkbox, toggle, select. Default: checkbox.<br/>
    * string -> text, textarea, select. Default: text.
    */
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   export let interfaceType: DynamicInputInterfaceType = undefined;
 
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   let enumValues: unknown[] = undefined;
 
   /**

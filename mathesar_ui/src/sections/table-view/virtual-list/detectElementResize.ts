@@ -39,26 +39,32 @@ interface Window extends globalThis.Window {
 }
 
 function getRequestFrame(): (arg: unknown) => unknown {
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   const raf: (arg: unknown) => unknown =
     window.requestAnimationFrame ||
     (window as Window).mozRequestAnimationFrame ||
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     window.webkitRequestAnimationFrame ||
     function fallback(fn: (arg: unknown) => unknown) {
       return window.setTimeout(fn, 20);
     };
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   return (fn: (arg: unknown) => unknown) => raf(fn);
 }
 
 function getCancelFrame(): (arg: unknown) => unknown {
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   const cancel: (arg: unknown) => void =
     window.cancelAnimationFrame ||
     (window as Window).mozCancelAnimationFrame ||
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     window.webkitCancelAnimationFrame ||
     window.clearTimeout;
 
   return (id: unknown): unknown => cancel(id);
 }
 
+// @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
 function resetTriggers(element) {
   const triggers = element.__resizeTriggers__;
   const expand = triggers.firstElementChild;
@@ -73,6 +79,7 @@ function resetTriggers(element) {
   expand.scrollTop = expand.scrollHeight;
 }
 
+// @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
 function checkTriggers(element) {
   return (
     element.offsetWidth !== element.__resizeLast__.width ||
@@ -94,15 +101,21 @@ export function createDetectElementResize(): ElementResizeDetector {
       return;
     }
 
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     const element = this;
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     resetTriggers(this);
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     if (this.__resizeRAF__) {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       cancelFrame(this.__resizeRAF__);
     }
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     this.__resizeRAF__ = requestFrame(() => {
       if (checkTriggers(element)) {
         element.__resizeLast__.width = element.offsetWidth;
         element.__resizeLast__.height = element.offsetHeight;
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         element.__resizeListeners__.forEach((fn) => {
           fn.call(element, e);
         });
@@ -129,6 +142,7 @@ export function createDetectElementResize(): ElementResizeDetector {
 
   if (animation === false) {
     for (let i = 0; i < domPrefixes.length; i += 1) {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       if (elm.style[domPrefixes[i] + 'AnimationName'] !== undefined) {
         pfx = domPrefixes[i];
         keyframeprefix = '-' + pfx.toLowerCase() + '-';
@@ -149,6 +163,7 @@ export function createDetectElementResize(): ElementResizeDetector {
   const animationStyle =
     keyframeprefix + 'animation: 1ms ' + animationName + '; ';
 
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   function createStyles(doc) {
     if (!doc.getElementById('detectElementResize')) {
       // opacity:0 works around a chrome bug https://code.google.com/p/chromium/issues/detail?id=286360
@@ -176,6 +191,7 @@ export function createDetectElementResize(): ElementResizeDetector {
     }
   }
 
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   function addResizeListener(element, fn) {
     if (!element.__resizeTriggers__) {
       const doc = element.ownerDocument;
@@ -202,6 +218,7 @@ export function createDetectElementResize(): ElementResizeDetector {
       /* Listen for a css animation to detect element display/re-attach */
       if (animationstartevent) {
         element.__resizeTriggers__.__animationListener__ =
+          // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
           function animationListener(e) {
             if (e.animationName === animationName) {
               resetTriggers(element);
@@ -216,6 +233,7 @@ export function createDetectElementResize(): ElementResizeDetector {
     element.__resizeListeners__.push(fn);
   }
 
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   function removeResizeListener(element, fn) {
     element.__resizeListeners__.splice(
       element.__resizeListeners__.indexOf(fn),

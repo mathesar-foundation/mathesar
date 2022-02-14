@@ -2,22 +2,27 @@ from django.urls import include, path
 from rest_framework_nested import routers
 
 from mathesar import views
-from mathesar.api import viewsets
+from mathesar.api.db import viewsets as db_viewsets
+from mathesar.api.ui import viewsets as ui_viewsets
 
-router = routers.DefaultRouter()
-router.register(r'tables', viewsets.TableViewSet, basename='table')
-router.register(r'schemas', viewsets.SchemaViewSet, basename='schema')
-router.register(r'databases', viewsets.DatabaseViewSet, basename='database')
-router.register(r'data_files', viewsets.DataFileViewSet, basename='data-file')
+db_router = routers.DefaultRouter()
+db_router.register(r'tables', db_viewsets.TableViewSet, basename='table')
+db_router.register(r'schemas', db_viewsets.SchemaViewSet, basename='schema')
+db_router.register(r'databases', db_viewsets.DatabaseViewSet, basename='database')
+db_router.register(r'data_files', db_viewsets.DataFileViewSet, basename='data-file')
 
-table_router = routers.NestedSimpleRouter(router, r'tables', lookup='table')
-table_router.register(r'records', viewsets.RecordViewSet, basename='table-record')
-table_router.register(r'columns', viewsets.ColumnViewSet, basename='table-column')
-table_router.register(r'constraints', viewsets.ConstraintViewSet, basename='table-constraint')
+db_table_router = routers.NestedSimpleRouter(db_router, r'tables', lookup='table')
+db_table_router.register(r'records', db_viewsets.RecordViewSet, basename='table-record')
+db_table_router.register(r'columns', db_viewsets.ColumnViewSet, basename='table-column')
+db_table_router.register(r'constraints', db_viewsets.ConstraintViewSet, basename='table-constraint')
+
+ui_router = routers.DefaultRouter()
+ui_router.register(r'databases', ui_viewsets.DatabaseViewSet, basename='database')
 
 urlpatterns = [
-    path('api/v0/', include(router.urls)),
-    path('api/v0/', include(table_router.urls)),
+    path('api/db/v0/', include(db_router.urls)),
+    path('api/db/v0/', include(db_table_router.urls)),
+    path('api/ui/v0/', include(ui_router.urls)),
 
     # Specifying each route individually to facilitate redirection and data pre-rendering based on route
     path('', views.home, name="home"),
