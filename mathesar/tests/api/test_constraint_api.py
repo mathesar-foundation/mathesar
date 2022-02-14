@@ -1,3 +1,4 @@
+import json
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
@@ -96,7 +97,11 @@ def test_create_multiple_column_unique_constraint(create_table, client):
         'type': 'unique',
         'columns': constraint_column_id_list
     }
-    response = client.post(f'/api/db/v0/tables/{table.id}/constraints/', data=data)
+    response = client.post(
+        f'/api/db/v0/tables/{table.id}/constraints/',
+        data=json.dumps(data),
+        content_type='application/json'
+    )
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), constraint_column_id_list, 'NASA Constraint List 4_Center_key')
 
@@ -109,7 +114,11 @@ def test_create_single_column_unique_constraint(create_table, client):
         'type': 'unique',
         'columns': [constraint_column_id]
     }
-    response = client.post(f'/api/db/v0/tables/{table.id}/constraints/', data=data)
+    response = client.post(
+        f'/api/db/v0/tables/{table.id}/constraints/',
+        data=json.dumps(data),
+        content_type='application/json'
+    )
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), [constraint_column_id], 'NASA Constraint List 5_Case Number_key')
 
@@ -125,7 +134,11 @@ def test_create_unique_constraint_with_name_specified(create_table, client):
         'type': 'unique',
         'columns': constraint_column_id_list
     }
-    response = client.post(f'/api/db/v0/tables/{table.id}/constraints/', data=data)
+    response = client.post(
+        f'/api/db/v0/tables/{table.id}/constraints/',
+        data=json.dumps(data),
+        content_type='application/json'
+    )
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), constraint_column_id_list, 'awesome_constraint')
 
@@ -162,7 +175,11 @@ def test_create_unique_constraint_with_duplicate_name(create_table, client):
         'type': 'unique',
         'columns': constraint_column_id_list
     }
-    response = client.post(f'/api/db/v0/tables/{table.id}/constraints/', data=data)
+    response = client.post(
+        f'/api/db/v0/tables/{table.id}/constraints/',
+        data=json.dumps(data),
+        content_type='application/json'
+    )
     assert response.status_code == 400
     response_body = response.json()[0]
     assert response_body['message'] == 'Relation with the same name already exists'
@@ -177,7 +194,11 @@ def test_create_unique_constraint_for_non_unique_column(create_table, client):
         'type': 'unique',
         'columns': [constraint_column.id]
     }
-    response = client.post(f'/api/db/v0/tables/{table.id}/constraints/', data=data)
+    response = client.post(
+        f'/api/db/v0/tables/{table.id}/constraints/',
+        data=json.dumps(data),
+        content_type='application/json'
+    )
     assert response.status_code == 400
     response_body = response.json()[0]
     assert response_body['message'] == 'This column has non-unique values so a unique constraint cannot be set'
