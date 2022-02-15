@@ -70,10 +70,10 @@ def _process_parameter(parameter, parent_db_function_subclass, column_ids_to_nam
 
 
 def _convert_column_reference_if_necessary(db_function_instance, column_ids_to_names):
-        if column_ids_to_names and isinstance(db_function_instance, ColumnID):
-            return db_function_instance.to_column_name(column_ids_to_names)
-        else:
-            return db_function_instance
+    if column_ids_to_names and isinstance(db_function_instance, ColumnID):
+        return db_function_instance.to_column_name(column_ids_to_names)
+    else:
+        return db_function_instance
 
 
 def _get_db_function_subclass_by_id(subclass_id):
@@ -82,7 +82,7 @@ def _get_db_function_subclass_by_id(subclass_id):
             return db_function_subclass
     raise UnknownDBFunctionId(
         f"DBFunction subclass with id {subclass_id} not found (or not"
-            +"available on this DB)."
+        + "available on this DB)."
     )
 
 
