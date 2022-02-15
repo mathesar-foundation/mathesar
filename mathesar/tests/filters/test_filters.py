@@ -15,7 +15,7 @@ def test_available_filters_structure(test_db_model):
     )
     assert expected_filters_are_available
     all_filter_parameters_have_at_least_one_mathesar_type_defined = all(
-        len(parameter['mathesar_types']) > 0
+        len(parameter['ui_types']) > 0
         for filter in available_filters
         for parameter in filter['parameters']
     )
