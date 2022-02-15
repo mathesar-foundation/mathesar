@@ -9,6 +9,7 @@ from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
 from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
+from mathesar.api.utils import get_column_id_name_bidirectional_map
 
 
 def test_record_list(create_table, client):
@@ -495,7 +496,7 @@ def test_record_create(create_table, client):
     table = create_table(table_name)
     records = table.get_records()
     original_num_records = len(records)
-    columns_name_id_map = {column.name: str(column.id) for column in table.columns.all().order_by('id')}
+    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
     data = {
         columns_name_id_map['Center']: 'NASA Example Space Center',
         columns_name_id_map['Status']: 'Application',
@@ -525,7 +526,7 @@ def test_record_partial_update(create_table, client):
 
     original_response = client.get(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
     original_data = original_response.json()
-    columns_name_id_map = {column.name: str(column.id) for column in table.columns.all().order_by('id')}
+    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
     data = {
         columns_name_id_map['Center']: 'NASA Example Space Center',
         columns_name_id_map['Status']: 'Example',
@@ -533,18 +534,17 @@ def test_record_partial_update(create_table, client):
     response = client.patch(f'/api/db/v0/tables/{table.id}/records/{record_id}/', data=data)
     record_data = response.json()
     assert response.status_code == 200
-    columns_name_id_map = {column.name: column.id for column in table.columns.all().order_by('id')}
     for column_name in table.sa_column_names:
         column_id_str = str(columns_name_id_map[column_name])
         assert column_id_str in record_data
-        if column_name in data and column_name not in ['Center', 'Status']:
-            assert original_data[column_name] == record_data[column_id_str]
+        if column_id_str in data and column_name not in ['Center', 'Status']:
+            assert original_data[column_id_str] == record_data[column_id_str]
         elif column_name == 'Center':
-            assert original_data[column_name] != record_data[column_id_str]
+            assert original_data[column_id_str] != record_data[column_id_str]
             assert record_data[column_id_str] == 'NASA Example Space Center'
         elif column_name == 'Status':
-            assert original_data[column_name] != record_data[column_id_str]
-            assert record_data[column_name] == 'Example'
+            assert original_data[column_id_str] != record_data[column_id_str]
+            assert record_data[column_id_str] == 'Example'
 
 
 def test_record_delete(create_table, client):
