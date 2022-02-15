@@ -70,7 +70,7 @@ def _make_filter_param(mathesar_types):
         for mathesar_type in mathesar_types
     )
     return dict(
-        mathesar_types=mathesar_type_strings
+        ui_types=mathesar_type_strings
     )
 
 
