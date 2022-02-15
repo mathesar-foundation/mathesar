@@ -1,7 +1,7 @@
 from sqlalchemy import select, func
 from sqlalchemy_filters import apply_sort
 
-from db.functions.operations.apply import apply_ma_function_spec_as_filter
+from db.functions.operations.apply import apply_db_function_as_filter
 from db.columns.base import MathesarColumn
 from db.records.operations import group
 from db.tables.utils import get_primary_key_column
@@ -24,7 +24,7 @@ def _sort_and_filter(query, order_by, filter):
     if order_by is not None:
         query = apply_sort(query, order_by)
     if filter is not None:
-        query = apply_ma_function_spec_as_filter(query, filter)
+        query = apply_db_function_as_filter(query, filter)
     return query
 
 

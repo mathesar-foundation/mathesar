@@ -7,14 +7,14 @@ exceptions_test_list = [
     (
         {
             "non_existent_fn": [
-                {"column_reference": ["varchar"]},
+                {"column_name": ["varchar"]},
                 {"literal": ["test"]},
             ]
         },
         UnknownDBFunctionId
     ),
     (
-        {"empty": {"column_reference": ["varchar"]}, },
+        {"empty": {"column_name": ["varchar"]}, },
         BadDBFunctionFormat
     ),
 ]

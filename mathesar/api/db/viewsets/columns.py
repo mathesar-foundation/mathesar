@@ -26,7 +26,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         table = get_table_or_404(pk=self.kwargs['table_pk'])
-        return table.get_dj_columns()
+        return table.get_dj_columns_queryset()
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)

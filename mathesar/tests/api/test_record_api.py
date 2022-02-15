@@ -5,6 +5,7 @@ import pytest
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.functions.exceptions import UnknownDBFunctionId
+from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
 from mathesar import models
@@ -82,21 +83,21 @@ def test_record_list_filter(create_table, client):
     filter = {"or": [
         {"and": [
             {"equal": [
-                {"column_reference": ["Center"]},
+                {"column_name": ["Center"]},
                 {"literal": ["NASA Ames Research Center"]}
             ]},
             {"equal": [
-                {"column_reference": ["Case Number"]},
+                {"column_name": ["Case Number"]},
                 {"literal": ["ARC-14048-1"]}
             ]},
         ]},
         {"and": [
             {"equal": [
-                {"column_reference": ["Center"]},
+                {"column_name": ["Center"]},
                 {"literal": ["NASA Kennedy Space Center"]}
             ]},
             {"equal": [
-                {"column_reference": ["Case Number"]},
+                {"column_name": ["Case Number"]},
                 {"literal": ["KSC-12871"]}
             ]},
         ]},
@@ -115,7 +116,7 @@ def test_record_list_filter(create_table, client):
     assert response_data['count'] == 2
     assert len(response_data['results']) == 2
     assert mock_get.call_args is not None
-    assert mock_get.call_args[1]['filter'] == filter
+    assert mock_get.call_args[1]['filter'] == get_db_function_from_ma_function_spec(filter)
 
 
 def test_record_list_filter_duplicates(create_table, client):
@@ -167,7 +168,7 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
             assert response_data['count'] == expected
             assert len(response_data['results']) == num_results
             assert mock_get.call_args is not None
-            assert mock_get.call_args[1]['filter'] == filter
+            assert mock_get.call_args[1]['filter'] == get_db_function_from_ma_function_spec(filter)
 
 
 def test_record_list_filter_for_boolean_type(create_table, client):
@@ -185,16 +186,16 @@ def test_record_list_filter_for_boolean_type(create_table, client):
 
     op_value_and_expected = [
         (
-            lambda new_column_name, value: {"not": [{"equal": [{"column_reference": [new_column_name]}, {"literal": [value]}]}]},
+            lambda new_column_name, value: {"not": [{"equal": [{"column_name": [new_column_name]}, {"literal": [value]}]}]},
             True, 2),
         (
-            lambda new_column_name, value: {"equal": [{"column_reference": [new_column_name]}, {"literal": [value]}]},
+            lambda new_column_name, value: {"equal": [{"column_name": [new_column_name]}, {"literal": [value]}]},
             False, 2),
         (
-            lambda new_column_name, _: {"empty": [{"column_reference": [new_column_name]}]},
+            lambda new_column_name, _: {"empty": [{"column_name": [new_column_name]}]},
             None, 1394),
         (
-            lambda new_column_name, _: {"not": [{"empty": [{"column_reference": [new_column_name]}]}]},
+            lambda new_column_name, _: {"not": [{"empty": [{"column_name": [new_column_name]}]}]},
             None, 49),
     ]
 
@@ -580,7 +581,7 @@ def test_record_list_filter_exceptions(create_table, client):
     exception = UnknownDBFunctionId
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    filter = json.dumps({"empty": [{"column_reference": ["Center"]}]})
+    filter = json.dumps({"empty": [{"column_name": ["Center"]}]})
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?filter={filter}'

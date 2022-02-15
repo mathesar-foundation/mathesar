@@ -1,4 +1,8 @@
-class BadDBFunctionFormat(Exception):
+class DBFunctionException(Exception):
+    pass
+
+
+class BadDBFunctionFormat(DBFunctionException):
     pass
 
 
@@ -7,4 +11,8 @@ class UnknownDBFunctionId(BadDBFunctionFormat):
 
 
 class ReferencedColumnsDontExist(BadDBFunctionFormat):
+    pass
+
+
+class UseOfColumnIDInSAExpression(DBFunctionException):
     pass

@@ -76,6 +76,7 @@ def column_test_table_with_service_layer_options(patent_schema):
 def test_column_list(column_test_table, client):
     cache.clear()
     response = client.get(f"/api/db/v0/tables/{column_test_table.id}/columns/")
+    assert response.status_code == 200
     response_data = response.json()
     assert response_data['count'] == len(column_test_table.sa_columns)
     expect_results = [
@@ -378,16 +379,19 @@ def test_column_update_name(column_test_table, client):
     response = client.get(
         f"/api/db/v0/tables/{column_test_table.id}/columns/"
     )
+    assert response.status_code == 200
     columns = response.json()['results']
     column_index = 1
     column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/db/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
+    assert response.status_code == 200
     assert response.json()["name"] == name
     response = client.get(
         f"/api/db/v0/tables/{column_test_table.id}/columns/{column_id}/"
     )
+    assert response.status_code == 200
     assert response.json()["name"] == name
 
 

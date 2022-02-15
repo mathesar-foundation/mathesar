@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.functions.exceptions import BadDBFunctionFormat, UnknownDBFunctionId, ReferencedColumnsDontExist
+from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
@@ -37,10 +38,20 @@ class RecordViewSet(viewsets.ViewSet):
         serializer = RecordListParameterSerializer(data=request.GET)
         serializer.is_valid(raise_exception=True)
 
+        filter_unprocessed = serializer.validated_data['filter']
+        filter_processed = None
+
         try:
+            if filter_unprocessed:
+                table = get_table_or_404(table_pk)
+                column_ids_to_names = table.get_dj_column_id_to_name_mapping()
+                filter_processed = get_db_function_from_ma_function_spec(
+                    spec=filter_unprocessed,
+                    column_ids_to_names=column_ids_to_names
+                )
             records = paginator.paginate_queryset(
                 self.get_queryset(), request, table_pk,
-                filter=serializer.validated_data['filter'],
+                filter=filter_processed,
                 order_by=serializer.validated_data['order_by'],
                 grouping=serializer.validated_data['grouping'],
                 duplicate_only=serializer.validated_data['duplicate_only'],
