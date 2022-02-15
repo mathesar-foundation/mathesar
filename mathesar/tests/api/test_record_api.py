@@ -77,28 +77,28 @@ def test_record_serialization(empty_nasa_table, create_column, client, type_, va
 def test_record_list_filter(create_table, client):
     table_name = 'NASA Record List Filter'
     table = create_table(table_name)
-    columns = table.columns.all().order_by('id')
+    columns_id_name_map = get_column_id_name_bidirectional_map(table.id)
     filter_list = [
         {'or': [
             {'and': [
-                {'field': columns[1].id, 'op': '==', 'value': 'NASA Ames Research Center'},
-                {'field': columns[3].id, 'op': '==', 'value': 'ARC-14048-1'}
+                {'field': columns_id_name_map.inverse['Center'], 'op': '==', 'value': 'NASA Ames Research Center'},
+                {'field': columns_id_name_map.inverse['Case Number'], 'op': '==', 'value': 'ARC-14048-1'}
             ]},
             {'and': [
-                {'field': columns[1].id, 'op': '==', 'value': 'NASA Kennedy Space Center'},
-                {'field': columns[3].id, 'op': '==', 'value': 'KSC-12871'}
+                {'field': columns_id_name_map.inverse['Center'], 'op': '==', 'value': 'NASA Kennedy Space Center'},
+                {'field': columns_id_name_map.inverse['Case Number'], 'op': '==', 'value': 'KSC-12871'}
             ]}
         ]}
     ]
     name_converted_filter_list = [
         {'or': [
             {'and': [
-                {'field': columns[1].name, 'op': '==', 'value': 'NASA Ames Research Center'},
-                {'field': columns[3].name, 'op': '==', 'value': 'ARC-14048-1'}
+                {'field': 'Center', 'op': '==', 'value': 'NASA Ames Research Center'},
+                {'field': 'Case Number', 'op': '==', 'value': 'ARC-14048-1'}
             ]},
             {'and': [
-                {'field': columns[1].name, 'op': '==', 'value': 'NASA Kennedy Space Center'},
-                {'field': columns[3].name, 'op': '==', 'value': 'KSC-12871'}
+                {'field': 'Center', 'op': '==', 'value': 'NASA Kennedy Space Center'},
+                {'field': 'Case Number', 'op': '==', 'value': 'KSC-12871'}
             ]}
         ]}
     ]
@@ -122,13 +122,12 @@ def test_record_list_filter(create_table, client):
 def test_record_list_filter_duplicates(create_table, client):
     table_name = 'NASA Record List Filter Duplicates'
     table = create_table(table_name)
-    columns = table.columns.all().order_by('id')
-    column = columns[7]
+    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
     filter_list = [
-        {'field': '', 'op': 'get_duplicates', 'value': [column.id]}
+        {'field': '', 'op': 'get_duplicates', 'value': [columns_name_id_map['Patent Expiration Date']]}
     ]
     name_converted_filter_list = [
-        {'field': '', 'op': 'get_duplicates', 'value': [column.name]}
+        {'field': '', 'op': 'get_duplicates', 'value': ['Patent Expiration Date']}
     ]
     json_filter_list = json.dumps(filter_list)
 
@@ -154,12 +153,10 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
             row_values_list.append({new_column_name: row_value})
 
         table.create_record_or_records(row_values_list)
-
+        columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
         for op, value, expected in operators_and_expected_values:
-            columns = table.columns.all()
-            dj_new_column = list(filter(lambda x: x.name == new_column_name, columns))[0]
-            filter_list = [{'field': dj_new_column.id, 'op': op, 'value': value}]
-            name_converted_filter_list = [{'field': dj_new_column.name, 'op': op, 'value': value}]
+            filter_list = [{'field': columns_name_id_map[new_column_name], 'op': op, 'value': value}]
+            name_converted_filter_list = [{'field': new_column_name, 'op': op, 'value': value}]
             json_filter_list = json.dumps(filter_list)
 
             with patch.object(
@@ -206,10 +203,10 @@ def test_record_list_filter_for_boolean_type(create_table, client):
 def test_record_list_sort(create_table, client):
     table_name = 'NASA Record List Order'
     table = create_table(table_name)
-    columns = table.columns.all().order_by('id')
+    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
     order_by = [
-        {'field': columns[3], 'direction': 'desc'},
-        {'field': columns[1], 'direction': 'asc'},
+        {'field': columns_name_id_map['Center'], 'direction': 'desc'},
+        {'field': columns_name_id_map['Case Number'], 'direction': 'asc'},
     ]
     id_converted_order_by = [{**column, 'field': column['field'].id} for column in order_by]
     json_order_by = json.dumps(id_converted_order_by)
@@ -374,24 +371,20 @@ grouping_params = [
 def test_null_error_record_create(create_table, client):
     table_name = 'NASA Record Create'
     table = create_table(table_name)
-    response = client.get(
-        f"/api/db/v0/tables/{table.id}/columns/"
-    )
-    columns = response.json()['results']
-    column_index = 3
-    column_id = columns[column_index]['id']
+    column_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    column_id = column_name_id_map['Case Number']
     data = {"nullable": False}
     client.patch(
         f"/api/db/v0/tables/{table.id}/columns/{column_id}/", data=data
     )
     data = {
-        'Center': 'NASA Example Space Center',
-        'Status': 'Application',
-        'Case Number': None,
-        'Patent Number': '01234',
-        'Application SN': '01/000,001',
-        'Title': 'Example Patent Name',
-        'Patent Expiration Date': ''
+        column_name_id_map['Center']: 'NASA Example Space Center',
+        column_name_id_map['Status']: 'Application',
+        column_name_id_map['Case Number']: None,
+        column_name_id_map['Patent Number']: '01234',
+        column_name_id_map['Application SN']: '01/000,001',
+        column_name_id_map['Title']: 'Example Patent Name',
+        column_name_id_map['Patent Expiration Date']: ''
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
     record_data = response.json()
@@ -404,14 +397,13 @@ def test_record_list_groups(
         table_name, grouping, expected_groups, create_table, client,
 ):
     table = create_table(table_name)
-    columns = table.columns.all().order_by('id')
+    column_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
 
     order_by = [
-        {'field': columns[0].id, 'direction': 'asc'},
+        {'field': column_name_id_map['id'], 'direction': 'asc'},
     ]
     json_order_by = json.dumps(order_by)
-    columns_name_dict = {column.name: column for column in columns}
-    group_by_columns_ids = [columns_name_dict[column_name].id for column_name in grouping['columns']]
+    group_by_columns_ids = [column_name_id_map[column_name] for column_name in grouping['columns']]
     ids_converted_group_by = {**grouping, 'columns': group_by_columns_ids}
     json_grouping = json.dumps(ids_converted_group_by)
     limit = 100
