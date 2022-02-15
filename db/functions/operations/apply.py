@@ -15,6 +15,7 @@ def apply_db_function_as_filter(relation, db_function):
     return relation
 
 
+# Irrelevant when column ids are used. Still relevant if just column names were used.
 def _assert_that_all_referenced_columns_exist(relation, db_function):
     columns_that_exist = _get_columns_that_exist(relation)
     referenced_columns = db_function.referenced_columns

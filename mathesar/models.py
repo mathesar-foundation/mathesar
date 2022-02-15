@@ -241,6 +241,10 @@ class Table(DatabaseObject):
             for dj_column in dj_columns
         )
 
+    def get_dj_column_name_to_id_mapping(self):
+        ids_to_names = self.get_dj_column_id_to_name_mapping()
+        return dict(map(reversed, ids_to_names.items()))
+
     def add_column(self, column_data):
         return create_column(
             self.schema._sa_engine,

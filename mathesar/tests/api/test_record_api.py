@@ -79,25 +79,26 @@ def test_record_serialization(empty_nasa_table, client, type_, value):
 def test_record_list_filter(create_table, client):
     table_name = 'NASA Record List Filter'
     table = create_table(table_name)
+    column_names_to_ids = table.get_dj_column_name_to_id_mapping()
 
     filter = {"or": [
         {"and": [
             {"equal": [
-                {"column_name": ["Center"]},
+                {"column_id": [column_names_to_ids["Center"]]},
                 {"literal": ["NASA Ames Research Center"]}
             ]},
             {"equal": [
-                {"column_name": ["Case Number"]},
+                {"column_id": [column_names_to_ids["Case Number"]]},
                 {"literal": ["ARC-14048-1"]}
             ]},
         ]},
         {"and": [
             {"equal": [
-                {"column_name": ["Center"]},
+                {"column_id": [column_names_to_ids["Center"]]},
                 {"literal": ["NASA Kennedy Space Center"]}
             ]},
             {"equal": [
-                {"column_name": ["Case Number"]},
+                {"column_id": [column_names_to_ids["Case Number"]]},
                 {"literal": ["KSC-12871"]}
             ]},
         ]},
@@ -116,10 +117,11 @@ def test_record_list_filter(create_table, client):
     assert response_data['count'] == 2
     assert len(response_data['results']) == 2
     assert mock_get.call_args is not None
-    assert mock_get.call_args[1]['filter'] == get_db_function_from_ma_function_spec(filter)
+    column_ids_to_names = table.get_dj_column_id_to_name_mapping()
+    assert mock_get.call_args[1]['filter'] == get_db_function_from_ma_function_spec(filter, column_ids_to_names)
 
 
-def test_record_list_filter_duplicates(create_table, client):
+def test_record_list_duplicate_rows_only(create_table, client):
     table_name = 'NASA Record List Filter Duplicates'
     table = create_table(table_name)
 
@@ -132,7 +134,33 @@ def test_record_list_filter_duplicates(create_table, client):
     assert mock_get.call_args[1]['duplicate_only'] == duplicate_only
 
 
-def _test_filter_with_added_columns(table, client, columns_to_add, operators_and_expected_values):
+def test_filter_with_added_columns(create_table, client):
+    table_name = 'NASA Record List Filter'
+    table = create_table(table_name)
+
+    columns_to_add = [
+        {
+            'name': 'Published',
+            'type': 'BOOLEAN',
+            'default_value': True,
+            'row_values': {1: False, 2: False, 3: None}
+        }
+    ]
+
+    operators_and_expected_values = [
+        (
+            lambda new_column_id, value: {"not": [{"equal": [{"column_id": [new_column_id]}, {"literal": [value]}]}]},
+            True, 2),
+        (
+            lambda new_column_id, value: {"equal": [{"column_id": [new_column_id]}, {"literal": [value]}]},
+            False, 2),
+        (
+            lambda new_column_id, _: {"empty": [{"column_id": [new_column_id]}]},
+            None, 1394),
+        (
+            lambda new_column_id, _: {"not": [{"empty": [{"column_id": [new_column_id]}]}]},
+            None, 49),
+    ]
 
     for new_column in columns_to_add:
         new_column_name = new_column.get("name")
@@ -148,9 +176,13 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
             row_values_list.append({new_column_name: row_value})
 
         table.create_record_or_records(row_values_list)
+        column_ids_to_names = table.get_dj_column_id_to_name_mapping()
+
+        column_names_to_ids = table.get_dj_column_name_to_id_mapping()
+        new_column_id = column_names_to_ids[new_column_name]
 
         for filter_lambda, value, expected in operators_and_expected_values:
-            filter = filter_lambda(new_column_name, value)
+            filter = filter_lambda(new_column_id, value)
             json_filter = json.dumps(filter)
 
             with patch.object(
@@ -168,38 +200,7 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
             assert response_data['count'] == expected
             assert len(response_data['results']) == num_results
             assert mock_get.call_args is not None
-            assert mock_get.call_args[1]['filter'] == get_db_function_from_ma_function_spec(filter)
-
-
-def test_record_list_filter_for_boolean_type(create_table, client):
-    table_name = 'NASA Record List Filter'
-    table = create_table(table_name)
-
-    columns_to_add = [
-        {
-            'name': 'Published',
-            'type': 'BOOLEAN',
-            'default_value': True,
-            'row_values': {1: False, 2: False, 3: None}
-        }
-    ]
-
-    op_value_and_expected = [
-        (
-            lambda new_column_name, value: {"not": [{"equal": [{"column_name": [new_column_name]}, {"literal": [value]}]}]},
-            True, 2),
-        (
-            lambda new_column_name, value: {"equal": [{"column_name": [new_column_name]}, {"literal": [value]}]},
-            False, 2),
-        (
-            lambda new_column_name, _: {"empty": [{"column_name": [new_column_name]}]},
-            None, 1394),
-        (
-            lambda new_column_name, _: {"not": [{"empty": [{"column_name": [new_column_name]}]}]},
-            None, 49),
-    ]
-
-    _test_filter_with_added_columns(table, client, columns_to_add, op_value_and_expected)
+            assert mock_get.call_args[1]['filter'] == get_db_function_from_ma_function_spec(filter, column_ids_to_names)
 
 
 def test_record_list_sort(create_table, client):
