@@ -76,13 +76,17 @@ class RecordViewSet(viewsets.ViewSet):
                 raise database_api_exceptions.NotNullViolationAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
             else:
                 raise database_api_exceptions.MathesarAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
-        serializer = RecordSerializer(record)
+        columns = Column.objects.filter(table_id=table_pk)
+        columns_map = {column.name: column.id for column in columns}
+        serializer = RecordSerializer(record, context={'columns_map': columns_map, 'table_pk': table_pk})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
         record = table.update_record(pk, request.data)
-        serializer = RecordSerializer(record)
+        columns = Column.objects.filter(table_id=table_pk)
+        columns_map = {column.name: column.id for column in columns}
+        serializer = RecordSerializer(record, context={'columns_map': columns_map, 'table_pk': table_pk})
         return Response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):

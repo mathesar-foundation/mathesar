@@ -495,19 +495,18 @@ def test_record_create(create_table, client):
     table = create_table(table_name)
     records = table.get_records()
     original_num_records = len(records)
-
+    columns_name_id_map = {column.name: str(column.id) for column in table.columns.all().order_by('id')}
     data = {
-        'Center': 'NASA Example Space Center',
-        'Status': 'Application',
-        'Case Number': 'ESC-0000',
-        'Patent Number': '01234',
-        'Application SN': '01/000,001',
-        'Title': 'Example Patent Name',
-        'Patent Expiration Date': ''
+        columns_name_id_map['Center']: 'NASA Example Space Center',
+        columns_name_id_map['Status']: 'Application',
+        columns_name_id_map['Case Number']: 'ESC-0000',
+        columns_name_id_map['Patent Number']: '01234',
+        columns_name_id_map['Application SN']: '01/000,001',
+        columns_name_id_map['Title']: 'Example Patent Name',
+        columns_name_id_map['Patent Expiration Date']: ''
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
     record_data = response.json()
-
     assert response.status_code == 201
     assert len(table.get_records()) == original_num_records + 1
     columns_name_id_map = {column.name: column.id for column in table.columns.all().order_by('id')}
@@ -526,14 +525,13 @@ def test_record_partial_update(create_table, client):
 
     original_response = client.get(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
     original_data = original_response.json()
-
+    columns_name_id_map = {column.name: str(column.id) for column in table.columns.all().order_by('id')}
     data = {
-        'Center': 'NASA Example Space Center',
-        'Status': 'Example',
+        columns_name_id_map['Center']: 'NASA Example Space Center',
+        columns_name_id_map['Status']: 'Example',
     }
     response = client.patch(f'/api/db/v0/tables/{table.id}/records/{record_id}/', data=data)
     record_data = response.json()
-
     assert response.status_code == 200
     columns_name_id_map = {column.name: column.id for column in table.columns.all().order_by('id')}
     for column_name in table.sa_column_names:
