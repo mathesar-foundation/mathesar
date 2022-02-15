@@ -1,7 +1,7 @@
 from mathesar.filters.base import get_available_filters
 
 
-def test_basic(test_db_model):
+def test_available_filters_structure(test_db_model):
     engine = test_db_model._sa_engine
     available_filters = get_available_filters(engine)
     assert len(available_filters) > 0
