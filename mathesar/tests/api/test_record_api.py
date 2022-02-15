@@ -1,6 +1,8 @@
 import json
 from unittest.mock import patch
 
+from django.core.cache import cache
+
 import pytest
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
@@ -135,6 +137,7 @@ def test_record_list_duplicate_rows_only(create_table, client):
 
 
 def test_filter_with_added_columns(create_table, client):
+    cache.clear()
     table_name = 'NASA Record List Filter'
     table = create_table(table_name)
 
