@@ -26,12 +26,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         table = get_table_or_404(pk=self.kwargs['table_pk'])
-        sa_column_name = [column.name for column in table.sa_columns]
-        column_attnum_list = [
-            result[0] for result in
-            get_columns_attnum_from_names(table.oid, sa_column_name, table.schema._sa_engine)
-        ]
-        return Column.objects.filter(table=table, attnum__in=column_attnum_list).order_by("attnum")
+        return table.get_dj_columns()
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)

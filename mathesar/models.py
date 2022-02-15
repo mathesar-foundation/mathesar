@@ -223,6 +223,29 @@ class Table(DatabaseObject):
     def has_dependencies(self):
         return True
 
+    def get_dj_columns(self):
+        sa_column_name = [column.name for column in self.sa_columns]
+        column_attnum_list = [
+            result[0] for result in
+            get_columns_attnum_from_names(self.oid, sa_column_name, self.schema._sa_engine)
+        ]
+        # See following link for explanation of following FK relationships backwards (use of
+        # `table.column_set`):
+        # https://docs.djangoproject.com/en/4.0/topics/db/queries/#following-relationships-backward
+        dj_columns_on_this_table = self.column_set.filter(
+            table=self,
+            attnum__in=column_attnum_list
+        )
+        those_dj_columns_ordered = dj_columns_on_this_table.order_by("attnum")
+        return tuple(those_dj_columns_ordered)
+
+    def get_dj_column_id_to_name_mapping(self):
+        dj_columns = self.get_dj_columns()
+        return dict(
+            (dj_column.id, dj_column.name)
+            for dj_column in dj_columns
+        )
+
     def add_column(self, column_data):
         return create_column(
             self.schema._sa_engine,
