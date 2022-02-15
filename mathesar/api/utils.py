@@ -1,7 +1,8 @@
+from bidict import bidict
 from rest_framework.exceptions import NotFound
 
 from db.records.operations import group
-from mathesar.models import Table
+from mathesar.models import Column, Table
 
 DATA_KEY = 'data'
 METADATA_KEY = 'metadata'
@@ -59,3 +60,9 @@ def process_annotated_records(record_list):
         output_groups = None
 
     return processed_records, output_groups
+
+
+def get_column_id_name_bidirectional_map(table_id):
+    columns = Column.objects.filter(table_id=table_id)
+    columns_map = bidict({column.id: column.name for column in columns})
+    return columns_map
