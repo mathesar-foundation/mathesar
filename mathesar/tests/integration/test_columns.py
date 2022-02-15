@@ -1,7 +1,10 @@
 from playwright.sync_api import Page, expect
 
 
-def test_add_column(page: Page, base_schema_url):
-    page.goto(base_schema_url)
-    page.pause()
-    raise NotImplementedError()
+def test_add_column(page: Page, go_to_patents_data_table):
+    page.click("button[aria-label='New Column']")
+    column_name = "TEST"
+    page.fill(".new-column-dropdown input", column_name)
+    page.click("button:has-text('Add')")
+    column_header = f".table-content .header .cell .name:has-text('{column_name}')"
+    expect(page.locator(column_header)).to_be_visible()
