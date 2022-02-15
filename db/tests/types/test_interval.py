@@ -48,6 +48,33 @@ def test_interval_type_column_reflection(engine_email_type):
     assert actual_cls == expect_cls
 
 
+def test_interval_type_column_default(engine_email_type):
+    engine, app_schema = engine_email_type
+    default_str = 'P1Y1M1DT1H1M1.1S'
+    with engine.begin() as conn:
+        conn.execute(text(f"SET search_path={app_schema}"))
+        metadata = MetaData(bind=conn)
+        test_table = Table(
+            "test_table",
+            metadata,
+            Column(
+                "time_intervals", interval.Interval, server_default=default_str,
+            ),
+        )
+        test_table.create()
+
+    _add_custom_types_to_engine(engine)
+    with engine.begin() as conn:
+        metadata = MetaData(bind=conn, schema=app_schema)
+        reflect_table = Table("test_table", metadata, autoload_with=conn)
+    intervals_col = reflect_table.columns["time_intervals"]
+    default_sql_txt = str(intervals_col.server_default.arg)
+    default_selectable = select(cast(text(default_sql_txt), intervals_col.type))
+    with engine.begin() as conn:
+        actual_default = conn.execute(default_selectable).scalar()
+    assert actual_default == default_str
+
+
 def test_interval_type_column_args(engine_email_type):
     engine, app_schema = engine_email_type
     with engine.begin() as conn:
