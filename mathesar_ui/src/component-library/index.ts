@@ -39,6 +39,7 @@ export { default as Tree } from './tree/Tree.svelte';
 
 // Systems
 export * from './confirmation';
+export * from './menu';
 export * from './modal';
 export * from './toast';
 export * from './form-builder';
