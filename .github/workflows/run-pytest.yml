@@ -17,9 +17,9 @@ jobs:
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
         with:
-          key: mathesar-docker-cache-changed-{hash}
+          key: mathesar-docker-cache-{hash}
           restore-keys: |
-            mathesar-docker-cache-changed-
+            mathesar-docker-cache-
 
       - name: Copy env file
         run: cp .env.example .env
@@ -36,7 +36,7 @@ jobs:
         run: docker exec mathesar_service mkdir coverage_report
 
       - name: Run tests with pytest
-        run: docker exec mathesar_service pytest -svv --cov-report=xml:coverage_report/coverage.xml
+        run: docker exec mathesar_service pytest --cov-report=xml:coverage_report/coverage.xml
 
       - name: Save the coverage report
         uses: codecov/codecov-action@v2
