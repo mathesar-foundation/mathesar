@@ -70,6 +70,12 @@ class ColumnViewSet(viewsets.ModelViewSet):
                     )
                 else:
                     raise database_base_api_exceptions.ProgrammingAPIException(e)
+            except TypeError as e:
+                raise base_api_exceptions.TypeErrorAPIException(
+                    e,
+                    message="Unknown type_option passed",
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
             except InvalidDefaultError as e:
                 raise database_api_exceptions.InvalidDefaultAPIException(
                     e,
