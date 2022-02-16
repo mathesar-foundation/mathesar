@@ -12,7 +12,3 @@ class UnknownDBFunctionId(BadDBFunctionFormat):
 
 class ReferencedColumnsDontExist(BadDBFunctionFormat):
     pass
-
-
-class UseOfColumnIDInSAExpression(DBFunctionException):
-    pass

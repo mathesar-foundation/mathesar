@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.functions.exceptions import BadDBFunctionFormat, UnknownDBFunctionId, ReferencedColumnsDontExist
-from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
+from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
@@ -45,9 +45,9 @@ class RecordViewSet(viewsets.ViewSet):
             if filter_unprocessed:
                 table = get_table_or_404(table_pk)
                 column_ids_to_names = table.get_dj_column_id_to_name_mapping()
-                filter_processed = get_db_function_from_ma_function_spec(
+                filter_processed = rewrite_db_function_spec_column_ids_to_names(
+                    column_ids_to_names=column_ids_to_names,
                     spec=filter_unprocessed,
-                    column_ids_to_names=column_ids_to_names
                 )
             records = paginator.paginate_queryset(
                 self.get_queryset(), request, table_pk,

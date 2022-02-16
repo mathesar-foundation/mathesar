@@ -5,7 +5,7 @@ from datetime import datetime
 from db.utils import execute_query
 
 from db.functions.base import (
-    ColumnReference, Not, Literal, Empty, Equal, Greater, And, Or
+    ColumnName, Not, Literal, Empty, Equal, Greater, And, Or
 )
 from db.functions.operations.apply import apply_db_function_as_filter
 
@@ -19,10 +19,10 @@ def _ilike(x, v):
 
 
 database_functions = {
-    "is_null": lambda x: Empty([ColumnReference([x])]),
-    "is_not_null": lambda x: Not([Empty([ColumnReference([x])])]),
-    "eq": lambda x, v: Equal([ColumnReference([x]), Literal([v])]),
-    "gt": lambda x, v: Greater([ColumnReference([x]), Literal([v])]),
+    "is_null": lambda x: Empty([ColumnName([x])]),
+    "is_not_null": lambda x: Not([Empty([ColumnName([x])])]),
+    "eq": lambda x, v: Equal([ColumnName([x]), Literal([v])]),
+    "gt": lambda x, v: Greater([ColumnName([x]), Literal([v])]),
     "and": lambda x: And(x),
     "or": lambda x: Or(x),
     "not": lambda x: Not(x),
@@ -125,7 +125,7 @@ def test_filter_boolean_ops(
     db_function_lambda = database_functions[op]
 
     db_function = db_function_lambda([
-        Equal([ColumnReference([column_name]), value])
+        Equal([ColumnName([column_name]), value])
         for column_name, value in column_name_and_val_pairs
     ])
 
@@ -150,12 +150,12 @@ def test_filtering_nested_boolean_ops(filter_sort_table_obj):
 
     db_function = And([
         Or([
-            Equal([ColumnReference(["varchar"]), Literal(["string24"])]),
-            Equal([ColumnReference(["numeric"]), Literal([42])]),
+            Equal([ColumnName(["varchar"]), Literal(["string24"])]),
+            Equal([ColumnName(["numeric"]), Literal([42])]),
         ]),
         Or([
-            Equal([ColumnReference(["varchar"]), Literal(["string42"])]),
-            Equal([ColumnReference(["numeric"]), Literal([24])]),
+            Equal([ColumnName(["varchar"]), Literal(["string42"])]),
+            Equal([ColumnName(["numeric"]), Literal([24])]),
         ]),
     ])
 

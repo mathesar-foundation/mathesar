@@ -7,10 +7,10 @@ import pytest
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.functions.exceptions import UnknownDBFunctionId
-from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
 from mathesar import models
+from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
@@ -120,7 +120,11 @@ def test_record_list_filter(create_table, client):
     assert len(response_data['results']) == 2
     assert mock_get.call_args is not None
     column_ids_to_names = table.get_dj_column_id_to_name_mapping()
-    assert mock_get.call_args[1]['filter'] == get_db_function_from_ma_function_spec(filter, column_ids_to_names)
+    processed_filter = rewrite_db_function_spec_column_ids_to_names(
+        column_ids_to_names=column_ids_to_names,
+        spec=filter,
+    )
+    assert mock_get.call_args[1]['filter'] == processed_filter
 
 
 def test_record_list_duplicate_rows_only(create_table, client):
@@ -203,7 +207,11 @@ def test_filter_with_added_columns(create_table, client):
             assert response_data['count'] == expected
             assert len(response_data['results']) == num_results
             assert mock_get.call_args is not None
-            assert mock_get.call_args[1]['filter'] == get_db_function_from_ma_function_spec(filter, column_ids_to_names)
+            processed_filter = rewrite_db_function_spec_column_ids_to_names(
+                column_ids_to_names=column_ids_to_names,
+                spec=filter,
+            )
+            assert mock_get.call_args[1]['filter'] == processed_filter
 
 
 def test_record_list_sort(create_table, client):

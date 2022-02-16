@@ -17,7 +17,7 @@ from abc import ABC, abstractmethod
 from sqlalchemy import column, not_, and_, or_, func, literal
 
 from db.functions import hints
-from db.functions.exceptions import BadDBFunctionFormat, UseOfColumnIDInSAExpression, ReferencedColumnsDontExist
+from db.functions.exceptions import BadDBFunctionFormat
 
 
 # NOTE: this class is abstract.
@@ -56,7 +56,7 @@ class DBFunction(ABC):
         Useful when checking if all referenced columns are present in the queried relation."""
         columns = set([])
         for parameter in self.parameters:
-            if isinstance(parameter, ColumnReference):
+            if isinstance(parameter, ColumnName):
                 columns.add(parameter.column)
             elif isinstance(parameter, DBFunction):
                 columns.update(parameter.referenced_columns)
@@ -81,8 +81,10 @@ class Literal(DBFunction):
         return literal(primitive)
 
 
-# NOTE: this class is abstract.
-class ColumnReference(DBFunction):
+# This represents referencing columns by their Postgres name.
+class ColumnName(DBFunction):
+    id = 'column_name'
+    name = 'as column name'
     hints = tuple([
         hints.parameter_count(1),
         hints.parameter(1, hints.column),
@@ -91,36 +93,6 @@ class ColumnReference(DBFunction):
     @property
     def column(self):
         return self.parameters[0]
-
-
-# This represents referencing columns by their Django ID.
-# It cannot be used to create an SQLAlchemy expression, see ColumnName.
-# The system is expected to convert id references to name references automatically.
-class ColumnID(ColumnReference):
-    id = 'column_id'
-    name = 'as column id'
-
-    def to_column_name(self, column_ids_to_names):
-        column_id = self.column
-        column_name = column_ids_to_names.get(column_id, None)
-        if column_name:
-            return ColumnName([column_name])
-        else:
-            raise ReferencedColumnsDontExist(
-                f"Column name corresponding to referenced column id {column_id} unknown."
-                + f" Known id-to-name mapping: {column_ids_to_names}"
-            )
-
-    @staticmethod
-    def to_sa_expression(_):
-        # DBFunction can be converted into an SA expression.
-        raise UseOfColumnIDInSAExpression
-
-
-# This represents referencing columns by their Postgres name.
-class ColumnName(ColumnReference):
-    id = 'column_name'
-    name = 'as column name'
 
     @staticmethod
     def to_sa_expression(column_name):
