@@ -59,6 +59,7 @@ def test_record_list(create_table, client):
 serialization_test_list = [
     ("TIME WITH TIME ZONE", "12:30:10+01:00"),
     ("TIMESTAMP WITHOUT TIME ZONE", "2000-05-23T12:30:10"),
+    ("MONEY", "$5.00"),
 ]
 
 
@@ -390,6 +391,7 @@ def test_null_error_record_create(create_table, client):
     record_data = response.json()
     assert response.status_code == 400
     assert 'null value in column "Case Number"' in record_data[0]['message']
+    assert column_id == record_data[0]['detail']['column_id']
 
 
 @pytest.mark.parametrize('table_name,grouping,expected_groups', grouping_params)

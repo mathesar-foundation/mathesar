@@ -191,6 +191,7 @@ export class TabList {
   }
 
   addParamListenerToTab(tab: MathesarTab): void {
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     tab.tabularData?.on('paramsUpdated', async (params: TabularDataParams) => {
       syncSingleTabularParamToURL(this.dbName, this.schemaId, params);
     });

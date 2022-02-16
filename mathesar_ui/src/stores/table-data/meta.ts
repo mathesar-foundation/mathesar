@@ -130,8 +130,10 @@ export class Meta {
 
   combinedModificationState: Readable<ModificationStatus>;
 
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   recordRequestParams: Readable<string>;
 
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   metaParameters: Readable<MetaParams>;
 
   constructor(type: TabularType, parentId: number, params?: MetaParams) {
@@ -243,6 +245,7 @@ export class Meta {
             op: term.condition.id,
             value: term.value,
           }));
+          // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
           filter[$filter.combination.id as string] = terms;
           if (
             'and' in filter &&

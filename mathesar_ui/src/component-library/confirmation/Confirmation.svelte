@@ -32,6 +32,7 @@
       $resolve(true);
       modal.close();
     } catch (error) {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       onError(error);
     } finally {
       allowClose = true;
@@ -58,7 +59,11 @@
   on:close={onClose}
   class="confirmation"
 >
-  <StringOrComponent slot="title" arg={title} />
+  <svelte:fragment slot="title">
+    {#if title}
+      <StringOrComponent arg={title} />
+    {/if}
+  </svelte:fragment>
   <StringOrComponent arg={body} />
   <CancelOrProceedButtonPair
     slot="footer"

@@ -21,6 +21,16 @@ module.exports = {
   rules: {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'no-console': ['warn', { allow: ['error'] }],
+    '@typescript-eslint/ban-ts-comment': [
+      'error',
+      {
+        'ts-expect-error': 'allow-with-description',
+        'ts-ignore': 'allow-with-description',
+        'ts-nocheck': 'allow-with-description',
+        'ts-check': false,
+        minimumDescriptionLength: 10,
+      },
+    ],
   },
   overrides: [
     {
