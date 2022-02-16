@@ -1,4 +1,4 @@
-from datetime import timedelta, date, time
+from datetime import date, time
 from datetime import datetime as py_datetime
 from decimal import Decimal
 
@@ -14,7 +14,7 @@ from db.columns.operations.select import get_column_default
 from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
-from db.types import money, datetime
+from db.types import money, datetime, interval
 from db.types.operations import cast as cast_operations
 from db.types.base import PostgresType, MathesarCustomType, get_qualified_name, get_available_types
 
@@ -301,10 +301,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             INTERVAL: {
                 VALID: [
-                    (
-                        timedelta(days=3, hours=3, minutes=5, seconds=30),
-                        timedelta(days=3, hours=3, minutes=5, seconds=30),
-                    )
+                    ("P0Y0M3DT3H5M30S", "P0Y0M3DT3H5M30S")
                 ]
             },
             TEXT: {
@@ -312,10 +309,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             VARCHAR: {
                 VALID: [
-                    (
-                        timedelta(days=3, hours=3, minutes=5, seconds=30),
-                        '3 days 03:05:30'
-                    )
+                    ("P0Y0M3DT3H5M30S", "3 days 03:05:30")
                 ]
             },
         }
@@ -602,10 +596,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             INTERVAL: {
                 VALID: [
-                    ("1 day", timedelta(days=1)),
-                    ("1 week", timedelta(days=7)),
-                    ("3:30", timedelta(hours=3, minutes=30)),
-                    ("00:03:30", timedelta(minutes=3, seconds=30)),
+                    ("1 day", "P0Y0M1DT0H0M0S"),
+                    ("1 week", "P0Y0M7DT0H0M0S"),
+                    ("3:30", "P0Y0M0DT3H30M0S"),
+                    ("00:03:30", "P0Y0M0DT0H3M30S"),
                 ],
                 INVALID: ["1 potato", "3"],
             },
@@ -760,10 +754,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             INTERVAL: {
                 VALID: [
-                    ("1 day", timedelta(days=1)),
-                    ("1 week", timedelta(days=7)),
-                    ("3:30", timedelta(hours=3, minutes=30)),
-                    ("00:03:30", timedelta(minutes=3, seconds=30)),
+                    ("1 day", "P0Y0M1DT0H0M0S"),
+                    ("1 week", "P0Y0M7DT0H0M0S"),
+                    ("3:30", "P0Y0M0DT3H30M0S"),
+                    ("00:03:30", "P0Y0M0DT0H3M30S"),
                 ],
                 INVALID: ["1 potato", "3"],
             },
@@ -1191,27 +1185,64 @@ def test_get_column_cast_expression_unsupported(engine_with_types):
 
 
 cast_expr_numeric_option_list = [
-    (Numeric, {"precision": 3}, 'CAST(colname AS NUMERIC(3))'),
-    (Numeric, {"precision": 3, "scale": 2}, 'CAST(colname AS NUMERIC(3, 2))'),
-    (Numeric, {"precision": 3, "scale": 2}, 'CAST(colname AS NUMERIC(3, 2))'),
+    (Numeric, "numeric", {"precision": 3}, 'CAST(colname AS NUMERIC(3))'),
+    (
+        Numeric,
+        "numeric",
+        {"precision": 3, "scale": 2},
+        'CAST(colname AS NUMERIC(3, 2))'
+    ),
+    (
+        Numeric,
+        "numeric",
+        {"precision": 3, "scale": 2},
+        'CAST(colname AS NUMERIC(3, 2))'
+    ),
     (
         String,
+        "numeric",
         {"precision": 3, "scale": 2},
         'CAST(mathesar_types.cast_to_numeric(colname) AS NUMERIC(3, 2))'
+    ),
+    (
+        interval.Interval,
+        "interval",
+        {"fields": "YEAR"},
+        "CAST(colname AS INTERVAL YEAR)"
+    ),
+    (
+        interval.Interval,
+        "interval",
+        {"precision": 2},
+        "CAST(colname AS INTERVAL (2))"
+    ),
+    (
+        interval.Interval,
+        "interval",
+        {"precision": 3, "fields": "SECOND"},
+        "CAST(colname AS INTERVAL SECOND (3))"
+    ),
+    (
+        String,
+        "interval",
+        {"precision": 3, "fields": "SECOND"},
+        "CAST(mathesar_types.cast_to_interval(colname) AS INTERVAL SECOND (3))"
     )
 ]
 
 
-@pytest.mark.parametrize("type_,options,expect_cast_expr", cast_expr_numeric_option_list)
-def test_get_column_cast_expression_numeric_options(
-        engine_with_types, type_, options, expect_cast_expr
+@pytest.mark.parametrize(
+    "type_,target_type,options,expect_cast_expr", cast_expr_numeric_option_list
+)
+def test_get_column_cast_expression_type_options(
+        engine_with_types, type_, target_type, options, expect_cast_expr
 ):
-    target_type = "numeric"
     column = Column("colname", type_)
     cast_expr = cast_operations.get_column_cast_expression(
         column, target_type, engine_with_types, type_options=options,
     )
-    assert str(cast_expr) == expect_cast_expr
+    actual_cast_expr = str(cast_expr.compile(engine_with_types))
+    assert actual_cast_expr == expect_cast_expr
 
 
 expect_cast_tuples = [
