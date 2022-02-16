@@ -205,10 +205,11 @@ def test_record_list_sort(create_table, client):
     table = create_table(table_name)
     columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
     order_by = [
-        {'field': columns_name_id_map['Center'], 'direction': 'desc'},
-        {'field': columns_name_id_map['Case Number'], 'direction': 'asc'},
+        {'field': 'Center', 'direction': 'desc'},
+        {'field': 'Case Number', 'direction': 'asc'},
     ]
-    id_converted_order_by = [{**column, 'field': column['field'].id} for column in order_by]
+
+    id_converted_order_by = [{**column, 'field': columns_name_id_map[column['field']]} for column in order_by]
     json_order_by = json.dumps(id_converted_order_by)
 
     with patch.object(
@@ -224,8 +225,7 @@ def test_record_list_sort(create_table, client):
     assert len(response_data['results']) == 50
 
     assert mock_get.call_args is not None
-    name_converted_order_by = [{**column, 'field': column['field'].name} for column in order_by]
-    assert mock_get.call_args[1]['order_by'] == name_converted_order_by
+    assert mock_get.call_args[1]['order_by'] == order_by
 
 
 grouping_params = [
@@ -371,20 +371,20 @@ grouping_params = [
 def test_null_error_record_create(create_table, client):
     table_name = 'NASA Record Create'
     table = create_table(table_name)
-    column_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
-    column_id = column_name_id_map['Case Number']
+    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    column_id = columns_name_id_map['Case Number']
     data = {"nullable": False}
     client.patch(
         f"/api/db/v0/tables/{table.id}/columns/{column_id}/", data=data
     )
     data = {
-        column_name_id_map['Center']: 'NASA Example Space Center',
-        column_name_id_map['Status']: 'Application',
-        column_name_id_map['Case Number']: None,
-        column_name_id_map['Patent Number']: '01234',
-        column_name_id_map['Application SN']: '01/000,001',
-        column_name_id_map['Title']: 'Example Patent Name',
-        column_name_id_map['Patent Expiration Date']: ''
+        columns_name_id_map['Center']: 'NASA Example Space Center',
+        columns_name_id_map['Status']: 'Application',
+        columns_name_id_map['Case Number']: None,
+        columns_name_id_map['Patent Number']: '01234',
+        columns_name_id_map['Application SN']: '01/000,001',
+        columns_name_id_map['Title']: 'Example Patent Name',
+        columns_name_id_map['Patent Expiration Date']: ''
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
     record_data = response.json()
@@ -397,13 +397,13 @@ def test_record_list_groups(
         table_name, grouping, expected_groups, create_table, client,
 ):
     table = create_table(table_name)
-    column_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
 
     order_by = [
-        {'field': column_name_id_map['id'], 'direction': 'asc'},
+        {'field': columns_name_id_map['id'], 'direction': 'asc'},
     ]
     json_order_by = json.dumps(order_by)
-    group_by_columns_ids = [column_name_id_map[column_name] for column_name in grouping['columns']]
+    group_by_columns_ids = [columns_name_id_map[column_name] for column_name in grouping['columns']]
     ids_converted_group_by = {**grouping, 'columns': group_by_columns_ids}
     json_grouping = json.dumps(ids_converted_group_by)
     limit = 100
@@ -476,7 +476,7 @@ def test_record_detail(create_table, client):
     record_as_dict = record._asdict()
 
     assert response.status_code == 200
-    columns_name_id_map = {column.name: column.id for column in table.columns.all().order_by('id')}
+    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
     for column_name in table.sa_column_names:
         column_id_str = str(columns_name_id_map[column_name])
         assert column_id_str in record_data
@@ -502,7 +502,8 @@ def test_record_create(create_table, client):
     record_data = response.json()
     assert response.status_code == 201
     assert len(table.get_records()) == original_num_records + 1
-    columns_name_id_map = {column.name: column.id for column in table.columns.all().order_by('id')}
+    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+
     for column_name in table.sa_column_names:
         column_id_str = str(columns_name_id_map[column_name])
         assert column_id_str in record_data
@@ -584,8 +585,8 @@ def test_record_404(create_table, client):
 def test_record_list_filter_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    columns = table.columns.all().order_by('id')
-    filter_list = json.dumps([{"field": columns[1].id, "op": "is_null"}])
+    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    filter_list = json.dumps([{"field": columns_name_id_map['Center'], "op": "is_null"}])
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?filters={filter_list}'
@@ -600,8 +601,8 @@ def test_record_list_filter_exceptions(create_table, client, exception):
 def test_record_list_sort_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    columns = table.columns.all().order_by('id')
-    order_by = json.dumps([{"field": columns[0].id, "direction": "desc"}])
+    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    order_by = json.dumps([{"field": columns_name_id_map['id'], "direction": "desc"}])
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?order_by={order_by}'
@@ -616,8 +617,8 @@ def test_record_list_sort_exceptions(create_table, client, exception):
 def test_record_list_group_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    columns = table.columns.all().order_by('id')
-    group_by = json.dumps({"columns": [columns[3].id]})
+    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    group_by = json.dumps({"columns": [columns_name_id_map['Case Number']]})
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?grouping={group_by}'
