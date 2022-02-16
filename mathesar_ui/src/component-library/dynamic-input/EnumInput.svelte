@@ -12,7 +12,7 @@
   } from './types.d';
 
   export let dataType: DynamicInputDataType;
-  export let enumValues: unknown[] = undefined;
+  export let enumValues: unknown[] | undefined = undefined;
   export let options: DynamicInputSelectElement['options'] = undefined;
   export let triggerAppearance: Appearance = 'default';
   export let value = getInitialValue(dataType, enumValues);

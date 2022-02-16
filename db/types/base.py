@@ -73,7 +73,7 @@ class MathesarCustomType(Enum):
     """
     EMAIL = 'email'
     URI = 'uri'
-    MONEY = 'money'
+    MATHESAR_MONEY = 'mathesar_money'
 
 
 db_types_hinted = frozendict({

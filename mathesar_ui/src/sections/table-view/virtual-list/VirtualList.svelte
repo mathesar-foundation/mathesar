@@ -97,6 +97,7 @@
 
   $: innerStyle =
     `height:${estimatedTotalSize + paddingBottom}px;` +
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `width:${width ? `${width}px` : '100%'};` +
     `${isScrolling ? 'pointer-events:none;' : ''}`;
 

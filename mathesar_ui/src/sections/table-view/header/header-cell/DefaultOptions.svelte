@@ -70,6 +70,7 @@
     } catch (error) {
       toast.error(
         `Unable to update "Allow NULL" of column "${column.name}". ${
+          // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
           error.message as string
         }.`,
       );
@@ -113,6 +114,7 @@
     } catch (error) {
       const message = `Unable to update "Allow Duplicates" of column "${
         column.name
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       }". ${error.message as string}.`;
       toast.error({ message });
     } finally {

@@ -2,7 +2,7 @@
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
 
   // Id for the input
-  export let id: string = undefined;
+  export let id: string | undefined = undefined;
 
   // Disable input
   export let disabled = false;

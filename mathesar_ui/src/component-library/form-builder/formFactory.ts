@@ -25,6 +25,7 @@ export function makeForm(
     (storeValues) => {
       const valueObj = {};
       [...stores.keys()].forEach((key, index) => {
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         valueObj[key] = storeValues[index];
       });
       return valueObj;
