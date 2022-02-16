@@ -48,15 +48,19 @@ export interface FormLayout {
   elements: FormElement[];
 }
 
+export interface FormConfigurationVariable {
+  type: DynamicInputDataType;
+  default?: FormInputDataType;
+  enum?: unknown[];
+}
+
+export type FormConfigurationVariables = Record<
+  string,
+  FormConfigurationVariable
+>;
+
 export interface FormConfiguration {
-  variables: Record<
-    string,
-    {
-      type: DynamicInputDataType;
-      default: FormInputDataType;
-      enum?: unknown[];
-    }
-  >;
+  variables: FormConfigurationVariables;
   layout: FormLayout;
 }
 

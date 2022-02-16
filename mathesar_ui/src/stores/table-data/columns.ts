@@ -19,6 +19,7 @@ export interface Column {
   id: number;
   name: string;
   type: DbType;
+  type_options: Record<string, string | number | boolean | undefined> | null;
   index: number;
   nullable: boolean;
   primary_key: boolean;
@@ -190,9 +191,10 @@ export class ColumnsDataStore
 
   async patchType(
     columnId: Column['id'],
-    type: DbType,
+    type: Column['type'],
+    type_options: Column['type_options'],
   ): Promise<Partial<Column>> {
-    const column = await this.api.update(columnId, { type });
+    const column = await this.api.update(columnId, { type, type_options });
     await this.fetch();
     await this.dispatch('columnPatched', column);
     return column;

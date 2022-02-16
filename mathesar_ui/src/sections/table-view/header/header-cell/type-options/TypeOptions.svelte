@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, getContext, tick } from 'svelte';
-  import { faDatabase, faSpinner } from '@fortawesome/free-solid-svg-icons';
-  import { Button, Icon } from '@mathesar-component-library';
+  import { faDatabase } from '@fortawesome/free-solid-svg-icons';
+  import { Button, Icon, Spinner } from '@mathesar-component-library';
   import {
     currentDbAbstractTypes,
     getAbstractTypesForDBTypeList,
@@ -34,21 +34,28 @@
   let abstractTypeContainer: HTMLUListElement;
   let selectedAbstractType: AbstractType | undefined;
   let selectedDbType: DbType | undefined;
+  let typeOptions: Column['type_options'];
   let typeChangeState = States.Idle;
 
   function selectAbstractType(abstractType: AbstractType) {
-    selectedAbstractType = abstractType;
-    if (abstractType.identifier === abstractTypeOfColumn?.identifier) {
-      selectedDbType = column.type;
-    } else if (abstractType.defaultDbType) {
-      selectedDbType = abstractType.defaultDbType;
-    } else if (abstractType.dbTypes.size > 0) {
-      [selectedDbType] = abstractType.dbTypes;
+    if (selectedAbstractType !== abstractType) {
+      if (abstractType.identifier === abstractTypeOfColumn?.identifier) {
+        selectedDbType = column.type;
+        typeOptions = column.type_options;
+      } else if (abstractType.defaultDbType) {
+        selectedDbType = abstractType.defaultDbType;
+        typeOptions = null;
+      } else if (abstractType.dbTypes.size > 0) {
+        [selectedDbType] = abstractType.dbTypes;
+        typeOptions = null;
+      }
+      selectedAbstractType = abstractType;
     }
   }
 
   function resetAbstractType() {
     selectedDbType = column.type;
+    typeOptions = column.type_options;
     selectedAbstractType = abstractTypeOfColumn;
   }
 
@@ -73,16 +80,14 @@
   }
 
   async function onSave() {
-    if (selectedDbType !== column.type) {
-      typeChangeState = States.Loading;
-      try {
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        await columnsDataStore.patchType(column.id, selectedDbType);
-      } catch (err) {
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        toast.error(`Unable to change column type. ${err.message as string}`);
-      }
+    typeChangeState = States.Loading;
+    try {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      await columnsDataStore.patchType(column.id, selectedDbType, typeOptions);
+    } catch (err) {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+      toast.error(`Unable to change column type. ${err.message as string}`);
     }
     close();
   }
@@ -120,8 +125,8 @@
     <div class="type-options-content">
       <DatabaseOptions
         bind:selectedDbType
+        bind:typeOptions
         {selectedAbstractType}
-        dbOptions={selectedAbstractType?.typeSwitchOptions?.database}
       />
     </div>
   </div>
@@ -134,7 +139,7 @@
       on:click={onSave}
     >
       {#if typeChangeState === States.Loading}
-        <Icon data={faSpinner} spin={true} />
+        <Spinner />
       {/if}
       <span>Save</span>
     </Button>

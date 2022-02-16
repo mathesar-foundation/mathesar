@@ -1,6 +1,7 @@
 import type {
   FormConfiguration,
-  FormValues,
+  FormConfigurationVariable,
+  FormInputDataType,
   DynamicInputType,
   Rule,
 } from '@mathesar-component-library/types';
@@ -12,15 +13,32 @@ export interface AbstractTypeResponse {
   db_types: DbType[];
 }
 
+interface AbstractTypeConfigFormSavedVariable
+  extends FormConfigurationVariable {
+  isSaved: true;
+}
+
+interface AbstractTypeConfigFormUnSavedVariable
+  extends FormConfigurationVariable {
+  defaults: Record<DbType, FormInputDataType>;
+}
+
+export type AbstractTypeConfigFormVariable =
+  | AbstractTypeConfigFormSavedVariable
+  | AbstractTypeConfigFormUnSavedVariable;
+
+export interface AbstractTypeConfigForm extends FormConfiguration {
+  variables: Record<string, AbstractTypeConfigFormVariable>;
+}
+
 export interface AbstractTypeDbConfigOptions {
   allowDefault: boolean;
   configuration: {
-    form: FormConfiguration;
+    form: AbstractTypeConfigForm;
     determinationRules: {
       resolve: string;
       rule: Rule;
     }[];
-    ruleReversalValues: Record<string, FormValues>;
   };
 }
 
@@ -33,7 +51,7 @@ export interface AbstractTypeConfiguration {
   typeSwitchOptions?: {
     database: AbstractTypeDbConfigOptions;
     display?: {
-      form: FormConfiguration;
+      form: AbstractTypeConfigForm;
     };
   };
 }
