@@ -12,6 +12,7 @@ These variables were broken off into a discrete module to avoid circular imports
 import inspect
 
 import db.functions.base
+import db.functions.redundant
 
 from db.functions.base import DBFunction
 
@@ -49,9 +50,21 @@ _db_functions_in_base_module = (
 )
 
 
+_db_functions_in_redundant_module = (
+    _get_module_members_that_satisfy(
+        db.functions.redundant,
+        _is_concrete_db_function_subclass
+    )
+)
+
+
 _db_functions_in_other_modules = tuple([
     uri.ExtractURIAuthority,
 ])
 
 
-known_db_functions = _db_functions_in_base_module + _db_functions_in_other_modules
+known_db_functions = (
+    _db_functions_in_base_module
+    + _db_functions_in_redundant_module
+    + _db_functions_in_other_modules
+)

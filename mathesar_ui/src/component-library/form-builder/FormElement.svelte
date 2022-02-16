@@ -22,7 +22,7 @@
   <If {store} {...element} let:element={childElement}>
     <svelte:self {variables} {stores} element={childElement} />
   </If>
-{:else if !element.type || element.type === 'layout'}
+{:else if element.type === 'layout' || !element.type}
   <FormLayout
     orientation={element.orientation}
     elements={element.elements}

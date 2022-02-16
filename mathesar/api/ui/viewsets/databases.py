@@ -9,6 +9,9 @@ from mathesar.api.dj_filters import DatabaseFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 
 from mathesar.api.serializers.databases import DatabaseSerializer, TypeSerializer
+from mathesar.api.serializers.filters import FilterSerializer
+
+from mathesar.filters.base import get_available_filters
 
 
 class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
@@ -24,4 +27,12 @@ class DatabaseViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixi
     def types(self, request, pk=None):
         database = self.get_object()
         serializer = TypeSerializer(database.supported_types, many=True)
+        return Response(serializer.data)
+
+    @action(methods=['get'], detail=True)
+    def filters(self, request, pk=None):
+        database = self.get_object()
+        engine = database._sa_engine
+        available_filters = get_available_filters(engine)
+        serializer = FilterSerializer(available_filters, many=True)
         return Response(serializer.data)
