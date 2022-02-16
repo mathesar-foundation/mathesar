@@ -1,7 +1,7 @@
 import warnings
 
 from pglast import Node, parse_sql
-from sqlalchemy import Table, MetaData, and_, select, text, func
+from sqlalchemy import Table, MetaData, and_, select, text, func, cast
 
 from db.columns.exceptions import DynamicDefaultWarning
 from db.tables.operations.select import reflect_table_from_oid
@@ -96,14 +96,15 @@ def get_column_default_dict(table_oid, column_index, engine, connection_to_use=N
         )
         default_value = sql_text
     else:
-        # Defaults are stored as text with SQL casts appended
+        # Defaults are often stored as text with SQL casts appended
         # Ex: "'test default string'::character varying" or "'2020-01-01'::date"
         # Here, we execute the cast to get the proper python value
         default_value = execute_statement(
             engine,
-            select(text(sql_text)),
+            select(cast(text(sql_text), column.type)),
             connection_to_use
-        ).first()[0]
+        ).scalar()
+
     return {"value": default_value, "is_dynamic": is_dynamic}
 
 

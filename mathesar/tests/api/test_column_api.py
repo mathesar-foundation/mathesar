@@ -1,5 +1,5 @@
 import json
-from datetime import date, timedelta
+from datetime import date
 
 import pytest
 from unittest.mock import patch
@@ -178,7 +178,7 @@ def test_column_create(column_test_table, client):
 
 create_default_test_list = [
     ("BOOLEAN", True, True, True),
-    ("INTERVAL", "00:42:00", timedelta(minutes=42), "2520.0"),
+    ("INTERVAL", "00:42:00", "P0Y0M0DT0H42M0S", "P0Y0M0DT0H42M0S"),
     ("NUMERIC", 42, 42, 42),
     ("STRING", "test_string", "test_string", "test_string"),
     ("VARCHAR", "test_string", "test_string", "test_string"),
@@ -297,6 +297,9 @@ def test_column_create_wrong_display_options(
         ("NUMERIC", {"precision": 5, "scale": 3}),
         ("VARCHAR", {"length": 5}),
         ("CHAR", {"length": 5}),
+        ("INTERVAL", {"precision": 5}),
+        ("INTERVAL", {"precision": 5, "fields": "second"}),
+        ("INTERVAL", {"fields": "day"}),
     ]
 )
 def test_column_create_retrieve_options(column_test_table, client, type_, type_options):
