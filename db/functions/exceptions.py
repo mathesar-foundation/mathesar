@@ -6,7 +6,7 @@ class BadDBFunctionFormat(DBFunctionException):
     pass
 
 
-class UnknownDBFunctionId(BadDBFunctionFormat):
+class UnknownDBFunctionID(BadDBFunctionFormat):
     pass
 
 

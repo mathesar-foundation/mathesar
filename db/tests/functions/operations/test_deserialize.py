@@ -1,5 +1,5 @@
 import pytest
-from db.functions.exceptions import UnknownDBFunctionId, BadDBFunctionFormat
+from db.functions.exceptions import UnknownDBFunctionID, BadDBFunctionFormat
 from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
 
 
@@ -11,7 +11,7 @@ exceptions_test_list = [
                 {"literal": ["test"]},
             ]
         },
-        UnknownDBFunctionId
+        UnknownDBFunctionID
     ),
     (
         {"empty": {"column_name": ["varchar"]}, },

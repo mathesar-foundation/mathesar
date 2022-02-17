@@ -6,7 +6,7 @@ from django.core.cache import cache
 import pytest
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
-from db.functions.exceptions import UnknownDBFunctionId
+from db.functions.exceptions import UnknownDBFunctionID
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
 from mathesar import models
@@ -590,7 +590,7 @@ def test_record_404(create_table, client):
 
 
 def test_record_list_filter_exceptions(create_table, client):
-    exception = UnknownDBFunctionId
+    exception = UnknownDBFunctionID
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
     filter = json.dumps({"empty": [{"column_name": ["Center"]}]})
