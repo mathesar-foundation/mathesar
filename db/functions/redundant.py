@@ -4,18 +4,33 @@ subclasses (in other words, subclasses defined here are redundant). We do this t
 Mathesar filters not supporting composition.
 """
 
-from db.functions.base import DBFunction
+from abc import abstractmethod
+
+from db.functions.base import DBFunction, Or, Lesser, Equal, Greater
 
 from db.functions import hints
 
 
-# TODO (tech debt) define in terms of other DBFunctions
-# would involve creating an alternative to to_sa_expression: something like to_db_function
-# execution engine would see that to_sa_expression is not implemented, and it would look for
-# to_db_function.
+class RedundantDBFunction(DBFunction):
+    """
+    A DBFunction that is meant to be unpacked into another DBFunction. A way to define a DBFunction
+    as a combination of DBFunctions. Its to_sa_expression method is not to used. Its concrete
+    implementations are expected to implement the unpack method.
+    """
+    @staticmethod
+    def to_sa_expression(*_):
+        raise Exception("UnpackabelDBFunction.to_sa_expression should never be used.")
+
+    @abstractmethod
+    def unpack(self):
+        """
+        Should return a DBFunction instance with self.parameters forwarded to it. A way to define
+        a DBFunction in terms of other DBFunctions.
+        """
+        pass
 
 
-class LesserOrEqual(DBFunction):
+class LesserOrEqual(RedundantDBFunction):
     id = 'lesser_or_equal'
     name = 'is lesser or equal to'
     hints = tuple([
@@ -25,9 +40,13 @@ class LesserOrEqual(DBFunction):
         hints.mathesar_filter,
     ])
 
-    @staticmethod
-    def to_sa_expression(value1, value2):
-        return value1 <= value2
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return Or([
+            Lesser([param0, param1]),
+            Equal([param0, param1]),
+        ])
 
 
 class GreaterOrEqual(DBFunction):
@@ -40,6 +59,10 @@ class GreaterOrEqual(DBFunction):
         hints.mathesar_filter,
     ])
 
-    @staticmethod
-    def to_sa_expression(value1, value2):
-        return value1 >= value2
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return Or([
+            Greater([param0, param1]),
+            Equal([param0, param1]),
+        ])
