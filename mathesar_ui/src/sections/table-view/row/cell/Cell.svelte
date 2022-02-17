@@ -13,6 +13,7 @@
     RecordsData,
   } from '@mathesar/stores/table-data/types';
   import CellValue from '@mathesar/components/CellValue.svelte';
+  import CellInput from './CellInput.svelte';
 
   export let recordsData: RecordsData;
   export let display: Display;
@@ -29,13 +30,10 @@
   $: isNullDisplayed = isBeingEdited && value === null;
 
   let cellRef: HTMLElement;
-  let inputRef: HTMLInputElement;
   let timer: number;
 
   afterUpdate(() => {
-    if (inputRef) {
-      inputRef.focus();
-    } else if (isActive) {
+    if (!isBeingEdited && isActive) {
       cellRef?.focus();
     }
   });
@@ -123,14 +121,9 @@
   </div>
 
   {#if isBeingEdited}
-    <input
-      bind:this={inputRef}
-      type="text"
-      class="edit-input-box"
-      class:is-null-displayed={isNullDisplayed}
-      value={typeof value === 'string' || typeof value === 'number'
-        ? value
-        : ''}
+    <CellInput
+      {value}
+      {isNullDisplayed}
       on:keydown={handleInputKeyDown}
       on:keyup={debounceAndSet}
       on:blur={onBlur}

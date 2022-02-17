@@ -4,7 +4,7 @@
   import { Button, Icon, Spinner } from '@mathesar-component-library';
   import {
     currentDbAbstractTypes,
-    getAbstractTypesForDBTypeList,
+    getAbstractTypesForDbTypeList,
   } from '@mathesar/stores/abstract-types';
   import { States } from '@mathesar/utils/api';
   import { toast } from '@mathesar/stores/toast';
@@ -26,7 +26,7 @@
   export let column: Column;
   export let abstractTypeOfColumn: AbstractType | undefined;
 
-  $: allowedTypeConversions = getAbstractTypesForDBTypeList(
+  $: allowedTypeConversions = getAbstractTypesForDbTypeList(
     [...(column.valid_target_types || []), column.type],
     $currentDbAbstractTypes.data,
   );

@@ -16,7 +16,7 @@
   import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import {
     currentDbAbstractTypes,
-    getAbstractTypeForDBType,
+    getAbstractTypeForDbType,
   } from '@mathesar/stores/abstract-types';
   import { focusAndSelectAll } from '@mathesar/utils/domUtils';
   import type {
@@ -35,7 +35,7 @@
   export let columnsDataStore: ColumnsDataStore;
   export let constraintsDataStore: ConstraintsDataStore;
 
-  $: abstractTypeOfColumn = getAbstractTypeForDBType(
+  $: abstractTypeOfColumn = getAbstractTypeForDbType(
     column.type,
     $currentDbAbstractTypes.data,
   );

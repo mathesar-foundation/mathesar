@@ -62,7 +62,7 @@ export function constructAbstractTypeMapFromResponse(
  *
  * However, it is not handled here yet, since it requires additional confirmation.
  */
-export function getAbstractTypesForDBTypeList(
+export function getAbstractTypesForDbTypeList(
   dbTypes: DbType[],
   abstractTypesMap: AbstractTypesMap,
 ): AbstractType[] {
@@ -96,12 +96,12 @@ export function getAbstractTypesForDBTypeList(
   return [];
 }
 
-export function getAbstractTypeForDBType(
+export function getAbstractTypeForDbType(
   dbType: DbType,
   abstractTypesMap: AbstractTypesMap,
 ): AbstractType {
   return (
-    getAbstractTypesForDBTypeList([dbType], abstractTypesMap)[0] ||
+    getAbstractTypesForDbTypeList([dbType], abstractTypesMap)[0] ||
     constructAbstractTypeFromResponse(unknownAbstractTypeResponse)
   );
 }
