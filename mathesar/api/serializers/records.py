@@ -44,6 +44,3 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
         columns_map = self.context['columns_map'].inverse
         data = {columns_map[int(column_id)]: value for column_id, value in data.items()}
         return data
-
-    def is_valid(self, raise_exception=False):
-        return super().is_valid(raise_exception)

@@ -392,6 +392,7 @@ def test_null_error_record_create(create_table, client):
     record_data = response.json()
     assert response.status_code == 400
     assert 'null value in column "Case Number"' in record_data[0]['message']
+    assert ErrorCodes.NotNullViolation.value == record_data[0]['code']
     assert column_id == record_data[0]['detail']['column_id']
 
 
@@ -598,6 +599,7 @@ def test_record_list_filter_exceptions(create_table, client, exception):
     assert response.status_code == 400
     assert len(response_data) == 1
     assert "filters" in response_data[0]['field']
+    assert response_data[0]['code'] == ErrorCodes.UnsupportedType.value
 
 
 @pytest.mark.parametrize("exception", [BadSortFormat, SortFieldNotFound])
@@ -614,6 +616,7 @@ def test_record_list_sort_exceptions(create_table, client, exception):
     assert response.status_code == 400
     assert len(response_data) == 1
     assert "order_by" in response_data[0]['field']
+    assert response_data[0]['code'] == ErrorCodes.UnsupportedType.value
 
 
 @pytest.mark.parametrize("exception", [BadGroupFormat, GroupFieldNotFound])
@@ -630,3 +633,4 @@ def test_record_list_group_exceptions(create_table, client, exception):
     assert response.status_code == 400
     assert len(response_data) == 1
     assert "grouping" in response_data[0]['field']
+    assert response_data[0]['code'] == ErrorCodes.UnsupportedType.value

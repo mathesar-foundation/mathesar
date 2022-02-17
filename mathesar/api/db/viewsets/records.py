@@ -74,7 +74,6 @@ class RecordViewSet(viewsets.ViewSet):
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
-        # We only support adding a single record through the API.
         serializer = RecordSerializer(data=request.data, context=self.get_serializer_context(table))
         serializer.is_valid(raise_exception=True)
         serializer.save()
