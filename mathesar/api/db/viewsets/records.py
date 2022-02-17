@@ -1,17 +1,14 @@
-from psycopg2.errors import NotNullViolation
-
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.renderers import BrowsableAPIRenderer
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
-from mathesar.api.utils import get_column_id_name_bidirectional_map, get_table_or_404
+from mathesar.api.utils import get_column_name_id_bidirectional_map, get_table_or_404
 from mathesar.models import Table
 from mathesar.utils.json import MathesarJSONRenderer
 
@@ -34,10 +31,10 @@ class RecordViewSet(viewsets.ViewSet):
 
         serializer = RecordListParameterSerializer(data=request.GET)
         serializer.is_valid(raise_exception=True)
-
+        table = get_table_or_404(table_pk)
         try:
             records = paginator.paginate_queryset(
-                self.get_queryset(), request, table_pk,
+                self.get_queryset(), request, table,
                 filters=serializer.validated_data['filters'],
                 order_by=serializer.validated_data['order_by'],
                 grouping=serializer.validated_data['grouping'],
@@ -60,13 +57,10 @@ class RecordViewSet(viewsets.ViewSet):
                 field='grouping',
                 status_code=status.HTTP_400_BAD_REQUEST
             )
-
-        # TODO: Prefetch column names to avoid N+1 queries
-        columns_map = get_column_id_name_bidirectional_map(table_pk)
         serializer = RecordSerializer(
             records,
             many=True,
-            context={'request': request, 'columns_map': columns_map.inverse, 'table_pk': table_pk}
+            context=self.get_serializer_context(table)
         )
         return paginator.get_paginated_response(serializer.data)
 
@@ -75,39 +69,30 @@ class RecordViewSet(viewsets.ViewSet):
         record = table.get_record(pk)
         if not record:
             raise NotFound
-        columns_map = get_column_id_name_bidirectional_map(table.id)
-        serializer = RecordSerializer(record, context={'columns_map': columns_map.inverse, 'table_pk': table_pk})
+        serializer = RecordSerializer(record, context=self.get_serializer_context(table))
         return Response(serializer.data)
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
         # We only support adding a single record through the API.
-        assert isinstance((request.data), dict)
-        columns_map = get_column_id_name_bidirectional_map(table.id)
-        data = {columns_map[int(column_id)]: value for column_id, value in request.data.items()}
-        try:
-            record = table.create_record_or_records(data)
-        except IntegrityError as e:
-            if type(e.orig) == NotNullViolation:
-                raise database_api_exceptions.NotNullViolationAPIException(
-                    e,
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    table=table
-                )
-            else:
-                raise database_api_exceptions.MathesarAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
-        serializer = RecordSerializer(record, context={'columns_map': columns_map.inverse, 'table_pk': table_pk})
+        serializer = RecordSerializer(data=request.data, context=self.get_serializer_context(table))
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
-        columns_map = get_column_id_name_bidirectional_map(table.id)
-        data = {columns_map[int(column_id)]: value for column_id, value in request.data.items()}
-        record = table.update_record(pk, data)
-        serializer = RecordSerializer(record, context={'columns_map': columns_map.inverse, 'table_pk': table_pk})
+        serializer = RecordSerializer({'id': pk}, data=request.data, context=self.get_serializer_context(table), partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
         table.delete_record(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_serializer_context(self, table):
+        columns_map = get_column_name_id_bidirectional_map(table.id)
+        context = {'columns_map': columns_map, 'table': table}
+        return context

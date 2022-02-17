@@ -9,7 +9,7 @@ from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
 from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.api.utils import get_column_id_name_bidirectional_map
+from mathesar.api.utils import get_column_name_id_bidirectional_map
 
 
 def test_record_list(create_table, client):
@@ -78,16 +78,16 @@ def test_record_serialization(empty_nasa_table, create_column, client, type_, va
 def test_record_list_filter(create_table, client):
     table_name = 'NASA Record List Filter'
     table = create_table(table_name)
-    columns_id_name_map = get_column_id_name_bidirectional_map(table.id)
+    columns_name_id_map = get_column_name_id_bidirectional_map(table.id)
     filter_list = [
         {'or': [
             {'and': [
-                {'field': columns_id_name_map.inverse['Center'], 'op': '==', 'value': 'NASA Ames Research Center'},
-                {'field': columns_id_name_map.inverse['Case Number'], 'op': '==', 'value': 'ARC-14048-1'}
+                {'field': columns_name_id_map['Center'], 'op': '==', 'value': 'NASA Ames Research Center'},
+                {'field': columns_name_id_map['Case Number'], 'op': '==', 'value': 'ARC-14048-1'}
             ]},
             {'and': [
-                {'field': columns_id_name_map.inverse['Center'], 'op': '==', 'value': 'NASA Kennedy Space Center'},
-                {'field': columns_id_name_map.inverse['Case Number'], 'op': '==', 'value': 'KSC-12871'}
+                {'field': columns_name_id_map['Center'], 'op': '==', 'value': 'NASA Kennedy Space Center'},
+                {'field': columns_name_id_map['Case Number'], 'op': '==', 'value': 'KSC-12871'}
             ]}
         ]}
     ]
@@ -123,7 +123,7 @@ def test_record_list_filter(create_table, client):
 def test_record_list_filter_duplicates(create_table, client):
     table_name = 'NASA Record List Filter Duplicates'
     table = create_table(table_name)
-    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    columns_name_id_map = get_column_name_id_bidirectional_map(table.id)
     filter_list = [
         {'field': '', 'op': 'get_duplicates', 'value': [columns_name_id_map['Patent Expiration Date']]}
     ]
@@ -154,7 +154,7 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
             row_values_list.append({new_column_name: row_value})
 
         table.create_record_or_records(row_values_list)
-        columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+        columns_name_id_map = get_column_name_id_bidirectional_map(table.id)
         for op, value, expected in operators_and_expected_values:
             filter_list = [{'field': columns_name_id_map[new_column_name], 'op': op, 'value': value}]
             name_converted_filter_list = [{'field': new_column_name, 'op': op, 'value': value}]
@@ -204,7 +204,7 @@ def test_record_list_filter_for_boolean_type(create_table, client):
 def test_record_list_sort(create_table, client):
     table_name = 'NASA Record List Order'
     table = create_table(table_name)
-    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    columns_name_id_map = get_column_name_id_bidirectional_map(table.id)
     order_by = [
         {'field': 'Center', 'direction': 'desc'},
         {'field': 'Case Number', 'direction': 'asc'},
@@ -372,7 +372,7 @@ grouping_params = [
 def test_null_error_record_create(create_table, client):
     table_name = 'NASA Record Create'
     table = create_table(table_name)
-    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    columns_name_id_map = get_column_name_id_bidirectional_map(table.id)
     column_id = columns_name_id_map['Case Number']
     data = {"nullable": False}
     client.patch(
@@ -399,7 +399,7 @@ def test_record_list_groups(
         table_name, grouping, expected_groups, create_table, client,
 ):
     table = create_table(table_name)
-    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    columns_name_id_map = get_column_name_id_bidirectional_map(table.id)
 
     order_by = [
         {'field': columns_name_id_map['id'], 'direction': 'asc'},
@@ -478,7 +478,7 @@ def test_record_detail(create_table, client):
     record_as_dict = record._asdict()
 
     assert response.status_code == 200
-    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    columns_name_id_map = get_column_name_id_bidirectional_map(table.id)
     for column_name in table.sa_column_names:
         column_id_str = str(columns_name_id_map[column_name])
         assert column_id_str in record_data
@@ -490,7 +490,7 @@ def test_record_create(create_table, client):
     table = create_table(table_name)
     records = table.get_records()
     original_num_records = len(records)
-    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    columns_name_id_map = get_column_name_id_bidirectional_map(table.id)
     data = {
         columns_name_id_map['Center']: 'NASA Example Space Center',
         columns_name_id_map['Status']: 'Application',
@@ -504,7 +504,7 @@ def test_record_create(create_table, client):
     record_data = response.json()
     assert response.status_code == 201
     assert len(table.get_records()) == original_num_records + 1
-    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    columns_name_id_map = get_column_name_id_bidirectional_map(table.id)
 
     for column_name in table.sa_column_names:
         column_id_str = str(columns_name_id_map[column_name])
@@ -521,7 +521,7 @@ def test_record_partial_update(create_table, client):
 
     original_response = client.get(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
     original_data = original_response.json()
-    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    columns_name_id_map = get_column_name_id_bidirectional_map(table.id)
     data = {
         columns_name_id_map['Center']: 'NASA Example Space Center',
         columns_name_id_map['Status']: 'Example',
@@ -587,7 +587,7 @@ def test_record_404(create_table, client):
 def test_record_list_filter_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    columns_name_id_map = get_column_name_id_bidirectional_map(table.id)
     filter_list = json.dumps([{"field": columns_name_id_map['Center'], "op": "is_null"}])
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
@@ -603,7 +603,7 @@ def test_record_list_filter_exceptions(create_table, client, exception):
 def test_record_list_sort_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    columns_name_id_map = get_column_name_id_bidirectional_map(table.id)
     order_by = json.dumps([{"field": columns_name_id_map['id'], "direction": "desc"}])
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
@@ -619,7 +619,7 @@ def test_record_list_sort_exceptions(create_table, client, exception):
 def test_record_list_group_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    columns_name_id_map = get_column_id_name_bidirectional_map(table.id).inverse
+    columns_name_id_map = get_column_name_id_bidirectional_map(table.id)
     group_by = json.dumps({"columns": [columns_name_id_map['Case Number']]})
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(

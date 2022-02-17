@@ -40,14 +40,13 @@ class ColumnLimitOffsetPagination(DefaultLimitOffsetPagination):
 class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
 
     def paginate_queryset(
-            self, queryset, request, table_id, filters=[], order_by=[], group_by=None,
+            self, queryset, request, table, filters=[], order_by=[], group_by=None,
     ):
         self.limit = self.get_limit(request)
         if self.limit is None:
             self.limit = self.default_limit
         self.offset = self.get_offset(request)
         # TODO: Cache count value somewhere, since calculating it is expensive.
-        table = get_table_or_404(pk=table_id)
         self.count = table.sa_num_records(filters=filters)
         self.request = request
 
@@ -150,7 +149,7 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         return converted_filters_object, name_converted_group_by, converted_order_by
 
     def paginate_queryset(
-            self, queryset, request, table_id, filters=[], order_by=[], grouping={},
+            self, queryset, request, table, filters=[], order_by=[], grouping={},
     ):
 
         # Convert column ids from `filters`, `order_by` and `grouping` into column names before passing it to the db layer.
@@ -164,7 +163,7 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         records = super().paginate_queryset(
             queryset,
             request,
-            table_id,
+            table,
             filters=converted_filters_object,
             order_by=converted_order_by,
             group_by=group_by,
