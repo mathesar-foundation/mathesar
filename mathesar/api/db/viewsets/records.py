@@ -7,7 +7,7 @@ from rest_framework.renderers import BrowsableAPIRenderer
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
-from db.functions.exceptions import BadDBFunctionFormat, UnknownDBFunctionId, ReferencedColumnsDontExist
+from db.functions.exceptions import BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 
@@ -56,7 +56,7 @@ class RecordViewSet(viewsets.ViewSet):
                 grouping=serializer.validated_data['grouping'],
                 duplicate_only=serializer.validated_data['duplicate_only'],
             )
-        except (BadDBFunctionFormat, UnknownDBFunctionId, ReferencedColumnsDontExist) as e:
+        except (BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist) as e:
             raise database_api_exceptions.BadFilterAPIException(
                 e,
                 field='filters',

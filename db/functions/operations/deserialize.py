@@ -1,6 +1,6 @@
 from db.functions.base import DBFunction, Literal, ColumnName
 from db.functions.known_db_functions import known_db_functions
-from db.functions.exceptions import UnknownDBFunctionId, BadDBFunctionFormat
+from db.functions.exceptions import UnknownDBFunctionID, BadDBFunctionFormat
 
 
 def get_db_function_from_ma_function_spec(spec: dict) -> DBFunction:
@@ -62,7 +62,7 @@ def _get_db_function_subclass_by_id(subclass_id):
     for db_function_subclass in known_db_functions:
         if db_function_subclass.id == subclass_id:
             return db_function_subclass
-    raise UnknownDBFunctionId(
+    raise UnknownDBFunctionID(
         f"DBFunction subclass with id {subclass_id} not found (or not"
         + "available on this DB)."
     )
