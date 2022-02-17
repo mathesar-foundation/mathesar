@@ -71,8 +71,8 @@ def base_schema_url(schema, live_server):
 
 
 @pytest.fixture
-def schemas_page_url(schema, live_server):
-    return f"{live_server}/{schema.database.name}/schemas/"
+def schemas_page_url(live_server, test_db_name):
+    return f"{live_server}/{test_db_name}/schemas/"
 
 
 @pytest.fixture
