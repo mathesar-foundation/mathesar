@@ -1,9 +1,8 @@
 from playwright.sync_api import Page, expect
 
 
-def test_create_schema(page: Page, schemas_page_url):
+def test_create_and_delete_schema(page: Page, schemas_page_url):
     page.goto(schemas_page_url)
-    page.pause()
     schema_name = "foo"
     schema_entry = page.locator(f".schema-list .schema-row:has-text('{schema_name}')")
     expect(schema_entry).not_to_be_visible()
@@ -11,3 +10,9 @@ def test_create_schema(page: Page, schemas_page_url):
     page.fill("[aria-label='name']", schema_name)
     page.click("button:has-text('Save')")
     expect(schema_entry).to_be_visible()
+    # We're also deleting the schema in the same test as a way of cleaning up
+    # the state created in this test so as not to interfer with other tests.
+    # This is a hack for now.
+    schema_entry.locator("button[aria-label='Delete Schema']").click()
+    page.click("button:has-text('Delete Schema')")
+    expect(schema_entry).not_to_be_visible()
