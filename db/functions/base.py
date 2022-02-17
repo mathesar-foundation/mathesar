@@ -20,6 +20,10 @@ from db.functions import hints
 from db.functions.exceptions import BadDBFunctionFormat
 
 
+def call_sql_function(function_name, *parameters):
+    return getattr(func, function_name)(*parameters)
+
+
 # NOTE: this class is abstract.
 class DBFunction(ABC):
     id = None
@@ -235,7 +239,8 @@ class StartsWith(DBFunction):
 
     @staticmethod
     def to_sa_expression(string, prefix):
-        return string.like(f'{prefix}%')
+        pattern = func.concat(prefix, '%')
+        return string.like(pattern)
 
 
 class Contains(DBFunction):
@@ -250,7 +255,8 @@ class Contains(DBFunction):
 
     @staticmethod
     def to_sa_expression(string, sub_string):
-        return string.like(f'%{sub_string}%')
+        pattern = func.concat('%', sub_string, '%')
+        return string.like(pattern)
 
 
 class ToLowercase(DBFunction):
