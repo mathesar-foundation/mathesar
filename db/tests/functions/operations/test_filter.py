@@ -7,6 +7,9 @@ from db.utils import execute_query
 from db.functions.base import (
     ColumnName, Not, Literal, Empty, Equal, Greater, And, Or
 )
+from db.functions.redundant import (
+    GreaterOrEqual, LesserOrEqual
+)
 from db.functions.operations.apply import apply_db_function_as_filter
 
 
@@ -26,6 +29,8 @@ database_functions = {
     "and": lambda x: And(x),
     "or": lambda x: Or(x),
     "not": lambda x: Not(x),
+    "ge": lambda x, v: GreaterOrEqual([ColumnName([x]), Literal([v])]),
+    "le": lambda x, v: LesserOrEqual([ColumnName([x]), Literal([v])]),
 }
 
 
@@ -51,6 +56,8 @@ op_to_python_func = {
 }
 
 
+# See this for list of possible test cases:
+# https://github.com/centerofci/mathesar/pull/1069/files#diff-0802cfe1f265d2b0d6b86f5c096a3917af004a3403ad0b9b43cc3c030b801dfdL125
 ops_test_list = [
     # is_null
     ("varchar", "is_null", None, 5),
@@ -71,6 +78,14 @@ ops_test_list = [
     ("varchar", "gt", "string0", 100),
     ("numeric", "gt", 50, 50),
     ("date", "gt", "2000-01-01", 99),
+    # ge
+    ("varchar", "ge", "string1", 100),
+    ("numeric", "ge", 50, 51),
+    ("date", "ge", "2000-01-01", 100),
+    # le
+    ("varchar", "le", "string2", 13),
+    ("numeric", "le", 51, 51),
+    ("date", "le", "2099-01-01", 100),
 ]
 
 
