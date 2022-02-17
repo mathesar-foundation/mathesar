@@ -99,9 +99,15 @@ We use [ESLint](https://eslint.org/) to help spot more complex issues within cod
 
 ## Testing
 
-We use [Jest](https://jestjs.io/) to run our tests and test utils functions. And we use [Testing Library](https://testing-library.com/docs/svelte-testing-library/intro/) to test our Svelte components.
+### Integration tests
 
-### Running tests
+See [Integration tests](../mathesar/tests/integration/README.md).
+
+### Unit tests
+
+We use [Jest](https://jestjs.io/) to run our unit tests, and we use [Testing Library](https://testing-library.com/docs/svelte-testing-library/intro/) to test our Svelte components.
+
+#### Running unit tests
 
 - Run all our tests:
 
@@ -117,7 +123,7 @@ We use [Jest](https://jestjs.io/) to run our tests and test utils functions. And
 
   This will run all test files with file names containing `TextInput`.
 
-### Writing tests
+#### Writing unit tests
 
 - Let's pretend we have a file `primeUtils.ts` containing function `getPrimality` that returns `true` for prime numbers.
 
