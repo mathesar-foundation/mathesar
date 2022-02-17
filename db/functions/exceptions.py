@@ -1,8 +1,12 @@
-class BadDBFunctionFormat(Exception):
+class DBFunctionException(Exception):
     pass
 
 
-class UnknownDBFunctionId(BadDBFunctionFormat):
+class BadDBFunctionFormat(DBFunctionException):
+    pass
+
+
+class UnknownDBFunctionID(BadDBFunctionFormat):
     pass
 
 
