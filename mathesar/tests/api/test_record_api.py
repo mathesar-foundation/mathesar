@@ -51,6 +51,7 @@ def test_record_list(create_table, client):
 
     assert response.status_code == 200
     assert response_data['count'] == 1393
+    assert response_data['grouping'] is None
     assert len(response_data['results']) == 50
     for column_id in table.columns.all().values_list('id', flat=True):
         assert str(column_id) in record_data

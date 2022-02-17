@@ -132,12 +132,12 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         columns_name_dict = {column.id: column for column in columns}
         # Replace column id value used in the `field` property with column name
         converted_order_by = [{**column, 'field': columns_name_dict[column['field']].name} for column in order_by]
-        group_by_columns_names = []
+        name_converted_group_by = None
         if grouping:
             group_by_columns_names = [columns_name_dict[column_id].name for column_id in grouping['columns']]
+            name_converted_group_by = {**grouping, 'columns': group_by_columns_names}
 
         # Replace column id values used in the `columns` property with column names
-        name_converted_group_by = {**grouping, 'columns': group_by_columns_names}
         # self._convert_filter_field_id_to_name modifies the argument passed which affects the original object
         converted_filters_object = copy.deepcopy(filters)
         # recursively loop and get to the last child object which contains the `field` property that holds the column id
