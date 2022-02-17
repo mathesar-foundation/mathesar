@@ -73,7 +73,7 @@ class Literal(DBFunction):
     name = 'as literal'
     hints = tuple([
         hints.parameter_count(1),
-        hints.parameter(1, hints.literal),
+        hints.parameter(0, hints.literal),
     ])
 
     @staticmethod
@@ -87,7 +87,7 @@ class ColumnName(DBFunction):
     name = 'as column name'
     hints = tuple([
         hints.parameter_count(1),
-        hints.parameter(1, hints.column),
+        hints.parameter(0, hints.column),
     ])
 
     @property
@@ -190,7 +190,8 @@ class In(DBFunction):
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
-        hints.parameter(2, hints.array),
+        hints.parameter(0, hints.any),
+        hints.parameter(1, hints.array),
     ])
 
     @staticmethod
