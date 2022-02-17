@@ -237,6 +237,21 @@ class StartsWith(DBFunction):
         return string.like(f'{prefix}%')
 
 
+class Contains(DBFunction):
+    id = 'contains'
+    name = 'contains'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.all_parameters(hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    @staticmethod
+    def to_sa_expression(string, sub_string):
+        return string.like(f'%{sub_string}%')
+
+
 class ToLowercase(DBFunction):
     id = 'to_lowercase'
     name = 'to lowercase'
