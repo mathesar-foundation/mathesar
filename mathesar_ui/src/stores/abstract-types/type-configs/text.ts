@@ -2,9 +2,6 @@ import type { AbstractTypeConfiguration } from '../types.d';
 
 const textType: AbstractTypeConfiguration = {
   icon: 'T',
-  input: {
-    type: 'string',
-  },
   defaultDbType: 'VARCHAR',
   typeSwitchOptions: {
     database: {
@@ -96,6 +93,11 @@ const textType: AbstractTypeConfiguration = {
                       op: 'eq',
                       value: null,
                     },
+                    {
+                      id: 'length',
+                      op: 'eq',
+                      value: undefined,
+                    },
                   ],
                 },
               ],
@@ -112,6 +114,17 @@ const textType: AbstractTypeConfiguration = {
         ],
       },
     },
+  },
+  input: {
+    type: 'string',
+    conditionalProps: {
+      TEXT: {
+        size: 'md'
+      },
+      VARCHAR: {
+        size: 'auto'
+      }
+    }
   },
 };
 

@@ -47,6 +47,12 @@ export interface AbstractTypeConfiguration {
   icon: string;
   input: {
     type: DynamicInputType;
+    conditionalProps?: Record<
+      string,
+      {
+        [key: string]: unknown;
+      }
+    >;
   };
   typeSwitchOptions?: {
     database: AbstractTypeDbConfigOptions;
