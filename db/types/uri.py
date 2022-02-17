@@ -6,7 +6,8 @@ from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.types import UserDefinedType
 
 from db.functions import hints
-from db.functions.base import DBFunction
+from db.functions.base import DBFunction, Contains
+from db.functions.redundant import RedundantDBFunction
 
 from db.types import base
 
@@ -129,7 +130,7 @@ def install_tld_lookup_table(engine):
 
 class ExtractURIAuthority(DBFunction):
     id = 'extract_uri_authority'
-    name = 'Extract URI Authority'
+    name = 'extract URI authority'
     hints = tuple([
         hints.parameter_count(1),
         hints.parameter(1, hints.uri),
@@ -139,3 +140,24 @@ class ExtractURIAuthority(DBFunction):
     @staticmethod
     def to_sa_expression(uri):
         return func.getattr(URIFunction.AUTHORITY)(uri)
+
+
+class URIAuthorityContains(RedundantDBFunction):
+    id = 'uri_authority_contains'
+    name = 'URI authority contains'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.parameter(0, hints.uri),
+        hints.parameter(1, hints.string_like),
+        hints.mathesar_filter,
+    ])
+    depends_on = tuple([URIFunction.AUTHORITY])
+
+    def unpack(self):
+        param0 = self.parameters[0]
+        param1 = self.parameters[1]
+        return Contains([
+            ExtractURIAuthority([param0]),
+            param1,
+        ])
