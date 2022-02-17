@@ -60,8 +60,7 @@ op_to_python_func = {
 }
 
 
-# See this for list of possible test cases:
-# https://github.com/centerofci/mathesar/pull/1069/files#diff-0802cfe1f265d2b0d6b86f5c096a3917af004a3403ad0b9b43cc3c030b801dfdL125
+# Table can be examined in db/tests/resources/filter_sort_create.sql
 ops_test_list = [
     # starts_with
     ("varchar", "starts_with", "string9", 11),
