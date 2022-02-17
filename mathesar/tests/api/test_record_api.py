@@ -1,12 +1,16 @@
 import json
 from unittest.mock import patch
 
-import pytest
-from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
+from django.core.cache import cache
 
+import pytest
+from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
+
+from db.functions.exceptions import UnknownDBFunctionID
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
 from mathesar import models
+from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
@@ -44,10 +48,10 @@ def test_record_list(create_table, client):
     table = create_table(table_name)
 
     response = client.get(f'/api/db/v0/tables/{table.id}/records/')
+    assert response.status_code == 200
+
     response_data = response.json()
     record_data = response_data['results'][0]
-
-    assert response.status_code == 200
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 50
     for column_name in table.sa_column_names:
@@ -77,52 +81,93 @@ def test_record_serialization(empty_nasa_table, client, type_, value):
 def test_record_list_filter(create_table, client):
     table_name = 'NASA Record List Filter'
     table = create_table(table_name)
+    column_names_to_ids = table.get_dj_column_name_to_id_mapping()
 
-    filter_list = [
-        {'or': [
-            {'and': [
-                {'field': 'Center', 'op': '==', 'value': 'NASA Ames Research Center'},
-                {'field': 'Case Number', 'op': '==', 'value': 'ARC-14048-1'}
+    filter = {"or": [
+        {"and": [
+            {"equal": [
+                {"column_id": [column_names_to_ids["Center"]]},
+                {"literal": ["NASA Ames Research Center"]}
             ]},
-            {'and': [
-                {'field': 'Center', 'op': '==', 'value': 'NASA Kennedy Space Center'},
-                {'field': 'Case Number', 'op': '==', 'value': 'KSC-12871'}
-            ]}
-        ]}
-    ]
-    json_filter_list = json.dumps(filter_list)
+            {"equal": [
+                {"column_id": [column_names_to_ids["Case Number"]]},
+                {"literal": ["ARC-14048-1"]}
+            ]},
+        ]},
+        {"and": [
+            {"equal": [
+                {"column_id": [column_names_to_ids["Center"]]},
+                {"literal": ["NASA Kennedy Space Center"]}
+            ]},
+            {"equal": [
+                {"column_id": [column_names_to_ids["Case Number"]]},
+                {"literal": ["KSC-12871"]}
+            ]},
+        ]},
+    ]}
+    json_filter = json.dumps(filter)
 
     with patch.object(
         models, "db_get_records", side_effect=models.db_get_records
     ) as mock_get:
         response = client.get(
-            f'/api/db/v0/tables/{table.id}/records/?filters={json_filter_list}'
+            f'/api/db/v0/tables/{table.id}/records/?filter={json_filter}'
         )
-        response_data = response.json()
 
     assert response.status_code == 200
+    response_data = response.json()
     assert response_data['count'] == 2
     assert len(response_data['results']) == 2
     assert mock_get.call_args is not None
-    assert mock_get.call_args[1]['filters'] == filter_list
+    column_ids_to_names = table.get_dj_column_id_to_name_mapping()
+    processed_filter = rewrite_db_function_spec_column_ids_to_names(
+        column_ids_to_names=column_ids_to_names,
+        spec=filter,
+    )
+    assert mock_get.call_args[1]['filter'] == processed_filter
 
 
-def test_record_list_filter_duplicates(create_table, client):
+def test_record_list_duplicate_rows_only(create_table, client):
     table_name = 'NASA Record List Filter Duplicates'
     table = create_table(table_name)
 
-    filter_list = [
-        {'field': '', 'op': 'get_duplicates', 'value': ['Patent Expiration Date']}
-    ]
-    json_filter_list = json.dumps(filter_list)
+    duplicate_only = ['Patent Expiration Date']
+    json_duplicate_only = json.dumps(duplicate_only)
 
     with patch.object(models, "db_get_records", return_value=[]) as mock_get:
-        client.get(f'/api/db/v0/tables/{table.id}/records/?filters={json_filter_list}')
+        client.get(f'/api/db/v0/tables/{table.id}/records/?duplicate_only={json_duplicate_only}')
     assert mock_get.call_args is not None
-    assert mock_get.call_args[1]['filters'] == filter_list
+    assert mock_get.call_args[1]['duplicate_only'] == duplicate_only
 
 
-def _test_filter_with_added_columns(table, client, columns_to_add, operators_and_expected_values):
+def test_filter_with_added_columns(create_table, client):
+    cache.clear()
+    table_name = 'NASA Record List Filter'
+    table = create_table(table_name)
+
+    columns_to_add = [
+        {
+            'name': 'Published',
+            'type': 'BOOLEAN',
+            'default_value': True,
+            'row_values': {1: False, 2: False, 3: None}
+        }
+    ]
+
+    operators_and_expected_values = [
+        (
+            lambda new_column_id, value: {"not": [{"equal": [{"column_id": [new_column_id]}, {"literal": [value]}]}]},
+            True, 2),
+        (
+            lambda new_column_id, value: {"equal": [{"column_id": [new_column_id]}, {"literal": [value]}]},
+            False, 2),
+        (
+            lambda new_column_id, _: {"empty": [{"column_id": [new_column_id]}]},
+            None, 1394),
+        (
+            lambda new_column_id, _: {"not": [{"empty": [{"column_id": [new_column_id]}]}]},
+            None, 49),
+    ]
 
     for new_column in columns_to_add:
         new_column_name = new_column.get("name")
@@ -138,16 +183,20 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
             row_values_list.append({new_column_name: row_value})
 
         table.create_record_or_records(row_values_list)
+        column_ids_to_names = table.get_dj_column_id_to_name_mapping()
 
-        for op, value, expected in operators_and_expected_values:
-            filter_list = [{'field': new_column_name, 'op': op, 'value': value}]
-            json_filter_list = json.dumps(filter_list)
+        column_names_to_ids = table.get_dj_column_name_to_id_mapping()
+        new_column_id = column_names_to_ids[new_column_name]
+
+        for filter_lambda, value, expected in operators_and_expected_values:
+            filter = filter_lambda(new_column_id, value)
+            json_filter = json.dumps(filter)
 
             with patch.object(
                 models, "db_get_records", side_effect=models.db_get_records
             ) as mock_get:
                 response = client.get(
-                    f'/api/db/v0/tables/{table.id}/records/?filters={json_filter_list}'
+                    f'/api/db/v0/tables/{table.id}/records/?filter={json_filter}'
                 )
                 response_data = response.json()
 
@@ -158,30 +207,11 @@ def _test_filter_with_added_columns(table, client, columns_to_add, operators_and
             assert response_data['count'] == expected
             assert len(response_data['results']) == num_results
             assert mock_get.call_args is not None
-            assert mock_get.call_args[1]['filters'] == filter_list
-
-
-def test_record_list_filter_for_boolean_type(create_table, client):
-    table_name = 'NASA Record List Filter'
-    table = create_table(table_name)
-
-    columns_to_add = [
-        {
-            'name': 'Published',
-            'type': 'BOOLEAN',
-            'default_value': True,
-            'row_values': {1: False, 2: False, 3: None}
-        }
-    ]
-
-    op_value_and_expected = [
-        ('ne', True, 2),
-        ('eq', False, 2),
-        ('is_null', None, 1394),
-        ('is_not_null', None, 49)
-    ]
-
-    _test_filter_with_added_columns(table, client, columns_to_add, op_value_and_expected)
+            processed_filter = rewrite_db_function_spec_column_ids_to_names(
+                column_ids_to_names=column_ids_to_names,
+                spec=filter,
+            )
+            assert mock_get.call_args[1]['filter'] == processed_filter
 
 
 def test_record_list_sort(create_table, client):
@@ -376,6 +406,7 @@ def test_null_error_record_create(create_table, client):
     record_data = response.json()
     assert response.status_code == 400
     assert 'null value in column "Case Number"' in record_data[0]['message']
+    assert column_id == record_data[0]['detail']['column_id']
 
 
 @pytest.mark.parametrize('table_name,grouping,expected_groups', grouping_params)
@@ -558,19 +589,19 @@ def test_record_404(create_table, client):
     assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
-@pytest.mark.parametrize("exception", [BadFilterFormat, FilterFieldNotFound])
-def test_record_list_filter_exceptions(create_table, client, exception):
+def test_record_list_filter_exceptions(create_table, client):
+    exception = UnknownDBFunctionID
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    filter_list = json.dumps([{"field": "Center", "op": "is_null"}])
+    filter = json.dumps({"empty": [{"column_name": ["Center"]}]})
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
-            f'/api/db/v0/tables/{table.id}/records/?filters={filter_list}'
+            f'/api/db/v0/tables/{table.id}/records/?filter={filter}'
         )
         response_data = response.json()
     assert response.status_code == 400
     assert len(response_data) == 1
-    assert "filters" in response_data[0]['field']
+    assert "filter" in response_data[0]['field']
 
 
 @pytest.mark.parametrize("exception", [BadSortFormat, SortFieldNotFound])

@@ -17,8 +17,10 @@ from abc import ABC, abstractmethod
 from sqlalchemy import column, not_, and_, or_, func, literal
 
 from db.functions import hints
+from db.functions.exceptions import BadDBFunctionFormat
 
 
+# NOTE: this class is abstract.
 class DBFunction(ABC):
     id = None
     name = None
@@ -30,6 +32,13 @@ class DBFunction(ABC):
     # strings.
     depends_on = None
 
+    def __eq__(self, other):
+        return (
+            isinstance(other, DBFunction)
+            and self.id == other.id
+            and self.parameters == other.parameters
+        )
+
     def __init__(self, parameters):
         if self.id is None:
             raise ValueError('DBFunction subclasses must define an ID.')
@@ -37,6 +46,8 @@ class DBFunction(ABC):
             raise ValueError('DBFunction subclasses must define a name.')
         if self.depends_on is not None and not isinstance(self.depends_on, tuple):
             raise ValueError('DBFunction subclasses\' depends_on attribute must either be None or a tuple of SQL function names.')
+        if not isinstance(parameters, list):
+            raise BadDBFunctionFormat('DBFunction instance parameter `parameters` must be a list.')
         self.parameters = parameters
 
     @property
@@ -45,7 +56,7 @@ class DBFunction(ABC):
         Useful when checking if all referenced columns are present in the queried relation."""
         columns = set([])
         for parameter in self.parameters:
-            if isinstance(parameter, ColumnReference):
+            if isinstance(parameter, ColumnName):
                 columns.add(parameter.column)
             elif isinstance(parameter, DBFunction):
                 columns.update(parameter.referenced_columns)
@@ -59,7 +70,7 @@ class DBFunction(ABC):
 
 class Literal(DBFunction):
     id = 'literal'
-    name = 'Literal'
+    name = 'as literal'
     hints = tuple([
         hints.parameter_count(1),
         hints.parameter(1, hints.literal),
@@ -70,9 +81,10 @@ class Literal(DBFunction):
         return literal(primitive)
 
 
-class ColumnReference(DBFunction):
-    id = 'column_reference'
-    name = 'Column Reference'
+# This represents referencing columns by their Postgres name.
+class ColumnName(DBFunction):
+    id = 'column_name'
+    name = 'as column name'
     hints = tuple([
         hints.parameter_count(1),
         hints.parameter(1, hints.column),
@@ -89,7 +101,7 @@ class ColumnReference(DBFunction):
 
 class List(DBFunction):
     id = 'list'
-    name = 'List'
+    name = 'as list'
 
     @staticmethod
     def to_sa_expression(*items):
@@ -98,10 +110,12 @@ class List(DBFunction):
 
 class Empty(DBFunction):
     id = 'empty'
-    name = 'Empty'
+    name = 'is empty'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(1),
+        hints.parameter(0, hints.any),
+        hints.mathesar_filter,
     ])
 
     @staticmethod
@@ -111,23 +125,28 @@ class Empty(DBFunction):
 
 class Not(DBFunction):
     id = 'not'
-    name = 'Not'
+    name = 'negate'
     hints = tuple([
         hints.returns(hints.boolean),
-        hints.parameter_count(1),
     ])
 
     @staticmethod
-    def to_sa_expression(value):
-        return not_(value)
+    def to_sa_expression(*values):
+        length = len(values)
+        if length > 1:
+            return not_(and_(*values))
+        else:
+            return not_(values[0])
 
 
 class Equal(DBFunction):
     id = 'equal'
-    name = 'Equal'
+    name = 'is equal to'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
+        hints.all_parameters(hints.any),
+        hints.mathesar_filter,
     ])
 
     @staticmethod
@@ -137,11 +156,12 @@ class Equal(DBFunction):
 
 class Greater(DBFunction):
     id = 'greater'
-    name = 'Greater'
+    name = 'is greater than'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
         hints.all_parameters(hints.comparable),
+        hints.mathesar_filter,
     ])
 
     @staticmethod
@@ -151,11 +171,12 @@ class Greater(DBFunction):
 
 class Lesser(DBFunction):
     id = 'lesser'
-    name = 'Lesser'
+    name = 'is lesser than'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
         hints.all_parameters(hints.comparable),
+        hints.mathesar_filter,
     ])
 
     @staticmethod
@@ -165,7 +186,7 @@ class Lesser(DBFunction):
 
 class In(DBFunction):
     id = 'in'
-    name = 'In'
+    name = 'is in'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
@@ -179,7 +200,7 @@ class In(DBFunction):
 
 class And(DBFunction):
     id = 'and'
-    name = 'And'
+    name = 'and'
     hints = tuple([
         hints.returns(hints.boolean),
     ])
@@ -191,7 +212,7 @@ class And(DBFunction):
 
 class Or(DBFunction):
     id = 'or'
-    name = 'Or'
+    name = 'or'
     hints = tuple([
         hints.returns(hints.boolean),
     ])
@@ -203,11 +224,12 @@ class Or(DBFunction):
 
 class StartsWith(DBFunction):
     id = 'starts_with'
-    name = 'Starts With'
+    name = 'starts with'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
         hints.all_parameters(hints.string_like),
+        hints.mathesar_filter,
     ])
 
     @staticmethod
@@ -217,10 +239,12 @@ class StartsWith(DBFunction):
 
 class ToLowercase(DBFunction):
     id = 'to_lowercase'
-    name = 'To Lowercase'
+    name = 'to lowercase'
     hints = tuple([
+        hints.returns(hints.string_like),
         hints.parameter_count(1),
         hints.all_parameters(hints.string_like),
+        hints.mathesar_filter,
     ])
 
     @staticmethod
