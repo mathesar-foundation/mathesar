@@ -9,7 +9,7 @@
     Column,
   } from '@mathesar/stores/table-data/types';
   import RowControl from './RowControl.svelte';
-  import Cell from './cell/Cell.svelte';
+  import EditableCell from './editable-cell/EditableCell.svelte';
   import GroupHeader from './GroupHeader.svelte';
   import RowPlaceholder from './RowPlaceholder.svelte';
 
@@ -80,7 +80,7 @@
     <RowControl primaryKeyColumn={primaryKey} {row} {meta} {recordsData} />
 
     {#each $columnsDataStore.columns as column (column.name)}
-      <Cell
+      <EditableCell
         {display}
         {row}
         bind:value={row[column.name]}

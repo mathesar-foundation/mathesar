@@ -14,6 +14,7 @@
   } from '@mathesar/stores/table-data/types';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import CellInput from './CellInput.svelte';
+  import { getClasses } from './utils';
 
   export let recordsData: RecordsData;
   export let display: Display;
@@ -26,6 +27,7 @@
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
   $: isBeingEdited =
     !!$activeCell && isCellBeingEdited($activeCell, row, column);
+  $: classes = getClasses(column);
 
   let cellRef: HTMLElement;
 
@@ -51,7 +53,7 @@
 
 <div
   bind:this={cellRef}
-  class="cell"
+  class={classes}
   class:is-active={isActive}
   class:is-in-edit={isBeingEdited}
   class:is-pk={column.primary_key}
@@ -86,3 +88,7 @@
     <div class="loader" />
   {/if}
 </div>
+
+<style lang="scss">
+  @import 'EditableCell.scss';
+</style>

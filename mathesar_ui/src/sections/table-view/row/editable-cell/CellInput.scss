@@ -1,0 +1,22 @@
+.cell-input-box {
+  border: none;
+  outline: 0;
+  margin: 0;
+  padding: 6px 14px;
+  line-height: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  display: block;
+  background: #fff;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  width: 100%;
+
+  &.is-null-displayed {
+    z-index: -1;
+    left: -4px;
+  }
+}

@@ -1,0 +1,43 @@
+.editable-cell {
+  user-select: none;
+  overflow: hidden;
+  background-color: #fff;
+
+  .content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    padding: 6px 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .loader {
+    top: 6px;
+    left: 15px;
+    right: 15px;
+    bottom: 6px;
+    position: absolute;
+    background: #efefef;
+  }
+
+  &.is-active {
+    z-index: 5;
+    background: #fff !important;
+    box-shadow: 0 0 0 2px #428af4;
+    border-radius: 2px;
+    border: none;
+    bottom: 1px;
+
+    &.is-in-edit {
+      box-shadow: 0 0 0 3px #428af4;
+    }
+
+    &.is-pk {
+      box-shadow: 0 0 0 2px #a8a8a8;
+    }
+  }
+}

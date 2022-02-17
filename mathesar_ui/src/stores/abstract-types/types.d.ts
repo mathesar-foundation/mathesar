@@ -42,17 +42,14 @@ export interface AbstractTypeDbConfigOptions {
   };
 }
 
+export type ConditionalPropsForDbType = Record<string, unknown>;
+
 export interface AbstractTypeConfiguration {
   defaultDbType?: DbType;
   icon: string;
   input: {
     type: DynamicInputType;
-    conditionalProps?: Record<
-      string,
-      {
-        [key: string]: unknown;
-      }
-    >;
+    conditionalProps?: Record<DbType, ConditionalPropsForDbType>;
   };
   typeSwitchOptions?: {
     database: AbstractTypeDbConfigOptions;

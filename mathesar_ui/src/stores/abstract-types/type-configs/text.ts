@@ -122,7 +122,7 @@ const textType: AbstractTypeConfiguration = {
         size: 'md'
       },
       VARCHAR: {
-        size: 'auto'
+        size: 'md-auto'
       }
     }
   },

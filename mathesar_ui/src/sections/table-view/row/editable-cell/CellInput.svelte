@@ -5,6 +5,7 @@
     Column,
     RecordsData,
   } from '@mathesar/stores/table-data/types';
+  import { getInputAttributes } from './utils';
 
   export let recordsData: RecordsData;
   export let row: TableRecord;
@@ -16,6 +17,7 @@
   let timer: number;
 
   $: isNullDisplayed = value === null;
+  $: inputAttrs = getInputAttributes(column);
 
   onMount(() => {
     inputRef.focus();
@@ -68,12 +70,17 @@
 <input
   bind:this={inputRef}
   type="text"
-  class="edit-input-box"
+  class="cell-input-box"
   class:is-null-displayed={isNullDisplayed}
   value={typeof value === 'string' || typeof value === 'number' ? value : ''}
+  {...inputAttrs}
   on:keyup={debounceAndSet}
   on:blur={onBlur}
   on:input={hideNullElement}
   on:keydown={handleInputKeyDown}
   on:keydown
 />
+
+<style lang="scss">
+  @import 'CellInput.scss';
+</style>
