@@ -49,7 +49,7 @@ class LesserOrEqual(RedundantDBFunction):
         ])
 
 
-class GreaterOrEqual(DBFunction):
+class GreaterOrEqual(RedundantDBFunction):
     id = 'greater_or_equal'
     name = 'is greater or equal to'
     hints = tuple([
