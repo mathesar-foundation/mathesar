@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { afterUpdate, onDestroy, tick } from 'svelte';
+  import { afterUpdate, tick } from 'svelte';
   import {
     isCellActive,
     isCellBeingEdited,
@@ -21,55 +21,19 @@
   export let row: TableRecord;
   export let column: Column;
   export let value: unknown = undefined;
-  let isNullDisplayed = false;
 
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
   $: isBeingEdited =
     !!$activeCell && isCellBeingEdited($activeCell, row, column);
-  $: isNullDisplayed = isBeingEdited && value === null;
 
   let cellRef: HTMLElement;
-  let timer: number;
 
   afterUpdate(() => {
     if (!isBeingEdited && isActive) {
       cellRef?.focus();
     }
   });
-
-  onDestroy(() => {
-    clearTimeout(timer);
-  });
-
-  function setValue(val: string) {
-    if (value !== val) {
-      value = val;
-      if (row.__isNew) {
-        void recordsData.createOrUpdateRecord(row, column);
-      } else {
-        void recordsData.updateCell(row, column);
-      }
-    }
-  }
-
-  function debounceAndSet(event: Event) {
-    window.clearTimeout(timer);
-    timer = window.setTimeout(() => {
-      const val = (event.target as HTMLInputElement).value;
-      setValue(val);
-    }, 500);
-  }
-
-  function onBlur(event: Event) {
-    const val = (event.target as HTMLInputElement).value;
-    window.clearTimeout(timer);
-    setValue(val);
-  }
-
-  function hideNullElement() {
-    isNullDisplayed = false;
-  }
 
   async function handleKeyDown(event: KeyboardEvent) {
     const type = display.handleKeyEventsOnActiveCell(event.key);
@@ -82,18 +46,6 @@
         scrollBasedOnActiveCell();
       }
     }
-  }
-
-  async function handleInputKeyDown(event: KeyboardEvent) {
-    if (
-      event.key === 'Tab' ||
-      event.key === 'Enter' ||
-      event.key === 'Escape'
-    ) {
-      onBlur(event);
-    }
-
-    await handleKeyDown(event);
   }
 </script>
 
@@ -122,12 +74,11 @@
 
   {#if isBeingEdited}
     <CellInput
-      {value}
-      {isNullDisplayed}
-      on:keydown={handleInputKeyDown}
-      on:keyup={debounceAndSet}
-      on:blur={onBlur}
-      on:input={hideNullElement}
+      bind:value
+      {recordsData}
+      {row}
+      {column}
+      on:keydown={handleKeyDown}
     />
   {/if}
 
