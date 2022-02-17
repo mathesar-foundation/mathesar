@@ -5,7 +5,7 @@ from datetime import datetime
 from db.utils import execute_query
 
 from db.functions.base import (
-    ColumnName, Not, Literal, Empty, Equal, Greater, And, Or
+    ColumnName, Not, Literal, Empty, Equal, Greater, And, Or, StartsWith, Contains
 )
 from db.functions.redundant import (
     GreaterOrEqual, LesserOrEqual
@@ -31,6 +31,8 @@ database_functions = {
     "not": lambda x: Not(x),
     "ge": lambda x, v: GreaterOrEqual([ColumnName([x]), Literal([v])]),
     "le": lambda x, v: LesserOrEqual([ColumnName([x]), Literal([v])]),
+    "starts_with": lambda x, v: StartsWith([ColumnName([x]), Literal([v])]),
+    "contains": lambda x, v: Contains([ColumnName([x]), Literal([v])]),
 }
 
 
@@ -52,13 +54,19 @@ op_to_python_func = {
     "not_any": lambda x, v: v not in x,
     "and": lambda x: all(x),
     "or": lambda x: any(x),
-    "not": lambda x: not x[0]
+    "not": lambda x: not x[0],
+    "starts_with": lambda x, v: x.startswith(v),
+    "contains": lambda x, v: v in x,
 }
 
 
 # See this for list of possible test cases:
 # https://github.com/centerofci/mathesar/pull/1069/files#diff-0802cfe1f265d2b0d6b86f5c096a3917af004a3403ad0b9b43cc3c030b801dfdL125
 ops_test_list = [
+    # starts_with
+    ("varchar", "starts_with", "string9", 11),
+    # contains
+    ("varchar", "contains", "g9", 11),
     # is_null
     ("varchar", "is_null", None, 5),
     ("numeric", "is_null", None, 5),

@@ -6,7 +6,7 @@ from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.types import UserDefinedType
 
 from db.functions import hints
-from db.functions.base import DBFunction, Contains
+from db.functions.base import DBFunction, Contains, call_sql_function
 from db.functions.redundant import RedundantDBFunction
 
 from db.types import base
@@ -139,7 +139,7 @@ class ExtractURIAuthority(DBFunction):
 
     @staticmethod
     def to_sa_expression(uri):
-        return func.getattr(URIFunction.AUTHORITY)(uri)
+        return call_sql_function(URIFunction.AUTHORITY.value, uri)
 
 
 class URIAuthorityContains(RedundantDBFunction):
