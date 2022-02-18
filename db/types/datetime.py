@@ -76,8 +76,7 @@ class TIME_WITH_TIME_ZONE(TypeDecorator):
                     func.to_char(
                         func.date_part("seconds", column), "FM00.0999999999"
                     ),
-                    "Z"
-                )
+                    "Z")
             ),
             else_=func.concat(
                 func.to_char(func.date_part("hour", column), "FM00"),
@@ -180,3 +179,13 @@ class TIMESTAMP_WITH_TIME_ZONE(TypeDecorator):
                 func.to_char(column, " BC"),
             )
         )
+
+
+class DATE(TypeDecorator):
+    impl = SA_DATE
+    cache_ok = True
+
+    def column_expression(self, column):
+        format_str = "YYYY-MM-DD AD"
+
+        return func.to_char(column, format_str)
