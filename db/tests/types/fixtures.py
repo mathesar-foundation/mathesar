@@ -10,7 +10,7 @@ import pytest
 from sqlalchemy import MetaData, Table
 from sqlalchemy.schema import CreateSchema, DropSchema
 from db.engine import _add_custom_types_to_engine
-from db.types import base, install, uri
+from db.types import base, install
 from db.columns.operations.alter import alter_column_type
 
 TEST_SCHEMA = "test_schema"

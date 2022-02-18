@@ -212,8 +212,7 @@ def test_uri_type_domain_rejects_malformed_uris(engine_email_type, test_str):
         assert type(e.orig) == CheckViolation
 
 
-@pytest.mark.parametrize("main_db_function,literal_param,expected_count",
-[
+@pytest.mark.parametrize("main_db_function,literal_param,expected_count", [
     (uri.URIAuthorityContains, "soundcloud", 4),
     (uri.URIAuthorityContains, "http", 0),
     (uri.URISchemeEquals, "ftp", 2),
@@ -223,8 +222,8 @@ def test_uri_db_functions(uris_table_obj, main_db_function, literal_param, expec
     selectable = table.select()
     uris_column_name = "uri"
     db_function = main_db_function([
-            ColumnName([uris_column_name]),
-            Literal([literal_param]),
+        ColumnName([uris_column_name]),
+        Literal([literal_param]),
     ])
     query = apply_db_function_as_filter(selectable, db_function)
     record_list = execute_query(engine, query)
