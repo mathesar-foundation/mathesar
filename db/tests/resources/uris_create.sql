@@ -32,7 +32,10 @@ INSERT INTO "uris" VALUES
 (14, 'http://yfrog.com/msradon2p'),
 (15, 'http://soundcloud.com/hedo/hedo-der-groove-junger-knospen'),
 (16, 'http://soundcloud.com/strawberryhaze/this-is-my-house-in-summer-2010'),
-(17, 'http://tumblr.com/x4acyiuxf');
+(17, 'http://tumblr.com/x4acyiuxf'),
+(18, 'ftp://foobar.com/179179'),
+(19, 'ftps://asldp.com/158915'),
+(20, 'ftp://abcdefg.com/x-y-z');
 
 SELECT pg_catalog.setval('"uris_id_seq"', 1000, true);
 

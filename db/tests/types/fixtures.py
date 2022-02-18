@@ -57,4 +57,6 @@ def uris_table_obj(engine_with_uris, uris_table_name):
             conn,
             uri_type_id,
         )
-    return table, engine
+    yield table, engine
+    with engine.begin() as conn:
+        conn.execute(DropSchema(base.SCHEMA, cascade=True, if_exists=True))

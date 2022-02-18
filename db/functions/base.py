@@ -20,7 +20,7 @@ from db.functions import hints
 from db.functions.exceptions import BadDBFunctionFormat
 
 
-def call_sql_function(function_name, *parameters):
+def sa_call_sql_function(function_name, *parameters):
     return getattr(func, function_name)(*parameters)
 
 
