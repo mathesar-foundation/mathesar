@@ -1,10 +1,7 @@
 """
-Exports the known_db_functions variable, which describes what `DBFunction`s the library is aware
-of. Note, that a `DBFunction` might be in this collection, but not be supported by a given
-database.
-
-Contains a private collection (`_db_functions_in_other_modules`) of `DBFunction` subclasses
-declared outside the base module.
+Exports the known_db_functions variable, which describes what `DBFunction` concrete subclasses the
+library is aware of. Note, that a `DBFunction` might be in this collection, but not be
+supported by a given database.
 
 These variables were broken off into a discrete module to avoid circular imports.
 """
@@ -13,10 +10,9 @@ import inspect
 
 import db.functions.base
 import db.functions.redundant
+import db.types.uri
 
 from db.functions.base import DBFunction
-
-from db.types import uri
 
 
 def _get_module_members_that_satisfy(module, predicate):
@@ -42,40 +38,21 @@ def _is_concrete_db_function_subclass(member):
     )
 
 
-_db_functions_in_base_module = (
-    _get_module_members_that_satisfy(
-        db.functions.base,
-        _is_concrete_db_function_subclass
-    )
-)
-
-
-_db_functions_in_redundant_module = (
-    _get_module_members_that_satisfy(
-        db.functions.redundant,
-        _is_concrete_db_function_subclass
-    )
-)
-
-
-_other_modules = tuple([uri])
+_modules_to_search_in = tuple([
+    db.functions.base,
+    db.functions.redundant,
+    db.types.uri
+])
 
 
 def _concat_tuples(tuples):
     return sum(tuples, ())
 
 
-_db_functions_in_other_modules = _concat_tuples([
+known_db_functions = _concat_tuples([
     _get_module_members_that_satisfy(
         module,
         _is_concrete_db_function_subclass
     )
-    for module in _other_modules
+    for module in _modules_to_search_in
 ])
-
-
-known_db_functions = (
-    _db_functions_in_base_module
-    + _db_functions_in_redundant_module
-    + _db_functions_in_other_modules
-)
