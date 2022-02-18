@@ -32,7 +32,8 @@ def _are_db_function_dependencies_satisfied(db_function, functions_on_database):
     return (
         no_dependencies
         or all(
-            dependency_function in functions_on_database
+            # dependency_function is expected to be an Enum member
+            dependency_function.value in functions_on_database
             for dependency_function in db_function.depends_on
         )
     )

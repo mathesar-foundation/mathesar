@@ -58,8 +58,19 @@ _db_functions_in_redundant_module = (
 )
 
 
-_db_functions_in_other_modules = tuple([
-    uri.ExtractURIAuthority,
+_other_modules = tuple([uri])
+
+
+def _concat_tuples(tuples):
+    return sum(tuples, ())
+
+
+_db_functions_in_other_modules = _concat_tuples([
+    _get_module_members_that_satisfy(
+        module,
+        _is_concrete_db_function_subclass
+    )
+    for module in _other_modules
 ])
 
 
