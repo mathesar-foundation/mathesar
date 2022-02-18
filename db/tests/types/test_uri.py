@@ -216,6 +216,7 @@ def test_uri_type_domain_rejects_malformed_uris(engine_email_type, test_str):
     (uri.URIAuthorityContains, "soundcloud", 4),
     (uri.URIAuthorityContains, "http", 0),
     (uri.URISchemeEquals, "ftp", 2),
+    (uri.Contains, ".com/31421017", 1),
 ])
 def test_uri_db_functions(uris_table_obj, main_db_function, literal_param, expected_count):
     table, engine = uris_table_obj
