@@ -111,7 +111,7 @@ def get_db_type_enum_from_id(db_type_id):
             # Sometimes MA type identifiers are qualified like so: `mathesar_types.uri`.
             # We want to remove that prefix, when it's there, because MathesarCustomType
             # enum stores type ids without a qualifier (e.g. `uri`).
-            possible_prefix = ma_type_qualifier_prefix + '.'
+            possible_prefix = _ma_type_qualifier_prefix + '.'
             preprocessed_db_type_id = _remove_prefix(db_type_id, possible_prefix)
             return MathesarCustomType(preprocessed_db_type_id)
         except ValueError:
@@ -188,11 +188,11 @@ preparer = create_engine("postgresql://").dialect.identifier_preparer
 
 
 # Should usually equal `mathesar_types`
-ma_type_qualifier_prefix = preparer.quote_schema(SCHEMA)
+_ma_type_qualifier_prefix = preparer.quote_schema(SCHEMA)
 
 
 def get_qualified_name(name):
-    return ".".join([ma_type_qualifier_prefix, name])
+    return ".".join([_ma_type_qualifier_prefix, name])
 
 
 def get_available_types(engine):
