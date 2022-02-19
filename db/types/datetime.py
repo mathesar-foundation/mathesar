@@ -1,16 +1,28 @@
-from sqlalchemy import case, func, and_, cast
-from sqlalchemy.dialects.postgresql.base import TIME as SA_TIME
-from sqlalchemy.dialects.postgresql.base import TIMESTAMP as SA_TIMESTAMP
-from sqlalchemy.dialects.postgresql.base import DATE as SA_DATE
+from sqlalchemy import case, func, and_
+from sqlalchemy.dialects.postgresql import DATE as SA_DATE
+from sqlalchemy.dialects.postgresql import INTERVAL
+from sqlalchemy.dialects.postgresql import TIME as SA_TIME
+from sqlalchemy.dialects.postgresql import TIMESTAMP as SA_TIMESTAMP
 from sqlalchemy.types import TypeDecorator
 
-from db.types import base, interval
+from db.types import base
+from db.types.exceptions import InvalidTypeParameters
 
 TIME_ZONE_DB_TYPE = base.PostgresType.TIME_WITH_TIME_ZONE.value
 WITHOUT_TIME_ZONE_DB_TYPE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
 TIMESTAMP_TIME_ZONE_DB_TYPE = base.PostgresType.TIMESTAMP_WITH_TIME_ZONE.value
 TIMESTAMP_WITHOUT_TIME_ZONE_DB_TYPE = base.PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value
-DATE_TYPE = base.PostgresType.DATE
+DATE_TYPE = base.PostgresType.DATE.value
+
+
+class DATE(TypeDecorator):
+    impl = SA_DATE
+    cache_ok = True
+
+    def column_expression(self, column):
+        format_str = "YYYY-MM-DD AD"
+
+        return func.to_char(column, format_str)
 
 
 class TIME_WITHOUT_TIME_ZONE(TypeDecorator):
@@ -181,11 +193,71 @@ class TIMESTAMP_WITH_TIME_ZONE(TypeDecorator):
         )
 
 
-class DATE(TypeDecorator):
-    impl = SA_DATE
+class Interval(TypeDecorator):
+    impl = INTERVAL
     cache_ok = True
 
-    def column_expression(self, column):
-        format_str = "YYYY-MM-DD AD"
+    def __init__(self, *arg, **kwarg):
+        TypeDecorator.__init__(self, *arg, **kwarg)
+        self.validate_arguments()
 
-        return func.to_char(column, format_str)
+    def validate_arguments(self):
+        seconds_fields = {
+            'SECOND',
+            'DAY TO SECOND',
+            'HOUR TO SECOND',
+            'MINUTE TO SECOND',
+        }
+        other_fields = {
+            'YEAR',
+            'MONTH',
+            'DAY',
+            'HOUR',
+            'MINUTE',
+            'YEAR TO MONTH',
+            'DAY TO HOUR',
+            'DAY TO MINUTE',
+            'HOUR TO MINUTE',
+        }
+        all_fields = seconds_fields.union(other_fields)
+        if self.impl.precision is not None:
+            try:
+                assert isinstance(self.impl.precision, int)
+            except AssertionError:
+                raise InvalidTypeParameters('precision must be an integer')
+            try:
+                assert (
+                    self.impl.fields is None
+                    or self.impl.fields.upper() in seconds_fields
+                )
+            except AssertionError:
+                raise InvalidTypeParameters(
+                    'If precision and fields are both given,'
+                    ' seconds must be included in fields.'
+                )
+        elif self.impl.fields is not None:
+            try:
+                assert self.impl.fields.upper() in all_fields
+            except AssertionError:
+                raise InvalidTypeParameters(
+                    f'fields "{self.impl.fields}" is not in {all_fields}'
+                )
+
+    def column_expression(self, col):
+        """
+        Given a column, this function constructs a function that writes
+        an SQL expression that formats an interval into an ISO 8601
+        string.
+        """
+        iso_8601_format_str = 'PFMYYYY"Y"FMMM"M"FMDD"D""T"FMHH24"H"FMMI"M"'
+        return case(
+            (col == None, None),  # noqa
+            # For some reason, it's not possible to nicely format
+            # including the seconds, so those are concatenated to the
+            # end.
+            else_=func.concat(
+                func.to_char(col, iso_8601_format_str),
+                func.date_part('seconds', col),
+                'S',
+            )
+        )

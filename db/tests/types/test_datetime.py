@@ -4,7 +4,7 @@ from sqlalchemy import text, Table, Column, MetaData, select, cast
 from sqlalchemy.dialects.postgresql import INTERVAL as SAInterval
 from db.engine import _add_custom_types_to_engine
 from db.tests.types import fixtures
-from db.types import interval, datetime, exceptions
+from db.types import datetime, exceptions
 
 
 # We need to set these variables when the file loads, or pytest can't
@@ -23,7 +23,7 @@ def test_interval_type_column_creation(engine_email_type):
         test_table = Table(
             "test_table",
             metadata,
-            Column("time_intervals", interval.Interval),
+            Column("time_intervals", datetime.Interval),
         )
         test_table.create()
 
@@ -43,7 +43,7 @@ def test_interval_type_column_reflection(engine_email_type):
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table("test_table", metadata, autoload_with=conn)
-    expect_cls = interval.Interval
+    expect_cls = datetime.Interval
     actual_cls = reflect_table.columns["time_intervals"].type.__class__
     assert actual_cls == expect_cls
 
@@ -58,7 +58,7 @@ def test_interval_type_column_default(engine_email_type):
             "test_table",
             metadata,
             Column(
-                "time_intervals", interval.Interval, server_default=default_str,
+                "time_intervals", datetime.Interval, server_default=default_str,
             ),
         )
         test_table.create()
@@ -84,7 +84,7 @@ def test_interval_type_column_args(engine_email_type):
             metadata,
             Column(
                 "time_intervals",
-                interval.Interval(precision=5, fields="SECOND")
+                datetime.Interval(precision=5, fields="SECOND")
             )
         )
         test_table.create()
@@ -93,7 +93,7 @@ def test_interval_type_column_args(engine_email_type):
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table("test_table", metadata, autoload_with=conn)
-    expect_cls = interval.Interval
+    expect_cls = datetime.Interval
     actual_cls = reflect_table.columns["time_intervals"].type.__class__
     assert actual_cls == expect_cls
     actual_interval = reflect_table.columns["time_intervals"].type
@@ -107,7 +107,7 @@ invalid_args_list = [(None, "SECONDS"), (1.34, None), (5, "HOURS")]
 @pytest.mark.parametrize("precision,fields", invalid_args_list)
 def test_interval_type_column_invalid_args(precision, fields):
     with pytest.raises(exceptions.InvalidTypeParameters):
-        interval.Interval(precision=precision, fields=fields)
+        datetime.Interval(precision=precision, fields=fields)
 
 
 intervals_out_to_ins = {
@@ -162,7 +162,7 @@ intervals_exploded = intervals_self_map + [
 def test_interval_transformations(engine_with_types, interval_in, interval_out):
     # First we make sure the interval input strings cast properly
     with engine_with_types.begin() as conn:
-        res = conn.execute(select(cast(interval_in, interval.Interval))).scalar()
+        res = conn.execute(select(cast(interval_in, datetime.Interval))).scalar()
     assert res == interval_out
 
 
@@ -177,7 +177,7 @@ def test_interval_insert_select(engine_email_type):
         test_table = Table(
             'test_table',
             metadata,
-            Column(column_name, interval.Interval),
+            Column(column_name, datetime.Interval),
         )
         test_table.create()
         conn.execute(test_table.insert().values(insert_dicts))
@@ -187,7 +187,7 @@ def test_interval_insert_select(engine_email_type):
 
 
 def test_interval_datetime_addition(engine_with_types):
-    three_days_interval = cast('3 days 4 hours 30 minutes', interval.Interval)
+    three_days_interval = cast('3 days 4 hours 30 minutes', datetime.Interval)
     the_date = cast(dt(2020, 1, 1), datetime.TIMESTAMP_WITHOUT_TIME_ZONE)
     with engine_with_types.begin() as conn:
         res = conn.execute(
@@ -197,10 +197,10 @@ def test_interval_datetime_addition(engine_with_types):
 
 
 def test_interval_interval_addition(engine_with_types):
-    three_days_interval = cast('3 days 4 hours 30 minutes', interval.Interval)
-    five_days_interval = cast('5 days', interval.Interval)
+    three_days_interval = cast('3 days 4 hours 30 minutes', datetime.Interval)
+    five_days_interval = cast('5 days', datetime.Interval)
     with engine_with_types.begin() as conn:
         res = conn.execute(
-            select(cast(three_days_interval + five_days_interval, interval.Interval))
+            select(cast(three_days_interval + five_days_interval, datetime.Interval))
         ).scalar()
     assert res == 'P0Y0M8DT4H30M0S'

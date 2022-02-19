@@ -1,9 +1,7 @@
-from datetime import date, time
-from datetime import datetime as py_datetime
+from datetime import date
 from decimal import Decimal
 
 import pytest
-from psycopg2.tz import FixedOffsetTimezone
 from psycopg2.errors import InvalidParameterValue
 from sqlalchemy import Table, Column, MetaData, select, cast
 from sqlalchemy import String, Numeric
@@ -14,7 +12,7 @@ from db.columns.operations.select import get_column_default
 from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
-from db.types import money, datetime, interval
+from db.types import money, datetime
 from db.types.operations import cast as cast_operations
 from db.types.base import PostgresType, MathesarCustomType, get_qualified_name, get_available_types
 
@@ -779,6 +777,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
 
 def test_get_alter_column_types_with_custom_engine(engine_with_types):
     type_dict = cast_operations.get_supported_alter_column_types(engine_with_types)
+    for type_ in types.CUSTOM_TYPE_DICT.values():
+        assert type_ in type_dict.values()
     assert all(
         [
             type_ in type_dict.values()
@@ -1170,19 +1170,19 @@ cast_expr_numeric_option_list = [
         'CAST(mathesar_types.cast_to_numeric(colname) AS NUMERIC(3, 2))'
     ),
     (
-        interval.Interval,
+        datetime.Interval,
         "interval",
         {"fields": "YEAR"},
         "CAST(colname AS INTERVAL YEAR)"
     ),
     (
-        interval.Interval,
+        datetime.Interval,
         "interval",
         {"precision": 2},
         "CAST(colname AS INTERVAL (2))"
     ),
     (
-        interval.Interval,
+        datetime.Interval,
         "interval",
         {"precision": 3, "fields": "SECOND"},
         "CAST(colname AS INTERVAL SECOND (3))"
