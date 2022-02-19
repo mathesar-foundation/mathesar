@@ -3,18 +3,19 @@ from alembic.migration import MigrationContext
 from alembic.operations import Operations
 import pytest
 from sqlalchemy import (
-    String, Integer, Column, Table, MetaData, DateTime, func, text, DefaultClause
+    String, Integer, Column, Table, MetaData, DateTime, func, text, DefaultClause,
 )
 
 from db.columns.exceptions import DynamicDefaultWarning
 from db.columns.operations.select import (
-    get_column_default, get_column_index_from_name, _is_default_expr_dynamic
+    get_column_attnum_from_name, get_column_default, get_column_index_from_name, _is_default_expr_dynamic,
+    get_column_name_from_attnum, get_columns_attnum_from_names,
 )
 from db.tables.operations.select import get_oid_from_table
 from db.tests.columns.utils import column_test_dict, get_default
 
 
-def test_get_column_index_from_name(engine_with_schema):
+def test_get_attnum_from_name(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "table_with_columns"
     zero_name = "colzero"
@@ -27,8 +28,28 @@ def test_get_column_index_from_name(engine_with_schema):
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
-    assert get_column_index_from_name(table_oid, zero_name, engine) == 0
-    assert get_column_index_from_name(table_oid, one_name, engine) == 1
+    column_zero_attnum = get_column_attnum_from_name(table_oid, zero_name, engine)
+    column_one_attnum = get_column_attnum_from_name(table_oid, one_name, engine)
+    assert get_column_name_from_attnum(table_oid, column_zero_attnum, engine) == zero_name
+    assert get_column_name_from_attnum(table_oid, column_one_attnum, engine) == one_name
+
+
+def test_get_attnum_from_names(engine_with_schema):
+    engine, schema = engine_with_schema
+    table_name = "table_with_columns"
+    zero_name = "colzero"
+    one_name = "colone"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(zero_name, Integer),
+        Column(one_name, String),
+    )
+    table.create()
+    table_oid = get_oid_from_table(table_name, schema, engine)
+    columns_attnum = get_columns_attnum_from_names(table_oid, [zero_name, one_name], engine)
+    assert get_column_name_from_attnum(table_oid, columns_attnum[0], engine) == zero_name
+    assert get_column_name_from_attnum(table_oid, columns_attnum[1], engine) == one_name
 
 
 def test_get_column_index_from_name_after_delete(engine_with_schema):
@@ -50,8 +71,9 @@ def test_get_column_index_from_name_after_delete(engine_with_schema):
         op.drop_column(table.name, one_name, schema=schema)
 
     table_oid = get_oid_from_table(table_name, schema, engine)
-    assert get_column_index_from_name(table_oid, zero_name, engine) == 0
-    assert get_column_index_from_name(table_oid, two_name, engine) == 1
+    columns_attnum = get_columns_attnum_from_names(table_oid, [zero_name, two_name], engine)
+    assert get_column_name_from_attnum(table_oid, columns_attnum[0], engine) == zero_name
+    assert get_column_name_from_attnum(table_oid, columns_attnum[1], engine) == two_name
 
 
 def test_get_column_index_from_name_after_delete_two_tables(engine_with_schema):

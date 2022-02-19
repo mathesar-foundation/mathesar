@@ -1,7 +1,7 @@
 import warnings
 
 from pglast import Node, parse_sql
-from sqlalchemy import Table, MetaData, and_, select, text, func, cast
+from sqlalchemy import Table, MetaData, and_, asc, select, text, func, cast
 
 from db.columns.exceptions import DynamicDefaultWarning
 from db.tables.operations.select import reflect_table_from_oid
@@ -17,7 +17,7 @@ from db.utils import execute_statement
 DYNAMIC_NODE_TAGS = {"SQLValueFunction", "FuncCall"}
 
 
-def get_columns_attnum_from_names(table_oid, column_names, engine, connection_to_use=None):
+def _get_columns_attnum_from_names(table_oid, column_names, engine, connection_to_use=None):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
         pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
@@ -26,8 +26,24 @@ def get_columns_attnum_from_names(table_oid, column_names, engine, connection_to
             pg_attribute.c.attrelid == table_oid,
             pg_attribute.c.attname.in_(column_names)
         )
-    )
-    return execute_statement(engine, sel, connection_to_use).fetchall()
+    ).order_by(asc(pg_attribute.c.attnum))
+    return sel
+
+
+def get_columns_attnum_from_names(table_oid, column_names, engine, connection_to_use=None):
+    """
+    Returns the respective list of attnum of the column names passed.
+     The order is based on the column order in the table and not by the order of the column names argument.
+    """
+    statement = _get_columns_attnum_from_names(table_oid, column_names, engine, connection_to_use=None)
+    attnums_tuple = execute_statement(engine, statement, connection_to_use).fetchall()
+    attnums = [attnum_tuple[0] for attnum_tuple in attnums_tuple]
+    return attnums
+
+
+def get_column_attnum_from_name(table_oid, column_name, engine, connection_to_use=None):
+    statement = _get_columns_attnum_from_names(table_oid, [column_name], engine, connection_to_use=None)
+    return execute_statement(engine, statement, connection_to_use).scalar()
 
 
 def get_column_index_from_name(table_oid, column_name, engine, connection_to_use=None):
@@ -77,7 +93,7 @@ def get_column_name_from_attnum(table_oid, attnum, engine, connection_to_use=Non
             pg_attribute.c.attnum == attnum
         )
     )
-    result = execute_statement(engine, sel, connection_to_use).fetchone()[0]
+    result = execute_statement(engine, sel, connection_to_use).scalar()
     return result
 
 
