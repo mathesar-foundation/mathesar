@@ -106,6 +106,8 @@ def test_create_email_type_domain_checks_broken_emails(engine_email_type):
 @pytest.mark.parametrize("main_db_function,literal_param,expected_count", [
     (email.EmailDomainContains, "mail", 588),
     (email.EmailDomainEquals, "gmail.com", 303),
+    (email.EmailDomainContains, "krista", 0),
+    (email.EmailDomainEquals, "kristaramirez@yahoo.com", 0),
 ])
 def test_email_db_functions(roster_table_obj, main_db_function, literal_param, expected_count):
     table, engine = roster_table_obj
