@@ -2,11 +2,12 @@ import os
 
 import pytest
 from sqlalchemy import MetaData, text
+from sqlalchemy.schema import DropSchema
 
 from db import constants
 from db.tables.operations.split import extract_columns_from_table
 from db.engine import _add_custom_types_to_engine
-from db.types import install
+from db.types import base, install
 
 
 APP_SCHEMA = "test_schema"
@@ -31,10 +32,14 @@ def engine_with_schema(engine):
 @pytest.fixture
 def engine_with_roster(engine_with_schema):
     engine, schema = engine_with_schema
+    _add_custom_types_to_engine(engine)
+    install.install_mathesar_on_database(engine)
     with engine.begin() as conn, open(ROSTER_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
-    return engine, schema
+    yield engine, schema
+    with engine.begin() as conn:
+        conn.execute(DropSchema(base.SCHEMA, cascade=True, if_exists=True))
 
 
 @pytest.fixture
@@ -45,7 +50,9 @@ def engine_with_uris(engine_with_schema):
     with engine.begin() as conn, open(URIS_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
-    return engine, schema
+    yield engine, schema
+    with engine.begin() as conn:
+        conn.execute(DropSchema(base.SCHEMA, cascade=True, if_exists=True))
 
 
 @pytest.fixture
