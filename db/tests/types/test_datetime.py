@@ -115,7 +115,7 @@ datetime_types = [
 
 
 @pytest.mark.parametrize('test_type', [type_[0] for type_ in datetime_types])
-def test_interval_type_column_creation(engine_email_type, test_type):
+def test_datetime_type_column_creation(engine_email_type, test_type):
     engine, app_schema = engine_email_type
     with engine.begin() as conn:
         conn.execute(text(f'SET search_path={app_schema}'))
@@ -132,7 +132,7 @@ def test_interval_type_column_creation(engine_email_type, test_type):
     'test_type,sa_type',
     [(type_[0], type_[1]) for type_ in datetime_types]
 )
-def test_interval_type_column_reflection(engine_email_type, test_type, sa_type):
+def test_datetime_type_column_reflection(engine_email_type, test_type, sa_type):
     engine, app_schema = engine_email_type
     col_name = 'time_type'
     table_name = 'test_table'
@@ -154,17 +154,27 @@ def test_interval_type_column_reflection(engine_email_type, test_type, sa_type):
     assert actual_cls == expect_cls
 
 
-def test_interval_type_column_default(engine_email_type):
+datetime_defaults = [
+    (tup[0], key)
+    for tup in datetime_types
+    for key in tup[2]
+]
+
+
+@pytest.mark.parametrize('type_,val', datetime_defaults)
+def test_datetime_type_column_default(engine_email_type, type_, val):
     engine, app_schema = engine_email_type
-    default_str = 'P1Y1M1DT1H1M1.1S'
+    default_str = val
+    column_name = 'time_type'
+    table_name = 'test_table'
     with engine.begin() as conn:
         conn.execute(text(f'SET search_path={app_schema}'))
         metadata = MetaData(bind=conn)
         test_table = Table(
-            'test_table',
+            table_name,
             metadata,
             Column(
-                'time_intervals', datetime.Interval, server_default=default_str,
+                column_name, type_, server_default=default_str,
             ),
         )
         test_table.create()
@@ -172,10 +182,10 @@ def test_interval_type_column_default(engine_email_type):
     _add_custom_types_to_engine(engine)
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
-        reflect_table = Table('test_table', metadata, autoload_with=conn)
-    intervals_col = reflect_table.columns['time_intervals']
-    default_sql_txt = str(intervals_col.server_default.arg)
-    default_selectable = select(cast(text(default_sql_txt), intervals_col.type))
+        reflect_table = Table(table_name, metadata, autoload_with=conn)
+    test_col = reflect_table.columns[column_name]
+    default_sql_txt = str(test_col.server_default.arg)
+    default_selectable = select(cast(text(default_sql_txt), test_col.type))
     with engine.begin() as conn:
         actual_default = conn.execute(default_selectable).scalar()
     assert actual_default == default_str
@@ -266,12 +276,17 @@ def test_interval_insert_select(engine_email_type, type_, out_in_map):
 
 def test_interval_datetime_addition(engine_with_types):
     three_days_interval = cast('3 days 4 hours 30 minutes', datetime.Interval)
-    the_date = cast(dt(2020, 1, 1), datetime.TIMESTAMP_WITHOUT_TIME_ZONE)
+    the_date = cast('2020-01-01', datetime.TIMESTAMP_WITHOUT_TIME_ZONE)
     with engine_with_types.begin() as conn:
         res = conn.execute(
-            select(the_date + three_days_interval)
+            select(
+                cast(
+                    the_date + three_days_interval,
+                    datetime.TIMESTAMP_WITHOUT_TIME_ZONE
+                )
+            )
         ).scalar()
-    assert res == dt(2020, 1, 4, 4, 30)
+    assert res == '2020-01-04T04:30:00.0 AD'
 
 
 def test_interval_interval_addition(engine_with_types):
