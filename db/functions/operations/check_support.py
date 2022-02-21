@@ -34,12 +34,13 @@ def _are_db_function_dependencies_satisfied(db_function, functions_on_database):
     return (
         no_dependencies
         or all(
-            _dependency_function_in(dependency_function, functions_on_database)
+            _is_dependency_function_in(dependency_function, functions_on_database)
             for dependency_function in db_function.depends_on
         )
     )
 
-def _dependency_function_in(dependency_function, functions_on_database):
+
+def _is_dependency_function_in(dependency_function, functions_on_database):
     """
     A dependency function may be specified as a string or as an enum instance, whose .value
     attribute is the string name of the function.
