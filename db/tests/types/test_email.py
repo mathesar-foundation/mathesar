@@ -5,12 +5,16 @@ from sqlalchemy.exc import IntegrityError
 from db.engine import _add_custom_types_to_engine
 from db.tests.types import fixtures
 from db.types import email
+from db.utils import execute_query
+from db.functions.base import ColumnName, Literal
+from db.functions.operations.apply import apply_db_function_as_filter
 
 
 # We need to set these variables when the file loads, or pytest can't
 # properly detect the fixtures.  Importing them directly results in a
 # flake8 unused import error, and a bunch of flake8 F811 errors.
 engine_with_types = fixtures.engine_with_types
+roster_table_obj = fixtures.roster_table_obj
 engine_email_type = fixtures.engine_email_type
 temporary_testing_schema = fixtures.temporary_testing_schema
 
@@ -97,3 +101,20 @@ def test_create_email_type_domain_checks_broken_emails(engine_email_type):
                 )
             )
         assert type(e.orig) == CheckViolation
+
+
+@pytest.mark.parametrize("main_db_function,literal_param,expected_count", [
+    (email.EmailDomainContains, "mail", 588),
+    (email.EmailDomainEquals, "gmail.com", 303),
+])
+def test_email_db_functions(roster_table_obj, main_db_function, literal_param, expected_count):
+    table, engine = roster_table_obj
+    selectable = table.select()
+    email_column_name = "Teacher Email"
+    db_function = main_db_function([
+        ColumnName([email_column_name]),
+        Literal([literal_param]),
+    ])
+    query = apply_db_function_as_filter(selectable, db_function)
+    record_list = execute_query(engine, query)
+    assert len(record_list) == expected_count
