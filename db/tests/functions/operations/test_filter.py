@@ -8,7 +8,7 @@ from db.functions.base import (
     ColumnName, Not, Literal, Empty, Equal, Greater, And, Or, StartsWith, Contains
 )
 from db.functions.redundant import (
-    GreaterOrEqual, LesserOrEqual
+    GreaterOrEqual, LesserOrEqual, StartsWithCaseInsensitive, ContainsCaseInsensitive
 )
 from db.functions.operations.apply import apply_db_function_as_filter
 
@@ -191,3 +191,21 @@ def test_filtering_nested_boolean_ops(filter_sort_table_obj):
     for record in record_list:
         assert ((record.varchar == "string24" or record.numeric == 42)
                 and (record.varchar == "string42" or record.numeric == 24))
+
+
+@pytest.mark.parametrize("column_name,main_db_function,literal_param,expected_count", [
+    ("Student Name", StartsWithCaseInsensitive, "stephanie", 15),
+    ("Student Name", StartsWith, "stephanie", 0),
+    ("Student Name", ContainsCaseInsensitive, "JUAREZ", 5),
+    ("Student Name", Contains, "juarez", 0),
+])
+def test_case_insensitive_filtering(roster_table_obj, column_name, main_db_function, literal_param, expected_count):
+    table, engine = roster_table_obj
+    selectable = table.select()
+    db_function = main_db_function([
+        ColumnName([column_name]),
+        Literal([literal_param]),
+    ])
+    query = apply_db_function_as_filter(selectable, db_function)
+    record_list = execute_query(engine, query)
+    assert len(record_list) == expected_count

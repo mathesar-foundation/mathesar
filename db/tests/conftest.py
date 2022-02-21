@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from sqlalchemy import MetaData, text
+from sqlalchemy import MetaData, text, Table
 from sqlalchemy.schema import DropSchema
 
 from db import constants
@@ -111,3 +111,11 @@ def extracted_remainder_roster(engine_with_roster, roster_table_name, roster_ext
     roster_no_teachers = metadata.tables[f"{schema}.{roster_no_teachers_table_name}"]
     roster = metadata.tables[f"{schema}.{roster_table_name}"]
     return teachers, roster_no_teachers, roster, engine, schema
+
+
+@pytest.fixture
+def roster_table_obj(engine_with_roster, roster_table_name):
+    engine, schema = engine_with_roster
+    metadata = MetaData(bind=engine)
+    roster = Table(roster_table_name, metadata, schema=schema, autoload_with=engine)
+    return roster, engine
