@@ -17,6 +17,7 @@ RESOURCES = os.path.join(FILE_DIR, "resources")
 ROSTER_SQL = os.path.join(RESOURCES, "roster_create.sql")
 URIS_SQL = os.path.join(RESOURCES, "uris_create.sql")
 TIMES_SQL = os.path.join(RESOURCES, "times_create.sql")
+BOOLEANS_SQL = os.path.join(RESOURCES, "booleans_create.sql")
 FILTER_SORT_SQL = os.path.join(RESOURCES, "filter_sort_create.sql")
 
 
@@ -65,6 +66,19 @@ def engine_with_times(engine_with_schema):
     _add_custom_types_to_engine(engine)
     install.install_mathesar_on_database(engine)
     with engine.begin() as conn, open(TIMES_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    yield engine, schema
+    with engine.begin() as conn:
+        conn.execute(DropSchema(base.SCHEMA, cascade=True, if_exists=True))
+
+
+@pytest.fixture
+def engine_with_booleans(engine_with_schema):
+    engine, schema = engine_with_schema
+    _add_custom_types_to_engine(engine)
+    install.install_mathesar_on_database(engine)
+    with engine.begin() as conn, open(BOOLEANS_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
     yield engine, schema
@@ -135,4 +149,12 @@ def times_table_obj(engine_with_times):
     engine, schema = engine_with_times
     metadata = MetaData(bind=engine)
     roster = Table("times", metadata, schema=schema, autoload_with=engine)
+    return roster, engine
+
+
+@pytest.fixture
+def boolean_table_obj(engine_with_booleans):
+    engine, schema = engine_with_booleans
+    metadata = MetaData(bind=engine)
+    roster = Table("boolean", metadata, schema=schema, autoload_with=engine)
     return roster, engine

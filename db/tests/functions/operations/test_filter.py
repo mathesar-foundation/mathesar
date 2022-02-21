@@ -210,3 +210,22 @@ def test_filtering_time_types(times_table_obj, column_name, main_db_function, li
     query = apply_db_function_as_filter(selectable, db_function)
     record_list = execute_query(engine, query)
     assert len(record_list) == expected_count
+
+
+@pytest.mark.parametrize("column_name,main_db_function,literal_param,expected_count", [
+    ("boolean", Equal, True, 3),
+    ("boolean", Equal, False, 1),
+    ("boolean", And, True, 3),
+    ("boolean", Or, True, 4),
+    ("boolean", Or, False, 3),
+])
+def test_filtering_booleans(boolean_table_obj, column_name, main_db_function, literal_param, expected_count):
+    table, engine = boolean_table_obj
+    selectable = table.select()
+    db_function = main_db_function([
+        ColumnName([column_name]),
+        Literal([literal_param]),
+    ])
+    query = apply_db_function_as_filter(selectable, db_function)
+    record_list = execute_query(engine, query)
+    assert len(record_list) == expected_count
