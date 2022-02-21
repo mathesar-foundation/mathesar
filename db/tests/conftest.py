@@ -134,5 +134,13 @@ def extracted_remainder_roster(engine_with_roster, roster_table_name, roster_ext
 def times_table_obj(engine_with_times):
     engine, schema = engine_with_times
     metadata = MetaData(bind=engine)
-    roster = Table("times", metadata, schema=schema, autoload_with=engine)
-    return roster, engine
+    table = Table("times", metadata, schema=schema, autoload_with=engine)
+    return table, engine
+
+
+@pytest.fixture
+def roster_table_obj(engine_with_roster, roster_table_name):
+    engine, schema = engine_with_roster
+    metadata = MetaData(bind=engine)
+    table = Table(roster_table_name, metadata, schema=schema, autoload_with=engine)
+    return table, engine
