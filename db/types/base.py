@@ -130,6 +130,9 @@ def _build_db_types_hinted():
         MathesarCustomType.URI: tuple([
             hints.uri
         ]),
+        MathesarCustomType.EMAIL: tuple([
+            hints.email
+        ]),
     }
 
     # Then, start adding hints automatically.
@@ -157,6 +160,7 @@ def _build_db_types_hinted():
         PostgresType.CHARACTER,
         PostgresType.TEXT,
         MathesarCustomType.URI,
+        MathesarCustomType.EMAIL,
     )
     hints_for_string_like_types = (hints.string_like,)
     _add_to_db_type_hintsets(string_like_db_types, hints_for_string_like_types)
