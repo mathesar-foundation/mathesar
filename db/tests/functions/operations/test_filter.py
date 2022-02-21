@@ -5,7 +5,7 @@ from datetime import datetime
 from db.utils import execute_query
 
 from db.functions.base import (
-    ColumnName, Not, Literal, Empty, Equal, Greater, And, Or, StartsWith, Contains
+    ColumnName, Not, Literal, Empty, Equal, Greater, And, Or, StartsWith, Contains, Lesser
 )
 from db.functions.redundant import (
     GreaterOrEqual, LesserOrEqual
@@ -191,3 +191,22 @@ def test_filtering_nested_boolean_ops(filter_sort_table_obj):
     for record in record_list:
         assert ((record.varchar == "string24" or record.numeric == 42)
                 and (record.varchar == "string42" or record.numeric == 24))
+
+
+@pytest.mark.parametrize("column_name,main_db_function,literal_param,expected_count", [
+    ("time", Equal, "06:05:06.789", 1),
+    ("date", Equal, "1999-01-08", 1),
+    ("time", LesserOrEqual, "04:05:06.789", 2),
+    ("timestamp", Greater, "1995-01-08", 1),
+    ("interval", Greater, "P1Y2M3DT4H5M6S", 2),
+])
+def test_filtering_time_types(times_table_obj, column_name, main_db_function, literal_param, expected_count):
+    table, engine = times_table_obj
+    selectable = table.select()
+    db_function = main_db_function([
+        ColumnName([column_name]),
+        Literal([literal_param]),
+    ])
+    query = apply_db_function_as_filter(selectable, db_function)
+    record_list = execute_query(engine, query)
+    assert len(record_list) == expected_count
