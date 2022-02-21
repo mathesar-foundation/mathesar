@@ -118,7 +118,7 @@ class EmailDomainContains(RedundantDBFunction):
 
 class EmailDomainEquals(RedundantDBFunction):
     id = 'email_domain_equals'
-    name = 'email domain equals'
+    name = 'email domain is'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
