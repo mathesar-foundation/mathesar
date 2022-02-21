@@ -1,4 +1,3 @@
-from datetime import datetime as dt
 import pytest
 from sqlalchemy import text, Table, Column, MetaData, select, cast
 from sqlalchemy.dialects.postgresql import DATE as SA_DATE
@@ -111,7 +110,6 @@ datetime_types = [
         }
     ),
 ]
-
 
 
 @pytest.mark.parametrize('test_type', [type_[0] for type_ in datetime_types])
@@ -238,6 +236,7 @@ types_exploded = types_self_map + [
     for key in tup[2]
     for val in tup[2][key]
 ]
+
 
 @pytest.mark.parametrize('type_,val_in,val_out', types_exploded)
 def test_type_transformations(engine_with_types, type_, val_in, val_out):
