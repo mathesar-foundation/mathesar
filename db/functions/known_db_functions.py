@@ -24,7 +24,7 @@ def _get_module_members_that_satisfy(module, predicate):
     all DBFunction subclasses found as top-level members of a module.
     """
     all_members_in_defining_module = inspect.getmembers(module)
-    return tuple(
+    return set(
         member
         for _, member in all_members_in_defining_module
         if predicate(member)
@@ -51,10 +51,12 @@ def _concat_tuples(tuples):
     return sum(tuples, ())
 
 
-known_db_functions = _concat_tuples([
-    _get_module_members_that_satisfy(
-        module,
-        _is_concrete_db_function_subclass
-    )
-    for module in _modules_to_search_in
-])
+known_db_functions = tuple(
+    set.union(*[
+        _get_module_members_that_satisfy(
+            module,
+            _is_concrete_db_function_subclass
+        )
+        for module in _modules_to_search_in
+    ])
+)
