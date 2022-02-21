@@ -159,6 +159,7 @@ def boolean_table_obj(engine_with_booleans):
     table = Table("boolean", metadata, schema=schema, autoload_with=engine)
     return table, engine
 
+
 @pytest.fixture
 def roster_table_obj(engine_with_roster, roster_table_name):
     engine, schema = engine_with_roster
