@@ -177,6 +177,7 @@ def _build_db_types_hinted():
         PostgresType.SMALLINT,
         PostgresType.NUMERIC,
         PostgresType.REAL,
+        PostgresType.MONEY,
     )
     hints_for_numeric_db_types = (hints.comparable,)
     _add_to_db_type_hintsets(numeric_db_types, hints_for_numeric_db_types)
