@@ -165,7 +165,7 @@ class DateFormatValidator(AbstractDateTimeFormatValidator):
 class TimeWithTimeZoneFormatValidator(AbstractDateTimeFormatValidator):
 
     def validate(self, datetime_obj, display_format, serializer_field):
-        time_only_format = 'HH:mm:ssZZ'
+        time_only_format = 'HH:mm:ss.SSSZZ'
         time_str = arrow.get('2013-09-30T15:34:00.000-07:00').format(time_only_format)
         parsed_time_str = arrow.get(time_str, time_only_format)
         if parsed_time_str.date() != datetime_obj.date():
@@ -178,6 +178,14 @@ class TimeWithoutTimeZoneFormatValidator(TimeWithTimeZoneFormatValidator):
         if 'z' in display_format.lower():
             raise serializers.ValidationError("Time without timezone column cannot contain timezone display format")
         return super().validate(datetime_obj, display_format, serializer_field)
+
+
+class DurationFormatValidator(TimeWithoutTimeZoneFormatValidator):
+    """
+    The validation is same as Time Without TimeZone as of now,
+     it has been subclassed without any overrides so that the validation logic can be changed in future if needed
+    """
+    pass
 
 
 class DateDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
@@ -216,6 +224,10 @@ class TimeWithoutTimezoneDisplayOptionSerializer(
     format = serializers.CharField(validators=[TimeWithoutTimeZoneFormatValidator()])
 
 
+class DurationDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
+    format = serializers.CharField(validators=[DurationFormatValidator()])
+
+
 class DisplayOptionsMappingSerializer(
     MathesarErrorMessageMixin,
     ReadWritePolymorphicSerializerMappingMixin,
@@ -231,6 +243,7 @@ class DisplayOptionsMappingSerializer(
         ('date', MathesarTypeIdentifier.DATETIME.value): DateDisplayOptionSerializer,
         ('time with time zone', MathesarTypeIdentifier.DATETIME.value): TimeWithTimezoneDisplayOptionSerializer,
         ('time without time zone', MathesarTypeIdentifier.DATETIME.value): TimeWithoutTimezoneDisplayOptionSerializer,
+        MathesarTypeIdentifier.DURATION.value: DurationDisplayOptionSerializer,
     }
 
     def get_mapping_field(self):
