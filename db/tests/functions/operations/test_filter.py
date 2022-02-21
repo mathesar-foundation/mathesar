@@ -5,7 +5,7 @@ from datetime import datetime
 from db.utils import execute_query
 
 from db.functions.base import (
-    ColumnName, Not, Literal, Empty, Equal, Greater, And, Or, StartsWith, Contains, Lesser
+    ColumnName, Not, Literal, Empty, Equal, Greater, And, Or, StartsWith, Contains
 )
 from db.functions.redundant import (
     GreaterOrEqual, LesserOrEqual
