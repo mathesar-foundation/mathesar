@@ -1,4 +1,4 @@
-from datetime import timedelta, date, time
+from datetime import date, time
 from datetime import datetime as py_datetime
 from decimal import Decimal
 
@@ -14,7 +14,7 @@ from db.columns.operations.select import get_column_default
 from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
-from db.types import money, datetime
+from db.types import money, datetime, interval
 from db.types.operations import cast as cast_operations
 from db.types.base import PostgresType, MathesarCustomType, get_qualified_name, get_available_types
 
@@ -35,6 +35,7 @@ DOUBLE = PostgresType.DOUBLE_PRECISION.value.upper()
 FLOAT = PostgresType.FLOAT.value.upper()
 INTEGER = PostgresType.INTEGER.value.upper()
 INTERVAL = PostgresType.INTERVAL.value.upper()
+MONEY = PostgresType.MONEY.value.upper()
 NUMERIC = PostgresType.NUMERIC.value.upper()
 REAL = PostgresType.REAL.value.upper()
 SMALLINT = PostgresType.SMALLINT.value.upper()
@@ -49,7 +50,7 @@ VARCHAR = "VARCHAR"
 
 # Custom types
 EMAIL = get_qualified_name(MathesarCustomType.EMAIL.value).upper()
-MONEY = get_qualified_name(MathesarCustomType.MONEY.value).upper()
+MATHESAR_MONEY = get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value).upper()
 URI = get_qualified_name(MathesarCustomType.URI.value).upper()
 
 
@@ -96,13 +97,16 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
-            MONEY: {
+            MATHESAR_MONEY: {
                 VALID: [
                     (
                         1234123412341234,
                         {money.VALUE: 1234123412341234, money.CURRENCY: "USD"}
                     )
                 ],
+            },
+            MONEY: {
+                VALID: [(1234, "$1,234.00")],
             },
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
@@ -143,10 +147,11 @@ MASTER_DB_TYPE_MAP_SPEC = {
             FLOAT: {VALID: [("1", 1.0)], INVALID: ["b"]},
             INTEGER: {VALID: [("4", 4)], INVALID: ["j"]},
             INTERVAL: {VALID: []},
-            MONEY: {
+            MATHESAR_MONEY: {
                 VALID: [("1", {money.VALUE: 1, money.CURRENCY: "USD"})],
                 INVALID: ["n"],
             },
+            MONEY: {VALID: []},
             NUMERIC: {VALID: [("1", Decimal("1"))], INVALID: ["a"]},
             REAL: {VALID: [("1", 1.0)], INVALID: ["b"]},
             SMALLINT: {VALID: [("4", 4)], INVALID: ["j"]},
@@ -199,7 +204,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [1234123412341234]
             },
-            MONEY: {
+            MATHESAR_MONEY: {
                 VALID: [
                     (12.12, {money.VALUE: 12.12, money.CURRENCY: "USD"}),
                     (
@@ -208,6 +213,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     )
                 ],
             },
+            MONEY: {VALID: [(12.12, "$12.12")]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {VALID: [(500, 500)], INVALID: [12341234]},
@@ -226,7 +232,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
             INTEGER: {VALID: [(500, 500)]},
-            MONEY: {VALID: [(12.12, {money.VALUE: 12.12, money.CURRENCY: "USD"})]},
+            MATHESAR_MONEY: {VALID: [(12.12, {money.VALUE: 12.12, money.CURRENCY: "USD"})]},
+            MONEY: {VALID: [(12.12, "$12.12")]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {VALID: [(500, 500)]},
@@ -256,7 +263,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
             INTEGER: {VALID: [(500, 500), (-5, -5)], INVALID: [-3.234, 234.34]},
-            MONEY: {VALID: [(12.12, {money.VALUE: 12.12, money.CURRENCY: "USD"})]},
+            MATHESAR_MONEY: {VALID: [(12.12, {money.VALUE: 12.12, money.CURRENCY: "USD"})]},
+            MONEY: {VALID: [(12.12, "$12.12")]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {VALID: [(500, 500), (-5, -5)], INVALID: [-3.234, 234.34]},
@@ -275,7 +283,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
-            MONEY: {VALID: [(12, {money.VALUE: 12, money.CURRENCY: "USD"})]},
+            MATHESAR_MONEY: {VALID: [(12, {money.VALUE: 12, money.CURRENCY: "USD"})]},
+            MONEY: {VALID: [(12, "$12.00")]},
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
             SMALLINT: {VALID: [(500, 500)]},
@@ -292,10 +301,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             INTERVAL: {
                 VALID: [
-                    (
-                        timedelta(days=3, hours=3, minutes=5, seconds=30),
-                        timedelta(days=3, hours=3, minutes=5, seconds=30),
-                    )
+                    ("P0Y0M3DT3H5M30S", "P0Y0M3DT3H5M30S")
                 ]
             },
             TEXT: {
@@ -303,21 +309,18 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             VARCHAR: {
                 VALID: [
-                    (
-                        timedelta(days=3, hours=3, minutes=5, seconds=30),
-                        '3 days 03:05:30'
-                    )
+                    ("P0Y0M3DT3H5M30S", "3 days 03:05:30")
                 ]
             },
         }
     },
-    MONEY: {
-        ISCHEMA_NAME: get_qualified_name(MathesarCustomType.MONEY.value),
-        SUPPORTED_MAP_NAME: MathesarCustomType.MONEY.value,
-        REFLECTED_NAME: MONEY,
+    MATHESAR_MONEY: {
+        ISCHEMA_NAME: get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value),
+        SUPPORTED_MAP_NAME: MathesarCustomType.MATHESAR_MONEY.value,
+        REFLECTED_NAME: MATHESAR_MONEY,
         TARGET_DICT: {
             CHAR: {VALID: []},
-            MONEY: {
+            MATHESAR_MONEY: {
                 VALID: [
                     (
                         {money.VALUE: 1234.12, money.CURRENCY: 'XYZ'},
@@ -343,6 +346,36 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
         }
     },
+    MONEY: {
+        ISCHEMA_NAME: PostgresType.MONEY.value,
+        REFLECTED_NAME: MONEY,
+        TARGET_DICT: {
+            CHAR: {VALID: []},
+            MONEY: {
+                VALID: [
+                    (
+                        "$12.12", "$12.12"
+                    )
+                ]
+            },
+            TEXT: {
+                VALID: [
+                    (
+                        "$12.12",
+                        "$12.12"
+                    )
+                ]
+            },
+            VARCHAR: {
+                VALID: [
+                    (
+                        "$12.12",
+                        "$12.12"
+                    )
+                ]
+            },
+        }
+    },
     NUMERIC: {
         ISCHEMA_NAME: PostgresType.NUMERIC.value,
         REFLECTED_NAME: NUMERIC,
@@ -360,7 +393,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [1.234, 1234123412341234]
             },
-            MONEY: {VALID: [(1, {money.VALUE: 1, money.CURRENCY: "USD"})]},
+            MATHESAR_MONEY: {VALID: [(1, {money.VALUE: 1, money.CURRENCY: "USD"})]},
+            MONEY: {VALID: [(12.12, "$12.12")]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {
@@ -388,7 +422,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [3.345]
             },
-            MONEY: {VALID: [(1.2, {money.VALUE: 1.2, money.CURRENCY: "USD"})]},
+            MATHESAR_MONEY: {VALID: [(1.2, {money.VALUE: 1.2, money.CURRENCY: "USD"})]},
+            MONEY: {VALID: [(12.12, "$12.12")]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {
@@ -410,7 +445,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
-            MONEY: {VALID: [(1, {money.VALUE: 1, money.CURRENCY: "USD"})]},
+            MATHESAR_MONEY: {VALID: [(1, {money.VALUE: 1, money.CURRENCY: "USD"})]},
+            MONEY: {VALID: [(12, "$12.00")]},
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
             SMALLINT: {VALID: [(500, 500)]},
@@ -531,7 +567,9 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             BOOLEAN: {
                 VALID: [
-                    ("true", True), ("false", False), ("t", True), ("f", False)
+                    ("true", True), ("false", False), ("t", True), ("f", False),
+                    ("yes", True), ("y", True), ("no", False), ("n", False),
+                    ("on", True), ("off", False),
                 ],
                 INVALID: ["cat"],
             },
@@ -558,15 +596,19 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             INTERVAL: {
                 VALID: [
-                    ("1 day", timedelta(days=1)),
-                    ("1 week", timedelta(days=7)),
-                    ("3:30", timedelta(hours=3, minutes=30)),
-                    ("00:03:30", timedelta(minutes=3, seconds=30)),
+                    ("1 day", "P0Y0M1DT0H0M0S"),
+                    ("1 week", "P0Y0M7DT0H0M0S"),
+                    ("3:30", "P0Y0M0DT3H30M0S"),
+                    ("00:03:30", "P0Y0M0DT0H3M30S"),
                 ],
                 INVALID: ["1 potato", "3"],
             },
-            MONEY: {
+            MATHESAR_MONEY: {
                 VALID: [("1234", {money.VALUE: 1234, money.CURRENCY: "USD"})],
+                INVALID: ["nanumb"],
+            },
+            MONEY: {
+                VALID: [("$1234", "$1,234.00")],
                 INVALID: ["nanumb"],
             },
             NUMERIC: {
@@ -670,7 +712,9 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             BOOLEAN: {
                 VALID: [
-                    ("true", True), ("false", False), ("t", True), ("f", False)
+                    ("true", True), ("false", False), ("t", True), ("f", False),
+                    ("yes", True), ("y", True), ("no", False), ("n", False),
+                    ("on", True), ("off", False),
                 ],
                 INVALID: ["cat"],
             },
@@ -710,14 +754,15 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             INTERVAL: {
                 VALID: [
-                    ("1 day", timedelta(days=1)),
-                    ("1 week", timedelta(days=7)),
-                    ("3:30", timedelta(hours=3, minutes=30)),
-                    ("00:03:30", timedelta(minutes=3, seconds=30)),
+                    ("1 day", "P0Y0M1DT0H0M0S"),
+                    ("1 week", "P0Y0M7DT0H0M0S"),
+                    ("3:30", "P0Y0M0DT3H30M0S"),
+                    ("00:03:30", "P0Y0M0DT0H3M30S"),
                 ],
                 INVALID: ["1 potato", "3"],
             },
-            MONEY: {
+            MONEY: {VALID: [("$12.12", "$12.12")]},
+            MATHESAR_MONEY: {
                 VALID: [("1234", {money.VALUE: 1234, money.CURRENCY: "USD"})],
                 INVALID: ["nanumb"],
             },
@@ -1019,8 +1064,8 @@ def test_alter_column_casts_data_gen(
     actual_default = get_column_default(table_oid, 0, engine)
     # TODO This needs to be sorted out by fixing how server_default is set.
     if all([
-            source_type != get_qualified_name(MathesarCustomType.MONEY.value),
-            target_type != MathesarCustomType.MONEY.value,
+            source_type != get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value),
+            target_type != MathesarCustomType.MATHESAR_MONEY.value,
     ]):
         assert actual_default == out_val
 
@@ -1140,27 +1185,64 @@ def test_get_column_cast_expression_unsupported(engine_with_types):
 
 
 cast_expr_numeric_option_list = [
-    (Numeric, {"precision": 3}, 'CAST(colname AS NUMERIC(3))'),
-    (Numeric, {"precision": 3, "scale": 2}, 'CAST(colname AS NUMERIC(3, 2))'),
-    (Numeric, {"precision": 3, "scale": 2}, 'CAST(colname AS NUMERIC(3, 2))'),
+    (Numeric, "numeric", {"precision": 3}, 'CAST(colname AS NUMERIC(3))'),
+    (
+        Numeric,
+        "numeric",
+        {"precision": 3, "scale": 2},
+        'CAST(colname AS NUMERIC(3, 2))'
+    ),
+    (
+        Numeric,
+        "numeric",
+        {"precision": 3, "scale": 2},
+        'CAST(colname AS NUMERIC(3, 2))'
+    ),
     (
         String,
+        "numeric",
         {"precision": 3, "scale": 2},
         'CAST(mathesar_types.cast_to_numeric(colname) AS NUMERIC(3, 2))'
+    ),
+    (
+        interval.Interval,
+        "interval",
+        {"fields": "YEAR"},
+        "CAST(colname AS INTERVAL YEAR)"
+    ),
+    (
+        interval.Interval,
+        "interval",
+        {"precision": 2},
+        "CAST(colname AS INTERVAL (2))"
+    ),
+    (
+        interval.Interval,
+        "interval",
+        {"precision": 3, "fields": "SECOND"},
+        "CAST(colname AS INTERVAL SECOND (3))"
+    ),
+    (
+        String,
+        "interval",
+        {"precision": 3, "fields": "SECOND"},
+        "CAST(mathesar_types.cast_to_interval(colname) AS INTERVAL SECOND (3))"
     )
 ]
 
 
-@pytest.mark.parametrize("type_,options,expect_cast_expr", cast_expr_numeric_option_list)
-def test_get_column_cast_expression_numeric_options(
-        engine_with_types, type_, options, expect_cast_expr
+@pytest.mark.parametrize(
+    "type_,target_type,options,expect_cast_expr", cast_expr_numeric_option_list
+)
+def test_get_column_cast_expression_type_options(
+        engine_with_types, type_, target_type, options, expect_cast_expr
 ):
-    target_type = "numeric"
     column = Column("colname", type_)
     cast_expr = cast_operations.get_column_cast_expression(
         column, target_type, engine_with_types, type_options=options,
     )
-    assert str(cast_expr) == expect_cast_expr
+    actual_cast_expr = str(cast_expr.compile(engine_with_types))
+    assert actual_cast_expr == expect_cast_expr
 
 
 expect_cast_tuples = [

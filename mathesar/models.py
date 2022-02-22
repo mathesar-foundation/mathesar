@@ -11,7 +11,7 @@ from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
-from db.columns.operations.select import get_column_name_from_attnum
+from db.columns.operations.select import get_column_name_from_attnum, get_columns_attnum_from_names
 from db.constraints.operations.create import create_unique_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
@@ -223,6 +223,28 @@ class Table(DatabaseObject):
     def has_dependencies(self):
         return True
 
+    def get_dj_columns_queryset(self):
+        sa_column_name = [column.name for column in self.sa_columns]
+        column_attnum_list = [
+            result[0] for result in
+            get_columns_attnum_from_names(self.oid, sa_column_name, self.schema._sa_engine)
+        ]
+        return Column.objects.filter(table=self, attnum__in=column_attnum_list).order_by("attnum")
+
+    def get_dj_columns(self):
+        return tuple(self.get_dj_columns_queryset())
+
+    def get_dj_column_id_to_name_mapping(self):
+        dj_columns = self.get_dj_columns()
+        return dict(
+            (dj_column.id, dj_column.name)
+            for dj_column in dj_columns
+        )
+
+    def get_dj_column_name_to_id_mapping(self):
+        ids_to_names = self.get_dj_column_id_to_name_mapping()
+        return dict(map(reversed, ids_to_names.items()))
+
     def add_column(self, column_data):
         return create_column(
             self.schema._sa_engine,
@@ -264,8 +286,8 @@ class Table(DatabaseObject):
     def sa_all_records(self):
         return db_get_records(self._sa_table, self.schema._sa_engine)
 
-    def sa_num_records(self, filters=[]):
-        return get_count(self._sa_table, self.schema._sa_engine, filters=filters)
+    def sa_num_records(self, filter=None):
+        return get_count(self._sa_table, self.schema._sa_engine, filter=filter)
 
     def update_sa_table(self, update_params):
         return model_utils.update_sa_table(self, update_params)
@@ -276,15 +298,24 @@ class Table(DatabaseObject):
     def get_record(self, id_value):
         return get_record(self._sa_table, self.schema._sa_engine, id_value)
 
-    def get_records(self, limit=None, offset=None, filters=[], order_by=[], group_by=None):
+    def get_records(
+        self,
+        limit=None,
+        offset=None,
+        filter=None,
+        order_by=[],
+        group_by=None,
+        duplicate_only=None,
+    ):
         return db_get_records(
             self._sa_table,
             self.schema._sa_engine,
             limit,
             offset,
-            filters=filters,
+            filter=filter,
             order_by=order_by,
-            group_by=group_by
+            group_by=group_by,
+            duplicate_only=duplicate_only,
         )
 
     def create_record_or_records(self, record_data):
@@ -299,11 +330,12 @@ class Table(DatabaseObject):
     def add_constraint(self, constraint_type, columns, name=None):
         if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
             raise ValueError('Only creating unique constraints is currently supported.')
+        column_names = [column.name for column in columns]
         create_unique_constraint(
             self.name,
             self._sa_table.schema,
             self.schema._sa_engine,
-            columns,
+            column_names,
             name
         )
         try:
@@ -313,9 +345,9 @@ class Table(DatabaseObject):
             pass
         engine = self.schema.database._sa_engine
         if not name:
-            name = constraint_utils.get_constraint_name(constraint_type, self.name, columns[0])
+            name = constraint_utils.get_constraint_name(constraint_type, self.name, column_names[0])
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
-        return Constraint.objects.create(oid=constraint_oid, table=self)
+        return Constraint.current_objects.create(oid=constraint_oid, table=self)
 
 
 class Column(ReflectionManagerMixin, BaseModel):
@@ -361,7 +393,10 @@ class Constraint(DatabaseObject):
 
     @cached_property
     def columns(self):
-        return [column.name for column in self._sa_constraint.columns]
+        column_names = [column.name for column in self._sa_constraint.columns]
+        engine = self.table.schema.database._sa_engine
+        column_attnum_list = [result[0] for result in get_columns_attnum_from_names(self.table.oid, column_names, engine)]
+        return Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
 
     def drop(self):
         drop_constraint(

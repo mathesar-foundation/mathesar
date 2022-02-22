@@ -9,11 +9,7 @@ module.exports = {
     project: ['./tsconfig.json'],
     extraFileExtensions: ['.svelte', '.cjs'],
   },
-  plugins: [
-    'svelte3',
-    'jest',
-    '@typescript-eslint',
-  ],
+  plugins: ['svelte3', 'jest', '@typescript-eslint'],
   extends: [
     'airbnb-typescript/base',
     'plugin:eslint-comments/recommended',
@@ -24,16 +20,21 @@ module.exports = {
   ],
   rules: {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
-    'no-console': [
-      'warn',
-      { allow: ['error'] },
+    'no-console': ['warn', { allow: ['error'] }],
+    '@typescript-eslint/ban-ts-comment': [
+      'error',
+      {
+        'ts-expect-error': 'allow-with-description',
+        'ts-ignore': 'allow-with-description',
+        'ts-nocheck': 'allow-with-description',
+        'ts-check': false,
+        minimumDescriptionLength: 10,
+      },
     ],
   },
   overrides: [
     {
-      files: [
-        '*.svelte',
-      ],
+      files: ['*.svelte'],
       processor: 'svelte3/svelte3',
       rules: {
         'import/first': 'off',
@@ -52,12 +53,21 @@ module.exports = {
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/no-unsafe-call': 'off',
         '@typescript-eslint/no-unsafe-return': 'off',
+        'object-curly-newline': 'off',
+        '@typescript-eslint/brace-style': 'off',
+        '@typescript-eslint/comma-dangle': 'off',
+        '@typescript-eslint/indent': 'off',
+        'function-paren-newline': 'off',
+        'implicit-arrow-linebreak': 'off',
+        'max-len': 'off',
+        'operator-linebreak': 'off',
+        'space-in-parens': 'off',
+        'no-confusing-arrow': 'off',
+        'no-constant-condition': 'off',
       },
     },
     {
-      files: [
-        '*.cjs', '*.config.js',
-      ],
+      files: ['*.cjs', '*.config.js'],
       rules: {
         '@typescript-eslint/no-var-requires': 'off',
         '@typescript-eslint/no-unsafe-assignment': 'off',
@@ -82,6 +92,18 @@ module.exports = {
         'import/prefer-default-export': 'off',
         'no-void': 'off',
         'no-underscore-dangle': 'off',
+        'object-curly-newline': 'off',
+        '@typescript-eslint/brace-style': 'off',
+        '@typescript-eslint/comma-dangle': 'off',
+        '@typescript-eslint/indent': 'off',
+        'function-paren-newline': 'off',
+        'implicit-arrow-linebreak': 'off',
+        'max-len': 'off',
+        'operator-linebreak': 'off',
+        'space-in-parens': 'off',
+        'no-confusing-arrow': 'off',
+        'no-constant-condition': 'off',
+        '@typescript-eslint/require-await': 'off',
       },
     },
   ],
@@ -93,6 +115,7 @@ module.exports = {
   },
   settings: {
     'svelte3/typescript': () => typescript,
+    'svelte3/ignore-styles': ({ lang }) => lang === 'scss',
     'import/resolver': {
       node: {
         extensions: ['.js', '.ts'],

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import {
-    faTimes,
-    faPlus,
-  } from '@fortawesome/free-solid-svg-icons';
+  import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
   import type { Meta, SortOption } from '@mathesar/stores/table-data/types';
   import { Icon, Button, Select } from '@mathesar-component-library';
-  import type { SelectOption, SelectChangeEvent } from '@mathesar-component-library/types';
+  import type {
+    SelectOption,
+    SelectChangeEvent,
+  } from '@mathesar-component-library/types';
 
   export let meta: Meta;
   export let options: SelectOption<string>[];
@@ -23,9 +23,7 @@
   ) {
     let sortOptions = _columns;
     if (_sort) {
-      sortOptions = sortOptions.filter(
-        (option) => !_sort.get(option.id),
-      );
+      sortOptions = sortOptions.filter((option) => !_sort.get(option.id));
     }
     sortColumns = sortOptions;
     [sortColumnValue] = sortColumns;
@@ -38,9 +36,7 @@
     { id: 'desc', label: 'desc' },
   ];
 
-  function getSelectedDirection(
-    option: [string, 'asc' | 'desc'],
-  ) {
+  function getSelectedDirection(option: [string, 'asc' | 'desc']) {
     return sortDirections.find((entry) => entry.id === option[1]);
   }
 
@@ -76,23 +72,19 @@
         <tr>
           <td class="column">{option[0]}</td>
           <td class="dir">
-            <Select options={sortDirections}
+            <Select
+              options={sortDirections}
               value={getSelectedDirection(option)}
-              on:change={
-                (event) => directionChanged(event, option)
-              }/>
+              on:change={(event) => directionChanged(event, option)}
+            />
           </td>
           <td class="action">
-            <Button on:click={() => meta.removeSort(option[0])}>
-              Clear
-            </Button>
+            <Button on:click={() => meta.removeSort(option[0])}>Clear</Button>
           </td>
         </tr>
       {:else}
         <tr>
-          <td class="empty-msg" colspan="3">
-            No column selected
-          </td>
+          <td class="empty-msg" colspan="3"> No column selected </td>
         </tr>
       {/each}
 
@@ -100,26 +92,37 @@
         {#if !addNew}
           <tr class="add-option">
             <td colspan="3">
-              <Button on:click={() => { addNew = true; }}>
+              <Button
+                on:click={() => {
+                  addNew = true;
+                }}
+              >
                 Add new sort column
               </Button>
             </td>
           </tr>
-
         {:else}
           <tr class="add-option">
             <td class="column">
-              <Select options={sortColumns} bind:value={sortColumnValue}/>
+              <Select options={sortColumns} bind:value={sortColumnValue} />
             </td>
             <td class="dir">
-              <Select options={sortDirections} bind:value={sortDirectionValue}/>
+              <Select
+                options={sortDirections}
+                bind:value={sortDirectionValue}
+              />
             </td>
             <td class="action">
               <Button size="small" on:click={addSortColumn}>
-                <Icon data={faPlus}/>
+                <Icon data={faPlus} />
               </Button>
-              <Button size="small" on:click={() => { addNew = false; }}>
-                <Icon data={faTimes}/>
+              <Button
+                size="small"
+                on:click={() => {
+                  addNew = false;
+                }}
+              >
+                <Icon data={faTimes} />
               </Button>
             </td>
           </tr>
@@ -130,5 +133,5 @@
 </div>
 
 <style global lang="scss">
-  @import "DisplayOption.scss";
+  @import 'DisplayOption.scss';
 </style>

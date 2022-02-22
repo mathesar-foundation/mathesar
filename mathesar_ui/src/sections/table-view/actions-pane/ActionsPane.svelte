@@ -14,18 +14,10 @@
   import { Button, Icon, Dropdown } from '@mathesar-component-library';
   import type {
     TabularDataStore,
-    TabularData,
-    RecordsData,
-    ColumnsDataStore,
     ColumnsData,
-    Meta,
   } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar-component-library/types';
-  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
-  import {
-    refetchTablesForSchema,
-    deleteTable,
-  } from '@mathesar/stores/tables';
+  import { refetchTablesForSchema, deleteTable } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
   import { getTabsForSchema } from '@mathesar/stores/tabs';
@@ -38,40 +30,37 @@
   import RenameTableModal from './RenameTableModal.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  
+
   function getColumnOptions(columnsData: ColumnsData): SelectOption<string>[] {
-    return columnsData?.columns?.map((column) => ({
-      id: column.name,
-      label: column.name,
-    })) || [];
+    return (
+      columnsData?.columns?.map((column) => ({
+        id: column.name,
+        label: column.name,
+      })) || []
+    );
   }
 
-  let recordsData: RecordsData;
-  let columnsDataStore: ColumnsDataStore;
-  let constraintsDataStore: ConstraintsDataStore;
-  let meta: Meta;
-  let recordState: RecordsData['state'];
-  let isTableConstraintsModalOpen = false;
-  const tableRenameModal = modal.createVisibilityStore();
+  const tableConstraintsModal = modal.spawnModalController();
+  const tableRenameModal = modal.spawnModalController();
 
-  $: ({
-    columnsDataStore, recordsData, meta, constraintsDataStore,
-  } = $tabularData as TabularData);
-  $: ({
-    filter, sort, group, selectedRecords, combinedModificationState,
-  } = meta);
-  $: ({ state: recordState } = recordsData);
+  $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
+    $tabularData);
+  $: ({ filter, sort, group, selectedRecords, combinedModificationState } =
+    meta);
+  $: recordState = recordsData.state;
 
-  $: isLoading = $columnsDataStore.state === States.Loading
-    || $recordState === States.Loading
-    || $constraintsDataStore.state === States.Loading;
-  $: isError = $columnsDataStore.state === States.Error
-    || $recordState === States.Error
-    || $constraintsDataStore.state === States.Error;
+  $: isLoading =
+    $columnsDataStore.state === States.Loading ||
+    $recordState === States.Loading ||
+    $constraintsDataStore.state === States.Loading;
+  $: isError =
+    $columnsDataStore.state === States.Error ||
+    $recordState === States.Error ||
+    $constraintsDataStore.state === States.Error;
   $: columnOptions = getColumnOptions($columnsDataStore);
 
   function refresh() {
-    void ($tabularData as TabularData).refresh();
+    void $tabularData.refresh();
   }
 
   function handleDeleteTable() {
@@ -79,9 +68,15 @@
       identifierType: 'Table',
       onProceed: async () => {
         await deleteTable($tabularData.id);
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         const tabList = getTabsForSchema($currentDBName, $currentSchemaId);
-        const tab = tabList.getTabularTabByTabularID($tabularData.type, $tabularData.id);
+        const tab = tabList.getTabularTabByTabularID(
+          $tabularData.type,
+          $tabularData.id,
+        );
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         tabList.remove(tab);
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         await refetchTablesForSchema($currentSchemaId);
       },
     });
@@ -96,33 +91,34 @@
     ariaLabel="Table Actions"
   >
     <svelte:fragment slot="trigger">
-      <Icon data={faCog}/>
+      <Icon data={faCog} />
       Table
     </svelte:fragment>
     <svelte:fragment slot="content">
       <ul>
-        <li class="item" on:click={() => tableRenameModal.open()}>
-          Rename
-        </li>
-        <li class="item" on:click={handleDeleteTable}>
-          Delete
-        </li>
-        <li class="item" on:click={() => { isTableConstraintsModalOpen = true; }}>
+        <li class="item" on:click={() => tableRenameModal.open()}>Rename</li>
+        <li class="item" on:click={handleDeleteTable}>Delete</li>
+        <li
+          class="item"
+          on:click={() => {
+            tableConstraintsModal.open();
+          }}
+        >
           Constraints
         </li>
       </ul>
     </svelte:fragment>
   </Dropdown>
 
-  <TableConstraints bind:isOpen={isTableConstraintsModalOpen} />
+  <TableConstraints controller={tableConstraintsModal} />
 
-  <RenameTableModal bind:isOpen={$tableRenameModal} tabularData={$tabularData} />
+  <RenameTableModal controller={tableRenameModal} tabularData={$tabularData} />
 
-  <div class="divider"/>
+  <div class="divider" />
 
   <Dropdown showArrow={false}>
     <svelte:fragment slot="trigger">
-      <Icon data={faFilter} size="0.8em"/>
+      <Icon data={faFilter} size="0.8em" />
       <span>
         Filters
         {#if $filter?.filters?.length > 0}
@@ -131,13 +127,13 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <DisplayFilter options={columnOptions} {meta}/>
+      <DisplayFilter options={columnOptions} {meta} />
     </svelte:fragment>
   </Dropdown>
 
   <Dropdown showArrow={false}>
     <svelte:fragment slot="trigger">
-      <Icon data={faSort}/>
+      <Icon data={faSort} />
       <span>
         Sort
         {#if $sort?.size > 0}
@@ -146,13 +142,13 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <DisplaySort options={columnOptions} {meta}/>
+      <DisplaySort options={columnOptions} {meta} />
     </svelte:fragment>
   </Dropdown>
 
   <Dropdown showArrow={false}>
     <svelte:fragment slot="trigger">
-      <Icon data={faListAlt}/>
+      <Icon data={faListAlt} />
       <span>
         Group
         {#if $group?.size > 0}
@@ -161,22 +157,20 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <DisplayGroup options={columnOptions} {meta}/>
+      <DisplayGroup options={columnOptions} {meta} />
     </svelte:fragment>
   </Dropdown>
 
-  <div class="divider"/>
+  <div class="divider" />
 
   <Button size="small" on:click={() => recordsData.addEmptyRecord()}>
-    <Icon data={faPlus}/>
-    <span>
-      New Record
-    </span>
+    <Icon data={faPlus} />
+    <span> New Record </span>
   </Button>
 
   {#if $selectedRecords.size > 0}
     <Button size="small" on:click={() => recordsData.deleteSelected()}>
-      <Icon data={faTrashAlt}/>
+      <Icon data={faTrashAlt} />
       <span>
         Delete {$selectedRecords.size} records
       </span>
@@ -184,7 +178,7 @@
   {/if}
 
   {#if $combinedModificationState !== 'idle'}
-    <div class="divider"/>
+    <div class="divider" />
     <div class="save-status">
       {#if $combinedModificationState === 'inprocess'}
         Saving changes
@@ -198,9 +192,10 @@
 
   <div class="loading-info">
     <Button size="small" disabled={isLoading} on:click={refresh}>
-      <Icon data={
-        isError && !isLoading ? faExclamationTriangle : faSync
-      } spin={isLoading}/>
+      <Icon
+        data={isError && !isLoading ? faExclamationTriangle : faSync}
+        spin={isLoading}
+      />
       <span>
         {#if isLoading}
           Loading
@@ -215,5 +210,5 @@
 </div>
 
 <style global lang="scss">
-  @import "ActionsPane.scss";
+  @import 'ActionsPane.scss';
 </style>

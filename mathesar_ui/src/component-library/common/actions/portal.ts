@@ -1,9 +1,9 @@
 import type { Action } from './types.d';
 
-export default function portal(node: Element, target?: HTMLElement) : Action {
-  const targetElement = target ?? document.querySelector('body');
+export default function portal(node: Element, target?: HTMLElement): Action {
+  const targetElement = target ?? document.querySelector('body') ?? undefined;
 
-  function update(newTarget: HTMLElement) {
+  function update(newTarget: HTMLElement | undefined) {
     if (newTarget && newTarget instanceof HTMLElement) {
       newTarget.appendChild(node);
     }
@@ -16,6 +16,7 @@ export default function portal(node: Element, target?: HTMLElement) : Action {
   update(targetElement);
 
   return {
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     update,
     destroy,
   };

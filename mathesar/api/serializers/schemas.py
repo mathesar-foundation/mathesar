@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models import Schema
 
 
@@ -9,11 +10,12 @@ class ModelNameField(serializers.CharField):
     `model.name`. Required to support passing and returing a model name from the
     endpoint, while also storing the model as a related field.
     """
+
     def to_representation(self, value):
         return value.name
 
 
-class SchemaSerializer(serializers.HyperlinkedModelSerializer):
+class SchemaSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSerializer):
     name = serializers.CharField()
     database = ModelNameField(max_length=128)
 

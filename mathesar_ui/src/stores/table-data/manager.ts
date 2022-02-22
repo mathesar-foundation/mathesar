@@ -20,7 +20,10 @@ export function getTabularContent(
   return entry;
 }
 
-export function removeTabularContent(type: TabularType, id: DBObjectEntry['id']): void {
+export function removeTabularContent(
+  type: TabularType,
+  id: DBObjectEntry['id'],
+): void {
   const tabularMap = type === TabularType.View ? viewMap : tableMap;
   // destroy all objects in table
   const entry = tabularMap.get(id);

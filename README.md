@@ -18,8 +18,6 @@ We started building Mathesar in March 2021 and are making steady progress toward
   - [Linting](#linting)
   - [Running tests](#running-tests)
   - [E2E integration tests](#e2e-integration-tests)
-    - [Setting up the environment for E2E tests](#setting-up-the-environment-for-e2e-tests)
-    - [Running E2E tests](#running-e2e-tests)
   - [Opening a shell in the container](#opening-a-shell-in-the-container)
   - [Troubleshooting](#troubleshooting)
 - [License](#license)
@@ -46,8 +44,7 @@ docker-compose up
 
 If it's your first time running the application, you'll also need to run database migrations and install Mathesar types and functions:
 ```
-docker exec mathesar_service python manage.py migrate
-docker exec -it mathesar_service python install.py
+docker exec mathesar_service sh -c "python manage.py migrate && python install.py"
 ```
 
 You should now have a web server and database server running. Opening `http://localhost:8000` in your browser will open the application. For sample table data, you can create a new table in the UI using the `patents.csv` file found in `/mathesar/tests/data`. 
@@ -65,7 +62,8 @@ If you want to use Mathesar with a preexisting Postgres DB, modify the `DATABASE
 **Please don't do this unless you have full confidence in what you're doing since Mathesar is not stable yet and may make unexpected changes to the database that you connect to it.**
 
 ### Frontend
-For more detailed information on Mathesar's frontend development, please refer the [readme file within mathesar_ui directory](https://github.com/centerofci/mathesar/blob/master/mathesar_ui/README.md).
+
+For more detailed information on Mathesar's frontend development, see [Mathesar UI](./mathesar_ui/README.md).
 
 ### Linting
 
@@ -100,28 +98,7 @@ docker exec mathesar_service bash -c "cd mathesar_ui && npm test"
 
 ### E2E integration tests
 
-#### Setting up the environment for E2E tests
-
-Running E2E integration tests requires a separate docker setup. The dockerfile for it can be found [here](Dockerfile.integ-tests).
-
-Inorder to make use of it, you can change line 18 in docker-compose.yml:
-
-```
-# change this
-dockerfile: Dockerfile
-
-# to this
-dockerfile: Dockerfile.integ-tests
-```
-
-If you are working on the frontend and would like to run integration tests regularly, you could make use of this for your default development environment setup.
-
-#### Running E2E tests
-
-The E2E tests require the server to be up and running. You can run the tests by executing the following command:
-```
-docker exec mathesar_service pytest integration_tests/
-```
+See [Integration Tests](./mathesar/tests/integration/README.md)
 
 ### Opening a shell in the container
 

@@ -21,7 +21,7 @@
   export let element: HTMLInputElement | undefined = undefined;
 
   // Id for the input
-  export let id: string = undefined;
+  export let id: string | undefined = undefined;
 
   export let hasValidationErrors = false;
 
@@ -35,13 +35,19 @@
   }
 </script>
 
-<BaseInput {...$$restProps} bind:id {disabled}/>
+<BaseInput {...$$restProps} bind:id {disabled} />
 
-<input bind:this={element} {...$$restProps} type='text'
+<input
+  bind:this={element}
+  {...$$restProps}
+  type="text"
   class={['input-element', 'text-input', classes].join(' ')}
   class:has-validation-errors={hasValidationErrors}
   bind:value
-  {id} {disabled}
+  {id}
+  {disabled}
+  on:input
   on:focus
   on:blur
-  on:keydown={handleKeydown}/>
+  on:keydown={handleKeydown}
+/>

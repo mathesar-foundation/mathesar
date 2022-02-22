@@ -23,7 +23,10 @@ import type {
   FileImportWritableInfo,
   FileImport,
 } from '@mathesar/stores/fileImports';
-import type { UploadCompletionOpts, PaginatedResponse } from '@mathesar/utils/api';
+import type {
+  UploadCompletionOpts,
+  PaginatedResponse,
+} from '@mathesar/utils/api';
 import type {
   FileUploadAddDetail,
   FileUploadProgress,
@@ -38,6 +41,7 @@ function completionCallback(
   if (!completionStatus && typeof dataFileId === 'number') {
     const existingProgress = get(fileImportStore).uploadProgress;
     setInFileStore(fileImportStore, {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       uploadProgress: {
         ...existingProgress,
         percentCompleted: 100,
@@ -49,7 +53,9 @@ function completionCallback(
     });
   } else {
     const uploadProgress = completionStatus;
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     if (completionStatus.percentCompleted > 99) {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       uploadProgress.percentCompleted = 99;
     }
     setInFileStore(fileImportStore, {
@@ -76,9 +82,11 @@ export function uploadNewFile(
   );
 
   setInFileStore(fileImportStore, {
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     uploadProgress: null,
     uploadStatus: States.Loading,
     uploadPromise,
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     error: null,
   });
 
@@ -87,17 +95,22 @@ export function uploadNewFile(
     dataFileName: file.name,
   });
 
-  uploadPromise.then((res: { id: number }) => {
-    completionCallback(fileImportStore, null, res.id);
-    return res;
-  }).catch((err: Error) => {
-    setInFileStore(fileImportStore, {
-      uploads: [],
-      uploadProgress: null,
-      uploadStatus: States.Error,
-      error: err.message,
+  uploadPromise
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+    .then((res: { id: number }) => {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+      completionCallback(fileImportStore, null, res.id);
+      return res;
+    })
+    .catch((err: Error) => {
+      setInFileStore(fileImportStore, {
+        uploads: [],
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+        uploadProgress: null,
+        uploadStatus: States.Error,
+        error: err.message,
+      });
     });
-  });
 }
 
 export function getFileUploadInfo(
@@ -106,6 +119,7 @@ export function getFileUploadInfo(
   if (fileData.uploads?.[0]) {
     return {
       [fileData.uploads[0].fileId]: {
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         state: fileData.uploadStatus.toString(),
         progress: fileData.uploadProgress?.percentCompleted || 0,
       },
@@ -120,9 +134,12 @@ async function deletePreviewTable(fileImportStore: FileImport): Promise<void> {
   fileImportData.previewDeletePromise?.cancel();
 
   if (fileImportData.previewId) {
-    const previewDeletePromise = deleteAPI(`/tables/${fileImportData.previewId}/`);
+    const previewDeletePromise = deleteAPI(
+      `/tables/${fileImportData.previewId}/`,
+    );
     setInFileStore(fileImportStore, {
       previewDeletePromise,
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       previewId: null,
     });
 
@@ -132,7 +149,7 @@ async function deletePreviewTable(fileImportStore: FileImport): Promise<void> {
 
 async function createPreviewTable(
   fileImportStore: FileImport,
-): Promise<{ id: number, name: string }> {
+): Promise<{ id: number; name: string }> {
   const fileImportData = get(fileImportStore);
 
   fileImportData.previewCreatePromise?.cancel();
@@ -150,11 +167,12 @@ async function createPreviewTable(
   setInFileStore(fileImportStore, {
     previewTableCreationStatus: States.Loading,
     previewCreatePromise,
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     error: null,
   });
 
   try {
-    const res = await previewCreatePromise as { id: number, name: string };
+    const res = (await previewCreatePromise) as { id: number; name: string };
 
     const toUpdate: FileImportWritableInfo = {
       previewTableCreationStatus: States.Done,
@@ -185,21 +203,31 @@ export async function fetchPreviewTableInfo(
 
   try {
     const previewColumnPromise = getAPI<PaginatedResponse<PreviewColumn>>(
+      // https://github.com/centerofci/mathesar/issues/1055
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `/tables/${fileImportData.previewId}/columns/?limit=500`,
     );
     const suggestedTypesPromise = getAPI<Record<string, string>>(
+      // https://github.com/centerofci/mathesar/issues/1055
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       `/tables/${fileImportData.previewId}/type_suggestions/`,
     );
 
     type DataFileResponse = Record<'header', boolean>;
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     let dataFilePromise: CancellablePromise<DataFileResponse> = null;
     if (!fileImportData.isDataFileInfoPresent) {
-      dataFilePromise = getAPI<DataFileResponse>(`/data_files/${fileImportData.dataFileId}/`);
+      dataFilePromise = getAPI<DataFileResponse>(
+        // https://github.com/centerofci/mathesar/issues/1055
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        `/data_files/${fileImportData.dataFileId}/`,
+      );
     }
 
     setInFileStore(fileImportStore, {
       previewStatus: States.Loading,
       previewColumnPromise,
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       error: null,
     });
 
@@ -221,6 +249,7 @@ export async function fetchPreviewTableInfo(
       previewColumnPromise,
       previewColumns,
       isDataFileInfoPresent: true,
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       error: null,
     };
 
@@ -248,9 +277,12 @@ export async function updateDataFileHeader(
   try {
     setInFileStore(fileImportStore, {
       previewStatus: States.Loading,
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       error: null,
     });
 
+    // https://github.com/centerofci/mathesar/issues/1055
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     await patchAPI(`/data_files/${fileImportData.dataFileId}/`, {
       header: headerValue,
     });
@@ -269,13 +301,16 @@ export async function updateDataFileHeader(
 // When next is clicked after upload
 export async function loadPreview(
   fileImportStore: FileImport,
-): Promise<{ id: number, name: string }> {
+): Promise<{ id: number; name: string }> {
   const fileImportData = get(fileImportStore);
-  let tableCreationResult: { id: number, name: string } = null;
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+  let tableCreationResult: { id: number; name: string } = null;
 
   if (fileImportData.previewTableCreationStatus === States.Done) {
     tableCreationResult = {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       id: fileImportData.previewId,
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       name: fileImportData.name,
     };
   } else {
@@ -295,9 +330,10 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
 
   if (fileImportData.previewId) {
     const columns: {
-      name?: PreviewColumn['name'],
-      type?: PreviewColumn['type']
+      name?: PreviewColumn['name'];
+      type?: PreviewColumn['type'];
     }[] = [];
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     fileImportData.previewColumns.forEach((column) => {
       if (column.isSelected) {
         columns.push({
@@ -312,10 +348,14 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
     fileImportData.importPromise?.cancel();
 
     try {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       let columnChangePromise: CancellablePromise<unknown> = null;
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       let verificationPromise: CancellablePromise<unknown> = null;
 
       const saveTable = async () => {
+        // https://github.com/centerofci/mathesar/issues/1055
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         columnChangePromise = patchAPI(`/tables/${fileImportData.previewId}/`, {
           columns,
         });
@@ -326,19 +366,31 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
         if (fileImportData.name !== fileImportData.previewName) {
           verificationRequest.name = fileImportData.name;
         }
-        verificationPromise = patchAPI(`/tables/${fileImportData.previewId}/`, verificationRequest);
+        verificationPromise = patchAPI(
+          // https://github.com/centerofci/mathesar/issues/1055
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          `/tables/${fileImportData.previewId}/`,
+          verificationRequest,
+        );
         await verificationPromise;
       };
 
-      const importPromise = new CancellablePromise((resolve, reject) => {
-        void saveTable().then(() => resolve(), (err) => reject(err));
-      }, () => {
-        columnChangePromise?.cancel();
-        verificationPromise?.cancel();
-      });
+      const importPromise = new CancellablePromise(
+        (resolve, reject) => {
+          void saveTable().then(
+            () => resolve(),
+            (err) => reject(err),
+          );
+        },
+        () => {
+          columnChangePromise?.cancel();
+          verificationPromise?.cancel();
+        },
+      );
       setInFileStore(fileImportStore, {
         importStatus: States.Loading,
         importPromise,
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         error: null,
       });
       await importPromise;
@@ -362,6 +414,7 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
         const newTab = constructTabularTab(
           TabularType.Table,
           fileImportData.previewId,
+          // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
           fileImportData.name,
         );
         tabList.replace(existingTab, newTab);
@@ -392,13 +445,17 @@ export function cancelImport(fileImportStore: FileImport): void {
 }
 
 interface DataFilesRequestData {
-  url?: string,
-  paste?: string,
+  url?: string;
+  paste?: string;
 }
 
-async function importData(fileImportStore: FileImport, data: DataFilesRequestData): Promise<void> {
+async function importData(
+  fileImportStore: FileImport,
+  data: DataFilesRequestData,
+): Promise<void> {
   setInFileStore(fileImportStore, {
     uploadStatus: States.Loading,
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     error: null,
   });
   try {
@@ -416,6 +473,7 @@ async function importData(fileImportStore: FileImport, data: DataFilesRequestDat
     });
     setInFileStore(fileImportStore, {
       uploadStatus: States.Done,
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       error: null,
     });
   } catch (err: unknown) {
@@ -426,17 +484,24 @@ async function importData(fileImportStore: FileImport, data: DataFilesRequestDat
   }
 }
 
-export async function importFromURL(fileImportStore: FileImport, url: string): Promise<void> {
+export async function importFromURL(
+  fileImportStore: FileImport,
+  url: string,
+): Promise<void> {
   return importData(fileImportStore, { url });
 }
 
-export async function importFromText(fileImportStore: FileImport, text: string): Promise<void> {
+export async function importFromText(
+  fileImportStore: FileImport,
+  text: string,
+): Promise<void> {
   return importData(fileImportStore, { paste: text });
 }
 
 // When errors are manually closed
 export function clearErrors(fileImportStore: FileImport): void {
   setInFileStore(fileImportStore, {
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     error: null,
   });
 }

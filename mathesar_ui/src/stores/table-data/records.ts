@@ -7,10 +7,7 @@ import {
   postAPI,
 } from '@mathesar/utils/api';
 import { TabularType } from '@mathesar/App.d';
-import type {
-  Writable,
-  Unsubscriber,
-} from 'svelte/store';
+import type { Writable, Unsubscriber } from 'svelte/store';
 import type { CancellablePromise } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/App.d';
 import type {
@@ -25,16 +22,16 @@ import type { Meta } from './meta';
 import type { ColumnsDataStore, Column } from './columns';
 
 export interface Group {
-  count: number,
-  firstValue: ResultValue,
-  lastValue: ResultValue,
-  resultIndices: number[],
+  count: number;
+  firstValue: ResultValue;
+  lastValue: ResultValue;
+  resultIndices: number[];
 }
 
 export interface Grouping {
-  columns: string[],
-  mode: GroupingMode,
-  groups: Group[],
+  columns: string[];
+  mode: GroupingMode;
+  groups: Group[];
 }
 
 function buildGroup(apiGroup: ApiGroup): Group {
@@ -55,33 +52,34 @@ function buildGrouping(apiGrouping: ApiGrouping): Grouping {
 }
 
 interface TableRecordInResponse {
-  [key: string]: unknown,
+  [key: string]: unknown;
 }
 
 export interface TableRecord extends TableRecordInResponse {
-  __identifier: string,
-  __isAddPlaceholder?: boolean,
-  __isNew?: boolean,
-  __isGroupHeader?: boolean,
-  __group?: Group,
-  __rowIndex?: number,
-  __state?: string, // TODO: Remove __state in favour of _recordsInProcess
-  __groupValues?: Record<string, unknown>,
+  __identifier: string;
+  __isAddPlaceholder?: boolean;
+  __isNew?: boolean;
+  __isGroupHeader?: boolean;
+  __group?: Group;
+  __rowIndex?: number;
+  __state?: string; // TODO: Remove __state in favour of _recordsInProcess
+  __groupValues?: Record<string, unknown>;
 }
 
 export interface TableRecordsData {
-  state: States,
-  error?: string,
-  savedRecords: TableRecord[],
-  totalCount: number,
-  grouping?: Grouping,
+  state: States;
+  error?: string;
+  savedRecords: TableRecord[];
+  totalCount: number;
+  grouping?: Grouping;
 }
 
 export function getRowKey(
   row: TableRecord,
   primaryKeyColumn?: Column['name'],
 ): unknown {
-  let key = row?.[primaryKeyColumn];
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+  let key: unknown = row?.[primaryKeyColumn];
   if (!key && row?.__isNew) {
     key = row?.__identifier;
   }
@@ -118,7 +116,9 @@ function preprocessRecords(
   let groupIndex = 0;
   let existingRecordIndex = 0;
 
-  const recordIndexToGroupMap = getRecordIndexToGroupMap(grouping?.groups ?? []);
+  const recordIndexToGroupMap = getRecordIndexToGroupMap(
+    grouping?.groups ?? [],
+  );
 
   records?.forEach((record) => {
     if (!record.__isGroupHeader && !record.__isAddPlaceholder) {
@@ -140,7 +140,11 @@ function preprocessRecords(
           combinedRecords.push({
             __isGroupHeader: true,
             __group: recordIndexToGroupMap.get(index),
-            __identifier: generateRowIdentifier('groupHeader', offset, groupIndex),
+            __identifier: generateRowIdentifier(
+              'groupHeader',
+              offset,
+              groupIndex,
+            ),
             __groupValues: record,
             __state: 'done',
           });
@@ -150,7 +154,11 @@ function preprocessRecords(
 
       combinedRecords.push({
         ...record,
-        __identifier: generateRowIdentifier('normal', offset, existingRecordIndex),
+        __identifier: generateRowIdentifier(
+          'normal',
+          offset,
+          existingRecordIndex,
+        ),
         __rowIndex: index,
         __state: 'done',
       });
@@ -190,14 +198,16 @@ export class RecordsData {
 
   grouping: Writable<Grouping | undefined>;
 
-  totalCount: Writable<number>;
+  totalCount: Writable<number | undefined>;
 
-  error: Writable<string>;
+  error: Writable<string | undefined>;
 
-  private promise: CancellablePromise<ApiRecordsResponse>;
+  private promise: CancellablePromise<ApiRecordsResponse> | undefined;
 
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   private createPromises: Map<unknown, CancellablePromise<unknown>>;
 
+  // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   private updatePromises: Map<unknown, CancellablePromise<unknown>>;
 
   private fetchCallback?: (storeData: TableRecordsData) => void;
@@ -220,25 +230,32 @@ export class RecordsData {
     this.savedRecords = writable([] as TableRecord[]);
     this.newRecords = writable([] as TableRecord[]);
     this.grouping = writable<Grouping | undefined>(undefined);
-    this.totalCount = writable(null as number);
-    this.error = writable(null as string);
+    this.totalCount = writable<number | undefined>(undefined);
+    this.error = writable<string | undefined>(undefined);
 
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
-    this.url = `/${this.type === TabularType.Table ? 'tables' : 'views'}/${this.parentId}/records/`;
+    this.url = `/${this.type === TabularType.Table ? 'tables' : 'views'}/${
+      this.parentId
+    }/records/`;
     this.fetchCallback = fetchCallback;
     void this.fetch();
 
     // TODO: Create base class to abstract subscriptions and unsubscriptions
-    this.requestParamsUnsubscriber = this.meta.recordRequestParams.subscribe(() => {
-      void this.fetch();
-    });
-    this.columnPatchUnsubscriber = this.columnsDataStore.on('columnPatched', () => {
-      void this.fetch();
-    });
+    this.requestParamsUnsubscriber = this.meta.recordRequestParams.subscribe(
+      () => {
+        void this.fetch();
+      },
+    );
+    this.columnPatchUnsubscriber = this.columnsDataStore.on(
+      'columnPatched',
+      () => this.fetch(),
+    );
   }
 
-  async fetch(retainExistingRows = false): Promise<TableRecordsData> {
+  async fetch(
+    retainExistingRows = false,
+  ): Promise<TableRecordsData | undefined> {
     this.promise?.cancel();
     const offset = getStoreValue(this.meta.offset);
 
@@ -250,14 +267,17 @@ export class RecordsData {
       data = data.map((entry) => {
         index += 1;
         if (!retainExistingRows || !entry) {
-          return { __state: 'loading', __identifier: generateRowIdentifier('dummy', offset, index) };
+          return {
+            __state: 'loading',
+            __identifier: generateRowIdentifier('dummy', offset, index),
+          };
         }
         return entry;
       });
 
       return data;
     });
-    this.error.set(null);
+    this.error.set(undefined);
     this.state.set(States.Loading);
     if (!retainExistingRows) {
       this.newRecords.set([]);
@@ -269,7 +289,9 @@ export class RecordsData {
       this.promise = getAPI<ApiRecordsResponse>(`${this.url}?${params ?? ''}`);
       const response = await this.promise;
       const totalCount = response.count || 0;
-      const grouping = response.grouping ? buildGrouping(response.grouping) : undefined;
+      const grouping = response.grouping
+        ? buildGrouping(response.grouping)
+        : undefined;
       const records = preprocessRecords(offset, response.results, grouping);
       const tableRecordsData: TableRecordsData = {
         state: States.Done,
@@ -281,14 +303,16 @@ export class RecordsData {
       this.state.set(States.Done);
       this.grouping.set(grouping);
       this.totalCount.set(totalCount);
-      this.error.set(null);
+      this.error.set(undefined);
       this.fetchCallback?.(tableRecordsData);
       return tableRecordsData;
     } catch (err) {
       this.state.set(States.Error);
-      this.error.set(err instanceof Error ? err.message : 'Unable to load records');
+      this.error.set(
+        err instanceof Error ? err.message : 'Unable to load records',
+      );
     }
-    return null;
+    return undefined;
   }
 
   async deleteSelected(): Promise<void> {
@@ -301,15 +325,17 @@ export class RecordsData {
         const successSet: Set<unknown> = new Set();
         const failed: unknown[] = [];
         // TODO: Convert this to single request
-        const promises = [...pkSet].map((pk) => deleteAPI<unknown>(`${this.url}${pk as string}/`)
-          .then(() => {
-            successSet.add(pk);
-            return successSet;
-          })
-          .catch(() => {
-            failed.push(pk);
-            return failed;
-          }));
+        const promises = [...pkSet].map((pk) =>
+          deleteAPI<unknown>(`${this.url}${pk as string}/`)
+            .then(() => {
+              successSet.add(pk);
+              return successSet;
+            })
+            .catch(() => {
+              failed.push(pk);
+              return failed;
+            }),
+        );
         await Promise.all(promises);
         await this.fetch(true);
 
@@ -319,7 +345,10 @@ export class RecordsData {
 
         this.newRecords.update((existing) => {
           let retained = existing.filter(
-            (entry) => !successSet.has(getRowKey(entry, this.columnsDataStore.get()?.primaryKey)),
+            (entry) =>
+              !successSet.has(
+                getRowKey(entry, this.columnsDataStore.get()?.primaryKey),
+              ),
           );
           if (retained.length === existing.length) {
             return existing;
@@ -330,11 +359,7 @@ export class RecordsData {
             return {
               ...entry,
               __rowIndex: savedRecordsLength + index,
-              __identifier: generateRowIdentifier(
-                'new',
-                offset,
-                index,
-              ),
+              __identifier: generateRowIdentifier('new', offset, index),
             };
           });
           return retained;
@@ -342,7 +367,10 @@ export class RecordsData {
         this.meta.clearMultipleRecordModificationStates([...successSet]);
         this.meta.setMultipleRecordModificationStates(failed, 'deleteFailed');
       } catch (err) {
-        this.meta.setMultipleRecordModificationStates([...pkSet], 'deleteFailed');
+        this.meta.setMultipleRecordModificationStates(
+          [...pkSet],
+          'deleteFailed',
+        );
       } finally {
         this.meta.clearSelectedRecords();
       }
@@ -354,7 +382,10 @@ export class RecordsData {
     const { primaryKey } = this.columnsDataStore.get();
     if (primaryKey && row[primaryKey]) {
       const rowKey = getRowKey(row, primaryKey);
-      const cellKey = `${rowKey.toString()}::${column.name}`;
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+      const rowKeyString: string = rowKey.toString();
+      const cellKey = `${rowKeyString}::${column.name}`;
       this.meta.setCellUpdateState(rowKey, cellKey, 'update');
       this.updatePromises?.get(cellKey)?.cancel();
       const promise = patchAPI<unknown>(
@@ -412,7 +443,11 @@ export class RecordsData {
     const savedRecords = getStoreValue(this.savedRecords);
     const savedRecordsLength = savedRecords?.length || 0;
     const existingNewRecords = getStoreValue(this.newRecords);
-    const identifier = generateRowIdentifier('new', offset, existingNewRecords.length);
+    const identifier = generateRowIdentifier(
+      'new',
+      offset,
+      existingNewRecords.length,
+    );
     const newRecord: TableRecord = {
       __identifier: identifier,
       __state: States.Done,
@@ -427,10 +462,7 @@ export class RecordsData {
     const rowKey = getRowKey(row, primaryKey);
     this.meta.setRecordModificationState(rowKey, 'create');
     this.createPromises?.get(rowKey)?.cancel();
-    const promise = postAPI<ApiResult>(
-      this.url,
-      prepareRowForRequest(row),
-    );
+    const promise = postAPI<ApiResult>(this.url, prepareRowForRequest(row));
     if (!this.createPromises) {
       this.createPromises = new Map();
     }
@@ -446,13 +478,15 @@ export class RecordsData {
       const updatedRowKey = getRowKey(newRow, primaryKey);
       this.meta.clearRecordModificationState(rowKey);
       this.meta.setRecordModificationState(updatedRowKey, 'created');
-      this.newRecords.update((existing) => existing.map((entry) => {
-        if (entry.__identifier === row.__identifier) {
-          return newRow;
-        }
-        return entry;
-      }));
-      this.totalCount.update((count) => count + 1);
+      this.newRecords.update((existing) =>
+        existing.map((entry) => {
+          if (entry.__identifier === row.__identifier) {
+            return newRow;
+          }
+          return entry;
+        }),
+      );
+      this.totalCount.update((count) => (count ?? 0) + 1);
     } catch (err) {
       this.meta.setRecordModificationState(rowKey, 'creationFailed');
     } finally {
@@ -467,8 +501,9 @@ export class RecordsData {
 
     // Row may not have been updated yet in view when additional request is made.
     // So check current values to ensure another row has not been created.
-    const existingNewRecordRow = getStoreValue(this.newRecords)
-      ?.find((entry) => entry.__identifier === row.__identifier);
+    const existingNewRecordRow = getStoreValue(this.newRecords)?.find(
+      (entry) => entry.__identifier === row.__identifier,
+    );
 
     if (!existingNewRecordRow && row.__isAddPlaceholder) {
       this.newRecords.update((existing) => {
@@ -480,7 +515,12 @@ export class RecordsData {
       });
     }
 
-    if (!existingNewRecordRow?.[primaryKey] && row.__isNew && !row[primaryKey]) {
+    if (
+      primaryKey &&
+      !existingNewRecordRow?.[primaryKey] &&
+      row.__isNew &&
+      !row[primaryKey]
+    ) {
       await this.createRecord(row);
     } else if (column) {
       await this.updateCell(row, column);
@@ -510,7 +550,7 @@ export class RecordsData {
 
   destroy(): void {
     this.promise?.cancel();
-    this.promise = null;
+    this.promise = undefined;
 
     this.requestParamsUnsubscriber();
     this.columnPatchUnsubscriber();

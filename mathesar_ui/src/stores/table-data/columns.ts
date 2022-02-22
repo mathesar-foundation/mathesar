@@ -7,49 +7,44 @@ import {
   States,
 } from '@mathesar/utils/api';
 import { TabularType } from '@mathesar/App.d';
-import { intersection } from '@mathesar/utils/language';
 import { EventHandler } from '@mathesar-component-library';
 
-import type {
-  Writable,
-  Updater,
-  Subscriber,
-  Unsubscriber,
-} from 'svelte/store';
+import type { Writable, Updater, Subscriber, Unsubscriber } from 'svelte/store';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
 import type { DBObjectEntry, DbType } from '@mathesar/App.d';
-import type { AbstractTypesMap, AbstractType } from '@mathesar/stores/abstractTypes';
 import type { Meta } from './meta';
 
 export interface Column {
-  id: number,
-  name: string,
-  type: DbType,
-  index: number,
-  nullable: boolean,
-  primary_key: boolean,
-  valid_target_types: DbType[],
-  __columnIndex?: number,
+  id: number;
+  name: string;
+  type: DbType;
+  index: number;
+  nullable: boolean;
+  primary_key: boolean;
+  valid_target_types: DbType[];
+  __columnIndex?: number;
 }
 
 export interface ColumnsData {
-  state: States,
-  error?: string,
-  columns: Column[],
-  primaryKey?: string,
+  state: States;
+  error?: string;
+  columns: Column[];
+  primaryKey?: string;
 }
 
 function preprocessColumns(response?: Column[]): Column[] {
   let index = 0;
-  return response?.map((column) => {
-    const newColumn = {
-      ...column,
-      __columnIndex: index,
-    };
-    index += 1;
-    return newColumn;
-  }) || [];
+  return (
+    response?.map((column) => {
+      const newColumn = {
+        ...column,
+        __columnIndex: index,
+      };
+      index += 1;
+      return newColumn;
+    }) || []
+  );
 }
 
 function api(url: string) {
@@ -69,14 +64,17 @@ function api(url: string) {
   };
 }
 
-export class ColumnsDataStore extends EventHandler implements Writable<ColumnsData> {
+export class ColumnsDataStore
+  extends EventHandler
+  implements Writable<ColumnsData>
+{
   private type: TabularType;
 
   private parentId: DBObjectEntry['id'];
 
   private store: Writable<ColumnsData>;
 
-  private promise: CancellablePromise<PaginatedResponse<Column>>;
+  private promise: CancellablePromise<PaginatedResponse<Column>> | undefined;
 
   private api: ReturnType<typeof api>;
 
@@ -88,7 +86,7 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
     type: TabularType,
     parentId: number,
     meta: Meta,
-    fetchCallback?: (storeData: ColumnsData) => void,
+    fetchCallback: (storeData: ColumnsData) => void = () => {},
   ) {
     super();
     this.type = type;
@@ -96,10 +94,14 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
     this.store = writable({
       state: States.Loading,
       columns: [],
-      primaryKey: null,
+      primaryKey: undefined,
     });
     this.meta = meta;
-    this.api = api(`/${this.type === TabularType.Table ? 'tables' : 'views'}/${this.parentId}/columns/`);
+    this.api = api(
+      `/${this.type === TabularType.Table ? 'tables' : 'views'}/${
+        this.parentId
+      }/columns/`,
+    );
     this.fetchCallback = fetchCallback;
     void this.fetch();
   }
@@ -112,9 +114,7 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
     this.store.update(updater);
   }
 
-  subscribe(
-    run: Subscriber<ColumnsData>,
-  ): Unsubscriber {
+  subscribe(run: Subscriber<ColumnsData>): Unsubscriber {
     return this.store.subscribe(run);
   }
 
@@ -122,7 +122,11 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
     return getStoreValue(this.store);
   }
 
-  async fetch(): Promise<ColumnsData> {
+  getColumnsByIds(ids: Column['id'][]): Column[] {
+    return this.get().columns.filter((column) => ids.includes(column.id));
+  }
+
+  async fetch(): Promise<ColumnsData | undefined> {
     this.update((existingData) => ({
       ...existingData,
       state: States.Loading,
@@ -139,7 +143,7 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
       const storeData: ColumnsData = {
         state: States.Done,
         columns: columnResponse,
-        primaryKey: pkColumn?.name || null,
+        primaryKey: pkColumn?.name,
       };
       this.set(storeData);
       this.fetchCallback?.(storeData);
@@ -147,14 +151,14 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
     } catch (err) {
       this.set({
         state: States.Error,
-        error: err instanceof Error ? err.message : null,
+        error: err instanceof Error ? err.message : undefined,
         columns: [],
-        primaryKey: null,
+        primaryKey: undefined,
       });
     } finally {
-      this.promise = null;
+      this.promise = undefined;
     }
-    return null;
+    return undefined;
   }
 
   async add(columnDetails: Partial<Column>): Promise<Partial<Column>> {
@@ -163,12 +167,19 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
     return column;
   }
 
+  async rename(id: Column['id'], newName: string): Promise<void> {
+    await this.api.update(id, { name: newName });
+    await this.dispatch('columnRenamed', id);
+  }
+
   async setNullabilityOfColumn(
     column: Column,
     nullable: boolean,
   ): Promise<void> {
     if (column.primary_key) {
-      throw new Error(`Column "${column.name}" cannot allow NULL because it is a primary key.`);
+      throw new Error(
+        `Column "${column.name}" cannot allow NULL because it is a primary key.`,
+      );
     }
     await this.api.update(column.id, { nullable });
     await this.fetch();
@@ -177,48 +188,19 @@ export class ColumnsDataStore extends EventHandler implements Writable<ColumnsDa
   // TODO: Analyze: Might be cleaner to move following functions as a property of Column class
   // but are the object instantiations worth it?
 
-  async patchType(columnId: Column['id'], type: DbType): Promise<Partial<Column>> {
+  async patchType(
+    columnId: Column['id'],
+    type: DbType,
+  ): Promise<Partial<Column>> {
     const column = await this.api.update(columnId, { type });
     await this.fetch();
-    this.dispatch('columnPatched', column);
+    await this.dispatch('columnPatched', column);
     return column;
-  }
-
-  /**
-   * Getting store data as argument for reactivity in components
-   * Another approach would be to subscribe to types store on class initialization
-   *  - That would require us to store the database id in Columns (which is probably a good idea)
-   *  - It would lead to calculation of allowed types when columns are fetched. Considering that
-   *    this would only be required when user opens particular views, it seems unnecessary.
-   *  - It would cache the calculated allowed types, which benefits us.
-   * TODO: Subscribe to types store from Columns, when dynamic type related information is provided
-   * by server.
-   */
-  static getAllowedTypeConversions(
-    column: Column, abstractTypesMap: AbstractTypesMap,
-  ): AbstractType[] {
-    const allowedTypeConversions: AbstractType[] = [];
-    if (column && abstractTypesMap) {
-      const dbTargetTypeSet = new Set(column.valid_target_types);
-      abstractTypesMap.forEach((entry) => {
-        const allowedDBTypesInMTType = intersection(
-          dbTargetTypeSet,
-          entry.dbTypes,
-        );
-        if (allowedDBTypesInMTType.length > 0) {
-          allowedTypeConversions.push({
-            ...entry,
-            dbTypes: new Set(allowedDBTypesInMTType),
-          });
-        }
-      });
-    }
-    return allowedTypeConversions;
   }
 
   destroy(): void {
     this.promise?.cancel();
-    this.promise = null;
+    this.promise = undefined;
     super.destroy();
   }
 

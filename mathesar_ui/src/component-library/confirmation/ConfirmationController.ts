@@ -2,30 +2,34 @@ import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
 import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 import type { Writable } from 'svelte/store';
 import { writable } from 'svelte/store';
-import type { ModalVisibilityStore } from '@mathesar-component-library';
-import type { IconFlip, IconRotate, ComponentAndProps } from '@mathesar-component-library/types';
+import type { ModalController } from '@mathesar-component-library-dir/modal';
+import type {
+  IconFlip,
+  IconRotate,
+  ComponentAndProps,
+} from '@mathesar-component-library/types';
 
 interface IconDetails {
-  data: IconDefinition,
-  spin?: boolean,
-  flip?: IconFlip,
-  rotate?: IconRotate,
+  data: IconDefinition;
+  spin?: boolean;
+  flip?: IconFlip;
+  rotate?: IconRotate;
 }
 
 interface ButtonDetails {
-  label: string,
-  icon?: IconDetails,
+  label: string;
+  icon?: IconDetails;
 }
 
 export interface ConfirmationProps {
-  title?: string | ComponentAndProps,
+  title?: string | ComponentAndProps;
   /** An array of strings will be transformed into paragraphs. */
-  body: string | string[] | ComponentAndProps,
-  proceedButton: ButtonDetails,
-  cancelButton: ButtonDetails,
-  onProceed: () => Promise<void>,
-  onSuccess: () => void,
-  onError: (error: Error) => void,
+  body: string | string[] | ComponentAndProps;
+  proceedButton: ButtonDetails;
+  cancelButton: ButtonDetails;
+  onProceed: () => Promise<void>;
+  onSuccess: () => void;
+  onError: (error: Error) => void;
 }
 
 const baseConfirmationProps: ConfirmationProps = {
@@ -44,32 +48,32 @@ const baseConfirmationProps: ConfirmationProps = {
 };
 
 export class ConfirmationController {
-  modal: ModalVisibilityStore;
+  modal: ModalController;
 
   confirmationProps: Writable<ConfirmationProps>;
 
   resolve = writable<(isConfirmed: boolean) => void>(() => {});
 
   constructor(
-    modalVisibilityStore: ModalVisibilityStore,
+    modalController: ModalController,
     initialConfirmationProps: ConfirmationProps,
   ) {
-    this.modal = modalVisibilityStore;
+    this.modal = modalController;
     this.confirmationProps = writable(initialConfirmationProps);
   }
 }
 
 interface MakeConfirm {
-  confirm: (props: Partial<ConfirmationProps>) => Promise<boolean>,
-  confirmationController: ConfirmationController,
+  confirm: (props: Partial<ConfirmationProps>) => Promise<boolean>;
+  confirmationController: ConfirmationController;
 }
 
 export function makeConfirm({
   confirmationModal,
   defaultConfirmationProps,
 }: {
-  confirmationModal: ModalVisibilityStore,
-  defaultConfirmationProps?: ConfirmationProps,
+  confirmationModal: ModalController;
+  defaultConfirmationProps?: ConfirmationProps;
 }): MakeConfirm {
   const fullDefaultConfirmationProps = {
     ...baseConfirmationProps,

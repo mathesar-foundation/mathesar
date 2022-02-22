@@ -1,13 +1,12 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
-
   "compilerOptions": {
     "moduleResolution": "node",
     "target": "esnext",
     "module": "esnext",
     "types": ["svelte", "jest", "@testing-library/jest-dom", "js-cookie"],
     "importsNotUsedAsValues": "error",
-    "strict": false,
+    "strict": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
     "sourceMap": true,
@@ -22,5 +21,11 @@
       "@mathesar-component-library": ["src/component-library/index.ts"]
     }
   },
-  "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.svelte", "**.cjs", "**.config.js"]
+  "include": [
+    "src/**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.svelte",
+    "**.cjs",
+    "**.config.js"
+  ]
 }

@@ -4,6 +4,10 @@ from sqlalchemy import create_engine
 
 from db import constants
 
+from db.functions import hints
+
+from frozendict import frozendict
+
 
 CHAR = 'char'
 STRING = 'string'
@@ -69,7 +73,85 @@ class MathesarCustomType(Enum):
     """
     EMAIL = 'email'
     URI = 'uri'
-    MONEY = 'money'
+    MATHESAR_MONEY = 'mathesar_money'
+
+
+_known_vanilla_db_types = tuple(postgres_type for postgres_type in PostgresType)
+
+
+_known_custom_db_types = tuple(mathesar_custom_type for mathesar_custom_type in MathesarCustomType)
+
+
+# Known database types are those that are defined on our PostgresType and MathesarCustomType Enums.
+known_db_types = _known_vanilla_db_types + _known_custom_db_types
+
+
+def get_db_type_enum_from_id(db_type_id):
+    """
+    Gets an instance of either the PostgresType enum or the MathesarCustomType enum corresponding
+    to the provided db_type_id. If the id doesn't correspond to any of the mentioned enums,
+    returns None.
+    """
+    try:
+        return PostgresType(db_type_id)
+    except ValueError:
+        try:
+            return MathesarCustomType(db_type_id)
+        except ValueError:
+            return None
+
+
+def _build_db_types_hinted():
+    db_types_hinted = {
+        PostgresType.BOOLEAN: tuple([
+            hints.boolean
+        ]),
+        PostgresType.CHARACTER_VARYING: tuple([
+            hints.string_like
+        ]),
+        PostgresType.CHARACTER: tuple([
+            hints.string_like
+        ]),
+        PostgresType.TEXT: tuple([
+            hints.string_like
+        ]),
+        MathesarCustomType.URI: tuple([
+            hints.uri
+        ]),
+    }
+
+    def _add_to_db_type_hintsets(db_types, hints):
+        """
+        Mutates db_types_hinted to map every hint in `hints` to every DB type in `db_types`.
+        """
+        for db_type in db_types:
+            if db_type in db_types_hinted:
+                updated_hintset = tuple(set(db_types_hinted[db_type] + tuple(hints)))
+                db_types_hinted[db_type] = updated_hintset
+            else:
+                db_types_hinted[db_type] = tuple(hints)
+
+    all_db_types = known_db_types
+    hints_for_all_db_types = (hints.any,)
+    _add_to_db_type_hintsets(all_db_types, hints_for_all_db_types)
+
+    numeric_db_types = (
+        PostgresType.BIGINT,
+        PostgresType.DECIMAL,
+        PostgresType.DOUBLE_PRECISION,
+        PostgresType.FLOAT,
+        PostgresType.INTEGER,
+        PostgresType.SMALLINT,
+        PostgresType.NUMERIC,
+        PostgresType.REAL,
+    )
+    hints_for_numeric_db_types = (hints.comparable,)
+    _add_to_db_type_hintsets(numeric_db_types, hints_for_numeric_db_types)
+
+    return frozendict(db_types_hinted)
+
+
+db_types_hinted = _build_db_types_hinted()
 
 
 SCHEMA = f"{constants.MATHESAR_PREFIX}types"
@@ -83,7 +165,24 @@ def get_qualified_name(name):
 
 
 def get_available_types(engine):
+    """
+    Returns a dict where the keys are database type names defined on the database associated with
+    provided Engine, and the values are their SQLAlchemy classes.
+    """
     return engine.dialect.ischema_names
+
+
+def get_available_known_db_types(engine):
+    """
+    Returns database types that are both available on the database and known through our Enums
+    above.
+    """
+    available_db_types = get_available_types(engine)
+    return tuple(
+        known_db_type
+        for known_db_type in known_db_types
+        if known_db_type.value in available_db_types
+    )
 
 
 def get_db_type_name(sa_type, engine):

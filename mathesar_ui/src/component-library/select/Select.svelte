@@ -1,18 +1,13 @@
 <script lang="ts">
-  import {
-    createEventDispatcher,
-    tick,
-  } from 'svelte';
+  import { createEventDispatcher, tick } from 'svelte';
   import { Dropdown } from '@mathesar-component-library';
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
-  import type {
-    Appearance,
-  } from '@mathesar-component-library/types';
+  import type { Appearance } from '@mathesar-component-library/types';
   import type { SelectOption } from './Select.d';
 
   const dispatch = createEventDispatcher();
 
-  export let id: string = undefined;
+  export let id: string | undefined = undefined;
 
   export let disabled = false;
 
@@ -35,8 +30,11 @@
 
   /**
    * Currently selected option.
+   *
+   * TODO: convert this to use undefined instead of null or explain why we're
+   * using null here.
    */
-  export let value: SelectOption = null;
+  export let value: SelectOption | null = null;
 
   /**
    * Classes to apply to the content (each of the options).
@@ -56,13 +54,13 @@
   /**
    * The ARIA label for this select component.
    */
-  export let ariaLabel: string = null;
+  export let ariaLabel: string | undefined = undefined;
 
   let isOpen = false;
   let currentIndex = 0;
   let parentHoverElem: HTMLElement;
 
-  function setValue(opt: SelectOption) {
+  function setValue(opt: SelectOption | null) {
     value = opt;
     dispatch('change', {
       value, // TODO: Change this to reflect value within option
@@ -70,12 +68,14 @@
     });
     isOpen = false;
   }
-  
+
   function setOptions(opts: SelectOption[]) {
     if (opts.length > 0) {
       if (!value) {
         setValue(opts[0]);
-      } else if (!opts.find((entry) => entry[idKey] === value[idKey])) {
+      } else if (
+        !opts.find((entry) => value && entry[idKey] === value[idKey])
+      ) {
         setValue(opts[0]);
       }
     } else {
@@ -85,13 +85,17 @@
 
   function scrollBehavior(): void {
     if (parentHoverElem) {
-      const hoveredElem: HTMLElement = parentHoverElem.querySelector('.hovered');
+      const hoveredElem: HTMLElement | null =
+        parentHoverElem.querySelector('.hovered');
       const container = parentHoverElem.parentElement as HTMLDivElement;
       if (hoveredElem && container) {
-        if (hoveredElem.offsetTop + hoveredElem.clientHeight
-         > (container.scrollTop + container.clientHeight)) {
-          const offsetValue: number = container.getBoundingClientRect().bottom
-            - hoveredElem.getBoundingClientRect().bottom;
+        if (
+          hoveredElem.offsetTop + hoveredElem.clientHeight >
+          container.scrollTop + container.clientHeight
+        ) {
+          const offsetValue: number =
+            container.getBoundingClientRect().bottom -
+            hoveredElem.getBoundingClientRect().bottom;
           container.scrollTop -= offsetValue;
         } else if (hoveredElem.offsetTop < container.scrollTop) {
           container.scrollTop = hoveredElem.offsetTop;
@@ -163,19 +167,39 @@
   $: setOptions(options);
 </script>
 
-<BaseInput {...$$restProps} bind:id {disabled}/>
+<BaseInput {...$$restProps} bind:id {disabled} />
 
-<Dropdown ariaControls="{id}-select-options" {ariaLabel} bind:isOpen {disabled} {id}
-          contentClass="select {contentClass}" {triggerAppearance} {triggerClass} 
-          on:keydown={keyAccessibility} on:open={setSelectedItem}>
+<Dropdown
+  ariaControls="{id}-select-options"
+  {ariaLabel}
+  bind:isOpen
+  {disabled}
+  {id}
+  contentClass="select {contentClass}"
+  {triggerAppearance}
+  {triggerClass}
+  on:keydown={keyAccessibility}
+  on:open={setSelectedItem}
+>
   <svelte:fragment slot="trigger">
     {value?.[labelKey]}
   </svelte:fragment>
-  
+
   <svelte:fragment slot="content">
-    <ul bind:this={parentHoverElem} id="{id}-select-options" tabindex="0" role="listbox" aria-expanded="true">
+    <ul
+      bind:this={parentHoverElem}
+      id="{id}-select-options"
+      tabindex="0"
+      role="listbox"
+      aria-expanded="true"
+    >
       {#each options as option (option[idKey])}
-        <li role='option' class:selected={option[idKey] === value[idKey]} class:hovered={option[idKey] === options[currentIndex]?.[idKey]} on:click={() => setValue(option)}>
+        <li
+          role="option"
+          class:selected={value && option[idKey] === value[idKey]}
+          class:hovered={option[idKey] === options[currentIndex]?.[idKey]}
+          on:click={() => setValue(option)}
+        >
           <span>{option[labelKey]}</span>
         </li>
       {/each}

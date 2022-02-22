@@ -44,17 +44,18 @@
 
 <Meta {...meta} />
 
-<Story 
+<Story
   name="Basic"
   args={{
     currentPage: 1,
     total: 1,
     pageSize: 10,
-    }}
-  let:args>
-  <Pagination {...args}/>
+  }}
+  let:args
+>
+  <Pagination {...args} />
 </Story>
 <Story name="Multiple Pages" parameters={disabledAddons}>
-  <Pagination total={20}/>
-  <Pagination total={200}/>
+  <Pagination total={20} />
+  <Pagination total={200} />
 </Story>

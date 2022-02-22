@@ -1,8 +1,4 @@
-import {
-  derived,
-  writable,
-  get,
-} from 'svelte/store';
+import { derived, writable, get } from 'svelte/store';
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
 
 import {
@@ -14,10 +10,7 @@ import {
 } from '@mathesar/utils/api';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
-import type {
-  SchemaEntry,
-  TableEntry,
-} from '@mathesar/App.d';
+import type { SchemaEntry, TableEntry } from '@mathesar/App.d';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
 
@@ -26,13 +19,19 @@ import { currentSchemaId } from './schemas';
 const commonData = preloadCommonData();
 
 export interface DBTablesStoreData {
-  state: States,
-  data: Map<TableEntry['id'], TableEntry>,
-  error?: string
+  state: States;
+  data: Map<TableEntry['id'], TableEntry>;
+  error?: string;
 }
 
-const schemaTablesStoreMap: Map<SchemaEntry['id'], Writable<DBTablesStoreData>> = new Map();
-const schemaTablesRequestMap: Map<SchemaEntry['id'], CancellablePromise<PaginatedResponse<TableEntry>>> = new Map();
+const schemaTablesStoreMap: Map<
+  SchemaEntry['id'],
+  Writable<DBTablesStoreData>
+> = new Map();
+const schemaTablesRequestMap: Map<
+  SchemaEntry['id'],
+  CancellablePromise<PaginatedResponse<TableEntry>>
+> = new Map();
 
 function sortedTableEntries(tableEntries: TableEntry[]): TableEntry[] {
   return [...tableEntries].sort((a, b) => a.name.localeCompare(b.name));
@@ -52,7 +51,7 @@ function setSchemaTablesStore(
   const storeValue: DBTablesStoreData = {
     state: States.Done,
     data: tables,
-    error: null,
+    error: undefined,
   };
 
   let store = schemaTablesStoreMap.get(schemaId);
@@ -73,11 +72,11 @@ export function removeTablesInSchemaTablesStore(
 
 export async function refetchTablesForSchema(
   schemaId: SchemaEntry['id'],
-): Promise<DBTablesStoreData> {
+): Promise<DBTablesStoreData | undefined> {
   const store = schemaTablesStoreMap.get(schemaId);
   if (!store) {
     console.error(`Tables store for schema: ${schemaId} not found.`);
-    return null;
+    return undefined;
   }
 
   try {
@@ -88,7 +87,9 @@ export async function refetchTablesForSchema(
 
     schemaTablesRequestMap.get(schemaId)?.cancel();
 
-    const tablesRequest = getAPI<PaginatedResponse<TableEntry>>(`/tables/?schema=${schemaId}&limit=500`);
+    const tablesRequest = getAPI<PaginatedResponse<TableEntry>>(
+      `/tables/?schema=${schemaId}&limit=500`,
+    );
     schemaTablesRequestMap.set(schemaId, tablesRequest);
     const response = await tablesRequest;
     const tableEntries = response.results || [];
@@ -102,13 +103,15 @@ export async function refetchTablesForSchema(
       state: States.Error,
       error: err instanceof Error ? err.message : 'Error in fetching schemas',
     }));
-    return null;
+    return undefined;
   }
 }
 
 let preload = true;
 
-export function getTablesStoreForSchema(schemaId: SchemaEntry['id']): Writable<DBTablesStoreData> {
+export function getTablesStoreForSchema(
+  schemaId: SchemaEntry['id'],
+): Writable<DBTablesStoreData> {
   let store = schemaTablesStoreMap.get(schemaId);
   if (!store) {
     store = writable({
@@ -118,7 +121,7 @@ export function getTablesStoreForSchema(schemaId: SchemaEntry['id']): Writable<D
     schemaTablesStoreMap.set(schemaId, store);
     if (preload) {
       preload = false;
-      store = setSchemaTablesStore(schemaId, commonData.tables || []);
+      store = setSchemaTablesStore(schemaId, commonData?.tables ?? []);
     } else {
       void refetchTablesForSchema(schemaId);
     }
@@ -132,7 +135,10 @@ export function deleteTable(id: number): CancellablePromise<TableEntry> {
   return deleteAPI(`/tables/${id}/`);
 }
 
-export function renameTable(id: number, name: string): CancellablePromise<TableEntry> {
+export function renameTable(
+  id: number,
+  name: string,
+): CancellablePromise<TableEntry> {
   return patchAPI(`/tables/${id}/`, { name });
 }
 

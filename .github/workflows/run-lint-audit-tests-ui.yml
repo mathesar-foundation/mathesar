@@ -3,6 +3,29 @@ name: UI - Lint, Audit and Tests
 on: [push, pull_request]
 
 jobs:
+  format:
+    runs-on: ubuntu-latest
+    # We only want to run on external PRs, since internal PRs are covered by "push"
+    # This prevents this from running twice on internal PRs
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    defaults:
+      run:
+        working-directory: ./mathesar_ui
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+      - id: npm-cache-dir
+        run: echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v2
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+      - run: npm install --no-audit --prefer-offline
+      - run: npm run check-format
+
   lint:
     runs-on: ubuntu-latest
     # We only want to run on external PRs, since internal PRs are covered by "push"
@@ -25,6 +48,29 @@ jobs:
           restore-keys: ${{ runner.os }}-node-
       - run: npm install --no-audit --prefer-offline
       - run: npm run lint
+
+  typecheck:
+    runs-on: ubuntu-latest
+    # We only want to run on external PRs, since internal PRs are covered by "push"
+    # This prevents this from running twice on internal PRs
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    defaults:
+      run:
+        working-directory: ./mathesar_ui
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+      - id: npm-cache-dir
+        run: echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v2
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+      - run: npm install --no-audit --prefer-offline
+      - run: npm run typecheck
 
   audit:
     runs-on: ubuntu-latest

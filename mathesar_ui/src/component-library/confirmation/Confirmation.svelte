@@ -1,6 +1,6 @@
 <script lang="ts">
   import CancelOrProceedButtonPair from '@mathesar-component-library-dir/cancel-or-proceed-button-pair/CancelOrProceedButtonPair.svelte';
-  import Modal from '../modal/Modal.svelte';
+  import { ControlledModal } from '@mathesar-component-library-dir/modal';
   import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
   import type { ConfirmationController } from './ConfirmationController';
 
@@ -32,6 +32,7 @@
       $resolve(true);
       modal.close();
     } catch (error) {
+      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       onError(error);
     } finally {
       allowClose = true;
@@ -52,19 +53,23 @@
   }
 </script>
 
-<Modal
-  bind:isOpen={$modal}
+<ControlledModal
+  controller={modal}
   {allowClose}
   on:close={onClose}
   class="confirmation"
 >
-  <StringOrComponent slot=title arg={title} />
+  <svelte:fragment slot="title">
+    {#if title}
+      <StringOrComponent arg={title} />
+    {/if}
+  </svelte:fragment>
   <StringOrComponent arg={body} />
   <CancelOrProceedButtonPair
-    slot=footer
+    slot="footer"
     {cancelButton}
     {proceedButton}
     onCancel={handleCancelButton}
     onProceed={handleProceedButton}
   />
-</Modal>
+</ControlledModal>

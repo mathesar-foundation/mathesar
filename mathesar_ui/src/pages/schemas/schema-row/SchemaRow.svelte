@@ -40,31 +40,31 @@
 <div class="schema-row">
   <div class="details">
     <div class="title">
-      <Icon data={faProjectDiagram}/>
+      <Icon data={faProjectDiagram} />
       {schema.name}
       {#if isLocked}
-        <Icon class="lock" data={faLock}/>
+        <Icon class="lock" data={faLock} />
       {/if}
     </div>
     {#if isDefault}
-    <div class="info">
-      <strong>Default</strong>
-    </div>
+      <div class="info">
+        <strong>Default</strong>
+      </div>
     {/if}
   </div>
   {#if !isLocked}
     <div class="controls">
       <Button class="edit" on:click={() => dispatch('edit', schema)}>
-        <Icon data={faPencilAlt}/>
+        <Icon data={faPencilAlt} />
       </Button>
       <Button class="delete" on:click={handleDelete}>
-        <Icon data={faTrashAlt}/>
+        <Icon data={faTrashAlt} />
       </Button>
-      <slot/>
+      <slot />
     </div>
   {/if}
 </div>
 
 <style global lang="scss">
-  @import "SchemaRow.scss";
+  @import 'SchemaRow.scss';
 </style>

@@ -1,32 +1,18 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
-  import {
-    ROW_CONTROL_COLUMN_WIDTH,
-  } from '@mathesar/stores/table-data';
-
+  import { ROW_CONTROL_COLUMN_WIDTH } from '@mathesar/stores/table-data';
   import type {
     TabularDataStore,
-    TabularData,
     Column,
     ColumnPosition,
     ColumnPositionMap,
-    ColumnsDataStore,
-    Display,
-    Meta,
   } from '@mathesar/stores/table-data/types';
-  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  let columnsDataStore: ColumnsDataStore;
-  let constraintsDataStore: ConstraintsDataStore;
-  let display: Display;
-  let meta: Meta;
 
-  $: ({
-    columnsDataStore, meta, display, constraintsDataStore,
-  } = $tabularData as TabularData);
+  $: ({ columnsDataStore, meta, display, constraintsDataStore } = $tabularData);
   $: ({ horizontalScrollOffset, columnPositionMap } = display);
 
   let headerRef: HTMLElement;
@@ -48,7 +34,7 @@
   function getColumnPosition(
     _columnPositionMap: ColumnPositionMap,
     _name: Column['name'],
-  ): ColumnPosition {
+  ): ColumnPosition | undefined {
     return _columnPositionMap.get(_name);
   }
 
@@ -73,8 +59,7 @@
 </script>
 
 <div bind:this={headerRef} class="header">
-  <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;">
-  </div>
+  <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;" />
 
   {#each $columnsDataStore.columns as column (column.name)}
     <HeaderCell
@@ -86,5 +71,9 @@
     />
   {/each}
 
-  <NewColumnCell {display} columns={$columnsDataStore.columns} on:addColumn={addColumn}/>
+  <NewColumnCell
+    {display}
+    columns={$columnsDataStore.columns}
+    on:addColumn={addColumn}
+  />
 </div>

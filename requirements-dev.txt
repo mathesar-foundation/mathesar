@@ -1,7 +1,9 @@
 flake8==3.9.0
-ipython==7.21.0
+ipython==7.31.1
 pytest==6.2.3
 pytest-django==4.2.0
 pytest-env==0.6.2
 pytest-cov==3.0.0
 Sphinx==3.5.3
+playwright==1.18.1
+pytest-playwright==0.2.2

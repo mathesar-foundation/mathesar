@@ -7,20 +7,20 @@
   export let label: string | undefined = undefined;
 </script>
 
-<fieldset class="fieldset-group" class:inline={isInline}>
+<fieldset class="fieldset-group" class:inline={isInline} on:change>
   {#if $$slots.label || label}
     <legend>
-      {#if $$slots.label}<slot name="label"/>{/if}
+      {#if $$slots.label}<slot name="label" />{/if}
       {#if label}{label}{/if}
     </legend>
   {/if}
   <ul class="options">
     {#each options as option (option.value)}
       <li class="option">
-        <LabeledInput layout='inline-input-first'>
-          <svelte:fragment slot=label>
+        <LabeledInput layout="inline-input-first">
+          <svelte:fragment slot="label">
             {#if option.label}
-               {option.label}
+              {option.label}
             {:else}
               <svelte:component
                 this={option.labelComponent}
@@ -28,7 +28,7 @@
               />
             {/if}
           </svelte:fragment>
-          <slot {option}/>
+          <slot {option} />
         </LabeledInput>
       </li>
     {/each}

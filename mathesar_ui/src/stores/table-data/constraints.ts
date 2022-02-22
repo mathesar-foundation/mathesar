@@ -1,10 +1,5 @@
 import { writable, get as getStoreValue, derived } from 'svelte/store';
-import {
-  deleteAPI,
-  getAPI,
-  postAPI,
-  States,
-} from '@mathesar/utils/api';
+import { deleteAPI, getAPI, postAPI, States } from '@mathesar/utils/api';
 import type {
   Writable,
   Updater,
@@ -15,25 +10,24 @@ import type {
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/App.d';
+import type { Constraint as ApiConstraint } from '@mathesar/api/tables/constraints';
 import type { Column } from './columns';
 
-export type ConstraintType = 'foreignkey' | 'primary' | 'unique' | 'check' | 'exclude';
-
-export interface Constraint {
-  id: number,
-  name: string,
-  type: ConstraintType,
-  /**
-   * Why use an Array instead of a Set? See discussion in
-   * https://github.com/centerofci/mathesar/pull/776#issuecomment-963514261
-   */
-  columns: string[],
-}
+/**
+ * When representing a constraint on the front end, we directly use the object
+ * schema from the API.
+ *
+ * In https://github.com/centerofci/mathesar/pull/776#issuecomment-963514261 we
+ * had some discussion about converting the `columns` field to a Set instead of
+ * an Array, but we chose to keep it as an Array because we didn't need the
+ * performance gains from a Set here.
+ */
+export type Constraint = ApiConstraint;
 
 export interface ConstraintsData {
-  state: States,
-  error?: string,
-  constraints: Constraint[],
+  state: States;
+  error?: string;
+  constraints: Constraint[];
 }
 
 /**
@@ -44,35 +38,32 @@ export interface ConstraintsData {
  */
 function filterConstraintsByColumnSet(
   constraints: Constraint[],
-  columns: Column[],
+  columnIds: number[],
 ): Constraint[] {
-  const columnsNames = columns.map((c) => c.name);
   function isMatch(constraint: Constraint) {
-    if (constraint.columns.length !== columnsNames.length) {
+    if (constraint.columns.length !== columnIds.length) {
       return false;
     }
-    return constraint.columns.every(
-      (constraintColumn) => columnsNames.includes(constraintColumn),
+    return constraint.columns.every((constraintColumnId) =>
+      columnIds.includes(constraintColumnId),
     );
   }
   return constraints.filter(isMatch);
 }
 
-/**
- * A set of column names representing columns which have single-column unique
- * constraints set.
- *
- * - Primary key constraints will not be reflected here.
- * - Multi-column unique constraints will not be reflected here.
- */
+/** For doc, @see ConstraintsDataStore.uniqueColumns */
 function uniqueColumns(
   constraintsDataStore: Writable<ConstraintsData>,
-): Readable<Set<string>> {
-  return derived(constraintsDataStore, ({ constraints }) => new Set(
-    constraints
-      .filter((c) => c.type === 'unique' && c.columns.length === 1)
-      .map((c) => c.columns[0]),
-  ));
+): Readable<Set<number>> {
+  return derived(
+    constraintsDataStore,
+    ({ constraints }) =>
+      new Set(
+        constraints
+          .filter((c) => c.type === 'unique' && c.columns.length === 1)
+          .map((c) => c.columns[0]),
+      ),
+  );
 }
 
 function api(url: string) {
@@ -94,18 +85,26 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
 
   private store: Writable<ConstraintsData>;
 
-  private promise: CancellablePromise<PaginatedResponse<Constraint>> | null;
+  private promise:
+    | CancellablePromise<PaginatedResponse<ApiConstraint>>
+    | undefined;
 
   private api: ReturnType<typeof api>;
 
   private fetchCallback: (storeData: ConstraintsData) => void;
 
-  /** @see uniqueColumns */
-  uniqueColumns: Readable<Set<string>>;
+  /**
+   * A set of column ids representing columns which have single-column unique
+   * constraints.
+   *
+   * - Primary key constraints will not be reflected here.
+   * - Multi-column unique constraints will not be reflected here.
+   */
+  uniqueColumns: Readable<Set<number>>;
 
   constructor(
     parentId: number,
-    fetchCallback?: (storeData: ConstraintsData) => void,
+    fetchCallback: (storeData: ConstraintsData) => void = () => {},
   ) {
     this.parentId = parentId;
     this.store = writable({
@@ -126,9 +125,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     this.store.update(updater);
   }
 
-  subscribe(
-    run: Subscriber<ConstraintsData>,
-  ): Unsubscriber {
+  subscribe(run: Subscriber<ConstraintsData>): Unsubscriber {
     return this.store.subscribe(run);
   }
 
@@ -136,7 +133,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     return getStoreValue(this.store);
   }
 
-  async fetch(): Promise<ConstraintsData> {
+  async fetch(): Promise<ConstraintsData | undefined> {
     this.update((existingData) => ({
       ...existingData,
       state: States.Loading,
@@ -158,16 +155,18 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     } catch (err) {
       this.set({
         state: States.Error,
-        error: err instanceof Error ? err.message : null,
+        error: err instanceof Error ? err.message : undefined,
         constraints: [],
       });
     } finally {
-      this.promise = null;
+      this.promise = undefined;
     }
-    return null;
+    return undefined;
   }
 
-  async add(constraintDetails: Partial<Constraint>): Promise<Partial<Constraint>> {
+  async add(
+    constraintDetails: Partial<Constraint>,
+  ): Promise<Partial<Constraint>> {
     const constraint = await this.api.add(constraintDetails);
     await this.fetch();
     return constraint;
@@ -178,35 +177,44 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     await this.fetch();
   }
 
-  async setUniquenessOfColumn(column: Column, shouldBeUnique: boolean): Promise<void> {
+  async setUniquenessOfColumn(
+    column: Column,
+    shouldBeUnique: boolean,
+  ): Promise<void> {
     if (column.primary_key) {
       if (!shouldBeUnique) {
-        throw new Error(`Column "${column.name}" must remain unique because it is a primary key.`);
+        throw new Error(
+          `Column "${column.name}" must remain unique because it is a primary key.`,
+        );
       }
       return;
     }
 
-    const currentlyIsUnique = getStoreValue(this.uniqueColumns).has(column.name);
+    const currentlyIsUnique = getStoreValue(this.uniqueColumns).has(column.id);
     if (shouldBeUnique === currentlyIsUnique) {
       return;
     }
     if (shouldBeUnique) {
-      await this.add({ type: 'unique', columns: [column.name] });
+      await this.add({ type: 'unique', columns: [column.id] });
       return;
     }
     // Technically, one column can have two unique constraints applied on it,
     // with different names. So we need to make sure do delete _all_ of them.
     const { constraints } = getStoreValue(this.store);
-    const uniqueConstraintsForColumn = filterConstraintsByColumnSet(constraints, [column])
-      .filter((c) => c.type === 'unique');
-    await Promise.all(uniqueConstraintsForColumn.map(
-      (constraint) => this.api.remove(constraint.id),
-    ));
+    const uniqueConstraintsForColumn = filterConstraintsByColumnSet(
+      constraints,
+      [column.id],
+    ).filter((c) => c.type === 'unique');
+    await Promise.all(
+      uniqueConstraintsForColumn.map((constraint) =>
+        this.api.remove(constraint.id),
+      ),
+    );
     await this.fetch();
   }
 
   destroy(): void {
     this.promise?.cancel();
-    this.promise = null;
+    this.promise = undefined;
   }
 }

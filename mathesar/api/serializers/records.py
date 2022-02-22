@@ -1,12 +1,15 @@
 from rest_framework import serializers
 
+from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 
-class RecordListParameterSerializer(serializers.Serializer):
-    filters = serializers.JSONField(required=False, default=[])
+
+class RecordListParameterSerializer(MathesarErrorMessageMixin, serializers.Serializer):
+    filter = serializers.JSONField(required=False, default=None)
     order_by = serializers.JSONField(required=False, default=[])
     grouping = serializers.JSONField(required=False, default={})
+    duplicate_only = serializers.JSONField(required=False, default=None)
 
 
-class RecordSerializer(serializers.BaseSerializer):
+class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
     def to_representation(self, instance):
         return instance._asdict() if not isinstance(instance, dict) else instance

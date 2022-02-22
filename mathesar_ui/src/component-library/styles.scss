@@ -4,33 +4,33 @@
  * out of the main project.
  */
 
-@import "common/styles/main.scss";
+@import 'common/styles/main.scss';
 
-@import "button/Button.scss";
-@import "cancel-or-proceed-button-pair/CancelOrProceedButtonPair.scss";
-@import "checkbox/Checkbox.scss";
-@import "fieldset-group/FieldsetGroup.scss";
-@import "icon/Icon.scss";
-@import "input-group/InputGroup.scss";
-@import "label/Label.scss";
-@import "labeled-input/LabeledInput.scss";
-@import "progress/Progress.scss";
-@import "radio/Radio.scss";
-@import "seesaw/Seesaw.scss";
-@import "skeleton/Skeleton.scss";
-@import "text-avatar/TextAvatar.scss";
-@import "spinner-area/SpinnerArea.scss";
+@import 'button/Button.scss';
+@import 'cancel-or-proceed-button-pair/CancelOrProceedButtonPair.scss';
+@import 'checkbox/Checkbox.scss';
+@import 'fieldset-group/FieldsetGroup.scss';
+@import 'icon/Icon.scss';
+@import 'input-group/InputGroup.scss';
+@import 'label/Label.scss';
+@import 'labeled-input/LabeledInput.scss';
+@import 'progress/Progress.scss';
+@import 'radio/Radio.scss';
+@import 'skeleton/Skeleton.scss';
+@import 'text-avatar/TextAvatar.scss';
+@import 'spinner-area/SpinnerArea.scss';
 
-@import "dropdown/Dropdown.scss";
-@import "file-upload/FileUpload.scss";
-@import "notification/Notification.scss";
-@import "pagination/Pagination.scss";
-@import "select/Select.scss";
-@import "tabs/TabContainer.scss";
-@import "tree/Tree.scss";
+@import 'dropdown/Dropdown.scss';
+@import 'help/Help.scss';
+@import 'file-upload/FileUpload.scss';
+@import 'notification/Notification.scss';
+@import 'pagination/Pagination.scss';
+@import 'select/Select.scss';
+@import 'tabs/TabContainer.scss';
+@import 'tree/Tree.scss';
 
-@import "form-builder/Form.scss";
-@import "modal/Modal.scss";
+@import 'form-builder/FormBuilder.scss';
+@import 'modal/IndependentModal.scss';
 // Limit to one scss export from a component/system
-@import "toast/ToastPresenter.scss";
-@import "toast/ToastItem.scss";
+@import 'toast/ToastPresenter.scss';
+@import 'toast/ToastItem.scss';

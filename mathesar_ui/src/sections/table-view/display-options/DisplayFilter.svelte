@@ -1,17 +1,12 @@
 <script lang="ts">
   import { get } from 'svelte/store';
-  import {
-    faTimes,
-    faPlus,
-  } from '@fortawesome/free-solid-svg-icons';
-  import {
-    Icon,
-    Button,
-    Select,
-    TextInput,
-  } from '@mathesar-component-library';
+  import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
+  import { Icon, Button, Select, TextInput } from '@mathesar-component-library';
   import { filterCombinations } from '@mathesar/stores/table-data';
-  import type { Meta, FilterCombination } from '@mathesar/stores/table-data/types';
+  import type {
+    Meta,
+    FilterCombination,
+  } from '@mathesar/stores/table-data/types';
   import type { SelectOption } from '@mathesar-component-library/types';
   import FilterEntry from './FilterEntry.svelte';
 
@@ -44,7 +39,7 @@
       condition: filterCondition,
       value: filterValue,
     });
-  
+
     [filterColumn] = options;
     [filterCondition] = conditions;
     filterValue = '';
@@ -73,23 +68,28 @@
       {#if $filter?.filters?.length > 0}
         <tr>
           <td>
-            <Select options={filterCombinations} bind:value={filterCombination}
-              on:change={() => meta.setFilterCombination(filterCombination)}/>
+            <Select
+              options={filterCombinations}
+              bind:value={filterCombination}
+              on:change={() => meta.setFilterCombination(filterCombination)}
+            />
           </td>
         </tr>
       {/if}
       {#each $filter?.filters || [] as option, index (option)}
-        <FilterEntry {options} {conditions} filterByDuplicates={option.condition.id === conditions[2].id}
+        <FilterEntry
+          {options}
+          {conditions}
+          filterByDuplicates={option.condition.id === conditions[2].id}
           bind:column={option.column}
           bind:condition={option.condition}
           bind:value={option.value}
           on:removeFilter={() => meta.removeFilter(index)}
-          on:reload={() => updateFilters()}/>
+          on:reload={() => updateFilters()}
+        />
       {:else}
         <tr>
-          <td class="empty-msg" colspan="3">
-            No filters added
-          </td>
+          <td class="empty-msg" colspan="3"> No filters added </td>
         </tr>
       {/each}
 
@@ -97,33 +97,41 @@
         {#if !addNew}
           <tr class="add-option">
             <td colspan="3">
-              <Button on:click={() => { addNew = true; }}>
+              <Button
+                on:click={() => {
+                  addNew = true;
+                }}
+              >
                 Add new filter
               </Button>
             </td>
           </tr>
-
         {:else}
           <tr class="add-option">
             <td class="column">
-              <Select {options} bind:value={filterColumn}/>
+              <Select {options} bind:value={filterColumn} />
             </td>
             <td class="dir">
-              <Select options={conditions} bind:value={filterCondition}/>
+              <Select options={conditions} bind:value={filterCondition} />
             </td>
             {#if filterCondition !== conditions[2]}
               <td class="value" colspan="2">
-                <TextInput bind:value={filterValue}/>
+                <TextInput bind:value={filterValue} />
               </td>
             {/if}
           </tr>
           <tr>
             <td class="filter-action" colspan="4">
               <Button size="small" on:click={addFilter}>
-                <Icon data={faPlus}/>
+                <Icon data={faPlus} />
               </Button>
-              <Button size="small" on:click={() => { addNew = false; }}>
-                <Icon data={faTimes}/>
+              <Button
+                size="small"
+                on:click={() => {
+                  addNew = false;
+                }}
+              >
+                <Icon data={faTimes} />
               </Button>
             </td>
           </tr>
@@ -134,5 +142,5 @@
 </div>
 
 <style global lang="scss">
-  @import "DisplayOption.scss";
+  @import 'DisplayOption.scss';
 </style>

@@ -26,7 +26,8 @@ VARCHAR = base.VARCHAR
 
 # custom types
 EMAIL = base.MathesarCustomType.EMAIL.value
-MONEY = base.MathesarCustomType.MONEY.value
+MATHESAR_MONEY = base.MathesarCustomType.MATHESAR_MONEY.value
+MONEY = base.PostgresType.MONEY.value
 TIME_WITHOUT_TIME_ZONE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
 TIME_WITH_TIME_ZONE = base.PostgresType.TIME_WITH_TIME_ZONE.value
 TIMESTAMP_WITH_TIME_ZONE = base.PostgresType.TIMESTAMP_WITH_TIME_ZONE.value
@@ -65,6 +66,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         FLOAT: dialect_types.get(FLOAT),
         INTEGER: dialect_types.get(INTEGER),
         INTERVAL: dialect_types.get(INTERVAL),
+        MONEY: dialect_types.get(MONEY),
         NUMERIC: dialect_types.get(NUMERIC),
         REAL: dialect_types.get(REAL),
         SMALLINT: dialect_types.get(SMALLINT),
@@ -77,7 +79,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),
-        MONEY: dialect_types.get(money.DB_TYPE),
+        MATHESAR_MONEY: dialect_types.get(money.DB_TYPE),
         URI: dialect_types.get(uri.DB_TYPE),
     }
     if friendly_names:
@@ -137,7 +139,8 @@ def get_column_cast_expression(column, target_type_str, engine, type_options={})
             column
         )
     if type_options:
-        cast_expr = cast_expr.cast(target_type(**type_options))
+        type_with_options = target_type(**type_options)
+        cast_expr = cast_expr.cast(type_with_options)
     return cast_expr
 
 
@@ -150,6 +153,7 @@ def install_all_casts(engine):
     create_interval_casts(engine)
     create_datetime_casts(engine)
     create_money_casts(engine)
+    create_mathesar_money_casts(engine)
     create_textual_casts(engine)
     create_uri_casts(engine)
 
@@ -206,6 +210,11 @@ def create_datetime_casts(engine):
 
 def create_money_casts(engine):
     type_body_map = _get_money_type_body_map()
+    create_cast_functions(MONEY, type_body_map, engine)
+
+
+def create_mathesar_money_casts(engine):
+    type_body_map = _get_mathesar_money_type_body_map()
     create_cast_functions(money.DB_TYPE, type_body_map, engine)
 
 
@@ -248,6 +257,7 @@ def get_defined_source_target_cast_tuples(engine):
         EMAIL: _get_email_type_body_map(),
         FLOAT: _get_decimal_number_type_body_map(target_type_str=FLOAT),
         INTEGER: _get_integer_type_body_map(target_type_str=INTEGER),
+        MATHESAR_MONEY: _get_mathesar_money_type_body_map(),
         MONEY: _get_money_type_body_map(),
         INTERVAL: _get_interval_type_body_map(),
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
@@ -304,8 +314,10 @@ def assemble_function_creation_sql(argument_type, target_type, function_body):
 
 def get_cast_function_name(target_type):
     """
-    Some casting functions change postgres config parameters  for the transaction they are run on like cast function for casting different data type to timestamp with timezone,
-    So they used be in an isolated transaction
+    Some casting functions change postgres config parameters  for the
+    transaction they are run on like cast function for casting different
+    data type to timestamp with timezone, So they used be in an isolated
+    transaction
     """
     unqualified_type_name = target_type.split('.')[-1].lower()
     if '(' in unqualified_type_name:
@@ -352,8 +364,16 @@ def _get_boolean_type_body_map():
         DECLARE
         istrue {BOOLEAN};
         BEGIN
-          SELECT lower($1)='t' OR lower($1)='true' OR $1='1' INTO istrue;
-          IF istrue OR lower($1)='f' OR lower($1)='false' OR $1='0' THEN
+          SELECT
+            $1='1' OR lower($1) = 'on'
+            OR lower($1)='t' OR lower($1)='true'
+            OR lower($1)='y' OR lower($1)='yes'
+          INTO istrue;
+          IF istrue
+            OR $1='0' OR lower($1) = 'off'
+            OR lower($1)='f' OR lower($1)='false'
+            OR lower($1)='n' OR lower($1)='no'
+          THEN
             RETURN istrue;
           END IF;
           {not_bool_exception_str}
@@ -457,6 +477,7 @@ def _get_integer_type_body_map(target_type_str=INTEGER):
           {cast_loss_exception_str}
         END;
         """
+
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, target_type_str,
     )
@@ -527,29 +548,35 @@ def get_text_and_datetime_to_datetime_cast_str(type_condition, exception_string)
 
 
 def _get_timestamp_with_timezone_type_body_map(target_type):
-    default_behavior_source_types = frozenset([TIMESTAMP_WITH_TIME_ZONE, TIMESTAMP_WITHOUT_TIME_ZONE, DATE]) | TEXT_TYPES
-    return _get_default_type_body_map(
-        default_behavior_source_types, target_type,
+    datetime_source_types = frozenset(
+        [TIMESTAMP_WITH_TIME_ZONE, TIMESTAMP_WITHOUT_TIME_ZONE, DATE]
     )
+    default_behavior_source_types = datetime_source_types | TEXT_TYPES
+    return _get_default_type_body_map(default_behavior_source_types, target_type)
 
 
 def _get_timestamp_without_timezone_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to timestamp without timezone.
-    We allow casting any text, timezone and date type to be cast into a timestamp without timezone,
-     provided it does not any timezone information as this could lead to a information loss
+    We allow casting any text, timezone and date type to be cast into a
+    timestamp without timezone, provided it does not any timezone
+    information as this could lead to a information loss
 
-    The cast function changes the timezone to `utc` for the transaction is called on.
-     So this function call should be used in a isolated transaction to avoid timezone change causing unintended side effect
+    The cast function changes the timezone to `utc` for the transaction
+    is called on.  So this function call should be used in a isolated
+    transaction to avoid timezone change causing unintended side effect
     """
     source_text_types = TEXT_TYPES
     source_datetime_types = frozenset([TIMESTAMP_WITH_TIME_ZONE, DATE])
     default_behavior_source_types = frozenset([TIMESTAMP_WITHOUT_TIME_ZONE])
 
-    not_timestamp_without_tz_exception_str = f"RAISE EXCEPTION '% is not a {TIMESTAMP_WITHOUT_TIME_ZONE}', $1;"
-    # Check if the value is missing timezone by casting it to a timestamp with timezone
-    # and comparing if the value is equal to a timestamp without timezone
+    not_timestamp_without_tz_exception_str = (
+        f"RAISE EXCEPTION '% is not a {TIMESTAMP_WITHOUT_TIME_ZONE}', $1;"
+    )
+    # Check if the value is missing timezone by casting it to a timestamp
+    # with timezone and comparing if the value is equal to a timestamp
+    # without timezone.
     timestamp_without_tz_condition_str = f"""
             IF (timestamp_value_with_tz = timestamp_value) THEN
             RETURN $1::{TIMESTAMP_WITHOUT_TIME_ZONE};
@@ -561,17 +588,19 @@ def _get_timestamp_without_timezone_type_body_map():
     )
     type_body_map.update(
         {
-            text_type: get_text_and_datetime_to_datetime_cast_str(timestamp_without_tz_condition_str,
-                                                                  not_timestamp_without_tz_exception_str
-                                                                  )
+            text_type: get_text_and_datetime_to_datetime_cast_str(
+                timestamp_without_tz_condition_str,
+                not_timestamp_without_tz_exception_str
+            )
             for text_type in source_text_types
         }
     )
     type_body_map.update(
         {
-            datetime_type: get_text_and_datetime_to_datetime_cast_str(timestamp_without_tz_condition_str,
-                                                                      not_timestamp_without_tz_exception_str
-                                                                      )
+            datetime_type: get_text_and_datetime_to_datetime_cast_str(
+                timestamp_without_tz_condition_str,
+                not_timestamp_without_tz_exception_str
+            )
             for datetime_type in source_datetime_types
         }
     )
@@ -579,6 +608,57 @@ def _get_timestamp_without_timezone_type_body_map():
 
 
 def _get_money_type_body_map():
+    """
+    Get SQL strings that create various functions for casting different
+    types to money.
+    We allow casting any number type to money, assuming currency is same as the locale currency.
+    We allow casting any textual type to money with the text prefixed or suffixed with the locale currency.
+    """
+    default_behavior_source_types = [MONEY]
+    number_types = NUMBER_TYPES
+    textual_types = TEXT_TYPES
+    cast_loss_exception_str = (
+        f"RAISE EXCEPTION '% cannot be cast to {MONEY} as currency symbol is missing', $1;"
+    )
+
+    def _get_number_cast_to_money():
+        return f"""
+        BEGIN
+          RETURN $1::numeric::{MONEY};
+        END;
+        """
+
+    def _get_base_textual_cast_to_money():
+        return f"""
+        DECLARE currency {TEXT};
+        BEGIN
+          SELECT to_char(1, 'L') INTO currency;
+          IF ($1 LIKE '%' || currency) OR ($1 LIKE currency || '%') THEN
+            RETURN $1::{MONEY};
+          END IF;
+          {cast_loss_exception_str}
+        END;
+        """
+
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, MONEY,
+    )
+    type_body_map.update(
+        {
+            type_name: _get_number_cast_to_money()
+            for type_name in number_types
+        }
+    )
+    type_body_map.update(
+        {
+            type_name: _get_base_textual_cast_to_money()
+            for type_name in textual_types
+        }
+    )
+    return type_body_map
+
+
+def _get_mathesar_money_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to money.
@@ -603,6 +683,7 @@ def _get_money_type_body_map():
           RETURN ROW($1::numeric, 'USD')::{money.DB_TYPE};
         END;
         """
+
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, money.DB_TYPE,
     )
@@ -624,13 +705,15 @@ def _get_money_type_body_map():
 def _get_textual_type_body_map(engine, target_type_str=VARCHAR):
     """
     Get SQL strings that create various functions for casting different
-    types to varchar.
+    types to text types through the TEXT type.
 
     All casts to varchar use default PostgreSQL behavior.
     All types in get_supported_alter_column_types are supported.
     """
     supported_types = get_supported_alter_column_db_types(engine)
 
+    # We cast everything through TEXT so that formatting is done correctly
+    # for CHAR.
     text_cast_str = f"""
         BEGIN
           RETURN $1::{TEXT};
@@ -644,11 +727,14 @@ def _get_date_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to date.
-    We allow casting any text, timezone and date type to be cast into a timestamp without timezone,
-     provided it does not any timezone information as this could lead to a information loss
 
-    The cast function changes the timezone to `utc` for the transaction is called on.
-     So this function call should be used in a isolated transaction to avoid timezone change causing unintended side effect
+    We allow casting any text, timezone and date type to be cast into a
+    timestamp without timezone, provided it does not any timezone
+    information as this could lead to a information loss.
+
+    The cast function changes the timezone to `utc` for the transaction
+    is called on.  So this function call should be used in a isolated
+    transaction to avoid timezone change causing unintended side effect.
     """
     # Note that default postgres conversion for dates depends on the
     # `DateStyle` option set on the server, which can be one of DMY, MDY,
@@ -687,6 +773,7 @@ def _get_uri_type_body_map():
     Get SQL strings that create various functions for casting different
     types to URIs.
     """
+
     def _get_text_uri_type_body_map():
         # We need to check that a string isn't a valid number before
         # casting to intervals (since a number is more likely)
@@ -708,6 +795,7 @@ def _get_uri_type_body_map():
           {not_uri_exception_str}
         END;
         """
+
     source_types = frozenset([uri.DB_TYPE]) | TEXT_TYPES
     return {type_: _get_text_uri_type_body_map() for type_ in source_types}
 

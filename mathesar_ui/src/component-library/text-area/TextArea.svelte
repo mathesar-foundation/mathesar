@@ -2,7 +2,7 @@
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
 
   // Id for the input
-  export let id: string = undefined;
+  export let id: string | undefined = undefined;
 
   // Disable input
   export let disabled = false;
@@ -14,6 +14,12 @@
   export let value = '';
 </script>
 
-<BaseInput {...$$restProps} bind:id {disabled}/>
+<BaseInput {...$$restProps} bind:id {disabled} />
 
-<textarea class="input-element text-area" {id} {disabled} bind:value {...$$restProps} />
+<textarea
+  class="input-element text-area"
+  {id}
+  {disabled}
+  bind:value
+  {...$$restProps}
+/>

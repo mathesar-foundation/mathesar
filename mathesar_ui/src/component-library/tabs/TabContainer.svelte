@@ -40,6 +40,7 @@
       } else if (tabs[index - 1]) {
         activeTab = tabs[index - 1];
       } else {
+        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         activeTab = null;
       }
     }
@@ -52,10 +53,12 @@
   }
 
   function focusTab(e: Event) {
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     (e.target as Node).parentElement.classList.add('focused');
   }
 
   function blurTab(e: Event) {
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
     (e.target as Node).parentElement.classList.remove('focused');
   }
 
@@ -68,18 +71,27 @@
   }
 
   function getTabURL(tab: Tab): string {
-    return getLink ? getLink(tab) : tab[linkKey] as string || null;
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+    return getLink ? getLink(tab) : (tab[linkKey] as string) || null;
   }
 </script>
 
 <div class="tab-container" role="navigation">
   <ul role="tablist" class="tabs">
     {#each tabs as tab, index (tab[idKey] || tab)}
-      <TabComponent {componentId} {tab} {allowRemoval} totalTabs={tabs.length}
-        {getTabURL} isActive={tab[idKey] === activeTab[idKey]}
-        on:focus={focusTab} on:blur={blurTab}
-        on:click={checkAndPreventDefault} on:mousedown={(e) => selectActiveTab(e, tab)}
-        on:remove={(e) => removeTab(e, index)}>
+      <TabComponent
+        {componentId}
+        {tab}
+        {allowRemoval}
+        totalTabs={tabs.length}
+        {getTabURL}
+        isActive={tab[idKey] === activeTab[idKey]}
+        on:focus={focusTab}
+        on:blur={blurTab}
+        on:click={checkAndPreventDefault}
+        on:mousedown={(e) => selectActiveTab(e, tab)}
+        on:remove={(e) => removeTab(e, index)}
+      >
         <slot name="tab" {tab}>
           {tab[labelKey]}
         </slot>
@@ -88,13 +100,16 @@
   </ul>
 
   <div class="tab-content-holder">
-    <div role="tabpanel" aria-hidden="false"
-          id="mtsr-{componentId}-tabpanel"
-          aria-labelledby="mtsr-{componentId}-tab"
-          tabindex="0">
+    <div
+      role="tabpanel"
+      aria-hidden="false"
+      id="mtsr-{componentId}-tabpanel"
+      aria-labelledby="mtsr-{componentId}-tab"
+      tabindex="0"
+    >
       {#if activeTab}
-        <slot></slot>
+        <slot />
       {/if}
     </div>
-  </div>  
+  </div>
 </div>

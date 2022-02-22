@@ -4,16 +4,9 @@
   export let group: string | number | string[] | undefined = undefined;
   export let value: string | number | string[] | undefined = undefined;
   export let disabled = false;
-  export let id: string = undefined;
+  export let id: string | undefined = undefined;
 </script>
 
-<BaseInput {...$$restProps} bind:id {disabled}/>
+<BaseInput {...$$restProps} bind:id {disabled} />
 
-<input
-  class="radio"
-  type="radio"
-  bind:group
-  {value}
-  {id}
-  {disabled}
-/>
+<input class="radio" type="radio" bind:group {value} {id} {disabled} />

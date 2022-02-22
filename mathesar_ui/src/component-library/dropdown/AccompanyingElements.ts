@@ -1,7 +1,5 @@
 import { writable } from 'svelte/store';
-import type {
-  Readable, Subscriber, Unsubscriber,
-} from 'svelte/store';
+import type { Readable, Subscriber, Unsubscriber } from 'svelte/store';
 
 /**
  * AccompanyingElements stores references to any DOM nodes which "accompany" a
@@ -24,7 +22,7 @@ import type {
 export class AccompanyingElements implements Readable<Set<HTMLElement>> {
   elements = writable(new Set<HTMLElement>());
 
-  parent: AccompanyingElements;
+  parent: AccompanyingElements | undefined;
 
   constructor(parent?: AccompanyingElements) {
     this.parent = parent;

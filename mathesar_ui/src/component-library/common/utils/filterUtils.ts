@@ -25,19 +25,22 @@ function recursiveFilter(
 }
 
 export function filterTree(
-  tree: Record<string, unknown>[], searchKey: string,
-  childKey: string, searchTerm: string,
+  tree: Record<string, unknown>[],
+  searchKey: string,
+  childKey: string,
+  searchTerm: string,
 ): Record<string, unknown>[] {
   const filterText = searchTerm?.trim();
   if (!filterText) {
     return tree;
   }
   return recursiveFilter(
-    tree, childKey,
-    (entry: Record<string, unknown>) => (
-      entry[searchKey] as string
-    )?.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1,
+    tree,
+    childKey,
+    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+    (entry: Record<string, unknown>) =>
+      (entry[searchKey] as string)
+        ?.toLowerCase()
+        .indexOf(searchTerm.toLowerCase()) > -1,
   );
 }
-
-export default {};

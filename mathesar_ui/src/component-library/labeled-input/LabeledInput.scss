@@ -9,7 +9,7 @@
     display: block;
 
     // TODO: Unify styling for all form elements
-    >button.dropdown.trigger {
+    > button.dropdown.trigger {
       display: flex;
       width: 100%;
     }
@@ -20,7 +20,7 @@
       margin-top: var(--spacing-y);
     }
   }
-  
+
   &.layout-inline .label-content,
   &.layout-inline-input-first .label-content {
     display: inline-flex;

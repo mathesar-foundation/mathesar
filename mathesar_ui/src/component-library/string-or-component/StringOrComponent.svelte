@@ -8,7 +8,7 @@
   {arg}
 {:else if Array.isArray(arg)}
   {#each arg as paragraph}
-  <p>{paragraph}</p>
+    <p>{paragraph}</p>
   {/each}
 {:else}
   <svelte:component this={arg.component} {...arg.props} />
