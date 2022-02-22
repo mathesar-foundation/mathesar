@@ -1,8 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
-
-  const dispatch = createEventDispatcher();
 
   /**
    * Value of the input. Use bind tag for two-way binding.
@@ -24,15 +21,6 @@
   export let id: string | undefined = undefined;
 
   export let hasValidationErrors = false;
-
-  function handleKeydown(e: KeyboardEvent) {
-    if (e.key === 'Enter') {
-      dispatch('enter');
-    }
-    if (e.key === 'Escape') {
-      dispatch('esc');
-    }
-  }
 </script>
 
 <BaseInput {...$$restProps} bind:id {disabled} />
@@ -49,5 +37,5 @@
   on:input
   on:focus
   on:blur
-  on:keydown={handleKeydown}
+  on:keydown
 />

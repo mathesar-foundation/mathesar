@@ -127,6 +127,14 @@
       isSubmittingRename = false;
     }
   }
+
+  async function handleColumnRenameInputKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter') {
+      await submitRename({ allowRetry: true });
+    } else if (e.key === 'Escape') {
+      handleCancelRename();
+    }
+  }
 </script>
 
 <div
@@ -144,9 +152,8 @@
         disabled={isSubmittingRename}
         hasValidationErrors={!!newNameValidationErrors.length}
         aria-label="Column name"
-        on:enter={() => submitRename({ allowRetry: true })}
+        on:keydown={handleColumnRenameInputKeydown}
         on:blur={() => submitRename({ allowRetry: false })}
-        on:esc={handleCancelRename}
       />
     </SpinnerArea>
   {:else}
