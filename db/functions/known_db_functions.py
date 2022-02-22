@@ -37,8 +37,8 @@ def _get_module_members_that_satisfy(module, predicate):
 def _is_concrete_db_function_subclass(member):
     return (
         inspect.isclass(member)
-        and member != DBFunction
         and issubclass(member, DBFunction)
+        and not inspect.isabstract(member)
     )
 
 
