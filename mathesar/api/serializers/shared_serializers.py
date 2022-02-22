@@ -180,8 +180,12 @@ class TimeWithoutTimeZoneFormatValidator(TimeWithTimeZoneFormatValidator):
         return super().validate(datetime_obj, display_format, serializer_field)
 
 
-class DateDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
-    format = serializers.CharField(validators=[DateFormatValidator()])
+class DateDisplayOptionSerializer(
+    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    serializers.Serializer
+):
+    date_format = serializers.CharField(validators=[DateFormatValidator()])
 
 
 class TimestampWithoutTimezoneDisplayOptionSerializer(
@@ -189,7 +193,8 @@ class TimestampWithoutTimezoneDisplayOptionSerializer(
     OverrideRootPartialMixin,
     serializers.Serializer
 ):
-    format = serializers.CharField(validators=[TimestampWithoutTimeZoneFormatValidator()])
+    time_format = serializers.CharField(validators=[TimeWithoutTimeZoneFormatValidator()])
+    date_format = serializers.CharField(validators=[DateFormatValidator()])
 
 
 class TimestampWithTimezoneDisplayOptionSerializer(
@@ -197,7 +202,8 @@ class TimestampWithTimezoneDisplayOptionSerializer(
     OverrideRootPartialMixin,
     serializers.Serializer
 ):
-    format = serializers.CharField(validators=[TimestampWithTimeZoneFormatValidator()])
+    time_format = serializers.CharField(validators=[TimeWithTimeZoneFormatValidator()])
+    date_format = serializers.CharField(validators=[DateFormatValidator()])
 
 
 class TimeWithTimezoneDisplayOptionSerializer(
@@ -205,7 +211,7 @@ class TimeWithTimezoneDisplayOptionSerializer(
     OverrideRootPartialMixin,
     serializers.Serializer
 ):
-    format = serializers.CharField(validators=[TimeWithTimeZoneFormatValidator()])
+    time_format = serializers.CharField(validators=[TimeWithTimeZoneFormatValidator()])
 
 
 class TimeWithoutTimezoneDisplayOptionSerializer(
@@ -213,7 +219,7 @@ class TimeWithoutTimezoneDisplayOptionSerializer(
     OverrideRootPartialMixin,
     serializers.Serializer
 ):
-    format = serializers.CharField(validators=[TimeWithoutTimeZoneFormatValidator()])
+    time_format = serializers.CharField(validators=[TimeWithoutTimeZoneFormatValidator()])
 
 
 class DisplayOptionsMappingSerializer(
@@ -228,9 +234,9 @@ class DisplayOptionsMappingSerializer(
          MathesarTypeIdentifier.DATETIME.value): TimestampWithTimezoneDisplayOptionSerializer,
         ('timestamp without time zone',
          MathesarTypeIdentifier.DATETIME.value): TimestampWithoutTimezoneDisplayOptionSerializer,
-        ('date', MathesarTypeIdentifier.DATETIME.value): DateDisplayOptionSerializer,
-        ('time with time zone', MathesarTypeIdentifier.DATETIME.value): TimeWithTimezoneDisplayOptionSerializer,
-        ('time without time zone', MathesarTypeIdentifier.DATETIME.value): TimeWithoutTimezoneDisplayOptionSerializer,
+        ('date', MathesarTypeIdentifier.DATE.value): DateDisplayOptionSerializer,
+        ('time with time zone', MathesarTypeIdentifier.TIME.value): TimeWithTimezoneDisplayOptionSerializer,
+        ('time without time zone', MathesarTypeIdentifier.TIME.value): TimeWithoutTimezoneDisplayOptionSerializer,
     }
 
     def get_mapping_field(self):
