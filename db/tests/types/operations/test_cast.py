@@ -1,4 +1,3 @@
-from datetime import date
 from decimal import Decimal
 
 import pytest
@@ -166,22 +165,14 @@ MASTER_DB_TYPE_MAP_SPEC = {
         REFLECTED_NAME: DATE,
         TARGET_DICT: {
             CHAR: {VALID: []},
-            DATE: {VALID: [(date(1999, 1, 18), date(1999, 1, 18))]},
-            TEXT: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
-            VARCHAR: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
+            DATE: {VALID: [("1999-01-18 AD", "1999-01-18 AD")]},
+            TEXT: {VALID: [("1999-01-18 AD", "1999-01-18")]},
+            VARCHAR: {VALID: [("1999-01-18 AD", "1999-01-18")]},
             TIMESTAMP_WITH_TIME_ZONE: {
-                VALID: [(
-                    date(1999, 1, 18),
-                    "1999-01-18T00:00:00.0Z AD",
-                ),
-                ]
+                VALID: [("1999-01-18 AD", "1999-01-18T00:00:00.0Z AD")]
             },
             TIMESTAMP_WITHOUT_TIME_ZONE: {
-                VALID: [(
-                    date(1999, 1, 18),
-                    "1999-01-18T00:00:00.0 AD",
-                ),
-                ]
+                VALID: [("1999-01-18 AD", "1999-01-18T00:00:00.0 AD")]
             },
         },
     },
@@ -482,7 +473,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             CHAR: {VALID: []},
             DATE: {
-                VALID: [("1999-01-18T00:00:00.0Z AD", date(1999, 1, 18))],
+                VALID: [("1999-01-18T00:00:00.0Z AD", "1999-01-18 AD")],
                 INVALID: [
                     "1999-01-18T12:30:45.0Z AD",
                     "1999-01-18T00:00:00.0+01:00 AD",
@@ -522,7 +513,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             CHAR: {VALID: []},
             DATE: {
-                VALID: [("1999-01-18T00:00:00.0 AD", date(1999, 1, 18))],
+                VALID: [("1999-01-18T00:00:00.0 AD", "1999-01-18 AD")],
                 INVALID: ["1999-01-18T00:10:00.0 AD"]
             },
             TIMESTAMP_WITHOUT_TIME_ZONE: {
@@ -608,10 +599,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             DATE: {
                 VALID: [
-                    ("1999-01-18", date(1999, 1, 18)),
-                    ("1/18/1999", date(1999, 1, 18)),
-                    ("jan-1999-18", date(1999, 1, 18)),
-                    ("19990118", date(1999, 1, 18)),
+                    ("1999-01-18", "1999-01-18 AD"),
+                    ("1/18/1999", "1999-01-18 AD"),
+                    ("jan-1999-18", "1999-01-18 AD"),
+                    ("19990118", "1999-01-18 AD"),
                 ],
                 INVALID: [
                     "18/1/1999",
@@ -683,10 +674,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             CHAR: {VALID: [("a", "a")]},
             DATE: {
                 VALID: [
-                    ("1999-01-18", date(1999, 1, 18)),
-                    ("1/18/1999", date(1999, 1, 18)),
-                    ("jan-1999-18", date(1999, 1, 18)),
-                    ("19990118", date(1999, 1, 18)),
+                    ("1999-01-18", "1999-01-18 AD"),
+                    ("1/18/1999", "1999-01-18 AD"),
+                    ("jan-1999-18", "1999-01-18 AD"),
+                    ("19990118", "1999-01-18 AD"),
                 ],
                 INVALID: [
                     "18/1/1999",
