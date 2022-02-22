@@ -183,20 +183,7 @@ def _build_db_types_hinted():
     hints_for_numeric_db_types = (hints.comparable,)
     _add_to_db_type_hintsets(numeric_db_types, hints_for_numeric_db_types)
 
-    # time related types get the "comparable" hint
-    time_related_db_types = (
-        PostgresType.DATE,
-        PostgresType.TIME,
-        PostgresType.TIME_WITH_TIME_ZONE,
-        PostgresType.TIME_WITHOUT_TIME_ZONE,
-        PostgresType.TIMESTAMP,
-        PostgresType.TIMESTAMP_WITH_TIME_ZONE,
-        PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE,
-        PostgresType.INTERVAL,
-    )
-    hints_for_time_related_types = (hints.comparable,)
-    _add_to_db_type_hintsets(time_related_db_types, hints_for_time_related_types)
-
+    # time of day db types get the "time" hint
     time_of_day_db_types = (
         PostgresType.TIME,
         PostgresType.TIME_WITH_TIME_ZONE,
@@ -204,11 +191,13 @@ def _build_db_types_hinted():
     )
     _add_to_db_type_hintsets(time_of_day_db_types, (hints.time,))
 
+    # date db types get the "date" hint
     date_db_types = (
         PostgresType.DATE,
     )
     _add_to_db_type_hintsets(date_db_types, (hints.date,))
 
+    # datetime db types get the "date" and "time" hints
     datetime_db_types = (
         PostgresType.TIMESTAMP,
         PostgresType.TIMESTAMP_WITH_TIME_ZONE,
@@ -216,6 +205,16 @@ def _build_db_types_hinted():
     )
     _add_to_db_type_hintsets(datetime_db_types, (hints.date, hints.time,))
 
+    # duration db types get the "duration" hints
+    duration_db_types = (
+        PostgresType.INTERVAL,
+    )
+    _add_to_db_type_hintsets(duration_db_types, (hints.duration,))
+
+    # time related types get the "comparable" hint
+    hints_for_time_related_types = (hints.comparable,)
+    for db_types in [time_of_day_db_types, date_db_types, datetime_db_types, duration_db_types]:
+        _add_to_db_type_hintsets(db_types, hints_for_time_related_types)
 
     return frozendict(db_types_hinted)
 
