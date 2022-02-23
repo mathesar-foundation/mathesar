@@ -1,16 +1,27 @@
-from sqlalchemy import (
-    CHAR, String, Integer, Boolean, select, Table, MetaData
-)
+import decimal
 
-from db.types import interval
+from sqlalchemy import (
+    CHAR, FLOAT, SMALLINT, String, Integer, Boolean, Text, VARCHAR, select, Table, MetaData, NUMERIC, BIGINT, DECIMAL,
+    REAL,
+)
+from sqlalchemy.dialects.postgresql import DOUBLE_PRECISION, MONEY
 
 column_test_dict = {
-    Integer: {"start": "0", "set": "5", "expt": 5},
-    String: {"start": "default", "set": "test", "expt": "test"},
+    BIGINT: {"start": "499999999999", "set": "500000000000", "expt": 500000000000},
     Boolean: {"start": "false", "set": "true", "expt": True},
     CHAR: {"start": "a", "set": "b", "expt": "b"},
-    interval.Interval: {"start": "P1Y1M1DT1H1M1.1S", "set": "P1Y1M1DT2H1M1.2S", "expt": "P1Y1M1DT2H1M1.2S"}
-
+    DECIMAL: {"start": "111.01111", "set": "111.01112", "expt": decimal.Decimal('111.01112')},
+    DOUBLE_PRECISION: {"start": "111.01111", "set": "111.01112", "expt": 111.01112},
+    FLOAT: {"start": "111.01111", "set": "111.01112", "expt": 111.01112},
+    Integer: {"start": "0", "set": "5", "expt": 5},
+    # Rounds to 2 digits
+    MONEY: {"start": "$12,312.23", "set": "$12,312.24", "expt": "$12,312.24"},
+    NUMERIC: {"start": "111.01111", "set": "111.01112", "expt": decimal.Decimal('111.01112')},
+    REAL: {"start": "111.01111", "set": "111.01112", "expt": 111.01112},
+    SMALLINT: {"start": "500", "set": "500", "expt": 500},
+    Text: {"start": "default", "set": "test", "expt": "test"},
+    String: {"start": "default", "set": "test", "expt": "test"},
+    VARCHAR: {"start": "default", "set": "test", "expt": "test"},
 }
 
 
