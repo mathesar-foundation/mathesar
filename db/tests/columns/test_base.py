@@ -9,7 +9,7 @@ from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT_COLUMNS
 from db.columns.utils import get_default_mathesar_column_list
 from db.tests.types import fixtures
-from db.types import email, interval
+from db.types import email, datetime
 
 
 engine_with_types = fixtures.engine_with_types
@@ -247,7 +247,7 @@ def test_MC_type_options_str(engine, target_type, type_options):
 
 
 def test_MC_type_options_interval(engine):
-    target_type = interval.Interval(precision=3, fields='SECOND')
+    target_type = datetime.Interval(precision=3, fields='SECOND')
     mc = MathesarColumn('testable_col', target_type)
     mc.add_engine(engine)
     assert mc.type_options == {'precision': 3, 'fields': 'SECOND'}
