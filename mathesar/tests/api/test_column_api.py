@@ -239,7 +239,7 @@ create_display_options_test_list = [
     ("BOOLEAN", {"input": "dropdown"}),
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
     ("DATE", {'format': 'YYYY-MM-DD'}),
-    ("INTERVAL", {'format': 'HH:mm:ss.SSS'}),
+    ("INTERVAL", {'format': 'DD HH:mm:ss.SSS'}),
     ("NUMERIC", {"show_as_percentage": True}),
     ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}),
     ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
@@ -257,7 +257,6 @@ def test_column_create_display_options(
     name = "anewcolumn"
     data = {"name": name, "type": type_, "display_options": display_options}
     response = client.post(f"/api/db/v0/tables/{column_test_table.id}/columns/", data)
-    print(response.data)
     assert response.status_code == 201
 
     # Ensure the correct serialized date is returned by the API

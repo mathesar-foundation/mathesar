@@ -180,12 +180,13 @@ class TimeWithoutTimeZoneFormatValidator(TimeWithTimeZoneFormatValidator):
         return super().validate(datetime_obj, display_format, serializer_field)
 
 
-class DurationFormatValidator(TimeWithoutTimeZoneFormatValidator):
-    """
-    The validation is same as Time Without TimeZone as of now,
-     it has been subclassed without any overrides so that the validation logic can be changed in future if needed
-    """
-    pass
+class DurationFormatValidator(AbstractDateTimeFormatValidator):
+
+    def validate(self, datetime_obj, display_format, serializer_field):
+        if 'z' in display_format.lower():
+            raise serializers.ValidationError(
+                "Duration column cannot contain timezone display format"
+            )
 
 
 class DateDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
