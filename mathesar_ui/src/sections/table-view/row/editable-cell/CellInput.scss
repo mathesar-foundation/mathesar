@@ -1,4 +1,4 @@
-.cell-input-box {
+:global(.cell-input-box.input-element) {
   border: none;
   outline: 0;
   margin: 0;
@@ -14,9 +14,14 @@
   right: 0;
   bottom: 2px;
   width: 100%;
+  resize: none;
+  height: 100%;
+}
 
-  &.is-null-displayed {
-    z-index: -1;
-    left: -4px;
-  }
+/**
+  * Nesting this within the previous block does not work.
+  * Possible issue with global tag and pre-processor.
+  */
+:global(.cell-input-box.input-element.is-null-displayed) {
+  z-index: -1;
 }

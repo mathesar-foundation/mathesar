@@ -1,33 +1,30 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
+  import { onDestroy } from 'svelte';
+  import { DynamicInput } from '@mathesar-component-library';
   import type {
     TableRecord,
     Column,
     RecordsData,
   } from '@mathesar/stores/table-data/types';
-  import { getInputAttributes } from './utils';
+  import { getInputAttributes, getInputProps } from './utils';
 
   export let recordsData: RecordsData;
   export let row: TableRecord;
   export let column: Column;
   export let value: unknown = undefined;
 
-  let inputRef: HTMLInputElement;
   let isNullDisplayed = false;
   let timer: number;
 
   $: isNullDisplayed = value === null;
+  $: inputProps = getInputProps(column);
   $: inputAttrs = getInputAttributes(column);
-
-  onMount(() => {
-    inputRef.focus();
-  });
 
   onDestroy(() => {
     clearTimeout(timer);
   });
 
-  function setValue(val: string) {
+  function setValue(val: unknown) {
     if (value !== val) {
       value = val;
       if (row.__isNew) {
@@ -38,47 +35,41 @@
     }
   }
 
-  function debounceAndSet(event: Event) {
+  function handleValueChange(event: CustomEvent<{ value: unknown }>) {
+    isNullDisplayed = false;
     window.clearTimeout(timer);
     timer = window.setTimeout(() => {
-      const val = (event.target as HTMLInputElement).value;
-      setValue(val);
+      setValue(event.detail.value);
     }, 500);
   }
 
-  function onBlur(event: Event) {
-    const val = (event.target as HTMLInputElement).value;
+  function clearTimerAndSetValue(event: CustomEvent<{ value: unknown }>) {
     window.clearTimeout(timer);
-    setValue(val);
+    setValue(event.detail.value);
   }
 
-  function hideNullElement() {
-    isNullDisplayed = false;
-  }
-
-  function handleInputKeyDown(event: KeyboardEvent) {
-    if (
-      event.key === 'Tab' ||
-      event.key === 'Enter' ||
-      event.key === 'Escape'
-    ) {
-      onBlur(event);
+  function handleSpecialKeyDown(e: CustomEvent<{ key: string, value: unknown }>) {
+    switch (e.detail.key) {
+      case 'Enter':
+      case 'Escape':
+      case 'Tab':
+        clearTimerAndSetValue(e);
+        break;
+      default:
+        break;
     }
   }
 </script>
 
-<input
-  bind:this={inputRef}
-  type="text"
-  class="cell-input-box"
-  class:is-null-displayed={isNullDisplayed}
-  value={typeof value === 'string' || typeof value === 'number' ? value : ''}
+<DynamicInput
+  class="cell-input-box {isNullDisplayed ? 'is-null-displayed' : ''}"
+  {...inputProps}
   {...inputAttrs}
-  on:keyup={debounceAndSet}
-  on:blur={onBlur}
-  on:input={hideNullElement}
-  on:keydown={handleInputKeyDown}
-  on:keydown
+  focusOnMount={true}
+  {value}
+  on:update={handleValueChange}
+  on:specialKeyDown={handleSpecialKeyDown}
+  on:focusOut={clearTimerAndSetValue}
 />
 
 <style lang="scss">

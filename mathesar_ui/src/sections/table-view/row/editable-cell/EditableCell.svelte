@@ -37,16 +37,20 @@
     }
   });
 
+  async function checkTypeAndScroll(type?: string) {
+    if (type === 'moved') {
+      await tick();
+      scrollBasedOnActiveCell();
+    }
+  }
+
   async function handleKeyDown(event: KeyboardEvent) {
     const type = display.handleKeyEventsOnActiveCell(event.key);
     if (type) {
       event.stopPropagation();
       event.preventDefault();
 
-      if (type === 'moved') {
-        await tick();
-        scrollBasedOnActiveCell();
-      }
+      await checkTypeAndScroll(type);
     }
   }
 </script>
@@ -80,7 +84,6 @@
       {recordsData}
       {row}
       {column}
-      on:keydown={handleKeyDown}
     />
   {/if}
 

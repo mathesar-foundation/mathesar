@@ -119,10 +119,10 @@ const textType: AbstractTypeConfiguration = {
     type: 'string',
     conditionalProps: {
       TEXT: {
-        size: 'md'
+        size: 'large'
       },
       VARCHAR: {
-        size: 'md-auto'
+        size: 'auto'
       }
     }
   },

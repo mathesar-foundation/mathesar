@@ -1,4 +1,4 @@
-.editable-cell {
+.editable-cell.cell {
   user-select: none;
   overflow: hidden;
   background-color: #fff;
@@ -30,10 +30,15 @@
     box-shadow: 0 0 0 2px #428af4;
     border-radius: 2px;
     border: none;
-    bottom: 1px;
+    bottom: 1px !important;
 
     &.is-in-edit {
       box-shadow: 0 0 0 3px #428af4;
+
+      &.size-large {
+        min-width: 200px;
+        min-height: 82px;
+      }
     }
 
     &.is-pk {
