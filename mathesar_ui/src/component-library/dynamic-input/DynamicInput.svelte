@@ -12,7 +12,7 @@
   /**
    * Type of input, one of: 'boolean', 'integer', 'float', 'string', 'date', 'datetime', 'time'
    */
-  export let dataType: DynamicInputDataType;
+  export let dataType: DynamicInputDataType = 'string';
 
   /**
    * Value of input. Depends on type.
@@ -50,5 +50,13 @@
 {:else if dataType === 'integer' || dataType === 'float'}
   <NumberInput {...$$restProps} isInteger={dataType === 'integer'} bind:value />
 {:else if dataType === 'string'}
-  <StringInput {...$$restProps} {interfaceType} bind:value />
+  <StringInput
+    {...$$restProps}
+    {interfaceType}
+    bind:value
+    on:update
+    on:specialKeyDown
+    on:focusIn
+    on:focusOut
+  />
 {/if}
