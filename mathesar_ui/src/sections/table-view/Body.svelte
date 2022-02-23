@@ -72,7 +72,7 @@
         {height}
         width={$rowWidth}
         itemCount={$displayableRecords.length}
-        paddingBottom={20}
+        paddingBottom={30}
         itemSize={getItemSize}
         itemKey={(index) => recordsData.getIterationKey(index)}
         let:items
