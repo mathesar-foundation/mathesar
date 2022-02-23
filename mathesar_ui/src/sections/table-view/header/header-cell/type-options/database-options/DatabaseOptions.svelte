@@ -14,6 +14,9 @@
   $: dbOptionsConfig =
     selectedAbstractType?.typeSwitchOptions?.database?.configuration ??
     undefined;
+  $: abstTypeHasMultipleDbTypes = selectedAbstractType?.dbTypes.size
+    ? selectedAbstractType?.dbTypes.size > 1
+    : false;
 </script>
 
 {#if dbOptionsConfig}
@@ -25,7 +28,7 @@
     />
   {/key}
   <DbTypeIndicator {selectedDbType} />
-{:else if selectedAbstractType?.dbTypes.size}
+{:else if abstTypeHasMultipleDbTypes}
   <DbTypeSelect bind:selectedDbType {selectedAbstractType} />
 {:else}
   <DbTypeIndicator {selectedDbType} />
