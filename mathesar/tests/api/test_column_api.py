@@ -1,5 +1,4 @@
 import json
-from datetime import date
 
 import pytest
 from unittest.mock import patch
@@ -183,7 +182,7 @@ create_default_test_list = [
     ("NUMERIC", 42, 42, 42),
     ("STRING", "test_string", "test_string", "test_string"),
     ("VARCHAR", "test_string", "test_string", "test_string"),
-    ("DATE", "2020-1-1", date(2020, 1, 1), "2020-01-01"),
+    ("DATE", "2020-1-1", "2020-01-01 AD", "2020-01-01 AD"),
     ("EMAIL", "test@test.com", "test@test.com", "test@test.com"),
 ]
 
