@@ -6,6 +6,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import DOUBLE_PRECISION, MONEY
 
+from db.types.uri import URI
+
 column_test_dict = {
     BIGINT: {"start": "499999999999", "set": "500000000000", "expt": 500000000000},
     Boolean: {"start": "false", "set": "true", "expt": True},
@@ -21,6 +23,7 @@ column_test_dict = {
     SMALLINT: {"start": "500", "set": "500", "expt": 500},
     Text: {"start": "default", "set": "test", "expt": "test"},
     String: {"start": "default", "set": "test", "expt": "test"},
+    URI: {"start": "https://centerofci.org", "set": "https://centerofci.org", "expt": "https://centerofci.org"},
     VARCHAR: {"start": "default", "set": "test", "expt": "test"},
 }
 

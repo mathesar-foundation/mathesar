@@ -346,8 +346,8 @@ def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_create(engine_with_schema, col_type):
-    engine, schema = engine_with_schema
+def test_column_default_create(engine_email_type, col_type):
+    engine, schema = engine_email_type
     table_name = "create_column_default_table"
     column_name = "create_column_default_column"
     _, set_default, expt_default = column_test_dict[col_type].values()
