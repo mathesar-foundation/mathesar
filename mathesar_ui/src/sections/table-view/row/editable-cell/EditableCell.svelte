@@ -79,12 +79,7 @@
   </div>
 
   {#if isBeingEdited}
-    <CellInput
-      bind:value
-      {recordsData}
-      {row}
-      {column}
-    />
+    <CellInput bind:value {recordsData} {row} {column} />
   {/if}
 
   {#if !row.__state || row.__state === 'loading'}

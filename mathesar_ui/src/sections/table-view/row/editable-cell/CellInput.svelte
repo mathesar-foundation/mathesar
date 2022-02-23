@@ -48,7 +48,9 @@
     setValue(event.detail.value);
   }
 
-  function handleSpecialKeyDown(e: CustomEvent<{ key: string, value: unknown }>) {
+  function handleSpecialKeyDown(
+    e: CustomEvent<{ key: string; value: unknown }>,
+  ) {
     switch (e.detail.key) {
       case 'Enter':
       case 'Escape':

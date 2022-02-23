@@ -27,7 +27,7 @@
 
   function handleInput() {
     dispatch('update', {
-      value
+      value,
     });
   }
 </script>

@@ -4,9 +4,14 @@ import {
   currentDbAbstractTypes,
   getAbstractTypeForDbType,
 } from '@mathesar/stores/abstract-types';
-import type { ConditionalPropsForDbType, AbstractTypeConfiguration } from '@mathesar/stores/abstract-types/types.d';
+import type {
+  ConditionalPropsForDbType,
+  AbstractTypeConfiguration,
+} from '@mathesar/stores/abstract-types/types.d';
 
-function getInputConfiguration(column: Column): AbstractTypeConfiguration['input'] {
+function getInputConfiguration(
+  column: Column,
+): AbstractTypeConfiguration['input'] {
   const abstractTypeOfColumn = getAbstractTypeForDbType(
     column.type,
     get(currentDbAbstractTypes)?.data,
@@ -23,7 +28,7 @@ function getSize(column: Column): string | null {
   const typeOptions = column.type_options;
 
   if ('size' in props) {
-    const size = (props.size as string);
+    const size = props.size as string;
     if (size.indexOf('auto') === 0) {
       if (
         !typeOptions ||
