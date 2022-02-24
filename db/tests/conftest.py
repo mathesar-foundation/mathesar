@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import MetaData, text, Table
 from sqlalchemy.schema import DropSchema
 
-from db import constants
+from db import constants, types
 from db.tables.operations.split import extract_columns_from_table
 from db.engine import _add_custom_types_to_engine
 from db.types import base, install
@@ -58,6 +58,7 @@ def engine_with_uris(engine_with_schema):
 @pytest.fixture
 def engine_with_filter_sort(engine_with_schema):
     engine, schema = engine_with_schema
+    engine.dialect.ischema_names.update(types.CUSTOM_TYPE_DICT)
     with engine.begin() as conn, open(FILTER_SORT_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))

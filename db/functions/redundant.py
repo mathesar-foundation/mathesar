@@ -6,7 +6,7 @@ Mathesar filters not supporting composition.
 
 from abc import abstractmethod
 
-from db.functions.base import DBFunction, Or, Lesser, Equal, Greater, StartsWith, Contains, ToLowercase
+from db.functions.base import DBFunction, Or, Lesser, Equal, Greater
 
 from db.functions import hints
 
@@ -65,42 +65,4 @@ class GreaterOrEqual(RedundantDBFunction):
         return Or([
             Greater([param0, param1]),
             Equal([param0, param1]),
-        ])
-
-
-class StartsWithCaseInsensitive(RedundantDBFunction):
-    id = 'starts_with_case_insensitive'
-    name = 'starts with (case insensitive)'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.all_parameters(hints.string_like),
-        hints.mathesar_filter,
-    ])
-
-    def unpack(self):
-        param0 = self.parameters[0]
-        param1 = self.parameters[1]
-        return StartsWith([
-            ToLowercase([param0]),
-            ToLowercase([param1]),
-        ])
-
-
-class ContainsCaseInsensitive(RedundantDBFunction):
-    id = 'contains_case_insensitive'
-    name = 'contains (case insensitive)'
-    hints = tuple([
-        hints.returns(hints.boolean),
-        hints.parameter_count(2),
-        hints.all_parameters(hints.string_like),
-        hints.mathesar_filter,
-    ])
-
-    def unpack(self):
-        param0 = self.parameters[0]
-        param1 = self.parameters[1]
-        return Contains([
-            ToLowercase([param0]),
-            ToLowercase([param1]),
         ])
