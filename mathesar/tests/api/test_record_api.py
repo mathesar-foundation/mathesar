@@ -59,8 +59,8 @@ def test_record_list(create_table, client):
 
 
 serialization_test_list = [
-    ("TIME WITH TIME ZONE", "12:30:10+01:00"),
-    ("TIMESTAMP WITHOUT TIME ZONE", "2000-05-23T12:30:10"),
+    ("TIME WITH TIME ZONE", "12:30:10.0+01:00"),
+    ("TIMESTAMP WITHOUT TIME ZONE", "2000-05-23T12:30:10.0 AD"),
     ("MONEY", "$5.00"),
 ]
 
