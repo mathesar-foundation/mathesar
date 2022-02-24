@@ -10,6 +10,7 @@ from db.functions.base import DBFunction, Contains, sa_call_sql_function, Equal
 from db.functions.packed import DBFunctionPacked
 
 from db.types import base
+from db.types.known_uri_schemes import known_uri_schemes
 
 URI_STR = base.MathesarCustomType.URI.value
 DB_TYPE = base.get_qualified_name(URI_STR)
@@ -184,7 +185,7 @@ class URISchemeEquals(DBFunctionPacked):
         hints.returns(hints.boolean),
         hints.parameter_count(2),
         hints.parameter(0, hints.uri),
-        hints.parameter(1, hints.string_like),
+        hints.parameter(1, hints.string_like, hints.suggested_values(known_uri_schemes)),
         hints.mathesar_filter,
     ])
     depends_on = tuple([URIFunction.SCHEME])
