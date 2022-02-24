@@ -93,8 +93,8 @@ def test_column_list(column_test_table, client):
             },
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
-                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MATHESAR_MONEY', 'MONEY', 'NUMERIC', 'REAL',
-                'SMALLINT', 'TEXT', 'VARCHAR',
+                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MULTICURRENCY_MONEY',
+                'MONEY', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT', 'VARCHAR',
             ],
         },
         {
@@ -108,8 +108,8 @@ def test_column_list(column_test_table, client):
             'default': None,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
-                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MATHESAR_MONEY', 'MONEY', 'NUMERIC', 'REAL',
-                'SMALLINT', 'TEXT', 'VARCHAR',
+                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MULTICURRENCY_MONEY',
+                'MONEY', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT', 'VARCHAR',
             ],
         },
         {
@@ -126,8 +126,8 @@ def test_column_list(column_test_table, client):
             },
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
-                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MATHESAR_MONEY', 'MONEY', 'NUMERIC', 'REAL',
-                'SMALLINT', 'TEXT', 'VARCHAR',
+                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MULTICURRENCY_MONEY',
+                'MONEY', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT', 'VARCHAR',
             ],
         },
         {
@@ -141,7 +141,7 @@ def test_column_list(column_test_table, client):
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DATE', 'DECIMAL',
                 'DOUBLE PRECISION', 'FLOAT', 'INTEGER', 'INTERVAL',
-                'MATHESAR_TYPES.EMAIL', 'MATHESAR_TYPES.MATHESAR_MONEY',
+                'MATHESAR_TYPES.EMAIL', 'MATHESAR_TYPES.MULTICURRENCY_MONEY',
                 'MATHESAR_TYPES.URI', 'MONEY', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT',
                 'TIME WITH TIME ZONE', 'TIME WITHOUT TIME ZONE',
                 'TIMESTAMP WITH TIME ZONE', 'TIMESTAMP WITHOUT TIME ZONE',
@@ -159,7 +159,10 @@ def test_column_create(column_test_table, client):
     cache.clear()
     num_columns = len(column_test_table.sa_columns)
     data = {
-        "name": name, "type": type_, "display_options": {"show_as_percentage": True}, 'nullable': False
+        "name": name,
+        "type": type_,
+        "display_options": {"show_as_percentage": True},
+        "nullable": False
     }
     response = client.post(
         f"/api/db/v0/tables/{column_test_table.id}/columns/",

@@ -4,14 +4,14 @@ from sqlalchemy.types import UserDefinedType
 
 from db.types import base
 
-MATHESAR_MONEY = base.MathesarCustomType.MATHESAR_MONEY.value
+MULTICURRENCY_MONEY = base.MathesarCustomType.MULTICURRENCY_MONEY.value
 
-DB_TYPE = base.get_qualified_name(MATHESAR_MONEY)
+DB_TYPE = base.get_qualified_name(MULTICURRENCY_MONEY)
 VALUE = 'value'
 CURRENCY = 'currency'
 
 
-class MathesarMoney(UserDefinedType):
+class MulticurrencyMoney(UserDefinedType):
 
     def get_col_spec(self, **_):
         return DB_TYPE.upper()

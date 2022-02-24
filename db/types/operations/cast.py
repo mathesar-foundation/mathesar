@@ -2,7 +2,7 @@ from sqlalchemy import text
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 
-from db.types import base, email, money, uri
+from db.types import base, email, multicurrency, uri
 from db.types.exceptions import UnsupportedTypeException
 
 # DB type name strings
@@ -26,7 +26,7 @@ VARCHAR = base.VARCHAR
 
 # custom types
 EMAIL = base.MathesarCustomType.EMAIL.value
-MATHESAR_MONEY = base.MathesarCustomType.MATHESAR_MONEY.value
+MULTICURRENCY_MONEY = base.MathesarCustomType.MULTICURRENCY_MONEY.value
 MONEY = base.PostgresType.MONEY.value
 TIME_WITHOUT_TIME_ZONE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
 TIME_WITH_TIME_ZONE = base.PostgresType.TIME_WITH_TIME_ZONE.value
@@ -79,7 +79,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),
-        MATHESAR_MONEY: dialect_types.get(money.DB_TYPE),
+        MULTICURRENCY_MONEY: dialect_types.get(multicurrency.DB_TYPE),
         URI: dialect_types.get(uri.DB_TYPE),
     }
     if friendly_names:
@@ -153,7 +153,7 @@ def install_all_casts(engine):
     create_interval_casts(engine)
     create_datetime_casts(engine)
     create_money_casts(engine)
-    create_mathesar_money_casts(engine)
+    create_multicurrency_money_casts(engine)
     create_textual_casts(engine)
     create_uri_casts(engine)
 
@@ -213,9 +213,9 @@ def create_money_casts(engine):
     create_cast_functions(MONEY, type_body_map, engine)
 
 
-def create_mathesar_money_casts(engine):
-    type_body_map = _get_mathesar_money_type_body_map()
-    create_cast_functions(money.DB_TYPE, type_body_map, engine)
+def create_multicurrency_money_casts(engine):
+    type_body_map = _get_multicurrency_money_type_body_map()
+    create_cast_functions(multicurrency.DB_TYPE, type_body_map, engine)
 
 
 def create_textual_casts(engine):
@@ -257,7 +257,7 @@ def get_defined_source_target_cast_tuples(engine):
         EMAIL: _get_email_type_body_map(),
         FLOAT: _get_decimal_number_type_body_map(target_type_str=FLOAT),
         INTEGER: _get_integer_type_body_map(target_type_str=INTEGER),
-        MATHESAR_MONEY: _get_mathesar_money_type_body_map(),
+        MULTICURRENCY_MONEY: _get_multicurrency_money_type_body_map(),
         MONEY: _get_money_type_body_map(),
         INTERVAL: _get_interval_type_body_map(),
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
@@ -658,7 +658,7 @@ def _get_money_type_body_map():
     return type_body_map
 
 
-def _get_mathesar_money_type_body_map():
+def _get_multicurrency_money_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to money.
@@ -666,26 +666,26 @@ def _get_mathesar_money_type_body_map():
     We allow casting any textual type to money, assuming currency is USD
     and that the type can be cast through a numeric.
     """
-    default_behavior_source_types = [money.DB_TYPE]
+    default_behavior_source_types = [multicurrency.DB_TYPE]
     number_types = NUMBER_TYPES
     textual_types = TEXT_TYPES
 
     def _get_number_cast_to_money():
         return f"""
         BEGIN
-          RETURN ROW($1, 'USD')::{money.DB_TYPE};
+          RETURN ROW($1, 'USD')::{multicurrency.DB_TYPE};
         END;
         """
 
     def _get_base_textual_cast_to_money():
         return f"""
         BEGIN
-          RETURN ROW($1::numeric, 'USD')::{money.DB_TYPE};
+          RETURN ROW($1::numeric, 'USD')::{multicurrency.DB_TYPE};
         END;
         """
 
     type_body_map = _get_default_type_body_map(
-        default_behavior_source_types, money.DB_TYPE,
+        default_behavior_source_types, multicurrency.DB_TYPE,
     )
     type_body_map.update(
         {
