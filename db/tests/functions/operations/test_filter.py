@@ -83,15 +83,15 @@ ops_test_list = [
     # gt
     ("varchar", "gt", "string0", 100),
     ("numeric", "gt", 50, 50),
-    ("date", "gt", "2000-01-01", 99),
+    ("date", "gt", "2000-01-01 AD", 99),
     # ge
     ("varchar", "ge", "string1", 100),
     ("numeric", "ge", 50, 51),
-    ("date", "ge", "2000-01-01", 100),
+    ("date", "ge", "2000-01-01 AD", 100),
     # le
     ("varchar", "le", "string2", 13),
     ("numeric", "le", 51, 51),
-    ("date", "le", "2099-01-01", 100),
+    ("date", "le", "2099-01-01 AD", 100),
 ]
 
 
@@ -120,7 +120,8 @@ def test_filter_with_db_functions(
     assert len(record_list) == res_len
     for record in record_list:
         val_func = op_to_python_func[op]
-        assert val_func(getattr(record, column_name), value)
+        actual_value = getattr(record, column_name)
+        assert val_func(actual_value, value)
 
 
 boolean_ops_test_list = [
