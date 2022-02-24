@@ -6,7 +6,7 @@ from db.utils import execute_query
 from db.functions.base import (
     ColumnName, Not, Literal, Empty, Equal, Greater, And, Or, StartsWith, Contains, StartsWithCaseInsensitive, ContainsCaseInsensitive
 )
-from db.functions.redundant import (
+from db.functions.packed import (
     GreaterOrEqual, LesserOrEqual
 )
 from db.functions.operations.apply import apply_db_function_as_filter
