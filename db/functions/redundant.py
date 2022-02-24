@@ -6,7 +6,7 @@ Mathesar filters not supporting composition.
 
 from abc import abstractmethod
 
-from db.functions.base import DBFunction, Or, Lesser, Equal, Greater, StartsWith, Contains, ToLowercase
+from db.functions.base import DBFunction, Or, Lesser, Equal, Greater
 
 from db.functions import hints
 
