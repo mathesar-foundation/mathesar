@@ -1,9 +1,9 @@
-from playwright.sync_api import Page, expect
+from playwright.sync_api import expect
 
 from mathesar.tests.integration.utils.locators import get_table_entry, get_tables_list
 
 
-def test_create_empty_table(page: Page, base_schema_url):
+def test_create_empty_table(page, base_schema_url):
     page.goto(base_schema_url)
     expect(get_tables_list(page)).to_be_empty()
     page.click("[aria-label='New Table']")

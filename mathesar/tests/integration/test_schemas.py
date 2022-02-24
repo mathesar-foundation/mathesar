@@ -1,7 +1,7 @@
-from playwright.sync_api import Page, expect
+from playwright.sync_api import expect
 
 
-def test_create_and_delete_schema(page: Page, schemas_page_url):
+def test_create_and_delete_schema(page, schemas_page_url):
     page.goto(schemas_page_url)
     schema_name = "foo"
     schema_entry = page.locator(f".schema-list .schema-row:has-text('{schema_name}')")

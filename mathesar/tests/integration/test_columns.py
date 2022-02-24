@@ -1,7 +1,7 @@
-from playwright.sync_api import Page, expect
+from playwright.sync_api import expect
 
 
-def test_add_column(page: Page, go_to_patents_data_table):
+def test_add_column(page, go_to_patents_data_table):
     page.click("button[aria-label='New Column']")
     column_name = "TEST"
     page.fill(".new-column-dropdown input", column_name)

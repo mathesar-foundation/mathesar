@@ -1,7 +1,7 @@
-from playwright.sync_api import Page, expect
+from playwright.sync_api import expect
 
 
-def test_add_and_remove_multi_column_unique_constraint(page: Page, go_to_patents_data_table):
+def test_add_and_remove_multi_column_unique_constraint(page, go_to_patents_data_table):
     # Add
     page.click("[aria-label='Table Actions']")
     page.click("text=Constraints")
@@ -24,7 +24,7 @@ def test_add_and_remove_multi_column_unique_constraint(page: Page, go_to_patents
     expect(page.locator("text=Table Constraints (1)")).to_be_visible()
 
 
-def test_try_to_dissallow_null_for_column_with_null_values(page: Page, go_to_patents_data_table):
+def test_try_to_dissallow_null_for_column_with_null_values(page, go_to_patents_data_table):
     page.click("button:has-text('Patent Number')")
     allow_null = page.locator("button:has-text('Allow NULL')")
     allow_null.click()

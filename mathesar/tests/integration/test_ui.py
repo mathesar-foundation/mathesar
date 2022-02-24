@@ -1,14 +1,14 @@
 import re
-from playwright.sync_api import Page, expect, Locator
+from playwright.sync_api import expect, Locator
 from mathesar.tests.integration.utils.locators import get_table_entry
 
 
-def create_new_empty_table(page: Page):
+def create_new_empty_table(page):
     page.click("[aria-label='New Table']")
     page.click("button:has-text('Empty Table')")
 
 
-def get_tab(page: Page, tab_text):
+def get_tab(page, tab_text):
     return page.locator(
         f".tab-container [role=tablist] [role=presentation]:has-text('{tab_text}')"
     )
@@ -19,7 +19,7 @@ def close_tab(tab_locator: Locator):
     tab_locator.locator("[aria-label=remove]").click()
 
 
-def test_tabs(page: Page, base_schema_url):
+def test_tabs(page, base_schema_url):
     page.goto(base_schema_url)
 
     # Create Table 0
