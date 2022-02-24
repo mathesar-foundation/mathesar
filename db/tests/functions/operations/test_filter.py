@@ -1,14 +1,13 @@
 import re
 import pytest
-from datetime import datetime
 
 from db.utils import execute_query
 
 from db.functions.base import (
-    ColumnName, Not, Literal, Empty, Equal, Greater, And, Or, StartsWith, Contains
+    ColumnName, Not, Literal, Empty, Equal, Greater, And, Or, StartsWith, Contains, StartsWithCaseInsensitive, ContainsCaseInsensitive
 )
 from db.functions.redundant import (
-    GreaterOrEqual, LesserOrEqual, StartsWithCaseInsensitive, ContainsCaseInsensitive
+    GreaterOrEqual, LesserOrEqual
 )
 from db.functions.operations.apply import apply_db_function_as_filter
 
@@ -79,20 +78,20 @@ ops_test_list = [
     # eq
     ("varchar", "eq", "string42", 1),
     ("numeric", "eq", 1, 1),
-    ("date", "eq", "2000-01-01", 1),
+    ("date", "eq", "2000-01-01 AD", 1),
     ("array", "eq", "{0,0}", 1),
     # gt
     ("varchar", "gt", "string0", 100),
     ("numeric", "gt", 50, 50),
-    ("date", "gt", "2000-01-01", 99),
+    ("date", "gt", "2000-01-01 AD", 99),
     # ge
     ("varchar", "ge", "string1", 100),
     ("numeric", "ge", 50, 51),
-    ("date", "ge", "2000-01-01", 100),
+    ("date", "ge", "2000-01-01 AD", 100),
     # le
     ("varchar", "le", "string2", 13),
     ("numeric", "le", 51, 51),
-    ("date", "le", "2099-01-01", 100),
+    ("date", "le", "2099-01-01 AD", 100),
 ]
 
 
@@ -115,15 +114,14 @@ def test_filter_with_db_functions(
 
     record_list = execute_query(engine, query)
 
-    if column_name == "date" and value is not None:
-        value = datetime.strptime(value, "%Y-%m-%d").date()
-    elif column_name == "array" and value is not None and op not in ["any", "not_any"]:
+    if column_name == "array" and value is not None and op not in ["any", "not_any"]:
         value = [int(c) for c in value[1:-1].split(",")]
 
     assert len(record_list) == res_len
     for record in record_list:
         val_func = op_to_python_func[op]
-        assert val_func(getattr(record, column_name), value)
+        actual_value = getattr(record, column_name)
+        assert val_func(actual_value, value)
 
 
 boolean_ops_test_list = [

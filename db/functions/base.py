@@ -234,7 +234,6 @@ class StartsWith(DBFunction):
         hints.returns(hints.boolean),
         hints.parameter_count(2),
         hints.all_parameters(hints.string_like),
-        hints.mathesar_filter,
     ])
 
     @staticmethod
@@ -250,13 +249,44 @@ class Contains(DBFunction):
         hints.returns(hints.boolean),
         hints.parameter_count(2),
         hints.all_parameters(hints.string_like),
-        hints.mathesar_filter,
     ])
 
     @staticmethod
     def to_sa_expression(string, sub_string):
         pattern = func.concat('%', sub_string, '%')
         return string.like(pattern)
+
+
+class StartsWithCaseInsensitive(DBFunction):
+    id = 'starts_with_case_insensitive'
+    name = 'starts with'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.all_parameters(hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    @staticmethod
+    def to_sa_expression(string, prefix):
+        pattern = func.concat(prefix, '%')
+        return string.ilike(pattern)
+
+
+class ContainsCaseInsensitive(DBFunction):
+    id = 'contains_case_insensitive'
+    name = 'contains'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.all_parameters(hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    @staticmethod
+    def to_sa_expression(string, sub_string):
+        pattern = func.concat('%', sub_string, '%')
+        return string.ilike(pattern)
 
 
 class ToLowercase(DBFunction):
