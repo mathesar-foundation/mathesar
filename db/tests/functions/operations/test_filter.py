@@ -1,6 +1,5 @@
 import re
 import pytest
-from datetime import datetime
 
 from db.utils import execute_query
 
@@ -79,7 +78,7 @@ ops_test_list = [
     # eq
     ("varchar", "eq", "string42", 1),
     ("numeric", "eq", 1, 1),
-    ("date", "eq", "2000-01-01", 1),
+    ("date", "eq", "2000-01-01 AD", 1),
     ("array", "eq", "{0,0}", 1),
     # gt
     ("varchar", "gt", "string0", 100),
@@ -115,9 +114,7 @@ def test_filter_with_db_functions(
 
     record_list = execute_query(engine, query)
 
-    if column_name == "date" and value is not None:
-        value = datetime.strptime(value, "%Y-%m-%d").date()
-    elif column_name == "array" and value is not None and op not in ["any", "not_any"]:
+    if column_name == "array" and value is not None and op not in ["any", "not_any"]:
         value = [int(c) for c in value[1:-1].split(",")]
 
     assert len(record_list) == res_len
