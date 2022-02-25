@@ -1,4 +1,5 @@
 import decimal
+from datetime import date
 
 from sqlalchemy import (
     CHAR, FLOAT, SMALLINT, String, Integer, BOOLEAN, TEXT, VARCHAR, select, Table, MetaData, NUMERIC, BIGINT, DECIMAL,
@@ -16,7 +17,7 @@ column_test_dict = {
     CHAR: {"start": "a", "set": "b", "expt": "b"},
     DECIMAL: {"start": "111.01111", "set": "111.01112", "expt": decimal.Decimal('111.01112')},
     DOUBLE_PRECISION: {"start": "111.01111", "set": "111.01112", "expt": 111.01112},
-    DATE: {"start": "1999-01-15 AD", "set": "1999-01-18 AD", "expt": "1999-01-18 AD"},
+    DATE: {"start": "1999-01-15 AD", "set": "1999-01-18 AD", "expt": date(1999, 1, 18)},
     FLOAT: {"start": "111.01111", "set": "111.01112", "expt": 111.01112},
     Integer: {"start": "0", "set": "5", "expt": 5},
     # Rounds to 2 digits
