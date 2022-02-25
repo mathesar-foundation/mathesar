@@ -38,6 +38,7 @@ class LesserOrEqual(DBFunctionPacked):
         hints.parameter_count(2),
         hints.all_parameters(hints.comparable),
         hints.mathesar_filter,
+        hints.use_this_alias_when("is before or same as", hints.point_in_time),
     ])
 
     def unpack(self):
@@ -57,6 +58,7 @@ class GreaterOrEqual(DBFunctionPacked):
         hints.parameter_count(2),
         hints.all_parameters(hints.comparable),
         hints.mathesar_filter,
+        hints.use_this_alias_when("is before or same as", hints.point_in_time),
     ])
 
     def unpack(self):
