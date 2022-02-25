@@ -238,6 +238,7 @@ create_display_options_test_list = [
     ("BOOLEAN", {"input": "dropdown"}),
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
     ("DATE", {'format': 'YYYY-MM-DD'}),
+    ("INTERVAL", {'format': 'DD HH:mm:ss.SSS'}),
     ("NUMERIC", {"show_as_percentage": True}),
     ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}),
     ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
