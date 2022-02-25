@@ -9,7 +9,7 @@ from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT, NAME, NULLABLE, TYPE
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
 from db.columns.operations.alter import set_column_default, change_column_nullable
-from db.columns.operations.select import get_column_default, get_column_index_from_name
+from db.columns.operations.select import get_column_attnum_from_name, get_column_default, get_column_index_from_name
 from db.columns.utils import get_mathesar_column_with_engine
 from db.constraints.operations.create import copy_constraint
 from db.constraints.operations.select import get_column_constraints
@@ -94,6 +94,7 @@ def compile_copy_column(element, compiler, **_):
 
 def _duplicate_column_data(table_oid, from_column, to_column, engine):
     table = reflect_table_from_oid(table_oid, engine)
+    from_column_attnum = get_column_attnum_from_name(table_oid, from_column, engine)
     copy = CopyColumn(
         table.schema,
         table.name,
@@ -102,8 +103,7 @@ def _duplicate_column_data(table_oid, from_column, to_column, engine):
     )
     with engine.begin() as conn:
         conn.execute(copy)
-
-    from_default = get_column_default(table_oid, from_column, engine)
+    from_default = get_column_default(table_oid, from_column_attnum, engine)
     if from_default is not None:
         with engine.begin() as conn:
             set_column_default(table, to_column, engine, conn, from_default)

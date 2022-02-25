@@ -130,8 +130,8 @@ def test_get_column_default(engine_with_schema, filler, col_type):
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
-
-    default = get_column_default(table_oid, 0, engine)
+    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine)
+    default = get_column_default(table_oid, column_attnum, engine)
     created_default = get_default(engine, table)
     assert default == expt_default
     assert default == created_default
@@ -155,9 +155,10 @@ def test_get_column_generated_default(engine_with_schema, col):
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
+    column_attnum = get_column_attnum_from_name(table_oid, col.name, engine)
     with warnings.catch_warnings(), pytest.raises(DynamicDefaultWarning):
         warnings.filterwarnings("error", category=DynamicDefaultWarning)
-        get_column_default(table_oid, 0, engine)
+        get_column_default(table_oid, column_attnum, engine)
 
 
 default_expression_test_list = [
