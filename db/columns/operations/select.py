@@ -97,9 +97,10 @@ def get_column_name_from_attnum(table_oid, attnum, engine, connection_to_use=Non
     return result
 
 
-def get_column_default_dict(table_oid, column_index, engine, connection_to_use=None):
+def get_column_default_dict(table_oid, attnum, engine, connection_to_use=None):
     table = reflect_table_from_oid(table_oid, engine, connection_to_use)
-    column = table.columns[column_index]
+    column_name = get_column_name_from_attnum(table_oid, attnum, engine, connection_to_use)
+    column = table.columns[column_name]
     if column.server_default is None:
         return
 
@@ -124,9 +125,9 @@ def get_column_default_dict(table_oid, column_index, engine, connection_to_use=N
     return {"value": default_value, "is_dynamic": is_dynamic}
 
 
-def get_column_default(table_oid, column_index, engine, connection_to_use=None):
+def get_column_default(table_oid, attnum, engine, connection_to_use=None):
     default_dict = get_column_default_dict(
-        table_oid, column_index, engine, connection_to_use=connection_to_use
+        table_oid, attnum, engine, connection_to_use=connection_to_use
     )
     if default_dict is not None:
         return default_dict['value']
