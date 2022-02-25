@@ -2,7 +2,7 @@ from sqlalchemy import text
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 
-from db.types import base, email, multicurrency, uri
+from db.types import base, email, money, multicurrency, uri
 from db.types.exceptions import UnsupportedTypeException
 
 # DB type name strings
@@ -14,6 +14,7 @@ DOUBLE_PRECISION = base.PostgresType.DOUBLE_PRECISION.value
 FLOAT = base.PostgresType.FLOAT.value
 INTEGER = base.PostgresType.INTEGER.value
 INTERVAL = base.PostgresType.INTERVAL.value
+MONEY = base.PostgresType.MONEY.value
 NUMERIC = base.PostgresType.NUMERIC.value
 REAL = base.PostgresType.REAL.value
 SMALLINT = base.PostgresType.SMALLINT.value
@@ -26,8 +27,8 @@ VARCHAR = base.VARCHAR
 
 # custom types
 EMAIL = base.MathesarCustomType.EMAIL.value
+MATHESAR_MONEY = base.MathesarCustomType.MATHESAR_MONEY.value
 MULTICURRENCY_MONEY = base.MathesarCustomType.MULTICURRENCY_MONEY.value
-MONEY = base.PostgresType.MONEY.value
 TIME_WITHOUT_TIME_ZONE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
 TIME_WITH_TIME_ZONE = base.PostgresType.TIME_WITH_TIME_ZONE.value
 TIMESTAMP_WITH_TIME_ZONE = base.PostgresType.TIMESTAMP_WITH_TIME_ZONE.value
@@ -79,6 +80,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         VARCHAR: dialect_types.get(FULL_VARCHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),
+        MATHESAR_MONEY: dialect_types.get(money.DB_TYPE),
         MULTICURRENCY_MONEY: dialect_types.get(multicurrency.DB_TYPE),
         URI: dialect_types.get(uri.DB_TYPE),
     }
@@ -602,6 +604,57 @@ def _get_timestamp_without_timezone_type_body_map():
                 not_timestamp_without_tz_exception_str
             )
             for datetime_type in source_datetime_types
+        }
+    )
+    return type_body_map
+
+
+def _get_mathesar_money_type_body_map():
+    """
+    Get SQL strings that create various functions for casting different
+    types to money.
+    We allow casting any number type to money, assuming currency is same as the locale currency.
+    We allow casting any textual type to money with the text prefixed or suffixed with the locale currency.
+    """
+    default_behavior_source_types = [MONEY]
+    number_types = NUMBER_TYPES
+    textual_types = TEXT_TYPES
+    cast_loss_exception_str = (
+        f"RAISE EXCEPTION '% cannot be cast to {MONEY} as currency symbol is missing', $1;"
+    )
+
+    def _get_number_cast_to_money():
+        return f"""
+        BEGIN
+          RETURN $1::numeric::{MONEY};
+        END;
+        """
+
+    def _get_base_textual_cast_to_money():
+        return f"""
+        DECLARE currency {TEXT};
+        BEGIN
+          SELECT to_char(1, 'L') INTO currency;
+          IF ($1 LIKE '%' || currency) OR ($1 LIKE currency || '%') THEN
+            RETURN $1::{MONEY};
+          END IF;
+          {cast_loss_exception_str}
+        END;
+        """
+
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, MONEY,
+    )
+    type_body_map.update(
+        {
+            type_name: _get_number_cast_to_money()
+            for type_name in number_types
+        }
+    )
+    type_body_map.update(
+        {
+            type_name: _get_base_textual_cast_to_money()
+            for type_name in textual_types
         }
     )
     return type_body_map
