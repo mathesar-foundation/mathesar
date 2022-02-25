@@ -1,18 +1,6 @@
 from frozendict import frozendict
 
 
-def get_hints_with_id(db_function_subclass, id):
-    return tuple(
-        hint
-        for hint in db_function_subclass.hints
-        if is_hint_id_equal_to(hint, id)
-    )
-
-
-def is_hint_id_equal_to(hint, id):
-    return hint.get("id") == id
-
-
 def _make_hint(id, **rest):
     return frozendict({"id": id, **rest})
 
@@ -124,19 +112,3 @@ any = _make_hint("any")
 # When applied to a parameter, meant to suggest values for that parameter.
 def suggested_values(values):
     return _make_hint("suggested_values", hints=(not_applicable_to_types,), values=values)
-
-
-# This hints suggests that a type is a point in time
-point_in_time = _make_hint("point_in_time")
-
-
-# Specifies that under conditions suggested by the `when` hintset the passed `alias` should be
-# used instead of the default name. Useful, for example, for filters that you want to have
-# different display names depending on what it is operating on.
-def use_this_alias_when(alias, *when):
-    return _make_hint(
-        "use_this_alias_when",
-        alias=alias,
-        when=when,
-        hints=(not_applicable_to_types,),
-    )

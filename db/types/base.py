@@ -183,8 +183,8 @@ def _build_db_types_hinted():
     hints_for_numeric_db_types = (hints.comparable,)
     _add_to_db_type_hintsets(numeric_db_types, hints_for_numeric_db_types)
 
-    # point in time db types get the "point_in_time" hint
-    point_in_time_db_types = (
+    # time related types get the "comparable" hint
+    time_related_db_types = (
         PostgresType.DATE,
         PostgresType.TIME,
         PostgresType.TIME_WITH_TIME_ZONE,
@@ -192,13 +192,6 @@ def _build_db_types_hinted():
         PostgresType.TIMESTAMP,
         PostgresType.TIMESTAMP_WITH_TIME_ZONE,
         PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE,
-    )
-    hints_for_point_in_time_types = (hints.point_in_time,)
-    _add_to_db_type_hintsets(point_in_time_db_types, hints_for_point_in_time_types)
-
-    # time related types get the "comparable" hint
-    time_related_db_types = (
-        *point_in_time_db_types,
         PostgresType.INTERVAL,
     )
     hints_for_time_related_types = (hints.comparable,)

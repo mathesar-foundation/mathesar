@@ -151,7 +151,6 @@ class Equal(DBFunction):
         hints.parameter_count(2),
         hints.all_parameters(hints.any),
         hints.mathesar_filter,
-        hints.use_this_alias_when("is same as", hints.point_in_time),
     ])
 
     @staticmethod
@@ -167,7 +166,6 @@ class Greater(DBFunction):
         hints.parameter_count(2),
         hints.all_parameters(hints.comparable),
         hints.mathesar_filter,
-        hints.use_this_alias_when("is after", hints.point_in_time),
     ])
 
     @staticmethod
@@ -183,7 +181,6 @@ class Lesser(DBFunction):
         hints.parameter_count(2),
         hints.all_parameters(hints.comparable),
         hints.mathesar_filter,
-        hints.use_this_alias_when("is before", hints.point_in_time),
     ])
 
     @staticmethod
