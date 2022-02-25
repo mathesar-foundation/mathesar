@@ -50,7 +50,7 @@ def get_column_index_from_name(table_oid, column_name, engine, connection_to_use
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
         pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
-    result = get_columns_attnum_from_names(table_oid, [column_name], engine, connection_to_use)[0][0]
+    result = get_column_attnum_from_name(table_oid, column_name, engine, connection_to_use)
 
     # Account for dropped columns that don't appear in the SQLAlchemy tables
     sel = (

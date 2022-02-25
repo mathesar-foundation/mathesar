@@ -360,7 +360,7 @@ def test_column_default_create(engine_with_schema, col_type):
     table_oid = get_oid_from_table(table_name, schema, engine)
     column_attnum = get_column_attnum_from_name(table_oid, column_name, engine)
     with engine.begin() as conn:
-        set_column_default(table, column_attnum, engine, conn, set_default)
+        set_column_default(table, 0, engine, conn, set_default)
 
     default = get_column_default(table_oid, column_attnum, engine)
     created_default = get_default(engine, table)
@@ -384,7 +384,7 @@ def test_column_default_update(engine_with_schema, col_type):
     table_oid = get_oid_from_table(table_name, schema, engine)
     column_attnum = get_column_attnum_from_name(table_oid, column_name, engine)
     with engine.begin() as conn:
-        set_column_default(table, column_attnum, engine, conn, set_default)
+        set_column_default(table, 0, engine, conn, set_default)
     default = get_column_default(table_oid, column_attnum, engine)
     created_default = get_default(engine, table)
 
@@ -408,7 +408,7 @@ def test_column_default_delete(engine_with_schema, col_type):
     table_oid = get_oid_from_table(table_name, schema, engine)
     column_attnum = get_column_attnum_from_name(table_oid, column_name, engine)
     with engine.begin() as conn:
-        set_column_default(table, column_attnum, engine, conn, None)
+        set_column_default(table, 0, engine, conn, None)
     default = get_column_default(table_oid, column_attnum, engine)
     created_default = get_default(engine, table)
 

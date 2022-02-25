@@ -94,7 +94,7 @@ def compile_copy_column(element, compiler, **_):
 
 def _duplicate_column_data(table_oid, from_column, to_column, engine):
     table = reflect_table_from_oid(table_oid, engine)
-    from_column_attnum = get_column_attnum_from_name(table_oid, from_column, engine)
+    from_column_attnum = get_column_attnum_from_name(table_oid, table.c[from_column].name, engine)
     copy = CopyColumn(
         table.schema,
         table.name,

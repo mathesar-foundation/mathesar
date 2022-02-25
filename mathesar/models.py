@@ -364,7 +364,7 @@ class Constraint(DatabaseObject):
     def columns(self):
         column_names = [column.name for column in self._sa_constraint.columns]
         engine = self.table.schema.database._sa_engine
-        column_attnum_list = [result[0] for result in get_columns_attnum_from_names(self.table.oid, column_names, engine)]
+        column_attnum_list = [result for result in get_columns_attnum_from_names(self.table.oid, column_names, engine)]
         return Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
 
     def drop(self):

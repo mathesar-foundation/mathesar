@@ -13,7 +13,7 @@ from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_a
 from db.columns.exceptions import (
     DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError,
 )
-from db.columns.operations.select import get_columns_attnum_from_names
+from db.columns.operations.select import get_column_attnum_from_name, get_columns_attnum_from_names
 from db.types.exceptions import InvalidTypeParameters
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
@@ -29,7 +29,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
         table = get_table_or_404(pk=self.kwargs['table_pk'])
         sa_column_name = [column.name for column in table.sa_columns]
         column_attnum_list = [
-            result[0] for result in
+            result for result in
             get_columns_attnum_from_names(table.oid, sa_column_name, table.schema._sa_engine)
         ]
         return Column.objects.filter(table=table, attnum__in=column_attnum_list).order_by("attnum")
@@ -98,8 +98,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
                 )
         dj_column = Column(
             table=table,
-            attnum=get_columns_attnum_from_names(table.oid, [column.name], table.schema._sa_engine)[0][
-                0],
+            attnum=get_column_attnum_from_name(table.oid, column.name, table.schema._sa_engine),
             **serializer.validated_model_fields
         )
         dj_column.save()
