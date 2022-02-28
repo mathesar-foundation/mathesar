@@ -1,19 +1,14 @@
 from django.core.files import File
 import pytest
 from rest_framework.test import APIClient
-from sqlalchemy import Column, MetaData, text, Integer
-from sqlalchemy import Table as SATable
+from sqlalchemy import text
 
-from db.types import base, install
-from db.tables.operations.select import get_oid_from_table
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import create_table_from_csv
-from mathesar.models import Table, DataFile
+from mathesar.models import DataFile
 
 
 TEST_SCHEMA = 'import_csv_schema'
-PATENT_SCHEMA = 'Patents'
-NASA_TABLE = 'NASA Schema List'
 
 
 @pytest.fixture
@@ -41,35 +36,6 @@ def create_data_types_table(data_types_csv_filename, create_schema):
         schema_model = create_schema(schema)
         return create_table_from_csv(data_file, table_name, schema_model)
     return _create_table
-
-
-@pytest.fixture
-def patent_schema(test_db_model, create_schema):
-    engine = create_mathesar_engine(test_db_model.name)
-    install.install_mathesar_on_database(engine)
-    with engine.begin() as conn:
-        conn.execute(text(f'DROP SCHEMA IF EXISTS "{PATENT_SCHEMA}" CASCADE;'))
-    yield create_schema(PATENT_SCHEMA)
-    with engine.begin() as conn:
-        conn.execute(text(f'DROP SCHEMA {base.SCHEMA} CASCADE;'))
-
-
-@pytest.fixture
-def empty_nasa_table(patent_schema):
-    engine = create_mathesar_engine(patent_schema.database.name)
-    db_table = SATable(
-        NASA_TABLE, MetaData(bind=engine),
-        Column('id', Integer, primary_key=True),
-        schema=patent_schema.name,
-    )
-    db_table.create()
-    db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
-
-    yield table
-
-    table.delete_sa_table()
-    table.delete()
 
 
 @pytest.fixture

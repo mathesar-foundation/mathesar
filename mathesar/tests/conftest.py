@@ -1,16 +1,25 @@
-from django.core.files import File
 """
 This inherits the fixtures in the root conftest.py
 """
 import pytest
 
-from sqlalchemy import text
+from django.core.files import File
 
+from sqlalchemy import Column, MetaData, text, Integer
+from sqlalchemy import Table as SATable
+
+from db.types import base, install
 from db.schemas.operations.create import create_schema as create_sa_schema
 from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
+from db.tables.operations.select import get_oid_from_table
+
+from mathesar.models import Schema, Table, Database, DataFile
+from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import create_table_from_csv
-from mathesar.models import Database
-from mathesar.models import Schema, DataFile
+
+
+PATENT_SCHEMA = 'Patents'
+NASA_TABLE = 'NASA Schema List'
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -119,6 +128,35 @@ def create_schema(engine, test_db_model):
         schema = get_schema_name_from_oid(oid, engine)
         with engine.begin() as conn:
             conn.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE;'))
+
+
+@pytest.fixture
+def patent_schema(test_db_model, create_schema):
+    engine = create_mathesar_engine(test_db_model.name)
+    install.install_mathesar_on_database(engine)
+    with engine.begin() as conn:
+        conn.execute(text(f'DROP SCHEMA IF EXISTS "{PATENT_SCHEMA}" CASCADE;'))
+    yield create_schema(PATENT_SCHEMA)
+    with engine.begin() as conn:
+        conn.execute(text(f'DROP SCHEMA {base.SCHEMA} CASCADE;'))
+
+
+@pytest.fixture
+def empty_nasa_table(patent_schema):
+    engine = create_mathesar_engine(patent_schema.database.name)
+    db_table = SATable(
+        NASA_TABLE, MetaData(bind=engine),
+        Column('id', Integer, primary_key=True),
+        schema=patent_schema.name,
+    )
+    db_table.create()
+    db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
+    table = Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+
+    yield table
+
+    table.delete_sa_table()
+    table.delete()
 
 
 @pytest.fixture

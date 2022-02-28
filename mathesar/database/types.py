@@ -152,7 +152,7 @@ def get_ma_types_mapped_to_hintsets(engine):
         # TODO
         ma_type = get_ma_type_enum_from_id(ma_type_description['identifier'])
         associated_db_type_descriptions = ma_type_description['db_types']
-        associated_db_types = (
+        associated_db_types = tuple(
             # TODO why is db_type_descriptions a list that seems to always have one element?
             get_db_type_enum_from_id(db_type_descriptions[0]["sa_type_name"])
             for _db_type_id, db_type_descriptions in associated_db_type_descriptions.items()
