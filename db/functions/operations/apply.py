@@ -1,6 +1,6 @@
 from db.functions.base import DBFunction
 from db.functions.exceptions import ReferencedColumnsDontExist
-from db.functions.redundant import RedundantDBFunction
+from db.functions.packed import DBFunctionPacked
 from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
 
 
@@ -39,7 +39,7 @@ def _db_function_to_sa_expression(db_function_or_literal):
     DBFunctions), and turns it into an SQLAlchemy expression. Each parameter is expected to either
     be a DBFunction instance or a literal primitive.
     """
-    if isinstance(db_function_or_literal, RedundantDBFunction):
+    if isinstance(db_function_or_literal, DBFunctionPacked):
         db_function = db_function_or_literal
         unpacked_db_function = db_function.unpack()
         return _db_function_to_sa_expression(unpacked_db_function)

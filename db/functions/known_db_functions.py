@@ -9,7 +9,7 @@ These variables were broken off into a discrete module to avoid circular imports
 import inspect
 
 import db.functions.base
-import db.functions.redundant
+import db.functions.packed
 import db.types.uri
 import db.types.email
 
@@ -41,7 +41,7 @@ def _is_concrete_db_function_subclass(member):
 
 _modules_to_search_in = tuple([
     db.functions.base,
-    db.functions.redundant,
+    db.functions.packed,
     db.types.uri,
     db.types.email,
 ])
