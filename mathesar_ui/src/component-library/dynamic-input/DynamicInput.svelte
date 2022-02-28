@@ -50,13 +50,5 @@
 {:else if dataType === 'integer' || dataType === 'float'}
   <NumberInput {...$$restProps} isInteger={dataType === 'integer'} bind:value />
 {:else if dataType === 'string'}
-  <StringInput
-    {...$$restProps}
-    {interfaceType}
-    bind:value
-    on:update
-    on:specialKeyDown
-    on:focusIn
-    on:focusOut
-  />
+  <StringInput {...$$restProps} {interfaceType} bind:value />
 {/if}
