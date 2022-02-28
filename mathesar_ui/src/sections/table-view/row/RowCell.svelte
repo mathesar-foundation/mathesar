@@ -2,7 +2,6 @@
   import { tick } from 'svelte';
   import {
     isCellActive,
-    isCellBeingEdited,
     scrollBasedOnActiveCell,
   } from '@mathesar/stores/table-data';
   import type {
@@ -23,8 +22,6 @@
 
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
-  $: isBeingEdited =
-    !!$activeCell && isCellBeingEdited($activeCell, row, column);
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -62,7 +59,6 @@
 <div
   class="cell editable-cell"
   class:is-active={isActive}
-  class:is-in-edit={isBeingEdited}
   class:readonly={column.primary_key}
   style="
       width:{columnPosition?.width ?? 0}px;
@@ -84,15 +80,6 @@
     user-select: none;
     overflow: hidden;
     background-color: #fff;
-
-    .loader {
-      top: 6px;
-      left: 15px;
-      right: 15px;
-      bottom: 6px;
-      position: absolute;
-      background: #efefef;
-    }
 
     &.is-active {
       z-index: 5;
