@@ -61,6 +61,9 @@ string_like = _make_hint("string_like")
 uri = _make_hint("uri")
 
 
+email = _make_hint("email")
+
+
 literal = _make_hint("literal")
 
 

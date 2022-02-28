@@ -16,6 +16,8 @@ def test_available_filters_structure(empty_nasa_table):
         'starts_with_case_insensitive',
         'uri_authority_contains',
         'uri_scheme_equals',
+        'email_domain_contains',
+        'email_domain_equals',
     ]
     expected_filters_are_available = set.issubset(
         set(some_filters_that_we_expect_to_be_there),

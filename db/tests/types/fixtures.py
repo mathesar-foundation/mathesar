@@ -58,5 +58,22 @@ def uris_table_obj(engine_with_uris, uris_table_name):
             uri_type_id,
         )
     yield table, engine
+
+
+@pytest.fixture
+def roster_table_obj(engine_with_roster, roster_table_name):
+    engine, schema = engine_with_roster
+    metadata = MetaData(bind=engine)
+    table = Table(roster_table_name, metadata, schema=schema, autoload_with=engine)
+    # Cast "uri" column from string to URI
     with engine.begin() as conn:
-        conn.execute(DropSchema(base.SCHEMA, cascade=True, if_exists=True))
+        email_column_name = "Teacher Email"
+        email_type_id = "email"
+        alter_column_type(
+            table,
+            email_column_name,
+            engine,
+            conn,
+            email_type_id,
+        )
+    yield table, engine

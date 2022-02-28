@@ -11,6 +11,7 @@ import inspect
 import db.functions.base
 import db.functions.redundant
 import db.types.uri
+import db.types.email
 
 from db.functions.base import DBFunction
 
@@ -41,7 +42,8 @@ def _is_concrete_db_function_subclass(member):
 _modules_to_search_in = tuple([
     db.functions.base,
     db.functions.redundant,
-    db.types.uri
+    db.types.uri,
+    db.types.email,
 ])
 
 
