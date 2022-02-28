@@ -28,17 +28,6 @@ def create_data_file():
 
 
 @pytest.fixture
-def create_table(csv_filename, create_schema):
-    with open(csv_filename, 'rb') as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file))
-
-    def _create_table(table_name, schema='Patents'):
-        schema_model = create_schema(schema)
-        return create_table_from_csv(data_file, table_name, schema_model)
-    return _create_table
-
-
-@pytest.fixture
 def create_data_types_table(data_types_csv_filename, create_schema):
     with open(data_types_csv_filename, 'rb') as csv_file:
         data_file = DataFile.objects.create(file=File(csv_file))
