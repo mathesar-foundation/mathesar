@@ -179,7 +179,7 @@ class URIAuthorityContains(RedundantDBFunction):
 
 class URISchemeEquals(RedundantDBFunction):
     id = 'uri_scheme_equals'
-    name = 'URI scheme equals'
+    name = 'URI scheme is'
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
