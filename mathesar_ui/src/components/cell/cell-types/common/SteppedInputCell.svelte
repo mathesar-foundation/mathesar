@@ -100,6 +100,7 @@
   class="cell-wrapper {classes}"
   class:is-edit-mode={isEditMode}
   class:is-active={isActive}
+  class:readonly
   bind:this={cellRef}
   on:dblclick={setModeToEdit}
   on:keydown={handleKeyDown}
@@ -137,6 +138,7 @@
 
     &.is-edit-mode {
       padding: 0px;
+      box-shadow: 0 0 0 3px #428af4 !important;
     }
 
     &:not(.is-active) {

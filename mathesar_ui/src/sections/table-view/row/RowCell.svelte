@@ -62,7 +62,6 @@
 <div
   class="cell editable-cell"
   class:is-active={isActive}
-  class:readonly={column.primary_key}
   style="
       width:{columnPosition?.width ?? 0}px;
       left:{columnPosition?.left ?? 0}px;
@@ -82,21 +81,14 @@
 <style lang="scss">
   .editable-cell.cell {
     user-select: none;
-    overflow: hidden;
     background-color: #fff;
 
     &.is-active {
       z-index: 5;
       background: #fff !important;
-      box-shadow: 0 0 0 2px #428af4;
-      border-radius: 2px;
       border: none;
       min-height: 100%;
       height: auto !important;
-
-      &.readonly {
-        box-shadow: 0 0 0 2px #a8a8a8;
-      }
     }
   }
 </style>

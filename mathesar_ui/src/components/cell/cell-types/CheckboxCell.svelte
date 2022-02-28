@@ -76,6 +76,7 @@
 <div
   class="cell-wrapper"
   class:is-active={isActive}
+  class:readonly
   bind:this={cellRef}
   on:keydown={handleWrapperKeyDown}
   on:click={checkAndToggle}

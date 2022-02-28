@@ -37,11 +37,12 @@
 <style lang="scss">
   .sheet-cell,
   .sheet-cell :global(.cell-wrapper) {
-    overflow: hidden;
     position: relative;
     display: flex;
     flex: 1 1 auto;
     min-height: 29px;
+    align-items: center;
+    width: 100%;
   }
 
   .sheet-cell {
@@ -56,12 +57,22 @@
   }
 
   .sheet-cell :global(.cell-wrapper) {
+    overflow: hidden;
     padding: 6px 8px;
+  }
 
-    &:not(.is-active) {
-      // This needs to be based on row height!
-      height: 29px;
-      max-height: 29px;
-    }
+  .sheet-cell :global(.cell-wrapper:not(.is-active)) {
+    // This needs to be based on row height!
+    height: 29px;
+    max-height: 29px;
+  }
+
+  .sheet-cell :global(.cell-wrapper.is-active) {
+    box-shadow: 0 0 0 2px #428af4;
+    border-radius: 2px;
+  }
+
+  .sheet-cell :global(.cell-wrapper.is-active.readonly) {
+    box-shadow: 0 0 0 2px #a8a8a8;
   }
 </style>
