@@ -30,11 +30,11 @@ def test_increment_pagination(page, go_to_patents_data_table):
 def test_edit_cell(page, go_to_patents_data_table):
     row = page.locator(".row:has-text('ARC-14231-3')")
     cell = row.locator(".cell:has-text('Issued') .cell-wrapper")
-    input = cell.locator("input")
+    input = cell.locator("textarea")
     all_changes_saved = page.locator("text=All changes saved")
     cell.dblclick()
     input.fill("TEST")
-    page.keyboard.press("Enter")
+    page.keyboard.press("Escape")
     expect(all_changes_saved).to_be_visible()
     expect(row).to_have_class(re.compile("updated"))
 
