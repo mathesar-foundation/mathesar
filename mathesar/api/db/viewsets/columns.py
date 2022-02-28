@@ -171,7 +171,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
         column_instance = self.get_object()
         table = column_instance.table
         try:
-            table.drop_column(column_instance.column_index)
+            table.drop_column(column_instance.attnum)
             column_instance.delete()
         except IndexError:
             raise NotFound
