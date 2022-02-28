@@ -1,5 +1,6 @@
 from db.functions.base import DBFunction
 from db.functions.exceptions import ReferencedColumnsDontExist
+from db.functions.redundant import RedundantDBFunction
 from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
 
 
@@ -32,19 +33,25 @@ def _get_columns_that_exist(relation):
     return set(column.name for column in columns)
 
 
-def _db_function_to_sa_expression(db_function):
+def _db_function_to_sa_expression(db_function_or_literal):
     """
-    Takes a DBFunction, looks at the tree of its parameters (and the parameters of nested
+    Takes a DBFunction instance, looks at the tree of its parameters (and the parameters of nested
     DBFunctions), and turns it into an SQLAlchemy expression. Each parameter is expected to either
     be a DBFunction instance or a literal primitive.
     """
-    if isinstance(db_function, DBFunction):
+    if isinstance(db_function_or_literal, RedundantDBFunction):
+        db_function = db_function_or_literal
+        unpacked_db_function = db_function.unpack()
+        return _db_function_to_sa_expression(unpacked_db_function)
+    elif isinstance(db_function_or_literal, DBFunction):
+        db_function = db_function_or_literal
         raw_parameters = db_function.parameters
-        parameters = [
+        sa_expression_parameters = [
             _db_function_to_sa_expression(raw_parameter)
             for raw_parameter in raw_parameters
         ]
         db_function_subclass = type(db_function)
-        return db_function_subclass.to_sa_expression(*parameters)
+        return db_function_subclass.to_sa_expression(*sa_expression_parameters)
     else:
-        return db_function
+        literal = db_function_or_literal
+        return literal

@@ -182,6 +182,10 @@ class Table(DatabaseObject):
         super().save(*args, **kwargs)
 
     @cached_property
+    def _sa_engine(self):
+        return self.schema._sa_engine
+
+    @cached_property
     def _sa_table(self):
         try:
             table = reflect_table_from_oid(

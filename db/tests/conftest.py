@@ -1,10 +1,12 @@
 import os
 
 import pytest
-from sqlalchemy import MetaData, text
+from sqlalchemy import MetaData, text, Table
 
 from db import constants, types
 from db.tables.operations.split import extract_columns_from_table
+from db.engine import _add_custom_types_to_engine
+from db.types import install
 
 
 APP_SCHEMA = "test_schema"
@@ -12,6 +14,7 @@ APP_SCHEMA = "test_schema"
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "resources")
 ROSTER_SQL = os.path.join(RESOURCES, "roster_create.sql")
+URIS_SQL = os.path.join(RESOURCES, "uris_create.sql")
 FILTER_SORT_SQL = os.path.join(RESOURCES, "filter_sort_create.sql")
 
 
@@ -35,6 +38,17 @@ def engine_with_roster(engine_with_schema):
 
 
 @pytest.fixture
+def engine_with_uris(engine_with_schema):
+    engine, schema = engine_with_schema
+    _add_custom_types_to_engine(engine)
+    install.install_mathesar_on_database(engine)
+    with engine.begin() as conn, open(URIS_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    return engine, schema
+
+
+@pytest.fixture
 def engine_with_filter_sort(engine_with_schema):
     engine, schema = engine_with_schema
     engine.dialect.ischema_names.update(types.CUSTOM_TYPE_DICT)
@@ -47,6 +61,11 @@ def engine_with_filter_sort(engine_with_schema):
 @pytest.fixture(scope='session')
 def roster_table_name():
     return "Roster"
+
+
+@pytest.fixture(scope='session')
+def uris_table_name():
+    return "uris"
 
 
 @pytest.fixture(scope='session')
@@ -86,3 +105,11 @@ def extracted_remainder_roster(engine_with_roster, roster_table_name, roster_ext
     roster_no_teachers = metadata.tables[f"{schema}.{roster_no_teachers_table_name}"]
     roster = metadata.tables[f"{schema}.{roster_table_name}"]
     return teachers, roster_no_teachers, roster, engine, schema
+
+
+@pytest.fixture
+def roster_table_obj(engine_with_roster, roster_table_name):
+    engine, schema = engine_with_roster
+    metadata = MetaData(bind=engine)
+    roster = Table(roster_table_name, metadata, schema=schema, autoload_with=engine)
+    return roster, engine

@@ -4,7 +4,10 @@ import pytest
 from db.utils import execute_query
 
 from db.functions.base import (
-    ColumnName, Not, Literal, Empty, Equal, Greater, And, Or
+    ColumnName, Not, Literal, Empty, Equal, Greater, And, Or, StartsWith, Contains, StartsWithCaseInsensitive, ContainsCaseInsensitive
+)
+from db.functions.redundant import (
+    GreaterOrEqual, LesserOrEqual
 )
 from db.functions.operations.apply import apply_db_function_as_filter
 
@@ -25,6 +28,10 @@ database_functions = {
     "and": lambda x: And(x),
     "or": lambda x: Or(x),
     "not": lambda x: Not(x),
+    "ge": lambda x, v: GreaterOrEqual([ColumnName([x]), Literal([v])]),
+    "le": lambda x, v: LesserOrEqual([ColumnName([x]), Literal([v])]),
+    "starts_with": lambda x, v: StartsWith([ColumnName([x]), Literal([v])]),
+    "contains": lambda x, v: Contains([ColumnName([x]), Literal([v])]),
 }
 
 
@@ -46,11 +53,18 @@ op_to_python_func = {
     "not_any": lambda x, v: v not in x,
     "and": lambda x: all(x),
     "or": lambda x: any(x),
-    "not": lambda x: not x[0]
+    "not": lambda x: not x[0],
+    "starts_with": lambda x, v: x.startswith(v),
+    "contains": lambda x, v: v in x,
 }
 
 
+# Table can be examined in db/tests/resources/filter_sort_create.sql
 ops_test_list = [
+    # starts_with
+    ("varchar", "starts_with", "string9", 11),
+    # contains
+    ("varchar", "contains", "g9", 11),
     # is_null
     ("varchar", "is_null", None, 5),
     ("numeric", "is_null", None, 5),
@@ -69,7 +83,15 @@ ops_test_list = [
     # gt
     ("varchar", "gt", "string0", 100),
     ("numeric", "gt", 50, 50),
-    ("date", "gt", "2000-01-01", 99),
+    ("date", "gt", "2000-01-01 AD", 99),
+    # ge
+    ("varchar", "ge", "string1", 100),
+    ("numeric", "ge", 50, 51),
+    ("date", "ge", "2000-01-01 AD", 100),
+    # le
+    ("varchar", "le", "string2", 13),
+    ("numeric", "le", 51, 51),
+    ("date", "le", "2099-01-01 AD", 100),
 ]
 
 
@@ -98,7 +120,8 @@ def test_filter_with_db_functions(
     assert len(record_list) == res_len
     for record in record_list:
         val_func = op_to_python_func[op]
-        assert val_func(getattr(record, column_name), value)
+        actual_value = getattr(record, column_name)
+        assert val_func(actual_value, value)
 
 
 boolean_ops_test_list = [
@@ -166,3 +189,21 @@ def test_filtering_nested_boolean_ops(filter_sort_table_obj):
     for record in record_list:
         assert ((record.varchar == "string24" or record.numeric == 42)
                 and (record.varchar == "string42" or record.numeric == 24))
+
+
+@pytest.mark.parametrize("column_name,main_db_function,literal_param,expected_count", [
+    ("Student Name", StartsWithCaseInsensitive, "stephanie", 15),
+    ("Student Name", StartsWith, "stephanie", 0),
+    ("Student Name", ContainsCaseInsensitive, "JUAREZ", 5),
+    ("Student Name", Contains, "juarez", 0),
+])
+def test_case_insensitive_filtering(roster_table_obj, column_name, main_db_function, literal_param, expected_count):
+    table, engine = roster_table_obj
+    selectable = table.select()
+    db_function = main_db_function([
+        ColumnName([column_name]),
+        Literal([literal_param]),
+    ])
+    query = apply_db_function_as_filter(selectable, db_function)
+    record_list = execute_query(engine, query)
+    assert len(record_list) == expected_count
