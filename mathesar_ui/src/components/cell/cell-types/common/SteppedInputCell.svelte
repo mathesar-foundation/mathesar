@@ -50,6 +50,12 @@
         resetEditMode();
         break;
       case 'Tab':
+        resetEditMode();
+        dispatch('movementKeyDown', {
+          originalEvent: e,
+          key: e.key,
+        });
+        break;
       case 'ArrowLeft':
       case 'ArrowRight':
       case 'ArrowDown':
