@@ -21,10 +21,10 @@
     formConfig: AbstractTypeDbConfigOptions['configuration']['form'],
     typeDefaults: Record<string, Record<string, FormInputDataType>>,
   ): FormBuildConfiguration {
-    if (selectedDbType && typeDefaults?.[selectedDbType]) {
+    if (selectedDbType && typeDefaults[selectedDbType]) {
       return makeForm(formConfig, {
         ...typeDefaults[selectedDbType],
-        ...typeOptions,
+        ...(typeOptions || {}),
       });
     }
     return makeForm(formConfig, typeOptions || {});

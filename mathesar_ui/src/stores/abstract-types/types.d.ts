@@ -2,7 +2,6 @@ import type {
   FormConfiguration,
   FormConfigurationVariable,
   FormInputDataType,
-  DynamicInputType,
   Rule,
 } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/App.d';
@@ -48,7 +47,7 @@ export interface AbstractTypeConfiguration {
   defaultDbType?: DbType;
   icon: string;
   input: {
-    type: DynamicInputType;
+    type: string;
     conditionalProps?: Record<DbType, ConditionalPropsForDbType>;
   };
   typeSwitchOptions?: {

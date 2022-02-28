@@ -20,6 +20,7 @@ export interface Column {
   name: string;
   type: DbType;
   type_options: Record<string, string | number | boolean | undefined> | null;
+  display_options: Record<string, unknown>;
   index: number;
   nullable: boolean;
   primary_key: boolean;

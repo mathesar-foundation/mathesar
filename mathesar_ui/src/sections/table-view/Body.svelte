@@ -38,8 +38,6 @@
 
   $: void resetIndex($displayableRecords);
 
-  let bodyRef: HTMLDivElement;
-
   function getItemSize(index: number) {
     const defaultRowHeight = 30;
     const allRecords = get(displayableRecords);
@@ -51,8 +49,22 @@
     return defaultRowHeight;
   }
 
-  function checkAndResetActiveCell(event: Event) {
-    if (!bodyRef.contains(event.target as HTMLElement)) {
+  function checkAndResetActiveCell(e: Event) {
+    const target = e.target as HTMLElement;
+    const targetMissing = !document.body.contains(target);
+    let clearActiveCell = false;
+
+    if (targetMissing) {
+      const focusedElementNotWithinEditableCell =
+        !document.activeElement ||
+        !document.activeElement.closest('.editable-cell');
+      clearActiveCell = focusedElementNotWithinEditableCell;
+    } else {
+      const targetNotWithinEditableCell = !target.closest('.editable-cell');
+      clearActiveCell = targetNotWithinEditableCell;
+    }
+
+    if (clearActiveCell) {
       display.resetActiveCell();
     }
   }
@@ -63,7 +75,7 @@
   on:mousedown={checkAndResetActiveCell}
 />
 
-<div bind:this={bodyRef} class="body" tabindex="-1">
+<div class="body" tabindex="-1">
   <Resizer let:height>
     {#key id}
       <VirtualList

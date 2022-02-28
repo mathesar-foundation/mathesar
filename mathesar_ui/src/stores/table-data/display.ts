@@ -266,43 +266,6 @@ export class Display {
       return 'moved';
     }
 
-    if (key === 'Tab' && activeCell?.type === 'edit') {
-      this.activeCell.update((existing) => {
-        if (!existing) {
-          return undefined;
-        }
-        const newActiveCell = { ...existing };
-        if (existing.columnIndex < columns.length - 1) {
-          newActiveCell.columnIndex += 1;
-        }
-        return newActiveCell;
-      });
-      return 'moved';
-    }
-
-    if (key === 'Enter') {
-      if (activeCell?.type === 'select') {
-        if (!columns[activeCell.columnIndex]?.primary_key) {
-          this.activeCell.update((existing) =>
-            existing ? { ...existing, type: 'edit' } : undefined,
-          );
-          return 'changed';
-        }
-      } else if (activeCell?.type === 'edit') {
-        this.activeCell.update((existing) =>
-          existing ? { ...existing, type: 'select' } : undefined,
-        );
-        return 'changed';
-      }
-    }
-
-    if (key === 'Escape' && activeCell?.type === 'edit') {
-      this.activeCell.update((existing) =>
-        existing ? { ...existing, type: 'select' } : undefined,
-      );
-      return 'changed';
-    }
-
     return undefined;
   }
 
