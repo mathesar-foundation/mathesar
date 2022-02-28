@@ -623,7 +623,25 @@ def _get_mathesar_money_type_body_map():
         f"RAISE EXCEPTION '% cannot be cast to {MONEY} as currency symbol is missing', $1;"
     )
 
-    ismoney_regex = '(^([^.,0-9]+)([0-9]*|[0-9]{1,3}([, ][0-9]{3})*)([.,]([0-9]{1,2}|[0-9]{4,}))?([^.,0-9]+)?$|^([^.,0-9]+)?([0-9]*|[0-9]{1,3}([, ][0-9]{3})*)([.,]([0-9]{1,2}|[0-9]{4,}))?([^.,0-9]+)$)'
+    scratch_function = """
+    CREATE OR REPLACE FUNCTION get_money(text) RETURNS text[]
+    AS $$
+      DECLARE
+        raw_arr text[];
+        group_divider_arr text[];
+        decimal_point_arr text[];
+        group_divider text;
+        decimal_point text;
+      BEGIN
+        SELECT regexp_matches($1, '^((?:[^.,0-9]+)(?:[0-9]{4,}(?:([,.])[0-9]+)?|[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?|[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+|[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+|[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?|[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?|[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?)(?:[^.,0-9]+)?|(?:[^.,0-9]+)?(?:[0-9]{4,}(?:([,.])[0-9]+)?|[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?|[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+|[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+|[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?|[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?|[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?)(?:[^.,0-9]+))$') INTO raw_arr;
+        SELECT array_remove(ARRAY[raw_arr[4],raw_arr[6],raw_arr[8],raw_arr[10],raw_arr[12],raw_arr[16],raw_arr[18],raw_arr[20],raw_arr[22],raw_arr[24]], null) INTO group_divider_arr;
+        SELECT array_remove(ARRAY[raw_arr[2],raw_arr[3],raw_arr[5],raw_arr[7],raw_arr[9],raw_arr[11],raw_arr[13],raw_arr[14],raw_arr[15],raw_arr[17],raw_arr[19],raw_arr[21],raw_arr[23],raw_arr[25]], null) INTO decimal_point_arr;
+        SELECT group_divider_arr[1] INTO group_divider;
+        SELECT decimal_point_arr[1] INTO decimal_point;
+        RETURN ARRAY[raw_arr[1], group_divider, decimal_point];
+      END;
+    $$ LANGUAGE plpgsql;
+    """
 
     def _get_number_cast_to_money():
         return f"""
