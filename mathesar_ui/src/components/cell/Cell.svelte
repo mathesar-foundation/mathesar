@@ -7,6 +7,7 @@
   export let column: Column;
   export let value: unknown;
   export let isActive = false;
+  export let state: 'loading' | 'error' | 'ready' = 'ready';
 
   // TODO (IMPORTANT): Calculate this at a higher level, instead of calculating on each cell instance
   $: [cellComponent, cellProps] = getCellComponentWithProps(column);
@@ -27,6 +28,10 @@
     on:activate
     on:update
   />
+
+  {#if state === 'loading'}
+    <div class='loader'/>
+  {/if}
 </div>
 
 <style lang="scss">
@@ -37,6 +42,17 @@
     display: flex;
     flex: 1 1 auto;
     min-height: 29px;
+  }
+
+  .sheet-cell {
+    .loader {
+      top: 6px;
+      left: 8px;
+      right: 8px;
+      bottom: 6px;
+      position: absolute;
+      background: #efefef;
+    }
   }
 
   .sheet-cell :global(.cell-wrapper) {

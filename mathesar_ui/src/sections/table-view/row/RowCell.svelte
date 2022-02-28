@@ -22,6 +22,9 @@
 
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
+  $: isLoading = !row.__state || row.__state === 'loading';
+
+  // TODO: Set individual cell states and errors in recordsData
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -69,6 +72,7 @@
     {column}
     {isActive}
     {value}
+    state={isLoading ? 'loading' : 'ready'}
     on:movementKeyDown={moveThroughCells}
     on:activate={() => display.selectCell(row, column)}
     on:update={valueUpdated}
