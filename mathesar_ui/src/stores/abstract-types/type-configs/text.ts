@@ -117,14 +117,6 @@ const textType: AbstractTypeConfiguration = {
   },
   input: {
     type: 'string',
-    conditionalProps: {
-      TEXT: {
-        size: 'large',
-      },
-      VARCHAR: {
-        size: 'auto',
-      },
-    },
   },
 };
 
