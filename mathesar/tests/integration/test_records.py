@@ -29,7 +29,7 @@ def test_increment_pagination(page, go_to_patents_data_table):
 
 def test_edit_cell(page, go_to_patents_data_table):
     row = page.locator(".row:has-text('ARC-14231-3')")
-    cell = row.locator(".cell:has-text('Issued')")
+    cell = row.locator(".cell:has-text('Issued') .cell-wrapper")
     input = cell.locator("input")
     all_changes_saved = page.locator("text=All changes saved")
     cell.dblclick()
