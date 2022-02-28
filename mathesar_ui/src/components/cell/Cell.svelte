@@ -30,7 +30,7 @@
   />
 
   {#if state === 'loading'}
-    <div class='loader'/>
+    <div class="loader" />
   {/if}
 </div>
 

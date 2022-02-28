@@ -203,9 +203,7 @@ export class Display {
     }
   }
 
-  handleKeyEventsOnActiveCell(
-    key: KeyboardEvent['key'],
-  ): 'moved' | undefined {
+  handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | undefined {
     const { columns } = this.columnsDataStore.get();
     const totalCount = get(this.recordsData.totalCount);
     const savedRecords = get(this.recordsData.savedRecords);
