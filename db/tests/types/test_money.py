@@ -37,6 +37,6 @@ def test_money_type_column_reflection(engine_email_type):
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table("test_table", metadata, autoload_with=conn)
-    expect_cls = money.Money
+    expect_cls = money.MathesarMoney
     actual_cls = reflect_table.columns["money_col"].type.__class__
     assert actual_cls == expect_cls

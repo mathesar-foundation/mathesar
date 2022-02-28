@@ -623,6 +623,8 @@ def _get_mathesar_money_type_body_map():
         f"RAISE EXCEPTION '% cannot be cast to {MONEY} as currency symbol is missing', $1;"
     )
 
+    ismoney_regex = '(^([^.,0-9]+)([0-9]*|[0-9]{1,3}([, ][0-9]{3})*)([.,]([0-9]{1,2}|[0-9]{4,}))?([^.,0-9]+)?$|^([^.,0-9]+)?([0-9]*|[0-9]{1,3}([, ][0-9]{3})*)([.,]([0-9]{1,2}|[0-9]{4,}))?([^.,0-9]+)$)'
+
     def _get_number_cast_to_money():
         return f"""
         BEGIN
