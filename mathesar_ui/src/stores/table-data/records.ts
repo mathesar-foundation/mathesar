@@ -6,7 +6,6 @@ import {
   patchAPI,
   postAPI,
 } from '@mathesar/utils/api';
-import { TabularType } from '@mathesar/App.d';
 import type { Writable, Unsubscriber } from 'svelte/store';
 import type { CancellablePromise } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/App.d';
@@ -17,9 +16,36 @@ import type {
   Grouping as ApiGrouping,
   ResultValue,
   GroupingMode,
+  GetRequestParams as ApiGetRequestParams,
 } from '@mathesar/api/tables/records';
 import type { Meta } from './meta';
 import type { ColumnsDataStore, Column } from './columns';
+import type { Pagination } from './pagination';
+import type { Sorting } from './sorting';
+import type { Grouping as GroupingTODORename } from './grouping';
+import type { Filtering } from './filtering';
+import { TabularType } from './TabularType';
+
+export interface RecordsRequestParamsData {
+  pagination: Pagination;
+  sorting: Sorting;
+  grouping: GroupingTODORename;
+  filtering: Filtering;
+}
+
+function buildFetchQueryString(data: RecordsRequestParamsData): string {
+  const params: ApiGetRequestParams = {
+    ...data.pagination.recordsRequestParams(),
+    ...data.sorting.recordsRequestParamsIncludingGrouping(data.grouping),
+    ...data.grouping.recordsRequestParams(),
+    ...data.filtering.recordsRequestParams(),
+  };
+  const entries: [string, string][] = Object.entries(params).map(([k, v]) => {
+    const value = typeof v === 'string' ? v : JSON.stringify(v);
+    return [k, value];
+  });
+  return new URLSearchParams(entries).toString();
+}
 
 export interface Group {
   count: number;
@@ -242,11 +268,10 @@ export class RecordsData {
     void this.fetch();
 
     // TODO: Create base class to abstract subscriptions and unsubscriptions
-    this.requestParamsUnsubscriber = this.meta.recordRequestParams.subscribe(
-      () => {
+    this.requestParamsUnsubscriber =
+      this.meta.recordsRequestParamsData.subscribe(() => {
         void this.fetch();
-      },
-    );
+      });
     this.columnPatchUnsubscriber = this.columnsDataStore.on(
       'columnPatched',
       () => this.fetch(),
@@ -257,11 +282,11 @@ export class RecordsData {
     retainExistingRows = false,
   ): Promise<TableRecordsData | undefined> {
     this.promise?.cancel();
-    const offset = getStoreValue(this.meta.offset);
+    const { offset } = getStoreValue(this.meta.pagination);
 
     this.savedRecords.update((existingData) => {
       let data = [...existingData];
-      data.length = getStoreValue(this.meta.pageSize);
+      data.length = getStoreValue(this.meta.pagination).size;
 
       let index = -1;
       data = data.map((entry) => {
@@ -285,8 +310,9 @@ export class RecordsData {
     }
 
     try {
-      const params = getStoreValue(this.meta.recordRequestParams);
-      this.promise = getAPI<ApiRecordsResponse>(`${this.url}?${params ?? ''}`);
+      const params = getStoreValue(this.meta.recordsRequestParamsData);
+      const queryString = buildFetchQueryString(params);
+      this.promise = getAPI<ApiRecordsResponse>(`${this.url}?${queryString}`);
       const response = await this.promise;
       const totalCount = response.count || 0;
       const grouping = response.grouping
@@ -339,7 +365,7 @@ export class RecordsData {
         await Promise.all(promises);
         await this.fetch(true);
 
-        const offset = getStoreValue(this.meta.offset);
+        const { offset } = getStoreValue(this.meta.pagination);
         const savedRecords = getStoreValue(this.savedRecords);
         const savedRecordsLength = savedRecords?.length || 0;
 
@@ -439,7 +465,7 @@ export class RecordsData {
   }
 
   getNewEmptyRecord(): TableRecord {
-    const offset = getStoreValue(this.meta.offset);
+    const { offset } = getStoreValue(this.meta.pagination);
     const savedRecords = getStoreValue(this.savedRecords);
     const savedRecordsLength = savedRecords?.length || 0;
     const existingNewRecords = getStoreValue(this.newRecords);

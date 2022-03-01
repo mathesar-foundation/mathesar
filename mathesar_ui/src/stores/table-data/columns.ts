@@ -1,4 +1,9 @@
+import type { Writable, Updater, Subscriber, Unsubscriber } from 'svelte/store';
 import { writable, get as getStoreValue } from 'svelte/store';
+import type { DBObjectEntry, DbType } from '@mathesar/App.d';
+import type { CancellablePromise } from '@mathesar-component-library';
+import { EventHandler } from '@mathesar-component-library';
+import type { PaginatedResponse } from '@mathesar/utils/api';
 import {
   deleteAPI,
   getAPI,
@@ -6,13 +11,7 @@ import {
   postAPI,
   States,
 } from '@mathesar/utils/api';
-import { TabularType } from '@mathesar/App.d';
-import { EventHandler } from '@mathesar-component-library';
-
-import type { Writable, Updater, Subscriber, Unsubscriber } from 'svelte/store';
-import type { PaginatedResponse } from '@mathesar/utils/api';
-import type { CancellablePromise } from '@mathesar-component-library';
-import type { DBObjectEntry, DbType } from '@mathesar/App.d';
+import { TabularType } from './TabularType';
 import type { Meta } from './meta';
 
 export interface Column {

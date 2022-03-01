@@ -1,3 +1,5 @@
+import { hasStringLabelProperty } from './typeUtils';
+
 export function formatSize(sizeInBytes: number): string {
   if (sizeInBytes === 0) {
     return '0 B';
@@ -12,4 +14,15 @@ export function formatSize(sizeInBytes: number): string {
   const repUnit = ' KMGTP'.charAt(repIndex);
 
   return `${repValue.toFixed(2)} ${repUnit}B`;
+}
+
+/**
+ * If the given value has a label property and it is a string, return it.
+ * Otherwise, return the value itself, converted to a string.
+ */
+export function getLabel(v: unknown): string {
+  if (hasStringLabelProperty(v)) {
+    return v.label;
+  }
+  return String(v);
 }
