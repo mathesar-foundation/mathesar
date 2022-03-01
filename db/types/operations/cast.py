@@ -702,6 +702,7 @@ def _build_mathesar_money_array_function():
     comma_separator_opt_decimal = r"[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?"
     period_separator_opt_decimal = r"[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?"
     space_separator_opt_decimal = r"[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?"
+    comma_separator_lakh_system = r"[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?"
 
     inner_number_tree = "|".join(
         [
@@ -712,6 +713,7 @@ def _build_mathesar_money_array_function():
             comma_separator_opt_decimal,
             period_separator_opt_decimal,
             space_separator_opt_decimal,
+            comma_separator_lakh_system,
         ]
     )
     inner_number_group = f"(?:{inner_number_tree})"
@@ -719,8 +721,8 @@ def _build_mathesar_money_array_function():
     required_currency_ending = f"{non_numeric}?{inner_number_group}{non_numeric}"
     money_finding_regex = f"^({required_currency_beginning}|{required_currency_ending})$"
 
-    group_divider_indices = [4, 6, 8, 10, 12, 16, 18, 20, 22, 24]
-    decimal_point_indices = [2, 3, 5, 7, 9, 11, 13, 14, 15, 17, 19, 21, 23, 25]
+    group_divider_indices = [4, 6, 8, 10, 12, 14, 18, 20, 22, 24, 26, 28]
+    decimal_point_indices = [2, 3, 5, 7, 9, 11, 13, 15, 16, 17, 19, 21, 23, 25, 27, 29]
     group_dividers_str = ','.join([f'raw_arr[{idx}]' for idx in group_divider_indices])
     decimal_points_str = ','.join([f'raw_arr[{idx}]' for idx in decimal_point_indices])
 
