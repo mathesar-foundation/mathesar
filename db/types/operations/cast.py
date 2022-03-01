@@ -718,6 +718,12 @@ def _build_mathesar_money_array_function():
     required_currency_beginning = f"{non_numeric}{inner_number_group}{non_numeric}?"
     required_currency_ending = f"{non_numeric}?{inner_number_group}{non_numeric}"
     money_finding_regex = f"^({required_currency_beginning}|{required_currency_ending})$"
+
+    group_divider_indices = [4, 6, 8, 10, 12, 16, 18, 20, 22, 24]
+    decimal_point_indices = [2, 3, 5, 7, 9, 11, 13, 14, 15, 17, 19, 21, 23, 25]
+    group_dividers_str = ','.join([f'raw_arr[{idx}]' for idx in group_divider_indices])
+    decimal_points_str = ','.join([f'raw_arr[{idx}]' for idx in decimal_point_indices])
+
     return rf"""
     CREATE OR REPLACE FUNCTION get_mathesar_money_array(text) RETURNS text[]
     AS $$
@@ -732,8 +738,8 @@ def _build_mathesar_money_array_function():
         IF raw_arr IS NULL THEN
           RETURN NULL;
         END IF;
-        SELECT array_remove(ARRAY[raw_arr[4],raw_arr[6],raw_arr[8],raw_arr[10],raw_arr[12],raw_arr[16],raw_arr[18],raw_arr[20],raw_arr[22],raw_arr[24]], null) INTO group_divider_arr;
-        SELECT array_remove(ARRAY[raw_arr[2],raw_arr[3],raw_arr[5],raw_arr[7],raw_arr[9],raw_arr[11],raw_arr[13],raw_arr[14],raw_arr[15],raw_arr[17],raw_arr[19],raw_arr[21],raw_arr[23],raw_arr[25]], null) INTO decimal_point_arr;
+        SELECT array_remove(ARRAY[{group_dividers_str}], null) INTO group_divider_arr;
+        SELECT array_remove(ARRAY[{decimal_points_str}], null) INTO decimal_point_arr;
         SELECT group_divider_arr[1] INTO group_divider;
         SELECT decimal_point_arr[1] INTO decimal_point;
         RETURN ARRAY[raw_arr[1], group_divider, decimal_point];
