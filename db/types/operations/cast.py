@@ -692,6 +692,9 @@ def _build_mathesar_money_array_function():
     The main reason for this function to be separate is for testing. This
     does have some performance impact; we should consider inlining later.
     """
+    bare_function_name = f"get_mathesar_money_array"
+    qualified_function_name = f"{base.get_qualified_name(bare_function_name)}"
+
     # An attempt to separate pieces into logical bits for easier
     # understanding and modification
     non_numeric = r"(?:[^.,0-9]+)"
@@ -727,7 +730,7 @@ def _build_mathesar_money_array_function():
     decimal_points_str = ','.join([f'raw_arr[{idx}]' for idx in decimal_point_indices])
 
     return rf"""
-    CREATE OR REPLACE FUNCTION get_mathesar_money_array(text) RETURNS text[]
+    CREATE OR REPLACE FUNCTION {qualified_function_name}(text) RETURNS text[]
     AS $$
       DECLARE
         raw_arr text[];

@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import pytest
 from psycopg2.errors import InvalidParameterValue
-from sqlalchemy import Table, Column, MetaData, select, cast, func
+from sqlalchemy import Table, Column, MetaData, select, cast, text
 from sqlalchemy import String, Numeric
 from sqlalchemy.exc import DataError
 
@@ -1333,5 +1333,9 @@ money_array_examples = [
 def test_mathesar_money_array_sql(engine_email_type, source_str, expect_arr):
     engine, _ = engine_email_type
     with engine.begin() as conn:
-        res = conn.execute(select(func.get_mathesar_money_array(source_str))).scalar()
+        res = conn.execute(
+            select(
+                text(f"mathesar_types.get_mathesar_money_array('{source_str}')")
+            )
+        ).scalar()
     assert res == expect_arr
