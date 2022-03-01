@@ -3,7 +3,7 @@ This inherits the fixtures in the root conftest.py
 """
 import pytest
 
-from mathesar.models import Database
+from django.core.files import File
 
 from sqlalchemy import Column, MetaData, text, Integer
 from sqlalchemy import Table as SATable
@@ -12,8 +12,10 @@ from db.types import base, install
 from db.schemas.operations.create import create_schema as create_sa_schema
 from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
 from db.tables.operations.select import get_oid_from_table
-from mathesar.models import Schema, Table
+
+from mathesar.models import Schema, Table, Database, DataFile
 from mathesar.database.base import create_mathesar_engine
+from mathesar.imports.csv import create_table_from_csv
 
 
 PATENT_SCHEMA = 'Patents'
@@ -155,3 +157,14 @@ def empty_nasa_table(patent_schema):
 
     table.delete_sa_table()
     table.delete()
+
+
+@pytest.fixture
+def create_table(csv_filename, create_schema):
+    with open(csv_filename, 'rb') as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+
+    def _create_table(table_name, schema='Patents'):
+        schema_model = create_schema(schema)
+        return create_table_from_csv(data_file, table_name, schema_model)
+    return _create_table
