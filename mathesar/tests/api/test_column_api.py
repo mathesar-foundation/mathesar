@@ -237,13 +237,13 @@ def test_column_create_invalid_default(column_test_table, client):
 create_display_options_test_list = [
     ("BOOLEAN", {"input": "dropdown"}),
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
-    ("DATE", {'format': 'YYYY-MM-DD'}),
+    ("DATE", {'date_format': 'YYYY-MM-DD'}),
     ("NUMERIC", {"show_as_percentage": True}),
     ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}),
-    ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
-    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
-    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm'}),
-    ("TIME WITH TIME ZONE", {'format': 'hh:mm Z'}),
+    ("TIMESTAMP WITH TIME ZONE", {'date_format': 'YYYY-MM-DD', 'time_format': 'hh:mm'}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'date_format': 'YYYY-MM-DD', 'time_format': 'hh:mm'}),
+    ("TIME WITHOUT TIME ZONE", {'time_format': 'hh:mm'}),
+    ("TIME WITH TIME ZONE", {'time_format': 'hh:mm Z'}),
 ]
 
 

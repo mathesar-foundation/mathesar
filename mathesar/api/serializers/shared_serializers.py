@@ -102,7 +102,7 @@ class CustomBooleanLabelSerializer(MathesarErrorMessageMixin, serializers.Serial
     FALSE = serializers.CharField()
 
 
-DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY = 'mathesar_type'
+DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY = 'db_type'
 
 
 class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
@@ -227,6 +227,7 @@ class DisplayOptionsMappingSerializer(
     ReadWritePolymorphicSerializerMappingMixin,
     serializers.Serializer
 ):
+    # Some mappings are based on Mathesar/UI types, while others are based on DB types
     serializers_mapping = {
         MathesarTypeIdentifier.BOOLEAN.value: BooleanDisplayOptionSerializer,
         MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,
@@ -234,14 +235,19 @@ class DisplayOptionsMappingSerializer(
          MathesarTypeIdentifier.DATETIME.value): TimestampWithTimezoneDisplayOptionSerializer,
         ('timestamp without time zone',
          MathesarTypeIdentifier.DATETIME.value): TimestampWithoutTimezoneDisplayOptionSerializer,
-        ('date', MathesarTypeIdentifier.DATE.value): DateDisplayOptionSerializer,
         ('time with time zone', MathesarTypeIdentifier.TIME.value): TimeWithTimezoneDisplayOptionSerializer,
         ('time without time zone', MathesarTypeIdentifier.TIME.value): TimeWithoutTimezoneDisplayOptionSerializer,
+        MathesarTypeIdentifier.DATE.value: DateDisplayOptionSerializer,
     }
 
     def get_mapping_field(self):
         mathesar_type = get_mathesar_type_from_db_type(self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY])
-        if mathesar_type == MathesarTypeIdentifier.DATETIME.value:
-            return self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY].lower(), mathesar_type
+        # For some db types, their serializer is mapped using a tuple of
+        # `(db_type, mathesar_type)`, for the rest it's just `mathesar_type`.
+        # NOTE: the use of a mathesar_type in the `(db_type, mathesar_type)` key is unnecessary, a
+        # `db_type` can only belong to a single `mathesar_type`, currently.
+        if mathesar_type in [MathesarTypeIdentifier.DATETIME.value, MathesarTypeIdentifier.TIME.value]:
+            db_type = self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY].lower()
+            return (db_type, mathesar_type)
         else:
             return mathesar_type
