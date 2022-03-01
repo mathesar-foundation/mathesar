@@ -237,13 +237,13 @@ def test_column_create_invalid_default(column_test_table, client):
 create_display_options_test_list = [
     ("BOOLEAN", {"input": "dropdown"}),
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
-    ("DATE", {'date_format': 'YYYY-MM-DD'}),
+    ("DATE", {'format': 'YYYY-MM-DD'}),
     ("NUMERIC", {"show_as_percentage": True}),
     ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}),
-    ("TIMESTAMP WITH TIME ZONE", {'date_format': 'YYYY-MM-DD', 'time_format': 'hh:mm'}),
-    ("TIMESTAMP WITHOUT TIME ZONE", {'date_format': 'YYYY-MM-DD', 'time_format': 'hh:mm'}),
-    ("TIME WITHOUT TIME ZONE", {'time_format': 'hh:mm'}),
-    ("TIME WITH TIME ZONE", {'time_format': 'hh:mm Z'}),
+    ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
+    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm'}),
+    ("TIME WITH TIME ZONE", {'format': 'hh:mm Z'}),
 ]
 
 
@@ -265,18 +265,18 @@ def test_column_create_display_options(
     assert actual_new_col["display_options"] == display_options
 
 
+_too_long_string = "x" * 256
+
+
 create_display_options_invalid_test_list = [
     ("BOOLEAN", {"input": "invalid", "use_custom_columns": False}),
     ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"yes": "yes", "1": "no"}}),
-    ("DATE", {'format': 'YYYY-MM-DD hh:mm Z'}),
-    ("DATE", {'format': 'hh:mm Z'}),
     ("NUMERIC", {"show_as_percentage": "wrong value type"}),
-    ("TIMESTAMP WITH TIME ZONE", {'format': 'xyz'}),
-    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'xyz'}),
-    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm Z'}),
-    ("TIME WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm Z'}),
-    ("TIME WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
-    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm Z'}),
+    ("DATE", {'format': _too_long_string}),
+    ("TIMESTAMP WITH TIME ZONE", {'format': []}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'format': _too_long_string}),
+    ("TIME WITH TIME ZONE", {'format': _too_long_string}),
+    ("TIME WITHOUT TIME ZONE", {'format': {}}),
 ]
 
 

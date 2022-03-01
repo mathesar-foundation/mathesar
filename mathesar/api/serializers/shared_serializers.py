@@ -1,6 +1,3 @@
-from abc import ABC, abstractmethod
-
-import arrow
 from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
@@ -115,111 +112,19 @@ class NumberDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootParti
     locale = serializers.CharField(required=False)
 
 
-class AbstractDateTimeFormatValidator(ABC):
-    requires_context = True
-
-    def __init__(self):
-        pass
-
-    def __call__(self, value, serializer_field):
-        self.date_format_validator(value, serializer_field)
-
-    def date_format_validator(self, value, serializer_field):
-        try:
-            timestamp_with_tz_obj = arrow.get('2013-09-30T15:34:00.000-07:00')
-            parsed_datetime_str = timestamp_with_tz_obj.format(value)
-            datetime_object = arrow.get(parsed_datetime_str, value)
-        except ValueError:
-            raise serializers.ValidationError(f"{value} is not a valid format used for parsing a datetime.")
-        else:
-            self.validate(datetime_object, value, serializer_field)
-
-    @abstractmethod
-    def validate(self, datetime_obj, display_format, serializer_field):
-        pass
+def is_time_format_valid(format):
+    if isinstance(format, str) and len(format) <= 255:
+        return True
+    else:
+        raise serializers.ValidationError("Time format string not a string or longer than 255 characters.")
 
 
-class TimestampWithTimeZoneFormatValidator(AbstractDateTimeFormatValidator):
-
-    def validate(self, datetime_obj, display_format, serializer_field):
-        pass
-
-
-class TimestampWithoutTimeZoneFormatValidator(AbstractDateTimeFormatValidator):
-
-    def validate(self, datetime_obj, display_format, serializer_field):
-        if 'z' in display_format.lower():
-            raise serializers.ValidationError(
-                "Timestamp without timezone column cannot contain timezone display format"
-            )
-
-
-class DateFormatValidator(AbstractDateTimeFormatValidator):
-
-    def validate(self, datetime_obj, display_format, serializer_field):
-        date_obj = arrow.get('2013-09-30')
-        if datetime_obj.time() != date_obj.time():
-            raise serializers.ValidationError("Date column cannot contain time or timezone display format")
-
-
-class TimeWithTimeZoneFormatValidator(AbstractDateTimeFormatValidator):
-
-    def validate(self, datetime_obj, display_format, serializer_field):
-        time_only_format = 'HH:mm:ssZZ'
-        time_str = arrow.get('2013-09-30T15:34:00.000-07:00').format(time_only_format)
-        parsed_time_str = arrow.get(time_str, time_only_format)
-        if parsed_time_str.date() != datetime_obj.date():
-            raise serializers.ValidationError("Time column cannot contain date display format")
-
-
-class TimeWithoutTimeZoneFormatValidator(TimeWithTimeZoneFormatValidator):
-
-    def validate(self, datetime_obj, display_format, serializer_field):
-        if 'z' in display_format.lower():
-            raise serializers.ValidationError("Time without timezone column cannot contain timezone display format")
-        return super().validate(datetime_obj, display_format, serializer_field)
-
-
-class DateDisplayOptionSerializer(
+class TimeFormatDisplayOptionSerializer(
     MathesarErrorMessageMixin,
     OverrideRootPartialMixin,
     serializers.Serializer
 ):
-    date_format = serializers.CharField(validators=[DateFormatValidator()])
-
-
-class TimestampWithoutTimezoneDisplayOptionSerializer(
-    MathesarErrorMessageMixin,
-    OverrideRootPartialMixin,
-    serializers.Serializer
-):
-    time_format = serializers.CharField(validators=[TimeWithoutTimeZoneFormatValidator()])
-    date_format = serializers.CharField(validators=[DateFormatValidator()])
-
-
-class TimestampWithTimezoneDisplayOptionSerializer(
-    MathesarErrorMessageMixin,
-    OverrideRootPartialMixin,
-    serializers.Serializer
-):
-    time_format = serializers.CharField(validators=[TimeWithTimeZoneFormatValidator()])
-    date_format = serializers.CharField(validators=[DateFormatValidator()])
-
-
-class TimeWithTimezoneDisplayOptionSerializer(
-    MathesarErrorMessageMixin,
-    OverrideRootPartialMixin,
-    serializers.Serializer
-):
-    time_format = serializers.CharField(validators=[TimeWithTimeZoneFormatValidator()])
-
-
-class TimeWithoutTimezoneDisplayOptionSerializer(
-    MathesarErrorMessageMixin,
-    OverrideRootPartialMixin,
-    serializers.Serializer
-):
-    time_format = serializers.CharField(validators=[TimeWithoutTimeZoneFormatValidator()])
+    format = serializers.CharField(validators=[is_time_format_valid])
 
 
 class DisplayOptionsMappingSerializer(
@@ -227,27 +132,15 @@ class DisplayOptionsMappingSerializer(
     ReadWritePolymorphicSerializerMappingMixin,
     serializers.Serializer
 ):
-    # Some mappings are based on Mathesar/UI types, while others are based on DB types
     serializers_mapping = {
         MathesarTypeIdentifier.BOOLEAN.value: BooleanDisplayOptionSerializer,
         MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,
-        ('timestamp with time zone',
-         MathesarTypeIdentifier.DATETIME.value): TimestampWithTimezoneDisplayOptionSerializer,
-        ('timestamp without time zone',
-         MathesarTypeIdentifier.DATETIME.value): TimestampWithoutTimezoneDisplayOptionSerializer,
-        ('time with time zone', MathesarTypeIdentifier.TIME.value): TimeWithTimezoneDisplayOptionSerializer,
-        ('time without time zone', MathesarTypeIdentifier.TIME.value): TimeWithoutTimezoneDisplayOptionSerializer,
-        MathesarTypeIdentifier.DATE.value: DateDisplayOptionSerializer,
+        MathesarTypeIdentifier.DATETIME.value: TimeFormatDisplayOptionSerializer,
+        MathesarTypeIdentifier.DATE.value: TimeFormatDisplayOptionSerializer,
+        MathesarTypeIdentifier.TIME.value: TimeFormatDisplayOptionSerializer,
     }
 
     def get_mapping_field(self):
-        mathesar_type = get_mathesar_type_from_db_type(self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY])
-        # For some db types, their serializer is mapped using a tuple of
-        # `(db_type, mathesar_type)`, for the rest it's just `mathesar_type`.
-        # NOTE: the use of a mathesar_type in the `(db_type, mathesar_type)` key is unnecessary, a
-        # `db_type` can only belong to a single `mathesar_type`, currently.
-        if mathesar_type in [MathesarTypeIdentifier.DATETIME.value, MathesarTypeIdentifier.TIME.value]:
-            db_type = self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY].lower()
-            return (db_type, mathesar_type)
-        else:
-            return mathesar_type
+        db_type = self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY]
+        mathesar_type = get_mathesar_type_from_db_type(db_type)
+        return mathesar_type
