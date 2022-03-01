@@ -39,14 +39,16 @@ def alter_column(engine, table_oid, column_index, column_data):
                 table, column_index, engine, conn,
                 type_options=column_data[TYPE_OPTIONS_KEY]
             )
-
+        column_name = table.columns[column_index].name
+        column_attnum = get_column_attnum_from_name(table_oid, column_name, engine)
         if NULLABLE_KEY in column_data:
             nullable = column_data[NULLABLE_KEY]
-            change_column_nullable(table, column_index, engine, conn, nullable)
+            change_column_nullable(table_oid, column_attnum, engine, conn, nullable)
         if DEFAULT_DICT in column_data:
             default_dict = column_data[DEFAULT_DICT]
             default = default_dict[DEFAULT_KEY] if default_dict is not None else None
-            set_column_default(table, column_index, engine, conn, default)
+
+            set_column_default(table_oid, column_attnum, engine, conn, default)
         if NAME_KEY in column_data:
             # Name always needs to be the last item altered
             # since previous operations need the name to work
@@ -137,7 +139,7 @@ def retype_column(
 
 
 def change_column_nullable(table_oid, column_attum, engine, connection, nullable):
-    table = reflect_table_from_oid(table_oid, engine)
+    table = reflect_table_from_oid(table_oid, engine, connection)
     column_name = get_column_name_from_attnum(table_oid, column_attum, engine)
     column = table.columns[column_name]
     ctx = MigrationContext.configure(connection)
