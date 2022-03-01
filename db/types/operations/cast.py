@@ -154,6 +154,7 @@ def install_all_casts(engine):
     create_integer_casts(engine)
     create_interval_casts(engine)
     create_datetime_casts(engine)
+    create_mathesar_money_casts(engine)
     create_money_casts(engine)
     create_multicurrency_money_casts(engine)
     create_textual_casts(engine)
@@ -208,6 +209,12 @@ def create_datetime_casts(engine):
 
     type_body_map = _get_date_type_body_map()
     create_cast_functions(DATE, type_body_map, engine)
+
+
+def create_mathesar_money_casts(engine):
+    mathesar_money_array_create = _build_mathesar_money_array_function()
+    with engine.begin() as conn:
+        conn.execute(text(mathesar_money_array_create))
 
 
 def create_money_casts(engine):
@@ -623,7 +630,7 @@ def _get_mathesar_money_type_body_map():
         f"RAISE EXCEPTION '% cannot be cast to {MONEY} as currency symbol is missing', $1;"
     )
 
-    scratch_function = """
+    scratch_function = r"""
     CREATE OR REPLACE FUNCTION get_money(text) RETURNS text[]
     AS $$
       DECLARE
@@ -678,6 +685,35 @@ def _get_mathesar_money_type_body_map():
         }
     )
     return type_body_map
+
+
+def _build_mathesar_money_array_function():
+    """
+    The main reason for this function to be separate is for testing. This
+    does have some performance impact; we should consider inlining later.
+    """
+    return r"""
+    CREATE OR REPLACE FUNCTION get_mathesar_money_array(text) RETURNS text[]
+    AS $$
+      DECLARE
+        raw_arr text[];
+        group_divider_arr text[];
+        decimal_point_arr text[];
+        group_divider text;
+        decimal_point text;
+      BEGIN
+        SELECT regexp_matches($1, '^((?:[^.,0-9]+)(?:[0-9]{4,}(?:([,.])[0-9]+)?|[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?|[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+|[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+|[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?|[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?|[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?)(?:[^.,0-9]+)?|(?:[^.,0-9]+)?(?:[0-9]{4,}(?:([,.])[0-9]+)?|[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?|[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+|[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+|[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?|[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?|[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?)(?:[^.,0-9]+))$') INTO raw_arr;
+        IF raw_arr IS NULL THEN
+          RETURN NULL;
+        END IF;
+        SELECT array_remove(ARRAY[raw_arr[4],raw_arr[6],raw_arr[8],raw_arr[10],raw_arr[12],raw_arr[16],raw_arr[18],raw_arr[20],raw_arr[22],raw_arr[24]], null) INTO group_divider_arr;
+        SELECT array_remove(ARRAY[raw_arr[2],raw_arr[3],raw_arr[5],raw_arr[7],raw_arr[9],raw_arr[11],raw_arr[13],raw_arr[14],raw_arr[15],raw_arr[17],raw_arr[19],raw_arr[21],raw_arr[23],raw_arr[25]], null) INTO decimal_point_arr;
+        SELECT group_divider_arr[1] INTO group_divider;
+        SELECT decimal_point_arr[1] INTO decimal_point;
+        RETURN ARRAY[raw_arr[1], group_divider, decimal_point];
+      END;
+    $$ LANGUAGE plpgsql;
+    """
 
 
 def _get_money_type_body_map():

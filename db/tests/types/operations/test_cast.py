@@ -2,7 +2,7 @@ from decimal import Decimal
 
 import pytest
 from psycopg2.errors import InvalidParameterValue
-from sqlalchemy import Table, Column, MetaData, select, cast
+from sqlalchemy import Table, Column, MetaData, select, cast, func
 from sqlalchemy import String, Numeric
 from sqlalchemy.exc import DataError
 
@@ -1293,3 +1293,33 @@ def test_get_full_cast_map(engine_with_types, source_type, expect_target_types):
     actual_cast_map = cast_operations.get_full_cast_map(engine_with_types)
     actual_target_types = actual_cast_map[source_type]
     assert sorted(actual_target_types) == sorted(expect_target_types)
+
+
+money_array_examples = [
+    ('$1,000.00', ['$1,000.00', ',', '.']),
+    ('$1', ['$1', None, None]),
+    ('$ 1', ['$ 1', None, None]),
+    ('1', None),
+    ('1,000', None),
+    ('1,000.00', None),
+    ('$1,000', None),
+    ('$1,000,000', ['$1,000,000', ',', None]),
+    ('$1 000,000', ['$1 000,000', ' ', ',']),
+    ('$1.000,000', ['$1.000,000', '.', ',']),
+    ('$1.000,00 HK', ['$1.000,00 HK', '.', ',']),
+    ('EUR 1.000,00', ['EUR 1.000,00', '.', ',']),
+    ('€1.000,00', ['€1.000,00', '.', ',']),
+    ('1.000,00€', ['1.000,00€', '.', ',']),
+    ('€1 000', ['€1 000', ' ', None]),
+    ('₿1,324.23466 BTC', ['₿1,324.23466 BTC', ',', '.']),
+    ('12₿1,324.23466 BTC', None),
+    ('₿1,324.23466 BTC12', None),
+]
+
+
+@pytest.mark.parametrize("source_str,expect_arr", money_array_examples)
+def test_mathesar_money_array_sql(engine_email_type, source_str, expect_arr):
+    engine, _ = engine_email_type
+    with engine.begin() as conn:
+        res = conn.execute(select(func.get_mathesar_money_array(source_str))).scalar()
+    assert res == expect_arr
