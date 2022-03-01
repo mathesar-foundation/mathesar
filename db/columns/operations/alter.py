@@ -6,7 +6,9 @@ from psycopg2.errors import InvalidTextRepresentation, InvalidParameterValue
 
 from db.columns.defaults import NAME, NULLABLE
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
-from db.columns.operations.select import get_column_attnum_from_name, get_column_default, get_column_index_from_name
+from db.columns.operations.select import (
+    get_column_attnum_from_name, get_column_default, get_column_name_from_attnum,
+)
 from db.columns.utils import get_mathesar_column_with_engine, get_type_options
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.types.base import get_db_type_name
@@ -72,13 +74,12 @@ def alter_column_type(
     # Re-reflect table so that column is accurate
     table = reflect_table_from_oid(table_oid, engine, connection)
     column = table.columns[column_name]
-    column_index = get_column_index_from_name(table_oid, column_name, engine, connection)
     column_attnum = get_column_attnum_from_name(table_oid, column_name, engine, connection)
 
     default = get_column_default(table_oid, column_attnum, engine, connection)
     if default is not None:
         default_text = column.server_default.arg.text
-    set_column_default(table, column_index, engine, connection, None)
+    set_column_default(table_oid, column_attnum, engine, connection, None)
 
     prepared_table_name = _preparer.format_table(table)
     prepared_column_name = _preparer.format_column(column)
@@ -97,7 +98,7 @@ def alter_column_type(
         cast_stmt = f"{cast_function_name}({default_text})"
         default_stmt = select(text(cast_stmt))
         new_default = str(execute_statement(engine, default_stmt, connection).first()[0])
-        set_column_default(table, column_index, engine, connection, new_default)
+        set_column_default(table_oid, column_attnum, engine, connection, new_default)
 
 
 def retype_column(
@@ -135,15 +136,19 @@ def retype_column(
         raise e.orig
 
 
-def change_column_nullable(table, column_index, engine, connection, nullable):
-    column = table.columns[column_index]
+def change_column_nullable(table_oid, column_attum, engine, connection, nullable):
+    table = reflect_table_from_oid(table_oid, engine)
+    column_name = get_column_name_from_attnum(table_oid, column_attum, engine)
+    column = table.columns[column_name]
     ctx = MigrationContext.configure(connection)
     op = Operations(ctx)
     op.alter_column(table.name, column.name, nullable=nullable, schema=table.schema)
 
 
-def set_column_default(table, column_index, engine, connection, default):
-    column = table.columns[column_index]
+def set_column_default(table_oid, column_attnum, engine, connection, default):
+    table = reflect_table_from_oid(table_oid, engine, connection)
+    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
+    column = table.columns[column_name]
     default_clause = DefaultClause(str(default)) if default is not None else default
     try:
         ctx = MigrationContext.configure(connection)
