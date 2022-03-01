@@ -692,7 +692,33 @@ def _build_mathesar_money_array_function():
     The main reason for this function to be separate is for testing. This
     does have some performance impact; we should consider inlining later.
     """
-    return r"""
+    # An attempt to separate pieces into logical bits for easier
+    # understanding and modification
+    non_numeric = r"(?:[^.,0-9]+)"
+    no_separator_big = r"[0-9]{4,}(?:([,.])[0-9]+)?"
+    no_separator_small = r"[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?"
+    comma_separator_req_decimal = r"[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+"
+    period_separator_req_decimal = r"[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+"
+    comma_separator_opt_decimal = r"[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?"
+    period_separator_opt_decimal = r"[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?"
+    space_separator_opt_decimal = r"[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?"
+
+    inner_number_tree = "|".join(
+        [
+            no_separator_big,
+            no_separator_small,
+            comma_separator_req_decimal,
+            period_separator_req_decimal,
+            comma_separator_opt_decimal,
+            period_separator_opt_decimal,
+            space_separator_opt_decimal,
+        ]
+    )
+    inner_number_group = f"(?:{inner_number_tree})"
+    required_currency_beginning = f"{non_numeric}{inner_number_group}{non_numeric}?"
+    required_currency_ending = f"{non_numeric}?{inner_number_group}{non_numeric}"
+    money_finding_regex = f"^({required_currency_beginning}|{required_currency_ending})$"
+    return rf"""
     CREATE OR REPLACE FUNCTION get_mathesar_money_array(text) RETURNS text[]
     AS $$
       DECLARE
@@ -702,7 +728,7 @@ def _build_mathesar_money_array_function():
         group_divider text;
         decimal_point text;
       BEGIN
-        SELECT regexp_matches($1, '^((?:[^.,0-9]+)(?:[0-9]{4,}(?:([,.])[0-9]+)?|[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?|[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+|[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+|[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?|[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?|[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?)(?:[^.,0-9]+)?|(?:[^.,0-9]+)?(?:[0-9]{4,}(?:([,.])[0-9]+)?|[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?|[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+|[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+|[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?|[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?|[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?)(?:[^.,0-9]+))$') INTO raw_arr;
+        SELECT regexp_matches($1, '{money_finding_regex}') INTO raw_arr;
         IF raw_arr IS NULL THEN
           RETURN NULL;
         END IF;
