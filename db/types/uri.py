@@ -7,7 +7,7 @@ from sqlalchemy.types import UserDefinedType
 
 from db.functions import hints
 from db.functions.base import DBFunction, Contains, sa_call_sql_function, Equal
-from db.functions.redundant import RedundantDBFunction
+from db.functions.packed import DBFunctionPacked
 
 from db.types import base
 
@@ -156,7 +156,7 @@ class ExtractURIScheme(DBFunction):
         return sa_call_sql_function(URIFunction.SCHEME.value, uri)
 
 
-class URIAuthorityContains(RedundantDBFunction):
+class URIAuthorityContains(DBFunctionPacked):
     id = 'uri_authority_contains'
     name = 'URI authority contains'
     hints = tuple([
@@ -177,7 +177,7 @@ class URIAuthorityContains(RedundantDBFunction):
         ])
 
 
-class URISchemeEquals(RedundantDBFunction):
+class URISchemeEquals(DBFunctionPacked):
     id = 'uri_scheme_equals'
     name = 'URI scheme is'
     hints = tuple([

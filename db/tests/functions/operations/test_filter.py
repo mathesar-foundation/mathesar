@@ -6,7 +6,7 @@ from db.utils import execute_query
 from db.functions.base import (
     ColumnName, Not, Literal, Empty, Equal, Greater, And, Or, StartsWith, Contains, StartsWithCaseInsensitive, ContainsCaseInsensitive
 )
-from db.functions.redundant import (
+from db.functions.packed import (
     GreaterOrEqual, LesserOrEqual
 )
 from db.functions.operations.apply import apply_db_function_as_filter
@@ -199,15 +199,18 @@ def test_filtering_nested_boolean_ops(filter_sort_table_obj):
     ("interval", Greater, "P1Y2M3DT4H5M6S", 2),
 ])
 def test_filtering_time_types(times_table_obj, column_name, main_db_function, literal_param, expected_count):
-    table, engine = times_table_obj
-    selectable = table.select()
-    db_function = main_db_function([
-        ColumnName([column_name]),
-        Literal([literal_param]),
-    ])
-    query = apply_db_function_as_filter(selectable, db_function)
-    record_list = execute_query(engine, query)
-    assert len(record_list) == expected_count
+    _filters_as_expected(times_table_obj, column_name, main_db_function, literal_param, expected_count)
+
+
+@pytest.mark.parametrize("column_name,main_db_function,literal_param,expected_count", [
+    ("boolean", Equal, True, 3),
+    ("boolean", Equal, False, 1),
+    ("boolean", And, True, 3),
+    ("boolean", Or, True, 4),
+    ("boolean", Or, False, 3),
+])
+def test_filtering_booleans(boolean_table_obj, column_name, main_db_function, literal_param, expected_count):
+    _filters_as_expected(boolean_table_obj, column_name, main_db_function, literal_param, expected_count)
 
 
 @pytest.mark.parametrize("column_name,main_db_function,literal_param,expected_count", [
@@ -217,7 +220,11 @@ def test_filtering_time_types(times_table_obj, column_name, main_db_function, li
     ("Student Name", Contains, "juarez", 0),
 ])
 def test_case_insensitive_filtering(roster_table_obj, column_name, main_db_function, literal_param, expected_count):
-    table, engine = roster_table_obj
+    _filters_as_expected(roster_table_obj, column_name, main_db_function, literal_param, expected_count)
+
+
+def _filters_as_expected(table_engine, column_name, main_db_function, literal_param, expected_count):
+    table, engine = table_engine
     selectable = table.select()
     db_function = main_db_function([
         ColumnName([column_name]),

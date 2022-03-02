@@ -7,7 +7,7 @@ from db.types import base
 
 from db.functions import hints
 from db.functions.base import DBFunction, Contains, sa_call_sql_function, Equal
-from db.functions.redundant import RedundantDBFunction
+from db.functions.packed import DBFunctionPacked
 
 EMAIL = base.MathesarCustomType.EMAIL.value
 EMAIL_DOMAIN_NAME = EMAIL + "_domain_name"
@@ -95,7 +95,7 @@ class ExtractEmailDomain(DBFunction):
         return sa_call_sql_function(EMAIL_DOMAIN_NAME, uri)
 
 
-class EmailDomainContains(RedundantDBFunction):
+class EmailDomainContains(DBFunctionPacked):
     id = 'email_domain_contains'
     name = 'email domain contains'
     hints = tuple([
@@ -116,7 +116,7 @@ class EmailDomainContains(RedundantDBFunction):
         ])
 
 
-class EmailDomainEquals(RedundantDBFunction):
+class EmailDomainEquals(DBFunctionPacked):
     id = 'email_domain_equals'
     name = 'email domain is'
     hints = tuple([
