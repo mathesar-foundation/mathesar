@@ -10,21 +10,30 @@
   } from '@mathesar-component-library/types';
   import type { DbType } from '@mathesar/App.d';
   import type { AbstractTypeDbConfigOptions } from '@mathesar/stores/abstract-types/types';
+  import type { Column } from '@mathesar/stores/table-data/types';
+  import { getDefaultsAndSavedVarsFromFormConfig } from '../utils';
 
   export let selectedDbType: DbType | undefined;
+  export let typeOptions: Column['type_options'];
   export let configuration: AbstractTypeDbConfigOptions['configuration'];
 
   function constructForm(
     formConfig: AbstractTypeDbConfigOptions['configuration']['form'],
-    formValues?: AbstractTypeDbConfigOptions['configuration']['ruleReversalValues'],
+    typeDefaults: Record<string, Record<string, FormInputDataType>>,
   ): FormBuildConfiguration {
-    if (selectedDbType && formValues?.[selectedDbType]) {
-      return makeForm(formConfig, formValues[selectedDbType]);
+    if (selectedDbType && typeDefaults[selectedDbType]) {
+      return makeForm(formConfig, {
+        ...typeDefaults[selectedDbType],
+        ...(typeOptions || {}),
+      });
     }
-    return makeForm(formConfig);
+    return makeForm(formConfig, typeOptions || {});
   }
 
-  $: form = constructForm(configuration.form, configuration.ruleReversalValues);
+  $: [dbTypeDefaults, savedVariables] = getDefaultsAndSavedVarsFromFormConfig(
+    configuration.form,
+  );
+  $: form = constructForm(configuration.form, dbTypeDefaults);
   $: values = form.values;
 
   function setSelectedDBType(formValues: Record<string, FormInputDataType>) {
@@ -33,6 +42,15 @@
       const result = executeRule(determinationRule.rule, formValues);
       if (result) {
         selectedDbType = determinationRule.resolve;
+        if (savedVariables.length > 0) {
+          const newTypeOptions: Column['type_options'] = {};
+          savedVariables.forEach((variable) => {
+            newTypeOptions[variable] = formValues[variable];
+          });
+          typeOptions = newTypeOptions;
+        } else {
+          typeOptions = null;
+        }
         break;
       }
     }

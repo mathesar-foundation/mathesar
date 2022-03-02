@@ -20,13 +20,16 @@ export function makeForm(
     stores.set(key, writable(value));
   });
 
+  const storeUsage = writable(new Map());
+
   const values: Readable<Record<string, FormInputDataType>> = derived(
-    [...stores.values()],
-    (storeValues) => {
-      const valueObj = {};
+    [storeUsage, ...stores.values()],
+    ([storeUsageValues, ...storeValues]) => {
+      const valueObj: Record<string, FormInputDataType> = {};
       [...stores.keys()].forEach((key, index) => {
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        valueObj[key] = storeValues[index];
+        if (storeUsageValues.get(key) > 0) {
+          valueObj[key] = storeValues[index];
+        }
       });
       return valueObj;
     },
@@ -39,6 +42,7 @@ export function makeForm(
   return {
     ...formConfig,
     stores,
+    storeUsage,
     values,
     getValues,
   };

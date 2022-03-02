@@ -16,7 +16,6 @@ export type ColumnPositionMap = Map<string, ColumnPosition>;
 export interface ActiveCell {
   rowIndex: number;
   columnIndex: number;
-  type: 'select' | 'edit';
 }
 
 export const ROW_CONTROL_COLUMN_WIDTH = 70;
@@ -64,14 +63,6 @@ export function isCellActive(
     activeCell?.columnIndex === column.__columnIndex &&
     activeCell.rowIndex === row.__rowIndex
   );
-}
-
-export function isCellBeingEdited(
-  activeCell: ActiveCell,
-  row: TableRecord,
-  column: Column,
-): boolean {
-  return isCellActive(activeCell, row, column) && activeCell.type === 'edit';
 }
 
 // TODO: Create a common utility action to handle active element based scroll
@@ -189,7 +180,6 @@ export class Display {
       rowIndex: row.__rowIndex,
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       columnIndex: column.__columnIndex,
-      type: 'select',
     });
   }
 
@@ -200,14 +190,11 @@ export class Display {
         rowIndex: row.__rowIndex,
         // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         columnIndex: column.__columnIndex,
-        type: 'edit',
       });
     }
   }
 
-  handleKeyEventsOnActiveCell(
-    key: KeyboardEvent['key'],
-  ): 'moved' | 'changed' | undefined {
+  handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | undefined {
     const { columns } = this.columnsDataStore.get();
     const totalCount = get(this.recordsData.totalCount);
     const savedRecords = get(this.recordsData.savedRecords);
@@ -222,7 +209,7 @@ export class Display {
       newRecords.length;
     const activeCell = get(this.activeCell);
 
-    if (movementKeys.has(key) && activeCell?.type === 'select') {
+    if (movementKeys.has(key) && activeCell) {
       this.activeCell.update((existing) => {
         if (!existing) {
           return undefined;
@@ -256,43 +243,6 @@ export class Display {
         return newActiveCell;
       });
       return 'moved';
-    }
-
-    if (key === 'Tab' && activeCell?.type === 'edit') {
-      this.activeCell.update((existing) => {
-        if (!existing) {
-          return undefined;
-        }
-        const newActiveCell = { ...existing };
-        if (existing.columnIndex < columns.length - 1) {
-          newActiveCell.columnIndex += 1;
-        }
-        return newActiveCell;
-      });
-      return 'moved';
-    }
-
-    if (key === 'Enter') {
-      if (activeCell?.type === 'select') {
-        if (!columns[activeCell.columnIndex]?.primary_key) {
-          this.activeCell.update((existing) =>
-            existing ? { ...existing, type: 'edit' } : undefined,
-          );
-          return 'changed';
-        }
-      } else if (activeCell?.type === 'edit') {
-        this.activeCell.update((existing) =>
-          existing ? { ...existing, type: 'select' } : undefined,
-        );
-        return 'changed';
-      }
-    }
-
-    if (key === 'Escape' && activeCell?.type === 'edit') {
-      this.activeCell.update((existing) =>
-        existing ? { ...existing, type: 'select' } : undefined,
-      );
-      return 'changed';
     }
 
     return undefined;

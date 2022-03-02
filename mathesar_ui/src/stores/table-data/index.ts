@@ -4,7 +4,6 @@ export { Meta } from './meta';
 export {
   Display,
   isCellActive,
-  isCellBeingEdited,
   scrollBasedOnActiveCell,
   ROW_CONTROL_COLUMN_WIDTH,
   DEFAULT_ROW_RIGHT_PADDING,
