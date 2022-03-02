@@ -47,6 +47,12 @@
     }
   }
 
+  async function handleInputKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter') {
+      await proceed?.();
+    }
+  }
+
   $: validationErrors = getValidationErrors(value);
   $: canProceed = !validationErrors.length;
 </script>
@@ -62,7 +68,7 @@
     bind:value
     bind:element={inputElement}
     aria-label={label}
-    on:enter={proceed}
+    on:keydown={handleInputKeydown}
     on:input={() => {
       valueHasChanged = true;
     }}
