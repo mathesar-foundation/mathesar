@@ -156,8 +156,10 @@ def _build_db_types_hinted():
 
     # string-like types get the "string_like" hint
     string_like_db_types = (
-        PostgresType.CHARACTER_VARYING,
+        PostgresType.CHAR,
         PostgresType.CHARACTER,
+        PostgresType.CHARACTER_VARYING,
+        PostgresType.NAME,
         PostgresType.TEXT,
         MathesarCustomType.URI,
         MathesarCustomType.EMAIL,
@@ -175,9 +177,24 @@ def _build_db_types_hinted():
         PostgresType.SMALLINT,
         PostgresType.NUMERIC,
         PostgresType.REAL,
+        PostgresType.MONEY,
     )
     hints_for_numeric_db_types = (hints.comparable,)
     _add_to_db_type_hintsets(numeric_db_types, hints_for_numeric_db_types)
+
+    # time related types get the "comparable" hint
+    time_related_db_types = (
+        PostgresType.DATE,
+        PostgresType.TIME,
+        PostgresType.TIME_WITH_TIME_ZONE,
+        PostgresType.TIME_WITHOUT_TIME_ZONE,
+        PostgresType.TIMESTAMP,
+        PostgresType.TIMESTAMP_WITH_TIME_ZONE,
+        PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE,
+        PostgresType.INTERVAL,
+    )
+    hints_for_time_related_types = (hints.comparable,)
+    _add_to_db_type_hintsets(time_related_db_types, hints_for_time_related_types)
 
     return frozendict(db_types_hinted)
 
