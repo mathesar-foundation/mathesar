@@ -49,6 +49,9 @@ VARCHAR = "VARCHAR"
 
 # Custom types
 EMAIL = get_qualified_name(MathesarCustomType.EMAIL.value).upper()
+MATHESAR_MONEY = get_qualified_name(
+    MathesarCustomType.MATHESAR_MONEY.value
+).upper()
 MULTICURRENCY_MONEY = get_qualified_name(
     MathesarCustomType.MULTICURRENCY_MONEY.value
 ).upper()
@@ -98,6 +101,12 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
+            MATHESAR_MONEY: {
+                VALID: [(1234, 1234)],
+            },
+            MONEY: {
+                VALID: [(1234, "$1,234.00")],
+            },
             MULTICURRENCY_MONEY: {
                 VALID: [
                     (
@@ -108,9 +117,6 @@ MASTER_DB_TYPE_MAP_SPEC = {
                         }
                     )
                 ],
-            },
-            MONEY: {
-                VALID: [(1234, "$1,234.00")],
             },
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
@@ -151,6 +157,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             FLOAT: {VALID: [("1", 1.0)], INVALID: ["b"]},
             INTEGER: {VALID: [("4", 4)], INVALID: ["j"]},
             INTERVAL: {VALID: []},
+            MATHESAR_MONEY: {VALID: []},
+            MONEY: {VALID: []},
             MULTICURRENCY_MONEY: {
                 VALID: [
                     (
@@ -160,7 +168,6 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 ],
                 INVALID: ["n"],
             },
-            MONEY: {VALID: []},
             NUMERIC: {VALID: [("1", Decimal("1"))], INVALID: ["a"]},
             REAL: {VALID: [("1", 1.0)], INVALID: ["b"]},
             SMALLINT: {VALID: [("4", 4)], INVALID: ["j"]},
@@ -205,6 +212,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [1234123412341234]
             },
+            MATHESAR_MONEY: {VALID: [(1234.12, 1234.12)]},
+            MONEY: {VALID: [(12.12, "$12.12")]},
             MULTICURRENCY_MONEY: {
                 VALID: [
                     (
@@ -220,7 +229,6 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     )
                 ],
             },
-            MONEY: {VALID: [(12.12, "$12.12")]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {VALID: [(500, 500)], INVALID: [12341234]},
@@ -239,6 +247,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
             INTEGER: {VALID: [(500, 500)]},
+            MATHESAR_MONEY: {VALID: [(12.12, 12.12)]},
+            MONEY: {VALID: [(12.12, "$12.12")]},
             MULTICURRENCY_MONEY: {
                 VALID: [
                     (
@@ -250,7 +260,6 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     )
                 ]
             },
-            MONEY: {VALID: [(12.12, "$12.12")]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {VALID: [(500, 500)]},
@@ -280,6 +289,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
             INTEGER: {VALID: [(500, 500), (-5, -5)], INVALID: [-3.234, 234.34]},
+            MATHESAR_MONEY: {VALID: [(12.12, 12.12)]},
+            MONEY: {VALID: [(12.12, "$12.12")]},
             MULTICURRENCY_MONEY: {
                 VALID: [
                     (
@@ -291,7 +302,6 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     )
                 ]
             },
-            MONEY: {VALID: [(12.12, "$12.12")]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {VALID: [(500, 500), (-5, -5)], INVALID: [-3.234, 234.34]},
@@ -310,12 +320,13 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
+            MATHESAR_MONEY: {VALID: [(500, 500)]},
+            MONEY: {VALID: [(12, "$12.00")]},
             MULTICURRENCY_MONEY: {
                 VALID: [
                     (12, {multicurrency.VALUE: 12, multicurrency.CURRENCY: "USD"})
                 ]
             },
-            MONEY: {VALID: [(12, "$12.00")]},
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
             SMALLINT: {VALID: [(500, 500)]},
@@ -343,6 +354,27 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     ("P0Y0M3DT3H5M30S", "3 days 03:05:30")
                 ]
             },
+        }
+    },
+    MATHESAR_MONEY: {
+        ISCHEMA_NAME: get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value),
+        REFLECTED_NAME: MATHESAR_MONEY,
+        TARGET_DICT: {
+            CHAR: {VALID: []},
+            MATHESAR_MONEY: {VALID: [(12.12, 12.12)]},
+            MONEY: {VALID: [(12.12, "$12.12")]},
+            TEXT: {VALID: [(12.12, "12.12")]},
+            VARCHAR: {VALID:[(12.12, "12.12")]},
+        }
+    },
+    MONEY: {
+        ISCHEMA_NAME: PostgresType.MONEY.value,
+        REFLECTED_NAME: MONEY,
+        TARGET_DICT: {
+            CHAR: {VALID: []},
+            MONEY: {VALID: [("$12.12", "$12.12")]},
+            TEXT: {VALID: [("$12.12", "$12.12")]},
+            VARCHAR: {VALID: [("$12.12", "$12.12")]},
         }
     },
     MULTICURRENCY_MONEY: {
@@ -386,36 +418,6 @@ MASTER_DB_TYPE_MAP_SPEC = {
                             multicurrency.CURRENCY: 'XYZ'
                         },
                         '(1234.12,XYZ)'
-                    )
-                ]
-            },
-        }
-    },
-    MONEY: {
-        ISCHEMA_NAME: PostgresType.MONEY.value,
-        REFLECTED_NAME: MONEY,
-        TARGET_DICT: {
-            CHAR: {VALID: []},
-            MONEY: {
-                VALID: [
-                    (
-                        "$12.12", "$12.12"
-                    )
-                ]
-            },
-            TEXT: {
-                VALID: [
-                    (
-                        "$12.12",
-                        "$12.12"
-                    )
-                ]
-            },
-            VARCHAR: {
-                VALID: [
-                    (
-                        "$12.12",
-                        "$12.12"
                     )
                 ]
             },
@@ -1296,36 +1298,36 @@ def test_get_full_cast_map(engine_with_types, source_type, expect_target_types):
 
 
 money_array_examples = [
-    ('$1,000.00', ['$1,000.00', ',', '.']),
-    ('1,000.00$', ['1,000.00$', ',', '.']),
-    ('$1', ['$1', None, None]),
-    ('1$', ['1$', None, None]),
-    ('$ 1', ['$ 1', None, None]),
+    ('$1,000.00', ['1,000.00', ',', '.']),
+    ('1,000.00$', ['1,000.00', ',', '.']),
+    ('$1', ['1', None, None]),
+    ('1$', ['1', None, None]),
+    ('$ 1', ['1', None, None]),
     ('1', None),
     ('1,000', None),
     ('1,000.00', None),
     ('$1,000', None),
-    ('$1,000,000', ['$1,000,000', ',', None]),
-    ('1,000,000$', ['1,000,000$', ',', None]),
-    ('$1 000,000', ['$1 000,000', ' ', ',']),
-    ('1 000,000$', ['1 000,000$', ' ', ',']),
-    ('1.000,000$', ['1.000,000$', '.', ',']),
-    ('$1.000,00 HK', ['$1.000,00 HK', '.', ',']),
-    ('EUR 1.000,00', ['EUR 1.000,00', '.', ',']),
-    ('€1.000,00', ['€1.000,00', '.', ',']),
-    ('1.000,00€', ['1.000,00€', '.', ',']),
-    ('€1 000', ['€1 000', ' ', None]),
-    ('1 000€', ['1 000€', ' ', None]),
-    ('₿1,324.23466 BTC', ['₿1,324.23466 BTC', ',', '.']),
+    ('$1,000,000', ['1,000,000', ',', None]),
+    ('1,000,000$', ['1,000,000', ',', None]),
+    ('$1 000,000', ['1 000,000', ' ', ',']),
+    ('1 000,000$', ['1 000,000', ' ', ',']),
+    ('1.000,000$', ['1.000,000', '.', ',']),
+    ('$1.000,00 HK', ['1.000,00', '.', ',']),
+    ('EUR 1.000,00', ['1.000,00', '.', ',']),
+    ('€1.000,00', ['1.000,00', '.', ',']),
+    ('1.000,00€', ['1.000,00', '.', ',']),
+    ('€1 000', ['1 000', ' ', None]),
+    ('1 000€', ['1 000', ' ', None]),
+    ('₿1,324.23466 BTC', ['1,324.23466', ',', '.']),
     ('12₿1,324.23466 BTC', None),
     ('₿1,324.23466 BTC12', None),
-    ('₹1,00,000', ['₹1,00,000', ',', None]),
-    ('1,00,000₹', ['1,00,000₹', ',', None]),
-    ('₹1,00,000.00', ['₹1,00,000.00', ',', '.']),
-    ('1,00,000.00₹', ['1,00,000.00₹', ',', '.']),
-    ('10,00,000.00₹', ['10,00,000.00₹', ',', '.']),
-    ('₹10,00,00,000.00', ['₹10,00,00,000.00', ',', '.']),
-    ('10,00,00,000.00₹', ['10,00,00,000.00₹', ',', '.']),
+    ('₹1,00,000', ['1,00,000', ',', None]),
+    ('1,00,000₹', ['1,00,000', ',', None]),
+    ('₹1,00,000.00', ['1,00,000.00', ',', '.']),
+    ('1,00,000.00₹', ['1,00,000.00', ',', '.']),
+    ('10,00,000.00₹', ['10,00,000.00', ',', '.']),
+    ('₹10,00,00,000.00', ['10,00,00,000.00', ',', '.']),
+    ('10,00,00,000.00₹', ['10,00,00,000.00', ',', '.']),
 ]
 
 
