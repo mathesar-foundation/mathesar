@@ -58,9 +58,10 @@ def alter_column(engine, table_oid, column_attnum, column_data):
 
 
 def alter_column_type(
-        table, column_name, engine, connection, target_type_str,
+        table_oid, column_name, engine, connection, target_type_str,
         type_options={}, friendly_names=True,
 ):
+    table = reflect_table_from_oid(table_oid, engine, connection)
     _preparer = engine.dialect.identifier_preparer
     supported_types = get_supported_alter_column_types(
         engine, friendly_names=friendly_names
@@ -117,7 +118,7 @@ def retype_column(
 
     try:
         alter_column_type(
-            table,
+            table_oid,
             column_name,
             engine,
             connection,
