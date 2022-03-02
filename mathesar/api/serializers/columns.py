@@ -106,7 +106,7 @@ class ColumnSerializer(SimpleColumnSerializer):
     )
 
     # From duplication fields
-    source_column = serializers.PrimaryKeyRelatedField(queryset=Column.objects.all(), required=False, write_only=True)
+    source_column = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), required=False, write_only=True)
     copy_source_data = serializers.BooleanField(default=True, write_only=True)
     copy_source_constraints = serializers.BooleanField(default=True, write_only=True)
 
