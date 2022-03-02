@@ -1,6 +1,10 @@
 from frozendict import frozendict
 
 
+def _make_hint(id, **rest):
+    return frozendict({"id": id, **rest})
+
+
 def get_parameter_hints(index, db_function_subclass):
     """
     Returns the hints declared on the parameter at specified index. If explicit hints are not
@@ -23,10 +27,6 @@ def get_parameter_count(db_function_subclass):
     return None
 
 
-def _make_hint(id, **rest):
-    return frozendict({"id": id, **rest})
-
-
 def parameter_count(count):
     return _make_hint("parameter_count", count=count)
 
@@ -41,6 +41,40 @@ def all_parameters(*hints):
 
 def returns(*hints):
     return _make_hint("returns", hints=hints)
+
+
+def get_parameter_type_hints(index, db_function_subclass):
+    """
+    Returns the output of get_parameter_hints filtered to only include hints that are applicable to
+    types. Useful when comparing a parameter's hintset to a type's hintset. We do that when
+    matching filters to UI/Mathesar types, for example.
+    """
+    parameter_hints = get_parameter_hints(index, db_function_subclass)
+    parameter_type_hints = tuple(
+        hint
+        for hint in parameter_hints
+        if _is_hint_applicable_to_types(hint)
+    )
+    return parameter_type_hints
+
+
+def _is_hint_applicable_to_types(hint):
+    """
+    Checks that a hint doesn't have the `not_applicable_to_types` hintset.
+    """
+    hints_about_hints = hint.get("hints", None)
+    if hints_about_hints:
+        return not_applicable_to_types not in hints_about_hints
+    else:
+        return True
+
+
+# When applied to a hint, meant to suggest that it doesn't describe type attributes.
+# Useful when you want to find only the hints that describe a type (or not a type).
+# For example, when checking if hints applied to a Mathesar/UI type are a superset of hints applied
+# to a parameter, you are only interested in hints that describe type-related information (that
+# might be applied to a type).
+not_applicable_to_types = _make_hint("not_applicable_to_types")
 
 
 boolean = _make_hint("boolean")
@@ -73,3 +107,8 @@ mathesar_filter = _make_hint("mathesar_filter")
 
 # A hint that all types are meant to satisfy.
 any = _make_hint("any")
+
+
+# When applied to a parameter, meant to suggest values for that parameter.
+def suggested_values(values):
+    return _make_hint("suggested_values", hints=(not_applicable_to_types,), values=values)
