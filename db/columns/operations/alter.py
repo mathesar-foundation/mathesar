@@ -16,7 +16,7 @@ from db.types.operations.cast import get_supported_alter_column_types, get_cast_
 from db.utils import execute_statement
 
 
-def alter_column(engine, table_oid, column_index, column_data):
+def alter_column(engine, table_oid, column_attnum, column_data):
     TYPE_KEY = 'plain_type'
     TYPE_OPTIONS_KEY = 'type_options'
     NULLABLE_KEY = NULLABLE
@@ -24,23 +24,19 @@ def alter_column(engine, table_oid, column_index, column_data):
     DEFAULT_KEY = 'value'
     NAME_KEY = NAME
 
-    table = reflect_table_from_oid(table_oid, engine)
-    column_index = int(column_index)
-
     with engine.begin() as conn:
         if TYPE_KEY in column_data:
             retype_column(
-                table, column_index, engine, conn,
+                table_oid, column_attnum, engine, conn,
                 new_type=column_data[TYPE_KEY],
                 type_options=column_data.get(TYPE_OPTIONS_KEY, {})
             )
         elif TYPE_OPTIONS_KEY in column_data:
             retype_column(
-                table, column_index, engine, conn,
+                table_oid, column_attnum, engine, conn,
                 type_options=column_data[TYPE_OPTIONS_KEY]
             )
-        column_name = table.columns[column_index].name
-        column_attnum = get_column_attnum_from_name(table_oid, column_name, engine)
+
         if NULLABLE_KEY in column_data:
             nullable = column_data[NULLABLE_KEY]
             change_column_nullable(table_oid, column_attnum, engine, conn, nullable)
@@ -53,10 +49,10 @@ def alter_column(engine, table_oid, column_index, column_data):
             # Name always needs to be the last item altered
             # since previous operations need the name to work
             name = column_data[NAME_KEY]
-            rename_column(table, column_index, engine, conn, name)
-
+            rename_column(table_oid, column_attnum, engine, conn, name)
+    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
     return get_mathesar_column_with_engine(
-        reflect_table_from_oid(table_oid, engine).columns[column_index],
+        reflect_table_from_oid(table_oid, engine).columns[column_name],
         engine
     )
 
@@ -104,9 +100,11 @@ def alter_column_type(
 
 
 def retype_column(
-        table, column_index, engine, connection, new_type=None, type_options={},
+        table_oid, column_attnum, engine, connection, new_type=None, type_options={},
 ):
-    column = table.columns[column_index]
+    table = reflect_table_from_oid(table_oid, engine, connection)
+    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
+    column = table.columns[column_name]
     column_db_type = get_db_type_name(column.type, engine)
     new_type = new_type if new_type is not None else column_db_type
     column_type_options = get_type_options(column)
@@ -120,7 +118,7 @@ def retype_column(
     try:
         alter_column_type(
             table,
-            table.columns[column_index].name,
+            column_name,
             engine,
             connection,
             new_type,
@@ -163,8 +161,10 @@ def set_column_default(table_oid, column_attnum, engine, connection, default):
             raise e
 
 
-def rename_column(table, column_index, engine, connection, new_name):
-    column = table.columns[column_index]
+def rename_column(table_oid, column_attnum, engine, connection, new_name):
+    table = reflect_table_from_oid(table_oid, engine, connection)
+    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
+    column = table.columns[column_name]
     ctx = MigrationContext.configure(connection)
     op = Operations(ctx)
     op.alter_column(table.name, column.name, new_column_name=new_name, schema=table.schema)
@@ -190,14 +190,16 @@ def _validate_columns_for_batch_update(table, column_data):
                 raise ValueError(f'Key "{key}" found in columns. Keys allowed are: {allowed_key_list}')
 
 
-def _batch_update_column_types(table, column_data_list, connection, engine):
+def _batch_update_column_types(table_oid, column_data_list, connection, engine):
+    table = reflect_table_from_oid(table_oid, engine, connection)
     for index, column_data in enumerate(column_data_list):
         if 'plain_type' in column_data:
             new_type = column_data['plain_type']
             type_options = column_data.get('type_options', {})
             if type_options is None:
                 type_options = {}
-            retype_column(table, index, engine, connection, new_type, type_options)
+            column_attnum = get_column_attnum_from_name(table_oid, table.columns[index].name, engine, connection)
+            retype_column(table_oid, column_attnum, engine, connection, new_type, type_options)
 
 
 def _batch_alter_table_columns(table, column_data_list, connection):
@@ -219,5 +221,5 @@ def batch_update_columns(table_oid, engine, column_data_list):
     table = reflect_table_from_oid(table_oid, engine)
     _validate_columns_for_batch_update(table, column_data_list)
     with engine.begin() as conn:
-        _batch_update_column_types(table, column_data_list, conn, engine)
+        _batch_update_column_types(table_oid, column_data_list, conn, engine)
         _batch_alter_table_columns(table, column_data_list, conn)

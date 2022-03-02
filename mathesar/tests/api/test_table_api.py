@@ -1146,7 +1146,7 @@ def test_table_patch_columns_multiple_type_change(create_data_types_table, clien
     }
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
-
+    print(response_json)
     assert response.status_code == 200
     _check_columns(response_json['columns'], column_data)
 

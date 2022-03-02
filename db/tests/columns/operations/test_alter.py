@@ -33,7 +33,7 @@ def _rename_column_and_assert(table, old_col_name, new_col_name, engine):
     table_oid = get_oid_from_table(table.name, table.schema, engine)
     column_index = get_column_index_from_name(table_oid, old_col_name, engine)
     with engine.begin() as conn:
-        rename_column(table, column_index, engine, conn, new_col_name)
+        rename_column(table_oid, column_index, engine, conn, new_col_name)
     table = reflect_table(table.name, table.schema, engine)
     assert new_col_name in table.columns
     assert old_col_name not in table.columns
