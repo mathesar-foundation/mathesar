@@ -16,6 +16,7 @@ FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "resources")
 ROSTER_SQL = os.path.join(RESOURCES, "roster_create.sql")
 URIS_SQL = os.path.join(RESOURCES, "uris_create.sql")
+TIMES_SQL = os.path.join(RESOURCES, "times_create.sql")
 FILTER_SORT_SQL = os.path.join(RESOURCES, "filter_sort_create.sql")
 
 
@@ -27,6 +28,9 @@ def engine_with_schema(engine):
     yield engine, schema
     with engine.begin() as conn:
         conn.execute(text(f"DROP SCHEMA {schema} CASCADE;"))
+
+
+# TODO tech debt: notice that below fixtures are very similar
 
 
 @pytest.fixture
@@ -48,6 +52,19 @@ def engine_with_uris(engine_with_schema):
     _add_custom_types_to_engine(engine)
     install.install_mathesar_on_database(engine)
     with engine.begin() as conn, open(URIS_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    yield engine, schema
+    with engine.begin() as conn:
+        conn.execute(DropSchema(base.SCHEMA, cascade=True, if_exists=True))
+
+
+@pytest.fixture
+def engine_with_times(engine_with_schema):
+    engine, schema = engine_with_schema
+    _add_custom_types_to_engine(engine)
+    install.install_mathesar_on_database(engine)
+    with engine.begin() as conn, open(TIMES_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
     yield engine, schema
@@ -115,8 +132,16 @@ def extracted_remainder_roster(engine_with_roster, roster_table_name, roster_ext
 
 
 @pytest.fixture
+def times_table_obj(engine_with_times):
+    engine, schema = engine_with_times
+    metadata = MetaData(bind=engine)
+    table = Table("times", metadata, schema=schema, autoload_with=engine)
+    return table, engine
+
+
+@pytest.fixture
 def roster_table_obj(engine_with_roster, roster_table_name):
     engine, schema = engine_with_roster
     metadata = MetaData(bind=engine)
-    roster = Table(roster_table_name, metadata, schema=schema, autoload_with=engine)
-    return roster, engine
+    table = Table(roster_table_name, metadata, schema=schema, autoload_with=engine)
+    return table, engine
