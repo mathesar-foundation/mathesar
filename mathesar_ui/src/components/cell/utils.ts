@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
-import type { SvelteComponent } from 'svelte';
 import type { Column } from '@mathesar/stores/table-data/types.d';
+import type { ComponentAndProps } from '@mathesar/component-library/types';
 import {
   currentDbAbstractTypes,
   getAbstractTypeForDbType,
@@ -20,10 +20,8 @@ function getInputConfiguration(
   return abstractTypeOfColumn?.input ?? null;
 }
 
-function getStringCellComponentAndProps(
-  column: Column,
-): [typeof SvelteComponent, Record<string, unknown>] {
-  const typeOptions = column.type_options;
+function getStringCellComponentAndProps(column: Column): ComponentAndProps {
+  const typeOptions = column.type_options ?? undefined;
   let component = TextBoxCell;
   if (
     !typeOptions ||
@@ -32,20 +30,16 @@ function getStringCellComponentAndProps(
   ) {
     component = TextAreaCell;
   }
-  return [component, typeOptions ?? {}];
+  return { component, props: typeOptions };
 }
 
-function getBooleanCellComponentAndProps(
-  column: Column,
-): [typeof SvelteComponent, Record<string, unknown>] {
-  const displayOptions = column.display_options;
+function getBooleanCellComponentAndProps(column: Column): ComponentAndProps {
+  const displayOptions = column.display_options ?? undefined;
   // TODO: Change to Select based on display option
-  return [CheckboxCell, displayOptions ?? {}];
+  return { component: CheckboxCell, props: displayOptions };
 }
 
-export function getCellComponentWithProps(
-  column: Column,
-): [typeof SvelteComponent, Record<string, unknown>] {
+export function getCellComponentWithProps(column: Column): ComponentAndProps {
   const inputOptions = getInputConfiguration(column);
   const inputDataType: string = inputOptions.type ?? 'string';
   switch (inputDataType) {
@@ -54,6 +48,6 @@ export function getCellComponentWithProps(
     case 'string':
       return getStringCellComponentAndProps(column);
     default:
-      return [TextBoxCell, {}];
+      return { component: TextBoxCell };
   }
 }

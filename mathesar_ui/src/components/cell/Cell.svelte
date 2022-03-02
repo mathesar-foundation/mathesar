@@ -10,7 +10,7 @@
   export let state: 'loading' | 'error' | 'ready' = 'ready';
 
   // TODO (IMPORTANT): Calculate this at a higher level, instead of calculating on each cell instance
-  $: [cellComponent, cellProps] = getCellComponentWithProps(column);
+  $: ({ component, props } = getCellComponentWithProps(column));
 </script>
 
 <!--
@@ -19,8 +19,8 @@
 -->
 <div class="sheet-cell">
   <svelte:component
-    this={cellComponent}
-    {...cellProps}
+    this={component}
+    {...props}
     {isActive}
     readonly={column.primary_key}
     bind:value
