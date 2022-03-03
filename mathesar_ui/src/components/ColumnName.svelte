@@ -2,12 +2,12 @@
   import type { Column } from '@mathesar/stores/table-data/types';
   import {
     currentDbAbstractTypes,
-    getAbstractTypeForDBType,
+    getAbstractTypeForDbType,
   } from '@mathesar/stores/abstract-types';
 
   export let column: Column;
 
-  $: abstractTypeOfColumn = getAbstractTypeForDBType(
+  $: abstractTypeOfColumn = getAbstractTypeForDbType(
     column.type,
     $currentDbAbstractTypes.data,
   );

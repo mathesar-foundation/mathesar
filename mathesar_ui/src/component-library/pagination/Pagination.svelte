@@ -29,6 +29,12 @@
     undefined;
 
   // Total number of pages.
+  //
+  // TODO: @seancolsen says:
+  // > Refactor `pageCount` to no longer be an exported prop. We're exporting it
+  // > just so the parent component can access the calculation done within this
+  // > component. That's an unconventional flow of data. I'd rather do the
+  // > calculation in the parent and pass it down to this component.
   export let pageCount = 0;
 
   // ARIA Label for component

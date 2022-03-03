@@ -1,5 +1,4 @@
 import json
-from datetime import date
 
 import pytest
 from unittest.mock import patch
@@ -83,6 +82,7 @@ def column_test_table_with_service_layer_options(patent_schema):
 def test_column_list(column_test_table, client):
     cache.clear()
     response = client.get(f"/api/db/v0/tables/{column_test_table.id}/columns/")
+    assert response.status_code == 200
     response_data = response.json()
     assert response_data['count'] == len(column_test_table.sa_columns)
     expect_results = [
@@ -189,7 +189,7 @@ create_default_test_list = [
     ("NUMERIC", 42, 42, 42),
     ("STRING", "test_string", "test_string", "test_string"),
     ("VARCHAR", "test_string", "test_string", "test_string"),
-    ("DATE", "2020-1-1", date(2020, 1, 1), "2020-01-01"),
+    ("DATE", "2020-1-1", "2020-01-01 AD", "2020-01-01 AD"),
     ("EMAIL", "test@test.com", "test@test.com", "test@test.com"),
 ]
 
@@ -245,6 +245,7 @@ create_display_options_test_list = [
     ("BOOLEAN", {"input": "dropdown"}),
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
     ("DATE", {'format': 'YYYY-MM-DD'}),
+    ("INTERVAL", {'format': 'DD HH:mm:ss.SSS'}),
     ("NUMERIC", {"show_as_percentage": True}),
     ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}),
     ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
@@ -389,18 +390,19 @@ def test_column_update_name(column_test_table, client):
     response = client.patch(
         f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/", data=data
     )
+    assert response.status_code == 200
     assert response.json()["name"] == name
     response = client.get(
         f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/"
     )
+    assert response.status_code == 200
     assert response.json()["name"] == name
 
 
 def test_column_update_display_options(column_test_table_with_service_layer_options, client):
     cache.clear()
     table, columns = column_test_table_with_service_layer_options
-    column_index = 1
-    column = columns[column_index]
+    column = _get_columns_by_name(column_test_table, ['mycolumn1'])[0]
     column_id = column.id
     display_options = {"input": "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}
     display_options_data = {"display_options": display_options}

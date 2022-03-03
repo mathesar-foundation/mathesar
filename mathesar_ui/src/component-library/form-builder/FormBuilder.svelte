@@ -17,6 +17,7 @@
   <form on:submit|preventDefault={submit}>
     <FormElement
       stores={form.stores}
+      storeUsage={form.storeUsage}
       variables={form.variables}
       element={form.layout}
     />

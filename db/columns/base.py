@@ -141,14 +141,13 @@ class MathesarColumn(Column):
     @property
     def column_attnum(self):
         """
-        Get the ordinal index of this column in its table, if it is
+        Get the attnum of this column in its table, if it is
         attached to a table that is associated with the column's engine.
         """
-        if (
-                self.engine is not None
-                and self.table_ is not None
-                and inspect(self.engine).has_table(self.table_.name, schema=self.table_.schema)
-        ):
+        engine_exists = self.engine is not None
+        table_exists = self.table_ is not None
+        engine_has_table = inspect(self.engine).has_table(self.table_.name, schema=self.table_.schema)
+        if engine_exists and table_exists and engine_has_table:
             return get_column_attnum_from_name(
                 self.table_oid,
                 self.name,

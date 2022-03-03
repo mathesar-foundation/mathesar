@@ -12,13 +12,12 @@
   import type {
     Meta,
     Column,
-    SortOption,
-    GroupOption,
     ColumnsDataStore,
     ConstraintsDataStore,
   } from '@mathesar/stores/table-data/types';
   import { toast } from '@mathesar/stores/toast';
   import { confirmDelete } from '@mathesar/stores/confirmation';
+  import { SortDirection } from '@mathesar/stores/table-data';
 
   const dispatch = createEventDispatcher();
 
@@ -30,28 +29,28 @@
   let isRequestingToggleAllowNull = false;
   let isRequestingToggleAllowDuplicates = false;
 
-  $: ({ sort, group } = meta);
-  $: sortDirection = ($sort as SortOption)?.get(column.name);
-  $: hasGrouping = ($group as GroupOption)?.has(column.name);
+  $: ({ sorting, grouping } = meta);
+  $: sortDirection = $sorting.get(column.name);
+  $: hasGrouping = $grouping.has(column.name);
 
   $: allowsNull = column.nullable;
   $: ({ uniqueColumns } = constraintsDataStore);
   $: allowsDuplicates = !(column.primary_key || $uniqueColumns.has(column.id));
 
-  function handleSort(order: 'asc' | 'desc') {
+  function handleSort(order: SortDirection) {
     if (sortDirection === order) {
-      meta.removeSort(column.name);
+      sorting.update((s) => s.without(column.name));
     } else {
-      meta.addUpdateSort(column.name, order);
+      sorting.update((s) => s.with(column.name, order));
     }
     dispatch('close');
   }
 
   function toggleGroup() {
     if (hasGrouping) {
-      meta.removeGroup(column.name);
+      grouping.update((g) => g.without(column.name));
     } else {
-      meta.addGroup(column.name);
+      grouping.update((g) => g.with(column.name));
     }
     dispatch('close');
   }
@@ -126,10 +125,10 @@
 <h6 class="category">Display</h6>
 <ul>
   <li>
-    <Button appearance="plain" on:click={() => handleSort('asc')}>
+    <Button appearance="plain" on:click={() => handleSort(SortDirection.A)}>
       <Icon class="opt" data={faSortAmountDownAlt} />
       <span>
-        {#if sortDirection === 'asc'}
+        {#if sortDirection === SortDirection.A}
           Remove asc sort
         {:else}
           Sort Ascending
@@ -138,10 +137,10 @@
     </Button>
   </li>
   <li>
-    <Button appearance="plain" on:click={() => handleSort('desc')}>
+    <Button appearance="plain" on:click={() => handleSort(SortDirection.D)}>
       <Icon class="opt" data={faSortAmountDown} />
       <span>
-        {#if sortDirection === 'desc'}
+        {#if sortDirection === SortDirection.D}
           Remove desc sort
         {:else}
           Sort Descending

@@ -1,9 +1,7 @@
-import { get } from 'svelte/store';
-import type { Writable, Unsubscriber } from 'svelte/store';
-import type { DBObjectEntry, TabularType } from '@mathesar/App.d';
-import { EventHandler } from '@mathesar-component-library';
-import type { MetaParams } from './meta';
-import { Meta } from './meta';
+import type { Writable } from 'svelte/store';
+import type { DBObjectEntry } from '@mathesar/App.d';
+import type { TerseMetaProps, MetaProps } from './meta';
+import { makeMetaProps, makeTerseMetaProps, Meta } from './meta';
 import type { ColumnsData } from './columns';
 import { ColumnsDataStore } from './columns';
 import type { TableRecordsData } from './records';
@@ -11,14 +9,38 @@ import { RecordsData } from './records';
 import { Display } from './display';
 import type { ConstraintsData } from './constraints';
 import { ConstraintsDataStore } from './constraints';
+import type { TabularType } from './TabularType';
 
-export type TabularDataParams = [
+export interface TabularDataProps {
+  type: TabularType;
+  id: DBObjectEntry['id'];
+  metaProps?: MetaProps;
+}
+
+/** [ type, id, metaProps ] */
+export type TerseTabularDataProps = [
   TabularType,
   DBObjectEntry['id'],
-  ...MetaParams
+  TerseMetaProps,
 ];
 
-export class TabularData extends EventHandler {
+export function makeTabularDataProps(
+  t: TerseTabularDataProps,
+): TabularDataProps {
+  return {
+    type: t[0],
+    id: t[1],
+    metaProps: makeMetaProps(t[2]),
+  };
+}
+
+export function makeTerseTabularDataProps(
+  p: TabularDataProps,
+): TerseTabularDataProps {
+  return [p.type, p.id, makeTerseMetaProps(p.metaProps)];
+}
+
+export class TabularData {
   type: TabularType;
 
   id: DBObjectEntry['id'];
@@ -33,42 +55,25 @@ export class TabularData extends EventHandler {
 
   display: Display;
 
-  private metaParametersUnsubscriber: Unsubscriber;
-
-  constructor(
-    type: TabularType,
-    id: DBObjectEntry['id'],
-    params?: TabularDataParams,
-  ) {
-    super();
-    this.type = type;
-    this.id = id;
-    this.meta = new Meta(type, id, params?.slice(2) as MetaParams);
-    this.columnsDataStore = new ColumnsDataStore(type, id, this.meta);
-    this.constraintsDataStore = new ConstraintsDataStore(id);
+  constructor(props: TabularDataProps) {
+    this.type = props.type;
+    this.id = props.id;
+    this.meta = new Meta(props.metaProps);
+    this.columnsDataStore = new ColumnsDataStore(this.type, this.id, this.meta);
+    this.constraintsDataStore = new ConstraintsDataStore(this.id);
     this.recordsData = new RecordsData(
-      type,
-      id,
+      this.type,
+      this.id,
       this.meta,
       this.columnsDataStore,
     );
     this.display = new Display(
-      type,
-      id,
       this.meta,
       this.columnsDataStore,
       this.recordsData,
     );
 
-    this.metaParametersUnsubscriber = this.meta.metaParameters.subscribe(() => {
-      void this.dispatch('paramsUpdated', this.parameterize());
-    });
     this.columnsDataStore.on('columnRenamed', () => this.refresh());
-  }
-
-  parameterize(): TabularDataParams {
-    const metaParams = get(this.meta.metaParameters);
-    return [this.type, this.id, ...metaParams];
   }
 
   refresh(): Promise<
@@ -86,13 +91,10 @@ export class TabularData extends EventHandler {
   }
 
   destroy(): void {
-    // Destroy in reverse order of creation
-    this.metaParametersUnsubscriber();
     this.display.destroy();
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
-    super.destroy();
   }
 }
 
