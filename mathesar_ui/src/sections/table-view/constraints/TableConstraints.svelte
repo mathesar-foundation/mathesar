@@ -65,7 +65,7 @@
   </div>
 
   <div slot="footer" class="footer">
-    <Dropdown closeOnInnerClick={true} ariaLabel="New table">
+    <Dropdown closeOnInnerClick={true} ariaLabel="New Constraint">
       <div slot="trigger" class="trigger">
         <Icon data={faPlus} />
         <span class="label">New Constraint</span>

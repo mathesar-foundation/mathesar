@@ -86,6 +86,18 @@ _known_custom_db_types = tuple(mathesar_custom_type for mathesar_custom_type in 
 known_db_types = _known_vanilla_db_types + _known_custom_db_types
 
 
+# Origin: https://www.python.org/dev/peps/pep-0616/#id17
+def _remove_prefix(self: str, prefix: str, /) -> str:
+    """
+    This will remove the passed prefix, if it's there.
+    Otherwise, it will return the string unchanged.
+    """
+    if self.startswith(prefix):
+        return self[len(prefix):]
+    else:
+        return self[:]
+
+
 def get_db_type_enum_from_id(db_type_id):
     """
     Gets an instance of either the PostgresType enum or the MathesarCustomType enum corresponding
@@ -96,30 +108,36 @@ def get_db_type_enum_from_id(db_type_id):
         return PostgresType(db_type_id)
     except ValueError:
         try:
-            return MathesarCustomType(db_type_id)
+            # Sometimes MA type identifiers are qualified like so: `mathesar_types.uri`.
+            # We want to remove that prefix, when it's there, because MathesarCustomType
+            # enum stores type ids without a qualifier (e.g. `uri`).
+            possible_prefix = _ma_type_qualifier_prefix + '.'
+            preprocessed_db_type_id = _remove_prefix(db_type_id, possible_prefix)
+            return MathesarCustomType(preprocessed_db_type_id)
         except ValueError:
             return None
 
 
 def _build_db_types_hinted():
+    """
+    Builds up a map of db types to hintsets.
+    """
+    # Start out by defining some hints manually.
     db_types_hinted = {
         PostgresType.BOOLEAN: tuple([
             hints.boolean
         ]),
-        PostgresType.CHARACTER_VARYING: tuple([
-            hints.string_like
-        ]),
-        PostgresType.CHARACTER: tuple([
-            hints.string_like
-        ]),
-        PostgresType.TEXT: tuple([
-            hints.string_like
-        ]),
         MathesarCustomType.URI: tuple([
             hints.uri
         ]),
+        MathesarCustomType.EMAIL: tuple([
+            hints.email
+        ]),
     }
 
+    # Then, start adding hints automatically.
+    # This is for many-to-many relationships, i.e. adding multiple identical hintsets to the
+    # hintsets of multiple db types.
     def _add_to_db_type_hintsets(db_types, hints):
         """
         Mutates db_types_hinted to map every hint in `hints` to every DB type in `db_types`.
@@ -131,10 +149,25 @@ def _build_db_types_hinted():
             else:
                 db_types_hinted[db_type] = tuple(hints)
 
+    # all types get the "any" hint
     all_db_types = known_db_types
     hints_for_all_db_types = (hints.any,)
     _add_to_db_type_hintsets(all_db_types, hints_for_all_db_types)
 
+    # string-like types get the "string_like" hint
+    string_like_db_types = (
+        PostgresType.CHAR,
+        PostgresType.CHARACTER,
+        PostgresType.CHARACTER_VARYING,
+        PostgresType.NAME,
+        PostgresType.TEXT,
+        MathesarCustomType.URI,
+        MathesarCustomType.EMAIL,
+    )
+    hints_for_string_like_types = (hints.string_like,)
+    _add_to_db_type_hintsets(string_like_db_types, hints_for_string_like_types)
+
+    # numeric types get the "comparable" hint
     numeric_db_types = (
         PostgresType.BIGINT,
         PostgresType.DECIMAL,
@@ -144,9 +177,25 @@ def _build_db_types_hinted():
         PostgresType.SMALLINT,
         PostgresType.NUMERIC,
         PostgresType.REAL,
+        PostgresType.MONEY,
+        MathesarCustomType.MATHESAR_MONEY,
     )
     hints_for_numeric_db_types = (hints.comparable,)
     _add_to_db_type_hintsets(numeric_db_types, hints_for_numeric_db_types)
+
+    # time related types get the "comparable" hint
+    time_related_db_types = (
+        PostgresType.DATE,
+        PostgresType.TIME,
+        PostgresType.TIME_WITH_TIME_ZONE,
+        PostgresType.TIME_WITHOUT_TIME_ZONE,
+        PostgresType.TIMESTAMP,
+        PostgresType.TIMESTAMP_WITH_TIME_ZONE,
+        PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE,
+        PostgresType.INTERVAL,
+    )
+    hints_for_time_related_types = (hints.comparable,)
+    _add_to_db_type_hintsets(time_related_db_types, hints_for_time_related_types)
 
     return frozendict(db_types_hinted)
 
@@ -160,8 +209,12 @@ SCHEMA = f"{constants.MATHESAR_PREFIX}types"
 preparer = create_engine("postgresql://").dialect.identifier_preparer
 
 
+# Should usually equal `mathesar_types`
+_ma_type_qualifier_prefix = preparer.quote_schema(SCHEMA)
+
+
 def get_qualified_name(name):
-    return ".".join([preparer.quote_schema(SCHEMA), name])
+    return ".".join([_ma_type_qualifier_prefix, name])
 
 
 def get_available_types(engine):

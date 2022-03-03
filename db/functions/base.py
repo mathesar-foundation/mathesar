@@ -17,8 +17,14 @@ from abc import ABC, abstractmethod
 from sqlalchemy import column, not_, and_, or_, func, literal
 
 from db.functions import hints
+from db.functions.exceptions import BadDBFunctionFormat
 
 
+def sa_call_sql_function(function_name, *parameters):
+    return getattr(func, function_name)(*parameters)
+
+
+# NOTE: this class is abstract.
 class DBFunction(ABC):
     id = None
     name = None
@@ -30,6 +36,13 @@ class DBFunction(ABC):
     # strings.
     depends_on = None
 
+    def __eq__(self, other):
+        return (
+            isinstance(other, DBFunction)
+            and self.id == other.id
+            and self.parameters == other.parameters
+        )
+
     def __init__(self, parameters):
         if self.id is None:
             raise ValueError('DBFunction subclasses must define an ID.')
@@ -37,6 +50,8 @@ class DBFunction(ABC):
             raise ValueError('DBFunction subclasses must define a name.')
         if self.depends_on is not None and not isinstance(self.depends_on, tuple):
             raise ValueError('DBFunction subclasses\' depends_on attribute must either be None or a tuple of SQL function names.')
+        if not isinstance(parameters, list):
+            raise BadDBFunctionFormat('DBFunction instance parameter `parameters` must be a list.')
         self.parameters = parameters
 
     @property
@@ -45,7 +60,7 @@ class DBFunction(ABC):
         Useful when checking if all referenced columns are present in the queried relation."""
         columns = set([])
         for parameter in self.parameters:
-            if isinstance(parameter, ColumnReference):
+            if isinstance(parameter, ColumnName):
                 columns.add(parameter.column)
             elif isinstance(parameter, DBFunction):
                 columns.update(parameter.referenced_columns)
@@ -62,7 +77,7 @@ class Literal(DBFunction):
     name = 'as literal'
     hints = tuple([
         hints.parameter_count(1),
-        hints.parameter(1, hints.literal),
+        hints.parameter(0, hints.literal),
     ])
 
     @staticmethod
@@ -70,12 +85,13 @@ class Literal(DBFunction):
         return literal(primitive)
 
 
-class ColumnReference(DBFunction):
-    id = 'column_reference'
-    name = 'as column Reference'
+# This represents referencing columns by their Postgres name.
+class ColumnName(DBFunction):
+    id = 'column_name'
+    name = 'as column name'
     hints = tuple([
         hints.parameter_count(1),
-        hints.parameter(1, hints.column),
+        hints.parameter(0, hints.column),
     ])
 
     @property
@@ -178,7 +194,8 @@ class In(DBFunction):
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
-        hints.parameter(2, hints.array),
+        hints.parameter(0, hints.any),
+        hints.parameter(1, hints.array),
     ])
 
     @staticmethod
@@ -217,12 +234,59 @@ class StartsWith(DBFunction):
         hints.returns(hints.boolean),
         hints.parameter_count(2),
         hints.all_parameters(hints.string_like),
+    ])
+
+    @staticmethod
+    def to_sa_expression(string, prefix):
+        pattern = func.concat(prefix, '%')
+        return string.like(pattern)
+
+
+class Contains(DBFunction):
+    id = 'contains'
+    name = 'contains'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.all_parameters(hints.string_like),
+    ])
+
+    @staticmethod
+    def to_sa_expression(string, sub_string):
+        pattern = func.concat('%', sub_string, '%')
+        return string.like(pattern)
+
+
+class StartsWithCaseInsensitive(DBFunction):
+    id = 'starts_with_case_insensitive'
+    name = 'starts with'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.all_parameters(hints.string_like),
         hints.mathesar_filter,
     ])
 
     @staticmethod
     def to_sa_expression(string, prefix):
-        return string.like(f'{prefix}%')
+        pattern = func.concat(prefix, '%')
+        return string.ilike(pattern)
+
+
+class ContainsCaseInsensitive(DBFunction):
+    id = 'contains_case_insensitive'
+    name = 'contains'
+    hints = tuple([
+        hints.returns(hints.boolean),
+        hints.parameter_count(2),
+        hints.all_parameters(hints.string_like),
+        hints.mathesar_filter,
+    ])
+
+    @staticmethod
+    def to_sa_expression(string, sub_string):
+        pattern = func.concat('%', sub_string, '%')
+        return string.ilike(pattern)
 
 
 class ToLowercase(DBFunction):
