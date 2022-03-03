@@ -6,6 +6,7 @@
     getTabsForSchema,
     constructTabularTab,
     constructImportTab,
+    TabType,
   } from '@mathesar/stores/tabs';
   import { tables } from '@mathesar/stores/tables';
   import { loadIncompleteImport } from '@mathesar/stores/fileImports';
@@ -13,7 +14,7 @@
   import type { DBTablesStoreData } from '@mathesar/stores/tables';
   import type { MathesarTab } from '@mathesar/stores/tabs/types';
   import type { SchemaEntry, TableEntry } from '@mathesar/App.d';
-  import { TabularType } from '@mathesar/App.d';
+  import { TabularType } from '@mathesar/stores/table-data';
   import type { TreeItem } from '@mathesar-component-library/types';
 
   export let database: string;
@@ -55,7 +56,7 @@
   $: tree = generateTree($tables);
 
   function onActiveTabChange(_activeTab: MathesarTab | undefined) {
-    if (_activeTab?.tabularData) {
+    if (_activeTab && _activeTab.type === TabType.Tabular) {
       activeOptionSet = new Set([_activeTab.tabularData.id]);
     } else {
       activeOptionSet = new Set();

@@ -261,10 +261,10 @@ class Table(DatabaseObject):
             column_data,
         )
 
-    def drop_column(self, column_index):
+    def drop_column(self, column_attnum):
         drop_column(
             self.oid,
-            column_index,
+            column_attnum,
             self.schema._sa_engine,
         )
 
