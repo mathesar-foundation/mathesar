@@ -6,9 +6,10 @@
 
   export let label: string;
   export let icon: IconProps | undefined = undefined;
+  export let closeOnInnerClick = true;
 </script>
 
-<Dropdown closeOnInnerClick={true} ariaLabel={label}>
+<Dropdown {closeOnInnerClick} ariaLabel={label}>
   <span slot="trigger">
     {#if icon}
       <Icon {...icon} />
