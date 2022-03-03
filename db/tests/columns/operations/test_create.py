@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import Integer, Column, Table, MetaData, Numeric, UniqueConstraint
 
 from db.columns.operations.create import create_column, duplicate_column
-from db.columns.operations.select import get_column_default, get_column_index_from_name
+from db.columns.operations.select import get_column_attnum_from_name, get_column_default, get_column_index_from_name
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.constraints.operations.select import get_column_constraints
 from db.tests.columns.utils import create_test_table
@@ -341,8 +341,8 @@ def test_duplicate_column_default(engine_with_schema, copy_data, copy_constraint
         table_oid, 0, engine, new_col_name, copy_data, copy_constraints
     )
 
-    col_index = get_column_index_from_name(table_oid, new_col_name, engine)
-    default = get_column_default(table_oid, col_index, engine)
+    column_attnum = get_column_attnum_from_name(table_oid, new_col_name, engine)
+    default = get_column_default(table_oid, column_attnum, engine)
     if copy_data:
         assert default == expt_default
     else:

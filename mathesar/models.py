@@ -229,10 +229,7 @@ class Table(DatabaseObject):
 
     def get_dj_columns_queryset(self):
         sa_column_name = [column.name for column in self.sa_columns]
-        column_attnum_list = [
-            result[0] for result in
-            get_columns_attnum_from_names(self.oid, sa_column_name, self.schema._sa_engine)
-        ]
+        column_attnum_list = get_columns_attnum_from_names(self.oid, sa_column_name, self.schema._sa_engine)
         return Column.objects.filter(table=self, attnum__in=column_attnum_list).order_by("attnum")
 
     def get_dj_columns(self):
@@ -399,7 +396,7 @@ class Constraint(DatabaseObject):
     def columns(self):
         column_names = [column.name for column in self._sa_constraint.columns]
         engine = self.table.schema.database._sa_engine
-        column_attnum_list = [result[0] for result in get_columns_attnum_from_names(self.table.oid, column_names, engine)]
+        column_attnum_list = [result for result in get_columns_attnum_from_names(self.table.oid, column_names, engine)]
         return Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
 
     def drop(self):
