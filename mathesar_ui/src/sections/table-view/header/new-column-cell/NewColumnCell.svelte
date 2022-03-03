@@ -50,6 +50,7 @@
     bind:isOpen={isDropdownOpen}
     triggerAppearance="plain"
     showArrow={false}
+    ariaLabel="New Column"
   >
     <svelte:fragment slot="trigger">
       <span class="name">

@@ -17,17 +17,18 @@ DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER = {
         },
     MathesarTypeIdentifier.DATETIME.value:
         {
-            "options": [
-                {"name": "time_format", "type": "string"},
-                {"name": "date_format", "type": "string"},
-            ]
+            "options": [{"name": "format", "type": "string"}]
         },
     MathesarTypeIdentifier.TIME.value:
         {
-            "options": [{"name": "time_format", "type": "string"}]
+            "options": [{"name": "format", "type": "string"}]
         },
     MathesarTypeIdentifier.DATE.value:
         {
-            "options": [{"name": "date_format", "type": "string"}]
+            "options": [{"name": "format", "type": "string"}]
         },
+    MathesarTypeIdentifier.DURATION.value:
+        {
+            "options": [{"name": "format", "type": "string"}]
+        }
 }

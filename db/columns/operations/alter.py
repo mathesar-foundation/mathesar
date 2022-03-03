@@ -6,7 +6,7 @@ from psycopg2.errors import InvalidTextRepresentation, InvalidParameterValue
 
 from db.columns.defaults import NAME, NULLABLE
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
-from db.columns.operations.select import get_column_default, get_column_index_from_name
+from db.columns.operations.select import get_column_attnum_from_name, get_column_default, get_column_index_from_name
 from db.columns.utils import get_mathesar_column_with_engine, get_type_options
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.types.base import get_db_type_name
@@ -73,8 +73,9 @@ def alter_column_type(
     table = reflect_table_from_oid(table_oid, engine, connection)
     column = table.columns[column_name]
     column_index = get_column_index_from_name(table_oid, column_name, engine, connection)
+    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine, connection)
 
-    default = get_column_default(table_oid, column_index, engine, connection)
+    default = get_column_default(table_oid, column_attnum, engine, connection)
     if default is not None:
         default_text = column.server_default.arg.text
     set_column_default(table, column_index, engine, connection, None)

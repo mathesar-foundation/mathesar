@@ -111,10 +111,15 @@ class NumberDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootParti
     show_as_percentage = serializers.BooleanField(default=False)
     locale = serializers.CharField(required=False)
 
+def raise_if_duration_format_invalid(format):
+    if 'z' in format.lower():
+        raise serializers.ValidationError(
+            "Duration column cannot contain timezone display format"
+        )
 
-def is_time_format_valid(format):
+def raise_if_time_format_invalid(format):
     if isinstance(format, str) and len(format) <= 255:
-        return True
+        return
     else:
         raise serializers.ValidationError("Time format string not a string or longer than 255 characters.")
 
@@ -124,7 +129,11 @@ class TimeFormatDisplayOptionSerializer(
     OverrideRootPartialMixin,
     serializers.Serializer
 ):
-    format = serializers.CharField(validators=[is_time_format_valid])
+    format = serializers.CharField(validators=[raise_if_time_format_invalid])
+
+
+class DurationDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
+    format = serializers.CharField(validators=[raise_if_duration_format_invalid])
 
 
 class DisplayOptionsMappingSerializer(
@@ -138,6 +147,7 @@ class DisplayOptionsMappingSerializer(
         MathesarTypeIdentifier.DATETIME.value: TimeFormatDisplayOptionSerializer,
         MathesarTypeIdentifier.DATE.value: TimeFormatDisplayOptionSerializer,
         MathesarTypeIdentifier.TIME.value: TimeFormatDisplayOptionSerializer,
+        MathesarTypeIdentifier.DURATION.value: DurationDisplayOptionSerializer,
     }
 
     def get_mapping_field(self):
