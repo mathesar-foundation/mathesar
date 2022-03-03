@@ -66,7 +66,7 @@ def _process_alias_hint(mathesar_type_hints, alias_hint):
     )
     return dict(
         alias=alias_name,
-        when=when_ma_type_strings,
+        ui_types=when_ma_type_strings,
     )
 
 
