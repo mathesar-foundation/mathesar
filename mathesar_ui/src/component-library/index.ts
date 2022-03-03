@@ -30,6 +30,7 @@ export { default as TextInput } from './text-input/TextInput.svelte';
 
 // Compound Components (Ordered)
 export { default as Dropdown } from './dropdown/Dropdown.svelte';
+export { default as DropdownMenu } from './dropdown-menu/DropdownMenu.svelte';
 export { default as DynamicInput } from './dynamic-input/DynamicInput.svelte';
 export { default as FileUpload } from './file-upload/FileUpload.svelte';
 export { default as Notification } from './notification/Notification.svelte';
