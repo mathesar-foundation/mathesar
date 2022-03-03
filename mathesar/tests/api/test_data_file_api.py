@@ -236,7 +236,6 @@ def test_data_file_create_url_invalid_address(client):
         response = client.post('/api/db/v0/data_files/', data={'url': url})
         response_dict = response.json()
     assert response.status_code == 400
-    print(response_dict)
     assert response_dict[0]['message'] == 'URL cannot be reached.'
 
 

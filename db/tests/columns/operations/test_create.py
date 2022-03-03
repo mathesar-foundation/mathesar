@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import Integer, Column, Table, MetaData, Numeric, UniqueConstraint
 
 from db.columns.operations.create import create_column, duplicate_column
-from db.columns.operations.select import get_column_default, get_column_index_from_name
+from db.columns.operations.select import get_column_attnum_from_name, get_column_default, get_column_index_from_name
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.constraints.operations.select import get_column_constraints
 from db.tests.columns.utils import create_test_table
@@ -161,6 +161,35 @@ def test_create_column_length_options(engine_email_type, target_type):
     assert created_col.type_options == {"length": 5}
 
 
+@pytest.mark.parametrize(
+    "type_options",
+    [{"fields": "year"}, {"precision": 3}, {"precision": 3, "fields": "second"}]
+)
+def test_create_column_interval_options(engine_email_type, type_options):
+    engine, schema = engine_email_type
+    table_name = "atableone"
+    initial_column_name = "original_column"
+    new_column_name = "added_column"
+    table = Table(
+        table_name,
+        MetaData(bind=engine, schema=schema),
+        Column(initial_column_name, Integer),
+    )
+    table.create()
+    table_oid = get_oid_from_table(table_name, schema, engine)
+    column_data = {
+        "name": new_column_name,
+        "type": "INTERVAL",
+        "type_options": type_options,
+    }
+    created_col = create_column(engine, table_oid, column_data)
+    altered_table = reflect_table_from_oid(table_oid, engine)
+    assert len(altered_table.columns) == 2
+    assert created_col.name == new_column_name
+    assert created_col.plain_type == "INTERVAL"
+    assert created_col.type_options == type_options
+
+
 def test_create_column_bad_options(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "atableone"
@@ -312,8 +341,8 @@ def test_duplicate_column_default(engine_with_schema, copy_data, copy_constraint
         table_oid, 0, engine, new_col_name, copy_data, copy_constraints
     )
 
-    col_index = get_column_index_from_name(table_oid, new_col_name, engine)
-    default = get_column_default(table_oid, col_index, engine)
+    column_attnum = get_column_attnum_from_name(table_oid, new_col_name, engine)
+    default = get_column_default(table_oid, column_attnum, engine)
     if copy_data:
         assert default == expt_default
     else:

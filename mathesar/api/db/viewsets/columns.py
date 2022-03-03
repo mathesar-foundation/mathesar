@@ -13,7 +13,8 @@ from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_a
 from db.columns.exceptions import (
     DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError,
 )
-from db.columns.operations.select import get_columns_attnum_from_names
+from db.columns.operations.select import get_column_attnum_from_name
+from db.types.exceptions import InvalidTypeParameters
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
@@ -26,12 +27,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         table = get_table_or_404(pk=self.kwargs['table_pk'])
-        sa_column_name = [column.name for column in table.sa_columns]
-        column_attnum_list = [
-            result[0] for result in
-            get_columns_attnum_from_names(table.oid, sa_column_name, table.schema._sa_engine)
-        ]
-        return Column.objects.filter(table=table, attnum__in=column_attnum_list).order_by("attnum")
+        return table.get_dj_columns_queryset()
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
@@ -81,7 +77,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
                     message=f'default "{request.data["default"]}" is invalid for type {request.data["type"]}',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
-            except InvalidTypeOptionError as e:
+            except (InvalidTypeOptionError, InvalidTypeParameters) as e:
                 type_options = request.data.get('type_options', '')
                 raise database_api_exceptions.InvalidTypeOptionAPIException(
                     e,
@@ -91,13 +87,13 @@ class ColumnViewSet(viewsets.ModelViewSet):
                 )
             except InvalidTypeError as e:
                 raise database_api_exceptions.InvalidTypeCastAPIException(
-                    e, message='This type casting is invalid.',
+                    e,
+                    message='This type casting is invalid.',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
         dj_column = Column(
             table=table,
-            attnum=get_columns_attnum_from_names(table.oid, [column.name], table.schema._sa_engine)[0][
-                0],
+            attnum=get_column_attnum_from_name(table.oid, column.name, table.schema._sa_engine),
             **serializer.validated_model_fields
         )
         dj_column.save()
@@ -146,7 +142,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
                             'Delete or change the default first.',
                     status_code=status.HTTP_400_BAD_REQUEST
                 )
-            except InvalidTypeOptionError as e:
+            except (InvalidTypeOptionError, InvalidTypeParameters) as e:
                 type_options = request.data.get('type_options', '')
                 raise database_api_exceptions.InvalidTypeOptionAPIException(
                     e,

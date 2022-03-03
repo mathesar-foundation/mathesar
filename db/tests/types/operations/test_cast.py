@@ -1,16 +1,13 @@
-from datetime import timedelta, date, time
-from datetime import datetime as py_datetime
 from decimal import Decimal
 
 import pytest
-from psycopg2.tz import FixedOffsetTimezone
 from psycopg2.errors import InvalidParameterValue
 from sqlalchemy import Table, Column, MetaData, select, cast
 from sqlalchemy import String, Numeric
 from sqlalchemy.exc import DataError
 
 from db import types
-from db.columns.operations.select import get_column_default
+from db.columns.operations.select import get_column_attnum_from_name, get_column_default
 from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
@@ -168,22 +165,14 @@ MASTER_DB_TYPE_MAP_SPEC = {
         REFLECTED_NAME: DATE,
         TARGET_DICT: {
             CHAR: {VALID: []},
-            DATE: {VALID: [(date(1999, 1, 18), date(1999, 1, 18))]},
-            TEXT: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
-            VARCHAR: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
+            DATE: {VALID: [("1999-01-18 AD", "1999-01-18 AD")]},
+            TEXT: {VALID: [("1999-01-18 AD", "1999-01-18")]},
+            VARCHAR: {VALID: [("1999-01-18 AD", "1999-01-18")]},
             TIMESTAMP_WITH_TIME_ZONE: {
-                VALID: [(
-                    date(1999, 1, 18),
-                    py_datetime(1999, 1, 18, 0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0))
-                ),
-                ]
+                VALID: [("1999-01-18 AD", "1999-01-18T00:00:00.0Z AD")]
             },
             TIMESTAMP_WITHOUT_TIME_ZONE: {
-                VALID: [(
-                    date(1999, 1, 18),
-                    py_datetime(1999, 1, 18, 0, 0, 0)
-                ),
-                ]
+                VALID: [("1999-01-18 AD", "1999-01-18T00:00:00.0 AD")]
             },
         },
     },
@@ -301,10 +290,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             INTERVAL: {
                 VALID: [
-                    (
-                        timedelta(days=3, hours=3, minutes=5, seconds=30),
-                        timedelta(days=3, hours=3, minutes=5, seconds=30),
-                    )
+                    ("P0Y0M3DT3H5M30S", "P0Y0M3DT3H5M30S")
                 ]
             },
             TEXT: {
@@ -312,10 +298,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             VARCHAR: {
                 VALID: [
-                    (
-                        timedelta(days=3, hours=3, minutes=5, seconds=30),
-                        '3 days 03:05:30'
-                    )
+                    ("P0Y0M3DT3H5M30S", "3 days 03:05:30")
                 ]
             },
         }
@@ -465,15 +448,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
         REFLECTED_NAME: TIME_WITHOUT_TIME_ZONE,
         TARGET_DICT: {
             CHAR: {VALID: []},
-            TIME_WITHOUT_TIME_ZONE: {VALID: [(time(12, 30, 45), time(12, 30, 45))]},
-            TIME_WITH_TIME_ZONE: {
-                VALID: [
-                    (time(12, 30, 45),
-                     time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0))),
-                ]
-            },
-            TEXT: {VALID: [(time(12, 30, 45), "12:30:45")]},
-            VARCHAR: {VALID: [(time(12, 30, 45), "12:30:45")]},
+            TIME_WITHOUT_TIME_ZONE: {VALID: [("12:30:45", "12:30:45.0")]},
+            TIME_WITH_TIME_ZONE: {VALID: [("12:30:45", "12:30:45.0Z")]},
+            TEXT: {VALID: [("12:30:45", "12:30:45")]},
+            VARCHAR: {VALID: [("12:30:45", "12:30:45")]},
         },
     },
     TIME_WITH_TIME_ZONE: {
@@ -482,29 +460,11 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             CHAR: {VALID: []},
             TIME_WITH_TIME_ZONE: {
-                VALID: [
-                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
-                     time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60))),
-                ]
+                VALID: [("12:30:45+01:00", "12:30:45.0+01:00")]
             },
-            TIME_WITHOUT_TIME_ZONE: {
-                VALID: [
-                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=1)),
-                     time(12, 30, 45))
-                ]
-            },
-            TEXT: {
-                VALID: [
-                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
-                     "12:30:45+01")
-                ]
-            },
-            VARCHAR: {
-                VALID: [
-                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
-                     "12:30:45+01")
-                ]
-            },
+            TIME_WITHOUT_TIME_ZONE: {VALID: [("12:30:45+01:00", "12:30:45.0")]},
+            TEXT: {VALID: [("12:30:45+01:00", "12:30:45+01")]},
+            VARCHAR: {VALID: [("12:30:45+01:00", "12:30:45+01")]},
         },
     },
     TIMESTAMP_WITH_TIME_ZONE: {
@@ -512,34 +472,37 @@ MASTER_DB_TYPE_MAP_SPEC = {
         REFLECTED_NAME: TIMESTAMP_WITH_TIME_ZONE,
         TARGET_DICT: {
             CHAR: {VALID: []},
-            DATE: {VALID: [(py_datetime(1999, 1, 18, 0, 0, 0), date(1999, 1, 18)),
-                           (
-                           py_datetime(1999, 1, 18, 0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0)), date(1999, 1, 18))],
-                   INVALID: [py_datetime(1999, 1, 18, 12, 30, 45),
-                             py_datetime(1999, 1, 18, 0, 0, 0, tzinfo=FixedOffsetTimezone(offset=60))
-                             ]
-                   },
+            DATE: {
+                VALID: [("1999-01-18T00:00:00.0Z AD", "1999-01-18 AD")],
+                INVALID: [
+                    "1999-01-18T12:30:45.0Z AD",
+                    "1999-01-18T00:00:00.0+01:00 AD",
+                ]
+            },
             TIMESTAMP_WITH_TIME_ZONE: {
                 VALID: [
-                    (py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
-                     py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60))),
+                    (
+                        "1999-01-18T12:30:45.0+01:00 AD",
+                        "1999-01-18T11:30:45.0Z AD",
+                    ),
                 ]
             },
             TIMESTAMP_WITHOUT_TIME_ZONE: {
-                VALID: [(py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0)),
-                         py_datetime(1999, 1, 18, 12, 30, 45)
-                         )],
+                VALID: [
+                    (
+                        "1999-01-18T12:30:45.0+01:00 AD",
+                        "1999-01-18T11:30:45.0 AD",
+                    )
+                ],
             },
             TEXT: {
                 VALID: [
-                    (py_datetime(1999, 1, 18, 12, 30, 45),
-                     "1999-01-18 12:30:45+00")
+                    ("1999-01-18T12:30:45.0+01:00 AD", "1999-01-18 11:30:45+00")
                 ]
             },
             VARCHAR: {
                 VALID: [
-                    (py_datetime(1999, 1, 18, 12, 30, 45),
-                     "1999-01-18 12:30:45+00")
+                    ("1999-01-18T12:30:45.0+01:00 AD", "1999-01-18 11:30:45+00")
                 ]
             },
         },
@@ -549,18 +512,20 @@ MASTER_DB_TYPE_MAP_SPEC = {
         REFLECTED_NAME: TIMESTAMP_WITHOUT_TIME_ZONE,
         TARGET_DICT: {
             CHAR: {VALID: []},
-            DATE: {VALID: [(py_datetime(1999, 1, 18, 0, 0, 0), date(1999, 1, 18))],
-                   INVALID: [(py_datetime(1999, 1, 18, 12, 30, 45), date(1999, 1, 18))]},
+            DATE: {
+                VALID: [("1999-01-18T00:00:00.0 AD", "1999-01-18 AD")],
+                INVALID: ["1999-01-18T00:10:00.0 AD"]
+            },
             TIMESTAMP_WITHOUT_TIME_ZONE: {
-                VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), py_datetime(1999, 1, 18, 12, 30, 45))]
+                VALID: [("1999-01-18T12:30:45", "1999-01-18T12:30:45.0 AD")]
             },
             TIMESTAMP_WITH_TIME_ZONE: {
-                VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), py_datetime(1999, 1, 18, 12, 30, 45,
-                                                                           tzinfo=FixedOffsetTimezone(offset=0)))
-                        ]
+                VALID: [("1999-01-18T12:30:45", "1999-01-18T12:30:45.0Z AD")]
             },
-            TEXT: {VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), "1999-01-18 12:30:45")]},
-            VARCHAR: {VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), "1999-01-18 12:30:45")]},
+            TEXT: {VALID: [("1999-01-18T12:30:45.0 AD", "1999-01-18 12:30:45")]},
+            VARCHAR: {
+                VALID: [("1999-01-18T12:30:45.0 AD", "1999-01-18 12:30:45")]
+            },
         },
     },
     TEXT: {
@@ -602,10 +567,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             INTERVAL: {
                 VALID: [
-                    ("1 day", timedelta(days=1)),
-                    ("1 week", timedelta(days=7)),
-                    ("3:30", timedelta(hours=3, minutes=30)),
-                    ("00:03:30", timedelta(minutes=3, seconds=30)),
+                    ("1 day", "P0Y0M1DT0H0M0S"),
+                    ("1 week", "P0Y0M7DT0H0M0S"),
+                    ("3:30", "P0Y0M0DT3H30M0S"),
+                    ("00:03:30", "P0Y0M0DT0H3M30S"),
                 ],
                 INVALID: ["1 potato", "3"],
             },
@@ -634,10 +599,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             DATE: {
                 VALID: [
-                    ("1999-01-18", date(1999, 1, 18)),
-                    ("1/18/1999", date(1999, 1, 18)),
-                    ("jan-1999-18", date(1999, 1, 18)),
-                    ("19990118", date(1999, 1, 18)),
+                    ("1999-01-18", "1999-01-18 AD"),
+                    ("1/18/1999", "1999-01-18 AD"),
+                    ("jan-1999-18", "1999-01-18 AD"),
+                    ("19990118", "1999-01-18 AD"),
                 ],
                 INVALID: [
                     "18/1/1999",
@@ -657,41 +622,23 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             TEXT: {VALID: [("a string", "a string")]},
             TIME_WITHOUT_TIME_ZONE: {
-                VALID: [
-                    ("04:05:06", time(4, 5, 6)),
-                    ("04:05", time(4, 5)),
-                ],
-                INVALID: [
-                    "not a time",
-                ]
+                VALID: [("04:05:06", "04:05:06.0"), ("04:05", "04:05:00.0")],
+                INVALID: ["not a time"]
             },
             TIME_WITH_TIME_ZONE: {
                 VALID: [
-                    ("04:05:06", time(4, 5, 6, tzinfo=FixedOffsetTimezone(offset=0))),
-                    ("04:05+01", time(4, 5, tzinfo=FixedOffsetTimezone(offset=60))),
+                    ("04:05:06", "04:05:06.0Z"),
+                    ("04:05+01", "04:05:00.0+01:00")
                 ],
-                INVALID: [
-                    "not a time",
-                ]
+                INVALID: ["not a time"]
             },
             TIMESTAMP_WITH_TIME_ZONE: {
-                VALID: [
-                    ("1999-01-18 12:30:45+00",
-                     py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0)),
-                     )
-                ],
-                INVALID: [
-                    "not a timestamp",
-                ]
+                VALID: [("1999-01-18 12:30:45+00", "1999-01-18T12:30:45.0Z AD")],
+                INVALID: ["not a timestamp"]
             },
             TIMESTAMP_WITHOUT_TIME_ZONE: {
-                VALID: [
-                    ("1999-01-18 12:30:45", py_datetime(1999, 1, 18, 12, 30, 45),
-                     )
-                ],
-                INVALID: [
-                    "not a timestamp",
-                ]
+                VALID: [("1999-01-18 12:30:45", "1999-01-18T12:30:45.0 AD")],
+                INVALID: ["not a timestamp"]
             },
             VARCHAR: {VALID: [("a string", "a string")]},
         }
@@ -727,10 +674,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             CHAR: {VALID: [("a", "a")]},
             DATE: {
                 VALID: [
-                    ("1999-01-18", date(1999, 1, 18)),
-                    ("1/18/1999", date(1999, 1, 18)),
-                    ("jan-1999-18", date(1999, 1, 18)),
-                    ("19990118", date(1999, 1, 18)),
+                    ("1999-01-18", "1999-01-18 AD"),
+                    ("1/18/1999", "1999-01-18 AD"),
+                    ("jan-1999-18", "1999-01-18 AD"),
+                    ("19990118", "1999-01-18 AD"),
                 ],
                 INVALID: [
                     "18/1/1999",
@@ -760,10 +707,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             INTERVAL: {
                 VALID: [
-                    ("1 day", timedelta(days=1)),
-                    ("1 week", timedelta(days=7)),
-                    ("3:30", timedelta(hours=3, minutes=30)),
-                    ("00:03:30", timedelta(minutes=3, seconds=30)),
+                    ("1 day", "P0Y0M1DT0H0M0S"),
+                    ("1 week", "P0Y0M7DT0H0M0S"),
+                    ("3:30", "P0Y0M0DT3H30M0S"),
+                    ("00:03:30", "P0Y0M0DT0H3M30S"),
                 ],
                 INVALID: ["1 potato", "3"],
             },
@@ -789,41 +736,25 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             TEXT: {VALID: [("a string", "a string")]},
             TIME_WITHOUT_TIME_ZONE: {
-                VALID: [
-                    ("04:05:06", time(4, 5, 6)),
-                    ("04:05", time(4, 5)),
-                ],
-                INVALID: [
-                    "not a time",
-                ]
+                VALID: [("04:05:06", "04:05:06.0"), ("04:05", "04:05:00.0")],
+                INVALID: ["not a time"]
             },
             TIME_WITH_TIME_ZONE: {
                 VALID: [
-                    ("04:05:06", time(4, 5, 6, tzinfo=FixedOffsetTimezone(offset=0))),
-                    ("04:05+01", time(4, 5, tzinfo=FixedOffsetTimezone(offset=60))),
+                    ("04:05:06", "04:05:06.0Z"),
+                    ("04:05+01", "04:05:00.0+01:00")
                 ],
                 INVALID: [
                     "not a time",
                 ]
             },
             TIMESTAMP_WITH_TIME_ZONE: {
-                VALID: [
-                    ("1999-01-18 12:30:45+00",
-                     py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0)),
-                     )
-                ],
-                INVALID: [
-                    "not a timestamp",
-                ]
+                VALID: [("1999-01-18 12:30:45+00", "1999-01-18T12:30:45.0Z AD")],
+                INVALID: ["not a timestamp"]
             },
             TIMESTAMP_WITHOUT_TIME_ZONE: {
-                VALID: [
-                    ("1999-01-18 12:30:45", py_datetime(1999, 1, 18, 12, 30, 45),
-                     )
-                ],
-                INVALID: [
-                    "not a timestamp",
-                ]
+                VALID: [("1999-01-18 12:30:45+00", "1999-01-18T12:30:45.0 AD")],
+                INVALID: ["not a timestamp"]
             },
             URI: {
                 VALID: [("https://centerofci.org", "https://centerofci.org")],
@@ -837,6 +768,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
 
 def test_get_alter_column_types_with_custom_engine(engine_with_types):
     type_dict = cast_operations.get_supported_alter_column_types(engine_with_types)
+    for type_ in types.CUSTOM_TYPE_DICT.values():
+        assert type_ in type_dict.values()
     assert all(
         [
             type_ in type_dict.values()
@@ -950,16 +883,33 @@ type_test_data_args_list = [
     # test that rounding is as intended
     (Numeric, "numeric", {"precision": 5, "scale": 2}, 1.235, Decimal("1.24")),
     (String, "numeric", {"precision": 5, "scale": 2}, "500.134", Decimal("500.13")),
-
-    (datetime.TIME_WITHOUT_TIME_ZONE, "time without time zone", {"precision": 0},
-     time(0, 0, 0, 9), time(0, 0, 0)),
-    (datetime.TIME_WITH_TIME_ZONE, "time with time zone", {"precision": 0},
-     time(0, 0, 0, 9, tzinfo=FixedOffsetTimezone(offset=0)),
-     time(0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0))),
-    (datetime.TIMESTAMP_WITH_TIME_ZONE, "timestamp with time zone", {"precision": 0},
-     py_datetime(1999, 1, 1, 0, 0, 0), py_datetime(1999, 1, 1, 0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0))),
-    (datetime.TIMESTAMP_WITHOUT_TIME_ZONE, "timestamp without time zone", {"precision": 0},
-     py_datetime(1999, 1, 1, 0, 0, 0), py_datetime(1999, 1, 1, 0, 0, 0)),
+    (
+        datetime.TIME_WITHOUT_TIME_ZONE,
+        "time without time zone",
+        {"precision": 0},
+        "00:00:00.1234",
+        "00:00:00.0"
+    ),
+    (
+        datetime.TIME_WITH_TIME_ZONE,
+        "time with time zone",
+        {"precision": 0},
+        "00:00:00.1234-04:30", "00:00:00.0-04:30"
+    ),
+    (
+        datetime.TIMESTAMP_WITH_TIME_ZONE,
+        "timestamp with time zone",
+        {"precision": 0},
+        "1999-01-01 00:00:00",
+        "1999-01-01T00:00:00.0Z AD",
+    ),
+    (
+        datetime.TIMESTAMP_WITHOUT_TIME_ZONE,
+        "timestamp without time zone",
+        {"precision": 0},
+        "1999-01-01 00:00:00",
+        "1999-01-01T00:00:00.0 AD",
+    ),
     (String, "char", {"length": 5}, "abcde", "abcde"),
 ]
 
@@ -1067,7 +1017,8 @@ def test_alter_column_casts_data_gen(
     actual_value = res[0][0]
     assert actual_value == out_val
     table_oid = get_oid_from_table(TABLE_NAME, schema, engine)
-    actual_default = get_column_default(table_oid, 0, engine)
+    column_attnum = get_column_attnum_from_name(table_oid, COLUMN_NAME, engine)
+    actual_default = get_column_default(table_oid, column_attnum, engine)
     # TODO This needs to be sorted out by fixing how server_default is set.
     if all([
             source_type != get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value),
@@ -1191,27 +1142,64 @@ def test_get_column_cast_expression_unsupported(engine_with_types):
 
 
 cast_expr_numeric_option_list = [
-    (Numeric, {"precision": 3}, 'CAST(colname AS NUMERIC(3))'),
-    (Numeric, {"precision": 3, "scale": 2}, 'CAST(colname AS NUMERIC(3, 2))'),
-    (Numeric, {"precision": 3, "scale": 2}, 'CAST(colname AS NUMERIC(3, 2))'),
+    (Numeric, "numeric", {"precision": 3}, 'CAST(colname AS NUMERIC(3))'),
+    (
+        Numeric,
+        "numeric",
+        {"precision": 3, "scale": 2},
+        'CAST(colname AS NUMERIC(3, 2))'
+    ),
+    (
+        Numeric,
+        "numeric",
+        {"precision": 3, "scale": 2},
+        'CAST(colname AS NUMERIC(3, 2))'
+    ),
     (
         String,
+        "numeric",
         {"precision": 3, "scale": 2},
         'CAST(mathesar_types.cast_to_numeric(colname) AS NUMERIC(3, 2))'
+    ),
+    (
+        datetime.Interval,
+        "interval",
+        {"fields": "YEAR"},
+        "CAST(colname AS INTERVAL YEAR)"
+    ),
+    (
+        datetime.Interval,
+        "interval",
+        {"precision": 2},
+        "CAST(colname AS INTERVAL (2))"
+    ),
+    (
+        datetime.Interval,
+        "interval",
+        {"precision": 3, "fields": "SECOND"},
+        "CAST(colname AS INTERVAL SECOND (3))"
+    ),
+    (
+        String,
+        "interval",
+        {"precision": 3, "fields": "SECOND"},
+        "CAST(mathesar_types.cast_to_interval(colname) AS INTERVAL SECOND (3))"
     )
 ]
 
 
-@pytest.mark.parametrize("type_,options,expect_cast_expr", cast_expr_numeric_option_list)
-def test_get_column_cast_expression_numeric_options(
-        engine_with_types, type_, options, expect_cast_expr
+@pytest.mark.parametrize(
+    "type_,target_type,options,expect_cast_expr", cast_expr_numeric_option_list
+)
+def test_get_column_cast_expression_type_options(
+        engine_with_types, type_, target_type, options, expect_cast_expr
 ):
-    target_type = "numeric"
     column = Column("colname", type_)
     cast_expr = cast_operations.get_column_cast_expression(
         column, target_type, engine_with_types, type_options=options,
     )
-    assert str(cast_expr) == expect_cast_expr
+    actual_cast_expr = str(cast_expr.compile(engine_with_types))
+    assert actual_cast_expr == expect_cast_expr
 
 
 expect_cast_tuples = [

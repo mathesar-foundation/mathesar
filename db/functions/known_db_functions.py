@@ -1,10 +1,7 @@
 """
-Exports the known_db_functions variable, which describes what `DBFunction`s the library is aware
-of. Note, that a `DBFunction` might be in this collection, but not be supported by a given
-database.
-
-Contains a private collection (`_db_functions_in_other_modules`) of `DBFunction` subclasses
-declared outside the base module.
+Exports the known_db_functions variable, which describes what `DBFunction` concrete subclasses the
+library is aware of. Note, that a `DBFunction` might be in this collection, but not be
+supported by a given database.
 
 These variables were broken off into a discrete module to avoid circular imports.
 """
@@ -12,10 +9,11 @@ These variables were broken off into a discrete module to avoid circular imports
 import inspect
 
 import db.functions.base
+import db.functions.packed
+import db.types.uri
+import db.types.email
 
 from db.functions.base import DBFunction
-
-from db.types import uri
 
 
 def _get_module_members_that_satisfy(module, predicate):
@@ -26,7 +24,7 @@ def _get_module_members_that_satisfy(module, predicate):
     all DBFunction subclasses found as top-level members of a module.
     """
     all_members_in_defining_module = inspect.getmembers(module)
-    return tuple(
+    return set(
         member
         for _, member in all_members_in_defining_module
         if predicate(member)
@@ -36,22 +34,29 @@ def _get_module_members_that_satisfy(module, predicate):
 def _is_concrete_db_function_subclass(member):
     return (
         inspect.isclass(member)
-        and member != DBFunction
         and issubclass(member, DBFunction)
+        and not inspect.isabstract(member)
     )
 
 
-_db_functions_in_base_module = (
-    _get_module_members_that_satisfy(
-        db.functions.base,
-        _is_concrete_db_function_subclass
-    )
-)
-
-
-_db_functions_in_other_modules = tuple([
-    uri.ExtractURIAuthority,
+_modules_to_search_in = tuple([
+    db.functions.base,
+    db.functions.packed,
+    db.types.uri,
+    db.types.email,
 ])
 
 
-known_db_functions = _db_functions_in_base_module + _db_functions_in_other_modules
+def _concat_tuples(tuples):
+    return sum(tuples, ())
+
+
+known_db_functions = tuple(
+    set.union(*[
+        _get_module_members_that_satisfy(
+            module,
+            _is_concrete_db_function_subclass
+        )
+        for module in _modules_to_search_in
+    ])
+)

@@ -2,7 +2,7 @@ from sqlalchemy import Column, ForeignKey, inspect
 
 from db.columns.defaults import TYPE, PRIMARY_KEY, NULLABLE, DEFAULT_COLUMNS
 from db.columns.operations.select import (
-    get_column_default, get_column_default_dict, get_column_index_from_name
+    get_column_attnum_from_name, get_column_default, get_column_default_dict, get_column_index_from_name,
 )
 from db.tables.operations.select import get_oid_from_table
 from db.types.operations.cast import get_full_cast_map
@@ -139,11 +139,27 @@ class MathesarColumn(Column):
             )
 
     @property
+    def column_attnum(self):
+        """
+        Get the attnum of this column in its table, if it is
+        attached to a table that is associated with the column's engine.
+        """
+        engine_exists = self.engine is not None
+        table_exists = self.table_ is not None
+        engine_has_table = inspect(self.engine).has_table(self.table_.name, schema=self.table_.schema)
+        if engine_exists and table_exists and engine_has_table:
+            return get_column_attnum_from_name(
+                self.table_oid,
+                self.name,
+                self.engine
+            )
+
+    @property
     def column_default_dict(self):
         if self.table_ is None:
             return
         default_dict = get_column_default_dict(
-            self.table_oid, self.column_index, self.engine
+            self.table_oid, self.column_attnum, self.engine
         )
         if default_dict:
             return {
@@ -154,7 +170,7 @@ class MathesarColumn(Column):
     @property
     def default_value(self):
         if self.table_ is not None:
-            return get_column_default(self.table_oid, self.column_index, self.engine)
+            return get_column_default(self.table_oid, self.column_attnum, self.engine)
 
     @property
     def plain_type(self):
@@ -169,6 +185,7 @@ class MathesarColumn(Column):
             "length": getattr(self.type, "length", None),
             "precision": getattr(self.type, "precision", None),
             "scale": getattr(self.type, "scale", None),
+            "fields": getattr(self.type, "fields", None),
         }
         _type_options = {k: v for k, v in full_type_options.items() if v is not None}
         return _type_options if _type_options else None

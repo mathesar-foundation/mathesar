@@ -25,7 +25,7 @@ const abstractTypesRequestMap: Map<
   CancellablePromise<AbstractTypeResponse[]>
 > = new Map();
 
-export async function refetchTypesForDB(
+export async function refetchTypesForDb(
   databaseId: Database['id'],
 ): Promise<AbstractTypesMap | undefined> {
   const store = databasesToAbstractTypesStoreMap.get(databaseId);
@@ -94,10 +94,10 @@ function getTypesForDatabase(
         data: constructAbstractTypeMapFromResponse(commonData.abstract_types),
       }));
     } else {
-      void refetchTypesForDB(databaseId);
+      void refetchTypesForDb(databaseId);
     }
   } else if (get(store).error) {
-    void refetchTypesForDB(databaseId);
+    void refetchTypesForDb(databaseId);
   }
   return store;
 }
