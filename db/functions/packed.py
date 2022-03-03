@@ -1,6 +1,6 @@
 """
-Here we define DBFunction subclasses that are equivalent of some combination of other DBFunction
-subclasses (in other words, subclasses defined here are redundant). We do this to workaround
+Here we define DBFunction subclasses that are defined in terms of other DBFunction subclasses
+(these DBFunctions are packages or combinations of other DBFunctions). We do this to workaround
 Mathesar filters not supporting composition.
 """
 
@@ -11,15 +11,15 @@ from db.functions.base import DBFunction, Or, Lesser, Equal, Greater
 from db.functions import hints
 
 
-class RedundantDBFunction(DBFunction):
+class DBFunctionPacked(DBFunction):
     """
     A DBFunction that is meant to be unpacked into another DBFunction. A way to define a DBFunction
-    as a combination of DBFunctions. Its to_sa_expression method is not to used. Its concrete
+    as a combination of DBFunctions. Its to_sa_expression method is not used. Its concrete
     implementations are expected to implement the unpack method.
     """
     @staticmethod
     def to_sa_expression(*_):
-        raise Exception("UnpackabelDBFunction.to_sa_expression should never be used.")
+        raise Exception("DBFunctionPacked.to_sa_expression should never be used.")
 
     @abstractmethod
     def unpack(self):
@@ -30,7 +30,7 @@ class RedundantDBFunction(DBFunction):
         pass
 
 
-class LesserOrEqual(RedundantDBFunction):
+class LesserOrEqual(DBFunctionPacked):
     id = 'lesser_or_equal'
     name = 'is lesser or equal to'
     hints = tuple([
@@ -49,7 +49,7 @@ class LesserOrEqual(RedundantDBFunction):
         ])
 
 
-class GreaterOrEqual(RedundantDBFunction):
+class GreaterOrEqual(DBFunctionPacked):
     id = 'greater_or_equal'
     name = 'is greater or equal to'
     hints = tuple([

@@ -2,9 +2,6 @@ import type { AbstractTypeConfiguration } from '../types.d';
 
 const textType: AbstractTypeConfiguration = {
   icon: 'T',
-  input: {
-    type: 'string',
-  },
   defaultDbType: 'VARCHAR',
   typeSwitchOptions: {
     database: {
@@ -14,11 +11,15 @@ const textType: AbstractTypeConfiguration = {
           variables: {
             restrictFieldSize: {
               type: 'boolean',
-              default: false,
+              defaults: {
+                CHAR: true,
+                VARCHAR: true,
+                TEXT: false,
+              },
             },
-            fieldSizeLimit: {
+            length: {
               type: 'integer',
-              default: 255,
+              isSaved: true,
             },
           },
           layout: {
@@ -37,7 +38,7 @@ const textType: AbstractTypeConfiguration = {
                 elements: [
                   {
                     type: 'input',
-                    variable: 'fieldSizeLimit',
+                    variable: 'length',
                     label: 'Field Size Limit',
                   },
                 ],
@@ -57,12 +58,12 @@ const textType: AbstractTypeConfiguration = {
                   value: true,
                 },
                 {
-                  id: 'fieldSizeLimit',
+                  id: 'length',
                   op: 'lte',
                   value: 255,
                 },
                 {
-                  id: 'fieldSizeLimit',
+                  id: 'length',
                   op: 'neq',
                   value: null,
                 },
@@ -83,14 +84,19 @@ const textType: AbstractTypeConfiguration = {
                   combination: 'or',
                   terms: [
                     {
-                      id: 'fieldSizeLimit',
+                      id: 'length',
                       op: 'gt',
                       value: 255,
                     },
                     {
-                      id: 'fieldSizeLimit',
+                      id: 'length',
                       op: 'eq',
                       value: null,
+                    },
+                    {
+                      id: 'length',
+                      op: 'eq',
+                      value: undefined,
                     },
                   ],
                 },
@@ -106,24 +112,11 @@ const textType: AbstractTypeConfiguration = {
             },
           },
         ],
-        ruleReversalValues: {
-          CHAR: {
-            restrictFieldSize: true,
-            fieldSizeLimit: 255,
-          },
-          VARCHAR: {
-            restrictFieldSize: true,
-            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-            fieldSizeLimit: null,
-          },
-          TEXT: {
-            restrictFieldSize: false,
-            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-            fieldSizeLimit: null,
-          },
-        },
       },
     },
+  },
+  input: {
+    type: 'string',
   },
 };
 
