@@ -61,9 +61,3 @@ def process_annotated_records(record_list):
 
     return processed_records, output_groups
 
-
-def get_column_name_id_bidirectional_map(table_id):
-    # TODO: Prefetch column names to avoid N+1 queries
-    columns = Column.objects.filter(table_id=table_id)
-    columns_map = bidict({column.name: column.id for column in columns})
-    return columns_map

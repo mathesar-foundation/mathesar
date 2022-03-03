@@ -1,5 +1,6 @@
 from typing import Any
 
+from bidict import bidict
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
@@ -227,25 +228,6 @@ class Table(DatabaseObject):
     def has_dependencies(self):
         return True
 
-    def get_dj_columns_queryset(self):
-        sa_column_name = [column.name for column in self.sa_columns]
-        column_attnum_list = get_columns_attnum_from_names(self.oid, sa_column_name, self.schema._sa_engine)
-        return Column.objects.filter(table=self, attnum__in=column_attnum_list).order_by("attnum")
-
-    def get_dj_columns(self):
-        return tuple(self.get_dj_columns_queryset())
-
-    def get_dj_column_id_to_name_mapping(self):
-        dj_columns = self.get_dj_columns()
-        return dict(
-            (dj_column.id, dj_column.name)
-            for dj_column in dj_columns
-        )
-
-    def get_dj_column_name_to_id_mapping(self):
-        ids_to_names = self.get_dj_column_id_to_name_mapping()
-        return dict(map(reversed, ids_to_names.items()))
-
     def add_column(self, column_data):
         return create_column(
             self.schema._sa_engine,
@@ -349,6 +331,13 @@ class Table(DatabaseObject):
             name = constraint_utils.get_constraint_name(constraint_type, self.name, column_names[0])
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         return Constraint.current_objects.create(oid=constraint_oid, table=self)
+
+
+    def get_column_name_id_bidirectional_map(self):
+        # TODO: Prefetch column names to avoid N+1 queries
+        columns = Column.objects.filter(table_id=self.id)
+        columns_map = bidict({column.name: column.id for column in columns})
+        return columns_map
 
 
 class Column(ReflectionManagerMixin, BaseModel):

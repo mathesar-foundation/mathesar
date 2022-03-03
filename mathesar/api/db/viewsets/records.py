@@ -1,20 +1,16 @@
-from psycopg2.errors import NotNullViolation
-
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound
-from rest_framework.response import Response
 from rest_framework.renderers import BrowsableAPIRenderer
-from sqlalchemy.exc import IntegrityError
+from rest_framework.response import Response
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
-from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
-from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
-
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
-from mathesar.api.utils import get_column_name_id_bidirectional_map, get_table_or_404
+from db.functions.exceptions import BadDBFunctionFormat, ReferencedColumnsDontExist, UnknownDBFunctionID
+from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
+from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.models import Table
 from mathesar.utils.json import MathesarJSONRenderer
 
@@ -38,24 +34,33 @@ class RecordViewSet(viewsets.ViewSet):
 
         serializer = RecordListParameterSerializer(data=request.GET)
         serializer.is_valid(raise_exception=True)
-
-        filter_unprocessed = serializer.validated_data['filter']
-        filter_processed = None
         table = get_table_or_404(table_pk)
 
+        filter_unprocessed = serializer.validated_data['filter']
+        order_by = serializer.validated_data['order_by']
+        grouping = serializer.validated_data['grouping']
+        filter_processed = None
+        column_ids_to_names = table.get_column_name_id_bidirectional_map().inverse
+        if filter_unprocessed:
+            table = get_table_or_404(table_pk)
+            filter_processed = rewrite_db_function_spec_column_ids_to_names(
+                column_ids_to_names=column_ids_to_names,
+                spec=filter_unprocessed,
+            )
+        # Replace column id value used in the `field` property with column name
+        name_converted_group_by = None
+        if grouping:
+            group_by_columns_names = [column_ids_to_names[column_id] for column_id in grouping['columns']]
+            name_converted_group_by = {**grouping, 'columns': group_by_columns_names}
+        name_converted_order_by = [{**column, 'field': column_ids_to_names[column['field']]} for column in order_by]
+
         try:
-            if filter_unprocessed:
-                table = get_table_or_404(table_pk)
-                column_ids_to_names = table.get_dj_column_id_to_name_mapping()
-                filter_processed = rewrite_db_function_spec_column_ids_to_names(
-                    column_ids_to_names=column_ids_to_names,
-                    spec=filter_unprocessed,
-                )
+
             records = paginator.paginate_queryset(
-                self.get_queryset(), request, table_pk,
-                filter=filter_processed,
-                order_by=serializer.validated_data['order_by'],
-                grouping=serializer.validated_data['grouping'],
+                self.get_queryset(), request, table,
+                filters=filter_processed,
+                order_by=name_converted_order_by,
+                grouping=name_converted_group_by,
                 duplicate_only=serializer.validated_data['duplicate_only'],
             )
         except (BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist) as e:
@@ -111,6 +116,6 @@ class RecordViewSet(viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_serializer_context(self, table):
-        columns_map = get_column_name_id_bidirectional_map(table.id)
+        columns_map = table.get_column_name_id_bidirectional_map()
         context = {'columns_map': columns_map, 'table': table}
         return context
