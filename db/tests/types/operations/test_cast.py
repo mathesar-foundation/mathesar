@@ -7,7 +7,7 @@ from sqlalchemy import String, Numeric
 from sqlalchemy.exc import DataError
 
 from db import types
-from db.columns.operations.select import get_column_default
+from db.columns.operations.select import get_column_attnum_from_name, get_column_default
 from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
@@ -1017,7 +1017,8 @@ def test_alter_column_casts_data_gen(
     actual_value = res[0][0]
     assert actual_value == out_val
     table_oid = get_oid_from_table(TABLE_NAME, schema, engine)
-    actual_default = get_column_default(table_oid, 0, engine)
+    column_attnum = get_column_attnum_from_name(table_oid, COLUMN_NAME, engine)
+    actual_default = get_column_default(table_oid, column_attnum, engine)
     # TODO This needs to be sorted out by fixing how server_default is set.
     if all([
             source_type != get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value),

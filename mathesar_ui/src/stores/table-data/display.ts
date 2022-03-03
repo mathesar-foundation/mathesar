@@ -1,7 +1,6 @@
 import { writable, get, derived } from 'svelte/store';
 import { States } from '@mathesar/utils/api';
 import type { Writable, Readable, Unsubscriber } from 'svelte/store';
-import type { TabularType, DBObjectEntry } from '@mathesar/App.d';
 import type { Meta } from './meta';
 import type { ColumnsDataStore, Column } from './columns';
 import type { TableRecord, RecordsData } from './records';
@@ -17,7 +16,6 @@ export type ColumnPositionMap = Map<string, ColumnPosition>;
 export interface ActiveCell {
   rowIndex: number;
   columnIndex: number;
-  type: 'select' | 'edit';
 }
 
 export const ROW_CONTROL_COLUMN_WIDTH = 70;
@@ -67,14 +65,6 @@ export function isCellActive(
   );
 }
 
-export function isCellBeingEdited(
-  activeCell: ActiveCell,
-  row: TableRecord,
-  column: Column,
-): boolean {
-  return isCellActive(activeCell, row, column) && activeCell.type === 'edit';
-}
-
 // TODO: Create a common utility action to handle active element based scroll
 export function scrollBasedOnActiveCell(): void {
   const activeCell: HTMLElement | null =
@@ -114,10 +104,6 @@ export function scrollBasedOnActiveCell(): void {
 }
 
 export class Display {
-  private type: TabularType;
-
-  private parentId: DBObjectEntry['id'];
-
   private meta: Meta;
 
   private columnsDataStore: ColumnsDataStore;
@@ -137,14 +123,10 @@ export class Display {
   displayableRecords: Readable<TableRecord[]>;
 
   constructor(
-    type: TabularType,
-    parentId: number,
     meta: Meta,
     columnsDataStore: ColumnsDataStore,
     recordsData: RecordsData,
   ) {
-    this.type = type;
-    this.parentId = parentId;
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
     this.recordsData = recordsData;
@@ -198,7 +180,6 @@ export class Display {
       rowIndex: row.__rowIndex,
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       columnIndex: column.__columnIndex,
-      type: 'select',
     });
   }
 
@@ -209,20 +190,18 @@ export class Display {
         rowIndex: row.__rowIndex,
         // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         columnIndex: column.__columnIndex,
-        type: 'edit',
       });
     }
   }
 
-  handleKeyEventsOnActiveCell(
-    key: KeyboardEvent['key'],
-  ): 'moved' | 'changed' | undefined {
+  handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | undefined {
     const { columns } = this.columnsDataStore.get();
     const totalCount = get(this.recordsData.totalCount);
     const savedRecords = get(this.recordsData.savedRecords);
     const newRecords = get(this.recordsData.newRecords);
-    const offset = get(this.meta.offset);
-    const pageSize = get(this.meta.pageSize);
+    const pagination = get(this.meta.pagination);
+    const { offset } = pagination;
+    const pageSize = pagination.size;
     const minRowIndex = 0;
     const maxRowIndex =
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
@@ -230,7 +209,7 @@ export class Display {
       newRecords.length;
     const activeCell = get(this.activeCell);
 
-    if (movementKeys.has(key) && activeCell?.type === 'select') {
+    if (movementKeys.has(key) && activeCell) {
       this.activeCell.update((existing) => {
         if (!existing) {
           return undefined;
@@ -264,43 +243,6 @@ export class Display {
         return newActiveCell;
       });
       return 'moved';
-    }
-
-    if (key === 'Tab' && activeCell?.type === 'edit') {
-      this.activeCell.update((existing) => {
-        if (!existing) {
-          return undefined;
-        }
-        const newActiveCell = { ...existing };
-        if (existing.columnIndex < columns.length - 1) {
-          newActiveCell.columnIndex += 1;
-        }
-        return newActiveCell;
-      });
-      return 'moved';
-    }
-
-    if (key === 'Enter') {
-      if (activeCell?.type === 'select') {
-        if (!columns[activeCell.columnIndex]?.primary_key) {
-          this.activeCell.update((existing) =>
-            existing ? { ...existing, type: 'edit' } : undefined,
-          );
-          return 'changed';
-        }
-      } else if (activeCell?.type === 'edit') {
-        this.activeCell.update((existing) =>
-          existing ? { ...existing, type: 'select' } : undefined,
-        );
-        return 'changed';
-      }
-    }
-
-    if (key === 'Escape' && activeCell?.type === 'edit') {
-      this.activeCell.update((existing) =>
-        existing ? { ...existing, type: 'select' } : undefined,
-      );
-      return 'changed';
     }
 
     return undefined;
