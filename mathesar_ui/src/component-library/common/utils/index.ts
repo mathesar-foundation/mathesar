@@ -2,6 +2,7 @@
 export { default as CancellablePromise } from './CancellablePromise';
 export { default as EventHandler } from './EventHandler';
 export { default as ImmutableSet } from './ImmutableSet';
+export { default as ImmutableMap } from './ImmutableMap';
 
 // Utility Functions
 export * from './domUtils';

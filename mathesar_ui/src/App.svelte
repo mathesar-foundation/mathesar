@@ -6,6 +6,15 @@
   import Header from '@mathesar/header/Header.svelte';
   import { toast } from '@mathesar/stores/toast';
   import { confirmationController } from '@mathesar/stores/confirmation';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { beginUpdatingUrlWhenSchemaChanges } from './utils/routing';
+
+  // This is a bit of a hack to deal with our routing still being a patchwork of
+  // declarative and imperative logic. Without this call, the URL will not
+  // reliably set the query params when the schema changes. It actually _will_
+  // set the query params _sometimes_, but we weren't able to figure out why the
+  // behavior is inconsistent.
+  beginUpdatingUrlWhenSchemaChanges(currentSchemaId);
 </script>
 
 <ToastPresenter entries={toast.entries} />

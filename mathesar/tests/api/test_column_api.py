@@ -1,5 +1,4 @@
 import json
-from datetime import date
 
 import pytest
 from unittest.mock import patch
@@ -8,7 +7,7 @@ from sqlalchemy import Column, Integer, String, MetaData, select, Boolean, TIMES
 from sqlalchemy import Table as SATable
 
 from db.columns.operations.alter import alter_column_type
-from db.columns.operations.select import get_columns_attnum_from_names
+from db.columns.operations.select import get_column_attnum_from_name
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
 from mathesar import models
@@ -66,7 +65,7 @@ def column_test_table_with_service_layer_options(patent_schema):
     table = models.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     service_columns = []
     for column_data in zip(column_list_in, column_data_list):
-        attnum = get_columns_attnum_from_names(db_table_oid, [column_data[0].name], engine)[0][0]
+        attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine)
         service_columns.append(ServiceLayerColumn.current_objects.get_or_create(table=table,
                                                                                 attnum=attnum,
                                                                                 display_options=column_data[1].get('display_options', None))[0])
@@ -76,6 +75,7 @@ def column_test_table_with_service_layer_options(patent_schema):
 def test_column_list(column_test_table, client):
     cache.clear()
     response = client.get(f"/api/db/v0/tables/{column_test_table.id}/columns/")
+    assert response.status_code == 200
     response_data = response.json()
     assert response_data['count'] == len(column_test_table.sa_columns)
     expect_results = [
@@ -182,7 +182,7 @@ create_default_test_list = [
     ("NUMERIC", 42, 42, 42),
     ("STRING", "test_string", "test_string", "test_string"),
     ("VARCHAR", "test_string", "test_string", "test_string"),
-    ("DATE", "2020-1-1", date(2020, 1, 1), "2020-01-01"),
+    ("DATE", "2020-1-1", "2020-01-01 AD", "2020-01-01 AD"),
     ("EMAIL", "test@test.com", "test@test.com", "test@test.com"),
 ]
 
@@ -238,6 +238,7 @@ create_display_options_test_list = [
     ("BOOLEAN", {"input": "dropdown"}),
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
     ("DATE", {'format': 'YYYY-MM-DD'}),
+    ("INTERVAL", {'format': 'DD HH:mm:ss.SSS'}),
     ("NUMERIC", {"show_as_percentage": True}),
     ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}),
     ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
@@ -381,16 +382,19 @@ def test_column_update_name(column_test_table, client):
     response = client.get(
         f"/api/db/v0/tables/{column_test_table.id}/columns/"
     )
+    assert response.status_code == 200
     columns = response.json()['results']
     column_index = 1
     column_id = columns[column_index]['id']
     response = client.patch(
         f"/api/db/v0/tables/{column_test_table.id}/columns/{column_id}/", data=data
     )
+    assert response.status_code == 200
     assert response.json()["name"] == name
     response = client.get(
         f"/api/db/v0/tables/{column_test_table.id}/columns/{column_id}/"
     )
+    assert response.status_code == 200
     assert response.json()["name"] == name
 
 

@@ -12,7 +12,7 @@
   /**
    * Type of input, one of: 'boolean', 'integer', 'float', 'string', 'date', 'datetime', 'time'
    */
-  export let dataType: DynamicInputDataType;
+  export let dataType: DynamicInputDataType = 'string';
 
   /**
    * Value of input. Depends on type.

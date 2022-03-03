@@ -1,16 +1,23 @@
+from psycopg2.errors import NotNullViolation
+
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.renderers import BrowsableAPIRenderer
-from sqlalchemy_filters.exceptions import BadFilterFormat, BadSortFormat, FilterFieldNotFound, SortFieldNotFound
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
+
+from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
+from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
-from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
+from mathesar.api.utils import get_column_name_id_bidirectional_map, get_table_or_404
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
-from mathesar.api.utils import get_column_name_id_bidirectional_map, get_table_or_404
+from mathesar.api.utils import get_table_or_404
 from mathesar.models import Table
 from mathesar.utils.json import MathesarJSONRenderer
+
 
 
 class RecordViewSet(viewsets.ViewSet):
@@ -23,7 +30,7 @@ class RecordViewSet(viewsets.ViewSet):
     renderer_classes = [MathesarJSONRenderer, BrowsableAPIRenderer]
 
     # For filter parameter formatting, see:
-    # https://github.com/centerofci/sqlalchemy-filters#filters-format
+    # db/functions/operations/deserialize.py::get_db_function_from_ma_function_spec function doc>
     # For sorting parameter formatting, see:
     # https://github.com/centerofci/sqlalchemy-filters#sort-format
     def list(self, request, table_pk=None):
@@ -31,15 +38,27 @@ class RecordViewSet(viewsets.ViewSet):
 
         serializer = RecordListParameterSerializer(data=request.GET)
         serializer.is_valid(raise_exception=True)
+
+        filter_unprocessed = serializer.validated_data['filter']
+        filter_processed = None
         table = get_table_or_404(table_pk)
+
         try:
+            if filter_unprocessed:
+                table = get_table_or_404(table_pk)
+                column_ids_to_names = table.get_dj_column_id_to_name_mapping()
+                filter_processed = rewrite_db_function_spec_column_ids_to_names(
+                    column_ids_to_names=column_ids_to_names,
+                    spec=filter_unprocessed,
+                )
             records = paginator.paginate_queryset(
-                self.get_queryset(), request, table,
-                filters=serializer.validated_data['filters'],
+                self.get_queryset(), request, table_pk,
+                filter=filter_processed,
                 order_by=serializer.validated_data['order_by'],
                 grouping=serializer.validated_data['grouping'],
+                duplicate_only=serializer.validated_data['duplicate_only'],
             )
-        except (BadFilterFormat, FilterFieldNotFound) as e:
+        except (BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist) as e:
             raise database_api_exceptions.BadFilterAPIException(
                 e,
                 field='filters',
