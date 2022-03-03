@@ -57,26 +57,42 @@ def _get_filter_parameters(mathesar_type_hints, db_function_subclass):
             db_function_subclass=db_function_subclass,
             parameter_index=parameter_index,
         )
+        suggested_values = _get_parameter_suggested_values(
+            db_function_subclass=db_function_subclass,
+            parameter_index=parameter_index,
+        )
         filter_param = _make_filter_param(
             mathesar_types=mathesar_types,
+            suggested_values=suggested_values,
         )
         filter_params.append(filter_param)
     return tuple(filter_params)
 
 
-def _make_filter_param(mathesar_types):
+def _get_parameter_suggested_values(db_function_subclass, parameter_index):
+    parameter_hints = hints.get_parameter_hints(parameter_index, db_function_subclass)
+    for hint in parameter_hints:
+        if hint['id'] == 'suggested_values':
+            return hint['values']
+
+
+def _make_filter_param(mathesar_types, suggested_values):
     mathesar_type_strings = tuple(
         mathesar_type.value
         for mathesar_type in mathesar_types
     )
-    return dict(
-        ui_types=mathesar_type_strings
-    )
+    filter_param = dict(ui_types=mathesar_type_strings)
+    if suggested_values:
+        filter_param['suggested_values'] = suggested_values
+    return filter_param
 
 
 def _get_parameter_mathesar_types(mathesar_type_hints, db_function_subclass, parameter_index):
-    parameter_hints = hints.get_parameter_hints(parameter_index, db_function_subclass)
-    parameter_mathesar_types = ma_types_that_satisfy_hintset(mathesar_type_hints, parameter_hints)
+    parameter_type_hints = hints.get_parameter_type_hints(parameter_index, db_function_subclass)
+    parameter_mathesar_types = ma_types_that_satisfy_hintset(
+        mathesar_type_hints,
+        parameter_type_hints
+    )
     if len(parameter_mathesar_types) == 0:
         raise Exception(
             f"Hints of DB function {db_function_subclass.id}"

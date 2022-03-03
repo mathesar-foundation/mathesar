@@ -7,7 +7,7 @@ from sqlalchemy import Column, Integer, String, MetaData, select, Boolean, TIMES
 from sqlalchemy import Table as SATable
 
 from db.columns.operations.alter import alter_column_type
-from db.columns.operations.select import get_columns_attnum_from_names
+from db.columns.operations.select import get_column_attnum_from_name
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
 from mathesar import models
@@ -65,7 +65,7 @@ def column_test_table_with_service_layer_options(patent_schema):
     table = models.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     service_columns = []
     for column_data in zip(column_list_in, column_data_list):
-        attnum = get_columns_attnum_from_names(db_table_oid, [column_data[0].name], engine)[0][0]
+        attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine)
         service_columns.append(ServiceLayerColumn.current_objects.get_or_create(table=table,
                                                                                 attnum=attnum,
                                                                                 display_options=column_data[1].get('display_options', None))[0])
