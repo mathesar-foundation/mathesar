@@ -332,7 +332,6 @@ class Table(DatabaseObject):
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         return Constraint.current_objects.create(oid=constraint_oid, table=self)
 
-
     def get_column_name_id_bidirectional_map(self):
         # TODO: Prefetch column names to avoid N+1 queries
         columns = Column.objects.filter(table_id=self.id)

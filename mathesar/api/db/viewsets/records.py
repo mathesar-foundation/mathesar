@@ -15,7 +15,6 @@ from mathesar.models import Table
 from mathesar.utils.json import MathesarJSONRenderer
 
 
-
 class RecordViewSet(viewsets.ViewSet):
     # There is no 'update' method.
     # We're not supporting PUT requests because there aren't a lot of use cases
@@ -105,7 +104,12 @@ class RecordViewSet(viewsets.ViewSet):
 
     def partial_update(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
-        serializer = RecordSerializer({'id': pk}, data=request.data, context=self.get_serializer_context(table), partial=True)
+        serializer = RecordSerializer(
+            {'id': pk},
+            data=request.data,
+            context=self.get_serializer_context(table),
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)

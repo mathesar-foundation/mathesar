@@ -14,7 +14,6 @@ from mathesar.functions.operations.convert import rewrite_db_function_spec_colum
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
-
 def test_record_list(create_table, client):
     """
     Desired format:

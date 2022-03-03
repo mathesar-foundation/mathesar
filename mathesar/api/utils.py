@@ -1,8 +1,7 @@
-from bidict import bidict
 from rest_framework.exceptions import NotFound
 
 from db.records.operations import group
-from mathesar.models import Column, Table
+from mathesar.models import Table
 
 DATA_KEY = 'data'
 METADATA_KEY = 'metadata'
@@ -60,4 +59,3 @@ def process_annotated_records(record_list):
         output_groups = None
 
     return processed_records, output_groups
-
