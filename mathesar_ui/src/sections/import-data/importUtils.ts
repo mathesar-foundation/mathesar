@@ -31,7 +31,7 @@ import type {
   FileUploadAddDetail,
   FileUploadProgress,
 } from '@mathesar-component-library/types';
-import { TabularType } from '@mathesar/App.d';
+import { TabularType } from '@mathesar/stores/table-data';
 
 function completionCallback(
   fileImportStore: FileImport,

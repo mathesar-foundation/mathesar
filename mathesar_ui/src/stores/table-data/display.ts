@@ -1,7 +1,6 @@
 import { writable, get, derived } from 'svelte/store';
 import { States } from '@mathesar/utils/api';
 import type { Writable, Readable, Unsubscriber } from 'svelte/store';
-import type { TabularType, DBObjectEntry } from '@mathesar/App.d';
 import type { Meta } from './meta';
 import type { ColumnsDataStore, Column } from './columns';
 import type { TableRecord, RecordsData } from './records';
@@ -105,10 +104,6 @@ export function scrollBasedOnActiveCell(): void {
 }
 
 export class Display {
-  private type: TabularType;
-
-  private parentId: DBObjectEntry['id'];
-
   private meta: Meta;
 
   private columnsDataStore: ColumnsDataStore;
@@ -128,14 +123,10 @@ export class Display {
   displayableRecords: Readable<TableRecord[]>;
 
   constructor(
-    type: TabularType,
-    parentId: number,
     meta: Meta,
     columnsDataStore: ColumnsDataStore,
     recordsData: RecordsData,
   ) {
-    this.type = type;
-    this.parentId = parentId;
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
     this.recordsData = recordsData;
@@ -208,8 +199,9 @@ export class Display {
     const totalCount = get(this.recordsData.totalCount);
     const savedRecords = get(this.recordsData.savedRecords);
     const newRecords = get(this.recordsData.newRecords);
-    const offset = get(this.meta.offset);
-    const pageSize = get(this.meta.pageSize);
+    const pagination = get(this.meta.pagination);
+    const { offset } = pagination;
+    const pageSize = pagination.size;
     const minRowIndex = 0;
     const maxRowIndex =
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055

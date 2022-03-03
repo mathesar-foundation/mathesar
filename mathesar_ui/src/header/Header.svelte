@@ -18,7 +18,7 @@
   } from '@mathesar/stores/tabs';
 
   import { Icon, Button, Dropdown } from '@mathesar-component-library';
-  import { TabularType } from '@mathesar/App.d';
+  import { TabularType } from '@mathesar/stores/table-data';
 
   import SchemaSelector from './schema-selector/SchemaSelector.svelte';
   import ImportIndicator from './import-indicator/ImportIndicator.svelte';
