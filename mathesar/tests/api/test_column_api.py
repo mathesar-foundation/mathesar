@@ -402,7 +402,7 @@ def test_column_update_name(column_test_table, client):
 def test_column_update_display_options(column_test_table_with_service_layer_options, client):
     cache.clear()
     table, columns = column_test_table_with_service_layer_options
-    column = _get_columns_by_name(column_test_table, ['mycolumn1'])[0]
+    column = _get_columns_by_name(table, ['mycolumn1'])[0]
     column_id = column.id
     display_options = {"input": "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}
     display_options_data = {"display_options": display_options}
