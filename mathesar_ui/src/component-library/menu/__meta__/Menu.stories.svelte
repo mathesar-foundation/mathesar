@@ -51,7 +51,11 @@
       Nostrud exercitation
     </MenuItem>
     <MenuItem icon={{ data: faShip }} disabled>
-      <Checkbox slot="control" checked />
+      <!--
+        NOTE: to disable the form control when the MenuItem is disabled, you
+        need to explicitly set the `disabled` attribute on the form control.
+      -->
+      <Checkbox slot="control" checked disabled />
       Aliquip ex ea commod
     </MenuItem>
     <MenuItem icon={{ data: faClock }}>

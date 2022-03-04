@@ -11,12 +11,22 @@
   const dispatch = createEventDispatcher();
 
   export let icon: IconProps | undefined = undefined;
+
+  /**
+   * Note: if you have a form control within the MenuItem, you'll need to
+   * explicitly set it to disabled as well. Its disabled state won't be inferred
+   * from the parent MenuItem.
+   */
   export let disabled = false;
 
   let labelController: LabelController | undefined;
   if ($$slots.control) {
     labelController = new LabelController();
+    labelController.disabled.set(disabled);
     setLabelControllerInContext(labelController);
+  }
+  $: if (disabled && labelController) {
+    labelController.disabled.set(disabled);
   }
 
   function handleClick() {
