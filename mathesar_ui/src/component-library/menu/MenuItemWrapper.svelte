@@ -10,19 +10,5 @@
     <slot />
   </Label>
 {:else}
-  <button class="passthrough-button">
-    <slot />
-  </button>
+  <slot />
 {/if}
-
-<style>
-  .passthrough-button {
-    text-align: inherit;
-    display: contents;
-    color: inherit;
-    font-family: inherit;
-    font-weight: inherit;
-    font-size: inherit;
-    cursor: inherit;
-  }
-</style>

@@ -46,7 +46,11 @@
         <Icon {...icon} />
       {/if}
     </div>
-    <div class="label cell"><slot /></div>
+    {#if labelController}
+      <div class="label cell"><slot /></div>
+    {:else}
+      <button class="label cell passthrough-button"><slot /></button>
+    {/if}
     <div class="spacer cell" />
   </MenuItemWrapper>
 </div>
@@ -102,5 +106,16 @@ quickly.
   }
   .cell.control {
     --checkbox-margin-bottom: 0;
+  }
+  .passthrough-button {
+    background: inherit;
+    border-radius: inherit;
+    border: inherit;
+    color: inherit;
+    cursor: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    text-align: inherit;
   }
 </style>
