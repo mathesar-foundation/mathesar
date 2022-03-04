@@ -1,49 +1,49 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount, onDestroy } from 'svelte';
-  import { faTimes } from '@fortawesome/free-solid-svg-icons';
-  import { Icon, Button, Select, TextInput } from '@mathesar-component-library';
-  import type { FilterEntry } from '@mathesar/stores/table-data/types';
-  import type { SelectOption } from '@mathesar-component-library/types';
+  // import { createEventDispatcher, onMount, onDestroy } from 'svelte';
+  // import { faTimes } from '@fortawesome/free-solid-svg-icons';
+  // import { Icon, Button, Select, TextInput } from '@mathesar-component-library';
+  // import type { FilterCondition } from '@mathesar/stores/table-data/types';
+  // import type { SelectOption } from '@mathesar-component-library/types';
 
-  const dispatch = createEventDispatcher();
+  // const dispatch = createEventDispatcher();
 
-  export let options: SelectOption[];
-  export let conditions: SelectOption[];
+  // export let columnSelectOptions: ColumnSelectOption[];
+  // export let conditions: FilterCondition[];
 
-  export let filterByDuplicates: boolean;
+  // export let filterByDuplicates: boolean;
 
-  export let column: FilterEntry['column'];
-  export let condition: FilterEntry['condition'];
-  export let value: FilterEntry['value'];
+  // export let column: ColumnSelectOption;
+  // export let condition: FilterEntry['condition'];
+  // export let value: FilterEntry['value'];
 
-  let inputValue: string;
-  let timer: number;
+  // let inputValue: string;
+  // let timer: number;
 
-  onMount(() => {
-    inputValue = value;
-  });
+  // onMount(() => {
+  //   inputValue = value;
+  // });
 
-  onDestroy(() => {
-    window.clearTimeout(timer);
-  });
+  // onDestroy(() => {
+  //   window.clearTimeout(timer);
+  // });
 
-  function onValueChange(_inputValue: string) {
-    clearTimeout(timer);
-    timer = window.setTimeout(() => {
-      if (value !== _inputValue) {
-        value = _inputValue;
-        dispatch('reload');
-      }
-    }, 500);
-  }
+  // function onValueChange(_inputValue: string) {
+  //   clearTimeout(timer);
+  //   timer = window.setTimeout(() => {
+  //     if (value !== _inputValue) {
+  //       value = _inputValue;
+  //       dispatch('reload');
+  //     }
+  //   }, 500);
+  // }
 
-  $: onValueChange(inputValue);
+  // $: onValueChange(inputValue);
 </script>
 
 <tr>
-  <td class="column">
+  <!-- <td class="column">
     <Select
-      {options}
+      options={columnSelectOptions}
       bind:value={column}
       on:change={() => dispatch('reload')}
     />
@@ -64,5 +64,5 @@
     <Button size="small" on:click={() => dispatch('removeFilter')}>
       <Icon data={faTimes} />
     </Button>
-  </td>
+  </td> -->
 </tr>

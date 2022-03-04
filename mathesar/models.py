@@ -182,6 +182,10 @@ class Table(DatabaseObject):
         super().save(*args, **kwargs)
 
     @cached_property
+    def _sa_engine(self):
+        return self.schema._sa_engine
+
+    @cached_property
     def _sa_table(self):
         try:
             table = reflect_table_from_oid(
@@ -222,6 +226,25 @@ class Table(DatabaseObject):
     @property
     def has_dependencies(self):
         return True
+
+    def get_dj_columns_queryset(self):
+        sa_column_name = [column.name for column in self.sa_columns]
+        column_attnum_list = get_columns_attnum_from_names(self.oid, sa_column_name, self.schema._sa_engine)
+        return Column.objects.filter(table=self, attnum__in=column_attnum_list).order_by("attnum")
+
+    def get_dj_columns(self):
+        return tuple(self.get_dj_columns_queryset())
+
+    def get_dj_column_id_to_name_mapping(self):
+        dj_columns = self.get_dj_columns()
+        return dict(
+            (dj_column.id, dj_column.name)
+            for dj_column in dj_columns
+        )
+
+    def get_dj_column_name_to_id_mapping(self):
+        ids_to_names = self.get_dj_column_id_to_name_mapping()
+        return dict(map(reversed, ids_to_names.items()))
 
     def add_column(self, column_data):
         return create_column(
@@ -264,8 +287,8 @@ class Table(DatabaseObject):
     def sa_all_records(self):
         return db_get_records(self._sa_table, self.schema._sa_engine)
 
-    def sa_num_records(self, filters=[]):
-        return get_count(self._sa_table, self.schema._sa_engine, filters=filters)
+    def sa_num_records(self, filter=None):
+        return get_count(self._sa_table, self.schema._sa_engine, filter=filter)
 
     def update_sa_table(self, update_params):
         return model_utils.update_sa_table(self, update_params)
@@ -276,15 +299,24 @@ class Table(DatabaseObject):
     def get_record(self, id_value):
         return get_record(self._sa_table, self.schema._sa_engine, id_value)
 
-    def get_records(self, limit=None, offset=None, filters=[], order_by=[], group_by=None):
+    def get_records(
+        self,
+        limit=None,
+        offset=None,
+        filter=None,
+        order_by=[],
+        group_by=None,
+        duplicate_only=None,
+    ):
         return db_get_records(
             self._sa_table,
             self.schema._sa_engine,
             limit,
             offset,
-            filters=filters,
+            filter=filter,
             order_by=order_by,
-            group_by=group_by
+            group_by=group_by,
+            duplicate_only=duplicate_only,
         )
 
     def create_record_or_records(self, record_data):

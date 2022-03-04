@@ -1,90 +1,90 @@
 <script lang="ts">
-  import { get } from 'svelte/store';
-  import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
-  import { Icon, Button, Select, TextInput } from '@mathesar-component-library';
-  import { filterCombinations } from '@mathesar/stores/table-data';
+  import type { Writable } from 'svelte/store';
+  // import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
+  // import { Icon, Button, Select, TextInput } from '@mathesar-component-library';
+  // import {
+  //   filterCombinations,
+  //   filterConditions,
+  //   defaultFilterCondition,
+  //   defaultFilterCombination,
+  // } from '@mathesar/stores/table-data';
   import type {
-    Meta,
-    FilterCombination,
+    Filtering,
+    Column,
+    // FilterCondition,
+    // FilterCombination,
   } from '@mathesar/stores/table-data/types';
-  import type { SelectOption } from '@mathesar-component-library/types';
-  import FilterEntry from './FilterEntry.svelte';
+  // import FilterEntry from './FilterEntry.svelte';
 
-  export let meta: Meta;
-  export let options: SelectOption[];
+  export let filtering: Writable<Filtering>;
+  export let columns: Column[];
 
-  let filter: Meta['filter'];
-  let filterCombination: FilterCombination;
-  let filterColumn: SelectOption;
-  let filterCondition: SelectOption;
-  let filterValue = '';
-  let addNew = false;
+  // let filterCombination: FilterCombination = defaultFilterCombination;
+  // let filterColumn: ColumnSelectOption = columnSelectOptions[0];
+  // let filterCondition: FilterCondition | undefined;
+  // let filterValue = '';
+  // let addNew = false;
 
-  const conditions = [
-    { id: 'eq', label: 'equals' },
-    { id: 'ne', label: 'not equals' },
-    { id: 'get_duplicates', label: 'has duplicates' },
-  ];
+  // function addFilter() {
+  //   if (!filterColumn) {
+  //     return;
+  //   }
+  //   filtering.update((f) =>
+  //     f.withEntry({
+  //       columnName: filterColumn.columnName,
+  //       condition: filterCondition ?? defaultFilterCondition,
+  //       value: filterValue,
+  //     }),
+  //   );
 
-  function onMetaChange(_meta: Meta) {
-    ({ filter } = _meta);
-    filterCombination = _meta.getFilterCombination();
-  }
+  //   filterColumn = columnSelectOptions[0];
+  //   filterCondition = filterConditions[0];
+  //   filterValue = '';
+  //   addNew = false;
+  // }
 
-  $: onMetaChange(meta);
+  // function removeFilter(index: number) {
+  //   filtering.update((f) => f.withoutEntry(index));
+  // }
 
-  function addFilter() {
-    meta.addFilter({
-      column: filterColumn,
-      condition: filterCondition,
-      value: filterValue,
-    });
-
-    [filterColumn] = options;
-    [filterCondition] = conditions;
-    filterValue = '';
-    addNew = false;
-  }
-
-  function updateFilters() {
-    // Recreate with new object to trigger subscriptions
-    meta.setFilters({
-      ...get(filter),
-    });
-  }
+  // function updateFilters() {
+  //   // Recreate with new object to trigger subscriptions
+  //   filtering.update((f) => f);
+  // }
 </script>
 
 <div class="display-option">
-  <div class="header">
+  <!-- <div class="header">
     <span>
       Filters
-      {#if $filter?.filters?.length > 0}
-        ({$filter?.filters?.length})
+      {#if $filtering.entries.length}
+        ({$filtering.entries.length})
       {/if}
     </span>
   </div>
   <div class="content">
     <table>
-      {#if $filter?.filters?.length > 0}
+      {#if $filtering?.entries.length}
         <tr>
           <td>
             <Select
               options={filterCombinations}
               bind:value={filterCombination}
-              on:change={() => meta.setFilterCombination(filterCombination)}
+              on:change={() =>
+                filtering.update((f) => f.withCombination(filterCombination))}
             />
           </td>
         </tr>
       {/if}
-      {#each $filter?.filters || [] as option, index (option)}
+      {#each $filtering.entries as entry, index (entry)}
         <FilterEntry
-          {options}
-          {conditions}
-          filterByDuplicates={option.condition.id === conditions[2].id}
-          bind:column={option.column}
-          bind:condition={option.condition}
-          bind:value={option.value}
-          on:removeFilter={() => meta.removeFilter(index)}
+          {columnSelectOptions}
+          conditions={filterConditions}
+          filterByDuplicates={entry.condition.id === filterConditions[2].id}
+          bind:column={entry.column}
+          bind:condition={entry.condition}
+          bind:value={entry.value}
+          on:removeFilter={() => removeFilter(index)}
           on:reload={() => updateFilters()}
         />
       {:else}
@@ -93,7 +93,7 @@
         </tr>
       {/each}
 
-      {#if options.length > 0}
+      {#if columnSelectOptions.length > 0}
         {#if !addNew}
           <tr class="add-option">
             <td colspan="3">
@@ -109,12 +109,12 @@
         {:else}
           <tr class="add-option">
             <td class="column">
-              <Select {options} bind:value={filterColumn} />
+              <Select options={columnSelectOptions} bind:value={filterColumn} />
             </td>
             <td class="dir">
-              <Select options={conditions} bind:value={filterCondition} />
+              <Select options={filterConditions} bind:value={filterCondition} />
             </td>
-            {#if filterCondition !== conditions[2]}
+            {#if filterCondition !== filterConditions[2]}
               <td class="value" colspan="2">
                 <TextInput bind:value={filterValue} />
               </td>
@@ -138,7 +138,7 @@
         {/if}
       {/if}
     </table>
-  </div>
+  </div> -->
 </div>
 
 <style global lang="scss">

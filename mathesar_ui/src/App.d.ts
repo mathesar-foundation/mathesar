@@ -33,12 +33,6 @@ export interface SchemaResponse extends SchemaEntry, TreeItem {
   tables: DBObjectEntry[];
 }
 
-// TODO: Come up with a better name for representing both tables and views
-export enum TabularType {
-  Table = 1,
-  View = 2,
-}
-
 export type DbType = string;
 
 export interface FilterConfiguration {
