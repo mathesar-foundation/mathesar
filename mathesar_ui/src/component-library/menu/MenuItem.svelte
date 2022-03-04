@@ -95,7 +95,8 @@ quickly.
   .cell:not(:empty) {
     padding: var(--spacing-y) var(--spacing-x);
   }
-  .cell {
+  .control,
+  .icon {
     display: flex;
     align-items: center;
   }
