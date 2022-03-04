@@ -78,7 +78,7 @@ quickly.
   .menu-item {
     display: contents;
   }
-  .menu-item:not(.disabled) {
+  .menu-item {
     cursor: pointer;
   }
   .menu-item:not(.disabled):hover .cell {
@@ -86,6 +86,7 @@ quickly.
   }
   .disabled {
     color: #999;
+    cursor: not-allowed;
   }
   .control {
     grid-column: control;
