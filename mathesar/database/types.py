@@ -70,8 +70,8 @@ def _get_type_map():
         'name': 'Money',
         'sa_type_names': [
             PostgresType.MONEY.value,
+            get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value),
             get_qualified_name(MathesarCustomType.MULTICURRENCY_MONEY.value),
-            get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value)
         ]
     }, {
         'identifier': MathesarTypeIdentifier.NUMBER.value,
@@ -240,8 +240,9 @@ def get_mathesar_type_from_db_type(db_type_string):
 
 def get_ma_type_enum_from_id(ma_type_id):
     """
-    Gets an instance of MathesarTypeIdentifier enum corresponding to the provided ma_type_id.
-    If the id doesn't correspond to the mentioned enum, returns None.
+    Gets an instance of MathesarTypeIdentifier enum corresponding to the
+    provided ma_type_id.  If the id doesn't correspond to the mentioned
+    enum, returns None.
     """
     try:
         return MathesarTypeIdentifier(ma_type_id)
