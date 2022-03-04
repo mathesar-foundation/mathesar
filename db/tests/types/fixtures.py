@@ -42,25 +42,6 @@ def engine_email_type(temporary_testing_schema):
 
 
 @pytest.fixture
-def uris_table_obj(engine_with_uris, uris_table_name):
-    engine, schema = engine_with_uris
-    metadata = MetaData(bind=engine)
-    table = Table(uris_table_name, metadata, schema=schema, autoload_with=engine)
-    # Cast "uri" column from string to URI
-    with engine.begin() as conn:
-        uri_column_name = "uri"
-        uri_type_id = "uri"
-        alter_column_type(
-            table,
-            uri_column_name,
-            engine,
-            conn,
-            uri_type_id,
-        )
-    yield table, engine
-
-
-@pytest.fixture
 def roster_table_obj(engine_with_roster, roster_table_name):
     engine, schema = engine_with_roster
     metadata = MetaData(bind=engine)

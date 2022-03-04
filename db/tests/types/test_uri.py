@@ -14,7 +14,6 @@ from db.functions.operations.apply import apply_db_function_as_filter
 # properly detect the fixtures.  Importing them directly results in a
 # flake8 unused import error, and a bunch of flake8 F811 errors.
 engine_with_types = fixtures.engine_with_types
-uris_table_obj = fixtures.uris_table_obj
 engine_email_type = fixtures.engine_email_type
 temporary_testing_schema = fixtures.temporary_testing_schema
 
@@ -215,7 +214,7 @@ def test_uri_type_domain_rejects_malformed_uris(engine_email_type, test_str):
 @pytest.mark.parametrize("main_db_function,literal_param,expected_count", [
     (uri.URIAuthorityContains, "soundcloud", 4),
     (uri.URIAuthorityContains, "http", 0),
-    (uri.URISchemeEquals, "ftp", 2),
+    (uri.URISchemeEquals, "ftp", 3),
     (uri.Contains, ".com/31421017", 1),
 ])
 def test_uri_db_functions(uris_table_obj, main_db_function, literal_param, expected_count):

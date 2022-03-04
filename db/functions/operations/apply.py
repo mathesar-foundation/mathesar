@@ -2,6 +2,13 @@ from db.functions.base import DBFunction
 from db.functions.exceptions import ReferencedColumnsDontExist
 from db.functions.packed import DBFunctionPacked
 from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
+from sqlalchemy import select
+
+
+def apply_db_function_as_function(relation, db_function):
+    sa_expression = _db_function_to_sa_expression(db_function)
+    relation = select(sa_expression).select_from(relation)
+    return relation
 
 
 def apply_db_function_spec_as_filter(relation, ma_function_spec):

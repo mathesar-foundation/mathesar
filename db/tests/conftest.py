@@ -8,6 +8,7 @@ from db import constants, types
 from db.tables.operations.split import extract_columns_from_table
 from db.engine import _add_custom_types_to_engine
 from db.types import base, install
+from db.columns.operations.alter import alter_column_type
 
 
 APP_SCHEMA = "test_schema"
@@ -167,3 +168,22 @@ def roster_table_obj(engine_with_roster, roster_table_name):
     metadata = MetaData(bind=engine)
     table = Table(roster_table_name, metadata, schema=schema, autoload_with=engine)
     return table, engine
+
+
+@pytest.fixture
+def uris_table_obj(engine_with_uris, uris_table_name):
+    engine, schema = engine_with_uris
+    metadata = MetaData(bind=engine)
+    table = Table(uris_table_name, metadata, schema=schema, autoload_with=engine)
+    # Cast "uri" column from string to URI
+    with engine.begin() as conn:
+        uri_column_name = "uri"
+        uri_type_id = "uri"
+        alter_column_type(
+            table,
+            uri_column_name,
+            engine,
+            conn,
+            uri_type_id,
+        )
+    yield table, engine

@@ -1,7 +1,8 @@
-from sqlalchemy import select, func
+from sqlalchemy import sql, select, func
 from sqlalchemy_filters import apply_sort
 
-from db.functions.operations.apply import apply_db_function_spec_as_filter
+from db.functions.base import ColumnName
+from db.functions.operations.apply import apply_db_function_as_function, apply_db_function_spec_as_filter
 from db.columns.base import MathesarColumn
 from db.records.operations import group
 from db.tables.utils import get_primary_key_column
@@ -32,7 +33,7 @@ def get_query(
     table,
     limit,
     offset,
-    order_by,
+    order_by=None,
     filter=None,
     columns_to_select=None,
     group_by=None,
@@ -104,7 +105,6 @@ def get_records(
             # If there aren't primary keys, order by all columns
             order_by = [{'field': col, 'direction': 'asc'}
                         for col in table.columns]
-
     query = get_query(
         table=table,
         limit=limit,
@@ -148,3 +148,29 @@ def get_column_cast_records(engine, table, column_definitions, num_records=20):
     with engine.begin() as conn:
         result = conn.execute(sel)
     return result.fetchall()
+
+
+def get_single_column(
+    table,
+    column,
+    engine,
+    limit=None,
+    offset=None,
+    preprocessor_db_function_subclass=None,
+    deduplicate=False,
+):
+    column_name = column.name
+    relation = get_query(
+        table=table,
+        limit=limit,
+        offset=offset,
+        columns_to_select=[sql.column(column_name)],
+    )
+    if preprocessor_db_function_subclass:
+        db_function = preprocessor_db_function_subclass([
+            ColumnName([column_name])
+        ])
+        relation = apply_db_function_as_function(relation, db_function)
+    if deduplicate:
+        relation = relation.distinct()
+    return execute_query(engine, relation)

@@ -14,6 +14,17 @@ import db.types.uri
 import db.types.email
 
 from db.functions.base import DBFunction
+from db.functions.exceptions import UnknownDBFunctionID
+
+
+def get_db_function_subclass_by_id(subclass_id):
+    for db_function_subclass in known_db_functions:
+        if db_function_subclass.id == subclass_id:
+            return db_function_subclass
+    raise UnknownDBFunctionID(
+        f"DBFunction subclass with id {subclass_id} not found (or not"
+        + "available on this DB)."
+    )
 
 
 def _get_module_members_that_satisfy(module, predicate):
