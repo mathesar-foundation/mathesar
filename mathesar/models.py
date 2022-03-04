@@ -182,6 +182,10 @@ class Table(DatabaseObject):
         super().save(*args, **kwargs)
 
     @cached_property
+    def _sa_engine(self):
+        return self.schema._sa_engine
+
+    @cached_property
     def _sa_table(self):
         try:
             table = reflect_table_from_oid(
@@ -225,10 +229,7 @@ class Table(DatabaseObject):
 
     def get_dj_columns_queryset(self):
         sa_column_name = [column.name for column in self.sa_columns]
-        column_attnum_list = [
-            result[0] for result in
-            get_columns_attnum_from_names(self.oid, sa_column_name, self.schema._sa_engine)
-        ]
+        column_attnum_list = get_columns_attnum_from_names(self.oid, sa_column_name, self.schema._sa_engine)
         return Column.objects.filter(table=self, attnum__in=column_attnum_list).order_by("attnum")
 
     def get_dj_columns(self):
@@ -260,17 +261,17 @@ class Table(DatabaseObject):
             column_data,
         )
 
-    def drop_column(self, column_index):
+    def drop_column(self, column_attnum):
         drop_column(
             self.oid,
-            column_index,
+            column_attnum,
             self.schema._sa_engine,
         )
 
-    def duplicate_column(self, column_index, copy_data, copy_constraints, name=None):
+    def duplicate_column(self, column_attnum, copy_data, copy_constraints, name=None):
         return duplicate_column(
             self.oid,
-            column_index,
+            column_attnum,
             self.schema._sa_engine,
             new_column_name=name,
             copy_data=copy_data,
@@ -395,7 +396,7 @@ class Constraint(DatabaseObject):
     def columns(self):
         column_names = [column.name for column in self._sa_constraint.columns]
         engine = self.table.schema.database._sa_engine
-        column_attnum_list = [result[0] for result in get_columns_attnum_from_names(self.table.oid, column_names, engine)]
+        column_attnum_list = [result for result in get_columns_attnum_from_names(self.table.oid, column_names, engine)]
         return Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
 
     def drop(self):

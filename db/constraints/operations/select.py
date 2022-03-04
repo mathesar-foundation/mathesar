@@ -49,7 +49,7 @@ def get_constraint_oid_by_name_and_table_oid(name, table_oid, engine):
     return result['oid']
 
 
-def get_column_constraints(column_index, table_oid, engine):
+def get_column_constraints(column_attnum, table_oid, engine):
     metadata = MetaData()
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
@@ -62,7 +62,7 @@ def get_column_constraints(column_index, table_oid, engine):
             pg_constraint.c.conrelid == table_oid,
             # 'conkey' contains a list of the constrained column's indices
             # Here, we check if the column index appears in the conkey list
-            pg_constraint.c.conkey.bool_op("&&")(f"{{{column_index + 1}}}")
+            pg_constraint.c.conkey.bool_op("&&")(f"{{{column_attnum}}}")
         ))
     )
 

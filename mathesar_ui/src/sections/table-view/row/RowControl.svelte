@@ -16,7 +16,7 @@
   export let meta: Meta;
   export let recordsData: RecordsData;
 
-  $: ({ selectedRecords, recordModificationState, offset } = meta);
+  $: ({ selectedRecords, recordModificationState, pagination } = meta);
   $: ({ savedRecords, newRecords, totalCount } = recordsData);
 
   $: primaryKeyValue = primaryKeyColumn ? row[primaryKeyColumn] : undefined;
@@ -50,7 +50,7 @@
           {row.__rowIndex +
             (row.__isNew
               ? ($totalCount ?? 0) - $savedRecords.length - $newRecords.length
-              : $offset) +
+              : $pagination.offset) +
             1}
           {#if row.__isNew}
             *

@@ -13,7 +13,7 @@ from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_a
 from db.columns.exceptions import (
     DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError,
 )
-from db.columns.operations.select import get_columns_attnum_from_names
+from db.columns.operations.select import get_column_attnum_from_name
 from db.types.exceptions import InvalidTypeParameters
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
@@ -36,21 +36,12 @@ class ColumnViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         if 'source_column' in serializer.validated_data:
-            try:
-                column = table.duplicate_column(
-                    serializer.validated_data['source_column'],
-                    serializer.validated_data['copy_source_data'],
-                    serializer.validated_data['copy_source_constraints'],
-                    serializer.validated_data.get('name'),
-                )
-            except IndexError as e:
-                _col_idx = serializer.validated_data['source_column']
-                raise base_api_exceptions.NotFoundAPIException(
-                    e,
-                    message=f'column index "{_col_idx}" not found',
-                    field='source_column',
-                    status_code=status.HTTP_400_BAD_REQUEST
-                )
+            column = table.duplicate_column(
+                serializer.validated_data['source_column'],
+                serializer.validated_data['copy_source_data'],
+                serializer.validated_data['copy_source_constraints'],
+                serializer.validated_data.get('name'),
+            )
         else:
             try:
                 column = table.add_column(request.data)
@@ -93,8 +84,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
                 )
         dj_column = Column(
             table=table,
-            attnum=get_columns_attnum_from_names(table.oid, [column.name], table.schema._sa_engine)[0][
-                0],
+            attnum=get_column_attnum_from_name(table.oid, column.name, table.schema._sa_engine),
             **serializer.validated_model_fields
         )
         dj_column.save()
@@ -167,7 +157,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
         column_instance = self.get_object()
         table = column_instance.table
         try:
-            table.drop_column(column_instance.column_index)
+            table.drop_column(column_instance.attnum)
             column_instance.delete()
         except IndexError:
             raise NotFound

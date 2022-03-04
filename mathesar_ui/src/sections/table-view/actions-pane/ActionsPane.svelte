@@ -12,11 +12,7 @@
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
   import { Button, Icon, Dropdown } from '@mathesar-component-library';
-  import type {
-    TabularDataStore,
-    ColumnsData,
-  } from '@mathesar/stores/table-data/types';
-  import type { SelectOption } from '@mathesar-component-library/types';
+  import type { TabularDataStore } from '@mathesar/stores/table-data/types';
   import { refetchTablesForSchema, deleteTable } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
@@ -31,22 +27,19 @@
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
-  function getColumnOptions(columnsData: ColumnsData): SelectOption<string>[] {
-    return (
-      columnsData?.columns?.map((column) => ({
-        id: column.name,
-        label: column.name,
-      })) || []
-    );
-  }
-
   const tableConstraintsModal = modal.spawnModalController();
   const tableRenameModal = modal.spawnModalController();
 
   $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
     $tabularData);
-  $: ({ filter, sort, group, selectedRecords, combinedModificationState } =
-    meta);
+  $: ({ columns } = $columnsDataStore);
+  $: ({
+    filtering,
+    sorting,
+    grouping,
+    selectedRecords,
+    combinedModificationState,
+  } = meta);
   $: recordState = recordsData.state;
 
   $: isLoading =
@@ -57,7 +50,6 @@
     $columnsDataStore.state === States.Error ||
     $recordState === States.Error ||
     $constraintsDataStore.state === States.Error;
-  $: columnOptions = getColumnOptions($columnsDataStore);
 
   function refresh() {
     void $tabularData.refresh();
@@ -121,13 +113,13 @@
       <Icon data={faFilter} size="0.8em" />
       <span>
         Filters
-        {#if $filter?.filters?.length > 0}
-          ({$filter?.filters?.length})
+        {#if $filtering.entries.length > 0}
+          ({$filtering.entries.length})
         {/if}
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <DisplayFilter options={columnOptions} {meta} />
+      <DisplayFilter {columns} filtering={meta.filtering} />
     </svelte:fragment>
   </Dropdown>
 
@@ -136,13 +128,13 @@
       <Icon data={faSort} />
       <span>
         Sort
-        {#if $sort?.size > 0}
-          ({$sort?.size})
+        {#if $sorting.size > 0}
+          ({$sorting.size})
         {/if}
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <DisplaySort options={columnOptions} {meta} />
+      <DisplaySort {columns} sorting={meta.sorting} />
     </svelte:fragment>
   </Dropdown>
 
@@ -151,13 +143,13 @@
       <Icon data={faListAlt} />
       <span>
         Group
-        {#if $group?.size > 0}
-          ({$group?.size})
+        {#if $grouping.size > 0}
+          ({$grouping.size})
         {/if}
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <DisplayGroup options={columnOptions} {meta} />
+      <DisplayGroup {columns} grouping={meta.grouping} />
     </svelte:fragment>
   </Dropdown>
 

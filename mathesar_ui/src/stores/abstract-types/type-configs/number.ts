@@ -14,26 +14,41 @@ const numberType: AbstractTypeConfiguration = {
           variables: {
             numberType: {
               type: 'string',
-              default: 'Integer',
               enum: ['Integer', 'Decimal', 'Float'],
+              defaults: {
+                INTEGER: 'Integer',
+                SMALLINT: 'Integer',
+                BIGINT: 'Integer',
+                DECIMAL: 'Decimal',
+                NUMERIC: 'Decimal',
+                REAL: 'Float',
+                'DOUBLE PRECISION': 'Float',
+              },
             },
             integerDataSize: {
               type: 'string',
-              default: 'default',
               enum: ['default', 'bigInt', 'smallInt'],
+              defaults: {
+                INTEGER: 'default',
+                SMALLINT: 'smallInt',
+                BIGINT: 'bigInt',
+              },
             },
-            decimalPlaces: {
+            precision: {
               type: 'integer',
-              default: 2,
+              isSaved: true,
             },
-            maxDigits: {
+            scale: {
               type: 'integer',
-              default: 2,
+              isSaved: true,
             },
             floatingPointType: {
               type: 'string',
-              default: 'real',
               enum: ['real', 'doublePrecision'],
+              defaults: {
+                REAL: 'real',
+                'DOUBLE PRECISION': 'doublePrecision',
+              },
             },
           },
           layout: {
@@ -68,12 +83,12 @@ const numberType: AbstractTypeConfiguration = {
                       elements: [
                         {
                           type: 'input',
-                          variable: 'decimalPlaces',
+                          variable: 'precision',
                           label: 'Decimal Places',
                         },
                         {
                           type: 'input',
-                          variable: 'maxDigits',
+                          variable: 'scale',
                           label: 'Max Digits',
                         },
                       ],
@@ -198,42 +213,6 @@ const numberType: AbstractTypeConfiguration = {
             },
           },
         ],
-        ruleReversalValues: {
-          INTEGER: {
-            numberType: 'Integer',
-            integerDataSize: 'default',
-          },
-          SMALLINT: {
-            numberType: 'Integer',
-            integerDataSize: 'smallInt',
-          },
-          BIGINT: {
-            numberType: 'Integer',
-            integerDataSize: 'bigInt',
-          },
-          DECIMAL: {
-            numberType: 'Decimal',
-            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-            decimalPlaces: null,
-            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-            maxDigits: null,
-          },
-          NUMERIC: {
-            numberType: 'Decimal',
-            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-            decimalPlaces: null,
-            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-            maxDigits: null,
-          },
-          REAL: {
-            numberType: 'Float',
-            floatingPointType: 'real',
-          },
-          'DOUBLE PRECISION': {
-            numberType: 'Float',
-            floatingPointType: 'doublePrecision',
-          },
-        },
       },
     },
     display: {
@@ -241,12 +220,12 @@ const numberType: AbstractTypeConfiguration = {
         variables: {
           showAsPercentage: {
             type: 'boolean',
-            default: false,
+            isSaved: true,
           },
           format: {
             type: 'string',
-            default: 'en_us',
             enum: ['en_us', 'fr'],
+            isSaved: true,
           },
         },
         layout: {

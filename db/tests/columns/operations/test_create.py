@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import Integer, Column, Table, MetaData, Numeric, UniqueConstraint
 
 from db.columns.operations.create import create_column, duplicate_column
-from db.columns.operations.select import get_column_default, get_column_index_from_name
+from db.columns.operations.select import get_column_attnum_from_name, get_column_default
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.constraints.operations.select import get_column_constraints
 from db.tests.columns.utils import create_test_table
@@ -35,14 +35,14 @@ def _check_duplicate_data(table_oid, engine, copy_data):
 
 
 def _check_duplicate_unique_constraint(
-    table_oid, col_index, con_idxs, engine, copy_constraints
+    table_oid, col_attnum, con_attnums, engine, copy_constraints
 ):
-    constraints_ = get_column_constraints(col_index, table_oid, engine)
+    constraints_ = get_column_constraints(col_attnum, table_oid, engine)
     if copy_constraints:
         assert len(constraints_) == 1
         constraint = constraints_[0]
         assert constraint.contype == "u"
-        assert set([con - 1 for con in constraint.conkey]) == set(con_idxs)
+        assert set(constraint.conkey) == set(con_attnums)
     else:
         assert len(constraints_) == 0
 
@@ -216,15 +216,17 @@ def test_create_column_bad_options(engine_with_schema):
 def test_duplicate_column_name(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "atable"
+    filler_column_name = "Filler"
     new_col_name = "duplicated_column"
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column("Filler", Numeric)
+        Column(filler_column_name, Numeric)
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
-    duplicate_column(table_oid, 0, engine, new_col_name)
+    col_attnum = get_column_attnum_from_name(table_oid, filler_column_name, engine)
+    duplicate_column(table_oid, col_attnum, engine, new_col_name)
     table = reflect_table_from_oid(table_oid, engine)
     assert new_col_name in table.c
 
@@ -240,14 +242,15 @@ def test_duplicate_column_single_unique(engine_with_schema, copy_data, copy_cons
     create_test_table(table_name, cols, insert_data, schema, engine)
 
     table_oid = get_oid_from_table(table_name, schema, engine)
+    target_col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
     duplicate_column(
-        table_oid, 0, engine, new_col_name, copy_data, copy_constraints
+        table_oid, target_col_attnum, engine, new_col_name, copy_data, copy_constraints
     )
 
-    col_index = get_column_index_from_name(table_oid, new_col_name, engine)
+    col_attnum = get_column_attnum_from_name(table_oid, new_col_name, engine)
     _check_duplicate_data(table_oid, engine, copy_data)
     _check_duplicate_unique_constraint(
-        table_oid, col_index, [col_index], engine, copy_constraints
+        table_oid, col_attnum, [col_attnum], engine, copy_constraints
     )
 
 
@@ -257,23 +260,26 @@ def test_duplicate_column_multi_unique(engine_with_schema, copy_data, copy_const
     table_name = "atable"
     target_column_name = "columtoduplicate"
     new_col_name = "duplicated_column"
+    filler_col_name = "Filler"
     cols = [
         Column(target_column_name, Numeric),
-        Column("Filler", Numeric),
-        UniqueConstraint(target_column_name, "Filler")
+        Column(filler_col_name, Numeric),
+        UniqueConstraint(target_column_name, filler_col_name)
     ]
     insert_data = [(1, 2), (2, 3), (3, 4)]
     create_test_table(table_name, cols, insert_data, schema, engine)
 
     table_oid = get_oid_from_table(table_name, schema, engine)
+    target_col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
     duplicate_column(
-        table_oid, 0, engine, new_col_name, copy_data, copy_constraints
+        table_oid, target_col_attnum, engine, new_col_name, copy_data, copy_constraints
     )
 
-    col_index = get_column_index_from_name(table_oid, new_col_name, engine)
+    new_col_attnum = get_column_attnum_from_name(table_oid, new_col_name, engine)
+    filler_col_attnum = get_column_attnum_from_name(table_oid, filler_col_name, engine)
     _check_duplicate_data(table_oid, engine, copy_data)
     _check_duplicate_unique_constraint(
-        table_oid, col_index, [1, col_index], engine, copy_constraints
+        table_oid, new_col_attnum, [filler_col_attnum, new_col_attnum], engine, copy_constraints
     )
 
 
@@ -291,8 +297,9 @@ def test_duplicate_column_nullable(
     create_test_table(table_name, cols, insert_data, schema, engine)
 
     table_oid = get_oid_from_table(table_name, schema, engine)
+    target_col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
     col = duplicate_column(
-        table_oid, 0, engine, new_col_name, copy_data, copy_constraints
+        table_oid, target_col_attnum, engine, new_col_name, copy_data, copy_constraints
     )
 
     _check_duplicate_data(table_oid, engine, copy_data)
@@ -321,7 +328,8 @@ def test_duplicate_non_unique_constraint(engine_with_schema):
             conn.execute(table.insert().values(data))
 
     table_oid = get_oid_from_table(table_name, schema, engine)
-    col = duplicate_column(table_oid, 0, engine, new_col_name)
+    col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
+    col = duplicate_column(table_oid, col_attnum, engine, new_col_name)
 
     _check_duplicate_data(table_oid, engine, True)
     assert col.primary_key is False
@@ -338,12 +346,13 @@ def test_duplicate_column_default(engine_with_schema, copy_data, copy_constraint
     create_test_table(table_name, cols, [], schema, engine)
 
     table_oid = get_oid_from_table(table_name, schema, engine)
+    target_col_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
     duplicate_column(
-        table_oid, 0, engine, new_col_name, copy_data, copy_constraints
+        table_oid, target_col_attnum, engine, new_col_name, copy_data, copy_constraints
     )
 
-    col_index = get_column_index_from_name(table_oid, new_col_name, engine)
-    default = get_column_default(table_oid, col_index, engine)
+    column_attnum = get_column_attnum_from_name(table_oid, new_col_name, engine)
+    default = get_column_default(table_oid, column_attnum, engine)
     if copy_data:
         assert default == expt_default
     else:

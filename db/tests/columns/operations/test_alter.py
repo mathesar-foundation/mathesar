@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from db import constants
 from db.columns.operations import alter as alter_operations
 from db.columns.operations.alter import alter_column, batch_update_columns, change_column_nullable, rename_column, retype_column, set_column_default
-from db.columns.operations.select import get_column_default, get_column_index_from_name
+from db.columns.operations.select import get_column_attnum_from_name, get_column_default, get_column_index_from_name
 from db.columns.utils import get_mathesar_column_with_engine
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table
@@ -262,10 +262,12 @@ def test_change_column_nullable_changes(engine_with_schema, nullable_tup):
         Column(nontarget_column_name, String),
     )
     table.create()
+    table_oid = get_oid_from_table(table_name, schema, engine)
+    target_column_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
     with engine.begin() as conn:
         change_column_nullable(
-            table,
-            0,
+            table_oid,
+            target_column_attnum,
             engine,
             conn,
             nullable_tup[1],
@@ -289,6 +291,7 @@ def test_change_column_nullable_with_data(engine_with_schema, nullable_tup):
         Column(target_column_name, Integer, nullable=nullable_tup[0]),
     )
     table.create()
+    table_oid = get_oid_from_table(table_name, schema, engine)
     ins = table.insert().values(
         [
             {target_column_name: 1},
@@ -298,10 +301,11 @@ def test_change_column_nullable_with_data(engine_with_schema, nullable_tup):
     )
     with engine.begin() as conn:
         conn.execute(ins)
+    target_column_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
     with engine.begin() as conn:
         change_column_nullable(
-            table,
-            0,
+            table_oid,
+            target_column_attnum,
             engine,
             conn,
             nullable_tup[1],
@@ -324,6 +328,8 @@ def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema
         Column(target_column_name, Integer, nullable=True),
     )
     table.create()
+    table_oid = get_oid_from_table(table_name, schema, engine)
+    target_column_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
     ins = table.insert().values(
         [
             {target_column_name: 1},
@@ -336,8 +342,8 @@ def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema
     with engine.begin() as conn:
         with pytest.raises(IntegrityError) as e:
             change_column_nullable(
-                table,
-                0,
+                table_oid,
+                target_column_attnum,
                 engine,
                 conn,
                 False,
@@ -357,11 +363,12 @@ def test_column_default_create(engine_with_schema, col_type):
         Column(column_name, col_type)
     )
     table.create()
-
-    with engine.begin() as conn:
-        set_column_default(table, 0, engine, conn, set_default)
     table_oid = get_oid_from_table(table_name, schema, engine)
-    default = get_column_default(table_oid, 0, engine)
+    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine)
+    with engine.begin() as conn:
+        set_column_default(table_oid, column_attnum, engine, conn, set_default)
+
+    default = get_column_default(table_oid, column_attnum, engine)
     created_default = get_default(engine, table)
 
     assert default == expt_default
@@ -380,11 +387,11 @@ def test_column_default_update(engine_with_schema, col_type):
         Column(column_name, col_type, server_default=start_default)
     )
     table.create()
-
-    with engine.begin() as conn:
-        set_column_default(table, 0, engine, conn, set_default)
     table_oid = get_oid_from_table(table_name, schema, engine)
-    default = get_column_default(table_oid, 0, engine)
+    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine)
+    with engine.begin() as conn:
+        set_column_default(table_oid, column_attnum, engine, conn, set_default)
+    default = get_column_default(table_oid, column_attnum, engine)
     created_default = get_default(engine, table)
 
     assert default != start_default
@@ -404,11 +411,11 @@ def test_column_default_delete(engine_with_schema, col_type):
         Column(column_name, col_type, server_default=set_default)
     )
     table.create()
-
-    with engine.begin() as conn:
-        set_column_default(table, 0, engine, conn, None)
     table_oid = get_oid_from_table(table_name, schema, engine)
-    default = get_column_default(table_oid, 0, engine)
+    column_attnum = get_column_attnum_from_name(table_oid, column_name, engine)
+    with engine.begin() as conn:
+        set_column_default(table_oid, column_attnum, engine, conn, None)
+    default = get_column_default(table_oid, column_attnum, engine)
     created_default = get_default(engine, table)
 
     assert default is None
