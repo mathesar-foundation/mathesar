@@ -10,7 +10,8 @@
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { constructTabularTab, getTabsForSchema } from '@mathesar/stores/tabs';
   import { currentDBName } from '@mathesar/stores/databases';
-  import { TabularType } from '@mathesar/App.d';
+  import { TabularType } from '@mathesar/stores/table-data';
+
   import ModalTextInputForm from '@mathesar/components/ModalTextInputForm.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
 

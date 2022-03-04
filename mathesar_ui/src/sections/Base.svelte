@@ -3,12 +3,14 @@
   import { TabContainer, Icon } from '@mathesar-component-library';
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId } from '@mathesar/stores/schemas';
+  import type { MathesarTab, TabList } from '@mathesar/stores/tabs/types';
   import {
     getTabsForSchema,
-    constructTabularTabLink,
+    tabIsTabular,
+    TabType,
   } from '@mathesar/stores/tabs';
-  import type { MathesarTab, TabList } from '@mathesar/stores/tabs/types';
-  import { TabularType } from '@mathesar/App.d';
+  import { constructTabularTabLink } from '@mathesar/stores/tabs/tabDataSaver';
+  import { TabularType } from '@mathesar/stores/table-data';
   import type { TableEntry } from '@mathesar/App.d';
 
   import ImportData from './import-data/ImportData.svelte';
@@ -35,15 +37,15 @@
   // TODO: Move this entire logic to data layer without involving view layer
   $: changeCurrentSchema(database, schemaId);
 
-  function getTabLink(entry: MathesarTab): string | undefined {
-    if (entry.isNew || !entry.tabularData) {
+  function getTabLink(tab: MathesarTab): string | undefined {
+    if (!tabIsTabular(tab)) {
       return undefined;
     }
     return constructTabularTabLink(
       database,
       schemaId,
-      entry.tabularData.type,
-      entry.tabularData.id,
+      tab.tabularData.type,
+      tab.tabularData.id,
     );
   }
 
@@ -92,9 +94,9 @@
       </span>
 
       {#if $activeTab}
-        {#if $activeTab.isNew}
+        {#if $activeTab.type === TabType.Import}
           <ImportData {database} {schemaId} id={$activeTab.fileImportId} />
-        {:else if $activeTab.tabularData}
+        {:else if $activeTab.type === TabType.Tabular}
           <TableView tabularData={$activeTab.tabularData} />
         {/if}
       {/if}

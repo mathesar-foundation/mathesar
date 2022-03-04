@@ -1,3 +1,11 @@
+<!--
+  @component
+
+  **NOTICE** This component will eventually be redesigned, with its props
+  behaving more like `SimpleSelect`.
+
+  https://github.com/centerofci/mathesar/issues/1099
+-->
 <script lang="ts">
   import { createEventDispatcher, tick } from 'svelte';
   import { Dropdown } from '@mathesar-component-library';

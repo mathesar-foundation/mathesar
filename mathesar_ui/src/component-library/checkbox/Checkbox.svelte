@@ -40,6 +40,7 @@
 <BaseInput {...$$restProps} bind:id {disabled} />
 
 <input
+  {...$$restProps}
   class="checkbox"
   type="checkbox"
   {id}
@@ -48,4 +49,6 @@
   {disabled}
   {value}
   on:change={onChange}
+  on:click
+  on:mousedown
 />
