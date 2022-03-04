@@ -10,7 +10,7 @@
 </script>
 
 <Dropdown {closeOnInnerClick} ariaLabel={label}>
-  <span slot="trigger">
+  <span class="dropdown-menu-trigger" slot="trigger">
     {#if icon}
       <Icon {...icon} />
     {/if}
@@ -20,3 +20,13 @@
     <slot />
   </Menu>
 </Dropdown>
+
+<style>
+  .dropdown-menu-trigger {
+    display: flex;
+    align-items: center;
+  }
+  .dropdown-menu-trigger > :global(* + *) {
+    margin-left: 0.4em;
+  }
+</style>
