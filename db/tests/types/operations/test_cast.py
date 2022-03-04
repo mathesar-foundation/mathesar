@@ -102,7 +102,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
             MATHESAR_MONEY: {
-                VALID: [(1234, 1234)],
+                VALID: [(1234, Decimal('1234.0'))],
             },
             MONEY: {
                 VALID: [(1234, "$1,234.00")],
@@ -212,7 +212,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [1234123412341234]
             },
-            MATHESAR_MONEY: {VALID: [(1234.12, 1234.12)]},
+            MATHESAR_MONEY: {VALID: [(1234.12, Decimal('1234.12'))]},
             MONEY: {VALID: [(12.12, "$12.12")]},
             MULTICURRENCY_MONEY: {
                 VALID: [
@@ -247,7 +247,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
             INTEGER: {VALID: [(500, 500)]},
-            MATHESAR_MONEY: {VALID: [(12.12, 12.12)]},
+            MATHESAR_MONEY: {VALID: [(12.12, Decimal('12.12'))]},
             MONEY: {VALID: [(12.12, "$12.12")]},
             MULTICURRENCY_MONEY: {
                 VALID: [
@@ -289,7 +289,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
             INTEGER: {VALID: [(500, 500), (-5, -5)], INVALID: [-3.234, 234.34]},
-            MATHESAR_MONEY: {VALID: [(12.12, 12.12)]},
+            MATHESAR_MONEY: {VALID: [(12.12, Decimal('12.12'))]},
             MONEY: {VALID: [(12.12, "$12.12")]},
             MULTICURRENCY_MONEY: {
                 VALID: [
@@ -320,7 +320,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
-            MATHESAR_MONEY: {VALID: [(500, 500)]},
+            MATHESAR_MONEY: {VALID: [(500, Decimal('500.0'))]},
             MONEY: {VALID: [(12, "$12.00")]},
             MULTICURRENCY_MONEY: {
                 VALID: [
@@ -358,11 +358,31 @@ MASTER_DB_TYPE_MAP_SPEC = {
     },
     MATHESAR_MONEY: {
         ISCHEMA_NAME: get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value),
+        SUPPORTED_MAP_NAME: MathesarCustomType.MATHESAR_MONEY.value,
         REFLECTED_NAME: MATHESAR_MONEY,
         TARGET_DICT: {
+            BIGINT: {VALID: [(12341234, 12341234)]},
             CHAR: {VALID: []},
-            MATHESAR_MONEY: {VALID: [(12.12, 12.12)]},
+            DECIMAL: {VALID: [(12.12, Decimal('12.12'))]},
+            DOUBLE: {VALID: [(12.12, 12.12)]},
+            FLOAT: {VALID: [(12.12, 12.12)]},
+            INTEGER: {VALID: [(123412, 123412)]},
+            MATHESAR_MONEY: {VALID: [(12.12, Decimal('12.12'))]},
+            MULTICURRENCY_MONEY: {
+                VALID: [
+                    (
+                        12.12,
+                        {
+                            multicurrency.VALUE: 12.12,
+                            multicurrency.CURRENCY: 'USD'
+                        }
+                    )
+                ]
+            },
             MONEY: {VALID: [(12.12, "$12.12")]},
+            NUMERIC: {VALID: [(12.12, Decimal('12.12'))]},
+            REAL: {VALID: [(12.12, 12.12)]},
+            SMALLINT: {VALID: [(1234, 1234)]},
             TEXT: {VALID: [(12.12, "12.12")]},
             VARCHAR: {VALID:[(12.12, "12.12")]},
         }
@@ -372,6 +392,18 @@ MASTER_DB_TYPE_MAP_SPEC = {
         REFLECTED_NAME: MONEY,
         TARGET_DICT: {
             CHAR: {VALID: []},
+            MATHESAR_MONEY: {VALID: [("$20.00", Decimal(20.0))]},
+            MULTICURRENCY_MONEY: {
+                VALID: [
+                    (
+                        "$12.12",
+                        {
+                            multicurrency.VALUE: 12.12,
+                            multicurrency.CURRENCY: 'USD'
+                        }
+                    )
+                ]
+            },
             MONEY: {VALID: [("$12.12", "$12.12")]},
             TEXT: {VALID: [("$12.12", "$12.12")]},
             VARCHAR: {VALID: [("$12.12", "$12.12")]},
@@ -440,6 +472,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [1.234, 1234123412341234]
             },
+            MATHESAR_MONEY: {VALID: [(12.12, Decimal('12.12'))]},
             MULTICURRENCY_MONEY: {
                 VALID: [
                     (1, {multicurrency.VALUE: 1, multicurrency.CURRENCY: "USD"})
@@ -473,6 +506,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [3.345]
             },
+            MATHESAR_MONEY: {VALID: [(12.12, Decimal('12.12'))]},
             MULTICURRENCY_MONEY: {
                 VALID: [
                     (
@@ -503,6 +537,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
+            MATHESAR_MONEY: {VALID: [(12, 12)]},
             MULTICURRENCY_MONEY: {
                 VALID: [
                     (1, {multicurrency.VALUE: 1, multicurrency.CURRENCY: "USD"})
@@ -646,6 +681,17 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     ("00:03:30", "P0Y0M0DT0H3M30S"),
                 ],
                 INVALID: ["1 potato", "3"],
+            },
+            MATHESAR_MONEY: {
+                VALID: [
+                    ("$1234", 1234),
+                    ("$1234 HK", 1234),
+                    ("$1234.00", 1234),
+                    ("$1,234.00", 1234),
+                    ("1234 USD", 1234),
+                    ("$1,234,567.1234", Decimal('1234567.1234')),
+                ],
+                INVALID: ["nanumb"],
             },
             MULTICURRENCY_MONEY: {
                 VALID: [
@@ -791,6 +837,13 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     ("00:03:30", "P0Y0M0DT0H3M30S"),
                 ],
                 INVALID: ["1 potato", "3"],
+            },
+            MATHESAR_MONEY: {
+                VALID: [
+                    ("$1234", 1234),
+                    ("-$$ 1,234,567", Decimal('-1234567')),
+                ],
+                INVALID: ["nanumb"],
             },
             MONEY: {VALID: [("$12.12", "$12.12")]},
             MULTICURRENCY_MONEY: {
@@ -1308,6 +1361,7 @@ money_array_examples = [
     ('1,000.00', None),
     ('$1,000', None),
     ('$1,000,000', ['1,000,000', ',', None]),
+    ('$1,234,567.1234', ['1,234,567.1234', ',', '.']),
     ('1,000,000$', ['1,000,000', ',', None]),
     ('$1 000,000', ['1 000,000', ' ', ',']),
     ('1 000,000$', ['1 000,000', ' ', ',']),
@@ -1337,7 +1391,7 @@ def test_mathesar_money_array_sql(engine_email_type, source_str, expect_arr):
     with engine.begin() as conn:
         res = conn.execute(
             select(
-                text(f"mathesar_types.get_mathesar_money_array('{source_str}')")
+                text(f"mathesar_types.get_mathesar_money_array('{source_str}'::text)")
             )
         ).scalar()
     assert res == expect_arr

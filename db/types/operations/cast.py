@@ -311,6 +311,7 @@ def create_cast_functions(target_type, type_body_map, engine):
     """
     for type_, body in type_body_map.items():
         query = assemble_function_creation_sql(type_, target_type, body)
+        print(query)
         with engine.begin() as conn:
             conn.execute(text(query))
 
@@ -630,6 +631,7 @@ def _get_mathesar_money_type_body_map():
     We allow casting any textual type to money with the text prefixed or
     suffixed with a currency.
     """
+    money_array_function = base.get_qualified_name(MONEY_ARR_FUNC_NAME)
     default_behavior_source_types = frozenset([money.DB_TYPE])
     number_types = NUMBER_TYPES
     textual_types = TEXT_TYPES | frozenset([MONEY])
@@ -651,17 +653,25 @@ def _get_mathesar_money_type_body_map():
         DECLARE money_arr {TEXT}[];
         DECLARE money_num {TEXT};
         BEGIN
-          SELECT to_char(1, 'D') INTO decimal_point;
-          SELECT $1 ~ '^.*(-|\(.+\)).' INTO is_negative;
-          SELECT {MONEY_ARR_FUNC_NAME}($1) INTO money_arr;
-          IF money_arr IS NOT NULL THEN
-            SELECT regexp_replace(regexp_replace(money_arr[1], money_arr[2], '', 'g'), money_arr[3], decimal_point) INTO money_num;
-            IF is_negative THEN
-              RETURN ('-' || money_num)::{money.DB_TYPE};
-            END IF;
-            RETURN money_num::{money.DB_TYPE};
+          SELECT {money_array_function}($1::{TEXT}) INTO money_arr;
+          IF money_arr IS NULL THEN
+            {cast_exception_str}
           END IF;
-          {cast_exception_str}
+
+          SELECT money_arr[1] INTO money_num;
+          SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
+          SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
+
+          IF money_arr[2] IS NOT NULL THEN
+            SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
+          END IF;
+          IF money_arr[3] IS NOT NULL THEN
+            SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
+          END IF;
+          IF is_negative THEN
+            RETURN ('-' || money_num)::{money.DB_TYPE};
+          END IF;
+          RETURN money_num::{money.DB_TYPE};
         END;
         """
 
@@ -818,8 +828,8 @@ def _get_multicurrency_money_type_body_map():
     and that the type can be cast through a numeric.
     """
     default_behavior_source_types = [multicurrency.DB_TYPE]
-    number_types = NUMBER_TYPES
-    textual_types = TEXT_TYPES
+    number_types = NUMBER_TYPES | frozenset([money.DB_TYPE])
+    textual_types = TEXT_TYPES | frozenset([MONEY])
 
     def _get_number_cast_to_money():
         return f"""
