@@ -9,7 +9,8 @@ export interface ColumnPosition {
   width: number;
   left: number;
 }
-export type ColumnPositionMap = Map<string, ColumnPosition>;
+/** keys are column ids */
+export type ColumnPositionMap = Map<number, ColumnPosition>;
 
 // TODO: Select active cell using primary key instead of index
 // Checkout scenarios with pk consisting multiple columns
@@ -30,6 +31,16 @@ const movementKeys = new Set([
   'Tab',
 ]);
 
+/**
+ * I don't understand what this is but I had to create it during a refactor.
+ * This value is used as a key in a ColumnPositionMap where column ids are also
+ * used, so should have the same type as a column id but needs to have a value
+ * that no column id will ever have. That's why we're using -1. If you
+ * understand this design and can suggest a better name for this variable, then
+ * please do so.
+ */
+export const ROW_POSITION_INDEX = -1;
+
 function recalculateColumnPositions(
   columnPositionMap: ColumnPositionMap,
   columns: Column[],
@@ -37,16 +48,16 @@ function recalculateColumnPositions(
   let left = ROW_CONTROL_COLUMN_WIDTH;
   const newColumnPositionMap: ColumnPositionMap = new Map();
   columns.forEach((column) => {
-    const columnWidth = columnPositionMap.get(column.name)?.width;
+    const columnWidth = columnPositionMap.get(column.id)?.width;
     const isColumnWidthValid = typeof columnWidth === 'number';
     const newWidth = isColumnWidthValid ? columnWidth : DEFAULT_COLUMN_WIDTH;
-    newColumnPositionMap.set(column.name, {
+    newColumnPositionMap.set(column.id, {
       left,
       width: newWidth,
     });
     left += newWidth;
   });
-  newColumnPositionMap.set('__row', {
+  newColumnPositionMap.set(ROW_POSITION_INDEX, {
     width: left,
     left: 0,
   });
@@ -141,7 +152,9 @@ export class Display {
         this.columnPositionMap.update((map) =>
           recalculateColumnPositions(map, columnData.columns),
         );
-        const width = get(this.columnPositionMap).get('__row')?.width;
+        const width = get(this.columnPositionMap).get(
+          ROW_POSITION_INDEX,
+        )?.width;
         const widthWithPadding = width ? width + DEFAULT_ROW_RIGHT_PADDING : 0;
         this.rowWidth.set(widthWithPadding);
       },

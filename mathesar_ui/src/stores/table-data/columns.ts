@@ -31,7 +31,7 @@ export interface ColumnsData {
   state: States;
   error?: string;
   columns: Column[];
-  primaryKey?: string;
+  primaryKeyColumnId?: number;
 }
 
 function preprocessColumns(response?: Column[]): Column[] {
@@ -144,7 +144,7 @@ export class ColumnsDataStore
       const storeData: ColumnsData = {
         state: States.Done,
         columns: columnResponse,
-        primaryKey: pkColumn?.name,
+        primaryKeyColumnId: pkColumn?.id,
       };
       this.set(storeData);
       this.fetchCallback?.(storeData);
@@ -154,7 +154,7 @@ export class ColumnsDataStore
         state: States.Error,
         error: err instanceof Error ? err.message : undefined,
         columns: [],
-        primaryKey: undefined,
+        primaryKeyColumnId: undefined,
       });
     } finally {
       this.promise = undefined;

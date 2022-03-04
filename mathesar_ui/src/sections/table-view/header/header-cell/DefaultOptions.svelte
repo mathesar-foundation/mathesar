@@ -30,8 +30,8 @@
   let isRequestingToggleAllowDuplicates = false;
 
   $: ({ sorting, grouping } = meta);
-  $: sortDirection = $sorting.get(column.name);
-  $: hasGrouping = $grouping.has(column.name);
+  $: sortDirection = $sorting.get(column.id);
+  $: hasGrouping = $grouping.has(column.id);
 
   $: allowsNull = column.nullable;
   $: ({ uniqueColumns } = constraintsDataStore);
@@ -39,18 +39,18 @@
 
   function handleSort(order: SortDirection) {
     if (sortDirection === order) {
-      sorting.update((s) => s.without(column.name));
+      sorting.update((s) => s.without(column.id));
     } else {
-      sorting.update((s) => s.with(column.name, order));
+      sorting.update((s) => s.with(column.id, order));
     }
     dispatch('close');
   }
 
   function toggleGroup() {
     if (hasGrouping) {
-      grouping.update((g) => g.without(column.name));
+      grouping.update((g) => g.without(column.id));
     } else {
-      grouping.update((g) => g.with(column.name));
+      grouping.update((g) => g.with(column.id));
     }
     dispatch('close');
   }
