@@ -384,7 +384,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             REAL: {VALID: [(12.12, 12.12)]},
             SMALLINT: {VALID: [(1234, 1234)]},
             TEXT: {VALID: [(12.12, "12.12")]},
-            VARCHAR: {VALID:[(12.12, "12.12")]},
+            VARCHAR: {VALID: [(12.12, "12.12")]},
         }
     },
     MONEY: {

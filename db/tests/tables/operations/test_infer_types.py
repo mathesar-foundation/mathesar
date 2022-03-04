@@ -2,7 +2,6 @@ import pytest
 from unittest.mock import call, patch
 from sqlalchemy import Column, MetaData, Table, select
 from sqlalchemy import BOOLEAN, Numeric, NUMERIC, String, VARCHAR
-from sqlalchemy.dialects.postgresql import MONEY
 
 from db.columns.operations.infer_types import infer_column_type
 from db.tables.operations import infer_types as infer_operations
