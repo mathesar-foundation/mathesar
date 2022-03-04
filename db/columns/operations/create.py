@@ -9,7 +9,9 @@ from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT, NAME, NULLABLE, TYPE
 from db.columns.exceptions import InvalidDefaultError, InvalidTypeError, InvalidTypeOptionError
 from db.columns.operations.alter import set_column_default, change_column_nullable
-from db.columns.operations.select import get_column_attnum_from_name, get_column_default, get_column_index_from_name
+from db.columns.operations.select import (
+    get_column_attnum_from_name, get_column_default, get_column_name_from_attnum,
+)
 from db.columns.utils import get_mathesar_column_with_engine
 from db.constraints.operations.create import copy_constraint
 from db.constraints.operations.select import get_column_constraints
@@ -92,43 +94,45 @@ def compile_copy_column(element, compiler, **_):
     )
 
 
-def _duplicate_column_data(table_oid, from_column, to_column, engine):
+def _duplicate_column_data(table_oid, from_column_attnum, to_column_attnum, engine):
     table = reflect_table_from_oid(table_oid, engine)
-    from_column_attnum = get_column_attnum_from_name(table_oid, table.c[from_column].name, engine)
+    from_column_name = get_column_name_from_attnum(table_oid, from_column_attnum, engine)
+    to_column_name = get_column_name_from_attnum(table_oid, to_column_attnum, engine)
     copy = CopyColumn(
         table.schema,
         table.name,
-        table.c[to_column].name,
-        table.c[from_column].name
+        to_column_name,
+        from_column_name,
     )
     with engine.begin() as conn:
         conn.execute(copy)
     from_default = get_column_default(table_oid, from_column_attnum, engine)
     if from_default is not None:
         with engine.begin() as conn:
-            set_column_default(table, to_column, engine, conn, from_default)
+            set_column_default(table_oid, to_column_attnum, engine, conn, from_default)
 
 
-def _duplicate_column_constraints(table_oid, from_column, to_column, engine, copy_nullable=True):
+def _duplicate_column_constraints(table_oid, from_column_attnum, to_column_attnum, engine, copy_nullable=True):
     table = reflect_table_from_oid(table_oid, engine)
+    from_column_name = get_column_name_from_attnum(table_oid, from_column_attnum, engine)
     if copy_nullable:
         with engine.begin() as conn:
-            change_column_nullable(table, to_column, engine, conn, table.c[from_column].nullable)
-
-    constraints = get_column_constraints(from_column, table_oid, engine)
+            change_column_nullable(table_oid, to_column_attnum, engine, conn, table.c[from_column_name].nullable)
+    constraints = get_column_constraints(from_column_attnum, table_oid, engine)
     for constraint in constraints:
         constraint_type = constraint_utils.get_constraint_type_from_char(constraint.contype)
         if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
             # Don't allow duplication of primary keys
             continue
         copy_constraint(
-            table, engine, constraint, from_column, to_column
+            table_oid, engine, constraint, from_column_attnum, to_column_attnum
         )
 
 
-def duplicate_column(table_oid, copy_from_index, engine, new_column_name=None, copy_data=True, copy_constraints=True):
+def duplicate_column(table_oid, copy_from_attnum, engine, new_column_name=None, copy_data=True, copy_constraints=True):
     table = reflect_table_from_oid(table_oid, engine)
-    from_column = table.c[copy_from_index]
+    copy_from_name = get_column_name_from_attnum(table_oid, copy_from_attnum, engine)
+    from_column = table.c[copy_from_name]
     if new_column_name is None:
         new_column_name = _gen_col_name(table, from_column.name)
 
@@ -138,25 +142,24 @@ def duplicate_column(table_oid, copy_from_index, engine, new_column_name=None, c
         NULLABLE: True,
     }
     new_column = create_column(engine, table_oid, column_data)
-    new_column_index = get_column_index_from_name(table_oid, new_column.name, engine)
-
+    new_column_attnum = get_column_attnum_from_name(table_oid, new_column.name, engine)
     if copy_data:
         _duplicate_column_data(
             table_oid,
-            copy_from_index,
-            new_column_index,
+            copy_from_attnum,
+            new_column_attnum,
             engine
         )
 
     if copy_constraints:
         _duplicate_column_constraints(
             table_oid,
-            copy_from_index,
-            new_column_index,
+            copy_from_attnum,
+            new_column_attnum,
             engine,
             copy_nullable=copy_data
         )
 
     table = reflect_table_from_oid(table_oid, engine)
-    column_index = get_column_index_from_name(table_oid, new_column_name, engine)
-    return get_mathesar_column_with_engine(table.c[column_index], engine)
+    column_name = get_column_name_from_attnum(table_oid, new_column_attnum, engine)
+    return get_mathesar_column_with_engine(table.c[column_name], engine)

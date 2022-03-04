@@ -268,10 +268,10 @@ class Table(DatabaseObject):
             self.schema._sa_engine,
         )
 
-    def duplicate_column(self, column_index, copy_data, copy_constraints, name=None):
+    def duplicate_column(self, column_attnum, copy_data, copy_constraints, name=None):
         return duplicate_column(
             self.oid,
-            column_index,
+            column_attnum,
             self.schema._sa_engine,
             new_column_name=name,
             copy_data=copy_data,

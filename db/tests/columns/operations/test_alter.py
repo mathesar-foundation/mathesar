@@ -262,10 +262,12 @@ def test_change_column_nullable_changes(engine_with_schema, nullable_tup):
         Column(nontarget_column_name, String),
     )
     table.create()
+    table_oid = get_oid_from_table(table_name, schema, engine)
+    target_column_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
     with engine.begin() as conn:
         change_column_nullable(
-            table,
-            0,
+            table_oid,
+            target_column_attnum,
             engine,
             conn,
             nullable_tup[1],
@@ -289,6 +291,7 @@ def test_change_column_nullable_with_data(engine_with_schema, nullable_tup):
         Column(target_column_name, Integer, nullable=nullable_tup[0]),
     )
     table.create()
+    table_oid = get_oid_from_table(table_name, schema, engine)
     ins = table.insert().values(
         [
             {target_column_name: 1},
@@ -298,10 +301,11 @@ def test_change_column_nullable_with_data(engine_with_schema, nullable_tup):
     )
     with engine.begin() as conn:
         conn.execute(ins)
+    target_column_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
     with engine.begin() as conn:
         change_column_nullable(
-            table,
-            0,
+            table_oid,
+            target_column_attnum,
             engine,
             conn,
             nullable_tup[1],
@@ -324,6 +328,8 @@ def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema
         Column(target_column_name, Integer, nullable=True),
     )
     table.create()
+    table_oid = get_oid_from_table(table_name, schema, engine)
+    target_column_attnum = get_column_attnum_from_name(table_oid, target_column_name, engine)
     ins = table.insert().values(
         [
             {target_column_name: 1},
@@ -336,8 +342,8 @@ def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema
     with engine.begin() as conn:
         with pytest.raises(IntegrityError) as e:
             change_column_nullable(
-                table,
-                0,
+                table_oid,
+                target_column_attnum,
                 engine,
                 conn,
                 False,
@@ -360,7 +366,7 @@ def test_column_default_create(engine_with_schema, col_type):
     table_oid = get_oid_from_table(table_name, schema, engine)
     column_attnum = get_column_attnum_from_name(table_oid, column_name, engine)
     with engine.begin() as conn:
-        set_column_default(table, 0, engine, conn, set_default)
+        set_column_default(table_oid, column_attnum, engine, conn, set_default)
 
     default = get_column_default(table_oid, column_attnum, engine)
     created_default = get_default(engine, table)
@@ -384,7 +390,7 @@ def test_column_default_update(engine_with_schema, col_type):
     table_oid = get_oid_from_table(table_name, schema, engine)
     column_attnum = get_column_attnum_from_name(table_oid, column_name, engine)
     with engine.begin() as conn:
-        set_column_default(table, 0, engine, conn, set_default)
+        set_column_default(table_oid, column_attnum, engine, conn, set_default)
     default = get_column_default(table_oid, column_attnum, engine)
     created_default = get_default(engine, table)
 
@@ -408,7 +414,7 @@ def test_column_default_delete(engine_with_schema, col_type):
     table_oid = get_oid_from_table(table_name, schema, engine)
     column_attnum = get_column_attnum_from_name(table_oid, column_name, engine)
     with engine.begin() as conn:
-        set_column_default(table, 0, engine, conn, None)
+        set_column_default(table_oid, column_attnum, engine, conn, None)
     default = get_column_default(table_oid, column_attnum, engine)
     created_default = get_default(engine, table)
 
