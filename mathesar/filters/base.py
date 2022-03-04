@@ -16,7 +16,7 @@ def get_available_filters(engine):
     filters = tuple(
         _filter_from_db_function(
             mathesar_type_hints,
-            db_function_castable_to_filter
+            db_function_castable_to_filter,
         )
         for db_function_castable_to_filter
         in db_functions_castable_to_filter
@@ -35,10 +35,38 @@ def _is_db_function_subclass_castable_to_filter(db_function_subclass):
 
 
 def _filter_from_db_function(mathesar_type_hints, db_function_subclass):
+    aliases = _get_aliases(mathesar_type_hints, db_function_subclass)
     return dict(
         id=db_function_subclass.id,
         name=db_function_subclass.name,
+        aliases=aliases,
         parameters=_get_filter_parameters(mathesar_type_hints, db_function_subclass),
+    )
+
+
+def _get_aliases(mathesar_type_hints, db_function_subclass):
+    alias_hints = hints.get_hints_with_id(db_function_subclass, 'use_this_alias_when')
+    aliases = tuple(
+        _process_alias_hint(mathesar_type_hints, alias_hint)
+        for alias_hint in alias_hints
+    )
+    return aliases
+
+
+def _process_alias_hint(mathesar_type_hints, alias_hint):
+    alias_name = alias_hint.get("alias")
+    when_hintset = alias_hint.get("when")
+    when_ma_types = ma_types_that_satisfy_hintset(
+        mathesar_type_hints,
+        when_hintset
+    )
+    when_ma_type_strings = tuple(
+        mathesar_type.value
+        for mathesar_type in when_ma_types
+    )
+    return dict(
+        alias=alias_name,
+        ui_types=when_ma_type_strings,
     )
 
 
