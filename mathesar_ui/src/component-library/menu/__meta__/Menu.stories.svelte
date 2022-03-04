@@ -36,9 +36,9 @@
       Consectetur adipiscing
     </MenuItem>
     <MenuItem icon={{ data: faHammer }}>Labore et dolore magna</MenuItem>
-    <MenuItem icon={{ data: faMagnet, rotate: IconRotate.NINETY }}
-      >Sed do <em>eiusmod</em></MenuItem
-    >
+    <MenuItem icon={{ data: faMagnet, rotate: IconRotate.NINETY }}>
+      Sed do <em>eiusmod</em>
+    </MenuItem>
     <MenuItem icon={{ data: faVideo }}>Minim veniam</MenuItem>
     <MenuDivider />
     <MenuHeading>Non proident</MenuHeading>
