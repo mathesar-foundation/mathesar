@@ -77,7 +77,7 @@ quickly.
   .menu-item:not(.disabled) {
     cursor: pointer;
   }
-  .menu-item:not(.disabled):hover > * {
+  .menu-item:not(.disabled):hover .cell {
     background-color: #f0f0f0;
   }
   .disabled {
@@ -94,5 +94,12 @@ quickly.
   }
   .cell:not(:empty) {
     padding: var(--spacing-y) var(--spacing-x);
+  }
+  .cell {
+    display: flex;
+    align-items: center;
+  }
+  .cell.control {
+    --checkbox-margin-bottom: 0;
   }
 </style>
