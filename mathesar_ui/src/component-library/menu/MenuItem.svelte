@@ -1,12 +1,12 @@
 <script lang="ts">
   import type { IconProps } from '@mathesar-component-library-dir/icon/Icon.d';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
-  import Label from '@mathesar-component-library-dir/label/Label.svelte';
   import { createEventDispatcher } from 'svelte';
   import {
     LabelController,
     setLabelControllerInContext,
   } from '@mathesar-component-library-dir/label/LabelController';
+  import MenuItemWrapper from './MenuItemWrapper.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -38,21 +38,17 @@
 </script>
 
 <div class="menu-item" on:click={handleClick} class:disabled>
-  <div class="spacer cell" />
-  <div class="control cell"><slot name="control" /></div>
-  <div class="icon cell">
-    {#if icon}
-      <Icon {...icon} />
-    {/if}
-  </div>
-  <div class="label cell">
-    {#if labelController}
-      <Label controller={labelController}><slot /></Label>
-    {:else}
-      <slot />
-    {/if}
-  </div>
-  <div class="spacer cell" />
+  <MenuItemWrapper {labelController}>
+    <div class="spacer cell" />
+    <div class="control cell"><slot name="control" /></div>
+    <div class="icon cell">
+      {#if icon}
+        <Icon {...icon} />
+      {/if}
+    </div>
+    <div class="label cell"><slot /></div>
+    <div class="spacer cell" />
+  </MenuItemWrapper>
 </div>
 
 <!-- 
