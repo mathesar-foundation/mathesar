@@ -14,6 +14,13 @@ from mathesar.functions.operations.convert import rewrite_db_function_spec_colum
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
+def _get_columns_by_name(table, name_list):
+    columns_by_name_dict = {
+        col.name: col for col in models.Column.objects.filter(table=table) if col.name in name_list
+    }
+    return [columns_by_name_dict[col_name] for col_name in name_list]
+
+
 def test_record_list(create_table, client):
     """
     Desired format:
