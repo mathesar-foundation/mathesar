@@ -88,13 +88,13 @@ quickly.
     color: #999;
   }
   .control {
-    grid-column: 'control';
+    grid-column: control;
   }
   .icon {
-    grid-column: 'icon';
+    grid-column: icon;
   }
   .label {
-    grid-column: 'label';
+    grid-column: label;
   }
   .cell:not(:empty) {
     padding: var(--spacing-y) var(--spacing-x);
