@@ -8,6 +8,12 @@ export interface FormInputBaseElement {
   interfaceType?: string;
   variable: string;
   label?: string;
+  errors?: {
+    validation?: {
+      isEmpty?: string;
+      isInvalid?: string;
+    };
+  };
 }
 
 export interface FormInputSelectElement extends FormInputBaseElement {
@@ -48,10 +54,16 @@ export interface FormLayout {
   elements: FormElement[];
 }
 
+type FormValidationCheck = 'isEmpty' | 'isInvalid';
+
 export interface FormConfigurationVariable {
   type: DynamicInputDataType;
   default?: FormInputDataType;
   enum?: unknown[];
+  validation?: {
+    checks: FormValidationCheck[];
+    // TODO: Support specification of invalidation logic
+  };
 }
 
 export type FormConfigurationVariables = Record<
@@ -68,9 +80,16 @@ export type FormInputStore = Writable<FormInputDataType>;
 
 export type FormValues = Record<string, FormInputDataType>;
 
+export interface FormValidationResult {
+  isValid: boolean;
+  failedChecks: Record<string, FormValidationCheck[]>;
+}
+
 export interface FormBuildConfiguration extends FormConfiguration {
   stores: Map<string, FormInputStore>;
   values: Readable<FormValues>;
   storeUsage: Writable<Map<string, number>>;
+  validation: Readable<FormValidationResult>;
+  getValidationResult: () => FormValidationResult;
   getValues: () => Record<string, FormInputDataType>;
 }
