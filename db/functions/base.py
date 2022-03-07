@@ -305,3 +305,20 @@ class ToLowercase(DBFunction):
     @staticmethod
     def to_sa_expression(string):
         return func.lower(string)
+
+
+class Identity(DBFunction):
+    """
+    The identity function is meant to return its input unchanged. Currently useful in testing.
+    """
+    id = 'identity'
+    name = 'identity'
+    hints = tuple([
+        hints.returns(hints.any),
+        hints.parameter_count(1),
+        hints.all_parameters(hints.any),
+    ])
+
+    @staticmethod
+    def to_sa_expression(input):
+        return input

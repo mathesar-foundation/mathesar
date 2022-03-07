@@ -1,8 +1,8 @@
-from sqlalchemy import sql, select, func
+from sqlalchemy import select, func
 from sqlalchemy_filters import apply_sort
 
-from db.functions.base import ColumnName
-from db.functions.operations.apply import apply_db_function_as_function, apply_db_function_spec_as_filter
+from db.functions.operations.apply import apply_db_function_as_filter, apply_db_function_as_function
+from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
 from db.columns.base import MathesarColumn
 from db.records.operations import group
 from db.tables.utils import get_primary_key_column
@@ -25,19 +25,21 @@ def _sort_and_filter(query, order_by, filter):
     if order_by is not None:
         query = apply_sort(query, order_by)
     if filter is not None:
-        query = apply_db_function_spec_as_filter(query, filter)
+        db_function = get_db_function_from_ma_function_spec(filter)
+        query = apply_db_function_as_filter(query, db_function)
     return query
 
 
 def get_query(
     table,
-    limit,
-    offset,
+    limit=None,
+    offset=None,
     order_by=None,
     filter=None,
-    columns_to_select=None,
     group_by=None,
-    duplicate_only=None
+    duplicate_only=None,
+    db_function=None,
+    deduplicate=False,
 ):
     if duplicate_only:
         select_target = _get_duplicate_only_cte(table, duplicate_only)
@@ -51,9 +53,12 @@ def get_query(
 
     selectable = _sort_and_filter(selectable, order_by, filter)
 
-    if columns_to_select:
-        selectable = selectable.cte()
-        selectable = select(*columns_to_select).select_from(selectable)
+    if db_function:
+        db_function = get_db_function_from_ma_function_spec(db_function)
+        selectable = apply_db_function_as_function(selectable, db_function)
+
+    if deduplicate:
+        selectable = selectable.distinct()
 
     selectable = selectable.limit(limit).offset(offset)
     return selectable
@@ -72,10 +77,13 @@ def get_records(
     engine,
     limit=None,
     offset=None,
+    # TODO change to order_by=None
     order_by=[],
     filter=None,
     group_by=None,
     duplicate_only=None,
+    db_function=None,
+    deduplicate=False,
 ):
     """
     Returns annotated records from a table.
@@ -112,23 +120,34 @@ def get_records(
         order_by=order_by,
         filter=filter,
         group_by=group_by,
-        duplicate_only=duplicate_only
+        duplicate_only=duplicate_only,
+        db_function=db_function,
+        deduplicate=deduplicate,
     )
     return execute_query(engine, query)
 
 
-def get_count(table, engine, filter=None):
+def get_count(
+    table,
+    engine,
+    filter=None,
+    db_function=None,
+    deduplicate=False,
+):
     col_name = "_count"
-    columns_to_select = [func.count().label(col_name)]
-    query = get_query(
+    count_column = func.count().label(col_name)
+    selectable = get_query(
         table=table,
         limit=None,
         offset=None,
         order_by=None,
         filter=filter,
-        columns_to_select=columns_to_select
+        db_function=db_function,
+        deduplicate=deduplicate,
     )
-    return execute_query(engine, query)[0][col_name]
+    selectable = selectable.cte()
+    selectable = select(count_column).select_from(selectable)
+    return execute_query(engine, selectable)[0][col_name]
 
 
 def get_column_cast_records(engine, table, column_definitions, num_records=20):
@@ -148,29 +167,3 @@ def get_column_cast_records(engine, table, column_definitions, num_records=20):
     with engine.begin() as conn:
         result = conn.execute(sel)
     return result.fetchall()
-
-
-def get_single_column(
-    table,
-    column,
-    engine,
-    limit=None,
-    offset=None,
-    preprocessor_db_function_subclass=None,
-    deduplicate=False,
-):
-    column_name = column.name
-    relation = get_query(
-        table=table,
-        limit=limit,
-        offset=offset,
-        columns_to_select=[sql.column(column_name)],
-    )
-    if preprocessor_db_function_subclass:
-        db_function = preprocessor_db_function_subclass([
-            ColumnName([column_name])
-        ])
-        relation = apply_db_function_as_function(relation, db_function)
-    if deduplicate:
-        relation = relation.distinct()
-    return execute_query(engine, relation)

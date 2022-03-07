@@ -1,19 +1,15 @@
+from sqlalchemy import select
 from db.functions.base import DBFunction
 from db.functions.exceptions import ReferencedColumnsDontExist
 from db.functions.packed import DBFunctionPacked
 from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
-from sqlalchemy import select
-
-
-def apply_db_function_as_function(relation, db_function):
-    sa_expression = _db_function_to_sa_expression(db_function)
-    relation = select(sa_expression).select_from(relation)
-    return relation
 
 
 def apply_db_function_spec_as_filter(relation, ma_function_spec):
     db_function = get_db_function_from_ma_function_spec(ma_function_spec)
-    return apply_db_function_as_filter(relation, db_function)
+    _assert_that_all_referenced_columns_exist(relation, db_function)
+    relation = apply_db_function_as_filter(relation, db_function)
+    return relation
 
 
 def apply_db_function_as_filter(relation, db_function):
@@ -62,3 +58,9 @@ def _db_function_to_sa_expression(db_function_or_literal):
     else:
         literal = db_function_or_literal
         return literal
+
+
+def apply_db_function_as_function(relation, db_function):
+    sa_expression = _db_function_to_sa_expression(db_function)
+    relation = select(sa_expression).select_from(relation)
+    return relation

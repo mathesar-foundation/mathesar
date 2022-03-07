@@ -39,19 +39,17 @@ class RecordViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
 
         filter_unprocessed = serializer.validated_data['filter']
-        filter_processed = None
+        db_function_unprocessed = serializer.validated_data['db_function']
 
         try:
-            if filter_unprocessed:
-                table = get_table_or_404(table_pk)
-                column_ids_to_names = table.get_dj_column_id_to_name_mapping()
-                filter_processed = rewrite_db_function_spec_column_ids_to_names(
-                    column_ids_to_names=column_ids_to_names,
-                    spec=filter_unprocessed,
-                )
+            filter_processed, db_function_processed = _rewrite_db_function_specs(
+                table_pk, filter_unprocessed, db_function_unprocessed
+            )
             records = paginator.paginate_queryset(
                 self.get_queryset(), request, table_pk,
                 filter=filter_processed,
+                db_function=db_function_processed,
+                deduplicate=serializer.validated_data['deduplicate'],
                 order_by=serializer.validated_data['order_by'],
                 grouping=serializer.validated_data['grouping'],
                 duplicate_only=serializer.validated_data['duplicate_only'],
@@ -114,3 +112,30 @@ class RecordViewSet(viewsets.ViewSet):
         table = get_table_or_404(table_pk)
         table.delete_record(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+def _rewrite_db_function_specs(table_pk, filter_unprocessed, db_function_unprocessed):
+    """
+    DB function JOSN specifications must be rewritten, because they may include column Django ID
+    references, which are not supported by the db layer. The column ID references are rewritten to
+    be column name references.
+    """
+    # TODO db function spec rewriting can be factored out by extending db function system
+    # to allow adding a ColumnId DBFunctionPacked that would take the mapping of column
+    # ids to names and use it when converting into a ColumnName.
+    filter_processed = None
+    db_function_processed = None
+    if filter_unprocessed or db_function_unprocessed:
+        table = get_table_or_404(table_pk)
+        column_ids_to_names = table.get_dj_column_id_to_name_mapping()
+        if filter_unprocessed:
+            filter_processed = rewrite_db_function_spec_column_ids_to_names(
+                column_ids_to_names=column_ids_to_names,
+                spec=filter_unprocessed,
+            )
+        if db_function_unprocessed:
+            db_function_processed = rewrite_db_function_spec_column_ids_to_names(
+                column_ids_to_names=column_ids_to_names,
+                spec=db_function_unprocessed,
+            )
+    return filter_processed, db_function_processed

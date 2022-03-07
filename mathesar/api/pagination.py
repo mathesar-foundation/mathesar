@@ -42,6 +42,8 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         order_by=[],
         group_by=None,
         duplicate_only=None,
+        db_function=None,
+        deduplicate=False,
     ):
         self.limit = self.get_limit(request)
         if self.limit is None:
@@ -49,7 +51,11 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         self.offset = self.get_offset(request)
         # TODO: Cache count value somewhere, since calculating it is expensive.
         table = get_table_or_404(pk=table_id)
-        self.count = table.sa_num_records(filter=filter)
+        self.count = table.sa_num_records(
+            filter=filter,
+            db_function=db_function,
+            deduplicate=deduplicate
+        )
         self.request = request
 
         return table.get_records(
@@ -59,6 +65,8 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
             order_by=order_by,
             group_by=group_by,
             duplicate_only=duplicate_only,
+            db_function=db_function,
+            deduplicate=deduplicate,
         )
 
 
@@ -79,6 +87,8 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         order_by=[],
         grouping={},
         duplicate_only=None,
+        db_function=None,
+        deduplicate=False,
     ):
         group_by = GroupBy(**grouping) if grouping else None
 
@@ -90,6 +100,8 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
             order_by=order_by,
             group_by=group_by,
             duplicate_only=duplicate_only,
+            db_function=db_function,
+            deduplicate=deduplicate,
         )
 
         if records:
