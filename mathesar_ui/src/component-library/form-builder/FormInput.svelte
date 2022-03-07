@@ -23,11 +23,18 @@
       {...$$restProps}
       dataType={type}
       {label}
+      hasError={validationErrors.length > 0}
       bind:value={$store}
     />
   </LabeledInput>
 
   {#each validationErrors as error (error)}
-    <div>{error}</div>
+    <div class="validation-error">
+      {#if error === 'isEmpty'}
+        * This is a required field
+      {:else}
+        {error}
+      {/if}
+    </div>
   {/each}
 </div>

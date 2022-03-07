@@ -39,6 +39,8 @@
   // Maximum value for input
   export let max: number | undefined = undefined;
 
+  export let hasError = false;
+
   const validKeyRegex = /^([0-9]|\.|-|\+|e)$/;
 
   function onInput(e: Event) {
@@ -81,6 +83,7 @@
   {...$$restProps}
   type="number"
   class={['input-element', 'number-input', classes].join(' ')}
+  class:has-error={hasError}
   {value}
   {id}
   {disabled}

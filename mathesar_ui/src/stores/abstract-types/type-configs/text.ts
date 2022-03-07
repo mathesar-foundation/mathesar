@@ -28,6 +28,7 @@ const textType: AbstractTypeConfiguration = {
             length: {
               type: 'integer',
               isSaved: true,
+              default: 255,
               validation: {
                 checks: ['isEmpty'],
               },
