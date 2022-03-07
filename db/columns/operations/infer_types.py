@@ -62,10 +62,11 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
     column_type_str = reverse_type_map.get(column_type)
 
     logger.debug(f"column_type_str: {column_type_str}")
+    table_oid = get_oid_from_table(table_name, schema, engine)
     for type_str in type_inference_dag.get(column_type_str, []):
         try:
             with engine.begin() as conn:
-                alter_column_type(get_oid_from_table(table_name, schema, engine), column_name, engine, conn, type_str)
+                alter_column_type(table_oid, column_name, engine, conn, type_str)
             logger.info(f"Column {column_name} altered to type {type_str}")
             column_type = infer_column_type(
                 schema,
