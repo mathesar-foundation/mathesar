@@ -52,12 +52,6 @@ const textType: AbstractTypeConfiguration = {
                     type: 'input',
                     variable: 'length',
                     label: 'Field Size Limit',
-                    errors: {
-                      validation: {
-                        isEmpty:
-                          'Please specify the field size limit inorder to impose restriction',
-                      },
-                    },
                   },
                 ],
               },

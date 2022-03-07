@@ -11,3 +11,4 @@ export * from './formatUtils';
 export * from './pauseableTweened';
 export * from './ruleExecuter';
 export * from './storeUtils';
+export * from './contextValidationUtil';

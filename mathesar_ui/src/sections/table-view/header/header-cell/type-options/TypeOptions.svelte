@@ -1,7 +1,12 @@
 <script lang="ts">
-  import { createEventDispatcher, getContext, tick } from 'svelte';
+  import { createEventDispatcher, getContext, tick, onMount } from 'svelte';
   import { faDatabase } from '@fortawesome/free-solid-svg-icons';
-  import { Button, Icon, Spinner } from '@mathesar-component-library';
+  import {
+    Button,
+    Icon,
+    Spinner,
+    createValidationContext,
+  } from '@mathesar-component-library';
   import {
     currentDbAbstractTypes,
     getAbstractTypesForDbTypeList,
@@ -36,6 +41,13 @@
   let selectedDbType: DbType | undefined;
   let typeOptions: Column['type_options'];
   let typeChangeState = States.Idle;
+
+  const validationContext = createValidationContext();
+  $: ({ validationResult } = validationContext);
+
+  onMount(() => {
+    validationContext.validate();
+  });
 
   function selectAbstractType(abstractType: AbstractType) {
     if (selectedAbstractType !== abstractType) {
@@ -91,6 +103,11 @@
     }
     close();
   }
+
+  $: isSaveDisabled =
+    !selectedAbstractType ||
+    typeChangeState === States.Loading ||
+    !$validationResult;
 </script>
 
 <div class="column-type-menu">
@@ -134,11 +151,7 @@
 
   <div class="divider" />
   <div class="type-menu-footer">
-    <Button
-      appearance="primary"
-      disabled={!selectedAbstractType || typeChangeState === States.Loading}
-      on:click={onSave}
-    >
+    <Button appearance="primary" disabled={isSaveDisabled} on:click={onSave}>
       {#if typeChangeState === States.Loading}
         <Spinner />
       {/if}

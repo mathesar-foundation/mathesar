@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { FormBuilder, makeForm } from '@mathesar-component-library';
+  import {
+    FormBuilder,
+    makeForm,
+    getValidationContext,
+  } from '@mathesar-component-library';
   import type {
     FormBuildConfiguration,
     FormInputDataType,
@@ -33,6 +37,12 @@
   $: form = constructForm(configuration.form, dbTypeDefaults);
   $: values = form.values;
 
+  const validationContext = getValidationContext();
+  validationContext.addValidator('DbFormValidator', () => {
+    const valid = form.getValidationResult().isValid;
+    return valid;
+  });
+
   function setSelectedDBType(formValues: Record<string, FormInputDataType>) {
     selectedDbType = configuration.determineDbType(
       formValues,
@@ -48,6 +58,7 @@
     } else {
       typeOptions = null;
     }
+    validationContext.validate();
   }
 
   $: setSelectedDBType($values);

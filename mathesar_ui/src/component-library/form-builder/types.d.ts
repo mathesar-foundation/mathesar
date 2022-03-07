@@ -8,7 +8,8 @@ export interface FormInputBaseElement {
   interfaceType?: string;
   variable: string;
   label?: string;
-  errors?: {
+  // TODO: Support customizable text (eg., errors, info etc.,)
+  text?: {
     validation?: {
       isEmpty?: string;
       isInvalid?: string;
