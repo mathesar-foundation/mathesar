@@ -2,9 +2,10 @@ import type {
   FormConfiguration,
   FormConfigurationVariable,
   FormInputDataType,
-  Rule,
+  FormValues,
 } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/App.d';
+import type { Column } from '@mathesar/stores/table-data/types.d';
 
 export interface AbstractTypeResponse {
   name: string;
@@ -34,10 +35,11 @@ export interface AbstractTypeDbConfigOptions {
   allowDefault: boolean;
   configuration: {
     form: AbstractTypeConfigForm;
-    determinationRules: {
-      resolve: string;
-      rule: Rule;
-    }[];
+    determineDbType: (
+      formValues: FormValues,
+      columnType: DbType,
+      typeOptions: Column['type_options'],
+    ) => DbType;
   };
 }
 

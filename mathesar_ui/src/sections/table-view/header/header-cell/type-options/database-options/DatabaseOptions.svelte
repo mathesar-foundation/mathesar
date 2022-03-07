@@ -10,6 +10,7 @@
   export let selectedDbType: DbType | undefined;
   export let typeOptions: Column['type_options'];
   export let selectedAbstractType: AbstractType | undefined;
+  export let column: Column;
 
   $: dbOptionsConfig =
     selectedAbstractType?.typeSwitchOptions?.database?.configuration ??
@@ -24,6 +25,7 @@
     <DbForm
       bind:selectedDbType
       bind:typeOptions
+      {column}
       configuration={dbOptionsConfig}
     />
   {/key}

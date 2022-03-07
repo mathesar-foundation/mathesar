@@ -1,9 +1,5 @@
 <script lang="ts">
-  import {
-    FormBuilder,
-    makeForm,
-    executeRule,
-  } from '@mathesar-component-library';
+  import { FormBuilder, makeForm } from '@mathesar-component-library';
   import type {
     FormBuildConfiguration,
     FormInputDataType,
@@ -16,6 +12,7 @@
   export let selectedDbType: DbType | undefined;
   export let typeOptions: Column['type_options'];
   export let configuration: AbstractTypeDbConfigOptions['configuration'];
+  export let column: Column;
 
   function constructForm(
     formConfig: AbstractTypeDbConfigOptions['configuration']['form'],
@@ -37,22 +34,19 @@
   $: values = form.values;
 
   function setSelectedDBType(formValues: Record<string, FormInputDataType>) {
-    // eslint-disable-next-line no-restricted-syntax
-    for (const determinationRule of configuration.determinationRules) {
-      const result = executeRule(determinationRule.rule, formValues);
-      if (result) {
-        selectedDbType = determinationRule.resolve;
-        if (savedVariables.length > 0) {
-          const newTypeOptions: Column['type_options'] = {};
-          savedVariables.forEach((variable) => {
-            newTypeOptions[variable] = formValues[variable];
-          });
-          typeOptions = newTypeOptions;
-        } else {
-          typeOptions = null;
-        }
-        break;
-      }
+    selectedDbType = configuration.determineDbType(
+      formValues,
+      column.type,
+      column.type_options,
+    );
+    if (savedVariables.length > 0) {
+      const newTypeOptions: Column['type_options'] = {};
+      savedVariables.forEach((variable) => {
+        newTypeOptions[variable] = formValues[variable];
+      });
+      typeOptions = newTypeOptions;
+    } else {
+      typeOptions = null;
     }
   }
 

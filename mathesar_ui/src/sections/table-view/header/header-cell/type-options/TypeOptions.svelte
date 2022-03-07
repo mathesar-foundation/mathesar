@@ -126,6 +126,7 @@
       <DatabaseOptions
         bind:selectedDbType
         bind:typeOptions
+        {column}
         {selectedAbstractType}
       />
     </div>
