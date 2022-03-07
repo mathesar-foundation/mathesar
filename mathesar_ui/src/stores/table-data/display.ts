@@ -32,12 +32,21 @@ const movementKeys = new Set([
 ]);
 
 /**
- * I don't understand what this is but I had to create it during a refactor.
- * This value is used as a key in a ColumnPositionMap where column ids are also
- * used, so should have the same type as a column id but needs to have a value
- * that no column id will ever have. That's why we're using -1. If you
- * understand this design and can suggest a better name for this variable, then
- * please do so.
+ * This value is used as a key in a `ColumnPositionMap` where each entry
+ * corresponds to the position of the column, as indexed by the column id.
+ * However, the entry indexed by `ROW_POSITION_INDEX` consists of the total
+ * width & left values (i.e the position) of the row. It's placed within
+ * `ColumnPositionMap` in order to avoid calculation within the component, which
+ * will run for each row. Thus, `ROW_POSITION_INDEX` should have the same type
+ * as a column id but needs to have a value that no column id will ever have.
+ * That's why we're using -1.
+ *
+ * We could use a dedicated store for it or even a new class containing both
+ * columnPosition and row width.
+ *
+ * Pavish put it within ColumnPositionMap because we were passing around a lot
+ * of props to the child components and he wanted to reduce the number of props.
+ * Now, it is all passed down using context, so that's no longer an issue.
  */
 export const ROW_POSITION_INDEX = -1;
 
