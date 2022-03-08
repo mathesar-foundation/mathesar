@@ -41,7 +41,12 @@ def _filter_from_db_function(mathesar_type_hints, db_function_subclass):
         name=db_function_subclass.name,
         aliases=aliases,
         parameters=_get_filter_parameters(mathesar_type_hints, db_function_subclass),
+        equality_based=_is_equality_based(db_function_subclass),
     )
+
+
+def _is_equality_based(db_function_subclass):
+    return hints.equality_based in db_function_subclass.hints
 
 
 def _get_aliases(mathesar_type_hints, db_function_subclass):
@@ -89,12 +94,21 @@ def _get_filter_parameters(mathesar_type_hints, db_function_subclass):
             db_function_subclass=db_function_subclass,
             parameter_index=parameter_index,
         )
+        processed_with = _get_parameter_processed_with(db_function_subclass, parameter_index)
         filter_param = _make_filter_param(
             mathesar_types=mathesar_types,
             suggested_values=suggested_values,
+            processed_with=processed_with,
         )
         filter_params.append(filter_param)
     return tuple(filter_params)
+
+
+def _get_parameter_processed_with(db_function_subclass, parameter_index):
+    parameter_hints = hints.get_parameter_hints(parameter_index, db_function_subclass)
+    for hint in parameter_hints:
+        if hint['id'] == 'processed_with':
+            return hint['db_function_id']
 
 
 def _get_parameter_suggested_values(db_function_subclass, parameter_index):
@@ -104,7 +118,7 @@ def _get_parameter_suggested_values(db_function_subclass, parameter_index):
             return hint['values']
 
 
-def _make_filter_param(mathesar_types, suggested_values):
+def _make_filter_param(mathesar_types, suggested_values, processed_with):
     mathesar_type_strings = tuple(
         mathesar_type.value
         for mathesar_type in mathesar_types
@@ -112,6 +126,8 @@ def _make_filter_param(mathesar_types, suggested_values):
     filter_param = dict(ui_types=mathesar_type_strings)
     if suggested_values:
         filter_param['suggested_values'] = suggested_values
+    if processed_with:
+        filter_param['processed_with'] = processed_with
     return filter_param
 
 

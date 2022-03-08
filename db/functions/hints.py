@@ -149,3 +149,17 @@ def use_this_alias_when(alias, *when):
         when=when,
         hints=(not_applicable_to_types,),
     )
+
+
+# Suggests that a filter is based on equality checking its parameters. See `processed_with`
+# parameter hint if one or more of parameters is preprocessed with a db function.
+equality_based = _make_hint("equality_based")
+
+
+# Suggests that a parameter is processed with the specified db function. Say you have a filter like
+# URISchemeEquals, which takes a URI as a parameter and extracts its URI scheme to equality check
+# against the second parameter. This hint lets you say that the first parameter is preprocessed
+# with ExtractURIScheme, and thus you can use it to look up what URI schemes are in a URI column,
+# and use that to make suggestions to the user about what values to use for that parameter.
+def processed_with(db_function_subclass):
+    return _make_hint("processed_with", hints=(not_applicable_to_types,), db_function_id=db_function_subclass.id)

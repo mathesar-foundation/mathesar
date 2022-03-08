@@ -122,9 +122,10 @@ class EmailDomainEquals(DBFunctionPacked):
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
-        hints.parameter(0, hints.email),
+        hints.parameter(0, hints.email, hints.processed_with(ExtractEmailDomain)),
         hints.parameter(1, hints.string_like),
         hints.mathesar_filter,
+        hints.equality_based,
     ])
     depends_on = tuple([EMAIL_DOMAIN_NAME])
 

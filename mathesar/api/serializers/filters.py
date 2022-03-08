@@ -6,3 +6,4 @@ class FilterSerializer(serializers.Serializer):
     name = serializers.CharField()
     aliases = serializers.ListField(child=serializers.DictField(), required=False)
     parameters = serializers.ListField(child=serializers.DictField())
+    equality_based = serializers.BooleanField(required=False)

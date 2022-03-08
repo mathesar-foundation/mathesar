@@ -152,6 +152,7 @@ class Equal(DBFunction):
         hints.all_parameters(hints.any),
         hints.mathesar_filter,
         hints.use_this_alias_when("is same as", hints.point_in_time),
+        hints.equality_based,
     ])
 
     @staticmethod

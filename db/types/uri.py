@@ -183,9 +183,10 @@ class URISchemeEquals(DBFunctionPacked):
     hints = tuple([
         hints.returns(hints.boolean),
         hints.parameter_count(2),
-        hints.parameter(0, hints.uri),
+        hints.parameter(0, hints.uri, hints.processed_with(ExtractURIScheme)),
         hints.parameter(1, hints.string_like),
         hints.mathesar_filter,
+        hints.equality_based,
     ])
     depends_on = tuple([URIFunction.SCHEME])
 
