@@ -38,4 +38,5 @@
   on:focus
   on:blur
   on:keydown
+  on:beforeinput
 />
