@@ -14,13 +14,6 @@ from mathesar.functions.operations.convert import rewrite_db_function_spec_colum
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
-def _get_columns_by_name(table, name_list):
-    columns_by_name_dict = {
-        col.name: col for col in models.Column.objects.filter(table=table) if col.name in name_list
-    }
-    return [columns_by_name_dict[col_name] for col_name in name_list]
-
-
 def test_record_list(create_table, client):
     """
     Desired format:
@@ -60,9 +53,10 @@ def test_record_list(create_table, client):
     response_data = response.json()
     record_data = response_data['results'][0]
     assert response_data['count'] == 1393
+    assert response_data['grouping'] is None
     assert len(response_data['results']) == 50
-    for column_name in table.sa_column_names:
-        assert column_name in record_data
+    for column_id in table.columns.all().values_list('id', flat=True):
+        assert str(column_id) in record_data
 
 
 serialization_test_list = [
@@ -73,41 +67,42 @@ serialization_test_list = [
 
 
 @pytest.mark.parametrize("type_, value", serialization_test_list)
-def test_record_serialization(empty_nasa_table, client, type_, value):
+def test_record_serialization(empty_nasa_table, create_column, client, type_, value):
+    cache.clear()
     col_name = "TEST COL"
-    empty_nasa_table.add_column({"name": col_name, "type": type_})
+    column = create_column(empty_nasa_table, {"name": col_name, "type": type_})
     empty_nasa_table.create_record_or_records([{col_name: value}])
 
     response = client.get(f'/api/db/v0/tables/{empty_nasa_table.id}/records/')
     response_data = response.json()
 
     assert response.status_code == 200
-    assert response_data["results"][0][col_name] == value
+    assert response_data["results"][0][str(column.id)] == value
 
 
 def test_record_list_filter(create_table, client):
     table_name = 'NASA Record List Filter'
     table = create_table(table_name)
-    column_names_to_ids = table.get_dj_column_name_to_id_mapping()
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
 
     filter = {"or": [
         {"and": [
             {"equal": [
-                {"column_id": [column_names_to_ids["Center"]]},
+                {"column_id": [columns_name_id_map['Center']]},
                 {"literal": ["NASA Ames Research Center"]}
             ]},
             {"equal": [
-                {"column_id": [column_names_to_ids["Case Number"]]},
+                {"column_id": [columns_name_id_map["Case Number"]]},
                 {"literal": ["ARC-14048-1"]}
             ]},
         ]},
         {"and": [
             {"equal": [
-                {"column_id": [column_names_to_ids["Center"]]},
+                {"column_id": [columns_name_id_map["Center"]]},
                 {"literal": ["NASA Kennedy Space Center"]}
             ]},
             {"equal": [
-                {"column_id": [column_names_to_ids["Case Number"]]},
+                {"column_id": [columns_name_id_map["Case Number"]]},
                 {"literal": ["KSC-12871"]}
             ]},
         ]},
@@ -126,7 +121,7 @@ def test_record_list_filter(create_table, client):
     assert response_data['count'] == 2
     assert len(response_data['results']) == 2
     assert mock_get.call_args is not None
-    column_ids_to_names = table.get_dj_column_id_to_name_mapping()
+    column_ids_to_names = table.get_column_name_id_bidirectional_map().inverse
     processed_filter = rewrite_db_function_spec_column_ids_to_names(
         column_ids_to_names=column_ids_to_names,
         spec=filter,
@@ -137,8 +132,8 @@ def test_record_list_filter(create_table, client):
 def test_record_list_duplicate_rows_only(create_table, client):
     table_name = 'NASA Record List Filter Duplicates'
     table = create_table(table_name)
-
-    duplicate_only = ['Patent Expiration Date']
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    duplicate_only = columns_name_id_map['Patent Expiration Date']
     json_duplicate_only = json.dumps(duplicate_only)
 
     with patch.object(models, "db_get_records", return_value=[]) as mock_get:
@@ -190,9 +185,8 @@ def test_filter_with_added_columns(create_table, client):
             row_values_list.append({new_column_name: row_value})
 
         table.create_record_or_records(row_values_list)
-        column_ids_to_names = table.get_dj_column_id_to_name_mapping()
 
-        column_names_to_ids = table.get_dj_column_name_to_id_mapping()
+        column_names_to_ids = table.get_column_name_id_bidirectional_map()
         new_column_id = column_names_to_ids[new_column_name]
 
         for filter_lambda, value, expected in operators_and_expected_values:
@@ -215,7 +209,7 @@ def test_filter_with_added_columns(create_table, client):
             assert len(response_data['results']) == num_results
             assert mock_get.call_args is not None
             processed_filter = rewrite_db_function_spec_column_ids_to_names(
-                column_ids_to_names=column_ids_to_names,
+                column_ids_to_names=column_names_to_ids.inverse,
                 spec=filter,
             )
             assert mock_get.call_args[1]['filter'] == processed_filter
@@ -224,12 +218,14 @@ def test_filter_with_added_columns(create_table, client):
 def test_record_list_sort(create_table, client):
     table_name = 'NASA Record List Order'
     table = create_table(table_name)
-
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
     order_by = [
         {'field': 'Center', 'direction': 'desc'},
         {'field': 'Case Number', 'direction': 'asc'},
     ]
-    json_order_by = json.dumps(order_by)
+
+    id_converted_order_by = [{**column, 'field': columns_name_id_map[column['field']]} for column in order_by]
+    json_order_by = json.dumps(id_converted_order_by)
 
     with patch.object(
         models, "db_get_records", side_effect=models.db_get_records
@@ -390,25 +386,27 @@ grouping_params = [
 def test_null_error_record_create(create_table, client):
     table_name = 'NASA Record Create'
     table = create_table(table_name)
-    column = _get_columns_by_name(table, ['Case Number'])[0]
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    column_id = columns_name_id_map['Case Number']
     data = {"nullable": False}
     client.patch(
-        f"/api/db/v0/tables/{table.id}/columns/{column.id}/", data=data
+        f"/api/db/v0/tables/{table.id}/columns/{column_id}/", data=data
     )
     data = {
-        'Center': 'NASA Example Space Center',
-        'Status': 'Application',
-        'Case Number': None,
-        'Patent Number': '01234',
-        'Application SN': '01/000,001',
-        'Title': 'Example Patent Name',
-        'Patent Expiration Date': ''
+        columns_name_id_map['Center']: 'NASA Example Space Center',
+        columns_name_id_map['Status']: 'Application',
+        columns_name_id_map['Case Number']: None,
+        columns_name_id_map['Patent Number']: '01234',
+        columns_name_id_map['Application SN']: '01/000,001',
+        columns_name_id_map['Title']: 'Example Patent Name',
+        columns_name_id_map['Patent Expiration Date']: ''
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
     record_data = response.json()
     assert response.status_code == 400
     assert 'null value in column "Case Number"' in record_data[0]['message']
-    assert column.id == record_data[0]['detail']['column_id']
+    assert ErrorCodes.NotNullViolation.value == record_data[0]['code']
+    assert column_id == record_data[0]['detail']['column_id']
 
 
 @pytest.mark.parametrize('table_name,grouping,expected_groups', grouping_params)
@@ -416,11 +414,15 @@ def test_record_list_groups(
         table_name, grouping, expected_groups, create_table, client,
 ):
     table = create_table(table_name)
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+
     order_by = [
-        {'field': 'id', 'direction': 'asc'},
+        {'field': columns_name_id_map['id'], 'direction': 'asc'},
     ]
     json_order_by = json.dumps(order_by)
-    json_grouping = json.dumps(grouping)
+    group_by_columns_ids = [columns_name_id_map[column_name] for column_name in grouping['columns']]
+    ids_converted_group_by = {**grouping, 'columns': group_by_columns_ids}
+    json_grouping = json.dumps(ids_converted_group_by)
     limit = 100
     query_str = f'grouping={json_grouping}&order_by={json_order_by}&limit={limit}'
 
@@ -451,13 +453,14 @@ def test_record_list_pagination_limit(create_table, client):
     assert response.status_code == 200
     assert response_data['count'] == 1393
     assert len(response_data['results']) == 5
-    for column_name in table.sa_column_names:
-        assert column_name in record_data
+    for column_id in table.columns.all().values_list('id', flat=True):
+        assert str(column_id) in record_data
 
 
 def test_record_list_pagination_offset(create_table, client):
     table_name = 'NASA Record List Pagination Offset'
     table = create_table(table_name)
+    columns_id = table.columns.all().order_by('id').values_list('id', flat=True)
 
     response_1 = client.get(f'/api/db/v0/tables/{table.id}/records/?limit=5&offset=5')
     response_1_data = response_1.json()
@@ -473,10 +476,10 @@ def test_record_list_pagination_offset(create_table, client):
     assert len(response_1_data['results']) == 5
     assert len(response_2_data['results']) == 5
 
-    assert record_1_data['id'] != record_2_data['id']
-    assert record_1_data['Case Number'] != record_2_data['Case Number']
-    assert record_1_data['Patent Number'] != record_2_data['Patent Number']
-    assert record_1_data['Application SN'] != record_2_data['Application SN']
+    assert record_1_data[str(columns_id[0])] != record_2_data[str(columns_id[0])]
+    assert record_1_data[str(columns_id[3])] != record_2_data[str(columns_id[3])]
+    assert record_1_data[str(columns_id[4])] != record_2_data[str(columns_id[4])]
+    assert record_1_data[str(columns_id[5])] != record_2_data[str(columns_id[5])]
 
 
 def test_record_detail(create_table, client):
@@ -490,9 +493,11 @@ def test_record_detail(create_table, client):
     record_as_dict = record._asdict()
 
     assert response.status_code == 200
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
     for column_name in table.sa_column_names:
-        assert column_name in record_data
-        assert record_as_dict[column_name] == record_data[column_name]
+        column_id_str = str(columns_name_id_map[column_name])
+        assert column_id_str in record_data
+        assert record_as_dict[column_name] == record_data[column_id_str]
 
 
 def test_record_create(create_table, client):
@@ -500,25 +505,27 @@ def test_record_create(create_table, client):
     table = create_table(table_name)
     records = table.get_records()
     original_num_records = len(records)
-
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
     data = {
-        'Center': 'NASA Example Space Center',
-        'Status': 'Application',
-        'Case Number': 'ESC-0000',
-        'Patent Number': '01234',
-        'Application SN': '01/000,001',
-        'Title': 'Example Patent Name',
-        'Patent Expiration Date': ''
+        columns_name_id_map['Center']: 'NASA Example Space Center',
+        columns_name_id_map['Status']: 'Application',
+        columns_name_id_map['Case Number']: 'ESC-0000',
+        columns_name_id_map['Patent Number']: '01234',
+        columns_name_id_map['Application SN']: '01/000,001',
+        columns_name_id_map['Title']: 'Example Patent Name',
+        columns_name_id_map['Patent Expiration Date']: ''
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
     record_data = response.json()
-
     assert response.status_code == 201
     assert len(table.get_records()) == original_num_records + 1
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+
     for column_name in table.sa_column_names:
-        assert column_name in record_data
+        column_id_str = str(columns_name_id_map[column_name])
+        assert column_id_str in record_data
         if column_name in data:
-            assert data[column_name] == record_data[column_name]
+            assert data[column_name] == record_data[column_id_str]
 
 
 def test_record_partial_update(create_table, client):
@@ -529,25 +536,25 @@ def test_record_partial_update(create_table, client):
 
     original_response = client.get(f'/api/db/v0/tables/{table.id}/records/{record_id}/')
     original_data = original_response.json()
-
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
     data = {
-        'Center': 'NASA Example Space Center',
-        'Status': 'Example',
+        columns_name_id_map['Center']: 'NASA Example Space Center',
+        columns_name_id_map['Status']: 'Example',
     }
     response = client.patch(f'/api/db/v0/tables/{table.id}/records/{record_id}/', data=data)
     record_data = response.json()
-
     assert response.status_code == 200
     for column_name in table.sa_column_names:
-        assert column_name in record_data
-        if column_name in data and column_name not in ['Center', 'Status']:
-            assert original_data[column_name] == record_data[column_name]
+        column_id_str = str(columns_name_id_map[column_name])
+        assert column_id_str in record_data
+        if column_id_str in data and column_name not in ['Center', 'Status']:
+            assert original_data[column_id_str] == record_data[column_id_str]
         elif column_name == 'Center':
-            assert original_data[column_name] != record_data[column_name]
-            assert record_data[column_name] == 'NASA Example Space Center'
+            assert original_data[column_id_str] != record_data[column_id_str]
+            assert record_data[column_id_str] == 'NASA Example Space Center'
         elif column_name == 'Status':
-            assert original_data[column_name] != record_data[column_name]
-            assert record_data[column_name] == 'Example'
+            assert original_data[column_id_str] != record_data[column_id_str]
+            assert record_data[column_id_str] == 'Example'
 
 
 def test_record_delete(create_table, client):
@@ -595,22 +602,25 @@ def test_record_list_filter_exceptions(create_table, client):
     exception = UnknownDBFunctionID
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    filter = json.dumps({"empty": [{"column_name": ["Center"]}]})
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    filter_list = json.dumps({"empty": [{"column_name": [columns_name_id_map['Center']]}]})
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
-            f'/api/db/v0/tables/{table.id}/records/?filter={filter}'
+            f'/api/db/v0/tables/{table.id}/records/?filters={filter_list}'
         )
         response_data = response.json()
     assert response.status_code == 400
     assert len(response_data) == 1
-    assert "filter" in response_data[0]['field']
+    assert "filters" in response_data[0]['field']
+    assert response_data[0]['code'] == ErrorCodes.UnsupportedType.value
 
 
 @pytest.mark.parametrize("exception", [BadSortFormat, SortFieldNotFound])
 def test_record_list_sort_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    order_by = json.dumps([{"field": "Center", "direction": "desc"}])
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    order_by = json.dumps([{"field": columns_name_id_map['id'], "direction": "desc"}])
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?order_by={order_by}'
@@ -619,13 +629,15 @@ def test_record_list_sort_exceptions(create_table, client, exception):
     assert response.status_code == 400
     assert len(response_data) == 1
     assert "order_by" in response_data[0]['field']
+    assert response_data[0]['code'] == ErrorCodes.UnsupportedType.value
 
 
 @pytest.mark.parametrize("exception", [BadGroupFormat, GroupFieldNotFound])
 def test_record_list_group_exceptions(create_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
     table = create_table(table_name)
-    group_by = json.dumps({"columns": ["Center"]})
+    columns_name_id_map = table.get_column_name_id_bidirectional_map()
+    group_by = json.dumps({"columns": [columns_name_id_map['Case Number']]})
     with patch.object(models, "db_get_records", side_effect=exception):
         response = client.get(
             f'/api/db/v0/tables/{table.id}/records/?grouping={group_by}'
@@ -634,3 +646,4 @@ def test_record_list_group_exceptions(create_table, client, exception):
     assert response.status_code == 400
     assert len(response_data) == 1
     assert "grouping" in response_data[0]['field']
+    assert response_data[0]['code'] == ErrorCodes.UnsupportedType.value
