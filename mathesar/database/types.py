@@ -13,6 +13,8 @@ from db.types.base import (
 class MathesarTypeIdentifier(Enum):
     BOOLEAN = 'boolean'
     DATETIME = 'datetime'
+    TIME = 'time'
+    DATE = 'date'
     DURATION = 'duration'
     EMAIL = 'email'
     MONEY = 'money'
@@ -48,12 +50,22 @@ def _get_type_map():
         'name': 'Boolean',
         'sa_type_names': [PostgresType.BOOLEAN.value]
     }, {
+        'identifier': MathesarTypeIdentifier.DATE.value,
+        'name': 'Date',
+        'sa_type_names': [
+            PostgresType.DATE.value,
+        ]
+    }, {
+        'identifier': MathesarTypeIdentifier.TIME.value,
+        'name': 'Time',
+        'sa_type_names': [
+            PostgresType.TIME_WITH_TIME_ZONE.value,
+            PostgresType.TIME_WITHOUT_TIME_ZONE.value,
+        ]
+    }, {
         'identifier': MathesarTypeIdentifier.DATETIME.value,
         'name': 'Date & Time',
         'sa_type_names': [
-            PostgresType.DATE.value,
-            PostgresType.TIME_WITH_TIME_ZONE.value,
-            PostgresType.TIME_WITHOUT_TIME_ZONE.value,
             PostgresType.TIMESTAMP_WITH_TIME_ZONE.value,
             PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value
         ]

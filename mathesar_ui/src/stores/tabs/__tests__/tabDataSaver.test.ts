@@ -35,16 +35,16 @@ test('round trip serialization, complex case', () => {
             combination: { id: 'and', label: 'and' },
             entries: [
               {
-                columnName: 'Foo',
+                columnId: 99,
                 condition: { id: 'eq', label: 'equals' },
                 value: 'This is a column value',
               },
             ],
           }),
-          grouping: new Grouping(['Column 1', 'Column 2']),
+          grouping: new Grouping([127, 91]),
           sorting: new Sorting([
-            ['My Column name', SortDirection.A],
-            ['Your column name', SortDirection.D],
+            [876, SortDirection.A],
+            [108, SortDirection.D],
           ]),
           pagination: new Pagination({ page: 2, size: 100 }),
         },

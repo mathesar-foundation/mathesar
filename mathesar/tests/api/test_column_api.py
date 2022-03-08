@@ -273,18 +273,18 @@ def test_column_create_display_options(
     assert actual_new_col["display_options"] == display_options
 
 
+_too_long_string = "x" * 256
+
+
 create_display_options_invalid_test_list = [
     ("BOOLEAN", {"input": "invalid", "use_custom_columns": False}),
     ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"yes": "yes", "1": "no"}}),
-    ("DATE", {'format': 'YYYY-MM-DD hh:mm Z'}),
-    ("DATE", {'format': 'hh:mm Z'}),
     ("NUMERIC", {"show_as_percentage": "wrong value type"}),
-    ("TIMESTAMP WITH TIME ZONE", {'format': 'xyz'}),
-    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'xyz'}),
-    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm Z'}),
-    ("TIME WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm Z'}),
-    ("TIME WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
-    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm Z'}),
+    ("DATE", {'format': _too_long_string}),
+    ("TIMESTAMP WITH TIME ZONE", {'format': []}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'format': _too_long_string}),
+    ("TIME WITH TIME ZONE", {'format': _too_long_string}),
+    ("TIME WITHOUT TIME ZONE", {'format': {}}),
 ]
 
 
@@ -432,7 +432,7 @@ def test_column_invalid_display_options_type_on_reflection(column_test_table_wit
     column_index = 2
     column = columns[column_index]
     with engine.begin() as conn:
-        alter_column_type(table._sa_table, column.name, engine, conn, 'boolean')
+        alter_column_type(table.oid, column.name, engine, conn, 'boolean')
     column_id = column.id
     response = client.get(
         f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
