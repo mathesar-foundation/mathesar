@@ -10,12 +10,12 @@
   export let columns: Column[];
 
   /** Columns which are not already used as a grouping entry */
-  $: availableColumns = columns.filter((column) => !$grouping.has(column.name));
+  $: availableColumns = columns.filter((column) => !$grouping.has(column.id));
   $: [newGroupColumn] = availableColumns;
   let addNew = false;
 
   function addGroupColumn() {
-    grouping.update((g) => g.with(newGroupColumn.name));
+    grouping.update((g) => g.with(newGroupColumn.id));
     addNew = false;
   }
 </script>
@@ -31,12 +31,14 @@
   </div>
   <div class="content">
     <table>
-      {#each [...$grouping] as columnName (columnName)}
+      {#each [...$grouping] as columnId (columnId)}
         <tr>
-          <td class="groupcolumn">{columnName}</td>
+          <td class="groupcolumn">
+            {columns.find((c) => c.id === columnId)?.name}
+          </td>
           <td class="action">
             <Button
-              on:click={() => grouping.update((g) => g.without(columnName))}
+              on:click={() => grouping.update((g) => g.without(columnId))}
             >
               Clear
             </Button>

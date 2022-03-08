@@ -1,6 +1,9 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import { getModificationState } from '@mathesar/stores/table-data';
+  import {
+    getModificationState,
+    ROW_POSITION_INDEX,
+  } from '@mathesar/stores/table-data';
   import type {
     ColumnPosition,
     ColumnPositionMap,
@@ -30,7 +33,7 @@
     if (!_style) {
       return '';
     }
-    const totalWidth = _columnPositionMap.get('__row')?.width || 0;
+    const totalWidth = _columnPositionMap.get(ROW_POSITION_INDEX)?.width || 0;
     return (
       `position:${_style.position};left:${_style.left}px;` +
       `top:${_style.top}px;height:${_style.height}px;` +
@@ -42,19 +45,21 @@
 
   function getColumnPosition(
     _columnPositionMap: ColumnPositionMap,
-    _name: Column['name'],
+    _id: Column['id'],
   ): ColumnPosition | undefined {
-    return _columnPositionMap.get(_name);
+    return _columnPositionMap.get(_id);
   }
 
-  $: ({ primaryKey } = $columnsDataStore);
-  $: isSelected = primaryKey && $selectedRecords.has(row[primaryKey]);
+  $: ({ primaryKeyColumnId } = $columnsDataStore);
+  $: isSelected =
+    primaryKeyColumnId && $selectedRecords.has(row[primaryKeyColumnId]);
   $: modificationState = getModificationState(
     $recordModificationState,
     row,
-    primaryKey,
+    primaryKeyColumnId,
   );
-  $: rowWidth = getColumnPosition($columnPositionMap, '__row')?.width || 0;
+  $: rowWidth =
+    getColumnPosition($columnPositionMap, ROW_POSITION_INDEX)?.width || 0;
 
   function checkAndCreateEmptyRow() {
     if (row.__isAddPlaceholder) {
@@ -77,16 +82,16 @@
   {:else if row.__isGroupHeader && $grouping && row.__group}
     <GroupHeader {row} {rowWidth} grouping={$grouping} group={row.__group} />
   {:else}
-    <RowControl primaryKeyColumn={primaryKey} {row} {meta} {recordsData} />
+    <RowControl {primaryKeyColumnId} {row} {meta} {recordsData} />
 
-    {#each $columnsDataStore.columns as column (column.name)}
+    {#each $columnsDataStore.columns as column (column.id)}
       <RowCell
         {display}
         {row}
-        bind:value={row[column.name]}
+        bind:value={row[column.id]}
         {column}
         {recordsData}
-        columnPosition={getColumnPosition($columnPositionMap, column.name)}
+        columnPosition={getColumnPosition($columnPositionMap, column.id)}
       />
     {/each}
   {/if}

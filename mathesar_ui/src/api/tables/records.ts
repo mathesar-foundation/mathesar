@@ -1,6 +1,6 @@
 export interface Grouping {
-  /** Each string is a column name */
-  columns: string[];
+  /** Each string is a column id */
+  columns: number[];
   mode: GroupingMode;
   /**
    * When `mode` === 'distinct', `num_groups` will always be `null`.
@@ -15,15 +15,15 @@ export interface Grouping {
 
 export type SortDirection = 'asc' | 'desc';
 export interface SortingEntry {
-  /** column name */
-  field: string;
+  /** column id */
+  field: number;
   direction: SortDirection;
 }
 export type FilterCombination = 'and' | 'or';
 export type FilterOperation = 'eq' | 'ne' | 'get_duplicates';
 export interface FilterCondition {
-  /** column name */
-  field: string;
+  /** column id */
+  field: number;
   op: FilterOperation;
   value: unknown;
 }
@@ -45,7 +45,7 @@ export interface GetRequestParams {
 export type ResultValue = string | number | boolean | null;
 
 export interface Result {
-  /** keys are column names */
+  /** keys are stringified column ids */
   [k: string]: ResultValue;
 }
 

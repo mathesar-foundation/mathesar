@@ -20,24 +20,24 @@ export const filterConditions: FilterCondition[] = [
 export const defaultFilterCondition = filterConditions[0];
 
 export interface FilterEntry {
-  readonly columnName: string;
+  readonly columnId: number;
   readonly condition: FilterCondition;
   readonly value: string;
 }
 
 function makeApiFilterCondition(filterEntry: FilterEntry): ApiFilterCondition {
   return {
-    field: filterEntry.columnName,
+    field: filterEntry.columnId,
     op: filterEntry.condition.id,
     value: filterEntry.value,
   };
 }
 
-/** [ columnName, operation, value ] */
-type TerseFilterEntry = [string, FilterOperation, string];
+/** [ columnId, operation, value ] */
+type TerseFilterEntry = [number, FilterOperation, string];
 
 function makeTerseFilterEntry(filterEntry: FilterEntry): TerseFilterEntry {
-  return [filterEntry.columnName, filterEntry.condition.id, filterEntry.value];
+  return [filterEntry.columnId, filterEntry.condition.id, filterEntry.value];
 }
 
 function makeFilterEntry(terseFilterEntry: TerseFilterEntry): FilterEntry {
@@ -48,7 +48,7 @@ function makeFilterEntry(terseFilterEntry: TerseFilterEntry): FilterEntry {
     condition = defaultFilterCondition;
   }
   return {
-    columnName: terseFilterEntry[0],
+    columnId: terseFilterEntry[0],
     condition,
     value: terseFilterEntry[2],
   };
