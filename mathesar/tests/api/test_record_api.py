@@ -15,6 +15,13 @@ from mathesar.functions.operations.convert import rewrite_db_function_spec_colum
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
+def _get_columns_by_name(table, name_list):
+    columns_by_name_dict = {
+        col.name: col for col in models.Column.objects.filter(table=table) if col.name in name_list
+    }
+    return [columns_by_name_dict[col_name] for col_name in name_list]
+
+
 def test_record_list(create_table, client):
     """
     Desired format:
@@ -399,15 +406,10 @@ grouping_params = [
 def test_null_error_record_create(create_table, client):
     table_name = 'NASA Record Create'
     table = create_table(table_name)
-    response = client.get(
-        f"/api/db/v0/tables/{table.id}/columns/"
-    )
-    columns = response.json()['results']
-    column_index = 3
-    column_id = columns[column_index]['id']
+    column = _get_columns_by_name(table, ['Case Number'])[0]
     data = {"nullable": False}
     client.patch(
-        f"/api/db/v0/tables/{table.id}/columns/{column_id}/", data=data
+        f"/api/db/v0/tables/{table.id}/columns/{column.id}/", data=data
     )
     data = {
         'Center': 'NASA Example Space Center',
@@ -422,7 +424,7 @@ def test_null_error_record_create(create_table, client):
     record_data = response.json()
     assert response.status_code == 400
     assert 'null value in column "Case Number"' in record_data[0]['message']
-    assert column_id == record_data[0]['detail']['column_id']
+    assert column.id == record_data[0]['detail']['column_id']
 
 
 @pytest.mark.parametrize('table_name,grouping,expected_groups', grouping_params)

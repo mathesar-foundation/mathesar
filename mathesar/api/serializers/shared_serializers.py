@@ -112,13 +112,6 @@ class NumberDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootParti
     locale = serializers.CharField(required=False)
 
 
-def raise_if_duration_format_invalid(format):
-    if 'z' in format.lower():
-        raise serializers.ValidationError(
-            "Duration column cannot contain timezone display format"
-        )
-
-
 class TimeFormatDisplayOptionSerializer(
     MathesarErrorMessageMixin,
     OverrideRootPartialMixin,
@@ -128,7 +121,7 @@ class TimeFormatDisplayOptionSerializer(
 
 
 class DurationDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
-    format = serializers.CharField(max_length=255, validators=[raise_if_duration_format_invalid])
+    format = serializers.CharField(max_length=255)
 
 
 class DisplayOptionsMappingSerializer(

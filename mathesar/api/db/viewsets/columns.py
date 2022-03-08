@@ -36,21 +36,12 @@ class ColumnViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         if 'source_column' in serializer.validated_data:
-            try:
-                column = table.duplicate_column(
-                    serializer.validated_data['source_column'],
-                    serializer.validated_data['copy_source_data'],
-                    serializer.validated_data['copy_source_constraints'],
-                    serializer.validated_data.get('name'),
-                )
-            except IndexError as e:
-                _col_idx = serializer.validated_data['source_column']
-                raise base_api_exceptions.NotFoundAPIException(
-                    e,
-                    message=f'column index "{_col_idx}" not found',
-                    field='source_column',
-                    status_code=status.HTTP_400_BAD_REQUEST
-                )
+            column = table.duplicate_column(
+                serializer.validated_data['source_column'],
+                serializer.validated_data['copy_source_data'],
+                serializer.validated_data['copy_source_constraints'],
+                serializer.validated_data.get('name'),
+            )
         else:
             try:
                 column = table.add_column(request.data)
@@ -108,7 +99,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
         with warnings.catch_warnings():
             warnings.filterwarnings("error", category=DynamicDefaultWarning)
             try:
-                table.alter_column(column_instance._sa_column.column_index, serializer.validated_data)
+                table.alter_column(column_instance._sa_column.column_attnum, serializer.validated_data)
             except ProgrammingError as e:
                 if type(e.orig) == UndefinedFunction:
                     raise database_api_exceptions.UndefinedFunctionAPIException(
