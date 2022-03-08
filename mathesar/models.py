@@ -253,11 +253,11 @@ class Table(DatabaseObject):
             column_data,
         )
 
-    def alter_column(self, column_index, column_data):
+    def alter_column(self, column_attnum, column_data):
         return alter_column(
             self.schema._sa_engine,
             self.oid,
-            column_index,
+            column_attnum,
             column_data,
         )
 
