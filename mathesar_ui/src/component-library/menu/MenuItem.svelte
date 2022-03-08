@@ -118,5 +118,6 @@ quickly.
     font-size: inherit;
     font-weight: inherit;
     text-align: inherit;
+    margin: 0;
   }
 </style>
