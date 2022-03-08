@@ -1,20 +1,16 @@
-from psycopg2.errors import NotNullViolation
-
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound
-from rest_framework.response import Response
 from rest_framework.renderers import BrowsableAPIRenderer
-from sqlalchemy.exc import IntegrityError
+from rest_framework.response import Response
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
-from db.functions.exceptions import BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist
-from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
-from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
-
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
+from db.functions.exceptions import BadDBFunctionFormat, ReferencedColumnsDontExist, UnknownDBFunctionID
+from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
+from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.models import Table
 from mathesar.utils.json import MathesarJSONRenderer
 
@@ -37,23 +33,33 @@ class RecordViewSet(viewsets.ViewSet):
 
         serializer = RecordListParameterSerializer(data=request.GET)
         serializer.is_valid(raise_exception=True)
+        table = get_table_or_404(table_pk)
 
         filter_unprocessed = serializer.validated_data['filter']
+        order_by = serializer.validated_data['order_by']
+        grouping = serializer.validated_data['grouping']
         filter_processed = None
+        column_ids_to_names = table.get_column_name_id_bidirectional_map().inverse
+        if filter_unprocessed:
+            table = get_table_or_404(table_pk)
+            filter_processed = rewrite_db_function_spec_column_ids_to_names(
+                column_ids_to_names=column_ids_to_names,
+                spec=filter_unprocessed,
+            )
+        # Replace column id value used in the `field` property with column name
+        name_converted_group_by = None
+        if grouping:
+            group_by_columns_names = [column_ids_to_names[column_id] for column_id in grouping['columns']]
+            name_converted_group_by = {**grouping, 'columns': group_by_columns_names}
+        name_converted_order_by = [{**column, 'field': column_ids_to_names[column['field']]} for column in order_by]
 
         try:
-            if filter_unprocessed:
-                table = get_table_or_404(table_pk)
-                column_ids_to_names = table.get_dj_column_id_to_name_mapping()
-                filter_processed = rewrite_db_function_spec_column_ids_to_names(
-                    column_ids_to_names=column_ids_to_names,
-                    spec=filter_unprocessed,
-                )
+
             records = paginator.paginate_queryset(
-                self.get_queryset(), request, table_pk,
-                filter=filter_processed,
-                order_by=serializer.validated_data['order_by'],
-                grouping=serializer.validated_data['grouping'],
+                self.get_queryset(), request, table,
+                filters=filter_processed,
+                order_by=name_converted_order_by,
+                grouping=name_converted_group_by,
                 duplicate_only=serializer.validated_data['duplicate_only'],
             )
         except (BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist) as e:
@@ -74,8 +80,11 @@ class RecordViewSet(viewsets.ViewSet):
                 field='grouping',
                 status_code=status.HTTP_400_BAD_REQUEST
             )
-
-        serializer = RecordSerializer(records, many=True)
+        serializer = RecordSerializer(
+            records,
+            many=True,
+            context=self.get_serializer_context(table)
+        )
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):
@@ -83,34 +92,34 @@ class RecordViewSet(viewsets.ViewSet):
         record = table.get_record(pk)
         if not record:
             raise NotFound
-        serializer = RecordSerializer(record)
+        serializer = RecordSerializer(record, context=self.get_serializer_context(table))
         return Response(serializer.data)
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
-        # We only support adding a single record through the API.
-        assert isinstance((request.data), dict)
-        try:
-            record = table.create_record_or_records(request.data)
-        except IntegrityError as e:
-            if type(e.orig) == NotNullViolation:
-                raise database_api_exceptions.NotNullViolationAPIException(
-                    e,
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    table=table
-                )
-            else:
-                raise database_api_exceptions.MathesarAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
-        serializer = RecordSerializer(record)
+        serializer = RecordSerializer(data=request.data, context=self.get_serializer_context(table))
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
-        record = table.update_record(pk, request.data)
-        serializer = RecordSerializer(record)
+        serializer = RecordSerializer(
+            {'id': pk},
+            data=request.data,
+            context=self.get_serializer_context(table),
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return Response(serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
         table = get_table_or_404(table_pk)
         table.delete_record(pk)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_serializer_context(self, table):
+        columns_map = table.get_column_name_id_bidirectional_map()
+        context = {'columns_map': columns_map, 'table': table}
+        return context

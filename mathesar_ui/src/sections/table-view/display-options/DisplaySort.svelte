@@ -12,13 +12,13 @@
   export let columns: Column[];
 
   /** Columns which are not already used as a sorting entry */
-  $: availableColumns = columns.filter((column) => !$sorting.has(column.name));
+  $: availableColumns = columns.filter((column) => !$sorting.has(column.id));
   $: [newSortColumn] = availableColumns;
   let newSortDirection = SortDirection.A;
   let addNew = false;
 
   function addSortColumn() {
-    sorting.update((s) => s.with(newSortColumn.name, newSortDirection));
+    sorting.update((s) => s.with(newSortColumn.id, newSortDirection));
     addNew = false;
   }
 </script>
@@ -34,21 +34,19 @@
   </div>
   <div class="content">
     <table>
-      {#each [...$sorting] as [columnName, sortDirection] (columnName)}
+      {#each [...$sorting] as [columnId, sortDirection] (columnId)}
         <tr>
-          <td class="column">{columnName}</td>
+          <td class="column">{columns.find((c) => c.id === columnId)?.name}</td>
           <td class="dir">
             <SelectSortDirection
               value={sortDirection}
               onChange={(direction) => {
-                sorting.update((s) => s.with(columnName, direction));
+                sorting.update((s) => s.with(columnId, direction));
               }}
             />
           </td>
           <td class="action">
-            <Button
-              on:click={() => sorting.update((s) => s.without(columnName))}
-            >
+            <Button on:click={() => sorting.update((s) => s.without(columnId))}>
               Clear
             </Button>
           </td>

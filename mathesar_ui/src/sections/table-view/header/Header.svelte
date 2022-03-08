@@ -33,9 +33,9 @@
 
   function getColumnPosition(
     _columnPositionMap: ColumnPositionMap,
-    _name: Column['name'],
+    _id: Column['id'],
   ): ColumnPosition | undefined {
-    return _columnPositionMap.get(_name);
+    return _columnPositionMap.get(_id);
   }
 
   onMount(() => {
@@ -61,13 +61,13 @@
 <div bind:this={headerRef} class="header">
   <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;" />
 
-  {#each $columnsDataStore.columns as column (column.name)}
+  {#each $columnsDataStore.columns as column (column.id)}
     <HeaderCell
       {column}
       {meta}
       {columnsDataStore}
       {constraintsDataStore}
-      columnPosition={getColumnPosition($columnPositionMap, column.name)}
+      columnPosition={getColumnPosition($columnPositionMap, column.id)}
     />
   {/each}
 

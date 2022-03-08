@@ -992,7 +992,7 @@ def test_alter_column_type_alters_column_type(
     input_table.create()
     with engine.begin() as conn:
         alter_column_type(
-            input_table,
+            get_oid_from_table(TABLE_NAME, schema, engine),
             COLUMN_NAME,
             engine,
             conn,
@@ -1071,7 +1071,7 @@ def test_alter_column_type_casts_column_data_args(
     with engine.begin() as conn:
         conn.execute(ins)
         alter_column_type(
-            input_table,
+            get_oid_from_table(TABLE_NAME, schema, engine),
             COLUMN_NAME,
             engine,
             conn,
@@ -1138,7 +1138,7 @@ def test_alter_column_casts_data_gen(
     with engine.begin() as conn:
         conn.execute(ins)
         alter_column_type(
-            input_table,
+            get_oid_from_table(TABLE_NAME, schema, engine),
             COLUMN_NAME,
             engine,
             conn,
@@ -1200,7 +1200,7 @@ def test_alter_column_type_raises_on_bad_column_data(
         conn.execute(ins)
         with pytest.raises(Exception):
             alter_column_type(
-                input_table,
+                get_oid_from_table(TABLE_NAME, schema, engine),
                 COLUMN_NAME,
                 engine,
                 conn,
@@ -1228,7 +1228,7 @@ def test_alter_column_type_raises_on_bad_parameters(
         conn.execute(ins)
         with pytest.raises(DataError) as e:
             alter_column_type(
-                input_table,
+                get_oid_from_table(TABLE_NAME, schema, engine),
                 COLUMN_NAME,
                 engine,
                 conn,

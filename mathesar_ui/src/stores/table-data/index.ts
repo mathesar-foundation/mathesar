@@ -7,6 +7,7 @@ export {
   scrollBasedOnActiveCell,
   ROW_CONTROL_COLUMN_WIDTH,
   DEFAULT_ROW_RIGHT_PADDING,
+  ROW_POSITION_INDEX,
 } from './display';
 export {
   filterCombinations,
