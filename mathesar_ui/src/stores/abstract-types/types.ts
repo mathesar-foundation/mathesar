@@ -6,6 +6,7 @@ import type {
 } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/App.d';
 import type { Column } from '@mathesar/stores/table-data/types.d';
+import type { States } from '@mathesar/utils/api';
 
 export interface AbstractTypeResponse {
   name: string;
@@ -48,6 +49,8 @@ export interface AbstractTypeConfiguration {
   icon: string;
   input: {
     type: string;
+    config?: Record<string, unknown>;
+    conditionalConfig?: Record<DbType, Record<string, unknown>>;
   };
   typeSwitchOptions?: {
     database: AbstractTypeDbConfigOptions;

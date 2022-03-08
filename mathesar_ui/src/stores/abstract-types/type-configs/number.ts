@@ -1,6 +1,6 @@
 import type { FormValues } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/App';
-import type { AbstractTypeConfiguration } from '../types.d';
+import type { AbstractTypeConfiguration } from '../types';
 
 const DB_TYPES = {
   DECIMAL: 'DECIMAL',

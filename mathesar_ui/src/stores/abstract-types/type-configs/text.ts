@@ -1,6 +1,6 @@
 import type { FormValues } from '@mathesar-component-library/types';
 import type { Column } from '@mathesar/stores/table-data/types.d';
-import type { AbstractTypeConfiguration } from '../types.d';
+import type { AbstractTypeConfiguration } from '../types';
 
 const DB_TYPES = {
   VARCHAR: 'VARCHAR',
@@ -64,11 +64,11 @@ const textType: AbstractTypeConfiguration = {
           columnTypeOptions: Column['type_options'],
         ) => {
           if (formValues.restrictFieldSize) {
-            if (
-              typeof formValues.length === 'number' &&
-              formValues.length > 255
-            ) {
-              return DB_TYPES.VARCHAR;
+            if (typeof formValues.length === 'string') {
+              const formValueLength = parseInt(formValues.length, 10);
+              if (formValueLength > 255) {
+                return DB_TYPES.VARCHAR;
+              }
             }
             return columnType === DB_TYPES.CHAR
               ? DB_TYPES.CHAR
@@ -87,6 +87,14 @@ const textType: AbstractTypeConfiguration = {
   },
   input: {
     type: 'string',
+    config: {
+      multiLine: true,
+    },
+    conditionalConfig: {
+      [DB_TYPES.CHAR]: {
+        multiLine: false,
+      },
+    },
   },
 };
 
