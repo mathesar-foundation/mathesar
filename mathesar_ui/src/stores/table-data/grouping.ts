@@ -1,11 +1,11 @@
 import type { GetRequestParams } from '@mathesar/api/tables/records';
 import { ImmutableSet } from '@mathesar/component-library';
 
-/** Each value is a column name */
-export type TerseGrouping = string[];
+/** Each value is a column id */
+export type TerseGrouping = number[];
 
-/** Each value is a column name. */
-export class Grouping extends ImmutableSet<string> {
+/** Each value is a column id. */
+export class Grouping extends ImmutableSet<number> {
   recordsRequestParams(): Pick<GetRequestParams, 'grouping'> {
     if (!this.size) {
       return {};
