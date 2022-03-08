@@ -55,7 +55,7 @@ export interface Group {
 }
 
 export interface Grouping {
-  columns: string[];
+  columnIds: number[];
   mode: GroupingMode;
   groups: Group[];
 }
@@ -71,7 +71,7 @@ function buildGroup(apiGroup: ApiGroup): Group {
 
 function buildGrouping(apiGrouping: ApiGrouping): Grouping {
   return {
-    columns: apiGrouping.columns,
+    columnIds: apiGrouping.columns,
     mode: apiGrouping.mode,
     groups: apiGrouping.groups.map(buildGroup),
   };
@@ -102,10 +102,10 @@ export interface TableRecordsData {
 
 export function getRowKey(
   row: TableRecord,
-  primaryKeyColumn?: Column['name'],
+  primaryKeyColumnId?: Column['id'],
 ): unknown {
   // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-  let key: unknown = row?.[primaryKeyColumn];
+  let key: unknown = row?.[primaryKeyColumnId];
   if (!key && row?.__isNew) {
     key = row?.__identifier;
   }
@@ -135,8 +135,8 @@ function preprocessRecords(
   records?: TableRecordInResponse[],
   grouping?: Grouping,
 ): TableRecord[] {
-  const groupingColumnNames = grouping?.columns ?? [];
-  const isResultGrouped = groupingColumnNames.length > 0;
+  const groupingColumnIds = grouping?.columnIds ?? [];
+  const isResultGrouped = groupingColumnIds.length > 0;
   const combinedRecords: TableRecord[] = [];
   let index = 0;
   let groupIndex = 0;
@@ -154,8 +154,8 @@ function preprocessRecords(
           isGroup = true;
         } else {
           // eslint-disable-next-line no-restricted-syntax
-          for (const column of groupingColumnNames) {
-            if (records[index - 1][column] !== records[index][column]) {
+          for (const id of groupingColumnIds) {
+            if (records[index - 1][id] !== records[index][id]) {
               isGroup = true;
               break;
             }
@@ -373,7 +373,10 @@ export class RecordsData {
           let retained = existing.filter(
             (entry) =>
               !successSet.has(
-                getRowKey(entry, this.columnsDataStore.get()?.primaryKey),
+                getRowKey(
+                  entry,
+                  this.columnsDataStore.get()?.primaryKeyColumnId,
+                ),
               ),
           );
           if (retained.length === existing.length) {
@@ -403,63 +406,91 @@ export class RecordsData {
     }
   }
 
-  // TODO: Handle states where cell update and row update happen in parallel
+  /**
+   * TODO:
+   * - Handle states where cell update and row update happen in parallel
+   * - Reduce code duplication between `updateCell` and `updateRecord`
+   */
   async updateCell(row: TableRecord, column: Column): Promise<void> {
-    const { primaryKey } = this.columnsDataStore.get();
-    if (primaryKey && row[primaryKey]) {
-      const rowKey = getRowKey(row, primaryKey);
-      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-      const rowKeyString: string = rowKey.toString();
-      const cellKey = `${rowKeyString}::${column.name}`;
-      this.meta.setCellUpdateState(rowKey, cellKey, 'update');
-      this.updatePromises?.get(cellKey)?.cancel();
-      const promise = patchAPI<unknown>(
-        `${this.url}${row[primaryKey] as string}/`,
-        { [column.name]: row[column.name] },
+    const { primaryKeyColumnId } = this.columnsDataStore.get();
+    if (!primaryKeyColumnId) {
+      // eslint-disable-next-line no-console
+      console.error('Unable to update record for a row without a primary key');
+      return;
+    }
+    const primaryKeyValue = row[primaryKeyColumnId];
+    if (primaryKeyValue === undefined) {
+      // eslint-disable-next-line no-console
+      console.error(
+        'Unable to update record for a row with a missing primary key value',
       );
-      if (!this.updatePromises) {
-        this.updatePromises = new Map();
-      }
-      this.updatePromises.set(cellKey, promise);
+      return;
+    }
+    const rowKey = getRowKey(row, primaryKeyColumnId);
+    const rowKeyString = String(rowKey);
+    const cellKey = `${rowKeyString}::${column.id}`;
+    this.meta.setCellUpdateState(rowKey, cellKey, 'update');
+    this.updatePromises?.get(cellKey)?.cancel();
+    const promise = patchAPI<unknown>(
+      `${this.url}${String(row[primaryKeyColumnId])}/`,
+      { [column.id]: row[column.id] },
+    );
+    if (!this.updatePromises) {
+      this.updatePromises = new Map();
+    }
+    this.updatePromises.set(cellKey, promise);
 
-      try {
-        await promise;
-        this.meta.setCellUpdateState(rowKey, cellKey, 'updated');
-      } catch (err) {
-        this.meta.setCellUpdateState(rowKey, cellKey, 'updateFailed');
-      } finally {
-        if (this.updatePromises.get(cellKey) === promise) {
-          this.updatePromises.delete(cellKey);
-        }
+    try {
+      await promise;
+      this.meta.setCellUpdateState(rowKey, cellKey, 'updated');
+    } catch (err) {
+      this.meta.setCellUpdateState(rowKey, cellKey, 'updateFailed');
+    } finally {
+      if (this.updatePromises.get(cellKey) === promise) {
+        this.updatePromises.delete(cellKey);
       }
     }
   }
 
+  /**
+   * TODO:
+   * - Reduce code duplication between `updateCell` and `updateRecord`
+   */
   async updateRecord(row: TableRecord): Promise<void> {
-    const { primaryKey } = this.columnsDataStore.get();
-    if (primaryKey && row[primaryKey]) {
-      const rowKey = getRowKey(row, primaryKey);
-      this.meta.setRecordModificationState(rowKey, 'update');
-      this.updatePromises?.get(rowKey)?.cancel();
-      const promise = patchAPI<unknown>(
-        `${this.url}${row[primaryKey] as string}/`,
-        prepareRowForRequest(row),
+    const { primaryKeyColumnId } = this.columnsDataStore.get();
+    if (!primaryKeyColumnId) {
+      // eslint-disable-next-line no-console
+      console.error('Unable to update record for a row without a primary key');
+      return;
+    }
+    const primaryKeyValue = row[primaryKeyColumnId];
+    if (primaryKeyValue === undefined) {
+      // eslint-disable-next-line no-console
+      console.error(
+        'Unable to update record for a row with a missing primary key value',
       );
-      if (!this.updatePromises) {
-        this.updatePromises = new Map();
-      }
-      this.updatePromises.set(rowKey, promise);
+      return;
+    }
+    const rowKey = getRowKey(row, primaryKeyColumnId);
+    this.meta.setRecordModificationState(rowKey, 'update');
+    this.updatePromises?.get(rowKey)?.cancel();
+    const promise = patchAPI<unknown>(
+      `${this.url}${row[primaryKeyColumnId] as string}/`,
+      prepareRowForRequest(row),
+    );
+    if (!this.updatePromises) {
+      this.updatePromises = new Map();
+    }
+    this.updatePromises.set(rowKey, promise);
 
-      try {
-        await promise;
-        this.meta.setRecordModificationState(rowKey, 'updated');
-      } catch (err) {
-        this.meta.setRecordModificationState(rowKey, 'updateFailed');
-      } finally {
-        if (this.updatePromises.get(rowKey) === promise) {
-          this.updatePromises.delete(rowKey);
-        }
+    try {
+      await promise;
+      this.meta.setRecordModificationState(rowKey, 'updated');
+    } catch (err) {
+      this.meta.setRecordModificationState(rowKey, 'updateFailed');
+    } finally {
+      if (this.updatePromises.get(rowKey) === promise) {
+        this.updatePromises.delete(rowKey);
       }
     }
   }
@@ -484,7 +515,7 @@ export class RecordsData {
   }
 
   async createRecord(row: TableRecord): Promise<void> {
-    const { primaryKey } = this.columnsDataStore.get();
+    const { primaryKeyColumnId: primaryKey } = this.columnsDataStore.get();
     const rowKey = getRowKey(row, primaryKey);
     this.meta.setRecordModificationState(rowKey, 'create');
     this.createPromises?.get(rowKey)?.cancel();
@@ -523,7 +554,7 @@ export class RecordsData {
   }
 
   async createOrUpdateRecord(row: TableRecord, column?: Column): Promise<void> {
-    const { primaryKey } = this.columnsDataStore.get();
+    const { primaryKeyColumnId: primaryKey } = this.columnsDataStore.get();
 
     // Row may not have been updated yet in view when additional request is made.
     // So check current values to ensure another row has not been created.

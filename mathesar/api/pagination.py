@@ -12,10 +12,14 @@ class DefaultLimitOffsetPagination(LimitOffsetPagination):
     max_limit = 500
 
     def get_paginated_response(self, data):
-        return Response(OrderedDict([
-            ('count', self.count),
-            ('results', data)
-        ]))
+        return Response(
+            OrderedDict(
+                [
+                    ('count', self.count),
+                    ('results', data)
+                ]
+            )
+        )
 
 
 class ColumnLimitOffsetPagination(DefaultLimitOffsetPagination):
@@ -37,8 +41,8 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         self,
         queryset,
         request,
-        table_id,
-        filter=None,
+        table,
+        filters=None,
         order_by=[],
         group_by=None,
         duplicate_only=None,
@@ -50,9 +54,8 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
             self.limit = self.default_limit
         self.offset = self.get_offset(request)
         # TODO: Cache count value somewhere, since calculating it is expensive.
-        table = get_table_or_404(pk=table_id)
         self.count = table.sa_num_records(
-            filter=filter,
+            filter=filters,
             db_function=db_function,
             deduplicate=deduplicate
         )
@@ -61,7 +64,7 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         return table.get_records(
             self.limit,
             self.offset,
-            filter=filter,
+            filter=filters,
             order_by=order_by,
             group_by=group_by,
             duplicate_only=duplicate_only,
@@ -72,18 +75,22 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
 
 class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
     def get_paginated_response(self, data):
-        return Response(OrderedDict([
-            ('count', self.count),
-            ('grouping', self.grouping),
-            ('results', data)
-        ]))
+        return Response(
+            OrderedDict(
+                [
+                    ('count', self.count),
+                    ('grouping', self.grouping),
+                    ('results', data)
+                ]
+            )
+        )
 
     def paginate_queryset(
         self,
         queryset,
         request,
-        table_id,
-        filter=None,
+        table,
+        filters=None,
         order_by=[],
         grouping={},
         duplicate_only=None,
@@ -91,12 +98,11 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         deduplicate=False,
     ):
         group_by = GroupBy(**grouping) if grouping else None
-
         records = super().paginate_queryset(
             queryset,
             request,
-            table_id,
-            filter=filter,
+            table,
+            filters=filters,
             order_by=order_by,
             group_by=group_by,
             duplicate_only=duplicate_only,
