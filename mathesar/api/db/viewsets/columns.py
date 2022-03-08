@@ -98,7 +98,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
         with warnings.catch_warnings():
             warnings.filterwarnings("error", category=DynamicDefaultWarning)
             try:
-                table.alter_column(column_instance._sa_column.column_index, serializer.validated_data)
+                table.alter_column(column_instance._sa_column.column_attnum, serializer.validated_data)
             except ProgrammingError as e:
                 if type(e.orig) == UndefinedFunction:
                     raise database_api_exceptions.UndefinedFunctionAPIException(

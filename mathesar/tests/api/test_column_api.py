@@ -432,7 +432,7 @@ def test_column_invalid_display_options_type_on_reflection(column_test_table_wit
     column_index = 2
     column = columns[column_index]
     with engine.begin() as conn:
-        alter_column_type(table._sa_table, column.name, engine, conn, 'boolean')
+        alter_column_type(table.oid, column.name, engine, conn, 'boolean')
     column_id = column.id
     response = client.get(
         f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
