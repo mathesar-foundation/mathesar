@@ -311,7 +311,6 @@ def create_cast_functions(target_type, type_body_map, engine):
     """
     for type_, body in type_body_map.items():
         query = assemble_function_creation_sql(type_, target_type, body)
-        print(query)
         with engine.begin() as conn:
             conn.execute(text(query))
 
