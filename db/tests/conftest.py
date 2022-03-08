@@ -170,6 +170,7 @@ def roster_table_obj(engine_with_roster, roster_table_name):
     return table, engine
 
 
+from db.tables.operations.select import get_oid_from_table
 @pytest.fixture
 def uris_table_obj(engine_with_uris, uris_table_name):
     engine, schema = engine_with_uris
@@ -179,11 +180,12 @@ def uris_table_obj(engine_with_uris, uris_table_name):
     with engine.begin() as conn:
         uri_column_name = "uri"
         uri_type_id = "uri"
+        table_oid = get_oid_from_table(name=table.name, schema=schema, engine=engine)
         alter_column_type(
-            table,
-            uri_column_name,
-            engine,
-            conn,
-            uri_type_id,
+            table_oid=table_oid,
+            column_name=uri_column_name,
+            engine=engine,
+            connection=conn,
+            target_type_str=uri_type_id,
         )
     yield table, engine

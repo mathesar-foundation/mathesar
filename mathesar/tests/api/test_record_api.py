@@ -147,7 +147,7 @@ def test_record_db_function_and_deduplicate(create_table, client):
     table_name = 'NASA Record List Filter Duplicates'
     table = create_table(table_name)
 
-    column_id = table.get_dj_columns()[1].id
+    column_id = table.dj_columns[1].id
     db_function = {Identity.id: [{'column_id': [column_id]}]}
     db_function_json = json.dumps(db_function)
     deduplicate = True

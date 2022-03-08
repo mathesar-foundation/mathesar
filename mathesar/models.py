@@ -215,6 +215,10 @@ class Table(DatabaseObject):
     def sa_columns(self):
         return self._enriched_column_sa_table.columns
 
+    @cached_property
+    def dj_columns(self):
+        return Column.objects.filter(table=self.id)
+
     @property
     def sa_constraints(self):
         return self._sa_table.constraints

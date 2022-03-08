@@ -63,21 +63,18 @@ class RecordViewSet(viewsets.ViewSet):
                 duplicate_only=serializer.validated_data['duplicate_only'],
             )
         except (BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist) as e:
-            breakpoint()
             raise database_api_exceptions.BadFilterAPIException(
                 e,
                 field='filters',
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         except (BadSortFormat, SortFieldNotFound) as e:
-            breakpoint()
             raise database_api_exceptions.BadSortAPIException(
                 e,
                 field='order_by',
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         except (BadGroupFormat, GroupFieldNotFound, InvalidGroupType) as e:
-            breakpoint()
             raise database_api_exceptions.BadGroupAPIException(
                 e,
                 field='grouping',
