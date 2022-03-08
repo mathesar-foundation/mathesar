@@ -6,6 +6,7 @@ from sqlalchemy.schema import DropSchema
 
 from db import constants, types
 from db.tables.operations.split import extract_columns_from_table
+from db.tables.operations.select import get_oid_from_table
 from db.engine import _add_custom_types_to_engine
 from db.types import base, install
 from db.columns.operations.alter import alter_column_type
@@ -170,7 +171,6 @@ def roster_table_obj(engine_with_roster, roster_table_name):
     return table, engine
 
 
-from db.tables.operations.select import get_oid_from_table
 @pytest.fixture
 def uris_table_obj(engine_with_uris, uris_table_name):
     engine, schema = engine_with_uris
