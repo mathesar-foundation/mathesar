@@ -55,6 +55,8 @@ class RecordViewSet(viewsets.ViewSet):
                 queryset=self.get_queryset(),
                 request=request,
                 table=table,
+                # TODO rename `filters` to something singular, for semantic correctness.
+                # avoid `filter`, because it shadows a standard library function.
                 filters=filter_processed,
                 db_function=db_function_processed,
                 deduplicate=serializer.validated_data['deduplicate'],
