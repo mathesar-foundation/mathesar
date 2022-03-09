@@ -21,15 +21,6 @@ def _get_duplicate_only_cte(table, duplicate_columns):
     return select(duplicate_flag_cte).where(duplicate_flag_cte.c[DUPLICATE_LABEL]).cte()
 
 
-def _sort_and_filter(query, order_by, filter):
-    if order_by is not None:
-        query = apply_sort(query, order_by)
-    if filter is not None:
-        db_function = get_db_function_from_ma_function_spec(filter)
-        query = apply_db_function_as_filter(query, db_function)
-    return query
-
-
 def get_query(
     table,
     limit=None,
@@ -51,16 +42,26 @@ def get_query(
     else:
         selectable = select(select_target)
 
-    selectable = _sort_and_filter(selectable, order_by, filter)
+    if order_by:
+        selectable = apply_sort(selectable, order_by)
+
+    if filter:
+        db_function_instance = get_db_function_from_ma_function_spec(filter)
+        selectable = apply_db_function_as_filter(selectable, db_function_instance)
 
     if db_function:
-        db_function = get_db_function_from_ma_function_spec(db_function)
-        selectable = apply_db_function_as_function(selectable, db_function)
+        db_function_instance = get_db_function_from_ma_function_spec(db_function)
+        selectable = apply_db_function_as_function(selectable, db_function_instance)
 
     if deduplicate:
         selectable = selectable.distinct()
 
-    selectable = selectable.limit(limit).offset(offset)
+    if limit:
+        selectable = selectable.limit(limit)
+
+    if offset:
+        selectable = selectable.offset(offset)
+
     return selectable
 
 
@@ -124,7 +125,8 @@ def get_records(
         db_function=db_function,
         deduplicate=deduplicate,
     )
-    return execute_query(engine, query)
+    results = execute_query(engine, query)
+    return results
 
 
 def get_count(
