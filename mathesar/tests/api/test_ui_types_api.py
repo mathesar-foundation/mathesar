@@ -37,7 +37,8 @@ def test_database_types_installed(client, test_db_name):
             "name": "Money",
             "db_types": [
                 "MONEY",
-                "MATHESAR_TYPES.MATHESAR_MONEY"
+                "MATHESAR_TYPES.MATHESAR_MONEY",
+                "MATHESAR_TYPES.MULTICURRENCY_MONEY",
             ],
             "filters": None,
             'display_options': None

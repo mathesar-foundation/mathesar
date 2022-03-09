@@ -111,7 +111,7 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
 RUN pip install playwright==1.18.2
-RUN pip install pytest-playwright==0.2.2
+RUN pip install pytest-playwright==0.2.3
 RUN playwright install
 RUN playwright install-deps
 

@@ -19,6 +19,14 @@ DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER = {
         {
             "options": [{"name": "format", "type": "string"}]
         },
+    MathesarTypeIdentifier.TIME.value:
+        {
+            "options": [{"name": "format", "type": "string"}]
+        },
+    MathesarTypeIdentifier.DATE.value:
+        {
+            "options": [{"name": "format", "type": "string"}]
+        },
     MathesarTypeIdentifier.DURATION.value:
         {
             "options": [{"name": "format", "type": "string"}]

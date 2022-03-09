@@ -110,6 +110,15 @@ uri = _make_hint("uri")
 email = _make_hint("email")
 
 
+duration = _make_hint("duration")
+
+
+time = _make_hint("time")
+
+
+date = _make_hint("date")
+
+
 literal = _make_hint("literal")
 
 

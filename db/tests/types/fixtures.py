@@ -10,6 +10,7 @@ import pytest
 from sqlalchemy import MetaData, Table
 from sqlalchemy.schema import CreateSchema, DropSchema
 from db.engine import _add_custom_types_to_engine
+from db.tables.operations.select import get_oid_from_table
 from db.types import base, install
 from db.columns.operations.alter import alter_column_type
 
@@ -51,7 +52,7 @@ def uris_table_obj(engine_with_uris, uris_table_name):
         uri_column_name = "uri"
         uri_type_id = "uri"
         alter_column_type(
-            table,
+            get_oid_from_table(table.name, schema, engine),
             uri_column_name,
             engine,
             conn,
@@ -70,7 +71,7 @@ def roster_table_obj(engine_with_roster, roster_table_name):
         email_column_name = "Teacher Email"
         email_type_id = "email"
         alter_column_type(
-            table,
+            get_oid_from_table(table.name, schema, engine),
             email_column_name,
             engine,
             conn,

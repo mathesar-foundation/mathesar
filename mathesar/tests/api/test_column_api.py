@@ -100,8 +100,9 @@ def test_column_list(column_test_table, client):
             },
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
-                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MATHESAR_MONEY', 'MONEY', 'NUMERIC', 'REAL',
-                'SMALLINT', 'TEXT', 'VARCHAR',
+                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MATHESAR_MONEY',
+                'MATHESAR_TYPES.MULTICURRENCY_MONEY', 'MONEY', 'NUMERIC',
+                'REAL', 'SMALLINT', 'TEXT', 'VARCHAR',
             ],
         },
         {
@@ -115,8 +116,9 @@ def test_column_list(column_test_table, client):
             'default': None,
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
-                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MATHESAR_MONEY', 'MONEY', 'NUMERIC', 'REAL',
-                'SMALLINT', 'TEXT', 'VARCHAR',
+                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MATHESAR_MONEY',
+                'MATHESAR_TYPES.MULTICURRENCY_MONEY', 'MONEY', 'NUMERIC',
+                'REAL', 'SMALLINT', 'TEXT', 'VARCHAR',
             ],
         },
         {
@@ -133,8 +135,9 @@ def test_column_list(column_test_table, client):
             },
             'valid_target_types': [
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DECIMAL', 'DOUBLE PRECISION',
-                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MATHESAR_MONEY', 'MONEY', 'NUMERIC', 'REAL',
-                'SMALLINT', 'TEXT', 'VARCHAR',
+                'FLOAT', 'INTEGER', 'MATHESAR_TYPES.MATHESAR_MONEY',
+                'MATHESAR_TYPES.MULTICURRENCY_MONEY', 'MONEY', 'NUMERIC',
+                'REAL', 'SMALLINT', 'TEXT', 'VARCHAR',
             ],
         },
         {
@@ -149,7 +152,8 @@ def test_column_list(column_test_table, client):
                 'BIGINT', 'BOOLEAN', 'CHAR', 'DATE', 'DECIMAL',
                 'DOUBLE PRECISION', 'FLOAT', 'INTEGER', 'INTERVAL',
                 'MATHESAR_TYPES.EMAIL', 'MATHESAR_TYPES.MATHESAR_MONEY',
-                'MATHESAR_TYPES.URI', 'MONEY', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT',
+                'MATHESAR_TYPES.MULTICURRENCY_MONEY', 'MATHESAR_TYPES.URI',
+                'MONEY', 'NUMERIC', 'REAL', 'SMALLINT', 'TEXT',
                 'TIME WITH TIME ZONE', 'TIME WITHOUT TIME ZONE',
                 'TIMESTAMP WITH TIME ZONE', 'TIMESTAMP WITHOUT TIME ZONE',
                 'VARCHAR',
@@ -166,7 +170,10 @@ def test_column_create(column_test_table, client):
     cache.clear()
     num_columns = len(column_test_table.sa_columns)
     data = {
-        "name": name, "type": type_, "display_options": {"show_as_percentage": True}, 'nullable': False
+        "name": name,
+        "type": type_,
+        "display_options": {"show_as_percentage": True},
+        "nullable": False
     }
     response = client.post(
         f"/api/db/v0/tables/{column_test_table.id}/columns/",
@@ -273,18 +280,18 @@ def test_column_create_display_options(
     assert actual_new_col["display_options"] == display_options
 
 
+_too_long_string = "x" * 256
+
+
 create_display_options_invalid_test_list = [
     ("BOOLEAN", {"input": "invalid", "use_custom_columns": False}),
     ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"yes": "yes", "1": "no"}}),
-    ("DATE", {'format': 'YYYY-MM-DD hh:mm Z'}),
-    ("DATE", {'format': 'hh:mm Z'}),
     ("NUMERIC", {"show_as_percentage": "wrong value type"}),
-    ("TIMESTAMP WITH TIME ZONE", {'format': 'xyz'}),
-    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'xyz'}),
-    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm Z'}),
-    ("TIME WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm Z'}),
-    ("TIME WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
-    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm Z'}),
+    ("DATE", {'format': _too_long_string}),
+    ("TIMESTAMP WITH TIME ZONE", {'format': []}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'format': _too_long_string}),
+    ("TIME WITH TIME ZONE", {'format': _too_long_string}),
+    ("TIME WITHOUT TIME ZONE", {'format': {}}),
 ]
 
 
@@ -432,7 +439,7 @@ def test_column_invalid_display_options_type_on_reflection(column_test_table_wit
     column_index = 2
     column = columns[column_index]
     with engine.begin() as conn:
-        alter_column_type(table._sa_table, column.name, engine, conn, 'boolean')
+        alter_column_type(table.oid, column.name, engine, conn, 'boolean')
     column_id = column.id
     response = client.get(
         f"/api/db/v0/tables/{table.id}/columns/{column_id}/",

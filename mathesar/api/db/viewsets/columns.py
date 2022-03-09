@@ -26,8 +26,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
     pagination_class = DefaultLimitOffsetPagination
 
     def get_queryset(self):
-        table = get_table_or_404(pk=self.kwargs['table_pk'])
-        return table.get_dj_columns_queryset()
+        return Column.objects.filter(table=self.kwargs['table_pk'])
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
@@ -99,7 +98,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
         with warnings.catch_warnings():
             warnings.filterwarnings("error", category=DynamicDefaultWarning)
             try:
-                table.alter_column(column_instance._sa_column.column_index, serializer.validated_data)
+                table.alter_column(column_instance._sa_column.column_attnum, serializer.validated_data)
             except ProgrammingError as e:
                 if type(e.orig) == UndefinedFunction:
                     raise database_api_exceptions.UndefinedFunctionAPIException(
