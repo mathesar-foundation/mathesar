@@ -13,7 +13,7 @@ from db.columns.utils import get_mathesar_column_with_engine
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tables.operations.split import extract_columns_from_table
-from db.tests.columns.utils import create_test_table, column_test_dict, get_default
+from db.tests.columns.utils import column_test_dict_with_engine, create_test_table, get_default
 from db.tests.types import fixtures
 from db.types.base import get_db_type_name
 
@@ -359,12 +359,12 @@ def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema
             assert type(e.orig) == NotNullViolation
 
 
-@pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_create(engine_email_type, col_type):
-    engine, schema = engine_email_type
+@pytest.mark.parametrize("engine_to_use, col_type, col_data", column_test_dict_with_engine)
+def test_column_default_create(request, engine_to_use, col_type, col_data):
+    engine, schema = request.getfixturevalue(engine_to_use)
     table_name = "create_column_default_table"
     column_name = "create_column_default_column"
-    _, set_default, expt_default = column_test_dict[col_type].values()
+    _, set_default, expt_default = col_data.values()
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -383,12 +383,12 @@ def test_column_default_create(engine_email_type, col_type):
     assert created_default == expt_default
 
 
-@pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_update(engine_with_schema, col_type):
-    engine, schema = engine_with_schema
+@pytest.mark.parametrize("engine_to_use, col_type, col_data", column_test_dict_with_engine)
+def test_column_default_update(request, engine_to_use, col_type, col_data):
+    engine, schema = request.getfixturevalue(engine_to_use)
     table_name = "update_column_default_table"
     column_name = "update_column_default_column"
-    start_default, set_default, expt_default = column_test_dict[col_type].values()
+    start_default, set_default, expt_default = col_data.values()
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -407,12 +407,12 @@ def test_column_default_update(engine_with_schema, col_type):
     assert created_default == expt_default
 
 
-@pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_delete(engine_with_schema, col_type):
-    engine, schema = engine_with_schema
+@pytest.mark.parametrize("engine_to_use, col_type, col_data", column_test_dict_with_engine)
+def test_column_default_delete(request, engine_to_use, col_type, col_data):
+    engine, schema = request.getfixturevalue(engine_to_use)
     table_name = "delete_column_default_table"
     column_name = "delete_column_default_column"
-    _, set_default, _ = column_test_dict[col_type].values()
+    _, set_default, _ = col_data.values()
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
