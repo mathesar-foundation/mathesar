@@ -148,10 +148,16 @@ def test_record_db_function_and_deduplicate(create_table, client):
     table = create_table(table_name)
 
     def db_function(column_id):
+        # {
+        #     StartsWithCaseInsensitive.id: [
+        #         {'column_id': [column_id]},
+        #         {Literal.id: ["ARC"]},
+        #     ]
+        # }
+        # TODO set to use identity db function for debugging purposes, revert to above version before merging
         return {
-            StartsWithCaseInsensitive.id: [
+            "identity": [
                 {'column_id': [column_id]},
-                {Literal.id: ["ARC"]},
             ]
         }
 
