@@ -1,25 +1,38 @@
-import type { FormInputDataType } from '@mathesar-component-library/types';
+import type {
+  FormInputDataType,
+  FormValues,
+} from '@mathesar-component-library/types';
+import type { DbType } from '@mathesar/App';
 import type { AbstractTypeConfigForm } from '@mathesar/stores/abstract-types/types';
+import type { Column } from '@mathesar/stores/table-data/types';
 
-export function getDefaultsAndSavedVarsFromFormConfig(
+export function getSavedVariablesFromFormConfig(
   abstractTypeFormConfig: AbstractTypeConfigForm,
-): [Record<string, Record<string, FormInputDataType>>, string[]] {
-  const savedVariables: string[] = [];
-  const defaults: Record<string, Record<string, FormInputDataType>> = {};
+): string[] {
+  return Object.keys(abstractTypeFormConfig.variables).filter(
+    (variableKey) => 'isSaved' in abstractTypeFormConfig.variables[variableKey],
+  );
+}
 
-  Object.keys(abstractTypeFormConfig.variables).forEach((variableKey) => {
-    const formVariable = abstractTypeFormConfig.variables[variableKey];
-    if ('isSaved' in formVariable) {
-      savedVariables.push(variableKey);
-    } else if (formVariable.defaults) {
-      Object.keys(formVariable.defaults).forEach((dbTypeKey) => {
-        if (!defaults[dbTypeKey]) {
-          defaults[dbTypeKey] = {};
+export function getDefaultsFromFormConfig(
+  abstractTypeFormConfig: AbstractTypeConfigForm,
+  selectedDbType: DbType,
+  column: Column,
+): Record<string, FormInputDataType> {
+  const typeOptions = column.type_options ?? {};
+  if (column.type === selectedDbType) {
+    const defaultValues: FormValues = {};
+    Object.keys(abstractTypeFormConfig.variables).forEach(
+      (variableKey: string) => {
+        const formVariable = abstractTypeFormConfig.variables[variableKey];
+        if ('isSaved' in formVariable) {
+          defaultValues[variableKey] = typeOptions[variableKey] ?? null;
+        } else if (formVariable.defaults[selectedDbType]) {
+          defaultValues[variableKey] = formVariable.defaults[selectedDbType];
         }
-        defaults[dbTypeKey][variableKey] = formVariable.defaults[dbTypeKey];
-      });
-    }
-  });
-
-  return [defaults, savedVariables];
+      },
+    );
+    return defaultValues;
+  }
+  return typeOptions;
 }

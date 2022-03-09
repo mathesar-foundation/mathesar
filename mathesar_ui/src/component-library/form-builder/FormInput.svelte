@@ -6,7 +6,7 @@
     FormInputElement,
     FormInputStore,
     FormValidationCheck,
-  } from './types.d';
+  } from './types';
 
   export let type: DynamicInputDataType;
   export let label: FormInputElement['label'] = undefined;

@@ -18,7 +18,7 @@ export interface Column {
   id: number;
   name: string;
   type: DbType;
-  type_options: Record<string, string | number | boolean | undefined> | null;
+  type_options: Record<string, string | number | boolean | null> | null;
   display_options: Record<string, unknown>;
   index: number;
   nullable: boolean;

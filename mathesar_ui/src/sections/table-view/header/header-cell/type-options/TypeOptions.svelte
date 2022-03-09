@@ -140,12 +140,14 @@
       </li>
     </ul>
     <div class="type-options-content">
-      <DatabaseOptions
-        bind:selectedDbType
-        bind:typeOptions
-        {column}
-        {selectedAbstractType}
-      />
+      {#if selectedDbType}
+        <DatabaseOptions
+          bind:selectedDbType
+          bind:typeOptions
+          {column}
+          {selectedAbstractType}
+        />
+      {/if}
     </div>
   </div>
 

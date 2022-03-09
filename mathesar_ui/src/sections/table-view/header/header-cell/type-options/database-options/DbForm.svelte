@@ -9,32 +9,35 @@
     FormInputDataType,
   } from '@mathesar-component-library/types';
   import type { DbType } from '@mathesar/App.d';
-  import type { AbstractTypeDbConfigOptions } from '@mathesar/stores/abstract-types/types';
+  import type {
+    AbstractTypeConfigForm,
+    AbstractTypeDbConfigOptions,
+  } from '@mathesar/stores/abstract-types/types';
   import type { Column } from '@mathesar/stores/table-data/types';
-  import { getDefaultsAndSavedVarsFromFormConfig } from '../utils';
+  import {
+    getDefaultsFromFormConfig,
+    getSavedVariablesFromFormConfig,
+  } from '../utils';
 
-  export let selectedDbType: DbType | undefined;
+  export let selectedDbType: DbType;
   export let typeOptions: Column['type_options'];
   export let configuration: AbstractTypeDbConfigOptions['configuration'];
   export let column: Column;
 
   function constructForm(
-    formConfig: AbstractTypeDbConfigOptions['configuration']['form'],
-    typeDefaults: Record<string, Record<string, FormInputDataType>>,
+    formConfig: AbstractTypeConfigForm,
+    _column: Column,
   ): FormBuildConfiguration {
-    if (selectedDbType && typeDefaults[selectedDbType]) {
-      return makeForm(formConfig, {
-        ...typeDefaults[selectedDbType],
-        ...(typeOptions || {}),
-      });
-    }
-    return makeForm(formConfig, typeOptions || {});
+    const dbTypeDefaults = getDefaultsFromFormConfig(
+      formConfig,
+      selectedDbType,
+      _column,
+    );
+    return makeForm(formConfig, dbTypeDefaults);
   }
 
-  $: [dbTypeDefaults, savedVariables] = getDefaultsAndSavedVarsFromFormConfig(
-    configuration.form,
-  );
-  $: form = constructForm(configuration.form, dbTypeDefaults);
+  $: savedVariables = getSavedVariablesFromFormConfig(configuration.form);
+  $: form = constructForm(configuration.form, column);
   $: values = form.values;
 
   const validationContext = getValidationContext();

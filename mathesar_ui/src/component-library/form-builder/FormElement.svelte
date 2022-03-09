@@ -8,7 +8,7 @@
     FormElement,
     FormBuildConfiguration,
     FormValidationResult,
-  } from './types.d';
+  } from './types';
 
   export let element: FormElement;
   export let stores: FormBuildConfiguration['stores'];

@@ -7,7 +7,7 @@
   import DbTypeSelect from './DbTypeSelect.svelte';
   import DbTypeIndicator from './DbTypeIndicator.svelte';
 
-  export let selectedDbType: DbType | undefined;
+  export let selectedDbType: DbType;
   export let typeOptions: Column['type_options'];
   export let selectedAbstractType: AbstractType | undefined;
   export let column: Column;

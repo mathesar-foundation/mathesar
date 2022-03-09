@@ -1,7 +1,7 @@
-import type { Writable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
 import type { DynamicInputDataType } from '@mathesar-component-library-dir/dynamic-input/types.d';
 
-export type FormInputDataType = boolean | string | number | undefined;
+export type FormInputDataType = boolean | string | number | null;
 
 export interface FormInputBaseElement {
   type: 'input';
@@ -55,7 +55,7 @@ export interface FormLayout {
   elements: FormElement[];
 }
 
-type FormValidationCheck = 'isEmpty' | 'isInvalid';
+export type FormValidationCheck = 'isEmpty' | 'isInvalid';
 
 export interface FormConfigurationVariable {
   type: DynamicInputDataType;
