@@ -6,7 +6,7 @@ from collections import Counter
 from sqlalchemy import Column
 from sqlalchemy import String
 
-from db.records.operations.select import get_records, get_column_cast_records
+from db.records.operations.select import get_records, get_column_cast_records, get_query
 from db.tables.operations.create import create_mathesar_table
 from db.functions.base import Identity
 from db.tests.types import fixtures
@@ -130,7 +130,6 @@ def test_apply_function_and_deduplicate(uris_table_obj, db_function_id, deduplic
         db_function = {db_function_id: [{"column_name": [uris_column_name]}]}
     else:
         db_function = None
-    from db.records.operations.select import get_query
     query = get_query(
         table=table,
         db_function=db_function,
