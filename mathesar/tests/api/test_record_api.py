@@ -161,8 +161,23 @@ def test_record_db_function_and_deduplicate(create_table, client):
         f'/api/db/v0/tables/{table.id}/records/?db_function={db_function_json}&deduplicate={deduplicate_json}'
     )
     assert response.status_code == 200
+    assert response.data['count'] == 1
+    assert len(response.data['results']) == 1
+    column_id = table.dj_columns[3].id
+    db_function = {
+        StartsWithCaseInsensitive.id: [
+            {'column_id': [column_id]},
+            {Literal.id: ["ARC"]},
+        ]
+    }
+    db_function_json = json.dumps(db_function)
+    response = client.get(
+        f'/api/db/v0/tables/{table.id}/records/?db_function={db_function_json}&deduplicate={deduplicate_json}'
+    )
+    assert response.status_code == 200
     assert response.data['count'] == 2
     assert len(response.data['results']) == 2
+    breakpoint()
 
 
 def test_filter_with_added_columns(create_table, client):

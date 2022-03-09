@@ -89,7 +89,6 @@ class RecordViewSet(viewsets.ViewSet):
             many=True,
             context=self.get_serializer_context(table)
         )
-        #breakpoint()
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):
