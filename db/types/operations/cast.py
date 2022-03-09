@@ -2,7 +2,7 @@ from sqlalchemy import text
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 
-from db.types import base, email, money, uri
+from db.types import base, email, money, multicurrency, uri
 from db.types.exceptions import UnsupportedTypeException
 
 # DB type name strings
@@ -14,6 +14,7 @@ DOUBLE_PRECISION = base.PostgresType.DOUBLE_PRECISION.value
 FLOAT = base.PostgresType.FLOAT.value
 INTEGER = base.PostgresType.INTEGER.value
 INTERVAL = base.PostgresType.INTERVAL.value
+MONEY = base.PostgresType.MONEY.value
 NUMERIC = base.PostgresType.NUMERIC.value
 REAL = base.PostgresType.REAL.value
 SMALLINT = base.PostgresType.SMALLINT.value
@@ -27,7 +28,7 @@ VARCHAR = base.VARCHAR
 # custom types
 EMAIL = base.MathesarCustomType.EMAIL.value
 MATHESAR_MONEY = base.MathesarCustomType.MATHESAR_MONEY.value
-MONEY = base.PostgresType.MONEY.value
+MULTICURRENCY_MONEY = base.MathesarCustomType.MULTICURRENCY_MONEY.value
 TIME_WITHOUT_TIME_ZONE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
 TIME_WITH_TIME_ZONE = base.PostgresType.TIME_WITH_TIME_ZONE.value
 TIMESTAMP_WITH_TIME_ZONE = base.PostgresType.TIMESTAMP_WITH_TIME_ZONE.value
@@ -43,6 +44,8 @@ DECIMAL_TYPES = frozenset([DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL])
 INTEGER_TYPES = frozenset([BIGINT, INTEGER, SMALLINT])
 NUMBER_TYPES = DECIMAL_TYPES | INTEGER_TYPES
 TEXT_TYPES = frozenset([CHAR, TEXT, VARCHAR])
+
+MONEY_ARR_FUNC_NAME = "get_mathesar_money_array"
 
 
 def get_supported_alter_column_types(engine, friendly_names=True):
@@ -80,6 +83,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),
         MATHESAR_MONEY: dialect_types.get(money.DB_TYPE),
+        MULTICURRENCY_MONEY: dialect_types.get(multicurrency.DB_TYPE),
         URI: dialect_types.get(uri.DB_TYPE),
     }
     if friendly_names:
@@ -152,8 +156,9 @@ def install_all_casts(engine):
     create_integer_casts(engine)
     create_interval_casts(engine)
     create_datetime_casts(engine)
-    create_money_casts(engine)
     create_mathesar_money_casts(engine)
+    create_money_casts(engine)
+    create_multicurrency_money_casts(engine)
     create_textual_casts(engine)
     create_uri_casts(engine)
 
@@ -208,14 +213,22 @@ def create_datetime_casts(engine):
     create_cast_functions(DATE, type_body_map, engine)
 
 
+def create_mathesar_money_casts(engine):
+    mathesar_money_array_create = _build_mathesar_money_array_function()
+    with engine.begin() as conn:
+        conn.execute(text(mathesar_money_array_create))
+    type_body_map = _get_mathesar_money_type_body_map()
+    create_cast_functions(money.DB_TYPE, type_body_map, engine)
+
+
 def create_money_casts(engine):
     type_body_map = _get_money_type_body_map()
     create_cast_functions(MONEY, type_body_map, engine)
 
 
-def create_mathesar_money_casts(engine):
-    type_body_map = _get_mathesar_money_type_body_map()
-    create_cast_functions(money.DB_TYPE, type_body_map, engine)
+def create_multicurrency_money_casts(engine):
+    type_body_map = _get_multicurrency_money_type_body_map()
+    create_cast_functions(multicurrency.DB_TYPE, type_body_map, engine)
 
 
 def create_textual_casts(engine):
@@ -259,6 +272,7 @@ def get_defined_source_target_cast_tuples(engine):
         INTEGER: _get_integer_type_body_map(target_type_str=INTEGER),
         MATHESAR_MONEY: _get_mathesar_money_type_body_map(),
         MONEY: _get_money_type_body_map(),
+        MULTICURRENCY_MONEY: _get_multicurrency_money_type_body_map(),
         INTERVAL: _get_interval_type_body_map(),
         NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
@@ -461,7 +475,7 @@ def _get_integer_type_body_map(target_type_str=INTEGER):
     etc.
     """
     default_behavior_source_types = INTEGER_TYPES | TEXT_TYPES
-    no_rounding_source_types = DECIMAL_TYPES
+    no_rounding_source_types = DECIMAL_TYPES | frozenset([money.DB_TYPE])
     cast_loss_exception_str = (
         f"RAISE EXCEPTION '% cannot be cast to {target_type_str} without loss', $1;"
     )
@@ -501,7 +515,7 @@ def _get_decimal_number_type_body_map(target_type_str=NUMERIC):
         boolean -> number:  We cast TRUE -> 1, FALSE -> 0
     """
 
-    default_behavior_source_types = NUMBER_TYPES | TEXT_TYPES
+    default_behavior_source_types = NUMBER_TYPES | TEXT_TYPES | frozenset([money.DB_TYPE])
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, target_type_str,
     )
@@ -607,14 +621,160 @@ def _get_timestamp_without_timezone_type_body_map():
     return type_body_map
 
 
+def _get_mathesar_money_type_body_map():
+    """
+    Get SQL strings that create various functions for casting different
+    types to money.
+    We allow casting any number type to our custom money.
+    We allow casting the default money type to our custom money.
+    We allow casting any textual type to money with the text prefixed or
+    suffixed with a currency.
+    """
+    money_array_function = base.get_qualified_name(MONEY_ARR_FUNC_NAME)
+    default_behavior_source_types = frozenset([money.DB_TYPE])
+    number_types = NUMBER_TYPES
+    textual_types = TEXT_TYPES | frozenset([MONEY])
+    cast_exception_str = (
+        f"RAISE EXCEPTION '% cannot be cast to {money.DB_TYPE}', $1;"
+    )
+
+    def _get_number_cast_to_money():
+        return f"""
+        BEGIN
+          RETURN $1::numeric::{money.DB_TYPE};
+        END;
+        """
+
+    def _get_base_textual_cast_to_money():
+        return rf"""
+        DECLARE decimal_point {TEXT};
+        DECLARE is_negative {BOOLEAN};
+        DECLARE money_arr {TEXT}[];
+        DECLARE money_num {TEXT};
+        BEGIN
+          SELECT {money_array_function}($1::{TEXT}) INTO money_arr;
+          IF money_arr IS NULL THEN
+            {cast_exception_str}
+          END IF;
+
+          SELECT money_arr[1] INTO money_num;
+          SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
+          SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
+
+          IF money_arr[2] IS NOT NULL THEN
+            SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
+          END IF;
+          IF money_arr[3] IS NOT NULL THEN
+            SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
+          END IF;
+          IF is_negative THEN
+            RETURN ('-' || money_num)::{money.DB_TYPE};
+          END IF;
+          RETURN money_num::{money.DB_TYPE};
+        END;
+        """
+
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, money.DB_TYPE,
+    )
+    type_body_map.update(
+        {
+            type_name: _get_number_cast_to_money()
+            for type_name in number_types
+        }
+    )
+    type_body_map.update(
+        {
+            type_name: _get_base_textual_cast_to_money()
+            for type_name in textual_types
+        }
+    )
+    return type_body_map
+
+
+def _build_mathesar_money_array_function():
+    """
+    The main reason for this function to be separate is for testing. This
+    does have some performance impact; we should consider inlining later.
+    """
+    qualified_function_name = base.get_qualified_name(MONEY_ARR_FUNC_NAME)
+
+    # An attempt to separate pieces into logical bits for easier
+    # understanding and modification
+    non_numeric = r"(?:[^.,0-9]+)"
+    no_separator_big = r"[0-9]{4,}(?:([,.])[0-9]+)?"
+    no_separator_small = r"[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?"
+    comma_separator_req_decimal = r"[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+"
+    period_separator_req_decimal = r"[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+"
+    comma_separator_opt_decimal = r"[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?"
+    period_separator_opt_decimal = r"[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?"
+    space_separator_opt_decimal = r"[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?"
+    comma_separator_lakh_system = r"[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?"
+
+    inner_number_tree = "|".join(
+        [
+            no_separator_big,
+            no_separator_small,
+            comma_separator_req_decimal,
+            period_separator_req_decimal,
+            comma_separator_opt_decimal,
+            period_separator_opt_decimal,
+            space_separator_opt_decimal,
+            comma_separator_lakh_system,
+        ]
+    )
+    inner_number_group = f"({inner_number_tree})"
+    required_currency_beginning = f"{non_numeric}{inner_number_group}{non_numeric}?"
+    required_currency_ending = f"{non_numeric}?{inner_number_group}{non_numeric}"
+    money_finding_regex = f"^(?:{required_currency_beginning}|{required_currency_ending})$"
+
+    actual_number_indices = [1, 16]
+    group_divider_indices = [4, 6, 8, 10, 12, 14, 19, 21, 23, 25, 27, 29]
+    decimal_point_indices = [2, 3, 5, 7, 9, 11, 13, 15, 17, 18, 20, 22, 24, 26, 28, 30]
+    actual_numbers_str = ','.join([f'raw_arr[{idx}]' for idx in actual_number_indices])
+    group_dividers_str = ','.join([f'raw_arr[{idx}]' for idx in group_divider_indices])
+    decimal_points_str = ','.join([f'raw_arr[{idx}]' for idx in decimal_point_indices])
+
+    return rf"""
+    CREATE OR REPLACE FUNCTION {qualified_function_name}({TEXT}) RETURNS {TEXT}[]
+    AS $$
+      DECLARE
+        raw_arr {TEXT}[];
+        actual_number_arr {TEXT}[];
+        group_divider_arr {TEXT}[];
+        decimal_point_arr {TEXT}[];
+        actual_number {TEXT};
+        group_divider {TEXT};
+        decimal_point {TEXT};
+      BEGIN
+        SELECT regexp_matches($1, '{money_finding_regex}') INTO raw_arr;
+        IF raw_arr IS NULL THEN
+          RETURN NULL;
+        END IF;
+        SELECT array_remove(ARRAY[{actual_numbers_str}], null) INTO actual_number_arr;
+        SELECT array_remove(ARRAY[{group_dividers_str}], null) INTO group_divider_arr;
+        SELECT array_remove(ARRAY[{decimal_points_str}], null) INTO decimal_point_arr;
+        SELECT actual_number_arr[1] INTO actual_number;
+        SELECT group_divider_arr[1] INTO group_divider;
+        SELECT decimal_point_arr[1] INTO decimal_point;
+        RETURN ARRAY[actual_number, group_divider, decimal_point];
+      END;
+    $$ LANGUAGE plpgsql;
+    """
+
+
 def _get_money_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to money.
-    We allow casting any number type to money, assuming currency is same as the locale currency.
-    We allow casting any textual type to money with the text prefixed or suffixed with the locale currency.
+    We allow casting any number type to money, assuming currency is the
+    locale currency.
+    We allow casting our custom money type to money assuming currency is the
+    locale currency.
+    We allow casting any textual type to money with the text prefixed or
+    suffixed with the locale currency.
     """
-    default_behavior_source_types = [MONEY]
+    default_behavior_source_types = frozenset([MONEY, money.DB_TYPE])
     number_types = NUMBER_TYPES
     textual_types = TEXT_TYPES
     cast_loss_exception_str = (
@@ -658,7 +818,7 @@ def _get_money_type_body_map():
     return type_body_map
 
 
-def _get_mathesar_money_type_body_map():
+def _get_multicurrency_money_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to money.
@@ -666,26 +826,26 @@ def _get_mathesar_money_type_body_map():
     We allow casting any textual type to money, assuming currency is USD
     and that the type can be cast through a numeric.
     """
-    default_behavior_source_types = [money.DB_TYPE]
-    number_types = NUMBER_TYPES
-    textual_types = TEXT_TYPES
+    default_behavior_source_types = [multicurrency.DB_TYPE]
+    number_types = NUMBER_TYPES | frozenset([money.DB_TYPE])
+    textual_types = TEXT_TYPES | frozenset([MONEY])
 
     def _get_number_cast_to_money():
         return f"""
         BEGIN
-          RETURN ROW($1, 'USD')::{money.DB_TYPE};
+          RETURN ROW($1, 'USD')::{multicurrency.DB_TYPE};
         END;
         """
 
     def _get_base_textual_cast_to_money():
         return f"""
         BEGIN
-          RETURN ROW($1::numeric, 'USD')::{money.DB_TYPE};
+          RETURN ROW($1::numeric, 'USD')::{multicurrency.DB_TYPE};
         END;
         """
 
     type_body_map = _get_default_type_body_map(
-        default_behavior_source_types, money.DB_TYPE,
+        default_behavior_source_types, multicurrency.DB_TYPE,
     )
     type_body_map.update(
         {

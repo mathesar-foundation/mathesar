@@ -1,5 +1,4 @@
-from sqlalchemy import text, MetaData, Table, Column, select
-from db.engine import _add_custom_types_to_engine
+from sqlalchemy import text, MetaData, Table, Column
 from db.tests.types import fixtures
 from db.types import money
 
@@ -31,70 +30,13 @@ def test_money_type_column_reflection(engine_email_type):
         test_table = Table(
             "test_table",
             metadata,
-            Column("sales_amounts", money.MathesarMoney),
+            Column("money_col", money.MathesarMoney),
         )
         test_table.create()
 
-    _add_custom_types_to_engine(engine)
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table("test_table", metadata, autoload_with=conn)
     expect_cls = money.MathesarMoney
-    actual_cls = reflect_table.columns["sales_amounts"].type.__class__
+    actual_cls = reflect_table.columns["money_col"].type.__class__
     assert actual_cls == expect_cls
-
-
-def test_money_type_raw_selecting(engine_email_type):
-    engine, _ = engine_email_type
-    money_str = '(1234.12,USD)'
-    with engine.begin() as conn:
-        res = conn.execute(
-            text(f"SELECT '{money_str}'::{money.DB_TYPE};")
-        )
-        assert res.fetchone()[0] == money_str
-
-
-def test_money_type_insert_from_dict(engine_email_type):
-    engine, app_schema = engine_email_type
-    metadata = MetaData(bind=engine, schema=app_schema)
-    test_table = Table(
-        "test_table",
-        metadata,
-        Column("sales_amounts", money.MathesarMoney),
-    )
-    test_table.create()
-    ins = test_table.insert().values(
-        sales_amounts={money.VALUE: 1234.12, money.CURRENCY: 'EUR'}
-    )
-    with engine.begin() as conn:
-        conn.execute(ins)
-
-    # we use raw select to ensure the tuple is correct in the DB
-    with engine.begin() as conn:
-        res = conn.execute(
-            text(f"SELECT * FROM {app_schema}.{test_table.name};")
-        )
-        actual_val = res.fetchone()[0]
-        expect_val = '(1234.12,EUR)'
-        assert actual_val == expect_val
-
-
-def test_money_type_select_to_dict(engine_email_type):
-    engine, app_schema = engine_email_type
-    metadata = MetaData(bind=engine, schema=app_schema)
-    test_table = Table(
-        "test_table",
-        metadata,
-        Column("sales_amounts", money.MathesarMoney),
-    )
-    test_table.create()
-    with engine.begin() as conn:
-        conn.execute(
-            text(f"INSERT INTO {app_schema}.{test_table.name} VALUES ('(11.11,HKD)');")
-        )
-    sel = select(test_table)
-    with engine.begin() as conn:
-        res = conn.execute(sel)
-        actual_val = res.fetchone()[0]
-        expect_val = {money.VALUE: 11.11, money.CURRENCY: 'HKD'}
-        assert actual_val == expect_val
