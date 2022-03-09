@@ -177,7 +177,6 @@ def test_record_db_function_and_deduplicate(create_table, client):
     assert response.status_code == 200
     assert response.data['count'] == 2
     assert len(response.data['results']) == 2
-    breakpoint()
 
 
 def test_filter_with_added_columns(create_table, client):
