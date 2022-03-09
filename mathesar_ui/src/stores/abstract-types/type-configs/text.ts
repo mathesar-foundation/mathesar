@@ -19,7 +19,7 @@ const textType: AbstractTypeConfiguration = {
           variables: {
             restrictFieldSize: {
               type: 'boolean',
-              defaults: {
+              conditionalDefault: {
                 [DB_TYPES.CHAR]: true,
                 [DB_TYPES.VARCHAR]: true,
                 [DB_TYPES.TEXT]: false,
@@ -27,7 +27,6 @@ const textType: AbstractTypeConfiguration = {
             },
             length: {
               type: 'integer',
-              isSaved: true,
               default: 255,
               validation: {
                 checks: ['isEmpty'],
@@ -61,7 +60,6 @@ const textType: AbstractTypeConfiguration = {
         determineDbType: (
           formValues: FormValues,
           columnType: Column['type'],
-          columnTypeOptions: Column['type_options'],
         ) => {
           if (formValues.restrictFieldSize) {
             if (typeof formValues.length === 'string') {
@@ -74,13 +72,14 @@ const textType: AbstractTypeConfiguration = {
               ? DB_TYPES.CHAR
               : DB_TYPES.VARCHAR;
           }
-          // If previous column type was VARCHAR(#n), then change it to TEXT
-          if (typeof columnTypeOptions?.length === 'number') {
-            return DB_TYPES.TEXT;
+          return DB_TYPES.TEXT;
+        },
+        getSavableTypeOptions: (columnType: Column['type']): string[] => {
+          const savableTypeOptions = [];
+          if (columnType === DB_TYPES.CHAR || columnType === DB_TYPES.VARCHAR) {
+            savableTypeOptions.push('length');
           }
-          return columnType === DB_TYPES.VARCHAR
-            ? DB_TYPES.VARCHAR
-            : DB_TYPES.TEXT;
+          return savableTypeOptions;
         },
       },
     },

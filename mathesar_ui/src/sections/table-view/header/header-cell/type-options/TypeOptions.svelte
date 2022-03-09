@@ -56,10 +56,10 @@
         typeOptions = column.type_options;
       } else if (abstractType.defaultDbType) {
         selectedDbType = abstractType.defaultDbType;
-        typeOptions = null;
+        typeOptions = {};
       } else if (abstractType.dbTypes.size > 0) {
         [selectedDbType] = abstractType.dbTypes;
-        typeOptions = null;
+        typeOptions = {};
       }
       selectedAbstractType = abstractType;
     }

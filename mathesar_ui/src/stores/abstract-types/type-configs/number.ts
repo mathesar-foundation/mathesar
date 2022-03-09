@@ -27,7 +27,7 @@ const numberType: AbstractTypeConfiguration = {
             numberType: {
               type: 'string',
               enum: ['Integer', 'Decimal', 'Float'],
-              defaults: {
+              conditionalDefault: {
                 [DB_TYPES.INTEGER]: 'Integer',
                 [DB_TYPES.SMALLINT]: 'Integer',
                 [DB_TYPES.BIGINT]: 'Integer',
@@ -40,7 +40,7 @@ const numberType: AbstractTypeConfiguration = {
             integerDataSize: {
               type: 'string',
               enum: ['default', 'bigInt', 'smallInt'],
-              defaults: {
+              conditionalDefault: {
                 [DB_TYPES.INTEGER]: 'default',
                 [DB_TYPES.SMALLINT]: 'smallInt',
                 [DB_TYPES.BIGINT]: 'bigInt',
@@ -48,16 +48,16 @@ const numberType: AbstractTypeConfiguration = {
             },
             precision: {
               type: 'integer',
-              isSaved: true,
+              default: 2,
             },
             scale: {
               type: 'integer',
-              isSaved: true,
+              default: 2,
             },
             floatingPointType: {
               type: 'string',
               enum: ['real', 'doublePrecision'],
-              defaults: {
+              conditionalDefault: {
                 [DB_TYPES.REAL]: 'real',
                 [DB_TYPES.DOUBLE_PRECISION]: 'doublePrecision',
               },
@@ -151,6 +151,16 @@ const numberType: AbstractTypeConfiguration = {
                 : DB_TYPES.NUMERIC;
           }
         },
+        getSavableTypeOptions: (columnType: DbType) => {
+          const savableTypeOptions = [];
+          if (
+            columnType === DB_TYPES.DECIMAL ||
+            columnType === DB_TYPES.NUMERIC
+          ) {
+            savableTypeOptions.push('precision', 'scale');
+          }
+          return savableTypeOptions;
+        },
       },
     },
     display: {
@@ -158,12 +168,10 @@ const numberType: AbstractTypeConfiguration = {
         variables: {
           showAsPercentage: {
             type: 'boolean',
-            isSaved: true,
           },
           format: {
             type: 'string',
             enum: ['en_us', 'fr'],
-            isSaved: true,
           },
         },
         layout: {

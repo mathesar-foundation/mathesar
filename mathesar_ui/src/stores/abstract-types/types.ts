@@ -14,20 +14,9 @@ export interface AbstractTypeResponse {
   db_types: DbType[];
 }
 
-interface AbstractTypeConfigFormSavedVariable
-  extends FormConfigurationVariable {
-  isSaved: true;
+interface AbstractTypeConfigFormVariable extends FormConfigurationVariable {
+  conditionalDefault?: Record<DbType, FormInputDataType>;
 }
-
-interface AbstractTypeConfigFormUnSavedVariable
-  extends FormConfigurationVariable {
-  defaults: Record<DbType, FormInputDataType>;
-}
-
-export type AbstractTypeConfigFormVariable =
-  | AbstractTypeConfigFormSavedVariable
-  | AbstractTypeConfigFormUnSavedVariable;
-
 export interface AbstractTypeConfigForm extends FormConfiguration {
   variables: Record<string, AbstractTypeConfigFormVariable>;
 }
@@ -41,6 +30,7 @@ export interface AbstractTypeDbConfigOptions {
       columnType: DbType,
       typeOptions: Column['type_options'],
     ) => DbType;
+    getSavableTypeOptions: (columnType: DbType) => string[];
   };
 }
 

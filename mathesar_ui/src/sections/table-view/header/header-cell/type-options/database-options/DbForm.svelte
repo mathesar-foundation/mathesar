@@ -9,15 +9,9 @@
     FormInputDataType,
   } from '@mathesar-component-library/types';
   import type { DbType } from '@mathesar/App.d';
-  import type {
-    AbstractTypeConfigForm,
-    AbstractTypeDbConfigOptions,
-  } from '@mathesar/stores/abstract-types/types';
+  import type { AbstractTypeDbConfigOptions } from '@mathesar/stores/abstract-types/types';
   import type { Column } from '@mathesar/stores/table-data/types';
-  import {
-    getDefaultsFromFormConfig,
-    getSavedVariablesFromFormConfig,
-  } from '../utils';
+  import { getDefaultValuesFromConfig } from '../utils';
 
   export let selectedDbType: DbType;
   export let typeOptions: Column['type_options'];
@@ -25,19 +19,18 @@
   export let column: Column;
 
   function constructForm(
-    formConfig: AbstractTypeConfigForm,
+    _configuration: AbstractTypeDbConfigOptions['configuration'],
     _column: Column,
   ): FormBuildConfiguration {
-    const dbTypeDefaults = getDefaultsFromFormConfig(
-      formConfig,
+    const dbTypeDefaults = getDefaultValuesFromConfig(
+      _configuration,
       selectedDbType,
       _column,
     );
-    return makeForm(formConfig, dbTypeDefaults);
+    return makeForm(_configuration.form, dbTypeDefaults);
   }
 
-  $: savedVariables = getSavedVariablesFromFormConfig(configuration.form);
-  $: form = constructForm(configuration.form, column);
+  $: form = constructForm(configuration, column);
   $: values = form.values;
 
   const validationContext = getValidationContext();
@@ -52,14 +45,16 @@
       column.type,
       column.type_options,
     );
-    if (savedVariables.length > 0) {
+    const savableVariables =
+      configuration.getSavableTypeOptions(selectedDbType);
+    if (savableVariables.length > 0) {
       const newTypeOptions: Column['type_options'] = {};
-      savedVariables.forEach((variable) => {
+      savableVariables.forEach((variable) => {
         newTypeOptions[variable] = formValues[variable];
       });
       typeOptions = newTypeOptions;
     } else {
-      typeOptions = null;
+      typeOptions = {};
     }
     validationContext.validate();
   }

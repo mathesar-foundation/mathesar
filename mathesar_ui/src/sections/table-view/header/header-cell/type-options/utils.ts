@@ -3,32 +3,31 @@ import type {
   FormValues,
 } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/App';
-import type { AbstractTypeConfigForm } from '@mathesar/stores/abstract-types/types';
+import type { AbstractTypeDbConfigOptions } from '@mathesar/stores/abstract-types/types';
 import type { Column } from '@mathesar/stores/table-data/types';
 
-export function getSavedVariablesFromFormConfig(
-  abstractTypeFormConfig: AbstractTypeConfigForm,
-): string[] {
-  return Object.keys(abstractTypeFormConfig.variables).filter(
-    (variableKey) => 'isSaved' in abstractTypeFormConfig.variables[variableKey],
-  );
-}
-
-export function getDefaultsFromFormConfig(
-  abstractTypeFormConfig: AbstractTypeConfigForm,
+export function getDefaultValuesFromConfig(
+  abstractTypeConfig: AbstractTypeDbConfigOptions['configuration'],
   selectedDbType: DbType,
   column: Column,
 ): Record<string, FormInputDataType> {
+  const abstractTypeFormConfig = abstractTypeConfig.form;
   const typeOptions = column.type_options ?? {};
   if (column.type === selectedDbType) {
     const defaultValues: FormValues = {};
+    const savableVariables =
+      abstractTypeConfig.getSavableTypeOptions(selectedDbType);
     Object.keys(abstractTypeFormConfig.variables).forEach(
       (variableKey: string) => {
         const formVariable = abstractTypeFormConfig.variables[variableKey];
-        if ('isSaved' in formVariable) {
+        if (savableVariables.includes(variableKey)) {
           defaultValues[variableKey] = typeOptions[variableKey] ?? null;
-        } else if (formVariable.defaults[selectedDbType]) {
-          defaultValues[variableKey] = formVariable.defaults[selectedDbType];
+        } else if (
+          typeof formVariable.conditionalDefault?.[selectedDbType] !==
+          'undefined'
+        ) {
+          defaultValues[variableKey] =
+            formVariable.conditionalDefault[selectedDbType];
         }
       },
     );
