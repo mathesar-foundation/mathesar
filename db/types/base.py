@@ -72,8 +72,9 @@ class MathesarCustomType(Enum):
     Keys returned by get_available_types are of the format 'mathesar_types.VALUE'
     """
     EMAIL = 'email'
-    URI = 'uri'
     MATHESAR_MONEY = 'mathesar_money'
+    MULTICURRENCY_MONEY = 'multicurrency_money'
+    URI = 'uri'
 
 
 _known_vanilla_db_types = tuple(postgres_type for postgres_type in PostgresType)
