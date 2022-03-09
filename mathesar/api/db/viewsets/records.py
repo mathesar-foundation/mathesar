@@ -57,6 +57,8 @@ class RecordViewSet(viewsets.ViewSet):
                 table=table,
                 # TODO rename `filters` to something singular, for semantic correctness.
                 # avoid `filter`, because it shadows a standard library function.
+                # be mindful that the use of this terms stretches through many methods, it's not
+                # isolated to this method alone.
                 filters=filter_processed,
                 db_function=db_function_processed,
                 deduplicate=serializer.validated_data['deduplicate'],
@@ -87,6 +89,7 @@ class RecordViewSet(viewsets.ViewSet):
             many=True,
             context=self.get_serializer_context(table)
         )
+        #breakpoint()
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None, table_pk=None):
