@@ -31,6 +31,9 @@ module.exports = {
         minimumDescriptionLength: 10,
       },
     ],
+    'no-multi-spaces': 'off',
+    '@typescript-eslint/comma-spacing': 'off',
+    'array-bracket-spacing': 'off',
   },
   overrides: [
     {
