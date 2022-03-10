@@ -60,7 +60,7 @@
         border-color: blue;
         z-index: 1;
       }
-
+      @media (hover: hover) {
       > button.remove {
         display: none;
         cursor: pointer;
@@ -78,6 +78,7 @@
       &:hover > button.remove {
         display: inline-block;
       }
+    }
     }
   }
 
