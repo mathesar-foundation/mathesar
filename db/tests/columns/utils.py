@@ -42,7 +42,7 @@ column_test_dict = {
     REAL: {"start": "111.01111", "set": "111.01112", "expt": 111.01112},
     SMALLINT: {"start": "500", "set": "500", "expt": 500},
     TIME_WITH_TIME_ZONE: {"start": "12:30:45.0Z", "set": "12:30:45.0+05:30", "expt": '12:30:45.0+05:30'},
-    TIME_WITHOUT_TIME_ZONE: {"start": "12:30:00.0", "set": "12:30:00.0", "expt": '12:30:00.0'},
+    TIME_WITHOUT_TIME_ZONE: {"start": "12:31:00.0", "set": "12:30:00.0", "expt": '12:30:00.0'},
     TIMESTAMP_WITH_TIME_ZONE: {"start": "10000-01-01T00:00:00.0Z AD", "set": "2000-07-30T19:15:03.65Z AD", "expt": '2000-07-30T19:15:03.65Z AD'},
     TIMESTAMP_WITHOUT_TIME_ZONE: {"start": "10000-01-01T00:00:00.0 AD", "set": "2000-07-30T19:15:03.65 AD", "expt": '2000-07-30T19:15:03.65 AD'},
     TEXT: {"start": "default", "set": "test", "expt": "test"},
