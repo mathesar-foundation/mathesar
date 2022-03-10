@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.functions.exceptions import UnknownDBFunctionID
-from db.functions.base import StartsWithCaseInsensitive, Literal
+from db.functions.base import Equal, Literal
 from db.records.exceptions import BadGroupFormat, GroupFieldNotFound
 from db.records.operations.group import GroupBy
 from mathesar import models
@@ -143,43 +143,26 @@ def test_record_list_duplicate_rows_only(create_table, client):
     assert mock_get.call_args[1]['duplicate_only'] == duplicate_only
 
 
-def test_record_db_function_and_deduplicate(create_table, client):
+@pytest.mark.parametrize("column_ix,expected_count", [[4,3],[3,1]])
+def test_record_db_function_and_deduplicate(create_table, client, column_ix, expected_count):
     table_name = 'NASA Record List Filter Duplicates'
     table = create_table(table_name)
-
-    def db_function(column_id):
-        # {
-        #     StartsWithCaseInsensitive.id: [
-        #         {'column_id': [column_id]},
-        #         {Literal.id: ["ARC"]},
-        #     ]
-        # }
-        # TODO set to use identity db function for debugging purposes, revert to above version before merging
-        return {
-            "identity": [
-                {'column_id': [column_id]},
-            ]
-        }
-
-    column_id = table.dj_columns[5].id
-    db_function_json = json.dumps(db_function(column_id))
+    column_id = table.dj_columns[column_ix].id
+    db_function = {
+        Equal.id: [
+            {'column_id': [column_id]},
+            {Literal.id: ["8408707"]},
+        ]
+    }
+    db_function_json = json.dumps(db_function)
     deduplicate = True
     deduplicate_json = json.dumps(deduplicate)
     response = client.get(
         f'/api/db/v0/tables/{table.id}/records/?db_function={db_function_json}&deduplicate={deduplicate_json}'
     )
     assert response.status_code == 200
-    assert response.data['count'] == 1
-    assert len(response.data['results']) == 1
-
-    column_id = table.dj_columns[3].id
-    db_function_json = json.dumps(db_function(column_id))
-    response = client.get(
-        f'/api/db/v0/tables/{table.id}/records/?db_function={db_function_json}&deduplicate={deduplicate_json}'
-    )
-    assert response.status_code == 200
-    assert response.data['count'] == 2
-    assert len(response.data['results']) == 2
+    assert response.data['count'] == expected_count
+    assert len(response.data['results']) == expected_count
 
 
 def test_filter_with_added_columns(create_table, client):
