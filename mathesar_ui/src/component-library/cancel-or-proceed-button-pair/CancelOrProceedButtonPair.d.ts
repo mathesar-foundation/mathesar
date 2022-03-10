@@ -1,17 +1,6 @@
-import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
-import type {
-  IconFlip,
-  IconRotate,
-} from '@mathesar-component-library-dir/types';
-
-export interface IconDetails {
-  data: IconDefinition;
-  spin?: boolean;
-  flip?: IconFlip;
-  rotate?: IconRotate;
-}
+import type { IconProps } from '@mathesar-component-library-dir/icon/Icon.d';
 
 export interface ButtonDetails {
   label: string;
-  icon: IconDetails;
+  icon: IconProps;
 }

@@ -3,7 +3,7 @@ from playwright.sync_api import expect
 
 def test_add_and_remove_multi_column_unique_constraint(page, go_to_patents_data_table):
     # Add
-    page.click("[aria-label='Table Actions']")
+    page.click(".actions-pane button:has-text('Table')")
     page.click("text=Constraints")
     page.click("[aria-label='New Constraint']")
     page.click("button:has-text('Unique')")
