@@ -12,7 +12,7 @@ from db.columns.operations.select import (
     get_column_name_from_attnum, get_columns_attnum_from_names,
 )
 from db.tables.operations.select import get_oid_from_table
-from db.tests.columns.utils import column_test_dict_with_engine, get_default
+from db.tests.columns.utils import column_test_dict, get_default
 
 engine_with_types = fixtures.engine_with_types
 engine_email_type = fixtures.engine_email_type
@@ -115,12 +115,12 @@ def test_get_column_index_from_name_after_delete_two_tables(engine_with_schema):
 
 
 @pytest.mark.parametrize("filler", [True, False])
-@pytest.mark.parametrize("engine_to_use, col_type, col_data", column_test_dict_with_engine)
-def test_get_column_default(request, filler, engine_to_use, col_type, col_data):
-    engine, schema = request.getfixturevalue(engine_to_use)
+@pytest.mark.parametrize("col_type", column_test_dict.keys())
+def test_get_column_default(engine_email_type, filler, col_type):
+    engine, schema = engine_email_type
     table_name = "get_column_default_table"
     column_name = "get_column_default_column"
-    _, set_default, expt_default = col_data.values()
+    _, set_default, expt_default = column_test_dict[col_type].values()
 
     # Ensure we test one and multiple defaults in a table
     # There _was_ a bug associated with multiple defaults
