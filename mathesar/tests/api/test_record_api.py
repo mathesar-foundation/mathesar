@@ -143,7 +143,7 @@ def test_record_list_duplicate_rows_only(create_table, client):
     assert mock_get.call_args[1]['duplicate_only'] == duplicate_only
 
 
-@pytest.mark.parametrize("column_ix,expected_count", [[4,3],[3,1]])
+@pytest.mark.parametrize("column_ix,expected_count", [[4, 3], [3, 1]])
 def test_record_db_function_and_deduplicate(create_table, client, column_ix, expected_count):
     table_name = 'NASA Record List Filter Duplicates'
     table = create_table(table_name)
