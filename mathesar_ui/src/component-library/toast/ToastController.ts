@@ -3,17 +3,13 @@ import {
   faExclamationTriangle,
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
-import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import type { IconProps } from '@mathesar-component-library-dir/icon/Icon.d';
 import type { SvelteComponent } from 'svelte';
 import { linear } from 'svelte/easing';
 import type { Writable, Readable } from 'svelte/store';
 import { writable, derived } from 'svelte/store';
 import type { PauseableTweened } from '@mathesar-component-library-dir/common/utils/pauseableTweened';
 import { pauseableTweened } from '@mathesar-component-library-dir/common/utils/pauseableTweened';
-import type {
-  IconFlip,
-  IconRotate,
-} from '@mathesar-component-library-dir/icon/Icon.d';
 
 /**
  * Allows control of the toast message after it is displayed
@@ -22,13 +18,6 @@ interface ToastEntryController {
   id: number;
   progress: PauseableTweened;
   dismiss: () => void;
-}
-
-interface Icon {
-  data: IconDefinition;
-  spin?: boolean;
-  flip?: IconFlip;
-  rotate?: IconRotate;
 }
 
 interface ToastEntryProps {
@@ -44,7 +33,7 @@ interface ToastEntryProps {
    */
   contentComponent?: typeof SvelteComponent;
   contentComponentProps?: Readable<unknown> | unknown;
-  icon?: Readable<Icon> | Icon;
+  icon?: Readable<IconProps> | IconProps;
   backgroundColor: Readable<string> | string;
   textColor: Readable<string> | string;
   progressColor: Readable<string> | string;
