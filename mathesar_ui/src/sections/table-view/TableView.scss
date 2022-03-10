@@ -68,29 +68,6 @@ section.table-section .tab-container .table-data {
   }
 }
 
-.dropdown.content.table-opts-content {
-  ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-
-    li {
-      padding: 8px 12px 8px 8px;
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-
-      > .opt {
-        margin-right: 8px;
-      }
-
-      &:hover {
-        background: #f6f7f7;
-      }
-    }
-  }
-}
-
 .delete-modal {
   .header {
     font-weight: 500;

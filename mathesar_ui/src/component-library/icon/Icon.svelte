@@ -2,6 +2,12 @@
   import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
   import type { IconFlip, IconRotate } from './Icon.d';
 
+  // NOTE:
+  // The type definition for the props here are duplicated in `Icon.d.ts` too.
+  //
+  // After https://github.com/sveltejs/language-tools/issues/442 is fixed, we
+  // should hopefully be able to clean up this code duplication a bit.
+
   // The Font-awesome icon definition from 'fortawesome' package.
   export let data: IconDefinition;
   $: [viewBoxWith, viewBoxHeight, , , path] = data.icon;

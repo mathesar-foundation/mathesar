@@ -1,24 +1,13 @@
-import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
+import type { IconProps } from '@mathesar-component-library-dir/icon/Icon.d';
 import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 import type { Writable } from 'svelte/store';
 import { writable } from 'svelte/store';
 import type { ModalController } from '@mathesar-component-library-dir/modal';
-import type {
-  IconFlip,
-  IconRotate,
-  ComponentAndProps,
-} from '@mathesar-component-library/types';
-
-interface IconDetails {
-  data: IconDefinition;
-  spin?: boolean;
-  flip?: IconFlip;
-  rotate?: IconRotate;
-}
+import type { ComponentAndProps } from '@mathesar-component-library/types';
 
 interface ButtonDetails {
   label: string;
-  icon?: IconDetails;
+  icon?: IconProps;
 }
 
 export interface ConfirmationProps {
