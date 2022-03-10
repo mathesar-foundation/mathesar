@@ -408,7 +408,7 @@ def test_column_default_update(engine_email_type, col_type):
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_delete(engine_email_type, col_type, col_data):
+def test_column_default_delete(engine_email_type, col_type):
     engine, schema = engine_email_type
     table_name = "delete_column_default_table"
     column_name = "delete_column_default_column"
