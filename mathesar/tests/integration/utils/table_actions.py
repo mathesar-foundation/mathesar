@@ -7,8 +7,8 @@ def create_empty_table(page):
 
 
 def delete_active_table(page):
-    page.click("[aria-label='Table Actions']")
-    page.click(".table-opts-content:visible :text('Delete')")
+    page.click("[aria-label='Table']")
+    page.click("div.menu div.menu-item:visible :text('Delete')")
     expect_modal_to_be_visible(page, "Delete Table?")
     # modal confirmation; blue button
     page.click("button:has-text('Delete Table')")
