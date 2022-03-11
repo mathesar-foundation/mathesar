@@ -9,3 +9,18 @@ def test_create_empty_table(page, base_schema_url):
     page.click("[aria-label='New Table']")
     page.click("button:has-text('Empty Table')")
     expect(get_table_entry(page, "Table 0")).to_be_visible()
+
+def test_rename_table_of_another_table(page, base_schema_url):
+    page.goto(base_schema_url)
+    expect(get_tables_list(page)).to_be_empty()
+    page.click("[aria-label='New Table']")
+    page.click("button:has-text('Empty Table')")
+    expect(get_table_entry(page, "Table 0")).to_be_visible()
+    page.click("[aria-label='New Table']")
+    page.click("button:has-text('Empty Table')")
+    expect(get_table_entry(page, "Table 1")).to_be_visible()
+    page.click("[aria-label='Table']")
+    page.click("text=Rename")
+    page.press("[aria-label='name']", "ArrowRight")
+    page.fill("[aria-label='name']", "Table 0")
+    page.locator("text=A table with that name already exists.")
