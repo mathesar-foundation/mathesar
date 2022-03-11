@@ -60,9 +60,8 @@
         border-color: blue;
         z-index: 1;
       }
-      @media (hover: hover) {
+
       > button.remove {
-        display: none;
         cursor: pointer;
         padding: 4px 10px;
         border: none;
@@ -75,10 +74,15 @@
         }
       }
 
-      &:hover > button.remove {
-        display: inline-block;
+      @media (hover: hover) {
+        button.remove {
+          visibility: hidden;
+        }
+
+        &:hover > button.remove {
+          visibility: visible;
+        }
       }
-    }
     }
   }
 
