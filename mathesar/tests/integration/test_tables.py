@@ -10,6 +10,7 @@ def test_create_empty_table(page, base_schema_url):
     page.click("button:has-text('Empty Table')")
     expect(get_table_entry(page, "Table 0")).to_be_visible()
 
+
 def test_rename_table_of_another_table(page, base_schema_url):
     page.goto(base_schema_url)
     expect(get_tables_list(page)).to_be_empty()
