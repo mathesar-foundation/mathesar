@@ -75,12 +75,8 @@
       }
 
       @media (hover: hover) {
-        button.remove {
-          visibility: hidden;
-        }
-
-        &:hover > button.remove {
-          visibility: visible;
+        &:not(:hover) > button.remove {
+          display: none;
         }
       }
     }
