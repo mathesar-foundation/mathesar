@@ -17,3 +17,9 @@
 <label for={$inputId} class="label-component" class:disabled={$disabled}>
   <slot inputId={$inputId} />
 </label>
+
+<style>
+  .label-component {
+    display: var(--display, inline);
+  }
+</style>

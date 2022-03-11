@@ -9,9 +9,17 @@
     faExclamationTriangle,
     faPlus,
     faCog,
+    faICursor,
+    faKey,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
-  import { Button, Icon, Dropdown } from '@mathesar-component-library';
+  import {
+    Button,
+    Icon,
+    Dropdown,
+    DropdownMenu,
+    MenuItem,
+  } from '@mathesar-component-library';
   import type { TabularDataStore } from '@mathesar/stores/table-data/types';
   import { refetchTablesForSchema, deleteTable } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
@@ -76,31 +84,23 @@
 </script>
 
 <div class="actions-pane">
-  <Dropdown
-    closeOnInnerClick={true}
-    triggerClass="opts"
-    contentClass="table-opts-content"
-    ariaLabel="Table Actions"
-  >
-    <svelte:fragment slot="trigger">
-      <Icon data={faCog} />
-      Table
-    </svelte:fragment>
-    <svelte:fragment slot="content">
-      <ul>
-        <li class="item" on:click={() => tableRenameModal.open()}>Rename</li>
-        <li class="item" on:click={handleDeleteTable}>Delete</li>
-        <li
-          class="item"
-          on:click={() => {
-            tableConstraintsModal.open();
-          }}
-        >
-          Constraints
-        </li>
-      </ul>
-    </svelte:fragment>
-  </Dropdown>
+  <DropdownMenu label="Table" icon={{ data: faCog }}>
+    <MenuItem
+      on:click={() => tableRenameModal.open()}
+      icon={{ data: faICursor }}
+    >
+      Rename
+    </MenuItem>
+    <MenuItem on:click={handleDeleteTable} icon={{ data: faTrashAlt }}>
+      Delete
+    </MenuItem>
+    <MenuItem
+      on:click={() => tableConstraintsModal.open()}
+      icon={{ data: faKey }}
+    >
+      Constraints
+    </MenuItem>
+  </DropdownMenu>
 
   <TableConstraints controller={tableConstraintsModal} />
 

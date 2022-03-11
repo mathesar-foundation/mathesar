@@ -17,7 +17,7 @@
     constructTabularTab,
   } from '@mathesar/stores/tabs';
 
-  import { Icon, Button, Dropdown } from '@mathesar-component-library';
+  import { Icon, DropdownMenu, MenuItem } from '@mathesar-component-library';
   import { TabularType } from '@mathesar/stores/table-data';
 
   import SchemaSelector from './schema-selector/SchemaSelector.svelte';
@@ -58,26 +58,14 @@
 
     {#if $currentSchemaId}
       <div class="quick-links">
-        <Dropdown closeOnInnerClick={true} ariaLabel="New Table">
-          <svelte:fragment slot="trigger">
-            <div class="new-table">
-              <Icon data={faPlus} />
-              <span class="label">New Table</span>
-            </div>
-          </svelte:fragment>
-          <svelte:fragment slot="content">
-            <div class="new-table-options">
-              <Button on:click={handleCreateEmptyTable} appearance="plain">
-                <Icon data={faTable} size="0.8em" />
-                <span>Empty Table</span>
-              </Button>
-              <Button on:click={beginDataImport} appearance="plain">
-                <Icon data={faUpload} size="0.8em" />
-                <span>Import Data</span>
-              </Button>
-            </div>
-          </svelte:fragment>
-        </Dropdown>
+        <DropdownMenu label="New Table" icon={{ data: faPlus }}>
+          <MenuItem on:click={handleCreateEmptyTable} icon={{ data: faTable }}>
+            Empty Table
+          </MenuItem>
+          <MenuItem on:click={beginDataImport} icon={{ data: faUpload }}>
+            Import Data
+          </MenuItem>
+        </DropdownMenu>
       </div>
     {/if}
 
