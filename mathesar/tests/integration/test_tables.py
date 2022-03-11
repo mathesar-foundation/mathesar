@@ -24,4 +24,5 @@ def test_rename_table_of_another_table(page, base_schema_url):
     page.click("text=Rename")
     page.press("[aria-label='name']", "ArrowRight")
     page.fill("[aria-label='name']", "Table 0")
-    page.locator("text=A table with that name already exists.")
+    expect(page.locator("text=A table with that name already exists.")).to_be_visible()
+    expect(page.locator("button:has-text('Save')")).to_be_disabled()
