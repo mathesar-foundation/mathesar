@@ -110,7 +110,7 @@
                 on:click={closeDropdown}
               >
                 <Icon class="schema" data={faProjectDiagram} />
-                {schema.name}
+                <p>{schema.name}</p>
               </a>
             </li>
           {:else}
