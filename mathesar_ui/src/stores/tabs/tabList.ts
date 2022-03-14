@@ -1,44 +1,55 @@
-import { get, writable } from 'svelte/store';
-import type { Writable, Unsubscriber } from 'svelte/store';
+import type { Readable, Writable, Unsubscriber } from 'svelte/store';
+import { derived, get, writable } from 'svelte/store';
 import type { Tab } from '@mathesar-component-library/types';
 import type {
   TabularData,
-  TabularDataParams,
+  TabularDataProps,
+  MetaProps,
 } from '@mathesar/stores/table-data/types';
-import type {
-  Database,
-  DBObjectEntry,
-  SchemaEntry,
-  TabularType,
-} from '@mathesar/App.d';
+import type { Database, DBObjectEntry, SchemaEntry } from '@mathesar/App.d';
 import {
   getTabularContent,
   removeTabularContent,
+  TabularType,
 } from '@mathesar/stores/table-data';
 import { getTablesStoreForSchema } from '@mathesar/stores/tables';
 import {
-  getAllImportDetailsForSchema,
   removeImportFromView,
+  getAllImportDetailsForSchema,
 } from '@mathesar/stores/fileImports';
 import type { FileImportInfo } from '@mathesar/stores/fileImports';
+import { collapse, unite } from '@mathesar/utils/storeUtils';
+import type { SavableTabData, TabularTabReference } from './tabDataSaver';
 import {
-  parseTabListConfigFromURL,
-  syncTabularParamListToURL,
-  syncSingleTabularParamToURL,
-  syncActiveTabToURL,
-} from './utils';
-import type { TabListConfig } from './utils';
+  getSavedTabData,
+  saveTabData,
+  tabMatchesReference,
+} from './tabDataSaver';
 
-export interface MathesarTab extends Tab {
+export enum TabType {
+  Tabular,
+  Import,
+}
+interface BaseTab extends Tab {
   id: string;
   label: string;
-
-  // TODO: Use a enum to determine type of tab
-  isNew: boolean;
-  tabularData?: TabularData;
-
-  // Discuss: Remove imports from within the tab context to a higher level modal context
+}
+export interface TabularTab extends BaseTab {
+  type: TabType.Tabular;
+  tabularData: TabularData;
+}
+export interface ImportTab extends BaseTab {
+  type: TabType.Import;
+  /**
+   * Discuss: Remove imports from within the tab context to a higher level
+   * modal context.
+   */
   fileImportId?: FileImportInfo['id'];
+}
+export type MathesarTab = TabularTab | ImportTab;
+
+export function tabIsTabular(tab: MathesarTab): tab is TabularTab {
+  return tab.type === TabType.Tabular;
 }
 
 interface TabAddOptions {
@@ -57,63 +68,94 @@ function calculateImportTabId(id: FileImportInfo['id']): MathesarTab['id'] {
   return `import_id_${id}`;
 }
 
-function getTabsFromImports(schemaId: SchemaEntry['id']): MathesarTab[] {
-  const imports: MathesarTab[] = getAllImportDetailsForSchema(schemaId).map(
+export function constructTabularTab(
+  type: TabularData['type'],
+  id: TabularData['id'],
+  label: DBObjectEntry['name'],
+  metaProps?: MetaProps,
+): TabularTab {
+  const newTab: TabularTab = {
+    id: calculateTabularTabId(type, id),
+    label,
+    type: TabType.Tabular,
+    tabularData: getTabularContent({ type, id, metaProps }),
+  };
+  return newTab;
+}
+
+function buildTabularTabFromProps({
+  schemaId,
+  tabularDataProps,
+}: {
+  schemaId: SchemaEntry['id'];
+  tabularDataProps: TabularDataProps;
+}) {
+  const { id, type, metaProps } = tabularDataProps;
+  const tableStoreData = get(getTablesStoreForSchema(schemaId));
+  const table = tableStoreData.data.get(id);
+  const label = table ? table.name : '(Unknown table)';
+  return constructTabularTab(type, id, label, metaProps);
+}
+
+function getTabsFromImports(schemaId: SchemaEntry['id']): ImportTab[] {
+  const imports: ImportTab[] = getAllImportDetailsForSchema(schemaId).map(
     (entry) => ({
       id: calculateImportTabId(entry.id),
       fileImportId: entry.id,
-      isNew: true,
+      type: TabType.Import,
       label: 'Import data',
     }),
   );
   return imports;
 }
 
-function getTabsFromConfig(
-  schemaId: SchemaEntry['id'],
-  tabListConfig?: TabListConfig,
-): MathesarTab[] {
-  const tabs: MathesarTab[] = [];
-  const tableStoreData = get(getTablesStoreForSchema(schemaId));
-  tabListConfig?.tabularDataParamList?.forEach((entry) => {
-    const table = tableStoreData.data.get(entry[1]);
-    if (table) {
-      tabs.push({
-        id: calculateTabularTabId(entry[0], entry[1]),
-        label: table.name,
-        isNew: false,
-        tabularData: getTabularContent(entry[0], entry[1], entry),
-      });
-    }
-  });
-  return tabs;
-}
-
-export function constructTabularTab(
-  type: TabularData['type'],
-  id: TabularData['id'],
-  label: DBObjectEntry['name'],
-): MathesarTab {
-  const newTab: MathesarTab = {
-    id: calculateTabularTabId(type, id),
-    label,
-    isNew: false,
-    tabularData: getTabularContent(type, id),
-  };
-  return newTab;
-}
-
 export function constructImportTab(
   fileImportId: FileImportInfo['id'],
   label?: FileImportInfo['name'],
-): MathesarTab {
-  const newTab: MathesarTab = {
+): ImportTab {
+  return {
     id: calculateImportTabId(fileImportId),
     label: label || 'Import data',
-    isNew: true,
+    type: TabType.Import,
     fileImportId,
   };
-  return newTab;
+}
+
+function getTabularTabReference(
+  tab: MathesarTab,
+): TabularTabReference | undefined {
+  if (!tabIsTabular(tab)) {
+    return undefined;
+  }
+  return { type: tab.tabularData.type, id: tab.tabularData.id };
+}
+
+function getTabularDataProps(
+  tabularTab: TabularTab,
+): Readable<TabularDataProps> {
+  return derived(tabularTab.tabularData.meta.props, (metaProps) => ({
+    type: tabularTab.tabularData.type,
+    id: tabularTab.tabularData.id,
+    metaProps,
+  }));
+}
+
+function getSavableTabData(
+  tabs: Readable<MathesarTab[]>,
+  activeTab: Readable<MathesarTab | undefined>,
+): Readable<SavableTabData> {
+  const tabularTabs = derived(tabs, ($tabs) => $tabs.filter(tabIsTabular));
+  return collapse(
+    derived([tabularTabs, activeTab], ([$tabularTabs, $activeTab]) => {
+      const tabularDataPropsArray = unite(
+        $tabularTabs.map(getTabularDataProps),
+      );
+      return derived(tabularDataPropsArray, ($tabularDataPropsArray) => ({
+        tabs: $tabularDataPropsArray,
+        activeTab: $activeTab && getTabularTabReference($activeTab),
+      }));
+    }),
+  );
 }
 
 /**
@@ -131,9 +173,9 @@ export class TabList {
 
   activeTab: Writable<MathesarTab | undefined>;
 
-  private tabsUnsubscriber: Unsubscriber;
+  savableTabData: Readable<SavableTabData>;
 
-  private activeTabUnsubscriber: Unsubscriber;
+  private savableTabDataUnsubscriber: Unsubscriber;
 
   constructor(dbName: Database['name'], schemaId: SchemaEntry['id']) {
     this.dbName = dbName;
@@ -142,59 +184,28 @@ export class TabList {
     // Load incomplete imports from fileImports store
     const importedFileTabs = getTabsFromImports(schemaId);
 
-    // Load tables & views from URL
-    const tabListConfig = parseTabListConfigFromURL(dbName, schemaId);
-    const tabularTabs = getTabsFromConfig(schemaId, tabListConfig);
+    // // Load tables & views from URL
+    const savedTabData = getSavedTabData();
+    const activeTabReference = savedTabData?.activeTab;
+    const tabularTabs =
+      savedTabData?.tabs.map((tabularDataProps) =>
+        buildTabularTabFromProps({ tabularDataProps, schemaId: this.schemaId }),
+      ) ?? [];
 
-    const tabs = [...importedFileTabs, ...tabularTabs];
-    const activeTab =
-      tabularTabs.find(
-        (tab) =>
-          tab.tabularData?.type === tabListConfig.activeTabularTab?.[0] &&
-          tab.tabularData?.id === tabListConfig.activeTabularTab?.[1],
-      ) || tabs[0];
-
+    const tabs: MathesarTab[] = [...importedFileTabs, ...tabularTabs];
     this.tabs = writable(tabs);
+
+    const activeTab =
+      (activeTabReference
+        ? tabularTabs.find((tab) =>
+            tabMatchesReference(tab, activeTabReference),
+          )
+        : undefined) ?? tabs[0];
     this.activeTab = writable(activeTab);
 
-    // Tabular tabs <-> url subscribers
-    this.tabsUnsubscriber = this.tabs.subscribe((tabsSubstance) => {
-      const tabularDataParamList: TabularDataParams[] = [];
-      tabsSubstance.forEach((entry) => {
-        if (entry.tabularData) {
-          tabularDataParamList.push(entry.tabularData.parameterize());
-        }
-      });
-      syncTabularParamListToURL(
-        this.dbName,
-        this.schemaId,
-        tabularDataParamList,
-      );
-    });
-    tabularTabs.forEach((tabularTab) => {
-      this.addParamListenerToTab(tabularTab);
-    });
-
-    // Active tab <-> url subscriber
-    this.activeTabUnsubscriber = this.activeTab.subscribe(
-      (activeTabSubstance) => {
-        let activeTabularTab: TabListConfig['activeTabularTab'] | undefined;
-        if (activeTabSubstance?.tabularData) {
-          activeTabularTab = [
-            activeTabSubstance.tabularData.type,
-            activeTabSubstance.tabularData.id,
-          ];
-        }
-        syncActiveTabToURL(this.dbName, this.schemaId, activeTabularTab);
-      },
-    );
-  }
-
-  addParamListenerToTab(tab: MathesarTab): void {
-    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-    tab.tabularData?.on('paramsUpdated', async (params: TabularDataParams) => {
-      syncSingleTabularParamToURL(this.dbName, this.schemaId, params);
-    });
+    this.savableTabData = getSavableTabData(this.tabs, this.activeTab);
+    this.savableTabDataUnsubscriber =
+      this.savableTabData.subscribe(saveTabData);
   }
 
   add(tab: MathesarTab, options?: TabAddOptions): void {
@@ -220,8 +231,6 @@ export class TabList {
         this.activeTab.set(existingTab || tab);
       }
     }
-
-    this.addParamListenerToTab(tab);
   }
 
   getTabularTabByTabularID(
@@ -264,13 +273,13 @@ export class TabList {
     /**
      * If called from component event, the tab would already have been removed in previous tick.
      * If called directly, tab will have to be removed.
-     * We have a find check to avoid unnessary re-renders incase of component events.
+     * We have a find check to avoid unnecessary re-renders incase of component events.
      */
     if (removedTabIndexInTabsArray > -1) {
       this.tabs.set(tabSubstance.filter((entry) => entry.id !== tab.id));
     }
 
-    if (tab.isNew) {
+    if (tab.type === TabType.Import) {
       if (tab.fileImportId) {
         removeImportFromView(this.schemaId, tab.fileImportId);
       }
@@ -301,7 +310,6 @@ export class TabList {
   }
 
   destroy(): void {
-    this.activeTabUnsubscriber();
-    this.tabsUnsubscriber();
+    this.savableTabDataUnsubscriber();
   }
 }

@@ -1,6 +1,6 @@
 from rest_framework import status
 
-from db.columns.operations.select import get_columns_attnum_from_names
+from db.columns.operations.select import get_column_attnum_from_name
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.generic_exceptions.base_exceptions import (
@@ -223,11 +223,11 @@ class NotNullViolationAPIException(MathesarAPIException):
     ):
         exception_diagnostics = exception.orig.diag
         message_str = message if message is not None else exception_diagnostics.message_primary
-        column_attnum = get_columns_attnum_from_names(
+        column_attnum = get_column_attnum_from_name(
             table.oid,
-            [exception.orig.diag.column_name],
+            exception.orig.diag.column_name,
             table.schema._sa_engine
-        )[0][0]
+        )
         column = Column.objects.get(attnum=column_attnum)
         details = {
             'record_detail': exception_diagnostics.message_detail,

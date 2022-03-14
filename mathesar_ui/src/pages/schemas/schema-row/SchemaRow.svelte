@@ -54,10 +54,14 @@
   </div>
   {#if !isLocked}
     <div class="controls">
-      <Button class="edit" on:click={() => dispatch('edit', schema)}>
+      <Button
+        class="edit"
+        on:click={() => dispatch('edit', schema)}
+        aria-label="Edit Schema"
+      >
         <Icon data={faPencilAlt} />
       </Button>
-      <Button class="delete" on:click={handleDelete}>
+      <Button class="delete" on:click={handleDelete} aria-label="Delete Schema">
         <Icon data={faTrashAlt} />
       </Button>
       <slot />

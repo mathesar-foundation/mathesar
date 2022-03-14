@@ -14,12 +14,13 @@ section.table-section .tab-container .table-data {
 
     .cell {
       position: absolute;
-      display: block;
+      display: flex;
+      align-items: center;
       border-bottom: 1px solid #e7e7e7;
       border-right: 1px solid #efefef;
       left: 0;
       top: 0;
-      bottom: 0;
+      height: 100%;
 
       &.row-control {
         font-size: 12px;
@@ -48,7 +49,6 @@ section.table-section .tab-container .table-data {
       overflow: hidden;
 
       .cell {
-        display: flex;
         border-bottom: none;
 
         &.row-control {
@@ -64,29 +64,6 @@ section.table-section .tab-container .table-data {
       right: 0px;
       bottom: 0px;
       overflow: hidden;
-    }
-  }
-}
-
-.dropdown.content.table-opts-content {
-  ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-
-    li {
-      padding: 8px 12px 8px 8px;
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-
-      > .opt {
-        margin-right: 8px;
-      }
-
-      &:hover {
-        background: #f6f7f7;
-      }
     }
   }
 }

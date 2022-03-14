@@ -10,7 +10,8 @@
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { constructTabularTab, getTabsForSchema } from '@mathesar/stores/tabs';
   import { currentDBName } from '@mathesar/stores/databases';
-  import { TabularType } from '@mathesar/App.d';
+  import { TabularType } from '@mathesar/stores/table-data';
+
   import ModalTextInputForm from '@mathesar/components/ModalTextInputForm.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
 
@@ -18,7 +19,14 @@
   export let tabularData: TabularData;
 
   function schemaContainsTableName(name: string): boolean {
-    return [...$tables.data.values()].map((t) => t.name).includes(name);
+    const { id } = tabularData;
+
+    const allTables = [...$tables.data.values()];
+    const tablesUsingName = allTables.filter(
+      (current) => current.name === name,
+    );
+
+    return tablesUsingName.length > 0 && tablesUsingName[0].id !== id;
   }
 
   function getValidationErrors(name: string): string[] {

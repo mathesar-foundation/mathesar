@@ -461,7 +461,6 @@ def test_table_previews_wrong_column_number(client, schema, engine_email_type):
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
-    print(response.json())
     assert response.status_code == 400
     assert "number" in response.json()[0]['message']
     assert ErrorCodes.ColumnSizeMismatch.value == response.json()[0]['code']
@@ -1146,7 +1145,6 @@ def test_table_patch_columns_multiple_type_change(create_data_types_table, clien
     }
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
-
     assert response.status_code == 200
     _check_columns(response_json['columns'], column_data)
 

@@ -1,37 +1,22 @@
 <script lang="ts">
+  import type { Writable } from 'svelte/store';
   import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
-  import type { Meta, GroupOption } from '@mathesar/stores/table-data/types';
-  import { Button, Select, Icon } from '@mathesar-component-library';
-  import type { SelectOption } from '@mathesar-component-library/types';
+  import type { Grouping } from '@mathesar/stores/table-data';
+  import { Button, Icon } from '@mathesar-component-library';
+  import type { Column } from '@mathesar/stores/table-data/columns';
+  import SelectColumn from '@mathesar/components/SelectColumn.svelte';
 
-  export let meta: Meta;
-  export let options: SelectOption<string>[];
+  export let grouping: Writable<Grouping>;
+  export let columns: Column[];
 
-  $: ({ group } = meta);
-
-  let groupColumns: SelectOption<string>[];
-  let groupColumnValue: SelectOption<string>;
+  /** Columns which are not already used as a grouping entry */
+  $: availableColumns = columns.filter((column) => !$grouping.has(column.id));
+  $: [newGroupColumn] = availableColumns;
   let addNew = false;
 
-  function calcNewGroupColumns(
-    _columns: SelectOption<string>[],
-    _group: GroupOption,
-  ) {
-    let groupOptions = _columns;
-    if (_group) {
-      groupOptions = groupOptions.filter((option) => !_group.has(option.id));
-    }
-    groupColumns = groupOptions;
-  }
-
-  $: calcNewGroupColumns(options, $group);
-
   function addGroupColumn() {
-    if (groupColumnValue?.id) {
-      const column = groupColumnValue.id;
-      meta.addGroup(column);
-      addNew = false;
-    }
+    grouping.update((g) => g.with(newGroupColumn.id));
+    addNew = false;
   }
 </script>
 
@@ -39,18 +24,24 @@
   <div class="header">
     <span>
       Group
-      {#if $group?.size > 0}
-        ({$group.size})
+      {#if $grouping.size > 0}
+        ({$grouping.size})
       {/if}
     </span>
   </div>
   <div class="content">
     <table>
-      {#each Array.from($group ?? []) as option (option)}
+      {#each [...$grouping] as columnId (columnId)}
         <tr>
-          <td class="groupcolumn">{option}</td>
+          <td class="groupcolumn">
+            {columns.find((c) => c.id === columnId)?.name}
+          </td>
           <td class="action">
-            <Button on:click={() => meta.removeGroup(option)}>Clear</Button>
+            <Button
+              on:click={() => grouping.update((g) => g.without(columnId))}
+            >
+              Clear
+            </Button>
           </td>
         </tr>
       {:else}
@@ -59,7 +50,7 @@
         </tr>
       {/each}
 
-      {#if groupColumns?.length > 0}
+      {#if availableColumns.length > 0}
         {#if !addNew}
           <tr class="add-option">
             <td colspan="3">
@@ -75,7 +66,10 @@
         {:else}
           <tr class="add-option">
             <td class="groupcolumn">
-              <Select options={groupColumns} bind:value={groupColumnValue} />
+              <SelectColumn
+                columns={availableColumns}
+                bind:column={newGroupColumn}
+              />
             </td>
             <td class="action">
               <Button size="small" on:click={addGroupColumn}>

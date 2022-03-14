@@ -1,59 +1,25 @@
 <script lang="ts">
+  import type { Writable } from 'svelte/store';
   import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
-  import type { Meta, SortOption } from '@mathesar/stores/table-data/types';
-  import { Icon, Button, Select } from '@mathesar-component-library';
-  import type {
-    SelectOption,
-    SelectChangeEvent,
-  } from '@mathesar-component-library/types';
+  import { Icon, Button } from '@mathesar-component-library';
+  import { SortDirection } from '@mathesar/stores/table-data';
+  import type { Sorting } from '@mathesar/stores/table-data';
+  import type { Column } from '@mathesar/stores/table-data/columns';
+  import SelectSortDirection from '@mathesar/components/SelectSortDirection.svelte';
+  import SelectColumn from '@mathesar/components/SelectColumn.svelte';
 
-  export let meta: Meta;
-  export let options: SelectOption<string>[];
+  export let sorting: Writable<Sorting>;
+  export let columns: Column[];
 
-  $: ({ sort } = meta);
-
-  let sortColumns: SelectOption<string>[];
-  let sortColumnValue: SelectOption<string>;
-  let sortDirectionValue: SelectOption<'asc' | 'desc'>;
+  /** Columns which are not already used as a sorting entry */
+  $: availableColumns = columns.filter((column) => !$sorting.has(column.id));
+  $: [newSortColumn] = availableColumns;
+  let newSortDirection = SortDirection.A;
   let addNew = false;
 
-  function calcNewSortColumns(
-    _columns: SelectOption<string>[],
-    _sort: SortOption,
-  ) {
-    let sortOptions = _columns;
-    if (_sort) {
-      sortOptions = sortOptions.filter((option) => !_sort.get(option.id));
-    }
-    sortColumns = sortOptions;
-    [sortColumnValue] = sortColumns;
-  }
-
-  $: calcNewSortColumns(options, $sort);
-
-  const sortDirections = [
-    { id: 'asc', label: 'asc' },
-    { id: 'desc', label: 'desc' },
-  ];
-
-  function getSelectedDirection(option: [string, 'asc' | 'desc']) {
-    return sortDirections.find((entry) => entry.id === option[1]);
-  }
-
-  function directionChanged(
-    event: SelectChangeEvent<'asc' | 'desc'>,
-    option: [string, 'asc' | 'desc'],
-  ) {
-    const newDirection = event.detail.value.id ?? 'asc';
-    meta.changeSortDirection(option[0], newDirection);
-  }
-
   function addSortColumn() {
-    if (sortColumnValue?.id) {
-      const column = sortColumnValue.id;
-      meta.addUpdateSort(column, sortDirectionValue?.id);
-      addNew = false;
-    }
+    sorting.update((s) => s.with(newSortColumn.id, newSortDirection));
+    addNew = false;
   }
 </script>
 
@@ -61,25 +27,28 @@
   <div class="header">
     <span>
       Sort
-      {#if $sort?.size > 0}
-        ({$sort.size})
+      {#if $sorting.size > 0}
+        ({$sorting.size})
       {/if}
     </span>
   </div>
   <div class="content">
     <table>
-      {#each Array.from($sort ?? []) as option (option[0])}
+      {#each [...$sorting] as [columnId, sortDirection] (columnId)}
         <tr>
-          <td class="column">{option[0]}</td>
+          <td class="column">{columns.find((c) => c.id === columnId)?.name}</td>
           <td class="dir">
-            <Select
-              options={sortDirections}
-              value={getSelectedDirection(option)}
-              on:change={(event) => directionChanged(event, option)}
+            <SelectSortDirection
+              value={sortDirection}
+              onChange={(direction) => {
+                sorting.update((s) => s.with(columnId, direction));
+              }}
             />
           </td>
           <td class="action">
-            <Button on:click={() => meta.removeSort(option[0])}>Clear</Button>
+            <Button on:click={() => sorting.update((s) => s.without(columnId))}>
+              Clear
+            </Button>
           </td>
         </tr>
       {:else}
@@ -88,7 +57,7 @@
         </tr>
       {/each}
 
-      {#if sortColumns?.length > 0}
+      {#if availableColumns.length > 0}
         {#if !addNew}
           <tr class="add-option">
             <td colspan="3">
@@ -104,13 +73,13 @@
         {:else}
           <tr class="add-option">
             <td class="column">
-              <Select options={sortColumns} bind:value={sortColumnValue} />
+              <SelectColumn
+                columns={availableColumns}
+                bind:column={newSortColumn}
+              />
             </td>
             <td class="dir">
-              <Select
-                options={sortDirections}
-                bind:value={sortDirectionValue}
-              />
+              <SelectSortDirection bind:value={newSortDirection} />
             </td>
             <td class="action">
               <Button size="small" on:click={addSortColumn}>

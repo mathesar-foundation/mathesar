@@ -11,20 +11,20 @@
     TableRecord,
   } from '@mathesar/stores/table-data/types';
 
-  export let primaryKeyColumn: string | undefined = undefined;
+  export let primaryKeyColumnId: number | undefined = undefined;
   export let row: TableRecord;
   export let meta: Meta;
   export let recordsData: RecordsData;
 
-  $: ({ selectedRecords, recordModificationState, offset } = meta);
+  $: ({ selectedRecords, recordModificationState, pagination } = meta);
   $: ({ savedRecords, newRecords, totalCount } = recordsData);
 
-  $: primaryKeyValue = primaryKeyColumn ? row[primaryKeyColumn] : undefined;
+  $: primaryKeyValue = primaryKeyColumnId ? row[primaryKeyColumnId] : undefined;
   $: isRowSelected = ($selectedRecords as Set<unknown>).has(primaryKeyValue);
   $: genericModificationStatus = getGenericModificationStatus(
     $recordModificationState,
     row,
-    primaryKeyColumn,
+    primaryKeyColumnId,
   );
 
   function selectionChanged(event: CustomEvent<{ checked: boolean }>) {
@@ -50,7 +50,7 @@
           {row.__rowIndex +
             (row.__isNew
               ? ($totalCount ?? 0) - $savedRecords.length - $newRecords.length
-              : $offset) +
+              : $pagination.offset) +
             1}
           {#if row.__isNew}
             *

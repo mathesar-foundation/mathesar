@@ -1,4 +1,9 @@
+import type { Writable, Updater, Subscriber, Unsubscriber } from 'svelte/store';
 import { writable, get as getStoreValue } from 'svelte/store';
+import type { DBObjectEntry, DbType } from '@mathesar/App.d';
+import type { CancellablePromise } from '@mathesar-component-library';
+import { EventHandler } from '@mathesar-component-library';
+import type { PaginatedResponse } from '@mathesar/utils/api';
 import {
   deleteAPI,
   getAPI,
@@ -6,19 +11,15 @@ import {
   postAPI,
   States,
 } from '@mathesar/utils/api';
-import { TabularType } from '@mathesar/App.d';
-import { EventHandler } from '@mathesar-component-library';
-
-import type { Writable, Updater, Subscriber, Unsubscriber } from 'svelte/store';
-import type { PaginatedResponse } from '@mathesar/utils/api';
-import type { CancellablePromise } from '@mathesar-component-library';
-import type { DBObjectEntry, DbType } from '@mathesar/App.d';
+import { TabularType } from './TabularType';
 import type { Meta } from './meta';
 
 export interface Column {
   id: number;
   name: string;
   type: DbType;
+  type_options: Record<string, string | number | boolean | undefined> | null;
+  display_options: Record<string, unknown>;
   index: number;
   nullable: boolean;
   primary_key: boolean;
@@ -30,7 +31,7 @@ export interface ColumnsData {
   state: States;
   error?: string;
   columns: Column[];
-  primaryKey?: string;
+  primaryKeyColumnId?: number;
 }
 
 function preprocessColumns(response?: Column[]): Column[] {
@@ -143,7 +144,7 @@ export class ColumnsDataStore
       const storeData: ColumnsData = {
         state: States.Done,
         columns: columnResponse,
-        primaryKey: pkColumn?.name,
+        primaryKeyColumnId: pkColumn?.id,
       };
       this.set(storeData);
       this.fetchCallback?.(storeData);
@@ -153,7 +154,7 @@ export class ColumnsDataStore
         state: States.Error,
         error: err instanceof Error ? err.message : undefined,
         columns: [],
-        primaryKey: undefined,
+        primaryKeyColumnId: undefined,
       });
     } finally {
       this.promise = undefined;
@@ -190,9 +191,10 @@ export class ColumnsDataStore
 
   async patchType(
     columnId: Column['id'],
-    type: DbType,
+    type: Column['type'],
+    type_options: Column['type_options'],
   ): Promise<Partial<Column>> {
-    const column = await this.api.update(columnId, { type });
+    const column = await this.api.update(columnId, { type, type_options });
     await this.fetch();
     await this.dispatch('columnPatched', column);
     return column;

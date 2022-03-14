@@ -3,8 +3,8 @@
   import {
     Icon,
     ControlledModal,
-    Dropdown,
-    Button,
+    DropdownMenu,
+    MenuItem,
   } from '@mathesar-component-library';
   import { getContext } from 'svelte';
   import type { TabularDataStore } from '@mathesar/stores/table-data/types';
@@ -65,21 +65,14 @@
   </div>
 
   <div slot="footer" class="footer">
-    <Dropdown closeOnInnerClick={true} ariaLabel="New table">
-      <div slot="trigger" class="trigger">
-        <Icon data={faPlus} />
-        <span class="label">New Constraint</span>
-      </div>
-      <div slot="content" class="content">
-        <Button
-          on:click={() => newUniqueConstraintModal.open()}
-          appearance="plain"
-        >
-          <Icon data={faSnowflake} />
-          <span>Unique</span>
-        </Button>
-      </div>
-    </Dropdown>
+    <DropdownMenu label="New Constraint" icon={{ data: faPlus }}>
+      <MenuItem
+        on:click={() => newUniqueConstraintModal.open()}
+        icon={{ data: faSnowflake }}
+      >
+        Unique
+      </MenuItem>
+    </DropdownMenu>
   </div>
 
   <NewUniqueConstraintModal controller={newUniqueConstraintModal} />
@@ -92,16 +85,5 @@
   }
   .footer {
     text-align: right;
-  }
-  .trigger {
-    display: flex;
-    align-items: center;
-  }
-  .label {
-    margin-left: 4px;
-  }
-  .content > :global(*) {
-    display: flex;
-    width: 100%;
   }
 </style>

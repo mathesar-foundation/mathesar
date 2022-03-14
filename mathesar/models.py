@@ -1,5 +1,6 @@
 from typing import Any
 
+from bidict import bidict
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
@@ -182,6 +183,10 @@ class Table(DatabaseObject):
         super().save(*args, **kwargs)
 
     @cached_property
+    def _sa_engine(self):
+        return self.schema._sa_engine
+
+    @cached_property
     def _sa_table(self):
         try:
             table = reflect_table_from_oid(
@@ -223,28 +228,6 @@ class Table(DatabaseObject):
     def has_dependencies(self):
         return True
 
-    def get_dj_columns_queryset(self):
-        sa_column_name = [column.name for column in self.sa_columns]
-        column_attnum_list = [
-            result[0] for result in
-            get_columns_attnum_from_names(self.oid, sa_column_name, self.schema._sa_engine)
-        ]
-        return Column.objects.filter(table=self, attnum__in=column_attnum_list).order_by("attnum")
-
-    def get_dj_columns(self):
-        return tuple(self.get_dj_columns_queryset())
-
-    def get_dj_column_id_to_name_mapping(self):
-        dj_columns = self.get_dj_columns()
-        return dict(
-            (dj_column.id, dj_column.name)
-            for dj_column in dj_columns
-        )
-
-    def get_dj_column_name_to_id_mapping(self):
-        ids_to_names = self.get_dj_column_id_to_name_mapping()
-        return dict(map(reversed, ids_to_names.items()))
-
     def add_column(self, column_data):
         return create_column(
             self.schema._sa_engine,
@@ -252,25 +235,25 @@ class Table(DatabaseObject):
             column_data,
         )
 
-    def alter_column(self, column_index, column_data):
+    def alter_column(self, column_attnum, column_data):
         return alter_column(
             self.schema._sa_engine,
             self.oid,
-            column_index,
+            column_attnum,
             column_data,
         )
 
-    def drop_column(self, column_index):
+    def drop_column(self, column_attnum):
         drop_column(
             self.oid,
-            column_index,
+            column_attnum,
             self.schema._sa_engine,
         )
 
-    def duplicate_column(self, column_index, copy_data, copy_constraints, name=None):
+    def duplicate_column(self, column_attnum, copy_data, copy_constraints, name=None):
         return duplicate_column(
             self.oid,
-            column_index,
+            column_attnum,
             self.schema._sa_engine,
             new_column_name=name,
             copy_data=copy_data,
@@ -349,6 +332,12 @@ class Table(DatabaseObject):
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         return Constraint.current_objects.create(oid=constraint_oid, table=self)
 
+    def get_column_name_id_bidirectional_map(self):
+        # TODO: Prefetch column names to avoid N+1 queries
+        columns = Column.objects.filter(table_id=self.id)
+        columns_map = bidict({column.name: column.id for column in columns})
+        return columns_map
+
 
 class Column(ReflectionManagerMixin, BaseModel):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='columns')
@@ -395,7 +384,7 @@ class Constraint(DatabaseObject):
     def columns(self):
         column_names = [column.name for column in self._sa_constraint.columns]
         engine = self.table.schema.database._sa_engine
-        column_attnum_list = [result[0] for result in get_columns_attnum_from_names(self.table.oid, column_names, engine)]
+        column_attnum_list = [result for result in get_columns_attnum_from_names(self.table.oid, column_names, engine)]
         return Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
 
     def drop(self):

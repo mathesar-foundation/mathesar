@@ -13,6 +13,8 @@ from db.types.base import (
 class MathesarTypeIdentifier(Enum):
     BOOLEAN = 'boolean'
     DATETIME = 'datetime'
+    TIME = 'time'
+    DATE = 'date'
     DURATION = 'duration'
     EMAIL = 'email'
     MONEY = 'money'
@@ -48,12 +50,22 @@ def _get_type_map():
         'name': 'Boolean',
         'sa_type_names': [PostgresType.BOOLEAN.value]
     }, {
+        'identifier': MathesarTypeIdentifier.DATE.value,
+        'name': 'Date',
+        'sa_type_names': [
+            PostgresType.DATE.value,
+        ]
+    }, {
+        'identifier': MathesarTypeIdentifier.TIME.value,
+        'name': 'Time',
+        'sa_type_names': [
+            PostgresType.TIME_WITH_TIME_ZONE.value,
+            PostgresType.TIME_WITHOUT_TIME_ZONE.value,
+        ]
+    }, {
         'identifier': MathesarTypeIdentifier.DATETIME.value,
         'name': 'Date & Time',
         'sa_type_names': [
-            PostgresType.DATE.value,
-            PostgresType.TIME_WITH_TIME_ZONE.value,
-            PostgresType.TIME_WITHOUT_TIME_ZONE.value,
             PostgresType.TIMESTAMP_WITH_TIME_ZONE.value,
             PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value
         ]
@@ -70,7 +82,8 @@ def _get_type_map():
         'name': 'Money',
         'sa_type_names': [
             PostgresType.MONEY.value,
-            get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value)
+            get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value),
+            get_qualified_name(MathesarCustomType.MULTICURRENCY_MONEY.value),
         ]
     }, {
         'identifier': MathesarTypeIdentifier.NUMBER.value,
@@ -152,7 +165,7 @@ def get_ma_types_mapped_to_hintsets(engine):
         # TODO
         ma_type = get_ma_type_enum_from_id(ma_type_description['identifier'])
         associated_db_type_descriptions = ma_type_description['db_types']
-        associated_db_types = (
+        associated_db_types = tuple(
             # TODO why is db_type_descriptions a list that seems to always have one element?
             get_db_type_enum_from_id(db_type_descriptions[0]["sa_type_name"])
             for _db_type_id, db_type_descriptions in associated_db_type_descriptions.items()
@@ -239,8 +252,9 @@ def get_mathesar_type_from_db_type(db_type_string):
 
 def get_ma_type_enum_from_id(ma_type_id):
     """
-    Gets an instance of MathesarTypeIdentifier enum corresponding to the provided ma_type_id.
-    If the id doesn't correspond to the mentioned enum, returns None.
+    Gets an instance of MathesarTypeIdentifier enum corresponding to the
+    provided ma_type_id.  If the id doesn't correspond to the mentioned
+    enum, returns None.
     """
     try:
         return MathesarTypeIdentifier(ma_type_id)

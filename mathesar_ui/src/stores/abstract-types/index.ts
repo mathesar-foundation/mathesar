@@ -1,5 +1,5 @@
 export {
-  getAbstractTypeForDBType,
-  getAbstractTypesForDBTypeList,
+  getAbstractTypeForDbType,
+  getAbstractTypesForDbTypeList,
 } from './abstractTypeCategories';
-export { currentDbAbstractTypes, refetchTypesForDB } from './store';
+export { currentDbAbstractTypes, refetchTypesForDb } from './store';

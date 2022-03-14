@@ -1,6 +1,51 @@
+export interface Grouping {
+  /** Each string is a column id */
+  columns: number[];
+  mode: GroupingMode;
+  /**
+   * When `mode` === 'distinct', `num_groups` will always be `null`.
+   *
+   * When `mode` === 'percentile', `num_groups` will give the number of groups,
+   * as specified in the request params.
+   */
+  num_groups: number | null;
+  ranged: boolean;
+  groups: Group[];
+}
+
+export type SortDirection = 'asc' | 'desc';
+export interface SortingEntry {
+  /** column id */
+  field: number;
+  direction: SortDirection;
+}
+export type FilterCombination = 'and' | 'or';
+export type FilterOperation = 'eq' | 'ne' | 'get_duplicates';
+export interface FilterCondition {
+  /** column id */
+  field: number;
+  op: FilterOperation;
+  value: unknown;
+}
+type MakeFilteringOption<U> = U extends string
+  ? { [k in U]: FilterCondition[] }
+  : never;
+export type Filtering =
+  | FilterCondition[]
+  | MakeFilteringOption<FilterCombination>;
+
+export interface GetRequestParams {
+  limit?: number;
+  offset?: number;
+  order_by?: SortingEntry[];
+  grouping?: Pick<Grouping, 'columns'>;
+  filters?: Filtering;
+}
+
 export type ResultValue = string | number | boolean | null;
 
 export interface Result {
+  /** keys are stringified column ids */
   [k: string]: ResultValue;
 }
 
@@ -27,21 +72,6 @@ export interface Group {
    * too small to show all the records, some indices will be missing here.
    */
   result_indices: number[];
-}
-
-export interface Grouping {
-  /** Each string is a column name */
-  columns: string[];
-  mode: GroupingMode;
-  /**
-   * When `mode` === 'distinct', `num_groups` will always be `null`.
-   *
-   * When `mode` === 'percentile', `num_groups` will give the number of groups,
-   * as specified in the request params.
-   */
-  num_groups: number | null;
-  ranged: boolean;
-  groups: Group[];
 }
 
 export interface Response {

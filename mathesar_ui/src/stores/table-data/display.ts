@@ -1,7 +1,6 @@
 import { writable, get, derived } from 'svelte/store';
 import { States } from '@mathesar/utils/api';
 import type { Writable, Readable, Unsubscriber } from 'svelte/store';
-import type { TabularType, DBObjectEntry } from '@mathesar/App.d';
 import type { Meta } from './meta';
 import type { ColumnsDataStore, Column } from './columns';
 import type { TableRecord, RecordsData } from './records';
@@ -10,14 +9,14 @@ export interface ColumnPosition {
   width: number;
   left: number;
 }
-export type ColumnPositionMap = Map<string, ColumnPosition>;
+/** keys are column ids */
+export type ColumnPositionMap = Map<number, ColumnPosition>;
 
 // TODO: Select active cell using primary key instead of index
 // Checkout scenarios with pk consisting multiple columns
 export interface ActiveCell {
   rowIndex: number;
   columnIndex: number;
-  type: 'select' | 'edit';
 }
 
 export const ROW_CONTROL_COLUMN_WIDTH = 70;
@@ -32,6 +31,25 @@ const movementKeys = new Set([
   'Tab',
 ]);
 
+/**
+ * This value is used as a key in a `ColumnPositionMap` where each entry
+ * corresponds to the position of the column, as indexed by the column id.
+ * However, the entry indexed by `ROW_POSITION_INDEX` consists of the total
+ * width & left values (i.e the position) of the row. It's placed within
+ * `ColumnPositionMap` in order to avoid calculation within the component, which
+ * will run for each row. Thus, `ROW_POSITION_INDEX` should have the same type
+ * as a column id but needs to have a value that no column id will ever have.
+ * That's why we're using -1.
+ *
+ * We could use a dedicated store for it or even a new class containing both
+ * columnPosition and row width.
+ *
+ * Pavish put it within ColumnPositionMap because we were passing around a lot
+ * of props to the child components and he wanted to reduce the number of props.
+ * Now, it is all passed down using context, so that's no longer an issue.
+ */
+export const ROW_POSITION_INDEX = -1;
+
 function recalculateColumnPositions(
   columnPositionMap: ColumnPositionMap,
   columns: Column[],
@@ -39,16 +57,16 @@ function recalculateColumnPositions(
   let left = ROW_CONTROL_COLUMN_WIDTH;
   const newColumnPositionMap: ColumnPositionMap = new Map();
   columns.forEach((column) => {
-    const columnWidth = columnPositionMap.get(column.name)?.width;
+    const columnWidth = columnPositionMap.get(column.id)?.width;
     const isColumnWidthValid = typeof columnWidth === 'number';
     const newWidth = isColumnWidthValid ? columnWidth : DEFAULT_COLUMN_WIDTH;
-    newColumnPositionMap.set(column.name, {
+    newColumnPositionMap.set(column.id, {
       left,
       width: newWidth,
     });
     left += newWidth;
   });
-  newColumnPositionMap.set('__row', {
+  newColumnPositionMap.set(ROW_POSITION_INDEX, {
     width: left,
     left: 0,
   });
@@ -65,14 +83,6 @@ export function isCellActive(
     activeCell?.columnIndex === column.__columnIndex &&
     activeCell.rowIndex === row.__rowIndex
   );
-}
-
-export function isCellBeingEdited(
-  activeCell: ActiveCell,
-  row: TableRecord,
-  column: Column,
-): boolean {
-  return isCellActive(activeCell, row, column) && activeCell.type === 'edit';
 }
 
 // TODO: Create a common utility action to handle active element based scroll
@@ -114,10 +124,6 @@ export function scrollBasedOnActiveCell(): void {
 }
 
 export class Display {
-  private type: TabularType;
-
-  private parentId: DBObjectEntry['id'];
-
   private meta: Meta;
 
   private columnsDataStore: ColumnsDataStore;
@@ -137,14 +143,10 @@ export class Display {
   displayableRecords: Readable<TableRecord[]>;
 
   constructor(
-    type: TabularType,
-    parentId: number,
     meta: Meta,
     columnsDataStore: ColumnsDataStore,
     recordsData: RecordsData,
   ) {
-    this.type = type;
-    this.parentId = parentId;
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
     this.recordsData = recordsData;
@@ -159,7 +161,9 @@ export class Display {
         this.columnPositionMap.update((map) =>
           recalculateColumnPositions(map, columnData.columns),
         );
-        const width = get(this.columnPositionMap).get('__row')?.width;
+        const width = get(this.columnPositionMap).get(
+          ROW_POSITION_INDEX,
+        )?.width;
         const widthWithPadding = width ? width + DEFAULT_ROW_RIGHT_PADDING : 0;
         this.rowWidth.set(widthWithPadding);
       },
@@ -198,7 +202,6 @@ export class Display {
       rowIndex: row.__rowIndex,
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       columnIndex: column.__columnIndex,
-      type: 'select',
     });
   }
 
@@ -209,20 +212,18 @@ export class Display {
         rowIndex: row.__rowIndex,
         // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         columnIndex: column.__columnIndex,
-        type: 'edit',
       });
     }
   }
 
-  handleKeyEventsOnActiveCell(
-    key: KeyboardEvent['key'],
-  ): 'moved' | 'changed' | undefined {
+  handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | undefined {
     const { columns } = this.columnsDataStore.get();
     const totalCount = get(this.recordsData.totalCount);
     const savedRecords = get(this.recordsData.savedRecords);
     const newRecords = get(this.recordsData.newRecords);
-    const offset = get(this.meta.offset);
-    const pageSize = get(this.meta.pageSize);
+    const pagination = get(this.meta.pagination);
+    const { offset } = pagination;
+    const pageSize = pagination.size;
     const minRowIndex = 0;
     const maxRowIndex =
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
@@ -230,7 +231,7 @@ export class Display {
       newRecords.length;
     const activeCell = get(this.activeCell);
 
-    if (movementKeys.has(key) && activeCell?.type === 'select') {
+    if (movementKeys.has(key) && activeCell) {
       this.activeCell.update((existing) => {
         if (!existing) {
           return undefined;
@@ -264,43 +265,6 @@ export class Display {
         return newActiveCell;
       });
       return 'moved';
-    }
-
-    if (key === 'Tab' && activeCell?.type === 'edit') {
-      this.activeCell.update((existing) => {
-        if (!existing) {
-          return undefined;
-        }
-        const newActiveCell = { ...existing };
-        if (existing.columnIndex < columns.length - 1) {
-          newActiveCell.columnIndex += 1;
-        }
-        return newActiveCell;
-      });
-      return 'moved';
-    }
-
-    if (key === 'Enter') {
-      if (activeCell?.type === 'select') {
-        if (!columns[activeCell.columnIndex]?.primary_key) {
-          this.activeCell.update((existing) =>
-            existing ? { ...existing, type: 'edit' } : undefined,
-          );
-          return 'changed';
-        }
-      } else if (activeCell?.type === 'edit') {
-        this.activeCell.update((existing) =>
-          existing ? { ...existing, type: 'select' } : undefined,
-        );
-        return 'changed';
-      }
-    }
-
-    if (key === 'Escape' && activeCell?.type === 'edit') {
-      this.activeCell.update((existing) =>
-        existing ? { ...existing, type: 'select' } : undefined,
-      );
-      return 'changed';
     }
 
     return undefined;

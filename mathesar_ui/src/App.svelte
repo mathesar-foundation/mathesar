@@ -6,6 +6,16 @@
   import Header from '@mathesar/header/Header.svelte';
   import { toast } from '@mathesar/stores/toast';
   import { confirmationController } from '@mathesar/stores/confirmation';
+  import { currentSchemaId } from '@mathesar/stores/schemas';
+  import { beginUpdatingUrlWhenSchemaChanges } from './utils/routing';
+
+  // Why is this function called at such a high level, and not handled closer to
+  // the code point related to saving tab data or the code point related to
+  // switching schemas?
+  //
+  // Because we need to place this at a high level in order to avoid circular
+  // imports.
+  beginUpdatingUrlWhenSchemaChanges(currentSchemaId);
 </script>
 
 <ToastPresenter entries={toast.entries} />

@@ -1,22 +1,21 @@
-from datetime import date, time
-from datetime import datetime as py_datetime
 from decimal import Decimal
 
 import pytest
-from psycopg2.tz import FixedOffsetTimezone
 from psycopg2.errors import InvalidParameterValue
-from sqlalchemy import Table, Column, MetaData, select, cast
+from sqlalchemy import Table, Column, MetaData, select, cast, text
 from sqlalchemy import String, Numeric
 from sqlalchemy.exc import DataError
 
 from db import types
-from db.columns.operations.select import get_column_default
+from db.columns.operations.select import get_column_attnum_from_name, get_column_default
 from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
-from db.types import money, datetime, interval
+from db.types import multicurrency, datetime
 from db.types.operations import cast as cast_operations
-from db.types.base import PostgresType, MathesarCustomType, get_qualified_name, get_available_types
+from db.types.base import (
+    PostgresType, MathesarCustomType, get_qualified_name, get_available_types
+)
 
 
 # We need to set these variables when the file loads, or pytest can't
@@ -50,7 +49,12 @@ VARCHAR = "VARCHAR"
 
 # Custom types
 EMAIL = get_qualified_name(MathesarCustomType.EMAIL.value).upper()
-MATHESAR_MONEY = get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value).upper()
+MATHESAR_MONEY = get_qualified_name(
+    MathesarCustomType.MATHESAR_MONEY.value
+).upper()
+MULTICURRENCY_MONEY = get_qualified_name(
+    MathesarCustomType.MULTICURRENCY_MONEY.value
+).upper()
 URI = get_qualified_name(MathesarCustomType.URI.value).upper()
 
 
@@ -98,15 +102,21 @@ MASTER_DB_TYPE_MAP_SPEC = {
             FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
             MATHESAR_MONEY: {
-                VALID: [
-                    (
-                        1234123412341234,
-                        {money.VALUE: 1234123412341234, money.CURRENCY: "USD"}
-                    )
-                ],
+                VALID: [(1234, Decimal('1234.0'))],
             },
             MONEY: {
                 VALID: [(1234, "$1,234.00")],
+            },
+            MULTICURRENCY_MONEY: {
+                VALID: [
+                    (
+                        1234123412341234,
+                        {
+                            multicurrency.VALUE: 1234123412341234,
+                            multicurrency.CURRENCY: "USD"
+                        }
+                    )
+                ],
             },
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
@@ -147,11 +157,17 @@ MASTER_DB_TYPE_MAP_SPEC = {
             FLOAT: {VALID: [("1", 1.0)], INVALID: ["b"]},
             INTEGER: {VALID: [("4", 4)], INVALID: ["j"]},
             INTERVAL: {VALID: []},
-            MATHESAR_MONEY: {
-                VALID: [("1", {money.VALUE: 1, money.CURRENCY: "USD"})],
+            MATHESAR_MONEY: {VALID: []},
+            MONEY: {VALID: []},
+            MULTICURRENCY_MONEY: {
+                VALID: [
+                    (
+                        "1",
+                        {multicurrency.VALUE: 1, multicurrency.CURRENCY: "USD"}
+                    )
+                ],
                 INVALID: ["n"],
             },
-            MONEY: {VALID: []},
             NUMERIC: {VALID: [("1", Decimal("1"))], INVALID: ["a"]},
             REAL: {VALID: [("1", 1.0)], INVALID: ["b"]},
             SMALLINT: {VALID: [("4", 4)], INVALID: ["j"]},
@@ -168,22 +184,14 @@ MASTER_DB_TYPE_MAP_SPEC = {
         REFLECTED_NAME: DATE,
         TARGET_DICT: {
             CHAR: {VALID: []},
-            DATE: {VALID: [(date(1999, 1, 18), date(1999, 1, 18))]},
-            TEXT: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
-            VARCHAR: {VALID: [(date(1999, 1, 18), "1999-01-18")]},
+            DATE: {VALID: [("1999-01-18 AD", "1999-01-18 AD")]},
+            TEXT: {VALID: [("1999-01-18 AD", "1999-01-18")]},
+            VARCHAR: {VALID: [("1999-01-18 AD", "1999-01-18")]},
             TIMESTAMP_WITH_TIME_ZONE: {
-                VALID: [(
-                    date(1999, 1, 18),
-                    py_datetime(1999, 1, 18, 0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0))
-                ),
-                ]
+                VALID: [("1999-01-18 AD", "1999-01-18T00:00:00.0Z AD")]
             },
             TIMESTAMP_WITHOUT_TIME_ZONE: {
-                VALID: [(
-                    date(1999, 1, 18),
-                    py_datetime(1999, 1, 18, 0, 0, 0)
-                ),
-                ]
+                VALID: [("1999-01-18 AD", "1999-01-18T00:00:00.0 AD")]
             },
         },
     },
@@ -204,16 +212,23 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [1234123412341234]
             },
-            MATHESAR_MONEY: {
+            MATHESAR_MONEY: {VALID: [(1234.12, Decimal('1234.12'))]},
+            MONEY: {VALID: [(12.12, "$12.12")]},
+            MULTICURRENCY_MONEY: {
                 VALID: [
-                    (12.12, {money.VALUE: 12.12, money.CURRENCY: "USD"}),
+                    (
+                        12.12,
+                        {multicurrency.VALUE: 12.12, multicurrency.CURRENCY: "USD"}
+                    ),
                     (
                         1234567890123456.12,
-                        {money.VALUE: 1234567890123456.12, money.CURRENCY: "USD"}
+                        {
+                            multicurrency.VALUE: 1234567890123456.12,
+                            multicurrency.CURRENCY: "USD"
+                        }
                     )
                 ],
             },
-            MONEY: {VALID: [(12.12, "$12.12")]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {VALID: [(500, 500)], INVALID: [12341234]},
@@ -232,8 +247,19 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
             INTEGER: {VALID: [(500, 500)]},
-            MATHESAR_MONEY: {VALID: [(12.12, {money.VALUE: 12.12, money.CURRENCY: "USD"})]},
+            MATHESAR_MONEY: {VALID: [(12.12, Decimal('12.12'))]},
             MONEY: {VALID: [(12.12, "$12.12")]},
+            MULTICURRENCY_MONEY: {
+                VALID: [
+                    (
+                        12.12,
+                        {
+                            multicurrency.VALUE: 12.12,
+                            multicurrency.CURRENCY: "USD"
+                        }
+                    )
+                ]
+            },
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {VALID: [(500, 500)]},
@@ -263,8 +289,19 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(1, 1.0), (1.5, 1.5)]},
             FLOAT: {VALID: [(1, 1.0), (1.5, 1.5)]},
             INTEGER: {VALID: [(500, 500), (-5, -5)], INVALID: [-3.234, 234.34]},
-            MATHESAR_MONEY: {VALID: [(12.12, {money.VALUE: 12.12, money.CURRENCY: "USD"})]},
+            MATHESAR_MONEY: {VALID: [(12.12, Decimal('12.12'))]},
             MONEY: {VALID: [(12.12, "$12.12")]},
+            MULTICURRENCY_MONEY: {
+                VALID: [
+                    (
+                        12.12,
+                        {
+                            multicurrency.VALUE: 12.12,
+                            multicurrency.CURRENCY: "USD"
+                        }
+                    )
+                ]
+            },
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
             SMALLINT: {VALID: [(500, 500), (-5, -5)], INVALID: [-3.234, 234.34]},
@@ -283,8 +320,13 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
-            MATHESAR_MONEY: {VALID: [(12, {money.VALUE: 12, money.CURRENCY: "USD"})]},
+            MATHESAR_MONEY: {VALID: [(500, Decimal('500.0'))]},
             MONEY: {VALID: [(12, "$12.00")]},
+            MULTICURRENCY_MONEY: {
+                VALID: [
+                    (12, {multicurrency.VALUE: 12, multicurrency.CURRENCY: "USD"})
+                ]
+            },
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
             SMALLINT: {VALID: [(500, 500)]},
@@ -319,31 +361,30 @@ MASTER_DB_TYPE_MAP_SPEC = {
         SUPPORTED_MAP_NAME: MathesarCustomType.MATHESAR_MONEY.value,
         REFLECTED_NAME: MATHESAR_MONEY,
         TARGET_DICT: {
+            BIGINT: {VALID: [(12341234, 12341234)]},
             CHAR: {VALID: []},
-            MATHESAR_MONEY: {
+            DECIMAL: {VALID: [(12.12, Decimal('12.12'))]},
+            DOUBLE: {VALID: [(12.12, 12.12)]},
+            FLOAT: {VALID: [(12.12, 12.12)]},
+            INTEGER: {VALID: [(123412, 123412)]},
+            MATHESAR_MONEY: {VALID: [(12.12, Decimal('12.12'))]},
+            MULTICURRENCY_MONEY: {
                 VALID: [
                     (
-                        {money.VALUE: 1234.12, money.CURRENCY: 'XYZ'},
-                        {money.VALUE: 1234.12, money.CURRENCY: 'XYZ'}
+                        12.12,
+                        {
+                            multicurrency.VALUE: 12.12,
+                            multicurrency.CURRENCY: 'USD'
+                        }
                     )
                 ]
             },
-            TEXT: {
-                VALID: [
-                    (
-                        {money.VALUE: 1234.12, money.CURRENCY: 'XYZ'},
-                        '(1234.12,XYZ)'
-                    )
-                ]
-            },
-            VARCHAR: {
-                VALID: [
-                    (
-                        {money.VALUE: 1234.12, money.CURRENCY: 'XYZ'},
-                        '(1234.12,XYZ)'
-                    )
-                ]
-            },
+            MONEY: {VALID: [(12.12, "$12.12")]},
+            NUMERIC: {VALID: [(12.12, Decimal('12.12'))]},
+            REAL: {VALID: [(12.12, 12.12)]},
+            SMALLINT: {VALID: [(1234, 1234)]},
+            TEXT: {VALID: [(12.12, "12.12")]},
+            VARCHAR: {VALID: [(12.12, "12.12")]},
         }
     },
     MONEY: {
@@ -351,26 +392,64 @@ MASTER_DB_TYPE_MAP_SPEC = {
         REFLECTED_NAME: MONEY,
         TARGET_DICT: {
             CHAR: {VALID: []},
-            MONEY: {
+            MATHESAR_MONEY: {VALID: [("$20.00", Decimal(20.0))]},
+            MULTICURRENCY_MONEY: {
                 VALID: [
                     (
-                        "$12.12", "$12.12"
+                        "$12.12",
+                        {
+                            multicurrency.VALUE: 12.12,
+                            multicurrency.CURRENCY: 'USD'
+                        }
+                    )
+                ]
+            },
+            MONEY: {VALID: [("$12.12", "$12.12")]},
+            TEXT: {VALID: [("$12.12", "$12.12")]},
+            VARCHAR: {VALID: [("$12.12", "$12.12")]},
+        }
+    },
+    MULTICURRENCY_MONEY: {
+        ISCHEMA_NAME: get_qualified_name(
+            MathesarCustomType.MULTICURRENCY_MONEY.value
+        ),
+        SUPPORTED_MAP_NAME: MathesarCustomType.MULTICURRENCY_MONEY.value,
+        REFLECTED_NAME: MULTICURRENCY_MONEY,
+        TARGET_DICT: {
+            CHAR: {VALID: []},
+            MULTICURRENCY_MONEY: {
+                VALID: [
+                    (
+                        {
+                            multicurrency.VALUE: 1234.12,
+                            multicurrency.CURRENCY: 'XYZ'
+                        },
+                        {
+                            multicurrency.VALUE: 1234.12,
+                            multicurrency.CURRENCY: 'XYZ'
+                        }
                     )
                 ]
             },
             TEXT: {
                 VALID: [
                     (
-                        "$12.12",
-                        "$12.12"
+                        {
+                            multicurrency.VALUE: 1234.12,
+                            multicurrency.CURRENCY: 'XYZ'
+                        },
+                        '(1234.12,XYZ)'
                     )
                 ]
             },
             VARCHAR: {
                 VALID: [
                     (
-                        "$12.12",
-                        "$12.12"
+                        {
+                            multicurrency.VALUE: 1234.12,
+                            multicurrency.CURRENCY: 'XYZ'
+                        },
+                        '(1234.12,XYZ)'
                     )
                 ]
             },
@@ -393,7 +472,12 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [1.234, 1234123412341234]
             },
-            MATHESAR_MONEY: {VALID: [(1, {money.VALUE: 1, money.CURRENCY: "USD"})]},
+            MATHESAR_MONEY: {VALID: [(12.12, Decimal('12.12'))]},
+            MULTICURRENCY_MONEY: {
+                VALID: [
+                    (1, {multicurrency.VALUE: 1, multicurrency.CURRENCY: "USD"})
+                ]
+            },
             MONEY: {VALID: [(12.12, "$12.12")]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
@@ -422,7 +506,15 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 VALID: [(500, 500)],
                 INVALID: [3.345]
             },
-            MATHESAR_MONEY: {VALID: [(1.2, {money.VALUE: 1.2, money.CURRENCY: "USD"})]},
+            MATHESAR_MONEY: {VALID: [(12.12, Decimal('12.12'))]},
+            MULTICURRENCY_MONEY: {
+                VALID: [
+                    (
+                        1.2,
+                        {multicurrency.VALUE: 1.2, multicurrency.CURRENCY: "USD"}
+                    )
+                ]
+            },
             MONEY: {VALID: [(12.12, "$12.12")]},
             NUMERIC: {VALID: [(1, 1.0)]},
             REAL: {VALID: [(1, 1.0), (1.5, 1.5)]},
@@ -445,7 +537,12 @@ MASTER_DB_TYPE_MAP_SPEC = {
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
             INTEGER: {VALID: [(500, 500)]},
-            MATHESAR_MONEY: {VALID: [(1, {money.VALUE: 1, money.CURRENCY: "USD"})]},
+            MATHESAR_MONEY: {VALID: [(12, 12)]},
+            MULTICURRENCY_MONEY: {
+                VALID: [
+                    (1, {multicurrency.VALUE: 1, multicurrency.CURRENCY: "USD"})
+                ]
+            },
             MONEY: {VALID: [(12, "$12.00")]},
             NUMERIC: {VALID: [(1, Decimal('1.0'))]},
             REAL: {VALID: [(5, 5.0)]},
@@ -459,15 +556,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
         REFLECTED_NAME: TIME_WITHOUT_TIME_ZONE,
         TARGET_DICT: {
             CHAR: {VALID: []},
-            TIME_WITHOUT_TIME_ZONE: {VALID: [(time(12, 30, 45), time(12, 30, 45))]},
-            TIME_WITH_TIME_ZONE: {
-                VALID: [
-                    (time(12, 30, 45),
-                     time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0))),
-                ]
-            },
-            TEXT: {VALID: [(time(12, 30, 45), "12:30:45")]},
-            VARCHAR: {VALID: [(time(12, 30, 45), "12:30:45")]},
+            TIME_WITHOUT_TIME_ZONE: {VALID: [("12:30:45", "12:30:45.0")]},
+            TIME_WITH_TIME_ZONE: {VALID: [("12:30:45", "12:30:45.0Z")]},
+            TEXT: {VALID: [("12:30:45", "12:30:45")]},
+            VARCHAR: {VALID: [("12:30:45", "12:30:45")]},
         },
     },
     TIME_WITH_TIME_ZONE: {
@@ -476,29 +568,11 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             CHAR: {VALID: []},
             TIME_WITH_TIME_ZONE: {
-                VALID: [
-                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
-                     time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60))),
-                ]
+                VALID: [("12:30:45+01:00", "12:30:45.0+01:00")]
             },
-            TIME_WITHOUT_TIME_ZONE: {
-                VALID: [
-                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=1)),
-                     time(12, 30, 45))
-                ]
-            },
-            TEXT: {
-                VALID: [
-                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
-                     "12:30:45+01")
-                ]
-            },
-            VARCHAR: {
-                VALID: [
-                    (time(12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
-                     "12:30:45+01")
-                ]
-            },
+            TIME_WITHOUT_TIME_ZONE: {VALID: [("12:30:45+01:00", "12:30:45.0")]},
+            TEXT: {VALID: [("12:30:45+01:00", "12:30:45+01")]},
+            VARCHAR: {VALID: [("12:30:45+01:00", "12:30:45+01")]},
         },
     },
     TIMESTAMP_WITH_TIME_ZONE: {
@@ -506,34 +580,37 @@ MASTER_DB_TYPE_MAP_SPEC = {
         REFLECTED_NAME: TIMESTAMP_WITH_TIME_ZONE,
         TARGET_DICT: {
             CHAR: {VALID: []},
-            DATE: {VALID: [(py_datetime(1999, 1, 18, 0, 0, 0), date(1999, 1, 18)),
-                           (
-                           py_datetime(1999, 1, 18, 0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0)), date(1999, 1, 18))],
-                   INVALID: [py_datetime(1999, 1, 18, 12, 30, 45),
-                             py_datetime(1999, 1, 18, 0, 0, 0, tzinfo=FixedOffsetTimezone(offset=60))
-                             ]
-                   },
+            DATE: {
+                VALID: [("1999-01-18T00:00:00.0Z AD", "1999-01-18 AD")],
+                INVALID: [
+                    "1999-01-18T12:30:45.0Z AD",
+                    "1999-01-18T00:00:00.0+01:00 AD",
+                ]
+            },
             TIMESTAMP_WITH_TIME_ZONE: {
                 VALID: [
-                    (py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60)),
-                     py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=60))),
+                    (
+                        "1999-01-18T12:30:45.0+01:00 AD",
+                        "1999-01-18T11:30:45.0Z AD",
+                    ),
                 ]
             },
             TIMESTAMP_WITHOUT_TIME_ZONE: {
-                VALID: [(py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0)),
-                         py_datetime(1999, 1, 18, 12, 30, 45)
-                         )],
+                VALID: [
+                    (
+                        "1999-01-18T12:30:45.0+01:00 AD",
+                        "1999-01-18T11:30:45.0 AD",
+                    )
+                ],
             },
             TEXT: {
                 VALID: [
-                    (py_datetime(1999, 1, 18, 12, 30, 45),
-                     "1999-01-18 12:30:45+00")
+                    ("1999-01-18T12:30:45.0+01:00 AD", "1999-01-18 11:30:45+00")
                 ]
             },
             VARCHAR: {
                 VALID: [
-                    (py_datetime(1999, 1, 18, 12, 30, 45),
-                     "1999-01-18 12:30:45+00")
+                    ("1999-01-18T12:30:45.0+01:00 AD", "1999-01-18 11:30:45+00")
                 ]
             },
         },
@@ -543,18 +620,20 @@ MASTER_DB_TYPE_MAP_SPEC = {
         REFLECTED_NAME: TIMESTAMP_WITHOUT_TIME_ZONE,
         TARGET_DICT: {
             CHAR: {VALID: []},
-            DATE: {VALID: [(py_datetime(1999, 1, 18, 0, 0, 0), date(1999, 1, 18))],
-                   INVALID: [(py_datetime(1999, 1, 18, 12, 30, 45), date(1999, 1, 18))]},
+            DATE: {
+                VALID: [("1999-01-18T00:00:00.0 AD", "1999-01-18 AD")],
+                INVALID: ["1999-01-18T00:10:00.0 AD"]
+            },
             TIMESTAMP_WITHOUT_TIME_ZONE: {
-                VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), py_datetime(1999, 1, 18, 12, 30, 45))]
+                VALID: [("1999-01-18T12:30:45", "1999-01-18T12:30:45.0 AD")]
             },
             TIMESTAMP_WITH_TIME_ZONE: {
-                VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), py_datetime(1999, 1, 18, 12, 30, 45,
-                                                                           tzinfo=FixedOffsetTimezone(offset=0)))
-                        ]
+                VALID: [("1999-01-18T12:30:45", "1999-01-18T12:30:45.0Z AD")]
             },
-            TEXT: {VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), "1999-01-18 12:30:45")]},
-            VARCHAR: {VALID: [(py_datetime(1999, 1, 18, 12, 30, 45), "1999-01-18 12:30:45")]},
+            TEXT: {VALID: [("1999-01-18T12:30:45.0 AD", "1999-01-18 12:30:45")]},
+            VARCHAR: {
+                VALID: [("1999-01-18T12:30:45.0 AD", "1999-01-18 12:30:45")]
+            },
         },
     },
     TEXT: {
@@ -604,7 +683,23 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 INVALID: ["1 potato", "3"],
             },
             MATHESAR_MONEY: {
-                VALID: [("1234", {money.VALUE: 1234, money.CURRENCY: "USD"})],
+                VALID: [
+                    ("$1234", 1234),
+                    ("$1234 HK", 1234),
+                    ("$1234.00", 1234),
+                    ("$1,234.00", 1234),
+                    ("1234 USD", 1234),
+                    ("$1,234,567.1234", Decimal('1234567.1234')),
+                ],
+                INVALID: ["nanumb"],
+            },
+            MULTICURRENCY_MONEY: {
+                VALID: [
+                    (
+                        "1234",
+                        {multicurrency.VALUE: 1234, multicurrency.CURRENCY: "USD"}
+                    )
+                ],
                 INVALID: ["nanumb"],
             },
             MONEY: {
@@ -628,10 +723,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             DATE: {
                 VALID: [
-                    ("1999-01-18", date(1999, 1, 18)),
-                    ("1/18/1999", date(1999, 1, 18)),
-                    ("jan-1999-18", date(1999, 1, 18)),
-                    ("19990118", date(1999, 1, 18)),
+                    ("1999-01-18", "1999-01-18 AD"),
+                    ("1/18/1999", "1999-01-18 AD"),
+                    ("jan-1999-18", "1999-01-18 AD"),
+                    ("19990118", "1999-01-18 AD"),
                 ],
                 INVALID: [
                     "18/1/1999",
@@ -651,41 +746,23 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             TEXT: {VALID: [("a string", "a string")]},
             TIME_WITHOUT_TIME_ZONE: {
-                VALID: [
-                    ("04:05:06", time(4, 5, 6)),
-                    ("04:05", time(4, 5)),
-                ],
-                INVALID: [
-                    "not a time",
-                ]
+                VALID: [("04:05:06", "04:05:06.0"), ("04:05", "04:05:00.0")],
+                INVALID: ["not a time"]
             },
             TIME_WITH_TIME_ZONE: {
                 VALID: [
-                    ("04:05:06", time(4, 5, 6, tzinfo=FixedOffsetTimezone(offset=0))),
-                    ("04:05+01", time(4, 5, tzinfo=FixedOffsetTimezone(offset=60))),
+                    ("04:05:06", "04:05:06.0Z"),
+                    ("04:05+01", "04:05:00.0+01:00")
                 ],
-                INVALID: [
-                    "not a time",
-                ]
+                INVALID: ["not a time"]
             },
             TIMESTAMP_WITH_TIME_ZONE: {
-                VALID: [
-                    ("1999-01-18 12:30:45+00",
-                     py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0)),
-                     )
-                ],
-                INVALID: [
-                    "not a timestamp",
-                ]
+                VALID: [("1999-01-18 12:30:45+00", "1999-01-18T12:30:45.0Z AD")],
+                INVALID: ["not a timestamp"]
             },
             TIMESTAMP_WITHOUT_TIME_ZONE: {
-                VALID: [
-                    ("1999-01-18 12:30:45", py_datetime(1999, 1, 18, 12, 30, 45),
-                     )
-                ],
-                INVALID: [
-                    "not a timestamp",
-                ]
+                VALID: [("1999-01-18 12:30:45", "1999-01-18T12:30:45.0 AD")],
+                INVALID: ["not a timestamp"]
             },
             VARCHAR: {VALID: [("a string", "a string")]},
         }
@@ -721,10 +798,10 @@ MASTER_DB_TYPE_MAP_SPEC = {
             CHAR: {VALID: [("a", "a")]},
             DATE: {
                 VALID: [
-                    ("1999-01-18", date(1999, 1, 18)),
-                    ("1/18/1999", date(1999, 1, 18)),
-                    ("jan-1999-18", date(1999, 1, 18)),
-                    ("19990118", date(1999, 1, 18)),
+                    ("1999-01-18", "1999-01-18 AD"),
+                    ("1/18/1999", "1999-01-18 AD"),
+                    ("jan-1999-18", "1999-01-18 AD"),
+                    ("19990118", "1999-01-18 AD"),
                 ],
                 INVALID: [
                     "18/1/1999",
@@ -761,9 +838,21 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 ],
                 INVALID: ["1 potato", "3"],
             },
-            MONEY: {VALID: [("$12.12", "$12.12")]},
             MATHESAR_MONEY: {
-                VALID: [("1234", {money.VALUE: 1234, money.CURRENCY: "USD"})],
+                VALID: [
+                    ("$1234", 1234),
+                    ("-$$ 1,234,567", Decimal('-1234567')),
+                ],
+                INVALID: ["nanumb"],
+            },
+            MONEY: {VALID: [("$12.12", "$12.12")]},
+            MULTICURRENCY_MONEY: {
+                VALID: [
+                    (
+                        "1234",
+                        {multicurrency.VALUE: 1234, multicurrency.CURRENCY: "USD"}
+                    )
+                ],
                 INVALID: ["nanumb"],
             },
             NUMERIC: {
@@ -783,41 +872,25 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             TEXT: {VALID: [("a string", "a string")]},
             TIME_WITHOUT_TIME_ZONE: {
-                VALID: [
-                    ("04:05:06", time(4, 5, 6)),
-                    ("04:05", time(4, 5)),
-                ],
-                INVALID: [
-                    "not a time",
-                ]
+                VALID: [("04:05:06", "04:05:06.0"), ("04:05", "04:05:00.0")],
+                INVALID: ["not a time"]
             },
             TIME_WITH_TIME_ZONE: {
                 VALID: [
-                    ("04:05:06", time(4, 5, 6, tzinfo=FixedOffsetTimezone(offset=0))),
-                    ("04:05+01", time(4, 5, tzinfo=FixedOffsetTimezone(offset=60))),
+                    ("04:05:06", "04:05:06.0Z"),
+                    ("04:05+01", "04:05:00.0+01:00")
                 ],
                 INVALID: [
                     "not a time",
                 ]
             },
             TIMESTAMP_WITH_TIME_ZONE: {
-                VALID: [
-                    ("1999-01-18 12:30:45+00",
-                     py_datetime(1999, 1, 18, 12, 30, 45, tzinfo=FixedOffsetTimezone(offset=0)),
-                     )
-                ],
-                INVALID: [
-                    "not a timestamp",
-                ]
+                VALID: [("1999-01-18 12:30:45+00", "1999-01-18T12:30:45.0Z AD")],
+                INVALID: ["not a timestamp"]
             },
             TIMESTAMP_WITHOUT_TIME_ZONE: {
-                VALID: [
-                    ("1999-01-18 12:30:45", py_datetime(1999, 1, 18, 12, 30, 45),
-                     )
-                ],
-                INVALID: [
-                    "not a timestamp",
-                ]
+                VALID: [("1999-01-18 12:30:45+00", "1999-01-18T12:30:45.0 AD")],
+                INVALID: ["not a timestamp"]
             },
             URI: {
                 VALID: [("https://centerofci.org", "https://centerofci.org")],
@@ -831,6 +904,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
 
 def test_get_alter_column_types_with_custom_engine(engine_with_types):
     type_dict = cast_operations.get_supported_alter_column_types(engine_with_types)
+    for type_ in types.CUSTOM_TYPE_DICT.values():
+        assert type_ in type_dict.values()
     assert all(
         [
             type_ in type_dict.values()
@@ -917,7 +992,7 @@ def test_alter_column_type_alters_column_type(
     input_table.create()
     with engine.begin() as conn:
         alter_column_type(
-            input_table,
+            get_oid_from_table(TABLE_NAME, schema, engine),
             COLUMN_NAME,
             engine,
             conn,
@@ -944,16 +1019,33 @@ type_test_data_args_list = [
     # test that rounding is as intended
     (Numeric, "numeric", {"precision": 5, "scale": 2}, 1.235, Decimal("1.24")),
     (String, "numeric", {"precision": 5, "scale": 2}, "500.134", Decimal("500.13")),
-
-    (datetime.TIME_WITHOUT_TIME_ZONE, "time without time zone", {"precision": 0},
-     time(0, 0, 0, 9), time(0, 0, 0)),
-    (datetime.TIME_WITH_TIME_ZONE, "time with time zone", {"precision": 0},
-     time(0, 0, 0, 9, tzinfo=FixedOffsetTimezone(offset=0)),
-     time(0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0))),
-    (datetime.TIMESTAMP_WITH_TIME_ZONE, "timestamp with time zone", {"precision": 0},
-     py_datetime(1999, 1, 1, 0, 0, 0), py_datetime(1999, 1, 1, 0, 0, 0, tzinfo=FixedOffsetTimezone(offset=0))),
-    (datetime.TIMESTAMP_WITHOUT_TIME_ZONE, "timestamp without time zone", {"precision": 0},
-     py_datetime(1999, 1, 1, 0, 0, 0), py_datetime(1999, 1, 1, 0, 0, 0)),
+    (
+        datetime.TIME_WITHOUT_TIME_ZONE,
+        "time without time zone",
+        {"precision": 0},
+        "00:00:00.1234",
+        "00:00:00.0"
+    ),
+    (
+        datetime.TIME_WITH_TIME_ZONE,
+        "time with time zone",
+        {"precision": 0},
+        "00:00:00.1234-04:30", "00:00:00.0-04:30"
+    ),
+    (
+        datetime.TIMESTAMP_WITH_TIME_ZONE,
+        "timestamp with time zone",
+        {"precision": 0},
+        "1999-01-01 00:00:00",
+        "1999-01-01T00:00:00.0Z AD",
+    ),
+    (
+        datetime.TIMESTAMP_WITHOUT_TIME_ZONE,
+        "timestamp without time zone",
+        {"precision": 0},
+        "1999-01-01 00:00:00",
+        "1999-01-01T00:00:00.0 AD",
+    ),
     (String, "char", {"length": 5}, "abcde", "abcde"),
 ]
 
@@ -979,7 +1071,7 @@ def test_alter_column_type_casts_column_data_args(
     with engine.begin() as conn:
         conn.execute(ins)
         alter_column_type(
-            input_table,
+            get_oid_from_table(TABLE_NAME, schema, engine),
             COLUMN_NAME,
             engine,
             conn,
@@ -1046,7 +1138,7 @@ def test_alter_column_casts_data_gen(
     with engine.begin() as conn:
         conn.execute(ins)
         alter_column_type(
-            input_table,
+            get_oid_from_table(TABLE_NAME, schema, engine),
             COLUMN_NAME,
             engine,
             conn,
@@ -1061,11 +1153,12 @@ def test_alter_column_casts_data_gen(
     actual_value = res[0][0]
     assert actual_value == out_val
     table_oid = get_oid_from_table(TABLE_NAME, schema, engine)
-    actual_default = get_column_default(table_oid, 0, engine)
+    column_attnum = get_column_attnum_from_name(table_oid, COLUMN_NAME, engine)
+    actual_default = get_column_default(table_oid, column_attnum, engine)
     # TODO This needs to be sorted out by fixing how server_default is set.
     if all([
-            source_type != get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value),
-            target_type != MathesarCustomType.MATHESAR_MONEY.value,
+            source_type != get_qualified_name(MathesarCustomType.MULTICURRENCY_MONEY.value),
+            target_type != MathesarCustomType.MULTICURRENCY_MONEY.value,
     ]):
         assert actual_default == out_val
 
@@ -1107,7 +1200,7 @@ def test_alter_column_type_raises_on_bad_column_data(
         conn.execute(ins)
         with pytest.raises(Exception):
             alter_column_type(
-                input_table,
+                get_oid_from_table(TABLE_NAME, schema, engine),
                 COLUMN_NAME,
                 engine,
                 conn,
@@ -1135,7 +1228,7 @@ def test_alter_column_type_raises_on_bad_parameters(
         conn.execute(ins)
         with pytest.raises(DataError) as e:
             alter_column_type(
-                input_table,
+                get_oid_from_table(TABLE_NAME, schema, engine),
                 COLUMN_NAME,
                 engine,
                 conn,
@@ -1205,19 +1298,19 @@ cast_expr_numeric_option_list = [
         'CAST(mathesar_types.cast_to_numeric(colname) AS NUMERIC(3, 2))'
     ),
     (
-        interval.Interval,
+        datetime.Interval,
         "interval",
         {"fields": "YEAR"},
         "CAST(colname AS INTERVAL YEAR)"
     ),
     (
-        interval.Interval,
+        datetime.Interval,
         "interval",
         {"precision": 2},
         "CAST(colname AS INTERVAL (2))"
     ),
     (
-        interval.Interval,
+        datetime.Interval,
         "interval",
         {"precision": 3, "fields": "SECOND"},
         "CAST(colname AS INTERVAL SECOND (3))"
@@ -1256,3 +1349,50 @@ def test_get_full_cast_map(engine_with_types, source_type, expect_target_types):
     actual_cast_map = cast_operations.get_full_cast_map(engine_with_types)
     actual_target_types = actual_cast_map[source_type]
     assert sorted(actual_target_types) == sorted(expect_target_types)
+
+
+money_array_examples = [
+    ('$1,000.00', ['1,000.00', ',', '.']),
+    ('1,000.00$', ['1,000.00', ',', '.']),
+    ('$1', ['1', None, None]),
+    ('1$', ['1', None, None]),
+    ('$ 1', ['1', None, None]),
+    ('1', None),
+    ('1,000', None),
+    ('1,000.00', None),
+    ('$1,000', None),
+    ('$1,000,000', ['1,000,000', ',', None]),
+    ('$1,234,567.1234', ['1,234,567.1234', ',', '.']),
+    ('1,000,000$', ['1,000,000', ',', None]),
+    ('$1 000,000', ['1 000,000', ' ', ',']),
+    ('1 000,000$', ['1 000,000', ' ', ',']),
+    ('1.000,000$', ['1.000,000', '.', ',']),
+    ('$1.000,00 HK', ['1.000,00', '.', ',']),
+    ('EUR 1.000,00', ['1.000,00', '.', ',']),
+    ('€1.000,00', ['1.000,00', '.', ',']),
+    ('1.000,00€', ['1.000,00', '.', ',']),
+    ('€1 000', ['1 000', ' ', None]),
+    ('1 000€', ['1 000', ' ', None]),
+    ('₿1,324.23466 BTC', ['1,324.23466', ',', '.']),
+    ('12₿1,324.23466 BTC', None),
+    ('₿1,324.23466 BTC12', None),
+    ('₹1,00,000', ['1,00,000', ',', None]),
+    ('1,00,000₹', ['1,00,000', ',', None]),
+    ('₹1,00,000.00', ['1,00,000.00', ',', '.']),
+    ('1,00,000.00₹', ['1,00,000.00', ',', '.']),
+    ('10,00,000.00₹', ['10,00,000.00', ',', '.']),
+    ('₹10,00,00,000.00', ['10,00,00,000.00', ',', '.']),
+    ('10,00,00,000.00₹', ['10,00,00,000.00', ',', '.']),
+]
+
+
+@pytest.mark.parametrize("source_str,expect_arr", money_array_examples)
+def test_mathesar_money_array_sql(engine_email_type, source_str, expect_arr):
+    engine, _ = engine_email_type
+    with engine.begin() as conn:
+        res = conn.execute(
+            select(
+                text(f"mathesar_types.get_mathesar_money_array('{source_str}'::text)")
+            )
+        ).scalar()
+    assert res == expect_arr
