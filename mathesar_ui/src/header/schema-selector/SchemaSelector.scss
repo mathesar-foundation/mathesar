@@ -139,14 +139,10 @@ button.dropdown.trigger.selector {
       .item {
         > a {
           padding: 9px 12px;
-        }
-      }
-
-      .item {
-        > a {
-          > p {
+          > span {
             margin: 0;
             padding: 0;
+            white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
           }
