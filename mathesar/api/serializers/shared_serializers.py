@@ -107,6 +107,15 @@ class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPart
     custom_labels = CustomBooleanLabelSerializer(required=False)
 
 
+class MoneyDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
+    currency_code = serializers.CharField()
+    symbol = serializers.CharField()
+    symbol_location = serializers.CharField()
+    decimal_symbol = serializers.CharField()
+    digit_grouping = serializers.ListField(child=serializers.IntegerField())
+    digit_grouping_symbol = serializers.CharField()
+
+
 class NumberDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
     show_as_percentage = serializers.BooleanField(default=False)
     locale = serializers.CharField(required=False)
