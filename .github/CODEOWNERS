@@ -5,5 +5,6 @@
 /mathesar/ @centerofci/mathesar-backend 
 /mathesar_ui/ @centerofci/mathesar-frontend
 /mathesar/templates/ @centerofci/mathesar-frontend
+/mathesar/tests/integration/ @centerofci/mathesar-frontend @centerofci/mathesar-backend
 /mathesar/urls.py @centerofci/mathesar-maintainers
 /mathesar/views.py @centerofci/mathesar-maintainers
