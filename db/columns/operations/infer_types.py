@@ -5,7 +5,7 @@ from sqlalchemy.exc import DatabaseError
 
 from db.columns.exceptions import DagCycleError
 from db.columns.operations.alter import alter_column_type
-from db.tables.operations.select import reflect_table
+from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.types.operations.cast import get_supported_alter_column_types
 from db.types import base
 
@@ -25,7 +25,7 @@ TYPE_INFERENCE_DAG = {
         base.PostgresType.BOOLEAN.value,
         base.PostgresType.DATE.value,
         base.PostgresType.NUMERIC.value,
-        base.PostgresType.MONEY.value,
+        base.MathesarCustomType.MATHESAR_MONEY.value,
         base.PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value,
         base.PostgresType.TIMESTAMP_WITH_TIME_ZONE.value,
         # We only infer to TIME_WITHOUT_TIME_ZONE as time zones don't make much sense
@@ -62,10 +62,11 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
     column_type_str = reverse_type_map.get(column_type)
 
     logger.debug(f"column_type_str: {column_type_str}")
+    table_oid = get_oid_from_table(table_name, schema, engine)
     for type_str in type_inference_dag.get(column_type_str, []):
         try:
             with engine.begin() as conn:
-                alter_column_type(table, column_name, engine, conn, type_str)
+                alter_column_type(table_oid, column_name, engine, conn, type_str)
             logger.info(f"Column {column_name} altered to type {type_str}")
             column_type = infer_column_type(
                 schema,
