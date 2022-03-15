@@ -158,7 +158,7 @@ async function createPreviewTable(
     throw new Error('Unexpected error: Data file not found');
   }
 
-  const previewCreatePromise = postAPI('/tables/', {
+  const previewCreatePromise = postAPI('/api/db/v0/tables/', {
     name: fileImportData.previewName,
     schema: fileImportData.schemaId,
     data_files: [fileImportData.dataFileId],
