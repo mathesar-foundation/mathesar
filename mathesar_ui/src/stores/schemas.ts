@@ -108,7 +108,7 @@ export async function refetchSchemasForDB(
     dbSchemasRequestMap.get(database)?.cancel();
 
     const schemaRequest = getAPI<PaginatedResponse<SchemaResponse>>(
-      `/schemas/?database=${database}&limit=500`,
+      `/api/db/v0/schemas/?database=${database}&limit=500`,
     );
     dbSchemasRequestMap.set(database, schemaRequest);
     const response = await schemaRequest;
@@ -138,7 +138,7 @@ export async function refetchSchema(
   }
 
   try {
-    const schemaRequest = getAPI<SchemaResponse>(`/schemas/${schemaId}/`);
+    const schemaRequest = getAPI<SchemaResponse>(`/api/db/v0/schemas/${schemaId}/`);
     const response = await schemaRequest;
     if (!response) {
       return undefined;
@@ -190,7 +190,7 @@ export async function createSchema(
   database: Database['name'],
   schemaName: SchemaEntry['name'],
 ): Promise<SchemaResponse> {
-  const response = await postAPI<SchemaResponse>('/schemas/', {
+  const response = await postAPI<SchemaResponse>('/api/db/v0/schemas/', {
     name: schemaName,
     database,
   });
@@ -202,7 +202,7 @@ export async function updateSchema(
   database: Database['name'],
   schema: SchemaEntry,
 ): Promise<SchemaResponse> {
-  const response = await patchAPI<SchemaResponse>(`/schemas/${schema.id}/`, {
+  const response = await patchAPI<SchemaResponse>(`/api/db/v0/schemas/${schema.id}/`, {
     name: schema.name,
   });
   updateSchemaInDBSchemaStore(database, response);
@@ -213,7 +213,7 @@ export async function deleteSchema(
   database: Database['name'],
   schemaId: SchemaEntry['id'],
 ): Promise<void> {
-  await deleteAPI(`/schemas/${schemaId}/`);
+  await deleteAPI(`/api/db/v0/schemas/${schemaId}/`);
   removeSchemaInDBSchemaStore(database, schemaId);
 }
 

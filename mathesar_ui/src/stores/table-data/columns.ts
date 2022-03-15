@@ -99,7 +99,7 @@ export class ColumnsDataStore
     });
     this.meta = meta;
     this.api = api(
-      `/${this.type === TabularType.Table ? 'tables' : 'views'}/${
+      `/api/db/v0/${this.type === TabularType.Table ? 'tables' : 'views'}/${
         this.parentId
       }/columns/`,
     );

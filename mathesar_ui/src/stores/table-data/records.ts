@@ -261,7 +261,7 @@ export class RecordsData {
 
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
-    this.url = `/${this.type === TabularType.Table ? 'tables' : 'views'}/${
+    this.url = `/api/db/v0/${this.type === TabularType.Table ? 'tables' : 'views'}/${
       this.parentId
     }/records/`;
     this.fetchCallback = fetchCallback;
