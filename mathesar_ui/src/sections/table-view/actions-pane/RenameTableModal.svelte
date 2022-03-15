@@ -19,7 +19,14 @@
   export let tabularData: TabularData;
 
   function schemaContainsTableName(name: string): boolean {
-    return [...$tables.data.values()].map((t) => t.name).includes(name);
+    const { id } = tabularData;
+
+    const allTables = [...$tables.data.values()];
+    const tablesUsingName = allTables.filter(
+      (current) => current.name === name,
+    );
+
+    return tablesUsingName.length > 0 && tablesUsingName[0].id !== id;
   }
 
   function getValidationErrors(name: string): string[] {
