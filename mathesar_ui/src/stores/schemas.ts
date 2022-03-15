@@ -137,8 +137,9 @@ export async function refetchSchema(
     return undefined;
   }
 
+  const url = `/api/db/v0/schemas/${schemaId}/`;
   try {
-    const schemaRequest = getAPI<SchemaResponse>(`/api/db/v0/schemas/${schemaId}/`);
+    const schemaRequest = getAPI<SchemaResponse>(url);
     const response = await schemaRequest;
     if (!response) {
       return undefined;
@@ -202,9 +203,8 @@ export async function updateSchema(
   database: Database['name'],
   schema: SchemaEntry,
 ): Promise<SchemaResponse> {
-  const response = await patchAPI<SchemaResponse>(`/api/db/v0/schemas/${schema.id}/`, {
-    name: schema.name,
-  });
+  const url = `/api/db/v0/schemas/${schema.id}/`;
+  const response = await patchAPI<SchemaResponse>(url, { name: schema.name });
   updateSchemaInDBSchemaStore(database, response);
   return response;
 }

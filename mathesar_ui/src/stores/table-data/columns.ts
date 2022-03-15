@@ -98,11 +98,8 @@ export class ColumnsDataStore
       primaryKey: undefined,
     });
     this.meta = meta;
-    this.api = api(
-      `/api/db/v0/${this.type === TabularType.Table ? 'tables' : 'views'}/${
-        this.parentId
-      }/columns/`,
-    );
+    const tabularEntity = this.type === TabularType.Table ? 'tables' : 'views';
+    this.api = api(`/api/db/v0/${tabularEntity}/${this.parentId}/columns/`);
     this.fetchCallback = fetchCallback;
     void this.fetch();
   }

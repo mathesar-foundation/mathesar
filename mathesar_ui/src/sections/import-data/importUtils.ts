@@ -356,9 +356,8 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
       const saveTable = async () => {
         // https://github.com/centerofci/mathesar/issues/1055
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        columnChangePromise = patchAPI(`/api/db/v0/tables/${fileImportData.previewId}/`, {
-          columns,
-        });
+        const url = `/api/db/v0/tables/${fileImportData.previewId}/`;
+        columnChangePromise = patchAPI(url, { columns });
         await columnChangePromise;
         const verificationRequest: Record<string, unknown> = {
           import_verified: true,
@@ -459,7 +458,10 @@ async function importData(
     error: null,
   });
   try {
-    const uploadResponse = await postAPI<{ id: number }>('/api/db/v0/data_files/', data);
+    const uploadResponse = await postAPI<{ id: number }>(
+      '/api/db/v0/data_files/',
+      data,
+    );
     const { id } = uploadResponse;
     setInFileStore(fileImportStore, {
       dataFileId: id,

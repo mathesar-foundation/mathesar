@@ -24,7 +24,6 @@ export interface PaginatedResponse<T> {
 const NO_CONTENT = 204;
 const successStatusCodes = new Set([200, 201, NO_CONTENT]);
 
-
 function sendXHRRequest<T>(
   method: string,
   url: string,
