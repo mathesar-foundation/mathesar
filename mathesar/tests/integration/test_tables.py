@@ -20,7 +20,7 @@ def test_rename_table_of_another_table(page, base_schema_url):
     page.click("[aria-label='New Table']")
     page.click("button:has-text('Empty Table')")
     expect(get_table_entry(page, "Table 1")).to_be_visible()
-    page.click("[aria-label='Table']")
+    page.click("[aria-label='Table Actions']")
     page.click("text=Rename")
     page.press("[aria-label='name']", "ArrowRight")
     page.fill("[aria-label='name']", "Table 0")
