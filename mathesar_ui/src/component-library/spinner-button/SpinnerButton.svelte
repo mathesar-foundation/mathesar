@@ -1,23 +1,12 @@
 <script lang="ts">
-  import type { IconDefinition } from '@fortawesome/fontawesome-common-types';
+  import type { IconProps } from '@mathesar-component-library-dir/icon/Icon.d';
   import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import Spinner from '@mathesar-component-library-dir/spinner/Spinner.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
-  import type {
-    IconFlip,
-    IconRotate,
-  } from '@mathesar-component-library-dir/types';
-
-  interface IconDetails {
-    data: IconDefinition;
-    spin?: boolean;
-    flip?: IconFlip;
-    rotate?: IconRotate;
-  }
 
   export let label = 'Proceed';
-  export let icon: IconDetails = { data: faArrowRight };
+  export let icon: IconProps = { data: faArrowRight };
   export let onClick: () => Promise<void>;
   export let disabled = false;
   export let isProcessing = false;
