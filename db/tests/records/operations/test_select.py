@@ -1,17 +1,12 @@
-import pytest
-
 from decimal import Decimal
 from collections import Counter
 
 from sqlalchemy import Column
 from sqlalchemy import String
 
-from db.records.operations.select import get_records, get_column_cast_records, get_query
+from db.records.operations.select import get_records, get_column_cast_records
 from db.tables.operations.create import create_mathesar_table
-from db.functions.base import Identity
 from db.tests.types import fixtures
-from db.types import uri
-from db.utils import execute_query
 
 
 engine_with_types = fixtures.engine_with_types
@@ -115,25 +110,3 @@ def test_get_records_duplicate_only(roster_table_obj):
     all_counter = {k: v for k, v in all_counter.items() if v > 1}
     got_counter = Counter(tuple(r[c] for c in duplicate_only) for r in dupe_record_list)
     assert all_counter == got_counter
-
-
-@pytest.mark.parametrize("db_function_id,deduplicate,expected_count", [
-    (Identity.id, False, 22),
-    (Identity.id, True, 20),
-    (uri.ExtractURIScheme.id, False, 22),
-    (uri.ExtractURIScheme.id, True, 4),
-])
-def test_apply_function_and_deduplicate(uris_table_obj, db_function_id, deduplicate, expected_count):
-    table, engine = uris_table_obj
-    uris_column_name = "uri"
-    if db_function_id:
-        db_function = {db_function_id: [{"column_name": [uris_column_name]}]}
-    else:
-        db_function = None
-    query = get_query(
-        table=table,
-        db_function=db_function,
-        deduplicate=deduplicate,
-    )
-    records = execute_query(engine, query)
-    assert len(records) == expected_count

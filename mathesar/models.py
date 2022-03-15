@@ -276,15 +276,11 @@ class Table(DatabaseObject):
     def sa_num_records(
         self,
         filter=None,
-        db_function=None,
-        deduplicate=False
     ):
         return get_count(
             self._sa_table,
             self.schema._sa_engine,
             filter=filter,
-            db_function=db_function,
-            deduplicate=deduplicate
         )
 
     def update_sa_table(self, update_params):
@@ -304,8 +300,6 @@ class Table(DatabaseObject):
         order_by=[],
         group_by=None,
         duplicate_only=None,
-        db_function=None,
-        deduplicate=False,
     ):
         return db_get_records(
             self._sa_table,
@@ -316,8 +310,6 @@ class Table(DatabaseObject):
             order_by=order_by,
             group_by=group_by,
             duplicate_only=duplicate_only,
-            db_function=db_function,
-            deduplicate=deduplicate,
         )
 
     def create_record_or_records(self, record_data):

@@ -36,7 +36,6 @@ class RecordViewSet(viewsets.ViewSet):
         table = get_table_or_404(table_pk)
 
         filter_unprocessed = serializer.validated_data['filter']
-        db_function_unprocessed = serializer.validated_data['db_function']
 
         column_ids_to_names = table.get_column_name_id_bidirectional_map().inverse
         order_by = serializer.validated_data['order_by']
@@ -48,8 +47,8 @@ class RecordViewSet(viewsets.ViewSet):
             name_converted_group_by = {**grouping, 'columns': group_by_columns_names}
         name_converted_order_by = [{**column, 'field': column_ids_to_names[column['field']]} for column in order_by]
         try:
-            filter_processed, db_function_processed = _rewrite_db_function_specs(
-                table_pk, filter_unprocessed, db_function_unprocessed, column_ids_to_names,
+            filter_processed = _rewrite_db_function_spec(
+                filter_unprocessed, column_ids_to_names,
             )
             records = paginator.paginate_queryset(
                 queryset=self.get_queryset(),
@@ -57,11 +56,9 @@ class RecordViewSet(viewsets.ViewSet):
                 table=table,
                 # TODO rename `filters` to something singular, for semantic correctness.
                 # avoid `filter`, because it shadows a standard library function.
-                # be mindful that the use of this terms stretches through many methods, it's not
+                # be mindful that the use of this term stretches through many methods, it's not
                 # isolated to this method alone.
                 filters=filter_processed,
-                db_function=db_function_processed,
-                deduplicate=serializer.validated_data['deduplicate'],
                 order_by=name_converted_order_by,
                 grouping=name_converted_group_by,
                 duplicate_only=serializer.validated_data['duplicate_only'],
@@ -129,7 +126,7 @@ class RecordViewSet(viewsets.ViewSet):
         return context
 
 
-def _rewrite_db_function_specs(table, filter_unprocessed, db_function_unprocessed, column_ids_to_names):
+def _rewrite_db_function_spec(spec, column_ids_to_names):
     """
     DB function JOSN specifications must be rewritten, because they may include column Django ID
     references, which are not supported by the db layer. The column ID references are rewritten to
@@ -138,17 +135,8 @@ def _rewrite_db_function_specs(table, filter_unprocessed, db_function_unprocesse
     # TODO db function spec rewriting can be factored out by extending db function system
     # to allow adding a ColumnId DBFunctionPacked that would take the mapping of column
     # ids to names and use it when converting into a ColumnName.
-    filter_processed = None
-    db_function_processed = None
-    if filter_unprocessed or db_function_unprocessed:
-        if filter_unprocessed:
-            filter_processed = rewrite_db_function_spec_column_ids_to_names(
-                column_ids_to_names=column_ids_to_names,
-                spec=filter_unprocessed,
-            )
-        if db_function_unprocessed:
-            db_function_processed = rewrite_db_function_spec_column_ids_to_names(
-                column_ids_to_names=column_ids_to_names,
-                spec=db_function_unprocessed,
-            )
-    return filter_processed, db_function_processed
+    if spec:
+        return rewrite_db_function_spec_column_ids_to_names(
+            column_ids_to_names=column_ids_to_names,
+            spec=spec,
+        )

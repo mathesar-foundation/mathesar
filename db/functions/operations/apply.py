@@ -1,4 +1,3 @@
-from sqlalchemy import select
 from db.functions.base import DBFunction
 from db.functions.exceptions import ReferencedColumnsDontExist
 from db.functions.packed import DBFunctionPacked
@@ -58,9 +57,3 @@ def _db_function_to_sa_expression(db_function_or_literal):
     else:
         literal = db_function_or_literal
         return literal
-
-
-def apply_db_function_as_function(relation, db_function):
-    sa_expression = _db_function_to_sa_expression(db_function)
-    relation = select(sa_expression).select_from(relation)
-    return relation

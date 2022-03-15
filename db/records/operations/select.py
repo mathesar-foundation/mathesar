@@ -1,7 +1,7 @@
 from sqlalchemy import select, func
 from sqlalchemy_filters import apply_sort
 
-from db.functions.operations.apply import apply_db_function_as_filter, apply_db_function_as_function
+from db.functions.operations.apply import apply_db_function_as_filter
 from db.functions.operations.deserialize import get_db_function_from_ma_function_spec
 from db.columns.base import MathesarColumn
 from db.records.operations import group
@@ -29,8 +29,6 @@ def get_query(
     filter=None,
     group_by=None,
     duplicate_only=None,
-    db_function=None,
-    deduplicate=False,
 ):
     if duplicate_only:
         select_target = _get_duplicate_only_cte(table, duplicate_only)
@@ -48,13 +46,6 @@ def get_query(
     if filter:
         db_function_instance = get_db_function_from_ma_function_spec(filter)
         selectable = apply_db_function_as_filter(selectable, db_function_instance)
-
-    if db_function:
-        db_function_instance = get_db_function_from_ma_function_spec(db_function)
-        selectable = apply_db_function_as_function(selectable, db_function_instance)
-
-    if deduplicate:
-        selectable = selectable.distinct()
 
     if limit:
         selectable = selectable.limit(limit)
@@ -83,8 +74,6 @@ def get_records(
     filter=None,
     group_by=None,
     duplicate_only=None,
-    db_function=None,
-    deduplicate=False,
 ):
     """
     Returns annotated records from a table.
@@ -122,8 +111,6 @@ def get_records(
         filter=filter,
         group_by=group_by,
         duplicate_only=duplicate_only,
-        db_function=db_function,
-        deduplicate=deduplicate,
     )
     results = execute_query(engine, query)
     return results
@@ -133,8 +120,6 @@ def get_count(
     table,
     engine,
     filter=None,
-    db_function=None,
-    deduplicate=False,
 ):
     col_name = "_count"
     count_column = func.count().label(col_name)
@@ -144,8 +129,6 @@ def get_count(
         offset=None,
         order_by=None,
         filter=filter,
-        db_function=db_function,
-        deduplicate=deduplicate,
     )
     selectable = selectable.cte()
     selectable = select(count_column).select_from(selectable)
