@@ -9,6 +9,8 @@ class DBTypeSerializer(serializers.Serializer):
 
     def to_representation(self, db_type):
         return {
-            "id": db_type.value,
+            # TODO solve db type casing holistically
+            # https://github.com/centerofci/mathesar/issues/1036
+            "id": db_type.value.upper(),
             "hints": db_types_hinted.get(db_type, None),
         }
