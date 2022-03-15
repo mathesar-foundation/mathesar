@@ -39,7 +39,7 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
         records = instance._asdict() if not isinstance(instance, dict) else instance
         columns_map = self.context['columns_map']
         records = {
-            _get_column_id_or_dynamic_name(columns_map, column_name): column_value
+            columns_map[column_name]: column_value
             for column_name, column_value in records.items()
         }
         return records
@@ -48,13 +48,3 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
         columns_map = self.context['columns_map'].inverse
         data = {columns_map[int(column_id)]: value for column_id, value in data.items()}
         return data
-
-
-def _get_column_id_or_dynamic_name(columns_map, column_name):
-    column_id = columns_map.get(column_name)
-    if column_id:
-        # This is a persisted column with a Django ID
-        return column_id
-    else:
-        # This is a dynamic/temporary column without a Django ID
-        return column_name
