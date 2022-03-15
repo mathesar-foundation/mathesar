@@ -2,6 +2,7 @@ from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
+from mathesar.api.exceptions.validation_exceptions.exceptions import MoneyDisplayOptionValueConflictAPIException
 from mathesar.database.types import MathesarTypeIdentifier, get_mathesar_type_from_db_type
 
 
@@ -108,12 +109,17 @@ class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPart
 
 
 class MoneyDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
-    currency_code = serializers.CharField()
-    symbol = serializers.CharField()
-    symbol_location = serializers.CharField()
-    decimal_symbol = serializers.CharField()
-    digit_grouping = serializers.ListField(child=serializers.IntegerField())
-    digit_grouping_symbol = serializers.CharField()
+    currency_code = serializers.CharField(allow_null=True)
+    symbol = serializers.CharField(required=False)
+    symbol_location = serializers.CharField(required=False)
+    decimal_symbol = serializers.CharField(required=False)
+    digit_grouping = serializers.ListField(child=serializers.IntegerField(), required=False)
+    digit_grouping_symbol = serializers.CharField(required=False)
+
+    def validate(self, attrs):
+        if attrs.get('currency_code', None) is not None and len(attrs.keys() - ['currency_code']) != 0:
+            raise MoneyDisplayOptionValueConflictAPIException()
+        return super().validate(attrs)
 
 
 class NumberDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
@@ -140,11 +146,12 @@ class DisplayOptionsMappingSerializer(
 ):
     serializers_mapping = {
         MathesarTypeIdentifier.BOOLEAN.value: BooleanDisplayOptionSerializer,
-        MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,
-        MathesarTypeIdentifier.DATETIME.value: TimeFormatDisplayOptionSerializer,
         MathesarTypeIdentifier.DATE.value: TimeFormatDisplayOptionSerializer,
-        MathesarTypeIdentifier.TIME.value: TimeFormatDisplayOptionSerializer,
+        MathesarTypeIdentifier.DATETIME.value: TimeFormatDisplayOptionSerializer,
         MathesarTypeIdentifier.DURATION.value: DurationDisplayOptionSerializer,
+        MathesarTypeIdentifier.MONEY.value: MoneyDisplayOptionSerializer,
+        MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,
+        MathesarTypeIdentifier.TIME.value: TimeFormatDisplayOptionSerializer,
     }
 
     def get_mapping_field(self):

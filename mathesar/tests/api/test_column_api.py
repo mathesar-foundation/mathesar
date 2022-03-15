@@ -253,6 +253,17 @@ create_display_options_test_list = [
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
     ("DATE", {'format': 'YYYY-MM-DD'}),
     ("INTERVAL", {'format': 'DD HH:mm:ss.SSS'}),
+    ("MONEY", {
+        'currency_code': 'en_us',
+    }),
+    ("MONEY", {
+        'currency_code': None,
+        'symbol': '$',
+        'symbol_location': 'End',
+        'decimal_symbol': '.',
+        'digit_grouping': [3, 0],
+        'digit_grouping_symbol': ','
+    }),
     ("NUMERIC", {"show_as_percentage": True}),
     ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}),
     ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
@@ -282,12 +293,19 @@ def test_column_create_display_options(
 
 _too_long_string = "x" * 256
 
-
 create_display_options_invalid_test_list = [
     ("BOOLEAN", {"input": "invalid", "use_custom_columns": False}),
     ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"yes": "yes", "1": "no"}}),
-    ("NUMERIC", {"show_as_percentage": "wrong value type"}),
     ("DATE", {'format': _too_long_string}),
+    ("MONEY", {
+        'currency_code': 'en_US',
+        'symbol': '$',
+        'symbol_location': 'End',
+        'decimal_symbol': '.',
+        'digit_grouping': [3, 0],
+        'digit_grouping_symbol': ','
+    }),
+    ("NUMERIC", {"show_as_percentage": "wrong value type"}),
     ("TIMESTAMP WITH TIME ZONE", {'format': []}),
     ("TIMESTAMP WITHOUT TIME ZONE", {'format': _too_long_string}),
     ("TIME WITH TIME ZONE", {'format': _too_long_string}),
