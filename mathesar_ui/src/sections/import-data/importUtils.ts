@@ -74,7 +74,7 @@ export function uploadNewFile(
   const formData = new FormData();
   formData.append('file', file);
   const uploadPromise = uploadFile(
-    '/data_files/',
+    '/api/db/v0/data_files/',
     formData,
     (completionStatus: UploadCompletionOpts) => {
       completionCallback(fileImportStore, completionStatus);
@@ -135,7 +135,7 @@ async function deletePreviewTable(fileImportStore: FileImport): Promise<void> {
 
   if (fileImportData.previewId) {
     const previewDeletePromise = deleteAPI(
-      `/tables/${fileImportData.previewId}/`,
+      `/api/db/v0/tables/${fileImportData.previewId}/`,
     );
     setInFileStore(fileImportStore, {
       previewDeletePromise,
@@ -158,7 +158,7 @@ async function createPreviewTable(
     throw new Error('Unexpected error: Data file not found');
   }
 
-  const previewCreatePromise = postAPI('/tables/', {
+  const previewCreatePromise = postAPI('/api/db/v0/tables/', {
     name: fileImportData.previewName,
     schema: fileImportData.schemaId,
     data_files: [fileImportData.dataFileId],
@@ -205,12 +205,12 @@ export async function fetchPreviewTableInfo(
     const previewColumnPromise = getAPI<PaginatedResponse<PreviewColumn>>(
       // https://github.com/centerofci/mathesar/issues/1055
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      `/tables/${fileImportData.previewId}/columns/?limit=500`,
+      `/api/db/v0/tables/${fileImportData.previewId}/columns/?limit=500`,
     );
     const suggestedTypesPromise = getAPI<Record<string, string>>(
       // https://github.com/centerofci/mathesar/issues/1055
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      `/tables/${fileImportData.previewId}/type_suggestions/`,
+      `/api/db/v0/tables/${fileImportData.previewId}/type_suggestions/`,
     );
 
     type DataFileResponse = Record<'header', boolean>;
@@ -220,7 +220,7 @@ export async function fetchPreviewTableInfo(
       dataFilePromise = getAPI<DataFileResponse>(
         // https://github.com/centerofci/mathesar/issues/1055
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        `/data_files/${fileImportData.dataFileId}/`,
+        `/api/db/v0/data_files/${fileImportData.dataFileId}/`,
       );
     }
 
@@ -283,7 +283,7 @@ export async function updateDataFileHeader(
 
     // https://github.com/centerofci/mathesar/issues/1055
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    await patchAPI(`/data_files/${fileImportData.dataFileId}/`, {
+    await patchAPI(`/api/db/v0/data_files/${fileImportData.dataFileId}/`, {
       header: headerValue,
     });
 
@@ -356,9 +356,8 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
       const saveTable = async () => {
         // https://github.com/centerofci/mathesar/issues/1055
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        columnChangePromise = patchAPI(`/tables/${fileImportData.previewId}/`, {
-          columns,
-        });
+        const url = `/api/db/v0/tables/${fileImportData.previewId}/`;
+        columnChangePromise = patchAPI(url, { columns });
         await columnChangePromise;
         const verificationRequest: Record<string, unknown> = {
           import_verified: true,
@@ -369,7 +368,7 @@ export async function finishImport(fileImportStore: FileImport): Promise<void> {
         verificationPromise = patchAPI(
           // https://github.com/centerofci/mathesar/issues/1055
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          `/tables/${fileImportData.previewId}/`,
+          `/api/db/v0/tables/${fileImportData.previewId}/`,
           verificationRequest,
         );
         await verificationPromise;
@@ -459,7 +458,10 @@ async function importData(
     error: null,
   });
   try {
-    const uploadResponse = await postAPI<{ id: number }>('/data_files/', data);
+    const uploadResponse = await postAPI<{ id: number }>(
+      '/api/db/v0/data_files/',
+      data,
+    );
     const { id } = uploadResponse;
     setInFileStore(fileImportStore, {
       dataFileId: id,
