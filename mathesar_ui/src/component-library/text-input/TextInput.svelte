@@ -20,7 +20,7 @@
   // Id for the input
   export let id: string | undefined = undefined;
 
-  export let hasValidationErrors = false;
+  export let hasError = false;
 </script>
 
 <BaseInput {...$$restProps} bind:id {disabled} />
@@ -30,7 +30,7 @@
   {...$$restProps}
   type="text"
   class={['input-element', 'text-input', classes].join(' ')}
-  class:has-validation-errors={hasValidationErrors}
+  class:has-error={hasError}
   bind:value
   {id}
   {disabled}
@@ -38,4 +38,5 @@
   on:focus
   on:blur
   on:keydown
+  on:beforeinput
 />
