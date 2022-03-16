@@ -88,7 +88,7 @@ export async function refetchTablesForSchema(
     schemaTablesRequestMap.get(schemaId)?.cancel();
 
     const tablesRequest = getAPI<PaginatedResponse<TableEntry>>(
-      `/tables/?schema=${schemaId}&limit=500`,
+      `/api/db/v0/tables/?schema=${schemaId}&limit=500`,
     );
     schemaTablesRequestMap.set(schemaId, tablesRequest);
     const response = await tablesRequest;
@@ -132,21 +132,21 @@ export function getTablesStoreForSchema(
 }
 
 export function deleteTable(id: number): CancellablePromise<TableEntry> {
-  return deleteAPI(`/tables/${id}/`);
+  return deleteAPI(`/api/db/v0/tables/${id}/`);
 }
 
 export function renameTable(
   id: number,
   name: string,
 ): CancellablePromise<TableEntry> {
-  return patchAPI(`/tables/${id}/`, { name });
+  return patchAPI(`/api/db/v0/tables/${id}/`, { name });
 }
 
 export function createTable(
   schema: SchemaEntry['id'],
   name?: string,
 ): CancellablePromise<TableEntry> {
-  return postAPI<TableEntry>('/tables/', { schema, name });
+  return postAPI<TableEntry>('/api/db/v0/tables/', { schema, name });
 }
 
 export const tables: Readable<DBTablesStoreData> = derived(
