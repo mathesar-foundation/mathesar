@@ -28,7 +28,8 @@
   function addColumn() {
     const newColumn = {
       name: columnName,
-      type: 'varchar',
+      // We should probably let the server decide the following
+      type: 'TEXT',
       nullable: true,
       primary_key: false,
     };

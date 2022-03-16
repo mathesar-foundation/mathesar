@@ -1,25 +1,37 @@
-import type { FormInputDataType } from '@mathesar-component-library/types';
-import type { AbstractTypeConfigForm } from '@mathesar/stores/abstract-types/types';
+import type {
+  FormInputDataType,
+  FormValues,
+} from '@mathesar-component-library/types';
+import type { DbType } from '@mathesar/App';
+import type { AbstractTypeDbConfigOptions } from '@mathesar/stores/abstract-types/types';
+import type { Column } from '@mathesar/stores/table-data/types';
 
-export function getDefaultsAndSavedVarsFromFormConfig(
-  abstractTypeFormConfig: AbstractTypeConfigForm,
-): [Record<string, Record<string, FormInputDataType>>, string[]] {
-  const savedVariables: string[] = [];
-  const defaults: Record<string, Record<string, FormInputDataType>> = {};
-
-  Object.keys(abstractTypeFormConfig.variables).forEach((variableKey) => {
-    const formVariable = abstractTypeFormConfig.variables[variableKey];
-    if ('isSaved' in formVariable) {
-      savedVariables.push(variableKey);
-    } else if (formVariable.defaults) {
-      Object.keys(formVariable.defaults).forEach((dbTypeKey) => {
-        if (!defaults[dbTypeKey]) {
-          defaults[dbTypeKey] = {};
+export function getDefaultValuesFromConfig(
+  abstractTypeConfig: AbstractTypeDbConfigOptions['configuration'],
+  selectedDbType: DbType,
+  column: Column,
+): Record<string, FormInputDataType> {
+  const abstractTypeFormConfig = abstractTypeConfig.form;
+  const typeOptions = column.type_options ?? {};
+  if (column.type === selectedDbType) {
+    const defaultValues: FormValues = {};
+    const savableVariables =
+      abstractTypeConfig.getSavableTypeOptions(selectedDbType);
+    Object.keys(abstractTypeFormConfig.variables).forEach(
+      (variableKey: string) => {
+        const formVariable = abstractTypeFormConfig.variables[variableKey];
+        if (savableVariables.includes(variableKey)) {
+          defaultValues[variableKey] = typeOptions[variableKey] ?? null;
+        } else if (
+          typeof formVariable.conditionalDefault?.[selectedDbType] !==
+          'undefined'
+        ) {
+          defaultValues[variableKey] =
+            formVariable.conditionalDefault[selectedDbType];
         }
-        defaults[dbTypeKey][variableKey] = formVariable.defaults[dbTypeKey];
-      });
-    }
-  });
-
-  return [defaults, savedVariables];
+      },
+    );
+    return defaultValues;
+  }
+  return typeOptions;
 }
