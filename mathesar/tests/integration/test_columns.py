@@ -23,3 +23,13 @@ def test_convert_boolean_col_to_text_col(page, base_schema_url):
     page.click("text=T Text")
     page.click("button:has-text('Save')")
     page.locator(".dropdown .container .section .btn:has-text('Text')")
+
+
+def test_convert_text_column_to_number(page, go_to_patents_data_table):
+    page.click(".table-content .header .cell:has-text('Center')")
+    page.click(".dropdown button:has-text('Text')")
+    page.click(".type-list button:has-text('Number')")
+    page.click("button:has-text('Save')")
+    error_message = "Unable to change column"
+    toast_box = f".toast-presenter .toast-item .message:has-text('{error_message}')"
+    expect(page.locator(toast_box)).to_be_visible()
