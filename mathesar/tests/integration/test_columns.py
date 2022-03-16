@@ -53,3 +53,18 @@ def test_group_by_column(page, go_to_patents_data_table):
     expect(locator_group_count).not_to_be_visible()
     expect(locator_group_header).not_to_be_visible()
     expect(page.locator("button:has-text('Group')")).to_be_visible()
+
+
+def test_convert_boolean_col_to_text_col(page, base_schema_url):
+    page.goto(base_schema_url)
+    page.click("[aria-label='New Table']")
+    page.click("button:has-text('Import Data')")
+    page.click("text=Copy and Paste Text")
+    page.fill("textarea", "foo,bar\ntrue,false")
+    page.click("button:has-text('Continue')")
+    page.click("button:has-text('Finish Import')")
+    page.click("button:has-text('foo')")
+    page.click("button:has-text('Boolean')")
+    page.click("text=T Text")
+    page.click("button:has-text('Save')")
+    page.locator(".dropdown .container .section .btn:has-text('Text')")

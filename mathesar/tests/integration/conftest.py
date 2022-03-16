@@ -117,8 +117,8 @@ def table_with_all_types(schema, create_column_with_display_options):
 
 
 @pytest.fixture
-def base_schema_url(schema, live_server):
-    return f"{live_server}/{schema.database.name}/{schema.id}"
+def base_schema_url(patent_schema, live_server):
+    return f"{live_server}/{patent_schema.database.name}/{patent_schema.id}"
 
 
 @pytest.fixture
