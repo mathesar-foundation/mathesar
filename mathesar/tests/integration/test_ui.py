@@ -4,6 +4,7 @@ from mathesar.tests.integration.utils.locators import get_table_entry
 from mathesar.tests.integration.utils.table_actions import create_empty_table, close_tab
 from mathesar.tests.integration.utils.locators import get_tab
 
+
 def test_tabs(page, base_schema_url):
     page.goto(base_schema_url)
 
