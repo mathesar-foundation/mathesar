@@ -16,19 +16,6 @@ def delete_active_table(page):
     expect_modal_not_to_be_visible(page)
 
 
-def add_column(page, column_name):
-    page.click("button[aria-label='New Column']")
-    page.fill(".new-column-dropdown input:visible", column_name)
-    page.click("button:has-text('Add')")
-
-
-def insert_data_cell(page, data):
-    page.click("div.editable-cell >> nth=1")
-    page.dblclick("div.editable-cell >> nth=1")
-    page.fill("textarea.input-element:visible", data)
-    page.keyboard.press("Tab")
-
-
 def close_tab(tab_locator: Locator):
     tab_locator.hover()
     tab_locator.locator("[aria-label=remove]").click()
