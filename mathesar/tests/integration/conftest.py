@@ -66,8 +66,8 @@ def schema(create_schema, schema_name):
 
 
 @pytest.fixture
-def base_schema_url(schema, live_server):
-    return f"{live_server}/{schema.database.name}/{schema.id}"
+def base_schema_url(patent_schema, live_server):
+    return f"{live_server}/{patent_schema.database.name}/{patent_schema.id}"
 
 
 @pytest.fixture
