@@ -249,12 +249,19 @@ def test_column_create_invalid_default(column_test_table, client):
 
 
 create_display_options_test_list = [
-    ("BOOLEAN", {"input": "dropdown"}),
-    ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
-    ("DATE", {'format': 'YYYY-MM-DD'}),
-    ("INTERVAL", {'format': 'DD HH:mm:ss.SSS'}),
+    ("BOOLEAN", {"input": "dropdown"}, {"input": "dropdown"}),
+    ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}, {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
+    ("DATE", {'format': 'YYYY-MM-DD'}, {'format': 'YYYY-MM-DD'}),
+    ("INTERVAL", {'format': 'DD HH:mm:ss.SSS'}, {'format': 'DD HH:mm:ss.SSS'}),
     ("MONEY", {
-        'currency_code': 'en_us',
+        'currency_code': 'en_US',
+    }, {
+        'currency_code': 'en_US',
+        'decimal_symbol': '.',
+        'digit_grouping': [3, 3, 0],
+        'digit_grouping_symbol': ',',
+        'symbol': '$',
+        'symbol_location': 'Beginning'
     }),
     ("MONEY", {
         'currency_code': None,
@@ -263,24 +270,32 @@ create_display_options_test_list = [
         'decimal_symbol': '.',
         'digit_grouping': [3, 0],
         'digit_grouping_symbol': ','
+    }, {
+        'currency_code': None,
+        'symbol': '$',
+        'symbol_location': 'End',
+        'decimal_symbol': '.',
+        'digit_grouping': [3, 0],
+        'digit_grouping_symbol': ','
     }),
-    ("NUMERIC", {"show_as_percentage": True}),
-    ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}),
-    ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
-    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
-    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm'}),
-    ("TIME WITH TIME ZONE", {'format': 'hh:mm Z'}),
+    ("NUMERIC", {"show_as_percentage": True}, {"show_as_percentage": True}),
+    ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}, {"show_as_percentage": True, "locale": "en_US"}),
+    ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}, {'format': 'YYYY-MM-DD hh:mm'}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}, {'format': 'YYYY-MM-DD hh:mm'}),
+    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm'}, {'format': 'hh:mm'}),
+    ("TIME WITH TIME ZONE", {'format': 'hh:mm Z'}, {'format': 'hh:mm Z'}),
 ]
 
 
-@pytest.mark.parametrize("type_,display_options", create_display_options_test_list)
+@pytest.mark.parametrize("type_,display_options, expected_display_options", create_display_options_test_list)
 def test_column_create_display_options(
-    column_test_table, type_, display_options, client, engine
+    column_test_table, type_, display_options, expected_display_options, client, engine
 ):
     cache.clear()
     name = "anewcolumn"
     data = {"name": name, "type": type_, "display_options": display_options}
     response = client.post(f"/api/db/v0/tables/{column_test_table.id}/columns/", data)
+    print(response.data)
     assert response.status_code == 201
 
     # Ensure the correct serialized date is returned by the API
@@ -288,7 +303,7 @@ def test_column_create_display_options(
         f"/api/db/v0/tables/{column_test_table.id}/columns/"
     )
     actual_new_col = new_columns_response.json()["results"][-1]
-    assert actual_new_col["display_options"] == display_options
+    assert actual_new_col["display_options"] == expected_display_options
 
 
 _too_long_string = "x" * 256

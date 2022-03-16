@@ -1,3 +1,5 @@
+import json
+
 from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
@@ -108,6 +110,12 @@ class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPart
     custom_labels = CustomBooleanLabelSerializer(required=False)
 
 
+def get_currency_details(currency_code):
+    with open("currency_info.json", 'r') as currency_file:
+        currency_dict = json.loads(currency_file.read())
+        return currency_dict[currency_code]
+
+
 class MoneyDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
     currency_code = serializers.CharField(allow_null=True)
     symbol = serializers.CharField(required=False)
@@ -117,8 +125,17 @@ class MoneyDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartia
     digit_grouping_symbol = serializers.CharField(required=False)
 
     def validate(self, attrs):
-        if attrs.get('currency_code', None) is not None and len(attrs.keys() - ['currency_code']) != 0:
-            raise MoneyDisplayOptionValueConflictAPIException()
+        currency_code = attrs.get('currency_code', None)
+        if currency_code is not None:
+            if len(attrs.keys() - ['currency_code']) != 0:
+                raise MoneyDisplayOptionValueConflictAPIException()
+            else:
+                currency_details = get_currency_details(currency_code)
+                attrs['symbol'] = currency_details['currency_symbol']
+                attrs['symbol_location'] = 'Beginning' if currency_details['p_cs_precedes'] == 1 else "End"
+                attrs['decimal_symbol'] = currency_details['mon_decimal_point']
+                attrs['digit_grouping'] = currency_details['mon_grouping']
+                attrs['digit_grouping_symbol'] = currency_details['mon_thousands_sep']
         return super().validate(attrs)
 
 
