@@ -29,9 +29,8 @@ def test_delete_empty_table(page, base_schema_url):
     # Delete Table 0
     delete_active_table(page)
 
-    # No entry in sidebar
+    # No Table 0 entry in the sidebar and no tab
     expect(get_tables_list(page)).to_be_empty()
-
-    # No tab and welcome message
     expect(get_tab(page, "Table 0")).not_to_be_visible()
+    
     expect_welcome_to_be_visible(page, welcome_text)
