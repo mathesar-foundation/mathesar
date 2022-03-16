@@ -20,4 +20,11 @@
       }
     }
   }
+
+  .form-input {
+    .validation-error {
+      margin-top: 5px;
+      color: #d67171;
+    }
+  }
 }
