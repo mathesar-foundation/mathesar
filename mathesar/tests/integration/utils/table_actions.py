@@ -1,4 +1,5 @@
 from mathesar.tests.integration.utils.validators import expect_modal_not_to_be_visible, expect_modal_to_be_visible
+from playwright.sync_api import Locator, Page
 
 
 def create_empty_table(page):
@@ -26,3 +27,8 @@ def insert_data_cell(page, data):
     page.dblclick("div.editable-cell >> nth=1")
     page.fill("textarea.input-element:visible", data)
     page.keyboard.press("Tab")
+
+
+def close_tab(tab_locator: Locator):
+    tab_locator.hover()
+    tab_locator.locator("[aria-label=remove]").click()
