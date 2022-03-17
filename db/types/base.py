@@ -3,7 +3,7 @@ from enum import Enum
 from sqlalchemy import create_engine
 
 from db import constants
-
+from db.types.aliases import canonical_to_aliases, alias_to_canonical
 from db.functions import hints
 
 from frozendict import frozendict
@@ -14,7 +14,21 @@ STRING = 'string'
 VARCHAR = 'varchar'
 
 
-class PostgresType(Enum):
+class DatabaseType:
+    @property
+    def is_canonical(self):
+        return self.value not in aliases
+
+    @property
+    def aliases(self):
+        return canonical_to_aliases.get(self.value, [])
+
+    @property
+    def alias_of(self):
+        return alias_to_canonical.get(self.value)
+
+
+class PostgresType(DatabaseType, Enum):
     """
     This only includes built-in Postgres types that SQLAlchemy supports.
     SQLAlchemy doesn't support XML. See zzzeek's comment on:
@@ -66,7 +80,7 @@ class PostgresType(Enum):
     UUID = 'uuid'
 
 
-class MathesarCustomType(Enum):
+class MathesarCustomType(DatabaseType, Enum):
     """
     This is a list of custom Mathesar DB types.
     Keys returned by get_available_types are of the format 'mathesar_types.VALUE'
