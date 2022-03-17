@@ -18,7 +18,7 @@ export interface Column {
   id: number;
   name: string;
   type: DbType;
-  type_options: Record<string, string | number | boolean | undefined> | null;
+  type_options: Record<string, string | number | boolean | null> | null;
   display_options: Record<string, unknown>;
   index: number;
   nullable: boolean;
@@ -98,11 +98,8 @@ export class ColumnsDataStore
       primaryKey: undefined,
     });
     this.meta = meta;
-    this.api = api(
-      `/${this.type === TabularType.Table ? 'tables' : 'views'}/${
-        this.parentId
-      }/columns/`,
-    );
+    const tabularEntity = this.type === TabularType.Table ? 'tables' : 'views';
+    this.api = api(`/api/db/v0/${tabularEntity}/${this.parentId}/columns/`);
     this.fetchCallback = fetchCallback;
     void this.fetch();
   }

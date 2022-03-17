@@ -2,9 +2,11 @@ import type {
   FormConfiguration,
   FormConfigurationVariable,
   FormInputDataType,
-  Rule,
+  FormValues,
 } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/App.d';
+import type { Column } from '@mathesar/stores/table-data/types.d';
+import type { States } from '@mathesar/utils/api';
 
 export interface AbstractTypeResponse {
   name: string;
@@ -12,20 +14,9 @@ export interface AbstractTypeResponse {
   db_types: DbType[];
 }
 
-interface AbstractTypeConfigFormSavedVariable
-  extends FormConfigurationVariable {
-  isSaved: true;
+interface AbstractTypeConfigFormVariable extends FormConfigurationVariable {
+  conditionalDefault?: Record<DbType, FormInputDataType>;
 }
-
-interface AbstractTypeConfigFormUnSavedVariable
-  extends FormConfigurationVariable {
-  defaults: Record<DbType, FormInputDataType>;
-}
-
-export type AbstractTypeConfigFormVariable =
-  | AbstractTypeConfigFormSavedVariable
-  | AbstractTypeConfigFormUnSavedVariable;
-
 export interface AbstractTypeConfigForm extends FormConfiguration {
   variables: Record<string, AbstractTypeConfigFormVariable>;
 }
@@ -34,10 +25,12 @@ export interface AbstractTypeDbConfigOptions {
   allowDefault: boolean;
   configuration: {
     form: AbstractTypeConfigForm;
-    determinationRules: {
-      resolve: string;
-      rule: Rule;
-    }[];
+    determineDbType: (
+      formValues: FormValues,
+      columnType: DbType,
+      typeOptions: Column['type_options'],
+    ) => DbType;
+    getSavableTypeOptions: (columnType: DbType) => string[];
   };
 }
 
@@ -46,6 +39,8 @@ export interface AbstractTypeConfiguration {
   icon: string;
   input: {
     type: string;
+    config?: Record<string, unknown>;
+    conditionalConfig?: Record<DbType, Record<string, unknown>>;
   };
   typeSwitchOptions?: {
     database: AbstractTypeDbConfigOptions;

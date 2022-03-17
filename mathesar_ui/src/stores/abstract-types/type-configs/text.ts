@@ -1,8 +1,16 @@
-import type { AbstractTypeConfiguration } from '../types.d';
+import type { FormValues } from '@mathesar-component-library/types';
+import type { Column } from '@mathesar/stores/table-data/types.d';
+import type { AbstractTypeConfiguration } from '../types';
+
+const DB_TYPES = {
+  VARCHAR: 'VARCHAR',
+  CHAR: 'CHAR',
+  TEXT: 'TEXT',
+};
 
 const textType: AbstractTypeConfiguration = {
   icon: 'T',
-  defaultDbType: 'VARCHAR',
+  defaultDbType: DB_TYPES.VARCHAR,
   typeSwitchOptions: {
     database: {
       allowDefault: true,
@@ -11,15 +19,18 @@ const textType: AbstractTypeConfiguration = {
           variables: {
             restrictFieldSize: {
               type: 'boolean',
-              defaults: {
-                CHAR: true,
-                VARCHAR: true,
-                TEXT: false,
+              conditionalDefault: {
+                [DB_TYPES.CHAR]: true,
+                [DB_TYPES.VARCHAR]: true,
+                [DB_TYPES.TEXT]: false,
               },
             },
             length: {
               type: 'integer',
-              isSaved: true,
+              default: 255,
+              validation: {
+                checks: ['isEmpty'],
+              },
             },
           },
           layout: {
@@ -46,77 +57,43 @@ const textType: AbstractTypeConfiguration = {
             ],
           },
         },
-        determinationRules: [
-          {
-            resolve: 'CHAR',
-            rule: {
-              combination: 'and',
-              terms: [
-                {
-                  id: 'restrictFieldSize',
-                  op: 'eq',
-                  value: true,
-                },
-                {
-                  id: 'length',
-                  op: 'lte',
-                  value: 255,
-                },
-                {
-                  id: 'length',
-                  op: 'neq',
-                  value: null,
-                },
-              ],
-            },
-          },
-          {
-            resolve: 'VARCHAR',
-            rule: {
-              combination: 'and',
-              terms: [
-                {
-                  id: 'restrictFieldSize',
-                  op: 'eq',
-                  value: true,
-                },
-                {
-                  combination: 'or',
-                  terms: [
-                    {
-                      id: 'length',
-                      op: 'gt',
-                      value: 255,
-                    },
-                    {
-                      id: 'length',
-                      op: 'eq',
-                      value: null,
-                    },
-                    {
-                      id: 'length',
-                      op: 'eq',
-                      value: undefined,
-                    },
-                  ],
-                },
-              ],
-            },
-          },
-          {
-            resolve: 'TEXT',
-            rule: {
-              id: 'restrictFieldSize',
-              op: 'eq',
-              value: false,
-            },
-          },
-        ],
+        determineDbType: (
+          formValues: FormValues,
+          columnType: Column['type'],
+        ) => {
+          if (formValues.restrictFieldSize) {
+            if (typeof formValues.length === 'string') {
+              const formValueLength = parseInt(formValues.length, 10);
+              if (formValueLength > 255) {
+                return DB_TYPES.VARCHAR;
+              }
+            }
+            return columnType === DB_TYPES.CHAR
+              ? DB_TYPES.CHAR
+              : DB_TYPES.VARCHAR;
+          }
+          return DB_TYPES.TEXT;
+        },
+        getSavableTypeOptions: (columnType: Column['type']): string[] => {
+          const savableTypeOptions = [];
+          if (columnType === DB_TYPES.CHAR || columnType === DB_TYPES.VARCHAR) {
+            savableTypeOptions.push('length');
+          }
+          return savableTypeOptions;
+        },
       },
     },
   },
   input: {
     type: 'string',
+    config: {
+      multiLine: true,
+    },
+    conditionalConfig: {
+      [DB_TYPES.CHAR]: {
+        multiLine: false,
+      },
+    },
   },
 };
 

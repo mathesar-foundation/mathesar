@@ -261,9 +261,8 @@ export class RecordsData {
 
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
-    this.url = `/${this.type === TabularType.Table ? 'tables' : 'views'}/${
-      this.parentId
-    }/records/`;
+    const tabularEntity = this.type === TabularType.Table ? 'tables' : 'views';
+    this.url = `/api/db/v0/${tabularEntity}/${this.parentId}/records/`;
     this.fetchCallback = fetchCallback;
     void this.fetch();
 
