@@ -10,9 +10,9 @@ from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGro
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
-from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.models import Table
 from mathesar.utils.json import MathesarJSONRenderer
+from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 
 
 class RecordViewSet(viewsets.ViewSet):
@@ -47,9 +47,15 @@ class RecordViewSet(viewsets.ViewSet):
             name_converted_group_by = {**grouping, 'columns': group_by_columns_names}
         name_converted_order_by = [{**column, 'field': column_ids_to_names[column['field']]} for column in order_by]
         try:
-            filter_processed = _rewrite_db_function_spec(
-                filter_unprocessed, column_ids_to_names,
-            )
+            # TODO db function spec rewriting can be factored out by extending db function system
+            # to allow adding a ColumnId DBFunctionPacked that would take the mapping of column
+            # ids to names and use it when converting into a ColumnName.
+            filter_processed = None
+            if filter_unprocessed:
+                filter_processed = rewrite_db_function_spec_column_ids_to_names(
+                    column_ids_to_names=column_ids_to_names,
+                    spec=filter_unprocessed,
+                )
             records = paginator.paginate_queryset(
                 queryset=self.get_queryset(),
                 request=request,
@@ -124,19 +130,3 @@ class RecordViewSet(viewsets.ViewSet):
         columns_map = table.get_column_name_id_bidirectional_map()
         context = {'columns_map': columns_map, 'table': table}
         return context
-
-
-def _rewrite_db_function_spec(spec, column_ids_to_names):
-    """
-    DB function JOSN specifications must be rewritten, because they may include column Django ID
-    references, which are not supported by the db layer. The column ID references are rewritten to
-    be column name references.
-    """
-    # TODO db function spec rewriting can be factored out by extending db function system
-    # to allow adding a ColumnId DBFunctionPacked that would take the mapping of column
-    # ids to names and use it when converting into a ColumnName.
-    if spec:
-        return rewrite_db_function_spec_column_ids_to_names(
-            column_ids_to_names=column_ids_to_names,
-            spec=spec,
-        )
