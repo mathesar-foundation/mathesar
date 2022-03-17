@@ -36,6 +36,12 @@ export function makeFormatter(opts: DerivedOptions): (value: number) => string {
       throw new Error(`Unable to format value. ${validationErrors.join(', ')}`);
     }
     const parts = Intl.NumberFormat(opts.locale, {
+      // Override the numbering system which is inferred from the locale so that
+      // we don't end up with 1.2 formatted as "১.২", "۱٫۲", or "१.२". Users
+      // need to be able to enter numbers in the same format which they are
+      // displayed, and we don't yet have support to accept entry of numbers in
+      // Bengali, Persian, or Marathi.
+      numberingSystem: 'latn',
       minimumFractionDigits: opts.minimumFractionDigits,
       // @ts-ignore because TypeScript's Intl.NumberFormatOptions is not up-to-date
       useGrouping: opts.useGrouping,
