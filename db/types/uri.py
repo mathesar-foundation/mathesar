@@ -92,8 +92,8 @@ def install(engine):
 
     create_domain_query = f"""
     CREATE DOMAIN {DB_TYPE} AS text CHECK (
-        {QualifiedURIFunction.SCHEME.value}(value) IS NOT NULL
-        AND {QualifiedURIFunction.PATH.value}(value) IS NOT NULL
+        (value IS NULL) OR ({QualifiedURIFunction.SCHEME.value}(value) IS NOT NULL
+        AND {QualifiedURIFunction.PATH.value}(value) IS NOT NULL)
     );
     """
 

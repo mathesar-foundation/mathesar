@@ -159,6 +159,24 @@ def test_uri_type_column_creation(engine_email_type):
         test_table.create()
 
 
+test_data = ('https://centerofci.org', None)
+
+
+@pytest.mark.parametrize("data", test_data)
+def test_uri_type_set_data(engine_email_type, data):
+    engine, app_schema = engine_email_type
+    with engine.begin() as conn:
+        conn.execute(text(f"SET search_path={app_schema}"))
+        metadata = MetaData(bind=conn)
+        test_table = Table(
+            "test_table",
+            metadata,
+            Column("uris", uri.URI),
+        )
+        test_table.create()
+        conn.execute(test_table.insert(values=(data,)))
+
+
 def test_uri_type_column_reflection(engine_email_type):
     engine, app_schema = engine_email_type
     with engine.begin() as conn:
