@@ -7,6 +7,7 @@ from db.schemas.operations.create import create_schema as create_sa_schema
 from db.schemas.utils import get_schema_name_from_oid, get_schema_oid_from_name
 from mathesar.models import Database, Schema
 from mathesar.tests.integration.utils.locators import get_table_entry
+from mathesar.utils.tables import create_empty_table
 
 TEST_SCHEMA = 'import_csv_schema'
 PATENT_SCHEMA = 'Patents'
@@ -84,6 +85,22 @@ def go_to_patents_data_table(page, create_table, schema_name, base_schema_url):
     table_name = "patents"
     table = create_table(table_name, schema_name)
     table.import_verified = True
+    table.save()
+    page.goto(base_schema_url)
+    get_table_entry(page, table_name).click()
+    yield table_name
+
+
+@pytest.fixture
+def go_to_table_with_numbers_in_text(page, patent_schema, create_column, schema, base_schema_url):
+    """
+    Returns a table containing columns with numbers in TEXT format.
+    """
+    table_name = "Table 0"
+    table = create_empty_table(table_name, schema)
+    col_name = "foo"
+    create_column(table, {"name": col_name, "type": "TEXT"})
+    table.create_record_or_records([{col_name: "123"}, {col_name: "876"}])
     table.save()
     page.goto(base_schema_url)
     get_table_entry(page, table_name).click()
