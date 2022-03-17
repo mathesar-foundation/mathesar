@@ -1,11 +1,23 @@
-import type { AbstractTypeConfiguration } from '../types.d';
+import type { FormValues } from '@mathesar-component-library/types';
+import type { DbType } from '@mathesar/App';
+import type { AbstractTypeConfiguration } from '../types';
+
+const DB_TYPES = {
+  DECIMAL: 'DECIMAL',
+  NUMERIC: 'NUMERIC',
+  INTEGER: 'INTEGER',
+  SMALLINT: 'SMALLINT',
+  BIGINT: 'BIGINT',
+  REAL: 'REAL',
+  DOUBLE_PRECISION: 'DOUBLE PRECISION',
+};
 
 const numberType: AbstractTypeConfiguration = {
   icon: '#',
   input: {
     type: 'integer',
   },
-  defaultDbType: 'INTEGER',
+  defaultDbType: DB_TYPES.NUMERIC,
   typeSwitchOptions: {
     database: {
       allowDefault: true,
@@ -15,39 +27,39 @@ const numberType: AbstractTypeConfiguration = {
             numberType: {
               type: 'string',
               enum: ['Integer', 'Decimal', 'Float'],
-              defaults: {
-                INTEGER: 'Integer',
-                SMALLINT: 'Integer',
-                BIGINT: 'Integer',
-                DECIMAL: 'Decimal',
-                NUMERIC: 'Decimal',
-                REAL: 'Float',
-                'DOUBLE PRECISION': 'Float',
+              conditionalDefault: {
+                [DB_TYPES.INTEGER]: 'Integer',
+                [DB_TYPES.SMALLINT]: 'Integer',
+                [DB_TYPES.BIGINT]: 'Integer',
+                [DB_TYPES.DECIMAL]: 'Decimal',
+                [DB_TYPES.NUMERIC]: 'Decimal',
+                [DB_TYPES.REAL]: 'Float',
+                [DB_TYPES.DOUBLE_PRECISION]: 'Float',
               },
             },
             integerDataSize: {
               type: 'string',
               enum: ['default', 'bigInt', 'smallInt'],
-              defaults: {
-                INTEGER: 'default',
-                SMALLINT: 'smallInt',
-                BIGINT: 'bigInt',
+              conditionalDefault: {
+                [DB_TYPES.INTEGER]: 'default',
+                [DB_TYPES.SMALLINT]: 'smallInt',
+                [DB_TYPES.BIGINT]: 'bigInt',
               },
             },
             precision: {
               type: 'integer',
-              isSaved: true,
+              default: 2,
             },
             scale: {
               type: 'integer',
-              isSaved: true,
+              default: 2,
             },
             floatingPointType: {
               type: 'string',
               enum: ['real', 'doublePrecision'],
-              defaults: {
-                REAL: 'real',
-                'DOUBLE PRECISION': 'doublePrecision',
+              conditionalDefault: {
+                [DB_TYPES.REAL]: 'real',
+                [DB_TYPES.DOUBLE_PRECISION]: 'doublePrecision',
               },
             },
           },
@@ -113,106 +125,42 @@ const numberType: AbstractTypeConfiguration = {
             ],
           },
         },
-        determinationRules: [
-          {
-            resolve: 'INTEGER',
-            rule: {
-              combination: 'and',
-              terms: [
-                {
-                  id: 'numberType',
-                  op: 'eq',
-                  value: 'Integer',
-                },
-                {
-                  id: 'integerDataSize',
-                  op: 'eq',
-                  value: 'default',
-                },
-              ],
-            },
-          },
-          {
-            resolve: 'SMALLINT',
-            rule: {
-              combination: 'and',
-              terms: [
-                {
-                  id: 'numberType',
-                  op: 'eq',
-                  value: 'Integer',
-                },
-                {
-                  id: 'integerDataSize',
-                  op: 'eq',
-                  value: 'smallInt',
-                },
-              ],
-            },
-          },
-          {
-            resolve: 'BIGINT',
-            rule: {
-              combination: 'and',
-              terms: [
-                {
-                  id: 'numberType',
-                  op: 'eq',
-                  value: 'Integer',
-                },
-                {
-                  id: 'integerDataSize',
-                  op: 'eq',
-                  value: 'bigInt',
-                },
-              ],
-            },
-          },
-          {
-            resolve: 'DECIMAL',
-            rule: {
-              id: 'numberType',
-              op: 'eq',
-              value: 'Decimal',
-            },
-          },
-          {
-            resolve: 'REAL',
-            rule: {
-              combination: 'and',
-              terms: [
-                {
-                  id: 'numberType',
-                  op: 'eq',
-                  value: 'Float',
-                },
-                {
-                  id: 'floatingPointType',
-                  op: 'eq',
-                  value: 'real',
-                },
-              ],
-            },
-          },
-          {
-            resolve: 'DOUBLE PRECISION',
-            rule: {
-              combination: 'and',
-              terms: [
-                {
-                  id: 'numberType',
-                  op: 'eq',
-                  value: 'Float',
-                },
-                {
-                  id: 'floatingPointType',
-                  op: 'eq',
-                  value: 'doublePrecision',
-                },
-              ],
-            },
-          },
-        ],
+        determineDbType: (formValues: FormValues, columnType: DbType) => {
+          switch (formValues.numberType) {
+            case 'Integer':
+              switch (formValues.integerDataSize) {
+                case 'smallInt':
+                  return DB_TYPES.SMALLINT;
+                case 'bigInt':
+                  return DB_TYPES.BIGINT;
+                default:
+                  return DB_TYPES.INTEGER;
+              }
+            case 'Float':
+              switch (formValues.floatingPointType) {
+                case 'real':
+                  return DB_TYPES.REAL;
+                case 'doublePrecision':
+                default:
+                  return DB_TYPES.DOUBLE_PRECISION;
+              }
+            case 'Decimal':
+            default:
+              return columnType === DB_TYPES.DECIMAL
+                ? DB_TYPES.DECIMAL
+                : DB_TYPES.NUMERIC;
+          }
+        },
+        getSavableTypeOptions: (columnType: DbType) => {
+          const savableTypeOptions = [];
+          if (
+            columnType === DB_TYPES.DECIMAL ||
+            columnType === DB_TYPES.NUMERIC
+          ) {
+            savableTypeOptions.push('precision', 'scale');
+          }
+          return savableTypeOptions;
+        },
       },
     },
     display: {
@@ -220,12 +168,10 @@ const numberType: AbstractTypeConfiguration = {
         variables: {
           showAsPercentage: {
             type: 'boolean',
-            isSaved: true,
           },
           format: {
             type: 'string',
             enum: ['en_us', 'fr'],
-            isSaved: true,
           },
         },
         layout: {
