@@ -1,6 +1,6 @@
 <script lang="ts">
   import { checkCondition } from './utils';
-  import type { FormInputStore, ConditionalIfElement } from './types.d';
+  import type { FormInputStore, ConditionalIfElement } from './types';
 
   export let store: FormInputStore;
   export let condition: ConditionalIfElement['condition'] = 'eq';

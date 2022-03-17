@@ -10,7 +10,7 @@ import type {
   AbstractTypesMap,
   AbstractTypesSubstance,
   AbstractTypeResponse,
-} from './types.d';
+} from './types';
 
 import { constructAbstractTypeMapFromResponse } from './abstractTypeCategories';
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FormLayout } from './types.d';
+  import type { FormLayout } from './types';
 
   export let orientation: FormLayout['orientation'] = 'vertical';
   export let elements: FormLayout['elements'];
