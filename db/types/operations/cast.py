@@ -5,6 +5,9 @@ from sqlalchemy.sql.functions import Function
 from db.types import base, email, money, multicurrency, uri
 from db.types.exceptions import UnsupportedTypeException
 
+# TODO it would be ideal to import these types regularly (from PostgresType import BIGINT, ...),
+# and to pass around Enum instances, not strings.
+
 # DB type name strings
 BIGINT = base.PostgresType.BIGINT.value
 BOOLEAN = base.PostgresType.BOOLEAN.value
@@ -21,6 +24,7 @@ SMALLINT = base.PostgresType.SMALLINT.value
 TEXT = base.PostgresType.TEXT.value
 
 # one-off strings representing keys in ischema_names
+# TODO consider formalizing these as Enums, like PostgresType or MathesarCustomType
 CHAR = base.CHAR
 STRING = base.STRING
 VARCHAR = base.VARCHAR
@@ -29,11 +33,12 @@ VARCHAR = base.VARCHAR
 EMAIL = base.MathesarCustomType.EMAIL.value
 MATHESAR_MONEY = base.MathesarCustomType.MATHESAR_MONEY.value
 MULTICURRENCY_MONEY = base.MathesarCustomType.MULTICURRENCY_MONEY.value
+URI = base.MathesarCustomType.URI.value
+
 TIME_WITHOUT_TIME_ZONE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
 TIME_WITH_TIME_ZONE = base.PostgresType.TIME_WITH_TIME_ZONE.value
 TIMESTAMP_WITH_TIME_ZONE = base.PostgresType.TIMESTAMP_WITH_TIME_ZONE.value
 TIMESTAMP_WITHOUT_TIME_ZONE = base.PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value
-URI = base.MathesarCustomType.URI.value
 
 # only needed for ischema lookup
 FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
@@ -48,7 +53,19 @@ TEXT_TYPES = frozenset([CHAR, TEXT, VARCHAR])
 MONEY_ARR_FUNC_NAME = "get_mathesar_money_array"
 
 
-def get_supported_alter_column_types(engine, friendly_names=True):
+# TODO is it safe to have type names in two forms: friendly and unfriendly?
+# NOTE: you could say that there are two distinct control flow branches in this
+# method (practically two methods):
+# both return only types available on the engine;
+# both return a map whose values are SA type classes;
+# friendly_names being true returns a map where keys are "canonical" (or "friendly") type names
+# (according to some definition of canonical and friendly);
+# friendly_names being false returns a map where keys are type names, as compiled by SA's PG
+# dialect.
+#
+# TODO it's not obvious that the type set returned is column-alteration-specific; maybe change
+# name or refactor to be more general?
+def get_supported_alter_column_types(engine, friendly_names):
     """
     Returns a list of valid types supported by mathesar for the given engine.
 
@@ -57,42 +74,72 @@ def get_supported_alter_column_types(engine, friendly_names=True):
     friendly_names: sets whether to use "friendly" service-layer or the
     actual DB-layer names.
     """
-    dialect_types = base.get_available_types(engine)
+    available_type_ids_to_classes = base.get_available_types(engine)
+
+    # TODO is this map about aliases?
+    # we've a dedicated namespace for aliases now, maybe leverage that.
+    #
+    # NOTE: below map's keys will only be used in the friendly_names=True case
+    # NOTE: below map's values seem to be "ischema_names"-friendly, as opposed to the keys.
+    # for example, VARCHAR is mapped to FULL_VARCHAR (CHARACTER_VARYING); I presume that's because
+    # VARCHAR is not a key in ischema_names.
+    #
+    # NOTE: below map's roles seem to be
+    # - map aliases to canonicals (VARCHAR -> CHARACTER_VARYING)
+    # - map mathesar custom type id to its qualified id (EMAIL -> MATHESAR_TYPES.EMAIL)
+    # - the mystical STRING -> NAME
+    # TODO this can be refactored into explicit steps.
+    # that will also solve the ambiguous name `friendly_type_map`.
     friendly_type_map = {
         # Default Postgres types
-        BIGINT: dialect_types.get(BIGINT),
-        BOOLEAN: dialect_types.get(BOOLEAN),
-        CHAR: dialect_types.get(FULL_CHAR),
-        DATE: dialect_types.get(DATE),
-        DECIMAL: dialect_types.get(DECIMAL),
-        DOUBLE_PRECISION: dialect_types.get(DOUBLE_PRECISION),
-        FLOAT: dialect_types.get(FLOAT),
-        INTEGER: dialect_types.get(INTEGER),
-        INTERVAL: dialect_types.get(INTERVAL),
-        MONEY: dialect_types.get(MONEY),
-        NUMERIC: dialect_types.get(NUMERIC),
-        REAL: dialect_types.get(REAL),
-        SMALLINT: dialect_types.get(SMALLINT),
-        STRING: dialect_types.get(NAME),
-        TEXT: dialect_types.get(TEXT),
-        TIME_WITHOUT_TIME_ZONE: dialect_types.get(TIME_WITHOUT_TIME_ZONE),
-        TIME_WITH_TIME_ZONE: dialect_types.get(TIME_WITH_TIME_ZONE),
-        TIMESTAMP_WITH_TIME_ZONE: dialect_types.get(TIMESTAMP_WITH_TIME_ZONE),
-        TIMESTAMP_WITHOUT_TIME_ZONE: dialect_types.get(TIMESTAMP_WITHOUT_TIME_ZONE),
-        VARCHAR: dialect_types.get(FULL_VARCHAR),
+        BIGINT: BIGINT,
+        BOOLEAN: BOOLEAN,
+        CHAR: FULL_CHAR,
+        DATE: DATE,
+        DECIMAL: DECIMAL,
+        DOUBLE_PRECISION: DOUBLE_PRECISION,
+        FLOAT: FLOAT,
+        INTEGER: INTEGER,
+        INTERVAL: INTERVAL,
+        MONEY: MONEY,
+        NUMERIC: NUMERIC,
+        REAL: REAL,
+        SMALLINT: SMALLINT,
+        # TODO what is the logic behind mapping (I presume) SA's string type to PG name type?
+        STRING: NAME,
+        TEXT: TEXT,
+        TIME_WITHOUT_TIME_ZONE: TIME_WITHOUT_TIME_ZONE,
+        TIME_WITH_TIME_ZONE: TIME_WITH_TIME_ZONE,
+        TIMESTAMP_WITH_TIME_ZONE: TIMESTAMP_WITH_TIME_ZONE,
+        TIMESTAMP_WITHOUT_TIME_ZONE: TIMESTAMP_WITHOUT_TIME_ZONE,
+        VARCHAR: FULL_VARCHAR,
         # Custom Mathesar types
-        EMAIL: dialect_types.get(email.DB_TYPE),
-        MATHESAR_MONEY: dialect_types.get(money.DB_TYPE),
-        MULTICURRENCY_MONEY: dialect_types.get(multicurrency.DB_TYPE),
-        URI: dialect_types.get(uri.DB_TYPE),
+        EMAIL: email.DB_TYPE,
+        MATHESAR_MONEY: money.DB_TYPE,
+        MULTICURRENCY_MONEY: multicurrency.DB_TYPE,
+        URI: uri.DB_TYPE,
     }
+    # NOTE: below available_type_ids_to_classes.get calls may return None.
+    # one case where that will happen is if it's a custom MA type
+    # that's not installed on the database.
+    friendly_type_map = {
+        k: available_type_ids_to_classes.get(v)
+        for k, v
+        in friendly_type_map.items()
+        if v is not None
+    }
+    # NOTE: friendly_names decides what the keys of the resulting map will be
     if friendly_names:
-        type_map = {k: v for k, v in friendly_type_map.items() if v is not None}
+        type_map = {
+            k: v
+            for k, v
+            in friendly_type_map.items()
+        }
     else:
         type_map = {
-            val().compile(dialect=engine.dialect): val
-            for val in friendly_type_map.values()
-            if val is not None
+            v().compile(dialect=engine.dialect): v
+            for v
+            in friendly_type_map.values()
         }
     return type_map
 
@@ -101,7 +148,7 @@ def get_supported_alter_column_db_types(engine):
     return set(
         [
             type_().compile(dialect=engine.dialect)
-            for type_ in get_supported_alter_column_types(engine).values()
+            for type_ in get_supported_alter_column_types(engine, friendly_names=True).values()
         ]
     )
 
