@@ -17,7 +17,7 @@ VARCHAR = 'varchar'
 class DatabaseType:
     @property
     def is_canonical(self):
-        return self.value not in aliases
+        return self.value in canonical_to_aliases
 
     @property
     def aliases(self):
