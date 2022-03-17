@@ -903,7 +903,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
 
 
 def test_get_alter_column_types_with_custom_engine(engine_with_types):
-    type_dict = cast_operations.get_supported_alter_column_types(engine_with_types)
+    type_dict = cast_operations.get_supported_alter_column_types(engine_with_types, friendly_names=True)
     for type_ in types.CUSTOM_TYPE_DICT.values():
         assert type_ in type_dict.values()
     assert all(
@@ -916,7 +916,7 @@ def test_get_alter_column_types_with_custom_engine(engine_with_types):
 
 def test_get_alter_column_types_with_unfriendly_names(engine_with_types):
     type_dict = cast_operations.get_supported_alter_column_types(
-        engine_with_types, friendly_names=False
+        engine_with_types, friendly_names=False,
     )
     assert all(
         [

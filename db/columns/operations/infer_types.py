@@ -43,8 +43,10 @@ def _get_type_classes_mapped_to_type_ids(engine):
     """
     Returns SA type classes mapped to their type names/ids (as compiled by SA's PG dialect).
     """
-    supported_types = get_supported_alter_column_types(engine, friendly_names=True)
-    type_classes_to_ids = {v: k for k, v in supported_types.items()}
+    # NOTE: it's interesting that we're using friendly_names=True here,
+    # I expected the "unfriendly" names to be used internally.
+    type_ids_to_classes = get_supported_alter_column_types(engine, friendly_names=True)
+    type_classes_to_ids = {v: k for k, v in type_ids_to_classes.items()}
     # NOTE: below dict merge seems to add some meta-entries to this map, which later, in
     # infer_column_type, are used to leverage recursion.
     type_classes_to_ids.update(
@@ -60,15 +62,25 @@ def _get_type_classes_mapped_to_type_ids(engine):
 def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inference_dag=TYPE_INFERENCE_DAG):
     if depth > MAX_INFERENCE_DAG_DEPTH:
         raise DagCycleError("The type_inference_dag likely has a cycle")
+
     type_classes_to_ids = _get_type_classes_mapped_to_type_ids(engine)
 
-    table = reflect_table(table_name, schema, engine)
-    column_type_class = table.columns[column_name].type.__class__
+    column_type_class = get_column_class(
+        engine=engine,
+        schema=schema,
+        table_name=table_name,
+        column_name=column_name
+    )
+
     column_type_id = type_classes_to_ids.get(column_type_class)
 
     logger.debug(f"column_type_id: {column_type_id}")
+
+    type_ids_to_cast_to = type_inference_dag.get(column_type_id, [])
+
     table_oid = get_oid_from_table(table_name, schema, engine)
-    for type_id in type_inference_dag.get(column_type_id, []):
+
+    for type_id in type_ids_to_cast_to:
         try:
             with engine.begin() as conn:
                 alter_column_type(table_oid, column_name, engine, conn, type_id)
@@ -88,4 +100,10 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
             logger.info(
                 f"Cannot alter column {column_name} to type {type_id}"
             )
+    return column_type_class
+
+
+def get_column_class(engine, schema, table_name, column_name):
+    table = reflect_table(table_name, schema, engine)
+    column_type_class = table.columns[column_name].type.__class__
     return column_type_class

@@ -67,7 +67,8 @@ MONEY_ARR_FUNC_NAME = "get_mathesar_money_array"
 # name or refactor to be more general?
 def get_supported_alter_column_types(engine, friendly_names):
     """
-    Returns a list of valid types supported by mathesar for the given engine.
+    Returns a map of type names to type classes. Types returned are supported by mathesar for the
+    given engine.
 
     engine:  This should be an engine connecting to the DB where we want
     to inspect the installed types.
@@ -144,11 +145,18 @@ def get_supported_alter_column_types(engine, friendly_names):
     return type_map
 
 
+# TODO bad name: semantically equivalent to above method get_supported_alter_column_types
+# TODO seems to be equivalent to
+# `set(get_supported_alter_column_types(engine, friendly_names=False).keys())`.
 def get_supported_alter_column_db_types(engine):
+    """
+    Returns a set of supported db type names, as compiled by the engine's dialect (PG, probably).
+    """
+    supported_type_classes = get_supported_alter_column_types(engine, friendly_names=True).values()
     return set(
         [
-            type_().compile(dialect=engine.dialect)
-            for type_ in get_supported_alter_column_types(engine, friendly_names=True).values()
+            type_class().compile(dialect=engine.dialect)
+            for type_class in supported_type_classes
         ]
     )
 
