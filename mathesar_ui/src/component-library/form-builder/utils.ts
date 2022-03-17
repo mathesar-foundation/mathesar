@@ -1,4 +1,4 @@
-import type { FormInputDataType, ConditionalIfElement } from './types.d';
+import type { FormInputDataType, ConditionalIfElement } from './types';
 
 export function checkCondition(
   term: FormInputDataType,
