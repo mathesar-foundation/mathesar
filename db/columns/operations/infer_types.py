@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 MAX_INFERENCE_DAG_DEPTH = 100
 
 TYPE_INFERENCE_DAG = {
+    base.PostgresType.TEXT.value:[],
     base.PostgresType.BOOLEAN.value: [],
     base.MathesarCustomType.EMAIL.value: [],
     base.PostgresType.INTERVAL.value: [],
