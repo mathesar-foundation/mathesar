@@ -134,6 +134,7 @@ button.dropdown.trigger.selector {
       ul {
         height: 198px;
         width: 230px;
+        overflow-y: auto;
       }
 
       .item {
