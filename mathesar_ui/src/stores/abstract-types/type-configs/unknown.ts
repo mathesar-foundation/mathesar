@@ -1,4 +1,4 @@
-import type { AbstractTypeConfiguration } from '../types.d';
+import type { AbstractTypeConfiguration } from '../types';
 
 const unknownType: AbstractTypeConfiguration = {
   icon: '?',
