@@ -19,6 +19,8 @@ from db.constraints import utils as constraint_utils
 from db.tables.operations.select import reflect_table_from_oid
 from db.types.operations.cast import get_supported_alter_column_types
 
+COLOMN_NAME_TEMPLATE = 'Column'
+POSTGRES_COL_NAME_LEN_CAP = 59
 
 def create_column(engine, table_oid, column_data):
     column_type = column_data.get(TYPE, column_data.get("type"))
@@ -66,6 +68,15 @@ def create_column(engine, table_oid, column_data):
         engine
     )
 
+def gen_col_name(table):
+    col_num = None
+    base_name = COLOMN_NAME_TEMPLATE
+    col_num = len(table.sa_column_names)
+    name = f'{base_name} {col_num}'
+    if len(name) > POSTGRES_COL_NAME_LEN_CAP:
+        base_name = base_name[:-1]
+        name = f'{base_name} {col_num}'
+    return name
 
 def _gen_col_name(table, column_name):
     num = 1

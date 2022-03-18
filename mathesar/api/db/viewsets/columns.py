@@ -14,6 +14,7 @@ from db.columns.exceptions import (
     DynamicDefaultWarning, InvalidDefaultError, InvalidTypeOptionError, InvalidTypeError,
 )
 from db.columns.operations.select import get_column_attnum_from_name
+from db.columns.operations.create import gen_col_name
 from db.types.exceptions import InvalidTypeParameters
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
@@ -31,6 +32,9 @@ class ColumnViewSet(viewsets.ModelViewSet):
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
         # We only support adding a single column through the API.
+        if(request.data['name'].strip() == ''):
+            request.data['name'] = gen_col_name(table)
+
         serializer = ColumnSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
