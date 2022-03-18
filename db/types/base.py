@@ -27,6 +27,34 @@ class DatabaseType:
     def alias_of(self):
         return alias_to_canonical.get(self.value)
 
+    @property
+    def canonical_id(self):
+        if self.is_canonical:
+            return self.value
+        else:
+            return self.alias_of
+
+    @property
+    def canonical(self):
+        return get_db_type_enum_from_id(self.canonical_id)
+
+    @property
+    def ischema_key(self):
+        """
+        Looks up this type's canonical type (if it is an alias) and returns its string id that may
+        correspond to keys on the SA ischema_names dict.
+
+        Note that PostgresType values are already such keys. However, MathesarCustomType values
+        require adding a qualifier prefix.
+        """
+        canonical_id = self.canonical_id
+        if isinstance(self, MathesarCustomType):
+            ischema_key = get_qualified_name(canonical_id)
+        else:
+            ischema_key = canonical_id
+        return ischema_key
+
+
 
 class PostgresType(DatabaseType, Enum):
     """
@@ -258,8 +286,9 @@ preparer = create_engine("postgresql://").dialect.identifier_preparer
 _ma_type_qualifier_prefix = preparer.quote_schema(SCHEMA)
 
 
-def get_qualified_name(name):
-    return ".".join([_ma_type_qualifier_prefix, name])
+# TODO rename to get_qualified_mathesar_type_name
+def get_qualified_name(unqualified_name):
+    return ".".join([_ma_type_qualifier_prefix, unqualified_name])
 
 
 def get_available_types(engine):
