@@ -23,6 +23,7 @@ export interface AbstractTypeConfigForm extends FormConfiguration {
 
 export interface AbstractTypeDbConfigOptions {
   allowDefault: boolean;
+  // TODO: Check if encapsulation within configuration is needed for it's properties
   configuration: {
     form: AbstractTypeConfigForm;
     determineDbType: (
@@ -34,6 +35,10 @@ export interface AbstractTypeDbConfigOptions {
   };
 }
 
+export interface AbstractTypeDisplayConfigOptions {
+  form: AbstractTypeConfigForm;
+}
+
 export interface AbstractTypeConfiguration {
   defaultDbType?: DbType;
   icon: string;
@@ -43,10 +48,8 @@ export interface AbstractTypeConfiguration {
     conditionalConfig?: Record<DbType, Record<string, unknown>>;
   };
   typeSwitchOptions?: {
-    database: AbstractTypeDbConfigOptions;
-    display?: {
-      form: AbstractTypeConfigForm;
-    };
+    database?: AbstractTypeDbConfigOptions;
+    display?: AbstractTypeDisplayConfigOptions;
   };
 }
 

@@ -163,39 +163,6 @@ const numberType: AbstractTypeConfiguration = {
         },
       },
     },
-    display: {
-      form: {
-        variables: {
-          showAsPercentage: {
-            type: 'boolean',
-          },
-          format: {
-            type: 'string',
-            enum: ['en_us', 'fr'],
-          },
-        },
-        layout: {
-          orientation: 'vertical',
-          elements: [
-            {
-              type: 'input',
-              variable: 'showAsPercentage',
-              label: 'Show as Percentage',
-            },
-            {
-              type: 'input',
-              variable: 'format',
-              label: 'Format',
-              interfaceType: 'select',
-              options: {
-                en_us: { label: 'English (US)' },
-                fr: { label: 'French (FR)' },
-              },
-            },
-          ],
-        },
-      },
-    },
   },
 };
 
