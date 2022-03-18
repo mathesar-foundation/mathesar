@@ -19,6 +19,7 @@ test.each(
     ['en-US', true,  true,  true,  false, 0, -0.1,       '-0.1'         ],
     ['en-US', true,  true,  true,  false, 0, 1.0,        '1'            ],
     ['en-US', true,  true,  true,  false, 0, 1234,       '1,234'        ],
+    ['en-US', true,  true,  true,  false, 0, 0.123456789,'0.123456789'  ],
     ['en-US', true,  true,  true,  false, 0, 1234567.89, '1,234,567.89' ],
     ['en-US', true,  true,  false, false, 0, 1234567.89, '1234567.89'   ],
     ['de-DE', true,  true,  true,  false, 0, 1234567.89, '1.234.567,89' ],

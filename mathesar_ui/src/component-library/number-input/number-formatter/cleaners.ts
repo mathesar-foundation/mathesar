@@ -24,6 +24,7 @@ export function forceAsciiMinusSign(input: string): string {
  * - `forceAsciiMinusSign`
  */
 export function removeExtraneousMinusSigns(input: string): string {
+  // TODO look behind is not supported in Safari.
   return input.replace(/(?<!^)-/g, '');
 }
 
@@ -78,6 +79,7 @@ export function factoryToRemoveExtraneousDecimalSeparators(
 export function factoryToPrependShorthandDecimalWithZero(
   opts: Pick<DerivedOptions, 'decimalSeparator'>,
 ): Cleaner {
+  // TODO look behind is not supported in Safari.
   const pattern = new RegExp(
     `(?<!\\d)(?=${escapeRegex(opts.decimalSeparator)})`,
   );
@@ -85,12 +87,88 @@ export function factoryToPrependShorthandDecimalWithZero(
 }
 
 /**
- * Returns a `normalize` function whose goals are:
- * - Produce a string that can be fed into `parseFloat`.
- * - Retain characteristics within the result that we can use to infer
- *   formatting settings to produce the `intermediateDisplay` value. For
- *   example, the trailing zeros will be retained.
- * - Remove useless stuff like grouping characters and invalid characters.
+ * Requires the following cleaners to be run first:
+ * - `removeInvalidCharacters`
+ * - `convertCommasToDots`
+ */
+export function removePrecedingZeros(input: string): string {
+  return input.replace(/^(-?)0*(?!\.|$)/, '$1');
+}
+
+/**
+ * Requires the following cleaners to be run first:
+ * - `removeInvalidCharacters`
+ * - `convertCommasToDots`
+ */
+export function removeTrailingDecimalZeros(input: string): string {
+  return input.replace(/(\.(?:[1-9]|0(?=0*[1-9]))*)(0*)$/, '$1');
+}
+
+/**
+ * Requires the following cleaners to be run first:
+ * - `prependShorthandDecimalWithZero`
+ * - `removeInvalidCharacters`
+ * - `convertCommasToDots`
+ * - `removeTrailingDecimalZeros`
+ */
+export function removeTrailingDecimalSeparator(input: string): string {
+  return input.replace(/\.$/, '');
+}
+
+/**
+ * Produces a cleaner comprised of multiple cleaners which run in sequence.
+ */
+function cleanInSequence(cleaners: Cleaner[]): Cleaner {
+  return (input: string) => cleaners.reduce((i, cleaner) => cleaner(i), input);
+}
+
+/**
+ * Returns a `simplify` function which converts a string representation of a
+ * number into "Simplified form".
+ *
+ * A string number in "Simplified form" has the following characteristics:
+ *
+ * - Common characteristics (for "Simplified" and "Normalized"):
+ *
+ *     - Can be fed into `parseFloat` and `parseInt`.
+ *     - Uses dot as the decimal separator, regardless of locale.
+ *     - Does not use any grouping separators.
+ *     - Does not have any invalid characters.
+ *
+ * - Special characteristics:
+ *
+ *     - It retains characteristics within the result that we can use to infer
+ *       formatting settings to produce the `intermediateDisplay` value. For
+ *       example, the trailing zeros will be retained, and a trailing decimal
+ *       will be retained. This means that the same number can be represented
+ *       multiple simplified ways.
+ */
+export function factoryToSimplify(
+  opts: Pick<
+    DerivedOptions,
+    'allowNegative' | 'decimalSeparator' | 'allowFloat'
+  >,
+): (input: string) => string {
+  return cleanInSequence([
+    forceAsciiMinusSign,
+    factoryToRemoveInvalidCharacters(opts),
+    removeExtraneousMinusSigns,
+    factoryToRemoveExtraneousDecimalSeparators(opts),
+    convertCommasToDots,
+    factoryToPrependShorthandDecimalWithZero(opts),
+    removePrecedingZeros,
+  ]);
+}
+
+/**
+ * Returns a `normalize` function which converts a string representation of a
+ * number into "Normalized form".
+ *
+ * A string number in "Normalized form" has the following characteristics:
+ *
+ * - All the "Common characteristics" of "Simplified form" (see above) plus:
+ *
+ * - Every raw number will be represented the _same way_ in normalized form.
  */
 export function factoryToNormalize(
   opts: Pick<
@@ -98,17 +176,9 @@ export function factoryToNormalize(
     'allowNegative' | 'decimalSeparator' | 'allowFloat'
   >,
 ): (input: string) => string {
-  /**
-   * The order of cleaners is important. See notes within each cleaner about its
-   * dependencies.
-   */
-  const cleaners = [
-    forceAsciiMinusSign,
-    factoryToRemoveInvalidCharacters(opts),
-    removeExtraneousMinusSigns,
-    factoryToRemoveExtraneousDecimalSeparators(opts),
-    convertCommasToDots,
-    factoryToPrependShorthandDecimalWithZero(opts),
-  ];
-  return (input: string) => cleaners.reduce((i, cleaner) => cleaner(i), input);
+  return cleanInSequence([
+    factoryToSimplify(opts),
+    removeTrailingDecimalZeros,
+    removeTrailingDecimalSeparator,
+  ]);
 }

@@ -2,7 +2,10 @@ import {
   removeExtraneousMinusSigns,
   factoryToRemoveExtraneousDecimalSeparators,
   factoryToPrependShorthandDecimalWithZero,
-  factoryToNormalize,
+  factoryToSimplify,
+  removePrecedingZeros,
+  removeTrailingDecimalZeros,
+  removeTrailingDecimalSeparator,
 } from '../cleaners';
 
 test.each([
@@ -50,6 +53,47 @@ test.each([
   expect(clean(input)).toBe(output);
 });
 
+test.each([
+  ['.', '.'],
+  ['0.1', '0.1'],
+  ['-0.1', '-0.1'],
+  ['-00.1', '-0.1'],
+  ['0.', '0.'],
+  ['00.', '0.'],
+  ['000', '0'],
+  ['00.0', '0.0'],
+  ['00.000', '0.000'],
+  ['0', '0'],
+  ['-01', '-1'],
+  ['01', '1'],
+  ['0001', '1'],
+  ['000100000', '100000'],
+  ['0001000001', '1000001'],
+  ['-000100000.000', '-100000.000'],
+])('removePrecedingZeros, %s', (input, output) => {
+  expect(removePrecedingZeros(input)).toBe(output);
+});
+
+test.each([
+  ['1000', '1000'],
+  ['1.0001', '1.0001'],
+  ['1.10001', '1.10001'],
+  ['1.0001000', '1.0001'],
+  ['1.10001000', '1.10001'],
+  ['1.000', '1.'],
+  ['0', '0'],
+])('removeTrailingDecimalZeros, %s', (input, output) => {
+  expect(removeTrailingDecimalZeros(input)).toBe(output);
+});
+
+test.each([
+  ['0', '0'],
+  ['0.', '0'],
+  ['0.1', '0.1'],
+])('removeTrailingDecimalSeparator, %s', (input, output) => {
+  expect(removeTrailingDecimalSeparator(input)).toBe(output);
+});
+
 test.each(
   // prettier-ignore
   [
@@ -68,6 +112,8 @@ test.each(
     ['.', true,  true,  'abc'             , ''      ],
     ['.', true,  true,  'NaN'             , ''      ],
     ['.', true,  true,  ' 1 '             , '1'     ],
+    ['.', true,  true,  '01'              , '1'     ],
+    ['.', true,  true,  '000'             , '0'     ],
     ['.', true,  true,  '--1'             , '-1'    ],
     ['.', true,  true,  '-1-'             , '-1'    ],
     ['.', true,  true,  '9-1'             , '91'    ],
@@ -98,13 +144,13 @@ test.each(
     ['.', false, false, '-123.4'          , '1234'  ],
   ],
 )(
-  'clean decimal="%s" allowFloat=%o allowNegative=%o input="%s"',
+  'simplify decimal="%s" allowFloat=%o allowNegative=%o input="%s"',
   (decimalSeparator, allowFloat, allowNegative, input, output) => {
-    const normalize = factoryToNormalize({
+    const simplify = factoryToSimplify({
       decimalSeparator,
       allowFloat,
       allowNegative,
     });
-    expect(normalize(input)).toBe(output);
+    expect(simplify(input)).toBe(output);
   },
 );

@@ -1,4 +1,4 @@
-import type { DerivedOptions } from './options';
+import { DerivedOptions, getDerivedOptions } from './options';
 import { forceAsciiMinusSign } from './cleaners';
 
 type Parts = Intl.NumberFormatPart[];
@@ -16,21 +16,23 @@ function combineParts(parts: Parts): string {
   return parts.map((part) => part.value).join('');
 }
 
-export function makeFormatter(opts: DerivedOptions): (value: number) => string {
-  function getValidationErrors(value: number) {
+export function makeFormatter(
+  opts: DerivedOptions,
+): (value: number | bigint) => string {
+  function getValidationErrors(value: number | bigint) {
     if (Number.isNaN(value)) {
       return ['Value is NaN.'];
     }
     if (!opts.allowNegative && (value < 0 || Object.is(value, -0))) {
       return ['Value must be positive.'];
     }
-    if (!opts.allowFloat && value % 1 !== 0) {
+    if (!opts.allowFloat && typeof value === 'number' && value % 1 !== 0) {
       return ['Value must be an integer.'];
     }
     return [];
   }
 
-  function format(value: number): string {
+  function format(value: number | bigint): string {
     const validationErrors = getValidationErrors(value);
     if (validationErrors.length) {
       throw new Error(`Unable to format value. ${validationErrors.join(', ')}`);
@@ -45,6 +47,9 @@ export function makeFormatter(opts: DerivedOptions): (value: number) => string {
       minimumFractionDigits: opts.minimumFractionDigits,
       // @ts-ignore because TypeScript's Intl.NumberFormatOptions is not up-to-date
       useGrouping: opts.useGrouping,
+      // 20 is the max allowed by the spec. The default is 3. We set this to
+      // avoid rounding.
+      maximumFractionDigits: 20,
     }).formatToParts(value);
 
     const polishers = [];
@@ -61,4 +66,29 @@ export function makeFormatter(opts: DerivedOptions): (value: number) => string {
   }
 
   return format;
+}
+
+export function formatToNormalizedForm(value: number | bigint): string {
+  return makeFormatter(
+    getDerivedOptions({
+      locale: 'en-US',
+      allowFloat: true,
+      allowNegative: true,
+      useGrouping: false,
+      minimumFractionDigits: 0,
+      forceTrailingDecimal: false,
+    }),
+  )(value);
+}
+
+/**
+ * This is to be used only as a fallback option when we need to format the
+ * number in oder to meet the locale requirements, but we don't have a number or
+ * bigint because the source is a high precision float.
+ */
+export function factoryToFormatSimplifiedInputForLocale(
+  opts: Pick<DerivedOptions, 'decimalSeparator'>,
+): (simplifiedInput: string) => string {
+  return (simplifiedInput: string) =>
+    simplifiedInput.replace(/\./g, opts.decimalSeparator);
 }
