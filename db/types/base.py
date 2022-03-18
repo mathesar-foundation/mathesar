@@ -55,7 +55,6 @@ class DatabaseType:
         return ischema_key
 
 
-
 class PostgresType(DatabaseType, Enum):
     """
     This only includes built-in Postgres types that SQLAlchemy supports.
