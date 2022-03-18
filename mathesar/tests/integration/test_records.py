@@ -47,3 +47,23 @@ def test_delete_multiple_rows(page, go_to_patents_data_table):
     page.click("button:has-text('Delete 2 records')")
     expect(page.locator("text=ARC-14281-1")).not_to_be_visible()
     expect(page.locator("text=ARC-14512-1")).not_to_be_visible()
+
+
+def test_keyboard_Cell_Moving(page, go_to_patents_data_table):
+    cell1 = page.locator(".cell:has-text('6445390') .cell-wrapper")
+    cell2 = page.locator(".cell:has-text('ARC-14275-1') .cell-wrapper")
+    cell3 = page.locator(".cell:has-text('6606612') .cell-wrapper")
+    cell1.click()
+    expect(cell1).to_have_class(re.compile("is-active"))
+    page.keyboard.press('ArrowLeft')
+    expect(cell1).not_to_have_class(re.compile("is-active"))
+    expect(cell2).to_have_class(re.compile("is-active"))
+    page.keyboard.press('ArrowRight')
+    expect(cell1).to_have_class(re.compile("is-active"))
+    expect(cell2).not_to_have_class(re.compile("is-active"))
+    page.keyboard.press('ArrowDown')
+    expect(cell1).not_to_have_class(re.compile("is-active"))
+    expect(cell3).to_have_class(re.compile("is-active"))
+    page.keyboard.press('ArrowUp')
+    expect(cell1).to_have_class(re.compile("is-active"))
+    expect(cell3).not_to_have_class(re.compile("is-active"))
