@@ -1,5 +1,4 @@
 from mathesar.tests.integration.utils.validators import expect_modal_not_to_be_visible, expect_modal_to_be_visible
-from playwright.sync_api import Locator, Page
 
 
 def create_empty_table(page):
