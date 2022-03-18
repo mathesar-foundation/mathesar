@@ -379,10 +379,12 @@ def test_table_type_suggestion(client, schema, engine_email_type):
         'col_3': 'BOOLEAN',
         'col_4': 'VARCHAR',
         'col_5': 'VARCHAR',
-        'col_6': 'NUMERIC'
+        'col_6': 'NUMERIC',
+        'col_7': 'MATHESAR_TYPES.MATHESAR_MONEY'
     }
     response = client.get(f'/api/db/v0/tables/{table.id}/type_suggestions/')
     response_table = response.json()
+    print(response_table)
     assert response.status_code == 200
     assert response_table == EXPECTED_TYPES
 

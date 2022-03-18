@@ -40,6 +40,7 @@ def standardize_error_response(data):
 
 
 def mathesar_exception_handler(exc, context):
+    raise exc
     response = exception_handler(exc, context)
     # DRF default exception handler does not handle non Api errors,
     # So we convert it to proper api response

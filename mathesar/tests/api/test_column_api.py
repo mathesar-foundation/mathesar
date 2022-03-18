@@ -295,7 +295,6 @@ def test_column_create_display_options(
     name = "anewcolumn"
     data = {"name": name, "type": type_, "display_options": display_options}
     response = client.post(f"/api/db/v0/tables/{column_test_table.id}/columns/", data)
-    print(response.data)
     assert response.status_code == 201
 
     # Ensure the correct serialized date is returned by the API
