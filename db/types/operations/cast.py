@@ -129,6 +129,12 @@ def get_supported_alter_column_types(engine, friendly_names):
         k: available_type_ids_to_classes.get(v)
         for k, v
         in friendly_type_map.items()
+    }
+    # Get rid of k:v pairs whose v is None
+    friendly_type_map = {
+        k: v
+        for k, v
+        in friendly_type_map.items()
         if v is not None
     }
     # NOTE: friendly_names decides what the keys of the resulting map will be
