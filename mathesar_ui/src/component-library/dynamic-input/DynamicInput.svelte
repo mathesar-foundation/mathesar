@@ -48,7 +48,7 @@
 {:else if dataType === 'boolean'}
   <BooleanInput {...$$restProps} {interfaceType} bind:value />
 {:else if dataType === 'integer' || dataType === 'float'}
-  <NumberInput {...$$restProps} isInteger={dataType === 'integer'} bind:value />
+  <NumberInput {...$$restProps} allowFloat={dataType === 'float'} bind:value />
 {:else if dataType === 'string'}
   <StringInput {...$$restProps} {interfaceType} bind:value />
 {/if}
