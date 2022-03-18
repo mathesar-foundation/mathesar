@@ -106,7 +106,9 @@ def get_supported_alter_column_types(engine, friendly_names):
         NUMERIC: NUMERIC,
         REAL: REAL,
         SMALLINT: SMALLINT,
-        # TODO what is the logic behind mapping (I presume) SA's string type to PG name type?
+        # NOTE: what is the logic behind mapping (I presume) SA's string type to PG name type?
+        # ischema_names keys that map to SA STRING are name and "char"
+        # so STRING -> NAME in this case resolves to STRING -> sa.STRING
         STRING: NAME,
         TEXT: TEXT,
         TIME_WITHOUT_TIME_ZONE: TIME_WITHOUT_TIME_ZONE,

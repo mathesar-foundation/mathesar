@@ -10,9 +10,6 @@ from frozendict import frozendict
 
 
 CHAR = 'char'
-# NOTE: 'string' doesn't seem to be a Postgres type identifier
-# is STRING's purpose only to act as a meta-type in the recursive
-# db.columns.operations.infer_types::infer_column_type?
 STRING = 'string'
 VARCHAR = 'varchar'
 
