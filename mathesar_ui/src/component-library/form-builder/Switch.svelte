@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { FormInputStore, ConditionalSwitchElement } from './types.d';
+  import type { FormInputStore, ConditionalSwitchElement } from './types';
 
   export let store: FormInputStore;
   export let cases: ConditionalSwitchElement['cases'];
