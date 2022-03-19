@@ -23,10 +23,8 @@ COLUMN_NAME_TEMPLATE = 'Column'
 
 def create_column(engine, table_oid, column_data):
     table = reflect_table_from_oid(table_oid, engine)
-    
-    if NAME in column_data and column_data[NAME].strip() != '':
-        pass
-    else:
+    column_name = column_data.get(NAME,'')
+    if column_name.strip() == '':
         column_data[NAME] = gen_col_name(table)
     column_type = column_data.get(TYPE, column_data.get("type"))
     column_type_options = column_data.get("type_options", {})
