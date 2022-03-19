@@ -117,12 +117,12 @@ def get_currency_details(currency_code):
 
 
 class MoneyDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
-    currency_code = serializers.CharField(allow_null=True)
+    currency_code = serializers.CharField(allow_null=True, required=False)
     symbol = serializers.CharField(required=False)
-    symbol_location = serializers.CharField(required=False)
-    decimal_symbol = serializers.CharField(required=False)
+    symbol_location = serializers.CharField(required=False, allow_null=True)
+    decimal_symbol = serializers.CharField(required=False, allow_null=True)
     digit_grouping = serializers.ListField(child=serializers.IntegerField(), required=False)
-    digit_grouping_symbol = serializers.CharField(required=False)
+    digit_grouping_symbol = serializers.CharField(required=False, allow_null=True)
 
     def validate(self, attrs):
         currency_code = attrs.get('currency_code', None)

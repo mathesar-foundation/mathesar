@@ -17,6 +17,7 @@ def infer_mathesar_money_display_options(table_oid, engine, column_attnum):
             for currency_code, currency_details in currency_dict.items():
                 if currency_details['currency_symbol'] == money_array[3]:
                     return {'currency_code': currency_code}
+            return {'decimal_symbol': money_array[2], 'digit_grouping_symbol': money_array[1], 'symbol': money_array[3], 'symbol_location': 'Beginning', 'digit_grouping': []}
 
 
 def get_table_column_display_options(table, col_name_type_dict):

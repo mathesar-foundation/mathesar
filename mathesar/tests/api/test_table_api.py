@@ -422,10 +422,22 @@ def test_table_column_options_suggestion(client, schema, engine_email_type):
             'name': 'col_7',
             'type': 'MATHESAR_TYPES.MATHESAR_MONEY',
             'type_options': None
+        },
+        {
+            'display_options': {
+                'currency_code': None,
+                'decimal_symbol': '.',
+                'digit_grouping': [],
+                'digit_grouping_symbol': None,
+                'symbol': '₿',
+                'symbol_location': 'Beginning'
+            },
+            'name': 'col_8',
+            'type': 'MATHESAR_TYPES.MATHESAR_MONEY',
+            'type_options': None
         }]
     response = client.get(f'/api/db/v0/tables/{table.id}/type_suggestions/')
     response_table = response.json()
-    print(response_table)
     assert response.status_code == 200
     assert response_table == EXPECTED_TYPES
 
