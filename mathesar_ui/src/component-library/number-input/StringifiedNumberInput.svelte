@@ -31,6 +31,7 @@
 <script lang="ts">
   import FormattedInput from '../formatted-input/FormattedInput.svelte';
   import { StringifiedNumberFormatter } from './number-formatter';
+  import { getInputMode } from './numberInputUtils';
 
   /**
    * When you bind to this value, you'll get a canonical stringified number. If
@@ -49,4 +50,10 @@
   });
 </script>
 
-<FormattedInput {formatter} bind:value {...$$restProps} bind:element />
+<FormattedInput
+  {formatter}
+  bind:value
+  {...$$restProps}
+  bind:element
+  inputmode={getInputMode({ allowFloat, allowNegative })}
+/>
