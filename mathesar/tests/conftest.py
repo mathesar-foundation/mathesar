@@ -168,3 +168,9 @@ def create_table(csv_filename, create_schema):
         schema_model = create_schema(schema)
         return create_table_from_csv(data_file, table_name, schema_model)
     return _create_table
+
+
+@pytest.fixture
+def custom_types_schema(test_db_model):
+    engine = create_mathesar_engine(test_db_model.name)
+    install.install_mathesar_on_database(engine)
