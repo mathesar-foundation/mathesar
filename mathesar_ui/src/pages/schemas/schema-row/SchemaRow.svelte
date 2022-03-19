@@ -8,11 +8,10 @@
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/App.d';
-  import { currentSchemaId, deleteSchema } from '@mathesar/stores/schemas';
+  import { deleteSchema } from '@mathesar/stores/schemas';
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { currentDBName } from '@mathesar/stores/databases';
-  import { router } from 'tinro';
 
   const dispatch = createEventDispatcher();
 
@@ -36,14 +35,9 @@
       },
     });
   }
-
-  function handleSchemaSwitch() {
-    $currentSchemaId = schema.id;
-    router.goto(`/${$currentDBName}/${schema.id}`);
-  }
 </script>
 
-<div class="schema-row" on:click|self={handleSchemaSwitch}>
+<div class="schema-row">
   <div class="details">
     <div class="title">
       <Icon data={faProjectDiagram} />
