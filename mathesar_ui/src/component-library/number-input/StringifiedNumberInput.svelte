@@ -39,8 +39,8 @@
    * component will pass `undefined` back up to you.
    */
   export let value: string | undefined = undefined;
-  export let allowFloat = true;
-  export let allowNegative = true;
+  export let allowFloat = false;
+  export let allowNegative = false;
   export let element: HTMLInputElement | undefined = undefined;
 
   $: formatter = new StringifiedNumberFormatter({
