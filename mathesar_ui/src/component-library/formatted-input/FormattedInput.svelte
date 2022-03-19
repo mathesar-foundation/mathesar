@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { InputFormatter, ParseResult } from './InputFormatter';
   import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
+  import { getValueAfterInput } from '@mathesar-component-library-dir/common/utils';
+  import type { InputFormatter, ParseResult } from './InputFormatter';
 
   type T = $$Generic;
 
@@ -8,6 +9,10 @@
   let parentValue: T | undefined;
   export { parentValue as value };
   export let element: HTMLInputElement | undefined = undefined;
+  export let onParseError: (props: {
+    userInput: string;
+    error: unknown;
+  }) => void = () => {};
 
   let childText = '';
   let parseResult: ParseResult<T> | undefined;
@@ -26,14 +31,15 @@
 
   $: handleParentValueChange(parentValue);
 
-  function handleChildValueChange() {
+  function handleChildValueChange(event: InputEvent) {
+    event.preventDefault();
+    const userInput = getValueAfterInput(event);
     try {
-      parseResult = formatter.parse(childText);
+      parseResult = formatter.parse(userInput);
       parentValue = parseResult.value;
       childText = parseResult.intermediateDisplay;
-    } catch (e) {
-      console.log(e);
-      // TODO
+    } catch (error) {
+      onParseError({ userInput, error });
     }
   }
 
@@ -43,9 +49,9 @@
 </script>
 
 <TextInput
-  bind:value={childText}
+  value={childText}
   {...$$restProps}
   bind:element
-  on:input={handleChildValueChange}
+  on:beforeinput={handleChildValueChange}
   on:blur={handleBlur}
 />
