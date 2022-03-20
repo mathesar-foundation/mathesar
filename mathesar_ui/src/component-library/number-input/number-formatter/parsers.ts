@@ -71,7 +71,7 @@ export function makeUniversalNumberParser(
       };
     }
     const normalize = factoryToNormalize(opts);
-    const normalizedInput = normalize(simplifiedInput);
+    const normalizedInput = normalize(input);
     const intermediateDisplay = makeFormatter({
       ...opts,
       ...inferOptsFromSimplifiedInput(simplifiedInput),
