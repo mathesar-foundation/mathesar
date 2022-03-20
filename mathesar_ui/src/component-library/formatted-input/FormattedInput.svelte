@@ -6,7 +6,7 @@
   type T = $$Generic;
 
   export let formatter: InputFormatter<T>;
-  let parentValue: T | undefined;
+  let parentValue: T | undefined = undefined;
   export { parentValue as value };
   export let element: HTMLInputElement | undefined = undefined;
   export let onParseError: (props: {
