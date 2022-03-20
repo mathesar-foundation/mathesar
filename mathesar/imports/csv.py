@@ -117,11 +117,12 @@ def create_db_table_from_data_file(data_file, name, schema):
     with open(sv_filename, 'rb') as sv_file:
         sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
         column_names = sv_reader.fieldnames
+        column_names_stripped = [column_name.strip() for column_name in column_names]
         column_names_alt = [fieldname if fieldname != constants.ID else constants.ID_ORIGINAL for fieldname in sv_reader.fieldnames]
         table = create_string_column_table(
             name=name,
             schema=schema.name,
-            column_names=column_names,
+            column_names=column_names_stripped,
             engine=engine
         )
     try:
@@ -129,7 +130,7 @@ def create_db_table_from_data_file(data_file, name, schema):
             table,
             engine,
             sv_filename,
-            column_names,
+            column_names_stripped,
             header,
             delimiter=dialect.delimiter,
             escape=dialect.escapechar,
