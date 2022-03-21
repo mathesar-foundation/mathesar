@@ -2,7 +2,7 @@
   import EnumInput from './EnumInput.svelte';
   import StringInput from './StringInput.svelte';
   import BooleanInput from './BooleanInput.svelte';
-  import NumberInput from '../number-input/NumberInput.svelte';
+  import NumberInput from '@mathesar-component-library-dir/number-input/NumberInput.svelte';
   import type {
     DynamicInputDataType,
     DynamicInputInterfaceType,
