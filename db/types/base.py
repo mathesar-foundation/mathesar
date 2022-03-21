@@ -16,24 +16,10 @@ VARCHAR = 'varchar'
 
 class DatabaseType:
     @property
-    def is_canonical(self):
-        return self.value in canonical_to_aliases
+    def id(self):
+        return self.value
 
-    @property
-    def aliases(self):
-        return canonical_to_aliases.get(self.value, [])
-
-    @property
-    def alias_of(self):
-        return alias_to_canonical.get(self.value)
-
-    @property
-    def canonical_id(self):
-        if self.is_canonical:
-            return self.value
-        else:
-            return self.alias_of
-
+    # TODO it would be great to factor out the difference in how MathesarCustomType ids are handled.
     @property
     def ischema_key(self):
         """
@@ -43,12 +29,11 @@ class DatabaseType:
         Note that PostgresType values are already such keys. However, MathesarCustomType values
         require adding a qualifier prefix.
         """
-        canonical_id = self.canonical_id
+        id = self.id
         if isinstance(self, MathesarCustomType):
-            ischema_key = get_qualified_name(canonical_id)
+            return get_qualified_name(id)
         else:
-            ischema_key = canonical_id
-        return ischema_key
+            return id
 
 
     def get_sa_class(self, engine):
