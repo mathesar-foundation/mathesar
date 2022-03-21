@@ -138,13 +138,8 @@ def get_supported_alter_column_types(engine, friendly_names):
         if v is not None
     }
     # NOTE: friendly_names decides what the keys of the resulting map will be
-    if friendly_names:
-        type_map = {
-            k: v
-            for k, v
-            in friendly_type_map.items()
-        }
-    else:
+    type_map = friendly_type_map
+    if not friendly_names:
         type_map = {
             v().compile(dialect=engine.dialect): v
             for v
