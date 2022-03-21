@@ -51,7 +51,7 @@ export async function reloadDatabases(): Promise<
   try {
     databaseRequest?.cancel();
     databaseRequest = getAPI<PaginatedResponse<Database>>(
-      '/databases/?limit=500',
+      '/api/db/v0/databases/?limit=500',
     );
     const response = await databaseRequest;
     const data = response.results || [];

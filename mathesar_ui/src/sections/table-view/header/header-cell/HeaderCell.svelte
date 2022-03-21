@@ -150,7 +150,7 @@
         bind:value={newName}
         bind:element={renamingInputElement}
         disabled={isSubmittingRename}
-        hasValidationErrors={!!newNameValidationErrors.length}
+        hasError={!!newNameValidationErrors.length}
         aria-label="Column name"
         on:keydown={handleColumnRenameInputKeydown}
         on:blur={() => submitRename({ allowRetry: false })}

@@ -9,7 +9,7 @@ import type {
   AbstractTypesMap,
   AbstractTypeResponse,
   AbstractTypeConfiguration,
-} from './types.d';
+} from './types';
 
 /**
  * This is meant to be serializable and replaced by an API

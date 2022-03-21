@@ -2,7 +2,7 @@
   import {
     FormBuilder,
     makeForm,
-    executeRule,
+    getValidationContext,
   } from '@mathesar-component-library';
   import type {
     FormBuildConfiguration,
@@ -11,49 +11,52 @@
   import type { DbType } from '@mathesar/App.d';
   import type { AbstractTypeDbConfigOptions } from '@mathesar/stores/abstract-types/types';
   import type { Column } from '@mathesar/stores/table-data/types';
-  import { getDefaultsAndSavedVarsFromFormConfig } from '../utils';
+  import { getDefaultValuesFromConfig } from '../utils';
 
-  export let selectedDbType: DbType | undefined;
+  export let selectedDbType: DbType;
   export let typeOptions: Column['type_options'];
   export let configuration: AbstractTypeDbConfigOptions['configuration'];
+  export let column: Column;
 
   function constructForm(
-    formConfig: AbstractTypeDbConfigOptions['configuration']['form'],
-    typeDefaults: Record<string, Record<string, FormInputDataType>>,
+    _configuration: AbstractTypeDbConfigOptions['configuration'],
+    _column: Column,
   ): FormBuildConfiguration {
-    if (selectedDbType && typeDefaults[selectedDbType]) {
-      return makeForm(formConfig, {
-        ...typeDefaults[selectedDbType],
-        ...(typeOptions || {}),
-      });
-    }
-    return makeForm(formConfig, typeOptions || {});
+    const dbTypeDefaults = getDefaultValuesFromConfig(
+      _configuration,
+      selectedDbType,
+      _column,
+    );
+    return makeForm(_configuration.form, dbTypeDefaults);
   }
 
-  $: [dbTypeDefaults, savedVariables] = getDefaultsAndSavedVarsFromFormConfig(
-    configuration.form,
-  );
-  $: form = constructForm(configuration.form, dbTypeDefaults);
+  $: form = constructForm(configuration, column);
   $: values = form.values;
 
+  const validationContext = getValidationContext();
+  validationContext.addValidator('DbFormValidator', () => {
+    const valid = form.getValidationResult().isValid;
+    return valid;
+  });
+
   function setSelectedDBType(formValues: Record<string, FormInputDataType>) {
-    // eslint-disable-next-line no-restricted-syntax
-    for (const determinationRule of configuration.determinationRules) {
-      const result = executeRule(determinationRule.rule, formValues);
-      if (result) {
-        selectedDbType = determinationRule.resolve;
-        if (savedVariables.length > 0) {
-          const newTypeOptions: Column['type_options'] = {};
-          savedVariables.forEach((variable) => {
-            newTypeOptions[variable] = formValues[variable];
-          });
-          typeOptions = newTypeOptions;
-        } else {
-          typeOptions = null;
-        }
-        break;
-      }
+    selectedDbType = configuration.determineDbType(
+      formValues,
+      column.type,
+      column.type_options,
+    );
+    const savableVariables =
+      configuration.getSavableTypeOptions(selectedDbType);
+    if (savableVariables.length > 0) {
+      const newTypeOptions: Column['type_options'] = {};
+      savableVariables.forEach((variable) => {
+        newTypeOptions[variable] = formValues[variable];
+      });
+      typeOptions = newTypeOptions;
+    } else {
+      typeOptions = {};
     }
+    validationContext.validate();
   }
 
   $: setSelectedDBType($values);
