@@ -3,28 +3,26 @@ from enum import Enum
 from sqlalchemy import create_engine
 
 from db import constants
-from db.types.aliases import canonical_to_aliases, alias_to_canonical
 from db.functions import hints
 
 from frozendict import frozendict
 
 
-CHAR = 'char'
-STRING = 'string'
-VARCHAR = 'varchar'
-
-
 class DatabaseType:
     @property
     def id(self):
+        # Here we're defining Enum's value attribute to be the database type id.
+        # However, the meaning of this id is not clear, since often you'll use the ischema_key
+        # below. I've not yet fully conceptualized this duality.
         return self.value
 
-    # TODO it would be great to factor out the difference in how MathesarCustomType ids are handled.
+    # TODO it would be great to merge id(self) and ischema_key(self). for that we'd need to factor
+    # out the difference in how PostgresType and MathesarCustomType ids are handled. specifically,
+    # MathesarCustomType ids require adding a prefix.
     @property
     def ischema_key(self):
         """
-        Looks up this type's canonical type (if it is an alias) and returns its string id that may
-        correspond to keys on the SA ischema_names dict.
+        Returns the key corresponding to this type on the SA ischema_names dict.
 
         Note that PostgresType values are already such keys. However, MathesarCustomType values
         require adding a qualifier prefix.
@@ -35,14 +33,37 @@ class DatabaseType:
         else:
             return id
 
-
     def get_sa_class(self, engine):
-        ischema_names = engine.dialect.ischema_names
-        return ischema_names.get(self.ischema_key)
+        """
+        Returns the SA class corresponding to this type or None if this type is not supported by
+        provided engine, or if it's ignored (see is_ignored).
+        """
+        if not self.is_ignored:
+            ischema_names = engine.dialect.ischema_names
+            return ischema_names.get(self.ischema_key)
 
-
-    def is_available_on_engine(self, engine):
+    def is_available(self, engine):
+        """
+        Returns true if this type is available on provided engine.
+        """
         return self.get_sa_class(engine) is not None
+
+    @property
+    def is_ignored(self):
+        """
+        We ignore some types. Current rule is that if type X is applied to a column, but upon
+        reflection that column is of some other type, we ignore type X. This mostly means
+        ignoring aliases. It also ignores NAME and CHAR, because both are reflected as the SA
+        String type.
+        """
+        ignored_types = (
+            PostgresType.TIME,
+            PostgresType.TIMESTAMP,
+            PostgresType.DECIMAL,
+            PostgresType.NAME,
+            PostgresType.CHAR,
+        )
+        return self in ignored_types
 
 
 class PostgresType(DatabaseType, Enum):
@@ -280,25 +301,14 @@ def get_qualified_name(unqualified_name):
     return ".".join([_ma_type_qualifier_prefix, unqualified_name])
 
 
-def get_available_types(engine):
+def get_available_db_types(engine):
     """
-    Returns a dict where the keys are database type names defined on the database associated with
-    provided Engine, and the values are their SQLAlchemy classes.
+    Returns a tuple of DatabaseType instances that are available on provided engine.
     """
-    breakpoint()
-    return engine.dialect.ischema_names
-
-
-def get_available_known_db_types(engine):
-    """
-    Returns database types that are both available on the database and known through our Enums
-    above.
-    """
-    available_db_types = get_available_types(engine)
     return tuple(
-        known_db_type
-        for known_db_type in known_db_types
-        if known_db_type.value in available_db_types
+        db_type
+        for db_type in known_db_types
+        if db_type.is_available(engine)
     )
 
 
