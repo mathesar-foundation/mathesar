@@ -22,10 +22,12 @@ export function forceAsciiMinusSign(input: string): string {
 /**
  * Requires the following cleaners to be run first:
  * - `forceAsciiMinusSign`
+ * - `removeInvalidCharacters`
  */
 export function removeExtraneousMinusSigns(input: string): string {
-  // TODO look behind is not supported in Safari.
-  return input.replace(/(?<!^)-/g, '');
+  const isNegative = !!/^-/.exec(input);
+  const cleanedInput = input.replace(/-/g, '');
+  return `${isNegative ? '-' : ''}${cleanedInput}`;
 }
 
 export function convertCommasToDots(input: string): string {
@@ -79,11 +81,10 @@ export function factoryToRemoveExtraneousDecimalSeparators(
 export function factoryToPrependShorthandDecimalWithZero(
   opts: Pick<DerivedOptions, 'decimalSeparator'>,
 ): Cleaner {
-  // TODO look behind is not supported in Safari.
   const pattern = new RegExp(
-    `(?<!\\d)(?=${escapeRegex(opts.decimalSeparator)})`,
+    `(^|[^\\d])(?=${escapeRegex(opts.decimalSeparator)})`,
   );
-  return (input: string) => input.replace(pattern, '0');
+  return (input: string) => input.replace(pattern, '$10');
 }
 
 /**
