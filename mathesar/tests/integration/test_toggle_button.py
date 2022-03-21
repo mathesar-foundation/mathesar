@@ -15,5 +15,3 @@ def test_toggle_button(page, base_schema_url):
     expect(get_table_entry(page, "Table 0")).to_be_visible()
     page.click("button:has-text('New Record')")
     page.click("button:has-text('Refresh')")    
-    cell1 = page.goto("role=checkbox")
-    print(cell1)
