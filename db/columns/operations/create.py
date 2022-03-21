@@ -21,9 +21,10 @@ from db.types.operations.cast import get_supported_alter_column_types
 
 COLUMN_NAME_TEMPLATE = 'Column'
 
+
 def create_column(engine, table_oid, column_data):
     table = reflect_table_from_oid(table_oid, engine)
-    column_name = column_data.get(NAME,'')
+    column_name = column_data.get(NAME, '')
     if column_name.strip() == '':
         column_data[NAME] = gen_col_name(table)
     column_type = column_data.get(TYPE, column_data.get("type"))
@@ -71,11 +72,13 @@ def create_column(engine, table_oid, column_data):
         engine
     )
 
+
 def gen_col_name(table):
     base_name = COLUMN_NAME_TEMPLATE
     col_num = len(table.c)
     name = f'{base_name} {col_num}'
     return name
+
 
 def _gen_col_name(table, column_name):
     num = 1
