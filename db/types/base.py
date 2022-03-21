@@ -35,10 +35,6 @@ class DatabaseType:
             return self.alias_of
 
     @property
-    def canonical(self):
-        return get_db_type_enum_from_id(self.canonical_id)
-
-    @property
     def ischema_key(self):
         """
         Looks up this type's canonical type (if it is an alias) and returns its string id that may
@@ -53,6 +49,10 @@ class DatabaseType:
         else:
             ischema_key = canonical_id
         return ischema_key
+
+
+    def get_sa_class(self, engine):
+        return get_available_types(engine).get(self.ischema_key)
 
 
 class PostgresType(DatabaseType, Enum):
@@ -295,6 +295,7 @@ def get_available_types(engine):
     Returns a dict where the keys are database type names defined on the database associated with
     provided Engine, and the values are their SQLAlchemy classes.
     """
+    breakpoint()
     return engine.dialect.ischema_names
 
 
