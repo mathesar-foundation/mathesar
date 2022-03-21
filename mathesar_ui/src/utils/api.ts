@@ -21,20 +21,8 @@ export interface PaginatedResponse<T> {
   results: T[];
 }
 
-const dbUrlPrefix = '/api/db/v0';
 const NO_CONTENT = 204;
 const successStatusCodes = new Set([200, 201, NO_CONTENT]);
-
-/*
- * We might need to use multiple versions of apis
- * simultaneously, later on
- */
-function appendUrlPrefix(url: string): string {
-  if (url.indexOf('/api/') === 0) {
-    return url;
-  }
-  return `${dbUrlPrefix}${url}`;
-}
 
 function sendXHRRequest<T>(
   method: string,
@@ -42,7 +30,7 @@ function sendXHRRequest<T>(
   data?: unknown,
 ): CancellablePromise<T> {
   const request = new XMLHttpRequest();
-  request.open(method, appendUrlPrefix(url));
+  request.open(method, url);
   request.setRequestHeader('Content-Type', 'application/json');
   const csrfToken = Cookies.get('csrftoken');
   if (csrfToken) {
@@ -121,7 +109,7 @@ export function uploadFile<T>(
   completionCallback?: (obj: UploadCompletionOpts) => unknown,
 ): CancellablePromise<T> {
   const request = new XMLHttpRequest();
-  request.open('POST', appendUrlPrefix(url));
+  request.open('POST', url);
   const csrfToken = Cookies.get('csrftoken');
   if (csrfToken) {
     request.setRequestHeader('X-CSRFToken', csrfToken);

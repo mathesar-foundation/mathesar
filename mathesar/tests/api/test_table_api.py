@@ -395,13 +395,13 @@ def test_table_column_options_suggestion(client, schema, engine_email_type):
         {
             'display_options': None,
             'name': 'col_4',
-            'type': 'VARCHAR',
+            'type': 'TEXT',
             'type_options': None
         },
         {
             'display_options': None,
             'name': 'col_5',
-            'type': 'VARCHAR',
+            'type': 'TEXT',
             'type_options': None
         },
         {
@@ -1166,16 +1166,16 @@ def _get_data_types_column_data():
         'type': 'INTEGER'
     }, {
         'name': 'Integer',
-        'type': 'VARCHAR'
+        'type': 'TEXT'
     }, {
         'name': 'Boolean',
-        'type': 'VARCHAR'
+        'type': 'TEXT'
     }, {
         'name': 'Text',
-        'type': 'VARCHAR'
+        'type': 'TEXT'
     }, {
         'name': 'Decimal',
-        'type': 'VARCHAR'
+        'type': 'TEXT'
     }]
 
 
@@ -1319,7 +1319,7 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
+    response = client.patch(f'/apVARCHARi/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
