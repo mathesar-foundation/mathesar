@@ -25,18 +25,20 @@
 -->
 <script lang="ts">
   import FormattedInput from '../formatted-input/FormattedInput.svelte';
+  import type { NumberFormatterOptions } from './number-formatter/types';
   import { NumberFormatter } from './number-formatter';
   import { getInputMode } from './numberInputUtils';
 
+  interface $$Props extends Partial<NumberFormatterOptions> {
+    value?: number;
+    element?: HTMLInputElement;
+  }
+
   export let value: number | undefined = undefined;
-  export let allowFloat = false;
-  export let allowNegative = false;
   export let element: HTMLInputElement | undefined = undefined;
 
-  $: formatter = new NumberFormatter({
-    allowFloat,
-    allowNegative,
-  });
+  $: formatter = new NumberFormatter($$restProps);
+  $: inputmode = getInputMode($$restProps as $$Props);
 </script>
 
 <FormattedInput
@@ -44,5 +46,5 @@
   bind:value
   {...$$restProps}
   bind:element
-  inputmode={getInputMode({ allowFloat, allowNegative })}
+  {inputmode}
 />

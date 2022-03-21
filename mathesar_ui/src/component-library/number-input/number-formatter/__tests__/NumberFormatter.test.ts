@@ -14,67 +14,72 @@ function getFormatter(partialOpts: Partial<Options> = {}): NumberFormatter {
 
 describe('parse and re-parse', () => {
   // prettier-ignore
-  const localeEnUs: [string, string, string, number | undefined][] = [
-  // locale   input     intermediateDisplay   value
-    ['en-US', ''           , ''             , undefined  ],
-    ['en-US', ','          , ''             , undefined  ],
-    ['en-US', 'a'          , ''             , undefined  ],
-    ['en-US', 'abc'        , ''             , undefined  ],
-    ['en-US', 'NaN'        , ''             , undefined  ],
-    ['en-US', 'Infinity'   , ''             , undefined  ],
-    ['en-US', ' '          , ''             , undefined  ],
-    ['en-US', '-'          , '-'            , undefined  ], // see 4
-    ['en-US', '-a'         , '-'            , undefined  ],
-    ['en-US', 'a-'         , '-'            , undefined  ],
-    ['en-US', '-0'         , '-0'           , -0         ],
-    ['en-US', '-.'         , '-0.'          , -0         ],
-    ['en-US', '-0.'        , '-0.'          , -0         ],
-    ['en-US', '-0.0'       , '-0.0'         , -0         ],
-    ['en-US', '-0.0a'      , '-0.0'         , -0         ],
-    ['en-US', '-0.0a0'     , '-0.00'        , -0         ],
-    ['en-US', '-0.0a1'     , '-0.01'        , -0.01      ],
-    ['en-US', '0'          , '0'            , 0          ],
-    ['en-US', '0.'         , '0.'           , 0          ],
-    ['en-US', '.-'         , '0.'           , 0          ],
-    ['en-US', '0.0'        , '0.0'          , 0          ],
-    ['en-US', '.00000'     , '0.00000'      , 0          ], // See 2
-    ['en-US', '.'          , '0.'           , 0          ],
-    ['en-US', '.0'         , '0.0'          , 0          ],
-    ['en-US', '-.1'        , '-0.1'         , -0.1       ],
-    ['en-US', '.1'         , '0.1'          , 0.1        ],
-    ['en-US', '.1.'        , '0.1'          , 0.1        ],
-    ['en-US', '.1.2'       , '0.12'         , 0.12       ],
-    ['en-US', '1.2'        , '1.2'          , 1.2        ],
-    ['en-US', '1.2.'       , '1.2'          , 1.2        ],
-    ['en-US', '1..2'       , '1.2'          , 1.2        ],
-    ['en-US', '1.2.3'      , '1.23'         , 1.23       ],
-    ['en-US', '-1'         , '-1'           , -1         ],
-    ['en-US', '-a1'        , '-1'           , -1         ],
-    ['en-US', '-1-'        , '-1'           , -1         ],
-    ['en-US', '--1'        , '-1'           , -1         ],
-    ['en-US', '\u20121'    , '-1'           , -1         ], // See 3
-    ['en-US', '1'          , '1'            , 1          ],
-    ['en-US', '1,'         , '1'            , 1          ],
-    ['en-US', '+1'         , '1'            , 1          ],
-    ['en-US', ' 1 '        , '1'            , 1          ],
-    ['en-US', 'a1a'        , '1'            , 1          ],
-    ['en-US', '1-'         , '1'            , 1          ],
-    ['en-US', '12345'      , '12,345'       , 12345      ],
-    ['en-US', '12,345'     , '12,345'       , 12345      ],
-    ['en-US', '1,2345'     , '12,345'       , 12345      ],
-    ['en-US', '1234567.89' , '1,234,567.89' , 1234567.89 ],
-    ['en-US', '.123456789' , '0.123456789'  , 0.123456789],
-    ['en-US', '-1-2-'      , '-12'          , -12        ],
-    ['en-US', '1e2'        , '12'           , 12         ], // See 1
-    ['en-US', '1,,2'       , '12'           , 12         ],
-    ['en-US', '1-2'        , '12'           , 12         ],
-    ['en-US', '12-'        , '12'           , 12         ],
-    ['en-US', '1-2-'       , '12'           , 12         ],
-    ['de-DE', '2..3'       , '23'           , 23         ],
-    ['de-DE', '2,,3'       , '2,3'          , 2.3        ],
-    ['de-DE', '1.2.3.4'    , '1.234'        , 1234       ],
-    ['de-DE', '1,2,3,4'    , '1,234'        , 1.234      ],
-    ['li'   , '-1'         , '-1'           , -1         ], // See 5
+  const localeEnUs: [string, boolean, boolean, string, string, number | undefined][] = [
+  // locale   allowFloat
+  //                  allowNegative
+  //                          input          intermediateDisplay
+  //                                                          value
+    ['en-US', true  , true  , ''           , ''             , undefined  ],
+    ['en-US', true  , true  , ','          , ''             , undefined  ],
+    ['en-US', true  , true  , 'a'          , ''             , undefined  ],
+    ['en-US', true  , true  , 'abc'        , ''             , undefined  ],
+    ['en-US', true  , true  , 'NaN'        , ''             , undefined  ],
+    ['en-US', true  , true  , 'Infinity'   , ''             , undefined  ],
+    ['en-US', true  , true  , ' '          , ''             , undefined  ],
+    ['en-US', true  , true  , '-'          , '-'            , undefined  ], // see 4
+    ['en-US', true  , false , '-'          , ''             , undefined  ],
+    ['en-US', true  , true  , '-a'         , '-'            , undefined  ],
+    ['en-US', true  , true  , 'a-'         , '-'            , undefined  ],
+    ['en-US', true  , true  , '-0'         , '-0'           , -0         ],
+    ['en-US', true  , true  , '-.'         , '-0.'          , -0         ],
+    ['en-US', true  , true  , '-0.'        , '-0.'          , -0         ],
+    ['en-US', true  , true  , '-0.0'       , '-0.0'         , -0         ],
+    ['en-US', true  , true  , '-0.0a'      , '-0.0'         , -0         ],
+    ['en-US', true  , true  , '-0.0a0'     , '-0.00'        , -0         ],
+    ['en-US', true  , true  , '-0.0a1'     , '-0.01'        , -0.01      ],
+    ['en-US', true  , true  , '0'          , '0'            , 0          ],
+    ['en-US', true  , true  , '0.'         , '0.'           , 0          ],
+    ['en-US', false , true  , '0.'         , '0'            , 0          ],
+    ['en-US', true  , true  , '.-'         , '0.'           , 0          ],
+    ['en-US', true  , true  , '0.0'        , '0.0'          , 0          ],
+    ['en-US', true  , true  , '.00000'     , '0.00000'      , 0          ], // See 2
+    ['en-US', true  , true  , '.'          , '0.'           , 0          ],
+    ['en-US', true  , true  , '.0'         , '0.0'          , 0          ],
+    ['en-US', true  , true  , '-.1'        , '-0.1'         , -0.1       ],
+    ['en-US', true  , true  , '.1'         , '0.1'          , 0.1        ],
+    ['en-US', true  , true  , '.1.'        , '0.1'          , 0.1        ],
+    ['en-US', true  , true  , '.1.2'       , '0.12'         , 0.12       ],
+    ['en-US', true  , true  , '1.2'        , '1.2'          , 1.2        ],
+    ['en-US', true  , true  , '1.2.'       , '1.2'          , 1.2        ],
+    ['en-US', true  , true  , '1..2'       , '1.2'          , 1.2        ],
+    ['en-US', true  , true  , '1.2.3'      , '1.23'         , 1.23       ],
+    ['en-US', true  , true  , '-1'         , '-1'           , -1         ],
+    ['en-US', true  , true  , '-a1'        , '-1'           , -1         ],
+    ['en-US', true  , true  , '-1-'        , '-1'           , -1         ],
+    ['en-US', true  , true  , '--1'        , '-1'           , -1         ],
+    ['en-US', true  , true  , '\u20121'    , '-1'           , -1         ], // See 3
+    ['en-US', true  , true  , '1'          , '1'            , 1          ],
+    ['en-US', true  , true  , '1,'         , '1'            , 1          ],
+    ['en-US', true  , true  , '+1'         , '1'            , 1          ],
+    ['en-US', true  , true  , ' 1 '        , '1'            , 1          ],
+    ['en-US', true  , true  , 'a1a'        , '1'            , 1          ],
+    ['en-US', true  , true  , '1-'         , '1'            , 1          ],
+    ['en-US', true  , true  , '12345'      , '12,345'       , 12345      ],
+    ['en-US', true  , true  , '12,345'     , '12,345'       , 12345      ],
+    ['en-US', true  , true  , '1,2345'     , '12,345'       , 12345      ],
+    ['en-US', true  , true  , '1234567.89' , '1,234,567.89' , 1234567.89 ],
+    ['en-US', true  , true  , '.123456789' , '0.123456789'  , 0.123456789],
+    ['en-US', true  , true  , '-1-2-'      , '-12'          , -12        ],
+    ['en-US', true  , true  , '1e2'        , '12'           , 12         ], // See 1
+    ['en-US', true  , true  , '1,,2'       , '12'           , 12         ],
+    ['en-US', true  , true  , '1-2'        , '12'           , 12         ],
+    ['en-US', true  , true  , '12-'        , '12'           , 12         ],
+    ['en-US', true  , true  , '1-2-'       , '12'           , 12         ],
+    ['de-DE', true  , true  , '2..3'       , '23'           , 23         ],
+    ['de-DE', true  , true  , '2,,3'       , '2,3'          , 2.3        ],
+    ['de-DE', true  , true  , '1.2.3.4'    , '1.234'        , 1234       ],
+    ['de-DE', true  , true  , '1,2,3,4'    , '1,234'        , 1.234      ],
+    ['li'   , true  , true  , '-1'         , '-1'           , -1         ], // See 5
 
     // 1. Entering numbers in scientific notation is not yet supported. We could
     //    add this in the future.
@@ -91,8 +96,15 @@ describe('parse and re-parse', () => {
   ];
   test.each(localeEnUs)(
     'with locale=%s, input="%s"',
-    (locale, input, expectedIntermediateDisplay, expectedValue) => {
-      const formatter = getFormatter({ locale });
+    (
+      locale,
+      allowFloat,
+      allowNegative,
+      input,
+      expectedIntermediateDisplay,
+      expectedValue,
+    ) => {
+      const formatter = getFormatter({ locale, allowFloat, allowNegative });
       const parsed = formatter.parse(input);
       expect(parsed.value).toEqual(expectedValue);
       expect(parsed.intermediateDisplay).toEqual(expectedIntermediateDisplay);

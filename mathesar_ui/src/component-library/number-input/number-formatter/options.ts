@@ -14,8 +14,8 @@ export interface Options {
  * browser.
  */
 export const defaultOptions: Options = {
-  allowFloat: true,
-  allowNegative: true,
+  allowFloat: false,
+  allowNegative: false,
   useGrouping: 'auto',
   minimumFractionDigits: 0,
   forceTrailingDecimal: false,

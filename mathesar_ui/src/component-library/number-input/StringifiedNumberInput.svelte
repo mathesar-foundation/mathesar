@@ -30,8 +30,14 @@
 -->
 <script lang="ts">
   import FormattedInput from '../formatted-input/FormattedInput.svelte';
+  import type { NumberFormatterOptions } from './number-formatter/types';
   import { StringifiedNumberFormatter } from './number-formatter';
   import { getInputMode } from './numberInputUtils';
+
+  interface $$Props extends Partial<NumberFormatterOptions> {
+    value?: string;
+    element?: HTMLInputElement;
+  }
 
   /**
    * When you bind to this value, you'll get a canonical stringified number. If
@@ -40,14 +46,10 @@
    * component will pass `undefined` back up to you.
    */
   export let value: string | undefined = undefined;
-  export let allowFloat = false;
-  export let allowNegative = false;
   export let element: HTMLInputElement | undefined = undefined;
 
-  $: formatter = new StringifiedNumberFormatter({
-    allowFloat,
-    allowNegative,
-  });
+  $: formatter = new StringifiedNumberFormatter($$restProps);
+  $: inputmode = getInputMode($$restProps as $$Props);
 </script>
 
 <FormattedInput
@@ -55,5 +57,5 @@
   bind:value
   {...$$restProps}
   bind:element
-  inputmode={getInputMode({ allowFloat, allowNegative })}
+  {inputmode}
 />
