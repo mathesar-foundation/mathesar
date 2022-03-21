@@ -1,5 +1,7 @@
 import json
 
+from thefuzz import fuzz
+
 from db.types import base
 from db.types.base import get_qualified_name
 from db.types.money import get_money_array
@@ -14,10 +16,19 @@ def infer_mathesar_money_display_options(table_oid, engine, column_attnum):
     else:
         with open("currency_info.json", 'r') as currency_file:
             currency_dict = json.loads(currency_file.read())
+            greatest_currency_similarity_score = 10  # Threshold score
+            selected_currency_code = None
             for currency_code, currency_details in currency_dict.items():
-                if currency_details['currency_symbol'] == money_array[3]:
+                currency_similarity_score = fuzz.ratio(currency_details['currency_symbol'], money_array[3])
+                if currency_similarity_score == 100:
                     return {'currency_code': currency_code}
-            return {'decimal_symbol': money_array[2], 'digit_grouping_symbol': money_array[1], 'symbol': money_array[3], 'symbol_location': 'Beginning', 'digit_grouping': []}
+                elif currency_similarity_score > greatest_currency_similarity_score:
+                    greatest_currency_similarity_score = currency_similarity_score
+                    selected_currency_code = currency_code
+            if selected_currency_code is not None:
+                return {'currency_code': currency_code}
+            else:
+                return {'decimal_symbol': money_array[2], 'digit_grouping_symbol': money_array[1], 'symbol': money_array[3], 'symbol_location': 'Beginning', 'digit_grouping': []}
 
 
 def get_table_column_display_options(table, col_name_type_dict):

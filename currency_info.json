@@ -178,7 +178,7 @@
     "p_sign_posn": 1,
     "n_sign_posn": 1,
     "decimal_point": ".",
-    "thousa`nds_sep": ",",
+    "thousands_sep": ",",
     "grouping": [
       3,
       3,
