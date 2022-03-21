@@ -13,6 +13,11 @@ type InputType =
   | 'deleteWordBackward'
   | 'deleteWordForward';
 
+export interface BeforeInputOutcome {
+  value: string;
+  cursorPosition: number;
+}
+
 /**
  * Use this function to compute the value an input element will have after the
  * user has modified text and the `beforeinput` event has been fired.
@@ -23,7 +28,9 @@ type InputType =
  *
  * @param event A `beforeinput` event, as sent from an HTMLInputElement
  */
-export function getValueAfterInput(event: InputEvent): string {
+export function getOutcomeOfBeforeInputEvent(
+  event: InputEvent,
+): BeforeInputOutcome {
   const element = event.target as HTMLInputElement;
   const inputType = event.inputType as InputType;
   const fullText = element.value;
@@ -69,5 +76,8 @@ export function getValueAfterInput(event: InputEvent): string {
   }
 
   const insertionText = (operation === 'insert' && event.data) || '';
-  return `${textBeforeSelection}${insertionText}${textAfterSelection}`;
+  return {
+    value: `${textBeforeSelection}${insertionText}${textAfterSelection}`,
+    cursorPosition: textBeforeSelection.length + insertionText.length,
+  };
 }

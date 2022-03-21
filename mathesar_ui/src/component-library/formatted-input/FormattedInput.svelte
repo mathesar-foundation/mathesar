@@ -1,6 +1,6 @@
 <script lang="ts">
   import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
-  import { getValueAfterInput } from '@mathesar-component-library-dir/common/utils';
+  import { getOutcomeOfBeforeInputEvent } from '@mathesar-component-library-dir/common/utils';
   import type { InputFormatter, ParseResult } from './InputFormatter';
 
   type T = $$Generic;
@@ -33,7 +33,7 @@
 
   function handleChildValueChange(event: InputEvent) {
     event.preventDefault();
-    const userInput = getValueAfterInput(event);
+    const { value: userInput } = getOutcomeOfBeforeInputEvent(event);
     try {
       parseResult = formatter.parse(userInput);
       parentValue = parseResult.value;
