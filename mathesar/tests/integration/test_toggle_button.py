@@ -1,6 +1,4 @@
 from multiprocessing.context import assert_spawning
-from tkinter.tix import Tree
-from xml.etree import cElementTree
 from playwright.sync_api import expect
 
 from mathesar.tests.integration.utils.locators import get_table_entry, get_tables_list
