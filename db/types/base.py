@@ -41,6 +41,10 @@ class DatabaseType:
         return ischema_names.get(self.ischema_key)
 
 
+    def is_available_on_engine(self, engine):
+        return self.get_sa_class(engine) is not None
+
+
 class PostgresType(DatabaseType, Enum):
     """
     This only includes built-in Postgres types that SQLAlchemy supports.
