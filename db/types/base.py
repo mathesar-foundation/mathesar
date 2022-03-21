@@ -37,7 +37,8 @@ class DatabaseType:
 
 
     def get_sa_class(self, engine):
-        return get_available_types(engine).get(self.ischema_key)
+        ischema_names = engine.dialect.ischema_names
+        return ischema_names.get(self.ischema_key)
 
 
 class PostgresType(DatabaseType, Enum):
