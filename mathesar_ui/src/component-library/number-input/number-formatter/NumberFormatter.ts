@@ -10,9 +10,9 @@ export default class NumberFormatter extends AbstractNumberFormatter<number> {
 
   parse(input: string): ParseResult<number> {
     const result = makeUniversalNumberParser(this.opts)(input);
-    if (result.value === undefined) {
+    if (result.value === null) {
       return {
-        value: undefined,
+        value: null,
         intermediateDisplay: result.intermediateDisplay,
       };
     }

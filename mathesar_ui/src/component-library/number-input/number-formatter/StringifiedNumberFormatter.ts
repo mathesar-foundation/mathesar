@@ -20,7 +20,7 @@ export default class StringifiedNumberFormatter extends AbstractNumberFormatter<
   parse(input: string): ParseResult<string> {
     const result = makeUniversalNumberParser(this.opts)(input);
     return {
-      value: result.value?.normalizedStringifiedNumber,
+      value: result.value?.normalizedStringifiedNumber ?? null,
       intermediateDisplay: result.intermediateDisplay,
     };
   }

@@ -14,22 +14,22 @@ function getFormatter(partialOpts: Partial<Options> = {}): NumberFormatter {
 
 describe('parse and re-parse', () => {
   // prettier-ignore
-  const localeEnUs: [string, boolean, boolean, string, string, number | undefined][] = [
+  const localeEnUs: [string, boolean, boolean, string, string, number | null][] = [
   // locale   allowFloat
   //                  allowNegative
   //                          input          intermediateDisplay
   //                                                          value
-    ['en-US', true  , true  , ''           , ''             , undefined  ],
-    ['en-US', true  , true  , ','          , ''             , undefined  ],
-    ['en-US', true  , true  , 'a'          , ''             , undefined  ],
-    ['en-US', true  , true  , 'abc'        , ''             , undefined  ],
-    ['en-US', true  , true  , 'NaN'        , ''             , undefined  ],
-    ['en-US', true  , true  , 'Infinity'   , ''             , undefined  ],
-    ['en-US', true  , true  , ' '          , ''             , undefined  ],
-    ['en-US', true  , true  , '-'          , '-'            , undefined  ], // see 4
-    ['en-US', true  , false , '-'          , ''             , undefined  ],
-    ['en-US', true  , true  , '-a'         , '-'            , undefined  ],
-    ['en-US', true  , true  , 'a-'         , '-'            , undefined  ],
+    ['en-US', true  , true  , ''           , ''             , null       ],
+    ['en-US', true  , true  , ','          , ''             , null       ],
+    ['en-US', true  , true  , 'a'          , ''             , null       ],
+    ['en-US', true  , true  , 'abc'        , ''             , null       ],
+    ['en-US', true  , true  , 'NaN'        , ''             , null       ],
+    ['en-US', true  , true  , 'Infinity'   , ''             , null       ],
+    ['en-US', true  , true  , ' '          , ''             , null       ],
+    ['en-US', true  , true  , '-'          , '-'            , null       ], // see 4
+    ['en-US', true  , false , '-'          , ''             , null       ],
+    ['en-US', true  , true  , '-a'         , '-'            , null       ],
+    ['en-US', true  , true  , 'a-'         , '-'            , null       ],
     ['en-US', true  , true  , '-0'         , '-0'           , -0         ],
     ['en-US', true  , true  , '-.'         , '-0.'          , -0         ],
     ['en-US', true  , true  , '-0.'        , '-0.'          , -0         ],

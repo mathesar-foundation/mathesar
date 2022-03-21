@@ -34,7 +34,11 @@
     element?: HTMLInputElement;
   }
 
-  export let value: number | undefined = undefined;
+  /**
+   * See docs within `FormattedInput` for an explanation of how we're using
+   * `null` vs `undefined` here.
+   */
+  export let value: number | null | undefined = undefined;
   export let element: HTMLInputElement | undefined = undefined;
 
   $: formatter = new NumberFormatter($$restProps);

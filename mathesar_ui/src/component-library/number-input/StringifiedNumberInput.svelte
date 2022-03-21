@@ -40,12 +40,13 @@
   }
 
   /**
-   * When you bind to this value, you'll get a canonical stringified number. If
-   * the input is blank or "-", you'll get `undefined` instead of an empty
-   * string. If you pass an invalid string like "foo" into `value`, the
-   * component will pass `undefined` back up to you.
+   * When you bind to this value, you'll get a canonical stringified number, or
+   * `null`.
+   *
+   * See docs within `FormattedInput` for an explanation of how we're using
+   * `null` vs `undefined` here.
    */
-  export let value: string | undefined = undefined;
+  export let value: string | null | undefined = undefined;
   export let element: HTMLInputElement | undefined = undefined;
 
   $: formatter = new StringifiedNumberFormatter($$restProps);

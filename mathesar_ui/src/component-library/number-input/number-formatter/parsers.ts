@@ -66,7 +66,7 @@ export function makeUniversalNumberParser(
     const numberValue = parseNumber(simplifiedInput);
     if (numberValue === undefined) {
       return {
-        value: undefined,
+        value: null,
         intermediateDisplay: simplifiedInput,
       };
     }
