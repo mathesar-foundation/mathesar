@@ -1,5 +1,5 @@
-col_1,col_2,col_3,col_4,col_5,col_6,col_7,col_8
-0,0,t,t,a,2,"$5","₿5.00"
-2,1,false,false,cat,1,"$1","₿2.00"
-1,1,true,2,mat,0,"$2","₿5.00"
-0,0,f,0,bat,0,"$3","₿5.00"
+col_1,col_2,col_3,col_4,col_5,col_6,col_7
+0,0,t,t,a,2,"$5"
+2,1,false,false,cat,1,"$1"
+1,1,true,2,mat,0,"$2"
+0,0,f,0,bat,0,"$3"
