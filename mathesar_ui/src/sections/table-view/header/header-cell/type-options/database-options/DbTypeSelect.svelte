@@ -4,19 +4,16 @@
   import type { SelectOption } from '@mathesar-component-library/types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
 
-  export let selectedDbType: DbType | undefined;
-  export let selectedAbstractType: AbstractType | undefined;
+  export let selectedDbType: DbType;
+  export let selectedAbstractType: AbstractType;
 
   function calculateDBTypeOptions(
-    _selectedAbstractType: AbstractType | undefined,
+    _selectedAbstractType: AbstractType,
   ): SelectOption[] {
-    if (_selectedAbstractType) {
-      return Array.from(_selectedAbstractType?.dbTypes).map((entry) => ({
-        id: entry,
-        label: entry,
-      }));
-    }
-    return [];
+    return Array.from(_selectedAbstractType.dbTypes).map((entry) => ({
+      id: entry,
+      label: entry,
+    }));
   }
 
   $: dbTypeOptions = calculateDBTypeOptions(selectedAbstractType);

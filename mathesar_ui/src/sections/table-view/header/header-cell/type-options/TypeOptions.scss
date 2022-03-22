@@ -35,10 +35,23 @@
     padding: 0.625rem 0;
 
     .type-option-tabs {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
       .type-option-tab {
         width: auto;
-        padding-bottom: 0.3125rem;
-        border-bottom: 2px solid #cdcdcd;
+        padding-bottom: 0.2rem;
+        border-bottom: 2px solid;
+        border-color: transparent;
+
+        &.selected {
+          border-color: #cdcdcd;
+          font-weight: 600;
+        }
+        &:not(.selected) {
+          color: #616166;
+        }
       }
     }
     .type-options-content {

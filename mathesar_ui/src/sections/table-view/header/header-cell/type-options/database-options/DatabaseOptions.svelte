@@ -9,14 +9,14 @@
 
   export let selectedDbType: DbType;
   export let typeOptions: Column['type_options'];
-  export let selectedAbstractType: AbstractType | undefined;
+  export let selectedAbstractType: AbstractType;
   export let column: Column;
 
   $: dbOptionsConfig =
-    selectedAbstractType?.typeSwitchOptions?.database?.configuration ??
+    selectedAbstractType.typeSwitchOptions?.database?.configuration ??
     undefined;
-  $: abstTypeHasMultipleDbTypes = selectedAbstractType?.dbTypes.size
-    ? selectedAbstractType?.dbTypes.size > 1
+  $: abstTypeHasMultipleDbTypes = selectedAbstractType.dbTypes.size
+    ? selectedAbstractType.dbTypes.size > 1
     : false;
 </script>
 
