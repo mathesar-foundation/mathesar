@@ -14,10 +14,8 @@ from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_a
 from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.dj_filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
-from mathesar.api.serializers.columns import SimpleColumnSerializer
 from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer
 from mathesar.models import Table
-from mathesar.utils.display_options_inference import infer_table_column_display_options
 from mathesar.utils.tables import (
     get_table_column_types
 )
@@ -69,19 +67,8 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):
         table = self.get_object()
-        inferred_column_data = []
         col_types = get_table_column_types(table)
-        display_options = infer_table_column_display_options(table, col_types)
-        for col_name, col_type in col_types.items():
-            column_data = {
-                'name': col_name,
-                'type': col_type,
-                'display_options': display_options.get(col_name, None)
-            }
-            inferred_column_data.append(column_data)
-        serializer = SimpleColumnSerializer(data=inferred_column_data, many=True)
-        if serializer.is_valid(raise_exception=True):
-            return Response(serializer.data)
+        return Response(col_types)
 
     @action(methods=['post'], detail=True)
     def previews(self, request, pk=None):
