@@ -29,7 +29,14 @@ def infer_mathesar_money_display_options(table_oid, engine, column_attnum):
             if selected_currency_code is not None:
                 return {'currency_code': currency_code}
             else:
-                return {'decimal_symbol': money_array[2], 'digit_grouping_symbol': money_array[1], 'symbol': money_array[3], 'symbol_location': 'Beginning', 'digit_grouping': []}
+                # TODO Improve default values based on locale
+                return {
+                    'decimal_symbol': money_array[2] if money_array[2] is not None else ".",
+                    'digit_grouping_symbol': money_array[1] if money_array[1] is not None else ",",
+                    'symbol': money_array[3],
+                    'symbol_location': 1,
+                    'digit_grouping': []
+                }
 
 
 def infer_table_column_display_options(table, col_name_type_dict):

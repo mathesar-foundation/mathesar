@@ -116,26 +116,32 @@ def get_currency_details(currency_code):
         return currency_dict[currency_code]
 
 
+class CurrencyDisplayOptions(MathesarErrorMessageMixin, serializers.Serializer):
+    symbol = serializers.CharField()
+    symbol_location = serializers.ChoiceField(choices=[(1, 1), (-1, -1)])
+    decimal_symbol = serializers.ChoiceField(choices=[(".", "."), (",", ",")])
+    digit_grouping = serializers.ListField(child=serializers.IntegerField(), allow_empty=True, default=[])
+    digit_grouping_symbol = serializers.ChoiceField(choices=[(".", "."), (",", ","), (" ", " ")], allow_null=True)
+
+
 class MoneyDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
     currency_code = serializers.CharField(allow_null=True, required=False)
-    symbol = serializers.CharField(required=False)
-    symbol_location = serializers.CharField(required=False, allow_null=True)
-    decimal_symbol = serializers.CharField(required=False, allow_null=True)
-    digit_grouping = serializers.ListField(child=serializers.IntegerField(), required=False)
-    digit_grouping_symbol = serializers.CharField(required=False, allow_null=True)
+    currency_details = CurrencyDisplayOptions(required=False)
 
     def validate(self, attrs):
         currency_code = attrs.get('currency_code', None)
         if currency_code is not None:
-            if len(attrs.keys() - ['currency_code']) != 0:
+            if attrs.get('currency_details', None) is not None:
                 raise MoneyDisplayOptionValueConflictAPIException()
             else:
                 currency_details = get_currency_details(currency_code)
-                attrs['symbol'] = currency_details['currency_symbol']
-                attrs['symbol_location'] = 'Beginning' if currency_details['p_cs_precedes'] == 1 else "End"
-                attrs['decimal_symbol'] = currency_details['mon_decimal_point']
-                attrs['digit_grouping'] = currency_details['mon_grouping']
-                attrs['digit_grouping_symbol'] = currency_details['mon_thousands_sep']
+                attrs['currency_details'] = {
+                    'symbol': currency_details['currency_symbol'],
+                    'symbol_location': 1 if currency_details['p_cs_precedes'] == 1 else -1,
+                    'decimal_symbol': currency_details['mon_decimal_point'],
+                    'digit_grouping': currency_details['mon_grouping'],
+                    'digit_grouping_symbol': currency_details['mon_thousands_sep']
+                }
         return super().validate(attrs)
 
 

@@ -62,7 +62,7 @@ def column_test_table_with_service_layer_options(patent_schema):
     column_data_list = [{},
                         {'display_options': {'input': "dropdown", 'use_custom_labels': False}},
                         {'display_options': {'show_as_percentage': True, 'locale': "en_US"}},
-                        {'display_options': {'symbol': "HK $"}}]
+                        {'display_options': {'currency_details': {'symbol': "HK $"}}}]
     db_table = SATable(
         "anewtable",
         MetaData(bind=engine),
@@ -259,26 +259,32 @@ create_display_options_test_list = [
         'currency_code': 'en_US',
     }, {
         'currency_code': 'en_US',
-        'decimal_symbol': '.',
-        'digit_grouping': [3, 3, 0],
-        'digit_grouping_symbol': ',',
-        'symbol': '$',
-        'symbol_location': 'Beginning'
+        'currency_details': {
+            'decimal_symbol': '.',
+            'digit_grouping': [3, 3, 0],
+            'digit_grouping_symbol': ',',
+            'symbol': '$',
+            'symbol_location': 1
+        }
     }),
     ("MONEY", {
         'currency_code': None,
-        'symbol': '$',
-        'symbol_location': 'End',
-        'decimal_symbol': '.',
-        'digit_grouping': [3, 0],
-        'digit_grouping_symbol': ','
+        'currency_details': {
+            'symbol': '$',
+            'symbol_location': -1,
+            'decimal_symbol': '.',
+            'digit_grouping': [3, 0],
+            'digit_grouping_symbol': ','
+        }
     }, {
         'currency_code': None,
-        'symbol': '$',
-        'symbol_location': 'End',
-        'decimal_symbol': '.',
-        'digit_grouping': [3, 0],
-        'digit_grouping_symbol': ','
+        'currency_details': {
+            'symbol': '$',
+            'symbol_location': -1,
+            'decimal_symbol': '.',
+            'digit_grouping': [3, 0],
+            'digit_grouping_symbol': ','
+        }
     }),
     ("NUMERIC", {"show_as_percentage": True}, {"show_as_percentage": True}),
     ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}, {"show_as_percentage": True, "locale": "en_US"}),
@@ -315,11 +321,13 @@ create_display_options_invalid_test_list = [
     ("DATE", {'format': _too_long_string}),
     ("MONEY", {
         'currency_code': 'en_US',
-        'symbol': '$',
-        'symbol_location': 'End',
-        'decimal_symbol': '.',
-        'digit_grouping': [3, 0],
-        'digit_grouping_symbol': ','
+        'currency_details': {
+            'symbol': '$',
+            'symbol_location': -1,
+            'decimal_symbol': '.',
+            'digit_grouping': [3, 0],
+            'digit_grouping_symbol': ','
+        }
     }),
     ("NUMERIC", {"show_as_percentage": "wrong value type"}),
     ("TIMESTAMP WITH TIME ZONE", {'format': []}),
@@ -462,11 +470,13 @@ def test_column_update_mathesar_money_display_options(column_test_table_with_ser
     display_options = {"currency_code": "en_US.ISO8859-1"}
     expected_display_options = {
         'currency_code': 'en_US.ISO8859-1',
-        'decimal_symbol': '.',
-        'digit_grouping': [3, 3, 0],
-        'digit_grouping_symbol': ',',
-        'symbol': '$',
-        'symbol_location': 'Beginning'
+        'currency_details': {
+            'decimal_symbol': '.',
+            'digit_grouping': [3, 3, 0],
+            'digit_grouping_symbol': ',',
+            'symbol': '$',
+            'symbol_location': 1
+        }
     }
     display_options_data = {"display_options": display_options}
     response = client.patch(
