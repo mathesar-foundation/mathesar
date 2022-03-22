@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { afterUpdate, createEventDispatcher, onMount } from 'svelte';
   import {
     faAngleDoubleLeft,
     faAngleDoubleRight,
@@ -45,7 +45,16 @@
 
   $: pageCount = Math.ceil(total / pageSize);
   $: pageInfo = calculatePages(currentPage, pageCount);
-
+  // $: pagebutton = document.querySelector(`[data-page="${currentPage}"]`);
+  // $: pagebutton = document.getElementById(`page-${currentPage}`);
+  let pagebutton: HTMLElement | null = null;
+  
+  afterUpdate(() => {
+    pagebutton = document.querySelector(`[data-page="${currentPage}"]`);
+    if (pagebutton) {
+      pagebutton.focus();
+    }
+	});
   function setPage(e: Event, _page: number) {
     if (_page > 0 && _page <= pageCount && currentPage !== _page) {
       currentPage = _page;
@@ -114,7 +123,7 @@
     {/if}
 
     {#each pageInfo.currentWindow as _page (_page)}
-      <li class:active={currentPage === _page}>
+      <li class:active={currentPage === _page} >
         {#if getLink}
           <a
             tabindex="0"
@@ -125,6 +134,7 @@
               : `Goto Page ${_page}`}
             aria-selected={currentPage === _page}
             on:click={(e) => setPage(e, _page)}
+            data-page={_page}
             data-tinro-ignore
           >
             {_page}
@@ -135,9 +145,10 @@
             role="link"
             aria-label={currentPage === _page
               ? `Current Page, Page ${currentPage}`
-              : `Goto Page ${_page}`}
+              : `Goto Page  ${_page}`}
             class="page"
             on:click={(e) => setPage(e, _page)}
+            data-page={_page}
             aria-selected={currentPage === _page}
           >
             {_page}
