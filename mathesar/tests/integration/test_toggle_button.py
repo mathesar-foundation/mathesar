@@ -1,11 +1,8 @@
-from playwright.sync_api import Playwright, sync_playwright, expect
+from playwright.sync_api import expect
 from mathesar.tests.integration.utils.locators import get_table_entry
 
 
-def run(playwright: Playwright) -> None:
-    browser = playwright.firefox.launch(headless=False)
-    context = browser.new_context()
-    page = context.new_page()
+def test_toggle_button(page):
     page.goto("http://0.0.0.0:8000/mathesar_tables/1/")
     page.goto("http://0.0.0.0:8000/mathesar_tables/1/?t=W1tdLG51bGxd")
     page.click("[aria-label='New Table']")
@@ -24,7 +21,3 @@ def run(playwright: Playwright) -> None:
     assert page.is_checked("div:nth-child(5) div:nth-child(3) .cell-wrapper input[type=checkbox]") is False
     cell1.check()
     assert page.is_checked("div:nth-child(5) div:nth-child(3) .cell-wrapper input[type=checkbox]") is True
-
-
-with sync_playwright() as playwright:
-    run(playwright)
