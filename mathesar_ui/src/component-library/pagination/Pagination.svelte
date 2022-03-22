@@ -45,7 +45,6 @@
 
   $: pageCount = Math.ceil(total / pageSize);
   $: pageInfo = calculatePages(currentPage, pageCount);
-  let pagebutton: HTMLElement | null = null;
 
   async function setPage(e: Event, _page: number) {
     if (_page > 0 && _page <= pageCount && currentPage !== _page) {
@@ -56,8 +55,8 @@
       });
     }
     await tick();
-    pagebutton = document.querySelector(`[data-page="${currentPage}"]`);
-    pagebutton?.focus();
+    const pagebutton = document.querySelector(`[data-page="${currentPage}"]`);
+    (pagebutton as HTMLElement)?.focus();
   }
 </script>
 
