@@ -4,6 +4,7 @@ import logging
 from sqlalchemy import select, func, and_, case, literal
 
 from db.records import exceptions as records_exceptions
+from db.records.operations import calculation
 from db.records.utils import create_col_objects
 
 logger = logging.getLogger(__name__)
@@ -137,22 +138,22 @@ def _get_distinct_group_select(table, grouping_columns):
     )
 
 
-def _get_tens_powers_range_group_select(table, grouping_column):
-    power_cte = select(
-        table,
-        (
-            func.floor(
-                func.log(
-                    func.max(grouping_column).over().label('maximum')
-                    - func.min(grouping_column).over().label('minimum')
-                )
-            ) - 1
-        ).label('power')
+def _get_tens_powers_range_group_select(table, grouping_columns):
+    assert len(grouping_columns) == 1
+    grouping_column = grouping_columns[0]
+    diff_cte = calculation.get_extrema_diff_select(
+        table, grouping_column, 'extrema_difference'
+    ).cte('diff_cte')
+    power_cte = calculation.get_offset_order_of_magnitude(
+        diff_cte, diff_cte.c.extrema_difference, 'power'
     ).cte('power_cte')
+
     RAW_ID = 'raw_id'
-    raw_id_cte = select(
+    raw_id_cte = calculation.divide_by_power_of_ten(
         power_cte,
-        func.ceil(power_cte.columns[grouping_column.name] / func.pow(literal(10.0), power_cte.c.power)).label(RAW_ID)
+        power_cte.columns[grouping_column.name],
+        power_cte.c.power,
+        RAW_ID
     ).cte('raw_id_cte')
     cte_main_col_list = [
         col for col in raw_id_cte.columns if col.name == grouping_column.name
