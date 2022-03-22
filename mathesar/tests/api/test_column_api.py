@@ -10,6 +10,7 @@ from db.columns.operations.alter import alter_column_type
 from db.columns.operations.select import get_column_attnum_from_name
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
+from db.types.money import MathesarMoney
 from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models import Column as ServiceLayerColumn
@@ -56,11 +57,12 @@ def column_test_table_with_service_layer_options(patent_schema):
         Column("mycolumn1", Boolean),
         Column("mycolumn2", Integer),
         Column("mycolumn4", TIMESTAMP),
+        Column("mycolumn5", MathesarMoney),
     ]
     column_data_list = [{},
                         {'display_options': {'input': "dropdown", 'use_custom_labels': False}},
-                        {'display_options': {"show_as_percentage": True, "locale": "en_US"}},
-                        {'display_options': {'format': 'YYYY-MM-DD hh:mm'}}]
+                        {'display_options': {'show_as_percentage': True, 'locale': "en_US"}},
+                        {'display_options': {'symbol': "HK $"}}]
     db_table = SATable(
         "anewtable",
         MetaData(bind=engine),
@@ -450,6 +452,28 @@ def test_column_update_display_options(column_test_table_with_service_layer_opti
         display_options_data,
     )
     assert response.json()["display_options"] == display_options
+
+
+def test_column_update_mathesar_money_display_options(column_test_table_with_service_layer_options, client):
+    cache.clear()
+    table, columns = column_test_table_with_service_layer_options
+    column = _get_columns_by_name(table, ['mycolumn5'])[0]
+    column_id = column.id
+    display_options = {"currency_code": "en_US.ISO8859-1"}
+    expected_display_options = {
+        'currency_code': 'en_US.ISO8859-1',
+        'decimal_symbol': '.',
+        'digit_grouping': [3, 3, 0],
+        'digit_grouping_symbol': ',',
+        'symbol': '$',
+        'symbol_location': 'Beginning'
+    }
+    display_options_data = {"display_options": display_options}
+    response = client.patch(
+        f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
+        display_options_data,
+    )
+    assert response.json()["display_options"] == expected_display_options
 
 
 def test_column_display_options_type_on_reflection(column_test_table,
