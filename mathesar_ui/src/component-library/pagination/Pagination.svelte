@@ -143,7 +143,7 @@
             role="link"
             aria-label={currentPage === _page
               ? `Current Page, Page ${currentPage}`
-              : `Goto Page  ${_page}`}
+              : `Goto Page ${_page}`}
             class="page"
             on:click={(e) => setPage(e, _page)}
             data-page={_page}
