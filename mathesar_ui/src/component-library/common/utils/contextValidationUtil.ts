@@ -8,11 +8,11 @@ export type ValidationResultStore = Writable<boolean>;
 const VALIDATION_CONTEXT_KEY = 'validationContext';
 
 class ContextBasedValidator {
-  public validationResult: Writable<boolean> = writable(true);
+  validationResult: Writable<boolean> = writable(true);
 
-  public validationFunctionMap: Map<string, ValidationFunction> = new Map();
+  validationFunctionMap: Map<string, ValidationFunction> = new Map();
 
-  public validate(): boolean {
+  validate(): boolean {
     let isValid = true;
     // eslint-disable-next-line no-restricted-syntax
     for (const validationFn of this.validationFunctionMap.values()) {
@@ -22,7 +22,7 @@ class ContextBasedValidator {
     return isValid;
   }
 
-  public addValidator(key: string, fn: ValidationFunction) {
+  addValidator(key: string, fn: ValidationFunction) {
     this.validationFunctionMap.set(key, fn);
 
     onDestroy(() => {
