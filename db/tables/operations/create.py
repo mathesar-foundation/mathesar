@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Table, MetaData
+from sqlalchemy import Column, TEXT, Table, MetaData
 from sqlalchemy.ext import compiler
 from sqlalchemy.schema import DDLElement
 
@@ -34,7 +34,7 @@ def create_string_column_table(name, schema, column_names, engine):
     This method creates a Postgres table in the specified schema, with all
     columns being String type.
     """
-    columns_ = [Column(name=column_name, type_=String) for column_name in column_names]
+    columns_ = [Column(name=column_name, type_=TEXT) for column_name in column_names]
     table = create_mathesar_table(name, schema, columns_, engine)
     return table
 
