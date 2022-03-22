@@ -1319,7 +1319,7 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
     body = {
         'columns': column_data
     }
-    response = client.patch(f'/apVARCHARi/db/v0/tables/{table.id}/', body)
+    response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
     response_json = response.json()
 
     assert response.status_code == 200
