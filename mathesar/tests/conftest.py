@@ -16,7 +16,8 @@ from db.tables.operations.select import get_oid_from_table
 from mathesar.models import Schema, Table, Database, DataFile
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import create_table_from_csv
-
+from db.columns.operations.select import get_column_attnum_from_name
+from mathesar.models import Column as mathesar_model_column
 
 PATENT_SCHEMA = 'Patents'
 NASA_TABLE = 'NASA Schema List'
@@ -168,6 +169,16 @@ def create_table(csv_filename, create_schema):
         schema_model = create_schema(schema)
         return create_table_from_csv(data_file, table_name, schema_model)
     return _create_table
+
+
+@pytest.fixture
+def create_column():
+    def _create_column(table, column_data):
+        column = table.add_column(column_data)
+        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine)
+        column = mathesar_model_column.current_objects.get_or_create(attnum=attnum, table=table)
+        return column[0]
+    return _create_column
 
 
 @pytest.fixture
