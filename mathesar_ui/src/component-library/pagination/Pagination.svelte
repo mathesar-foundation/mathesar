@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { afterUpdate, createEventDispatcher } from 'svelte';
+  import { tick, createEventDispatcher } from 'svelte';
   import {
     faAngleDoubleLeft,
     faAngleDoubleRight,
@@ -47,13 +47,7 @@
   $: pageInfo = calculatePages(currentPage, pageCount);
   let pagebutton: HTMLElement | null = null;
 
-  afterUpdate(() => {
-    pagebutton = document.querySelector(`[data-page="${currentPage}"]`);
-    if (pagebutton) {
-      pagebutton.focus();
-    }
-  });
-  function setPage(e: Event, _page: number) {
+  async function setPage(e: Event, _page: number) {
     if (_page > 0 && _page <= pageCount && currentPage !== _page) {
       currentPage = _page;
       dispatch('change', {
@@ -61,6 +55,9 @@
         originalEvent: e,
       });
     }
+    await tick();
+    pagebutton = document.querySelector(`[data-page="${currentPage}"]`);
+    pagebutton?.focus();
   }
 </script>
 
