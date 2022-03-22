@@ -37,7 +37,7 @@ def get_money_array(table_oid, engine, column_attnum):
     with engine.begin() as conn:
         package_func = getattr(func, get_qualifier_prefix())
         money_func = getattr(package_func, MONEY_ARR_FUNC_NAME)
-        money_select = money_func((table.c[column_name]), type_=ARRAY(String)).label('x')
+        money_select = money_func((table.c[column_name]), type_=ARRAY(String))
         sel = select(money_select).where(money_select[4] is not None)
         data = conn.execute(sel).fetchone()
         if data is None:
