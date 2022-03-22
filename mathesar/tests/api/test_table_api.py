@@ -459,10 +459,21 @@ def test_table_previews(client, schema, engine_email_type):
             {"name": "col_4", "type": "VARCHAR"},
             {"name": "col_5", "type": "VARCHAR"},
             {"name": "col_6", "type": "NUMERIC"},
-            {"name": "col_7", "type": "MATHESAR_MONEY"}
+            {
+                "name": "col_7",
+                "type": "MATHESAR_TYPES.MATHESAR_MONEY",
+                "display_options": {
+                    "symbol": "$",
+                    'currency_code': None,
+                    'symbol_location': None,
+                    'decimal_symbol': None,
+                    'digit_grouping_symbol': None
+                }
+            }
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
+    print(response.json())
     assert response.status_code == 200
     expect_dict = {
         'name': 'Type Modification Table',
@@ -533,7 +544,7 @@ def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
             {"name": "col_4", "type": "NUMERIC"},
             {"name": "col_5", "type": "VARCHAR"},
             {"name": "col_6", "type": "NUMERIC"},
-            {"name": "col_7", "type": "MATHESAR_MONEY"}
+            {"name": "col_7", "type": "MATHESAR_TYPES.MATHESAR_MONEY"}
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
@@ -565,7 +576,7 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_email_typ
             {"name": "col_4", "type": "NUMERIC"},
             {"name": "col_5", "type": "mathesar_types.email"},
             {"name": "col_6", "type": "NUMERIC"},
-            {"name": "col_7", "type": "MATHESAR_MONEY"}
+            {"name": "col_7", "type": "MATHESAR_TYPES.MATHESAR_MONEY"}
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
@@ -596,7 +607,7 @@ def test_table_previews_unsupported_type(client, schema, engine_email_type):
             {"name": "col_4", "type": "NUMERIC"},
             {"name": "col_5", "type": "VARCHAR"},
             {"name": "col_6", "type": "NUMERIC"},
-            {"name": "col_7", "type": "MATHESAR_MONEY"}
+            {"name": "col_7", "type": "MATHESAR_TYPES.MATHESAR_MONEY"}
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
