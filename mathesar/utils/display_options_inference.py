@@ -2,6 +2,7 @@ import json
 
 from thefuzz import fuzz
 
+from db.columns.operations.select import get_column_attnum_from_name
 from db.types import base
 from db.types.base import get_qualified_name
 from db.types.money import get_money_array
@@ -31,12 +32,13 @@ def infer_mathesar_money_display_options(table_oid, engine, column_attnum):
                 return {'decimal_symbol': money_array[2], 'digit_grouping_symbol': money_array[1], 'symbol': money_array[3], 'symbol_location': 'Beginning', 'digit_grouping': []}
 
 
-def get_table_column_display_options(table, col_name_type_dict):
+def infer_table_column_display_options(table, col_name_type_dict):
     inferred_display_options = {}
     for column_name, columnn_type in col_name_type_dict.items():
         inference_fn = display_options_inference_map.get(columnn_type.lower())
         if inference_fn is not None:
-            inferred_display_options[column_name] = inference_fn(table.oid, table.schema._sa_engine, column_name)
+            column_attnum = get_column_attnum_from_name(table.oid, column_name, table.schema._sa_engine)
+            inferred_display_options[column_name] = inference_fn(table.oid, table.schema._sa_engine, column_attnum)
         else:
             inferred_display_options[column_name] = None
     return inferred_display_options

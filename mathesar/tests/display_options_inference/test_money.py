@@ -1,5 +1,6 @@
 from django.core.files.base import File
 
+from db.columns.operations.select import get_column_attnum_from_name
 from db.tests.types import fixtures
 from mathesar.models import DataFile, Table
 from mathesar.utils.display_options_inference import infer_mathesar_money_display_options
@@ -23,4 +24,5 @@ def test_display_options_inference(client, patent_schema):
     }
     response_table = client.post('/api/db/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
-    infer_mathesar_money_display_options(table.oid, engine, "col_4")
+    column_attnum = get_column_attnum_from_name(table.oid, "col_4", engine)
+    infer_mathesar_money_display_options(table.oid, engine, column_attnum)

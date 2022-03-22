@@ -1,6 +1,7 @@
 from sqlalchemy import ARRAY, String, func, select, text
 from sqlalchemy.types import UserDefinedType
 
+from db.columns.operations.select import get_column_name_from_attnum
 from db.tables.operations.select import reflect_table_from_oid
 from db.types import base
 from db.types.base import get_qualifier_prefix
@@ -32,7 +33,7 @@ def install(engine):
 
 def get_money_array(table_oid, engine, column_attnum):
     table = reflect_table_from_oid(table_oid, engine)
-    column_name = column_attnum
+    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
     with engine.begin() as conn:
         package_func = getattr(func, get_qualifier_prefix())
         money_func = getattr(package_func, MONEY_ARR_FUNC_NAME)

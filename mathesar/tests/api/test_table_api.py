@@ -473,7 +473,6 @@ def test_table_previews(client, schema, engine_email_type):
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
-    print(response.json())
     assert response.status_code == 200
     expect_dict = {
         'name': 'Type Modification Table',
