@@ -1,5 +1,6 @@
 from playwright.sync_api import Playwright, sync_playwright, expect
-from mathesar.tests.integration.utils.locators import get_table_entry, get_tables_list
+from mathesar.tests.integration.utils.locators import get_table_entry
+
 
 def run(playwright: Playwright) -> None:
     browser = playwright.firefox.launch(headless=False)
@@ -23,6 +24,7 @@ def run(playwright: Playwright) -> None:
     assert page.is_checked("div:nth-child(5) div:nth-child(3) .cell-wrapper input[type=checkbox]") is False
     cell1.check()
     assert page.is_checked("div:nth-child(5) div:nth-child(3) .cell-wrapper input[type=checkbox]") is True
+
 
 with sync_playwright() as playwright:
     run(playwright)
