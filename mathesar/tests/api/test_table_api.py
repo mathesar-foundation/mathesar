@@ -377,8 +377,8 @@ def test_table_type_suggestion(client, schema, engine_email_type):
         'col_1': 'NUMERIC',
         'col_2': 'BOOLEAN',
         'col_3': 'BOOLEAN',
-        'col_4': 'VARCHAR',
-        'col_5': 'VARCHAR',
+        'col_4': 'TEXT',
+        'col_5': 'TEXT',
         'col_6': 'NUMERIC',
         'col_7': 'MATHESAR_TYPES.MATHESAR_MONEY'
     }
