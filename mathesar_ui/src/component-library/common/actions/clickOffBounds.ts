@@ -25,7 +25,7 @@ export default function clickOffBounds(
     }
   }
 
-  document.body.addEventListener('click', outOfBoundsListener, true);
+  document.body.addEventListener('pointerdown', outOfBoundsListener, true);
 
   function update(opts: Options) {
     callback = opts.callback;
@@ -33,7 +33,7 @@ export default function clickOffBounds(
   }
 
   function destroy() {
-    document.body.removeEventListener('click', outOfBoundsListener, true);
+    document.body.removeEventListener('pointerdown', outOfBoundsListener, true);
   }
 
   return {
