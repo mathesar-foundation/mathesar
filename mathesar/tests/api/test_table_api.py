@@ -359,7 +359,7 @@ def test_table_detail(create_table, client):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_column_options_suggestion(client, schema, engine_email_type):
+def test_table_type_suggestion(client, schema, engine_email_type):
     table_name = 'Type Inference Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -373,56 +373,15 @@ def test_table_column_options_suggestion(client, schema, engine_email_type):
     response_table = client.post('/api/db/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
 
-    EXPECTED_TYPES = [
-        {
-            'display_options': None,
-            'name': 'col_1',
-            'type': 'NUMERIC',
-            'type_options': None
-        },
-        {
-            'display_options': None,
-            'name': 'col_2',
-            'type': 'BOOLEAN',
-            'type_options': None
-        },
-        {
-            'display_options': None,
-            'name': 'col_3',
-            'type': 'BOOLEAN',
-            'type_options': None
-        },
-        {
-            'display_options': None,
-            'name': 'col_4',
-            'type': 'TEXT',
-            'type_options': None
-        },
-        {
-            'display_options': None,
-            'name': 'col_5',
-            'type': 'TEXT',
-            'type_options': None
-        },
-        {
-            'display_options': None,
-            'name': 'col_6',
-            'type': 'NUMERIC',
-            'type_options': None
-        },
-        {
-            'display_options': {
-                'currency_code': 'en_US.ISO8859-1',
-                'decimal_symbol': '.',
-                'digit_grouping': [3, 3, 0],
-                'digit_grouping_symbol': ',',
-                'symbol': '$',
-                'symbol_location': 'Beginning'
-            },
-            'name': 'col_7',
-            'type': 'MATHESAR_TYPES.MATHESAR_MONEY',
-            'type_options': None
-        }]
+    EXPECTED_TYPES = {
+        'col_1': 'NUMERIC',
+        'col_2': 'BOOLEAN',
+        'col_3': 'BOOLEAN',
+        'col_4': 'VARCHAR',
+        'col_5': 'VARCHAR',
+        'col_6': 'NUMERIC',
+        'col_7': 'MATHESAR_TYPES.MATHESAR_MONEY'
+    }
     response = client.get(f'/api/db/v0/tables/{table.id}/type_suggestions/')
     response_table = response.json()
     assert response.status_code == 200
@@ -459,17 +418,7 @@ def test_table_previews(client, schema, engine_email_type):
             {"name": "col_4", "type": "VARCHAR"},
             {"name": "col_5", "type": "VARCHAR"},
             {"name": "col_6", "type": "NUMERIC"},
-            {
-                "name": "col_7",
-                "type": "MATHESAR_TYPES.MATHESAR_MONEY",
-                "display_options": {
-                    "symbol": "$",
-                    'currency_code': None,
-                    'symbol_location': None,
-                    'decimal_symbol': None,
-                    'digit_grouping_symbol': None
-                }
-            }
+            {"name": "col_7", "type": "MATHESAR_TYPES.MATHESAR_MONEY"}
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
