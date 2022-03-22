@@ -1,5 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import { faBackspace } from '@fortawesome/free-solid-svg-icons';
+  import { ContextMenu, MenuItem } from '@mathesar-component-library';
   import {
     isCellActive,
     scrollBasedOnActiveCell,
@@ -12,6 +14,7 @@
     RecordsData,
   } from '@mathesar/stores/table-data/types';
   import Cell from '@mathesar/components/cell/Cell.svelte';
+  import Null from '@mathesar/components/Null.svelte';
 
   export let recordsData: RecordsData;
   export let display: Display;
@@ -23,6 +26,7 @@
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
   $: isLoading = !row.__state || row.__state === 'loading';
+  $: canSetNull = column.nullable && value !== null;
 
   // TODO: Set individual cell states and errors in recordsData
 
@@ -46,8 +50,7 @@
     }
   }
 
-  async function valueUpdated(e: CustomEvent<{ value: unknown }>) {
-    const newValue = e.detail.value;
+  async function setValue(newValue: unknown) {
     if (newValue !== value) {
       value = newValue;
       if (row.__isNew) {
@@ -56,6 +59,10 @@
         await recordsData.updateCell(row, column);
       }
     }
+  }
+
+  async function valueUpdated(e: CustomEvent<{ value: unknown }>) {
+    await setValue(e.detail.value);
   }
 </script>
 
@@ -77,6 +84,15 @@
     on:activate={() => display.selectCell(row, column)}
     on:update={valueUpdated}
   />
+  <ContextMenu>
+    <MenuItem
+      icon={{ data: faBackspace }}
+      disabled={!canSetNull}
+      on:click={() => setValue(null)}
+    >
+      Set to <Null />
+    </MenuItem>
+  </ContextMenu>
 </div>
 
 <style lang="scss">
