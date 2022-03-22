@@ -13,6 +13,7 @@ MATHESAR_GROUP_METADATA = '__mathesar_group_metadata'
 
 class GroupMode(Enum):
     DISTINCT = 'distinct'
+    MAGNITUDE = 'magnitude'
     PERCENTILE = 'percentile'
 
 
@@ -113,6 +114,8 @@ def get_group_augmented_records_query(table, group_by):
         query = _get_percentile_range_group_select(
             table, grouping_columns, group_by.num_groups
         )
+    elif group_by.mode == GroupMode.MAGNITUDE.value:
+        query = _get_tens_powers_range_group_select(table, grouping_columns)
     elif group_by.mode == GroupMode.DISTINCT.value:
         query = _get_distinct_group_select(table, grouping_columns)
     else:
@@ -134,25 +137,37 @@ def _get_distinct_group_select(table, grouping_columns):
     )
 
 
-def _get_tens_powers_range_group_select(columns):
-    column = columns[0]  # For now, this only works on single columns
-    extrema_cte = select(
-        column, func.min(column).over().label('minimum'), func.max(column).over().label('maximum')
-    ).cte('extrema_cte')
-    diff_cte = select(
-        extrema_cte,
-        (extrema_cte.c.maximum - extrema_cte.c.minimum).label('extrema_difference')
-    ).cte('diff_cte')
+def _get_tens_powers_range_group_select(table, grouping_column):
     power_cte = select(
-        diff_cte,
-        (func.floor(func.log(diff_cte.c.extrema_difference)) - 1).label('power')
+        table,
+        (
+            func.floor(
+                func.log(
+                    func.max(grouping_column).over().label('maximum')
+                    - func.min(grouping_column).over().label('minimum')
+                )
+            ) - 1
+        ).label('power')
     ).cte('power_cte')
+    RAW_ID = 'raw_id'
     raw_id_cte = select(
         power_cte,
-        func.ceil(power_cte.columns[column.name] / func.pow(literal(10.0), power_cte.c.power)).label('raw_id')
+        func.ceil(power_cte.columns[grouping_column.name] / func.pow(literal(10.0), power_cte.c.power)).label(RAW_ID)
     ).cte('raw_id_cte')
-    built_cte = select(raw_id_cte)
-    return built_cte
+    cte_main_col_list = [
+        col for col in raw_id_cte.columns if col.name == grouping_column.name
+    ]
+    window_def = GroupingWindowDefinition(
+        order_by=cte_main_col_list, partition_by=raw_id_cte.columns[RAW_ID]
+    )
+
+    group_id_expr = window_def.partition_by
+    return select(
+        *[col for col in raw_id_cte.columns if col.name in table.columns],
+        _get_group_metadata_definition(
+            window_def, cte_main_col_list, group_id_expr
+        )
+    )
 
 
 def _get_percentile_range_group_select(table, columns, num_groups):
