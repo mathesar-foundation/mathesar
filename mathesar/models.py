@@ -169,6 +169,11 @@ class Table(DatabaseObject):
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["oid", "schema"], name="unique_table")
+        ]
+
     def validate_unique(self, exclude=None):
         # Ensure oid is unique on db level
         if Table.current_objects.filter(
