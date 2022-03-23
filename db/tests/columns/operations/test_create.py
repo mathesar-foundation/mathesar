@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy import Integer, Column, Table, MetaData, Numeric, UniqueConstraint
 
-from db.columns.operations.create import create_column, duplicate_column,gen_col_name
+from db.columns.operations.create import create_column, duplicate_column, gen_col_name
 from db.columns.operations.select import get_column_attnum_from_name, get_column_default
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.constraints.operations.select import get_column_constraints
@@ -359,16 +359,11 @@ def test_duplicate_column_default(engine_with_schema, copy_data, copy_constraint
         assert default is None
 
 
-@pytest.mark.parametrize("target_type", type_set)
-def test_create_column_accepts_column_data_without_name_attribute(engine_email_type, target_type):
+def test_create_column_accepts_column_data_without_name_attribute(engine_email_type):
     engine, schema = engine_email_type
     table_name = "atableone"
     initial_column_name = "Column 0"
     expected_column_name = "Column 1"
-    input_output_type_map = {type_: type_ for type_ in type_set}
-    # update the map with types that reflect differently than they're
-    # set when creating a column
-    input_output_type_map.update({'FLOAT': 'DOUBLE PRECISION', 'DECIMAL': 'NUMERIC', 'CHAR': 'CHAR(1)'})
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -376,24 +371,18 @@ def test_create_column_accepts_column_data_without_name_attribute(engine_email_t
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
-    column_data = {"type": target_type}
+    column_data = {"type": "BOOLEAN"}
     created_col = create_column(engine, table_oid, column_data)
     altered_table = reflect_table_from_oid(table_oid, engine)
     assert len(altered_table.columns) == 2
     assert created_col.name == expected_column_name
-    assert created_col.type.compile(engine.dialect) == input_output_type_map[target_type]
 
 
-@pytest.mark.parametrize("target_type", type_set)
-def test_create_column_accepts_column_data_with_name_as_empty_string(engine_email_type, target_type):
+def test_create_column_accepts_column_data_with_name_as_empty_string(engine_email_type):
     engine, schema = engine_email_type
     table_name = "atableone"
     initial_column_name = "Column 0"
     expected_column_name = "Column 1"
-    input_output_type_map = {type_: type_ for type_ in type_set}
-    # update the map with types that reflect differently than they're
-    # set when creating a column
-    input_output_type_map.update({'FLOAT': 'DOUBLE PRECISION', 'DECIMAL': 'NUMERIC', 'CHAR': 'CHAR(1)'})
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -401,25 +390,24 @@ def test_create_column_accepts_column_data_with_name_as_empty_string(engine_emai
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
-    column_data = {"name": "", "type": target_type}
+    column_data = {"name": "", "type": "BOOLEAN"}
     created_col = create_column(engine, table_oid, column_data)
     altered_table = reflect_table_from_oid(table_oid, engine)
     assert len(altered_table.columns) == 2
     assert created_col.name == expected_column_name
-    assert created_col.type.compile(engine.dialect) == input_output_type_map[target_type]
 
 
-@pytest.mark.parametrize("target_type", type_set)
-def test_generate_column_name(engine_email_type,target_type):
+def test_generate_column_name(engine_email_type):
     engine, schema = engine_email_type
     name_set = {
-    'NASA Kennedy Space Center',
-    'Application',
-    'KSC-12871',
-    '0',
-    '13/033,085',
-    'Polyimide Wire Insulation Repair System',
-    ''
+        'Center',
+        'Status',
+        'Case Number',
+        'Patent Number',
+        'Application SN',
+        'Title',
+        'Patent Expiration Date',
+        ''
     }
     table_name = "atableone"
     initial_column_name = "id"
@@ -431,13 +419,13 @@ def test_generate_column_name(engine_email_type,target_type):
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
     for name in name_set:
-        column_data = {"name": name , "type": target_type}
+        column_data = {"name": name, "type": "BOOLEAN"}
         create_column(engine, table_oid, column_data)
     altered_table = reflect_table_from_oid(table_oid, engine)
     n = len(name_set) + 1
-    #Expected column name should be 'Column n' 
-    #where n is length of number of columns already in the table
-    expected_column_name = f"Column {n}" 
+    # Expected column name should be 'Column n'
+    # where n is length of number of columns already in the table
+    expected_column_name = f"Column {n}"
     generated_column_name = gen_col_name(altered_table)
     assert len(altered_table.columns) == n
     assert generated_column_name == expected_column_name

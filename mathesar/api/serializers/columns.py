@@ -95,7 +95,7 @@ class ColumnSerializer(SimpleColumnSerializer):
         )
         model_fields = ('display_options',)
 
-    name = serializers.CharField(required=False,allow_blank=True)
+    name = serializers.CharField(required=False, allow_blank=True)
 
     # From scratch fields
     type = serializers.CharField(source='plain_type', required=False)
