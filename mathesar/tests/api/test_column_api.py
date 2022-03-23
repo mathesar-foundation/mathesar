@@ -329,6 +329,16 @@ create_display_options_invalid_test_list = [
             'digit_grouping_symbol': ','
         }
     }),
+    ("MONEY", {
+        'currency_code': None,
+        'currency_details': {
+            'symbol': '$',
+            'symbol_location': -1,
+            'decimal_symbol': '|',  # Invalid choice
+            'digit_grouping': [3, 0],
+            'digit_grouping_symbol': ','
+        }
+    }),
     ("NUMERIC", {"show_as_percentage": "wrong value type"}),
     ("TIMESTAMP WITH TIME ZONE", {'format': []}),
     ("TIMESTAMP WITHOUT TIME ZONE", {'format': _too_long_string}),
