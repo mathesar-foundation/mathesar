@@ -1,4 +1,4 @@
-from mathesar.api.display_options import DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER
+from mathesar.api.display_options import get_display_options_for_identifier
 from mathesar.api.dj_filters import FILTER_OPTIONS_BY_TYPE_IDENTIFIER
 from mathesar.models import Database
 from mathesar.reflection import reflect_db_objects
@@ -17,7 +17,7 @@ def test_type_list(client, test_db_name):
         expected_filters = FILTER_OPTIONS_BY_TYPE_IDENTIFIER.get(supported_type.get('identifier'))
         assert found_filters == expected_filters
         found_display_options = supported_type.get('display_options')
-        expected_display_options = DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER.get(supported_type.get('identifier'))
+        expected_display_options = get_display_options_for_identifier(supported_type.get('identifier'))
         assert found_display_options == expected_display_options
 
 
