@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { tick, createEventDispatcher } from 'svelte';
   import {
     faAngleDoubleLeft,
     faAngleDoubleRight,
@@ -46,7 +46,7 @@
   $: pageCount = Math.ceil(total / pageSize);
   $: pageInfo = calculatePages(currentPage, pageCount);
 
-  function setPage(e: Event, _page: number) {
+  async function setPage(e: Event, _page: number) {
     if (_page > 0 && _page <= pageCount && currentPage !== _page) {
       currentPage = _page;
       dispatch('change', {
@@ -54,6 +54,9 @@
         originalEvent: e,
       });
     }
+    await tick();
+    const pagebutton = document.querySelector(`[data-page="${currentPage}"]`);
+    (pagebutton as HTMLElement)?.focus();
   }
 </script>
 
@@ -125,6 +128,7 @@
               : `Goto Page ${_page}`}
             aria-selected={currentPage === _page}
             on:click={(e) => setPage(e, _page)}
+            data-page={_page}
             data-tinro-ignore
           >
             {_page}
@@ -138,6 +142,7 @@
               : `Goto Page ${_page}`}
             class="page"
             on:click={(e) => setPage(e, _page)}
+            data-page={_page}
             aria-selected={currentPage === _page}
           >
             {_page}
