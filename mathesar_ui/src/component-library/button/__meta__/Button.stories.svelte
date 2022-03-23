@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import Button from '../Button.svelte';
   import ButtonDocs from './Button.mdx';
