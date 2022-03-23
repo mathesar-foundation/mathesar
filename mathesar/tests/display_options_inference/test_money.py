@@ -25,4 +25,13 @@ def test_display_options_inference(client, patent_schema):
     response_table = client.post('/api/db/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
     column_attnum = get_column_attnum_from_name(table.oid, "col_4", engine)
-    infer_mathesar_money_display_options(table.oid, engine, column_attnum)
+    inferred_display_options = infer_mathesar_money_display_options(table.oid, engine, column_attnum)
+    expected_display_options = {
+        'decimal_symbol': '.',
+        'digit_grouping_symbol': ',',
+        'symbol': '₿',
+        'symbol_location': 1,
+        'digit_grouping': []
+    }
+
+    assert inferred_display_options == expected_display_options
