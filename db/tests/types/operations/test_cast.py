@@ -1392,7 +1392,7 @@ def test_mathesar_money_array_sql(engine_email_type, source_str, expect_arr):
     with engine.begin() as conn:
         res = conn.execute(
             select(
-                text(f"mathesar_types.gmathesar_money_array('{source_str}'::text)")
+                text(f"mathesar_types.get_mathesar_money_array('{source_str}'::text)")
             )
         ).scalar()
     assert res == expect_arr
