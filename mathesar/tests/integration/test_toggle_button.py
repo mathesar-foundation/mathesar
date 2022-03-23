@@ -1,10 +1,11 @@
 from playwright.sync_api import expect
-from mathesar.tests.integration.utils.locators import get_table_entry
+
+from mathesar.tests.integration.utils.locators import get_table_entry, get_tables_list
 
 
-def test_toggle_button(page):
-    page.goto("http://0.0.0.0:8000/mathesar_tables/1/")
-    page.goto("http://0.0.0.0:8000/mathesar_tables/1/?t=W1tdLG51bGxd")
+def test_toggle_button(page, base_schema_url):
+    page.goto(base_schema_url)
+    expect(get_tables_list(page)).to_be_empty()
     page.click("[aria-label='New Table']")
     page.click("button:has-text('Import Data')")
     page.click("text=Copy and Paste Text")
