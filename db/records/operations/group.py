@@ -23,6 +23,10 @@ class GroupMetadataField(Enum):
     GROUP_ID = 'group_id'
     FIRST_VALUE = 'first_value'
     LAST_VALUE = 'last_value'
+    GEQ_VALUE = 'greater_than_eq_value'
+    LT_VALUE = 'less_than_value'
+    LEQ_VALUE = 'less_than_eq_value'
+    GT_VALUE = 'greater_than_value'
 
 
 class GroupBy:
@@ -139,20 +143,22 @@ def _get_distinct_group_select(table, grouping_columns):
 
 
 def _get_tens_powers_range_group_select(table, grouping_columns):
+    EXTREMA_DIFF = 'extrema_difference'
+    POWER = 'power'
+    RAW_ID = 'raw_id'
+
     assert len(grouping_columns) == 1
     grouping_column = grouping_columns[0]
     diff_cte = calculation.get_extrema_diff_select(
-        table, grouping_column, 'extrema_difference'
+        table, grouping_column, EXTREMA_DIFF
     ).cte('diff_cte')
     power_cte = calculation.get_offset_order_of_magnitude(
-        diff_cte, diff_cte.c.extrema_difference, 'power'
+        diff_cte, diff_cte.columns[EXTREMA_DIFF], POWER
     ).cte('power_cte')
-
-    RAW_ID = 'raw_id'
     raw_id_cte = calculation.divide_by_power_of_ten(
         power_cte,
         power_cte.columns[grouping_column.name],
-        power_cte.c.power,
+        power_cte.columns[POWER],
         RAW_ID
     ).cte('raw_id_cte')
     cte_main_col_list = [
@@ -162,11 +168,27 @@ def _get_tens_powers_range_group_select(table, grouping_columns):
         order_by=cte_main_col_list, partition_by=raw_id_cte.columns[RAW_ID]
     )
 
-    group_id_expr = window_def.partition_by
+    group_id_expr = func.dense_rank().over(
+        order_by=window_def.partition_by, range_=window_def.range_
+    )
+
+    power_expr = func.pow(literal(10.0), raw_id_cte.columns[POWER])
+    geq_expr = func.json_build_object(
+        grouping_column.name, raw_id_cte.columns[RAW_ID] * power_expr
+    )
+    lt_expr = func.json_build_object(
+        grouping_column.name, (raw_id_cte.columns[RAW_ID] + 1) * power_expr
+    )
     return select(
-        *[col for col in raw_id_cte.columns if col.name in table.columns],
+        # *[col for col in raw_id_cte.columns if col.name in table.columns],
+        raw_id_cte.columns[RAW_ID],
+        raw_id_cte.columns[grouping_column.name],
         _get_group_metadata_definition(
-            window_def, cte_main_col_list, group_id_expr
+            window_def,
+            cte_main_col_list,
+            group_id_expr,
+            geq_expr=geq_expr,
+            lt_expr=lt_expr,
         )
     )
 
@@ -214,7 +236,15 @@ def _get_percentile_range_group_select(table, columns, num_groups):
     )
 
 
-def _get_group_metadata_definition(window_def, grouping_columns, group_id_expr):
+def _get_group_metadata_definition(
+        window_def,
+        grouping_columns,
+        group_id_expr,
+        leq_expr=None,
+        geq_expr=None,
+        lt_expr=None,
+        gt_expr=None,
+):
     col_key_value_tuples = ((literal(str(col.name)), col) for col in grouping_columns)
     col_key_value_list = [
         col_part for col_tuple in col_key_value_tuples for col_part in col_tuple
@@ -238,6 +268,14 @@ def _get_group_metadata_definition(window_def, grouping_columns, group_id_expr):
             order_by=window_def.order_by,
             range_=window_def.range_,
         ),
+        literal(GroupMetadataField.LEQ_VALUE.value),
+        leq_expr,
+        literal(GroupMetadataField.GEQ_VALUE.value),
+        geq_expr,
+        literal(GroupMetadataField.LT_VALUE.value),
+        lt_expr,
+        literal(GroupMetadataField.GT_VALUE.value),
+        gt_expr,
     ).label(MATHESAR_GROUP_METADATA)
 
 

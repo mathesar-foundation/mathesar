@@ -37,7 +37,7 @@ def divide_by_power_of_ten(selectable, divisor_col, power_col, output_label):
     """
     return select(
         selectable,
-        func.ceil(
+        func.floor(
             divisor_col / func.pow(literal(10.0), power_col)
         ).label(output_label)
     )
