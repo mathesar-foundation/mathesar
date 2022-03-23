@@ -6,7 +6,7 @@ from sqlalchemy.sql.functions import Function
 
 from db.types import base, uri
 from db.types.exceptions import UnsupportedTypeException
-from db.types.base import DatabaseType, PostgresType, MathesarCustomType, get_available_known_db_types
+from db.types.base import DatabaseType, PostgresType, MathesarCustomType, get_available_known_db_types, get_db_type_enum_from_class
 from db.types import categories
 
 from collections.abc import Collection, Mapping
@@ -27,14 +27,11 @@ def get_column_cast_expression(column, target_type: DatabaseType, engine, type_o
         raise UnsupportedTypeException(
             f"Target Type '{target_type.id}' is not supported."
         )
-    else:
-        # TODO this might be replacable with `prepared_target_type_name = target_type.id`
-        prepared_target_type_name = target_type_class().compile(dialect=engine.dialect)
-
-    if prepared_target_type_name == column.type.__class__().compile(dialect=engine.dialect):
+    column_type = get_db_type_enum_from_class(column.type, engine)
+    if target_type == column_type:
         cast_expr = column
     else:
-        qualified_function_name = get_cast_function_name(prepared_target_type_name)
+        qualified_function_name = get_cast_function_name(target_type)
         cast_expr = Function(
             quoted_name(qualified_function_name, False),
             column
