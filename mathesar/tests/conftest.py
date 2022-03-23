@@ -182,6 +182,7 @@ def create_column():
 
 
 @pytest.fixture
-def custom_types_schema(test_db_model):
+def custom_types_schema(test_db_model, schema, live_server):
     engine = create_mathesar_engine(test_db_model.name)
     install.install_mathesar_on_database(engine)
+    return f"{live_server}/{schema.database.name}/{schema.id}"
