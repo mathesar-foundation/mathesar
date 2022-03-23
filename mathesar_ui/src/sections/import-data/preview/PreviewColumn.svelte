@@ -6,10 +6,15 @@
   const dispatch = createEventDispatcher();
   export let column: PreviewColumn;
 
-  const options = column.valid_target_types?.map((type) => ({
+  let options = column.valid_target_types?.map((type) => ({
     id: type,
     label: type,
   }));
+
+  if (column.name === 'id' && options === undefined) {
+    options = [{ id: 'INTEGER', label: 'INTEGER' }];
+  }
+
   let selectedOption = {
     id: column.type,
     label: column.type,
@@ -21,15 +26,17 @@
       type: e.detail.value.id as string,
     });
   }
+  const disabled = !column.isEditable;
 </script>
 
 <th class:disabled={!column.isEditable}>
   <div class="name">
-    <Checkbox disabled={!column.isEditable} bind:checked={column.isSelected} />
-    <TextInput disabled={!column.isEditable} bind:value={column.displayName} />
+    <Checkbox {disabled} bind:checked={column.isSelected} />
+    <TextInput {disabled} bind:value={column.displayName} />
   </div>
   <div class="type">
     <Select
+      {disabled}
       {options}
       triggerAppearance="plain"
       bind:value={selectedOption}
