@@ -6,13 +6,12 @@ from enum import Enum
 
 from db.types.base import (
     DatabaseType, PostgresType, MathesarCustomType, get_available_known_db_types,
-    get_qualified_name, get_db_type_name, db_types_hinted,
-    get_db_type_enum_from_id
+    get_qualified_name, db_types_hinted,
 )
 
 from copy import deepcopy
 
-from collections.abc import Sequence, Mapping, MutableMapping, MutableSequence
+from collections.abc import Sequence, Mapping, MutableSequence
 
 
 class MathesarType(Enum):
