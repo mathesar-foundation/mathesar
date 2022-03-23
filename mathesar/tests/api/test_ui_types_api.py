@@ -41,7 +41,7 @@ def test_database_types_installed(client, test_db_name):
                 "MATHESAR_TYPES.MULTICURRENCY_MONEY",
             ],
             "filters": None,
-            'display_options': None
+            'display_options': get_display_options_for_identifier("money")
         },
         {
             "identifier": "uri",
