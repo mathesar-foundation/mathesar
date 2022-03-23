@@ -5,12 +5,17 @@ Mathesar data types are shown in the UI.
 from enum import Enum
 
 from db.types.base import (
-    PostgresType, MathesarCustomType, get_available_types, get_qualified_name,
-    get_db_type_name, db_types_hinted, get_db_type_enum_from_id
+    DatabaseType, PostgresType, MathesarCustomType, get_available_known_db_types,
+    get_qualified_name, get_db_type_name, db_types_hinted,
+    get_db_type_enum_from_id
 )
 
+from copy import deepcopy
 
-class MathesarTypeIdentifier(Enum):
+from collections.abc import Sequence, Mapping, MutableMapping, MutableSequence
+
+
+class MathesarType(Enum):
     BOOLEAN = 'boolean'
     DATETIME = 'datetime'
     TIME = 'time'
@@ -27,115 +32,130 @@ class MathesarTypeIdentifier(Enum):
     CUSTOM = 'custom'
 
 
-def _get_mapped_types(type_map):
+def _get_mapped_types(type_map) -> Sequence[DatabaseType]:
+    """
+    Returns the db types mentioned in given type_map.
+    """
     mapped_types = []
     for type_dict in type_map:
-        for sa_type in type_dict['sa_type_names']:
-            mapped_types.append(sa_type)
+        for db_type in type_dict['db_types']:
+            mapped_types.append(db_type)
     return mapped_types
 
 
-def _get_other_types(type_map):
+def _get_other_types(type_map) -> dict:
     mapped_types = _get_mapped_types(type_map)
     return {
-        'identifier': MathesarTypeIdentifier.OTHER.value,
+        'ma_type': MathesarType.OTHER,
         'name': 'Other',
-        'sa_type_names': [pg_type.value for pg_type in PostgresType if pg_type.value not in mapped_types]
+        'db_types': [pg_type for pg_type in PostgresType if pg_type not in mapped_types]
     }
 
 
-def _get_type_map():
+def _get_type_map() -> MutableSequence[dict]:
+    """
+    Returns a sequence of Mathesar type descriptions.
+
+    Notice that this mapping might include types that are unavailable on a given engine or that
+    are ignored.
+    """
     type_map = [{
-        'identifier': MathesarTypeIdentifier.BOOLEAN.value,
+        'ma_type': MathesarType.BOOLEAN,
         'name': 'Boolean',
-        'sa_type_names': [PostgresType.BOOLEAN.value]
+        'db_types': [PostgresType.BOOLEAN]
     }, {
-        'identifier': MathesarTypeIdentifier.DATE.value,
+        'ma_type': MathesarType.DATE,
         'name': 'Date',
-        'sa_type_names': [
-            PostgresType.DATE.value,
+        'db_types': [
+            PostgresType.DATE,
         ]
     }, {
-        'identifier': MathesarTypeIdentifier.TIME.value,
+        'ma_type': MathesarType.TIME,
         'name': 'Time',
-        'sa_type_names': [
-            PostgresType.TIME_WITH_TIME_ZONE.value,
-            PostgresType.TIME_WITHOUT_TIME_ZONE.value,
+        'db_types': [
+            PostgresType.TIME_WITH_TIME_ZONE,
+            PostgresType.TIME_WITHOUT_TIME_ZONE,
         ]
     }, {
-        'identifier': MathesarTypeIdentifier.DATETIME.value,
+        'ma_type': MathesarType.DATETIME,
         'name': 'Date & Time',
-        'sa_type_names': [
-            PostgresType.TIMESTAMP_WITH_TIME_ZONE.value,
-            PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value
+        'db_types': [
+            PostgresType.TIMESTAMP_WITH_TIME_ZONE,
+            PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE
         ]
     }, {
-        'identifier': MathesarTypeIdentifier.DURATION.value,
+        'ma_type': MathesarType.DURATION,
         'name': 'Duration',
-        'sa_type_names': [PostgresType.INTERVAL.value]
+        'db_types': [PostgresType.INTERVAL]
     }, {
-        'identifier': MathesarTypeIdentifier.EMAIL.value,
+        'ma_type': MathesarType.EMAIL,
         'name': 'Email',
-        'sa_type_names': [get_qualified_name(MathesarCustomType.EMAIL.value)]
+        'db_types': [get_qualified_name(MathesarCustomType.EMAIL)]
     }, {
-        'identifier': MathesarTypeIdentifier.MONEY.value,
+        'ma_type': MathesarType.MONEY,
         'name': 'Money',
-        'sa_type_names': [
-            PostgresType.MONEY.value,
-            get_qualified_name(MathesarCustomType.MATHESAR_MONEY.value),
-            get_qualified_name(MathesarCustomType.MULTICURRENCY_MONEY.value),
+        'db_types': [
+            PostgresType.MONEY,
+            get_qualified_name(MathesarCustomType.MATHESAR_MONEY),
+            get_qualified_name(MathesarCustomType.MULTICURRENCY_MONEY),
         ]
     }, {
-        'identifier': MathesarTypeIdentifier.NUMBER.value,
+        'ma_type': MathesarType.NUMBER,
         'name': 'Number',
-        'sa_type_names': [
-            PostgresType.BIGINT.value,
-            PostgresType.DECIMAL.value,
-            PostgresType.DOUBLE_PRECISION.value,
-            PostgresType.FLOAT.value,
-            PostgresType.INTEGER.value,
-            PostgresType.NUMERIC.value,
-            PostgresType.REAL.value,
-            PostgresType.SMALLINT.value
+        'db_types': [
+            PostgresType.BIGINT,
+            PostgresType.DECIMAL,
+            PostgresType.DOUBLE_PRECISION,
+            PostgresType.FLOAT,
+            PostgresType.INTEGER,
+            PostgresType.NUMERIC,
+            PostgresType.REAL,
+            PostgresType.SMALLINT
         ]
     }, {
-        'identifier': MathesarTypeIdentifier.TEXT.value,
+        'ma_type': MathesarType.TEXT,
         'name': 'Text',
-        'sa_type_names': [
-            PostgresType.CHAR.value,
-            PostgresType.CHARACTER.value,
-            PostgresType.CHARACTER_VARYING.value,
-            PostgresType.NAME.value,
-            PostgresType.TEXT.value,
+        'db_types': [
+            PostgresType.CHARACTER,
+            PostgresType.CHARACTER_VARYING,
+            PostgresType.TEXT,
+            PostgresType.NAME,
+            PostgresType.CHAR,
         ]
     }, {
-        'identifier': MathesarTypeIdentifier.URI.value,
+        'ma_type': MathesarType.URI,
         'name': 'URI',
-        'sa_type_names': [get_qualified_name(MathesarCustomType.URI.value)]
+        'db_types': [get_qualified_name(MathesarCustomType.URI)]
     }]
     type_map.append(_get_other_types(type_map))
     return type_map
 
 
 def _get_custom_types(type_map, installed_types):
+    """
+    Describes the CUSTOM MA type that contains the db types whose set is the subtraction of db types
+    mentioned in `type_map` from `installed_types`.
+    """
     mapped_types = _get_mapped_types(type_map)
     return {
-        'identifier': MathesarTypeIdentifier.CUSTOM.value,
+        'ma_type': MathesarType.CUSTOM,
         'name': 'Custom',
-        'sa_type_names': [db_type for db_type in installed_types.keys() if db_type not in mapped_types]
+        'db_types': [db_type for db_type in installed_types.keys() if db_type not in mapped_types]
     }
 
 
-def _ignore_type(sa_type_name):
+def _is_ignored_type(db_type: DatabaseType):
     # We ignore these types since they're internal to SQLAlchemy
+    #
+    # NOTE: in response to above comment, CHAR and NAME are not actually internal to SA.
+    # SA reflects columns with these types as SA String type classes, which makes them unusable
+    # for our purposes (we can't distinguish them). That's the reason for ignoring them.
     IGNORED_TYPES = [
-        PostgresType._ARRAY.value,
-        PostgresType.CHAR.value,
-        PostgresType.NAME.value,
+        PostgresType._ARRAY,
+        PostgresType.CHAR,
+        PostgresType.NAME,
     ]
-    if sa_type_name in IGNORED_TYPES:
-        return True
-    return False
+    return db_type in IGNORED_TYPES
 
 
 def ma_types_that_satisfy_hintset(ma_types_mapped_to_hintsets, hintset):
@@ -162,14 +182,8 @@ def get_ma_types_mapped_to_hintsets(engine):
     ma_type_descriptions = get_types(engine)
     ma_types_mapped_to_hintsets = {}
     for ma_type_description in ma_type_descriptions:
-        # TODO
-        ma_type = get_ma_type_enum_from_id(ma_type_description['identifier'])
-        associated_db_type_descriptions = ma_type_description['db_types']
-        associated_db_types = tuple(
-            # TODO why is db_type_descriptions a list that seems to always have one element?
-            get_db_type_enum_from_id(db_type_descriptions[0]["sa_type_name"])
-            for _db_type_id, db_type_descriptions in associated_db_type_descriptions.items()
-        )
+        ma_type = ma_type_description['ma_type']
+        associated_db_types = ma_type_description['db_types']
         associated_db_type_hintsets = tuple(
             set(db_types_hinted[associated_db_type])
             for associated_db_type in associated_db_types
@@ -188,75 +202,55 @@ def _safe_set_intersection(sets):
         return set()
 
 
-# TODO improve readability
-# TODO improve naming (e.g. what's the difference between sa_type_name and sa_type?)
-def get_types(engine):
-    """
-    Returns a sequence of dicts describing Mathesar types supported by the database
-    associated with the provided engine. It has the following structure:
-
-    ```
-    [
-        dict(
-            identifier,
-            name,
-            db_types=[
-                dict(sa_type_name, sa_type),
-                dict(sa_type_name, sa_type),
-                ...
-            ]
-        ),
-        ...
-    ]
-    ```
-    """
-    types = []
-    installed_types = get_available_types(engine)
+# TODO notice the awkwardness between _get_actual_type_map and _get_type_map
+def _get_actual_type_map(engine) -> Sequence[Mapping]:
+    installed_types = get_available_known_db_types(engine)
     type_map = _get_type_map()
     type_map.append(_get_custom_types(type_map, installed_types))
-    for type_dict in type_map:
-        type_info = {
-            'identifier': type_dict['identifier'],
-            'name': type_dict['name'],
-            'db_types': {}
-        }
-        for sa_type_name in type_dict['sa_type_names']:
-            if sa_type_name in installed_types and (not _ignore_type(sa_type_name)):
-                sa_type = installed_types[sa_type_name]
-                db_type = get_db_type_name(sa_type, engine)
-                sa_type_info = {
-                    'sa_type_name': sa_type_name,
-                    'sa_type': sa_type,
-                }
-                if db_type in type_info['db_types']:
-                    type_info['db_types'][db_type].append(sa_type_info)
-                else:
-                    type_info['db_types'][db_type] = [sa_type_info]
-        types.append(type_info)
-    return types
+    return type_map
 
 
-def get_sa_type_map():
-    sa_types_map = {}
-    for type_map in _get_type_map():
-        mathesar_type = type_map['identifier']
-        for sa_type in type_map['sa_type_names']:
-            sa_types_map[sa_type] = mathesar_type
-    return sa_types_map
-
-
-def get_mathesar_type_from_db_type(db_type_string):
-    type_map = get_sa_type_map()
-    return type_map[db_type_string.lower()]
-
-
-def get_ma_type_enum_from_id(ma_type_id):
+# TODO rename to get_ma_types: it's important to easily distinguish MA types referred to here from
+# other types like DB or SA types.
+def get_types(engine) -> Sequence[Mapping]:
     """
-    Gets an instance of MathesarTypeIdentifier enum corresponding to the
-    provided ma_type_id.  If the id doesn't correspond to the mentioned
-    enum, returns None.
+    Returns a sequence of dicts describing Mathesar types supported by the database associated with
+    the provided engine. It has the same structure as the output of _get_type_map.
     """
-    try:
-        return MathesarTypeIdentifier(ma_type_id)
-    except ValueError:
-        return None
+    def filter_out_ignored_types(ma_type_desc) -> Mapping:
+        db_types = ma_type_desc["db_types"]
+        filtered_db_types = tuple(
+            db_type
+            for db_type
+            in db_types
+            if (not db_type.is_ignored) and (not _is_ignored_type(db_type))
+        )
+        ma_type_desc["db_types"] = filtered_db_types
+        return ma_type_desc
+    ma_type_descriptions = _get_actual_type_map(engine)
+    ma_type_descriptions = deepcopy(ma_type_descriptions)
+    return tuple(
+        filter_out_ignored_types(ma_type_desc)
+        for ma_type_desc
+        in ma_type_descriptions
+    )
+
+
+def _get_db_types_to_mathesar_types_iterator():
+    """
+    Returns an iterator of (db_type, ma_type) pairs, where the db_type is associated with the
+    ma_type. We use an iterator for its laziness.
+    """
+    return (
+        (db_type, ma_type_desc['ma_type'])
+        for ma_type_desc
+        in _get_type_map()
+        for db_type
+        in ma_type_desc['db_types']
+    )
+
+
+def get_mathesar_type_from_db_type(db_type_to_find: DatabaseType) -> MathesarType | None:
+    for db_type, ma_type in _get_db_types_to_mathesar_types_iterator():
+        if db_type == db_type_to_find:
+            return ma_type

@@ -7,31 +7,20 @@ from db.functions import hints
 
 from frozendict import frozendict
 
+from collections.abc import Sequence, Mapping
+
+from db.base import categories
 
 class DatabaseType:
+
+    value: str
+
     @property
-    def id(self):
-        # Here we're defining Enum's value attribute to be the database type id.
-        # However, the meaning of this id is not clear, since often you'll use the ischema_key
-        # below. I've not yet fully conceptualized this duality.
+    def id(self) -> str:
+        """
+        Here we're defining Enum's value attribute to be the database type id.
+        """
         return self.value
-
-    # TODO it would be great to merge id(self) and ischema_key(self). for that we'd need to factor
-    # out the difference in how PostgresType and MathesarCustomType ids are handled. specifically,
-    # MathesarCustomType ids require adding a prefix.
-    @property
-    def ischema_key(self):
-        """
-        Returns the key corresponding to this type on the SA ischema_names dict.
-
-        Note that PostgresType values are already such keys. However, MathesarCustomType values
-        require adding a qualifier prefix.
-        """
-        id = self.id
-        if isinstance(self, MathesarCustomType):
-            return get_qualified_name(id)
-        else:
-            return id
 
     def get_sa_class(self, engine):
         """
@@ -40,16 +29,16 @@ class DatabaseType:
         """
         if not self.is_ignored:
             ischema_names = engine.dialect.ischema_names
-            return ischema_names.get(self.ischema_key)
+            return ischema_names.get(self.id)
 
-    def is_available(self, engine):
+    def is_available(self, engine) -> bool:
         """
         Returns true if this type is available on provided engine.
         """
         return self.get_sa_class(engine) is not None
 
     @property
-    def is_ignored(self):
+    def is_ignored(self) -> bool:
         """
         We ignore some types. Current rule is that if type X is applied to a column, but upon
         reflection that column is of some other type, we ignore type X. This mostly means
@@ -64,6 +53,14 @@ class DatabaseType:
             PostgresType.CHAR,
         )
         return self in ignored_types
+
+    def get_sa_class_compiled(self, engine) -> str | None:
+        sa_class = self.get_sa_class(engine)
+        if sa_class is not None:
+            return sa_class().compile(dialect=engine.dialect)
+
+
+
 
 
 class PostgresType(DatabaseType, Enum):
@@ -118,6 +115,10 @@ class PostgresType(DatabaseType, Enum):
     UUID = 'uuid'
 
 
+# TODO big misnomer!
+# we already have a concept of Mathesar types (UI types) in the mathesar namespace.
+# maybe rename to just CustomType?
+# also, note that db layer should not be aware of Mathesar
 class MathesarCustomType(DatabaseType, Enum):
     """
     This is a list of custom Mathesar DB types.
@@ -127,6 +128,16 @@ class MathesarCustomType(DatabaseType, Enum):
     MATHESAR_MONEY = 'mathesar_money'
     MULTICURRENCY_MONEY = 'multicurrency_money'
     URI = 'uri'
+
+    def __new__(cls, unqualified_id):
+        """
+        Prefixes a qualifier to this Enum's values.
+        `email` becomes something akin to `mathesar_types.email`.
+        """
+        qualified_id = get_qualified_name(unqualified_id)
+        instance = object.__new__(cls)
+        instance._value_ = qualified_id
+        return instance
 
 
 _known_vanilla_db_types = tuple(postgres_type for postgres_type in PostgresType)
@@ -151,7 +162,7 @@ def _remove_prefix(self: str, prefix: str, /) -> str:
         return self[:]
 
 
-def get_db_type_enum_from_id(db_type_id):
+def get_db_type_enum_from_id(db_type_id) -> DatabaseType | None:
     """
     Gets an instance of either the PostgresType enum or the MathesarCustomType enum corresponding
     to the provided db_type_id. If the id doesn't correspond to any of the mentioned enums,
@@ -171,7 +182,7 @@ def get_db_type_enum_from_id(db_type_id):
             return None
 
 
-def _build_db_types_hinted():
+def _build_db_types_hinted() -> Mapping[PostgresType | MathesarCustomType, Sequence[Mapping]]:
     """
     Builds up a map of db types to hintsets.
     """
@@ -204,81 +215,15 @@ def _build_db_types_hinted():
 
     # all types get the "any" hint
     all_db_types = known_db_types
-    hints_for_all_db_types = (hints.any,)
-    _add_to_db_type_hintsets(all_db_types, hints_for_all_db_types)
+    _add_to_db_type_hintsets(all_db_types, (hints.any,))
 
-    # string-like types get the "string_like" hint
-    string_like_db_types = (
-        PostgresType.CHAR,
-        PostgresType.CHARACTER,
-        PostgresType.CHARACTER_VARYING,
-        PostgresType.NAME,
-        PostgresType.TEXT,
-        MathesarCustomType.URI,
-        MathesarCustomType.EMAIL,
-    )
-    hints_for_string_like_types = (hints.string_like,)
-    _add_to_db_type_hintsets(string_like_db_types, hints_for_string_like_types)
-
-    # numeric types get the "comparable" hint
-    numeric_db_types = (
-        PostgresType.BIGINT,
-        PostgresType.DECIMAL,
-        PostgresType.DOUBLE_PRECISION,
-        PostgresType.FLOAT,
-        PostgresType.INTEGER,
-        PostgresType.SMALLINT,
-        PostgresType.NUMERIC,
-        PostgresType.REAL,
-        PostgresType.MONEY,
-        MathesarCustomType.MATHESAR_MONEY,
-    )
-    hints_for_numeric_db_types = (hints.comparable,)
-    _add_to_db_type_hintsets(numeric_db_types, hints_for_numeric_db_types)
-
-    # time of day db types get the "time" hint
-    time_of_day_db_types = (
-        PostgresType.TIME,
-        PostgresType.TIME_WITH_TIME_ZONE,
-        PostgresType.TIME_WITHOUT_TIME_ZONE,
-    )
-    _add_to_db_type_hintsets(time_of_day_db_types, (hints.time,))
-
-    # point in time db types get the "point_in_time" hint
-    point_in_time_db_types = (
-        *time_of_day_db_types,
-        PostgresType.DATE,
-    )
-    hints_for_point_in_time_types = (hints.point_in_time,)
-    _add_to_db_type_hintsets(point_in_time_db_types, hints_for_point_in_time_types)
-
-    # date db types get the "date" hint
-    date_db_types = (
-        PostgresType.DATE,
-    )
-    _add_to_db_type_hintsets(date_db_types, (hints.date,))
-
-    # datetime db types get the "date" and "time" hints
-    datetime_db_types = (
-        PostgresType.TIMESTAMP,
-        PostgresType.TIMESTAMP_WITH_TIME_ZONE,
-        PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE,
-    )
-    _add_to_db_type_hintsets(datetime_db_types, (hints.date, hints.time,))
-
-    # duration db types get the "duration" hints
-    duration_db_types = (
-        PostgresType.INTERVAL,
-    )
-    _add_to_db_type_hintsets(duration_db_types, (hints.duration,))
-
-    # time related types get the "comparable" hint
-    time_related_db_types = (
-        *point_in_time_db_types,
-        *duration_db_types,
-    )
-    hints_for_time_related_types = (hints.comparable,)
-    _add_to_db_type_hintsets(time_related_db_types, hints_for_time_related_types)
+    _add_to_db_type_hintsets(categories.STRING_LIKE_TYPES, (hints.string_like,))
+    _add_to_db_type_hintsets(categories.TIME_OF_DAY_TYPES, (hints.time,))
+    _add_to_db_type_hintsets(categories.POINT_IN_TIME_TYPES, (hints.point_in_time,))
+    _add_to_db_type_hintsets(categories.DATE_TYPES, (hints.date,))
+    _add_to_db_type_hintsets(categories.DATETIME_TYPES, (hints.date, hints.time,))
+    _add_to_db_type_hintsets(categories.DURATION_TYPES, (hints.duration,))
+    _add_to_db_type_hintsets(categories.COMPARABLE_TYPES, (hints.comparable,))
 
     return frozendict(db_types_hinted)
 
@@ -296,12 +241,15 @@ preparer = create_engine("postgresql://").dialect.identifier_preparer
 _ma_type_qualifier_prefix = preparer.quote_schema(SCHEMA)
 
 
-# TODO rename to get_qualified_mathesar_type_name
+# TODO rename to get_qualified_mathesar_obj_name
+# it's not only used for types. it's also used for qualifying sql function ids
 def get_qualified_name(unqualified_name):
     return ".".join([_ma_type_qualifier_prefix, unqualified_name])
 
 
-def get_available_db_types(engine):
+# TODO improve name; currently its weird names serves to distinguish it from similarly named
+# methods throughout the codebase; should be renamed at earliest convenience.
+def get_available_known_db_types(engine) -> Sequence[DatabaseType]:
     """
     Returns a tuple of DatabaseType instances that are available on provided engine.
     """
@@ -312,9 +260,13 @@ def get_available_db_types(engine):
     )
 
 
-def get_db_type_name(sa_type, engine):
+def get_db_type_enum_from_class(sa_type, engine) -> DatabaseType:
     try:
-        db_type = sa_type.compile(dialect=engine.dialect)
+        db_type_id = sa_type.compile(dialect=engine.dialect)
     except TypeError:
-        db_type = sa_type().compile(dialect=engine.dialect)
-    return db_type
+        db_type_id = sa_type().compile(dialect=engine.dialect)
+    db_type = get_db_type_enum_from_id(db_type_id)
+    if db_type:
+        return db_type
+    else:
+        raise Exception("We don't know how to map this type class to a DatabaseType Enum.")

@@ -11,8 +11,8 @@ from db.columns.operations.select import (
 )
 from db.columns.utils import get_mathesar_column_with_engine, get_type_options
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
-from db.types.base import get_db_type_name
-from db.types.operations.cast import get_supported_alter_column_types, get_cast_function_name
+from db.types.base import get_db_type_enum_from_class, DatabaseType
+from db.types.operations.cast import get_cast_function_name
 from db.utils import execute_statement
 
 
@@ -58,15 +58,11 @@ def alter_column(engine, table_oid, column_attnum, column_data):
 
 
 def alter_column_type(
-        table_oid, column_name, engine, connection, target_type_str,
-        type_options={}, friendly_names=True,
+    table_oid, column_name, engine, connection, target_type: DatabaseType,
+    type_options={}, friendly_names=True,
 ):
     table = reflect_table_from_oid(table_oid, engine, connection)
     _preparer = engine.dialect.identifier_preparer
-    supported_types = get_supported_alter_column_types(
-        engine, friendly_names=friendly_names
-    )
-    target_type = supported_types.get(target_type_str)
     schema = table.schema
 
     table_oid = get_oid_from_table(table.name, schema, engine)
@@ -82,7 +78,12 @@ def alter_column_type(
 
     prepared_table_name = _preparer.format_table(table)
     prepared_column_name = _preparer.format_column(column)
-    prepared_type_name = target_type(**type_options).compile(dialect=engine.dialect)
+    target_type_class = target_type.get_sa_class(engine)
+    if target_type_class is None:
+        # Here it is presumed that target_type will always be available on this engine, so no None
+        # handling.
+        raise Exception("This should never happen")
+    prepared_type_name = target_type_class(**type_options).compile(dialect=engine.dialect)
     cast_function_name = get_cast_function_name(prepared_type_name)
     alter_stmt = f"""
     ALTER TABLE {prepared_table_name}
@@ -101,18 +102,18 @@ def alter_column_type(
 
 
 def retype_column(
-        table_oid, column_attnum, engine, connection, new_type=None, type_options={},
+    table_oid, column_attnum, engine, connection, new_type: DatabaseType = None, type_options={},
 ):
     table = reflect_table_from_oid(table_oid, engine, connection)
     column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
     column = table.columns[column_name]
-    column_db_type = get_db_type_name(column.type, engine)
+    column_db_type = get_db_type_enum_from_class(column.type, engine)
     new_type = new_type if new_type is not None else column_db_type
     column_type_options = get_type_options(column)
 
     if (
-            (new_type.lower() == column_db_type.lower())
-            and _check_type_option_equivalence(type_options, column_type_options)
+        new_type == column_db_type
+        and _check_type_option_equivalence(type_options, column_type_options)
     ):
         return
 
