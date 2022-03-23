@@ -4,16 +4,21 @@
   import type { PreviewColumn } from '@mathesar/stores/fileImports';
 
   const dispatch = createEventDispatcher();
+
   export let column: PreviewColumn;
 
-  let options = column.valid_target_types?.map((type) => ({
-    id: type,
-    label: type,
-  }));
-
-  if (column.name === 'id' && options === undefined) {
-    options = [{ id: 'INTEGER', label: 'INTEGER' }];
+  function getOptions(_column: PreviewColumn) {
+    if (_column.valid_target_types === null) {
+      return [{ id: _column.type, label: _column.type }];
+    }
+    return _column.valid_target_types.map((type) => ({
+      id: type,
+      label: type,
+    }));
   }
+
+  $: options = getOptions(column);
+  $: disabled = !column.isEditable;
 
   let selectedOption = {
     id: column.type,
@@ -26,10 +31,9 @@
       type: e.detail.value.id as string,
     });
   }
-  const disabled = !column.isEditable;
 </script>
 
-<th class:disabled={!column.isEditable}>
+<th class:disabled>
   <div class="name">
     <Checkbox {disabled} bind:checked={column.isSelected} />
     <TextInput {disabled} bind:value={column.displayName} />
