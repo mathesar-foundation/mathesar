@@ -99,6 +99,9 @@ def patents_url_filename():
 def data_types_csv_filename():
     return 'mathesar/tests/data/data_types.csv'
 
+@pytest.fixture(scope='session')
+def col_names_with_spaces_csv_filename():
+    return 'mathesar/tests/data/col_names_with_spaces.csv'
 
 @pytest.fixture(scope='session')
 def non_unicode_csv_filename():
