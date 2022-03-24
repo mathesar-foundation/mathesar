@@ -1,4 +1,4 @@
-from sqlalchemy import func, literal, select
+from sqlalchemy import func, literal, select, cast, INTEGER
 
 
 def get_extrema_diff_select(selectable, column, output_label):
@@ -37,7 +37,10 @@ def divide_by_power_of_ten_select(selectable, divisor_col, power_col, output_lab
     """
     return select(
         selectable,
-        func.floor(
-            divisor_col / func.pow(literal(10.0), power_col)
-        ).label(output_label)
+        cast(
+            func.floor(
+                divisor_col / func.pow(literal(10.0), power_col)
+            ).label(output_label),
+            INTEGER
+        )
     )
