@@ -44,6 +44,8 @@ def record_dictionary_list():
                     'group_id': 15, 'count': 29,
                     'first_value': {'Center': 'NASA KSC', 'Status': 'Application'},
                     'last_value': {'Center': 'NASA KSC', 'Status': 'Application'},
+                    'less_than_eq_value': None, 'greater_than_eq_value': None,
+                    'less_than_value': None, 'greater_than_value': None,
                 }
             },
             'metadata': {}
@@ -54,7 +56,9 @@ def record_dictionary_list():
                 '__mathesar_group_metadata': {
                     'group_id': 2, 'count': 100,
                     'first_value': {'Center': 'NASA ARC', 'Status': 'Issued'},
-                    'last_value': {'Center': 'NASA ARC', 'Status': 'Issued'}
+                    'last_value': {'Center': 'NASA ARC', 'Status': 'Issued'},
+                    'less_than_eq_value': None, 'greater_than_eq_value': None,
+                    'less_than_value': None, 'greater_than_value': None,
                 }
             },
             'metadata': {}
@@ -65,7 +69,9 @@ def record_dictionary_list():
                 '__mathesar_group_metadata': {
                     'group_id': 2, 'count': 100,
                     'first_value': {'Center': 'NASA ARC', 'Status': 'Issued'},
-                    'last_value': {'Center': 'NASA ARC', 'Status': 'Issued'}
+                    'last_value': {'Center': 'NASA ARC', 'Status': 'Issued'},
+                    'less_than_eq_value': None, 'greater_than_eq_value': None,
+                    'less_than_value': None, 'greater_than_value': None,
                 }
             },
             'metadata': {}
