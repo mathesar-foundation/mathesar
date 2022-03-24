@@ -18,6 +18,11 @@ $font-size-info: 0.875rem;
       display: flex;
       flex-direction: row;
       gap: 0.5em;
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
     }
 
     .fa-icon {
