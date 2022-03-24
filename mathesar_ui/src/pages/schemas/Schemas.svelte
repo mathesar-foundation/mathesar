@@ -17,8 +17,8 @@
   function changeCurrentDB(_db: string) {
     if ($currentDBName !== _db) {
       $currentDBName = _db;
-      $currentSchemaId = undefined; // TODO: why reset schema if no DB change?
     }
+    $currentSchemaId = undefined;
   }
 
   $: changeCurrentDB(database);
@@ -50,13 +50,6 @@
     activeSchema = schema;
     addEditModal.open();
   }
-
-  function handlePropagation(e: Event) {
-    if ((e.target as HTMLElement).closest('button')) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  }
 </script>
 
 <svelte:head>
@@ -81,9 +74,7 @@
     <ul class="schema-list">
       {#each displayList as schema (schema.id)}
         <li>
-          <a href="/{$currentDBName}/{schema.id}" on:click={handlePropagation}>
-            <SchemaRow {schema} on:edit={() => editSchema(schema)} />
-          </a>
+          <SchemaRow {schema} on:edit={() => editSchema(schema)} />
         </li>
       {/each}
     </ul>
