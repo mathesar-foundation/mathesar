@@ -36,9 +36,9 @@ def test_db_model(test_db_name):
 
 
 @pytest.fixture
-def new_default_timeout(page: Page):
-    page.set_default_navigation_timeout(10000)
-    return page
+def page(page):
+    page.set_default_navigation_timeout(30000)
+    yeild page
 
 
 @pytest.fixture
