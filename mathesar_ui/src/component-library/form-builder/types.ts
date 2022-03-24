@@ -89,8 +89,6 @@ export interface FormValidationResult {
 export interface FormBuildConfiguration extends FormConfiguration {
   stores: Map<string, FormInputStore>;
   values: Readable<FormValues>;
-  storeUsage: Writable<Map<string, number>>;
-  validation: Readable<FormValidationResult>;
+  validationStore: Readable<FormValidationResult>;
   getValidationResult: () => FormValidationResult;
-  getValues: () => Record<string, FormInputDataType>;
 }
