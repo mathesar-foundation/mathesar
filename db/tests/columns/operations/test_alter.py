@@ -430,92 +430,6 @@ def test_column_default_delete(engine_email_type, col_type):
     assert created_default is None
 
 
-batch_update_cases = (
-    # no changes
-    dict(),
-    # update column names
-    dict(
-        data = (
-            (1, 'name', 'Pizza Style'),
-            (2, 'name', 'Eaten Recently?'),
-        ),
-        expected_length_change = 0,
-        index_offset = 0,
-    ),
-    # column types
-    dict(
-        data = (
-            (0, 'plain_type', 'DOUBLE PRECISION'),
-            (2, 'plain_type', 'BOOLEAN'),
-        ),
-        expected_length_change = 0,
-        index_offset = 0,
-    ),
-    # names and types
-    dict(
-        data = (
-            (0, 'name', 'Pizza ID'),
-            (0, 'plain_type', 'INTEGER'),
-            (1, 'name', 'Pizza Style'),
-            (2, 'plain_type', 'BOOLEAN'),
-        ),
-        expected_length_change = 0,
-        index_offset = 0,
-    ),
-    # drop columns
-    dict(
-        data = (
-            (0, None, {}),
-            (1, None, {}),
-        ),
-        expected_length_change = -2,
-        index_offset = -2,
-    ),
-    # all operations
-    dict(
-        data = (
-            (0, 'name', 'Pizza ID'),
-            (0, 'plain_type', 'INTEGER'),
-            (1, 'name', 'Pizza Style'),
-            (2, 'plain_type', 'BOOLEAN'),
-            (3, None, {}),
-        ),
-        expected_length_change = -1,
-        index_offset = 0,
-    ),
-)
-
-
-@pytest.mark.parametrize("test_case", batch_update_cases)
-def test_batch_update(engine_email_type, test_case):
-    engine, schema = engine_email_type
-    table = _create_pizza_table(engine, schema)
-    table_oid = get_oid_from_table(table.name, schema, engine)
-
-    column_data = _get_pizza_column_data()
-
-    update_data = test_case['data']
-    for update_datum in update_data:
-        ix = update_datum[0]
-        name = update_datum[1]
-        value = update_datum[2]
-        if name:
-            column_data[ix][name] = value
-        else:
-            column_data[ix] = value
-
-    batch_update_columns(table_oid, engine, column_data)
-    updated_table = reflect_table(table.name, schema, engine)
-
-    assert len(table.columns) == len(updated_table.columns) + test_case['length_change']
-    for index, column in enumerate(table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
-        index_with_offset = index + test_case['index_offset']
-        assert new_column_type == column_data[index_with_offset]['plain_type']
-        assert updated_table.columns[index].name == column_data[index_with_offset]['name']
-
-
-@pytest.mark.skip(reason="this group of tests is replaced by above parametrized test")
 def test_batch_update_columns_no_changes(engine_email_type):
     engine, schema = engine_email_type
     table = _create_pizza_table(engine, schema)
@@ -526,12 +440,11 @@ def test_batch_update_columns_no_changes(engine_email_type):
 
     assert len(table.columns) == len(updated_table.columns)
     for index, column in enumerate(table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
+        new_column_type = get_db_type_enum_from_class(updated_table.columns[index].type, engine).id
         assert new_column_type == 'VARCHAR'
         assert updated_table.columns[index].name == table.columns[index].name
 
 
-@pytest.mark.skip(reason="this group of tests is replaced by above parametrized test")
 def test_batch_update_column_names(engine_email_type):
     engine, schema = engine_email_type
     table = _create_pizza_table(engine, schema)
@@ -546,12 +459,11 @@ def test_batch_update_column_names(engine_email_type):
 
     assert len(table.columns) == len(updated_table.columns)
     for index, column in enumerate(table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
+        new_column_type = get_db_type_enum_from_class(updated_table.columns[index].type, engine).id
         assert new_column_type == column_data[index]['plain_type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
-@pytest.mark.skip(reason="this group of tests is replaced by above parametrized test")
 def test_batch_update_column_types(engine_email_type):
     engine, schema = engine_email_type
     table = _create_pizza_table(engine, schema)
@@ -566,12 +478,11 @@ def test_batch_update_column_types(engine_email_type):
 
     assert len(table.columns) == len(updated_table.columns)
     for index, column in enumerate(table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
+        new_column_type = get_db_type_enum_from_class(updated_table.columns[index].type, engine).id
         assert new_column_type == column_data[index]['plain_type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
-@pytest.mark.skip(reason="this group of tests is replaced by above parametrized test")
 def test_batch_update_column_names_and_types(engine_email_type):
     engine, schema = engine_email_type
     table = _create_pizza_table(engine, schema)
@@ -588,12 +499,11 @@ def test_batch_update_column_names_and_types(engine_email_type):
 
     assert len(table.columns) == len(updated_table.columns)
     for index, column in enumerate(table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
+        new_column_type = get_db_type_enum_from_class(updated_table.columns[index].type, engine).id
         assert new_column_type == column_data[index]['plain_type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
-@pytest.mark.skip(reason="this group of tests is replaced by above parametrized test")
 def test_batch_update_column_drop_columns(engine_email_type):
     engine, schema = engine_email_type
     table = _create_pizza_table(engine, schema)
@@ -608,12 +518,11 @@ def test_batch_update_column_drop_columns(engine_email_type):
 
     assert len(updated_table.columns) == len(table.columns) - 2
     for index, column in enumerate(updated_table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
+        new_column_type = get_db_type_enum_from_class(updated_table.columns[index].type, engine).id
         assert new_column_type == column_data[index - 2]['plain_type']
         assert updated_table.columns[index].name == column_data[index - 2]['name']
 
 
-@pytest.mark.skip(reason="this group of tests is replaced by above parametrized test")
 def test_batch_update_column_all_operations(engine_email_type):
     engine, schema = engine_email_type
     table = _create_pizza_table(engine, schema)
@@ -631,6 +540,6 @@ def test_batch_update_column_all_operations(engine_email_type):
 
     assert len(updated_table.columns) == len(table.columns) - 1
     for index, column in enumerate(updated_table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
+        new_column_type = get_db_type_enum_from_class(updated_table.columns[index].type, engine).id
         assert new_column_type == column_data[index]['plain_type']
         assert updated_table.columns[index].name == column_data[index]['name']
