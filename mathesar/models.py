@@ -347,7 +347,7 @@ class Column(ReflectionManagerMixin, BaseModel):
     def __str__(self):
         return f"{self.__class__.__name__}: {self.table_id}-{self.attnum}"
 
-    def __getattribute__(self, name: str) -> Any:
+    def __getattribute__(self, name):
         try:
             return super().__getattribute__(name)
         except AttributeError:
