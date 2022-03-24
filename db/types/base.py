@@ -9,7 +9,7 @@ from frozendict import frozendict
 
 from collections.abc import Sequence, Mapping
 
-from db.base import categories
+from db.types import categories
 
 
 class DatabaseType:
@@ -54,11 +54,6 @@ class DatabaseType:
             PostgresType.CHAR,
         )
         return self in ignored_types
-
-    def get_sa_class_compiled(self, engine) -> str | None:
-        sa_class = self.get_sa_class(engine)
-        if sa_class is not None:
-            return sa_class().compile(dialect=engine.dialect)
 
 
 class PostgresType(DatabaseType, Enum):
