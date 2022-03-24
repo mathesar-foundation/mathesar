@@ -4,7 +4,6 @@ from mathesar.tests.integration.utils.locators import get_table_entry, get_table
 
 
 def test_import_from_clipboard(page, base_schema_url):
-    page.set_default_navigation_timeout(10000)
     page.goto(base_schema_url)
     expect(get_tables_list(page)).to_be_empty()
     page.click("[aria-label='New Table']")
@@ -16,8 +15,7 @@ def test_import_from_clipboard(page, base_schema_url):
     expect(get_table_entry(page, "Table 0")).to_be_visible()
 
 
-def test_import_from_file(page, base_schema_url):
-    page.set_default_navigation_timeout(10000)
+def test_import_from_file(page, base_schema_url,browser_type_launch_args):
     page.goto(base_schema_url)
     page.click("[aria-label='New Table']")
     page.click("button:has-text('Import Data')")

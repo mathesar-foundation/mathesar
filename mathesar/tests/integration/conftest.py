@@ -35,6 +35,12 @@ def test_db_model(test_db_name):
 
 
 @pytest.fixture
+def context(context):
+    context.set_default_timeout(20000)
+    yield context
+
+
+@pytest.fixture
 def create_schema(engine, test_db_model):
     """
     Creates a schema factory, making sure to track and clean up new instances
