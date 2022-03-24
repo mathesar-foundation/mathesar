@@ -6,28 +6,29 @@
   } from '@mathesar-component-library';
   import type {
     FormBuildConfiguration,
-    FormInputDataType,
+    FormValues,
   } from '@mathesar-component-library/types';
   import type { DbType } from '@mathesar/App.d';
-  import type { AbstractTypeDbConfigOptions } from '@mathesar/stores/abstract-types/types';
+  import type { AbstractTypeDbConfig } from '@mathesar/stores/abstract-types/types';
   import type { Column } from '@mathesar/stores/table-data/types';
-  import { getDefaultValuesFromConfig } from '../utils';
 
   export let selectedDbType: DbType;
   export let typeOptions: Column['type_options'];
-  export let configuration: AbstractTypeDbConfigOptions['configuration'];
+  export let configuration: AbstractTypeDbConfig;
   export let column: Column;
 
   function constructForm(
-    _configuration: AbstractTypeDbConfigOptions['configuration'],
+    _configuration: AbstractTypeDbConfig,
     _column: Column,
   ): FormBuildConfiguration {
-    const dbTypeDefaults = getDefaultValuesFromConfig(
-      _configuration,
-      selectedDbType,
-      _column,
-    );
-    return makeForm(_configuration.form, dbTypeDefaults);
+    const dbFormValues =
+      _column.type === selectedDbType
+        ? _configuration.constructDbFormValuesFromTypeOptions(
+            column.type,
+            column.type_options,
+          )
+        : {};
+    return makeForm(_configuration.form, dbFormValues);
   }
 
   $: form = constructForm(configuration, column);
@@ -39,23 +40,13 @@
     return valid;
   });
 
-  function setSelectedDBType(formValues: Record<string, FormInputDataType>) {
-    selectedDbType = configuration.determineDbType(
+  function setSelectedDBType(formValues: FormValues) {
+    const determinedResult = configuration.determineDbTypeAndOptions(
       formValues,
       column.type,
-      column.type_options,
     );
-    const savableVariables =
-      configuration.getSavableTypeOptions(selectedDbType);
-    if (savableVariables.length > 0) {
-      const newTypeOptions: Column['type_options'] = {};
-      savableVariables.forEach((variable) => {
-        newTypeOptions[variable] = formValues[variable];
-      });
-      typeOptions = newTypeOptions;
-    } else {
-      typeOptions = {};
-    }
+    typeOptions = determinedResult.typeOptions;
+    selectedDbType = determinedResult.dbType;
     validationContext.validate();
   }
 

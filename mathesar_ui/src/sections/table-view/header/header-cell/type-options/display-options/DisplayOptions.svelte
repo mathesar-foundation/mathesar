@@ -13,7 +13,7 @@
   } from '@mathesar/component-library/types';
   import type {
     AbstractType,
-    AbstractTypeDisplayConfigOptions,
+    AbstractTypeDisplayConfig,
   } from '@mathesar/stores/abstract-types/types';
   import type { Column } from '@mathesar/stores/table-data/types';
 
@@ -24,28 +24,43 @@
 
   const dummyReadable = readable({});
 
-  $: displayOptionsConfig =
-    selectedAbstractType.typeSwitchOptions?.display ?? undefined;
+  $: configuration = selectedAbstractType.getDisplayConfig?.() ?? undefined;
 
   function constructForm(
-    _displayOptionsConfig?: AbstractTypeDisplayConfigOptions | undefined,
+    _configuration: AbstractTypeDisplayConfig | undefined,
+    _column: Column,
   ): FormBuildConfiguration | undefined {
-    if (_displayOptionsConfig?.form) {
-      return makeForm(_displayOptionsConfig.form, {});
+    if (_configuration) {
+      const displayFormValues =
+        _column.type === selectedDbType
+          ? _configuration.constructDisplayFormValuesFromDisplayOptions(
+              column.display_options,
+            )
+          : {};
+      return makeForm(_configuration.form, displayFormValues);
     }
     return undefined;
   }
 
-  $: form = constructForm(displayOptionsConfig);
+  $: form = constructForm(configuration, column);
   $: values = form?.values ?? dummyReadable;
 
+  const validationContext = getValidationContext();
+  validationContext.addValidator('DisplayFormValidator', () => {
+    if (form) {
+      return form.getValidationResult().isValid;
+    }
+    return true;
+  });
+
   function setDisplayOptions(formValues: Record<string, FormInputDataType>) {
-    //
+    displayOptions = configuration?.determineDisplayOptions(formValues) ?? {};
+    validationContext.validate();
   }
 
   $: setDisplayOptions($values);
 </script>
 
-{#if displayOptionsConfig && form}
+{#if form}
   <FormBuilder {form} />
 {/if}

@@ -56,8 +56,8 @@
     if (selectedAbstractType !== abstractType) {
       if (abstractType.identifier === abstractTypeOfColumn?.identifier) {
         selectedDbType = column.type;
-        typeOptions = { ...(column.type_options || {}) };
-        displayOptions = { ...(column.display_options || {}) };
+        typeOptions = { ...(column.type_options ?? {}) };
+        displayOptions = { ...(column.display_options ?? {}) };
       } else if (abstractType.defaultDbType) {
         selectedDbType = abstractType.defaultDbType;
         typeOptions = {};
@@ -74,8 +74,8 @@
 
   function resetAbstractType() {
     selectedDbType = column.type;
-    typeOptions = column.type_options;
-    displayOptions = column.display_options;
+    typeOptions = { ...(column.type_options ?? {}) };
+    displayOptions = { ...(column.display_options ?? {}) };
     selectedAbstractType = abstractTypeOfColumn;
     selectedTab = 'database';
   }
@@ -159,7 +159,7 @@
           <span>Database</span>
         </Button>
       </li>
-      {#if selectedAbstractType?.typeSwitchOptions?.display}
+      {#if selectedAbstractType?.getDisplayConfig}
         <li class="type-option-tab" class:selected={selectedTab === 'display'}>
           <Button
             appearance="ghost"
