@@ -152,10 +152,10 @@ def _get_tens_powers_range_group_select(table, grouping_columns):
     diff_cte = calculation.get_extrema_diff_select(
         table, grouping_column, EXTREMA_DIFF
     ).cte('diff_cte')
-    power_cte = calculation.get_offset_order_of_magnitude(
+    power_cte = calculation.get_offset_order_of_magnitude_select(
         diff_cte, diff_cte.columns[EXTREMA_DIFF], POWER
     ).cte('power_cte')
-    raw_id_cte = calculation.divide_by_power_of_ten(
+    raw_id_cte = calculation.divide_by_power_of_ten_select(
         power_cte,
         power_cte.columns[grouping_column.name],
         power_cte.columns[POWER],
@@ -180,9 +180,7 @@ def _get_tens_powers_range_group_select(table, grouping_columns):
         grouping_column.name, (raw_id_cte.columns[RAW_ID] + 1) * power_expr
     )
     return select(
-        # *[col for col in raw_id_cte.columns if col.name in table.columns],
-        raw_id_cte.columns[RAW_ID],
-        raw_id_cte.columns[grouping_column.name],
+        *[col for col in raw_id_cte.columns if col.name in table.columns],
         _get_group_metadata_definition(
             window_def,
             cte_main_col_list,

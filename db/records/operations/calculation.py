@@ -14,7 +14,7 @@ def get_extrema_diff_select(selectable, column, output_label):
     )
 
 
-def get_offset_order_of_magnitude(selectable, column, output_label):
+def get_offset_order_of_magnitude_select(selectable, column, output_label):
     """
     This function returns a select statement composed of the given
     selectable, with an additional column containing an integer p such
@@ -28,7 +28,7 @@ def get_offset_order_of_magnitude(selectable, column, output_label):
     )
 
 
-def divide_by_power_of_ten(selectable, divisor_col, power_col, output_label):
+def divide_by_power_of_ten_select(selectable, divisor_col, power_col, output_label):
     """
     This function returns a select statement composed of the given
     selectable, with an additional column containing an integer that is the next
