@@ -15,11 +15,11 @@ def test_import_from_clipboard(page, base_schema_url):
     expect(get_table_entry(page, "Table 0")).to_be_visible()
 
 
-def test_import_from_file(page, base_schema_url, new_default_timeout):
-    page.goto(base_schema_url)
-    page.click("[aria-label='New Table']")
-    page.click("button:has-text('Import Data')")
-    page.set_input_files(".file-upload input", "/code/mathesar/tests/data/patents.csv")
-    page.click("button:has-text('Finish Import')")
-    # "1393 records" is part of the text shown below the table near the pager
-    expect(page.locator("text=1393 records")).to_be_visible()
+def test_import_from_file(base_schema_url, new_default_timeout):
+    new_default_timeout.goto(base_schema_url)
+    new_default_timeout.click("[aria-label='New Table']")
+    new_default_timeout.click("button:has-text('Import Data')")
+    new_default_timeout.set_input_files(".file-upload input", "/code/mathesar/tests/data/patents.csv")
+    new_default_timeout.click("button:has-text('Finish Import')")
+    # "1393 records" is part of the text shown below the table near the new_default_timeoutr
+    expect(new_default_timeout.locator("text=1393 records")).to_be_visible()
