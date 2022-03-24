@@ -3,7 +3,6 @@ from rest_framework.test import APIClient
 from sqlalchemy import text, Table as SATable
 from sqlalchemy import Column, MetaData, Integer, VARCHAR, CHAR, TEXT
 from django.core.cache import cache
-from playwright.sync_api import Page
 
 from db.schemas.operations.create import create_schema as create_sa_schema
 from db.schemas.utils import get_schema_name_from_oid, get_schema_oid_from_name
