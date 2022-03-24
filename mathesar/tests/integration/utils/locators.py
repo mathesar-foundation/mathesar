@@ -1,6 +1,3 @@
-from playwright.sync_api import Page
-
-
 def get_tables_list(page):
     return page.locator("#sidebar li[aria-level='1']:has(button:has-text('Tables')) ul")
 

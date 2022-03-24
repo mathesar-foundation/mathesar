@@ -1,5 +1,3 @@
-from typing import Any
-
 from bidict import bidict
 from django.contrib.auth.models import User
 from django.core.cache import cache
