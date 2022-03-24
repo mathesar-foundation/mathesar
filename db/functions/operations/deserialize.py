@@ -1,4 +1,4 @@
-from db.functions.base import DBFunction, Literal, ColumnName
+from db.functions.base import Literal, ColumnName
 from db.functions.known_db_functions import known_db_functions
 from db.functions.exceptions import UnknownDBFunctionID, BadDBFunctionFormat
 
