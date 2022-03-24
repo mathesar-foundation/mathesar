@@ -15,7 +15,7 @@ def test_import_from_clipboard(page, base_schema_url):
     expect(get_table_entry(page, "Table 0")).to_be_visible()
 
 
-def test_import_from_file(page, base_schema_url):
+def test_import_from_file(page, base_schema_url, new_default_timeout):
     page.goto(base_schema_url)
     page.click("[aria-label='New Table']")
     page.click("button:has-text('Import Data')")

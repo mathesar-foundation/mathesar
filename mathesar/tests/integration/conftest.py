@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 from sqlalchemy import text, Table as SATable
 from sqlalchemy import Column, MetaData, Integer, VARCHAR, CHAR, TEXT
 from django.core.cache import cache
+from playwright.sync_api import Page
 
 from db.schemas.operations.create import create_schema as create_sa_schema
 from db.schemas.utils import get_schema_name_from_oid, get_schema_oid_from_name
@@ -35,9 +36,8 @@ def test_db_model(test_db_name):
 
 
 @pytest.fixture
-def context(context):
-    context.set_default_timeout(20000)
-    yield context
+def new_default_timeout(page: Page):
+    page.set_default_navigation_timeout(20000)
 
 
 @pytest.fixture
