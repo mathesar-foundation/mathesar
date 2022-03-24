@@ -1,11 +1,11 @@
 from django_filters import BooleanFilter, DateTimeFromToRangeFilter, OrderingFilter
 from django_property_filter import PropertyFilterSet, PropertyBaseInFilter, PropertyCharFilter, PropertyOrderingFilter
 
-from mathesar.database.types import MathesarTypeIdentifier
+from mathesar.database.types import MathesarType
 from mathesar.models import Schema, Table, Database
 
 FILTER_OPTIONS_BY_TYPE_IDENTIFIER = {
-    MathesarTypeIdentifier.BOOLEAN.value:
+    MathesarType.BOOLEAN.value:
     {
         "db_type": "BOOLEAN",
         "options": [{

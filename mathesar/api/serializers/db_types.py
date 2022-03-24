@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from db.types.base import db_types_hinted
+from db.types.hintsets import db_types_hinted
 
 
 class DBTypeSerializer(serializers.Serializer):

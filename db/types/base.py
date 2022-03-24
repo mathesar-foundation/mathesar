@@ -3,13 +3,8 @@ from enum import Enum
 from sqlalchemy import create_engine
 
 from db import constants
-from db.functions import hints
 
-from frozendict import frozendict
-
-from collections.abc import Sequence, Mapping
-
-from db.types import categories
+from typing import Optional, Sequence
 
 
 class DatabaseType:
@@ -108,6 +103,22 @@ class PostgresType(DatabaseType, Enum):
     UUID = 'uuid'
 
 
+SCHEMA = f"{constants.MATHESAR_PREFIX}types"
+# Since we want to have our identifiers quoted appropriately for use in
+# PostgreSQL, we want to use the postgres dialect preparer to set this up.
+preparer = create_engine("postgresql://").dialect.identifier_preparer
+
+
+# Should usually equal `mathesar_types`
+_ma_type_qualifier_prefix = preparer.quote_schema(SCHEMA)
+
+
+# TODO rename to get_qualified_mathesar_obj_name
+# it's not only used for types. it's also used for qualifying sql function ids
+def get_qualified_name(unqualified_name):
+    return ".".join([_ma_type_qualifier_prefix, unqualified_name])
+
+
 # TODO big misnomer!
 # we already have a concept of Mathesar types (UI types) in the mathesar namespace.
 # maybe rename to just CustomType?
@@ -155,7 +166,7 @@ def _remove_prefix(self: str, prefix: str, /) -> str:
         return self[:]
 
 
-def get_db_type_enum_from_id(db_type_id) -> DatabaseType | None:
+def get_db_type_enum_from_id(db_type_id) -> Optional[DatabaseType]:
     """
     Gets an instance of either the PostgresType enum or the MathesarCustomType enum corresponding
     to the provided db_type_id. If the id doesn't correspond to any of the mentioned enums,
@@ -173,71 +184,6 @@ def get_db_type_enum_from_id(db_type_id) -> DatabaseType | None:
             return MathesarCustomType(preprocessed_db_type_id)
         except ValueError:
             return None
-
-
-def _build_db_types_hinted() -> Mapping[PostgresType | MathesarCustomType, Sequence[Mapping]]:
-    """
-    Builds up a map of db types to hintsets.
-    """
-    # Start out by defining some hints manually.
-    db_types_hinted = {
-        PostgresType.BOOLEAN: tuple([
-            hints.boolean
-        ]),
-        MathesarCustomType.URI: tuple([
-            hints.uri
-        ]),
-        MathesarCustomType.EMAIL: tuple([
-            hints.email
-        ]),
-    }
-
-    # Then, start adding hints automatically.
-    # This is for many-to-many relationships, i.e. adding multiple identical hintsets to the
-    # hintsets of multiple db types.
-    def _add_to_db_type_hintsets(db_types, hints):
-        """
-        Mutates db_types_hinted to map every hint in `hints` to every DB type in `db_types`.
-        """
-        for db_type in db_types:
-            if db_type in db_types_hinted:
-                updated_hintset = tuple(set(db_types_hinted[db_type] + tuple(hints)))
-                db_types_hinted[db_type] = updated_hintset
-            else:
-                db_types_hinted[db_type] = tuple(hints)
-
-    # all types get the "any" hint
-    all_db_types = known_db_types
-    _add_to_db_type_hintsets(all_db_types, (hints.any,))
-
-    _add_to_db_type_hintsets(categories.STRING_LIKE_TYPES, (hints.string_like,))
-    _add_to_db_type_hintsets(categories.TIME_OF_DAY_TYPES, (hints.time,))
-    _add_to_db_type_hintsets(categories.POINT_IN_TIME_TYPES, (hints.point_in_time,))
-    _add_to_db_type_hintsets(categories.DATE_TYPES, (hints.date,))
-    _add_to_db_type_hintsets(categories.DATETIME_TYPES, (hints.date, hints.time,))
-    _add_to_db_type_hintsets(categories.DURATION_TYPES, (hints.duration,))
-    _add_to_db_type_hintsets(categories.COMPARABLE_TYPES, (hints.comparable,))
-
-    return frozendict(db_types_hinted)
-
-
-db_types_hinted = _build_db_types_hinted()
-
-
-SCHEMA = f"{constants.MATHESAR_PREFIX}types"
-# Since we want to have our identifiers quoted appropriately for use in
-# PostgreSQL, we want to use the postgres dialect preparer to set this up.
-preparer = create_engine("postgresql://").dialect.identifier_preparer
-
-
-# Should usually equal `mathesar_types`
-_ma_type_qualifier_prefix = preparer.quote_schema(SCHEMA)
-
-
-# TODO rename to get_qualified_mathesar_obj_name
-# it's not only used for types. it's also used for qualifying sql function ids
-def get_qualified_name(unqualified_name):
-    return ".".join([_ma_type_qualifier_prefix, unqualified_name])
 
 
 # TODO improve name; currently its weird names serves to distinguish it from similarly named

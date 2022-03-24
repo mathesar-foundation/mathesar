@@ -1,7 +1,7 @@
-from mathesar.database.types import MathesarTypeIdentifier
+from mathesar.database.types import MathesarType
 
 DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER = {
-    MathesarTypeIdentifier.BOOLEAN.value:
+    MathesarType.BOOLEAN.value:
         {
             "options": [{"name": "input", "type": "string",
                          "enum": ['dropdown', 'checkbox']},
@@ -10,24 +10,24 @@ DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER = {
                                    {'name': "FALSE", "type": "string"}]}]
 
         },
-    MathesarTypeIdentifier.NUMBER.value:
+    MathesarType.NUMBER.value:
         {
             "options": [{"name": "show_as_percentage", "type": "boolean"},
                         {"name": "locale", "type": "string"}]
         },
-    MathesarTypeIdentifier.DATETIME.value:
+    MathesarType.DATETIME.value:
         {
             "options": [{"name": "format", "type": "string"}]
         },
-    MathesarTypeIdentifier.TIME.value:
+    MathesarType.TIME.value:
         {
             "options": [{"name": "format", "type": "string"}]
         },
-    MathesarTypeIdentifier.DATE.value:
+    MathesarType.DATE.value:
         {
             "options": [{"name": "format", "type": "string"}]
         },
-    MathesarTypeIdentifier.DURATION.value:
+    MathesarType.DURATION.value:
         {
             "options": [{"name": "format", "type": "string"}]
         }

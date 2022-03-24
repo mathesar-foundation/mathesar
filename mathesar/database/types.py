@@ -6,12 +6,15 @@ from enum import Enum
 
 from db.types.base import (
     DatabaseType, PostgresType, MathesarCustomType, get_available_known_db_types,
-    get_qualified_name, db_types_hinted,
-)
+    get_qualified_name
+    )
+from db.types.hintsets import db_types_hinted
 
 from copy import deepcopy
 
 from collections.abc import Sequence, Mapping, MutableSequence
+
+from typing import Optional
 
 
 class MathesarType(Enum):
@@ -249,7 +252,7 @@ def _get_db_types_to_mathesar_types_iterator():
     )
 
 
-def get_mathesar_type_from_db_type(db_type_to_find: DatabaseType) -> MathesarType | None:
+def get_mathesar_type_from_db_type(db_type_to_find: DatabaseType) -> Optional[MathesarType]:
     for db_type, ma_type in _get_db_types_to_mathesar_types_iterator():
         if db_type == db_type_to_find:
             return ma_type

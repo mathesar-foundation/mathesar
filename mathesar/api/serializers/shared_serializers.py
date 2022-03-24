@@ -2,7 +2,7 @@ from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.database.types import MathesarTypeIdentifier, get_mathesar_type_from_db_type
+from mathesar.database.types import MathesarType, get_mathesar_type_from_db_type
 
 
 class ReadOnlyPolymorphicSerializerMappingMixin:
@@ -130,12 +130,12 @@ class DisplayOptionsMappingSerializer(
     serializers.Serializer
 ):
     serializers_mapping = {
-        MathesarTypeIdentifier.BOOLEAN.value: BooleanDisplayOptionSerializer,
-        MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,
-        MathesarTypeIdentifier.DATETIME.value: TimeFormatDisplayOptionSerializer,
-        MathesarTypeIdentifier.DATE.value: TimeFormatDisplayOptionSerializer,
-        MathesarTypeIdentifier.TIME.value: TimeFormatDisplayOptionSerializer,
-        MathesarTypeIdentifier.DURATION.value: DurationDisplayOptionSerializer,
+        MathesarType.BOOLEAN.value: BooleanDisplayOptionSerializer,
+        MathesarType.NUMBER.value: NumberDisplayOptionSerializer,
+        MathesarType.DATETIME.value: TimeFormatDisplayOptionSerializer,
+        MathesarType.DATE.value: TimeFormatDisplayOptionSerializer,
+        MathesarType.TIME.value: TimeFormatDisplayOptionSerializer,
+        MathesarType.DURATION.value: DurationDisplayOptionSerializer,
     }
 
     def get_mapping_field(self):
