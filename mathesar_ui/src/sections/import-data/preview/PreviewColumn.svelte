@@ -4,12 +4,22 @@
   import type { PreviewColumn } from '@mathesar/stores/fileImports';
 
   const dispatch = createEventDispatcher();
+
   export let column: PreviewColumn;
 
-  const options = column.valid_target_types?.map((type) => ({
-    id: type,
-    label: type,
-  }));
+  function getOptions(_column: PreviewColumn) {
+    if (_column.valid_target_types === null) {
+      return [{ id: _column.type, label: _column.type }];
+    }
+    return _column.valid_target_types.map((type) => ({
+      id: type,
+      label: type,
+    }));
+  }
+
+  $: options = getOptions(column);
+  $: disabled = !column.isEditable;
+
   let selectedOption = {
     id: column.type,
     label: column.type,
@@ -23,13 +33,14 @@
   }
 </script>
 
-<th class:disabled={!column.isEditable}>
+<th class:disabled>
   <div class="name">
-    <Checkbox disabled={!column.isEditable} bind:checked={column.isSelected} />
-    <TextInput disabled={!column.isEditable} bind:value={column.displayName} />
+    <Checkbox {disabled} bind:checked={column.isSelected} />
+    <TextInput {disabled} bind:value={column.displayName} />
   </div>
   <div class="type">
     <Select
+      {disabled}
       {options}
       triggerAppearance="plain"
       bind:value={selectedOption}

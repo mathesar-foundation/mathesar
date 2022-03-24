@@ -13,9 +13,6 @@ logger = logging.getLogger(__name__)
 
 MAX_INFERENCE_DAG_DEPTH = 100
 
-# This constant is used in below DAG to group some types.
-STRING = 'string'
-
 TYPE_INFERENCE_DAG = {
     PostgresType.BOOLEAN: [],
     MathesarCustomType.EMAIL: [],
@@ -23,7 +20,7 @@ TYPE_INFERENCE_DAG = {
     PostgresType.NUMERIC: [
         PostgresType.BOOLEAN,
     ],
-    STRING: [
+    PostgresType.TEXT: [
         PostgresType.BOOLEAN,
         PostgresType.DATE,
         PostgresType.NUMERIC,
@@ -67,11 +64,9 @@ def infer_column_type(schema, table_name, column_name, engine, depth=0, type_inf
         table_name=table_name,
         column_name=column_name
     )
-    # a DAG node will either be a DatabaseType Enum or the STRING constant
+    # a DAG node will be a DatabaseType Enum
     dag_node = type_classes_to_dag_nodes.get(column_type_class)
     logger.debug(f"dag_node: {dag_node}")
-
-    # nested type_inference_dag nodes will always be DatabaseType Enums
     types_to_cast_to = type_inference_dag.get(dag_node, [])
     table_oid = get_oid_from_table(table_name, schema, engine)
     for db_type in types_to_cast_to:
@@ -115,13 +110,13 @@ def _get_type_classes_mapped_to_dag_nodes(engine):
         for db_type
         in get_available_known_db_types(engine)
     }
-    # NOTE: below dict merge sets some keys to STRING, which, in infer_column_type,
-    # maps these classes to the types grouped under TYPE_INFERENCE_DAG[STRING].
+    # NOTE: below dict merge sets some keys to PostgresType.TEXT, which, in infer_column_type,
+    # maps these classes to the types grouped under TYPE_INFERENCE_DAG[PostgresType.TEXT].
     type_classes_to_dag_nodes = (
         type_classes_to_enums | {
-            Text: STRING,
-            TEXT: STRING,
-            VARCHAR: STRING,
+            Text: PostgresType.TEXT,
+            TEXT: PostgresType.TEXT,
+            VARCHAR: PostgresType.TEXT,
         }
     )
     return type_classes_to_dag_nodes
