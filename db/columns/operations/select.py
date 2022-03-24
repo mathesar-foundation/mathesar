@@ -1,7 +1,7 @@
 import warnings
 
 from pglast import Node, parse_sql
-from sqlalchemy import Table, MetaData, and_, asc, select, text, func, cast
+from sqlalchemy import MetaData, Table, and_, asc, cast, select, text
 
 from db.columns.exceptions import DynamicDefaultWarning
 from db.tables.operations.select import reflect_table_from_oid
@@ -46,27 +46,7 @@ def get_column_attnum_from_name(table_oid, column_name, engine, connection_to_us
     return execute_statement(engine, statement, connection_to_use).scalar()
 
 
-def get_column_index_from_name(table_oid, column_name, engine, connection_to_use=None):
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
-    result = get_column_attnum_from_name(table_oid, column_name, engine, connection_to_use)
-
-    # Account for dropped columns that don't appear in the SQLAlchemy tables
-    sel = (
-        select(func.count())
-        .where(and_(
-            pg_attribute.c.attrelid == table_oid,
-            pg_attribute.c.attisdropped.is_(True),
-            pg_attribute.c.attnum < result,
-        ))
-    )
-    dropped_count = execute_statement(engine, sel, connection_to_use).fetchone()[0]
-
-    return result - 1 - dropped_count
-
-
-def get_column_indexes_from_table(table_oid, engine, connection_to_use=None):
+def get_column_attnums_from_table(table_oid, engine, connection_to_use=None):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
         pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
