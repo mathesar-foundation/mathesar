@@ -23,9 +23,9 @@ class GroupMetadataField(Enum):
     GROUP_ID = 'group_id'
     FIRST_VALUE = 'first_value'
     LAST_VALUE = 'last_value'
+    LEQ_VALUE = 'less_than_eq_value'
     GEQ_VALUE = 'greater_than_eq_value'
     LT_VALUE = 'less_than_value'
-    LEQ_VALUE = 'less_than_eq_value'
     GT_VALUE = 'greater_than_value'
 
 
@@ -245,7 +245,9 @@ def _get_group_metadata_definition(
         lt_expr=None,
         gt_expr=None,
 ):
-    col_key_value_tuples = ((literal(str(col.name)), col) for col in grouping_columns)
+    col_key_value_tuples = (
+        (literal(str(col.name)), col) for col in grouping_columns
+    )
     col_key_value_list = [
         col_part for col_tuple in col_key_value_tuples for col_part in col_tuple
     ]
@@ -268,6 +270,9 @@ def _get_group_metadata_definition(
             order_by=window_def.order_by,
             range_=window_def.range_,
         ),
+        # These values are 'pretty' bounds. What 'pretty' means is based
+        # on the caller, and so these expressions need to be defined by
+        # that caller.
         literal(GroupMetadataField.LEQ_VALUE.value),
         leq_expr,
         literal(GroupMetadataField.GEQ_VALUE.value),

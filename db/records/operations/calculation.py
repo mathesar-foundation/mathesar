@@ -2,16 +2,16 @@ from sqlalchemy import func, literal, select
 
 
 def get_extrema_diff_select(selectable, column, output_label):
-        """
-        This function creates a select statement composed of the given
-        selectable, with an additional column containing the difference
-        between the max and min of the given column on each row. The
-        given column needs to be in the given table.
-        """
-        return select(
-            selectable,
-            (func.max(column).over() - func.min(column).over()).label(output_label)
-        )
+    """
+    This function creates a select statement composed of the given
+    selectable, with an additional column containing the difference
+    between the max and min of the given column on each row. The
+    given column needs to be in the given table.
+    """
+    return select(
+        selectable,
+        (func.max(column).over() - func.min(column).over()).label(output_label)
+    )
 
 
 def get_offset_order_of_magnitude(selectable, column, output_label):
