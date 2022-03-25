@@ -1,6 +1,4 @@
 import warnings
-from alembic.migration import MigrationContext
-from alembic.operations import Operations
 import pytest
 from sqlalchemy import (
     String, Integer, Column, Table, MetaData, DateTime, func, text, DefaultClause,
@@ -54,30 +52,6 @@ def test_get_attnum_from_names(engine_with_schema):
     columns_attnum = get_columns_attnum_from_names(table_oid, [zero_name, one_name], engine)
     assert get_column_name_from_attnum(table_oid, columns_attnum[0], engine) == zero_name
     assert get_column_name_from_attnum(table_oid, columns_attnum[1], engine) == one_name
-
-
-def test_get_column_index_from_name_after_delete(engine_with_schema):
-    engine, schema = engine_with_schema
-    table_name = "table_with_columns"
-    zero_name = "colzero"
-    one_name = "colone"
-    two_name = "coltwo"
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column(zero_name, Integer),
-        Column(one_name, String),
-        Column(two_name, String),
-    )
-    table.create()
-    with engine.begin() as conn:
-        op = Operations(MigrationContext.configure(conn))
-        op.drop_column(table.name, one_name, schema=schema)
-
-    table_oid = get_oid_from_table(table_name, schema, engine)
-    columns_attnum = get_columns_attnum_from_names(table_oid, [zero_name, two_name], engine)
-    assert get_column_name_from_attnum(table_oid, columns_attnum[0], engine) == zero_name
-    assert get_column_name_from_attnum(table_oid, columns_attnum[1], engine) == two_name
 
 
 @pytest.mark.parametrize("filler", [True, False])
