@@ -1,14 +1,10 @@
 <script lang="ts">
-  import { createEventDispatcher, getContext, tick, onMount } from 'svelte';
+  import { createEventDispatcher, getContext, onMount } from 'svelte';
   import {
     Button,
     Spinner,
     createValidationContext,
   } from '@mathesar-component-library';
-  import {
-    currentDbAbstractTypes,
-    getAbstractTypesForDbTypeList,
-  } from '@mathesar/stores/abstract-types';
   import { States } from '@mathesar/utils/api';
   import { toast } from '@mathesar/stores/toast';
 
@@ -20,6 +16,7 @@
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
 
   import AbstractTypeOptions from './AbstractTypeOptions.svelte';
+  import AbstractTypeSelector from './AbstractTypeSelector.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -29,12 +26,6 @@
   export let column: Column;
   export let abstractTypeOfColumn: AbstractType | undefined;
 
-  $: allowedTypeConversions = getAbstractTypesForDbTypeList(
-    [...(column.valid_target_types || []), column.type],
-    $currentDbAbstractTypes.data,
-  );
-
-  let abstractTypeContainer: HTMLUListElement;
   let selectedAbstractType: AbstractType | undefined;
   let selectedDbType: DbType | undefined;
   let typeOptions: Column['type_options'];
@@ -73,20 +64,7 @@
     displayOptions = { ...(column.display_options ?? {}) };
     selectedAbstractType = abstractTypeOfColumn;
   }
-
-  async function scrollToSelectedType() {
-    await tick();
-    const selectedElement: HTMLLIElement | null =
-      abstractTypeContainer?.querySelector('li.selected');
-    if (selectedElement) {
-      abstractTypeContainer.scrollTop = selectedElement.offsetTop;
-    }
-  }
-
-  $: if (!selectedAbstractType && abstractTypeOfColumn) {
-    resetAbstractType();
-    void scrollToSelectedType();
-  }
+  resetAbstractType();
 
   function close() {
     resetAbstractType();
@@ -120,22 +98,11 @@
 
 <div class="column-type-menu">
   <h5 class="menu-header">Set Column Type</h5>
-  <ul bind:this={abstractTypeContainer} class="type-list">
-    {#each allowedTypeConversions as abstractType (abstractType.identifier)}
-      <li
-        class:selected={selectedAbstractType?.identifier ===
-          abstractType?.identifier}
-      >
-        <Button
-          appearance="plain"
-          on:click={() => selectAbstractType(abstractType)}
-        >
-          <span class="data-icon">{abstractType.icon}</span>
-          <span>{abstractType.name}</span>
-        </Button>
-      </li>
-    {/each}
-  </ul>
+  <AbstractTypeSelector
+    {selectedAbstractType}
+    {column}
+    on:selection={(e) => selectAbstractType(e.detail)}
+  />
 
   {#if selectedAbstractType && selectedDbType}
     {#key selectedAbstractType}
@@ -162,5 +129,5 @@
 </div>
 
 <style global lang="scss">
-  @import 'TypeOptions.scss';
+  @import 'AbstractTypeConfiguration.scss';
 </style>
