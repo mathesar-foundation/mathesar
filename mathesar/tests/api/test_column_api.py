@@ -385,6 +385,49 @@ def test_column_create_some_parameters(column_test_table, client):
     assert response_data['field'] == "type"
 
 
+def test_column_create_no_name_parameter(column_test_table, client):
+    cache.clear()
+    type_ = "BOOLEAN"
+    num_columns = len(column_test_table.sa_columns)
+    generated_name = f"Column {num_columns}"
+    data = {
+        "type": type_
+    }
+    response = client.post(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/", data=data
+    )
+    assert response.status_code == 201
+    new_columns_response = client.get(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/"
+    )
+    assert new_columns_response.json()["count"] == num_columns + 1
+    actual_new_col = new_columns_response.json()["results"][-1]
+    assert actual_new_col["name"] == generated_name
+    assert actual_new_col["type"] == type_
+
+
+def test_column_create_name_parameter_empty(column_test_table, client):
+    cache.clear()
+    name = ""
+    type_ = "BOOLEAN"
+    num_columns = len(column_test_table.sa_columns)
+    generated_name = f"Column {num_columns}"
+    data = {
+        "name": name, "type": type_
+    }
+    response = client.post(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/", data=data
+    )
+    assert response.status_code == 201
+    new_columns_response = client.get(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/"
+    )
+    assert new_columns_response.json()["count"] == num_columns + 1
+    actual_new_col = new_columns_response.json()["results"][-1]
+    assert actual_new_col["name"] == generated_name
+    assert actual_new_col["type"] == type_
+
+
 def test_column_update_name(column_test_table, client):
     cache.clear()
     name = "updatedname"
@@ -749,6 +792,4 @@ def test_column_duplicate_no_parameters(column_test_table, client):
     response_data = response.json()
     assert response.status_code == 400
     assert response_data[0]["message"] == "This field is required."
-    assert response_data[0]["field"] == "name"
-    assert response_data[1]["message"] == "This field is required."
-    assert response_data[1]["field"] == "type"
+    assert response_data[0]["field"] == "type"
