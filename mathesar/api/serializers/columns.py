@@ -89,7 +89,6 @@ class ColumnSerializer(SimpleColumnSerializer):
             'source_column',
             'copy_source_data',
             'copy_source_constraints',
-            'index',
             'valid_target_types',
             'default'
         )
@@ -111,7 +110,6 @@ class ColumnSerializer(SimpleColumnSerializer):
     copy_source_constraints = serializers.BooleanField(default=True, write_only=True)
 
     # Read only fields
-    index = serializers.IntegerField(source='column_index', read_only=True)
     valid_target_types = serializers.ListField(read_only=True)
 
     def validate(self, data):
