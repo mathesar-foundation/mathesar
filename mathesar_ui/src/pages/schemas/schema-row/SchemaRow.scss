@@ -2,6 +2,7 @@
 $color-dark: #1e1e1e;
 $color-muted: #606066;
 $color-danger: #f47171;
+$color-link: #1a79c8;
 
 $font-size-info: 0.875rem;
 
@@ -18,6 +19,15 @@ $font-size-info: 0.875rem;
       display: flex;
       flex-direction: row;
       gap: 0.5em;
+
+      a {
+        color: $color-link;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
 
     .fa-icon {

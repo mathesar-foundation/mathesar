@@ -4,55 +4,57 @@ import type {
   ModifierArguments,
   Options,
   Instance,
+  VirtualElement,
 } from '@popperjs/core/lib/types';
 import type { Action } from './types';
 
 export default function popper(
   node: HTMLElement,
   actionOpts: {
-    reference: HTMLElement;
+    reference: VirtualElement;
     options?: Partial<Options>;
   },
 ): Action {
   let popperInstance: Instance;
   let prevReference: HTMLElement | undefined;
 
-  function create(reference: HTMLElement, options?: Partial<Options>) {
-    if (reference) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      popperInstance = createPopper(reference, node, {
-        placement: options?.placement || 'bottom-start',
-        modifiers: [
-          {
-            name: 'setMinWidth',
-            enabled: true,
-            phase: 'beforeWrite',
-            requires: ['computeStyles'],
-            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-            fn: (obj: ModifierArguments<unknown>): void => {
-              // eslint-disable-next-line no-param-reassign
-              obj.state.styles.popper.minWidth = `${obj.state.rects.reference.width}px`;
-            },
-            // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-            effect: (obj: ModifierArguments<unknown>): void => {
-              const width = (obj.state.elements.reference as HTMLElement)
-                .offsetWidth;
-              // eslint-disable-next-line no-param-reassign
-              obj.state.elements.popper.style.minWidth = `${width}px`;
-            },
-          },
-          {
-            name: 'flip',
-          },
-          {
-            name: 'offset',
-            options: {
-              offset: [0, 0],
-            },
-          },
-        ],
-      }) as Instance;
+  function create(reference?: VirtualElement, options?: Partial<Options>) {
+    if (!reference) {
+      return;
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    popperInstance = createPopper(reference, node, {
+      placement: options?.placement || 'bottom-start',
+      modifiers: [
+        {
+          name: 'setMinWidth',
+          enabled: true,
+          phase: 'beforeWrite',
+          requires: ['computeStyles'],
+          // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+          fn: (obj: ModifierArguments<unknown>): void => {
+            // eslint-disable-next-line no-param-reassign
+            obj.state.styles.popper.minWidth = `${obj.state.rects.reference.width}px`;
+          },
+          // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
+          effect: (obj: ModifierArguments<unknown>): void => {
+            const width = (obj.state.elements.reference as HTMLElement)
+              .offsetWidth;
+            // eslint-disable-next-line no-param-reassign
+            obj.state.elements.popper.style.minWidth = `${width}px`;
+          },
+        },
+        {
+          name: 'flip',
+        },
+        {
+          name: 'offset',
+          options: {
+            offset: [0, 0],
+          },
+        },
+      ],
+    }) as Instance;
   }
 
   function destroy() {
