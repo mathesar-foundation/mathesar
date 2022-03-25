@@ -19,7 +19,7 @@ export function ensureReadable<T>(v: Readable<T> | T): Readable<T> {
 /**
  * Collapse two nested stores into a single store.
  */
- export function collapse<T>(outerStore: Readable<Readable<T>>): Readable<T> {
+export function collapse<T>(outerStore: Readable<Readable<T>>): Readable<T> {
   // This is memory-safe because the Unsubscriber function gets returned from
   // the callback passed to `derive`.
   //
