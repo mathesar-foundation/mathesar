@@ -2,7 +2,7 @@ from sqlalchemy import Column, ForeignKey, inspect
 
 from db.columns.defaults import TYPE, PRIMARY_KEY, NULLABLE, DEFAULT_COLUMNS
 from db.columns.operations.select import (
-    get_column_attnum_from_name, get_column_default, get_column_default_dict, get_column_index_from_name,
+    get_column_attnum_from_name, get_column_default, get_column_default_dict,
 )
 from db.tables.operations.select import get_oid_from_table
 from db.types.operations.cast import get_full_cast_map
@@ -16,6 +16,7 @@ class MathesarColumn(Column):
     column definition that we care about, and this class defines that
     subset.
     """
+
     def __init__(
             self,
             name,
@@ -120,23 +121,6 @@ class MathesarColumn(Column):
                 )
             )
             return valid_target_types if valid_target_types else None
-
-    @property
-    def column_index(self):
-        """
-        Get the ordinal index of this column in its table, if it is
-        attached to a table that is associated with the column's engine.
-        """
-        if (
-                self.engine is not None
-                and self.table_ is not None
-                and inspect(self.engine).has_table(self.table_.name, schema=self.table_.schema)
-        ):
-            return get_column_index_from_name(
-                self.table_oid,
-                self.name,
-                self.engine
-            )
 
     @property
     def column_attnum(self):
