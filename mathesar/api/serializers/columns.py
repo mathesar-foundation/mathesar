@@ -95,7 +95,7 @@ class ColumnSerializer(SimpleColumnSerializer):
         )
         model_fields = ('display_options',)
 
-    name = serializers.CharField(required=False)
+    name = serializers.CharField(required=False, allow_blank=True)
 
     # From scratch fields
     type = serializers.CharField(source='plain_type', required=False)
@@ -116,7 +116,7 @@ class ColumnSerializer(SimpleColumnSerializer):
 
     def validate(self, data):
         if not self.partial:
-            from_scratch_required_fields = ['name', 'type']
+            from_scratch_required_fields = ['type']
             from_scratch_specific_fields = ['type', 'nullable', 'primary_key']
             from_dupe_required_fields = ['source_column']
             from_dupe_specific_fields = ['source_column', 'copy_source_data',
