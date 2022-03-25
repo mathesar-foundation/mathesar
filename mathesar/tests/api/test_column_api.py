@@ -90,7 +90,6 @@ def test_column_list(column_test_table, client):
             'name': 'mycolumn0',
             'type': 'INTEGER',
             'type_options': None,
-            'index': 0,
             'nullable': False,
             'primary_key': True,
             'display_options': None,
@@ -109,7 +108,6 @@ def test_column_list(column_test_table, client):
             'name': 'mycolumn1',
             'type': 'INTEGER',
             'type_options': None,
-            'index': 1,
             'nullable': False,
             'primary_key': False,
             'display_options': None,
@@ -125,7 +123,6 @@ def test_column_list(column_test_table, client):
             'name': 'mycolumn2',
             'type': 'INTEGER',
             'type_options': None,
-            'index': 2,
             'nullable': True,
             'primary_key': False,
             'display_options': None,
@@ -144,7 +141,6 @@ def test_column_list(column_test_table, client):
             'name': 'mycolumn3',
             'type': 'VARCHAR',
             'type_options': None,
-            'index': 3,
             'nullable': True,
             'primary_key': False,
             'display_options': None,
@@ -659,11 +655,10 @@ def test_column_update_returns_table_dependent_fields(column_test_table, client)
     column = _get_columns_by_name(column_test_table, ['mycolumn1'])[0]
     response = client.patch(
         f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",
-        data=json.dumps(data),
-        content_type="application/json"
+        data=data,
     )
     assert response.json()["default"] is not None
-    assert response.json()["index"] is not None
+    assert response.json()["id"] is not None
 
 
 @pytest.mark.parametrize("type_options", invalid_type_options)
