@@ -88,9 +88,3 @@
     </div>
   {/if}
 </div>
-
-<style>
-  .context-menu {
-    position: fixed;
-  }
-</style>

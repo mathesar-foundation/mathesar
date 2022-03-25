@@ -25,7 +25,20 @@ export default function clickOffBounds(
     }
   }
 
-  document.body.addEventListener('pointerdown', outOfBoundsListener, true);
+  /**
+   * When the browser supports pointer events, we use the pointerdown event
+   * which is fired for all mouse buttons and touches. However, older Safari
+   * versions don't have pointer events, so we fallback to mouse events. Touches
+   * should fire a mousedown event too.
+   */
+  const events =
+    'onpointerdown' in document.body
+      ? ['pointerdown']
+      : ['mousedown', 'contextmenu'];
+
+  events.forEach((event) => {
+    document.body.addEventListener(event, outOfBoundsListener, true);
+  });
 
   function update(opts: Options) {
     callback = opts.callback;
@@ -33,7 +46,9 @@ export default function clickOffBounds(
   }
 
   function destroy() {
-    document.body.removeEventListener('pointerdown', outOfBoundsListener, true);
+    events.forEach((event) => {
+      document.body.removeEventListener(event, outOfBoundsListener, true);
+    });
   }
 
   return {
