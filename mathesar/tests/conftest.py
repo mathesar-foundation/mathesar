@@ -185,4 +185,6 @@ def create_column():
 def custom_types_schema(test_db_model, schema, live_server):
     engine = create_mathesar_engine(test_db_model.name)
     install.install_mathesar_on_database(engine)
-    return f"{live_server}/{schema.database.name}/{schema.id}"
+    yield f"{live_server}/{schema.database.name}/{schema.id}"
+    with engine.begin() as conn:
+        conn.execute(text(f'DROP SCHEMA IF EXISTS {base.SCHEMA} CASCADE;'))
