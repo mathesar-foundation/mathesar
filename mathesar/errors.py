@@ -11,6 +11,6 @@ class URLNotReachable(Exception):
 
 
 class URLInvalidContentTypeError(Exception):
-    def __init__(self, content_type, *args: object):
+    def __init__(self, content_type, *args):
         self.content_type = content_type
         super().__init__(*args)
