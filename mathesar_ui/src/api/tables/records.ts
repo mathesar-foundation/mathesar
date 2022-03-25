@@ -44,10 +44,8 @@ export interface GetRequestParams {
 
 export type ResultValue = string | number | boolean | null;
 
-export interface Result {
-  /** keys are stringified column ids */
-  [k: string]: ResultValue;
-}
+/** keys are stringified column ids */
+export type Result = Record<string, ResultValue>;
 
 export type GroupingMode = 'distinct' | 'percentile';
 

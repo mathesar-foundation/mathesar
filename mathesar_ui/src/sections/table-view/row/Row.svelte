@@ -8,7 +8,7 @@
     ColumnPosition,
     ColumnPositionMap,
     TabularDataStore,
-    TableRecord,
+    Row,
     Column,
   } from '@mathesar/stores/table-data/types';
   import RowControl from './RowControl.svelte';
@@ -16,7 +16,7 @@
   import GroupHeader from './GroupHeader.svelte';
   import RowPlaceholder from './RowPlaceholder.svelte';
 
-  export let row: TableRecord;
+  export let row: Row;
   export let style: { [key: string]: string | number };
 
   const tabularData = getContext<TabularDataStore>('tabularData');
@@ -52,7 +52,8 @@
 
   $: ({ primaryKeyColumnId } = $columnsDataStore);
   $: isSelected =
-    primaryKeyColumnId && $selectedRecords.has(row[primaryKeyColumnId]);
+    primaryKeyColumnId &&
+    $selectedRecords.has(row.record?.[primaryKeyColumnId]);
   $: modificationState = getModificationState(
     $recordModificationState,
     row,
@@ -62,33 +63,33 @@
     getColumnPosition($columnPositionMap, ROW_POSITION_INDEX)?.width || 0;
 
   function checkAndCreateEmptyRow() {
-    if (row.__isAddPlaceholder) {
+    if (row.isAddPlaceholder) {
       void recordsData.createOrUpdateRecord(row);
     }
   }
 </script>
 
 <div
-  class="row {row.__state} {modificationState || ''}"
+  class="row {row.state} {modificationState || ''}"
   class:selected={isSelected}
-  class:is-group-header={row.__isGroupHeader}
-  class:is-add-placeholder={row.__isAddPlaceholder}
+  class:is-group-header={row.isGroupHeader}
+  class:is-add-placeholder={row.isAddPlaceholder}
   style={styleString}
-  data-identifier={row.__identifier}
+  data-identifier={row.identifier}
   on:mousedown={checkAndCreateEmptyRow}
 >
-  {#if row.__isNewHelpText}
+  {#if row.isNewHelpText}
     <RowPlaceholder {rowWidth} />
-  {:else if row.__isGroupHeader && $grouping && row.__group}
-    <GroupHeader {row} {rowWidth} grouping={$grouping} group={row.__group} />
-  {:else}
+  {:else if row.isGroupHeader && $grouping && row.group}
+    <GroupHeader {row} {rowWidth} grouping={$grouping} group={row.group} />
+  {:else if row.record}
     <RowControl {primaryKeyColumnId} {row} {meta} {recordsData} />
 
     {#each $columnsDataStore.columns as column (column.id)}
       <RowCell
         {display}
         {row}
-        bind:value={row[column.id]}
+        bind:value={row.record[column.id]}
         {column}
         {recordsData}
         columnPosition={getColumnPosition($columnPositionMap, column.id)}
