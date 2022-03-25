@@ -214,6 +214,8 @@ def _get_actual_type_map(engine) -> Sequence[Mapping]:
 
 # TODO rename to get_ma_types: it's important to easily distinguish MA types referred to here from
 # other types like DB or SA types.
+# TODO consider just having get_types(engine) -> Collection[MathesarType]
+# that implies moving a lot of this logic to the MathesarType enum
 def get_types(engine) -> Sequence[Mapping]:
     """
     Returns a sequence of dicts describing Mathesar types supported by the database associated with

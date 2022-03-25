@@ -7,7 +7,7 @@ from db.tables.operations.select import get_oid_from_table, reflect_table_from_o
 from db.constraints.operations.select import get_column_constraints
 from db.tests.columns.utils import create_test_table
 from db.tests.types import fixtures
-from db.types.operations.cast import get_supported_alter_column_db_types
+from db.types.base import get_available_known_db_types, known_db_types, get_db_type_enum_from_class, PostgresType
 
 
 engine_with_types = fixtures.engine_with_types
@@ -47,7 +47,7 @@ def _check_duplicate_unique_constraint(
         assert len(constraints_) == 0
 
 
-type_set = {
+_type_set = {
     'BIGINT',
     'BOOLEAN',
     'CHAR',
@@ -79,22 +79,21 @@ def test_type_list_completeness(engine_with_types):
     This metatest ensures that tests parameterized on the type_set
     use the entire set supported.
     """
-    actual_supported_db_types = get_supported_alter_column_db_types(
-        engine_with_types
-    )
-    assert type_set == actual_supported_db_types
+    actual_supported_db_types = get_available_known_db_types(engine_with_types)
+    assert set(known_db_types) == set(actual_supported_db_types)
 
 
-@pytest.mark.parametrize("target_type", type_set)
+@pytest.mark.parametrize("target_type", known_db_types)
 def test_create_column(engine_email_type, target_type):
+    """
+    One of the things this test checks is for every type in known_db_types, once that type is
+    applied to a column, and the column is reflected, that the reflected type is the same one that
+    was applied.
+    """
     engine, schema = engine_email_type
     table_name = "atableone"
     initial_column_name = "original_column"
     new_column_name = "added_column"
-    input_output_type_map = {type_: type_ for type_ in type_set}
-    # update the map with types that reflect differently than they're
-    # set when creating a column
-    input_output_type_map.update({'FLOAT': 'DOUBLE PRECISION', 'DECIMAL': 'NUMERIC', 'CHAR': 'CHAR(1)'})
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -102,15 +101,16 @@ def test_create_column(engine_email_type, target_type):
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
-    column_data = {"name": new_column_name, "type": target_type}
+    target_type_id = target_type.id
+    column_data = {"name": new_column_name, "type": target_type_id}
     created_col = create_column(engine, table_oid, column_data)
     altered_table = reflect_table_from_oid(table_oid, engine)
     assert len(altered_table.columns) == 2
     assert created_col.name == new_column_name
-    assert created_col.type.compile(engine.dialect) == input_output_type_map[target_type]
+    assert get_db_type_enum_from_class(created_col.type, engine_email_type) == target_type
 
 
-@pytest.mark.parametrize("target_type", ["NUMERIC", "DECIMAL"])
+@pytest.mark.parametrize("target_type", [PostgresType.NUMERIC, PostgresType.DECIMAL])
 def test_create_column_options(engine_email_type, target_type):
     engine, schema = engine_email_type
     table_name = "atableone"
@@ -125,18 +125,18 @@ def test_create_column_options(engine_email_type, target_type):
     table_oid = get_oid_from_table(table_name, schema, engine)
     column_data = {
         "name": new_column_name,
-        "type": target_type,
+        "type": target_type.id,
         "type_options": {"precision": 5, "scale": 3},
     }
     created_col = create_column(engine, table_oid, column_data)
     altered_table = reflect_table_from_oid(table_oid, engine)
     assert len(altered_table.columns) == 2
     assert created_col.name == new_column_name
-    assert created_col.plain_type == "NUMERIC"
+    assert created_col.plain_type == PostgresType.NUMERIC.id
     assert created_col.type_options == {"precision": 5, "scale": 3}
 
 
-@pytest.mark.parametrize("target_type", ["CHAR", "VARCHAR"])
+@pytest.mark.parametrize("target_type", [PostgresType.CHAR, PostgresType.CHARACTER_VARYING])
 def test_create_column_length_options(engine_email_type, target_type):
     engine, schema = engine_email_type
     table_name = "atableone"
@@ -151,14 +151,14 @@ def test_create_column_length_options(engine_email_type, target_type):
     table_oid = get_oid_from_table(table_name, schema, engine)
     column_data = {
         "name": new_column_name,
-        "type": target_type,
+        "type": target_type.id,
         "type_options": {"length": 5},
     }
     created_col = create_column(engine, table_oid, column_data)
     altered_table = reflect_table_from_oid(table_oid, engine)
     assert len(altered_table.columns) == 2
     assert created_col.name == new_column_name
-    assert created_col.plain_type == target_type
+    assert created_col.plain_type == target_type.id
     assert created_col.type_options == {"length": 5}
 
 
@@ -180,21 +180,21 @@ def test_create_column_interval_options(engine_email_type, type_options):
     table_oid = get_oid_from_table(table_name, schema, engine)
     column_data = {
         "name": new_column_name,
-        "type": "INTERVAL",
+        "type": PostgresType.INTERVAL.id,
         "type_options": type_options,
     }
     created_col = create_column(engine, table_oid, column_data)
     altered_table = reflect_table_from_oid(table_oid, engine)
     assert len(altered_table.columns) == 2
     assert created_col.name == new_column_name
-    assert created_col.plain_type == "INTERVAL"
+    assert created_col.plain_type == PostgresType.INTERVAL.id
     assert created_col.type_options == type_options
 
 
 def test_create_column_bad_options(engine_with_schema):
     engine, schema = engine_with_schema
     table_name = "atableone"
-    target_type = "BOOLEAN"
+    target_type = PostgresType.BOOLEAN
     initial_column_name = "original_column"
     new_column_name = "added_column"
     table = Table(
@@ -206,7 +206,7 @@ def test_create_column_bad_options(engine_with_schema):
     table_oid = get_oid_from_table(table_name, schema, engine)
     column_data = {
         "name": new_column_name,
-        "type": target_type,
+        "type": target_type.id,
         "type_options": {"precision": 5, "scale": 3},
     }
     with pytest.raises(TypeError):

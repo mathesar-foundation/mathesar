@@ -14,7 +14,7 @@ from db.tests.types import fixtures
 from db.types import multicurrency, datetime
 from db.types.operations import cast as cast_operations
 from db.types.base import (
-    PostgresType, MathesarCustomType, get_qualified_name, get_available_types
+    PostgresType, MathesarCustomType, get_qualified_name
 )
 
 

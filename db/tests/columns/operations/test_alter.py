@@ -15,7 +15,7 @@ from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tables.operations.split import extract_columns_from_table
 from db.tests.columns.utils import column_test_dict, create_test_table, get_default
 from db.tests.types import fixtures
-from db.types.base import get_db_type_name
+from db.types.base import get_db_type_enum_from_class
 
 
 engine_with_types = fixtures.engine_with_types

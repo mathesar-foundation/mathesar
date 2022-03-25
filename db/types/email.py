@@ -3,19 +3,18 @@ from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import GenericFunction
 from sqlalchemy.types import UserDefinedType
 
-from db.types import base
+from db.types.base import MathesarCustomType
 
 from db.functions import hints
 from db.functions.base import DBFunction, Contains, sa_call_sql_function, Equal
 from db.functions.packed import DBFunctionPacked
 
-EMAIL = base.MathesarCustomType.EMAIL.value
-EMAIL_DOMAIN_NAME = EMAIL + "_domain_name"
-EMAIL_LOCAL_PART = EMAIL + "_local_part"
+EMAIL_DOMAIN_NAME = MathesarCustomType.EMAIL.id + "_domain_name"
+EMAIL_LOCAL_PART = MathesarCustomType.EMAIL.id + "_local_part"
 
-DB_TYPE = base.get_qualified_name(EMAIL)
-QUALIFIED_EMAIL_DOMAIN_NAME = base.get_qualified_name(EMAIL_DOMAIN_NAME)
-QUALIFIED_EMAIL_LOCAL_PART = base.get_qualified_name(EMAIL_LOCAL_PART)
+DB_TYPE = MathesarCustomType.EMAIL.id
+QUALIFIED_EMAIL_DOMAIN_NAME = EMAIL_DOMAIN_NAME
+QUALIFIED_EMAIL_LOCAL_PART = EMAIL_LOCAL_PART
 
 # This is directly from the HTML5 email spec, we could change it based on our
 # needs (it's more restrictive than the actual RFC)

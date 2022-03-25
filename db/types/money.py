@@ -1,10 +1,9 @@
 from sqlalchemy import text
 from sqlalchemy.types import UserDefinedType
 
-from db.types import base
+from db.types.base import MathesarCustomType
 
-MATHESAR_MONEY = base.MathesarCustomType.MATHESAR_MONEY.value
-DB_TYPE = base.get_qualified_name(MATHESAR_MONEY)
+DB_TYPE = MathesarCustomType.MATHESAR_MONEY.id
 
 
 class MathesarMoney(UserDefinedType):

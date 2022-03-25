@@ -41,6 +41,7 @@ class DatabaseType:
         ignoring aliases. It also ignores NAME and CHAR, because both are reflected as the SA
         String type.
         """
+        # TODO should PostgresType.FLOAT be ignored as well? is it reflected as DOUBLE_PRECISION?
         ignored_types = (
             PostgresType.TIME,
             PostgresType.TIMESTAMP,

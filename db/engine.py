@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from db import types
+from db.types.custom import CUSTOM_TYPE_DICT
 
 
 def get_connection_string(username, password, hostname, database, port='5432'):
@@ -29,4 +29,4 @@ def create_future_engine(
 
 
 def _add_custom_types_to_engine(engine):
-    engine.dialect.ischema_names.update(types.CUSTOM_TYPE_DICT)
+    engine.dialect.ischema_names.update(CUSTOM_TYPE_DICT)
