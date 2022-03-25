@@ -10,8 +10,8 @@ import inspect
 
 import db.functions.base
 import db.functions.packed
-import db.types.uri
-import db.types.email
+import db.types.custom.uri
+import db.types.custom.email
 
 from db.functions.base import DBFunction
 
@@ -42,13 +42,9 @@ def _is_concrete_db_function_subclass(member):
 _modules_to_search_in = tuple([
     db.functions.base,
     db.functions.packed,
-    db.types.uri,
-    db.types.email,
+    db.types.custom.uri,
+    db.types.custom.email,
 ])
-
-
-def _concat_tuples(tuples):
-    return sum(tuples, ())
 
 
 known_db_functions = tuple(

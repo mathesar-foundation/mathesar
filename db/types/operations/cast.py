@@ -4,7 +4,8 @@ from sqlalchemy import text
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 
-from db.types import base, uri
+from db.types import base
+from db.types.custom import uri
 from db.types.exceptions import UnsupportedTypeException
 from db.types.base import DatabaseType, PostgresType, MathesarCustomType, get_available_known_db_types, get_db_type_enum_from_class
 from db.types import categories
@@ -178,7 +179,7 @@ def get_full_cast_map(engine) -> Mapping[DatabaseType, Collection[DatabaseType]]
         {
             source: frozenset(target_set)
             for source, target_set
-            in source_to_target_sets
+            in source_to_target_sets.items()
         }
     )
 

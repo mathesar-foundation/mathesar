@@ -6,6 +6,10 @@ from db.columns.operations.select import (
 )
 from db.tables.operations.select import get_oid_from_table
 from db.types.operations.cast import get_full_cast_map
+from db.types.base import get_db_type_enum_from_class, DatabaseType
+
+from collections.abc import Collection
+from typing import Optional
 
 
 class MathesarColumn(Column):
@@ -105,19 +109,20 @@ class MathesarColumn(Column):
         self.engine = engine
 
     @property
-    def valid_target_types(self):
+    def valid_target_types(self) -> Optional[Collection[DatabaseType]]:
         """
         Returns a set of valid types to which the type of the column can be
         altered.
         """
         if self.engine is not None and not self.is_default:
-            db_type = self.plain_type
+            db_type = self.db_type
             valid_target_types = sorted(
                 list(
                     set(
                         get_full_cast_map(self.engine).get(db_type, [])
                     )
-                )
+                ),
+                key=lambda db_type: db_type.id
             )
             return valid_target_types if valid_target_types else None
 
@@ -173,11 +178,11 @@ class MathesarColumn(Column):
             return get_column_default(self.table_oid, self.column_attnum, self.engine)
 
     @property
-    def plain_type(self):
+    def db_type(self):
         """
-        Get the type name without arguments
+        Get this column's database type enum.
         """
-        return self.type.__class__().compile(self.engine.dialect)
+        return get_db_type_enum_from_class(self.type.__class__, self.engine)
 
     @property
     def type_options(self):

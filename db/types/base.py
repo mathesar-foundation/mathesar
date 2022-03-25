@@ -201,12 +201,26 @@ def get_available_known_db_types(engine) -> Sequence[DatabaseType]:
 
 
 def get_db_type_enum_from_class(sa_type, engine) -> DatabaseType:
+    db_type_id = _sa_type_class_to_db_type_id(sa_type, engine)
+    if db_type_id:
+        db_type = get_db_type_enum_from_id(db_type_id)
+        if db_type:
+            return db_type
+    raise Exception("We don't know how to map this type class to a DatabaseType Enum.")
+
+
+def _sa_type_class_to_db_type_id(sa_type_class, engine) -> Optional[str]:
+    return _get_sa_type_class_id_from_ischema_names(sa_type_class, engine)
+
+
+def _get_sa_type_class_id_from_ischema_names(sa_type_class1, engine) -> Optional[str]:
+    for db_type_id, sa_type_class2 in engine.dialect.ischema_names.items():
+        if sa_type_class1 == sa_type_class2:
+            return db_type_id
+
+
+def _compile_sa_class(sa_class, engine):
     try:
-        db_type_id = sa_type.compile(dialect=engine.dialect)
+        return sa_class.compile(dialect=engine.dialect)
     except TypeError:
-        db_type_id = sa_type().compile(dialect=engine.dialect)
-    db_type = get_db_type_enum_from_id(db_type_id)
-    if db_type:
-        return db_type
-    else:
-        raise Exception("We don't know how to map this type class to a DatabaseType Enum.")
+        return sa_class().compile(dialect=engine.dialect)

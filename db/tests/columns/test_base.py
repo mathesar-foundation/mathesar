@@ -2,14 +2,14 @@ import re
 
 import pytest
 from sqlalchemy import (
-    String, Integer, ForeignKey, Table, MetaData, Numeric, VARCHAR, CHAR
+    String, Integer, ForeignKey, Table, MetaData, Numeric, VARCHAR, CHAR, Text
 )
 
 from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT_COLUMNS
 from db.columns.utils import get_default_mathesar_column_list
 from db.tests.types import fixtures
-from db.types import email, datetime
+from db.types.custom import email, datetime
 
 
 engine_with_types = fixtures.engine_with_types
@@ -155,10 +155,11 @@ def test_MC_valid_target_types_no_engine():
     assert mc.valid_target_types is None
 
 
+from db.types.base import PostgresType
 def test_MC_valid_target_types_default_engine(engine):
-    mc = MathesarColumn('testable_col', String)
+    mc = MathesarColumn('testable_col', PostgresType.CHARACTER_VARYING.get_sa_class(engine))
     mc.add_engine(engine)
-    assert "VARCHAR" in mc.valid_target_types
+    assert PostgresType.CHARACTER_VARYING in mc.valid_target_types
 
 
 def test_MC_valid_target_types_custom_engine(engine_with_types):

@@ -1,10 +1,11 @@
-from db.types import base, email, money, multicurrency, uri
+from db.types.custom import email, money, multicurrency, uri
+from db.types.base import SCHEMA
 from db.schemas.operations.create import create_schema
 from db.types.operations.cast import install_all_casts
 
 
 def create_type_schema(engine):
-    create_schema(base.SCHEMA, engine)
+    create_schema(SCHEMA, engine)
 
 
 def install_mathesar_on_database(engine):

@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from db.types.custom import CUSTOM_TYPE_DICT
+from db.types.custom.base import CUSTOM_TYPE_DICT
 
 
 def get_connection_string(username, password, hostname, database, port='5432'):
