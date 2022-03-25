@@ -24,7 +24,7 @@ NASA_TABLE = 'NASA Schema List'
 
 
 @pytest.fixture(scope="session", autouse=True)
-def django_db_setup(request, django_db_blocker) -> None:
+def django_db_setup(request, django_db_blocker):
     """
     A stripped down version of pytest-django's original django_db_setup fixture
     See: https://github.com/pytest-dev/pytest-django/blob/master/pytest_django/fixtures.py#L96
@@ -45,7 +45,7 @@ def django_db_setup(request, django_db_blocker) -> None:
             aliases=["default"],
         )
 
-    def teardown_database() -> None:
+    def teardown_database():
         with django_db_blocker.unblock():
             try:
                 teardown_databases(db_cfg, verbosity=request.config.option.verbose)
@@ -99,6 +99,11 @@ def patents_url_filename():
 @pytest.fixture(scope='session')
 def data_types_csv_filename():
     return 'mathesar/tests/data/data_types.csv'
+
+
+@pytest.fixture(scope='session')
+def col_names_with_spaces_csv_filename():
+    return 'mathesar/tests/data/col_names_with_spaces.csv'
 
 
 @pytest.fixture(scope='session')
