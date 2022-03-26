@@ -83,17 +83,18 @@
     <GroupHeader {row} {rowWidth} grouping={$grouping} group={row.__group} />
   {:else}
     <RowControl {primaryKeyColumnId} {row} {meta} {recordsData} />
-
-    {#each $columnsDataStore.columns as column (column.id)}
-      <RowCell
-        {display}
-        {row}
-        bind:value={row[column.id]}
-        {column}
-        {recordsData}
-        columnPosition={getColumnPosition($columnPositionMap, column.id)}
-      />
-    {/each}
+    {#if !row.__isAddPlaceholder}
+      {#each $columnsDataStore.columns as column (column.id)}
+        <RowCell
+          {display}
+          {row}
+          bind:value={row[column.id]}
+          {column}
+          {recordsData}
+          columnPosition={getColumnPosition($columnPositionMap, column.id)}
+        />
+      {/each}
+    {/if}
   {/if}
 </div>
 
