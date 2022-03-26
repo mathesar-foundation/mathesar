@@ -39,12 +39,18 @@
     validationContext.validate();
   });
 
+  function resetAbstractType() {
+    selectedDbType = column.type;
+    typeOptions = { ...(column.type_options ?? {}) };
+    displayOptions = { ...(column.display_options ?? {}) };
+    selectedAbstractType = abstractTypeOfColumn;
+  }
+  resetAbstractType();
+
   function selectAbstractType(abstractType: AbstractType) {
     if (selectedAbstractType !== abstractType) {
       if (abstractType.identifier === abstractTypeOfColumn?.identifier) {
-        selectedDbType = column.type;
-        typeOptions = { ...(column.type_options ?? {}) };
-        displayOptions = { ...(column.display_options ?? {}) };
+        resetAbstractType();
       } else if (abstractType.defaultDbType) {
         selectedDbType = abstractType.defaultDbType;
         typeOptions = {};
@@ -57,14 +63,6 @@
       selectedAbstractType = abstractType;
     }
   }
-
-  function resetAbstractType() {
-    selectedDbType = column.type;
-    typeOptions = { ...(column.type_options ?? {}) };
-    displayOptions = { ...(column.display_options ?? {}) };
-    selectedAbstractType = abstractTypeOfColumn;
-  }
-  resetAbstractType();
 
   function close() {
     resetAbstractType();

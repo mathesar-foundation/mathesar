@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { faDatabase, faPalette } from '@fortawesome/free-solid-svg-icons';
+  import {
+    faDatabase,
+    faPalette,
+    faTimesCircle,
+  } from '@fortawesome/free-solid-svg-icons';
   import {
     Button,
     FormBuilder,
@@ -21,11 +25,13 @@
   export let column: Column;
 
   let selectedTab: 'database' | 'display' = 'database';
+  let dbFormHasError = false;
+  let displayFormHasError = false;
 
   // Why are the following not reactive?
   // The whole component gets re-rendered when selectedAbstractType changes,
   // so these do not have to be reactive.
-  // Also, these functions should not be reactive for selectedDbType and column.
+  // Also, these functions should not be reactive for changes in selectedDbType and column.
   const { dbOptionsConfig, dbForm, dbFormValues } = constructDbForm(
     selectedAbstractType,
     selectedDbType,
@@ -35,13 +41,17 @@
     constructDisplayForm(selectedAbstractType, selectedDbType, column);
 
   const validationContext = getValidationContext();
-  validationContext.addValidator('DisplayFormValidator', () => {
+  validationContext.addValidator('AbstractTypeConfigValidator', () => {
     let isValid = true;
     if (dbForm) {
-      isValid = isValid && dbForm.getValidationResult().isValid;
+      const isDbFormValid = dbForm.getValidationResult().isValid;
+      dbFormHasError = !isDbFormValid;
+      isValid = isValid && isDbFormValid;
     }
     if (displayForm) {
-      isValid = isValid && displayForm.getValidationResult().isValid;
+      const isDisplayFormValid = displayForm.getValidationResult().isValid;
+      displayFormHasError = !isDisplayFormValid;
+      isValid = isValid && isDisplayFormValid;
     }
     return isValid;
   });
@@ -76,7 +86,11 @@
   <!-- TODO: Make tab container more low-level to be used here -->
   <!-- Ensure tab accessibility in the low-level component -->
   <ul class="type-option-tabs">
-    <li class="type-option-tab" class:selected={selectedTab === 'database'}>
+    <li
+      class="type-option-tab"
+      class:selected={selectedTab === 'database'}
+      class:has-error={dbFormHasError}
+    >
       <Button
         appearance="ghost"
         class="padding-zero"
@@ -86,10 +100,17 @@
       >
         <Icon size="0.75em" data={faDatabase} />
         <span>Database</span>
+        {#if dbFormHasError}
+          <Icon class="error-icon" data={faTimesCircle} />
+        {/if}
       </Button>
     </li>
     {#if displayForm}
-      <li class="type-option-tab" class:selected={selectedTab === 'display'}>
+      <li
+        class="type-option-tab"
+        class:selected={selectedTab === 'display'}
+        class:has-error={displayFormHasError}
+      >
         <Button
           appearance="ghost"
           class="padding-zero"
@@ -99,6 +120,9 @@
         >
           <Icon size="0.75em" data={faPalette} />
           <span>Display</span>
+          {#if displayFormHasError}
+            <Icon class="error-icon" data={faTimesCircle} />
+          {/if}
         </Button>
       </li>
     {/if}
