@@ -192,6 +192,71 @@ function constructDbFormValuesFromTypeOptions(
   }
 }
 
+interface NumberDisplayOptions {
+  show_as_percentage?: boolean | null;
+  locale?: string | null;
+}
+
+const displayForm: AbstractTypeConfigForm = {
+  variables: {
+    showAsPercentage: {
+      type: 'boolean',
+      default: false,
+    },
+    format: {
+      type: 'string',
+      enum: ['none', 'af', 'ar-DZ', 'bg', 'bn', 'de-CH'],
+      default: 'none',
+    },
+  },
+  layout: {
+    orientation: 'vertical',
+    elements: [
+      {
+        type: 'input',
+        variable: 'showAsPercentage',
+        label: 'Show as Percentage',
+      },
+      {
+        type: 'input',
+        variable: 'format',
+        label: 'Format',
+        options: {
+          none: { label: 'Use browser locale' },
+          af: { label: '1,234,567.89' },
+          'ar-DZ': { label: '1.234.567,89' },
+          bg: { label: '1 234 567,89' },
+          bn: { label: '12,34,567.89' },
+          'de-CH': { label: "1'234'567.89" },
+        },
+      },
+    ],
+  },
+};
+
+function determineDisplayOptions(
+  dispFormValues: FormValues,
+): Column['display_options'] {
+  const displayOptions: Column['display_options'] = {
+    show_as_percentage: dispFormValues.showAsPercentage,
+  };
+  if (dispFormValues.format !== 'none') {
+    displayOptions.locale = dispFormValues.format;
+  }
+  return displayOptions;
+}
+
+function constructDisplayFormValuesFromDisplayOptions(
+  columnDisplayOpts: Column['display_options'],
+): FormValues {
+  const displayOptions = columnDisplayOpts as NumberDisplayOptions | null;
+  const dispFormValues: FormValues = {
+    showAsPercentage: displayOptions?.show_as_percentage ?? false,
+    format: displayOptions?.locale ?? 'none',
+  };
+  return dispFormValues;
+}
+
 const numberType: AbstractTypeConfiguration = {
   icon: '#',
   input: {
@@ -202,6 +267,11 @@ const numberType: AbstractTypeConfiguration = {
     form: dbForm,
     determineDbTypeAndOptions,
     constructDbFormValuesFromTypeOptions,
+  }),
+  getDisplayConfig: () => ({
+    form: displayForm,
+    determineDisplayOptions,
+    constructDisplayFormValuesFromDisplayOptions,
   }),
 };
 
