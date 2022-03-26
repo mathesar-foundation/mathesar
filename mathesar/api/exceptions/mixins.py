@@ -20,7 +20,7 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         """
         pretty = []
         if self.is_pretty(errors):
-            # DRF serializers supports error any of the following format, error string, list of error strings or {'field': [error strings]}
+            # DRF serializers supports exceptions in any of the following format, error string, list of error strings or {'field': [error strings]}
             # Since our exception is an object instead of a string, the object properties are mistaken to be fields of a serializer,
             # and it gets converted into {'field': [error strings]} by DRF
             # We need to convert it to dictionary of list of object and return it instead of passing it down the line
