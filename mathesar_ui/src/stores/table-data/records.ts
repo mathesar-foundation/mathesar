@@ -107,7 +107,7 @@ export function getRowKey(
   primaryKeyColumnId?: Column['id'],
 ): unknown {
   // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-  let key: unknown = row?.[primaryKeyColumnId];
+  let key: unknown = row.record?.[primaryKeyColumnId];
   if (!key && row?.isNew) {
     key = row?.identifier;
   }
@@ -285,6 +285,8 @@ export class RecordsData {
           return {
             state: 'loading',
             identifier: generateRowIdentifier('dummy', offset, index),
+            rowIndex: index,
+            record: {},
           };
         }
         return entry;
