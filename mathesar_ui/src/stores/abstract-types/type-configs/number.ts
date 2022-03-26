@@ -31,11 +31,11 @@ const dbForm: AbstractTypeConfigForm = {
     },
     decimalPlaces: {
       type: 'integer',
-      default: 2,
+      default: null,
     },
     maxDigits: {
       type: 'integer',
-      default: 2,
+      default: null,
     },
     floatingPointType: {
       type: 'string',
@@ -141,8 +141,12 @@ function determineDbTypeAndOptions(
   const typeOptions: Column['type_options'] = {};
 
   if (dbType === DB_TYPES.DECIMAL || dbType === DB_TYPES.NUMERIC) {
-    typeOptions.precision = dbFormValues.decimalPlaces;
-    typeOptions.scale = dbFormValues.maxDigits;
+    if (dbFormValues.maxDigits !== null) {
+      typeOptions.precision = dbFormValues.maxDigits;
+    }
+    if (dbFormValues.decimalPlaces !== null) {
+      typeOptions.scale = dbFormValues.decimalPlaces;
+    }
   }
 
   return {
@@ -186,8 +190,8 @@ function constructDbFormValuesFromTypeOptions(
     default:
       return {
         numberType: 'Decimal',
-        decimalPlaces: (typeOptions?.precision as number) ?? null,
-        maxDigits: (typeOptions?.scale as number) ?? null,
+        maxDigits: (typeOptions?.precision as number) ?? null,
+        decimalPlaces: (typeOptions?.scale as number) ?? null,
       };
   }
 }
