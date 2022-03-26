@@ -15,13 +15,8 @@
   $: ({ size: pageSize, page, offset } = $pagination);
   $: ({ totalCount, state, newRecords } = recordsData);
   $: recordState = $state;
-  $: selectedPageSize = { id: pageSize, label: pageSize };
 
-  const pageSizeOpts = [
-    { id: 100, label: '100' },
-    { id: 200, label: '200' },
-    { id: 500, label: '500' },
-  ];
+  const pageSizeOpts = [100, 200, 500];
 
   let pageCount: number;
   $: max = Math.min($totalCount ?? 0, offset + pageSize);
@@ -36,10 +31,8 @@
     );
   }
 
-  function setPageSize(
-    event: CustomEvent<{ value: { id: number; label: string } }>,
-  ) {
-    const newPageSize = event.detail.value.id;
+  function setPageSize(event: CustomEvent<number>) {
+    const newPageSize = event.detail;
     if (pageSize !== newPageSize) {
       $pagination = new Pagination({ page: 1, size: newPageSize });
     }
@@ -71,11 +64,7 @@
         currentPage={page}
         on:change={handlePageChange}
       />
-      <Select
-        options={pageSizeOpts}
-        value={selectedPageSize}
-        on:change={setPageSize}
-      />
+      <Select options={pageSizeOpts} value={pageSize} on:change={setPageSize} />
     {/if}
   </div>
 </div>
