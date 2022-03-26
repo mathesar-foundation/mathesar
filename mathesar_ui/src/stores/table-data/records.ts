@@ -10,7 +10,7 @@ import type { Writable, Unsubscriber } from 'svelte/store';
 import type { CancellablePromise } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/App.d';
 import type {
-  Result as ApiResult,
+  Result as ApiRecord,
   Response as ApiRecordsResponse,
   Group as ApiGroup,
   Grouping as ApiGrouping,
@@ -77,37 +77,39 @@ function buildGrouping(apiGrouping: ApiGrouping): Grouping {
   };
 }
 
-interface TableRecordInResponse {
-  [key: string]: unknown;
-}
-
-export interface TableRecord extends TableRecordInResponse {
-  __identifier: string;
-  __isAddPlaceholder?: boolean;
-  __isNew?: boolean;
-  __isGroupHeader?: boolean;
-  __group?: Group;
-  __rowIndex?: number;
-  __state?: string; // TODO: Remove __state in favour of _recordsInProcess
-  __groupValues?: Record<string, unknown>;
+export interface Row {
+  /**
+   * Can be `undefined` because some rows don't have an associated record, e.g.
+   * group headers, dummy rows, etc.
+   */
+  record?: ApiRecord;
+  identifier: string;
+  isAddPlaceholder?: boolean;
+  isNew?: boolean;
+  isNewHelpText?: boolean;
+  isGroupHeader?: boolean;
+  group?: Group;
+  rowIndex?: number;
+  state?: string;
+  groupValues?: Record<string, unknown>;
 }
 
 export interface TableRecordsData {
   state: States;
   error?: string;
-  savedRecords: TableRecord[];
+  savedRecords: Row[];
   totalCount: number;
   grouping?: Grouping;
 }
 
 export function getRowKey(
-  row: TableRecord,
+  row: Row,
   primaryKeyColumnId?: Column['id'],
 ): unknown {
   // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
   let key: unknown = row?.[primaryKeyColumnId];
-  if (!key && row?.__isNew) {
-    key = row?.__identifier;
+  if (!key && row?.isNew) {
+    key = row?.identifier;
   }
   return key;
 }
@@ -130,14 +132,18 @@ function getRecordIndexToGroupMap(groups: Group[]): Map<number, Group> {
   return map;
 }
 
-function preprocessRecords(
-  offset: number,
-  records?: TableRecordInResponse[],
-  grouping?: Grouping,
-): TableRecord[] {
+function preprocessRecords({
+  records,
+  offset,
+  grouping,
+}: {
+  records: ApiRecord[];
+  offset: number;
+  grouping?: Grouping;
+}): Row[] {
   const groupingColumnIds = grouping?.columnIds ?? [];
   const isResultGrouped = groupingColumnIds.length > 0;
-  const combinedRecords: TableRecord[] = [];
+  const combinedRecords: Row[] = [];
   let index = 0;
   let groupIndex = 0;
   let existingRecordIndex = 0;
@@ -147,62 +153,47 @@ function preprocessRecords(
   );
 
   records?.forEach((record) => {
-    if (!record.__isGroupHeader && !record.__isAddPlaceholder) {
-      if (isResultGrouped) {
-        let isGroup = false;
-        if (index === 0) {
-          isGroup = true;
-        } else {
-          // eslint-disable-next-line no-restricted-syntax
-          for (const id of groupingColumnIds) {
-            if (records[index - 1][id] !== records[index][id]) {
-              isGroup = true;
-              break;
-            }
+    if (isResultGrouped) {
+      let isGroup = false;
+      if (index === 0) {
+        isGroup = true;
+      } else {
+        // eslint-disable-next-line no-restricted-syntax
+        for (const id of groupingColumnIds) {
+          if (records[index - 1][id] !== records[index][id]) {
+            isGroup = true;
+            break;
           }
-        }
-
-        if (isGroup) {
-          combinedRecords.push({
-            __isGroupHeader: true,
-            __group: recordIndexToGroupMap.get(index),
-            __identifier: generateRowIdentifier(
-              'groupHeader',
-              offset,
-              groupIndex,
-            ),
-            __groupValues: record,
-            __state: 'done',
-          });
-          groupIndex += 1;
         }
       }
 
-      combinedRecords.push({
-        ...record,
-        __identifier: generateRowIdentifier(
-          'normal',
-          offset,
-          existingRecordIndex,
-        ),
-        __rowIndex: index,
-        __state: 'done',
-      });
-      index += 1;
-      existingRecordIndex += 1;
+      if (isGroup) {
+        combinedRecords.push({
+          record,
+          isGroupHeader: true,
+          group: recordIndexToGroupMap.get(index),
+          identifier: generateRowIdentifier('groupHeader', offset, groupIndex),
+          groupValues: record,
+          state: 'done',
+        });
+        groupIndex += 1;
+      }
     }
+
+    combinedRecords.push({
+      record,
+      identifier: generateRowIdentifier('normal', offset, existingRecordIndex),
+      rowIndex: index,
+      state: 'done',
+    });
+    index += 1;
+    existingRecordIndex += 1;
   });
   return combinedRecords;
 }
 
-function prepareRowForRequest(row: TableRecord): TableRecordInResponse {
-  const rowForRequest: TableRecordInResponse = {};
-  Object.keys(row).forEach((key) => {
-    if (key.indexOf('__') !== 0) {
-      rowForRequest[key] = row[key];
-    }
-  });
-  return rowForRequest;
+function prepareRowForRequest(row: Row): ApiRecord {
+  return row.record ?? {};
 }
 
 export class RecordsData {
@@ -218,9 +209,9 @@ export class RecordsData {
 
   state: Writable<States>;
 
-  savedRecords: Writable<TableRecord[]>;
+  savedRecords: Writable<Row[]>;
 
-  newRecords: Writable<TableRecord[]>;
+  newRecords: Writable<Row[]>;
 
   grouping: Writable<Grouping | undefined>;
 
@@ -253,11 +244,11 @@ export class RecordsData {
     this.parentId = parentId;
 
     this.state = writable(States.Loading);
-    this.savedRecords = writable([] as TableRecord[]);
-    this.newRecords = writable([] as TableRecord[]);
-    this.grouping = writable<Grouping | undefined>(undefined);
-    this.totalCount = writable<number | undefined>(undefined);
-    this.error = writable<string | undefined>(undefined);
+    this.savedRecords = writable([]);
+    this.newRecords = writable([]);
+    this.grouping = writable(undefined);
+    this.totalCount = writable(undefined);
+    this.error = writable(undefined);
 
     this.meta = meta;
     this.columnsDataStore = columnsDataStore;
@@ -292,8 +283,8 @@ export class RecordsData {
         index += 1;
         if (!retainExistingRows || !entry) {
           return {
-            __state: 'loading',
-            __identifier: generateRowIdentifier('dummy', offset, index),
+            state: 'loading',
+            identifier: generateRowIdentifier('dummy', offset, index),
           };
         }
         return entry;
@@ -317,7 +308,11 @@ export class RecordsData {
       const grouping = response.grouping
         ? buildGrouping(response.grouping)
         : undefined;
-      const records = preprocessRecords(offset, response.results, grouping);
+      const records = preprocessRecords({
+        records: response.results,
+        offset,
+        grouping,
+      });
       const tableRecordsData: TableRecordsData = {
         state: States.Done,
         savedRecords: records,
@@ -386,8 +381,8 @@ export class RecordsData {
             index += 1;
             return {
               ...entry,
-              __rowIndex: savedRecordsLength + index,
-              __identifier: generateRowIdentifier('new', offset, index),
+              rowIndex: savedRecordsLength + index,
+              identifier: generateRowIdentifier('new', offset, index),
             };
           });
           return retained;
@@ -410,14 +405,19 @@ export class RecordsData {
    * - Handle states where cell update and row update happen in parallel
    * - Reduce code duplication between `updateCell` and `updateRecord`
    */
-  async updateCell(row: TableRecord, column: Column): Promise<void> {
+  async updateCell(row: Row, column: Column): Promise<void> {
+    const { record } = row;
+    if (!record) {
+      console.error('Unable to update row that does not have a record');
+      return;
+    }
     const { primaryKeyColumnId } = this.columnsDataStore.get();
     if (!primaryKeyColumnId) {
       // eslint-disable-next-line no-console
       console.error('Unable to update record for a row without a primary key');
       return;
     }
-    const primaryKeyValue = row[primaryKeyColumnId];
+    const primaryKeyValue = record[primaryKeyColumnId];
     if (primaryKeyValue === undefined) {
       // eslint-disable-next-line no-console
       console.error(
@@ -431,8 +431,8 @@ export class RecordsData {
     this.meta.setCellUpdateState(rowKey, cellKey, 'update');
     this.updatePromises?.get(cellKey)?.cancel();
     const promise = patchAPI<unknown>(
-      `${this.url}${String(row[primaryKeyColumnId])}/`,
-      { [column.id]: row[column.id] },
+      `${this.url}${String(primaryKeyValue)}/`,
+      { [column.id]: record[column.id] },
     );
     if (!this.updatePromises) {
       this.updatePromises = new Map();
@@ -455,14 +455,19 @@ export class RecordsData {
    * TODO:
    * - Reduce code duplication between `updateCell` and `updateRecord`
    */
-  async updateRecord(row: TableRecord): Promise<void> {
+  async updateRecord(row: Row): Promise<void> {
+    const { record } = row;
+    if (!record) {
+      console.error('Unable to update row that does not have a record');
+      return;
+    }
     const { primaryKeyColumnId } = this.columnsDataStore.get();
     if (!primaryKeyColumnId) {
       // eslint-disable-next-line no-console
       console.error('Unable to update record for a row without a primary key');
       return;
     }
-    const primaryKeyValue = row[primaryKeyColumnId];
+    const primaryKeyValue = record[primaryKeyColumnId];
     if (primaryKeyValue === undefined) {
       // eslint-disable-next-line no-console
       console.error(
@@ -474,7 +479,7 @@ export class RecordsData {
     this.meta.setRecordModificationState(rowKey, 'update');
     this.updatePromises?.get(rowKey)?.cancel();
     const promise = patchAPI<unknown>(
-      `${this.url}${row[primaryKeyColumnId] as string}/`,
+      `${this.url}${String(primaryKeyValue)}/`,
       prepareRowForRequest(row),
     );
     if (!this.updatePromises) {
@@ -494,7 +499,7 @@ export class RecordsData {
     }
   }
 
-  getNewEmptyRecord(): TableRecord {
+  getNewEmptyRecord(): Row {
     const { offset } = getStoreValue(this.meta.pagination);
     const savedRecords = getStoreValue(this.savedRecords);
     const savedRecordsLength = savedRecords?.length || 0;
@@ -504,39 +509,40 @@ export class RecordsData {
       offset,
       existingNewRecords.length,
     );
-    const newRecord: TableRecord = {
-      __identifier: identifier,
-      __state: States.Done,
-      __isNew: true,
-      __rowIndex: existingNewRecords.length + savedRecordsLength,
+    const newRecord: Row = {
+      record: {},
+      identifier,
+      state: States.Done,
+      isNew: true,
+      rowIndex: existingNewRecords.length + savedRecordsLength,
     };
     return newRecord;
   }
 
-  async createRecord(row: TableRecord): Promise<void> {
+  async createRecord(row: Row): Promise<void> {
     const { primaryKeyColumnId: primaryKey } = this.columnsDataStore.get();
     const rowKey = getRowKey(row, primaryKey);
     this.meta.setRecordModificationState(rowKey, 'create');
     this.createPromises?.get(rowKey)?.cancel();
-    const promise = postAPI<ApiResult>(this.url, prepareRowForRequest(row));
+    const promise = postAPI<ApiRecord>(this.url, prepareRowForRequest(row));
     if (!this.createPromises) {
       this.createPromises = new Map();
     }
     this.createPromises.set(rowKey, promise);
 
     try {
-      const result = await promise;
-      const newRow = {
+      const record = await promise;
+      const newRow: Row = {
         ...row,
-        ...result,
-        __isAddPlaceholder: false,
+        record,
+        isAddPlaceholder: false,
       };
       const updatedRowKey = getRowKey(newRow, primaryKey);
       this.meta.clearRecordModificationState(rowKey);
       this.meta.setRecordModificationState(updatedRowKey, 'created');
       this.newRecords.update((existing) =>
         existing.map((entry) => {
-          if (entry.__identifier === row.__identifier) {
+          if (entry.identifier === row.identifier) {
             return newRow;
           }
           return entry;
@@ -552,30 +558,30 @@ export class RecordsData {
     }
   }
 
-  async createOrUpdateRecord(row: TableRecord, column?: Column): Promise<void> {
-    const { primaryKeyColumnId: primaryKey } = this.columnsDataStore.get();
+  async createOrUpdateRecord(row: Row, column?: Column): Promise<void> {
+    const { primaryKeyColumnId } = this.columnsDataStore.get();
 
     // Row may not have been updated yet in view when additional request is made.
     // So check current values to ensure another row has not been created.
-    const existingNewRecordRow = getStoreValue(this.newRecords)?.find(
-      (entry) => entry.__identifier === row.__identifier,
+    const existingNewRecordRow = getStoreValue(this.newRecords).find(
+      (entry) => entry.identifier === row.identifier,
     );
 
-    if (!existingNewRecordRow && row.__isAddPlaceholder) {
+    if (!existingNewRecordRow && row.isAddPlaceholder) {
       this.newRecords.update((existing) => {
         existing.push({
           ...row,
-          __isAddPlaceholder: false,
+          isAddPlaceholder: false,
         });
         return existing;
       });
     }
 
     if (
-      primaryKey &&
-      !existingNewRecordRow?.[primaryKey] &&
-      row.__isNew &&
-      !row[primaryKey]
+      primaryKeyColumnId &&
+      !existingNewRecordRow?.record?.[primaryKeyColumnId] &&
+      row.isNew &&
+      !row.record?.[primaryKeyColumnId]
     ) {
       await this.createRecord(row);
     } else if (column) {
@@ -594,12 +600,12 @@ export class RecordsData {
   getIterationKey(index: number): string {
     const savedRecords = getStoreValue(this.savedRecords);
     if (savedRecords?.[index]) {
-      return savedRecords[index].__identifier;
+      return savedRecords[index].identifier;
     }
     const savedLength = savedRecords?.length || 0;
     const newRecordsData = getStoreValue(this.newRecords);
     if (newRecordsData?.[index + savedLength]) {
-      return newRecordsData[index + savedLength].__identifier;
+      return newRecordsData[index + savedLength].identifier;
     }
     return `__index_${index}`;
   }

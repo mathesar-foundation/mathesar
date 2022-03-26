@@ -10,7 +10,7 @@
     InputGroupText,
   } from '@mathesar-component-library';
   import { DEFAULT_ROW_RIGHT_PADDING } from '@mathesar/stores/table-data';
-  import type { Display, Column } from '@mathesar/stores/table-data/types.d';
+  import type { Display, Column } from '@mathesar/stores/table-data/types';
 
   const dispatch = createEventDispatcher();
   export let columns: Column[];
