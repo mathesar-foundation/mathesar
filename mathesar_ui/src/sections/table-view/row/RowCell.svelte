@@ -8,7 +8,7 @@
   } from '@mathesar/stores/table-data';
   import type {
     ColumnPosition,
-    TableRecord,
+    Row,
     Column,
     Display,
     RecordsData,
@@ -19,13 +19,13 @@
   export let recordsData: RecordsData;
   export let display: Display;
   export let columnPosition: ColumnPosition | undefined = undefined;
-  export let row: TableRecord;
+  export let row: Row;
   export let column: Column;
   export let value: unknown = undefined;
 
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
-  $: isLoading = !row.__state || row.__state === 'loading';
+  $: isLoading = !row.state || row.state === 'loading';
   $: canSetNull = column.nullable && value !== null;
 
   // TODO: Set individual cell states and errors in recordsData
@@ -53,7 +53,7 @@
   async function setValue(newValue: unknown) {
     if (newValue !== value) {
       value = newValue;
-      if (row.__isNew) {
+      if (row.isNew) {
         await recordsData.createOrUpdateRecord(row, column);
       } else {
         await recordsData.updateCell(row, column);

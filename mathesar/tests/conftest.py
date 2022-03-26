@@ -184,3 +184,12 @@ def create_column():
         column = mathesar_model_column.current_objects.get_or_create(attnum=attnum, table=table)
         return column[0]
     return _create_column
+
+
+@pytest.fixture
+def custom_types_schema_url(test_db_model, schema, live_server):
+    engine = create_mathesar_engine(test_db_model.name)
+    install.install_mathesar_on_database(engine)
+    yield f"{live_server}/{schema.database.name}/{schema.id}"
+    with engine.begin() as conn:
+        conn.execute(text(f'DROP SCHEMA IF EXISTS {base.SCHEMA} CASCADE;'))

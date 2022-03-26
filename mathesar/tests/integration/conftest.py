@@ -35,6 +35,12 @@ def test_db_model(test_db_name):
 
 
 @pytest.fixture
+def page(page):
+    page.set_default_navigation_timeout(30000)
+    yield page
+
+
+@pytest.fixture
 def create_schema(engine, test_db_model):
     """
     Creates a schema factory, making sure to track and clean up new instances
