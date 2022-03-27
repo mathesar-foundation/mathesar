@@ -184,7 +184,7 @@ test('hide select dropdown by pressing ESC', async () => {
 test('list scrolls automatically to display the currently selected option', async () => {
   const options: Object[] = [];
   for (let i = 1; i < 18; i += 1) {
-    options.push({ id: i, label: `Option ${i}` })
+    options.push({ id: i, label: `Option ${i}` });
   }
 
   const { getByRole, getAllByRole } = render(Select, {
@@ -202,9 +202,9 @@ test('list scrolls automatically to display the currently selected option', asyn
   const selectUl = getByRole('listbox');
   const dropdownContainer: any = selectUl.parentElement;
 
-  // list of options obtained 
+  // list of options obtained
   const optionElementList = getAllByRole('option');
-  
+
   // scrolling through the list to reach second last element
   for (let i = 1; i < 17; i += 1) {
     await fireEvent.keyDown(selectBtn, { key: 'ArrowDown', code: 'ArrowDown' });
@@ -221,8 +221,12 @@ test('list scrolls automatically to display the currently selected option', asyn
   // Reopen the dropdown
   await fireEvent.click(selectBtn);
 
-  expect(optionElement.offsetTop).toBeGreaterThanOrEqual(dropdownContainer.scrollTop);
-  expect(optionElement.offsetTop + optionElement.clientHeight).toBeLessThanOrEqual(
+  expect(optionElement.offsetTop).toBeGreaterThanOrEqual(
+    dropdownContainer.scrollTop,
+  );
+  expect(
+    optionElement.offsetTop + optionElement.clientHeight,
+  ).toBeLessThanOrEqual(
     dropdownContainer.scrollTop + dropdownContainer.clientHeight,
   );
 });
