@@ -200,19 +200,19 @@ test('list scrolls automatically to display the currently selected option', asyn
 
   // dropdown container obtained
   const selectUl = getByRole('listbox');
-  const dropdownContainer: any = selectUl.parentElement;
+  const dropdownContainer: HTMLElement | null = selectUl?.parentElement;
 
   // list of options obtained
   const optionElementList = getAllByRole('option');
 
   // scrolling through the list to reach second last element
   for (let i = 1; i < 17; i += 1) {
-    await fireEvent.keyDown(selectBtn, { key: 'ArrowDown', code: 'ArrowDown' });
-    await fireEvent.keyUp(selectBtn, { key: 'ArrowDown', code: 'ArrowDown' });
+    fireEvent.keyDown(selectBtn, { key: 'ArrowDown', code: 'ArrowDown' });
+    fireEvent.keyUp(selectBtn, { key: 'ArrowDown', code: 'ArrowDown' });
   }
 
   // second last element obtained
-  let optionElement = optionElementList[16];
+  const optionElement = optionElementList[16];
 
   // select the option.
   await fireEvent.keyDown(selectBtn, { key: 'Enter', code: 'Enter' });
@@ -222,11 +222,13 @@ test('list scrolls automatically to display the currently selected option', asyn
   await fireEvent.click(selectBtn);
 
   expect(optionElement.offsetTop).toBeGreaterThanOrEqual(
-    dropdownContainer.scrollTop,
+    dropdownContainer ? dropdownContainer.scrollTop : 0,
   );
   expect(
     optionElement.offsetTop + optionElement.clientHeight,
   ).toBeLessThanOrEqual(
-    dropdownContainer.scrollTop + dropdownContainer.clientHeight,
+    dropdownContainer
+      ? dropdownContainer.scrollTop + dropdownContainer.clientHeight
+      : 0,
   );
 });
