@@ -1,4 +1,4 @@
-import { hasStringLabelProperty } from './typeUtils';
+import { hasStringProperty } from './typeUtils';
 
 export function formatSize(sizeInBytes: number): string {
   if (sizeInBytes === 0) {
@@ -20,9 +20,9 @@ export function formatSize(sizeInBytes: number): string {
  * If the given value has a label property and it is a string, return it.
  * Otherwise, return the value itself, converted to a string.
  */
-export function getLabel(v: unknown): string {
-  if (hasStringLabelProperty(v)) {
-    return v.label;
+export function getLabel(v: unknown, labelKey = 'label'): string {
+  if (hasStringProperty(v, labelKey)) {
+    return (v as Record<string, unknown>)[labelKey] as string;
   }
   return String(v);
 }
