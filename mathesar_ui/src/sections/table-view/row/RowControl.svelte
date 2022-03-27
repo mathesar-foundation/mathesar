@@ -8,18 +8,20 @@
   import type {
     Meta,
     RecordsData,
-    TableRecord,
+    Row,
   } from '@mathesar/stores/table-data/types';
 
   export let primaryKeyColumnId: number | undefined = undefined;
-  export let row: TableRecord;
+  export let row: Row;
   export let meta: Meta;
   export let recordsData: RecordsData;
 
   $: ({ selectedRecords, recordModificationState, pagination } = meta);
   $: ({ savedRecords, newRecords, totalCount } = recordsData);
 
-  $: primaryKeyValue = primaryKeyColumnId ? row[primaryKeyColumnId] : undefined;
+  $: primaryKeyValue = primaryKeyColumnId
+    ? row.record?.[primaryKeyColumnId]
+    : undefined;
   $: isRowSelected = ($selectedRecords as Set<unknown>).has(primaryKeyValue);
   $: genericModificationStatus = getGenericModificationStatus(
     $recordModificationState,
@@ -42,17 +44,17 @@
   style="width:{ROW_CONTROL_COLUMN_WIDTH}px;left:0px"
 >
   <div class="control">
-    {#if row.__isAddPlaceholder}
+    {#if row.isAddPlaceholder}
       <Icon data={faPlus} />
     {:else}
-      {#if typeof row.__rowIndex === 'number'}
+      {#if typeof row.rowIndex === 'number'}
         <span class="number">
-          {row.__rowIndex +
-            (row.__isNew
+          {row.rowIndex +
+            (row.isNew
               ? ($totalCount ?? 0) - $savedRecords.length - $newRecords.length
               : $pagination.offset) +
             1}
-          {#if row.__isNew}
+          {#if row.isNew}
             *
           {/if}
         </span>

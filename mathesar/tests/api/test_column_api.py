@@ -90,7 +90,6 @@ def test_column_list(column_test_table, client):
             'name': 'mycolumn0',
             'type': 'INTEGER',
             'type_options': None,
-            'index': 0,
             'nullable': False,
             'primary_key': True,
             'display_options': None,
@@ -109,7 +108,6 @@ def test_column_list(column_test_table, client):
             'name': 'mycolumn1',
             'type': 'INTEGER',
             'type_options': None,
-            'index': 1,
             'nullable': False,
             'primary_key': False,
             'display_options': None,
@@ -125,7 +123,6 @@ def test_column_list(column_test_table, client):
             'name': 'mycolumn2',
             'type': 'INTEGER',
             'type_options': None,
-            'index': 2,
             'nullable': True,
             'primary_key': False,
             'display_options': None,
@@ -144,7 +141,6 @@ def test_column_list(column_test_table, client):
             'name': 'mycolumn3',
             'type': 'VARCHAR',
             'type_options': None,
-            'index': 3,
             'nullable': True,
             'primary_key': False,
             'display_options': None,
@@ -389,6 +385,49 @@ def test_column_create_some_parameters(column_test_table, client):
     assert response_data['field'] == "type"
 
 
+def test_column_create_no_name_parameter(column_test_table, client):
+    cache.clear()
+    type_ = "BOOLEAN"
+    num_columns = len(column_test_table.sa_columns)
+    generated_name = f"Column {num_columns}"
+    data = {
+        "type": type_
+    }
+    response = client.post(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/", data=data
+    )
+    assert response.status_code == 201
+    new_columns_response = client.get(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/"
+    )
+    assert new_columns_response.json()["count"] == num_columns + 1
+    actual_new_col = new_columns_response.json()["results"][-1]
+    assert actual_new_col["name"] == generated_name
+    assert actual_new_col["type"] == type_
+
+
+def test_column_create_name_parameter_empty(column_test_table, client):
+    cache.clear()
+    name = ""
+    type_ = "BOOLEAN"
+    num_columns = len(column_test_table.sa_columns)
+    generated_name = f"Column {num_columns}"
+    data = {
+        "name": name, "type": type_
+    }
+    response = client.post(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/", data=data
+    )
+    assert response.status_code == 201
+    new_columns_response = client.get(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/"
+    )
+    assert new_columns_response.json()["count"] == num_columns + 1
+    actual_new_col = new_columns_response.json()["results"][-1]
+    assert actual_new_col["name"] == generated_name
+    assert actual_new_col["type"] == type_
+
+
 def test_column_update_name(column_test_table, client):
     cache.clear()
     name = "updatedname"
@@ -616,11 +655,10 @@ def test_column_update_returns_table_dependent_fields(column_test_table, client)
     column = _get_columns_by_name(column_test_table, ['mycolumn1'])[0]
     response = client.patch(
         f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",
-        data=json.dumps(data),
-        content_type="application/json"
+        data=data,
     )
     assert response.json()["default"] is not None
-    assert response.json()["index"] is not None
+    assert response.json()["id"] is not None
 
 
 @pytest.mark.parametrize("type_options", invalid_type_options)
@@ -754,6 +792,4 @@ def test_column_duplicate_no_parameters(column_test_table, client):
     response_data = response.json()
     assert response.status_code == 400
     assert response_data[0]["message"] == "This field is required."
-    assert response_data[0]["field"] == "name"
-    assert response_data[1]["message"] == "This field is required."
-    assert response_data[1]["field"] == "type"
+    assert response_data[0]["field"] == "type"

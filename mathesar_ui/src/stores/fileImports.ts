@@ -24,7 +24,7 @@ export interface PreviewColumn {
   isSelected?: boolean;
   isEditable?: boolean;
   primary_key?: boolean;
-  valid_target_types: string[];
+  valid_target_types: string[] | null;
 }
 
 export type PreviewRow = Record<string, string>;
