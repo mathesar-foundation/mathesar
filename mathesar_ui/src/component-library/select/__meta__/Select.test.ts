@@ -182,8 +182,8 @@ test('hide select dropdown by pressing ESC', async () => {
 });
 
 test('list scrolls automatically to display the currently selected option', async () => {
-  const options: Object[] = [];
-  for (let i = 1; i < 18; i += 1) {
+  const options = [];
+  for (let i = 1; i < 10; i += 1) {
     options.push({ id: i, label: `Option ${i}` });
   }
 
@@ -206,13 +206,13 @@ test('list scrolls automatically to display the currently selected option', asyn
   const optionElementList = getAllByRole('option');
 
   // scrolling through the list to reach second last element
-  for (let i = 1; i < 17; i += 1) {
-    fireEvent.keyDown(selectBtn, { key: 'ArrowDown', code: 'ArrowDown' });
-    fireEvent.keyUp(selectBtn, { key: 'ArrowDown', code: 'ArrowDown' });
-  }
+  Array(7).forEach(async () => {
+    await fireEvent.keyDown(selectBtn, { key: 'ArrowDown', code: 'ArrowDown' });
+    await fireEvent.keyUp(selectBtn, { key: 'ArrowDown', code: 'ArrowDown' });
+  });
 
   // second last element obtained
-  const optionElement = optionElementList[16];
+  const optionElement = optionElementList[7];
 
   // select the option.
   await fireEvent.keyDown(selectBtn, { key: 'Enter', code: 'Enter' });
