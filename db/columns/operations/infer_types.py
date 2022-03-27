@@ -21,7 +21,7 @@ TYPE_INFERENCE_DAG = {
     base.PostgresType.NUMERIC.value: [
         base.PostgresType.BOOLEAN.value,
     ],
-    base.STRING: [
+    base.PostgresType.TEXT.value: [
         base.PostgresType.BOOLEAN.value,
         base.PostgresType.DATE.value,
         base.PostgresType.NUMERIC.value,
@@ -44,9 +44,9 @@ def _get_reverse_type_map(engine):
     reverse_type_map = {v: k for k, v in supported_types.items()}
     reverse_type_map.update(
         {
-            Text: base.STRING,
-            TEXT: base.STRING,
-            VARCHAR: base.STRING,
+            Text: base.PostgresType.TEXT.value,
+            TEXT: base.PostgresType.TEXT.value,
+            VARCHAR: base.PostgresType.TEXT.value,
         }
     )
     return reverse_type_map

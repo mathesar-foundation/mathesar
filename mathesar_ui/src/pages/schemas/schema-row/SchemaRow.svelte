@@ -41,7 +41,9 @@
   <div class="details">
     <div class="title">
       <Icon data={faProjectDiagram} />
-      {schema.name}
+      <a href="/{$currentDBName}/{schema.id}">
+        {schema.name}
+      </a>
       {#if isLocked}
         <Icon class="lock" data={faLock} />
       {/if}
