@@ -1,60 +1,54 @@
+<!--
+  @component
+
+  Use this component when you want to accept user input for a regular old number
+  and you don't need any high precision.
+
+  ## Features
+
+  - Invalid input is rejected.
+
+  - Input is partially formatted as the user types. Grouping separators are
+    automatically inserted.
+
+  - Input is fully reformatted when focus is blurred. For example, trailing
+    decimal separators are removed.
+
+  ## Limitations
+
+  - This component can't accept input for numbers like `99999999999999.99`
+    (which becomes `99999999999999.98` as a `number`) or `9999999999999999`
+    (which becomes `10000000000000000` as a `number`).  See
+    `StringifiedNumberInput.svelte` for a component that will allow
+    high-precision numbers by binding to a `string` instead of a `number`.
+
+-->
 <script lang="ts">
-  import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
+  import FormattedInput from '../formatted-input/FormattedInput.svelte';
+  import type { NumberFormatterOptions } from './number-formatter/types';
+  import { NumberFormatter } from './number-formatter';
+  import { getInputMode } from './numberInputUtils';
+
+  interface $$Props extends Partial<NumberFormatterOptions> {
+    value?: number;
+    element?: HTMLInputElement;
+  }
 
   /**
-   * Value of the input. Use bind tag for two-way binding.
-   * Refer Svelte docs for more info on binding form input values.
+   * See docs within `FormattedInput` for an explanation of how we're using
+   * `null` vs `undefined` here.
    */
-  export let value: string | undefined = undefined;
-
-  // Underlying DOM element for direct access
+  export let value: number | null | undefined = undefined;
   export let element: HTMLInputElement | undefined = undefined;
 
-  // Id for the input
-  export let id: string | undefined = undefined;
-
-  // Forces input to only allow integer values
-  export let isInteger = false;
-
-  const validKeyRegex = /[0-9]|e|\+|-|\./;
-
-  // Before input cannot be relied on, since user can enter chars
-  // anywhere in the textbox. This is a temporary method.
-  function onBeforeInput(e: Event) {
-    // Very basic validation to prevent entering invalid characters
-    // Does not cover all cases
-    const key = (e as InputEvent).data;
-    const inputElement = e.target as HTMLInputElement;
-
-    if (key !== null) {
-      if (validKeyRegex.test(key)) {
-        if (isInteger && key === '.') {
-          e.preventDefault();
-        }
-        if (inputElement.value !== '' && (key === '-' || key === '+')) {
-          e.preventDefault();
-        }
-      } else {
-        e.preventDefault();
-      }
-    }
-  }
-
-  function onInput(e: Event) {
-    const inputElement = e.target as HTMLInputElement;
-    if (inputElement.value === '') {
-      value = undefined;
-    } else {
-      value = inputElement.value;
-    }
-  }
+  $: formatter = new NumberFormatter($$restProps);
+  $: inputmode = getInputMode($$restProps as $$Props);
 </script>
 
-<TextInput
-  bind:element
+<FormattedInput
+  {formatter}
+  bind:value
   {...$$restProps}
-  {value}
-  {id}
-  on:beforeinput={onBeforeInput}
-  on:input={onInput}
+  bind:element
+  {inputmode}
 />
