@@ -7,7 +7,7 @@
     DynamicInputDataType,
     DynamicInputInterfaceType,
     DynamicInputSelectElement,
-  } from './types.d';
+  } from './types';
 
   /**
    * Type of input, one of: 'boolean', 'integer', 'float', 'string', 'date', 'datetime', 'time'

@@ -1,5 +1,5 @@
 import type { Readable, Writable } from 'svelte/store';
-import type { DynamicInputDataType } from '@mathesar-component-library-dir/dynamic-input/types.d';
+import type { DynamicInputDataType } from '@mathesar-component-library-dir/dynamic-input/types';
 
 export type FormInputDataType = boolean | string | number | null;
 

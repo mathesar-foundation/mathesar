@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import Select from '../Select.svelte';
 
@@ -6,19 +6,47 @@
     title: 'Components/Select',
     component: Select,
   };
+
+  const aValues = [1, 2, 3];
+  const aDefault = aValues[0];
+  let a = 2;
+
+  const bValues = [
+    { foo: 'arst', bar: 'oien' },
+    { foo: 'qyul', bar: 'zwfp' },
+  ];
+  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  const bGetLabel = (o) => `${o.foo}-${o.bar}`;
+  const bDefault = bValues[0];
+  let b = bValues[0];
 </script>
 
 <Meta {...meta} />
 
 <Story name="Basic">
-  <Select
-    options={[
-      { id: 1, label: 'Option 1' },
-      { id: 2, label: 'Option 2' },
-      { id: 3, label: 'Option 3' },
-      { id: 4, label: 'Option 4' },
-    ]}
-  />
+  <div><Select options={aValues} bind:value={a} /></div>
+  <div>
+    Value: {a}
+    <button
+      on:click={() => {
+        a = aDefault;
+      }}>Reset</button
+    >
+  </div>
+</Story>
+
+<Story name="Objects as options">
+  <div>
+    <Select options={bValues} bind:value={b} getLabel={bGetLabel} />
+  </div>
+  <div>
+    foo: {b?.foo}, bar: {b?.bar}
+    <button
+      on:click={() => {
+        b = bDefault;
+      }}>Reset</button
+    >
+  </div>
 </Story>
 
 <Story name="Trigger Apperances">
