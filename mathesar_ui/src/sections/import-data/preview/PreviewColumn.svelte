@@ -7,28 +7,15 @@
 
   export let column: PreviewColumn;
 
-  function getOptions(_column: PreviewColumn) {
-    if (_column.valid_target_types === null) {
-      return [{ id: _column.type, label: _column.type }];
-    }
-    return _column.valid_target_types.map((type) => ({
-      id: type,
-      label: type,
-    }));
-  }
-
-  $: options = getOptions(column);
+  $: options = column.valid_target_types ?? [column.type];
   $: disabled = !column.isEditable;
 
-  let selectedOption = {
-    id: column.type,
-    label: column.type,
-  };
+  let selectedOption = column.type;
 
-  function onTypeChange(e: CustomEvent) {
+  function onTypeChange(e: CustomEvent<string>) {
     dispatch('typechange', {
       name: column.name,
-      type: e.detail.value.id as string,
+      type: e.detail,
     });
   }
 </script>

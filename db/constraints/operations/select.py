@@ -60,8 +60,8 @@ def get_column_constraints(column_attnum, table_oid, engine):
         .where(and_(
             # 'conrelid' contains the table oid
             pg_constraint.c.conrelid == table_oid,
-            # 'conkey' contains a list of the constrained column's indices
-            # Here, we check if the column index appears in the conkey list
+            # 'conkey' contains a list of the constrained column's attnum
+            # Here, we check if the column attnum appears in the conkey list
             pg_constraint.c.conkey.bool_op("&&")(f"{{{column_attnum}}}")
         ))
     )

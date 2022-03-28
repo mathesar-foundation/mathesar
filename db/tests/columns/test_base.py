@@ -1,16 +1,13 @@
 import re
 
 import pytest
-from sqlalchemy import (
-    String, Integer, ForeignKey, Table, MetaData, Numeric, VARCHAR, CHAR
-)
+from sqlalchemy import (CHAR, ForeignKey, Integer, Numeric, String, VARCHAR)
 
 from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT_COLUMNS
 from db.columns.utils import get_default_mathesar_column_list
 from db.tests.types import fixtures
-from db.types import email, datetime
-
+from db.types import datetime, email
 
 engine_with_types = fixtures.engine_with_types
 temporary_testing_schema = fixtures.temporary_testing_schema
@@ -165,45 +162,6 @@ def test_MC_valid_target_types_custom_engine(engine_with_types):
     mc = MathesarColumn('testable_col', String)
     mc.add_engine(engine_with_types)
     assert "MATHESAR_TYPES.EMAIL" in mc.valid_target_types
-
-
-def test_MC_column_index_when_no_engine():
-    mc = MathesarColumn('testable_col', String)
-    assert mc.column_index is None
-
-
-def test_MC_column_index_when_no_table(engine):
-    mc = MathesarColumn('testable_col', String)
-    mc.add_engine(engine)
-    assert mc.column_index is None
-
-
-def test_MC_column_index_when_no_db_table(engine):
-    mc = MathesarColumn('testable_col', String)
-    mc.add_engine(engine)
-    table = Table('atable', MetaData(), mc)
-    assert mc.table == table and mc.column_index is None
-
-
-def test_MC_column_index_single(engine_with_schema):
-    engine, schema = engine_with_schema
-    mc = MathesarColumn('testable_col', String)
-    mc.add_engine(engine)
-    metadata = MetaData(bind=engine, schema=schema)
-    Table('asupertable', metadata, mc).create()
-    assert mc.column_index == 0
-
-
-def test_MC_column_index_multiple(engine_with_schema):
-    engine, schema = engine_with_schema
-    mc_1 = MathesarColumn('testable_col', String)
-    mc_2 = MathesarColumn('testable_col2', String)
-    mc_1.add_engine(engine)
-    mc_2.add_engine(engine)
-    metadata = MetaData(bind=engine, schema=schema)
-    Table('asupertable', metadata, mc_1, mc_2).create()
-    assert mc_1.column_index == 0
-    assert mc_2.column_index == 1
 
 
 def test_MC_plain_type_no_opts(engine):

@@ -158,7 +158,7 @@ def test_rename_column_index(engine_with_schema):
     table = Table(table_name, metadata, Column(old_col_name, Integer, index=True))
     table.create()
 
-    table = _rename_column_and_assert(table, old_col_name, new_col_name, engine)
+    _rename_column_and_assert(table, old_col_name, new_col_name, engine)
 
     with engine.begin() as conn:
         index = engine.dialect.get_indexes(conn, table_name, schema)[0]

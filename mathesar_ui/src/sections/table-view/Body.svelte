@@ -3,10 +3,10 @@
   import { get } from 'svelte/store';
   import type {
     TabularDataStore,
-    TableRecord,
+    Row,
   } from '@mathesar/stores/table-data/types';
 
-  import Row from './row/Row.svelte';
+  import RowComponent from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
 
@@ -20,7 +20,7 @@
 
   let previousNewRecordsCount = 0;
 
-  async function resetIndex(_displayableRecords: TableRecord[]) {
+  async function resetIndex(_displayableRecords: Row[]) {
     const allRecordLength = _displayableRecords?.length;
     const newRecordLength = get(newRecords)?.length || 0;
     if (allRecordLength && previousNewRecordsCount !== newRecordLength) {
@@ -41,7 +41,7 @@
   function getItemSize(index: number) {
     const defaultRowHeight = 30;
     const allRecords = get(displayableRecords);
-    if (allRecords?.[index]?.__isNewHelpText) {
+    if (allRecords?.[index]?.isNewHelpText) {
       return 24;
     }
 
@@ -91,7 +91,10 @@
       >
         {#each items as it (it?.key || it)}
           {#if it && $displayableRecords[it.index]}
-            <Row style={it.style} bind:row={$displayableRecords[it.index]} />
+            <RowComponent
+              style={it.style}
+              bind:row={$displayableRecords[it.index]}
+            />
           {/if}
         {/each}
       </VirtualList>
