@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import NumberInput from '../NumberInput.svelte';
 
@@ -11,6 +11,13 @@
           disable: true,
         },
       },
+      allowFloat: { control: 'boolean', defaultValue: false },
+      allowNegative: { control: 'boolean', defaultValue: false },
+      locale: {
+        type: { name: 'string', required: false },
+        control: 'select',
+        options: ['en-US', 'de-DE'],
+      },
     },
     parameters: {
       controls: {
@@ -22,31 +29,33 @@
       },
     },
   };
+
+  let value = 12345;
 </script>
 
 <Meta {...meta} />
 
-<Story
-  name="Basic"
-  args={{
-    value: 10,
-  }}
-  let:args
->
-  <div style="position:relative;height:30px;width:280px;">
-    <NumberInput {...args} />
+<Story name="Basic" let:args>
+  <div class="wrapper">
+    <NumberInput {...args} bind:value />
+  </div>
+  <div>
+    Value:
+    {#if value === undefined}
+      <em>undefined</em>
+    {:else if value === ''}
+      <em>empty string</em>
+    {:else}
+      {value}
+    {/if}
+  </div>
+  <div>
+    Type: {typeof value}
   </div>
 </Story>
 
-<Story
-  name="Integer input"
-  args={{
-    value: 10,
-    isInteger: true,
-  }}
-  let:args
->
-  <div style="position:relative;height:30px;width:280px;">
-    <NumberInput {...args} />
-  </div>
-</Story>
+<style>
+  .wrapper {
+    width: 280px;
+  }
+</style>

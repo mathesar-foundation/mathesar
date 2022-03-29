@@ -1,13 +1,13 @@
 <script lang="ts">
+  import NumberInput from '@mathesar-component-library-dir/number-input/NumberInput.svelte';
   import EnumInput from './EnumInput.svelte';
   import StringInput from './StringInput.svelte';
   import BooleanInput from './BooleanInput.svelte';
-  import NumberInput from '../number-input/NumberInput.svelte';
   import type {
     DynamicInputDataType,
     DynamicInputInterfaceType,
     DynamicInputSelectElement,
-  } from './types.d';
+  } from './types';
 
   /**
    * Type of input, one of: 'boolean', 'integer', 'float', 'string', 'date', 'datetime', 'time'
@@ -48,7 +48,12 @@
 {:else if dataType === 'boolean'}
   <BooleanInput {...$$restProps} {interfaceType} bind:value />
 {:else if dataType === 'integer' || dataType === 'float'}
-  <NumberInput {...$$restProps} isInteger={dataType === 'integer'} bind:value />
+  <NumberInput
+    {...$$restProps}
+    allowFloat={dataType === 'float'}
+    allowNegative
+    bind:value
+  />
 {:else if dataType === 'string'}
   <StringInput {...$$restProps} {interfaceType} bind:value />
 {/if}

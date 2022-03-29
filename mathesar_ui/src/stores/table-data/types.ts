@@ -4,7 +4,7 @@ export type {
   TabularDataProps,
   TerseTabularDataProps,
 } from './tabularData';
-export type { RecordsData, TableRecord } from './records';
+export type { RecordsData, Row } from './records';
 export type { ColumnPosition, ColumnPositionMap } from './display';
 export type { Column, ColumnsData, ColumnsDataStore } from './columns';
 export type {
