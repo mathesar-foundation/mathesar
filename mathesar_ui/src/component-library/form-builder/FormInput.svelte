@@ -1,7 +1,7 @@
 <script lang="ts">
   import LabeledInput from '@mathesar-component-library-dir/labeled-input/LabeledInput.svelte';
   import DynamicInput from '@mathesar-component-library-dir/dynamic-input/DynamicInput.svelte';
-  import type { DynamicInputDataType } from '@mathesar-component-library-dir/dynamic-input/types.d';
+  import type { DynamicInputDataType } from '@mathesar-component-library-dir/dynamic-input/types';
   import type {
     FormInputElement,
     FormInputStore,

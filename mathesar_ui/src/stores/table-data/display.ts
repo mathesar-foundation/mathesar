@@ -3,7 +3,7 @@ import { States } from '@mathesar/utils/api';
 import type { Writable, Readable, Unsubscriber } from 'svelte/store';
 import type { Meta } from './meta';
 import type { ColumnsDataStore, Column } from './columns';
-import type { TableRecord, RecordsData } from './records';
+import type { Row, RecordsData } from './records';
 
 export interface ColumnPosition {
   width: number;
@@ -75,13 +75,13 @@ function recalculateColumnPositions(
 
 export function isCellActive(
   activeCell: ActiveCell,
-  row: TableRecord,
+  row: Row,
   column: Column,
 ): boolean {
   return (
     activeCell &&
     activeCell?.columnIndex === column.__columnIndex &&
-    activeCell.rowIndex === row.__rowIndex
+    activeCell.rowIndex === row.rowIndex
   );
 }
 
@@ -140,7 +140,7 @@ export class Display {
 
   rowWidth: Writable<number>;
 
-  displayableRecords: Readable<TableRecord[]>;
+  displayableRecords: Readable<Row[]>;
 
   constructor(
     meta: Meta,
@@ -177,15 +177,15 @@ export class Display {
         if ($newRecords.length > 0) {
           allRecords = allRecords
             .concat({
-              __identifier: '__new_help_text',
-              __isNewHelpText: true,
-              __state: States.Done,
+              identifier: '__new_help_text',
+              isNewHelpText: true,
+              state: States.Done,
             })
             .concat($newRecords);
         }
         allRecords = allRecords.concat({
           ...this.recordsData.getNewEmptyRecord(),
-          __isAddPlaceholder: true,
+          isAddPlaceholder: true,
         });
         set(allRecords);
       },
@@ -196,20 +196,20 @@ export class Display {
     this.activeCell.set(undefined);
   }
 
-  selectCell(row: TableRecord, column: Column): void {
+  selectCell(row: Row, column: Column): void {
     this.activeCell.set({
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-      rowIndex: row.__rowIndex,
+      rowIndex: row.rowIndex,
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       columnIndex: column.__columnIndex,
     });
   }
 
-  editCell(row: TableRecord, column: Column): void {
+  editCell(row: Row, column: Column): void {
     if (!column.primary_key) {
       this.activeCell.set({
         // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        rowIndex: row.__rowIndex,
+        rowIndex: row.rowIndex,
         // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         columnIndex: column.__columnIndex,
       });
