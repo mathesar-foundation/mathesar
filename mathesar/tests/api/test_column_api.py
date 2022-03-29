@@ -276,6 +276,37 @@ def test_column_create_display_options(
     assert actual_new_col["display_options"] == display_options
 
 
+default_display_options_test_list = [
+    ("BOOLEAN", None, None),
+    ("BOOLEAN", {}, {"input": "checkbox"}),
+    ("DATE", None, None),
+    ("INTERVAL", None, None),
+    ("NUMERIC", None, None),
+    ("TIMESTAMP WITH TIME ZONE", None, None),
+    ("TIMESTAMP WITHOUT TIME ZONE", None, None),
+    ("TIME WITHOUT TIME ZONE", None, None),
+    ("TIME WITH TIME ZONE", None, None),
+]
+
+
+@pytest.mark.parametrize("type_,display_options, expected_display_options", default_display_options_test_list)
+def test_column_create_empty_display_options(
+    column_test_table, type_, display_options, expected_display_options, client, engine
+):
+    cache.clear()
+    name = "anewcolumn"
+    data = {"name": name, "type": type_, "display_options": display_options}
+    response = client.post(f"/api/db/v0/tables/{column_test_table.id}/columns/", data)
+    assert response.status_code == 201
+
+    # Ensure the correct serialized date is returned by the API
+    new_columns_response = client.get(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/"
+    )
+    actual_new_col = new_columns_response.json()["results"][-1]
+    assert actual_new_col["display_options"] == expected_display_options
+
+
 _too_long_string = "x" * 256
 
 
@@ -478,12 +509,28 @@ def test_column_invalid_display_options_type_on_reflection(column_test_table_wit
     column_index = 2
     column = columns[column_index]
     with engine.begin() as conn:
-        alter_column_type(table.oid, column.name, engine, conn, 'boolean')
+        alter_column_type(table.oid, column.name, engine, conn, 'text')
     column_id = column.id
     response = client.get(
         f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
     )
     assert response.json()["display_options"] is None
+
+
+def test_column_alter_same_type_display_options(column_test_table_with_service_layer_options,
+                                                client, engine):
+    cache.clear()
+    table, columns = column_test_table_with_service_layer_options
+    column_index = 2
+    column = columns[column_index]
+    pre_alter_display_options = column.display_options
+    with engine.begin() as conn:
+        alter_column_type(table.oid, column.name, engine, conn, 'numeric')
+    column_id = column.id
+    response = client.get(
+        f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
+    )
+    assert response.json()["display_options"] == pre_alter_display_options
 
 
 def test_column_update_default(column_test_table, client):
