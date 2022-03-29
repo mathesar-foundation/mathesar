@@ -31,6 +31,7 @@ class URIFunction(Enum):
     FRAGMENT = DB_TYPE + "_fragment"
 
 
+# TODO remove if unneeded
 QualifiedURIFunction = Enum(
     "QualifiedURIFunction",
     {
@@ -56,7 +57,7 @@ class URI(UserDefinedType):
 def build_generic_function_def_class(name):
     class_dict = {
         "type": Text,
-        "name": quoted_name(QualifiedURIFunction[name].value, False),
+        "name": quoted_name(URIFunction[name].value, False),
         "identifier": URIFunction[name].value
     }
     return type(class_dict["identifier"], (GenericFunction,), class_dict)
@@ -75,24 +76,24 @@ def install(engine):
     """
 
     create_uri_parts_query = f"""
-    CREATE OR REPLACE FUNCTION {QualifiedURIFunction.PARTS.value}({PostgresType.TEXT.value})
+    CREATE OR REPLACE FUNCTION {URIFunction.PARTS.value}({PostgresType.TEXT.value})
     RETURNS {PostgresType.TEXT.value}[] AS $$
         SELECT regexp_match($1, {URI_REGEX_STR});
     $$
     LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
     """
     uri_parts_map = {
-        QualifiedURIFunction.SCHEME.value: 2,
-        QualifiedURIFunction.AUTHORITY.value: 4,
-        QualifiedURIFunction.PATH.value: 5,
-        QualifiedURIFunction.QUERY.value: 7,
-        QualifiedURIFunction.FRAGMENT.value: 9,
+        URIFunction.SCHEME.value: 2,
+        URIFunction.AUTHORITY.value: 4,
+        URIFunction.PATH.value: 5,
+        URIFunction.QUERY.value: 7,
+        URIFunction.FRAGMENT.value: 9,
     }
 
     create_domain_query = f"""
     CREATE DOMAIN {DB_TYPE} AS text CHECK (
-        (value IS NULL) OR ({QualifiedURIFunction.SCHEME.value}(value) IS NOT NULL
-        AND {QualifiedURIFunction.PATH.value}(value) IS NOT NULL)
+        (value IS NULL) OR ({URIFunction.SCHEME.value}(value) IS NOT NULL
+        AND {URIFunction.PATH.value}(value) IS NOT NULL)
     );
     """
 
@@ -103,7 +104,7 @@ def install(engine):
             create_uri_part_getter_query = f"""
             CREATE OR REPLACE FUNCTION {part}({PostgresType.TEXT.value})
             RETURNS {PostgresType.TEXT.value} AS $$
-                SELECT ({QualifiedURIFunction.PARTS.value}($1))[{index}];
+                SELECT ({URIFunction.PARTS.value}($1))[{index}];
             $$
             LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
             """

@@ -2,7 +2,7 @@ import re
 
 import pytest
 from sqlalchemy import (
-    String, Integer, ForeignKey, Table, MetaData, Numeric, VARCHAR, CHAR, Text
+    String, Integer, ForeignKey, Table, MetaData, Numeric, VARCHAR, CHAR, NUMERIC
 )
 
 from db.columns.base import MathesarColumn
@@ -10,6 +10,7 @@ from db.columns.defaults import DEFAULT_COLUMNS
 from db.columns.utils import get_default_mathesar_column_list
 from db.tests.types import fixtures
 from db.types.custom import email, datetime
+from db.types.base import MathesarCustomType
 
 
 engine_with_types = fixtures.engine_with_types
@@ -165,7 +166,7 @@ def test_MC_valid_target_types_default_engine(engine):
 def test_MC_valid_target_types_custom_engine(engine_with_types):
     mc = MathesarColumn('testable_col', String)
     mc.add_engine(engine_with_types)
-    assert "MATHESAR_TYPES.EMAIL" in mc.valid_target_types
+    assert MathesarCustomType.EMAIL in mc.valid_target_types
 
 
 def test_MC_column_index_when_no_engine():
@@ -207,32 +208,32 @@ def test_MC_column_index_multiple(engine_with_schema):
     assert mc_2.column_index == 1
 
 
-def test_MC_plain_type_no_opts(engine):
-    mc = MathesarColumn('acolumn', String)
+def test_MC_db_type_no_opts(engine):
+    mc = MathesarColumn('acolumn', VARCHAR)
     mc.add_engine(engine)
-    assert mc.plain_type == "VARCHAR"
+    assert mc.db_type == PostgresType.CHARACTER_VARYING
 
 
-def test_MC_plain_type_no_opts_custom_type(engine_with_types):
+def test_MC_db_type_no_opts_custom_type(engine_with_types):
     mc = MathesarColumn('testable_col', email.Email)
     mc.add_engine(engine_with_types)
-    assert mc.plain_type == "MATHESAR_TYPES.EMAIL"
+    assert mc.db_type == MathesarCustomType.EMAIL
 
 
-def test_MC_plain_type_numeric_opts(engine):
-    mc = MathesarColumn('testable_col', Numeric(5, 2))
+def test_MC_db_type_numeric_opts(engine):
+    mc = MathesarColumn('testable_col', NUMERIC(5, 2))
     mc.add_engine(engine)
-    assert mc.plain_type == "NUMERIC"
+    assert mc.db_type == PostgresType.NUMERIC
 
 
 def test_MC_type_options_no_opts(engine):
-    mc = MathesarColumn('testable_col', Numeric)
+    mc = MathesarColumn('testable_col', NUMERIC)
     mc.add_engine(engine)
     assert mc.type_options is None
 
 
 def test_MC_type_options(engine):
-    mc = MathesarColumn('testable_col', Numeric(5, 2))
+    mc = MathesarColumn('testable_col', NUMERIC(5, 2))
     mc.add_engine(engine)
     assert mc.type_options == {'precision': 5, 'scale': 2}
 

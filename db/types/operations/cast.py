@@ -142,7 +142,8 @@ def get_full_cast_map(engine) -> Mapping[DatabaseType, Collection[DatabaseType]]
     target_to_source_maps = {
         PostgresType.BIGINT: _get_integer_type_body_map(target_type=PostgresType.BIGINT),
         PostgresType.BOOLEAN: _get_boolean_type_body_map(),
-        PostgresType.CHAR: _get_textual_type_body_map(engine),
+        PostgresType.CHARACTER: _get_textual_type_body_map(engine),
+        PostgresType.CHARACTER_VARYING: _get_textual_type_body_map(engine),
         PostgresType.DATE: _get_date_type_body_map(),
         PostgresType.DECIMAL: _get_decimal_number_type_body_map(target_type=PostgresType.DECIMAL),
         PostgresType.DOUBLE_PRECISION: _get_decimal_number_type_body_map(target_type=PostgresType.DOUBLE_PRECISION),
@@ -162,7 +163,6 @@ def get_full_cast_map(engine) -> Mapping[DatabaseType, Collection[DatabaseType]]
         PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE: _get_timestamp_without_timezone_type_body_map(),
         PostgresType.TEXT: _get_textual_type_body_map(engine),
         MathesarCustomType.URI: _get_uri_type_body_map(),
-        PostgresType.CHARACTER_VARYING: _get_textual_type_body_map(engine),
     }
     # invert the map
     source_to_target_tuples = (
@@ -210,7 +210,7 @@ def create_cast_functions(target_type: DatabaseType, type_body_map: TypeBodyMap,
 def assemble_function_creation_sql(argument_type: DatabaseType, target_type: DatabaseType, function_body: str) -> str:
     function_name = get_cast_function_name(target_type)
     return f"""
-    CREATE OR REPLACE FUNCTION {function_name}({argument_type})
+    CREATE OR REPLACE FUNCTION {function_name}({argument_type.id})
     RETURNS {target_type.id}
     AS $$
     {function_body}
@@ -234,7 +234,19 @@ def get_cast_function_name(target_type: DatabaseType) -> str:
         bare_type_name = unqualified_type_name
     function_type_name = '_'.join(bare_type_name.split())
     bare_function_name = f"cast_to_{function_type_name}"
-    return f"{base.get_qualified_name(bare_function_name)}"
+    escaped_bare_function_name = _escape_illegal_characters(bare_function_name)
+    qualified_escaped_bare_function_name = f"{base.get_qualified_name(escaped_bare_function_name)}"
+    return qualified_escaped_bare_function_name
+
+
+def _escape_illegal_characters(sql_name: str) -> str:
+    replacement_mapping = {
+        '"': '_double_quote_'
+    }
+    resulting_string = sql_name
+    for old, new in replacement_mapping.items():
+        resulting_string = resulting_string.replace(old, new)
+    return resulting_string
 
 
 def _get_boolean_type_body_map() -> TypeBodyMap:
@@ -764,7 +776,6 @@ def _get_textual_type_body_map(engine) -> TypeBodyMap:
     All types in get_supported_alter_column_types are supported.
     """
     supported_types = get_available_known_db_types(engine)
-
     # We cast everything through TEXT so that formatting is done correctly
     # for CHAR.
     text_cast_str = f"""
@@ -772,7 +783,6 @@ def _get_textual_type_body_map(engine) -> TypeBodyMap:
           RETURN $1::{PostgresType.TEXT.id};
         END;
     """
-
     return {type_: text_cast_str for type_ in supported_types}
 
 

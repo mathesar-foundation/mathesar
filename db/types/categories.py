@@ -18,7 +18,6 @@ INTEGER_TYPES = frozenset((
 ))
 
 DECIMAL_TYPES = frozenset((
-    PostgresType.DECIMAL,
     PostgresType.DOUBLE_PRECISION,
     PostgresType.FLOAT,
     PostgresType.NUMERIC,

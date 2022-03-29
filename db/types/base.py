@@ -1,10 +1,12 @@
 from enum import Enum
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 from db import constants
 
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Collection
+
+import inspect
 
 
 class DatabaseType:
@@ -27,11 +29,16 @@ class DatabaseType:
             ischema_names = engine.dialect.ischema_names
             return ischema_names.get(self.id)
 
-    def is_available(self, engine) -> bool:
+    def is_available(self, engine, type_ids_on_database:Collection[str]=None) -> bool:
         """
-        Returns true if this type is available on provided engine.
+        Returns true if this type is available on provided engine's database. For the sake of
+        optimizing IO, the result of _get_type_ids_on_database(engine) may be passed as the
+        type_ids_on_database parameter.
         """
-        return self.get_sa_class(engine) is not None
+        if type_ids_on_database is None:
+            type_ids_on_database = _get_type_ids_on_database(engine)
+        is_type_in_database = self.id in type_ids_on_database
+        return is_type_in_database
 
     @property
     def is_ignored(self) -> bool:
@@ -45,11 +52,18 @@ class DatabaseType:
         ignored_types = (
             PostgresType.TIME,
             PostgresType.TIMESTAMP,
-            PostgresType.DECIMAL,
             PostgresType.NAME,
             PostgresType.CHAR,
         )
         return self in ignored_types
+
+
+    def get_sa_instance_compiled(self, engine, type_options={}):
+        sa_class = self.get_sa_class(engine)
+        if sa_class:
+            dialect = engine.dialect
+            instance = sa_class(**type_options)
+            return instance.compile(dialect=dialect)
 
 
 class PostgresType(DatabaseType, Enum):
@@ -71,7 +85,6 @@ class PostgresType(DatabaseType, Enum):
     CIDR = 'cidr'
     DATE = 'date'
     DATERANGE = 'daterange'
-    DECIMAL = 'decimal'
     DOUBLE_PRECISION = 'double precision'
     FLOAT = 'float'
     HSTORE = 'hstore'
@@ -127,7 +140,6 @@ def get_qualified_name(unqualified_name):
 class MathesarCustomType(DatabaseType, Enum):
     """
     This is a list of custom Mathesar DB types.
-    Keys returned by get_available_types are of the format 'mathesar_types.VALUE'
     """
     EMAIL = 'email'
     MATHESAR_MONEY = 'mathesar_money'
@@ -177,12 +189,7 @@ def get_db_type_enum_from_id(db_type_id) -> Optional[DatabaseType]:
         return PostgresType(db_type_id)
     except ValueError:
         try:
-            # Sometimes MA type identifiers are qualified like so: `mathesar_types.uri`.
-            # We want to remove that prefix, when it's there, because MathesarCustomType
-            # enum stores type ids without a qualifier (e.g. `uri`).
-            possible_prefix = _ma_type_qualifier_prefix + '.'
-            preprocessed_db_type_id = _remove_prefix(db_type_id, possible_prefix)
-            return MathesarCustomType(preprocessed_db_type_id)
+            return MathesarCustomType(db_type_id)
         except ValueError:
             return None
 
@@ -193,14 +200,22 @@ def get_available_known_db_types(engine) -> Sequence[DatabaseType]:
     """
     Returns a tuple of DatabaseType instances that are available on provided engine.
     """
+    type_ids_on_database = _get_type_ids_on_database(engine)
     return tuple(
         db_type
         for db_type in known_db_types
-        if db_type.is_available(engine)
+        if db_type.is_available(
+            engine,
+            type_ids_on_database=type_ids_on_database,
+        )
     )
 
 
 def get_db_type_enum_from_class(sa_type, engine) -> DatabaseType:
+    if not inspect.isclass(sa_type):
+        # Instead of extracting classes from instances, we're supporting a single type of parameter
+        # and failing early so that the codebase is more homogenous.
+        raise Exception("Programming error: sa_type parameter must be a class, not an instance.")
     db_type_id = _sa_type_class_to_db_type_id(sa_type, engine)
     if db_type_id:
         db_type = get_db_type_enum_from_id(db_type_id)
@@ -224,3 +239,26 @@ def _compile_sa_class(sa_class, engine):
         return sa_class.compile(dialect=engine.dialect)
     except TypeError:
         return sa_class().compile(dialect=engine.dialect)
+
+
+def _get_type_ids_on_database(engine) -> Collection[str]:
+    """
+    Returns db type ids available on the database.
+    """
+    # Adapted from the SQL expression produced by typing `\dT *` in psql.
+    select_statement = text(
+        "SELECT\n"
+        "  pg_catalog.format_type(t.oid, NULL) AS \"Name\"\n"
+        " FROM pg_catalog.pg_type t\n"
+        "      LEFT JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace\n"
+        " WHERE (t.typrelid = 0 OR (SELECT c.relkind = 'c' FROM pg_catalog.pg_class c WHERE c.oid = t.typrelid))\n"
+        "   AND NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid)\n"
+        "   AND pg_catalog.pg_type_is_visible(t.oid);"
+    )
+    with engine.connect() as connection:
+        db_type_ids = frozenset(
+            db_type_id
+            for db_type_id,
+            in connection.execute(select_statement)
+        )
+        return db_type_ids

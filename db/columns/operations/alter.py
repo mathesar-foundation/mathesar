@@ -11,7 +11,7 @@ from db.columns.operations.select import (
 )
 from db.columns.utils import get_mathesar_column_with_engine, get_type_options
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
-from db.types.base import get_db_type_enum_from_class, DatabaseType
+from db.types.base import get_db_type_enum_from_class, DatabaseType, get_db_type_enum_from_id
 from db.types.operations.cast import get_cast_function_name
 from db.utils import execute_statement
 
@@ -78,13 +78,11 @@ def alter_column_type(
 
     prepared_table_name = _preparer.format_table(table)
     prepared_column_name = _preparer.format_column(column)
-    target_type_class = target_type.get_sa_class(engine)
-    if target_type_class is None:
-        # Here it is presumed that target_type will always be available on this engine, so no None
-        # handling.
-        raise Exception("This should never happen")
-    prepared_type_name = target_type_class(**type_options).compile(dialect=engine.dialect)
-    cast_function_name = get_cast_function_name(prepared_type_name)
+    prepared_type_name = target_type.get_sa_instance_compiled(
+        engine=engine,
+        type_options=type_options
+    )
+    cast_function_name = get_cast_function_name(target_type)
     alter_stmt = f"""
     ALTER TABLE {prepared_table_name}
       ALTER COLUMN {prepared_column_name}
@@ -107,7 +105,7 @@ def retype_column(
     table = reflect_table_from_oid(table_oid, engine, connection)
     column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
     column = table.columns[column_name]
-    column_db_type = get_db_type_enum_from_class(column.type, engine)
+    column_db_type = get_db_type_enum_from_class(column.type.__class__, engine)
     new_type = new_type if new_type is not None else column_db_type
     column_type_options = get_type_options(column)
 
@@ -196,7 +194,7 @@ def _batch_update_column_types(table_oid, column_data_list, connection, engine):
     table = reflect_table_from_oid(table_oid, engine, connection)
     for index, column_data in enumerate(column_data_list):
         if 'plain_type' in column_data:
-            new_type = column_data['plain_type']
+            new_type = get_db_type_enum_from_id(column_data['plain_type'])
             type_options = column_data.get('type_options', {})
             if type_options is None:
                 type_options = {}

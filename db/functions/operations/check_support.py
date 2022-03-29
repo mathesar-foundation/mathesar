@@ -23,10 +23,12 @@ def _get_functions_defined_on_database(engine):
     metadata = MetaData()
     pg_proc = Table('pg_proc', metadata, autoload_with=engine, schema='pg_catalog')
     select_statement = select(pg_proc.c.proname)
-    return tuple(
-        function_name
-        for function_name, in engine.connect().execute(select_statement)
-    )
+    with engine.connect() as connection:
+        return tuple(
+            function_name
+            for function_name,
+            in connection.execute(select_statement)
+        )
 
 
 def _are_db_function_dependencies_satisfied(db_function, functions_on_database):
