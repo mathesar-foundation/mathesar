@@ -103,7 +103,7 @@ DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY = 'db_type'
 
 
 class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
-    input = serializers.ChoiceField(choices=[("dropdown", "dropdown"), ("checkbox", "checkbox")], default="checkbox")
+    input = serializers.ChoiceField(choices=[("dropdown", "dropdown"), ("checkbox", "checkbox")])
     custom_labels = CustomBooleanLabelSerializer(required=False)
 
 

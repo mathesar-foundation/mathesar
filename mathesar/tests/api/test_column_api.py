@@ -289,24 +289,6 @@ default_display_options_test_list = [
 ]
 
 
-@pytest.mark.parametrize("type_,display_options, expected_display_options", default_display_options_test_list)
-def test_column_create_empty_display_options(
-    column_test_table, type_, display_options, expected_display_options, client, engine
-):
-    cache.clear()
-    name = "anewcolumn"
-    data = {"name": name, "type": type_, "display_options": display_options}
-    response = client.post(f"/api/db/v0/tables/{column_test_table.id}/columns/", data)
-    assert response.status_code == 201
-
-    # Ensure the correct serialized date is returned by the API
-    new_columns_response = client.get(
-        f"/api/db/v0/tables/{column_test_table.id}/columns/"
-    )
-    actual_new_col = new_columns_response.json()["results"][-1]
-    assert actual_new_col["display_options"] == expected_display_options
-
-
 _too_long_string = "x" * 256
 
 
