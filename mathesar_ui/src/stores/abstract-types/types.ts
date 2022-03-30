@@ -21,33 +21,42 @@ export interface AbstractTypeConfigForm extends FormConfiguration {
   variables: Record<string, AbstractTypeConfigFormVariable>;
 }
 
-export interface AbstractTypeDbConfigOptions {
-  allowDefault: boolean;
-  configuration: {
-    form: AbstractTypeConfigForm;
-    determineDbType: (
-      formValues: FormValues,
-      columnType: DbType,
-      typeOptions: Column['type_options'],
-    ) => DbType;
-    getSavableTypeOptions: (columnType: DbType) => string[];
+export interface AbstractTypeDbConfig {
+  form: AbstractTypeConfigForm;
+  determineDbTypeAndOptions: (
+    dbFormValues: FormValues,
+    columnType: DbType,
+  ) => {
+    dbType: DbType;
+    typeOptions: Column['type_options'];
   };
+  constructDbFormValuesFromTypeOptions: (
+    columnType: DbType,
+    typeOptions: Column['type_options'],
+  ) => FormValues;
+}
+
+export interface AbstractTypeDisplayConfig {
+  form: AbstractTypeConfigForm;
+  determineDisplayOptions: (
+    dbFormValues: FormValues,
+  ) => Column['display_options'];
+  constructDisplayFormValuesFromDisplayOptions: (
+    displayOptions: Column['display_options'],
+  ) => FormValues;
 }
 
 export interface AbstractTypeConfiguration {
   defaultDbType?: DbType;
   icon: string;
+  allowSettingDefaultValue?: boolean;
   input: {
     type: string;
     config?: Record<string, unknown>;
     conditionalConfig?: Record<DbType, Record<string, unknown>>;
   };
-  typeSwitchOptions?: {
-    database: AbstractTypeDbConfigOptions;
-    display?: {
-      form: AbstractTypeConfigForm;
-    };
-  };
+  getDbConfig?: (selectedDbType?: DbType) => AbstractTypeDbConfig;
+  getDisplayConfig?: () => AbstractTypeDisplayConfig;
 }
 
 export interface AbstractType

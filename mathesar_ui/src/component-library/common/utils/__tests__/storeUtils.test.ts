@@ -1,5 +1,5 @@
 import { get, writable } from 'svelte/store';
-import { collapse, unite } from './storeUtils';
+import { collapse, unite } from '../storeUtils';
 
 test('collapse', () => {
   const innerA = writable(21);
