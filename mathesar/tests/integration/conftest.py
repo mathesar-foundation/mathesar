@@ -98,7 +98,7 @@ def table_with_all_types(schema):
             varchar='cell with varchar value',
             varchar_n='cell with varchar n value',
             text='cell with text value',
-            boolean= None,
+            boolean=None,
         ))
 
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
