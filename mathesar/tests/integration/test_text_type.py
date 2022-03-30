@@ -119,3 +119,13 @@ def test_text_db_type_selection(page, go_to_all_types_table):
     page.locator(restrict_field_size_option_locator).set_checked(False)
     expect(page.locator(field_size_limit_locator)).not_to_be_visible()
     verify_column_type(page, "TEXT")
+
+
+def test_boolean_column(page, go_to_all_types_table):
+    expect_table_to_open(page)
+    page.check("div:nth-child(7) .sheet-cell .cell-wrapper input[type=checkbox]")
+    assert page.is_checked("div:nth-child(7) .sheet-cell .cell-wrapper input[type=checkbox]") is True
+    page.uncheck("div:nth-child(7) .sheet-cell .cell-wrapper input[type=checkbox]")
+    assert page.is_checked("div:nth-child(7) .sheet-cell .cell-wrapper input[type=checkbox]") is False
+    page.check("div:nth-child(7) .sheet-cell .cell-wrapper input[type=checkbox]")
+    assert page.is_checked("div:nth-child(7) .sheet-cell .cell-wrapper input[type=checkbox]") is True
