@@ -6,7 +6,7 @@
   const dispatch = createEventDispatcher();
 
   export let form: FormBuildConfiguration;
-  $: validationStore = form.validation;
+  $: validationStore = form.validationStore;
 
   function submit() {
     dispatch('submit');
@@ -18,7 +18,6 @@
   <form on:submit|preventDefault={submit}>
     <FormElement
       stores={form.stores}
-      storeUsage={form.storeUsage}
       variables={form.variables}
       element={form.layout}
       validationResult={$validationStore}
