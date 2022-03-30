@@ -123,9 +123,12 @@ def test_text_db_type_selection(page, go_to_all_types_table):
 
 def test_boolean_column(page, go_to_all_types_table):
     expect_table_to_open(page)
-    page.check("div:nth-child(7) .sheet-cell .cell-wrapper input[type=checkbox]")
-    assert page.is_checked("div:nth-child(7) .sheet-cell .cell-wrapper input[type=checkbox]") is True
-    page.uncheck("div:nth-child(7) .sheet-cell .cell-wrapper input[type=checkbox]")
-    assert page.is_checked("div:nth-child(7) .sheet-cell .cell-wrapper input[type=checkbox]") is False
-    page.check("div:nth-child(7) .sheet-cell .cell-wrapper input[type=checkbox]")
-    assert page.is_checked("div:nth-child(7) .sheet-cell .cell-wrapper input[type=checkbox]") is True
+    checkbox_selector = ".table-content .row:nth-child(1) .cell:nth-child(7) [type=checkbox]"
+    assert page.locator(checkbox_selector).element_handle().evaluate("node => node.indeterminate") is True
+    page.check(checkbox_selector)
+    assert page.locator(checkbox_selector).element_handle().evaluate("node => node.indeterminate") is False
+    assert page.is_checked(checkbox_selector) is True
+    page.uncheck(checkbox_selector)
+    assert page.is_checked(checkbox_selector) is False
+    page.check(checkbox_selector)
+    assert page.is_checked(checkbox_selector) is True
