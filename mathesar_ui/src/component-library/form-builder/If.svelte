@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { checkCondition } from './utils';
+  import { computeIfElements } from './utils';
   import type { FormInputStore, ConditionalIfElement } from './types';
 
   export let store: FormInputStore;
@@ -7,11 +7,13 @@
   export let value: ConditionalIfElement['value'];
   export let elements: ConditionalIfElement['elements'];
 
-  $: isConditionSatisfied = checkCondition($store, condition, value);
+  $: elementsToDisplay = computeIfElements($store, {
+    condition,
+    value,
+    elements,
+  });
 </script>
 
-{#if isConditionSatisfied}
-  {#each elements || [] as element (element)}
-    <slot {element} />
-  {/each}
-{/if}
+{#each elementsToDisplay as element (element)}
+  <slot {element} />
+{/each}
