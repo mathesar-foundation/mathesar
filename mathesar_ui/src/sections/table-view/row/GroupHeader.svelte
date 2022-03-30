@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { Grouping, Group } from '@mathesar/stores/table-data/records';
   import { ROW_CONTROL_COLUMN_WIDTH } from '@mathesar/stores/table-data';
-  import type { TableRecord } from '@mathesar/stores/table-data/types';
+  import type { Row } from '@mathesar/stores/table-data/types';
   import CellValue from '@mathesar/components/CellValue.svelte';
 
-  export let row: TableRecord;
+  export let row: Row;
   export let grouping: Grouping;
   export let group: Group;
   export let rowWidth: number;
@@ -12,7 +12,7 @@
   $: ({ columnIds } = grouping);
 
   $: cellValue = (columnId: number) =>
-    row.__groupValues ? row.__groupValues[columnId] : undefined;
+    row.groupValues ? row.groupValues[columnId] : undefined;
 </script>
 
 <div

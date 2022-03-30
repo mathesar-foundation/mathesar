@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { SimpleSelect } from '@mathesar-component-library';
+  import { Select } from '@mathesar-component-library';
   import {
     SortDirection,
     getDirectionLabel,
@@ -9,9 +9,9 @@
   export let onChange: (value: SortDirection) => void = () => {};
 </script>
 
-<SimpleSelect
-  values={Object.values(SortDirection)}
+<Select
+  options={Object.values(SortDirection)}
   getLabel={getDirectionLabel}
   bind:value
-  {onChange}
+  on:change={(e) => onChange(e.detail)}
 />
