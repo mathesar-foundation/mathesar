@@ -4,7 +4,7 @@
   import { Icon, Button } from '@mathesar-component-library';
   import { SortDirection } from '@mathesar/stores/table-data';
   import type { Sorting } from '@mathesar/stores/table-data';
-  import type { Column } from '@mathesar/stores/table-data/columns';
+  import type { Column } from '@mathesar/stores/table-data/types';
   import SelectSortDirection from '@mathesar/components/SelectSortDirection.svelte';
   import SelectColumn from '@mathesar/components/SelectColumn.svelte';
 

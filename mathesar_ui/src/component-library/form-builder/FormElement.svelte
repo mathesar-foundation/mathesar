@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import FormInput from './FormInput.svelte';
   import FormLayout from './FormLayout.svelte';
   import Switch from './Switch.svelte';
@@ -12,37 +11,10 @@
 
   export let element: FormElement;
   export let stores: FormBuildConfiguration['stores'];
-  export let storeUsage: FormBuildConfiguration['storeUsage'];
   export let variables: FormBuildConfiguration['variables'];
   export let validationResult: FormValidationResult;
 
   $: store = 'variable' in element ? stores.get(element.variable) : undefined;
-
-  onMount(() => {
-    if ('variable' in element) {
-      const variableName = element.variable;
-      storeUsage.update((existingMap) => {
-        const newMap = new Map(existingMap);
-        const existingCount = newMap.get(variableName) ?? 0;
-        newMap.set(variableName, existingCount + 1);
-        return newMap;
-      });
-
-      return () => {
-        storeUsage.update((existingMap) => {
-          const newMap = new Map(existingMap);
-          const existingCount = newMap.get(variableName) ?? 0;
-          if (existingCount > 0) {
-            newMap.set(variableName, existingCount - 1);
-          } else {
-            newMap.delete(variableName);
-          }
-          return newMap;
-        });
-      };
-    }
-    return () => {};
-  });
 </script>
 
 {#if element.type === 'input' && store}
