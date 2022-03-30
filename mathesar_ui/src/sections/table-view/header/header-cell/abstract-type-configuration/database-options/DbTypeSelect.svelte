@@ -3,8 +3,8 @@
   import type { DbType } from '@mathesar/App.d';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
 
-  export let selectedDbType: DbType | undefined;
-  export let selectedAbstractType: AbstractType | undefined;
+  export let selectedDbType: DbType;
+  export let selectedAbstractType: AbstractType;
 
   $: dbTypeOptions = selectedAbstractType
     ? Array.from(selectedAbstractType.dbTypes)
