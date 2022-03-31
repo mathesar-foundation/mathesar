@@ -40,6 +40,29 @@ class DatabaseType:
         is_type_in_database = self.id in type_ids_on_database
         return is_type_in_database
 
+    def get_sa_instance_compiled(self, engine, type_options={}):
+        sa_class = self.get_sa_class(engine)
+        if sa_class:
+            dialect = engine.dialect
+            instance = sa_class(**type_options)
+            return instance.compile(dialect=dialect)
+
+    @property
+    def is_alias(self) -> bool:
+        return self in _non_canonical_alias_db_types
+
+    @property
+    def is_sa_only(self) -> bool:
+        return self in _sa_only_db_types
+
+    @property
+    def is_optional(self) -> bool:
+        return self in _optional_db_types
+
+    @property
+    def is_inconsistent(self) -> bool:
+        return self in _inconsistent_db_types
+
     @property
     def is_ignored(self) -> bool:
         """
@@ -48,22 +71,15 @@ class DatabaseType:
         ignoring aliases. It also ignores NAME and CHAR, because both are reflected as the SA
         String type.
         """
-        # TODO should PostgresType.FLOAT be ignored as well? is it reflected as DOUBLE_PRECISION?
-        ignored_types = (
-            PostgresType.TIME,
-            PostgresType.TIMESTAMP,
-            PostgresType.NAME,
-            PostgresType.CHAR,
-        )
-        return self in ignored_types
+        return self in _inconsistent_db_types
 
+    @property
+    def is_reflection_supported(self) -> bool:
+        return not self.is_inconsistent
 
-    def get_sa_instance_compiled(self, engine, type_options={}):
-        sa_class = self.get_sa_class(engine)
-        if sa_class:
-            dialect = engine.dialect
-            instance = sa_class(**type_options)
-            return instance.compile(dialect=dialect)
+    @property
+    def is_application_supported(self) -> bool:
+        return not self.is_inconsistent and not _sa_only_db_types
 
 
 class PostgresType(DatabaseType, Enum):
@@ -157,14 +173,41 @@ class MathesarCustomType(DatabaseType, Enum):
         return instance
 
 
-_known_vanilla_db_types = tuple(postgres_type for postgres_type in PostgresType)
+_non_canonical_alias_db_types = frozenset({
+    PostgresType.FLOAT,
+    PostgresType.TIME,
+    PostgresType.TIMESTAMP,
+})
 
 
-_known_custom_db_types = tuple(mathesar_custom_type for mathesar_custom_type in MathesarCustomType)
+_inconsistent_db_types = frozenset.union(
+    _non_canonical_alias_db_types,
+    frozenset({
+        PostgresType.NAME,
+        PostgresType.CHAR,
+        PostgresType.BIT_VARYING,
+    }),
+)
+
+
+_sa_only_db_types = frozenset({
+    PostgresType._ARRAY,
+})
+
+
+_optional_db_types = frozenset({
+    PostgresType.HSTORE,
+})
+
+
+_known_vanilla_db_types = frozenset(postgres_type for postgres_type in PostgresType)
+
+
+_known_custom_db_types = frozenset(mathesar_custom_type for mathesar_custom_type in MathesarCustomType)
 
 
 # Known database types are those that are defined on our PostgresType and MathesarCustomType Enums.
-known_db_types = _known_vanilla_db_types + _known_custom_db_types
+known_db_types = frozenset.union(_known_vanilla_db_types, _known_custom_db_types)
 
 
 # Origin: https://www.python.org/dev/peps/pep-0616/#id17
@@ -252,8 +295,7 @@ def _get_type_ids_on_database(engine) -> Collection[str]:
         " FROM pg_catalog.pg_type t\n"
         "      LEFT JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace\n"
         " WHERE (t.typrelid = 0 OR (SELECT c.relkind = 'c' FROM pg_catalog.pg_class c WHERE c.oid = t.typrelid))\n"
-        "   AND NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid)\n"
-        "   AND pg_catalog.pg_type_is_visible(t.oid);"
+        "   AND NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid);"
     )
     with engine.connect() as connection:
         db_type_ids = frozenset(

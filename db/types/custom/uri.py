@@ -32,13 +32,13 @@ class URIFunction(Enum):
 
 
 # TODO remove if unneeded
-QualifiedURIFunction = Enum(
-    "QualifiedURIFunction",
-    {
-        func_name.name: get_qualified_name(func_name.value)
-        for func_name in URIFunction
-    }
-)
+#   QualifiedURIFunction = Enum(
+#       "QualifiedURIFunction",
+#       {
+#           func_name.name: get_qualified_name(func_name.value)
+#           for func_name in URIFunction
+#       }
+#   )
 
 
 # This regex and the use of it are based on the one given in RFC 3986.

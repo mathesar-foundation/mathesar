@@ -17,7 +17,7 @@ from db.constraints.operations.create import copy_constraint
 from db.constraints.operations.select import get_column_constraints
 from db.constraints import utils as constraint_utils
 from db.tables.operations.select import reflect_table_from_oid
-from db.types.base import PostgresType, get_db_type_enum_from_id
+from db.types.base import PostgresType, get_db_type_enum_from_id, get_db_type_enum_from_class
 
 
 def create_column(engine, table_oid, column_data):
@@ -132,13 +132,17 @@ def _duplicate_column_constraints(table_oid, from_column_attnum, to_column_attnu
 def duplicate_column(table_oid, copy_from_attnum, engine, new_column_name=None, copy_data=True, copy_constraints=True):
     table = reflect_table_from_oid(table_oid, engine)
     copy_from_name = get_column_name_from_attnum(table_oid, copy_from_attnum, engine)
-    from_column = table.c[copy_from_name]
+    from_column = MathesarColumn.from_column(table.c[copy_from_name])
+    from_column_db_type = get_db_type_enum_from_class(
+        from_column.type.__class__,
+        engine,
+    )
     if new_column_name is None:
         new_column_name = _gen_col_name(table, from_column.name)
 
     column_data = {
         NAME: new_column_name,
-        "type": from_column.type.compile(dialect=engine.dialect),
+        "type": from_column_db_type.id,
         NULLABLE: True,
     }
     new_column = create_column(engine, table_oid, column_data)

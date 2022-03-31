@@ -182,6 +182,7 @@ class MathesarColumn(Column):
         """
         Get this column's database type enum.
         """
+        self._assert_that_engine_is_present()
         return get_db_type_enum_from_class(self.type.__class__, self.engine)
 
     @property
@@ -194,3 +195,8 @@ class MathesarColumn(Column):
         }
         _type_options = {k: v for k, v in full_type_options.items() if v is not None}
         return _type_options if _type_options else None
+
+
+    def _assert_that_engine_is_present(self):
+        if self.engine is None:
+            raise Exception("Engine should not be None.")

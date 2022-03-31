@@ -5,9 +5,10 @@ from sqlalchemy.dialects.postgresql import INTERVAL as SA_INTERVAL
 from sqlalchemy.dialects.postgresql import TIME as SA_TIME
 from sqlalchemy.dialects.postgresql import TIMESTAMP as SA_TIMESTAMP
 
-from db.engine import _add_custom_types_to_engine
+from db.engine import _add_custom_types_to_ischema_names
 from db.tests.types import fixtures
-from db.types import datetime, exceptions
+from db.types.custom import datetime
+from db.types import exceptions
 
 
 # We need to set these variables when the file loads, or pytest can't
@@ -143,7 +144,7 @@ def test_datetime_type_column_reflection(engine_email_type, test_type, sa_type):
         )
         test_table.create()
 
-    _add_custom_types_to_engine(engine)
+    _add_custom_types_to_ischema_names(engine)
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table(table_name, metadata, autoload_with=conn)
@@ -177,7 +178,7 @@ def test_datetime_type_column_default(engine_email_type, type_, val):
         )
         test_table.create()
 
-    _add_custom_types_to_engine(engine)
+    _add_custom_types_to_ischema_names(engine)
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table(table_name, metadata, autoload_with=conn)
@@ -203,7 +204,7 @@ def test_interval_type_column_args(engine_email_type):
         )
         test_table.create()
 
-    _add_custom_types_to_engine(engine)
+    _add_custom_types_to_ischema_names(engine)
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table('test_table', metadata, autoload_with=conn)

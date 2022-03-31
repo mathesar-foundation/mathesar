@@ -1,7 +1,7 @@
 from sqlalchemy import text, MetaData, Table, Column, select
-from db.engine import _add_custom_types_to_engine
+from db.engine import _add_custom_types_to_ischema_names
 from db.tests.types import fixtures
-from db.types import multicurrency
+from db.types.custom import multicurrency
 
 # We need to set these variables when the file loads, or pytest can't
 # properly detect the fixtures.  Importing them directly results in a
@@ -35,7 +35,7 @@ def test_multicurrency_type_column_reflection(engine_email_type):
         )
         test_table.create()
 
-    _add_custom_types_to_engine(engine)
+    _add_custom_types_to_ischema_names(engine)
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table("test_table", metadata, autoload_with=conn)

@@ -2,9 +2,9 @@ from psycopg2.errors import CheckViolation
 import pytest
 from sqlalchemy import text, select, func, Table, Column, MetaData
 from sqlalchemy.exc import IntegrityError
-from db.engine import _add_custom_types_to_engine
+from db.engine import _add_custom_types_to_ischema_names
 from db.tests.types import fixtures
-from db.types import email
+from db.types.custom import email
 from db.utils import execute_query
 from db.functions.base import ColumnName, Literal
 from db.functions.operations.apply import apply_db_function_as_filter
@@ -59,7 +59,7 @@ def test_email_type_column_reflection(engine_email_type):
         )
         test_table.create()
 
-    _add_custom_types_to_engine(engine)
+    _add_custom_types_to_ischema_names(engine)
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table("test_table", metadata, autoload_with=conn)

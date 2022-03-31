@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import Integer, Column, Table, MetaData, Numeric, UniqueConstraint
+from sqlalchemy import INTEGER, Column, Table, MetaData, NUMERIC, UniqueConstraint
 
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.select import get_column_attnum_from_name, get_column_default
@@ -47,40 +47,19 @@ def _check_duplicate_unique_constraint(
         assert len(constraints_) == 0
 
 
-_type_set = {
-    'BIGINT',
-    'BOOLEAN',
-    'CHAR',
-    'DATE',
-    'DECIMAL',
-    'DOUBLE PRECISION',
-    'FLOAT',
-    'INTEGER',
-    'INTERVAL',
-    'MATHESAR_TYPES.EMAIL',
-    'MATHESAR_TYPES.MATHESAR_MONEY',
-    'MATHESAR_TYPES.MULTICURRENCY_MONEY',
-    'MATHESAR_TYPES.URI',
-    'MONEY',
-    'NUMERIC',
-    'REAL',
-    'SMALLINT',
-    'TEXT',
-    'TIME WITH TIME ZONE',
-    'TIME WITHOUT TIME ZONE',
-    'TIMESTAMP WITH TIME ZONE',
-    'TIMESTAMP WITHOUT TIME ZONE',
-    'VARCHAR',
-}
-
-
-def test_type_list_completeness(engine_with_types):
+def test_type_list_completeness(engine_email_type):
     """
-    This metatest ensures that tests parameterized on the type_set
-    use the entire set supported.
+    Ensure that unavailable types are unavailable for a good reason.
     """
-    actual_supported_db_types = get_available_known_db_types(engine_with_types)
-    assert set(known_db_types) == set(actual_supported_db_types)
+    engine, schema = engine_email_type
+    actual_supported_db_types = get_available_known_db_types(engine)
+    unavailable_types = set.difference(set(known_db_types), set(actual_supported_db_types))
+    for db_type in unavailable_types:
+        assert (
+            db_type.is_inconsistent
+            or db_type.is_optional
+            or db_type.is_sa_only
+        )
 
 
 @pytest.mark.parametrize("target_type", known_db_types)
@@ -90,27 +69,29 @@ def test_create_column(engine_email_type, target_type):
     applied to a column, and the column is reflected, that the reflected type is the same one that
     was applied.
     """
-    engine, schema = engine_email_type
-    table_name = "atableone"
-    initial_column_name = "original_column"
-    new_column_name = "added_column"
-    table = Table(
-        table_name,
-        MetaData(bind=engine, schema=schema),
-        Column(initial_column_name, Integer),
-    )
-    table.create()
-    table_oid = get_oid_from_table(table_name, schema, engine)
-    target_type_id = target_type.id
-    column_data = {"name": new_column_name, "type": target_type_id}
-    created_col = create_column(engine, table_oid, column_data)
-    altered_table = reflect_table_from_oid(table_oid, engine)
-    assert len(altered_table.columns) == 2
-    assert created_col.name == new_column_name
-    assert get_db_type_enum_from_class(created_col.type, engine_email_type) == target_type
+    if target_type.is_application_supported and target_type.is_reflection_supported and not target_type.is_optional:
+        engine, schema = engine_email_type
+        table_name = "atableone"
+        initial_column_name = "original_column"
+        new_column_name = "added_column"
+        table = Table(
+            table_name,
+            MetaData(bind=engine, schema=schema),
+            Column(initial_column_name, INTEGER),
+        )
+        table.create()
+        table_oid = get_oid_from_table(table_name, schema, engine)
+        target_type_id = target_type.id
+        column_data = {"name": new_column_name, "type": target_type_id}
+        created_col = create_column(engine, table_oid, column_data)
+        altered_table = reflect_table_from_oid(table_oid, engine)
+        assert len(altered_table.columns) == 2
+        assert created_col.name == new_column_name
+        reflected_type = get_db_type_enum_from_class(created_col.type.__class__, engine)
+        assert reflected_type == target_type
 
 
-@pytest.mark.parametrize("target_type", [PostgresType.NUMERIC, PostgresType.DECIMAL])
+@pytest.mark.parametrize("target_type", [PostgresType.NUMERIC])
 def test_create_column_options(engine_email_type, target_type):
     engine, schema = engine_email_type
     table_name = "atableone"
@@ -119,7 +100,7 @@ def test_create_column_options(engine_email_type, target_type):
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(initial_column_name, Integer),
+        Column(initial_column_name, INTEGER),
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
@@ -132,11 +113,11 @@ def test_create_column_options(engine_email_type, target_type):
     altered_table = reflect_table_from_oid(table_oid, engine)
     assert len(altered_table.columns) == 2
     assert created_col.name == new_column_name
-    assert created_col.plain_type == PostgresType.NUMERIC.id
+    assert created_col.db_type == PostgresType.NUMERIC
     assert created_col.type_options == {"precision": 5, "scale": 3}
 
 
-@pytest.mark.parametrize("target_type", [PostgresType.CHAR, PostgresType.CHARACTER_VARYING])
+@pytest.mark.parametrize("target_type", [PostgresType.CHARACTER, PostgresType.CHARACTER_VARYING])
 def test_create_column_length_options(engine_email_type, target_type):
     engine, schema = engine_email_type
     table_name = "atableone"
@@ -145,7 +126,7 @@ def test_create_column_length_options(engine_email_type, target_type):
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(initial_column_name, Integer),
+        Column(initial_column_name, INTEGER),
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
@@ -158,7 +139,7 @@ def test_create_column_length_options(engine_email_type, target_type):
     altered_table = reflect_table_from_oid(table_oid, engine)
     assert len(altered_table.columns) == 2
     assert created_col.name == new_column_name
-    assert created_col.plain_type == target_type.id
+    assert created_col.db_type == target_type
     assert created_col.type_options == {"length": 5}
 
 
@@ -174,7 +155,7 @@ def test_create_column_interval_options(engine_email_type, type_options):
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(initial_column_name, Integer),
+        Column(initial_column_name, INTEGER),
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
@@ -187,7 +168,7 @@ def test_create_column_interval_options(engine_email_type, type_options):
     altered_table = reflect_table_from_oid(table_oid, engine)
     assert len(altered_table.columns) == 2
     assert created_col.name == new_column_name
-    assert created_col.plain_type == PostgresType.INTERVAL.id
+    assert created_col.db_type == PostgresType.INTERVAL
     assert created_col.type_options == type_options
 
 
@@ -200,7 +181,7 @@ def test_create_column_bad_options(engine_with_schema):
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(initial_column_name, Integer),
+        Column(initial_column_name, INTEGER),
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
@@ -221,7 +202,7 @@ def test_duplicate_column_name(engine_with_schema):
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(filler_column_name, Numeric)
+        Column(filler_column_name, NUMERIC)
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
@@ -237,7 +218,7 @@ def test_duplicate_column_single_unique(engine_with_schema, copy_data, copy_cons
     table_name = "atable"
     target_column_name = "columtoduplicate"
     new_col_name = "duplicated_column"
-    cols = [Column(target_column_name, Numeric, unique=True)]
+    cols = [Column(target_column_name, NUMERIC, unique=True)]
     insert_data = [(1,), (2,), (3,)]
     create_test_table(table_name, cols, insert_data, schema, engine)
 
@@ -262,8 +243,8 @@ def test_duplicate_column_multi_unique(engine_with_schema, copy_data, copy_const
     new_col_name = "duplicated_column"
     filler_col_name = "Filler"
     cols = [
-        Column(target_column_name, Numeric),
-        Column(filler_col_name, Numeric),
+        Column(target_column_name, NUMERIC),
+        Column(filler_col_name, NUMERIC),
         UniqueConstraint(target_column_name, filler_col_name)
     ]
     insert_data = [(1, 2), (2, 3), (3, 4)]
@@ -292,7 +273,7 @@ def test_duplicate_column_nullable(
     table_name = "atable"
     target_column_name = "columtoduplicate"
     new_col_name = "duplicated_column"
-    cols = [Column(target_column_name, Numeric, nullable=nullable)]
+    cols = [Column(target_column_name, NUMERIC, nullable=nullable)]
     insert_data = [(1,), (2,), (3,)]
     create_test_table(table_name, cols, insert_data, schema, engine)
 
@@ -320,7 +301,7 @@ def test_duplicate_non_unique_constraint(engine_with_schema):
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(target_column_name, Numeric, primary_key=True),
+        Column(target_column_name, NUMERIC, primary_key=True),
     )
     table.create()
     with engine.begin() as conn:
@@ -342,7 +323,7 @@ def test_duplicate_column_default(engine_with_schema, copy_data, copy_constraint
     target_column_name = "columtoduplicate"
     new_col_name = "duplicated_column"
     expt_default = 1
-    cols = [Column(target_column_name, Numeric, server_default=str(expt_default))]
+    cols = [Column(target_column_name, NUMERIC, server_default=str(expt_default))]
     create_test_table(table_name, cols, [], schema, engine)
 
     table_oid = get_oid_from_table(table_name, schema, engine)

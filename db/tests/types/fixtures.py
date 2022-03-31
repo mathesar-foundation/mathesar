@@ -9,7 +9,7 @@ those are imports that are used in these fixtures.
 import pytest
 from sqlalchemy import MetaData, Table
 from sqlalchemy.schema import CreateSchema, DropSchema
-from db.engine import _add_custom_types_to_engine
+from db.engine import _add_custom_types_to_ischema_names
 from db.tables.operations.select import get_oid_from_table
 from db.types import base, install
 from db.columns.operations.alter import alter_column_type
@@ -19,7 +19,7 @@ TEST_SCHEMA = "test_schema"
 
 @pytest.fixture
 def engine_with_types(engine):
-    _add_custom_types_to_engine(engine)
+    _add_custom_types_to_ischema_names(engine)
     return engine
 
 

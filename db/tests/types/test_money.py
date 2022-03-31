@@ -1,6 +1,6 @@
 from sqlalchemy import text, MetaData, Table, Column
 from db.tests.types import fixtures
-from db.types import money
+from db.types.custom import money
 
 # We need to set these variables when the file loads, or pytest can't
 # properly detect the fixtures.  Importing them directly results in a

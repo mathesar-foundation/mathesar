@@ -14,7 +14,7 @@ def create_future_engine_with_custom_types(
     )
     # We need to add our custom types to any engine created for SQLALchemy use
     # so that they can be used for reflection
-    _add_custom_types_to_engine(engine)
+    _add_custom_types_to_ischema_names(engine)
     return engine
 
 
@@ -28,5 +28,9 @@ def create_future_engine(
     return create_engine(conn_str, *args, **kwargs)
 
 
-def _add_custom_types_to_engine(engine):
+def _add_custom_types_to_ischema_names(engine):
+    """
+    Updating the ischema_names dict changes which Postgres types are reflected into which SA
+    classes.
+    """
     engine.dialect.ischema_names.update(CUSTOM_TYPE_DICT)

@@ -145,7 +145,6 @@ def get_full_cast_map(engine) -> Mapping[DatabaseType, Collection[DatabaseType]]
         PostgresType.CHARACTER: _get_textual_type_body_map(engine),
         PostgresType.CHARACTER_VARYING: _get_textual_type_body_map(engine),
         PostgresType.DATE: _get_date_type_body_map(),
-        PostgresType.DECIMAL: _get_decimal_number_type_body_map(target_type=PostgresType.DECIMAL),
         PostgresType.DOUBLE_PRECISION: _get_decimal_number_type_body_map(target_type=PostgresType.DOUBLE_PRECISION),
         MathesarCustomType.EMAIL: _get_email_type_body_map(),
         PostgresType.FLOAT: _get_decimal_number_type_body_map(target_type=PostgresType.FLOAT),
@@ -840,7 +839,7 @@ def _get_uri_type_body_map() -> TypeBodyMap:
     def _get_text_uri_type_body_map():
         # We need to check that a string isn't a valid number before
         # casting to intervals (since a number is more likely)
-        auth_func = uri.QualifiedURIFunction.AUTHORITY.value
+        auth_func = uri.URIFunction.AUTHORITY.value
         tld_regex = r"'(?<=\.)(?:.(?!\.))+$'"
         not_uri_exception_str = f"RAISE EXCEPTION '% is not a {MathesarCustomType.URI.id}', $1;"
         return f"""

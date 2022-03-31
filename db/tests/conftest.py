@@ -6,7 +6,7 @@ from sqlalchemy.schema import DropSchema
 
 from db import constants, types
 from db.tables.operations.split import extract_columns_from_table
-from db.engine import _add_custom_types_to_engine
+from db.engine import _add_custom_types_to_ischema_names
 from db.types import base, install
 
 
@@ -37,7 +37,7 @@ def engine_with_schema(engine):
 @pytest.fixture
 def engine_with_roster(engine_with_schema):
     engine, schema = engine_with_schema
-    _add_custom_types_to_engine(engine)
+    _add_custom_types_to_ischema_names(engine)
     install.install_mathesar_on_database(engine)
     with engine.begin() as conn, open(ROSTER_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
@@ -50,7 +50,7 @@ def engine_with_roster(engine_with_schema):
 @pytest.fixture
 def engine_with_uris(engine_with_schema):
     engine, schema = engine_with_schema
-    _add_custom_types_to_engine(engine)
+    _add_custom_types_to_ischema_names(engine)
     install.install_mathesar_on_database(engine)
     with engine.begin() as conn, open(URIS_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
@@ -63,7 +63,7 @@ def engine_with_uris(engine_with_schema):
 @pytest.fixture
 def engine_with_times(engine_with_schema):
     engine, schema = engine_with_schema
-    _add_custom_types_to_engine(engine)
+    _add_custom_types_to_ischema_names(engine)
     install.install_mathesar_on_database(engine)
     with engine.begin() as conn, open(TIMES_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
@@ -76,7 +76,7 @@ def engine_with_times(engine_with_schema):
 @pytest.fixture
 def engine_with_booleans(engine_with_schema):
     engine, schema = engine_with_schema
-    _add_custom_types_to_engine(engine)
+    _add_custom_types_to_ischema_names(engine)
     install.install_mathesar_on_database(engine)
     with engine.begin() as conn, open(BOOLEANS_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
