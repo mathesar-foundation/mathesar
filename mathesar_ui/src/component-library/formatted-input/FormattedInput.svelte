@@ -1,8 +1,9 @@
 <script lang="ts">
+  import Diff from 'fast-diff';
+  import type {diff} from 'fast-diff';
   import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
   import { getOutcomeOfBeforeInputEvent } from '@mathesar-component-library-dir/common/utils';
   import type { InputFormatter, ParseResult } from './InputFormatter';
-
   type T = $$Generic;
 
   export let formatter: InputFormatter<T>;
@@ -62,18 +63,55 @@
     if (parseResult?.value === newParentValue) {
       return;
     }
+
     childText = formattedValue;
   }
 
   $: handleParentValueChange(parentValue);
 
+  // set cursor previous position
+  function setCursorToPostion(
+    userInput: string,
+    cursorPosition: number,
+    intermediateDisplay: string,
+  ) {
+    if (element) {
+      element.value = intermediateDisplay;
+      const diff = Diff(userInput, intermediateDisplay, cursorPosition);
+      // Find New Cursor Position using diff and cursorPosition
+      let newCursorPosition = 0;
+      diff.forEach((part: diff[]) => {
+        if (part[0] === -1) {
+          newCursorPosition -= 1;
+        } else if (part[0] === 1) {
+          newCursorPosition += 1;
+        }
+      });
+      if (newCursorPosition < 0) {
+        newCursorPosition = 0;
+      }
+      // Set Cursor Position
+      element.setSelectionRange(
+        cursorPosition + newCursorPosition,
+        cursorPosition + newCursorPosition,
+      );
+    }
+  }
   function handleChildValueChange(event: InputEvent) {
     event.preventDefault();
-    const { value: userInput } = getOutcomeOfBeforeInputEvent(event);
+    const { value: userInput, cursorPosition } =
+      getOutcomeOfBeforeInputEvent(event);
+
     try {
       parseResult = formatter.parse(userInput);
       parentValue = parseResult.value;
       childText = parseResult.intermediateDisplay;
+
+      setCursorToPostion(
+        userInput,
+        cursorPosition,
+        parseResult.intermediateDisplay,
+      );
     } catch (error) {
       onParseError({ userInput, error });
     }
