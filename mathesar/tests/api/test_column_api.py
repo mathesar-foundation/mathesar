@@ -3,7 +3,7 @@ import json
 import pytest
 from unittest.mock import patch
 from django.core.cache import cache
-from sqlalchemy import Column, Integer, String, MetaData, select, Boolean, TIMESTAMP
+from sqlalchemy import Column, Integer, String, MetaData, Text, select, Boolean, TIMESTAMP
 from sqlalchemy import Table as SATable
 
 from db.columns.operations.alter import alter_column_type
@@ -55,11 +55,17 @@ def column_test_table_with_service_layer_options(patent_schema):
         Column("mycolumn0", Integer, primary_key=True),
         Column("mycolumn1", Boolean),
         Column("mycolumn2", Integer),
-        Column("mycolumn4", TIMESTAMP),
+        Column("mycolumn3", Text),
+        Column("mycolumn4", Text),
+        Column("mycolumn5", Text),
+        Column("mycolumn6", TIMESTAMP),
     ]
     column_data_list = [{},
-                        {'display_options': {'input': "dropdown", 'use_custom_labels': False}},
+                        {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
                         {'display_options': {"show_as_percentage": True, "locale": "en_US"}},
+                        {},
+                        {},
+                        {},
                         {'display_options': {'format': 'YYYY-MM-DD hh:mm'}}]
     db_table = SATable(
         "anewtable",
@@ -276,25 +282,12 @@ def test_column_create_display_options(
     assert actual_new_col["display_options"] == display_options
 
 
-default_display_options_test_list = [
-    ("BOOLEAN", None, None),
-    ("BOOLEAN", {}, {"input": "checkbox"}),
-    ("DATE", None, None),
-    ("INTERVAL", None, None),
-    ("NUMERIC", None, None),
-    ("TIMESTAMP WITH TIME ZONE", None, None),
-    ("TIMESTAMP WITHOUT TIME ZONE", None, None),
-    ("TIME WITHOUT TIME ZONE", None, None),
-    ("TIME WITH TIME ZONE", None, None),
-]
-
-
 _too_long_string = "x" * 256
 
 
 create_display_options_invalid_test_list = [
-    ("BOOLEAN", {"input": "invalid", "use_custom_columns": False}),
-    ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"yes": "yes", "1": "no"}}),
+    ("BOOLEAN", {"input": "invalid"}),
+    ("BOOLEAN", {"input": "checkbox", "custom_labels": {"yes": "yes", "1": "no"}}),
     ("NUMERIC", {"show_as_percentage": "wrong value type"}),
     ("DATE", {'format': _too_long_string}),
     ("TIMESTAMP WITH TIME ZONE", {'format': []}),
@@ -461,15 +454,18 @@ def test_column_update_name(column_test_table, client):
 def test_column_update_display_options(column_test_table_with_service_layer_options, client):
     cache.clear()
     table, columns = column_test_table_with_service_layer_options
-    column = _get_columns_by_name(table, ['mycolumn1'])[0]
-    column_id = column.id
-    display_options = {"input": "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}
-    display_options_data = {"display_options": display_options}
-    response = client.patch(
-        f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
-        display_options_data,
-    )
-    assert response.json()["display_options"] == display_options
+    column_indexes = [2, 3, 4, 5]
+    for column_index in column_indexes:
+        colum_name = f"mycolumn{column_index}"
+        column = _get_columns_by_name(table, [colum_name])[0]
+        column_id = column.id
+        display_options = {"input": "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}
+        display_options_data = {"display_options": display_options, 'type': 'BOOLEAN', 'type_options': {}}
+        response = client.patch(
+            f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
+            display_options_data,
+        )
+        assert response.json()["display_options"] == display_options
 
 
 def test_column_display_options_type_on_reflection(column_test_table,
