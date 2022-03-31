@@ -13,7 +13,7 @@ from db.columns.utils import get_mathesar_column_with_engine
 from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tables.operations.split import extract_columns_from_table
-from db.tests.columns.utils import create_test_table, column_test_dict, get_default
+from db.tests.columns.utils import column_test_dict, create_test_table, get_default
 from db.tests.types import fixtures
 from db.types.base import get_db_type_name
 
@@ -158,7 +158,7 @@ def test_rename_column_index(engine_with_schema):
     table = Table(table_name, metadata, Column(old_col_name, Integer, index=True))
     table.create()
 
-    table = _rename_column_and_assert(table, old_col_name, new_col_name, engine)
+    _rename_column_and_assert(table, old_col_name, new_col_name, engine)
 
     with engine.begin() as conn:
         index = engine.dialect.get_indexes(conn, table_name, schema)[0]
@@ -360,8 +360,8 @@ def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_create(engine_with_schema, col_type):
-    engine, schema = engine_with_schema
+def test_column_default_create(engine_email_type, col_type):
+    engine, schema = engine_email_type
     table_name = "create_column_default_table"
     column_name = "create_column_default_column"
     _, set_default, expt_default = column_test_dict[col_type].values()
@@ -384,8 +384,8 @@ def test_column_default_create(engine_with_schema, col_type):
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_update(engine_with_schema, col_type):
-    engine, schema = engine_with_schema
+def test_column_default_update(engine_email_type, col_type):
+    engine, schema = engine_email_type
     table_name = "update_column_default_table"
     column_name = "update_column_default_column"
     start_default, set_default, expt_default = column_test_dict[col_type].values()
@@ -408,8 +408,8 @@ def test_column_default_update(engine_with_schema, col_type):
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_delete(engine_with_schema, col_type):
-    engine, schema = engine_with_schema
+def test_column_default_delete(engine_email_type, col_type):
+    engine, schema = engine_email_type
     table_name = "delete_column_default_table"
     column_name = "delete_column_default_column"
     _, set_default, _ = column_test_dict[col_type].values()

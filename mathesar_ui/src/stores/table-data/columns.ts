@@ -18,8 +18,8 @@ export interface Column {
   id: number;
   name: string;
   type: DbType;
-  type_options: Record<string, string | number | boolean | undefined> | null;
-  display_options: Record<string, unknown>;
+  type_options: Record<string, unknown> | null;
+  display_options: Record<string, unknown> | null;
   index: number;
   nullable: boolean;
   primary_key: boolean;
@@ -98,11 +98,8 @@ export class ColumnsDataStore
       primaryKey: undefined,
     });
     this.meta = meta;
-    this.api = api(
-      `/${this.type === TabularType.Table ? 'tables' : 'views'}/${
-        this.parentId
-      }/columns/`,
-    );
+    const tabularEntity = this.type === TabularType.Table ? 'tables' : 'views';
+    this.api = api(`/api/db/v0/${tabularEntity}/${this.parentId}/columns/`);
     this.fetchCallback = fetchCallback;
     void this.fetch();
   }
@@ -194,8 +191,13 @@ export class ColumnsDataStore
     columnId: Column['id'],
     type: Column['type'],
     type_options: Column['type_options'],
+    display_options: Column['display_options'],
   ): Promise<Partial<Column>> {
-    const column = await this.api.update(columnId, { type, type_options });
+    const column = await this.api.update(columnId, {
+      type,
+      type_options,
+      display_options,
+    });
     await this.fetch();
     await this.dispatch('columnPatched', column);
     return column;

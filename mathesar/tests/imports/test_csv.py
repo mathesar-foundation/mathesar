@@ -27,11 +27,18 @@ def headerless_data_file(headerless_csv_filename):
     return data_file
 
 
+@pytest.fixture
+def col_names_with_spaces_data_file(col_names_with_spaces_csv_filename):
+    with open(col_names_with_spaces_csv_filename, "rb") as csv_file:
+        data_file = DataFile.objects.create(file=File(csv_file))
+    return data_file
+
+
 @pytest.fixture()
 def schema(engine, test_db_model):
     create_schema(TEST_SCHEMA, engine)
     schema_oid = get_schema_oid_from_name(TEST_SCHEMA, engine)
-    yield Schema.objects.create(oid=schema_oid, database=test_db_model)
+    yield Schema.current_objects.create(oid=schema_oid, database=test_db_model)
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA "{TEST_SCHEMA}" CASCADE;'))
 
@@ -90,6 +97,23 @@ def test_headerless_csv_upload(headerless_data_file, schema):
         None,
     )
     expected_cols = ["column_" + str(i) for i in range(7)]
+
+    check_csv_upload(
+        table, table_name, schema, num_records, expected_row, expected_cols
+    )
+
+
+def test_col_names_with_spaces_csv(col_names_with_spaces_data_file, schema):
+    table_name = "Column names with spaces"
+    table = create_table_from_csv(col_names_with_spaces_data_file, table_name, schema)
+
+    num_records = 2
+    expected_row = (
+        1,
+        "foo",
+        "bar",
+    )
+    expected_cols = ["id", "a", "b"]
 
     check_csv_upload(
         table, table_name, schema, num_records, expected_row, expected_cols

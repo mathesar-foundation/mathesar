@@ -1,90 +1,54 @@
+<!--
+  @component
+
+  Use this component when you want to accept user input for a regular old number
+  and you don't need any high precision.
+
+  ## Features
+
+  - Invalid input is rejected.
+
+  - Input is partially formatted as the user types. Grouping separators are
+    automatically inserted.
+
+  - Input is fully reformatted when focus is blurred. For example, trailing
+    decimal separators are removed.
+
+  ## Limitations
+
+  - This component can't accept input for numbers like `99999999999999.99`
+    (which becomes `99999999999999.98` as a `number`) or `9999999999999999`
+    (which becomes `10000000000000000` as a `number`).  See
+    `StringifiedNumberInput.svelte` for a component that will allow
+    high-precision numbers by binding to a `string` instead of a `number`.
+
+-->
 <script lang="ts">
-  import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
-  import type { HTMLNumberInputElement } from './types.d';
+  import FormattedInput from '../formatted-input/FormattedInput.svelte';
+  import type { NumberFormatterOptions } from './number-formatter/types';
+  import { NumberFormatter } from './number-formatter';
+  import { getInputMode } from './numberInputUtils';
 
-  /**
-   * DISCUSS: Input type number is highly limited when we need to express
-   * high or fixed precision numbers and for formatting which would be
-   * required to represent monetary values.
-   *
-   * We could use a text input with custom aria fields and validation to
-   * make it function like a number input.
-   */
-
-  /**
-   * Value of the input. Use bind tag for two-way binding.
-   * Refer Svelte docs for more info on binding form input values.
-   */
-  export let value: number | undefined = undefined;
-
-  // Additional classes
-  let classes = '';
-  export { classes as class };
-
-  // Disable input
-  export let disabled = false;
-
-  // Underlying DOM element for direct access
-  export let element: HTMLElement | undefined = undefined;
-
-  // Id for the input
-  export let id: string | undefined = undefined;
-
-  // Forces input to only allow integer values
-  export let isInteger = false;
-
-  // Minimum value for input
-  export let min: number | undefined = undefined;
-
-  // Maximum value for input
-  export let max: number | undefined = undefined;
-
-  const validKeyRegex = /^([0-9]|\.|-|\+|e)$/;
-
-  function onInput(e: Event) {
-    // Basic validation to prevent entering invalid characters
-    const key = (e as InputEvent).data;
-    const inputElement = e.target as HTMLNumberInputElement;
-    if (inputElement.value === '') {
-      inputElement.value = null;
-      value = undefined;
-    } else {
-      if (key !== null) {
-        if (!validKeyRegex.test(key)) {
-          inputElement.value = value ?? null;
-        } else if (
-          !inputElement.value &&
-          value &&
-          (key === 'e' || key === '+' || key === '-')
-        ) {
-          inputElement.value = value;
-        }
-      }
-      if (
-        isInteger &&
-        inputElement.value !== null &&
-        !Number.isInteger(inputElement.value)
-      ) {
-        inputElement.value = Math.floor(inputElement.value);
-      }
-      if (value !== inputElement.value) {
-        value = inputElement.value ?? undefined;
-      }
-    }
+  interface $$Props extends Partial<NumberFormatterOptions> {
+    value?: number;
+    element?: HTMLInputElement;
   }
+
+  /**
+   * See docs within `FormattedInput` for an explanation of how we're using
+   * `null` vs `undefined` here.
+   */
+  export let value: number | null | undefined = undefined;
+  export let element: HTMLInputElement | undefined = undefined;
+
+  $: formatter = new NumberFormatter($$restProps);
+  $: inputmode = getInputMode($$restProps as $$Props);
 </script>
 
-<BaseInput {...$$restProps} bind:id {disabled} />
-
-<input
-  bind:this={element}
+<FormattedInput
+  {formatter}
+  bind:value
   {...$$restProps}
-  type="number"
-  class={['input-element', 'number-input', classes].join(' ')}
-  {value}
-  {id}
-  {disabled}
-  {min}
-  {max}
-  on:input={onInput}
+  bind:element
+  {inputmode}
 />
