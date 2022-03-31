@@ -164,6 +164,7 @@ export class ColumnsDataStore
 
   async add(columnDetails: Partial<Column>): Promise<Partial<Column>> {
     const column = await this.api.add(columnDetails);
+    await this.dispatch('columnAdded', column); 
     await this.fetch();
     return column;
   }
