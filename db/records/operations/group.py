@@ -68,6 +68,10 @@ class GroupBy:
             raise records_exceptions.BadGroupFormat(
                 'percentile mode requires integer num_groups'
             )
+        if self.mode == GroupMode.MAGNITUDE.value and not len(self.columns) == 1:
+            raise records_exceptions.BadGroupFormat(
+                'magnitude mode only works on single columns'
+            )
 
         for col in self.columns:
             if type(col) != str:
@@ -172,12 +176,23 @@ def _get_tens_powers_range_group_select(table, grouping_columns):
         order_by=window_def.partition_by, range_=window_def.range_
     )
 
-    power_expr = func.pow(literal(10.0), raw_id_cte.columns[POWER])
+    def _get_pretty_bound_expr(id_offset):
+        raw_id_col = raw_id_cte.columns[RAW_ID]
+        power_col = raw_id_cte.columns[POWER]
+        power_expr = func.pow(literal(10.0), power_col)
+        return case(
+            (power_col >= 0, func.trunc((raw_id_col + id_offset) * power_expr)),
+            else_=func.trunc(
+                (raw_id_col + id_offset) * power_expr,
+                ((-1) * power_col)
+            )
+        )
+
     geq_expr = func.json_build_object(
-        grouping_column.name, raw_id_cte.columns[RAW_ID] * power_expr
+        grouping_column.name, _get_pretty_bound_expr(0)
     )
     lt_expr = func.json_build_object(
-        grouping_column.name, (raw_id_cte.columns[RAW_ID] + 1) * power_expr
+        grouping_column.name, _get_pretty_bound_expr(1)
     )
     return select(
         *[col for col in raw_id_cte.columns if col.name in table.columns],

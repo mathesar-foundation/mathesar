@@ -24,7 +24,9 @@ def get_offset_order_of_magnitude_select(selectable, column, output_label):
     """
     return select(
         selectable,
-        (func.floor(func.log(column)) - 1).label(output_label)
+        cast(
+            (func.floor(func.log(column)) - 1), INTEGER
+        ).label(output_label)
     )
 
 
@@ -40,7 +42,7 @@ def divide_by_power_of_ten_select(selectable, divisor_col, power_col, output_lab
         cast(
             func.floor(
                 divisor_col / func.pow(literal(10.0), power_col)
-            ).label(output_label),
+            ),
             INTEGER
-        )
+        ).label(output_label)
     )
