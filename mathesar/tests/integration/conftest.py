@@ -1,7 +1,7 @@
 import pytest
 from rest_framework.test import APIClient
 from sqlalchemy import text, Table as SATable
-from sqlalchemy import Column, MetaData, Integer, VARCHAR, CHAR, TEXT
+from sqlalchemy import Column, MetaData, Integer, VARCHAR, CHAR, TEXT, BOOLEAN
 from django.core.cache import cache
 
 from db.schemas.operations.create import create_schema as create_sa_schema
@@ -87,6 +87,7 @@ def table_with_all_types(schema):
         Column('varchar', VARCHAR()),
         Column('varchar_n', VARCHAR(100)),
         Column('text', TEXT()),
+        Column('boolean', BOOLEAN()),
         schema=schema.name,
     )
     db_table.create()
@@ -96,7 +97,8 @@ def table_with_all_types(schema):
             char='cell with char value',
             varchar='cell with varchar value',
             varchar_n='cell with varchar n value',
-            text='cell with text value'
+            text='cell with text value',
+            boolean=None,
         ))
 
     db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
