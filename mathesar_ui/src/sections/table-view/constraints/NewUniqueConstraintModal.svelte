@@ -158,7 +158,7 @@
         <LabeledInput label="Constraint Name" layout="stacked">
           <TextInput
             bind:value={constraintName}
-            hasValidationErrors={nameValidationErrors.length > 0}
+            hasError={nameValidationErrors.length > 0}
           />
         </LabeledInput>
       </FormField>

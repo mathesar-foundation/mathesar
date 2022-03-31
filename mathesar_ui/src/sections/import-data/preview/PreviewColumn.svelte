@@ -4,32 +4,30 @@
   import type { PreviewColumn } from '@mathesar/stores/fileImports';
 
   const dispatch = createEventDispatcher();
+
   export let column: PreviewColumn;
 
-  const options = column.valid_target_types?.map((type) => ({
-    id: type,
-    label: type,
-  }));
-  let selectedOption = {
-    id: column.type,
-    label: column.type,
-  };
+  $: options = column.valid_target_types ?? [column.type];
+  $: disabled = !column.isEditable;
 
-  function onTypeChange(e: CustomEvent) {
+  let selectedOption = column.type;
+
+  function onTypeChange(e: CustomEvent<string>) {
     dispatch('typechange', {
       name: column.name,
-      type: e.detail.value.id as string,
+      type: e.detail,
     });
   }
 </script>
 
-<th class:disabled={!column.isEditable}>
+<th class:disabled>
   <div class="name">
-    <Checkbox disabled={!column.isEditable} bind:checked={column.isSelected} />
-    <TextInput disabled={!column.isEditable} bind:value={column.displayName} />
+    <Checkbox {disabled} bind:checked={column.isSelected} />
+    <TextInput {disabled} bind:value={column.displayName} />
   </div>
   <div class="type">
     <Select
+      {disabled}
       {options}
       triggerAppearance="plain"
       bind:value={selectedOption}

@@ -129,15 +129,24 @@ button.dropdown.trigger.selector {
     .schemas {
       flex-basis: 230px;
       border-left: 1px solid #efefef;
+      overflow: hidden;
 
       ul {
-        height: 198px;
-        overflow: auto;
+        height: 194px;
+        width: 230px;
+        overflow-y: auto;
       }
 
       .item {
         > a {
           padding: 9px 12px;
+          > span {
+            margin: 0;
+            padding: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
         }
       }
 
