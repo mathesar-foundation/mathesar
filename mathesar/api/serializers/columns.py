@@ -75,6 +75,17 @@ class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
             self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY] = data.get('type', None)
         return super().to_internal_value(data)
 
+    def validate(self, data):
+        # Reevaluate column display options based on the new column type.
+        if self.partial and 'plain_type' in data and 'display_options' not in data:
+            display_options_serializer = DisplayOptionsMappingSerializer(
+                data=self.instance.display_options,
+                context={DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY: data.get('plain_type', None)}
+            )
+            if not display_options_serializer.is_valid(False):
+                data['display_options'] = None
+        return super().validate(data)
+
 
 class ColumnDefaultSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     value = InputValueField()
@@ -113,6 +124,7 @@ class ColumnSerializer(SimpleColumnSerializer):
     valid_target_types = serializers.ListField(read_only=True)
 
     def validate(self, data):
+        data = super().validate(data)
         if not self.partial:
             from_scratch_required_fields = ['type']
             from_scratch_specific_fields = ['type', 'nullable', 'primary_key']
