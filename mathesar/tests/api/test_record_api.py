@@ -252,11 +252,19 @@ grouping_params = [
                 'count': 87,
                 'first_value': {'Center': 'NASA Kennedy Space Center'},
                 'last_value': {'Center': 'NASA Kennedy Space Center'},
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [0]
             }, {
                 'count': 138,
                 'first_value': {'Center': 'NASA Ames Research Center'},
                 'last_value': {'Center': 'NASA Ames Research Center'},
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [
                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
                     18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33,
@@ -270,6 +278,10 @@ grouping_params = [
                 'count': 21,
                 'first_value': {'Center': 'NASA Armstrong Flight Research Center'},
                 'last_value': {'Center': 'NASA Armstrong Flight Research Center'},
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [30]
             },
         ],
@@ -282,11 +294,19 @@ grouping_params = [
                 'count': 87,
                 'first_value': {'Center': 'NASA Kennedy Space Center'},
                 'last_value': {'Center': 'NASA Kennedy Space Center'},
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [0]
             }, {
                 'count': 159,
                 'first_value': {'Center': 'NASA Ames Research Center'},
                 'last_value': {'Center': 'NASA Armstrong Flight Research Center'},
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [
                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
                     18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
@@ -311,6 +331,10 @@ grouping_params = [
                 'last_value': {
                     'Center': 'NASA Kennedy Space Center', 'Status': 'Application'
                 },
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [0]
             }, {
                 'count': 100,
@@ -319,7 +343,12 @@ grouping_params = [
                 },
                 'last_value': {
                     'Center': 'NASA Ames Research Center', 'Status': 'Issued'
-                }, 'result_indices': [
+                },
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
+                'result_indices': [
                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
                     18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33,
                     34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
@@ -335,6 +364,10 @@ grouping_params = [
                 'last_value': {
                     'Center': 'NASA Armstrong Flight Research Center', 'Status': 'Issued'
                 },
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [30]
             }, {
                 'count': 38,
@@ -343,7 +376,12 @@ grouping_params = [
                 },
                 'last_value': {
                     'Center': 'NASA Ames Research Center', 'Status': 'Application'
-                }, 'result_indices': [86, 87, 89, 93, 95, 97]
+                },
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
+                'result_indices': [86, 87, 89, 93, 95, 97]
             },
         ],
     ),
@@ -359,6 +397,10 @@ grouping_params = [
                 'last_value': {
                     'Center': 'NASA Langley Research Center', 'Status': 'Application'
                 },
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [0]
             }, {
                 'count': 159,
@@ -368,6 +410,10 @@ grouping_params = [
                 'last_value': {
                     'Center': 'NASA Armstrong Flight Research Center', 'Status': 'Issued'
                 },
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [
                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
                     18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
