@@ -82,11 +82,6 @@ def reflect_columns_from_table(table):
             if not serializer.is_valid(False):
                 column.display_options = None
                 column.save()
-            # Serializer could be valid as DRF does not raise exception rather silently discards extraneous fields.
-            # So we check for a data mismatch as the returned data will be different when the column type has changed
-            elif serializer.validated_data != column.display_options:
-                column.display_options = serializer.validated_data
-                column.save()
     models.Column.current_objects.filter(table=table).filter(~Q(attnum__in=attnums)).delete()
 
 

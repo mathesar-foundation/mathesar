@@ -77,12 +77,13 @@ class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
 
     def validate(self, data):
         # Reevaluate column display options based on the new column type.
-        if self.partial and 'plain_type' in data and 'display_options' not in data:
-            display_options_serializer = DisplayOptionsMappingSerializer(
-                data=self.instance.display_options,
-                context={DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY: data.get('plain_type', None)}
-            )
-            if not display_options_serializer.is_valid(False):
+        if 'plain_type' in data and 'display_options' not in data:
+            if self.instance:
+                instance_type = getattr(self.instance, 'plain_type', None)
+                # Invalidate display_options if type has been changed
+                if str(instance_type) != data['plain_type']:
+                    data['display_options'] = None
+            else:
                 data['display_options'] = None
         return super().validate(data)
 
