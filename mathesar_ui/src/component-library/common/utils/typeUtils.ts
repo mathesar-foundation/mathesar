@@ -1,7 +1,8 @@
-function hasLabelProperty(v: unknown): v is { label: unknown } {
-  return typeof v === 'object' && v !== null && 'label' in v;
-}
-
-export function hasStringLabelProperty(v: unknown): v is { label: string } {
-  return hasLabelProperty(v) && typeof v.label === 'string';
+export function hasStringProperty(object: unknown, property: string): boolean {
+  return (
+    typeof object === 'object' &&
+    object !== null &&
+    property in object &&
+    typeof (object as Record<string, unknown>)[property] === 'string'
+  );
 }

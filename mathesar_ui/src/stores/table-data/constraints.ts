@@ -113,7 +113,7 @@ export class ConstraintsDataStore implements Writable<ConstraintsData> {
     });
     this.uniqueColumns = uniqueColumns(this.store);
     this.fetchCallback = fetchCallback;
-    this.api = api(`/tables/${this.parentId}/constraints/`);
+    this.api = api(`/api/db/v0/tables/${this.parentId}/constraints/`);
     void this.fetch();
   }
 

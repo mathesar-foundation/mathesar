@@ -62,7 +62,6 @@
       }
 
       > button.remove {
-        display: none;
         cursor: pointer;
         padding: 4px 10px;
         border: none;
@@ -75,8 +74,10 @@
         }
       }
 
-      &:hover > button.remove {
-        display: inline-block;
+      @media (hover: hover) {
+        &:not(:hover) > button.remove {
+          display: none;
+        }
       }
     }
   }

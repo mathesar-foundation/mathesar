@@ -4,3 +4,9 @@ def get_tables_list(page):
 
 def get_table_entry(page, table_name):
     return get_tables_list(page).locator(f"li:has-text('{table_name}')")
+
+
+def get_tab(page, tab_text):
+    return page.locator(
+        f".tab-container [role=tablist] [role=presentation]:has-text('{tab_text}')"
+    )

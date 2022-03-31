@@ -21,6 +21,7 @@ module.exports = {
   rules: {
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'no-console': ['warn', { allow: ['error'] }],
+    '@typescript-eslint/explicit-member-accessibility': 'off',
     '@typescript-eslint/ban-ts-comment': [
       'error',
       {
@@ -31,6 +32,9 @@ module.exports = {
         minimumDescriptionLength: 10,
       },
     ],
+    'no-multi-spaces': 'off',
+    '@typescript-eslint/comma-spacing': 'off',
+    'array-bracket-spacing': 'off',
   },
   overrides: [
     {
@@ -104,6 +108,15 @@ module.exports = {
         'no-confusing-arrow': 'off',
         'no-constant-condition': 'off',
         '@typescript-eslint/require-await': 'off',
+      },
+    },
+    {
+      files: ['*.ts', '*.tsx'],
+      rules: {
+        '@typescript-eslint/explicit-member-accessibility': [
+          'error',
+          { accessibility: 'no-public' },
+        ],
       },
     },
   ],

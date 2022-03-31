@@ -9,11 +9,11 @@ import type {
   ModificationType,
   ModificationStateMap,
 } from './meta';
-import type { TableRecord } from './records';
+import type { Row } from './records';
 
 export function getGenericModificationStatus(
   recordModificationState: ModificationStateMap,
-  row: TableRecord,
+  row: Row,
   primaryKeyColumn?: Column['id'],
 ): ModificationStatus {
   const key = getRowKey(row, primaryKeyColumn);
@@ -22,7 +22,7 @@ export function getGenericModificationStatus(
 
 export function getModificationState(
   recordModificationState: ModificationStateMap,
-  row: TableRecord,
+  row: Row,
   primaryKeyColumn?: Column['id'],
 ): ModificationType | undefined {
   const key = getRowKey(row, primaryKeyColumn);

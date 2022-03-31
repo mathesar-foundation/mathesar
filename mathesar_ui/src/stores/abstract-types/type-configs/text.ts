@@ -1,123 +1,125 @@
-import type { AbstractTypeConfiguration } from '../types.d';
+import type { FormValues } from '@mathesar-component-library/types';
 
-const textType: AbstractTypeConfiguration = {
-  icon: 'T',
-  defaultDbType: 'VARCHAR',
-  typeSwitchOptions: {
-    database: {
-      allowDefault: true,
-      configuration: {
-        form: {
-          variables: {
-            restrictFieldSize: {
-              type: 'boolean',
-              defaults: {
-                CHAR: true,
-                VARCHAR: true,
-                TEXT: false,
-              },
-            },
-            length: {
-              type: 'integer',
-              isSaved: true,
-            },
-          },
-          layout: {
-            orientation: 'vertical',
-            elements: [
-              {
-                type: 'input',
-                variable: 'restrictFieldSize',
-                label: 'Restrict Field Size',
-              },
-              {
-                type: 'if',
-                variable: 'restrictFieldSize',
-                condition: 'eq',
-                value: true,
-                elements: [
-                  {
-                    type: 'input',
-                    variable: 'length',
-                    label: 'Field Size Limit',
-                  },
-                ],
-              },
-            ],
-          },
-        },
-        determinationRules: [
-          {
-            resolve: 'CHAR',
-            rule: {
-              combination: 'and',
-              terms: [
-                {
-                  id: 'restrictFieldSize',
-                  op: 'eq',
-                  value: true,
-                },
-                {
-                  id: 'length',
-                  op: 'lte',
-                  value: 255,
-                },
-                {
-                  id: 'length',
-                  op: 'neq',
-                  value: null,
-                },
-              ],
-            },
-          },
-          {
-            resolve: 'VARCHAR',
-            rule: {
-              combination: 'and',
-              terms: [
-                {
-                  id: 'restrictFieldSize',
-                  op: 'eq',
-                  value: true,
-                },
-                {
-                  combination: 'or',
-                  terms: [
-                    {
-                      id: 'length',
-                      op: 'gt',
-                      value: 255,
-                    },
-                    {
-                      id: 'length',
-                      op: 'eq',
-                      value: null,
-                    },
-                    {
-                      id: 'length',
-                      op: 'eq',
-                      value: undefined,
-                    },
-                  ],
-                },
-              ],
-            },
-          },
-          {
-            resolve: 'TEXT',
-            rule: {
-              id: 'restrictFieldSize',
-              op: 'eq',
-              value: false,
-            },
-          },
-        ],
+import type { DbType } from '@mathesar/App';
+import type { Column } from '@mathesar/stores/table-data/types';
+import type {
+  AbstractTypeConfigForm,
+  AbstractTypeConfiguration,
+  AbstractTypeDbConfig,
+} from '../types';
+
+const DB_TYPES = {
+  VARCHAR: 'VARCHAR',
+  CHAR: 'CHAR',
+  TEXT: 'TEXT',
+};
+
+const dbForm: AbstractTypeConfigForm = {
+  variables: {
+    restrictFieldSize: {
+      type: 'boolean',
+      default: false,
+    },
+    length: {
+      type: 'integer',
+      default: 255,
+      validation: {
+        checks: ['isEmpty'],
       },
     },
   },
+  layout: {
+    orientation: 'vertical',
+    elements: [
+      {
+        type: 'input',
+        variable: 'restrictFieldSize',
+        label: 'Restrict Field Size',
+      },
+      {
+        type: 'if',
+        variable: 'restrictFieldSize',
+        condition: 'eq',
+        value: true,
+        elements: [
+          {
+            type: 'input',
+            variable: 'length',
+            label: 'Field Size Limit',
+          },
+        ],
+      },
+    ],
+  },
+};
+
+function determineDbType(dbFormValues: FormValues, columnType: DbType): DbType {
+  if (dbFormValues.restrictFieldSize) {
+    const { length } = dbFormValues;
+    if (typeof length === 'string' || typeof length === 'number') {
+      const integerValueOfLength =
+        typeof length === 'string' ? parseInt(length, 10) : length;
+      if (integerValueOfLength > 255) {
+        return DB_TYPES.VARCHAR;
+      }
+    }
+    return columnType === DB_TYPES.CHAR ? DB_TYPES.CHAR : DB_TYPES.VARCHAR;
+  }
+  return DB_TYPES.TEXT;
+}
+
+function determineDbTypeAndOptions(
+  dbFormValues: FormValues,
+  columnType: DbType,
+): ReturnType<AbstractTypeDbConfig['determineDbTypeAndOptions']> {
+  const dbType = determineDbType(dbFormValues, columnType);
+  const typeOptions: Column['type_options'] = {};
+  if (dbType === DB_TYPES.CHAR || dbType === DB_TYPES.VARCHAR) {
+    typeOptions.length = dbFormValues.length;
+  }
+  return {
+    dbType,
+    typeOptions,
+  };
+}
+
+function constructDbFormValuesFromTypeOptions(
+  columnType: DbType,
+  typeOptions: Column['type_options'],
+): FormValues {
+  switch (columnType) {
+    case DB_TYPES.CHAR:
+    case DB_TYPES.VARCHAR:
+      return {
+        length: (typeOptions?.length as number) ?? null,
+        restrictFieldSize: true,
+      };
+    default:
+      return {
+        restrictFieldSize: false,
+      };
+  }
+}
+
+const textType: AbstractTypeConfiguration = {
+  icon: 'T',
+  defaultDbType: DB_TYPES.VARCHAR,
   input: {
     type: 'string',
+    config: {
+      multiLine: true,
+    },
+    conditionalConfig: {
+      [DB_TYPES.CHAR]: {
+        multiLine: false,
+      },
+    },
   },
+  getDbConfig: () => ({
+    form: dbForm,
+    determineDbTypeAndOptions,
+    constructDbFormValuesFromTypeOptions,
+  }),
 };
 
 export default textType;

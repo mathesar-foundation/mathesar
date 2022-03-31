@@ -27,7 +27,7 @@
   } from '@mathesar/stores/table-data/types';
 
   import DefaultOptions from './DefaultOptions.svelte';
-  import TypeOptions from './type-options/TypeOptions.svelte';
+  import AbstractTypeConfiguration from './abstract-type-configuration/AbstractTypeConfiguration.svelte';
 
   export let columnPosition: ColumnPosition | undefined = undefined;
   export let column: Column;
@@ -150,7 +150,7 @@
         bind:value={newName}
         bind:element={renamingInputElement}
         disabled={isSubmittingRename}
-        hasValidationErrors={!!newNameValidationErrors.length}
+        hasError={!!newNameValidationErrors.length}
         aria-label="Column name"
         on:keydown={handleColumnRenameInputKeydown}
         on:blur={() => submitRename({ allowRetry: false })}
@@ -212,7 +212,7 @@
                 on:rename={handleStartRenaming}
               />
             {:else if view === 'type'}
-              <TypeOptions
+              <AbstractTypeConfiguration
                 {column}
                 {abstractTypeOfColumn}
                 on:close={closeMenu}

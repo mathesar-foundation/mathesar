@@ -1,13 +1,20 @@
-import type { Writable } from 'svelte/store';
-import type { DynamicInputDataType } from '@mathesar-component-library-dir/dynamic-input/types.d';
+import type { Readable, Writable } from 'svelte/store';
+import type { DynamicInputDataType } from '@mathesar-component-library-dir/dynamic-input/types';
 
-export type FormInputDataType = boolean | string | number | undefined;
+export type FormInputDataType = boolean | string | number | null;
 
 export interface FormInputBaseElement {
   type: 'input';
   interfaceType?: string;
   variable: string;
   label?: string;
+  // TODO: Support customizable text (eg., errors, info etc.,)
+  text?: {
+    validation?: {
+      isEmpty?: string;
+      isInvalid?: string;
+    };
+  };
 }
 
 export interface FormInputSelectElement extends FormInputBaseElement {
@@ -48,10 +55,16 @@ export interface FormLayout {
   elements: FormElement[];
 }
 
+export type FormValidationCheck = 'isEmpty' | 'isInvalid';
+
 export interface FormConfigurationVariable {
   type: DynamicInputDataType;
   default?: FormInputDataType;
   enum?: unknown[];
+  validation?: {
+    checks: FormValidationCheck[];
+    // TODO: Support specification of invalidation logic
+  };
 }
 
 export type FormConfigurationVariables = Record<
@@ -68,9 +81,14 @@ export type FormInputStore = Writable<FormInputDataType>;
 
 export type FormValues = Record<string, FormInputDataType>;
 
+export interface FormValidationResult {
+  isValid: boolean;
+  failedChecks: Record<string, FormValidationCheck[]>;
+}
+
 export interface FormBuildConfiguration extends FormConfiguration {
   stores: Map<string, FormInputStore>;
   values: Readable<FormValues>;
-  storeUsage: Writable<Map<string, number>>;
-  getValues: () => Record<string, FormInputDataType>;
+  validationStore: Readable<FormValidationResult>;
+  getValidationResult: () => FormValidationResult;
 }
