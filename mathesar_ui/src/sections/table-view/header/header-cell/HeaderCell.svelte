@@ -27,7 +27,7 @@
   } from '@mathesar/stores/table-data/types';
 
   import DefaultOptions from './DefaultOptions.svelte';
-  import TypeOptions from './type-options/TypeOptions.svelte';
+  import AbstractTypeConfiguration from './abstract-type-configuration/AbstractTypeConfiguration.svelte';
 
   export let columnPosition: ColumnPosition | undefined = undefined;
   export let column: Column;
@@ -212,7 +212,7 @@
                 on:rename={handleStartRenaming}
               />
             {:else if view === 'type'}
-              <TypeOptions
+              <AbstractTypeConfiguration
                 {column}
                 {abstractTypeOfColumn}
                 on:close={closeMenu}
