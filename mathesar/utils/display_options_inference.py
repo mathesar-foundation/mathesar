@@ -5,13 +5,13 @@ from thefuzz import fuzz
 from db.columns.operations.select import get_column_attnum_from_name
 from db.types import base
 from db.types.base import get_qualified_name
-from db.types.money import get_money_array
+from db.types.money import get_first_money_array_with_symbol
 
 MATHESAR_MONEY = get_qualified_name(base.MathesarCustomType.MATHESAR_MONEY.value)
 
 
 def infer_mathesar_money_display_options(table_oid, engine, column_attnum):
-    money_array = get_money_array(table_oid, engine, column_attnum)
+    money_array = get_first_money_array_with_symbol(table_oid, engine, column_attnum)
     if money_array is None:
         return None
     else:

@@ -31,16 +31,18 @@ def install(engine):
         conn.commit()
 
 
-def get_money_array(table_oid, engine, column_attnum):
+def get_money_array_select_statement(table_oid, engine, column_attnum):
     table = reflect_table_from_oid(table_oid, engine)
     column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
+    package_func = getattr(func, get_qualifier_prefix())
+    money_func = getattr(package_func, MONEY_ARR_FUNC_NAME)
+    money_select = money_func((table.c[column_name]), type_=ARRAY(String))
+    sel = select(money_select).where(money_select[4].is_not(None))
+    return sel
+
+
+def get_first_money_array_with_symbol(table_oid, engine, money_column_attnum):
     with engine.begin() as conn:
-        package_func = getattr(func, get_qualifier_prefix())
-        money_func = getattr(package_func, MONEY_ARR_FUNC_NAME)
-        money_select = money_func((table.c[column_name]), type_=ARRAY(String))
-        sel = select(money_select).where(money_select[4] is not None)
-        data = conn.execute(sel).fetchone()
-        if data is None:
-            return None
-        else:
-            return data[0]
+        sel = get_money_array_select_statement(table_oid, engine, money_column_attnum).limit(1)
+        data = conn.execute(sel).scalar()
+        return data
