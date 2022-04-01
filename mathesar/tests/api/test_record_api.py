@@ -1,3 +1,4 @@
+from copy import deepcopy
 import json
 from unittest.mock import patch
 
@@ -475,17 +476,44 @@ def test_record_list_groups(
     response = client.get(f'/api/db/v0/tables/{table.id}/records/?{query_str}')
     response_data = response.json()
 
+    def _test_group_equality(actual_groups, expect_groups):
+        actual_groups = deepcopy(actual_groups)
+        expect_groups = deepcopy(expect_groups)
+        assert len(actual_groups) == len(expect_groups)
+        for i in range(len(actual_groups)):
+            assert actual_groups[i].pop('count') == expect_groups[i].pop('count')
+            assert (
+                actual_groups[i].pop('result_indices')
+                == expect_groups[i].pop('result_indices')
+            )
+            for k in expect_groups[i]:
+                print(k)
+                actual_item = actual_groups[i][k]
+                expect_item = expect_groups[i][k]
+                print("ACTUAL_ITEM", actual_item)
+                print("EXPECT_ITEM", expect_item)
+                if expect_item is not None:
+                    for column_name in expect_item:
+                        assert (
+                            expect_item[column_name]
+                            == actual_item[str(columns_name_id_map[column_name])]
+                        )
+                else:
+                    assert actual_item is None
+
     assert response.status_code == 200
     assert response_data['count'] == 1393
     assert len(response_data['results']) == limit
 
     group_by = GroupBy(**grouping)
     grouping_dict = response_data['grouping']
-    assert grouping_dict['columns'] == list(group_by.columns)
+    assert grouping_dict['columns'] == [
+        columns_name_id_map[colname] for colname in group_by.columns
+    ]
     assert grouping_dict['mode'] == group_by.mode
     assert grouping_dict['num_groups'] == group_by.num_groups
     assert grouping_dict['ranged'] == group_by.ranged
-    assert grouping_dict['groups'] == expected_groups
+    _test_group_equality(grouping_dict['groups'], expected_groups)
 
 
 def test_record_list_pagination_limit(create_table, client):
