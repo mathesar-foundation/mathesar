@@ -39,7 +39,8 @@ class RecordViewSet(viewsets.ViewSet):
         order_by = serializer.validated_data['order_by']
         grouping = serializer.validated_data['grouping']
         filter_processed = None
-        column_ids_to_names = table.get_column_name_id_bidirectional_map().inverse
+        column_names_to_ids = table.get_column_name_id_bidirectional_map()
+        column_ids_to_names = column_names_to_ids.inverse
         if filter_unprocessed:
             table = get_table_or_404(table_pk)
             filter_processed = rewrite_db_function_spec_column_ids_to_names(
@@ -56,7 +57,7 @@ class RecordViewSet(viewsets.ViewSet):
         try:
 
             records = paginator.paginate_queryset(
-                self.get_queryset(), request, table,
+                self.get_queryset(), request, table, column_names_to_ids,
                 filters=filter_processed,
                 order_by=name_converted_order_by,
                 grouping=name_converted_group_by,
