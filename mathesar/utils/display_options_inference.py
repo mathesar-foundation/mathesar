@@ -11,6 +11,9 @@ MATHESAR_MONEY = get_qualified_name(base.MathesarCustomType.MATHESAR_MONEY.value
 
 
 def infer_mathesar_money_display_options(table_oid, engine, column_attnum):
+    """
+    Display options are inferred based on the values of the first valid row with a currency symbol,
+    """
     money_array = get_first_money_array_with_symbol(table_oid, engine, column_attnum)
     if money_array is None:
         return None
