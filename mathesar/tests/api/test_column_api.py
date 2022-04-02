@@ -14,6 +14,7 @@ from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models import Column as ServiceLayerColumn
 from mathesar.tests.api.test_table_api import check_columns_response
+from db.constants import COLUMN_NAME_TEMPLATE
 
 engine_with_types = fixtures.engine_with_types
 engine_email_type = fixtures.engine_email_type
@@ -389,7 +390,7 @@ def test_column_create_no_name_parameter(column_test_table, client):
     cache.clear()
     type_ = "BOOLEAN"
     num_columns = len(column_test_table.sa_columns)
-    generated_name = f"Column {num_columns}"
+    generated_name = f"{COLUMN_NAME_TEMPLATE}{num_columns}"
     data = {
         "type": type_
     }
@@ -411,7 +412,7 @@ def test_column_create_name_parameter_empty(column_test_table, client):
     name = ""
     type_ = "BOOLEAN"
     num_columns = len(column_test_table.sa_columns)
-    generated_name = f"Column {num_columns}"
+    generated_name = f"{COLUMN_NAME_TEMPLATE}{num_columns}"
     data = {
         "name": name, "type": type_
     }

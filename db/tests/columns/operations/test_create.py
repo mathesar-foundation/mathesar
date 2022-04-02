@@ -8,6 +8,7 @@ from db.constraints.operations.select import get_column_constraints
 from db.tests.columns.utils import create_test_table
 from db.tests.types import fixtures
 from db.types.operations.cast import get_supported_alter_column_db_types
+from db.constants import COLUMN_NAME_TEMPLATE
 
 
 engine_with_types = fixtures.engine_with_types
@@ -362,8 +363,8 @@ def test_duplicate_column_default(engine_with_schema, copy_data, copy_constraint
 def test_create_column_accepts_column_data_without_name_attribute(engine_email_type):
     engine, schema = engine_email_type
     table_name = "atableone"
-    initial_column_name = "Column 0"
-    expected_column_name = "Column 1"
+    initial_column_name = f"{COLUMN_NAME_TEMPLATE}0"
+    expected_column_name = f"{COLUMN_NAME_TEMPLATE}1"
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -381,8 +382,8 @@ def test_create_column_accepts_column_data_without_name_attribute(engine_email_t
 def test_create_column_accepts_column_data_with_name_as_empty_string(engine_email_type):
     engine, schema = engine_email_type
     table_name = "atableone"
-    initial_column_name = "Column 0"
-    expected_column_name = "Column 1"
+    initial_column_name = f"{COLUMN_NAME_TEMPLATE}0"
+    expected_column_name = f"{COLUMN_NAME_TEMPLATE}1"
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -425,7 +426,7 @@ def test_generate_column_name(engine_email_type):
     n = len(name_set) + 1
     # Expected column name should be 'Column n'
     # where n is length of number of columns already in the table
-    expected_column_name = f"Column {n}"
+    expected_column_name = f"{COLUMN_NAME_TEMPLATE}{n}"
     generated_column_name = gen_col_name(altered_table)
     assert len(altered_table.columns) == n
     assert generated_column_name == expected_column_name
