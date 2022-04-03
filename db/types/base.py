@@ -45,6 +45,7 @@ class PostgresType(Enum):
     JSON = 'json'
     JSONB = 'jsonb'
     MACADDR = 'macaddr'
+    MATHESAR_CHAR = 'mathesar char'
     MONEY = 'money'
     NAME = 'name'
     NUMERIC = 'numeric'
