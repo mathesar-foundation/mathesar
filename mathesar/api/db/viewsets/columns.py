@@ -26,7 +26,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
     pagination_class = DefaultLimitOffsetPagination
 
     def get_queryset(self):
-        return Column.objects.filter(table=self.kwargs['table_pk'])
+        return Column.objects.filter(table=self.kwargs['table_pk']).order_by('attnum')
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
