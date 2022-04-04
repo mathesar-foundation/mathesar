@@ -18,7 +18,7 @@ import {
   getAllImportDetailsForSchema,
 } from '@mathesar/stores/fileImports';
 import type { FileImportInfo } from '@mathesar/stores/fileImports';
-import { collapse, unite } from '@mathesar/utils/storeUtils';
+import { collapse, unite } from '@mathesar-component-library';
 import type { SavableTabData, TabularTabReference } from './tabDataSaver';
 import {
   getSavedTabData,

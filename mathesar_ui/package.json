@@ -32,6 +32,7 @@
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.21",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/svelte": "^3.0.3",
+    "@testing-library/user-event": "^14.0.0-beta.13",
     "@tsconfig/svelte": "^1.0.13",
     "@types/jest": "^26.0.23",
     "@types/js-cookie": "^2.2.6",

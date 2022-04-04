@@ -1,5 +1,5 @@
 import type { Readable, Writable } from 'svelte/store';
-import type { DynamicInputDataType } from '@mathesar-component-library-dir/dynamic-input/types.d';
+import type { DynamicInputDataType } from '@mathesar-component-library-dir/dynamic-input/types';
 
 export type FormInputDataType = boolean | string | number | null;
 
@@ -89,8 +89,6 @@ export interface FormValidationResult {
 export interface FormBuildConfiguration extends FormConfiguration {
   stores: Map<string, FormInputStore>;
   values: Readable<FormValues>;
-  storeUsage: Writable<Map<string, number>>;
-  validation: Readable<FormValidationResult>;
+  validationStore: Readable<FormValidationResult>;
   getValidationResult: () => FormValidationResult;
-  getValues: () => Record<string, FormInputDataType>;
 }

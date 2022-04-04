@@ -16,14 +16,15 @@ from db.tables.operations.select import get_oid_from_table
 from mathesar.models import Schema, Table, Database, DataFile
 from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import create_table_from_csv
-
+from db.columns.operations.select import get_column_attnum_from_name
+from mathesar.models import Column as mathesar_model_column
 
 PATENT_SCHEMA = 'Patents'
 NASA_TABLE = 'NASA Schema List'
 
 
 @pytest.fixture(scope="session", autouse=True)
-def django_db_setup(request, django_db_blocker) -> None:
+def django_db_setup(request, django_db_blocker):
     """
     A stripped down version of pytest-django's original django_db_setup fixture
     See: https://github.com/pytest-dev/pytest-django/blob/master/pytest_django/fixtures.py#L96
@@ -44,7 +45,7 @@ def django_db_setup(request, django_db_blocker) -> None:
             aliases=["default"],
         )
 
-    def teardown_database() -> None:
+    def teardown_database():
         with django_db_blocker.unblock():
             try:
                 teardown_databases(db_cfg, verbosity=request.config.option.verbose)
@@ -98,6 +99,11 @@ def patents_url_filename():
 @pytest.fixture(scope='session')
 def data_types_csv_filename():
     return 'mathesar/tests/data/data_types.csv'
+
+
+@pytest.fixture(scope='session')
+def col_names_with_spaces_csv_filename():
+    return 'mathesar/tests/data/col_names_with_spaces.csv'
 
 
 @pytest.fixture(scope='session')
@@ -168,3 +174,22 @@ def create_table(csv_filename, create_schema):
         schema_model = create_schema(schema)
         return create_table_from_csv(data_file, table_name, schema_model)
     return _create_table
+
+
+@pytest.fixture
+def create_column():
+    def _create_column(table, column_data):
+        column = table.add_column(column_data)
+        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine)
+        column = mathesar_model_column.current_objects.get_or_create(attnum=attnum, table=table)
+        return column[0]
+    return _create_column
+
+
+@pytest.fixture
+def custom_types_schema_url(test_db_model, schema, live_server):
+    engine = create_mathesar_engine(test_db_model.name)
+    install.install_mathesar_on_database(engine)
+    yield f"{live_server}/{schema.database.name}/{schema.id}"
+    with engine.begin() as conn:
+        conn.execute(text(f'DROP SCHEMA IF EXISTS {base.SCHEMA} CASCADE;'))
