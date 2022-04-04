@@ -74,6 +74,7 @@ export class TabularData {
     );
 
     this.columnsDataStore.on('columnRenamed', () => this.refresh());
+    this.columnsDataStore.on('columnAdded', () => this.recordsData.fetch());
   }
 
   refresh(): Promise<
