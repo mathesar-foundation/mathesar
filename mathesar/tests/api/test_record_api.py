@@ -427,6 +427,39 @@ grouping_params = [
             },
         ],
     ),
+    (
+        'Magnitude Grouping',
+        {'columns': ['id'], 'mode': 'magnitude'},
+        [
+            {
+                'count': 99,
+                'first_value': {'id': 1},
+                'last_value': {'id': 99},
+                'less_than_eq_value': None,
+                'greater_than_eq_value': {'id': 0},
+                'less_than_value': {'id': 100},
+                'greater_than_value': None,
+                'result_indices': [
+                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                    17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+                    32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46,
+                    47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
+                    62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76,
+                    77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88,
+                    89, 90, 91, 92, 93, 94, 95, 96, 97, 98
+                ],
+            }, {
+                'count': 100,
+                'first_value': {'id': 100},
+                'last_value': {'id': 199},
+                'less_than_eq_value': None,
+                'greater_than_eq_value': {'id': 100},
+                'less_than_value': {'id': 200},
+                'greater_than_value': None,
+                'result_indices': [99],
+            },
+        ],
+    ),
 ]
 
 
@@ -487,11 +520,8 @@ def test_record_list_groups(
                 == expect_groups[i].pop('result_indices')
             )
             for k in expect_groups[i]:
-                print(k)
                 actual_item = actual_groups[i][k]
                 expect_item = expect_groups[i][k]
-                print("ACTUAL_ITEM", actual_item)
-                print("EXPECT_ITEM", expect_item)
                 if expect_item is not None:
                     for column_name in expect_item:
                         assert (
@@ -507,6 +537,7 @@ def test_record_list_groups(
 
     group_by = GroupBy(**grouping)
     grouping_dict = response_data['grouping']
+    print(grouping_dict)
     assert grouping_dict['columns'] == [
         columns_name_id_map[colname] for colname in group_by.columns
     ]

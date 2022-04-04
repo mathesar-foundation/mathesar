@@ -198,7 +198,8 @@ def test_get_group_augmented_records_query_metadata_fields(roster_table_obj, gro
         res = conn.execute(augmented_query).fetchall()
     for row in res:
         assert all(
-            [metadata_field.value in row[group.MATHESAR_GROUP_METADATA]
+            [
+                metadata_field.value in row[group.MATHESAR_GROUP_METADATA]
                 for metadata_field in group.GroupMetadataField
             ]
         )
