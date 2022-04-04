@@ -33,17 +33,23 @@ def test_convert_text_col_of_num_to_num_col(page, go_to_table_with_numbers_in_te
 
 
 def test_group_by_column(page, go_to_patents_data_table):
+    # selectors
+    selector_column_header = ".table-content .header .cell:has-text('Center')"
+    selector_group_header = "div.groupheader >> span >> nth=0"
+    # locators
+    locator_group_header = page.locator(selector_group_header)
+    locator_group_count = page.locator("text=count: 138")
     # group by the column "Center"
-    page.click(".table-content .header .cell:has-text('Center')")
+    page.click(selector_column_header)
     page.click(".dropdown button:has-text('Group by column')")
     # verify the count of the first listed group and its name
-    expect(page.locator("text=count: 138")).to_be_visible()
-    expect(page.locator("text=Center: undefined")).to_be_visible()
+    expect(locator_group_count).to_be_visible()
+    expect(locator_group_header).to_contain_text('Center:')
     expect(page.locator("button:has-text('Group (1)')")).to_be_visible()
     # ungroup
-    page.click(".table-content .header .cell:has-text('Center')")
+    page.click(selector_column_header)
     page.click("button:has-text('Remove grouping')")
     # verify
-    expect(page.locator("text=count: 138")).not_to_be_visible()
-    expect(page.locator("text=Center: undefined")).not_to_be_visible()
+    expect(locator_group_count).not_to_be_visible()
+    expect(locator_group_header).not_to_be_visible()
     expect(page.locator("button:has-text('Group')")).to_be_visible()
