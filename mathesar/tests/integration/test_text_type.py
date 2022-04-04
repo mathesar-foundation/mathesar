@@ -119,3 +119,16 @@ def test_text_db_type_selection(page, go_to_all_types_table):
     page.locator(restrict_field_size_option_locator).set_checked(False)
     expect(page.locator(field_size_limit_locator)).not_to_be_visible()
     verify_column_type(page, "TEXT")
+
+
+def test_boolean_column(page, go_to_all_types_table):
+    expect_table_to_open(page)
+    checkbox_selector = ".table-content .row:nth-child(1) .cell:nth-child(7) [type=checkbox]"
+    assert page.locator(checkbox_selector).element_handle().evaluate("node => node.indeterminate") is True
+    page.check(checkbox_selector)
+    assert page.locator(checkbox_selector).element_handle().evaluate("node => node.indeterminate") is False
+    assert page.is_checked(checkbox_selector) is True
+    page.uncheck(checkbox_selector)
+    assert page.is_checked(checkbox_selector) is False
+    page.check(checkbox_selector)
+    assert page.is_checked(checkbox_selector) is True
