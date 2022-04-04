@@ -145,20 +145,6 @@ class BadFilterAPIException(MathesarAPIException):
         super().__init__(exception, self.error_code, message, field, details, status_code)
 
 
-class BadFunctionAPIException(MathesarAPIException):
-    error_code = ErrorCodes.UnsupportedType.value
-
-    def __init__(
-            self,
-            exception,
-            message="Some function was undefined",
-            field=None,
-            details=None,
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-    ):
-        super().__init__(exception, self.error_code, message, field, details, status_code)
-
-
 class BadSortAPIException(MathesarAPIException):
     # Default message is not needed as the exception string provides enough details
     error_code = ErrorCodes.UnsupportedType.value

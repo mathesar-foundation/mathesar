@@ -86,7 +86,7 @@ class RecordViewSet(viewsets.ViewSet):
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         except UndefinedFunction as e:
-            raise database_api_exceptions.BadFunctionAPIException(
+            raise database_api_exceptions.UndefinedFunctionAPIException(
                 e,
                 details=e.args[0],
                 status_code=status.HTTP_400_BAD_REQUEST

@@ -1,5 +1,5 @@
 import warnings
-from psycopg2.errors import DuplicateColumn, UndefinedFunction
+from psycopg2.errors import DuplicateColumn
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
@@ -15,6 +15,7 @@ from db.columns.exceptions import (
 )
 from db.columns.operations.select import get_column_attnum_from_name
 from db.types.exceptions import InvalidTypeParameters
+from db.records.exceptions import UndefinedFunction
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.columns import ColumnSerializer
 from mathesar.api.utils import get_table_or_404
@@ -99,18 +100,17 @@ class ColumnViewSet(viewsets.ModelViewSet):
             warnings.filterwarnings("error", category=DynamicDefaultWarning)
             try:
                 table.alter_column(column_instance._sa_column.column_attnum, serializer.validated_data)
+            except UndefinedFunction as e:
+                raise database_api_exceptions.UndefinedFunctionAPIException(
+                    e,
+                    message='This type cast is not implemented',
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
             except ProgrammingError as e:
-                if type(e.orig) == UndefinedFunction:
-                    raise database_api_exceptions.UndefinedFunctionAPIException(
-                        e,
-                        message='This type cast is not implemented',
-                        status_code=status.HTTP_400_BAD_REQUEST
-                    )
-                else:
-                    raise database_base_api_exceptions.ProgrammingAPIException(
-                        e,
-                        status_code=status.HTTP_400_BAD_REQUEST
-                    )
+                raise database_base_api_exceptions.ProgrammingAPIException(
+                    e,
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
             except IndexError as e:
                 raise base_api_exceptions.NotFoundAPIException(e)
             except TypeError as e:
