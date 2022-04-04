@@ -5,7 +5,7 @@
    * Value of the input. Use bind tag for two-way binding.
    * Refer Svelte docs for more info on binding form input values.
    */
-  export let value: string | undefined | null | number = '';
+  export let value: string | undefined | null = '';
 
   // Additional classes
   let classes = '';

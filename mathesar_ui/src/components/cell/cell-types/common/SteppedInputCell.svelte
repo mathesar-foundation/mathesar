@@ -5,7 +5,7 @@
   const dispatch = createEventDispatcher();
 
   export let isActive = false;
-  export let value: string | null | undefined | number = undefined;
+  export let value: string | null | undefined = undefined;
   export let readonly = false;
   export let disabled = false;
   let classes = '';
@@ -113,7 +113,7 @@
     <div class="content">
       {#if value === null}
         <Null />
-      {:else if value || value === 0}
+      {:else if value || typeof value !== 'undefined'}
         {value}
       {/if}
     </div>

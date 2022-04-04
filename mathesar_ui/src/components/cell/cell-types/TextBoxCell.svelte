@@ -3,7 +3,7 @@
   import SteppedInputCell from './common/SteppedInputCell.svelte';
 
   export let isActive = false;
-  export let value: string | null | undefined | number = undefined;
+  export let value: string | null | undefined = undefined;
   export let readonly = false;
   export let disabled = false;
 
