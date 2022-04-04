@@ -113,7 +113,7 @@
     <div class="content">
       {#if value === null}
         <Null />
-      {:else if value}
+      {:else if value || typeof value !== 'undefined'}
         {value}
       {/if}
     </div>
