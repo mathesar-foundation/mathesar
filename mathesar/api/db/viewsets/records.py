@@ -5,8 +5,12 @@ from rest_framework.response import Response
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
-from db.functions.exceptions import BadDBFunctionFormat, ReferencedColumnsDontExist, UnknownDBFunctionID
-from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
+from db.functions.exceptions import (
+    BadDBFunctionFormat, ReferencedColumnsDontExist, UnknownDBFunctionID
+)
+from db.records.exceptions import (
+    BadGroupFormat, GroupFieldNotFound, InvalidGroupType, UndefinedFunction
+)
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
@@ -79,6 +83,12 @@ class RecordViewSet(viewsets.ViewSet):
             raise database_api_exceptions.BadGroupAPIException(
                 e,
                 field='grouping',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except UndefinedFunction as e:
+            raise database_api_exceptions.BadFunctionAPIException(
+                e,
+                details=e.args[0],
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         serializer = RecordSerializer(
