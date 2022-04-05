@@ -1,5 +1,5 @@
 import type { Writable } from 'svelte/store';
-import type { DBObjectEntry } from '@mathesar/App.d';
+import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { TerseMetaProps, MetaProps } from './meta';
 import { makeMetaProps, makeTerseMetaProps, Meta } from './meta';
 import type { ColumnsData } from './columns';

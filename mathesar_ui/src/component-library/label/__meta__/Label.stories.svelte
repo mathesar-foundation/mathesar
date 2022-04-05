@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Checkbox from '@mathesar/component-library/checkbox/Checkbox.svelte';
+  import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import Label from '../Label.svelte';
   import { LabelController } from '../LabelController';

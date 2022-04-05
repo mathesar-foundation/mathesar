@@ -17,7 +17,7 @@
     "paths": {
       "@mathesar/*": ["src/*"],
       "@mathesar-component-library-dir/*": ["src/component-library/*"],
-      "@mathesar-component-library/types": ["src/component-library/types.d.ts"],
+      "@mathesar-component-library/types": ["src/component-library/types.ts"],
       "@mathesar-component-library": ["src/component-library/index.ts"]
     }
   },

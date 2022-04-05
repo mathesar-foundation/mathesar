@@ -16,7 +16,7 @@
     TextInput,
   } from '@mathesar-component-library';
 
-  import type { Database, SchemaEntry } from '@mathesar/App.d';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
 
   let interalSelectedDB: Database['name'] = get(currentDBName);
   $: schemas = getSchemasStoreForDB(interalSelectedDB);
