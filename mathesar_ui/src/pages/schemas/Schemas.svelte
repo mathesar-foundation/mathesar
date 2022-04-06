@@ -3,7 +3,7 @@
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
   import { Icon, Button, TextInput } from '@mathesar-component-library';
-  import type { SchemaEntry } from '@mathesar/App.d';
+  import type { SchemaEntry } from '@mathesar/AppTypes';
   import type { DBSchemaStoreData } from '@mathesar/stores/schemas';
   import { modal } from '@mathesar/stores/modal';
   import SchemaRow from './schema-row/SchemaRow.svelte';

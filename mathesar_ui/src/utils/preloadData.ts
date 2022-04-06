@@ -3,7 +3,7 @@ import type {
   SchemaResponse,
   TableEntry,
   AbstractTypeResponse,
-} from '@mathesar/App.d';
+} from '@mathesar/AppTypes';
 
 interface CommonData {
   databases: Database[];

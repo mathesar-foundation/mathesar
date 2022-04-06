@@ -3,7 +3,7 @@ import {
   faExclamationTriangle,
   faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
-import type { IconProps } from '@mathesar-component-library-dir/icon/Icon.d';
+import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 import type { SvelteComponent } from 'svelte';
 import { linear } from 'svelte/easing';
 import type { Writable, Readable } from 'svelte/store';

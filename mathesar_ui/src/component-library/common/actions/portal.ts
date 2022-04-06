@@ -1,4 +1,4 @@
-import type { Action } from './types.d';
+import type { Action } from './actionsTypes';
 
 export default function portal(node: Element, target?: HTMLElement): Action {
   const targetElement = target ?? document.querySelector('body') ?? undefined;
