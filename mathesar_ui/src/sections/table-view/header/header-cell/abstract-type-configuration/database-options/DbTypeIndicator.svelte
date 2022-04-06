@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { DbType } from '@mathesar/App.d';
+  import type { DbType } from '@mathesar/AppTypes';
 
   export let selectedDbType: DbType | undefined;
 </script>

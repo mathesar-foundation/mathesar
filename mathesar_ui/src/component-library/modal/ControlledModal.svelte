@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Size } from '../types';
-  import type { ModalCloseAction } from './modal';
+  import type { ModalCloseAction } from './modalTypes';
   import IndependentModal from './IndependentModal.svelte';
   import type ModalController from './ModalController';
 

@@ -8,7 +8,7 @@
   import { States } from '@mathesar/utils/api';
   import { toast } from '@mathesar/stores/toast';
 
-  import type { DbType } from '@mathesar/App.d';
+  import type { DbType } from '@mathesar/AppTypes';
   import type {
     Column,
     TabularDataStore,

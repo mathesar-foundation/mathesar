@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IconProps } from '@mathesar-component-library-dir/icon/Icon.d';
+  import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
   import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import Spinner from '@mathesar-component-library-dir/spinner/Spinner.svelte';

@@ -9,7 +9,7 @@ import type {
 } from 'svelte/store';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import type { CancellablePromise } from '@mathesar-component-library';
-import type { DBObjectEntry } from '@mathesar/App.d';
+import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { Constraint as ApiConstraint } from '@mathesar/api/tables/constraints';
 import type { Column } from './columns';
 
