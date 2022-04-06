@@ -1,4 +1,5 @@
 from rest_framework.exceptions import NotFound
+import re
 
 from db.records.operations import group
 from mathesar.models import Table
@@ -59,3 +60,41 @@ def process_annotated_records(record_list):
         output_groups = None
 
     return processed_records, output_groups
+
+
+def is_number(column_type):
+    """
+    Check if a column data type is a number
+    Args:
+        column_type: data type of column
+    """
+    return str(column_type) in [
+        'INTEGER',
+        'BIGINT',
+        'SMALLINT',
+        'NUMERIC',
+        'REAL',
+        'DOUBLE_PRECISION'
+    ]
+
+
+def follows_json_spec(number):
+    """
+    Check if a number follows JSON number spec
+    Args:
+        number: number as string
+    """
+    patterns = [
+        r"^-?0$",
+        r"^-?0.[0-9]+$",
+        r"^-?0[eE][+-]?[0-9]*$",
+        r"^-?0.[0-9]+[eE][+-]?[0-9]*$",
+        r"^-?[1-9][0-9]*$",
+        r"^-?[1-9][0-9]*.[0-9]+$",
+        r"^-?[1-9][0-9]*[eE][+-]?[0-9]*$",
+        r"^-?[1-9][0-9]*.[0-9]+[eE][+-]?[0-9]*$",
+    ]
+    for pattern in patterns:
+        if re.search(pattern, number) is not None:
+            return True
+    return False
