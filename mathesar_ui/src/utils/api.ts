@@ -58,7 +58,9 @@ function sendXHRRequest<T>(
             // TODO: Follow a proper error message structure
             const message = JSON.parse(request.response) as string | string[];
             if (Array.isArray(message)) {
-              errorMessage = message.join(', ');
+              errorMessage = message
+                .map((msg) => JSON.stringify(msg))
+                .join(', ');
             } else if (typeof message === 'string') {
               errorMessage = message;
             } else if (message) {
