@@ -10,16 +10,7 @@
   // Db options
   export let length: number | undefined = undefined;
 
-  function handleKeyDown(
-    e: KeyboardEvent,
-    handler: (e: KeyboardEvent) => void,
-  ) {
-    if (e.key === 'Enter') {
-      e.stopPropagation();
-    } else {
-      handler(e);
-    }
-  }
+  const addNewLineOnAllEnterKeyCombinations = true;
 </script>
 
 <SteppedInputCell
@@ -40,7 +31,9 @@
     {disabled}
     bind:value
     on:blur={handleInputBlur}
-    on:keydown={(e) => handleKeyDown(e, handleInputKeydown)}
+    on:keydown
+    {addNewLineOnAllEnterKeyCombinations}
+    {handleInputKeydown}
   />
 </SteppedInputCell>
 
