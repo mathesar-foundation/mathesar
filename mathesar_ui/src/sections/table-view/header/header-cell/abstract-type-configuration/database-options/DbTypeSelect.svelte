@@ -1,6 +1,6 @@
 <script lang="ts">
   import { LabeledInput, Select } from '@mathesar-component-library';
-  import type { DbType } from '@mathesar/App.d';
+  import type { DbType } from '@mathesar/AppTypes';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
 
   export let selectedDbType: DbType;

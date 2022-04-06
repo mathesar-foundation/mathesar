@@ -4,7 +4,7 @@ import { currentDBId } from '@mathesar/stores/databases';
 import { preloadCommonData } from '@mathesar/utils/preloadData';
 
 import type { Readable, Writable, Unsubscriber } from 'svelte/store';
-import type { Database } from '@mathesar/App.d';
+import type { Database } from '@mathesar/AppTypes';
 import type { CancellablePromise } from '@mathesar-component-library';
 import type {
   AbstractTypesMap,

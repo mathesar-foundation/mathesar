@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Meta, Story } from '@storybook/addon-svelte-csf';
-  import Checkbox from '@mathesar/component-library/checkbox/Checkbox.svelte';
+  import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
   import LabeledInput from '../LabeledInput.svelte';
 
   const meta = {

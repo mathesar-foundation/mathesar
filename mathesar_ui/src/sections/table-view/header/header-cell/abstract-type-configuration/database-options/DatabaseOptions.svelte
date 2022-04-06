@@ -1,6 +1,6 @@
 <script lang="ts">
   import { FormBuilder } from '@mathesar-component-library';
-  import type { DbType } from '@mathesar/App.d';
+  import type { DbType } from '@mathesar/AppTypes';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
   import type { FormBuildConfiguration } from '@mathesar-component-library/types';
 
