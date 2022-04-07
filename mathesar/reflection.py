@@ -76,9 +76,9 @@ def reflect_columns_from_table(table):
                                                                       table=table,
                                                                       defaults={'display_options': None})
         if not created and column.display_options:
+            # If the type of column has changed, existing display options won't be valid anymore.
             serializer = DisplayOptionsMappingSerializer(data=column.display_options,
                                                          context={DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY: str(column.plain_type)})
-            # If the type of column has changed, the display options won't match with existing options
             if not serializer.is_valid(False):
                 column.display_options = None
                 column.save()
