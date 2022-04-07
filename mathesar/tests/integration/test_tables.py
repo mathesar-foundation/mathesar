@@ -7,16 +7,16 @@ from mathesar.tests.integration.utils.validators import expect_welcome_to_be_vis
 welcome_text = "Welcome to Mathesar!"
 
 
-def test_create_empty_table(page, base_schema_url):
-    page.goto(base_schema_url)
+def test_create_empty_table(page, custom_types_schema_url):
+    page.goto(custom_types_schema_url)
     expect(get_tables_list(page)).to_be_empty()
     # Table 0
     create_empty_table(page)
     expect(get_table_entry(page, "Table 0")).to_be_visible()
 
 
-def test_delete_empty_table(page, base_schema_url):
-    page.goto(base_schema_url)
+def test_delete_empty_table(page, custom_types_schema_url):
+    page.goto(custom_types_schema_url)
 
     # No entry in sidebar
     expect(get_tables_list(page)).to_be_empty()
@@ -35,8 +35,8 @@ def test_delete_empty_table(page, base_schema_url):
     expect_welcome_to_be_visible(page, welcome_text)
 
 
-def test_rename_empty_table(page, base_schema_url):
-    page.goto(base_schema_url)
+def test_rename_empty_table(page, custom_types_schema_url):
+    page.goto(custom_types_schema_url)
 
     # Create Table 0
     create_empty_table(page)
@@ -54,8 +54,8 @@ def test_rename_empty_table(page, base_schema_url):
     expect(table_0_tab).not_to_be_visible()
 
 
-def test_rename_table_of_another_table(page, base_schema_url):
-    page.goto(base_schema_url)
+def test_rename_table_of_another_table(page, custom_types_schema_url):
+    page.goto(custom_types_schema_url)
     expect(get_tables_list(page)).to_be_empty()
     page.click("[aria-label='New Table']")
     page.click("button:has-text('Empty Table')")

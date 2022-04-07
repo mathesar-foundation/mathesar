@@ -5,8 +5,8 @@ from mathesar.tests.integration.utils.table_actions import create_empty_table, c
 from mathesar.tests.integration.utils.locators import get_tab
 
 
-def test_tabs(page, base_schema_url):
-    page.goto(base_schema_url)
+def test_tabs(page, custom_types_schema_url):
+    page.goto(custom_types_schema_url)
 
     # Create Table 0
     create_empty_table(page)

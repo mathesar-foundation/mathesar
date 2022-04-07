@@ -121,13 +121,13 @@ def schemas_page_url(live_server, test_db_name):
 
 
 @pytest.fixture
-def go_to_all_types_table(page, table_with_all_types, base_schema_url):
-    page.goto(base_schema_url)
+def go_to_all_types_table(page, table_with_all_types, custom_types_schema_url):
+    page.goto(custom_types_schema_url)
     get_table_entry(page, table_with_all_types.name).click()
 
 
 @pytest.fixture
-def go_to_patents_data_table(page, create_table, schema_name, base_schema_url):
+def go_to_patents_data_table(page, create_table, schema_name, custom_types_schema_url):
     """
     Imports the `patents.csv` data into a table named "patents" and navigates to
     the view of that table before starting the test.
@@ -136,13 +136,13 @@ def go_to_patents_data_table(page, create_table, schema_name, base_schema_url):
     table = create_table(table_name, schema_name)
     table.import_verified = True
     table.save()
-    page.goto(base_schema_url)
+    page.goto(custom_types_schema_url)
     get_table_entry(page, table_name).click()
     yield table_name
 
 
 @pytest.fixture
-def go_to_table_with_numbers_in_text(page, patent_schema, create_column, schema, base_schema_url):
+def go_to_table_with_numbers_in_text(page, patent_schema, create_column, schema, custom_types_schema_url):
     """
     Returns a table containing columns with numbers in TEXT format.
     """
@@ -152,6 +152,6 @@ def go_to_table_with_numbers_in_text(page, patent_schema, create_column, schema,
     create_column(table, {"name": col_name, "type": "TEXT"})
     table.create_record_or_records([{col_name: "123"}, {col_name: "876"}])
     table.save()
-    page.goto(base_schema_url)
+    page.goto(custom_types_schema_url)
     get_table_entry(page, table_name).click()
     yield table_name
