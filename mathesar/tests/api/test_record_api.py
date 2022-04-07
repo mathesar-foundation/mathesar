@@ -647,3 +647,24 @@ def test_record_list_group_exceptions(create_table, client, exception):
     assert len(response_data) == 1
     assert "grouping" in response_data[0]['field']
     assert response_data[0]['code'] == ErrorCodes.UnsupportedType.value
+
+
+def test_number_input_validation(create_table, client):
+    table_name = 'NASA Record List'
+    table = create_table(table_name)
+    table.add_column({"name": 'Nonce', "type": 'REAL'})
+    nonce_id = table.get_column_name_id_bidirectional_map()['Nonce']
+
+    for nonce, status_code in [
+        ("34.1e+7", 201),
+        ("034.11", 400),
+        ("123.4e7", 201),
+        ("1,23", 400),
+        ("~2324", 400),
+        (2132, 201),
+    ]:
+        data = {
+            nonce_id: nonce,
+        }
+        response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
+        assert response.status_code == status_code
