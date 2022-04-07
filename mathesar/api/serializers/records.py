@@ -8,6 +8,7 @@ from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models import Column
 from mathesar.api.utils import follows_json_spec, is_number
 
+
 class RecordListParameterSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     filter = serializers.JSONField(required=False, default=None)
     order_by = serializers.JSONField(required=False, default=[])
@@ -53,7 +54,7 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
             value = data[column_name]
             if is_number(column_type) and type(data[column_name]) is str and not follows_json_spec(value):
                 raise database_api_exceptions.MathesarAPIException(
-                    IntegrityError, 
+                    IntegrityError,
                     status_code=status.HTTP_400_BAD_REQUEST,
                     message="Number strings should follow JSON number spec",
                     field=column_name
