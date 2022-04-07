@@ -1,7 +1,7 @@
 import type {
   InputFormatter,
   ParseResult,
-} from '@mathesar/component-library/formatted-input/InputFormatter';
+} from '@mathesar-component-library-dir/formatted-input/InputFormatter';
 import type { DerivedOptions, Options } from './options';
 import { defaultOptions, getDerivedOptions } from './options';
 

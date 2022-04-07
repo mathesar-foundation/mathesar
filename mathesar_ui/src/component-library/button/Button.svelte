@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Appearance, Size } from '@mathesar-component-library/types';
+  import type { Appearance, Size } from '@mathesar-component-library-dir/types';
 
   /**
    * Button appearance. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.

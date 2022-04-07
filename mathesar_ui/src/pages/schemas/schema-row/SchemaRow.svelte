@@ -7,7 +7,7 @@
     faTrashAlt,
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-component-library';
-  import type { SchemaEntry } from '@mathesar/App.d';
+  import type { SchemaEntry } from '@mathesar/AppTypes';
   import { deleteSchema } from '@mathesar/stores/schemas';
   import { removeTablesInSchemaTablesStore } from '@mathesar/stores/tables';
   import { confirmDelete } from '@mathesar/stores/confirmation';

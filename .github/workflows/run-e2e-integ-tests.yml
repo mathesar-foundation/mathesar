@@ -50,7 +50,7 @@ jobs:
         run: docker exec -w /code/mathesar_ui mathesar_service npx vite build
 
       - name: Run integ tests with pytest
-        run: docker exec mathesar_service pytest --browser chromium --browser webkit --browser firefox mathesar/tests/integration/
+        run: docker exec mathesar_service pytest --browser chromium --browser webkit --browser firefox --video="on" --output="./videos/" mathesar/tests/integration/
 
       - uses: actions/upload-artifact@v2
         if: ${{ failure() || success() }}

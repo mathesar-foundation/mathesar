@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IconProps } from '@mathesar-component-library-dir/icon/Icon.d';
+  import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import { createEventDispatcher } from 'svelte';
   import {

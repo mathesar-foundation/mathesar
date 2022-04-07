@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { IconDefinition } from '@fortawesome/free-solid-svg-icons';
-  import type { IconFlip, IconRotate } from './Icon.d';
+  import type { IconFlip, IconRotate } from './IconTypes';
 
   // NOTE:
   // The type definition for the props here are duplicated in `Icon.d.ts` too.
