@@ -2,8 +2,8 @@
   import { createEventDispatcher } from 'svelte';
   import { faCaretRight } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-component-library';
-  import { IconRotate } from '@mathesar-component-library/types';
-  import type { TreeItem } from './Tree.d';
+  import { IconRotate } from '@mathesar-component-library-dir/types';
+  import type { TreeItem } from './TreeTypes';
 
   const dispatch = createEventDispatcher();
 

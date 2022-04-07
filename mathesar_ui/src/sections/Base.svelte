@@ -11,7 +11,7 @@
   } from '@mathesar/stores/tabs';
   import { constructTabularTabLink } from '@mathesar/stores/tabs/tabDataSaver';
   import { TabularType } from '@mathesar/stores/table-data';
-  import type { TableEntry } from '@mathesar/App.d';
+  import type { TableEntry } from '@mathesar/AppTypes';
 
   import ImportData from './import-data/ImportData.svelte';
   import TableView from './table-view/TableView.svelte';

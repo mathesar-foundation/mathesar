@@ -1,9 +1,9 @@
-import type { IconProps } from '@mathesar-component-library-dir/icon/Icon.d';
+import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 import type { Writable } from 'svelte/store';
 import { writable } from 'svelte/store';
 import type { ModalController } from '@mathesar-component-library-dir/modal';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+import type { ComponentAndProps } from '@mathesar-component-library-dir/types';
 
 interface ButtonDetails {
   label: string;

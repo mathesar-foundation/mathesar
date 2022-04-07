@@ -1,6 +1,6 @@
 import type { Writable, Updater, Subscriber, Unsubscriber } from 'svelte/store';
 import { writable, get as getStoreValue } from 'svelte/store';
-import type { DBObjectEntry, DbType } from '@mathesar/App.d';
+import type { DBObjectEntry, DbType } from '@mathesar/AppTypes';
 import type { CancellablePromise } from '@mathesar-component-library';
 import { EventHandler } from '@mathesar-component-library';
 import type { PaginatedResponse } from '@mathesar/utils/api';
@@ -161,6 +161,7 @@ export class ColumnsDataStore
 
   async add(columnDetails: Partial<Column>): Promise<Partial<Column>> {
     const column = await this.api.add(columnDetails);
+    await this.dispatch('columnAdded', column);
     await this.fetch();
     return column;
   }
