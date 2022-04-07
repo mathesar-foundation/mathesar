@@ -10,7 +10,7 @@ class MATHESAR_CHAR(TypeDecorator):
 
     @classmethod
     def __str__(cls):
-        return cls.__name__ 
+        return cls.__name__
 
 
 @compiles(MATHESAR_CHAR, 'postgresql')
