@@ -48,7 +48,7 @@ def install_on_db_with_key(database_key, skip_confirm):
                 f"Mathesar will be installed on DB {db_name} at host {host}."
                 "Confirm? (y/n) >  "
             )
-        if confirmation.lower() in ["y", "yes"]):
+        if confirmation.lower() in ["y", "yes"]:
             print("Installing...")
             install.install_mathesar_on_preexisting_database(
                 username,
