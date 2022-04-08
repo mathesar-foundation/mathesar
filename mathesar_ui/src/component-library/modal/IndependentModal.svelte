@@ -2,9 +2,9 @@
   import { createEventDispatcher, tick } from 'svelte';
   import { fade, fly } from 'svelte/transition';
   import { faTimes } from '@fortawesome/free-solid-svg-icons';
-  import type { Size } from '@mathesar-component-library/types';
+  import type { Size } from '@mathesar-component-library-dir/types';
   import { Button, Icon, portal } from '@mathesar-component-library';
-  import type { ModalCloseAction } from './modal.d';
+  import type { ModalCloseAction } from './modalTypes';
 
   const dispatch = createEventDispatcher();
 

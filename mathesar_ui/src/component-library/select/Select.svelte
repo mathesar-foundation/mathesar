@@ -3,7 +3,7 @@
   import { Dropdown } from '@mathesar-component-library';
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
   import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
-  import type { Appearance } from '@mathesar-component-library/types';
+  import type { Appearance } from '@mathesar-component-library-dir/types';
 
   const dispatch = createEventDispatcher();
 
