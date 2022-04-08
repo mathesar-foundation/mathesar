@@ -1,10 +1,11 @@
 """
 This script installs functions and types for Mathesar onto the configured DB.
 """
+import getopt
+import sys
+
 from config.settings import DATABASES
 from db import install
-import sys
-import getopt
 
 
 def main():
