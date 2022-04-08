@@ -11,7 +11,7 @@ import {
 } from '@mathesar/utils/api';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 
-import type { Database, SchemaEntry, SchemaResponse } from '@mathesar/App.d';
+import type { Database, SchemaEntry, SchemaResponse } from '@mathesar/AppTypes';
 import type { CancellablePromise } from '@mathesar-component-library';
 
 import { currentDBName } from './databases';

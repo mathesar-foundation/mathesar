@@ -9,7 +9,7 @@
   } from '@fortawesome/free-solid-svg-icons';
   import Icon from '../Icon.svelte';
   import IconDocs from './Icon.mdx';
-  import { IconFlip, IconRotate } from '../Icon.d';
+  import { IconFlip, IconRotate } from '../IconTypes';
 
   const meta = {
     title: 'Components/Icon',

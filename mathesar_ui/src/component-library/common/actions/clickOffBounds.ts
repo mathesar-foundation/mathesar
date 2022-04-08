@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 import type { Readable } from 'svelte/store';
-import type { Action } from './types.d';
+import type { Action } from './actionsTypes';
 
 type CallbackFn = (e: Event) => void;
 interface Options {

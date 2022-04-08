@@ -3,7 +3,7 @@
   import SpinnerButton from '@mathesar-component-library-dir/spinner-button/SpinnerButton.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
-  import type { ButtonDetails } from './CancelOrProceedButtonPair';
+  import type { ButtonDetails } from './CancelOrProceedButtonPairTypes';
 
   const cancelButtonDefaults: ButtonDetails = {
     label: 'Cancel',

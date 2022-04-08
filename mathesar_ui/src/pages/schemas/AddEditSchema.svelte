@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ModalController } from '@mathesar-component-library';
-  import type { SchemaEntry } from '@mathesar/App.d';
+  import type { SchemaEntry } from '@mathesar/AppTypes';
   import { currentDBName } from '@mathesar/stores/databases';
   import {
     schemas,
