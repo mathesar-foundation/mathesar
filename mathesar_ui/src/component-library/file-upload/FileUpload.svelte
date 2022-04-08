@@ -15,7 +15,7 @@
     FileUpload,
     FileUploadProgress,
     FileUploadAddDetail,
-  } from './FileUpload.d';
+  } from './FileUploadTypes';
 
   const dispatch = createEventDispatcher();
   const componentId = `file-import-${getId()}`;

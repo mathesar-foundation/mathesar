@@ -1,5 +1,5 @@
 import { router } from 'tinro';
-import type { DBObjectEntry, Database, SchemaEntry } from '@mathesar/App';
+import type { DBObjectEntry, Database, SchemaEntry } from '@mathesar/AppTypes';
 import type { TabularType } from '@mathesar/stores/table-data';
 import Url64 from '@mathesar/utils/Url64';
 import {
