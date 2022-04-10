@@ -4,19 +4,22 @@
   import type {
     TabularDataStore,
     Row,
+Meta,
   } from '@mathesar/stores/table-data/types';
 
   import RowComponent from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
+import type { Sorting } from '@mathesar/stores/table-data';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
   let virtualListRef: VirtualList;
 
-  $: ({ id, recordsData, display } = $tabularData);
+  $: ({ id, recordsData, display, meta } = $tabularData);
+  $: ({ sorting, filtering, grouping } = meta);
   $: ({ newRecords } = recordsData);
-  $: ({ rowWidth, horizontalScrollOffset, displayableRecords } = display);
+  $: ({ rowWidth, horizontalScrollOffset, scrollOffset, displayableRecords } = display);
 
   let previousNewRecordsCount = 0;
 
@@ -81,6 +84,7 @@
       <VirtualList
         bind:this={virtualListRef}
         bind:horizontalScrollOffset={$horizontalScrollOffset}
+        bind:scrollOffset={$scrollOffset}
         {height}
         width={$rowWidth}
         itemCount={$displayableRecords.length}

@@ -132,6 +132,8 @@ export class Display {
 
   private columnPositionMapUnsubscriber: Unsubscriber;
 
+  scrollOffset: Writable<number>;
+
   horizontalScrollOffset: Writable<number>;
 
   columnPositionMap: Writable<ColumnPositionMap>;
@@ -151,6 +153,7 @@ export class Display {
     this.columnsDataStore = columnsDataStore;
     this.recordsData = recordsData;
     this.horizontalScrollOffset = writable(0);
+    this.scrollOffset = writable(0);
     this.columnPositionMap = writable(new Map() as ColumnPositionMap);
     this.activeCell = writable<ActiveCell | undefined>(undefined);
     this.rowWidth = writable(0);
