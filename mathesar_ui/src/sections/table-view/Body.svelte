@@ -1,16 +1,15 @@
 <script lang="ts">
-  import { getContext, tick } from 'svelte';
+  import { beforeUpdate, getContext, tick } from 'svelte';
   import { get } from 'svelte/store';
   import type {
     TabularDataStore,
     Row,
-Meta,
   } from '@mathesar/stores/table-data/types';
 
   import RowComponent from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
-import type { Sorting } from '@mathesar/stores/table-data';
+import type { Sorting, Filtering, Grouping } from '@mathesar/stores/table-data';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
@@ -20,6 +19,37 @@ import type { Sorting } from '@mathesar/stores/table-data';
   $: ({ sorting, filtering, grouping } = meta);
   $: ({ newRecords } = recordsData);
   $: ({ rowWidth, horizontalScrollOffset, scrollOffset, displayableRecords } = display);
+
+  let initialSorting: Sorting;
+  let initialFiltering: Filtering;
+  let initialGrouping: Grouping;
+
+  beforeUpdate(() => {
+    sorting.subscribe(s => initialSorting = s);
+    filtering.subscribe(f => initialFiltering = f);
+    grouping.subscribe(g => initialGrouping = g);
+  })
+
+  $: sorting.subscribe(currentSorting => {
+    if (initialSorting == currentSorting) {
+      return;
+    }
+    virtualListRef?.ScrollToTop();
+  })
+
+  $: filtering.subscribe(currentfiltering => {
+    if (initialFiltering == currentfiltering) {
+      return;
+    }
+    virtualListRef?.ScrollToTop();
+  })
+
+  $: grouping.subscribe(currentGrouping => {
+    if (initialGrouping == currentGrouping) {
+      return;
+    }
+    virtualListRef?.ScrollToTop();
+  })
 
   let previousNewRecordsCount = 0;
 
