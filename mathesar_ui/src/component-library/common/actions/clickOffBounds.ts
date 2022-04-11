@@ -5,7 +5,7 @@ import type { Action } from './actionsTypes';
 type CallbackFn = (e: Event) => void;
 interface Options {
   callback: CallbackFn;
-  references?: Readable<HTMLElement[]>;
+  references?: Readable<(HTMLElement | undefined)[]>;
 }
 
 export default function clickOffBounds(
@@ -18,7 +18,7 @@ export default function clickOffBounds(
     const isWithinReferenceElement =
       references &&
       get(references)?.some((reference) =>
-        reference.contains(event.target as Node),
+        reference?.contains(event.target as Node) ?? false,
       );
     if (!isWithinReferenceElement && !node.contains(event.target as Node)) {
       callback(event);
