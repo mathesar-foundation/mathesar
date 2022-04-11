@@ -147,9 +147,11 @@ class ColumnViewSet(viewsets.ModelViewSet):
                 )
             except Exception as e:
                 raise base_api_exceptions.MathesarAPIException(e)
+
         serializer.update(column_instance, serializer.validated_model_fields)
         # Invalidate the cache as the underlying columns have changed
-        out_serializer = ColumnSerializer(self.get_object())
+        column_instance = self.get_object()
+        out_serializer = ColumnSerializer(column_instance)
         return Response(out_serializer.data)
 
     def destroy(self, request, pk=None, table_pk=None):
