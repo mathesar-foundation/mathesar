@@ -94,7 +94,7 @@
         grouping.update((g) => g.without(column.id));
       },
     });
-}
+  }
 
   function handleRename() {
     dispatch('close');
