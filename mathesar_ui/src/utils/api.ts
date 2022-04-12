@@ -20,6 +20,44 @@ export type RequestStatus =
   | { state: 'success' }
   | { state: 'failure'; errors: string[] };
 
+/**
+ * When multiple states are present, the one listed highest here is considered
+ * the most important.
+ */
+const requestStatusStatesByImportance: RequestStatus['state'][] = [
+  'processing',
+  'failure',
+  'success',
+];
+const paramountRequestStatusState = requestStatusStatesByImportance[0];
+
+function pickMostImportantRequestStatusState(
+  a: RequestStatus['state'],
+  b: RequestStatus['state'],
+): RequestStatus['state'] {
+  for (const state of requestStatusStatesByImportance) {
+    if (a === state || b === state) {
+      return state;
+    }
+  }
+  throw new Error('Invalid RequestStatus states.');
+}
+
+export function getMostImportantRequestStatusState(
+  statuses: Iterable<RequestStatus>,
+): RequestStatus['state'] | undefined {
+  let result: RequestStatus['state'] | undefined;
+  for (const { state } of statuses) {
+    if (state === paramountRequestStatusState) {
+      return state;
+    }
+    result = result
+      ? pickMostImportantRequestStatusState(state, result)
+      : state;
+  }
+  return result;
+}
+
 export interface UploadCompletionOpts {
   loaded: number;
   total: number;
