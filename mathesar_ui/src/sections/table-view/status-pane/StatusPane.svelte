@@ -31,9 +31,9 @@
     );
   }
 
-  function setPageSize(event: CustomEvent<number>) {
+  function setPageSize(event: CustomEvent<number | undefined>) {
     const newPageSize = event.detail;
-    if (pageSize !== newPageSize) {
+    if (typeof newPageSize !== 'undefined' && pageSize !== newPageSize) {
       $pagination = new Pagination({ page: 1, size: newPageSize });
     }
   }

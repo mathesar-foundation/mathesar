@@ -17,8 +17,8 @@ export default function clickOffBounds(
   function outOfBoundsListener(event: Event) {
     const isWithinReferenceElement =
       references &&
-      get(references)?.some((reference) =>
-        reference?.contains(event.target as Node) ?? false,
+      get(references)?.some(
+        (reference) => reference?.contains(event.target as Node) ?? false,
       );
     if (!isWithinReferenceElement && !node.contains(event.target as Node)) {
       callback(event);
