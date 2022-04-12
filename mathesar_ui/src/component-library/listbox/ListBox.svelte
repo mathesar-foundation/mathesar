@@ -14,30 +14,53 @@
   type Option = $$Generic;
   type $$Props = ListBoxProps<Option>;
 
-  const dispatch = createEventDispatcher();
+  // We need to set types to required to use with props exported in the component
+  // or else the component assumes the props can be 'undefined' as a value and throws errors,
+  // even though we set default values to them.
+  type $$DefinedProps = Required<$$Props>;
+  interface $$Slots {
+    default: {
+      api: ListBoxApi<Option>;
+      isOpen: boolean;
+    };
+  }
 
-  export let selectionType: $$Props['selectionType'] = 'multiple';
-  export let options: $$Props['options'];
-  export let value: $$Props['value'] = [];
+  const dispatch = createEventDispatcher<{ change: $$DefinedProps['value'] }>();
 
-  export let searchable: $$Props['searchable'] = false;
-  export let disabled: $$Props['disabled'] = false;
-  export let labelKey: $$Props['labelKey'] = 'label';
-  export let getLabel: $$Props['getLabel'] = defaultGetLabel;
-  export let checkEquality: $$Props['checkEquality'] = (
+  export let selectionType: $$DefinedProps['selectionType'] = 'multiple';
+  export let options: $$DefinedProps['options'];
+  export let value: $$DefinedProps['value'] = [];
+
+  export let searchable: $$DefinedProps['searchable'] = false;
+  export let disabled: $$DefinedProps['disabled'] = false;
+  export let labelKey: $$DefinedProps['labelKey'] = 'label';
+  export let getLabel: $$DefinedProps['getLabel'] = defaultGetLabel;
+  export let checkEquality: $$DefinedProps['checkEquality'] = (
     opt: Option,
     opt2: Option | undefined,
   ) => opt === opt2;
-  export let checkIfOptionIsDisabled: $$Props['checkIfOptionIsDisabled'] = () =>
-    false;
+  export let checkIfOptionIsDisabled: $$DefinedProps['checkIfOptionIsDisabled'] =
+    () => false;
 
   const isOpen = writable(false);
   const displayedOptions = writable(Array.isArray(options) ? options : []);
   const focusedOptionIndex = writable(-1);
 
+  function focusSelected(): void {
+    const lastSelectedOption = value[value.length - 1];
+    if (lastSelectedOption) {
+      $focusedOptionIndex = $displayedOptions.findIndex((opt) =>
+        checkEquality(lastSelectedOption, opt),
+      );
+    } else {
+      $focusedOptionIndex = -1;
+    }
+  }
+
   function open(): void {
     if (disabled) return;
     $isOpen = true;
+    focusSelected();
   }
 
   function close(): void {
@@ -68,7 +91,7 @@
   function focusPrevious(): void {
     const displayOptionLength = $displayedOptions.length;
     $focusedOptionIndex =
-      $focusedOptionIndex < 0
+      $focusedOptionIndex <= 0
         ? displayOptionLength - 1
         : $focusedOptionIndex - 1;
   }
@@ -86,6 +109,9 @@
       return;
     }
     if (isOptionSelected(option)) {
+      if (selectionType === 'single') {
+        close();
+      }
       return;
     }
     if (selectionType === 'single') {
@@ -121,6 +147,40 @@
     }
   }
 
+  function handleKeyDown(e: KeyboardEvent): void {
+    if ($isOpen) {
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          focusNext();
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          focusPrevious();
+          break;
+        case 'Escape':
+          e.preventDefault();
+          close();
+          break;
+        case 'Enter':
+          e.preventDefault();
+          selectFocused();
+          break;
+        default:
+          break;
+      }
+    } else {
+      switch (e.key) {
+        case 'Enter':
+          e.preventDefault();
+          open();
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
   export const api: ListBoxApi<Option> = {
     open,
     close,
@@ -132,6 +192,7 @@
     select,
     deselect,
     selectFocused,
+    handleKeyDown,
   };
 
   /**
@@ -180,4 +241,4 @@
   });
 </script>
 
-<slot {api} />
+<slot {api} isOpen={$isOpen} />

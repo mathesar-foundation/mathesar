@@ -15,9 +15,9 @@ export interface ListBoxStaticContextProps<Option> {
 }
 
 export interface ListBoxProps<Option>
-  extends ListBoxStaticContextProps<Option> {
+  extends Partial<ListBoxStaticContextProps<Option>> {
   options: Option[] | CancellablePromise<Option[]>;
-  value: Option[];
+  value?: Option[];
 }
 
 export interface ListBoxContextState<Option> {
@@ -39,6 +39,7 @@ export interface ListBoxApi<Option> {
   select: (option: Option) => void;
   deselect: (option: Option) => void;
   selectFocused: () => void;
+  handleKeyDown: (e: KeyboardEvent) => void;
 }
 
 export interface ListBoxContext<Option> {
