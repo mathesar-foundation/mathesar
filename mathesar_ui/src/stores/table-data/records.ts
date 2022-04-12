@@ -158,7 +158,6 @@ function preprocessRecords({
       if (index === 0) {
         isGroup = true;
       } else {
-        // eslint-disable-next-line no-restricted-syntax
         for (const id of groupingColumnIds) {
           if (records[index - 1][id] !== records[index][id]) {
             isGroup = true;
