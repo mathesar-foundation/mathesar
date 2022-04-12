@@ -15,4 +15,15 @@ ul.listbox-options {
       background: #f3f4f5;
     }
   }
+
+  &.multiple {
+    li {
+      border: 1px solid transparent;
+
+      &.selected {
+        border: 1px solid #39a0f5;
+        background: #39a0f530;
+      }
+    }
+  }
 }
