@@ -205,17 +205,6 @@ export class Display {
     });
   }
 
-  editCell(row: Row, column: Column): void {
-    if (!column.primary_key) {
-      this.activeCell.set({
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        rowIndex: row.rowIndex,
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        columnIndex: column.__columnIndex,
-      });
-    }
-  }
-
   handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | undefined {
     const { columns } = this.columnsDataStore.get();
     const totalCount = get(this.recordsData.totalCount);

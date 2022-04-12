@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tick, createEventDispatcher } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
   import Null from '@mathesar/components/Null.svelte';
   import CellWrapper from './CellWrapper.svelte';
 
@@ -13,15 +13,6 @@
 
   let cellRef: HTMLElement;
   let isEditMode = false;
-
-  async function focusCell(_isActive: boolean, _isEditMode: boolean) {
-    await tick();
-    if (_isActive && !_isEditMode) {
-      cellRef?.focus();
-    }
-  }
-
-  $: void focusCell(isActive, isEditMode);
 
   function setModeToEdit() {
     if (!readonly && !disabled) {

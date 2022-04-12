@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { tick } from 'svelte';
+
   export let element: HTMLElement;
 
   export let isActive: boolean;
@@ -6,6 +8,17 @@
   export let disabled: boolean;
   export let mode: 'edit' | 'default' = 'default';
   export let multiLineTruncate = false;
+
+  async function focusCell(_isActive: boolean, _mode: 'edit' | 'default') {
+    await tick();
+    if (_isActive && element && _mode !== 'edit') {
+      if (!element.contains(document.activeElement)) {
+        element.focus();
+      }
+    }
+  }
+
+  $: void focusCell(isActive, mode);
 </script>
 
 <div
@@ -21,6 +34,7 @@
   on:mousedown
   on:keydown
   tabindex={-1}
+  {...$$restProps}
 >
   <slot />
 </div>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tick, createEventDispatcher } from 'svelte';
+  import { createEventDispatcher } from 'svelte';
   import { Checkbox } from '@mathesar-component-library';
   import CellWrapper from './common/CellWrapper.svelte';
 
@@ -12,17 +12,6 @@
 
   let cellRef: HTMLElement;
   let isFirstActivated = false;
-
-  async function focusCell(_isActive: boolean) {
-    await tick();
-    if (_isActive && cellRef) {
-      if (!cellRef.contains(document.activeElement)) {
-        cellRef.focus();
-      }
-    }
-  }
-
-  $: void focusCell(isActive);
 
   function dispatchUpdate() {
     dispatch('update', { value });
