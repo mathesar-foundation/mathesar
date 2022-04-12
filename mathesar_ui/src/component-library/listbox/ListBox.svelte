@@ -162,6 +162,8 @@
     const focusedOption = $displayedOptions[$focusedOptionIndex];
     if (focusedOption) {
       pick(focusedOption);
+    } else if (selectionType === 'single') {
+      close();
     }
   }
 
