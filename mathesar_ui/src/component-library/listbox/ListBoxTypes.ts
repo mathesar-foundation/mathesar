@@ -16,7 +16,7 @@ export interface ListBoxStaticContextProps<Option> {
 
 export interface ListBoxProps<Option>
   extends Partial<ListBoxStaticContextProps<Option>> {
-  options: Option[] | CancellablePromise<Option[]>;
+  options: Option[] | (() => CancellablePromise<Option[]>);
   value?: Option[];
 }
 
