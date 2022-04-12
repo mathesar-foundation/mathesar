@@ -55,6 +55,8 @@
   aria-label={ariaLabel}
   {size}
   on:keydown
+  on:focus
+  on:blur
   {...$$restProps}
 >
   <span class="label">
