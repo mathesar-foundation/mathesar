@@ -18,6 +18,7 @@
   // or else the component assumes the props can be 'undefined' as a value and throws errors,
   // even though we set default values to them.
   type $$DefinedProps = Required<$$Props>;
+
   interface $$Slots {
     default: {
       api: ListBoxApi<Option>;
@@ -43,8 +44,13 @@
     () => false;
 
   const isOpen = writable(false);
-  const displayedOptions = writable(Array.isArray(options) ? options : []);
   const focusedOptionIndex = writable(-1);
+
+  // We have displayedOptions inorder to be used:
+  // * when options is passed as a promise,
+  // * while searching through option list.
+  const displayedOptions = writable(Array.isArray(options) ? options : []);
+  $: displayedOptions.set(Array.isArray(options) ? options : []);
 
   function focusSelected(): void {
     const lastSelectedOption = value[value.length - 1];
@@ -140,6 +146,18 @@
     dispatch('change', value);
   }
 
+  function pick(option: Option): void {
+    if (selectionType === 'single') {
+      select(option);
+      return;
+    }
+    if (isOptionSelected(option)) {
+      deselect(option);
+    } else {
+      select(option);
+    }
+  }
+
   function selectFocused(): void {
     const focusedOption = $displayedOptions[$focusedOptionIndex];
     if (focusedOption) {
@@ -191,6 +209,7 @@
     isOptionSelected,
     select,
     deselect,
+    pick,
     selectFocused,
     handleKeyDown,
   };

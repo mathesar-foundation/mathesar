@@ -58,7 +58,7 @@
         $staticProps.checkEquality(opt, option),
       )}
       class:in-focus={index === $focusedOptionIndex}
-      on:click={() => api.select(option)}
+      on:click={() => api.pick(option)}
     >
       <span>{$staticProps.getLabel(option, $staticProps.labelKey)}</span>
     </li>

@@ -38,6 +38,7 @@ export interface ListBoxApi<Option> {
   isOptionSelected: (option: Option) => boolean;
   select: (option: Option) => void;
   deselect: (option: Option) => void;
+  pick: (option: Option) => void;
   selectFocused: () => void;
   handleKeyDown: (e: KeyboardEvent) => void;
 }
