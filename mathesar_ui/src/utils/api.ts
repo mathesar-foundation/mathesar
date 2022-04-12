@@ -53,21 +53,14 @@ function sendXHRRequest<T>(
               : (JSON.parse(request.response) as T);
           resolve(result);
         } else {
-          let errorMessage = 'An unexpected error has occurred';
           try {
-            // TODO: Follow a proper error message structure
-            const message = JSON.parse(request.response) as string | string[];
-            if (Array.isArray(message)) {
-              errorMessage = message
-                .map((msg) => JSON.stringify(msg))
-                .join(', ');
-            } else if (typeof message === 'string') {
-              errorMessage = message;
-            } else if (message) {
-              errorMessage = JSON.stringify(message);
-            }
-          } finally {
-            reject(new Error(errorMessage));
+            reject(new ApiMultiError(JSON.parse(request.response)));
+          } catch {
+            const msg = [
+              'When making an XHR request, the server responded with an',
+              'error, but the response body was not valid JSON.',
+            ].join(' ');
+            reject(new Error(msg));
           }
         }
       });
