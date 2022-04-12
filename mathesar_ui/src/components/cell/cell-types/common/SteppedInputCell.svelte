@@ -108,7 +108,7 @@
     >
       {#if value === null}
         <Null />
-      {:else if value || typeof value !== 'undefined'}
+      {:else if typeof value !== 'undefined'}
         {value}
       {/if}
     </div>
