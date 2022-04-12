@@ -30,12 +30,12 @@ export { default as TextAvatar } from './text-avatar/TextAvatar.svelte';
 export { default as TextInput } from './text-input/TextInput.svelte';
 
 // Compound Components (Ordered)
-export { default as AttachableDropdown } from './dropdown/AttachableDropdown.svelte';
-export { default as Dropdown } from './dropdown/Dropdown.svelte';
+export { AttachableDropdown, Dropdown } from './dropdown';
 export { default as DropdownMenu } from './dropdown-menu/DropdownMenu.svelte';
 export { default as DynamicInput } from './dynamic-input/DynamicInput.svelte';
 export { default as FileUpload } from './file-upload/FileUpload.svelte';
 export { default as Notification } from './notification/Notification.svelte';
+export { ListBox, ListBoxOptions } from './listbox';
 export { default as Pagination } from './pagination/Pagination.svelte';
 export { default as Select } from './select/Select.svelte';
 export { default as TabContainer } from './tabs/TabContainer.svelte';
