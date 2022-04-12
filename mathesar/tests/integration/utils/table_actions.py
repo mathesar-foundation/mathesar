@@ -27,3 +27,9 @@ def rename_table(page, new_name):
     page.fill("div.modal input[aria-label='name']", new_name)
     page.click("div.cancel-or-proceed-button-pair span:has-text('Save')")
     expect_modal_not_to_be_visible(page)
+
+def rename_column(page, old_name, new_name):
+    page.click(f"button:has-text('{old_name}')")
+    page.click("button:has-text('Rename')")
+    page.fill("[aria-label='Column name']", new_name)
+    page.keyboard.press("Enter")
