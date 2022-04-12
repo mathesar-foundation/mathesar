@@ -39,7 +39,7 @@ export interface ListBoxApi<Option> {
   select: (option: Option) => void;
   deselect: (option: Option) => void;
   pick: (option: Option) => void;
-  selectFocused: () => void;
+  pickFocused: () => void;
   handleKeyDown: (e: KeyboardEvent) => void;
 }
 

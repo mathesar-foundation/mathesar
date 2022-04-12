@@ -49,7 +49,7 @@
   {id}
   role="listbox"
   aria-expanded="true"
-  class={['listbox-options', ...classes].join(' ')}
+  class={['listbox-options', $staticProps.selectionType, ...classes].join(' ')}
 >
   {#each $displayedOptions as option, index (option)}
     <li

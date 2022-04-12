@@ -158,10 +158,10 @@
     }
   }
 
-  function selectFocused(): void {
+  function pickFocused(): void {
     const focusedOption = $displayedOptions[$focusedOptionIndex];
     if (focusedOption) {
-      select(focusedOption);
+      pick(focusedOption);
     }
   }
 
@@ -182,7 +182,7 @@
           break;
         case 'Enter':
           e.preventDefault();
-          selectFocused();
+          pickFocused();
           break;
         default:
           break;
@@ -210,7 +210,7 @@
     select,
     deselect,
     pick,
-    selectFocused,
+    pickFocused,
     handleKeyDown,
   };
 
