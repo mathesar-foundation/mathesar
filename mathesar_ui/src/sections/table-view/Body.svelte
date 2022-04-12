@@ -9,25 +9,27 @@
   import RowComponent from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
-import type { Sorting, Filtering, Grouping } from '@mathesar/stores/table-data';
+  import type { Sorting, Filtering, Grouping, Pagination } from '@mathesar/stores/table-data';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
   let virtualListRef: VirtualList;
 
   $: ({ id, recordsData, display, meta } = $tabularData);
-  $: ({ sorting, filtering, grouping } = meta);
+  $: ({ sorting, filtering, grouping, pagination } = meta);
   $: ({ newRecords } = recordsData);
   $: ({ rowWidth, horizontalScrollOffset, scrollOffset, displayableRecords } = display);
 
   let initialSorting: Sorting;
   let initialFiltering: Filtering;
   let initialGrouping: Grouping;
+  let initialPagination: Pagination;
 
   beforeUpdate(() => {
     sorting.subscribe(s => initialSorting = s);
     filtering.subscribe(f => initialFiltering = f);
     grouping.subscribe(g => initialGrouping = g);
+    pagination.subscribe(p => initialPagination = p);
   })
 
   $: sorting.subscribe(currentSorting => {
@@ -46,6 +48,13 @@ import type { Sorting, Filtering, Grouping } from '@mathesar/stores/table-data';
 
   $: grouping.subscribe(currentGrouping => {
     if (initialGrouping == currentGrouping) {
+      return;
+    }
+    virtualListRef?.ScrollToTop();
+  })
+
+  $: pagination.subscribe(currentPagination => {
+    if (initialPagination == currentPagination) {
       return;
     }
     virtualListRef?.ScrollToTop();

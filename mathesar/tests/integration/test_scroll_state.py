@@ -12,25 +12,42 @@ def test_scroll_preserving_on_tabs_switching(page, go_to_patents_data_table):
     expect(thirtieth_element).to_be_visible()
     # creating new table switches to its tab
     create_empty_table(page)
-    get_table_entry(page, 'patents').click()
+    get_table_entry(page, "patents").click()
     expect(thirtieth_element).to_be_visible()
 
 def test_scroll_preserving_on_active_table_updating(page, go_to_patents_data_table):
-    thirtieth_element = page.locator('span.number:text-is("30")')
+    thirtieth_element = page.locator("span.number:text-is('30')")
     expect(thirtieth_element).not_to_be_visible()
     page.locator(".ps__rail-y").click()
     expect(thirtieth_element).to_be_visible()
-    rename_column(page, 'Center', 'Center2')
+    rename_column(page, "Center", "Updated Center")
     expect(thirtieth_element).to_be_visible()
 
-# add Filter when implemented
-@pytest.mark.parametrize("action", ['Sort', 'Group'])
+# TODO: add 'Filter' when implemented
+@pytest.mark.parametrize("action", ["Sort", "Group"])
 def test_scroll_resetting_on_sort_group_applying(page, go_to_patents_data_table, action):
-    thirtieth_element = page.locator('span.number:text-is("30")')
+    thirtieth_element = page.locator("span.number:text-is('30')")
     expect(thirtieth_element).not_to_be_visible()
     page.locator(".ps__rail-y").click()
     expect(thirtieth_element).to_be_visible()
     page.locator(f"button:has-text('{action}')").click()
     page.locator(f"button:has-text('Add new {action} column')").click()
     page.locator("td.action >> button:first-child").click()
+    expect(thirtieth_element).not_to_be_visible()
+
+def test_scroll_resetting_on_table_page_update(page, go_to_patents_data_table):
+    thirtieth_element = page.locator("span.number:text-is('30')")
+    expect(thirtieth_element).not_to_be_visible()
+    page.locator(".ps__rail-y").click()
+    expect(thirtieth_element).to_be_visible()
+    page.locator("[aria-label='Goto Page 2']").click()
+    expect(page.locator("span.number:text-is('501')")).to_be_visible()
+
+def test_scroll_resetting_on_table_page_size_update(page, go_to_patents_data_table):
+    thirtieth_element = page.locator("span.number:text-is('30')")
+    expect(thirtieth_element).not_to_be_visible()
+    page.locator(".ps__rail-y").click()
+    expect(thirtieth_element).to_be_visible()
+    page.locator("button:has-text('500')").click()
+    page.locator("li[role='option']:has-text('100')").click()
     expect(thirtieth_element).not_to_be_visible()
