@@ -18,8 +18,7 @@ from db.constraints.operations.select import get_column_constraints
 from db.constraints import utils as constraint_utils
 from db.tables.operations.select import reflect_table_from_oid
 from db.types.operations.cast import get_supported_alter_column_types
-
-COLUMN_NAME_TEMPLATE = 'Column'
+from db import constants
 
 
 def create_column(engine, table_oid, column_data):
@@ -74,9 +73,9 @@ def create_column(engine, table_oid, column_data):
 
 
 def gen_col_name(table):
-    base_name = COLUMN_NAME_TEMPLATE
+    base_name = constants.COLUMN_NAME_TEMPLATE
     col_num = len(table.c)
-    name = f'{base_name} {col_num}'
+    name = f'{base_name}{col_num}'
     return name
 
 
