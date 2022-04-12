@@ -5,6 +5,8 @@
   type Option = $$Generic;
 
   export let id: string;
+  let classes = '';
+  export { classes as class };
 
   const { api, state } = getContext<ListBoxContext<Option>>('LISTBOX_CONTEXT');
   const { displayedOptions, value, focusedOptionIndex, staticProps } = state;
@@ -47,6 +49,7 @@
   {id}
   role="listbox"
   aria-expanded="true"
+  class={['listbox-options', ...classes].join(' ')}
 >
   {#each $displayedOptions as option, index (option)}
     <li
