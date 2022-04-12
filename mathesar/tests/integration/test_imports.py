@@ -22,4 +22,4 @@ def test_import_from_file(page, custom_types_schema_url):
     page.set_input_files(".file-upload input", "/code/mathesar/tests/data/patents.csv")
     page.click("button:has-text('Finish Import')")
     # "1393 records" is part of the text shown below the table near the pager
-    expect(page.locator("text=1393 records")).to_be_visible()
+    expect(page.locator("text=1393")).to_be_visible()
