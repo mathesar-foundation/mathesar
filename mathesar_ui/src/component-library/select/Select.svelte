@@ -112,7 +112,6 @@
     on:open={() => api.open()}
     on:close={() => api.close()}
     on:keydown={(e) => api.handleKeyDown(e)}
-    on:blur={() => api.close()}
   >
     <svelte:fragment slot="trigger">
       {#if typeof value !== 'undefined'}

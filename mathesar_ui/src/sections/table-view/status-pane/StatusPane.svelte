@@ -64,7 +64,12 @@
         currentPage={page}
         on:change={handlePageChange}
       />
-      <Select options={pageSizeOpts} value={pageSize} on:change={setPageSize} />
+      <Select
+        triggerAppearance="plain"
+        options={pageSizeOpts}
+        value={pageSize}
+        on:change={setPageSize}
+      />
     {/if}
   </div>
 </div>
