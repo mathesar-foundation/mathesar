@@ -9,6 +9,7 @@ import type { AbstractTypeConfiguration } from '@mathesar/stores/abstract-types/
 import TextBoxCell from './cell-types/TextBoxCell.svelte';
 import TextAreaCell from './cell-types/TextAreaCell.svelte';
 import CheckboxCell from './cell-types/CheckboxCell.svelte';
+import SingleSelectCell from './cell-types/SingleSelectCell.svelte';
 
 function getInputConfiguration(
   column: Column,
@@ -31,7 +32,51 @@ function getStringCellComponentAndProps(
 
 function getBooleanCellComponentAndProps(column: Column): ComponentAndProps {
   const displayOptions = column.display_options ?? undefined;
-  // TODO: Change to Select based on display option
+  if (displayOptions && displayOptions.input === 'dropdown') {
+    const customLabels =
+      (displayOptions.custom_labels as { TRUE: string; FALSE: string }) ??
+      undefined;
+    const options = [
+      customLabels?.TRUE ?? 'true',
+      customLabels?.FALSE ?? 'false',
+    ];
+    const getSelectedOptionsFromValue = (
+      value: boolean | undefined | null,
+    ): string[] => {
+      if (value === true) {
+        return [options[0]];
+      }
+      if (value === false) {
+        return [options[1]];
+      }
+      return [];
+    };
+    const getValueFromSelectedOptions = (values: string[]): boolean | null => {
+      let value = null;
+      switch (values[0]) {
+        case options[0]:
+          value = true;
+          break;
+        case options[1]:
+          value = false;
+          break;
+        default:
+          break;
+      }
+      return value;
+    };
+    const getLabel = (value: boolean) => (value ? options[0] : options[1]);
+
+    return {
+      component: SingleSelectCell,
+      props: {
+        options,
+        getSelectedOptionsFromValue,
+        getValueFromSelectedOptions,
+        getLabel,
+      },
+    };
+  }
   return { component: CheckboxCell, props: displayOptions };
 }
 
