@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tick, createEventDispatcher } from 'svelte';
   import Null from '@mathesar/components/Null.svelte';
+  import CellWrapper from './CellWrapper.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -8,8 +9,7 @@
   export let value: string | null | undefined = undefined;
   export let readonly = false;
   export let disabled = false;
-  let classes = '';
-  export { classes as class };
+  export let multiLineTruncate = false;
 
   let cellRef: HTMLElement;
   let isEditMode = false;
@@ -96,21 +96,25 @@
   }
 </script>
 
-<div
-  class="cell-wrapper {classes}"
-  class:is-edit-mode={isEditMode}
-  class:is-active={isActive}
-  class:readonly
-  bind:this={cellRef}
+<CellWrapper
+  {isActive}
+  {readonly}
+  {disabled}
+  bind:element={cellRef}
   on:dblclick={setModeToEdit}
   on:keydown={handleKeyDown}
   on:mousedown={() => dispatch('activate')}
-  tabindex={-1}
+  mode={isEditMode ? 'edit' : 'default'}
+  {multiLineTruncate}
 >
   {#if isEditMode}
     <slot {handleInputBlur} {handleInputKeydown} />
   {:else}
-    <div class="content">
+    <div
+      class="content"
+      class:nowrap={!isActive}
+      class:truncate={isActive && multiLineTruncate}
+    >
       {#if value === null}
         <Null />
       {:else if value || typeof value !== 'undefined'}
@@ -118,36 +122,19 @@
       {/if}
     </div>
   {/if}
-</div>
+</CellWrapper>
 
 <style lang="scss">
-  .cell-wrapper {
-    .content {
-      overflow: hidden;
-      position: relative;
-      text-overflow: ellipsis;
+  .content {
+    overflow: hidden;
+    position: relative;
+    text-overflow: ellipsis;
+
+    &.nowrap {
+      white-space: nowrap;
     }
 
-    :global(.input-element) {
-      box-shadow: none;
-
-      &:focus {
-        border: none;
-      }
-    }
-
-    &.is-edit-mode {
-      padding: 0px;
-      box-shadow: 0 0 0 3px #428af4, 0 0 8px #000000 !important;
-    }
-
-    &:not(.is-active) {
-      .content {
-        white-space: nowrap;
-      }
-    }
-
-    &.is-active:global(.multi-line-truncate) .content {
+    &.truncate {
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;

@@ -27,7 +27,7 @@
   {isActive}
   {readonly}
   {disabled}
-  class="multi-line-truncate"
+  multiLineTruncate={true}
   let:handleInputBlur
   let:handleInputKeydown
   on:movementKeyDown
@@ -43,12 +43,3 @@
     on:keydown={(e) => handleKeyDown(e, handleInputKeydown)}
   />
 </SteppedInputCell>
-
-<style lang="scss">
-  :global(.cell-wrapper.multi-line-truncate) {
-    :global(textarea.input-element) {
-      resize: vertical;
-      min-height: 5em;
-    }
-  }
-</style>

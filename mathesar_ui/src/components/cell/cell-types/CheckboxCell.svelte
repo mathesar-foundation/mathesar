@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tick, createEventDispatcher } from 'svelte';
   import { Checkbox } from '@mathesar-component-library';
+  import CellWrapper from './common/CellWrapper.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -73,15 +74,14 @@
   }
 </script>
 
-<div
-  class="cell-wrapper"
-  class:is-active={isActive}
-  class:readonly
-  bind:this={cellRef}
+<CellWrapper
+  bind:element={cellRef}
+  {isActive}
+  {readonly}
+  {disabled}
   on:keydown={handleWrapperKeyDown}
   on:click={checkAndToggle}
   on:mousedown={handleMouseDown}
-  tabindex={-1}
 >
   <Checkbox
     bind:checked={value}
@@ -89,4 +89,4 @@
     {disabled}
     on:change={dispatchUpdate}
   />
-</div>
+</CellWrapper>
