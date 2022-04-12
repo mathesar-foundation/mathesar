@@ -44,6 +44,8 @@ def record_dictionary_list():
                     'group_id': 15, 'count': 29,
                     'first_value': {'Center': 'NASA KSC', 'Status': 'Application'},
                     'last_value': {'Center': 'NASA KSC', 'Status': 'Application'},
+                    'less_than_eq_value': None, 'greater_than_eq_value': None,
+                    'less_than_value': None, 'greater_than_value': None,
                 }
             },
             'metadata': {}
@@ -54,7 +56,9 @@ def record_dictionary_list():
                 '__mathesar_group_metadata': {
                     'group_id': 2, 'count': 100,
                     'first_value': {'Center': 'NASA ARC', 'Status': 'Issued'},
-                    'last_value': {'Center': 'NASA ARC', 'Status': 'Issued'}
+                    'last_value': {'Center': 'NASA ARC', 'Status': 'Issued'},
+                    'less_than_eq_value': None, 'greater_than_eq_value': None,
+                    'less_than_value': None, 'greater_than_value': None,
                 }
             },
             'metadata': {}
@@ -65,7 +69,9 @@ def record_dictionary_list():
                 '__mathesar_group_metadata': {
                     'group_id': 2, 'count': 100,
                     'first_value': {'Center': 'NASA ARC', 'Status': 'Issued'},
-                    'last_value': {'Center': 'NASA ARC', 'Status': 'Issued'}
+                    'last_value': {'Center': 'NASA ARC', 'Status': 'Issued'},
+                    'less_than_eq_value': None, 'greater_than_eq_value': None,
+                    'less_than_value': None, 'greater_than_value': None,
                 }
             },
             'metadata': {}
@@ -97,6 +103,14 @@ def test_GB_validate_passes_valid_kwargs_perc():
     gb.validate()
 
 
+def test_GB_validate_passes_valid_kwargs_mag():
+    gb = group.GroupBy(
+        columns=['col1'],
+        mode=group.GroupMode.MAGNITUDE.value,
+    )
+    gb.validate()
+
+
 def test_GB_validate_fails_invalid_mode():
     gb = group.GroupBy(
         columns=['col1', 'col2'],
@@ -112,6 +126,15 @@ def test_GB_validate_fails_invalid_num_group():
         columns=['col1', 'col2'],
         mode=group.GroupMode.PERCENTILE.value,
         num_groups=None,
+    )
+    with pytest.raises(records_exceptions.BadGroupFormat):
+        gb.validate()
+
+
+def test_GB_validate_fails_invalid_columns_len():
+    gb = group.GroupBy(
+        columns=['col1', 'col2'],
+        mode=group.GroupMode.MAGNITUDE.value,
     )
     with pytest.raises(records_exceptions.BadGroupFormat):
         gb.validate()
@@ -146,20 +169,46 @@ def _group_last_val(row):
     return row[group.MATHESAR_GROUP_METADATA][group.GroupMetadataField.LAST_VALUE.value]
 
 
+def _group_geq_value(row):
+    return row[group.MATHESAR_GROUP_METADATA][group.GroupMetadataField.GEQ_VALUE.value]
+
+
+def _group_lt_value(row):
+    return row[group.MATHESAR_GROUP_METADATA][group.GroupMetadataField.LT_VALUE.value]
+
+
 def _group_id(row):
     return row[group.MATHESAR_GROUP_METADATA][group.GroupMetadataField.GROUP_ID.value]
 
 
-group_modes = [group.GroupMode.DISTINCT.value, group.GroupMode.PERCENTILE.value]
+basic_group_modes = [
+    group.GroupMode.DISTINCT.value,
+    group.GroupMode.PERCENTILE.value,
+]
 
 
-@pytest.mark.parametrize('group_mode', group_modes)
+@pytest.mark.parametrize('group_mode', basic_group_modes)
 def test_get_group_augmented_records_query_metadata_fields(roster_table_obj, group_mode):
     roster, engine = roster_table_obj
     group_by = group.GroupBy(
         ['Student Number', 'Student Name'], mode=group_mode, num_groups=12
     )
     augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_query).fetchall()
+    for row in res:
+        assert all(
+            [
+                metadata_field.value in row[group.MATHESAR_GROUP_METADATA]
+                for metadata_field in group.GroupMetadataField
+            ]
+        )
+
+
+def test_smoke_get_group_augmented_records_query_magnitude(magnitude_table_obj):
+    magnitude, engine = magnitude_table_obj
+    group_by = group.GroupBy(['big_num'], mode=group.GroupMode.MAGNITUDE.value)
+    augmented_query = group.get_group_augmented_records_query(magnitude, group_by)
     with engine.begin() as conn:
         res = conn.execute(augmented_query).fetchall()
     for row in res:
@@ -224,6 +273,88 @@ def test_get_distinct_group_select_correct_num_group_id(
         res = conn.execute(augmented_query).fetchall()
 
     assert max([_group_id(row) for row in res]) == num
+
+
+magnitude_lt_zero = ['sm_num', 'sm_dbl']
+magnitude_gt_zero = ['id', 'big_num', 'big_int', 'pm_seq', 'tens_seq']
+
+
+magnitude_columns = magnitude_lt_zero + magnitude_gt_zero
+
+magnitude_max_group_ids = [30, 87, 21, 85, 90, 21, 21]
+
+
+@pytest.mark.parametrize('col_name,num', zip(magnitude_columns, magnitude_max_group_ids))
+def test_group_select_correct_num_group_id_magnitude(
+        magnitude_table_obj, col_name, num
+):
+    magnitude, engine = magnitude_table_obj
+    group_by = group.GroupBy(
+        [col_name],
+        mode=group.GroupMode.MAGNITUDE.value,
+    )
+    augmented_query = group.get_group_augmented_records_query(magnitude, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_query).fetchall()
+
+    assert max([_group_id(row) for row in res]) == num
+
+
+@pytest.mark.parametrize('col_name', magnitude_columns)
+def test_magnitude_group_select_bounds_chain(magnitude_table_obj, col_name):
+    magnitude, engine = magnitude_table_obj
+    group_by = group.GroupBy(
+        [col_name],
+        mode=group.GroupMode.MAGNITUDE.value,
+    )
+    augmented_query = group.get_group_augmented_records_query(magnitude, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_query).fetchall()
+
+    for i in range(len(res) - 1):
+        assert (
+            _group_lt_value(res[i])[col_name] <= _group_geq_value(res[i + 1])[col_name]
+            or (
+                _group_lt_value(res[i]) == _group_lt_value(res[i + 1])
+                and _group_geq_value(res[i]) == _group_geq_value(res[i + 1])
+            )
+        )
+
+
+@pytest.mark.parametrize('col_name', magnitude_columns)
+def test_magnitude_group_select_bounds_pretty(magnitude_table_obj, col_name):
+    magnitude, engine = magnitude_table_obj
+    group_by = group.GroupBy(
+        [col_name],
+        mode=group.GroupMode.MAGNITUDE.value,
+    )
+    augmented_query = group.get_group_augmented_records_query(magnitude, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_query).fetchall()
+
+    for row in res:
+        assert (
+            len(str(_group_lt_value(row)[col_name])) <= 7
+            and len(str(_group_geq_value(row)[col_name])) <= 7
+        )
+
+
+@pytest.mark.parametrize('col_name', magnitude_columns)
+def test_magnitude_group_select_inside_bounds(magnitude_table_obj, col_name):
+    magnitude, engine = magnitude_table_obj
+    group_by = group.GroupBy(
+        [col_name],
+        mode=group.GroupMode.MAGNITUDE.value,
+    )
+    augmented_query = group.get_group_augmented_records_query(magnitude, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_query).fetchall()
+
+    for row in res:
+        assert (
+            row[col_name] < _group_lt_value(row)[col_name]
+            and row[col_name] >= _group_geq_value(row)[col_name]
+        )
 
 
 def test_get_distinct_group_select_correct_first_last_row_match(roster_distinct_setup):
