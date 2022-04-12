@@ -206,6 +206,67 @@ def _get_tens_powers_range_group_select(table, grouping_columns):
     )
 
 
+def _get_custom_endpoints_range_group_select(table, columns, bound_tuples_list):
+    column_names = [col.name for col in columns]
+    GROUP_OBJ = 'group_obj'
+    RANGE_ID = 'range_id'
+    GEQ_BOUND = 'geq_bound'
+    LT_BOUND = 'lt_bound'
+
+    def _get_inner_json_object(bound_tuple):
+        key_value_tuples = (
+            (literal(str(col)), literal(val))
+            for col, val in zip(column_names, bound_tuple)
+        )
+        key_value_list = [
+            part for tup in key_value_tuples for part in tup
+        ]
+        return func.json_build_object(*key_value_list)
+
+    ranges = [
+        (
+            and_(
+                func.ROW(*columns) >= func.ROW(*bound_tuples_list[i]),
+                func.ROW(*columns) < func.ROW(*bound_tuples_list[i + 1])
+            ),
+            func.json_build_object(
+                literal(RANGE_ID),
+                i + 1,
+                literal(GEQ_BOUND),
+                _get_inner_json_object(*bound_tuples_list[i]),
+                literal(LT_BOUND),
+                _get_inner_json_object(*bound_tuples_list[i + 1]),
+            )
+        )
+        for i in range(len(bound_tuples_list))
+    ]
+    ranges_cte = select(
+        *columns,
+        case(*ranges).label(GROUP_OBJ)
+    ).cte()
+
+    ranges_aggregation_cols = [
+        col for col in ranges_cte.columns if col.name in column_names
+    ]
+    window_def = GroupingWindowDefinition(
+        order_by=ranges_aggregation_cols,
+        partition_by=ranges_cte.columns[GROUP_OBJ][RANGE_ID]
+    )
+    group_id_expr = window_def.partition_by
+    geq_expr = ranges_cte.columns[GROUP_OBJ][GEQ_BOUND]
+    lt_expr = ranges_cte.columns[GROUP_OBJ][LT_BOUND]
+    return select(
+        *[col for col in ranges_cte.columns if col.name in table.columns],
+        _get_group_metadata_definition(
+            window_def,
+            ranges_aggregation_cols,
+            group_id_expr,
+            geq_expr=geq_expr,
+            lt_expr=lt_expr,
+        )
+    )
+
+
 def _get_percentile_range_group_select(table, columns, num_groups):
     column_names = [col.name for col in columns]
     # cume_dist is a PostgreSQL function that calculates the cumulative
