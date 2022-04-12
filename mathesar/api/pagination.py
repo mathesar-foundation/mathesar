@@ -82,6 +82,7 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         queryset,
         request,
         table,
+        column_name_id_bidirectional_map,
         filters=None,
         order_by=[],
         grouping={},
@@ -99,13 +100,16 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         )
 
         if records:
-            processed_records, groups = process_annotated_records(records)
+            processed_records, groups = process_annotated_records(
+                records,
+                column_name_id_bidirectional_map,
+            )
         else:
             processed_records, groups = None, None
 
         if group_by:
             self.grouping = {
-                'columns': group_by.columns,
+                'columns': [column_name_id_bidirectional_map[n] for n in group_by.columns],
                 'mode': group_by.mode,
                 'num_groups': group_by.num_groups,
                 'ranged': group_by.ranged,

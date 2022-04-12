@@ -1,6 +1,6 @@
 import { makeForm } from '@mathesar-component-library';
-import type { DbType } from '@mathesar/App';
-import type { FormBuildConfiguration } from '@mathesar/component-library/types';
+import type { DbType } from '@mathesar/AppTypes';
+import type { FormBuildConfiguration } from '@mathesar-component-library/types';
 import type {
   AbstractType,
   AbstractTypeDbConfig,

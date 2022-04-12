@@ -1,4 +1,4 @@
-import type { DbType } from '@mathesar/App.d';
+import type { DbType } from '@mathesar/AppTypes';
 import { abstractTypeCategory, unknownAbstractTypeResponse } from './constants';
 import Text from './type-configs/text';
 import Number from './type-configs/number';

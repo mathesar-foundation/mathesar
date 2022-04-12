@@ -8,7 +8,7 @@ import {
 } from '@mathesar/utils/api';
 import type { Writable, Unsubscriber } from 'svelte/store';
 import type { CancellablePromise } from '@mathesar-component-library';
-import type { DBObjectEntry } from '@mathesar/App.d';
+import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type {
   Result as ApiRecord,
   Response as ApiRecordsResponse,
