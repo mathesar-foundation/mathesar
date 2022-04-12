@@ -1,6 +1,11 @@
 import Cookies from 'js-cookie';
 import { CancellablePromise } from '@mathesar-component-library';
+import { ApiMultiError } from './errors';
 
+/**
+ * @deprecated in favor of `RequestStatus` which also stores info about the
+ * errors.
+ */
 export enum States {
   /** Before any requests have been made */
   Idle = 'idle',
@@ -9,6 +14,11 @@ export enum States {
   Done = 'done',
   Error = 'error',
 }
+
+export type RequestStatus =
+  | { state: 'processing' }
+  | { state: 'success' }
+  | { state: 'failure'; errors: string[] };
 
 export interface UploadCompletionOpts {
   loaded: number;
