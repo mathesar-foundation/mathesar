@@ -4,6 +4,7 @@ from unittest.mock import patch
 from django.core.cache import cache
 
 import pytest
+from mathesar.api.utils import follows_json_number_spec
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.functions.exceptions import UnknownDBFunctionID
@@ -649,17 +650,47 @@ def test_record_list_group_exceptions(create_table, client, exception):
     assert response_data[0]['code'] == ErrorCodes.UnsupportedType.value
 
 
-def test_number_input_validation(create_table, client):
-    table_name = 'NASA Record List'
+@pytest.mark.parametrize("test_input, expected", [
+    ("0", True),
+    ("-0", True),
+    ("0.314", True),
+    ("-0.00314", True),
+    ("0.0314e3", True),
+    ("0.0314e+3", True),
+    ("0.0314e-3", True),
+    ("0.314e01", True),
+    ("-314", True),
+    ("-0314", False),
+    ("314", True),
+    ("0314", False),
+    ("100.04", True),
+    ("100.", False),
+    ("314e3", True),
+    ("314E+3", True),
+    ("314e-3", True),
+    ("314.0e-3", True),
+    ("314.0E+3", True),
+    ("314.0E1", True),
+    ("~2324", False)
+])
+def test_json_number_spec_validation(test_input, expected):
+    assert follows_json_number_spec(test_input) == expected
+
+
+def test_number_input_api_validation(create_table, client):
+    cache.clear()
+    table_name = 'NASA Number Input Api Validation'
     table = create_table(table_name)
-    table.add_column({"name": 'Nonce', "type": 'REAL'})
-    nonce_id = table.get_column_name_id_bidirectional_map()['Nonce']
+    column_name = 'Nonce'
+    table.add_column({"name": column_name, "type": 'REAL'})
+    nonce_id = table.get_column_name_id_bidirectional_map()[column_name]
 
     for nonce, status_code in [
-        ("34.1e+7", 201),
-        ("034.11", 400),
-        ("123.4e7", 201),
-        ("1,23", 400),
+        ("0", 201),
+        ("-0.00314", 201),
+        ("-314", 201),
+        ("-0314", 400),
+        ("314.0e-3", 201),
         ("~2324", 400),
         (2132, 201),
     ]:

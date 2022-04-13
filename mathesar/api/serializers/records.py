@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models import Column
-from mathesar.api.utils import follows_json_spec, is_number
+from mathesar.api.utils import follows_json_number_spec, is_number
 
 
 class RecordListParameterSerializer(MathesarErrorMessageMixin, serializers.Serializer):
@@ -52,7 +52,7 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
             column = Column.objects.get(id=columns_map.inverse[column_name])
             column_type = column.type
             value = data[column_name]
-            if is_number(column_type) and type(data[column_name]) is str and not follows_json_spec(value):
+            if is_number(column_type) and type(data[column_name]) is str and not follows_json_number_spec(value):
                 raise database_api_exceptions.MathesarAPIException(
                     IntegrityError,
                     status_code=status.HTTP_400_BAD_REQUEST,
