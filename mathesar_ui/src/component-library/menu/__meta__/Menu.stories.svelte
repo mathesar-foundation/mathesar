@@ -12,7 +12,7 @@
   } from '@fortawesome/free-solid-svg-icons';
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
-  import { IconRotate } from '@mathesar-component-library-dir/icon/Icon.d';
+  import { IconRotate } from '@mathesar-component-library-dir/icon/IconTypes';
   import Menu from '../Menu.svelte';
   import MenuItem from '../MenuItem.svelte';
   import MenuDivider from '../MenuDivider.svelte';

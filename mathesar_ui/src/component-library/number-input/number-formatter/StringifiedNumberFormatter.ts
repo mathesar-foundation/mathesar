@@ -1,4 +1,4 @@
-import type { ParseResult } from '@mathesar/component-library/formatted-input/InputFormatter';
+import type { ParseResult } from '@mathesar-component-library-dir/formatted-input/InputFormatter';
 import AbstractNumberFormatter from './AbstractNumberFormatter';
 import { makeFormatter } from './formatter';
 import { makeUniversalNumberParser } from './parsers';

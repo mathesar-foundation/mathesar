@@ -13,7 +13,7 @@
 
   import type { DBTablesStoreData } from '@mathesar/stores/tables';
   import type { MathesarTab } from '@mathesar/stores/tabs/types';
-  import type { SchemaEntry, TableEntry } from '@mathesar/App.d';
+  import type { SchemaEntry, TableEntry } from '@mathesar/AppTypes';
   import { TabularType } from '@mathesar/stores/table-data';
   import type { TreeItem } from '@mathesar-component-library/types';
 

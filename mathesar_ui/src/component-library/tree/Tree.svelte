@@ -8,7 +8,7 @@
   import { filterTree } from '@mathesar-component-library-dir/common/utils/filterUtils';
   import { faSearch } from '@fortawesome/free-solid-svg-icons';
   import TreeItemComponent from './TreeItem.svelte';
-  import type { TreeItem } from './Tree.d';
+  import type { TreeItem } from './TreeTypes';
 
   export let data: TreeItem[] = [];
   export let idKey = 'id';

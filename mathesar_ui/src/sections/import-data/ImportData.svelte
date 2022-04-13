@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getFileStore, Stages } from '@mathesar/stores/fileImports';
   import { Notification } from '@mathesar-component-library';
-  import type { Database, SchemaEntry } from '@mathesar/App.d';
+  import type { Database, SchemaEntry } from '@mathesar/AppTypes';
   import Preview from './preview/Preview.svelte';
   import Upload from './upload/Upload.svelte';
   import { clearErrors } from './importUtils';
