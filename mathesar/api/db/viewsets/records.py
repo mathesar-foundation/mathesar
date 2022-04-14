@@ -5,8 +5,12 @@ from rest_framework.response import Response
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
-from db.functions.exceptions import BadDBFunctionFormat, ReferencedColumnsDontExist, UnknownDBFunctionID
-from db.records.exceptions import BadGroupFormat, GroupFieldNotFound, InvalidGroupType
+from db.functions.exceptions import (
+    BadDBFunctionFormat, ReferencedColumnsDontExist, UnknownDBFunctionID
+)
+from db.records.exceptions import (
+    BadGroupFormat, GroupFieldNotFound, InvalidGroupType, UndefinedFunction
+)
 from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
@@ -39,7 +43,8 @@ class RecordViewSet(viewsets.ViewSet):
         order_by = serializer.validated_data['order_by']
         grouping = serializer.validated_data['grouping']
         filter_processed = None
-        column_ids_to_names = table.get_column_name_id_bidirectional_map().inverse
+        column_names_to_ids = table.get_column_name_id_bidirectional_map()
+        column_ids_to_names = column_names_to_ids.inverse
         if filter_unprocessed:
             table = get_table_or_404(table_pk)
             filter_processed = rewrite_db_function_spec_column_ids_to_names(
@@ -56,7 +61,7 @@ class RecordViewSet(viewsets.ViewSet):
         try:
 
             records = paginator.paginate_queryset(
-                self.get_queryset(), request, table,
+                self.get_queryset(), request, table, column_names_to_ids,
                 filters=filter_processed,
                 order_by=name_converted_order_by,
                 grouping=name_converted_group_by,
@@ -78,6 +83,12 @@ class RecordViewSet(viewsets.ViewSet):
             raise database_api_exceptions.BadGroupAPIException(
                 e,
                 field='grouping',
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except UndefinedFunction as e:
+            raise database_api_exceptions.UndefinedFunctionAPIException(
+                e,
+                details=e.args[0],
                 status_code=status.HTTP_400_BAD_REQUEST
             )
         serializer = RecordSerializer(

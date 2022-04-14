@@ -24,7 +24,7 @@ def get_table_or_404(pk):
     return table
 
 
-def process_annotated_records(record_list):
+def process_annotated_records(record_list, column_name_id_map):
 
     RESULT_IDX = 'result_indices'
 
@@ -44,10 +44,19 @@ def process_annotated_records(record_list):
         *tuple(tuple(d.values()) for d in combined_records)
     )
 
+    def _replace_column_names_with_ids(group_metadata_item):
+        try:
+            processed_group_metadata_item = {
+                column_name_id_map[k]: v for k, v in group_metadata_item.items()
+            }
+        except AttributeError:
+            processed_group_metadata_item = group_metadata_item
+        return processed_group_metadata_item
+
     if groups is not None:
         groups_by_id = {
             grp[group.GroupMetadataField.GROUP_ID.value]: {
-                k: v for k, v in grp.items()
+                k: _replace_column_names_with_ids(v) for k, v in grp.items()
                 if k != group.GroupMetadataField.GROUP_ID.value
             } | {RESULT_IDX: []}
             for grp in groups
