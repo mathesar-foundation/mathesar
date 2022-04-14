@@ -11,7 +11,7 @@ import type { Action } from './actionsTypes';
 export default function popper(
   node: HTMLElement,
   actionOpts: {
-    reference: VirtualElement;
+    reference?: VirtualElement;
     options?: Partial<Options>;
   },
 ): Action {

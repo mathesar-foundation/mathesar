@@ -32,6 +32,8 @@
   {...$$restProps}
   on:click
   on:keydown
+  on:focus
+  on:blur
 >
   <slot />
 </button>
