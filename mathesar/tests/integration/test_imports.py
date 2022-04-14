@@ -14,7 +14,7 @@ def test_import_from_clipboard(page, custom_types_schema_url):
     page.click("button:has-text('Finish Import')")
     expect(get_table_entry(page, "Table 0")).to_be_visible()
 
-    
+
 # def test_import_from_file(page, custom_types_schema_url):
 #     page.goto(custom_types_schema_url)
 #     page.click("[aria-label='New Table']")
