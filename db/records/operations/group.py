@@ -1,8 +1,7 @@
 from enum import Enum
 import json
 import logging
-from sqlalchemy import select, func, and_, cast, case, literal
-from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy import select, func, and_, case, literal
 
 from db.records import exceptions as records_exceptions
 from db.records.operations import calculation
@@ -15,6 +14,7 @@ MATHESAR_GROUP_METADATA = '__mathesar_group_metadata'
 
 class GroupMode(Enum):
     DISTINCT = 'distinct'
+    ENDPOINTS = 'endpoints'
     MAGNITUDE = 'magnitude'
     PERCENTILE = 'percentile'
 
@@ -32,11 +32,16 @@ class GroupMetadataField(Enum):
 
 class GroupBy:
     def __init__(
-            self, columns, mode=GroupMode.DISTINCT.value, num_groups=None
+            self,
+            columns,
+            mode=GroupMode.DISTINCT.value,
+            num_groups=None,
+            bound_tuples=None,
     ):
         self._columns = tuple(columns) if type(columns) != str else tuple([columns])
         self._mode = mode
         self._num_groups = num_groups
+        self._bound_tuples = bound_tuples
         self._ranged = bool(mode != GroupMode.DISTINCT.value)
 
     @property
@@ -52,6 +57,10 @@ class GroupBy:
         return self._num_groups
 
     @property
+    def bound_tuples(self):
+        return self._bound_tuples
+
+    @property
     def ranged(self):
         return self._ranged
 
@@ -62,16 +71,20 @@ class GroupBy:
                 f'mode "{self.mode}" is invalid. valid modes are: '
                 + ', '.join([f"'{gm}'" for gm in group_modes])
             )
-        if (
+        elif (
                 self.mode == GroupMode.PERCENTILE.value
                 and not type(self.num_groups) == int
         ):
             raise records_exceptions.BadGroupFormat(
-                'percentile mode requires integer num_groups'
+                f'{GroupMode.PERCENTILE.value} mode requires integer num_groups'
             )
-        if self.mode == GroupMode.MAGNITUDE.value and not len(self.columns) == 1:
+        elif self.mode == GroupMode.MAGNITUDE.value and not len(self.columns) == 1:
             raise records_exceptions.BadGroupFormat(
-                'magnitude mode only works on single columns'
+                f'{GroupMode.MAGNITUDE.value} mode only works on single columns'
+            )
+        elif self.mode == GroupMode.ENDPOINTS.value and self.bound_tuples is None:
+            raise records_exceptions.BadGroupFormat(
+                f'{GroupMode.ENDPOINTS.value} mode requires bound_tuples'
             )
 
         for col in self.columns:
@@ -123,6 +136,10 @@ def get_group_augmented_records_query(table, group_by):
     if group_by.mode == GroupMode.PERCENTILE.value:
         query = _get_percentile_range_group_select(
             table, grouping_columns, group_by.num_groups
+        )
+    elif group_by.mode == GroupMode.ENDPOINTS.value:
+        query = _get_custom_endpoints_range_group_select(
+            table, grouping_columns, group_by.bound_tuples
         )
     elif group_by.mode == GroupMode.MAGNITUDE.value:
         query = _get_tens_powers_range_group_select(table, grouping_columns)
@@ -209,7 +226,6 @@ def _get_tens_powers_range_group_select(table, grouping_columns):
 
 def _get_custom_endpoints_range_group_select(table, columns, bound_tuples_list):
     column_names = [col.name for col in columns]
-    GROUP_OBJ = 'group_obj'
     RANGE_ID = 'range_id'
     GEQ_BOUND = 'geq_bound'
     LT_BOUND = 'lt_bound'
@@ -271,7 +287,7 @@ def _get_custom_endpoints_range_group_select(table, columns, bound_tuples_list):
             geq_expr=geq_expr,
             lt_expr=lt_expr,
         )
-    ).where(ranges_cte.columns[RANGE_ID] != None)
+    ).where(ranges_cte.columns[RANGE_ID] != None)  # noqa
 
 
 def _get_percentile_range_group_select(table, columns, num_groups):
