@@ -22,6 +22,7 @@
   import Cell from '@mathesar/components/cell/Cell.svelte';
   import Null from '@mathesar/components/Null.svelte';
   import type { RequestStatus } from '@mathesar/utils/api';
+  import { States } from '@mathesar/utils/api';
   import CellErrors from './CellErrors.svelte';
 
   export let recordsData: RecordsData;
@@ -33,6 +34,7 @@
   export let column: Column;
   export let value: unknown = undefined;
 
+  $: recordsDataState = recordsData.state;
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
   $: modificationStatus = $modificationStatusMap.get(key);
@@ -89,7 +91,7 @@
     {column}
     {isActive}
     {value}
-    state={modificationStatus?.state === 'processing' ? 'loading' : 'ready'}
+    showAsSkeleton={$recordsDataState === States.Loading}
     on:movementKeyDown={moveThroughCells}
     on:activate={() => display.selectCell(row, column)}
     on:update={valueUpdated}
