@@ -1,7 +1,9 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
   import { getOutcomeOfBeforeInputEvent } from '@mathesar-component-library-dir/common/utils';
   import type { InputFormatter, ParseResult } from './InputFormatter';
+  import { getCursorPositionAfterReformat } from './formattedInputUtils';
 
   type T = $$Generic;
 
@@ -67,13 +69,22 @@
 
   $: handleParentValueChange(parentValue);
 
-  function handleChildValueChange(event: InputEvent) {
+  async function handleChildValueChange(event: InputEvent) {
     event.preventDefault();
-    const { value: userInput } = getOutcomeOfBeforeInputEvent(event);
+    const { value: userInput, cursorPosition } =
+      getOutcomeOfBeforeInputEvent(event);
+
     try {
       parseResult = formatter.parse(userInput);
       parentValue = parseResult.value;
       childText = parseResult.intermediateDisplay;
+      const newCursorPosition = getCursorPositionAfterReformat({
+        oldText: userInput,
+        oldCursorPosition: cursorPosition,
+        newText: parseResult.intermediateDisplay,
+      });
+      await tick();
+      element?.setSelectionRange(newCursorPosition, newCursorPosition);
     } catch (error) {
       onParseError({ userInput, error });
     }
