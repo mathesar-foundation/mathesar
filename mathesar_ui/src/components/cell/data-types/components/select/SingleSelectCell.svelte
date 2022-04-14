@@ -10,23 +10,26 @@
   } from '@mathesar-component-library';
   import type { ListBoxApi } from '@mathesar-component-library/types';
   import Null from '@mathesar/components/Null.svelte';
-  import CellWrapper from './common/CellWrapper.svelte';
+  import CellWrapper from '../CellWrapper.svelte';
+  import type { SingleSelectCellProps } from '../typeDefinitions';
 
   type Option = $$Generic;
+  type Value = $$Generic;
+  type $$Props = SingleSelectCellProps<Value, Option>;
+  type $$DefinedProps = Required<$$Props>;
 
   const dispatch = createEventDispatcher();
 
   const id = getGloballyUniqueId();
 
-  export let isActive = false;
-  export let value: Option | null | undefined = undefined;
-  export let disabled = false;
-  export let options: Option[] = [];
-  export let getSelectedOptionsFromValue: (
-    value: Option | null | undefined,
-  ) => Option[];
-  export let getValueFromSelectedOptions: (values: Option[]) => Option | null;
-  export let getLabel: (value: Option | null | undefined) => string = (_val) =>
+  export let isActive: $$DefinedProps['isActive'];
+  export let value: $$DefinedProps['value'] = undefined;
+  export let disabled: $$DefinedProps['disabled'];
+
+  export let options: $$DefinedProps['options'] = [];
+  export let getSelectedOptionsFromValue: $$DefinedProps['getSelectedOptionsFromValue'];
+  export let getValueFromSelectedOptions: $$DefinedProps['getValueFromSelectedOptions'];
+  export let getValueLabel: $$DefinedProps['getValueLabel'] = (_val) =>
     String(_val);
 
   let cellRef: HTMLElement;
@@ -115,7 +118,7 @@
     {#if value === null}
       <Null />
     {:else if typeof value !== 'undefined'}
-      {getLabel(value)}
+      {getValueLabel(value)}
     {/if}
 
     {#if isActive}

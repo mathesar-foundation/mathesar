@@ -2,12 +2,13 @@
   import { createEventDispatcher } from 'svelte';
   import Null from '@mathesar/components/Null.svelte';
   import CellWrapper from './CellWrapper.svelte';
+  import type { CellTypeProps } from './typeDefinitions';
 
   const dispatch = createEventDispatcher();
 
-  export let isActive = false;
-  export let value: string | null | undefined = undefined;
-  export let disabled = false;
+  export let isActive: CellTypeProps['isActive'];
+  export let value: CellTypeProps['value'];
+  export let disabled: CellTypeProps['disabled'];
   export let multiLineTruncate = false;
 
   let cellRef: HTMLElement;

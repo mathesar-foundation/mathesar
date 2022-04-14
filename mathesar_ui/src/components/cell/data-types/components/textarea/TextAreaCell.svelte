@@ -1,13 +1,16 @@
 <script lang="ts">
   import { TextArea } from '@mathesar-component-library';
-  import SteppedInputCell from './common/SteppedInputCell.svelte';
+  import SteppedInputCell from '../SteppedInputCell.svelte';
+  import type { TextAreaCellProps } from '../typeDefinitions';
 
-  export let isActive = false;
-  export let value: string | null | undefined = undefined;
-  export let disabled = false;
+  type $$Props = TextAreaCellProps;
+
+  export let isActive: $$Props['isActive'];
+  export let value: $$Props['value'];
+  export let disabled: $$Props['disabled'];
 
   // Db options
-  export let length: number | undefined = undefined;
+  export let length: $$Props['length'];
 
   function handleKeyDown(
     e: KeyboardEvent,

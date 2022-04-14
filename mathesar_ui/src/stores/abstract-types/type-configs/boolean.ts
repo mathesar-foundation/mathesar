@@ -124,7 +124,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 
 const booleanType: AbstractTypeConfiguration = {
   icon: '?',
-  input: {
+  cell: {
     type: 'boolean',
   },
   getDisplayConfig: () => ({

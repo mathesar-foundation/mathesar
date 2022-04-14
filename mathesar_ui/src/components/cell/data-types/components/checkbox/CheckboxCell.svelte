@@ -1,13 +1,16 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { Checkbox } from '@mathesar-component-library';
-  import CellWrapper from './common/CellWrapper.svelte';
+  import CellWrapper from '../CellWrapper.svelte';
+  import type { CheckBoxCellProps } from '../typeDefinitions';
+
+  type $$Props = CheckBoxCellProps;
 
   const dispatch = createEventDispatcher();
 
-  export let isActive = false;
-  export let value: boolean | null | undefined = undefined;
-  export let disabled = false;
+  export let isActive: $$Props['isActive'];
+  export let value: $$Props['value'];
+  export let disabled: $$Props['disabled'];
 
   let cellRef: HTMLElement;
   let isFirstActivated = false;

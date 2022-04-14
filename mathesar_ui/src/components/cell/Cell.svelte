@@ -14,10 +14,6 @@
   $: ({ component, props } = getCellComponentWithProps(column));
 </script>
 
-<!--
-  We need this parent div here because there's no other way to target css
-  for child components without making the styles global
--->
 <div class="sheet-cell">
   <svelte:component
     this={component}
