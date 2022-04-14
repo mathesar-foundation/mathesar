@@ -1,6 +1,6 @@
 <script lang="ts">
   import Select from '@mathesar-component-library-dir/select/Select.svelte';
-  import type { Appearance } from '@mathesar-component-library-dir/types.d';
+  import type { Appearance } from '@mathesar-component-library-dir/types';
   import {
     generateSelectOptions,
     getSelectedValue,

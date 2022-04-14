@@ -10,7 +10,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import TabComponent from './Tab.svelte';
-  import type { Tab } from './TabContainer';
+  import type { Tab } from './TabContainerTypes';
 
   const dispatch = createEventDispatcher();
   const componentId = getId();

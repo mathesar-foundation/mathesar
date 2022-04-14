@@ -12,3 +12,7 @@ class GroupFieldNotFound(FieldNotFound):
 
 class InvalidGroupType(Exception):
     pass
+
+
+class UndefinedFunction(Exception):
+    pass
