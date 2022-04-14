@@ -1,7 +1,8 @@
 from enum import Enum
 import json
 import logging
-from sqlalchemy import select, func, and_, case, literal
+from sqlalchemy import select, func, and_, cast, case, literal
+from sqlalchemy.dialects.postgresql import JSON
 
 from db.records import exceptions as records_exceptions
 from db.records.operations import calculation
@@ -223,26 +224,32 @@ def _get_custom_endpoints_range_group_select(table, columns, bound_tuples_list):
         ]
         return func.json_build_object(*key_value_list)
 
-    ranges = [
-        (
-            and_(
-                func.ROW(*columns) >= func.ROW(*bound_tuples_list[i]),
-                func.ROW(*columns) < func.ROW(*bound_tuples_list[i + 1])
-            ),
-            func.json_build_object(
-                literal(RANGE_ID),
-                i + 1,
-                literal(GEQ_BOUND),
-                _get_inner_json_object(*bound_tuples_list[i]),
-                literal(LT_BOUND),
-                _get_inner_json_object(*bound_tuples_list[i + 1]),
+    def _build_range_cases(result_expr):
+        return [
+            (
+                and_(
+                    func.ROW(*columns) >= func.ROW(*bound_tuples_list[i]),
+                    func.ROW(*columns) < func.ROW(*bound_tuples_list[i + 1])
+                ),
+                result_expr(i)
             )
-        )
-        for i in range(len(bound_tuples_list))
-    ]
+            for i in range(len(bound_tuples_list) - 1)
+        ]
     ranges_cte = select(
         *columns,
-        case(*ranges).label(GROUP_OBJ)
+        case(*_build_range_cases(lambda x: x + 1), else_=None).label(RANGE_ID),
+        case(
+            *_build_range_cases(
+                lambda x: _get_inner_json_object(bound_tuples_list[x])
+            ),
+            else_=None
+        ).label(GEQ_BOUND),
+        case(
+            *_build_range_cases(
+                lambda x: _get_inner_json_object(bound_tuples_list[x + 1])
+            ),
+            else_=None
+        ).label(LT_BOUND),
     ).cte()
 
     ranges_aggregation_cols = [
@@ -250,11 +257,11 @@ def _get_custom_endpoints_range_group_select(table, columns, bound_tuples_list):
     ]
     window_def = GroupingWindowDefinition(
         order_by=ranges_aggregation_cols,
-        partition_by=ranges_cte.columns[GROUP_OBJ][RANGE_ID]
+        partition_by=ranges_cte.columns[RANGE_ID]
     )
     group_id_expr = window_def.partition_by
-    geq_expr = ranges_cte.columns[GROUP_OBJ][GEQ_BOUND]
-    lt_expr = ranges_cte.columns[GROUP_OBJ][LT_BOUND]
+    geq_expr = ranges_cte.columns[GEQ_BOUND]
+    lt_expr = ranges_cte.columns[LT_BOUND]
     return select(
         *[col for col in ranges_cte.columns if col.name in table.columns],
         _get_group_metadata_definition(
@@ -264,7 +271,7 @@ def _get_custom_endpoints_range_group_select(table, columns, bound_tuples_list):
             geq_expr=geq_expr,
             lt_expr=lt_expr,
         )
-    )
+    ).where(ranges_cte.columns[RANGE_ID] != None)
 
 
 def _get_percentile_range_group_select(table, columns, num_groups):
