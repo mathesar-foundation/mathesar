@@ -8,16 +8,16 @@
   let classes = '';
   export { classes as class };
 
-  const { api, state } = getContext<ListBoxContext<Option>>('LISTBOX_CONTEXT');
+  const { api, state } = getContext<ListBoxContext<Option>>('LIST_BOX_CONTEXT');
   const { displayedOptions, value, focusedOptionIndex, staticProps } = state;
 
-  let listboxelement: HTMLUListElement;
+  let listBoxElement: HTMLUListElement;
 
   function scrollToFocusedItem(): void {
-    if (listboxelement) {
+    if (listBoxElement) {
       const elementInFocus: HTMLElement | null =
-        listboxelement.querySelector('.in-focus');
-      const container = listboxelement.parentElement as HTMLElement;
+        listBoxElement.querySelector('.in-focus');
+      const container = listBoxElement.parentElement as HTMLElement;
       if (elementInFocus && container) {
         if (
           elementInFocus.offsetTop + elementInFocus.clientHeight >
@@ -44,12 +44,12 @@
 </script>
 
 <ul
-  bind:this={listboxelement}
+  bind:this={listBoxElement}
   tabindex="0"
   {id}
   role="listbox"
   aria-expanded="true"
-  class={['listbox-options', $staticProps.selectionType, ...classes].join(' ')}
+  class={['list-box-options', $staticProps.selectionType, ...classes].join(' ')}
 >
   {#each $displayedOptions as option, index (option)}
     <li

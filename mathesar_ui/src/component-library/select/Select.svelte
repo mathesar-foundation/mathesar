@@ -4,7 +4,7 @@
   import {
     ListBox,
     ListBoxOptions,
-  } from '@mathesar-component-library-dir/listbox';
+  } from '@mathesar-component-library-dir/list-box';
   import { Dropdown } from '@mathesar-component-library-dir/dropdown';
   import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
   import type { Appearance } from '@mathesar-component-library-dir/types';

@@ -35,7 +35,7 @@ export { default as DropdownMenu } from './dropdown-menu/DropdownMenu.svelte';
 export { default as DynamicInput } from './dynamic-input/DynamicInput.svelte';
 export { default as FileUpload } from './file-upload/FileUpload.svelte';
 export { default as Notification } from './notification/Notification.svelte';
-export { ListBox, ListBoxOptions } from './listbox';
+export { ListBox, ListBoxOptions } from './list-box';
 export { default as Pagination } from './pagination/Pagination.svelte';
 export { default as Select } from './select/Select.svelte';
 export { default as TabContainer } from './tabs/TabContainer.svelte';
