@@ -31,9 +31,9 @@
     );
   }
 
-  function setPageSize(event: CustomEvent<number>) {
+  function setPageSize(event: CustomEvent<number | undefined>) {
     const newPageSize = event.detail;
-    if (pageSize !== newPageSize) {
+    if (typeof newPageSize !== 'undefined' && pageSize !== newPageSize) {
       $pagination = new Pagination({ page: 1, size: newPageSize });
     }
   }
@@ -64,7 +64,12 @@
         currentPage={page}
         on:change={handlePageChange}
       />
-      <Select options={pageSizeOpts} value={pageSize} on:change={setPageSize} />
+      <Select
+        triggerAppearance="plain"
+        options={pageSizeOpts}
+        value={pageSize}
+        on:change={setPageSize}
+      />
     {/if}
   </div>
 </div>
