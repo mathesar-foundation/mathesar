@@ -9,7 +9,7 @@ from db.tables.operations.create import create_string_column_table
 from db.tables.operations.select import get_oid_from_table
 from db.tables.operations.drop import drop_table
 from mathesar.errors import InvalidTableError
-from db import constants
+from db.constants import ID, ID_ORIGINAL, COLUMN_NAME_TEMPLATE
 from psycopg2.errors import IntegrityError, DataError
 
 from mathesar.reflection import reflect_columns_from_table
@@ -100,7 +100,7 @@ def get_sv_reader(file, header, dialect=None):
         reader = csv.DictReader(file)
     if not header:
         reader.fieldnames = [
-            f"column_{i}" for i in range(len(reader.fieldnames))
+            f"{COLUMN_NAME_TEMPLATE}{i}" for i in range(len(reader.fieldnames))
         ]
         file.seek(0)
 
@@ -116,8 +116,9 @@ def create_db_table_from_data_file(data_file, name, schema):
     encoding = get_file_encoding(data_file.file)
     with open(sv_filename, 'rb') as sv_file:
         sv_reader = get_sv_reader(sv_file, header, dialect=dialect)
-        column_names = sv_reader.fieldnames
-        column_names_alt = [fieldname if fieldname != constants.ID else constants.ID_ORIGINAL for fieldname in sv_reader.fieldnames]
+        column_names = [column_name.strip() for column_name in sv_reader.fieldnames]
+        column_names = [f"{COLUMN_NAME_TEMPLATE}{i}" if name == '' else name for i, name in enumerate(column_names)]
+        column_names_alt = [fieldname if fieldname != ID else ID_ORIGINAL for fieldname in column_names]
         table = create_string_column_table(
             name=name,
             schema=schema.name,

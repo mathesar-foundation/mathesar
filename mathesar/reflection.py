@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Q
 
-from db.columns.operations.select import get_column_indexes_from_table
+from db.columns.operations.select import get_column_attnums_from_table
 from db.constraints.operations.select import get_constraints_with_oids
 from db.schemas.operations.select import get_mathesar_schemas_with_oids
 from db.tables.operations.select import get_table_oids_from_schema
@@ -69,13 +69,14 @@ def reflect_tables_from_schema(schema):
 def reflect_columns_from_table(table):
     attnums = {
         column['attnum']
-        for column in get_column_indexes_from_table(table.oid, table.schema._sa_engine)
+        for column in get_column_attnums_from_table(table.oid, table.schema._sa_engine)
     }
     for attnum in attnums:
         column, created = models.Column.current_objects.get_or_create(attnum=attnum,
                                                                       table=table,
                                                                       defaults={'display_options': None})
         if not created and column.display_options:
+            # If the type of column has changed, existing display options won't be valid anymore.
             serializer = DisplayOptionsMappingSerializer(data=column.display_options,
                                                          context={DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY: str(column.plain_type)})
             if not serializer.is_valid(False):

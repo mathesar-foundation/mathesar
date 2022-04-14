@@ -3,7 +3,7 @@ import json
 import pytest
 from unittest.mock import patch
 from django.core.cache import cache
-from sqlalchemy import Column, Integer, String, MetaData, select, Boolean, TIMESTAMP
+from sqlalchemy import Column, Integer, String, MetaData, Text, select, Boolean, TIMESTAMP
 from sqlalchemy import Table as SATable
 
 from db.columns.operations.alter import alter_column_type
@@ -14,6 +14,7 @@ from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models import Column as ServiceLayerColumn
 from mathesar.tests.api.test_table_api import check_columns_response
+from db.constants import COLUMN_NAME_TEMPLATE
 
 engine_with_types = fixtures.engine_with_types
 engine_email_type = fixtures.engine_email_type
@@ -55,11 +56,17 @@ def column_test_table_with_service_layer_options(patent_schema):
         Column("mycolumn0", Integer, primary_key=True),
         Column("mycolumn1", Boolean),
         Column("mycolumn2", Integer),
-        Column("mycolumn4", TIMESTAMP),
+        Column("mycolumn3", Text),
+        Column("mycolumn4", Text),
+        Column("mycolumn5", Text),
+        Column("mycolumn6", TIMESTAMP),
     ]
     column_data_list = [{},
-                        {'display_options': {'input': "dropdown", 'use_custom_labels': False}},
+                        {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
                         {'display_options': {"show_as_percentage": True, "locale": "en_US"}},
+                        {},
+                        {},
+                        {},
                         {'display_options': {'format': 'YYYY-MM-DD hh:mm'}}]
     db_table = SATable(
         "anewtable",
@@ -90,7 +97,6 @@ def test_column_list(column_test_table, client):
             'name': 'mycolumn0',
             'type': 'INTEGER',
             'type_options': None,
-            'index': 0,
             'nullable': False,
             'primary_key': True,
             'display_options': None,
@@ -109,7 +115,6 @@ def test_column_list(column_test_table, client):
             'name': 'mycolumn1',
             'type': 'INTEGER',
             'type_options': None,
-            'index': 1,
             'nullable': False,
             'primary_key': False,
             'display_options': None,
@@ -125,7 +130,6 @@ def test_column_list(column_test_table, client):
             'name': 'mycolumn2',
             'type': 'INTEGER',
             'type_options': None,
-            'index': 2,
             'nullable': True,
             'primary_key': False,
             'display_options': None,
@@ -144,7 +148,6 @@ def test_column_list(column_test_table, client):
             'name': 'mycolumn3',
             'type': 'VARCHAR',
             'type_options': None,
-            'index': 3,
             'nullable': True,
             'primary_key': False,
             'display_options': None,
@@ -284,8 +287,8 @@ _too_long_string = "x" * 256
 
 
 create_display_options_invalid_test_list = [
-    ("BOOLEAN", {"input": "invalid", "use_custom_columns": False}),
-    ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"yes": "yes", "1": "no"}}),
+    ("BOOLEAN", {"input": "invalid"}),
+    ("BOOLEAN", {"input": "checkbox", "custom_labels": {"yes": "yes", "1": "no"}}),
     ("NUMERIC", {"show_as_percentage": "wrong value type"}),
     ("DATE", {'format': _too_long_string}),
     ("TIMESTAMP WITH TIME ZONE", {'format': []}),
@@ -389,6 +392,49 @@ def test_column_create_some_parameters(column_test_table, client):
     assert response_data['field'] == "type"
 
 
+def test_column_create_no_name_parameter(column_test_table, client):
+    cache.clear()
+    type_ = "BOOLEAN"
+    num_columns = len(column_test_table.sa_columns)
+    generated_name = f"{COLUMN_NAME_TEMPLATE}{num_columns}"
+    data = {
+        "type": type_
+    }
+    response = client.post(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/", data=data
+    )
+    assert response.status_code == 201
+    new_columns_response = client.get(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/"
+    )
+    assert new_columns_response.json()["count"] == num_columns + 1
+    actual_new_col = new_columns_response.json()["results"][-1]
+    assert actual_new_col["name"] == generated_name
+    assert actual_new_col["type"] == type_
+
+
+def test_column_create_name_parameter_empty(column_test_table, client):
+    cache.clear()
+    name = ""
+    type_ = "BOOLEAN"
+    num_columns = len(column_test_table.sa_columns)
+    generated_name = f"{COLUMN_NAME_TEMPLATE}{num_columns}"
+    data = {
+        "name": name, "type": type_
+    }
+    response = client.post(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/", data=data
+    )
+    assert response.status_code == 201
+    new_columns_response = client.get(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/"
+    )
+    assert new_columns_response.json()["count"] == num_columns + 1
+    actual_new_col = new_columns_response.json()["results"][-1]
+    assert actual_new_col["name"] == generated_name
+    assert actual_new_col["type"] == type_
+
+
 def test_column_update_name(column_test_table, client):
     cache.clear()
     name = "updatedname"
@@ -409,15 +455,32 @@ def test_column_update_name(column_test_table, client):
 def test_column_update_display_options(column_test_table_with_service_layer_options, client):
     cache.clear()
     table, columns = column_test_table_with_service_layer_options
-    column = _get_columns_by_name(table, ['mycolumn1'])[0]
+    column_indexes = [2, 3, 4, 5]
+    for column_index in column_indexes:
+        colum_name = f"mycolumn{column_index}"
+        column = _get_columns_by_name(table, [colum_name])[0]
+        column_id = column.id
+        display_options = {"input": "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}
+        display_options_data = {"display_options": display_options, 'type': 'BOOLEAN', 'type_options': {}}
+        response = client.patch(
+            f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
+            display_options_data,
+        )
+        assert response.json()["display_options"] == display_options
+
+
+def test_column_update_type_with_existing_display_options(column_test_table_with_service_layer_options, client):
+    cache.clear()
+    table, columns = column_test_table_with_service_layer_options
+    colum_name = "mycolumn2"
+    column = _get_columns_by_name(table, [colum_name])[0]
     column_id = column.id
-    display_options = {"input": "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}
-    display_options_data = {"display_options": display_options}
+    display_options_data = {'type': 'BOOLEAN'}
     response = client.patch(
         f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
         display_options_data,
     )
-    assert response.json()["display_options"] == display_options
+    assert response.json()["display_options"] is None
 
 
 def test_column_display_options_type_on_reflection(column_test_table,
@@ -445,6 +508,22 @@ def test_column_invalid_display_options_type_on_reflection(column_test_table_wit
         f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
     )
     assert response.json()["display_options"] is None
+
+
+def test_column_alter_same_type_display_options(column_test_table_with_service_layer_options,
+                                                client, engine):
+    cache.clear()
+    table, columns = column_test_table_with_service_layer_options
+    column_index = 2
+    column = columns[column_index]
+    pre_alter_display_options = column.display_options
+    with engine.begin() as conn:
+        alter_column_type(table.oid, column.name, engine, conn, 'numeric')
+    column_id = column.id
+    response = client.get(
+        f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
+    )
+    assert response.json()["display_options"] == pre_alter_display_options
 
 
 def test_column_update_default(column_test_table, client):
@@ -616,11 +695,10 @@ def test_column_update_returns_table_dependent_fields(column_test_table, client)
     column = _get_columns_by_name(column_test_table, ['mycolumn1'])[0]
     response = client.patch(
         f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",
-        data=json.dumps(data),
-        content_type="application/json"
+        data=data,
     )
     assert response.json()["default"] is not None
-    assert response.json()["index"] is not None
+    assert response.json()["id"] is not None
 
 
 @pytest.mark.parametrize("type_options", invalid_type_options)
@@ -754,6 +832,4 @@ def test_column_duplicate_no_parameters(column_test_table, client):
     response_data = response.json()
     assert response.status_code == 400
     assert response_data[0]["message"] == "This field is required."
-    assert response_data[0]["field"] == "name"
-    assert response_data[1]["message"] == "This field is required."
-    assert response_data[1]["field"] == "type"
+    assert response_data[0]["field"] == "type"

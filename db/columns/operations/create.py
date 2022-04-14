@@ -18,9 +18,14 @@ from db.constraints.operations.select import get_column_constraints
 from db.constraints import utils as constraint_utils
 from db.tables.operations.select import reflect_table_from_oid
 from db.types.base import PostgresType, get_db_type_enum_from_id, get_db_type_enum_from_class
+from db import constants
 
 
 def create_column(engine, table_oid, column_data):
+    table = reflect_table_from_oid(table_oid, engine)
+    column_name = column_data.get(NAME, '').strip()
+    if column_name == '':
+        column_data[NAME] = gen_col_name(table)
     column_type_id = column_data.get(TYPE, column_data.get("type"))
     column_type_options = column_data.get("type_options", {})
     column_nullable = column_data.get(NULLABLE, True)
@@ -65,6 +70,13 @@ def create_column(engine, table_oid, column_data):
         reflect_table_from_oid(table_oid, engine).columns[column_data[NAME]],
         engine
     )
+
+
+def gen_col_name(table):
+    base_name = constants.COLUMN_NAME_TEMPLATE
+    col_num = len(table.c)
+    name = f'{base_name}{col_num}'
+    return name
 
 
 def _gen_col_name(table, column_name):

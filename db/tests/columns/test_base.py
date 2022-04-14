@@ -2,7 +2,7 @@ import re
 
 import pytest
 from sqlalchemy import (
-    String, Integer, ForeignKey, Table, MetaData, Numeric, VARCHAR, CHAR, NUMERIC
+    String, Integer, ForeignKey, VARCHAR, CHAR, NUMERIC
 )
 
 from db.columns.base import MathesarColumn
@@ -11,7 +11,6 @@ from db.columns.utils import get_default_mathesar_column_list
 from db.tests.types import fixtures
 from db.types.custom import email, datetime
 from db.types.base import MathesarCustomType
-
 
 engine_with_types = fixtures.engine_with_types
 temporary_testing_schema = fixtures.temporary_testing_schema
@@ -160,55 +159,18 @@ from db.types.base import PostgresType
 def test_MC_valid_target_types_default_engine(engine):
     mc = MathesarColumn('testable_col', PostgresType.CHARACTER_VARYING.get_sa_class(engine))
     mc.add_engine(engine)
+    assert mc.valid_target_types is not None
     assert PostgresType.CHARACTER_VARYING in mc.valid_target_types
 
 
 def test_MC_valid_target_types_custom_engine(engine_with_types):
     mc = MathesarColumn('testable_col', String)
     mc.add_engine(engine_with_types)
+    assert mc.valid_target_types is not None
     assert MathesarCustomType.EMAIL in mc.valid_target_types
 
 
-def test_MC_column_index_when_no_engine():
-    mc = MathesarColumn('testable_col', String)
-    assert mc.column_index is None
-
-
-def test_MC_column_index_when_no_table(engine):
-    mc = MathesarColumn('testable_col', String)
-    mc.add_engine(engine)
-    assert mc.column_index is None
-
-
-def test_MC_column_index_when_no_db_table(engine):
-    mc = MathesarColumn('testable_col', String)
-    mc.add_engine(engine)
-    table = Table('atable', MetaData(), mc)
-    assert mc.table == table and mc.column_index is None
-
-
-def test_MC_column_index_single(engine_with_schema):
-    engine, schema = engine_with_schema
-    mc = MathesarColumn('testable_col', String)
-    mc.add_engine(engine)
-    metadata = MetaData(bind=engine, schema=schema)
-    Table('asupertable', metadata, mc).create()
-    assert mc.column_index == 0
-
-
-def test_MC_column_index_multiple(engine_with_schema):
-    engine, schema = engine_with_schema
-    mc_1 = MathesarColumn('testable_col', String)
-    mc_2 = MathesarColumn('testable_col2', String)
-    mc_1.add_engine(engine)
-    mc_2.add_engine(engine)
-    metadata = MetaData(bind=engine, schema=schema)
-    Table('asupertable', metadata, mc_1, mc_2).create()
-    assert mc_1.column_index == 0
-    assert mc_2.column_index == 1
-
-
-def test_MC_db_type_no_opts(engine):
+def test_MC_plain_type_no_opts(engine):
     mc = MathesarColumn('acolumn', VARCHAR)
     mc.add_engine(engine)
     assert mc.db_type == PostgresType.CHARACTER_VARYING

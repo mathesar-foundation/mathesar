@@ -6,7 +6,7 @@ import type {
   TabularDataProps,
   MetaProps,
 } from '@mathesar/stores/table-data/types';
-import type { Database, DBObjectEntry, SchemaEntry } from '@mathesar/App.d';
+import type { Database, DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
 import {
   getTabularContent,
   removeTabularContent,
@@ -18,7 +18,7 @@ import {
   getAllImportDetailsForSchema,
 } from '@mathesar/stores/fileImports';
 import type { FileImportInfo } from '@mathesar/stores/fileImports';
-import { collapse, unite } from '@mathesar/utils/storeUtils';
+import { collapse, unite } from '@mathesar-component-library';
 import type { SavableTabData, TabularTabReference } from './tabDataSaver';
 import {
   getSavedTabData,

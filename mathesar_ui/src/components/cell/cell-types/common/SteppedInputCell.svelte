@@ -113,7 +113,7 @@
     <div class="content">
       {#if value === null}
         <Null />
-      {:else if value}
+      {:else if value || typeof value !== 'undefined'}
         {value}
       {/if}
     </div>
@@ -138,7 +138,7 @@
 
     &.is-edit-mode {
       padding: 0px;
-      box-shadow: 0 0 0 3px #428af4 !important;
+      box-shadow: 0 0 0 3px #428af4, 0 0 8px #000000 !important;
     }
 
     &:not(.is-active) {

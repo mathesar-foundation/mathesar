@@ -1,4 +1,3 @@
-import type { SelectOption } from '@mathesar-component-library/types';
 import type {
   FilterCombination as ApiFilterCombination,
   GetRequestParams,
@@ -54,7 +53,7 @@ function makeFilterEntry(terseFilterEntry: TerseFilterEntry): FilterEntry {
   };
 }
 
-export interface FilterCombination extends SelectOption {
+export interface FilterCombination {
   readonly id: ApiFilterCombination;
   readonly label: string;
 }

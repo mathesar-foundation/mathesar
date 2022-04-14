@@ -30,3 +30,26 @@ def test_convert_text_col_of_num_to_num_col(page, go_to_table_with_numbers_in_te
     page.click("button:has-text('Number')")
     selected_type = ".section .type-list li.selected"
     expect(page.locator(selected_type)).to_contain_text("Number")
+
+
+def test_group_by_column(page, go_to_patents_data_table):
+    # selectors
+    selector_column_header = ".table-content .header .cell:has-text('Center')"
+    selector_group_header = "div.groupheader >> span >> nth=0"
+    # locators
+    locator_group_header = page.locator(selector_group_header)
+    locator_group_count = page.locator("text=count: 138")
+    # group by the column "Center"
+    page.click(selector_column_header)
+    page.click(".dropdown button:has-text('Group by column')")
+    # verify the count of the first listed group and its member
+    expect(locator_group_count).to_be_visible()
+    expect(locator_group_header).to_contain_text(': NASA Ames Research Center')
+    expect(page.locator("button:has-text('Group (1)')")).to_be_visible()
+    # ungroup
+    page.click(selector_column_header)
+    page.click("button:has-text('Remove grouping')")
+    # verify
+    expect(locator_group_count).not_to_be_visible()
+    expect(locator_group_header).not_to_be_visible()
+    expect(page.locator("button:has-text('Group')")).to_be_visible()

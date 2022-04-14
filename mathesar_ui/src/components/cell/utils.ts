@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
-import type { Column } from '@mathesar/stores/table-data/types.d';
-import type { ComponentAndProps } from '@mathesar/component-library/types';
+import type { Column } from '@mathesar/stores/table-data/types';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
 import {
   currentDbAbstractTypes,
   getAbstractTypeForDbType,

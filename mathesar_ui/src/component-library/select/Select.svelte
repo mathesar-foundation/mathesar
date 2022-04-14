@@ -1,29 +1,17 @@
-<!--
-  @component
-
-  **NOTICE** This component will eventually be redesigned, with its props
-  behaving more like `SimpleSelect`.
-
-  https://github.com/centerofci/mathesar/issues/1099
--->
 <script lang="ts">
   import { createEventDispatcher, tick } from 'svelte';
   import { Dropdown } from '@mathesar-component-library';
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
-  import type { Appearance } from '@mathesar-component-library/types';
-  import type { SelectOption } from './Select.d';
+  import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
+  import type { Appearance } from '@mathesar-component-library-dir/types';
 
   const dispatch = createEventDispatcher();
+
+  type Option = $$Generic;
 
   export let id: string | undefined = undefined;
 
   export let disabled = false;
-
-  // DISCUSS: Maybe valueKey = 'value' is a better term to use than idKey
-  /**
-   * Specifies the key on which the options ID is stored.
-   */
-  export let idKey = 'id';
 
   /**
    * Specifies the key on which the options label is stored.
@@ -34,15 +22,9 @@
    * List of options to select from. Must be an array of SelectOption.
    * @required
    */
-  export let options: SelectOption[] = [];
+  export let options: Option[] = [];
 
-  /**
-   * Currently selected option.
-   *
-   * TODO: convert this to use undefined instead of null or explain why we're
-   * using null here.
-   */
-  export let value: SelectOption | null = null;
+  export let value: Option | undefined = undefined;
 
   /**
    * Classes to apply to the content (each of the options).
@@ -64,30 +46,43 @@
    */
   export let ariaLabel: string | undefined = undefined;
 
+  export let getLabel: (value: Option, labelKey?: string) => string =
+    defaultGetLabel;
+
+  /**
+   * By default, options will be compared by equality. If you're using objects as
+   * options, you can supply a custom function here to compare them.
+   *
+   * For example:
+   *
+   * ```ts
+   * valuesAreEqual={(a, b) => a.id === b.id}
+   * ```
+   */
+  export let valuesAreEqual: (
+    optionToCompare: Option,
+    selectedOption: Option | undefined,
+  ) => boolean = (a, b) => a === b;
+
   let isOpen = false;
   let currentIndex = 0;
   let parentHoverElem: HTMLElement;
 
-  function setValue(opt: SelectOption | null) {
+  function setValue(opt?: Option) {
     value = opt;
-    dispatch('change', {
-      value, // TODO: Change this to reflect value within option
-      option: value,
-    });
+    dispatch('change', value);
     isOpen = false;
   }
 
-  function setOptions(opts: SelectOption[]) {
+  function setOptions(opts: Option[]) {
     if (opts.length > 0) {
       if (!value) {
         setValue(opts[0]);
-      } else if (
-        !opts.find((entry) => value && entry[idKey] === value[idKey])
-      ) {
+      } else if (!opts.find((entry) => value && valuesAreEqual(entry, value))) {
         setValue(opts[0]);
       }
     } else {
-      setValue(null);
+      setValue(undefined);
     }
   }
 
@@ -113,7 +108,7 @@
   }
 
   function setSelectedItem() {
-    const index = options.findIndex((e) => e[idKey] === value?.[idKey]);
+    const index = options.findIndex((opt) => valuesAreEqual(opt, value));
     if (index > -1) {
       currentIndex = index;
     }
@@ -149,11 +144,7 @@
         case 'Enter':
           e.preventDefault();
           if (options.length === 0) break;
-          value = options[currentIndex];
-          dispatch('change', {
-            value,
-          });
-          isOpen = !isOpen;
+          setValue(options[currentIndex]);
           break;
         default:
           break;
@@ -190,7 +181,11 @@
   on:open={setSelectedItem}
 >
   <svelte:fragment slot="trigger">
-    {value?.[labelKey]}
+    {#if typeof value !== 'undefined'}
+      {getLabel(value, labelKey)}
+    {:else}
+      No option selected
+    {/if}
   </svelte:fragment>
 
   <svelte:fragment slot="content">
@@ -201,14 +196,14 @@
       role="listbox"
       aria-expanded="true"
     >
-      {#each options as option (option[idKey])}
+      {#each options as option (option)}
         <li
           role="option"
-          class:selected={value && option[idKey] === value[idKey]}
-          class:hovered={option[idKey] === options[currentIndex]?.[idKey]}
+          class:selected={value && valuesAreEqual(option, value)}
+          class:hovered={valuesAreEqual(option, options[currentIndex])}
           on:click={() => setValue(option)}
         >
-          <span>{option[labelKey]}</span>
+          <span>{getLabel(option, labelKey)}</span>
         </li>
       {/each}
     </ul>

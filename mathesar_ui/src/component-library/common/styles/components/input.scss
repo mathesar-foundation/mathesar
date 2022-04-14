@@ -19,10 +19,10 @@
   }
 
   &:disabled {
-    background: #efefef;
+    background: var(--input-disabled-background);
   }
 
   &.has-error {
-    background: #fde9e9;
+    background: var(--danger-background-color);
   }
 }

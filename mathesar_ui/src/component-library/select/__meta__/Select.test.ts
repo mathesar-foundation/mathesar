@@ -180,3 +180,57 @@ test('hide select dropdown by pressing ESC', async () => {
   const selectOption2 = queryByRole('listbox');
   expect(selectOption2).not.toBeInTheDocument();
 });
+
+test('list scrolls automatically to display the currently selected option', async () => {
+  const options = [];
+  for (let i = 1; i < 10; i += 1) {
+    options.push({ id: i, label: `Option ${i}` });
+  }
+
+  const { getByRole, getAllByRole } = render(Select, {
+    props: {
+      options,
+      triggerAppearance: 'default',
+    },
+  });
+
+  // options are only rendered when the button is clicked
+  const selectBtn = getByRole('button');
+  await fireEvent.click(selectBtn);
+
+  // scrolling through the list to reach second last element
+  Array(7).forEach(() => async () => {
+    await fireEvent.keyDown(selectBtn, {
+      key: 'ArrowDown',
+      code: 'ArrowDown',
+    });
+    await fireEvent.keyUp(selectBtn, { key: 'ArrowDown', code: 'ArrowDown' });
+  });
+
+  // select the option
+  await fireEvent.keyDown(selectBtn, { key: 'Enter', code: 'Enter' });
+  await fireEvent.keyUp(selectBtn, { key: 'Enter', code: 'Enter' });
+
+  // reopen the dropdown
+  await fireEvent.click(selectBtn);
+
+  // obtain dropdown container
+  const selectUl = getByRole('listbox');
+  const dropdownContainer: HTMLElement | null = selectUl?.parentElement;
+
+  // second last element obtained
+  const optionElementList = getAllByRole('option');
+  const optionElement = optionElementList[7];
+
+  expect(dropdownContainer).toBeInTheDocument();
+  expect(optionElement.offsetTop).toBeGreaterThanOrEqual(
+    dropdownContainer ? dropdownContainer.scrollTop : 0,
+  );
+  expect(
+    optionElement.offsetTop + optionElement.clientHeight,
+  ).toBeLessThanOrEqual(
+    dropdownContainer
+      ? dropdownContainer.scrollTop + dropdownContainer.clientHeight
+      : 0,
+  );
+});

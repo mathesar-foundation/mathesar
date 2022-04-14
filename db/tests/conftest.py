@@ -19,6 +19,7 @@ URIS_SQL = os.path.join(RESOURCES, "uris_create.sql")
 TIMES_SQL = os.path.join(RESOURCES, "times_create.sql")
 BOOLEANS_SQL = os.path.join(RESOURCES, "booleans_create.sql")
 FILTER_SORT_SQL = os.path.join(RESOURCES, "filter_sort_create.sql")
+MAGNITUDE_SQL = os.path.join(RESOURCES, "magnitude_testing_create.sql")
 
 
 @pytest.fixture
@@ -96,6 +97,19 @@ def engine_with_filter_sort(engine_with_schema):
     return engine, schema
 
 
+@pytest.fixture
+def engine_with_magnitude(engine_with_schema):
+    engine, schema = engine_with_schema
+    _add_custom_types_to_engine(engine)
+    install.install_mathesar_on_database(engine)
+    with engine.begin() as conn, open(MAGNITUDE_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    yield engine, schema
+    with engine.begin() as conn:
+        conn.execute(DropSchema(base.SCHEMA, cascade=True, if_exists=True))
+
+
 @pytest.fixture(scope='session')
 def roster_table_name():
     return "Roster"
@@ -104,6 +118,11 @@ def roster_table_name():
 @pytest.fixture(scope='session')
 def uris_table_name():
     return "uris"
+
+
+@pytest.fixture(scope='session')
+def magnitude_table_name():
+    return "magnitude_testing"
 
 
 @pytest.fixture(scope='session')
@@ -166,4 +185,12 @@ def roster_table_obj(engine_with_roster, roster_table_name):
     engine, schema = engine_with_roster
     metadata = MetaData(bind=engine)
     table = Table(roster_table_name, metadata, schema=schema, autoload_with=engine)
+    return table, engine
+
+
+@pytest.fixture
+def magnitude_table_obj(engine_with_magnitude, magnitude_table_name):
+    engine, schema = engine_with_magnitude
+    metadata = MetaData(bind=engine)
+    table = Table(magnitude_table_name, metadata, schema=schema, autoload_with=engine)
     return table, engine

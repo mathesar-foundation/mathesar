@@ -1,6 +1,6 @@
 <script lang="ts">
   import Select from '@mathesar-component-library-dir/select/Select.svelte';
-  import type { Appearance } from '@mathesar-component-library-dir/types.d';
+  import type { Appearance } from '@mathesar-component-library-dir/types';
   import {
     generateSelectOptions,
     getSelectedValue,
@@ -9,7 +9,8 @@
   import type {
     DynamicInputDataType,
     DynamicInputSelectElement,
-  } from './types.d';
+    EnumSelectOption,
+  } from './types';
 
   export let dataType: DynamicInputDataType;
   export let enumValues: unknown[] | undefined = undefined;
@@ -22,13 +23,12 @@
 
   // TODO: Handle indeterminate state for boolean
 
-  function onChange(e: CustomEvent<{ option: { value: unknown } }>) {
-    value = e.detail?.option.value;
+  function onChange(e: CustomEvent<EnumSelectOption>) {
+    value = e.detail?.value;
   }
 </script>
 
 <Select
-  idKey="value"
   {...$$restProps}
   {triggerAppearance}
   options={selectOptions}

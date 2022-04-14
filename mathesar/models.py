@@ -1,5 +1,3 @@
-from typing import Any
-
 from bidict import bidict
 from django.contrib.auth.models import User
 from django.core.cache import cache
@@ -168,6 +166,11 @@ class Table(DatabaseObject):
     schema = models.ForeignKey('Schema', on_delete=models.CASCADE,
                                related_name='tables')
     import_verified = models.BooleanField(blank=True, null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["oid", "schema"], name="unique_table")
+        ]
 
     def validate_unique(self, exclude=None):
         # Ensure oid is unique on db level
@@ -347,7 +350,7 @@ class Column(ReflectionManagerMixin, BaseModel):
     def __str__(self):
         return f"{self.__class__.__name__}: {self.table_id}-{self.attnum}"
 
-    def __getattribute__(self, name: str) -> Any:
+    def __getattribute__(self, name):
         try:
             return super().__getattribute__(name)
         except AttributeError:

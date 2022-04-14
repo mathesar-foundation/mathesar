@@ -211,7 +211,7 @@ known_db_types = frozenset.union(_known_vanilla_db_types, _known_custom_db_types
 
 
 # Origin: https://www.python.org/dev/peps/pep-0616/#id17
-def _remove_prefix(self: str, prefix: str, /) -> str:
+def _remove_prefix(self, prefix, /):
     """
     This will remove the passed prefix, if it's there.
     Otherwise, it will return the string unchanged.
