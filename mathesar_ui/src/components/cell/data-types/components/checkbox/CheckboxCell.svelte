@@ -9,7 +9,7 @@
   const dispatch = createEventDispatcher();
 
   export let isActive: $$Props['isActive'];
-  export let value: $$Props['value'];
+  export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
 
   let cellRef: HTMLElement;

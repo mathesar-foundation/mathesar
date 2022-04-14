@@ -2,7 +2,7 @@
   import { tick } from 'svelte';
   import type { CellTypeProps } from './typeDefinitions';
 
-  export let element: HTMLElement;
+  export let element: HTMLElement | undefined = undefined;
 
   export let isActive: CellTypeProps['isActive'];
   export let disabled: CellTypeProps['disabled'];

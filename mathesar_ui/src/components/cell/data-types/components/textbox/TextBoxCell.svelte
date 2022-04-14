@@ -6,11 +6,11 @@
   type $$Props = TextBoxCellProps;
 
   export let isActive: $$Props['isActive'];
-  export let value: $$Props['value'];
+  export let value: $$Props['value'] = undefined;
   export let disabled: $$Props['disabled'];
 
   // Db options
-  export let length: $$Props['length'];
+  export let length: $$Props['length'] = undefined;
 </script>
 
 <SteppedInputCell
