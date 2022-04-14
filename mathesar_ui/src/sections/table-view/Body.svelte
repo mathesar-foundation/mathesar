@@ -51,6 +51,12 @@
 
   function checkAndResetActiveCell(e: Event) {
     const target = e.target as HTMLElement;
+    // Use this class for elements attached out of cell element
+    // which are part of cell interaction
+    if (target.closest('.retain-active-cell')) {
+      return;
+    }
+
     const targetMissing = !document.body.contains(target);
     let clearActiveCell = false;
 

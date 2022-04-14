@@ -93,7 +93,7 @@
 
   function handleDropdownClose(api: ListBoxApi<Option>) {
     api.close();
-    dispatch('activate');
+    cellRef?.focus();
   }
 </script>
 
@@ -134,7 +134,7 @@
     trigger={cellRef}
     {isOpen}
     on:close={() => handleDropdownClose(api)}
-    class="single-select-cell-dropdown"
+    class="single-select-cell-dropdown retain-active-cell"
   >
     <ListBoxOptions {id} />
   </AttachableDropdown>
