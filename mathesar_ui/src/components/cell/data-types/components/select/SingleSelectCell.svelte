@@ -115,14 +115,18 @@
     on:click={() => checkAndToggle(api)}
     on:keydown={(e) => handleKeyDown(e, api, isOpen)}
   >
-    {#if value === null}
-      <Null />
-    {:else if typeof value !== 'undefined'}
-      {getValueLabel(value)}
-    {/if}
+    <div class="value" class:active={isActive}>
+      {#if value === null}
+        <Null />
+      {:else if typeof value !== 'undefined'}
+        {getValueLabel(value)}
+      {/if}
+    </div>
 
     {#if isActive}
-      <Icon data={faAngleDown} />
+      <div class="icon">
+        <Icon data={faAngleDown} />
+      </div>
     {/if}
   </CellWrapper>
 
@@ -130,7 +134,27 @@
     trigger={cellRef}
     {isOpen}
     on:close={() => handleDropdownClose(api)}
+    class="single-select-cell-dropdown"
   >
     <ListBoxOptions {id} />
   </AttachableDropdown>
 </ListBox>
+
+<style lang="scss">
+  // This needs to be global since we do not have actual dom
+  // elements in this component
+  :global(.dropdown.content.single-select-cell-dropdown) {
+    border: 1px solid #ccc;
+    max-width: 250px;
+  }
+
+  .value {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .icon {
+    flex: 0 0 auto;
+  }
+</style>
