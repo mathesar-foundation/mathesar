@@ -20,7 +20,6 @@
 
   export let isActive = false;
   export let value: Option | null | undefined = undefined;
-  export let readonly = false;
   export let disabled = false;
   export let options: Option[] = [];
   export let getSelectedOptionsFromValue: (
@@ -68,7 +67,7 @@
 
     switch (e.key) {
       case 'Enter':
-        if (!disabled && !readonly) {
+        if (!disabled) {
           api.handleKeyDown(e);
         }
         break;
@@ -108,7 +107,6 @@
     aria-controls={id}
     aria-haspopup="listbox"
     {isActive}
-    {readonly}
     {disabled}
     on:mousedown={handleMouseDown}
     on:click={() => checkAndToggle(api)}

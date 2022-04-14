@@ -77,7 +77,7 @@ function getBooleanCellComponentAndProps(column: Column): ComponentAndProps {
       },
     };
   }
-  return { component: CheckboxCell, props: displayOptions };
+  return { component: CheckboxCell, props: {} };
 }
 
 export function getCellComponentWithProps(column: Column): ComponentAndProps {

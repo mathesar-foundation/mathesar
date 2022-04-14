@@ -7,7 +7,6 @@
 
   export let isActive = false;
   export let value: boolean | null | undefined = undefined;
-  export let readonly = false;
   export let disabled = false;
 
   let cellRef: HTMLElement;
@@ -41,13 +40,7 @@
   }
 
   function checkAndToggle(e: Event) {
-    if (
-      !disabled &&
-      !readonly &&
-      isActive &&
-      e.target === cellRef &&
-      !isFirstActivated
-    ) {
+    if (!disabled && isActive && e.target === cellRef && !isFirstActivated) {
       value = !value;
       dispatchUpdate();
     }
@@ -66,7 +59,6 @@
 <CellWrapper
   bind:element={cellRef}
   {isActive}
-  {readonly}
   {disabled}
   on:keydown={handleWrapperKeyDown}
   on:click={checkAndToggle}

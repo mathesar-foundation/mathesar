@@ -4,7 +4,6 @@
   export let element: HTMLElement;
 
   export let isActive: boolean;
-  export let readonly: boolean;
   export let disabled: boolean;
   export let mode: 'edit' | 'default' = 'default';
   export let multiLineTruncate = false;
@@ -24,7 +23,6 @@
 <div
   class="cell-wrapper"
   class:is-active={isActive}
-  class:readonly
   class:disabled
   class:is-edit-mode={mode === 'edit'}
   class:truncate={multiLineTruncate}
@@ -44,11 +42,17 @@
     overflow: hidden;
     padding: 6px 8px;
 
+    .disabled {
+      > :global(*) {
+        pointer-events: none;
+      }
+    }
+
     &.is-active {
       box-shadow: 0 0 0 2px #428af4;
       border-radius: 2px;
 
-      &.readonly {
+      &.disabled {
         box-shadow: 0 0 0 2px #a8a8a8;
       }
     }

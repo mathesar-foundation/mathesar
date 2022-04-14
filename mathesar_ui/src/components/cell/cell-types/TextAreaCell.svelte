@@ -4,7 +4,6 @@
 
   export let isActive = false;
   export let value: string | null | undefined = undefined;
-  export let readonly = false;
   export let disabled = false;
 
   // Db options
@@ -25,7 +24,6 @@
 <SteppedInputCell
   {value}
   {isActive}
-  {readonly}
   {disabled}
   multiLineTruncate={true}
   let:handleInputBlur

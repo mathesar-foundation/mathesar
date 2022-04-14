@@ -7,7 +7,6 @@
 
   export let isActive = false;
   export let value: string | null | undefined = undefined;
-  export let readonly = false;
   export let disabled = false;
   export let multiLineTruncate = false;
 
@@ -15,7 +14,7 @@
   let isEditMode = false;
 
   function setModeToEdit() {
-    if (!readonly && !disabled) {
+    if (!disabled) {
       isEditMode = true;
     }
   }
@@ -89,7 +88,6 @@
 
 <CellWrapper
   {isActive}
-  {readonly}
   {disabled}
   bind:element={cellRef}
   on:dblclick={setModeToEdit}

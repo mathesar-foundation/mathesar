@@ -7,6 +7,7 @@
   export let column: Column;
   export let value: unknown;
   export let isActive = false;
+  export let disabled = false;
   export let state: 'loading' | 'error' | 'ready' = 'ready';
 
   // TODO (IMPORTANT): Calculate this at a higher level, instead of calculating on each cell instance
@@ -22,7 +23,7 @@
     this={component}
     {...props}
     {isActive}
-    readonly={column.primary_key}
+    disabled={disabled || column.primary_key}
     bind:value
     on:movementKeyDown
     on:activate
