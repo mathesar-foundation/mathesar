@@ -76,7 +76,11 @@
 
   function toggle(): void {
     if (disabled) return;
-    $isOpen = !$isOpen;
+    if ($isOpen) {
+      close();
+    } else {
+      open();
+    }
   }
 
   function focusOption(option: Option): void {
