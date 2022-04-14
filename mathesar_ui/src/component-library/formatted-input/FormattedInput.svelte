@@ -1,8 +1,9 @@
 <script lang="ts">
-  import Diff from 'fast-diff';
   import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
   import { getOutcomeOfBeforeInputEvent } from '@mathesar-component-library-dir/common/utils';
   import type { InputFormatter, ParseResult } from './InputFormatter';
+  import { getCursorPositionAfterReformat } from './formattedInputUtils';
+  import { tick } from 'svelte';
 
   type T = $$Generic;
 
@@ -63,41 +64,12 @@
     if (parseResult?.value === newParentValue) {
       return;
     }
-
     childText = formattedValue;
   }
 
   $: handleParentValueChange(parentValue);
 
-  // set cursor previous position
-  function setCursorToPostion(
-    userInput: string,
-    cursorPosition: number,
-    intermediateDisplay: string,
-  ) {
-    if (element) {
-      element.value = intermediateDisplay;
-      const diff = Diff(userInput, intermediateDisplay);
-      // Find New Cursor Position using diff and cursorPosition
-      let newCursorPosition = 0;
-      diff.forEach((part: any[]) => {
-        if (part[0] === -1) {
-          newCursorPosition -= 1;
-        } else if (part[0] === 1) {
-          newCursorPosition += 1;
-        }
-      });
-      if (newCursorPosition < 0) {
-        newCursorPosition = 0;
-      }
-      // Set Cursor Position
-      element.setSelectionRange(
-        cursorPosition + newCursorPosition,
-        cursorPosition + newCursorPosition,
-      );
-    }
-  }
-  function handleChildValueChange(event: InputEvent) {
+  async function handleChildValueChange(event: InputEvent) {
     event.preventDefault();
     const { value: userInput, cursorPosition } =
       getOutcomeOfBeforeInputEvent(event);
@@ -106,14 +78,13 @@
       parseResult = formatter.parse(userInput);
       parentValue = parseResult.value;
       childText = parseResult.intermediateDisplay;
-      // get last character of userInput
-      // Regex for finding number
-      const regex1 = RegExp('[0-9]');
-      const lastCharacter = userInput[userInput.length - 1];
-      // set cursor position if last character is number
-      if (regex1.exec(lastCharacter)) {
-        setCursorToPostion(userInput, cursorPosition, childText);
-      }
+      const newCursorPosition = getCursorPositionAfterReformat({
+        oldText: userInput,
+        oldCursorPosition: cursorPosition,
+        newText: parseResult.intermediateDisplay,
+      });
+      await tick();
+      element?.setSelectionRange(newCursorPosition, newCursorPosition);
     } catch (error) {
       onParseError({ userInput, error });
     }
