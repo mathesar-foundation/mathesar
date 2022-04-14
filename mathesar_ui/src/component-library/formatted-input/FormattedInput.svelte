@@ -1,9 +1,9 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
   import { getOutcomeOfBeforeInputEvent } from '@mathesar-component-library-dir/common/utils';
   import type { InputFormatter, ParseResult } from './InputFormatter';
   import { getCursorPositionAfterReformat } from './formattedInputUtils';
-  import { tick } from 'svelte';
 
   type T = $$Generic;
 
