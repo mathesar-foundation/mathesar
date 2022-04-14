@@ -14,9 +14,9 @@
   type Option = $$Generic;
   type $$Props = ListBoxProps<Option>;
 
-  // We need to set types to required to use with props exported in the component
-  // or else the component assumes the props can be 'undefined' as a value and throws errors,
-  // even though we set default values to them.
+  // We need to set types to required to use with props exported in the
+  // component or else the component assumes the props can be 'undefined' as a
+  // value and throws errors, even though we set default values to them.
   type $$DefinedProps = Required<$$Props>;
 
   interface $$Slots {
@@ -46,9 +46,11 @@
   const isOpen = writable(false);
   const focusedOptionIndex = writable(-1);
 
-  // We have displayedOptions inorder to be used:
-  // * when options is passed as a promise,
-  // * while searching through option list.
+  /**
+   * We have displayedOptions in order to be used:
+   * - when options is passed as a promise,
+   * - while searching through option list.
+   */
   const displayedOptions = writable(Array.isArray(options) ? options : []);
   $: displayedOptions.set(Array.isArray(options) ? options : []);
 
@@ -220,15 +222,13 @@
     handleKeyDown,
   };
 
-  /**
-   * We need the following stores to not have undefined values.
-   * We need to update them when props change.
-   * The stores cannot be recreated, since we need to set them in context.
-   * The only way so far do that is to create a writable with the props, and then
-   * a reactive statement which updates the store when those props change.
-   *
-   * TODO: Check if we can do this in a better manner.
-   */
+  // We need the following stores to not have undefined values. We need to
+  // update them when props change. The stores cannot be recreated, since we
+  // need to set them in context. The only way so far do that is to create a
+  // writable with the props, and then a reactive statement which updates the
+  // store when those props change.
+  //
+  // TODO: Check if we can do this in a better manner.
 
   const valueStore = writable(value);
   $: valueStore.set(value);
@@ -260,7 +260,7 @@
     staticProps,
   };
 
-  setContext<ListBoxContext<Option>>('LISTBOX_CONTEXT', {
+  setContext<ListBoxContext<Option>>('LIST_BOX_CONTEXT', {
     api,
     state,
   });
