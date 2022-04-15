@@ -8,7 +8,7 @@
   export let value: unknown;
   export let isActive = false;
   export let disabled = false;
-  export let state: 'loading' | 'error' | 'ready' = 'ready';
+  export let showAsSkeleton = false;
 
   // TODO (IMPORTANT): Calculate this at a higher level, instead of calculating on each cell instance
   $: ({ component, props } = getCellComponentWithProps(column));
@@ -26,7 +26,7 @@
     on:update
   />
 
-  {#if state === 'loading'}
+  {#if showAsSkeleton}
     <div class="loader" />
   {/if}
 </div>

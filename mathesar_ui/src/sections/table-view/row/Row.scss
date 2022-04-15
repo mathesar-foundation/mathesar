@@ -2,7 +2,7 @@ section.table-section .tab-container .table-data .body {
   .row {
     transition: all 0.2s cubic-bezier(0, 0, 0.2, 1);
 
-    &:not(.done) {
+    &.processing {
       pointer-events: none;
     }
 
@@ -31,29 +31,20 @@ section.table-section .tab-container .table-data .body {
         }
       }
 
-      &.update,
-      &.delete,
-      &.create {
+      &.processing {
         .cell {
           transition: background-color 0.2s cubic-bezier(0, 0, 0.2, 1);
           background-color: #fff7d7;
         }
       }
 
-      &.delete {
-        pointer-events: none;
-      }
-
-      &.updateFailed,
-      &.deleteFailed,
-      &.creationFailed {
+      &.failed {
         .cell {
           transition: background-color 0.2s cubic-bezier(0, 0, 0.2, 1);
           background-color: #fef1f1;
         }
       }
 
-      &.updated,
       &.created {
         .cell {
           transition: background-color 0.2s cubic-bezier(0, 0, 0.2, 1);

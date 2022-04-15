@@ -41,13 +41,7 @@
   $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
     $tabularData);
   $: ({ columns } = $columnsDataStore);
-  $: ({
-    filtering,
-    sorting,
-    grouping,
-    selectedRecords,
-    combinedModificationState,
-  } = meta);
+  $: ({ filtering, sorting, grouping, selectedRows, sheetState } = meta);
   $: recordState = recordsData.state;
 
   $: isLoading =
@@ -160,23 +154,23 @@
     <span> New Record </span>
   </Button>
 
-  {#if $selectedRecords.size > 0}
+  {#if $selectedRows.size > 0}
     <Button size="small" on:click={() => recordsData.deleteSelected()}>
       <Icon data={faTrashAlt} />
       <span>
-        Delete {$selectedRecords.size} records
+        Delete {$selectedRows.size} records
       </span>
     </Button>
   {/if}
 
-  {#if $combinedModificationState !== 'idle'}
+  {#if $sheetState}
     <div class="divider" />
     <div class="save-status">
-      {#if $combinedModificationState === 'inprocess'}
+      {#if $sheetState === 'processing'}
         Saving changes
-      {:else if $combinedModificationState === 'error'}
+      {:else if $sheetState === 'failure'}
         <span class="error">! Couldn't save changes</span>
-      {:else if $combinedModificationState === 'complete'}
+      {:else if $sheetState === 'success'}
         All changes saved
       {/if}
     </div>
