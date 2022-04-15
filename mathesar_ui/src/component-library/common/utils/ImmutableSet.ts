@@ -24,18 +24,20 @@ export default class ImmutableSet<T extends string | number | boolean | null> {
     return this.getNewInstance(set);
   }
 
-  union(other: ImmutableSet<T>): this {
+  union(other: Iterable<T>): this {
     const set = new Set(this.set);
-    [...other.values()].forEach((value) => {
+    [...other].forEach((value) => {
       set.add(value);
     });
     return this.getNewInstance(set);
   }
 
-  without(item: T): this {
+  without(itemOrItems: T | T[]): this {
+    const items = Array.isArray(itemOrItems) ? itemOrItems : [itemOrItems];
     const set = new Set(this.set);
-    set.delete(item);
-    //
+    items.forEach((item) => {
+      set.delete(item);
+    });
     return this.getNewInstance(set);
   }
 
