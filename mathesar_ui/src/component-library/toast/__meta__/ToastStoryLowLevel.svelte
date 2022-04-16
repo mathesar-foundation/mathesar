@@ -1,9 +1,9 @@
 <script>
   import {
-    faBreadSlice,
-    faCheck,
-    faExclamationTriangle,
-  } from '@fortawesome/free-solid-svg-icons';
+    iconBreadSlice,
+    iconCheck,
+    iconExclamationTriangle,
+  } from '@mathesar-component-library-dir/common/icons';
   import { onMount } from 'svelte';
   import Button from '../../button/Button.svelte';
   import ToastPresenter from '../ToastPresenter.svelte';
@@ -16,13 +16,13 @@
 
   const iconChoices = [
     { id: 0, label: '(None)', value: undefined },
-    { id: 1, label: 'Bread', value: { data: faBreadSlice } },
+    { id: 1, label: 'Bread', value: iconBreadSlice },
     {
       id: 2,
       label: 'Exclamation Triangle',
-      value: { data: faExclamationTriangle },
+      value: iconExclamationTriangle,
     },
-    { id: 3, label: 'Check', value: { data: faCheck } },
+    { id: 3, label: 'Check', value: iconCheck },
   ];
 
   let icon = iconChoices[1];

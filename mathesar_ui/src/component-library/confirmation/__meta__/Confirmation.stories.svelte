@@ -20,7 +20,11 @@
 <script>
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import { Button } from '@mathesar-component-library';
-  import { faFire, faRecycle, faCut } from '@fortawesome/free-solid-svg-icons';
+  import {
+    iconFire,
+    iconRecycle,
+    iconCut,
+  } from '@mathesar-component-library-dir/common/icons';
   import {
     makeToast,
     ToastPresenter,
@@ -44,7 +48,7 @@
     void confirm({
       title: 'Recycle document?',
       body: 'It will be permanently destroyed',
-      proceedButton: { label: 'Recycle', icon: { data: faRecycle } },
+      proceedButton: { label: 'Recycle', icon: iconRecycle },
       onProceed: () => api.recycle(),
       onSuccess: () => toast.success({ message: 'Document recycled.' }),
       onError: (e) =>
@@ -59,7 +63,7 @@
         'It will be permanently destroyed.',
         'It will take a couple of seconds for the shredding to complete.',
       ],
-      proceedButton: { label: 'Shred', icon: { data: faCut } },
+      proceedButton: { label: 'Shred', icon: iconCut },
       onProceed: () => api.shred(),
       onSuccess: () => toast.success({ message: 'Document shredded.' }),
       onError: (e) =>
@@ -74,7 +78,7 @@
         'It will be permanently destroyed.',
         'It may take some time to get the fire started.',
       ],
-      proceedButton: { label: 'Burn', icon: { data: faFire } },
+      proceedButton: { label: 'Burn', icon: iconFire },
       onProceed: () => api.burn(),
       onSuccess: () => toast.success({ message: 'Document burned.' }),
       onError: (e) =>

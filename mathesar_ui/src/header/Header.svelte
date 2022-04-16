@@ -1,12 +1,13 @@
 <script lang="ts">
   import { get } from 'svelte/store';
+  import { faDragon, faUser } from '@fortawesome/free-solid-svg-icons';
   import {
-    faDragon,
-    faUser,
-    faPlus,
-    faUpload,
-    faTable,
-  } from '@fortawesome/free-solid-svg-icons';
+    iconDragon,
+    iconUser,
+    iconPlus,
+    iconUpload,
+    iconTable,
+  } from '@mathesar/icons';
   import { createTable, refetchTablesForSchema } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
@@ -58,11 +59,11 @@
 
     {#if $currentSchemaId}
       <div class="quick-links">
-        <DropdownMenu label="New Table" icon={{ data: faPlus }}>
-          <MenuItem on:click={handleCreateEmptyTable} icon={{ data: faTable }}>
+        <DropdownMenu label="New Table" icon={iconPlus}>
+          <MenuItem on:click={handleCreateEmptyTable} icon={iconTable}>
             Empty Table
           </MenuItem>
-          <MenuItem on:click={beginDataImport} icon={{ data: faUpload }}>
+          <MenuItem on:click={beginDataImport} icon={iconUpload}>
             Import Data
           </MenuItem>
         </DropdownMenu>

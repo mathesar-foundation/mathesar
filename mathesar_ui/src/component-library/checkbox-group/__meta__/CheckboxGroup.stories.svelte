@@ -1,5 +1,8 @@
 <script>
-  import { faCoffee, faRocket } from '@fortawesome/free-solid-svg-icons';
+  import {
+    iconCoffee,
+    iconRocket,
+  } from '@mathesar-component-library-dir/common/icons';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import { Meta, Story } from '@storybook/addon-svelte-csf';
@@ -19,12 +22,12 @@
     {
       value: 'faRocket',
       labelComponent: Icon,
-      labelComponentProps: { data: faRocket },
+      labelComponentProps: iconCoffee,
     },
     {
       value: 'faCoffee',
       labelComponent: Icon,
-      labelComponentProps: { data: faCoffee },
+      labelComponentProps: iconRocket,
     },
   ];
   let richValue;

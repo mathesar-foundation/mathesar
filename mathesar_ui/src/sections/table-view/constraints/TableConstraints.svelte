@@ -13,11 +13,9 @@
     ConstraintsDataStore,
   } from '@mathesar/stores/table-data/types';
   import { States } from '@mathesar/utils/api';
-  import {
-    faPlus,
-    faSnowflake,
-    faSpinner,
-  } from '@fortawesome/free-solid-svg-icons';
+  import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+  import { iconPlus, iconSnowflake, iconSpinner } from '@mathesar/icons';
+
   import { modal } from '@mathesar/stores/modal';
   import NewUniqueConstraintModal from './NewUniqueConstraintModal.svelte';
   import TableConstraint from './TableConstraint.svelte';
@@ -65,10 +63,10 @@
   </div>
 
   <div slot="footer" class="footer">
-    <DropdownMenu label="New Constraint" icon={{ data: faPlus }}>
+    <DropdownMenu label="New Constraint" icon={iconPlus}>
       <MenuItem
         on:click={() => newUniqueConstraintModal.open()}
-        icon={{ data: faSnowflake }}
+        icon={iconSnowflake}
       >
         Unique
       </MenuItem>

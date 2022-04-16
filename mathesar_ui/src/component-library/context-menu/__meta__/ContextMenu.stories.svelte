@@ -1,9 +1,9 @@
 <script>
   import {
-    faFillDrip,
-    faPlus,
-    faTimes,
-  } from '@fortawesome/free-solid-svg-icons';
+    iconFillDrip,
+    iconPlus,
+    iconTimes,
+  } from '@mathesar-component-library-dir/common/icons';
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import MenuItem from '@mathesar-component-library-dir/menu/MenuItem.svelte';
   import Checkbox from '@mathesar-component-library-dir/checkbox/Checkbox.svelte';
@@ -36,11 +36,11 @@
     <p>This box has a context menu.</p>
     <p>The count is: <strong>{count}</strong>.</p>
     <ContextMenu>
-      <MenuItem icon={{ data: faFillDrip }} on:click={toggleBackground}>
+      <MenuItem icon={iconFillDrip} on:click={toggleBackground}>
         <Checkbox slot="control" checked={hasBackground} />
         Use Background
       </MenuItem>
-      <MenuItem icon={{ data: faPlus }} on:click={incrementCount}>
+      <MenuItem icon={iconPlus} on:click={incrementCount}>
         Increment Counter
       </MenuItem>
     </ContextMenu>
@@ -49,7 +49,7 @@
   <div class="box with-context" has-background>
     <p>This box <em>also</em> has a context menu.</p>
     <ContextMenu>
-      <MenuItem icon={{ data: faTimes }}>I don't do anything</MenuItem>
+      <MenuItem icon={iconTimes}>I don't do anything</MenuItem>
     </ContextMenu>
   </div>
 

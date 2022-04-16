@@ -1,6 +1,6 @@
 <script lang="ts">
   import { tick } from 'svelte';
-  import { faBackspace } from '@fortawesome/free-solid-svg-icons';
+  import { iconBackspace } from '@mathesar/icons';
 
   import {
     ContextMenu,
@@ -98,7 +98,7 @@
   />
   <ContextMenu>
     <MenuItem
-      icon={{ data: faBackspace }}
+      icon={iconBackspace}
       disabled={!canSetNull}
       on:click={() => setValue(null)}
     >

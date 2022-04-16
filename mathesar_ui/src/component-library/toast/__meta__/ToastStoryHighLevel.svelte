@@ -1,5 +1,5 @@
 <script>
-  import { faRocket } from '@fortawesome/free-solid-svg-icons';
+  import { iconRocket } from '@mathesar-component-library-dir/common/icons';
   import { derived, writable } from 'svelte/store';
   import Button from '../../button/Button.svelte';
   import { makeToast } from '../ToastController';
@@ -29,7 +29,7 @@
     progressToast?.dismiss();
     progressToast = toast.progress({
       message: 'Hold on to your hats!',
-      icon: { data: faRocket },
+      icon: iconRocket,
     });
   }
   function incrementProgress(incrementAmount) {

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { get } from 'svelte/store';
-  import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+  import { iconDelete } from '@mathesar/icons';
   import {
     TextInput,
     LabeledInput,
@@ -117,7 +117,7 @@
   <CancelOrProceedButtonPair
     onCancel={() => cancelImport(fileImportStore)}
     onProceed={() => finishImport(fileImportStore)}
-    cancelButton={{ icon: { data: faTrashAlt } }}
+    cancelButton={{ icon: iconDelete }}
     proceedButton={{ label: 'Finish Import' }}
     {canProceed}
   />

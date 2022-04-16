@@ -8,10 +8,8 @@
     faSync,
     faExclamationTriangle,
     faPlus,
-    faCog,
-    faICursor,
-    faKey,
   } from '@fortawesome/free-solid-svg-icons';
+
   import { States } from '@mathesar/utils/api';
   import {
     Button,
@@ -32,6 +30,12 @@
   import DisplaySort from '../display-options/DisplaySort.svelte';
   import DisplayGroup from '../display-options/DisplayGroup.svelte';
   import RenameTableModal from './RenameTableModal.svelte';
+  import {
+    iconConstraints,
+    iconDelete,
+    iconRename,
+    iconSettings,
+  } from '@mathesar/icons';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
@@ -78,19 +82,14 @@
 </script>
 
 <div class="actions-pane">
-  <DropdownMenu label="Table" icon={{ data: faCog }}>
-    <MenuItem
-      on:click={() => tableRenameModal.open()}
-      icon={{ data: faICursor }}
-    >
+  <DropdownMenu label="Table" icon={iconSettings}>
+    <MenuItem on:click={() => tableRenameModal.open()} icon={iconRename}>
       Rename
     </MenuItem>
-    <MenuItem on:click={handleDeleteTable} icon={{ data: faTrashAlt }}>
-      Delete
-    </MenuItem>
+    <MenuItem on:click={handleDeleteTable} icon={iconDelete}>Delete</MenuItem>
     <MenuItem
       on:click={() => tableConstraintsModal.open()}
-      icon={{ data: faKey }}
+      icon={iconConstraints}
     >
       Constraints
     </MenuItem>
