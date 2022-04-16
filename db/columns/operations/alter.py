@@ -29,7 +29,7 @@ def alter_column(engine, table_oid, column_attnum, column_data):
             retype_column(
                 table_oid, column_attnum, engine, conn,
                 new_type=column_data[TYPE_KEY],
-                type_options=column_data.get(TYPE_OPTIONS_KEY, {}) if column_data[TYPE_OPTIONS_KEY] is not None else {}
+                type_options=column_data.get(TYPE_OPTIONS_KEY, {})
             )
         elif TYPE_OPTIONS_KEY in column_data:
             retype_column(
