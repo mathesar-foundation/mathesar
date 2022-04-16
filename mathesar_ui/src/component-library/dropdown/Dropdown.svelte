@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
+  import { iconAngleDown } from '@mathesar-component-library-dir/common/icons';
   import type { Placement } from '@popperjs/core/lib/enums';
   import type { Appearance, Size } from '@mathesar-component-library-dir/types';
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
@@ -64,7 +64,7 @@
   </span>
   {#if showArrow}
     <span class="arrow">
-      <Icon data={faAngleDown} />
+      <Icon {...iconAngleDown} />
     </span>
   {/if}
 </Button>

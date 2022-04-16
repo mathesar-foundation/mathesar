@@ -1,12 +1,12 @@
 <script lang="ts">
   import { tick, createEventDispatcher } from 'svelte';
   import {
-    faAngleDoubleLeft,
-    faAngleDoubleRight,
-    faEllipsisH,
-    faAngleLeft,
-    faAngleRight,
-  } from '@fortawesome/free-solid-svg-icons';
+    iconAngleDoubleLeft,
+    iconAngleDoubleRight,
+    iconEllipsisH,
+    iconAngleLeft,
+    iconAngleRight,
+  } from '@mathesar-component-library-dir/common/icons';
   import { Icon } from '@mathesar-component-library';
   import { calculatePages } from './paginationUtils';
 
@@ -71,7 +71,7 @@
           on:click={(e) => setPage(e, currentPage - 1)}
           disabled={currentPage === 1}
         >
-          <Icon data={faAngleLeft} tabindex="-1" />
+          <Icon {...iconAngleLeft} tabindex="-1" />
         </button>
       </li>
     {/if}
@@ -109,8 +109,8 @@
             aria-label="Goto Page {pageInfo.prevPageWindow}"
             on:click={(e) => setPage(e, pageInfo.prevPageWindow)}
           >
-            <Icon class="ellipsis" data={faEllipsisH} />
-            <Icon class="arrow" data={faAngleDoubleLeft} />
+            <Icon class="ellipsis" {...iconEllipsisH} />
+            <Icon class="arrow" {...iconAngleDoubleLeft} />
           </button>
         </li>
       {/if}
@@ -160,8 +160,8 @@
             aria-label="Goto Page {pageInfo.nextPageWindow}"
             on:click={(e) => setPage(e, pageInfo.nextPageWindow)}
           >
-            <Icon class="ellipsis" data={faEllipsisH} />
-            <Icon class="arrow" data={faAngleDoubleRight} />
+            <Icon class="ellipsis" {...iconEllipsisH} />
+            <Icon class="arrow" {...iconAngleDoubleRight} />
           </button>
         </li>
       {/if}
@@ -200,7 +200,7 @@
           on:click={(e) => setPage(e, currentPage + 1)}
           disabled={currentPage === pageCount}
         >
-          <Icon data={faAngleRight} />
+          <Icon {...iconAngleRight} />
         </button>
       </li>
     {/if}

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { get } from 'svelte/store';
-  import { faDragon, faUser } from '@fortawesome/free-solid-svg-icons';
   import {
     iconDragon,
     iconUser,
@@ -46,7 +45,7 @@
 <header>
   <div class="logo">
     <div class="image-wrapper">
-      <Icon data={faDragon} />
+      <Icon {...iconDragon} />
     </div>
   </div>
 
@@ -71,7 +70,7 @@
     {/if}
 
     <div class="image-wrapper">
-      <Icon data={faUser} />
+      <Icon {...iconUser} />
     </div>
   </div>
 </header>

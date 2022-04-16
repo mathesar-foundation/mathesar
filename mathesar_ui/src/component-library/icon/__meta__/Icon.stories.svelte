@@ -1,12 +1,12 @@
 <script lang="ts">
   import { Meta, Story } from '@storybook/addon-svelte-csf';
   import {
-    faCat,
-    faDog,
-    faBug,
-    faHippo,
-    faKiwiBird,
-  } from '@fortawesome/free-solid-svg-icons';
+    iconCat,
+    iconDog,
+    iconBug,
+    iconHippo,
+    iconKiwiBird,
+  } from '@mathesar-component-library-dir/common/icons';
   import Icon from '../Icon.svelte';
   import IconDocs from './Icon.mdx';
   import { IconFlip, IconRotate } from '../IconTypes';
@@ -78,16 +78,16 @@
 </Story>
 
 <Story name="Customizations" parameters={disabledAddons}>
-  <Icon data={faCat} size="25px" />
+  <Icon {...iconCat} size="25px" />
 
-  <Icon data={faCat} flip={IconFlip.VERTICAL} />
-  <Icon data={faCat} rotate={IconRotate.ONE_EIGHTY} />
+  <Icon {...iconCat} flip={IconFlip.VERTICAL} />
+  <Icon {...iconCat} rotate={IconRotate.ONE_EIGHTY} />
 
-  <Icon data={faDog} class="color-red" size="20px" />
-  <Icon data={faHippo} style="color:blue" size="24px" />
+  <Icon {...iconDog} class="color-red" size="20px" />
+  <Icon {...iconHippo} style="color:blue" size="24px" />
 
-  <Icon data={faBug} spin={true} />
-  <Icon data={faKiwiBird} pulse={true} size="1.2em" style="color:green" />
+  <Icon {...iconBug} spin={true} />
+  <Icon {...iconKiwiBird} pulse={true} size="1.2em" style="color:green" />
 
   <style>
     .color-red {

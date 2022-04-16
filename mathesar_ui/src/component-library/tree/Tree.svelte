@@ -6,7 +6,7 @@
     InputGroupText,
   } from '@mathesar-component-library-dir/input-group';
   import { filterTree } from '@mathesar-component-library-dir/common/utils/filterUtils';
-  import { faSearch } from '@fortawesome/free-solid-svg-icons';
+  import { iconSearch } from '@mathesar-component-library-dir/common/icons';
   import TreeItemComponent from './TreeItem.svelte';
   import type { TreeItem } from './TreeTypes';
 
@@ -29,7 +29,7 @@
   {#if search}
     <InputGroup class="search-box">
       <InputGroupText>
-        <Icon class="search-icon" data={faSearch} />
+        <Icon class="search-icon" {...iconSearch} />
       </InputGroupText>
       <TextInput placeholder="search" bind:value={searchText} />
     </InputGroup>

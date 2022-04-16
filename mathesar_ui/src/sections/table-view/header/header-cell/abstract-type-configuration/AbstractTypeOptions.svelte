@@ -1,9 +1,5 @@
 <script lang="ts">
-  import {
-    faDatabase,
-    faPalette,
-    faTimesCircle,
-  } from '@fortawesome/free-solid-svg-icons';
+  import { iconDatabase, iconPalette, iconTimesCircle } from '@mathesar/icons';
   import {
     Button,
     FormBuilder,
@@ -98,10 +94,10 @@
           selectedTab = 'database';
         }}
       >
-        <Icon size="0.75em" data={faDatabase} />
+        <Icon size="0.75em" {...iconDatabase} />
         <span>Database</span>
         {#if dbFormHasError}
-          <Icon class="error-icon" data={faTimesCircle} />
+          <Icon class="error-icon" {...iconTimesCircle} />
         {/if}
       </Button>
     </li>
@@ -118,10 +114,10 @@
             selectedTab = 'display';
           }}
         >
-          <Icon size="0.75em" data={faPalette} />
+          <Icon size="0.75em" {...iconDatabase} />
           <span>Display</span>
           {#if displayFormHasError}
-            <Icon class="error-icon" data={faTimesCircle} />
+            <Icon class="error-icon" {...iconTimesCircle} />
           {/if}
         </Button>
       </li>

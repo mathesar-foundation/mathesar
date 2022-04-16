@@ -1,11 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import {
-    faLock,
-    faProjectDiagram,
-    faPencilAlt,
-    faTrashAlt,
-  } from '@fortawesome/free-solid-svg-icons';
+    iconLock,
+    iconProjectDiagram,
+    iconPencilAlt,
+    iconDelete,
+  } from '@mathesar/icons';
   import { Icon, Button } from '@mathesar-component-library';
   import type { SchemaEntry } from '@mathesar/AppTypes';
   import { deleteSchema } from '@mathesar/stores/schemas';
@@ -40,12 +40,12 @@
 <div class="schema-row">
   <div class="details">
     <div class="title">
-      <Icon data={faProjectDiagram} />
+      <Icon {...iconProjectDiagram} />
       <a href="/{$currentDBName}/{schema.id}">
         {schema.name}
       </a>
       {#if isLocked}
-        <Icon class="lock" data={faLock} />
+        <Icon class="lock" {...iconLock} />
       {/if}
     </div>
     {#if isDefault}
@@ -61,10 +61,10 @@
         on:click={() => dispatch('edit', schema)}
         aria-label="Edit Schema"
       >
-        <Icon data={faPencilAlt} />
+        <Icon {...iconPencilAlt} />
       </Button>
       <Button class="delete" on:click={handleDelete} aria-label="Delete Schema">
-        <Icon data={faTrashAlt} />
+        <Icon {...iconDelete} />
       </Button>
       <slot />
     </div>

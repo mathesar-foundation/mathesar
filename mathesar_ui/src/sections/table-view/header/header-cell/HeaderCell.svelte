@@ -1,10 +1,10 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import {
-    faCog,
-    faChevronRight,
-    faChevronLeft,
-  } from '@fortawesome/free-solid-svg-icons';
+    iconSettings,
+    iconChevronRight,
+    iconChevronLeft,
+  } from '@mathesar/icons';
   import { toast } from '@mathesar/stores/toast';
   import {
     Dropdown,
@@ -181,8 +181,8 @@
                 on:click={setTypeView}
               >
                 <span>{abstractTypeOfColumn?.name}</span>
-                <Icon size="0.8em" data={faCog} />
-                <Icon size="0.7em" data={faChevronRight} />
+                <Icon size="0.8em" {...iconSettings} />
+                <Icon size="0.7em" {...iconChevronRight} />
               </Button>
             {:else if view === 'type'}
               <h6 class="category">
@@ -192,7 +192,7 @@
                   class="padding-zero"
                   on:click={setDefaultView}
                 >
-                  <Icon data={faChevronLeft} />
+                  <Icon {...iconChevronLeft} />
                   Go back
                 </Button>
               </h6>

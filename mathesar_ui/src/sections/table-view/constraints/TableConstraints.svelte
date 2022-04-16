@@ -13,7 +13,6 @@
     ConstraintsDataStore,
   } from '@mathesar/stores/table-data/types';
   import { States } from '@mathesar/utils/api';
-  import { faSpinner } from '@fortawesome/free-solid-svg-icons';
   import { iconPlus, iconSnowflake, iconSpinner } from '@mathesar/icons';
 
   import { modal } from '@mathesar/stores/modal';
@@ -47,7 +46,7 @@
   <span slot="title">Table Constraints{countText} <ConstraintHelp /></span>
   <div class="table-constraints">
     {#if shouldShowLoadingSpinner}
-      <Icon data={faSpinner} spin={true} />
+      <Icon {...iconSpinner} spin={true} />
     {:else if state === States.Error}
       <div>Unable to fetch table constraints</div>
       <div>{errorMsg}</div>

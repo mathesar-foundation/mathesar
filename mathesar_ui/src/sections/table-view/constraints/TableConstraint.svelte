@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Icon, Button } from '@mathesar-component-library';
-  import { faTrash } from '@fortawesome/free-solid-svg-icons';
+  import { iconTrash } from '@mathesar/icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import type {
     Constraint,
@@ -41,7 +41,7 @@
   </div>
   <div class="drop">
     <Button on:click={handleDrop} title={dropTitle}>
-      <Icon data={faTrash} />
+      <Icon {...iconTrash} />
     </Button>
   </div>
 </div>

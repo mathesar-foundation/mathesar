@@ -26,10 +26,7 @@ import{
     faPlus,
     faTable,
     faUpload,
-    faExclamationTriangle,
-
-    
-
+    faExclamationTriangle,  
     faCat,
     faDog,
     faHippo,
@@ -76,10 +73,6 @@ export const iconPlus = { data: faPlus };
 export const iconTable = { data: faTable };
 export const iconUpload = { data: faUpload };
 export const iconExclamationTriangle = { data: faExclamationTriangle };
-
-
-
-
 export const iconCat = { data: faCat };
 export const iconDog = { data: faDog };
 export const iconHippo = { data: faHippo };

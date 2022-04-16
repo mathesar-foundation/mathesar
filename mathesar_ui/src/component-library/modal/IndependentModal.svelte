@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, tick } from 'svelte';
   import { fade, fly } from 'svelte/transition';
-  import { faTimes } from '@fortawesome/free-solid-svg-icons';
+  import { iconTimes } from '@mathesar-component-library-dir/common/icons';
   import type { Size } from '@mathesar-component-library-dir/types';
   import { Button, Icon, portal } from '@mathesar-component-library';
   import type { ModalCloseAction } from './modalTypes';
@@ -72,7 +72,7 @@
           </div>
           {#if closeOnButton}
             <Button appearance="plain" class="close-button" on:click={close}>
-              <Icon data={faTimes} />
+              <Icon {...iconTimes} />
             </Button>
           {/if}
         </div>

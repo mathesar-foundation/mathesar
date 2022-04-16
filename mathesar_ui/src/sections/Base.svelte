@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { faTable } from '@fortawesome/free-solid-svg-icons';
+  import { iconTable } from '@mathesar/icons';
   import { TabContainer, Icon } from '@mathesar-component-library';
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId } from '@mathesar/stores/schemas';
@@ -89,7 +89,7 @@
       on:tabRemoved={tabRemoved}
     >
       <span slot="tab" let:tab>
-        <Icon data={faTable} />
+        <Icon {...iconTable} />
         <span>{tab.label}</span>
       </span>
 

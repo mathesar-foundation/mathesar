@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
-  import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
+  import { iconTimes, iconPlus } from '@mathesar/icons';
   import type { Grouping } from '@mathesar/stores/table-data';
   import { Button, Icon } from '@mathesar-component-library';
   import type { Column } from '@mathesar/stores/table-data/types';
@@ -73,7 +73,7 @@
             </td>
             <td class="action">
               <Button size="small" on:click={addGroupColumn}>
-                <Icon data={faPlus} />
+                <Icon {...iconPlus} />
               </Button>
               <Button
                 size="small"
@@ -81,7 +81,7 @@
                   addNew = false;
                 }}
               >
-                <Icon data={faTimes} />
+                <Icon {...iconTimes} />
               </Button>
             </td>
           </tr>

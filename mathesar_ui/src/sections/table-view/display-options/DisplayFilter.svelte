@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
-  // import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
+  // import { iconTimes, iconPlus } from '@mathesar/icons';
   // import { Icon, Button, Select, TextInput } from '@mathesar-component-library';
   // import {
   //   filterCombinations,
@@ -123,7 +123,7 @@
           <tr>
             <td class="filter-action" colspan="4">
               <Button size="small" on:click={addFilter}>
-                <Icon data={faPlus} />
+                <Icon {...iconPlus} />
               </Button>
               <Button
                 size="small"
@@ -131,7 +131,7 @@
                   addNew = false;
                 }}
               >
-                <Icon data={faTimes} />
+                <Icon {...iconTimes} />
               </Button>
             </td>
           </tr>

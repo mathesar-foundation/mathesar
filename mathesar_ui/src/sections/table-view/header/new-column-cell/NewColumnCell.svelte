@@ -1,6 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { faPlus } from '@fortawesome/free-solid-svg-icons';
   import {
     Button,
     Dropdown,
@@ -11,6 +10,7 @@
   } from '@mathesar-component-library';
   import { DEFAULT_ROW_RIGHT_PADDING } from '@mathesar/stores/table-data';
   import type { Display, Column } from '@mathesar/stores/table-data/types';
+  import { iconPlus } from '@mathesar/icons';
 
   const dispatch = createEventDispatcher();
   export let columns: Column[];
@@ -55,7 +55,7 @@
   >
     <svelte:fragment slot="trigger">
       <span class="name">
-        <Icon class="opt" data={faPlus} size="0.8em" />
+        <Icon class="opt" {...iconPlus} size="0.8em" />
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">

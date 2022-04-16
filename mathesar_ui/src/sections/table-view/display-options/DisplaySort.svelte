@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
-  import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
+  import { iconTimes, iconPlus } from '@mathesar/icons';
   import { Icon, Button } from '@mathesar-component-library';
   import { SortDirection } from '@mathesar/stores/table-data';
   import type { Sorting } from '@mathesar/stores/table-data';
@@ -83,7 +83,7 @@
             </td>
             <td class="action">
               <Button size="small" on:click={addSortColumn}>
-                <Icon data={faPlus} />
+                <Icon {...iconPlus} />
               </Button>
               <Button
                 size="small"
@@ -91,7 +91,7 @@
                   addNew = false;
                 }}
               >
-                <Icon data={faTimes} />
+                <Icon {...iconTimes} />
               </Button>
             </td>
           </tr>

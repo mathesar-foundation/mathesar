@@ -1,13 +1,8 @@
 <script lang="ts">
   import { getContext } from 'svelte';
   import {
-    faFilter,
-    faSort,
-    faListAlt,
-    faTrashAlt,
     faSync,
     faExclamationTriangle,
-    faPlus,
   } from '@fortawesome/free-solid-svg-icons';
 
   import { States } from '@mathesar/utils/api';
@@ -35,6 +30,12 @@
     iconDelete,
     iconRename,
     iconSettings,
+    iconFilter,
+    iconSort,
+    iconListAlt,
+    iconSync,
+    iconExclamationTriangle,
+    iconPlus,
   } from '@mathesar/icons';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
@@ -103,7 +104,7 @@
 
   <Dropdown showArrow={false}>
     <svelte:fragment slot="trigger">
-      <Icon data={faFilter} size="0.8em" />
+      <Icon {...iconFilter} size="0.8em" />
       <span>
         Filters
         {#if $filtering.entries.length > 0}
@@ -118,7 +119,7 @@
 
   <Dropdown showArrow={false}>
     <svelte:fragment slot="trigger">
-      <Icon data={faSort} />
+      <Icon {...iconSort} />
       <span>
         Sort
         {#if $sorting.size > 0}
@@ -133,7 +134,7 @@
 
   <Dropdown showArrow={false}>
     <svelte:fragment slot="trigger">
-      <Icon data={faListAlt} />
+      <Icon {...iconListAlt} />
       <span>
         Group
         {#if $grouping.size > 0}
@@ -149,13 +150,13 @@
   <div class="divider" />
 
   <Button size="small" on:click={() => recordsData.addEmptyRecord()}>
-    <Icon data={faPlus} />
+    <Icon {...iconPlus} />
     <span> New Record </span>
   </Button>
 
   {#if $selectedRows.size > 0}
     <Button size="small" on:click={() => recordsData.deleteSelected()}>
-      <Icon data={faTrashAlt} />
+      <Icon {...iconDelete} />
       <span>
         Delete {$selectedRows.size} records
       </span>

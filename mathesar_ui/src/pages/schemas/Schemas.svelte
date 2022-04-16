@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { faPlus } from '@fortawesome/free-solid-svg-icons';
+  import { iconPlus } from '@mathesar/icons';
   import { currentDBName } from '@mathesar/stores/databases';
   import { currentSchemaId, schemas } from '@mathesar/stores/schemas';
   import { Icon, Button, TextInput } from '@mathesar-component-library';
@@ -61,7 +61,7 @@
     <div class="container">
       <h1>{$currentDBName}</h1>
       <Button class="add" on:click={addSchema}>
-        <Icon data={faPlus} />
+        <Icon {...iconPlus} />
         New Schema
       </Button>
     </div>

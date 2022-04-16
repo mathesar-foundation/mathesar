@@ -1,6 +1,6 @@
 <script lang="ts">
   // import { createEventDispatcher, onMount, onDestroy } from 'svelte';
-  // import { faTimes } from '@fortawesome/free-solid-svg-icons';
+  // import { iconTimes } from '@mathesar/icons';
   // import { Icon, Button, Select, TextInput } from '@mathesar-component-library';
   // import type { FilterCondition } from '@mathesar/stores/table-data/types';
   // import type { SelectOption } from '@mathesar-component-library/types';
@@ -62,7 +62,7 @@
   {/if}
   <td>
     <Button size="small" on:click={() => dispatch('removeFilter')}>
-      <Icon data={faTimes} />
+      <Icon {...iconTimes} />
     </Button>
   </td> -->
 </tr>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { get } from 'svelte/store';
-  import { faTable } from '@fortawesome/free-solid-svg-icons';
+  import { iconTable } from '@mathesar/icons';
   import { Icon, Tree } from '@mathesar-component-library';
   import {
     getTabsForSchema,
@@ -96,7 +96,7 @@
       on:nodeSelected={tableSelected}
       let:entry
     >
-      <Icon data={faTable} />
+      <Icon {...iconTable} />
       <span>{entry.label}</span>
 
       <svelte:fragment slot="empty">No tables found</svelte:fragment>
