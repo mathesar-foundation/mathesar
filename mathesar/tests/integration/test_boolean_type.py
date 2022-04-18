@@ -16,7 +16,7 @@ def expect_table_to_open(page):
     expect_tab_to_be_visible(page, "All datatypes table")
 
 
-def test_boolean_options(page):
+def test_boolean_options(page, go_to_all_types_table):
     expect_table_to_open(page)
     open_column_options_and_verify_type(page, "boolean_cb", "Boolean", "BOOLEAN")
     open_column_options_and_verify_type(page, "boolean_dd", "Boolean", "BOOLEAN")

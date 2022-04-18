@@ -90,7 +90,6 @@ def test_char_cell(page, go_to_all_types_table):
     row = page.locator(":nth-match(.row, 1)")
     cell = row.locator(".cell:has-text('cell with char value') .cell-wrapper")
     cell.dblclick()
-    page.pause()
     expect(row.locator("input[type='text']")).to_be_visible()
 
 
