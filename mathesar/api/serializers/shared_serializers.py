@@ -1,4 +1,5 @@
 from django.core.exceptions import ImproperlyConfigured
+from rest_framework.fields import empty
 from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
@@ -137,6 +138,11 @@ class DisplayOptionsMappingSerializer(
         MathesarTypeIdentifier.TIME.value: TimeFormatDisplayOptionSerializer,
         MathesarTypeIdentifier.DURATION.value: DurationDisplayOptionSerializer,
     }
+
+    def run_validation(self, data=empty):
+        if data == {}:
+            data = None
+        return super(DisplayOptionsMappingSerializer,self).run_validation(data)
 
     def get_mapping_field(self):
         db_type = self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY]
