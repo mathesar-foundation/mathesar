@@ -43,12 +43,6 @@
     overflow: hidden;
     padding: 6px 8px;
 
-    .disabled {
-      > :global(*) {
-        pointer-events: none;
-      }
-    }
-
     &.is-active {
       box-shadow: 0 0 0 2px #428af4;
       border-radius: 2px;

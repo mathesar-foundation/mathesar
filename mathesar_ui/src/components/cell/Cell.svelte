@@ -14,7 +14,7 @@
   $: ({ component, props } = getCellComponentWithProps(column));
 </script>
 
-<div class="sheet-cell">
+<div class="sheet-cell" data-column-id={column.id}>
   <svelte:component
     this={component}
     {...props}
