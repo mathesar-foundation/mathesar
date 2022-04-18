@@ -1,15 +1,20 @@
 <script lang="ts">
-  import { beforeUpdate, getContext, tick } from 'svelte';
+  import { getContext, onMount, tick } from 'svelte';
   import { get } from 'svelte/store';
   import type {
     TabularDataStore,
     Row,
   } from '@mathesar/stores/table-data/types';
 
+  import type {
+    Sorting,
+    Filtering,
+    Grouping,
+    Pagination,
+  } from '@mathesar/stores/table-data';
   import RowComponent from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
-  import type { Sorting, Filtering, Grouping, Pagination } from '@mathesar/stores/table-data';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
@@ -18,47 +23,31 @@
   $: ({ id, recordsData, display, meta } = $tabularData);
   $: ({ sorting, filtering, grouping, pagination } = meta);
   $: ({ newRecords } = recordsData);
-  $: ({ rowWidth, horizontalScrollOffset, scrollOffset, displayableRecords } = display);
+  $: ({ rowWidth, horizontalScrollOffset, scrollOffset, displayableRecords } =
+    display);
 
   let initialSorting: Sorting;
   let initialFiltering: Filtering;
   let initialGrouping: Grouping;
   let initialPagination: Pagination;
 
-  beforeUpdate(() => {
-    sorting.subscribe(s => initialSorting = s);
-    filtering.subscribe(f => initialFiltering = f);
-    grouping.subscribe(g => initialGrouping = g);
-    pagination.subscribe(p => initialPagination = p);
-  })
+  onMount(() => {
+    initialSorting = get(sorting);
+    initialFiltering = get(filtering);
+    initialGrouping = get(grouping);
+    initialPagination = get(pagination);
+  });
 
-  $: sorting.subscribe(currentSorting => {
-    if (initialSorting == currentSorting) {
-      return;
+  $: {
+    if (
+      initialSorting !== $sorting ||
+      initialFiltering !== $filtering ||
+      initialGrouping !== $grouping ||
+      initialPagination !== $pagination
+    ) {
+      virtualListRef?.ScrollToTop();
     }
-    virtualListRef?.ScrollToTop();
-  })
-
-  $: filtering.subscribe(currentfiltering => {
-    if (initialFiltering == currentfiltering) {
-      return;
-    }
-    virtualListRef?.ScrollToTop();
-  })
-
-  $: grouping.subscribe(currentGrouping => {
-    if (initialGrouping == currentGrouping) {
-      return;
-    }
-    virtualListRef?.ScrollToTop();
-  })
-
-  $: pagination.subscribe(currentPagination => {
-    if (initialPagination == currentPagination) {
-      return;
-    }
-    virtualListRef?.ScrollToTop();
-  })
+  }
 
   let previousNewRecordsCount = 0;
 
