@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getContext, onMount, tick } from 'svelte';
+  import { beforeUpdate, getContext, tick } from 'svelte';
   import { get } from 'svelte/store';
   import type {
     TabularDataStore,
@@ -31,7 +31,7 @@
   let initialGrouping: Grouping;
   let initialPagination: Pagination;
 
-  onMount(() => {
+  beforeUpdate(() => {
     initialSorting = get(sorting);
     initialFiltering = get(filtering);
     initialGrouping = get(grouping);
