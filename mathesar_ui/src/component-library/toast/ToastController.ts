@@ -1,7 +1,7 @@
 import {
- iconCheck,
- iconExclamationTriangle,
- iconSpinner,
+  iconCheck,
+  iconExclamationTriangle,
+  iconSpinner,
 } from '@mathesar-component-library-dir/common/icons';
 import type { IconProps } from '@mathesar-component-library-dir/icon/IconTypes';
 import type { SvelteComponent } from 'svelte';
