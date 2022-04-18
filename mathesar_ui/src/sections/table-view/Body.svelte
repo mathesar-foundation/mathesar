@@ -1,17 +1,11 @@
 <script lang="ts">
-  import { getContext, onMount, tick } from 'svelte';
+  import { getContext, tick } from 'svelte';
   import { get } from 'svelte/store';
   import type {
     TabularDataStore,
     Row,
   } from '@mathesar/stores/table-data/types';
 
-  import type {
-    Sorting,
-    Filtering,
-    Grouping,
-    Pagination,
-  } from '@mathesar/stores/table-data';
   import RowComponent from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
@@ -26,28 +20,13 @@
   $: ({ rowWidth, horizontalScrollOffset, scrollOffset, displayableRecords } =
     display);
 
-  let initialSorting: Sorting;
-  let initialFiltering: Filtering;
-  let initialGrouping: Grouping;
-  let initialPagination: Pagination;
-
-  onMount(() => {
-    initialSorting = get(sorting);
-    initialFiltering = get(filtering);
-    initialGrouping = get(grouping);
-    initialPagination = get(pagination);
-  });
-
-  $: {
-    if (
-      initialSorting !== $sorting ||
-      initialFiltering !== $filtering ||
-      initialGrouping !== $grouping ||
-      initialPagination !== $pagination
-    ) {
-      virtualListRef?.ScrollToTop();
-    }
-  }
+  // Whenever the sorting, filtering, grouping, or pagination changes, scroll to
+  // the top of the table.
+  $: $sorting &&
+    $filtering &&
+    $grouping &&
+    $pagination &&
+    virtualListRef?.ScrollToTop();
 
   let previousNewRecordsCount = 0;
 
