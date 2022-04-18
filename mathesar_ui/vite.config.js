@@ -19,6 +19,7 @@ function getAlias() {
 }
 
 export default defineConfig({
+  base: process.env.MODE === 'PRODUCTION' ? '/static/' : '/',
   resolve: {
     alias: getAlias(),
   },

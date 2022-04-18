@@ -1,7 +1,7 @@
 <script lang="ts">
   import { get } from 'svelte/store';
+  const headerLogo = new URL('../../images/logo.svg', import.meta.url).href
   import {
-    faDragon,
     faUser,
     faPlus,
     faUpload,
@@ -45,7 +45,7 @@
 <header>
   <div class="logo">
     <div class="image-wrapper">
-      <Icon data={faDragon} />
+      <img style="height: 30px;width: 30px" src={headerLogo} alt="logo">
     </div>
   </div>
 
