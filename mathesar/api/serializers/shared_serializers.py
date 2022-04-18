@@ -142,7 +142,7 @@ class DisplayOptionsMappingSerializer(
     def run_validation(self, data=empty):
         if data == {}:
             data = None
-        return super(DisplayOptionsMappingSerializer,self).run_validation(data)
+        return super(DisplayOptionsMappingSerializer, self).run_validation(data)
 
     def get_mapping_field(self):
         db_type = self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY]
