@@ -22,7 +22,7 @@ export function formatSize(sizeInBytes: number): string {
  */
 export function getLabel(v: unknown, labelKey = 'label'): string {
   if (hasStringProperty(v, labelKey)) {
-    return (v as Record<string, unknown>)[labelKey] as string;
+    return v[labelKey];
   }
   return String(v);
 }

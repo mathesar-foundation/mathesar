@@ -1,5 +1,4 @@
 import { writable, get, derived } from 'svelte/store';
-import { States } from '@mathesar/utils/api';
 import type { Writable, Readable, Unsubscriber } from 'svelte/store';
 import type { Meta } from './meta';
 import type { ColumnsDataStore, Column } from './columns';
@@ -182,7 +181,6 @@ export class Display {
             .concat({
               identifier: '__new_help_text',
               isNewHelpText: true,
-              state: States.Done,
             })
             .concat($newRecords);
         }

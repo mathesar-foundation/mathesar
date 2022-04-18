@@ -35,6 +35,7 @@ module.exports = {
     'no-multi-spaces': 'off',
     '@typescript-eslint/comma-spacing': 'off',
     'array-bracket-spacing': 'off',
+    'no-restricted-syntax': 0,
   },
   overrides: [
     {
