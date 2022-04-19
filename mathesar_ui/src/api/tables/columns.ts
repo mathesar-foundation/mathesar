@@ -29,11 +29,13 @@ interface FormattedNumberDisplayOptions {
   // use_grouping: 'true' | 'false' | 'auto';
 }
 
-interface NumberDisplayOptions extends FormattedNumberDisplayOptions {
+export interface NumberDisplayOptions
+  extends Record<string, unknown>,
+    FormattedNumberDisplayOptions {
   show_as_percentage: boolean;
 }
 
-interface MoneyDisplayOptions extends FormattedNumberDisplayOptions {
+export interface MoneyDisplayOptions extends FormattedNumberDisplayOptions {
   /**
    * e.g. "$", "€", "NZD", etc.
    */

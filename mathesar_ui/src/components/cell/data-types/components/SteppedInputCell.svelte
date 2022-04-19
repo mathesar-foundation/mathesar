@@ -1,15 +1,20 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import Null from '@mathesar/components/Null.svelte';
+  import type { CellValueFormatter } from '@mathesar/components/cell/utils';
+  import CellValue from '@mathesar/components/CellValue.svelte';
   import CellWrapper from './CellWrapper.svelte';
   import type { CellTypeProps } from './typeDefinitions';
 
   const dispatch = createEventDispatcher();
 
-  export let isActive: CellTypeProps['isActive'];
-  export let value: CellTypeProps['value'];
-  export let disabled: CellTypeProps['disabled'];
+  type Value = $$Generic;
+  type Props = CellTypeProps<Value>;
+
+  export let isActive: Props['isActive'];
+  export let value: Props['value'];
+  export let disabled: Props['disabled'];
   export let multiLineTruncate = false;
+  export let formatValue: CellValueFormatter<Value> | undefined = undefined;
 
   let cellRef: HTMLElement;
   let isEditMode = false;
@@ -32,9 +37,9 @@
         } else {
           setModeToEdit();
         }
-        // Preventing default behaviour here
-        // Interesting problem: If this is not prevented, the textarea gets a new line break
-        // Needs more digging down
+        // Preventing default behaviour here. Interesting problem: If this is
+        // not prevented, the textarea gets a new line break. Needs more digging
+        // down.
         e.preventDefault();
         break;
       case 'Escape':
@@ -105,11 +110,7 @@
       class:nowrap={!isActive}
       class:truncate={isActive && multiLineTruncate}
     >
-      {#if value === null}
-        <Null />
-      {:else if typeof value !== 'undefined'}
-        {value}
-      {/if}
+      <CellValue {value} {formatValue} />
     </div>
   {/if}
 </CellWrapper>
