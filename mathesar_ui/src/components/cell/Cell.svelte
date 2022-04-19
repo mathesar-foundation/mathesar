@@ -7,22 +7,19 @@
   export let column: Column;
   export let value: unknown;
   export let isActive = false;
+  export let disabled = false;
   export let showAsSkeleton = false;
 
   // TODO (IMPORTANT): Calculate this at a higher level, instead of calculating on each cell instance
   $: ({ component, props } = getCellComponentWithProps(column));
 </script>
 
-<!--
-  We need this parent div here because there's no other way to target css
-  for child components without making the styles global
--->
-<div class="sheet-cell">
+<div class="sheet-cell" data-column-id={column.id}>
   <svelte:component
     this={component}
     {...props}
     {isActive}
-    readonly={column.primary_key}
+    disabled={disabled || column.primary_key}
     bind:value
     on:movementKeyDown
     on:activate
@@ -56,23 +53,9 @@
     }
   }
 
-  .sheet-cell :global(.cell-wrapper) {
-    overflow: hidden;
-    padding: 6px 8px;
-  }
-
   .sheet-cell :global(.cell-wrapper:not(.is-active)) {
     // This needs to be based on row height!
     height: 29px;
     max-height: 29px;
-  }
-
-  .sheet-cell :global(.cell-wrapper.is-active) {
-    box-shadow: 0 0 0 2px #428af4;
-    border-radius: 2px;
-  }
-
-  .sheet-cell :global(.cell-wrapper.is-active.readonly) {
-    box-shadow: 0 0 0 2px #a8a8a8;
   }
 </style>
