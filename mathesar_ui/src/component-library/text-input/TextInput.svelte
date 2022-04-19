@@ -1,4 +1,5 @@
 <script context="module" lang="ts">
+  // eslint-disable-next-line no-undef
   type InputProps = svelte.JSX.HTMLAttributes<HTMLElementTagNameMap['input']>;
   type SimplifiedInputProps = Omit<InputProps, 'disabled' | 'id' | 'class'>;
 
