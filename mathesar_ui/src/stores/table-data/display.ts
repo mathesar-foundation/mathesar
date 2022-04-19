@@ -131,6 +131,8 @@ export class Display {
 
   private columnPositionMapUnsubscriber: Unsubscriber;
 
+  scrollOffset: Writable<number>;
+
   horizontalScrollOffset: Writable<number>;
 
   columnPositionMap: Writable<ColumnPositionMap>;
@@ -150,6 +152,7 @@ export class Display {
     this.columnsDataStore = columnsDataStore;
     this.recordsData = recordsData;
     this.horizontalScrollOffset = writable(0);
+    this.scrollOffset = writable(0);
     this.columnPositionMap = writable(new Map() as ColumnPositionMap);
     this.activeCell = writable<ActiveCell | undefined>(undefined);
     this.rowWidth = writable(0);
@@ -201,17 +204,6 @@ export class Display {
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       columnIndex: column.__columnIndex,
     });
-  }
-
-  editCell(row: Row, column: Column): void {
-    if (!column.primary_key) {
-      this.activeCell.set({
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        rowIndex: row.rowIndex,
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        columnIndex: column.__columnIndex,
-      });
-    }
   }
 
   handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | undefined {
