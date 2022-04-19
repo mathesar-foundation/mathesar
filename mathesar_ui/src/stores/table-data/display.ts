@@ -1,5 +1,4 @@
 import { writable, get, derived } from 'svelte/store';
-import { States } from '@mathesar/utils/api';
 import type { Writable, Readable, Unsubscriber } from 'svelte/store';
 import type { Meta } from './meta';
 import type { ColumnsDataStore, Column } from './columns';
@@ -132,6 +131,8 @@ export class Display {
 
   private columnPositionMapUnsubscriber: Unsubscriber;
 
+  scrollOffset: Writable<number>;
+
   horizontalScrollOffset: Writable<number>;
 
   columnPositionMap: Writable<ColumnPositionMap>;
@@ -151,6 +152,7 @@ export class Display {
     this.columnsDataStore = columnsDataStore;
     this.recordsData = recordsData;
     this.horizontalScrollOffset = writable(0);
+    this.scrollOffset = writable(0);
     this.columnPositionMap = writable(new Map() as ColumnPositionMap);
     this.activeCell = writable<ActiveCell | undefined>(undefined);
     this.rowWidth = writable(0);
@@ -179,7 +181,6 @@ export class Display {
             .concat({
               identifier: '__new_help_text',
               isNewHelpText: true,
-              state: States.Done,
             })
             .concat($newRecords);
         }
@@ -203,17 +204,6 @@ export class Display {
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
       columnIndex: column.__columnIndex,
     });
-  }
-
-  editCell(row: Row, column: Column): void {
-    if (!column.primary_key) {
-      this.activeCell.set({
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        rowIndex: row.rowIndex,
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        columnIndex: column.__columnIndex,
-      });
-    }
   }
 
   handleKeyEventsOnActiveCell(key: KeyboardEvent['key']): 'moved' | undefined {

@@ -192,6 +192,20 @@ def create_column():
 
 
 @pytest.fixture
+def create_column_with_display_options():
+    def _create_column(table, column_data):
+        column = table.add_column(column_data)
+        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine)
+        column = mathesar_model_column.current_objects.get_or_create(
+            attnum=attnum,
+            table=table,
+            display_options=column_data.get('display_options', None)
+        )
+        return column[0]
+    return _create_column
+
+
+@pytest.fixture
 def custom_types_schema_url(test_db_model, schema, live_server):
     engine = create_mathesar_engine(test_db_model.name)
     install.install_mathesar_on_database(engine)

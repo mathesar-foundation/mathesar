@@ -26,14 +26,14 @@ const displayForm: AbstractTypeConfigForm = {
     },
     trueLabel: {
       type: 'string',
-      default: 'TRUE',
+      default: 'true',
       validation: {
         checks: ['isEmpty'],
       },
     },
     falseLabel: {
       type: 'string',
-      default: 'FALSE',
+      default: 'false',
       validation: {
         checks: ['isEmpty'],
       },
@@ -124,7 +124,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 
 const booleanType: AbstractTypeConfiguration = {
   icon: '?',
-  input: {
+  cell: {
     type: 'boolean',
   },
   getDisplayConfig: () => ({

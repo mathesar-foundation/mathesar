@@ -263,8 +263,8 @@ function constructDisplayFormValuesFromDisplayOptions(
 
 const numberType: AbstractTypeConfiguration = {
   icon: '#',
-  input: {
-    type: 'integer',
+  cell: {
+    type: 'number',
   },
   defaultDbType: DB_TYPES.NUMERIC,
   getDbConfig: () => ({
