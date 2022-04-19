@@ -1,6 +1,8 @@
 <script lang="ts">
   import { get } from 'svelte/store';
-  const headerLogo = new URL('../../images/logo.svg', import.meta.url).href
+  /* eslint import/newline-after-import: "off" */
+  const headerLogo = new URL('../../images/logo.svg', import.meta.url
+  ).href;
   import {
     faUser,
     faPlus,
@@ -45,7 +47,7 @@
 <header>
   <div class="logo">
     <div class="image-wrapper">
-      <img style="height: 30px;width: 30px" src={headerLogo} alt="logo">
+      <img style="height: 30px;width: 30px" src={headerLogo} alt="logo" />
     </div>
   </div>
 
