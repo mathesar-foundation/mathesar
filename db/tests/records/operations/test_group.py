@@ -121,41 +121,37 @@ def test_GB_validate_passes_valid_kwargs_endpoints():
 
 
 def test_GB_validate_fails_invalid_mode():
-    gb = group.GroupBy(
-        columns=['col1', 'col2'],
-        mode='potato',
-        num_groups=1234,
-    )
     with pytest.raises(records_exceptions.InvalidGroupType):
-        gb.validate()
+        group.GroupBy(
+            columns=['col1', 'col2'],
+            mode='potato',
+            num_groups=1234,
+        )
 
 
 def test_GB_validate_fails_invalid_num_group():
-    gb = group.GroupBy(
-        columns=['col1', 'col2'],
-        mode=group.GroupMode.PERCENTILE.value,
-        num_groups=None,
-    )
     with pytest.raises(records_exceptions.BadGroupFormat):
-        gb.validate()
+        group.GroupBy(
+            columns=['col1', 'col2'],
+            mode=group.GroupMode.PERCENTILE.value,
+            num_groups=None,
+        )
 
 
 def test_GB_validate_fails_invalid_columns_len():
-    gb = group.GroupBy(
-        columns=['col1', 'col2'],
-        mode=group.GroupMode.MAGNITUDE.value,
-    )
     with pytest.raises(records_exceptions.BadGroupFormat):
-        gb.validate()
+        group.GroupBy(
+            columns=['col1', 'col2'],
+            mode=group.GroupMode.MAGNITUDE.value,
+        )
 
 
 def test_GB_validate_fails_missing_bound_tuples():
-    gb = group.GroupBy(
-        columns=['col1', 'col2'],
-        mode=group.GroupMode.ENDPOINTS.value,
-    )
     with pytest.raises(records_exceptions.BadGroupFormat):
-        gb.validate()
+        group.GroupBy(
+            columns=['col1', 'col2'],
+            mode=group.GroupMode.ENDPOINTS.value,
+        )
 
 
 def test_GB_get_valid_group_by_columns_str_cols(roster_table_obj):
@@ -391,26 +387,6 @@ def test_magnitude_group_select_inside_bounds(magnitude_table_obj, col_name):
             row[col_name] < _group_lt_value(row)[col_name]
             and row[col_name] >= _group_geq_value(row)[col_name]
         )
-
-
-invalid_endpoints_setups = [
-    (['Grade'], [(0,), (2,), (1,)])
-]
-
-
-@pytest.mark.parametrize('columns,bound_tuples', invalid_endpoints_setups)
-def test_invalid_bound_tuples_lists(roster_table_obj, columns, bound_tuples):
-    roster, engine = roster_table_obj
-    input_cols = columns
-    group_by = group.GroupBy(
-        columns=input_cols,
-        mode=group.GroupMode.ENDPOINTS.value,
-        bound_tuples=bound_tuples
-    )
-    sel = group.get_group_augmented_records_query(roster, group_by)
-    with pytest.raises(records_exceptions.BadGroupFormat):
-        with engine.begin() as conn:
-            conn.execute(sel).fetchall()
 
 
 def test_get_distinct_group_select_correct_first_last_row_match(roster_distinct_setup):

@@ -14,8 +14,9 @@ MATHESAR_GROUP_METADATA = '__mathesar_group_metadata'
 
 class GroupMode(Enum):
     DISTINCT = 'distinct'
-    ENDPOINTS = 'endpoints'
+    ENDPOINTS = 'endpoints'  # intended for internal use at the moment
     MAGNITUDE = 'magnitude'
+    COUNT_BY = 'count_by'
     PERCENTILE = 'percentile'
 
 
@@ -37,12 +38,17 @@ class GroupBy:
             mode=GroupMode.DISTINCT.value,
             num_groups=None,
             bound_tuples=None,
+            global_min=None,
+            global_max=None,
     ):
         self._columns = tuple(columns) if type(columns) != str else tuple([columns])
         self._mode = mode
         self._num_groups = num_groups
         self._bound_tuples = bound_tuples
+        self._global_min = global_min
+        self._global_max = global_max
         self._ranged = bool(mode != GroupMode.DISTINCT.value)
+        self.validate()
 
     @property
     def columns(self):
@@ -94,7 +100,6 @@ class GroupBy:
                 )
 
     def get_validated_group_by_columns(self, table):
-        self.validate()
         for col in self.columns:
             col_name = col if isinstance(col, str) else col.name
             if col_name not in table.columns:
