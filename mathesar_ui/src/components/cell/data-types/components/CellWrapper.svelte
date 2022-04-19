@@ -1,11 +1,9 @@
 <script lang="ts">
   import { tick } from 'svelte';
-  import type { CellTypeProps } from './typeDefinitions';
 
   export let element: HTMLElement | undefined = undefined;
-
-  export let isActive: CellTypeProps['isActive'];
-  export let disabled: CellTypeProps['disabled'];
+  export let isActive = false;
+  export let disabled = false;
   export let mode: 'edit' | 'default' = 'default';
   export let multiLineTruncate = false;
 

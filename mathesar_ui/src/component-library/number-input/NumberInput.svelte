@@ -23,26 +23,30 @@
     high-precision numbers by binding to a `string` instead of a `number`.
 
 -->
+<script context="module" lang="ts">
+  export interface NumberInputProps extends Partial<NumberFormatterOptions> {
+    value?: number;
+    element?: HTMLInputElement;
+  }
+</script>
+
 <script lang="ts">
   import FormattedInput from '../formatted-input/FormattedInput.svelte';
   import type { NumberFormatterOptions } from './number-formatter/types';
   import { NumberFormatter } from './number-formatter';
   import { getInputMode } from './numberInputUtils';
 
-  interface $$Props extends Partial<NumberFormatterOptions> {
-    value?: number;
-    element?: HTMLInputElement;
-  }
+  type $$Props = NumberInputProps;
 
   /**
    * See docs within `FormattedInput` for an explanation of how we're using
    * `null` vs `undefined` here.
    */
-  export let value: number | null | undefined = undefined;
-  export let element: HTMLInputElement | undefined = undefined;
+  export let value: $$Props['value'] = undefined;
+  export let element: $$Props['element'] = undefined;
 
   $: formatter = new NumberFormatter($$restProps);
-  $: inputmode = getInputMode($$restProps as $$Props);
+  $: inputmode = getInputMode($$restProps);
 </script>
 
 <FormattedInput
