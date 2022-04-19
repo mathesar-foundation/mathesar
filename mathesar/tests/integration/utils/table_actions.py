@@ -30,6 +30,13 @@ def rename_table(page, new_name):
     expect_modal_not_to_be_visible(page)
 
 
+def rename_column(page, old_name, new_name):
+    page.click(f"button:has-text('{old_name}')")
+    page.click("button:has-text('Rename')")
+    page.fill("[aria-label='Column name']", new_name)
+    page.keyboard.press("Enter")
+
+
 def get_column_header_locator(page, column_name):
     column_header = f":nth-match(.table-content .header .cell .name:has-text('{column_name}'), 1)"
     expect(page.locator(column_header)).to_be_visible()
