@@ -1,8 +1,9 @@
 import type { Writable, Updater, Subscriber, Unsubscriber } from 'svelte/store';
 import { writable, get as getStoreValue } from 'svelte/store';
-import type { DBObjectEntry, DbType } from '@mathesar/AppTypes';
+import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { CancellablePromise } from '@mathesar-component-library';
 import { EventHandler } from '@mathesar-component-library';
+import type { Column as ApiColumn } from '@mathesar/api/tables/columns';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import {
   deleteAPI,
@@ -14,16 +15,7 @@ import {
 import { TabularType } from './TabularType';
 import type { Meta } from './meta';
 
-export interface Column {
-  id: number;
-  name: string;
-  type: DbType;
-  type_options: Record<string, unknown> | null;
-  display_options: Record<string, unknown> | null;
-  index: number;
-  nullable: boolean;
-  primary_key: boolean;
-  valid_target_types: DbType[];
+export interface Column extends ApiColumn {
   __columnIndex?: number;
 }
 
