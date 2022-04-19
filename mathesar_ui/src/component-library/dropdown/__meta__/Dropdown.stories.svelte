@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Meta, Story } from '@storybook/addon-svelte-csf';
-  import Select from '../../select/Select.svelte';
+  import Select from '@mathesar-component-library-dir/select/Select.svelte';
   import Dropdown from '../Dropdown.svelte';
 
   const meta = {

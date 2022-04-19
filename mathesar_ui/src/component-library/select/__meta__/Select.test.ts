@@ -115,9 +115,9 @@ test('updates currently selected option', async () => {
   selectOptions = getAllByRole('option');
 
   // Expect the selected option to have the correct classes.
-  expect(selectOptions[1]).toHaveClass('selected', 'hovered');
+  expect(selectOptions[1]).toHaveClass('selected', 'in-focus');
 
-  expect(selectOptions[0]).not.toHaveClass('selected', 'hovered');
+  expect(selectOptions[0]).not.toHaveClass('selected', 'in-focus');
 });
 
 test('select option using keyboard', async () => {
@@ -145,7 +145,7 @@ test('select option using keyboard', async () => {
 
   // Check if the second option has the correct classes.
   const selectOptions = getAllByRole('option');
-  expect(selectOptions[1]).toHaveClass('hovered');
+  expect(selectOptions[1]).toHaveClass('in-focus');
   expect(selectOptions[1]).not.toHaveClass('selected');
 
   // Select the second option.

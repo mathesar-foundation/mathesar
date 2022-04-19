@@ -12,11 +12,14 @@
 
   let selectedOption = column.type;
 
-  function onTypeChange(e: CustomEvent<string>) {
-    dispatch('typechange', {
-      name: column.name,
-      type: e.detail,
-    });
+  function onTypeChange(e: CustomEvent<string | undefined>) {
+    const type = e.detail;
+    if (typeof type !== 'undefined') {
+      dispatch('typechange', {
+        name: column.name,
+        type,
+      });
+    }
   }
 </script>
 
