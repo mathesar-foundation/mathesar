@@ -21,7 +21,7 @@
 
 <style>
   .errors {
-    margin: 1em 0 0 2em;
+    margin: 0.5em 0 0 0em;
     color: #f47171;
   }
 

@@ -24,6 +24,10 @@ export interface Column {
   nullable: boolean;
   primary_key: boolean;
   valid_target_types: DbType[];
+  default: {
+    is_dynamic: boolean;
+    value: unknown;
+  } | null;
   __columnIndex?: number;
 }
 

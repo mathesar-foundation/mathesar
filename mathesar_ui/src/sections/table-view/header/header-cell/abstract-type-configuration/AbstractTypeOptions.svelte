@@ -1,11 +1,6 @@
 <script lang="ts">
+  import { faDatabase, faPalette } from '@fortawesome/free-solid-svg-icons';
   import {
-    faDatabase,
-    faPalette,
-    faTimesCircle,
-  } from '@fortawesome/free-solid-svg-icons';
-  import {
-    Button,
     FormBuilder,
     Icon,
     getValidationContext,
@@ -15,18 +10,23 @@
   import type { Column } from '@mathesar/stores/table-data/types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
 
-  import DatabaseOptions from './database-options/DatabaseOptions.svelte';
+  import DbOptionsForm from './db-options-form/DbOptionsForm.svelte';
+  import DbTypeIndicator from './DbTypeIndicator.svelte';
+  import SetDefaultValue from './SetDefaultValue.svelte';
+  import TypeOptionTab from './TypeOptionTab.svelte';
   import { constructDbForm, constructDisplayForm } from './utils';
 
   export let selectedAbstractType: AbstractType;
   export let selectedDbType: DbType;
   export let typeOptions: Column['type_options'];
   export let displayOptions: Column['display_options'];
+  export let defaultValue: Column['default'];
   export let column: Column;
 
   let selectedTab: 'database' | 'display' = 'database';
   let dbFormHasError = false;
   let displayFormHasError = false;
+  let defaultValueHasError = false;
 
   // Why are the following not reactive?
   // The whole component gets re-rendered when selectedAbstractType changes,
@@ -42,7 +42,7 @@
 
   const validationContext = getValidationContext();
   validationContext.addValidator('AbstractTypeConfigValidator', () => {
-    let isValid = true;
+    let isValid = !defaultValueHasError;
     if (dbForm) {
       const isDbFormValid = dbForm.getValidationResult().isValid;
       dbFormHasError = !isDbFormValid;
@@ -83,53 +83,31 @@
 </script>
 
 <div class="type-options">
-  <!-- TODO: Make tab container more low-level to be used here -->
-  <!-- Ensure tab accessibility in the low-level component -->
   <ul class="type-option-tabs">
-    <li
-      class="type-option-tab"
-      class:selected={selectedTab === 'database'}
-      class:has-error={dbFormHasError}
+    <TypeOptionTab
+      bind:selectedTab
+      tab="database"
+      hasError={dbFormHasError || defaultValueHasError}
     >
-      <Button
-        appearance="ghost"
-        class="padding-zero"
-        on:click={() => {
-          selectedTab = 'database';
-        }}
-      >
-        <Icon size="0.75em" data={faDatabase} />
-        <span>Database</span>
-        {#if dbFormHasError}
-          <Icon class="error-icon" data={faTimesCircle} />
-        {/if}
-      </Button>
-    </li>
+      <Icon size="0.75em" data={faDatabase} />
+      <span>Database</span>
+    </TypeOptionTab>
     {#if displayForm}
-      <li
-        class="type-option-tab"
-        class:selected={selectedTab === 'display'}
-        class:has-error={displayFormHasError}
+      <TypeOptionTab
+        bind:selectedTab
+        tab="display"
+        hasError={displayFormHasError}
       >
-        <Button
-          appearance="ghost"
-          class="padding-zero"
-          on:click={() => {
-            selectedTab = 'display';
-          }}
-        >
-          <Icon size="0.75em" data={faPalette} />
-          <span>Display</span>
-          {#if displayFormHasError}
-            <Icon class="error-icon" data={faTimesCircle} />
-          {/if}
-        </Button>
-      </li>
+        <Icon size="0.75em" data={faPalette} />
+        <span>Display</span>
+      </TypeOptionTab>
     {/if}
   </ul>
   <div class="type-options-content">
     {#if selectedTab === 'database'}
-      <DatabaseOptions bind:selectedDbType {selectedAbstractType} {dbForm} />
+      <DbOptionsForm bind:selectedDbType {selectedAbstractType} {dbForm} />
+      <SetDefaultValue bind:defaultValue bind:defaultValueHasError />
+      <DbTypeIndicator {selectedDbType} />
     {:else if displayForm}
       <FormBuilder form={displayForm} />
     {/if}
