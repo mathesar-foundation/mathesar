@@ -71,7 +71,6 @@ export function getAbstractTypesForDbTypeList(
     let isUnknownTypeRequired = false;
     dbTypes.forEach((dbType) => {
       let isKnownType = false;
-      // eslint-disable-next-line no-restricted-syntax
       for (const [, abstractType] of abstractTypesMap) {
         if (abstractType.dbTypes.has(dbType)) {
           abstractTypeSet.add(abstractType);

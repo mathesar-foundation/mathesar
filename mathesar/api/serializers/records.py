@@ -5,6 +5,8 @@ from sqlalchemy.exc import IntegrityError
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
+from mathesar.models import Column
+from mathesar.api.utils import follows_json_number_spec, is_number
 
 
 class RecordListParameterSerializer(MathesarErrorMessageMixin, serializers.Serializer):
@@ -44,4 +46,17 @@ class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):
     def to_internal_value(self, data):
         columns_map = self.context['columns_map'].inverse
         data = {columns_map[int(column_id)]: value for column_id, value in data.items()}
+        # If the data type of the column is number then the value must be an integer
+        # or a string which follows JSON number spec.
+        for column_name in data.keys():
+            column = Column.objects.get(id=columns_map.inverse[column_name])
+            column_type = column.type
+            value = data[column_name]
+            if is_number(column_type) and type(data[column_name]) is str and not follows_json_number_spec(value):
+                raise database_api_exceptions.MathesarAPIException(
+                    IntegrityError,
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    message="Number strings should follow JSON number spec",
+                    field=column_name
+                )
         return data

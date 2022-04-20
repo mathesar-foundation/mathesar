@@ -248,6 +248,13 @@
       psRef.update();
     }
   }
+
+  export function ScrollToTop(): void {
+    if (outerRef && psRef) {
+      outerRef.scrollTop = 0;
+      psRef.update();
+    }
+  }
 </script>
 
 <div

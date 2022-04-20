@@ -50,8 +50,19 @@ export interface AbstractTypeConfiguration {
   defaultDbType?: DbType;
   icon: string;
   allowSettingDefaultValue?: boolean;
-  input: {
-    type: string;
+  cell: {
+    // The types here are frontend types and are
+    // different from db types.
+    // One frontend type can map to multiple db types
+    type:
+      | 'string'
+      | 'boolean'
+      | 'number'
+      | 'uri'
+      | 'money'
+      | 'date'
+      | 'time'
+      | 'datetime';
     config?: Record<string, unknown>;
     conditionalConfig?: Record<DbType, Record<string, unknown>>;
   };

@@ -2,7 +2,7 @@ import type { AbstractTypeConfiguration } from '../types';
 
 const unknownType: AbstractTypeConfiguration = {
   icon: '?',
-  input: {
+  cell: {
     type: 'string',
   },
 };

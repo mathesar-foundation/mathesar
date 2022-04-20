@@ -42,9 +42,9 @@ def test_group_by_column(page, go_to_patents_data_table):
     # group by the column "Center"
     page.click(selector_column_header)
     page.click(".dropdown button:has-text('Group by column')")
-    # verify the count of the first listed group and its name
+    # verify the count of the first listed group and its member
     expect(locator_group_count).to_be_visible()
-    expect(locator_group_header).to_contain_text('Center:')
+    expect(locator_group_header).to_contain_text(': NASA Ames Research Center')
     expect(page.locator("button:has-text('Group (1)')")).to_be_visible()
     # ungroup
     page.click(selector_column_header)
