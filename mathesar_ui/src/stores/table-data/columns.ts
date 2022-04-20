@@ -211,6 +211,7 @@ export class ColumnsDataStore
 
   async deleteColumn(columnId: Column['id']): Promise<void> {
     await this.api.remove(columnId);
+    await this.dispatch('columnDeleted', columnId);
     await this.fetch();
   }
 }

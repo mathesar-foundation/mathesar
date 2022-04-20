@@ -75,6 +75,13 @@ export class TabularData {
 
     this.columnsDataStore.on('columnRenamed', () => this.refresh());
     this.columnsDataStore.on('columnAdded', () => this.recordsData.fetch());
+
+    this.columnsDataStore.on('columnDeleted', (columnId) =>
+      this.meta.sorting.update((s) => s.without(columnId)),
+    );
+    this.columnsDataStore.on('columnDeleted', (columnId) =>
+      this.meta.grouping.update((g) => g.without(columnId)),
+    );
   }
 
   refresh(): Promise<

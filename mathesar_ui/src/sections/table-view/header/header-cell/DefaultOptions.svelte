@@ -88,11 +88,7 @@
         'This could break existing tables and views.',
         'Are you sure you want to proceed?',
       ],
-      onProceed: async () => {
-        await columnsDataStore.deleteColumn(column.id);
-        sorting.update((s) => s.without(column.id));
-        grouping.update((g) => g.without(column.id));
-      },
+      onProceed: () => columnsDataStore.deleteColumn(column.id),
     });
   }
 
