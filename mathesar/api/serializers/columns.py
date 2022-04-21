@@ -53,6 +53,7 @@ class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
                   'type_options',
                   'display_options'
                   )
+    id = serializers.IntegerField(required=False)
     name = serializers.CharField()
     type = serializers.CharField(source='plain_type')
     type_options = TypeOptionSerializer(required=False, allow_null=True)
