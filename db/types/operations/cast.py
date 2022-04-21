@@ -28,7 +28,7 @@ def get_column_cast_expression(column, target_type: DatabaseType, engine, type_o
         raise UnsupportedTypeException(
             f"Target Type '{target_type.id}' is not supported."
         )
-    column_type = get_db_type_enum_from_class(column.type, engine)
+    column_type = get_db_type_enum_from_class(column.type.__class__, engine)
     if target_type == column_type:
         cast_expr = column
     else:
@@ -138,7 +138,11 @@ def create_uri_casts(engine):
     create_cast_functions(MathesarCustomType.URI, type_body_map, engine)
 
 
+# TODO find more descriptive name
 def get_full_cast_map(engine) -> Mapping[DatabaseType, Collection[DatabaseType]]:
+    """
+    Returns a mapping of source types to target type sets.
+    """
     target_to_source_maps = {
         PostgresType.BIGINT: _get_integer_type_body_map(target_type=PostgresType.BIGINT),
         PostgresType.BOOLEAN: _get_boolean_type_body_map(),
@@ -147,7 +151,6 @@ def get_full_cast_map(engine) -> Mapping[DatabaseType, Collection[DatabaseType]]
         PostgresType.DATE: _get_date_type_body_map(),
         PostgresType.DOUBLE_PRECISION: _get_decimal_number_type_body_map(target_type=PostgresType.DOUBLE_PRECISION),
         MathesarCustomType.EMAIL: _get_email_type_body_map(),
-        PostgresType.FLOAT: _get_decimal_number_type_body_map(target_type=PostgresType.FLOAT),
         PostgresType.INTEGER: _get_integer_type_body_map(target_type=PostgresType.INTEGER),
         MathesarCustomType.MATHESAR_MONEY: _get_mathesar_money_type_body_map(),
         PostgresType.MONEY: _get_money_type_body_map(),
@@ -262,7 +265,7 @@ def _get_boolean_type_body_map() -> TypeBodyMap:
                              exception.
     """
     source_number_types = categories.NUMERIC_TYPES
-    source_text_types = categories.STRING_LIKE_TYPES
+    source_text_types = categories.STRING_TYPES
     default_behavior_source_types = frozenset([PostgresType.BOOLEAN])
 
     not_bool_exception_str = f"RAISE EXCEPTION '% is not a {PostgresType.BOOLEAN.id}', $1;"
@@ -325,9 +328,11 @@ def _get_email_type_body_map() -> TypeBodyMap:
                      just check that the VARCHAR object satisfies the email
                      DOMAIN).
     """
-    default_behavior_source_types = categories.STRING_LIKE_TYPES
+    identity_set = {MathesarCustomType.EMAIL}
+    default_behavior_source_types = categories.STRING_TYPES
+    source_types = default_behavior_source_types.union(identity_set)
     return _get_default_type_body_map(
-        default_behavior_source_types, MathesarCustomType.EMAIL,
+        source_types, MathesarCustomType.EMAIL,
     )
 
 
@@ -341,7 +346,7 @@ def _get_interval_type_body_map() -> TypeBodyMap:
                            to a numeric, and then try to cast the varchar
                            to an interval.
     """
-    source_text_types = categories.STRING_LIKE_TYPES
+    source_text_types = categories.STRING_TYPES
 
     def _get_text_interval_type_body_map():
         # We need to check that a string isn't a valid number before
@@ -377,8 +382,8 @@ def _get_integer_type_body_map(target_type=PostgresType.INTEGER) -> TypeBodyMap:
     We specifically disallow rounding or truncating when casting from numerics,
     etc.
     """
-    default_behavior_source_types = categories.INTEGER_TYPES | categories.STRING_LIKE_TYPES
-    no_rounding_source_types = categories.DECIMAL_TYPES | categories.MONEY_TYPES
+    default_behavior_source_types = categories.INTEGER_TYPES | categories.STRING_TYPES
+    no_rounding_source_types = categories.DECIMAL_TYPES | categories.MONEY_WITHOUT_CURRENCY_TYPES
     target_type_str = target_type.id
     cast_loss_exception_str = (
         f"RAISE EXCEPTION '% cannot be cast to {target_type_str} without loss', $1;"
@@ -405,7 +410,7 @@ def _get_integer_type_body_map(target_type=PostgresType.INTEGER) -> TypeBodyMap:
             for type_name in no_rounding_source_types
         }
     )
-    type_body_map.update({PostgresType.BOOLEAN: _get_boolean_to_number_cast(target_type_str)})
+    type_body_map.update({PostgresType.BOOLEAN: _get_boolean_to_number_cast(target_type)})
     return type_body_map
 
 
@@ -420,7 +425,7 @@ def _get_decimal_number_type_body_map(target_type=PostgresType.NUMERIC) -> TypeB
     """
 
     default_behavior_source_types = (
-        categories.NUMERIC_TYPES | categories.STRING_LIKE_TYPES | categories.MONEY_TYPES
+        categories.NUMERIC_TYPES | categories.STRING_TYPES | categories.MONEY_WITHOUT_CURRENCY_TYPES
     )
     type_body_map = _get_default_type_body_map(
         default_behavior_source_types, target_type,
@@ -429,13 +434,14 @@ def _get_decimal_number_type_body_map(target_type=PostgresType.NUMERIC) -> TypeB
     return type_body_map
 
 
-def _get_boolean_to_number_cast(target_type):
+def _get_boolean_to_number_cast(target_type: DatabaseType):
+    target_type_str = target_type.id
     return f"""
     BEGIN
       IF $1 THEN
-        RETURN 1::{target_type};
+        RETURN 1::{target_type_str};
       END IF;
-      RETURN 0::{target_type};
+      RETURN 0::{target_type_str};
     END;
     """
 
@@ -468,7 +474,7 @@ def get_text_and_datetime_to_datetime_cast_str(type_condition, exception_string)
 
 
 def _get_timestamp_with_timezone_type_body_map(target_type) -> TypeBodyMap:
-    default_behavior_source_types = categories.DATETIME_TYPES | categories.STRING_LIKE_TYPES
+    default_behavior_source_types = categories.DATETIME_TYPES | categories.STRING_TYPES
     return _get_default_type_body_map(default_behavior_source_types, target_type)
 
 
@@ -484,7 +490,7 @@ def _get_timestamp_without_timezone_type_body_map() -> TypeBodyMap:
     is called on.  So this function call should be used in a isolated
     transaction to avoid timezone change causing unintended side effect
     """
-    source_text_types = categories.STRING_LIKE_TYPES
+    source_text_types = categories.STRING_TYPES
     source_datetime_types = frozenset([PostgresType.TIMESTAMP_WITH_TIME_ZONE, PostgresType.DATE])
     default_behavior_source_types = frozenset([PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE])
 
@@ -536,7 +542,7 @@ def _get_mathesar_money_type_body_map() -> TypeBodyMap:
     money_array_function = base.get_qualified_name(MONEY_ARR_FUNC_NAME)
     default_behavior_source_types = frozenset([MathesarCustomType.MATHESAR_MONEY])
     number_types = categories.NUMERIC_TYPES
-    textual_types = categories.STRING_LIKE_TYPES | frozenset([PostgresType.MONEY])
+    textual_types = categories.STRING_TYPES | frozenset([PostgresType.MONEY])
     cast_exception_str = (
         f"RAISE EXCEPTION '% cannot be cast to {MathesarCustomType.MATHESAR_MONEY.id}', $1;"
     )
@@ -680,7 +686,7 @@ def _get_money_type_body_map() -> TypeBodyMap:
     """
     default_behavior_source_types = frozenset([PostgresType.MONEY, MathesarCustomType.MATHESAR_MONEY])
     number_types = categories.NUMERIC_TYPES
-    textual_types = categories.STRING_LIKE_TYPES
+    textual_types = categories.STRING_TYPES
     cast_loss_exception_str = (
         f"RAISE EXCEPTION '% cannot be cast to {PostgresType.MONEY.id} as currency symbol is missing', $1;"
     )
@@ -732,7 +738,7 @@ def _get_multicurrency_money_type_body_map() -> TypeBodyMap:
     """
     default_behavior_source_types = [MathesarCustomType.MULTICURRENCY_MONEY]
     number_types = categories.NUMERIC_TYPES | frozenset([MathesarCustomType.MATHESAR_MONEY])
-    textual_types = categories.STRING_LIKE_TYPES | frozenset([PostgresType.MONEY])
+    textual_types = categories.STRING_TYPES | frozenset([PostgresType.MONEY])
 
     def _get_number_cast_to_money():
         return f"""
@@ -801,7 +807,7 @@ def _get_date_type_body_map() -> TypeBodyMap:
     # Note that default postgres conversion for dates depends on the
     # `DateStyle` option set on the server, which can be one of DMY, MDY,
     # or YMD. Defaults to MDY.
-    source_text_types = categories.STRING_LIKE_TYPES
+    source_text_types = categories.STRING_TYPES
     source_datetime_types = frozenset([PostgresType.TIMESTAMP_WITH_TIME_ZONE, PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE])
     default_behavior_source_types = frozenset([PostgresType.DATE])
 
@@ -858,7 +864,7 @@ def _get_uri_type_body_map() -> TypeBodyMap:
         END;
         """
 
-    source_types = frozenset([MathesarCustomType.URI]) | categories.STRING_LIKE_TYPES
+    source_types = frozenset([MathesarCustomType.URI]) | categories.STRING_TYPES
     return {type_: _get_text_uri_type_body_map() for type_ in source_types}
 
 

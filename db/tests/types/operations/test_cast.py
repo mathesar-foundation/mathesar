@@ -6,24 +6,16 @@ from sqlalchemy import Table, Column, MetaData, select, cast, text
 from sqlalchemy import VARCHAR, NUMERIC
 from sqlalchemy.exc import DataError
 
-from db.types.custom.base import CUSTOM_TYPE_DICT
+from db.types.custom.base import CUSTOM_DB_TYPE_TO_SA_CLASS
 from db.columns.operations.select import get_column_attnum_from_name, get_column_default
 from db.columns.operations.alter import alter_column_type
 from db.tables.operations.select import get_oid_from_table
-from db.tests.types import fixtures
-from db.types.custom import multicurrency, datetime
+from db.types.custom import multicurrency
 from db.types.operations import cast as cast_operations
 from db.types.base import (
-    PostgresType, MathesarCustomType
+    DatabaseType, PostgresType, MathesarCustomType, get_available_known_db_types,
+    get_db_type_enum_from_class,
 )
-
-
-# We need to set these variables when the file loads, or pytest can't
-# properly detect the fixtures.  Importing them directly results in a
-# flake8 unused import error, and a bunch of flake8 F811 errors.
-engine_with_types = fixtures.engine_with_types
-engine_email_type = fixtures.engine_email_type
-temporary_testing_schema = fixtures.temporary_testing_schema
 
 
 TARGET_DICT = "target_dict"
@@ -134,9 +126,6 @@ MASTER_DB_TYPE_MAP_SPEC = {
             PostgresType.DATE: {VALID: [("1999-01-18 AD", "1999-01-18 AD")]},
             PostgresType.TEXT: {VALID: [("1999-01-18 AD", "1999-01-18")]},
             PostgresType.CHARACTER_VARYING: {VALID: [("1999-01-18 AD", "1999-01-18")]},
-            PostgresType.TIMESTAMP_WITH_TIME_ZONE: {
-                VALID: [("1999-01-18 AD", "1999-01-18T00:00:00.0Z AD")]
-            },
             PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE: {
                 VALID: [("1999-01-18 AD", "1999-01-18T00:00:00.0 AD")]
             },
@@ -246,7 +235,15 @@ MASTER_DB_TYPE_MAP_SPEC = {
     },
     PostgresType.MONEY: {
         TARGET_DICT: {
+            PostgresType.BIGINT: {
+                VALID: [
+                    # Following case is failing for some reason.
+                    # ("$12341234.00", 12341234)
+                ]
+            },
             PostgresType.CHARACTER: {VALID: []},
+            PostgresType.DOUBLE_PRECISION: {VALID: [("$12.12", 12.12)]},
+            PostgresType.INTEGER: {VALID: [("$123412.00", 123412)]},
             MathesarCustomType.MATHESAR_MONEY: {VALID: [("$20.00", Decimal(20.0))]},
             MathesarCustomType.MULTICURRENCY_MONEY: {
                 VALID: [
@@ -260,6 +257,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 ]
             },
             PostgresType.MONEY: {VALID: [("$12.12", "$12.12")]},
+            PostgresType.REAL: {VALID: [("$12.12", 12.12)]},
+            PostgresType.SMALLINT: {VALID: [("$1234.00", 1234)]},
             PostgresType.TEXT: {VALID: [("$12.12", "$12.12")]},
             PostgresType.CHARACTER_VARYING: {VALID: [("$12.12", "$12.12")]},
         }
@@ -708,30 +707,30 @@ MASTER_DB_TYPE_MAP_SPEC = {
 }
 
 
-def test_get_alter_column_types_with_custom_engine(engine_with_types):
-    type_dict = cast_operations.get_supported_alter_column_types(engine_with_types, friendly_names=True)
-    for type_ in CUSTOM_TYPE_DICT.values():
-        assert type_ in type_dict.values()
-    assert all(
-        [
-            type_ in type_dict.values()
-            for type_ in CUSTOM_TYPE_DICT.values()
-        ]
-    )
+# TODO move to a more fundamental db type test suite
+def test_get_alter_column_types_with_custom_engine(engine_with_uris):
+    engine, _ = engine_with_uris
+    available_known_db_types = get_available_known_db_types(engine)
+    custom_db_types = CUSTOM_DB_TYPE_TO_SA_CLASS.keys()
+    for custom_db_type in custom_db_types:
+        assert custom_db_type in available_known_db_types
 
 
-def test_get_alter_column_types_with_unfriendly_names(engine_with_types):
-    type_dict = cast_operations.get_supported_alter_column_types(
-        engine_with_types, friendly_names=False,
-    )
-    assert all(
-        [
-            type_dict[type_]().compile(dialect=engine_with_types.dialect) == type_
-            for type_ in type_dict
-        ]
-    )
+# TODO move to a more fundamental db type test suite
+def test_db_type_juggling_consistency(engine_with_uris):
+    """
+    A db type should remain constant after being reflected from its SA class.
+    """
+    engine, _ = engine_with_uris
+    available_known_db_types = get_available_known_db_types(engine)
+    for db_type in available_known_db_types:
+        sa_class = db_type.get_sa_class(engine)
+        db_type_from_sa_class = get_db_type_enum_from_class(sa_class, engine)
+        assert db_type == db_type_from_sa_class
 
 
+# This list is assembled by taking all source and target type pairs without type options and then
+# appending some of those pairs again with type options specified.
 type_test_list = [
     (
         source_type,
@@ -769,14 +768,14 @@ type_test_list = [
     "source_type,target_type,options,expect_type_compiled_str", type_test_list
 )
 def test_alter_column_type_alters_column_type(
-        engine_email_type, source_type, target_type, options, expect_type_compiled_str
+        engine_with_mathesar, source_type, target_type, options, expect_type_compiled_str
 ):
     """
     The massive number of cases make sure all type casting functions at
     least pass a smoke test for each type mapping defined in
     MASTER_DB_TYPE_MAP_SPEC above.
     """
-    engine, schema = engine_email_type
+    engine, schema = engine_with_mathesar
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
@@ -805,66 +804,105 @@ def test_alter_column_type_alters_column_type(
         schema=schema,
         autoload_with=engine
     ).columns[COLUMN_NAME]
-    actual_type = actual_column.type.compile(dialect=engine.dialect)
-    expect_type_compiled_str = (
-        expect_type_compiled_str + '(1)' if expect_type_compiled_str
-        == PostgresType.CHARACTER.id else expect_type_compiled_str
-    )
-    assert actual_type == expect_type_compiled_str
+    actual_type = get_db_type_enum_from_class(actual_column.type.__class__, engine)
+    assert actual_type == target_type
 
 
 type_test_data_args_list = [
-    (NUMERIC(precision=5), "numeric", {}, 1, 1.0),
-    (NUMERIC(precision=5, scale=2), "numeric", {}, 1, 1.0),
-    (NUMERIC, "numeric", {"precision": 5, "scale": 2}, 1.234, Decimal("1.23")),
+    (
+        NUMERIC(precision=5),
+        PostgresType.NUMERIC,
+        {},
+        1,
+        1.0,
+    ),
+    (
+        NUMERIC(precision=5, scale=2),
+        PostgresType.NUMERIC,
+        {},
+        1,
+        1.0,
+    ),
+    (
+        PostgresType.NUMERIC,
+        PostgresType.NUMERIC,
+        {"precision": 5, "scale": 2},
+        1.234,
+        Decimal("1.23"),
+    ),
     # test that rounding is as intended
-    (NUMERIC, "numeric", {"precision": 5, "scale": 2}, 1.235, Decimal("1.24")),
-    (PostgresType.CHARACTER_VARYING, "numeric", {"precision": 5, "scale": 2}, "500.134", Decimal("500.13")),
+    (
+        PostgresType.NUMERIC,
+        PostgresType.NUMERIC,
+        {"precision": 5, "scale": 2},
+        1.235,
+        Decimal("1.24"),
+    ),
+    (
+        PostgresType.CHARACTER_VARYING,
+        PostgresType.NUMERIC,
+        {"precision": 5, "scale": 2},
+        "500.134",
+        Decimal("500.13"),
+    ),
     (
         PostgresType.TIME_WITHOUT_TIME_ZONE,
-        "time without time zone",
+        PostgresType.TIME_WITHOUT_TIME_ZONE,
         {"precision": 0},
         "00:00:00.1234",
-        "00:00:00.0"
+        "00:00:00.0",
     ),
     (
         PostgresType.TIME_WITH_TIME_ZONE,
-        "time with time zone",
+        PostgresType.TIME_WITH_TIME_ZONE,
         {"precision": 0},
-        "00:00:00.1234-04:30", "00:00:00.0-04:30"
+        "00:00:00.1234-04:30",
+        "00:00:00.0-04:30",
     ),
     (
         PostgresType.TIMESTAMP_WITH_TIME_ZONE,
-        "timestamp with time zone",
+        PostgresType.TIMESTAMP_WITH_TIME_ZONE,
         {"precision": 0},
         "1999-01-01 00:00:00",
         "1999-01-01T00:00:00.0Z AD",
     ),
     (
         PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE,
-        "timestamp without time zone",
+        PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE,
         {"precision": 0},
         "1999-01-01 00:00:00",
         "1999-01-01T00:00:00.0 AD",
     ),
-    (PostgresType.CHARACTER_VARYING, "char", {"length": 5}, "abcde", "abcde"),
+    (
+        PostgresType.CHARACTER_VARYING,
+        PostgresType.CHARACTER,
+        {"length": 5},
+        "abcde",
+        "abcde",
+    ),
 ]
 
 
 @pytest.mark.parametrize(
-    "type_,target_type,options,value,expect_value", type_test_data_args_list
+    "source_type,target_type,options,value,expect_value", type_test_data_args_list
 )
 def test_alter_column_type_casts_column_data_args(
-        engine_email_type, type_, target_type, options, value, expect_value,
+        engine_with_mathesar, source_type, target_type, options, value, expect_value,
 ):
-    engine, schema = engine_email_type
+    engine, schema = engine_with_mathesar
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
+    # Sometimes source_type is a DatabaseType enum and other times an SA type instance.
+    source_sa_type = (
+        source_type.get_sa_class(engine)
+        if isinstance(source_type, DatabaseType)
+        else source_type
+    )
     input_table = Table(
         TABLE_NAME,
         metadata,
-        Column(COLUMN_NAME, type_),
+        Column(COLUMN_NAME, source_sa_type),
         schema=schema
     )
     input_table.create()
@@ -896,8 +934,8 @@ def test_alter_column_type_casts_column_data_args(
 
 type_test_data_gen_list = [
     (
-        source_type.id,
-        target_type.id,
+        source_type,
+        target_type,
         in_val,
         out_val,
     )
@@ -911,14 +949,14 @@ type_test_data_gen_list = [
     "source_type,target_type,in_val,out_val", type_test_data_gen_list
 )
 def test_alter_column_casts_data_gen(
-        engine_email_type, source_type, target_type, in_val, out_val
+        engine_with_mathesar, source_type, target_type, in_val, out_val
 ):
-    engine, schema = engine_email_type
-    available_types = get_available_types(engine)
+    engine, schema = engine_with_mathesar
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
-    in_sel = select(cast(cast(in_val, available_types[source_type]), VARCHAR))
+    source_sa_type = source_type.get_sa_class(engine)
+    in_sel = select(cast(cast(in_val, source_sa_type), VARCHAR))
     with engine.begin() as conn:
         processed_in_val = conn.execute(in_sel).scalar()
 
@@ -927,13 +965,14 @@ def test_alter_column_casts_data_gen(
         metadata,
         Column(
             COLUMN_NAME,
-            available_types[source_type],
+            source_sa_type,
             server_default=processed_in_val
         ),
         schema=schema
     )
     input_table.create()
     ins = input_table.insert().values(testcol=in_val)
+    target_sa_type = target_type.get_sa_class(engine)
     with engine.begin() as conn:
         conn.execute(ins)
         alter_column_type(
@@ -956,45 +995,44 @@ def test_alter_column_casts_data_gen(
     actual_default = get_column_default(table_oid, column_attnum, engine)
     # TODO This needs to be sorted out by fixing how server_default is set.
     if all([
-            source_type != MathesarCustomType.MULTICURRENCY_MONEY.value,
-            target_type != MathesarCustomType.MULTICURRENCY_MONEY.value,
+            source_type != MathesarCustomType.MULTICURRENCY_MONEY,
+            target_type != MathesarCustomType.MULTICURRENCY_MONEY,
     ]):
         assert actual_default == out_val
 
 
 type_test_bad_data_gen_list = [
     (
-        val[ISCHEMA_NAME],
-        MASTER_DB_TYPE_MAP_SPEC[target].get(
-            SUPPORTED_MAP_NAME, MASTER_DB_TYPE_MAP_SPEC[target][ISCHEMA_NAME]
-        ),
+        source_type,
+        target_type,
         data,
     )
-    for val in MASTER_DB_TYPE_MAP_SPEC.values()
-    for target in val[TARGET_DICT]
-    for data in val[TARGET_DICT][target].get(INVALID, [])
+    for source_type, val in MASTER_DB_TYPE_MAP_SPEC.items()
+    for target_type in val[TARGET_DICT]
+    for data in val[TARGET_DICT][target_type].get(INVALID, [])
 ]
 
 
 @pytest.mark.parametrize(
-    "type_,target_type,value", type_test_bad_data_gen_list
+    "source_type,target_type,value", type_test_bad_data_gen_list
 )
 def test_alter_column_type_raises_on_bad_column_data(
-        engine_email_type, type_, target_type, value,
+        engine_with_mathesar, source_type, target_type, value,
 ):
-    engine, schema = engine_email_type
-    available_types = get_available_types(engine)
+    engine, schema = engine_with_mathesar
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
+    source_sa_type = source_type.get_sa_class(engine)
     input_table = Table(
         TABLE_NAME,
         metadata,
-        Column(COLUMN_NAME, available_types[type_]),
+        Column(COLUMN_NAME, source_sa_type),
         schema=schema
     )
     input_table.create()
     ins = input_table.insert(values=(value,))
+    target_sa_type = target_type.get_sa_class(engine)
     with engine.begin() as conn:
         conn.execute(ins)
         with pytest.raises(Exception):
@@ -1008,9 +1046,9 @@ def test_alter_column_type_raises_on_bad_column_data(
 
 
 def test_alter_column_type_raises_on_bad_parameters(
-        engine_email_type,
+        engine_with_mathesar,
 ):
-    engine, schema = engine_email_type
+    engine, schema = engine_with_mathesar
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
@@ -1031,123 +1069,135 @@ def test_alter_column_type_raises_on_bad_parameters(
                 COLUMN_NAME,
                 engine,
                 conn,
-                "numeric",
+                PostgresType.NUMERIC,
                 bad_options
             )
             assert e.orig == InvalidParameterValue
 
 
-def test_get_column_cast_expression_unchanged(engine_with_types):
-    target_type = "numeric"
+def test_get_column_cast_expression_unchanged(engine_with_schema):
+    engine, _ = engine_with_schema
+    target_type = PostgresType.NUMERIC
     col_name = "my_column"
     column = Column(col_name, NUMERIC)
     cast_expr = cast_operations.get_column_cast_expression(
-        column, target_type, engine_with_types
+        column, target_type, engine
     )
     assert cast_expr == column
 
 
-def test_get_column_cast_expression_change(engine_with_types):
-    target_type = "boolean"
+def test_get_column_cast_expression_change(engine_with_schema):
+    engine, _ = engine_with_schema
+    target_type = PostgresType.BOOLEAN
     col_name = "my_column"
     column = Column(col_name, NUMERIC)
     cast_expr = cast_operations.get_column_cast_expression(
-        column, target_type, engine_with_types
+        column, target_type, engine
     )
     assert str(cast_expr) == f"mathesar_types.cast_to_boolean({col_name})"
 
 
-def test_get_column_cast_expression_change_quotes(engine_with_types):
-    target_type = "boolean"
+def test_get_column_cast_expression_change_quotes(engine_with_schema):
+    engine, _ = engine_with_schema
+    target_type = PostgresType.BOOLEAN
     col_name = "A Column Needing Quotes"
     column = Column(col_name, NUMERIC)
     cast_expr = cast_operations.get_column_cast_expression(
-        column, target_type, engine_with_types
+        column, target_type, engine
     )
     assert str(cast_expr) == f'mathesar_types.cast_to_boolean("{col_name}")'
 
 
-def test_get_column_cast_expression_unsupported(engine_with_types):
-    target_type = "this_type_does_not_exist"
+def test_get_column_cast_expression_unsupported(engine_with_schema):
+    engine, _ = engine_with_schema
+    target_type = MathesarCustomType.URI
     column = Column("colname", NUMERIC)
     with pytest.raises(cast_operations.UnsupportedTypeException):
         cast_operations.get_column_cast_expression(
-            column, target_type, engine_with_types
+            column, target_type, engine
         )
 
 
 cast_expr_numeric_option_list = [
-    (NUMERIC, "numeric", {"precision": 3}, 'CAST(colname AS NUMERIC(3))'),
     (
         PostgresType.NUMERIC,
-        "numeric",
-        {"precision": 3, "scale": 2},
-        'CAST(colname AS NUMERIC(3, 2))'
+        PostgresType.NUMERIC,
+        {"precision": 3},
+        'CAST(colname AS NUMERIC(3))',
     ),
     (
         PostgresType.NUMERIC,
-        "numeric",
+        PostgresType.NUMERIC,
         {"precision": 3, "scale": 2},
-        'CAST(colname AS NUMERIC(3, 2))'
+        'CAST(colname AS NUMERIC(3, 2))',
     ),
     (
-        VARCHAR,
-        "numeric",
+        PostgresType.NUMERIC,
+        PostgresType.NUMERIC,
         {"precision": 3, "scale": 2},
-        'CAST(mathesar_types.cast_to_numeric(colname) AS NUMERIC(3, 2))'
+        'CAST(colname AS NUMERIC(3, 2))',
     ),
     (
-        datetime.Interval,
-        "interval",
+        PostgresType.CHARACTER_VARYING,
+        PostgresType.NUMERIC,
+        {"precision": 3, "scale": 2},
+        'CAST(mathesar_types.cast_to_numeric(colname) AS NUMERIC(3, 2))',
+    ),
+    (
+        PostgresType.INTERVAL,
+        PostgresType.INTERVAL,
         {"fields": "YEAR"},
-        "CAST(colname AS INTERVAL YEAR)"
+        "CAST(colname AS INTERVAL YEAR)",
     ),
     (
-        datetime.Interval,
-        "interval",
+        PostgresType.INTERVAL,
+        PostgresType.INTERVAL,
         {"precision": 2},
-        "CAST(colname AS INTERVAL (2))"
+        "CAST(colname AS INTERVAL (2))",
     ),
     (
-        datetime.Interval,
-        "interval",
+        PostgresType.INTERVAL,
+        PostgresType.INTERVAL,
         {"precision": 3, "fields": "SECOND"},
-        "CAST(colname AS INTERVAL SECOND (3))"
+        "CAST(colname AS INTERVAL SECOND (3))",
     ),
     (
-        VARCHAR,
-        "interval",
+        PostgresType.CHARACTER_VARYING,
+        PostgresType.INTERVAL,
         {"precision": 3, "fields": "SECOND"},
-        "CAST(mathesar_types.cast_to_interval(colname) AS INTERVAL SECOND (3))"
+        "CAST(mathesar_types.cast_to_interval(colname) AS INTERVAL SECOND (3))",
     )
 ]
 
 
 @pytest.mark.parametrize(
-    "type_,target_type,options,expect_cast_expr", cast_expr_numeric_option_list
+    "source_type,target_type,options,expect_cast_expr", cast_expr_numeric_option_list
 )
 def test_get_column_cast_expression_type_options(
-        engine_with_types, type_, target_type, options, expect_cast_expr
+        engine_with_mathesar, source_type, target_type, options, expect_cast_expr
 ):
-    column = Column("colname", type_)
+    engine, _ = engine_with_mathesar
+    source_sa_type = source_type.get_sa_class(engine)
+    column = Column("colname", source_sa_type)
     cast_expr = cast_operations.get_column_cast_expression(
-        column, target_type, engine_with_types, type_options=options,
+        column, target_type, engine, type_options=options,
     )
-    actual_cast_expr = str(cast_expr.compile(engine_with_types))
+    actual_cast_expr = str(cast_expr.compile(engine))
     assert actual_cast_expr == expect_cast_expr
 
 
 expect_cast_tuples = [
-    (key, [target for target in val[TARGET_DICT]])
-    for key, val in MASTER_DB_TYPE_MAP_SPEC.items()
+    (source_type, [target_type for target_type in val[TARGET_DICT]])
+    for source_type, val in MASTER_DB_TYPE_MAP_SPEC.items()
 ]
 
 
 @pytest.mark.parametrize("source_type,expect_target_types", expect_cast_tuples)
-def test_get_full_cast_map(engine_with_types, source_type, expect_target_types):
-    actual_cast_map = cast_operations.get_full_cast_map(engine_with_types)
+def test_get_full_cast_map(engine_with_mathesar, source_type, expect_target_types):
+    engine, _ = engine_with_mathesar
+    actual_cast_map = cast_operations.get_full_cast_map(engine)
     actual_target_types = actual_cast_map[source_type]
-    assert sorted(actual_target_types) == sorted(expect_target_types)
+    assert set(actual_target_types) == set(expect_target_types)
 
 
 money_array_examples = [
@@ -1186,8 +1236,8 @@ money_array_examples = [
 
 
 @pytest.mark.parametrize("source_str,expect_arr", money_array_examples)
-def test_mathesar_money_array_sql(engine_email_type, source_str, expect_arr):
-    engine, _ = engine_email_type
+def test_mathesar_money_array_sql(engine_with_mathesar, source_str, expect_arr):
+    engine, _ = engine_with_mathesar
     with engine.begin() as conn:
         res = conn.execute(
             select(

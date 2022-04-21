@@ -6,6 +6,7 @@ environment (e.g., the login info for the Postgres instance for testing)
 import pytest
 from sqlalchemy import create_engine, text
 from config.settings import DATABASES
+from db.engine import add_custom_types_to_ischema_names
 
 TEST_DB = "mathesar_db_test"
 
@@ -28,8 +29,7 @@ def test_db():
         conn.execute(text(f"DROP DATABASE {TEST_DB} WITH (FORCE)"))
 
 
-@pytest.fixture(scope="session")
-def engine(test_db):
+def _create_engine(test_db):
     return create_engine(
         _get_connection_string(
             DATABASES["default"]["USER"],
@@ -41,6 +41,53 @@ def engine(test_db):
         # Setting a fixed timezone makes the timezone aware test cases predictable.
         connect_args={"options": "-c timezone=utc -c lc_monetary=en_US.UTF-8"}
     )
+
+
+@pytest.fixture(scope="session")
+def engine(test_db):
+    engine = _create_engine(test_db)
+    return engine
+
+
+@pytest.fixture
+def engine_with_ischema_names_updated(test_db):
+    """
+    This fixture does not inherit from the fixture `engine`, because it mutates the engine, which
+    would otherwise taint tests depending on `engine`.
+    """
+    engine = _create_engine(test_db)
+    add_custom_types_to_ischema_names(engine)
+    return engine
+
+
+APP_SCHEMA = "test_schema"
+
+
+@pytest.fixture
+def engine_with_schema(engine):
+    schema = APP_SCHEMA
+    _create_schema(engine, schema)
+    yield engine, schema
+    _drop_schema(engine, schema)
+
+
+@pytest.fixture
+def engine_with_schema_with_ischema_names_updated(engine_with_ischema_names_updated):
+    engine = engine_with_ischema_names_updated
+    schema = APP_SCHEMA
+    _create_schema(engine, schema)
+    yield engine, schema
+    _drop_schema(engine, schema)
+
+
+def _create_schema(engine, schema):
+    with engine.begin() as conn:
+        conn.execute(text(f"CREATE SCHEMA {schema};"))
+
+
+def _drop_schema(engine, schema):
+    with engine.begin() as conn:
+        conn.execute(text(f"DROP SCHEMA {schema} CASCADE;"))
 
 
 def _get_superuser_engine():

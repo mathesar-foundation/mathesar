@@ -241,15 +241,19 @@ def get_db_type_enum_from_id(db_type_id) -> Optional[DatabaseType]:
 # methods throughout the codebase; should be renamed at earliest convenience.
 def get_available_known_db_types(engine) -> Sequence[DatabaseType]:
     """
-    Returns a tuple of DatabaseType instances that are available on provided engine.
+    Returns a tuple of DatabaseType instances that are not ignored and are available on provided
+    engine.
     """
     type_ids_on_database = _get_type_ids_on_database(engine)
     return tuple(
         db_type
         for db_type in known_db_types
-        if db_type.is_available(
-            engine,
-            type_ids_on_database=type_ids_on_database,
+        if (
+            not db_type.is_ignored
+            and db_type.is_available(
+                engine,
+                type_ids_on_database=type_ids_on_database,
+            )
         )
     )
 

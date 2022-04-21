@@ -9,12 +9,10 @@ from db.functions import hints
 from db.functions.base import DBFunction, Contains, sa_call_sql_function, Equal
 from db.functions.packed import DBFunctionPacked
 
-EMAIL_DOMAIN_NAME = MathesarCustomType.EMAIL.id + "_domain_name"
-EMAIL_LOCAL_PART = MathesarCustomType.EMAIL.id + "_local_part"
-
 DB_TYPE = MathesarCustomType.EMAIL.id
-QUALIFIED_EMAIL_DOMAIN_NAME = EMAIL_DOMAIN_NAME
-QUALIFIED_EMAIL_LOCAL_PART = EMAIL_LOCAL_PART
+
+EMAIL_DOMAIN_NAME = DB_TYPE + "_domain_name"
+EMAIL_LOCAL_PART = DB_TYPE + "_local_part"
 
 # This is directly from the HTML5 email spec, we could change it based on our
 # needs (it's more restrictive than the actual RFC)
@@ -36,7 +34,7 @@ class Email(UserDefinedType):
 # it can be used via `func.email_domain_name`
 class email_domain_name(GenericFunction):
     type = Text
-    name = quoted_name(QUALIFIED_EMAIL_DOMAIN_NAME, False)
+    name = quoted_name(EMAIL_DOMAIN_NAME, False)
     identifier = EMAIL_DOMAIN_NAME
 
 
@@ -44,7 +42,7 @@ class email_domain_name(GenericFunction):
 # it can be used via `func.email_local_part`
 class email_local_part(GenericFunction):
     type = Text
-    name = quoted_name(QUALIFIED_EMAIL_LOCAL_PART, False)
+    name = quoted_name(EMAIL_LOCAL_PART, False)
     identifier = EMAIL_LOCAL_PART
 
 
@@ -59,14 +57,14 @@ def install(engine):
     CREATE DOMAIN {DB_TYPE} AS text CHECK (value ~ {EMAIL_REGEX_STR});
     """
     create_email_domain_name_query = f"""
-    CREATE OR REPLACE FUNCTION {QUALIFIED_EMAIL_DOMAIN_NAME}({DB_TYPE})
+    CREATE OR REPLACE FUNCTION {EMAIL_DOMAIN_NAME}({DB_TYPE})
     RETURNS text AS $$
         SELECT split_part($1, '@', 2);
     $$
     LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
     """
     create_email_local_part_query = f"""
-    CREATE OR REPLACE FUNCTION {QUALIFIED_EMAIL_LOCAL_PART}({DB_TYPE})
+    CREATE OR REPLACE FUNCTION {EMAIL_LOCAL_PART}({DB_TYPE})
     RETURNS text AS $$
         SELECT split_part($1, '@', 1);
     $$
