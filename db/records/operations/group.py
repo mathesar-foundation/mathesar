@@ -38,6 +38,7 @@ class GroupBy:
             mode=GroupMode.DISTINCT.value,
             num_groups=None,
             bound_tuples=None,
+            count_by=None,
             global_min=None,
             global_max=None,
     ):
@@ -45,6 +46,7 @@ class GroupBy:
         self._mode = mode
         self._num_groups = num_groups
         self._bound_tuples = bound_tuples
+        self._count_by = count_by
         self._global_min = global_min
         self._global_max = global_max
         self._ranged = bool(mode != GroupMode.DISTINCT.value)
@@ -64,11 +66,20 @@ class GroupBy:
 
     @property
     def bound_tuples(self):
-        return self._bound_tuples
+        if self._bound_tuples is not None:
+            return self._bound_tuples
+        elif self._mode == GroupMode.COUNT_BY.value:
+            return [bt for bt in self._bound_tuple_generator()]
 
     @property
     def ranged(self):
         return self._ranged
+
+    def _bound_tuple_generator(self):
+        val = self._global_min
+        while val <= self._global_max:
+            yield (val,)
+            val += self._count_by
 
     def validate(self):
         group_modes = {group_mode.value for group_mode in GroupMode}
@@ -88,9 +99,16 @@ class GroupBy:
             raise records_exceptions.BadGroupFormat(
                 f'{GroupMode.MAGNITUDE.value} mode only works on single columns'
             )
-        elif self.mode == GroupMode.ENDPOINTS.value and self.bound_tuples is None:
+        elif self.mode == GroupMode.ENDPOINTS.value and not self.bound_tuples:
             raise records_exceptions.BadGroupFormat(
                 f'{GroupMode.ENDPOINTS.value} mode requires bound_tuples'
+            )
+        elif (
+                self.mode == GroupMode.COUNT_BY.value
+                and (self._global_min is None or self._global_max is None)
+        ):
+            raise records_exceptions.BadGroupFormat(
+                f'{GroupMode.COUNT_BY.value} mode requires global_min and global_max'
             )
 
         for col in self.columns:
@@ -142,7 +160,10 @@ def get_group_augmented_records_query(table, group_by):
         query = _get_percentile_range_group_select(
             table, grouping_columns, group_by.num_groups
         )
-    elif group_by.mode == GroupMode.ENDPOINTS.value:
+    elif (
+            group_by.mode == GroupMode.ENDPOINTS.value
+            or group_by.mode == GroupMode.COUNT_BY.value
+    ) :
         query = _get_custom_endpoints_range_group_select(
             table, grouping_columns, group_by.bound_tuples
         )
