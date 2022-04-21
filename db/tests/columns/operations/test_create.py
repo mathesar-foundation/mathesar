@@ -6,14 +6,8 @@ from db.columns.operations.select import get_column_attnum_from_name, get_column
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.constraints.operations.select import get_column_constraints
 from db.tests.columns.utils import create_test_table
-from db.tests.types import fixtures
 from db.types.base import get_available_known_db_types, known_db_types, get_db_type_enum_from_class, PostgresType
 from db.constants import COLUMN_NAME_TEMPLATE
-
-
-engine_with_types = fixtures.engine_with_types
-temporary_testing_schema = fixtures.temporary_testing_schema
-engine_email_type = fixtures.engine_email_type
 
 
 duplicate_column_options = [
@@ -48,11 +42,11 @@ def _check_duplicate_unique_constraint(
         assert len(constraints_) == 0
 
 
-def test_type_list_completeness(engine_email_type):
+def test_type_list_completeness(engine_with_mathesar):
     """
     Ensure that unavailable types are unavailable for a good reason.
     """
-    engine, schema = engine_email_type
+    engine, schema = engine_with_mathesar
     actual_supported_db_types = get_available_known_db_types(engine)
     unavailable_types = set.difference(set(known_db_types), set(actual_supported_db_types))
     for db_type in unavailable_types:
@@ -64,14 +58,14 @@ def test_type_list_completeness(engine_email_type):
 
 
 @pytest.mark.parametrize("target_type", known_db_types)
-def test_create_column(engine_email_type, target_type):
+def test_create_column(engine_with_mathesar, target_type):
     """
     One of the things this test checks is for every type in known_db_types, once that type is
     applied to a column, and the column is reflected, that the reflected type is the same one that
     was applied.
     """
     if target_type.is_application_supported and target_type.is_reflection_supported and not target_type.is_optional:
-        engine, schema = engine_email_type
+        engine, schema = engine_with_mathesar
         table_name = "atableone"
         initial_column_name = "original_column"
         new_column_name = "added_column"
@@ -93,8 +87,8 @@ def test_create_column(engine_email_type, target_type):
 
 
 @pytest.mark.parametrize("target_type", [PostgresType.NUMERIC])
-def test_create_column_options(engine_email_type, target_type):
-    engine, schema = engine_email_type
+def test_create_column_options(engine_with_mathesar, target_type):
+    engine, schema = engine_with_mathesar
     table_name = "atableone"
     initial_column_name = "original_column"
     new_column_name = "added_column"
@@ -119,8 +113,8 @@ def test_create_column_options(engine_email_type, target_type):
 
 
 @pytest.mark.parametrize("target_type", [PostgresType.CHARACTER, PostgresType.CHARACTER_VARYING])
-def test_create_column_length_options(engine_email_type, target_type):
-    engine, schema = engine_email_type
+def test_create_column_length_options(engine_with_mathesar, target_type):
+    engine, schema = engine_with_mathesar
     table_name = "atableone"
     initial_column_name = "original_column"
     new_column_name = "added_column"
@@ -148,8 +142,8 @@ def test_create_column_length_options(engine_email_type, target_type):
     "type_options",
     [{"fields": "year"}, {"precision": 3}, {"precision": 3, "fields": "second"}]
 )
-def test_create_column_interval_options(engine_email_type, type_options):
-    engine, schema = engine_email_type
+def test_create_column_interval_options(engine_with_mathesar, type_options):
+    engine, schema = engine_with_mathesar
     table_name = "atableone"
     initial_column_name = "original_column"
     new_column_name = "added_column"
@@ -341,8 +335,8 @@ def test_duplicate_column_default(engine_with_schema, copy_data, copy_constraint
         assert default is None
 
 
-def test_create_column_accepts_column_data_without_name_attribute(engine_email_type):
-    engine, schema = engine_email_type
+def test_create_column_accepts_column_data_without_name_attribute(engine_with_mathesar):
+    engine, schema = engine_with_mathesar
     table_name = "atableone"
     initial_column_name = f"{COLUMN_NAME_TEMPLATE}0"
     expected_column_name = f"{COLUMN_NAME_TEMPLATE}1"
@@ -360,8 +354,8 @@ def test_create_column_accepts_column_data_without_name_attribute(engine_email_t
     assert created_col.name == expected_column_name
 
 
-def test_create_column_accepts_column_data_with_name_as_empty_string(engine_email_type):
-    engine, schema = engine_email_type
+def test_create_column_accepts_column_data_with_name_as_empty_string(engine_with_mathesar):
+    engine, schema = engine_with_mathesar
     table_name = "atableone"
     initial_column_name = f"{COLUMN_NAME_TEMPLATE}0"
     expected_column_name = f"{COLUMN_NAME_TEMPLATE}1"
@@ -379,8 +373,8 @@ def test_create_column_accepts_column_data_with_name_as_empty_string(engine_emai
     assert created_col.name == expected_column_name
 
 
-def test_generate_column_name(engine_email_type):
-    engine, schema = engine_email_type
+def test_generate_column_name(engine_with_mathesar):
+    engine, schema = engine_with_mathesar
     name_set = {
         'Center',
         'Status',

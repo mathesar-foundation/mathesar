@@ -14,13 +14,7 @@ from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tables.operations.split import extract_columns_from_table
 from db.tests.columns.utils import column_test_dict, create_test_table, get_default
-from db.tests.types import fixtures
 from db.types.base import get_db_type_enum_from_class, PostgresType
-
-
-engine_with_types = fixtures.engine_with_types
-temporary_testing_schema = fixtures.temporary_testing_schema
-engine_email_type = fixtures.engine_email_type
 
 
 nullable_changes = [(True, True), (False, False), (True, False), (False, True)]
@@ -360,8 +354,8 @@ def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_create(engine_email_type, col_type):
-    engine, schema = engine_email_type
+def test_column_default_create(engine_with_mathesar, col_type):
+    engine, schema = engine_with_mathesar
     table_name = "create_column_default_table"
     column_name = "create_column_default_column"
     _, set_default, expt_default = column_test_dict[col_type].values()
@@ -384,8 +378,8 @@ def test_column_default_create(engine_email_type, col_type):
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_update(engine_email_type, col_type):
-    engine, schema = engine_email_type
+def test_column_default_update(engine_with_mathesar, col_type):
+    engine, schema = engine_with_mathesar
     table_name = "update_column_default_table"
     column_name = "update_column_default_column"
     start_default, set_default, expt_default = column_test_dict[col_type].values()
@@ -408,8 +402,8 @@ def test_column_default_update(engine_email_type, col_type):
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_delete(engine_email_type, col_type):
-    engine, schema = engine_email_type
+def test_column_default_delete(engine_with_mathesar, col_type):
+    engine, schema = engine_with_mathesar
     table_name = "delete_column_default_table"
     column_name = "delete_column_default_column"
     _, set_default, _ = column_test_dict[col_type].values()
@@ -430,8 +424,8 @@ def test_column_default_delete(engine_email_type, col_type):
     assert created_default is None
 
 
-def test_batch_update_columns_no_changes(engine_email_type):
-    engine, schema = engine_email_type
+def test_batch_update_columns_no_changes(engine_with_mathesar):
+    engine, schema = engine_with_mathesar
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
@@ -446,8 +440,8 @@ def test_batch_update_columns_no_changes(engine_email_type):
         assert updated_table.columns[index].name == table.columns[index].name
 
 
-def test_batch_update_column_names(engine_email_type):
-    engine, schema = engine_email_type
+def test_batch_update_column_names(engine_with_mathesar):
+    engine, schema = engine_with_mathesar
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
@@ -466,8 +460,8 @@ def test_batch_update_column_names(engine_email_type):
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
-def test_batch_update_column_types(engine_email_type):
-    engine, schema = engine_email_type
+def test_batch_update_column_types(engine_with_mathesar):
+    engine, schema = engine_with_mathesar
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
@@ -486,8 +480,8 @@ def test_batch_update_column_types(engine_email_type):
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
-def test_batch_update_column_names_and_types(engine_email_type):
-    engine, schema = engine_email_type
+def test_batch_update_column_names_and_types(engine_with_mathesar):
+    engine, schema = engine_with_mathesar
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
@@ -508,8 +502,8 @@ def test_batch_update_column_names_and_types(engine_email_type):
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
-def test_batch_update_column_drop_columns(engine_email_type):
-    engine, schema = engine_email_type
+def test_batch_update_column_drop_columns(engine_with_mathesar):
+    engine, schema = engine_with_mathesar
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
@@ -528,8 +522,8 @@ def test_batch_update_column_drop_columns(engine_email_type):
         assert updated_table.columns[index].name == column_data[index - 2]['name']
 
 
-def test_batch_update_column_all_operations(engine_email_type):
-    engine, schema = engine_email_type
+def test_batch_update_column_all_operations(engine_with_mathesar):
+    engine, schema = engine_with_mathesar
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 

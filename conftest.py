@@ -4,6 +4,7 @@ intended to be the containment zone for anything specific about the testing
 environment (e.g., the login info for the Postgres instance for testing)
 """
 import pytest
+import copy
 from sqlalchemy import create_engine, text
 from config.settings import DATABASES
 from db.engine import add_custom_types_to_ischema_names
@@ -16,21 +17,21 @@ def test_db_name():
     return TEST_DB
 
 
-@pytest.fixture(scope="session", autouse=True)
-def test_db():
+@pytest.fixture(scope="session")
+def test_db(test_db_name):
     superuser_engine = _get_superuser_engine()
     with superuser_engine.connect() as conn:
         conn.execution_options(isolation_level="AUTOCOMMIT")
-        conn.execute(text(f"DROP DATABASE IF EXISTS {TEST_DB} WITH (FORCE)"))
-        conn.execute(text(f"CREATE DATABASE {TEST_DB}"))
-    yield TEST_DB
+        conn.execute(text(f"DROP DATABASE IF EXISTS {test_db_name} WITH (FORCE)"))
+        conn.execute(text(f"CREATE DATABASE {test_db_name}"))
+    yield test_db_name
     with superuser_engine.connect() as conn:
         conn.execution_options(isolation_level="AUTOCOMMIT")
-        conn.execute(text(f"DROP DATABASE {TEST_DB} WITH (FORCE)"))
+        conn.execute(text(f"DROP DATABASE {test_db_name} WITH (FORCE)"))
 
 
 def _create_engine(test_db):
-    return create_engine(
+    engine = create_engine(
         _get_connection_string(
             DATABASES["default"]["USER"],
             DATABASES["default"]["PASSWORD"],
@@ -41,6 +42,18 @@ def _create_engine(test_db):
         # Setting a fixed timezone makes the timezone aware test cases predictable.
         connect_args={"options": "-c timezone=utc -c lc_monetary=en_US.UTF-8"}
     )
+    _make_ischema_names_unique(engine)
+    return engine
+
+
+def _make_ischema_names_unique(engine):
+    """
+    For some reason, engine.dialect.ischema_names reference the same dict across different engines.
+    This resets it to a referentially unique copy of itself.
+    """
+    ischema_names = engine.dialect.ischema_names
+    ischema_names_copy = copy.deepcopy(ischema_names)
+    setattr(engine.dialect, "ischema_names", ischema_names_copy)
 
 
 @pytest.fixture(scope="session")
@@ -49,7 +62,7 @@ def engine(test_db):
     return engine
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def engine_with_ischema_names_updated(test_db):
     """
     This fixture does not inherit from the fixture `engine`, because it mutates the engine, which
