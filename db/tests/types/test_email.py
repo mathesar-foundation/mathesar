@@ -2,17 +2,10 @@ from psycopg2.errors import CheckViolation
 import pytest
 from sqlalchemy import text, select, Table, Column, MetaData
 from sqlalchemy.exc import IntegrityError
-#from db.tests.types import fixtures
 from db.types.custom import email
 from db.utils import execute_query
 from db.functions.base import ColumnName, Literal, sa_call_sql_function
 from db.functions.operations.apply import apply_db_function_as_filter
-
-
-# We need to set these variables when the file loads, or pytest can't
-# properly detect the fixtures.  Importing them directly results in a
-# flake8 unused import error, and a bunch of flake8 F811 errors.
-#roster_table_obj = fixtures.roster_table_obj
 
 
 def test_domain_func_wrapper(engine_with_mathesar):
