@@ -26,11 +26,10 @@
   $: errors = status?.errorsFromWholeRowAndCells ?? [];
   $: isRowSelected = primaryKeyValue !== undefined && $selectedRows.has(rowKey);
 
-  function selectionChanged(event: CustomEvent<{ checked: boolean }>) {
+  function selectionChanged({ detail: checked }: CustomEvent<boolean>) {
     if (primaryKeyValue === undefined) {
       return;
     }
-    const { checked } = event.detail;
     if (checked) {
       meta.selectedRows.add(rowKey);
     } else {

@@ -1,3 +1,4 @@
+import type { ComponentAndProps } from '@mathesar-component-library-dir/common/types/ComponentAndPropsTypes';
 import { hasStringProperty } from './typeUtils';
 
 export function formatSize(sizeInBytes: number): string {
@@ -15,6 +16,8 @@ export function formatSize(sizeInBytes: number): string {
 
   return `${repValue.toFixed(2)} ${repUnit}B`;
 }
+
+export type LabelGetter<Option> = (value: Option) => string | ComponentAndProps;
 
 /**
  * If the given value has a label property and it is a string, return it.
