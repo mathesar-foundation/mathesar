@@ -8,6 +8,9 @@ ul.list-box-options {
     position: relative;
     padding: 6px 12px;
     cursor: default;
+    box-sizing: content-box;
+    line-height: 1.2;
+    min-height: 1.2em;
 
     &:hover {
       background: #f3f4f5;

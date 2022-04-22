@@ -34,7 +34,7 @@
   export let getLabel: DefinedProps['getLabel'] = defaultGetLabel;
   export let checkEquality: DefinedProps['checkEquality'] = (
     opt: Option,
-    opt2: Option | undefined,
+    opt2: Option,
   ) => opt === opt2;
   export let checkIfOptionIsDisabled: DefinedProps['checkIfOptionIsDisabled'] =
     () => false;

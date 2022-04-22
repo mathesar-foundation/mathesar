@@ -24,5 +24,8 @@ export function getLabel(v: unknown, labelKey = 'label'): string {
   if (hasStringProperty(v, labelKey)) {
     return v[labelKey];
   }
+  if (v === undefined) {
+    return '';
+  }
   return String(v);
 }
