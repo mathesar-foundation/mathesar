@@ -192,7 +192,6 @@ def _validate_columns_for_batch_update(table, column_data):
 
 
 def _batch_update_column_types(table_oid, column_data_list, connection, engine):
-    table = reflect_table_from_oid(table_oid, engine, connection)
     for index, column_data in enumerate(column_data_list):
         column_attnum = column_data.get('attnum', None)
         if 'plain_type' in column_data and column_attnum is not None:
