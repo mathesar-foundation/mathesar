@@ -27,6 +27,7 @@
   let dbFormHasError = false;
   let displayFormHasError = false;
   let defaultValueHasError = false;
+  let showDefaultValueErrorIndication = false;
 
   // Why are the following not reactive?
   // The whole component gets re-rendered when selectedAbstractType changes,
@@ -87,7 +88,7 @@
     <TypeOptionTab
       bind:selectedTab
       tab="database"
-      hasError={dbFormHasError || defaultValueHasError}
+      hasError={dbFormHasError || showDefaultValueErrorIndication}
     >
       <Icon size="0.75em" data={faDatabase} />
       <span>Database</span>
@@ -97,6 +98,9 @@
         bind:selectedTab
         tab="display"
         hasError={displayFormHasError}
+        on:select={() => {
+          showDefaultValueErrorIndication = defaultValueHasError;
+        }}
       >
         <Icon size="0.75em" data={faPalette} />
         <span>Display</span>
@@ -106,7 +110,11 @@
   <div class="type-options-content">
     {#if selectedTab === 'database'}
       <DbOptionsForm bind:selectedDbType {selectedAbstractType} {dbForm} />
-      <SetDefaultValue bind:defaultValue bind:defaultValueHasError />
+      <SetDefaultValue
+        bind:defaultValue
+        bind:defaultValueHasError
+        bind:showError={showDefaultValueErrorIndication}
+      />
       <DbTypeIndicator {selectedDbType} />
     {:else if displayForm}
       <FormBuilder form={displayForm} />

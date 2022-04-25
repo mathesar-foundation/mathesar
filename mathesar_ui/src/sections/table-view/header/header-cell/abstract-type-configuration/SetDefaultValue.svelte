@@ -60,7 +60,7 @@
   }
 
   // Show error to the user only after user modifies value
-  let showError = false;
+  export let showError = false;
 
   function onInputChange() {
     if (typeof value === 'undefined' || value === null || value === '') {
@@ -85,7 +85,7 @@
     <div>
       <LabeledInput label="Default Value" layout="stacked">
         {#if isDynamic}
-          <TextInput {value} disabled={true} />
+          <TextInput value={String(value)} disabled={true} />
         {:else}
           <FormField errors={showError ? ['* This is a required field'] : []}>
             <TextInput
