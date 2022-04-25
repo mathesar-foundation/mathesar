@@ -18,6 +18,7 @@
   import ColumnName from '@mathesar/components/ColumnName.svelte';
   import { toast } from '@mathesar/stores/toast';
   import Form from '@mathesar/components/Form.svelte';
+  import { getAvailableName } from '@mathesar/utils/db';
   import UniqueConstraintsHelp from './__help__/UniqueConstraintsHelp.svelte';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
   import UniqueConstraintColumnsHelp from './__help__/UniqueConstraintColumnsHelp.svelte';
@@ -36,25 +37,17 @@
   function getSuggestedName(
     _tableName: string,
     _columns: Column[],
-    _columnsInTable: Column[],
-    _existingConstraintNames: string[],
-  ): string | undefined {
+    reservedNames: Set<string>,
+  ): string {
     const columnNames = _columns.map((c) => c.name);
-    let ordinal = 0;
-    while (true) {
-      const suffix = ordinal ? `_${ordinal}` : '';
-      const name = `${_tableName}_${columnNames.join('_')}${suffix}`;
-      if (!_existingConstraintNames.includes(name)) {
-        return name;
-      }
-      ordinal += 1;
-    }
+    const desiredName = `${_tableName}_${columnNames.join('_')}`;
+    return getAvailableName(desiredName, reservedNames);
   }
 
   function getNameValidationErrors(
     _namingStrategy: NamingStrategy,
     _constraintName: string | undefined,
-    _existingConstraintNames: string[],
+    _existingConstraintNames: Set<string>,
   ) {
     if (_namingStrategy === 'auto') {
       return [];
@@ -62,7 +55,7 @@
     if (!_constraintName?.trim()) {
       return ['Name cannot be empty'];
     }
-    if (_existingConstraintNames.includes(_constraintName?.trim())) {
+    if (_existingConstraintNames.has(_constraintName?.trim())) {
       return ['A constraint with that name already exists'];
     }
     return [];
@@ -79,8 +72,8 @@
   }
 
   $: constraintsDataStore = $tabularData.constraintsDataStore;
-  $: existingConstraintNames = $constraintsDataStore.constraints.map(
-    (c) => c.name,
+  $: existingConstraintNames = new Set(
+    $constraintsDataStore.constraints.map((c) => c.name),
   );
   $: tableName = $tables.data.get($tabularData.id)?.name ?? '';
   $: columnsDataStore = $tabularData.columnsDataStore;
@@ -100,7 +93,6 @@
         ? getSuggestedName(
             tableName,
             constraintColumns,
-            columnsInTable,
             existingConstraintNames,
           )
         : undefined;
