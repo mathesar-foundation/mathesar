@@ -1,5 +1,3 @@
-import type { SvelteComponent } from 'svelte';
-
 export * from './common/utils';
 
 export type Appearance =
@@ -9,14 +7,6 @@ export type Appearance =
   | 'plain'
   | 'ghost';
 export type Size = 'small' | 'medium' | 'large';
-
-export interface Option {
-  value: string | number;
-  label?: string;
-  labelComponent?: typeof SvelteComponent;
-  labelComponentProps?: unknown;
-  disabled?: boolean;
-}
 
 export type { Tab } from './tabs/TabContainerTypes';
 export type { TreeItem } from './tree/TreeTypes';

@@ -8,6 +8,10 @@ import type { AbstractTypeConfiguration } from '@mathesar/stores/abstract-types/
 import type { CellComponentAndProps } from './data-types/components/typeDefinitions';
 import DataTypes from './data-types';
 
+export type CellValueFormatter<T> = (
+  value: T | null | undefined,
+) => string | null | undefined;
+
 function getCellConfiguration(
   column: Column,
 ): AbstractTypeConfiguration['cell'] | undefined {
@@ -33,6 +37,8 @@ export function getCellComponentWithProps(
       return DataTypes.boolean.get(column);
     case 'string':
       return DataTypes.string.get(column, combinedCellConfig);
+    case 'number':
+      return DataTypes.number.get(column);
     default:
       return DataTypes.string.get(column);
   }

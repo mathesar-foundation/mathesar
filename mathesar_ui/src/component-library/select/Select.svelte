@@ -29,6 +29,8 @@
    */
   export let options: Option[] = [];
 
+  export let prependBlank = false;
+
   export let value: Option | undefined = undefined;
 
   /**
@@ -51,8 +53,10 @@
    */
   export let ariaLabel: string | undefined = undefined;
 
-  export let getLabel: (value: Option, labelKey?: string) => string =
-    defaultGetLabel;
+  export let getLabel: (
+    value: Option | undefined,
+    labelKey?: string,
+  ) => string = defaultGetLabel;
 
   /**
    * By default, options will be compared by equality. If you're using objects as
@@ -65,11 +69,11 @@
    * ```
    */
   export let valuesAreEqual: (
-    optionToCompare: Option,
+    optionToCompare: Option | undefined,
     selectedOption: Option | undefined,
   ) => boolean = (a, b) => a === b;
 
-  function setValueFromArray(values: Option[]) {
+  function setValueFromArray(values: (Option | undefined)[]) {
     [value] = values;
     dispatch('change', value);
   }
@@ -84,6 +88,7 @@
     }
   }
 
+  $: fullOptions = prependBlank ? [undefined, ...options] : options;
   $: setValueOnOptionChange(options);
 </script>
 
@@ -91,7 +96,7 @@
 
 <ListBox
   selectionType="single"
-  {options}
+  options={fullOptions}
   value={typeof value !== 'undefined' ? [value] : []}
   on:change={(e) => setValueFromArray(e.detail)}
   {labelKey}
@@ -114,11 +119,7 @@
     on:keydown={(e) => api.handleKeyDown(e)}
   >
     <svelte:fragment slot="trigger">
-      {#if typeof value !== 'undefined'}
-        {getLabel(value, labelKey)}
-      {:else}
-        No option selected
-      {/if}
+      {getLabel(value, labelKey)}
     </svelte:fragment>
 
     <svelte:fragment slot="content">
