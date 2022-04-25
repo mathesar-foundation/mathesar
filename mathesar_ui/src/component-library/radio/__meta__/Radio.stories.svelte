@@ -15,13 +15,13 @@
 
   <p>
     <LabeledInput label="With a form label" layout="inline-input-first">
-      <Radio group={null} />
+      <Radio />
     </LabeledInput>
   </p>
 
   <p>
     <LabeledInput label="Disabled" layout="inline-input-first">
-      <Radio group={null} disabled />
+      <Radio disabled />
     </LabeledInput>
   </p>
 </Story>
