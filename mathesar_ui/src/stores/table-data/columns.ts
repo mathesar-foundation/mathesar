@@ -13,7 +13,6 @@ import {
   States,
 } from '@mathesar/utils/api';
 import { TabularType } from './TabularType';
-import type { Meta } from './meta';
 
 export interface Column extends ApiColumn {
   __columnIndex?: number;
@@ -71,14 +70,11 @@ export class ColumnsDataStore
 
   private api: ReturnType<typeof api>;
 
-  private meta: Meta;
-
   private fetchCallback: (storeData: ColumnsData) => void;
 
   constructor(
     type: TabularType,
     parentId: number,
-    meta: Meta,
     fetchCallback: (storeData: ColumnsData) => void = () => {},
   ) {
     super();
@@ -89,7 +85,6 @@ export class ColumnsDataStore
       columns: [],
       primaryKey: undefined,
     });
-    this.meta = meta;
     const tabularEntity = this.type === TabularType.Table ? 'tables' : 'views';
     this.api = api(`/api/db/v0/${tabularEntity}/${this.parentId}/columns/`);
     this.fetchCallback = fetchCallback;

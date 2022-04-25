@@ -59,7 +59,7 @@ export class TabularData {
     this.type = props.type;
     this.id = props.id;
     this.meta = new Meta(props.metaProps);
-    this.columnsDataStore = new ColumnsDataStore(this.type, this.id, this.meta);
+    this.columnsDataStore = new ColumnsDataStore(this.type, this.id);
     this.constraintsDataStore = new ConstraintsDataStore(this.id);
     this.recordsData = new RecordsData(
       this.type,
