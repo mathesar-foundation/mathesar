@@ -7,10 +7,7 @@ export interface ListBoxStaticContextProps<Option> {
   getLabel: (value: Option, labelKey?: string) => string;
   searchable: boolean;
   disabled: boolean;
-  checkEquality: (
-    option: Option,
-    optionToCompare: Option | undefined,
-  ) => boolean;
+  checkEquality: (option: Option, optionToCompare: Option) => boolean;
   checkIfOptionIsDisabled: (optionToCheck: Option) => boolean;
 }
 
