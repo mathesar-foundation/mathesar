@@ -505,6 +505,7 @@ def test_record_list_groups(
     json_grouping = json.dumps(ids_converted_group_by)
     limit = 100
     query_str = f'grouping={json_grouping}&order_by={json_order_by}&limit={limit}'
+    print(query_str)
 
     response = client.get(f'/api/db/v0/tables/{table.id}/records/?{query_str}')
     response_data = response.json()

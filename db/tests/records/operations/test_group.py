@@ -120,6 +120,17 @@ def test_GB_validate_passes_valid_kwargs_endpoints():
     gb.validate()
 
 
+def test_GB_validate_passes_valid_kwargs_count_by():
+    gb = group.GroupBy(
+        columns=['col1'],
+        mode=group.GroupMode.COUNT_BY.value,
+        count_by=3,
+        global_min=234.5,
+        global_max=987.6
+    )
+    gb.validate()
+
+
 def test_GB_validate_fails_invalid_mode():
     with pytest.raises(records_exceptions.InvalidGroupType):
         group.GroupBy(
@@ -151,6 +162,50 @@ def test_GB_validate_fails_missing_bound_tuples():
         group.GroupBy(
             columns=['col1', 'col2'],
             mode=group.GroupMode.ENDPOINTS.value,
+        )
+
+
+def test_GB_validate_fails_missing_count_by():
+    with pytest.raises(records_exceptions.BadGroupFormat):
+        group.GroupBy(
+            columns=['col1'],
+            mode=group.GroupMode.COUNT_BY.value,
+            count_by=None,
+            global_min=234.5,
+            global_max=987.6
+        )
+
+
+def test_GB_validate_fails_missing_global_min():
+    with pytest.raises(records_exceptions.BadGroupFormat):
+        group.GroupBy(
+            columns=['col1'],
+            mode=group.GroupMode.COUNT_BY.value,
+            count_by=3,
+            global_min=None,
+            global_max=987.6
+        )
+
+
+def test_GB_validate_fails_missing_global_max():
+    with pytest.raises(records_exceptions.BadGroupFormat):
+        group.GroupBy(
+            columns=['col1'],
+            mode=group.GroupMode.COUNT_BY.value,
+            count_by=3,
+            global_min=234.5,
+            global_max=None
+        )
+
+
+def test_GB_validate_fails_multiple_cols_with_count_by():
+    with pytest.raises(records_exceptions.BadGroupFormat):
+        group.GroupBy(
+            columns=['col1', 'col2'],
+            mode=group.GroupMode.COUNT_BY.value,
+            count_by=3,
+            global_min=234.5,
+            global_max=987.6
         )
 
 
@@ -227,9 +282,22 @@ def test_get_group_augmented_records_query_metadata_fields(roster_table_obj, gro
         )
 
 
-def test_smoke_get_group_augmented_records_query_magnitude(magnitude_table_obj):
+single_col_number_modes = [
+    group.GroupMode.MAGNITUDE.value,
+    group.GroupMode.COUNT_BY.value,
+]
+
+
+@pytest.mark.parametrize('mode', single_col_number_modes)
+def test_smoke_get_group_augmented_records_query_magnitude(magnitude_table_obj, mode):
     magnitude, engine = magnitude_table_obj
-    group_by = group.GroupBy(['big_num'], mode=group.GroupMode.MAGNITUDE.value)
+    group_by = group.GroupBy(
+        ['big_num'],
+        mode=mode,
+        count_by=50,
+        global_min=0,
+        global_max=1000
+    )
     augmented_query = group.get_group_augmented_records_query(magnitude, group_by)
     with engine.begin() as conn:
         res = conn.execute(augmented_query).fetchall()
@@ -324,6 +392,36 @@ def test_group_select_correct_num_group_id_magnitude(
     group_by = group.GroupBy(
         [col_name],
         mode=group.GroupMode.MAGNITUDE.value,
+    )
+    augmented_query = group.get_group_augmented_records_query(magnitude, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_query).fetchall()
+
+    assert max([_group_id(row) for row in res]) == num
+
+
+count_by_count_by = [0.000005, 0.00001, 7, 80.5, 750, 25, 100]
+count_by_global_min = [0, 0, 0, -100, -4500, -100, 0]
+count_by_global_max = [0.0003, 0.001, 250, 600, 5500, 100, 2000]
+count_by_max_group_id = [59, 99, 29, 8, 13, 8, 20]
+
+
+@pytest.mark.parametrize(
+    'col_name,count_by,global_min,global_max,num', zip(
+        magnitude_columns, count_by_count_by, count_by_global_min,
+        count_by_global_max, count_by_max_group_id
+    )
+)
+def test_group_select_correct_num_group_id_count_by(
+        magnitude_table_obj, col_name, count_by, global_min, global_max, num
+):
+    magnitude, engine = magnitude_table_obj
+    group_by = group.GroupBy(
+        [col_name],
+        mode=group.GroupMode.COUNT_BY.value,
+        count_by=count_by,
+        global_min=global_min,
+        global_max=global_max,
     )
     augmented_query = group.get_group_augmented_records_query(magnitude, group_by)
     with engine.begin() as conn:

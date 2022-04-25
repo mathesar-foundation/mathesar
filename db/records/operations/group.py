@@ -105,10 +105,17 @@ class GroupBy:
             )
         elif (
                 self.mode == GroupMode.COUNT_BY.value
-                and (self._global_min is None or self._global_max is None)
+                and (
+                    self._count_by is None
+                    or not len(self.columns) == 1
+                    or self._global_min is None
+                    or self._global_max is None
+                )
         ):
             raise records_exceptions.BadGroupFormat(
-                f'{GroupMode.COUNT_BY.value} mode requires global_min and global_max'
+                f'{GroupMode.COUNT_BY.value} mode requires'
+                ' count_by, global_min, and global_max.'
+                ' further, it works only for single columns.'
             )
 
         for col in self.columns:
@@ -163,7 +170,7 @@ def get_group_augmented_records_query(table, group_by):
     elif (
             group_by.mode == GroupMode.ENDPOINTS.value
             or group_by.mode == GroupMode.COUNT_BY.value
-    ) :
+    ):
         query = _get_custom_endpoints_range_group_select(
             table, grouping_columns, group_by.bound_tuples
         )
