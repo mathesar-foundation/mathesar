@@ -3,7 +3,7 @@
   import type { TableEntry } from '@mathesar/AppTypes';
 
   export let tables: TableEntry[];
-  export let table: TableEntry | undefined;
+  export let table: TableEntry | undefined = undefined;
   export let prependBlank = false;
 </script>
 
