@@ -1,5 +1,13 @@
 import type { Column } from '@mathesar/stores/table-data/types';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+import type {
+  ComponentAndProps,
+  TextInputProps,
+} from '@mathesar-component-library/types';
+import {
+  TextInput,
+  TextArea,
+  optionalNonNullable,
+} from '@mathesar-component-library';
 import TextBoxCell from './components/textbox/TextBoxCell.svelte';
 import TextAreaCell from './components/textarea/TextAreaCell.svelte';
 import type {
@@ -24,6 +32,18 @@ const stringType: CellComponentFactory = {
     const typeOptions = column.type_options ?? {};
     const component = config?.multiLine ? TextAreaCell : TextBoxCell;
     return { component, props: typeOptions };
+  },
+  getInput: (
+    column: StringLikeColumn,
+    config?: { multiLine?: boolean },
+  ): ComponentAndProps<TextInputProps> => {
+    const component = config?.multiLine ? TextArea : TextInput;
+    return {
+      component,
+      props: {
+        maxlength: optionalNonNullable(column.type_options?.length),
+      },
+    };
   },
 };
 

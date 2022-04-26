@@ -39,14 +39,13 @@ export function getCellComponentWithProps(
 ): ComponentAndProps<unknown> {
   const cellInfo = getCellInfo(column);
   const config = getCellConfiguration(column, cellInfo);
-  switch (cellInfo?.type) {
-    case 'boolean':
-      return DataTypes.boolean.get(column);
-    case 'string':
-      return DataTypes.string.get(column, config);
-    case 'number':
-      return DataTypes.number.get(column);
-    default:
-      return DataTypes.string.get(column);
-  }
+  return DataTypes[cellInfo?.type ?? 'string'].get(column, config);
+}
+
+export function getColumnBasedInputComponentWithProps(
+  column: Column,
+): ComponentAndProps<unknown> {
+  const cellInfo = getCellInfo(column);
+  const config = getCellConfiguration(column, cellInfo);
+  return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }

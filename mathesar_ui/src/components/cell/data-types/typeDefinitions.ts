@@ -12,4 +12,8 @@ export interface CellComponentFactory {
     column: Column,
     config?: Record<string, unknown>,
   ): ComponentAndProps<unknown>;
+  getInput(
+    column: Column,
+    config?: Record<string, unknown>,
+  ): ComponentAndProps<unknown>;
 }
