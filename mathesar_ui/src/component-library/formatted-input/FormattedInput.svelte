@@ -1,13 +1,30 @@
+<script context="module" lang="ts">
+  type SimplifiedTextInputProps = Omit<TextInputProps, 'value'>;
+  type ParseErrorCallback = (p: { userInput: string; error: unknown }) => void;
+
+  export interface FormattedInputProps<T> extends SimplifiedTextInputProps {
+    formatter: InputFormatter<T>;
+    value?: T | null;
+    onParseError?: ParseErrorCallback;
+  }
+</script>
+
 <script lang="ts">
-  import { tick } from 'svelte';
+  import { createEventDispatcher, tick } from 'svelte';
+  import type { TextInputProps } from '@mathesar-component-library-dir/text-input/TextInput.svelte';
   import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
   import { getOutcomeOfBeforeInputEvent } from '@mathesar-component-library-dir/common/utils';
-  import type { InputFormatter, ParseResult } from './InputFormatter';
+  import type { ParseResult, InputFormatter } from './InputFormatter';
   import { getCursorPositionAfterReformat } from './formattedInputUtils';
 
   type T = $$Generic;
+  type $$Props = FormattedInputProps<T>;
 
-  export let formatter: InputFormatter<T>;
+  const dispatch = createEventDispatcher<{
+    input: T | null;
+  }>();
+
+  export let formatter: $$Props['formatter'];
   /**
    * ## `null` vs `undefined`
    *
@@ -44,13 +61,10 @@
    *   to turn `value` into `undefined` again because when they clear the
    *   contents, `value` will become `null`.
    */
-  let parentValue: T | null | undefined = undefined;
+  let parentValue: $$Props['value'] = undefined;
   export { parentValue as value };
-  export let element: HTMLInputElement | undefined = undefined;
-  export let onParseError: (props: {
-    userInput: string;
-    error: unknown;
-  }) => void = () => {};
+  export let onParseError: Required<$$Props>['onParseError'] = () => {};
+  export let element: $$Props['element'] = undefined;
 
   let childText = '';
   let parseResult: ParseResult<T> | undefined;
@@ -69,6 +83,11 @@
 
   $: handleParentValueChange(parentValue);
 
+  function updateParentValue(v: T | null) {
+    parentValue = v;
+    dispatch('input', v);
+  }
+
   async function handleChildValueChange(event: InputEvent) {
     event.preventDefault();
     const { value: userInput, cursorPosition } =
@@ -76,7 +95,7 @@
 
     try {
       parseResult = formatter.parse(userInput);
-      parentValue = parseResult.value;
+      updateParentValue(parseResult.value);
       childText = parseResult.intermediateDisplay;
       const newCursorPosition = getCursorPositionAfterReformat({
         oldText: userInput,
@@ -100,5 +119,7 @@
   {...$$restProps}
   bind:element
   on:beforeinput={handleChildValueChange}
+  on:blur
   on:blur={handleBlur}
+  on:keydown
 />

@@ -50,10 +50,6 @@
       previewColumns: [...previewColumns],
     });
   }
-
-  function handleChangeFirstRowAsHeader(e: CustomEvent) {
-    void updateDataFileHeader(fileImportStore, e.detail.checked as boolean);
-  }
 </script>
 
 <h2>Confirm your data</h2>
@@ -79,7 +75,7 @@
     <Checkbox
       bind:checked={$fileImportStore.firstRowHeader}
       disabled={$fileImportStore.previewStatus === States.Loading}
-      on:change={handleChangeFirstRowAsHeader}
+      on:change={({ detail }) => updateDataFileHeader(fileImportStore, detail)}
     />
   </LabeledInput>
 </div>

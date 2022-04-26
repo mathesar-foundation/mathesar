@@ -5,8 +5,8 @@ export interface CellComponentAndProps<T> {
   props?: T;
 }
 
-export interface CellTypeProps {
-  value: unknown;
+export interface CellTypeProps<Value> {
+  value: Value | null | undefined;
   isActive: boolean;
   disabled: boolean;
 }
@@ -18,10 +18,8 @@ export interface TextBoxCellExternalProps {
 }
 
 export interface TextBoxCellProps
-  extends CellTypeProps,
-    TextBoxCellExternalProps {
-  value: string | null | undefined;
-}
+  extends CellTypeProps<string>,
+    TextBoxCellExternalProps {}
 
 // TextArea
 
@@ -29,13 +27,22 @@ export type TextAreaCellExternalProps = TextBoxCellExternalProps;
 
 export type TextAreaCellProps = TextBoxCellProps;
 
+// Number
+
+export interface NumberCellExternalProps {
+  format: 'english' | 'german' | 'french' | 'hindi' | 'swiss' | null;
+  isPercentage: boolean;
+}
+
+export interface NumberCellProps
+  extends CellTypeProps<string | number>,
+    NumberCellExternalProps {}
+
 // Checkbox
 
 export type CheckBoxCellExternalProps = Record<string, never>;
 
-export interface CheckBoxCellProps extends CellTypeProps {
-  value: boolean | null | undefined;
-}
+export type CheckBoxCellProps = CellTypeProps<boolean>;
 
 // SingleSelect
 
@@ -52,7 +59,5 @@ export interface SingleSelectCellExternalProps<
 }
 
 export interface SingleSelectCellProps<ValueType, OptionType = ValueType>
-  extends CellTypeProps,
-    SingleSelectCellExternalProps<ValueType, OptionType> {
-  value: ValueType | null | undefined;
-}
+  extends CellTypeProps<ValueType>,
+    SingleSelectCellExternalProps<ValueType, OptionType> {}

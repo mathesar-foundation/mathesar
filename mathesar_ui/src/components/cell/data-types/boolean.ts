@@ -17,12 +17,12 @@ export interface BooleanLikeColumn extends Column {
   } | null;
 }
 
+type Props =
+  | CheckBoxCellExternalProps
+  | SingleSelectCellExternalProps<boolean, string>;
+
 export default {
-  get: (
-    column: BooleanLikeColumn,
-  ): CellComponentAndProps<
-    CheckBoxCellExternalProps | SingleSelectCellExternalProps<boolean, string>
-  > => {
+  get: (column: BooleanLikeColumn): CellComponentAndProps<Props> => {
     const displayOptions = column.display_options ?? undefined;
     if (displayOptions && displayOptions.input === 'dropdown') {
       const customLabels = displayOptions.custom_labels ?? undefined;

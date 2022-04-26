@@ -25,7 +25,7 @@
 >
   <TextInput
     focusOnMount={true}
-    maxlength={length}
+    maxlength={length ?? undefined}
     {disabled}
     bind:value
     on:blur={handleInputBlur}
