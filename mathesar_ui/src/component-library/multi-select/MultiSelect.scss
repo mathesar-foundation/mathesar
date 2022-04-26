@@ -1,0 +1,46 @@
+.multi-select-trigger {
+  --spacing: 0.15em;
+  --spacing-2: calc(2 * var(--spacing));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: solid 0.02em #ddd;
+  padding: var(--spacing);
+  min-height: 1.5em;
+
+  .selected-values {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .selected-value {
+    display: flex;
+    padding: 0 var(--spacing-2);
+    margin: var(--spacing);
+    background: #f4f4f4;
+    border: solid 0.02em #ddd;
+    border-radius: 0.1em;
+  }
+
+  .icon-button {
+    color: #888;
+    cursor: pointer;
+  }
+  .icon-button:hover {
+    color: black;
+  }
+
+  .remove-button {
+    display: flex;
+    align-items: center;
+    padding-left: var(--spacing-2);
+  }
+
+  .clear-button {
+    padding-left: 1em;
+    visibility: hidden;
+  }
+  &:hover .clear-button {
+    visibility: visible;
+  }
+}
