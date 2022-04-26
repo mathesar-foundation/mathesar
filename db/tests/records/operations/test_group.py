@@ -131,6 +131,15 @@ def test_GB_validate_passes_valid_kwargs_count_by():
     gb.validate()
 
 
+def test_GB_validate_passes_valid_kwargs_prefix():
+    gb = group.GroupBy(
+        columns=['col1'],
+        mode=group.GroupMode.PREFIX.value,
+        prefix_length=3
+    )
+    gb.validate()
+
+
 def test_GB_validate_fails_invalid_mode():
     with pytest.raises(records_exceptions.InvalidGroupType):
         group.GroupBy(
@@ -162,6 +171,23 @@ def test_GB_validate_fails_missing_bound_tuples():
         group.GroupBy(
             columns=['col1', 'col2'],
             mode=group.GroupMode.ENDPOINTS.value,
+        )
+
+
+def test_GB_validate_fails_missing_prefix_length():
+    with pytest.raises(records_exceptions.BadGroupFormat):
+        group.GroupBy(
+            columns=['col1'],
+            mode=group.GroupMode.PREFIX.value,
+        )
+
+
+def test_GB_validate_fails_multi_cols_prefix():
+    with pytest.raises(records_exceptions.BadGroupFormat):
+        group.GroupBy(
+            columns=['col1', 'col2'],
+            mode=group.GroupMode.PREFIX.value,
+            prefix_length=3
         )
 
 
@@ -282,6 +308,25 @@ def test_get_group_augmented_records_query_metadata_fields(roster_table_obj, gro
         )
 
 
+def test_smoke_get_group_augmented_records_query_prefix(roster_table_obj):
+    roster, engine = roster_table_obj
+    group_by = group.GroupBy(
+        ['Student Number'],
+        mode=group.GroupMode.PREFIX.value,
+        prefix_length=1,
+    )
+    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_query).fetchall()
+    for row in res:
+        assert all(
+            [
+                metadata_field.value in row[group.MATHESAR_GROUP_METADATA]
+                for metadata_field in group.GroupMetadataField
+            ]
+        )
+
+
 single_col_number_modes = [
     group.GroupMode.MAGNITUDE.value,
     group.GroupMode.COUNT_BY.value,
@@ -359,7 +404,15 @@ group_by_num_list = [
             ]
         ),
         4
-    )
+    ),
+    (
+        group.GroupBy(
+            ['Student Number'],
+            mode=group.GroupMode.PREFIX.value,
+            prefix_length=1
+        ),
+        16
+    ),
 ]
 
 
