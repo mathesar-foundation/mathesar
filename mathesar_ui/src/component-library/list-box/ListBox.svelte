@@ -31,7 +31,8 @@
   export let searchable: DefinedProps['searchable'] = false;
   export let disabled: DefinedProps['disabled'] = false;
   export let labelKey: DefinedProps['labelKey'] = 'label';
-  export let getLabel: DefinedProps['getLabel'] = defaultGetLabel;
+  export let getLabel: DefinedProps['getLabel'] = (option: Option) =>
+    defaultGetLabel(option, labelKey);
   export let checkEquality: DefinedProps['checkEquality'] = (
     opt: Option,
     opt2: Option,
@@ -231,7 +232,6 @@
 
   const staticProps: Writable<ListBoxStaticContextProps<Option>> = writable({
     selectionType,
-    labelKey,
     getLabel,
     searchable,
     disabled,
@@ -240,7 +240,6 @@
   });
   $: staticProps.set({
     selectionType,
-    labelKey,
     getLabel,
     searchable,
     disabled,
