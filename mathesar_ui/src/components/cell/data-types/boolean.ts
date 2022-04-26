@@ -1,5 +1,10 @@
 import type { Column } from '@mathesar/stores/table-data/types';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+import {
+  ComponentAndProps,
+  isDefinedNonNullable,
+  SelectProps,
+} from '@mathesar-component-library/types';
+import { Select } from '@mathesar-component-library';
 import CheckboxCell from './components/checkbox/CheckboxCell.svelte';
 import SingleSelectCell from './components/select/SingleSelectCell.svelte';
 import type {
@@ -22,15 +27,18 @@ type Props =
   | CheckBoxCellExternalProps
   | SingleSelectCellExternalProps<boolean, string>;
 
+function getLabels(
+  displayOptions?: BooleanLikeColumn['display_options'],
+): [string, string] {
+  const customLabels = displayOptions?.custom_labels ?? undefined;
+  return [customLabels?.TRUE ?? 'true', customLabels?.FALSE ?? 'false'];
+}
+
 const booleanType: CellComponentFactory = {
   get: (column: BooleanLikeColumn): ComponentAndProps<Props> => {
     const displayOptions = column.display_options ?? undefined;
     if (displayOptions && displayOptions.input === 'dropdown') {
-      const customLabels = displayOptions.custom_labels ?? undefined;
-      const options = [
-        customLabels?.TRUE ?? 'true',
-        customLabels?.FALSE ?? 'false',
-      ];
+      const options = getLabels(displayOptions);
       const getSelectedOptionsFromValue = (
         value: boolean | undefined | null,
       ): string[] => {
@@ -72,6 +80,23 @@ const booleanType: CellComponentFactory = {
       };
     }
     return { component: CheckboxCell, props: {} };
+  },
+  getInput: (
+    column: BooleanLikeColumn,
+  ): ComponentAndProps<SelectProps<boolean>> => {
+    const labels = getLabels(column.display_options);
+    return {
+      component: Select,
+      props: {
+        options: [true, false],
+        getLabel: (value?: boolean) => {
+          if (isDefinedNonNullable(value)) {
+            return value ? labels[0] : labels[1];
+          }
+          return '';
+        },
+      },
+    };
   },
 };
 

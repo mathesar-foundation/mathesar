@@ -1,3 +1,24 @@
+<script context="module" lang="ts">
+  import type { BaseInputProps } from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
+  import type {
+    Appearance,
+    ListBoxProps,
+  } from '@mathesar-component-library-dir/types';
+
+  export interface SelectProps<Option> extends BaseInputProps {
+    options: Option[];
+    value?: Option;
+    labelKey?: string;
+    getLabel?: LabelGetter<Option | undefined>;
+    prependBlank?: boolean;
+    contentClass?: string;
+    triggerClass?: string;
+    triggerAppearance?: Appearance;
+    ariaLabel?: string;
+    valuesAreEqual?: ListBoxProps<Option | undefined>['checkEquality'];
+  }
+</script>
+
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
@@ -8,56 +29,55 @@
   import { Dropdown } from '@mathesar-component-library-dir/dropdown';
   import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';
   import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
-  import type { Appearance } from '@mathesar-component-library-dir/types';
   import { getGloballyUniqueId } from '@mathesar-component-library-dir/common/utils/domUtils';
   import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
 
   type Option = $$Generic;
+  type $$Props = SelectProps<Option>;
+  type DefinedProps = Required<$$Props>;
 
   const dispatch = createEventDispatcher<{ change: Option | undefined }>();
 
-  export let id = getGloballyUniqueId();
-
-  export let disabled = false;
+  export let id: DefinedProps['id'] = getGloballyUniqueId();
+  export let disabled: DefinedProps['disabled'] = false;
 
   /**
    * Specifies the key on which the options label is stored.
    */
-  export let labelKey = 'label';
+  export let labelKey: DefinedProps['labelKey'] = 'label';
 
-  export let getLabel: LabelGetter<Option | undefined> = (
-    o: Option | undefined,
-  ) => defaultGetLabel(o, labelKey);
+  export let getLabel: DefinedProps['getLabel'] = (o: Option | undefined) =>
+    defaultGetLabel(o, labelKey);
 
   /**
    * List of options to select from. Must be an array of SelectOption.
    * @required
    */
-  export let options: Option[] = [];
+  export let options: DefinedProps['options'];
 
-  export let prependBlank = false;
+  export let prependBlank: DefinedProps['prependBlank'] = false;
 
-  export let value: Option | undefined = undefined;
+  export let value: $$Props['value'] = undefined;
 
   /**
    * Classes to apply to the content (each of the options).
    */
-  export let contentClass = '';
+  export let contentClass: DefinedProps['contentClass'] = '';
 
   /**
    * Classes to apply to the trigger button (the dropdown button).
    */
-  export let triggerClass = '';
+  export let triggerClass: DefinedProps['triggerClass'] = '';
 
   /**
    * Appearance of the trigger button. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.
    */
-  export let triggerAppearance: Appearance = 'default';
+  export let triggerAppearance: DefinedProps['triggerAppearance'] = 'default';
 
   /**
    * The ARIA label for this select component.
    */
-  export let ariaLabel: string | undefined = undefined;
+  export let ariaLabel: $$Props['ariaLabel'] = undefined;
 
   /**
    * By default, options will be compared by equality. If you're using objects as
@@ -69,10 +89,7 @@
    * valuesAreEqual={(a, b) => a.id === b.id}
    * ```
    */
-  export let valuesAreEqual: (
-    optionToCompare: Option | undefined,
-    selectedOption: Option | undefined,
-  ) => boolean = (a, b) => a === b;
+  export let valuesAreEqual: DefinedProps['valuesAreEqual'] = (a, b) => a === b;
 
   function setValueFromArray(values: (Option | undefined)[]) {
     [value] = values;
