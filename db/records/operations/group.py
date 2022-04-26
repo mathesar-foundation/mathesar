@@ -75,6 +75,18 @@ class GroupBy:
             return [bt for bt in self._bound_tuple_generator()]
 
     @property
+    def count_by(self):
+        return self._count_by
+
+    @property
+    def global_min(self):
+        return self._count_by
+
+    @property
+    def global_max(self):
+        return self._count_by
+
+    @property
     def prefix_length(self):
         return self._prefix_length
 

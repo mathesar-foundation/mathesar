@@ -585,6 +585,11 @@ def test_record_list_groups(
     ]
     assert grouping_dict['mode'] == group_by.mode
     assert grouping_dict['num_groups'] == group_by.num_groups
+    assert grouping_dict['bound_tuples'] == group_by.bound_tuples
+    assert grouping_dict['count_by'] == group_by.count_by
+    assert grouping_dict['global_min'] == group_by.global_min
+    assert grouping_dict['global_max'] == group_by.global_max
+    assert grouping_dict['prefix_length'] == group_by.prefix_length
     assert grouping_dict['ranged'] == group_by.ranged
     _test_group_equality(grouping_dict['groups'], expected_groups)
 
