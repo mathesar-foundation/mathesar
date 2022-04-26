@@ -46,7 +46,6 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
     def get_serializer_fields(self):
         return self.fields
 
-
     def _run_validator(self, validator, field, message):
         """
         This method build on top of `_run_validator` method of the superclass
