@@ -23,7 +23,7 @@ export type TextAreaCellProps = TextBoxCellProps;
 // Number
 
 export interface NumberCellExternalProps {
-  format: 'english' | 'german' | 'french' | 'hindi' | 'swiss' | null;
+  locale?: string;
   isPercentage: boolean;
 }
 

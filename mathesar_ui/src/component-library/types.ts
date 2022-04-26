@@ -19,3 +19,4 @@ export * from './cancel-or-proceed-button-pair/CancelOrProceedButtonPairTypes';
 export * from './list-box/ListBoxTypes';
 export type { TextInputProps } from './text-input/TextInput.svelte';
 export type { TextAreaProps } from './text-area/TextArea.svelte';
+export type { StringifiedNumberInputProps } from './number-input/StringifiedNumberInput.svelte';

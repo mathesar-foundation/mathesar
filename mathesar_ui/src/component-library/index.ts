@@ -16,7 +16,11 @@ export { default as Icon } from './icon/Icon.svelte';
 export { InputGroup, InputGroupText } from './input-group';
 export { default as Label } from './label/Label.svelte';
 export { default as LabeledInput } from './labeled-input/LabeledInput.svelte';
-export { default as NumberInput } from './number-input/NumberInput.svelte';
+export {
+  NumberInput,
+  StringifiedNumberInput,
+  StringifiedNumberFormatter,
+} from './number-input';
 export { default as Progress } from './progress/Progress.svelte';
 export { default as Radio } from './radio/Radio.svelte';
 export { default as RadioGroup } from './radio-group/RadioGroup.svelte';
@@ -25,7 +29,6 @@ export { default as Spinner } from './spinner/Spinner.svelte';
 export { default as SpinnerArea } from './spinner-area/SpinnerArea.svelte';
 export { default as StringOrComponent } from './string-or-component/StringOrComponent.svelte';
 export { default as SpinnerButton } from './spinner-button/SpinnerButton.svelte';
-export { default as StringifiedNumberInput } from './number-input/StringifiedNumberInput.svelte';
 export { default as TextArea } from './text-area/TextArea.svelte';
 export { default as TextAvatar } from './text-avatar/TextAvatar.svelte';
 export { default as TextInput } from './text-input/TextInput.svelte';
