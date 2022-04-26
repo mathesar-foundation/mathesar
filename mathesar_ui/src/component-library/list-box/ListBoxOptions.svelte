@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, getContext, tick } from 'svelte';
+  import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
   import type { ListBoxContext } from './ListBoxTypes';
 
   type Option = $$Generic;
@@ -62,7 +63,7 @@
       class:in-focus={index === $focusedOptionIndex}
       on:click={() => api.pick(option)}
     >
-      <span>{$staticProps.getLabel(option, $staticProps.labelKey)}</span>
+      <StringOrComponent arg={$staticProps.getLabel(option)} />
     </li>
   {/each}
 </ul>
