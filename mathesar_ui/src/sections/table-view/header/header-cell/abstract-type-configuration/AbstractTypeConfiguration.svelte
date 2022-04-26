@@ -80,12 +80,12 @@
     typeChangeState = States.Loading;
     try {
       if (selectedDbType) {
-        await columnsDataStore.patchType(
-          column.id,
-          selectedDbType,
-          typeOptions,
-          displayOptions,
-        );
+        await columnsDataStore.patch(column.id, {
+          type: selectedDbType,
+          type_options: typeOptions,
+          display_options: displayOptions,
+          default: defaultValue?.is_dynamic ? undefined : defaultValue,
+        });
       }
     } catch (err) {
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
