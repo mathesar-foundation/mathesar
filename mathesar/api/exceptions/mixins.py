@@ -27,7 +27,7 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                 else:
                     pretty.extend(self.get_non_field_error_entries(errors[error_type]))
             else:
-                field = self.fields.fields[error_type]
+                field = self.get_serializer_fields().fields[error_type]
                 if isinstance(field, Serializer) and type(errors[error_type]) == dict:
                     field.initial_data = self.initial_data[error_type]
                     child_errors = field.build_pretty_errors(errors[error_type])
@@ -42,6 +42,10 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         if pretty:
             return pretty
         return []
+
+    def get_serializer_fields(self):
+        return self.fields
+
 
     def _run_validator(self, validator, field, message):
         """
