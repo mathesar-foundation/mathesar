@@ -6,9 +6,11 @@
     ListBoxOptions,
   } from '@mathesar-component-library-dir/list-box';
   import { Dropdown } from '@mathesar-component-library-dir/dropdown';
+  import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';
   import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
   import type { Appearance } from '@mathesar-component-library-dir/types';
   import { getGloballyUniqueId } from '@mathesar-component-library-dir/common/utils/domUtils';
+  import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
 
   type Option = $$Generic;
 
@@ -22,6 +24,10 @@
    * Specifies the key on which the options label is stored.
    */
   export let labelKey = 'label';
+
+  export let getLabel: LabelGetter<Option | undefined> = (
+    o: Option | undefined,
+  ) => defaultGetLabel(o, labelKey);
 
   /**
    * List of options to select from. Must be an array of SelectOption.
@@ -52,11 +58,6 @@
    * The ARIA label for this select component.
    */
   export let ariaLabel: string | undefined = undefined;
-
-  export let getLabel: (
-    value: Option | undefined,
-    labelKey?: string,
-  ) => string = defaultGetLabel;
 
   /**
    * By default, options will be compared by equality. If you're using objects as
@@ -119,7 +120,7 @@
     on:keydown={(e) => api.handleKeyDown(e)}
   >
     <svelte:fragment slot="trigger">
-      {getLabel(value, labelKey)}
+      <StringOrComponent arg={getLabel(value)} />
     </svelte:fragment>
 
     <svelte:fragment slot="content">
