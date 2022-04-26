@@ -1,7 +1,7 @@
 from enum import Enum
 import json
 import logging
-from sqlalchemy import select, func, and_, case, literal
+from sqlalchemy import select, func, and_, case, literal, cast, TEXT
 
 from db.records import exceptions as records_exceptions
 from db.records.operations import calculation
@@ -219,7 +219,7 @@ def _get_distinct_group_select(table, grouping_columns):
 
 def _get_prefix_group_select(table, grouping_columns, prefix_length):
     grouping_column = grouping_columns[0]
-    prefix_expr = func.left(grouping_column, prefix_length)
+    prefix_expr = func.left(cast(grouping_column, TEXT), prefix_length)
     window_def = GroupingWindowDefinition(
         order_by=grouping_columns, partition_by=prefix_expr
     )
