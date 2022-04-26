@@ -40,4 +40,5 @@
   on:input={({ detail: newChildValue }) => {
     parentValue = newChildValue;
   }}
+  on:input
 />

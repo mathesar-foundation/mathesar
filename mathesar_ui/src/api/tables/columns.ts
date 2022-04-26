@@ -55,6 +55,18 @@ export interface MoneyDisplayOptions extends FormattedNumberDisplayOptions {
   // use_accounting_notation: boolean;
 }
 
+export interface TextTypeOptions extends Record<string, unknown> {
+  length: number | null;
+}
+
+export interface BooleanDisplayOptions extends Record<string, unknown> {
+  input: 'checkbox' | 'dropdown' | null;
+  custom_labels: {
+    TRUE: string;
+    FALSE: string;
+  } | null;
+}
+
 export interface BaseColumn {
   id: number;
   name: string;

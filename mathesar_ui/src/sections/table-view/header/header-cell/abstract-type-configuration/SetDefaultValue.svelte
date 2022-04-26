@@ -24,14 +24,21 @@
 </script>
 
 <script lang="ts">
-  import { getValidationContext } from '@mathesar-component-library';
+  import {
+    getValidationContext,
+    isDefinedNonNullable,
+  } from '@mathesar-component-library';
   import {
     LabeledInput,
     Checkbox,
     TextInput,
   } from '@mathesar-component-library';
   import FormField from '@mathesar/components/FormField.svelte';
+  import DataTypeBasedInput from '@mathesar/components/cell/DataTypeBasedInput.svelte';
 
+  export let selectedDbType: Column['type'];
+  export let typeOptions: Column['type_options'];
+  export let displayOptions: Column['display_options'];
   export let defaultValue: Column['default'];
   export let defaultValueHasError = false;
 
@@ -63,10 +70,10 @@
   export let showError = false;
 
   function onInputChange() {
-    if (typeof value === 'undefined' || value === null || value === '') {
-      showError = true;
-    } else {
+    if (isDefinedNonNullable(value) && value !== '') {
       showError = false;
+    } else {
+      showError = true;
     }
   }
 </script>
@@ -88,10 +95,16 @@
           <TextInput value={String(value)} disabled={true} />
         {:else}
           <FormField errors={showError ? ['* This is a required field'] : []}>
-            <TextInput
+            <DataTypeBasedInput
               bind:value
+              column={{
+                type: selectedDbType,
+                type_options: typeOptions,
+                display_options: displayOptions,
+              }}
               hasError={showError}
               on:input={onInputChange}
+              on:change={onInputChange}
             />
           </FormField>
         {/if}

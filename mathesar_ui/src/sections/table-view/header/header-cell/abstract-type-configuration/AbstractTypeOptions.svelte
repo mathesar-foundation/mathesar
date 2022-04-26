@@ -114,6 +114,9 @@
         bind:defaultValue
         bind:defaultValueHasError
         bind:showError={showDefaultValueErrorIndication}
+        {selectedDbType}
+        {typeOptions}
+        {displayOptions}
       />
       <DbTypeIndicator {selectedDbType} />
     {:else if displayForm}

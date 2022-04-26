@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/stores/table-data/types';
+import type { TextTypeOptions } from '@mathesar/api/tables/columns';
 import type {
   ComponentAndProps,
   TextInputProps,
@@ -14,12 +14,10 @@ import type {
   TextBoxCellExternalProps,
   TextAreaCellExternalProps,
 } from './components/typeDefinitions';
-import type { CellComponentFactory } from './typeDefinitions';
+import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
 
-export interface StringLikeColumn extends Column {
-  type_options: {
-    length?: number | null;
-  } | null;
+export interface StringLikeColumn extends CellColumnLike {
+  type_options: Partial<TextTypeOptions> | null;
 }
 
 const stringType: CellComponentFactory = {

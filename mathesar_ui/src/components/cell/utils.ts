@@ -1,5 +1,4 @@
 import { get } from 'svelte/store';
-import type { Column } from '@mathesar/stores/table-data/types';
 import {
   currentDbAbstractTypes,
   getAbstractTypeForDbType,
@@ -7,27 +6,28 @@ import {
 import type { AbstractTypeConfiguration } from '@mathesar/stores/abstract-types/types';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import DataTypes from './data-types';
+import type { CellColumnLike } from './data-types/typeDefinitions';
 
 export type CellValueFormatter<T> = (
   value: T | null | undefined,
 ) => string | null | undefined;
 
 function getCellInfo(
-  column: Column,
+  dbType: CellColumnLike['type'],
 ): AbstractTypeConfiguration['cell'] | undefined {
   const abstractTypeOfColumn = getAbstractTypeForDbType(
-    column.type,
+    dbType,
     get(currentDbAbstractTypes)?.data,
   );
   return abstractTypeOfColumn?.cell;
 }
 
 function getCellConfiguration(
-  column: Column,
+  dbType: CellColumnLike['type'],
   cellInfo?: AbstractTypeConfiguration['cell'],
 ): Record<string, unknown> {
   const config = cellInfo?.config ?? {};
-  const conditionalConfig = cellInfo?.conditionalConfig?.[column.type] ?? {};
+  const conditionalConfig = cellInfo?.conditionalConfig?.[dbType] ?? {};
   return {
     ...config,
     ...conditionalConfig,
@@ -35,17 +35,17 @@ function getCellConfiguration(
 }
 
 export function getCellComponentWithProps(
-  column: Column,
+  column: CellColumnLike,
 ): ComponentAndProps<unknown> {
-  const cellInfo = getCellInfo(column);
-  const config = getCellConfiguration(column, cellInfo);
+  const cellInfo = getCellInfo(column.type);
+  const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].get(column, config);
 }
 
-export function getColumnBasedInputComponentWithProps(
-  column: Column,
+export function getDbTypeBasedInputComponentWithProps(
+  column: CellColumnLike,
 ): ComponentAndProps<unknown> {
-  const cellInfo = getCellInfo(column);
-  const config = getCellConfiguration(column, cellInfo);
+  const cellInfo = getCellInfo(column.type);
+  const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }

@@ -7,13 +7,18 @@ import type { ComponentAndProps } from '@mathesar-component-library/types';
 // Yet to add: 'uri' | 'money' | 'date' | 'time' | 'datetime'
 export type CellDataType = 'string' | 'boolean' | 'number';
 
+export type CellColumnLike = Pick<
+  Column,
+  'type' | 'type_options' | 'display_options'
+>;
+
 export interface CellComponentFactory {
   get(
-    column: Column,
+    column: CellColumnLike,
     config?: Record<string, unknown>,
   ): ComponentAndProps<unknown>;
   getInput(
-    column: Column,
+    column: CellColumnLike,
     config?: Record<string, unknown>,
   ): ComponentAndProps<unknown>;
 }
