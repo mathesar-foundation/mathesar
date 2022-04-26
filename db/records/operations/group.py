@@ -18,6 +18,7 @@ class GroupMode(Enum):
     MAGNITUDE = 'magnitude'
     COUNT_BY = 'count_by'
     PERCENTILE = 'percentile'
+    PREFIX = 'prefix'
 
 
 class GroupMetadataField(Enum):
@@ -41,6 +42,7 @@ class GroupBy:
             count_by=None,
             global_min=None,
             global_max=None,
+            prefix_length=None,
     ):
         self._columns = tuple(columns) if type(columns) != str else tuple([columns])
         self._mode = mode
@@ -49,6 +51,7 @@ class GroupBy:
         self._count_by = count_by
         self._global_min = global_min
         self._global_max = global_max
+        self._prefix_length = prefix_length
         self._ranged = bool(mode != GroupMode.DISTINCT.value)
         self.validate()
 
@@ -70,6 +73,10 @@ class GroupBy:
             return self._bound_tuples
         elif self._mode == GroupMode.COUNT_BY.value:
             return [bt for bt in self._bound_tuple_generator()]
+
+    @property
+    def prefix_length(self):
+        return self._prefix_length
 
     @property
     def ranged(self):
@@ -102,6 +109,17 @@ class GroupBy:
         elif self.mode == GroupMode.ENDPOINTS.value and not self.bound_tuples:
             raise records_exceptions.BadGroupFormat(
                 f'{GroupMode.ENDPOINTS.value} mode requires bound_tuples'
+            )
+        elif (
+                self.mode == GroupMode.PREFIX.value
+                and (
+                    not len(self.columns) == 1
+                    or self.prefix_length is None
+                )
+        ):
+            raise records_exceptions.BadGroupFormat(
+                f'{GroupMode.PREFIX.value} mode requires prefix_length,'
+                ' and only works for single columns'
             )
         elif (
                 self.mode == GroupMode.COUNT_BY.value
@@ -178,6 +196,8 @@ def get_group_augmented_records_query(table, group_by):
         query = _get_tens_powers_range_group_select(table, grouping_columns)
     elif group_by.mode == GroupMode.DISTINCT.value:
         query = _get_distinct_group_select(table, grouping_columns)
+    elif group_by.mode == GroupMode.PREFIX.value:
+        query = _get_prefix_group_select(table, grouping_columns, group_by.prefix_length)
     else:
         raise records_exceptions.BadGroupFormat("Unknown error")
     return query
@@ -190,6 +210,21 @@ def _get_distinct_group_select(table, grouping_columns):
 
     group_id_expr = func.dense_rank().over(
         order_by=window_def.order_by, range_=window_def.range_
+    )
+    return select(
+        table,
+        _get_group_metadata_definition(window_def, grouping_columns, group_id_expr)
+    )
+
+
+def _get_prefix_group_select(table, grouping_columns, prefix_length):
+    grouping_column = grouping_columns[0]
+    prefix_expr = func.left(grouping_column, prefix_length)
+    window_def = GroupingWindowDefinition(
+        order_by=grouping_columns, partition_by=prefix_expr
+    )
+    group_id_expr = func.dense_rank().over(
+        order_by=window_def.partition_by, range_=window_def.range_
     )
     return select(
         table,
