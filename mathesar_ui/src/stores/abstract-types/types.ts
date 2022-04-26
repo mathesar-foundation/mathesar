@@ -4,6 +4,7 @@ import type {
   FormInputDataType,
   FormValues,
 } from '@mathesar-component-library/types';
+import type { CellDataType } from '@mathesar/components/cell/data-types/typeDefinitions';
 import type { DbType } from '@mathesar/AppTypes';
 import type { Column } from '@mathesar/stores/table-data/types';
 import type { States } from '@mathesar/utils/api';
@@ -51,18 +52,7 @@ export interface AbstractTypeConfiguration {
   icon: string;
   allowSettingDefaultValue?: boolean;
   cell: {
-    // The types here are frontend types and are
-    // different from db types.
-    // One frontend type can map to multiple db types
-    type:
-      | 'string'
-      | 'boolean'
-      | 'number'
-      | 'uri'
-      | 'money'
-      | 'date'
-      | 'time'
-      | 'datetime';
+    type: CellDataType;
     config?: Record<string, unknown>;
     conditionalConfig?: Record<DbType, Record<string, unknown>>;
   };

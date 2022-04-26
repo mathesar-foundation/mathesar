@@ -1,10 +1,3 @@
-import type { SvelteComponent } from 'svelte';
-
-export interface CellComponentAndProps<T> {
-  component: typeof SvelteComponent;
-  props?: T;
-}
-
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
   isActive: boolean;

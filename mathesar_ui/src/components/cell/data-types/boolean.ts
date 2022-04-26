@@ -1,11 +1,12 @@
 import type { Column } from '@mathesar/stores/table-data/types';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
 import CheckboxCell from './components/checkbox/CheckboxCell.svelte';
 import SingleSelectCell from './components/select/SingleSelectCell.svelte';
 import type {
-  CellComponentAndProps,
   CheckBoxCellExternalProps,
   SingleSelectCellExternalProps,
 } from './components/typeDefinitions';
+import type { CellComponentFactory } from './typeDefinitions';
 
 export interface BooleanLikeColumn extends Column {
   display_options: {
@@ -21,8 +22,8 @@ type Props =
   | CheckBoxCellExternalProps
   | SingleSelectCellExternalProps<boolean, string>;
 
-export default {
-  get: (column: BooleanLikeColumn): CellComponentAndProps<Props> => {
+const booleanType: CellComponentFactory = {
+  get: (column: BooleanLikeColumn): ComponentAndProps<Props> => {
     const displayOptions = column.display_options ?? undefined;
     if (displayOptions && displayOptions.input === 'dropdown') {
       const customLabels = displayOptions.custom_labels ?? undefined;
@@ -73,3 +74,5 @@ export default {
     return { component: CheckboxCell, props: {} };
   },
 };
+
+export default booleanType;
