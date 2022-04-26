@@ -9,6 +9,6 @@
 <Select
   options={columns}
   labelKey="name"
-  valuesAreEqual={(a, b) => a.id === b?.id}
+  valuesAreEqual={(a, b) => a?.id === b?.id}
   bind:value={column}
 />

@@ -28,16 +28,25 @@
     numerical operations on the user input. See `NumberInput.svelte` for a
     component that will bind to a `number` instead of a `string`.
 -->
+<script context="module" lang="ts">
+  export interface StringifiedNumberInputProps
+    extends Partial<NumberFormatterOptions>,
+      Omit<FormattedInputProps<string>, 'formatter'> {
+    value?: string | null;
+    element?: HTMLInputElement;
+  }
+</script>
+
 <script lang="ts">
+  import type { FormattedInputProps } from '../formatted-input/FormattedInput.svelte';
   import FormattedInput from '../formatted-input/FormattedInput.svelte';
   import type { NumberFormatterOptions } from './number-formatter/types';
   import { StringifiedNumberFormatter } from './number-formatter';
   import { getInputMode } from './numberInputUtils';
 
-  interface $$Props extends Partial<NumberFormatterOptions> {
-    value?: string;
-    element?: HTMLInputElement;
-  }
+  type $$Props = StringifiedNumberInputProps;
+
+  type $$Events = FormattedInput<string>['$$events_def'];
 
   /**
    * When you bind to this value, you'll get a canonical stringified number, or
@@ -46,17 +55,20 @@
    * See docs within `FormattedInput` for an explanation of how we're using
    * `null` vs `undefined` here.
    */
-  export let value: string | null | undefined = undefined;
-  export let element: HTMLInputElement | undefined = undefined;
+  export let value: $$Props['value'] = undefined;
+  export let element: $$Props['element'] = undefined;
 
   $: formatter = new StringifiedNumberFormatter($$restProps);
-  $: inputmode = getInputMode($$restProps as $$Props);
+  $: inputmode = getInputMode($$restProps);
 </script>
 
 <FormattedInput
-  {formatter}
-  bind:value
   {...$$restProps}
+  bind:value
   bind:element
+  {formatter}
   {inputmode}
+  on:blur
+  on:keydown
+  on:input
 />

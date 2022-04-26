@@ -16,20 +16,20 @@
   type Option = $$Generic;
   type Value = $$Generic;
   type $$Props = SingleSelectCellProps<Value, Option>;
-  type $$DefinedProps = Required<$$Props>;
+  type DefinedProps = Required<$$Props>;
 
   const dispatch = createEventDispatcher();
 
   const id = getGloballyUniqueId();
 
-  export let isActive: $$DefinedProps['isActive'];
-  export let value: $$DefinedProps['value'] = undefined;
-  export let disabled: $$DefinedProps['disabled'];
+  export let isActive: DefinedProps['isActive'];
+  export let value: DefinedProps['value'] = undefined;
+  export let disabled: DefinedProps['disabled'];
 
-  export let options: $$DefinedProps['options'] = [];
-  export let getSelectedOptionsFromValue: $$DefinedProps['getSelectedOptionsFromValue'];
-  export let getValueFromSelectedOptions: $$DefinedProps['getValueFromSelectedOptions'];
-  export let getValueLabel: $$DefinedProps['getValueLabel'] = (_val) =>
+  export let options: DefinedProps['options'] = [];
+  export let getSelectedOptionsFromValue: DefinedProps['getSelectedOptionsFromValue'];
+  export let getValueFromSelectedOptions: DefinedProps['getValueFromSelectedOptions'];
+  export let getValueLabel: DefinedProps['getValueLabel'] = (_val) =>
     String(_val);
 
   let cellRef: HTMLElement;
