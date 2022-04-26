@@ -10,7 +10,7 @@
 
 <div class="help-content">Paste your data below:</div>
 
-<TextArea bind:value={clipboardContent} rows="10" />
+<TextArea bind:value={clipboardContent} rows={10} />
 
 <div class="buttons">
   <SpinnerButton

@@ -1,4 +1,6 @@
 <script context="module" lang="ts">
+  import type { BaseInputProps } from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
+
   // eslint-disable-next-line no-undef
   type InputProps = svelte.JSX.HTMLAttributes<HTMLElementTagNameMap['input']>;
   type SimplifiedInputProps = Omit<InputProps, 'disabled' | 'id' | 'class'>;
@@ -12,7 +14,6 @@
 </script>
 
 <script lang="ts">
-  import type { BaseInputProps } from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
 
   type $$Props = TextInputProps;
