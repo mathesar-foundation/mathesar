@@ -1,7 +1,9 @@
 import re
 
 import pytest
-from sqlalchemy import CHAR, ForeignKey, Integer, Numeric, String, VARCHAR, ARRAY
+from sqlalchemy import (
+    CHAR, ForeignKey, Integer, Numeric, String, VARCHAR, ARRAY, JSON
+)
 from sqlalchemy.sql.sqltypes import NullType
 
 from db.columns.base import MathesarColumn
@@ -193,6 +195,12 @@ def test_MC_plain_type_array_type(engine):
     mc = MathesarColumn('testable_col', ARRAY(Integer))
     mc.add_engine(engine)
     assert mc.plain_type is None
+
+
+def test_MC_plain_type_array_type(engine):
+    mc = MathesarColumn('testable_col', JSON())
+    mc.add_engine(engine)
+    assert mc.plain_type == "JSON"
 
 
 def test_MC_type_options_no_opts(engine):
