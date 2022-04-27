@@ -110,7 +110,7 @@
     {id}
     contentClass="select {contentClass}"
     {triggerAppearance}
-    {triggerClass}
+    triggerClass="select full-width {triggerClass}"
     on:open={() => api.open()}
     on:close={() => api.close()}
     on:keydown={(e) => api.handleKeyDown(e)}

@@ -20,6 +20,8 @@
   export let value: string | undefined | null = '';
 
   export let element: $$Props['element'] = undefined;
+
+  export let hasError = false;
 </script>
 
 <BaseInput {...$$restProps} bind:id {disabled} />
@@ -28,6 +30,7 @@
   bind:this={element}
   {...$$restProps}
   class="input-element text-area {classes}"
+  class:has-error={hasError}
   {id}
   {disabled}
   bind:value
