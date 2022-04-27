@@ -186,7 +186,6 @@ def test_retype_column_correct_column(engine_with_schema):
             conn,
             PostgresType.BOOLEAN,
             {},
-            friendly_names=False
         )
 
 
@@ -217,7 +216,6 @@ def test_retype_column_adds_options(engine_with_schema, target_type):
             conn,
             target_type,
             type_options,
-            friendly_names=False
         )
 
 
@@ -247,7 +245,6 @@ def test_retype_column_options_only(engine_with_schema):
             conn,
             target_type,
             type_options,
-            friendly_names=False
         )
 
 

@@ -4,12 +4,6 @@ from django.core.cache import cache
 
 from mathesar.reflection import reflect_db_objects
 from mathesar.models import Table, Schema, Database
-from db.tests.types import fixtures
-
-
-engine_with_types = fixtures.engine_with_types
-temporary_testing_schema = fixtures.temporary_testing_schema
-engine_email_type = fixtures.engine_email_type
 
 
 TEST_DB = "test_database_api_db"

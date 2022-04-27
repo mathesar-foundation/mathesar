@@ -227,7 +227,10 @@ def get_db_type_enum_from_id(db_type_id) -> Optional[DatabaseType]:
     Gets an instance of either the PostgresType enum or the MathesarCustomType enum corresponding
     to the provided db_type_id. If the id doesn't correspond to any of the mentioned enums,
     returns None.
+
+    Input is case insensitive, because sometimes all-caps is used, while the canonical is all lower caps.
     """
+    db_type_id = db_type_id.lower()
     try:
         return PostgresType(db_type_id)
     except ValueError:

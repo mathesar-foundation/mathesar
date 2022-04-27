@@ -86,18 +86,18 @@ def test_schema_list_filter(client, monkeypatch):
                                   schema.database.name, check_schema_objects=False)
 
 
-def test_schema_detail(create_table, client, test_db_name):
+def test_schema_detail(create_patents_table, client, test_db_name):
     """
     Desired format:
     One item in the results list in the schema list view, see above.
     """
-    create_table('NASA Schema Detail')
+    table = create_patents_table('NASA Schema Detail')
 
     schema = models.Schema.objects.get()
     response = client.get(f'/api/db/v0/schemas/{schema.id}/')
     response_schema = response.json()
     assert response.status_code == 200
-    check_schema_response(response_schema, schema, 'Patents', test_db_name)
+    check_schema_response(response_schema, schema, table.schema.name, test_db_name)
 
 
 def test_schema_sort_by_name(create_schema, client):

@@ -111,9 +111,9 @@ def test_multi_db_tables(engine, multi_db_engine, client):
 
     cache.clear()
     response = client.get('/api/db/v0/tables/')
-    response_tables = [s['name'] for s in response.json()['results']]
-
     assert response.status_code == 200
+
+    response_tables = [s['name'] for s in response.json()['results']]
     expected_tables = test_tables + ["multi_db_" + s for s in test_tables]
     for table_name in expected_tables:
         assert table_name in response_tables

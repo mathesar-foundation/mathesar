@@ -8,19 +8,16 @@ from django.core.files import File
 from sqlalchemy import Column, MetaData, text, Integer
 from sqlalchemy import Table as SATable
 
-from db.types import base, install
+from db.types import base
+from db.schemas.operations.drop import drop_schema as drop_sa_schema
 from db.schemas.operations.create import create_schema as create_sa_schema
 from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
 from db.tables.operations.select import get_oid_from_table
 
 from mathesar.models import Schema, Table, Database, DataFile
-from mathesar.database.base import create_mathesar_engine
 from mathesar.imports.csv import create_table_from_csv
 from db.columns.operations.select import get_column_attnum_from_name
 from mathesar.models import Column as mathesar_model_column
-
-PATENT_SCHEMA = 'Patents'
-NASA_TABLE = 'NASA Schema List'
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -72,7 +69,7 @@ def enable_db_access_for_all_tests(db):
 
 
 @pytest.fixture(scope='session')
-def csv_filename():
+def patents_csv_filepath():
     return 'mathesar/tests/data/patents.csv'
 
 
@@ -82,7 +79,7 @@ def paste_filename():
 
 
 @pytest.fixture(scope='session')
-def headerless_csv_filename():
+def headerless_patents_csv_filepath():
     return 'mathesar/tests/data/headerless_patents.csv'
 
 
@@ -97,64 +94,29 @@ def patents_url_filename():
 
 
 @pytest.fixture(scope='session')
-def data_types_csv_filename():
+def data_types_csv_filepath():
     return 'mathesar/tests/data/data_types.csv'
 
 
 @pytest.fixture(scope='session')
-def col_names_with_spaces_csv_filename():
+def col_names_with_spaces_csv_filepath():
     return 'mathesar/tests/data/col_names_with_spaces.csv'
 
 
 @pytest.fixture(scope='session')
-def col_headers_empty_csv_filename():
+def col_headers_empty_csv_filepath():
     return 'mathesar/tests/data/col_headers_empty.csv'
 
 
 @pytest.fixture(scope='session')
-def non_unicode_csv_filename():
+def non_unicode_csv_filepath():
     return 'mathesar/tests/data/non_unicode_files/utf_16_le.csv'
 
 
 @pytest.fixture
-def create_schema(engine, test_db_model):
-    """
-    Creates a schema factory, making sure to track and clean up new instances
-    """
-    function_schemas = {}
-
-    def _create_schema(schema_name):
-        if schema_name in function_schemas:
-            schema_oid = function_schemas[schema_name]
-        else:
-            create_sa_schema(schema_name, engine)
-            schema_oid = get_schema_oid_from_name(schema_name, engine)
-            function_schemas[schema_name] = schema_oid
-        schema_model, _ = Schema.current_objects.get_or_create(oid=schema_oid, database=test_db_model)
-        return schema_model
-    yield _create_schema
-
-    for oid in function_schemas.values():
-        # Handle schemas being renamed during test
-        schema = get_schema_name_from_oid(oid, engine)
-        with engine.begin() as conn:
-            conn.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE;'))
-
-
-@pytest.fixture
-def patent_schema(test_db_model, create_schema):
-    engine = create_mathesar_engine(test_db_model.name)
-    install.install_mathesar_on_database(engine)
-    with engine.begin() as conn:
-        conn.execute(text(f'DROP SCHEMA IF EXISTS "{PATENT_SCHEMA}" CASCADE;'))
-    yield create_schema(PATENT_SCHEMA)
-    with engine.begin() as conn:
-        conn.execute(text(f'DROP SCHEMA {base.SCHEMA} CASCADE;'))
-
-
-@pytest.fixture
-def empty_nasa_table(patent_schema):
-    engine = create_mathesar_engine(patent_schema.database.name)
+def empty_nasa_table(patent_schema, engine_with_mathesar):
+    engine, _ = engine_with_mathesar
+    NASA_TABLE = 'NASA Schema List'
     db_table = SATable(
         NASA_TABLE, MetaData(bind=engine),
         Column('id', Integer, primary_key=True),
@@ -171,14 +133,63 @@ def empty_nasa_table(patent_schema):
 
 
 @pytest.fixture
-def create_table(csv_filename, create_schema):
-    with open(csv_filename, 'rb') as csv_file:
-        data_file = DataFile.objects.create(file=File(csv_file))
+def patent_schema(create_schema):
+    PATENT_SCHEMA = 'Patents'
+    yield create_schema(PATENT_SCHEMA)
 
-    def _create_table(table_name, schema='Patents'):
-        schema_model = create_schema(schema)
+
+@pytest.fixture
+def create_schema(engine_with_mathesar, test_db_model):
+    """
+    Creates a schema factory, making sure to track and clean up new instances
+    """
+    engine, _ = engine_with_mathesar
+    function_schemas = {}
+
+    def _create_schema(schema_name):
+        if schema_name in function_schemas:
+            schema_oid = function_schemas[schema_name]
+        else:
+            create_sa_schema(schema_name, engine)
+            schema_oid = get_schema_oid_from_name(schema_name, engine)
+            function_schemas[schema_name] = schema_oid
+        schema_model, _ = Schema.current_objects.get_or_create(oid=schema_oid, database=test_db_model)
+        return schema_model
+    yield _create_schema
+
+    for oid in function_schemas.values():
+        # Handle schemas being renamed during test
+        schema = get_schema_name_from_oid(oid, engine)
+        drop_sa_schema(schema, engine, cascade=True, if_exists=True)
+
+
+@pytest.fixture
+def create_patents_table(patents_csv_filepath, patent_schema, create_table):
+    schema_name = patent_schema.name
+    csv_filepath = patents_csv_filepath
+    def _create_table(table_name, schema_name=schema_name):
+        return create_table(
+            table_name=table_name,
+            schema_name=schema_name,
+            csv_filepath=csv_filepath,
+        )
+    return _create_table
+
+
+@pytest.fixture
+def create_table(create_schema):
+    def _create_table(table_name, schema_name, csv_filepath):
+        data_file = _get_datafile_for_path(csv_filepath)
+
+        schema_model = create_schema(schema_name)
         return create_table_from_csv(data_file, table_name, schema_model)
     return _create_table
+
+
+def _get_datafile_for_path(path):
+    with open(path, 'rb') as file:
+        datafile = DataFile.objects.create(file=File(file))
+        return datafile
 
 
 @pytest.fixture
@@ -192,9 +203,5 @@ def create_column():
 
 
 @pytest.fixture
-def custom_types_schema_url(test_db_model, schema, live_server):
-    engine = create_mathesar_engine(test_db_model.name)
-    install.install_mathesar_on_database(engine)
-    yield f"{live_server}/{schema.database.name}/{schema.id}"
-    with engine.begin() as conn:
-        conn.execute(text(f'DROP SCHEMA IF EXISTS {base.SCHEMA} CASCADE;'))
+def custom_types_schema_url(schema, live_server):
+    return f"{live_server}/{schema.database.name}/{schema.id}"

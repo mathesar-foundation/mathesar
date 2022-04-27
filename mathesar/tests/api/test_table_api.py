@@ -9,12 +9,6 @@ from mathesar import reflection
 from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models import Table, DataFile
-from db.tests.types import fixtures
-
-
-engine_with_types = fixtures.engine_with_types
-engine_email_type = fixtures.engine_email_type
-temporary_testing_schema = fixtures.temporary_testing_schema
 
 
 @pytest.fixture
@@ -28,8 +22,8 @@ def schema(create_schema, schema_name):
 
 
 @pytest.fixture
-def data_file(csv_filename):
-    with open(csv_filename, 'rb') as csv_file:
+def data_file(patents_csv_filepath):
+    with open(patents_csv_filepath, 'rb') as csv_file:
         data_file = DataFile.objects.create(
             file=File(csv_file),
             created_from='file',
@@ -145,7 +139,7 @@ def check_create_table_response(
     check_table_response(response_table, table, expt_name)
 
 
-def test_table_list(create_table, client):
+def test_table_list(create_patents_table, client):
     """
     Desired format:
     {
@@ -174,7 +168,7 @@ def test_table_list(create_table, client):
     }
     """
     table_name = 'NASA Table List'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
 
     response = client.get('/api/db/v0/tables/')
     response_data = response.json()
@@ -189,11 +183,11 @@ def test_table_list(create_table, client):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_list_filter_name(create_table, client):
+def test_table_list_filter_name(create_patents_table, client):
     expected_tables = {
-        'Filter Name 1': create_table('Filter Name 1'),
-        'Filter Name 2': create_table('Filter Name 2'),
-        'Filter Name 3': create_table('Filter Name 3')
+        'Filter Name 1': create_patents_table('Filter Name 1'),
+        'Filter Name 2': create_patents_table('Filter Name 2'),
+        'Filter Name 3': create_patents_table('Filter Name 3')
     }
 
     filter_tables = ['Filter Name 1', 'Filter Name 2']
@@ -210,11 +204,11 @@ def test_table_list_filter_name(create_table, client):
         check_table_response(response_table, table, table_name)
 
 
-def test_table_list_filter_schema(create_table, client):
+def test_table_list_filter_schema(create_patents_table, client):
     expected_tables = {
-        'Schema 1': create_table('Filter Schema 1', schema='Schema 1'),
-        'Schema 2': create_table('Filter Schema 2', schema='Schema 2'),
-        'Schema 3': create_table('Filter Schema 3', schema='Schema 3')
+        'Schema 1': create_patents_table('Filter Schema 1', schema='Schema 1'),
+        'Schema 2': create_patents_table('Filter Schema 2', schema='Schema 2'),
+        'Schema 3': create_patents_table('Filter Schema 3', schema='Schema 3')
     }
 
     schema_name = 'Schema 1'
@@ -232,12 +226,12 @@ def test_table_list_filter_schema(create_table, client):
     check_table_response(response_table, table, table.name)
 
 
-def test_table_list_order_by_name(create_table, client):
-    table_2 = create_table('Filter Name 2')
-    table_1 = create_table('Filter Name 1')
-    table_4 = create_table('Filter Name 4')
-    table_3 = create_table('Filter Name 3')
-    table_5 = create_table('Filter Name 5')
+def test_table_list_order_by_name(create_patents_table, client):
+    table_2 = create_patents_table('Filter Name 2')
+    table_1 = create_patents_table('Filter Name 1')
+    table_4 = create_patents_table('Filter Name 4')
+    table_3 = create_patents_table('Filter Name 3')
+    table_5 = create_patents_table('Filter Name 5')
     unsorted_expected_tables = [table_5, table_3, table_4, table_1, table_2]
     expected_tables = [table_1, table_2, table_3, table_4, table_5]
     response = client.get('/api/db/v0/tables/')
@@ -255,10 +249,10 @@ def test_table_list_order_by_name(create_table, client):
         check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
 
 
-def test_table_list_order_by_id(create_table, client):
-    table_1 = create_table('Filter Name 1')
-    table_2 = create_table('Filter Name 2')
-    table_3 = create_table('Filter Name 3')
+def test_table_list_order_by_id(create_patents_table, client):
+    table_1 = create_patents_table('Filter Name 1')
+    table_2 = create_patents_table('Filter Name 2')
+    table_3 = create_patents_table('Filter Name 3')
     unsorted_expected_tables = [
         table_3,
         table_2,
@@ -287,9 +281,9 @@ def test_table_list_order_by_id(create_table, client):
 
 
 @pytest.mark.parametrize('timestamp_type', ['created', 'updated'])
-def test_table_list_filter_timestamps(create_table, client, timestamp_type):
+def test_table_list_filter_timestamps(create_patents_table, client, timestamp_type):
     table_name = f'Fitler {timestamp_type}'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     query_str = '2020-01-01 8:00'
 
     response = client.get(f'/api/db/v0/tables/?{timestamp_type}_before={query_str}')
@@ -308,10 +302,10 @@ def test_table_list_filter_timestamps(create_table, client, timestamp_type):
     check_table_response(response_data['results'][0], table, table_name)
 
 
-def test_table_list_filter_import_verified(create_table, client):
+def test_table_list_filter_import_verified(create_patents_table, client):
     expected_tables = {
-        True: create_table('Filter Verified 1'),
-        False: create_table('Filter Verified 2'),
+        True: create_patents_table('Filter Verified 1'),
+        False: create_patents_table('Filter Verified 2'),
     }
     for verified, table in expected_tables.items():
         table.import_verified = verified
@@ -325,11 +319,11 @@ def test_table_list_filter_import_verified(create_table, client):
         check_table_response(response_data['results'][0], table, table.name)
 
 
-def test_table_list_filter_imported(create_table, client):
+def test_table_list_filter_imported(create_patents_table, client):
     expected_tables = {
-        None: create_table('Filter Imported 1'),
-        False: create_table('Filter Imported 2'),
-        True: create_table('Filter Imported 3'),
+        None: create_patents_table('Filter Imported 1'),
+        False: create_patents_table('Filter Imported 2'),
+        True: create_patents_table('Filter Imported 3'),
     }
     for verified, table in expected_tables.items():
         table.import_verified = verified
@@ -345,13 +339,13 @@ def test_table_list_filter_imported(create_table, client):
     check_table_response(response_data['results'][0], table, table.name)
 
 
-def test_table_detail(create_table, client):
+def test_table_detail(create_patents_table, client):
     """
     Desired format:
     One item in the results list in the table list view, see above.
     """
     table_name = 'NASA Table Detail'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
 
     response = client.get(f'/api/db/v0/tables/{table.id}/')
     response_table = response.json()
@@ -359,7 +353,7 @@ def test_table_detail(create_table, client):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_type_suggestion(client, schema, engine_email_type):
+def test_table_type_suggestion(client, schema, engine_with_mathesar):
     table_name = 'Type Inference Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -394,7 +388,7 @@ def _check_columns(actual_column_list, expected_column_list):
         assert all([actual_column[key] == expected_column[key] for key in expected_column])
 
 
-def test_table_previews(client, schema, engine_email_type):
+def test_table_previews(client, schema, engine_with_mathesar):
     table_name = 'Type Modification Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -436,7 +430,7 @@ def test_table_previews(client, schema, engine_email_type):
     _check_columns(actual_dict['columns'], expect_dict['columns'])
 
 
-def test_table_previews_wrong_column_number(client, schema, engine_email_type):
+def test_table_previews_wrong_column_number(client, schema, engine_with_mathesar):
     table_name = 'Wrong Column Number Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -466,7 +460,7 @@ def test_table_previews_wrong_column_number(client, schema, engine_email_type):
     assert ErrorCodes.ColumnSizeMismatch.value == response.json()[0]['code']
 
 
-def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
+def test_table_previews_invalid_type_cast(client, schema, engine_with_mathesar):
     table_name = 'Wrong Type Preview Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -497,7 +491,7 @@ def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
     assert "columns" in response.json()[0]['field']
 
 
-def test_table_previews_invalid_type_cast_check(client, schema, engine_email_type):
+def test_table_previews_invalid_type_cast_check(client, schema, engine_with_mathesar):
     table_name = 'Type Check Preview Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -527,7 +521,7 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_email_typ
     assert "Invalid type" in response.json()[0]['message']
 
 
-def test_table_previews_unsupported_type(client, schema, engine_email_type):
+def test_table_previews_unsupported_type(client, schema, engine_with_mathesar):
     table_name = 'Unsupported Type Preview Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -558,7 +552,7 @@ def test_table_previews_unsupported_type(client, schema, engine_email_type):
     assert "columns" in response.json()[0]['field']
 
 
-def test_table_previews_missing_columns(client, schema, engine_email_type):
+def test_table_previews_missing_columns(client, schema, engine_with_mathesar):
     table_name = 'Missing Columns Preview Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -635,9 +629,9 @@ def test_table_create_without_datafile(client, schema, data_files, table_name):
     check_table_response(response_table, table, expt_name)
 
 
-def test_table_create_name_taken(client, paste_data_file, schema, create_table, schema_name):
-    create_table('Table 2', schema=schema_name)
-    create_table('Table 3', schema=schema_name)
+def test_table_create_name_taken(client, paste_data_file, schema, create_patents_table, schema_name):
+    create_patents_table('Table 2', schema=schema_name)
+    create_patents_table('Table 3', schema=schema_name)
     expt_name = 'Table 4'
 
     first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
@@ -650,9 +644,9 @@ def test_table_create_name_taken(client, paste_data_file, schema, create_table, 
     )
 
 
-def test_table_create_base_name_taken(client, data_file, schema, create_table, schema_name):
-    create_table('patents', schema=schema_name)
-    create_table('patents 1', schema=schema_name)
+def test_table_create_base_name_taken(client, data_file, schema, create_patents_table, schema_name):
+    create_patents_table('patents', schema=schema_name)
+    create_patents_table('patents 1', schema=schema_name)
     expt_name = 'patents 2'
 
     first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
@@ -718,10 +712,10 @@ def test_table_create_with_same_name(client, schema):
     assert response_error[0]['message'] == f"Relation {table_name} already exists in schema {schema.id}"
 
 
-def test_table_partial_update(create_table, client):
+def test_table_partial_update(create_patents_table, client):
     table_name = 'NASA Table Partial Update'
     new_table_name = 'NASA Table Partial Update New'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
 
     body = {'name': new_table_name}
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
@@ -734,9 +728,9 @@ def test_table_partial_update(create_table, client):
     assert table.name == new_table_name
 
 
-def test_table_partial_update_import_verified(create_table, client):
+def test_table_partial_update_import_verified(create_patents_table, client):
     table_name = 'NASA Table Import Verify'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
 
     body = {'import_verified': True}
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
@@ -746,9 +740,9 @@ def test_table_partial_update_import_verified(create_table, client):
     assert response_table['import_verified'] is True
 
 
-def test_table_partial_update_schema(create_table, client):
+def test_table_partial_update_schema(create_patents_table, client):
     table_name = 'NASA Table Schema PATCH'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
 
     body = {'schema': table.schema.id}
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
@@ -759,9 +753,9 @@ def test_table_partial_update_schema(create_table, client):
     assert response_error['code'] == ErrorCodes.UnsupportedAlter.value
 
 
-def test_table_delete(create_table, client):
+def test_table_delete(create_patents_table, client):
     table_name = 'NASA Table Delete'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     table_count = len(Table.objects.all())
 
     with patch.object(models, 'drop_table') as mock_delete:
@@ -785,9 +779,9 @@ def test_table_delete(create_table, client):
     }
 
 
-def test_table_dependencies(client, create_table):
+def test_table_dependencies(client, create_patents_table):
     table_name = 'NASA Table Dependencies'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
 
     response = client.get(f'/api/db/v0/tables/{table.id}/')
     response_table = response.json()
@@ -837,9 +831,9 @@ def test_table_create_from_multiple_datafile(client, data_file, schema):
     assert response_table[0]['field'] == 'data_files'
 
 
-def test_table_partial_update_invalid_field(create_table, client):
+def test_table_partial_update_invalid_field(create_patents_table, client):
     table_name = 'NASA Table Partial Update'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
 
     body = {'schema': table.schema.id}
     response = client.patch(f'/api/db/v0/tables/{table.id}/', body)
@@ -862,8 +856,8 @@ def test_table_delete_404(client):
     assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
-def test_table_update(client, create_table):
-    table = create_table('update_table_test')
+def test_table_update(client, create_patents_table):
+    table = create_patents_table('update_table_test')
     response = client.put(f'/api/db/v0/tables/{table.id}/')
     assert response.status_code == 405
     assert response.json()[0]['message'] == 'Method "PUT" not allowed.'
@@ -1019,9 +1013,9 @@ def _get_patents_column_data():
     }]
 
 
-def test_table_patch_same_table_name(create_table, client):
+def test_table_patch_same_table_name(create_patents_table, client):
     table_name = 'PATCH same name'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
 
     body = {'name': table_name}
     # Need to specify format here because otherwise the body gets sent
@@ -1032,9 +1026,9 @@ def test_table_patch_same_table_name(create_table, client):
     assert response.json()['name'] == table_name
 
 
-def test_table_patch_columns_and_table_name(create_table, client):
+def test_table_patch_columns_and_table_name(create_patents_table, client):
     table_name = 'PATCH columns 1'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
 
     body = {
         'name': 'PATCH COLUMNS 1',
@@ -1049,9 +1043,9 @@ def test_table_patch_columns_and_table_name(create_table, client):
     assert response_error['message'] == 'Only name or columns can be passed in, not both.'
 
 
-def test_table_patch_columns_no_changes(create_table, client, engine_email_type):
+def test_table_patch_columns_no_changes(create_patents_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 2'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     column_data = _get_patents_column_data()
 
     body = {
@@ -1064,9 +1058,9 @@ def test_table_patch_columns_no_changes(create_table, client, engine_email_type)
     _check_columns(response_json['columns'], column_data)
 
 
-def test_table_patch_columns_one_name_change(create_table, client, engine_email_type):
+def test_table_patch_columns_one_name_change(create_patents_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 3'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     column_data = _get_patents_column_data()
     column_data[1]['name'] = 'NASA Center'
 
@@ -1080,9 +1074,9 @@ def test_table_patch_columns_one_name_change(create_table, client, engine_email_
     _check_columns(response_json['columns'], column_data)
 
 
-def test_table_patch_columns_two_name_changes(create_table, client, engine_email_type):
+def test_table_patch_columns_two_name_changes(create_patents_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 4'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     column_data = _get_patents_column_data()
     column_data[1]['name'] = 'NASA Center'
     column_data[2]['name'] = 'Patent Status'
@@ -1097,9 +1091,9 @@ def test_table_patch_columns_two_name_changes(create_table, client, engine_email
     _check_columns(response_json['columns'], column_data)
 
 
-def test_table_patch_columns_one_type_change(create_table, client, engine_email_type):
+def test_table_patch_columns_one_type_change(create_patents_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 5'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     column_data = _get_patents_column_data()
     column_data[7]['type'] = 'DATE'
 
@@ -1132,7 +1126,7 @@ def _get_data_types_column_data():
     }]
 
 
-def test_table_patch_columns_multiple_type_change(create_data_types_table, client, engine_email_type):
+def test_table_patch_columns_multiple_type_change(create_data_types_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 6'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1155,7 +1149,7 @@ def _check_columns_with_dropped(response_column_data, request_column_data, dropp
     _check_columns(response_column_data, expected_column_data)
 
 
-def test_table_patch_columns_one_drop(create_data_types_table, client, engine_email_type):
+def test_table_patch_columns_one_drop(create_data_types_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 7'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1171,7 +1165,7 @@ def test_table_patch_columns_one_drop(create_data_types_table, client, engine_em
     _check_columns_with_dropped(response_json['columns'], column_data, [1])
 
 
-def test_table_patch_columns_multiple_drop(create_data_types_table, client, engine_email_type):
+def test_table_patch_columns_multiple_drop(create_data_types_table, client, engine_with_mathesar):
     INDICES_TO_DROP = [1, 2]
     table_name = 'PATCH columns 8'
     table = create_data_types_table(table_name)
@@ -1189,7 +1183,7 @@ def test_table_patch_columns_multiple_drop(create_data_types_table, client, engi
     _check_columns_with_dropped(response_json['columns'], column_data, INDICES_TO_DROP)
 
 
-def test_table_patch_columns_diff_name_type_change(create_data_types_table, client, engine_email_type):
+def test_table_patch_columns_diff_name_type_change(create_data_types_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 9'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1206,7 +1200,7 @@ def test_table_patch_columns_diff_name_type_change(create_data_types_table, clie
     _check_columns(response_json['columns'], column_data)
 
 
-def test_table_patch_columns_same_name_type_change(create_data_types_table, client, engine_email_type):
+def test_table_patch_columns_same_name_type_change(create_data_types_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 10'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1223,7 +1217,7 @@ def test_table_patch_columns_same_name_type_change(create_data_types_table, clie
     _check_columns(response_json['columns'], column_data)
 
 
-def test_table_patch_columns_multiple_name_type_change(create_data_types_table, client, engine_email_type):
+def test_table_patch_columns_multiple_name_type_change(create_data_types_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 11'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1242,7 +1236,7 @@ def test_table_patch_columns_multiple_name_type_change(create_data_types_table, 
     _check_columns(response_json['columns'], column_data)
 
 
-def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client, engine_email_type):
+def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 12'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1260,7 +1254,7 @@ def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client
     _check_columns_with_dropped(response_json['columns'], column_data, [3])
 
 
-def test_table_patch_columns_same_name_type_drop(create_data_types_table, client, engine_email_type):
+def test_table_patch_columns_same_name_type_drop(create_data_types_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 13'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1279,7 +1273,7 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
     _check_columns_with_dropped(response_json['columns'], column_data, [1, 3])
 
 
-def test_table_patch_columns_invalid_type(create_data_types_table, client, engine_email_type):
+def test_table_patch_columns_invalid_type(create_data_types_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 14'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1295,7 +1289,7 @@ def test_table_patch_columns_invalid_type(create_data_types_table, client, engin
     assert 'Pizza is not a boolean' in response_json[0]['message']
 
 
-def test_table_patch_columns_invalid_type_with_name(create_data_types_table, client, engine_email_type):
+def test_table_patch_columns_invalid_type_with_name(create_data_types_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 15'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1316,7 +1310,7 @@ def test_table_patch_columns_invalid_type_with_name(create_data_types_table, cli
     _check_columns(current_table_response.json()['columns'], original_column_data)
 
 
-def test_table_patch_columns_invalid_type_with_type(create_data_types_table, client, engine_email_type):
+def test_table_patch_columns_invalid_type_with_type(create_data_types_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 16'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1337,7 +1331,7 @@ def test_table_patch_columns_invalid_type_with_type(create_data_types_table, cli
     _check_columns(current_table_response.json()['columns'], original_column_data)
 
 
-def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, client, engine_email_type):
+def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 17'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1358,7 +1352,7 @@ def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, cli
     _check_columns(current_table_response.json()['columns'], original_column_data)
 
 
-def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_types_table, client, engine_email_type):
+def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_types_table, client, engine_with_mathesar):
     table_name = 'PATCH columns 18'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()

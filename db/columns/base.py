@@ -12,6 +12,8 @@ from collections.abc import Collection
 from typing import Optional
 
 
+# TODO consider renaming to DbColumn or DatabaseColumn
+# We are attempting to reserve the term Mathesar for types in the mathesar namespace.
 class MathesarColumn(Column):
     """
     This class constrains the possible arguments, enabling us to include

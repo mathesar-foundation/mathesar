@@ -2,11 +2,9 @@ import os
 
 import pytest
 from sqlalchemy import MetaData, text, Table
-from sqlalchemy.schema import DropSchema
 
 from db import constants
 from db.tables.operations.split import extract_columns_from_table
-from db.types import base, install
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "resources")
@@ -16,15 +14,6 @@ TIMES_SQL = os.path.join(RESOURCES, "times_create.sql")
 BOOLEANS_SQL = os.path.join(RESOURCES, "booleans_create.sql")
 FILTER_SORT_SQL = os.path.join(RESOURCES, "filter_sort_create.sql")
 MAGNITUDE_SQL = os.path.join(RESOURCES, "magnitude_testing_create.sql")
-
-
-@pytest.fixture
-def engine_with_mathesar(engine_with_schema_with_ischema_names_updated):
-    engine, schema = engine_with_schema_with_ischema_names_updated
-    install.install_mathesar_on_database(engine)
-    yield engine, schema
-    with engine.begin() as conn:
-        conn.execute(DropSchema(base.SCHEMA, cascade=True, if_exists=True))
 
 
 @pytest.fixture

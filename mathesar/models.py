@@ -7,6 +7,7 @@ from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 
 from db.columns import utils as column_utils
+from db.columns.base import MathesarColumn
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
@@ -28,7 +29,7 @@ from db.tables.operations.select import reflect_table_from_oid
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
-from mathesar.database.types import get_types
+from mathesar.database.types import UIType
 
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -98,17 +99,12 @@ class Database(ReflectionManagerMixin, BaseModel):
         return _engines[self.name]
 
     @property
-    def supported_types(self):
-        supported_types = []
-        available_types = get_types(self._sa_engine)
-        for index, available_type in enumerate(available_types):
-            db_types = available_type['db_types']
-            db_type_list = [key for key in db_types.keys()]
-            if db_type_list:
-                # Remove SQLAlchemy implementation info.
-                available_type['db_types'] = db_type_list
-                supported_types.append(available_type)
-        return supported_types
+    def supported_ui_types(self):
+        """
+        At the moment we don't actually filter our UIType set based on whether or not a UIType's
+        constituent DB types are supported.
+        """
+        return UIType
 
 
 class Schema(DatabaseObject):

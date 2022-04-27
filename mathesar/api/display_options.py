@@ -1,7 +1,7 @@
-from mathesar.database.types import MathesarType
+from mathesar.database.types import UIType
 
-DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER = {
-    MathesarType.BOOLEAN.value:
+DISPLAY_OPTIONS_BY_UI_TYPE = {
+    UIType.BOOLEAN:
         {
             "options": [{"name": "input", "type": "string",
                          "enum": ['dropdown', 'checkbox']},
@@ -10,24 +10,24 @@ DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER = {
                                    {'name': "FALSE", "type": "string"}]}]
 
         },
-    MathesarType.NUMBER.value:
+    UIType.NUMBER:
         {
             "options": [{"name": "show_as_percentage", "type": "boolean"},
                         {"name": "locale", "type": "string"}]
         },
-    MathesarType.DATETIME.value:
+    UIType.DATETIME:
         {
             "options": [{"name": "format", "type": "string"}]
         },
-    MathesarType.TIME.value:
+    UIType.TIME:
         {
             "options": [{"name": "format", "type": "string"}]
         },
-    MathesarType.DATE.value:
+    UIType.DATE:
         {
             "options": [{"name": "format", "type": "string"}]
         },
-    MathesarType.DURATION.value:
+    UIType.DURATION:
         {
             "options": [{"name": "format", "type": "string"}]
         }

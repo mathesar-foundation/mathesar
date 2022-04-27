@@ -14,6 +14,8 @@ def execute_statement(engine, statement, connection_to_use=None):
         if isinstance(e.orig, UndefinedFunction):
             message = e.orig.args[0].split('\n')[0]
             raise exceptions.UndefinedFunction(message)
+        else:
+            raise e
 
 
 def execute_query(engine, query, connection_to_use=None):

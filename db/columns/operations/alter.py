@@ -17,7 +17,7 @@ from db.utils import execute_statement
 
 
 def alter_column(engine, table_oid, column_attnum, column_data):
-    TYPE_KEY = 'plain_type'
+    TYPE_KEY = 'type'
     TYPE_OPTIONS_KEY = 'type_options'
     NULLABLE_KEY = NULLABLE
     DEFAULT_DICT = 'column_default_dict'
@@ -26,9 +26,10 @@ def alter_column(engine, table_oid, column_attnum, column_data):
 
     with engine.begin() as conn:
         if TYPE_KEY in column_data:
+            new_type = get_db_type_enum_from_id(column_data[TYPE_KEY])
             retype_column(
                 table_oid, column_attnum, engine, conn,
-                new_type=column_data[TYPE_KEY],
+                new_type=new_type,
                 type_options=column_data.get(TYPE_OPTIONS_KEY, {})
             )
         elif TYPE_OPTIONS_KEY in column_data:
@@ -51,15 +52,51 @@ def alter_column(engine, table_oid, column_attnum, column_data):
             name = column_data[NAME_KEY]
             rename_column(table_oid, column_attnum, engine, conn, name)
     column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
-    return get_mathesar_column_with_engine(
+    reflected_column = get_mathesar_column_with_engine(
         reflect_table_from_oid(table_oid, engine).columns[column_name],
         engine
     )
+    return reflected_column
+
+
+def retype_column(
+    table_oid, column_attnum, engine, connection, new_type: DatabaseType = None, type_options={},
+):
+    table = reflect_table_from_oid(table_oid, engine, connection)
+    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
+    column = table.columns[column_name]
+    column_db_type = get_db_type_enum_from_class(column.type.__class__, engine)
+    new_type = new_type if new_type is not None else column_db_type
+    column_type_options = get_type_options(column)
+
+    if (
+        new_type == column_db_type
+        and _check_type_option_equivalence(type_options, column_type_options)
+    ):
+        return
+
+    try:
+        alter_column_type(
+            table_oid,
+            column_name,
+            engine,
+            connection,
+            new_type,
+            type_options,
+        )
+    except DataError as e:
+        if type(e.orig) == InvalidParameterValue:
+            raise InvalidTypeOptionError
+        if type(e.orig) == InvalidTextRepresentation:
+            raise InvalidTypeError
+        else:
+            raise e
+    except InternalError as e:
+        raise e.orig
 
 
 def alter_column_type(
-    table_oid, column_name, engine, connection, target_type: DatabaseType,
-    type_options={}, friendly_names=True,
+    table_oid, column_name, engine, connection, target_type: DatabaseType, type_options={}
 ):
     table = reflect_table_from_oid(table_oid, engine, connection)
     _preparer = engine.dialect.identifier_preparer
@@ -67,6 +104,7 @@ def alter_column_type(
 
     table_oid = get_oid_from_table(table.name, schema, engine)
     # Re-reflect table so that column is accurate
+    # TODO unclear why re-reflection is needed; comment more if possible
     table = reflect_table_from_oid(table_oid, engine, connection)
     column = table.columns[column_name]
     column_attnum = get_column_attnum_from_name(table_oid, column_name, engine, connection)
@@ -97,43 +135,6 @@ def alter_column_type(
         default_stmt = select(text(cast_stmt))
         new_default = str(execute_statement(engine, default_stmt, connection).first()[0])
         set_column_default(table_oid, column_attnum, engine, connection, new_default)
-
-
-def retype_column(
-    table_oid, column_attnum, engine, connection, new_type: DatabaseType = None, type_options={},
-):
-    table = reflect_table_from_oid(table_oid, engine, connection)
-    column_name = get_column_name_from_attnum(table_oid, column_attnum, engine)
-    column = table.columns[column_name]
-    column_db_type = get_db_type_enum_from_class(column.type.__class__, engine)
-    new_type = new_type if new_type is not None else column_db_type
-    column_type_options = get_type_options(column)
-
-    if (
-        new_type == column_db_type
-        and _check_type_option_equivalence(type_options, column_type_options)
-    ):
-        return
-
-    try:
-        alter_column_type(
-            table_oid,
-            column_name,
-            engine,
-            connection,
-            new_type,
-            type_options,
-            friendly_names=False
-        )
-    except DataError as e:
-        if type(e.orig) == InvalidParameterValue:
-            raise InvalidTypeOptionError
-        if type(e.orig) == InvalidTextRepresentation:
-            raise InvalidTypeError
-        else:
-            raise e
-    except InternalError as e:
-        raise e.orig
 
 
 def change_column_nullable(table_oid, column_attum, engine, connection, nullable):

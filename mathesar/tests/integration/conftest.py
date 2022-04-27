@@ -12,11 +12,6 @@ from mathesar.database.base import create_mathesar_engine
 from mathesar.tests.integration.utils.locators import get_table_entry
 from mathesar.utils.tables import create_empty_table
 
-TEST_SCHEMA = 'import_csv_schema'
-PATENT_SCHEMA = 'Patents'
-NASA_TABLE = 'NASA Schema List'
-ALL_DATA_TYPES_TABLE = 'All datatypes table'
-
 
 @pytest.fixture(autouse=True)
 def clear_cache():
@@ -80,6 +75,7 @@ def schema(create_schema, schema_name):
 @pytest.fixture
 def table_with_all_types(schema):
     engine = create_mathesar_engine(schema.database.name)
+    ALL_DATA_TYPES_TABLE = 'All datatypes table'
     db_table = SATable(
         ALL_DATA_TYPES_TABLE, MetaData(bind=engine),
         Column('id', Integer, primary_key=True, autoincrement=True),
@@ -127,13 +123,13 @@ def go_to_all_types_table(page, table_with_all_types, base_schema_url):
 
 
 @pytest.fixture
-def go_to_patents_data_table(page, create_table, schema_name, base_schema_url):
+def go_to_patents_data_table(page, create_patents_table, schema_name, base_schema_url):
     """
     Imports the `patents.csv` data into a table named "patents" and navigates to
     the view of that table before starting the test.
     """
     table_name = "patents"
-    table = create_table(table_name, schema_name)
+    table = create_patents_table(table_name, schema_name)
     table.import_verified = True
     table.save()
     page.goto(base_schema_url)

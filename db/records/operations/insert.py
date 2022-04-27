@@ -27,8 +27,8 @@ def insert_record_or_records(table, engine, record_data):
     return None
 
 
-def insert_records_from_csv(table, engine, csv_filename, column_names, header, delimiter=None, escape=None, quote=None, encoding=None):
-    with open(csv_filename, "r", encoding=encoding) as csv_file:
+def insert_records_from_csv(table, engine, csv_filepath, column_names, header, delimiter=None, escape=None, quote=None, encoding=None):
+    with open(csv_filepath, "r", encoding=encoding) as csv_file:
         with engine.begin() as conn:
             cursor = conn.connection.cursor()
             # We should convert our entire query to sql.SQL class in order to keep its original header's name

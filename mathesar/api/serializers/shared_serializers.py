@@ -1,8 +1,11 @@
+from typing import Optional
 from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.database.types import MathesarType, get_mathesar_type_from_db_type
+from mathesar.database.types import UIType, get_ui_type_from_db_type
+
+from db.types.base import DatabaseType
 
 
 class ReadOnlyPolymorphicSerializerMappingMixin:
@@ -39,7 +42,7 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
             self.__class__ = self.serializers_cls_mapping.get(self.get_mapping_field())
             return serializer.to_representation(instance)
         else:
-            raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
+            raise _get_exception_cannot_find_serializer_for_type(self.get_mapping_field())
 
     def get_mapping_field(self):
         mapping_field = getattr(self, "mapping_field", None)
@@ -58,7 +61,11 @@ class ReadWritePolymorphicSerializerMappingMixin(ReadOnlyPolymorphicSerializerMa
             self.__class__ = self.serializers_cls_mapping.get(self.get_mapping_field())
             return serializer.to_internal_value(data=data)
         else:
-            raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
+            raise _get_exception_cannot_find_serializer_for_type(self.get_mapping_field())
+
+
+def _get_exception_cannot_find_serializer_for_type(type):
+    return Exception(f"Cannot find a matching serializer for the specified type {type}")
 
 
 class MonkeyPatchPartial:
@@ -99,7 +106,9 @@ class CustomBooleanLabelSerializer(MathesarErrorMessageMixin, serializers.Serial
     FALSE = serializers.CharField()
 
 
-DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY = 'db_type'
+# This is the key which will determine which display options serializer is used. Its value is
+# supposed to be the column's DB type (a DatabaseType instance).
+DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY: Optional[DatabaseType] = 'db_type'
 
 
 class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
@@ -130,15 +139,18 @@ class DisplayOptionsMappingSerializer(
     serializers.Serializer
 ):
     serializers_mapping = {
-        MathesarType.BOOLEAN.value: BooleanDisplayOptionSerializer,
-        MathesarType.NUMBER.value: NumberDisplayOptionSerializer,
-        MathesarType.DATETIME.value: TimeFormatDisplayOptionSerializer,
-        MathesarType.DATE.value: TimeFormatDisplayOptionSerializer,
-        MathesarType.TIME.value: TimeFormatDisplayOptionSerializer,
-        MathesarType.DURATION.value: DurationDisplayOptionSerializer,
+        UIType.BOOLEAN: BooleanDisplayOptionSerializer,
+        UIType.NUMBER: NumberDisplayOptionSerializer,
+        UIType.DATETIME: TimeFormatDisplayOptionSerializer,
+        UIType.DATE: TimeFormatDisplayOptionSerializer,
+        UIType.TIME: TimeFormatDisplayOptionSerializer,
+        UIType.DURATION: DurationDisplayOptionSerializer,
     }
 
     def get_mapping_field(self):
+        return self._get_ui_type_of_column_being_serialized()
+
+    def _get_ui_type_of_column_being_serialized(self):
         db_type = self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY]
-        mathesar_type = get_mathesar_type_from_db_type(db_type)
-        return mathesar_type
+        ui_type = get_ui_type_from_db_type(db_type)
+        return ui_type
