@@ -1,24 +1,3 @@
-<script context="module" lang="ts">
-  import type { BaseInputProps } from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
-  import type {
-    Appearance,
-    ListBoxProps,
-  } from '@mathesar-component-library-dir/types';
-
-  export interface SelectProps<Option> extends BaseInputProps {
-    options: Option[];
-    value?: Option;
-    labelKey?: string;
-    getLabel?: LabelGetter<Option | undefined>;
-    prependBlank?: boolean;
-    contentClass?: string;
-    triggerClass?: string;
-    triggerAppearance?: Appearance;
-    ariaLabel?: string;
-    valuesAreEqual?: ListBoxProps<Option | undefined>['checkEquality'];
-  }
-</script>
-
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import BaseInput from '@mathesar-component-library-dir/common/base-components/BaseInput.svelte';
@@ -27,10 +6,10 @@
     ListBoxOptions,
   } from '@mathesar-component-library-dir/list-box';
   import { Dropdown } from '@mathesar-component-library-dir/dropdown';
-  import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';
   import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
   import { getGloballyUniqueId } from '@mathesar-component-library-dir/common/utils/domUtils';
   import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
+  import type { SelectProps } from './SelectTypes';
 
   type Option = $$Generic;
   type $$Props = SelectProps<Option>;
