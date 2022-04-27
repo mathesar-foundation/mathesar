@@ -5,6 +5,8 @@ from django.core.cache import cache
 from django.core.files.base import File, ContentFile
 from sqlalchemy import text
 
+from db.types.base import PostgresType, MathesarCustomType
+
 from mathesar import reflection
 from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
@@ -143,26 +145,26 @@ def test_table_list(create_patents_table, client):
     """
     Desired format:
     {
-        "count": 1,
-        "results": [
+        'count': 1,
+        'results': [
             {
-                "id": 1,
-                "name": "NASA Table List",
-                "schema": "http://testserver/api/db/v0/schemas/1/",
-                "created_at": "2021-04-27T18:43:41.201851Z",
-                "updated_at": "2021-04-27T18:43:41.201898Z",
-                "columns": [
+                'id': 1,
+                'name': 'NASA Table List',
+                'schema': 'http://testserver/api/db/v0/schemas/1/',
+                'created_at': '2021-04-27T18:43:41.201851Z',
+                'updated_at': '2021-04-27T18:43:41.201898Z',
+                'columns': [
                     {
-                        "name": "id",
-                        "type": "INTEGER"
+                        'name': 'id',
+                        'type': PostgresType.INTEGER.id
                     },
                     {
-                        "name": "Center",
-                        "type": "VARCHAR"
+                        'name': 'Center',
+                        'type': PostgresType.CHARACTER_VARYING.id
                     },
                     # etc.
                 ],
-                "records_url": "http://testserver/api/db/v0/tables/3/records/"
+                'records_url': 'http://testserver/api/db/v0/tables/3/records/'
             }
         ]
     }
@@ -206,9 +208,9 @@ def test_table_list_filter_name(create_patents_table, client):
 
 def test_table_list_filter_schema(create_patents_table, client):
     expected_tables = {
-        'Schema 1': create_patents_table('Filter Schema 1', schema='Schema 1'),
-        'Schema 2': create_patents_table('Filter Schema 2', schema='Schema 2'),
-        'Schema 3': create_patents_table('Filter Schema 3', schema='Schema 3')
+        'Schema 1': create_patents_table('Filter Schema 1', schema_name='Schema 1'),
+        'Schema 2': create_patents_table('Filter Schema 2', schema_name='Schema 2'),
+        'Schema 3': create_patents_table('Filter Schema 3', schema_name='Schema 3')
     }
 
     schema_name = 'Schema 1'
@@ -240,7 +242,7 @@ def test_table_list_order_by_name(create_patents_table, client):
     comparison_tuples = zip(response_tables, unsorted_expected_tables)
     for comparison_tuple in comparison_tuples:
         check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
-    sort_field = "name"
+    sort_field = 'name'
     response = client.get(f'/api/db/v0/tables/?sort_by={sort_field}')
     response_data = response.json()
     response_tables = response_data['results']
@@ -271,7 +273,7 @@ def test_table_list_order_by_id(create_patents_table, client):
     for comparison_tuple in comparison_tuples:
         check_table_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name)
 
-    sort_field = "id"
+    sort_field = 'id'
     response = client.get(f'/api/db/v0/tables/?sort_by={sort_field}')
     response_data = response.json()
     response_tables = response_data['results']
@@ -368,12 +370,12 @@ def test_table_type_suggestion(client, schema, engine_with_mathesar):
     table = Table.objects.get(id=response_table['id'])
 
     EXPECTED_TYPES = {
-        'col_1': 'NUMERIC',
-        'col_2': 'BOOLEAN',
-        'col_3': 'BOOLEAN',
-        'col_4': 'TEXT',
-        'col_5': 'TEXT',
-        'col_6': 'NUMERIC'
+        'col_1': PostgresType.NUMERIC.id,
+        'col_2': PostgresType.BOOLEAN.id,
+        'col_3': PostgresType.BOOLEAN.id,
+        'col_4': PostgresType.TEXT.id,
+        'col_5': PostgresType.TEXT.id,
+        'col_6': PostgresType.NUMERIC.id
     }
     response = client.get(f'/api/db/v0/tables/{table.id}/type_suggestions/')
     response_table = response.json()
@@ -404,13 +406,13 @@ def test_table_previews(client, schema, engine_with_mathesar):
 
     post_body = {
         'columns': [
-            {"name": "id", "type": "INTEGER"},
-            {"name": "col_1", "type": "NUMERIC"},
-            {"name": "col_2", "type": "BOOLEAN"},
-            {"name": "col_3", "type": "BOOLEAN"},
-            {"name": "col_4", "type": "VARCHAR"},
-            {"name": "col_5", "type": "VARCHAR"},
-            {"name": "col_6", "type": "NUMERIC"}
+            {'name': 'id', 'type': PostgresType.INTEGER.id},
+            {'name': 'col_1', 'type': PostgresType.NUMERIC.id},
+            {'name': 'col_2', 'type': PostgresType.BOOLEAN.id},
+            {'name': 'col_3', 'type': PostgresType.BOOLEAN.id},
+            {'name': 'col_4', 'type': PostgresType.CHARACTER_VARYING.id},
+            {'name': 'col_5', 'type': PostgresType.CHARACTER_VARYING.id},
+            {'name': 'col_6', 'type': PostgresType.NUMERIC.id}
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
@@ -446,17 +448,17 @@ def test_table_previews_wrong_column_number(client, schema, engine_with_mathesar
 
     post_body = {
         'columns': [
-            {"name": "id", "type": "INTEGER"},
-            {"name": "col_2", "type": "BOOLEAN"},
-            {"name": "col_3", "type": "BOOLEAN"},
-            {"name": "col_4", "type": "VARCHAR"},
-            {"name": "col_5", "type": "VARCHAR"},
-            {"name": "col_6", "type": "NUMERIC"}
+            {'name': 'id', 'type': PostgresType.INTEGER.id},
+            {'name': 'col_2', 'type': PostgresType.BOOLEAN.id},
+            {'name': 'col_3', 'type': PostgresType.BOOLEAN.id},
+            {'name': 'col_4', 'type': PostgresType.CHARACTER_VARYING.id},
+            {'name': 'col_5', 'type': PostgresType.CHARACTER_VARYING.id},
+            {'name': 'col_6', 'type': PostgresType.NUMERIC.id}
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    assert "number" in response.json()[0]['message']
+    assert 'number' in response.json()[0]['message']
     assert ErrorCodes.ColumnSizeMismatch.value == response.json()[0]['code']
 
 
@@ -476,19 +478,19 @@ def test_table_previews_invalid_type_cast(client, schema, engine_with_mathesar):
 
     post_body = {
         'columns': [
-            {"name": "id", "type": "INTEGER"},
-            {"name": "col_1", "type": "NUMERIC"},
-            {"name": "col_2", "type": "BOOLEAN"},
-            {"name": "col_3", "type": "BOOLEAN"},
-            {"name": "col_4", "type": "NUMERIC"},
-            {"name": "col_5", "type": "VARCHAR"},
-            {"name": "col_6", "type": "NUMERIC"}
+            {'name': 'id', 'type': PostgresType.INTEGER.id},
+            {'name': 'col_1', 'type': PostgresType.NUMERIC.id},
+            {'name': 'col_2', 'type': PostgresType.BOOLEAN.id},
+            {'name': 'col_3', 'type': PostgresType.BOOLEAN.id},
+            {'name': 'col_4', 'type': PostgresType.NUMERIC.id},
+            {'name': 'col_5', 'type': PostgresType.CHARACTER_VARYING.id},
+            {'name': 'col_6', 'type': PostgresType.NUMERIC.id}
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    assert "Invalid type" in response.json()[0]['message']
-    assert "columns" in response.json()[0]['field']
+    assert 'Invalid type' in response.json()[0]['message']
+    assert 'columns' in response.json()[0]['field']
 
 
 def test_table_previews_invalid_type_cast_check(client, schema, engine_with_mathesar):
@@ -507,18 +509,18 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_with_math
 
     post_body = {
         'columns': [
-            {"name": "id", "type": "INTEGER"},
-            {"name": "col_1", "type": "NUMERIC"},
-            {"name": "col_2", "type": "BOOLEAN"},
-            {"name": "col_3", "type": "BOOLEAN"},
-            {"name": "col_4", "type": "NUMERIC"},
-            {"name": "col_5", "type": "mathesar_types.email"},
-            {"name": "col_6", "type": "NUMERIC"}
+            {'name': 'id', 'type': PostgresType.INTEGER.id},
+            {'name': 'col_1', 'type': PostgresType.NUMERIC.id},
+            {'name': 'col_2', 'type': PostgresType.BOOLEAN.id},
+            {'name': 'col_3', 'type': PostgresType.BOOLEAN.id},
+            {'name': 'col_4', 'type': PostgresType.NUMERIC.id},
+            {'name': 'col_5', 'type': MathesarCustomType.EMAIL.id},
+            {'name': 'col_6', 'type': PostgresType.NUMERIC.id}
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    assert "Invalid type" in response.json()[0]['message']
+    assert 'Invalid type' in response.json()[0]['message']
 
 
 def test_table_previews_unsupported_type(client, schema, engine_with_mathesar):
@@ -537,19 +539,19 @@ def test_table_previews_unsupported_type(client, schema, engine_with_mathesar):
 
     post_body = {
         'columns': [
-            {"name": "id", "type": "INTEGER"},
-            {"name": "col_1", "type": "notatype"},
-            {"name": "col_2", "type": "BOOLEAN"},
-            {"name": "col_3", "type": "BOOLEAN"},
-            {"name": "col_4", "type": "NUMERIC"},
-            {"name": "col_5", "type": "VARCHAR"},
-            {"name": "col_6", "type": "NUMERIC"}
+            {'name': 'id', 'type': PostgresType.INTEGER.id},
+            {'name': 'col_1', 'type': 'notatype'},
+            {'name': 'col_2', 'type': PostgresType.BOOLEAN.id},
+            {'name': 'col_3', 'type': PostgresType.BOOLEAN.id},
+            {'name': 'col_4', 'type': PostgresType.NUMERIC.id},
+            {'name': 'col_5', 'type': PostgresType.CHARACTER_VARYING.id},
+            {'name': 'col_6', 'type': PostgresType.NUMERIC.id}
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    assert "not supported" in response.json()[0]['message']
-    assert "columns" in response.json()[0]['field']
+    assert 'Unknown database type identifier' in response.json()[0]['message']
+    assert 'columns' in response.json()[0]['field']
 
 
 def test_table_previews_missing_columns(client, schema, engine_with_mathesar):
@@ -569,8 +571,8 @@ def test_table_previews_missing_columns(client, schema, engine_with_mathesar):
     post_body = {}
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
-    assert "required" in response.json()[0]['message']
-    assert "columns" in response.json()[0]['field']
+    assert 'required' in response.json()[0]['message']
+    assert 'columns' in response.json()[0]['field']
 
 
 @pytest.mark.parametrize('table_name', ['Test Table Create From Datafile', ''])
@@ -630,8 +632,8 @@ def test_table_create_without_datafile(client, schema, data_files, table_name):
 
 
 def test_table_create_name_taken(client, paste_data_file, schema, create_patents_table, schema_name):
-    create_patents_table('Table 2', schema=schema_name)
-    create_patents_table('Table 3', schema=schema_name)
+    create_patents_table('Table 2', schema_name=schema_name)
+    create_patents_table('Table 3', schema_name=schema_name)
     expt_name = 'Table 4'
 
     first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
@@ -645,8 +647,8 @@ def test_table_create_name_taken(client, paste_data_file, schema, create_patents
 
 
 def test_table_create_base_name_taken(client, data_file, schema, create_patents_table, schema_name):
-    create_patents_table('patents', schema=schema_name)
-    create_patents_table('patents 1', schema=schema_name)
+    create_patents_table('patents', schema_name=schema_name)
+    create_patents_table('patents 1', schema_name=schema_name)
     expt_name = 'patents 2'
 
     first_row = (1, 'NASA Kennedy Space Center', 'Application', 'KSC-12871', '0',
@@ -675,20 +677,20 @@ def test_table_create_base_name_too_long(client, data_file, schema):
 
 
 get_encoding_test_list = [
-    ("mathesar/tests/data/non_unicode_files/cp1250.csv", "cp1250", (1, '2',
+    ('mathesar/tests/data/non_unicode_files/cp1250.csv', 'cp1250', (1, '2',
                                                                     '1.7 Cubic Foot Compact "Cube" Office Refrigerators',
                                                                     'Barry French',
                                                                     '293', '457.81', '208.16', '68.02', 'Nunavut',
                                                                     'Appliances', '0.58'),
-     ['1', "Eldon Base for stackable storage shelf, platinum", "Muhammed MacIntyre",
-      '3', '-213.25', '38.94', '35', "Nunavut", "Storage & Organization", '0.8']),
+     ['1', 'Eldon Base for stackable storage shelf, platinum', 'Muhammed MacIntyre',
+      '3', '-213.25', '38.94', '35', 'Nunavut', 'Storage & Organization', '0.8']),
 
-    ("mathesar/tests/data/non_unicode_files/utf_16_le.csv", "utf_16_le", (1, 'Troy', '2004', 'English'),
+    ('mathesar/tests/data/non_unicode_files/utf_16_le.csv', 'utf_16_le', (1, 'Troy', '2004', 'English'),
      ['Title', 'Year', 'Language']),
 ]
 
 
-@pytest.mark.parametrize("non_unicode_file_path, filename, first_row, column_names", get_encoding_test_list)
+@pytest.mark.parametrize('non_unicode_file_path, filename, first_row, column_names', get_encoding_test_list)
 def test_table_create_non_unicode(client, non_unicode_file_path, filename, first_row, column_names,
                                   schema, create_data_file):
     expt_name = filename
@@ -709,7 +711,7 @@ def test_table_create_with_same_name(client, schema):
     response_error = response.json()
     assert response.status_code == 400
     assert response_error[0]['code'] == ErrorCodes.DuplicateTableError.value
-    assert response_error[0]['message'] == f"Relation {table_name} already exists in schema {schema.id}"
+    assert response_error[0]['message'] == f'Relation {table_name} already exists in schema {schema.id}'
 
 
 def test_table_partial_update(create_patents_table, client):
@@ -878,8 +880,8 @@ def test_table_get_with_reflect_new(client, table_for_reflection):
     assert created_table['name'] == table_name
     created_columns = created_table['columns']
     check_columns_response(created_columns, [
-        {'name': 'id', 'type': 'INTEGER', 'type_options': None, 'display_options': None},
-        {'name': 'name', 'type': 'VARCHAR', 'type_options': None, 'display_options': None}
+        {'name': 'id', 'type': PostgresType.INTEGER.id, 'type_options': None, 'display_options': None},
+        {'name': 'name', 'type': PostgresType.CHARACTER_VARYING.id, 'type_options': None, 'display_options': None}
     ])
 
 
@@ -915,8 +917,8 @@ def test_table_get_with_reflect_column_change(client, table_for_reflection):
     new_columns = altered_table['columns']
     assert altered_table['id'] == orig_id
     check_columns_response(new_columns, [
-        {'name': 'id', 'type': 'INTEGER', 'type_options': None, 'display_options': None},
-        {'name': new_column_name, 'type': 'VARCHAR', 'type_options': None, 'display_options': None}
+        {'name': 'id', 'type': PostgresType.INTEGER.id, 'type_options': None, 'display_options': None},
+        {'name': new_column_name, 'type': PostgresType.CHARACTER_VARYING.id, 'type_options': None, 'display_options': None}
     ])
 
 
@@ -988,28 +990,28 @@ def test_table_viewset_checks_cache(client):
 def _get_patents_column_data():
     return [{
         'name': 'id',
-        'type': 'INTEGER',
+        'type': PostgresType.INTEGER.id,
     }, {
         'name': 'Center',
-        'type': 'VARCHAR',
+        'type': PostgresType.CHARACTER_VARYING.id,
     }, {
         'name': 'Status',
-        'type': 'VARCHAR',
+        'type': PostgresType.CHARACTER_VARYING.id,
     }, {
         'name': 'Case Number',
-        'type': 'VARCHAR',
+        'type': PostgresType.CHARACTER_VARYING.id,
     }, {
         'name': 'Patent Number',
-        'type': 'VARCHAR',
+        'type': PostgresType.CHARACTER_VARYING.id,
     }, {
         'name': 'Application SN',
-        'type': 'VARCHAR',
+        'type': PostgresType.CHARACTER_VARYING.id,
     }, {
         'name': 'Title',
-        'type': 'VARCHAR',
+        'type': PostgresType.CHARACTER_VARYING.id,
     }, {
         'name': 'Patent Expiration Date',
-        'type': 'VARCHAR',
+        'type': PostgresType.CHARACTER_VARYING.id,
     }]
 
 
@@ -1110,19 +1112,19 @@ def test_table_patch_columns_one_type_change(create_patents_table, client, engin
 def _get_data_types_column_data():
     return [{
         'name': 'id',
-        'type': 'INTEGER'
+        'type': PostgresType.INTEGER.id
     }, {
         'name': 'Integer',
-        'type': 'TEXT'
+        'type': PostgresType.TEXT.id
     }, {
         'name': 'Boolean',
-        'type': 'TEXT'
+        'type': PostgresType.TEXT.id
     }, {
         'name': 'Text',
-        'type': 'TEXT'
+        'type': PostgresType.TEXT.id
     }, {
         'name': 'Decimal',
-        'type': 'TEXT'
+        'type': PostgresType.TEXT.id
     }]
 
 
@@ -1130,9 +1132,9 @@ def test_table_patch_columns_multiple_type_change(create_data_types_table, clien
     table_name = 'PATCH columns 6'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
-    column_data[1]['type'] = 'INTEGER'
-    column_data[2]['type'] = 'BOOLEAN'
-    column_data[4]['type'] = 'NUMERIC'
+    column_data[1]['type'] = PostgresType.INTEGER.id
+    column_data[2]['type'] = PostgresType.BOOLEAN.id
+    column_data[4]['type'] = PostgresType.NUMERIC.id
 
     body = {
         'columns': column_data
@@ -1187,7 +1189,7 @@ def test_table_patch_columns_diff_name_type_change(create_data_types_table, clie
     table_name = 'PATCH columns 9'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
-    column_data[1]['type'] = 'INTEGER'
+    column_data[1]['type'] = PostgresType.INTEGER.id
     column_data[2]['name'] = 'Checkbox'
 
     body = {
@@ -1204,7 +1206,7 @@ def test_table_patch_columns_same_name_type_change(create_data_types_table, clie
     table_name = 'PATCH columns 10'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
-    column_data[2]['type'] = 'BOOLEAN'
+    column_data[2]['type'] = PostgresType.BOOLEAN.id
     column_data[2]['name'] = 'Checkbox'
 
     body = {
@@ -1221,9 +1223,9 @@ def test_table_patch_columns_multiple_name_type_change(create_data_types_table, 
     table_name = 'PATCH columns 11'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
-    column_data[1]['type'] = 'INTEGER'
+    column_data[1]['type'] = PostgresType.INTEGER.id
     column_data[1]['name'] = 'Int.'
-    column_data[2]['type'] = 'BOOLEAN'
+    column_data[2]['type'] = PostgresType.BOOLEAN.id
     column_data[2]['name'] = 'Checkbox'
 
     body = {
@@ -1240,7 +1242,7 @@ def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client
     table_name = 'PATCH columns 12'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
-    column_data[1]['type'] = 'INTEGER'
+    column_data[1]['type'] = PostgresType.INTEGER.id
     column_data[2]['name'] = 'Checkbox'
     column_data[3] = {}
 
@@ -1259,7 +1261,7 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
     column_data[1] = {}
-    column_data[2]['type'] = 'BOOLEAN'
+    column_data[2]['type'] = PostgresType.BOOLEAN.id
     column_data[2]['name'] = 'Checkbox'
     column_data[3] = {}
 
@@ -1277,7 +1279,7 @@ def test_table_patch_columns_invalid_type(create_data_types_table, client, engin
     table_name = 'PATCH columns 14'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
-    column_data[3]['type'] = 'BOOLEAN'
+    column_data[3]['type'] = PostgresType.BOOLEAN.id
 
     body = {
         'columns': column_data
@@ -1294,7 +1296,7 @@ def test_table_patch_columns_invalid_type_with_name(create_data_types_table, cli
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
     column_data[1]['name'] = 'hello'
-    column_data[3]['type'] = 'BOOLEAN'
+    column_data[3]['type'] = PostgresType.BOOLEAN.id
 
     body = {
         'columns': column_data
@@ -1314,8 +1316,8 @@ def test_table_patch_columns_invalid_type_with_type(create_data_types_table, cli
     table_name = 'PATCH columns 16'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
-    column_data[1]['type'] = 'INTEGER'
-    column_data[3]['type'] = 'BOOLEAN'
+    column_data[1]['type'] = PostgresType.INTEGER.id
+    column_data[3]['type'] = PostgresType.BOOLEAN.id
 
     body = {
         'columns': column_data
@@ -1336,7 +1338,7 @@ def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, cli
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
     column_data[1] = {}
-    column_data[3]['type'] = 'BOOLEAN'
+    column_data[3]['type'] = PostgresType.BOOLEAN.id
 
     body = {
         'columns': column_data
@@ -1358,8 +1360,8 @@ def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_type
     column_data = _get_data_types_column_data()
     column_data[1] = {}
     column_data[2]['name'] = 'Checkbox'
-    column_data[2]['type'] = 'BOOLEAN'
-    column_data[3]['type'] = 'BOOLEAN'
+    column_data[2]['type'] = PostgresType.BOOLEAN.id
+    column_data[3]['type'] = PostgresType.BOOLEAN.id
 
     body = {
         'columns': column_data

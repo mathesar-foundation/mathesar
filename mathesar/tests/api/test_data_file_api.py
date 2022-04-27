@@ -1,7 +1,7 @@
 import os
 
 import pytest
-import requests
+from mathesar.errors import URLNotReachable
 from unittest.mock import patch
 from django.core.files import File
 
@@ -232,7 +232,7 @@ def test_data_file_create_url_invalid_format(client):
 
 def test_data_file_create_url_invalid_address(client):
     url = 'https://www.test.invalid'
-    with patch('requests.head', side_effect=requests.exceptions.ConnectionError):
+    with patch('requests.head', side_effect=URLNotReachable):
         response = client.post('/api/db/v0/data_files/', data={'url': url})
         response_dict = response.json()
     assert response.status_code == 400

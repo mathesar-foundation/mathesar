@@ -21,19 +21,27 @@ def check_schema_response(response_schema, schema, schema_name, test_db_name, ch
         )
 
 
-def test_schema_list(client, patent_schema, empty_nasa_table):
+def test_schema_list(client, patent_schema):
     cache.clear()
     response = client.get('/api/db/v0/schemas/')
-    response_data = response.json()
-    response_schema = [
-        s for s in response_data['results'] if s['name'] != 'public'
-    ][0]
-
     assert response.status_code == 200
-    assert response_data['count'] == 2
-    assert len(response_data['results']) == 2
-    check_schema_response(response_schema, patent_schema, patent_schema.name,
-                          patent_schema.database.name)
+
+    response_data = response.json()
+
+    assert response_data['count'] == 3
+    assert len(response_data['results']) == 3
+
+    response_schema = None
+    for some_schema in response_data['results']:
+        if some_schema['name'] == patent_schema.name:
+            response_schema = some_schema
+    assert response_schema is not None
+    check_schema_response(
+        response_schema,
+        patent_schema,
+        patent_schema.name,
+        patent_schema.database.name,
+    )
 
 
 def test_schema_list_filter(client, monkeypatch):

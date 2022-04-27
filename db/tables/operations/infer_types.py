@@ -33,6 +33,7 @@ def update_table_column_types(schema, table_name, engine):
         )
 
 
+# TODO consider returning a mapping of column identifiers to types
 def infer_table_column_types(schema, table_name, engine):
     table = reflect_table(table_name, schema, engine)
 

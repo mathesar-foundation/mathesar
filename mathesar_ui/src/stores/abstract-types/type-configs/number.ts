@@ -9,7 +9,7 @@ import type {
 
 const DB_TYPES = {
   DECIMAL: 'DECIMAL',
-  NUMERIC: 'NUMERIC',
+  NUMERIC: PostgresType.NUMERIC.id,
   INTEGER: 'INTEGER',
   SMALLINT: 'SMALLINT',
   BIGINT: 'BIGINT',
