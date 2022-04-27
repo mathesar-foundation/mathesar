@@ -53,7 +53,7 @@
 
   function focusSelected(): void {
     const lastSelectedOption = value[value.length - 1];
-    if (lastSelectedOption) {
+    if (typeof lastSelectedOption !== 'undefined') {
       $focusedOptionIndex = $displayedOptions.findIndex((opt) =>
         checkEquality(lastSelectedOption, opt),
       );
@@ -163,7 +163,7 @@
 
   function pickFocused(): void {
     const focusedOption = $displayedOptions[$focusedOptionIndex];
-    if (focusedOption) {
+    if (typeof focusedOption !== 'undefined') {
       pick(focusedOption);
     } else if (selectionType === 'single') {
       close();
