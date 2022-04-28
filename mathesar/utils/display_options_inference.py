@@ -32,16 +32,16 @@ def infer_mathesar_money_display_options(table_oid, engine, column_attnum):
                     selected_currency_details = currency_details
             if selected_currency_details is not None:
                 return {
-                        'currency_symbol': selected_currency_details['currency_symbol'],
-                        'symbol_location': 'after-minus',
-                        'number_format': 'english',
-                      }
+                    'currency_symbol': selected_currency_details['currency_symbol'],
+                    'symbol_location': 'after-minus',
+                    'number_format': 'english',
+                }
             else:
                 return {
-                        'currency_symbol': money_array[3],
-                        'symbol_location': 'after-minus',
-                        'number_format': 'english',
-                      }
+                    'currency_symbol': money_array[3],
+                    'symbol_location': 'after-minus',
+                    'number_format': 'english',
+                }
 
 
 def infer_table_column_display_options(table, col_name_type_dict):

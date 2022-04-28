@@ -1,10 +1,7 @@
-import json
-
 from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.api.exceptions.validation_exceptions.exceptions import MoneyDisplayOptionValueConflictAPIException
 from mathesar.database.types import MathesarTypeIdentifier, get_mathesar_type_from_db_type
 
 
