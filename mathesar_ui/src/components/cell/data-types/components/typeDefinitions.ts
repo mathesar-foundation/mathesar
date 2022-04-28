@@ -1,9 +1,4 @@
-import type { SvelteComponent } from 'svelte';
-
-export interface CellComponentAndProps<T> {
-  component: typeof SvelteComponent;
-  props?: T;
-}
+import type { SelectProps } from '@mathesar-component-library/types';
 
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
@@ -30,7 +25,7 @@ export type TextAreaCellProps = TextBoxCellProps;
 // Number
 
 export interface NumberCellExternalProps {
-  format: 'english' | 'german' | 'french' | 'hindi' | 'swiss' | null;
+  locale?: string;
   isPercentage: boolean;
 }
 
@@ -46,18 +41,11 @@ export type CheckBoxCellProps = CellTypeProps<boolean>;
 
 // SingleSelect
 
-export interface SingleSelectCellExternalProps<
-  ValueType,
-  OptionType = ValueType,
-> {
-  options: OptionType[];
-  getSelectedOptionsFromValue: (
-    value: ValueType | null | undefined,
-  ) => OptionType[];
-  getValueFromSelectedOptions: (options: OptionType[]) => ValueType | null;
-  getValueLabel?: (value: ValueType) => string;
-}
+export type SingleSelectCellExternalProps<Option> = Pick<
+  SelectProps<Option>,
+  'options' | 'getLabel'
+>;
 
-export interface SingleSelectCellProps<ValueType, OptionType = ValueType>
-  extends CellTypeProps<ValueType>,
-    SingleSelectCellExternalProps<ValueType, OptionType> {}
+export interface SingleSelectCellProps<Option>
+  extends CellTypeProps<Option>,
+    SingleSelectCellExternalProps<Option> {}

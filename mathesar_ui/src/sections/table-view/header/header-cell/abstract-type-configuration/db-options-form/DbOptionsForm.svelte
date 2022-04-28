@@ -5,7 +5,6 @@
   import type { FormBuildConfiguration } from '@mathesar-component-library/types';
 
   import DbTypeSelect from './DbTypeSelect.svelte';
-  import DbTypeIndicator from './DbTypeIndicator.svelte';
 
   export let selectedDbType: DbType;
   export let selectedAbstractType: AbstractType;
@@ -14,13 +13,13 @@
   $: abstTypeHasMultipleDbTypes = selectedAbstractType.dbTypes.size
     ? selectedAbstractType.dbTypes.size > 1
     : false;
+
+  $: showDbFormSelector = !dbForm && abstTypeHasMultipleDbTypes;
 </script>
 
 {#if dbForm}
   <FormBuilder form={dbForm} />
-  <DbTypeIndicator {selectedDbType} />
-{:else if abstTypeHasMultipleDbTypes}
+{:else if showDbFormSelector}
+  <!--Temporary component, to be removed after all types are implemented-->
   <DbTypeSelect bind:selectedDbType {selectedAbstractType} />
-{:else}
-  <DbTypeIndicator {selectedDbType} />
 {/if}

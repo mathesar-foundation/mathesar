@@ -1,7 +1,10 @@
 <script lang="ts">
   import { faAngleDown } from '@fortawesome/free-solid-svg-icons';
   import type { Placement } from '@popperjs/core/lib/enums';
-  import type { Appearance, Size } from '@mathesar-component-library-dir/types';
+  import type {
+    Appearance,
+    Size,
+  } from '@mathesar-component-library-dir/commonTypes';
   import Button from '@mathesar-component-library-dir/button/Button.svelte';
   import Icon from '@mathesar-component-library-dir/icon/Icon.svelte';
 

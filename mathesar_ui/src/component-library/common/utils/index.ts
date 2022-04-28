@@ -15,3 +15,4 @@ export * from './ruleExecuter';
 export * from './storeUtils';
 export * from './contextValidationUtil';
 export * from './inputUtils';
+export * from './typeUtils';
