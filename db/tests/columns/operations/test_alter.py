@@ -71,6 +71,12 @@ def _get_pizza_column_data():
         'plain_type': 'VARCHAR'
     }]
 
+def _get_pizza_column_data_with_attnums(table_oid, column_data, engine):
+    for data in column_data:
+        name = data['name']
+        data['attnum'] = get_column_attnum_from_name(table_oid, name, engine)
+    return column_data
+
 
 @pytest.mark.parametrize(
     "column_dict,func_name",
@@ -435,7 +441,7 @@ def test_batch_update_columns_no_changes(engine_email_type):
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
-    batch_update_columns(table_oid, engine, _get_pizza_column_data())
+    batch_update_columns(table_oid, engine, _get_pizza_column_data_with_attnums(table_oid, _get_pizza_column_data(), engine))
     updated_table = reflect_table(table.name, schema, engine)
 
     assert len(table.columns) == len(updated_table.columns)
@@ -450,7 +456,7 @@ def test_batch_update_column_names(engine_email_type):
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
-    column_data = _get_pizza_column_data()
+    column_data = _get_pizza_column_data_with_attnums(table_oid, _get_pizza_column_data(), engine)
     column_data[1]['name'] = 'Pizza Style'
     column_data[2]['name'] = 'Eaten Recently?'
 
@@ -469,7 +475,7 @@ def test_batch_update_column_types(engine_email_type):
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
-    column_data = _get_pizza_column_data()
+    column_data = _get_pizza_column_data_with_attnums(table_oid, _get_pizza_column_data(), engine)
     column_data[0]['plain_type'] = 'DOUBLE PRECISION'
     column_data[2]['plain_type'] = 'BOOLEAN'
 
@@ -488,7 +494,7 @@ def test_batch_update_column_names_and_types(engine_email_type):
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
-    column_data = _get_pizza_column_data()
+    column_data = _get_pizza_column_data_with_attnums(table_oid, _get_pizza_column_data(), engine)
     column_data[0]['name'] = 'Pizza ID'
     column_data[0]['plain_type'] = 'INTEGER'
     column_data[1]['name'] = 'Pizza Style'
@@ -509,9 +515,9 @@ def test_batch_update_column_drop_columns(engine_email_type):
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
-    column_data = _get_pizza_column_data()
-    column_data[0] = {}
-    column_data[1] = {}
+    column_data = _get_pizza_column_data_with_attnums(table_oid, _get_pizza_column_data(), engine)
+    column_data[0] = {'attnum': get_column_attnum_from_name(table_oid, column_data[0]['name'], engine)}
+    column_data[1] = {'attnum': get_column_attnum_from_name(table_oid, column_data[1]['name'], engine)}
 
     batch_update_columns(table_oid, engine, column_data)
     updated_table = reflect_table(table.name, schema, engine)
@@ -528,12 +534,12 @@ def test_batch_update_column_all_operations(engine_email_type):
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
-    column_data = _get_pizza_column_data()
+    column_data = _get_pizza_column_data_with_attnums(table_oid, _get_pizza_column_data(), engine)
     column_data[0]['name'] = 'Pizza ID'
     column_data[0]['plain_type'] = 'INTEGER'
     column_data[1]['name'] = 'Pizza Style'
     column_data[2]['plain_type'] = 'BOOLEAN'
-    column_data[3] = {}
+    column_data[3] = {'attnum': get_column_attnum_from_name(table_oid, column_data[3]['name'], engine)}
 
     batch_update_columns(table_oid, engine, column_data)
     updated_table = reflect_table(table.name, schema, engine)
