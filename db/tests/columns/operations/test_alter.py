@@ -71,6 +71,7 @@ def _get_pizza_column_data():
         'plain_type': 'VARCHAR'
     }]
 
+
 def _get_pizza_column_data_with_attnums(table_oid, column_data, engine):
     for data in column_data:
         name = data['name']
