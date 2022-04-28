@@ -1,11 +1,13 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import type { HorizontalAlignment } from './typeDefinitions';
 
   export let element: HTMLElement | undefined = undefined;
   export let isActive = false;
   export let disabled = false;
   export let mode: 'edit' | 'default' = 'default';
   export let multiLineTruncate = false;
+  export let horizontalAlignment: HorizontalAlignment = 'left';
 
   async function focusCell(_isActive: boolean, _mode: 'edit' | 'default') {
     await tick();
@@ -25,6 +27,8 @@
   class:disabled
   class:is-edit-mode={mode === 'edit'}
   class:truncate={multiLineTruncate}
+  class:h-align-right={horizontalAlignment === 'right'}
+  class:h-align-center={horizontalAlignment === 'center'}
   bind:this={element}
   on:click
   on:dblclick
@@ -40,6 +44,21 @@
   .cell-wrapper {
     overflow: hidden;
     padding: 6px 8px;
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    min-height: var(--cell-height);
+    align-items: center;
+    width: 100%;
+
+    &.h-align-right {
+      justify-content: flex-end;
+      --input-element-text-align: right;
+    }
+    &.h-align-center {
+      justify-content: center;
+      --input-element-text-align: center;
+    }
 
     &.is-active {
       box-shadow: 0 0 0 2px #428af4;
