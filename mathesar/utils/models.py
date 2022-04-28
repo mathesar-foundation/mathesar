@@ -49,10 +49,11 @@ def update_sa_schema(schema, validated_data):
 def update_id_to_attnum(table, validated_data):
     if 'columns' in validated_data:
         data = validated_data.get('columns')
+        queryset = table.columns.all()
         for column_data in data:
             col_id = column_data.get('id', None)
             if col_id is not None:
-                attnum = table.columns.get(id=col_id).attnum
+                attnum = queryset.get(id=col_id).attnum
                 column_data['attnum'] = attnum
                 column_data.pop('id')
     return validated_data
