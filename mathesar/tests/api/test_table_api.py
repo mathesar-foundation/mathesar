@@ -1019,6 +1019,14 @@ def _get_patents_column_data():
     }]
 
 
+def get_column_data_with_id(table, column_data):
+    bidirectmap = table.get_column_name_id_bidirectional_map()
+    for data in column_data:
+        name = data['name']
+        data['id'] = bidirectmap[name]
+    return column_data
+
+
 def test_table_patch_same_table_name(create_table, client):
     table_name = 'PATCH same name'
     table = create_table(table_name)
@@ -1038,7 +1046,7 @@ def test_table_patch_columns_and_table_name(create_table, client):
 
     body = {
         'name': 'PATCH COLUMNS 1',
-        'columns': _get_patents_column_data()
+        'columns': get_column_data_with_id(table, _get_patents_column_data())
     }
     # Need to specify format here because otherwise the body gets sent
     # as a multi-part form, which can't handle nested keys.
@@ -1052,7 +1060,7 @@ def test_table_patch_columns_and_table_name(create_table, client):
 def test_table_patch_columns_no_changes(create_table, client, engine_email_type):
     table_name = 'PATCH columns 2'
     table = create_table(table_name)
-    column_data = _get_patents_column_data()
+    column_data = get_column_data_with_id(table, _get_patents_column_data())
 
     body = {
         'columns': column_data
@@ -1067,7 +1075,7 @@ def test_table_patch_columns_no_changes(create_table, client, engine_email_type)
 def test_table_patch_columns_one_name_change(create_table, client, engine_email_type):
     table_name = 'PATCH columns 3'
     table = create_table(table_name)
-    column_data = _get_patents_column_data()
+    column_data = get_column_data_with_id(table, _get_patents_column_data())
     column_data[1]['name'] = 'NASA Center'
 
     body = {
@@ -1083,7 +1091,7 @@ def test_table_patch_columns_one_name_change(create_table, client, engine_email_
 def test_table_patch_columns_two_name_changes(create_table, client, engine_email_type):
     table_name = 'PATCH columns 4'
     table = create_table(table_name)
-    column_data = _get_patents_column_data()
+    column_data = get_column_data_with_id(table, _get_patents_column_data())
     column_data[1]['name'] = 'NASA Center'
     column_data[2]['name'] = 'Patent Status'
 
@@ -1100,7 +1108,7 @@ def test_table_patch_columns_two_name_changes(create_table, client, engine_email
 def test_table_patch_columns_one_type_change(create_table, client, engine_email_type):
     table_name = 'PATCH columns 5'
     table = create_table(table_name)
-    column_data = _get_patents_column_data()
+    column_data = get_column_data_with_id(table, _get_patents_column_data())
     column_data[7]['type'] = 'DATE'
 
     body = {
@@ -1135,7 +1143,7 @@ def _get_data_types_column_data():
 def test_table_patch_columns_multiple_type_change(create_data_types_table, client, engine_email_type):
     table_name = 'PATCH columns 6'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
+    column_data = get_column_data_with_id(table, _get_data_types_column_data())
     column_data[1]['type'] = 'INTEGER'
     column_data[2]['type'] = 'BOOLEAN'
     column_data[4]['type'] = 'NUMERIC'
@@ -1158,8 +1166,8 @@ def _check_columns_with_dropped(response_column_data, request_column_data, dropp
 def test_table_patch_columns_one_drop(create_data_types_table, client, engine_email_type):
     table_name = 'PATCH columns 7'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
-    column_data[1] = {}
+    column_data = get_column_data_with_id(table, _get_data_types_column_data())
+    column_data[1] = {'id': column_data[1]['id']}
 
     body = {
         'columns': column_data
@@ -1175,9 +1183,9 @@ def test_table_patch_columns_multiple_drop(create_data_types_table, client, engi
     INDICES_TO_DROP = [1, 2]
     table_name = 'PATCH columns 8'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
+    column_data = get_column_data_with_id(table, _get_data_types_column_data())
     for index in INDICES_TO_DROP:
-        column_data[index] = {}
+        column_data[index] = {'id': column_data[index]['id']}
 
     body = {
         'columns': column_data
@@ -1192,7 +1200,7 @@ def test_table_patch_columns_multiple_drop(create_data_types_table, client, engi
 def test_table_patch_columns_diff_name_type_change(create_data_types_table, client, engine_email_type):
     table_name = 'PATCH columns 9'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
+    column_data = get_column_data_with_id(table, _get_data_types_column_data())
     column_data[1]['type'] = 'INTEGER'
     column_data[2]['name'] = 'Checkbox'
 
@@ -1209,7 +1217,7 @@ def test_table_patch_columns_diff_name_type_change(create_data_types_table, clie
 def test_table_patch_columns_same_name_type_change(create_data_types_table, client, engine_email_type):
     table_name = 'PATCH columns 10'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
+    column_data = get_column_data_with_id(table, _get_data_types_column_data())
     column_data[2]['type'] = 'BOOLEAN'
     column_data[2]['name'] = 'Checkbox'
 
@@ -1226,7 +1234,7 @@ def test_table_patch_columns_same_name_type_change(create_data_types_table, clie
 def test_table_patch_columns_multiple_name_type_change(create_data_types_table, client, engine_email_type):
     table_name = 'PATCH columns 11'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
+    column_data = get_column_data_with_id(table, _get_data_types_column_data())
     column_data[1]['type'] = 'INTEGER'
     column_data[1]['name'] = 'Int.'
     column_data[2]['type'] = 'BOOLEAN'
@@ -1245,10 +1253,10 @@ def test_table_patch_columns_multiple_name_type_change(create_data_types_table, 
 def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client, engine_email_type):
     table_name = 'PATCH columns 12'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
+    column_data = get_column_data_with_id(table, _get_data_types_column_data())
     column_data[1]['type'] = 'INTEGER'
     column_data[2]['name'] = 'Checkbox'
-    column_data[3] = {}
+    column_data[3] = {'id': column_data[3]['id']}
 
     body = {
         'columns': column_data
@@ -1263,11 +1271,11 @@ def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client
 def test_table_patch_columns_same_name_type_drop(create_data_types_table, client, engine_email_type):
     table_name = 'PATCH columns 13'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
-    column_data[1] = {}
+    column_data = get_column_data_with_id(table, _get_data_types_column_data())
+    column_data[1] = {'id': column_data[1]['id']}
     column_data[2]['type'] = 'BOOLEAN'
     column_data[2]['name'] = 'Checkbox'
-    column_data[3] = {}
+    column_data[3] = {'id': column_data[3]['id']}
 
     body = {
         'columns': column_data
@@ -1282,7 +1290,7 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
 def test_table_patch_columns_invalid_type(create_data_types_table, client, engine_email_type):
     table_name = 'PATCH columns 14'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
+    column_data = get_column_data_with_id(table, _get_data_types_column_data())
     column_data[3]['type'] = 'BOOLEAN'
 
     body = {
@@ -1298,7 +1306,7 @@ def test_table_patch_columns_invalid_type(create_data_types_table, client, engin
 def test_table_patch_columns_invalid_type_with_name(create_data_types_table, client, engine_email_type):
     table_name = 'PATCH columns 15'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
+    column_data = get_column_data_with_id(table, _get_data_types_column_data())
     column_data[1]['name'] = 'hello'
     column_data[3]['type'] = 'BOOLEAN'
 
@@ -1312,14 +1320,14 @@ def test_table_patch_columns_invalid_type_with_name(create_data_types_table, cli
 
     current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
-    original_column_data = _get_data_types_column_data()
+    original_column_data = get_column_data_with_id(table, _get_data_types_column_data())
     _check_columns(current_table_response.json()['columns'], original_column_data)
 
 
 def test_table_patch_columns_invalid_type_with_type(create_data_types_table, client, engine_email_type):
     table_name = 'PATCH columns 16'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
+    column_data = get_column_data_with_id(table, _get_data_types_column_data())
     column_data[1]['type'] = 'INTEGER'
     column_data[3]['type'] = 'BOOLEAN'
 
@@ -1333,15 +1341,15 @@ def test_table_patch_columns_invalid_type_with_type(create_data_types_table, cli
 
     current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
-    original_column_data = _get_data_types_column_data()
+    original_column_data = get_column_data_with_id(table, _get_data_types_column_data())
     _check_columns(current_table_response.json()['columns'], original_column_data)
 
 
 def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, client, engine_email_type):
     table_name = 'PATCH columns 17'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
-    column_data[1] = {}
+    column_data = get_column_data_with_id(table, _get_data_types_column_data())
+    column_data[1] = {'id': column_data[1]['id']}
     column_data[3]['type'] = 'BOOLEAN'
 
     body = {
@@ -1354,15 +1362,15 @@ def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, cli
 
     current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
-    original_column_data = _get_data_types_column_data()
+    original_column_data = get_column_data_with_id(table, _get_data_types_column_data())
     _check_columns(current_table_response.json()['columns'], original_column_data)
 
 
 def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_types_table, client, engine_email_type):
     table_name = 'PATCH columns 18'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
-    column_data[1] = {}
+    column_data = get_column_data_with_id(table, _get_data_types_column_data())
+    column_data[1] = {'id': column_data[1]['id']}
     column_data[2]['name'] = 'Checkbox'
     column_data[2]['type'] = 'BOOLEAN'
     column_data[3]['type'] = 'BOOLEAN'
@@ -1377,5 +1385,5 @@ def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_type
 
     current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
-    original_column_data = _get_data_types_column_data()
+    original_column_data = get_column_data_with_id(table, _get_data_types_column_data())
     _check_columns(current_table_response.json()['columns'], original_column_data)
