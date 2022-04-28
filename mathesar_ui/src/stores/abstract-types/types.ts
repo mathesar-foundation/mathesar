@@ -8,10 +8,15 @@ import type { CellDataType } from '@mathesar/components/cell/data-types/typeDefi
 import type { DbType } from '@mathesar/AppTypes';
 import type { Column } from '@mathesar/stores/table-data/types';
 import type { States } from '@mathesar/utils/api';
+import type { abstractTypeCategory } from './constants';
+
+type AbstractTypeCategoryKeys = keyof typeof abstractTypeCategory;
+export type MathesarTypeCategoryIdentifier =
+  typeof abstractTypeCategory[AbstractTypeCategoryKeys];
 
 export interface AbstractTypeResponse {
   name: string;
-  identifier: string;
+  identifier: MathesarTypeCategoryIdentifier;
   db_types: DbType[];
 }
 
@@ -73,3 +78,23 @@ export interface AbstractTypesSubstance {
   data: AbstractTypesMap;
   error?: string;
 }
+
+export interface FilterDefinitionResponse {
+  id: string;
+  name: string;
+  aliases?: Record<MathesarTypeCategoryIdentifier, string>;
+  uiTypeParameterMap: Partial<
+    Record<MathesarTypeCategoryIdentifier, MathesarTypeCategoryIdentifier[]>
+  >;
+}
+
+export interface FilterDefinition {
+  id: FilterDefinitionResponse['id'];
+  name: FilterDefinitionResponse['name']; // Would be extraced from alias if present
+  parameters: MathesarTypeCategoryIdentifier[];
+}
+
+export type FilterDefinitionMap = Map<
+  MathesarTypeCategoryIdentifier,
+  FilterDefinition[]
+>;
