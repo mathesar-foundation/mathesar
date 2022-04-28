@@ -1,3 +1,4 @@
+import pytest
 from django.core.files.base import File
 
 from db.columns.operations.select import get_column_attnum_from_name
@@ -9,8 +10,22 @@ engine_with_types = fixtures.engine_with_types
 engine_email_type = fixtures.engine_email_type
 temporary_testing_schema = fixtures.temporary_testing_schema
 
+create_display_options_test_list = [
+    ('col_4', {
+        'number_format': 'english',
+        'currency_symbol': '₿',
+        'symbol_location': 'after-minus'
+    }),
+    ('col_3', {
+        'number_format': 'english',
+        'currency_symbol': '$',
+        'symbol_location': 'after-minus'
+    })
+]
 
-def test_display_options_inference(client, patent_schema):
+
+@pytest.mark.parametrize("col_name, expected_display_options", create_display_options_test_list)
+def test_display_options_inference(client, patent_schema, col_name, expected_display_options):
     engine = patent_schema._sa_engine
     table_name = 'Type Inference Table'
     file = 'mathesar/tests/data/display_options_inference.csv'
@@ -24,14 +39,6 @@ def test_display_options_inference(client, patent_schema):
     }
     response_table = client.post('/api/db/v0/tables/', body).json()
     table = Table.objects.get(id=response_table['id'])
-    column_attnum = get_column_attnum_from_name(table.oid, "col_4", engine)
+    column_attnum = get_column_attnum_from_name(table.oid, col_name, engine)
     inferred_display_options = infer_mathesar_money_display_options(table.oid, engine, column_attnum)
-    expected_display_options = {
-        'decimal_symbol': '.',
-        'digit_grouping_symbol': ',',
-        'symbol': '₿',
-        'symbol_location': 1,
-        'digit_grouping': []
-    }
-
     assert inferred_display_options == expected_display_options

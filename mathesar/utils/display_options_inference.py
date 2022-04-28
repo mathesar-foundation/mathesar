@@ -21,25 +21,27 @@ def infer_mathesar_money_display_options(table_oid, engine, column_attnum):
         with open("currency_info.json", 'r') as currency_file:
             currency_dict = json.loads(currency_file.read())
             greatest_currency_similarity_score = 10  # Threshold score
-            selected_currency_code = None
+            selected_currency_details = None
             for currency_code, currency_details in currency_dict.items():
                 currency_similarity_score = fuzz.ratio(currency_details['currency_symbol'], money_array[3])
                 if currency_similarity_score == 100:
-                    return {'currency_code': currency_code}
+                    selected_currency_details = currency_details
+                    break
                 elif currency_similarity_score > greatest_currency_similarity_score:
                     greatest_currency_similarity_score = currency_similarity_score
-                    selected_currency_code = currency_code
-            if selected_currency_code is not None:
-                return {'currency_code': currency_code}
-            else:
-                # TODO Improve default values based on locale
+                    selected_currency_details = currency_details
+            if selected_currency_details is not None:
                 return {
-                    'decimal_symbol': money_array[2] if money_array[2] is not None else ".",
-                    'digit_grouping_symbol': money_array[1] if money_array[1] is not None else ",",
-                    'symbol': money_array[3],
-                    'symbol_location': 1,
-                    'digit_grouping': []
-                }
+                        'currency_symbol': selected_currency_details['currency_symbol'],
+                        'symbol_location': 'after-minus',
+                        'number_format': 'english',
+                      }
+            else:
+                return {
+                        'currency_symbol': money_array[3],
+                        'symbol_location': 'after-minus',
+                        'number_format': 'english',
+                      }
 
 
 def infer_table_column_display_options(table, col_name_type_dict):

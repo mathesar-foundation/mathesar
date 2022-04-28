@@ -110,39 +110,9 @@ class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPart
     custom_labels = CustomBooleanLabelSerializer(required=False)
 
 
-def get_currency_details(currency_code):
-    with open("currency_info.json", 'r') as currency_file:
-        currency_dict = json.loads(currency_file.read())
-        return currency_dict[currency_code]
-
-
-class CurrencyDisplayOptions(MathesarErrorMessageMixin, serializers.Serializer):
-    symbol = serializers.CharField()
-    symbol_location = serializers.ChoiceField(choices=[(1, 1), (-1, -1)])
-    decimal_symbol = serializers.ChoiceField(choices=[(".", "."), (",", ",")])
-    digit_grouping = serializers.ListField(child=serializers.IntegerField(), allow_empty=True, default=[])
-    digit_grouping_symbol = serializers.ChoiceField(choices=[(".", "."), (",", ","), (" ", " ")], allow_null=True)
-
-
 class MoneyDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
-    currency_code = serializers.CharField(allow_null=True, required=False)
-    currency_details = CurrencyDisplayOptions(required=False)
-
-    def validate(self, attrs):
-        currency_code = attrs.get('currency_code', None)
-        if currency_code is not None:
-            if attrs.get('currency_details', None) is not None:
-                raise MoneyDisplayOptionValueConflictAPIException()
-            else:
-                currency_details = get_currency_details(currency_code)
-                attrs['currency_details'] = {
-                    'symbol': currency_details['currency_symbol'],
-                    'symbol_location': 1 if currency_details['p_cs_precedes'] == 1 else -1,
-                    'decimal_symbol': currency_details['mon_decimal_point'],
-                    'digit_grouping': currency_details['mon_grouping'],
-                    'digit_grouping_symbol': currency_details['mon_thousands_sep']
-                }
-        return super().validate(attrs)
+    currency_symbol = serializers.CharField()
+    currency_symbol_location = serializers.ChoiceField(choices=['after-minus', 'end-with-space'])
 
 
 class NumberDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):

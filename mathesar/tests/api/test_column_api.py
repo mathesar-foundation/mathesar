@@ -251,37 +251,7 @@ create_display_options_test_list = [
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}, {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
     ("DATE", {'format': 'YYYY-MM-DD'}, {'format': 'YYYY-MM-DD'}),
     ("INTERVAL", {'format': 'DD HH:mm:ss.SSS'}, {'format': 'DD HH:mm:ss.SSS'}),
-    ("MONEY", {
-        'currency_code': 'en_US',
-    }, {
-        'currency_code': 'en_US',
-        'currency_details': {
-            'decimal_symbol': '.',
-            'digit_grouping': [3, 3, 0],
-            'digit_grouping_symbol': ',',
-            'symbol': '$',
-            'symbol_location': 1
-        }
-    }),
-    ("MONEY", {
-        'currency_code': None,
-        'currency_details': {
-            'symbol': '$',
-            'symbol_location': -1,
-            'decimal_symbol': '.',
-            'digit_grouping': [3, 0],
-            'digit_grouping_symbol': ','
-        }
-    }, {
-        'currency_code': None,
-        'currency_details': {
-            'symbol': '$',
-            'symbol_location': -1,
-            'decimal_symbol': '.',
-            'digit_grouping': [3, 0],
-            'digit_grouping_symbol': ','
-        }
-    }),
+    ("MONEY", {'symbol': '$', 'symbol_location': 'after-minus'}),
     ("NUMERIC", {"show_as_percentage": True}, {"show_as_percentage": True}),
     ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}, {"show_as_percentage": True, "locale": "en_US"}),
     ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}, {'format': 'YYYY-MM-DD hh:mm'}),
@@ -509,30 +479,6 @@ def test_column_update_display_options(column_test_table_with_service_layer_opti
         display_options_data,
     )
     assert response.json()["display_options"] == display_options
-
-
-def test_column_update_mathesar_money_display_options(column_test_table_with_service_layer_options, client):
-    cache.clear()
-    table, columns = column_test_table_with_service_layer_options
-    column = _get_columns_by_name(table, ['mycolumn5'])[0]
-    column_id = column.id
-    display_options = {"currency_code": "en_US.ISO8859-1"}
-    expected_display_options = {
-        'currency_code': 'en_US.ISO8859-1',
-        'currency_details': {
-            'decimal_symbol': '.',
-            'digit_grouping': [3, 3, 0],
-            'digit_grouping_symbol': ',',
-            'symbol': '$',
-            'symbol_location': 1
-        }
-    }
-    display_options_data = {"display_options": display_options}
-    response = client.patch(
-        f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
-        display_options_data,
-    )
-    assert response.json()["display_options"] == expected_display_options
 
 
 def test_column_display_options_type_on_reflection(column_test_table,
