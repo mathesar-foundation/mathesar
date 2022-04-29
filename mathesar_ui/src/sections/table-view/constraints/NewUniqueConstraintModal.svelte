@@ -148,6 +148,7 @@
         bind:value={namingStrategy}
         isInline
         on:change={handleNamingStrategyChange}
+        getRadioLabel={(s) => namingStrategyLabelMap.get(s) ?? ''}
       >
         Set Constraint Name <ConstraintNameHelp />
       </RadioGroup>

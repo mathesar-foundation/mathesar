@@ -21,8 +21,8 @@
 
 <style>
   .errors {
-    margin: 1em 0 0 2em;
-    color: #f47171;
+    margin: 0.5em 0 0 0em;
+    color: var(--danger-color);
   }
 
   ul {

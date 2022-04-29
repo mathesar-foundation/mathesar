@@ -1,3 +1,5 @@
+import type { TextInputProps } from '@mathesar-component-library-dir/text-input/TextInputTypes';
+
 export interface ParseResult<T> {
   /**
    * See docs within `FormattedInput` for an explanation of how we're using
@@ -20,4 +22,13 @@ export interface InputFormatter<T> {
    * @throws Error if unable to parse
    */
   parse(input: string): ParseResult<T>;
+}
+
+type SimplifiedTextInputProps = Omit<TextInputProps, 'value'>;
+type ParseErrorCallback = (p: { userInput: string; error: unknown }) => void;
+
+export interface FormattedInputProps<T> extends SimplifiedTextInputProps {
+  formatter: InputFormatter<T>;
+  value?: T | null;
+  onParseError?: ParseErrorCallback;
 }

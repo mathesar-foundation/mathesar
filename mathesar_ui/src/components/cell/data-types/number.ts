@@ -1,25 +1,53 @@
-import type { NumberDisplayOptions } from '@mathesar/api/tables/columns';
-import type { Column } from '@mathesar/stores/table-data/types';
-import NumberCell from './components/number/NumberCell.svelte';
 import type {
-  CellComponentAndProps,
-  NumberCellExternalProps,
-} from './components/typeDefinitions';
+  NumberDisplayOptions,
+  NumberFormat,
+} from '@mathesar/api/tables/columns';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+import NumberCell from './components/number/NumberCell.svelte';
+import NumberCellInput from './components/number/NumberCellInput.svelte';
+import type { NumberCellExternalProps } from './components/typeDefinitions';
+import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
 
-export interface NumberLikeColumn extends Column {
+export interface NumberLikeColumn extends CellColumnLike {
   display_options: Partial<NumberDisplayOptions> | null;
 }
 
-export default {
-  get(
-    column: NumberLikeColumn,
-  ): CellComponentAndProps<NumberCellExternalProps> {
+// prettier-ignore
+const localeMap = new Map<NumberFormat, string>([
+  ['english' , 'en'    ],
+  ['german'  , 'de'    ],
+  ['french'  , 'fr'    ],
+  ['hindi'   , 'hi'    ],
+  ['swiss'   , 'de-CH' ],
+]);
+
+function getProps(column: NumberLikeColumn): NumberCellExternalProps {
+  const format = column.display_options?.number_format ?? null;
+  const props = {
+    locale: (format && localeMap.get(format)) ?? undefined,
+    isPercentage: column.display_options?.show_as_percentage ?? false,
+  };
+  return props;
+}
+
+const numberType: CellComponentFactory = {
+  get(column: NumberLikeColumn): ComponentAndProps<NumberCellExternalProps> {
     return {
       component: NumberCell,
-      props: {
-        format: column.display_options?.number_format ?? null,
-        isPercentage: column.display_options?.show_as_percentage ?? false,
-      },
+      props: getProps(column),
+    };
+  },
+  // This should ideally return StringifiedNumberInput with props
+  // But since we require addional operations like isPercentage, it's
+  // better to use a dedicated NumberCellInput component
+  getInput(
+    column: NumberLikeColumn,
+  ): ComponentAndProps<NumberCellExternalProps> {
+    return {
+      component: NumberCellInput,
+      props: getProps(column),
     };
   },
 };
+
+export default numberType;

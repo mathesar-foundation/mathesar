@@ -31,7 +31,8 @@
   export let searchable: DefinedProps['searchable'] = false;
   export let disabled: DefinedProps['disabled'] = false;
   export let labelKey: DefinedProps['labelKey'] = 'label';
-  export let getLabel: DefinedProps['getLabel'] = defaultGetLabel;
+  export let getLabel: DefinedProps['getLabel'] = (option: Option) =>
+    defaultGetLabel(option, labelKey);
   export let checkEquality: DefinedProps['checkEquality'] = (
     opt: Option,
     opt2: Option,
@@ -52,7 +53,7 @@
 
   function focusSelected(): void {
     const lastSelectedOption = value[value.length - 1];
-    if (lastSelectedOption) {
+    if (typeof lastSelectedOption !== 'undefined') {
       $focusedOptionIndex = $displayedOptions.findIndex((opt) =>
         checkEquality(lastSelectedOption, opt),
       );
@@ -162,7 +163,7 @@
 
   function pickFocused(): void {
     const focusedOption = $displayedOptions[$focusedOptionIndex];
-    if (focusedOption) {
+    if (typeof focusedOption !== 'undefined') {
       pick(focusedOption);
     } else if (selectionType === 'single') {
       close();
@@ -231,7 +232,6 @@
 
   const staticProps: Writable<ListBoxStaticContextProps<Option>> = writable({
     selectionType,
-    labelKey,
     getLabel,
     searchable,
     disabled,
@@ -240,7 +240,6 @@
   });
   $: staticProps.set({
     selectionType,
-    labelKey,
     getLabel,
     searchable,
     disabled,

@@ -11,12 +11,10 @@
   export let label: string | undefined = undefined;
 
   export let labelKey = 'label';
-  let customGetLabel: LabelGetter<Option> | undefined = undefined;
-  export { customGetLabel as getLabel };
+  export let getLabel: LabelGetter<Option> = (o: Option) =>
+    defaultGetLabel(o, labelKey);
 
   export let getDisabled: (value: Option | undefined) => boolean = () => false;
-
-  $: getLabel = customGetLabel ?? ((o: Option) => defaultGetLabel(o, labelKey));
 </script>
 
 <fieldset class="fieldset-group" class:inline={isInline} on:change>

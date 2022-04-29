@@ -1,20 +1,8 @@
-<script context="module" lang="ts">
-  type SimplifiedTextInputProps = Omit<TextInputProps, 'value'>;
-  type ParseErrorCallback = (p: { userInput: string; error: unknown }) => void;
-
-  export interface FormattedInputProps<T> extends SimplifiedTextInputProps {
-    formatter: InputFormatter<T>;
-    value?: T | null;
-    onParseError?: ParseErrorCallback;
-  }
-</script>
-
 <script lang="ts">
   import { createEventDispatcher, tick } from 'svelte';
-  import type { TextInputProps } from '@mathesar-component-library-dir/text-input/TextInput.svelte';
   import TextInput from '@mathesar-component-library-dir/text-input/TextInput.svelte';
   import { getOutcomeOfBeforeInputEvent } from '@mathesar-component-library-dir/common/utils';
-  import type { ParseResult, InputFormatter } from './InputFormatter';
+  import type { ParseResult, FormattedInputProps } from './FormattedInputTypes';
   import { getCursorPositionAfterReformat } from './formattedInputUtils';
 
   type T = $$Generic;
