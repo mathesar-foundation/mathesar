@@ -9,7 +9,7 @@
   let classes = '';
   export { classes as class };
   export let style = '';
-  export let size: Size = 'medium';
+  export let size: Size | undefined = undefined;
   export let allowClose = true;
   export let closeOn: ModalCloseAction[] = ['button'];
 
