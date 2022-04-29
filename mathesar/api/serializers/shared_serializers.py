@@ -103,18 +103,25 @@ DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY = 'db_type'
 
 
 class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
-    input = serializers.ChoiceField(choices=[("dropdown", 1), ("checkbox", 2)])
+    input = serializers.ChoiceField(choices=[("dropdown", "dropdown"), ("checkbox", "checkbox")])
     custom_labels = CustomBooleanLabelSerializer(required=False)
+
+
+class AbstractNumberDisplayOptionSerializer(serializers.Serializer):
+    number_format = serializers.ChoiceField(required=False, choices=['english', 'german', 'french', 'hindi', 'swiss'])
+
+
+class NumberDisplayOptionSerializer(
+    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    AbstractNumberDisplayOptionSerializer
+):
+    show_as_percentage = serializers.BooleanField(default=False)
 
 
 class MoneyDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
     currency_symbol = serializers.CharField()
     currency_symbol_location = serializers.ChoiceField(choices=['after-minus', 'end-with-space'])
-
-
-class NumberDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
-    show_as_percentage = serializers.BooleanField(default=False)
-    locale = serializers.CharField(required=False)
 
 
 class TimeFormatDisplayOptionSerializer(
@@ -131,6 +138,7 @@ class DurationDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPar
 
 class DisplayOptionsMappingSerializer(
     MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
     ReadWritePolymorphicSerializerMappingMixin,
     serializers.Serializer
 ):

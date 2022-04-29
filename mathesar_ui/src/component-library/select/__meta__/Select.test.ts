@@ -115,9 +115,9 @@ test('updates currently selected option', async () => {
   selectOptions = getAllByRole('option');
 
   // Expect the selected option to have the correct classes.
-  expect(selectOptions[1]).toHaveClass('selected', 'hovered');
+  expect(selectOptions[1]).toHaveClass('selected', 'in-focus');
 
-  expect(selectOptions[0]).not.toHaveClass('selected', 'hovered');
+  expect(selectOptions[0]).not.toHaveClass('selected', 'in-focus');
 });
 
 test('select option using keyboard', async () => {
@@ -145,7 +145,7 @@ test('select option using keyboard', async () => {
 
   // Check if the second option has the correct classes.
   const selectOptions = getAllByRole('option');
-  expect(selectOptions[1]).toHaveClass('hovered');
+  expect(selectOptions[1]).toHaveClass('in-focus');
   expect(selectOptions[1]).not.toHaveClass('selected');
 
   // Select the second option.
@@ -179,4 +179,58 @@ test('hide select dropdown by pressing ESC', async () => {
   // Use `queryBy` to avoid throwing an error with `getBy`.
   const selectOption2 = queryByRole('listbox');
   expect(selectOption2).not.toBeInTheDocument();
+});
+
+test('list scrolls automatically to display the currently selected option', async () => {
+  const options = [];
+  for (let i = 1; i < 10; i += 1) {
+    options.push({ id: i, label: `Option ${i}` });
+  }
+
+  const { getByRole, getAllByRole } = render(Select, {
+    props: {
+      options,
+      triggerAppearance: 'default',
+    },
+  });
+
+  // options are only rendered when the button is clicked
+  const selectBtn = getByRole('button');
+  await fireEvent.click(selectBtn);
+
+  // scrolling through the list to reach second last element
+  Array(7).forEach(() => async () => {
+    await fireEvent.keyDown(selectBtn, {
+      key: 'ArrowDown',
+      code: 'ArrowDown',
+    });
+    await fireEvent.keyUp(selectBtn, { key: 'ArrowDown', code: 'ArrowDown' });
+  });
+
+  // select the option
+  await fireEvent.keyDown(selectBtn, { key: 'Enter', code: 'Enter' });
+  await fireEvent.keyUp(selectBtn, { key: 'Enter', code: 'Enter' });
+
+  // reopen the dropdown
+  await fireEvent.click(selectBtn);
+
+  // obtain dropdown container
+  const selectUl = getByRole('listbox');
+  const dropdownContainer: HTMLElement | null = selectUl?.parentElement;
+
+  // second last element obtained
+  const optionElementList = getAllByRole('option');
+  const optionElement = optionElementList[7];
+
+  expect(dropdownContainer).toBeInTheDocument();
+  expect(optionElement.offsetTop).toBeGreaterThanOrEqual(
+    dropdownContainer ? dropdownContainer.scrollTop : 0,
+  );
+  expect(
+    optionElement.offsetTop + optionElement.clientHeight,
+  ).toBeLessThanOrEqual(
+    dropdownContainer
+      ? dropdownContainer.scrollTop + dropdownContainer.clientHeight
+      : 0,
+  );
 });

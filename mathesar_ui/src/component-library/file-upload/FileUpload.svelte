@@ -15,7 +15,7 @@
     FileUpload,
     FileUploadProgress,
     FileUploadAddDetail,
-  } from './FileUpload.d';
+  } from './FileUploadTypes';
 
   const dispatch = createEventDispatcher();
   const componentId = `file-import-${getId()}`;
@@ -41,7 +41,6 @@
   function processFiles(event: Event, files: FileList | File[]) {
     const newUploads: FileUpload[] = [];
 
-    // eslint-disable-next-line no-restricted-syntax
     for (const file of files) {
       newUploads.push({
         fileId: `${componentId}-${fileId}`,

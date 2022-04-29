@@ -1,8 +1,9 @@
 import type { Writable, Updater, Subscriber, Unsubscriber } from 'svelte/store';
 import { writable, get as getStoreValue } from 'svelte/store';
-import type { DBObjectEntry, DbType } from '@mathesar/App.d';
+import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { CancellablePromise } from '@mathesar-component-library';
 import { EventHandler } from '@mathesar-component-library';
+import type { Column as ApiColumn } from '@mathesar/api/tables/columns';
 import type { PaginatedResponse } from '@mathesar/utils/api';
 import {
   deleteAPI,
@@ -14,16 +15,7 @@ import {
 import { TabularType } from './TabularType';
 import type { Meta } from './meta';
 
-export interface Column {
-  id: number;
-  name: string;
-  type: DbType;
-  type_options: Record<string, unknown> | null;
-  display_options: Record<string, unknown> | null;
-  index: number;
-  nullable: boolean;
-  primary_key: boolean;
-  valid_target_types: DbType[];
+export interface Column extends ApiColumn {
   __columnIndex?: number;
 }
 
@@ -161,6 +153,7 @@ export class ColumnsDataStore
 
   async add(columnDetails: Partial<Column>): Promise<Partial<Column>> {
     const column = await this.api.add(columnDetails);
+    await this.dispatch('columnAdded', column);
     await this.fetch();
     return column;
   }
@@ -186,16 +179,12 @@ export class ColumnsDataStore
   // TODO: Analyze: Might be cleaner to move following functions as a property of Column class
   // but are the object instantiations worth it?
 
-  async patchType(
+  async patch(
     columnId: Column['id'],
-    type: Column['type'],
-    type_options: Column['type_options'],
-    display_options: Column['display_options'],
+    properties: Omit<Partial<ApiColumn>, 'id'>,
   ): Promise<Partial<Column>> {
     const column = await this.api.update(columnId, {
-      type,
-      type_options,
-      display_options,
+      ...properties,
     });
     await this.fetch();
     await this.dispatch('columnPatched', column);
@@ -210,6 +199,7 @@ export class ColumnsDataStore
 
   async deleteColumn(columnId: Column['id']): Promise<void> {
     await this.api.remove(columnId);
+    await this.dispatch('columnDeleted', columnId);
     await this.fetch();
   }
 }

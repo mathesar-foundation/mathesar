@@ -12,6 +12,10 @@ button.dropdown.trigger {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    box-sizing: content-box;
+    line-height: 1.4;
+    min-height: 1.4em;
+    min-width: 2ch;
   }
 
   > .arrow {

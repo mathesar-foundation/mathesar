@@ -1,6 +1,6 @@
 <script lang="ts">
   import Select from '@mathesar-component-library-dir/select/Select.svelte';
-  import type { Appearance } from '@mathesar-component-library-dir/types.d';
+  import type { Appearance } from '@mathesar-component-library-dir/types';
   import {
     generateSelectOptions,
     getSelectedValue,
@@ -23,7 +23,7 @@
 
   // TODO: Handle indeterminate state for boolean
 
-  function onChange(e: CustomEvent<EnumSelectOption>) {
+  function onChange(e: CustomEvent<EnumSelectOption | undefined>) {
     value = e.detail?.value;
   }
 </script>

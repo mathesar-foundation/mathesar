@@ -4,7 +4,13 @@
     "moduleResolution": "node",
     "target": "esnext",
     "module": "esnext",
-    "types": ["svelte", "jest", "@testing-library/jest-dom", "js-cookie"],
+    "types": [
+      "svelte",
+      "jest",
+      "@testing-library/jest-dom",
+      "js-cookie",
+      "svelte2tsx/svelte-jsx"
+    ],
     "importsNotUsedAsValues": "error",
     "strict": true,
     "isolatedModules": true,
@@ -17,7 +23,7 @@
     "paths": {
       "@mathesar/*": ["src/*"],
       "@mathesar-component-library-dir/*": ["src/component-library/*"],
-      "@mathesar-component-library/types": ["src/component-library/types.d.ts"],
+      "@mathesar-component-library/types": ["src/component-library/types.ts"],
       "@mathesar-component-library": ["src/component-library/index.ts"]
     }
   },

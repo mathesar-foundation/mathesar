@@ -1,9 +1,11 @@
+from copy import deepcopy
 import json
 from unittest.mock import patch
 
 from django.core.cache import cache
 
 import pytest
+from mathesar.api.utils import follows_json_number_spec
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.functions.exceptions import UnknownDBFunctionID
@@ -252,11 +254,19 @@ grouping_params = [
                 'count': 87,
                 'first_value': {'Center': 'NASA Kennedy Space Center'},
                 'last_value': {'Center': 'NASA Kennedy Space Center'},
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [0]
             }, {
                 'count': 138,
                 'first_value': {'Center': 'NASA Ames Research Center'},
                 'last_value': {'Center': 'NASA Ames Research Center'},
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [
                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
                     18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33,
@@ -270,6 +280,10 @@ grouping_params = [
                 'count': 21,
                 'first_value': {'Center': 'NASA Armstrong Flight Research Center'},
                 'last_value': {'Center': 'NASA Armstrong Flight Research Center'},
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [30]
             },
         ],
@@ -282,11 +296,19 @@ grouping_params = [
                 'count': 87,
                 'first_value': {'Center': 'NASA Kennedy Space Center'},
                 'last_value': {'Center': 'NASA Kennedy Space Center'},
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [0]
             }, {
                 'count': 159,
                 'first_value': {'Center': 'NASA Ames Research Center'},
                 'last_value': {'Center': 'NASA Armstrong Flight Research Center'},
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [
                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
                     18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
@@ -311,6 +333,10 @@ grouping_params = [
                 'last_value': {
                     'Center': 'NASA Kennedy Space Center', 'Status': 'Application'
                 },
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [0]
             }, {
                 'count': 100,
@@ -319,7 +345,12 @@ grouping_params = [
                 },
                 'last_value': {
                     'Center': 'NASA Ames Research Center', 'Status': 'Issued'
-                }, 'result_indices': [
+                },
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
+                'result_indices': [
                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
                     18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33,
                     34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
@@ -335,6 +366,10 @@ grouping_params = [
                 'last_value': {
                     'Center': 'NASA Armstrong Flight Research Center', 'Status': 'Issued'
                 },
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [30]
             }, {
                 'count': 38,
@@ -343,7 +378,12 @@ grouping_params = [
                 },
                 'last_value': {
                     'Center': 'NASA Ames Research Center', 'Status': 'Application'
-                }, 'result_indices': [86, 87, 89, 93, 95, 97]
+                },
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
+                'result_indices': [86, 87, 89, 93, 95, 97]
             },
         ],
     ),
@@ -359,6 +399,10 @@ grouping_params = [
                 'last_value': {
                     'Center': 'NASA Langley Research Center', 'Status': 'Application'
                 },
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [0]
             }, {
                 'count': 159,
@@ -368,6 +412,10 @@ grouping_params = [
                 'last_value': {
                     'Center': 'NASA Armstrong Flight Research Center', 'Status': 'Issued'
                 },
+                'less_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_eq_value': None,
+                'greater_than_value': None,
                 'result_indices': [
                     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
                     18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
@@ -377,6 +425,39 @@ grouping_params = [
                     78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92,
                     93, 94, 95, 96, 97, 98, 99
                 ],
+            },
+        ],
+    ),
+    (
+        'Magnitude Grouping',
+        {'columns': ['id'], 'mode': 'magnitude'},
+        [
+            {
+                'count': 99,
+                'first_value': {'id': 1},
+                'last_value': {'id': 99},
+                'less_than_eq_value': None,
+                'greater_than_eq_value': {'id': 0},
+                'less_than_value': {'id': 100},
+                'greater_than_value': None,
+                'result_indices': [
+                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                    17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+                    32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46,
+                    47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
+                    62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76,
+                    77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88,
+                    89, 90, 91, 92, 93, 94, 95, 96, 97, 98
+                ],
+            }, {
+                'count': 100,
+                'first_value': {'id': 100},
+                'last_value': {'id': 199},
+                'less_than_eq_value': None,
+                'greater_than_eq_value': {'id': 100},
+                'less_than_value': {'id': 200},
+                'greater_than_value': None,
+                'result_indices': [99],
             },
         ],
     ),
@@ -429,17 +510,41 @@ def test_record_list_groups(
     response = client.get(f'/api/db/v0/tables/{table.id}/records/?{query_str}')
     response_data = response.json()
 
+    def _test_group_equality(actual_groups, expect_groups):
+        actual_groups = deepcopy(actual_groups)
+        expect_groups = deepcopy(expect_groups)
+        assert len(actual_groups) == len(expect_groups)
+        for i in range(len(actual_groups)):
+            assert actual_groups[i].pop('count') == expect_groups[i].pop('count')
+            assert (
+                actual_groups[i].pop('result_indices')
+                == expect_groups[i].pop('result_indices')
+            )
+            for k in expect_groups[i]:
+                actual_item = actual_groups[i][k]
+                expect_item = expect_groups[i][k]
+                if expect_item is not None:
+                    for column_name in expect_item:
+                        assert (
+                            expect_item[column_name]
+                            == actual_item[str(columns_name_id_map[column_name])]
+                        )
+                else:
+                    assert actual_item is None
+
     assert response.status_code == 200
     assert response_data['count'] == 1393
     assert len(response_data['results']) == limit
 
     group_by = GroupBy(**grouping)
     grouping_dict = response_data['grouping']
-    assert grouping_dict['columns'] == list(group_by.columns)
+    assert grouping_dict['columns'] == [
+        columns_name_id_map[colname] for colname in group_by.columns
+    ]
     assert grouping_dict['mode'] == group_by.mode
     assert grouping_dict['num_groups'] == group_by.num_groups
     assert grouping_dict['ranged'] == group_by.ranged
-    assert grouping_dict['groups'] == expected_groups
+    _test_group_equality(grouping_dict['groups'], expected_groups)
 
 
 def test_record_list_pagination_limit(create_table, client):
@@ -647,3 +752,54 @@ def test_record_list_group_exceptions(create_table, client, exception):
     assert len(response_data) == 1
     assert "grouping" in response_data[0]['field']
     assert response_data[0]['code'] == ErrorCodes.UnsupportedType.value
+
+
+@pytest.mark.parametrize("test_input, expected", [
+    ("0", True),
+    ("-0", True),
+    ("0.314", True),
+    ("-0.00314", True),
+    ("0.0314e3", True),
+    ("0.0314e+3", True),
+    ("0.0314e-3", True),
+    ("0.314e01", True),
+    ("-314", True),
+    ("-0314", False),
+    ("314", True),
+    ("0314", False),
+    ("100.04", True),
+    ("100.", False),
+    ("314e3", True),
+    ("314E+3", True),
+    ("314e-3", True),
+    ("314.0e-3", True),
+    ("314.0E+3", True),
+    ("314.0E1", True),
+    ("~2324", False)
+])
+def test_json_number_spec_validation(test_input, expected):
+    assert follows_json_number_spec(test_input) == expected
+
+
+def test_number_input_api_validation(create_table, client):
+    cache.clear()
+    table_name = 'NASA Number Input Api Validation'
+    table = create_table(table_name)
+    column_name = 'Nonce'
+    table.add_column({"name": column_name, "type": 'REAL'})
+    nonce_id = table.get_column_name_id_bidirectional_map()[column_name]
+
+    for nonce, status_code in [
+        ("0", 201),
+        ("-0.00314", 201),
+        ("-314", 201),
+        ("-0314", 400),
+        ("314.0e-3", 201),
+        ("~2324", 400),
+        (2132, 201),
+    ]:
+        data = {
+            nonce_id: nonce,
+        }
+        response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
+        assert response.status_code == status_code

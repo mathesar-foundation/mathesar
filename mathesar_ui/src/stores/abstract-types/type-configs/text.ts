@@ -1,6 +1,6 @@
 import type { FormValues } from '@mathesar-component-library/types';
 
-import type { DbType } from '@mathesar/App';
+import type { DbType } from '@mathesar/AppTypes';
 import type { Column } from '@mathesar/stores/table-data/types';
 import type {
   AbstractTypeConfigForm,
@@ -104,7 +104,7 @@ function constructDbFormValuesFromTypeOptions(
 const textType: AbstractTypeConfiguration = {
   icon: 'T',
   defaultDbType: DB_TYPES.VARCHAR,
-  input: {
+  cell: {
     type: 'string',
     config: {
       multiLine: true,

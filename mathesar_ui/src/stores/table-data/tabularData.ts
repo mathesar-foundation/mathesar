@@ -1,5 +1,5 @@
 import type { Writable } from 'svelte/store';
-import type { DBObjectEntry } from '@mathesar/App.d';
+import type { DBObjectEntry } from '@mathesar/AppTypes';
 import type { TerseMetaProps, MetaProps } from './meta';
 import { makeMetaProps, makeTerseMetaProps, Meta } from './meta';
 import type { ColumnsData } from './columns';
@@ -74,6 +74,12 @@ export class TabularData {
     );
 
     this.columnsDataStore.on('columnRenamed', () => this.refresh());
+    this.columnsDataStore.on('columnAdded', () => this.recordsData.fetch());
+    this.columnsDataStore.on('columnDeleted', async (columnId: unknown) => {
+      this.meta.sorting.update((s) => s.without(columnId as number));
+      this.meta.grouping.update((g) => g.without(columnId as number));
+      this.meta.filtering.update((f) => f.withoutColumn(columnId as number));
+    });
   }
 
   refresh(): Promise<

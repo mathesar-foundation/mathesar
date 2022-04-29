@@ -6,7 +6,7 @@ import type {
   TabularDataProps,
   MetaProps,
 } from '@mathesar/stores/table-data/types';
-import type { Database, DBObjectEntry, SchemaEntry } from '@mathesar/App.d';
+import type { Database, DBObjectEntry, SchemaEntry } from '@mathesar/AppTypes';
 import {
   getTabularContent,
   removeTabularContent,
