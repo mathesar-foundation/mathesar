@@ -35,6 +35,16 @@ export interface NumberDisplayOptions
   show_as_percentage: boolean;
 }
 
+/**
+ * See the [Postgres docs][1] for an explanation of `scale` and `precision`.
+ *
+ * [1]: https://www.postgresql.org/docs/current/datatype-numeric.html
+ */
+export interface NumberTypeOptions {
+  scale: number;
+  precision: number;
+}
+
 export interface MoneyDisplayOptions extends FormattedNumberDisplayOptions {
   /**
    * e.g. "$", "€", "NZD", etc.
@@ -81,8 +91,30 @@ export interface BaseColumn {
   } | null;
 }
 
-// TODO convert to discriminated union
+/**
+ * TODO:
+ *
+ * Once we have all column types defined like `NumberColumn` is defined, then
+ * convert the `Column` type to a discriminated union of all possible specific
+ * column types.
+ */
 export interface Column extends BaseColumn {
   type_options: Record<string, unknown> | null;
   display_options: Record<string, unknown> | null;
+}
+
+export interface NumberColumn extends Column {
+  type:
+    | 'BIGINT'
+    | 'BIGSERIAL'
+    | 'DECIMAL'
+    | 'DOUBLE PRECISION'
+    | 'INTEGER'
+    | 'NUMERIC'
+    | 'REAL'
+    | 'SERIAL'
+    | 'SMALLINT'
+    | 'SMALLSERIAL';
+  type_options: Partial<NumberTypeOptions> | null;
+  display_options: Partial<NumberDisplayOptions> | null;
 }
