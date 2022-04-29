@@ -64,7 +64,7 @@ def column_test_table_with_service_layer_options(patent_schema):
     ]
     column_data_list = [{},
                         {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
-                        {'display_options': {"show_as_percentage": True, 'number_format': "english"}},
+                        {'display_options': {'show_as_percentage': True, 'number_format': "english"}},
                         {},
                         {},
                         {'display_options': {
@@ -89,8 +89,7 @@ def column_test_table_with_service_layer_options(patent_schema):
         attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine)
         service_columns.append(ServiceLayerColumn.current_objects.get_or_create(table=table,
                                                                                 attnum=attnum,
-                                                                                display_options=column_data[1].get(
-                                                                                    'display_options', None))[0])
+                                                                                display_options=column_data[1].get('display_options', None))[0])
     return table, service_columns
 
 
@@ -264,7 +263,7 @@ create_display_options_test_list = [
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}},
      {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
     ("DATE", {'format': 'YYYY-MM-DD'}, {'format': 'YYYY-MM-DD'}),
-    ("INTERVAL", {'format': 'DD HH:mm:ss.SSS'}, {'format': 'DD HH:mm:ss.SSS'}),
+    ("INTERVAL", {'min': 's', 'max': 'h', 'show_units': True}),
     ("MONEY",
      {'number_format': "english", 'currency_symbol': '$', 'currency_symbol_location': 'after-minus'},
      {'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'number_format': "english"}),

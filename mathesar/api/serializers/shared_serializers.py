@@ -137,7 +137,9 @@ class TimeFormatDisplayOptionSerializer(
 
 
 class DurationDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
-    format = serializers.CharField(max_length=255)
+    min = serializers.CharField(max_length=255)
+    max = serializers.CharField(max_length=255)
+    show_units = serializers.BooleanField()
 
 
 class DisplayOptionsMappingSerializer(
