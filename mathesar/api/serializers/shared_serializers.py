@@ -107,9 +107,16 @@ class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPart
     custom_labels = CustomBooleanLabelSerializer(required=False)
 
 
-class NumberDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
+class AbstractNumberDisplayOptionSerializer(serializers.Serializer):
+    number_format = serializers.ChoiceField(allow_null=True, required=False, choices=['english', 'german', 'french', 'hindi', 'swiss'])
+
+
+class NumberDisplayOptionSerializer(
+    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    AbstractNumberDisplayOptionSerializer
+):
     show_as_percentage = serializers.BooleanField(default=False)
-    locale = serializers.CharField(required=False)
 
 
 class TimeFormatDisplayOptionSerializer(
@@ -121,7 +128,9 @@ class TimeFormatDisplayOptionSerializer(
 
 
 class DurationDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
-    format = serializers.CharField(max_length=255)
+    min = serializers.CharField(max_length=255)
+    max = serializers.CharField(max_length=255)
+    show_units = serializers.BooleanField()
 
 
 class DisplayOptionsMappingSerializer(

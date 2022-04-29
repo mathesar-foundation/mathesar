@@ -39,6 +39,7 @@
   {isActive}
   {disabled}
   {formatValue}
+  horizontalAlignment="right"
   let:handleInputBlur
   let:handleInputKeydown
   on:movementKeyDown

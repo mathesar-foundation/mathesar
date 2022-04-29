@@ -32,12 +32,12 @@
 </div>
 
 <style lang="scss">
-  .sheet-cell,
-  .sheet-cell :global(.cell-wrapper) {
+  .sheet-cell {
+    --cell-height: 29px;
     position: relative;
     display: flex;
     flex: 1 1 auto;
-    min-height: 29px;
+    min-height: var(--cell-height);
     align-items: center;
     width: 100%;
   }
@@ -51,11 +51,5 @@
       position: absolute;
       background: #efefef;
     }
-  }
-
-  .sheet-cell :global(.cell-wrapper:not(.is-active)) {
-    // This needs to be based on row height!
-    height: 29px;
-    max-height: 29px;
   }
 </style>

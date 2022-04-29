@@ -41,4 +41,5 @@
     parentValue = newChildValue;
   }}
   on:input
+  --input-element-text-align="right"
 />
