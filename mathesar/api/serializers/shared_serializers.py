@@ -126,6 +126,7 @@ class DurationDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPar
 
 class DisplayOptionsMappingSerializer(
     MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
     ReadWritePolymorphicSerializerMappingMixin,
     serializers.Serializer
 ):

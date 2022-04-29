@@ -30,6 +30,7 @@
   let selectedDbType: DbType | undefined;
   let typeOptions: Column['type_options'];
   let displayOptions: Column['display_options'];
+  let defaultValue: Column['default'];
   let typeChangeState = States.Idle;
 
   const validationContext = createValidationContext();
@@ -43,9 +44,16 @@
     selectedDbType = column.type;
     typeOptions = { ...(column.type_options ?? {}) };
     displayOptions = { ...(column.display_options ?? {}) };
+    defaultValue = column.default ? { ...column.default } : null;
     selectedAbstractType = abstractTypeOfColumn;
   }
   resetAbstractType();
+
+  function clearTypeRelatedOptions() {
+    typeOptions = {};
+    displayOptions = {};
+    defaultValue = null;
+  }
 
   function selectAbstractType(abstractType: AbstractType) {
     if (selectedAbstractType !== abstractType) {
@@ -53,12 +61,10 @@
         resetAbstractType();
       } else if (abstractType.defaultDbType) {
         selectedDbType = abstractType.defaultDbType;
-        typeOptions = {};
-        displayOptions = {};
+        clearTypeRelatedOptions();
       } else if (abstractType.dbTypes.size > 0) {
         [selectedDbType] = abstractType.dbTypes;
-        typeOptions = {};
-        displayOptions = {};
+        clearTypeRelatedOptions();
       }
       selectedAbstractType = abstractType;
     }
@@ -74,12 +80,12 @@
     typeChangeState = States.Loading;
     try {
       if (selectedDbType) {
-        await columnsDataStore.patchType(
-          column.id,
-          selectedDbType,
-          typeOptions,
-          displayOptions,
-        );
+        await columnsDataStore.patch(column.id, {
+          type: selectedDbType,
+          type_options: typeOptions,
+          display_options: displayOptions,
+          default: defaultValue?.is_dynamic ? undefined : defaultValue,
+        });
       }
     } catch (err) {
       // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
@@ -109,6 +115,7 @@
         bind:selectedDbType
         bind:typeOptions
         bind:displayOptions
+        bind:defaultValue
         {column}
       />
     {/key}

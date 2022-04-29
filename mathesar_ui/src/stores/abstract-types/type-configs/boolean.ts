@@ -1,17 +1,10 @@
 import type { FormValues } from '@mathesar-component-library/types';
 import type { Column } from '@mathesar/stores/table-data/types';
+import type { BooleanDisplayOptions } from '@mathesar/api/tables/columns';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
 } from '../types';
-
-interface BooleanDisplayOptions {
-  input?: string | null;
-  custom_labels?: {
-    TRUE: string;
-    FALSE: string;
-  } | null;
-}
 
 const displayForm: AbstractTypeConfigForm = {
   variables: {

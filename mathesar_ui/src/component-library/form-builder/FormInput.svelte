@@ -1,4 +1,5 @@
 <script lang="ts">
+  // TODO: Use FormField component here
   import LabeledInput from '@mathesar-component-library-dir/labeled-input/LabeledInput.svelte';
   import DynamicInput from '@mathesar-component-library-dir/dynamic-input/DynamicInput.svelte';
   import type { DynamicInputDataType } from '@mathesar-component-library-dir/dynamic-input/types';

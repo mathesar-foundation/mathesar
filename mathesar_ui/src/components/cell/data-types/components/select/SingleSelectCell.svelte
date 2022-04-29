@@ -7,6 +7,8 @@
     ListBoxOptions,
     getGloballyUniqueId,
     Icon,
+    isDefinedNonNullable,
+    getLabel as defaultGetLabel,
   } from '@mathesar-component-library';
   import type { ListBoxApi } from '@mathesar-component-library/types';
   import Null from '@mathesar/components/Null.svelte';
@@ -14,8 +16,7 @@
   import type { SingleSelectCellProps } from '../typeDefinitions';
 
   type Option = $$Generic;
-  type Value = $$Generic;
-  type $$Props = SingleSelectCellProps<Value, Option>;
+  type $$Props = SingleSelectCellProps<Option>;
   type DefinedProps = Required<$$Props>;
 
   const dispatch = createEventDispatcher();
@@ -27,10 +28,8 @@
   export let disabled: DefinedProps['disabled'];
 
   export let options: DefinedProps['options'] = [];
-  export let getSelectedOptionsFromValue: DefinedProps['getSelectedOptionsFromValue'];
-  export let getValueFromSelectedOptions: DefinedProps['getValueFromSelectedOptions'];
-  export let getValueLabel: DefinedProps['getValueLabel'] = (_val) =>
-    String(_val);
+  export let getLabel: DefinedProps['getLabel'] = (option?: Option) =>
+    defaultGetLabel(option);
 
   let cellRef: HTMLElement;
   let isInitiallyActivated = false;
@@ -87,7 +86,7 @@
   }
 
   function setValueFromListBox(values: Option[]) {
-    value = getValueFromSelectedOptions(values);
+    [value] = values;
     dispatch('update', { value });
   }
 
@@ -99,8 +98,9 @@
 
 <ListBox
   {options}
+  {getLabel}
   selectionType="single"
-  value={getSelectedOptionsFromValue(value)}
+  value={isDefinedNonNullable(value) ? [value] : []}
   on:change={(e) => setValueFromListBox(e.detail)}
   let:api
   let:isOpen
@@ -119,7 +119,7 @@
       {#if value === null}
         <Null />
       {:else if typeof value !== 'undefined'}
-        {getValueLabel(value)}
+        {getLabel(value)}
       {/if}
     </div>
 
