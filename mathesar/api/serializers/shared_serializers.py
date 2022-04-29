@@ -108,7 +108,7 @@ class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPart
 
 
 class AbstractNumberDisplayOptionSerializer(serializers.Serializer):
-    number_format = serializers.ChoiceField(required=False, choices=['english', 'german', 'french', 'hindi', 'swiss'])
+    number_format = serializers.ChoiceField(allow_null=True, required=False, choices=['english', 'german', 'french', 'hindi', 'swiss'])
 
 
 class NumberDisplayOptionSerializer(
