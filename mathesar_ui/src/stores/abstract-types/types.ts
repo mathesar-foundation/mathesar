@@ -11,12 +11,12 @@ import type { States } from '@mathesar/utils/api';
 import type { abstractTypeCategory } from './constants';
 
 type AbstractTypeCategoryKeys = keyof typeof abstractTypeCategory;
-export type MathesarTypeCategoryIdentifier =
+export type AbstractTypeCategoryIdentifier =
   typeof abstractTypeCategory[AbstractTypeCategoryKeys];
 
 export interface AbstractTypeResponse {
   name: string;
-  identifier: MathesarTypeCategoryIdentifier;
+  identifier: AbstractTypeCategoryIdentifier;
   db_types: DbType[];
 }
 
@@ -79,22 +79,22 @@ export interface AbstractTypesSubstance {
   error?: string;
 }
 
-export interface FilterDefinitionResponse {
+export interface AbstractTypeFilterDefinitionResponse {
   id: string;
   name: string;
-  aliases?: Record<MathesarTypeCategoryIdentifier, string>;
+  aliases?: Record<AbstractTypeCategoryIdentifier, string>;
   uiTypeParameterMap: Partial<
-    Record<MathesarTypeCategoryIdentifier, MathesarTypeCategoryIdentifier[]>
+    Record<AbstractTypeCategoryIdentifier, AbstractTypeCategoryIdentifier[]>
   >;
 }
 
-export interface FilterDefinition {
-  id: FilterDefinitionResponse['id'];
-  name: FilterDefinitionResponse['name']; // Would be extraced from alias if present
-  parameters: MathesarTypeCategoryIdentifier[];
+export interface AbstractTypeFilterDefinition {
+  id: AbstractTypeFilterDefinitionResponse['id'];
+  name: AbstractTypeFilterDefinitionResponse['name']; // Would be extraced from alias if present
+  parameters: AbstractTypeCategoryIdentifier[];
 }
 
-export type FilterDefinitionMap = Map<
-  MathesarTypeCategoryIdentifier,
-  FilterDefinition[]
+export type AbstractTypeFilterDefinitionMap = Map<
+  AbstractTypeCategoryIdentifier,
+  AbstractTypeFilterDefinition[]
 >;

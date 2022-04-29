@@ -9,7 +9,7 @@ import type {
   AbstractTypesMap,
   AbstractTypeResponse,
   AbstractTypeConfiguration,
-  MathesarTypeCategoryIdentifier,
+  AbstractTypeCategoryIdentifier,
 } from './types';
 
 /**
@@ -17,7 +17,7 @@ import type {
  * at a later point
  */
 const abstractTypeCategories: Partial<
-  Record<MathesarTypeCategoryIdentifier, AbstractTypeConfiguration>
+  Record<AbstractTypeCategoryIdentifier, AbstractTypeConfiguration>
 > = {
   [abstractTypeCategory.Text]: Text,
   [abstractTypeCategory.Number]: Number,

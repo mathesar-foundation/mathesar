@@ -12,9 +12,11 @@
   import RowCell from './RowCell.svelte';
   import GroupHeader from './GroupHeader.svelte';
   import RowPlaceholder from './RowPlaceholder.svelte';
+  import type { ProcessedTableColumn } from '../utils';
 
   export let row: Row;
   export let style: { [key: string]: string | number };
+  export let processedTableColumns: ProcessedTableColumn[];
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
@@ -75,16 +77,16 @@
   {:else if row.record}
     <RowControl {primaryKeyColumnId} {row} {meta} {recordsData} />
 
-    {#each $columnsDataStore.columns as column (column.id)}
+    {#each processedTableColumns as processedColumn (processedColumn.column.id)}
       <RowCell
         {display}
         {row}
-        key={getCellKey(rowKey, column.id)}
+        key={getCellKey(rowKey, processedColumn.column.id)}
         modificationStatusMap={cellModificationStatus}
-        bind:value={row.record[column.id]}
-        {column}
+        bind:value={row.record[processedColumn.column.id]}
+        {processedColumn}
         {recordsData}
-        columnPosition={$columnPositionMap.get(column.id)}
+        columnPosition={$columnPositionMap.get(processedColumn.column.id)}
       />
     {/each}
   {/if}

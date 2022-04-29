@@ -1,8 +1,9 @@
 import { abstractTypeCategory } from '../constants';
 import type {
-  MathesarTypeCategoryIdentifier,
-  FilterDefinitionResponse,
-  FilterDefinitionMap,
+  AbstractTypeCategoryIdentifier,
+  AbstractTypeFilterDefinitionResponse,
+  AbstractTypeFilterDefinitionMap,
+  AbstractTypeFilterDefinition,
 } from '../types';
 
 const allDateTimeTypes = [
@@ -20,39 +21,40 @@ const numericallyOperableTypesParams = {
 };
 
 function constructAliasMapForTypes(
-  categories: MathesarTypeCategoryIdentifier[],
+  categories: AbstractTypeCategoryIdentifier[],
   alias: string,
-): Record<MathesarTypeCategoryIdentifier, string> {
-  const map: Map<MathesarTypeCategoryIdentifier, string> = new Map(
+): Record<AbstractTypeCategoryIdentifier, string> {
+  const map: Map<AbstractTypeCategoryIdentifier, string> = new Map(
     categories.map((category) => [category, alias]),
   );
   return Object.fromEntries(map) as Record<
-    MathesarTypeCategoryIdentifier,
+    AbstractTypeCategoryIdentifier,
     string
   >;
 }
 
 function constructParamMapForAllTypes(
   getParamsForType: (
-    category: MathesarTypeCategoryIdentifier,
-  ) => MathesarTypeCategoryIdentifier[],
-): Record<MathesarTypeCategoryIdentifier, MathesarTypeCategoryIdentifier[]> {
+    category: AbstractTypeCategoryIdentifier,
+  ) => AbstractTypeCategoryIdentifier[],
+): Record<AbstractTypeCategoryIdentifier, AbstractTypeCategoryIdentifier[]> {
   const categories =
-    Object.values<MathesarTypeCategoryIdentifier>(abstractTypeCategory);
+    Object.values<AbstractTypeCategoryIdentifier>(abstractTypeCategory);
   const map: Map<
-    MathesarTypeCategoryIdentifier,
-    MathesarTypeCategoryIdentifier[]
+    AbstractTypeCategoryIdentifier,
+    AbstractTypeCategoryIdentifier[]
   > = new Map(
     categories.map((category) => [category, getParamsForType(category)]),
   );
   return Object.fromEntries(map) as Record<
-    MathesarTypeCategoryIdentifier,
-    MathesarTypeCategoryIdentifier[]
+    AbstractTypeCategoryIdentifier,
+    AbstractTypeCategoryIdentifier[]
   >;
 }
 
 // This is the API response expected from the server
-const filterResponse: FilterDefinitionResponse[] = [
+// Might be better if we can have this with the types endpoint
+const filterResponse: AbstractTypeFilterDefinitionResponse[] = [
   {
     id: 'contains_case_insensitive',
     name: 'contains',
@@ -139,10 +141,10 @@ const filterResponse: FilterDefinitionResponse[] = [
   },
 ];
 
-function getFilterResponseMap(): FilterDefinitionMap {
+function getFilterDefinitionMap(): AbstractTypeFilterDefinitionMap {
   const categories =
-    Object.values<MathesarTypeCategoryIdentifier>(abstractTypeCategory);
-  const filterDefinitionMap: FilterDefinitionMap = new Map();
+    Object.values<AbstractTypeCategoryIdentifier>(abstractTypeCategory);
+  const filterDefinitionMap: AbstractTypeFilterDefinitionMap = new Map();
   categories.forEach((category) => {
     if (!filterDefinitionMap.has(category)) {
       filterDefinitionMap.set(category, []);
@@ -162,6 +164,10 @@ function getFilterResponseMap(): FilterDefinitionMap {
   return filterDefinitionMap;
 }
 
-const filterDefintionMap = getFilterResponseMap();
+export const filterDefinitionMap = getFilterDefinitionMap();
 
-export default filterDefintionMap;
+export function getFiltersForAbstractType(
+  categoryIdentifier: AbstractTypeCategoryIdentifier,
+): AbstractTypeFilterDefinition[] {
+  return filterDefinitionMap.get(categoryIdentifier) ?? [];
+}
