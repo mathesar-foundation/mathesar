@@ -263,7 +263,7 @@ create_display_options_test_list = [
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}},
      {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
     ("DATE", {'format': 'YYYY-MM-DD'}, {'format': 'YYYY-MM-DD'}),
-    ("INTERVAL", {'min': 's', 'max': 'h', 'show_units': True}),
+    ("INTERVAL", {'min': 's', 'max': 'h', 'show_units': True}, {'min': 's', 'max': 'h', 'show_units': True}),
     ("MONEY",
      {'number_format': "english", 'currency_symbol': '$', 'currency_symbol_location': 'after-minus'},
      {'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'number_format': "english"}),
