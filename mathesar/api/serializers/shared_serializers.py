@@ -108,7 +108,7 @@ class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPart
 
 
 class AbstractNumberDisplayOptionSerializer(serializers.Serializer):
-    number_format = serializers.ChoiceField(allow_null=True, required=False, choices=['english', 'german', 'french', 'hindi', 'swiss'])
+    number_format = serializers.ChoiceField(required=False, choices=['english', 'german', 'french', 'hindi', 'swiss'])
 
 
 class NumberDisplayOptionSerializer(
@@ -119,7 +119,11 @@ class NumberDisplayOptionSerializer(
     show_as_percentage = serializers.BooleanField(default=False)
 
 
-class MoneyDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
+class MoneyDisplayOptionSerializer(
+    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    AbstractNumberDisplayOptionSerializer
+):
     currency_symbol = serializers.CharField()
     currency_symbol_location = serializers.ChoiceField(choices=['after-minus', 'end-with-space'])
 
