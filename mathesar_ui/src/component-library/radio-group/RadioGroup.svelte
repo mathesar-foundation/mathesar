@@ -5,7 +5,7 @@
 
   type Option = $$Generic;
 
-  export let value: Option | undefined;
+  export let value: Option | undefined = undefined;
   export let isInline = false;
   export let options: Option[] = [];
   export let label: string | undefined = undefined;
