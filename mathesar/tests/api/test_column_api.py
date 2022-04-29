@@ -63,7 +63,7 @@ def column_test_table_with_service_layer_options(patent_schema):
     ]
     column_data_list = [{},
                         {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
-                        {'display_options': {"show_as_percentage": True, "locale": "en_US"}},
+                        {'display_options': {'show_as_percentage': True, 'number_format': "english"}},
                         {},
                         {},
                         {},
@@ -256,7 +256,7 @@ create_display_options_test_list = [
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
     ("DATE", {'format': 'YYYY-MM-DD'}),
     ("INTERVAL", {'format': 'DD HH:mm:ss.SSS'}),
-    ("NUMERIC", {"show_as_percentage": True}),
+    ("NUMERIC", {"show_as_percentage": True, 'number_format': None}),
     ("NUMERIC", {"show_as_percentage": True, 'number_format': "english"}),
     ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
     ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
