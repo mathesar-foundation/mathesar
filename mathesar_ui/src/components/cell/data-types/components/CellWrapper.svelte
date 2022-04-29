@@ -7,6 +7,14 @@
   export let disabled = false;
   export let mode: 'edit' | 'default' = 'default';
   export let multiLineTruncate = false;
+
+  /**
+   * This only affects the alignment of the displayed value while in
+   * select-mode. It does not affect the alignment of the value within an input
+   * during edit mode -- that alignment is controlled by the specific cell input
+   * component (e.g. `NumberCellInput`) because the input is also used in other
+   * places (e.g. default values and filter conditions).
+   */
   export let horizontalAlignment: HorizontalAlignment = 'left';
 
   async function focusCell(_isActive: boolean, _mode: 'edit' | 'default') {
@@ -53,11 +61,9 @@
 
     &.h-align-right {
       justify-content: flex-end;
-      --input-element-text-align: right;
     }
     &.h-align-center {
       justify-content: center;
-      --input-element-text-align: center;
     }
 
     &.is-active {
