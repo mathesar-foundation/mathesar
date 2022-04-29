@@ -68,11 +68,11 @@ def column_test_table_with_service_layer_options(patent_schema):
                         {},
                         {},
                         {'display_options': {'currency_details':
-                            {
-                                'currency_symbol': "HK $",
-                                'number_format': "english",
-                                'currency_symbol_location': 'after-minus'
-                            }
+                         {
+                            'currency_symbol': "HK $",
+                            'number_format': "english",
+                            'currency_symbol_location': 'after-minus'
+                         }
                         }},
                         {'display_options': {'format': 'YYYY-MM-DD hh:mm'}}]
     db_table = SATable(
@@ -281,7 +281,7 @@ create_display_options_test_list = [
 
 @pytest.mark.parametrize("type_,display_options, expected_display_options", create_display_options_test_list)
 def test_column_create_display_options(
-    column_test_table, type_, display_options, expected_display_options, client, engine
+        column_test_table, type_, display_options, expected_display_options, client, engine
 ):
     cache.clear()
     name = "anewcolumn"
@@ -315,7 +315,7 @@ create_display_options_invalid_test_list = [
 
 @pytest.mark.parametrize("type_,display_options", create_display_options_invalid_test_list)
 def test_column_create_wrong_display_options(
-    column_test_table, type_, display_options, client, engine
+        column_test_table, type_, display_options, client, engine
 ):
     cache.clear()
     name = "anewcolumn"
