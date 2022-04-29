@@ -67,12 +67,12 @@ def column_test_table_with_service_layer_options(patent_schema):
                         {'display_options': {"show_as_percentage": True, 'number_format': "english"}},
                         {},
                         {},
-                        {'display_options': {'currency_details':
-                         {
-                            'currency_symbol': "HK $",
-                            'number_format': "english",
-                            'currency_symbol_location': 'after-minus'
-                         }
+                        {'display_options': {
+                            'currency_details': {
+                                'currency_symbol': "HK $",
+                                'number_format': "english",
+                                'currency_symbol_location': 'after-minus'
+                            }
                         }},
                         {'display_options': {'format': 'YYYY-MM-DD hh:mm'}}]
     db_table = SATable(
