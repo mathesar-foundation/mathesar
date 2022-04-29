@@ -11,6 +11,7 @@
     faCog,
     faICursor,
     faKey,
+    faLink,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
   import {
@@ -27,15 +28,17 @@
   import { getTabsForSchema } from '@mathesar/stores/tabs';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
-  import TableConstraints from '../constraints/TableConstraints.svelte';
-  import DisplayFilter from '../display-options/DisplayFilter.svelte';
-  import DisplaySort from '../display-options/DisplaySort.svelte';
-  import DisplayGroup from '../display-options/DisplayGroup.svelte';
+  import LinkTableModal from '@mathesar/sections/table-view/link-table/LinkTableModal.svelte';
+  import TableConstraints from '@mathesar/sections/table-view/constraints/TableConstraints.svelte';
+  import DisplayFilter from '@mathesar/sections/table-view/display-options/DisplayFilter.svelte';
+  import DisplaySort from '@mathesar/sections/table-view/display-options/DisplaySort.svelte';
+  import DisplayGroup from '@mathesar/sections/table-view/display-options/DisplayGroup.svelte';
   import RenameTableModal from './RenameTableModal.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
   const tableConstraintsModal = modal.spawnModalController();
+  const linkTableModal = modal.spawnModalController();
   const tableRenameModal = modal.spawnModalController();
 
   $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
@@ -100,6 +103,11 @@
 
   <RenameTableModal controller={tableRenameModal} tabularData={$tabularData} />
 
+  <LinkTableModal
+    controller={linkTableModal}
+    on:goToConstraints={() => tableConstraintsModal.open()}
+  />
+
   <div class="divider" />
 
   <Dropdown showArrow={false}>
@@ -151,7 +159,14 @@
 
   <Button size="small" on:click={() => recordsData.addEmptyRecord()}>
     <Icon data={faPlus} />
-    <span> New Record </span>
+    <span>New Record</span>
+  </Button>
+
+  <div class="divider" />
+
+  <Button size="small" on:click={() => linkTableModal.open()}>
+    <Icon data={faLink} />
+    <span>Link Table</span>
   </Button>
 
   {#if $selectedRows.size > 0}
