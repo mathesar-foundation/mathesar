@@ -306,7 +306,6 @@ def test_column_create_wrong_display_options(
     name = "anewcolumn"
     data = {"name": name, "type": type_, "display_options": display_options}
     response = client.post(f"/api/db/v0/tables/{column_test_table.id}/columns/", data)
-    print(response.json())
     assert response.status_code == 400
 
 
@@ -498,7 +497,6 @@ def test_column_update_type_get_all_columns(column_test_table_with_service_layer
     new_columns_response = client.get(
         f"/api/db/v0/tables/{table.id}/columns/"
     )
-    print(new_columns_response.json())
     assert new_columns_response.status_code == 200
 
 
