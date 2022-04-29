@@ -386,8 +386,12 @@ def test_table_type_suggestion(client, schema, engine_with_mathesar):
 def _check_columns(actual_column_list, expected_column_list):
     # Columns will return an extra type_options key in actual_dict
     # so we need to check equality only for the keys in expect_dict
-    for actual_column, expected_column in zip(actual_column_list, expected_column_list):
-        assert all([actual_column[key] == expected_column[key] for key in expected_column])
+    actual_column_list = [
+        { k: v for k, v in actual_column.items() if k in expected_column }
+        for actual_column, expected_column
+        in zip(actual_column_list, expected_column_list)
+    ]
+    assert actual_column_list == expected_column_list
 
 
 def test_table_previews(client, schema, engine_with_mathesar):
@@ -993,25 +997,25 @@ def _get_patents_column_data():
         'type': PostgresType.INTEGER.id,
     }, {
         'name': 'Center',
-        'type': PostgresType.CHARACTER_VARYING.id,
+        'type': PostgresType.TEXT.id,
     }, {
         'name': 'Status',
-        'type': PostgresType.CHARACTER_VARYING.id,
+        'type': PostgresType.TEXT.id,
     }, {
         'name': 'Case Number',
-        'type': PostgresType.CHARACTER_VARYING.id,
+        'type': PostgresType.TEXT.id,
     }, {
         'name': 'Patent Number',
-        'type': PostgresType.CHARACTER_VARYING.id,
+        'type': PostgresType.TEXT.id,
     }, {
         'name': 'Application SN',
-        'type': PostgresType.CHARACTER_VARYING.id,
+        'type': PostgresType.TEXT.id,
     }, {
         'name': 'Title',
-        'type': PostgresType.CHARACTER_VARYING.id,
+        'type': PostgresType.TEXT.id,
     }, {
         'name': 'Patent Expiration Date',
-        'type': PostgresType.CHARACTER_VARYING.id,
+        'type': PostgresType.TEXT.id,
     }]
 
 
@@ -1097,7 +1101,7 @@ def test_table_patch_columns_one_type_change(create_patents_table, client, engin
     table_name = 'PATCH columns 5'
     table = create_patents_table(table_name)
     column_data = _get_patents_column_data()
-    column_data[7]['type'] = 'DATE'
+    column_data[7]['type'] = PostgresType.DATE.id
 
     body = {
         'columns': column_data

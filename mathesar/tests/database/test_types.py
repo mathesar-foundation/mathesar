@@ -4,8 +4,8 @@ from db.types.base import known_db_types
 
 
 def _verify_type_mapping(supported_ui_types):
-    valid_ui_types = {ui_type.value for ui_type in UIType}
-    valid_db_types = {db_type.value for db_type in known_db_types}
+    valid_ui_types = {ui_type for ui_type in UIType}
+    valid_db_types = {db_type for db_type in known_db_types}
     seen_db_types = []
     seen_ui_types = []
     for ui_type in supported_ui_types:

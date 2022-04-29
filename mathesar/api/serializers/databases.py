@@ -27,7 +27,7 @@ class TypeSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     identifier = serializers.CharField()
     name = serializers.CharField()
     db_types = serializers.ListField(child=serializers.CharField())
-    display_options = serializers.SerializerMethodField()
+    display_options = serializers.DictField()
 
     def to_representation(self, ui_type):
         primitive = dict(

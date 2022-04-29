@@ -165,7 +165,7 @@ def test_MC_valid_target_types_custom_engine(engine_with_ischema_names_updated):
     assert MathesarCustomType.EMAIL in mc.valid_target_types
 
 
-def test_MC_plain_type_no_opts(engine):
+def test_MC_type_no_opts(engine):
     mc = MathesarColumn('acolumn', VARCHAR)
     mc.add_engine(engine)
     assert mc.db_type == PostgresType.CHARACTER_VARYING

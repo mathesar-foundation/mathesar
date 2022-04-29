@@ -26,6 +26,7 @@ def alter_column(engine, table_oid, column_attnum, column_data):
 
     with engine.begin() as conn:
         if TYPE_KEY in column_data:
+            breakpoint()
             new_type = get_db_type_enum_from_id(column_data[TYPE_KEY])
             retype_column(
                 table_oid, column_attnum, engine, conn,
@@ -33,6 +34,7 @@ def alter_column(engine, table_oid, column_attnum, column_data):
                 type_options=column_data.get(TYPE_OPTIONS_KEY, {})
             )
         elif TYPE_OPTIONS_KEY in column_data:
+            breakpoint()
             retype_column(
                 table_oid, column_attnum, engine, conn,
                 type_options=column_data[TYPE_OPTIONS_KEY]
@@ -181,7 +183,7 @@ def _check_type_option_equivalence(type_options_1, type_options_2):
 
 
 def _validate_columns_for_batch_update(table, column_data):
-    ALLOWED_KEYS = ['name', 'plain_type', 'type_options']
+    ALLOWED_KEYS = ['name', 'type', 'type_options']
     if len(column_data) != len(table.columns):
         raise ValueError('Number of columns passed in must equal number of columns in table')
     for single_column_data in column_data:
@@ -194,8 +196,8 @@ def _validate_columns_for_batch_update(table, column_data):
 def _batch_update_column_types(table_oid, column_data_list, connection, engine):
     table = reflect_table_from_oid(table_oid, engine, connection)
     for index, column_data in enumerate(column_data_list):
-        if 'plain_type' in column_data:
-            new_type = get_db_type_enum_from_id(column_data['plain_type'])
+        if 'type' in column_data:
+            new_type = get_db_type_enum_from_id(column_data['type'])
             type_options = column_data.get('type_options', {})
             if type_options is None:
                 type_options = {}

@@ -17,11 +17,13 @@ def user_directory_path(instance, filename):
 
 
 def update_sa_table(table, validated_data):
-    errors = [base_api_exceptions.ErrorBody(
-        ErrorCodes.UnsupportedAlter.value,
-        message=f'Updating {arg} for tables is not supported.'
-    )
-        for arg in set(validated_data) - SUPPORTED_TABLE_ALTER_ARGS]
+    errors = [
+        base_api_exceptions.ErrorBody(
+            ErrorCodes.UnsupportedAlter.value,
+            message=f'Updating {arg} for tables is not supported.'
+        )
+        for arg in set(validated_data) - SUPPORTED_TABLE_ALTER_ARGS
+    ]
     if errors:
         raise base_api_exceptions.GenericAPIException(errors, status_code=status.HTTP_400_BAD_REQUEST)
     try:

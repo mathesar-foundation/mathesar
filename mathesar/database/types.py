@@ -142,6 +142,9 @@ class UIType(Enum):
         obj.db_types = frozenset(db_types)
         return obj
 
+    def __str__(self):
+        return self.id
+
 
 def ui_types_that_satisfy_hintset(ui_types_mapped_to_hintsets, hintset):
     """

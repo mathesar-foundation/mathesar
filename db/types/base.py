@@ -81,6 +81,9 @@ class DatabaseType:
     def is_application_supported(self) -> bool:
         return not self.is_inconsistent and not _sa_only_db_types
 
+    def __str__(self):
+        return self.id
+
 
 class PostgresType(DatabaseType, Enum):
     """

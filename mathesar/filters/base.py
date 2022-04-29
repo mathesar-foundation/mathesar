@@ -109,7 +109,7 @@ def _make_filter_param(ui_types, suggested_values):
 
 def _get_parameter_ui_types(ui_type_hints, db_function_subclass, parameter_index):
     parameter_type_hints = hints.get_parameter_type_hints(parameter_index, db_function_subclass)
-    parameter_ui_types = ma_types_that_satisfy_hintset(
+    parameter_ui_types = ui_types_that_satisfy_hintset(
         ui_type_hints,
         parameter_type_hints
     )

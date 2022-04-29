@@ -53,16 +53,16 @@ def _create_pizza_table(engine, schema):
 def _get_pizza_column_data():
     return [{
         'name': 'ID',
-        'plain_type': PostgresType.CHARACTER_VARYING.id
+        'type': PostgresType.CHARACTER_VARYING.id
     }, {
         'name': 'Pizza',
-        'plain_type': PostgresType.CHARACTER_VARYING.id
+        'type': PostgresType.CHARACTER_VARYING.id
     }, {
         'name': 'Checkbox',
-        'plain_type': PostgresType.CHARACTER_VARYING.id
+        'type': PostgresType.CHARACTER_VARYING.id
     }, {
         'name': 'Rating',
-        'plain_type': PostgresType.CHARACTER_VARYING.id
+        'type': PostgresType.CHARACTER_VARYING.id
     }]
 
 
@@ -70,7 +70,7 @@ def _get_pizza_column_data():
     "column_dict,func_name",
     [
         ({"name": "blah"}, "rename_column"),
-        ({"plain_type": "blah"}, "retype_column"),
+        ({"type": "blah"}, "retype_column"),
         ({"type_options": {"blah": "blah"}}, "retype_column"),
         ({"nullable": True}, "change_column_nullable"),
         ({"column_default_dict": {"value": 1}}, "set_column_default"),
@@ -453,7 +453,7 @@ def test_batch_update_column_names(engine_with_mathesar):
     for index, column in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
         new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
-        assert new_column_type == column_data[index]['plain_type']
+        assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
@@ -463,8 +463,8 @@ def test_batch_update_column_types(engine_with_mathesar):
     table_oid = get_oid_from_table(table.name, schema, engine)
 
     column_data = _get_pizza_column_data()
-    column_data[0]['plain_type'] = PostgresType.DOUBLE_PRECISION.id
-    column_data[2]['plain_type'] = PostgresType.BOOLEAN.id
+    column_data[0]['type'] = PostgresType.DOUBLE_PRECISION.id
+    column_data[2]['type'] = PostgresType.BOOLEAN.id
 
     batch_update_columns(table_oid, engine, column_data)
     updated_table = reflect_table(table.name, schema, engine)
@@ -473,7 +473,7 @@ def test_batch_update_column_types(engine_with_mathesar):
     for index, column in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
         new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
-        assert new_column_type == column_data[index]['plain_type']
+        assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
@@ -484,9 +484,9 @@ def test_batch_update_column_names_and_types(engine_with_mathesar):
 
     column_data = _get_pizza_column_data()
     column_data[0]['name'] = 'Pizza ID'
-    column_data[0]['plain_type'] = PostgresType.INTEGER.id
+    column_data[0]['type'] = PostgresType.INTEGER.id
     column_data[1]['name'] = 'Pizza Style'
-    column_data[2]['plain_type'] = PostgresType.BOOLEAN.id
+    column_data[2]['type'] = PostgresType.BOOLEAN.id
 
     batch_update_columns(table_oid, engine, column_data)
     updated_table = reflect_table(table.name, schema, engine)
@@ -495,7 +495,7 @@ def test_batch_update_column_names_and_types(engine_with_mathesar):
     for index, column in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
         new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
-        assert new_column_type == column_data[index]['plain_type']
+        assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
@@ -515,7 +515,7 @@ def test_batch_update_column_drop_columns(engine_with_mathesar):
     for index, column in enumerate(updated_table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
         new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
-        assert new_column_type == column_data[index - 2]['plain_type']
+        assert new_column_type == column_data[index - 2]['type']
         assert updated_table.columns[index].name == column_data[index - 2]['name']
 
 
@@ -526,9 +526,9 @@ def test_batch_update_column_all_operations(engine_with_mathesar):
 
     column_data = _get_pizza_column_data()
     column_data[0]['name'] = 'Pizza ID'
-    column_data[0]['plain_type'] = PostgresType.INTEGER.id
+    column_data[0]['type'] = PostgresType.INTEGER.id
     column_data[1]['name'] = 'Pizza Style'
-    column_data[2]['plain_type'] = PostgresType.BOOLEAN.id
+    column_data[2]['type'] = PostgresType.BOOLEAN.id
     column_data[3] = {}
 
     batch_update_columns(table_oid, engine, column_data)
@@ -538,5 +538,5 @@ def test_batch_update_column_all_operations(engine_with_mathesar):
     for index, column in enumerate(updated_table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
         new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
-        assert new_column_type == column_data[index]['plain_type']
+        assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']

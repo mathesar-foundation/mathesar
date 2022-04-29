@@ -31,7 +31,7 @@ def create_data_file():
 def create_data_types_table(data_types_csv_filepath, create_table):
     csv_filepath = data_types_csv_filepath
     def _create_table(table_name, schema_name='Data Types'):
-        create_table(
+        return create_table(
             table_name=table_name,
             schema_name=schema_name,
             csv_filepath=csv_filepath,
