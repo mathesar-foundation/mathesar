@@ -64,10 +64,16 @@ def column_test_table_with_service_layer_options(patent_schema):
     ]
     column_data_list = [{},
                         {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
-                        {'display_options': {"show_as_percentage": True, "locale": "en_US"}},
+                        {'display_options': {"show_as_percentage": True, 'number_format': "english"}},
                         {},
                         {},
-                        {'display_options': {'currency_details': {'symbol': "HK $"}}},
+                        {'display_options': {'currency_details':
+                            {
+                                'currency_symbol': "HK $",
+                                'number_format': "english",
+                                'currency_symbol_location': 'after-minus'
+                            }
+                        }},
                         {'display_options': {'format': 'YYYY-MM-DD hh:mm'}}]
     db_table = SATable(
         "anewtable",
@@ -83,7 +89,8 @@ def column_test_table_with_service_layer_options(patent_schema):
         attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine)
         service_columns.append(ServiceLayerColumn.current_objects.get_or_create(table=table,
                                                                                 attnum=attnum,
-                                                                                display_options=column_data[1].get('display_options', None))[0])
+                                                                                display_options=column_data[1].get(
+                                                                                    'display_options', None))[0])
     return table, service_columns
 
 
@@ -254,10 +261,13 @@ def test_column_create_invalid_default(column_test_table, client):
 
 create_display_options_test_list = [
     ("BOOLEAN", {"input": "dropdown"}, {"input": "dropdown"}),
-    ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}, {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
+    ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}},
+     {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
     ("DATE", {'format': 'YYYY-MM-DD'}, {'format': 'YYYY-MM-DD'}),
     ("INTERVAL", {'format': 'DD HH:mm:ss.SSS'}, {'format': 'DD HH:mm:ss.SSS'}),
-    ("MONEY", {'symbol': '$', 'symbol_location': 'after-minus'}, {'symbol': '$', 'symbol_location': 'after-minus'}),
+    ("MONEY",
+     {'number_format': "english", 'currency_symbol': '$', 'currency_symbol_location': 'after-minus'},
+     {'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'number_format': "english"}),
     ("NUMERIC", {"show_as_percentage": True}, {"show_as_percentage": True}),
     ("NUMERIC",
      {"show_as_percentage": True, 'number_format': "english"},
@@ -293,26 +303,7 @@ create_display_options_invalid_test_list = [
     ("BOOLEAN", {"input": "invalid", "use_custom_columns": False}),
     ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"yes": "yes", "1": "no"}}),
     ("DATE", {'format': _too_long_string}),
-    ("MONEY", {
-        'currency_code': 'en_US',
-        'currency_details': {
-            'symbol': '$',
-            'symbol_location': -1,
-            'decimal_symbol': '.',
-            'digit_grouping': [3, 0],
-            'digit_grouping_symbol': ','
-        }
-    }),
-    ("MONEY", {
-        'currency_code': None,
-        'currency_details': {
-            'symbol': '$',
-            'symbol_location': -1,
-            'decimal_symbol': '|',  # Invalid choice
-            'digit_grouping': [3, 0],
-            'digit_grouping_symbol': ','
-        }
-    }),
+    ("MONEY", {'currency_symbol': '$', 'currency_symbol_location': 'after-minus'}),
     ("NUMERIC", {"show_as_percentage": "wrong value type"}),
     ("NUMERIC", {'number_format': "wrong"}),
     ("TIMESTAMP WITH TIME ZONE", {'format': []}),
