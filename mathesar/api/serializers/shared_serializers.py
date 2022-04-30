@@ -40,7 +40,7 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
             self.__class__ = self.serializers_cls_mapping.get(self.get_mapping_field())
             return serializer.to_representation(instance)
         else:
-            raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
+            return instance
 
     def get_mapping_field(self):
         mapping_field = getattr(self, "mapping_field", None)
@@ -59,7 +59,8 @@ class ReadWritePolymorphicSerializerMappingMixin(ReadOnlyPolymorphicSerializerMa
             self.__class__ = self.serializers_cls_mapping.get(self.get_mapping_field())
             return serializer.to_internal_value(data=data)
         else:
-            raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
+            data = {}
+            return data
 
 
 class MonkeyPatchPartial:
@@ -139,10 +140,6 @@ class DisplayOptionsMappingSerializer(
         MathesarTypeIdentifier.DURATION.value: DurationDisplayOptionSerializer,
     }
 
-    def run_validation(self, data=empty):
-        if data == {}:
-            data = None
-        return super(DisplayOptionsMappingSerializer, self).run_validation(data)
 
     def get_mapping_field(self):
         db_type = self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY]
