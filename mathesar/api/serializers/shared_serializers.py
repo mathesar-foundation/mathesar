@@ -140,7 +140,6 @@ class DisplayOptionsMappingSerializer(
         MathesarTypeIdentifier.DURATION.value: DurationDisplayOptionSerializer,
     }
 
-
     def get_mapping_field(self):
         db_type = self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY]
         mathesar_type = get_mathesar_type_from_db_type(db_type)
