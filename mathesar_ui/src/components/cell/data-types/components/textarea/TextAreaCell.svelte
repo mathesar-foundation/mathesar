@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TextArea } from '@mathesar-component-library';
+  import { TextArea, optionalNonNullable } from '@mathesar-component-library';
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type { TextAreaCellProps } from '../typeDefinitions';
 
@@ -37,7 +37,7 @@
 >
   <TextArea
     focusOnMount={true}
-    maxlength={length}
+    maxlength={optionalNonNullable(length)}
     {disabled}
     bind:value
     on:blur={handleInputBlur}
