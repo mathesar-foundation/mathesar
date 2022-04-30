@@ -63,8 +63,8 @@ def column_test_table_with_service_layer_options(patent_schema):
     ]
     column_data_list = [{},
                         {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
-                        {'display_options': {"show_as_percentage": True, "locale": "en_US"}},
-                        {},
+                        {'display_options': {'show_as_percentage': True, 'number_format': "english"}},
+                        {'display_options': None},
                         {},
                         {},
                         {'display_options': {'format': 'YYYY-MM-DD hh:mm'}}]
@@ -255,9 +255,8 @@ create_display_options_test_list = [
     ("BOOLEAN", {"input": "dropdown"}),
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
     ("DATE", {'format': 'YYYY-MM-DD'}),
-    ("INTERVAL", {'format': 'DD HH:mm:ss.SSS'}),
-    ("NUMERIC", {"show_as_percentage": True}),
-    ("NUMERIC", {"show_as_percentage": True, "locale": "en_US"}),
+    ("INTERVAL", {'min': 's', 'max': 'h', 'show_units': True}),
+    ("NUMERIC", {"show_as_percentage": True, 'number_format': "english"}),
     ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
     ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
     ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm'}),
@@ -290,6 +289,7 @@ create_display_options_invalid_test_list = [
     ("BOOLEAN", {"input": "invalid"}),
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"yes": "yes", "1": "no"}}),
     ("NUMERIC", {"show_as_percentage": "wrong value type"}),
+    ("NUMERIC", {'number_format': "wrong"}),
     ("DATE", {'format': _too_long_string}),
     ("TIMESTAMP WITH TIME ZONE", {'format': []}),
     ("TIMESTAMP WITHOUT TIME ZONE", {'format': _too_long_string}),
@@ -481,6 +481,37 @@ def test_column_update_type_with_existing_display_options(column_test_table_with
         display_options_data,
     )
     assert response.json()["display_options"] is None
+
+
+def test_column_update_type_invalid_display_options(column_test_table_with_service_layer_options, client):
+    cache.clear()
+    table, columns = column_test_table_with_service_layer_options
+    colum_name = "mycolumn3"
+    column = _get_columns_by_name(table, [colum_name])[0]
+    column_id = column.id
+    display_options_data = {'type': 'BOOLEAN', 'display_options': {}}
+    response = client.patch(
+        f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
+        display_options_data,
+    )
+    assert response.status_code == 400
+
+
+def test_column_update_type_get_all_columns(column_test_table_with_service_layer_options, client):
+    cache.clear()
+    table, columns = column_test_table_with_service_layer_options
+    colum_name = "mycolumn2"
+    column = _get_columns_by_name(table, [colum_name])[0]
+    column_id = column.id
+    display_options_data = {'type': 'BOOLEAN'}
+    client.patch(
+        f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
+        display_options_data,
+    )
+    new_columns_response = client.get(
+        f"/api/db/v0/tables/{table.id}/columns/"
+    )
+    assert new_columns_response.status_code == 200
 
 
 def test_column_display_options_type_on_reflection(column_test_table,

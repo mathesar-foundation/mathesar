@@ -1,21 +1,19 @@
 import type { Readable } from 'svelte/store';
 import type CancellablePromise from '@mathesar-component-library-dir/common/utils/CancellablePromise';
+import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';
 
 export interface ListBoxStaticContextProps<Option> {
   selectionType: 'single' | 'multiple';
-  labelKey: string;
-  getLabel: (value: Option, labelKey?: string) => string;
+  getLabel: LabelGetter<Option>;
   searchable: boolean;
   disabled: boolean;
-  checkEquality: (
-    option: Option,
-    optionToCompare: Option | undefined,
-  ) => boolean;
+  checkEquality: (option: Option, optionToCompare: Option) => boolean;
   checkIfOptionIsDisabled: (optionToCheck: Option) => boolean;
 }
 
 export interface ListBoxProps<Option>
   extends Partial<ListBoxStaticContextProps<Option>> {
+  labelKey?: string;
   options: Option[] | (() => CancellablePromise<Option[]>);
   value?: Option[];
 }

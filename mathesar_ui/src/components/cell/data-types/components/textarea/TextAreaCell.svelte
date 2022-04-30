@@ -1,14 +1,16 @@
 <script lang="ts">
-  import { TextArea } from '@mathesar-component-library';
-  import SteppedInputCell from './common/SteppedInputCell.svelte';
+  import { TextArea, optionalNonNullable } from '@mathesar-component-library';
+  import SteppedInputCell from '../SteppedInputCell.svelte';
+  import type { TextAreaCellProps } from '../typeDefinitions';
 
-  export let isActive = false;
-  export let value: string | null | undefined = undefined;
-  export let readonly = false;
-  export let disabled = false;
+  type $$Props = TextAreaCellProps;
+
+  export let isActive: $$Props['isActive'];
+  export let value: $$Props['value'] = undefined;
+  export let disabled: $$Props['disabled'];
 
   // Db options
-  export let length: number | undefined = undefined;
+  export let length: $$Props['length'] = undefined;
 
   function handleKeyDown(
     e: KeyboardEvent,
@@ -25,9 +27,8 @@
 <SteppedInputCell
   {value}
   {isActive}
-  {readonly}
   {disabled}
-  class="multi-line-truncate"
+  multiLineTruncate={true}
   let:handleInputBlur
   let:handleInputKeydown
   on:movementKeyDown
@@ -36,19 +37,10 @@
 >
   <TextArea
     focusOnMount={true}
-    maxlength={length}
+    maxlength={optionalNonNullable(length)}
     {disabled}
     bind:value
     on:blur={handleInputBlur}
     on:keydown={(e) => handleKeyDown(e, handleInputKeydown)}
   />
 </SteppedInputCell>
-
-<style lang="scss">
-  :global(.cell-wrapper.multi-line-truncate) {
-    :global(textarea.input-element) {
-      resize: vertical;
-      min-height: 5em;
-    }
-  }
-</style>

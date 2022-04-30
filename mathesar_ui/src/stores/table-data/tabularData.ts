@@ -59,7 +59,7 @@ export class TabularData {
     this.type = props.type;
     this.id = props.id;
     this.meta = new Meta(props.metaProps);
-    this.columnsDataStore = new ColumnsDataStore(this.type, this.id, this.meta);
+    this.columnsDataStore = new ColumnsDataStore(this.type, this.id);
     this.constraintsDataStore = new ConstraintsDataStore(this.id);
     this.recordsData = new RecordsData(
       this.type,
@@ -75,6 +75,11 @@ export class TabularData {
 
     this.columnsDataStore.on('columnRenamed', () => this.refresh());
     this.columnsDataStore.on('columnAdded', () => this.recordsData.fetch());
+    this.columnsDataStore.on('columnDeleted', async (columnId: unknown) => {
+      this.meta.sorting.update((s) => s.without(columnId as number));
+      this.meta.grouping.update((g) => g.without(columnId as number));
+      this.meta.filtering.update((f) => f.withoutColumn(columnId as number));
+    });
   }
 
   refresh(): Promise<

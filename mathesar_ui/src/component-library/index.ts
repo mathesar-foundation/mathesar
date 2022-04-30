@@ -16,7 +16,11 @@ export { default as Icon } from './icon/Icon.svelte';
 export { InputGroup, InputGroupText } from './input-group';
 export { default as Label } from './label/Label.svelte';
 export { default as LabeledInput } from './labeled-input/LabeledInput.svelte';
-export { default as NumberInput } from './number-input/NumberInput.svelte';
+export {
+  NumberInput,
+  StringifiedNumberInput,
+  StringifiedNumberFormatter,
+} from './number-input';
 export { default as Progress } from './progress/Progress.svelte';
 export { default as Radio } from './radio/Radio.svelte';
 export { default as RadioGroup } from './radio-group/RadioGroup.svelte';

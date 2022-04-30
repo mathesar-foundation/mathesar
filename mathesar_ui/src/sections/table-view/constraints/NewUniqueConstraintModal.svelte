@@ -18,6 +18,7 @@
   import ColumnName from '@mathesar/components/ColumnName.svelte';
   import { toast } from '@mathesar/stores/toast';
   import Form from '@mathesar/components/Form.svelte';
+  import { getAvailableName } from '@mathesar/utils/db';
   import UniqueConstraintsHelp from './__help__/UniqueConstraintsHelp.svelte';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
   import UniqueConstraintColumnsHelp from './__help__/UniqueConstraintColumnsHelp.svelte';
@@ -25,37 +26,28 @@
   export let controller: ModalController;
 
   type NamingStrategy = 'auto' | 'manual';
+  const namingStrategyLabelMap = new Map<NamingStrategy, string>([
+    ['auto', 'Automatically'],
+    ['manual', 'Manually'],
+  ]);
+  const namingStrategies = [...namingStrategyLabelMap.keys()];
 
   const tabularData = getContext<TabularDataStore>('tabularData');
-  const namingStrategyOptions = [
-    { value: 'auto', label: 'Automatically' },
-    { value: 'manual', label: 'Manually' },
-  ];
 
   function getSuggestedName(
     _tableName: string,
-    columnIds: number[],
-    _columnsInTable: Column[],
-    _existingConstraintNames: string[],
-  ): string | undefined {
-    const getColumnName = (id: number) =>
-      _columnsInTable.find((c) => c.id === id)?.name;
-    const columnNames = columnIds.map(getColumnName);
-    let ordinal = 0;
-    while (true) {
-      const suffix = ordinal ? `_${ordinal}` : '';
-      const name = `${_tableName}_${columnNames.join('_')}${suffix}`;
-      if (!_existingConstraintNames.includes(name)) {
-        return name;
-      }
-      ordinal += 1;
-    }
+    _columns: Column[],
+    reservedNames: Set<string>,
+  ): string {
+    const columnNames = _columns.map((c) => c.name);
+    const desiredName = `${_tableName}_${columnNames.join('_')}`;
+    return getAvailableName(desiredName, reservedNames);
   }
 
   function getNameValidationErrors(
     _namingStrategy: NamingStrategy,
     _constraintName: string | undefined,
-    _existingConstraintNames: string[],
+    _existingConstraintNames: Set<string>,
   ) {
     if (_namingStrategy === 'auto') {
       return [];
@@ -63,41 +55,35 @@
     if (!_constraintName?.trim()) {
       return ['Name cannot be empty'];
     }
-    if (_existingConstraintNames.includes(_constraintName?.trim())) {
+    if (_existingConstraintNames.has(_constraintName?.trim())) {
       return ['A constraint with that name already exists'];
     }
     return [];
   }
 
-  let constraintColumnIds: number[] = [];
+  let constraintColumns: Column[] = [];
   let namingStrategy: NamingStrategy = 'auto';
   let constraintName: string | undefined;
 
   function init() {
-    constraintColumnIds = [];
+    constraintColumns = [];
     namingStrategy = 'auto';
     constraintName = undefined;
   }
 
   $: constraintsDataStore = $tabularData.constraintsDataStore;
-  $: existingConstraintNames = $constraintsDataStore.constraints.map(
-    (c) => c.name,
+  $: existingConstraintNames = new Set(
+    $constraintsDataStore.constraints.map((c) => c.name),
   );
   $: tableName = $tables.data.get($tabularData.id)?.name ?? '';
   $: columnsDataStore = $tabularData.columnsDataStore;
   $: columnsInTable = $columnsDataStore.columns;
-  $: columnsOptions = columnsInTable.map((column) => ({
-    value: column.id,
-    labelComponent: ColumnName,
-    labelComponentProps: { column },
-  }));
   $: nameValidationErrors = getNameValidationErrors(
     namingStrategy,
     constraintName,
     existingConstraintNames,
   );
-  $: canProceed =
-    constraintColumnIds.length > 0 && !nameValidationErrors.length;
+  $: canProceed = constraintColumns.length > 0 && !nameValidationErrors.length;
 
   function handleNamingStrategyChange() {
     // Begin with a suggested name as the starting value, but only do it when
@@ -106,8 +92,7 @@
       namingStrategy === 'manual'
         ? getSuggestedName(
             tableName,
-            constraintColumnIds,
-            columnsInTable,
+            constraintColumns,
             existingConstraintNames,
           )
         : undefined;
@@ -116,7 +101,7 @@
   async function handleSave() {
     try {
       await constraintsDataStore.add({
-        columns: constraintColumnIds,
+        columns: constraintColumns.map((c) => c.id),
         type: 'unique',
         name: constraintName,
       });
@@ -137,17 +122,25 @@
   <span slot="title">New Unique Constraint <UniqueConstraintsHelp /></span>
   <Form>
     <FormField>
-      <CheckboxGroup options={columnsOptions} bind:values={constraintColumnIds}>
+      <CheckboxGroup
+        options={columnsInTable}
+        bind:values={constraintColumns}
+        getCheckboxLabel={(c) => ({
+          component: ColumnName,
+          props: { column: c },
+        })}
+      >
         Columns <UniqueConstraintColumnsHelp />
       </CheckboxGroup>
     </FormField>
 
     <FormField>
       <RadioGroup
-        options={namingStrategyOptions}
+        options={namingStrategies}
         bind:value={namingStrategy}
         isInline
         on:change={handleNamingStrategyChange}
+        getRadioLabel={(s) => namingStrategyLabelMap.get(s) ?? ''}
       >
         Set Constraint Name <ConstraintNameHelp />
       </RadioGroup>

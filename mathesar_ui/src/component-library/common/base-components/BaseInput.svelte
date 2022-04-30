@@ -2,6 +2,9 @@
   import { tick, afterUpdate } from 'svelte';
   import { getLabelControllerFromContainingLabel } from '@mathesar-component-library-dir/label/LabelController';
   import { getGloballyUniqueId } from '@mathesar-component-library-dir/common/utils/domUtils';
+  import type { BaseInputProps } from './BaseInputTypes';
+
+  type $$Props = BaseInputProps;
 
   export let id = getGloballyUniqueId();
   export let labelController = getLabelControllerFromContainingLabel();
@@ -14,7 +17,10 @@
   afterUpdate(async () => {
     await tick();
     if (focusOnMount) {
-      (document.querySelector(`#${id}`) as HTMLInputElement)?.focus();
+      const inputElement = document.querySelector(`#${id}`) as
+        | HTMLInputElement
+        | undefined;
+      inputElement?.focus();
     }
   });
 </script>

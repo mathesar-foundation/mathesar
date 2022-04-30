@@ -1,9 +1,6 @@
 /* eslint-disable max-classes-per-file */
 
-import {
-  hasProperty,
-  hasStringProperty,
-} from '@mathesar/component-library/common/utils/typeUtils';
+import { hasProperty, hasStringProperty } from '@mathesar-component-library';
 
 /**
  * This is our front end representation of API errors. It's almost the same as

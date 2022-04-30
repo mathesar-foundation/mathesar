@@ -1,4 +1,4 @@
-import type { ParseResult } from '@mathesar-component-library-dir/formatted-input/InputFormatter';
+import type { ParseResult } from '@mathesar-component-library-dir/formatted-input/FormattedInputTypes';
 import { factoryToNormalize, factoryToSimplify } from './cleaners';
 import {
   formatToNormalizedForm,
