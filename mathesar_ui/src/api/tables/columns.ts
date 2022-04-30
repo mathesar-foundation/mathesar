@@ -103,6 +103,20 @@ export interface Column extends BaseColumn {
   display_options: Record<string, unknown> | null;
 }
 
+export interface MathesarMoneyColumn extends Column {
+  type: 'MATHESAR_TYPES.MATHESAR_MONEY';
+  type_options: Partial<NumberTypeOptions> | null;
+  display_options: Partial<MoneyDisplayOptions> | null;
+}
+
+export interface PostgresMoneyColumn extends Column {
+  type: 'MONEY';
+  type_options: null;
+  display_options: Partial<MoneyDisplayOptions> | null;
+}
+
+export type MoneyColumn = MathesarMoneyColumn | PostgresMoneyColumn;
+
 export interface NumberColumn extends Column {
   type:
     | 'BIGINT'

@@ -1,6 +1,7 @@
 import type { DbType } from '@mathesar/AppTypes';
 import { abstractTypeCategory, unknownAbstractTypeResponse } from './constants';
 import Text from './type-configs/text';
+import Money from './type-configs/money';
 import Number from './type-configs/number';
 import Boolean from './type-configs/boolean';
 import Unknown from './type-configs/unknown';
@@ -17,6 +18,7 @@ import type {
  */
 const abstractTypeCategories = {
   [abstractTypeCategory.Text]: Text,
+  [abstractTypeCategory.Money]: Money,
   [abstractTypeCategory.Number]: Number,
   [abstractTypeCategory.Boolean]: Boolean,
   [abstractTypeCategory.Other]: Unknown,
