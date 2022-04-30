@@ -875,5 +875,5 @@ def test_column_update_type_with_display_and_type_options_as_empty_objects(colum
     assert response.status_code == 200
     response_json = response.json()
     assert response_json["type"] == type_
-    assert response_json["display_options"] is None
+    assert response_json["display_options"] == {}
     assert response_json["type_options"] is None

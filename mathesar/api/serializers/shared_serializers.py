@@ -1,5 +1,4 @@
 from django.core.exceptions import ImproperlyConfigured
-from rest_framework.fields import empty
 from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
