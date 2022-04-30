@@ -36,7 +36,6 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
     def to_representation(self, instance):
         serializer = self.serializers_mapping.get(self.get_mapping_field(), None)
         if serializer is not None:
-            self.__class__ = self.serializers_cls_mapping.get(self.get_mapping_field())
             return serializer.to_representation(instance)
         else:
             raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
@@ -55,7 +54,6 @@ class ReadWritePolymorphicSerializerMappingMixin(ReadOnlyPolymorphicSerializerMa
     def to_internal_value(self, data):
         serializer = self.serializers_mapping.get(self.get_mapping_field())
         if serializer is not None:
-            self.__class__ = self.serializers_cls_mapping.get(self.get_mapping_field())
             return serializer.to_internal_value(data=data)
         else:
             raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
@@ -92,6 +90,11 @@ class OverrideRootPartialMixin:
             with MonkeyPatchPartial(self.root):
                 return super().run_validation(*args, **kwargs)
         return super().run_validation(*args, **kwargs)
+
+
+class MathesarPolymorphicErrorMixin(MathesarErrorMessageMixin):
+    def get_serializer_fields(self):
+        return self.serializers_mapping[self.get_mapping_field()].fields
 
 
 class CustomBooleanLabelSerializer(MathesarErrorMessageMixin, serializers.Serializer):
@@ -143,8 +146,8 @@ class DurationDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPar
 
 
 class DisplayOptionsMappingSerializer(
-    MathesarErrorMessageMixin,
     OverrideRootPartialMixin,
+    MathesarPolymorphicErrorMixin,
     ReadWritePolymorphicSerializerMappingMixin,
     serializers.Serializer
 ):
