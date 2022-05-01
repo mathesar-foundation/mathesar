@@ -168,6 +168,15 @@ export const filterDefinitionMap = getFilterDefinitionMap();
 
 export function getFiltersForAbstractType(
   categoryIdentifier: AbstractTypeCategoryIdentifier,
-): AbstractTypeFilterDefinition[] {
-  return filterDefinitionMap.get(categoryIdentifier) ?? [];
+): Map<AbstractTypeFilterDefinition['id'], AbstractTypeFilterDefinition> {
+  const allowedFiltersMap: Map<
+    AbstractTypeFilterDefinition['id'],
+    AbstractTypeFilterDefinition
+  > = new Map();
+
+  filterDefinitionMap.get(categoryIdentifier)?.forEach((filter) => {
+    allowedFiltersMap.set(filter.id, filter);
+  });
+
+  return allowedFiltersMap;
 }
