@@ -9,14 +9,14 @@
   } from '@mathesar/stores/table-data/types';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
-  import type { ProcessedTableColumn } from '../utils';
+  import type { ProcessedTableColumnMap } from '../utils';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
   $: ({ columnsDataStore, meta, display, constraintsDataStore } = $tabularData);
   $: ({ horizontalScrollOffset, columnPositionMap } = display);
 
-  export let processedTableColumns: ProcessedTableColumn[];
+  export let processedTableColumnsMap: ProcessedTableColumnMap;
 
   let headerRef: HTMLElement;
 
@@ -64,16 +64,13 @@
 <div bind:this={headerRef} class="header">
   <div class="cell row-control" style="width:{ROW_CONTROL_COLUMN_WIDTH}px;" />
 
-  {#each processedTableColumns as processedColumn (processedColumn.column.id)}
+  {#each [...processedTableColumnsMap] as [columnId, processedColumn] (columnId)}
     <HeaderCell
       {processedColumn}
       {meta}
       {columnsDataStore}
       {constraintsDataStore}
-      columnPosition={getColumnPosition(
-        $columnPositionMap,
-        processedColumn.column.id,
-      )}
+      columnPosition={getColumnPosition($columnPositionMap, columnId)}
     />
   {/each}
 

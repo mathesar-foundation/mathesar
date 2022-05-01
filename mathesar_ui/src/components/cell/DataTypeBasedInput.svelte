@@ -23,7 +23,7 @@
           column: CellColumnLike;
         }
       | {
-          componentAndProps: ComponentAndProps;
+          componentAndProps: ComponentAndProps<unknown>;
         }
     );
 

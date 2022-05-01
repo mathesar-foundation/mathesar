@@ -30,16 +30,19 @@
   import { modal } from '@mathesar/stores/modal';
   import LinkTableModal from '@mathesar/sections/table-view/link-table/LinkTableModal.svelte';
   import TableConstraints from '@mathesar/sections/table-view/constraints/TableConstraints.svelte';
-  import DisplayFilter from '@mathesar/sections/table-view/display-options/DisplayFilter.svelte';
-  import DisplaySort from '@mathesar/sections/table-view/display-options/DisplaySort.svelte';
-  import DisplayGroup from '@mathesar/sections/table-view/display-options/DisplayGroup.svelte';
+  // import DisplayGroup from '@mathesar/sections/table-view/display-options/DisplayGroup.svelte';
+  import Sort from './record-operations/Sort.svelte';
+  import Filter from './record-operations/Filter.svelte';
   import RenameTableModal from './RenameTableModal.svelte';
+  import type { ProcessedTableColumnMap } from '../utils';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
   const tableConstraintsModal = modal.spawnModalController();
   const linkTableModal = modal.spawnModalController();
   const tableRenameModal = modal.spawnModalController();
+
+  export let processedTableColumnsMap: ProcessedTableColumnMap;
 
   $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
     $tabularData);
@@ -121,7 +124,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <DisplayFilter {columns} filtering={meta.filtering} />
+      <Filter {processedTableColumnsMap} filtering={meta.filtering} />
     </svelte:fragment>
   </Dropdown>
 
@@ -136,7 +139,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <DisplaySort {columns} sorting={meta.sorting} />
+      <Sort {columns} sorting={meta.sorting} />
     </svelte:fragment>
   </Dropdown>
 
@@ -151,7 +154,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <DisplayGroup {columns} grouping={meta.grouping} />
+      <!-- <DisplayGroup {columns} grouping={meta.grouping} /> -->
     </svelte:fragment>
   </Dropdown>
 

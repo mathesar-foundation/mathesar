@@ -77,7 +77,10 @@
 
   function setValueOnOptionChange(opts: Option[]) {
     if (opts.length > 0) {
-      if (!value || !opts.some((entry) => valuesAreEqual(entry, value))) {
+      if (
+        typeof value === 'undefined' ||
+        !opts.some((entry) => valuesAreEqual(entry, value))
+      ) {
         setValueFromArray(opts);
       }
     } else {

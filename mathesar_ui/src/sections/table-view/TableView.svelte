@@ -7,7 +7,7 @@
   import Header from './header/Header.svelte';
   import Body from './Body.svelte';
   import StatusPane from './status-pane/StatusPane.svelte';
-  import { getProcessedColumns } from './utils';
+  import { getProcessedColumnsMap } from './utils';
 
   export let tabularData: TabularData;
 
@@ -23,20 +23,20 @@
    * created, the path of minimal changes is taken and is passed
    * down as a prop.
    */
-  $: processedTableColumns = getProcessedColumns(
+  $: processedTableColumnsMap = getProcessedColumnsMap(
     $columnsDataStore.columns,
     $currentDbAbstractTypes.data,
   );
 </script>
 
-<ActionsPane />
+<ActionsPane {processedTableColumnsMap} />
 
 <div class="table-data">
   <div class="table-content">
-    {#if processedTableColumns.length > 0}
-      <Header {processedTableColumns} />
+    {#if processedTableColumnsMap.size}
+      <Header {processedTableColumnsMap} />
       <!-- We'd eventually replace Body with Sheet -->
-      <Body {processedTableColumns} />
+      <Body {processedTableColumnsMap} />
     {/if}
   </div>
 </div>

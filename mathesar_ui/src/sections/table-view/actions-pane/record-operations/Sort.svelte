@@ -100,7 +100,3 @@
     </table>
   </div>
 </div>
-
-<style global lang="scss">
-  @import 'DisplayOption.scss';
-</style>
