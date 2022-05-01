@@ -54,7 +54,7 @@ class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
         model = Column
         fields = ('id',
                   'name',
-                  'type',
+                  TYPE_KEY,
                   'type_options',
                   DISPLAY_OPTIONS_KEY,
                   )
@@ -68,7 +68,7 @@ class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
 
     def to_representation(self, instance):
         if isinstance(instance, dict):
-            db_type_id = instance.get('type')
+            db_type_id = instance.get(TYPE_KEY)
             db_type = get_db_type_enum_from_id(db_type_id)
         else:
             db_type = instance.db_type
@@ -80,10 +80,10 @@ class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
         return representation
 
     def to_internal_value(self, data):
-        if self.partial and 'type' not in data:
+        if self.partial and TYPE_KEY not in data:
             db_type = getattr(self.instance, 'db_type', None)
         else:
-            db_type_id = data.get('type', None)
+            db_type_id = data.get(TYPE_KEY, None)
             db_type = get_db_type_enum_from_id(db_type_id) if db_type_id else None
         self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY] = db_type
         return super().to_internal_value(data)
@@ -91,13 +91,13 @@ class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
 
 def _force_canonical_type(representation, db_type: DatabaseType):
         """
-        Sometimes the representation's 'type' attribute will also include type option information
+        Sometimes the representation's TYPE_KEY attribute will also include type option information
         (e.g. `numeric(3, 5)`). We override the attribute's value to a canonical type id.
 
         This might be better solved upstream, but since our Column model subclasses SA's Column,
-        overriding its 'type' attribute, might interfere with SA's workings.
+        overriding its TYPE_KEY attribute, might interfere with SA's workings.
         """
-        representation['type'] = db_type.id
+        representation[TYPE_KEY] = db_type.id
         return representation
 
 
@@ -150,8 +150,8 @@ class ColumnSerializer(SimpleColumnSerializer):
             else:
                 data[DISPLAY_OPTIONS_KEY] = None
         if not self.partial:
-            from_scratch_required_fields = ['type']
-            from_scratch_specific_fields = ['type', 'nullable', 'primary_key']
+            from_scratch_required_fields = [TYPE_KEY]
+            from_scratch_specific_fields = [TYPE_KEY, 'nullable', 'primary_key']
             from_dupe_required_fields = ['source_column']
             from_dupe_specific_fields = ['source_column', 'copy_source_data',
                                          'copy_source_constraints']

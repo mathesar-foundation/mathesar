@@ -26,7 +26,6 @@ def alter_column(engine, table_oid, column_attnum, column_data):
 
     with engine.begin() as conn:
         if TYPE_KEY in column_data:
-            breakpoint()
             new_type = get_db_type_enum_from_id(column_data[TYPE_KEY])
             retype_column(
                 table_oid, column_attnum, engine, conn,
@@ -34,7 +33,6 @@ def alter_column(engine, table_oid, column_attnum, column_data):
                 type_options=column_data.get(TYPE_OPTIONS_KEY, {})
             )
         elif TYPE_OPTIONS_KEY in column_data:
-            breakpoint()
             retype_column(
                 table_oid, column_attnum, engine, conn,
                 type_options=column_data[TYPE_OPTIONS_KEY]

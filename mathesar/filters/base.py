@@ -7,7 +7,7 @@ from mathesar.database.types import ui_types_that_satisfy_hintset
 
 def get_available_filters(engine):
     available_db_functions = get_supported_db_functions(engine)
-    db_functions_castable_to_filter = (
+    db_functions_castable_to_filter = tuple(
         db_function
         for db_function in available_db_functions
         if _is_db_function_subclass_castable_to_filter(db_function)

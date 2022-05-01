@@ -26,33 +26,40 @@ def test_database_types_installed(client, test_db_name):
         {
             "identifier": UIType.EMAIL.id,
             "name": "Email",
-            "db_types": [
+            "db_types": set([
                 MathesarCustomType.EMAIL.id,
-            ],
+            ]),
             'display_options': None
         },
         {
             "identifier": UIType.MONEY.id,
             "name": "Money",
-            "db_types": [
+            "db_types": set([
                 PostgresType.MONEY.id,
-                MathesarCustomType.MATHESAR_MONEY.id,
                 MathesarCustomType.MULTICURRENCY_MONEY.id,
-            ],
+                MathesarCustomType.MATHESAR_MONEY.id,
+            ]),
             'display_options': None
         },
         {
             "identifier": UIType.URI.id,
             "name": "URI",
-            "db_types": [
+            "db_types": set([
                 MathesarCustomType.URI.id,
-            ],
+            ]),
             'display_options': None
         },
     ]
     reflect_db_objects()
     default_database = Database.objects.get(name=test_db_name)
 
-    response = client.get(f'/api/ui/v0/databases/{default_database.id}/types/').json()
-    for type_data in expected_custom_types:
-        assert type_data in response
+    response = client.get(f'/api/ui/v0/databases/{default_database.id}/types/')
+    assert response.status_code == 200
+    actual_custom_types = response.json()
+
+    for actual_custom_type in actual_custom_types:
+        # Treat JSON lists as sets
+        actual_custom_type['db_types'] = set(actual_custom_type['db_types'])
+
+    for custom_type in expected_custom_types:
+        assert custom_type in actual_custom_types

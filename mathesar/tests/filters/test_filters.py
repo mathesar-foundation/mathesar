@@ -1,8 +1,8 @@
 from mathesar.filters.base import get_available_filters
 
 
-def test_available_filters_structure(empty_nasa_table):
-    engine = empty_nasa_table._sa_engine
+def test_available_filters_structure(engine_with_mathesar):
+    engine, _ = engine_with_mathesar
     available_filters = get_available_filters(engine)
     assert len(available_filters) > 0
     available_filter_ids = tuple(filter['id'] for filter in available_filters)
