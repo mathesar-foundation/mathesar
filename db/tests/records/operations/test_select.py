@@ -46,9 +46,9 @@ def test_get_column_cast_records(engine_with_mathesar):
     COL1_MOD = COL1 + "_mod"
     COL2_MOD = COL2 + "_mod"
     column_definitions = [
-        {"name": "id", "type": PostgresType.INTEGER},
-        {"name": COL1_MOD, "type": PostgresType.CHARACTER_VARYING},
-        {"name": COL2_MOD, "type": PostgresType.NUMERIC},
+        {"name": "id", "type": PostgresType.INTEGER.id},
+        {"name": COL1_MOD, "type": PostgresType.CHARACTER_VARYING.id},
+        {"name": COL2_MOD, "type": PostgresType.NUMERIC.id},
     ]
     records = get_column_cast_records(engine, table, column_definitions)
     for record in records:
@@ -77,9 +77,9 @@ def test_get_column_cast_records_options(engine_with_mathesar):
     COL1_MOD = COL1 + "_mod"
     COL2_MOD = COL2 + "_mod"
     column_definitions = [
-        {"name": "id", "type": PostgresType.INTEGER},
-        {"name": COL1_MOD, "type": PostgresType.CHARACTER_VARYING},
-        {"name": COL2_MOD, "type": PostgresType.NUMERIC, "type_options": {"precision": 5, "scale": 2}},
+        {"name": "id", "type": PostgresType.INTEGER.id},
+        {"name": COL1_MOD, "type": PostgresType.CHARACTER_VARYING.id},
+        {"name": COL2_MOD, "type": PostgresType.NUMERIC.id, "type_options": {"precision": 5, "scale": 2}},
     ]
     records = get_column_cast_records(engine, table, column_definitions)
     for record in records:
