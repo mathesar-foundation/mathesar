@@ -29,6 +29,10 @@ DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER = {
         },
     MathesarTypeIdentifier.DURATION.value:
         {
-            "options": [{"name": "format", "type": "string"}]
+            "options": [
+                {"name": "min", "type": "string"},
+                {"name": "max", "type": "string"},
+                {"name": "show_units", "type": "boolean"},
+            ]
         }
 }
