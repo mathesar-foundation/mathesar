@@ -99,6 +99,13 @@ export class Filtering {
     });
   }
 
+  withoutColumn(columnId: number): Filtering {
+    return new Filtering({
+      combination: this.combination,
+      entries: this.entries.filter((entry) => entry.columnId !== columnId),
+    });
+  }
+
   withCombination(combination: FilterCombination): Filtering {
     return new Filtering({
       combination,

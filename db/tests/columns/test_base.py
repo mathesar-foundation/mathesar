@@ -2,8 +2,9 @@ import re
 
 import pytest
 from sqlalchemy import (
-    Integer, ForeignKey, VARCHAR, CHAR, NUMERIC
+    INTEGER, ForeignKey, VARCHAR, CHAR, NUMERIC, ARRAY, JSON
 )
+from sqlalchemy.sql.sqltypes import NullType
 
 from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT_COLUMNS
@@ -122,7 +123,7 @@ def test_MC_is_default_when_false_for_name():
 def test_MC_is_default_when_false_for_type():
     for default_col in DEFAULT_COLUMNS:
         dc_definition = DEFAULT_COLUMNS[default_col]
-        changed_type = Integer if dc_definition["sa_type"] == VARCHAR else VARCHAR
+        changed_type = INTEGER if dc_definition["sa_type"] == VARCHAR else VARCHAR
         col = MathesarColumn(
             default_col,
             changed_type,
@@ -180,6 +181,24 @@ def test_MC_db_type_numeric_opts(engine):
     mc = MathesarColumn('testable_col', NUMERIC(5, 2))
     mc.add_engine(engine)
     assert mc.db_type == PostgresType.NUMERIC
+
+
+def test_MC_plain_type_unknown_type(engine):
+    mc = MathesarColumn('testable_col', NullType())
+    mc.add_engine(engine)
+    assert mc.plain_type is None
+
+
+def test_MC_plain_type_array_type(engine):
+    mc = MathesarColumn('testable_col', ARRAY(INTEGER))
+    mc.add_engine(engine)
+    assert mc.plain_type is None
+
+
+def test_MC_plain_type_json_type(engine):
+    mc = MathesarColumn('testable_col', JSON())
+    mc.add_engine(engine)
+    assert mc.plain_type == "JSON"
 
 
 def test_MC_type_options_no_opts(engine):

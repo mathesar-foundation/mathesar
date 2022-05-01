@@ -2,15 +2,19 @@ import json
 
 import pytest
 from unittest.mock import patch
-from django.core.cache import cache
 
-from sqlalchemy import select
+from django.core.cache import cache
+from sqlalchemy import select, INTEGER, BOOLEAN, TEXT, TIMESTAMP, Column, Table as SATable, MetaData
+
 from db.columns.operations.alter import alter_column_type
+from db.columns.operations.select import get_column_attnum_from_name
+from db.constants import COLUMN_NAME_TEMPLATE
+from db.types.base import PostgresType, MathesarCustomType
+from db.tables.operations.select import get_oid_from_table
+
 from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.tests.api.test_table_api import check_columns_response
-from db.constants import COLUMN_NAME_TEMPLATE
-from db.types.base import PostgresType, MathesarCustomType
 
 
 def _get_columns_by_name(table, name_list):
@@ -18,6 +22,47 @@ def _get_columns_by_name(table, name_list):
         col.name: col for col in models.Column.objects.filter(table=table) if col.name in name_list
     }
     return [columns_by_name_dict[col_name] for col_name in name_list]
+
+
+@pytest.fixture
+def column_test_table_with_service_layer_options(patent_schema):
+    engine = patent_schema._sa_engine
+    column_list_in = [
+        Column("mycolumn0", INTEGER, primary_key=True),
+        Column("mycolumn1", BOOLEAN),
+        Column("mycolumn2", INTEGER),
+        Column("mycolumn3", TEXT),
+        Column("mycolumn4", TEXT),
+        Column("mycolumn5", TEXT),
+        Column("mycolumn6", TIMESTAMP),
+    ]
+    column_data_list = [{},
+                        {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
+                        {'display_options': {'show_as_percentage': True, 'number_format': "english"}},
+                        {'display_options': None},
+                        {},
+                        {},
+                        {'display_options': {'format': 'YYYY-MM-DD hh:mm'}}]
+    db_table = SATable(
+        "anewtable",
+        MetaData(bind=engine),
+        *column_list_in,
+        schema=patent_schema.name
+    )
+    db_table.create()
+    db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
+    table = models.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+    service_columns = []
+    for column_data in zip(column_list_in, column_data_list):
+        attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine)
+        service_columns.append(
+            models.Column.current_objects.get_or_create(
+                table=table,
+                attnum=attnum,
+                display_options=column_data[1].get('display_options', None)
+            )[0]
+        )
+    return table, service_columns
 
 
 def test_column_list(column_test_table, client):
@@ -184,12 +229,11 @@ def test_column_create_invalid_default(column_test_table, client):
 
 
 create_display_options_test_list = [
-    (PostgresType.BOOLEAN, {"input": "dropdown"}),
-    (PostgresType.BOOLEAN, {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
+    (PostgresType.BOOLEAN, {'input': 'dropdown'}),
+    (PostgresType.BOOLEAN, {'input': 'checkbox', 'custom_labels': {'TRUE': 'yes', 'FALSE': 'no'}}),
     (PostgresType.DATE, {'format': 'YYYY-MM-DD'}),
-    (PostgresType.INTERVAL, {'format': 'DD HH:mm:ss.SSS'}),
-    (PostgresType.NUMERIC, {"show_as_percentage": True}),
-    (PostgresType.NUMERIC, {"show_as_percentage": True, "locale": "en_US"}),
+    (PostgresType.INTERVAL, {'min': 's', 'max': 'h', 'show_units': True}),
+    (PostgresType.NUMERIC, {'show_as_percentage': True, 'number_format': 'english'}),
     (PostgresType.TIMESTAMP_WITH_TIME_ZONE, {'format': 'YYYY-MM-DD hh:mm'}),
     (PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE, {'format': 'YYYY-MM-DD hh:mm'}),
     (PostgresType.TIME_WITHOUT_TIME_ZONE, {'format': 'hh:mm'}),
@@ -199,7 +243,7 @@ create_display_options_test_list = [
 
 @pytest.mark.parametrize("db_type,display_options", create_display_options_test_list)
 def test_column_create_display_options(
-    column_test_table, db_type, display_options, client, engine
+    column_test_table, db_type, display_options, client
 ):
     cache.clear()
     name = "anewcolumn"
@@ -222,6 +266,7 @@ create_display_options_invalid_test_list = [
     (PostgresType.BOOLEAN, {"input": "invalid"}),
     (PostgresType.BOOLEAN, {"input": "checkbox", "custom_labels": {"yes": "yes", "1": "no"}}),
     (PostgresType.NUMERIC, {"show_as_percentage": "wrong value type"}),
+    (PostgresType.NUMERIC, {'number_format': "wrong"}),
     (PostgresType.DATE, {'format': _too_long_string}),
     (PostgresType.TIMESTAMP_WITH_TIME_ZONE, {'format': []}),
     (PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE, {'format': _too_long_string}),
@@ -232,7 +277,7 @@ create_display_options_invalid_test_list = [
 
 @pytest.mark.parametrize("db_type,display_options", create_display_options_invalid_test_list)
 def test_column_create_wrong_display_options(
-    column_test_table, db_type, display_options, client, engine
+    column_test_table, db_type, display_options, client
 ):
     cache.clear()
     name = "anewcolumn"
@@ -424,8 +469,40 @@ def test_column_update_type_with_existing_display_options(column_test_table_with
     assert response.json()["display_options"] is None
 
 
-def test_column_display_options_type_on_reflection(column_test_table,
-                                                   client, engine):
+def test_column_update_type_invalid_display_options(column_test_table_with_service_layer_options, client):
+    cache.clear()
+    table, _ = column_test_table_with_service_layer_options
+    colum_name = "mycolumn3"
+    column = _get_columns_by_name(table, [colum_name])[0]
+    column_id = column.id
+    display_options_data = {'type': 'BOOLEAN', 'display_options': {}}
+    response = client.patch(
+        f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
+        display_options_data,
+    )
+    assert response.status_code == 400
+
+
+def test_column_update_type_get_all_columns(column_test_table_with_service_layer_options, client):
+    cache.clear()
+    table, _ = column_test_table_with_service_layer_options
+    colum_name = "mycolumn2"
+    column = _get_columns_by_name(table, [colum_name])[0]
+    column_id = column.id
+    display_options_data = {'type': 'BOOLEAN'}
+    client.patch(
+        f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
+        display_options_data,
+    )
+    new_columns_response = client.get(
+        f"/api/db/v0/tables/{table.id}/columns/"
+    )
+    assert new_columns_response.status_code == 200
+
+
+def test_column_display_options_type_on_reflection(
+    column_test_table, client
+):
     cache.clear()
     table = column_test_table
     response = client.get(
@@ -436,8 +513,9 @@ def test_column_display_options_type_on_reflection(column_test_table,
         assert column["display_options"] is None
 
 
-def test_column_invalid_display_options_type_on_reflection(column_test_table_with_service_layer_options,
-                                                           client, engine):
+def test_column_invalid_display_options_type_on_reflection(
+    column_test_table_with_service_layer_options, client, engine
+):
     cache.clear()
     table, columns = column_test_table_with_service_layer_options
     column_index = 2
@@ -451,8 +529,10 @@ def test_column_invalid_display_options_type_on_reflection(column_test_table_wit
     assert response.json()["display_options"] is None
 
 
-def test_column_alter_same_type_display_options(column_test_table_with_service_layer_options,
-                                                client, engine):
+def test_column_alter_same_type_display_options(
+    column_test_table_with_service_layer_options,
+    client, engine
+):
     cache.clear()
     table, columns = column_test_table_with_service_layer_options
     column_index = 2

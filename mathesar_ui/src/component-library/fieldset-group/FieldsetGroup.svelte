@@ -1,10 +1,20 @@
 <script lang="ts">
-  import type { Option } from '@mathesar-component-library-dir/types';
   import LabeledInput from '@mathesar-component-library-dir/labeled-input/LabeledInput.svelte';
+  import type { LabelGetter } from '@mathesar-component-library-dir/common/utils/formatUtils';
+  import { getLabel as defaultGetLabel } from '@mathesar-component-library-dir/common/utils/formatUtils';
+  import StringOrComponent from '@mathesar-component-library-dir/string-or-component/StringOrComponent.svelte';
+
+  type Option = $$Generic;
 
   export let isInline = false;
   export let options: Option[] = [];
   export let label: string | undefined = undefined;
+
+  export let labelKey = 'label';
+  export let getLabel: LabelGetter<Option> = (o: Option) =>
+    defaultGetLabel(o, labelKey);
+
+  export let getDisabled: (value: Option | undefined) => boolean = () => false;
 </script>
 
 <fieldset class="fieldset-group" class:inline={isInline} on:change>
@@ -15,20 +25,13 @@
     </legend>
   {/if}
   <ul class="options">
-    {#each options as option (option.value)}
+    {#each options as option (option)}
       <li class="option">
         <LabeledInput layout="inline-input-first">
           <svelte:fragment slot="label">
-            {#if option.label}
-              {option.label}
-            {:else}
-              <svelte:component
-                this={option.labelComponent}
-                {...option.labelComponentProps}
-              />
-            {/if}
+            <StringOrComponent arg={getLabel(option)} />
           </svelte:fragment>
-          <slot {option} />
+          <slot {option} disabled={getDisabled(option)} />
         </LabeledInput>
       </li>
     {/each}

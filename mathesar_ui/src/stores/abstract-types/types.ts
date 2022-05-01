@@ -4,6 +4,7 @@ import type {
   FormInputDataType,
   FormValues,
 } from '@mathesar-component-library/types';
+import type { CellDataType } from '@mathesar/components/cell/data-types/typeDefinitions';
 import type { DbType } from '@mathesar/AppTypes';
 import type { Column } from '@mathesar/stores/table-data/types';
 import type { States } from '@mathesar/utils/api';
@@ -50,8 +51,8 @@ export interface AbstractTypeConfiguration {
   defaultDbType?: DbType;
   icon: string;
   allowSettingDefaultValue?: boolean;
-  input: {
-    type: string;
+  cell: {
+    type: CellDataType;
     config?: Record<string, unknown>;
     conditionalConfig?: Record<DbType, Record<string, unknown>>;
   };

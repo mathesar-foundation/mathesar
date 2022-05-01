@@ -1,6 +1,6 @@
 import type { SvelteComponent } from 'svelte';
 
-export interface ComponentAndProps {
+export interface ComponentAndProps<T = Record<string, unknown>> {
   component: typeof SvelteComponent;
-  props?: Record<string, unknown>;
+  props?: T;
 }

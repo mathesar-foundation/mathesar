@@ -117,7 +117,11 @@ class MathesarColumn(Column):
         Returns a set of valid types to which the type of the column can be
         altered.
         """
-        if self.engine is not None and not self.is_default:
+        if (
+            self.engine is not None
+            and not self.is_default
+            and self.db_type is not None
+        ):
             db_type = self.db_type
             valid_target_types = sorted(
                 list(

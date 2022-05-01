@@ -13,5 +13,5 @@
   options={Object.values(SortDirection)}
   getLabel={getDirectionLabel}
   bind:value
-  on:change={(e) => onChange(e.detail)}
+  on:change={(e) => onChange(e.detail ?? SortDirection.A)}
 />

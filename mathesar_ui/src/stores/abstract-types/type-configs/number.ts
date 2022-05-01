@@ -1,3 +1,4 @@
+import type { NumberDisplayOptions } from '@mathesar/api/tables/columns';
 import type { FormValues } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/AppTypes';
 import type { Column } from '@mathesar/stores/table-data/types';
@@ -196,11 +197,6 @@ function constructDbFormValuesFromTypeOptions(
   }
 }
 
-interface NumberDisplayOptions {
-  show_as_percentage?: boolean | null;
-  locale?: string | null;
-}
-
 const displayForm: AbstractTypeConfigForm = {
   variables: {
     showAsPercentage: {
@@ -209,7 +205,7 @@ const displayForm: AbstractTypeConfigForm = {
     },
     format: {
       type: 'string',
-      enum: ['none', 'af', 'ar-DZ', 'bg', 'bn', 'de-CH'],
+      enum: ['none', 'english', 'german', 'french', 'hindi', 'swiss'],
       default: 'none',
     },
   },
@@ -227,11 +223,11 @@ const displayForm: AbstractTypeConfigForm = {
         label: 'Format',
         options: {
           none: { label: 'Use browser locale' },
-          af: { label: '1,234,567.89' },
-          'ar-DZ': { label: '1.234.567,89' },
-          bg: { label: '1 234 567,89' },
-          bn: { label: '12,34,567.89' },
-          'de-CH': { label: "1'234'567.89" },
+          english: { label: '1,234,567.89' },
+          german: { label: '1.234.567,89' },
+          french: { label: '1 234 567,89' },
+          hindi: { label: '12,34,567.89' },
+          swiss: { label: "1'234'567.89" },
         },
       },
     ],
@@ -245,7 +241,7 @@ function determineDisplayOptions(
     show_as_percentage: dispFormValues.showAsPercentage,
   };
   if (dispFormValues.format !== 'none') {
-    displayOptions.locale = dispFormValues.format;
+    displayOptions.number_format = dispFormValues.format;
   }
   return displayOptions;
 }
@@ -256,15 +252,15 @@ function constructDisplayFormValuesFromDisplayOptions(
   const displayOptions = columnDisplayOpts as NumberDisplayOptions | null;
   const dispFormValues: FormValues = {
     showAsPercentage: displayOptions?.show_as_percentage ?? false,
-    format: displayOptions?.locale ?? 'none',
+    format: displayOptions?.number_format ?? 'none',
   };
   return dispFormValues;
 }
 
 const numberType: AbstractTypeConfiguration = {
   icon: '#',
-  input: {
-    type: 'integer',
+  cell: {
+    type: 'number',
   },
   defaultDbType: DB_TYPES.NUMERIC,
   getDbConfig: () => ({

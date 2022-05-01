@@ -29,6 +29,10 @@ DISPLAY_OPTIONS_BY_UI_TYPE = {
         },
     UIType.DURATION:
         {
-            "options": [{"name": "format", "type": "string"}]
+            "options": [
+                {"name": "min", "type": "string"},
+                {"name": "max", "type": "string"},
+                {"name": "show_units", "type": "boolean"},
+            ]
         }
 }

@@ -1,14 +1,12 @@
 import pytest
 from rest_framework.test import APIClient
-from sqlalchemy import text, Table as SATable
-from sqlalchemy import Column, MetaData, Integer, VARCHAR, CHAR, TEXT, BOOLEAN
+from sqlalchemy import text
 from django.core.cache import cache
 
 from db.schemas.operations.create import create_schema as create_sa_schema
 from db.schemas.utils import get_schema_name_from_oid, get_schema_oid_from_name
-from db.tables.operations.select import get_oid_from_table
-from mathesar.models import Database, Schema, Table
-from mathesar.database.base import create_mathesar_engine
+from db.types.base import PostgresType
+from mathesar.models import Database, Schema
 from mathesar.tests.integration.utils.locators import get_table_entry
 from mathesar.utils.tables import create_empty_table
 
@@ -32,6 +30,7 @@ def test_db_model(test_db_name):
 @pytest.fixture
 def page(page):
     page.set_default_navigation_timeout(30000)
+    page.set_default_timeout(30000)
     yield page
 
 
@@ -73,35 +72,43 @@ def schema(create_schema, schema_name):
 
 # Todo: Add all types here
 @pytest.fixture
-def table_with_all_types(schema):
-    engine = create_mathesar_engine(schema.database.name)
+def table_wiph_all_types(schema, create_column_with_display_options):
     ALL_DATA_TYPES_TABLE = 'All datatypes table'
-    db_table = SATable(
-        ALL_DATA_TYPES_TABLE, MetaData(bind=engine),
-        Column('id', Integer, primary_key=True, autoincrement=True),
-        Column('char', CHAR(100)),
-        Column('varchar', VARCHAR()),
-        Column('varchar_n', VARCHAR(100)),
-        Column('text', TEXT()),
-        Column('boolean', BOOLEAN()),
-        schema=schema.name,
-    )
-    db_table.create()
-    with engine.begin() as conn:
-        conn.execute(db_table.insert().values(
-            id=1,
-            char='cell with char value',
-            varchar='cell with varchar value',
-            varchar_n='cell with varchar n value',
-            text='cell with text value',
-            boolean=None,
-        ))
-
-    db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
-    table = Table.current_objects.create(oid=db_table_oid, schema=schema)
-
+    table = create_empty_table(ALL_DATA_TYPES_TABLE, schema)
+    create_column_with_display_options(table, {"name": "char", "type": PostgresType.CHARACTER.id, "type_options": {"length": 100}})
+    create_column_with_display_options(table, {"name": "varchar", "type": PostgresType.CHARACTER_VARYING.id})
+    create_column_with_display_options(table, {"name": "varchar_n", "type": PostgresType.CHARACTER_VARYING.id, "type_options": {"length": 100}})
+    create_column_with_display_options(table, {"name": "text", "type": PostgresType.TEXT.id})
+    create_column_with_display_options(table, {"name": "boolean_cb", "type": PostgresType.BOOLEAN.id})
+    create_column_with_display_options(table, {"name": "boolean_dd", "type": PostgresType.BOOLEAN.id, "display_options": {"input": "dropdown"}})
+    table.create_record_or_records([
+        {
+            "char": "cell with char value",
+            "varchar": "cell with varchar value",
+            "varchar_n": "cell with varchar n value",
+            "text": "cell with text value",
+            "boolean_cb": None,
+            "boolean_dd": None
+        },
+        {
+            "char": "Row: 2, Column: char",
+            "varchar": "Row: 2: Column: varchar",
+            "varchar_n": "Row 2: Column: varchar_n",
+            "text": "Row 2: Column: text",
+            "boolean_cb": True,
+            "boolean_dd": True
+        },
+        {
+            "char": "Row: 3, Column: char",
+            "varchar": "Row: 3: Column: varchar",
+            "varchar_n": "Row 3: Column: varchar_n",
+            "text": "Row 3: Column: text",
+            "boolean_cb": False,
+            "boolean_dd": False
+        }
+    ])
+    table.save()
     yield table
-
     table.delete_sa_table()
     table.delete()
 
