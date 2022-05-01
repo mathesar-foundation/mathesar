@@ -29,7 +29,7 @@ class DatabaseType:
             ischema_names = engine.dialect.ischema_names
             return ischema_names.get(self.id)
 
-    def is_available(self, engine, type_ids_on_database:Collection[str]=None) -> bool:
+    def is_available(self, engine, type_ids_on_database: Collection[str] = None) -> bool:
         """
         Returns true if this type is available on provided engine's database. For the sake of
         optimizing IO, the result of _get_type_ids_on_database(engine) may be passed as the

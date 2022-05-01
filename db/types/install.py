@@ -18,8 +18,10 @@ def install_mathesar_on_database(engine):
     uri.install_tld_lookup_table(engine)
     install_all_casts(engine)
 
+
 def uninstall_mathesar_from_database(engine):
     _cascade_type_schema(engine)
+
 
 def _cascade_type_schema(engine):
     drop_schema(SCHEMA, engine, cascade=True)

@@ -9,7 +9,7 @@ from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT_COLUMNS
 from db.columns.utils import get_default_mathesar_column_list
 from db.types.custom import email, datetime
-from db.types.base import MathesarCustomType
+from db.types.base import MathesarCustomType, PostgresType
 
 
 def init_column(*args, **kwargs):
@@ -150,7 +150,6 @@ def test_MC_valid_target_types_no_engine():
     assert mc.valid_target_types is None
 
 
-from db.types.base import PostgresType
 def test_MC_valid_target_types_default_engine(engine):
     mc = MathesarColumn('testable_col', PostgresType.CHARACTER_VARYING.get_sa_class(engine))
     mc.add_engine(engine)

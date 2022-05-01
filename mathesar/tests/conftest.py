@@ -5,10 +5,9 @@ import pytest
 
 from django.core.files import File
 
-from sqlalchemy import Column, MetaData, text, Integer
+from sqlalchemy import Column, MetaData, Integer
 from sqlalchemy import Table as SATable
 
-from db.types import base
 from db.schemas.operations.drop import drop_schema as drop_sa_schema
 from db.schemas.operations.create import create_schema as create_sa_schema
 from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
@@ -167,12 +166,14 @@ def create_schema(engine_with_mathesar, test_db_model):
 def create_patents_table(patents_csv_filepath, patent_schema, create_table):
     schema_name = patent_schema.name
     csv_filepath = patents_csv_filepath
+
     def _create_table(table_name, schema_name=schema_name):
         return create_table(
             table_name=table_name,
             schema_name=schema_name,
             csv_filepath=csv_filepath,
         )
+
     return _create_table
 
 
@@ -180,7 +181,6 @@ def create_patents_table(patents_csv_filepath, patent_schema, create_table):
 def create_table(create_schema):
     def _create_table(table_name, schema_name, csv_filepath):
         data_file = _get_datafile_for_path(csv_filepath)
-
         schema_model = create_schema(schema_name)
         return create_table_from_csv(data_file, table_name, schema_model)
     return _create_table

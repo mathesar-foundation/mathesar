@@ -90,15 +90,15 @@ class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
 
 
 def _force_canonical_type(representation, db_type: DatabaseType):
-        """
-        Sometimes the representation's TYPE_KEY attribute will also include type option information
-        (e.g. `numeric(3, 5)`). We override the attribute's value to a canonical type id.
+    """
+    Sometimes the representation's TYPE_KEY attribute will also include type option information
+    (e.g. `numeric(3, 5)`). We override the attribute's value to a canonical type id.
 
-        This might be better solved upstream, but since our Column model subclasses SA's Column,
-        overriding its TYPE_KEY attribute, might interfere with SA's workings.
-        """
-        representation[TYPE_KEY] = db_type.id
-        return representation
+    This might be better solved upstream, but since our Column model subclasses SA's Column,
+    overriding its TYPE_KEY attribute, might interfere with SA's workings.
+    """
+    representation[TYPE_KEY] = db_type.id
+    return representation
 
 
 class ColumnDefaultSerializer(MathesarErrorMessageMixin, serializers.Serializer):
@@ -192,7 +192,6 @@ class ColumnSerializer(SimpleColumnSerializer):
     @property
     def validated_model_fields(self):
         return {key: self.validated_data[key] for key in self.validated_data if key in self.Meta.model_fields}
-
 
     def get_valid_target_types(self, column):
         valid_target_types = column.valid_target_types

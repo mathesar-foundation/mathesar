@@ -30,6 +30,7 @@ def create_data_file():
 @pytest.fixture
 def create_data_types_table(data_types_csv_filepath, create_table):
     csv_filepath = data_types_csv_filepath
+
     def _create_table(table_name, schema_name='Data Types'):
         return create_table(
             table_name=table_name,
@@ -56,6 +57,7 @@ def table_for_reflection(engine_with_ischema_names_updated):
     yield schema_name, table_name, engine
     with engine.begin() as conn:
         conn.execute(text(f'DROP SCHEMA {schema_name} CASCADE;'))
+
 
 @pytest.fixture
 def column_test_table(patent_schema):

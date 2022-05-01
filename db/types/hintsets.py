@@ -53,4 +53,5 @@ def _build_db_types_hinted() -> Mapping[Union[PostgresType, MathesarCustomType],
 
     return frozendict(db_types_hinted)
 
+
 db_types_hinted = _build_db_types_hinted()

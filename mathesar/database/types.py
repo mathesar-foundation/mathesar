@@ -7,7 +7,7 @@ from collections.abc import Set, Collection, Mapping
 from typing import Optional
 from db.types.base import (
     DatabaseType, PostgresType, MathesarCustomType
-    )
+)
 from db.types.hintsets import db_types_hinted
 
 
@@ -15,7 +15,6 @@ class UIType(Enum):
     id: str
     display_name: str
     db_types: Collection[DatabaseType]
-
 
     BOOLEAN = (
         'boolean',

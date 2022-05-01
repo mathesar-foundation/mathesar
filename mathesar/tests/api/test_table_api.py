@@ -387,7 +387,7 @@ def _check_columns(actual_column_list, expected_column_list):
     # Columns will return an extra type_options key in actual_dict
     # so we need to check equality only for the keys in expect_dict
     actual_column_list = [
-        { k: v for k, v in actual_column.items() if k in expected_column }
+        {k: v for k, v in actual_column.items() if k in expected_column}
         for actual_column, expected_column
         in zip(actual_column_list, expected_column_list)
     ]

@@ -7,7 +7,6 @@ from django.utils.functional import cached_property
 from django.core.exceptions import ValidationError
 
 from db.columns import utils as column_utils
-from db.columns.base import MathesarColumn
 from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column

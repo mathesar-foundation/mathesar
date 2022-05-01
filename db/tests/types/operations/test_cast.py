@@ -237,17 +237,17 @@ MASTER_DB_TYPE_MAP_SPEC = {
     PostgresType.MONEY: {
         TARGET_DICT: {
             PostgresType.BIGINT: {VALID: [
-                    # TODO Following case is failing for some reason.
-                    # ("$12341234.00", 12341234)
-                ]},
+                # TODO Following case is failing for some reason.
+                # ("$12341234.00", 12341234)
+            ]},
             PostgresType.CHARACTER: {VALID: []},
             PostgresType.DOUBLE_PRECISION: {VALID: [
                 # TODO Following case is failing for some reason.
-                #("$12.12", 12.12)
+                # ("$12.12", 12.12)
             ]},
             PostgresType.INTEGER: {VALID: [
                 # TODO Following case is failing for some reason.
-                #("$123412.00", 123412)
+                # ("$123412.00", 123412)
             ]},
             MathesarCustomType.MATHESAR_MONEY: {VALID: [("$20.00", Decimal(20.0))]},
             MathesarCustomType.MULTICURRENCY_MONEY: {
@@ -264,17 +264,17 @@ MASTER_DB_TYPE_MAP_SPEC = {
             PostgresType.MONEY: {VALID: [("$12.12", "$12.12")]},
             PostgresType.REAL: {VALID: [
                 # TODO Following case is failing for some reason.
-                #("$12.12", 12.12)
+                # ("$12.12", 12.12)
             ]},
             PostgresType.SMALLINT: {VALID: [
                 # TODO Following case is failing for some reason.
-                #("$1234.00", 1234)
+                # ("$1234.00", 1234)
             ]},
             PostgresType.TEXT: {VALID: [("$12.12", "$12.12")]},
             PostgresType.CHARACTER_VARYING: {VALID: [("$12.12", "$12.12")]},
             PostgresType.NUMERIC: {VALID: [
                 # TODO Following case is failing for some reason.
-                #("$12.34", 12.34)
+                # ("$12.34", 12.34)
             ]},
         }
     },
@@ -987,7 +987,6 @@ def test_alter_column_casts_data_gen(
     )
     input_table.create()
     ins = input_table.insert().values(testcol=in_val)
-    target_sa_type = target_type.get_sa_class(engine)
     with engine.begin() as conn:
         conn.execute(ins)
         alter_column_type(
@@ -1047,7 +1046,6 @@ def test_alter_column_type_raises_on_bad_column_data(
     )
     input_table.create()
     ins = input_table.insert(values=(value,))
-    target_sa_type = target_type.get_sa_class(engine)
     with engine.begin() as conn:
         conn.execute(ins)
         with pytest.raises(Exception):
