@@ -28,6 +28,8 @@
     bind:columnId={entry.columnId}
     bind:conditionId={entry.conditionId}
     bind:value={entry.value}
+    {index}
+    noOfFilters={entries.length}
     on:removeFilter={() => dispatch('remove', index)}
     on:update
   >

@@ -12,7 +12,9 @@ export function validateFilterEntry(
   return typeof value !== 'undefined' && String(value) !== '';
 }
 
-export function deepCloneFiltering(filtering: Filtering): Filtering {
+export function deepCloneFiltering(
+  filtering: Pick<Filtering, 'combination' | 'entries'>,
+): Filtering {
   return new Filtering({
     combination: filtering.combination,
     // OPTIMIZE: Find a faster way to deep clone filtering entries

@@ -1,7 +1,8 @@
 <script lang="ts">
   import { writable } from 'svelte/store';
   import type { Writable } from 'svelte/store';
-  import { Button } from '@mathesar-component-library';
+  import { faExclamationCircle } from '@fortawesome/free-solid-svg-icons';
+  import { Button, Icon } from '@mathesar-component-library';
   import type { Filtering } from '@mathesar/stores/table-data';
   import type { FilterCombination } from '@mathesar/api/tables/records';
   import FilterEntries from './FilterEntries.svelte';
@@ -17,10 +18,12 @@
   // everytime the dropdown reopens.
   const internalFiltering = writable(deepCloneFiltering($filtering));
 
-  $: isFiltered = $internalFiltering.entries.length;
+  $: filterCount = $internalFiltering.entries.length;
+
+  let isValid = true;
 
   function checkAndSetExternalFiltering() {
-    const isValid = $internalFiltering.entries.every((filter) => {
+    isValid = $internalFiltering.entries.every((filter) => {
       const column = processedTableColumnsMap.get(filter.columnId);
       const condition = column?.allowedFiltersMap.get(filter.conditionId);
       if (condition) {
@@ -67,10 +70,10 @@
   }
 </script>
 
-<div class="filters" class:filtered={isFiltered}>
+<div class="filters" class:filtered={filterCount}>
   <div class="header">
     <span>
-      {#if isFiltered}
+      {#if filterCount}
         Filter records
       {:else}
         No filters have been added
@@ -87,8 +90,14 @@
     />
 
     {#if processedTableColumnsMap.size}
-      <div class="add-option">
+      <div class="footer">
         <Button on:click={addFilter}>Add new filter</Button>
+        {#if !isValid && filterCount > 1}
+          <span class="state-info">
+            <Icon data={faExclamationCircle} />
+            Changes not applied
+          </span>
+        {/if}
       </div>
     {/if}
   </div>
@@ -106,8 +115,19 @@
     .content {
       margin-top: 12px;
 
-      .add-option {
+      .footer {
+        display: flex;
+        align-items: center;
         margin-top: 18px;
+        max-width: 560px;
+
+        .state-info {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          color: #576546;
+          margin-left: auto;
+        }
       }
     }
   }

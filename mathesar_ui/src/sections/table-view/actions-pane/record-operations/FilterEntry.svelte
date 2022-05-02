@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onDestroy, tick } from 'svelte';
+  import { createEventDispatcher, onDestroy } from 'svelte';
   import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
   import {
     InputGroup,
@@ -25,7 +25,8 @@
   export let columnId: FilterEntry['columnId'] | undefined;
   export let conditionId: FilterEntry['conditionId'] | undefined;
   export let value: FilterEntry['value'] | undefined;
-  export let allowRemoval = true;
+  export let noOfFilters: number;
+  export let index: number;
 
   $: columnIds = [...processedTableColumnsMap].map(([_columnId]) => _columnId);
   $: processedSelectedColumn = columnId
@@ -42,9 +43,14 @@
     : undefined;
   $: selectedColumnInputCap = processedSelectedColumn?.dbTypeInputCap;
 
+  const initialNoOfFilters = noOfFilters;
+  let showError = index > 0;
   $: isValid = selectedCondition
     ? validateFilterEntry(selectedCondition, value)
     : false;
+  $: if (noOfFilters !== initialNoOfFilters) {
+    showError = true;
+  }
 
   let prevValue: unknown = value;
   let timer: number;
@@ -165,19 +171,24 @@
       <DataTypeBasedInput
         bind:value
         {...inputCap}
+        on:input={() => {
+          showError = true;
+        }}
+        on:blur={() => {
+          showError = true;
+        }}
         on:change={onValueChangeFromUser}
         class="filter-input"
+        hasError={showError && !isValid}
       />
     {/if}
-    {#if allowRemoval}
-      <Button
-        size="small"
-        class="filter-remove"
-        on:click={() => dispatch('removeFilter')}
-      >
-        <Icon data={faTrashAlt} />
-      </Button>
-    {/if}
+    <Button
+      size="small"
+      class="filter-remove"
+      on:click={() => dispatch('removeFilter')}
+    >
+      <Icon data={faTrashAlt} />
+    </Button>
   </InputGroup>
 </div>
 
