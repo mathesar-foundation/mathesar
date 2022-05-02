@@ -175,7 +175,7 @@ def test_MC_type_no_opts(engine):
     "sa_type,db_type",
     [
         (email.Email, MathesarCustomType.EMAIL),
-        (NUMERIC(5,2), PostgresType.NUMERIC),
+        (NUMERIC(5, 2), PostgresType.NUMERIC),
         (NullType(), None),
         (ARRAY(INTEGER), None),
         (JSON(), None),
