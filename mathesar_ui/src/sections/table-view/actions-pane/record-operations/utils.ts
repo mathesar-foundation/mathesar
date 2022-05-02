@@ -9,7 +9,7 @@ export function validateFilterEntry(
   if (filterCondition.parameters.length === 0) {
     return typeof value === 'undefined';
   }
-  return typeof value !== 'undefined' && String(value) !== '';
+  return typeof value !== 'undefined' && value !== null && String(value) !== '';
 }
 
 export function deepCloneFiltering(

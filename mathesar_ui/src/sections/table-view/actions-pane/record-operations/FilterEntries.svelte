@@ -18,8 +18,7 @@
 
   export let entries: FilterEntry[];
   export let processedTableColumnsMap: ProcessedTableColumnMap;
-
-  let filterCombination: FilterCombination = defaultFilterCombination;
+  export let filterCombination: FilterCombination = defaultFilterCombination;
 </script>
 
 {#each entries as entry, index (entry)}

@@ -77,7 +77,8 @@
   </div>
   <div class="content">
     <FilterEntries
-      entries={$internalFiltering.entries}
+      bind:entries={$internalFiltering.entries}
+      bind:filterCombination={$internalFiltering.combination}
       {processedTableColumnsMap}
       on:remove={(e) => removeFilter(e.detail)}
       on:update={updateFilter}
