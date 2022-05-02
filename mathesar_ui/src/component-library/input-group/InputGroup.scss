@@ -24,7 +24,8 @@
     min-width: 0;
   }
 
-  .input-element, button {
+  .input-element,
+  button {
     &:focus {
       z-index: 10;
     }
