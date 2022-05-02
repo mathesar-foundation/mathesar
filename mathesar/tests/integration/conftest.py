@@ -72,7 +72,7 @@ def schema(create_schema, schema_name):
 
 # Todo: Add all types here
 @pytest.fixture
-def table_wiph_all_types(schema, create_column_with_display_options):
+def table_with_all_types(schema, create_column_with_display_options):
     ALL_DATA_TYPES_TABLE = 'All datatypes table'
     table = create_empty_table(ALL_DATA_TYPES_TABLE, schema)
     create_column_with_display_options(table, {"name": "char", "type": PostgresType.CHARACTER.id, "type_options": {"length": 100}})
