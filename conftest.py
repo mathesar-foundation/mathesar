@@ -11,6 +11,7 @@ from db.types import install
 from db.schemas.operations.create import create_schema
 from db.schemas.operations.drop import drop_schema
 
+
 @pytest.fixture(scope="session")
 def test_db_name():
     test_db_name = "mathesar_db_test"
