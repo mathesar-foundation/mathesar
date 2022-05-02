@@ -783,7 +783,7 @@ type_test_list = [
     "source_type,target_type,options,expect_type_compiled_str", type_test_list
 )
 def test_alter_column_type_alters_column_type(
-        engine_with_mathesar, source_type, target_type, options, expect_type_compiled_str
+        engine_with_mathesar, source_type, target_type, options
 ):
     """
     The massive number of cases make sure all type casting functions at
