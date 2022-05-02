@@ -1,8 +1,9 @@
 from enum import Enum
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 
 from db import constants
+from sqlalchemy import create_engine as sa_create_engine
 
 from typing import Optional, Sequence, Collection
 
@@ -136,11 +137,12 @@ class PostgresType(DatabaseType, Enum):
     UUID = 'uuid'
 
 
-SCHEMA = f"{constants.MATHESAR_PREFIX}types"
 # Since we want to have our identifiers quoted appropriately for use in
 # PostgreSQL, we want to use the postgres dialect preparer to set this up.
-preparer = create_engine("postgresql://").dialect.identifier_preparer
+preparer = sa_create_engine("postgresql://").dialect.identifier_preparer
 
+
+SCHEMA = f"{constants.MATHESAR_PREFIX}types"
 
 # Should usually equal `mathesar_types`
 _ma_type_qualifier_prefix = preparer.quote_schema(SCHEMA)
@@ -274,7 +276,11 @@ def get_db_type_enum_from_class(sa_type, engine) -> DatabaseType:
         db_type = get_db_type_enum_from_id(db_type_id)
         if db_type:
             return db_type
-    raise Exception("We don't know how to map this type class to a DatabaseType Enum.")
+    raise UnknownDbTypeId
+
+
+class UnknownDbTypeId(Exception):
+    pass
 
 
 def _sa_type_class_to_db_type_id(sa_type_class, engine) -> Optional[str]:

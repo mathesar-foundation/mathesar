@@ -4,10 +4,9 @@ from sqlalchemy import text
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 
-from db.types import base
 from db.types.custom import uri
 from db.types.exceptions import UnsupportedTypeException
-from db.types.base import DatabaseType, PostgresType, MathesarCustomType, get_available_known_db_types, get_db_type_enum_from_class
+from db.types.base import DatabaseType, PostgresType, MathesarCustomType, get_available_known_db_types, get_db_type_enum_from_class, get_qualified_name
 from db.types import categories
 
 from collections.abc import Collection, Mapping
@@ -237,7 +236,7 @@ def get_cast_function_name(target_type: DatabaseType) -> str:
     function_type_name = '_'.join(bare_type_name.split())
     bare_function_name = f"cast_to_{function_type_name}"
     escaped_bare_function_name = _escape_illegal_characters(bare_function_name)
-    qualified_escaped_bare_function_name = f"{base.get_qualified_name(escaped_bare_function_name)}"
+    qualified_escaped_bare_function_name = f"{get_qualified_name(escaped_bare_function_name)}"
     return qualified_escaped_bare_function_name
 
 
@@ -539,7 +538,7 @@ def _get_mathesar_money_type_body_map() -> TypeBodyMap:
     We allow casting any textual type to money with the text prefixed or
     suffixed with a currency.
     """
-    money_array_function = base.get_qualified_name(MONEY_ARR_FUNC_NAME)
+    money_array_function = get_qualified_name(MONEY_ARR_FUNC_NAME)
     default_behavior_source_types = frozenset([MathesarCustomType.MATHESAR_MONEY])
     number_types = categories.NUMERIC_TYPES
     textual_types = categories.STRING_TYPES | frozenset([PostgresType.MONEY])
@@ -606,7 +605,7 @@ def _build_mathesar_money_array_function():
     The main reason for this function to be separate is for testing. This
     does have some performance impact; we should consider inlining later.
     """
-    qualified_function_name = base.get_qualified_name(MONEY_ARR_FUNC_NAME)
+    qualified_function_name = get_qualified_name(MONEY_ARR_FUNC_NAME)
 
     # An attempt to separate pieces into logical bits for easier
     # understanding and modification

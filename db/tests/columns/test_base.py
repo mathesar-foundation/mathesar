@@ -10,7 +10,7 @@ from db.columns.base import MathesarColumn
 from db.columns.defaults import DEFAULT_COLUMNS
 from db.columns.utils import get_default_mathesar_column_list
 from db.types.custom import email, datetime
-from db.types.base import MathesarCustomType, PostgresType
+from db.types.base import MathesarCustomType, PostgresType, UnknownDbTypeId
 
 
 def init_column(*args, **kwargs):
@@ -171,34 +171,26 @@ def test_MC_type_no_opts(engine):
     assert mc.db_type == PostgresType.CHARACTER_VARYING
 
 
-def test_MC_db_type_no_opts_custom_type(engine_with_ischema_names_updated):
-    mc = MathesarColumn('testable_col', email.Email)
+@pytest.mark.parametrize(
+    "sa_type,db_type",
+    [
+        (email.Email, MathesarCustomType.EMAIL),
+        (NUMERIC(5,2), PostgresType.NUMERIC),
+        (NullType(), None),
+        (ARRAY(INTEGER), None),
+        (JSON(), None),
+    ]
+)
+def test_MC_db_type_no_opts_custom_type(
+    engine_with_ischema_names_updated, sa_type, db_type
+):
+    mc = MathesarColumn('testable_col', sa_type)
     mc.add_engine(engine_with_ischema_names_updated)
-    assert mc.db_type == MathesarCustomType.EMAIL
-
-
-def test_MC_db_type_numeric_opts(engine):
-    mc = MathesarColumn('testable_col', NUMERIC(5, 2))
-    mc.add_engine(engine)
-    assert mc.db_type == PostgresType.NUMERIC
-
-
-def test_MC_plain_type_unknown_type(engine):
-    mc = MathesarColumn('testable_col', NullType())
-    mc.add_engine(engine)
-    assert mc.plain_type is None
-
-
-def test_MC_plain_type_array_type(engine):
-    mc = MathesarColumn('testable_col', ARRAY(INTEGER))
-    mc.add_engine(engine)
-    assert mc.plain_type is None
-
-
-def test_MC_plain_type_json_type(engine):
-    mc = MathesarColumn('testable_col', JSON())
-    mc.add_engine(engine)
-    assert mc.plain_type == "JSON"
+    if db_type is not None:
+        assert mc.db_type == db_type
+    else:
+        with pytest.raises(UnknownDbTypeId):
+            mc.db_type
 
 
 def test_MC_type_options_no_opts(engine):

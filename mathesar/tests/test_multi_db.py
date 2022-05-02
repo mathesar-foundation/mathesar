@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 from sqlalchemy.schema import DropSchema
 from config.settings import DATABASES
 from django.core.cache import cache
@@ -11,6 +11,8 @@ from mathesar.models import Table, Schema, Database
 from mathesar.reflection import reflect_db_objects
 from db.schemas.operations.create import create_schema
 from db.tables.operations.create import create_mathesar_table
+
+from db.engine import create_engine
 
 MULTI_DB_TEST_DB = "mathesar_multi_db_test"
 
