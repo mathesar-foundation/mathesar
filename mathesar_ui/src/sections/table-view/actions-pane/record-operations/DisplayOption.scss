@@ -1,47 +1,49 @@
-// .display-option {
-//   margin-top: 10px;
-//   padding: 10px;
+/* TEMPORARY styles. TODO: Remove after Sorting and Grouping UX is updated */
 
-//   .content {
-//     margin-top: 10px;
+.display-option {
+  margin-top: 10px;
+  padding: 10px;
 
-//     table {
-//       width: 100%;
+  .content {
+    margin-top: 10px;
 
-//       td.column {
-//         width: 104px;
-//         > button {
-//           width: 100px;
-//         }
-//       }
-//       td.dir {
-//         width: 78px;
-//         > button {
-//           width: 74px;
-//         }
-//       }
-//       td.groupcolumn {
-//         width: 182px;
-//         > button {
-//           width: 178px;
-//         }
-//       }
-//       td.filter-action {
-//         text-align: right;
-//       }
-//       td.value {
-//         .text-input {
-//           background: #fff;
-//         }
-//       }
+    table {
+      width: 100%;
 
-//       tr.add-option td {
-//         padding-top: 10px;
-//       }
-//     }
+      td.column {
+        width: 104px;
+        > button {
+          width: 100px;
+        }
+      }
+      td.dir {
+        width: 78px;
+        > button {
+          width: 74px;
+        }
+      }
+      td.groupcolumn {
+        width: 182px;
+        > button {
+          width: 178px;
+        }
+      }
+      td.filter-action {
+        text-align: right;
+      }
+      td.value {
+        .text-input {
+          background: #fff;
+        }
+      }
 
-//     .empty-msg {
-//       color: #606066;
-//     }
-//   }
-// }
+      tr.add-option td {
+        padding-top: 10px;
+      }
+    }
+
+    .empty-msg {
+      color: #606066;
+    }
+  }
+}

@@ -26,7 +26,6 @@
   export let conditionId: FilterEntry['conditionId'] | undefined;
   export let value: FilterEntry['value'] | undefined;
   export let noOfFilters: number;
-  export let index: number;
 
   $: columnIds = [...processedTableColumnsMap].map(([_columnId]) => _columnId);
   $: processedSelectedColumn = columnId
@@ -44,7 +43,7 @@
   $: selectedColumnInputCap = processedSelectedColumn?.dbTypeInputCap;
 
   const initialNoOfFilters = noOfFilters;
-  let showError = index > 0;
+  let showError = false;
   $: isValid = selectedCondition
     ? validateFilterEntry(selectedCondition, value)
     : false;

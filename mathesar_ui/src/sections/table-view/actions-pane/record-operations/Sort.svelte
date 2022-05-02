@@ -1,4 +1,6 @@
 <script lang="ts">
+  // TODO: Improve UX
+
   import type { Writable } from 'svelte/store';
   import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button } from '@mathesar-component-library';
@@ -100,3 +102,7 @@
     </table>
   </div>
 </div>
+
+<style global lang="scss">
+  @import 'DisplayOption.scss';
+</style>
