@@ -287,13 +287,6 @@ def _get_sa_type_class_id_from_ischema_names(sa_type_class1, engine) -> Optional
             return db_type_id
 
 
-def _compile_sa_class(sa_class, engine):
-    try:
-        return sa_class.compile(dialect=engine.dialect)
-    except TypeError:
-        return sa_class().compile(dialect=engine.dialect)
-
-
 def _get_type_ids_on_database(engine) -> Collection[str]:
     """
     Returns db type ids available on the database.

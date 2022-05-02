@@ -781,10 +781,9 @@ def test_json_number_spec_validation(test_input, expected):
     assert follows_json_number_spec(test_input) == expected
 
 
-def test_number_input_api_validation(create_table, client):
+def test_number_input_api_validation(empty_nasa_table, client):
     cache.clear()
-    table_name = 'NASA Number Input Api Validation'
-    table = create_table(table_name)
+    table = empty_nasa_table
     column_name = 'Nonce'
     table.add_column({"name": column_name, "type": 'REAL'})
     nonce_id = table.get_column_name_id_bidirectional_map()[column_name]

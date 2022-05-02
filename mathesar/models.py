@@ -28,7 +28,7 @@ from db.tables.operations.select import reflect_table_from_oid
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
-from mathesar.database.types import UIType
+from mathesar.database.types import UIType, get_ui_type_from_db_type
 
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -202,7 +202,7 @@ class Table(DatabaseObject):
     @cached_property
     def _enriched_column_sa_table(self):
         return column_utils.get_enriched_column_table(
-            self._sa_table, engine=self.schema._sa_engine,
+            self._sa_table, engine=self._sa_engine,
         )
 
     @cached_property
@@ -351,6 +351,10 @@ class Column(ReflectionManagerMixin, BaseModel):
         except AttributeError:
             return getattr(self._sa_column, name)
 
+    @property
+    def _sa_engine(self):
+        return self.table._sa_engine
+
     @cached_property
     def _sa_column(self):
         return self.table.sa_columns[self.name]
@@ -358,8 +362,17 @@ class Column(ReflectionManagerMixin, BaseModel):
     @property
     def name(self):
         return get_column_name_from_attnum(
-            self.table.oid, self.attnum, self.table.schema._sa_engine
+            self.table.oid, self.attnum, self._sa_engine,
         )
+
+    @property
+    def ui_type(self):
+        if self.db_type:
+            return get_ui_type_from_db_type(self.db_type)
+
+    @property
+    def db_type(self):
+        return self._sa_column.db_type
 
 
 class Constraint(DatabaseObject):
