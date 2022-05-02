@@ -1,13 +1,22 @@
 <script lang="ts">
-  import { createEventDispatcher, onDestroy } from 'svelte';
-  import { faTimes } from '@fortawesome/free-solid-svg-icons';
-  import { Icon, Button, Select } from '@mathesar-component-library';
+  import { createEventDispatcher, onDestroy, tick } from 'svelte';
+  import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+  import {
+    InputGroup,
+    Icon,
+    Button,
+    Select,
+  } from '@mathesar-component-library';
+  import type { ComponentAndProps } from '@mathesar-component-library/types';
   import type { FilterEntry } from '@mathesar/stores/table-data/types';
+  import type { AbstractTypeFilterDefinition } from '@mathesar/stores/abstract-types/types';
   import DataTypeBasedInput from '@mathesar/components/cell/DataTypeBasedInput.svelte';
+  import type { CellColumnLike } from '@mathesar/components/cell/data-types/typeDefinitions';
   import type {
     ProcessedTableColumn,
     ProcessedTableColumnMap,
   } from '../../utils';
+  import { validateFilterEntry } from './utils';
 
   const dispatch = createEventDispatcher();
 
@@ -33,6 +42,10 @@
     : undefined;
   $: selectedColumnInputCap = processedSelectedColumn?.dbTypeInputCap;
 
+  $: isValid = selectedCondition
+    ? validateFilterEntry(selectedCondition, value)
+    : false;
+
   let prevValue: unknown = value;
   let timer: number;
 
@@ -54,57 +67,167 @@
     return '';
   }
 
-  function onValueInput() {
+  function onValueUpdate(_value: unknown) {
+    if (prevValue !== _value) {
+      prevValue = _value;
+      dispatch('update');
+    }
+  }
+
+  function onValueChange(_value: unknown) {
     clearTimeout(timer);
     timer = window.setTimeout(() => {
-      if (prevValue !== value) {
-        prevValue = value;
-        dispatch('reload');
-      }
+      onValueUpdate(_value);
     }, 500);
   }
+  $: onValueChange(value);
 
-  function onValueChange() {
+  function onValueChangeFromUser() {
     clearTimeout(timer);
-    prevValue = value;
-    dispatch('reload');
+    onValueUpdate(value);
   }
 
-  // TODO: Calculate input based on type in selectedCondition?.parameters
-  // If parameter.type is same as column abstract type, ignore it
-  //
+  function calculateInputCap(
+    _selectedCondition?: AbstractTypeFilterDefinition,
+    _processedSelectedColumn?: ProcessedTableColumn,
+  ):
+    | { column: CellColumnLike }
+    | { componentAndProps: ComponentAndProps<unknown> }
+    | undefined {
+    const parameterTypeId = _selectedCondition?.parameters[0];
+    // If there are no parameters, show no input. eg., isEmpty
+    if (typeof parameterTypeId === 'undefined') {
+      return undefined;
+    }
+
+    // If there is a parameter
+    // Check if the type is same as column's type.
+    // If yes, pass down column's calculated cap.
+    // If no, pass down the type directly.
+    const abstractTypeId =
+      _processedSelectedColumn?.abstractTypeOfColumn.identifier;
+    if (abstractTypeId === parameterTypeId && selectedColumnInputCap) {
+      return { componentAndProps: selectedColumnInputCap };
+    }
+    return {
+      column: {
+        type: parameterTypeId,
+        type_options: {},
+        display_options: {},
+      },
+    };
+  }
+
+  $: inputCap = calculateInputCap(selectedCondition, processedSelectedColumn);
+
+  function onColumnChange() {
+    prevValue = undefined;
+    value = undefined;
+    dispatch('update');
+  }
+
+  function onConditionChange(_conditionId?: string) {
+    if (!_conditionId) {
+      return;
+    }
+    const condition = selectedColumnFiltersMap.get(_conditionId);
+    if (!condition) {
+      return;
+    }
+    if (typeof condition?.parameters[0] === 'undefined') {
+      prevValue = undefined;
+      value = undefined;
+    }
+    dispatch('update');
+  }
 </script>
 
-<tr>
-  <td class="column">
+<div class="filter-entry">
+  <div class="prefix">
+    <slot />
+  </div>
+  <InputGroup>
     <Select
       options={columnIds}
       bind:value={columnId}
       getLabel={getColumnName}
-      on:change={() => dispatch('reload')}
+      on:change={onColumnChange}
+      triggerClass="filter-column-id"
     />
-  </td>
-  <td class="dir">
     <Select
       options={conditionIds}
       bind:value={conditionId}
       getLabel={getConditionName}
-      on:change={() => dispatch('reload')}
+      on:change={(e) => onConditionChange(e.detail)}
+      triggerClass="filter-condition"
     />
-  </td>
-  {#if selectedCondition?.parameters && selectedColumnInputCap}
-    <DataTypeBasedInput
-      bind:value
-      componentAndProps={selectedColumnInputCap}
-      on:input={onValueInput}
-      on:change={onValueChange}
-    />
-  {/if}
-  {#if allowRemoval}
-    <td>
-      <Button size="small" on:click={() => dispatch('removeFilter')}>
-        <Icon data={faTimes} />
+    {#if inputCap}
+      <DataTypeBasedInput
+        bind:value
+        {...inputCap}
+        on:change={onValueChangeFromUser}
+        class="filter-input"
+      />
+    {/if}
+    {#if allowRemoval}
+      <Button
+        size="small"
+        class="filter-remove"
+        on:click={() => dispatch('removeFilter')}
+      >
+        <Icon data={faTrashAlt} />
       </Button>
-    </td>
-  {/if}
-</tr>
+    {/if}
+  </InputGroup>
+</div>
+
+<style lang="scss">
+  .filter-entry {
+    display: flex;
+    min-width: 560px;
+    gap: 10px;
+
+    .prefix {
+      flex-basis: 80px;
+      flex-shrink: 0;
+      flex-grow: 0;
+      display: flex;
+      align-items: center;
+
+      > :global(.input-group-text) {
+        padding: 5px 13px;
+      }
+    }
+
+    & + :global(.filter-entry) {
+      margin-top: 6px;
+    }
+
+    :global(.filter-column-id.trigger) {
+      width: 140px;
+      flex-basis: 140px;
+      flex-shrink: 0;
+      flex-grow: 0;
+    }
+    :global(.filter-condition) {
+      width: 140px;
+      flex-basis: 140px;
+      flex-shrink: 0;
+      flex-grow: 0;
+    }
+
+    :global(.filter-input) {
+      width: 160px;
+      flex-basis: 160px;
+      flex-shrink: 0;
+      flex-grow: 0;
+      max-height: 31.5px;
+      resize: none;
+    }
+
+    :global(.filter-remove) {
+      flex-shrink: 0;
+      flex-grow: 0;
+    }
+  }
+</style>

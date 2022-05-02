@@ -6,14 +6,14 @@ import type {
 } from '@mathesar/api/tables/records';
 
 export interface FilterEntry {
-  readonly columnId: number;
-  readonly conditionId: string;
-  readonly value: unknown;
+  columnId: number;
+  conditionId: string;
+  value: unknown;
 }
 
 function makeApiFilterCondition(filterEntry: FilterEntry): FilterCondition {
   const params: FilterConditionParams = [{ column_id: [filterEntry.columnId] }];
-  if (typeof filterEntry.value !== undefined) {
+  if (typeof filterEntry.value !== 'undefined') {
     params.push({ literal: [filterEntry.value] });
   }
   return { [filterEntry.conditionId]: params };
@@ -40,9 +40,9 @@ export const defaultFilterCombination = filterCombinations[0];
 export type TerseFiltering = [FilterCombination, TerseFilterEntry[]];
 
 export class Filtering {
-  readonly combination: FilterCombination;
+  combination: FilterCombination;
 
-  readonly entries: FilterEntry[];
+  entries: FilterEntry[];
 
   constructor({
     combination,

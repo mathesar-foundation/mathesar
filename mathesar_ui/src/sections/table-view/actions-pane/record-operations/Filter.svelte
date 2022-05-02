@@ -1,129 +1,114 @@
 <script lang="ts">
+  import { writable } from 'svelte/store';
   import type { Writable } from 'svelte/store';
-  import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
-  import { Icon, Button, Select } from '@mathesar-component-library';
-  import {
-    filterCombinations,
-    defaultFilterCombination,
-  } from '@mathesar/stores/table-data';
+  import { Button } from '@mathesar-component-library';
+  import type { Filtering } from '@mathesar/stores/table-data';
   import type { FilterCombination } from '@mathesar/api/tables/records';
-  import type { FilterEntry } from '@mathesar/stores/table-data/types';
-  import type { Filtering } from '@mathesar/stores/table-data/types';
-  import FilterEntryComponent from './FilterEntry.svelte';
+  import FilterEntries from './FilterEntries.svelte';
   import type { ProcessedTableColumnMap } from '../../utils';
+  import { validateFilterEntry, deepCloneFiltering } from './utils';
 
   export let filtering: Writable<Filtering>;
   export let processedTableColumnsMap: ProcessedTableColumnMap;
 
-  let filterCombination: FilterCombination = defaultFilterCombination;
-  let newfilterColumnId: FilterEntry['columnId'] | undefined;
-  let newfilterConditionId: FilterEntry['conditionId'] | undefined;
-  let newfilterValue: FilterEntry['value'] = undefined;
-  let addNew = false;
+  // This component is not reactive towards $filtering
+  // to avoid having to sync states and handle unnecessary set calls.
+  // This should be okay since this component is re-created
+  // everytime the dropdown reopens.
+  const internalFiltering = writable(deepCloneFiltering($filtering));
+
+  $: isFiltered = $internalFiltering.entries.length;
+
+  function checkAndSetExternalFiltering() {
+    const isValid = $internalFiltering.entries.every((filter) => {
+      const column = processedTableColumnsMap.get(filter.columnId);
+      const condition = column?.allowedFiltersMap.get(filter.conditionId);
+      if (condition) {
+        return validateFilterEntry(condition, filter.value);
+      }
+      return false;
+    });
+    if (isValid) {
+      filtering.set(deepCloneFiltering($internalFiltering));
+    }
+  }
 
   function addFilter() {
-    if (!newfilterColumnId || !newfilterConditionId) {
+    const firstColumn = [...processedTableColumnsMap.values()][0];
+    if (!firstColumn) {
+      return;
+    }
+    const firstCondition = [...firstColumn.allowedFiltersMap.values()][0];
+    if (!firstCondition) {
       return;
     }
     const newFilter = {
-      columnId: newfilterColumnId,
-      conditionId: newfilterConditionId,
-      value: newfilterValue,
+      columnId: firstColumn.column.id,
+      conditionId: firstCondition.id,
+      value: undefined,
+      isValid: validateFilterEntry(firstCondition, undefined),
     };
-    filtering.update((f) => f.withEntry(newFilter));
-
-    newfilterColumnId = undefined;
-    newfilterConditionId = undefined;
-    newfilterValue = undefined;
-    addNew = false;
+    internalFiltering.update((f) => f.withEntry(newFilter));
+    checkAndSetExternalFiltering();
   }
 
   function removeFilter(index: number) {
-    filtering.update((f) => f.withoutEntry(index));
+    internalFiltering.update((f) => f.withoutEntry(index));
+    checkAndSetExternalFiltering();
   }
 
-  function updateFilters() {
-    // Recreate with new object to trigger subscriptions
-    filtering.update((f) => f);
+  function setCombination(combination: FilterCombination) {
+    internalFiltering.update((f) => f.withCombination(combination));
+    checkAndSetExternalFiltering();
+  }
+
+  function updateFilter() {
+    checkAndSetExternalFiltering();
   }
 </script>
 
-<div class="display-option">
+<div class="filters" class:filtered={isFiltered}>
   <div class="header">
     <span>
-      Filters
-      {#if $filtering.entries.length}
-        ({$filtering.entries.length})
+      {#if isFiltered}
+        Filter records
+      {:else}
+        No filters have been added
       {/if}
     </span>
   </div>
   <div class="content">
-    <table>
-      {#if $filtering?.entries.length}
-        <tr>
-          <td>
-            <Select
-              options={filterCombinations}
-              bind:value={filterCombination}
-              on:change={() =>
-                filtering.update((f) => f.withCombination(filterCombination))}
-            />
-          </td>
-        </tr>
-      {/if}
-      {#each $filtering.entries as entry, index (entry)}
-        <FilterEntryComponent
-          {processedTableColumnsMap}
-          bind:columnId={entry.columnId}
-          bind:conditionId={entry.conditionId}
-          bind:value={entry.value}
-          on:removeFilter={() => removeFilter(index)}
-          on:reload={() => updateFilters()}
-        />
-      {:else}
-        <tr>
-          <td class="empty-msg" colspan="3"> No filters added </td>
-        </tr>
-      {/each}
+    <FilterEntries
+      entries={$internalFiltering.entries}
+      {processedTableColumnsMap}
+      on:remove={(e) => removeFilter(e.detail)}
+      on:update={updateFilter}
+      on:updateCombination={(e) => setCombination(e.detail)}
+    />
 
-      {#if processedTableColumnsMap.size}
-        {#if !addNew}
-          <tr class="add-option">
-            <td colspan="3">
-              <Button
-                on:click={() => {
-                  addNew = true;
-                }}
-              >
-                Add new filter
-              </Button>
-            </td>
-          </tr>
-        {:else}
-          <FilterEntryComponent
-            {processedTableColumnsMap}
-            allowRemoval={false}
-            bind:columnId={newfilterColumnId}
-            bind:conditionId={newfilterConditionId}
-            bind:value={newfilterValue}
-          />
-          <tr>
-            <td class="filter-action" colspan="4">
-              <Button size="small" on:click={addFilter}>
-                <Icon data={faPlus} />
-              </Button>
-              <Button
-                size="small"
-                on:click={() => {
-                  addNew = false;
-                }}
-              >
-                <Icon data={faTimes} />
-              </Button>
-            </td>
-          </tr>
-        {/if}
-      {/if}
-    </table>
+    {#if processedTableColumnsMap.size}
+      <div class="add-option">
+        <Button on:click={addFilter}>Add new filter</Button>
+      </div>
+    {/if}
   </div>
 </div>
+
+<style lang="scss">
+  .filters {
+    padding: 12px;
+    min-width: 310px;
+
+    &.filtered {
+      min-width: 620px;
+    }
+
+    .content {
+      margin-top: 12px;
+
+      .add-option {
+        margin-top: 18px;
+      }
+    }
+  }
+</style>

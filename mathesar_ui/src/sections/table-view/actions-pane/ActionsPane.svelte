@@ -113,7 +113,7 @@
 
   <div class="divider" />
 
-  <Dropdown showArrow={false}>
+  <Dropdown showArrow={false} contentClass="filter-dropdown-content">
     <svelte:fragment slot="trigger">
       <Icon data={faFilter} size="0.8em" />
       <span>
