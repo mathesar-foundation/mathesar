@@ -65,10 +65,13 @@ const numberType: CellComponentFactory = {
    * require additional operations like `isPercentage`, it's better to use a
    * dedicated `NumberCellInput` component.
    */
-  getInput(column: NumberColumn): ComponentAndProps<NumberCellExternalProps> {
+  getInput(
+    column: NumberColumn,
+    config?: Config,
+  ): ComponentAndProps<NumberCellExternalProps> {
     return {
       component: NumberCellInput,
-      props: getProps(column),
+      props: getProps(column, config),
     };
   },
 };
