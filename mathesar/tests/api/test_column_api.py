@@ -64,7 +64,7 @@ def column_test_table_with_service_layer_options(patent_schema):
     column_data_list = [{},
                         {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
                         {'display_options': {'show_as_percentage': True, 'number_format': "english"}},
-                        {},
+                        {'display_options': None},
                         {},
                         {},
                         {'display_options': {'format': 'YYYY-MM-DD hh:mm'}}]
@@ -495,6 +495,23 @@ def test_column_update_type_invalid_display_options(column_test_table_with_servi
         display_options_data,
     )
     assert response.status_code == 400
+
+
+def test_column_update_type_get_all_columns(column_test_table_with_service_layer_options, client):
+    cache.clear()
+    table, columns = column_test_table_with_service_layer_options
+    colum_name = "mycolumn2"
+    column = _get_columns_by_name(table, [colum_name])[0]
+    column_id = column.id
+    display_options_data = {'type': 'BOOLEAN'}
+    client.patch(
+        f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
+        display_options_data,
+    )
+    new_columns_response = client.get(
+        f"/api/db/v0/tables/{table.id}/columns/"
+    )
+    assert new_columns_response.status_code == 200
 
 
 def test_column_display_options_type_on_reflection(column_test_table,
