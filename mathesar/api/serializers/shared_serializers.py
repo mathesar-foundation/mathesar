@@ -38,7 +38,7 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
         if serializer is not None:
             return serializer.to_representation(instance)
         else:
-            raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
+            return instance
 
     def get_mapping_field(self):
         mapping_field = getattr(self, "mapping_field", None)
@@ -56,7 +56,8 @@ class ReadWritePolymorphicSerializerMappingMixin(ReadOnlyPolymorphicSerializerMa
         if serializer is not None:
             return serializer.to_internal_value(data=data)
         else:
-            raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
+            data = {}
+            return data
 
 
 class MonkeyPatchPartial:
