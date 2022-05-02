@@ -11,6 +11,7 @@
   import { getDbTypeBasedInputCap } from './utils';
   import type { CellColumnLike } from './data-types/typeDefinitions';
 
+  // TODO: Provide this as a discrimated union of all input types
   interface StaticProps
     extends BaseInputProps,
       Omit<SimplifiedInputProps, 'value'> {

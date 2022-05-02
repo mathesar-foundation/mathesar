@@ -49,6 +49,12 @@
   export let triggerClass: DefinedProps['triggerClass'] = '';
 
   /**
+   * Classes to apply to both content and trigger.
+   */
+  let classes: DefinedProps['class'] = '';
+  export { classes as class };
+
+  /**
    * Appearance of the trigger button. One of: 'default', 'primary', 'secondary', 'plain', 'ghost'.
    */
   export let triggerAppearance: DefinedProps['triggerAppearance'] = 'default';
@@ -111,9 +117,9 @@
     {isOpen}
     {disabled}
     {id}
-    contentClass="select {contentClass}"
+    contentClass={['select', classes, contentClass].join(' ')}
     {triggerAppearance}
-    triggerClass="select full-width {triggerClass}"
+    triggerClass={['select full-width', classes, triggerClass].join(' ')}
     on:open={() => api.open()}
     on:close={() => api.close()}
     on:keydown={(e) => api.handleKeyDown(e)}
