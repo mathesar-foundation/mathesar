@@ -7,11 +7,7 @@ export type {
 export type { RecordsData, Row } from './records';
 export type { ColumnPosition, ColumnPositionMap } from './display';
 export type { Column, ColumnsData, ColumnsDataStore } from './columns';
-export type {
-  Filtering,
-  FilterCondition,
-  FilterCombination,
-} from './filtering';
+export type { Filtering, FilterEntry } from './filtering';
 export type {
   Constraint,
   ConstraintsData,
