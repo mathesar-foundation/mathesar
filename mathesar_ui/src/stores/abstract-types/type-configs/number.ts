@@ -261,6 +261,15 @@ const numberType: AbstractTypeConfiguration = {
   icon: '#',
   cell: {
     type: 'number',
+    conditionalConfig: {
+      [DB_TYPES.DECIMAL]: { floatAllowanceStrategy: 'scale-based' },
+      [DB_TYPES.NUMERIC]: { floatAllowanceStrategy: 'scale-based' },
+      [DB_TYPES.INTEGER]: { floatAllowanceStrategy: 'never' },
+      [DB_TYPES.SMALLINT]: { floatAllowanceStrategy: 'never' },
+      [DB_TYPES.BIGINT]: { floatAllowanceStrategy: 'never' },
+      [DB_TYPES.REAL]: { floatAllowanceStrategy: 'always' },
+      [DB_TYPES.DOUBLE_PRECISION]: { floatAllowanceStrategy: 'always' },
+    },
   },
   defaultDbType: DB_TYPES.NUMERIC,
   getDbConfig: () => ({
