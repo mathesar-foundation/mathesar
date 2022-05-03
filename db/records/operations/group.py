@@ -3,6 +3,7 @@ import json
 import logging
 from sqlalchemy import select, func, and_, case, literal, cast, TEXT
 
+from db.functions.operations.deserialize import get_db_function_subclass_by_id
 from db.records import exceptions as records_exceptions
 from db.records.operations import calculation
 from db.records.utils import create_col_objects
@@ -37,6 +38,7 @@ class GroupBy:
             self,
             columns,
             mode=GroupMode.DISTINCT.value,
+            preproc=None,
             num_groups=None,
             bound_tuples=None,
             count_by=None,
@@ -46,6 +48,12 @@ class GroupBy:
     ):
         self._columns = tuple(columns) if type(columns) != str else tuple([columns])
         self._mode = mode
+        if type(preproc) == str:
+            self._preproc = tuple([preproc])
+        elif preproc is not None:
+            self._preproc = tuple(preproc)
+        else:
+            self._preproc = None
         self._num_groups = num_groups
         self._bound_tuples = bound_tuples
         self._count_by = count_by
@@ -62,6 +70,10 @@ class GroupBy:
     @property
     def mode(self):
         return self._mode
+
+    @property
+    def preproc(self):
+        return self._preproc
 
     @property
     def num_groups(self):
@@ -107,6 +119,11 @@ class GroupBy:
                 f'mode "{self.mode}" is invalid. valid modes are: '
                 + ', '.join([f"'{gm}'" for gm in group_modes])
             )
+        elif self.preproc is not None and len(self.preproc) != len(self.columns):
+            raise records_exceptions.BadGroupFormat(
+                f'preproc must be same length as columns if given'
+            )
+
         elif (
                 self.mode == GroupMode.PERCENTILE.value
                 and not type(self.num_groups) == int
@@ -207,7 +224,7 @@ def get_group_augmented_records_query(table, group_by):
     elif group_by.mode == GroupMode.MAGNITUDE.value:
         query = _get_tens_powers_range_group_select(table, grouping_columns)
     elif group_by.mode == GroupMode.DISTINCT.value:
-        query = _get_distinct_group_select(table, grouping_columns)
+        query = _get_distinct_group_select(table, grouping_columns, group_by.preproc)
     elif group_by.mode == GroupMode.PREFIX.value:
         query = _get_prefix_group_select(table, grouping_columns, group_by.prefix_length)
     else:
@@ -215,13 +232,22 @@ def get_group_augmented_records_query(table, group_by):
     return query
 
 
-def _get_distinct_group_select(table, grouping_columns):
+def _get_distinct_group_select(table, grouping_columns, preproc):
     window_def = GroupingWindowDefinition(
         order_by=grouping_columns, partition_by=grouping_columns
     )
 
+    if preproc is not None:
+        processed_columns = [
+            get_db_function_subclass_by_id(proc).to_sa_expression(col)
+            for proc, col in zip(preproc, grouping_columns)
+            if proc is not None
+        ]
+    else:
+        processed_columns = grouping_columns
+
     group_id_expr = func.dense_rank().over(
-        order_by=window_def.order_by, range_=window_def.range_
+        order_by=processed_columns, range_=window_def.range_
     )
     return select(
         table,

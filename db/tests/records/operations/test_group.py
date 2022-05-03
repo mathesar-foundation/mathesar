@@ -3,6 +3,10 @@ from sqlalchemy import Column
 
 from db.records.operations import group
 from db.records import exceptions as records_exceptions
+from db.tests.types import fixtures
+
+engine_with_types = fixtures.engine_with_types
+uris_table_obj = fixtures.uris_table_obj
 
 
 @pytest.fixture
@@ -11,7 +15,7 @@ def roster_distinct_setup(roster_table_obj):
     input_cols = ['Student Number', 'Student Email']
     gb = group.GroupBy(columns=input_cols)
     grouping_columns = gb.get_validated_group_by_columns(roster)
-    sel = group._get_distinct_group_select(roster, grouping_columns)
+    sel = group._get_distinct_group_select(roster, grouping_columns, None)
     with engine.begin() as conn:
         res = conn.execute(sel).fetchall()
     return res
@@ -327,6 +331,45 @@ def test_smoke_get_group_augmented_records_query_prefix(roster_table_obj):
         )
 
 
+def test_smoke_get_group_augmented_records_query_email_preproc(roster_table_obj):
+    roster, engine = roster_table_obj
+    group_by = group.GroupBy(
+        ['Student Email'],
+        mode=group.GroupMode.DISTINCT.value,
+        preproc=['extract_email_domain']
+    )
+    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_query).fetchall()
+    for row in res:
+        assert all(
+            [
+                metadata_field.value in row[group.MATHESAR_GROUP_METADATA]
+                for metadata_field in group.GroupMetadataField
+            ]
+        )
+
+
+@pytest.mark.parametrize('preproc', ['extract_uri_authority', 'extract_uri_scheme'])
+def test_smoke_get_group_augmented_records_query_uris_preproc(uris_table_obj, preproc):
+    roster, engine = uris_table_obj
+    group_by = group.GroupBy(
+        ['uri'],
+        mode=group.GroupMode.DISTINCT.value,
+        preproc=[preproc]
+    )
+    augmented_query = group.get_group_augmented_records_query(roster, group_by)
+    with engine.begin() as conn:
+        res = conn.execute(augmented_query).fetchall()
+    for row in res:
+        assert all(
+            [
+                metadata_field.value in row[group.MATHESAR_GROUP_METADATA]
+                for metadata_field in group.GroupMetadataField
+            ]
+        )
+
+
 single_col_number_modes = [
     group.GroupMode.MAGNITUDE.value,
     group.GroupMode.COUNT_BY.value,
@@ -362,6 +405,14 @@ group_by_num_list = [
             mode=group.GroupMode.DISTINCT.value
         ),
         259
+    ),
+    (
+        group.GroupBy(
+            ['Student Number', 'Student Email'],
+            mode=group.GroupMode.DISTINCT.value,
+            preproc=[None, 'extract_email_domain']
+        ),
+        3
     ),
     (
         group.GroupBy(
