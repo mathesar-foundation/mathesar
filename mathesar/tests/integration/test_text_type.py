@@ -2,6 +2,8 @@ import re
 from playwright.sync_api import expect
 from mathesar.tests.integration.utils.table_actions import open_column_options_and_verify_type
 from mathesar.tests.integration.utils.validators import expect_tab_to_be_visible
+from mathesar.database.types import UIType
+from db.types.base import PostgresType
 
 
 restrict_field_size_option_locator = "span:has-text('Restrict Field Size') input[type='checkbox']"
@@ -18,7 +20,7 @@ def verify_column_type(page, db_type):
 
 
 def open_and_verify_column_type(page, column_name, db_type):
-    open_column_options_and_verify_type(page, column_name, "Text", db_type)
+    open_column_options_and_verify_type(page, column_name, UIType.TEXT.display_name, db_type)
 
 
 def test_add_new_column_default_text_type(page, go_to_all_types_table):
@@ -27,19 +29,21 @@ def test_add_new_column_default_text_type(page, go_to_all_types_table):
     column_name = "NewColumnText"
     page.fill(".new-column-dropdown input", column_name)
     page.click("button:has-text('Add')")
-    open_and_verify_column_type(page, column_name, "TEXT")
+    open_and_verify_column_type(page, column_name, PostgresType.TEXT.id)
 
 
 def test_text_options(page, go_to_all_types_table):
     expect_table_to_open(page)
-    open_and_verify_column_type(page, "text", "TEXT")
+    column_name = "text"
+    open_and_verify_column_type(page, column_name, PostgresType.TEXT.id)
     expect(page.locator(restrict_field_size_option_locator)).not_to_be_checked()
     expect(page.locator(field_size_limit_locator)).not_to_be_visible()
 
 
 def test_varchar_options(page, go_to_all_types_table):
     expect_table_to_open(page)
-    open_and_verify_column_type(page, "varchar", "VARCHAR")
+    column_name = "varchar"
+    open_and_verify_column_type(page, column_name, PostgresType.CHARACTER_VARYING.id)
     expect(page.locator(restrict_field_size_option_locator)).to_be_checked()
     field_size_input = page.locator(field_size_limit_locator)
     expect(field_size_input).to_be_visible()
@@ -50,7 +54,8 @@ def test_varchar_options(page, go_to_all_types_table):
 
 def test_varchar_n_options(page, go_to_all_types_table):
     expect_table_to_open(page)
-    open_and_verify_column_type(page, "varchar_n", "VARCHAR")
+    column_name = "varchar_n"
+    open_and_verify_column_type(page, column_name, PostgresType.CHARACTER_VARYING.id)
     expect(page.locator(restrict_field_size_option_locator)).to_be_checked()
     field_size_input = page.locator(field_size_limit_locator)
     expect(field_size_input).to_be_visible()
@@ -59,7 +64,8 @@ def test_varchar_n_options(page, go_to_all_types_table):
 
 def test_char_options(page, go_to_all_types_table):
     expect_table_to_open(page)
-    open_and_verify_column_type(page, "char", "CHAR")
+    column_name = "char"
+    open_and_verify_column_type(page, column_name, PostgresType.CHARACTER.id)
     expect(page.locator(restrict_field_size_option_locator)).to_be_checked()
     field_size_input = page.locator(field_size_limit_locator)
     expect(field_size_input).to_be_visible()
@@ -95,12 +101,13 @@ def test_char_cell(page, go_to_all_types_table):
 
 def test_text_db_type_selection(page, go_to_all_types_table):
     expect_table_to_open(page)
-    open_and_verify_column_type(page, "text", "TEXT")
+    column_name = "text"
+    open_and_verify_column_type(page, column_name, PostgresType.TEXT.id)
     expect(page.locator(restrict_field_size_option_locator)).not_to_be_checked()
     expect(page.locator(field_size_limit_locator)).not_to_be_visible()
     page.locator(restrict_field_size_option_locator).set_checked(True)
     expect(page.locator(field_size_limit_locator)).to_have_value("255")
-    verify_column_type(page, "VARCHAR")
+    verify_column_type(page, PostgresType.CHARACTER_VARYING.id)
     page.locator(restrict_field_size_option_locator).set_checked(False)
     expect(page.locator(field_size_limit_locator)).not_to_be_visible()
-    verify_column_type(page, "TEXT")
+    verify_column_type(page, PostgresType.TEXT.id)

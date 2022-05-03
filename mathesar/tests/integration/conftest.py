@@ -1,12 +1,9 @@
 import pytest
 from rest_framework.test import APIClient
-from sqlalchemy import text
 from django.core.cache import cache
 
-from db.schemas.operations.create import create_schema as create_sa_schema
-from db.schemas.utils import get_schema_name_from_oid, get_schema_oid_from_name
 from db.types.base import PostgresType
-from mathesar.models import Database, Schema
+from mathesar.models import Database
 from mathesar.tests.integration.utils.locators import get_table_entry
 from mathesar.utils.tables import create_empty_table
 
@@ -32,32 +29,6 @@ def page(page):
     page.set_default_navigation_timeout(30000)
     page.set_default_timeout(30000)
     yield page
-
-
-@pytest.fixture
-def create_schema(engine, test_db_model):
-    """
-    Creates a schema factory, making sure to track and clean up new instances
-    """
-    function_schemas = {}
-
-    def _create_schema(schema_name):
-        if schema_name in function_schemas:
-            schema_oid = function_schemas[schema_name]
-        else:
-            create_sa_schema(schema_name, engine)
-            schema_oid = get_schema_oid_from_name(schema_name, engine)
-            function_schemas[schema_name] = schema_oid
-        schema_model, _ = Schema.current_objects.get_or_create(oid=schema_oid, database=test_db_model)
-        return schema_model
-
-    yield _create_schema
-
-    for oid in function_schemas.values():
-        # Handle schemas being renamed during test
-        schema = get_schema_name_from_oid(oid, engine)
-        with engine.begin() as conn:
-            conn.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE;'))
 
 
 @pytest.fixture
@@ -145,7 +116,7 @@ def go_to_patents_data_table(page, create_patents_table, schema_name, base_schem
 
 
 @pytest.fixture
-def go_to_table_with_numbers_in_text(page, patent_schema, create_column, schema, base_schema_url):
+def go_to_table_with_numbers_in_text(page, create_column, schema, base_schema_url):
     """
     Returns a table containing columns with numbers in TEXT format.
     """

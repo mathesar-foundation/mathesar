@@ -3,6 +3,8 @@ from playwright.sync_api import expect
 from mathesar.tests.integration.utils.table_actions import open_column_options_and_verify_type, get_cell_selector
 from mathesar.tests.integration.utils.component_actions import change_select_input_value
 from mathesar.tests.integration.utils.validators import expect_tab_to_be_visible
+from mathesar.database.types import UIType
+from db.types.base import PostgresType
 
 
 display_tab_selector = ".type-option-tab:has-text('Display')"
@@ -18,20 +20,20 @@ def expect_table_to_open(page):
 
 def test_boolean_options(page, go_to_all_types_table):
     expect_table_to_open(page)
-    open_column_options_and_verify_type(page, "boolean_cb", "Boolean", "BOOLEAN")
-    open_column_options_and_verify_type(page, "boolean_dd", "Boolean", "BOOLEAN")
+    open_column_options_and_verify_type(page, "boolean_cb", UIType.BOOLEAN.display_name, PostgresType.BOOLEAN.id)
+    open_column_options_and_verify_type(page, "boolean_dd", UIType.BOOLEAN.display_name, PostgresType.BOOLEAN.id)
 
 
 def test_boolean_display_options(page, go_to_all_types_table):
     expect_table_to_open(page)
-    open_column_options_and_verify_type(page, "boolean_cb", "Boolean", "BOOLEAN")
+    open_column_options_and_verify_type(page, "boolean_cb", UIType.BOOLEAN.display_name, PostgresType.BOOLEAN.id)
     page.locator(display_tab_selector).click()
     display_as_option_locator = page.locator(display_as_option_selector)
     custom_label_option_locator = page.locator(use_custom_label_option_selector)
     expect(display_as_option_locator).to_be_visible()
     expect(display_as_option_locator).to_contain_text("Checkbox", use_inner_text=True)
     expect(custom_label_option_locator).not_to_be_visible()
-    open_column_options_and_verify_type(page, "boolean_dd", "Boolean", "BOOLEAN")
+    open_column_options_and_verify_type(page, "boolean_dd", UIType.BOOLEAN.display_name, PostgresType.BOOLEAN.id)
     page.locator(display_tab_selector).click()
     display_as_option_locator = page.locator(display_as_option_selector)
     expect(display_as_option_locator).to_be_visible()
@@ -42,7 +44,7 @@ def test_boolean_display_options(page, go_to_all_types_table):
 
 def test_boolean_disp_checkbox_to_dropdown(page, table_with_all_types, go_to_all_types_table):
     expect_table_to_open(page)
-    open_column_options_and_verify_type(page, "boolean_cb", "Boolean", "BOOLEAN")
+    open_column_options_and_verify_type(page, "boolean_cb", UIType.BOOLEAN.display_name, PostgresType.BOOLEAN.id)
     page.locator(display_tab_selector).click()
     display_as_option_locator = page.locator(display_as_option_selector)
     custom_label_option_locator = page.locator(use_custom_label_option_selector)
@@ -74,7 +76,7 @@ def test_boolean_disp_checkbox_to_dropdown(page, table_with_all_types, go_to_all
 
 def test_boolean_disp_dropdown_to_checkbox(page, table_with_all_types, go_to_all_types_table):
     expect_table_to_open(page)
-    open_column_options_and_verify_type(page, "boolean_dd", "Boolean", "BOOLEAN")
+    open_column_options_and_verify_type(page, "boolean_dd", UIType.BOOLEAN.display_name, PostgresType.BOOLEAN.id)
     page.locator(display_tab_selector).click()
     display_as_option_locator = page.locator(display_as_option_selector)
     custom_label_option_locator = page.locator(use_custom_label_option_selector)
