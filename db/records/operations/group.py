@@ -121,7 +121,7 @@ class GroupBy:
             )
         elif self.preproc is not None and len(self.preproc) != len(self.columns):
             raise records_exceptions.BadGroupFormat(
-                f'preproc must be same length as columns if given'
+                'preproc must be same length as columns if given'
             )
 
         elif (
