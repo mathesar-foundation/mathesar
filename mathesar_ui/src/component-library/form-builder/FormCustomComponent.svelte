@@ -6,16 +6,16 @@
   } from './types';
 
   export let componentId: FormStaticElement['componentId'];
-  export let props: FormStaticElement['props'];
+  export let props: FormStaticElement['props'] = undefined;
   export let stores: FormBuildConfiguration['stores'];
   export let store: FormValueStore;
   export let customComponents: FormBuildConfiguration['customComponents'];
 </script>
 
 {#if customComponents?.[componentId]}
-  <svlete:component
+  <svelte:component
     this={customComponents[componentId]}
-    {...props}
+    {...props ?? {}}
     {store}
     {stores}
   />

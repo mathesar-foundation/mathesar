@@ -15,7 +15,7 @@ function getNamesOfVariablesInUse(
 ): Set<string> {
   const variablesInUse: Set<string> = new Set();
   let childElements: FormElement[] = [];
-  if (element.type === 'input') {
+  if (element.type === 'input' || element.type === 'static') {
     variablesInUse.add(element.variable);
   } else if (element.type === 'switch') {
     const valueOfVariable = values[element.variable];

@@ -77,6 +77,14 @@ export interface BooleanDisplayOptions extends Record<string, unknown> {
   } | null;
 }
 
+export type DurationUnit = 'd' | 'h' | 'm' | 's' | 'ms';
+
+export interface DurationDisplayOptions extends Record<string, unknown> {
+  min: DurationUnit | null;
+  max: DurationUnit | null;
+  show_units: boolean | null;
+}
+
 export interface BaseColumn {
   id: number;
   name: string;

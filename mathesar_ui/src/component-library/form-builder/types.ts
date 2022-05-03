@@ -30,7 +30,7 @@ export interface FormStaticElement {
   type: 'static';
   variable: string;
   componentId: string;
-  props: Record<string, unknown>;
+  props?: Record<string, unknown>;
 }
 
 export type FormInputElement = FormInputBaseElement | FormInputSelectElement;
