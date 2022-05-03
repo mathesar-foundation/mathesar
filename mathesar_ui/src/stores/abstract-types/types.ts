@@ -19,9 +19,10 @@ export interface AbstractTypeResponse {
   db_types: DbType[];
 }
 
-type AbstractTypeConfigFormVariable = FormConfigurationVariable & {
+export interface AbstractTypeConfigFormVariable
+  extends FormConfigurationVariable {
   conditionalDefault?: Record<DbType, unknown>;
-};
+}
 
 export interface AbstractTypeConfigForm extends FormConfiguration {
   variables: Record<string, AbstractTypeConfigFormVariable>;

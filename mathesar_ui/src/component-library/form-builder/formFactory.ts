@@ -61,6 +61,7 @@ function getNamesOfConditionalVariables(element: FormElement): Set<string> {
 export function makeForm(
   formConfig: FormConfiguration,
   formValues?: FormValues,
+  customComponents?: FormBuildConfiguration['customComponents'],
 ): FormBuildConfiguration {
   const conditionalVariableNames = getNamesOfConditionalVariables(
     formConfig.layout,
@@ -161,5 +162,6 @@ export function makeForm(
     values,
     validationStore,
     getValidationResult,
+    customComponents,
   };
 }
