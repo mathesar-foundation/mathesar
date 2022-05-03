@@ -34,7 +34,7 @@ class TypeOptionSerializer(MathesarErrorMessageMixin, serializers.Serializer):
 
     def run_validation(self, data=empty):
         # Ensure that there are no unknown type options passed in.
-        if data is not empty:
+        if data is not empty and data is not None:
             unknown = set(data) - set(self.fields)
             if unknown:
                 errors = ['Unknown field: {}'.format(field) for field in unknown]
