@@ -367,6 +367,12 @@ export class RecordsData {
       const { offset } = getStoreValue(this.meta.pagination);
       const savedRecords = getStoreValue(this.savedRecords);
       const savedRecordsLength = savedRecords?.length || 0;
+      const savedRecordKeys = new Set<RowKey>();
+      savedRecords.forEach((entry) =>
+        savedRecordKeys.add(
+          getRowKey(entry, this.columnsDataStore.get()?.primaryKeyColumnId),
+        ),
+      );
 
       this.newRecords.update((existing) => {
         let retained = existing.filter(
@@ -375,6 +381,13 @@ export class RecordsData {
               getRowKey(entry, this.columnsDataStore.get()?.primaryKeyColumnId),
             ),
         );
+        retained = retained.filter(
+          (entry) =>
+            !savedRecordKeys.has(
+              getRowKey(entry, this.columnsDataStore.get()?.primaryKeyColumnId),
+            ),
+        );
+
         if (retained.length === existing.length) {
           return existing;
         }
@@ -389,7 +402,7 @@ export class RecordsData {
         });
         return retained;
       });
-      this.meta.rowCreationStatus.delete([...successRowKeys]);
+      this.meta.rowCreationStatus.delete([...savedRecordKeys]);
       this.meta.rowDeletionStatus.delete([...successRowKeys]);
       this.meta.selectedRows.delete([...successRowKeys]);
       this.meta.rowDeletionStatus.setEntries(
