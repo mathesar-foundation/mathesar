@@ -12,7 +12,7 @@
 
 <style lang="scss">
   div {
-    margin-top: 15px;
+    margin-top: 0.9rem;
 
     span {
       font-size: 0.8rem;

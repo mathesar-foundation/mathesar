@@ -28,21 +28,11 @@
     numerical operations on the user input. See `NumberInput.svelte` for a
     component that will bind to a `number` instead of a `string`.
 -->
-<script context="module" lang="ts">
-  export interface StringifiedNumberInputProps
-    extends Partial<NumberFormatterOptions>,
-      Omit<FormattedInputProps<string>, 'formatter'> {
-    value?: string | null;
-    element?: HTMLInputElement;
-  }
-</script>
-
 <script lang="ts">
-  import type { FormattedInputProps } from '../formatted-input/FormattedInput.svelte';
-  import FormattedInput from '../formatted-input/FormattedInput.svelte';
-  import type { NumberFormatterOptions } from './number-formatter/types';
+  import FormattedInput from '@mathesar-component-library-dir/formatted-input/FormattedInput.svelte';
   import { StringifiedNumberFormatter } from './number-formatter';
   import { getInputMode } from './numberInputUtils';
+  import type { StringifiedNumberInputProps } from './NumberInputTypes';
 
   type $$Props = StringifiedNumberInputProps;
 

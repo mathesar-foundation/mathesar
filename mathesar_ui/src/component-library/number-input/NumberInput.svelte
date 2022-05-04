@@ -23,18 +23,11 @@
     high-precision numbers by binding to a `string` instead of a `number`.
 
 -->
-<script context="module" lang="ts">
-  export interface NumberInputProps extends Partial<NumberFormatterOptions> {
-    value?: number;
-    element?: HTMLInputElement;
-  }
-</script>
-
 <script lang="ts">
   import FormattedInput from '../formatted-input/FormattedInput.svelte';
-  import type { NumberFormatterOptions } from './number-formatter/types';
   import { NumberFormatter } from './number-formatter';
   import { getInputMode } from './numberInputUtils';
+  import type { NumberInputProps } from './NumberInputTypes';
 
   type $$Props = NumberInputProps;
 
