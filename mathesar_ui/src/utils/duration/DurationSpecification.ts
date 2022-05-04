@@ -11,27 +11,54 @@ const defaults: DurationConfig = {
   min: 's',
 };
 
-export default class DurationSpecification {
-  private min: DurationUnit;
+const formattingTokens: Record<DurationUnit, string> = {
+  d: 'D',
+  h: 'HH',
+  m: 'mm',
+  s: 'ss',
+  ms: 'SSS',
+};
 
-  private max: DurationUnit;
+export default class DurationSpecification {
+  readonly min: DurationUnit;
+
+  readonly max: DurationUnit;
 
   constructor(config?: Partial<DurationConfig>) {
     this.min = config?.min ?? defaults.min;
     this.max = config?.max ?? defaults.max;
   }
 
-  getFormattingString(): string {
-    const range = allUnits.slice(
+  getUnitsInRange(): DurationUnit[] {
+    return allUnits.slice(
       allUnits.indexOf(this.max),
       allUnits.indexOf(this.min) + 1,
     );
-    if (range[range.length - 1] === 'ms') {
-      return `${range.slice(0, range.length - 1).join(':')}.${
-        range[range.length - 1]
-      }`;
+  }
+
+  getHigherUnit(unit: DurationUnit): DurationUnit | null {
+    const higherUnit = allUnits[allUnits.indexOf(unit) - 1];
+    if (!higherUnit) {
+      return null;
     }
-    return range.join(':');
+    if (allUnits.indexOf(higherUnit) < allUnits.indexOf(this.max)) {
+      return null;
+    }
+    return higherUnit;
+  }
+
+  getFormattingString(): string {
+    const tokens = this.getUnitsInRange().map((unit) => formattingTokens[unit]);
+    if (tokens.length === 1) {
+      return tokens[0];
+    }
+    if (tokens[tokens.length - 1] === formattingTokens.ms) {
+      return [
+        tokens.slice(0, tokens.length - 1).join(':'),
+        tokens[tokens.length - 1],
+      ].join('.');
+    }
+    return tokens.join(':');
   }
 
   static getAllUnits(): DurationUnit[] {

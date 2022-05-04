@@ -9,14 +9,14 @@ import {
   DurationSpecification,
 } from '@mathesar/utils/duration';
 import FormattedInputCell from './components/formatted-input/FormattedInputCell.svelte';
-import type { DurationCellExternalProps } from './components/typeDefinitions';
+import type { FormattedInputCellExternalProps } from './components/typeDefinitions';
 import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
 
 export interface DurationLikeColumn extends CellColumnLike {
   display_options: Partial<DurationDisplayOptions> | null;
 }
 
-function getProps(column: DurationLikeColumn): DurationCellExternalProps {
+function getProps(column: DurationLikeColumn): FormattedInputCellExternalProps {
   const defaults = DurationSpecification.getDefaults();
   const max = column.display_options?.max ?? defaults.max;
   const min = column.display_options?.min ?? defaults.min;
@@ -24,13 +24,14 @@ function getProps(column: DurationLikeColumn): DurationCellExternalProps {
   const formatter = new DurationFormatter(durationSpecification);
   return {
     formatter,
+    placeholder: durationSpecification.getFormattingString(),
   };
 }
 
 const durationType: CellComponentFactory = {
   get: (
     column: DurationLikeColumn,
-  ): ComponentAndProps<DurationCellExternalProps> => ({
+  ): ComponentAndProps<FormattedInputCellExternalProps> => ({
     component: FormattedInputCell,
     props: getProps(column),
   }),
