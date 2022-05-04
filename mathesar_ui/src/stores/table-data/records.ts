@@ -403,6 +403,7 @@ export class RecordsData {
         return retained;
       });
       this.meta.rowCreationStatus.delete([...savedRecordKeys]);
+      this.meta.rowCreationStatus.delete([...successRowKeys]);
       this.meta.rowDeletionStatus.delete([...successRowKeys]);
       this.meta.selectedRows.delete([...successRowKeys]);
       this.meta.rowDeletionStatus.setEntries(
