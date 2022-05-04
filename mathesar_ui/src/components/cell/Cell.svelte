@@ -1,25 +1,23 @@
 <script lang="ts">
+  // TODO: Move this component within Sheet
   // This component is meant to be common for tables, views, and for import preview
+  import type { SheetColumn } from '@mathesar/components/sheet/types';
 
-  import type { Column } from '@mathesar/stores/table-data/types';
-  import { getCellComponentWithProps } from './utils';
-
-  export let column: Column;
+  export let sheetColumn: SheetColumn;
   export let value: unknown;
   export let isActive = false;
   export let disabled = false;
   export let showAsSkeleton = false;
 
-  // TODO (IMPORTANT): Calculate this at a higher level, instead of calculating on each cell instance
-  $: ({ component, props } = getCellComponentWithProps(column));
+  $: ({ component, props } = sheetColumn.cellCap);
 </script>
 
-<div class="sheet-cell" data-column-id={column.id}>
+<div class="sheet-cell" data-column-id={sheetColumn.column.id}>
   <svelte:component
     this={component}
     {...props}
     {isActive}
-    disabled={disabled || column.primary_key}
+    disabled={disabled || sheetColumn.column.primary_key}
     bind:value
     on:movementKeyDown
     on:activate
@@ -32,12 +30,12 @@
 </div>
 
 <style lang="scss">
-  .sheet-cell,
-  .sheet-cell :global(.cell-wrapper) {
+  .sheet-cell {
+    --cell-height: 29px;
     position: relative;
     display: flex;
     flex: 1 1 auto;
-    min-height: 29px;
+    min-height: var(--cell-height);
     align-items: center;
     width: 100%;
   }
@@ -51,11 +49,5 @@
       position: absolute;
       background: #efefef;
     }
-  }
-
-  .sheet-cell :global(.cell-wrapper:not(.is-active)) {
-    // This needs to be based on row height!
-    height: 29px;
-    max-height: 29px;
   }
 </style>

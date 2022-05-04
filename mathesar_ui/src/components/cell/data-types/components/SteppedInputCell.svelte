@@ -3,7 +3,7 @@
   import type { CellValueFormatter } from '@mathesar/components/cell/utils';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import CellWrapper from './CellWrapper.svelte';
-  import type { CellTypeProps } from './typeDefinitions';
+  import type { CellTypeProps, HorizontalAlignment } from './typeDefinitions';
 
   const dispatch = createEventDispatcher();
 
@@ -15,6 +15,7 @@
   export let disabled: Props['disabled'];
   export let multiLineTruncate = false;
   export let formatValue: CellValueFormatter<Value> | undefined = undefined;
+  export let horizontalAlignment: HorizontalAlignment | undefined = undefined;
 
   let cellRef: HTMLElement;
   let isEditMode = false;
@@ -101,6 +102,7 @@
   on:mousedown={() => dispatch('activate')}
   mode={isEditMode ? 'edit' : 'default'}
   {multiLineTruncate}
+  {horizontalAlignment}
 >
   {#if isEditMode}
     <slot {handleInputBlur} {handleInputKeydown} />

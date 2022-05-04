@@ -26,6 +26,7 @@ export type TextAreaCellProps = TextBoxCellProps;
 
 export interface NumberCellExternalProps {
   locale?: string;
+  allowFloat: boolean;
   isPercentage: boolean;
 }
 
@@ -49,3 +50,5 @@ export type SingleSelectCellExternalProps<Option> = Pick<
 export interface SingleSelectCellProps<Option>
   extends CellTypeProps<Option>,
     SingleSelectCellExternalProps<Option> {}
+
+export type HorizontalAlignment = 'left' | 'right' | 'center';

@@ -14,11 +14,12 @@
   export let disabled: $$Props['disabled'];
 
   export let locale: $$Props['locale'];
+  export let allowFloat: $$Props['allowFloat'];
   export let isPercentage: $$Props['isPercentage'];
 
   $: formatterOptions = {
     locale,
-    allowFloat: true, // TODO set based on DB options
+    allowFloat,
     allowNegative: true,
   };
   $: formatter = new StringifiedNumberFormatter(formatterOptions);
@@ -38,6 +39,7 @@
   {isActive}
   {disabled}
   {formatValue}
+  horizontalAlignment="right"
   let:handleInputBlur
   let:handleInputKeydown
   on:movementKeyDown
