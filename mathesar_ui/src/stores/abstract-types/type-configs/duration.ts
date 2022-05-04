@@ -1,13 +1,13 @@
 import type { FormValues } from '@mathesar-component-library/types';
 import type { Column } from '@mathesar/stores/table-data/types';
 import type { DurationDisplayOptions } from '@mathesar/api/tables/columns';
+import DurationUtils from '@mathesar/utils/Duration';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
 } from '../types';
 
-const defaultMax = 'm';
-const defaultMin = 's';
+const durationDefaults = DurationUtils.getDefaults();
 
 const displayForm: AbstractTypeConfigForm = {
   variables: {
@@ -21,8 +21,8 @@ const displayForm: AbstractTypeConfigForm = {
     durationConfig: {
       type: 'custom',
       default: {
-        max: defaultMax,
-        min: defaultMin,
+        max: durationDefaults.max,
+        min: durationDefaults.min,
       },
     },
   },
@@ -54,8 +54,8 @@ function constructDisplayFormValuesFromDisplayOptions(
   const displayOptions = columnDisplayOpts as DurationDisplayOptions | null;
   const dispFormValues: FormValues = {
     durationConfig: {
-      max: displayOptions?.max ?? defaultMax,
-      min: displayOptions?.min ?? defaultMin,
+      max: displayOptions?.max ?? durationDefaults.max,
+      min: displayOptions?.min ?? durationDefaults.min,
     },
   };
   return dispFormValues;
