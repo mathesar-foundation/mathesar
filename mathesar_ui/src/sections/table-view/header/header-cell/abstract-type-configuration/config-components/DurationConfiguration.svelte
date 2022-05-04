@@ -1,16 +1,18 @@
 <script lang="ts">
   import type { Writable } from 'svelte/store';
-  import type { DurationUnit } from '@mathesar/utils/Duration';
   import { LabeledInput, Select } from '@mathesar-component-library';
+  import type {
+    DurationUnit,
+    DurationConfig,
+  } from '@mathesar/utils/duration/types';
   import type { FormValues } from '@mathesar-component-library/types';
-  import Duration from '@mathesar/utils/Duration';
-  import type { DurationConfig } from '@mathesar/utils/Duration';
+  import { DurationSpecification } from '@mathesar/utils/duration';
 
   interface DurationFormValues extends FormValues, DurationConfig {}
 
   export let store: Writable<DurationFormValues>;
 
-  const options: DurationUnit[] = Duration.getAllUnits();
+  const options: DurationUnit[] = DurationSpecification.getAllUnits();
   const labels: Record<DurationUnit, string> = {
     d: 'days',
     h: 'hours',
@@ -20,7 +22,7 @@
   };
   const getLabel = (opt?: DurationUnit) => (opt && labels[opt]) ?? '';
 
-  $: format = new Duration($store).getFormattingString();
+  $: format = new DurationSpecification($store).getFormattingString();
 
   function onMaxChange(_max?: DurationUnit) {
     if (!_max) return;

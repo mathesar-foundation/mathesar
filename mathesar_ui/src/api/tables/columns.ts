@@ -1,5 +1,5 @@
 import type { DbType } from '@mathesar/AppTypes';
-import type { DurationUnit } from '@mathesar/utils/Duration';
+import type { DurationUnit } from '@mathesar/utils/duration/types';
 
 /**
  * | value     | example locale | example format |
@@ -110,6 +110,7 @@ export interface Column extends BaseColumn {
   display_options: Record<string, unknown> | null;
 }
 
+// TODO: Remove specification DB types here
 export interface NumberColumn extends Column {
   type:
     | 'BIGINT'

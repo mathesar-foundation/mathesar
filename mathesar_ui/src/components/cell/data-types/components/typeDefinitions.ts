@@ -1,4 +1,5 @@
 import type { SelectProps } from '@mathesar-component-library/types';
+import type { DurationFormatter } from '@mathesar/utils/duration/types';
 
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
@@ -50,5 +51,15 @@ export type SingleSelectCellExternalProps<Option> = Pick<
 export interface SingleSelectCellProps<Option>
   extends CellTypeProps<Option>,
     SingleSelectCellExternalProps<Option> {}
+
+// Duration
+
+export interface DurationCellExternalProps {
+  formatter: DurationFormatter;
+}
+
+export interface DurationCellProps
+  extends CellTypeProps<string>,
+    DurationCellExternalProps {}
 
 export type HorizontalAlignment = 'left' | 'right' | 'center';

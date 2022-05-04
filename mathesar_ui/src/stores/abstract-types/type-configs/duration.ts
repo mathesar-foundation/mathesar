@@ -1,13 +1,13 @@
 import type { FormValues } from '@mathesar-component-library/types';
 import type { Column } from '@mathesar/stores/table-data/types';
 import type { DurationDisplayOptions } from '@mathesar/api/tables/columns';
-import DurationUtils from '@mathesar/utils/Duration';
+import { DurationSpecification } from '@mathesar/utils/duration';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
 } from '../types';
 
-const durationDefaults = DurationUtils.getDefaults();
+const durationDefaults = DurationSpecification.getDefaults();
 
 const displayForm: AbstractTypeConfigForm = {
   variables: {
@@ -64,7 +64,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 const durationType: AbstractTypeConfiguration = {
   icon: ':',
   cell: {
-    type: 'string',
+    type: 'duration',
   },
   getDisplayConfig: () => ({
     form: displayForm,

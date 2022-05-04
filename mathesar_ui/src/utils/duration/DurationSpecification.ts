@@ -11,7 +11,7 @@ const defaults: DurationConfig = {
   min: 's',
 };
 
-export default class Duration {
+export default class DurationSpecification {
   private min: DurationUnit;
 
   private max: DurationUnit;
