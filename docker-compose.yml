@@ -1,5 +1,5 @@
 version: "3.9"
-   
+
 services:
   db:
     image: postgres:13
@@ -15,8 +15,7 @@ services:
   service:
     build:
       context: .
-      # Change this to Dockerfile.integ-tests to be able to run e2e integ tests
-      dockerfile: Dockerfile
+      dockerfile: ${DOCKERFILE}
     container_name: mathesar_service
     environment:
       - MODE=${MODE-PRODUCTION}
