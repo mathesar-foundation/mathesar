@@ -270,6 +270,7 @@ export class RecordsData {
 
   async fetch(
     retainExistingRows = false,
+    isDeleteOperation = false
   ): Promise<TableRecordsData | undefined> {
     this.promise?.cancel();
     const { offset } = getStoreValue(this.meta.pagination);
@@ -283,7 +284,7 @@ export class RecordsData {
         index += 1;
         if (!retainExistingRows || !entry) {
           return {
-            state: 'loading',
+            state: 'processing',
             identifier: generateRowIdentifier('dummy', offset, index),
             rowIndex: index,
             record: {},
@@ -295,7 +296,9 @@ export class RecordsData {
       return data;
     });
     this.error.set(undefined);
-    this.state.set(States.Loading);
+    if (!isDeleteOperation){
+      this.state.set(States.Loading);
+    }
     if (!retainExistingRows) {
       this.newRecords.set([]);
       this.meta.cellClientSideErrors.clear();
@@ -362,7 +365,7 @@ export class RecordsData {
           }),
       );
       await Promise.all(promises);
-      await this.fetch(true);
+      await this.fetch(true, true)
 
       const { offset } = getStoreValue(this.meta.pagination);
       const savedRecords = getStoreValue(this.savedRecords);
@@ -372,7 +375,9 @@ export class RecordsData {
         let retained = existing.filter(
           (entry) =>
             !successRowKeys.has(
-              getRowKey(entry, this.columnsDataStore.get()?.primaryKeyColumnId),
+              getRowKey(
+                entry, 
+                this.columnsDataStore.get()?.primaryKeyColumnId),
             ),
         );
         if (retained.length === existing.length) {
