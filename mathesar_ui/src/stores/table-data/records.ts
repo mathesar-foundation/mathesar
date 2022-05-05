@@ -270,7 +270,7 @@ export class RecordsData {
 
   async fetch(
     retainExistingRows = false,
-    isDeleteOperation = false
+    isDeleteOperation = false,
   ): Promise<TableRecordsData | undefined> {
     this.promise?.cancel();
     const { offset } = getStoreValue(this.meta.pagination);
@@ -296,7 +296,7 @@ export class RecordsData {
       return data;
     });
     this.error.set(undefined);
-    if (!isDeleteOperation){
+    if (!isDeleteOperation) {
       this.state.set(States.Loading);
     }
     if (!retainExistingRows) {
@@ -375,9 +375,7 @@ export class RecordsData {
         let retained = existing.filter(
           (entry) =>
             !successRowKeys.has(
-              getRowKey(
-                entry, 
-                this.columnsDataStore.get()?.primaryKeyColumnId),
+              getRowKey(entry, this.columnsDataStore.get()?.primaryKeyColumnId),
             ),
         );
         if (retained.length === existing.length) {
