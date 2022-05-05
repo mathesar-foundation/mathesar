@@ -1,56 +1,52 @@
 import { get } from 'svelte/store';
-import type { Column } from '@mathesar/stores/table-data/types';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
 import {
   currentDbAbstractTypes,
   getAbstractTypeForDbType,
 } from '@mathesar/stores/abstract-types';
 import type { AbstractTypeConfiguration } from '@mathesar/stores/abstract-types/types';
-import TextBoxCell from './cell-types/TextBoxCell.svelte';
-import TextAreaCell from './cell-types/TextAreaCell.svelte';
-import CheckboxCell from './cell-types/CheckboxCell.svelte';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
+import DataTypes from './data-types';
+import type { CellColumnLike } from './data-types/typeDefinitions';
 
-function getInputConfiguration(
-  column: Column,
-): AbstractTypeConfiguration['input'] {
+export type CellValueFormatter<T> = (
+  value: T | null | undefined,
+) => string | null | undefined;
+
+function getCellInfo(
+  dbType: CellColumnLike['type'],
+): AbstractTypeConfiguration['cell'] | undefined {
   const abstractTypeOfColumn = getAbstractTypeForDbType(
-    column.type,
+    dbType,
     get(currentDbAbstractTypes)?.data,
   );
-  return abstractTypeOfColumn?.input ?? null;
+  return abstractTypeOfColumn?.cell;
 }
 
-function getStringCellComponentAndProps(
-  column: Column,
-  config: Record<string, unknown>,
-): ComponentAndProps {
-  const typeOptions = column.type_options ?? undefined;
-  const component = config.multiLine ? TextAreaCell : TextBoxCell;
-  return { component, props: typeOptions };
-}
-
-function getBooleanCellComponentAndProps(column: Column): ComponentAndProps {
-  const displayOptions = column.display_options ?? undefined;
-  // TODO: Change to Select based on display option
-  return { component: CheckboxCell, props: displayOptions };
-}
-
-export function getCellComponentWithProps(column: Column): ComponentAndProps {
-  const inputOptions = getInputConfiguration(column);
-  const inputDataType: string = inputOptions.type ?? 'string';
-  const inputConfig = inputOptions.config ?? {};
-  const inputConditionalConfig =
-    inputOptions.conditionalConfig?.[column.type] ?? {};
-  const combinedInputConfig = {
-    ...inputConfig,
-    ...inputConditionalConfig,
+function getCellConfiguration(
+  dbType: CellColumnLike['type'],
+  cellInfo?: AbstractTypeConfiguration['cell'],
+): Record<string, unknown> {
+  const config = cellInfo?.config ?? {};
+  const conditionalConfig = cellInfo?.conditionalConfig?.[dbType] ?? {};
+  return {
+    ...config,
+    ...conditionalConfig,
   };
-  switch (inputDataType) {
-    case 'boolean':
-      return getBooleanCellComponentAndProps(column);
-    case 'string':
-      return getStringCellComponentAndProps(column, combinedInputConfig);
-    default:
-      return { component: TextBoxCell };
-  }
+}
+
+export function getCellCap(
+  column: CellColumnLike,
+  cellInfo: AbstractTypeConfiguration['cell'],
+): ComponentAndProps<unknown> {
+  const config = getCellConfiguration(column.type, cellInfo);
+  return DataTypes[cellInfo?.type ?? 'string'].get(column, config);
+}
+
+export function getDbTypeBasedInputCap(
+  column: CellColumnLike,
+  cellInfoConfig?: AbstractTypeConfiguration['cell'],
+): ComponentAndProps<unknown> {
+  const cellInfo = cellInfoConfig ?? getCellInfo(column.type);
+  const config = getCellConfiguration(column.type, cellInfo);
+  return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }

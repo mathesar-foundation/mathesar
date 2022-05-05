@@ -1,7 +1,12 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import { faBackspace } from '@fortawesome/free-solid-svg-icons';
-  import { ContextMenu, MenuItem } from '@mathesar-component-library';
+
+  import {
+    ContextMenu,
+    MenuItem,
+    WritableMap,
+  } from '@mathesar-component-library';
   import {
     isCellActive,
     scrollBasedOnActiveCell,
@@ -9,26 +14,32 @@
   import type {
     ColumnPosition,
     Row,
-    Column,
     Display,
     RecordsData,
+    CellKey,
   } from '@mathesar/stores/table-data/types';
   import Cell from '@mathesar/components/cell/Cell.svelte';
   import Null from '@mathesar/components/Null.svelte';
+  import type { RequestStatus } from '@mathesar/utils/api';
+  import { States } from '@mathesar/utils/api';
+  import CellErrors from './CellErrors.svelte';
+  import type { ProcessedTableColumn } from '../utils';
 
   export let recordsData: RecordsData;
   export let display: Display;
   export let columnPosition: ColumnPosition | undefined = undefined;
   export let row: Row;
-  export let column: Column;
+  export let key: CellKey;
+  export let modificationStatusMap: WritableMap<CellKey, RequestStatus>;
+  export let processedColumn: ProcessedTableColumn;
   export let value: unknown = undefined;
 
+  $: recordsDataState = recordsData.state;
+  $: ({ column } = processedColumn);
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
-  $: isLoading = !row.state || row.state === 'loading';
+  $: modificationStatus = $modificationStatusMap.get(key);
   $: canSetNull = column.nullable && value !== null;
-
-  // TODO: Set individual cell states and errors in recordsData
 
   async function checkTypeAndScroll(type?: string) {
     if (type === 'moved') {
@@ -40,8 +51,8 @@
   async function moveThroughCells(
     event: CustomEvent<{ originalEvent: KeyboardEvent; key: string }>,
   ) {
-    const { originalEvent, key } = event.detail;
-    const type = display.handleKeyEventsOnActiveCell(key);
+    const { originalEvent } = event.detail;
+    const type = display.handleKeyEventsOnActiveCell(event.detail.key);
     if (type) {
       originalEvent.stopPropagation();
       originalEvent.preventDefault();
@@ -68,6 +79,8 @@
 
 <div
   class="cell editable-cell"
+  class:error={modificationStatus?.state === 'failure'}
+  class:modified={modificationStatus?.state === 'success'}
   class:is-active={isActive}
   class:is-pk={column.primary_key}
   style="
@@ -76,10 +89,10 @@
     "
 >
   <Cell
-    {column}
+    sheetColumn={processedColumn}
     {isActive}
     {value}
-    state={isLoading ? 'loading' : 'ready'}
+    showAsSkeleton={$recordsDataState === States.Loading}
     on:movementKeyDown={moveThroughCells}
     on:activate={() => display.selectCell(row, column)}
     on:update={valueUpdated}
@@ -93,6 +106,9 @@
       Set to <Null />
     </MenuItem>
   </ContextMenu>
+  {#if modificationStatus?.state === 'failure'}
+    <CellErrors errors={modificationStatus.errors} forceShowErrors={isActive} />
+  {/if}
 </div>
 
 <style lang="scss">
@@ -106,6 +122,14 @@
       border: none;
       min-height: 100%;
       height: auto !important;
+    }
+
+    &.modified {
+      background-color: #ebfeef;
+    }
+    &.error {
+      background-color: #fef1f1;
+      color: #888;
     }
   }
 </style>

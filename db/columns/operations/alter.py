@@ -61,6 +61,7 @@ def alter_column_type(
         table_oid, column_name, engine, connection, target_type_str,
         type_options={}, friendly_names=True,
 ):
+    type_options = type_options if type_options is not None else {}
     table = reflect_table_from_oid(table_oid, engine, connection)
     _preparer = engine.dialect.identifier_preparer
     supported_types = get_supported_alter_column_types(

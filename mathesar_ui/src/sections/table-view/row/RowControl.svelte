@@ -1,40 +1,39 @@
 <script lang="ts">
   import { faSync, faPlus } from '@fortawesome/free-solid-svg-icons';
   import { Checkbox, Icon } from '@mathesar-component-library';
-  import {
-    ROW_CONTROL_COLUMN_WIDTH,
-    getGenericModificationStatus,
-  } from '@mathesar/stores/table-data';
+  import { ROW_CONTROL_COLUMN_WIDTH } from '@mathesar/stores/table-data';
+  import { getRowKey } from '@mathesar/stores/table-data';
   import type {
     Meta,
     RecordsData,
     Row,
   } from '@mathesar/stores/table-data/types';
+  import CellErrors from './CellErrors.svelte';
 
   export let primaryKeyColumnId: number | undefined = undefined;
   export let row: Row;
   export let meta: Meta;
   export let recordsData: RecordsData;
 
-  $: ({ selectedRecords, recordModificationState, pagination } = meta);
+  $: ({ selectedRows, pagination, rowStatus } = meta);
   $: ({ savedRecords, newRecords, totalCount } = recordsData);
-
   $: primaryKeyValue = primaryKeyColumnId
     ? row.record?.[primaryKeyColumnId]
     : undefined;
-  $: isRowSelected = ($selectedRecords as Set<unknown>).has(primaryKeyValue);
-  $: genericModificationStatus = getGenericModificationStatus(
-    $recordModificationState,
-    row,
-    primaryKeyColumnId,
-  );
+  $: rowKey = getRowKey(row, primaryKeyColumnId);
+  $: status = $rowStatus.get(rowKey);
+  $: state = status?.wholeRowState;
+  $: errors = status?.errorsFromWholeRowAndCells ?? [];
+  $: isRowSelected = primaryKeyValue !== undefined && $selectedRows.has(rowKey);
 
-  function selectionChanged(event: CustomEvent<{ checked: boolean }>) {
-    const { checked } = event.detail;
+  function selectionChanged({ detail: checked }: CustomEvent<boolean>) {
+    if (primaryKeyValue === undefined) {
+      return;
+    }
     if (checked) {
-      meta.selectRecordByPrimaryKey(primaryKeyValue);
+      meta.selectedRows.add(rowKey);
     } else {
-      meta.deSelectRecordByPrimaryKey(primaryKeyValue);
+      meta.selectedRows.delete(rowKey);
     }
   }
 </script>
@@ -66,7 +65,11 @@
     {/if}
   </div>
 
-  {#if genericModificationStatus === 'inprocess'}
+  {#if state === 'processing'}
     <Icon class="mod-indicator" size="0.9em" data={faSync} spin={true} />
+  {/if}
+
+  {#if errors.length}
+    <CellErrors {errors} />
   {/if}
 </div>

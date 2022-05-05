@@ -121,6 +121,10 @@ button.btn {
     padding: 8px 14px;
   }
 
+  &.full-width {
+    width: 100%;
+  }
+
   /* State */
   &:disabled {
     opacity: 0.5;

@@ -1,22 +1,55 @@
 <script lang="ts">
-  import { getContext, tick } from 'svelte';
+  import { beforeUpdate, getContext, tick } from 'svelte';
   import { get } from 'svelte/store';
   import type {
     TabularDataStore,
     Row,
   } from '@mathesar/stores/table-data/types';
-
+  import type {
+    Sorting,
+    Filtering,
+    Grouping,
+    Pagination,
+  } from '@mathesar/stores/table-data';
   import RowComponent from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
+  import type { ProcessedTableColumnMap } from './utils';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
   let virtualListRef: VirtualList;
 
-  $: ({ id, recordsData, display } = $tabularData);
+  $: ({ id, recordsData, display, meta } = $tabularData);
+  $: ({ sorting, filtering, grouping, pagination } = meta);
   $: ({ newRecords } = recordsData);
-  $: ({ rowWidth, horizontalScrollOffset, displayableRecords } = display);
+  $: ({ rowWidth, horizontalScrollOffset, scrollOffset, displayableRecords } =
+    display);
+
+  export let processedTableColumnsMap: ProcessedTableColumnMap;
+
+  let initialSorting: Sorting;
+  let initialFiltering: Filtering;
+  let initialGrouping: Grouping;
+  let initialPagination: Pagination;
+
+  beforeUpdate(() => {
+    initialSorting = get(sorting);
+    initialFiltering = get(filtering);
+    initialGrouping = get(grouping);
+    initialPagination = get(pagination);
+  });
+
+  $: {
+    if (
+      initialSorting !== $sorting ||
+      initialFiltering !== $filtering ||
+      initialGrouping !== $grouping ||
+      initialPagination !== $pagination
+    ) {
+      virtualListRef?.ScrollToTop();
+    }
+  }
 
   let previousNewRecordsCount = 0;
 
@@ -51,6 +84,12 @@
 
   function checkAndResetActiveCell(e: Event) {
     const target = e.target as HTMLElement;
+    // Use this class for elements attached out of cell element
+    // which are part of cell interaction
+    if (target.closest('.retain-active-cell')) {
+      return;
+    }
+
     const targetMissing = !document.body.contains(target);
     let clearActiveCell = false;
 
@@ -81,6 +120,7 @@
       <VirtualList
         bind:this={virtualListRef}
         bind:horizontalScrollOffset={$horizontalScrollOffset}
+        bind:scrollOffset={$scrollOffset}
         {height}
         width={$rowWidth}
         itemCount={$displayableRecords.length}
@@ -94,6 +134,7 @@
             <RowComponent
               style={it.style}
               bind:row={$displayableRecords[it.index]}
+              {processedTableColumnsMap}
             />
           {/if}
         {/each}

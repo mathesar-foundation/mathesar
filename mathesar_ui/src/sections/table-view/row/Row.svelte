@@ -1,29 +1,29 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import {
-    getModificationState,
-    ROW_POSITION_INDEX,
-  } from '@mathesar/stores/table-data';
+  import { ROW_POSITION_INDEX } from '@mathesar/stores/table-data';
+  import { getCellKey } from '@mathesar/stores/table-data';
   import type {
-    ColumnPosition,
     ColumnPositionMap,
     TabularDataStore,
     Row,
-    Column,
   } from '@mathesar/stores/table-data/types';
+  import { getRowKey } from '@mathesar/stores/table-data';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
   import GroupHeader from './GroupHeader.svelte';
   import RowPlaceholder from './RowPlaceholder.svelte';
+  import type { ProcessedTableColumnMap } from '../utils';
 
   export let row: Row;
   export let style: { [key: string]: string | number };
+  export let processedTableColumnsMap: ProcessedTableColumnMap;
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
   $: ({ recordsData, columnsDataStore, meta, display } = $tabularData);
   $: ({ columnPositionMap } = display);
-  $: ({ selectedRecords, recordModificationState } = meta);
+  $: ({ selectedRows, rowStatus, rowCreationStatus, cellModificationStatus } =
+    meta);
   $: ({ grouping } = recordsData);
 
   function calculateStyle(
@@ -42,36 +42,28 @@
   }
 
   $: styleString = calculateStyle(style, $columnPositionMap);
-
-  function getColumnPosition(
-    _columnPositionMap: ColumnPositionMap,
-    _id: Column['id'],
-  ): ColumnPosition | undefined {
-    return _columnPositionMap.get(_id);
-  }
-
   $: ({ primaryKeyColumnId } = $columnsDataStore);
-  $: isSelected =
-    primaryKeyColumnId &&
-    $selectedRecords.has(row.record?.[primaryKeyColumnId]);
-  $: modificationState = getModificationState(
-    $recordModificationState,
-    row,
-    primaryKeyColumnId,
-  );
-  $: rowWidth =
-    getColumnPosition($columnPositionMap, ROW_POSITION_INDEX)?.width || 0;
+  $: rowKey = getRowKey(row, primaryKeyColumnId);
+  $: creationStatus = $rowCreationStatus.get(rowKey)?.state;
+  $: status = $rowStatus.get(rowKey);
+  $: wholeRowState = status?.wholeRowState;
+  $: rowWidth = $columnPositionMap.get(ROW_POSITION_INDEX)?.width || 0;
 
   function checkAndCreateEmptyRow() {
     if (row.isAddPlaceholder) {
-      void recordsData.createOrUpdateRecord(row);
+      void recordsData.addEmptyRecord();
     }
   }
 </script>
 
 <div
-  class="row {row.state} {modificationState || ''}"
-  class:selected={isSelected}
+  class="row"
+  class:selected={$selectedRows.has(rowKey)}
+  class:processing={wholeRowState === 'processing'}
+  class:failed={wholeRowState === 'failure'}
+  class:created={creationStatus === 'success'}
+  class:add-placeholder={row.isAddPlaceholder}
+  class:new={row.isNew}
   class:is-group-header={row.isGroupHeader}
   class:is-add-placeholder={row.isAddPlaceholder}
   style={styleString}
@@ -85,14 +77,16 @@
   {:else if row.record}
     <RowControl {primaryKeyColumnId} {row} {meta} {recordsData} />
 
-    {#each $columnsDataStore.columns as column (column.id)}
+    {#each [...processedTableColumnsMap] as [columnId, processedColumn] (columnId)}
       <RowCell
         {display}
         {row}
-        bind:value={row.record[column.id]}
-        {column}
+        key={getCellKey(rowKey, columnId)}
+        modificationStatusMap={cellModificationStatus}
+        bind:value={row.record[columnId]}
+        {processedColumn}
         {recordsData}
-        columnPosition={getColumnPosition($columnPositionMap, column.id)}
+        columnPosition={$columnPositionMap.get(columnId)}
       />
     {/each}
   {/if}

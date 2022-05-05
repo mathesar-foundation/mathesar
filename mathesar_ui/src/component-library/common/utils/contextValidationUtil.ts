@@ -14,7 +14,6 @@ class ContextBasedValidator {
 
   validate(): boolean {
     let isValid = true;
-    // eslint-disable-next-line no-restricted-syntax
     for (const validationFn of this.validationFunctionMap.values()) {
       isValid = isValid && validationFn();
     }

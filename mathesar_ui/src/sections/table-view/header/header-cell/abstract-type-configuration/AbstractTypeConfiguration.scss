@@ -41,13 +41,14 @@
 
       .type-option-tab {
         width: auto;
-        padding-bottom: 0.2rem;
+        padding: 0 0.1rem 0.2rem 0rem;
         border-bottom: 2px solid;
         border-color: transparent;
 
         &.selected {
           border-color: #cdcdcd;
-          font-weight: 600;
+          font-weight: 500;
+          padding: 0 0rem 0.2rem 0rem;
         }
         &:not(.selected) {
           color: #616166;
@@ -58,7 +59,7 @@
           .error-icon {
             position: absolute;
             top: -2px;
-            right: -10px;
+            right: -8px;
           }
 
           &.selected {
