@@ -140,6 +140,15 @@ class TimeFormatDisplayOptionSerializer(
     format = serializers.CharField(max_length=255)
 
 
+class DateTimeFormatDisplayOptionSerializer(
+    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    serializers.Serializer
+):
+    time_format = serializers.CharField(max_length=255)
+    date_format = serializers.CharField(max_length=255)
+
+
 class DurationDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
     min = serializers.CharField(max_length=255)
     max = serializers.CharField(max_length=255)
@@ -154,8 +163,8 @@ class DisplayOptionsMappingSerializer(
 ):
     serializers_mapping = {
         MathesarTypeIdentifier.BOOLEAN.value: BooleanDisplayOptionSerializer,
+        MathesarTypeIdentifier.DATETIME.value: DateTimeFormatDisplayOptionSerializer,
         MathesarTypeIdentifier.DATE.value: TimeFormatDisplayOptionSerializer,
-        MathesarTypeIdentifier.DATETIME.value: TimeFormatDisplayOptionSerializer,
         MathesarTypeIdentifier.DURATION.value: DurationDisplayOptionSerializer,
         MathesarTypeIdentifier.MONEY.value: MoneyDisplayOptionSerializer,
         MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,

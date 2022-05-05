@@ -3,7 +3,7 @@ import json
 import pytest
 from unittest.mock import patch
 from django.core.cache import cache
-from sqlalchemy import Column, Integer, String, MetaData, Text, select, Boolean, TIMESTAMP
+from sqlalchemy import Column, Integer, String, MetaData, Text, select, Boolean, TIMESTAMP, TIME, DATE
 from sqlalchemy import Table as SATable
 
 from db.columns.operations.alter import alter_column_type
@@ -61,20 +61,28 @@ def column_test_table_with_service_layer_options(patent_schema):
         Column("mycolumn4", Text),
         Column("mycolumn5", MathesarMoney),
         Column("mycolumn6", TIMESTAMP),
+        Column("mycolumn7", TIME),
+        Column("mycolumn8", DATE),
     ]
-    column_data_list = [{},
-                        {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
-                        {'display_options': {'show_as_percentage': True, 'number_format': "english"}},
-                        {'display_options': None},
-                        {},
-                        {'display_options': {
-                            'currency_details': {
-                                'currency_symbol': "HK $",
-                                'number_format': "english",
-                                'currency_symbol_location': 'after-minus'
-                            }
-                        }},
-                        {'display_options': {'format': 'YYYY-MM-DD hh:mm'}}]
+    column_data_list = [
+        {},
+        {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
+        {'display_options': {'show_as_percentage': True, 'number_format': "english"}},
+        {'display_options': None},
+        {},
+        {
+            'display_options': {
+                'currency_details': {
+                    'currency_symbol': "HK $",
+                    'number_format': "english",
+                    'currency_symbol_location': 'after-minus'
+                }
+            }
+        },
+        {'display_options': {'time_format': 'hh:mm', 'date_format': 'YYYY-MM-DD'}},
+        {'display_options': {'format': 'hh:mm'}},
+        {'display_options': {'format': 'YYYY-MM-DD'}},
+    ]
     db_table = SATable(
         "anewtable",
         MetaData(bind=engine),
@@ -87,9 +95,13 @@ def column_test_table_with_service_layer_options(patent_schema):
     service_columns = []
     for column_data in zip(column_list_in, column_data_list):
         attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine)
-        service_columns.append(ServiceLayerColumn.current_objects.get_or_create(table=table,
-                                                                                attnum=attnum,
-                                                                                display_options=column_data[1].get('display_options', None))[0])
+        service_columns.append(
+            ServiceLayerColumn.current_objects.get_or_create(
+                table=table,
+                attnum=attnum,
+                display_options=column_data[1].get('display_options', None)
+            )[0]
+        )
     return table, service_columns
 
 
@@ -258,6 +270,7 @@ def test_column_create_invalid_default(column_test_table, client):
     assert f'default "{data["default"]}" is invalid for type' in response.json()[0]['message']
 
 
+# NOTE: display option value types are checked backend, but that's it: e.g. a time format may be any string.
 create_display_options_test_list = [
     ("BOOLEAN", {"input": "dropdown"}, {"input": "dropdown"}),
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}},
@@ -271,8 +284,8 @@ create_display_options_test_list = [
     ("NUMERIC",
      {"show_as_percentage": True, 'number_format': "english"},
      {"show_as_percentage": True, 'number_format': "english"}),
-    ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}, {'format': 'YYYY-MM-DD hh:mm'}),
-    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}, {'format': 'YYYY-MM-DD hh:mm'}),
+    ("TIMESTAMP WITH TIME ZONE", {'date_format': 'x', 'time_format': 'x'}, {'date_format': 'x', 'time_format': 'x'}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'date_format': 'x', 'time_format': 'x'}, {'date_format': 'x', 'time_format': 'x'}),
     ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm'}, {'format': 'hh:mm'}),
     ("TIME WITH TIME ZONE", {'format': 'hh:mm Z'}, {'format': 'hh:mm Z'}),
 ]
@@ -529,8 +542,10 @@ def test_column_update_type_get_all_columns(column_test_table_with_service_layer
     assert new_columns_response.status_code == 200
 
 
-def test_column_display_options_type_on_reflection(column_test_table,
-                                                   client, engine):
+def test_column_display_options_type_on_reflection(
+        column_test_table,
+        client, engine
+):
     cache.clear()
     table = column_test_table
     response = client.get(
@@ -541,8 +556,10 @@ def test_column_display_options_type_on_reflection(column_test_table,
         assert column["display_options"] is None
 
 
-def test_column_invalid_display_options_type_on_reflection(column_test_table_with_service_layer_options,
-                                                           client, engine):
+def test_column_invalid_display_options_type_on_reflection(
+        column_test_table_with_service_layer_options,
+        client, engine
+):
     cache.clear()
     table, columns = column_test_table_with_service_layer_options
     column_index = 2
@@ -556,8 +573,10 @@ def test_column_invalid_display_options_type_on_reflection(column_test_table_wit
     assert response.json()["display_options"] is None
 
 
-def test_column_alter_same_type_display_options(column_test_table_with_service_layer_options,
-                                                client, engine):
+def test_column_alter_same_type_display_options(
+        column_test_table_with_service_layer_options,
+        client, engine
+):
     cache.clear()
     table, columns = column_test_table_with_service_layer_options
     column_index = 2
