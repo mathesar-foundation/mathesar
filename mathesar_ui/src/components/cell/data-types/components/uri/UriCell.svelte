@@ -2,9 +2,9 @@
   import { TextInput } from '@mathesar-component-library';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import SteppedInputCell from '../SteppedInputCell.svelte';
-  import type { TextBoxCellProps } from '../typeDefinitions';
+  import type { CellTypeProps } from '../typeDefinitions';
 
-  type $$Props = TextBoxCellProps;
+  type $$Props = CellTypeProps<string>;
 
   export let isActive: $$Props['isActive'];
   export let value: $$Props['value'] = undefined;
@@ -23,7 +23,7 @@
 >
   <span slot="content">
     <CellValue {value}>
-      <a href={value} target="_blank" class="link">{value}</a>
+      <a href={value ?? ''} target="_blank" class="link">{value}</a>
     </CellValue>
   </span>
   <TextInput
