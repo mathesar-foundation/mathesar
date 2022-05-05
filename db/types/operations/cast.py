@@ -40,12 +40,13 @@ FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
 FULL_CHAR = base.PostgresType.CHARACTER.value
 NAME = base.PostgresType.NAME.value
 
-DECIMAL_TYPES = frozenset([DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL])
+DECIMAL_TYPES = frozenset([DECIMAL, DOUBLE_PRECISION, FLOAT, REAL])
 INTEGER_TYPES = frozenset([BIGINT, INTEGER, SMALLINT])
-NUMBER_TYPES = DECIMAL_TYPES | INTEGER_TYPES
+NUMBER_TYPES = DECIMAL_TYPES | INTEGER_TYPES | frozenset([NUMERIC])
 TEXT_TYPES = frozenset([CHAR, TEXT, VARCHAR])
 
 MONEY_ARR_FUNC_NAME = "get_mathesar_money_array"
+NUMERIC_ARR_FUNC_NAME = "get_numeric_array"
 
 
 def get_supported_alter_column_types(engine, friendly_names=True):
@@ -161,6 +162,7 @@ def install_all_casts(engine):
     create_multicurrency_money_casts(engine)
     create_textual_casts(engine)
     create_uri_casts(engine)
+    create_numeric_casts(engine)
 
 
 def create_boolean_casts(engine):
@@ -242,6 +244,12 @@ def create_uri_casts(engine):
     type_body_map = _get_uri_type_body_map()
     create_cast_functions(uri.DB_TYPE, type_body_map, engine)
 
+def create_numeric_casts(engine):
+    numeric_array_create = _build_numeric_array_function()
+    with engine.begin() as conn:
+        conn.execute(text(numeric_array_create))
+    type_body_map = _get_numeric_type_body_map()
+    create_cast_functions(NUMERIC, type_body_map, engine)
 
 def get_full_cast_map(engine):
     full_cast_map = {}
@@ -959,6 +967,111 @@ def _get_uri_type_body_map():
     source_types = frozenset([uri.DB_TYPE]) | TEXT_TYPES
     return {type_: _get_text_uri_type_body_map() for type_ in source_types}
 
+def _get_numeric_type_body_map():
+    """
+    Get SQL strings that create various functions for casting different
+    types to numeric.
+    We allow casting any textual type to locale-agnostic numeric.
+    """
+    source_text_types = TEXT_TYPES
+    return {type: _get_text_to_numeric_cast() for type in source_text_types}
+
+def _get_text_to_numeric_cast():
+    numeric_array_function = base.get_qualified_name(NUMERIC_ARR_FUNC_NAME)
+    cast_exception_str = (
+        f"RAISE EXCEPTION '% cannot be cast to {NUMERIC}', $1;"
+    )
+    return rf"""
+    DECLARE decimal_point {TEXT};
+    DECLARE is_negative {BOOLEAN};
+    DECLARE money_arr {TEXT}[];
+    DECLARE money_num {TEXT};
+    BEGIN
+        SELECT {numeric_array_function}($1::{TEXT}) INTO money_arr;
+        IF money_arr IS NULL THEN
+            {cast_exception_str}
+        END IF;
+
+        SELECT money_arr[1] INTO money_num;
+        SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
+        SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
+
+        IF money_arr[2] IS NOT NULL THEN
+            SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
+        END IF;
+        IF money_arr[3] IS NOT NULL THEN
+            SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
+        END IF;
+        IF is_negative THEN
+            RETURN ('-' || money_num)::{NUMERIC};
+        END IF;
+        RETURN money_num::{NUMERIC};
+    END;
+    """
+
+def _build_numeric_array_function():
+    """
+    The main reason for this function to be separate is for testing. This
+    does have some performance impact; we should consider inlining later.
+    """
+    qualified_function_name = base.get_qualified_name(NUMERIC_ARR_FUNC_NAME)
+
+    no_separator_big = r"[0-9]{4,}(?:([,.])[0-9]+)?"
+    no_separator_small = r"[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?"
+    comma_separator_req_decimal = r"[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+"
+    period_separator_req_decimal = r"[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+"
+    comma_separator_opt_decimal = r"[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?"
+    period_separator_opt_decimal = r"[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?"
+    space_separator_opt_decimal = r"[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?"
+    comma_separator_lakh_system = r"[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?"
+
+    inner_number_tree = "|".join(
+        [
+            no_separator_big,
+            no_separator_small,
+            comma_separator_req_decimal,
+            period_separator_req_decimal,
+            comma_separator_opt_decimal,
+            period_separator_opt_decimal,
+            space_separator_opt_decimal,
+            comma_separator_lakh_system,
+        ]
+    )
+    numeric_finding_regex = f"^[-+]?(?:({inner_number_tree}))$"
+
+    actual_number_indices = [1, 16]
+    group_divider_indices = [4, 6, 8, 10, 12, 14, 19, 21, 23, 25, 27, 29]
+    decimal_point_indices = [2, 3, 5, 7, 9, 11, 13, 15, 17, 18, 20, 22, 24, 26, 28, 30]
+    actual_numbers_str = ','.join([f'raw_arr[{idx}]' for idx in actual_number_indices])
+    group_dividers_str = ','.join([f'raw_arr[{idx}]' for idx in group_divider_indices])
+    decimal_points_str = ','.join([f'raw_arr[{idx}]' for idx in decimal_point_indices])
+
+    return rf"""
+    CREATE OR REPLACE FUNCTION {qualified_function_name}({TEXT}) RETURNS {TEXT}[]
+    AS $$
+      DECLARE
+        raw_arr {TEXT}[];
+        actual_number_arr {TEXT}[];
+        group_divider_arr {TEXT}[];
+        decimal_point_arr {TEXT}[];
+        actual_number {TEXT};
+        group_divider {TEXT};
+        decimal_point {TEXT};
+      BEGIN
+        SELECT regexp_matches($1, '{numeric_finding_regex}') INTO raw_arr;
+        IF raw_arr IS NULL THEN
+          RETURN NULL;
+        END IF;
+        SELECT array_remove(ARRAY[{actual_numbers_str}], null) INTO actual_number_arr;
+        SELECT array_remove(ARRAY[{group_dividers_str}], null) INTO group_divider_arr;
+        SELECT array_remove(ARRAY[{decimal_points_str}], null) INTO decimal_point_arr;
+        SELECT actual_number_arr[1] INTO actual_number;
+        SELECT group_divider_arr[1] INTO group_divider;
+        SELECT decimal_point_arr[1] INTO decimal_point;
+        RETURN ARRAY[actual_number, group_divider, decimal_point];
+      END;
+    $$ LANGUAGE plpgsql;
+    """
 
 def _get_default_type_body_map(source_types, target_type_str):
     default_cast_str = f"""
