@@ -32,11 +32,11 @@ test('round trip serialization, complex case', () => {
         id: 123,
         metaProps: {
           filtering: new Filtering({
-            combination: { id: 'and', label: 'and' },
+            combination: 'and',
             entries: [
               {
                 columnId: 99,
-                condition: { id: 'eq', label: 'equals' },
+                conditionId: 'eq',
                 value: 'This is a column value',
               },
             ],

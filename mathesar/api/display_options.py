@@ -43,7 +43,13 @@ DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER = {
     },
     MathesarTypeIdentifier.DATE.value: lambda: {"options": [{"name": "format", "type": "string"}]},
     MathesarTypeIdentifier.DATETIME.value: lambda: {"options": [{"name": "format", "type": "string"}]},
-    MathesarTypeIdentifier.DURATION.value: lambda: {"options": [{"name": "format", "type": "string"}]},
+    MathesarTypeIdentifier.DURATION.value: lambda: {
+        "options": [
+            {"name": "min", "type": "string"},
+            {"name": "max", "type": "string"},
+            {"name": "show_units", "type": "boolean"},
+        ]
+    },
     MathesarTypeIdentifier.MONEY.value: money_display_options_schema,
     MathesarTypeIdentifier.NUMBER.value: lambda: {
         "options": [

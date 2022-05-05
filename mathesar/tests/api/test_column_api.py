@@ -879,3 +879,47 @@ def test_column_duplicate_no_parameters(column_test_table, client):
     assert response.status_code == 400
     assert response_data[0]["message"] == "This field is required."
     assert response_data[0]["field"] == "type"
+
+
+def test_column_update_type_with_display_and_type_options_as_null(column_test_table, client):
+    cache.clear()
+    type_ = "MATHESAR_TYPES.URI"
+    display_options = None
+    type_options = None
+    data = {
+        "type": type_,
+        "display_options": display_options,
+        "type_options": type_options
+    }
+    column = _get_columns_by_name(column_test_table, ['mycolumn3'])[0]
+    response = client.patch(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",
+        data=data,
+    )
+    assert response.status_code == 200
+    response_json = response.json()
+    assert response_json["type"] == type_
+    assert response_json["display_options"] == display_options
+    assert response_json["type_options"] == type_options
+
+
+def test_column_update_type_with_display_and_type_options_as_empty_objects(column_test_table, client):
+    cache.clear()
+    type_ = "MATHESAR_TYPES.URI"
+    display_options = {}
+    type_options = {}
+    data = {
+        "type": type_,
+        "display_options": display_options,
+        "type_options": type_options
+    }
+    column = _get_columns_by_name(column_test_table, ['mycolumn3'])[0]
+    response = client.patch(
+        f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",
+        data=data,
+    )
+    assert response.status_code == 200
+    response_json = response.json()
+    assert response_json["type"] == type_
+    assert response_json["display_options"] == {}
+    assert response_json["type_options"] is None

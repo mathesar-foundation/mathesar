@@ -4,8 +4,14 @@ import { makeFormatter } from './formatter';
 import { makeUniversalNumberParser } from './parsers';
 
 export default class StringifiedNumberFormatter extends AbstractNumberFormatter<string> {
-  format(value: string): string {
-    const parseResult = makeUniversalNumberParser(this.opts)(value);
+  format(canonicalStringifiedNumber: string): string {
+    const parseCanonical = makeUniversalNumberParser({
+      ...this.opts,
+      // Override the decimal separator because we're parsing a canonical
+      // stringified number.
+      decimalSeparator: '.',
+    });
+    const parseResult = parseCanonical(canonicalStringifiedNumber);
     switch (parseResult.value?.type) {
       case 'bigfloat':
         return parseResult.value.normalizedStringifiedNumber;
@@ -17,8 +23,9 @@ export default class StringifiedNumberFormatter extends AbstractNumberFormatter<
     }
   }
 
-  parse(input: string): ParseResult<string> {
-    const result = makeUniversalNumberParser(this.opts)(input);
+  parse(userInput: string): ParseResult<string> {
+    const parseUserInput = makeUniversalNumberParser(this.opts);
+    const result = parseUserInput(userInput);
     return {
       value: result.value?.normalizedStringifiedNumber ?? null,
       intermediateDisplay: result.intermediateDisplay,
