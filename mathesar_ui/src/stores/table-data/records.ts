@@ -284,7 +284,7 @@ export class RecordsData {
         index += 1;
         if (!retainExistingRows || !entry) {
           return {
-            state: 'processing',
+            state: 'loading',
             identifier: generateRowIdentifier('dummy', offset, index),
             rowIndex: index,
             record: {},
@@ -365,7 +365,7 @@ export class RecordsData {
           }),
       );
       await Promise.all(promises);
-      await this.fetch(true, true)
+      await this.fetch(true, true);
 
       const { offset } = getStoreValue(this.meta.pagination);
       const savedRecords = getStoreValue(this.savedRecords);
