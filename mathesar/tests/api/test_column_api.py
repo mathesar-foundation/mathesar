@@ -3,7 +3,7 @@ import json
 import pytest
 from unittest.mock import patch
 from django.core.cache import cache
-from sqlalchemy import Column, Integer, String, MetaData, Text, select, Boolean, TIMESTAMP
+from sqlalchemy import Column, Integer, String, MetaData, Text, select, Boolean, TIMESTAMP, TIME, DATE
 from sqlalchemy import Table as SATable
 
 from db.columns.operations.alter import alter_column_type
@@ -60,14 +60,20 @@ def column_test_table_with_service_layer_options(patent_schema):
         Column("mycolumn4", Text),
         Column("mycolumn5", Text),
         Column("mycolumn6", TIMESTAMP),
+        Column("mycolumn7", TIME),
+        Column("mycolumn8", DATE),
     ]
-    column_data_list = [{},
-                        {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
-                        {'display_options': {'show_as_percentage': True, 'number_format': "english"}},
-                        {'display_options': None},
-                        {},
-                        {},
-                        {'display_options': {'format': 'YYYY-MM-DD hh:mm'}}]
+    column_data_list = [
+        {},
+        {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
+        {'display_options': {'show_as_percentage': True, 'number_format': "english"}},
+        {'display_options': None},
+        {},
+        {},
+        {'display_options': {'time_format': 'hh:mm', 'date_format': 'YYYY-MM-DD'}},
+        {'display_options': {'format': 'hh:mm'}},
+        {'display_options': {'format': 'YYYY-MM-DD'}},
+    ]
     db_table = SATable(
         "anewtable",
         MetaData(bind=engine),
@@ -251,14 +257,15 @@ def test_column_create_invalid_default(column_test_table, client):
     assert f'default "{data["default"]}" is invalid for type' in response.json()[0]['message']
 
 
+# NOTE: display option value types are checked backend, but that's it: e.g. a time format may be any string.
 create_display_options_test_list = [
     ("BOOLEAN", {"input": "dropdown"}),
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
     ("DATE", {'format': 'YYYY-MM-DD'}),
     ("INTERVAL", {'min': 's', 'max': 'h', 'show_units': True}),
     ("NUMERIC", {"show_as_percentage": True, 'number_format': "english"}),
-    ("TIMESTAMP WITH TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
-    ("TIMESTAMP WITHOUT TIME ZONE", {'format': 'YYYY-MM-DD hh:mm'}),
+    ("TIMESTAMP WITH TIME ZONE", {'date_format': 'x', 'time_format': 'x'}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'date_format': 'x', 'time_format': 'x'}),
     ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm'}),
     ("TIME WITH TIME ZONE", {'format': 'hh:mm Z'}),
 ]
