@@ -47,6 +47,13 @@ describe('parse', () => {
       expect(() => formatter.parse(input)).toThrow();
     },
   );
+
+  test('empty string', () => {
+    const formatter = new DurationFormatter(
+      new DurationSpecification({ min: 'm', max: 's' }),
+    );
+    expect(formatter.parse('').value).toBeNull();
+  });
 });
 
 describe('format', () => {

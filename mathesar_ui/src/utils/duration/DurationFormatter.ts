@@ -15,7 +15,7 @@ const FLOAT_REGEX = /^((\.?\d+)|(\d+(\.\d+)?))$/;
 function parseRawDurationStringToISOString(
   specification: DurationSpecification,
   userInput: string,
-): string {
+): string | null {
   let unitsInRange = specification.getUnitsInRange();
   if (unitsInRange[unitsInRange.length - 1] === 'ms') {
     unitsInRange = unitsInRange.slice(0, unitsInRange.length - 1);
@@ -23,7 +23,7 @@ function parseRawDurationStringToISOString(
 
   let cleanedInput = userInput.trim();
   if (cleanedInput === '') {
-    return dayjs.duration(0, 's').toISOString();
+    return null;
   }
 
   const firstEntry = cleanedInput[0];
