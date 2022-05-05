@@ -64,11 +64,13 @@
   async function setValue(newValue: unknown) {
     if (newValue !== value) {
       value = newValue;
+      let updatedRow;
       if (row.isNew) {
-        await recordsData.createOrUpdateRecord(row, column);
+        updatedRow = await recordsData.createOrUpdateRecord(row, column);
       } else {
-        await recordsData.updateCell(row, column);
+        updatedRow = await recordsData.updateCell(row, column);
       }
+      value = updatedRow.record?.[column.id] ?? value;
     }
   }
 
