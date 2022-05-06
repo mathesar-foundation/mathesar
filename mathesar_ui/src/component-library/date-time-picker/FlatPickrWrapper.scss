@@ -1,0 +1,11 @@
+/* TODO: Find a cleaner way to do this */
+@import "flatpickr/dist/flatpickr.min.css";
+
+.flatpickr-calendar {
+  border-radius: 0;
+  box-shadow: none;
+
+  &.inline {
+    top: 0px;
+  }
+}

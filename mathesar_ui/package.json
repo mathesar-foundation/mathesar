@@ -74,6 +74,7 @@
     "@popperjs/core": "^2.9.2",
     "dayjs": "^1.11.1",
     "fast-diff": "^1.2.0",
+    "flatpickr": "^4.6.13",
     "iter-tools": "^7.3.1",
     "js-cookie": "^2.2.1",
     "perfect-scrollbar": "^1.5.1"
