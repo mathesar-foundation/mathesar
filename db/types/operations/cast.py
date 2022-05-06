@@ -757,7 +757,7 @@ def _build_mathesar_money_array_function():
         SELECT actual_number_arr[1] INTO actual_number;
         SELECT group_divider_arr[1] INTO group_divider;
         SELECT decimal_point_arr[1] INTO decimal_point;
-        RETURN ARRAY[actual_number, group_divider, decimal_point];
+        RETURN ARRAY[actual_number, group_divider, decimal_point, replace($1, actual_number, '')];
       END;
     $$ LANGUAGE plpgsql;
     """
