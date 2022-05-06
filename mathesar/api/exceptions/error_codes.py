@@ -33,6 +33,7 @@ class ErrorCodes(Enum):
     ColumnSizeMismatch = 4401
     DistinctColumnNameRequired = 4402
     MultipleDataFiles = 4400
+    MoneyDisplayOptionConflict = 4407
     UnsupportedAlter = 4403
     URLDownloadError = 4404
     URLNotReachableError = 4405
