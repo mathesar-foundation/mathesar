@@ -280,7 +280,7 @@ create_display_options_test_list = [
     ("MONEY",
      {'number_format': "english", 'currency_symbol': '$', 'currency_symbol_location': 'after-minus'},
      {'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'number_format': "english"}),
-    ("NUMERIC", {"show_as_percentage": True}, {"show_as_percentage": True}),
+    ("NUMERIC", {"show_as_percentage": True, 'number_format': None}, {"show_as_percentage": True, 'number_format': None}),
     ("NUMERIC",
      {"show_as_percentage": True, 'number_format': "english"},
      {"show_as_percentage": True, 'number_format': "english"}),
