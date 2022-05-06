@@ -5,8 +5,8 @@ import type {
   InputFormatter,
   ParseResult,
 } from '@mathesar-component-library/types';
+import type { DurationUnit } from '@mathesar/api/tables/columns';
 import type DurationSpecification from './DurationSpecification';
-import type { DurationUnit } from './DurationSpecification';
 
 dayjs.extend(durationPlugin);
 
