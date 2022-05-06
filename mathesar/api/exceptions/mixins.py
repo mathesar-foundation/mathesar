@@ -19,6 +19,13 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
         2. Add field to the pretty exception body if raised by field validation method
         """
         pretty = []
+        if self.is_pretty(errors):
+            # DRF serializers supports error any of the following format, error string, list of error strings or {'field': [error strings]}
+            # Since our exception is an object instead of a string, the object properties are mistaken to be fields of a serializer,
+            # and it gets converted into {'field': [error strings]} by DRF
+            # We need to convert it to dictionary of list of object and return it instead of passing it down the line
+            scalar_errors = dict(map(lambda item: (item[0], item[1][0] if type(item[1]) == list else item[1]), errors.items()))
+            return [scalar_errors]
         for error_type in errors:
             error = errors[error_type]
             if error_type == 'non_field_errors':

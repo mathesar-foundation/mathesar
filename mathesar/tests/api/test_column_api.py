@@ -10,6 +10,7 @@ from db.columns.operations.alter import alter_column_type
 from db.columns.operations.select import get_column_attnum_from_name
 from db.tables.operations.select import get_oid_from_table
 from db.tests.types import fixtures
+from db.types.money import MathesarMoney
 from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.models import Column as ServiceLayerColumn
@@ -58,7 +59,7 @@ def column_test_table_with_service_layer_options(patent_schema):
         Column("mycolumn2", Integer),
         Column("mycolumn3", Text),
         Column("mycolumn4", Text),
-        Column("mycolumn5", Text),
+        Column("mycolumn5", MathesarMoney),
         Column("mycolumn6", TIMESTAMP),
         Column("mycolumn7", TIME),
         Column("mycolumn8", DATE),
@@ -69,7 +70,15 @@ def column_test_table_with_service_layer_options(patent_schema):
         {'display_options': {'show_as_percentage': True, 'number_format': "english"}},
         {'display_options': None},
         {},
-        {},
+        {
+            'display_options': {
+                'currency_details': {
+                    'currency_symbol': "HK $",
+                    'number_format': "english",
+                    'currency_symbol_location': 'after-minus'
+                }
+            }
+        },
         {'display_options': {'time_format': 'hh:mm', 'date_format': 'YYYY-MM-DD'}},
         {'display_options': {'format': 'hh:mm'}},
         {'display_options': {'format': 'YYYY-MM-DD'}},
@@ -86,9 +95,13 @@ def column_test_table_with_service_layer_options(patent_schema):
     service_columns = []
     for column_data in zip(column_list_in, column_data_list):
         attnum = get_column_attnum_from_name(db_table_oid, column_data[0].name, engine)
-        service_columns.append(ServiceLayerColumn.current_objects.get_or_create(table=table,
-                                                                                attnum=attnum,
-                                                                                display_options=column_data[1].get('display_options', None))[0])
+        service_columns.append(
+            ServiceLayerColumn.current_objects.get_or_create(
+                table=table,
+                attnum=attnum,
+                display_options=column_data[1].get('display_options', None)
+            )[0]
+        )
     return table, service_columns
 
 
@@ -259,21 +272,28 @@ def test_column_create_invalid_default(column_test_table, client):
 
 # NOTE: display option value types are checked backend, but that's it: e.g. a time format may be any string.
 create_display_options_test_list = [
-    ("BOOLEAN", {"input": "dropdown"}),
-    ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
-    ("DATE", {'format': 'YYYY-MM-DD'}),
-    ("INTERVAL", {'min': 's', 'max': 'h', 'show_units': True}),
-    ("NUMERIC", {"show_as_percentage": True, 'number_format': "english"}),
-    ("TIMESTAMP WITH TIME ZONE", {'date_format': 'x', 'time_format': 'x'}),
-    ("TIMESTAMP WITHOUT TIME ZONE", {'date_format': 'x', 'time_format': 'x'}),
-    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm'}),
-    ("TIME WITH TIME ZONE", {'format': 'hh:mm Z'}),
+    ("BOOLEAN", {"input": "dropdown"}, {"input": "dropdown"}),
+    ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}},
+     {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
+    ("DATE", {'format': 'YYYY-MM-DD'}, {'format': 'YYYY-MM-DD'}),
+    ("INTERVAL", {'min': 's', 'max': 'h', 'show_units': True}, {'min': 's', 'max': 'h', 'show_units': True}),
+    ("MONEY",
+     {'number_format': "english", 'currency_symbol': '$', 'currency_symbol_location': 'after-minus'},
+     {'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'number_format': "english"}),
+    ("NUMERIC", {"show_as_percentage": True}, {"show_as_percentage": True}),
+    ("NUMERIC",
+     {"show_as_percentage": True, 'number_format': "english"},
+     {"show_as_percentage": True, 'number_format': "english"}),
+    ("TIMESTAMP WITH TIME ZONE", {'date_format': 'x', 'time_format': 'x'}, {'date_format': 'x', 'time_format': 'x'}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'date_format': 'x', 'time_format': 'x'}, {'date_format': 'x', 'time_format': 'x'}),
+    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm'}, {'format': 'hh:mm'}),
+    ("TIME WITH TIME ZONE", {'format': 'hh:mm Z'}, {'format': 'hh:mm Z'}),
 ]
 
 
-@pytest.mark.parametrize("type_,display_options", create_display_options_test_list)
+@pytest.mark.parametrize("type_,display_options, expected_display_options", create_display_options_test_list)
 def test_column_create_display_options(
-    column_test_table, type_, display_options, client, engine
+        column_test_table, type_, display_options, expected_display_options, client, engine
 ):
     cache.clear()
     name = "anewcolumn"
@@ -286,18 +306,19 @@ def test_column_create_display_options(
         f"/api/db/v0/tables/{column_test_table.id}/columns/"
     )
     actual_new_col = new_columns_response.json()["results"][-1]
-    assert actual_new_col["display_options"] == display_options
+    assert actual_new_col["display_options"] == expected_display_options
 
 
 _too_long_string = "x" * 256
 
-
 create_display_options_invalid_test_list = [
-    ("BOOLEAN", {"input": "invalid"}),
-    ("BOOLEAN", {"input": "checkbox", "custom_labels": {"yes": "yes", "1": "no"}}),
+    ("BOOLEAN", {"input": "invalid", "use_custom_columns": False}),
+    ("BOOLEAN", {"input": "checkbox", "use_custom_columns": True, "custom_labels": {"yes": "yes", "1": "no"}}),
+    ("DATE", {'format': _too_long_string}),
+    ("MONEY", {'currency_symbol': '$', 'currency_symbol_location': 'middle'}),
+    ("MONEY", {'currency_symbol': None}),
     ("NUMERIC", {"show_as_percentage": "wrong value type"}),
     ("NUMERIC", {'number_format': "wrong"}),
-    ("DATE", {'format': _too_long_string}),
     ("TIMESTAMP WITH TIME ZONE", {'format': []}),
     ("TIMESTAMP WITHOUT TIME ZONE", {'format': _too_long_string}),
     ("TIME WITH TIME ZONE", {'format': _too_long_string}),
@@ -307,7 +328,7 @@ create_display_options_invalid_test_list = [
 
 @pytest.mark.parametrize("type_,display_options", create_display_options_invalid_test_list)
 def test_column_create_wrong_display_options(
-    column_test_table, type_, display_options, client, engine
+        column_test_table, type_, display_options, client, engine
 ):
     cache.clear()
     name = "anewcolumn"
@@ -521,8 +542,10 @@ def test_column_update_type_get_all_columns(column_test_table_with_service_layer
     assert new_columns_response.status_code == 200
 
 
-def test_column_display_options_type_on_reflection(column_test_table,
-                                                   client, engine):
+def test_column_display_options_type_on_reflection(
+        column_test_table,
+        client, engine
+):
     cache.clear()
     table = column_test_table
     response = client.get(
@@ -533,8 +556,10 @@ def test_column_display_options_type_on_reflection(column_test_table,
         assert column["display_options"] is None
 
 
-def test_column_invalid_display_options_type_on_reflection(column_test_table_with_service_layer_options,
-                                                           client, engine):
+def test_column_invalid_display_options_type_on_reflection(
+        column_test_table_with_service_layer_options,
+        client, engine
+):
     cache.clear()
     table, columns = column_test_table_with_service_layer_options
     column_index = 2
@@ -548,8 +573,10 @@ def test_column_invalid_display_options_type_on_reflection(column_test_table_wit
     assert response.json()["display_options"] is None
 
 
-def test_column_alter_same_type_display_options(column_test_table_with_service_layer_options,
-                                                client, engine):
+def test_column_alter_same_type_display_options(
+        column_test_table_with_service_layer_options,
+        client, engine
+):
     cache.clear()
     table, columns = column_test_table_with_service_layer_options
     column_index = 2
