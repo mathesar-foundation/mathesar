@@ -1,23 +1,48 @@
 from rest_framework import serializers
 
+from db.links.operations.create import create_foreign_key_link
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.api.serializers.columns import SimpleColumnSerializer
+from mathesar.api.exceptions.validation_exceptions.exceptions import ColumnSizeMismatchAPIException
 from mathesar.api.serializers.shared_serializers import (
     MathesarPolymorphicErrorMixin,
     ReadWritePolymorphicSerializerMappingMixin,
 )
-from mathesar.api.serializers.tables import TableSerializer
+from mathesar.models import Table
 
 
 class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
-    column = SimpleColumnSerializer(required=False)
-    column_id = serializers.PrimaryKeyRelatedField(required=False)
-    referent_column_id = serializers.PrimaryKeyRelatedField()
+    column_name = serializers.CharField()
+    reference_table = serializers.PrimaryKeyRelatedField(queryset=Table.objects.all())
+    referent_table = serializers.PrimaryKeyRelatedField(queryset=Table.objects.all())
+
+    def is_link_unique(self):
+        return True
+
+    def create(self, validated_data):
+        reference_table: Table = validated_data['reference_table']
+        create_foreign_key_link(
+            reference_table.schema._sa_engine,
+            reference_table._sa_table.schema,
+            validated_data.get('column_name'),
+            reference_table.oid,
+            validated_data.get('referent_table').oid,
+            unique_link=self.is_link_unique()
+        )
+        return validated_data
+
+
+class OneToManySerializer(OneToOneSerializer):
+
+    def is_link_unique(self):
+        return False
 
 
 class ManyToManySerializer(MathesarErrorMessageMixin, serializers.Serializer):
-    referent_columns = serializers.PrimaryKeyRelatedField(many=True)
-    map_table = TableSerializer()
+    referent_tables = serializers.PrimaryKeyRelatedField(queryset=Table.objects.all(), many=True)
+    map_table_name = serializers.CharField()
+
+    def save(self, **kwargs):
+        return super().save(**kwargs)
 
 
 class LinksMappingSerializer(
@@ -25,15 +50,19 @@ class LinksMappingSerializer(
     ReadWritePolymorphicSerializerMappingMixin,
     serializers.Serializer
 ):
+    def create(self, validated_data):
+        serializer = self.serializers_mapping.get(self.get_mapping_field())
+        return serializer.create(validated_data)
+
     serializers_mapping = {
         "o2o": OneToOneSerializer,
+        "o2m": OneToManySerializer,
         "m2m": ManyToManySerializer
     }
+    link_type = serializers.CharField(required=True)
 
     def get_mapping_field(self):
-        return self.instance.link_type
-
-
-class ConstraintSerializer(serializers.ModelSerializer):
-    link_type = serializers.IntegerField()
-    data = LinksMappingSerializer()
+        link_type = self.initial_data.get('link_type', None)
+        if link_type is None:
+            raise ColumnSizeMismatchAPIException()
+        return link_type
