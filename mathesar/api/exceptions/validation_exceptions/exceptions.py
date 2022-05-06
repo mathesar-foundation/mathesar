@@ -36,3 +36,15 @@ class MultipleDataFileAPIException(MathesarValidationException):
             details=None,
     ):
         super().__init__(None, self.error_code, message, field, details)
+
+
+class MoneyDisplayOptionValueConflictAPIException(MathesarValidationException):
+    error_code = ErrorCodes.MoneyDisplayOptionConflict.value
+
+    def __init__(
+            self,
+            message="Money type cannot specify a currency code display option as well as other display options.",
+            field=None,
+            details=None,
+    ):
+        super().__init__(None, self.error_code, message, field, details)

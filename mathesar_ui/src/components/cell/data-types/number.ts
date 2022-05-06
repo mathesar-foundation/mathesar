@@ -14,41 +14,49 @@ const localeMap = new Map<NumberFormat, string>([
   ['swiss'   , 'de-CH' ],
 ]);
 
-function numberColumnIsInteger(column: NumberColumn): boolean {
-  switch (column.type) {
-    case 'INTEGER':
-    case 'BIGINT':
-    case 'SMALLINT':
-    case 'SERIAL':
-    case 'BIGSERIAL':
-    case 'SMALLSERIAL':
-      return true;
-    case 'DOUBLE PRECISION':
-    case 'REAL':
-      return false;
-    case 'DECIMAL':
-    case 'NUMERIC':
-      return (column.type_options?.scale ?? Infinity) === 0;
-    default:
-      return false;
-  }
+/**
+ * The strategy for determining the `allowFloat` prop, based on the column's
+ * type_options.
+ */
+type FloatAllowanceStrategy = 'always' | 'never' | 'scale-based';
+
+interface Config extends Record<string, unknown> {
+  floatAllowanceStrategy: FloatAllowanceStrategy;
 }
 
-function getProps(column: NumberColumn): NumberCellExternalProps {
+function getAllowFloat(
+  column: NumberColumn,
+  floatAllowanceStrategy?: FloatAllowanceStrategy,
+): boolean {
+  if (floatAllowanceStrategy === 'scale-based') {
+    return (column.type_options?.scale ?? Infinity) !== 0;
+  }
+  if (floatAllowanceStrategy === 'never') {
+    return false;
+  }
+  return true;
+}
+
+function getProps(
+  column: NumberColumn,
+  config?: Config,
+): NumberCellExternalProps {
   const format = column.display_options?.number_format ?? null;
   const props = {
     locale: (format && localeMap.get(format)) ?? undefined,
     isPercentage: column.display_options?.show_as_percentage ?? false,
-    allowFloat: !numberColumnIsInteger(column),
+    allowFloat: getAllowFloat(column, config?.floatAllowanceStrategy),
   };
   return props;
 }
-
 const numberType: CellComponentFactory = {
-  get(column: NumberColumn): ComponentAndProps<NumberCellExternalProps> {
+  get(
+    column: NumberColumn,
+    config?: Config,
+  ): ComponentAndProps<NumberCellExternalProps> {
     return {
       component: NumberCell,
-      props: getProps(column),
+      props: getProps(column, config),
     };
   },
 
@@ -57,10 +65,13 @@ const numberType: CellComponentFactory = {
    * require additional operations like `isPercentage`, it's better to use a
    * dedicated `NumberCellInput` component.
    */
-  getInput(column: NumberColumn): ComponentAndProps<NumberCellExternalProps> {
+  getInput(
+    column: NumberColumn,
+    config?: Config,
+  ): ComponentAndProps<NumberCellExternalProps> {
     return {
       component: NumberCellInput,
-      props: getProps(column),
+      props: getProps(column, config),
     };
   },
 };

@@ -11,6 +11,7 @@ export interface SelectProps<Option> extends BaseInputProps {
   prependBlank?: boolean;
   contentClass?: string;
   triggerClass?: string;
+  class?: string;
   triggerAppearance?: Appearance;
   ariaLabel?: string;
   valuesAreEqual?: ListBoxProps<Option | undefined>['checkEquality'];
