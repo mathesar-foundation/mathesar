@@ -10,7 +10,7 @@ import type {
 
 const DB_TYPES = {
   MONEY: 'MONEY',
-  MATHESAR_TYPES__MATHESAR_MONEY: 'MATHESAR_TYPES__MATHESAR_MONEY',
+  MATHESAR_TYPES__MATHESAR_MONEY: 'MATHESAR_TYPES.MATHESAR_MONEY',
 };
 
 const dbForm: AbstractTypeConfigForm = {
@@ -52,7 +52,10 @@ function determineDbTypeAndOptions(
   columnType: DbType,
 ): ReturnType<AbstractTypeDbConfig['determineDbTypeAndOptions']> {
   return {
-    dbType: columnType,
+    dbType:
+      columnType === DB_TYPES.MONEY
+        ? DB_TYPES.MONEY
+        : DB_TYPES.MATHESAR_TYPES__MATHESAR_MONEY,
     typeOptions: {
       precision: dbFormValues.maxDigits,
       scale: dbFormValues.decimalPlaces,
