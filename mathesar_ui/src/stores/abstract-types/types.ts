@@ -1,7 +1,6 @@
 import type {
   FormConfiguration,
   FormConfigurationVariable,
-  FormInputDataType,
   FormValues,
 } from '@mathesar-component-library/types';
 import type { CellDataType } from '@mathesar/components/cell/data-types/typeDefinitions';
@@ -20,9 +19,11 @@ export interface AbstractTypeResponse {
   db_types: DbType[];
 }
 
-interface AbstractTypeConfigFormVariable extends FormConfigurationVariable {
-  conditionalDefault?: Record<DbType, FormInputDataType>;
+export interface AbstractTypeConfigFormVariable
+  extends FormConfigurationVariable {
+  conditionalDefault?: Record<DbType, unknown>;
 }
+
 export interface AbstractTypeConfigForm extends FormConfiguration {
   variables: Record<string, AbstractTypeConfigFormVariable>;
 }

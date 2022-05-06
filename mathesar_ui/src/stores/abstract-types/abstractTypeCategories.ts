@@ -4,6 +4,7 @@ import Text from './type-configs/text';
 import Money from './type-configs/money';
 import Number from './type-configs/number';
 import Boolean from './type-configs/boolean';
+import Duration from './type-configs/duration';
 import Fallback from './type-configs/fallback';
 import type {
   AbstractType,
@@ -24,6 +25,7 @@ const abstractTypeCategories: Partial<
   [abstractTypeCategory.Money]: Money,
   [abstractTypeCategory.Number]: Number,
   [abstractTypeCategory.Boolean]: Boolean,
+  [abstractTypeCategory.Duration]: Duration,
   [abstractTypeCategory.Other]: Fallback,
 };
 

@@ -77,6 +77,14 @@ export interface BooleanDisplayOptions extends Record<string, unknown> {
   } | null;
 }
 
+export type DurationUnit = 'd' | 'h' | 'm' | 's' | 'ms';
+
+export interface DurationDisplayOptions extends Record<string, unknown> {
+  min: DurationUnit | null;
+  max: DurationUnit | null;
+  show_units: boolean | null;
+}
+
 export interface BaseColumn {
   id: number;
   name: string;
@@ -117,6 +125,7 @@ export interface PostgresMoneyColumn extends Column {
 
 export type MoneyColumn = MathesarMoneyColumn | PostgresMoneyColumn;
 
+// TODO: Remove specification DB types here
 export interface NumberColumn extends Column {
   type:
     | 'BIGINT'
