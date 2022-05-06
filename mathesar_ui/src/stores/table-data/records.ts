@@ -401,17 +401,19 @@ export class RecordsData {
     }
   }
 
-  async updateCell(row: Row, column: Column): Promise<void> {
+  // TODO: It would be better to throw errors instead of silently failing
+  // and returning a value.
+  async updateCell(row: Row, column: Column): Promise<Row> {
     const { record } = row;
     if (!record) {
       console.error('Unable to update row that does not have a record');
-      return;
+      return row;
     }
     const { primaryKeyColumnId } = this.columnsDataStore.get();
     if (!primaryKeyColumnId) {
       // eslint-disable-next-line no-console
       console.error('Unable to update record for a row without a primary key');
-      return;
+      return row;
     }
     const primaryKeyValue = record[primaryKeyColumnId];
     if (primaryKeyValue === undefined) {
@@ -419,13 +421,13 @@ export class RecordsData {
       console.error(
         'Unable to update record for a row with a missing primary key value',
       );
-      return;
+      return row;
     }
     const rowKey = getRowKey(row, primaryKeyColumnId);
     const cellKey = getCellKey(rowKey, column.id);
     this.meta.cellModificationStatus.set(cellKey, { state: 'processing' });
     this.updatePromises?.get(cellKey)?.cancel();
-    const promise = patchAPI<unknown>(
+    const promise = patchAPI<ApiRecord>(
       `${this.url}${String(primaryKeyValue)}/`,
       { [column.id]: record[column.id] },
     );
@@ -435,8 +437,12 @@ export class RecordsData {
     this.updatePromises.set(cellKey, promise);
 
     try {
-      await promise;
+      const result = await promise;
       this.meta.cellModificationStatus.set(cellKey, { state: 'success' });
+      return {
+        ...row,
+        record: result,
+      };
     } catch (err) {
       this.meta.cellModificationStatus.set(cellKey, {
         state: 'failure',
@@ -447,6 +453,7 @@ export class RecordsData {
         this.updatePromises.delete(cellKey);
       }
     }
+    return row;
   }
 
   getNewEmptyRecord(): Row {
@@ -468,7 +475,7 @@ export class RecordsData {
     return newRecord;
   }
 
-  async createRecord(row: Row): Promise<void> {
+  async createRecord(row: Row): Promise<Row> {
     const { primaryKeyColumnId } = this.columnsDataStore.get();
     const rowKeyOfBlankRow = getRowKey(row, primaryKeyColumnId);
     this.meta.rowCreationStatus.set(rowKeyOfBlankRow, { state: 'processing' });
@@ -498,6 +505,7 @@ export class RecordsData {
         }),
       );
       this.totalCount.update((count) => (count ?? 0) + 1);
+      return newRow;
     } catch (err) {
       this.meta.rowCreationStatus.set(rowKeyOfBlankRow, {
         state: 'failure',
@@ -508,9 +516,10 @@ export class RecordsData {
         this.createPromises.delete(rowKeyOfBlankRow);
       }
     }
+    return row;
   }
 
-  async createOrUpdateRecord(row: Row, column: Column): Promise<void> {
+  async createOrUpdateRecord(row: Row, column: Column): Promise<Row> {
     const { primaryKeyColumnId } = this.columnsDataStore.get();
 
     // Row may not have been updated yet in view when additional request is made.
@@ -529,16 +538,18 @@ export class RecordsData {
       });
     }
 
+    let result = row;
     if (
       primaryKeyColumnId &&
       !existingNewRecordRow?.record?.[primaryKeyColumnId] &&
       row.isNew &&
       !row.record?.[primaryKeyColumnId]
     ) {
-      await this.createRecord(row);
+      result = await this.createRecord(row);
     } else {
-      await this.updateCell(row, column);
+      result = await this.updateCell(row, column);
     }
+    return result;
   }
 
   async addEmptyRecord(): Promise<void> {
