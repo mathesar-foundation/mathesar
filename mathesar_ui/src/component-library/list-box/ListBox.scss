@@ -8,6 +8,17 @@ ul.list-box-options {
     position: relative;
     padding: 6px 12px;
     cursor: default;
+    box-sizing: content-box;
+    line-height: 1.2;
+    min-height: 1.2em;
+
+    // Disable text selection. Without this, if I inadvertently drag my mouse
+    // over some blank space in the option, then I select text outside the
+    // ListBox.
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 
     &:hover {
       background: #f3f4f5;

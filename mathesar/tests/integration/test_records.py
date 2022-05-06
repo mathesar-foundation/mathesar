@@ -18,7 +18,7 @@ def test_add_row(page, go_to_patents_data_table):
     expect(page.locator("text=KSC-12871")).to_be_visible()
 
     page.click("button:has-text('New Record')")
-    expect(page.locator(".row.created .cell.is-pk:has-text('1394')")).to_be_visible()
+    expect(page.locator(".row.created .cell.is-pk:has-text('1,394')")).to_be_visible()
 
 
 def test_sort_table_by_column(page, go_to_patents_data_table):

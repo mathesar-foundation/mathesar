@@ -65,3 +65,10 @@ def get_cell_selector(page, table, row_number, column_name):
     cell_locator = page.locator(cell_selector)
     expect(cell_locator).to_be_visible()
     return cell_selector
+
+
+def get_default_value_checkbox(page):
+    default_value_cb_selector = "span:has-text('Set Default Value') input[type='checkbox']"
+    cb_locator = page.locator(default_value_cb_selector)
+    expect(cb_locator).to_be_visible()
+    return cb_locator

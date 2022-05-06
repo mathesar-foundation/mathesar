@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TextInput } from '@mathesar-component-library';
+  import { TextInput, optionalNonNullable } from '@mathesar-component-library';
   import SteppedInputCell from '../SteppedInputCell.svelte';
   import type { TextBoxCellProps } from '../typeDefinitions';
 
@@ -25,7 +25,7 @@
 >
   <TextInput
     focusOnMount={true}
-    maxlength={length}
+    maxlength={optionalNonNullable(length)}
     {disabled}
     bind:value
     on:blur={handleInputBlur}

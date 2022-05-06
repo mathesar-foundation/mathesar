@@ -11,6 +11,7 @@
     faCog,
     faICursor,
     faKey,
+    faLink,
   } from '@fortawesome/free-solid-svg-icons';
   import { States } from '@mathesar/utils/api';
   import {
@@ -27,16 +28,21 @@
   import { getTabsForSchema } from '@mathesar/stores/tabs';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { modal } from '@mathesar/stores/modal';
-  import TableConstraints from '../constraints/TableConstraints.svelte';
-  import DisplayFilter from '../display-options/DisplayFilter.svelte';
-  import DisplaySort from '../display-options/DisplaySort.svelte';
-  import DisplayGroup from '../display-options/DisplayGroup.svelte';
+  import LinkTableModal from '@mathesar/sections/table-view/link-table/LinkTableModal.svelte';
+  import TableConstraints from '@mathesar/sections/table-view/constraints/TableConstraints.svelte';
+  // import DisplayGroup from '@mathesar/sections/table-view/display-options/DisplayGroup.svelte';
+  import Sort from './record-operations/Sort.svelte';
+  import Filter from './record-operations/Filter.svelte';
   import RenameTableModal from './RenameTableModal.svelte';
+  import type { ProcessedTableColumnMap } from '../utils';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
   const tableConstraintsModal = modal.spawnModalController();
+  const linkTableModal = modal.spawnModalController();
   const tableRenameModal = modal.spawnModalController();
+
+  export let processedTableColumnsMap: ProcessedTableColumnMap;
 
   $: ({ columnsDataStore, recordsData, meta, constraintsDataStore } =
     $tabularData);
@@ -100,9 +106,14 @@
 
   <RenameTableModal controller={tableRenameModal} tabularData={$tabularData} />
 
+  <LinkTableModal
+    controller={linkTableModal}
+    on:goToConstraints={() => tableConstraintsModal.open()}
+  />
+
   <div class="divider" />
 
-  <Dropdown showArrow={false}>
+  <Dropdown showArrow={false} contentClass="filter-dropdown-content">
     <svelte:fragment slot="trigger">
       <Icon data={faFilter} size="0.8em" />
       <span>
@@ -113,7 +124,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <DisplayFilter {columns} filtering={meta.filtering} />
+      <Filter {processedTableColumnsMap} filtering={meta.filtering} />
     </svelte:fragment>
   </Dropdown>
 
@@ -128,7 +139,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <DisplaySort {columns} sorting={meta.sorting} />
+      <Sort {columns} sorting={meta.sorting} />
     </svelte:fragment>
   </Dropdown>
 
@@ -143,7 +154,7 @@
       </span>
     </svelte:fragment>
     <svelte:fragment slot="content">
-      <DisplayGroup {columns} grouping={meta.grouping} />
+      <!-- <DisplayGroup {columns} grouping={meta.grouping} /> -->
     </svelte:fragment>
   </Dropdown>
 
@@ -151,7 +162,14 @@
 
   <Button size="small" on:click={() => recordsData.addEmptyRecord()}>
     <Icon data={faPlus} />
-    <span> New Record </span>
+    <span>New Record</span>
+  </Button>
+
+  <div class="divider" />
+
+  <Button size="small" on:click={() => linkTableModal.open()}>
+    <Icon data={faLink} />
+    <span>Link Table</span>
   </Button>
 
   {#if $selectedRows.size > 0}

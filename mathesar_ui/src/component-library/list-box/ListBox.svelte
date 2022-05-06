@@ -13,11 +13,7 @@
 
   type Option = $$Generic;
   type $$Props = ListBoxProps<Option>;
-
-  // We need to set types to required to use with props exported in the
-  // component or else the component assumes the props can be 'undefined' as a
-  // value and throws errors, even though we set default values to them.
-  type $$DefinedProps = Required<$$Props>;
+  type DefinedProps = Required<$$Props>;
 
   interface $$Slots {
     default: {
@@ -26,21 +22,22 @@
     };
   }
 
-  const dispatch = createEventDispatcher<{ change: $$DefinedProps['value'] }>();
+  const dispatch = createEventDispatcher<{ change: DefinedProps['value'] }>();
 
-  export let selectionType: $$DefinedProps['selectionType'] = 'multiple';
-  export let options: $$DefinedProps['options'];
-  export let value: $$DefinedProps['value'] = [];
+  export let selectionType: DefinedProps['selectionType'] = 'multiple';
+  export let options: DefinedProps['options'];
+  export let value: DefinedProps['value'] = [];
 
-  export let searchable: $$DefinedProps['searchable'] = false;
-  export let disabled: $$DefinedProps['disabled'] = false;
-  export let labelKey: $$DefinedProps['labelKey'] = 'label';
-  export let getLabel: $$DefinedProps['getLabel'] = defaultGetLabel;
-  export let checkEquality: $$DefinedProps['checkEquality'] = (
+  export let searchable: DefinedProps['searchable'] = false;
+  export let disabled: DefinedProps['disabled'] = false;
+  export let labelKey: DefinedProps['labelKey'] = 'label';
+  export let getLabel: DefinedProps['getLabel'] = (option: Option) =>
+    defaultGetLabel(option, labelKey);
+  export let checkEquality: DefinedProps['checkEquality'] = (
     opt: Option,
-    opt2: Option | undefined,
+    opt2: Option,
   ) => opt === opt2;
-  export let checkIfOptionIsDisabled: $$DefinedProps['checkIfOptionIsDisabled'] =
+  export let checkIfOptionIsDisabled: DefinedProps['checkIfOptionIsDisabled'] =
     () => false;
 
   const isOpen = writable(false);
@@ -56,7 +53,7 @@
 
   function focusSelected(): void {
     const lastSelectedOption = value[value.length - 1];
-    if (lastSelectedOption) {
+    if (typeof lastSelectedOption !== 'undefined') {
       $focusedOptionIndex = $displayedOptions.findIndex((opt) =>
         checkEquality(lastSelectedOption, opt),
       );
@@ -166,7 +163,7 @@
 
   function pickFocused(): void {
     const focusedOption = $displayedOptions[$focusedOptionIndex];
-    if (focusedOption) {
+    if (typeof focusedOption !== 'undefined') {
       pick(focusedOption);
     } else if (selectionType === 'single') {
       close();
@@ -235,7 +232,6 @@
 
   const staticProps: Writable<ListBoxStaticContextProps<Option>> = writable({
     selectionType,
-    labelKey,
     getLabel,
     searchable,
     disabled,
@@ -244,7 +240,6 @@
   });
   $: staticProps.set({
     selectionType,
-    labelKey,
     getLabel,
     searchable,
     disabled,

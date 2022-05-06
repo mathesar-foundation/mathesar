@@ -249,6 +249,10 @@ def get_qualified_name(name):
     return ".".join([_ma_type_qualifier_prefix, name])
 
 
+def get_qualifier_prefix():
+    return _ma_type_qualifier_prefix
+
+
 def get_available_types(engine):
     """
     Returns a dict where the keys are database type names defined on the database associated with

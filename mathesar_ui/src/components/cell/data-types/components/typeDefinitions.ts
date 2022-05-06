@@ -1,12 +1,10 @@
-import type { SvelteComponent } from 'svelte';
+import type {
+  FormattedInputProps,
+  SelectProps,
+} from '@mathesar-component-library/types';
 
-export interface CellComponentAndProps<T> {
-  component: typeof SvelteComponent;
-  props?: T;
-}
-
-export interface CellTypeProps {
-  value: unknown;
+export interface CellTypeProps<Value> {
+  value: Value | null | undefined;
   isActive: boolean;
   disabled: boolean;
 }
@@ -18,10 +16,8 @@ export interface TextBoxCellExternalProps {
 }
 
 export interface TextBoxCellProps
-  extends CellTypeProps,
-    TextBoxCellExternalProps {
-  value: string | null | undefined;
-}
+  extends CellTypeProps<string>,
+    TextBoxCellExternalProps {}
 
 // TextArea
 
@@ -29,30 +25,44 @@ export type TextAreaCellExternalProps = TextBoxCellExternalProps;
 
 export type TextAreaCellProps = TextBoxCellProps;
 
+// Number
+
+export interface NumberCellExternalProps {
+  locale?: string;
+  allowFloat: boolean;
+  isPercentage: boolean;
+}
+
+export interface NumberCellProps
+  extends CellTypeProps<string | number>,
+    NumberCellExternalProps {}
+
 // Checkbox
 
 export type CheckBoxCellExternalProps = Record<string, never>;
 
-export interface CheckBoxCellProps extends CellTypeProps {
-  value: boolean | null | undefined;
-}
+export type CheckBoxCellProps = CellTypeProps<boolean>;
 
 // SingleSelect
 
-export interface SingleSelectCellExternalProps<
-  ValueType,
-  OptionType = ValueType,
-> {
-  options: OptionType[];
-  getSelectedOptionsFromValue: (
-    value: ValueType | null | undefined,
-  ) => OptionType[];
-  getValueFromSelectedOptions: (options: OptionType[]) => ValueType | null;
-  getValueLabel?: (value: ValueType) => string;
-}
+export type SingleSelectCellExternalProps<Option> = Pick<
+  SelectProps<Option>,
+  'options' | 'getLabel'
+>;
 
-export interface SingleSelectCellProps<ValueType, OptionType = ValueType>
-  extends CellTypeProps,
-    SingleSelectCellExternalProps<ValueType, OptionType> {
-  value: ValueType | null | undefined;
-}
+export interface SingleSelectCellProps<Option>
+  extends CellTypeProps<Option>,
+    SingleSelectCellExternalProps<Option> {}
+
+// Duration
+
+export type FormattedInputCellExternalProps = Omit<
+  FormattedInputProps<string>,
+  'disabled' | 'value'
+>;
+
+export interface FormattedInputCellProps
+  extends CellTypeProps<string>,
+    FormattedInputCellExternalProps {}
+
+export type HorizontalAlignment = 'left' | 'right' | 'center';

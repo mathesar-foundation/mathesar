@@ -1,4 +1,5 @@
 from sqlalchemy import Column, ForeignKey, inspect
+from sqlalchemy.exc import CompileError
 
 from db.columns.defaults import TYPE, PRIMARY_KEY, NULLABLE, DEFAULT_COLUMNS
 from db.columns.operations.select import (
@@ -111,7 +112,7 @@ class MathesarColumn(Column):
         Returns a set of valid types to which the type of the column can be
         altered.
         """
-        if self.engine is not None and not self.is_default:
+        if self.engine is not None and self.plain_type is not None and not self.is_default:
             db_type = self.plain_type
             valid_target_types = sorted(
                 list(
@@ -161,7 +162,12 @@ class MathesarColumn(Column):
         """
         Get the type name without arguments
         """
-        return self.type.__class__().compile(self.engine.dialect)
+        try:
+            _plain_type = self.type.__class__().compile(self.engine.dialect)
+        except (TypeError, CompileError):
+            _plain_type = None
+
+        return _plain_type
 
     @property
     def type_options(self):

@@ -36,10 +36,9 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
     def to_representation(self, instance):
         serializer = self.serializers_mapping.get(self.get_mapping_field(), None)
         if serializer is not None:
-            self.__class__ = self.serializers_cls_mapping.get(self.get_mapping_field())
             return serializer.to_representation(instance)
         else:
-            raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
+            return instance
 
     def get_mapping_field(self):
         mapping_field = getattr(self, "mapping_field", None)
@@ -55,10 +54,10 @@ class ReadWritePolymorphicSerializerMappingMixin(ReadOnlyPolymorphicSerializerMa
     def to_internal_value(self, data):
         serializer = self.serializers_mapping.get(self.get_mapping_field())
         if serializer is not None:
-            self.__class__ = self.serializers_cls_mapping.get(self.get_mapping_field())
             return serializer.to_internal_value(data=data)
         else:
-            raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
+            data = {}
+            return data
 
 
 class MonkeyPatchPartial:
@@ -94,6 +93,11 @@ class OverrideRootPartialMixin:
         return super().run_validation(*args, **kwargs)
 
 
+class MathesarPolymorphicErrorMixin(MathesarErrorMessageMixin):
+    def get_serializer_fields(self):
+        return self.serializers_mapping[self.get_mapping_field()].fields
+
+
 class CustomBooleanLabelSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     TRUE = serializers.CharField()
     FALSE = serializers.CharField()
@@ -107,9 +111,25 @@ class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPart
     custom_labels = CustomBooleanLabelSerializer(required=False)
 
 
-class NumberDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
+class AbstractNumberDisplayOptionSerializer(serializers.Serializer):
+    number_format = serializers.ChoiceField(required=False, choices=['english', 'german', 'french', 'hindi', 'swiss'])
+
+
+class NumberDisplayOptionSerializer(
+    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    AbstractNumberDisplayOptionSerializer
+):
     show_as_percentage = serializers.BooleanField(default=False)
-    locale = serializers.CharField(required=False)
+
+
+class MoneyDisplayOptionSerializer(
+    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    AbstractNumberDisplayOptionSerializer
+):
+    currency_symbol = serializers.CharField()
+    currency_symbol_location = serializers.ChoiceField(choices=['after-minus', 'end-with-space'])
 
 
 class TimeFormatDisplayOptionSerializer(
@@ -120,22 +140,35 @@ class TimeFormatDisplayOptionSerializer(
     format = serializers.CharField(max_length=255)
 
 
+class DateTimeFormatDisplayOptionSerializer(
+    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    serializers.Serializer
+):
+    time_format = serializers.CharField(max_length=255)
+    date_format = serializers.CharField(max_length=255)
+
+
 class DurationDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
-    format = serializers.CharField(max_length=255)
+    min = serializers.CharField(max_length=255)
+    max = serializers.CharField(max_length=255)
+    show_units = serializers.BooleanField()
 
 
 class DisplayOptionsMappingSerializer(
-    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    MathesarPolymorphicErrorMixin,
     ReadWritePolymorphicSerializerMappingMixin,
     serializers.Serializer
 ):
     serializers_mapping = {
         MathesarTypeIdentifier.BOOLEAN.value: BooleanDisplayOptionSerializer,
-        MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,
-        MathesarTypeIdentifier.DATETIME.value: TimeFormatDisplayOptionSerializer,
+        MathesarTypeIdentifier.DATETIME.value: DateTimeFormatDisplayOptionSerializer,
         MathesarTypeIdentifier.DATE.value: TimeFormatDisplayOptionSerializer,
-        MathesarTypeIdentifier.TIME.value: TimeFormatDisplayOptionSerializer,
         MathesarTypeIdentifier.DURATION.value: DurationDisplayOptionSerializer,
+        MathesarTypeIdentifier.MONEY.value: MoneyDisplayOptionSerializer,
+        MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,
+        MathesarTypeIdentifier.TIME.value: TimeFormatDisplayOptionSerializer,
     }
 
     def get_mapping_field(self):

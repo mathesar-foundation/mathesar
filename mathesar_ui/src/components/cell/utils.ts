@@ -1,39 +1,52 @@
 import { get } from 'svelte/store';
-import type { Column } from '@mathesar/stores/table-data/types';
 import {
   currentDbAbstractTypes,
   getAbstractTypeForDbType,
 } from '@mathesar/stores/abstract-types';
 import type { AbstractTypeConfiguration } from '@mathesar/stores/abstract-types/types';
-import type { CellComponentAndProps } from './data-types/components/typeDefinitions';
+import type { ComponentAndProps } from '@mathesar-component-library/types';
 import DataTypes from './data-types';
+import type { CellColumnLike } from './data-types/typeDefinitions';
 
-function getCellConfiguration(
-  column: Column,
+export type CellValueFormatter<T> = (
+  value: T | null | undefined,
+) => string | null | undefined;
+
+function getCellInfo(
+  dbType: CellColumnLike['type'],
 ): AbstractTypeConfiguration['cell'] | undefined {
   const abstractTypeOfColumn = getAbstractTypeForDbType(
-    column.type,
+    dbType,
     get(currentDbAbstractTypes)?.data,
   );
   return abstractTypeOfColumn?.cell;
 }
 
-export function getCellComponentWithProps(
-  column: Column,
-): CellComponentAndProps<unknown> {
-  const cellInfo = getCellConfiguration(column);
+function getCellConfiguration(
+  dbType: CellColumnLike['type'],
+  cellInfo?: AbstractTypeConfiguration['cell'],
+): Record<string, unknown> {
   const config = cellInfo?.config ?? {};
-  const conditionalConfig = cellInfo?.conditionalConfig?.[column.type] ?? {};
-  const combinedCellConfig = {
+  const conditionalConfig = cellInfo?.conditionalConfig?.[dbType] ?? {};
+  return {
     ...config,
     ...conditionalConfig,
   };
-  switch (cellInfo?.type) {
-    case 'boolean':
-      return DataTypes.boolean.get(column);
-    case 'string':
-      return DataTypes.string.get(column, combinedCellConfig);
-    default:
-      return DataTypes.string.get(column);
-  }
+}
+
+export function getCellCap(
+  column: CellColumnLike,
+  cellInfo: AbstractTypeConfiguration['cell'],
+): ComponentAndProps<unknown> {
+  const config = getCellConfiguration(column.type, cellInfo);
+  return DataTypes[cellInfo?.type ?? 'string'].get(column, config);
+}
+
+export function getDbTypeBasedInputCap(
+  column: CellColumnLike,
+  cellInfoConfig?: AbstractTypeConfiguration['cell'],
+): ComponentAndProps<unknown> {
+  const cellInfo = cellInfoConfig ?? getCellInfo(column.type);
+  const config = getCellConfiguration(column.type, cellInfo);
+  return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
 }
