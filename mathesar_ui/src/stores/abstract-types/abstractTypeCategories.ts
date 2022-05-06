@@ -4,6 +4,7 @@ import Text from './type-configs/text';
 import Number from './type-configs/number';
 import Boolean from './type-configs/boolean';
 import Uri from './type-configs/uri';
+import Duration from './type-configs/duration';
 import Fallback from './type-configs/fallback';
 import type {
   AbstractType,
@@ -24,6 +25,7 @@ const abstractTypeCategories: Partial<
   [abstractTypeCategory.Number]: Number,
   [abstractTypeCategory.Boolean]: Boolean,
   [abstractTypeCategory.Uri]: Uri,
+  [abstractTypeCategory.Duration]: Duration,
   [abstractTypeCategory.Other]: Fallback,
 };
 
