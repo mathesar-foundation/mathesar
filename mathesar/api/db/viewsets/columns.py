@@ -34,8 +34,12 @@ class ColumnViewSet(viewsets.ModelViewSet):
         # We only support adding a single column through the API.
         serializer = ColumnSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        if request.data.get('type_options', None) is not None and request.data['type_options'].get('scale', None) is not None and request.data['type_options'].get('precision', None) is None:
-            request.data['type_options']['precision'] = 1000
+        type_options = request.data.get('type_options', None)
+        if type_options is not None:
+            scale = type_options.get('scale', None)
+            precision = type_options.get('precision', None)
+            if scale is not None and precision is None:
+                request.data['type_options']['precision'] = 1000
         if 'source_column' in serializer.validated_data:
             column = table.duplicate_column(
                 serializer.validated_data['source_column'],
