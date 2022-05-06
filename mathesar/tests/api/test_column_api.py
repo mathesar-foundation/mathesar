@@ -338,17 +338,18 @@ def test_column_create_wrong_display_options(
 
 
 @pytest.mark.parametrize(
-    "type_,type_options",
+    "type_,type_options,expected_type_options",
     [
-        ("NUMERIC", {"precision": 5, "scale": 3}),
-        ("VARCHAR", {"length": 5}),
-        ("CHAR", {"length": 5}),
-        ("INTERVAL", {"precision": 5}),
-        ("INTERVAL", {"precision": 5, "fields": "second"}),
-        ("INTERVAL", {"fields": "day"}),
+        ("NUMERIC", {"precision": 5, "scale": 3}, {"precision": 5, "scale": 3}),
+        ("NUMERIC", {"scale": 3}, {"precision": 1000, "scale": 3}),
+        ("VARCHAR", {"length": 5}, {"length": 5}),
+        ("CHAR", {"length": 5}, {"length": 5}),
+        ("INTERVAL", {"precision": 5}, {"precision": 5}),
+        ("INTERVAL", {"precision": 5, "fields": "second"}, {"precision": 5, "fields": "second"}),
+        ("INTERVAL", {"fields": "day"}, {"fields": "day"}),
     ]
 )
-def test_column_create_retrieve_options(column_test_table, client, type_, type_options):
+def test_column_create_retrieve_options(column_test_table, client, type_, type_options, expected_type_options):
     name = "anewcolumn"
     cache.clear()
     num_columns = len(column_test_table.sa_columns)
@@ -367,7 +368,7 @@ def test_column_create_retrieve_options(column_test_table, client, type_, type_o
     actual_new_col = new_columns_response.json()["results"][-1]
     assert actual_new_col["name"] == name
     assert actual_new_col["type"] == type_
-    assert actual_new_col["type_options"] == type_options
+    assert actual_new_col["type_options"] == expected_type_options
 
 
 invalid_type_options = [
