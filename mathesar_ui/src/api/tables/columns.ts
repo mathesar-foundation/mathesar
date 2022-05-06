@@ -1,5 +1,4 @@
 import type { DbType } from '@mathesar/AppTypes';
-import type { DurationUnit } from '@mathesar/utils/duration/types';
 
 /**
  * | value     | example locale | example format |
@@ -77,6 +76,8 @@ export interface BooleanDisplayOptions extends Record<string, unknown> {
     FALSE: string;
   } | null;
 }
+
+export type DurationUnit = 'd' | 'h' | 'm' | 's' | 'ms';
 
 export interface DurationDisplayOptions extends Record<string, unknown> {
   min: DurationUnit | null;

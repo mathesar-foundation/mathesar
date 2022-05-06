@@ -1,5 +1,4 @@
 export type {
-  DurationUnit,
   DurationConfig,
   default as DurationSpecification,
 } from './DurationSpecification';
