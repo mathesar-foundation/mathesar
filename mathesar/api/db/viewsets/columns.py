@@ -49,6 +49,7 @@ class ColumnViewSet(viewsets.ModelViewSet):
             )
         else:
             try:
+                # TODO Refactor add_column to user serializer validated date instead of request data
                 column = table.add_column(request.data)
             except ProgrammingError as e:
                 if type(e.orig) == DuplicateColumn:

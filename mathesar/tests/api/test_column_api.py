@@ -705,7 +705,8 @@ def test_column_update_name_type_nullable_default(column_test_table, client):
 def test_column_update_type_options(column_test_table, client):
     cache.clear()
     type_ = "NUMERIC"
-    type_options = {"precision": 3, "scale": 1}
+    type_options = {"scale": 1}
+    expected_type_options = {'precision': 1000, 'scale': 1}
     data = {"type": type_, "type_options": type_options}
     column = _get_columns_by_name(column_test_table, ['mycolumn3'])[0]
     response = client.patch(
@@ -713,7 +714,7 @@ def test_column_update_type_options(column_test_table, client):
         data,
     )
     assert response.json()["type"] == type_
-    assert response.json()["type_options"] == type_options
+    assert response.json()["type_options"] == expected_type_options
 
 
 def test_column_update_type_options_no_type(column_test_table, client):
