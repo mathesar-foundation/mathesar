@@ -751,39 +751,38 @@ type_test_list = [
         source_type,
         target_type,
         {},
-        target_type.id.upper(),
     )
     for source_type, val in MASTER_DB_TYPE_MAP_SPEC.items()
     for target_type in val[TARGET_DICT]
 ] + [
-    (source_type, PostgresType.NUMERIC, {"precision": 5}, "NUMERIC(5, 0)")
+    (source_type, PostgresType.NUMERIC, {"precision": 5})
     for source_type, val in MASTER_DB_TYPE_MAP_SPEC.items() if PostgresType.NUMERIC in val[TARGET_DICT]
 ] + [
-    (source_type, PostgresType.NUMERIC, {"precision": 5, "scale": 3}, "NUMERIC(5, 3)")
+    (source_type, PostgresType.NUMERIC, {"precision": 5, "scale": 3})
     for source_type, val in MASTER_DB_TYPE_MAP_SPEC.items() if PostgresType.NUMERIC in val[TARGET_DICT]
 ] + [
-    (source_type, PostgresType.TIME_WITHOUT_TIME_ZONE, {"precision": 5}, "TIME(5) WITHOUT TIME ZONE")
+    (source_type, PostgresType.TIME_WITHOUT_TIME_ZONE, {"precision": 5})
     for source_type, val in MASTER_DB_TYPE_MAP_SPEC.items() if PostgresType.TIME_WITHOUT_TIME_ZONE in val[TARGET_DICT]
 ] + [
-    (source_type, PostgresType.TIME_WITH_TIME_ZONE, {"precision": 5}, "TIME(5) WITH TIME ZONE")
+    (source_type, PostgresType.TIME_WITH_TIME_ZONE, {"precision": 5})
     for source_type, val in MASTER_DB_TYPE_MAP_SPEC.items() if PostgresType.TIME_WITH_TIME_ZONE in val[TARGET_DICT]
 ] + [
-    (source_type, PostgresType.TIMESTAMP_WITH_TIME_ZONE, {"precision": 5}, "TIMESTAMP(5) WITH TIME ZONE")
+    (source_type, PostgresType.TIMESTAMP_WITH_TIME_ZONE, {"precision": 5})
     for source_type, val in MASTER_DB_TYPE_MAP_SPEC.items() if PostgresType.TIMESTAMP_WITH_TIME_ZONE in val[TARGET_DICT]
 ] + [
-    (source_type, PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE, {"precision": 5}, "TIMESTAMP(5) WITHOUT TIME ZONE")
+    (source_type, PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE, {"precision": 5})
     for source_type, val in MASTER_DB_TYPE_MAP_SPEC.items() if PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE in val[TARGET_DICT]
 ] + [
-    (source_type, PostgresType.CHARACTER, {"length": 5}, "CHARACTER(5)")
+    (source_type, PostgresType.CHARACTER, {"length": 5})
     for source_type, val in MASTER_DB_TYPE_MAP_SPEC.items() if PostgresType.CHARACTER in val[TARGET_DICT]
 ]
 
 
 @pytest.mark.parametrize(
-    "source_type,target_type,options,expect_type_compiled_str", type_test_list
+    "source_type,target_type,options", type_test_list
 )
 def test_alter_column_type_alters_column_type(
-        engine_with_mathesar, source_type, target_type, options
+    engine_with_mathesar, source_type, target_type, options
 ):
     """
     The massive number of cases make sure all type casting functions at

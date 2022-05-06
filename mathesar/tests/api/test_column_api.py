@@ -862,13 +862,17 @@ def test_column_duplicate_no_parameters(column_test_table, client):
     assert response_data[0]["field"] == "type"
 
 
-def test_column_update_type_with_display_and_type_options_as_null(column_test_table, client):
+@pytest.mark.parametrize(
+    "display_options,type_options",
+    [[None, None],[{},{}]]
+)
+def test_column_update_type_with_display_and_type_options_as_null_or_empty_obj(
+    column_test_table, client, display_options, type_options
+):
     cache.clear()
-    type_ = "MATHESAR_TYPES.URI"
-    display_options = None
-    type_options = None
+    db_type_id = MathesarCustomType.URI.id
     data = {
-        "type": type_,
+        "type": db_type_id,
         "display_options": display_options,
         "type_options": type_options
     }
@@ -879,28 +883,6 @@ def test_column_update_type_with_display_and_type_options_as_null(column_test_ta
     )
     assert response.status_code == 200
     response_json = response.json()
-    assert response_json["type"] == type_
+    assert response_json["type"] == db_type_id
     assert response_json["display_options"] == display_options
     assert response_json["type_options"] == type_options
-
-
-def test_column_update_type_with_display_and_type_options_as_empty_objects(column_test_table, client):
-    cache.clear()
-    type_ = "MATHESAR_TYPES.URI"
-    display_options = {}
-    type_options = {}
-    data = {
-        "type": type_,
-        "display_options": display_options,
-        "type_options": type_options
-    }
-    column = _get_columns_by_name(column_test_table, ['mycolumn3'])[0]
-    response = client.patch(
-        f"/api/db/v0/tables/{column_test_table.id}/columns/{column.id}/",
-        data=data,
-    )
-    assert response.status_code == 200
-    response_json = response.json()
-    assert response_json["type"] == type_
-    assert response_json["display_options"] == {}
-    assert response_json["type_options"] is None
