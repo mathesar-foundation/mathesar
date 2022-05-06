@@ -21,9 +21,13 @@
   on:activate
   on:update
 >
-  <span slot="content">
+  <span slot="content" class="content">
     <CellValue {value}>
-      <a href={value ?? ''} target="_blank" class="link">{value}</a>
+      {#if isActive}
+        <a href={value ?? ''} target="_blank" class="link">{value}</a>
+      {:else}
+        {value}
+      {/if}
     </CellValue>
   </span>
   <TextInput
@@ -36,6 +40,9 @@
 </SteppedInputCell>
 
 <style>
+  .content {
+    text-decoration: underline;
+  }
   .link {
     color: #3867ad;
   }
