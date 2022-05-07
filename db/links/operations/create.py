@@ -36,8 +36,9 @@ def create_foreign_key_link(engine, schema, column_name, referrer_table_oid, ref
         )
 
 
-def create_many_to_many_link(engine, schema, map_table_name, referent_tables_oid):
+def create_many_to_many_link(engine, schema, map_table_name, referents):
     with engine.begin() as conn:
+        referent_tables_oid = [referent['referent_table'] for referent in referents]
         referent_tables = reflect_tables_from_oids(referent_tables_oid, engine, conn)
         metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
         opts = {
@@ -46,9 +47,10 @@ def create_many_to_many_link(engine, schema, map_table_name, referent_tables_oid
         ctx = MigrationContext.configure(conn, opts=opts)
         op = Operations(ctx)
         op.create_table(map_table_name, schema=schema)
-        for index, referent_table_oid in enumerate(referent_tables):
+        for referent in referents:
+            referent_table_oid = referent['referent_table']
             referent_table = referent_tables[referent_table_oid]
-            col_name = f"col_{index}"
+            col_name = referent['column_name']
             primary_key_column = get_primary_key_column(referent_table)
             column = MathesarColumn(
                 col_name, primary_key_column.type

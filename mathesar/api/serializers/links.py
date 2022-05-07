@@ -37,17 +37,24 @@ class OneToManySerializer(OneToOneSerializer):
         return False
 
 
+class MapColumnSerializer(serializers.Serializer):
+    column_name = serializers.CharField()
+    referent_table = serializers.PrimaryKeyRelatedField(queryset=Table.objects.all())
+
+
 class ManyToManySerializer(MathesarErrorMessageMixin, serializers.Serializer):
-    referent_tables = serializers.PrimaryKeyRelatedField(queryset=Table.objects.all(), many=True)
-    map_table_name = serializers.CharField()
+    referents = MapColumnSerializer(many=True)
+    mapping_table_name = serializers.CharField()
 
     def create(self, validated_data):
-        referent_tables = validated_data['referent_tables']
-        referent_tables_oid = [table.oid for table in validated_data['referent_tables']]
+        referents = validated_data['referents']
+        referent_tables_oid = [
+            {'referent_table': map_table_obj['referent_table'].oid, 'column_name': map_table_obj['column_name']} for
+            map_table_obj in validated_data['referents']]
         create_many_to_many_link(
-            referent_tables[0].schema._sa_engine,
-            referent_tables[0]._sa_table.schema,
-            validated_data.get('map_table_name'),
+            referents[0]['referent_table'].schema._sa_engine,
+            referents[0]['referent_table']._sa_table.schema,
+            validated_data.get('mapping_table_name'),
             referent_tables_oid,
         )
         return validated_data
