@@ -61,3 +61,18 @@ def test_one_to_many_link_create(column_test_table, client):
         data=data,
     )
     assert response.status_code == 201
+
+
+def test_many_to_many_link_create(column_test_table, client):
+    cache.clear()
+    data = {
+        "link_type": "m2m",
+        "map_table_name": "map_table",
+        "referent_tables": [column_test_table.id],
+    }
+    response = client.post(
+        "/api/db/v0/links/",
+        data=data,
+    )
+    print(response.json())
+    assert response.status_code == 201
