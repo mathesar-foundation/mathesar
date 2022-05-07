@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from db.links.operations.create import create_foreign_key_link
+from db.links.operations.create import create_foreign_key_link, create_many_to_many_link
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.exceptions.validation_exceptions.exceptions import ColumnSizeMismatchAPIException
 from mathesar.api.serializers.shared_serializers import (
@@ -41,8 +41,16 @@ class ManyToManySerializer(MathesarErrorMessageMixin, serializers.Serializer):
     referent_tables = serializers.PrimaryKeyRelatedField(queryset=Table.objects.all(), many=True)
     map_table_name = serializers.CharField()
 
-    def save(self, **kwargs):
-        return super().save(**kwargs)
+    def create(self, validated_data):
+        referent_tables = validated_data['referent_tables']
+        referent_tables_oid = [table.oid for table in validated_data['referent_tables']]
+        create_many_to_many_link(
+            referent_tables[0].schema._sa_engine,
+            referent_tables[0]._sa_table.schema,
+            validated_data.get('map_table_name'),
+            referent_tables_oid,
+        )
+        return validated_data
 
 
 class LinksMappingSerializer(
