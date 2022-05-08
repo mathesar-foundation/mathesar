@@ -29,6 +29,8 @@ from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import get_types
+from rest_framework import status
+from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -314,8 +316,12 @@ class Table(DatabaseObject):
         return delete_record(self._sa_table, self.schema._sa_engine, id_value)
 
     def add_constraint(self, constraint_type, columns, name=None):
+        if columns == []:
+            message = 'Columns field cannot be empty.'
+            raise base_api_exceptions.NotFoundAPIException(SyntaxError, message=message, status_code=status.HTTP_400_BAD_REQUEST)
         if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
-            raise ValueError('Only creating unique constraints is currently supported.')
+            message = 'Only creating unique constraints is currently supported.'
+            raise base_api_exceptions.ValueAPIException(ValueError, message=message, status_code=status.HTTP_400_BAD_REQUEST)
         column_names = [column.name for column in columns]
         create_unique_constraint(
             self.name,
