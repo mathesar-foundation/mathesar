@@ -33,12 +33,13 @@ def column_test_table(patent_schema):
     return table
 
 
-def test_one_to_one_link_create(column_test_table, client):
+def test_one_to_one_link_create(column_test_table, client, create_table):
     cache.clear()
+    table_2 = create_table('Table 2')
     data = {
         "link_type": "o2o",
         "column_name": "col_1",
-        "reference_table": column_test_table.id,
+        "reference_table": table_2.id,
         "referent_table": column_test_table.id,
     }
     response = client.post(
@@ -48,7 +49,23 @@ def test_one_to_one_link_create(column_test_table, client):
     assert response.status_code == 201
 
 
-def test_one_to_many_link_create(column_test_table, client):
+def test_one_to_many_link_create(column_test_table, client, create_table):
+    cache.clear()
+    table_2 = create_table('Table 2')
+    data = {
+        "link_type": "o2m",
+        "column_name": "col_1",
+        "reference_table": table_2.id,
+        "referent_table": column_test_table.id,
+    }
+    response = client.post(
+        "/api/db/v0/links/",
+        data=data,
+    )
+    assert response.status_code == 201
+
+
+def test_one_to_many_self_referential_link_create(column_test_table, client):
     cache.clear()
     data = {
         "link_type": "o2m",
@@ -63,12 +80,33 @@ def test_one_to_many_link_create(column_test_table, client):
     assert response.status_code == 201
 
 
-def test_many_to_many_link_create(column_test_table, client):
+def test_many_to_many_self_referential_link_create(column_test_table, client):
     cache.clear()
     data = {
         "link_type": "m2m",
         "mapping_table_name": "map_table",
-        "referents": [{'referent_table': column_test_table.id, 'column_name': "link_1"}],
+        "referents": [
+            {'referent_table': column_test_table.id, 'column_name': "link_1"},
+            {'referent_table': column_test_table.id, 'column_name': "link_2"}
+        ],
+    }
+    response = client.post(
+        "/api/db/v0/links/",
+        data=data,
+    )
+    assert response.status_code == 201
+
+
+def test_many_to_many_link_create(column_test_table, client, create_table):
+    cache.clear()
+    table_2 = create_table('Table 2')
+    data = {
+        "link_type": "m2m",
+        "mapping_table_name": "map_table",
+        "referents": [
+            {'referent_table': column_test_table.id, 'column_name': "link_1"},
+            {'referent_table': table_2.id, 'column_name': "link_2"}
+        ],
     }
     response = client.post(
         "/api/db/v0/links/",
