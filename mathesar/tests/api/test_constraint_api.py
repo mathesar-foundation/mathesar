@@ -99,6 +99,7 @@ def test_existing_foreign_key_constraint_list(patent_schema, client):
     table = models.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
     response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     response_data = response.json()
+    print(response_data)
     for constraint_data in response_data['results']:
         if constraint_data['type'] == 'foreignkey':
             _verify_foreign_key_constraint(

@@ -34,13 +34,13 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
             self.serializers_cls_mapping[identifier] = serializer_cls
 
     def to_representation(self, instance):
-        serializer = self.serializers_mapping.get(self.get_mapping_field(), None)
+        serializer = self.serializers_mapping.get(self.get_mapping_field(instance), None)
         if serializer is not None:
             return serializer.to_representation(instance)
         else:
-            raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
+            raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field(instance)}")
 
-    def get_mapping_field(self):
+    def get_mapping_field(self, data):
         mapping_field = getattr(self, "mapping_field", None)
         if mapping_field is None:
             raise Exception(
@@ -52,11 +52,11 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
 
 class ReadWritePolymorphicSerializerMappingMixin(ReadOnlyPolymorphicSerializerMappingMixin):
     def to_internal_value(self, data):
-        serializer = self.serializers_mapping.get(self.get_mapping_field())
+        serializer = self.serializers_mapping.get(self.get_mapping_field(data))
         if serializer is not None:
             return serializer.to_internal_value(data=data)
         else:
-            raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field()}")
+            raise Exception(f"Cannot find a matching serializer for the specified type {self.get_mapping_field(data)}")
 
 
 class MonkeyPatchPartial:
@@ -93,8 +93,8 @@ class OverrideRootPartialMixin:
 
 
 class MathesarPolymorphicErrorMixin(MathesarErrorMessageMixin):
-    def get_serializer_fields(self):
-        return self.serializers_mapping[self.get_mapping_field()].fields
+    def get_serializer_fields(self, data):
+        return self.serializers_mapping[self.get_mapping_field(data)].fields
 
 
 class CustomBooleanLabelSerializer(MathesarErrorMessageMixin, serializers.Serializer):
@@ -151,7 +151,7 @@ class DisplayOptionsMappingSerializer(
         MathesarTypeIdentifier.DURATION.value: DurationDisplayOptionSerializer,
     }
 
-    def get_mapping_field(self):
+    def get_mapping_field(self, data):
         db_type = self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY]
         mathesar_type = get_mathesar_type_from_db_type(db_type)
         return mathesar_type

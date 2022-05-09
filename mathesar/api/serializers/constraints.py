@@ -18,14 +18,12 @@ class BaseConstraintSerializer(serializers.ModelSerializer):
 
 
 class ForeignKeyConstraintSerializer(BaseConstraintSerializer):
-    referent_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
+    class Meta:
+        model = Constraint
+        fields = BaseConstraintSerializer.Meta.fields
 
 
 class ConstraintSerializer(ReadWritePolymorphicSerializerMappingMixin, MathesarPolymorphicErrorMixin, serializers.ModelSerializer):
-    name = serializers.CharField(required=False)
-    type = serializers.CharField()
-    columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
-
     class Meta:
         model = Constraint
         fields = '__all__'
@@ -34,5 +32,9 @@ class ConstraintSerializer(ReadWritePolymorphicSerializerMappingMixin, MathesarP
         'foreignkey': ForeignKeyConstraintSerializer,
     }
 
-    def get_mapping_field(self):
-        return self.instance.type
+    def get_mapping_field(self, data):
+        if isinstance(data, Constraint):
+            constraint_type = data.type
+        else:
+            constraint_type = data.get('type', None)
+        return constraint_type
