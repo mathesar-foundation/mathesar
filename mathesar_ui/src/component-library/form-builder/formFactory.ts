@@ -15,7 +15,7 @@ function getNamesOfVariablesInUse(
 ): Set<string> {
   const variablesInUse: Set<string> = new Set();
   let childElements: FormElement[] = [];
-  if (element.type === 'input') {
+  if (element.type === 'input' || element.type === 'static') {
     variablesInUse.add(element.variable);
   } else if (element.type === 'switch') {
     const valueOfVariable = values[element.variable];
@@ -61,6 +61,7 @@ function getNamesOfConditionalVariables(element: FormElement): Set<string> {
 export function makeForm(
   formConfig: FormConfiguration,
   formValues?: FormValues,
+  customComponents?: FormBuildConfiguration['customComponents'],
 ): FormBuildConfiguration {
   const conditionalVariableNames = getNamesOfConditionalVariables(
     formConfig.layout,
@@ -161,5 +162,6 @@ export function makeForm(
     values,
     validationStore,
     getValidationResult,
+    customComponents,
   };
 }

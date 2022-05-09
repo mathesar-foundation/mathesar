@@ -379,7 +379,8 @@ def test_table_type_suggestion(client, schema, engine_email_type):
         'col_3': 'BOOLEAN',
         'col_4': 'TEXT',
         'col_5': 'TEXT',
-        'col_6': 'NUMERIC'
+        'col_6': 'NUMERIC',
+        'col_7': 'MATHESAR_TYPES.MATHESAR_MONEY'
     }
     response = client.get(f'/api/db/v0/tables/{table.id}/type_suggestions/')
     response_table = response.json()
@@ -416,7 +417,8 @@ def test_table_previews(client, schema, engine_email_type):
             {"name": "col_3", "type": "BOOLEAN"},
             {"name": "col_4", "type": "VARCHAR"},
             {"name": "col_5", "type": "VARCHAR"},
-            {"name": "col_6", "type": "NUMERIC"}
+            {"name": "col_6", "type": "NUMERIC"},
+            {"name": "col_7", "type": "MATHESAR_TYPES.MATHESAR_MONEY"}
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
@@ -425,10 +427,10 @@ def test_table_previews(client, schema, engine_email_type):
         'name': 'Type Modification Table',
         'columns': post_body['columns'],
         'records': [
-            {'id': 1, 'col_1': 0.0, 'col_2': False, 'col_3': True, 'col_4': 't', 'col_5': 'a', 'col_6': 2.0},
-            {'id': 2, 'col_1': 2.0, 'col_2': True, 'col_3': False, 'col_4': 'false', 'col_5': 'cat', 'col_6': 1.0},
-            {'id': 3, 'col_1': 1.0, 'col_2': True, 'col_3': True, 'col_4': '2', 'col_5': 'mat', 'col_6': 0.0},
-            {'id': 4, 'col_1': 0.0, 'col_2': False, 'col_3': False, 'col_4': '0', 'col_5': 'bat', 'col_6': 0.0}
+            {'id': 1, 'col_1': 0.0, 'col_2': False, 'col_3': True, 'col_4': 't', 'col_5': 'a', 'col_6': 2.0, 'col_7': 5},
+            {'id': 2, 'col_1': 2.0, 'col_2': True, 'col_3': False, 'col_4': 'false', 'col_5': 'cat', 'col_6': 1.0, 'col_7': 1},
+            {'id': 3, 'col_1': 1.0, 'col_2': True, 'col_3': True, 'col_4': '2', 'col_5': 'mat', 'col_6': 0.0, 'col_7': 2},
+            {'id': 4, 'col_1': 0.0, 'col_2': False, 'col_3': False, 'col_4': '0', 'col_5': 'bat', 'col_6': 0.0, 'col_7': 3}
         ],
     }
     actual_dict = response.json()
@@ -457,7 +459,8 @@ def test_table_previews_wrong_column_number(client, schema, engine_email_type):
             {"name": "col_3", "type": "BOOLEAN"},
             {"name": "col_4", "type": "VARCHAR"},
             {"name": "col_5", "type": "VARCHAR"},
-            {"name": "col_6", "type": "NUMERIC"}
+            {"name": "col_6", "type": "NUMERIC"},
+            {"name": "col_7", "type": "MATHESAR_TYPES.MATHESAR_MONEY"}
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
@@ -488,7 +491,8 @@ def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
             {"name": "col_3", "type": "BOOLEAN"},
             {"name": "col_4", "type": "NUMERIC"},
             {"name": "col_5", "type": "VARCHAR"},
-            {"name": "col_6", "type": "NUMERIC"}
+            {"name": "col_6", "type": "NUMERIC"},
+            {"name": "col_7", "type": "MATHESAR_TYPES.MATHESAR_MONEY"}
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
@@ -519,7 +523,8 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_email_typ
             {"name": "col_3", "type": "BOOLEAN"},
             {"name": "col_4", "type": "NUMERIC"},
             {"name": "col_5", "type": "mathesar_types.email"},
-            {"name": "col_6", "type": "NUMERIC"}
+            {"name": "col_6", "type": "NUMERIC"},
+            {"name": "col_7", "type": "MATHESAR_TYPES.MATHESAR_MONEY"}
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
@@ -549,7 +554,8 @@ def test_table_previews_unsupported_type(client, schema, engine_email_type):
             {"name": "col_3", "type": "BOOLEAN"},
             {"name": "col_4", "type": "NUMERIC"},
             {"name": "col_5", "type": "VARCHAR"},
-            {"name": "col_6", "type": "NUMERIC"}
+            {"name": "col_6", "type": "NUMERIC"},
+            {"name": "col_7", "type": "MATHESAR_TYPES.MATHESAR_MONEY"}
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
