@@ -1,20 +1,15 @@
 <script lang="ts">
   import type { Column } from '@mathesar/stores/table-data/types';
-  import {
-    currentDbAbstractTypes,
-    getAbstractTypeForDbType,
-  } from '@mathesar/stores/abstract-types';
+  import { getColumnIconProps } from './cell/utils';
+  import TypeIcon from './TypeIcon.svelte';
 
   export let column: Column;
 
-  $: abstractTypeOfColumn = getAbstractTypeForDbType(
-    column.type,
-    $currentDbAbstractTypes.data,
-  );
+  $: icon = getColumnIconProps(column);
 </script>
 
 <span class="column-name">
-  <span class="type">{abstractTypeOfColumn.icon}</span>
+  <span class="icon"><TypeIcon {icon} /></span>
   <span class="name">{column.name}</span>
 </span>
 
@@ -23,10 +18,8 @@
     display: flex;
   }
 
-  .type {
+  .icon {
     margin-right: 5px;
-    color: #7f7f7f;
-    font-weight: 500;
   }
 
   .name {
