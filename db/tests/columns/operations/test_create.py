@@ -167,8 +167,8 @@ def test_create_column_interval_options(engine_with_mathesar, type_options):
     assert created_col.type_options == type_options
 
 
-def test_create_column_bad_options(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_create_column_bad_options(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atableone"
     target_type = PostgresType.BOOLEAN
     initial_column_name = "original_column"
@@ -189,8 +189,8 @@ def test_create_column_bad_options(engine_with_schema):
         create_column(engine, table_oid, column_data)
 
 
-def test_duplicate_column_name(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_duplicate_column_name(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atable"
     filler_column_name = "Filler"
     new_col_name = "duplicated_column"
@@ -208,8 +208,8 @@ def test_duplicate_column_name(engine_with_schema):
 
 
 @pytest.mark.parametrize('copy_data,copy_constraints', duplicate_column_options)
-def test_duplicate_column_single_unique(engine_with_schema, copy_data, copy_constraints):
-    engine, schema = engine_with_schema
+def test_duplicate_column_single_unique(engine_with_schema_without_updated_ischema_names, copy_data, copy_constraints):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atable"
     target_column_name = "columtoduplicate"
     new_col_name = "duplicated_column"
@@ -231,8 +231,8 @@ def test_duplicate_column_single_unique(engine_with_schema, copy_data, copy_cons
 
 
 @pytest.mark.parametrize('copy_data,copy_constraints', duplicate_column_options)
-def test_duplicate_column_multi_unique(engine_with_schema, copy_data, copy_constraints):
-    engine, schema = engine_with_schema
+def test_duplicate_column_multi_unique(engine_with_schema_without_updated_ischema_names, copy_data, copy_constraints):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atable"
     target_column_name = "columtoduplicate"
     new_col_name = "duplicated_column"
@@ -262,9 +262,9 @@ def test_duplicate_column_multi_unique(engine_with_schema, copy_data, copy_const
 @pytest.mark.parametrize('copy_data,copy_constraints', duplicate_column_options)
 @pytest.mark.parametrize('nullable', [True, False])
 def test_duplicate_column_nullable(
-    engine_with_schema, nullable, copy_data, copy_constraints
+    engine_with_schema_without_updated_ischema_names, nullable, copy_data, copy_constraints
 ):
-    engine, schema = engine_with_schema
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atable"
     target_column_name = "columtoduplicate"
     new_col_name = "duplicated_column"
@@ -287,8 +287,8 @@ def test_duplicate_column_nullable(
         assert col.nullable is True
 
 
-def test_duplicate_non_unique_constraint(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_duplicate_non_unique_constraint(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atable"
     target_column_name = "columtoduplicate"
     new_col_name = "duplicated_column"
@@ -312,8 +312,8 @@ def test_duplicate_non_unique_constraint(engine_with_schema):
 
 
 @pytest.mark.parametrize('copy_data,copy_constraints', duplicate_column_options)
-def test_duplicate_column_default(engine_with_schema, copy_data, copy_constraints):
-    engine, schema = engine_with_schema
+def test_duplicate_column_default(engine_with_schema_without_updated_ischema_names, copy_data, copy_constraints):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atable"
     target_column_name = "columtoduplicate"
     new_col_name = "duplicated_column"

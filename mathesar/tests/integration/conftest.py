@@ -18,10 +18,10 @@ def client():
     return APIClient()
 
 
-@pytest.fixture
-def test_db_model(test_db_name):
-    database_model = Database.current_objects.create(name=test_db_name)
-    return database_model
+#   @pytest.fixture
+#   def test_db_model(test_db_name):
+#       database_model = Database.current_objects.create(name=test_db_name)
+#       return database_model
 
 
 @pytest.fixture
@@ -33,7 +33,7 @@ def page(page):
 
 @pytest.fixture
 def schema_name():
-    return 'table_tests'
+    return 'integration_tests_schema'
 
 
 @pytest.fixture

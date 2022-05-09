@@ -6,38 +6,38 @@ from db.tables.operations import infer_types
 from db.schemas.operations.select import get_mathesar_schemas_with_oids
 
 
-def test_get_mathesar_schemas_with_oids_gets_added_schema(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_get_mathesar_schemas_with_oids_gets_added_schema(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     actual_schemas = get_mathesar_schemas_with_oids(engine)
     assert schema in [schema for schema, oid in actual_schemas]
 
 
-def test_get_mathesar_schemas_with_oids_avoids_pg_schemas(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_get_mathesar_schemas_with_oids_avoids_pg_schemas(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     actual_schemas = get_mathesar_schemas_with_oids(engine)
     assert all([schema[:3] != "pg_" for schema, oid in actual_schemas])
 
 
-def test_get_mathesar_schemas_with_oids_avoids_information_schema(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_get_mathesar_schemas_with_oids_avoids_information_schema(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     actual_schemas = get_mathesar_schemas_with_oids(engine)
     assert all([schema != "information_schema" for schema, _ in actual_schemas])
 
 
-def test_get_mathesar_schemas_with_oids_avoids_types_schema(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_get_mathesar_schemas_with_oids_avoids_types_schema(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     actual_schemas = get_mathesar_schemas_with_oids(engine)
     assert all([schema != types.base.SCHEMA for schema, _ in actual_schemas])
 
 
-def test_get_mathesar_schemas_with_oids_avoids_temp_schema(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_get_mathesar_schemas_with_oids_avoids_temp_schema(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     actual_schemas = get_mathesar_schemas_with_oids(engine)
     assert all([schema != infer_types.TEMP_SCHEMA for schema, _ in actual_schemas])
 
 
-def test_get_mathesar_schemas_with_oids_gets_correct_oid(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_get_mathesar_schemas_with_oids_gets_correct_oid(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     metadata = MetaData()
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")

@@ -69,7 +69,7 @@ def multi_db_test_db(multi_db_test_db_connection_string):
     del settings.DATABASES[MULTI_DB_TEST_DB]
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="module", autouse=True)
 def multi_db_engine(multi_db_test_db_connection_string):
     return create_engine(
         multi_db_test_db_connection_string,
@@ -138,7 +138,9 @@ def test_multi_db_oid_unique(multi_db_engine):
 def test_single_db_oid_unique_exception():
     reflect_db_objects()
     table_oid = 5001
-    db = Database.objects.all()[0]
+    dbs = Database.objects.all()
+    assert len(dbs) > 0
+    db = dbs[0]
     schema_1 = Schema.objects.create(oid=4000, database=db)
     schema_2 = Schema.objects.create(oid=5000, database=db)
     with pytest.raises(ValidationError):

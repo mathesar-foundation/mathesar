@@ -20,7 +20,11 @@ def test_db_name():
         conn.execution_options(isolation_level="AUTOCOMMIT")
         conn.execute(text(f"DROP DATABASE IF EXISTS {test_db_name} WITH (FORCE)"))
         conn.execute(text(f"CREATE DATABASE {test_db_name}"))
+    # Unclear if superuser_engine can't be used here.
+    engine = _create_engine(test_db_name)
+    install.install_mathesar_on_database(engine)
     yield test_db_name
+    install.uninstall_mathesar_from_database(engine)
     with superuser_engine.connect() as conn:
         conn.execution_options(isolation_level="AUTOCOMMIT")
         conn.execute(text(f"DROP DATABASE {test_db_name} WITH (FORCE)"))
@@ -48,8 +52,9 @@ def test_schema_name():
     return "test_schema"
 
 
+engine_with_schema_without_updated_ischema_names
 @pytest.fixture
-def engine_with_schema(engine, test_schema_name):
+def engine_with_schema_without_updated_ischema_names(engine, test_schema_name):
     schema = test_schema_name
     _create_schema(engine, schema)
     yield engine, schema

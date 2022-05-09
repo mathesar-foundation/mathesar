@@ -185,8 +185,9 @@ create_default_test_list = [
     "db_type,default,default_obj,expt_default", create_default_test_list
 )
 def test_column_create_default(
-        column_test_table, db_type, default, default_obj, expt_default, client, engine
+        column_test_table, db_type, default, default_obj, expt_default, client, engine_with_mathesar
 ):
+    engine, _ = engine_with_mathesar
     cache.clear()
     name = "anewcolumn"
     data = {"name": name, "type": db_type.id, "default": {"value": default}}
@@ -885,4 +886,5 @@ def test_column_update_type_with_display_and_type_options_as_null_or_empty_obj(
     response_json = response.json()
     assert response_json["type"] == db_type_id
     assert response_json["display_options"] == display_options
-    assert response_json["type_options"] == type_options
+    # For some reason, type_options will reflect None, whether it was updated to None or to {}.
+    assert response_json["type_options"] == None

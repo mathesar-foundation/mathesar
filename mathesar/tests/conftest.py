@@ -138,25 +138,25 @@ def patent_schema(create_schema):
 
 
 @pytest.fixture
-def create_schema(engine_with_mathesar, test_db_model):
+def create_schema(test_db_model):
     """
     Creates a schema factory, making sure to track and clean up new instances
     """
-    engine, _ = engine_with_mathesar
-    function_schemas = {}
+    engine = test_db_model._sa_engine
+    created_schemas = {}
 
     def _create_schema(schema_name):
-        if schema_name in function_schemas:
-            schema_oid = function_schemas[schema_name]
+        if schema_name in created_schemas:
+            schema_oid = created_schemas[schema_name]
         else:
             create_sa_schema(schema_name, engine)
             schema_oid = get_schema_oid_from_name(schema_name, engine)
-            function_schemas[schema_name] = schema_oid
+            created_schemas[schema_name] = schema_oid
         schema_model, _ = Schema.current_objects.get_or_create(oid=schema_oid, database=test_db_model)
         return schema_model
     yield _create_schema
 
-    for oid in function_schemas.values():
+    for oid in created_schemas.values():
         # Handle schemas being renamed during test
         schema = get_schema_name_from_oid(oid, engine)
         drop_sa_schema(schema, engine, cascade=True, if_exists=True)

@@ -76,9 +76,9 @@ def _get_pizza_column_data():
         ({"column_default_dict": {"value": 1}}, "set_column_default"),
     ]
 )
-def test_alter_column_chooses_wisely(column_dict, func_name, engine_with_schema):
+def test_alter_column_chooses_wisely(column_dict, func_name, engine_with_schema_without_updated_ischema_names):
     table_name = "table_with_columns"
-    engine, schema = engine_with_schema
+    engine, schema = engine_with_schema_without_updated_ischema_names
     metadata = MetaData(bind=engine, schema=schema)
     column_name = 'col'
     table = Table(table_name, metadata, Column(column_name, VARCHAR))
@@ -95,19 +95,19 @@ def test_alter_column_chooses_wisely(column_dict, func_name, engine_with_schema)
         mock_alterer.assert_called_once()
 
 
-def test_rename_column_and_assert(engine_with_schema):
+def test_rename_column_and_assert(engine_with_schema_without_updated_ischema_names):
     old_col_name = "col1"
     new_col_name = "col2"
     table_name = "table_with_columns"
-    engine, schema = engine_with_schema
+    engine, schema = engine_with_schema_without_updated_ischema_names
     metadata = MetaData(bind=engine, schema=schema)
     table = Table(table_name, metadata, Column(old_col_name, VARCHAR))
     table.create()
     _rename_column_and_assert(table, old_col_name, new_col_name, engine)
 
 
-def test_rename_column_foreign_keys(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_rename_column_foreign_keys(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "table_to_split"
     columns_list = [Column("Filler 1", INTEGER), Column("Filler 2", INTEGER)]
     create_mathesar_table(table_name, schema, columns_list, engine)
@@ -122,10 +122,10 @@ def test_rename_column_foreign_keys(engine_with_schema):
     assert fk.column.table.name == extracted.name
 
 
-def test_rename_column_sequence(engine_with_schema):
+def test_rename_column_sequence(engine_with_schema_without_updated_ischema_names):
     old_col_name = constants.ID
     new_col_name = "new_" + constants.ID
-    engine, schema = engine_with_schema
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "table_with_columns"
     table = create_mathesar_table(table_name, schema, [], engine)
     with engine.begin() as conn:
@@ -143,10 +143,10 @@ def test_rename_column_sequence(engine_with_schema):
     assert new_value == 2
 
 
-def test_rename_column_index(engine_with_schema):
+def test_rename_column_index(engine_with_schema_without_updated_ischema_names):
     old_col_name = constants.ID
     new_col_name = "new_" + constants.ID
-    engine, schema = engine_with_schema
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "table_with_index"
     metadata = MetaData(bind=engine, schema=schema)
     table = Table(table_name, metadata, Column(old_col_name, INTEGER, index=True))
@@ -161,8 +161,8 @@ def test_rename_column_index(engine_with_schema):
     assert new_col_name in index_columns
 
 
-def test_retype_column_correct_column(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_retype_column_correct_column(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atableone"
     target_type = PostgresType.BOOLEAN
     target_column_name = "thecolumntochange"
@@ -190,8 +190,8 @@ def test_retype_column_correct_column(engine_with_schema):
 
 
 @pytest.mark.parametrize('target_type', [PostgresType.NUMERIC])
-def test_retype_column_adds_options(engine_with_schema, target_type):
-    engine, schema = engine_with_schema
+def test_retype_column_adds_options(engine_with_schema_without_updated_ischema_names, target_type):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atableone"
     target_column_name = "thecolumntochange"
     nontarget_column_name = "notthecolumntochange"
@@ -219,8 +219,8 @@ def test_retype_column_adds_options(engine_with_schema, target_type):
         )
 
 
-def test_retype_column_options_only(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_retype_column_options_only(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atableone"
     target_column_name = "thecolumntochange"
     target_type = PostgresType.CHARACTER_VARYING
@@ -249,8 +249,8 @@ def test_retype_column_options_only(engine_with_schema):
 
 
 @pytest.mark.parametrize("nullable_tup", nullable_changes)
-def test_change_column_nullable_changes(engine_with_schema, nullable_tup):
-    engine, schema = engine_with_schema
+def test_change_column_nullable_changes(engine_with_schema_without_updated_ischema_names, nullable_tup):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atablefornulling"
     target_column_name = "thecolumntochange"
     nontarget_column_name = "notthecolumntochange"
@@ -280,8 +280,8 @@ def test_change_column_nullable_changes(engine_with_schema, nullable_tup):
 
 
 @pytest.mark.parametrize("nullable_tup", nullable_changes)
-def test_change_column_nullable_with_data(engine_with_schema, nullable_tup):
-    engine, schema = engine_with_schema
+def test_change_column_nullable_with_data(engine_with_schema_without_updated_ischema_names, nullable_tup):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atablefornulling"
     target_column_name = "thecolumntochange"
     table = Table(
@@ -317,8 +317,8 @@ def test_change_column_nullable_with_data(engine_with_schema, nullable_tup):
     assert changed_column.nullable is nullable_tup[1]
 
 
-def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atablefornulling"
     target_column_name = "thecolumntochange"
     table = Table(
