@@ -24,7 +24,7 @@ from db.schemas.operations.drop import drop_schema
 from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
-from db.tables.operations.select import reflect_table_from_oid
+from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
@@ -389,6 +389,20 @@ class Constraint(DatabaseObject):
         engine = self.table.schema.database._sa_engine
         column_attnum_list = [result for result in get_columns_attnum_from_names(self.table.oid, column_names, engine)]
         return Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
+
+    @cached_property
+    def referent_columns(self):
+        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
+            column_names = [fk.column.name for fk in self._sa_constraint.elements]
+            engine = self.table.schema._sa_engine
+            oid = get_oid_from_table(self._sa_constraint.referred_table.name,
+                                     self._sa_constraint.referred_table.schema,
+                                     engine)
+            table = Table.objects.get(oid=oid)
+            column_attnum_list = get_columns_attnum_from_names(oid, column_names, table.schema._sa_engine)
+            columns = Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
+            return columns
+        return None
 
     def drop(self):
         drop_constraint(
