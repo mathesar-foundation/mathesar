@@ -1,4 +1,9 @@
 import json
+
+from sqlalchemy import Column, ForeignKey, Integer, MetaData, Table as SATable
+
+from db.tables.operations.select import get_oid_from_table
+from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
 
 
@@ -65,30 +70,43 @@ def test_multiple_constraint_list(create_table, client):
             _verify_unique_constraint(constraint_data, [constraint_column.id], 'NASA Constraint List 1_Case Number_key')
 
 
-def test_existing_foreign_key_constraint_list(create_foreign_key_table, client):
-    table_name = 'Patents'
-    ref_table_name = 'Center'
-    table, ref_table = create_foreign_key_table(table_name, ref_table_name)
-    unique_referent_constraint_column = _get_columns_by_name(ref_table, ['Id'])[0]
-    ref_table.add_constraint('unique', [unique_referent_constraint_column])
-    fk_constraint_column = _get_columns_by_name(table, ['Center'])[0]
-    table.add_constraint(
-        'foreignkey',
-        [fk_constraint_column],
-        referent_table=ref_table,
-        referent_columns=[unique_referent_constraint_column]
+def test_existing_foreign_key_constraint_list(patent_schema, client):
+    engine = patent_schema._sa_engine
+    referent_col_name = "referred_col"
+    metadata = MetaData(bind=engine, schema=patent_schema.name)
+    db_table = SATable(
+        "referent",
+        metadata,
+        Column(referent_col_name, Integer, primary_key=True),
+        schema=patent_schema.name
     )
-
-    response = client.get(f'/api/v0/tables/{table.id}/constraints/')
+    db_table.create()
+    db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
+    ref_table = models.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+    fk_column_name = "fk_col"
+    column_list_in = [
+        Column("mycolumn0", Integer, primary_key=True),
+        Column(fk_column_name, Integer, ForeignKey("referent.referred_col"), nullable=False),
+    ]
+    db_table = SATable(
+        "referrer",
+        metadata,
+        *column_list_in,
+        schema=patent_schema.name
+    )
+    db_table.create()
+    db_table_oid = get_oid_from_table(db_table.name, db_table.schema, engine)
+    table = models.Table.current_objects.create(oid=db_table_oid, schema=patent_schema)
+    response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     response_data = response.json()
     for constraint_data in response_data['results']:
         if constraint_data['type'] == 'foreignkey':
             _verify_foreign_key_constraint(
                 constraint_data,
-                [fk_constraint_column],
+                [referent_col_name],
                 'Patents_Center_fkey',
                 ref_table.id,
-                [unique_referent_constraint_column]
+                [fk_column_name]
             )
 
 
