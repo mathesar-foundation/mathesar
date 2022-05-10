@@ -12,8 +12,8 @@ from mathesar.models import Table
 
 class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     referent_column_name = serializers.CharField()
-    reference_table = serializers.PrimaryKeyRelatedField(queryset=Table.objects.all())
-    referent_table = serializers.PrimaryKeyRelatedField(queryset=Table.objects.all())
+    reference_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
+    referent_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
 
     def is_link_unique(self):
         return True
@@ -39,7 +39,7 @@ class OneToManySerializer(OneToOneSerializer):
 
 class MapColumnSerializer(serializers.Serializer):
     column_name = serializers.CharField()
-    referent_table = serializers.PrimaryKeyRelatedField(queryset=Table.objects.all())
+    referent_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
 
 
 class ManyToManySerializer(MathesarErrorMessageMixin, serializers.Serializer):
