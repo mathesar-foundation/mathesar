@@ -37,7 +37,7 @@ def test_one_to_one_link_create(column_test_table, client, create_table):
     cache.clear()
     table_2 = create_table('Table 2')
     data = {
-        "link_type": "o2o",
+        "link_type": "one-to-one",
         "referent_column_name": "col_1",
         "reference_table": table_2.id,
         "referent_table": column_test_table.id,
@@ -53,7 +53,7 @@ def test_one_to_many_link_create(column_test_table, client, create_table):
     cache.clear()
     table_2 = create_table('Table 2')
     data = {
-        "link_type": "o2m",
+        "link_type": "one-to-many",
         "referent_column_name": "col_1",
         "reference_table": table_2.id,
         "referent_table": column_test_table.id,
@@ -68,7 +68,7 @@ def test_one_to_many_link_create(column_test_table, client, create_table):
 def test_one_to_many_self_referential_link_create(column_test_table, client):
     cache.clear()
     data = {
-        "link_type": "o2m",
+        "link_type": "one-to-many",
         "referent_column_name": "col_1",
         "reference_table": column_test_table.id,
         "referent_table": column_test_table.id,
@@ -83,7 +83,7 @@ def test_one_to_many_self_referential_link_create(column_test_table, client):
 def test_many_to_many_self_referential_link_create(column_test_table, client):
     cache.clear()
     data = {
-        "link_type": "m2m",
+        "link_type": "many-to-many",
         "mapping_table_name": "map_table",
         "referents": [
             {'referent_table': column_test_table.id, 'column_name': "link_1"},
@@ -101,7 +101,7 @@ def test_many_to_many_link_create(column_test_table, client, create_table):
     cache.clear()
     table_2 = create_table('Table 2')
     data = {
-        "link_type": "m2m",
+        "link_type": "many-to-many",
         "mapping_table_name": "map_table",
         "referents": [
             {'referent_table': column_test_table.id, 'column_name': "link_1"},

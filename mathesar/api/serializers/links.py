@@ -70,9 +70,9 @@ class LinksMappingSerializer(
         return serializer.create(validated_data)
 
     serializers_mapping = {
-        "o2o": OneToOneSerializer,
-        "o2m": OneToManySerializer,
-        "m2m": ManyToManySerializer
+        "one-to-one": OneToOneSerializer,
+        "one-to-many": OneToManySerializer,
+        "many-to-many": ManyToManySerializer
     }
     link_type = serializers.CharField(required=True)
 
