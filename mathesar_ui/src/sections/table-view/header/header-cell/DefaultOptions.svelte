@@ -7,6 +7,7 @@
     faTrashAlt,
     faSpinner,
     faICursor,
+    faUnlink,
   } from '@fortawesome/free-solid-svg-icons';
   import { Icon, Button, Checkbox } from '@mathesar-component-library';
   import type {
@@ -18,6 +19,7 @@
   import { toast } from '@mathesar/stores/toast';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import { SortDirection } from '@mathesar/stores/table-data';
+  import { getErrorMessage } from '@mathesar/utils/errors';
 
   const dispatch = createEventDispatcher();
 
@@ -36,6 +38,14 @@
   $: allowsNull = column.nullable;
   $: ({ uniqueColumns } = constraintsDataStore);
   $: allowsDuplicates = !(column.primary_key || $uniqueColumns.has(column.id));
+  $: tableLinkConstraints = $constraintsDataStore.constraints.filter(
+    (constraint) =>
+      constraint.type === 'foreignkey' &&
+      constraint.columns.length === 1 && // only single-column foreign keys
+      constraint.columns.includes(column.id),
+  );
+  $: hasTableLink = tableLinkConstraints.length > 0;
+  $: isRequestingRemoveTableLink = false;
 
   function handleSort(order: SortDirection) {
     if (sortDirection === order) {
@@ -118,6 +128,21 @@
       toast.error({ message });
     } finally {
       isRequestingToggleAllowDuplicates = false;
+    }
+  }
+
+  async function removeTableLink() {
+    isRequestingRemoveTableLink = true;
+    try {
+      await Promise.all(
+        tableLinkConstraints.map((c) => constraintsDataStore.remove(c.id)),
+      );
+      toast.success('Table link removed');
+      dispatch('close');
+    } catch (error) {
+      toast.error(`Unable to remove table link. ${getErrorMessage(error)}`);
+    } finally {
+      isRequestingRemoveTableLink = false;
     }
   }
 </script>
@@ -204,4 +229,16 @@
       <span>Allow Duplicates</span>
     </Button>
   </li>
+  {#if hasTableLink}
+    <li>
+      <Button appearance="plain" on:click={removeTableLink}>
+        {#if isRequestingRemoveTableLink}
+          <Icon class="opt" data={faSpinner} spin={true} />
+        {:else}
+          <Icon class="opt" data={faUnlink} />
+        {/if}
+        <span>Remove Table Link</span>
+      </Button>
+    </li>
+  {/if}
 </ul>

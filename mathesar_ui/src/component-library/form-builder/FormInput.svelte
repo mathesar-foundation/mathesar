@@ -5,13 +5,13 @@
   import type { DynamicInputDataType } from '@mathesar-component-library-dir/dynamic-input/types';
   import type {
     FormInputElement,
-    FormInputStore,
+    FormValueStore,
     FormValidationCheck,
   } from './types';
 
   export let type: DynamicInputDataType;
   export let label: FormInputElement['label'] = undefined;
-  export let store: FormInputStore;
+  export let store: FormValueStore;
   export let validationErrors: FormValidationCheck[];
 </script>
 

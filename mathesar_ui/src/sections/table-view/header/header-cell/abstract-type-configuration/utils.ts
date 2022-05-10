@@ -8,6 +8,7 @@ import type {
 } from '@mathesar/stores/abstract-types/types';
 import type { Column } from '@mathesar/stores/table-data/types';
 import { readable } from 'svelte/store';
+import DurationConfiguration from './config-components/DurationConfiguration.svelte';
 
 export function getFormValueStore(
   form: FormBuildConfiguration | undefined,
@@ -66,7 +67,9 @@ export function constructDisplayForm(
             column.display_options,
           )
         : {};
-    displayForm = makeForm(displayOptionsConfig.form, displayFormValues);
+    displayForm = makeForm(displayOptionsConfig.form, displayFormValues, {
+      'duration-config-menu': DurationConfiguration,
+    });
   }
   const displayFormValues = getFormValueStore(displayForm);
   return {
