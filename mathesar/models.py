@@ -398,9 +398,9 @@ class Constraint(DatabaseObject):
             oid = get_oid_from_table(self._sa_constraint.referred_table.name,
                                      self._sa_constraint.referred_table.schema,
                                      engine)
-            table = Table.objects.get(oid=oid)
+            table = Table.objects.get(oid=oid, schema=self.table.schema)
             column_attnum_list = get_columns_attnum_from_names(oid, column_names, table.schema._sa_engine)
-            columns = Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
+            columns = Column.objects.filter(table=table, attnum__in=column_attnum_list).order_by("attnum")
             return columns
         return None
 
