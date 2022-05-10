@@ -17,11 +17,22 @@ def _verify_primary_and_unique_constraints(response):
     assert set(['unique', 'primary']) == set([constraint_data['type'] for constraint_data in constraints_data])
 
 
-def _verify_foreign_key_constraint(constraint_data, columns, name, referent_columns):
+def _verify_foreign_key_constraint(
+        constraint_data,
+        columns,
+        name,
+        referent_columns,
+        onupdate,
+        ondelete,
+        deferrable,
+):
     assert constraint_data['columns'] == columns
     assert constraint_data['referent_columns'] == referent_columns
     assert constraint_data['name'] == name
     assert constraint_data['type'] == 'foreignkey'
+    assert constraint_data['onupdate'] == onupdate
+    assert constraint_data['ondelete'] == ondelete
+    assert constraint_data['deferrable'] == deferrable
     assert 'id' in constraint_data and type(constraint_data['id']) == int
 
 
@@ -88,7 +99,18 @@ def test_existing_foreign_key_constraint_list(patent_schema, create_table, creat
     fk_column_name = "fk_col"
     column_list_in = [
         Column("mycolumn0", Integer, primary_key=True),
-        Column(fk_column_name, Integer, ForeignKey("referent.referred_col"), nullable=False),
+        Column(
+            fk_column_name,
+            Integer,
+            ForeignKey(
+                "referent.referred_col",
+                onupdate="RESTRICT",
+                ondelete="CASCADE",
+                deferrable="NOT DEFERABLE",
+                match="SIMPLE"
+            ),
+            nullable=False
+        ),
     ]
     db_table = SATable(
         "referrer",
@@ -104,14 +126,19 @@ def test_existing_foreign_key_constraint_list(patent_schema, create_table, creat
     column_attnum = get_column_attnum_from_name(db_table_oid, [fk_column_name], engine)
     columns = list(models.Column.objects.filter(table=table, attnum=column_attnum).values_list('id', flat=True))
     referent_column_attnum = get_column_attnum_from_name(referent_table_oid, [referent_col_name], engine)
-    referent_columns = list(models.Column.objects.filter(table=table, attnum=referent_column_attnum).values_list('id', flat=True))
+    referent_columns = list(
+        models.Column.objects.filter(table=table, attnum=referent_column_attnum).values_list('id', flat=True)
+    )
     for constraint_data in response_data['results']:
         if constraint_data['type'] == 'foreignkey':
             _verify_foreign_key_constraint(
                 constraint_data,
                 columns,
                 'referrer_fk_col_fkey',
-                referent_columns
+                referent_columns,
+                onupdate="RESTRICT",
+                ondelete="CASCADE",
+                deferrable=True
             )
 
 
