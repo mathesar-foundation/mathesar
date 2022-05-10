@@ -19,7 +19,7 @@ class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
         return True
 
     def create(self, validated_data):
-        reference_table: Table = validated_data['reference_table']
+        reference_table = validated_data['reference_table']
         create_foreign_key_link(
             reference_table.schema._sa_engine,
             reference_table._sa_table.schema,
