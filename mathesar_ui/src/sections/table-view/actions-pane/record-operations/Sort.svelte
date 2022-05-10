@@ -1,21 +1,26 @@
 <script lang="ts">
+  // TODO: Improve UX
+
   import type { Writable } from 'svelte/store';
   import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
-  import type { Grouping } from '@mathesar/stores/table-data';
-  import { Button, Icon } from '@mathesar-component-library';
+  import { Icon, Button } from '@mathesar-component-library';
+  import { SortDirection } from '@mathesar/stores/table-data';
+  import type { Sorting } from '@mathesar/stores/table-data';
   import type { Column } from '@mathesar/stores/table-data/types';
+  import SelectSortDirection from '@mathesar/components/SelectSortDirection.svelte';
   import SelectColumn from '@mathesar/components/SelectColumn.svelte';
 
-  export let grouping: Writable<Grouping>;
+  export let sorting: Writable<Sorting>;
   export let columns: Column[];
 
-  /** Columns which are not already used as a grouping entry */
-  $: availableColumns = columns.filter((column) => !$grouping.has(column.id));
-  $: [newGroupColumn] = availableColumns;
+  /** Columns which are not already used as a sorting entry */
+  $: availableColumns = columns.filter((column) => !$sorting.has(column.id));
+  $: [newSortColumn] = availableColumns;
+  let newSortDirection = SortDirection.A;
   let addNew = false;
 
-  function addGroupColumn() {
-    grouping.update((g) => g.with(newGroupColumn.id));
+  function addSortColumn() {
+    sorting.update((s) => s.with(newSortColumn.id, newSortDirection));
     addNew = false;
   }
 </script>
@@ -23,23 +28,27 @@
 <div class="display-option">
   <div class="header">
     <span>
-      Group
-      {#if $grouping.size > 0}
-        ({$grouping.size})
+      Sort
+      {#if $sorting.size > 0}
+        ({$sorting.size})
       {/if}
     </span>
   </div>
   <div class="content">
     <table>
-      {#each [...$grouping] as columnId (columnId)}
+      {#each [...$sorting] as [columnId, sortDirection] (columnId)}
         <tr>
-          <td class="groupcolumn">
-            {columns.find((c) => c.id === columnId)?.name}
+          <td class="column">{columns.find((c) => c.id === columnId)?.name}</td>
+          <td class="dir">
+            <SelectSortDirection
+              value={sortDirection}
+              onChange={(direction) => {
+                sorting.update((s) => s.with(columnId, direction));
+              }}
+            />
           </td>
           <td class="action">
-            <Button
-              on:click={() => grouping.update((g) => g.without(columnId))}
-            >
+            <Button on:click={() => sorting.update((s) => s.without(columnId))}>
               Clear
             </Button>
           </td>
@@ -59,20 +68,23 @@
                   addNew = true;
                 }}
               >
-                Add new group column
+                Add new sort column
               </Button>
             </td>
           </tr>
         {:else}
           <tr class="add-option">
-            <td class="groupcolumn">
+            <td class="column">
               <SelectColumn
                 columns={availableColumns}
-                bind:column={newGroupColumn}
+                bind:column={newSortColumn}
               />
             </td>
+            <td class="dir">
+              <SelectSortDirection bind:value={newSortDirection} />
+            </td>
             <td class="action">
-              <Button size="small" on:click={addGroupColumn}>
+              <Button size="small" on:click={addSortColumn}>
                 <Icon data={faPlus} />
               </Button>
               <Button
