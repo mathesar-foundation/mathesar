@@ -1,10 +1,10 @@
 import type { AbstractTypeConfiguration } from '../types';
 
-const unknownType: AbstractTypeConfiguration = {
+const fallbackType: AbstractTypeConfiguration = {
   icon: '?',
   cell: {
     type: 'string',
   },
 };
 
-export default unknownType;
+export default fallbackType;

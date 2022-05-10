@@ -18,11 +18,22 @@ def _verify_primary_and_unique_constraints(response):
     assert set(['unique', 'primary']) == set([constraint_data['type'] for constraint_data in constraints_data])
 
 
-def _verify_foreign_key_constraint(constraint_data, columns, name, referent_columns):
+def _verify_foreign_key_constraint(
+        constraint_data,
+        columns,
+        name,
+        referent_columns,
+        onupdate,
+        ondelete,
+        deferrable,
+):
     assert constraint_data['columns'] == columns
     assert constraint_data['referent_columns'] == referent_columns
     assert constraint_data['name'] == name
     assert constraint_data['type'] == 'foreignkey'
+    assert constraint_data['onupdate'] == onupdate
+    assert constraint_data['ondelete'] == ondelete
+    assert constraint_data['deferrable'] == deferrable
     assert 'id' in constraint_data and type(constraint_data['id']) == int
 
 
@@ -88,7 +99,18 @@ def test_existing_foreign_key_constraint_list(patent_schema, create_table, creat
     fk_column_name = "fk_col"
     column_list_in = [
         Column("mycolumn0", Integer, primary_key=True),
-        Column(fk_column_name, Integer, ForeignKey("referent.referred_col"), nullable=False),
+        Column(
+            fk_column_name,
+            Integer,
+            ForeignKey(
+                "referent.referred_col",
+                onupdate="RESTRICT",
+                ondelete="CASCADE",
+                deferrable="NOT DEFERABLE",
+                match="SIMPLE"
+            ),
+            nullable=False
+        ),
     ]
     db_table = SATable(
         "referrer",
@@ -111,7 +133,10 @@ def test_existing_foreign_key_constraint_list(patent_schema, create_table, creat
                 constraint_data,
                 columns,
                 'referrer_fk_col_fkey',
-                referent_columns
+                referent_columns,
+                onupdate="RESTRICT",
+                ondelete="CASCADE",
+                deferrable=True
             )
 
 
@@ -164,7 +189,6 @@ def test_create_multiple_column_unique_constraint(create_table, client):
     response = client.post(
         f'/api/db/v0/tables/{table.id}/constraints/', data
     )
-    print(response.json())
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), constraint_column_id_list, 'NASA Constraint List 4_Center_key')
 

@@ -5,7 +5,6 @@
     TabularDataStore,
     Row,
   } from '@mathesar/stores/table-data/types';
-
   import type {
     Sorting,
     Filtering,
@@ -15,6 +14,7 @@
   import RowComponent from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
+  import type { ProcessedTableColumnMap } from './utils';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
@@ -25,6 +25,8 @@
   $: ({ newRecords } = recordsData);
   $: ({ rowWidth, horizontalScrollOffset, scrollOffset, displayableRecords } =
     display);
+
+  export let processedTableColumnsMap: ProcessedTableColumnMap;
 
   let initialSorting: Sorting;
   let initialFiltering: Filtering;
@@ -132,6 +134,7 @@
             <RowComponent
               style={it.style}
               bind:row={$displayableRecords[it.index]}
+              {processedTableColumnsMap}
             />
           {/if}
         {/each}

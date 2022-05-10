@@ -3,7 +3,6 @@ import type { SimplifiedInputProps } from '@mathesar-component-library-dir/commo
 
 export interface TextInputProps extends SimplifiedInputProps, BaseInputProps {
   value?: string | null;
-  class?: string;
   element?: HTMLInputElement;
   hasError?: boolean;
 }

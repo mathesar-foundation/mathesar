@@ -366,7 +366,7 @@ class Column(ReflectionManagerMixin, BaseModel):
 class Constraint(DatabaseObject):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='constraints')
 
-    @property
+    @cached_property
     def _sa_constraint(self):
         engine = self.table.schema.database._sa_engine
         return get_constraint_from_oid(self.oid, engine, self.table._sa_table)
@@ -399,6 +399,26 @@ class Constraint(DatabaseObject):
             columns = Column.objects.filter(table=table, attnum__in=column_attnum_list).order_by("attnum")
             return columns
         return None
+
+    @cached_property
+    def ondelete(self):
+        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
+            return self._sa_constraint.ondelete
+
+    @cached_property
+    def onupdate(self):
+        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
+            return self._sa_constraint.onupdate
+
+    @cached_property
+    def deferrable(self):
+        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
+            return self._sa_constraint.deferrable
+
+    @cached_property
+    def match(self):
+        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
+            return self._sa_constraint.match
 
     def drop(self):
         drop_constraint(

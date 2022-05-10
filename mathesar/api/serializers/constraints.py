@@ -58,9 +58,19 @@ class BaseConstraintSerializer(serializers.ModelSerializer):
 class ForeignKeyConstraintSerializer(BaseConstraintSerializer):
     class Meta:
         model = Constraint
-        fields = BaseConstraintSerializer.Meta.fields + ['referent_columns']
+        fields = BaseConstraintSerializer.Meta.fields + [
+            'referent_columns',
+            'onupdate',
+            'ondelete',
+            'deferrable',
+            'match'
+        ]
 
     referent_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
+    onupdate = serializers.ChoiceField(choices=['CASCADE', 'DELETE', 'RESTRICT'])
+    ondelete = serializers.ChoiceField(choices=['CASCADE', 'DELETE', 'RESTRICT'])
+    deferrable = serializers.BooleanField()
+    match = serializers.ChoiceField(choices=['SIMPLE', 'PARTIAL', 'FULL'])
 
     def construct_constraint_obj(self, table, data):
         columns_attnum = [column.attnum for column in data.get('columns')]
@@ -75,7 +85,11 @@ class ForeignKeyConstraintSerializer(BaseConstraintSerializer):
         )
 
 
-class ConstraintSerializer(ReadWritePolymorphicSerializerMappingMixin, MathesarPolymorphicErrorMixin, serializers.ModelSerializer):
+class ConstraintSerializer(
+    ReadWritePolymorphicSerializerMappingMixin,
+    MathesarPolymorphicErrorMixin,
+    serializers.ModelSerializer
+):
     class Meta:
         model = Constraint
         fields = '__all__'

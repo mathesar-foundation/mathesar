@@ -72,8 +72,9 @@
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@popperjs/core": "^2.9.2",
-    "iter-tools": "^7.3.1",
+    "dayjs": "^1.11.1",
     "fast-diff": "^1.2.0",
+    "iter-tools": "^7.3.1",
     "js-cookie": "^2.2.1",
     "perfect-scrollbar": "^1.5.1"
   }
