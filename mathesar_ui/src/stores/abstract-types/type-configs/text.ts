@@ -103,7 +103,7 @@ function constructDbFormValuesFromTypeOptions(
 }
 
 const textType: AbstractTypeConfiguration = {
-  icon: { data: faAlignLeft },
+  icon: { data: faAlignLeft, label: 'Text' },
   defaultDbType: DB_TYPES.VARCHAR,
   cell: {
     type: 'string',

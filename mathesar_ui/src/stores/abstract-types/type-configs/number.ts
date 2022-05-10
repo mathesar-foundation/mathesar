@@ -259,7 +259,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const numberType: AbstractTypeConfiguration = {
-  icon: { data: faHashtag },
+  icon: { data: faHashtag, label: 'Number' },
   cell: {
     type: 'number',
     conditionalConfig: {

@@ -63,7 +63,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const durationType: AbstractTypeConfiguration = {
-  icon: { data: faStopwatch },
+  icon: { data: faStopwatch, label: 'Duration' },
   cell: {
     type: 'duration',
   },

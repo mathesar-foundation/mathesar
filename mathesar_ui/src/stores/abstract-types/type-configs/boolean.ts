@@ -117,7 +117,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const booleanType: AbstractTypeConfiguration = {
-  icon: { data: faCheckSquare },
+  icon: { data: faCheckSquare, label: 'Boolean' },
   cell: {
     type: 'boolean',
   },
