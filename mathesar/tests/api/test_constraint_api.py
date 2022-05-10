@@ -65,33 +65,6 @@ def test_multiple_constraint_list(create_table, client):
             _verify_unique_constraint(constraint_data, [constraint_column.id], 'NASA Constraint List 1_Case Number_key')
 
 
-def test_existing_foreign_key_constraint_list(create_foreign_key_table, client):
-    table_name = 'Patents'
-    ref_table_name = 'Center'
-    table, ref_table = create_foreign_key_table(table_name, ref_table_name)
-    unique_referent_constraint_column = _get_columns_by_name(ref_table, ['Id'])[0]
-    ref_table.add_constraint('unique', [unique_referent_constraint_column])
-    fk_constraint_column = _get_columns_by_name(table, ['Center'])[0]
-    table.add_constraint(
-        'foreignkey',
-        [fk_constraint_column],
-        referent_table=ref_table,
-        referent_columns=[unique_referent_constraint_column]
-    )
-
-    response = client.get(f'/api/v0/tables/{table.id}/constraints/')
-    response_data = response.json()
-    for constraint_data in response_data['results']:
-        if constraint_data['type'] == 'foreignkey':
-            _verify_foreign_key_constraint(
-                constraint_data,
-                [fk_constraint_column],
-                'Patents_Center_fkey',
-                ref_table.id,
-                [unique_referent_constraint_column]
-            )
-
-
 def test_multiple_column_constraint_list(create_table, client):
     table_name = 'NASA Constraint List 2'
     table = create_table(table_name)
