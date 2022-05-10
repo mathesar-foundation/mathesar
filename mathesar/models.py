@@ -11,7 +11,7 @@ from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
 from db.columns.operations.select import get_column_name_from_attnum, get_columns_attnum_from_names
-from db.constraints.operations.create import create_unique_constraint
+from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
 from db.constraints import utils as constraint_utils
@@ -313,16 +313,11 @@ class Table(DatabaseObject):
     def delete_record(self, id_value):
         return delete_record(self._sa_table, self.schema._sa_engine, id_value)
 
-    def add_constraint(self, constraint_type, columns, name=None):
-        if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
-            raise ValueError('Only creating unique constraints is currently supported.')
-        column_names = [column.name for column in columns]
-        create_unique_constraint(
-            self.name,
+    def add_constraint(self, constraint_obj):
+        create_constraint(
             self._sa_table.schema,
             self.schema._sa_engine,
-            column_names,
-            name
+            constraint_obj
         )
         try:
             # Clearing cache so that new constraint shows up.
@@ -330,8 +325,9 @@ class Table(DatabaseObject):
         except AttributeError:
             pass
         engine = self.schema.database._sa_engine
+        name = constraint_obj.name
         if not name:
-            name = constraint_utils.get_constraint_name(constraint_type, self.name, column_names[0])
+            name = constraint_utils.get_constraint_name(engine, constraint_obj.constraint_type(), self.oid, constraint_obj.columns_attnum[0])
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         return Constraint.current_objects.create(oid=constraint_oid, table=self)
 
@@ -398,9 +394,9 @@ class Constraint(DatabaseObject):
             oid = get_oid_from_table(self._sa_constraint.referred_table.name,
                                      self._sa_constraint.referred_table.schema,
                                      engine)
-            table = Table.objects.get(oid=oid)
+            table = Table.objects.get(oid=oid, schema=self.table.schema)
             column_attnum_list = get_columns_attnum_from_names(oid, column_names, table.schema._sa_engine)
-            columns = Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
+            columns = Column.objects.filter(table=table, attnum__in=column_attnum_list).order_by("attnum")
             return columns
         return None
 
