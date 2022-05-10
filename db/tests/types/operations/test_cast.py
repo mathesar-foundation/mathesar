@@ -75,7 +75,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
     #     SUPPORTED_MAP_NAME: <optional; key in supported type map dictionaries>
     #     TARGET_DICT: {
     #         <target_type_1>: {
-    #             VALID: [(in_val, out_val), (in_val, out_val)],
+    #             VALID: [(in_val, out_val, <optional; target_type_options_dict>),
+    #                     (in_val, out_val)],
     #             INVALID: [in_val, in_val]
     #         },
     #         <target_type_2>: {
@@ -88,15 +89,17 @@ MASTER_DB_TYPE_MAP_SPEC = {
     # The TARGET_DICT is a dict with keys giving a valid target type for
     # alteration of a column of the given type, and values giving a dict
     # of valid and invalid casting values.  VALID value list is a list of
-    # tuples representing the input and expected output, whereas INVALID
-    # value list only needs input (since it should break, giving no output)
+    # tuples representing the input and expected output as well as an
+    # optional dict that specifies type options for the target type.
+    # Whereas INVALID value list only needs input (since it should break,
+    # giving no output)
     BIGINT: {
         ISCHEMA_NAME: PostgresType.BIGINT.value,
         REFLECTED_NAME: BIGINT,
         TARGET_DICT: {
             BIGINT: {VALID: [(500, 500), (500000000000, 500000000000)]},
             BOOLEAN: {VALID: [(1, True), (0, False)], INVALID: [3]},
-            CHAR: {VALID: [(3, "3")]},
+            CHAR: {VALID: [(3, "3"), (33, "33", {"length": 2})]},
             DECIMAL: {VALID: [(1, Decimal('1.0'))]},
             DOUBLE: {VALID: [(3, 3.0)]},
             FLOAT: {VALID: [(4, 4.0)]},
@@ -131,7 +134,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             BIGINT: {VALID: [(True, 1), (False, 0)]},
             BOOLEAN: {VALID: [(True, True), (False, False)]},
-            CHAR: {VALID: []},
+            CHAR: {VALID: [(True, 'true', {"length": 4}), (False, 'false', {"length": 5})]},
             DECIMAL: {VALID: [(True, Decimal('1.0')), (False, Decimal('0'))]},
             DOUBLE: {VALID: [(True, 1.0), (False, 0.0)]},
             FLOAT: {VALID: [(True, 1.0), (False, 0.0)]},
@@ -183,7 +186,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: PostgresType.DATE.value,
         REFLECTED_NAME: DATE,
         TARGET_DICT: {
-            CHAR: {VALID: []},
+            CHAR: {VALID: [("1999-01-18 AD", "1999-01-18", {"length": 10})]},
             DATE: {VALID: [("1999-01-18 AD", "1999-01-18 AD")]},
             TEXT: {VALID: [("1999-01-18 AD", "1999-01-18")]},
             VARCHAR: {VALID: [("1999-01-18 AD", "1999-01-18")]},
@@ -272,7 +275,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         SUPPORTED_MAP_NAME: MathesarCustomType.EMAIL.value,
         REFLECTED_NAME: EMAIL,
         TARGET_DICT: {
-            CHAR: {VALID: []},
+            CHAR: {VALID: [("alice@example.com", "alice@example.com", {"length": 17})]},
             EMAIL: {VALID: [("alice@example.com", "alice@example.com")]},
             TEXT: {VALID: [("bob@example.com", "bob@example.com")]},
             VARCHAR: {VALID: [("bob@example.com", "bob@example.com")]},
@@ -339,7 +342,9 @@ MASTER_DB_TYPE_MAP_SPEC = {
         REFLECTED_NAME: INTERVAL,
         TARGET_DICT: {
             CHAR: {
-                VALID: []
+                VALID: [
+                    ("P0Y0M3DT3H5M30S", "3 days 03:05:30", {"length": 15}),
+                ]
             },
             INTERVAL: {
                 VALID: [
@@ -362,7 +367,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         REFLECTED_NAME: MATHESAR_MONEY,
         TARGET_DICT: {
             BIGINT: {VALID: [(12341234, 12341234)]},
-            CHAR: {VALID: []},
+            CHAR: {VALID: [(12.12, "12.12", {"length": 5})]},
             DECIMAL: {VALID: [(12.12, Decimal('12.12'))]},
             DOUBLE: {VALID: [(12.12, 12.12)]},
             FLOAT: {VALID: [(12.12, 12.12)]},
@@ -391,7 +396,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: PostgresType.MONEY.value,
         REFLECTED_NAME: MONEY,
         TARGET_DICT: {
-            CHAR: {VALID: []},
+            CHAR: {VALID: [("$12.12", "$12.12", {"length": 6})]},
             MATHESAR_MONEY: {VALID: [("$20.00", Decimal(20.0))]},
             MULTICURRENCY_MONEY: {
                 VALID: [
@@ -416,7 +421,18 @@ MASTER_DB_TYPE_MAP_SPEC = {
         SUPPORTED_MAP_NAME: MathesarCustomType.MULTICURRENCY_MONEY.value,
         REFLECTED_NAME: MULTICURRENCY_MONEY,
         TARGET_DICT: {
-            CHAR: {VALID: []},
+            CHAR: {
+                VALID: [
+                    (
+                        {
+                            multicurrency.VALUE: 1234.12,
+                            multicurrency.CURRENCY: 'XYZ'
+                        },
+                        '(1234.12,XYZ)',
+                        {"length": 13}
+                    )
+                ]
+            },
             MULTICURRENCY_MONEY: {
                 VALID: [
                     (
@@ -555,7 +571,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: PostgresType.TIME_WITHOUT_TIME_ZONE.value,
         REFLECTED_NAME: TIME_WITHOUT_TIME_ZONE,
         TARGET_DICT: {
-            CHAR: {VALID: []},
+            CHAR: {VALID: [("12:30:45", "12:30:45", {"length": 8})]},
             TIME_WITHOUT_TIME_ZONE: {VALID: [("12:30:45", "12:30:45.0")]},
             TIME_WITH_TIME_ZONE: {VALID: [("12:30:45", "12:30:45.0Z")]},
             TEXT: {VALID: [("12:30:45", "12:30:45")]},
@@ -566,7 +582,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: PostgresType.TIME_WITH_TIME_ZONE.value,
         REFLECTED_NAME: TIME_WITH_TIME_ZONE,
         TARGET_DICT: {
-            CHAR: {VALID: []},
+            CHAR: {VALID: [("12:30:45+01:00", "12:30:45+01", {"length": 11})]},
             TIME_WITH_TIME_ZONE: {
                 VALID: [("12:30:45+01:00", "12:30:45.0+01:00")]
             },
@@ -579,7 +595,9 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: PostgresType.TIMESTAMP_WITH_TIME_ZONE.value,
         REFLECTED_NAME: TIMESTAMP_WITH_TIME_ZONE,
         TARGET_DICT: {
-            CHAR: {VALID: []},
+            CHAR: {VALID: [
+                ("1999-01-18T12:30:45.0+01:00 AD", "1999-01-18 11:30:45+00", {"length": 22}),
+            ]},
             DATE: {
                 VALID: [("1999-01-18T00:00:00.0Z AD", "1999-01-18 AD")],
                 INVALID: [
@@ -619,7 +637,9 @@ MASTER_DB_TYPE_MAP_SPEC = {
         ISCHEMA_NAME: PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value,
         REFLECTED_NAME: TIMESTAMP_WITHOUT_TIME_ZONE,
         TARGET_DICT: {
-            CHAR: {VALID: []},
+            CHAR: {VALID: [
+                ("1999-01-18T12:30:45.0 AD", "1999-01-18 12:30:45", {"length": 19}),
+            ]},
             DATE: {
                 VALID: [("1999-01-18T00:00:00.0 AD", "1999-01-18 AD")],
                 INVALID: ["1999-01-18T00:10:00.0 AD"]
@@ -772,7 +792,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
         SUPPORTED_MAP_NAME: MathesarCustomType.URI.value,
         REFLECTED_NAME: URI,
         TARGET_DICT: {
-            CHAR: {VALID: []},
+            CHAR: {VALID: [("https://centerofci.org", "https://centerofci.org", {"length": 22})]},
             TEXT: {VALID: [("https://centerofci.org", "https://centerofci.org")]},
             URI: {VALID: [("https://centerofci.org", "https://centerofci.org")]},
             VARCHAR: {VALID: [("https://centerofci.org", "https://centerofci.org")]},
@@ -1099,20 +1119,22 @@ type_test_data_gen_list = [
         MASTER_DB_TYPE_MAP_SPEC[target].get(
             SUPPORTED_MAP_NAME, MASTER_DB_TYPE_MAP_SPEC[target][ISCHEMA_NAME]
         ),
+        options,
         in_val,
-        out_val,
+        out_val
     )
     for val in MASTER_DB_TYPE_MAP_SPEC.values()
     for target in val[TARGET_DICT]
-    for in_val, out_val in val[TARGET_DICT][target].get(VALID, [])
+    for case in val[TARGET_DICT][target].get(VALID, [])
+    for in_val, out_val, options in [(list(case) + [{}])[:3]]
 ]
 
 
 @pytest.mark.parametrize(
-    "source_type,target_type,in_val,out_val", type_test_data_gen_list
+    "source_type,target_type,options,in_val,out_val", type_test_data_gen_list
 )
 def test_alter_column_casts_data_gen(
-        engine_email_type, source_type, target_type, in_val, out_val
+        engine_email_type, source_type, target_type, options, in_val, out_val
 ):
     engine, schema = engine_email_type
     available_types = get_available_types(engine)
@@ -1142,7 +1164,8 @@ def test_alter_column_casts_data_gen(
             COLUMN_NAME,
             engine,
             conn,
-            target_type
+            target_type,
+            options
         )
     metadata = MetaData(bind=engine)
     metadata.reflect()
