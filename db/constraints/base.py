@@ -19,12 +19,20 @@ class ForeignKeyConstraint(Constraint):
     def constraint_type(self):
         return "foreignkey"
 
-    def __init__(self, name, table_oid, columns_attnum, referent_table_oid, referent_columns_attnum):
+    def __init__(
+            self, name,
+            table_oid,
+            columns_attnum,
+            referent_table_oid,
+            referent_columns_attnum,
+            options
+    ):
         self.name = name
         self.table_oid = table_oid
         self.columns_attnum = columns_attnum
         self.referent_table_oid = referent_table_oid
         self.referent_columns = referent_columns_attnum
+        self.options = options
 
     def add_constraint(self, migration_operation, engine, connection_to_use):
         table = reflect_table_from_oid(self.table_oid, engine, connection_to_use)
@@ -43,7 +51,8 @@ class ForeignKeyConstraint(Constraint):
             columns_name,
             referent_columns_name,
             source_schema=table.schema,
-            referent_schema=referent_table.schema
+            referent_schema=referent_table.schema,
+            **self.options
         )
 
 

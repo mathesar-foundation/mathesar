@@ -67,21 +67,27 @@ class ForeignKeyConstraintSerializer(BaseConstraintSerializer):
         ]
 
     referent_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
-    onupdate = serializers.ChoiceField(choices=['CASCADE', 'DELETE', 'RESTRICT'])
-    ondelete = serializers.ChoiceField(choices=['CASCADE', 'DELETE', 'RESTRICT'])
-    deferrable = serializers.BooleanField()
-    match = serializers.ChoiceField(choices=['SIMPLE', 'PARTIAL', 'FULL'])
+    onupdate = serializers.ChoiceField(choices=['CASCADE', 'DELETE', 'RESTRICT'], required=False)
+    ondelete = serializers.ChoiceField(choices=['CASCADE', 'DELETE', 'RESTRICT'], required=False)
+    deferrable = serializers.BooleanField(required=False)
+    match = serializers.ChoiceField(choices=['SIMPLE', 'PARTIAL', 'FULL'], required=False)
 
     def construct_constraint_obj(self, table, data):
         columns_attnum = [column.attnum for column in data.get('columns')]
         referent_columns = data.get('referent_columns')
         referent_columns_attnum = [column.attnum for column in referent_columns]
+        constraint_options_fields = ['onupdate', 'ondelete', 'deferrable']
+        constraint_options = {
+            constraint_options_field: data[constraint_options_field]
+            for constraint_options_field in constraint_options_fields if constraint_options_field in data
+        }
         return ForeignKeyConstraint(
             data.get('name', None),
             table.oid,
             columns_attnum,
             referent_columns[0].table.oid,
-            referent_columns_attnum
+            referent_columns_attnum,
+            constraint_options
         )
 
 
