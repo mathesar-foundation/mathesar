@@ -85,6 +85,14 @@ export interface DurationDisplayOptions extends Record<string, unknown> {
   show_units: boolean | null;
 }
 
+export type DateFormat = 'none' | 'us' | 'eu' | 'friendly' | 'iso';
+
+export interface DateDisplayOptions extends Record<string, unknown> {
+  format: DateFormat | null;
+}
+
+export type TimeFormat = 'none' | '24hr' | '12hr';
+
 export interface BaseColumn {
   id: number;
   name: string;
