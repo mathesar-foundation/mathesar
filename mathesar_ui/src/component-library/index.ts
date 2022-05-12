@@ -35,6 +35,7 @@ export { default as TextInput } from './text-input/TextInput.svelte';
 
 // Compound Components (Ordered)
 export { AttachableDropdown, Dropdown } from './dropdown';
+export { DatePicker, InlineDateTimePicker } from './date-time-picker';
 export { default as DropdownMenu } from './dropdown-menu/DropdownMenu.svelte';
 export { default as DynamicInput } from './dynamic-input/DynamicInput.svelte';
 export { default as FileUpload } from './file-upload/FileUpload.svelte';
