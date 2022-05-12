@@ -5,6 +5,7 @@ from unittest.mock import patch
 from django.core.cache import cache
 
 import pytest
+from mathesar.api.utils import follows_json_number_spec
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 from db.functions.exceptions import UnknownDBFunctionID
@@ -460,6 +461,98 @@ grouping_params = [
             },
         ],
     ),
+    (
+        'Count By Grouping',
+        {
+            'columns': ['id'],
+            'mode': 'count_by',
+            'global_min': 0,
+            'global_max': 1000,
+            'count_by': 50
+        },
+        [
+            {
+                'count': 49,
+                'first_value': {'id': 1},
+                'last_value': {'id': 49},
+                'less_than_eq_value': None,
+                'greater_than_eq_value': {'id': 0},
+                'less_than_value': {'id': 50},
+                'greater_than_value': None,
+                'result_indices': [
+                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                    17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+                    32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46,
+                    47, 48
+                ]
+            }, {
+                'count': 50,
+                'first_value': {'id': 50},
+                'last_value': {'id': 99},
+                'less_than_eq_value': None,
+                'greater_than_eq_value': {'id': 50},
+                'less_than_value': {'id': 100},
+                'greater_than_value': None,
+                'result_indices': [
+                    49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
+                    64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78,
+                    79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93,
+                    94, 95, 96, 97, 98
+                ]
+            }, {
+                'count': 50,
+                'first_value': {'id': 100},
+                'last_value': {'id': 149},
+                'less_than_eq_value': None,
+                'greater_than_eq_value': {'id': 100},
+                'less_than_value': {'id': 150},
+                'greater_than_value': None,
+                'result_indices': [99]
+            }
+        ]
+    ),
+    (
+        'NASA Record List Group Prefix',
+        {'columns': ['Case Number'], 'mode': 'prefix', 'prefix_length': 3},
+        [
+            {
+                'count': 87,
+                'first_value': {'Case Number': 'KSC-11641'},
+                'last_value': {'Case Number': 'KSC-13689'},
+                'less_than_eq_value': None,
+                'greater_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_value': None,
+                'result_indices': [0]
+            }, {
+                'count': 138,
+                'first_value': {'Case Number': 'ARC-14048-1'},
+                'last_value': {'Case Number': 'ARC-16942-2'},
+                'less_than_eq_value': None,
+                'greater_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_value': None,
+                'result_indices': [
+                    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+                    18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33,
+                    34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+                    49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
+                    64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78,
+                    79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93,
+                    94, 95, 96, 97, 98, 99
+                ]
+            }, {
+                'count': 21,
+                'first_value': {'Case Number': 'DRC-001-049'},
+                'last_value': {'Case Number': 'DRC-098-001'},
+                'less_than_eq_value': None,
+                'greater_than_eq_value': None,
+                'less_than_value': None,
+                'greater_than_value': None,
+                'result_indices': [30]
+            },
+        ],
+    ),
 ]
 
 
@@ -531,17 +624,28 @@ def test_record_list_groups(
                 else:
                     assert actual_item is None
 
+    def _retuple_bound_tuples(bound_tuple_list):
+        if bound_tuple_list is not None:
+            return [tuple(t) for t in grouping_dict['bound_tuples']]
+
     assert response.status_code == 200
     assert response_data['count'] == 1393
     assert len(response_data['results']) == limit
 
     group_by = GroupBy(**grouping)
     grouping_dict = response_data['grouping']
+    print(grouping_dict)
     assert grouping_dict['columns'] == [
         columns_name_id_map[colname] for colname in group_by.columns
     ]
     assert grouping_dict['mode'] == group_by.mode
     assert grouping_dict['num_groups'] == group_by.num_groups
+    assert _retuple_bound_tuples(grouping_dict['bound_tuples']) == group_by.bound_tuples
+    assert grouping_dict['count_by'] == group_by.count_by
+    assert grouping_dict['global_min'] == group_by.global_min
+    assert grouping_dict['global_max'] == group_by.global_max
+    assert grouping_dict['preproc'] == group_by.preproc
+    assert grouping_dict['prefix_length'] == group_by.prefix_length
     assert grouping_dict['ranged'] == group_by.ranged
     _test_group_equality(grouping_dict['groups'], expected_groups)
 
@@ -751,3 +855,54 @@ def test_record_list_group_exceptions(create_table, client, exception):
     assert len(response_data) == 1
     assert "grouping" in response_data[0]['field']
     assert response_data[0]['code'] == ErrorCodes.UnsupportedType.value
+
+
+@pytest.mark.parametrize("test_input, expected", [
+    ("0", True),
+    ("-0", True),
+    ("0.314", True),
+    ("-0.00314", True),
+    ("0.0314e3", True),
+    ("0.0314e+3", True),
+    ("0.0314e-3", True),
+    ("0.314e01", True),
+    ("-314", True),
+    ("-0314", False),
+    ("314", True),
+    ("0314", False),
+    ("100.04", True),
+    ("100.", False),
+    ("314e3", True),
+    ("314E+3", True),
+    ("314e-3", True),
+    ("314.0e-3", True),
+    ("314.0E+3", True),
+    ("314.0E1", True),
+    ("~2324", False)
+])
+def test_json_number_spec_validation(test_input, expected):
+    assert follows_json_number_spec(test_input) == expected
+
+
+def test_number_input_api_validation(create_table, client):
+    cache.clear()
+    table_name = 'NASA Number Input Api Validation'
+    table = create_table(table_name)
+    column_name = 'Nonce'
+    table.add_column({"name": column_name, "type": 'REAL'})
+    nonce_id = table.get_column_name_id_bidirectional_map()[column_name]
+
+    for nonce, status_code in [
+        ("0", 201),
+        ("-0.00314", 201),
+        ("-314", 201),
+        ("-0314", 400),
+        ("314.0e-3", 201),
+        ("~2324", 400),
+        (2132, 201),
+    ]:
+        data = {
+            nonce_id: nonce,
+        }
+        response = client.post(f'/api/db/v0/tables/{table.id}/records/', data=data)
+        assert response.status_code == status_code

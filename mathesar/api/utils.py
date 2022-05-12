@@ -1,7 +1,9 @@
 from rest_framework.exceptions import NotFound
+import re
 
 from db.records.operations import group
 from mathesar.models import Table
+from mathesar.database.types import _get_type_map
 
 DATA_KEY = 'data'
 METADATA_KEY = 'metadata'
@@ -68,3 +70,39 @@ def process_annotated_records(record_list, column_name_id_map):
         output_groups = None
 
     return processed_records, output_groups
+
+
+def is_number(column_type):
+    """
+    Check if a column data type is a number
+    Args:
+        column_type: data type of column
+    """
+    for type in _get_type_map():
+        if type['name'] == 'Number':
+            if str(column_type).lower() in type['sa_type_names']:
+                return True
+            else:
+                return False
+
+
+def follows_json_number_spec(number):
+    """
+    Check if a string follows JSON number spec
+    Args:
+        number: number as string
+    """
+    patterns = [
+        r"^-?0$",
+        r"^-?0[\.][0-9]+$",
+        r"^-?0[eE][+-]?[0-9]*$",
+        r"^-?0[\.][0-9]+[eE][+-]?[0-9]+$",
+        r"^-?[1-9][0-9]*$",
+        r"^-?[1-9][0-9]*[\.][0-9]+$",
+        r"^-?[1-9][0-9]*[eE][+-]?[0-9]+$",
+        r"^-?[1-9][0-9]*[\.][0-9]+[eE][+-]?[0-9]+$",
+    ]
+    for pattern in patterns:
+        if re.search(pattern, number) is not None:
+            return True
+    return False

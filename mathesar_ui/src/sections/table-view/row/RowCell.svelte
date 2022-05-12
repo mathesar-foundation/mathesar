@@ -14,7 +14,6 @@
   import type {
     ColumnPosition,
     Row,
-    Column,
     Display,
     RecordsData,
     CellKey,
@@ -24,6 +23,7 @@
   import type { RequestStatus } from '@mathesar/utils/api';
   import { States } from '@mathesar/utils/api';
   import CellErrors from './CellErrors.svelte';
+  import type { ProcessedTableColumn } from '../utils';
 
   export let recordsData: RecordsData;
   export let display: Display;
@@ -31,10 +31,11 @@
   export let row: Row;
   export let key: CellKey;
   export let modificationStatusMap: WritableMap<CellKey, RequestStatus>;
-  export let column: Column;
+  export let processedColumn: ProcessedTableColumn;
   export let value: unknown = undefined;
 
   $: recordsDataState = recordsData.state;
+  $: ({ column } = processedColumn);
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
   $: modificationStatus = $modificationStatusMap.get(key);
@@ -63,11 +64,13 @@
   async function setValue(newValue: unknown) {
     if (newValue !== value) {
       value = newValue;
+      let updatedRow;
       if (row.isNew) {
-        await recordsData.createOrUpdateRecord(row, column);
+        updatedRow = await recordsData.createOrUpdateRecord(row, column);
       } else {
-        await recordsData.updateCell(row, column);
+        updatedRow = await recordsData.updateCell(row, column);
       }
+      value = updatedRow.record?.[column.id] ?? value;
     }
   }
 
@@ -88,7 +91,7 @@
     "
 >
   <Cell
-    {column}
+    sheetColumn={processedColumn}
     {isActive}
     {value}
     showAsSkeleton={$recordsDataState === States.Loading}

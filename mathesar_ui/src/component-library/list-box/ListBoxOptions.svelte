@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, getContext, tick } from 'svelte';
+  import StringOrComponent from '../string-or-component/StringOrComponent.svelte';
   import type { ListBoxContext } from './ListBoxTypes';
 
   type Option = $$Generic;
@@ -7,6 +8,7 @@
   export let id: string;
   let classes = '';
   export { classes as class };
+  export let truncateOnOverflow = true;
 
   const { api, state } = getContext<ListBoxContext<Option>>('LIST_BOX_CONTEXT');
   const { displayedOptions, value, focusedOptionIndex, staticProps } = state;
@@ -49,7 +51,8 @@
   {id}
   role="listbox"
   aria-expanded="true"
-  class={['list-box-options', $staticProps.selectionType, ...classes].join(' ')}
+  class={['list-box-options', $staticProps.selectionType, classes].join(' ')}
+  class:truncate={truncateOnOverflow}
 >
   {#each $displayedOptions as option, index (option)}
     <li
@@ -60,7 +63,7 @@
       class:in-focus={index === $focusedOptionIndex}
       on:click={() => api.pick(option)}
     >
-      <span>{$staticProps.getLabel(option, $staticProps.labelKey)}</span>
+      <StringOrComponent arg={$staticProps.getLabel(option)} />
     </li>
   {/each}
 </ul>

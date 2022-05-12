@@ -55,6 +55,12 @@ section.table-section .tab-container .table-data .body {
 
     &.is-add-placeholder {
       cursor: pointer;
+
+      .cell:not(.is-active) {
+        .sheet-cell .cell-wrapper > * {
+          visibility: hidden;
+        }
+      }
     }
 
     .cell.row-control {

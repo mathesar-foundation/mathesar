@@ -192,6 +192,42 @@ def create_column():
 
 
 @pytest.fixture
+def create_column_with_display_options():
+    def _create_column(table, column_data):
+        column = table.add_column(column_data)
+        attnum = get_column_attnum_from_name(table.oid, [column.name], table.schema._sa_engine)
+        column = mathesar_model_column.current_objects.get_or_create(
+            attnum=attnum,
+            table=table,
+            display_options=column_data.get('display_options', None)
+        )
+        return column[0]
+    return _create_column
+
+
+@pytest.fixture(scope='session')
+def self_referential_filename():
+    return 'mathesar/tests/data/self_referential_table.csv'
+
+
+@pytest.fixture(scope='session')
+def foreign_key_csv_filename_tuple():
+    return 'mathesar/tests/data/base_table.csv', 'mathesar/tests/data/reference_table.csv'
+
+
+@pytest.fixture(scope='session')
+def multi_column_foreign_key_csv_filename_tuple():
+    return 'mathesar/tests/data/multi_column_foreign_key_base_table.csv', \
+        'mathesar/tests/data/multi_column_reference_table.csv'
+
+
+@pytest.fixture(scope='session')
+def invalid_related_data_foreign_key_csv_filename_tuple():
+    return 'mathesar/tests/data/invalid_reference_base_table.csv', \
+        'mathesar/tests/data/reference_table.csv'
+
+
+@pytest.fixture
 def custom_types_schema_url(test_db_model, schema, live_server):
     engine = create_mathesar_engine(test_db_model.name)
     install.install_mathesar_on_database(engine)
