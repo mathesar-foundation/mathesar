@@ -1,3 +1,4 @@
+import { faGlobe } from '@fortawesome/free-solid-svg-icons';
 import type { AbstractTypeConfiguration } from '../types';
 
 const DB_TYPES = {
@@ -5,7 +6,7 @@ const DB_TYPES = {
 };
 
 const uriType: AbstractTypeConfiguration = {
-  icon: '?',
+  icon: { data: faGlobe },
   defaultDbType: DB_TYPES.MATHESAR_TYPES__URI,
   cell: {
     type: 'uri',
