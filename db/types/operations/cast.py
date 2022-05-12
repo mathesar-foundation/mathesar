@@ -282,7 +282,7 @@ def get_defined_source_target_cast_tuples(engine):
         MONEY: _get_money_type_body_map(),
         MULTICURRENCY_MONEY: _get_multicurrency_money_type_body_map(),
         INTERVAL: _get_interval_type_body_map(),
-        NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
+        NUMERIC: _get_numeric_type_body_map(),
         REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
         SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
         TIME_WITHOUT_TIME_ZONE: _get_time_type_body_map(TIME_WITHOUT_TIME_ZONE),
@@ -973,8 +973,8 @@ def _get_numeric_type_body_map():
     types to numeric.
     We allow casting any textual type to locale-agnostic numeric.
     """
-    source_text_types = TEXT_TYPES
-    return {type: _get_text_to_numeric_cast() for type in source_text_types}
+    source_types = NUMBER_TYPES | TEXT_TYPES | frozenset([money.DB_TYPE])
+    return {type_: _get_text_to_numeric_cast() for type_ in source_types}
 
 def _get_text_to_numeric_cast():
     numeric_array_function = base.get_qualified_name(NUMERIC_ARR_FUNC_NAME)
@@ -1016,32 +1016,28 @@ def _build_numeric_array_function():
     """
     qualified_function_name = base.get_qualified_name(NUMERIC_ARR_FUNC_NAME)
 
-    no_separator_big = r"[0-9]{4,}(?:([,.])[0-9]+)?"
-    no_separator_small = r"[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?"
-    comma_separator_req_decimal = r"[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+"
-    period_separator_req_decimal = r"[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+"
-    comma_separator_opt_decimal = r"[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?"
-    period_separator_opt_decimal = r"[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?"
-    space_separator_opt_decimal = r"[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?"
-    comma_separator_lakh_system = r"[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?"
+    no_separator = r"[0-9]+(?:([.,])[0-9]+)?"
+    period_sep_comma_decimal = r"[0-9]{1,3}(?:(\.)[0-9]{3})+(?:(,)[0-9]+)?"
+    comma_sep_period_decimal = r"[0-9]{1,3}(?:(,)[0-9]{3})+(?:(\.)[0-9]+)?"
+    space_sep_comma_decimal = r"[0-9]{1,3}(?:( )[0-9]{3})+(?:(,)[0-9]+)?"
+    comma_sep_period_decimal_lakh = r"[0-9]{1,3}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?"
+    apostophe_sep_period_decima = r"[0-9]{1,3}(?:(\'')[0-9]{3})+(?:(\.)[0-9]+)?"
 
     inner_number_tree = "|".join(
         [
-            no_separator_big,
-            no_separator_small,
-            comma_separator_req_decimal,
-            period_separator_req_decimal,
-            comma_separator_opt_decimal,
-            period_separator_opt_decimal,
-            space_separator_opt_decimal,
-            comma_separator_lakh_system,
+            no_separator,
+            period_sep_comma_decimal,
+            comma_sep_period_decimal,
+            space_sep_comma_decimal,
+            comma_sep_period_decimal_lakh,
+            apostophe_sep_period_decima
         ]
     )
     numeric_finding_regex = f"^[-+]?(?:({inner_number_tree}))$"
 
-    actual_number_indices = [1, 16]
-    group_divider_indices = [4, 6, 8, 10, 12, 14, 19, 21, 23, 25, 27, 29]
-    decimal_point_indices = [2, 3, 5, 7, 9, 11, 13, 15, 17, 18, 20, 22, 24, 26, 28, 30]
+    actual_number_indices = [1]
+    group_divider_indices = [2, 3, 5, 7, 9, 11]
+    decimal_point_indices = [4, 6, 8, 10, 12]
     actual_numbers_str = ','.join([f'raw_arr[{idx}]' for idx in actual_number_indices])
     group_dividers_str = ','.join([f'raw_arr[{idx}]' for idx in group_divider_indices])
     decimal_points_str = ','.join([f'raw_arr[{idx}]' for idx in decimal_point_indices])
