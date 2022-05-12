@@ -21,12 +21,12 @@
   on:activate
   on:update
 >
-  <span slot="content" class="content">
+  <span slot="content">
     <CellValue {value}>
       {#if isActive}
         <a href={value ?? ''} target="_blank" class="link">{value}</a>
       {:else}
-        {value}
+        <span class="content">{value}</span>
       {/if}
     </CellValue>
   </span>
