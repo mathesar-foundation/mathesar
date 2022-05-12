@@ -22,6 +22,7 @@ class ForeignKeyConstraintSerializer(BaseConstraintSerializer):
         model = Constraint
         fields = BaseConstraintSerializer.Meta.fields + [
             'referent_columns',
+            'referent_table',
             'onupdate',
             'ondelete',
             'deferrable',
@@ -29,6 +30,7 @@ class ForeignKeyConstraintSerializer(BaseConstraintSerializer):
         ]
 
     referent_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
+    referent_table = serializers.SerializerMethodField()
     onupdate = serializers.ChoiceField(
         choices=['RESTRICT', 'CASCADE', 'SET NULL', 'NO ACTION', 'SET DEFAULT'],
         required=False, allow_null=True
@@ -39,6 +41,9 @@ class ForeignKeyConstraintSerializer(BaseConstraintSerializer):
     )
     deferrable = serializers.BooleanField(allow_null=True, required=False)
     match = serializers.ChoiceField(choices=['SIMPLE', 'PARTIAL', 'FULL'], allow_null=True, required=False)
+
+    def get_referent_table(self, obj):
+        return obj.columns[0].id
 
 
 class ConstraintSerializer(

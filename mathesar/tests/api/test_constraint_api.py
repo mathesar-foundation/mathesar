@@ -127,6 +127,7 @@ def test_existing_foreign_key_constraint_list(patent_schema, create_table, creat
     columns = list(models.Column.objects.filter(table=table, attnum=column_attnum).values_list('id', flat=True))
     referent_column_attnum = get_column_attnum_from_name(referent_table_oid, [referent_col_name], engine)
     referent_columns = list(models.Column.objects.filter(table=referent_table, attnum=referent_column_attnum).values_list('id', flat=True))
+    print(response.json())
     for constraint_data in response_data['results']:
         if constraint_data['type'] == 'foreignkey':
             _verify_foreign_key_constraint(
