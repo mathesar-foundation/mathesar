@@ -13,26 +13,8 @@ def reflect_table(name, schema, engine, metadata=None, connection_to_use=None):
 
 
 def reflect_table_from_oid(oid, engine, connection_to_use=None):
-    metadata = MetaData()
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", message="Did not recognize type")
-        pg_class = Table("pg_class", metadata, autoload_with=engine)
-        pg_namespace = Table("pg_namespace", metadata, autoload_with=engine)
-    sel = (
-        select(pg_namespace.c.nspname, pg_class.c.relname)
-        .select_from(
-            join(
-                pg_class,
-                pg_namespace,
-                pg_class.c.relnamespace == pg_namespace.c.oid
-            )
-        )
-        .where(pg_class.c.oid == oid)
-    )
-    result = execute_statement(engine, sel, connection_to_use)
-    schema, table_name = result.fetchall()[0]
-    return reflect_table(table_name, schema, engine, connection_to_use=connection_to_use)
+    tables = reflect_tables_from_oids([oid], engine, connection_to_use)
+    return tables.get(oid, None)
 
 
 def reflect_tables_from_oids(oids, engine, connection_to_use=None):
