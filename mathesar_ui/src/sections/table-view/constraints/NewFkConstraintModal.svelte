@@ -24,6 +24,7 @@
   import { tables as tablesStore } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { States } from '@mathesar/utils/api';
+  import { getErrorMessage } from '@mathesar/utils/errors';
   import { getAvailableName } from '@mathesar/utils/db';
   import ConstraintNameHelp from './__help__/ConstraintNameHelp.svelte';
 
@@ -116,11 +117,21 @@
 
   async function handleSave() {
     try {
-      // TODO
+      if (!baseColumn) {
+        throw new Error('No base column selected.');
+      }
+      if (!targetTable) {
+        throw new Error('No target table selected.');
+      }
+      if (!targetColumn) {
+        throw new Error('No target column selected.');
+      }
       await constraintsDataStore.add({
-        columns: [],
+        columns: [baseColumn.id],
         type: 'foreignkey',
         name: constraintName,
+        referent_table: targetTable.id,
+        referent_columns: [targetColumn.id],
       });
       // Why init before close when we also init on open? Because without init
       // there's a weird UI state during the out-transition of the modal where
@@ -128,9 +139,8 @@
       // duplicate at that point.
       init();
       controller.close();
-    } catch (error) {
-      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-      toast.error(`Unable to add constraint. ${error.message as string}`);
+    } catch (e) {
+      toast.error(`Unable to add constraint. ${getErrorMessage(e)}`);
     }
   }
 </script>
