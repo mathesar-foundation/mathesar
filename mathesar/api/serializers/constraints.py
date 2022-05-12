@@ -33,17 +33,19 @@ class ForeignKeyConstraintSerializer(BaseConstraintSerializer):
     referent_table = serializers.SerializerMethodField()
     onupdate = serializers.ChoiceField(
         choices=['RESTRICT', 'CASCADE', 'SET NULL', 'NO ACTION', 'SET DEFAULT'],
-        required=False, allow_null=True
+        required=False,
+        allow_null=True
     )
     ondelete = serializers.ChoiceField(
         choices=['RESTRICT', 'CASCADE', 'SET NULL', 'NO ACTION', 'SET DEFAULT'],
-        required=False, allow_null=True
+        required=False,
+        allow_null=True
     )
     deferrable = serializers.BooleanField(allow_null=True, required=False)
     match = serializers.ChoiceField(choices=['SIMPLE', 'PARTIAL', 'FULL'], allow_null=True, required=False)
 
     def get_referent_table(self, obj):
-        return obj.columns[0].id
+        return obj.referent_columns[0].table.id
 
 
 class ConstraintSerializer(
