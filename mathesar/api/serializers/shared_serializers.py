@@ -34,13 +34,13 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
             self.serializers_cls_mapping[identifier] = serializer_cls
 
     def to_representation(self, instance):
-        serializer = self.serializers_mapping.get(self.get_mapping_field(), None)
+        serializer = self.serializers_mapping.get(self.get_mapping_field(instance), None)
         if serializer is not None:
             return serializer.to_representation(instance)
         else:
             return instance
 
-    def get_mapping_field(self):
+    def get_mapping_field(self, data):
         mapping_field = getattr(self, "mapping_field", None)
         if mapping_field is None:
             raise Exception(
@@ -52,7 +52,7 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
 
 class ReadWritePolymorphicSerializerMappingMixin(ReadOnlyPolymorphicSerializerMappingMixin):
     def to_internal_value(self, data):
-        serializer = self.serializers_mapping.get(self.get_mapping_field())
+        serializer = self.serializers_mapping.get(self.get_mapping_field(data))
         if serializer is not None:
             return serializer.to_internal_value(data=data)
         else:
@@ -94,8 +94,8 @@ class OverrideRootPartialMixin:
 
 
 class MathesarPolymorphicErrorMixin(MathesarErrorMessageMixin):
-    def get_serializer_fields(self):
-        return self.serializers_mapping[self.get_mapping_field()].fields
+    def get_serializer_fields(self, data):
+        return self.serializers_mapping[self.get_mapping_field(data)].fields
 
 
 class CustomBooleanLabelSerializer(MathesarErrorMessageMixin, serializers.Serializer):
@@ -112,7 +112,7 @@ class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPart
 
 
 class AbstractNumberDisplayOptionSerializer(serializers.Serializer):
-    number_format = serializers.ChoiceField(allow_null=True, required=False, choices=['english', 'german', 'french', 'hindi', 'swiss'])
+    number_format = serializers.ChoiceField(required=False, allow_null=True, choices=['english', 'german', 'french', 'hindi', 'swiss'])
 
 
 class NumberDisplayOptionSerializer(
@@ -123,12 +123,30 @@ class NumberDisplayOptionSerializer(
     show_as_percentage = serializers.BooleanField(default=False)
 
 
+class MoneyDisplayOptionSerializer(
+    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    AbstractNumberDisplayOptionSerializer
+):
+    currency_symbol = serializers.CharField()
+    currency_symbol_location = serializers.ChoiceField(choices=['after-minus', 'end-with-space'])
+
+
 class TimeFormatDisplayOptionSerializer(
     MathesarErrorMessageMixin,
     OverrideRootPartialMixin,
     serializers.Serializer
 ):
     format = serializers.CharField(max_length=255)
+
+
+class DateTimeFormatDisplayOptionSerializer(
+    MathesarErrorMessageMixin,
+    OverrideRootPartialMixin,
+    serializers.Serializer
+):
+    time_format = serializers.CharField(max_length=255)
+    date_format = serializers.CharField(max_length=255)
 
 
 class DurationDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
@@ -145,14 +163,15 @@ class DisplayOptionsMappingSerializer(
 ):
     serializers_mapping = {
         MathesarTypeIdentifier.BOOLEAN.value: BooleanDisplayOptionSerializer,
-        MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,
-        MathesarTypeIdentifier.DATETIME.value: TimeFormatDisplayOptionSerializer,
+        MathesarTypeIdentifier.DATETIME.value: DateTimeFormatDisplayOptionSerializer,
         MathesarTypeIdentifier.DATE.value: TimeFormatDisplayOptionSerializer,
-        MathesarTypeIdentifier.TIME.value: TimeFormatDisplayOptionSerializer,
         MathesarTypeIdentifier.DURATION.value: DurationDisplayOptionSerializer,
+        MathesarTypeIdentifier.MONEY.value: MoneyDisplayOptionSerializer,
+        MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,
+        MathesarTypeIdentifier.TIME.value: TimeFormatDisplayOptionSerializer,
     }
 
-    def get_mapping_field(self):
+    def get_mapping_field(self, data):
         db_type = self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY]
         mathesar_type = get_mathesar_type_from_db_type(db_type)
         return mathesar_type
