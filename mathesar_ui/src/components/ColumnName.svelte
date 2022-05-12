@@ -16,9 +16,11 @@
 <style>
   .column-name {
     display: flex;
+    align-items: center;
   }
 
   .icon {
+    display: inline-flex;
     margin-right: 5px;
   }
 

@@ -5,10 +5,11 @@
   export let icon: IconProps;
 </script>
 
-<span class="type-icon"><Icon {...icon} /></span>
+<span class="type-icon"><Icon {...icon} size="0.9rem" /></span>
 
 <style>
   .type-icon {
     color: #aaa;
+    display: inline-flex;
   }
 </style>
