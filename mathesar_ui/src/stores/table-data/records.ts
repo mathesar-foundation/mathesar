@@ -270,7 +270,6 @@ export class RecordsData {
 
   async fetch(
     retainExistingRows = false,
-    isDeleteOperation = false,
   ): Promise<TableRecordsData | undefined> {
     this.promise?.cancel();
     const { offset } = getStoreValue(this.meta.pagination);
@@ -296,10 +295,8 @@ export class RecordsData {
       return data;
     });
     this.error.set(undefined);
-    if (!isDeleteOperation) {
-      this.state.set(States.Loading);
-    }
     if (!retainExistingRows) {
+      this.state.set(States.Loading);
       this.newRecords.set([]);
       this.meta.cellClientSideErrors.clear();
       this.meta.cellModificationStatus.clear();
@@ -365,7 +362,7 @@ export class RecordsData {
           }),
       );
       await Promise.all(promises);
-      await this.fetch(true, true);
+      await this.fetch(true);
 
       const { offset } = getStoreValue(this.meta.pagination);
       const savedRecords = getStoreValue(this.savedRecords);
