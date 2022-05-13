@@ -176,7 +176,7 @@ def create_date_casts(engine):
 
 
 def create_decimal_number_casts(engine):
-    decimal_number_types = DECIMAL_TYPES | frozenset([NUMERIC])
+    decimal_number_types = DECIMAL_TYPES
     for type_str in decimal_number_types:
         type_body_map = _get_decimal_number_type_body_map(target_type_str=type_str)
         create_cast_functions(type_str, type_body_map, engine)
