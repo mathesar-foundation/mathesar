@@ -176,7 +176,7 @@ def create_date_casts(engine):
 
 
 def create_decimal_number_casts(engine):
-    decimal_number_types = DECIMAL_TYPES
+    decimal_number_types = DECIMAL_TYPES | frozenset([NUMERIC])
     for type_str in decimal_number_types:
         type_body_map = _get_decimal_number_type_body_map(target_type_str=type_str)
         create_cast_functions(type_str, type_body_map, engine)
@@ -244,6 +244,7 @@ def create_uri_casts(engine):
     type_body_map = _get_uri_type_body_map()
     create_cast_functions(uri.DB_TYPE, type_body_map, engine)
 
+
 def create_numeric_casts(engine):
     numeric_array_create = _build_numeric_array_function()
     with engine.begin() as conn:
@@ -251,11 +252,13 @@ def create_numeric_casts(engine):
     type_body_map = _get_numeric_type_body_map()
     create_cast_functions(NUMERIC, type_body_map, engine)
 
+
 def get_full_cast_map(engine):
     full_cast_map = {}
     supported_types = get_robust_supported_alter_column_type_map(engine)
     for source, target in get_defined_source_target_cast_tuples(engine):
         source_python_type = supported_types.get(source)
+        print(source)
         target_python_type = supported_types.get(target)
         if source_python_type is not None and target_python_type is not None:
             source_db_type = source_python_type().compile(dialect=engine.dialect)
@@ -483,7 +486,7 @@ def _get_integer_type_body_map(target_type_str=INTEGER):
     etc.
     """
     default_behavior_source_types = INTEGER_TYPES | TEXT_TYPES
-    no_rounding_source_types = DECIMAL_TYPES | frozenset([money.DB_TYPE])
+    no_rounding_source_types = DECIMAL_TYPES | frozenset([money.DB_TYPE, NUMERIC])
     cast_loss_exception_str = (
         f"RAISE EXCEPTION '% cannot be cast to {target_type_str} without loss', $1;"
     )
@@ -967,14 +970,28 @@ def _get_uri_type_body_map():
     source_types = frozenset([uri.DB_TYPE]) | TEXT_TYPES
     return {type_: _get_text_uri_type_body_map() for type_ in source_types}
 
+
 def _get_numeric_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to numeric.
     We allow casting any textual type to locale-agnostic numeric.
     """
-    source_types = NUMBER_TYPES | TEXT_TYPES | frozenset([money.DB_TYPE])
-    return {type_: _get_text_to_numeric_cast() for type_ in source_types}
+    default_behavior_source_types = NUMBER_TYPES | frozenset([money.DB_TYPE])
+    text_source_types = TEXT_TYPES
+
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, NUMERIC
+    )
+    type_body_map.update(
+        {
+            text_type: _get_text_to_numeric_cast()
+            for text_type in text_source_types
+        }
+    )
+    type_body_map.update({BOOLEAN: _get_boolean_to_number_cast(NUMERIC)})
+    return type_body_map
+
 
 def _get_text_to_numeric_cast():
     numeric_array_function = base.get_qualified_name(NUMERIC_ARR_FUNC_NAME)
@@ -994,7 +1011,7 @@ def _get_text_to_numeric_cast():
 
         SELECT money_arr[1] INTO money_num;
         SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
-        SELECT $1::text ~ '^.*(-|\(.+\)).*$' INTO is_negative;
+        SELECT $1::text ~ '^-.*$' INTO is_negative;
 
         IF money_arr[2] IS NOT NULL THEN
             SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
@@ -1008,6 +1025,7 @@ def _get_text_to_numeric_cast():
         RETURN money_num::{NUMERIC};
     END;
     """
+
 
 def _build_numeric_array_function():
     """
@@ -1036,8 +1054,8 @@ def _build_numeric_array_function():
     numeric_finding_regex = f"^[-+]?(?:({inner_number_tree}))$"
 
     actual_number_indices = [1]
-    group_divider_indices = [2, 3, 5, 7, 9, 11]
-    decimal_point_indices = [4, 6, 8, 10, 12]
+    group_divider_indices = [3, 5, 7, 9, 11]
+    decimal_point_indices = [2, 4, 6, 8, 10, 12]
     actual_numbers_str = ','.join([f'raw_arr[{idx}]' for idx in actual_number_indices])
     group_dividers_str = ','.join([f'raw_arr[{idx}]' for idx in group_divider_indices])
     decimal_points_str = ','.join([f'raw_arr[{idx}]' for idx in decimal_point_indices])
@@ -1068,6 +1086,7 @@ def _build_numeric_array_function():
       END;
     $$ LANGUAGE plpgsql;
     """
+
 
 def _get_default_type_body_map(source_types, target_type_str):
     default_cast_str = f"""
