@@ -212,10 +212,9 @@ def _batch_alter_table_rename_columns(table_oid, column_data_list, connection, e
             column_attnum = column_data.get('attnum', None)
             if column_attnum is not None:
                 name = get_column_name_from_attnum(table_oid, column_attnum, engine, connection)
-                column = table.columns[name]
-            if 'name' in column_data and column.name != column_data['name']:
+            if 'name' in column_data and name != column_data['name']:
                 batch_op.alter_column(
-                    column.name,
+                    name,
                     new_column_name=column_data['name']
                 )
 
@@ -227,11 +226,9 @@ def _batch_alter_table_drop_columns(table_oid, column_data_list, connection, eng
     with op.batch_alter_table(table.name, schema=table.schema) as batch_op:
         for index, column_data in enumerate(column_data_list):
             column_attnum = column_data.get('attnum', None)
-            if column_attnum is not None:
+            if column_attnum is not None and len(column_data.keys()) == 1:
                 name = get_column_name_from_attnum(table_oid, column_attnum, engine, connection)
-                column = table.columns[name]
-            if len(column_data.keys()) == 1 and column_attnum is not None:
-                batch_op.drop_column(column.name)
+                batch_op.drop_column(name)
 
 
 def batch_update_columns(table_oid, engine, column_data_list):
