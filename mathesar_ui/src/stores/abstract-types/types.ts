@@ -2,6 +2,7 @@ import type {
   FormConfiguration,
   FormConfigurationVariable,
   FormValues,
+  IconProps,
 } from '@mathesar-component-library/types';
 import type { CellDataType } from '@mathesar/components/cell/data-types/typeDefinitions';
 import type { DbType } from '@mathesar/AppTypes';
@@ -55,7 +56,7 @@ export interface AbstractTypeDisplayConfig {
 
 export interface AbstractTypeConfiguration {
   defaultDbType?: DbType;
-  icon: string;
+  icon: IconProps;
   allowSettingDefaultValue?: boolean;
   cell: {
     type: CellDataType;

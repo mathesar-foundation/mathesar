@@ -295,8 +295,8 @@ export class RecordsData {
       return data;
     });
     this.error.set(undefined);
-    this.state.set(States.Loading);
     if (!retainExistingRows) {
+      this.state.set(States.Loading);
       this.newRecords.set([]);
       this.meta.cellClientSideErrors.clear();
       this.meta.cellModificationStatus.clear();
