@@ -205,6 +205,28 @@ def create_column_with_display_options():
     return _create_column
 
 
+@pytest.fixture(scope='session')
+def self_referential_filename():
+    return 'mathesar/tests/data/self_referential_table.csv'
+
+
+@pytest.fixture(scope='session')
+def foreign_key_csv_filename_tuple():
+    return 'mathesar/tests/data/base_table.csv', 'mathesar/tests/data/reference_table.csv'
+
+
+@pytest.fixture(scope='session')
+def multi_column_foreign_key_csv_filename_tuple():
+    return 'mathesar/tests/data/multi_column_foreign_key_base_table.csv', \
+        'mathesar/tests/data/multi_column_reference_table.csv'
+
+
+@pytest.fixture(scope='session')
+def invalid_related_data_foreign_key_csv_filename_tuple():
+    return 'mathesar/tests/data/invalid_reference_base_table.csv', \
+        'mathesar/tests/data/reference_table.csv'
+
+
 @pytest.fixture
 def custom_types_schema_url(test_db_model, schema, live_server):
     engine = create_mathesar_engine(test_db_model.name)
