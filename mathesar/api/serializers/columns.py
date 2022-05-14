@@ -31,6 +31,11 @@ class TypeOptionSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     scale = serializers.IntegerField(required=False)
     fields = serializers.CharField(required=False)
 
+    def validate(self, attrs):
+        if attrs.get('scale', None) is not None and attrs.get('precision', None) is None:
+            attrs['precision'] = 1000
+        return super().validate(attrs)
+
     def run_validation(self, data=empty):
         # Ensure that there are no unknown type options passed in.
         if data is not empty and data is not None:
@@ -53,6 +58,7 @@ class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
                   'type_options',
                   'display_options'
                   )
+    id = serializers.IntegerField(required=False)
     name = serializers.CharField()
     type = serializers.CharField(source='plain_type')
     type_options = TypeOptionSerializer(required=False, allow_null=True)

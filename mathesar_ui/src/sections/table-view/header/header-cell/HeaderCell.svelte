@@ -20,7 +20,7 @@
     ColumnPosition,
     ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
-
+  import ColumnName from '@mathesar/components/ColumnName.svelte';
   import DefaultOptions from './DefaultOptions.svelte';
   import AbstractTypeConfiguration from './abstract-type-configuration/AbstractTypeConfiguration.svelte';
   import type { ProcessedTableColumn } from '../../utils';
@@ -157,12 +157,7 @@
       contentClass="column-opts-content"
       on:close={setDefaultView}
     >
-      <svelte:fragment slot="trigger">
-        <span class="type">
-          {abstractTypeOfColumn?.icon}
-        </span>
-        <span class="name">{column.name}</span>
-      </svelte:fragment>
+      <ColumnName slot="trigger" {column} />
       <svelte:fragment slot="content">
         <div class="container">
           <div class="section type-header">
