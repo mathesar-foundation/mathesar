@@ -20,13 +20,7 @@ def create_unique_constraint(table_name, schema, engine, columns, constraint_nam
 
 def create_constraint(schema, engine, constraint_obj):
     with engine.begin() as conn:
-        metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
-        opts = {
-            'target_metadata': metadata
-        }
-        ctx = MigrationContext.configure(conn, opts=opts)
-        op = Operations(ctx)
-        constraint_obj.add_constraint(op, engine, conn)
+        constraint_obj.add_constraint(schema, engine, conn)
 
 
 def copy_constraint(table_oid, engine, constraint, from_column_attnum, to_column_attnum):
