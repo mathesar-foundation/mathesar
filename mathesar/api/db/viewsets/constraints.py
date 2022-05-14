@@ -22,7 +22,7 @@ class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
 
     def create(self, request, table_pk=None):
         table = get_table_or_404(table_pk)
-        serializer = ConstraintSerializer(data=request.data, context={'request': request})
+        serializer = ConstraintSerializer(data=request.data, context={'request': request, 'table_id': table_pk})
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         try:

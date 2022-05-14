@@ -14,9 +14,10 @@ class ConstraintSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'type', 'columns']
 
     def run_validation(self, data):
+        table_id = self.context['table_id']
         for col_id in dict(data)['columns']:
             try:
-                column = Column.current_objects.get(id=col_id)
+                column = Column.current_objects.filter(table__id=table_id).get(id=col_id)
             except Column.DoesNotExist:
                 message = "Column does not exist"
                 raise base_api_exceptions.NotFoundAPIException(ValueError, message=message, status_code=status.HTTP_400_BAD_REQUEST)
