@@ -2,7 +2,9 @@ from rest_framework import serializers
 
 from db.links.operations.create import create_foreign_key_link, create_many_to_many_link
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.api.exceptions.validation_exceptions.exceptions import ColumnSizeMismatchAPIException
+from mathesar.api.exceptions.validation_exceptions.exceptions import (
+    InvalidLinkChoiceAPIException,
+)
 from mathesar.api.serializers.shared_serializers import (
     MathesarPolymorphicErrorMixin,
     ReadWritePolymorphicSerializerMappingMixin,
@@ -14,6 +16,8 @@ class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     referent_column_name = serializers.CharField()
     reference_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
     referent_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
+    # TODO Fix hacky link_type detection by reflecting it correctly
+    link_type = serializers.CharField(default="one-to-one")
 
     def is_link_unique(self):
         return True
@@ -32,6 +36,7 @@ class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
 
 
 class OneToManySerializer(OneToOneSerializer):
+    link_type = serializers.CharField(default="one-to-many")
 
     def is_link_unique(self):
         return False
@@ -45,6 +50,7 @@ class MapColumnSerializer(serializers.Serializer):
 class ManyToManySerializer(MathesarErrorMessageMixin, serializers.Serializer):
     referents = MapColumnSerializer(many=True)
     mapping_table_name = serializers.CharField()
+    link_type = serializers.CharField(default="many-to-many")
 
     def create(self, validated_data):
         referents = validated_data['referents']
@@ -66,7 +72,7 @@ class LinksMappingSerializer(
     serializers.Serializer
 ):
     def create(self, validated_data):
-        serializer = self.serializers_mapping.get(self.get_mapping_field())
+        serializer = self.serializers_mapping.get(self.get_mapping_field(validated_data))
         return serializer.create(validated_data)
 
     serializers_mapping = {
@@ -76,8 +82,8 @@ class LinksMappingSerializer(
     }
     link_type = serializers.CharField(required=True)
 
-    def get_mapping_field(self):
-        link_type = self.initial_data.get('link_type', None)
+    def get_mapping_field(self, data):
+        link_type = data.get('link_type', None)
         if link_type is None:
-            raise ColumnSizeMismatchAPIException()
+            raise InvalidLinkChoiceAPIException()
         return link_type

@@ -26,6 +26,18 @@ class ColumnSizeMismatchAPIException(MathesarValidationException):
         super().__init__(None, self.error_code, message, field, details)
 
 
+class InvalidLinkChoiceAPIException(MathesarValidationException):
+    error_code = ErrorCodes.InvalidLinkChoice.value
+
+    def __init__(
+            self,
+            message="Invalid Link type",
+            field=None,
+            details=None,
+    ):
+        super().__init__(None, self.error_code, message, field, details)
+
+
 class MultipleDataFileAPIException(MathesarValidationException):
     error_code = ErrorCodes.MultipleDataFiles.value
 
