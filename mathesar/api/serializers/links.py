@@ -42,7 +42,7 @@ class OneToManySerializer(OneToOneSerializer):
         return False
 
 
-class MapColumnSerializer(serializers.Serializer):
+class MapColumnSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     column_name = serializers.CharField()
     referent_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
 
