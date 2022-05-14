@@ -70,7 +70,7 @@ class ConstraintSerializer(
         else:
             constraint_type = data.get('type', None)
         return constraint_type
-    
+
     def run_validation(self, data):
         table_id = self.context['table_id']
         for col_id in dict(data)['columns']:
