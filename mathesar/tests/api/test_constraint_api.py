@@ -23,16 +23,19 @@ def _verify_foreign_key_constraint(
         columns,
         name,
         referent_columns,
-        constraint_options=None
+        referent_table_id,
+        onupdate=None,
+        ondelete=None,
+        deferrable=None,
 ):
     assert constraint_data['columns'] == columns
     assert constraint_data['referent_columns'] == referent_columns
+    assert constraint_data['referent_table'] == referent_table_id
     assert constraint_data['name'] == name
     assert constraint_data['type'] == 'foreignkey'
-    if constraint_options:
-        assert constraint_data['onupdate'] == constraint_options['onupdate']
-        assert constraint_data['ondelete'] == constraint_options['ondelete']
-        assert constraint_data['deferrable'] == constraint_options['deferrable']
+    assert constraint_data['onupdate'] == onupdate
+    assert constraint_data['ondelete'] == ondelete
+    assert constraint_data['deferrable'] == deferrable
     assert 'id' in constraint_data and type(constraint_data['id']) == int
 
 
@@ -126,7 +129,6 @@ def test_existing_foreign_key_constraint_list(patent_schema, create_table, creat
     columns = list(models.Column.objects.filter(table=table, attnum=column_attnum).values_list('id', flat=True))
     referent_column_attnum = get_column_attnum_from_name(referent_table_oid, [referent_col_name], engine)
     referent_columns = list(models.Column.objects.filter(table=referent_table, attnum=referent_column_attnum).values_list('id', flat=True))
-    constraint_options = {'onupdate': "RESTRICT", 'ondelete': "CASCADE", 'deferrable': True}
     for constraint_data in response_data['results']:
         if constraint_data['type'] == 'foreignkey':
             _verify_foreign_key_constraint(
@@ -134,7 +136,10 @@ def test_existing_foreign_key_constraint_list(patent_schema, create_table, creat
                 columns,
                 'referrer_fk_col_fkey',
                 referent_columns,
-                constraint_options
+                referent_table.id,
+                onupdate="RESTRICT",
+                ondelete="CASCADE",
+                deferrable=True
             )
 
 
@@ -239,7 +244,7 @@ def test_create_single_column_foreign_key_constraint(create_foreign_key_table, c
     response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
     assert response.status_code == 201
     _verify_foreign_key_constraint(response.json(), [referrer_column.id], 'Patents_Center_fkey',
-                                   [referent_column.id])
+                                   [referent_column.id], referent_table.id)
 
 
 def test_create_single_column_foreign_key_constraint_with_options(create_foreign_key_table, client):
@@ -262,7 +267,10 @@ def test_create_single_column_foreign_key_constraint_with_options(create_foreign
     _verify_foreign_key_constraint(
         response.json(), [referrer_column.id], 'Patents_Center_fkey',
         [referent_column.id],
-        {'onupdate': 'RESTRICT', 'ondelete': 'CASCADE', 'deferrable': None}
+        referent_table.id,
+        onupdate='RESTRICT',
+        ondelete='CASCADE',
+        deferrable=None
     )
 
 
@@ -281,7 +289,7 @@ def test_create_self_referential_single_column_foreign_key_constraint(create_sel
     response = client.post(f'/api/db/v0/tables/{table.id}/constraints/', data)
     assert response.status_code == 201
     _verify_foreign_key_constraint(response.json(), [parent_column.id], 'Tree_Parent_fkey',
-                                   [column.id])
+                                   [column.id], table.id)
     # Recursively fetch children
     with engine.begin() as conn:
         sa_table = table._sa_table
@@ -327,7 +335,7 @@ def test_create_multiple_column_foreign_key_constraint(create_multi_column_forei
     }
     response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
     assert response.status_code == 201
-    _verify_foreign_key_constraint(response.json(), referrer_columns_id, 'Patents_Center_fkey', referent_columns_id)
+    _verify_foreign_key_constraint(response.json(), referrer_columns_id, 'Patents_Center_fkey', referent_columns_id, referent_table.id)
 
 
 def test_drop_constraint(create_table, client):

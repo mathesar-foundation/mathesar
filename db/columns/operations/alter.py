@@ -182,7 +182,7 @@ def _check_type_option_equivalence(type_options_1, type_options_2):
 
 
 def _validate_columns_for_batch_update(table, column_data):
-    ALLOWED_KEYS = ['name', 'plain_type', 'type_options']
+    ALLOWED_KEYS = ['attnum', 'name', 'plain_type', 'type_options']
     if len(column_data) != len(table.columns):
         raise ValueError('Number of columns passed in must equal number of columns in table')
     for single_column_data in column_data:
@@ -193,38 +193,42 @@ def _validate_columns_for_batch_update(table, column_data):
 
 
 def _batch_update_column_types(table_oid, column_data_list, connection, engine):
-    table = reflect_table_from_oid(table_oid, engine, connection)
     for index, column_data in enumerate(column_data_list):
-        if 'plain_type' in column_data:
+        column_attnum = column_data.get('attnum', None)
+        if 'plain_type' in column_data and column_attnum is not None:
             new_type = column_data['plain_type']
             type_options = column_data.get('type_options', {})
             if type_options is None:
                 type_options = {}
-            column_attnum = get_column_attnum_from_name(table_oid, table.columns[index].name, engine, connection)
             retype_column(table_oid, column_attnum, engine, connection, new_type, type_options)
 
 
-def _batch_alter_table_rename_columns(table, column_data_list, connection):
+def _batch_alter_table_rename_columns(table_oid, column_data_list, connection, engine):
+    table = reflect_table_from_oid(table_oid, engine, connection)
     ctx = MigrationContext.configure(connection)
     op = Operations(ctx)
     with op.batch_alter_table(table.name, schema=table.schema) as batch_op:
         for index, column_data in enumerate(column_data_list):
-            column = table.columns[index]
-            if 'name' in column_data and column.name != column_data['name']:
+            column_attnum = column_data.get('attnum', None)
+            if column_attnum is not None:
+                name = get_column_name_from_attnum(table_oid, column_attnum, engine, connection)
+            if 'name' in column_data and name != column_data['name']:
                 batch_op.alter_column(
-                    column.name,
+                    name,
                     new_column_name=column_data['name']
                 )
 
 
-def _batch_alter_table_drop_columns(table, column_data_list, connection):
+def _batch_alter_table_drop_columns(table_oid, column_data_list, connection, engine):
+    table = reflect_table_from_oid(table_oid, engine, connection)
     ctx = MigrationContext.configure(connection)
     op = Operations(ctx)
     with op.batch_alter_table(table.name, schema=table.schema) as batch_op:
         for index, column_data in enumerate(column_data_list):
-            column = table.columns[index]
-            if len(column_data.keys()) == 0:
-                batch_op.drop_column(column.name)
+            column_attnum = column_data.get('attnum', None)
+            if column_attnum is not None and len(column_data.keys()) == 1:
+                name = get_column_name_from_attnum(table_oid, column_attnum, engine, connection)
+                batch_op.drop_column(name)
 
 
 def batch_update_columns(table_oid, engine, column_data_list):
@@ -232,5 +236,5 @@ def batch_update_columns(table_oid, engine, column_data_list):
     _validate_columns_for_batch_update(table, column_data_list)
     with engine.begin() as conn:
         _batch_update_column_types(table_oid, column_data_list, conn, engine)
-        _batch_alter_table_rename_columns(table, column_data_list, conn)
-        _batch_alter_table_drop_columns(table, column_data_list, conn)
+        _batch_alter_table_rename_columns(table_oid, column_data_list, conn, engine)
+        _batch_alter_table_drop_columns(table_oid, column_data_list, conn, engine)
