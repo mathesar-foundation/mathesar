@@ -17,16 +17,6 @@ class BaseConstraintSerializer(serializers.ModelSerializer):
         model = Constraint
         fields = ['id', 'name', 'type', 'columns']
 
-    def run_validation(self, data):
-        table_id = self.context['table_id']
-        for col_id in dict(data)['columns']:
-            try:
-                Column.current_objects.filter(table__id=table_id).get(id=col_id)
-            except Column.DoesNotExist:
-                message = "Column does not exist"
-                raise base_api_exceptions.NotFoundAPIException(ValueError, message=message, status_code=status.HTTP_400_BAD_REQUEST)
-        return super(BaseConstraintSerializer, self).run_validation(data)
-
 
 class ForeignKeyConstraintSerializer(BaseConstraintSerializer):
     class Meta:
@@ -80,3 +70,13 @@ class ConstraintSerializer(
         else:
             constraint_type = data.get('type', None)
         return constraint_type
+    
+    def run_validation(self, data):
+        table_id = self.context['table_id']
+        for col_id in dict(data)['columns']:
+            try:
+                Column.current_objects.filter(table__id=table_id).get(id=col_id)
+            except Column.DoesNotExist:
+                message = "Column does not exist"
+                raise base_api_exceptions.NotFoundAPIException(ValueError, message=message, status_code=status.HTTP_400_BAD_REQUEST)
+        return super(ConstraintSerializer, self).run_validation(data)
