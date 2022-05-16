@@ -6,13 +6,11 @@ section.table-section .tab-container .table-data .body {
       pointer-events: none;
     }
 
-    &:not(.group) {
-      &:hover {
-        .cell {
-          background-color: #f6f7f7;
-        }
-      }
+    &:not(:hover) .cell-bg-row-hover {
+      display: none;
+    }
 
+    &:not(.group) {
       &:hover,
       &.selected {
         .cell.row-control {
@@ -22,33 +20,6 @@ section.table-section .tab-container .table-data .body {
           .number {
             display: none;
           }
-        }
-      }
-
-      &.selected {
-        .cell {
-          background-color: #e4f2ff;
-        }
-      }
-
-      &.processing {
-        .cell {
-          transition: background-color 0.2s cubic-bezier(0, 0, 0.2, 1);
-          background-color: #fff7d7;
-        }
-      }
-
-      &.failed {
-        .cell {
-          transition: background-color 0.2s cubic-bezier(0, 0, 0.2, 1);
-          background-color: #fef1f1;
-        }
-      }
-
-      &.created {
-        .cell {
-          transition: background-color 0.2s cubic-bezier(0, 0, 0.2, 1);
-          background-color: #ebfeef;
         }
       }
     }
@@ -66,12 +37,13 @@ section.table-section .tab-container .table-data .body {
     .cell.row-control {
       display: flex;
       align-items: center;
-      background-color: #f9f9f9;
+      position: relative;
 
       .control {
         display: inline-flex;
         align-items: center;
         min-width: 16px;
+        position: relative;
       }
 
       .mod-indicator {
