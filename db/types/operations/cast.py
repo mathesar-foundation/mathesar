@@ -1003,28 +1003,28 @@ def _get_text_to_numeric_cast():
     return rf"""
     DECLARE decimal_point {TEXT};
     DECLARE is_negative {BOOLEAN};
-    DECLARE money_arr {TEXT}[];
-    DECLARE money_num {TEXT};
+    DECLARE numeric_arr {TEXT}[];
+    DECLARE numeric {TEXT};
     BEGIN
-        SELECT {numeric_array_function}($1::{TEXT}) INTO money_arr;
-        IF money_arr IS NULL THEN
+        SELECT {numeric_array_function}($1::{TEXT}) INTO numeric_arr;
+        IF numeric_arr IS NULL THEN
             {cast_exception_str}
         END IF;
 
-        SELECT money_arr[1] INTO money_num;
+        SELECT numeric_arr[1] INTO numeric;
         SELECT ltrim(to_char(1, 'D'), ' ') INTO decimal_point;
         SELECT $1::text ~ '^-.*$' INTO is_negative;
 
-        IF money_arr[2] IS NOT NULL THEN
-            SELECT regexp_replace(money_num, money_arr[2], '', 'gq') INTO money_num;
+        IF numeric_arr[2] IS NOT NULL THEN
+            SELECT regexp_replace(numeric, numeric_arr[2], '', 'gq') INTO numeric;
         END IF;
-        IF money_arr[3] IS NOT NULL THEN
-            SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
+        IF numeric_arr[3] IS NOT NULL THEN
+            SELECT regexp_replace(numeric, numeric_arr[3], decimal_point, 'q') INTO numeric;
         END IF;
         IF is_negative THEN
-            RETURN ('-' || money_num)::{NUMERIC};
+            RETURN ('-' || numeric)::{NUMERIC};
         END IF;
-        RETURN money_num::{NUMERIC};
+        RETURN numeric::{NUMERIC};
     END;
     """
 
