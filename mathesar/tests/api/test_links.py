@@ -38,7 +38,7 @@ def test_one_to_one_link_create(column_test_table, client, create_table):
     table_2 = create_table('Table 2')
     data = {
         "link_type": "one-to-one",
-        "referent_column_name": "col_1",
+        "reference_column_name": "col_1",
         "reference_table": table_2.id,
         "referent_table": column_test_table.id,
     }
@@ -54,7 +54,7 @@ def test_one_to_many_link_create(column_test_table, client, create_table):
     table_2 = create_table('Table 2')
     data = {
         "link_type": "one-to-many",
-        "referent_column_name": "col_1",
+        "reference_column_name": "col_1",
         "reference_table": table_2.id,
         "referent_table": column_test_table.id,
     }
@@ -69,7 +69,7 @@ def test_one_to_many_self_referential_link_create(column_test_table, client):
     cache.clear()
     data = {
         "link_type": "one-to-many",
-        "referent_column_name": "col_1",
+        "reference_column_name": "col_1",
         "reference_table": column_test_table.id,
         "referent_table": column_test_table.id,
     }
