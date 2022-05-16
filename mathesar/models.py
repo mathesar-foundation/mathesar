@@ -11,7 +11,7 @@ from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
 from db.columns.operations.select import get_column_name_from_attnum, get_columns_attnum_from_names
-from db.constraints.operations.create import create_unique_constraint
+from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
 from db.constraints import utils as constraint_utils
@@ -24,7 +24,7 @@ from db.schemas.operations.drop import drop_schema
 from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
-from db.tables.operations.select import reflect_table_from_oid
+from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
@@ -313,16 +313,11 @@ class Table(DatabaseObject):
     def delete_record(self, id_value):
         return delete_record(self._sa_table, self.schema._sa_engine, id_value)
 
-    def add_constraint(self, constraint_type, columns, name=None):
-        if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
-            raise ValueError('Only creating unique constraints is currently supported.')
-        column_names = [column.name for column in columns]
-        create_unique_constraint(
-            self.name,
+    def add_constraint(self, constraint_obj):
+        create_constraint(
             self._sa_table.schema,
             self.schema._sa_engine,
-            column_names,
-            name
+            constraint_obj
         )
         try:
             # Clearing cache so that new constraint shows up.
@@ -330,8 +325,9 @@ class Table(DatabaseObject):
         except AttributeError:
             pass
         engine = self.schema.database._sa_engine
+        name = constraint_obj.name
         if not name:
-            name = constraint_utils.get_constraint_name(constraint_type, self.name, column_names[0])
+            name = constraint_utils.get_constraint_name(engine, constraint_obj.constraint_type(), self.oid, constraint_obj.columns_attnum[0])
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         return Constraint.current_objects.create(oid=constraint_oid, table=self)
 
@@ -370,7 +366,7 @@ class Column(ReflectionManagerMixin, BaseModel):
 class Constraint(DatabaseObject):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='constraints')
 
-    @property
+    @cached_property
     def _sa_constraint(self):
         engine = self.table.schema.database._sa_engine
         return get_constraint_from_oid(self.oid, engine, self.table._sa_table)
@@ -389,6 +385,40 @@ class Constraint(DatabaseObject):
         engine = self.table.schema.database._sa_engine
         column_attnum_list = [result for result in get_columns_attnum_from_names(self.table.oid, column_names, engine)]
         return Column.objects.filter(table=self.table, attnum__in=column_attnum_list).order_by("attnum")
+
+    @cached_property
+    def referent_columns(self):
+        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
+            column_names = [fk.column.name for fk in self._sa_constraint.elements]
+            engine = self.table.schema._sa_engine
+            oid = get_oid_from_table(self._sa_constraint.referred_table.name,
+                                     self._sa_constraint.referred_table.schema,
+                                     engine)
+            table = Table.objects.get(oid=oid, schema=self.table.schema)
+            column_attnum_list = get_columns_attnum_from_names(oid, column_names, table.schema._sa_engine)
+            columns = Column.objects.filter(table=table, attnum__in=column_attnum_list).order_by("attnum")
+            return columns
+        return None
+
+    @cached_property
+    def ondelete(self):
+        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
+            return self._sa_constraint.ondelete
+
+    @cached_property
+    def onupdate(self):
+        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
+            return self._sa_constraint.onupdate
+
+    @cached_property
+    def deferrable(self):
+        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
+            return self._sa_constraint.deferrable
+
+    @cached_property
+    def match(self):
+        if self.type == constraint_utils.ConstraintType.FOREIGN_KEY.value:
+            return self._sa_constraint.match
 
     def drop(self):
         drop_constraint(

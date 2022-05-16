@@ -38,6 +38,7 @@ export { AttachableDropdown, Dropdown } from './dropdown';
 export { default as DropdownMenu } from './dropdown-menu/DropdownMenu.svelte';
 export { default as DynamicInput } from './dynamic-input/DynamicInput.svelte';
 export { default as FileUpload } from './file-upload/FileUpload.svelte';
+export { default as FormattedInput } from './formatted-input/FormattedInput.svelte';
 export { default as Notification } from './notification/Notification.svelte';
 export { ListBox, ListBoxOptions } from './list-box';
 export { default as Pagination } from './pagination/Pagination.svelte';

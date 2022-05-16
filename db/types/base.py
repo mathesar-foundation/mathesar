@@ -45,6 +45,7 @@ class PostgresType(Enum):
     JSON = 'json'
     JSONB = 'jsonb'
     MACADDR = 'macaddr'
+    MATHESAR_CHAR = '"char"'
     MONEY = 'money'
     NAME = 'name'
     NUMERIC = 'numeric'
@@ -246,6 +247,10 @@ _ma_type_qualifier_prefix = preparer.quote_schema(SCHEMA)
 
 def get_qualified_name(name):
     return ".".join([_ma_type_qualifier_prefix, name])
+
+
+def get_qualifier_prefix():
+    return _ma_type_qualifier_prefix
 
 
 def get_available_types(engine):

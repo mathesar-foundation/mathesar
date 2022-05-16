@@ -1,12 +1,11 @@
 import type {
-  FormInputDataType,
   ConditionalIfElement,
   ConditionalSwitchElement,
   FormElement,
 } from './types';
 
 function checkCondition(
-  term: FormInputDataType,
+  term: unknown,
   condition: ConditionalIfElement['condition'],
   value: ConditionalIfElement['value'],
 ): boolean {
@@ -20,7 +19,7 @@ function checkCondition(
 }
 
 export function computeSwitchElements(
-  storeValue: FormInputDataType,
+  storeValue: unknown,
   switchArgs: { cases: ConditionalSwitchElement['cases'] },
 ): FormElement[] {
   const { cases } = switchArgs;
@@ -28,7 +27,7 @@ export function computeSwitchElements(
 }
 
 export function computeIfElements(
-  storeValue: FormInputDataType,
+  storeValue: unknown,
   ifArgs: {
     condition: ConditionalIfElement['condition'];
     value: ConditionalIfElement['value'];

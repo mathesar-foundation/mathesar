@@ -6,9 +6,9 @@ import type {
 } from '@mathesar/api/tables/records';
 
 export interface FilterEntry {
-  columnId: number;
-  conditionId: string;
-  value: unknown;
+  readonly columnId: number;
+  readonly conditionId: string;
+  readonly value: unknown;
 }
 
 function makeApiFilterCondition(filterEntry: FilterEntry): FilterCondition {
