@@ -18,6 +18,11 @@ def create_unique_constraint(table_name, schema, engine, columns, constraint_nam
         op.create_unique_constraint(constraint_name, table_name, columns, schema)
 
 
+def create_constraint(schema, engine, constraint_obj):
+    with engine.begin() as conn:
+        constraint_obj.add_constraint(schema, engine, conn)
+
+
 def copy_constraint(table_oid, engine, constraint, from_column_attnum, to_column_attnum):
     table = reflect_table_from_oid(table_oid, engine)
     constraint_type = get_constraint_type_from_char(constraint.contype)
