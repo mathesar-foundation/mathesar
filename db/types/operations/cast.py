@@ -39,6 +39,7 @@ URI = base.MathesarCustomType.URI.value
 FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
 FULL_CHAR = base.PostgresType.CHARACTER.value
 NAME = base.PostgresType.NAME.value
+MATHESAR_CHAR = base.PostgresType.MATHESAR_CHAR.value
 
 DECIMAL_TYPES = frozenset([DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL])
 INTEGER_TYPES = frozenset([BIGINT, INTEGER, SMALLINT])
@@ -80,6 +81,7 @@ def get_supported_alter_column_types(engine, friendly_names=True):
         TIMESTAMP_WITH_TIME_ZONE: dialect_types.get(TIMESTAMP_WITH_TIME_ZONE),
         TIMESTAMP_WITHOUT_TIME_ZONE: dialect_types.get(TIMESTAMP_WITHOUT_TIME_ZONE),
         VARCHAR: dialect_types.get(FULL_VARCHAR),
+        MATHESAR_CHAR: dialect_types.get(MATHESAR_CHAR),
         # Custom Mathesar types
         EMAIL: dialect_types.get(email.DB_TYPE),
         MATHESAR_MONEY: dialect_types.get(money.DB_TYPE),
