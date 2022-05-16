@@ -1,9 +1,10 @@
 import json
 
 from django.core.cache import cache
-from sqlalchemy import Column, ForeignKey, Integer, MetaData, Table as SATable
+from sqlalchemy import Column, ForeignKey, Integer, MetaData, Table as SATable, select
 
 from db.columns.operations.select import get_column_attnum_from_name
+from db.constraints.base import UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
 from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
@@ -23,9 +24,9 @@ def _verify_foreign_key_constraint(
         name,
         referent_columns,
         referent_table_id,
-        onupdate,
-        ondelete,
-        deferrable,
+        onupdate=None,
+        ondelete=None,
+        deferrable=None,
 ):
     assert constraint_data['columns'] == columns
     assert constraint_data['referent_columns'] == referent_columns
@@ -73,8 +74,7 @@ def test_multiple_constraint_list(create_table, client):
     table_name = 'NASA Constraint List 1'
     table = create_table(table_name)
     constraint_column = _get_columns_by_name(table, ['Case Number'])[0]
-    table.add_constraint('unique', [constraint_column])
-
+    table.add_constraint(UniqueConstraint(None, table.oid, [constraint_column.attnum]))
     response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     response_data = response.json()
 
@@ -148,7 +148,8 @@ def test_multiple_column_constraint_list(create_table, client):
     table = create_table(table_name)
     constraint_columns = _get_columns_by_name(table, ['Center', 'Case Number'])
     constraint_column_id_list = [constraint_columns[0].id, constraint_columns[1].id]
-    table.add_constraint('unique', [constraint_columns[0], constraint_columns[1]])
+    constraint_column_attnum_list = [constraint_columns[0].attnum, constraint_columns[1].attnum]
+    table.add_constraint(UniqueConstraint(None, table.oid, constraint_column_attnum_list))
 
     response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     response_data = response.json()
@@ -163,8 +164,7 @@ def test_retrieve_constraint(create_table, client):
     table_name = 'NASA Constraint List 3'
     table = create_table(table_name)
     constraint_column = _get_columns_by_name(table, ['Case Number'])[0]
-    constraint_column_id_list = [constraint_column.id]
-    table.add_constraint('unique', [constraint_column])
+    table.add_constraint(UniqueConstraint(None, table.oid, [constraint_column.attnum]))
     list_response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     list_response_data = list_response.json()
     assert list_response_data['count'] == 2
@@ -175,7 +175,7 @@ def test_retrieve_constraint(create_table, client):
 
     response = client.get(f'/api/db/v0/tables/{table.id}/constraints/{constraint_id}/')
     assert response.status_code == 200
-    _verify_unique_constraint(response.json(), constraint_column_id_list, 'NASA Constraint List 3_Case Number_key')
+    _verify_unique_constraint(response.json(), [constraint_column.id], 'NASA Constraint List 3_Case Number_key')
 
 
 def test_create_multiple_column_unique_constraint(create_table, client):
@@ -190,9 +190,7 @@ def test_create_multiple_column_unique_constraint(create_table, client):
         'columns': constraint_column_id_list
     }
     response = client.post(
-        f'/api/db/v0/tables/{table.id}/constraints/',
-        data=json.dumps(data),
-        content_type='application/json'
+        f'/api/db/v0/tables/{table.id}/constraints/', data
     )
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), constraint_column_id_list, 'NASA Constraint List 4_Center_key')
@@ -226,12 +224,118 @@ def test_create_unique_constraint_with_name_specified(create_table, client):
         'columns': constraint_column_id_list
     }
     response = client.post(
-        f'/api/db/v0/tables/{table.id}/constraints/',
-        data=json.dumps(data),
-        content_type='application/json'
-    )
+        f'/api/db/v0/tables/{table.id}/constraints/', data)
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), constraint_column_id_list, 'awesome_constraint')
+
+
+def test_create_single_column_foreign_key_constraint(create_foreign_key_table, client):
+    referrer_table_name = 'Patents'
+    referent_table_name = 'Center'
+    referrer_table, referent_table = create_foreign_key_table(referrer_table_name, referent_table_name)
+    referent_column = _get_columns_by_name(referent_table, ["Id"])[0]
+    referrer_column = _get_columns_by_name(referrer_table, ["Center"])[0]
+    referent_table.add_constraint(UniqueConstraint(None, referent_table.oid, [referent_column.attnum]))
+    data = {
+        'type': 'foreignkey',
+        'columns': [referrer_column.id],
+        'referent_columns': [referent_column.id]
+    }
+    response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
+    assert response.status_code == 201
+    _verify_foreign_key_constraint(response.json(), [referrer_column.id], 'Patents_Center_fkey',
+                                   [referent_column.id], referent_table.id)
+
+
+def test_create_single_column_foreign_key_constraint_with_options(create_foreign_key_table, client):
+    referrer_table_name = 'Patents'
+    referent_table_name = 'Center'
+    referrer_table, referent_table = create_foreign_key_table(referrer_table_name, referent_table_name)
+    referent_column = _get_columns_by_name(referent_table, ["Id"])[0]
+    referrer_column = _get_columns_by_name(referrer_table, ["Center"])[0]
+    referent_table.add_constraint(UniqueConstraint(None, referent_table.oid, [referent_column.attnum]))
+    data = {
+        'type': 'foreignkey',
+        'columns': [referrer_column.id],
+        'referent_columns': [referent_column.id],
+        'onupdate': "RESTRICT",
+        'ondelete': "CASCADE",
+        'deferrable': False,
+    }
+    response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
+    assert response.status_code == 201
+    _verify_foreign_key_constraint(
+        response.json(), [referrer_column.id], 'Patents_Center_fkey',
+        [referent_column.id],
+        referent_table.id,
+        onupdate='RESTRICT',
+        ondelete='CASCADE',
+        deferrable=None
+    )
+
+
+def test_create_self_referential_single_column_foreign_key_constraint(create_self_referential_table, client, engine):
+    table_name = 'Tree'
+    table = create_self_referential_table(table_name)
+    column = _get_columns_by_name(table, ["Id"])[0]
+    parent_column = _get_columns_by_name(table, ["Parent"])[0]
+    table.add_constraint(UniqueConstraint(None, table.oid, [column.attnum]))
+
+    data = {
+        'type': 'foreignkey',
+        'columns': [parent_column.id],
+        'referent_columns': [column.id]
+    }
+    response = client.post(f'/api/db/v0/tables/{table.id}/constraints/', data)
+    assert response.status_code == 201
+    _verify_foreign_key_constraint(response.json(), [parent_column.id], 'Tree_Parent_fkey',
+                                   [column.id], table.id)
+    # Recursively fetch children
+    with engine.begin() as conn:
+        sa_table = table._sa_table
+        head = select(sa_table).filter(sa_table.c.Id == "1").cte(recursive=True)
+        u = head.union_all(select(sa_table).join(head, sa_table.c.Parent == head.c.Id))
+        stmt = select(u.c.Id)
+        created_default = conn.execute(stmt).fetchall()
+        assert created_default == [("1",), ("2", ), ("4", )]
+
+
+def test_create_single_column_foreign_key_constraint_invalid_related_data(create_invalid_related_data_foreign_key_table,
+                                                                          client):
+    referrer_table_name = 'Patents'
+    referent_table_name = 'Center'
+    referrer_table, referent_table = create_invalid_related_data_foreign_key_table(referrer_table_name, referent_table_name)
+    referent_column = _get_columns_by_name(referent_table, ["Id"])[0]
+    referrer_column = _get_columns_by_name(referrer_table, ["Center"])[0]
+    referent_table.add_constraint(UniqueConstraint(None, referent_table.oid, [referent_column.attnum]))
+
+    data = {
+        'type': 'foreignkey',
+        'columns': [referrer_column.id],
+        'referent': {'table': referent_table.id, 'columns': [referent_column.id]}
+    }
+    response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
+    assert response.status_code == 400
+
+
+def test_create_multiple_column_foreign_key_constraint(create_multi_column_foreign_key_table, client):
+    referrer_table_name = 'Patents'
+    referent_table_name = 'Center'
+    referrer_table, referent_table = create_multi_column_foreign_key_table(referrer_table_name, referent_table_name)
+    referent_columns = _get_columns_by_name(referent_table, ['Name', 'City'])
+    referrer_columns = _get_columns_by_name(referrer_table, ["Center", 'Center City'])
+    referent_columns_id = [referent_column.id for referent_column in referent_columns]
+    referrer_columns_id = [referrer_column.id for referrer_column in referrer_columns]
+    referent_table.add_constraint(UniqueConstraint(None, referent_table.oid, [referent_column.attnum for referent_column in referent_columns]))
+
+    data = {
+        'type': 'foreignkey',
+        'columns': referrer_columns_id,
+        'referent_columns': referent_columns_id
+    }
+    response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
+    assert response.status_code == 201
+    _verify_foreign_key_constraint(response.json(), referrer_columns_id, 'Patents_Center_fkey', referent_columns_id, referent_table.id)
 
 
 def test_drop_constraint(create_table, client):
@@ -239,7 +343,7 @@ def test_drop_constraint(create_table, client):
     table = create_table(table_name)
 
     constraint_column = _get_columns_by_name(table, ['Case Number'])[0]
-    table.add_constraint('unique', [constraint_column])
+    table.add_constraint(UniqueConstraint(None, table.oid, [constraint_column.attnum]))
     list_response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     list_response_data = list_response.json()
     assert list_response_data['count'] == 2
@@ -259,7 +363,8 @@ def test_create_unique_constraint_with_duplicate_name(create_table, client):
     table = create_table(table_name)
     constraint_columns = _get_columns_by_name(table, ['Center', 'Case Number'])
     constraint_column_id_list = [constraint_columns[0].id, constraint_columns[1].id]
-    table.add_constraint('unique', [constraint_columns[0], constraint_columns[1]])
+    constraint_column_attnum_list = [constraint_columns[0].attnum, constraint_columns[1].attnum]
+    table.add_constraint(UniqueConstraint(None, table.oid, constraint_column_attnum_list))
     data = {
         'type': 'unique',
         'columns': constraint_column_id_list
