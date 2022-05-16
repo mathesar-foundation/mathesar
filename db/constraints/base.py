@@ -1,13 +1,18 @@
 from abc import ABC, abstractmethod
 
+from alembic.migration import MigrationContext
+from alembic.operations import Operations
+from sqlalchemy import MetaData
+
 from db.columns.operations.select import get_columns_name_from_attnums
+from db.constraints.utils import naming_convention
 from db.tables.operations.select import reflect_table_from_oid
 
 
 class Constraint(ABC):
 
     @abstractmethod
-    def add_constraint(self, migration_operation, engine, connection_to_use):
+    def add_constraint(self, schema, engine, connection_to_use):
         pass
 
     @abstractmethod
@@ -34,7 +39,7 @@ class ForeignKeyConstraint(Constraint):
         self.referent_columns = referent_columns_attnum
         self.options = options
 
-    def add_constraint(self, migration_operation, engine, connection_to_use):
+    def add_constraint(self, schema, engine, connection_to_use):
         table = reflect_table_from_oid(self.table_oid, engine, connection_to_use)
         referent_table = reflect_table_from_oid(self.referent_table_oid, engine, connection_to_use)
         columns_name = get_columns_name_from_attnums(self.table_oid, self.columns_attnum, engine, connection_to_use)
@@ -44,7 +49,13 @@ class ForeignKeyConstraint(Constraint):
             engine,
             connection_to_use
         )
-        migration_operation.create_foreign_key(
+        metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
+        opts = {
+            'target_metadata': metadata
+        }
+        ctx = MigrationContext.configure(connection_to_use, opts=opts)
+        op = Operations(ctx)
+        op.create_foreign_key(
             self.name,
             table.name,
             referent_table.name,
@@ -63,10 +74,16 @@ class UniqueConstraint(Constraint):
         self.table_oid = table_oid
         self.columns_attnum = columns_attnum
 
-    def add_constraint(self, migration_operation, engine, connection_to_use):
+    def add_constraint(self, schema, engine, connection_to_use):
         table = reflect_table_from_oid(self.table_oid, engine, connection_to_use)
         columns = get_columns_name_from_attnums(self.table_oid, self.columns_attnum, engine, connection_to_use)
-        migration_operation.create_unique_constraint(self.name, table.name, columns, table.schema)
+        metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
+        opts = {
+            'target_metadata': metadata
+        }
+        ctx = MigrationContext.configure(connection_to_use, opts=opts)
+        op = Operations(ctx)
+        op.create_unique_constraint(self.name, table.name, columns, table.schema)
 
     def constraint_type(self):
         return "unique"
