@@ -8,7 +8,14 @@ from db.tables.operations.select import reflect_table_from_oid, reflect_tables_f
 from db.tables.utils import get_primary_key_column
 
 
-def create_foreign_key_link(engine, schema, column_name, referrer_table_oid, referent_table_oid, unique_link=False):
+def create_foreign_key_link(
+        engine,
+        schema,
+        referrer_column_name,
+        referrer_table_oid,
+        referent_table_oid,
+        unique_link=False
+):
     with engine.begin() as conn:
         referent_table = reflect_table_from_oid(referent_table_oid, engine, conn)
         referrer_table = reflect_table_from_oid(referrer_table_oid, engine, conn)
@@ -20,11 +27,11 @@ def create_foreign_key_link(engine, schema, column_name, referrer_table_oid, ref
         ctx = MigrationContext.configure(conn, opts=opts)
         op = Operations(ctx)
         column = MathesarColumn(
-            column_name, primary_key_column.type
+            referrer_column_name, primary_key_column.type
         )
         op.add_column(referrer_table.name, column, schema=schema)
         if unique_link:
-            op.create_unique_constraint(None, referrer_table.name, [column_name], schema=schema)
+            op.create_unique_constraint(None, referrer_table.name, [referrer_column_name], schema=schema)
         op.create_foreign_key(
             None,
             referrer_table.name,

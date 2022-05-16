@@ -13,7 +13,7 @@ from mathesar.models import Table
 
 
 class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
-    referent_column_name = serializers.CharField()
+    reference_column_name = serializers.CharField()
     reference_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
     referent_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
     # TODO Fix hacky link_type detection by reflecting it correctly
@@ -27,7 +27,7 @@ class OneToOneSerializer(MathesarErrorMessageMixin, serializers.Serializer):
         create_foreign_key_link(
             reference_table.schema._sa_engine,
             reference_table._sa_table.schema,
-            validated_data.get('referent_column_name'),
+            validated_data.get('reference_column_name'),
             reference_table.oid,
             validated_data.get('referent_table').oid,
             unique_link=self.is_link_unique()
