@@ -19,6 +19,6 @@ export { Pagination } from './pagination';
 export { getRowKey } from './records';
 export { getCellKey } from './utils';
 
-export { getTabularContent, removeTabularContent } from './manager';
+export { initTabularData, removeTabularData } from './manager';
 export { makeTabularDataProps, makeTerseTabularDataProps } from './tabularData';
 export { TabularType } from './TabularType';

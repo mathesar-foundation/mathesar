@@ -6,7 +6,14 @@ import { TabularType } from './TabularType';
 const tableMap: Map<TableEntry['id'], TabularData> = new Map();
 const viewMap: Map<ViewEntry['id'], TabularData> = new Map();
 
-export function getTabularContent(props: TabularDataProps): TabularData {
+export function getTabularData(
+  props: TabularDataProps,
+): TabularData | undefined {
+  const tabularMap = props.type === TabularType.View ? viewMap : tableMap;
+  return tabularMap.get(props.id);
+}
+
+export function initTabularData(props: TabularDataProps): TabularData {
   const tabularMap = props.type === TabularType.View ? viewMap : tableMap;
   let entry = tabularMap.get(props.id);
   if (!entry) {
@@ -16,7 +23,7 @@ export function getTabularContent(props: TabularDataProps): TabularData {
   return entry;
 }
 
-export function removeTabularContent(
+export function removeTabularData(
   type: TabularType,
   id: DBObjectEntry['id'],
 ): void {
