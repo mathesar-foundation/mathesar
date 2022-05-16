@@ -74,8 +74,9 @@
           $tabularData.type,
           $tabularData.id,
         );
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        tabList.remove(tab);
+        if (tab) {
+          tabList.removeTabAndItsData(tab);
+        }
         // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         await refetchTablesForSchema($currentSchemaId);
       },
