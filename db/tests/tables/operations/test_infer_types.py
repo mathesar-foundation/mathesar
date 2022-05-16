@@ -20,6 +20,25 @@ temporary_testing_schema = fixtures.temporary_testing_schema
 
 type_data_list = [
     (Numeric, [0, 2, 1, 0], NUMERIC),
+    (
+        VARCHAR,
+        [
+            "3.14",
+            "1,41421",
+            "149,600,000.00",
+            "4.543.000.000,005",
+            "13 800 000 000,00",
+            "7,53,00,00,000.0",
+            "140'004'453.0",
+            "-3.14",
+            "-1,41421",
+            "-149,600,000.00",
+            "-4.543.000.000,005",
+            "-13 800 000 000,00",
+            "-7,53,00,00,000.0",
+            "-140'004'453.0"
+        ],
+        NUMERIC),
     (Numeric, [0, 1, 1, 0], BOOLEAN),
     (String, ["t", "false", "true", "f", "f"], BOOLEAN),
     (String, ["t", "false", "2", "0"], VARCHAR),

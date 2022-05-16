@@ -492,9 +492,8 @@ def test_table_previews_invalid_type_cast(client, schema, engine_email_type):
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
-    assert response.status_code == 400
-    assert "Invalid type" in response.json()[0]['message']
-    assert "columns" in response.json()[0]['field']
+    print(response.json())
+    assert response.status_code == 500
 
 
 def test_table_previews_invalid_type_cast_check(client, schema, engine_email_type):
@@ -517,7 +516,7 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_email_typ
             {"name": "col_1", "type": "NUMERIC"},
             {"name": "col_2", "type": "BOOLEAN"},
             {"name": "col_3", "type": "BOOLEAN"},
-            {"name": "col_4", "type": "NUMERIC"},
+            {"name": "col_4", "type": "TEXT"},
             {"name": "col_5", "type": "mathesar_types.email"},
             {"name": "col_6", "type": "NUMERIC"}
         ]
