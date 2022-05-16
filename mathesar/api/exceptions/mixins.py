@@ -44,9 +44,16 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                     pretty_child_errors = []
                     for index, child_error in enumerate(errors[error_type]):
                         child_field = field.child
-                        child_field.initial_data = self.initial_data[error_type][index]
-                        child_errors = child_field.build_pretty_errors(child_error)
-                        pretty_child_errors.extend(child_errors)
+                        initial_data = self.initial_data.get(error_type, None)
+                        if initial_data is not None:
+                            child_field.initial_data = self.initial_data[error_type][index]
+                        else:
+                            child_field.initial_data = None
+                        if isinstance(child_error, str):
+                            pretty_child_errors.append(self.get_field_error_entry(child_error, field))
+                        else:
+                            child_errors = child_field.build_pretty_errors(child_error)
+                            pretty_child_errors.extend(child_errors)
                     pretty.extend(pretty_child_errors)
                     continue
                 if self.is_pretty(error):
