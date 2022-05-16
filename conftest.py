@@ -141,7 +141,6 @@ def create_db_schema():
         logger.debug(f"created schema '{schema_name}' in db '{engine_url}'")
         return schema_name
     yield _create_schema
-
     logger.debug(f"cleaning up created schemas")
     for engine_url, created_schemas_in_this_engine in created_schemas.items():
         engine = create_engine(engine_url)

@@ -27,10 +27,22 @@ def automatically_clear_cache():
     """
     Makes sure Django cache is cleared before every test.
     """
-    logger = logging.getLogger("automatically_clear_cache")
+    logger = logging.getLogger("django cache clearing fixture")
     logger.debug("clearing cache")
     cache.clear()
     yield
+
+
+@pytest.fixture(autouse=True)
+def delete_all_models(django_db_blocker):
+    yield
+    logger = logging.getLogger('django model clearing fixture')
+    with django_db_blocker.unblock():
+        all_models = {Table, Schema, Database}
+        for model in all_models:
+            count = model.current_objects.count()
+            logger.debug(f'deleting {count} instances of {model}')
+            model.current_objects.all().delete()
 
 
 @pytest.fixture(scope="session", autouse=True)

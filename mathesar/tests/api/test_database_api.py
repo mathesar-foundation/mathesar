@@ -1,5 +1,4 @@
 import pytest
-import logging
 from django.conf import settings
 from django.core.cache import cache
 
@@ -7,20 +6,9 @@ from mathesar.reflection import reflect_db_objects
 from mathesar.models import Table, Schema, Database
 
 
-@pytest.fixture(autouse=True)
-def delete_all_models():
-    yield
-    logger = logging.getLogger('delete_all_models')
-    models = {Table, Schema, Database}
-    for model in models:
-        count = model.current_objects.count()
-        logger.debug(f'deleting {count} instances of {model}')
-        model.current_objects.all().delete()
-
-
 @pytest.fixture
-def database_api_db(create_temp_dj_db, uid):
-    db_name = "test_database_api_db" + uid
+def database_api_db(create_temp_dj_db):
+    db_name = "test_database_api_db"
     create_temp_dj_db(db_name)
     return db_name
 
