@@ -1,21 +1,17 @@
-export type ConstraintType =
-  | 'foreignkey'
-  | 'primary'
-  | 'unique'
-  | 'check'
-  | 'exclude';
-
-export interface BasicConstraint {
+export interface BaseConstraint {
   id: number;
   name: string;
-  type: ConstraintType;
   /**
    * Each number is a column id.
    */
   columns: number[];
 }
 
-export interface FkConstraint extends BasicConstraint {
+export interface BasicConstraint extends BaseConstraint {
+  type: 'primary' | 'unique' | 'check' | 'exclude';
+}
+
+export interface FkConstraint extends BaseConstraint {
   type: 'foreignkey';
   /** The ids of the columns in the table which this FK references */
   referent_columns: number[];
@@ -40,3 +36,5 @@ export interface FkConstraint extends BasicConstraint {
 }
 
 export type Constraint = BasicConstraint | FkConstraint;
+
+export type ConstraintType = Constraint['type'];
