@@ -51,8 +51,8 @@ def test_get_attnum_from_names(engine_with_schema_without_updated_ischema_names)
 
 @pytest.mark.parametrize("filler", [True, False])
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_get_column_default(engine_with_mathesar, filler, col_type):
-    engine, schema = engine_with_mathesar
+def test_get_column_default(engine_with_schema, filler, col_type):
+    engine, schema = engine_with_schema
     table_name = "get_column_default_table"
     column_name = "get_column_default_column"
     _, set_default, expt_default = column_test_dict[col_type].values()

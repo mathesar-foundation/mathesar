@@ -107,8 +107,8 @@ def create_test_table(engine, schema, table_name, column_name, column_type, valu
 
 
 @pytest.mark.parametrize("initial_type,value_list,expected_type", type_data_list)
-def test_type_inference(engine_with_mathesar, initial_type, value_list, expected_type):
-    engine, schema = engine_with_mathesar
+def test_type_inference(engine_with_schema, initial_type, value_list, expected_type):
+    engine, schema = engine_with_schema
     TEST_TABLE = "test_table"
     TEST_COLUMN = "test_column"
     create_test_table(
@@ -132,8 +132,8 @@ def test_type_inference(engine_with_mathesar, initial_type, value_list, expected
 
 
 @pytest.mark.parametrize("initial_type,value_list,expected_type", type_data_list)
-def test_table_inference(engine_with_mathesar, initial_type, value_list, expected_type):
-    engine, schema = engine_with_mathesar
+def test_table_inference(engine_with_schema, initial_type, value_list, expected_type):
+    engine, schema = engine_with_schema
     test_table = "test_table"
     test_column = "test_column"
     input_table = create_test_table(
@@ -158,8 +158,8 @@ def test_table_inference(engine_with_mathesar, initial_type, value_list, expecte
     assert original_table == new_table
 
 
-def test_table_inference_drop_temp(engine_with_mathesar):
-    engine, schema = engine_with_mathesar
+def test_table_inference_drop_temp(engine_with_schema):
+    engine, schema = engine_with_schema
     test_table = "test_table"
     test_column = "test_column"
     db_type = PostgresType.NUMERIC
@@ -174,8 +174,8 @@ def test_table_inference_drop_temp(engine_with_mathesar):
     infer_operations.infer_table_column_types(schema, test_table, engine)
 
 
-def test_table_inference_same_name(engine_with_mathesar):
-    engine, schema = engine_with_mathesar
+def test_table_inference_same_name(engine_with_schema):
+    engine, schema = engine_with_schema
     test_table = "temp_table"
     test_column = "test_column"
     db_type = PostgresType.NUMERIC

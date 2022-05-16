@@ -185,9 +185,9 @@ create_default_test_list = [
     "db_type,default,default_obj,expt_default", create_default_test_list
 )
 def test_column_create_default(
-        column_test_table, db_type, default, default_obj, expt_default, client, engine_with_mathesar
+        column_test_table, db_type, default, default_obj, expt_default, client, engine_with_schema
 ):
-    engine, _ = engine_with_mathesar
+    engine, _ = engine_with_schema
     cache.clear()
     name = "anewcolumn"
     data = {"name": name, "type": db_type.id, "default": {"value": default}}
@@ -256,8 +256,14 @@ def test_column_create_display_options(
     new_columns_response = client.get(
         f"/api/db/v0/tables/{column_test_table.id}/columns/"
     )
-    actual_new_col = new_columns_response.json()["results"][-1]
-    assert actual_new_col["display_options"] == display_options
+    assert new_columns_response.status_code == 200
+    columns = new_columns_response.json()["results"]
+    new_column = None
+    for column in columns:
+        if column['name'] == name:
+            new_column = column
+    assert new_column is not None
+    assert new_column["display_options"] == display_options
 
 
 _too_long_string = "x" * 256

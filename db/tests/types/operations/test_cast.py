@@ -782,14 +782,14 @@ type_test_list = [
     "source_type,target_type,options", type_test_list
 )
 def test_alter_column_type_alters_column_type(
-    engine_with_mathesar, source_type, target_type, options
+    engine_with_schema, source_type, target_type, options
 ):
     """
     The massive number of cases make sure all type casting functions at
     least pass a smoke test for each type mapping defined in
     MASTER_DB_TYPE_MAP_SPEC above.
     """
-    engine, schema = engine_with_mathesar
+    engine, schema = engine_with_schema
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
@@ -901,9 +901,9 @@ type_test_data_args_list = [
     "source_type,target_type,options,value,expect_value", type_test_data_args_list
 )
 def test_alter_column_type_casts_column_data_args(
-        engine_with_mathesar, source_type, target_type, options, value, expect_value,
+        engine_with_schema, source_type, target_type, options, value, expect_value,
 ):
-    engine, schema = engine_with_mathesar
+    engine, schema = engine_with_schema
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
@@ -963,9 +963,9 @@ type_test_data_gen_list = [
     "source_type,target_type,in_val,out_val", type_test_data_gen_list
 )
 def test_alter_column_casts_data_gen(
-        engine_with_mathesar, source_type, target_type, in_val, out_val
+        engine_with_schema, source_type, target_type, in_val, out_val
 ):
-    engine, schema = engine_with_mathesar
+    engine, schema = engine_with_schema
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
@@ -1030,9 +1030,9 @@ type_test_bad_data_gen_list = [
     "source_type,target_type,value", type_test_bad_data_gen_list
 )
 def test_alter_column_type_raises_on_bad_column_data(
-        engine_with_mathesar, source_type, target_type, value,
+        engine_with_schema, source_type, target_type, value,
 ):
-    engine, schema = engine_with_mathesar
+    engine, schema = engine_with_schema
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
@@ -1058,9 +1058,9 @@ def test_alter_column_type_raises_on_bad_column_data(
 
 
 def test_alter_column_type_raises_on_bad_parameters(
-        engine_with_mathesar,
+        engine_with_schema,
 ):
-    engine, schema = engine_with_mathesar
+    engine, schema = engine_with_schema
     TABLE_NAME = "testtable"
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
@@ -1186,9 +1186,9 @@ cast_expr_numeric_option_list = [
     "source_type,target_type,options,expect_cast_expr", cast_expr_numeric_option_list
 )
 def test_get_column_cast_expression_type_options(
-        engine_with_mathesar, source_type, target_type, options, expect_cast_expr
+        engine_with_schema, source_type, target_type, options, expect_cast_expr
 ):
-    engine, _ = engine_with_mathesar
+    engine, _ = engine_with_schema
     source_sa_type = source_type.get_sa_class(engine)
     column = Column("colname", source_sa_type)
     cast_expr = cast_operations.get_column_cast_expression(
@@ -1205,8 +1205,8 @@ expect_cast_tuples = [
 
 
 @pytest.mark.parametrize("source_type,expect_target_types", expect_cast_tuples)
-def test_get_full_cast_map(engine_with_mathesar, source_type, expect_target_types):
-    engine, _ = engine_with_mathesar
+def test_get_full_cast_map(engine_with_schema, source_type, expect_target_types):
+    engine, _ = engine_with_schema
     actual_cast_map = cast_operations.get_full_cast_map(engine)
     actual_target_types = actual_cast_map[source_type]
     assert set(actual_target_types) == set(expect_target_types)
@@ -1248,8 +1248,8 @@ money_array_examples = [
 
 
 @pytest.mark.parametrize("source_str,expect_arr", money_array_examples)
-def test_mathesar_money_array_sql(engine_with_mathesar, source_str, expect_arr):
-    engine, _ = engine_with_mathesar
+def test_mathesar_money_array_sql(engine_with_schema, source_str, expect_arr):
+    engine, _ = engine_with_schema
     with engine.begin() as conn:
         res = conn.execute(
             select(

@@ -2,8 +2,8 @@ from sqlalchemy import text, MetaData, Table, Column
 from db.types.custom import money
 
 
-def test_money_type_column_creation(engine_with_mathesar):
-    engine, app_schema = engine_with_mathesar
+def test_money_type_column_creation(engine_with_schema):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={app_schema}"))
         metadata = MetaData(bind=conn)
@@ -15,8 +15,8 @@ def test_money_type_column_creation(engine_with_mathesar):
         test_table.create()
 
 
-def test_money_type_column_reflection(engine_with_mathesar):
-    engine, app_schema = engine_with_mathesar
+def test_money_type_column_reflection(engine_with_schema):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         test_table = Table(

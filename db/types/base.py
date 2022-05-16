@@ -50,14 +50,26 @@ class DatabaseType:
 
     @property
     def is_alias(self) -> bool:
+        """
+        Checks if this type is an alias for another type, the other type being the canonical
+        alias, and this type being a non-canonical alias.
+        """
         return self in _non_canonical_alias_db_types
 
     @property
     def is_sa_only(self) -> bool:
+        """
+        A column can be reflected to have an SQLAlchemy type that does not represent an actual
+        Postgres type.
+        """
         return self in _sa_only_db_types
 
     @property
     def is_optional(self) -> bool:
+        """
+        Some types are official, but optional in that they may or may not be installed on a given
+        Postgres database.
+        """
         return self in _optional_db_types
 
     @property
@@ -80,7 +92,7 @@ class DatabaseType:
 
     @property
     def is_application_supported(self) -> bool:
-        return not self.is_inconsistent and not _sa_only_db_types
+        return not self.is_inconsistent and not self.is_sa_only
 
     def __str__(self):
         return self.id
@@ -178,6 +190,8 @@ class MathesarCustomType(DatabaseType, Enum):
         return instance
 
 
+# TODO these will never be reflected. find a more comprehensive way to make sure that these types
+# never appear in any API responses.
 _non_canonical_alias_db_types = frozenset({
     PostgresType.FLOAT,
     PostgresType.TIME,

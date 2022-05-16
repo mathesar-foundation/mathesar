@@ -41,8 +41,7 @@ def create_data_types_table(data_types_csv_filepath, create_table):
 
 
 @pytest.fixture
-def table_for_reflection(engine_with_ischema_names_updated):
-    engine = engine_with_ischema_names_updated
+def table_for_reflection(engine):
     schema_name = 'a_new_schema'
     table_name = 'a_new_table'
     with engine.begin() as conn:

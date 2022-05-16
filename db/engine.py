@@ -21,6 +21,7 @@ def create_future_engine_with_custom_types(
     return engine
 
 
+# TODO would an engine without ischema names updated ever be used? make it private if not
 def create_future_engine(
         username, password, hostname, database, port, *args, **kwargs
 ):
@@ -31,6 +32,7 @@ def create_future_engine(
     return create_engine(conn_str, *args, **kwargs)
 
 
+# NOTE: used in testing, hence public
 def create_engine(conn_str, *args, **kwargs):
     """
     Wrapper over sqlalchemy.create_engine that stops SA from propagating changes to ischema_names

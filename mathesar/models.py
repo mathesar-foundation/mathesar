@@ -94,8 +94,13 @@ class Database(ReflectionManagerMixin, BaseModel):
         global _engines
         # We're caching this since the engine is used frequently.
         if self.name not in _engines:
-            _engines[self.name] = create_mathesar_engine(self.name)
-        return _engines[self.name]
+            engine = create_mathesar_engine(self.name)
+            _engines[self.name] = engine
+            return engine
+        else:
+            engine = _engines[self.name]
+            model_utils.ensure_cached_engine_ready(engine)
+            return engine
 
     @property
     def supported_ui_types(self):

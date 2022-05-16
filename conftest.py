@@ -4,86 +4,160 @@ intended to be the containment zone for anything specific about the testing
 environment (e.g., the login info for the Postgres instance for testing)
 """
 import pytest
-from sqlalchemy import text
+import logging
+import random
+import string
+
+from sqlalchemy.exc import OperationalError
+from sqlalchemy_utils import database_exists, create_database, drop_database
+
 from config.settings import DATABASES
+
 from db.engine import add_custom_types_to_ischema_names, create_engine
 from db.types import install
-from db.schemas.operations.create import create_schema
-from db.schemas.operations.drop import drop_schema
+from db.schemas.operations.drop import drop_schema as drop_sa_schema
+from db.schemas.operations.create import create_schema as create_sa_schema
+from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
 
 
 @pytest.fixture(scope="session")
-def test_db_name():
+def get_uid():
+    used_uids = set()
+    def _get_uid():
+        letters = string.ascii_letters
+        candidate = "".join(random.sample(letters, 4))
+        if candidate not in used_uids:
+            used_uids.add(candidate)
+            return candidate
+        else:
+            return _get_uid()
+    yield _get_uid
+
+
+@pytest.fixture
+def uid(get_uid):
+    return get_uid()
+
+
+def _create_db(get_uid):
+    logger = logging.getLogger("_create_db" + "-" + get_uid())
+    logger.debug("init")
+    created_dbs = set()
+    def __create_db(db_name):
+        logger.debug(f"creating db {db_name}")
+        engine = _create_engine(db_name)
+        if database_exists(engine.url):
+            logger.error(f"db {db_name} already exists!")
+            drop_database(engine.url)
+        create_database(engine.url)
+        created_dbs.add(db_name)
+        # Our default testing database has our types and functions preinstalled.
+        install.install_mathesar_on_database(engine)
+        return db_name
+    yield __create_db
+    logger.debug(f"about to clean up {created_dbs}")
+    for db_name in created_dbs:
+        logger.debug(f"cleaning up db {db_name}")
+        engine = _create_engine(db_name)
+        if database_exists(engine.url):
+            drop_database(engine.url)
+        else:
+            logger.error(f"db {db_name} already gone!")
+    logger.debug(f"exit")
+
+
+# This factory will clean up its created dbs after each test function that it's used in.
+# Useful when doing API stuff that would otherwise be bothersome to clean up.
+# TODO padaryti kad duombaze butu ideta ir isimta is settings.DATABASES
+# kaip tai daroma kituose fixtures?
+create_temp_db = pytest.fixture(_create_db, scope="function")
+
+
+# This factory will clean up its created dbs after the whole testing session is finished.
+create_session_db = pytest.fixture(_create_db, scope="session")
+
+
+@pytest.fixture(scope="session")
+def test_db_name(create_session_db):
     test_db_name = "mathesar_db_test"
-    superuser_engine = _get_superuser_engine()
-    with superuser_engine.connect() as conn:
-        conn.execution_options(isolation_level="AUTOCOMMIT")
-        conn.execute(text(f"DROP DATABASE IF EXISTS {test_db_name} WITH (FORCE)"))
-        conn.execute(text(f"CREATE DATABASE {test_db_name}"))
-    # Unclear if superuser_engine can't be used here.
+    yield create_session_db(test_db_name)
+
+
+# TODO does testing this make sense?
+@pytest.fixture(scope="session")
+def engine_without_ischema_names_updated(test_db_name):
+    """
+    For testing environments where an engine might not be fully setup.
+    """
     engine = _create_engine(test_db_name)
-    install.install_mathesar_on_database(engine)
-    yield test_db_name
-    install.uninstall_mathesar_from_database(engine)
-    with superuser_engine.connect() as conn:
-        conn.execution_options(isolation_level="AUTOCOMMIT")
-        conn.execute(text(f"DROP DATABASE {test_db_name} WITH (FORCE)"))
+    return engine
 
 
 @pytest.fixture(scope="session")
 def engine(test_db_name):
     engine = _create_engine(test_db_name)
-    return engine
-
-
-@pytest.fixture(scope="session")
-def engine_with_ischema_names_updated(test_db_name):
-    """
-    This fixture does not inherit from the fixture `engine`, because it mutates the engine, which
-    would otherwise taint tests depending on `engine`.
-    """
-    engine = _create_engine(test_db_name)
     add_custom_types_to_ischema_names(engine)
     return engine
 
 
-@pytest.fixture
-def test_schema_name():
-    return "test_schema"
-
-
-engine_with_schema_without_updated_ischema_names
-@pytest.fixture
-def engine_with_schema_without_updated_ischema_names(engine, test_schema_name):
-    schema = test_schema_name
-    _create_schema(engine, schema)
-    yield engine, schema
-    _drop_schema(engine, schema)
+@pytest.fixture(scope="session")
+def _test_schema_name():
+    return "_test_schema_name"
 
 
 @pytest.fixture
-def engine_with_schema_with_ischema_names_updated(engine_with_ischema_names_updated, test_schema_name):
-    engine = engine_with_ischema_names_updated
-    schema = test_schema_name
-    _create_schema(engine, schema)
-    yield engine, schema
-    _drop_schema(engine, schema)
+def engine_with_schema_without_updated_ischema_names(
+    engine_without_ischema_names_updated, _test_schema_name, create_db_schema
+):
+    engine = engine_without_ischema_names_updated
+    schema_name = _test_schema_name
+    create_db_schema(schema_name, engine)
+    yield engine, schema_name
 
 
 @pytest.fixture
-def engine_with_mathesar(engine_with_schema_with_ischema_names_updated):
-    engine, schema = engine_with_schema_with_ischema_names_updated
-    install.install_mathesar_on_database(engine)
-    yield engine, schema
-    install.uninstall_mathesar_from_database(engine)
+def engine_with_schema(engine, _test_schema_name, create_db_schema):
+    schema_name = _test_schema_name
+    create_db_schema(schema_name, engine)
+    yield engine, schema_name
 
 
-def _create_schema(engine, schema):
-    create_schema(schema, engine)
+@pytest.fixture
+def create_db_schema():
+    """
+    Creates a DB schema factory, making sure to track and clean up new instances
+    """
+    logger = logging.getLogger('create_db_schema')
+    logger.debug("init")
+    created_schemas = {}
+    def _create_schema(schema_name, engine, schema_mustnt_exist=True):
+        if schema_mustnt_exist:
+            assert schema_name not in created_schemas
+        create_sa_schema(schema_name, engine)
+        schema_oid = get_schema_oid_from_name(schema_name, engine)
+        engine_url = engine.url
+        created_schemas_in_this_engine = created_schemas.setdefault(engine_url, {})
+        created_schemas_in_this_engine[schema_name] = schema_oid
+        logger.debug(f"created schema '{schema_name}' in db '{engine_url}'")
+        return schema_name
+    yield _create_schema
 
-
-def _drop_schema(engine, schema):
-    drop_schema(schema, engine, cascade=True, if_exists=False)
+    logger.debug(f"cleaning up created schemas")
+    for engine_url, created_schemas_in_this_engine in created_schemas.items():
+        engine = create_engine(engine_url)
+        try:
+            for _, schema_oid in created_schemas_in_this_engine.items():
+                # Handle schemas being renamed during test
+                schema_name = get_schema_name_from_oid(schema_oid, engine)
+                if schema_name:
+                    drop_sa_schema(schema_name, engine, cascade=True, if_exists=True)
+                    logger.debug(f"dropped: schema '{schema_name}' from db '{engine_url}'")
+                else:
+                    logger.debug(f"already was dropped: schema '{schema_name}' from db '{engine_url}'")
+        except OperationalError:
+            logger.debug(f"already was dropped: db '{engine_url}'")
+            pass
+    logger.debug("exit")
 
 
 def _get_superuser_engine():

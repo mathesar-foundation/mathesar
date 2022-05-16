@@ -2,8 +2,8 @@ from sqlalchemy import text, MetaData, Table, Column, select
 from db.types.custom import multicurrency
 
 
-def test_multicurrency_type_column_creation(engine_with_mathesar):
-    engine, app_schema = engine_with_mathesar
+def test_multicurrency_type_column_creation(engine_with_schema):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={app_schema}"))
         metadata = MetaData(bind=conn)
@@ -15,8 +15,8 @@ def test_multicurrency_type_column_creation(engine_with_mathesar):
         test_table.create()
 
 
-def test_multicurrency_type_column_reflection(engine_with_mathesar):
-    engine, app_schema = engine_with_mathesar
+def test_multicurrency_type_column_reflection(engine_with_schema):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         test_table = Table(
@@ -34,8 +34,8 @@ def test_multicurrency_type_column_reflection(engine_with_mathesar):
     assert actual_cls == expect_cls
 
 
-def test_multicurrency_type_raw_selecting(engine_with_mathesar):
-    engine, _ = engine_with_mathesar
+def test_multicurrency_type_raw_selecting(engine_with_schema):
+    engine, _ = engine_with_schema
     multicurrency_str = '(1234.12,USD)'
     with engine.begin() as conn:
         res = conn.execute(
@@ -44,8 +44,8 @@ def test_multicurrency_type_raw_selecting(engine_with_mathesar):
         assert res.fetchone()[0] == multicurrency_str
 
 
-def test_multicurrency_type_insert_from_dict(engine_with_mathesar):
-    engine, app_schema = engine_with_mathesar
+def test_multicurrency_type_insert_from_dict(engine_with_schema):
+    engine, app_schema = engine_with_schema
     metadata = MetaData(bind=engine, schema=app_schema)
     test_table = Table(
         "test_table",
@@ -69,8 +69,8 @@ def test_multicurrency_type_insert_from_dict(engine_with_mathesar):
         assert actual_val == expect_val
 
 
-def test_multicurrency_type_select_to_dict(engine_with_mathesar):
-    engine, app_schema = engine_with_mathesar
+def test_multicurrency_type_select_to_dict(engine_with_schema):
+    engine, app_schema = engine_with_schema
     metadata = MetaData(bind=engine, schema=app_schema)
     test_table = Table(
         "test_table",

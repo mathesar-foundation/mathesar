@@ -8,24 +8,24 @@ from db.functions.base import ColumnName, Literal, sa_call_sql_function
 from db.functions.operations.apply import apply_db_function_as_filter
 
 
-def test_domain_func_wrapper(engine_with_mathesar):
-    engine, _ = engine_with_mathesar
+def test_domain_func_wrapper(engine_with_schema):
+    engine, _ = engine_with_schema
     sel = select(sa_call_sql_function(email.EMAIL_DOMAIN_NAME, text("'test@example.com'")))
     with engine.begin() as conn:
         res = conn.execute(sel)
         assert res.fetchone()[0] == "example.com"
 
 
-def test_local_part_func_wrapper(engine_with_mathesar):
-    engine, _ = engine_with_mathesar
+def test_local_part_func_wrapper(engine_with_schema):
+    engine, _ = engine_with_schema
     sel = select(sa_call_sql_function(email.EMAIL_LOCAL_PART, text("'test@example.com'")))
     with engine.begin() as conn:
         res = conn.execute(sel)
         assert res.fetchone()[0] == "test"
 
 
-def test_email_type_column_creation(engine_with_mathesar):
-    engine, app_schema = engine_with_mathesar
+def test_email_type_column_creation(engine_with_schema):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={app_schema}"))
         metadata = MetaData(bind=conn)
@@ -37,8 +37,8 @@ def test_email_type_column_creation(engine_with_mathesar):
         test_table.create()
 
 
-def test_email_type_column_reflection(engine_with_mathesar):
-    engine, app_schema = engine_with_mathesar
+def test_email_type_column_reflection(engine_with_schema):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         test_table = Table(
@@ -55,8 +55,8 @@ def test_email_type_column_reflection(engine_with_mathesar):
     assert actual_cls == expect_cls
 
 
-def test_create_email_type_domain_passes_correct_emails(engine_with_mathesar):
-    engine, _ = engine_with_mathesar
+def test_create_email_type_domain_passes_correct_emails(engine_with_schema):
+    engine, _ = engine_with_schema
     email_addresses_correct = ["alice@example.com", "alice@example"]
     for address in email_addresses_correct:
         with engine.begin() as conn:
@@ -66,8 +66,8 @@ def test_create_email_type_domain_passes_correct_emails(engine_with_mathesar):
             assert res.fetchone()[0] == address
 
 
-def test_create_email_type_domain_accepts_uppercase(engine_with_mathesar):
-    engine, _ = engine_with_mathesar
+def test_create_email_type_domain_accepts_uppercase(engine_with_schema):
+    engine, _ = engine_with_schema
     email_addresses_correct = ["alice@example.com", "alice@example"]
     for address in email_addresses_correct:
         with engine.begin() as conn:
@@ -77,8 +77,8 @@ def test_create_email_type_domain_accepts_uppercase(engine_with_mathesar):
             assert res.fetchone()[0] == address
 
 
-def test_create_email_type_domain_checks_broken_emails(engine_with_mathesar):
-    engine, _ = engine_with_mathesar
+def test_create_email_type_domain_checks_broken_emails(engine_with_schema):
+    engine, _ = engine_with_schema
     address_incorrect = "aliceexample.com"
     with pytest.raises(IntegrityError) as e:
         with engine.begin() as conn:

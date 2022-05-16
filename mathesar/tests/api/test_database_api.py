@@ -1,4 +1,5 @@
 import pytest
+import logging
 from django.conf import settings
 from django.core.cache import cache
 
@@ -6,28 +7,22 @@ from mathesar.reflection import reflect_db_objects
 from mathesar.models import Table, Schema, Database
 
 
-TEST_DB = "test_database_api_db"
-
-
-@pytest.fixture
-def database_api_db(test_db_name):
-    settings.DATABASES[TEST_DB] = settings.DATABASES[test_db_name]
-    yield TEST_DB
-    if TEST_DB in settings.DATABASES:
-        del settings.DATABASES[TEST_DB]
-
-
-@pytest.fixture
-def create_database(test_db_name, request):
-    def _create_database(db_name):
-        settings.DATABASES[db_name] = settings.DATABASES[test_db_name]
-        request.addfinalizer(lambda: (settings.DATABASES.pop(db_name, None)))
-    return _create_database
-
-
 @pytest.fixture(autouse=True)
-def clear_cache():
-    cache.clear()
+def delete_all_models():
+    yield
+    logger = logging.getLogger('delete_all_models')
+    models = {Table, Schema, Database}
+    for model in models:
+        count = model.current_objects.count()
+        logger.debug(f'deleting {count} instances of {model}')
+        model.current_objects.all().delete()
+
+
+@pytest.fixture
+def database_api_db(create_temp_dj_db, uid):
+    db_name = "test_database_api_db" + uid
+    create_temp_dj_db(db_name)
+    return db_name
 
 
 def test_database_reflection_new(database_api_db):
@@ -132,8 +127,8 @@ def test_database_list_filter_deleted(client, deleted, test_db_name, database_ap
     response_data = response.json()
 
     expected_databases = {
-        False: Database.objects.get(name=test_db_name),
-        True: Database.objects.get(name=database_api_db),
+        False: Database.current_objects.get(name=test_db_name),
+        True: Database.current_objects.get(name=database_api_db),
     }
 
     assert response.status_code == 200
@@ -145,31 +140,33 @@ def test_database_list_filter_deleted(client, deleted, test_db_name, database_ap
     check_database(expected_database, response_database)
 
 
-def test_database_list_ordered_by_id(client, test_db_name, database_api_db, create_database):
+def test_database_list_ordered_by_id(client, test_db_name, database_api_db, create_temp_dj_db):
     reflect_db_objects()
     test_db_name_1 = "mathesar_db_test_1"
-    create_database(test_db_name_1)
+    create_temp_dj_db(test_db_name_1)
     cache.clear()
     expected_databases = [
         Database.objects.get(name=test_db_name),
         Database.objects.get(name=database_api_db),
         Database.objects.get(name=test_db_name_1),
     ]
+    expected_databases = sorted(expected_databases, key=lambda db: db.id)
     sort_field = "id"
     response = client.get(f'/api/db/v0/databases/?sort_by={sort_field}')
     response_data = response.json()
     response_databases = response_data['results']
+    response_databases = sorted(response_databases, key=lambda db: db['id'])
     comparison_tuples = zip(expected_databases, response_databases)
     for comparison_tuple in comparison_tuples:
         check_database(comparison_tuple[0], comparison_tuple[1])
 
 
-def test_database_list_ordered_by_name(client, test_db_name, database_api_db, create_database):
+def test_database_list_ordered_by_name(client, test_db_name, database_api_db, create_temp_dj_db):
     reflect_db_objects()
     test_db_name_1 = "mathesar_db_test_1"
     test_db_name_2 = "mathesar_db_test_2"
-    create_database(test_db_name_1)
-    create_database(test_db_name_2)
+    create_temp_dj_db(test_db_name_1)
+    create_temp_dj_db(test_db_name_2)
 
     cache.clear()
     expected_databases = [

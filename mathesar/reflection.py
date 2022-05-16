@@ -22,36 +22,50 @@ DB_REFLECTION_INTERVAL = 60 * 5  # we reflect DB changes every 5 minutes
 
 
 def reflect_databases():
-    databases = set(settings.DATABASES)
+    dbs_in_settings = set(settings.DATABASES)
     # We only want to track non-django dbs
-    databases.remove('default')
+    dbs_in_settings.remove('default')
 
-    # Update deleted databases
+    # Ignore dbs that are models; update deleted databases
     for database in models.Database.current_objects.all():
-        if database.name in databases:
-            databases.remove(database.name)
+        if database.name in dbs_in_settings:
+            dbs_in_settings.remove(database.name)
         else:
             database.deleted = True
             models.Schema.current_objects.filter(database=database).delete()
             database.save()
 
     # Create databases that aren't models yet
-    for database in databases:
-        models.Database.current_objects.create(name=database)
+    for db_name in dbs_in_settings:
+        models.Database.current_objects.create(name=db_name)
 
 
-def reflect_schemas_from_database(database):
-    engine = create_mathesar_engine(database)
+import logging
+def reflect_schemas_from_database(database_name):
+    logger = logging.getLogger("reflect_schemas_from_database")
+    logger.debug("enter")
+    logger.debug(f"database_name {database_name}")
+    logger.debug(f"schemas before {[(x.name, x.database.name) for x in models.Schema.current_objects.all()]}")
+    engine = create_mathesar_engine(database_name)
     db_schema_oids = {
         schema['oid'] for schema in get_mathesar_schemas_with_oids(engine)
     }
+    logger.debug(f"db_schema_oids {db_schema_oids}")
 
-    database = models.Database.current_objects.get(name=database)
+    database = models.Database.current_objects.get(name=database_name)
+    logger.debug(f"database {database.name}")
     for oid in db_schema_oids:
-        models.Schema.current_objects.get_or_create(oid=oid, database=database)
+        logger.debug(f"oid of schema to be gotten or created {oid}")
+        schema, boolean = models.Schema.current_objects.get_or_create(oid=oid, database=database)
+        logger.debug(f"gotten or created schema.name {schema.name}")
+        logger.debug(f"gotten or created schema.database.name {schema.database.name}")
+        logger.debug(f"gotten or created boolean {boolean}")
+    logger.debug(f"schemas during {[(x.name, x.database.name) for x in models.Schema.current_objects.all()]}")
     for schema in models.Schema.current_objects.all():
         if schema.database.name == database and schema.oid not in db_schema_oids:
             schema.delete()
+    logger.debug(f"schemas after {[(x.name, x.database.name) for x in models.Schema.current_objects.all()]}")
+    logger.debug("exit")
 
 
 def reflect_tables_from_schema(schema):

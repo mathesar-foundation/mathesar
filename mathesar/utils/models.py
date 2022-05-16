@@ -1,10 +1,14 @@
 import os
 
+from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
+
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 
 from db.tables.operations.alter import alter_table, SUPPORTED_TABLE_ALTER_ARGS
 from db.schemas.operations.alter import alter_schema, SUPPORTED_SCHEMA_ALTER_ARGS
+
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from mathesar.reflection import reflect_columns_from_table
@@ -45,3 +49,25 @@ def update_sa_schema(schema, validated_data):
     if errors:
         raise ValidationError(errors)
     alter_schema(schema.name, schema._sa_engine, validated_data)
+
+
+def ensure_cached_engine_ready(engine):
+    """
+    We must make sure that a cached engine is usable. An engine might become unusable if its
+    Postgres database is dropped and then recreated. This handles that case, by making a dumb
+    query, which if it fails, will cause the engine to reestablish a usable connection and the
+    subsequent queries will work as expected.
+
+    A problem with this is that we have to do this whenever an engine is retrieved from our engine
+    cache, which degrades the performance benefits of an engine cache. It might be worth eventually
+    benchmarking whether this is indeed better than not caching engines at all.
+    """
+    try:
+        attempt_dumb_query(engine)
+    except OperationalError:
+        pass
+
+
+def attempt_dumb_query(engine):
+    with engine.connect() as con:
+        con.execute(text('select 1 as is_alive'))

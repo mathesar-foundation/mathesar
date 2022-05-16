@@ -1,6 +1,5 @@
 import pytest
 from sqlalchemy import text
-from sqlalchemy.schema import DropSchema
 from config.settings import DATABASES
 from django.core.cache import cache
 from django.conf import settings
@@ -9,8 +8,6 @@ from django.core.exceptions import ValidationError
 
 from mathesar.models import Table, Schema, Database
 from mathesar.reflection import reflect_db_objects
-from db.schemas.operations.create import create_schema
-from db.tables.operations.create import create_mathesar_table
 
 from db.engine import create_engine
 
@@ -69,6 +66,7 @@ def multi_db_test_db(multi_db_test_db_connection_string):
     del settings.DATABASES[MULTI_DB_TEST_DB]
 
 
+# TODO replace with proper fixtures; currently this is largely a copy-paste of code in conftest.py
 @pytest.fixture(scope="module", autouse=True)
 def multi_db_engine(multi_db_test_db_connection_string):
     return create_engine(
@@ -77,11 +75,11 @@ def multi_db_engine(multi_db_test_db_connection_string):
     )
 
 
-def test_multi_db_schema(engine, multi_db_engine, client):
+def test_multi_db_schema(engine, multi_db_engine, client, create_db_schema):
     test_schemas = ["test_schema_1", "test_schema_2"]
-    for schema in test_schemas:
-        create_schema(schema, engine)
-        create_schema("multi_db_" + schema, multi_db_engine)
+    for schema_name in test_schemas:
+        create_db_schema(schema_name, engine)
+        create_db_schema("multi_db_" + schema_name, multi_db_engine)
 
     cache.clear()
     response = client.get('/api/db/v0/schemas/')
@@ -96,13 +94,8 @@ def test_multi_db_schema(engine, multi_db_engine, client):
     expected_schemas = test_schemas + ["multi_db_" + s for s in test_schemas]
     assert set(response_schemas) == set(expected_schemas)
 
-    # We have to delete the schemas to not break later tests
-    with engine.begin() as conn:
-        for schema in test_schemas:
-            conn.execute(DropSchema(schema))
 
-
-def test_multi_db_tables(engine, multi_db_engine, client):
+def test_multi_db_tables(engine, multi_db_engine, client, create_mathesar_table):
     schema_name = "test_multi_db_tables_schema"
     test_tables = ["test_table_1", "test_table_2"]
     for table_name in test_tables:
@@ -113,6 +106,7 @@ def test_multi_db_tables(engine, multi_db_engine, client):
 
     cache.clear()
     response = client.get('/api/db/v0/tables/')
+
     assert response.status_code == 200
 
     response_tables = [s['name'] for s in response.json()['results']]
@@ -120,13 +114,11 @@ def test_multi_db_tables(engine, multi_db_engine, client):
     for table_name in expected_tables:
         assert table_name in response_tables
 
-    # We have to delete the schema to not break later tests
-    with engine.begin() as conn:
-        conn.execute(DropSchema(schema_name, cascade=True))
-
 
 def test_multi_db_oid_unique(multi_db_engine):
-    # Ensure the same OID is allowed for different dbs
+    """
+    Ensure the same OID is allowed for different dbs
+    """
     reflect_db_objects()
     schema_oid = 5000
     table_oid = 5001

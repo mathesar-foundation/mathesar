@@ -1,8 +1,8 @@
 from mathesar.filters.base import get_available_filters
 
 
-def test_available_filters_structure(engine_with_mathesar):
-    engine, _ = engine_with_mathesar
+def test_available_filters_structure(engine_with_schema):
+    engine, _ = engine_with_schema
     available_filters = get_available_filters(engine)
     assert len(available_filters) > 0
     available_filter_ids = tuple(filter['id'] for filter in available_filters)

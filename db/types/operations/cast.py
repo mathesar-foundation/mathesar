@@ -80,7 +80,7 @@ def create_email_casts(engine):
 
 
 def create_integer_casts(engine):
-    integer_types = [PostgresType.BIGINT, PostgresType.INTEGER, PostgresType.SMALLINT]
+    integer_types = categories.INTEGER_TYPES
     for db_type in integer_types:
         type_body_map = _get_integer_type_body_map(target_type=db_type)
         create_cast_functions(db_type, type_body_map, engine)
@@ -236,7 +236,7 @@ def get_cast_function_name(target_type: DatabaseType) -> str:
     function_type_name = '_'.join(bare_type_name.split())
     bare_function_name = f"cast_to_{function_type_name}"
     escaped_bare_function_name = _escape_illegal_characters(bare_function_name)
-    qualified_escaped_bare_function_name = f"{get_qualified_name(escaped_bare_function_name)}"
+    qualified_escaped_bare_function_name = get_qualified_name(escaped_bare_function_name)
     return qualified_escaped_bare_function_name
 
 

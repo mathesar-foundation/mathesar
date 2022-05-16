@@ -2,12 +2,11 @@ from django.core.cache import cache
 from sqlalchemy import text
 from unittest.mock import patch
 
-from db.schemas.utils import get_mathesar_schemas
+from db.schemas.utils import get_mathesar_schemas, get_schema_oid_from_name
 from mathesar import models
 from mathesar import reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
 from mathesar.database.base import create_mathesar_engine
-from mathesar.utils.schemas import create_schema_and_object
 
 
 def check_schema_response(response_schema, schema, schema_name, test_db_name, check_schema_objects=True):
@@ -28,8 +27,9 @@ def test_schema_list(client, patent_schema):
 
     response_data = response.json()
 
-    assert response_data['count'] == 3
-    assert len(response_data['results']) == 3
+    assert response_data['count'] == 2
+    results = response_data['results']
+    assert len(results) == 2
 
     response_schema = None
     for some_schema in response_data['results']:
@@ -44,27 +44,29 @@ def test_schema_list(client, patent_schema):
     )
 
 
-def test_schema_list_filter(client, monkeypatch):
+def test_schema_list_filter(client, create_db_schema, create_temp_dj_db):
     schema_params = [("schema_1", "database_1"), ("schema_2", "database_2"),
                      ("schema_3", "database_3"), ("schema_1", "database_3")]
-    dbs = {
-        "database_1": models.Database.objects.create(name="database_1"),
-        "database_2": models.Database.objects.create(name="database_2"),
-        "database_3": models.Database.objects.create(name="database_3"),
-    }
 
-    def mock_get_name_from_oid(oid, engine):
-        return schema_params[oid][0]
+    dbs_to_create = set(param[1] for param in schema_params)
 
-    monkeypatch.setattr(models.schema_utils, "get_schema_name_from_oid", mock_get_name_from_oid)
-    monkeypatch.setattr(models, "create_mathesar_engine", lambda x: x)
-    monkeypatch.setattr(reflection, "reflect_db_objects", lambda: None)
+    for db_name in dbs_to_create:
+        create_temp_dj_db(db_name)
+
+    for schema_name, db_name in schema_params:
+        engine = create_mathesar_engine(db_name)
+        create_db_schema(schema_name, engine)
+
+    cache.clear()
 
     schemas = {
-        (schema_params[i][0], schema_params[i][1]): models.Schema.objects.create(
-            oid=i, database=dbs[schema_params[i][1]]
+        schema_param: models.Schema.objects.get(
+            oid=get_schema_oid_from_name(
+                schema_param[0],
+                create_mathesar_engine(schema_param[1])
+            ),
         )
-        for i in range(len(schema_params))
+        for schema_param in schema_params
     }
 
     names = ["schema_1", "schema_3"]
@@ -81,12 +83,15 @@ def test_schema_list_filter(client, monkeypatch):
     assert response_data['count'] == 2
     assert len(response_data['results']) == 2
 
-    response_schemas = {(schema["name"], schema["database"]): schema
-                        for schema in response_schemas}
+    response_schemas = {
+        (schema["name"], schema["database"]): schema
+        for schema in response_schemas
+    }
+
     for name in names:
         for database in databases:
             query_tuple = (name, database)
-            if query_tuple not in schemas:
+            if query_tuple not in schema_params:
                 continue
             schema = schemas[query_tuple]
             response_schema = response_schemas[query_tuple]
@@ -101,11 +106,11 @@ def test_schema_detail(create_patents_table, client, test_db_name):
     """
     table = create_patents_table('NASA Schema Detail')
 
-    schema = models.Schema.objects.get()
-    response = client.get(f'/api/db/v0/schemas/{schema.id}/')
+    cache.clear()
+    response = client.get(f'/api/db/v0/schemas/{table.schema.id}/')
     response_schema = response.json()
     assert response.status_code == 200
-    check_schema_response(response_schema, schema, table.schema.name, test_db_name)
+    check_schema_response(response_schema, table.schema, table.schema.name, test_db_name)
 
 
 def test_schema_sort_by_name(create_schema, client):
@@ -190,24 +195,29 @@ def test_schema_sort_by_id(create_schema, client):
                               comparison_tuple[1].database.name)
 
 
-def test_schema_create(client, test_db_name):
-    num_schemas = models.Schema.objects.count()
+def test_schema_create(client, create_temp_dj_db):
+    db_name = "some_db1"
+    create_temp_dj_db(db_name)
 
+    schema_count_before = models.Schema.objects.count()
+
+    schema_name = 'Test Schema'
     data = {
-        'name': 'Test Schema',
-        'database': test_db_name
+        'name': schema_name,
+        'database': db_name
     }
     response = client.post('/api/db/v0/schemas/', data=data)
     response_schema = response.json()
-    schema = models.Schema.objects.get(id=response_schema['id'])
 
     assert response.status_code == 201
-    assert models.Schema.objects.count() == num_schemas + 1
-    check_schema_response(response_schema, schema, 'Test Schema', test_db_name, 0)
+    schema_count_after = models.Schema.objects.count()
+    assert schema_count_after == schema_count_before + 1
+    schema = models.Schema.objects.get(id=response_schema['id'])
+    check_schema_response(response_schema, schema, schema_name, db_name, 0)
 
 
-def test_schema_update(client, test_db_name):
-    schema = create_schema_and_object('foo', test_db_name)
+def test_schema_update(client, create_schema):
+    schema = create_schema('foo')
     data = {
         'name': 'blah'
     }
@@ -323,11 +333,9 @@ def test_schema_get_with_reflect_new(client, test_db_name):
         conn.execute(text(f'DROP SCHEMA {schema_name} CASCADE;'))
 
 
-def test_schema_get_with_reflect_change(client, test_db_name):
-    engine = create_mathesar_engine(test_db_name)
+def test_schema_get_with_reflect_change(client, engine, create_db_schema):
     schema_name = 'a_new_schema'
-    with engine.begin() as conn:
-        conn.execute(text(f'CREATE SCHEMA {schema_name};'))
+    create_db_schema(schema_name, engine)
 
     cache.clear()
     response = client.get('/api/db/v0/schemas/')
@@ -355,10 +363,14 @@ def test_schema_get_with_reflect_change(client, test_db_name):
     assert orig_id == modified_id
 
 
-def test_schema_create_duplicate(client, test_db_name):
+def test_schema_create_duplicate(client, create_temp_dj_db):
+    db_name = "tmp_db1"
+    create_temp_dj_db(db_name)
+    cache.clear()
+
     data = {
         'name': 'Test Duplication Schema',
-        'database': test_db_name
+        'database': db_name
     }
     response = client.post('/api/db/v0/schemas/', data=data)
     assert response.status_code == 201
@@ -366,11 +378,9 @@ def test_schema_create_duplicate(client, test_db_name):
     assert response.status_code == 400
 
 
-def test_schema_get_with_reflect_delete(client, test_db_name):
-    engine = create_mathesar_engine(test_db_name)
+def test_schema_get_with_reflect_delete(client, engine, create_db_schema):
     schema_name = 'a_new_schema'
-    with engine.begin() as conn:
-        conn.execute(text(f'CREATE SCHEMA {schema_name};'))
+    create_db_schema(schema_name, engine)
 
     cache.clear()
     response = client.get('/api/db/v0/schemas/')

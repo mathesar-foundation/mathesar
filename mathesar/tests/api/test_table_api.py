@@ -355,7 +355,7 @@ def test_table_detail(create_patents_table, client):
     check_table_response(response_table, table, table_name)
 
 
-def test_table_type_suggestion(client, schema, engine_with_mathesar):
+def test_table_type_suggestion(client, schema, engine_with_schema):
     table_name = 'Type Inference Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -394,7 +394,7 @@ def _check_columns(actual_column_list, expected_column_list):
     assert actual_column_list == expected_column_list
 
 
-def test_table_previews(client, schema, engine_with_mathesar):
+def test_table_previews(client, schema, engine_with_schema):
     table_name = 'Type Modification Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -436,7 +436,7 @@ def test_table_previews(client, schema, engine_with_mathesar):
     _check_columns(actual_dict['columns'], expect_dict['columns'])
 
 
-def test_table_previews_wrong_column_number(client, schema, engine_with_mathesar):
+def test_table_previews_wrong_column_number(client, schema, engine_with_schema):
     table_name = 'Wrong Column Number Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -466,7 +466,7 @@ def test_table_previews_wrong_column_number(client, schema, engine_with_mathesar
     assert ErrorCodes.ColumnSizeMismatch.value == response.json()[0]['code']
 
 
-def test_table_previews_invalid_type_cast(client, schema, engine_with_mathesar):
+def test_table_previews_invalid_type_cast(client, schema, engine_with_schema):
     table_name = 'Wrong Type Preview Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -497,7 +497,7 @@ def test_table_previews_invalid_type_cast(client, schema, engine_with_mathesar):
     assert 'columns' in response.json()[0]['field']
 
 
-def test_table_previews_invalid_type_cast_check(client, schema, engine_with_mathesar):
+def test_table_previews_invalid_type_cast_check(client, schema, engine_with_schema):
     table_name = 'Type Check Preview Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -527,7 +527,7 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_with_math
     assert 'Invalid type' in response.json()[0]['message']
 
 
-def test_table_previews_unsupported_type(client, schema, engine_with_mathesar):
+def test_table_previews_unsupported_type(client, schema, engine_with_schema):
     table_name = 'Unsupported Type Preview Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -558,7 +558,7 @@ def test_table_previews_unsupported_type(client, schema, engine_with_mathesar):
     assert 'columns' in response.json()[0]['field']
 
 
-def test_table_previews_missing_columns(client, schema, engine_with_mathesar):
+def test_table_previews_missing_columns(client, schema, engine_with_schema):
     table_name = 'Missing Columns Preview Table'
     file = 'mathesar/tests/data/type_inference.csv'
     with open(file, 'rb') as csv_file:
@@ -1049,7 +1049,7 @@ def test_table_patch_columns_and_table_name(create_patents_table, client):
     assert response_error['message'] == 'Only name or columns can be passed in, not both.'
 
 
-def test_table_patch_columns_no_changes(create_patents_table, client, engine_with_mathesar):
+def test_table_patch_columns_no_changes(create_patents_table, client, engine_with_schema):
     table_name = 'PATCH columns 2'
     table = create_patents_table(table_name)
     column_data = _get_patents_column_data()
@@ -1064,7 +1064,7 @@ def test_table_patch_columns_no_changes(create_patents_table, client, engine_wit
     _check_columns(response_json['columns'], column_data)
 
 
-def test_table_patch_columns_one_name_change(create_patents_table, client, engine_with_mathesar):
+def test_table_patch_columns_one_name_change(create_patents_table, client, engine_with_schema):
     table_name = 'PATCH columns 3'
     table = create_patents_table(table_name)
     column_data = _get_patents_column_data()
@@ -1080,7 +1080,7 @@ def test_table_patch_columns_one_name_change(create_patents_table, client, engin
     _check_columns(response_json['columns'], column_data)
 
 
-def test_table_patch_columns_two_name_changes(create_patents_table, client, engine_with_mathesar):
+def test_table_patch_columns_two_name_changes(create_patents_table, client, engine_with_schema):
     table_name = 'PATCH columns 4'
     table = create_patents_table(table_name)
     column_data = _get_patents_column_data()
@@ -1097,7 +1097,7 @@ def test_table_patch_columns_two_name_changes(create_patents_table, client, engi
     _check_columns(response_json['columns'], column_data)
 
 
-def test_table_patch_columns_one_type_change(create_patents_table, client, engine_with_mathesar):
+def test_table_patch_columns_one_type_change(create_patents_table, client, engine_with_schema):
     table_name = 'PATCH columns 5'
     table = create_patents_table(table_name)
     column_data = _get_patents_column_data()
@@ -1132,7 +1132,7 @@ def _get_data_types_column_data():
     }]
 
 
-def test_table_patch_columns_multiple_type_change(create_data_types_table, client, engine_with_mathesar):
+def test_table_patch_columns_multiple_type_change(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 6'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1155,7 +1155,7 @@ def _check_columns_with_dropped(response_column_data, request_column_data, dropp
     _check_columns(response_column_data, expected_column_data)
 
 
-def test_table_patch_columns_one_drop(create_data_types_table, client, engine_with_mathesar):
+def test_table_patch_columns_one_drop(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 7'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1171,7 +1171,7 @@ def test_table_patch_columns_one_drop(create_data_types_table, client, engine_wi
     _check_columns_with_dropped(response_json['columns'], column_data, [1])
 
 
-def test_table_patch_columns_multiple_drop(create_data_types_table, client, engine_with_mathesar):
+def test_table_patch_columns_multiple_drop(create_data_types_table, client, engine_with_schema):
     INDICES_TO_DROP = [1, 2]
     table_name = 'PATCH columns 8'
     table = create_data_types_table(table_name)
@@ -1189,7 +1189,7 @@ def test_table_patch_columns_multiple_drop(create_data_types_table, client, engi
     _check_columns_with_dropped(response_json['columns'], column_data, INDICES_TO_DROP)
 
 
-def test_table_patch_columns_diff_name_type_change(create_data_types_table, client, engine_with_mathesar):
+def test_table_patch_columns_diff_name_type_change(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 9'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1206,7 +1206,7 @@ def test_table_patch_columns_diff_name_type_change(create_data_types_table, clie
     _check_columns(response_json['columns'], column_data)
 
 
-def test_table_patch_columns_same_name_type_change(create_data_types_table, client, engine_with_mathesar):
+def test_table_patch_columns_same_name_type_change(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 10'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1223,7 +1223,7 @@ def test_table_patch_columns_same_name_type_change(create_data_types_table, clie
     _check_columns(response_json['columns'], column_data)
 
 
-def test_table_patch_columns_multiple_name_type_change(create_data_types_table, client, engine_with_mathesar):
+def test_table_patch_columns_multiple_name_type_change(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 11'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1242,7 +1242,7 @@ def test_table_patch_columns_multiple_name_type_change(create_data_types_table, 
     _check_columns(response_json['columns'], column_data)
 
 
-def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client, engine_with_mathesar):
+def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 12'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1260,7 +1260,7 @@ def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client
     _check_columns_with_dropped(response_json['columns'], column_data, [3])
 
 
-def test_table_patch_columns_same_name_type_drop(create_data_types_table, client, engine_with_mathesar):
+def test_table_patch_columns_same_name_type_drop(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 13'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1279,7 +1279,7 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
     _check_columns_with_dropped(response_json['columns'], column_data, [1, 3])
 
 
-def test_table_patch_columns_invalid_type(create_data_types_table, client, engine_with_mathesar):
+def test_table_patch_columns_invalid_type(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 14'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1295,7 +1295,7 @@ def test_table_patch_columns_invalid_type(create_data_types_table, client, engin
     assert 'Pizza is not a boolean' in response_json[0]['message']
 
 
-def test_table_patch_columns_invalid_type_with_name(create_data_types_table, client, engine_with_mathesar):
+def test_table_patch_columns_invalid_type_with_name(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 15'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1316,7 +1316,7 @@ def test_table_patch_columns_invalid_type_with_name(create_data_types_table, cli
     _check_columns(current_table_response.json()['columns'], original_column_data)
 
 
-def test_table_patch_columns_invalid_type_with_type(create_data_types_table, client, engine_with_mathesar):
+def test_table_patch_columns_invalid_type_with_type(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 16'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1337,7 +1337,7 @@ def test_table_patch_columns_invalid_type_with_type(create_data_types_table, cli
     _check_columns(current_table_response.json()['columns'], original_column_data)
 
 
-def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, client, engine_with_mathesar):
+def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 17'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()
@@ -1358,7 +1358,7 @@ def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, cli
     _check_columns(current_table_response.json()['columns'], original_column_data)
 
 
-def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_types_table, client, engine_with_mathesar):
+def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 18'
     table = create_data_types_table(table_name)
     column_data = _get_data_types_column_data()

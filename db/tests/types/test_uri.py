@@ -128,8 +128,8 @@ FUNC_WRAPPERS = [
 
 @pytest.mark.parametrize("test_uri,part_dict", RFC_3986_EXAMPLES)
 @pytest.mark.parametrize("part,uri_function", FUNC_WRAPPERS)
-def test_uri_func_wrapper(engine_with_mathesar, test_uri, part_dict, part, uri_function):
-    engine, _ = engine_with_mathesar
+def test_uri_func_wrapper(engine_with_schema, test_uri, part_dict, part, uri_function):
+    engine, _ = engine_with_schema
     uri_function_name = uri_function.value
     sel = select(sa_call_sql_function(uri_function_name, text(f"'{test_uri}'")))
     with engine.begin() as conn:
@@ -137,8 +137,8 @@ def test_uri_func_wrapper(engine_with_mathesar, test_uri, part_dict, part, uri_f
     assert result == part_dict[part]
 
 
-def test_uri_type_column_creation(engine_with_mathesar):
-    engine, app_schema = engine_with_mathesar
+def test_uri_type_column_creation(engine_with_schema):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={app_schema}"))
         metadata = MetaData(bind=conn)
@@ -154,8 +154,8 @@ test_data = ('https://centerofci.org', None)
 
 
 @pytest.mark.parametrize("data", test_data)
-def test_uri_type_set_data(engine_with_mathesar, data):
-    engine, app_schema = engine_with_mathesar
+def test_uri_type_set_data(engine_with_schema, data):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={app_schema}"))
         metadata = MetaData(bind=conn)
@@ -168,8 +168,8 @@ def test_uri_type_set_data(engine_with_mathesar, data):
         conn.execute(test_table.insert(values=(data,)))
 
 
-def test_uri_type_column_reflection(engine_with_mathesar):
-    engine, app_schema = engine_with_mathesar
+def test_uri_type_column_reflection(engine_with_schema):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         test_table = Table(
@@ -188,15 +188,15 @@ def test_uri_type_column_reflection(engine_with_mathesar):
 
 
 @pytest.mark.parametrize("test_uri", [tup[0] for tup in RFC_3986_EXAMPLES])
-def test_uri_type_domain_passes_correct_uris(engine_with_mathesar, test_uri):
-    engine, _ = engine_with_mathesar
+def test_uri_type_domain_passes_correct_uris(engine_with_schema, test_uri):
+    engine, _ = engine_with_schema
     with engine.begin() as conn:
         res = conn.execute(text(f"SELECT '{test_uri}'::{uri.DB_TYPE};"))
     assert res.fetchone()[0] == test_uri
 
 
-def test_uri_type_domain_accepts_uppercase(engine_with_mathesar):
-    engine, _ = engine_with_mathesar
+def test_uri_type_domain_accepts_uppercase(engine_with_schema):
+    engine, _ = engine_with_schema
     test_uri = "https://centerofci.org"
     with engine.begin() as conn:
         res = conn.execute(text(f"SELECT '{test_uri}'::{uri.DB_TYPE.upper()};"))
@@ -211,8 +211,8 @@ bad_uris = [
 
 
 @pytest.mark.parametrize("test_str", bad_uris)
-def test_uri_type_domain_rejects_malformed_uris(engine_with_mathesar, test_str):
-    engine, _ = engine_with_mathesar
+def test_uri_type_domain_rejects_malformed_uris(engine_with_schema, test_str):
+    engine, _ = engine_with_schema
     with pytest.raises(IntegrityError) as e:
         with engine.begin() as conn:
             conn.execute(text(f"SELECT '{test_str}'::{uri.DB_TYPE}"))

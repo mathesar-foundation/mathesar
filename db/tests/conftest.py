@@ -17,8 +17,8 @@ MAGNITUDE_SQL = os.path.join(RESOURCES, "magnitude_testing_create.sql")
 
 
 @pytest.fixture
-def engine_with_roster(engine_with_mathesar):
-    engine, schema = engine_with_mathesar
+def engine_with_roster(engine_with_schema):
+    engine, schema = engine_with_schema
     with engine.begin() as conn, open(ROSTER_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
@@ -26,8 +26,8 @@ def engine_with_roster(engine_with_mathesar):
 
 
 @pytest.fixture
-def engine_with_uris(engine_with_mathesar):
-    engine, schema = engine_with_mathesar
+def engine_with_uris(engine_with_schema):
+    engine, schema = engine_with_schema
     with engine.begin() as conn, open(URIS_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
@@ -35,8 +35,8 @@ def engine_with_uris(engine_with_mathesar):
 
 
 @pytest.fixture
-def engine_with_times(engine_with_mathesar):
-    engine, schema = engine_with_mathesar
+def engine_with_times(engine_with_schema):
+    engine, schema = engine_with_schema
     with engine.begin() as conn, open(TIMES_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
@@ -44,8 +44,8 @@ def engine_with_times(engine_with_mathesar):
 
 
 @pytest.fixture
-def engine_with_booleans(engine_with_mathesar):
-    engine, schema = engine_with_mathesar
+def engine_with_booleans(engine_with_schema):
+    engine, schema = engine_with_schema
     with engine.begin() as conn, open(BOOLEANS_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
@@ -53,8 +53,8 @@ def engine_with_booleans(engine_with_mathesar):
 
 
 @pytest.fixture
-def engine_with_filter_sort(engine_with_schema_with_ischema_names_updated):
-    engine, schema = engine_with_schema_with_ischema_names_updated
+def engine_with_filter_sort(engine_with_schema):
+    engine, schema = engine_with_schema
     with engine.begin() as conn, open(FILTER_SORT_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
@@ -62,8 +62,8 @@ def engine_with_filter_sort(engine_with_schema_with_ischema_names_updated):
 
 
 @pytest.fixture
-def engine_with_magnitude(engine_with_mathesar):
-    engine, schema = engine_with_mathesar
+def engine_with_magnitude(engine_with_schema):
+    engine, schema = engine_with_schema
     with engine.begin() as conn, open(MAGNITUDE_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))

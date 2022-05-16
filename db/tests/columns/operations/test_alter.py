@@ -351,8 +351,8 @@ def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_create(engine_with_mathesar, col_type):
-    engine, schema = engine_with_mathesar
+def test_column_default_create(engine_with_schema, col_type):
+    engine, schema = engine_with_schema
     table_name = "create_column_default_table"
     column_name = "create_column_default_column"
     _, set_default, expt_default = column_test_dict[col_type].values()
@@ -375,8 +375,8 @@ def test_column_default_create(engine_with_mathesar, col_type):
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_update(engine_with_mathesar, col_type):
-    engine, schema = engine_with_mathesar
+def test_column_default_update(engine_with_schema, col_type):
+    engine, schema = engine_with_schema
     table_name = "update_column_default_table"
     column_name = "update_column_default_column"
     start_default, set_default, expt_default = column_test_dict[col_type].values()
@@ -399,8 +399,8 @@ def test_column_default_update(engine_with_mathesar, col_type):
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_delete(engine_with_mathesar, col_type):
-    engine, schema = engine_with_mathesar
+def test_column_default_delete(engine_with_schema, col_type):
+    engine, schema = engine_with_schema
     table_name = "delete_column_default_table"
     column_name = "delete_column_default_column"
     _, set_default, _ = column_test_dict[col_type].values()
@@ -421,8 +421,8 @@ def test_column_default_delete(engine_with_mathesar, col_type):
     assert created_default is None
 
 
-def test_batch_update_columns_no_changes(engine_with_mathesar):
-    engine, schema = engine_with_mathesar
+def test_batch_update_columns_no_changes(engine_with_schema):
+    engine, schema = engine_with_schema
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
@@ -437,8 +437,8 @@ def test_batch_update_columns_no_changes(engine_with_mathesar):
         assert updated_table.columns[index].name == table.columns[index].name
 
 
-def test_batch_update_column_names(engine_with_mathesar):
-    engine, schema = engine_with_mathesar
+def test_batch_update_column_names(engine_with_schema):
+    engine, schema = engine_with_schema
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
@@ -457,8 +457,8 @@ def test_batch_update_column_names(engine_with_mathesar):
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
-def test_batch_update_column_types(engine_with_mathesar):
-    engine, schema = engine_with_mathesar
+def test_batch_update_column_types(engine_with_schema):
+    engine, schema = engine_with_schema
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
@@ -477,8 +477,8 @@ def test_batch_update_column_types(engine_with_mathesar):
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
-def test_batch_update_column_names_and_types(engine_with_mathesar):
-    engine, schema = engine_with_mathesar
+def test_batch_update_column_names_and_types(engine_with_schema):
+    engine, schema = engine_with_schema
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
@@ -499,8 +499,8 @@ def test_batch_update_column_names_and_types(engine_with_mathesar):
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
-def test_batch_update_column_drop_columns(engine_with_mathesar):
-    engine, schema = engine_with_mathesar
+def test_batch_update_column_drop_columns(engine_with_schema):
+    engine, schema = engine_with_schema
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
@@ -519,8 +519,8 @@ def test_batch_update_column_drop_columns(engine_with_mathesar):
         assert updated_table.columns[index].name == column_data[index - 2]['name']
 
 
-def test_batch_update_column_all_operations(engine_with_mathesar):
-    engine, schema = engine_with_mathesar
+def test_batch_update_column_all_operations(engine_with_schema):
+    engine, schema = engine_with_schema
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 

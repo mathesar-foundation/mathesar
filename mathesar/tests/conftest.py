@@ -2,21 +2,35 @@
 This inherits the fixtures in the root conftest.py
 """
 import pytest
+import logging
+from copy import deepcopy
 
 from django.core.files import File
+from django.core.cache import cache
+from django.conf import settings
 
 from sqlalchemy import Column, MetaData, Integer
 from sqlalchemy import Table as SATable
 
-from db.schemas.operations.drop import drop_schema as drop_sa_schema
-from db.schemas.operations.create import create_schema as create_sa_schema
-from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
 from db.tables.operations.select import get_oid_from_table
+from db.tables.operations.create import create_mathesar_table as actual_create_mathesar_table
+from db.columns.operations.select import get_column_attnum_from_name
+from db.schemas.utils import get_schema_oid_from_name
 
 from mathesar.models import Schema, Table, Database, DataFile
 from mathesar.imports.csv import create_table_from_csv
-from db.columns.operations.select import get_column_attnum_from_name
 from mathesar.models import Column as mathesar_model_column
+
+
+@pytest.fixture(autouse=True)
+def automatically_clear_cache():
+    """
+    Makes sure Django cache is cleared before every test.
+    """
+    logger = logging.getLogger("automatically_clear_cache")
+    logger.debug("clearing cache")
+    cache.clear()
+    yield
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -60,6 +74,49 @@ def test_db_model(test_db_name, django_db_blocker):
     with django_db_blocker.unblock():
         database_model = Database.current_objects.create(name=test_db_name)
     return database_model
+
+
+@pytest.fixture
+def add_db_to_dj_settings():
+    """
+    If the Django layer should be aware of a db, it should be added to settings.DATABASES dict.
+    """
+    logger = logging.getLogger("add_db_to_dj_settings")
+    logger.debug("init")
+    logger.debug(f"settings.DATABASES initially {list(settings.DATABASES.keys())}")
+    added_dbs = set()
+    def _add(db_name):
+        logger.debug(f"adding {db_name}")
+        reference_entry = settings.DATABASES["default"]
+        new_entry = dict(
+            USER=reference_entry['USER'],
+            PASSWORD=reference_entry['PASSWORD'],
+            HOST=reference_entry['HOST'],
+            PORT=reference_entry['PORT'],
+            NAME=db_name,
+        )
+        settings.DATABASES[db_name] = new_entry
+        cache.clear()
+        added_dbs.add(db_name)
+        return db_name
+    yield _add
+    logger.debug(f"about to clean up {added_dbs}")
+    for db_name in added_dbs:
+        settings.DATABASES.pop(db_name, None)
+        logger.debug(f"cleaned up {db_name}")
+    logger.debug("exit")
+
+
+@pytest.fixture
+def create_temp_dj_db(add_db_to_dj_settings, create_temp_db):
+    """
+    Like create_temp_db, but adds the new db to Django's settings.DATABASES dict.
+    """
+    def _create_and_add(db_name):
+        create_temp_db(db_name)
+        add_db_to_dj_settings(db_name)
+        return db_name
+    yield _create_and_add
 
 
 @pytest.fixture(autouse=True)
@@ -113,8 +170,8 @@ def non_unicode_csv_filepath():
 
 
 @pytest.fixture
-def empty_nasa_table(patent_schema, engine_with_mathesar):
-    engine, _ = engine_with_mathesar
+def empty_nasa_table(patent_schema, engine_with_schema):
+    engine, _ = engine_with_schema
     NASA_TABLE = 'NASA Schema List'
     db_table = SATable(
         NASA_TABLE, MetaData(bind=engine),
@@ -138,28 +195,32 @@ def patent_schema(create_schema):
 
 
 @pytest.fixture
-def create_schema(test_db_model):
+def create_schema(test_db_model, create_db_schema):
     """
-    Creates a schema factory, making sure to track and clean up new instances
+    Creates a DJ Schema model factory, making sure to track and clean up new instances
     """
     engine = test_db_model._sa_engine
-    created_schemas = {}
-
     def _create_schema(schema_name):
-        if schema_name in created_schemas:
-            schema_oid = created_schemas[schema_name]
-        else:
-            create_sa_schema(schema_name, engine)
-            schema_oid = get_schema_oid_from_name(schema_name, engine)
-            created_schemas[schema_name] = schema_oid
+        create_db_schema(schema_name, engine)
+        schema_oid = get_schema_oid_from_name(schema_name, engine)
         schema_model, _ = Schema.current_objects.get_or_create(oid=schema_oid, database=test_db_model)
         return schema_model
     yield _create_schema
+    # NOTE: Schema model is not cleaned up. Maybe invalidate cache?
 
-    for oid in created_schemas.values():
-        # Handle schemas being renamed during test
-        schema = get_schema_name_from_oid(oid, engine)
-        drop_sa_schema(schema, engine, cascade=True, if_exists=True)
+
+@pytest.fixture
+def create_mathesar_table(create_db_schema):
+    def _create_mathesar_table(
+        table_name, schema_name, columns, engine, metadata=None,
+    ):
+        # We use a fixture for schema creation, so that it gets cleaned up.
+        create_db_schema(schema_name, engine, schema_mustnt_exist=False)
+        return actual_create_mathesar_table(
+            name=table_name, schema=schema_name, columns=columns,
+            engine=engine, metadata=metadata
+        )
+    yield _create_mathesar_table
 
 
 @pytest.fixture
