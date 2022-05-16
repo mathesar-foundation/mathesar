@@ -8,12 +8,16 @@
     RecordsData,
     Row,
   } from '@mathesar/stores/table-data/types';
+  import CellBackground from './CellBackground.svelte';
   import CellErrors from './CellErrors.svelte';
+  import RowCellBackgrounds from './RowCellBackgrounds.svelte';
 
   export let primaryKeyColumnId: number | undefined = undefined;
   export let row: Row;
   export let meta: Meta;
   export let recordsData: RecordsData;
+  export let isSelected = false;
+  export let hasErrors = false;
 
   $: ({ selectedRows, pagination, rowStatus } = meta);
   $: ({ savedRecords, newRecords, totalCount } = recordsData);
@@ -42,6 +46,8 @@
   class="cell row-control"
   style="width:{ROW_CONTROL_COLUMN_WIDTH}px;left:0px"
 >
+  <CellBackground color="var(--cell-bg-color-header)" />
+  <RowCellBackgrounds {isSelected} {hasErrors} />
   <div class="control">
     {#if row.isAddPlaceholder}
       <Icon data={faPlus} />
