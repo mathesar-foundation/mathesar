@@ -81,7 +81,7 @@ def django_db_setup(request, django_db_blocker):
     request.addfinalizer(teardown_database)
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def test_db_model(test_db_name, django_db_blocker):
     with django_db_blocker.unblock():
         database_model = Database.current_objects.create(name=test_db_name)
