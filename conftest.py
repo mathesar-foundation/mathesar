@@ -77,7 +77,7 @@ create_temp_db = pytest.fixture(_create_db, scope="function")
 create_session_db = pytest.fixture(_create_db, scope="session")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def test_db_name(create_session_db):
     test_db_name = "mathesar_db_test"
     yield create_session_db(test_db_name)
@@ -93,7 +93,7 @@ def engine_without_ischema_names_updated(test_db_name):
     return engine
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def engine(test_db_name):
     engine = _create_engine(test_db_name)
     add_custom_types_to_ischema_names(engine)

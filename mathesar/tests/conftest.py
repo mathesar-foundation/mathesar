@@ -8,6 +8,7 @@ from copy import deepcopy
 from django.core.files import File
 from django.core.cache import cache
 from django.conf import settings
+from django.test.utils import setup_databases, teardown_databases
 
 from sqlalchemy import Column, MetaData, Integer
 from sqlalchemy import Table as SATable
@@ -33,19 +34,20 @@ def automatically_clear_cache():
     yield
 
 
-@pytest.fixture(autouse=True)
-def delete_all_models(django_db_blocker):
-    yield
-    logger = logging.getLogger('django model clearing fixture')
-    with django_db_blocker.unblock():
-        all_models = {Table, Schema, Database}
-        for model in all_models:
-            count = model.current_objects.count()
-            logger.debug(f'deleting {count} instances of {model}')
-            model.current_objects.all().delete()
+#   @pytest.fixture(autouse=True)
+#   def delete_all_models(django_db_blocker):
+#       yield
+#       logger = logging.getLogger('django model clearing fixture')
+#       with django_db_blocker.unblock():
+#           all_models = {Table, Schema, Database}
+#           for model in all_models:
+#               count = model.current_objects.count()
+#               logger.debug(f'deleting {count} instances of {model}')
+#               model.current_objects.all().delete()
 
 
-@pytest.fixture(scope="session", autouse=True)
+# TODO autouse redundant?
+@pytest.fixture(scope="function", autouse=True)
 def django_db_setup(request, django_db_blocker):
     """
     A stripped down version of pytest-django's original django_db_setup fixture
@@ -55,30 +57,24 @@ def django_db_setup(request, django_db_blocker):
     Removes most additional options (use migrations, keep / create db, etc.)
     Adds 'aliases' to the call to setup_databases() which restrict Django to only
     building and destroying the default Django db, and not our tables dbs.
-
-    Called by build_test_db_model to setup the django DB before the databse models.
     """
-    from django.test.utils import setup_databases, teardown_databases
-
+    verbosity = request.config.option.verbose
     with django_db_blocker.unblock():
         db_cfg = setup_databases(
-            verbosity=request.config.option.verbose,
+            verbosity=verbosity,
             interactive=False,
             aliases=["default"],
         )
-
-    def teardown_database():
-        with django_db_blocker.unblock():
-            try:
-                teardown_databases(db_cfg, verbosity=request.config.option.verbose)
-            except Exception as exc:
-                request.node.warn(
-                    pytest.PytestWarning(
-                        "Error when trying to teardown test databases: %r" % exc
-                    )
+    yield
+    with django_db_blocker.unblock():
+        try:
+            teardown_databases(db_cfg, verbosity=verbosity)
+        except Exception as exc:
+            request.node.warn(
+                pytest.PytestWarning(
+                    "Error when trying to teardown test databases: %r" % exc
                 )
-
-    request.addfinalizer(teardown_database)
+            )
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -132,7 +128,7 @@ def create_temp_dj_db(add_db_to_dj_settings, create_temp_db):
 
 
 @pytest.fixture(autouse=True)
-def enable_db_access_for_all_tests(db):
+def enable_db_access_for_all_tests(transactional_db):
     pass
 
 
