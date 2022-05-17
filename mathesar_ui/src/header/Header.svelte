@@ -1,8 +1,5 @@
 <script lang="ts">
   import { get } from 'svelte/store';
-  /* eslint import/newline-after-import: "off" */
-  const headerLogo = new URL('../../images/logo.svg', import.meta.url
-  ).href;
   import {
     faUser,
     faPlus,
@@ -24,6 +21,8 @@
 
   import SchemaSelector from './schema-selector/SchemaSelector.svelte';
   import ImportIndicator from './import-indicator/ImportIndicator.svelte';
+
+  const headerLogo = new URL('../../images/logo.svg', import.meta.url).href;
 
   async function handleCreateEmptyTable() {
     if (!$currentSchemaId) {
