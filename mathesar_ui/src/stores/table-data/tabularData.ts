@@ -84,6 +84,9 @@ export class TabularData {
       this.meta.grouping.update((g) => g.without(columnId as number));
       this.meta.filtering.update((f) => f.withoutColumn(columnId as number));
     });
+    this.columnsDataStore.on('columnPatched', async () => {
+      await this.recordsData.fetch();
+    });
   }
 
   refresh(): Promise<
