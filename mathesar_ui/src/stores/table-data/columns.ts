@@ -57,7 +57,12 @@ function api(url: string) {
 }
 
 export class ColumnsDataStore
-  extends EventHandler
+  extends EventHandler<{
+    columnRenamed: number;
+    columnAdded: Partial<Column>;
+    columnDeleted: number;
+    columnPatched: Partial<Column>;
+  }>
   implements Writable<ColumnsData>
 {
   private type: TabularType;

@@ -73,8 +73,12 @@ export class TabularData {
       this.recordsData,
     );
 
-    this.columnsDataStore.on('columnRenamed', () => this.refresh());
-    this.columnsDataStore.on('columnAdded', () => this.recordsData.fetch());
+    this.columnsDataStore.on('columnRenamed', async () => {
+      await this.refresh();
+    });
+    this.columnsDataStore.on('columnAdded', async () => {
+      await this.recordsData.fetch();
+    });
     this.columnsDataStore.on('columnDeleted', async (columnId: unknown) => {
       this.meta.sorting.update((s) => s.without(columnId as number));
       this.meta.grouping.update((g) => g.without(columnId as number));
