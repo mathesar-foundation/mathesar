@@ -73,6 +73,7 @@ type_set = {
     'TIMESTAMP WITHOUT TIME ZONE',
     'VARCHAR',
     '"char"',
+    'name'
 }
 
 
