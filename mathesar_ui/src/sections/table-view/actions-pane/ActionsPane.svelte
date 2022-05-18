@@ -161,14 +161,22 @@
 
   <div class="divider" />
 
-  <Button size="small" on:click={() => recordsData.addEmptyRecord()}>
+  <Button
+    disabled={isLoading}
+    size="small"
+    on:click={() => recordsData.addEmptyRecord()}
+  >
     <Icon data={faPlus} />
     <span>New Record</span>
   </Button>
 
   <div class="divider" />
 
-  <Button size="small" on:click={() => linkTableModal.open()}>
+  <Button
+    disabled={isLoading}
+    size="small"
+    on:click={() => linkTableModal.open()}
+  >
     <Icon data={faLink} />
     <span>Link Table</span>
   </Button>
