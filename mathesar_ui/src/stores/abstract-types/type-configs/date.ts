@@ -1,3 +1,4 @@
+import { faCalendarDay } from '@fortawesome/free-solid-svg-icons';
 import { dayjs } from '@mathesar-component-library';
 import type { FormValues } from '@mathesar-component-library/types';
 import type { Column } from '@mathesar/stores/table-data/types';
@@ -70,7 +71,7 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const dateType: AbstractTypeConfiguration = {
-  icon: 'D',
+  icon: { data: faCalendarDay, label: 'Date' },
   cell: {
     type: 'date',
   },

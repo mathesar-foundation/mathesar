@@ -73,7 +73,7 @@
 />
 
 <AttachableDropdown
-  class="retain-active-cell"
+  class="retain-active-cell no-max-height"
   trigger={element}
   bind:isOpen
   on:close={onDropdownClose}

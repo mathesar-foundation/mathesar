@@ -51,8 +51,6 @@
   }
 </script>
 
-<div class="flat-pickr-wrapper">
-  <div bind:this={element} class="flat-pickr">
-    <input type="hidden" data-input style="display: none;" />
-  </div>
+<div bind:this={element} class="flat-pickr">
+  <input type="hidden" data-input />
 </div>
