@@ -17,7 +17,7 @@
     this={component}
     {...props}
     {isActive}
-    disabled={disabled || sheetColumn.column.primary_key}
+    {disabled}
     bind:value
     on:movementKeyDown
     on:activate

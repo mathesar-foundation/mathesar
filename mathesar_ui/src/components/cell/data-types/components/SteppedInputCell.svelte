@@ -112,7 +112,9 @@
       class:nowrap={!isActive}
       class:truncate={isActive && multiLineTruncate}
     >
-      <CellValue {value} {formatValue} />
+      <slot name="content" {value} {formatValue}>
+        <CellValue {value} {formatValue} />
+      </slot>
     </div>
   {/if}
 </CellWrapper>

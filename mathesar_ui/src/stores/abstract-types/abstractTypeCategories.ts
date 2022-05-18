@@ -3,6 +3,7 @@ import { abstractTypeCategory } from './constants';
 import Text from './type-configs/text';
 import Number from './type-configs/number';
 import Boolean from './type-configs/boolean';
+import Uri from './type-configs/uri';
 import Duration from './type-configs/duration';
 import Date from './type-configs/date';
 import Fallback from './type-configs/fallback';
@@ -24,6 +25,7 @@ const abstractTypeCategories: Partial<
   [abstractTypeCategory.Text]: Text,
   [abstractTypeCategory.Number]: Number,
   [abstractTypeCategory.Boolean]: Boolean,
+  [abstractTypeCategory.Uri]: Uri,
   [abstractTypeCategory.Duration]: Duration,
   [abstractTypeCategory.Date]: Date,
   [abstractTypeCategory.Other]: Fallback,

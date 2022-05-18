@@ -72,6 +72,7 @@ type_set = {
     'TIMESTAMP WITH TIME ZONE',
     'TIMESTAMP WITHOUT TIME ZONE',
     'VARCHAR',
+    '"char"',
 }
 
 
