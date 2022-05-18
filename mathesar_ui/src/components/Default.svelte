@@ -2,4 +2,4 @@
   import PostgresKeyword from './PostgresKeyword.svelte';
 </script>
 
-<PostgresKeyword>NULL</PostgresKeyword>
+<PostgresKeyword>DEFAULT</PostgresKeyword>

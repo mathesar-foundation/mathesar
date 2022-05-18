@@ -37,6 +37,7 @@
   export let key: CellKey;
   export let modificationStatusMap: WritableMap<CellKey, RequestStatus>;
   export let processedColumn: ProcessedTableColumn;
+  export let clientSideErrorMap: WritableMap<CellKey, string[]>;
   export let value: unknown = undefined;
 
   $: recordsDataState = recordsData.state;
@@ -44,8 +45,12 @@
   $: ({ activeCell } = display);
   $: isActive = $activeCell && isCellActive($activeCell, row, column);
   $: modificationStatus = $modificationStatusMap.get(key);
+  $: serverErrors =
+    modificationStatus?.state === 'failure' ? modificationStatus?.errors : [];
+  $: clientErrors = $clientSideErrorMap.get(key) ?? [];
+  $: errors = [...serverErrors, ...clientErrors];
   $: canSetNull = column.nullable && value !== null;
-  $: hasError = modificationStatus?.state === 'failure';
+  $: hasError = !!errors.length;
   $: isProcessing = modificationStatus?.state === 'processing';
   $: isEditable = !column.primary_key;
 
@@ -70,16 +75,14 @@
   }
 
   async function setValue(newValue: unknown) {
-    if (newValue !== value) {
-      value = newValue;
-      let updatedRow;
-      if (row.isNew) {
-        updatedRow = await recordsData.createOrUpdateRecord(row, column);
-      } else {
-        updatedRow = await recordsData.updateCell(row, column);
-      }
-      value = updatedRow.record?.[column.id] ?? value;
+    if (newValue === value) {
+      return;
     }
+    value = newValue;
+    const updatedRow = row.isNew
+      ? await recordsData.createOrUpdateRecord(row, column)
+      : await recordsData.updateCell(row, column);
+    value = updatedRow.record?.[column.id] ?? value;
   }
 
   async function valueUpdated(e: CustomEvent<{ value: unknown }>) {
@@ -133,8 +136,8 @@
       Set to <Null />
     </MenuItem>
   </ContextMenu>
-  {#if modificationStatus?.state === 'failure'}
-    <CellErrors errors={modificationStatus.errors} forceShowErrors={isActive} />
+  {#if errors.length}
+    <CellErrors {errors} forceShowErrors={isActive} />
   {/if}
 </div>
 

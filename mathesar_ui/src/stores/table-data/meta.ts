@@ -2,6 +2,7 @@ import { writable, derived } from 'svelte/store';
 import type { Writable, Readable } from 'svelte/store';
 import {
   ImmutableMap,
+  ImmutableSet,
   WritableMap,
   WritableSet,
 } from '@mathesar-component-library';
@@ -16,7 +17,7 @@ import type { TerseGrouping } from './grouping';
 import { Grouping } from './grouping';
 import type { RecordsRequestParamsData } from './records';
 import type { CellKey, RowKey } from './utils';
-import { getRowStatus, getSheetState } from './utils';
+import { getRowStatus, getSheetState, extractRowKeyFromCellKey } from './utils';
 
 /**
  * Unlike in `RequestStatus`, here the state and the error messages are
@@ -101,6 +102,8 @@ export class Meta {
 
   cellClientSideErrors = new WritableMap<CellKey, string[]>();
 
+  rowsWithClientSideErrors: Readable<ImmutableSet<RowKey>>;
+
   /**
    * For each cell, the status of the most recent request to update the cell. If
    * no request has been made, then no entry will be present in the map.
@@ -143,14 +146,26 @@ export class Meta {
     this.grouping = writable(props.grouping);
     this.filtering = writable(props.filtering);
 
+    this.rowsWithClientSideErrors = derived(
+      this.cellClientSideErrors,
+      (e) => new ImmutableSet([...e.keys()].map(extractRowKeyFromCellKey)),
+    );
+
     this.rowStatus = derived(
       [
+        this.cellClientSideErrors,
         this.cellModificationStatus,
         this.rowDeletionStatus,
         this.rowCreationStatus,
       ],
-      ([cellModificationStatus, rowDeletionStatus, rowCreationStatus]) =>
+      ([
+        cellClientSideErrors,
+        cellModificationStatus,
+        rowDeletionStatus,
+        rowCreationStatus,
+      ]) =>
         getRowStatus({
+          cellClientSideErrors,
           cellModificationStatus,
           rowDeletionStatus,
           rowCreationStatus,

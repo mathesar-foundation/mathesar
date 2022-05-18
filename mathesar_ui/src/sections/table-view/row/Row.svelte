@@ -22,8 +22,13 @@
 
   $: ({ recordsData, columnsDataStore, meta, display } = $tabularData);
   $: ({ columnPositionMap } = display);
-  $: ({ selectedRows, rowStatus, rowCreationStatus, cellModificationStatus } =
-    meta);
+  $: ({
+    selectedRows,
+    rowStatus,
+    rowCreationStatus,
+    cellModificationStatus,
+    cellClientSideErrors,
+  } = meta);
   $: ({ grouping } = recordsData);
 
   function calculateStyle(
@@ -96,6 +101,7 @@
         rowHasErrors={hasWholeRowErrors}
         key={getCellKey(rowKey, columnId)}
         modificationStatusMap={cellModificationStatus}
+        clientSideErrorMap={cellClientSideErrors}
         bind:value={row.record[columnId]}
         {processedColumn}
         {recordsData}
