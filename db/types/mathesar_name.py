@@ -1,3 +1,4 @@
+from sqlalchemy.dialects.postgresql import CHAR as SA_CHAR
 from sqlalchemy.types import TypeDecorator
 from sqlalchemy.ext.compiler import compiles
 
