@@ -4,6 +4,9 @@
     faCog,
     faChevronRight,
     faChevronLeft,
+    faLink,
+    faKey,
+    faArrowRight,
   } from '@fortawesome/free-solid-svg-icons';
   import { toast } from '@mathesar/stores/toast';
   import {
@@ -21,6 +24,8 @@
     ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
   import ColumnName from '@mathesar/components/ColumnName.svelte';
+  import FkReferent from '@mathesar/components/FkReferent.svelte';
+  import type { FkConstraint } from '@mathesar/api/tables/constraints';
   import DefaultOptions from './DefaultOptions.svelte';
   import AbstractTypeConfiguration from './abstract-type-configuration/AbstractTypeConfiguration.svelte';
   import type { ProcessedTableColumn } from '../../utils';
@@ -32,6 +37,9 @@
   export let constraintsDataStore: ConstraintsDataStore;
 
   $: ({ column, abstractTypeOfColumn } = processedColumn);
+  $: fkConstraint = $constraintsDataStore.constraints.find(
+    (c) => c.type === 'foreignkey' && c.columns.includes(column.id),
+  ) as FkConstraint | undefined;
 
   let menuIsOpen = false;
   let renamingInputElement: HTMLInputElement | undefined;
@@ -157,58 +165,71 @@
       contentClass="column-opts-content"
       on:close={setDefaultView}
     >
-      <ColumnName slot="trigger" {column} />
-      <svelte:fragment slot="content">
-        <div class="container">
-          <div class="section type-header">
-            {#if view === 'default'}
-              <h6 class="category">Data Type</h6>
+      <span slot="trigger" class="trigger-content">
+        <span class="column-description">
+          {#if column.primary_key}
+            <Icon class="constraint-icon" size="0.9rem" data={faKey} />
+          {:else if fkConstraint}
+            <Icon class="constraint-icon" size="0.9rem" data={faLink} />
+          {/if}
+          <ColumnName {column} />
+        </span>
+        {#if fkConstraint}
+          <span class="referent">
+            <Icon class="arrow" data={faArrowRight} />
+            <FkReferent constraint={fkConstraint} />
+          </span>
+        {/if}
+      </span>
+      <div class="container" slot="content">
+        <div class="section type-header">
+          {#if view === 'default'}
+            <h6 class="category">Data Type</h6>
+            <Button
+              class="type-switch"
+              appearance="plain"
+              on:click={setTypeView}
+            >
+              <span>{abstractTypeOfColumn?.name}</span>
+              <Icon size="0.8em" data={faCog} />
+              <Icon size="0.7em" data={faChevronRight} />
+            </Button>
+          {:else if view === 'type'}
+            <h6 class="category">
               <Button
-                class="type-switch"
+                size="small"
                 appearance="plain"
-                on:click={setTypeView}
+                class="padding-zero"
+                on:click={setDefaultView}
               >
-                <span>{abstractTypeOfColumn?.name}</span>
-                <Icon size="0.8em" data={faCog} />
-                <Icon size="0.7em" data={faChevronRight} />
+                <Icon data={faChevronLeft} />
+                Go back
               </Button>
-            {:else if view === 'type'}
-              <h6 class="category">
-                <Button
-                  size="small"
-                  appearance="plain"
-                  class="padding-zero"
-                  on:click={setDefaultView}
-                >
-                  <Icon data={faChevronLeft} />
-                  Go back
-                </Button>
-              </h6>
-            {/if}
-          </div>
+            </h6>
+          {/if}
+        </div>
 
-          <div class="divider" />
+        <div class="divider" />
 
-          <div class="section">
-            {#if view === 'default'}
-              <DefaultOptions
-                {meta}
-                {column}
-                {columnsDataStore}
-                {constraintsDataStore}
-                on:close={closeMenu}
-                on:rename={handleStartRenaming}
-              />
-            {:else if view === 'type'}
-              <AbstractTypeConfiguration
-                {column}
-                {abstractTypeOfColumn}
-                on:close={closeMenu}
-              />
-            {/if}
-          </div>
-        </div></svelte:fragment
-      >
+        <div class="section">
+          {#if view === 'default'}
+            <DefaultOptions
+              {meta}
+              {column}
+              {columnsDataStore}
+              {constraintsDataStore}
+              on:close={closeMenu}
+              on:rename={handleStartRenaming}
+            />
+          {:else if view === 'type'}
+            <AbstractTypeConfiguration
+              {column}
+              {abstractTypeOfColumn}
+              on:close={closeMenu}
+            />
+          {/if}
+        </div>
+      </div>
     </Dropdown>
   {/if}
 </div>

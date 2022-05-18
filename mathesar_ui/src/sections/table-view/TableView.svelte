@@ -15,7 +15,10 @@
   setContext('tabularData', tabularDataContextStore);
 
   $: tabularDataContextStore.set(tabularData);
-  $: ({ columnsDataStore } = tabularData);
+  $: ({ columnsDataStore, constraintsDataStore } = tabularData);
+  $: hasForeignKeys = $constraintsDataStore.constraints.some(
+    (c) => c.type === 'foreignkey',
+  );
 
   /**
    * This would ideally be part of the context. But since, we'd be
@@ -32,7 +35,7 @@
 <ActionsPane {processedTableColumnsMap} />
 
 <div class="table-data">
-  <div class="table-content">
+  <div class="table-content" class:has-foreign-keys={hasForeignKeys}>
     {#if processedTableColumnsMap.size}
       <Header {processedTableColumnsMap} />
       <!-- We'd eventually replace Body with Sheet -->

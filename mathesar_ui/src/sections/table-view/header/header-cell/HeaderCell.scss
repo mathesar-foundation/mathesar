@@ -1,5 +1,28 @@
 .dropdown.trigger.column-opts {
   width: 100%;
+  height: 100%;
+  .trigger-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .column-description {
+    display: flex;
+    align-items: center;
+  }
+  .constraint-icon {
+    color: #888;
+    margin-right: 0.2em;
+  }
+  .referent {
+    margin-left: 2em;
+    display: block;
+    font-size: 80%;
+    color: #555;
+    .arrow {
+      color: #aaa;
+    }
+  }
 }
 
 .dropdown.content.column-opts-content {

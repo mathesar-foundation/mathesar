@@ -1,20 +1,11 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import { Icon, Button, Spinner } from '@mathesar-component-library';
-  import {
-    faArrowRight,
-    faExclamationTriangle,
-    faPlus,
-    faTrash,
-  } from '@fortawesome/free-solid-svg-icons';
+  import { Icon, Button } from '@mathesar-component-library';
+  import { faTrash } from '@fortawesome/free-solid-svg-icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
   import type { TabularDataStore } from '@mathesar/stores/table-data/types';
   import type { Constraint } from '@mathesar/api/tables/constraints';
-  import { tables } from '@mathesar/stores/tables';
-  import Identifier from '@mathesar/components/Identifier.svelte';
-  import type { Column } from '@mathesar/api/tables/columns';
-  import type { PaginatedResponse } from '@mathesar/utils/api';
-  import { getAPI } from '@mathesar/utils/api';
+  import FkReferent from '@mathesar/components/FkReferent.svelte';
 
   export let constraint: Constraint;
   export let drop: () => Promise<void>;
@@ -36,22 +27,6 @@
   );
   $: columnNames = columns.map((columnInConstraint) => columnInConstraint.name);
   $: columnSummary = columnNames.join(', ');
-  $: referentTable =
-    constraint.type === 'foreignkey'
-      ? $tables.data.get(constraint.referent_table)
-      : undefined;
-
-  async function getReferentColumns(_constraint: Constraint) {
-    if (_constraint.type !== 'foreignkey') {
-      return [];
-    }
-    const tableId = _constraint.referent_table;
-    const url = `/api/db/v0/tables/${tableId}/columns/?limit=500`;
-    const referentTableColumns = await getAPI<PaginatedResponse<Column>>(url);
-    return referentTableColumns.results.filter((c) =>
-      _constraint.referent_columns.includes(c.id),
-    );
-  }
 </script>
 
 <div class="table-constraint">
@@ -63,22 +38,8 @@
       <span class="columns">{columnSummary}</span>
     </div>
     <div class="referent">
-      {#if referentTable}
-        References
-        <Identifier>{referentTable.name}</Identifier>
-        <Icon data={faArrowRight} />
-        {#await getReferentColumns(constraint)}
-          <Spinner />
-        {:then referentColumns}
-          {#each referentColumns as referentColumn, index (referentColumn.id)}
-            <Identifier>{referentColumn.name}</Identifier>
-            {#if index < referentColumns.length - 1}
-              <Icon data={faPlus} />
-            {/if}
-          {/each}
-        {:catch error}
-          <Icon data={faExclamationTriangle} />
-        {/await}
+      {#if constraint.type === 'foreignkey'}
+        References: <FkReferent {constraint} />
       {/if}
     </div>
   </div>

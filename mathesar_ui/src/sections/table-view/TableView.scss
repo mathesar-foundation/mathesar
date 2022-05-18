@@ -32,6 +32,7 @@ section.table-section .tab-container .table-data {
   position: relative;
 
   .table-content {
+    --header-height: 32px;
     overflow: hidden;
     position: absolute;
     left: 0;
@@ -39,6 +40,11 @@ section.table-section .tab-container .table-data {
     top: 0;
     bottom: 0;
     background: #f7f8f8;
+    &.has-foreign-keys {
+      // We increase the height of the header to account for the description of
+      // the referent.
+      --header-height: 42px;
+    }
 
     .cell {
       position: absolute;
@@ -68,7 +74,7 @@ section.table-section .tab-container .table-data {
     }
 
     .header {
-      height: 32px;
+      height: var(--header-height);
       min-width: 100%;
       position: relative;
       background: #f9f9f9;
@@ -87,7 +93,7 @@ section.table-section .tab-container .table-data {
 
     .body {
       position: absolute;
-      top: 32px;
+      top: var(--header-height);
       left: 0px;
       right: 0px;
       bottom: 0px;
