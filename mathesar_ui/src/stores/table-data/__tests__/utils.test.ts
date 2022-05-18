@@ -15,17 +15,18 @@ describe('getRowStatus', () => {
   }
   const m = ROW_HAS_CELL_ERROR_MSG;
   const testCases: TestCase[] = [
-    {
-      label: 'All empty',
-      cellClientErrors: [],
-      cellModification: [],
-      rowCreation: [],
-      rowDeletion: [],
-      result: [],
-    },
+    // {
+    //   label: 'All empty',
+    //   cellClientErrors: [],
+    //   cellModification: [],
+    //   rowCreation: [],
+    //   rowDeletion: [],
+    //   result: [],
+    // },
     {
       label: 'Complex',
-      cellClientErrors: [['300:1', ['Client error']]],
+      cellClientErrors: [['300::1', ['Client error']]],
+      // cellClientErrors: [],
       cellModification: [
         ['1::1', { state: 'success' }],
         ['1::2', { state: 'processing' }],
@@ -48,6 +49,7 @@ describe('getRowStatus', () => {
         ['202', { state: 'failure', errors: ['Unable to delete row.'] }],
       ],
       result: [
+        ['300', { errorsFromWholeRowAndCells: [m] }],
         ['1', { wholeRowState: undefined, errorsFromWholeRowAndCells: [m] }],
         ['2', { wholeRowState: 'success', errorsFromWholeRowAndCells: [m] }],
         ['3', { wholeRowState: 'success', errorsFromWholeRowAndCells: [] }],
@@ -75,7 +77,6 @@ describe('getRowStatus', () => {
             errorsFromWholeRowAndCells: ['Unable to delete row.'],
           },
         ],
-        ['300', { wholeRowState: undefined, errorsFromWholeRowAndCells: [m] }],
       ],
     },
   ];
