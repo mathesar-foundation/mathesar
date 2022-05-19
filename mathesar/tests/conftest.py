@@ -23,6 +23,43 @@ from mathesar.imports.csv import create_table_from_csv
 from mathesar.models import Column as mathesar_model_column
 
 
+def _dj_databases(get_uid):
+    """
+    Returns django.conf.settings.DATABASES by reference. During cleanup, restores it to the state
+    it was when returned.
+    """
+    logger = logging.getLogger(f"_dj_databases_{get_uid()}")
+    logger.debug(f"initially: {set(settings.DATABASES.keys())}")
+
+    dj_databases_deep_copy = deepcopy(settings.DATABASES)
+    yield settings.DATABASES
+
+    logger.debug(f"before cleanup: {set(settings.DATABASES.keys())}")
+
+    settings.DATABASES = dj_databases_deep_copy
+
+    logger.debug(f"after cleanup: {set(settings.DATABASES.keys())}")
+
+
+dj_databases = pytest.fixture(_dj_databases, scope="function", autouse=True)
+dj_module_databases = pytest.fixture(_dj_databases, scope="module", autouse=True)
+dj_session_databases = pytest.fixture(_dj_databases, scope="session")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def ignore_all_dbs_except_default(_default_test_db_name, dj_session_databases):
+    """
+    Ignore the default test database: we're creating and tearing down our own databases dynamically.
+    """
+    logger = logging.getLogger("ignore_default_dj_test_db")
+    logger.debug(f"before deleting keys: {set(dj_session_databases.keys())}")
+    database_to_keep = "default"
+    for entry_name in set(dj_session_databases.keys()):
+        if entry_name != database_to_keep:
+            del dj_session_databases[entry_name]
+    logger.debug(f"after deleting keys: {set(dj_session_databases.keys())}")
+
+
 @pytest.fixture(autouse=True)
 def automatically_clear_cache():
     """
@@ -34,68 +71,77 @@ def automatically_clear_cache():
     yield
 
 
-#   @pytest.fixture(autouse=True)
-#   def delete_all_models(django_db_blocker):
-#       yield
-#       logger = logging.getLogger('django model clearing fixture')
-#       with django_db_blocker.unblock():
-#           all_models = {Table, Schema, Database}
-#           for model in all_models:
-#               count = model.current_objects.count()
-#               logger.debug(f'deleting {count} instances of {model}')
-#               model.current_objects.all().delete()
-
-
-# TODO autouse redundant?
-@pytest.fixture(scope="function", autouse=True)
-def django_db_setup(request, django_db_blocker):
-    """
-    A stripped down version of pytest-django's original django_db_setup fixture
-    See: https://github.com/pytest-dev/pytest-django/blob/master/pytest_django/fixtures.py#L96
-    Also see: https://pytest-django.readthedocs.io/en/latest/database.html#using-a-template-database-for-tests
-
-    Removes most additional options (use migrations, keep / create db, etc.)
-    Adds 'aliases' to the call to setup_databases() which restrict Django to only
-    building and destroying the default Django db, and not our tables dbs.
-    """
-    verbosity = request.config.option.verbose
-    with django_db_blocker.unblock():
-        db_cfg = setup_databases(
-            verbosity=verbosity,
-            interactive=False,
-            aliases=["default"],
-        )
+#@pytest.fixture(autouse=True)
+def delete_all_models(django_db_blocker):
     yield
+    logger = logging.getLogger('django model clearing fixture')
     with django_db_blocker.unblock():
-        try:
-            teardown_databases(db_cfg, verbosity=verbosity)
-        except Exception as exc:
-            request.node.warn(
-                pytest.PytestWarning(
-                    "Error when trying to teardown test databases: %r" % exc
-                )
-            )
+        all_models = {Table, Schema, Database}
+        for model in all_models:
+            count = model.current_objects.count()
+            logger.debug(f'deleting {count} instances of {model}')
+            model.current_objects.all().delete()
+
+
+@pytest.fixture(scope="session")
+def django_db_modify_db_settings(ignore_all_dbs_except_default, django_db_modify_db_settings):
+    return
+
+
+# TODO below setup_databases/teardown_databases hooking can be avoided by not putting our
+# target/data/mathesar databases into settings.DATABASES.
+# TODO autouse redundant?
+#   @pytest.fixture(scope="session", autouse=True)
+#   def django_db_setup(request, django_db_blocker, ignore_all_dbs_except_default):
+#       """
+#       A stripped down version of pytest-django's original django_db_setup fixture
+#       See: https://github.com/pytest-dev/pytest-django/blob/master/pytest_django/fixtures.py#L96
+#       Also see: https://pytest-django.readthedocs.io/en/latest/database.html#using-a-template-database-for-tests
+
+#       Removes most additional options (use migrations, keep / create db, etc.)
+#       Adds 'aliases' to the call to setup_databases() which restrict Django to only
+#       building and destroying the default Django db, and not our tables dbs.
+
+#       """
+#       verbosity = request.config.option.verbose
+#       with django_db_blocker.unblock():
+#           db_cfg = setup_databases(
+#               verbosity=verbosity,
+#               interactive=False,
+#               aliases=["default"],
+#           )
+#       yield
+#       with django_db_blocker.unblock():
+#           try:
+#               teardown_databases(db_cfg, verbosity=verbosity)
+#           except Exception as exc:
+#               request.node.warn(
+#                   pytest.PytestWarning(
+#                       "Error when trying to teardown test databases: %r" % exc
+#                   )
+#               )
 
 
 @pytest.fixture(scope="function", autouse=True)
-def test_db_model(test_db_name, django_db_blocker):
+def test_db_model(add_temp_db_to_dj_settings, test_db_name, django_db_blocker):
+    add_temp_db_to_dj_settings(test_db_name)
     with django_db_blocker.unblock():
         database_model = Database.current_objects.create(name=test_db_name)
     return database_model
 
 
-@pytest.fixture
-def add_db_to_dj_settings():
+def _add_db_to_dj_settings():
     """
     If the Django layer should be aware of a db, it should be added to settings.DATABASES dict.
     """
-    logger = logging.getLogger("add_db_to_dj_settings")
+    logger = logging.getLogger("_add_db_to_dj_settings")
     logger.debug("init")
-    logger.debug(f"settings.DATABASES initially {list(settings.DATABASES.keys())}")
+    logger.debug(f"settings.DATABASES initially {set(settings.DATABASES.keys())}")
     added_dbs = set()
     def _add(db_name):
+        dj_databases = settings.DATABASES
         logger.debug(f"adding {db_name}")
-        reference_entry = settings.DATABASES["default"]
+        reference_entry = dj_databases["default"]
         new_entry = dict(
             USER=reference_entry['USER'],
             PASSWORD=reference_entry['PASSWORD'],
@@ -103,32 +149,52 @@ def add_db_to_dj_settings():
             PORT=reference_entry['PORT'],
             NAME=db_name,
         )
-        settings.DATABASES[db_name] = new_entry
+        dj_databases[db_name] = new_entry
         cache.clear()
         added_dbs.add(db_name)
         return db_name
     yield _add
     logger.debug(f"about to clean up {added_dbs}")
-    for db_name in added_dbs:
-        settings.DATABASES.pop(db_name, None)
-        logger.debug(f"cleaned up {db_name}")
+    # NOTE dj_databases fixture should clean up automatically
+    #for db_name in added_dbs:
+    #    settings.DATABASES.pop(db_name, None)
+    #    logger.debug(f"cleaned up {db_name}")
     logger.debug("exit")
 
 
+add_temp_db_to_dj_settings = pytest.fixture(_add_db_to_dj_settings, scope="function")
+
+
+add_module_db_to_dj_settings = pytest.fixture(_add_db_to_dj_settings, scope="module")
+
+
+# TODO consider renaming dj_db to target_db
 @pytest.fixture
-def create_temp_dj_db(add_db_to_dj_settings, create_temp_db):
+def create_temp_dj_db(add_temp_db_to_dj_settings, create_temp_db):
     """
     Like create_temp_db, but adds the new db to Django's settings.DATABASES dict.
     """
     def _create_and_add(db_name):
         create_temp_db(db_name)
-        add_db_to_dj_settings(db_name)
+        add_temp_db_to_dj_settings(db_name)
+        return db_name
+    yield _create_and_add
+
+
+@pytest.fixture(scope="module")
+def create_module_dj_db(add_module_db_to_dj_settings, create_module_db):
+    """
+    Like create_module_db, but adds the new db to Django's settings.DATABASES dict.
+    """
+    def _create_and_add(db_name):
+        create_module_db(db_name)
+        add_module_db_to_dj_settings(db_name)
         return db_name
     yield _create_and_add
 
 
 @pytest.fixture(autouse=True)
-def enable_db_access_for_all_tests(transactional_db):
+def enable_db_access_for_all_tests(db):
     pass
 
 

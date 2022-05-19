@@ -18,12 +18,6 @@ def client():
     return APIClient()
 
 
-#   @pytest.fixture
-#   def test_db_model(test_db_name):
-#       database_model = Database.current_objects.create(name=test_db_name)
-#       return database_model
-
-
 @pytest.fixture
 def page(page):
     page.set_default_navigation_timeout(30000)

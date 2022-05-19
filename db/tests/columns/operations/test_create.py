@@ -57,7 +57,7 @@ def test_type_list_completeness(engine_with_schema):
         )
 
 
-@pytest.mark.parametrize("target_type", known_db_types)
+@pytest.mark.parametrize("target_type", sorted(known_db_types))
 def test_create_column(engine_with_schema, target_type):
     """
     One of the things this test checks is for every type in known_db_types, once that type is

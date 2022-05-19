@@ -8,10 +8,10 @@ import logging
 import random
 import string
 
+from django.db import connection as dj_connection
+
 from sqlalchemy.exc import OperationalError
 from sqlalchemy_utils import database_exists, create_database, drop_database
-
-from config.settings import DATABASES
 
 from db.engine import add_custom_types_to_ischema_names, create_engine
 from db.types import install
@@ -21,11 +21,26 @@ from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
 
 
 @pytest.fixture(scope="session")
-def get_uid():
+def worker_id(worker_id):
+    """
+    Guaranteed to always be a non-empty string.
+
+    Returns 'master' when we're not parallelizing, 'gw0', 'gw1', etc., otherwise.
+    """
+    return worker_id
+
+
+@pytest.fixture(scope="session")
+def get_uid(worker_id):
+    """
+    A factory of session-unique 4 letter strings.
+    """
     used_uids = set()
     def _get_uid():
         letters = string.ascii_letters
         candidate = "".join(random.sample(letters, 4))
+        if worker_id:
+            candidate = worker_id + '_' + candidate
         if candidate not in used_uids:
             used_uids.add(candidate)
             return candidate
@@ -34,12 +49,22 @@ def get_uid():
     yield _get_uid
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def uid(get_uid):
+    """
+    A session-unique string.
+    """
     return get_uid()
 
 
 def _create_db(get_uid):
+    """
+    A factory for Postgres mathesar-installed databases. A fixture made of this method tears down
+    created dbs when leaving scope.
+
+    This method is used to create two fixtures with different scopes, that's why it's not a fixture
+    itself.
+    """
     logger = logging.getLogger("_create_db" + "-" + get_uid())
     logger.debug("init")
     created_dbs = set()
@@ -47,7 +72,7 @@ def _create_db(get_uid):
         logger.debug(f"creating db {db_name}")
         engine = _create_engine(db_name)
         if database_exists(engine.url):
-            logger.error(f"db {db_name} already exists!")
+            logger.warning(f"db {db_name} already exists!")
             drop_database(engine.url)
         create_database(engine.url)
         created_dbs.add(db_name)
@@ -73,14 +98,29 @@ def _create_db(get_uid):
 create_temp_db = pytest.fixture(_create_db, scope="function")
 
 
+# This factory will clean up its created dbs after its module is finished testing.
+create_module_db = pytest.fixture(_create_db, scope="module")
+
+
 # This factory will clean up its created dbs after the whole testing session is finished.
 create_session_db = pytest.fixture(_create_db, scope="session")
 
 
-@pytest.fixture
-def test_db_name(create_session_db):
-    test_db_name = "mathesar_db_test"
-    yield create_session_db(test_db_name)
+
+@pytest.fixture(scope="session")
+def _default_test_db_name():
+    return "mathesar_db_test"
+
+
+@pytest.fixture(scope="session")
+def test_db_name(_default_test_db_name, worker_id, create_session_db):
+    """
+    A dynamic, yet non-random, db_name is used so that subsequent runs would automatically clean up
+    test databases that we failed to tear down.
+    """
+    db_name = f"{_default_test_db_name}_{worker_id}"
+    create_session_db(db_name)
+    yield db_name
 
 
 # TODO does testing this make sense?
@@ -90,14 +130,16 @@ def engine_without_ischema_names_updated(test_db_name):
     For testing environments where an engine might not be fully setup.
     """
     engine = _create_engine(test_db_name)
-    return engine
+    yield engine
+    engine.dispose()
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def engine(test_db_name):
     engine = _create_engine(test_db_name)
     add_custom_types_to_ischema_names(engine)
-    return engine
+    yield engine
+    engine.dispose()
 
 
 @pytest.fixture(scope="session")
@@ -159,29 +201,18 @@ def create_db_schema():
     logger.debug("exit")
 
 
-def _get_superuser_engine():
-    return create_engine(
-        _get_connection_string(
-            username=DATABASES["default"]["USER"],
-            password=DATABASES["default"]["PASSWORD"],
-            hostname=DATABASES["default"]["HOST"],
-            database=DATABASES["default"]["NAME"],
-        ),
-        future=True,
-    )
-
-
 def _get_connection_string(username, password, hostname, database):
     return f"postgresql://{username}:{password}@{hostname}/{database}"
 
 
 def _create_engine(db_name):
+    dj_connection_settings = dj_connection.settings_dict
     engine = create_engine(
         _get_connection_string(
-            DATABASES["default"]["USER"],
-            DATABASES["default"]["PASSWORD"],
-            DATABASES["default"]["HOST"],
-            db_name,
+            username=dj_connection_settings["USER"],
+            password=dj_connection_settings["PASSWORD"],
+            hostname=dj_connection_settings["HOST"],
+            database=db_name,
         ),
         future=True,
         # Setting a fixed timezone makes the timezone aware test cases predictable.

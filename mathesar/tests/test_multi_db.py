@@ -1,78 +1,22 @@
 import pytest
-from sqlalchemy import text
-from config.settings import DATABASES
 from django.core.cache import cache
-from django.conf import settings
-from dj_database_url import parse as db_url
 from django.core.exceptions import ValidationError
 
 from mathesar.models import Table, Schema, Database
 from mathesar.reflection import reflect_db_objects
-
-from db.engine import create_engine
-
-MULTI_DB_TEST_DB = "mathesar_multi_db_test"
+from mathesar.database.base import create_mathesar_engine
 
 
-def _get_connection_string(username, password, hostname, database, port=5432):
-    return f"postgresql://{username}:{password}@{hostname}:{port}/{database}"
+@pytest.fixture(autouse=True)
+def multi_db_test_db(create_temp_dj_db, uid):
+    db_name = f"mathesar_multi_db_test_{uid}"
+    create_temp_dj_db(db_name)
+    return db_name
 
 
-def _get_superuser_engine():
-    return create_engine(
-        _get_connection_string(
-            username=DATABASES["default"]["USER"],
-            password=DATABASES["default"]["PASSWORD"],
-            hostname=DATABASES["default"]["HOST"],
-            database=DATABASES["default"]["NAME"],
-        ),
-        future=True,
-    )
-
-
-@pytest.fixture(scope="module")
-def multi_db_test_db_name():
-    return MULTI_DB_TEST_DB
-
-
-@pytest.fixture(scope="module")
-def multi_db_test_db_connection_string(multi_db_test_db_name):
-    return _get_connection_string(
-        DATABASES["default"]["USER"],
-        DATABASES["default"]["PASSWORD"],
-        DATABASES["default"]["HOST"],
-        multi_db_test_db_name,
-    )
-
-
-@pytest.fixture(scope="module", autouse=True)
-def multi_db_test_db(multi_db_test_db_connection_string):
-    superuser_engine = _get_superuser_engine()
-    with superuser_engine.connect() as conn:
-        conn.execution_options(isolation_level="AUTOCOMMIT")
-        conn.execute(text(f"DROP DATABASE IF EXISTS {MULTI_DB_TEST_DB} WITH (FORCE)"))
-        conn.execute(text(f"CREATE DATABASE {MULTI_DB_TEST_DB}"))
-
-    settings.DATABASES[MULTI_DB_TEST_DB] = db_url(
-        multi_db_test_db_connection_string
-    )
-
-    yield MULTI_DB_TEST_DB
-
-    with superuser_engine.connect() as conn:
-        conn.execution_options(isolation_level="AUTOCOMMIT")
-        conn.execute(text(f"DROP DATABASE {MULTI_DB_TEST_DB} WITH (FORCE)"))
-
-    del settings.DATABASES[MULTI_DB_TEST_DB]
-
-
-# TODO replace with proper fixtures; currently this is largely a copy-paste of code in conftest.py
-@pytest.fixture(scope="module", autouse=True)
-def multi_db_engine(multi_db_test_db_connection_string):
-    return create_engine(
-        multi_db_test_db_connection_string,
-        future=True,
-    )
+@pytest.fixture
+def multi_db_engine(multi_db_test_db):
+    return create_mathesar_engine(multi_db_test_db)
 
 
 def test_multi_db_schema(engine, multi_db_engine, client, create_db_schema):
@@ -115,7 +59,7 @@ def test_multi_db_tables(engine, multi_db_engine, client, create_mathesar_table)
         assert table_name in response_tables
 
 
-def test_multi_db_oid_unique(multi_db_engine):
+def test_multi_db_oid_unique():
     """
     Ensure the same OID is allowed for different dbs
     """

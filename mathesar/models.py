@@ -77,6 +77,9 @@ class DatabaseObject(ReflectionManagerMixin, BaseModel):
     def __str__(self):
         return f"{self.__class__.__name__}: {self.oid}"
 
+    def __repr__ (self):
+        return f'<{self.__class__.__name__}: {self.oid}>'
+
 
 # TODO: Replace with a proper form of caching
 # See: https://github.com/centerofci/mathesar/issues/280
@@ -109,6 +112,9 @@ class Database(ReflectionManagerMixin, BaseModel):
         constituent DB types are supported.
         """
         return UIType
+
+    def __repr__ (self):
+        return f'{self.__class__.__name__}: {self.name}, {self.id}'
 
 
 class Schema(DatabaseObject):

@@ -67,7 +67,7 @@ def test_model_current_queryset_does_not_reflects_db_objects(model):
 
 
 @pytest.mark.parametrize('iteration', range(2))
-def test_database_engine_cache_stability(create_temp_dj_db, iteration):
+def test_database_engine_cache_stability(create_temp_dj_db, iteration, uid):
     """
     We are using an engine cache to minimize new engine creations; however, a cached engine might
     unexpectedly fail if its underlying database is dropped and then recreated. This test checks
@@ -77,7 +77,7 @@ def test_database_engine_cache_stability(create_temp_dj_db, iteration):
     drops the database during cleanup; the second, recreates the database, fetches a cached engine,
     and tests it.
     """
-    some_db_name = "engine_cache_stability_test_db"
+    some_db_name = uid
     create_temp_dj_db(some_db_name)
     db_model, _ = Database.objects.get_or_create(name=some_db_name)
     attempt_dumb_query(db_model._sa_engine)

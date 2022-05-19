@@ -1,16 +1,15 @@
 from enum import Enum
+import inspect
 
-from sqlalchemy import text
+from sqlalchemy import text, create_engine as sa_create_engine
 
 from db import constants
-from sqlalchemy import create_engine as sa_create_engine
+from db.utils import OrderByIds
 
 from typing import Optional, Sequence, Collection
 
-import inspect
 
-
-class DatabaseType:
+class DatabaseType(OrderByIds):
 
     value: str
 

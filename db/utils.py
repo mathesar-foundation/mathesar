@@ -20,3 +20,34 @@ def execute_statement(engine, statement, connection_to_use=None):
 
 def execute_query(engine, query, connection_to_use=None):
     return execute_statement(engine, query, connection_to_use=None).fetchall()
+
+
+class OrderByIds:
+    """
+    A mixin for ordering based on ids; useful at least for type enums in testing.
+    """
+
+    id: str
+
+    def __ge__(self, other):
+        if self._ordering_supported(other):
+            return self.id >= other.id
+        return NotImplemented
+
+    def __gt__(self, other):
+        if self._ordering_supported(other):
+            return self.id > other.id
+        return NotImplemented
+
+    def __le__(self, other):
+        if self._ordering_supported(other):
+            return self.id <= other.id
+        return NotImplemented
+
+    def __lt__(self, other):
+        if self._ordering_supported(other):
+            return self.id < other.id
+        return NotImplemented
+
+    def _ordering_supported(self, other):
+        return hasattr(other, 'id')
