@@ -444,3 +444,13 @@ class DataFile(BaseModel):
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)
     quotechar = models.CharField(max_length=1, default='"', blank=True)
+
+
+class PreviewColumnSettings(BaseModel):
+    columns = models.ManyToManyField(Column)
+    customized = models.BooleanField()
+
+
+class TableSettings(BaseModel):
+    preview_columns = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
+    table = models.OneToOneField(Table, on_delete=models.CASCADE)
