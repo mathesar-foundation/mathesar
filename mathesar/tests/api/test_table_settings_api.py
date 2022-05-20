@@ -54,7 +54,7 @@ def test_create_table_settings(client, schema, create_table, schema_name):
 def test_update_table_settings(client, column_test_table):
     cache.clear()
     columns = list(models.Column.objects.filter(table=column_test_table).values_list('id', flat=True))
-    settings_id = column_test_table.table_settings.id
+    settings_id = column_test_table.settings.id
     data = {
         "preview_columns": {
             'columns': columns,

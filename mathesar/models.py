@@ -459,4 +459,4 @@ class PreviewColumnSettings(BaseModel):
 
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_columns = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
-    table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="table_settings")
+    table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
