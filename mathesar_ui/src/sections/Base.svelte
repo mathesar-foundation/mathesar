@@ -59,7 +59,7 @@
   }
 
   function tabRemoved(e: { detail: { removedTab: MathesarTab } }) {
-    tabList.remove(e.detail.removedTab);
+    tabList.removeTabAndItsData(e.detail.removedTab);
   }
 
   // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055

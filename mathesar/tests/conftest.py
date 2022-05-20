@@ -8,7 +8,7 @@ from copy import deepcopy
 from django.core.files import File
 from django.core.cache import cache
 from django.conf import settings
-from django.test.utils import setup_databases, teardown_databases
+#from django.test.utils import setup_databases, teardown_databases
 
 from sqlalchemy import Column, MetaData, Integer
 from sqlalchemy import Table as SATable
@@ -47,15 +47,15 @@ dj_session_databases = pytest.fixture(_dj_databases, scope="session")
 
 
 @pytest.fixture(scope="session", autouse=True)
-def ignore_all_dbs_except_default(_default_test_db_name, dj_session_databases):
+def ignore_all_dbs_except_default(dj_session_databases):
     """
     Ignore the default test database: we're creating and tearing down our own databases dynamically.
     """
     logger = logging.getLogger("ignore_default_dj_test_db")
     logger.debug(f"before deleting keys: {set(dj_session_databases.keys())}")
-    database_to_keep = "default"
+    entry_name_to_keep = "default"
     for entry_name in set(dj_session_databases.keys()):
-        if entry_name != database_to_keep:
+        if entry_name != entry_name_to_keep:
             del dj_session_databases[entry_name]
     logger.debug(f"after deleting keys: {set(dj_session_databases.keys())}")
 
@@ -72,6 +72,7 @@ def automatically_clear_cache():
 
 
 #@pytest.fixture(autouse=True)
+# TODO decide if this is necessary
 def delete_all_models(django_db_blocker):
     yield
     logger = logging.getLogger('django model clearing fixture')

@@ -39,7 +39,7 @@ def test_database_types_installed(client, test_db_name):
                 MathesarCustomType.MULTICURRENCY_MONEY.id,
                 MathesarCustomType.MATHESAR_MONEY.id,
             ]),
-            'display_options': None
+            'display_options': DISPLAY_OPTIONS_BY_UI_TYPE.get(UIType.MONEY)
         },
         {
             "identifier": UIType.URI.id,

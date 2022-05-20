@@ -1,4 +1,4 @@
-from db.types.custom import datetime, email, money, multicurrency, uri
+from db.types.custom import datetime, email, money, multicurrency, uri, char
 from db.types.base import PostgresType, MathesarCustomType
 
 from frozendict import frozendict
@@ -10,6 +10,7 @@ CUSTOM_DB_TYPE_TO_SA_CLASS = frozendict(
         MathesarCustomType.EMAIL: email.Email,
         MathesarCustomType.MULTICURRENCY_MONEY: multicurrency.MulticurrencyMoney,
         MathesarCustomType.MATHESAR_MONEY: money.MathesarMoney,
+        PostgresType.MATHESAR_CHAR: mathesar_char.MATHESAR_CHAR,
         PostgresType.DATE: datetime.DATE,
         PostgresType.TIME_WITH_TIME_ZONE: datetime.TIME_WITH_TIME_ZONE,
         PostgresType.TIME_WITHOUT_TIME_ZONE: datetime.TIME_WITHOUT_TIME_ZONE,

@@ -437,7 +437,7 @@ export function cancelImport(fileImportStore: FileImport): void {
     );
     const existingTab = tabList.getImportTabByImportID(fileImportData.id);
     if (existingTab) {
-      tabList.remove(existingTab);
+      tabList.removeTabAndItsData(existingTab);
     }
     void deletePreviewTable(fileImportStore);
   }

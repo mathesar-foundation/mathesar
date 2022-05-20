@@ -21,7 +21,6 @@ def check_schema_response(response_schema, schema, schema_name, test_db_name, ch
 
 
 def test_schema_list(client, patent_schema):
-    cache.clear()
     response = client.get('/api/db/v0/schemas/')
     assert response.status_code == 200
 
@@ -106,7 +105,6 @@ def test_schema_detail(create_patents_table, client, test_db_name):
     """
     table = create_patents_table('NASA Schema Detail')
 
-    cache.clear()
     response = client.get(f'/api/db/v0/schemas/{table.schema.id}/')
     response_schema = response.json()
     assert response.status_code == 200
@@ -316,12 +314,10 @@ def test_schema_delete_404(client):
     assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
-def test_schema_get_with_reflect_new(client, test_db_name):
-    engine = create_mathesar_engine(test_db_name)
+def test_schema_get_with_reflect_new(client, engine):
     schema_name = 'a_new_schema'
     with engine.begin() as conn:
         conn.execute(text(f'CREATE SCHEMA {schema_name};'))
-    cache.clear()
     response = client.get('/api/db/v0/schemas/')
     # The schema number should only change after the GET request
     response_data = response.json()
@@ -336,8 +332,6 @@ def test_schema_get_with_reflect_new(client, test_db_name):
 def test_schema_get_with_reflect_change(client, engine, create_db_schema):
     schema_name = 'a_new_schema'
     create_db_schema(schema_name, engine)
-
-    cache.clear()
     response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     orig_created = [
@@ -366,7 +360,6 @@ def test_schema_get_with_reflect_change(client, engine, create_db_schema):
 def test_schema_create_duplicate(client, create_temp_dj_db):
     db_name = "tmp_db1"
     create_temp_dj_db(db_name)
-    cache.clear()
 
     data = {
         'name': 'Test Duplication Schema',
@@ -382,7 +375,6 @@ def test_schema_get_with_reflect_delete(client, engine, create_db_schema):
     schema_name = 'a_new_schema'
     create_db_schema(schema_name, engine)
 
-    cache.clear()
     response = client.get('/api/db/v0/schemas/')
     response_data = response.json()
     orig_created = [

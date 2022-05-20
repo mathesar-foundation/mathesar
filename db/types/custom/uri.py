@@ -9,7 +9,7 @@ from db.functions import hints
 from db.functions.base import DBFunction, Contains, sa_call_sql_function, Equal
 from db.functions.packed import DBFunctionPacked
 
-from db.types.base import MathesarCustomType, PostgresType, get_qualified_name, preparer, SCHEMA
+from db.types.base import MathesarCustomType, PostgresType, get_qualified_name, get_ma_qualified_schema
 
 DB_TYPE = MathesarCustomType.URI.id
 
@@ -29,16 +29,6 @@ class URIFunction(Enum):
     PATH = DB_TYPE + "_path"
     QUERY = DB_TYPE + "_query"
     FRAGMENT = DB_TYPE + "_fragment"
-
-
-# TODO remove if unneeded
-#   QualifiedURIFunction = Enum(
-#       "QualifiedURIFunction",
-#       {
-#           func_name.name: get_qualified_name(func_name.value)
-#           for func_name in URIFunction
-#       }
-#   )
 
 
 # This regex and the use of it are based on the one given in RFC 3986.
@@ -118,7 +108,7 @@ def install_tld_lookup_table(engine):
         TLDS_TABLE_NAME,
         MetaData(bind=engine),
         Column("tld", String, primary_key=True),
-        schema=preparer.quote_schema(SCHEMA)
+        schema=get_ma_qualified_schema(),
     )
     tlds_table.create()
     with engine.begin() as conn, open(TLDS_PATH) as f:

@@ -11,8 +11,6 @@ export {
 } from './display';
 export {
   filterCombinations,
-  filterConditions,
-  defaultFilterCondition,
   defaultFilterCombination,
   Filtering,
 } from './filtering';

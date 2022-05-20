@@ -31,7 +31,8 @@ def update_sa_table(table, validated_data):
     if errors:
         raise base_api_exceptions.GenericAPIException(errors, status_code=status.HTTP_400_BAD_REQUEST)
     try:
-        alter_table(table.name, table.oid, table.schema.name, table.schema._sa_engine, validated_data)
+        data = _update_id_to_attnum(table, validated_data)
+        alter_table(table.name, table.oid, table.schema.name, table.schema._sa_engine, data)
         reflect_columns_from_table(table)
     # TODO: Catch more specific exceptions
     except Exception as e:
@@ -71,3 +72,16 @@ def ensure_cached_engine_ready(engine):
 def attempt_dumb_query(engine):
     with engine.connect() as con:
         con.execute(text('select 1 as is_alive'))
+
+
+def _update_id_to_attnum(table, validated_data):
+    if 'columns' in validated_data:
+        data = validated_data.get('columns')
+        queryset = table.columns.all()
+        for column_data in data:
+            col_id = column_data.get('id', None)
+            if col_id is not None:
+                attnum = queryset.get(id=col_id).attnum
+                column_data['attnum'] = attnum
+                column_data.pop('id')
+    return validated_data

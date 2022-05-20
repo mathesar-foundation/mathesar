@@ -50,8 +50,8 @@ def _create_pizza_table(engine, schema):
     return create_test_table(table_name, cols, insert_data, schema, engine)
 
 
-def _get_pizza_column_data():
-    return [{
+def _get_pizza_column_data(table_oid, engine):
+    column_data = [{
         'name': 'ID',
         'type': PostgresType.CHARACTER_VARYING.id
     }, {
@@ -64,6 +64,10 @@ def _get_pizza_column_data():
         'name': 'Rating',
         'type': PostgresType.CHARACTER_VARYING.id
     }]
+    for data in column_data:
+        name = data['name']
+        data['attnum'] = get_column_attnum_from_name(table_oid, name, engine)
+    return column_data
 
 
 @pytest.mark.parametrize(
@@ -426,11 +430,12 @@ def test_batch_update_columns_no_changes(engine_with_schema):
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
-    batch_update_columns(table_oid, engine, _get_pizza_column_data())
+    column_data = _get_pizza_column_data(table_oid, engine)
+    batch_update_columns(table_oid, engine, column_data)
     updated_table = reflect_table(table.name, schema, engine)
 
     assert len(table.columns) == len(updated_table.columns)
-    for index, column in enumerate(table.columns):
+    for index, _ in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
         new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
         assert new_column_type == PostgresType.CHARACTER_VARYING.id
@@ -442,7 +447,7 @@ def test_batch_update_column_names(engine_with_schema):
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
-    column_data = _get_pizza_column_data()
+    column_data = _get_pizza_column_data(table_oid, engine)
     column_data[1]['name'] = 'Pizza Style'
     column_data[2]['name'] = 'Eaten Recently?'
 
@@ -450,7 +455,7 @@ def test_batch_update_column_names(engine_with_schema):
     updated_table = reflect_table(table.name, schema, engine)
 
     assert len(table.columns) == len(updated_table.columns)
-    for index, column in enumerate(table.columns):
+    for index, _ in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
         new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
         assert new_column_type == column_data[index]['type']
@@ -462,7 +467,7 @@ def test_batch_update_column_types(engine_with_schema):
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
-    column_data = _get_pizza_column_data()
+    column_data = _get_pizza_column_data(table_oid, engine)
     column_data[0]['type'] = PostgresType.DOUBLE_PRECISION.id
     column_data[2]['type'] = PostgresType.BOOLEAN.id
 
@@ -470,7 +475,7 @@ def test_batch_update_column_types(engine_with_schema):
     updated_table = reflect_table(table.name, schema, engine)
 
     assert len(table.columns) == len(updated_table.columns)
-    for index, column in enumerate(table.columns):
+    for index, _ in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
         new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
         assert new_column_type == column_data[index]['type']
@@ -482,7 +487,7 @@ def test_batch_update_column_names_and_types(engine_with_schema):
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
-    column_data = _get_pizza_column_data()
+    column_data = _get_pizza_column_data(table_oid, engine)
     column_data[0]['name'] = 'Pizza ID'
     column_data[0]['type'] = PostgresType.INTEGER.id
     column_data[1]['name'] = 'Pizza Style'
@@ -492,7 +497,7 @@ def test_batch_update_column_names_and_types(engine_with_schema):
     updated_table = reflect_table(table.name, schema, engine)
 
     assert len(table.columns) == len(updated_table.columns)
-    for index, column in enumerate(table.columns):
+    for index, _ in enumerate(table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
         new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
         assert new_column_type == column_data[index]['type']
@@ -504,15 +509,15 @@ def test_batch_update_column_drop_columns(engine_with_schema):
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
-    column_data = _get_pizza_column_data()
-    column_data[0] = {}
-    column_data[1] = {}
+    column_data = _get_pizza_column_data(table_oid, engine)
+    column_data[0] = {'attnum': get_column_attnum_from_name(table_oid, column_data[0]['name'], engine)}
+    column_data[1] = {'attnum': get_column_attnum_from_name(table_oid, column_data[1]['name'], engine)}
 
     batch_update_columns(table_oid, engine, column_data)
     updated_table = reflect_table(table.name, schema, engine)
 
     assert len(updated_table.columns) == len(table.columns) - 2
-    for index, column in enumerate(updated_table.columns):
+    for index, _ in enumerate(updated_table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
         new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
         assert new_column_type == column_data[index - 2]['type']
@@ -524,18 +529,18 @@ def test_batch_update_column_all_operations(engine_with_schema):
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
-    column_data = _get_pizza_column_data()
+    column_data = _get_pizza_column_data(table_oid, engine)
     column_data[0]['name'] = 'Pizza ID'
     column_data[0]['type'] = PostgresType.INTEGER.id
     column_data[1]['name'] = 'Pizza Style'
     column_data[2]['type'] = PostgresType.BOOLEAN.id
-    column_data[3] = {}
+    column_data[3] = {'attnum': get_column_attnum_from_name(table_oid, column_data[3]['name'], engine)}
 
     batch_update_columns(table_oid, engine, column_data)
     updated_table = reflect_table(table.name, schema, engine)
 
     assert len(updated_table.columns) == len(table.columns) - 1
-    for index, column in enumerate(updated_table.columns):
+    for index, _ in enumerate(updated_table.columns):
         new_column_type_class = updated_table.columns[index].type.__class__
         new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
         assert new_column_type == column_data[index]['type']

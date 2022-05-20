@@ -3,7 +3,7 @@
   import type { Column } from '@mathesar/stores/table-data/types';
 
   export let columns: Column[];
-  export let column: Column;
+  export let column: Column | undefined;
 </script>
 
 <Select

@@ -41,6 +41,56 @@ def create_data_types_table(data_types_csv_filepath, create_table):
 
 
 @pytest.fixture
+def self_referential_table(create_table, get_uid):
+    return create_table(
+        table_name=get_uid(),
+        schema_name=get_uid(),
+        csv_filepath='mathesar/tests/data/self_referential_table.csv',
+    )
+
+
+@pytest.fixture
+def two_foreign_key_tables(_create_two_tables):
+    return _create_two_tables(
+        'mathesar/tests/data/base_table.csv',
+        'mathesar/tests/data/reference_table.csv',
+    )
+
+
+@pytest.fixture
+def two_multi_column_foreign_key_tables(_create_two_tables):
+    return _create_two_tables(
+        'mathesar/tests/data/multi_column_foreign_key_base_table.csv',
+        'mathesar/tests/data/multi_column_reference_table.csv'
+    )
+
+
+@pytest.fixture
+def two_invalid_related_data_foreign_key_tables(_create_two_tables):
+    return _create_two_tables(
+        'mathesar/tests/data/invalid_reference_base_table.csv',
+        'mathesar/tests/data/reference_table.csv'
+    )
+
+
+@pytest.fixture
+def _create_two_tables(create_table, get_uid):
+    def _create(two_table_names=(get_uid(), get_uid()), schema_name=get_uid(), *two_csv_filepaths):
+        assert len(two_table_names) == 2
+        assert len(two_csv_filepaths) == 2
+        return tuple(
+            create_table(
+                table_name=table_name,
+                schema_name=schema_name,
+                csv_filepath=csv_filepath,
+            )
+            for table_name, csv_filepath
+            in zip(two_table_names, two_csv_filepaths)
+        )
+    return _create
+
+
+@pytest.fixture
 def table_for_reflection(engine):
     schema_name = 'a_new_schema'
     table_name = 'a_new_table'

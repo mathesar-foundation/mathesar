@@ -77,6 +77,14 @@ export interface BooleanDisplayOptions extends Record<string, unknown> {
   } | null;
 }
 
+export type DurationUnit = 'd' | 'h' | 'm' | 's' | 'ms';
+
+export interface DurationDisplayOptions extends Record<string, unknown> {
+  min: DurationUnit | null;
+  max: DurationUnit | null;
+  show_units: boolean | null;
+}
+
 export interface BaseColumn {
   id: number;
   name: string;
@@ -103,6 +111,7 @@ export interface Column extends BaseColumn {
   display_options: Record<string, unknown> | null;
 }
 
+// TODO: Remove specification DB types here
 export interface NumberColumn extends Column {
   type:
     | 'BIGINT'

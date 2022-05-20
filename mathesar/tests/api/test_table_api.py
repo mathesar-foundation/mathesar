@@ -370,12 +370,22 @@ def test_table_type_suggestion(client, schema, engine_with_schema):
     table = Table.objects.get(id=response_table['id'])
 
     EXPECTED_TYPES = {
+<<<<<<< HEAD
         'col_1': PostgresType.NUMERIC.id,
         'col_2': PostgresType.BOOLEAN.id,
         'col_3': PostgresType.BOOLEAN.id,
         'col_4': PostgresType.TEXT.id,
         'col_5': PostgresType.TEXT.id,
         'col_6': PostgresType.NUMERIC.id
+=======
+        'col_1': 'NUMERIC',
+        'col_2': 'BOOLEAN',
+        'col_3': 'BOOLEAN',
+        'col_4': 'TEXT',
+        'col_5': 'TEXT',
+        'col_6': 'NUMERIC',
+        'col_7': 'MATHESAR_TYPES.MATHESAR_MONEY'
+>>>>>>> master
     }
     response = client.get(f'/api/db/v0/tables/{table.id}/type_suggestions/')
     response_table = response.json()
@@ -410,6 +420,7 @@ def test_table_previews(client, schema, engine_with_schema):
 
     post_body = {
         'columns': [
+<<<<<<< HEAD
             {'name': 'id', 'type': PostgresType.INTEGER.id},
             {'name': 'col_1', 'type': PostgresType.NUMERIC.id},
             {'name': 'col_2', 'type': PostgresType.BOOLEAN.id},
@@ -417,6 +428,16 @@ def test_table_previews(client, schema, engine_with_schema):
             {'name': 'col_4', 'type': PostgresType.CHARACTER_VARYING.id},
             {'name': 'col_5', 'type': PostgresType.CHARACTER_VARYING.id},
             {'name': 'col_6', 'type': PostgresType.NUMERIC.id}
+=======
+            {"name": "id", "type": "INTEGER"},
+            {"name": "col_1", "type": "NUMERIC"},
+            {"name": "col_2", "type": "BOOLEAN"},
+            {"name": "col_3", "type": "BOOLEAN"},
+            {"name": "col_4", "type": "VARCHAR"},
+            {"name": "col_5", "type": "VARCHAR"},
+            {"name": "col_6", "type": "NUMERIC"},
+            {"name": "col_7", "type": "MATHESAR_TYPES.MATHESAR_MONEY"}
+>>>>>>> master
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
@@ -425,10 +446,10 @@ def test_table_previews(client, schema, engine_with_schema):
         'name': 'Type Modification Table',
         'columns': post_body['columns'],
         'records': [
-            {'id': 1, 'col_1': 0.0, 'col_2': False, 'col_3': True, 'col_4': 't', 'col_5': 'a', 'col_6': 2.0},
-            {'id': 2, 'col_1': 2.0, 'col_2': True, 'col_3': False, 'col_4': 'false', 'col_5': 'cat', 'col_6': 1.0},
-            {'id': 3, 'col_1': 1.0, 'col_2': True, 'col_3': True, 'col_4': '2', 'col_5': 'mat', 'col_6': 0.0},
-            {'id': 4, 'col_1': 0.0, 'col_2': False, 'col_3': False, 'col_4': '0', 'col_5': 'bat', 'col_6': 0.0}
+            {'id': 1, 'col_1': 0.0, 'col_2': False, 'col_3': True, 'col_4': 't', 'col_5': 'a', 'col_6': 2.0, 'col_7': 5},
+            {'id': 2, 'col_1': 2.0, 'col_2': True, 'col_3': False, 'col_4': 'false', 'col_5': 'cat', 'col_6': 1.0, 'col_7': 1},
+            {'id': 3, 'col_1': 1.0, 'col_2': True, 'col_3': True, 'col_4': '2', 'col_5': 'mat', 'col_6': 0.0, 'col_7': 2},
+            {'id': 4, 'col_1': 0.0, 'col_2': False, 'col_3': False, 'col_4': '0', 'col_5': 'bat', 'col_6': 0.0, 'col_7': 3}
         ],
     }
     actual_dict = response.json()
@@ -452,12 +473,22 @@ def test_table_previews_wrong_column_number(client, schema, engine_with_schema):
 
     post_body = {
         'columns': [
+<<<<<<< HEAD
             {'name': 'id', 'type': PostgresType.INTEGER.id},
             {'name': 'col_2', 'type': PostgresType.BOOLEAN.id},
             {'name': 'col_3', 'type': PostgresType.BOOLEAN.id},
             {'name': 'col_4', 'type': PostgresType.CHARACTER_VARYING.id},
             {'name': 'col_5', 'type': PostgresType.CHARACTER_VARYING.id},
             {'name': 'col_6', 'type': PostgresType.NUMERIC.id}
+=======
+            {"name": "id", "type": "INTEGER"},
+            {"name": "col_2", "type": "BOOLEAN"},
+            {"name": "col_3", "type": "BOOLEAN"},
+            {"name": "col_4", "type": "VARCHAR"},
+            {"name": "col_5", "type": "VARCHAR"},
+            {"name": "col_6", "type": "NUMERIC"},
+            {"name": "col_7", "type": "MATHESAR_TYPES.MATHESAR_MONEY"}
+>>>>>>> master
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
@@ -482,6 +513,7 @@ def test_table_previews_invalid_type_cast(client, schema, engine_with_schema):
 
     post_body = {
         'columns': [
+<<<<<<< HEAD
             {'name': 'id', 'type': PostgresType.INTEGER.id},
             {'name': 'col_1', 'type': PostgresType.NUMERIC.id},
             {'name': 'col_2', 'type': PostgresType.BOOLEAN.id},
@@ -489,6 +521,16 @@ def test_table_previews_invalid_type_cast(client, schema, engine_with_schema):
             {'name': 'col_4', 'type': PostgresType.NUMERIC.id},
             {'name': 'col_5', 'type': PostgresType.CHARACTER_VARYING.id},
             {'name': 'col_6', 'type': PostgresType.NUMERIC.id}
+=======
+            {"name": "id", "type": "INTEGER"},
+            {"name": "col_1", "type": "NUMERIC"},
+            {"name": "col_2", "type": "BOOLEAN"},
+            {"name": "col_3", "type": "BOOLEAN"},
+            {"name": "col_4", "type": "NUMERIC"},
+            {"name": "col_5", "type": "VARCHAR"},
+            {"name": "col_6", "type": "NUMERIC"},
+            {"name": "col_7", "type": "MATHESAR_TYPES.MATHESAR_MONEY"}
+>>>>>>> master
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
@@ -513,6 +555,7 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_with_sche
 
     post_body = {
         'columns': [
+<<<<<<< HEAD
             {'name': 'id', 'type': PostgresType.INTEGER.id},
             {'name': 'col_1', 'type': PostgresType.NUMERIC.id},
             {'name': 'col_2', 'type': PostgresType.BOOLEAN.id},
@@ -520,6 +563,16 @@ def test_table_previews_invalid_type_cast_check(client, schema, engine_with_sche
             {'name': 'col_4', 'type': PostgresType.NUMERIC.id},
             {'name': 'col_5', 'type': MathesarCustomType.EMAIL.id},
             {'name': 'col_6', 'type': PostgresType.NUMERIC.id}
+=======
+            {"name": "id", "type": "INTEGER"},
+            {"name": "col_1", "type": "NUMERIC"},
+            {"name": "col_2", "type": "BOOLEAN"},
+            {"name": "col_3", "type": "BOOLEAN"},
+            {"name": "col_4", "type": "NUMERIC"},
+            {"name": "col_5", "type": "mathesar_types.email"},
+            {"name": "col_6", "type": "NUMERIC"},
+            {"name": "col_7", "type": "MATHESAR_TYPES.MATHESAR_MONEY"}
+>>>>>>> master
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
@@ -543,6 +596,7 @@ def test_table_previews_unsupported_type(client, schema, engine_with_schema):
 
     post_body = {
         'columns': [
+<<<<<<< HEAD
             {'name': 'id', 'type': PostgresType.INTEGER.id},
             {'name': 'col_1', 'type': 'notatype'},
             {'name': 'col_2', 'type': PostgresType.BOOLEAN.id},
@@ -550,6 +604,16 @@ def test_table_previews_unsupported_type(client, schema, engine_with_schema):
             {'name': 'col_4', 'type': PostgresType.NUMERIC.id},
             {'name': 'col_5', 'type': PostgresType.CHARACTER_VARYING.id},
             {'name': 'col_6', 'type': PostgresType.NUMERIC.id}
+=======
+            {"name": "id", "type": "INTEGER"},
+            {"name": "col_1", "type": "notatype"},
+            {"name": "col_2", "type": "BOOLEAN"},
+            {"name": "col_3", "type": "BOOLEAN"},
+            {"name": "col_4", "type": "NUMERIC"},
+            {"name": "col_5", "type": "VARCHAR"},
+            {"name": "col_6", "type": "NUMERIC"},
+            {"name": "col_7", "type": "MATHESAR_TYPES.MATHESAR_MONEY"}
+>>>>>>> master
         ]
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
@@ -872,7 +936,6 @@ def test_table_update(client, create_patents_table):
 
 def test_table_get_with_reflect_new(client, table_for_reflection):
     _, table_name, _ = table_for_reflection
-    cache.clear()
     response = client.get('/api/db/v0/tables/')
     # The table number should only change after the GET request
     response_data = response.json()
@@ -900,7 +963,6 @@ def check_columns_response(created_columns, expected_response):
 
 def test_table_get_with_reflect_column_change(client, table_for_reflection):
     schema_name, table_name, engine = table_for_reflection
-    cache.clear()
     response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     orig_created = [
@@ -928,7 +990,6 @@ def test_table_get_with_reflect_column_change(client, table_for_reflection):
 
 def test_table_get_with_reflect_name_change(client, table_for_reflection):
     schema_name, table_name, engine = table_for_reflection
-    cache.clear()
     response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     orig_created = [
@@ -959,7 +1020,6 @@ def test_table_get_with_reflect_name_change(client, table_for_reflection):
 
 def test_table_get_with_reflect_delete(client, table_for_reflection):
     schema_name, table_name, engine = table_for_reflection
-    cache.clear()
     response = client.get('/api/db/v0/tables/')
     response_data = response.json()
     orig_created = [
@@ -991,8 +1051,8 @@ def test_table_viewset_checks_cache(client):
     mock_reflect.assert_called()
 
 
-def _get_patents_column_data():
-    return [{
+def _get_patents_column_data(table):
+    column_data = [{
         'name': 'id',
         'type': PostgresType.INTEGER.id,
     }, {
@@ -1017,6 +1077,11 @@ def _get_patents_column_data():
         'name': 'Patent Expiration Date',
         'type': PostgresType.TEXT.id,
     }]
+    bidirectmap = table.get_column_name_id_bidirectional_map()
+    for data in column_data:
+        name = data['name']
+        data['id'] = bidirectmap[name]
+    return column_data
 
 
 def test_table_patch_same_table_name(create_patents_table, client):
@@ -1038,7 +1103,7 @@ def test_table_patch_columns_and_table_name(create_patents_table, client):
 
     body = {
         'name': 'PATCH COLUMNS 1',
-        'columns': _get_patents_column_data()
+        'columns': _get_patents_column_data(table)
     }
     # Need to specify format here because otherwise the body gets sent
     # as a multi-part form, which can't handle nested keys.
@@ -1051,8 +1116,13 @@ def test_table_patch_columns_and_table_name(create_patents_table, client):
 
 def test_table_patch_columns_no_changes(create_patents_table, client, engine_with_schema):
     table_name = 'PATCH columns 2'
+<<<<<<< HEAD
     table = create_patents_table(table_name)
     column_data = _get_patents_column_data()
+=======
+    table = create_table(table_name)
+    column_data = _get_patents_column_data(table)
+>>>>>>> master
 
     body = {
         'columns': column_data
@@ -1066,8 +1136,13 @@ def test_table_patch_columns_no_changes(create_patents_table, client, engine_wit
 
 def test_table_patch_columns_one_name_change(create_patents_table, client, engine_with_schema):
     table_name = 'PATCH columns 3'
+<<<<<<< HEAD
     table = create_patents_table(table_name)
     column_data = _get_patents_column_data()
+=======
+    table = create_table(table_name)
+    column_data = _get_patents_column_data(table)
+>>>>>>> master
     column_data[1]['name'] = 'NASA Center'
 
     body = {
@@ -1082,8 +1157,13 @@ def test_table_patch_columns_one_name_change(create_patents_table, client, engin
 
 def test_table_patch_columns_two_name_changes(create_patents_table, client, engine_with_schema):
     table_name = 'PATCH columns 4'
+<<<<<<< HEAD
     table = create_patents_table(table_name)
     column_data = _get_patents_column_data()
+=======
+    table = create_table(table_name)
+    column_data = _get_patents_column_data(table)
+>>>>>>> master
     column_data[1]['name'] = 'NASA Center'
     column_data[2]['name'] = 'Patent Status'
 
@@ -1099,9 +1179,15 @@ def test_table_patch_columns_two_name_changes(create_patents_table, client, engi
 
 def test_table_patch_columns_one_type_change(create_patents_table, client, engine_with_schema):
     table_name = 'PATCH columns 5'
+<<<<<<< HEAD
     table = create_patents_table(table_name)
     column_data = _get_patents_column_data()
     column_data[7]['type'] = PostgresType.DATE.id
+=======
+    table = create_table(table_name)
+    column_data = _get_patents_column_data(table)
+    column_data[7]['type'] = 'DATE'
+>>>>>>> master
 
     body = {
         'columns': column_data
@@ -1113,8 +1199,8 @@ def test_table_patch_columns_one_type_change(create_patents_table, client, engin
     _check_columns(response_json['columns'], column_data)
 
 
-def _get_data_types_column_data():
-    return [{
+def _get_data_types_column_data(table):
+    column_data = [{
         'name': 'id',
         'type': PostgresType.INTEGER.id
     }, {
@@ -1130,15 +1216,27 @@ def _get_data_types_column_data():
         'name': 'Decimal',
         'type': PostgresType.TEXT.id
     }]
+    bidirectmap = table.get_column_name_id_bidirectional_map()
+    for data in column_data:
+        name = data['name']
+        data['id'] = bidirectmap[name]
+    return column_data
 
 
 def test_table_patch_columns_multiple_type_change(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 6'
     table = create_data_types_table(table_name)
+<<<<<<< HEAD
     column_data = _get_data_types_column_data()
     column_data[1]['type'] = PostgresType.INTEGER.id
     column_data[2]['type'] = PostgresType.BOOLEAN.id
     column_data[4]['type'] = PostgresType.NUMERIC.id
+=======
+    column_data = _get_data_types_column_data(table)
+    column_data[1]['type'] = 'INTEGER'
+    column_data[2]['type'] = 'BOOLEAN'
+    column_data[4]['type'] = 'NUMERIC'
+>>>>>>> master
 
     body = {
         'columns': column_data
@@ -1158,8 +1256,8 @@ def _check_columns_with_dropped(response_column_data, request_column_data, dropp
 def test_table_patch_columns_one_drop(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 7'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
-    column_data[1] = {}
+    column_data = _get_data_types_column_data(table)
+    column_data[1] = {'id': column_data[1]['id']}
 
     body = {
         'columns': column_data
@@ -1175,9 +1273,9 @@ def test_table_patch_columns_multiple_drop(create_data_types_table, client, engi
     INDICES_TO_DROP = [1, 2]
     table_name = 'PATCH columns 8'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
+    column_data = _get_data_types_column_data(table)
     for index in INDICES_TO_DROP:
-        column_data[index] = {}
+        column_data[index] = {'id': column_data[index]['id']}
 
     body = {
         'columns': column_data
@@ -1192,8 +1290,13 @@ def test_table_patch_columns_multiple_drop(create_data_types_table, client, engi
 def test_table_patch_columns_diff_name_type_change(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 9'
     table = create_data_types_table(table_name)
+<<<<<<< HEAD
     column_data = _get_data_types_column_data()
     column_data[1]['type'] = PostgresType.INTEGER.id
+=======
+    column_data = _get_data_types_column_data(table)
+    column_data[1]['type'] = 'INTEGER'
+>>>>>>> master
     column_data[2]['name'] = 'Checkbox'
 
     body = {
@@ -1209,8 +1312,13 @@ def test_table_patch_columns_diff_name_type_change(create_data_types_table, clie
 def test_table_patch_columns_same_name_type_change(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 10'
     table = create_data_types_table(table_name)
+<<<<<<< HEAD
     column_data = _get_data_types_column_data()
     column_data[2]['type'] = PostgresType.BOOLEAN.id
+=======
+    column_data = _get_data_types_column_data(table)
+    column_data[2]['type'] = 'BOOLEAN'
+>>>>>>> master
     column_data[2]['name'] = 'Checkbox'
 
     body = {
@@ -1226,8 +1334,13 @@ def test_table_patch_columns_same_name_type_change(create_data_types_table, clie
 def test_table_patch_columns_multiple_name_type_change(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 11'
     table = create_data_types_table(table_name)
+<<<<<<< HEAD
     column_data = _get_data_types_column_data()
     column_data[1]['type'] = PostgresType.INTEGER.id
+=======
+    column_data = _get_data_types_column_data(table)
+    column_data[1]['type'] = 'INTEGER'
+>>>>>>> master
     column_data[1]['name'] = 'Int.'
     column_data[2]['type'] = PostgresType.BOOLEAN.id
     column_data[2]['name'] = 'Checkbox'
@@ -1245,10 +1358,15 @@ def test_table_patch_columns_multiple_name_type_change(create_data_types_table, 
 def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 12'
     table = create_data_types_table(table_name)
+<<<<<<< HEAD
     column_data = _get_data_types_column_data()
     column_data[1]['type'] = PostgresType.INTEGER.id
+=======
+    column_data = _get_data_types_column_data(table)
+    column_data[1]['type'] = 'INTEGER'
+>>>>>>> master
     column_data[2]['name'] = 'Checkbox'
-    column_data[3] = {}
+    column_data[3] = {'id': column_data[3]['id']}
 
     body = {
         'columns': column_data
@@ -1263,11 +1381,17 @@ def test_table_patch_columns_diff_name_type_drop(create_data_types_table, client
 def test_table_patch_columns_same_name_type_drop(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 13'
     table = create_data_types_table(table_name)
+<<<<<<< HEAD
     column_data = _get_data_types_column_data()
     column_data[1] = {}
     column_data[2]['type'] = PostgresType.BOOLEAN.id
+=======
+    column_data = _get_data_types_column_data(table)
+    column_data[1] = {'id': column_data[1]['id']}
+    column_data[2]['type'] = 'BOOLEAN'
+>>>>>>> master
     column_data[2]['name'] = 'Checkbox'
-    column_data[3] = {}
+    column_data[3] = {'id': column_data[3]['id']}
 
     body = {
         'columns': column_data
@@ -1282,8 +1406,13 @@ def test_table_patch_columns_same_name_type_drop(create_data_types_table, client
 def test_table_patch_columns_invalid_type(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 14'
     table = create_data_types_table(table_name)
+<<<<<<< HEAD
     column_data = _get_data_types_column_data()
     column_data[3]['type'] = PostgresType.BOOLEAN.id
+=======
+    column_data = _get_data_types_column_data(table)
+    column_data[3]['type'] = 'BOOLEAN'
+>>>>>>> master
 
     body = {
         'columns': column_data
@@ -1298,7 +1427,7 @@ def test_table_patch_columns_invalid_type(create_data_types_table, client, engin
 def test_table_patch_columns_invalid_type_with_name(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 15'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
+    column_data = _get_data_types_column_data(table)
     column_data[1]['name'] = 'hello'
     column_data[3]['type'] = PostgresType.BOOLEAN.id
 
@@ -1312,16 +1441,22 @@ def test_table_patch_columns_invalid_type_with_name(create_data_types_table, cli
 
     current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
-    original_column_data = _get_data_types_column_data()
+    original_column_data = _get_data_types_column_data(table)
     _check_columns(current_table_response.json()['columns'], original_column_data)
 
 
 def test_table_patch_columns_invalid_type_with_type(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 16'
     table = create_data_types_table(table_name)
+<<<<<<< HEAD
     column_data = _get_data_types_column_data()
     column_data[1]['type'] = PostgresType.INTEGER.id
     column_data[3]['type'] = PostgresType.BOOLEAN.id
+=======
+    column_data = _get_data_types_column_data(table)
+    column_data[1]['type'] = 'INTEGER'
+    column_data[3]['type'] = 'BOOLEAN'
+>>>>>>> master
 
     body = {
         'columns': column_data
@@ -1333,16 +1468,22 @@ def test_table_patch_columns_invalid_type_with_type(create_data_types_table, cli
 
     current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
-    original_column_data = _get_data_types_column_data()
+    original_column_data = _get_data_types_column_data(table)
     _check_columns(current_table_response.json()['columns'], original_column_data)
 
 
 def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 17'
     table = create_data_types_table(table_name)
+<<<<<<< HEAD
     column_data = _get_data_types_column_data()
     column_data[1] = {}
     column_data[3]['type'] = PostgresType.BOOLEAN.id
+=======
+    column_data = _get_data_types_column_data(table)
+    column_data[1] = {'id': column_data[1]['id']}
+    column_data[3]['type'] = 'BOOLEAN'
+>>>>>>> master
 
     body = {
         'columns': column_data
@@ -1354,15 +1495,15 @@ def test_table_patch_columns_invalid_type_with_drop(create_data_types_table, cli
 
     current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
-    original_column_data = _get_data_types_column_data()
+    original_column_data = _get_data_types_column_data(table)
     _check_columns(current_table_response.json()['columns'], original_column_data)
 
 
 def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_types_table, client, engine_with_schema):
     table_name = 'PATCH columns 18'
     table = create_data_types_table(table_name)
-    column_data = _get_data_types_column_data()
-    column_data[1] = {}
+    column_data = _get_data_types_column_data(table)
+    column_data[1] = {'id': column_data[1]['id']}
     column_data[2]['name'] = 'Checkbox'
     column_data[2]['type'] = PostgresType.BOOLEAN.id
     column_data[3]['type'] = PostgresType.BOOLEAN.id
@@ -1377,5 +1518,5 @@ def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_type
 
     current_table_response = client.get(f'/api/db/v0/tables/{table.id}/')
     # The table should not have changed
-    original_column_data = _get_data_types_column_data()
+    original_column_data = _get_data_types_column_data(table)
     _check_columns(current_table_response.json()['columns'], original_column_data)

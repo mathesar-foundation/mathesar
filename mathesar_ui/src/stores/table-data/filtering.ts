@@ -1,75 +1,48 @@
 import type {
-  FilterCombination as ApiFilterCombination,
+  FilterCombination,
   GetRequestParams,
-  FilterOperation,
-  FilterCondition as ApiFilterCondition,
+  FilterCondition,
+  FilterConditionParams,
 } from '@mathesar/api/tables/records';
-
-export interface FilterCondition {
-  id: FilterOperation;
-  label: string;
-}
-
-export const filterConditions: FilterCondition[] = [
-  { id: 'eq', label: 'equals' },
-  { id: 'ne', label: 'not equals' },
-  { id: 'get_duplicates', label: 'has duplicates' },
-];
-
-export const defaultFilterCondition = filterConditions[0];
 
 export interface FilterEntry {
   readonly columnId: number;
-  readonly condition: FilterCondition;
-  readonly value: string;
+  readonly conditionId: string;
+  readonly value: unknown;
 }
 
-function makeApiFilterCondition(filterEntry: FilterEntry): ApiFilterCondition {
-  return {
-    field: filterEntry.columnId,
-    op: filterEntry.condition.id,
-    value: filterEntry.value,
-  };
+function makeApiFilterCondition(filterEntry: FilterEntry): FilterCondition {
+  const params: FilterConditionParams = [{ column_id: [filterEntry.columnId] }];
+  if (typeof filterEntry.value !== 'undefined') {
+    params.push({ literal: [filterEntry.value] });
+  }
+  return { [filterEntry.conditionId]: params };
 }
 
 /** [ columnId, operation, value ] */
-type TerseFilterEntry = [number, FilterOperation, string];
+type TerseFilterEntry = [number, string, unknown];
 
 function makeTerseFilterEntry(filterEntry: FilterEntry): TerseFilterEntry {
-  return [filterEntry.columnId, filterEntry.condition.id, filterEntry.value];
+  return [filterEntry.columnId, filterEntry.conditionId, filterEntry.value];
 }
 
 function makeFilterEntry(terseFilterEntry: TerseFilterEntry): FilterEntry {
-  const filterOperation = terseFilterEntry[1];
-  let condition = filterConditions.find((c) => c.id === filterOperation);
-  if (!condition) {
-    console.error(`Unknown filter operation ${filterOperation}.`);
-    condition = defaultFilterCondition;
-  }
   return {
     columnId: terseFilterEntry[0],
-    condition,
+    conditionId: terseFilterEntry[1],
     value: terseFilterEntry[2],
   };
 }
 
-export interface FilterCombination {
-  readonly id: ApiFilterCombination;
-  readonly label: string;
-}
-
-export const filterCombinations: FilterCombination[] = [
-  { id: 'and', label: 'and' },
-  { id: 'or', label: 'or' },
-];
+export const filterCombinations: FilterCombination[] = ['and', 'or'];
 export const defaultFilterCombination = filterCombinations[0];
 
-export type TerseFiltering = [ApiFilterCombination, TerseFilterEntry[]];
+export type TerseFiltering = [FilterCombination, TerseFilterEntry[]];
 
 export class Filtering {
-  readonly combination: FilterCombination;
+  combination: FilterCombination;
 
-  readonly entries: FilterEntry[];
+  entries: FilterEntry[];
 
   constructor({
     combination,
@@ -113,37 +86,27 @@ export class Filtering {
     });
   }
 
-  recordsRequestParams(): Pick<GetRequestParams, 'filters'> {
+  recordsRequestParams(): Pick<GetRequestParams, 'filter'> {
     if (!this.entries.length) {
       return {};
     }
     const conditions = this.entries.map(makeApiFilterCondition);
-
-    if (
-      this.combination.id === 'and' &&
-      this.entries.length === 1 &&
-      this.entries[0].condition.id === 'get_duplicates'
-    ) {
-      // Special handling for the get_duplicates operation due to backend bug.
-      // The backend can only handle the get_duplicates operation by itself. The
-      // "and" must be removed and the value must be in an array.
-      conditions[0].value = [conditions[0].value];
-      return { filters: conditions };
+    if (conditions.length === 1) {
+      return { filter: conditions[0] };
     }
-
-    const filters =
-      this.combination.id === 'and' ? { and: conditions } : { or: conditions };
-    return { filters };
+    const filter =
+      this.combination === 'and' ? { and: conditions } : { or: conditions };
+    return { filter };
   }
 
   terse(): TerseFiltering {
-    return [this.combination.id, this.entries.map(makeTerseFilterEntry)];
+    return [this.combination, this.entries.map(makeTerseFilterEntry)];
   }
 
   static fromTerse(terse: TerseFiltering): Filtering {
     return new Filtering({
       combination:
-        filterCombinations.find((c) => c.id === terse[0]) ??
+        filterCombinations.find((c) => c === terse[0]) ??
         defaultFilterCombination,
       entries: terse[1].map(makeFilterEntry),
     });

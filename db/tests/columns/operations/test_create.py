@@ -42,11 +42,10 @@ def _check_duplicate_unique_constraint(
         assert len(constraints_) == 0
 
 
-def test_type_list_completeness(engine_with_schema):
+def test_type_list_completeness(engine):
     """
     Ensure that unavailable types are unavailable for a good reason.
     """
-    engine, schema = engine_with_schema
     actual_supported_db_types = get_available_known_db_types(engine)
     unavailable_types = set.difference(set(known_db_types), set(actual_supported_db_types))
     for db_type in unavailable_types:

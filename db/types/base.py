@@ -148,21 +148,25 @@ class PostgresType(DatabaseType, Enum):
     UUID = 'uuid'
 
 
-# Since we want to have our identifiers quoted appropriately for use in
-# PostgreSQL, we want to use the postgres dialect preparer to set this up.
-preparer = sa_create_engine("postgresql://").dialect.identifier_preparer
-
-
 SCHEMA = f"{constants.MATHESAR_PREFIX}types"
 
-# Should usually equal `mathesar_types`
-_ma_type_qualifier_prefix = preparer.quote_schema(SCHEMA)
+# Since we want to have our identifiers quoted appropriately for use in
+# PostgreSQL, we want to use the postgres dialect preparer to set this up.
+_preparer = sa_create_engine("postgresql://").dialect.identifier_preparer
+
+
+def get_ma_qualified_schema():
+    """
+    Should usually return `mathesar_types`
+    """
+    return _preparer.quote_schema(SCHEMA)
 
 
 # TODO rename to get_qualified_mathesar_obj_name
 # it's not only used for types. it's also used for qualifying sql function ids
 def get_qualified_name(unqualified_name):
-    return ".".join([_ma_type_qualifier_prefix, unqualified_name])
+    qualifier_prefix = get_ma_qualified_schema()
+    return ".".join([qualifier_prefix, unqualified_name])
 
 
 # TODO big misnomer!
