@@ -469,7 +469,7 @@ export class RecordsData {
     );
     const record = Object.fromEntries(
       getStoreValue(this.columnsDataStore)
-        .columns.filter((column) => column.nullable || column.default === null)
+        .columns.filter((column) => column.default === null)
         .map((column) => [String(column.id), null]),
     );
     const newRow: Row = {

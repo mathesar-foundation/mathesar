@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { Checkbox } from '@mathesar-component-library';
+  import Default from '@mathesar/components/Default.svelte';
   import CellWrapper from '../CellWrapper.svelte';
   import type { CheckBoxCellProps } from '../typeDefinitions';
 
@@ -67,10 +68,14 @@
   on:click={checkAndToggle}
   on:mousedown={handleMouseDown}
 >
-  <Checkbox
-    bind:checked={value}
-    allowIndeterminate={true}
-    {disabled}
-    on:change={dispatchUpdate}
-  />
+  {#if value === undefined}
+    <Default />
+  {:else}
+    <Checkbox
+      bind:checked={value}
+      allowIndeterminate={true}
+      {disabled}
+      on:change={dispatchUpdate}
+    />
+  {/if}
 </CellWrapper>

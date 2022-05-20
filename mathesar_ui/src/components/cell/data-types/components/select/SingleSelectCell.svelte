@@ -11,7 +11,7 @@
     getLabel as defaultGetLabel,
   } from '@mathesar-component-library';
   import type { ListBoxApi } from '@mathesar-component-library/types';
-  import Null from '@mathesar/components/Null.svelte';
+  import CellValue from '@mathesar/components/CellValue.svelte';
   import CellWrapper from '../CellWrapper.svelte';
   import type { SingleSelectCellProps } from '../typeDefinitions';
 
@@ -116,11 +116,9 @@
     on:keydown={(e) => handleKeyDown(e, api, isOpen)}
   >
     <div class="value" class:active={isActive}>
-      {#if value === null}
-        <Null />
-      {:else if typeof value !== 'undefined'}
-        {getLabel(value)}
-      {/if}
+      <CellValue {value}>
+        {getLabel(value ?? undefined)}
+      </CellValue>
     </div>
 
     {#if isActive}
