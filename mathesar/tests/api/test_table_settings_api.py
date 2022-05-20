@@ -1,21 +1,22 @@
-from django.core.cache import cache
-
-from mathesar import models
+import pytest
 
 
-def test_create_table_settings(column_test_table, client):
-    cache.clear()
-    columns = list(models.Column.objects.filter(table=column_test_table).values_list('id', flat=True))
-    data = {
-        "preview_columns": {
-            'columns': columns,
-        }
-    }
-    response = client.post(
-        f"/api/db/v0/tables/{column_test_table.id}/settings/",
-        data=data,
+@pytest.fixture
+def schema_name():
+    return 'table_tests'
+
+
+@pytest.fixture
+def schema(create_schema, schema_name):
+    return create_schema(schema_name)
+
+
+def test_create_table_settings(client, schema, create_table, schema_name):
+    table = create_table('Table 2', schema=schema_name)
+    response = client.get(
+        f"/api/db/v0/tables/{table.id}/settings/"
     )
     response_data = response.json()
-    assert response.status_code == 201
-    assert response_data['preview_columns']['columns'] == columns
-    assert response_data['preview_columns']['customized'] is True
+    print(response_data)
+    assert response.status_code == 200
+    assert response_data['count'] == 1
