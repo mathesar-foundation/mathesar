@@ -349,8 +349,14 @@ class Column(ReflectionManagerMixin, BaseModel):
     def __getattribute__(self, name):
         try:
             return super().__getattribute__(name)
-        except AttributeError:
-            return getattr(self._sa_column, name)
+        except AttributeError as e:
+            # Blacklist Django attribute names that cause recursion by trying to fetch an invalid cache.
+            # TODO Find a better way to avoid finding Django related columns
+            blacklisted_attribute_names = ['resolve_expression']
+            if name not in blacklisted_attribute_names:
+                return getattr(self._sa_column, name)
+            else:
+                raise e
 
     @cached_property
     def _sa_column(self):
