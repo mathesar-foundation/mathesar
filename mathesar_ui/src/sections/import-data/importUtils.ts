@@ -32,6 +32,7 @@ import type {
   FileUploadProgress,
 } from '@mathesar-component-library/types';
 import { TabularType } from '@mathesar/stores/table-data';
+import { getErrorMessage } from '@mathesar/utils/errors';
 
 function completionCallback(
   fileImportStore: FileImport,
@@ -324,106 +325,88 @@ export async function loadPreview(
   return tableCreationResult;
 }
 
-// When finish is clicked after preview
+/** When finish is clicked after preview */
 export async function finishImport(fileImportStore: FileImport): Promise<void> {
   const fileImportData = get(fileImportStore);
+  const { previewId } = fileImportData;
+  if (previewId === undefined) {
+    return;
+  }
 
-  if (fileImportData.previewId) {
-    const columns: {
-      name?: PreviewColumn['name'];
-      type?: PreviewColumn['type'];
-    }[] = [];
-    // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-    fileImportData.previewColumns.forEach((column) => {
-      if (column.isSelected) {
-        columns.push({
-          name: column.displayName,
-          type: column.type,
-        });
-      } else {
-        columns.push({});
-      }
-    });
+  const previewColumns = fileImportData.previewColumns ?? [];
+  const columns = previewColumns.map((column) => ({
+    id: column.id,
+    name: column.displayName,
+    type: column.type,
+  }));
 
-    fileImportData.importPromise?.cancel();
+  fileImportData.importPromise?.cancel();
 
-    try {
-      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-      let columnChangePromise: CancellablePromise<unknown> = null;
-      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-      let verificationPromise: CancellablePromise<unknown> = null;
+  try {
+    let columnChangePromise: CancellablePromise<unknown> | undefined;
+    let verificationPromise: CancellablePromise<unknown> | undefined;
 
-      const saveTable = async () => {
-        // https://github.com/centerofci/mathesar/issues/1055
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        const url = `/api/db/v0/tables/${fileImportData.previewId}/`;
-        columnChangePromise = patchAPI(url, { columns });
-        await columnChangePromise;
-        const verificationRequest: Record<string, unknown> = {
-          import_verified: true,
-        };
-        if (fileImportData.name !== fileImportData.previewName) {
-          verificationRequest.name = fileImportData.name;
-        }
-        verificationPromise = patchAPI(
-          // https://github.com/centerofci/mathesar/issues/1055
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          `/api/db/v0/tables/${fileImportData.previewId}/`,
-          verificationRequest,
-        );
-        await verificationPromise;
+    const saveTable = async () => {
+      const url = `/api/db/v0/tables/${previewId}/`;
+      columnChangePromise = patchAPI(url, { columns });
+      await columnChangePromise;
+      const verificationRequest: Record<string, unknown> = {
+        import_verified: true,
       };
-
-      const importPromise = new CancellablePromise(
-        (resolve, reject) => {
-          void saveTable().then(
-            () => resolve(),
-            (err) => reject(err),
-          );
-        },
-        () => {
-          columnChangePromise?.cancel();
-          verificationPromise?.cancel();
-        },
-      );
-      setInFileStore(fileImportStore, {
-        importStatus: States.Loading,
-        importPromise,
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        error: null,
-      });
-      await importPromise;
-
-      void refetchTablesForSchema(fileImportData.schemaId);
-
-      setInFileStore(fileImportStore, {
-        importStatus: States.Done,
-      });
-      setImportStatus(fileImportData.id, {
-        status: States.Done,
-      });
-      removeImportFromView(fileImportData.schemaId, fileImportData.id);
-
-      const tabList = getTabsForSchema(
-        fileImportData.databaseName,
-        fileImportData.schemaId,
-      );
-      const existingTab = tabList.getImportTabByImportID(fileImportData.id);
-      if (existingTab) {
-        const newTab = constructTabularTab(
-          TabularType.Table,
-          fileImportData.previewId,
-          // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-          fileImportData.name,
-        );
-        tabList.replace(existingTab, newTab);
+      if (fileImportData.name !== fileImportData.previewName) {
+        verificationRequest.name = fileImportData.name;
       }
-    } catch (err: unknown) {
-      setInFileStore(fileImportStore, {
-        importStatus: States.Error,
-        error: (err as Error)?.message,
-      });
+      verificationPromise = patchAPI(url, verificationRequest);
+      await verificationPromise;
+    };
+
+    const importPromise = new CancellablePromise(
+      (resolve, reject) => {
+        void saveTable().then(
+          () => resolve(),
+          (err) => reject(err),
+        );
+      },
+      () => {
+        columnChangePromise?.cancel();
+        verificationPromise?.cancel();
+      },
+    );
+    setInFileStore(fileImportStore, {
+      importStatus: States.Loading,
+      importPromise,
+      error: undefined,
+    });
+    await importPromise;
+
+    void refetchTablesForSchema(fileImportData.schemaId);
+
+    setInFileStore(fileImportStore, {
+      importStatus: States.Done,
+    });
+    setImportStatus(fileImportData.id, {
+      status: States.Done,
+    });
+    removeImportFromView(fileImportData.schemaId, fileImportData.id);
+
+    const tabList = getTabsForSchema(
+      fileImportData.databaseName,
+      fileImportData.schemaId,
+    );
+    const existingTab = tabList.getImportTabByImportID(fileImportData.id);
+    if (existingTab) {
+      const newTab = constructTabularTab(
+        TabularType.Table,
+        previewId,
+        fileImportData.name ?? 'UNKNOWN',
+      );
+      tabList.replace(existingTab, newTab);
     }
+  } catch (err: unknown) {
+    setInFileStore(fileImportStore, {
+      importStatus: States.Error,
+      error: getErrorMessage(err),
+    });
   }
 }
 
