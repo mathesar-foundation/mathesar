@@ -6,6 +6,7 @@
   import type { FileImport, PreviewRow } from '@mathesar/stores/fileImports';
   import CellValue from '@mathesar/components/CellValue.svelte';
   import type { CancellablePromise } from '@mathesar-component-library';
+  import { getErrorMessage } from '@mathesar/utils/errors';
 
   interface Response {
     records: PreviewRow[];
@@ -18,30 +19,31 @@
     previewPromise?.cancel();
     try {
       const fileImportData = get(fileImportStore);
-      const columnInfo = fileImportData.previewColumns?.map((column) => ({
+      const { previewId } = fileImportData;
+      if (previewId === undefined) {
+        throw new Error('Missing previewId.');
+      }
+      const columns = fileImportData.previewColumns?.map((column) => ({
+        id: column.id,
         name: column.name,
         type: column.type,
       }));
+
       setInFileStore(fileImportStore, {
         previewRowsLoadStatus: States.Loading,
         error: undefined,
       });
-      previewPromise = postAPI<Response>(
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        `/api/db/v0/tables/${fileImportData.previewId}/previews/`,
-        {
-          columns: columnInfo,
-        },
-      );
+      const url = `/api/db/v0/tables/${previewId}/previews/`;
+      previewPromise = postAPI<Response>(url, { columns });
       const result = await previewPromise;
       setInFileStore(fileImportStore, {
         previewRowsLoadStatus: States.Done,
-        previewRows: result.records || [],
+        previewRows: result.records ?? [],
       });
     } catch (err) {
       setInFileStore(fileImportStore, {
         previewRowsLoadStatus: States.Error,
-        error: (err as Error).message,
+        error: getErrorMessage(err),
         previewRows: [],
       });
     }
