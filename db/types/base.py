@@ -80,7 +80,7 @@ class DatabaseType(OrderByIds):
         """
         We ignore some types. Current rule is that if type X is applied to a column, but upon
         reflection that column is of some other type, we ignore type X. This mostly means
-        ignoring aliases. It also ignores NAME and CHAR, because both are reflected as the SA
+        ignoring aliases. It also ignores NAME, because it's reflected as the SA
         String type.
         """
         return self in _inconsistent_db_types
@@ -206,7 +206,6 @@ _inconsistent_db_types = frozenset.union(
     _non_canonical_alias_db_types,
     frozenset({
         PostgresType.NAME,
-        PostgresType.CHAR,
         PostgresType.BIT_VARYING,
     }),
 )

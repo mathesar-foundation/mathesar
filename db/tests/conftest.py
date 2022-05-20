@@ -5,6 +5,9 @@ from sqlalchemy import MetaData, text, Table
 
 from db import constants
 from db.tables.operations.split import extract_columns_from_table
+from db.tables.operations.select import get_oid_from_table
+from db.types.base import MathesarCustomType
+from db.columns.operations.alter import alter_column_type
 
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "resources")
@@ -154,3 +157,22 @@ def magnitude_table_obj(engine_with_magnitude, magnitude_table_name):
     metadata = MetaData(bind=engine)
     table = Table(magnitude_table_name, metadata, schema=schema, autoload_with=engine)
     return table, engine
+
+
+@pytest.fixture
+def uris_table_obj(engine_with_uris, uris_table_name):
+    engine, schema = engine_with_uris
+    metadata = MetaData(bind=engine)
+    table = Table(uris_table_name, metadata, schema=schema, autoload_with=engine)
+    # Cast "uri" column from string to URI
+    with engine.begin() as conn:
+        uri_column_name = "uri"
+        uri_type = MathesarCustomType.URI
+        alter_column_type(
+            get_oid_from_table(table.name, schema, engine),
+            uri_column_name,
+            engine,
+            conn,
+            uri_type,
+        )
+    yield table, engine

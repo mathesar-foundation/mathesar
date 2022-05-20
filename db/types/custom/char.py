@@ -5,7 +5,7 @@ from sqlalchemy.ext.compiler import compiles
 from db.types.base import PostgresType
 
 
-class MATHESAR_CHAR(TypeDecorator):
+class CHAR(TypeDecorator):
     impl = SA_CHAR
 
     @classmethod
@@ -13,10 +13,10 @@ class MATHESAR_CHAR(TypeDecorator):
         return cls.__name__
 
 
-@compiles(MATHESAR_CHAR, 'postgresql')
-def _compile_mathesar_char(element, compiler, **kw):
+@compiles(CHAR, 'postgresql')
+def _compile_char(element, compiler, **kw):
     unchanged_compiled_string = compiler.visit_VARCHAR(element, **kw)
     unchanged_id = "VARCHAR"
-    changed_id = PostgresType.MATHESAR_CHAR.value
+    changed_id = PostgresType.CHAR.id
     changed_compiled_string = unchanged_compiled_string.replace(unchanged_id, changed_id)
     return changed_compiled_string

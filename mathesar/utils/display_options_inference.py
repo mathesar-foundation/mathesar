@@ -5,7 +5,7 @@ from thefuzz import fuzz
 from db.columns.operations.select import get_column_attnum_from_name
 from db.types import base
 from db.types.base import get_qualified_name
-from db.types.money import get_first_money_array_with_symbol
+from db.types.custom.money import get_first_money_array_with_symbol
 
 MATHESAR_MONEY = get_qualified_name(base.MathesarCustomType.MATHESAR_MONEY.value)
 

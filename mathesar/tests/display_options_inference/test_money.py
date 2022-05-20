@@ -2,13 +2,8 @@ import pytest
 from django.core.files.base import File
 
 from db.columns.operations.select import get_column_attnum_from_name
-from db.tests.types import fixtures
 from mathesar.models import DataFile, Table
 from mathesar.utils.display_options_inference import infer_mathesar_money_display_options
-
-engine_with_types = fixtures.engine_with_types
-engine_email_type = fixtures.engine_email_type
-temporary_testing_schema = fixtures.temporary_testing_schema
 
 create_display_options_test_list = [
     ('col_4', {

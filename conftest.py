@@ -107,8 +107,8 @@ create_session_db = pytest.fixture(_create_db, scope="session")
 
 
 
-@pytest.fixture(scope="session")
-def test_db_name(_default_test_db_name, worker_id, create_session_db):
+@pytest.fixture(scope="session", autouse=True)
+def test_db_name(worker_id, create_session_db):
     """
     A dynamic, yet non-random, db_name is used so that subsequent runs would automatically clean up
     test databases that we failed to tear down.

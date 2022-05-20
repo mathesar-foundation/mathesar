@@ -723,8 +723,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
 
 
 # TODO move to a more fundamental db type test suite
-def test_get_alter_column_types_with_custom_engine(engine_with_uris):
-    engine, _ = engine_with_uris
+def test_get_alter_column_types_with_custom_engine(engine):
     available_known_db_types = get_available_known_db_types(engine)
     custom_db_types = CUSTOM_DB_TYPE_TO_SA_CLASS.keys()
     for custom_db_type in custom_db_types:
@@ -732,11 +731,10 @@ def test_get_alter_column_types_with_custom_engine(engine_with_uris):
 
 
 # TODO move to a more fundamental db type test suite
-def test_db_type_juggling_consistency(engine_with_uris):
+def test_db_type_juggling_consistency(engine):
     """
     A db type should remain constant after being reflected from its SA class.
     """
-    engine, _ = engine_with_uris
     available_known_db_types = get_available_known_db_types(engine)
     for db_type in available_known_db_types:
         sa_class = db_type.get_sa_class(engine)

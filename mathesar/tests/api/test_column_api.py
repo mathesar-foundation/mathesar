@@ -174,7 +174,7 @@ def test_column_create_invalid_default(column_test_table, client):
 
 
 @pytest.mark.parametrize(
-    "type_,type_options,expected_type_options",
+    "db_type,type_options,expected_type_options",
     [
         (PostgresType.NUMERIC, {"precision": 5, "scale": 3}, {"precision": 5, "scale": 3}),
         (PostgresType.NUMERIC, {"scale": 3}, {"precision": 1000, "scale": 3}),

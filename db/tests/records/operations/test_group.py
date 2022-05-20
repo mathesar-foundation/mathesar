@@ -3,10 +3,6 @@ from sqlalchemy import Column
 
 from db.records.operations import group
 from db.records import exceptions as records_exceptions
-from db.tests.types import fixtures
-
-engine_with_types = fixtures.engine_with_types
-uris_table_obj = fixtures.uris_table_obj
 
 
 @pytest.fixture
