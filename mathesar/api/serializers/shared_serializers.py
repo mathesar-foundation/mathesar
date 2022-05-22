@@ -108,7 +108,7 @@ class MathesarPolymorphicErrorMixin(MathesarErrorMessageMixin):
 
 
 class BaseDisplayOptionsSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
-    show_preview = serializers.BooleanField(default=True)
+    show_fk_preview = serializers.BooleanField(default=True)
 
 
 class CustomBooleanLabelSerializer(MathesarErrorMessageMixin, serializers.Serializer):

@@ -66,8 +66,8 @@ def column_test_table_with_service_layer_options(patent_schema):
     ]
     column_data_list = [
         {},
-        {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
-        {'display_options': {'show_as_percentage': True, 'number_format': "english"}},
+        {'display_options': {'input': "dropdown", 'show_fk_preview': True, "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
+        {'display_options': {'show_as_percentage': True, 'show_fk_preview': True, 'number_format': "english"}},
         {'display_options': None},
         {},
         {
@@ -76,12 +76,13 @@ def column_test_table_with_service_layer_options(patent_schema):
                     'currency_symbol': "HK $",
                     'number_format': "english",
                     'currency_symbol_location': 'after-minus'
-                }
+                },
+                'show_fk_preview': True
             }
         },
-        {'display_options': {'time_format': 'hh:mm', 'date_format': 'YYYY-MM-DD'}},
-        {'display_options': {'format': 'hh:mm'}},
-        {'display_options': {'format': 'YYYY-MM-DD'}},
+        {'display_options': {'time_format': 'hh:mm', 'date_format': 'YYYY-MM-DD', 'show_fk_preview': True}},
+        {'display_options': {'format': 'hh:mm', 'show_fk_preview': True}},
+        {'display_options': {'format': 'YYYY-MM-DD', 'show_fk_preview': True}},
     ]
     db_table = SATable(
         "anewtable",
@@ -272,22 +273,22 @@ def test_column_create_invalid_default(column_test_table, client):
 
 # NOTE: display option value types are checked backend, but that's it: e.g. a time format may be any string.
 create_display_options_test_list = [
-    ("BOOLEAN", {"input": "dropdown"}, {"input": "dropdown"}),
+    ("BOOLEAN", {"input": "dropdown"}, {"input": "dropdown", 'show_fk_preview': True}),
     ("BOOLEAN", {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}},
-     {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}),
-    ("DATE", {'format': 'YYYY-MM-DD'}, {'format': 'YYYY-MM-DD'}),
-    ("INTERVAL", {'min': 's', 'max': 'h', 'show_units': True}, {'min': 's', 'max': 'h', 'show_units': True}),
+     {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}, 'show_fk_preview': True}),
+    ("DATE", {'format': 'YYYY-MM-DD'}, {'format': 'YYYY-MM-DD', 'show_fk_preview': True}),
+    ("INTERVAL", {'min': 's', 'max': 'h', 'show_units': True}, {'min': 's', 'max': 'h', 'show_units': True, 'show_fk_preview': True}),
     ("MONEY",
      {'number_format': "english", 'currency_symbol': '$', 'currency_symbol_location': 'after-minus'},
-     {'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'number_format': "english"}),
-    ("NUMERIC", {"show_as_percentage": True, 'number_format': None}, {"show_as_percentage": True, 'number_format': None}),
+     {'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'number_format': "english", 'show_fk_preview': True}),
+    ("NUMERIC", {"show_as_percentage": True, 'number_format': None}, {"show_as_percentage": True, 'number_format': None, 'show_fk_preview': True}),
     ("NUMERIC",
      {"show_as_percentage": True, 'number_format': "english"},
-     {"show_as_percentage": True, 'number_format': "english"}),
-    ("TIMESTAMP WITH TIME ZONE", {'date_format': 'x', 'time_format': 'x'}, {'date_format': 'x', 'time_format': 'x'}),
-    ("TIMESTAMP WITHOUT TIME ZONE", {'date_format': 'x', 'time_format': 'x'}, {'date_format': 'x', 'time_format': 'x'}),
-    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm'}, {'format': 'hh:mm'}),
-    ("TIME WITH TIME ZONE", {'format': 'hh:mm Z'}, {'format': 'hh:mm Z'}),
+     {"show_as_percentage": True, 'number_format': "english", 'show_fk_preview': True}),
+    ("TIMESTAMP WITH TIME ZONE", {'date_format': 'x', 'time_format': 'x'}, {'date_format': 'x', 'time_format': 'x', 'show_fk_preview': True}),
+    ("TIMESTAMP WITHOUT TIME ZONE", {'date_format': 'x', 'time_format': 'x'}, {'date_format': 'x', 'time_format': 'x', 'show_fk_preview': True}),
+    ("TIME WITHOUT TIME ZONE", {'format': 'hh:mm'}, {'format': 'hh:mm', 'show_fk_preview': True}),
+    ("TIME WITH TIME ZONE", {'format': 'hh:mm Z'}, {'format': 'hh:mm Z', 'show_fk_preview': True}),
 ]
 
 
@@ -489,7 +490,7 @@ def test_column_update_display_options(column_test_table_with_service_layer_opti
         colum_name = f"mycolumn{column_index}"
         column = _get_columns_by_name(table, [colum_name])[0]
         column_id = column.id
-        display_options = {"input": "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}
+        display_options = {"input": "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}, 'show_fk_preview': False}
         display_options_data = {"display_options": display_options, 'type': 'BOOLEAN', 'type_options': {}}
         response = client.patch(
             f"/api/db/v0/tables/{table.id}/columns/{column_id}/",
@@ -942,5 +943,5 @@ def test_column_update_type_with_display_and_type_options_as_empty_objects(colum
     assert response.status_code == 200
     response_json = response.json()
     assert response_json["type"] == type_
-    assert response_json["display_options"] == {}
+    assert response_json["display_options"] == {'show_fk_preview': True}
     assert response_json["type_options"] is None
