@@ -120,7 +120,7 @@ class ConstraintSerializer(
     }
 
     def create(self, validated_data):
-        serializer = self.serializers_mapping.get(self.get_mapping_field(validated_data))
+        serializer = self.get_serializer_class(self.get_mapping_field(validated_data))
         return serializer.create(validated_data)
 
     def get_mapping_field(self, data):
