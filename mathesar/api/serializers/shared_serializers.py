@@ -10,6 +10,7 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
     This serializer mixin is helpful in serializing polymorphic models,
     by switching to correct serializer based on the mapping field value.
     """
+    default_serializer = None
 
     def __new__(cls, *args, **kwargs):
         if cls.serializers_mapping is None:
@@ -24,6 +25,8 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
         self.serializers_cls_mapping = {}
         serializers_mapping = self.serializers_mapping
         self.serializers_mapping = {}
+        if self.default_serializer is not None:
+            self.default_serializer = self.default_serializer(*args, **kwargs)
         for identifier, serializer_cls in serializers_mapping.items():
             if callable(serializer_cls):
                 serializer = serializer_cls(*args, **kwargs)
@@ -33,8 +36,14 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
             self.serializers_mapping[identifier] = serializer
             self.serializers_cls_mapping[identifier] = serializer_cls
 
+    def get_serializer_class(self, identifier):
+        if identifier in self.serializers_mapping:
+            return self.serializers_mapping.get(identifier)
+        else:
+            return self.default_serializer
+
     def to_representation(self, instance):
-        serializer = self.serializers_mapping.get(self.get_mapping_field(instance), None)
+        serializer = self.get_serializer_class(self.get_mapping_field(instance))
         if serializer is not None:
             return serializer.to_representation(instance)
         else:
@@ -52,7 +61,7 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
 
 class ReadWritePolymorphicSerializerMappingMixin(ReadOnlyPolymorphicSerializerMappingMixin):
     def to_internal_value(self, data):
-        serializer = self.serializers_mapping.get(self.get_mapping_field(data))
+        serializer = self.get_serializer_class(self.get_mapping_field(data))
         if serializer is not None:
             return serializer.to_internal_value(data=data)
         else:
@@ -98,6 +107,10 @@ class MathesarPolymorphicErrorMixin(MathesarErrorMessageMixin):
         return self.serializers_mapping[self.get_mapping_field(data)].fields
 
 
+class BaseDisplayOptionsSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
+    show_fk_preview = serializers.BooleanField(default=True)
+
+
 class CustomBooleanLabelSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     TRUE = serializers.CharField()
     FALSE = serializers.CharField()
@@ -106,50 +119,38 @@ class CustomBooleanLabelSerializer(MathesarErrorMessageMixin, serializers.Serial
 DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY = 'db_type'
 
 
-class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
+class BooleanDisplayOptionSerializer(BaseDisplayOptionsSerializer):
     input = serializers.ChoiceField(choices=[("dropdown", "dropdown"), ("checkbox", "checkbox")])
     custom_labels = CustomBooleanLabelSerializer(required=False)
 
 
-class AbstractNumberDisplayOptionSerializer(serializers.Serializer):
-    number_format = serializers.ChoiceField(required=False, allow_null=True, choices=['english', 'german', 'french', 'hindi', 'swiss'])
+class AbstractNumberDisplayOptionSerializer(BaseDisplayOptionsSerializer):
+    number_format = serializers.ChoiceField(
+        required=False,
+        allow_null=True,
+        choices=['english', 'german', 'french', 'hindi', 'swiss']
+    )
 
 
-class NumberDisplayOptionSerializer(
-    MathesarErrorMessageMixin,
-    OverrideRootPartialMixin,
-    AbstractNumberDisplayOptionSerializer
-):
+class NumberDisplayOptionSerializer(AbstractNumberDisplayOptionSerializer):
     show_as_percentage = serializers.BooleanField(default=False)
 
 
-class MoneyDisplayOptionSerializer(
-    MathesarErrorMessageMixin,
-    OverrideRootPartialMixin,
-    AbstractNumberDisplayOptionSerializer
-):
+class MoneyDisplayOptionSerializer(AbstractNumberDisplayOptionSerializer):
     currency_symbol = serializers.CharField()
     currency_symbol_location = serializers.ChoiceField(choices=['after-minus', 'end-with-space'])
 
 
-class TimeFormatDisplayOptionSerializer(
-    MathesarErrorMessageMixin,
-    OverrideRootPartialMixin,
-    serializers.Serializer
-):
+class TimeFormatDisplayOptionSerializer(BaseDisplayOptionsSerializer):
     format = serializers.CharField(max_length=255)
 
 
-class DateTimeFormatDisplayOptionSerializer(
-    MathesarErrorMessageMixin,
-    OverrideRootPartialMixin,
-    serializers.Serializer
-):
+class DateTimeFormatDisplayOptionSerializer(BaseDisplayOptionsSerializer):
     time_format = serializers.CharField(max_length=255)
     date_format = serializers.CharField(max_length=255)
 
 
-class DurationDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
+class DurationDisplayOptionSerializer(BaseDisplayOptionsSerializer):
     min = serializers.CharField(max_length=255)
     max = serializers.CharField(max_length=255)
     show_units = serializers.BooleanField()
@@ -170,6 +171,7 @@ class DisplayOptionsMappingSerializer(
         MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,
         MathesarTypeIdentifier.TIME.value: TimeFormatDisplayOptionSerializer,
     }
+    default_serializer = BaseDisplayOptionsSerializer
 
     def get_mapping_field(self, data):
         db_type = self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY]
