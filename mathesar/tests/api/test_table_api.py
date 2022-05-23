@@ -398,7 +398,7 @@ def _check_columns(actual_column_list, expected_column_list):
 
 
 @pytest.fixture
-def _type_inference_table_previews_post_body():
+def _type_inference_table_previews_post_body(_type_inference_table_type_suggestions):
     return {
         'columns': [
             {'name': 'id', 'type': PostgresType.INTEGER.id}
@@ -416,7 +416,7 @@ def test_table_previews(client, type_inference_table, _type_inference_table_prev
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 200
     expect_dict = {
-        'name': 'Type Modification Table',
+        'name': table.name,
         'columns': post_body['columns'],
         'records': [
             {'id': 1, 'col_1': 0.0, 'col_2': False, 'col_3': True, 'col_4': 't', 'col_5': 'a', 'col_6': 2.0, 'col_7': 5},
@@ -430,11 +430,15 @@ def test_table_previews(client, type_inference_table, _type_inference_table_prev
     _check_columns(actual_dict['columns'], expect_dict['columns'])
 
 
+def _find_post_body_column_ix_by_name(post_body, name):
+    return tuple(column['name'] for column in post_body['columns']).index(name)
+
+
 def test_table_previews_wrong_column_number(client, type_inference_table, _type_inference_table_previews_post_body):
     table = type_inference_table
 
     post_body = _type_inference_table_previews_post_body
-    del post_body['columns']['col_1']
+    del post_body['columns'][_find_post_body_column_ix_by_name(post_body, 'col_1')]
 
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
@@ -446,8 +450,8 @@ def test_table_previews_invalid_type_cast_check(client, type_inference_table, _t
     table = type_inference_table
 
     post_body = _type_inference_table_previews_post_body
-    post_body['columns']['col_4']['type'] = PostgresType.NUMERIC.id
-    post_body['columns']['col_5']['type'] = MathesarCustomType.EMAIL.id
+    post_body['columns'][_find_post_body_column_ix_by_name(post_body, 'col_4')]['type'] = PostgresType.NUMERIC.id
+    post_body['columns'][_find_post_body_column_ix_by_name(post_body, 'col_5')]['type'] = MathesarCustomType.EMAIL.id
 
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400
@@ -458,7 +462,7 @@ def test_table_previews_unsupported_type(client, type_inference_table, _type_inf
     table = type_inference_table
 
     post_body = _type_inference_table_previews_post_body
-    post_body['columns']['col_1']['type'] = 'notatype'
+    post_body['columns'][_find_post_body_column_ix_by_name(post_body, 'col_1')]['type'] = 'notatype'
 
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)
     assert response.status_code == 400

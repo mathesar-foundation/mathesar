@@ -235,8 +235,9 @@ def test_create_single_column_foreign_key_constraint(two_foreign_key_tables, cli
     }
     response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
     assert response.status_code == 201
+    fk_name = referrer_table.name + '_Center_fkey'
     _verify_foreign_key_constraint(
-        response.json(), [referrer_column.id], 'Patents_Center_fkey',
+        response.json(), [referrer_column.id], fk_name,
         [referent_column.id], referent_table.id
     )
 
@@ -260,8 +261,9 @@ def test_create_single_column_foreign_key_constraint_with_options(
     }
     response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
     assert response.status_code == 201
+    fk_name = referrer_table.name + '_Center_fkey'
     _verify_foreign_key_constraint(
-        response.json(), [referrer_column.id], 'Patents_Center_fkey',
+        response.json(), [referrer_column.id], fk_name,
         [referent_column.id],
         referent_table.id,
         onupdate='RESTRICT',
@@ -285,8 +287,9 @@ def test_create_self_referential_single_column_foreign_key_constraint(
     }
     response = client.post(f'/api/db/v0/tables/{table.id}/constraints/', data)
     assert response.status_code == 201
+    fk_name = table.name + '_Parent_fkey'
     _verify_foreign_key_constraint(
-        response.json(), [parent_column.id], 'Tree_Parent_fkey',
+        response.json(), [parent_column.id], fk_name,
         [column.id], table.id
     )
     # Recursively fetch children
@@ -337,8 +340,9 @@ def test_create_multiple_column_foreign_key_constraint(
     }
     response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
     assert response.status_code == 201
+    fk_name = referrer_table.name + '_Center_fkey'
     _verify_foreign_key_constraint(
-        response.json(), referrer_columns_id, 'Patents_Center_fkey', referent_columns_id, referent_table.id
+        response.json(), referrer_columns_id, fk_name, referent_columns_id, referent_table.id
     )
 
 
