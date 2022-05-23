@@ -1,6 +1,5 @@
 import json
 
-from django.core.cache import cache
 from sqlalchemy import Column, ForeignKey, Integer, MetaData, Table as SATable, select
 
 from db.columns.operations.select import get_column_attnum_from_name
@@ -243,8 +242,8 @@ def test_create_single_column_foreign_key_constraint(two_foreign_key_tables, cli
 
 
 def test_create_single_column_foreign_key_constraint_with_options(
-        two_foreign_key_tables, client
-    ):
+    two_foreign_key_tables, client
+):
     referrer_table, referent_table = two_foreign_key_tables
     referent_column = referent_table.get_columns_by_name(["Id"])[0]
     referrer_column = referrer_table.get_columns_by_name(["Center"])[0]
@@ -273,8 +272,8 @@ def test_create_single_column_foreign_key_constraint_with_options(
 
 
 def test_create_self_referential_single_column_foreign_key_constraint(
-        self_referential_table, client, engine
-    ):
+    self_referential_table, client, engine
+):
     table = self_referential_table
     column = table.get_columns_by_name(["Id"])[0]
     parent_column = table.get_columns_by_name(["Parent"])[0]
@@ -303,8 +302,8 @@ def test_create_self_referential_single_column_foreign_key_constraint(
 
 
 def test_create_single_column_foreign_key_constraint_invalid_related_data(
-        two_invalid_related_data_foreign_key_tables, client
-    ):
+    two_invalid_related_data_foreign_key_tables, client
+):
     referrer_table, referent_table = two_invalid_related_data_foreign_key_tables
     referent_column = referent_table.get_columns_by_name(["Id"])[0]
     referrer_column = referrer_table.get_columns_by_name(["Center"])[0]
@@ -320,8 +319,8 @@ def test_create_single_column_foreign_key_constraint_invalid_related_data(
 
 
 def test_create_multiple_column_foreign_key_constraint(
-        two_multi_column_foreign_key_tables, client
-    ):
+    two_multi_column_foreign_key_tables, client
+):
     referrer_table, referent_table = two_multi_column_foreign_key_tables
     referent_columns = referent_table.get_columns_by_name(['Name', 'City'])
     referrer_columns = referrer_table.get_columns_by_name(["Center", 'Center City'])

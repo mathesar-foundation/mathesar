@@ -6,17 +6,13 @@ from sqlalchemy.sql.functions import Function
 
 from db.types.custom import uri
 from db.types.exceptions import UnsupportedTypeException
-from db.types.base import DatabaseType, PostgresType, MathesarCustomType, get_available_known_db_types, get_db_type_enum_from_class, get_qualified_name
+from db.types.base import PostgresType, MathesarCustomType, get_available_known_db_types, get_db_type_enum_from_class, get_qualified_name
 from db.types import categories
-
-from collections.abc import Collection, Mapping
 
 MONEY_ARR_FUNC_NAME = "get_mathesar_money_array"
 
-TypeBodyMap = dict[DatabaseType, str]
 
-
-def get_column_cast_expression(column, target_type: DatabaseType, engine, type_options={}):
+def get_column_cast_expression(column, target_type, engine, type_options={}):
     """
     Given a Column, we get the correct SQL selectable for selecting the
     results of a Mathesar cast_to_<type> function on that column, where
@@ -138,7 +134,7 @@ def create_uri_casts(engine):
 
 
 # TODO find more descriptive name
-def get_full_cast_map(engine) -> Mapping[DatabaseType, Collection[DatabaseType]]:
+def get_full_cast_map(engine):
     """
     Returns a mapping of source types to target type sets.
     """
@@ -185,7 +181,7 @@ def get_full_cast_map(engine) -> Mapping[DatabaseType, Collection[DatabaseType]]
     )
 
 
-def create_cast_functions(target_type: DatabaseType, type_body_map: TypeBodyMap, engine):
+def create_cast_functions(target_type, type_body_map, engine):
     """
     This python function writes a number of PL/pgSQL functions that cast
     between types supported by Mathesar, and installs them on the DB
@@ -208,7 +204,7 @@ def create_cast_functions(target_type: DatabaseType, type_body_map: TypeBodyMap,
             conn.execute(text(query))
 
 
-def assemble_function_creation_sql(argument_type: DatabaseType, target_type: DatabaseType, function_body: str) -> str:
+def assemble_function_creation_sql(argument_type, target_type, function_body):
     function_name = get_cast_function_name(target_type)
     return f"""
     CREATE OR REPLACE FUNCTION {function_name}({argument_type.id})
@@ -219,7 +215,7 @@ def assemble_function_creation_sql(argument_type: DatabaseType, target_type: Dat
     """
 
 
-def get_cast_function_name(target_type: DatabaseType) -> str:
+def get_cast_function_name(target_type):
     """
     Some casting functions change postgres config parameters  for the
     transaction they are run on like cast function for casting different
@@ -240,7 +236,7 @@ def get_cast_function_name(target_type: DatabaseType) -> str:
     return qualified_escaped_bare_function_name
 
 
-def _escape_illegal_characters(sql_name: str) -> str:
+def _escape_illegal_characters(sql_name):
     replacement_mapping = {
         '"': '_double_quote_'
     }
@@ -250,7 +246,7 @@ def _escape_illegal_characters(sql_name: str) -> str:
     return resulting_string
 
 
-def _get_boolean_type_body_map() -> TypeBodyMap:
+def _get_boolean_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to booleans.
@@ -317,7 +313,7 @@ def _get_boolean_type_body_map() -> TypeBodyMap:
     return type_body_map
 
 
-def _get_email_type_body_map() -> TypeBodyMap:
+def _get_email_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to email.
@@ -335,7 +331,7 @@ def _get_email_type_body_map() -> TypeBodyMap:
     )
 
 
-def _get_interval_type_body_map() -> TypeBodyMap:
+def _get_interval_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to interval.
@@ -359,7 +355,7 @@ def _get_interval_type_body_map() -> TypeBodyMap:
         END;
         """
 
-    type_body_map: TypeBodyMap = {
+    type_body_map = {
         PostgresType.INTERVAL: """
         BEGIN
           RETURN $1;
@@ -375,7 +371,7 @@ def _get_interval_type_body_map() -> TypeBodyMap:
     return type_body_map
 
 
-def _get_integer_type_body_map(target_type=PostgresType.INTEGER) -> TypeBodyMap:
+def _get_integer_type_body_map(target_type=PostgresType.INTEGER):
     """
     We use default behavior for identity and casts from TEXT types.
     We specifically disallow rounding or truncating when casting from numerics,
@@ -413,7 +409,7 @@ def _get_integer_type_body_map(target_type=PostgresType.INTEGER) -> TypeBodyMap:
     return type_body_map
 
 
-def _get_decimal_number_type_body_map(target_type=PostgresType.NUMERIC) -> TypeBodyMap:
+def _get_decimal_number_type_body_map(target_type=PostgresType.NUMERIC):
     """
     Get SQL strings that create various functions for casting different
     types to number types including DECIMAL, DOUBLE PRECISION, FLOAT,
@@ -433,7 +429,7 @@ def _get_decimal_number_type_body_map(target_type=PostgresType.NUMERIC) -> TypeB
     return type_body_map
 
 
-def _get_boolean_to_number_cast(target_type: DatabaseType):
+def _get_boolean_to_number_cast(target_type):
     target_type_str = target_type.id
     return f"""
     BEGIN
@@ -445,7 +441,7 @@ def _get_boolean_to_number_cast(target_type: DatabaseType):
     """
 
 
-def _get_time_type_body_map(target_type) -> TypeBodyMap:
+def _get_time_type_body_map(target_type):
     default_behavior_source_types = [
         PostgresType.TEXT, PostgresType.CHARACTER_VARYING, PostgresType.TIME_WITHOUT_TIME_ZONE, PostgresType.TIME_WITH_TIME_ZONE
     ]
@@ -472,12 +468,12 @@ def get_text_and_datetime_to_datetime_cast_str(type_condition, exception_string)
     """
 
 
-def _get_timestamp_with_timezone_type_body_map(target_type) -> TypeBodyMap:
+def _get_timestamp_with_timezone_type_body_map(target_type):
     default_behavior_source_types = categories.DATETIME_TYPES | categories.STRING_TYPES
     return _get_default_type_body_map(default_behavior_source_types, target_type)
 
 
-def _get_timestamp_without_timezone_type_body_map() -> TypeBodyMap:
+def _get_timestamp_without_timezone_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to timestamp without timezone.
@@ -529,7 +525,7 @@ def _get_timestamp_without_timezone_type_body_map() -> TypeBodyMap:
     return type_body_map
 
 
-def _get_mathesar_money_type_body_map() -> TypeBodyMap:
+def _get_mathesar_money_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to money.
@@ -672,7 +668,7 @@ def _build_mathesar_money_array_function():
     """
 
 
-def _get_money_type_body_map() -> TypeBodyMap:
+def _get_money_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to money.
@@ -727,7 +723,7 @@ def _get_money_type_body_map() -> TypeBodyMap:
     return type_body_map
 
 
-def _get_multicurrency_money_type_body_map() -> TypeBodyMap:
+def _get_multicurrency_money_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to money.
@@ -771,7 +767,7 @@ def _get_multicurrency_money_type_body_map() -> TypeBodyMap:
     return type_body_map
 
 
-def _get_textual_type_body_map(engine) -> TypeBodyMap:
+def _get_textual_type_body_map(engine):
     """
     Get SQL strings that create various functions for casting different
     types to text types through the TEXT type.
@@ -790,7 +786,7 @@ def _get_textual_type_body_map(engine) -> TypeBodyMap:
     return {type_: text_cast_str for type_ in supported_types}
 
 
-def _get_date_type_body_map() -> TypeBodyMap:
+def _get_date_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to date.
@@ -835,7 +831,7 @@ def _get_date_type_body_map() -> TypeBodyMap:
     return type_body_map
 
 
-def _get_uri_type_body_map() -> TypeBodyMap:
+def _get_uri_type_body_map():
     """
     Get SQL strings that create various functions for casting different
     types to URIs.
@@ -867,7 +863,7 @@ def _get_uri_type_body_map() -> TypeBodyMap:
     return {type_: _get_text_uri_type_body_map() for type_ in source_types}
 
 
-def _get_default_type_body_map(source_types: Collection[DatabaseType], target_type: DatabaseType) -> TypeBodyMap:
+def _get_default_type_body_map(source_types, target_type):
     default_cast_str = f"""
         BEGIN
           RETURN $1::{target_type.id};

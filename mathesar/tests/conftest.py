@@ -57,16 +57,6 @@ def automatically_clear_cache():
     yield
 
 
-#@pytest.fixture(autouse=True)
-# TODO decide if this is necessary
-def delete_all_models(django_db_blocker):
-    yield
-    with django_db_blocker.unblock():
-        all_models = {Table, Schema, Database}
-        for model in all_models:
-            model.current_objects.all().delete()
-
-
 @pytest.fixture(scope="session")
 def django_db_modify_db_settings(ignore_all_dbs_except_default, django_db_modify_db_settings):
     return
@@ -85,6 +75,7 @@ def _add_db_to_dj_settings():
     If the Django layer should be aware of a db, it should be added to settings.DATABASES dict.
     """
     added_dbs = set()
+
     def _add(db_name):
         dj_databases = settings.DATABASES
         reference_entry = dj_databases["default"]
@@ -214,6 +205,7 @@ def create_schema(test_db_model, create_db_schema):
     Creates a DJ Schema model factory, making sure to track and clean up new instances
     """
     engine = test_db_model._sa_engine
+
     def _create_schema(schema_name):
         create_db_schema(schema_name, engine)
         schema_oid = get_schema_oid_from_name(schema_name, engine)

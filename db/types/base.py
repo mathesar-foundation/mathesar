@@ -6,15 +6,13 @@ from sqlalchemy import text, create_engine as sa_create_engine
 from db import constants
 from db.utils import OrderByIds
 
-from typing import Optional, Sequence, Collection
-
 
 class DatabaseType(OrderByIds):
 
-    value: str
+    value: str  # noqa: NT001
 
     @property
-    def id(self) -> str:
+    def id(self):
         """
         Here we're defining Enum's value attribute to be the database type id.
         """
@@ -29,7 +27,7 @@ class DatabaseType(OrderByIds):
             ischema_names = engine.dialect.ischema_names
             return ischema_names.get(self.id)
 
-    def is_available(self, engine, type_ids_on_database: Collection[str] = None) -> bool:
+    def is_available(self, engine, type_ids_on_database=None):
         """
         Returns true if this type is available on provided engine's database. For the sake of
         optimizing IO, the result of _get_type_ids_on_database(engine) may be passed as the
@@ -48,7 +46,7 @@ class DatabaseType(OrderByIds):
             return instance.compile(dialect=dialect)
 
     @property
-    def is_alias(self) -> bool:
+    def is_alias(self):
         """
         Checks if this type is an alias for another type, the other type being the canonical
         alias, and this type being a non-canonical alias.
@@ -56,7 +54,7 @@ class DatabaseType(OrderByIds):
         return self in _non_canonical_alias_db_types
 
     @property
-    def is_sa_only(self) -> bool:
+    def is_sa_only(self):
         """
         A column can be reflected to have an SQLAlchemy type that does not represent an actual
         Postgres type.
@@ -64,7 +62,7 @@ class DatabaseType(OrderByIds):
         return self in _sa_only_db_types
 
     @property
-    def is_optional(self) -> bool:
+    def is_optional(self):
         """
         Some types are official, but optional in that they may or may not be installed on a given
         Postgres database.
@@ -72,11 +70,11 @@ class DatabaseType(OrderByIds):
         return self in _optional_db_types
 
     @property
-    def is_inconsistent(self) -> bool:
+    def is_inconsistent(self):
         return self in _inconsistent_db_types
 
     @property
-    def is_ignored(self) -> bool:
+    def is_ignored(self):
         """
         We ignore some types. Current rule is that if type X is applied to a column, but upon
         reflection that column is of some other type, we ignore type X. This mostly means
@@ -86,11 +84,11 @@ class DatabaseType(OrderByIds):
         return self in _inconsistent_db_types
 
     @property
-    def is_reflection_supported(self) -> bool:
+    def is_reflection_supported(self):
         return not self.is_inconsistent
 
     @property
-    def is_application_supported(self) -> bool:
+    def is_application_supported(self):
         return not self.is_inconsistent and not self.is_sa_only
 
     def __str__(self):
@@ -231,19 +229,7 @@ _known_custom_db_types = frozenset(mathesar_custom_type for mathesar_custom_type
 known_db_types = frozenset.union(_known_vanilla_db_types, _known_custom_db_types)
 
 
-# Origin: https://www.python.org/dev/peps/pep-0616/#id17
-def _remove_prefix(self, prefix, /):
-    """
-    This will remove the passed prefix, if it's there.
-    Otherwise, it will return the string unchanged.
-    """
-    if self.startswith(prefix):
-        return self[len(prefix):]
-    else:
-        return self[:]
-
-
-def get_db_type_enum_from_id(db_type_id) -> Optional[DatabaseType]:
+def get_db_type_enum_from_id(db_type_id):
     """
     Gets an instance of either the PostgresType enum or the MathesarCustomType enum corresponding
     to the provided db_type_id. If the id doesn't correspond to any of the mentioned enums,
@@ -263,7 +249,7 @@ def get_db_type_enum_from_id(db_type_id) -> Optional[DatabaseType]:
 
 # TODO improve name; currently its weird names serves to distinguish it from similarly named
 # methods throughout the codebase; should be renamed at earliest convenience.
-def get_available_known_db_types(engine) -> Sequence[DatabaseType]:
+def get_available_known_db_types(engine):
     """
     Returns a tuple of DatabaseType instances that are not ignored and are available on provided
     engine.
@@ -282,7 +268,7 @@ def get_available_known_db_types(engine) -> Sequence[DatabaseType]:
     )
 
 
-def get_db_type_enum_from_class(sa_type, engine) -> DatabaseType:
+def get_db_type_enum_from_class(sa_type, engine):
     if not inspect.isclass(sa_type):
         # Instead of extracting classes from instances, we're supporting a single type of parameter
         # and failing early so that the codebase is more homogenous.
@@ -299,17 +285,17 @@ class UnknownDbTypeId(Exception):
     pass
 
 
-def _sa_type_class_to_db_type_id(sa_type_class, engine) -> Optional[str]:
+def _sa_type_class_to_db_type_id(sa_type_class, engine):
     return _get_sa_type_class_id_from_ischema_names(sa_type_class, engine)
 
 
-def _get_sa_type_class_id_from_ischema_names(sa_type_class1, engine) -> Optional[str]:
+def _get_sa_type_class_id_from_ischema_names(sa_type_class1, engine):
     for db_type_id, sa_type_class2 in engine.dialect.ischema_names.items():
         if sa_type_class1 == sa_type_class2:
             return db_type_id
 
 
-def _get_type_ids_on_database(engine) -> Collection[str]:
+def _get_type_ids_on_database(engine):
     """
     Returns db type ids available on the database.
     """

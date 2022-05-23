@@ -403,10 +403,10 @@ def _type_inference_table_previews_post_body(_type_inference_table_type_suggesti
         'columns': [
             {'name': 'id', 'type': PostgresType.INTEGER.id}
         ] + [
-                {'name': id, 'type': db_type_id}
-                for id, db_type_id
-                in _type_inference_table_type_suggestions.items()
-            ]
+            {'name': id, 'type': db_type_id}
+            for id, db_type_id
+            in _type_inference_table_type_suggestions.items()
+        ]
     }
 
 

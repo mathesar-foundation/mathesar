@@ -3,8 +3,7 @@ This file describes UI data types and how they map to DB-layer database types (s
 of db.types.base.DatabaseType).
 """
 from enum import Enum
-from collections.abc import Set, Collection, Mapping
-from typing import Optional
+from collections.abc import Collection
 from db.types.base import (
     DatabaseType, PostgresType, MathesarCustomType
 )
@@ -12,9 +11,9 @@ from db.types.hintsets import db_types_hinted
 
 
 class UIType(Enum):
-    id: str
-    display_name: str
-    db_types: Collection[DatabaseType]
+    id: str  # noqa: NT001
+    display_name: str  # noqa: NT001
+    db_types: Collection[DatabaseType]  # noqa: NT001
 
     BOOLEAN = (
         'boolean',
@@ -129,7 +128,7 @@ class UIType(Enum):
         },
     )
 
-    def __new__(cls, ui_type_id, display_name, db_types: Set[DatabaseType]):
+    def __new__(cls, ui_type_id, display_name, db_types):
         """
         The Enum is adapted to take three initial properties. Enum's value is set to be the first
         property -- the id.
@@ -160,7 +159,7 @@ def ui_types_that_satisfy_hintset(ui_types_mapped_to_hintsets, hintset):
     )
 
 
-def get_ui_types_mapped_to_hintsets() -> Mapping[UIType, Collection[str]]:
+def get_ui_types_mapped_to_hintsets():
     """
     Returns a dict where the keys are UI types and the values their hintsets.
     A UI type's hintset is defined as the intersection of the hintsets of its associated
@@ -187,14 +186,14 @@ def _safe_set_intersection(sets):
         return set()
 
 
-def get_ui_type_from_db_type(db_type_to_find: DatabaseType) -> Optional[UIType]:
+def get_ui_type_from_db_type(db_type_to_find):
     for ui_type in UIType:
         associated_db_types = ui_type.db_types
         if db_type_to_find in associated_db_types:
             return ui_type
 
 
-def get_ui_type_from_id(ui_type_id) -> Optional[UIType]:
+def get_ui_type_from_id(ui_type_id):
     try:
         return UIType(ui_type_id)
     except ValueError:

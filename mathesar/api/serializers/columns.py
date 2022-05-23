@@ -9,7 +9,7 @@ from mathesar.api.serializers.shared_serializers import (
     DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY,
 )
 from mathesar.models import Column
-from db.types.base import get_db_type_enum_from_id, DatabaseType
+from db.types.base import get_db_type_enum_from_id
 
 
 class InputValueField(serializers.CharField):
@@ -95,7 +95,7 @@ class SimpleColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSeriali
         return super().to_internal_value(data)
 
 
-def _force_canonical_type(representation, db_type: DatabaseType):
+def _force_canonical_type(representation, db_type):
     """
     Sometimes the representation's TYPE_KEY attribute will also include type option information
     (e.g. `numeric(3, 5)`). We override the attribute's value to a canonical type id.

@@ -134,7 +134,9 @@ def test_database_list_sorted_by(client, test_db_name, database_api_db, create_t
     """
     reflect_db_objects()
 
-    test_db_name_2 = 'a'+get_uid()
+    # I appended a lowercase letter in front of the random string, because I suspected that Python
+    # and Postgres might be sorting multi-case string sets differently.
+    test_db_name_2 = 'a' + get_uid()
 
     create_temp_dj_db(test_db_name_2)
 

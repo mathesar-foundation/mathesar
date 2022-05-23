@@ -2,6 +2,7 @@ import json
 from mathesar.database.types import UIType
 from lazydict import LazyDictionary
 
+
 def _money_display_options_schema():
     with open("currency_info.json", "r") as info_file:
         currency_info = json.load(info_file)
@@ -21,6 +22,7 @@ def _money_display_options_schema():
                 ]
             }]
     }
+
 
 DISPLAY_OPTIONS_BY_UI_TYPE = LazyDictionary(
     {

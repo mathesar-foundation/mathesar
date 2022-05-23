@@ -2,8 +2,6 @@ from copy import deepcopy
 import json
 from unittest.mock import patch
 
-from django.core.cache import cache
-
 import pytest
 from mathesar.api.utils import follows_json_number_spec
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound

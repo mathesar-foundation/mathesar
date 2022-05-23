@@ -1,6 +1,4 @@
 from frozendict import frozendict
-from collections.abc import Mapping, Sequence
-from typing import Union
 
 from db.functions import hints
 from db.types import categories
@@ -8,7 +6,7 @@ from db.types.base import PostgresType, MathesarCustomType, known_db_types
 
 
 # TODO switch from using tuples for hintsets to using frozensets
-def _build_db_types_hinted() -> Mapping[Union[PostgresType, MathesarCustomType], Sequence[Mapping]]:
+def _build_db_types_hinted():
     """
     Builds up a map of db types to hintsets.
     """

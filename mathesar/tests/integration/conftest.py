@@ -3,7 +3,6 @@ from rest_framework.test import APIClient
 from django.core.cache import cache
 
 from db.types.base import PostgresType
-from mathesar.models import Database
 from mathesar.tests.integration.utils.locators import get_table_entry
 from mathesar.utils.tables import create_empty_table
 

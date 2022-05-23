@@ -6,10 +6,7 @@ from db.columns.operations.select import (
 )
 from db.tables.operations.select import get_oid_from_table
 from db.types.operations.cast import get_full_cast_map
-from db.types.base import get_db_type_enum_from_class, DatabaseType
-
-from collections.abc import Collection
-from typing import Optional
+from db.types.base import get_db_type_enum_from_class
 
 
 # TODO consider renaming to DbColumn or DatabaseColumn
@@ -112,7 +109,7 @@ class MathesarColumn(Column):
         self.engine = engine
 
     @property
-    def valid_target_types(self) -> Optional[Collection[DatabaseType]]:
+    def valid_target_types(self):
         """
         Returns a set of valid types to which the type of the column can be
         altered.

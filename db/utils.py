@@ -19,7 +19,7 @@ def execute_statement(engine, statement, connection_to_use=None):
 
 
 def execute_query(engine, query, connection_to_use=None):
-    return execute_statement(engine, query, connection_to_use=None).fetchall()
+    return execute_statement(engine, query, connection_to_use=connection_to_use).fetchall()
 
 
 class OrderByIds:
@@ -27,7 +27,7 @@ class OrderByIds:
     A mixin for ordering based on ids; useful at least for type enums in testing.
     """
 
-    id: str
+    id: str  # noqa: NT001
 
     def __ge__(self, other):
         if self._ordering_supported(other):

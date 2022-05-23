@@ -1,17 +1,15 @@
 import pytest
 
-from django.core.cache import cache
-
 from sqlalchemy import INTEGER, BOOLEAN, TEXT, TIMESTAMP, Column, Table as SATable, MetaData, TIME, DATE
-from sqlalchemy import Table as SATable
 
 from db.columns.operations.alter import alter_column_type
 from db.columns.operations.select import get_column_attnum_from_name
-from db.types.base import PostgresType, MathesarCustomType
 from db.tables.operations.select import get_oid_from_table
+from db.types.base import PostgresType, MathesarCustomType
 from db.types.custom.money import MathesarMoney
 
 from mathesar import models
+
 
 @pytest.fixture
 def column_test_table_with_service_layer_options(patent_schema):
@@ -320,7 +318,7 @@ def test_column_alter_same_type_display_options(
 
 @pytest.mark.parametrize(
     "display_options,type_options",
-    [[None, None],[{},{}]]
+    [[None, None], [{}, {}]]
 )
 def test_column_update_type_with_display_and_type_options_as_null_or_empty_obj(
     column_test_table, client, display_options, type_options
@@ -341,4 +339,4 @@ def test_column_update_type_with_display_and_type_options_as_null_or_empty_obj(
     assert response_json["type"] == db_type_id
     assert response_json["display_options"] == display_options
     # For some reason, type_options will reflect None, whether it was updated to None or to {}.
-    assert response_json["type_options"] == None
+    assert response_json["type_options"] is None

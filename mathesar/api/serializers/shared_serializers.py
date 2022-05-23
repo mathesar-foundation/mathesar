@@ -1,11 +1,8 @@
-from typing import Optional
 from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.database.types import UIType, get_ui_type_from_db_type
-
-from db.types.base import DatabaseType
 
 
 class ReadOnlyPolymorphicSerializerMappingMixin:
@@ -108,7 +105,7 @@ class CustomBooleanLabelSerializer(MathesarErrorMessageMixin, serializers.Serial
 
 # This is the key which will determine which display options serializer is used. Its value is
 # supposed to be the column's DB type (a DatabaseType instance).
-DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY: Optional[DatabaseType] = 'db_type'
+DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY = 'db_type'
 
 
 class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPartialMixin, serializers.Serializer):
