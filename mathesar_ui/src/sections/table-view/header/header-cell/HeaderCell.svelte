@@ -27,6 +27,7 @@
   import DefaultOptions from './DefaultOptions.svelte';
   import AbstractTypeConfiguration from './abstract-type-configuration/AbstractTypeConfiguration.svelte';
   import type { ProcessedTableColumn } from '../../utils';
+  import ColumnResizer from './ColumnResizer.svelte';
 
   const tabularData = getContext<TabularDataStore>('tabularData');
 
@@ -136,7 +137,7 @@
 </script>
 
 <div
-  class="cell"
+  class="cell header-cell"
   style="
     width:{$columnWidths.get(column.id) ?? 0}px;
     left:{$columnPositions.get(column.id) ?? 0}px;
@@ -216,6 +217,7 @@
       >
     </Dropdown>
   {/if}
+  <ColumnResizer columnId={column.id} />
 </div>
 
 <style global lang="scss">
