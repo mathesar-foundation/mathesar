@@ -16,6 +16,7 @@ export const Stages = {
 };
 
 export interface PreviewColumn {
+  id: number;
   name: string;
   displayName: string;
   index: number;
