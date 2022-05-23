@@ -35,6 +35,7 @@ def get_uid(worker_id):
     A factory of session-unique 4 letter strings.
     """
     used_uids = set()
+
     def _get_uid():
         letters = string.ascii_letters
         candidate = "".join(random.sample(letters, 4))
@@ -85,6 +86,7 @@ def _create_db():
     itself.
     """
     created_dbs = set()
+
     def __create_db(db_name):
         engine = _create_engine(db_name)
         if database_exists(engine.url):
@@ -114,7 +116,6 @@ create_module_db = pytest.fixture(_create_db, scope="module")
 
 # This factory will clean up its created dbs after the whole testing session is finished.
 create_session_db = pytest.fixture(_create_db, scope="session")
-
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -176,6 +177,7 @@ def create_db_schema():
     Creates a DB schema factory, making sure to track and clean up new instances
     """
     created_schemas = {}
+
     def _create_schema(schema_name, engine, schema_mustnt_exist=True):
         if schema_mustnt_exist:
             assert schema_name not in created_schemas
