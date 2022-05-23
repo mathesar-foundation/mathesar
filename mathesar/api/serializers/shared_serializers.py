@@ -20,19 +20,23 @@ class ReadOnlyPolymorphicSerializerMappingMixin:
             )
         return super().__new__(cls, *args, **kwargs)
 
+    def _init_serializer(self, serializer_cls, *args, **kwargs):
+        if callable(serializer_cls):
+            serializer = serializer_cls(*args, **kwargs)
+            serializer.parent = self
+        else:
+            serializer = serializer_cls
+        return serializer
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.serializers_cls_mapping = {}
         serializers_mapping = self.serializers_mapping
         self.serializers_mapping = {}
         if self.default_serializer is not None:
-            self.default_serializer = self.default_serializer(*args, **kwargs)
+            self.default_serializer = self._init_serializer(self.default_serializer, *args, **kwargs)
         for identifier, serializer_cls in serializers_mapping.items():
-            if callable(serializer_cls):
-                serializer = serializer_cls(*args, **kwargs)
-                serializer.parent = self
-            else:
-                serializer = serializer_cls
+            serializer = self._init_serializer(serializer_cls, *args, **kwargs)
             self.serializers_mapping[identifier] = serializer
             self.serializers_cls_mapping[identifier] = serializer_cls
 
