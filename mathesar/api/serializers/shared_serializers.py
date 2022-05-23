@@ -169,13 +169,14 @@ class DisplayOptionsMappingSerializer(
     serializers_mapping = {
         UIType.BOOLEAN: BooleanDisplayOptionSerializer,
         UIType.NUMBER: NumberDisplayOptionSerializer,
-        UIType.DATETIME: TimeFormatDisplayOptionSerializer,
+        UIType.DATETIME: DateTimeFormatDisplayOptionSerializer,
         UIType.DATE: TimeFormatDisplayOptionSerializer,
         UIType.TIME: TimeFormatDisplayOptionSerializer,
         UIType.DURATION: DurationDisplayOptionSerializer,
+        UIType.MONEY: MoneyDisplayOptionSerializer,
     }
 
-    def get_mapping_field(self):
+    def get_mapping_field(self, _):
         return self._get_ui_type_of_column_being_serialized()
 
     def _get_ui_type_of_column_being_serialized(self):
