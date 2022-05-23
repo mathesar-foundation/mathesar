@@ -58,7 +58,7 @@ def automatically_clear_cache():
 
 
 @pytest.fixture(scope="session")
-def django_db_modify_db_settings(ignore_all_dbs_except_default, django_db_modify_db_settings):
+def django_db_modify_db_settings(ignore_all_dbs_except_default, django_db_modify_db_settings):  # noqa: F841
     return
 
 

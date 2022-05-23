@@ -77,6 +77,7 @@ def test_database_engine_cache_stability(create_temp_dj_db, iteration, uid):
     drops the database during cleanup; the second, recreates the database, fetches a cached engine,
     and tests it.
     """
+    del iteration  # An unused parameter
     some_db_name = uid
     create_temp_dj_db(some_db_name)
     db_model, _ = Database.objects.get_or_create(name=some_db_name)
