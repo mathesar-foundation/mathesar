@@ -4,14 +4,13 @@ intended to be the containment zone for anything specific about the testing
 environment (e.g., the login info for the Postgres instance for testing)
 """
 import pytest
-import logging
 import random
 import string
 
 from django.db import connection as dj_connection
 
-from sqlalchemy.exc import OperationalError
 from sqlalchemy_utils import database_exists, create_database, drop_database
+from sqlalchemy.exc import OperationalError
 
 from db.engine import add_custom_types_to_ischema_names, create_engine
 from db.types import install
@@ -57,7 +56,27 @@ def uid(get_uid):
     return get_uid()
 
 
-def _create_db(get_uid):
+def _get_connection_string(username, password, hostname, database):
+    return f"postgresql://{username}:{password}@{hostname}/{database}"
+
+
+def _create_engine(db_name):
+    dj_connection_settings = dj_connection.settings_dict
+    engine = create_engine(
+        _get_connection_string(
+            username=dj_connection_settings["USER"],
+            password=dj_connection_settings["PASSWORD"],
+            hostname=dj_connection_settings["HOST"],
+            database=db_name,
+        ),
+        future=True,
+        # Setting a fixed timezone makes the timezone aware test cases predictable.
+        connect_args={"options": "-c timezone=utc -c lc_monetary=en_US.UTF-8"}
+    )
+    return engine
+
+
+def _create_db():
     """
     A factory for Postgres mathesar-installed databases. A fixture made of this method tears down
     created dbs when leaving scope.
@@ -65,14 +84,10 @@ def _create_db(get_uid):
     This method is used to create two fixtures with different scopes, that's why it's not a fixture
     itself.
     """
-    logger = logging.getLogger("_create_db" + "-" + get_uid())
-    logger.debug("init")
     created_dbs = set()
     def __create_db(db_name):
-        logger.debug(f"creating db {db_name}")
         engine = _create_engine(db_name)
         if database_exists(engine.url):
-            logger.warning(f"db {db_name} already exists!")
             drop_database(engine.url)
         create_database(engine.url)
         created_dbs.add(db_name)
@@ -80,15 +95,10 @@ def _create_db(get_uid):
         install.install_mathesar_on_database(engine)
         return db_name
     yield __create_db
-    logger.debug(f"about to clean up {created_dbs}")
     for db_name in created_dbs:
-        logger.debug(f"cleaning up db {db_name}")
         engine = _create_engine(db_name)
         if database_exists(engine.url):
             drop_database(engine.url)
-        else:
-            logger.error(f"db {db_name} already gone!")
-    logger.debug(f"exit")
 
 
 # This factory will clean up its created dbs after each test function that it's used in.
@@ -165,8 +175,6 @@ def create_db_schema():
     """
     Creates a DB schema factory, making sure to track and clean up new instances
     """
-    logger = logging.getLogger('create_db_schema')
-    logger.debug("init")
     created_schemas = {}
     def _create_schema(schema_name, engine, schema_mustnt_exist=True):
         if schema_mustnt_exist:
@@ -176,10 +184,8 @@ def create_db_schema():
         engine_url = engine.url
         created_schemas_in_this_engine = created_schemas.setdefault(engine_url, {})
         created_schemas_in_this_engine[schema_name] = schema_oid
-        logger.debug(f"created schema '{schema_name}' in db '{engine_url}'")
         return schema_name
     yield _create_schema
-    logger.debug(f"cleaning up created schemas")
     for engine_url, created_schemas_in_this_engine in created_schemas.items():
         engine = create_engine(engine_url)
         try:
@@ -188,30 +194,5 @@ def create_db_schema():
                 schema_name = get_schema_name_from_oid(schema_oid, engine)
                 if schema_name:
                     drop_sa_schema(schema_name, engine, cascade=True, if_exists=True)
-                    logger.debug(f"dropped: schema '{schema_name}' from db '{engine_url}'")
-                else:
-                    logger.debug(f"already was dropped: schema '{schema_name}' from db '{engine_url}'")
         except OperationalError:
-            logger.debug(f"already was dropped: db '{engine_url}'")
             pass
-    logger.debug("exit")
-
-
-def _get_connection_string(username, password, hostname, database):
-    return f"postgresql://{username}:{password}@{hostname}/{database}"
-
-
-def _create_engine(db_name):
-    dj_connection_settings = dj_connection.settings_dict
-    engine = create_engine(
-        _get_connection_string(
-            username=dj_connection_settings["USER"],
-            password=dj_connection_settings["PASSWORD"],
-            hostname=dj_connection_settings["HOST"],
-            database=db_name,
-        ),
-        future=True,
-        # Setting a fixed timezone makes the timezone aware test cases predictable.
-        connect_args={"options": "-c timezone=utc -c lc_monetary=en_US.UTF-8"}
-    )
-    return engine
