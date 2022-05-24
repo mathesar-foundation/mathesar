@@ -46,14 +46,6 @@ class DatabaseType(OrderByIds):
             return instance.compile(dialect=dialect)
 
     @property
-    def is_alias(self):
-        """
-        Checks if this type is an alias for another type, the other type being the canonical
-        alias, and this type being a non-canonical alias.
-        """
-        return self in _non_canonical_alias_db_types
-
-    @property
     def is_sa_only(self):
         """
         A column can be reflected to have an SQLAlchemy type that does not represent an actual
