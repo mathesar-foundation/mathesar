@@ -9,10 +9,9 @@ from db.functions import hints
 from db.functions.base import DBFunction, Contains, sa_call_sql_function, Equal
 from db.functions.packed import DBFunctionPacked
 
-from db.types import base
+from db.types.base import MathesarCustomType, PostgresType, get_qualified_name, get_ma_qualified_schema
 
-URI_STR = base.MathesarCustomType.URI.value
-DB_TYPE = base.get_qualified_name(URI_STR)
+DB_TYPE = MathesarCustomType.URI.id
 
 TLDS_PATH = os.path.join(
     os.path.join(os.path.abspath(os.path.dirname(__file__)), "resources"),
@@ -20,25 +19,16 @@ TLDS_PATH = os.path.join(
 )
 
 TLDS_TABLE_NAME = "top_level_domains"
-QUALIFIED_TLDS = base.get_qualified_name(TLDS_TABLE_NAME)
+QUALIFIED_TLDS = get_qualified_name(TLDS_TABLE_NAME)
 
 
 class URIFunction(Enum):
-    PARTS = URI_STR + "_parts"
-    SCHEME = URI_STR + "_scheme"
-    AUTHORITY = URI_STR + "_authority"
-    PATH = URI_STR + "_path"
-    QUERY = URI_STR + "_query"
-    FRAGMENT = URI_STR + "_fragment"
-
-
-QualifiedURIFunction = Enum(
-    "QualifiedURIFunction",
-    {
-        func_name.name: base.get_qualified_name(func_name.value)
-        for func_name in URIFunction
-    }
-)
+    PARTS = DB_TYPE + "_parts"
+    SCHEME = DB_TYPE + "_scheme"
+    AUTHORITY = DB_TYPE + "_authority"
+    PATH = DB_TYPE + "_path"
+    QUERY = DB_TYPE + "_query"
+    FRAGMENT = DB_TYPE + "_fragment"
 
 
 # This regex and the use of it are based on the one given in RFC 3986.
@@ -57,7 +47,7 @@ class URI(UserDefinedType):
 def build_generic_function_def_class(name):
     class_dict = {
         "type": Text,
-        "name": quoted_name(QualifiedURIFunction[name].value, False),
+        "name": quoted_name(URIFunction[name].value, False),
         "identifier": URIFunction[name].value
     }
     return type(class_dict["identifier"], (GenericFunction,), class_dict)
@@ -76,24 +66,24 @@ def install(engine):
     """
 
     create_uri_parts_query = f"""
-    CREATE OR REPLACE FUNCTION {QualifiedURIFunction.PARTS.value}({base.PostgresType.TEXT.value})
-    RETURNS {base.PostgresType.TEXT.value}[] AS $$
+    CREATE OR REPLACE FUNCTION {URIFunction.PARTS.value}({PostgresType.TEXT.value})
+    RETURNS {PostgresType.TEXT.value}[] AS $$
         SELECT regexp_match($1, {URI_REGEX_STR});
     $$
     LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
     """
     uri_parts_map = {
-        QualifiedURIFunction.SCHEME.value: 2,
-        QualifiedURIFunction.AUTHORITY.value: 4,
-        QualifiedURIFunction.PATH.value: 5,
-        QualifiedURIFunction.QUERY.value: 7,
-        QualifiedURIFunction.FRAGMENT.value: 9,
+        URIFunction.SCHEME.value: 2,
+        URIFunction.AUTHORITY.value: 4,
+        URIFunction.PATH.value: 5,
+        URIFunction.QUERY.value: 7,
+        URIFunction.FRAGMENT.value: 9,
     }
 
     create_domain_query = f"""
     CREATE DOMAIN {DB_TYPE} AS text CHECK (
-        (value IS NULL) OR ({QualifiedURIFunction.SCHEME.value}(value) IS NOT NULL
-        AND {QualifiedURIFunction.PATH.value}(value) IS NOT NULL)
+        (value IS NULL) OR ({URIFunction.SCHEME.value}(value) IS NOT NULL
+        AND {URIFunction.PATH.value}(value) IS NOT NULL)
     );
     """
 
@@ -102,9 +92,9 @@ def install(engine):
         conn.execute(text(create_uri_parts_query))
         for part, index in uri_parts_map.items():
             create_uri_part_getter_query = f"""
-            CREATE OR REPLACE FUNCTION {part}({base.PostgresType.TEXT.value})
-            RETURNS {base.PostgresType.TEXT.value} AS $$
-                SELECT ({QualifiedURIFunction.PARTS.value}($1))[{index}];
+            CREATE OR REPLACE FUNCTION {part}({PostgresType.TEXT.value})
+            RETURNS {PostgresType.TEXT.value} AS $$
+                SELECT ({URIFunction.PARTS.value}($1))[{index}];
             $$
             LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
             """
@@ -118,7 +108,7 @@ def install_tld_lookup_table(engine):
         TLDS_TABLE_NAME,
         MetaData(bind=engine),
         Column("tld", String, primary_key=True),
-        schema=base.preparer.quote_schema(base.SCHEMA)
+        schema=get_ma_qualified_schema(),
     )
     tlds_table.create()
     with engine.begin() as conn, open(TLDS_PATH) as f:

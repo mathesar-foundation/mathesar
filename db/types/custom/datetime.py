@@ -5,14 +5,7 @@ from sqlalchemy.dialects.postgresql import TIME as SA_TIME
 from sqlalchemy.dialects.postgresql import TIMESTAMP as SA_TIMESTAMP
 from sqlalchemy.types import TypeDecorator
 
-from db.types import base
 from db.types.exceptions import InvalidTypeParameters
-
-TIME_ZONE_DB_TYPE = base.PostgresType.TIME_WITH_TIME_ZONE.value
-WITHOUT_TIME_ZONE_DB_TYPE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
-TIMESTAMP_TIME_ZONE_DB_TYPE = base.PostgresType.TIMESTAMP_WITH_TIME_ZONE.value
-TIMESTAMP_WITHOUT_TIME_ZONE_DB_TYPE = base.PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value
-DATE_TYPE = base.PostgresType.DATE.value
 
 
 class DATE(TypeDecorator):

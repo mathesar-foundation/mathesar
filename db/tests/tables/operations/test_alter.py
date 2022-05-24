@@ -7,8 +7,8 @@ from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tests.tables import utils as test_utils
 
 
-def test_rename_table(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_rename_table(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "test_rename_table"
     new_table_name = "test_rename_table_new"
     old_table = create_mathesar_table(table_name, schema, [], engine)
@@ -25,8 +25,8 @@ def test_rename_table(engine_with_schema):
         reflect_table(table_name, schema, engine)
 
 
-def test_rename_table_foreign_key(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_rename_table_foreign_key(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "test_rename_table_foreign_key"
     new_table_name = "test_rename_table_foreign_key_new"
     related_table_name = "test_rename_table_foreign_key_related"

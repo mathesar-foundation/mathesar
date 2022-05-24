@@ -2,7 +2,7 @@ import { faGlobe } from '@fortawesome/free-solid-svg-icons';
 import type { AbstractTypeConfiguration } from '../types';
 
 const DB_TYPES = {
-  MATHESAR_TYPES__URI: 'MATHESAR_TYPES.URI',
+  MATHESAR_TYPES__URI: 'mathesar_types.uri',
 };
 
 const uriType: AbstractTypeConfiguration = {
