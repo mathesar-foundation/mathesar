@@ -115,7 +115,6 @@ class PostgresType(DatabaseType, Enum):
     DATE = 'date'
     DATERANGE = 'daterange'
     DOUBLE_PRECISION = 'double precision'
-    FLOAT = 'float'
     HSTORE = 'hstore'
     INET = 'inet'
     INT4RANGE = 'int4range'
@@ -134,10 +133,8 @@ class PostgresType(DatabaseType, Enum):
     REGCLASS = 'regclass'
     SMALLINT = 'smallint'
     TEXT = 'text'
-    TIME = 'time'
     TIME_WITH_TIME_ZONE = 'time with time zone'
     TIME_WITHOUT_TIME_ZONE = 'time without time zone'
-    TIMESTAMP = 'timestamp'
     TIMESTAMP_WITH_TIME_ZONE = 'timestamp with time zone'
     TIMESTAMP_WITHOUT_TIME_ZONE = 'timestamp without time zone'
     TSRANGE = 'tsrange'
@@ -191,17 +188,7 @@ class MathesarCustomType(DatabaseType, Enum):
         return instance
 
 
-# TODO these will never be reflected. find a more comprehensive way to make sure that these types
-# never appear in any API responses.
-_non_canonical_alias_db_types = frozenset({
-    PostgresType.FLOAT,
-    PostgresType.TIME,
-    PostgresType.TIMESTAMP,
-})
-
-
 _inconsistent_db_types = frozenset.union(
-    _non_canonical_alias_db_types,
     frozenset({
         PostgresType.NAME,
         PostgresType.BIT_VARYING,

@@ -22,13 +22,11 @@ INTEGER_TYPES = frozenset({
 
 DECIMAL_TYPES = frozenset({
     PostgresType.DOUBLE_PRECISION,
-    PostgresType.FLOAT,
     PostgresType.NUMERIC,
     PostgresType.REAL,
 })
 
 TIME_OF_DAY_TYPES = frozenset({
-    PostgresType.TIME,
     PostgresType.TIME_WITH_TIME_ZONE,
     PostgresType.TIME_WITHOUT_TIME_ZONE,
 })
@@ -38,7 +36,6 @@ DATE_TYPES = frozenset({
 })
 
 DATETIME_TYPES = frozenset({
-    PostgresType.TIMESTAMP,
     PostgresType.TIMESTAMP_WITH_TIME_ZONE,
     PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE,
 })

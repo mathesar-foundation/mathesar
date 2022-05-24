@@ -74,7 +74,6 @@ class UIType(Enum):
         {
             PostgresType.BIGINT,
             PostgresType.DOUBLE_PRECISION,
-            PostgresType.FLOAT,
             PostgresType.INTEGER,
             PostgresType.NUMERIC,
             PostgresType.REAL,
@@ -120,7 +119,6 @@ class UIType(Enum):
             PostgresType.NUMRANGE,
             PostgresType.OID,
             PostgresType.REGCLASS,
-            PostgresType.TIMESTAMP,
             PostgresType.TSRANGE,
             PostgresType.TSTZRANGE,
             PostgresType.TSVECTOR,
