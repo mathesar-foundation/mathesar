@@ -5,7 +5,6 @@
 
   interface $$Props extends Omit<StringifiedNumberInputProps, 'value'> {
     value: NumberCellProps['value'];
-    isPercentage: NumberCellProps['isPercentage'];
   }
 
   type ParentValue = $$Props['value'];
@@ -13,9 +12,6 @@
 
   let parentValue: ParentValue = undefined;
   export { parentValue as value };
-
-  // TODO connect this to StringifiedNumberInput
-  export let isPercentage: $$Props['isPercentage'];
 
   let childValue: ChildValue = null;
 
