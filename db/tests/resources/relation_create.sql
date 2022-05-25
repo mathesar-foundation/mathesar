@@ -1,5 +1,5 @@
 CREATE TABLE "Person" (
-    id integer NOT NULL UNIQUE,
+    id integer NOT NULL UNIQUE PRIMARY KEY,
     "Name" character varying(100),
     "Email" mathesar_types.email
 
@@ -17,7 +17,7 @@ ALTER SEQUENCE "Person_id_seq" OWNED BY "Person".id;
 ALTER TABLE ONLY "Person" ALTER COLUMN id SET DEFAULT nextval('"Person_id_seq"'::regclass);
 
 CREATE TABLE "Subject" (
-    id integer NOT NULL UNIQUE ,
+    id integer NOT NULL UNIQUE PRIMARY KEY,
     "person" integer REFERENCES "Person"(id),
     "teacher" integer REFERENCES "Person"(id),
     supplementary integer REFERENCES "Subject"(id),

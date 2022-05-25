@@ -117,7 +117,14 @@ def test_foreign_key_record(relation_table_obj):
     referent_table, referrer_table, engine = relation_table_obj
     fk_column_name = "person"
     preview_columns[fk_column_name] = {'table': referent_table, 'columns': ["Name", "Email"]}
-    get_records(referrer_table, engine, preview_columns=preview_columns)
+    records = get_records(
+        referrer_table,
+        engine,
+        order_by=[{'field': "id", 'direction': "asc"}],
+        preview_columns=preview_columns
+    )
+    expected_record_data = (1, 1, 6, None, 'Physics', 43, 'Stephanie Norris', 'stephanienorris@hotmail.com')
+    assert records[0] == expected_record_data
 
 
 def test_multiple_column_same_table_relation_foreign_key_record(relation_table_obj):
@@ -127,7 +134,26 @@ def test_multiple_column_same_table_relation_foreign_key_record(relation_table_o
     preview_columns[fk_column_name] = {'table': referent_table, 'columns': ["Name", "Email"]}
     fk_column_name = "teacher"
     preview_columns[fk_column_name] = {'table': referent_table, 'columns': ["Name", "Email"]}
-    get_records(referrer_table, engine, preview_columns=preview_columns)
+    records = get_records(
+        referrer_table,
+        engine,
+        order_by=[{'field': "id", 'direction': "asc"}],
+        preview_columns=preview_columns
+    )
+    record_index = 3
+    expected_record_data_dict = {
+        'Name': 'Biology',
+        'Score': 41,
+        'id': 4,
+        'person': 1,
+        'person_fk_Email': 'stephanienorris@hotmail.com',
+        'person_fk_Name': 'Stephanie Norris',
+        'supplementary': None,
+        'teacher': 7,
+        'teacher_fk_Email': 'judymartinez@gmail.com',
+        'teacher_fk_Name': 'Judy Martinez'
+    }
+    assert records[record_index]._asdict() == expected_record_data_dict
 
 
 def test_self_referential_relation_foreign_key_record(relation_table_obj):
@@ -137,4 +163,22 @@ def test_self_referential_relation_foreign_key_record(relation_table_obj):
     preview_columns[fk_column_name] = {'table': referent_table, 'columns': ["Name", "Email"]}
     fk_column_name = "supplementary"
     preview_columns[fk_column_name] = {'table': referrer_table, 'columns': ["Name"]}
-    get_records(referrer_table, engine, preview_columns=preview_columns)
+    records = get_records(
+        referrer_table,
+        engine,
+        order_by=[{'field': "id", 'direction': "asc"}],
+        preview_columns=preview_columns
+    )
+    record_index = 7
+    expected_record_data = {
+        'Name': 'Art',
+        'Score': 31,
+        'id': 8,
+        'person': 2,
+        'person_fk_Email': 'shannonramos@gmail.com',
+        'person_fk_Name': 'Shannon Ramos',
+        'supplementary': 3,
+        'supplementary_fk_Name': 'Chemistry',
+        'teacher': 10
+    }
+    assert records[record_index]._asdict() == expected_record_data

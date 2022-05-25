@@ -28,6 +28,10 @@ def _sort_and_filter(query, order_by, filter):
     return query
 
 
+def preview_column_key(preview_column, column_name):
+    return f"{preview_column}_fk_{column_name}"
+
+
 def get_query(
     table,
     limit,
@@ -58,8 +62,11 @@ def get_query(
     if preview_columns:
         for preview_column, referent_obj in preview_columns.items():
             referent_table = referent_obj['table'].alias(f"{preview_column}_fk_table")
-            selectable = selectable.join(referent_table, table.c[preview_column] == referent_table.c.id)
-            selectable_columns = [referent_table.c[column_name] for column_name in referent_obj['columns']]
+            selectable = selectable.join(referent_table, table.c[preview_column] == referent_table.c.id, isouter=True)
+            selectable_columns = [
+                referent_table.c[column_name].label(preview_column_key(preview_column, column_name))
+                for column_name in referent_obj['columns']
+            ]
             selectable = selectable.add_columns(*selectable_columns)
 
     selectable = selectable.limit(limit).offset(offset)
