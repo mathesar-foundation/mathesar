@@ -5,6 +5,8 @@ from unittest.mock import patch
 from django.core.cache import cache
 
 import pytest
+
+from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from mathesar.api.utils import follows_json_number_spec
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
@@ -14,6 +16,13 @@ from db.records.operations.group import GroupBy
 from mathesar import models
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.api.exceptions.error_codes import ErrorCodes
+
+
+def _get_columns_by_name(table, name_list):
+    columns_by_name_dict = {
+        col.name: col for col in models.Column.objects.filter(table=table) if col.name in name_list
+    }
+    return [columns_by_name_dict[col_name] for col_name in name_list]
 
 
 def test_record_list(create_table, client):
@@ -80,6 +89,23 @@ def test_record_serialization(empty_nasa_table, create_column, client, type_, va
 
     assert response.status_code == 200
     assert response_data["results"][0][str(column.id)] == value
+
+
+def test_foreign_key_record_api(create_foreign_key_table, client):
+    referrer_table_name = 'Patents'
+    referent_table_name = 'Center'
+    referrer_table, referent_table = create_foreign_key_table(referrer_table_name, referent_table_name)
+    referent_column = _get_columns_by_name(referent_table, ["Id"])[0]
+    referrer_column = _get_columns_by_name(referrer_table, ["Center"])[0]
+    referent_table.add_constraint(UniqueConstraint(None, referent_table.oid, [referent_column.attnum]))
+    referrer_table.add_constraint(ForeignKeyConstraint(None,
+                                                       referrer_table.oid,
+                                                       [referrer_column.attnum],
+                                                       referent_table.oid,
+                                                       [referent_column.attnum], {}))
+    response = client.get(f'/api/db/v0/tables/{referrer_table.id}/records/')
+    response_data = response.json()
+    print(response_data)
 
 
 def test_record_list_filter(create_table, client):
