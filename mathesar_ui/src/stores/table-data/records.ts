@@ -367,35 +367,27 @@ export class RecordsData {
       const { offset } = getStoreValue(this.meta.pagination);
       const savedRecords = getStoreValue(this.savedRecords);
       const savedRecordsLength = savedRecords?.length || 0;
-      const savedRecordKeys = new Set<RowKey>();
-      savedRecords.forEach((entry) =>
-        savedRecordKeys.add(
-          getRowKey(entry, this.columnsDataStore.get()?.primaryKeyColumnId),
-        ),
+      const pkColumnId = this.columnsDataStore.get()?.primaryKeyColumnId;
+      const savedRecordKeys = new Set(
+        savedRecords.map((row) => getRowKey(row, pkColumnId)),
       );
 
       this.newRecords.update((existing) => {
         let retained = existing.filter(
-          (entry) =>
-            !successRowKeys.has(
-              getRowKey(entry, this.columnsDataStore.get()?.primaryKeyColumnId),
-            ),
+          (row) => !successRowKeys.has(getRowKey(row, pkColumnId)),
         );
         retained = retained.filter(
-          (entry) =>
-            !savedRecordKeys.has(
-              getRowKey(entry, this.columnsDataStore.get()?.primaryKeyColumnId),
-            ),
+          (row) => !savedRecordKeys.has(getRowKey(row, pkColumnId)),
         );
 
         if (retained.length === existing.length) {
           return existing;
         }
         let index = -1;
-        retained = retained.map((entry) => {
+        retained = retained.map((row) => {
           index += 1;
           return {
-            ...entry,
+            ...row,
             rowIndex: savedRecordsLength + index,
             identifier: generateRowIdentifier('new', offset, index),
           };
