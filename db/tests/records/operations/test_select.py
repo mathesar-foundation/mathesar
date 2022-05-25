@@ -110,3 +110,31 @@ def test_get_records_duplicate_only(roster_table_obj):
     all_counter = {k: v for k, v in all_counter.items() if v > 1}
     got_counter = Counter(tuple(r[c] for c in duplicate_only) for r in dupe_record_list)
     assert all_counter == got_counter
+
+
+def test_foreign_key_record(relation_table_obj):
+    preview_columns = {}
+    referent_table, referrer_table, engine = relation_table_obj
+    fk_column_name = "person"
+    preview_columns[fk_column_name] = {'table': referent_table, 'columns': ["Name", "Email"]}
+    get_records(referrer_table, engine, preview_columns=preview_columns)
+
+
+def test_multiple_column_same_table_relation_foreign_key_record(relation_table_obj):
+    preview_columns = {}
+    referent_table, referrer_table, engine = relation_table_obj
+    fk_column_name = "person"
+    preview_columns[fk_column_name] = {'table': referent_table, 'columns': ["Name", "Email"]}
+    fk_column_name = "teacher"
+    preview_columns[fk_column_name] = {'table': referent_table, 'columns': ["Name", "Email"]}
+    get_records(referrer_table, engine, preview_columns=preview_columns)
+
+
+def test_self_referential_relation_foreign_key_record(relation_table_obj):
+    preview_columns = {}
+    referent_table, referrer_table, engine = relation_table_obj
+    fk_column_name = "person"
+    preview_columns[fk_column_name] = {'table': referent_table, 'columns': ["Name", "Email"]}
+    fk_column_name = "supplementary"
+    preview_columns[fk_column_name] = {'table': referrer_table, 'columns': ["Name"]}
+    get_records(referrer_table, engine, preview_columns=preview_columns)

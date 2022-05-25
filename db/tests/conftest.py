@@ -15,6 +15,7 @@ APP_SCHEMA = "test_schema"
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 RESOURCES = os.path.join(FILE_DIR, "resources")
 ROSTER_SQL = os.path.join(RESOURCES, "roster_create.sql")
+RELATION_SQL = os.path.join(RESOURCES, "relation_create.sql")
 URIS_SQL = os.path.join(RESOURCES, "uris_create.sql")
 TIMES_SQL = os.path.join(RESOURCES, "times_create.sql")
 BOOLEANS_SQL = os.path.join(RESOURCES, "booleans_create.sql")
@@ -41,6 +42,19 @@ def engine_with_roster(engine_with_schema):
     _add_custom_types_to_engine(engine)
     install.install_mathesar_on_database(engine)
     with engine.begin() as conn, open(ROSTER_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    yield engine, schema
+    with engine.begin() as conn:
+        conn.execute(DropSchema(base.SCHEMA, cascade=True, if_exists=True))
+
+
+@pytest.fixture
+def engine_with_relation(engine_with_schema):
+    engine, schema = engine_with_schema
+    _add_custom_types_to_engine(engine)
+    install.install_mathesar_on_database(engine)
+    with engine.begin() as conn, open(RELATION_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
     yield engine, schema
@@ -116,6 +130,11 @@ def roster_table_name():
 
 
 @pytest.fixture(scope='session')
+def relation_table_names():
+    return "Person", "Subject"
+
+
+@pytest.fixture(scope='session')
 def uris_table_name():
     return "uris"
 
@@ -186,6 +205,15 @@ def roster_table_obj(engine_with_roster, roster_table_name):
     metadata = MetaData(bind=engine)
     table = Table(roster_table_name, metadata, schema=schema, autoload_with=engine)
     return table, engine
+
+
+@pytest.fixture
+def relation_table_obj(engine_with_relation, relation_table_names):
+    engine, schema = engine_with_relation
+    metadata = MetaData(bind=engine)
+    referent_table = Table(relation_table_names[0], metadata, schema=schema, autoload_with=engine)
+    referrer_table = Table(relation_table_names[1], metadata, schema=schema, autoload_with=engine)
+    return referent_table, referrer_table, engine
 
 
 @pytest.fixture

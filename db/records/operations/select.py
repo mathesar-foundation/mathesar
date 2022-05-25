@@ -36,7 +36,8 @@ def get_query(
     filter=None,
     columns_to_select=None,
     group_by=None,
-    duplicate_only=None
+    duplicate_only=None,
+    preview_columns=None
 ):
     if duplicate_only:
         select_target = _get_duplicate_only_cte(table, duplicate_only)
@@ -53,6 +54,13 @@ def get_query(
     if columns_to_select:
         selectable = selectable.cte()
         selectable = select(*columns_to_select).select_from(selectable)
+
+    if preview_columns:
+        for preview_column, referent_obj in preview_columns.items():
+            referent_table = referent_obj['table'].alias(f"{preview_column}_fk_table")
+            selectable = selectable.join(referent_table, table.c[preview_column] == referent_table.c.id)
+            selectable_columns = [referent_table.c[column_name] for column_name in referent_obj['columns']]
+            selectable = selectable.add_columns(*selectable_columns)
 
     selectable = selectable.limit(limit).offset(offset)
     return selectable
@@ -75,6 +83,7 @@ def get_records(
     filter=None,
     group_by=None,
     duplicate_only=None,
+    preview_columns=None
 ):
     """
     Returns annotated records from a table.
@@ -93,6 +102,8 @@ def get_records(
         group_by:        group.GroupBy object
         duplicate_only:  list of column names; only rows that have duplicates across those rows
                          will be returned
+        preview_columns: a dictionary with one key-value pair, where the key is the foreign key column attnum and
+                         the value is a list of referent column attnums.
     """
     if not order_by:
         # Set default ordering if none was requested
@@ -112,7 +123,8 @@ def get_records(
         order_by=order_by,
         filter=filter,
         group_by=group_by,
-        duplicate_only=duplicate_only
+        duplicate_only=duplicate_only,
+        preview_columns=preview_columns
     )
     return execute_query(engine, query)
 
