@@ -2,7 +2,7 @@ from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
-from mathesar.database.types import MathesarTypeIdentifier, get_mathesar_type_from_db_type
+from mathesar.database.types import UIType, get_ui_type_from_db_type
 
 
 class ReadOnlyPolymorphicSerializerMappingMixin:
@@ -103,6 +103,8 @@ class CustomBooleanLabelSerializer(MathesarErrorMessageMixin, serializers.Serial
     FALSE = serializers.CharField()
 
 
+# This is the key which will determine which display options serializer is used. Its value is
+# supposed to be the column's DB type (a DatabaseType instance).
 DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY = 'db_type'
 
 
@@ -162,16 +164,19 @@ class DisplayOptionsMappingSerializer(
     serializers.Serializer
 ):
     serializers_mapping = {
-        MathesarTypeIdentifier.BOOLEAN.value: BooleanDisplayOptionSerializer,
-        MathesarTypeIdentifier.DATETIME.value: DateTimeFormatDisplayOptionSerializer,
-        MathesarTypeIdentifier.DATE.value: TimeFormatDisplayOptionSerializer,
-        MathesarTypeIdentifier.DURATION.value: DurationDisplayOptionSerializer,
-        MathesarTypeIdentifier.MONEY.value: MoneyDisplayOptionSerializer,
-        MathesarTypeIdentifier.NUMBER.value: NumberDisplayOptionSerializer,
-        MathesarTypeIdentifier.TIME.value: TimeFormatDisplayOptionSerializer,
+        UIType.BOOLEAN: BooleanDisplayOptionSerializer,
+        UIType.NUMBER: NumberDisplayOptionSerializer,
+        UIType.DATETIME: DateTimeFormatDisplayOptionSerializer,
+        UIType.DATE: TimeFormatDisplayOptionSerializer,
+        UIType.TIME: TimeFormatDisplayOptionSerializer,
+        UIType.DURATION: DurationDisplayOptionSerializer,
+        UIType.MONEY: MoneyDisplayOptionSerializer,
     }
 
-    def get_mapping_field(self, data):
+    def get_mapping_field(self, _):
+        return self._get_ui_type_of_column_being_serialized()
+
+    def _get_ui_type_of_column_being_serialized(self):
         db_type = self.context[DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY]
-        mathesar_type = get_mathesar_type_from_db_type(db_type)
-        return mathesar_type
+        ui_type = get_ui_type_from_db_type(db_type)
+        return ui_type

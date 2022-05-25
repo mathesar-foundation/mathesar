@@ -120,6 +120,9 @@ class ColumnViewSet(viewsets.ModelViewSet):
             except IndexError as e:
                 raise base_api_exceptions.NotFoundAPIException(e)
             except TypeError as e:
+                # TODO this error is actually much more general than just badly specified
+                # type_options problems. e.g. if a bad keyword argument is passed to a function,
+                # TypeError will be raised.
                 raise database_api_exceptions.InvalidTypeOptionAPIException(
                     e,
                     message="Unknown type_option passed",

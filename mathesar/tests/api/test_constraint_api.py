@@ -1,9 +1,9 @@
 import json
 
-from django.core.cache import cache
-from sqlalchemy import Column, ForeignKey, Integer, MetaData, Table as SATable
+from sqlalchemy import Column, ForeignKey, Integer, MetaData, Table as SATable, select
 
 from db.columns.operations.select import get_column_attnum_from_name
+from db.constraints.base import UniqueConstraint
 from db.tables.operations.select import get_oid_from_table
 from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
@@ -23,9 +23,9 @@ def _verify_foreign_key_constraint(
         name,
         referent_columns,
         referent_table_id,
-        onupdate,
-        ondelete,
-        deferrable,
+        onupdate=None,
+        ondelete=None,
+        deferrable=None,
 ):
     assert constraint_data['columns'] == columns
     assert constraint_data['referent_columns'] == referent_columns
@@ -45,17 +45,10 @@ def _verify_unique_constraint(constraint_data, columns, name):
     assert 'id' in constraint_data and type(constraint_data['id']) == int
 
 
-def _get_columns_by_name(table, name_list):
-    columns_by_name_dict = {
-        col.name: col for col in table.columns.all() if col.name in name_list
-    }
-    return [columns_by_name_dict[col_name] for col_name in name_list]
-
-
-def test_default_constraint_list(create_table, client):
+def test_default_constraint_list(create_patents_table, client):
     table_name = 'NASA Constraint List 0'
-    table = create_table(table_name)
-    constraint_column_id = _get_columns_by_name(table, ['id'])[0].id
+    table = create_patents_table(table_name)
+    constraint_column_id = table.get_columns_by_name(['id'])[0].id
 
     response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     response_data = response.json()
@@ -69,12 +62,11 @@ def test_default_constraint_list(create_table, client):
     assert constraint_data['type'] == 'primary'
 
 
-def test_multiple_constraint_list(create_table, client):
+def test_multiple_constraint_list(create_patents_table, client):
     table_name = 'NASA Constraint List 1'
-    table = create_table(table_name)
-    constraint_column = _get_columns_by_name(table, ['Case Number'])[0]
-    table.add_constraint('unique', [constraint_column])
-
+    table = create_patents_table(table_name)
+    constraint_column = table.get_columns_by_name(['Case Number'])[0]
+    table.add_constraint(UniqueConstraint(None, table.oid, [constraint_column.attnum]))
     response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     response_data = response.json()
 
@@ -84,8 +76,7 @@ def test_multiple_constraint_list(create_table, client):
             _verify_unique_constraint(constraint_data, [constraint_column.id], 'NASA Constraint List 1_Case Number_key')
 
 
-def test_existing_foreign_key_constraint_list(patent_schema, create_table, create_column, client):
-    cache.clear()
+def test_existing_foreign_key_constraint_list(patent_schema, client):
     engine = patent_schema._sa_engine
     referent_col_name = "referred_col"
     metadata = MetaData(bind=engine, schema=patent_schema.name)
@@ -143,12 +134,13 @@ def test_existing_foreign_key_constraint_list(patent_schema, create_table, creat
             )
 
 
-def test_multiple_column_constraint_list(create_table, client):
+def test_multiple_column_constraint_list(create_patents_table, client):
     table_name = 'NASA Constraint List 2'
-    table = create_table(table_name)
-    constraint_columns = _get_columns_by_name(table, ['Center', 'Case Number'])
+    table = create_patents_table(table_name)
+    constraint_columns = table.get_columns_by_name(['Center', 'Case Number'])
     constraint_column_id_list = [constraint_columns[0].id, constraint_columns[1].id]
-    table.add_constraint('unique', [constraint_columns[0], constraint_columns[1]])
+    constraint_column_attnum_list = [constraint_columns[0].attnum, constraint_columns[1].attnum]
+    table.add_constraint(UniqueConstraint(None, table.oid, constraint_column_attnum_list))
 
     response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     response_data = response.json()
@@ -159,12 +151,11 @@ def test_multiple_column_constraint_list(create_table, client):
             _verify_unique_constraint(constraint_data, constraint_column_id_list, 'NASA Constraint List 2_Center_key')
 
 
-def test_retrieve_constraint(create_table, client):
+def test_retrieve_constraint(create_patents_table, client):
     table_name = 'NASA Constraint List 3'
-    table = create_table(table_name)
-    constraint_column = _get_columns_by_name(table, ['Case Number'])[0]
-    constraint_column_id_list = [constraint_column.id]
-    table.add_constraint('unique', [constraint_column])
+    table = create_patents_table(table_name)
+    constraint_column = table.get_columns_by_name(['Case Number'])[0]
+    table.add_constraint(UniqueConstraint(None, table.oid, [constraint_column.attnum]))
     list_response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     list_response_data = list_response.json()
     assert list_response_data['count'] == 2
@@ -175,13 +166,13 @@ def test_retrieve_constraint(create_table, client):
 
     response = client.get(f'/api/db/v0/tables/{table.id}/constraints/{constraint_id}/')
     assert response.status_code == 200
-    _verify_unique_constraint(response.json(), constraint_column_id_list, 'NASA Constraint List 3_Case Number_key')
+    _verify_unique_constraint(response.json(), [constraint_column.id], 'NASA Constraint List 3_Case Number_key')
 
 
-def test_create_multiple_column_unique_constraint(create_table, client):
+def test_create_multiple_column_unique_constraint(create_patents_table, client):
     table_name = 'NASA Constraint List 4'
-    table = create_table(table_name)
-    constraint_columns = _get_columns_by_name(table, ['Center', 'Case Number'])
+    table = create_patents_table(table_name)
+    constraint_columns = table.get_columns_by_name(['Center', 'Case Number'])
     constraint_column_1 = constraint_columns[0]
     constraint_column_2 = constraint_columns[1]
     constraint_column_id_list = [constraint_column_1.id, constraint_column_2.id]
@@ -190,18 +181,16 @@ def test_create_multiple_column_unique_constraint(create_table, client):
         'columns': constraint_column_id_list
     }
     response = client.post(
-        f'/api/db/v0/tables/{table.id}/constraints/',
-        data=json.dumps(data),
-        content_type='application/json'
+        f'/api/db/v0/tables/{table.id}/constraints/', data
     )
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), constraint_column_id_list, 'NASA Constraint List 4_Center_key')
 
 
-def test_create_single_column_unique_constraint(create_table, client):
+def test_create_single_column_unique_constraint(create_patents_table, client):
     table_name = 'NASA Constraint List 5'
-    table = create_table(table_name)
-    constraint_column_id = _get_columns_by_name(table, ['Case Number'])[0].id
+    table = create_patents_table(table_name)
+    constraint_column_id = table.get_columns_by_name(['Case Number'])[0].id
     data = {
         'type': 'unique',
         'columns': [constraint_column_id]
@@ -215,10 +204,10 @@ def test_create_single_column_unique_constraint(create_table, client):
     _verify_unique_constraint(response.json(), [constraint_column_id], 'NASA Constraint List 5_Case Number_key')
 
 
-def test_create_unique_constraint_with_name_specified(create_table, client):
+def test_create_unique_constraint_with_name_specified(create_patents_table, client):
     table_name = 'NASA Constraint List 6'
-    table = create_table(table_name)
-    constraint_columns = _get_columns_by_name(table, ['Case Number'])
+    table = create_patents_table(table_name)
+    constraint_columns = table.get_columns_by_name(['Case Number'])
     constraint_column_id_list = [constraint_columns[0].id]
     data = {
         'name': 'awesome_constraint',
@@ -226,20 +215,142 @@ def test_create_unique_constraint_with_name_specified(create_table, client):
         'columns': constraint_column_id_list
     }
     response = client.post(
-        f'/api/db/v0/tables/{table.id}/constraints/',
-        data=json.dumps(data),
-        content_type='application/json'
-    )
+        f'/api/db/v0/tables/{table.id}/constraints/', data)
     assert response.status_code == 201
     _verify_unique_constraint(response.json(), constraint_column_id_list, 'awesome_constraint')
 
 
-def test_drop_constraint(create_table, client):
-    table_name = 'NASA Constraint List 7'
-    table = create_table(table_name)
+def test_create_single_column_foreign_key_constraint(two_foreign_key_tables, client):
+    referrer_table, referent_table = two_foreign_key_tables
+    referent_column = referent_table.get_columns_by_name(["Id"])[0]
+    referrer_column = referrer_table.get_columns_by_name(["Center"])[0]
+    referent_table.add_constraint(
+        UniqueConstraint(None, referent_table.oid, [referent_column.attnum])
+    )
+    data = {
+        'type': 'foreignkey',
+        'columns': [referrer_column.id],
+        'referent_columns': [referent_column.id]
+    }
+    response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
+    assert response.status_code == 201
+    fk_name = referrer_table.name + '_Center_fkey'
+    _verify_foreign_key_constraint(
+        response.json(), [referrer_column.id], fk_name,
+        [referent_column.id], referent_table.id
+    )
 
-    constraint_column = _get_columns_by_name(table, ['Case Number'])[0]
-    table.add_constraint('unique', [constraint_column])
+
+def test_create_single_column_foreign_key_constraint_with_options(
+    two_foreign_key_tables, client
+):
+    referrer_table, referent_table = two_foreign_key_tables
+    referent_column = referent_table.get_columns_by_name(["Id"])[0]
+    referrer_column = referrer_table.get_columns_by_name(["Center"])[0]
+    referent_table.add_constraint(
+        UniqueConstraint(None, referent_table.oid, [referent_column.attnum])
+    )
+    data = {
+        'type': 'foreignkey',
+        'columns': [referrer_column.id],
+        'referent_columns': [referent_column.id],
+        'onupdate': "RESTRICT",
+        'ondelete': "CASCADE",
+        'deferrable': False,
+    }
+    response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
+    assert response.status_code == 201
+    fk_name = referrer_table.name + '_Center_fkey'
+    _verify_foreign_key_constraint(
+        response.json(), [referrer_column.id], fk_name,
+        [referent_column.id],
+        referent_table.id,
+        onupdate='RESTRICT',
+        ondelete='CASCADE',
+        deferrable=None
+    )
+
+
+def test_create_self_referential_single_column_foreign_key_constraint(
+    self_referential_table, client, engine
+):
+    table = self_referential_table
+    column = table.get_columns_by_name(["Id"])[0]
+    parent_column = table.get_columns_by_name(["Parent"])[0]
+    table.add_constraint(UniqueConstraint(None, table.oid, [column.attnum]))
+
+    data = {
+        'type': 'foreignkey',
+        'columns': [parent_column.id],
+        'referent_columns': [column.id]
+    }
+    response = client.post(f'/api/db/v0/tables/{table.id}/constraints/', data)
+    assert response.status_code == 201
+    fk_name = table.name + '_Parent_fkey'
+    _verify_foreign_key_constraint(
+        response.json(), [parent_column.id], fk_name,
+        [column.id], table.id
+    )
+    # Recursively fetch children
+    with engine.begin() as conn:
+        sa_table = table._sa_table
+        head = select(sa_table).filter(sa_table.c.Id == "1").cte(recursive=True)
+        u = head.union_all(select(sa_table).join(head, sa_table.c.Parent == head.c.Id))
+        stmt = select(u.c.Id)
+        created_default = conn.execute(stmt).fetchall()
+        assert created_default == [("1",), ("2", ), ("4", )]
+
+
+def test_create_single_column_foreign_key_constraint_invalid_related_data(
+    two_invalid_related_data_foreign_key_tables, client
+):
+    referrer_table, referent_table = two_invalid_related_data_foreign_key_tables
+    referent_column = referent_table.get_columns_by_name(["Id"])[0]
+    referrer_column = referrer_table.get_columns_by_name(["Center"])[0]
+    referent_table.add_constraint(UniqueConstraint(None, referent_table.oid, [referent_column.attnum]))
+
+    data = {
+        'type': 'foreignkey',
+        'columns': [referrer_column.id],
+        'referent': {'table': referent_table.id, 'columns': [referent_column.id]}
+    }
+    response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
+    assert response.status_code == 400
+
+
+def test_create_multiple_column_foreign_key_constraint(
+    two_multi_column_foreign_key_tables, client
+):
+    referrer_table, referent_table = two_multi_column_foreign_key_tables
+    referent_columns = referent_table.get_columns_by_name(['Name', 'City'])
+    referrer_columns = referrer_table.get_columns_by_name(["Center", 'Center City'])
+    referent_columns_id = [referent_column.id for referent_column in referent_columns]
+    referrer_columns_id = [referrer_column.id for referrer_column in referrer_columns]
+    referent_table.add_constraint(
+        UniqueConstraint(
+            None, referent_table.oid, [referent_column.attnum for referent_column in referent_columns]
+        )
+    )
+
+    data = {
+        'type': 'foreignkey',
+        'columns': referrer_columns_id,
+        'referent_columns': referent_columns_id
+    }
+    response = client.post(f'/api/db/v0/tables/{referrer_table.id}/constraints/', data)
+    assert response.status_code == 201
+    fk_name = referrer_table.name + '_Center_fkey'
+    _verify_foreign_key_constraint(
+        response.json(), referrer_columns_id, fk_name, referent_columns_id, referent_table.id
+    )
+
+
+def test_drop_constraint(create_patents_table, client):
+    table_name = 'NASA Constraint List 7'
+    table = create_patents_table(table_name)
+
+    constraint_column = table.get_columns_by_name(['Case Number'])[0]
+    table.add_constraint(UniqueConstraint(None, table.oid, [constraint_column.attnum]))
     list_response = client.get(f'/api/db/v0/tables/{table.id}/constraints/')
     list_response_data = list_response.json()
     assert list_response_data['count'] == 2
@@ -254,12 +365,13 @@ def test_drop_constraint(create_table, client):
     assert new_list_response.json()['count'] == 1
 
 
-def test_create_unique_constraint_with_duplicate_name(create_table, client):
+def test_create_unique_constraint_with_duplicate_name(create_patents_table, client):
     table_name = 'NASA Constraint List 8'
-    table = create_table(table_name)
-    constraint_columns = _get_columns_by_name(table, ['Center', 'Case Number'])
+    table = create_patents_table(table_name)
+    constraint_columns = table.get_columns_by_name(['Center', 'Case Number'])
     constraint_column_id_list = [constraint_columns[0].id, constraint_columns[1].id]
-    table.add_constraint('unique', [constraint_columns[0], constraint_columns[1]])
+    constraint_column_attnum_list = [constraint_columns[0].attnum, constraint_columns[1].attnum]
+    table.add_constraint(UniqueConstraint(None, table.oid, constraint_column_attnum_list))
     data = {
         'type': 'unique',
         'columns': constraint_column_id_list
@@ -275,10 +387,10 @@ def test_create_unique_constraint_with_duplicate_name(create_table, client):
     assert response_body['code'] == ErrorCodes.DuplicateTableError.value
 
 
-def test_create_unique_constraint_for_non_unique_column(create_table, client):
+def test_create_unique_constraint_for_non_unique_column(create_patents_table, client):
     table_name = 'NASA Constraint List 9'
-    table = create_table(table_name)
-    constraint_column = _get_columns_by_name(table, ['Center'])[0]
+    table = create_patents_table(table_name)
+    constraint_column = table.get_columns_by_name(['Center'])[0]
     data = {
         'type': 'unique',
         'columns': [constraint_column.id]
@@ -294,9 +406,9 @@ def test_create_unique_constraint_for_non_unique_column(create_table, client):
     assert response_body['code'] == ErrorCodes.UniqueViolation.value
 
 
-def test_drop_nonexistent_constraint(create_table, client):
+def test_drop_nonexistent_constraint(create_patents_table, client):
     table_name = 'NASA Constraint List 10'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
 
     response = client.delete(f'/api/db/v0/tables/{table.id}/constraints/345/')
     assert response.status_code == 404
@@ -305,7 +417,7 @@ def test_drop_nonexistent_constraint(create_table, client):
     assert response_data['code'] == ErrorCodes.NotFound.value
 
 
-def test_drop_nonexistent_table(create_table, client):
+def test_drop_nonexistent_table(client):
     response = client.delete('/api/db/v0/tables/9387489/constraints/4234/')
     assert response.status_code == 404
     response_data = response.json()[0]

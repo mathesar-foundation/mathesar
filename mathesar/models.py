@@ -11,7 +11,7 @@ from db.columns.operations.create import create_column, duplicate_column
 from db.columns.operations.alter import alter_column
 from db.columns.operations.drop import drop_column
 from db.columns.operations.select import get_column_name_from_attnum, get_columns_attnum_from_names
-from db.constraints.operations.create import create_unique_constraint
+from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
 from db.constraints import utils as constraint_utils
@@ -31,6 +31,7 @@ from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import get_types
 from rest_framework import status
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
+from mathesar.database.types import UIType, get_ui_type_from_db_type
 
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -79,6 +80,9 @@ class DatabaseObject(ReflectionManagerMixin, BaseModel):
     def __str__(self):
         return f"{self.__class__.__name__}: {self.oid}"
 
+    def __repr__(self):
+        return f'<{self.__class__.__name__}: {self.oid}>'
+
 
 # TODO: Replace with a proper form of caching
 # See: https://github.com/centerofci/mathesar/issues/280
@@ -96,21 +100,24 @@ class Database(ReflectionManagerMixin, BaseModel):
         global _engines
         # We're caching this since the engine is used frequently.
         if self.name not in _engines:
-            _engines[self.name] = create_mathesar_engine(self.name)
-        return _engines[self.name]
+            engine = create_mathesar_engine(self.name)
+            _engines[self.name] = engine
+            return engine
+        else:
+            engine = _engines[self.name]
+            model_utils.ensure_cached_engine_ready(engine)
+            return engine
 
     @property
-    def supported_types(self):
-        supported_types = []
-        available_types = get_types(self._sa_engine)
-        for index, available_type in enumerate(available_types):
-            db_types = available_type['db_types']
-            db_type_list = [key for key in db_types.keys()]
-            if db_type_list:
-                # Remove SQLAlchemy implementation info.
-                available_type['db_types'] = db_type_list
-                supported_types.append(available_type)
-        return supported_types
+    def supported_ui_types(self):
+        """
+        At the moment we don't actually filter our UIType set based on whether or not a UIType's
+        constituent DB types are supported.
+        """
+        return UIType
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}: {self.name}, {self.id}'
 
 
 class Schema(DatabaseObject):
@@ -209,7 +216,7 @@ class Table(DatabaseObject):
     @cached_property
     def _enriched_column_sa_table(self):
         return column_utils.get_enriched_column_table(
-            self._sa_table, engine=self.schema._sa_engine,
+            self._sa_table, engine=self._sa_engine,
         )
 
     @cached_property
@@ -322,10 +329,11 @@ class Table(DatabaseObject):
         column_names = [column.name for column in columns]
         create_unique_constraint(
             self.name,
+    def add_constraint(self, constraint_obj):
+        create_constraint(
             self._sa_table.schema,
             self.schema._sa_engine,
-            column_names,
-            name
+            constraint_obj
         )
         try:
             # Clearing cache so that new constraint shows up.
@@ -333,8 +341,9 @@ class Table(DatabaseObject):
         except AttributeError:
             pass
         engine = self.schema.database._sa_engine
+        name = constraint_obj.name
         if not name:
-            name = constraint_utils.get_constraint_name(constraint_type, self.name, column_names[0])
+            name = constraint_utils.get_constraint_name(engine, constraint_obj.constraint_type(), self.oid, constraint_obj.columns_attnum[0])
         constraint_oid = get_constraint_oid_by_name_and_table_oid(name, self.oid, engine)
         return Constraint.current_objects.create(oid=constraint_oid, table=self)
 
@@ -343,6 +352,19 @@ class Table(DatabaseObject):
         columns = Column.objects.filter(table_id=self.id)
         columns_map = bidict({column.name: column.id for column in columns})
         return columns_map
+
+    def get_columns_by_name(self, name_list):
+        columns_by_name_dict = {
+            col.name: col
+            for col
+            in Column.objects.filter(table=self)
+            if col.name in name_list
+        }
+        return [
+            columns_by_name_dict[col_name]
+            for col_name
+            in name_list
+        ]
 
 
 class Column(ReflectionManagerMixin, BaseModel):
@@ -359,6 +381,10 @@ class Column(ReflectionManagerMixin, BaseModel):
         except AttributeError:
             return getattr(self._sa_column, name)
 
+    @property
+    def _sa_engine(self):
+        return self.table._sa_engine
+
     @cached_property
     def _sa_column(self):
         return self.table.sa_columns[self.name]
@@ -366,8 +392,17 @@ class Column(ReflectionManagerMixin, BaseModel):
     @property
     def name(self):
         return get_column_name_from_attnum(
-            self.table.oid, self.attnum, self.table.schema._sa_engine
+            self.table.oid, self.attnum, self._sa_engine,
         )
+
+    @property
+    def ui_type(self):
+        if self.db_type:
+            return get_ui_type_from_db_type(self.db_type)
+
+    @property
+    def db_type(self):
+        return self._sa_column.db_type
 
 
 class Constraint(DatabaseObject):

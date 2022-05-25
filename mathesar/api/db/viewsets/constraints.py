@@ -1,11 +1,10 @@
-from psycopg2.errors import DuplicateTable, UniqueViolation, UndefinedObject
+from psycopg2.errors import UndefinedObject
 from rest_framework import status, viewsets
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
-from sqlalchemy.exc import ProgrammingError, IntegrityError
+from sqlalchemy.exc import ProgrammingError
 
 import mathesar.api.exceptions.database_exceptions.base_exceptions as base_database_api_exceptions
-import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
 import mathesar.api.exceptions.generic_exceptions.base_exceptions as base_api_exceptions
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.constraints import ConstraintSerializer
@@ -13,7 +12,7 @@ from mathesar.api.utils import get_table_or_404
 from mathesar.models import Constraint
 
 
-class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMixin):
+class ConstraintViewSet(ListModelMixin, RetrieveModelMixin, CreateModelMixin, viewsets.GenericViewSet):
     serializer_class = ConstraintSerializer
     pagination_class = DefaultLimitOffsetPagination
 
@@ -46,8 +45,10 @@ class ConstraintViewSet(viewsets.GenericViewSet, ListModelMixin, RetrieveModelMi
             else:
                 raise base_api_exceptions.MathesarAPIException(e)
 
-        out_serializer = ConstraintSerializer(constraint, context={'request': request})
-        return Response(out_serializer.data, status=status.HTTP_201_CREATED)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['table'] = get_table_or_404(self.kwargs['table_pk'])
+        return context
 
     def destroy(self, request, pk=None, table_pk=None):
         constraint = self.get_object()

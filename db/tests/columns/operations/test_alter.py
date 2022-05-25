@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from psycopg2.errors import NotNullViolation
 import pytest
-from sqlalchemy import String, Integer, Column, select, Table, MetaData, VARCHAR
+from sqlalchemy import Column, select, Table, MetaData, VARCHAR, INTEGER
 from sqlalchemy.exc import IntegrityError
 
 from db import constants
@@ -14,13 +14,7 @@ from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import get_oid_from_table, reflect_table
 from db.tables.operations.split import extract_columns_from_table
 from db.tests.columns.utils import column_test_dict, create_test_table, get_default
-from db.tests.types import fixtures
-from db.types.base import get_db_type_name
-
-
-engine_with_types = fixtures.engine_with_types
-temporary_testing_schema = fixtures.temporary_testing_schema
-engine_email_type = fixtures.engine_email_type
+from db.types.base import get_db_type_enum_from_class, PostgresType
 
 
 nullable_changes = [(True, True), (False, False), (True, False), (False, True)]
@@ -43,10 +37,10 @@ def _rename_column_and_assert(table, old_col_name, new_col_name, engine):
 def _create_pizza_table(engine, schema):
     table_name = 'Pizzas'
     cols = [
-        Column('ID', String),
-        Column('Pizza', String),
-        Column('Checkbox', String),
-        Column('Rating', String)
+        Column('ID', VARCHAR),
+        Column('Pizza', VARCHAR),
+        Column('Checkbox', VARCHAR),
+        Column('Rating', VARCHAR)
     ]
     insert_data = [
         ('1', 'Pepperoni', 'true', '4.0'),
@@ -59,16 +53,16 @@ def _create_pizza_table(engine, schema):
 def _get_pizza_column_data(table_oid, engine):
     column_data = [{
         'name': 'ID',
-        'plain_type': 'VARCHAR'
+        'type': PostgresType.CHARACTER_VARYING.id
     }, {
         'name': 'Pizza',
-        'plain_type': 'VARCHAR'
+        'type': PostgresType.CHARACTER_VARYING.id
     }, {
         'name': 'Checkbox',
-        'plain_type': 'VARCHAR'
+        'type': PostgresType.CHARACTER_VARYING.id
     }, {
         'name': 'Rating',
-        'plain_type': 'VARCHAR'
+        'type': PostgresType.CHARACTER_VARYING.id
     }]
     for data in column_data:
         name = data['name']
@@ -80,18 +74,18 @@ def _get_pizza_column_data(table_oid, engine):
     "column_dict,func_name",
     [
         ({"name": "blah"}, "rename_column"),
-        ({"plain_type": "blah"}, "retype_column"),
+        ({"type": "blah"}, "retype_column"),
         ({"type_options": {"blah": "blah"}}, "retype_column"),
         ({"nullable": True}, "change_column_nullable"),
         ({"column_default_dict": {"value": 1}}, "set_column_default"),
     ]
 )
-def test_alter_column_chooses_wisely(column_dict, func_name, engine_with_schema):
+def test_alter_column_chooses_wisely(column_dict, func_name, engine_with_schema_without_updated_ischema_names):
     table_name = "table_with_columns"
-    engine, schema = engine_with_schema
+    engine, schema = engine_with_schema_without_updated_ischema_names
     metadata = MetaData(bind=engine, schema=schema)
     column_name = 'col'
-    table = Table(table_name, metadata, Column(column_name, String))
+    table = Table(table_name, metadata, Column(column_name, VARCHAR))
     table.create()
     table_oid = get_oid_from_table(table.name, table.schema, engine)
     target_column_attnum = get_column_attnum_from_name(table_oid, column_name, engine)
@@ -105,21 +99,21 @@ def test_alter_column_chooses_wisely(column_dict, func_name, engine_with_schema)
         mock_alterer.assert_called_once()
 
 
-def test_rename_column_and_assert(engine_with_schema):
+def test_rename_column_and_assert(engine_with_schema_without_updated_ischema_names):
     old_col_name = "col1"
     new_col_name = "col2"
     table_name = "table_with_columns"
-    engine, schema = engine_with_schema
+    engine, schema = engine_with_schema_without_updated_ischema_names
     metadata = MetaData(bind=engine, schema=schema)
-    table = Table(table_name, metadata, Column(old_col_name, String))
+    table = Table(table_name, metadata, Column(old_col_name, VARCHAR))
     table.create()
     _rename_column_and_assert(table, old_col_name, new_col_name, engine)
 
 
-def test_rename_column_foreign_keys(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_rename_column_foreign_keys(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "table_to_split"
-    columns_list = [Column("Filler 1", Integer), Column("Filler 2", Integer)]
+    columns_list = [Column("Filler 1", INTEGER), Column("Filler 2", INTEGER)]
     create_mathesar_table(table_name, schema, columns_list, engine)
     extracted, remainder, fk_name = extract_columns_from_table(
         table_name, ["Filler 1"], "Extracted", "Remainder", schema, engine
@@ -132,10 +126,10 @@ def test_rename_column_foreign_keys(engine_with_schema):
     assert fk.column.table.name == extracted.name
 
 
-def test_rename_column_sequence(engine_with_schema):
+def test_rename_column_sequence(engine_with_schema_without_updated_ischema_names):
     old_col_name = constants.ID
     new_col_name = "new_" + constants.ID
-    engine, schema = engine_with_schema
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "table_with_columns"
     table = create_mathesar_table(table_name, schema, [], engine)
     with engine.begin() as conn:
@@ -153,13 +147,13 @@ def test_rename_column_sequence(engine_with_schema):
     assert new_value == 2
 
 
-def test_rename_column_index(engine_with_schema):
+def test_rename_column_index(engine_with_schema_without_updated_ischema_names):
     old_col_name = constants.ID
     new_col_name = "new_" + constants.ID
-    engine, schema = engine_with_schema
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "table_with_index"
     metadata = MetaData(bind=engine, schema=schema)
-    table = Table(table_name, metadata, Column(old_col_name, Integer, index=True))
+    table = Table(table_name, metadata, Column(old_col_name, INTEGER, index=True))
     table.create()
 
     _rename_column_and_assert(table, old_col_name, new_col_name, engine)
@@ -171,17 +165,17 @@ def test_rename_column_index(engine_with_schema):
     assert new_col_name in index_columns
 
 
-def test_retype_column_correct_column(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_retype_column_correct_column(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atableone"
-    target_type = "boolean"
+    target_type = PostgresType.BOOLEAN
     target_column_name = "thecolumntochange"
     nontarget_column_name = "notthecolumntochange"
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(target_column_name, Integer),
-        Column(nontarget_column_name, String),
+        Column(target_column_name, INTEGER),
+        Column(nontarget_column_name, VARCHAR),
     )
     table.create()
     table_oid = get_oid_from_table(table.name, table.schema, engine)
@@ -194,23 +188,22 @@ def test_retype_column_correct_column(engine_with_schema):
             target_column_name,
             engine,
             conn,
-            "boolean",
+            PostgresType.BOOLEAN,
             {},
-            friendly_names=False
         )
 
 
-@pytest.mark.parametrize('target_type', ['numeric', 'decimal'])
-def test_retype_column_adds_options(engine_with_schema, target_type):
-    engine, schema = engine_with_schema
+@pytest.mark.parametrize('target_type', [PostgresType.NUMERIC])
+def test_retype_column_adds_options(engine_with_schema_without_updated_ischema_names, target_type):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atableone"
     target_column_name = "thecolumntochange"
     nontarget_column_name = "notthecolumntochange"
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(target_column_name, Integer),
-        Column(nontarget_column_name, String),
+        Column(target_column_name, INTEGER),
+        Column(nontarget_column_name, VARCHAR),
     )
     table.create()
     type_options = {"precision": 5}
@@ -227,15 +220,14 @@ def test_retype_column_adds_options(engine_with_schema, target_type):
             conn,
             target_type,
             type_options,
-            friendly_names=False
         )
 
 
-def test_retype_column_options_only(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_retype_column_options_only(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atableone"
     target_column_name = "thecolumntochange"
-    target_type = "VARCHAR"
+    target_type = PostgresType.CHARACTER_VARYING
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
@@ -257,21 +249,20 @@ def test_retype_column_options_only(engine_with_schema):
             conn,
             target_type,
             type_options,
-            friendly_names=False
         )
 
 
 @pytest.mark.parametrize("nullable_tup", nullable_changes)
-def test_change_column_nullable_changes(engine_with_schema, nullable_tup):
-    engine, schema = engine_with_schema
+def test_change_column_nullable_changes(engine_with_schema_without_updated_ischema_names, nullable_tup):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atablefornulling"
     target_column_name = "thecolumntochange"
     nontarget_column_name = "notthecolumntochange"
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(target_column_name, Integer, nullable=nullable_tup[0]),
-        Column(nontarget_column_name, String),
+        Column(target_column_name, INTEGER, nullable=nullable_tup[0]),
+        Column(nontarget_column_name, VARCHAR),
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
@@ -293,14 +284,14 @@ def test_change_column_nullable_changes(engine_with_schema, nullable_tup):
 
 
 @pytest.mark.parametrize("nullable_tup", nullable_changes)
-def test_change_column_nullable_with_data(engine_with_schema, nullable_tup):
-    engine, schema = engine_with_schema
+def test_change_column_nullable_with_data(engine_with_schema_without_updated_ischema_names, nullable_tup):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atablefornulling"
     target_column_name = "thecolumntochange"
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(target_column_name, Integer, nullable=nullable_tup[0]),
+        Column(target_column_name, INTEGER, nullable=nullable_tup[0]),
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
@@ -330,14 +321,14 @@ def test_change_column_nullable_with_data(engine_with_schema, nullable_tup):
     assert changed_column.nullable is nullable_tup[1]
 
 
-def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "atablefornulling"
     target_column_name = "thecolumntochange"
     table = Table(
         table_name,
         MetaData(bind=engine, schema=schema),
-        Column(target_column_name, Integer, nullable=True),
+        Column(target_column_name, INTEGER, nullable=True),
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
@@ -364,8 +355,8 @@ def test_change_column_nullable_changes_raises_with_null_data(engine_with_schema
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_create(engine_email_type, col_type):
-    engine, schema = engine_email_type
+def test_column_default_create(engine_with_schema, col_type):
+    engine, schema = engine_with_schema
     table_name = "create_column_default_table"
     column_name = "create_column_default_column"
     _, set_default, expt_default = column_test_dict[col_type].values()
@@ -388,8 +379,8 @@ def test_column_default_create(engine_email_type, col_type):
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_update(engine_email_type, col_type):
-    engine, schema = engine_email_type
+def test_column_default_update(engine_with_schema, col_type):
+    engine, schema = engine_with_schema
     table_name = "update_column_default_table"
     column_name = "update_column_default_column"
     start_default, set_default, expt_default = column_test_dict[col_type].values()
@@ -412,8 +403,8 @@ def test_column_default_update(engine_email_type, col_type):
 
 
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_column_default_delete(engine_email_type, col_type):
-    engine, schema = engine_email_type
+def test_column_default_delete(engine_with_schema, col_type):
+    engine, schema = engine_with_schema
     table_name = "delete_column_default_table"
     column_name = "delete_column_default_column"
     _, set_default, _ = column_test_dict[col_type].values()
@@ -434,8 +425,8 @@ def test_column_default_delete(engine_email_type, col_type):
     assert created_default is None
 
 
-def test_batch_update_columns_no_changes(engine_email_type):
-    engine, schema = engine_email_type
+def test_batch_update_columns_no_changes(engine_with_schema):
+    engine, schema = engine_with_schema
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
@@ -444,14 +435,15 @@ def test_batch_update_columns_no_changes(engine_email_type):
     updated_table = reflect_table(table.name, schema, engine)
 
     assert len(table.columns) == len(updated_table.columns)
-    for index, column in enumerate(table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
-        assert new_column_type == 'VARCHAR'
+    for index, _ in enumerate(table.columns):
+        new_column_type_class = updated_table.columns[index].type.__class__
+        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        assert new_column_type == PostgresType.CHARACTER_VARYING.id
         assert updated_table.columns[index].name == table.columns[index].name
 
 
-def test_batch_update_column_names(engine_email_type):
-    engine, schema = engine_email_type
+def test_batch_update_column_names(engine_with_schema):
+    engine, schema = engine_with_schema
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
@@ -463,54 +455,57 @@ def test_batch_update_column_names(engine_email_type):
     updated_table = reflect_table(table.name, schema, engine)
 
     assert len(table.columns) == len(updated_table.columns)
-    for index, column in enumerate(table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
-        assert new_column_type == column_data[index]['plain_type']
+    for index, _ in enumerate(table.columns):
+        new_column_type_class = updated_table.columns[index].type.__class__
+        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
-def test_batch_update_column_types(engine_email_type):
-    engine, schema = engine_email_type
+def test_batch_update_column_types(engine_with_schema):
+    engine, schema = engine_with_schema
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
     column_data = _get_pizza_column_data(table_oid, engine)
-    column_data[0]['plain_type'] = 'DOUBLE PRECISION'
-    column_data[2]['plain_type'] = 'BOOLEAN'
+    column_data[0]['type'] = PostgresType.DOUBLE_PRECISION.id
+    column_data[2]['type'] = PostgresType.BOOLEAN.id
 
     batch_update_columns(table_oid, engine, column_data)
     updated_table = reflect_table(table.name, schema, engine)
 
     assert len(table.columns) == len(updated_table.columns)
-    for index, column in enumerate(table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
-        assert new_column_type == column_data[index]['plain_type']
+    for index, _ in enumerate(table.columns):
+        new_column_type_class = updated_table.columns[index].type.__class__
+        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
-def test_batch_update_column_names_and_types(engine_email_type):
-    engine, schema = engine_email_type
+def test_batch_update_column_names_and_types(engine_with_schema):
+    engine, schema = engine_with_schema
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
     column_data = _get_pizza_column_data(table_oid, engine)
     column_data[0]['name'] = 'Pizza ID'
-    column_data[0]['plain_type'] = 'INTEGER'
+    column_data[0]['type'] = PostgresType.INTEGER.id
     column_data[1]['name'] = 'Pizza Style'
-    column_data[2]['plain_type'] = 'BOOLEAN'
+    column_data[2]['type'] = PostgresType.BOOLEAN.id
 
     batch_update_columns(table_oid, engine, column_data)
     updated_table = reflect_table(table.name, schema, engine)
 
     assert len(table.columns) == len(updated_table.columns)
-    for index, column in enumerate(table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
-        assert new_column_type == column_data[index]['plain_type']
+    for index, _ in enumerate(table.columns):
+        new_column_type_class = updated_table.columns[index].type.__class__
+        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']
 
 
-def test_batch_update_column_drop_columns(engine_email_type):
-    engine, schema = engine_email_type
+def test_batch_update_column_drop_columns(engine_with_schema):
+    engine, schema = engine_with_schema
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
@@ -522,29 +517,31 @@ def test_batch_update_column_drop_columns(engine_email_type):
     updated_table = reflect_table(table.name, schema, engine)
 
     assert len(updated_table.columns) == len(table.columns) - 2
-    for index, column in enumerate(updated_table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
-        assert new_column_type == column_data[index - 2]['plain_type']
+    for index, _ in enumerate(updated_table.columns):
+        new_column_type_class = updated_table.columns[index].type.__class__
+        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        assert new_column_type == column_data[index - 2]['type']
         assert updated_table.columns[index].name == column_data[index - 2]['name']
 
 
-def test_batch_update_column_all_operations(engine_email_type):
-    engine, schema = engine_email_type
+def test_batch_update_column_all_operations(engine_with_schema):
+    engine, schema = engine_with_schema
     table = _create_pizza_table(engine, schema)
     table_oid = get_oid_from_table(table.name, schema, engine)
 
     column_data = _get_pizza_column_data(table_oid, engine)
     column_data[0]['name'] = 'Pizza ID'
-    column_data[0]['plain_type'] = 'INTEGER'
+    column_data[0]['type'] = PostgresType.INTEGER.id
     column_data[1]['name'] = 'Pizza Style'
-    column_data[2]['plain_type'] = 'BOOLEAN'
+    column_data[2]['type'] = PostgresType.BOOLEAN.id
     column_data[3] = {'attnum': get_column_attnum_from_name(table_oid, column_data[3]['name'], engine)}
 
     batch_update_columns(table_oid, engine, column_data)
     updated_table = reflect_table(table.name, schema, engine)
 
     assert len(updated_table.columns) == len(table.columns) - 1
-    for index, column in enumerate(updated_table.columns):
-        new_column_type = get_db_type_name(updated_table.columns[index].type, engine)
-        assert new_column_type == column_data[index]['plain_type']
+    for index, _ in enumerate(updated_table.columns):
+        new_column_type_class = updated_table.columns[index].type.__class__
+        new_column_type = get_db_type_enum_from_class(new_column_type_class, engine).id
+        assert new_column_type == column_data[index]['type']
         assert updated_table.columns[index].name == column_data[index]['name']

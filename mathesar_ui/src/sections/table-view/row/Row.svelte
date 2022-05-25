@@ -48,6 +48,10 @@
   $: status = $rowStatus.get(rowKey);
   $: wholeRowState = status?.wholeRowState;
   $: rowWidth = $columnPositionMap.get(ROW_POSITION_INDEX)?.width || 0;
+  $: isSelected = $selectedRows.has(rowKey);
+  $: hasWholeRowErrors = wholeRowState === 'failure';
+  /** Including whole row errors and individual cell errors */
+  $: hasAnyErrors = !!status?.errorsFromWholeRowAndCells?.length;
 
   function checkAndCreateEmptyRow() {
     if (row.isAddPlaceholder) {
@@ -58,9 +62,9 @@
 
 <div
   class="row"
-  class:selected={$selectedRows.has(rowKey)}
+  class:selected={isSelected}
   class:processing={wholeRowState === 'processing'}
-  class:failed={wholeRowState === 'failure'}
+  class:failed={hasWholeRowErrors}
   class:created={creationStatus === 'success'}
   class:add-placeholder={row.isAddPlaceholder}
   class:new={row.isNew}
@@ -75,12 +79,21 @@
   {:else if row.isGroupHeader && $grouping && row.group}
     <GroupHeader {row} {rowWidth} grouping={$grouping} group={row.group} />
   {:else if row.record}
-    <RowControl {primaryKeyColumnId} {row} {meta} {recordsData} />
+    <RowControl
+      {primaryKeyColumnId}
+      {row}
+      {meta}
+      {recordsData}
+      {isSelected}
+      hasErrors={hasAnyErrors}
+    />
 
     {#each [...processedTableColumnsMap] as [columnId, processedColumn] (columnId)}
       <RowCell
         {display}
         {row}
+        rowIsSelected={isSelected}
+        rowHasErrors={hasWholeRowErrors}
         key={getCellKey(rowKey, columnId)}
         modificationStatusMap={cellModificationStatus}
         bind:value={row.record[columnId]}

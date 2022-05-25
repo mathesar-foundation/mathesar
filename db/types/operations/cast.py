@@ -1,149 +1,39 @@
+from frozendict import frozendict
+
 from sqlalchemy import text
 from sqlalchemy.sql import quoted_name
 from sqlalchemy.sql.functions import Function
 
-from db.types import base, email, money, multicurrency, uri
+from db.types.custom import uri
 from db.types.exceptions import UnsupportedTypeException
-
-# DB type name strings
-BIGINT = base.PostgresType.BIGINT.value
-BOOLEAN = base.PostgresType.BOOLEAN.value
-DATE = base.PostgresType.DATE.value
-DECIMAL = base.PostgresType.DECIMAL.value
-DOUBLE_PRECISION = base.PostgresType.DOUBLE_PRECISION.value
-FLOAT = base.PostgresType.FLOAT.value
-INTEGER = base.PostgresType.INTEGER.value
-INTERVAL = base.PostgresType.INTERVAL.value
-MONEY = base.PostgresType.MONEY.value
-NUMERIC = base.PostgresType.NUMERIC.value
-REAL = base.PostgresType.REAL.value
-SMALLINT = base.PostgresType.SMALLINT.value
-TEXT = base.PostgresType.TEXT.value
-
-# one-off strings representing keys in ischema_names
-CHAR = base.CHAR
-STRING = base.STRING
-VARCHAR = base.VARCHAR
-
-# custom types
-EMAIL = base.MathesarCustomType.EMAIL.value
-MATHESAR_MONEY = base.MathesarCustomType.MATHESAR_MONEY.value
-MULTICURRENCY_MONEY = base.MathesarCustomType.MULTICURRENCY_MONEY.value
-TIME_WITHOUT_TIME_ZONE = base.PostgresType.TIME_WITHOUT_TIME_ZONE.value
-TIME_WITH_TIME_ZONE = base.PostgresType.TIME_WITH_TIME_ZONE.value
-TIMESTAMP_WITH_TIME_ZONE = base.PostgresType.TIMESTAMP_WITH_TIME_ZONE.value
-TIMESTAMP_WITHOUT_TIME_ZONE = base.PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.value
-URI = base.MathesarCustomType.URI.value
-
-# only needed for ischema lookup
-FULL_VARCHAR = base.PostgresType.CHARACTER_VARYING.value
-FULL_CHAR = base.PostgresType.CHARACTER.value
-NAME = base.PostgresType.NAME.value
-
-DECIMAL_TYPES = frozenset([DECIMAL, DOUBLE_PRECISION, FLOAT, NUMERIC, REAL])
-INTEGER_TYPES = frozenset([BIGINT, INTEGER, SMALLINT])
-NUMBER_TYPES = DECIMAL_TYPES | INTEGER_TYPES
-TEXT_TYPES = frozenset([CHAR, TEXT, VARCHAR])
+from db.types.base import PostgresType, MathesarCustomType, get_available_known_db_types, get_db_type_enum_from_class, get_qualified_name
+from db.types import categories
 
 MONEY_ARR_FUNC_NAME = "get_mathesar_money_array"
 
 
-def get_supported_alter_column_types(engine, friendly_names=True):
-    """
-    Returns a list of valid types supported by mathesar for the given engine.
-
-    engine:  This should be an engine connecting to the DB where we want
-    to inspect the installed types.
-    friendly_names: sets whether to use "friendly" service-layer or the
-    actual DB-layer names.
-    """
-    dialect_types = base.get_available_types(engine)
-    friendly_type_map = {
-        # Default Postgres types
-        BIGINT: dialect_types.get(BIGINT),
-        BOOLEAN: dialect_types.get(BOOLEAN),
-        CHAR: dialect_types.get(FULL_CHAR),
-        DATE: dialect_types.get(DATE),
-        DECIMAL: dialect_types.get(DECIMAL),
-        DOUBLE_PRECISION: dialect_types.get(DOUBLE_PRECISION),
-        FLOAT: dialect_types.get(FLOAT),
-        INTEGER: dialect_types.get(INTEGER),
-        INTERVAL: dialect_types.get(INTERVAL),
-        MONEY: dialect_types.get(MONEY),
-        NUMERIC: dialect_types.get(NUMERIC),
-        REAL: dialect_types.get(REAL),
-        SMALLINT: dialect_types.get(SMALLINT),
-        STRING: dialect_types.get(NAME),
-        TEXT: dialect_types.get(TEXT),
-        TIME_WITHOUT_TIME_ZONE: dialect_types.get(TIME_WITHOUT_TIME_ZONE),
-        TIME_WITH_TIME_ZONE: dialect_types.get(TIME_WITH_TIME_ZONE),
-        TIMESTAMP_WITH_TIME_ZONE: dialect_types.get(TIMESTAMP_WITH_TIME_ZONE),
-        TIMESTAMP_WITHOUT_TIME_ZONE: dialect_types.get(TIMESTAMP_WITHOUT_TIME_ZONE),
-        VARCHAR: dialect_types.get(FULL_VARCHAR),
-        # Custom Mathesar types
-        EMAIL: dialect_types.get(email.DB_TYPE),
-        MATHESAR_MONEY: dialect_types.get(money.DB_TYPE),
-        MULTICURRENCY_MONEY: dialect_types.get(multicurrency.DB_TYPE),
-        URI: dialect_types.get(uri.DB_TYPE),
-    }
-    if friendly_names:
-        type_map = {k: v for k, v in friendly_type_map.items() if v is not None}
-    else:
-        type_map = {
-            val().compile(dialect=engine.dialect): val
-            for val in friendly_type_map.values()
-            if val is not None
-        }
-    return type_map
-
-
-def get_supported_alter_column_db_types(engine):
-    return set(
-        [
-            type_().compile(dialect=engine.dialect)
-            for type_ in get_supported_alter_column_types(engine).values()
-        ]
-    )
-
-
-def get_robust_supported_alter_column_type_map(engine):
-    supported_types = get_supported_alter_column_types(engine, friendly_names=True)
-    supported_types.update(get_supported_alter_column_types(engine, friendly_names=False))
-    supported_types.update(
-        {
-            type_.lower(): supported_types[type_] for type_ in supported_types
-        } | {
-
-            type_.upper(): supported_types[type_] for type_ in supported_types
-        }
-    )
-    return supported_types
-
-
-def get_column_cast_expression(column, target_type_str, engine, type_options={}):
+def get_column_cast_expression(column, target_type, engine, type_options={}):
     """
     Given a Column, we get the correct SQL selectable for selecting the
     results of a Mathesar cast_to_<type> function on that column, where
-    <type> is derived from the target_type_str.
+    <type> is derived from the target_type.
     """
-    target_type = get_robust_supported_alter_column_type_map(engine).get(target_type_str)
-    if target_type is None:
+    target_type_class = target_type.get_sa_class(engine)
+    if target_type_class is None:
         raise UnsupportedTypeException(
-            f"Target Type '{target_type_str}' is not supported."
+            f"Target Type '{target_type.id}' is not supported."
         )
-    else:
-        prepared_target_type_name = target_type().compile(dialect=engine.dialect)
-
-    if prepared_target_type_name == column.type.__class__().compile(dialect=engine.dialect):
+    column_type = get_db_type_enum_from_class(column.type.__class__, engine)
+    if target_type == column_type:
         cast_expr = column
     else:
-        qualified_function_name = get_cast_function_name(prepared_target_type_name)
+        qualified_function_name = get_cast_function_name(target_type)
         cast_expr = Function(
             quoted_name(qualified_function_name, False),
             column
         )
     if type_options:
-        type_with_options = target_type(**type_options)
+        type_with_options = target_type_class(**type_options)
         cast_expr = cast_expr.cast(type_with_options)
     return cast_expr
 
@@ -165,52 +55,52 @@ def install_all_casts(engine):
 
 def create_boolean_casts(engine):
     type_body_map = _get_boolean_type_body_map()
-    create_cast_functions(BOOLEAN, type_body_map, engine)
+    create_cast_functions(PostgresType.BOOLEAN, type_body_map, engine)
 
 
 def create_date_casts(engine):
     type_body_map = _get_date_type_body_map()
-    create_cast_functions(DATE, type_body_map, engine)
+    create_cast_functions(PostgresType.DATE, type_body_map, engine)
 
 
 def create_decimal_number_casts(engine):
-    decimal_number_types = DECIMAL_TYPES
-    for type_str in decimal_number_types:
-        type_body_map = _get_decimal_number_type_body_map(target_type_str=type_str)
-        create_cast_functions(type_str, type_body_map, engine)
+    decimal_number_types = categories.DECIMAL_TYPES
+    for db_type in decimal_number_types:
+        type_body_map = _get_decimal_number_type_body_map(target_type=db_type)
+        create_cast_functions(db_type, type_body_map, engine)
 
 
 def create_email_casts(engine):
     type_body_map = _get_email_type_body_map()
-    create_cast_functions(email.DB_TYPE, type_body_map, engine)
+    create_cast_functions(MathesarCustomType.EMAIL, type_body_map, engine)
 
 
 def create_integer_casts(engine):
-    integer_types = [BIGINT, INTEGER, SMALLINT]
-    for type_str in integer_types:
-        type_body_map = _get_integer_type_body_map(target_type_str=type_str)
-        create_cast_functions(type_str, type_body_map, engine)
+    integer_types = categories.INTEGER_TYPES
+    for db_type in integer_types:
+        type_body_map = _get_integer_type_body_map(target_type=db_type)
+        create_cast_functions(db_type, type_body_map, engine)
 
 
 def create_interval_casts(engine):
     type_body_map = _get_interval_type_body_map()
-    create_cast_functions(INTERVAL, type_body_map, engine)
+    create_cast_functions(PostgresType.INTERVAL, type_body_map, engine)
 
 
 def create_datetime_casts(engine):
-    time_types = [TIME_WITHOUT_TIME_ZONE, TIME_WITH_TIME_ZONE]
+    time_types = [PostgresType.TIME_WITHOUT_TIME_ZONE, PostgresType.TIME_WITH_TIME_ZONE]
     for time_type in time_types:
         type_body_map = _get_time_type_body_map(time_type)
         create_cast_functions(time_type, type_body_map, engine)
 
-    type_body_map = _get_timestamp_with_timezone_type_body_map(TIMESTAMP_WITH_TIME_ZONE)
-    create_cast_functions(TIMESTAMP_WITH_TIME_ZONE, type_body_map, engine)
+    type_body_map = _get_timestamp_with_timezone_type_body_map(PostgresType.TIMESTAMP_WITH_TIME_ZONE)
+    create_cast_functions(PostgresType.TIMESTAMP_WITH_TIME_ZONE, type_body_map, engine)
 
     type_body_map = _get_timestamp_without_timezone_type_body_map()
-    create_cast_functions(TIMESTAMP_WITHOUT_TIME_ZONE, type_body_map, engine)
+    create_cast_functions(PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE, type_body_map, engine)
 
     type_body_map = _get_date_type_body_map()
-    create_cast_functions(DATE, type_body_map, engine)
+    create_cast_functions(PostgresType.DATE, type_body_map, engine)
 
 
 def create_mathesar_money_casts(engine):
@@ -218,78 +108,77 @@ def create_mathesar_money_casts(engine):
     with engine.begin() as conn:
         conn.execute(text(mathesar_money_array_create))
     type_body_map = _get_mathesar_money_type_body_map()
-    create_cast_functions(money.DB_TYPE, type_body_map, engine)
+    create_cast_functions(MathesarCustomType.MATHESAR_MONEY, type_body_map, engine)
 
 
 def create_money_casts(engine):
     type_body_map = _get_money_type_body_map()
-    create_cast_functions(MONEY, type_body_map, engine)
+    create_cast_functions(PostgresType.MONEY, type_body_map, engine)
 
 
 def create_multicurrency_money_casts(engine):
     type_body_map = _get_multicurrency_money_type_body_map()
-    create_cast_functions(multicurrency.DB_TYPE, type_body_map, engine)
+    create_cast_functions(MathesarCustomType.MULTICURRENCY_MONEY, type_body_map, engine)
 
 
 def create_textual_casts(engine):
-    textual_types = TEXT_TYPES
-    for type_str in textual_types:
-        type_body_map = _get_textual_type_body_map(engine, target_type_str=type_str)
-        create_cast_functions(type_str, type_body_map, engine)
+    textual_types = categories.STRING_LIKE_TYPES
+    for db_type in textual_types:
+        type_body_map = _get_textual_type_body_map(engine)
+        create_cast_functions(db_type, type_body_map, engine)
 
 
 def create_uri_casts(engine):
     type_body_map = _get_uri_type_body_map()
-    create_cast_functions(uri.DB_TYPE, type_body_map, engine)
+    create_cast_functions(MathesarCustomType.URI, type_body_map, engine)
 
 
+# TODO find more descriptive name
 def get_full_cast_map(engine):
-    full_cast_map = {}
-    supported_types = get_robust_supported_alter_column_type_map(engine)
-    for source, target in get_defined_source_target_cast_tuples(engine):
-        source_python_type = supported_types.get(source)
-        target_python_type = supported_types.get(target)
-        if source_python_type is not None and target_python_type is not None:
-            source_db_type = source_python_type().compile(dialect=engine.dialect)
-            target_db_type = target_python_type().compile(dialect=engine.dialect)
-            full_cast_map.setdefault(source_db_type, []).append(target_db_type)
-
-    return {
-        key: list(set(val)) for key, val in full_cast_map.items()
+    """
+    Returns a mapping of source types to target type sets.
+    """
+    target_to_source_maps = {
+        PostgresType.BIGINT: _get_integer_type_body_map(target_type=PostgresType.BIGINT),
+        PostgresType.BOOLEAN: _get_boolean_type_body_map(),
+        PostgresType.CHARACTER: _get_textual_type_body_map(engine),
+        PostgresType.CHARACTER_VARYING: _get_textual_type_body_map(engine),
+        PostgresType.DATE: _get_date_type_body_map(),
+        PostgresType.DOUBLE_PRECISION: _get_decimal_number_type_body_map(target_type=PostgresType.DOUBLE_PRECISION),
+        MathesarCustomType.EMAIL: _get_email_type_body_map(),
+        PostgresType.INTEGER: _get_integer_type_body_map(target_type=PostgresType.INTEGER),
+        MathesarCustomType.MATHESAR_MONEY: _get_mathesar_money_type_body_map(),
+        PostgresType.MONEY: _get_money_type_body_map(),
+        MathesarCustomType.MULTICURRENCY_MONEY: _get_multicurrency_money_type_body_map(),
+        PostgresType.INTERVAL: _get_interval_type_body_map(),
+        PostgresType.NUMERIC: _get_decimal_number_type_body_map(target_type=PostgresType.NUMERIC),
+        PostgresType.REAL: _get_decimal_number_type_body_map(target_type=PostgresType.REAL),
+        PostgresType.SMALLINT: _get_integer_type_body_map(target_type=PostgresType.SMALLINT),
+        PostgresType.TIME_WITHOUT_TIME_ZONE: _get_time_type_body_map(PostgresType.TIME_WITHOUT_TIME_ZONE),
+        PostgresType.TIME_WITH_TIME_ZONE: _get_time_type_body_map(PostgresType.TIME_WITH_TIME_ZONE),
+        PostgresType.TIMESTAMP_WITH_TIME_ZONE: _get_timestamp_with_timezone_type_body_map(PostgresType.TIMESTAMP_WITH_TIME_ZONE),
+        PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE: _get_timestamp_without_timezone_type_body_map(),
+        PostgresType.TEXT: _get_textual_type_body_map(engine),
+        MathesarCustomType.URI: _get_uri_type_body_map(),
     }
-
-
-def get_defined_source_target_cast_tuples(engine):
-    type_body_map_map = {
-        BIGINT: _get_integer_type_body_map(target_type_str=BIGINT),
-        BOOLEAN: _get_boolean_type_body_map(),
-        CHAR: _get_textual_type_body_map(engine, target_type_str=CHAR),
-        DATE: _get_date_type_body_map(),
-        DECIMAL: _get_decimal_number_type_body_map(target_type_str=DECIMAL),
-        DOUBLE_PRECISION: _get_decimal_number_type_body_map(target_type_str=DOUBLE_PRECISION),
-        EMAIL: _get_email_type_body_map(),
-        FLOAT: _get_decimal_number_type_body_map(target_type_str=FLOAT),
-        INTEGER: _get_integer_type_body_map(target_type_str=INTEGER),
-        MATHESAR_MONEY: _get_mathesar_money_type_body_map(),
-        MONEY: _get_money_type_body_map(),
-        MULTICURRENCY_MONEY: _get_multicurrency_money_type_body_map(),
-        INTERVAL: _get_interval_type_body_map(),
-        NUMERIC: _get_decimal_number_type_body_map(target_type_str=NUMERIC),
-        REAL: _get_decimal_number_type_body_map(target_type_str=REAL),
-        SMALLINT: _get_integer_type_body_map(target_type_str=SMALLINT),
-        TIME_WITHOUT_TIME_ZONE: _get_time_type_body_map(TIME_WITHOUT_TIME_ZONE),
-        TIME_WITH_TIME_ZONE: _get_time_type_body_map(TIME_WITH_TIME_ZONE),
-        TIMESTAMP_WITH_TIME_ZONE: _get_timestamp_with_timezone_type_body_map(TIMESTAMP_WITH_TIME_ZONE),
-        TIMESTAMP_WITHOUT_TIME_ZONE: _get_timestamp_without_timezone_type_body_map(),
-        TEXT: _get_textual_type_body_map(engine, target_type_str=TEXT),
-        URI: _get_uri_type_body_map(),
-        VARCHAR: _get_textual_type_body_map(engine, target_type_str=VARCHAR),
-    }
-    return {
-        (source_type, target_type)
-        for target_type in type_body_map_map
-        for source_type in type_body_map_map[target_type]
-    }
+    # invert the map
+    source_to_target_tuples = (
+        (source, target)
+        for target in target_to_source_maps
+        for source in target_to_source_maps[target]
+    )
+    # reduce (source, target) tuples to a dictionary of sets
+    source_to_target_sets = {}
+    for source, target in source_to_target_tuples:
+        source_to_target_sets.setdefault(source, set()).add(target)
+    # freeze the collections
+    return frozendict(
+        {
+            source: frozenset(target_set)
+            for source, target_set
+            in source_to_target_sets.items()
+        }
+    )
 
 
 def create_cast_functions(target_type, type_body_map, engine):
@@ -302,7 +191,7 @@ def create_cast_functions(target_type, type_body_map, engine):
     input (source) type.
 
     Args:
-        target_type:   string corresponding to the target type of the
+        target_type:   Enum corresponding to the target type of the
                        cast function.
         type_body_map: dictionary that gives a map between source types
                        and the body of a PL/pgSQL function to cast a
@@ -318,8 +207,8 @@ def create_cast_functions(target_type, type_body_map, engine):
 def assemble_function_creation_sql(argument_type, target_type, function_body):
     function_name = get_cast_function_name(target_type)
     return f"""
-    CREATE OR REPLACE FUNCTION {function_name}({argument_type})
-    RETURNS {target_type}
+    CREATE OR REPLACE FUNCTION {function_name}({argument_type.id})
+    RETURNS {target_type.id}
     AS $$
     {function_body}
     $$ LANGUAGE plpgsql RETURNS NULL ON NULL INPUT;
@@ -333,7 +222,7 @@ def get_cast_function_name(target_type):
     data type to timestamp with timezone, So they used be in an isolated
     transaction
     """
-    unqualified_type_name = target_type.split('.')[-1].lower()
+    unqualified_type_name = target_type.id.split('.')[-1].lower()
     if '(' in unqualified_type_name:
         bare_type_name = unqualified_type_name[:unqualified_type_name.find('(')]
         if unqualified_type_name[-1] != ')':
@@ -342,7 +231,19 @@ def get_cast_function_name(target_type):
         bare_type_name = unqualified_type_name
     function_type_name = '_'.join(bare_type_name.split())
     bare_function_name = f"cast_to_{function_type_name}"
-    return f"{base.get_qualified_name(bare_function_name)}"
+    escaped_bare_function_name = _escape_illegal_characters(bare_function_name)
+    qualified_escaped_bare_function_name = get_qualified_name(escaped_bare_function_name)
+    return qualified_escaped_bare_function_name
+
+
+def _escape_illegal_characters(sql_name):
+    replacement_mapping = {
+        '"': '_double_quote_'
+    }
+    resulting_string = sql_name
+    for old, new in replacement_mapping.items():
+        resulting_string = resulting_string.replace(old, new)
+    return resulting_string
 
 
 def _get_boolean_type_body_map():
@@ -358,11 +259,11 @@ def _get_boolean_type_body_map():
                              PostgreSQL).  Others raise a custom
                              exception.
     """
-    source_number_types = NUMBER_TYPES
-    source_text_types = TEXT_TYPES
-    default_behavior_source_types = frozenset([BOOLEAN])
+    source_number_types = categories.NUMERIC_TYPES
+    source_text_types = categories.STRING_TYPES
+    default_behavior_source_types = frozenset([PostgresType.BOOLEAN])
 
-    not_bool_exception_str = f"RAISE EXCEPTION '% is not a {BOOLEAN}', $1;"
+    not_bool_exception_str = f"RAISE EXCEPTION '% is not a {PostgresType.BOOLEAN.id}', $1;"
 
     def _get_number_to_boolean_cast_str():
         return f"""
@@ -376,7 +277,7 @@ def _get_boolean_type_body_map():
     def _get_text_to_boolean_cast_str():
         return f"""
         DECLARE
-        istrue {BOOLEAN};
+        istrue {PostgresType.BOOLEAN.id};
         BEGIN
           SELECT
             $1='1' OR lower($1) = 'on'
@@ -395,7 +296,7 @@ def _get_boolean_type_body_map():
         """
 
     type_body_map = _get_default_type_body_map(
-        default_behavior_source_types, BOOLEAN,
+        default_behavior_source_types, PostgresType.BOOLEAN,
     )
     type_body_map.update(
         {
@@ -422,9 +323,11 @@ def _get_email_type_body_map():
                      just check that the VARCHAR object satisfies the email
                      DOMAIN).
     """
-    default_behavior_source_types = frozenset([email.DB_TYPE]) | TEXT_TYPES
+    identity_set = {MathesarCustomType.EMAIL}
+    default_behavior_source_types = categories.STRING_TYPES
+    source_types = default_behavior_source_types.union(identity_set)
     return _get_default_type_body_map(
-        default_behavior_source_types, email.DB_TYPE,
+        source_types, MathesarCustomType.EMAIL,
     )
 
 
@@ -438,22 +341,22 @@ def _get_interval_type_body_map():
                            to a numeric, and then try to cast the varchar
                            to an interval.
     """
-    source_text_types = TEXT_TYPES
+    source_text_types = categories.STRING_TYPES
 
     def _get_text_interval_type_body_map():
         # We need to check that a string isn't a valid number before
         # casting to intervals (since a number is more likely)
         return f""" BEGIN
-          PERFORM $1::{NUMERIC};
-          RAISE EXCEPTION '% is a {NUMERIC}', $1;
+          PERFORM $1::{PostgresType.NUMERIC.id};
+          RAISE EXCEPTION '% is a {PostgresType.NUMERIC.id}', $1;
           EXCEPTION
             WHEN sqlstate '22P02' THEN
-              RETURN $1::{INTERVAL};
+              RETURN $1::{PostgresType.INTERVAL.id};
         END;
         """
 
     type_body_map = {
-        INTERVAL: """
+        PostgresType.INTERVAL: """
         BEGIN
           RETURN $1;
         END;
@@ -468,14 +371,15 @@ def _get_interval_type_body_map():
     return type_body_map
 
 
-def _get_integer_type_body_map(target_type_str=INTEGER):
+def _get_integer_type_body_map(target_type=PostgresType.INTEGER):
     """
     We use default behavior for identity and casts from TEXT types.
     We specifically disallow rounding or truncating when casting from numerics,
     etc.
     """
-    default_behavior_source_types = INTEGER_TYPES | TEXT_TYPES
-    no_rounding_source_types = DECIMAL_TYPES | frozenset([money.DB_TYPE])
+    default_behavior_source_types = categories.INTEGER_TYPES | categories.STRING_TYPES
+    no_rounding_source_types = categories.DECIMAL_TYPES | categories.MONEY_WITHOUT_CURRENCY_TYPES
+    target_type_str = target_type.id
     cast_loss_exception_str = (
         f"RAISE EXCEPTION '% cannot be cast to {target_type_str} without loss', $1;"
     )
@@ -493,7 +397,7 @@ def _get_integer_type_body_map(target_type_str=INTEGER):
         """
 
     type_body_map = _get_default_type_body_map(
-        default_behavior_source_types, target_type_str,
+        default_behavior_source_types, target_type,
     )
     type_body_map.update(
         {
@@ -501,11 +405,11 @@ def _get_integer_type_body_map(target_type_str=INTEGER):
             for type_name in no_rounding_source_types
         }
     )
-    type_body_map.update({BOOLEAN: _get_boolean_to_number_cast(target_type_str)})
+    type_body_map.update({PostgresType.BOOLEAN: _get_boolean_to_number_cast(target_type)})
     return type_body_map
 
 
-def _get_decimal_number_type_body_map(target_type_str=NUMERIC):
+def _get_decimal_number_type_body_map(target_type=PostgresType.NUMERIC):
     """
     Get SQL strings that create various functions for casting different
     types to number types including DECIMAL, DOUBLE PRECISION, FLOAT,
@@ -515,28 +419,31 @@ def _get_decimal_number_type_body_map(target_type_str=NUMERIC):
         boolean -> number:  We cast TRUE -> 1, FALSE -> 0
     """
 
-    default_behavior_source_types = NUMBER_TYPES | TEXT_TYPES | frozenset([money.DB_TYPE])
-    type_body_map = _get_default_type_body_map(
-        default_behavior_source_types, target_type_str,
+    default_behavior_source_types = (
+        categories.NUMERIC_TYPES | categories.STRING_TYPES | categories.MONEY_WITHOUT_CURRENCY_TYPES
     )
-    type_body_map.update({BOOLEAN: _get_boolean_to_number_cast(target_type_str)})
+    type_body_map = _get_default_type_body_map(
+        default_behavior_source_types, target_type,
+    )
+    type_body_map.update({PostgresType.BOOLEAN: _get_boolean_to_number_cast(target_type)})
     return type_body_map
 
 
 def _get_boolean_to_number_cast(target_type):
+    target_type_str = target_type.id
     return f"""
     BEGIN
       IF $1 THEN
-        RETURN 1::{target_type};
+        RETURN 1::{target_type_str};
       END IF;
-      RETURN 0::{target_type};
+      RETURN 0::{target_type_str};
     END;
     """
 
 
 def _get_time_type_body_map(target_type):
     default_behavior_source_types = [
-        TEXT, VARCHAR, TIME_WITHOUT_TIME_ZONE, TIME_WITH_TIME_ZONE
+        PostgresType.TEXT, PostgresType.CHARACTER_VARYING, PostgresType.TIME_WITHOUT_TIME_ZONE, PostgresType.TIME_WITH_TIME_ZONE
     ]
     return _get_default_type_body_map(
         default_behavior_source_types, target_type,
@@ -562,10 +469,7 @@ def get_text_and_datetime_to_datetime_cast_str(type_condition, exception_string)
 
 
 def _get_timestamp_with_timezone_type_body_map(target_type):
-    datetime_source_types = frozenset(
-        [TIMESTAMP_WITH_TIME_ZONE, TIMESTAMP_WITHOUT_TIME_ZONE, DATE]
-    )
-    default_behavior_source_types = datetime_source_types | TEXT_TYPES
+    default_behavior_source_types = categories.DATETIME_TYPES | categories.STRING_TYPES
     return _get_default_type_body_map(default_behavior_source_types, target_type)
 
 
@@ -581,24 +485,24 @@ def _get_timestamp_without_timezone_type_body_map():
     is called on.  So this function call should be used in a isolated
     transaction to avoid timezone change causing unintended side effect
     """
-    source_text_types = TEXT_TYPES
-    source_datetime_types = frozenset([TIMESTAMP_WITH_TIME_ZONE, DATE])
-    default_behavior_source_types = frozenset([TIMESTAMP_WITHOUT_TIME_ZONE])
+    source_text_types = categories.STRING_TYPES
+    source_datetime_types = frozenset([PostgresType.TIMESTAMP_WITH_TIME_ZONE, PostgresType.DATE])
+    default_behavior_source_types = frozenset([PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE])
 
     not_timestamp_without_tz_exception_str = (
-        f"RAISE EXCEPTION '% is not a {TIMESTAMP_WITHOUT_TIME_ZONE}', $1;"
+        f"RAISE EXCEPTION '% is not a {PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.id}', $1;"
     )
     # Check if the value is missing timezone by casting it to a timestamp
     # with timezone and comparing if the value is equal to a timestamp
     # without timezone.
     timestamp_without_tz_condition_str = f"""
             IF (timestamp_value_with_tz = timestamp_value) THEN
-            RETURN $1::{TIMESTAMP_WITHOUT_TIME_ZONE};
+            RETURN $1::{PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE.id};
             END IF;
         """
 
     type_body_map = _get_default_type_body_map(
-        default_behavior_source_types, TIMESTAMP_WITHOUT_TIME_ZONE,
+        default_behavior_source_types, PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE,
     )
     type_body_map.update(
         {
@@ -630,29 +534,29 @@ def _get_mathesar_money_type_body_map():
     We allow casting any textual type to money with the text prefixed or
     suffixed with a currency.
     """
-    money_array_function = base.get_qualified_name(MONEY_ARR_FUNC_NAME)
-    default_behavior_source_types = frozenset([money.DB_TYPE])
-    number_types = NUMBER_TYPES
-    textual_types = TEXT_TYPES | frozenset([MONEY])
+    money_array_function = get_qualified_name(MONEY_ARR_FUNC_NAME)
+    default_behavior_source_types = frozenset([MathesarCustomType.MATHESAR_MONEY])
+    number_types = categories.NUMERIC_TYPES
+    textual_types = categories.STRING_TYPES | frozenset([PostgresType.MONEY])
     cast_exception_str = (
-        f"RAISE EXCEPTION '% cannot be cast to {money.DB_TYPE}', $1;"
+        f"RAISE EXCEPTION '% cannot be cast to {MathesarCustomType.MATHESAR_MONEY.id}', $1;"
     )
 
     def _get_number_cast_to_money():
         return f"""
         BEGIN
-          RETURN $1::numeric::{money.DB_TYPE};
+          RETURN $1::numeric::{MathesarCustomType.MATHESAR_MONEY.id};
         END;
         """
 
     def _get_base_textual_cast_to_money():
         return rf"""
-        DECLARE decimal_point {TEXT};
-        DECLARE is_negative {BOOLEAN};
-        DECLARE money_arr {TEXT}[];
-        DECLARE money_num {TEXT};
+        DECLARE decimal_point {PostgresType.TEXT.id};
+        DECLARE is_negative {PostgresType.BOOLEAN.id};
+        DECLARE money_arr {PostgresType.TEXT.id}[];
+        DECLARE money_num {PostgresType.TEXT.id};
         BEGIN
-          SELECT {money_array_function}($1::{TEXT}) INTO money_arr;
+          SELECT {money_array_function}($1::{PostgresType.TEXT.id}) INTO money_arr;
           IF money_arr IS NULL THEN
             {cast_exception_str}
           END IF;
@@ -668,14 +572,14 @@ def _get_mathesar_money_type_body_map():
             SELECT regexp_replace(money_num, money_arr[3], decimal_point, 'q') INTO money_num;
           END IF;
           IF is_negative THEN
-            RETURN ('-' || money_num)::{money.DB_TYPE};
+            RETURN ('-' || money_num)::{MathesarCustomType.MATHESAR_MONEY.id};
           END IF;
-          RETURN money_num::{money.DB_TYPE};
+          RETURN money_num::{MathesarCustomType.MATHESAR_MONEY.id};
         END;
         """
 
     type_body_map = _get_default_type_body_map(
-        default_behavior_source_types, money.DB_TYPE,
+        default_behavior_source_types, MathesarCustomType.MATHESAR_MONEY,
     )
     type_body_map.update(
         {
@@ -697,7 +601,7 @@ def _build_mathesar_money_array_function():
     The main reason for this function to be separate is for testing. This
     does have some performance impact; we should consider inlining later.
     """
-    qualified_function_name = base.get_qualified_name(MONEY_ARR_FUNC_NAME)
+    qualified_function_name = get_qualified_name(MONEY_ARR_FUNC_NAME)
 
     # An attempt to separate pieces into logical bits for easier
     # understanding and modification
@@ -735,17 +639,18 @@ def _build_mathesar_money_array_function():
     group_dividers_str = ','.join([f'raw_arr[{idx}]' for idx in group_divider_indices])
     decimal_points_str = ','.join([f'raw_arr[{idx}]' for idx in decimal_point_indices])
 
+    text_db_type_id = PostgresType.TEXT.id
     return rf"""
-    CREATE OR REPLACE FUNCTION {qualified_function_name}({TEXT}) RETURNS {TEXT}[]
+    CREATE OR REPLACE FUNCTION {qualified_function_name}({text_db_type_id}) RETURNS {text_db_type_id}[]
     AS $$
       DECLARE
-        raw_arr {TEXT}[];
-        actual_number_arr {TEXT}[];
-        group_divider_arr {TEXT}[];
-        decimal_point_arr {TEXT}[];
-        actual_number {TEXT};
-        group_divider {TEXT};
-        decimal_point {TEXT};
+        raw_arr {text_db_type_id}[];
+        actual_number_arr {text_db_type_id}[];
+        group_divider_arr {text_db_type_id}[];
+        decimal_point_arr {text_db_type_id}[];
+        actual_number {text_db_type_id};
+        group_divider {text_db_type_id};
+        decimal_point {text_db_type_id};
       BEGIN
         SELECT regexp_matches($1, '{money_finding_regex}') INTO raw_arr;
         IF raw_arr IS NULL THEN
@@ -774,45 +679,45 @@ def _get_money_type_body_map():
     We allow casting any textual type to money with the text prefixed or
     suffixed with the locale currency.
     """
-    default_behavior_source_types = frozenset([MONEY, money.DB_TYPE])
-    number_types = NUMBER_TYPES
-    textual_types = TEXT_TYPES
+    default_behavior_source_types = frozenset([PostgresType.MONEY, MathesarCustomType.MATHESAR_MONEY])
+    number_types = categories.NUMERIC_TYPES
+    textual_types = categories.STRING_TYPES
     cast_loss_exception_str = (
-        f"RAISE EXCEPTION '% cannot be cast to {MONEY} as currency symbol is missing', $1;"
+        f"RAISE EXCEPTION '% cannot be cast to {PostgresType.MONEY.id} as currency symbol is missing', $1;"
     )
 
     def _get_number_cast_to_money():
         return f"""
         BEGIN
-          RETURN $1::numeric::{MONEY};
+          RETURN $1::numeric::{PostgresType.MONEY.id};
         END;
         """
 
     def _get_base_textual_cast_to_money():
         return f"""
-        DECLARE currency {TEXT};
+        DECLARE currency {PostgresType.TEXT.id};
         BEGIN
           SELECT to_char(1, 'L') INTO currency;
           IF ($1 LIKE '%' || currency) OR ($1 LIKE currency || '%') THEN
-            RETURN $1::{MONEY};
+            RETURN $1::{PostgresType.MONEY.id};
           END IF;
           {cast_loss_exception_str}
         END;
         """
 
     type_body_map = _get_default_type_body_map(
-        default_behavior_source_types, MONEY,
+        default_behavior_source_types, PostgresType.MONEY,
     )
     type_body_map.update(
         {
-            type_name: _get_number_cast_to_money()
-            for type_name in number_types
+            db_type: _get_number_cast_to_money()
+            for db_type in number_types
         }
     )
     type_body_map.update(
         {
-            type_name: _get_base_textual_cast_to_money()
-            for type_name in textual_types
+            db_type: _get_base_textual_cast_to_money()
+            for db_type in textual_types
         }
     )
     return type_body_map
@@ -826,43 +731,43 @@ def _get_multicurrency_money_type_body_map():
     We allow casting any textual type to money, assuming currency is USD
     and that the type can be cast through a numeric.
     """
-    default_behavior_source_types = [multicurrency.DB_TYPE]
-    number_types = NUMBER_TYPES | frozenset([money.DB_TYPE])
-    textual_types = TEXT_TYPES | frozenset([MONEY])
+    default_behavior_source_types = [MathesarCustomType.MULTICURRENCY_MONEY]
+    number_types = categories.NUMERIC_TYPES | frozenset([MathesarCustomType.MATHESAR_MONEY])
+    textual_types = categories.STRING_TYPES | frozenset([PostgresType.MONEY])
 
     def _get_number_cast_to_money():
         return f"""
         BEGIN
-          RETURN ROW($1, 'USD')::{multicurrency.DB_TYPE};
+          RETURN ROW($1, 'USD')::{MathesarCustomType.MULTICURRENCY_MONEY.id};
         END;
         """
 
     def _get_base_textual_cast_to_money():
         return f"""
         BEGIN
-          RETURN ROW($1::numeric, 'USD')::{multicurrency.DB_TYPE};
+          RETURN ROW($1::numeric, 'USD')::{MathesarCustomType.MULTICURRENCY_MONEY.id};
         END;
         """
 
     type_body_map = _get_default_type_body_map(
-        default_behavior_source_types, multicurrency.DB_TYPE,
+        default_behavior_source_types, MathesarCustomType.MULTICURRENCY_MONEY,
     )
     type_body_map.update(
         {
-            type_name: _get_number_cast_to_money()
-            for type_name in number_types
+            db_type: _get_number_cast_to_money()
+            for db_type in number_types
         }
     )
     type_body_map.update(
         {
-            type_name: _get_base_textual_cast_to_money()
-            for type_name in textual_types
+            db_type: _get_base_textual_cast_to_money()
+            for db_type in textual_types
         }
     )
     return type_body_map
 
 
-def _get_textual_type_body_map(engine, target_type_str=VARCHAR):
+def _get_textual_type_body_map(engine):
     """
     Get SQL strings that create various functions for casting different
     types to text types through the TEXT type.
@@ -870,16 +775,14 @@ def _get_textual_type_body_map(engine, target_type_str=VARCHAR):
     All casts to varchar use default PostgreSQL behavior.
     All types in get_supported_alter_column_types are supported.
     """
-    supported_types = get_supported_alter_column_db_types(engine)
-
+    supported_types = get_available_known_db_types(engine)
     # We cast everything through TEXT so that formatting is done correctly
     # for CHAR.
     text_cast_str = f"""
         BEGIN
-          RETURN $1::{TEXT};
+          RETURN $1::{PostgresType.TEXT.id};
         END;
     """
-
     return {type_: text_cast_str for type_ in supported_types}
 
 
@@ -899,19 +802,19 @@ def _get_date_type_body_map():
     # Note that default postgres conversion for dates depends on the
     # `DateStyle` option set on the server, which can be one of DMY, MDY,
     # or YMD. Defaults to MDY.
-    source_text_types = TEXT_TYPES
-    source_datetime_types = frozenset([TIMESTAMP_WITH_TIME_ZONE, TIMESTAMP_WITHOUT_TIME_ZONE])
-    default_behavior_source_types = frozenset([DATE])
+    source_text_types = categories.STRING_TYPES
+    source_datetime_types = frozenset([PostgresType.TIMESTAMP_WITH_TIME_ZONE, PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE])
+    default_behavior_source_types = frozenset([PostgresType.DATE])
 
-    not_date_exception_str = f"RAISE EXCEPTION '% is not a {DATE}', $1;"
+    not_date_exception_str = f"RAISE EXCEPTION '% is not a {PostgresType.DATE.id}', $1;"
     date_condition_str = f"""
             IF (timestamp_value_with_tz = date_value) THEN
-            RETURN $1::{DATE};
+            RETURN $1::{PostgresType.DATE.id};
             END IF;
         """
 
     type_body_map = _get_default_type_body_map(
-        default_behavior_source_types, TIMESTAMP_WITH_TIME_ZONE
+        default_behavior_source_types, PostgresType.TIMESTAMP_WITH_TIME_ZONE
     )
     type_body_map.update(
         {
@@ -937,16 +840,16 @@ def _get_uri_type_body_map():
     def _get_text_uri_type_body_map():
         # We need to check that a string isn't a valid number before
         # casting to intervals (since a number is more likely)
-        auth_func = uri.QualifiedURIFunction.AUTHORITY.value
+        auth_func = uri.URIFunction.AUTHORITY.value
         tld_regex = r"'(?<=\.)(?:.(?!\.))+$'"
-        not_uri_exception_str = f"RAISE EXCEPTION '% is not a {URI}', $1;"
+        not_uri_exception_str = f"RAISE EXCEPTION '% is not a {MathesarCustomType.URI.id}', $1;"
         return f"""
-        DECLARE uri_res {uri.DB_TYPE} := 'https://centerofci.org';
-        DECLARE uri_tld {TEXT};
+        DECLARE uri_res {MathesarCustomType.URI.id} := 'https://centerofci.org';
+        DECLARE uri_tld {PostgresType.TEXT.id};
         BEGIN
-          RETURN $1::{uri.DB_TYPE};
+          RETURN $1::{MathesarCustomType.URI.id};
           EXCEPTION WHEN SQLSTATE '23514' THEN
-              SELECT lower(('http://' || $1)::{uri.DB_TYPE}) INTO uri_res;
+              SELECT lower(('http://' || $1)::{MathesarCustomType.URI.id}) INTO uri_res;
               SELECT (regexp_match({auth_func}(uri_res), {tld_regex}))[1]
                 INTO uri_tld;
               IF EXISTS(SELECT 1 FROM {uri.QUALIFIED_TLDS} WHERE tld = uri_tld) THEN
@@ -956,14 +859,14 @@ def _get_uri_type_body_map():
         END;
         """
 
-    source_types = frozenset([uri.DB_TYPE]) | TEXT_TYPES
+    source_types = frozenset([MathesarCustomType.URI]) | categories.STRING_TYPES
     return {type_: _get_text_uri_type_body_map() for type_ in source_types}
 
 
-def _get_default_type_body_map(source_types, target_type_str):
+def _get_default_type_body_map(source_types, target_type):
     default_cast_str = f"""
         BEGIN
-          RETURN $1::{target_type_str};
+          RETURN $1::{target_type.id};
         END;
     """
-    return {type_name: default_cast_str for type_name in source_types}
+    return {db_type: default_cast_str for db_type in source_types}
