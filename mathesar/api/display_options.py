@@ -52,6 +52,11 @@ DISPLAY_OPTIONS_BY_UI_TYPE = LazyDictionary(
                     "enum": ['dropdown', 'checkbox']
                 },
                 {
+                    "name": "use_grouping",
+                    "type": "string",
+                    "enum": ['true', 'false', 'auto']
+                },
+                {
                     "name": "locale",
                     "type": "string"
                 }

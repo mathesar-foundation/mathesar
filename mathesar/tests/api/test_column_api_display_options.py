@@ -28,7 +28,7 @@ def column_test_table_with_service_layer_options(patent_schema):
     column_data_list = [
         {},
         {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
-        {'display_options': {'show_as_percentage': True, 'number_format': "english"}},
+        {'display_options': {'show_as_percentage': True, 'number_format': "english", "use_grouping": 'auto'}},
         {'display_options': None},
         {},
         {
@@ -90,18 +90,23 @@ _create_display_options_test_list = [
     ),
     (
         PostgresType.MONEY,
-        {'number_format': "english", 'currency_symbol': '$', 'currency_symbol_location': 'after-minus'},
-        {'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'number_format': "english"}
+        {'number_format': "english", 'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'use_grouping': 'true'},
+        {'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'number_format': "english", 'use_grouping': 'true'}
     ),
     (
         PostgresType.NUMERIC,
-        {"show_as_percentage": True, 'number_format': None},
-        {"show_as_percentage": True, 'number_format': None}
+        {},
+        {"show_as_percentage": False, 'number_format': None, 'use_grouping': 'auto'}
     ),
     (
         PostgresType.NUMERIC,
-        {"show_as_percentage": True, 'number_format': "english"},
-        {"show_as_percentage": True, 'number_format': "english"}
+        {"show_as_percentage": True, 'number_format': None, 'use_grouping': 'false'},
+        {"show_as_percentage": True, 'number_format': None, 'use_grouping': 'false'}
+    ),
+    (
+        PostgresType.NUMERIC,
+        {"show_as_percentage": True, 'number_format': "english", 'use_grouping': 'auto'},
+        {"show_as_percentage": True, 'number_format': "english", 'use_grouping': 'auto'}
     ),
     (
         PostgresType.TIMESTAMP_WITH_TIME_ZONE,
@@ -307,6 +312,8 @@ def test_column_alter_same_type_display_options(
     column_index = 2
     column = columns[column_index]
     pre_alter_display_options = column.display_options
+    print("----------------------------------------------------")
+    print(pre_alter_display_options)
     with engine.begin() as conn:
         alter_column_type(table.oid, column.name, engine, conn, PostgresType.NUMERIC)
     column_id = column.id
