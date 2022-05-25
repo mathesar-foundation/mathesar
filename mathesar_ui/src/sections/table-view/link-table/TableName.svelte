@@ -1,7 +1,7 @@
 <script lang="ts">
   import Identifier from '@mathesar/components/Identifier.svelte';
 
-  export let name: string;
+  export let name = '';
   export let which: 'this' | 'that' | 'mapping';
 </script>
 

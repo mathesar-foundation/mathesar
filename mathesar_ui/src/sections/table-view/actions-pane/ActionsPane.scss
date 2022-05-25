@@ -27,3 +27,8 @@
     margin-left: auto;
   }
 }
+
+.filter-dropdown-content.dropdown.content {
+  overflow-x: hidden;
+  max-height: 320px;
+}

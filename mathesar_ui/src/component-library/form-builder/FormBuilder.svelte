@@ -20,6 +20,7 @@
       stores={form.stores}
       variables={form.variables}
       element={form.layout}
+      customComponents={form.customComponents}
       validationResult={$validationStore}
     />
   </form>

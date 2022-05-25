@@ -4,7 +4,10 @@ import {
   getAbstractTypeForDbType,
 } from '@mathesar/stores/abstract-types';
 import type { AbstractTypeConfiguration } from '@mathesar/stores/abstract-types/types';
-import type { ComponentAndProps } from '@mathesar-component-library/types';
+import type {
+  ComponentAndProps,
+  IconProps,
+} from '@mathesar-component-library/types';
 import DataTypes from './data-types';
 import type { CellColumnLike } from './data-types/typeDefinitions';
 
@@ -34,18 +37,26 @@ function getCellConfiguration(
   };
 }
 
-export function getCellComponentWithProps(
+export function getCellCap(
   column: CellColumnLike,
+  cellInfo: AbstractTypeConfiguration['cell'],
 ): ComponentAndProps<unknown> {
-  const cellInfo = getCellInfo(column.type);
   const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].get(column, config);
 }
 
-export function getDbTypeBasedInputComponentWithProps(
+export function getDbTypeBasedInputCap(
   column: CellColumnLike,
+  cellInfoConfig?: AbstractTypeConfiguration['cell'],
 ): ComponentAndProps<unknown> {
-  const cellInfo = getCellInfo(column.type);
+  const cellInfo = cellInfoConfig ?? getCellInfo(column.type);
   const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].getInput(column, config);
+}
+
+export function getColumnIconProps(column: CellColumnLike): IconProps {
+  return getAbstractTypeForDbType(
+    column.type,
+    get(currentDbAbstractTypes)?.data,
+  ).icon;
 }

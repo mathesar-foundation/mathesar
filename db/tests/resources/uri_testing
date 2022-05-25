@@ -1,0 +1,101 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 13.6 (Debian 13.6-1.pgdg110+1)
+-- Dumped by pg_dump version 14.2
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: uri_testing; Type: TABLE; Schema: public; Owner: mathesar
+--
+
+CREATE TABLE public.uri_testing (
+    id integer NOT NULL,
+    uris mathesar_types.uri
+);
+
+
+ALTER TABLE public.uri_testing OWNER TO mathesar;
+
+--
+-- Name: uri_testing_id_seq; Type: SEQUENCE; Schema: public; Owner: mathesar
+--
+
+CREATE SEQUENCE public.uri_testing_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.uri_testing_id_seq OWNER TO mathesar;
+
+--
+-- Name: uri_testing_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: mathesar
+--
+
+ALTER SEQUENCE public.uri_testing_id_seq OWNED BY public.uri_testing.id;
+
+
+--
+-- Name: uri_testing id; Type: DEFAULT; Schema: public; Owner: mathesar
+--
+
+ALTER TABLE ONLY public.uri_testing ALTER COLUMN id SET DEFAULT nextval('public.uri_testing_id_seq'::regclass);
+
+
+--
+-- Data for Name: uri_testing; Type: TABLE DATA; Schema: public; Owner: mathesar
+--
+
+COPY public.uri_testing (id, uris) FROM stdin;
+1	https://google.com
+2	https://yahoo.com
+3	https://github.com/centerofci/mathesar/issues?q=is%3Aissue+is%3Aopen+group
+4	https://github.com/centerofci/mathesar/issues?q=is%3Aissue+group+is%3Aclosed
+5	https://github.com/centerofci/mathesar/
+6	ftp://ftp.example.com/path/to/RFC/rfc959.txt
+7	sftp://ftp.example.com/path/to/RFC/rfc959.txt
+8	http://google.com
+9	http://yahoo.com
+10	http://github.com/centerofci/mathesar/issues?q=is%3Aissue+is%3Aopen+group
+11	http://github.com/centerofci/mathesar/issues?q=is%3Aissue+group+is%3Aclosed
+\.
+
+
+--
+-- Name: uri_testing_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mathesar
+--
+
+SELECT pg_catalog.setval('public.uri_testing_id_seq', 11, true);
+
+
+--
+-- Name: uri_testing uri_testing_pkey; Type: CONSTRAINT; Schema: public; Owner: mathesar
+--
+
+ALTER TABLE ONLY public.uri_testing
+    ADD CONSTRAINT uri_testing_pkey PRIMARY KEY (id);
+
+
+--
+-- PostgreSQL database dump complete
+--
+

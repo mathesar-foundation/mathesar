@@ -22,7 +22,10 @@
     flex: 1 1 auto;
     width: 1%;
     min-width: 0;
+  }
 
+  .input-element,
+  button {
     &:focus {
       z-index: 10;
     }

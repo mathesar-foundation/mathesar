@@ -1,3 +1,4 @@
+import { faHashtag } from '@fortawesome/free-solid-svg-icons';
 import type { NumberDisplayOptions } from '@mathesar/api/tables/columns';
 import type { FormValues } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/AppTypes';
@@ -9,13 +10,13 @@ import type {
 } from '../types';
 
 const DB_TYPES = {
-  DECIMAL: 'DECIMAL',
-  NUMERIC: 'NUMERIC',
-  INTEGER: 'INTEGER',
-  SMALLINT: 'SMALLINT',
-  BIGINT: 'BIGINT',
-  REAL: 'REAL',
-  DOUBLE_PRECISION: 'DOUBLE PRECISION',
+  DECIMAL: 'decimal',
+  NUMERIC: 'numeric',
+  INTEGER: 'integer',
+  SMALLINT: 'smallint',
+  BIGINT: 'bigint',
+  REAL: 'real',
+  DOUBLE_PRECISION: 'double precision',
 };
 
 const dbForm: AbstractTypeConfigForm = {
@@ -258,9 +259,18 @@ function constructDisplayFormValuesFromDisplayOptions(
 }
 
 const numberType: AbstractTypeConfiguration = {
-  icon: '#',
+  icon: { data: faHashtag, label: 'Number' },
   cell: {
     type: 'number',
+    conditionalConfig: {
+      [DB_TYPES.DECIMAL]: { floatAllowanceStrategy: 'scale-based' },
+      [DB_TYPES.NUMERIC]: { floatAllowanceStrategy: 'scale-based' },
+      [DB_TYPES.INTEGER]: { floatAllowanceStrategy: 'never' },
+      [DB_TYPES.SMALLINT]: { floatAllowanceStrategy: 'never' },
+      [DB_TYPES.BIGINT]: { floatAllowanceStrategy: 'never' },
+      [DB_TYPES.REAL]: { floatAllowanceStrategy: 'always' },
+      [DB_TYPES.DOUBLE_PRECISION]: { floatAllowanceStrategy: 'always' },
+    },
   },
   defaultDbType: DB_TYPES.NUMERIC,
   getDbConfig: () => ({

@@ -1,4 +1,7 @@
-import type { SelectProps } from '@mathesar-component-library/types';
+import type {
+  FormattedInputProps,
+  SelectProps,
+} from '@mathesar-component-library/types';
 
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
@@ -26,6 +29,7 @@ export type TextAreaCellProps = TextBoxCellProps;
 
 export interface NumberCellExternalProps {
   locale?: string;
+  allowFloat: boolean;
   isPercentage: boolean;
 }
 
@@ -49,5 +53,16 @@ export type SingleSelectCellExternalProps<Option> = Pick<
 export interface SingleSelectCellProps<Option>
   extends CellTypeProps<Option>,
     SingleSelectCellExternalProps<Option> {}
+
+// Duration
+
+export type FormattedInputCellExternalProps = Omit<
+  FormattedInputProps<string>,
+  'disabled' | 'value'
+>;
+
+export interface FormattedInputCellProps
+  extends CellTypeProps<string>,
+    FormattedInputCellExternalProps {}
 
 export type HorizontalAlignment = 'left' | 'right' | 'center';

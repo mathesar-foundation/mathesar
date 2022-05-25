@@ -3,6 +3,9 @@ from enum import Enum
 from sqlalchemy import CheckConstraint, ForeignKeyConstraint, PrimaryKeyConstraint, UniqueConstraint
 from sqlalchemy.dialects.postgresql import ExcludeConstraint
 
+from db.columns.operations.select import get_column_name_from_attnum
+from db.tables.operations.select import reflect_table_from_oid
+
 
 class ConstraintType(Enum):
     FOREIGN_KEY = 'foreignkey'
@@ -51,7 +54,9 @@ def get_constraint_type_from_char(constraint_char):
     return None
 
 
-def get_constraint_name(constraint_type, table_name, column_0_name):
+def get_constraint_name(engine, constraint_type, table_oid, column_0_attnum, connection_to_use=None):
+    table_name = reflect_table_from_oid(table_oid, engine, connection_to_use).name
+    column_0_name = get_column_name_from_attnum(table_oid, column_0_attnum, engine, connection_to_use)
     data = {
         'table_name': table_name,
         'column_0_name': column_0_name

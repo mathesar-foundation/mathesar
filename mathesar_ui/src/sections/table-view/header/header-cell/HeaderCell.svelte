@@ -14,31 +14,24 @@
     SpinnerArea,
   } from '@mathesar-component-library';
   import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
-  import {
-    currentDbAbstractTypes,
-    getAbstractTypeForDbType,
-  } from '@mathesar/stores/abstract-types';
   import { focusAndSelectAll } from '@mathesar/utils/domUtils';
   import type {
     Meta,
-    Column,
     ColumnPosition,
     ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
-
+  import ColumnName from '@mathesar/components/ColumnName.svelte';
   import DefaultOptions from './DefaultOptions.svelte';
   import AbstractTypeConfiguration from './abstract-type-configuration/AbstractTypeConfiguration.svelte';
+  import type { ProcessedTableColumn } from '../../utils';
 
   export let columnPosition: ColumnPosition | undefined = undefined;
-  export let column: Column;
+  export let processedColumn: ProcessedTableColumn;
   export let meta: Meta;
   export let columnsDataStore: ColumnsDataStore;
   export let constraintsDataStore: ConstraintsDataStore;
 
-  $: abstractTypeOfColumn = getAbstractTypeForDbType(
-    column.type,
-    $currentDbAbstractTypes.data,
-  );
+  $: ({ column, abstractTypeOfColumn } = processedColumn);
 
   let menuIsOpen = false;
   let renamingInputElement: HTMLInputElement | undefined;
@@ -164,12 +157,7 @@
       contentClass="column-opts-content"
       on:close={setDefaultView}
     >
-      <svelte:fragment slot="trigger">
-        <span class="type">
-          {abstractTypeOfColumn?.icon}
-        </span>
-        <span class="name">{column.name}</span>
-      </svelte:fragment>
+      <ColumnName slot="trigger" {column} />
       <svelte:fragment slot="content">
         <div class="container">
           <div class="section type-header">

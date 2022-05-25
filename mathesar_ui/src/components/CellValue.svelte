@@ -7,10 +7,14 @@
 
   export let value: Value | null | undefined;
   export let formatValue: CellValueFormatter<Value> = (v) => String(v);
+
+  $: formattedValue = formatValue(value);
 </script>
 
 {#if value === null}
   <Null />
 {:else if typeof value !== 'undefined'}
-  {formatValue(value)}
+  <slot {formattedValue}>
+    {formattedValue}
+  </slot>
 {/if}

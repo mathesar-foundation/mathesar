@@ -56,17 +56,14 @@
   /** Name of column in the mapping table which references "that" table */
   let mappingToThatColumnName = '';
 
-  $: thisTable = (() => {
-    const t = $tables.data.get($tabularData.id);
-    if (!t) {
-      // This should never happen because the user shouldn't be able to open
-      // the modal if the table doesn't exist. But we throw an error here to
-      // make sure that `thisTable` is always defined.
-      throw new Error('Unable to configure a table ling without a base table');
-    }
-    return t;
-  })();
-  $: isSelfReferential = thisTable.id === thatTable?.id;
+  /**
+   * It's annoying that `thisTable` can be `undefined`, but this situation
+   * actually does happen when adding a new table via copy-paste CSV data
+   * because we open a tab for the table (and mount this component in the
+   * process) before the entry for the table is set into the `$tables` store.
+   */
+  $: thisTable = $tables.data.get($tabularData.id);
+  $: isSelfReferential = thisTable?.id === thatTable?.id;
   $: canProceed =
     thatTable &&
     thisHasManyOfThat !== undefined &&
@@ -99,10 +96,7 @@
     thisHasManyOfThat = undefined;
     thatHasManyOfThis = undefined;
     mappingTableName = getAvailableName(
-      // eslint is not smart enough to handle this, probably because of the IIFE
-      // used to assign thisTable.
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      `${thisTable.name}_${_thatTable?.name ?? ''}`,
+      `${(thisTable?.name ?? '') as string}_${_thatTable?.name ?? ''}`,
       unavailableTableNames,
     );
   }
@@ -123,12 +117,12 @@
     }
     switch (_relationshipType) {
       case 'many-to-many':
-        mappingToThisColumnName = makeFkColumnName(thisTable.name);
+        mappingToThisColumnName = makeFkColumnName(thisTable?.name ?? '');
         mappingToThatColumnName = makeFkColumnName(thatTable.name);
         break;
       case 'one-to-many':
         thatNewColumnName = makeFkColumnName(
-          thisTable.name,
+          thisTable?.name ?? '',
           _namesOfColumnsInThatTable,
         );
         break;
@@ -163,7 +157,7 @@
 
 <ControlledModal {controller} on:open={init} size="large">
   <div slot="title">
-    Link <Identifier>{thisTable.name}</Identifier> to Another Table
+    Link <Identifier>{thisTable?.name}</Identifier> to Another Table
     <Help>
       <p>Associate records from this table with records from another table.</p>
       <p>
@@ -194,7 +188,7 @@
                   isInline
                 >
                   Can one
-                  <TableName name={thisTable.name} which="this" />
+                  <TableName name={thisTable?.name} which="this" />
                   record have multiple
                   <TableName name={thatTable.name} which="that" />
                   records?
@@ -211,7 +205,7 @@
                     Can one
                     <TableName name={thatTable.name} which="that" />
                     record have multiple
-                    <TableName name={thisTable.name} which="this" />
+                    <TableName name={thisTable?.name} which="this" />
                     records?
                   </RadioGroup>
                 </FormField>
@@ -255,7 +249,7 @@
                     Each
                     <TableName name={mappingTableName} which="mapping" />
                     record will reference one
-                    <TableName name={thisTable.name} which="this" />
+                    <TableName name={thisTable?.name} which="this" />
                     record using a column named:
                   </div>
                   <TextInput bind:value={mappingToThisColumnName} />
@@ -267,7 +261,7 @@
                     Each
                     <TableName name={mappingTableName} which="mapping" />
                     record will reference one
-                    <TableName name={thatTable?.name ?? ''} which="that" />
+                    <TableName name={thatTable?.name} which="that" />
                     record using a column named:
                   </div>
                   <TextInput bind:value={mappingToThatColumnName} />
@@ -278,7 +272,7 @@
                 <LabeledInput>
                   <div slot="label">
                     The
-                    <TableName name={thatTable?.name ?? ''} which="that" />
+                    <TableName name={thatTable?.name} which="that" />
                     table will get a new column named:
                   </div>
                   <TextInput bind:value={thatNewColumnName} />
@@ -286,9 +280,9 @@
               </FormField>
               <FormField>
                 Then each
-                <TableName name={thatTable?.name ?? ''} which="that" />
+                <TableName name={thatTable?.name} which="that" />
                 record will use that column to reference one
-                <TableName name={thisTable.name} which="this" />
+                <TableName name={thisTable?.name} which="this" />
                 record.
               </FormField>
             {:else if relationshipType === 'many-to-one'}
@@ -296,7 +290,7 @@
                 <LabeledInput>
                   <div slot="label">
                     The
-                    <TableName name={thisTable.name} which="this" />
+                    <TableName name={thisTable?.name} which="this" />
                     table will get a new column named:
                   </div>
                   <TextInput bind:value={thisNewColumnName} />
@@ -304,9 +298,9 @@
               </FormField>
               <FormField>
                 Then each
-                <TableName name={thisTable.name} which="this" />
+                <TableName name={thisTable?.name} which="this" />
                 record will use that column to reference one
-                <TableName name={thatTable?.name ?? ''} which="that" />
+                <TableName name={thatTable?.name} which="that" />
                 record.
               </FormField>
             {:else if relationshipType === 'one-to-one'}
@@ -314,7 +308,7 @@
                 <LabeledInput>
                   <div slot="label">
                     The
-                    <TableName name={thisTable.name} which="this" />
+                    <TableName name={thisTable?.name} which="this" />
                     table will get a new column named:
                   </div>
                   <TextInput bind:value={thisNewColumnName} />
@@ -322,17 +316,17 @@
               </FormField>
               <FormField>
                 Then each
-                <TableName name={thisTable.name} which="this" />
+                <TableName name={thisTable?.name} which="this" />
                 record will use that column to reference one
-                <TableName name={thatTable?.name ?? ''} which="that" />
+                <TableName name={thatTable?.name} which="that" />
                 record.
               </FormField>
               <FormField>
                 The
-                <TableName name={thisTable.name} which="this" />
+                <TableName name={thisTable?.name} which="this" />
                 table will also get a unique constraint ensuring that no two records
                 can reference the same
-                <TableName name={thatTable?.name ?? ''} which="that" />
+                <TableName name={thatTable?.name} which="that" />
                 record.
               </FormField>
             {/if}

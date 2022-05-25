@@ -1,8 +1,7 @@
 from django.urls import reverse
 from rest_framework import serializers
 
-from mathesar.api.display_options import DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER
-from mathesar.api.dj_filters import FILTER_OPTIONS_BY_TYPE_IDENTIFIER
+from mathesar.api.display_options import DISPLAY_OPTIONS_BY_UI_TYPE
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.models import Database
 
@@ -28,11 +27,13 @@ class TypeSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     identifier = serializers.CharField()
     name = serializers.CharField()
     db_types = serializers.ListField(child=serializers.CharField())
-    filters = serializers.SerializerMethodField()
-    display_options = serializers.SerializerMethodField()
+    display_options = serializers.DictField()
 
-    def get_filters(self, obj):
-        return FILTER_OPTIONS_BY_TYPE_IDENTIFIER.get(obj.get('identifier'))
-
-    def get_display_options(self, obj):
-        return DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER.get(obj.get('identifier'))
+    def to_representation(self, ui_type):
+        primitive = dict(
+            identifier=ui_type.id,
+            name=ui_type.display_name,
+            db_types=ui_type.db_types,
+            display_options=DISPLAY_OPTIONS_BY_UI_TYPE.get(ui_type, None),
+        )
+        return super().to_representation(primitive)

@@ -2,13 +2,15 @@ import pytest
 from sqlalchemy import String, Integer, Column, Table, MetaData
 from sqlalchemy.exc import ProgrammingError
 
-from db.constraints.operations.create import create_unique_constraint
+from db.columns.operations.select import get_column_attnum_from_name, get_columns_attnum_from_names
+from db.constraints.base import UniqueConstraint
+from db.constraints.operations.create import create_constraint, create_unique_constraint
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.tests.constraints import utils as test_utils
 
 
-def test_create_single_column_unique_constraint(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_create_single_column_unique_constraint(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "orders_1"
     unique_column_name = 'product_name'
     table = Table(
@@ -20,8 +22,8 @@ def test_create_single_column_unique_constraint(engine_with_schema):
     table.create()
     test_utils.assert_only_primary_key_present(table)
     table_oid = get_oid_from_table(table_name, schema, engine)
-
-    create_unique_constraint(table.name, schema, engine, [unique_column_name])
+    unique_column_attnum = get_column_attnum_from_name(table_oid, unique_column_name, engine)
+    create_constraint(schema, engine, UniqueConstraint(None, table_oid, [unique_column_attnum]))
     altered_table = reflect_table_from_oid(table_oid, engine)
     test_utils.assert_primary_key_and_unique_present(altered_table)
 
@@ -31,8 +33,8 @@ def test_create_single_column_unique_constraint(engine_with_schema):
     assert list(unique_constraint.columns)[0].name == unique_column_name
 
 
-def test_create_multiple_column_unique_constraint(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_create_multiple_column_unique_constraint(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "orders_2"
     unique_column_names = ['product_name', 'customer_name']
     table = Table(
@@ -45,8 +47,8 @@ def test_create_multiple_column_unique_constraint(engine_with_schema):
     table.create()
     test_utils.assert_only_primary_key_present(table)
     table_oid = get_oid_from_table(table_name, schema, engine)
-
-    create_unique_constraint(table.name, schema, engine, unique_column_names)
+    unique_column_attnums = get_columns_attnum_from_names(table_oid, unique_column_names, engine)
+    create_constraint(schema, engine, UniqueConstraint(None, table_oid, unique_column_attnums))
     altered_table = reflect_table_from_oid(table_oid, engine)
     test_utils.assert_primary_key_and_unique_present(altered_table)
 
@@ -57,8 +59,8 @@ def test_create_multiple_column_unique_constraint(engine_with_schema):
     assert set([column.name for column in unique_constraint.columns]) == set(unique_column_names)
 
 
-def test_create_unique_constraint_with_custom_name(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_create_unique_constraint_with_custom_name(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "orders_4"
     unique_column_name = 'product_name'
     constraint_name = 'unique_product_name'
@@ -70,7 +72,8 @@ def test_create_unique_constraint_with_custom_name(engine_with_schema):
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
-    create_unique_constraint(table.name, schema, engine, [unique_column_name], constraint_name)
+    unique_column_attnum = get_column_attnum_from_name(table_oid, unique_column_name, engine)
+    create_constraint(schema, engine, UniqueConstraint(constraint_name, table_oid, [unique_column_attnum]))
 
     altered_table = reflect_table_from_oid(table_oid, engine)
     test_utils.assert_primary_key_and_unique_present(altered_table)
@@ -81,8 +84,8 @@ def test_create_unique_constraint_with_custom_name(engine_with_schema):
     assert list(unique_constraint.columns)[0].name == unique_column_name
 
 
-def test_create_unique_constraint_with_duplicate_name(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_create_unique_constraint_with_duplicate_name(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "orders_4"
     unique_column_names = ['product_name', 'customer_name']
     constraint_name = 'unique_product_name'
@@ -95,7 +98,8 @@ def test_create_unique_constraint_with_duplicate_name(engine_with_schema):
     )
     table.create()
     table_oid = get_oid_from_table(table_name, schema, engine)
-    create_unique_constraint(table.name, schema, engine, [unique_column_names[0]], constraint_name)
+    unique_column_attnum = get_column_attnum_from_name(table_oid, unique_column_names[0], engine)
+    create_constraint(schema, engine, UniqueConstraint(constraint_name, table_oid, [unique_column_attnum]))
 
     altered_table = reflect_table_from_oid(table_oid, engine)
     test_utils.assert_primary_key_and_unique_present(altered_table)
