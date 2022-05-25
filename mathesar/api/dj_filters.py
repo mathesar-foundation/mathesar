@@ -1,24 +1,7 @@
 from django_filters import BooleanFilter, DateTimeFromToRangeFilter, OrderingFilter
 from django_property_filter import PropertyFilterSet, PropertyBaseInFilter, PropertyCharFilter, PropertyOrderingFilter
 
-from mathesar.database.types import MathesarTypeIdentifier
 from mathesar.models import Schema, Table, Database
-
-FILTER_OPTIONS_BY_TYPE_IDENTIFIER = {
-    MathesarTypeIdentifier.BOOLEAN.value:
-    {
-        "db_type": "BOOLEAN",
-        "options": [{
-            "op": "eq",
-            "value": {
-                "allowed_types": ["BOOLEAN"],
-            }
-        }, {
-            "op": "is_null",
-            "value": "null",
-        }]
-    }
-}
 
 
 class CharInFilter(PropertyBaseInFilter, PropertyCharFilter):

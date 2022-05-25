@@ -74,8 +74,9 @@
           $tabularData.type,
           $tabularData.id,
         );
-        // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-        tabList.remove(tab);
+        if (tab) {
+          tabList.removeTabAndItsData(tab);
+        }
         // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
         await refetchTablesForSchema($currentSchemaId);
       },
@@ -160,14 +161,22 @@
 
   <div class="divider" />
 
-  <Button size="small" on:click={() => recordsData.addEmptyRecord()}>
+  <Button
+    disabled={isLoading}
+    size="small"
+    on:click={() => recordsData.addEmptyRecord()}
+  >
     <Icon data={faPlus} />
     <span>New Record</span>
   </Button>
 
   <div class="divider" />
 
-  <Button size="small" on:click={() => linkTableModal.open()}>
+  <Button
+    disabled={isLoading}
+    size="small"
+    on:click={() => linkTableModal.open()}
+  >
     <Icon data={faLink} />
     <span>Link Table</span>
   </Button>

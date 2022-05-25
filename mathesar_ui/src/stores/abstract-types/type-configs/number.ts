@@ -10,13 +10,13 @@ import type {
 } from '../types';
 
 const DB_TYPES = {
-  DECIMAL: 'DECIMAL',
-  NUMERIC: 'NUMERIC',
-  INTEGER: 'INTEGER',
-  SMALLINT: 'SMALLINT',
-  BIGINT: 'BIGINT',
-  REAL: 'REAL',
-  DOUBLE_PRECISION: 'DOUBLE PRECISION',
+  DECIMAL: 'decimal',
+  NUMERIC: 'numeric',
+  INTEGER: 'integer',
+  SMALLINT: 'smallint',
+  BIGINT: 'bigint',
+  REAL: 'real',
+  DOUBLE_PRECISION: 'double precision',
 };
 
 const dbForm: AbstractTypeConfigForm = {

@@ -3,9 +3,11 @@ from psycopg2.errors import DuplicateTable
 from rest_framework import serializers, status
 from sqlalchemy.exc import ProgrammingError
 
+from db.types.base import get_db_type_enum_from_id
+
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
-    ColumnSizeMismatchAPIException,
-    DistinctColumnRequiredAPIException, MultipleDataFileAPIException,
+    ColumnSizeMismatchAPIException, DistinctColumnRequiredAPIException,
+    MultipleDataFileAPIException, UnknownDatabaseTypeIdentifier
 )
 from mathesar.api.exceptions.database_exceptions.exceptions import DuplicateTableAPIException
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
@@ -113,4 +115,9 @@ class TablePreviewSerializer(MathesarErrorMessageMixin, serializers.Serializer):
             raise DistinctColumnRequiredAPIException()
         if not len(columns) == len(table.sa_columns):
             raise ColumnSizeMismatchAPIException()
+        for column in columns:
+            db_type_id = column['type']
+            db_type = get_db_type_enum_from_id(db_type_id)
+            if db_type is None:
+                raise UnknownDatabaseTypeIdentifier(db_type_id=db_type_id)
         return columns

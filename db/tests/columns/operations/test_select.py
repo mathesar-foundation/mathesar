@@ -3,7 +3,6 @@ import pytest
 from sqlalchemy import (
     String, Integer, Column, Table, MetaData, DateTime, func, text, DefaultClause,
 )
-from db.tests.types import fixtures
 from db.columns.exceptions import DynamicDefaultWarning
 from db.columns.operations.select import (
     get_column_attnum_from_name, get_column_default, _is_default_expr_dynamic,
@@ -12,13 +11,9 @@ from db.columns.operations.select import (
 from db.tables.operations.select import get_oid_from_table
 from db.tests.columns.utils import column_test_dict, get_default
 
-engine_with_types = fixtures.engine_with_types
-engine_email_type = fixtures.engine_email_type
-temporary_testing_schema = fixtures.temporary_testing_schema
 
-
-def test_get_attnum_from_name(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_get_attnum_from_name(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "table_with_columns"
     zero_name = "colzero"
     one_name = "colone"
@@ -36,8 +31,8 @@ def test_get_attnum_from_name(engine_with_schema):
     assert get_column_name_from_attnum(table_oid, column_one_attnum, engine) == one_name
 
 
-def test_get_attnum_from_names(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_get_attnum_from_names(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "table_with_columns"
     zero_name = "colzero"
     one_name = "colone"
@@ -56,8 +51,8 @@ def test_get_attnum_from_names(engine_with_schema):
 
 @pytest.mark.parametrize("filler", [True, False])
 @pytest.mark.parametrize("col_type", column_test_dict.keys())
-def test_get_column_default(engine_email_type, filler, col_type):
-    engine, schema = engine_email_type
+def test_get_column_default(engine_with_schema, filler, col_type):
+    engine, schema = engine_with_schema
     table_name = "get_column_default_table"
     column_name = "get_column_default_column"
     _, set_default, expt_default = column_test_dict[col_type].values()
@@ -89,8 +84,8 @@ get_column_generated_default_test_list = [
 
 
 @pytest.mark.parametrize("col", get_column_generated_default_test_list)
-def test_get_column_generated_default(engine_with_schema, col):
-    engine, schema = engine_with_schema
+def test_get_column_generated_default(engine_with_schema_without_updated_ischema_names, col):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "get_column_generated_default_table"
     table = Table(
         table_name,
