@@ -1,6 +1,7 @@
 import type {
   FormattedInputProps,
   SelectProps,
+  StringifiedNumberInputProps,
 } from '@mathesar-component-library/types';
 
 export interface CellTypeProps<Value> {
@@ -30,6 +31,7 @@ export type TextAreaCellProps = TextBoxCellProps;
 export interface NumberCellExternalProps {
   locale?: string;
   allowFloat: boolean;
+  useGrouping: StringifiedNumberInputProps['useGrouping'];
 }
 
 export interface NumberCellProps

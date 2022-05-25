@@ -12,7 +12,7 @@
   export let isActive: $$Props['isActive'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
-
+  export let useGrouping: $$Props['useGrouping'];
   export let locale: $$Props['locale'];
   export let allowFloat: $$Props['allowFloat'];
 
@@ -20,6 +20,7 @@
     locale,
     allowFloat,
     allowNegative: true,
+    useGrouping,
   };
   $: formatter = new StringifiedNumberFormatter(formatterOptions);
 
