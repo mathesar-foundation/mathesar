@@ -319,9 +319,6 @@ class Table(DatabaseObject):
         if columns == []:
             message = 'Columns field cannot be empty.'
             raise base_api_exceptions.NotFoundAPIException(SyntaxError, message=message, status_code=status.HTTP_400_BAD_REQUEST)
-        if constraint_type != constraint_utils.ConstraintType.UNIQUE.value:
-            message = 'Only creating unique constraints is currently supported.'
-            raise base_api_exceptions.ValueAPIException(ValueError, message=message, status_code=status.HTTP_400_BAD_REQUEST)
         column_names = [column.name for column in columns]
         create_unique_constraint(
             self.name,
