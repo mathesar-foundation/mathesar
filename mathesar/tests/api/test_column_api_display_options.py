@@ -262,6 +262,15 @@ _create_display_options_invalid_test_list = [
     (PostgresType.NUMERIC, {'minimum_fraction_digits': "can't be a string"}),
     (PostgresType.NUMERIC, {'maximum_fraction_digits': "can't be a string"}),
 
+    # Values in conflict. Max must be greater or equal to min.
+    (
+        PostgresType.NUMERIC,
+        {
+            'minimum_fraction_digits': 4,
+            'maximum_fraction_digits': 3,
+        },
+    ),
+
     (
         PostgresType.TIMESTAMP_WITH_TIME_ZONE,
         {'format': []}

@@ -150,6 +150,13 @@ class AbstractNumberDisplayOptionSerializer(serializers.Serializer):
     minimum_fraction_digits = serializers.IntegerField(**FRACTION_DIGITS_CONFIG)
     maximum_fraction_digits = serializers.IntegerField(**FRACTION_DIGITS_CONFIG)
 
+    def validate(self, data):
+        if data['minimum_fraction_digits'] > data['maximum_fraction_digits']:
+            raise serializers.ValidationError(
+                "maximum_fraction_digits cannot be less than minimum_fraction_digits."
+            )
+        return data
+
 
 class NumberDisplayOptionSerializer(
     MathesarErrorMessageMixin,
