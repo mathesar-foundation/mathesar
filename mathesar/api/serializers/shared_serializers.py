@@ -59,6 +59,12 @@ class ReadWritePolymorphicSerializerMappingMixin(ReadOnlyPolymorphicSerializerMa
             data = {}
             return data
 
+    def validate(self, attrs):
+        serializer = self.serializers_mapping.get(self.get_mapping_field(attrs))
+        if serializer is not None:
+            return serializer.validate(attrs)
+        return {}
+
 
 class MonkeyPatchPartial:
     """
