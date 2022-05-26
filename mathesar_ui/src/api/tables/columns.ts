@@ -25,6 +25,9 @@ interface FormattedNumberDisplayOptions {
    *   may also be dependent on the currency"
    */
   use_grouping: 'true' | 'false' | 'auto';
+
+  minimum_fraction_digits: number;
+  maximum_fraction_digits: number;
 }
 
 export interface NumberDisplayOptions

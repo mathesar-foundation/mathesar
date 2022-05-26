@@ -119,6 +119,19 @@ class BooleanDisplayOptionSerializer(MathesarErrorMessageMixin, OverrideRootPart
     custom_labels = CustomBooleanLabelSerializer(required=False)
 
 
+FRACTION_DIGITS_CONFIG = {
+    "required": False,
+    "allow_null": True,
+    "min_value": 0,
+    "max_value": 20
+}
+"""
+Max value of 20 is taken from [Intl.NumberFormat docs][1].
+
+[1]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
+"""
+
+
 class AbstractNumberDisplayOptionSerializer(serializers.Serializer):
     number_format = serializers.ChoiceField(required=False, allow_null=True, choices=['english', 'german', 'french', 'hindi', 'swiss'])
 
@@ -133,6 +146,9 @@ class AbstractNumberDisplayOptionSerializer(serializers.Serializer):
 
     [1]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
     """
+
+    minimum_fraction_digits = serializers.IntegerField(**FRACTION_DIGITS_CONFIG)
+    maximum_fraction_digits = serializers.IntegerField(**FRACTION_DIGITS_CONFIG)
 
 
 class NumberDisplayOptionSerializer(

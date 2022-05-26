@@ -28,7 +28,15 @@ def column_test_table_with_service_layer_options(patent_schema):
     column_data_list = [
         {},
         {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
-        {'display_options': {'show_as_percentage': True, 'number_format': "english", "use_grouping": 'auto'}},
+        {
+            'display_options': {
+                'show_as_percentage': True,
+                'number_format': "english",
+                "use_grouping": 'auto',
+                "minimum_fraction_digits": None,
+                "maximum_fraction_digits": None,
+            }
+        },
         {'display_options': None},
         {},
         {
@@ -90,23 +98,67 @@ _create_display_options_test_list = [
     ),
     (
         PostgresType.MONEY,
-        {'number_format': "english", 'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'use_grouping': 'true'},
-        {'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'number_format': "english", 'use_grouping': 'true'}
+        {
+            'number_format': "english",
+            'currency_symbol': '$',
+            'currency_symbol_location': 'after-minus',
+            'use_grouping': 'true',
+            "minimum_fraction_digits": 2,
+            "maximum_fraction_digits": 2,
+        },
+        {
+            'currency_symbol': '$',
+            'currency_symbol_location': 'after-minus',
+            'number_format': "english",
+            'use_grouping': 'true',
+            "minimum_fraction_digits": 2,
+            "maximum_fraction_digits": 2,
+        },
     ),
     (
         PostgresType.NUMERIC,
         {},
-        {"show_as_percentage": False, 'number_format': None, 'use_grouping': 'auto'}
+        {
+            "show_as_percentage": False,
+            'number_format': None,
+            'use_grouping': 'auto',
+            "minimum_fraction_digits": None,
+            "maximum_fraction_digits": None,
+        },
     ),
     (
         PostgresType.NUMERIC,
-        {"show_as_percentage": True, 'number_format': None, 'use_grouping': 'false'},
-        {"show_as_percentage": True, 'number_format': None, 'use_grouping': 'false'}
+        {
+            "show_as_percentage": True,
+            'number_format': None,
+            'use_grouping': 'false',
+            "minimum_fraction_digits": 2,
+            "maximum_fraction_digits": 20,
+        },
+        {
+            "show_as_percentage": True,
+            'number_format': None,
+            'use_grouping': 'false',
+            "minimum_fraction_digits": 2,
+            "maximum_fraction_digits": 20,
+        },
     ),
     (
         PostgresType.NUMERIC,
-        {"show_as_percentage": True, 'number_format': "english", 'use_grouping': 'auto'},
-        {"show_as_percentage": True, 'number_format': "english", 'use_grouping': 'auto'}
+        {
+            "show_as_percentage": True,
+            'number_format': "english",
+            'use_grouping': 'auto',
+            "minimum_fraction_digits": None,
+            "maximum_fraction_digits": None,
+        },
+        {
+            "show_as_percentage": True,
+            'number_format': "english",
+            'use_grouping': 'auto',
+            "minimum_fraction_digits": None,
+            "maximum_fraction_digits": None,
+        },
     ),
     (
         PostgresType.TIMESTAMP_WITH_TIME_ZONE,
@@ -197,6 +249,19 @@ _create_display_options_invalid_test_list = [
         PostgresType.NUMERIC,
         {'number_format': "wrong"}
     ),
+
+    # Out of range values
+    (PostgresType.NUMERIC, {'minimum_fraction_digits': -1}),
+    (PostgresType.NUMERIC, {'maximum_fraction_digits': -1}),
+    (PostgresType.NUMERIC, {'minimum_fraction_digits': 21}),
+    (PostgresType.NUMERIC, {'maximum_fraction_digits': 21}),
+
+    # Incorrect types
+    (PostgresType.NUMERIC, {'minimum_fraction_digits': 1.5}),
+    (PostgresType.NUMERIC, {'maximum_fraction_digits': 1.5}),
+    (PostgresType.NUMERIC, {'minimum_fraction_digits': "can't be a string"}),
+    (PostgresType.NUMERIC, {'maximum_fraction_digits': "can't be a string"}),
+
     (
         PostgresType.TIMESTAMP_WITH_TIME_ZONE,
         {'format': []}
