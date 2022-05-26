@@ -292,6 +292,7 @@ class Table(DatabaseObject):
         order_by=[],
         group_by=None,
         duplicate_only=None,
+        preview_columns=None
     ):
         return db_get_records(
             self._sa_table,
@@ -302,6 +303,7 @@ class Table(DatabaseObject):
             order_by=order_by,
             group_by=group_by,
             duplicate_only=duplicate_only,
+            preview_columns=preview_columns
         )
 
     def create_record_or_records(self, record_data):

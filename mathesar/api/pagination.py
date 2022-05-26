@@ -46,6 +46,7 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
         order_by=[],
         group_by=None,
         duplicate_only=None,
+        preview_columns=None
     ):
         self.limit = self.get_limit(request)
         if self.limit is None:
@@ -62,6 +63,7 @@ class TableLimitOffsetPagination(DefaultLimitOffsetPagination):
             order_by=order_by,
             group_by=group_by,
             duplicate_only=duplicate_only,
+            preview_columns=preview_columns
         )
 
 
@@ -87,6 +89,7 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
         order_by=[],
         grouping={},
         duplicate_only=None,
+        preview_columns=None
     ):
         group_by = GroupBy(**grouping) if grouping else None
         records = super().paginate_queryset(
@@ -97,16 +100,19 @@ class TableLimitOffsetGroupPagination(TableLimitOffsetPagination):
             order_by=order_by,
             group_by=group_by,
             duplicate_only=duplicate_only,
+            preview_columns=preview_columns
         )
 
         if records:
             processed_records, groups = process_annotated_records(
                 records,
                 column_name_id_bidirectional_map,
+                preview_columns
             )
         else:
             processed_records, groups = None, None
-
+        if preview_columns:
+            self.preview_data = {}
         if group_by:
             self.grouping = {
                 'columns': [column_name_id_bidirectional_map[n] for n in group_by.columns],

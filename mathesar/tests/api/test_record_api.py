@@ -96,16 +96,36 @@ def test_foreign_key_record_api(create_foreign_key_table, client):
     referent_table_name = 'Center'
     referrer_table, referent_table = create_foreign_key_table(referrer_table_name, referent_table_name)
     referent_column = _get_columns_by_name(referent_table, ["Id"])[0]
-    referrer_column = _get_columns_by_name(referrer_table, ["Center"])[0]
+    referrer_table_columns = _get_columns_by_name(
+        referrer_table,
+        ["Id", "Center", "Affiliated Center", "Original Patent"]
+    )
+    referrer_table_pk = referrer_table_columns[0]
+    referrer_column_1 = referrer_table_columns[1]
+    referrer_column_2 = referrer_table_columns[2]
+    self_referential_column = referrer_table_columns[3]
+
+    referrer_table.add_constraint(UniqueConstraint(None, referrer_table.oid, [referrer_table_pk.attnum]))
     referent_table.add_constraint(UniqueConstraint(None, referent_table.oid, [referent_column.attnum]))
     referrer_table.add_constraint(ForeignKeyConstraint(None,
                                                        referrer_table.oid,
-                                                       [referrer_column.attnum],
+                                                       [referrer_column_1.attnum],
                                                        referent_table.oid,
                                                        [referent_column.attnum], {}))
-    response = client.get(f'/api/db/v0/tables/{referrer_table.id}/records/')
+    referrer_table.add_constraint(ForeignKeyConstraint(None,
+                                                       referrer_table.oid,
+                                                       [referrer_column_2.attnum],
+                                                       referent_table.oid,
+                                                       [referent_column.attnum], {}))
+    referrer_table.add_constraint(ForeignKeyConstraint(None,
+                                                       referrer_table.oid,
+                                                       [self_referential_column.attnum],
+                                                       referrer_table.oid,
+                                                       [referrer_table_pk.attnum], {}))
+    response = client.get(f'/api/db/v0/tables/{referrer_table.id}/records/', data={'fk_previews': 'all'})
     response_data = response.json()
-    print(response_data)
+    assert response_data['preview_data'][referent_column]['data'][0]
+    assert response_data['preview_data'][referent_column]['referent_column']
 
 
 def test_record_list_filter(create_table, client):

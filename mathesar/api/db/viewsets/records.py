@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
 import mathesar.api.exceptions.database_exceptions.exceptions as database_api_exceptions
+from db.constraints.utils import ConstraintType
 from db.functions.exceptions import (
     BadDBFunctionFormat, ReferencedColumnsDontExist, UnknownDBFunctionID
 )
@@ -15,7 +16,7 @@ from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
-from mathesar.models import Table
+from mathesar.models import Constraint, Table
 from mathesar.utils.json import MathesarJSONRenderer
 
 
@@ -42,6 +43,7 @@ class RecordViewSet(viewsets.ViewSet):
         filter_unprocessed = serializer.validated_data['filter']
         order_by = serializer.validated_data['order_by']
         grouping = serializer.validated_data['grouping']
+        fk_previews = serializer.validated_data['fk_previews']
         filter_processed = None
         column_names_to_ids = table.get_column_name_id_bidirectional_map()
         column_ids_to_names = column_names_to_ids.inverse
@@ -57,7 +59,26 @@ class RecordViewSet(viewsets.ViewSet):
             group_by_columns_names = [column_ids_to_names[column_id] for column_id in grouping['columns']]
             name_converted_group_by = {**grouping, 'columns': group_by_columns_names}
         name_converted_order_by = [{**column, 'field': column_ids_to_names[column['field']]} for column in order_by]
-
+        preview_columns = None
+        if fk_previews:
+            table_constraints = Constraint.objects.filter(table__id=self.kwargs['table_pk'])
+            fk_constraints = [table_constraint for table_constraint in table_constraints if table_constraint.type == ConstraintType.FOREIGN_KEY.value]
+            preview_columns = {}
+            if fk_previews == 'all':
+                for fk_constraint in fk_constraints:
+                    constrained_column = fk_constraint.columns[0]
+                    referent_columns = fk_constraint.referent_columns
+                    referent_table = referent_columns[0].table
+                    preview_data_columns = referent_columns[0].table.settings.preview_columns.columns.all()
+                    preview_data_columns_name = [preview_data_column.name for preview_data_column in preview_data_columns]
+                    referent_columns_name = [column.name for column in fk_constraint.referent_columns]
+                    preview_columns[constrained_column.name] = {
+                        'table': referent_table._sa_table,
+                        'columns': preview_data_columns_name,
+                        'referent_column': referent_columns_name[0],
+                    }
+            elif fk_previews == 'auto':
+                table_constraints = Constraint.objects.filter(table__id=self.kwargs['table_pk'])
         try:
 
             records = paginator.paginate_queryset(
@@ -66,6 +87,7 @@ class RecordViewSet(viewsets.ViewSet):
                 order_by=name_converted_order_by,
                 grouping=name_converted_group_by,
                 duplicate_only=serializer.validated_data['duplicate_only'],
+                preview_columns=preview_columns
             )
         except (BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist) as e:
             raise database_api_exceptions.BadFilterAPIException(

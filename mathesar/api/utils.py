@@ -24,7 +24,7 @@ def get_table_or_404(pk):
     return table
 
 
-def process_annotated_records(record_list, column_name_id_map):
+def process_annotated_records(record_list, column_name_id_map, preview_columns):
 
     RESULT_IDX = 'result_indices'
 

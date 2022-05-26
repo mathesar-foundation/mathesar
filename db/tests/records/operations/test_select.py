@@ -116,7 +116,7 @@ def test_foreign_key_record(relation_table_obj):
     preview_columns = {}
     referent_table, referrer_table, engine = relation_table_obj
     fk_column_name = "person"
-    preview_columns[fk_column_name] = {'table': referent_table, 'columns': ["Name", "Email"]}
+    preview_columns[fk_column_name] = {'table': referent_table, 'referent_column': 'id', 'columns': ["Name", "Email"]}
     records = get_records(
         referrer_table,
         engine,
@@ -131,9 +131,9 @@ def test_multiple_column_same_table_relation_foreign_key_record(relation_table_o
     preview_columns = {}
     referent_table, referrer_table, engine = relation_table_obj
     fk_column_name = "person"
-    preview_columns[fk_column_name] = {'table': referent_table, 'columns': ["Name", "Email"]}
+    preview_columns[fk_column_name] = {'table': referent_table, 'referent_column': 'id', 'columns': ["Name", "Email"]}
     fk_column_name = "teacher"
-    preview_columns[fk_column_name] = {'table': referent_table, 'columns': ["Name", "Email"]}
+    preview_columns[fk_column_name] = {'table': referent_table, 'referent_column': 'id', 'columns': ["Name", "Email"]}
     records = get_records(
         referrer_table,
         engine,
@@ -160,9 +160,9 @@ def test_self_referential_relation_foreign_key_record(relation_table_obj):
     preview_columns = {}
     referent_table, referrer_table, engine = relation_table_obj
     fk_column_name = "person"
-    preview_columns[fk_column_name] = {'table': referent_table, 'columns': ["Name", "Email"]}
+    preview_columns[fk_column_name] = {'table': referent_table, 'referent_column': 'id', 'columns': ["Name", "Email"]}
     fk_column_name = "supplementary"
-    preview_columns[fk_column_name] = {'table': referrer_table, 'columns': ["Name"]}
+    preview_columns[fk_column_name] = {'table': referrer_table, 'referent_column': 'id', 'columns': ["Name"]}
     records = get_records(
         referrer_table,
         engine,
