@@ -150,11 +150,19 @@ class AbstractNumberDisplayOptionSerializer(serializers.Serializer):
     minimum_fraction_digits = serializers.IntegerField(**FRACTION_DIGITS_CONFIG)
     maximum_fraction_digits = serializers.IntegerField(**FRACTION_DIGITS_CONFIG)
 
-    def validate(self, data):
-        if data['minimum_fraction_digits'] > data['maximum_fraction_digits']:
+    def _validate_fraction_digits(self, data):
+        minimum = data.get("minimum_fraction_digits")
+        maximum = data.get("maximum_fraction_digits")
+        if minimum is None or maximum is None:
+            # No errors if one of the fields is not set
+            return
+        if minimum > maximum:
             raise serializers.ValidationError(
                 "maximum_fraction_digits cannot be less than minimum_fraction_digits."
             )
+
+    def validate(self, data):
+        self._validate_fraction_digits(data)
         return data
 
 
