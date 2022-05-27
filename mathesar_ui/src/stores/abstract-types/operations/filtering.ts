@@ -18,7 +18,7 @@ const numericallyOperableTypesParams = {
   [abstractTypeCategory.Time]: [abstractTypeCategory.Time],
   [abstractTypeCategory.Duration]: [abstractTypeCategory.Duration],
   [abstractTypeCategory.Number]: [abstractTypeCategory.Number],
-  // TODO add money
+  [abstractTypeCategory.Money]: [abstractTypeCategory.Money],
 };
 
 function constructAliasMapForTypes(

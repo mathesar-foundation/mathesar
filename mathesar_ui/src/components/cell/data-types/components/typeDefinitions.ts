@@ -36,11 +36,10 @@ export interface NumberCellProps
 
 // Money
 
-export interface MoneyCellExternalProps {
+export interface MoneyCellExternalProps
+  extends Partial<NumberFormatterOptions> {
   currencySymbol: string;
   currencySymbolLocation: 'after-minus' | 'end-with-space';
-  locale?: string;
-  allowFloat: boolean;
 }
 
 export interface MoneyCellProps

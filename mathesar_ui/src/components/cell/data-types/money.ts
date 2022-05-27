@@ -4,6 +4,7 @@ import MoneyCell from './components/money/MoneyCell.svelte';
 import MoneyCellInput from './components/money/MoneyCellInput.svelte';
 import type { MoneyCellExternalProps } from './components/typeDefinitions';
 import type { CellComponentFactory } from './typeDefinitions';
+import { getUseGrouping } from './number';
 
 // Values to use if for some reason we don't get them from the API.
 const FALLBACK_CURRENCY_SYMBOL = '$';
@@ -23,14 +24,17 @@ function moneyColumnIsInteger(column: MoneyColumn): boolean {
 }
 
 function getProps(column: MoneyColumn): MoneyCellExternalProps {
-  const format = column.display_options?.number_format ?? null;
+  const displayOptions = column.display_options;
+  const format = displayOptions?.number_format ?? null;
   const props: MoneyCellExternalProps = {
     locale: (format && localeMap.get(format)) ?? undefined,
+    useGrouping: getUseGrouping(displayOptions?.use_grouping ?? 'auto'),
     allowFloat: !moneyColumnIsInteger(column),
-    currencySymbol:
-      column.display_options?.currency_symbol ?? FALLBACK_CURRENCY_SYMBOL,
+    minimumFractionDigits: displayOptions?.minimum_fraction_digits ?? undefined,
+    maximumFractionDigits: displayOptions?.maximum_fraction_digits ?? undefined,
+    currencySymbol: displayOptions?.currency_symbol ?? FALLBACK_CURRENCY_SYMBOL,
     currencySymbolLocation:
-      column.display_options?.currency_symbol_location ??
+      displayOptions?.currency_symbol_location ??
       FALLBACK_CURRENCY_SYMBOL_LOCATION,
   };
   return props;
