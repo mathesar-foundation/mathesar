@@ -2,6 +2,7 @@ from rest_framework.exceptions import NotFound
 import re
 
 from db.records.operations import group
+from db.records.operations.preview import extract_preview_metadata
 from mathesar.models import Table
 from mathesar.database.types import _get_type_map
 
@@ -43,6 +44,9 @@ def process_annotated_records(record_list, column_name_id_map, preview_columns):
     processed_records, record_metadata = zip(
         *tuple(tuple(d.values()) for d in combined_records)
     )
+    previews = None
+    if preview_columns:
+        previews, processed_records = extract_preview_metadata(processed_records, preview_columns)
 
     def _replace_column_names_with_ids(group_metadata_item):
         try:
@@ -52,6 +56,12 @@ def process_annotated_records(record_list, column_name_id_map, preview_columns):
         except AttributeError:
             processed_group_metadata_item = group_metadata_item
         return processed_group_metadata_item
+
+    if preview_columns is not None:
+        previews = _replace_column_names_with_ids(previews)
+        for preview_column, preview in previews.items():
+            for reference_key, preview_data in preview.items():
+                previews[preview_column][reference_key] = _replace_column_names_with_ids(preview_data)
 
     if groups is not None:
         groups_by_id = {
@@ -69,7 +79,7 @@ def process_annotated_records(record_list, column_name_id_map, preview_columns):
     else:
         output_groups = None
 
-    return processed_records, output_groups
+    return processed_records, output_groups, previews
 
 
 def is_number(column_type):

@@ -124,8 +124,8 @@ def test_foreign_key_record_api(create_foreign_key_table, client):
                                                        [referrer_table_pk.attnum], {}))
     response = client.get(f'/api/db/v0/tables/{referrer_table.id}/records/', data={'fk_previews': 'all'})
     response_data = response.json()
-    assert response_data['preview_data'][referent_column]['data'][0]
-    assert response_data['preview_data'][referent_column]['referent_column']
+    referred_value = 1
+    assert response_data['previews'][str(referent_column.id)][str(referred_value)] == {str(referent_column.id): referred_value}
 
 
 def test_record_list_filter(create_table, client):
