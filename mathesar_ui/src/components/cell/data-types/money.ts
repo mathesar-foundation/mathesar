@@ -51,7 +51,7 @@ const moneyType: CellComponentFactory = {
   getInput(column: MoneyColumn): ComponentAndProps<MoneyCellExternalProps> {
     return {
       component: MoneyCellInput,
-      props: getProps(column),
+      props: { ...getProps(column), maximumFractionDigits: undefined },
     };
   },
 };
