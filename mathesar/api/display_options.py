@@ -1,9 +1,9 @@
 import json
+from mathesar.database.types import UIType
+from lazydict import LazyDictionary
 
-from mathesar.database.types import MathesarTypeIdentifier
 
-
-def money_display_options_schema():
+def _money_display_options_schema():
     with open("currency_info.json", "r") as info_file:
         currency_info = json.load(info_file)
     currency_codes = list(currency_info.keys())
@@ -24,53 +24,73 @@ def money_display_options_schema():
     }
 
 
-DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER = {
-    MathesarTypeIdentifier.BOOLEAN.value: lambda: {
-        "options": [
-            {
-                "name": "input", "type": "string",
-                "enum": ['dropdown', 'checkbox']
-            },
-            {
-                'name': "custom_labels", "type": "object",
-                "items": [
-                    {"name": "TRUE", "type": "string"},
-                    {'name': "FALSE", "type": "string"}
-                ]
-            }
-        ]
+DISPLAY_OPTIONS_BY_UI_TYPE = LazyDictionary(
+    {
+        UIType.BOOLEAN:
+        {
+            "options": [
+                {
+                    "name": "input", "type": "string",
+                    "enum": ['dropdown', 'checkbox']
+                },
+                {
+                    'name': "custom_labels", "type": "object",
+                    "items": [
+                        {"name": "TRUE", "type": "string"},
+                        {'name': "FALSE", "type": "string"}
+                    ]
+                }
+            ]
 
-    },
-    MathesarTypeIdentifier.DATE.value: lambda: {"options": [{"name": "format", "type": "string"}]},
-    MathesarTypeIdentifier.DATETIME.value: lambda: {"options": [{"name": "format", "type": "string"}]},
-    MathesarTypeIdentifier.DURATION.value: lambda: {
-        "options": [
-            {"name": "min", "type": "string"},
-            {"name": "max", "type": "string"},
-            {"name": "show_units", "type": "boolean"},
-        ]
-    },
-    MathesarTypeIdentifier.MONEY.value: money_display_options_schema,
-    MathesarTypeIdentifier.NUMBER.value: lambda: {
-        "options": [
-            {
-                "name": "show_as_percentage",
-                "type": "string",
-                "enum": ['dropdown', 'checkbox']
-            },
-            {
-                "name": "locale",
-                "type": "string"
-            }
-        ]
-    },
-    MathesarTypeIdentifier.TIME.value: (lambda: {"options": [{"name": "format", "type": "string"}]})
-}
-
-
-def get_display_options_for_identifier(identifier):
-    display_options_function = DISPLAY_OPTIONS_BY_TYPE_IDENTIFIER.get(identifier, None)
-    if display_options_function is not None:
-        return display_options_function()
-    else:
-        return None
+        },
+        UIType.NUMBER:
+        {
+            "options": [
+                {
+                    "name": "show_as_percentage",
+                    "type": "string",
+                    "enum": ['dropdown', 'checkbox']
+                },
+                {
+                    "name": "use_grouping",
+                    "type": "string",
+                    "enum": ['true', 'false', 'auto']
+                },
+                {
+                    "name": "minimum_fraction_digits",
+                    "type": "number",
+                },
+                {
+                    "name": "maximum_fraction_digits",
+                    "type": "number",
+                },
+                {
+                    "name": "locale",
+                    "type": "string"
+                }
+            ]
+        },
+        UIType.DATETIME:
+        {
+            "options": [{"name": "format", "type": "string"}]
+        },
+        UIType.TIME:
+        {
+            "options": [{"name": "format", "type": "string"}]
+        },
+        UIType.DATE:
+        {
+            "options": [{"name": "format", "type": "string"}]
+        },
+        UIType.DURATION:
+        {
+            "options": [
+                {"name": "min", "type": "string"},
+                {"name": "max", "type": "string"},
+                {"name": "show_units", "type": "boolean"},
+            ]
+        },
+        # NOTE: below callable will be evaluated lazily by LazyDictionary
+        UIType.MONEY: _money_display_options_schema,
+    }
+)

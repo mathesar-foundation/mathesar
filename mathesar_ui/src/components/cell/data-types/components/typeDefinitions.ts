@@ -1,5 +1,6 @@
 import type {
   FormattedInputProps,
+  NumberFormatterOptions,
   SelectProps,
 } from '@mathesar-component-library/types';
 
@@ -27,11 +28,7 @@ export type TextAreaCellProps = TextBoxCellProps;
 
 // Number
 
-export interface NumberCellExternalProps {
-  locale?: string;
-  allowFloat: boolean;
-  isPercentage: boolean;
-}
+export type NumberCellExternalProps = Partial<NumberFormatterOptions>;
 
 export interface NumberCellProps
   extends CellTypeProps<string | number>,

@@ -5,6 +5,7 @@ export type { BaseInputProps } from './common/base-components/BaseInputTypes';
 export type { Tab } from './tabs/TabContainerTypes';
 export type { TreeItem } from './tree/TreeTypes';
 export type { ComponentAndProps } from './common/types/ComponentAndPropsTypes';
+export type { PartiallyMissingOrUndefined } from './common/types/utilityTypes';
 export * from './icon/IconTypes';
 export * from './file-upload/FileUploadTypes';
 export * from './formatted-input/FormattedInputTypes';

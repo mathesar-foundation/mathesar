@@ -1,22 +1,5 @@
 .dropdown.trigger.column-opts {
   width: 100%;
-
-  .label {
-    display: flex;
-  }
-
-  .type {
-    margin-right: 5px;
-    color: #7f7f7f;
-    font-weight: 500;
-  }
-
-  .name {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
 }
 
 .dropdown.content.column-opts-content {

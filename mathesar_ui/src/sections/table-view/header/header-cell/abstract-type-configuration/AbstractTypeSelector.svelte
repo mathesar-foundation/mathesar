@@ -7,6 +7,7 @@
   } from '@mathesar/stores/abstract-types';
   import type { AbstractType } from '@mathesar/stores/abstract-types/types';
   import type { Column } from '@mathesar/stores/table-data/types';
+  import TypeIcon from '@mathesar/components/TypeIcon.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -43,7 +44,7 @@
         appearance="plain"
         on:click={() => dispatch('selection', abstractType)}
       >
-        <span class="data-icon">{abstractType.icon}</span>
+        <TypeIcon icon={abstractType.icon} />
         <span>{abstractType.name}</span>
       </Button>
     </li>

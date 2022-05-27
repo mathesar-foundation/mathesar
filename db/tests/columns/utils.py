@@ -6,14 +6,14 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import DOUBLE_PRECISION, MONEY
 
-from db.types.datetime import (
+from db.types.custom.datetime import (
     DATE, Interval, TIMESTAMP_WITHOUT_TIME_ZONE, TIMESTAMP_WITH_TIME_ZONE,
     TIME_WITHOUT_TIME_ZONE, TIME_WITH_TIME_ZONE,
 )
-from db.types.email import Email
-from db.types.money import MathesarMoney
-from db.types import multicurrency
-from db.types.uri import URI
+from db.types.custom.email import Email
+from db.types.custom.money import MathesarMoney
+from db.types.custom import multicurrency
+from db.types.custom.uri import URI
 
 column_test_dict = {
     BIGINT: {"start": "499999999999", "set": "500000000000", "expt": 500000000000},

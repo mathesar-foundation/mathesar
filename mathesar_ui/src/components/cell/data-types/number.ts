@@ -1,4 +1,8 @@
-import type { NumberColumn, NumberFormat } from '@mathesar/api/tables/columns';
+import type {
+  NumberColumn,
+  NumberDisplayOptions,
+  NumberFormat,
+} from '@mathesar/api/tables/columns';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import NumberCell from './components/number/NumberCell.svelte';
 import NumberCellInput from './components/number/NumberCellInput.svelte';
@@ -37,18 +41,35 @@ function getAllowFloat(
   return true;
 }
 
+function getUseGrouping(
+  apiUseGrouping: NumberDisplayOptions['use_grouping'],
+): NumberCellExternalProps['useGrouping'] {
+  switch (apiUseGrouping) {
+    case 'true':
+      return true;
+    case 'false':
+      return false;
+    case 'auto':
+    default:
+      return 'auto';
+  }
+}
+
 function getProps(
   column: NumberColumn,
   config?: Config,
 ): NumberCellExternalProps {
-  const format = column.display_options?.number_format ?? null;
-  const props = {
+  const displayOptions = column.display_options;
+  const format = displayOptions?.number_format ?? null;
+  return {
     locale: (format && localeMap.get(format)) ?? undefined,
-    isPercentage: column.display_options?.show_as_percentage ?? false,
+    useGrouping: getUseGrouping(displayOptions?.use_grouping ?? 'auto'),
     allowFloat: getAllowFloat(column, config?.floatAllowanceStrategy),
+    minimumFractionDigits: displayOptions?.minimum_fraction_digits ?? undefined,
+    maximumFractionDigits: displayOptions?.maximum_fraction_digits ?? undefined,
   };
-  return props;
 }
+
 const numberType: CellComponentFactory = {
   get(
     column: NumberColumn,
@@ -60,11 +81,6 @@ const numberType: CellComponentFactory = {
     };
   },
 
-  /**
-   * This should ideally return `StringifiedNumberInput` with props But since we
-   * require additional operations like `isPercentage`, it's better to use a
-   * dedicated `NumberCellInput` component.
-   */
   getInput(
     column: NumberColumn,
     config?: Config,
