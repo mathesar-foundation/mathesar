@@ -59,14 +59,17 @@ function getProps(
   column: NumberColumn,
   config?: Config,
 ): NumberCellExternalProps {
-  const format = column.display_options?.number_format ?? null;
-  const props = {
+  const displayOptions = column.display_options;
+  const format = displayOptions?.number_format ?? null;
+  return {
     locale: (format && localeMap.get(format)) ?? undefined,
-    useGrouping: getUseGrouping(column.display_options?.use_grouping ?? 'auto'),
+    useGrouping: getUseGrouping(displayOptions?.use_grouping ?? 'auto'),
     allowFloat: getAllowFloat(column, config?.floatAllowanceStrategy),
+    minimumFractionDigits: displayOptions?.minimum_fraction_digits ?? undefined,
+    maximumFractionDigits: displayOptions?.maximum_fraction_digits ?? undefined,
   };
-  return props;
 }
+
 const numberType: CellComponentFactory = {
   get(
     column: NumberColumn,

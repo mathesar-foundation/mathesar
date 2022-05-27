@@ -26,8 +26,8 @@ interface FormattedNumberDisplayOptions {
    */
   use_grouping: 'true' | 'false' | 'auto';
 
-  minimum_fraction_digits: number;
-  maximum_fraction_digits: number;
+  minimum_fraction_digits: number | null;
+  maximum_fraction_digits: number | null;
 }
 
 export interface NumberDisplayOptions
