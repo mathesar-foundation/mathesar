@@ -29,7 +29,7 @@ from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
 from mathesar.database.types import get_types
-
+from mathesar.utils.conversion import convert_preview_data_to_db_identifier
 
 NAME_CACHE_INTERVAL = 60 * 5
 
@@ -294,6 +294,7 @@ class Table(DatabaseObject):
         duplicate_only=None,
         preview_columns=None
     ):
+        identifier_converted_preview_data = convert_preview_data_to_db_identifier(preview_columns)
         return db_get_records(
             self._sa_table,
             self.schema._sa_engine,
@@ -303,7 +304,7 @@ class Table(DatabaseObject):
             order_by=order_by,
             group_by=group_by,
             duplicate_only=duplicate_only,
-            preview_columns=preview_columns
+            preview_columns=identifier_converted_preview_data
         )
 
     def create_record_or_records(self, record_data):

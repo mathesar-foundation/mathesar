@@ -66,16 +66,16 @@ class RecordViewSet(viewsets.ViewSet):
             preview_columns = {}
             if fk_previews == 'all':
                 for fk_constraint in fk_constraints:
+                    # For now only single column foreign key is used.
                     constrained_column = fk_constraint.columns[0]
-                    referent_columns = fk_constraint.referent_columns
-                    referent_table = referent_columns[0].table
-                    preview_data_columns = referent_columns[0].table.settings.preview_columns.columns.all()
-                    preview_data_columns_name = [preview_data_column.name for preview_data_column in preview_data_columns]
-                    referent_columns_name = [column.name for column in fk_constraint.referent_columns]
-                    preview_columns[constrained_column.name] = {
-                        'table': referent_table._sa_table,
-                        'columns': preview_data_columns_name,
-                        'referent_column': referent_columns_name[0],
+                    referent_column = fk_constraint.referent_columns[0]
+                    referent_table = referent_column.table
+                    referent_table_settings = referent_column.table.settings
+                    preview_data_columns = referent_table_settings.preview_columns.columns.all()
+                    preview_columns[constrained_column] = {
+                        'table': referent_table,
+                        'columns': preview_data_columns,
+                        'referent_column': referent_column,
                     }
             elif fk_previews == 'auto':
                 table_constraints = Constraint.objects.filter(table__id=self.kwargs['table_pk'])

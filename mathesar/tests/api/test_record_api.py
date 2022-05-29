@@ -7,6 +7,7 @@ from django.core.cache import cache
 import pytest
 
 from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
+from db.tables.utils import get_primary_key_column
 from mathesar.api.utils import follows_json_number_spec
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
@@ -125,7 +126,10 @@ def test_foreign_key_record_api(create_foreign_key_table, client):
     response = client.get(f'/api/db/v0/tables/{referrer_table.id}/records/', data={'fk_previews': 'all'})
     response_data = response.json()
     referred_value = 1
-    assert response_data['previews'][str(referent_column.id)][str(referred_value)] == {str(referent_column.id): referred_value}
+    primary_key_sa_column = get_primary_key_column(referent_table._sa_table)
+    primary_key_column = _get_columns_by_name(referent_table, [primary_key_sa_column.name])[0]
+
+    assert response_data['previews'][str(referrer_column_1.id)][str(referred_value)] == {str(primary_key_column.id): referred_value}
 
 
 def test_record_list_filter(create_table, client):

@@ -5,6 +5,7 @@ from db.records.operations import group
 from db.records.operations.preview import extract_preview_metadata
 from mathesar.models import Table
 from mathesar.database.types import _get_type_map
+from mathesar.utils.conversion import convert_preview_data_to_db_identifier
 
 DATA_KEY = 'data'
 METADATA_KEY = 'metadata'
@@ -46,27 +47,30 @@ def process_annotated_records(record_list, column_name_id_map, preview_columns):
     )
     previews = None
     if preview_columns:
-        previews, processed_records = extract_preview_metadata(processed_records, preview_columns)
+        converted_preview_columns = convert_preview_data_to_db_identifier(preview_columns)
+        previews, processed_records = extract_preview_metadata(processed_records, converted_preview_columns)
 
-    def _replace_column_names_with_ids(group_metadata_item):
+    def _replace_column_names_with_ids(group_metadata_item, table_column_name_id_map):
         try:
             processed_group_metadata_item = {
-                column_name_id_map[k]: v for k, v in group_metadata_item.items()
+                table_column_name_id_map[k]: v for k, v in group_metadata_item.items()
             }
         except AttributeError:
             processed_group_metadata_item = group_metadata_item
         return processed_group_metadata_item
 
     if preview_columns is not None:
-        previews = _replace_column_names_with_ids(previews)
-        for preview_column, preview in previews.items():
+        previews = _replace_column_names_with_ids(previews, column_name_id_map)
+        for preview_column, preview_obj in preview_columns.items():
+            preview = previews[preview_column.id]
+            referent_column_name_id_map = preview_obj['table'].get_column_name_id_bidirectional_map()
             for reference_key, preview_data in preview.items():
-                previews[preview_column][reference_key] = _replace_column_names_with_ids(preview_data)
+                previews[preview_column.id][reference_key] = _replace_column_names_with_ids(preview_data, referent_column_name_id_map)
 
     if groups is not None:
         groups_by_id = {
             grp[group.GroupMetadataField.GROUP_ID.value]: {
-                k: _replace_column_names_with_ids(v) for k, v in grp.items()
+                k: _replace_column_names_with_ids(v, column_name_id_map) for k, v in grp.items()
                 if k != group.GroupMetadataField.GROUP_ID.value
             } | {RESULT_IDX: []}
             for grp in groups
