@@ -21,6 +21,21 @@ interface TimeStampConfig {
 
 export type DateTimeConfig = DateConfig | TimeConfig | TimeStampConfig;
 
+// TODO: Find if there's a native or iter-tools option to do this
+function combine<T>(
+  array1: T[],
+  array2: T[],
+  combinationFn: (e: T, e2: T) => T,
+): T[] {
+  const newArray: T[] = [];
+  array1.forEach((entry) => {
+    array2.forEach((a2Entry) => {
+      newArray.push(combinationFn(entry, a2Entry));
+    });
+  });
+  return newArray;
+}
+
 function getDateFormattingStringMap(): Record<DateFormat, string> {
   // Galaxy Quest was released on this day
   const constDate = new Date('1999-12-25');
@@ -60,9 +75,12 @@ const commonTimeFormattingStrings = [
   'HH:mm',
 ];
 const commonTimeWithTZFormattingStrings = [
-  ...commonTimeFormattingStrings.map((entry) => `${entry}.Z`),
-  ...commonTimeFormattingStrings.map((entry) => `${entry} Z`),
-  ...commonTimeFormattingStrings.map((entry) => `${entry}Z`),
+  ...commonTimeFormattingStrings,
+  ...combine(
+    commonTimeFormattingStrings,
+    [' Z', '.Z', 'Z'],
+    (a, b) => `${a}${b}`,
+  ),
 ];
 
 export default class DateTimeSpecification {
@@ -86,16 +104,26 @@ export default class DateTimeSpecification {
   }
 
   getFormattingString(): string {
-    if (this.type === 'date') {
-      return dateFormattingStringMap[this.dateFormat];
+    switch (this.type) {
+      case 'date':
+        return dateFormattingStringMap[this.dateFormat];
+      case 'time':
+      case 'timeWithTZ':
+        return timeFormattingStringMap[this.timeFormat];
+      case 'timestamp':
+      case 'timestampWithTZ':
+      default:
+        return `${dateFormattingStringMap[this.dateFormat]} ${
+          timeFormattingStringMap[this.timeFormat]
+        }`;
     }
-    if (this.type === 'time' || this.type === 'timeWithTZ') {
-      return timeFormattingStringMap[this.timeFormat];
-    }
-    return '';
   }
 
   getCommonFormattingStrings(): string[] {
+    const allDateFormattingStrings = [
+      dateFormattingStringMap[this.dateFormat],
+      ...(commonDateFormattingStringsMap.get(this.dateFormat) ?? []),
+    ];
     if (this.type === 'date') {
       return commonDateFormattingStringsMap.get(this.dateFormat) ?? [];
     }
@@ -105,20 +133,58 @@ export default class DateTimeSpecification {
     if (this.type === 'timeWithTZ') {
       return commonTimeWithTZFormattingStrings;
     }
+    if (this.type === 'timestamp') {
+      return combine(
+        allDateFormattingStrings,
+        commonTimeFormattingStrings,
+        (a, b) => `${a} ${b}`,
+      );
+    }
+    if (this.type === 'timestampWithTZ') {
+      return combine(
+        allDateFormattingStrings,
+        commonTimeWithTZFormattingStrings,
+        (a, b) => `${a} ${b}`,
+      );
+    }
     return [];
   }
 
   getCanonicalFormattingStrings(): string[] {
-    if (this.type === 'date') {
-      return ['YYYY-MM-DD', 'YYYY-MM-DD [AD]', 'YYYY-MM-DD [BC]'];
+    const date = ['YYYY-MM-DD'];
+    const dateFull = [...date, 'YYYY-MM-DD [AD]', 'YYYY-MM-DD [BC]'];
+    const time = ['HH:mm:ss'];
+    const timeWithTZ = [
+      'HH:mm:ss.Z',
+      'HH:mm:ss Z',
+      'HH:mm:ss.ZZ',
+      'HH:mm:ss ZZ',
+    ];
+    const timestamp = combine(date, time, (a, b) => `${a} ${b}`);
+    const timestampFull = [
+      ...timestamp,
+      ...combine(timestamp, ['[AD]', '[BC]'], (a, b) => `${a} ${b}`),
+    ];
+    const timestampWithTZ = combine(date, timeWithTZ, (a, b) => `${a} ${b}`);
+    const timestampWithTZFull = [
+      ...timestampWithTZ,
+      ...combine(timestampWithTZ, ['[AD]', '[BC]'], (a, b) => `${a} ${b}`),
+    ];
+
+    switch (this.type) {
+      case 'date':
+        return dateFull;
+      case 'time':
+        return time;
+      case 'timeWithTZ':
+        return timeWithTZ;
+      case 'timestamp':
+        return timestampFull;
+      case 'timestampWithTZ':
+        return timestampWithTZFull;
+      default:
+        return [];
     }
-    if (this.type === 'time') {
-      return ['HH:mm:ss', 'HH:mm:ss.S'];
-    }
-    if (this.type === 'timeWithTZ') {
-      return ['HH:mm:ss.Z', 'HH:mm:ss Z', 'HH:mm:ss.ZZ', 'HH:mm:ss ZZ'];
-    }
-    return [];
   }
 
   getCanonicalString(dateObject: Date): string {
@@ -130,6 +196,12 @@ export default class DateTimeSpecification {
     }
     if (this.type === 'timeWithTZ') {
       return dayjs(dateObject).format('HH:mm:ss Z');
+    }
+    if (this.type === 'timestamp') {
+      return dayjs(dateObject).format('YYYY-MM-DD HH:mm:ss');
+    }
+    if (this.type === 'timestampWithTZ') {
+      return dayjs(dateObject).format('YYYY-MM-DD HH:mm:ss Z');
     }
     return dateObject.toISOString();
   }

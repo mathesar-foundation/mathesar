@@ -11,7 +11,8 @@ export type CellDataType =
   | 'uri'
   | 'duration'
   | 'date'
-  | 'time';
+  | 'time'
+  | 'datetime';
 
 export type CellColumnLike = Pick<
   Column,

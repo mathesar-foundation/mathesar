@@ -95,6 +95,11 @@ export interface TimeDisplayOptions extends Record<string, unknown> {
   format: TimeFormat | null;
 }
 
+export interface TimeStampDisplayOptions extends Record<string, unknown> {
+  date_format: DateDisplayOptions['format'];
+  time_format: TimeDisplayOptions['format'];
+}
+
 export interface BaseColumn {
   id: number;
   name: string;

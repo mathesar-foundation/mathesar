@@ -1,20 +1,21 @@
-import { faClock } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarWeek } from '@fortawesome/free-solid-svg-icons';
 import type { FormValues } from '@mathesar-component-library/types';
 import type { Column } from '@mathesar/stores/table-data/types';
 import type {
-  TimeDisplayOptions,
+  TimeStampDisplayOptions,
   TimeFormat,
+  DateFormat,
 } from '@mathesar/api/tables/columns';
 import type {
   AbstractTypeDbConfig,
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
 } from '../types';
-import { getTimeFormatOptions } from './utils';
+import { getDateFormatOptions, getTimeFormatOptions } from './utils';
 
 const DB_TYPES = {
-  TIME_WITH_TZ: 'time with time zone',
-  TIME_WITHOUT_TZ: 'time without time zone',
+  TIMESTAMP_WITH_TZ: 'timestamp with time zone',
+  TIMESTAMP_WITHOUT_TZ: 'timestamp without time zone',
 };
 
 const dbForm: AbstractTypeConfigForm = {
@@ -40,8 +41,8 @@ function determineDbTypeAndOptions(
   dbFormValues: FormValues,
 ): ReturnType<AbstractTypeDbConfig['determineDbTypeAndOptions']> {
   const dbType = dbFormValues.supportTimeZones
-    ? DB_TYPES.TIME_WITH_TZ
-    : DB_TYPES.TIME_WITHOUT_TZ;
+    ? DB_TYPES.TIMESTAMP_WITH_TZ
+    : DB_TYPES.TIMESTAMP_WITHOUT_TZ;
   return {
     dbType,
     typeOptions: {},
@@ -52,13 +53,18 @@ function constructDbFormValuesFromTypeOptions(
   columnType: Column['type'],
 ): FormValues {
   return {
-    supportTimeZones: columnType === DB_TYPES.TIME_WITH_TZ,
+    supportTimeZones: columnType === DB_TYPES.TIMESTAMP_WITH_TZ,
   };
 }
 
 const displayForm: AbstractTypeConfigForm = {
   variables: {
-    format: {
+    dateFormat: {
+      type: 'string',
+      enum: ['none', 'us', 'eu', 'friendly', 'iso'],
+      default: 'none',
+    },
+    timeFormat: {
       type: 'string',
       enum: ['24hr', '24hrLong', '12hr', '12hrLong'],
       default: '24hr',
@@ -69,7 +75,13 @@ const displayForm: AbstractTypeConfigForm = {
     elements: [
       {
         type: 'input',
-        variable: 'format',
+        variable: 'dateFormat',
+        label: 'Date Format',
+        options: getDateFormatOptions(),
+      },
+      {
+        type: 'input',
+        variable: 'timeFormat',
         label: 'Time Format',
         options: getTimeFormatOptions(),
       },
@@ -80,8 +92,9 @@ const displayForm: AbstractTypeConfigForm = {
 function determineDisplayOptions(
   dispFormValues: FormValues,
 ): Column['display_options'] {
-  const displayOptions: TimeDisplayOptions = {
-    format: dispFormValues.format as TimeFormat,
+  const displayOptions: TimeStampDisplayOptions = {
+    date_format: dispFormValues.dateFormat as DateFormat,
+    time_format: dispFormValues.timeFormat as TimeFormat,
   };
   return displayOptions;
 }
@@ -89,23 +102,24 @@ function determineDisplayOptions(
 function constructDisplayFormValuesFromDisplayOptions(
   columnDisplayOpts: Column['display_options'],
 ): FormValues {
-  const displayOptions = columnDisplayOpts as TimeDisplayOptions | null;
+  const displayOptions = columnDisplayOpts as TimeStampDisplayOptions | null;
   const dispFormValues: FormValues = {
-    format: displayOptions?.format ?? '24hr',
+    dateFormat: displayOptions?.date_format ?? 'none',
+    timeFormat: displayOptions?.time_format ?? '24hr',
   };
   return dispFormValues;
 }
 
-const timeType: AbstractTypeConfiguration = {
-  icon: { data: faClock, label: 'Time' },
-  defaultDbType: DB_TYPES.TIME_WITH_TZ,
+const dateTimeType: AbstractTypeConfiguration = {
+  icon: { data: faCalendarWeek, label: 'Date & Time' },
+  defaultDbType: DB_TYPES.TIMESTAMP_WITH_TZ,
   cell: {
-    type: 'time',
+    type: 'datetime',
     conditionalConfig: {
-      [DB_TYPES.TIME_WITH_TZ]: {
+      [DB_TYPES.TIMESTAMP_WITH_TZ]: {
         supportTimeZone: true,
       },
-      [DB_TYPES.TIME_WITHOUT_TZ]: {
+      [DB_TYPES.TIMESTAMP_WITHOUT_TZ]: {
         supportTimeZone: false,
       },
     },
@@ -122,4 +136,4 @@ const timeType: AbstractTypeConfiguration = {
   }),
 };
 
-export default timeType;
+export default dateTimeType;

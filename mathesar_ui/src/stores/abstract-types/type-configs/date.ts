@@ -1,34 +1,15 @@
 import { faCalendarDay } from '@fortawesome/free-solid-svg-icons';
-import { dayjs } from '@mathesar-component-library';
 import type { FormValues } from '@mathesar-component-library/types';
 import type { Column } from '@mathesar/stores/table-data/types';
 import type {
   DateDisplayOptions,
   DateFormat,
 } from '@mathesar/api/tables/columns';
-import { DateTimeSpecification } from '@mathesar/utils/date-time';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
 } from '../types';
-
-function getFormatOptions(): Record<string, { label: string }> {
-  const day = dayjs();
-  const dateFormattingStringMap =
-    DateTimeSpecification.getDateFormattingStringMap();
-
-  return {
-    none: {
-      label: `Infer from browser (${day.format(dateFormattingStringMap.none)})`,
-    },
-    us: { label: `US (${day.format(dateFormattingStringMap.us)})` },
-    eu: { label: `European (${day.format(dateFormattingStringMap.eu)})` },
-    friendly: {
-      label: `Friendly (${day.format(dateFormattingStringMap.friendly)})`,
-    },
-    iso: { label: `Standard (${day.format(dateFormattingStringMap.iso)})` },
-  };
-}
+import { getDateFormatOptions } from './utils';
 
 const displayForm: AbstractTypeConfigForm = {
   variables: {
@@ -45,7 +26,7 @@ const displayForm: AbstractTypeConfigForm = {
         type: 'input',
         variable: 'format',
         label: 'Date Format',
-        options: getFormatOptions(),
+        options: getDateFormatOptions(),
       },
     ],
   },
