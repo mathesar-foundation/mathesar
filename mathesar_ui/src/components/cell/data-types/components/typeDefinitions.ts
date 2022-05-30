@@ -31,7 +31,6 @@ export type TextAreaCellProps = TextBoxCellProps;
 export interface NumberCellExternalProps {
   locale?: string;
   allowFloat: boolean;
-  isPercentage: boolean;
 }
 
 export interface NumberCellProps

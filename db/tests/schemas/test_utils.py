@@ -1,6 +1,6 @@
 from unittest.mock import patch
-from sqlalchemy import create_engine
 
+from db.engine import create_engine
 from db.schemas import utils as schema_utils
 
 

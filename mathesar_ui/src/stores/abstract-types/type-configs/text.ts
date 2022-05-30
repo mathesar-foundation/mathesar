@@ -10,9 +10,9 @@ import type {
 } from '../types';
 
 const DB_TYPES = {
-  VARCHAR: 'VARCHAR',
-  CHAR: 'CHAR',
-  TEXT: 'TEXT',
+  VARCHAR: 'character varying',
+  CHAR: 'character',
+  TEXT: 'text',
 };
 
 const dbForm: AbstractTypeConfigForm = {
