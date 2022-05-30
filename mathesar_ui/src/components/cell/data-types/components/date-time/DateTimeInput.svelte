@@ -7,15 +7,18 @@
     AttachableDropdown,
   } from '@mathesar-component-library';
   import type {
-    DateCellExternalProps,
-    DateCellProps,
+    DateTimeCellExternalProps,
+    DateTimeCellProps,
   } from '../typeDefinitions';
 
   const dispatch = createEventDispatcher();
 
-  type $$Props = DateCellExternalProps & { value: DateCellProps['value'] };
+  type $$Props = DateTimeCellExternalProps & {
+    value: DateTimeCellProps['value'];
+  };
 
-  export let dateFormattingString: $$Props['dateFormattingString'];
+  export let type: $$Props['type'];
+  export let formattingString: $$Props['formattingString'];
   export let formatter: $$Props['formatter'];
 
   export let value: $$Props['value'];
@@ -26,7 +29,7 @@
   function getDatePickerValue(_value: $$Props['value']): string | undefined {
     if (isDefinedNonNullable(_value)) {
       const parsedAndFormatted = formatter.parseAndFormat(_value);
-      if (dayjs(parsedAndFormatted, dateFormattingString, true).isValid()) {
+      if (dayjs(parsedAndFormatted, formattingString, true).isValid()) {
         return parsedAndFormatted;
       }
     }
@@ -64,7 +67,7 @@
   focusOnMount={true}
   bind:value
   {formatter}
-  placeholder={dateFormattingString}
+  placeholder={formattingString}
   bind:element
   on:focus={open}
   on:focus
@@ -79,8 +82,9 @@
   on:close={onDropdownClose}
 >
   <InlineDateTimePicker
+    {type}
     value={datePickerValue}
-    dateFormat={dateFormattingString}
+    format={formattingString}
     on:change={(e) => onValueChange(e.detail)}
   />
 </AttachableDropdown>

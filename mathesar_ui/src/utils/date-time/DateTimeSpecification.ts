@@ -8,13 +8,13 @@ interface DateConfig {
 }
 
 interface TimeConfig {
-  type: 'time';
+  type: 'time' | 'timeWithTZ';
   timeFormat?: TimeFormat;
   dateFormat?: never;
 }
 
 interface TimeStampConfig {
-  type: 'timestamp';
+  type: 'timestamp' | 'timestampWithTZ';
   dateFormat?: DateFormat;
   timeFormat?: TimeFormat;
 }
@@ -46,8 +46,32 @@ const commonDateFormattingStringsMap: Map<DateFormat, string[]> = new Map([
   ['friendly', ['D MMM YY']],
 ]);
 
+const timeFormattingStringMap: Record<TimeFormat, string> = {
+  '24hr': 'HH:mm',
+  '24hrLong': 'HH:mm:ss',
+  '12hr': 'hh:mm a',
+  '12hrLong': 'hh:mm:ss a',
+};
+
+const commonTimeFormattingStrings = [
+  'hh:mm:ss a',
+  'HH:mm:ss',
+  'hh:mm a',
+  'HH:mm',
+];
+const commonTimeWithTZFormattingStrings = [
+  ...commonTimeFormattingStrings.map((entry) => `${entry}.Z`),
+  ...commonTimeFormattingStrings.map((entry) => `${entry} Z`),
+  ...commonTimeFormattingStrings.map((entry) => `${entry}Z`),
+];
+
 export default class DateTimeSpecification {
-  readonly type: 'date' | 'time' | 'timestamp';
+  readonly type:
+    | DateConfig['type']
+    | TimeConfig['type']
+    | TimeStampConfig['type'];
+
+  readonly isTimeZoneType: boolean;
 
   readonly dateFormat: DateFormat;
 
@@ -56,12 +80,17 @@ export default class DateTimeSpecification {
   constructor(config?: DateTimeConfig) {
     this.type = config?.type ?? 'timestamp';
     this.dateFormat = config?.dateFormat ?? 'none';
-    this.timeFormat = config?.timeFormat ?? 'none';
+    this.timeFormat = config?.timeFormat ?? '24hr';
+    this.isTimeZoneType =
+      this.type === 'timeWithTZ' || this.type === 'timestampWithTZ';
   }
 
   getFormattingString(): string {
     if (this.type === 'date') {
       return dateFormattingStringMap[this.dateFormat];
+    }
+    if (this.type === 'time' || this.type === 'timeWithTZ') {
+      return timeFormattingStringMap[this.timeFormat];
     }
     return '';
   }
@@ -70,6 +99,12 @@ export default class DateTimeSpecification {
     if (this.type === 'date') {
       return commonDateFormattingStringsMap.get(this.dateFormat) ?? [];
     }
+    if (this.type === 'time') {
+      return commonTimeFormattingStrings;
+    }
+    if (this.type === 'timeWithTZ') {
+      return commonTimeWithTZFormattingStrings;
+    }
     return [];
   }
 
@@ -77,20 +112,33 @@ export default class DateTimeSpecification {
     if (this.type === 'date') {
       return ['YYYY-MM-DD', 'YYYY-MM-DD [AD]', 'YYYY-MM-DD [BC]'];
     }
+    if (this.type === 'time') {
+      return ['HH:mm:ss', 'HH:mm:ss.S'];
+    }
+    if (this.type === 'timeWithTZ') {
+      return ['HH:mm:ss.Z', 'HH:mm:ss Z', 'HH:mm:ss.ZZ', 'HH:mm:ss ZZ'];
+    }
     return [];
   }
 
-  getCanonicalString(date: Date): string {
+  getCanonicalString(dateObject: Date): string {
     if (this.type === 'date') {
-      return dayjs(date).format('YYYY-MM-DD');
+      return dayjs(dateObject).format('YYYY-MM-DD');
     }
     if (this.type === 'time') {
-      return dayjs(date).format('HH:mm:ss');
+      return dayjs(dateObject).format('HH:mm:ss');
     }
-    return date.toISOString();
+    if (this.type === 'timeWithTZ') {
+      return dayjs(dateObject).format('HH:mm:ss Z');
+    }
+    return dateObject.toISOString();
   }
 
   static getDateFormattingStringMap(): Record<DateFormat, string> {
     return dateFormattingStringMap;
+  }
+
+  static getTimeFormattingStringMap(): Record<TimeFormat, string> {
+    return timeFormattingStringMap;
   }
 }

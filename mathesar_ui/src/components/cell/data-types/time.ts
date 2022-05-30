@@ -1,4 +1,4 @@
-import type { DateDisplayOptions } from '@mathesar/api/tables/columns';
+import type { TimeDisplayOptions } from '@mathesar/api/tables/columns';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import {
   DateTimeFormatter,
@@ -9,19 +9,22 @@ import type { CellComponentFactory, CellColumnLike } from './typeDefinitions';
 import DateTimeCell from './components/date-time/DateTimeCell.svelte';
 import DateTimeInput from './components/date-time/DateTimeInput.svelte';
 
-export interface DateLikeColumn extends CellColumnLike {
-  display_options: Partial<DateDisplayOptions> | null;
+export interface TimeLikeColumn extends CellColumnLike {
+  display_options: Partial<TimeDisplayOptions> | null;
 }
 
-function getProps(column: DateLikeColumn): DateTimeCellExternalProps {
+function getProps(
+  column: TimeLikeColumn,
+  supportTimeZone: boolean,
+): DateTimeCellExternalProps {
   const displayOptions = column.display_options ?? {};
-  const format = displayOptions.format ?? 'none';
+  const format = displayOptions.format ?? '24hr';
   const specification = new DateTimeSpecification({
-    type: 'date',
-    dateFormat: format,
+    type: supportTimeZone ? 'timeWithTZ' : 'time',
+    timeFormat: format,
   });
   return {
-    type: 'date',
+    type: 'time',
     formattingString: specification.getFormattingString(),
     formatter: new DateTimeFormatter(specification),
   };
@@ -29,16 +32,18 @@ function getProps(column: DateLikeColumn): DateTimeCellExternalProps {
 
 const stringType: CellComponentFactory = {
   get: (
-    column: DateLikeColumn,
+    column: TimeLikeColumn,
+    config?: { supportTimeZone?: boolean },
   ): ComponentAndProps<DateTimeCellExternalProps> => ({
     component: DateTimeCell,
-    props: getProps(column),
+    props: getProps(column, config?.supportTimeZone ?? false),
   }),
   getInput: (
-    column: DateLikeColumn,
+    column: TimeLikeColumn,
+    config?: { supportTimeZone?: boolean },
   ): ComponentAndProps<DateTimeCellExternalProps> => ({
     component: DateTimeInput,
-    props: getProps(column),
+    props: getProps(column, config?.supportTimeZone ?? false),
   }),
 };
 

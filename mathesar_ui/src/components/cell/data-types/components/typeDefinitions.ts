@@ -68,14 +68,15 @@ export interface FormattedInputCellProps
 
 // DateInput
 
-export interface DateCellExternalProps {
-  dateFormattingString: string;
+export interface DateTimeCellExternalProps {
+  type: 'date' | 'time' | 'datetime';
+  formattingString: string;
   formatter: DateTimeFormatter;
 }
 
-export interface DateCellProps
+export interface DateTimeCellProps
   extends CellTypeProps<string>,
-    DateCellExternalProps {}
+    DateTimeCellExternalProps {}
 
 // Common
 

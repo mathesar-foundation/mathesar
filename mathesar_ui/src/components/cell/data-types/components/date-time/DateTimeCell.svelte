@@ -1,16 +1,17 @@
 <script lang="ts">
   import { isDefinedNonNullable } from '@mathesar-component-library';
   import SteppedInputCell from '../SteppedInputCell.svelte';
-  import type { DateCellProps } from '../typeDefinitions';
+  import type { DateTimeCellProps } from '../typeDefinitions';
   import DateTimeInput from './DateTimeInput.svelte';
 
-  type $$Props = DateCellProps;
+  type $$Props = DateTimeCellProps;
 
   export let isActive: $$Props['isActive'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
 
-  export let dateFormattingString: $$Props['dateFormattingString'];
+  export let type: $$Props['type'];
+  export let formattingString: $$Props['formattingString'];
   export let formatter: $$Props['formatter'];
 
   function formatValue(
@@ -36,7 +37,8 @@
 >
   <DateTimeInput
     bind:value
-    {dateFormattingString}
+    {type}
+    {formattingString}
     {formatter}
     on:blur={handleInputBlur}
     on:keydown={handleInputKeydown}

@@ -12,22 +12,28 @@ export default class DateTimeFormatter implements InputFormatter<string> {
     this.specification = specification;
   }
 
-  parse(userInput: string): ParseResult<string> {
-    const value = dayjs(
-      userInput,
-      [
-        this.specification.getFormattingString(),
-        ...this.specification.getCommonFormattingStrings(),
-        ...this.specification.getCanonicalFormattingStrings(),
-      ],
-      true,
-    );
+  parse(userInputOrServerResponse: string): ParseResult<string> {
+    const formattingOptions = [
+      this.specification.getFormattingString(),
+      ...this.specification.getCommonFormattingStrings(),
+      ...this.specification.getCanonicalFormattingStrings(),
+    ];
+
+    let value = dayjs(userInputOrServerResponse, formattingOptions, true);
+
+    if (!value.isValid()) {
+      // Try parsing only in canonical format if general formatting fails
+      value = dayjs(
+        userInputOrServerResponse,
+        this.specification.getCanonicalFormattingStrings(),
+      );
+    }
 
     return {
       value: value.isValid()
         ? this.specification.getCanonicalString(value.toDate())
-        : userInput,
-      intermediateDisplay: userInput,
+        : userInputOrServerResponse,
+      intermediateDisplay: userInputOrServerResponse,
     };
   }
 
@@ -35,11 +41,11 @@ export default class DateTimeFormatter implements InputFormatter<string> {
     const value = dayjs(
       canonicalDateStringOrUserInput,
       this.specification.getCanonicalFormattingStrings(),
-      true,
     );
     if (value.isValid()) {
       return value.format(this.specification.getFormattingString());
     }
+
     return canonicalDateStringOrUserInput;
   }
 

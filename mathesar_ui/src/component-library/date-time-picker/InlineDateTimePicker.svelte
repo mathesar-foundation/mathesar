@@ -8,13 +8,9 @@
 
   export let value: string | null | undefined;
 
-  // The following should be non-reactive
-  // To support more options, refer:
-  // https://flatpickr.js.org/options/
-  export let enableTime = false;
-  export let noCalendar = false;
-  export let time24hr = true;
-  export let dateFormat: string;
+  // The following are meant to be non-reactive
+  export let type: 'date' | 'time' | 'datetime';
+  export let format: string;
 
   let element: HTMLDivElement;
   let instance: FlatPickr.Instance;
@@ -22,18 +18,19 @@
   onMount(() => {
     instance = flatpickr(element, {
       wrap: true,
-      enableTime,
-      noCalendar,
-      dateFormat,
-      parseDate: (datestr, format) => dayjs(datestr, format).toDate(),
-      formatDate: (date, format) => dayjs(date).format(format),
-      time_24hr: time24hr,
+      enableTime: type !== 'date',
+      enableSeconds: true,
+      noCalendar: type === 'time',
+      dateFormat: format,
+      parseDate: (datestr, _format) => dayjs(datestr, _format).toDate(),
+      formatDate: (date, _format) => dayjs(date).format(_format),
+      time_24hr: true,
       static: true,
       inline: true,
       monthSelectorType: 'static',
       onChange: (val) => {
         if (val[0]) {
-          value = dayjs(val[0]).format(dateFormat);
+          value = dayjs(val[0]).format(format);
           dispatch('change', value);
         }
       },

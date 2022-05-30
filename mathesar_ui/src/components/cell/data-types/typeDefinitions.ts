@@ -10,7 +10,8 @@ export type CellDataType =
   | 'number'
   | 'uri'
   | 'duration'
-  | 'date';
+  | 'date'
+  | 'time';
 
 export type CellColumnLike = Pick<
   Column,

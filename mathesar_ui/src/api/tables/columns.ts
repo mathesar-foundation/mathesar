@@ -91,7 +91,11 @@ export interface DateDisplayOptions extends Record<string, unknown> {
   format: DateFormat | null;
 }
 
-export type TimeFormat = 'none' | '24hr' | '12hr';
+export type TimeFormat = '24hr' | '12hr' | '24hrLong' | '12hrLong';
+
+export interface TimeDisplayOptions extends Record<string, unknown> {
+  format: TimeFormat | null;
+}
 
 export interface BaseColumn {
   id: number;
