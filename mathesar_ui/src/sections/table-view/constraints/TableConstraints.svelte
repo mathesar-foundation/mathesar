@@ -14,6 +14,7 @@
   } from '@mathesar/stores/table-data/types';
   import { States } from '@mathesar/utils/api';
   import {
+    faLink,
     faPlus,
     faSnowflake,
     faSpinner,
@@ -22,11 +23,13 @@
   import NewUniqueConstraintModal from './NewUniqueConstraintModal.svelte';
   import TableConstraint from './TableConstraint.svelte';
   import ConstraintHelp from './__help__/ConstraintHelp.svelte';
+  import NewFkConstraintModal from './NewFkConstraintModal.svelte';
 
   export let controller: ModalController;
 
   const tabularData = getContext<TabularDataStore>('tabularData');
   const newUniqueConstraintModal = modal.spawnModalController();
+  const newFkConstraintModal = modal.spawnModalController();
 
   $: constraintsDataStore = $tabularData.constraintsDataStore;
   $: state = $constraintsDataStore.state;
@@ -72,10 +75,17 @@
       >
         Unique
       </MenuItem>
+      <MenuItem
+        on:click={() => newFkConstraintModal.open()}
+        icon={{ data: faLink }}
+      >
+        Foreign Key
+      </MenuItem>
     </DropdownMenu>
   </div>
 
   <NewUniqueConstraintModal controller={newUniqueConstraintModal} />
+  <NewFkConstraintModal controller={newFkConstraintModal} />
 </ControlledModal>
 
 <style>

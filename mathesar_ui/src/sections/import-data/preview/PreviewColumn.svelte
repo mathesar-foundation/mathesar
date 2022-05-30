@@ -16,6 +16,7 @@
     const type = e.detail;
     if (typeof type !== 'undefined') {
       dispatch('typechange', {
+        id: column.id,
         name: column.name,
         type,
       });

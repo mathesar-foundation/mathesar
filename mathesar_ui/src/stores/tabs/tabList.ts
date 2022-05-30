@@ -248,7 +248,7 @@ export class TabList {
     return tabSubstance.find((entry) => entry.id === importTabId);
   }
 
-  remove(tab: MathesarTab): void {
+  private removeTabWithoutTouchingItsData(tab: MathesarTab): void {
     const tabSubstance = get(this.tabs);
     const activeTabSubstance = get(this.activeTab);
 
@@ -278,6 +278,10 @@ export class TabList {
     if (removedTabIndexInTabsArray > -1) {
       this.tabs.set(tabSubstance.filter((entry) => entry.id !== tab.id));
     }
+  }
+
+  removeTabAndItsData(tab: MathesarTab): void {
+    this.removeTabWithoutTouchingItsData(tab);
 
     if (tab.type === TabType.Import) {
       if (tab.fileImportId) {
@@ -298,7 +302,7 @@ export class TabList {
     const existingTab = tabSubstance[existingTabIndex];
 
     if (existingTab) {
-      this.remove(existingTab);
+      this.removeTabWithoutTouchingItsData(existingTab);
     }
     this.add(tab, {
       position: existingTabIndex,

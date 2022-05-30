@@ -15,7 +15,6 @@
 
   export let locale: $$Props['locale'];
   export let allowFloat: $$Props['allowFloat'];
-  export let isPercentage: $$Props['isPercentage'];
 
   $: formatterOptions = {
     locale,
@@ -50,7 +49,6 @@
     {disabled}
     bind:value
     {...formatterOptions}
-    {isPercentage}
     on:blur={handleInputBlur}
     on:keydown={handleInputKeydown}
   />
