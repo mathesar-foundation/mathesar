@@ -71,6 +71,8 @@ export interface DateTimeCellExternalProps {
   type: 'date' | 'time' | 'datetime';
   formattingString: string;
   formatter: DateTimeFormatter;
+  timeShow24Hr?: boolean;
+  timeEnableSeconds?: boolean;
 }
 
 export interface DateTimeCellProps

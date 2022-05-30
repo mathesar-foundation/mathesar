@@ -22,6 +22,8 @@
   export let formatter: $$Props['formatter'];
 
   export let value: $$Props['value'];
+  export let timeShow24Hr: $$Props['timeShow24Hr'] = true;
+  export let timeEnableSeconds: $$Props['timeEnableSeconds'] = true;
 
   let element: HTMLInputElement;
   let isOpen = false;
@@ -85,6 +87,8 @@
     {type}
     value={datePickerValue}
     format={formattingString}
+    {timeShow24Hr}
+    {timeEnableSeconds}
     on:change={(e) => onValueChange(e.detail)}
   />
 </AttachableDropdown>

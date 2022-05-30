@@ -13,6 +13,8 @@
   export let type: $$Props['type'];
   export let formattingString: $$Props['formattingString'];
   export let formatter: $$Props['formatter'];
+  export let timeShow24Hr: $$Props['timeShow24Hr'] = true;
+  export let timeEnableSeconds: $$Props['timeEnableSeconds'] = true;
 
   function formatValue(
     v: string | null | undefined,
@@ -40,6 +42,8 @@
     {type}
     {formattingString}
     {formatter}
+    {timeShow24Hr}
+    {timeEnableSeconds}
     on:blur={handleInputBlur}
     on:keydown={handleInputKeydown}
   />

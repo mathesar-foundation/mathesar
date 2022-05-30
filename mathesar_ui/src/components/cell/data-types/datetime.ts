@@ -29,6 +29,8 @@ function getProps(
     type: 'datetime',
     formattingString: specification.getFormattingString(),
     formatter: new DateTimeFormatter(specification),
+    timeEnableSeconds: specification.hasSecondsInTime(),
+    timeShow24Hr: specification.isTime24Hr(),
   };
 }
 

@@ -3,14 +3,20 @@
   import type FlatPickr from 'flatpickr/dist/typings';
   import { dayjs } from '@mathesar-component-library-dir/common/utils';
   import flatpickr from 'flatpickr';
+  import type { InlineDateTimePickerProps } from './DateTimePickerTypes';
+
+  type $$Props = InlineDateTimePickerProps;
+  type DefinedProps = Required<$$Props>;
 
   const dispatch = createEventDispatcher();
 
-  export let value: string | null | undefined;
+  export let value: $$Props['value'];
 
   // The following are meant to be non-reactive
-  export let type: 'date' | 'time' | 'datetime';
-  export let format: string;
+  export let type: DefinedProps['type'];
+  export let format: DefinedProps['format'];
+  export let timeShow24Hr: DefinedProps['timeShow24Hr'] = true;
+  export let timeEnableSeconds: DefinedProps['timeEnableSeconds'] = true;
 
   let element: HTMLDivElement;
   let instance: FlatPickr.Instance;
@@ -19,12 +25,12 @@
     instance = flatpickr(element, {
       wrap: true,
       enableTime: type !== 'date',
-      enableSeconds: true,
+      enableSeconds: timeEnableSeconds,
       noCalendar: type === 'time',
       dateFormat: format,
       parseDate: (datestr, _format) => dayjs(datestr, _format).toDate(),
       formatDate: (date, _format) => dayjs(date).format(_format),
-      time_24hr: true,
+      time_24hr: timeShow24Hr,
       static: true,
       inline: true,
       monthSelectorType: 'static',

@@ -206,6 +206,20 @@ export default class DateTimeSpecification {
     return dateObject.toISOString();
   }
 
+  hasSecondsInTime(): boolean {
+    if (this.type === 'date') {
+      return false;
+    }
+    return this.timeFormat === '12hrLong' || this.timeFormat === '24hrLong';
+  }
+
+  isTime24Hr(): boolean {
+    if (this.type === 'date') {
+      return false;
+    }
+    return this.timeFormat === '24hr' || this.timeFormat === '24hrLong';
+  }
+
   static getDateFormattingStringMap(): Record<DateFormat, string> {
     return dateFormattingStringMap;
   }
