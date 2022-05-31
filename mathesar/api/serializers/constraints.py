@@ -1,3 +1,4 @@
+from rest_framework.exceptions import ValidationError
 from psycopg2.errors import DuplicateTable, UniqueViolation
 from rest_framework import serializers, status
 from sqlalchemy.exc import IntegrityError, ProgrammingError
@@ -13,10 +14,19 @@ from mathesar.api.serializers.shared_serializers import (
 from mathesar.models import Column, Constraint
 
 
+class Table_Filtered_Column_queryset(serializers.PrimaryKeyRelatedField):
+    def get_queryset(self):
+        table_id = self.context.get('table_id', None)
+        queryset = super(Table_Filtered_Column_queryset, self).get_queryset()
+        if table_id == None or not queryset:
+            return None
+        return queryset.filter(table__id = table_id)
+
+
 class BaseConstraintSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=False)
     type = serializers.CharField()
-    columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
+    columns = Table_Filtered_Column_queryset(queryset=Column.current_objects, many=True)
 
     class Meta:
         model = Constraint
@@ -32,7 +42,12 @@ class BaseConstraintSerializer(serializers.ModelSerializer):
         table = self.context['table']
         constraint_obj = self.construct_constraint_obj(table, validated_data)
         if constraint_obj is None:
-            raise ValueError('Only creating unique constraints is currently supported.')
+            message = 'Only creating unique constraints is currently supported.'
+            raise base_api_exceptions.ValueAPIException(
+                ValueError,
+                message=message,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         try:
             constraint = table.add_constraint(constraint_obj)
         except ProgrammingError as e:
@@ -121,6 +136,13 @@ class ConstraintSerializer(
 
     def create(self, validated_data):
         serializer = self.serializers_mapping.get(self.get_mapping_field(validated_data))
+        if serializer == None:
+            message = 'Unknown type passed.'
+            raise base_api_exceptions.NotFoundAPIException(
+                ValidationError,
+                message=message,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         return serializer.create(validated_data)
 
     def get_mapping_field(self, data):
@@ -129,3 +151,15 @@ class ConstraintSerializer(
         else:
             constraint_type = data.get('type', None)
         return constraint_type
+
+    def run_validation(self, data):
+        print(f'context === {self.context}')
+        columns = data.get('columns', None)
+        if columns == []:
+            message = 'Columns field cannot be empty'
+            raise base_api_exceptions.NotFoundAPIException(
+                SyntaxError,
+                message=message,
+                status_code=status.HTTP_400_BAD_REQUEST
+                )
+        return super(ConstraintSerializer, self).run_validation(data)
