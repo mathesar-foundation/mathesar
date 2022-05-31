@@ -1,6 +1,3 @@
-"""
-TODO
-"""
 import pytest
 import random
 import string
