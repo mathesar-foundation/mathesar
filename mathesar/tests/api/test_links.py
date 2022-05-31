@@ -3,13 +3,12 @@ from sqlalchemy import Column, Integer, MetaData, String
 from sqlalchemy import Table as SATable
 from django.core.cache import cache
 
+from db.constraints.utils import ConstraintType
 from db.tables.operations.select import get_oid_from_table
-from db.tests.types import fixtures
-from mathesar import models
+from db.tables.utils import get_primary_key_column
 
-engine_with_types = fixtures.engine_with_types
-engine_email_type = fixtures.engine_email_type
-temporary_testing_schema = fixtures.temporary_testing_schema
+from mathesar import models
+from mathesar.models import Constraint, Table
 
 
 @pytest.fixture
@@ -33,9 +32,9 @@ def column_test_table(patent_schema):
     return table
 
 
-def test_one_to_one_link_create(column_test_table, client, create_table):
+def test_one_to_one_link_create(column_test_table, client, create_patents_table):
     cache.clear()
-    table_2 = create_table('Table 2')
+    table_2 = create_patents_table('Table 2')
     data = {
         "link_type": "one-to-one",
         "reference_column_name": "col_1",
@@ -47,11 +46,31 @@ def test_one_to_one_link_create(column_test_table, client, create_table):
         data=data,
     )
     assert response.status_code == 201
+    constraints = Constraint.objects.filter(table=table_2)
+    assert constraints.count() == 3
+
+    unique_constraint = next(
+        constraint
+        for constraint in constraints
+        if constraint.type == ConstraintType.UNIQUE.value
+    )
+    fk_constraint = next(
+        constraint
+        for constraint in constraints
+        if constraint.type == ConstraintType.FOREIGN_KEY.value
+    )
+    unique_constraint_columns = list(unique_constraint.columns.all())
+    fk_constraint_columns = list(fk_constraint.columns.all())
+    referent_columns = list(fk_constraint.referent_columns.all())
+    assert unique_constraint_columns == table_2.get_columns_by_name(['col_1'])
+    assert fk_constraint_columns == table_2.get_columns_by_name(['col_1'])
+    referent_primary_key_column_name = get_primary_key_column(column_test_table._sa_table).name
+    assert referent_columns == column_test_table.get_columns_by_name([referent_primary_key_column_name])
 
 
-def test_one_to_many_link_create(column_test_table, client, create_table):
+def test_one_to_many_link_create(column_test_table, client, create_patents_table):
     cache.clear()
-    table_2 = create_table('Table 2')
+    table_2 = create_patents_table('Table 2')
     data = {
         "link_type": "one-to-many",
         "reference_column_name": "col_1",
@@ -63,6 +82,19 @@ def test_one_to_many_link_create(column_test_table, client, create_table):
         data=data,
     )
     assert response.status_code == 201
+    constraints = Constraint.objects.filter(table=table_2)
+    assert constraints.count() == 2
+
+    fk_constraint = next(
+        constraint
+        for constraint in constraints
+        if constraint.type == ConstraintType.FOREIGN_KEY.value
+    )
+    fk_constraint_columns = list(fk_constraint.columns.all())
+    referent_columns = list(fk_constraint.referent_columns.all())
+    assert fk_constraint_columns == table_2.get_columns_by_name(['col_1'])
+    referent_primary_key_column_name = get_primary_key_column(column_test_table._sa_table).name
+    assert referent_columns == column_test_table.get_columns_by_name([referent_primary_key_column_name])
 
 
 def test_one_to_many_self_referential_link_create(column_test_table, client):
@@ -78,9 +110,24 @@ def test_one_to_many_self_referential_link_create(column_test_table, client):
         data=data,
     )
     assert response.status_code == 201
+    constraints = Constraint.objects.filter(table=column_test_table)
+    assert constraints.count() == 2
+
+    fk_constraint = next(
+        constraint
+        for constraint in constraints
+        if constraint.type == ConstraintType.FOREIGN_KEY.value
+    )
+    fk_constraint_columns = list(fk_constraint.columns.all())
+    referent_columns = list(fk_constraint.referent_columns.all())
+    assert fk_constraint_columns == column_test_table.get_columns_by_name(['col_1'])
+    referent_primary_key_column_name = get_primary_key_column(column_test_table._sa_table).name
+    assert referent_columns == column_test_table.get_columns_by_name([referent_primary_key_column_name])
 
 
 def test_many_to_many_self_referential_link_create(column_test_table, client):
+    schema = column_test_table.schema
+    engine = schema._sa_engine
     cache.clear()
     data = {
         "link_type": "many-to-many",
@@ -95,11 +142,15 @@ def test_many_to_many_self_referential_link_create(column_test_table, client):
         data=data,
     )
     assert response.status_code == 201
+    map_table_oid = get_oid_from_table("map_table", schema.name, engine)
+    map_table = Table.objects.get(oid=map_table_oid)
+    constraints = Constraint.objects.filter(table=map_table)
+    assert constraints.count() == 3
 
 
-def test_many_to_many_link_create(column_test_table, client, create_table):
+def test_many_to_many_link_create(column_test_table, client, create_patents_table):
     cache.clear()
-    table_2 = create_table('Table 2')
+    table_2 = create_patents_table('Table 2')
     data = {
         "link_type": "many-to-many",
         "mapping_table_name": "map_table",

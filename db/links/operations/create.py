@@ -1,9 +1,10 @@
 from alembic.operations import Operations
 from alembic.migration import MigrationContext
-from sqlalchemy import MetaData
+from sqlalchemy import ForeignKey, MetaData
 
 from db.columns.base import MathesarColumn
 from db.constraints.utils import naming_convention
+from db.tables.operations.create import create_mathesar_table
 from db.tables.operations.select import reflect_table_from_oid, reflect_tables_from_oids
 from db.tables.utils import get_primary_key_column
 
@@ -48,27 +49,17 @@ def create_many_to_many_link(engine, schema, map_table_name, referents):
         referent_tables_oid = [referent['referent_table'] for referent in referents]
         referent_tables = reflect_tables_from_oids(referent_tables_oid, engine, conn)
         metadata = MetaData(bind=engine, schema=schema, naming_convention=naming_convention)
-        opts = {
-            'target_metadata': metadata
-        }
-        ctx = MigrationContext.configure(conn, opts=opts)
-        op = Operations(ctx)
-        op.create_table(map_table_name, schema=schema)
+        # Throws sqlalchemy.exc.NoReferencedTableError if metadata is not reflected.
+        metadata.reflect()
+        referrer_columns = []
         for referent in referents:
             referent_table_oid = referent['referent_table']
             referent_table = referent_tables[referent_table_oid]
             col_name = referent['column_name']
             primary_key_column = get_primary_key_column(referent_table)
+            foreign_keys = {ForeignKey(primary_key_column)}
             column = MathesarColumn(
-                col_name, primary_key_column.type
+                col_name, primary_key_column.type, foreign_keys=foreign_keys,
             )
-            op.add_column(map_table_name, column, schema=schema)
-            op.create_foreign_key(
-                None,
-                map_table_name,
-                referent_table.name,
-                [column.name],
-                [primary_key_column.name],
-                source_schema=schema,
-                referent_schema=schema
-            )
+            referrer_columns.append(column)
+        create_mathesar_table(map_table_name, schema, referrer_columns, engine, metadata)
