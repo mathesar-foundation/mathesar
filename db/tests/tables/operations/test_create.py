@@ -1,9 +1,9 @@
 from db.tables.operations.create import create_mathesar_table
 
 
-def test_table_creation_doesnt_reuse_defaults(engine_with_schema_without_updated_ischema_names):
+def test_table_creation_doesnt_reuse_defaults(engine_with_schema):
     column_list = []
-    engine, schema = engine_with_schema_without_updated_ischema_names
+    engine, schema = engine_with_schema
     t1 = create_mathesar_table("t1", schema, column_list, engine)
     t2 = create_mathesar_table("t2", schema, column_list, engine)
     assert all(

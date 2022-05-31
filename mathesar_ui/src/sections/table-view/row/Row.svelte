@@ -1,9 +1,7 @@
 <script lang="ts">
   import { getContext } from 'svelte';
-  import { ROW_POSITION_INDEX } from '@mathesar/stores/table-data';
   import { getCellKey } from '@mathesar/stores/table-data';
   import type {
-    ColumnPositionMap,
     TabularDataStore,
     Row,
   } from '@mathesar/stores/table-data/types';
@@ -21,33 +19,30 @@
   const tabularData = getContext<TabularDataStore>('tabularData');
 
   $: ({ recordsData, columnsDataStore, meta, display } = $tabularData);
-  $: ({ columnPositionMap } = display);
+  $: ({ columnPositions, columnWidths } = display);
+  $: rowWidthStore = display.rowWidth;
+  $: rowWidth = $rowWidthStore;
   $: ({ selectedRows, rowStatus, rowCreationStatus, cellModificationStatus } =
     meta);
   $: ({ grouping } = recordsData);
 
-  function calculateStyle(
-    _style: { [key: string]: string | number },
-    _columnPositionMap: ColumnPositionMap,
-  ) {
+  function calculateStyle(_style: { [key: string]: string | number }) {
     if (!_style) {
       return '';
     }
-    const totalWidth = _columnPositionMap.get(ROW_POSITION_INDEX)?.width || 0;
     return (
       `position:${_style.position};left:${_style.left}px;` +
       `top:${_style.top}px;height:${_style.height}px;` +
-      `width:${totalWidth}px`
+      `width:${rowWidth as number}px`
     );
   }
 
-  $: styleString = calculateStyle(style, $columnPositionMap);
+  $: styleString = calculateStyle(style);
   $: ({ primaryKeyColumnId } = $columnsDataStore);
   $: rowKey = getRowKey(row, primaryKeyColumnId);
   $: creationStatus = $rowCreationStatus.get(rowKey)?.state;
   $: status = $rowStatus.get(rowKey);
   $: wholeRowState = status?.wholeRowState;
-  $: rowWidth = $columnPositionMap.get(ROW_POSITION_INDEX)?.width || 0;
   $: isSelected = $selectedRows.has(rowKey);
   $: hasWholeRowErrors = wholeRowState === 'failure';
   /** Including whole row errors and individual cell errors */
@@ -99,7 +94,8 @@
         bind:value={row.record[columnId]}
         {processedColumn}
         {recordsData}
-        columnPosition={$columnPositionMap.get(columnId)}
+        columnWidth={$columnWidths.get(columnId)}
+        columnPosition={$columnPositions.get(columnId)}
       />
     {/each}
   {/if}

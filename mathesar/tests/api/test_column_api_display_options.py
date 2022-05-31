@@ -27,11 +27,12 @@ def column_test_table_with_service_layer_options(patent_schema):
     ]
     column_data_list = [
         {},
-        {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}},
+        {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}, 'show_fk_preview': True},
         {
             'display_options': {
                 'show_as_percentage': True,
                 'number_format': "english",
+                'show_fk_preview': True,
                 "use_grouping": 'auto',
                 "minimum_fraction_digits": None,
                 "maximum_fraction_digits": None,
@@ -45,12 +46,13 @@ def column_test_table_with_service_layer_options(patent_schema):
                     'currency_symbol': "HK $",
                     'number_format': "english",
                     'currency_symbol_location': 'after-minus'
-                }
+                },
+                'show_fk_preview': True
             }
         },
-        {'display_options': {'time_format': 'hh:mm', 'date_format': 'YYYY-MM-DD'}},
-        {'display_options': {'format': 'hh:mm'}},
-        {'display_options': {'format': 'YYYY-MM-DD'}},
+        {'display_options': {'time_format': 'hh:mm', 'date_format': 'YYYY-MM-DD', 'show_fk_preview': True}},
+        {'display_options': {'format': 'hh:mm', 'show_fk_preview': True}},
+        {'display_options': {'format': 'YYYY-MM-DD', 'show_fk_preview': True}},
     ]
     db_table = SATable(
         "anewtable",
@@ -79,22 +81,22 @@ _create_display_options_test_list = [
     (
         PostgresType.BOOLEAN,
         {"input": "dropdown"},
-        {"input": "dropdown"}
+        {"input": "dropdown", 'show_fk_preview': True}
     ),
     (
         PostgresType.BOOLEAN,
         {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}},
-        {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}
+        {"input": "checkbox", "custom_labels": {"TRUE": "yes", "FALSE": "no"}, 'show_fk_preview': True}
     ),
     (
         PostgresType.DATE,
         {'format': 'YYYY-MM-DD'},
-        {'format': 'YYYY-MM-DD'}
+        {'format': 'YYYY-MM-DD', 'show_fk_preview': True}
     ),
     (
         PostgresType.INTERVAL,
         {'min': 's', 'max': 'h', 'show_units': True},
-        {'min': 's', 'max': 'h', 'show_units': True}
+        {'min': 's', 'max': 'h', 'show_units': True, 'show_fk_preview': True}
     ),
     (
         PostgresType.MONEY,
@@ -111,6 +113,7 @@ _create_display_options_test_list = [
             'currency_symbol_location': 'after-minus',
             'number_format': "english",
             'use_grouping': 'true',
+            'show_fk_preview': True,
             "minimum_fraction_digits": 2,
             "maximum_fraction_digits": 2,
         },
@@ -122,6 +125,7 @@ _create_display_options_test_list = [
             "show_as_percentage": False,
             'number_format': None,
             'use_grouping': 'auto',
+            'show_fk_preview': True,
             "minimum_fraction_digits": None,
             "maximum_fraction_digits": None,
         },
@@ -139,6 +143,7 @@ _create_display_options_test_list = [
             "show_as_percentage": True,
             'number_format': None,
             'use_grouping': 'false',
+            'show_fk_preview': True,
             "minimum_fraction_digits": 2,
             "maximum_fraction_digits": 20,
         },
@@ -156,6 +161,7 @@ _create_display_options_test_list = [
             "show_as_percentage": True,
             'number_format': "english",
             'use_grouping': 'auto',
+            'show_fk_preview': True,
             "minimum_fraction_digits": None,
             "maximum_fraction_digits": None,
         },
@@ -163,22 +169,22 @@ _create_display_options_test_list = [
     (
         PostgresType.TIMESTAMP_WITH_TIME_ZONE,
         {'date_format': 'x', 'time_format': 'x'},
-        {'date_format': 'x', 'time_format': 'x'}
+        {'date_format': 'x', 'time_format': 'x', 'show_fk_preview': True}
     ),
     (
         PostgresType.TIMESTAMP_WITHOUT_TIME_ZONE,
         {'date_format': 'x', 'time_format': 'x'},
-        {'date_format': 'x', 'time_format': 'x'}
+        {'date_format': 'x', 'time_format': 'x', 'show_fk_preview': True}
     ),
     (
         PostgresType.TIME_WITHOUT_TIME_ZONE,
         {'format': 'hh:mm'},
-        {'format': 'hh:mm'}
+        {'format': 'hh:mm', 'show_fk_preview': True}
     ),
     (
         PostgresType.TIME_WITH_TIME_ZONE,
         {'format': 'hh:mm Z'},
-        {'format': 'hh:mm Z'}
+        {'format': 'hh:mm Z', 'show_fk_preview': True}
     ),
 ]
 
@@ -309,7 +315,8 @@ def test_column_update_display_options(column_test_table_with_service_layer_opti
         column_id = column.id
         display_options = {
             "input": "dropdown",
-            "custom_labels": {"TRUE": "yes", "FALSE": "no"}
+            "custom_labels": {"TRUE": "yes", "FALSE": "no"},
+            'show_fk_preview': False
         }
         column_data = {
             'type': PostgresType.BOOLEAN.id,
@@ -386,8 +393,6 @@ def test_column_alter_same_type_display_options(
     column_index = 2
     column = columns[column_index]
     pre_alter_display_options = column.display_options
-    print("----------------------------------------------------")
-    print(pre_alter_display_options)
     with engine.begin() as conn:
         alter_column_type(table.oid, column.name, engine, conn, PostgresType.NUMERIC)
     column_id = column.id
@@ -398,11 +403,11 @@ def test_column_alter_same_type_display_options(
 
 
 @pytest.mark.parametrize(
-    "display_options,type_options",
-    [[None, None], [{}, {}]]
+    "display_options,type_options, expected_display_options, expected_type_options",
+    [[None, None, None, None], [{}, {}, {'show_fk_preview': True}, {}]]
 )
 def test_column_update_type_with_display_and_type_options_as_null_or_empty_obj(
-    column_test_table, client, display_options, type_options
+    column_test_table, client, display_options, type_options, expected_display_options, expected_type_options
 ):
     db_type_id = MathesarCustomType.URI.id
     data = {
@@ -418,6 +423,6 @@ def test_column_update_type_with_display_and_type_options_as_null_or_empty_obj(
     assert response.status_code == 200
     response_json = response.json()
     assert response_json["type"] == db_type_id
-    assert response_json["display_options"] == display_options
+    assert response_json["display_options"] == expected_display_options
     # For some reason, type_options will reflect None, whether it was updated to None or to {}.
     assert response_json["type_options"] is None
