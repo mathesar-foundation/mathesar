@@ -24,7 +24,7 @@ indent() { sed 's/^/│  /'; } # Indents piped output with a indent guide lines
 RUN_PYTHON="false"
 CHANGED_NON_NODE_FILES=$(git diff --name-only --staged -- . :^mathesar_ui)
 if [[ $CHANGED_NON_NODE_FILES != "" ]]; then
-	RUN_PYTHON="true"
+	RUN_PYTHON="false"
 fi
 
 RUN_NODE="false"

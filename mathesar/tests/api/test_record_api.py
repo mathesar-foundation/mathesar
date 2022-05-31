@@ -2,12 +2,11 @@ from copy import deepcopy
 import json
 from unittest.mock import patch
 
-from django.core.cache import cache
-
 import pytest
 
 from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
 from db.tables.utils import get_primary_key_column
+
 from mathesar.api.utils import follows_json_number_spec
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
@@ -17,16 +16,10 @@ from db.records.operations.group import GroupBy
 from mathesar import models
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.api.exceptions.error_codes import ErrorCodes
+from mathesar.models import Table
 
 
-def _get_columns_by_name(table, name_list):
-    columns_by_name_dict = {
-        col.name: col for col in models.Column.objects.filter(table=table) if col.name in name_list
-    }
-    return [columns_by_name_dict[col_name] for col_name in name_list]
-
-
-def test_record_list(create_table, client):
+def test_record_list(create_patents_table, client):
     """
     Desired format:
     {
@@ -57,7 +50,7 @@ def test_record_list(create_table, client):
     }
     """
     table_name = 'NASA Record List'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
 
     response = client.get(f'/api/db/v0/tables/{table.id}/records/')
     assert response.status_code == 200
@@ -80,7 +73,6 @@ serialization_test_list = [
 
 @pytest.mark.parametrize("type_, value", serialization_test_list)
 def test_record_serialization(empty_nasa_table, create_column, client, type_, value):
-    cache.clear()
     col_name = "TEST COL"
     column = create_column(empty_nasa_table, {"name": col_name, "type": type_})
     empty_nasa_table.create_record_or_records([{col_name: value}])
@@ -91,13 +83,12 @@ def test_record_serialization(empty_nasa_table, create_column, client, type_, va
     assert response.status_code == 200
     assert response_data["results"][0][str(column.id)] == value
 
-
 def test_foreign_key_record_api(create_foreign_key_table, client):
     referrer_table_name = 'Patents'
     referent_table_name = 'Center'
     referrer_table, referent_table = create_foreign_key_table(referrer_table_name, referent_table_name)
-    referent_column = _get_columns_by_name(referent_table, ["Id"])[0]
-    referrer_table_columns = _get_columns_by_name(
+    referent_column = referent_table.get_columns_name(["Id"])[0]
+    referrer_table_columns = referrer_table.get_columns_name(
         referrer_table,
         ["Id", "Center", "Affiliated Center", "Original Patent"]
     )
@@ -127,14 +118,14 @@ def test_foreign_key_record_api(create_foreign_key_table, client):
     response_data = response.json()
     referred_value = 1
     primary_key_sa_column = get_primary_key_column(referent_table._sa_table)
-    primary_key_column = _get_columns_by_name(referent_table, [primary_key_sa_column.name])[0]
+    primary_key_column = referent_table.get_columns_name(referent_table, [primary_key_sa_column.name])[0]
 
     assert response_data['previews'][str(referrer_column_1.id)][str(referred_value)] == {str(primary_key_column.id): referred_value}
 
 
-def test_record_list_filter(create_table, client):
+def test_record_list_filter(create_patents_table, client):
     table_name = 'NASA Record List Filter'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
 
     filter = {"or": [
@@ -181,9 +172,9 @@ def test_record_list_filter(create_table, client):
     assert mock_get.call_args[1]['filter'] == processed_filter
 
 
-def test_record_list_duplicate_rows_only(create_table, client):
+def test_record_list_duplicate_rows_only(create_patents_table, client):
     table_name = 'NASA Record List Filter Duplicates'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     duplicate_only = columns_name_id_map['Patent Expiration Date']
     json_duplicate_only = json.dumps(duplicate_only)
@@ -194,10 +185,9 @@ def test_record_list_duplicate_rows_only(create_table, client):
     assert mock_get.call_args[1]['duplicate_only'] == duplicate_only
 
 
-def test_filter_with_added_columns(create_table, client):
-    cache.clear()
+def test_filter_with_added_columns(create_patents_table, client):
     table_name = 'NASA Record List Filter'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
 
     columns_to_add = [
         {
@@ -228,7 +218,8 @@ def test_filter_with_added_columns(create_table, client):
         new_column_type = new_column.get("type")
         table.add_column({"name": new_column_name, "type": new_column_type})
         row_values_list = []
-
+        # Get a new instance with clean cache, so that the new column is added to the _sa_column list
+        table = Table.objects.get(oid=table.oid)
         response_data = client.get(f'/api/db/v0/tables/{table.id}/records/').json()
         existing_records = response_data['results']
 
@@ -267,9 +258,9 @@ def test_filter_with_added_columns(create_table, client):
             assert mock_get.call_args[1]['filter'] == processed_filter
 
 
-def test_record_list_sort(create_table, client):
+def test_record_list_sort(create_patents_table, client):
     table_name = 'NASA Record List Order'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     order_by = [
         {'field': 'Center', 'direction': 'desc'},
@@ -606,9 +597,9 @@ grouping_params = [
 ]
 
 
-def test_null_error_record_create(create_table, client):
+def test_null_error_record_create(create_patents_table, client):
     table_name = 'NASA Record Create'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     column_id = columns_name_id_map['Case Number']
     data = {"nullable": False}
@@ -634,9 +625,9 @@ def test_null_error_record_create(create_table, client):
 
 @pytest.mark.parametrize('table_name,grouping,expected_groups', grouping_params)
 def test_record_list_groups(
-        table_name, grouping, expected_groups, create_table, client,
+        table_name, grouping, expected_groups, create_patents_table, client,
 ):
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
 
     order_by = [
@@ -700,9 +691,9 @@ def test_record_list_groups(
     _test_group_equality(grouping_dict['groups'], expected_groups)
 
 
-def test_record_list_pagination_limit(create_table, client):
+def test_record_list_pagination_limit(create_patents_table, client):
     table_name = 'NASA Record List Pagination Limit'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
 
     response = client.get(f'/api/db/v0/tables/{table.id}/records/?limit=5')
     response_data = response.json()
@@ -715,9 +706,9 @@ def test_record_list_pagination_limit(create_table, client):
         assert str(column_id) in record_data
 
 
-def test_record_list_pagination_offset(create_table, client):
+def test_record_list_pagination_offset(create_patents_table, client):
     table_name = 'NASA Record List Pagination Offset'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     columns_id = table.columns.all().order_by('id').values_list('id', flat=True)
 
     response_1 = client.get(f'/api/db/v0/tables/{table.id}/records/?limit=5&offset=5')
@@ -740,9 +731,9 @@ def test_record_list_pagination_offset(create_table, client):
     assert record_1_data[str(columns_id[5])] != record_2_data[str(columns_id[5])]
 
 
-def test_record_detail(create_table, client):
+def test_record_detail(create_patents_table, client):
     table_name = 'NASA Record Detail'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     record_id = 1
     record = table.get_record(record_id)
 
@@ -758,9 +749,9 @@ def test_record_detail(create_table, client):
         assert record_as_dict[column_name] == record_data[column_id_str]
 
 
-def test_record_create(create_table, client):
+def test_record_create(create_patents_table, client):
     table_name = 'NASA Record Create'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     records = table.get_records()
     original_num_records = len(records)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
@@ -786,9 +777,9 @@ def test_record_create(create_table, client):
             assert data[column_name] == record_data[column_id_str]
 
 
-def test_record_partial_update(create_table, client):
+def test_record_partial_update(create_patents_table, client):
     table_name = 'NASA Record Patch'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     records = table.get_records()
     record_id = records[0]['id']
 
@@ -815,9 +806,9 @@ def test_record_partial_update(create_table, client):
             assert record_data[column_id_str] == 'Example'
 
 
-def test_record_delete(create_table, client):
+def test_record_delete(create_patents_table, client):
     table_name = 'NASA Record Delete'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     records = table.get_records()
     original_num_records = len(records)
     record_id = records[0]['id']
@@ -827,9 +818,9 @@ def test_record_delete(create_table, client):
     assert len(table.get_records()) == original_num_records - 1
 
 
-def test_record_update(create_table, client):
+def test_record_update(create_patents_table, client):
     table_name = 'NASA Record Put'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     records = table.get_records()
     record_id = records[0]['id']
 
@@ -843,9 +834,9 @@ def test_record_update(create_table, client):
     assert response.json()[0]['code'] == ErrorCodes.MethodNotAllowed.value
 
 
-def test_record_404(create_table, client):
+def test_record_404(create_patents_table, client):
     table_name = 'NASA Record 404'
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     records = table.get_records()
     record_id = records[0]['id']
 
@@ -856,10 +847,10 @@ def test_record_404(create_table, client):
     assert response.json()[0]['code'] == ErrorCodes.NotFound.value
 
 
-def test_record_list_filter_exceptions(create_table, client):
+def test_record_list_filter_exceptions(create_patents_table, client):
     exception = UnknownDBFunctionID
     table_name = f"NASA Record List {exception.__name__}"
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     filter_list = json.dumps({"empty": [{"column_name": [columns_name_id_map['Center']]}]})
     with patch.object(models, "db_get_records", side_effect=exception):
@@ -874,9 +865,9 @@ def test_record_list_filter_exceptions(create_table, client):
 
 
 @pytest.mark.parametrize("exception", [BadSortFormat, SortFieldNotFound])
-def test_record_list_sort_exceptions(create_table, client, exception):
+def test_record_list_sort_exceptions(create_patents_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     order_by = json.dumps([{"field": columns_name_id_map['id'], "direction": "desc"}])
     with patch.object(models, "db_get_records", side_effect=exception):
@@ -891,9 +882,9 @@ def test_record_list_sort_exceptions(create_table, client, exception):
 
 
 @pytest.mark.parametrize("exception", [BadGroupFormat, GroupFieldNotFound])
-def test_record_list_group_exceptions(create_table, client, exception):
+def test_record_list_group_exceptions(create_patents_table, client, exception):
     table_name = f"NASA Record List {exception.__name__}"
-    table = create_table(table_name)
+    table = create_patents_table(table_name)
     columns_name_id_map = table.get_column_name_id_bidirectional_map()
     group_by = json.dumps({"columns": [columns_name_id_map['Case Number']]})
     with patch.object(models, "db_get_records", side_effect=exception):
@@ -934,10 +925,8 @@ def test_json_number_spec_validation(test_input, expected):
     assert follows_json_number_spec(test_input) == expected
 
 
-def test_number_input_api_validation(create_table, client):
-    cache.clear()
-    table_name = 'NASA Number Input Api Validation'
-    table = create_table(table_name)
+def test_number_input_api_validation(empty_nasa_table, client):
+    table = empty_nasa_table
     column_name = 'Nonce'
     table.add_column({"name": column_name, "type": 'REAL'})
     nonce_id = table.get_column_name_id_bidirectional_map()[column_name]

@@ -31,9 +31,7 @@ interface FormattedNumberDisplayOptions {
 
 export interface NumberDisplayOptions
   extends Record<string, unknown>,
-    FormattedNumberDisplayOptions {
-  show_as_percentage: boolean;
-}
+    FormattedNumberDisplayOptions {}
 
 /**
  * See the [Postgres docs][1] for an explanation of `scale` and `precision`.

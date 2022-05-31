@@ -36,8 +36,8 @@ def column_test_table(patent_schema):
     return table
 
 
-def test_create_table_settings(client, schema, create_table, schema_name):
-    table = create_table('Table 2', schema=schema_name)
+def test_create_table_settings(client, schema, create_patents_table, schema_name):
+    table = create_patents_table('Table 2', schema_name=schema_name)
     primary_key_column = table.get_column_name_id_bidirectional_map()['id']
     computed_columns = [primary_key_column]
     response = client.get(
