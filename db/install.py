@@ -17,6 +17,8 @@ def create_mathesar_database(
         username, password, hostname, user_database, port
     )
     install.install_mathesar_on_database(user_db_engine)
+    user_db_engine.dispose()
+    root_db_engine.dispose()
 
 
 def install_mathesar_on_preexisting_database(
@@ -26,3 +28,4 @@ def install_mathesar_on_preexisting_database(
         username, password, hostname, database, port
     )
     install.install_mathesar_on_database(user_db_engine)
+    user_db_engine.dispose()

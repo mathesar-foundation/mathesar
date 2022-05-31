@@ -2,11 +2,9 @@ from psycopg2.extras import Json
 from sqlalchemy import cast, text, func
 from sqlalchemy.types import UserDefinedType
 
-from db.types import base
+from db.types.base import MathesarCustomType
 
-MULTICURRENCY_MONEY = base.MathesarCustomType.MULTICURRENCY_MONEY.value
-
-DB_TYPE = base.get_qualified_name(MULTICURRENCY_MONEY)
+DB_TYPE = MathesarCustomType.MULTICURRENCY_MONEY.id
 VALUE = 'value'
 CURRENCY = 'currency'
 

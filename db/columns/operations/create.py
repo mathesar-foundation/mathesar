@@ -17,7 +17,7 @@ from db.constraints.operations.create import copy_constraint
 from db.constraints.operations.select import get_column_constraints
 from db.constraints import utils as constraint_utils
 from db.tables.operations.select import reflect_table_from_oid
-from db.types.operations.cast import get_supported_alter_column_types
+from db.types.base import PostgresType, get_db_type_enum_from_id, get_db_type_enum_from_class
 from db import constants
 
 
@@ -26,24 +26,24 @@ def create_column(engine, table_oid, column_data):
     column_name = column_data.get(NAME, '').strip()
     if column_name == '':
         column_data[NAME] = gen_col_name(table)
-    column_type = column_data.get(TYPE, column_data.get("type"))
+    column_type_id = column_data.get(TYPE, column_data.get("type"))
     column_type_options = column_data.get("type_options", {})
     column_nullable = column_data.get(NULLABLE, True)
     default_value = column_data.get(DEFAULT, {}).get('value')
     prepared_default_value = str(default_value) if default_value is not None else None
-    supported_types = get_supported_alter_column_types(
-        engine, friendly_names=False,
-    )
-    sa_type = supported_types.get(column_type)
-    if sa_type is None:
-        # Requested type not supported. falling back to VARCHAR
-        sa_type = supported_types["VARCHAR"]
+    column_type = get_db_type_enum_from_id(column_type_id)
+    column_type_class = None
+    if column_type is not None:
+        column_type_class = column_type.get_sa_class(engine)
+    if column_type_class is None:
+        # Requested type unknown or not supported. Falling back to CHARACTER_VARYING
+        column_type_class = PostgresType.CHARACTER_VARYING.get_sa_class(engine)
         column_type_options = {}
     table = reflect_table_from_oid(table_oid, engine)
 
     try:
         column = MathesarColumn(
-            column_data[NAME], sa_type(**column_type_options), nullable=column_nullable,
+            column_data[NAME], column_type_class(**column_type_options), nullable=column_nullable,
             server_default=prepared_default_value,
         )
     except DataError as e:
@@ -144,13 +144,17 @@ def _duplicate_column_constraints(table_oid, from_column_attnum, to_column_attnu
 def duplicate_column(table_oid, copy_from_attnum, engine, new_column_name=None, copy_data=True, copy_constraints=True):
     table = reflect_table_from_oid(table_oid, engine)
     copy_from_name = get_column_name_from_attnum(table_oid, copy_from_attnum, engine)
-    from_column = table.c[copy_from_name]
+    from_column = MathesarColumn.from_column(table.c[copy_from_name])
+    from_column_db_type = get_db_type_enum_from_class(
+        from_column.type.__class__,
+        engine,
+    )
     if new_column_name is None:
         new_column_name = _gen_col_name(table, from_column.name)
 
     column_data = {
         NAME: new_column_name,
-        "type": from_column.type.compile(dialect=engine.dialect),
+        "type": from_column_db_type.id,
         NULLABLE: True,
     }
     new_column = create_column(engine, table_oid, column_data)

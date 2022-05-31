@@ -22,36 +22,38 @@ DB_REFLECTION_INTERVAL = 60 * 5  # we reflect DB changes every 5 minutes
 
 
 def reflect_databases():
-    databases = set(settings.DATABASES)
+    dbs_in_settings = set(settings.DATABASES)
     # We only want to track non-django dbs
-    databases.remove('default')
+    dbs_in_settings.remove('default')
 
-    # Update deleted databases
+    # Ignore dbs that are models; update deleted databases
     for database in models.Database.current_objects.all():
-        if database.name in databases:
-            databases.remove(database.name)
+        if database.name in dbs_in_settings:
+            dbs_in_settings.remove(database.name)
         else:
             database.deleted = True
             models.Schema.current_objects.filter(database=database).delete()
             database.save()
 
     # Create databases that aren't models yet
-    for database in databases:
-        models.Database.current_objects.create(name=database)
+    for db_name in dbs_in_settings:
+        models.Database.current_objects.create(name=db_name)
 
 
-def reflect_schemas_from_database(database):
-    engine = create_mathesar_engine(database)
+# TODO creating a one-off engine is expensive
+def reflect_schemas_from_database(database_name):
+    engine = create_mathesar_engine(database_name)
     db_schema_oids = {
         schema['oid'] for schema in get_mathesar_schemas_with_oids(engine)
     }
 
-    database = models.Database.current_objects.get(name=database)
+    database = models.Database.current_objects.get(name=database_name)
     for oid in db_schema_oids:
-        models.Schema.current_objects.get_or_create(oid=oid, database=database)
+        schema, boolean = models.Schema.current_objects.get_or_create(oid=oid, database=database)
     for schema in models.Schema.current_objects.all():
         if schema.database.name == database and schema.oid not in db_schema_oids:
             schema.delete()
+    engine.dispose()
 
 
 def reflect_tables_from_schema(schema):
@@ -72,19 +74,23 @@ def reflect_columns_from_table(table):
         for column in get_column_attnums_from_table(table.oid, table.schema._sa_engine)
     }
     for attnum in attnums:
-        column, created = models.Column.current_objects.get_or_create(attnum=attnum,
-                                                                      table=table,
-                                                                      defaults={'display_options': None})
+        column, created = models.Column.current_objects.get_or_create(
+            attnum=attnum,
+            table=table,
+            defaults={'display_options': None})
         if not created and column.display_options:
             # If the type of column has changed, existing display options won't be valid anymore.
-            serializer = DisplayOptionsMappingSerializer(data=column.display_options,
-                                                         context={DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY: str(column.plain_type)})
+            serializer = DisplayOptionsMappingSerializer(
+                data=column.display_options,
+                context={DISPLAY_OPTIONS_SERIALIZER_MAPPING_KEY: column.db_type}
+            )
             if not serializer.is_valid(False):
                 column.display_options = None
                 column.save()
     models.Column.current_objects.filter(table=table).filter(~Q(attnum__in=attnums)).delete()
 
 
+# TODO creating a one-off engine is expensive
 def reflect_constraints_from_database(database):
     engine = create_mathesar_engine(database)
     db_constraints = get_constraints_with_oids(engine)
@@ -97,8 +103,10 @@ def reflect_constraints_from_database(database):
     for constraint in models.Constraint.current_objects.all():
         if constraint.oid not in [db_constraint['oid'] for db_constraint in db_constraints]:
             constraint.delete()
+    engine.dispose()
 
 
+# TODO creating a one-off engine is expensive
 def reflect_new_table_constraints(table):
     engine = create_mathesar_engine(table.schema.database.name)
     db_constraints = get_constraints_with_oids(engine, table_oid=table.oid)
@@ -109,6 +117,7 @@ def reflect_new_table_constraints(table):
         )
         for db_constraint in db_constraints
     ]
+    engine.dispose()
     return constraints
 
 

@@ -231,8 +231,6 @@ export class RecordsData {
 
   private requestParamsUnsubscriber: Unsubscriber;
 
-  private columnPatchUnsubscriber: () => void;
-
   constructor(
     type: TabularType,
     parentId: number,
@@ -262,10 +260,6 @@ export class RecordsData {
       this.meta.recordsRequestParamsData.subscribe(() => {
         void this.fetch();
       });
-    this.columnPatchUnsubscriber = this.columnsDataStore.on(
-      'columnPatched',
-      () => this.fetch(),
-    );
   }
 
   async fetch(
@@ -367,28 +361,34 @@ export class RecordsData {
       const { offset } = getStoreValue(this.meta.pagination);
       const savedRecords = getStoreValue(this.savedRecords);
       const savedRecordsLength = savedRecords?.length || 0;
+      const pkColumnId = this.columnsDataStore.get()?.primaryKeyColumnId;
+      const savedRecordKeys = new Set(
+        savedRecords.map((row) => getRowKey(row, pkColumnId)),
+      );
 
       this.newRecords.update((existing) => {
         let retained = existing.filter(
-          (entry) =>
-            !successRowKeys.has(
-              getRowKey(entry, this.columnsDataStore.get()?.primaryKeyColumnId),
-            ),
+          (row) => !successRowKeys.has(getRowKey(row, pkColumnId)),
         );
+        retained = retained.filter(
+          (row) => !savedRecordKeys.has(getRowKey(row, pkColumnId)),
+        );
+
         if (retained.length === existing.length) {
           return existing;
         }
         let index = -1;
-        retained = retained.map((entry) => {
+        retained = retained.map((row) => {
           index += 1;
           return {
-            ...entry,
+            ...row,
             rowIndex: savedRecordsLength + index,
             identifier: generateRowIdentifier('new', offset, index),
           };
         });
         return retained;
       });
+      this.meta.rowCreationStatus.delete([...savedRecordKeys]);
       this.meta.rowCreationStatus.delete([...successRowKeys]);
       this.meta.rowDeletionStatus.delete([...successRowKeys]);
       this.meta.selectedRows.delete([...successRowKeys]);
@@ -576,6 +576,5 @@ export class RecordsData {
     this.promise = undefined;
 
     this.requestParamsUnsubscriber();
-    this.columnPatchUnsubscriber();
   }
 }

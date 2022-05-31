@@ -3,12 +3,6 @@ from sqlalchemy import String, Integer, Column, Table, MetaData
 from db.columns.operations.drop import drop_column
 from db.columns.operations.select import get_column_attnum_from_name
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
-from db.tests.types import fixtures
-
-
-engine_with_types = fixtures.engine_with_types
-temporary_testing_schema = fixtures.temporary_testing_schema
-engine_email_type = fixtures.engine_email_type
 
 
 def test_drop_column_correct_column(engine_with_schema):

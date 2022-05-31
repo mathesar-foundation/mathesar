@@ -1,13 +1,4 @@
 from db.tables.operations.create import create_mathesar_table
-from db.tests.types import fixtures
-
-
-# We need to set these variables when the file loads, or pytest can't
-# properly detect the fixtures.  Importing them directly results in a
-# flake8 unused import error, and a bunch of flake8 F811 errors.
-engine_with_types = fixtures.engine_with_types
-engine_email_type = fixtures.engine_email_type
-temporary_testing_schema = fixtures.temporary_testing_schema
 
 
 def test_table_creation_doesnt_reuse_defaults(engine_with_schema):
