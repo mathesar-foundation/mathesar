@@ -6,9 +6,9 @@ from mathesar.models import Table, Schema, Database
 
 
 @pytest.fixture(scope="module")
-def database_api_db(create_module_dj_db, get_uid):
+def database_api_db(MOD_create_dj_db, get_uid):
     db_name = "test_database_api_db_" + get_uid()
-    create_module_dj_db(db_name)
+    MOD_create_dj_db(db_name)
     return db_name
 
 
@@ -17,19 +17,19 @@ def test_database_reflection_new(database_api_db):
     assert Database.objects.filter(name=database_api_db).exists()
 
 
-def test_database_reflection_delete(database_api_db, dj_databases):
+def test_database_reflection_delete(database_api_db, FUN_dj_databases):
     reflect_db_objects()
     db = Database.objects.get(name=database_api_db)
     assert db.deleted is False
 
-    del dj_databases[database_api_db]
+    del FUN_dj_databases[database_api_db]
     cache.clear()
     reflect_db_objects()
     db.refresh_from_db()
     assert db.deleted is True
 
 
-def test_database_reflection_delete_schema(database_api_db, dj_databases):
+def test_database_reflection_delete_schema(database_api_db, FUN_dj_databases):
     reflect_db_objects()
     db = Database.objects.get(name=database_api_db)
 
@@ -37,13 +37,13 @@ def test_database_reflection_delete_schema(database_api_db, dj_databases):
     # We expect the test schema + 'public'
     assert Schema.objects.filter(database=db).count() == 2
 
-    del dj_databases[database_api_db]
+    del FUN_dj_databases[database_api_db]
     cache.clear()
     reflect_db_objects()
     assert Schema.objects.filter(database=db).count() == 0
 
 
-def test_database_reflection_delete_table(database_api_db, dj_databases):
+def test_database_reflection_delete_table(database_api_db, FUN_dj_databases):
     reflect_db_objects()
     db = Database.objects.get(name=database_api_db)
 
@@ -51,7 +51,7 @@ def test_database_reflection_delete_table(database_api_db, dj_databases):
     Table.objects.create(oid=2, schema=schema)
     assert Table.objects.filter(schema__database=db).count() == 1
 
-    del dj_databases[database_api_db]
+    del FUN_dj_databases[database_api_db]
     cache.clear()
     reflect_db_objects()
     assert Table.objects.filter(schema__database=db).count() == 0
@@ -83,9 +83,9 @@ def test_database_list(client, test_db_name, database_api_db):
         check_database(expected_database, response_database)
 
 
-def test_database_list_deleted(client, test_db_name, database_api_db, dj_databases):
+def test_database_list_deleted(client, test_db_name, database_api_db, FUN_dj_databases):
     reflect_db_objects()
-    del dj_databases[database_api_db]
+    del FUN_dj_databases[database_api_db]
 
     cache.clear()
     response = client.get('/api/db/v0/databases/')
@@ -105,9 +105,9 @@ def test_database_list_deleted(client, test_db_name, database_api_db, dj_databas
 
 
 @pytest.mark.parametrize('deleted', [True, False])
-def test_database_list_filter_deleted(client, deleted, test_db_name, database_api_db, dj_databases):
+def test_database_list_filter_deleted(client, deleted, test_db_name, database_api_db, FUN_dj_databases):
     reflect_db_objects()
-    del dj_databases[database_api_db]
+    del FUN_dj_databases[database_api_db]
 
     cache.clear()
     response = client.get(f'/api/db/v0/databases/?deleted={deleted}')
@@ -128,7 +128,7 @@ def test_database_list_filter_deleted(client, deleted, test_db_name, database_ap
 
 
 @pytest.mark.parametrize('sort_field', ['id', 'name'])
-def test_database_list_sorted_by(client, test_db_name, database_api_db, create_temp_dj_db, sort_field, get_uid):
+def test_database_list_sorted_by(client, test_db_name, database_api_db, FUN_create_dj_db, sort_field, get_uid):
     """
     Notice that we must pull in databases that are already setup in this scope.
     """
@@ -138,7 +138,7 @@ def test_database_list_sorted_by(client, test_db_name, database_api_db, create_t
     # and Postgres might be sorting multi-case string sets differently.
     test_db_name_2 = 'a' + get_uid()
 
-    create_temp_dj_db(test_db_name_2)
+    FUN_create_dj_db(test_db_name_2)
 
     cache.clear()
 
