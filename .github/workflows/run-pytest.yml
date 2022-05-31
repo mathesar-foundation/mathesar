@@ -32,7 +32,7 @@ jobs:
       - name: Build the stack
         run: docker-compose up --build -d
 
-      - name: create coverage directory
+      - name: Create coverage directory
         run: docker exec mathesar_service mkdir coverage_report
 
       - name: Run tests with pytest

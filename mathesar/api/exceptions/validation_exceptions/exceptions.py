@@ -26,6 +26,18 @@ class ColumnSizeMismatchAPIException(MathesarValidationException):
         super().__init__(None, self.error_code, message, field, details)
 
 
+class InvalidLinkChoiceAPIException(MathesarValidationException):
+    error_code = ErrorCodes.InvalidLinkChoice.value
+
+    def __init__(
+            self,
+            message="Invalid Link type",
+            field=None,
+            details=None,
+    ):
+        super().__init__(None, self.error_code, message, field, details)
+
+
 class MultipleDataFileAPIException(MathesarValidationException):
     error_code = ErrorCodes.MultipleDataFiles.value
 
@@ -35,6 +47,19 @@ class MultipleDataFileAPIException(MathesarValidationException):
             field=None,
             details=None,
     ):
+        super().__init__(None, self.error_code, message, field, details)
+
+
+class UnknownDatabaseTypeIdentifier(MathesarValidationException):
+    error_code = ErrorCodes.UnknownDBType.value
+
+    def __init__(
+            self,
+            db_type_id,
+            field=None,
+            details=None,
+    ):
+        message = f"Unknown database type identifier {db_type_id}."
         super().__init__(None, self.error_code, message, field, details)
 
 

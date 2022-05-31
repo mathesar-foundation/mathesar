@@ -10,13 +10,13 @@ import type {
 } from '../types';
 
 const DB_TYPES = {
-  DECIMAL: 'DECIMAL',
-  NUMERIC: 'NUMERIC',
-  INTEGER: 'INTEGER',
-  SMALLINT: 'SMALLINT',
-  BIGINT: 'BIGINT',
-  REAL: 'REAL',
-  DOUBLE_PRECISION: 'DOUBLE PRECISION',
+  DECIMAL: 'decimal',
+  NUMERIC: 'numeric',
+  INTEGER: 'integer',
+  SMALLINT: 'smallint',
+  BIGINT: 'bigint',
+  REAL: 'real',
+  DOUBLE_PRECISION: 'double precision',
 };
 
 const dbForm: AbstractTypeConfigForm = {
@@ -200,10 +200,6 @@ function constructDbFormValuesFromTypeOptions(
 
 const displayForm: AbstractTypeConfigForm = {
   variables: {
-    showAsPercentage: {
-      type: 'boolean',
-      default: false,
-    },
     format: {
       type: 'string',
       enum: ['none', 'english', 'german', 'french', 'hindi', 'swiss'],
@@ -213,11 +209,6 @@ const displayForm: AbstractTypeConfigForm = {
   layout: {
     orientation: 'vertical',
     elements: [
-      {
-        type: 'input',
-        variable: 'showAsPercentage',
-        label: 'Show as Percentage',
-      },
       {
         type: 'input',
         variable: 'format',
@@ -238,9 +229,7 @@ const displayForm: AbstractTypeConfigForm = {
 function determineDisplayOptions(
   dispFormValues: FormValues,
 ): Column['display_options'] {
-  const displayOptions: Column['display_options'] = {
-    show_as_percentage: dispFormValues.showAsPercentage,
-  };
+  const displayOptions: Column['display_options'] = {};
   if (dispFormValues.format !== 'none') {
     displayOptions.number_format = dispFormValues.format;
   }
@@ -252,7 +241,6 @@ function constructDisplayFormValuesFromDisplayOptions(
 ): FormValues {
   const displayOptions = columnDisplayOpts as NumberDisplayOptions | null;
   const dispFormValues: FormValues = {
-    showAsPercentage: displayOptions?.show_as_percentage ?? false,
     format: displayOptions?.number_format ?? 'none',
   };
   return dispFormValues;

@@ -30,7 +30,7 @@ fi
 RUN_NODE="false"
 CHANGED_NODE_FILES=$(git diff --name-only --staged mathesar_ui/)
 if [[ $CHANGED_NODE_FILES == *"mathesar_ui/"* ]]; then
-	RUN_NODE="false"
+	RUN_NODE="true"
 fi
 
 # Argument parsing

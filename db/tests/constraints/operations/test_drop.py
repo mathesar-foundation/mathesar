@@ -6,8 +6,8 @@ from db.tables.operations.select import get_oid_from_table, reflect_table_from_o
 from db.tests.constraints import utils as test_utils
 
 
-def test_drop_unique_constraint(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_drop_unique_constraint(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "orders_3"
     unique_column_name = 'product_name'
     table = Table(

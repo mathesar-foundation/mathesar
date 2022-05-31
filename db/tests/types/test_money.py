@@ -1,17 +1,9 @@
 from sqlalchemy import text, MetaData, Table, Column
-from db.tests.types import fixtures
-from db.types import money
-
-# We need to set these variables when the file loads, or pytest can't
-# properly detect the fixtures.  Importing them directly results in a
-# flake8 unused import error, and a bunch of flake8 F811 errors.
-engine_with_types = fixtures.engine_with_types
-engine_email_type = fixtures.engine_email_type
-temporary_testing_schema = fixtures.temporary_testing_schema
+from db.types.custom import money
 
 
-def test_money_type_column_creation(engine_email_type):
-    engine, app_schema = engine_email_type
+def test_money_type_column_creation(engine_with_schema):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={app_schema}"))
         metadata = MetaData(bind=conn)
@@ -23,8 +15,8 @@ def test_money_type_column_creation(engine_email_type):
         test_table.create()
 
 
-def test_money_type_column_reflection(engine_email_type):
-    engine, app_schema = engine_email_type
+def test_money_type_column_reflection(engine_with_schema):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         test_table = Table(

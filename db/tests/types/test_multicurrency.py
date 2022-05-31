@@ -1,18 +1,9 @@
 from sqlalchemy import text, MetaData, Table, Column, select
-from db.engine import _add_custom_types_to_engine
-from db.tests.types import fixtures
-from db.types import multicurrency
-
-# We need to set these variables when the file loads, or pytest can't
-# properly detect the fixtures.  Importing them directly results in a
-# flake8 unused import error, and a bunch of flake8 F811 errors.
-engine_with_types = fixtures.engine_with_types
-engine_email_type = fixtures.engine_email_type
-temporary_testing_schema = fixtures.temporary_testing_schema
+from db.types.custom import multicurrency
 
 
-def test_multicurrency_type_column_creation(engine_email_type):
-    engine, app_schema = engine_email_type
+def test_multicurrency_type_column_creation(engine_with_schema):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f"SET search_path={app_schema}"))
         metadata = MetaData(bind=conn)
@@ -24,8 +15,8 @@ def test_multicurrency_type_column_creation(engine_email_type):
         test_table.create()
 
 
-def test_multicurrency_type_column_reflection(engine_email_type):
-    engine, app_schema = engine_email_type
+def test_multicurrency_type_column_reflection(engine_with_schema):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         test_table = Table(
@@ -35,7 +26,6 @@ def test_multicurrency_type_column_reflection(engine_email_type):
         )
         test_table.create()
 
-    _add_custom_types_to_engine(engine)
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table("test_table", metadata, autoload_with=conn)
@@ -44,8 +34,8 @@ def test_multicurrency_type_column_reflection(engine_email_type):
     assert actual_cls == expect_cls
 
 
-def test_multicurrency_type_raw_selecting(engine_email_type):
-    engine, _ = engine_email_type
+def test_multicurrency_type_raw_selecting(engine_with_schema):
+    engine, _ = engine_with_schema
     multicurrency_str = '(1234.12,USD)'
     with engine.begin() as conn:
         res = conn.execute(
@@ -54,8 +44,8 @@ def test_multicurrency_type_raw_selecting(engine_email_type):
         assert res.fetchone()[0] == multicurrency_str
 
 
-def test_multicurrency_type_insert_from_dict(engine_email_type):
-    engine, app_schema = engine_email_type
+def test_multicurrency_type_insert_from_dict(engine_with_schema):
+    engine, app_schema = engine_with_schema
     metadata = MetaData(bind=engine, schema=app_schema)
     test_table = Table(
         "test_table",
@@ -79,8 +69,8 @@ def test_multicurrency_type_insert_from_dict(engine_email_type):
         assert actual_val == expect_val
 
 
-def test_multicurrency_type_select_to_dict(engine_email_type):
-    engine, app_schema = engine_email_type
+def test_multicurrency_type_select_to_dict(engine_with_schema):
+    engine, app_schema = engine_with_schema
     metadata = MetaData(bind=engine, schema=app_schema)
     test_table = Table(
         "test_table",
