@@ -135,7 +135,7 @@ class ConstraintSerializer(
     }
 
     def create(self, validated_data):
-        serializer = self.serializers_mapping.get(self.get_mapping_field(validated_data))
+        serializer = self.serializers_mapping(self.get_mapping_field(validated_data))
         if serializer == None:
             message = 'Unknown type passed.'
             raise base_api_exceptions.NotFoundAPIException(
