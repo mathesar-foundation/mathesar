@@ -3,7 +3,7 @@ import type { DateFormat, TimeFormat } from '@mathesar/api/tables/columns';
 import { DateTimeSpecification } from '@mathesar/utils/date-time';
 
 export function getDateFormatOptions(): Record<DateFormat, { label: string }> {
-  const day = dayjs();
+  const day = dayjs('2001-12-31');
   const dateFormattingStringMap =
     DateTimeSpecification.getDateFormattingStringMap();
 
