@@ -4,7 +4,6 @@ import re
 from db.records.operations import group
 from db.records.operations.preview import extract_preview_metadata
 from mathesar.models import Table
-from mathesar.database.types import _get_type_map
 from mathesar.utils.conversion import convert_preview_data_to_db_identifier
 
 DATA_KEY = 'data'

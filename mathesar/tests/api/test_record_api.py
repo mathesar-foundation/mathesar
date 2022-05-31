@@ -83,6 +83,7 @@ def test_record_serialization(empty_nasa_table, create_column, client, type_, va
     assert response.status_code == 200
     assert response_data["results"][0][str(column.id)] == value
 
+
 def test_foreign_key_record_api(create_foreign_key_table, client):
     referrer_table_name = 'Patents'
     referent_table_name = 'Center'

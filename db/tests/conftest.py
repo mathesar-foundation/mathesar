@@ -32,14 +32,10 @@ def engine_with_roster(engine_with_schema):
 @pytest.fixture
 def engine_with_relation(engine_with_schema):
     engine, schema = engine_with_schema
-    _add_custom_types_to_engine(engine)
-    install.install_mathesar_on_database(engine)
     with engine.begin() as conn, open(RELATION_SQL) as f:
         conn.execute(text(f"SET search_path={schema}"))
         conn.execute(text(f.read()))
     yield engine, schema
-    with engine.begin() as conn:
-        conn.execute(DropSchema(base.SCHEMA, cascade=True, if_exists=True))
 
 
 @pytest.fixture

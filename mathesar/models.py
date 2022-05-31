@@ -28,7 +28,6 @@ from db.tables.operations.select import get_oid_from_table, reflect_table_from_o
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
-from mathesar.database.types import get_types
 from mathesar.utils.conversion import convert_preview_data_to_db_identifier
 from mathesar.database.types import UIType, get_ui_type_from_db_type
 
