@@ -12,7 +12,6 @@
     scrollBasedOnActiveCell,
   } from '@mathesar/stores/table-data';
   import type {
-    ColumnPosition,
     Row,
     Display,
     RecordsData,
@@ -29,7 +28,8 @@
 
   export let recordsData: RecordsData;
   export let display: Display;
-  export let columnPosition: ColumnPosition | undefined = undefined;
+  export let columnWidth = 0;
+  export let columnPosition = 0;
   export let row: Row;
   export let rowIsSelected = false;
   export let rowIsProcessing = false;
@@ -95,8 +95,8 @@
   class:is-processing={isProcessing}
   class:is-pk={column.primary_key}
   style="
-      width:{columnPosition?.width ?? 0}px;
-      left:{columnPosition?.left ?? 0}px;
+      width:{columnWidth}px;
+      left:{columnPosition}px;
     "
 >
   <CellBackground when={hasError} color="var(--cell-bg-color-error)" />
