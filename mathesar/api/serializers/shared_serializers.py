@@ -2,6 +2,7 @@ from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
+from mathesar.api.exceptions.validation_exceptions.exceptions import IncompatibleFractionDigitValuesAPIException
 from mathesar.database.types import UIType, get_ui_type_from_db_type
 
 
@@ -178,9 +179,7 @@ class AbstractNumberDisplayOptionSerializer(BaseDisplayOptionsSerializer):
             # No errors if one of the fields is not set
             return
         if minimum > maximum:
-            raise serializers.ValidationError(
-                "maximum_fraction_digits cannot be less than minimum_fraction_digits."
-            )
+            raise IncompatibleFractionDigitValuesAPIException()
 
     def validate(self, data):
         self._validate_fraction_digits(data)

@@ -73,3 +73,15 @@ class MoneyDisplayOptionValueConflictAPIException(MathesarValidationException):
             details=None,
     ):
         super().__init__(None, self.error_code, message, field, details)
+
+
+class IncompatibleFractionDigitValuesAPIException(MathesarValidationException):
+    error_code = ErrorCodes.IncompatibleFractionDigitValues.value
+
+    def __init__(
+            self,
+            message="maximum_fraction_digits cannot be less than minimum_fraction_digits.",
+            field=None,
+            details=None,
+    ):
+        super().__init__(None, self.error_code, message, field, details)
