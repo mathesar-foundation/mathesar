@@ -22,6 +22,7 @@ def engine_cache(request):
     logger = logging.getLogger(f'engine_cache-{request.scope}')
     logger.debug('enter')
     db_names_to_engines = {}
+
     def _get(db_name):
         engine = db_names_to_engines.get(db_name)
         logger.debug(f'getting engine for {db_name}')
@@ -74,7 +75,7 @@ def create_db(request, SES_engine_cache):
         engine.dispose()
         return db_name
     yield __create_db
-    logger.debug(f'about to clean up')
+    logger.debug('about to clean up')
     for db_name in created_dbs:
         engine = engine_cache(db_name)
         if database_exists(engine.url):
