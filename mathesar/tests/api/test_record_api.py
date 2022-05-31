@@ -3,6 +3,7 @@ import json
 from unittest.mock import patch
 
 import pytest
+
 from mathesar.api.utils import follows_json_number_spec
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
 
@@ -12,6 +13,7 @@ from db.records.operations.group import GroupBy
 from mathesar import models
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.api.exceptions.error_codes import ErrorCodes
+from mathesar.models import Table
 
 
 def test_record_list(create_patents_table, client):
@@ -174,7 +176,8 @@ def test_filter_with_added_columns(create_patents_table, client):
         new_column_type = new_column.get("type")
         table.add_column({"name": new_column_name, "type": new_column_type})
         row_values_list = []
-
+        # Get a new instance with clean cache, so that the new column is added to the _sa_column list
+        table = Table.objects.get(oid=table.oid)
         response_data = client.get(f'/api/db/v0/tables/{table.id}/records/').json()
         existing_records = response_data['results']
 
