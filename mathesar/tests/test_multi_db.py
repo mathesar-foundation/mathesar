@@ -18,7 +18,6 @@ def multi_db_engine(multi_db_test_db, MOD_engine_cache):
     return MOD_engine_cache(multi_db_test_db)
 
 
-
 def test_multi_db_schema(engine, multi_db_engine, client, create_db_schema):
     test_schemas = ["test_schema_1", "test_schema_2"]
     for schema_name in test_schemas:

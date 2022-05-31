@@ -5,25 +5,95 @@ import pytest
 import random
 import string
 
-from sqlalchemy.exc import OperationalError
+# These imports come from the mathesar namespace, because our DB setup logic depends on it.
+from django.db import connection as dj_connection
 
-from db.engine import add_custom_types_to_ischema_names
+from sqlalchemy.exc import OperationalError
+from sqlalchemy_utils import database_exists, create_database, drop_database
+
+from db.engine import add_custom_types_to_ischema_names, create_engine as sa_create_engine
+from db.types import install
 from db.schemas.operations.drop import drop_schema as drop_sa_schema
 from db.schemas.operations.create import create_schema as create_sa_schema
 from db.schemas.utils import get_schema_oid_from_name, get_schema_name_from_oid
 
-from testing.utils import create_scoped_fixtures, get_fixture_value
-from testing import impls
+from fixtures.utils import create_scoped_fixtures
 
 
-_fixture_impls_to_bootstrap = (
-    impls.engine_cache,
-    impls.create_db,
-)
+def engine_cache(request):
+    import logging
+    logger = logging.getLogger(f'engine_cache-{request.scope}')
+    logger.debug('enter')
+    db_names_to_engines = {}
+    def _get(db_name):
+        engine = db_names_to_engines.get(db_name)
+        logger.debug(f'getting engine for {db_name}')
+        if engine is None:
+            logger.debug(f'creating engine for {db_name}')
+            engine = _create_engine(db_name)
+            db_names_to_engines[db_name] = engine
+        return engine
+    yield _get
+    for db_name, engine in db_names_to_engines.items():
+        logger.debug(f'cleaning up engine for {db_name}')
+        engine.dispose()
+    logger.debug('exit')
 
 
-for fixture_impl in _fixture_impls_to_bootstrap:
-    create_scoped_fixtures(globals(), fixture_impl)
+# defines:
+# FUN_engine_cache
+# CLA_engine_cache
+# MOD_engine_cache
+# SES_engine_cache
+create_scoped_fixtures(globals(), engine_cache)
+
+
+def create_db(request, SES_engine_cache):
+    """
+    A factory for Postgres mathesar-installed databases. A fixture made of this method tears down
+    created dbs when leaving scope.
+
+    This method is used to create two fixtures with different scopes, that's why it's not a fixture
+    itself.
+    """
+    engine_cache = SES_engine_cache
+
+    import logging
+    logger = logging.getLogger(f'create_db-{request.scope}')
+    logger.debug('enter')
+
+    created_dbs = set()
+
+    def __create_db(db_name):
+        engine = engine_cache(db_name)
+        if database_exists(engine.url):
+            logger.debug(f'dropping preexisting {db_name}')
+            drop_database(engine.url)
+        logger.debug(f'creating {db_name}')
+        create_database(engine.url)
+        created_dbs.add(db_name)
+        # Our default testing database has our types and functions preinstalled.
+        install.install_mathesar_on_database(engine)
+        engine.dispose()
+        return db_name
+    yield __create_db
+    logger.debug(f'about to clean up')
+    for db_name in created_dbs:
+        engine = engine_cache(db_name)
+        if database_exists(engine.url):
+            logger.debug(f'dropping {db_name}')
+            drop_database(engine.url)
+        else:
+            logger.debug(f'{db_name} already gone')
+    logger.debug('exit')
+
+
+# defines:
+# FUN_create_db
+# CLA_create_db
+# MOD_create_db
+# SES_create_db
+create_scoped_fixtures(globals(), create_db)
 
 
 @pytest.fixture(scope="session")
@@ -135,7 +205,6 @@ def create_db_schema(SES_engine_cache):
     created_schemas = {}
 
     def _create_schema(schema_name, engine, schema_mustnt_exist=True):
-        logger.debug('eval')
         if schema_mustnt_exist:
             assert schema_name not in created_schemas
         logger.debug(f'creating {schema_name}')
@@ -157,5 +226,28 @@ def create_db_schema(SES_engine_cache):
                     drop_sa_schema(schema_name, engine, cascade=True, if_exists=True)
                     logger.debug(f'dropping {schema_name}')
         except OperationalError as e:
-            logger.debug(f'operational error')
+            logger.debug(f'ignoring operational error: {e}')
     logger.debug('exit')
+
+
+# Seems to be roughly equivalent to mathesar/database/base.py::create_mathesar_engine
+# TODO consider fixing this seeming duplication
+# either way, both depend on Django configuration. can that be resolved?
+def _create_engine(db_name):
+    dj_connection_settings = dj_connection.settings_dict
+    engine = sa_create_engine(
+        _get_connection_string(
+            username=dj_connection_settings["USER"],
+            password=dj_connection_settings["PASSWORD"],
+            hostname=dj_connection_settings["HOST"],
+            database=db_name,
+        ),
+        future=True,
+        # Setting a fixed timezone makes the timezone aware test cases predictable.
+        connect_args={"options": "-c timezone=utc -c lc_monetary=en_US.UTF-8"}
+    )
+    return engine
+
+
+def _get_connection_string(username, password, hostname, database):
+    return f"postgresql://{username}:{password}@{hostname}/{database}"

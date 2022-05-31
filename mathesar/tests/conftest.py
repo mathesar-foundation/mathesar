@@ -21,12 +21,15 @@ from mathesar.models import Schema, Table, Database, DataFile
 from mathesar.imports.csv import create_table_from_csv
 from mathesar.models import Column as mathesar_model_column
 
-from testing.utils import create_scoped_fixtures, get_fixture_value
-import testing.impls
+from fixtures.utils import create_scoped_fixtures, get_fixture_value
+import conftest
 
 
 @pytest.fixture(scope="session")
-def django_db_modify_db_settings(ignore_all_dbs_except_default, django_db_modify_db_settings):  # noqa: F841
+def django_db_modify_db_settings(
+        ignore_all_dbs_except_default,  # noqa: F841
+        django_db_modify_db_settings,   # noqa: F841
+):
     return
 
 
@@ -61,7 +64,7 @@ def create_dj_db(request):
     )
     create_db = get_fixture_value(
         request,
-        testing.impls.create_db
+        conftest.create_db
     )
 
     def _create_and_add(db_name):
@@ -71,6 +74,11 @@ def create_dj_db(request):
     yield _create_and_add
 
 
+# defines:
+# FUN_create_dj_db
+# CLA_create_dj_db
+# MOD_create_dj_db
+# SES_create_dj_db
 create_scoped_fixtures(globals(), create_dj_db)
 
 
@@ -110,6 +118,11 @@ def add_db_to_dj_settings(request):
     yield _add
 
 
+# defines:
+# FUN_add_db_to_dj_settings
+# CLA_add_db_to_dj_settings
+# MOD_add_db_to_dj_settings
+# SES_add_db_to_dj_settings
 create_scoped_fixtures(globals(), add_db_to_dj_settings)
 
 
@@ -123,6 +136,11 @@ def dj_databases():
     settings.DATABASES = dj_databases_deep_copy
 
 
+# defines:
+# FUN_dj_databases
+# CLA_dj_databases
+# MOD_dj_databases
+# SES_dj_databases
 create_scoped_fixtures(globals(), dj_databases)
 
 

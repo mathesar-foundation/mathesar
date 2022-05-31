@@ -1,4 +1,3 @@
-import pytest
 from db.types.base import MathesarCustomType
 
 
