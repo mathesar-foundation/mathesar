@@ -24,12 +24,12 @@ def install_on_db_with_key(database_key, skip_confirm):
         # create the DB
         print("Creating Mathesar DB on docker-created PostgreSQL instance")
         install.create_mathesar_database(
-            DATABASES[database_key]["NAME"],
-            DATABASES["default"]["USER"],
-            DATABASES["default"]["PASSWORD"],
-            DATABASES["default"]["HOST"],
-            DATABASES["default"]["NAME"],
-            DATABASES["default"]["PORT"],
+            user_database=DATABASES[database_key]["NAME"],
+            username=DATABASES["default"]["USER"],
+            password=DATABASES["default"]["PASSWORD"],
+            hostname=DATABASES["default"]["HOST"],
+            root_database=DATABASES["default"]["NAME"],
+            port=DATABASES["default"]["PORT"],
         )
         print(f"Created DB is {DATABASES['mathesar_tables']['NAME']}")
     else:

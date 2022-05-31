@@ -9,7 +9,7 @@ Integration tests (also known as "end-to-end tests" or "E2E tests" within the Ma
 
 ## Setup
 
-### 1. Install system dependencies
+### 1. Set up your environment
 
 > **♻️ Re-do** these steps if you **move to a new machine**.
 
@@ -17,18 +17,15 @@ Integration tests (also known as "end-to-end tests" or "E2E tests" within the Ma
     1. Install and open [XQuartz](https://www.xquartz.org/).
     1. In "XQuartz" -> "Preferences" -> "Security", Enable "Allow connections from network clients"
 
+1. In your `.env` file, change `DOCKERFILE=Dockerfile` to `DOCKERFILE=Dockerfile.integ-tests` so that Docker will build your container with extra functionality to run the E2E tests.
+
 ### 2. Build Docker container
 
 Running integration tests requires a separate Docker setup using a much beefier Docker container.
 
 > **♻️ Re-do** these steps if you **rebuild your Docker container** (e.g. when pulling new changes from `master` that add a pip package).
 
-1. Modify `docker-compose.yml`
-
-    1. (All platforms): Change `dockerfile: Dockerfile` to `dockerfile: Dockerfile.integ-tests`
-    1. (For Mac OS only): Also change `DISPLAY=${DISPLAY}` to `DISPLAY=${YOUR_IP}:0`, e.g. `DISPLAY=192.168.29.198:0`
-
-
+1. (For Mac OS only) Modify `docker-compose.yml`, changing `DISPLAY=${DISPLAY}` to `DISPLAY=${YOUR_IP}:0`, e.g. `DISPLAY=192.168.29.198:0`
 1. Re-build the container by running `docker-compose up --build`
 1. Discard your changes to `docker-compose.yml` so you don't commit them.
 1. After this, you can continue to use this newly built Docker container as your default development environment for other work too.
