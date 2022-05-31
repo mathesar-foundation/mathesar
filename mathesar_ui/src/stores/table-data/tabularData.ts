@@ -97,7 +97,6 @@ export class TabularData {
   }
 
   destroy(): void {
-    this.display.destroy();
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();
