@@ -5,17 +5,8 @@ from sqlalchemy.dialects.postgresql import INTERVAL as SA_INTERVAL
 from sqlalchemy.dialects.postgresql import TIME as SA_TIME
 from sqlalchemy.dialects.postgresql import TIMESTAMP as SA_TIMESTAMP
 
-from db.engine import _add_custom_types_to_engine
-from db.tests.types import fixtures
-from db.types import datetime, exceptions
-
-
-# We need to set these variables when the file loads, or pytest can't
-# properly detect the fixtures.  Importing them directly results in a
-# flake8 unused import error, and a bunch of flake8 F811 errors.
-engine_with_types = fixtures.engine_with_types
-temporary_testing_schema = fixtures.temporary_testing_schema
-engine_email_type = fixtures.engine_email_type
+from db.types.custom import datetime
+from db.types import exceptions
 
 
 datetime_types = [
@@ -113,8 +104,8 @@ datetime_types = [
 
 
 @pytest.mark.parametrize('test_type', [type_[0] for type_ in datetime_types])
-def test_datetime_type_column_creation(engine_email_type, test_type):
-    engine, app_schema = engine_email_type
+def test_datetime_type_column_creation(engine_with_schema, test_type):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         conn.execute(text(f'SET search_path={app_schema}'))
         metadata = MetaData(bind=conn)
@@ -130,8 +121,8 @@ def test_datetime_type_column_creation(engine_email_type, test_type):
     'test_type,sa_type',
     [(type_[0], type_[1]) for type_ in datetime_types]
 )
-def test_datetime_type_column_reflection(engine_email_type, test_type, sa_type):
-    engine, app_schema = engine_email_type
+def test_datetime_type_column_reflection(engine_with_schema, test_type, sa_type):
+    engine, app_schema = engine_with_schema
     col_name = 'time_type'
     table_name = 'test_table'
     with engine.begin() as conn:
@@ -143,7 +134,6 @@ def test_datetime_type_column_reflection(engine_email_type, test_type, sa_type):
         )
         test_table.create()
 
-    _add_custom_types_to_engine(engine)
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table(table_name, metadata, autoload_with=conn)
@@ -160,8 +150,8 @@ datetime_defaults = [
 
 
 @pytest.mark.parametrize('type_,val', datetime_defaults)
-def test_datetime_type_column_default(engine_email_type, type_, val):
-    engine, app_schema = engine_email_type
+def test_datetime_type_column_default(engine_with_schema, type_, val):
+    engine, app_schema = engine_with_schema
     default_str = val
     column_name = 'time_type'
     table_name = 'test_table'
@@ -177,7 +167,6 @@ def test_datetime_type_column_default(engine_email_type, type_, val):
         )
         test_table.create()
 
-    _add_custom_types_to_engine(engine)
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table(table_name, metadata, autoload_with=conn)
@@ -189,8 +178,8 @@ def test_datetime_type_column_default(engine_email_type, type_, val):
     assert actual_default == default_str
 
 
-def test_interval_type_column_args(engine_email_type):
-    engine, app_schema = engine_email_type
+def test_interval_type_column_args(engine_with_schema):
+    engine, app_schema = engine_with_schema
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         test_table = Table(
@@ -203,7 +192,6 @@ def test_interval_type_column_args(engine_email_type):
         )
         test_table.create()
 
-    _add_custom_types_to_engine(engine)
     with engine.begin() as conn:
         metadata = MetaData(bind=conn, schema=app_schema)
         reflect_table = Table('test_table', metadata, autoload_with=conn)
@@ -239,9 +227,9 @@ types_exploded = types_self_map + [
 
 
 @pytest.mark.parametrize('type_,val_in,val_out', types_exploded)
-def test_type_transformations(engine_with_types, type_, val_in, val_out):
+def test_type_transformations(engine, type_, val_in, val_out):
     # First we make sure the date/time input strings cast properly
-    with engine_with_types.begin() as conn:
+    with engine.begin() as conn:
         res = conn.execute(select(cast(val_in, type_))).scalar()
     assert res == val_out
 
@@ -249,13 +237,13 @@ def test_type_transformations(engine_with_types, type_, val_in, val_out):
 @pytest.mark.parametrize(
     'type_,out_in_map', [(tup[0], tup[2]) for tup in datetime_types]
 )
-def test_interval_insert_select(engine_email_type, type_, out_in_map):
+def test_interval_insert_select(engine_with_schema, type_, out_in_map):
     # Now we bulk test inserting and selecting
     fixed_type_self_map = [(key, key) for key in out_in_map]
     fixed_type_exploded = fixed_type_self_map + [
         (val, key) for key in out_in_map for val in out_in_map[key]
     ]
-    engine, app_schema = engine_email_type
+    engine, app_schema = engine_with_schema
     column_name = 'time_type'
     insert_dicts = [{column_name: tup[0]} for tup in fixed_type_exploded]
     output_values = [tup[1] for tup in fixed_type_exploded]
@@ -273,10 +261,10 @@ def test_interval_insert_select(engine_email_type, type_, out_in_map):
     assert all([res[i][0] == output_values[i] for i in range(len(res))])
 
 
-def test_interval_datetime_addition(engine_with_types):
+def test_interval_datetime_addition(engine):
     three_days_interval = cast('3 days 4 hours 30 minutes', datetime.Interval)
     the_date = cast('2020-01-01', datetime.TIMESTAMP_WITHOUT_TIME_ZONE)
-    with engine_with_types.begin() as conn:
+    with engine.begin() as conn:
         res = conn.execute(
             select(
                 cast(
@@ -288,10 +276,10 @@ def test_interval_datetime_addition(engine_with_types):
     assert res == '2020-01-04T04:30:00.0 AD'
 
 
-def test_interval_interval_addition(engine_with_types):
+def test_interval_interval_addition(engine):
     three_days_interval = cast('3 days 4 hours 30 minutes', datetime.Interval)
     five_days_interval = cast('5 days', datetime.Interval)
-    with engine_with_types.begin() as conn:
+    with engine.begin() as conn:
         res = conn.execute(
             select(cast(three_days_interval + five_days_interval, datetime.Interval))
         ).scalar()

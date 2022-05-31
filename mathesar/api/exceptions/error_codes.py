@@ -38,3 +38,5 @@ class ErrorCodes(Enum):
     URLDownloadError = 4404
     URLNotReachableError = 4405
     URLInvalidContentType = 4406
+    UnknownDBType = 4408
+    InvalidLinkChoice = 4409

@@ -28,7 +28,7 @@ from db.tables.operations.select import get_oid_from_table, reflect_table_from_o
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
-from mathesar.database.types import get_types
+from mathesar.database.types import UIType, get_ui_type_from_db_type
 
 
 NAME_CACHE_INTERVAL = 60 * 5
@@ -77,6 +77,9 @@ class DatabaseObject(ReflectionManagerMixin, BaseModel):
     def __str__(self):
         return f"{self.__class__.__name__}: {self.oid}"
 
+    def __repr__(self):
+        return f'<{self.__class__.__name__}: {self.oid}>'
+
 
 # TODO: Replace with a proper form of caching
 # See: https://github.com/centerofci/mathesar/issues/280
@@ -94,21 +97,24 @@ class Database(ReflectionManagerMixin, BaseModel):
         global _engines
         # We're caching this since the engine is used frequently.
         if self.name not in _engines:
-            _engines[self.name] = create_mathesar_engine(self.name)
-        return _engines[self.name]
+            engine = create_mathesar_engine(self.name)
+            _engines[self.name] = engine
+            return engine
+        else:
+            engine = _engines[self.name]
+            model_utils.ensure_cached_engine_ready(engine)
+            return engine
 
     @property
-    def supported_types(self):
-        supported_types = []
-        available_types = get_types(self._sa_engine)
-        for index, available_type in enumerate(available_types):
-            db_types = available_type['db_types']
-            db_type_list = [key for key in db_types.keys()]
-            if db_type_list:
-                # Remove SQLAlchemy implementation info.
-                available_type['db_types'] = db_type_list
-                supported_types.append(available_type)
-        return supported_types
+    def supported_ui_types(self):
+        """
+        At the moment we don't actually filter our UIType set based on whether or not a UIType's
+        constituent DB types are supported.
+        """
+        return UIType
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}: {self.name}, {self.id}'
 
 
 class Schema(DatabaseObject):
@@ -207,7 +213,7 @@ class Table(DatabaseObject):
     @cached_property
     def _enriched_column_sa_table(self):
         return column_utils.get_enriched_column_table(
-            self._sa_table, engine=self.schema._sa_engine,
+            self._sa_table, engine=self._sa_engine,
         )
 
     @cached_property
@@ -337,6 +343,19 @@ class Table(DatabaseObject):
         columns_map = bidict({column.name: column.id for column in columns})
         return columns_map
 
+    def get_columns_by_name(self, name_list):
+        columns_by_name_dict = {
+            col.name: col
+            for col
+            in Column.objects.filter(table=self)
+            if col.name in name_list
+        }
+        return [
+            columns_by_name_dict[col_name]
+            for col_name
+            in name_list
+        ]
+
 
 class Column(ReflectionManagerMixin, BaseModel):
     table = models.ForeignKey('Table', on_delete=models.CASCADE, related_name='columns')
@@ -352,6 +371,10 @@ class Column(ReflectionManagerMixin, BaseModel):
         except AttributeError:
             return getattr(self._sa_column, name)
 
+    @property
+    def _sa_engine(self):
+        return self.table._sa_engine
+
     @cached_property
     def _sa_column(self):
         return self.table.sa_columns[self.name]
@@ -359,8 +382,17 @@ class Column(ReflectionManagerMixin, BaseModel):
     @property
     def name(self):
         return get_column_name_from_attnum(
-            self.table.oid, self.attnum, self.table.schema._sa_engine
+            self.table.oid, self.attnum, self._sa_engine,
         )
+
+    @property
+    def ui_type(self):
+        if self.db_type:
+            return get_ui_type_from_db_type(self.db_type)
+
+    @property
+    def db_type(self):
+        return self._sa_column.db_type
 
 
 class Constraint(DatabaseObject):

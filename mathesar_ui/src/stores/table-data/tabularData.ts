@@ -73,12 +73,19 @@ export class TabularData {
       this.recordsData,
     );
 
-    this.columnsDataStore.on('columnRenamed', () => this.refresh());
-    this.columnsDataStore.on('columnAdded', () => this.recordsData.fetch());
-    this.columnsDataStore.on('columnDeleted', async (columnId: unknown) => {
-      this.meta.sorting.update((s) => s.without(columnId as number));
-      this.meta.grouping.update((g) => g.without(columnId as number));
-      this.meta.filtering.update((f) => f.withoutColumn(columnId as number));
+    this.columnsDataStore.on('columnRenamed', async () => {
+      await this.refresh();
+    });
+    this.columnsDataStore.on('columnAdded', async () => {
+      await this.recordsData.fetch();
+    });
+    this.columnsDataStore.on('columnDeleted', async (columnId) => {
+      this.meta.sorting.update((s) => s.without(columnId));
+      this.meta.grouping.update((g) => g.without(columnId));
+      this.meta.filtering.update((f) => f.withoutColumn(columnId));
+    });
+    this.columnsDataStore.on('columnPatched', async () => {
+      await this.recordsData.fetch();
     });
   }
 
@@ -97,7 +104,6 @@ export class TabularData {
   }
 
   destroy(): void {
-    this.display.destroy();
     this.recordsData.destroy();
     this.constraintsDataStore.destroy();
     this.columnsDataStore.destroy();

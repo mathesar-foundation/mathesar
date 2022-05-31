@@ -44,7 +44,6 @@ function getProps(
   const format = column.display_options?.number_format ?? null;
   const props = {
     locale: (format && localeMap.get(format)) ?? undefined,
-    isPercentage: column.display_options?.show_as_percentage ?? false,
     allowFloat: getAllowFloat(column, config?.floatAllowanceStrategy),
   };
   return props;
@@ -60,11 +59,6 @@ const numberType: CellComponentFactory = {
     };
   },
 
-  /**
-   * This should ideally return `StringifiedNumberInput` with props But since we
-   * require additional operations like `isPercentage`, it's better to use a
-   * dedicated `NumberCellInput` component.
-   */
   getInput(
     column: NumberColumn,
     config?: Config,
