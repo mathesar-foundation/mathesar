@@ -18,9 +18,9 @@ class Table_Filtered_Column_queryset(serializers.PrimaryKeyRelatedField):
     def get_queryset(self):
         table_id = self.context.get('table_id', None)
         queryset = super(Table_Filtered_Column_queryset, self).get_queryset()
-        if table_id == None or not queryset:
+        if table_id is None or not queryset:
             return None
-        return queryset.filter(table__id = table_id)
+        return queryset.filter(table__id=table_id)
 
 
 class BaseConstraintSerializer(serializers.ModelSerializer):
@@ -136,7 +136,7 @@ class ConstraintSerializer(
 
     def create(self, validated_data):
         serializer = self.get_serializer_class(self.get_mapping_field(validated_data))
-        if serializer == None:
+        if serializer is None:
             message = 'Unknown type passed.'
             raise base_api_exceptions.NotFoundAPIException(
                 ValidationError,
@@ -161,5 +161,5 @@ class ConstraintSerializer(
                 SyntaxError,
                 message=message,
                 status_code=status.HTTP_400_BAD_REQUEST
-                )
+            )
         return super(ConstraintSerializer, self).run_validation(data)
