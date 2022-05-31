@@ -99,8 +99,6 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
                 field='columns',
                 status_code=status.HTTP_400_BAD_REQUEST
             )
-        except Exception as e:
-            raise base_api_exceptions.MathesarAPIException(e)
         table_data.update(
             {
                 # There's no way to reflect actual column data without

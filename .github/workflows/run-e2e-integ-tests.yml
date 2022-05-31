@@ -34,7 +34,7 @@ jobs:
 
       - name: Build the stack
         run: docker-compose up --build -d
-      
+
       - name: Sleep for 60 seconds
         run: sleep 60s
         shell: bash
@@ -42,7 +42,7 @@ jobs:
       # TODO: This needs to be handled inside the tests
       - name: Run migrations
         run: docker exec mathesar_service python manage.py migrate
-      
+
       - name: Run type installation
         run: docker exec mathesar_service python install.py --skip-confirm
 
@@ -50,7 +50,7 @@ jobs:
         run: docker exec -w /code/mathesar_ui mathesar_service npx vite build
 
       - name: Run integ tests with pytest
-        run: docker exec mathesar_service pytest --browser chromium --browser webkit --browser firefox --video="on" --output="./videos/" mathesar/tests/integration/
+        run: docker exec mathesar_service pytest --browser chromium --browser webkit --browser firefox --video="on" --output="./videos/" mathesar/tests/integration/ -n0
 
       - uses: actions/upload-artifact@v2
         if: ${{ failure() || success() }}

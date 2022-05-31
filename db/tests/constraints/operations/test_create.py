@@ -9,8 +9,8 @@ from db.tables.operations.select import get_oid_from_table, reflect_table_from_o
 from db.tests.constraints import utils as test_utils
 
 
-def test_create_single_column_unique_constraint(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_create_single_column_unique_constraint(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "orders_1"
     unique_column_name = 'product_name'
     table = Table(
@@ -33,8 +33,8 @@ def test_create_single_column_unique_constraint(engine_with_schema):
     assert list(unique_constraint.columns)[0].name == unique_column_name
 
 
-def test_create_multiple_column_unique_constraint(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_create_multiple_column_unique_constraint(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "orders_2"
     unique_column_names = ['product_name', 'customer_name']
     table = Table(
@@ -59,8 +59,8 @@ def test_create_multiple_column_unique_constraint(engine_with_schema):
     assert set([column.name for column in unique_constraint.columns]) == set(unique_column_names)
 
 
-def test_create_unique_constraint_with_custom_name(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_create_unique_constraint_with_custom_name(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "orders_4"
     unique_column_name = 'product_name'
     constraint_name = 'unique_product_name'
@@ -84,8 +84,8 @@ def test_create_unique_constraint_with_custom_name(engine_with_schema):
     assert list(unique_constraint.columns)[0].name == unique_column_name
 
 
-def test_create_unique_constraint_with_duplicate_name(engine_with_schema):
-    engine, schema = engine_with_schema
+def test_create_unique_constraint_with_duplicate_name(engine_with_schema_without_updated_ischema_names):
+    engine, schema = engine_with_schema_without_updated_ischema_names
     table_name = "orders_4"
     unique_column_names = ['product_name', 'customer_name']
     constraint_name = 'unique_product_name'
