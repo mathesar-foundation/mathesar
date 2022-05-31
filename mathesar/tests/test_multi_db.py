@@ -4,19 +4,18 @@ from django.core.exceptions import ValidationError
 
 from mathesar.models import Table, Schema, Database
 from mathesar.reflection import reflect_db_objects
-from mathesar.database.base import create_mathesar_engine
 
 
 @pytest.fixture(autouse=True)
-def multi_db_test_db(create_temp_dj_db, uid):
+def multi_db_test_db(FUN_create_dj_db, uid):
     db_name = f"mathesar_multi_db_test_{uid}"
-    create_temp_dj_db(db_name)
+    FUN_create_dj_db(db_name)
     return db_name
 
 
 @pytest.fixture
-def multi_db_engine(multi_db_test_db):
-    return create_mathesar_engine(multi_db_test_db)
+def multi_db_engine(multi_db_test_db, MOD_engine_cache):
+    return MOD_engine_cache(multi_db_test_db)
 
 
 def test_multi_db_schema(engine, multi_db_engine, client, create_db_schema):
