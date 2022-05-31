@@ -314,8 +314,6 @@ def test_column_alter_same_type_display_options(
     column_index = 2
     column = columns[column_index]
     pre_alter_display_options = column.display_options
-    print("----------------------------------------------------")
-    print(pre_alter_display_options)
     with engine.begin() as conn:
         alter_column_type(table.oid, column.name, engine, conn, PostgresType.NUMERIC)
     column_id = column.id
