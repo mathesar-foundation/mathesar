@@ -134,6 +134,7 @@ def create_uri_casts(engine):
     type_body_map = _get_uri_type_body_map()
     create_cast_functions(MathesarCustomType.URI, type_body_map, engine)
 
+
 def create_numeric_casts(engine):
     numeric_array_create = _build_numeric_array_function()
     with engine.begin() as conn:
@@ -938,28 +939,33 @@ def _build_numeric_array_function():
     """
     qualified_function_name = get_qualified_name(NUMERIC_ARR_FUNC_NAME)
 
-    no_separator = r"[0-9]+(?:([.,])[0-9]+)?"
-    period_sep_comma_decimal = r"[0-9]{1,3}(?:(\.)[0-9]{3})+(?:(,)[0-9]+)?"
-    comma_sep_period_decimal = r"[0-9]{1,3}(?:(,)[0-9]{3})+(?:(\.)[0-9]+)?"
-    space_sep_comma_decimal = r"[0-9]{1,3}(?:( )[0-9]{3})+(?:(,)[0-9]+)?"
-    comma_sep_period_decimal_lakh = r"[0-9]{1,3}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?"
-    apostophe_sep_period_decima = r"[0-9]{1,3}(?:(\'')[0-9]{3})+(?:(\.)[0-9]+)?"
+    no_separator_big = r"[0-9]{4,}(?:([,.])[0-9]+)?"
+    no_separator_small = r"[0-9]{1,3}(?:([,.])[0-9]{1,2}|[0-9]{4,})?"
+    comma_separator_req_decimal = r"[0-9]{1,3}(,)[0-9]{3}(\.)[0-9]+"
+    period_separator_req_decimal = r"[0-9]{1,3}(\.)[0-9]{3}(,)[0-9]+"
+    comma_separator_opt_decimal = r"[0-9]{1,3}(?:(,)[0-9]{3}){2,}(?:(\.)[0-9]+)?"
+    period_separator_opt_decimal = r"[0-9]{1,3}(?:(\.)[0-9]{3}){2,}(?:(,)[0-9]+)?"
+    space_separator_opt_decimal = r"[0-9]{1,3}(?:( )[0-9]{3})+(?:([,.])[0-9]+)?"
+    comma_separator_lakh_system = r"[0-9]{1,2}(?:(,)[0-9]{2})+,[0-9]{3}(?:(\.)[0-9]+)?"
+    single_quote_separator_opt_decimal = r"[0-9]{1,3}(?:(\'')[0-9]{3})+(?:([.])[0-9]+)?"
 
     inner_number_tree = "|".join(
         [
-            no_separator,
-            period_sep_comma_decimal,
-            comma_sep_period_decimal,
-            space_sep_comma_decimal,
-            comma_sep_period_decimal_lakh,
-            apostophe_sep_period_decima
-        ]
-    )
-    numeric_finding_regex = f"^[-+]?(?:({inner_number_tree}))$"
+            no_separator_big,
+            no_separator_small,
+            comma_separator_req_decimal,
+            period_separator_req_decimal,
+            comma_separator_opt_decimal,
+            period_separator_opt_decimal,
+            space_separator_opt_decimal,
+            comma_separator_lakh_system,
+            single_quote_separator_opt_decimal
+        ])
+    numeric_finding_regex = f"^(?:[+-]?({inner_number_tree}))$"
 
     actual_number_indices = [1]
-    group_divider_indices = [3, 5, 7, 9, 11]
-    decimal_point_indices = [2, 4, 6, 8, 10, 12]
+    group_divider_indices = [4, 6, 8, 10, 12, 14, 16]
+    decimal_point_indices = [2, 3, 5, 7, 9, 11, 13, 15, 17]
     actual_numbers_str = ','.join([f'raw_arr[{idx}]' for idx in actual_number_indices])
     group_dividers_str = ','.join([f'raw_arr[{idx}]' for idx in group_divider_indices])
     decimal_points_str = ','.join([f'raw_arr[{idx}]' for idx in decimal_point_indices])

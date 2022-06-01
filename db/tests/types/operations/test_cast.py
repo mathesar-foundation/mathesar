@@ -1294,8 +1294,8 @@ numeric_array_examples = [
 
 
 @pytest.mark.parametrize("source_str,expect_arr", numeric_array_examples)
-def test_numeric_array_sql(engine_email_type, source_str, expect_arr):
-    engine, _ = engine_email_type
+def test_numeric_array_sql(engine_with_schema, source_str, expect_arr):
+    engine, _ = engine_with_schema
     with engine.begin() as conn:
         res = conn.execute(
             select(

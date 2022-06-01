@@ -22,7 +22,6 @@ INTEGER_TYPES = frozenset({
 
 DECIMAL_TYPES = frozenset({
     PostgresType.DOUBLE_PRECISION,
-    PostgresType.NUMERIC,
     PostgresType.REAL,
 })
 
@@ -72,7 +71,7 @@ MONEY_TYPES = frozenset({
 NUMERIC_TYPES = frozenset({
     *INTEGER_TYPES,
     *DECIMAL_TYPES,
-    frozenset([PostgresType.NUMERIC])
+    PostgresType.NUMERIC
 })
 
 # Comparable types are those that should support greater, lesser, equal comparisons amongst

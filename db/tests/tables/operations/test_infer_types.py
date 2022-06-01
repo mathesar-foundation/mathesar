@@ -10,21 +10,17 @@ from db.types.base import PostgresType, MathesarCustomType, get_db_type_enum_fro
 
 type_data_list = [
     (
-        PostgresType.NUMERIC,
-        [0, 2, 1, 0],
-        PostgresType.NUMERIC),
-    (
         PostgresType.TEXT,
         [
             "3.14",
-            "1,41421",
+            "1,41",
             "149,600,000.00",
             "4.543.000.000,005",
             "13 800 000 000,00",
             "7,53,00,00,000.0",
             "140'004'453.0",
             "-3.14",
-            "-1,41421",
+            "-1,41",
             "-149,600,000.00",
             "-4.543.000.000,005",
             "-13 800 000 000,00",
