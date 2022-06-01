@@ -160,7 +160,7 @@
       bind:isOpen={menuIsOpen}
       triggerClass="column-opts"
       triggerAppearance="plain"
-      contentClass="column-opts-content"
+      contentClass="no-max-height column-opts-content"
       on:close={setDefaultView}
     >
       <ColumnName slot="trigger" {column} />

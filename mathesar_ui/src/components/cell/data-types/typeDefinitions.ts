@@ -4,8 +4,15 @@ import type { ComponentAndProps } from '@mathesar-component-library/types';
 // The types here are frontend types and are
 // different from db types.
 // One frontend type can map to multiple db types
-// Yet to add: 'money' | 'date' | 'time' | 'datetime'
-export type CellDataType = 'string' | 'boolean' | 'number' | 'uri' | 'duration';
+export type CellDataType =
+  | 'string'
+  | 'boolean'
+  | 'number'
+  | 'uri'
+  | 'duration'
+  | 'date'
+  | 'time'
+  | 'datetime';
 
 export type CellColumnLike = Pick<
   Column,

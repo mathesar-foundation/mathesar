@@ -77,10 +77,7 @@
 
     :global(.input-element) {
       box-shadow: none;
-
-      &:focus {
-        border: none;
-      }
+      border: none;
     }
 
     &.is-edit-mode {
