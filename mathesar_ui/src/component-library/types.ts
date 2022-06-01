@@ -16,3 +16,4 @@ export * from './text-input/TextInputTypes';
 export * from './text-area/TextAreaTypes';
 export * from './select/SelectTypes';
 export * from './number-input/NumberInputTypes';
+export * from './date-time-picker/DateTimePickerTypes';

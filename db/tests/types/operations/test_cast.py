@@ -1105,8 +1105,8 @@ def test_alter_column_type_raises_on_bad_parameters(
             assert e.orig == InvalidParameterValue
 
 
-def test_get_column_cast_expression_unchanged(engine_with_schema_without_updated_ischema_names):
-    engine, _ = engine_with_schema_without_updated_ischema_names
+def test_get_column_cast_expression_unchanged(engine_with_schema):
+    engine, _ = engine_with_schema
     target_type = PostgresType.NUMERIC
     col_name = "my_column"
     column = Column(col_name, NUMERIC)
@@ -1116,8 +1116,8 @@ def test_get_column_cast_expression_unchanged(engine_with_schema_without_updated
     assert cast_expr == column
 
 
-def test_get_column_cast_expression_change(engine_with_schema_without_updated_ischema_names):
-    engine, _ = engine_with_schema_without_updated_ischema_names
+def test_get_column_cast_expression_change(engine_with_schema):
+    engine, _ = engine_with_schema
     target_type = PostgresType.BOOLEAN
     col_name = "my_column"
     column = Column(col_name, NUMERIC)
@@ -1127,8 +1127,8 @@ def test_get_column_cast_expression_change(engine_with_schema_without_updated_is
     assert str(cast_expr) == f"mathesar_types.cast_to_boolean({col_name})"
 
 
-def test_get_column_cast_expression_change_quotes(engine_with_schema_without_updated_ischema_names):
-    engine, _ = engine_with_schema_without_updated_ischema_names
+def test_get_column_cast_expression_change_quotes(engine_with_schema):
+    engine, _ = engine_with_schema
     target_type = PostgresType.BOOLEAN
     col_name = "A Column Needing Quotes"
     column = Column(col_name, NUMERIC)
@@ -1138,8 +1138,8 @@ def test_get_column_cast_expression_change_quotes(engine_with_schema_without_upd
     assert str(cast_expr) == f'mathesar_types.cast_to_boolean("{col_name}")'
 
 
-def test_get_column_cast_expression_unsupported(engine_with_schema_without_updated_ischema_names):
-    engine, _ = engine_with_schema_without_updated_ischema_names
+def test_get_column_cast_expression_unsupported(engine_without_ischema_names_updated):
+    engine = engine_without_ischema_names_updated
     target_type = MathesarCustomType.URI
     column = Column("colname", NUMERIC)
     with pytest.raises(cast_operations.UnsupportedTypeException):
