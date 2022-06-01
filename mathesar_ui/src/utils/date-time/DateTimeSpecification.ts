@@ -38,7 +38,7 @@ function combine<T>(
 
 function getDateFormattingStringMap(): Record<DateFormat, string> {
   // Galaxy Quest was released on this day
-  const constDate = new Date('1999-12-25');
+  const constDate = new Date('1999-12-25T00:00');
   const localeString = constDate.toLocaleDateString();
   const localeFormat = localeString
     .replace('25', 'DD')
