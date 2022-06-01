@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tick } from 'svelte';
+  import { getContext, tick } from 'svelte';
   import {
     faCog,
     faChevronRight,
@@ -13,25 +13,32 @@
     TextInput,
     SpinnerArea,
   } from '@mathesar-component-library';
-  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
+  import type {
+    ConstraintsDataStore,
+    TabularDataStore,
+  } from '@mathesar/stores/table-data/types';
   import { focusAndSelectAll } from '@mathesar/utils/domUtils';
   import type {
     Meta,
-    ColumnPosition,
     ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
   import ColumnName from '@mathesar/components/ColumnName.svelte';
+  import { getErrorMessage } from '@mathesar/utils/errors';
   import DefaultOptions from './DefaultOptions.svelte';
   import AbstractTypeConfiguration from './abstract-type-configuration/AbstractTypeConfiguration.svelte';
   import type { ProcessedTableColumn } from '../../utils';
+  import ColumnResizer from './ColumnResizer.svelte';
 
-  export let columnPosition: ColumnPosition | undefined = undefined;
+  const tabularData = getContext<TabularDataStore>('tabularData');
+
   export let processedColumn: ProcessedTableColumn;
   export let meta: Meta;
   export let columnsDataStore: ColumnsDataStore;
   export let constraintsDataStore: ConstraintsDataStore;
 
   $: ({ column, abstractTypeOfColumn } = processedColumn);
+  $: ({ display } = $tabularData);
+  $: ({ columnWidths, columnPositions } = display);
 
   let menuIsOpen = false;
   let renamingInputElement: HTMLInputElement | undefined;
@@ -89,7 +96,7 @@
     if (isSubmittingRename || !isRenaming) {
       // When the user presses Enter, the TextInput will dispatch an 'enter'
       // event as well as a 'blur' event. Since we're handling both events, we
-      // need to make sure this function dosen't run twice.
+      // need to make sure this function doesn't run twice.
       //
       // Similarly, when the user presses Esc, we need to make sure not to
       // proceed with submitting a rename operation.
@@ -111,8 +118,7 @@
       await columnsDataStore.rename(column.id, newName);
       isRenaming = false;
     } catch (error) {
-      // @ts-ignore: https://github.com/centerofci/mathesar/issues/1055
-      toast.error(`Unable to rename column. ${error?.message as string}`);
+      toast.error(`Unable to rename column. ${getErrorMessage(error)}`);
       if (!allowRetry) {
         isRenaming = false;
       }
@@ -131,10 +137,10 @@
 </script>
 
 <div
-  class="cell"
+  class="cell header-cell"
   style="
-    width:{columnPosition?.width || 0}px;
-    left:{columnPosition?.left || 0}px;
+    width:{$columnWidths.get(column.id) ?? 0}px;
+    left:{$columnPositions.get(column.id) ?? 0}px;
   "
 >
   {#if isRenaming}
@@ -211,6 +217,7 @@
       >
     </Dropdown>
   {/if}
+  <ColumnResizer columnId={column.id} />
 </div>
 
 <style global lang="scss">

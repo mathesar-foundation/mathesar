@@ -12,8 +12,8 @@ from db.tables.operations.select import get_oid_from_table
 from db.tests.columns.utils import column_test_dict, get_default
 
 
-def test_get_attnum_from_name(engine_with_schema_without_updated_ischema_names):
-    engine, schema = engine_with_schema_without_updated_ischema_names
+def test_get_attnum_from_name(engine_with_schema):
+    engine, schema = engine_with_schema
     table_name = "table_with_columns"
     zero_name = "colzero"
     one_name = "colone"
@@ -31,8 +31,8 @@ def test_get_attnum_from_name(engine_with_schema_without_updated_ischema_names):
     assert get_column_name_from_attnum(table_oid, column_one_attnum, engine) == one_name
 
 
-def test_get_attnum_from_names(engine_with_schema_without_updated_ischema_names):
-    engine, schema = engine_with_schema_without_updated_ischema_names
+def test_get_attnum_from_names(engine_with_schema):
+    engine, schema = engine_with_schema
     table_name = "table_with_columns"
     zero_name = "colzero"
     one_name = "colone"
@@ -84,8 +84,8 @@ get_column_generated_default_test_list = [
 
 
 @pytest.mark.parametrize("col", get_column_generated_default_test_list)
-def test_get_column_generated_default(engine_with_schema_without_updated_ischema_names, col):
-    engine, schema = engine_with_schema_without_updated_ischema_names
+def test_get_column_generated_default(engine_with_schema, col):
+    engine, schema = engine_with_schema
     table_name = "get_column_generated_default_table"
     table = Table(
         table_name,

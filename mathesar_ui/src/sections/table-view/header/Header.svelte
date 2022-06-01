@@ -4,8 +4,6 @@
   import type {
     TabularDataStore,
     Column,
-    ColumnPosition,
-    ColumnPositionMap,
   } from '@mathesar/stores/table-data/types';
   import HeaderCell from './header-cell/HeaderCell.svelte';
   import NewColumnCell from './new-column-cell/NewColumnCell.svelte';
@@ -14,7 +12,7 @@
   const tabularData = getContext<TabularDataStore>('tabularData');
 
   $: ({ columnsDataStore, meta, display, constraintsDataStore } = $tabularData);
-  $: ({ horizontalScrollOffset, columnPositionMap } = display);
+  $: ({ horizontalScrollOffset } = display);
 
   export let processedTableColumnsMap: ProcessedTableColumnMap;
 
@@ -32,13 +30,6 @@
     if ($horizontalScrollOffset !== scrollLeft) {
       $horizontalScrollOffset = scrollLeft;
     }
-  }
-
-  function getColumnPosition(
-    _columnPositionMap: ColumnPositionMap,
-    _id: Column['id'],
-  ): ColumnPosition | undefined {
-    return _columnPositionMap.get(_id);
   }
 
   onMount(() => {
@@ -70,7 +61,6 @@
       {meta}
       {columnsDataStore}
       {constraintsDataStore}
-      columnPosition={getColumnPosition($columnPositionMap, columnId)}
     />
   {/each}
 
