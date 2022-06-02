@@ -873,9 +873,9 @@ type_test_data_args_list = [
     (
         PostgresType.CHARACTER_VARYING,
         PostgresType.NUMERIC,
-        {"precision": 5, "scale": 2},
-        "500.134",
-        Decimal("500.13"),
+        {"precision": 6, "scale": 2},
+        "5000.134",
+        Decimal("5000.13"),
     ),
     (
         PostgresType.TIME_WITHOUT_TIME_ZONE,
