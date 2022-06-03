@@ -6,6 +6,7 @@ import type { ComponentAndProps } from '@mathesar-component-library/types';
 // One frontend type can map to multiple db types
 export type CellDataType =
   | 'string'
+  | 'email'
   | 'boolean'
   | 'number'
   | 'uri'
