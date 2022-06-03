@@ -2,6 +2,7 @@
   import type { CellValueFormatter } from './cell/utils';
 
   import Null from './Null.svelte';
+  import Default from './Default.svelte';
 
   type Value = $$Generic;
 
@@ -13,6 +14,8 @@
 
 {#if value === null}
   <Null />
+{:else if value === undefined}
+  <Default />
 {:else if typeof value !== 'undefined'}
   <slot {formattedValue}>
     {formattedValue}

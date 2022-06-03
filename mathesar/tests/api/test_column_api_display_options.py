@@ -28,7 +28,7 @@ def column_test_table_with_service_layer_options(patent_schema):
     column_data_list = [
         {},
         {'display_options': {'input': "dropdown", "custom_labels": {"TRUE": "yes", "FALSE": "no"}}, 'show_fk_preview': True},
-        {'display_options': {'show_as_percentage': True, 'number_format': "english", 'show_fk_preview': True}},
+        {'display_options': {'show_as_percentage': True, 'number_format': "english", 'show_fk_preview': True, "use_grouping": 'auto'}},
         {'display_options': None},
         {},
         {
@@ -91,18 +91,23 @@ _create_display_options_test_list = [
     ),
     (
         PostgresType.MONEY,
-        {'number_format': "english", 'currency_symbol': '$', 'currency_symbol_location': 'after-minus'},
-        {'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'number_format': "english", 'show_fk_preview': True}
+        {'number_format': "english", 'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'use_grouping': 'true'},
+        {'currency_symbol': '$', 'currency_symbol_location': 'after-minus', 'number_format': "english", 'use_grouping': 'true', 'show_fk_preview': True}
     ),
     (
         PostgresType.NUMERIC,
-        {"show_as_percentage": True, 'number_format': None},
-        {"show_as_percentage": True, 'number_format': None, 'show_fk_preview': True}
+        {},
+        {"show_as_percentage": False, 'number_format': None, 'use_grouping': 'auto', 'show_fk_preview': True}
     ),
     (
         PostgresType.NUMERIC,
-        {"show_as_percentage": True, 'number_format': "english"},
-        {"show_as_percentage": True, 'number_format': "english", 'show_fk_preview': True}
+        {"show_as_percentage": True, 'number_format': None, 'use_grouping': 'false'},
+        {"show_as_percentage": True, 'number_format': None, 'use_grouping': 'false', 'show_fk_preview': True}
+    ),
+    (
+        PostgresType.NUMERIC,
+        {"show_as_percentage": True, 'number_format': "english", 'use_grouping': 'auto'},
+        {"show_as_percentage": True, 'number_format': "english", 'use_grouping': 'auto', 'show_fk_preview': True}
     ),
     (
         PostgresType.TIMESTAMP_WITH_TIME_ZONE,

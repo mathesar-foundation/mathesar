@@ -1,5 +1,8 @@
 import { faHashtag } from '@fortawesome/free-solid-svg-icons';
-import type { NumberDisplayOptions } from '@mathesar/api/tables/columns';
+import type {
+  NumberDisplayOptions,
+  NumberFormat,
+} from '@mathesar/api/tables/columns';
 import type { FormValues } from '@mathesar-component-library/types';
 import type { DbType } from '@mathesar/AppTypes';
 import type { Column } from '@mathesar/stores/table-data/types';
@@ -200,7 +203,12 @@ function constructDbFormValuesFromTypeOptions(
 
 const displayForm: AbstractTypeConfigForm = {
   variables: {
-    format: {
+    useGrouping: {
+      type: 'string',
+      enum: ['true', 'false', 'auto'],
+      default: 'auto',
+    },
+    numberFormat: {
       type: 'string',
       enum: ['none', 'english', 'german', 'french', 'hindi', 'swiss'],
       default: 'none',
@@ -211,7 +219,17 @@ const displayForm: AbstractTypeConfigForm = {
     elements: [
       {
         type: 'input',
-        variable: 'format',
+        variable: 'useGrouping',
+        label: 'Digit Grouping',
+        options: {
+          true: { label: 'On' },
+          false: { label: 'Off' },
+          auto: { label: 'Auto' },
+        },
+      },
+      {
+        type: 'input',
+        variable: 'numberFormat',
         label: 'Format',
         options: {
           none: { label: 'Use browser locale' },
@@ -227,23 +245,30 @@ const displayForm: AbstractTypeConfigForm = {
 };
 
 function determineDisplayOptions(
-  dispFormValues: FormValues,
+  formValues: FormValues,
 ): Column['display_options'] {
-  const displayOptions: Column['display_options'] = {};
-  if (dispFormValues.format !== 'none') {
-    displayOptions.number_format = dispFormValues.format;
-  }
-  return displayOptions;
+  const opts: Partial<NumberDisplayOptions> = {
+    number_format:
+      formValues.numberFormat === 'none'
+        ? undefined
+        : (formValues.numberFormat as NumberFormat),
+    use_grouping:
+      (formValues.useGrouping as
+        | NumberDisplayOptions['use_grouping']
+        | undefined) ?? 'auto',
+  };
+  return opts;
 }
 
 function constructDisplayFormValuesFromDisplayOptions(
   columnDisplayOpts: Column['display_options'],
 ): FormValues {
   const displayOptions = columnDisplayOpts as NumberDisplayOptions | null;
-  const dispFormValues: FormValues = {
-    format: displayOptions?.number_format ?? 'none',
+  const formValues: FormValues = {
+    numberFormat: displayOptions?.number_format ?? 'none',
+    useGrouping: displayOptions?.use_grouping ?? 'auto',
   };
-  return dispFormValues;
+  return formValues;
 }
 
 const numberType: AbstractTypeConfiguration = {

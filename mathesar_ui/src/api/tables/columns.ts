@@ -19,14 +19,12 @@ interface FormattedNumberDisplayOptions {
   number_format: NumberFormat | null;
 
   /**
-   * PLANNED FOR FUTURE IMPLEMENTATION POST-ALPHA.
-   *
    * - "true": display grouping separators even if the locale prefers otherwise.
    * - "false": do not display grouping separators.
    * - "auto": display grouping separators based on the locale preference, which
    *   may also be dependent on the currency"
    */
-  // use_grouping: 'true' | 'false' | 'auto';
+  use_grouping: 'true' | 'false' | 'auto';
 }
 
 export interface NumberDisplayOptions
