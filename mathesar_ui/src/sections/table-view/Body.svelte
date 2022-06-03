@@ -84,22 +84,19 @@
 
   function checkAndResetActiveCell(e: Event) {
     const target = e.target as HTMLElement;
-    // Use this class for elements attached out of cell element
-    // which are part of cell interaction
-    if (target.closest('.retain-active-cell')) {
-      return;
-    }
-
     const targetMissing = !document.body.contains(target);
     let clearActiveCell = false;
 
     if (targetMissing) {
       const focusedElementNotWithinEditableCell =
         !document.activeElement ||
-        !document.activeElement.closest('.editable-cell');
+        (!document.activeElement.closest('.editable-cell') &&
+          !document.activeElement.closest('.retain-active-cell'));
       clearActiveCell = focusedElementNotWithinEditableCell;
     } else {
-      const targetNotWithinEditableCell = !target.closest('.editable-cell');
+      const targetNotWithinEditableCell =
+        !target.closest('.editable-cell') &&
+        !target.closest('.retain-active-cell');
       clearActiveCell = targetNotWithinEditableCell;
     }
 
