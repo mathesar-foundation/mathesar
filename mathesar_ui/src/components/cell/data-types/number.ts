@@ -1,4 +1,8 @@
-import type { NumberColumn, NumberFormat } from '@mathesar/api/tables/columns';
+import type {
+  NumberColumn,
+  NumberDisplayOptions,
+  NumberFormat,
+} from '@mathesar/api/tables/columns';
 import type { ComponentAndProps } from '@mathesar-component-library/types';
 import NumberCell from './components/number/NumberCell.svelte';
 import NumberCellInput from './components/number/NumberCellInput.svelte';
@@ -37,6 +41,20 @@ function getAllowFloat(
   return true;
 }
 
+function getUseGrouping(
+  apiUseGrouping: NumberDisplayOptions['use_grouping'],
+): NumberCellExternalProps['useGrouping'] {
+  switch (apiUseGrouping) {
+    case 'true':
+      return true;
+    case 'false':
+      return false;
+    case 'auto':
+    default:
+      return 'auto';
+  }
+}
+
 function getProps(
   column: NumberColumn,
   config?: Config,
@@ -44,6 +62,7 @@ function getProps(
   const format = column.display_options?.number_format ?? null;
   const props = {
     locale: (format && localeMap.get(format)) ?? undefined,
+    useGrouping: getUseGrouping(column.display_options?.use_grouping ?? 'auto'),
     allowFloat: getAllowFloat(column, config?.floatAllowanceStrategy),
   };
   return props;
