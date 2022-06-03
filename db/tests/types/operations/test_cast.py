@@ -542,8 +542,18 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             PostgresType.NUMERIC: {
                 VALID: [
-                    ("1.2", Decimal("1.2")),
-                    ("1", Decimal("1")),
+                    ("3.14", Decimal("3.14")),
+                    ("123,456.7", Decimal("123456.7")),
+                    ("123.456,7", Decimal("123456.7")),
+                    ("123 456,7", Decimal("123456.7")),
+                    ("1,23,456.7", Decimal("123456.7")),
+                    ("123'456.7", Decimal("123456.7")),
+                    ("-3.14", Decimal("-3.14")),
+                    ("-123,456.7", Decimal("-123456.7")),
+                    ("-123.456,7", Decimal("-123456.7")),
+                    ("-123 456,7", Decimal("-123456.7")),
+                    ("-1,23,456.7", Decimal("-123456.7")),
+                    ("-123'456.7", Decimal("-123456.7"))
                 ],
                 INVALID: ["not a number"],
             },
@@ -677,8 +687,18 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             PostgresType.NUMERIC: {
                 VALID: [
-                    ("1.2", Decimal("1.2")),
-                    ("1", Decimal("1")),
+                    ("3.14", Decimal("3.14")),
+                    ("123,456.7", Decimal("123456.7")),
+                    ("123.456,7", Decimal("123456.7")),
+                    ("123 456,7", Decimal("123456.7")),
+                    ("1,23,456.7", Decimal("123456.7")),
+                    ("123'456.7", Decimal("123456.7")),
+                    ("-3.14", Decimal("-3.14")),
+                    ("-123,456.7", Decimal("-123456.7")),
+                    ("-123.456,7", Decimal("-123456.7")),
+                    ("-123 456,7", Decimal("-123456.7")),
+                    ("-1,23,456.7", Decimal("-123456.7")),
+                    ("-123'456.7", Decimal("-123456.7"))
                 ],
                 INVALID: ["not a number"],
             },
@@ -853,9 +873,9 @@ type_test_data_args_list = [
     (
         PostgresType.CHARACTER_VARYING,
         PostgresType.NUMERIC,
-        {"precision": 5, "scale": 2},
-        "500.134",
-        Decimal("500.13"),
+        {"precision": 6, "scale": 2},
+        "5000.134",
+        Decimal("5000.13"),
     ),
     (
         PostgresType.TIME_WITHOUT_TIME_ZONE,
@@ -1252,6 +1272,34 @@ def test_mathesar_money_array_sql(engine_with_schema, source_str, expect_arr):
         res = conn.execute(
             select(
                 text(f"mathesar_types.get_mathesar_money_array('{source_str}'::text)")
+            )
+        ).scalar()
+    assert res == expect_arr
+
+
+numeric_array_examples = [
+    ('3.14', ['3.14', None, '.']),
+    ('331,209.00', ['331,209.00', ',', '.']),
+    ('1,234,567.8910', ['1,234,567.8910', ',', '.']),
+    ('-1,234,567.8910', ['1,234,567.8910', ',', '.']),
+    ('3,14', ['3,14', None, ',']),
+    ('331.293,00', ['331.293,00', '.', ',']),
+    ('1.234.567,8910', ['1.234.567,8910', '.', ',']),
+    ('331 293,00', ['331 293,00', ' ', ',']),
+    ('1 234 567,8910', ['1 234 567,8910', ' ', ',']),
+    ('-1 234 567,8910', ['1 234 567,8910', ' ', ',']),
+    ('1,23,45,678.910', ['1,23,45,678.910', ',', '.']),
+    ('1\'\'234\'\'567.8910', ['1\'234\'567.8910', '\'', '.']),
+]
+
+
+@pytest.mark.parametrize("source_str,expect_arr", numeric_array_examples)
+def test_numeric_array_sql(engine_with_schema, source_str, expect_arr):
+    engine, _ = engine_with_schema
+    with engine.begin() as conn:
+        res = conn.execute(
+            select(
+                text(f"mathesar_types.get_numeric_array('{source_str}'::text)")
             )
         ).scalar()
     assert res == expect_arr

@@ -143,6 +143,18 @@ class AbstractNumberDisplayOptionSerializer(BaseDisplayOptionsSerializer):
         choices=['english', 'german', 'french', 'hindi', 'swiss']
     )
 
+    use_grouping = serializers.ChoiceField(required=False, choices=['true', 'false', 'auto'], default='auto')
+    """
+    The choices here correspond to the options available for the `useGrouping`
+    property within the [Intl API][1]. True and False are encoded as strings
+    instead of booleans to maintain consistency with the Intl API and to keep
+    the type consistent. We did considering using an optional boolean but
+    decided a string would be better, especially if we want to support other
+    options eventually, like "min2".
+
+    [1]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
+    """
+
 
 class NumberDisplayOptionSerializer(AbstractNumberDisplayOptionSerializer):
     show_as_percentage = serializers.BooleanField(default=False)

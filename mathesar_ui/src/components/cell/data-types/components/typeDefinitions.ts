@@ -1,7 +1,9 @@
 import type {
   FormattedInputProps,
   SelectProps,
+  StringifiedNumberInputProps,
 } from '@mathesar-component-library/types';
+import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
 
 export interface CellTypeProps<Value> {
   value: Value | null | undefined;
@@ -30,6 +32,7 @@ export type TextAreaCellProps = TextBoxCellProps;
 export interface NumberCellExternalProps {
   locale?: string;
   allowFloat: boolean;
+  useGrouping: StringifiedNumberInputProps['useGrouping'];
 }
 
 export interface NumberCellProps
@@ -53,7 +56,7 @@ export interface SingleSelectCellProps<Option>
   extends CellTypeProps<Option>,
     SingleSelectCellExternalProps<Option> {}
 
-// Duration
+// FormattedInput
 
 export type FormattedInputCellExternalProps = Omit<
   FormattedInputProps<string>,
@@ -63,5 +66,21 @@ export type FormattedInputCellExternalProps = Omit<
 export interface FormattedInputCellProps
   extends CellTypeProps<string>,
     FormattedInputCellExternalProps {}
+
+// DateInput
+
+export interface DateTimeCellExternalProps {
+  type: 'date' | 'time' | 'datetime';
+  formattingString: string;
+  formatter: DateTimeFormatter;
+  timeShow24Hr?: boolean;
+  timeEnableSeconds?: boolean;
+}
+
+export interface DateTimeCellProps
+  extends CellTypeProps<string>,
+    DateTimeCellExternalProps {}
+
+// Common
 
 export type HorizontalAlignment = 'left' | 'right' | 'center';
