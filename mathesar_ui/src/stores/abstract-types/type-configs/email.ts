@@ -5,7 +5,7 @@ const emailType: AbstractTypeConfiguration = {
   icon: { data: faEnvelope },
   defaultDbType: 'mathesar_types.email',
   cell: {
-    type: 'email',
+    type: 'string',
   },
 };
 
