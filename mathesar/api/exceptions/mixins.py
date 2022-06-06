@@ -1,4 +1,4 @@
-from rest_framework.serializers import Serializer
+from rest_framework.serializers import ListSerializer, Serializer
 from rest_framework.utils.serializer_helpers import ReturnList
 from rest_framework_friendly_errors.mixins import FriendlyErrorMessagesMixin
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -39,6 +39,22 @@ class MathesarErrorMessageMixin(FriendlyErrorMessagesMixin):
                     field.initial_data = self.initial_data[error_type]
                     child_errors = field.build_pretty_errors(errors[error_type])
                     pretty += child_errors
+                    continue
+                if isinstance(field, ListSerializer) and type(errors[error_type]) == list:
+                    pretty_child_errors = []
+                    for index, child_error in enumerate(errors[error_type]):
+                        child_field = field.child
+                        initial_data = self.initial_data.get(error_type, None)
+                        if initial_data is not None:
+                            child_field.initial_data = self.initial_data[error_type][index]
+                        else:
+                            child_field.initial_data = None
+                        if isinstance(child_error, str):
+                            pretty_child_errors.append(self.get_field_error_entry(child_error, field))
+                        else:
+                            child_errors = child_field.build_pretty_errors(child_error)
+                            pretty_child_errors.extend(child_errors)
+                    pretty.extend(pretty_child_errors)
                     continue
                 if self.is_pretty(error):
                     if 'field' not in error or error['field'] is None or str(error['field']) == 'None':

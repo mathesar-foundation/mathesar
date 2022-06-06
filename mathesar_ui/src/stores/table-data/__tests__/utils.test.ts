@@ -7,6 +7,7 @@ import { ROW_HAS_CELL_ERROR_MSG, getRowStatus } from '../utils';
 describe('getRowStatus', () => {
   interface TestCase {
     label: string;
+    cellClientErrors: [CellKey, string[]][];
     cellModification: [CellKey, RequestStatus][];
     rowCreation: [RowKey, RequestStatus][];
     rowDeletion: [RowKey, RequestStatus][];
@@ -14,15 +15,18 @@ describe('getRowStatus', () => {
   }
   const m = ROW_HAS_CELL_ERROR_MSG;
   const testCases: TestCase[] = [
-    {
-      label: 'All empty',
-      cellModification: [],
-      rowCreation: [],
-      rowDeletion: [],
-      result: [],
-    },
+    // {
+    //   label: 'All empty',
+    //   cellClientErrors: [],
+    //   cellModification: [],
+    //   rowCreation: [],
+    //   rowDeletion: [],
+    //   result: [],
+    // },
     {
       label: 'Complex',
+      cellClientErrors: [['300::1', ['Client error']]],
+      // cellClientErrors: [],
       cellModification: [
         ['1::1', { state: 'success' }],
         ['1::2', { state: 'processing' }],
@@ -45,6 +49,7 @@ describe('getRowStatus', () => {
         ['202', { state: 'failure', errors: ['Unable to delete row.'] }],
       ],
       result: [
+        ['300', { errorsFromWholeRowAndCells: [m] }],
         ['1', { wholeRowState: undefined, errorsFromWholeRowAndCells: [m] }],
         ['2', { wholeRowState: 'success', errorsFromWholeRowAndCells: [m] }],
         ['3', { wholeRowState: 'success', errorsFromWholeRowAndCells: [] }],
@@ -78,6 +83,7 @@ describe('getRowStatus', () => {
   test.each(testCases)('getRowStatus %#', (testCase) => {
     expect([
       ...getRowStatus({
+        cellClientSideErrors: new ImmutableMap(testCase.cellClientErrors),
         cellModificationStatus: new ImmutableMap(testCase.cellModification),
         rowCreationStatus: new ImmutableMap(testCase.rowCreation),
         rowDeletionStatus: new ImmutableMap(testCase.rowDeletion),

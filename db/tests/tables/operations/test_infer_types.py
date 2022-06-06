@@ -10,6 +10,25 @@ from db.types.base import PostgresType, MathesarCustomType, get_db_type_enum_fro
 
 type_data_list = [
     (
+        PostgresType.TEXT,
+        [
+            "3.14",
+            "1,41",
+            "149,600,000.00",
+            "4.543.000.000,005",
+            "13 800 000 000,00",
+            "7,53,00,00,000.0",
+            "140'004'453.0",
+            "-3.14",
+            "-1,41",
+            "-149,600,000.00",
+            "-4.543.000.000,005",
+            "-13 800 000 000,00",
+            "-7,53,00,00,000.0",
+            "-140'004'453.0"
+        ],
+        PostgresType.NUMERIC),
+    (
         PostgresType.NUMERIC,
         [0, 2, 1, 0],
         PostgresType.NUMERIC
@@ -191,9 +210,9 @@ def test_table_inference_same_name(engine_with_schema):
     assert original_table == new_table
 
 
-def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema_without_updated_ischema_names):
+def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema):
     column_list = []
-    engine, schema = engine_with_schema_without_updated_ischema_names
+    engine, schema = engine_with_schema
     table_name = "t1"
     create_mathesar_table(
         table_name, schema, column_list, engine
@@ -207,11 +226,11 @@ def test_infer_table_column_types_doesnt_touch_defaults(engine_with_schema_witho
     mock_infer.assert_not_called()
 
 
-def test_update_table_column_types_infers_non_default_types(engine_with_schema_without_updated_ischema_names):
+def test_update_table_column_types_infers_non_default_types(engine_with_schema):
     col1 = Column("col1", VARCHAR)
     col2 = Column("col2", VARCHAR)
     column_list = [col1, col2]
-    engine, schema = engine_with_schema_without_updated_ischema_names
+    engine, schema = engine_with_schema
     table_name = "table_with_columns"
     create_mathesar_table(
         table_name, schema, column_list, engine
@@ -239,9 +258,9 @@ def test_update_table_column_types_infers_non_default_types(engine_with_schema_w
     mock_infer.assert_has_calls(expect_calls)
 
 
-def test_update_table_column_types_skips_pkey_columns(engine_with_schema_without_updated_ischema_names):
+def test_update_table_column_types_skips_pkey_columns(engine_with_schema):
     column_list = [Column("checkcol", VARCHAR, primary_key=True)]
-    engine, schema = engine_with_schema_without_updated_ischema_names
+    engine, schema = engine_with_schema
     table_name = "t1"
     create_mathesar_table(
         table_name, schema, column_list, engine

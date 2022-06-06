@@ -6,6 +6,9 @@ import Number from './type-configs/number';
 import Boolean from './type-configs/boolean';
 import Uri from './type-configs/uri';
 import Duration from './type-configs/duration';
+import Date from './type-configs/date';
+import Time from './type-configs/time';
+import DateTime from './type-configs/datetime';
 import Fallback from './type-configs/fallback';
 import type {
   AbstractType,
@@ -28,6 +31,9 @@ const abstractTypeCategories: Partial<
   [abstractTypeCategory.Boolean]: Boolean,
   [abstractTypeCategory.Uri]: Uri,
   [abstractTypeCategory.Duration]: Duration,
+  [abstractTypeCategory.Date]: Date,
+  [abstractTypeCategory.Time]: Time,
+  [abstractTypeCategory.DateTime]: DateTime,
   [abstractTypeCategory.Other]: Fallback,
 };
 

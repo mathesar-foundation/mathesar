@@ -26,6 +26,18 @@ class ColumnSizeMismatchAPIException(MathesarValidationException):
         super().__init__(None, self.error_code, message, field, details)
 
 
+class InvalidLinkChoiceAPIException(MathesarValidationException):
+    error_code = ErrorCodes.InvalidLinkChoice.value
+
+    def __init__(
+            self,
+            message="Invalid Link type",
+            field=None,
+            details=None,
+    ):
+        super().__init__(None, self.error_code, message, field, details)
+
+
 class MultipleDataFileAPIException(MathesarValidationException):
     error_code = ErrorCodes.MultipleDataFiles.value
 
@@ -57,6 +69,18 @@ class MoneyDisplayOptionValueConflictAPIException(MathesarValidationException):
     def __init__(
             self,
             message="Money type cannot specify a currency code display option as well as other display options.",
+            field=None,
+            details=None,
+    ):
+        super().__init__(None, self.error_code, message, field, details)
+
+
+class IncompatibleFractionDigitValuesAPIException(MathesarValidationException):
+    error_code = ErrorCodes.IncompatibleFractionDigitValues.value
+
+    def __init__(
+            self,
+            message="maximum_fraction_digits cannot be less than minimum_fraction_digits.",
             field=None,
             details=None,
     ):
