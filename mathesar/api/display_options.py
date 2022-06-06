@@ -57,6 +57,14 @@ DISPLAY_OPTIONS_BY_UI_TYPE = LazyDictionary(
                     "enum": ['true', 'false', 'auto']
                 },
                 {
+                    "name": "minimum_fraction_digits",
+                    "type": "number",
+                },
+                {
+                    "name": "maximum_fraction_digits",
+                    "type": "number",
+                },
+                {
                     "name": "locale",
                     "type": "string"
                 }

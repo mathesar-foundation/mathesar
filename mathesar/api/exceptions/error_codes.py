@@ -40,3 +40,4 @@ class ErrorCodes(Enum):
     URLInvalidContentType = 4406
     UnknownDBType = 4408
     InvalidLinkChoice = 4409
+    IncompatibleFractionDigitValues = 4410

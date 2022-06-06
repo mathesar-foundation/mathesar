@@ -2,6 +2,7 @@ from django.core.exceptions import ImproperlyConfigured
 from rest_framework import serializers
 
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
+from mathesar.api.exceptions.validation_exceptions.exceptions import IncompatibleFractionDigitValuesAPIException
 from mathesar.database.types import UIType, get_ui_type_from_db_type
 
 
@@ -136,6 +137,19 @@ class BooleanDisplayOptionSerializer(BaseDisplayOptionsSerializer):
     custom_labels = CustomBooleanLabelSerializer(required=False)
 
 
+FRACTION_DIGITS_CONFIG = {
+    "required": False,
+    "allow_null": True,
+    "min_value": 0,
+    "max_value": 20
+}
+"""
+Max value of 20 is taken from [Intl.NumberFormat docs][1].
+
+[1]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
+"""
+
+
 class AbstractNumberDisplayOptionSerializer(BaseDisplayOptionsSerializer):
     number_format = serializers.ChoiceField(
         required=False,
@@ -154,6 +168,22 @@ class AbstractNumberDisplayOptionSerializer(BaseDisplayOptionsSerializer):
 
     [1]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat
     """
+
+    minimum_fraction_digits = serializers.IntegerField(**FRACTION_DIGITS_CONFIG)
+    maximum_fraction_digits = serializers.IntegerField(**FRACTION_DIGITS_CONFIG)
+
+    def _validate_fraction_digits(self, data):
+        minimum = data.get("minimum_fraction_digits")
+        maximum = data.get("maximum_fraction_digits")
+        if minimum is None or maximum is None:
+            # No errors if one of the fields is not set
+            return
+        if minimum > maximum:
+            raise IncompatibleFractionDigitValuesAPIException()
+
+    def validate(self, data):
+        self._validate_fraction_digits(data)
+        return data
 
 
 class NumberDisplayOptionSerializer(AbstractNumberDisplayOptionSerializer):
