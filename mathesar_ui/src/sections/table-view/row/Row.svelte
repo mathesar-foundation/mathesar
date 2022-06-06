@@ -22,8 +22,13 @@
   $: ({ columnPositions, columnWidths } = display);
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
-  $: ({ selectedRows, rowStatus, rowCreationStatus, cellModificationStatus } =
-    meta);
+  $: ({
+    selectedRows,
+    rowStatus,
+    rowCreationStatus,
+    cellModificationStatus,
+    cellClientSideErrors,
+  } = meta);
   $: ({ grouping } = recordsData);
 
   function calculateStyle(_style: { [key: string]: string | number }) {
@@ -91,6 +96,7 @@
         rowHasErrors={hasWholeRowErrors}
         key={getCellKey(rowKey, columnId)}
         modificationStatusMap={cellModificationStatus}
+        clientSideErrorMap={cellClientSideErrors}
         bind:value={row.record[columnId]}
         {processedColumn}
         {recordsData}

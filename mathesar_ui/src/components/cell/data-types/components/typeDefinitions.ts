@@ -1,5 +1,6 @@
 import type {
   FormattedInputProps,
+  NumberFormatterOptions,
   SelectProps,
 } from '@mathesar-component-library/types';
 import type { DateTimeFormatter } from '@mathesar/utils/date-time/types';
@@ -28,10 +29,7 @@ export type TextAreaCellProps = TextBoxCellProps;
 
 // Number
 
-export interface NumberCellExternalProps {
-  locale?: string;
-  allowFloat: boolean;
-}
+export type NumberCellExternalProps = Partial<NumberFormatterOptions>;
 
 export interface NumberCellProps
   extends CellTypeProps<string | number>,
