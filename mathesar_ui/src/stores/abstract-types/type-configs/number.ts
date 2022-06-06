@@ -203,6 +203,10 @@ function constructDbFormValuesFromTypeOptions(
 
 const displayForm: AbstractTypeConfigForm = {
   variables: {
+    decimalPlaces: {
+      type: 'integer',
+      default: null,
+    },
     useGrouping: {
       type: 'string',
       enum: ['true', 'false', 'auto'],
@@ -217,6 +221,11 @@ const displayForm: AbstractTypeConfigForm = {
   layout: {
     orientation: 'vertical',
     elements: [
+      {
+        type: 'input',
+        variable: 'decimalPlaces',
+        label: 'Decimal Places',
+      },
       {
         type: 'input',
         variable: 'useGrouping',
@@ -247,6 +256,7 @@ const displayForm: AbstractTypeConfigForm = {
 function determineDisplayOptions(
   formValues: FormValues,
 ): Column['display_options'] {
+  const decimalPlaces = formValues.decimalPlaces as number | null;
   const opts: Partial<NumberDisplayOptions> = {
     number_format:
       formValues.numberFormat === 'none'
@@ -256,6 +266,8 @@ function determineDisplayOptions(
       (formValues.useGrouping as
         | NumberDisplayOptions['use_grouping']
         | undefined) ?? 'auto',
+    minimum_fraction_digits: decimalPlaces ?? undefined,
+    maximum_fraction_digits: decimalPlaces ?? undefined,
   };
   return opts;
 }
@@ -264,9 +276,24 @@ function constructDisplayFormValuesFromDisplayOptions(
   columnDisplayOpts: Column['display_options'],
 ): FormValues {
   const displayOptions = columnDisplayOpts as NumberDisplayOptions | null;
+  const decimalPlaces = (() => {
+    const min = displayOptions?.minimum_fraction_digits ?? null;
+    const max = displayOptions?.maximum_fraction_digits ?? null;
+    if (min === null && max === null) {
+      return null;
+    }
+    if (min === null) {
+      return max;
+    }
+    if (max === null) {
+      return min;
+    }
+    return Math.max(min, max);
+  })();
   const formValues: FormValues = {
     numberFormat: displayOptions?.number_format ?? 'none',
     useGrouping: displayOptions?.use_grouping ?? 'auto',
+    decimalPlaces,
   };
   return formValues;
 }

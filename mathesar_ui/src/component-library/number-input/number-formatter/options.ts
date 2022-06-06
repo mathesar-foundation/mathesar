@@ -16,6 +16,7 @@ export interface Options {
    */
   useGrouping: boolean | 'auto';
   minimumFractionDigits: number;
+  maximumFractionDigits: number;
   forceTrailingDecimal: boolean;
 }
 
@@ -28,6 +29,7 @@ export const defaultOptions: Options = {
   allowNegative: false,
   useGrouping: 'auto',
   minimumFractionDigits: 0,
+  maximumFractionDigits: 20,
   forceTrailingDecimal: false,
 };
 
