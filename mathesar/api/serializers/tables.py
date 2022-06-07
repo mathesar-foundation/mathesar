@@ -126,11 +126,12 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     def validate(self, data):
         if self.partial:
             columns = data.get('columns', None)
-            for col in columns:
-                id = col.get('id', None)
-                if id is None:
-                    message = "'id' field is required while batch updating columns."
-                    raise base_api_exceptions.NotFoundAPIException(ValidationError, message=message, status_code=status.HTTP_400_BAD_REQUEST)
+            if columns is not None:
+                for col in columns:
+                    id = col.get('id', None)
+                    if id is None:
+                        message = "'id' field is required while batch updating columns."
+                        raise base_api_exceptions.NotFoundAPIException(ValidationError, message=message, status_code=status.HTTP_400_BAD_REQUEST)
         return data
 
 
