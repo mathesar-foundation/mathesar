@@ -10,7 +10,6 @@ from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions,
     base_exceptions as database_base_api_exceptions,
 )
-from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.dj_filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination

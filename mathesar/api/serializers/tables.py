@@ -104,7 +104,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
             else:
                 raise ProgrammingAPIException(e)
         return table
-    
+
     def update(self, instance, validated_data):
         if self.partial:
             # Save the fields that are stored in the model.
