@@ -12,6 +12,7 @@ from mathesar.api.exceptions.validation_exceptions.exceptions import (
 )
 from mathesar.api.exceptions.database_exceptions.exceptions import DuplicateTableAPIException
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
+from mathesar.api.exceptions.validation_exceptions import base_exceptions as base_validation_exceptions
 from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.columns import SimpleColumnSerializer
@@ -131,7 +132,7 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
                     id = col.get('id', None)
                     if id is None:
                         message = "'id' field is required while batch updating columns."
-                        raise base_api_exceptions.NotFoundAPIException(ValidationError, message=message, status_code=status.HTTP_400_BAD_REQUEST)
+                        raise base_validation_exceptions.MathesarValidationException(ValidationError, message=message)
         return data
 
 
