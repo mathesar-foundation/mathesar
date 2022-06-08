@@ -6,6 +6,8 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateMode
 from rest_framework.response import Response
 from sqlalchemy.exc import DataError, IntegrityError
 
+from db.tables.operations.select import get_oid_from_table
+from db.tables.operations.split import extract_columns_from_table
 from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions,
     base_exceptions as database_base_api_exceptions,
@@ -14,8 +16,12 @@ from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_a
 from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.dj_filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
-from mathesar.api.serializers.tables import TableSerializer, TablePreviewSerializer
+from mathesar.api.serializers.tables import (
+    SplitTableResponseSerializer, SplitTableRequestSerializer, TableSerializer,
+    TablePreviewSerializer,
+)
 from mathesar.models import Table
+from mathesar.reflection import reflect_db_objects
 from mathesar.utils.tables import (
     get_table_column_types
 )
@@ -69,6 +75,35 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         table = self.get_object()
         col_types = get_table_column_types(table)
         return Response(col_types)
+
+    @action(methods=['post'], detail=True)
+    def split_table(self, request, pk=None):
+        table = self.get_object()
+        serializer = SplitTableRequestSerializer(data=request.data, context={"request": request, 'table': table})
+        if serializer.is_valid(True):
+            extracted_columns = [column.name for column in serializer.validated_data['extract_columns']]
+            extracted_table_name = serializer.validated_data['extract_table_name']
+            remainder_table_name = serializer.validated_data['remainder_table_name']
+            drop_original_table = serializer.validated_data['drop_original_table']
+            engine = table._sa_engine
+            extracted_table, remainder_table, remainder_fk = extract_columns_from_table(
+                table.name,
+                extracted_columns,
+                extracted_table_name,
+                remainder_table_name,
+                table.schema.name,
+                engine,
+                drop_original_table=drop_original_table
+            )
+            extracted_table_oid = get_oid_from_table(extracted_table.name, extracted_table.schema, engine)
+            remainder_table_oid = get_oid_from_table(remainder_table.name, remainder_table.schema, engine)
+            reflect_db_objects(skip_cache_check=True)
+            extracted_table_obj = Table.objects.get(oid=extracted_table_oid)
+            remainder_table_obj = Table.objects.get(oid=remainder_table_oid)
+            split_table_response = {'extracted_table': extracted_table_obj.id, 'remainder_table': remainder_table_obj.id}
+            response_serializer = SplitTableResponseSerializer(data=split_table_response)
+            response_serializer.is_valid(True)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     @action(methods=['post'], detail=True)
     def previews(self, request, pk=None):

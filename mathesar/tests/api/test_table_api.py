@@ -1287,3 +1287,39 @@ def test_table_patch_columns_invalid_type_with_multiple_changes(create_data_type
     # The table should not have changed
     original_column_data = _get_data_types_column_data(table)
     _check_columns(current_table_response.json()['columns'], original_column_data)
+
+
+def test_table_extract_columns(create_patents_table, client):
+    table_name = 'Patents'
+    table = create_patents_table(table_name)
+    column_name_id_map = table.get_column_name_id_bidirectional_map()
+    existing_columns = table.columns.all()
+    existing_columns = [existing_column.name for existing_column in existing_columns]
+    columns_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
+    columns_id_to_extract = [column_name_id_map[name] for name in columns_names_to_extract]
+
+    extract_table_name = "Patent Status"
+    remainder_table_name = "Patent Info"
+    split_data = {
+        'extract_columns': columns_id_to_extract,
+        'extract_table_name': extract_table_name,
+        "remainder_table_name": remainder_table_name,
+        'drop_original_table': False
+    }
+    current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
+    assert current_table_response.status_code == 201
+    response_data = current_table_response.json()
+    extracted_table_id = response_data['extracted_table']
+    extracted_table = Table.objects.get(id=extracted_table_id)
+    assert extract_table_name == extracted_table.name
+    remainder_table_id = response_data['remainder_table']
+    remainder_table = Table.objects.get(id=remainder_table_id)
+    assert remainder_table_name == remainder_table.name
+    extracted_columns = extracted_table.columns.all()
+    extracted_columns_name = [extracted_column.name for extracted_column in extracted_columns]
+    expected_extracted_columns_name = ['id'] + columns_names_to_extract
+    assert expected_extracted_columns_name == extracted_columns_name
+    remainder_columns = remainder_table.columns.all()
+    remainder_columns_name = [remainder_column.name for remainder_column in remainder_columns]
+    expected_remainder_columns = (set(existing_columns) - set(columns_names_to_extract)) | {'Patent Status_id'}
+    assert set(expected_remainder_columns) == set(remainder_columns_name)

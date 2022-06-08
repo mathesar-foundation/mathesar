@@ -13,7 +13,7 @@ from mathesar.api.exceptions.database_exceptions.exceptions import DuplicateTabl
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.columns import SimpleColumnSerializer
-from mathesar.models import Table, DataFile
+from mathesar.models import Column, Table, DataFile
 from mathesar.utils.tables import gen_table_name, create_table_from_datafile, create_empty_table
 
 
@@ -121,3 +121,15 @@ class TablePreviewSerializer(MathesarErrorMessageMixin, serializers.Serializer):
             if db_type is None:
                 raise UnknownDatabaseTypeIdentifier(db_type_id=db_type_id)
         return columns
+
+
+class SplitTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
+    extract_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
+    extract_table_name = serializers.CharField()
+    remainder_table_name = serializers.CharField()
+    drop_original_table = serializers.BooleanField()
+
+
+class SplitTableResponseSerializer(MathesarErrorMessageMixin, serializers.Serializer):
+    extracted_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
+    remainder_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
