@@ -450,7 +450,6 @@ def test_table_previews_invalid_type_cast_check(client, type_inference_table, _t
     table = type_inference_table
 
     post_body = _type_inference_table_previews_post_body
-    post_body['columns'][_find_post_body_column_ix_by_name(post_body, 'col_4')]['type'] = PostgresType.NUMERIC.id
     post_body['columns'][_find_post_body_column_ix_by_name(post_body, 'col_5')]['type'] = MathesarCustomType.EMAIL.id
 
     response = client.post(f'/api/db/v0/tables/{table.id}/previews/', data=post_body)

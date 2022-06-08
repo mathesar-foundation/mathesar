@@ -2,6 +2,8 @@ import type {
   InputFormatter,
   ParseResult,
 } from '@mathesar-component-library-dir/formatted-input/FormattedInputTypes';
+import type { PartiallyMissingOrUndefined } from '@mathesar-component-library-dir/types';
+import { withDefaults } from '@mathesar-component-library-dir/common/utils';
 import type { DerivedOptions, Options } from './options';
 import { defaultOptions, getDerivedOptions } from './options';
 
@@ -10,11 +12,8 @@ export default abstract class AbstractNumberFormatter<T>
 {
   opts: DerivedOptions;
 
-  constructor(partialOptions: Partial<Options> = {}) {
-    this.opts = getDerivedOptions({
-      ...defaultOptions,
-      ...partialOptions,
-    });
+  constructor(partialOptions: PartiallyMissingOrUndefined<Options> = {}) {
+    this.opts = getDerivedOptions(withDefaults(defaultOptions, partialOptions));
   }
 
   abstract format(value: T): string;

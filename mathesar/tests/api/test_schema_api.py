@@ -6,21 +6,19 @@ from db.schemas.utils import get_mathesar_schemas, get_schema_oid_from_name
 from mathesar import models
 from mathesar import reflection
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.database.base import create_mathesar_engine
 
 
-def check_schema_response(response_schema, schema, schema_name, test_db_name, check_schema_objects=True):
+def check_schema_response(MOD_engine_cache, response_schema, schema, schema_name, test_db_name, check_schema_objects=True):
     assert response_schema['id'] == schema.id
     assert response_schema['name'] == schema_name
     assert response_schema['database'] == test_db_name
     assert 'has_dependencies' in response_schema
     if check_schema_objects:
-        assert schema_name in get_mathesar_schemas(
-            create_mathesar_engine(test_db_name)
-        )
+        engine = MOD_engine_cache(test_db_name)
+        assert schema_name in get_mathesar_schemas(engine)
 
 
-def test_schema_list(client, patent_schema):
+def test_schema_list(client, patent_schema, MOD_engine_cache):
     response = client.get('/api/db/v0/schemas/')
     assert response.status_code == 200
 
@@ -36,6 +34,7 @@ def test_schema_list(client, patent_schema):
             response_schema = some_schema
     assert response_schema is not None
     check_schema_response(
+        MOD_engine_cache,
         response_schema,
         patent_schema,
         patent_schema.name,
@@ -43,17 +42,17 @@ def test_schema_list(client, patent_schema):
     )
 
 
-def test_schema_list_filter(client, create_db_schema, create_temp_dj_db):
+def test_schema_list_filter(client, create_db_schema, FUN_create_dj_db, MOD_engine_cache):
     schema_params = [("schema_1", "database_1"), ("schema_2", "database_2"),
                      ("schema_3", "database_3"), ("schema_1", "database_3")]
 
     dbs_to_create = set(param[1] for param in schema_params)
 
     for db_name in dbs_to_create:
-        create_temp_dj_db(db_name)
+        FUN_create_dj_db(db_name)
 
     for schema_name, db_name in schema_params:
-        engine = create_mathesar_engine(db_name)
+        engine = MOD_engine_cache(db_name)
         create_db_schema(schema_name, engine)
 
     cache.clear()
@@ -62,7 +61,7 @@ def test_schema_list_filter(client, create_db_schema, create_temp_dj_db):
         schema_param: models.Schema.objects.get(
             oid=get_schema_oid_from_name(
                 schema_param[0],
-                create_mathesar_engine(schema_param[1])
+                MOD_engine_cache(schema_param[1])
             ),
         )
         for schema_param in schema_params
@@ -94,11 +93,13 @@ def test_schema_list_filter(client, create_db_schema, create_temp_dj_db):
                 continue
             schema = schemas[query_tuple]
             response_schema = response_schemas[query_tuple]
-            check_schema_response(response_schema, schema, schema.name,
-                                  schema.database.name, check_schema_objects=False)
+            check_schema_response(
+                MOD_engine_cache,
+                response_schema, schema, schema.name,
+                schema.database.name, check_schema_objects=False)
 
 
-def test_schema_detail(create_patents_table, client, test_db_name):
+def test_schema_detail(create_patents_table, client, test_db_name, MOD_engine_cache):
     """
     Desired format:
     One item in the results list in the schema list view, see above.
@@ -108,10 +109,13 @@ def test_schema_detail(create_patents_table, client, test_db_name):
     response = client.get(f'/api/db/v0/schemas/{table.schema.id}/')
     response_schema = response.json()
     assert response.status_code == 200
-    check_schema_response(response_schema, table.schema, table.schema.name, test_db_name)
+    check_schema_response(
+        MOD_engine_cache,
+        response_schema, table.schema, table.schema.name, test_db_name
+    )
 
 
-def test_schema_sort_by_name(create_schema, client):
+def test_schema_sort_by_name(create_schema, client, MOD_engine_cache):
     """
     Desired format:
     One item in the results list in the schema list view, see above.
@@ -140,19 +144,21 @@ def test_schema_sort_by_name(create_schema, client):
     response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
     comparison_tuples = zip(response_schemas, unsorted_expected_schemas)
     for comparison_tuple in comparison_tuples:
-        check_schema_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
-                              comparison_tuple[1].database.name)
+        check_schema_response(
+            MOD_engine_cache, comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
+            comparison_tuple[1].database.name)
     sort_field = "name"
     response = client.get(f'/api/db/v0/schemas/?sort_by={sort_field}')
     response_data = response.json()
     response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
     comparison_tuples = zip(response_schemas, expected_schemas)
     for comparison_tuple in comparison_tuples:
-        check_schema_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
-                              comparison_tuple[1].database.name)
+        check_schema_response(
+            MOD_engine_cache, comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
+            comparison_tuple[1].database.name)
 
 
-def test_schema_sort_by_id(create_schema, client):
+def test_schema_sort_by_id(create_schema, client, MOD_engine_cache):
     """
     Desired format:
     One item in the results list in the schema list view, see above.
@@ -181,21 +187,25 @@ def test_schema_sort_by_id(create_schema, client):
     response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
     comparison_tuples = zip(response_schemas, unsorted_expected_schemas)
     for comparison_tuple in comparison_tuples:
-        check_schema_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
-                              comparison_tuple[1].database.name)
+        check_schema_response(
+            MOD_engine_cache,
+            comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
+            comparison_tuple[1].database.name)
 
     response = client.get('/api/db/v0/schemas/?sort_by=id')
     response_data = response.json()
     response_schemas = [s for s in response_data['results'] if s['name'] != 'public']
     comparison_tuples = zip(response_schemas, expected_schemas)
     for comparison_tuple in comparison_tuples:
-        check_schema_response(comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
-                              comparison_tuple[1].database.name)
+        check_schema_response(
+            MOD_engine_cache,
+            comparison_tuple[0], comparison_tuple[1], comparison_tuple[1].name,
+            comparison_tuple[1].database.name)
 
 
-def test_schema_create(client, create_temp_dj_db):
+def test_schema_create(client, FUN_create_dj_db, MOD_engine_cache):
     db_name = "some_db1"
-    create_temp_dj_db(db_name)
+    FUN_create_dj_db(db_name)
 
     schema_count_before = models.Schema.objects.count()
 
@@ -211,7 +221,7 @@ def test_schema_create(client, create_temp_dj_db):
     schema_count_after = models.Schema.objects.count()
     assert schema_count_after == schema_count_before + 1
     schema = models.Schema.objects.get(id=response_schema['id'])
-    check_schema_response(response_schema, schema, schema_name, db_name, 0)
+    check_schema_response(MOD_engine_cache, response_schema, schema, schema_name, db_name, 0)
 
 
 def test_schema_update(client, create_schema):
@@ -225,7 +235,7 @@ def test_schema_update(client, create_schema):
     assert response.json()[0]['code'] == ErrorCodes.MethodNotAllowed.value
 
 
-def test_schema_partial_update(create_schema, client, test_db_name):
+def test_schema_partial_update(create_schema, client, test_db_name, MOD_engine_cache):
     schema_name = 'NASA Schema Partial Update'
     new_schema_name = 'NASA Schema Partial Update New'
     schema = create_schema(schema_name)
@@ -235,13 +245,13 @@ def test_schema_partial_update(create_schema, client, test_db_name):
 
     response_schema = response.json()
     assert response.status_code == 200
-    check_schema_response(response_schema, schema, new_schema_name, test_db_name,)
+    check_schema_response(MOD_engine_cache, response_schema, schema, new_schema_name, test_db_name,)
 
     schema = models.Schema.objects.get(oid=schema.oid)
     assert schema.name == new_schema_name
 
 
-def test_schema_patch_same_name(create_schema, client, test_db_name):
+def test_schema_patch_same_name(create_schema, client, test_db_name, MOD_engine_cache):
     schema_name = 'Patents Schema Same Name'
     schema = create_schema(schema_name)
 
@@ -251,6 +261,7 @@ def test_schema_patch_same_name(create_schema, client, test_db_name):
     response_schema = response.json()
     assert response.status_code == 200
     check_schema_response(
+        MOD_engine_cache,
         response_schema,
         schema,
         schema_name,
@@ -357,9 +368,9 @@ def test_schema_get_with_reflect_change(client, engine, create_db_schema):
     assert orig_id == modified_id
 
 
-def test_schema_create_duplicate(client, create_temp_dj_db):
+def test_schema_create_duplicate(client, FUN_create_dj_db):
     db_name = "tmp_db1"
-    create_temp_dj_db(db_name)
+    FUN_create_dj_db(db_name)
 
     data = {
         'name': 'Test Duplication Schema',
