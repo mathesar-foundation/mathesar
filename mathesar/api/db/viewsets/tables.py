@@ -6,6 +6,7 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateMode
 from rest_framework.response import Response
 from sqlalchemy.exc import DataError, IntegrityError
 
+from db.columns.operations.select import get_columns_attnum_from_names
 from db.tables.operations.select import get_oid_from_table
 from db.tables.operations.split import extract_columns_from_table
 from mathesar.api.exceptions.database_exceptions import (
@@ -19,8 +20,8 @@ from mathesar.api.serializers.tables import (
     SplitTableResponseSerializer, SplitTableRequestSerializer, TableSerializer,
     TablePreviewSerializer,
 )
-from mathesar.models import Table
-from mathesar.reflection import reflect_db_objects
+from mathesar.models import Column, Table
+from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
 from mathesar.utils.tables import (
     get_table_column_types
 )
@@ -63,6 +64,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     @action(methods=['post'], detail=True)
     def split_table(self, request, pk=None):
         table = self.get_object()
+        old_table_columns_name_id_map = table.get_column_name_id_bidirectional_map()
         serializer = SplitTableRequestSerializer(data=request.data, context={"request": request, 'table': table})
         if serializer.is_valid(True):
             extracted_columns = [column.name for column in serializer.validated_data['extract_columns']]
@@ -81,6 +83,21 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             )
             extracted_table_oid = get_oid_from_table(extracted_table.name, extracted_table.schema, engine)
             remainder_table_oid = get_oid_from_table(remainder_table.name, remainder_table.schema, engine)
+            if drop_original_table:
+                table.oid = remainder_table_oid
+                table.save()
+                reflect_tables_from_schema(table.schema)
+                extracted_table_obj = Table.objects.get(oid=extracted_table_oid)
+                # Update attnum as it would have changed due to columns moving to a new table.
+                extracted_columns_name_attnum_map = get_columns_attnum_from_names(extracted_table_oid, extracted_columns, table._sa_engine, return_as_name_map=True)
+                extracted_column_objs = []
+                for extracted_column_name, extracted_column_attnum in extracted_columns_name_attnum_map.items():
+                    column_id = old_table_columns_name_id_map[extracted_column_name]
+                    column = Column.current_objects.get(id=column_id)
+                    column.table_id = extracted_table_obj.id
+                    column.attnum = extracted_column_attnum
+                    extracted_column_objs.append(column)
+                Column.current_objects.bulk_update(extracted_column_objs, fields=['table_id', 'attnum'])
             reflect_db_objects(skip_cache_check=True)
             extracted_table_obj = Table.objects.get(oid=extracted_table_oid)
             remainder_table_obj = Table.objects.get(oid=remainder_table_oid)
