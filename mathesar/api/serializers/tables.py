@@ -7,7 +7,7 @@ from db.types.base import get_db_type_enum_from_id
 
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ColumnSizeMismatchAPIException, DistinctColumnRequiredAPIException,
-    MultipleDataFileAPIException, UnknownDatabaseTypeIdentifier
+    MultipleDataFileAPIException, RemainderTableNameRequiredAPIException, UnknownDatabaseTypeIdentifier,
 )
 from mathesar.api.exceptions.database_exceptions.exceptions import DuplicateTableAPIException
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
@@ -128,6 +128,11 @@ class SplitTableRequestSerializer(MathesarErrorMessageMixin, serializers.Seriali
     extract_table_name = serializers.CharField()
     remainder_table_name = serializers.CharField()
     drop_original_table = serializers.BooleanField()
+
+    def validate(self, attrs):
+        if not attrs['drop_original_table'] and not attrs['remainder_table_name']:
+            raise RemainderTableNameRequiredAPIException()
+        return super().validate(attrs)
 
 
 class SplitTableResponseSerializer(MathesarErrorMessageMixin, serializers.Serializer):
