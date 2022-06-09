@@ -22,6 +22,7 @@ def execute_query(engine, query, connection_to_use=None):
     return execute_statement(engine, query, connection_to_use=connection_to_use).fetchall()
 
 
+# TODO refactor to use @functools.total_ordering
 class OrderByIds:
     """
     A mixin for ordering based on ids; useful at least for type enums in testing.

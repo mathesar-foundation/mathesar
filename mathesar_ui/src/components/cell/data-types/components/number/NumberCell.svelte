@@ -12,7 +12,9 @@
   export let isActive: $$Props['isActive'];
   export let value: $$Props['value'];
   export let disabled: $$Props['disabled'];
-
+  export let useGrouping: $$Props['useGrouping'];
+  export let minimumFractionDigits: $$Props['minimumFractionDigits'];
+  export let maximumFractionDigits: $$Props['maximumFractionDigits'];
   export let locale: $$Props['locale'];
   export let allowFloat: $$Props['allowFloat'];
 
@@ -20,8 +22,16 @@
     locale,
     allowFloat,
     allowNegative: true,
+    useGrouping,
+    minimumFractionDigits,
   };
-  $: formatter = new StringifiedNumberFormatter(formatterOptions);
+  /** Used only for display -- not during input */
+  $: displayFormatter = new StringifiedNumberFormatter({
+    ...formatterOptions,
+    // We only want to apply `maximumFractionDigits` during display. We don't
+    // want it to take effect during input.
+    maximumFractionDigits,
+  });
 
   function formatValue(
     v: string | number | null | undefined,
@@ -29,7 +39,7 @@
     if (!isDefinedNonNullable(v)) {
       return v;
     }
-    return formatter.format(String(v));
+    return displayFormatter.format(String(v));
   }
 </script>
 
