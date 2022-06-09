@@ -10,7 +10,7 @@ from db.types.base import PostgresType, MathesarCustomType
 from mathesar import reflection
 from mathesar import models
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models import Table, DataFile
+from mathesar.models import Column, Table, DataFile
 
 
 @pytest.fixture
@@ -1298,8 +1298,8 @@ def test_table_extract_columns(create_patents_table, client):
     columns_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
     columns_id_to_extract = [column_name_id_map[name] for name in columns_names_to_extract]
 
-    extract_table_name = "Patent Status"
-    remainder_table_name = "Patent Info"
+    extract_table_name = "Patent Info"
+    remainder_table_name = "Patent Status"
     split_data = {
         'extract_columns': columns_id_to_extract,
         'extract_table_name': extract_table_name,
@@ -1323,3 +1323,31 @@ def test_table_extract_columns(create_patents_table, client):
     remainder_columns_name = [remainder_column.name for remainder_column in remainder_columns]
     expected_remainder_columns = (set(existing_columns) - set(columns_names_to_extract)) | {'Patent Status_id'}
     assert set(expected_remainder_columns) == set(remainder_columns_name)
+
+
+def test_table_extract_columns_with_display_options(create_patents_table, client):
+    table_name = 'Patents'
+    table = create_patents_table(table_name)
+    column_name_id_map = table.get_column_name_id_bidirectional_map()
+    existing_columns = table.columns.all()
+    existing_columns = [existing_column.name for existing_column in existing_columns]
+    columns_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
+    columns_id_to_extract = [column_name_id_map[name] for name in columns_names_to_extract]
+    extract_column_display_options = {'show_as_percentage': True, 'number_format': 'english'}
+    extract_column_name_with_display_options = columns_names_to_extract[0]
+    extract_column_id_with_display_options = column_name_id_map[extract_column_name_with_display_options]
+    Column.objects.filter(id=extract_column_id_with_display_options).update(display_options=extract_column_display_options)
+    extract_table_name = "Patent Info"
+    remainder_table_name = "Patent Status"
+    split_data = {
+        'extract_columns': columns_id_to_extract,
+        'extract_table_name': extract_table_name,
+        "remainder_table_name": remainder_table_name,
+        'drop_original_table': True
+    }
+    current_table_response = client.post(f'/api/db/v0/tables/{table.id}/split_table/', data=split_data)
+    assert current_table_response.status_code == 201
+    response_data = current_table_response.json()
+    extracted_table_id = response_data['extracted_table']
+    extracted_table = Table.objects.get(id=extracted_table_id)
+    assert extracted_table.get_column_name_id_bidirectional_map()[extract_column_name_with_display_options] == extract_column_id_with_display_options
