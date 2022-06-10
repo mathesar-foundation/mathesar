@@ -1,26 +1,23 @@
 from django_filters import rest_framework as filters
-from psycopg2.errors import InvalidTextRepresentation, CheckViolation
+from psycopg2.errors import CheckViolation, InvalidTextRepresentation
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, CreateModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from sqlalchemy.exc import DataError, IntegrityError
 
-from db.columns.operations.select import get_columns_attnum_from_names
 from db.tables.operations.select import get_oid_from_table
-from db.tables.operations.split import extract_columns_from_table
-from mathesar.api.exceptions.database_exceptions import (
-    exceptions as database_api_exceptions,
-    base_exceptions as database_base_api_exceptions,
-)
 from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.dj_filters import TableFilter
+from mathesar.api.exceptions.database_exceptions import (
+    base_exceptions as database_base_api_exceptions,
+    exceptions as database_api_exceptions,
+)
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import (
-    SplitTableResponseSerializer, SplitTableRequestSerializer, TableSerializer,
-    TablePreviewSerializer,
+    SplitTableRequestSerializer, SplitTableResponseSerializer, TablePreviewSerializer, TableSerializer,
 )
-from mathesar.models import Column, Table
+from mathesar.models import Table
 from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
 from mathesar.utils.tables import (
     get_table_column_types
@@ -64,44 +61,41 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     @action(methods=['post'], detail=True)
     def split_table(self, request, pk=None):
         table = self.get_object()
-        old_table_columns_name_id_map = table.get_column_name_id_bidirectional_map()
+        columns_name_id_map = table.get_column_name_id_bidirectional_map()
         serializer = SplitTableRequestSerializer(data=request.data, context={"request": request, 'table': table})
         if serializer.is_valid(True):
-            extracted_columns = [column.name for column in serializer.validated_data['extract_columns']]
+            # We need to get the column names before splitting the table,
+            # as they are the only reference to the new column after it is moved to a new table
+            extracted_columns_name = [column.name for column in serializer.validated_data['extract_columns']]
             extracted_table_name = serializer.validated_data['extract_table_name']
             remainder_table_name = serializer.validated_data['remainder_table_name']
             drop_original_table = serializer.validated_data['drop_original_table']
+
             engine = table._sa_engine
-            extracted_table, remainder_table, remainder_fk = extract_columns_from_table(
-                table.name,
-                extracted_columns,
+            extracted_sa_table, remainder_sa_table, remainder_fk = table.split_table(
+                serializer.validated_data['extract_columns'],
                 extracted_table_name,
                 remainder_table_name,
-                table.schema.name,
-                engine,
                 drop_original_table=drop_original_table
             )
-            extracted_table_oid = get_oid_from_table(extracted_table.name, extracted_table.schema, engine)
-            remainder_table_oid = get_oid_from_table(remainder_table.name, remainder_table.schema, engine)
+            extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
+            remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
+
             if drop_original_table:
                 table.oid = remainder_table_oid
                 table.save()
                 reflect_tables_from_schema(table.schema)
                 extracted_table_obj = Table.objects.get(oid=extracted_table_oid)
                 # Update attnum as it would have changed due to columns moving to a new table.
-                extracted_columns_name_attnum_map = get_columns_attnum_from_names(extracted_table_oid, extracted_columns, table._sa_engine, return_as_name_map=True)
-                extracted_column_objs = []
-                for extracted_column_name, extracted_column_attnum in extracted_columns_name_attnum_map.items():
-                    column_id = old_table_columns_name_id_map[extracted_column_name]
-                    column = Column.current_objects.get(id=column_id)
-                    column.table_id = extracted_table_obj.id
-                    column.attnum = extracted_column_attnum
-                    extracted_column_objs.append(column)
-                Column.current_objects.bulk_update(extracted_column_objs, fields=['table_id', 'attnum'])
+                extracted_table_obj.update_moved_column_reference(extracted_columns_name, columns_name_id_map)
+
             reflect_db_objects(skip_cache_check=True)
             extracted_table_obj = Table.objects.get(oid=extracted_table_oid)
             remainder_table_obj = Table.objects.get(oid=remainder_table_oid)
-            split_table_response = {'extracted_table': extracted_table_obj.id, 'remainder_table': remainder_table_obj.id}
+            split_table_response = {
+                'extracted_table': extracted_table_obj.id,
+                'remainder_table': remainder_table_obj.id
+            }
             response_serializer = SplitTableResponseSerializer(data=split_table_response)
             response_serializer.is_valid(True)
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
