@@ -61,16 +61,16 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
     @action(methods=['post'], detail=True)
     def split_table(self, request, pk=None):
         table = self.get_object()
-        columns_name_id_map = table.get_column_name_id_bidirectional_map()
+        column_names_id_map = table.get_column_name_id_bidirectional_map()
         serializer = SplitTableRequestSerializer(data=request.data, context={"request": request, 'table': table})
         if serializer.is_valid(True):
             # We need to get the column names before splitting the table,
             # as they are the only reference to the new column after it is moved to a new table
-            extracted_columns_name = [column.name for column in serializer.validated_data['extract_columns']]
-            extracted_table_name = serializer.validated_data['extract_table_name']
+            extracted_column_names = [column.name for column in serializer.validated_data['extract_columns']]
+
+            extracted_table_name = serializer.validated_data['extracted_table_name']
             remainder_table_name = serializer.validated_data['remainder_table_name']
             drop_original_table = serializer.validated_data['drop_original_table']
-
             engine = table._sa_engine
             extracted_sa_table, remainder_sa_table, remainder_fk = table.split_table(
                 serializer.validated_data['extract_columns'],
@@ -85,15 +85,15 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
                 table.oid = remainder_table_oid
                 table.save()
                 reflect_tables_from_schema(table.schema)
-                extracted_table_obj = Table.objects.get(oid=extracted_table_oid)
+                extracted_table = Table.objects.get(oid=extracted_table_oid)
                 # Update attnum as it would have changed due to columns moving to a new table.
-                extracted_table_obj.update_moved_column_reference(extracted_columns_name, columns_name_id_map)
+                extracted_table.update_moved_column_reference(extracted_column_names, column_names_id_map)
 
             reflect_db_objects(skip_cache_check=True)
-            extracted_table_obj = Table.objects.get(oid=extracted_table_oid)
+            extracted_table = Table.objects.get(oid=extracted_table_oid)
             remainder_table_obj = Table.objects.get(oid=remainder_table_oid)
             split_table_response = {
-                'extracted_table': extracted_table_obj.id,
+                'extracted_table': extracted_table.id,
                 'remainder_table': remainder_table_obj.id
             }
             response_serializer = SplitTableResponseSerializer(data=split_table_response)

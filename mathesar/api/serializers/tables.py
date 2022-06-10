@@ -157,7 +157,7 @@ class TablePreviewSerializer(MathesarErrorMessageMixin, serializers.Serializer):
 
 class SplitTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     extract_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
-    extract_table_name = serializers.CharField()
+    extracted_table_name = serializers.CharField()
     remainder_table_name = serializers.CharField()
     drop_original_table = serializers.BooleanField()
 

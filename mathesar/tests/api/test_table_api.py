@@ -1294,14 +1294,14 @@ def test_table_extract_columns(create_patents_table, client):
     column_name_id_map = table.get_column_name_id_bidirectional_map()
     existing_columns = table.columns.all()
     existing_columns = [existing_column.name for existing_column in existing_columns]
-    columns_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
-    columns_id_to_extract = [column_name_id_map[name] for name in columns_names_to_extract]
+    column_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
+    column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
 
     extract_table_name = "Patent Info"
     remainder_table_name = "Patent Status"
     split_data = {
-        'extract_columns': columns_id_to_extract,
-        'extract_table_name': extract_table_name,
+        'extract_columns': column_ids_to_extract,
+        'extracted_table_name': extract_table_name,
         "remainder_table_name": remainder_table_name,
         'drop_original_table': False
     }
@@ -1314,33 +1314,38 @@ def test_table_extract_columns(create_patents_table, client):
     remainder_table_id = response_data['remainder_table']
     remainder_table = Table.objects.get(id=remainder_table_id)
     assert remainder_table_name == remainder_table.name
+
     extracted_columns = extracted_table.columns.all()
     extracted_columns_name = [extracted_column.name for extracted_column in extracted_columns]
-    expected_extracted_columns_name = ['id'] + columns_names_to_extract
-    assert expected_extracted_columns_name == extracted_columns_name
+    expected_extracted_column_names = ['id'] + column_names_to_extract
+    assert expected_extracted_column_names == extracted_columns_name
+
     remainder_columns = remainder_table.columns.all()
-    remainder_columns_name = [remainder_column.name for remainder_column in remainder_columns]
-    expected_remainder_columns = (set(existing_columns) - set(columns_names_to_extract)) | {'Patent Info_id'}
-    assert set(expected_remainder_columns) == set(remainder_columns_name)
+    remainder_column_names = [remainder_column.name for remainder_column in remainder_columns]
+    expected_remainder_columns = (set(existing_columns) - set(column_names_to_extract)) | {'Patent Info_id'}
+    assert set(expected_remainder_columns) == set(remainder_column_names)
 
 
 def test_table_extract_columns_with_display_options(create_patents_table, client):
     table_name = 'Patents'
     table = create_patents_table(table_name)
     column_name_id_map = table.get_column_name_id_bidirectional_map()
-    existing_columns = table.columns.all()
-    existing_columns = [existing_column.name for existing_column in existing_columns]
-    columns_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
-    columns_id_to_extract = [column_name_id_map[name] for name in columns_names_to_extract]
-    extract_column_display_options = {'show_as_percentage': True, 'number_format': 'english'}
-    extract_column_name_with_display_options = columns_names_to_extract[0]
-    extract_column_id_with_display_options = column_name_id_map[extract_column_name_with_display_options]
-    Column.objects.filter(id=extract_column_id_with_display_options).update(display_options=extract_column_display_options)
+    column_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
+    column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
+
+    column_name_with_display_options = column_names_to_extract[0]
+    column_id_with_display_options = column_name_id_map[column_name_with_display_options]
+
+    column_display_options = {'show_as_percentage': True, 'number_format': 'english'}
+    column_with_display_options = Column.objects.get(id=column_id_with_display_options)
+    column_with_display_options.display_options = column_display_options
+    column_with_display_options.save()
+
     extract_table_name = "Patent Info"
     remainder_table_name = "Patent Status"
     split_data = {
-        'extract_columns': columns_id_to_extract,
-        'extract_table_name': extract_table_name,
+        'extract_columns': column_ids_to_extract,
+        'extracted_table_name': extract_table_name,
         "remainder_table_name": remainder_table_name,
         'drop_original_table': True
     }
@@ -1349,4 +1354,7 @@ def test_table_extract_columns_with_display_options(create_patents_table, client
     response_data = current_table_response.json()
     extracted_table_id = response_data['extracted_table']
     extracted_table = Table.objects.get(id=extracted_table_id)
-    assert extracted_table.get_column_name_id_bidirectional_map()[extract_column_name_with_display_options] == extract_column_id_with_display_options
+    extracted_column_id = extracted_table.get_column_name_id_bidirectional_map()[column_name_with_display_options]
+    extracted_column = Column.objects.get(id=extracted_column_id)
+    assert extracted_column.id == extracted_column_id
+    assert extracted_column.display_options == column_with_display_options.display_options
