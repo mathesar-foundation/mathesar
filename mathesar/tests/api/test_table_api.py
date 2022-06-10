@@ -1320,7 +1320,7 @@ def test_table_extract_columns(create_patents_table, client):
     assert expected_extracted_columns_name == extracted_columns_name
     remainder_columns = remainder_table.columns.all()
     remainder_columns_name = [remainder_column.name for remainder_column in remainder_columns]
-    expected_remainder_columns = (set(existing_columns) - set(columns_names_to_extract)) | {'Patent Status_id'}
+    expected_remainder_columns = (set(existing_columns) - set(columns_names_to_extract)) | {'Patent Info_id'}
     assert set(expected_remainder_columns) == set(remainder_columns_name)
 
 
