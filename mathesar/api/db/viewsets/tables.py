@@ -15,7 +15,8 @@ from mathesar.api.exceptions.database_exceptions import (
 )
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import (
-    SplitTableRequestSerializer, SplitTableResponseSerializer, TablePreviewSerializer, TableSerializer,
+    MoveTableRequestSerializer, SplitTableRequestSerializer, SplitTableResponseSerializer, TablePreviewSerializer,
+    TableSerializer,
 )
 from mathesar.models import Table
 from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
@@ -99,6 +100,22 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             response_serializer = SplitTableResponseSerializer(data=split_table_response)
             response_serializer.is_valid(True)
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['post'], detail=True)
+    def move_columns(self, request, pk=None):
+        table = self.get_object()
+        column_names_id_map = table.get_column_name_id_bidirectional_map()
+        serializer = MoveTableRequestSerializer(data=request.data, context={"request": request, 'table': table})
+        if serializer.is_valid(True):
+            target_table = serializer.validated_data['target_table']
+            move_columns = serializer.validated_data['move_columns']
+            extracted_sa_table, remainder_sa_table = table.move_columns(
+                move_columns,
+                target_table,
+            )
+            column_names_to_move = [column.name for column in move_columns]
+            table.update_moved_column_reference(column_names_to_move, column_names_id_map)
+        return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=['post'], detail=True)
     def previews(self, request, pk=None):

@@ -24,6 +24,7 @@ from db.schemas.operations.drop import drop_schema
 from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
+from db.tables.operations.move_columns import move_columns_between_related_tables
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.tables.operations.split import extract_columns_from_table
 from mathesar import reflection
@@ -356,6 +357,17 @@ class Table(DatabaseObject):
             for col_name
             in name_list
         ]
+
+    def move_columns(self, columns_to_move, target_table):
+        columns_name_to_move = [column.name for column in columns_to_move]
+        target_table_oid = target_table.oid
+        return move_columns_between_related_tables(
+            self.oid,
+            target_table_oid,
+            columns_name_to_move,
+            self.schema.name,
+            self._sa_engine
+        )
 
     def split_table(
             self,
