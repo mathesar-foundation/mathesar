@@ -387,21 +387,21 @@ class Table(DatabaseObject):
             drop_original_table=drop_original_table
         )
 
-    def update_moved_column_reference(self, columns_name, column_name_id_map):
-        extracted_columns_name_attnum_map = get_columns_attnum_from_names(
+    def update_column_reference(self, columns_name, column_name_id_map):
+        columns_name_attnum_map = get_columns_attnum_from_names(
             self.oid,
             columns_name,
             self._sa_engine,
             return_as_name_map=True
         )
-        extracted_column_objs = []
-        for extracted_column_name, extracted_column_attnum in extracted_columns_name_attnum_map.items():
-            column_id = column_name_id_map[extracted_column_name]
+        column_objs = []
+        for column_name, column_attnum in columns_name_attnum_map.items():
+            column_id = column_name_id_map[column_name]
             column = Column.current_objects.get(id=column_id)
             column.table_id = self.id
-            column.attnum = extracted_column_attnum
-            extracted_column_objs.append(column)
-        Column.current_objects.bulk_update(extracted_column_objs, fields=['table_id', 'attnum'])
+            column.attnum = column_attnum
+            column_objs.append(column)
+        Column.current_objects.bulk_update(column_objs, fields=['table_id', 'attnum'])
 
 
 class Column(ReflectionManagerMixin, BaseModel):
