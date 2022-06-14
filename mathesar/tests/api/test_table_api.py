@@ -1437,6 +1437,7 @@ def test_table_move_columns_after_extracting(create_patents_table, client):
         'target_table': extracted_table_id,
     }
     current_table_response = client.post(f'/api/db/v0/tables/{remainder_table_id}/move_columns/', data=move_data)
+    assert current_table_response.status_code == 201
     extracted_table = Table.objects.get(id=extracted_table_id)
     extracted_column_id = extracted_table.get_column_name_id_bidirectional_map()[column_name_with_display_options]
     extracted_column = Column.objects.get(id=extracted_column_id)
