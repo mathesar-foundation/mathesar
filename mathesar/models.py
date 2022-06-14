@@ -476,3 +476,18 @@ class DataFile(BaseModel):
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)
     quotechar = models.CharField(max_length=1, default='"', blank=True)
+
+
+from django.contrib.postgres.fields import ArrayField
+
+class Query(BaseModel):
+    name = models.CharField(max_length=128, unique=True)
+    base_table = models.ForeignKey('Table', on_delete=models.CASCADE)
+    columns = ArrayField(
+        base_field=models.IntegerField,
+    )
+    transformations = ArrayField(
+        base_field=models.JSONField,
+        null=True,
+        blank=True,
+    )
