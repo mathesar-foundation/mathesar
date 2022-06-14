@@ -1376,8 +1376,6 @@ def test_table_extract_columns_with_display_options(create_patents_table, client
     column_name_id_map = table.get_column_name_id_bidirectional_map()
     column_names_to_extract = ['Patent Number', 'Title', 'Patent Expiration Date']
     column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
-    existing_columns = table.columns.all()
-    existing_columns = [existing_column.name for existing_column in existing_columns]
     column_name_with_display_options = column_names_to_extract[0]
     column_id_with_display_options = column_name_id_map[column_name_with_display_options]
 
