@@ -1409,7 +1409,7 @@ def test_table_move_columns_after_extracting(create_patents_table, client):
     column_name_id_map = table.get_column_name_id_bidirectional_map()
     existing_columns = table.columns.all()
     existing_columns = [existing_column.name for existing_column in existing_columns]
-    column_names_to_extract = ['Patent Number', 'Patent Expiration Date']
+    column_names_to_extract = ['Title', 'Patent Expiration Date']
     column_ids_to_extract = [column_name_id_map[name] for name in column_names_to_extract]
 
     extract_table_name = "Patent Info"
@@ -1424,12 +1424,21 @@ def test_table_move_columns_after_extracting(create_patents_table, client):
     assert current_table_response.status_code == 201
     remainder_table_id = current_table_response.json()['remainder_table']
     extracted_table_id = current_table_response.json()['extracted_table']
-    column_names_to_move = ['Title']
+    column_names_to_move = ['Patent Number']
     column_ids_to_move = [column_name_id_map[name] for name in column_names_to_move]
-
+    column_display_options = {'show_as_percentage': True, 'number_format': 'english'}
+    column_name_with_display_options = column_names_to_move[0]
+    column_id_with_display_options = column_name_id_map[column_name_with_display_options]
+    column_with_display_options = Column.objects.get(id=column_id_with_display_options)
+    column_with_display_options.display_options = column_display_options
+    column_with_display_options.save()
     move_data = {
         'move_columns': column_ids_to_move,
         'target_table': extracted_table_id,
     }
     current_table_response = client.post(f'/api/db/v0/tables/{remainder_table_id}/move_columns/', data=move_data)
-    print(current_table_response.status_code)
+    extracted_table = Table.objects.get(id=extracted_table_id)
+    extracted_column_id = extracted_table.get_column_name_id_bidirectional_map()[column_name_with_display_options]
+    extracted_column = Column.objects.get(id=extracted_column_id)
+    assert extracted_column.id == extracted_column_id
+    assert extracted_column.display_options == column_with_display_options.display_options

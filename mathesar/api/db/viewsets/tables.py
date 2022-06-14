@@ -115,12 +115,21 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         if serializer.is_valid(True):
             target_table = serializer.validated_data['target_table']
             move_columns = serializer.validated_data['move_columns']
+            column_names_to_move = [column.name for column in move_columns]
             extracted_sa_table, remainder_sa_table = table.move_columns(
                 move_columns,
                 target_table,
             )
-            column_names_to_move = [column.name for column in move_columns]
-            table.update_moved_column_reference(column_names_to_move, column_names_id_map)
+            engine = table._sa_engine
+            extracted_table_oid = get_oid_from_table(extracted_sa_table.name, extracted_sa_table.schema, engine)
+            remainder_table_oid = get_oid_from_table(remainder_sa_table.name, remainder_sa_table.schema, engine)
+            table.oid = remainder_table_oid
+            table.save()
+            target_table.oid = extracted_table_oid
+            target_table.save()
+            target_table.update_column_reference(column_names_to_move, column_names_id_map)
+            remainder_column_names = column_names_id_map.keys() - column_names_to_move
+            table.update_column_reference(remainder_column_names, column_names_id_map)
         return Response(status=status.HTTP_201_CREATED)
 
     @action(methods=['post'], detail=True)
