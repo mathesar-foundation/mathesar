@@ -10,7 +10,6 @@ from mathesar.api.exceptions.database_exceptions import (
     exceptions as database_api_exceptions,
     base_exceptions as database_base_api_exceptions,
 )
-from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from db.types.exceptions import UnsupportedTypeException
 from mathesar.api.dj_filters import TableFilter
 from mathesar.api.pagination import DefaultLimitOffsetPagination
@@ -31,27 +30,12 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         return Table.objects.all().order_by('-created_at')
 
     def partial_update(self, request, pk=None):
+        table = self.get_object()
         serializer = TableSerializer(
-            data=request.data, context={'request': request}, partial=True
+            table, data=request.data, context={'request': request}, partial=True
         )
         serializer.is_valid(raise_exception=True)
-        table = self.get_object()
-
-        # Save the fields that are stored in the model.
-        present_model_fields = []
-        for model_field in table.MODEL_FIELDS:
-            if model_field in serializer.validated_data:
-                setattr(table, model_field, serializer.validated_data[model_field])
-                present_model_fields.append(model_field)
-        table.save(update_fields=present_model_fields)
-        for key in present_model_fields:
-            del serializer.validated_data[key]
-
-        # Save the fields that are stored in the underlying DB.
-        try:
-            table.update_sa_table(serializer.validated_data)
-        except ValueError as e:
-            raise base_api_exceptions.ValueAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
 
         # Reload the table to avoid cached properties
         table = self.get_object()
