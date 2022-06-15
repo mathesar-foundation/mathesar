@@ -1,4 +1,4 @@
-import type { Column } from '@mathesar/stores/table-data/types';
+import type { Column, Constraint } from '@mathesar/stores/table-data/types';
 import type { SheetColumn } from '@mathesar/components/sheet/types';
 import type { AbstractTypesMap } from '@mathesar/stores/abstract-types/types';
 import {
@@ -18,6 +18,7 @@ export interface ProcessedTableColumn extends SheetColumn {
 
 export function getProcessedColumn(
   column: Column,
+  constraints: Constraint[],
   abstractTypeMap: AbstractTypesMap,
 ): ProcessedTableColumn {
   const abstractTypeOfColumn = getAbstractTypeForDbType(
@@ -27,7 +28,7 @@ export function getProcessedColumn(
   return {
     column,
     abstractTypeOfColumn,
-    cellCap: getCellCap(column, abstractTypeOfColumn.cell),
+    cellCap: getCellCap(column, constraints, abstractTypeOfColumn.cell),
     dbTypeInputCap: getDbTypeBasedInputCap(column, abstractTypeOfColumn.cell),
     allowedFiltersMap: getFiltersForAbstractType(
       abstractTypeOfColumn.identifier,
@@ -39,11 +40,15 @@ export type ProcessedTableColumnMap = Map<Column['id'], ProcessedTableColumn>;
 
 export function getProcessedColumnsMap(
   columns: Column[],
+  constraints: Constraint[],
   abstractTypeMap: AbstractTypesMap,
 ): ProcessedTableColumnMap {
   const map: ProcessedTableColumnMap = new Map();
   columns.forEach((column) => {
-    map.set(column.id, getProcessedColumn(column, abstractTypeMap));
+    map.set(
+      column.id,
+      getProcessedColumn(column, constraints, abstractTypeMap),
+    );
   });
   return map;
 }

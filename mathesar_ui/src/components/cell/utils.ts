@@ -8,8 +8,13 @@ import type {
   ComponentAndProps,
   IconProps,
 } from '@mathesar-component-library/types';
+import type { Constraint } from '@mathesar/stores/table-data/constraints';
+import { findFkConstraintsForColumn } from '@mathesar/stores/table-data/constraintsUtils';
+import type { Column } from '@mathesar/stores/table-data/columns';
 import DataTypes from './data-types';
 import type { CellColumnLike } from './data-types/typeDefinitions';
+import type { LinkedRecordCellExternalProps } from './data-types/components/typeDefinitions';
+import LinkedRecordCell from './data-types/components/linked-record/LinkedRecordCell.svelte';
 
 export type CellValueFormatter<T> = (
   value: T | null | undefined,
@@ -38,9 +43,20 @@ function getCellConfiguration(
 }
 
 export function getCellCap(
-  column: CellColumnLike,
+  column: Column,
+  constraints: Constraint[],
   cellInfo: AbstractTypeConfiguration['cell'],
 ): ComponentAndProps<unknown> {
+  const fks = findFkConstraintsForColumn(constraints, column.id);
+  if (fks.length) {
+    const props: LinkedRecordCellExternalProps = {
+      tableId: fks[0].referent_table,
+    };
+    return {
+      component: LinkedRecordCell,
+      props,
+    };
+  }
   const config = getCellConfiguration(column.type, cellInfo);
   return DataTypes[cellInfo?.type ?? 'string'].get(column, config);
 }

@@ -15,7 +15,7 @@
   setTabularDataStoreInContext(tabularDataContextStore);
 
   $: tabularDataContextStore.set(tabularData);
-  $: ({ columnsDataStore } = tabularData);
+  $: ({ columnsDataStore, constraintsDataStore } = tabularData);
 
   /**
    * This would ideally be part of the context. But since, we'd be
@@ -25,6 +25,7 @@
    */
   $: processedTableColumnsMap = getProcessedColumnsMap(
     $columnsDataStore.columns,
+    $constraintsDataStore.constraints,
     $currentDbAbstractTypes.data,
   );
 </script>
