@@ -37,6 +37,7 @@ def get_query(
     filter=None,
     columns_to_select=None,
     group_by=None,
+    search={},
     duplicate_only=None
 ):
     if duplicate_only:
@@ -75,6 +76,7 @@ def get_records(
     order_by=[],
     filter=None,
     group_by=None,
+    search={},
     duplicate_only=None,
 ):
     """
@@ -87,6 +89,8 @@ def get_records(
         offset:          int, gives number of rows to skip
         order_by:        list of dictionaries, where each dictionary has a 'field' and
                          'direction' field.
+        search:          list of dictionaries, where each dictionary has a 'column' and
+                         'literal' field.
                          See: https://github.com/centerofci/sqlalchemy-filters#sort-format
         filter:          a dictionary with one key-value pair, where the key is the filter id and
                          the value is a list of parameters; supports composition/nesting.
@@ -113,6 +117,7 @@ def get_records(
         order_by=order_by,
         filter=filter,
         group_by=group_by,
+        search=search,
         duplicate_only=duplicate_only
     )
     return execute_query(engine, query)

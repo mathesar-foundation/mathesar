@@ -10,11 +10,17 @@ from mathesar.api.utils import follows_json_number_spec
 from mathesar.database.types import UIType
 
 
+class SearchParameterSerializer(MathesarErrorMessageMixin, serializers.Serializer):
+    column = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all())
+    literal = serializers.CharField()
+
+
 class RecordListParameterSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     filter = serializers.JSONField(required=False, default=None)
     order_by = serializers.JSONField(required=False, default=[])
     grouping = serializers.JSONField(required=False, default={})
     duplicate_only = serializers.JSONField(required=False, default=None)
+    search_fuzzy = SearchParameterSerializer(many=True)
 
 
 class RecordSerializer(MathesarErrorMessageMixin, serializers.BaseSerializer):

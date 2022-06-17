@@ -297,6 +297,7 @@ class Table(DatabaseObject):
         filter=None,
         order_by=[],
         group_by=None,
+        search={},
         duplicate_only=None,
     ):
         return db_get_records(
@@ -307,6 +308,7 @@ class Table(DatabaseObject):
             filter=filter,
             order_by=order_by,
             group_by=group_by,
+            search=search,
             duplicate_only=duplicate_only,
         )
 

@@ -42,6 +42,7 @@ class RecordViewSet(viewsets.ViewSet):
         filter_unprocessed = serializer.validated_data['filter']
         order_by = serializer.validated_data['order_by']
         grouping = serializer.validated_data['grouping']
+        search_fuzzy = serializer.validated_data['search_fuzzy']
         filter_processed = None
         column_names_to_ids = table.get_column_name_id_bidirectional_map()
         column_ids_to_names = column_names_to_ids.inverse
@@ -57,6 +58,7 @@ class RecordViewSet(viewsets.ViewSet):
             group_by_columns_names = [column_ids_to_names[column_id] for column_id in grouping['columns']]
             name_converted_group_by = {**grouping, 'columns': group_by_columns_names}
         name_converted_order_by = [{**column, 'field': column_ids_to_names[column['field']]} for column in order_by]
+        name_converted_search = [{**search_fuzzy, 'column': column_ids_to_names[column['field']]} for column in search_fuzzy]
 
         try:
 
@@ -65,6 +67,7 @@ class RecordViewSet(viewsets.ViewSet):
                 filters=filter_processed,
                 order_by=name_converted_order_by,
                 grouping=name_converted_group_by,
+                search=name_converted_search,
                 duplicate_only=serializer.validated_data['duplicate_only'],
             )
         except (BadDBFunctionFormat, UnknownDBFunctionID, ReferencedColumnsDontExist) as e:
