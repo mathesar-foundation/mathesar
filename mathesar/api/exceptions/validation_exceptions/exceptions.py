@@ -85,3 +85,15 @@ class IncompatibleFractionDigitValuesAPIException(MathesarValidationException):
             details=None,
     ):
         super().__init__(None, self.error_code, message, field, details)
+
+
+class RemainderTableNameRequiredAPIException(MathesarValidationException):
+    error_code = ErrorCodes.RemainderTableNameRequired.value
+
+    def __init__(
+            self,
+            message="Remainder Table name is required when old table is not dropped",
+            field=None,
+            details=None,
+    ):
+        super().__init__(None, self.error_code, message, field, details)
