@@ -148,8 +148,7 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         )
 
         return Response(table_data)
-    
-    
+
     @action(methods=['post'], detail=True)
     def existing_import(self, request, pk=None):
         temp_table = self.get_object()

@@ -179,5 +179,5 @@ def create_table_from_csv(data_file, name, schema):
 
 
 def insert_records_to_existing_table(existing_table, temp_table, mappings, data_files):
-    #TBD
+    # TBD
     pass
