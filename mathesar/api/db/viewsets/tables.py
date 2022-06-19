@@ -8,6 +8,8 @@ from sqlalchemy.exc import DataError, IntegrityError
 
 from db.tables.operations.select import get_oid_from_table
 from db.types.exceptions import UnsupportedTypeException
+from mathesar.imports.csv import insert_records_to_existing_table
+from mathesar.api.utils import get_table_or_404
 from mathesar.api.dj_filters import TableFilter
 from mathesar.api.exceptions.database_exceptions import (
     base_exceptions as database_base_api_exceptions,
@@ -15,7 +17,7 @@ from mathesar.api.exceptions.database_exceptions import (
 )
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.tables import (
-    SplitTableRequestSerializer, SplitTableResponseSerializer, TablePreviewSerializer, TableSerializer,
+    SplitTableRequestSerializer, SplitTableResponseSerializer, TablePreviewSerializer, TableSerializer, TableImportSerializer
 )
 from mathesar.models import Table
 from mathesar.reflection import reflect_db_objects, reflect_tables_from_schema
@@ -145,4 +147,30 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
             }
         )
 
+        return Response(table_data)
+    
+    
+    @action(methods=['post'], detail=True)
+    def existing_import(self, request, pk=None):
+        temp_table = self.get_object()
+        serializer = TableImportSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        existing_table_id = serializer.validated_data['table_to_import_to']
+        data_files = serializer.validated_data['data-files']
+        mappings = serializer.validated_data['mappings']
+        existing_table = get_table_or_404(existing_table_id)
+
+        try:
+            insert_records_to_existing_table(
+                existing_table, temp_table, mappings, data_files
+            )
+        except Exception as e:
+            # ToDo raise specific exceptions.
+            raise e
+        # Reload the table to avoid cached properties
+        existing_table = get_table_or_404(existing_table_id)
+        serializer = TableSerializer(
+            existing_table, context={'request': request}
+        )
+        table_data = serializer.data
         return Response(table_data)
