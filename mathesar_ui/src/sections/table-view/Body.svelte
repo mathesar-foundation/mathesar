@@ -124,11 +124,11 @@
         itemKey={(index) => recordsData.getIterationKey(index)}
         let:items
       >
-        {#each items as it (it?.key || it)}
-          {#if it && $displayableRecords[it.index]}
+        {#each items as item (item?.key || item)}
+          {#if item && $displayableRecords[item.index]}
             <RowComponent
-              style={it.style}
-              bind:row={$displayableRecords[it.index]}
+              style={item.style}
+              bind:row={$displayableRecords[item.index]}
               {processedTableColumnsMap}
             />
           {/if}
