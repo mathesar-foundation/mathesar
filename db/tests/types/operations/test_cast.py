@@ -499,7 +499,7 @@ MASTER_DB_TYPE_MAP_SPEC = {
             PostgresType.JSON:{
                 VALID: [
                 ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
-                ('{"key2":"val2"}', json.loads('{"key2":"val2"}')),
+                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))],
                 INVALID:[],
             },
             PostgresType.DOUBLE_PRECISION: {
