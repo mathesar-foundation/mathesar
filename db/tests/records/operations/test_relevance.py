@@ -1,6 +1,19 @@
-import json
 from sqlalchemy import select, desc
 from db.records.operations import relevance
+
+
+def test_rank_and_filter_rows(roster_table_obj):
+    roster, engine = roster_table_obj
+    sel = relevance.rank_and_filter_rows(
+        roster, {'Student Name': 'John'}, engine
+    )
+
+    with engine.begin() as conn:
+        res = conn.execute(sel).fetchall()
+
+    assert len(res) == 40 and all(
+        ['John' in row['Student Name'] for row in res]
+    )
 
 
 def test_get_scored_selectable_text_exact(roster_table_obj):
@@ -43,8 +56,7 @@ def test_get_scored_selectable_text_begin_and_mid(roster_table_obj):
     assert len(matches) == 40 and all(
         [
             (row['Student Name'][:4] == 'John' and row[relevance.SCORE_COL] == 3)
-            or
-            ('John' in row['Student Name'] and row[relevance.SCORE_COL] == 2)
+            or ('John' in row['Student Name'] and row[relevance.SCORE_COL] == 2)
             for row in matches
         ]
     )
@@ -64,40 +76,46 @@ def test_get_scored_selectable_multicol(roster_table_obj):
         row for row in res if row[relevance.SCORE_COL] > 0
     ]
 
-    with open('test_out2.txt', 'w') as f:
-        f.writelines([json.dumps(r._asdict()) + '\n' for r in matches])
-
     assert len(matches) == 124 and all(
         [
             (
                 row['Student Name'][:4] == 'John'
                 and row['Subject'] == 'Math'
                 and row[relevance.SCORE_COL] == 7
-            )
-            or
-            (
+            ) or (
                 row['Student Name'][:4] == 'John'
                 and row['Subject'] != 'Math'
                 and row[relevance.SCORE_COL] == 3
-            )
-            or
-            (
+            ) or (
                 'John' in row['Student Name']
                 and row['Subject'] == 'Math'
                 and row[relevance.SCORE_COL] == 6
-            )
-            or
-            (
+            ) or (
                 'John' in row['Student Name']
                 and row['Subject'] != 'Math'
                 and row[relevance.SCORE_COL] == 2
-            )
-            or
-            (
+            ) or (
                 'John' not in row['Student Name']
                 and row['Subject'] == 'Math'
                 and row[relevance.SCORE_COL] == 4
             )
             for row in matches
         ]
+    )
+
+
+def test_get_scored_selectable_nontext(roster_table_obj):
+    roster, engine = roster_table_obj
+    sel = select(
+        relevance._get_scored_selectable(roster, {'Grade': 100}, engine)
+    ).order_by(desc(relevance.SCORE_COL))
+    with engine.begin() as conn:
+        res = conn.execute(sel).fetchall()
+
+    matches = [
+        row for row in res if row[relevance.SCORE_COL] > 0
+    ]
+
+    assert len(matches) == 7 and all(
+        [row['Grade'] == 100 and row[relevance.SCORE_COL] == 4 for row in matches]
     )
