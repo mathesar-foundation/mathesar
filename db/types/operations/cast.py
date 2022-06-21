@@ -276,20 +276,34 @@ def _get_json_type_body_map(target_type):
     target_type_str = target_type.id
 
     def _get_text_to_json_cast(target_type):
-        return f"""
-            DECLARE 
-            BEGIN
-                SELECT 
-                    CASE WHEN $1 IS NULL THEN NULL
-                    ELSE $1::{target_type_str} 
-                    END 
-                    INTO json_res;
-            IF json_res != "object" AND  json_res != "array"
-                THEN RAISE EXCEPTION 'Invalid json expression';
-            END IF;
-            RETURN json_res;
-            END;  
-            """
+        if target_type_str == "json":
+            return f"""
+                BEGIN
+                    SELECT 
+                        CASE WHEN $1 IS NULL THEN NULL
+                        ELSE $1::{target_type_str} 
+                        END 
+                        INTO json_res;
+                IF json_typeof(json_res) != "object" AND  json_typeof(json_res) != "array"
+                    THEN RAISE EXCEPTION 'Invalid json expression';
+                END IF;
+                RETURN json_res;
+                END;  
+                """
+        else:
+            return f"""
+                BEGIN
+                    SELECT 
+                        CASE WHEN $1 IS NULL THEN NULL
+                        ELSE $1::{target_type_str} 
+                        END 
+                        INTO json_res;
+                IF jsonb_typeof(json_res) != "object" AND  jsonb_typeof(json_res) != "array"
+                    THEN RAISE EXCEPTION 'Invalid json expression';
+                END IF;
+                RETURN json_res;
+                END;  
+                """
 
     type_body_map =_get_default_type_body_map(default_behavior_source_types, target_type)
     type_body_map.update(
