@@ -5,6 +5,7 @@ from psycopg2.errors import InvalidParameterValue
 from sqlalchemy import Table, Column, MetaData, select, cast, text
 from sqlalchemy import VARCHAR, NUMERIC
 from sqlalchemy.exc import DataError
+import json
 
 from db.types.custom.base import CUSTOM_DB_TYPE_TO_SA_CLASS
 from db.columns.operations.select import get_column_attnum_from_name, get_column_default
@@ -497,8 +498,8 @@ MASTER_DB_TYPE_MAP_SPEC = {
             PostgresType.CHARACTER: {VALID: [("a", "a")]},
             PostgresType.JSON:{
                 VALID: [
-                ('{"key1":"val1"}', '{"key1":"val1"}'),
-                ('{"key2":"val2"}', '{"key2":"val2"}')],
+                ('{"key1":"val1"}', {"key1":"val1"}),
+                ('{"key2":"val2"}', {"key2":"val2"})],
                 INVALID:[],
             },
             PostgresType.DOUBLE_PRECISION: {
