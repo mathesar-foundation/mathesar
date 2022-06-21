@@ -176,8 +176,3 @@ def create_table_from_csv(data_file, name, schema):
     data_file.table_imported_to = table
     data_file.save()
     return table
-
-
-def insert_records_to_existing_table(existing_table, temp_table, mappings, data_files):
-    # TBD
-    pass

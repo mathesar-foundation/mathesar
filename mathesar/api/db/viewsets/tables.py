@@ -8,7 +8,6 @@ from sqlalchemy.exc import DataError, IntegrityError
 
 from db.tables.operations.select import get_oid_from_table
 from db.types.exceptions import UnsupportedTypeException
-from mathesar.imports.csv import insert_records_to_existing_table
 from mathesar.api.utils import get_table_or_404
 from mathesar.api.dj_filters import TableFilter
 from mathesar.api.exceptions.database_exceptions import (
@@ -160,8 +159,8 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         existing_table = get_table_or_404(existing_table_id)
 
         try:
-            insert_records_to_existing_table(
-                existing_table, temp_table, mappings, data_files
+            temp_table.insert_records_to_existing_table(
+                existing_table, temp_table, mappings
             )
         except Exception as e:
             # ToDo raise specific exceptions.
