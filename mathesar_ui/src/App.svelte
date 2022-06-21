@@ -7,6 +7,7 @@
   import { toast } from '@mathesar/stores/toast';
   import { setNewRecordSelectorControllerInContext } from '@mathesar/systems/record-selector/RecordSelectorController';
   import { confirmationController } from '@mathesar/stores/confirmation';
+  import { getTableName } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { beginUpdatingUrlWhenSchemaChanges } from './utils/routing';
   import { modal } from './stores/modal';
@@ -22,6 +23,7 @@
 
   const recordSelectorController = setNewRecordSelectorControllerInContext({
     modal: modal.spawnModalController(),
+    getTableName,
   });
 </script>
 
