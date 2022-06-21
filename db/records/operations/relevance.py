@@ -8,6 +8,7 @@ WEIGHT_3 = 3
 WEIGHT_2 = 2
 WEIGHT_1 = 1
 WEIGHT_0 = 0
+SCORE_COL = '__mathesar_relevance_score'
 
 
 def rank_and_filter_rows(relation, parameters_dict, engine):
@@ -16,25 +17,26 @@ def rank_and_filter_rows(relation, parameters_dict, engine):
     the relation by the strength of their match with the various
     parameters given in parameters_dict.
     """
-    rank_cte = select(
-        relation,
-        _get_full_score_expr(relation, parameters_dict, engine).label('score')
-    ).cte()
+    rank_cte = _get_scored_selectable(relation, parameters_dict, engine)
     filtered_ordered_cte = apply_sort(
-        select(rank_cte).where(rank_cte.columns['score'] > 0),
-        {'field': 'score', 'direction': 'desc'}
+        select(rank_cte).where(rank_cte.columns[SCORE_COL] > 0),
+        {'field': SCORE_COL, 'direction': 'desc'}
     ).cte()
     return select(
         *[filtered_ordered_cte.columns[c] for c in [col.name for col in relation.columns]]
     )
 
 
-def _get_full_score_expr(relation, parameters_dict, engine):
-    col_scores = [
-        _get_col_score_expr(relation.columns[col_name], val, engine)
-        for col_name, val in parameters_dict.items()
-    ]
-    return sum(col_scores)
+def _get_scored_selectable(relation, parameters_dict, engine):
+    return select(
+        relation,
+        sum(
+            [
+                _get_col_score_expr(relation.columns[col_name], val, engine)
+                for col_name, val in parameters_dict.items()
+            ]
+        ).label(SCORE_COL)
+    ).cte()
 
 
 def _get_col_score_expr(col, param_val, engine):
