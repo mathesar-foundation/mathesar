@@ -11,7 +11,7 @@ WEIGHT_0 = 0
 SCORE_COL = '__mathesar_relevance_score'
 
 
-def get_rank_and_filter_rows_query(relation, parameters_dict, engine):
+def get_rank_and_filter_rows_query(relation, parameters_dict, engine, limit=10):
     """
     Given a relation, we use a score-assignment algorithm to rank rows of
     the relation by the strength of their match with the various
@@ -24,7 +24,7 @@ def get_rank_and_filter_rows_query(relation, parameters_dict, engine):
     ).cte()
     return select(
         *[filtered_ordered_cte.columns[c] for c in [col.name for col in relation.columns]]
-    )
+    ).limit(limit)
 
 
 def _get_scored_selectable(relation, parameters_dict, engine):

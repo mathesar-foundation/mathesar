@@ -11,7 +11,7 @@ def test_rank_and_filter_rows(roster_table_obj):
     with engine.begin() as conn:
         res = conn.execute(sel).fetchall()
 
-    assert len(res) == 40 and all(
+    assert len(res) == 10 and all(
         ['John' in row['Student Name'] for row in res]
     )
 
