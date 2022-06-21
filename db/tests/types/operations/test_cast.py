@@ -495,6 +495,12 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 INVALID: ["cat"],
             },
             PostgresType.CHARACTER: {VALID: [("a", "a")]},
+            PostgresType.JSON:{
+                VALID: [
+                ('{"key1":"val1"}', '{"key1":"val1"}'),
+                ('{"key2":"val2"}', '{"key2":"val2"}')],
+                INVALID:[],
+            },
             PostgresType.DOUBLE_PRECISION: {
                 VALID: [("1.234", 1.234)],
                 INVALID: ["bat"],

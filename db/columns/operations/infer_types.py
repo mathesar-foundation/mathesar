@@ -34,6 +34,8 @@ TYPE_INFERENCE_DAG = {
         PostgresType.INTERVAL,
         MathesarCustomType.EMAIL,
         MathesarCustomType.URI,
+        PostgresType.JSON,
+        PostgresType.JSONB,
     ],
 }
 

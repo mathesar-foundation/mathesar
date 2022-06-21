@@ -53,6 +53,8 @@ def install_all_casts(engine):
     create_textual_casts(engine)
     create_uri_casts(engine)
     create_numeric_casts(engine)
+    ####
+    create_json_casts(engine)
 
 
 def create_boolean_casts(engine):
@@ -63,6 +65,13 @@ def create_boolean_casts(engine):
 def create_date_casts(engine):
     type_body_map = _get_date_type_body_map()
     create_cast_functions(PostgresType.DATE, type_body_map, engine)
+
+
+def create_json_casts(engine):
+    json_types = categories.JSON_TYPES
+    for db_type in json_types:
+        type_body_map = _get_json_type_body_map(db_type)
+        create_cast_functions(db_type, type_body_map, engine)
 
 
 def create_decimal_number_casts(engine):
@@ -154,6 +163,8 @@ def get_full_cast_map(engine):
         PostgresType.CHARACTER: _get_textual_type_body_map(engine),
         PostgresType.CHARACTER_VARYING: _get_textual_type_body_map(engine),
         PostgresType.DATE: _get_date_type_body_map(),
+        PostgresType.JSON: _get_json_type_body_map(target_type=PostgresType.JSON),
+        PostgresType.JSONB: _get_json_type_body_map(target_type=PostgresType.JSONB),
         PostgresType.DOUBLE_PRECISION: _get_decimal_number_type_body_map(target_type=PostgresType.DOUBLE_PRECISION),
         MathesarCustomType.EMAIL: _get_email_type_body_map(),
         PostgresType.INTEGER: _get_integer_type_body_map(target_type=PostgresType.INTEGER),
@@ -254,6 +265,40 @@ def _escape_illegal_characters(sql_name):
     for old, new in replacement_mapping.items():
         resulting_string = resulting_string.replace(old, new)
     return resulting_string
+
+def _get_json_type_body_map(target_type):
+    '''
+    json --> jsonb(or jsonb --> json): use default casting
+    text --> json: use _get_text_to_json_cast()
+    '''
+    default_behavior_source_types = frozenset([PostgresType.JSON, PostgresType.JSONB])
+    source_text_types = categories.STRING_TYPES
+    target_type_str = target_type.id
+
+    def _get_text_to_json_cast(target_type):
+        return f"""
+            DECLARE 
+            BEGIN
+                SELECT 
+                    CASE WHEN $1 IS NULL THEN NULL
+                    ELSE $1::{target_type_str} 
+                    END 
+                    INTO json_res;
+            IF json_res != "object" AND  json_res != "array"
+                THEN RAISE EXCEPTION 'Invalid json expression';
+            END IF;
+            RETURN json_res;
+            END;  
+            """
+
+    type_body_map =_get_default_type_body_map(default_behavior_source_types, target_type)
+    type_body_map.update(
+        {
+            text_type: _get_text_to_json_cast(target_type)
+            for text_type in source_text_types
+        }
+    )
+    return type_body_map
 
 
 def _get_boolean_type_body_map():
@@ -892,7 +937,7 @@ def _get_numeric_type_body_map():
         }
     )
     type_body_map.update({PostgresType.BOOLEAN: _get_boolean_to_number_cast(PostgresType.NUMERIC)})
-    return type_body_map
+    return update
 
 
 def _get_text_to_numeric_cast():

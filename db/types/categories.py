@@ -81,3 +81,9 @@ COMPARABLE_TYPES = frozenset({
     *MONEY_TYPES,
     *TIME_RELATED_TYPES,
 })
+
+###########
+JSON_TYPES = frozenset({
+    PostgresType.JSON,
+    PostgresType.JSONB
+})
