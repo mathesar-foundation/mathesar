@@ -937,7 +937,7 @@ def _get_numeric_type_body_map():
         }
     )
     type_body_map.update({PostgresType.BOOLEAN: _get_boolean_to_number_cast(PostgresType.NUMERIC)})
-    return update
+    return type_body_map
 
 
 def _get_text_to_numeric_cast():
