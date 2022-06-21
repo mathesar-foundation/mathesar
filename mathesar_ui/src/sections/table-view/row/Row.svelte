@@ -1,11 +1,12 @@
 <script lang="ts">
   import {
+    DEFAULT_ROW_RIGHT_PADDING,
+    ROW_CONTROL_COLUMN_WIDTH,
     getCellKey,
     getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import type { Row } from '@mathesar/stores/table-data/types';
   import { getRowKey } from '@mathesar/stores/table-data';
-  import { ROW_CONTROL_COLUMN_WIDTH } from '@mathesar/stores/table-data';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
   import GroupHeader from './GroupHeader.svelte';
@@ -21,7 +22,8 @@
   $: ({ recordsData, columnsDataStore, meta, display } = $tabularData);
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
-  $: fullRowWidth = rowWidth + ROW_CONTROL_COLUMN_WIDTH;
+  $: fullRowWidth =
+    rowWidth + ROW_CONTROL_COLUMN_WIDTH + DEFAULT_ROW_RIGHT_PADDING;
   $: ({
     selectedRows,
     rowStatus,
@@ -77,12 +79,7 @@
   {#if row.isNewHelpText}
     <RowPlaceholder rowWidth={fullRowWidth} />
   {:else if row.isGroupHeader && $grouping && row.group}
-    <GroupHeader
-      {row}
-      rowWidth={fullRowWidth}
-      grouping={$grouping}
-      group={row.group}
-    />
+    <GroupHeader {row} {rowWidth} grouping={$grouping} group={row.group} />
   {:else if row.record}
     <RowControl
       {primaryKeyColumnId}

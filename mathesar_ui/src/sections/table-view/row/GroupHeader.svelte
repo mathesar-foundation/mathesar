@@ -17,14 +17,12 @@
 
 <div
   class="cell row-control group-control"
-  style="width:{ROW_CONTROL_COLUMN_WIDTH}px;left:0px"
+  style="width:{ROW_CONTROL_COLUMN_WIDTH}px; left:0px;"
 />
 
 <div
   class="cell groupheader"
-  style="left:{ROW_CONTROL_COLUMN_WIDTH}px;width:{rowWidth +
-    ROW_CONTROL_COLUMN_WIDTH -
-    ROW_CONTROL_COLUMN_WIDTH}px"
+  style="left:{ROW_CONTROL_COLUMN_WIDTH}px; width:{rowWidth}px;"
 >
   {#each columnIds as columnId (columnId)}
     <span class="tag"

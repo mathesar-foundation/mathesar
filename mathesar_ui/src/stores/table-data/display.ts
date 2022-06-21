@@ -156,13 +156,12 @@ export class Display {
       },
     );
 
-    this.rowWidth = derived(this.columnPlacements, (placements) => {
-      const totalColumnWidth = [...placements.values()].reduce(
+    this.rowWidth = derived(this.columnPlacements, (placements) =>
+      [...placements.values()].reduce(
         (width, placement) => width + placement.width,
         0,
-      );
-      return totalColumnWidth + DEFAULT_ROW_RIGHT_PADDING;
-    });
+      ),
+    );
 
     const { savedRecords, newRecords } = this.recordsData;
     this.displayableRecords = derived(

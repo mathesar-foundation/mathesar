@@ -46,7 +46,7 @@
   class="cell new-column"
   style="
   width:{DEFAULT_ROW_RIGHT_PADDING}px;
-  left:{$rowWidth + ROW_CONTROL_COLUMN_WIDTH - DEFAULT_ROW_RIGHT_PADDING}px"
+  left:{$rowWidth + ROW_CONTROL_COLUMN_WIDTH}px"
 >
   <Dropdown
     closeOnInnerClick={false}

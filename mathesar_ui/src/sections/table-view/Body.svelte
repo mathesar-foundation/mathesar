@@ -8,6 +8,7 @@
     Grouping,
     Pagination,
     getTabularDataStoreFromContext,
+    DEFAULT_ROW_RIGHT_PADDING,
   } from '@mathesar/stores/table-data';
   import RowComponent from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
@@ -117,7 +118,7 @@
         bind:horizontalScrollOffset={$horizontalScrollOffset}
         bind:scrollOffset={$scrollOffset}
         {height}
-        width={$rowWidth}
+        width={$rowWidth + DEFAULT_ROW_RIGHT_PADDING}
         itemCount={$displayableRecords.length}
         paddingBottom={30}
         itemSize={getItemSize}
