@@ -154,7 +154,6 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         serializer = TableImportSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         existing_table_id = serializer.validated_data['table_to_import_to']
-        data_files = serializer.validated_data['data-files']
         mappings = serializer.validated_data['mappings']
         existing_table = get_table_or_404(existing_table_id)
 
