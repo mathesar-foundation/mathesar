@@ -32,12 +32,12 @@
     customizedColumnWidths.set(columnId, newColumnWidth);
   }
 
-  function getColumnWidth(columnId: number): number {
-    const customizedWidth = customizedColumnWidths.getValue(columnId);
+  function getColumnWidth(_columnId: number): number {
+    const customizedWidth = customizedColumnWidths.getValue(_columnId);
     if (customizedWidth) {
       return customizedWidth;
     }
-    const placement = get(columnPlacements).get(columnId);
+    const placement = get(columnPlacements).get(_columnId);
     if (!placement) {
       return 0;
     }

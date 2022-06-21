@@ -4,9 +4,9 @@
   import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
   import type { Row } from '@mathesar/stores/table-data/records';
   import Cell from '@mathesar/components/cell/Cell.svelte';
-  import CellArranger from './CellArranger.svelte';
   import RowCellBackgrounds from '@mathesar/sections/table-view/row/RowCellBackgrounds.svelte';
   import { rowHeightPx } from '@mathesar/sections/table-view/geometry';
+  import CellArranger from './CellArranger.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -18,7 +18,9 @@
   $: ({ display } = $tabularData);
   $: recordsStore = $tabularData.recordsData.savedRecords;
   $: records = $recordsStore;
-  $: ({ rowWidth } = display);
+  $: rowWidthStore = display.rowWidth;
+  $: rowWidth = $rowWidthStore;
+  $: rowStyle = `width: ${rowWidth as number}px; height: ${rowHeightPx}px;`;
 
   function selectPrevious() {
     selectionIndex = Math.max(selectionIndex - 1, 0);
@@ -65,11 +67,7 @@
 <div class="record-selector-results">
   {#each records as row, index}
     {#if row.record}
-      <div
-        class="row"
-        style={`width: ${$rowWidth}px; height: ${rowHeightPx}px;`}
-        on:click={() => submitRecord(index)}
-      >
+      <div class="row" style={rowStyle} on:click={() => submitRecord(index)}>
         <CellArranger
           {processedTableColumnsMap}
           {display}

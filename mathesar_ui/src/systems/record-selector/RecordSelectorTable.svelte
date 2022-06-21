@@ -9,11 +9,10 @@
     TabularData,
   } from '@mathesar/stores/table-data/tabularData';
   import ColumnResizer from '@mathesar/sections/table-view/header/header-cell/ColumnResizer.svelte';
+  import DataTypeBasedInput from '@mathesar/components/cell/DataTypeBasedInput.svelte';
   import type { RecordSelectorController } from './RecordSelectorController';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
   import CellArranger from './CellArranger.svelte';
-  import Cell from '@mathesar/components/cell/Cell.svelte';
-  import DataTypeBasedInput from '@mathesar/components/cell/DataTypeBasedInput.svelte';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
