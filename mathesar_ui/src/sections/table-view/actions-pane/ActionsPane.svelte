@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
   import {
     faFilter,
     faSort,
@@ -21,7 +20,7 @@
     DropdownMenu,
     MenuItem,
   } from '@mathesar-component-library';
-  import type { TabularDataStore } from '@mathesar/stores/table-data/types';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { refetchTablesForSchema, deleteTable } from '@mathesar/stores/tables';
   import { currentSchemaId } from '@mathesar/stores/schemas';
   import { currentDBName } from '@mathesar/stores/databases';
@@ -36,7 +35,7 @@
   import RenameTableModal from './RenameTableModal.svelte';
   import type { ProcessedTableColumnMap } from '../utils';
 
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
 
   const tableConstraintsModal = modal.spawnModalController();
   const linkTableModal = modal.spawnModalController();

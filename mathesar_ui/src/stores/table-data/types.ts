@@ -1,6 +1,5 @@
 export type {
   TabularData,
-  TabularDataStore,
   TabularDataProps,
   TerseTabularDataProps,
 } from './tabularData';

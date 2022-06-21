@@ -1,14 +1,15 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
   import {
     Pagination as PaginationComponent,
     Select,
   } from '@mathesar-component-library';
   import { States } from '@mathesar/utils/api';
-  import type { TabularDataStore } from '@mathesar/stores/table-data/types';
-  import { Pagination } from '@mathesar/stores/table-data';
+  import {
+    getTabularDataStoreFromContext,
+    Pagination,
+  } from '@mathesar/stores/table-data';
 
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
 
   $: ({ recordsData, meta } = $tabularData);
   $: ({ selectedRows, pagination } = meta);

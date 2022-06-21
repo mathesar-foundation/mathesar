@@ -6,8 +6,7 @@
     DropdownMenu,
     MenuItem,
   } from '@mathesar-component-library';
-  import { getContext } from 'svelte';
-  import type { TabularDataStore } from '@mathesar/stores/table-data/types';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type {
     Constraint,
     ConstraintsDataStore,
@@ -27,7 +26,7 @@
 
   export let controller: ModalController;
 
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
   const newUniqueConstraintModal = modal.spawnModalController();
   const newFkConstraintModal = modal.spawnModalController();
 

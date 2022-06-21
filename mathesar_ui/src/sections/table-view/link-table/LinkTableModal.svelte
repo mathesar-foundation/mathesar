@@ -1,5 +1,6 @@
 <script lang="ts">
   import { faHammer, faLink } from '@fortawesome/free-solid-svg-icons';
+  import { createEventDispatcher } from 'svelte';
   import type { ModalController } from '@mathesar-component-library';
   import {
     CancelOrProceedButtonPair,
@@ -17,13 +18,15 @@
   import FormField from '@mathesar/components/FormField.svelte';
   import Identifier from '@mathesar/components/Identifier.svelte';
   import SelectTableWithinCurrentSchema from '@mathesar/components/SelectTableWithinCurrentSchema.svelte';
-  import { ColumnsDataStore, TabularType } from '@mathesar/stores/table-data';
-  import type { TabularDataStore } from '@mathesar/stores/table-data/types';
+  import {
+    ColumnsDataStore,
+    getTabularDataStoreFromContext,
+    TabularType,
+  } from '@mathesar/stores/table-data';
   import { tables } from '@mathesar/stores/tables';
   import { toast } from '@mathesar/stores/toast';
   import { States } from '@mathesar/utils/api';
   import { getAvailableName } from '@mathesar/utils/db';
-  import { createEventDispatcher, getContext } from 'svelte';
   import type { RelationshipType } from './linkTableUtils';
   import {
     getRelationshipType,
@@ -34,7 +37,7 @@
   import TableName from './TableName.svelte';
 
   const dispatch = createEventDispatcher();
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
 
   export let controller: ModalController;
 

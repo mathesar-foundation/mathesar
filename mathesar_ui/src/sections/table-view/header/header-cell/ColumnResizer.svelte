@@ -1,10 +1,9 @@
 <script lang="ts">
-  import type { TabularDataStore } from '@mathesar/stores/table-data/types';
-  import { getContext } from 'svelte';
   import { get } from 'svelte/store';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data/tabularData';
 
   const MIN_COLUMN_WIDTH = 50;
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
 
   export let columnId: number;
 

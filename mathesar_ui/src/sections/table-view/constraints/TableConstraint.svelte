@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
   import { Icon, Button, Spinner } from '@mathesar-component-library';
   import {
     faArrowRight,
@@ -8,7 +7,7 @@
     faTrash,
   } from '@fortawesome/free-solid-svg-icons';
   import { confirmDelete } from '@mathesar/stores/confirmation';
-  import type { TabularDataStore } from '@mathesar/stores/table-data/types';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import type { Constraint } from '@mathesar/api/tables/constraints';
   import { tables } from '@mathesar/stores/tables';
   import Identifier from '@mathesar/components/Identifier.svelte';
@@ -19,7 +18,7 @@
   export let constraint: Constraint;
   export let drop: () => Promise<void>;
 
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
 
   function handleDrop() {
     void confirmDelete({

@@ -1,22 +1,20 @@
 <script lang="ts">
-  import { beforeUpdate, getContext, tick } from 'svelte';
+  import { beforeUpdate, tick } from 'svelte';
   import { get } from 'svelte/store';
-  import type {
-    TabularDataStore,
-    Row,
-  } from '@mathesar/stores/table-data/types';
-  import type {
+  import type { Row } from '@mathesar/stores/table-data/types';
+  import {
     Sorting,
     Filtering,
     Grouping,
     Pagination,
+    getTabularDataStoreFromContext,
   } from '@mathesar/stores/table-data';
   import RowComponent from './row/Row.svelte';
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
   import type { ProcessedTableColumnMap } from './utils';
 
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
 
   let virtualListRef: VirtualList;
 

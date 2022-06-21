@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
   import type { ModalController } from '@mathesar-component-library';
   import {
     CheckboxGroup,
@@ -9,10 +8,8 @@
   } from '@mathesar-component-library';
   import { CancelOrProceedButtonPair } from '@mathesar-component-library';
   import { ControlledModal } from '@mathesar-component-library';
-  import type {
-    Column,
-    TabularDataStore,
-  } from '@mathesar/stores/table-data/types';
+  import type { Column } from '@mathesar/stores/table-data/types';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { tables } from '@mathesar/stores/tables';
   import FormField from '@mathesar/components/FormField.svelte';
   import ColumnName from '@mathesar/components/ColumnName.svelte';
@@ -32,7 +29,7 @@
   ]);
   const namingStrategies = [...namingStrategyLabelMap.keys()];
 
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
 
   function getSuggestedName(
     _tableName: string,

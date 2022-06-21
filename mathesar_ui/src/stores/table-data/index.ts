@@ -20,5 +20,10 @@ export { getRowKey } from './records';
 export { getCellKey } from './utils';
 
 export { getTabularContent, removeTabularContent } from './manager';
-export { makeTabularDataProps, makeTerseTabularDataProps } from './tabularData';
+export {
+  makeTabularDataProps,
+  makeTerseTabularDataProps,
+  setTabularDataStoreInContext,
+  getTabularDataStoreFromContext,
+} from './tabularData';
 export { TabularType } from './TabularType';

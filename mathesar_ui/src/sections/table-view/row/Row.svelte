@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
-  import { getCellKey } from '@mathesar/stores/table-data';
-  import type {
-    TabularDataStore,
-    Row,
-  } from '@mathesar/stores/table-data/types';
+  import {
+    getCellKey,
+    getTabularDataStoreFromContext,
+  } from '@mathesar/stores/table-data';
+  import type { Row } from '@mathesar/stores/table-data/types';
   import { getRowKey } from '@mathesar/stores/table-data';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
@@ -16,7 +15,7 @@
   export let style: { [key: string]: string | number };
   export let processedTableColumnsMap: ProcessedTableColumnMap;
 
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
 
   $: ({ recordsData, columnsDataStore, meta, display } = $tabularData);
   $: ({ columnPositions, columnWidths } = display);

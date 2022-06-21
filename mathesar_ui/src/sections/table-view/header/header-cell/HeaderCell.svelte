@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getContext, tick } from 'svelte';
+  import { tick } from 'svelte';
   import {
     faCog,
     faChevronRight,
@@ -13,10 +13,8 @@
     TextInput,
     SpinnerArea,
   } from '@mathesar-component-library';
-  import type {
-    ConstraintsDataStore,
-    TabularDataStore,
-  } from '@mathesar/stores/table-data/types';
+  import type { ConstraintsDataStore } from '@mathesar/stores/table-data/types';
+  import { getTabularDataStoreFromContext } from '@mathesar/stores/table-data';
   import { focusAndSelectAll } from '@mathesar/utils/domUtils';
   import type {
     Meta,
@@ -29,7 +27,7 @@
   import type { ProcessedTableColumn } from '../../utils';
   import ColumnResizer from './ColumnResizer.svelte';
 
-  const tabularData = getContext<TabularDataStore>('tabularData');
+  const tabularData = getTabularDataStoreFromContext();
 
   export let processedColumn: ProcessedTableColumn;
   export let meta: Meta;
