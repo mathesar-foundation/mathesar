@@ -25,6 +25,7 @@ from db.schemas import utils as schema_utils
 from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
+from db.tables.operations.split import extract_columns_from_table
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
@@ -357,6 +358,40 @@ class Table(DatabaseObject):
             for col_name
             in name_list
         ]
+
+    def split_table(
+            self,
+            columns_to_extract,
+            extracted_table_name,
+            remainder_table_name,
+            drop_original_table
+    ):
+        columns_name_to_extract = [column.name for column in columns_to_extract]
+        return extract_columns_from_table(
+            self.name,
+            columns_name_to_extract,
+            extracted_table_name,
+            remainder_table_name,
+            self.schema.name,
+            self._sa_engine,
+            drop_original_table=drop_original_table
+        )
+
+    def update_column_reference(self, columns_name, column_name_id_map):
+        columns_name_attnum_map = get_columns_attnum_from_names(
+            self.oid,
+            columns_name,
+            self._sa_engine,
+            return_as_name_map=True
+        )
+        column_objs = []
+        for column_name, column_attnum in columns_name_attnum_map.items():
+            column_id = column_name_id_map[column_name]
+            column = Column.current_objects.get(id=column_id)
+            column.table_id = self.id
+            column.attnum = column_attnum
+            column_objs.append(column)
+        Column.current_objects.bulk_update(column_objs, fields=['table_id', 'attnum'])
 
 
 class Column(ReflectionManagerMixin, BaseModel):
