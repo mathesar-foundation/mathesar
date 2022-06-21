@@ -284,7 +284,7 @@ def _get_json_type_body_map(target_type):
                         ELSE $1::{target_type_str} 
                         END 
                         INTO json_res;
-                IF {target_type_str}_typeof(json_res) != "object" AND  {target_type_str}_typeof(json_res) != "array"
+                IF {target_type_str}_typeof(json_res) != 'object' AND  {target_type_str}_typeof(json_res) != 'array'
                     THEN RAISE EXCEPTION 'Invalid json expression';
                 END IF;
                 RETURN json_res;
