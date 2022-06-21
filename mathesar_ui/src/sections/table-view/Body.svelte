@@ -14,6 +14,7 @@
   import Resizer from './virtual-list/Resizer.svelte';
   import VirtualList from './virtual-list/VirtualList.svelte';
   import type { ProcessedTableColumnMap } from './utils';
+  import { rowHeightPx } from './geometry';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -71,14 +72,13 @@
   $: void resetIndex($displayableRecords);
 
   function getItemSize(index: number) {
-    const defaultRowHeight = 30;
     const allRecords = get(displayableRecords);
     if (allRecords?.[index]?.isNewHelpText) {
       return 24;
     }
 
     // TODO: Check and set extra height for group. Needs UX rethought.
-    return defaultRowHeight;
+    return rowHeightPx;
   }
 
   function checkAndResetActiveCell(e: Event) {

@@ -12,6 +12,8 @@
   import type { RecordSelectorController } from './RecordSelectorController';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
   import CellArranger from './CellArranger.svelte';
+  import Cell from '@mathesar/components/cell/Cell.svelte';
+  import DataTypeBasedInput from '@mathesar/components/cell/DataTypeBasedInput.svelte';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
@@ -57,20 +59,31 @@
       let:style
       let:processedColumn
     >
-      <div class="cell" {style}>
+      <div class="cell column-header" {style}>
         <ColumnName column={processedColumn.column} />
         <ColumnResizer columnId={processedColumn.column.id} />
       </div>
     </CellArranger>
   </div>
 
-  <!-- <div class="row inputs">
-  {#each columns as column (column.id)}
-    <td>
-      <input type="text" bind:value={} />
-    </td>
-  {/each}
-</div> -->
+  <div class="row inputs">
+    <CellArranger
+      {processedTableColumnsMap}
+      {display}
+      let:style
+      let:processedColumn
+    >
+      <div class="cell" {style}>
+        <DataTypeBasedInput column={processedColumn.column} value={null} />
+      </div>
+    </CellArranger>
+  </div>
+
+  <div class="divider">
+    <CellArranger {processedTableColumnsMap} {display} let:style>
+      <div class="cell" {style} />
+    </CellArranger>
+  </div>
 
   <RecordSelectorResults
     {processedTableColumnsMap}
@@ -79,11 +92,33 @@
 </div>
 
 <style>
+  @import './Cell.scss';
+
   .row {
     position: relative;
     height: 30px;
   }
-  .cell {
-    position: absolute;
+
+  .divider {
+    position: relative;
+    height: 10px;
+    box-sizing: content-box;
+  }
+  .divider .cell {
+    background: #e7e7e7;
+  }
+
+  .column-header {
+    background: #f7f8f8;
+    border-top: var(--cell-border-horizontal);
+    /**
+     * Padding is chosen to match `button.dropdown.trigger`. It would be good to
+     * eliminate this code duplication somehow.
+     */
+    padding: 5px 26px 5px 12px;
+  }
+
+  .inputs {
+    overflow: hidden;
   }
 </style>

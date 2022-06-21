@@ -5,6 +5,8 @@
   import type { Row } from '@mathesar/stores/table-data/records';
   import Cell from '@mathesar/components/cell/Cell.svelte';
   import CellArranger from './CellArranger.svelte';
+  import RowCellBackgrounds from '@mathesar/sections/table-view/row/RowCellBackgrounds.svelte';
+  import { rowHeightPx } from '@mathesar/sections/table-view/geometry';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -26,6 +28,10 @@
     selectionIndex = Math.min(selectionIndex + 1, records.length - 1);
   }
 
+  function submitRecord(index: number) {
+    submit(records[index]);
+  }
+
   function handleKeydown(e: KeyboardEvent) {
     let handled = true;
     switch (e.key) {
@@ -36,7 +42,7 @@
         selectNext();
         break;
       case 'Enter':
-        submit(records[selectionIndex]);
+        submitRecord(selectionIndex);
         break;
       default:
         handled = false;
@@ -56,39 +62,42 @@
   });
 </script>
 
-{#each records as row, index}
-  {#if row.record}
-    <div
-      class="row"
-      class:selected={index === selectionIndex}
-      style={`width: ${$rowWidth}px;`}
-    >
-      <CellArranger
-        {processedTableColumnsMap}
-        {display}
-        let:style
-        let:processedColumn
+<div class="record-selector-results">
+  {#each records as row, index}
+    {#if row.record}
+      <div
+        class="row"
+        style={`width: ${$rowWidth}px; height: ${rowHeightPx}px;`}
+        on:click={() => submitRecord(index)}
       >
-        <div class="cell" {style}>
-          <Cell
-            sheetColumn={processedColumn}
-            value={row.record[processedColumn.column.id]}
-          />
-        </div>
-      </CellArranger>
-    </div>
-  {/if}
-{/each}
+        <CellArranger
+          {processedTableColumnsMap}
+          {display}
+          let:style
+          let:processedColumn
+        >
+          <div class="cell" {style}>
+            <Cell
+              sheetColumn={processedColumn}
+              value={row.record[processedColumn.column.id]}
+              disabled
+            />
+            <RowCellBackgrounds isSelected={index === selectionIndex} />
+          </div>
+        </CellArranger>
+      </div>
+    {/if}
+  {/each}
+</div>
 
 <style>
+  @import './Cell.scss';
+
   .row {
     position: relative;
-    height: 30px;
+    cursor: pointer;
   }
-  .cell {
-    position: absolute;
-  }
-  .selected {
-    background-color: #f0f0f0;
+  .row:not(:hover) :global(.cell-bg-row-hover) {
+    display: none;
   }
 </style>
