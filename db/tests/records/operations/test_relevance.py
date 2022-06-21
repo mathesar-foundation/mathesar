@@ -4,7 +4,7 @@ from db.records.operations import relevance
 
 def test_rank_and_filter_rows(roster_table_obj):
     roster, engine = roster_table_obj
-    sel = relevance.rank_and_filter_rows(
+    sel = relevance.get_rank_and_filter_rows_query(
         roster, {'Student Name': 'John'}, engine
     )
 
