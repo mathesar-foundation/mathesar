@@ -20,6 +20,7 @@
     Meta,
     ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
+  import { ROW_CONTROL_COLUMN_WIDTH } from '@mathesar/stores/table-data/display';
   import ColumnName from '@mathesar/components/ColumnName.svelte';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import DefaultOptions from './DefaultOptions.svelte';
@@ -138,7 +139,7 @@
   class="cell header-cell"
   style="
     width:{$columnWidths.get(column.id) ?? 0}px;
-    left:{$columnPositions.get(column.id) ?? 0}px;
+    left:{($columnPositions.get(column.id) ?? 0) + ROW_CONTROL_COLUMN_WIDTH}px;
   "
 >
   {#if isRenaming}

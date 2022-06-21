@@ -28,8 +28,8 @@
 
   export let recordsData: RecordsData;
   export let display: Display;
-  export let columnWidth = 0;
-  export let columnPosition = 0;
+  export let columnWidth: number;
+  export let columnPosition: number;
   export let row: Row;
   export let rowIsSelected = false;
   export let rowIsProcessing = false;

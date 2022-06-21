@@ -22,7 +22,8 @@
 
 <div
   class="cell groupheader"
-  style="left:{ROW_CONTROL_COLUMN_WIDTH}px;width:{rowWidth -
+  style="left:{ROW_CONTROL_COLUMN_WIDTH}px;width:{rowWidth +
+    ROW_CONTROL_COLUMN_WIDTH -
     ROW_CONTROL_COLUMN_WIDTH}px"
 >
   {#each columnIds as columnId (columnId)}

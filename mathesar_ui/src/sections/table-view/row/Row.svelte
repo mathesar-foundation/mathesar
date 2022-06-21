@@ -5,6 +5,7 @@
   } from '@mathesar/stores/table-data';
   import type { Row } from '@mathesar/stores/table-data/types';
   import { getRowKey } from '@mathesar/stores/table-data';
+  import { ROW_CONTROL_COLUMN_WIDTH } from '@mathesar/stores/table-data';
   import RowControl from './RowControl.svelte';
   import RowCell from './RowCell.svelte';
   import GroupHeader from './GroupHeader.svelte';
@@ -21,6 +22,7 @@
   $: ({ columnPositions, columnWidths } = display);
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
+  $: fullRowWidth = rowWidth + ROW_CONTROL_COLUMN_WIDTH;
   $: ({
     selectedRows,
     rowStatus,
@@ -37,7 +39,7 @@
     return (
       `position:${_style.position};left:${_style.left}px;` +
       `top:${_style.top}px;height:${_style.height}px;` +
-      `width:${rowWidth as number}px`
+      `width:${fullRowWidth as number}px`
     );
   }
 
@@ -74,9 +76,14 @@
   on:mousedown={checkAndCreateEmptyRow}
 >
   {#if row.isNewHelpText}
-    <RowPlaceholder {rowWidth} />
+    <RowPlaceholder rowWidth={fullRowWidth} />
   {:else if row.isGroupHeader && $grouping && row.group}
-    <GroupHeader {row} {rowWidth} grouping={$grouping} group={row.group} />
+    <GroupHeader
+      {row}
+      rowWidth={fullRowWidth}
+      grouping={$grouping}
+      group={row.group}
+    />
   {:else if row.record}
     <RowControl
       {primaryKeyColumnId}
@@ -99,8 +106,9 @@
         bind:value={row.record[columnId]}
         {processedColumn}
         {recordsData}
-        columnWidth={$columnWidths.get(columnId)}
-        columnPosition={$columnPositions.get(columnId)}
+        columnWidth={$columnWidths.get(columnId) ?? 0}
+        columnPosition={($columnPositions.get(columnId) ?? 0) +
+          ROW_CONTROL_COLUMN_WIDTH}
       />
     {/each}
   {/if}

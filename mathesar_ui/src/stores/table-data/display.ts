@@ -135,7 +135,7 @@ export class Display {
     );
 
     this.columnPositions = derived(this.columnWidths, (columnWidths) => {
-      let position = ROW_CONTROL_COLUMN_WIDTH;
+      let position = 0;
       const map = new Map<number, number>();
       columnWidths.forEach((width, id) => {
         map.set(id, position);
@@ -146,9 +146,7 @@ export class Display {
 
     this.rowWidth = derived(this.columnWidths, (widths) => {
       const totalColumnWidth = [...widths.values()].reduce((a, b) => a + b, 0);
-      return (
-        totalColumnWidth + ROW_CONTROL_COLUMN_WIDTH + DEFAULT_ROW_RIGHT_PADDING
-      );
+      return totalColumnWidth + DEFAULT_ROW_RIGHT_PADDING;
     });
 
     const { savedRecords, newRecords } = this.recordsData;
