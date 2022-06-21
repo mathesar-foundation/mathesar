@@ -19,7 +19,6 @@
   const tabularData = getTabularDataStoreFromContext();
 
   $: ({ recordsData, columnsDataStore, meta, display } = $tabularData);
-  $: ({ columnPositions, columnWidths } = display);
   $: rowWidthStore = display.rowWidth;
   $: rowWidth = $rowWidthStore;
   $: fullRowWidth = rowWidth + ROW_CONTROL_COLUMN_WIDTH;
@@ -106,9 +105,6 @@
         bind:value={row.record[columnId]}
         {processedColumn}
         {recordsData}
-        columnWidth={$columnWidths.get(columnId) ?? 0}
-        columnPosition={($columnPositions.get(columnId) ?? 0) +
-          ROW_CONTROL_COLUMN_WIDTH}
       />
     {/each}
   {/if}

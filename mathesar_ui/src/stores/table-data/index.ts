@@ -5,6 +5,7 @@ export {
   Display,
   isCellActive,
   scrollBasedOnActiveCell,
+  getCellStyle,
   ROW_CONTROL_COLUMN_WIDTH,
   DEFAULT_ROW_RIGHT_PADDING,
 } from './display';

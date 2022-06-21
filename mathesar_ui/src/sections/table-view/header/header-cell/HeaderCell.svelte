@@ -20,7 +20,10 @@
     Meta,
     ColumnsDataStore,
   } from '@mathesar/stores/table-data/types';
-  import { ROW_CONTROL_COLUMN_WIDTH } from '@mathesar/stores/table-data/display';
+  import {
+    getCellStyle,
+    ROW_CONTROL_COLUMN_WIDTH,
+  } from '@mathesar/stores/table-data/display';
   import ColumnName from '@mathesar/components/ColumnName.svelte';
   import { getErrorMessage } from '@mathesar/utils/errors';
   import DefaultOptions from './DefaultOptions.svelte';
@@ -37,7 +40,7 @@
 
   $: ({ column, abstractTypeOfColumn } = processedColumn);
   $: ({ display } = $tabularData);
-  $: ({ columnWidths, columnPositions } = display);
+  $: ({ columnPlacements } = display);
 
   let menuIsOpen = false;
   let renamingInputElement: HTMLInputElement | undefined;
@@ -137,10 +140,7 @@
 
 <div
   class="cell header-cell"
-  style="
-    width:{$columnWidths.get(column.id) ?? 0}px;
-    left:{($columnPositions.get(column.id) ?? 0) + ROW_CONTROL_COLUMN_WIDTH}px;
-  "
+  style={getCellStyle($columnPlacements, column.id, ROW_CONTROL_COLUMN_WIDTH)}
 >
   {#if isRenaming}
     <SpinnerArea isSpinning={isSubmittingRename} hasOverlay={false}>
