@@ -1,9 +1,12 @@
+.header-cell {
+  position: relative;
+}
+
 .dropdown.trigger.column-opts {
   width: 100%;
 }
 
 .dropdown.content.column-opts-content {
-  max-height: none;
   padding: 0.3125rem 0;
 
   .container {

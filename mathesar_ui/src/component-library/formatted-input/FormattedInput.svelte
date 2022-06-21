@@ -107,6 +107,7 @@
   {...$$restProps}
   bind:element
   on:beforeinput={handleChildValueChange}
+  on:focus
   on:blur
   on:blur={handleBlur}
   on:keydown

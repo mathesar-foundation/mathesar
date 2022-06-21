@@ -38,6 +38,7 @@ export function makeFormatter(
     if (validationErrors.length) {
       throw new Error(`Unable to format value. ${validationErrors.join(', ')}`);
     }
+
     const parts = Intl.NumberFormat(opts.locale, {
       // Override the numbering system which is inferred from the locale so that
       // we don't end up with 1.2 formatted as "১.২", "۱٫۲", or "१.२". Users
@@ -46,11 +47,13 @@ export function makeFormatter(
       // Bengali, Persian, or Marathi.
       numberingSystem: 'latn',
       minimumFractionDigits: opts.minimumFractionDigits,
+      // Ensure that max is greater or equal to min, for safety's sake.
+      maximumFractionDigits: Math.max(
+        opts.minimumFractionDigits,
+        opts.maximumFractionDigits,
+      ),
       // @ts-ignore because TypeScript's Intl.NumberFormatOptions is not up-to-date
       useGrouping: opts.useGrouping,
-      // 20 is the max allowed by the spec. The default is 3. We set this to
-      // avoid rounding.
-      maximumFractionDigits: 20,
     }).formatToParts(value);
 
     const polishers = [];
@@ -77,6 +80,7 @@ export function formatToNormalizedForm(value: number | bigint): string {
       allowNegative: true,
       useGrouping: false,
       minimumFractionDigits: 0,
+      maximumFractionDigits: 20,
       forceTrailingDecimal: false,
     }),
   )(value);
