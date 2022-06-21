@@ -278,6 +278,7 @@ def _get_json_type_body_map(target_type):
     def _get_text_to_json_cast(target_type):
         if target_type_str == "json":
             return f"""
+                DECLARE integer_res {target_type_str};
                 BEGIN
                     SELECT 
                         CASE WHEN $1 IS NULL THEN NULL
@@ -292,6 +293,7 @@ def _get_json_type_body_map(target_type):
                 """
         else:
             return f"""
+            DECLARE integer_res {target_type_str};
                 BEGIN
                     SELECT 
                         CASE WHEN $1 IS NULL THEN NULL
