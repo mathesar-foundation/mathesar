@@ -1,4 +1,4 @@
-from sqlalchemy import case, select, literal
+from sqlalchemy import case, select
 from sqlalchemy_filters import apply_sort
 from db.types import categories
 from db.types.base import get_db_type_enum_from_class
@@ -16,7 +16,10 @@ def rank_and_filter_rows(relation, parameters_dict, engine):
     the relation by the strength of their match with the various
     parameters given in parameters_dict.
     """
-    rank_cte = select(relation, _get_full_score_expr(relation, parameters_dict, engine).label('score')).cte()
+    rank_cte = select(
+        relation,
+        _get_full_score_expr(relation, parameters_dict, engine).label('score')
+    ).cte()
     filtered_ordered_cte = apply_sort(
         select(rank_cte).where(rank_cte.columns['score'] > 0),
         {'field': 'score', 'direction': 'desc'}
@@ -26,13 +29,13 @@ def rank_and_filter_rows(relation, parameters_dict, engine):
     )
 
 
-
 def _get_full_score_expr(relation, parameters_dict, engine):
     col_scores = [
         _get_col_score_expr(relation.columns[col_name], val, engine)
         for col_name, val in parameters_dict.items()
     ]
     return sum(col_scores)
+
 
 def _get_col_score_expr(col, param_val, engine):
     col_type = get_db_type_enum_from_class(col.type.__class__, engine)
@@ -45,6 +48,6 @@ def _get_col_score_expr(col, param_val, engine):
             else_=WEIGHT_0
         )
     else:
-        score_expr = literal(0)
+        score_expr = case((col == param_val, WEIGHT_4), else_=WEIGHT_0)
 
     return score_expr
