@@ -1,10 +1,12 @@
 from bidict import bidict
-from django.contrib.auth.models import User
+
 from django.core.cache import cache
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField
 from django.utils.functional import cached_property
-from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
@@ -478,16 +480,50 @@ class DataFile(BaseModel):
     quotechar = models.CharField(max_length=1, default='"', blank=True)
 
 
-from django.contrib.postgres.fields import ArrayField
-
 class Query(BaseModel):
-    name = models.CharField(max_length=128, unique=True)
-    base_table = models.ForeignKey('Table', on_delete=models.CASCADE)
-    columns = ArrayField(
-        base_field=models.IntegerField,
+    name = models.CharField(
+        max_length=128,
+        unique=True,
+        null=True,
+        blank=True,
     )
+    base_table = models.ForeignKey('Table', on_delete=models.CASCADE)
+
+    # sequence of dicts
+    initial_columns = ArrayField(
+        base_field=models.JSONField,
+    )
+
+    # sequence of dicts
     transformations = ArrayField(
         base_field=models.JSONField,
         null=True,
         blank=True,
     )
+
+    # dict of column ids/aliases to display options
+    display_options = models.JSONField()
+
+    @cached_property
+    def sa_relation():
+        """
+        A query describes a relation. This property is the result of parsing a query into a
+        relation.
+        """
+        pass
+
+    @cached_property
+    def sa_columns():
+        """
+        Sequence of SQLAlchemy columns representing the output columns of the relation described
+        by this query.
+        """
+        pass
+
+    @cached_property
+    def get_columns_described():
+        """
+        Returns columns' description to be returned verbatim by the `queries/[id]/columns` endpoint.
+        """
+        pass
+
