@@ -525,13 +525,10 @@ class Query(BaseModel):
     base_table = models.ForeignKey('Table', on_delete=models.CASCADE)
 
     # sequence of dicts
-    initial_columns = ArrayField(
-        base_field=models.JSONField,
-    )
+    initial_columns = models.JSONField()
 
     # sequence of dicts
-    transformations = ArrayField(
-        base_field=models.JSONField,
+    transformations = models.JSONField(
         null=True,
         blank=True,
     )
