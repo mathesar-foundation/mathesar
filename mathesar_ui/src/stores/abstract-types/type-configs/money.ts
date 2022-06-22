@@ -4,12 +4,10 @@ import type {
   NumberFormat,
 } from '@mathesar/api/tables/columns';
 import type { FormValues } from '@mathesar-component-library/types';
-import type { DbType } from '@mathesar/AppTypes';
 import type { Column } from '@mathesar/stores/table-data/types';
 import type {
   AbstractTypeConfigForm,
   AbstractTypeConfiguration,
-  AbstractTypeDbConfig,
 } from '../types';
 import { getDecimalPlaces } from './number';
 
@@ -17,66 +15,6 @@ const DB_TYPES = {
   MONEY: 'MONEY',
   MATHESAR_TYPES__MATHESAR_MONEY: 'MATHESAR_TYPES.MATHESAR_MONEY',
 };
-
-const dbForm: AbstractTypeConfigForm = {
-  variables: {
-    decimalPlaces: {
-      type: 'integer',
-      default: null,
-    },
-    maxDigits: {
-      type: 'integer',
-      default: null,
-    },
-  },
-  layout: {
-    orientation: 'vertical',
-    elements: [
-      {
-        type: 'layout',
-        orientation: 'horizontal',
-        elements: [
-          {
-            type: 'input',
-            variable: 'decimalPlaces',
-            label: 'Decimal Places',
-          },
-          {
-            type: 'input',
-            variable: 'maxDigits',
-            label: 'Max Digits',
-          },
-        ],
-      },
-    ],
-  },
-};
-
-function determineDbTypeAndOptions(
-  dbFormValues: FormValues,
-  columnType: DbType,
-): ReturnType<AbstractTypeDbConfig['determineDbTypeAndOptions']> {
-  return {
-    dbType:
-      columnType === DB_TYPES.MONEY
-        ? DB_TYPES.MONEY
-        : DB_TYPES.MATHESAR_TYPES__MATHESAR_MONEY,
-    typeOptions: {
-      precision: dbFormValues.maxDigits,
-      scale: dbFormValues.decimalPlaces,
-    },
-  };
-}
-
-function constructDbFormValuesFromTypeOptions(
-  columnType: DbType,
-  typeOptions: Column['type_options'],
-): FormValues {
-  return {
-    maxDigits: (typeOptions?.precision as number) ?? null,
-    decimalPlaces: (typeOptions?.scale as number) ?? null,
-  };
-}
 
 const displayForm: AbstractTypeConfigForm = {
   variables: {
@@ -199,11 +137,6 @@ const moneyType: AbstractTypeConfiguration = {
     type: 'money',
   },
   defaultDbType: DB_TYPES.MATHESAR_TYPES__MATHESAR_MONEY,
-  getDbConfig: () => ({
-    form: dbForm,
-    determineDbTypeAndOptions,
-    constructDbFormValuesFromTypeOptions,
-  }),
   getDisplayConfig: () => ({
     form: displayForm,
     determineDisplayOptions,
