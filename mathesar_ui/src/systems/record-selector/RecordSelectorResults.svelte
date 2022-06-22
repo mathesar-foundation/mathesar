@@ -7,6 +7,7 @@
   import RowCellBackgrounds from '@mathesar/sections/table-view/row/RowCellBackgrounds.svelte';
   import { rowHeightPx } from '@mathesar/sections/table-view/geometry';
   import CellArranger from './CellArranger.svelte';
+  import CellWrapper from './CellWrapper.svelte';
 
   const tabularData = getTabularDataStoreFromContext();
 
@@ -74,14 +75,14 @@
           let:style
           let:processedColumn
         >
-          <div class="cell" {style}>
+          <CellWrapper {style}>
             <Cell
               sheetColumn={processedColumn}
               value={row.record[processedColumn.column.id]}
               disabled
             />
             <RowCellBackgrounds isSelected={index === selectionIndex} />
-          </div>
+          </CellWrapper>
         </CellArranger>
       </div>
     {/if}
@@ -89,8 +90,6 @@
 </div>
 
 <style>
-  @import './Cell.scss';
-
   .row {
     position: relative;
     cursor: pointer;

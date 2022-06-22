@@ -13,6 +13,7 @@
   import type { RecordSelectorController } from './RecordSelectorController';
   import RecordSelectorResults from './RecordSelectorResults.svelte';
   import CellArranger from './CellArranger.svelte';
+  import CellWrapper from './CellWrapper.svelte';
 
   export let controller: RecordSelectorController;
   export let tabularData: TabularData;
@@ -58,10 +59,10 @@
       let:style
       let:processedColumn
     >
-      <div class="cell column-header" {style}>
+      <CellWrapper header {style}>
         <ColumnName column={processedColumn.column} />
         <ColumnResizer columnId={processedColumn.column.id} />
-      </div>
+      </CellWrapper>
     </CellArranger>
   </div>
 
@@ -72,15 +73,15 @@
       let:style
       let:processedColumn
     >
-      <div class="cell" {style}>
+      <CellWrapper {style}>
         <DataTypeBasedInput column={processedColumn.column} value={null} />
-      </div>
+      </CellWrapper>
     </CellArranger>
   </div>
 
   <div class="divider">
     <CellArranger {processedTableColumnsMap} {display} let:style>
-      <div class="cell" {style} />
+      <CellWrapper {style} divider />
     </CellArranger>
   </div>
 
@@ -91,32 +92,15 @@
 </div>
 
 <style>
-  @import './Cell.scss';
-
   .row {
     position: relative;
     height: 30px;
   }
-
   .divider {
     position: relative;
     height: 10px;
     box-sizing: content-box;
   }
-  .divider .cell {
-    background: #e7e7e7;
-  }
-
-  .column-header {
-    background: #f7f8f8;
-    border-top: var(--cell-border-horizontal);
-    /**
-     * Padding is chosen to match `button.dropdown.trigger`. It would be good to
-     * eliminate this code duplication somehow.
-     */
-    padding: 5px 26px 5px 12px;
-  }
-
   .inputs {
     overflow: hidden;
   }
