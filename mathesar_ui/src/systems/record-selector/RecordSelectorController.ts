@@ -1,6 +1,6 @@
 import { getContext, setContext } from 'svelte';
 import type { Readable } from 'svelte/store';
-import { get, derived, writable } from 'svelte/store';
+import { derived, writable } from 'svelte/store';
 import type { ModalController } from '@mathesar-component-library';
 import type { DBObjectEntry } from '@mathesar/AppTypes';
 import { TabularData } from '@mathesar/stores/table-data/tabularData';
@@ -30,8 +30,6 @@ export class RecordSelectorController {
 
   tabularData: Readable<TabularData | undefined>;
 
-  queries = writable<string[]>([]);
-
   tableName: Readable<string | undefined>;
 
   constructor(props: RecordSelectorControllerProps) {
@@ -51,16 +49,6 @@ export class RecordSelectorController {
           filtering: new Filtering(),
         },
       });
-    });
-
-    // TODO: unsubscribe from this somewhere
-    this.tabularData.subscribe((tabularData) => {
-      if (!tabularData) {
-        this.queries.set([]);
-        return;
-      }
-      const { columns } = get(tabularData.columnsDataStore);
-      this.queries.set(columns.map(() => ''));
     });
 
     this.tableName = derived(this.tableId, (id) =>
