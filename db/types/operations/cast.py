@@ -266,6 +266,7 @@ def _escape_illegal_characters(sql_name):
         resulting_string = resulting_string.replace(old, new)
     return resulting_string
 
+
 def _get_json_type_body_map(target_type):
     """
     json --> jsonb(or jsonb --> json): use default casting

@@ -94,31 +94,31 @@ MASTER_DB_TYPE_MAP_SPEC = {
         TARGET_DICT: {
             PostgresType.JSONB: {
                 VALID: [],
-                INVALID:[],
+                INVALID: [],
             },
             PostgresType.JSON: {
                 VALID: [],
-                INVALID:[],
+                INVALID: [],
             },
             PostgresType.TEXT: {
                 VALID: [],
-                INVALID:[],
+                INVALID: [],
             },
             PostgresType.CHARACTER: {
                 VALID: [],
-                INVALID:[],
+                INVALID: [],
             },
             PostgresType.CHARACTER_VARYING: {
                 VALID: [],
-                INVALID:[],
+                INVALID: [],
             },
         },
     },
-    PostgresType.JSONB:{
+    PostgresType.JSONB: {
         TARGET_DICT: {
             PostgresType.JSONB: {
                 VALID: [],
-                INVALID:[],
+                INVALID: [],
             },
             PostgresType.JSON: {
                 VALID: [],
@@ -554,16 +554,16 @@ MASTER_DB_TYPE_MAP_SPEC = {
             PostgresType.CHARACTER: {VALID: [("a", "a")]},
             PostgresType.JSON: {
                 VALID: [
-                ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
-                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))
-                ],
+                    ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
+                    ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))
+                    ],
                 INVALID: [],
             },
             PostgresType.JSONB: {
                 VALID: [
-                ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
-                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))
-                ],
+                    ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
+                    ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))
+                    ],
                 INVALID: [],
             },
             PostgresType.DOUBLE_PRECISION: {
@@ -720,16 +720,16 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             PostgresType.JSON: {
                 VALID: [
-                ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
-                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))
-                ],
+                    ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
+                    ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))
+                    ],
                 INVALID: [],
             },
             PostgresType.JSONB: {
                 VALID: [
-                ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
-                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))
-                ],
+                    ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
+                    ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))
+                    ],
                 INVALID: [],
             },
             PostgresType.DOUBLE_PRECISION: {
