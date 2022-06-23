@@ -90,25 +90,25 @@ MASTER_DB_TYPE_MAP_SPEC = {
             PostgresType.CHARACTER_VARYING: {VALID: [(True, 'true'), (False, 'false')]},
         }
     },
-    PostgresType.JSON:{
+    PostgresType.JSON: {
         TARGET_DICT: {
-            PostgresType.JSONB:{
+            PostgresType.JSONB: {
                 VALID: [],
                 INVALID:[],
             },
-            PostgresType.JSON:{
+            PostgresType.JSON: {
                 VALID: [],
                 INVALID:[],
             },
-            PostgresType.TEXT:{
+            PostgresType.TEXT: {
                 VALID: [],
                 INVALID:[],
             },
-            PostgresType.CHARACTER:{
+            PostgresType.CHARACTER: {
                 VALID: [],
                 INVALID:[],
             },
-            PostgresType.CHARACTER_VARYING:{
+            PostgresType.CHARACTER_VARYING: {
                 VALID: [],
                 INVALID:[],
             },
@@ -116,25 +116,25 @@ MASTER_DB_TYPE_MAP_SPEC = {
     },
     PostgresType.JSONB:{
         TARGET_DICT: {
-            PostgresType.JSONB:{
+            PostgresType.JSONB: {
                 VALID: [],
                 INVALID:[],
             },
-            PostgresType.JSON:{
+            PostgresType.JSON: {
                 VALID: [],
-                INVALID:[],
+                INVALID: [],
             },
-            PostgresType.TEXT:{
+            PostgresType.TEXT: {
                 VALID: [],
-                INVALID:[],
+                INVALID: [],
             },
-            PostgresType.CHARACTER:{
+            PostgresType.CHARACTER: {
                 VALID: [],
-                INVALID:[],
+                INVALID: [],
             },
-            PostgresType.CHARACTER_VARYING:{
+            PostgresType.CHARACTER_VARYING: {
                 VALID: [],
-                INVALID:[],
+                INVALID: [],
             },
         },
     },
@@ -151,11 +151,11 @@ MASTER_DB_TYPE_MAP_SPEC = {
             PostgresType.MONEY: {VALID: []},
             PostgresType.JSON: {
                 VALID: [],
-                INVALID:[],
+                INVALID: [],
             },
-            PostgresType.JSONB:{
+            PostgresType.JSONB: {
                 VALID: [],
-                INVALID:[],
+                INVALID: [],
             },
             MathesarCustomType.MULTICURRENCY_MONEY: {
                 VALID: [
@@ -552,17 +552,19 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 INVALID: ["cat"],
             },
             PostgresType.CHARACTER: {VALID: [("a", "a")]},
-            PostgresType.JSON:{
+            PostgresType.JSON: {
                 VALID: [
                 ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
-                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))],
-                INVALID:[],
+                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))
+                ],
+                INVALID: [],
             },
-            PostgresType.JSONB:{
+            PostgresType.JSONB: {
                 VALID: [
                 ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
-                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))],
-                INVALID:[],
+                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))
+                ],
+                INVALID: [],
             },
             PostgresType.DOUBLE_PRECISION: {
                 VALID: [("1.234", 1.234)],
@@ -716,17 +718,19 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     "1234",
                 ]
             },
-            PostgresType.JSON:{
+            PostgresType.JSON: {
                 VALID: [
                 ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
-                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))],
-                INVALID:[],
+                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))
+                ],
+                INVALID: [],
             },
-            PostgresType.JSONB:{
+            PostgresType.JSONB: {
                 VALID: [
                 ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
-                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))],
-                INVALID:[],
+                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))
+                ],
+                INVALID: [],
             },
             PostgresType.DOUBLE_PRECISION: {
                 VALID: [("1.234", 1.234)],
@@ -1061,7 +1065,6 @@ type_test_data_gen_list = [
 @pytest.mark.parametrize(
     "source_type,target_type,in_val,out_val", type_test_data_gen_list
 )
-
 def test_alter_column_casts_data_gen(
         engine_with_schema, source_type, target_type, in_val, out_val
 ):
@@ -1117,7 +1120,6 @@ def test_alter_column_casts_data_gen(
     # TODO This needs to be sorted out by fixing how server_default is set.
     if source_type not in default_unsupported and target_type not in default_unsupported:
         assert actual_default == out_val
-
 
 
 type_test_bad_data_gen_list = [

@@ -267,10 +267,10 @@ def _escape_illegal_characters(sql_name):
     return resulting_string
 
 def _get_json_type_body_map(target_type):
-    '''
+    """
     json --> jsonb(or jsonb --> json): use default casting
     text --> json: use _get_text_to_json_cast()
-    '''
+    """
     default_behavior_source_types = frozenset([PostgresType.JSON, PostgresType.JSONB])
     source_text_types = categories.STRING_TYPES
     target_type_str = target_type.id
@@ -279,10 +279,10 @@ def _get_json_type_body_map(target_type):
         return f"""
                 DECLARE json_res {target_type_str};
                 BEGIN
-                    SELECT 
+                    SELECT
                         CASE WHEN $1 IS NULL THEN NULL
-                        ELSE $1::{target_type_str} 
-                        END 
+                        ELSE $1::{target_type_str}
+                        END
                         INTO json_res;
                 IF {target_type_str}_typeof(json_res) != 'object' AND  {target_type_str}_typeof(json_res) != 'array'
                     THEN RAISE EXCEPTION 'Invalid json expression';
@@ -291,7 +291,7 @@ def _get_json_type_body_map(target_type):
                 END;
                 """
 
-    type_body_map =_get_default_type_body_map(default_behavior_source_types, target_type)
+    type_body_map = _get_default_type_body_map(default_behavior_source_types, target_type)
     type_body_map.update(
         {
             text_type: _get_text_to_json_cast(target_type)
