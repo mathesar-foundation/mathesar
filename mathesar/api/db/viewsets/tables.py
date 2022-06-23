@@ -54,6 +54,11 @@ class TableViewSet(CreateModelMixin, RetrieveModelMixin, ListModelMixin, viewset
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)
+    def dependents(self, request, pk=None):
+        table = self.get_object()
+        return Response(table.dependents())
+
+    @action(methods=['get'], detail=True)
     def type_suggestions(self, request, pk=None):
         table = self.get_object()
         col_types = get_table_column_types(table)
