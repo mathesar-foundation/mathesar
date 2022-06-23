@@ -90,6 +90,54 @@ MASTER_DB_TYPE_MAP_SPEC = {
             PostgresType.CHARACTER_VARYING: {VALID: [(True, 'true'), (False, 'false')]},
         }
     },
+    PostgresType.JSON:{
+        TARGET_DICT: {
+            PostgresType.JSONB:{
+                VALID: [],
+                INVALID:[],
+            },
+            PostgresType.JSON:{
+                VALID: [],
+                INVALID:[],
+            },
+            PostgresType.TEXT:{
+                VALID: [],
+                INVALID:[],
+            },
+            PostgresType.CHARACTER:{
+                VALID: [],
+                INVALID:[],
+            },
+            PostgresType.CHARACTER_VARYING:{
+                VALID: [],
+                INVALID:[],
+            },
+        },
+    },
+    PostgresType.JSONB:{
+        TARGET_DICT: {
+            PostgresType.JSONB:{
+                VALID: [],
+                INVALID:[],
+            },
+            PostgresType.JSON:{
+                VALID: [],
+                INVALID:[],
+            },
+            PostgresType.TEXT:{
+                VALID: [],
+                INVALID:[],
+            },
+            PostgresType.CHARACTER:{
+                VALID: [],
+                INVALID:[],
+            },
+            PostgresType.CHARACTER_VARYING:{
+                VALID: [],
+                INVALID:[],
+            },
+        },
+    },
     PostgresType.CHARACTER: {
         TARGET_DICT: {
             PostgresType.BIGINT: {VALID: [("4", 4)], INVALID: ["c"]},
@@ -101,6 +149,14 @@ MASTER_DB_TYPE_MAP_SPEC = {
             PostgresType.INTERVAL: {VALID: []},
             MathesarCustomType.MATHESAR_MONEY: {VALID: []},
             PostgresType.MONEY: {VALID: []},
+            PostgresType.JSON: {
+                VALID: [],
+                INVALID:[],
+            },
+            PostgresType.JSONB:{
+                VALID: [],
+                INVALID:[],
+            },
             MathesarCustomType.MULTICURRENCY_MONEY: {
                 VALID: [
                     (
@@ -502,6 +558,12 @@ MASTER_DB_TYPE_MAP_SPEC = {
                 ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))],
                 INVALID:[],
             },
+            PostgresType.JSONB:{
+                VALID: [
+                ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
+                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))],
+                INVALID:[],
+            },
             PostgresType.DOUBLE_PRECISION: {
                 VALID: [("1.234", 1.234)],
                 INVALID: ["bat"],
@@ -653,6 +715,18 @@ MASTER_DB_TYPE_MAP_SPEC = {
                     "not a date",
                     "1234",
                 ]
+            },
+            PostgresType.JSON:{
+                VALID: [
+                ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
+                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))],
+                INVALID:[],
+            },
+            PostgresType.JSONB:{
+                VALID: [
+                ('{"key1":"val1"}', json.loads('{"key1":"val1"}')),
+                ('{"key2":"val2"}', json.loads('{"key2":"val2"}'))],
+                INVALID:[],
             },
             PostgresType.DOUBLE_PRECISION: {
                 VALID: [("1.234", 1.234)],
@@ -987,6 +1061,7 @@ type_test_data_gen_list = [
 @pytest.mark.parametrize(
     "source_type,target_type,in_val,out_val", type_test_data_gen_list
 )
+
 def test_alter_column_casts_data_gen(
         engine_with_schema, source_type, target_type, in_val, out_val
 ):
@@ -995,9 +1070,17 @@ def test_alter_column_casts_data_gen(
     COLUMN_NAME = "testcol"
     metadata = MetaData(bind=engine)
     source_sa_type = source_type.get_sa_class(engine)
-    in_sel = select(cast(cast(in_val, source_sa_type), VARCHAR))
-    with engine.begin() as conn:
-        processed_in_val = conn.execute(in_sel).scalar()
+    default_unsupported = [
+        MathesarCustomType.MULTICURRENCY_MONEY,
+        PostgresType.JSON,
+        PostgresType.JSONB,
+    ]
+    if source_type not in default_unsupported and target_type not in default_unsupported:
+        in_sel = select(cast(cast(in_val, source_sa_type), VARCHAR))
+        with engine.begin() as conn:
+            processed_in_val = conn.execute(in_sel).scalar()
+    else:
+        processed_in_val = None
 
     input_table = Table(
         TABLE_NAME,
@@ -1032,11 +1115,9 @@ def test_alter_column_casts_data_gen(
     column_attnum = get_column_attnum_from_name(table_oid, COLUMN_NAME, engine)
     actual_default = get_column_default(table_oid, column_attnum, engine)
     # TODO This needs to be sorted out by fixing how server_default is set.
-    if all([
-            source_type != MathesarCustomType.MULTICURRENCY_MONEY,
-            target_type != MathesarCustomType.MULTICURRENCY_MONEY,
-    ]):
+    if source_type not in default_unsupported and target_type not in default_unsupported:
         assert actual_default == out_val
+
 
 
 type_test_bad_data_gen_list = [
