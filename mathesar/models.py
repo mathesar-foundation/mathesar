@@ -488,6 +488,7 @@ class PreviewColumnSettings(BaseModel):
     customized = models.BooleanField()
     template = models.CharField(max_length=255)
 
+
 class TableSettings(ReflectionManagerMixin, BaseModel):
     preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")

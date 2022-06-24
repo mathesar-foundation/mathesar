@@ -13,6 +13,7 @@ class PreviewColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSerial
     customized = serializers.BooleanField(default=True, read_only=True)
     template = serializers.CharField()
 
+
 class TableSettingsSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSerializer):
     preview_settings = PreviewColumnSerializer()
 
