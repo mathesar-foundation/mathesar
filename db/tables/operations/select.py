@@ -76,6 +76,12 @@ def get_joinable_tables_query(engine):
     DEPTH = 'depth'
     PATH = 'path'
 
+    SYMMETRIC_FKEYS = 'symmetric_fkeys'
+    SFK = 'sfk'
+
+    SEARCH_FKEY_GRAPH = 'search_fkey_graph'
+    SG = 'sg'
+
     jba = func.jsonb_build_array
 
 
@@ -105,7 +111,7 @@ def get_joinable_tables_query(engine):
                 func.array_length(pg_constraint.c.conkey, 1) == 1
             )
         )
-    ).cte()
+    ).cte(name=SYMMETRIC_FKEYS)
 
     search_fkey_graph = select(
         symmetric_fkeys.columns[LEFT_REL],
@@ -128,7 +134,7 @@ def get_joinable_tables_query(engine):
             ),
             JSONB
         ).label(PATH)
-    ).cte(recursive=True)
+    ).cte(name=SEARCH_FKEY_GRAPH, recursive=True)
 
     search_fkey_graph = search_fkey_graph.union_all(
         select(
@@ -152,7 +158,29 @@ def get_joinable_tables_query(engine):
                 ),
                 JSONB
             )
-        ).where(search_fkey_graph.columns[DEPTH] < 3)
+        ).where(
+            and_(
+                symmetric_fkeys.columns[LEFT_REL] == search_fkey_graph.columns[RIGHT_REL],
+                search_fkey_graph.columns[DEPTH] < 3,
+                search_fkey_graph.columns[PATH][-1] != jba(
+                    jba(
+                        symmetric_fkeys.columns[RIGHT_REL],
+                        symmetric_fkeys.columns[RIGHT_COL]
+                    ),
+                    jba(
+                        symmetric_fkeys.columns[LEFT_REL],
+                        symmetric_fkeys.columns[LEFT_COL]
+                    ),
+                )
+            )
+        )
     )
 
-    return select(search_fkey_graph)
+    output_cte = select(
+        cast(search_fkey_graph.columns[PATH][0][0][0], Integer).label('base'),
+        cast(search_fkey_graph.columns[PATH][-1][-1][0], Integer).label('target'),
+        search_fkey_graph.columns[PATH].label(PATH),
+        search_fkey_graph.columns[DEPTH].label(DEPTH)
+    ).cte(name='output_cte')
+
+    return select(output_cte)
