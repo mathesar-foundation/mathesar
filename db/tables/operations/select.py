@@ -67,25 +67,26 @@ def get_oid_from_table(name, schema, engine):
     return inspector.get_table_oid(name, schema=schema)
 
 
-def get_joinable_tables_query(engine):
+def get_joinable_tables_query(engine, base_table_name=None, schema=None):
     LEFT_REL = 'left_rel'
     RIGHT_REL = 'right_rel'
     LEFT_COL = 'left_col'
     RIGHT_COL = 'right_col'
 
+    BASE = 'base'
     DEPTH = 'depth'
     PATH = 'path'
+    TARGET = 'target'
 
     SYMMETRIC_FKEYS = 'symmetric_fkeys'
-    SFK = 'sfk'
-
     SEARCH_FKEY_GRAPH = 'search_fkey_graph'
-    SG = 'sg'
+    OUTPUT_CTE = 'output_cte'
 
     jba = func.jsonb_build_array
 
-
-    pg_constraint = Table("pg_constraint", MetaData(), autoload_with=engine)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message="Did not recognize type")
+        pg_constraint = Table("pg_constraint", MetaData(), autoload_with=engine)
 
     symmetric_fkeys = select(
         pg_constraint.c.oid,
@@ -177,10 +178,17 @@ def get_joinable_tables_query(engine):
     )
 
     output_cte = select(
-        cast(search_fkey_graph.columns[PATH][0][0][0], Integer).label('base'),
-        cast(search_fkey_graph.columns[PATH][-1][-1][0], Integer).label('target'),
+        cast(search_fkey_graph.columns[PATH][0][0][0], Integer).label(BASE),
+        cast(search_fkey_graph.columns[PATH][-1][-1][0], Integer).label(TARGET),
         search_fkey_graph.columns[PATH].label(PATH),
         search_fkey_graph.columns[DEPTH].label(DEPTH)
-    ).cte(name='output_cte')
+    ).cte(name=OUTPUT_CTE)
 
-    return select(output_cte)
+    if base_table_name is not None:
+        final_sel = select(output_cte).where(
+            output_cte.columns[BASE] == get_oid_from_table(base_table_name, schema, engine)
+        )
+    else:
+        final_sel = select(output_cte)
+
+    return final_sel
