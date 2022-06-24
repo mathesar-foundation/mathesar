@@ -63,17 +63,9 @@ UNION ALL
   WHERE
     sfk.left_rel=sg.right_rel
     AND depth<3
-    AND NOT path @> jsonb_build_array(
-      jsonb_build_array(
-        jsonb_build_array(sfk.right_rel, sfk.right_cols),
-        jsonb_build_array(sfk.left_rel, sfk.left_cols)
-      )
-    )
-    AND NOT path @> jsonb_build_array(
-      jsonb_build_array(
-        jsonb_build_array(sfk.left_rel, sfk.left_cols),
-        jsonb_build_array(sfk.right_rel, sfk.right_cols)
-      )
+    AND (path -> -1) != jsonb_build_array(
+      jsonb_build_array(sfk.right_rel, sfk.right_cols),
+      jsonb_build_array(sfk.left_rel, sfk.left_cols)
     )
 ), output_cte AS (
   SELECT
@@ -83,21 +75,3 @@ UNION ALL
   FROM search_fkey_graph
 )
 SELECT * FROM output_cte;
-
-/*
-  WHERE sfk.left_rel=sg.right_rel AND depth<8 AND (path -> -1) != jsonb_build_array(
-    jsonb_build_array(sfk.right_rel, sfk.right_cols),
-    jsonb_build_array(sfk.left_rel, sfk.left_cols)
-  )
-*/
-
-
-
-/*
-  WHERE sfk.left_rel=sg.right_rel AND depth<3 AND NOT path @> jsonb_build_array(
-    jsonb_build_array(
-      jsonb_build_array(sfk.right_rel, sfk.right_cols),
-      jsonb_build_array(sfk.left_rel, sfk.left_cols)
-    )
-  )
-*/
