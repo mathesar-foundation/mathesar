@@ -25,11 +25,11 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
     @action(methods=['get'], detail=True)
     def columns(self, request, pk=None):
         query = self.get_object()
-        cols = query.get_columns_described()
-        return Response(cols)
+        output_cols = query.get_output_columns_described()
+        return Response(output_cols)
 
     @action(methods=['get'], detail=True)
     def records(self, request, pk=None):
         query = self.get_object()
-        cols = query.get_columns_described()
-        return Response(cols)
+        records = query.get_records()
+        return Response(records)

@@ -6,7 +6,6 @@ from django.db import models
 from django.db.models import JSONField
 from django.utils.functional import cached_property
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import ArrayField
 
 from db.columns import utils as column_utils
 from db.columns.operations.create import create_column, duplicate_column
@@ -28,6 +27,7 @@ from db.tables import utils as table_utils
 from db.tables.operations.drop import drop_table
 from db.tables.operations.select import get_oid_from_table, reflect_table_from_oid
 from db.tables.operations.split import extract_columns_from_table
+
 from mathesar import reflection
 from mathesar.utils import models as model_utils
 from mathesar.database.base import create_mathesar_engine
@@ -513,49 +513,3 @@ class DataFile(BaseModel):
     delimiter = models.CharField(max_length=1, default=',', blank=True)
     escapechar = models.CharField(max_length=1, blank=True)
     quotechar = models.CharField(max_length=1, default='"', blank=True)
-
-
-class Query(BaseModel):
-    name = models.CharField(
-        max_length=128,
-        unique=True,
-        null=True,
-        blank=True,
-    )
-    base_table = models.ForeignKey('Table', on_delete=models.CASCADE)
-
-    # sequence of dicts
-    initial_columns = models.JSONField()
-
-    # sequence of dicts
-    transformations = models.JSONField(
-        null=True,
-        blank=True,
-    )
-
-    # dict of column ids/aliases to display options
-    display_options = models.JSONField()
-
-    @cached_property
-    def sa_relation():
-        """
-        A query describes a relation. This property is the result of parsing a query into a
-        relation.
-        """
-        pass
-
-    @cached_property
-    def sa_columns():
-        """
-        Sequence of SQLAlchemy columns representing the output columns of the relation described
-        by this query.
-        """
-        pass
-
-    @cached_property
-    def get_columns_described():
-        """
-        Returns columns' description to be returned verbatim by the `queries/[id]/columns` endpoint.
-        """
-        pass
-
