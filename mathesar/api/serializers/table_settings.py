@@ -8,24 +8,22 @@ from mathesar.models import PreviewColumnSettings, TableSettings
 class PreviewColumnSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
     class Meta:
         model = PreviewColumnSettings
-        fields = ['columns', 'customized']
+        fields = ['customized', 'template']
 
     customized = serializers.BooleanField(default=True, read_only=True)
-
+    template = serializers.CharField()
 
 class TableSettingsSerializer(MathesarErrorMessageMixin, serializers.HyperlinkedModelSerializer):
-    preview_columns = PreviewColumnSerializer()
+    preview_settings = PreviewColumnSerializer()
 
     class Meta:
         model = TableSettings
-        fields = ['preview_columns']
+        fields = ['preview_settings']
 
     def update(self, instance, validated_data):
-        preview_column_data = validated_data.pop('preview_columns', None)
-        if preview_column_data is not None:
-            preview_columns = preview_column_data.pop('columns')
-            instance.preview_columns.delete()
-            preview_column_settings = PreviewColumnSettings.objects.create(customized=True)
-            preview_column_settings.columns.set(preview_columns)
-            instance.preview_columns = preview_column_settings
+        preview_settings_data = validated_data.pop('preview_settings', None)
+        if preview_settings_data is not None:
+            instance.preview_settings.delete()
+            preview_settings = PreviewColumnSettings.objects.create(customized=True, **preview_settings_data)
+            instance.preview_settings = preview_settings
         return instance

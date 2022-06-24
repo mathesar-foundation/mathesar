@@ -485,10 +485,9 @@ class DataFile(BaseModel):
 
 
 class PreviewColumnSettings(BaseModel):
-    columns = models.ManyToManyField(Column)
     customized = models.BooleanField()
-
+    template = models.CharField(max_length=255)
 
 class TableSettings(ReflectionManagerMixin, BaseModel):
-    preview_columns = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
+    preview_settings = models.OneToOneField(PreviewColumnSettings, on_delete=models.CASCADE)
     table = models.OneToOneField(Table, on_delete=models.CASCADE, related_name="settings")
