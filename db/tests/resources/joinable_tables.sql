@@ -17,8 +17,8 @@ WITH RECURSIVE symmetric_fkeys AS (
     c.oid,
     c.conrelid::INTEGER left_rel,
     c.confrelid::INTEGER right_rel,
-    c.conkey[1]::INTEGER left_cols,
-    c.confkey[1]::INTEGER right_cols
+    c.conkey[1]::INTEGER left_col,
+    c.confkey[1]::INTEGER right_col
   FROM pg_constraint c
   WHERE c.contype='f' and array_length(c.conkey, 1)=1
 UNION ALL
@@ -26,23 +26,23 @@ UNION ALL
     c.oid,
     c.confrelid::INTEGER left_rel,
     c.conrelid::INTEGER right_rel,
-    c.confkey[1]::INTEGER left_cols,
-    c.conkey[1]::INTEGER right_cols
+    c.confkey[1]::INTEGER left_col,
+    c.conkey[1]::INTEGER right_col
   FROM pg_constraint c
   WHERE c.contype='f' and array_length(c.conkey, 1)=1
 ),
 
-search_fkey_graph(left_rel, right_rel, left_cols, right_cols, depth, path) AS (
+search_fkey_graph(left_rel, right_rel, left_col, right_col, depth, path) AS (
   SELECT
     sfk.left_rel,
     sfk.right_rel,
-    sfk.left_cols,
-    sfk.right_cols,
+    sfk.left_col,
+    sfk.right_col,
     1,
     jsonb_build_array(
       jsonb_build_array(
-        jsonb_build_array(sfk.left_rel, sfk.left_cols),
-        jsonb_build_array(sfk.right_rel, sfk.right_cols)
+        jsonb_build_array(sfk.left_rel, sfk.left_col),
+        jsonb_build_array(sfk.right_rel, sfk.right_col)
       )
     )
   FROM symmetric_fkeys sfk
@@ -50,13 +50,13 @@ UNION ALL
   SELECT
     sfk.left_rel,
     sfk.right_rel,
-    sfk.left_cols,
-    sfk.right_cols,
+    sfk.left_col,
+    sfk.right_col,
     sg.depth + 1,
     path || jsonb_build_array(
       jsonb_build_array(
-        jsonb_build_array(sfk.left_rel, sfk.left_cols),
-        jsonb_build_array(sfk.right_rel, sfk.right_cols)
+        jsonb_build_array(sfk.left_rel, sfk.left_col),
+        jsonb_build_array(sfk.right_rel, sfk.right_col)
       )
     )
   FROM symmetric_fkeys sfk, search_fkey_graph sg
@@ -64,8 +64,8 @@ UNION ALL
     sfk.left_rel=sg.right_rel
     AND depth<3
     AND (path -> -1) != jsonb_build_array(
-      jsonb_build_array(sfk.right_rel, sfk.right_cols),
-      jsonb_build_array(sfk.left_rel, sfk.left_cols)
+      jsonb_build_array(sfk.right_rel, sfk.right_col),
+      jsonb_build_array(sfk.left_rel, sfk.left_col)
     )
 ), output_cte AS (
   SELECT

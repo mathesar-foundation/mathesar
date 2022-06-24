@@ -1,6 +1,9 @@
 import warnings
 
-from sqlalchemy import Table, MetaData, select, join, inspect, and_
+from sqlalchemy import (
+    Table, MetaData, select, join, inspect, and_, cast, func, Integer, literal
+)
+from sqlalchemy.dialects.postgresql import JSONB
 
 from db.utils import execute_statement
 
@@ -62,3 +65,94 @@ def get_table_oids_from_schema(schema_oid, engine):
 def get_oid_from_table(name, schema, engine):
     inspector = inspect(engine)
     return inspector.get_table_oid(name, schema=schema)
+
+
+def get_joinable_tables_query(engine):
+    LEFT_REL = 'left_rel'
+    RIGHT_REL = 'right_rel'
+    LEFT_COL = 'left_col'
+    RIGHT_COL = 'right_col'
+
+    DEPTH = 'depth'
+    PATH = 'path'
+
+    jba = func.jsonb_build_array
+
+
+    pg_constraint = Table("pg_constraint", MetaData(), autoload_with=engine)
+
+    symmetric_fkeys = select(
+        pg_constraint.c.oid,
+        cast(pg_constraint.c.conrelid, Integer).label(LEFT_REL),
+        cast(pg_constraint.c.confrelid, Integer).label(RIGHT_REL),
+        cast(pg_constraint.c.conkey[1], Integer).label(LEFT_COL),
+        cast(pg_constraint.c.confkey[1], Integer).label(RIGHT_COL),
+    ).where(
+        and_(
+            pg_constraint.c.contype == 'f',
+            func.array_length(pg_constraint.c.conkey, 1) == 1
+        )
+    ).union_all(
+        select(
+            pg_constraint.c.oid,
+            cast(pg_constraint.c.confrelid, Integer).label(LEFT_REL),
+            cast(pg_constraint.c.conrelid, Integer).label(RIGHT_REL),
+            cast(pg_constraint.c.confkey[1], Integer).label(LEFT_COL),
+            cast(pg_constraint.c.conkey[1], Integer).label(RIGHT_COL),
+        ).where(
+            and_(
+                pg_constraint.c.contype == 'f',
+                func.array_length(pg_constraint.c.conkey, 1) == 1
+            )
+        )
+    ).cte()
+
+    search_fkey_graph = select(
+        symmetric_fkeys.columns[LEFT_REL],
+        symmetric_fkeys.columns[RIGHT_REL],
+        symmetric_fkeys.columns[LEFT_COL],
+        symmetric_fkeys.columns[RIGHT_COL],
+        literal(1).label(DEPTH),
+        cast(
+            jba(
+                jba(
+                    jba(
+                        symmetric_fkeys.columns[LEFT_REL],
+                        symmetric_fkeys.columns[LEFT_COL]
+                    ),
+                    jba(
+                        symmetric_fkeys.columns[RIGHT_REL],
+                        symmetric_fkeys.columns[RIGHT_COL]
+                    ),
+                )
+            ),
+            JSONB
+        ).label(PATH)
+    ).cte(recursive=True)
+
+    search_fkey_graph = search_fkey_graph.union_all(
+        select(
+            symmetric_fkeys.columns[LEFT_REL],
+            symmetric_fkeys.columns[RIGHT_REL],
+            symmetric_fkeys.columns[LEFT_COL],
+            symmetric_fkeys.columns[RIGHT_COL],
+            search_fkey_graph.columns[DEPTH] + 1,
+            search_fkey_graph.columns[PATH] + cast(
+                jba(
+                    jba(
+                        jba(
+                            symmetric_fkeys.columns[LEFT_REL],
+                            symmetric_fkeys.columns[LEFT_COL]
+                        ),
+                        jba(
+                            symmetric_fkeys.columns[RIGHT_REL],
+                            symmetric_fkeys.columns[RIGHT_COL]
+                        ),
+                    )
+                ),
+                JSONB
+            )
+        ).where(search_fkey_graph.columns[DEPTH] < 3)
+    )
+
+    return select(search_fkey_graph)
