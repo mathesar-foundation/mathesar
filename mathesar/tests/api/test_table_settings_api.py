@@ -1,5 +1,4 @@
 import pytest
-from django.core.cache import cache
 from sqlalchemy import Column, Integer, MetaData
 from sqlalchemy import Table as SATable
 
