@@ -67,7 +67,6 @@ def test_create_empty_table_settings(client, schema, empty_nasa_table, schema_na
 
 
 def test_update_table_settings(client, column_test_table):
-    cache.clear()
     columns = models.Column.objects.filter(table=column_test_table).values_list('id', flat=True)
     preview_template = ','.join(f'{{{ column }}}' for column in columns)
     settings_id = column_test_table.settings.id
