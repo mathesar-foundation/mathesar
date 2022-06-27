@@ -89,7 +89,6 @@ def get_joinable_tables_query(engine, base_table_name=None, schema=None):
         pg_constraint = Table("pg_constraint", MetaData(), autoload_with=engine)
 
     symmetric_fkeys = select(
-        pg_constraint.c.oid,
         cast(pg_constraint.c.conrelid, Integer).label(LEFT_REL),
         cast(pg_constraint.c.confrelid, Integer).label(RIGHT_REL),
         cast(pg_constraint.c.conkey[1], Integer).label(LEFT_COL),
@@ -101,7 +100,6 @@ def get_joinable_tables_query(engine, base_table_name=None, schema=None):
         )
     ).union_all(
         select(
-            pg_constraint.c.oid,
             cast(pg_constraint.c.confrelid, Integer).label(LEFT_REL),
             cast(pg_constraint.c.conrelid, Integer).label(RIGHT_REL),
             cast(pg_constraint.c.confkey[1], Integer).label(LEFT_COL),
