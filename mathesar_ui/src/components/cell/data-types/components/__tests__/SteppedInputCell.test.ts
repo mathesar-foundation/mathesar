@@ -47,6 +47,6 @@ describe('StepperInputCell', () => {
 
     const cellContent = container.querySelector('.content');
     expect(cellContent).not.toBeNull();
-    expect(cellContent).toHaveTextContent('');
+    expect(cellContent).toHaveTextContent('DEFAULT');
   });
 });

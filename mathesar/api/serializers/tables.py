@@ -1,19 +1,22 @@
 from django.urls import reverse
 from psycopg2.errors import DuplicateTable
 from rest_framework import serializers, status
+from rest_framework.exceptions import ValidationError
 from sqlalchemy.exc import ProgrammingError
 
 from db.types.base import get_db_type_enum_from_id
 
 from mathesar.api.exceptions.validation_exceptions.exceptions import (
     ColumnSizeMismatchAPIException, DistinctColumnRequiredAPIException,
-    MultipleDataFileAPIException, UnknownDatabaseTypeIdentifier
+    MultipleDataFileAPIException, RemainderTableNameRequiredAPIException, UnknownDatabaseTypeIdentifier,
 )
 from mathesar.api.exceptions.database_exceptions.exceptions import DuplicateTableAPIException
 from mathesar.api.exceptions.database_exceptions.base_exceptions import ProgrammingAPIException
+from mathesar.api.exceptions.validation_exceptions import base_exceptions as base_validation_exceptions
+from mathesar.api.exceptions.generic_exceptions import base_exceptions as base_api_exceptions
 from mathesar.api.exceptions.mixins import MathesarErrorMessageMixin
 from mathesar.api.serializers.columns import SimpleColumnSerializer
-from mathesar.models import Table, DataFile
+from mathesar.models import Column, Table, DataFile
 from mathesar.utils.tables import gen_table_name, create_table_from_datafile, create_empty_table
 
 
@@ -103,6 +106,35 @@ class TableSerializer(MathesarErrorMessageMixin, serializers.ModelSerializer):
                 raise ProgrammingAPIException(e)
         return table
 
+    def update(self, instance, validated_data):
+        if self.partial:
+            # Save the fields that are stored in the model.
+            present_model_fields = []
+            for model_field in instance.MODEL_FIELDS:
+                if model_field in validated_data:
+                    setattr(instance, model_field, validated_data[model_field])
+                    present_model_fields.append(model_field)
+            instance.save(update_fields=present_model_fields)
+            for key in present_model_fields:
+                del validated_data[key]
+            # Save the fields that are stored in the underlying DB.
+            try:
+                instance.update_sa_table(validated_data)
+            except ValueError as e:
+                raise base_api_exceptions.ValueAPIException(e, status_code=status.HTTP_400_BAD_REQUEST)
+        return instance
+
+    def validate(self, data):
+        if self.partial:
+            columns = data.get('columns', None)
+            if columns is not None:
+                for col in columns:
+                    id = col.get('id', None)
+                    if id is None:
+                        message = "'id' field is required while batch updating columns."
+                        raise base_validation_exceptions.MathesarValidationException(ValidationError, message=message)
+        return data
+
 
 class TablePreviewSerializer(MathesarErrorMessageMixin, serializers.Serializer):
     name = serializers.CharField(required=False)
@@ -121,3 +153,30 @@ class TablePreviewSerializer(MathesarErrorMessageMixin, serializers.Serializer):
             if db_type is None:
                 raise UnknownDatabaseTypeIdentifier(db_type_id=db_type_id)
         return columns
+
+
+class SplitTableRequestSerializer(MathesarErrorMessageMixin, serializers.Serializer):
+    extract_columns = serializers.PrimaryKeyRelatedField(queryset=Column.current_objects.all(), many=True)
+    extracted_table_name = serializers.CharField()
+    remainder_table_name = serializers.CharField()
+    drop_original_table = serializers.BooleanField()
+
+    def validate(self, attrs):
+        if not attrs['drop_original_table'] and not attrs['remainder_table_name']:
+            raise RemainderTableNameRequiredAPIException()
+        return super().validate(attrs)
+
+
+class SplitTableResponseSerializer(MathesarErrorMessageMixin, serializers.Serializer):
+    extracted_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
+    remainder_table = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all())
+
+
+class MappingSerializer(MathesarErrorMessageMixin, serializers.Serializer):
+    # TBD
+    pass
+
+
+class TableImportSerializer(MathesarErrorMessageMixin, serializers.Serializer):
+    table_to_import_to = serializers.PrimaryKeyRelatedField(queryset=Table.current_objects.all(), required=True)
+    mappings = MappingSerializer(required=True)

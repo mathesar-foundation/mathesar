@@ -542,8 +542,18 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             PostgresType.NUMERIC: {
                 VALID: [
-                    ("1.2", Decimal("1.2")),
-                    ("1", Decimal("1")),
+                    ("3.14", Decimal("3.14")),
+                    ("123,456.7", Decimal("123456.7")),
+                    ("123.456,7", Decimal("123456.7")),
+                    ("123 456,7", Decimal("123456.7")),
+                    ("1,23,456.7", Decimal("123456.7")),
+                    ("123'456.7", Decimal("123456.7")),
+                    ("-3.14", Decimal("-3.14")),
+                    ("-123,456.7", Decimal("-123456.7")),
+                    ("-123.456,7", Decimal("-123456.7")),
+                    ("-123 456,7", Decimal("-123456.7")),
+                    ("-1,23,456.7", Decimal("-123456.7")),
+                    ("-123'456.7", Decimal("-123456.7"))
                 ],
                 INVALID: ["not a number"],
             },
@@ -677,8 +687,18 @@ MASTER_DB_TYPE_MAP_SPEC = {
             },
             PostgresType.NUMERIC: {
                 VALID: [
-                    ("1.2", Decimal("1.2")),
-                    ("1", Decimal("1")),
+                    ("3.14", Decimal("3.14")),
+                    ("123,456.7", Decimal("123456.7")),
+                    ("123.456,7", Decimal("123456.7")),
+                    ("123 456,7", Decimal("123456.7")),
+                    ("1,23,456.7", Decimal("123456.7")),
+                    ("123'456.7", Decimal("123456.7")),
+                    ("-3.14", Decimal("-3.14")),
+                    ("-123,456.7", Decimal("-123456.7")),
+                    ("-123.456,7", Decimal("-123456.7")),
+                    ("-123 456,7", Decimal("-123456.7")),
+                    ("-1,23,456.7", Decimal("-123456.7")),
+                    ("-123'456.7", Decimal("-123456.7"))
                 ],
                 INVALID: ["not a number"],
             },
@@ -853,9 +873,9 @@ type_test_data_args_list = [
     (
         PostgresType.CHARACTER_VARYING,
         PostgresType.NUMERIC,
-        {"precision": 5, "scale": 2},
-        "500.134",
-        Decimal("500.13"),
+        {"precision": 6, "scale": 2},
+        "5000.134",
+        Decimal("5000.13"),
     ),
     (
         PostgresType.TIME_WITHOUT_TIME_ZONE,
@@ -1085,8 +1105,8 @@ def test_alter_column_type_raises_on_bad_parameters(
             assert e.orig == InvalidParameterValue
 
 
-def test_get_column_cast_expression_unchanged(engine_with_schema_without_updated_ischema_names):
-    engine, _ = engine_with_schema_without_updated_ischema_names
+def test_get_column_cast_expression_unchanged(engine_with_schema):
+    engine, _ = engine_with_schema
     target_type = PostgresType.NUMERIC
     col_name = "my_column"
     column = Column(col_name, NUMERIC)
@@ -1096,8 +1116,8 @@ def test_get_column_cast_expression_unchanged(engine_with_schema_without_updated
     assert cast_expr == column
 
 
-def test_get_column_cast_expression_change(engine_with_schema_without_updated_ischema_names):
-    engine, _ = engine_with_schema_without_updated_ischema_names
+def test_get_column_cast_expression_change(engine_with_schema):
+    engine, _ = engine_with_schema
     target_type = PostgresType.BOOLEAN
     col_name = "my_column"
     column = Column(col_name, NUMERIC)
@@ -1107,8 +1127,8 @@ def test_get_column_cast_expression_change(engine_with_schema_without_updated_is
     assert str(cast_expr) == f"mathesar_types.cast_to_boolean({col_name})"
 
 
-def test_get_column_cast_expression_change_quotes(engine_with_schema_without_updated_ischema_names):
-    engine, _ = engine_with_schema_without_updated_ischema_names
+def test_get_column_cast_expression_change_quotes(engine_with_schema):
+    engine, _ = engine_with_schema
     target_type = PostgresType.BOOLEAN
     col_name = "A Column Needing Quotes"
     column = Column(col_name, NUMERIC)
@@ -1118,8 +1138,8 @@ def test_get_column_cast_expression_change_quotes(engine_with_schema_without_upd
     assert str(cast_expr) == f'mathesar_types.cast_to_boolean("{col_name}")'
 
 
-def test_get_column_cast_expression_unsupported(engine_with_schema_without_updated_ischema_names):
-    engine, _ = engine_with_schema_without_updated_ischema_names
+def test_get_column_cast_expression_unsupported(engine_without_ischema_names_updated):
+    engine = engine_without_ischema_names_updated
     target_type = MathesarCustomType.URI
     column = Column("colname", NUMERIC)
     with pytest.raises(cast_operations.UnsupportedTypeException):
@@ -1252,6 +1272,34 @@ def test_mathesar_money_array_sql(engine_with_schema, source_str, expect_arr):
         res = conn.execute(
             select(
                 text(f"mathesar_types.get_mathesar_money_array('{source_str}'::text)")
+            )
+        ).scalar()
+    assert res == expect_arr
+
+
+numeric_array_examples = [
+    ('3.14', ['3.14', None, '.']),
+    ('331,209.00', ['331,209.00', ',', '.']),
+    ('1,234,567.8910', ['1,234,567.8910', ',', '.']),
+    ('-1,234,567.8910', ['1,234,567.8910', ',', '.']),
+    ('3,14', ['3,14', None, ',']),
+    ('331.293,00', ['331.293,00', '.', ',']),
+    ('1.234.567,8910', ['1.234.567,8910', '.', ',']),
+    ('331 293,00', ['331 293,00', ' ', ',']),
+    ('1 234 567,8910', ['1 234 567,8910', ' ', ',']),
+    ('-1 234 567,8910', ['1 234 567,8910', ' ', ',']),
+    ('1,23,45,678.910', ['1,23,45,678.910', ',', '.']),
+    ('1\'\'234\'\'567.8910', ['1\'234\'567.8910', '\'', '.']),
+]
+
+
+@pytest.mark.parametrize("source_str,expect_arr", numeric_array_examples)
+def test_numeric_array_sql(engine_with_schema, source_str, expect_arr):
+    engine, _ = engine_with_schema
+    with engine.begin() as conn:
+        res = conn.execute(
+            select(
+                text(f"mathesar_types.get_numeric_array('{source_str}'::text)")
             )
         ).scalar()
     assert res == expect_arr

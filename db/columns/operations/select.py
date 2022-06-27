@@ -17,11 +17,11 @@ from db.utils import execute_statement
 DYNAMIC_NODE_TAGS = {"SQLValueFunction", "FuncCall"}
 
 
-def _get_columns_attnum_from_names(table_oid, column_names, engine, connection_to_use=None):
+def _get_columns_attnum_from_names(table_oid, column_names, engine):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Did not recognize type")
         pg_attribute = Table("pg_attribute", MetaData(), autoload_with=engine)
-    sel = select(pg_attribute.c.attnum).where(
+    sel = select(pg_attribute.c.attnum, pg_attribute.c.attname).where(
         and_(
             pg_attribute.c.attrelid == table_oid,
             pg_attribute.c.attname.in_(column_names)
@@ -30,19 +30,23 @@ def _get_columns_attnum_from_names(table_oid, column_names, engine, connection_t
     return sel
 
 
-def get_columns_attnum_from_names(table_oid, column_names, engine, connection_to_use=None):
+def get_columns_attnum_from_names(table_oid, column_names, engine, connection_to_use=None, return_as_name_map=False):
     """
     Returns the respective list of attnum of the column names passed.
      The order is based on the column order in the table and not by the order of the column names argument.
     """
-    statement = _get_columns_attnum_from_names(table_oid, column_names, engine, connection_to_use=None)
+    statement = _get_columns_attnum_from_names(table_oid, column_names, engine)
     attnums_tuple = execute_statement(engine, statement, connection_to_use).fetchall()
-    attnums = [attnum_tuple[0] for attnum_tuple in attnums_tuple]
-    return attnums
+    if return_as_name_map:
+        name_attnum_map = {attnum_tuple[1]: attnum_tuple[0] for attnum_tuple in attnums_tuple}
+        return name_attnum_map
+    else:
+        attnums = [attnum_tuple[0] for attnum_tuple in attnums_tuple]
+        return attnums
 
 
 def get_column_attnum_from_name(table_oid, column_name, engine, connection_to_use=None):
-    statement = _get_columns_attnum_from_names(table_oid, [column_name], engine, connection_to_use=None)
+    statement = _get_columns_attnum_from_names(table_oid, [column_name], engine)
     return execute_statement(engine, statement, connection_to_use).scalar()
 
 

@@ -1,5 +1,4 @@
 import pytest
-from django.core.cache import cache
 from sqlalchemy import Column, Integer, MetaData
 from sqlalchemy import Table as SATable
 
@@ -36,10 +35,10 @@ def column_test_table(patent_schema):
     return table
 
 
-def test_create_table_settings(client, schema, create_patents_table, schema_name):
+def test_create_non_empty_table_settings(client, schema, create_patents_table, schema_name):
     table = create_patents_table('Table 2', schema_name=schema_name)
-    primary_key_column = table.get_column_name_id_bidirectional_map()['id']
-    computed_columns = [primary_key_column]
+    first_non_primary_column = table.columns.order_by('attnum')[1]
+    expected_preview_template = f'{{{first_non_primary_column.id}}}'
     response = client.get(
         f"/api/db/v0/tables/{table.id}/settings/"
     )
@@ -47,17 +46,32 @@ def test_create_table_settings(client, schema, create_patents_table, schema_name
     results = response_data['results']
     assert response.status_code == 200
     assert response_data['count'] == 1
-    assert results[0]['preview_columns']['columns'] == computed_columns
-    assert results[0]['preview_columns']['customized'] is False
+    assert results[0]['preview_settings']['template'] == expected_preview_template
+    assert results[0]['preview_settings']['customized'] is False
+
+
+def test_create_empty_table_settings(client, schema, empty_nasa_table, schema_name):
+    table = empty_nasa_table
+    primary_key_column_id = table.get_column_name_id_bidirectional_map()['id']
+    expected_preview_template = f'{{{primary_key_column_id}}}'
+    response = client.get(
+        f"/api/db/v0/tables/{table.id}/settings/"
+    )
+    response_data = response.json()
+    results = response_data['results']
+    assert response.status_code == 200
+    assert response_data['count'] == 1
+    assert results[0]['preview_settings']['template'] == expected_preview_template
+    assert results[0]['preview_settings']['customized'] is False
 
 
 def test_update_table_settings(client, column_test_table):
-    cache.clear()
-    columns = list(models.Column.objects.filter(table=column_test_table).values_list('id', flat=True))
+    columns = models.Column.objects.filter(table=column_test_table).values_list('id', flat=True)
+    preview_template = ','.join(f'{{{ column }}}' for column in columns)
     settings_id = column_test_table.settings.id
     data = {
-        "preview_columns": {
-            'columns': columns,
+        "preview_settings": {
+            'template': preview_template,
         }
     }
     response = client.patch(
@@ -66,5 +80,5 @@ def test_update_table_settings(client, column_test_table):
     )
     assert response.status_code == 200
     response_data = response.json()
-    assert response_data['preview_columns']['columns'] == columns
-    assert response_data['preview_columns']['customized'] is True
+    assert response_data['preview_settings']['template'] == preview_template
+    assert response_data['preview_settings']['customized'] is True
