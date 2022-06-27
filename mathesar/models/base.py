@@ -412,6 +412,7 @@ class Column(ReflectionManagerMixin, BaseModel):
     def _sa_engine(self):
         return self.table._sa_engine
 
+    # TODO probably shouldn't be private: a lot of code already references it.
     @cached_property
     def _sa_column(self):
         return self.table.sa_columns[self.name]

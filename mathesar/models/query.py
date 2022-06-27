@@ -1,6 +1,13 @@
 from collections import namedtuple
 
+from sqlalchemy import select, join
+
+from django.db import models
+from django.utils.functional import cached_property
+
 from db.columns.base import MathesarColumn
+
+from mathesar.models.base import BaseModel, Column
 
 
 class Query(BaseModel):
@@ -47,7 +54,8 @@ class Query(BaseModel):
     @cached_property
     def get_output_columns_described(self):
         """
-        Returns columns' description to be returned verbatim by the `queries/[id]/columns` endpoint.
+        Returns columns' description, which is to be returned verbatim by the
+        `queries/[id]/columns` endpoint.
         """
         return tuple(
             {
@@ -76,12 +84,31 @@ class Query(BaseModel):
 class JoinParams(
         namedtuple(
             'JoinParams',
-            ['left_table', 'right_table', 'left_column', 'right_column']
+            [
+                'left_table',
+                'right_table',
+                'left_column',
+                'right_column',
+            ]
         )
     ):
+
     def flip(self):
-        # TODO
-        return self
+        return JoinParams(
+            left_table=self.right_table,
+            right_table=self.left_table,
+            left_column=self.right_column,
+            right_column=self.left_column,
+        )
+
+    @staticmethod
+    def from_json(json):
+        return JoinParams(
+            left_table=json['left_table'],
+            right_table=json['foreign_table'],
+            left_column=json['native_column'],
+            right_column=json['foreign_column'],
+        )
 
 
 def _apply_transformations(initial_relation, transformations):
@@ -96,7 +123,6 @@ def _get_initial_relation(query):
         nested_join, sa_column_to_select = _process_initial_column(
             initial_column=initial_column,
             nested_join=nested_join,
-            query=query,
         )
         sa_columns_to_select.append(sa_column_to_select)
 
@@ -105,44 +131,21 @@ def _get_initial_relation(query):
     return stmt
 
 
-def _process_initial_column(initial_column, nested_join, query):
+def _process_initial_column(initial_column, nested_join):
     if _is_base_column(initial_column):
-        base_sa_col_to_select = _get_sa_column_by_id(initial_column.id)
-        return nested_join, base_sa_col_to_select
+        col_to_select = _get_sa_col_from_initial_col(initial_column)
     else:
-        fk_id_path = _get_fk_id_path(initial_column)
+        jp_path = _get_jp_path(initial_column)
 
-        jp_path = _fk_id_path_to_jp_path(fk_id_path, query.sa_base_table)
-
-        nested_join, foreign_sa_col_to_select = _process_jp_path(
+        target_sa_column = _get_sa_col_from_initial_col(initial_column)
+        nested_join, col_to_select = _process_jp_path(
             jp_path=jp_path,
             nested_join=nested_join,
-            target_sa_column=get_sa_column_by_id(_get_initial_column_id(initial_column))
+            target_sa_column=target_sa_column,
         )
-        return nested_join, foreign_sa_col_to_select
-
-
-def _fk_id_path_to_jp_path(fk_id_path, sa_base_table):
-    """
-    Converts a path made up of foreign key ids, into a path made up of join parameters.
-    """
-    fk_model_path = tuple(
-        _get_dj_constraint_model_by_id(fk_id)
-        for fk_id
-        in fk_id_path
-    )
-    disoriented_jp_path = tuple(
-        # TODO impl conversion
-        JoinParams(
-            left_table=fk_model.native_table,
-            right_table=fk_model.foreign_table,
-            left_column=fk_model.native_column,
-            right_column=fk_model.foreign_column,
-        )
-        for fk_model
-        in fk_model_path
-    )
-    return _fix_jp_orientations(disoriented_jp_path, sa_base_table)
+    # Give an alias/label to this column, since that's how it will be referenced in transforms.
+    aliased_col_to_select = col_to_select.label(initial_column.alias)
+    return nested_join, aliased_col_to_select
 
 
 def _process_jp_path(jp_path, nested_join, target_sa_column):
@@ -166,40 +169,24 @@ def _process_jp_path(jp_path, nested_join, target_sa_column):
     return nested_join, sa_col_to_select
 
 
-def _fix_jp_orientations(jp_path, sa_base_table):
-    flipped_jp_path = []
-    for i, jp in enumerate(jp_path):
-        should_flip = False
-        is_first_jp = i == 0
-        if is_first_jp:
-            if sa_base_table != jp.left_table:
-                should_flip = True
-        else:
-            previous_jp = flipped_jp_path[i-1]
-            well_oriented = previous_jp.right_table == jp.left_table
-            if not well_oriented:
-                should_flip = True
-        if should_flip:
-            processed_jp = jp.flip()
-        else:
-            processed_jp = jp
-        flipped_jp_path.append(processed_jp)
-    return tuple(flipped_jp_path)
-
 def _access_column_on_aliased_relation(aliased_relation, sa_column):
-    pass
+    column_name = sa_column.name
+    return getattr(aliased_relation.c, column_name)
 
-def _get_dj_constraint_model_by_id(dj_id):
-    pass
 
-def _get_sa_column_by_id(dj_id):
-    pass
+def _get_sa_col_from_initial_col(initial_column):
+    dj_id = _get_initial_column_id(initial_column)
+    return Column.objects.get(pk=dj_id)._sa_column
 
-def _get_fk_id_path(initial_column):
-    return initial_column['fk_path']
+
+def _get_jp_path(initial_column):
+    json = initial_column['jp_path']
+    return JoinParams.from_json(json)
+
 
 def _get_initial_column_id(initial_column):
     return initial_column['id']
 
+
 def _is_base_column(initial_column):
-    return _get_fk_id_path(initial_column) is not None
+    return _get_jp_path(initial_column) is not None

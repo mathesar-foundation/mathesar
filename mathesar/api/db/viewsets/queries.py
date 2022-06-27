@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 
 from mathesar.api.pagination import DefaultLimitOffsetPagination
 from mathesar.api.serializers.queries import QuerySerializer
-from mathesar.models import Query
+from mathesar.models.query import Query
 
 class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListModelMixin, viewsets.GenericViewSet):
     serializer_class = QuerySerializer
@@ -16,11 +16,6 @@ class QueryViewSet(CreateModelMixin, UpdateModelMixin, RetrieveModelMixin, ListM
 
     def get_queryset(self):
         return Query.objects.all().order_by('-created_at')
-
-    def destroy(self, request, pk=None):
-        query = self.get_object()
-        query.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['get'], detail=True)
     def columns(self, request, pk=None):
