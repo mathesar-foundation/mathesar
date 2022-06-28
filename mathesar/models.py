@@ -15,7 +15,7 @@ from db.constraints.operations.create import create_constraint
 from db.constraints.operations.drop import drop_constraint
 from db.constraints.operations.select import get_constraint_oid_by_name_and_table_oid, get_constraint_from_oid
 from db.constraints import utils as constraint_utils
-from db.dependents_utils import get_dependent_objects, has_dependencies
+from db.dependents_utils import get_all_dependent_objects, has_dependencies
 from db.records.operations.delete import delete_record
 from db.records.operations.insert import insert_record_or_records
 from db.records.operations.select import get_column_cast_records, get_count, get_record
@@ -244,7 +244,7 @@ class Table(DatabaseObject):
         )
 
     def dependents(self):
-        return get_dependent_objects(
+        return get_all_dependent_objects(
             self.name,
             self.schema.name,
             self.schema._sa_engine
