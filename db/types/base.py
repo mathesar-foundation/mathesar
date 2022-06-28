@@ -168,6 +168,8 @@ class MathesarCustomType(DatabaseType, Enum):
     MATHESAR_MONEY = 'mathesar_money'
     MULTICURRENCY_MONEY = 'multicurrency_money'
     URI = 'uri'
+    MATHESAR_JSON_OBJECT = 'mathesar_json_object'
+    MATHESAR_JSON_ARRAY = 'mathesar_json_array'
 
     def __new__(cls, unqualified_id):
         """

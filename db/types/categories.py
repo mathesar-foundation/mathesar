@@ -82,8 +82,9 @@ COMPARABLE_TYPES = frozenset({
     *TIME_RELATED_TYPES,
 })
 
-###########
 JSON_TYPES = frozenset({
     PostgresType.JSON,
-    PostgresType.JSONB
+    PostgresType.JSONB,
+    MathesarCustomType.MATHESAR_JSON_OBJECT,
+    MathesarCustomType.MATHESAR_JSON_ARRAY
 })

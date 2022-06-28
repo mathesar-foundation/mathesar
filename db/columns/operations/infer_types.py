@@ -36,6 +36,8 @@ TYPE_INFERENCE_DAG = {
         MathesarCustomType.URI,
         PostgresType.JSON,
         PostgresType.JSONB,
+        MathesarCustomType.MATHESAR_JSON_ARRAY,
+        MathesarCustomType.MATHESAR_JSON_OBJECT,
     ],
 }
 
