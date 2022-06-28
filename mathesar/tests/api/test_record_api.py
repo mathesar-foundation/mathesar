@@ -5,7 +5,6 @@ from unittest.mock import patch
 import pytest
 
 from db.constraints.base import ForeignKeyConstraint, UniqueConstraint
-from db.tables.utils import get_primary_key_column
 
 from mathesar.api.utils import follows_json_number_spec
 from sqlalchemy_filters.exceptions import BadSortFormat, SortFieldNotFound
@@ -84,13 +83,10 @@ def test_record_serialization(empty_nasa_table, create_column, client, type_, va
     assert response_data["results"][0][str(column.id)] == value
 
 
-def test_foreign_key_record_api(create_foreign_key_table, client):
-    referrer_table_name = 'Patents'
-    referent_table_name = 'Center'
-    referrer_table, referent_table = create_foreign_key_table(referrer_table_name, referent_table_name)
-    referent_column = referent_table.get_columns_name(["Id"])[0]
-    referrer_table_columns = referrer_table.get_columns_name(
-        referrer_table,
+def test_foreign_key_record_api(two_foreign_key_tables, client):
+    referrer_table, referent_table = two_foreign_key_tables
+    referent_column = referent_table.get_columns_by_name(["Id"])[0]
+    referrer_table_columns = referrer_table.get_columns_by_name(
         ["Id", "Center", "Affiliated Center", "Original Patent"]
     )
     referrer_table_pk = referrer_table_columns[0]
@@ -117,11 +113,9 @@ def test_foreign_key_record_api(create_foreign_key_table, client):
                                                        [referrer_table_pk.attnum], {}))
     response = client.get(f'/api/db/v0/tables/{referrer_table.id}/records/', data={'fk_previews': 'all'})
     response_data = response.json()
-    referred_value = 1
-    primary_key_sa_column = get_primary_key_column(referent_table._sa_table)
-    primary_key_column = referent_table.get_columns_name(referent_table, [primary_key_sa_column.name])[0]
-
-    assert response_data['previews'][str(referrer_column_1.id)][str(referred_value)] == {str(primary_key_column.id): referred_value}
+    referred_value = '1'
+    default_template_column = referent_table.get_columns_by_name(['Id'])[0]
+    assert response_data['previews'][str(referrer_column_1.id)][str(referred_value)] == {str(default_template_column.id): referred_value}
 
 
 def test_record_list_filter(create_patents_table, client):

@@ -1,3 +1,5 @@
+import re
+
 from rest_framework import status, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.renderers import BrowsableAPIRenderer
@@ -16,7 +18,7 @@ from mathesar.api.pagination import TableLimitOffsetGroupPagination
 from mathesar.api.serializers.records import RecordListParameterSerializer, RecordSerializer
 from mathesar.api.utils import get_table_or_404
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
-from mathesar.models import Constraint, Table
+from mathesar.models import Constraint, Table, Column
 from mathesar.utils.json import MathesarJSONRenderer
 
 
@@ -64,21 +66,24 @@ class RecordViewSet(viewsets.ViewSet):
             table_constraints = Constraint.objects.filter(table__id=self.kwargs['table_pk'])
             fk_constraints = [table_constraint for table_constraint in table_constraints if table_constraint.type == ConstraintType.FOREIGN_KEY.value]
             preview_columns = {}
-            if fk_previews == 'all':
-                for fk_constraint in fk_constraints:
-                    # For now only single column foreign key is used.
-                    constrained_column = fk_constraint.columns[0]
-                    referent_column = fk_constraint.referent_columns[0]
-                    referent_table = referent_column.table
-                    referent_table_settings = referent_column.table.settings
-                    preview_data_columns = referent_table_settings.preview_columns.columns.all()
+            for fk_constraint in fk_constraints:
+                # For now only single column foreign key is used.
+                constrained_column = fk_constraint.columns[0]
+                referent_column = fk_constraint.referent_columns[0]
+                referent_table = referent_column.table
+                referent_table_settings = referent_column.table.settings
+                preview_template = referent_table_settings.preview_settings.template
+                preview_columns_extraction_regex = r'\{(.*?)\}'
+                preview_data_column_ids = re.findall(preview_columns_extraction_regex, preview_template)
+                preview_data_columns = Column.objects.filter(id__in=preview_data_column_ids)
+                if fk_previews == 'all':
                     preview_columns[constrained_column] = {
                         'table': referent_table,
                         'columns': preview_data_columns,
                         'referent_column': referent_column,
                     }
-            elif fk_previews == 'auto':
-                table_constraints = Constraint.objects.filter(table__id=self.kwargs['table_pk'])
+                elif fk_previews == 'auto':
+                    table_constraints = Constraint.objects.filter(table__id=self.kwargs['table_pk'])
         try:
 
             records = paginator.paginate_queryset(
