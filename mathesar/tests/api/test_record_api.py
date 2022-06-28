@@ -15,7 +15,7 @@ from db.records.operations.group import GroupBy
 from mathesar import models
 from mathesar.functions.operations.convert import rewrite_db_function_spec_column_ids_to_names
 from mathesar.api.exceptions.error_codes import ErrorCodes
-from mathesar.models import Table
+from mathesar.models import Table, Column
 
 
 def test_record_list(create_patents_table, client):
@@ -83,7 +83,7 @@ def test_record_serialization(empty_nasa_table, create_column, client, type_, va
     assert response_data["results"][0][str(column.id)] == value
 
 
-def test_foreign_key_record_api(two_foreign_key_tables, client):
+def test_foreign_key_record_api_all_column_previews(two_foreign_key_tables, client):
     referrer_table, referent_table = two_foreign_key_tables
     referent_column = referent_table.get_columns_by_name(["Id"])[0]
     referrer_table_columns = referrer_table.get_columns_by_name(
@@ -115,6 +115,47 @@ def test_foreign_key_record_api(two_foreign_key_tables, client):
     response_data = response.json()
     referred_value = '1'
     default_template_column = referent_table.get_columns_by_name(['Id'])[0]
+    assert response_data['previews'][str(referrer_column_1.id)][str(referred_value)] == {str(default_template_column.id): referred_value}
+
+
+def test_foreign_key_record_api_auto_column_previews(two_foreign_key_tables, client):
+    referrer_table, referent_table = two_foreign_key_tables
+    referent_column = referent_table.get_columns_by_name(["Id"])[0]
+    referrer_table_columns = referrer_table.get_columns_by_name(
+        ["Id", "Center", "Affiliated Center", "Original Patent"]
+    )
+    referrer_table_column_ids = [referrer_column.id for referrer_column in referrer_table_columns]
+    Column.objects.filter(id__in=referrer_table_column_ids).update(display_options={'show_fk_preview': False})
+    referrer_table_pk = referrer_table_columns[0]
+    referrer_column_1 = referrer_table_columns[1]
+    referrer_column_1.display_options = {'show_fk_preview': True}
+    referrer_column_1.save()
+    referrer_column_2 = referrer_table_columns[2]
+    self_referential_column = referrer_table_columns[3]
+
+    referrer_table.add_constraint(UniqueConstraint(None, referrer_table.oid, [referrer_table_pk.attnum]))
+    referent_table.add_constraint(UniqueConstraint(None, referent_table.oid, [referent_column.attnum]))
+    referrer_table.add_constraint(ForeignKeyConstraint(None,
+                                                       referrer_table.oid,
+                                                       [referrer_column_1.attnum],
+                                                       referent_table.oid,
+                                                       [referent_column.attnum], {}))
+    referrer_table.add_constraint(ForeignKeyConstraint(None,
+                                                       referrer_table.oid,
+                                                       [referrer_column_2.attnum],
+                                                       referent_table.oid,
+                                                       [referent_column.attnum], {}))
+    referrer_table.add_constraint(ForeignKeyConstraint(None,
+                                                       referrer_table.oid,
+                                                       [self_referential_column.attnum],
+                                                       referrer_table.oid,
+                                                       [referrer_table_pk.attnum], {}))
+    response = client.get(f'/api/db/v0/tables/{referrer_table.id}/records/', data={'fk_previews': 'auto'})
+    assert response.status_code == 200
+    response_data = response.json()
+    referred_value = '1'
+    default_template_column = referent_table.get_columns_by_name(['Id'])[0]
+    assert len(response_data['previews'].keys()) == 1
     assert response_data['previews'][str(referrer_column_1.id)][str(referred_value)] == {str(default_template_column.id): referred_value}
 
 

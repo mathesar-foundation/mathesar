@@ -69,6 +69,8 @@ class RecordViewSet(viewsets.ViewSet):
             for fk_constraint in fk_constraints:
                 # For now only single column foreign key is used.
                 constrained_column = fk_constraint.columns[0]
+                if fk_previews == 'auto' and not constrained_column.display_options['show_fk_preview']:
+                    continue
                 referent_column = fk_constraint.referent_columns[0]
                 referent_table = referent_column.table
                 referent_table_settings = referent_column.table.settings
@@ -76,14 +78,11 @@ class RecordViewSet(viewsets.ViewSet):
                 preview_columns_extraction_regex = r'\{(.*?)\}'
                 preview_data_column_ids = re.findall(preview_columns_extraction_regex, preview_template)
                 preview_data_columns = Column.objects.filter(id__in=preview_data_column_ids)
-                if fk_previews == 'all':
-                    preview_columns[constrained_column] = {
-                        'table': referent_table,
-                        'columns': preview_data_columns,
-                        'referent_column': referent_column,
-                    }
-                elif fk_previews == 'auto':
-                    table_constraints = Constraint.objects.filter(table__id=self.kwargs['table_pk'])
+                preview_columns[constrained_column] = {
+                    'table': referent_table,
+                    'columns': preview_data_columns,
+                    'referent_column': referent_column,
+                }
         try:
 
             records = paginator.paginate_queryset(
