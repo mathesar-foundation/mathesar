@@ -30,6 +30,15 @@ def engine_with_academics(engine_with_schema):
 
 
 @pytest.fixture
+def engine_with_roster(engine_with_schema):
+    engine, schema = engine_with_schema
+    with engine.begin() as conn, open(ROSTER_SQL) as f:
+        conn.execute(text(f"SET search_path={schema}"))
+        conn.execute(text(f.read()))
+    yield engine, schema
+
+
+@pytest.fixture
 def engine_with_uris(engine_with_schema):
     engine, schema = engine_with_schema
     with engine.begin() as conn, open(URIS_SQL) as f:
