@@ -29,6 +29,7 @@ DEPTH = ma_sel.DEPTH
 PATH = ma_sel.PATH
 TARGET = ma_sel.TARGET
 
+
 def _transform_row_to_names(row, engine):
     output_dict = {
         ma_sel.BASE: ma_sel.reflect_table_from_oid(row[ma_sel.BASE], engine).name,
@@ -46,6 +47,7 @@ def _transform_row_to_names(row, engine):
         ma_sel.DEPTH: row[ma_sel.DEPTH]
     }
     return output_dict
+
 
 l1_joinable_tables = [
     (
@@ -155,11 +157,12 @@ l1_joinable_tables = [
 def test_get_joinable_tables_query_self_refer(
         engine_with_academics, table, l1_paths
 ):
-    """
-    At the moment, this test is dependent on consistent order of returned
-    rows, which is suboptimal.
-    """
     engine, schema = engine_with_academics
     academics_oid = ma_sel.get_oid_from_table(table, schema, engine)
     joinable_tables = ma_sel.get_joinable_tables(academics_oid, engine, max_depth=1)
-    assert [_transform_row_to_names(r, engine) for r in joinable_tables] == l1_paths
+    expect_rows = sorted(l1_paths, key=lambda x: x[PATH])
+    actual_rows = sorted(
+        [_transform_row_to_names(r, engine) for r in joinable_tables],
+        key=lambda x: x[PATH]
+    )
+    assert expect_rows == actual_rows
